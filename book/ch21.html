@@ -68,11 +68,11 @@
           increased to 8 MB if you use Core (which generally prefers default settings that improve
           performance, but at the cost of a bigger memory profile). This setting can be overridden
           via the <code>s=&lt;words&gt;</code> argument to <code>OCAMLRUNPARAM</code>. You can change it after the program has started
-          by calling the <code>Gc.set</code> function:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript"/><p>Changing the GC size dynamically will trigger an immediate minor
+          by calling the <code>Gc.set</code> function:</p></div><link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript"/><p>Changing the GC size dynamically will trigger an immediate minor
         heap collection. Note that Core increases the default minor heap size
         from the standard OCaml installation quite significantly, and you'll
         want to reduce this if running in very memory-constrained
-        environments.</p></div></section></section><section id="the-long-lived-major-heap" data-type="sect1"><h1>The Long-Lived Major Heap</h1><p>The major heap is where the bulk of the longer-lived and larger
+        environments.</p></section></section><section id="the-long-lived-major-heap" data-type="sect1"><h1>The Long-Lived Major Heap</h1><p>The major heap is where the bulk of the longer-lived and larger
     values in your program are stored. It consists of any number of
     noncontiguous chunks of virtual memory, each containing live blocks
     interspersed with regions of free memory. The runtime system maintains a
@@ -108,7 +108,7 @@
           amount of heap resizing required in order to satisfy the allocation requests. A small
           increment may result in lots of smaller heap chunks spread across different regions of
           virtual memory that require more housekeeping in the OCaml runtime to keep track of
-          them:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript" part="1"/></div><p>Allocating an OCaml value on the major heap first checks the free
+          them:</p></div><link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript" part="1"/><p>Allocating an OCaml value on the major heap first checks the free
       list of blocks for a suitable region to place it. If there isn't enough
       room on the free list, the runtime expands the major heap by allocating
       a fresh heap chunk that will be large enough. That chunk is then added
@@ -182,14 +182,14 @@
         collection first, and then a single slice. The size of the slice is
         normally automatically computed by the GC to an appropriate value and
         returns this value so that you can modify it in future calls if
-        necessary:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript" part="2"/><p>The <code>space_overhead</code> setting
+        necessary:</p></div><link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript" part="2"/><p>The <code>space_overhead</code> setting
         controls how aggressive the GC is about setting the slice size to a
         large size. This represents the proportion of memory used for live
         data that will be "wasted" because the GC doesn't immediately collect
         unreachable blocks. Core defaults this to <code>100</code> to reflect a typical system that isn't
         overly memory-constrained. Set this even higher if you have lots of
         memory, or lower to cause the GC to work harder and collect blocks
-        faster at the expense of using more CPU time.</p></div></section><section id="heap-compaction" data-type="sect2"><h2>Heap Compaction</h2><p>After a certain number of major GC cycles have completed, the heap
+        faster at the expense of using more CPU time.</p></section><section id="heap-compaction" data-type="sect2"><h2>Heap Compaction</h2><p>After a certain number of major GC cycles have completed, the heap
       may begin to be fragmented due to values being deallocated out of order
       from how they were allocated. This makes it harder for the GC to find a
       contiguous block of memory for fresh allocations, which in turn would
@@ -204,7 +204,7 @@
         maximum value of <code>1000000</code> disables
         heap compaction completely. The default settings should be fine unless
         you have unusual allocation patterns that are causing a
-        higher-than-usual rate of compactions:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript" part="3"/></div></section><section id="inter-generational-pointers" data-type="sect2"><h2>Intergenerational Pointers</h2><p>One complexity of generational collection arises from the fact
+        higher-than-usual rate of compactions:</p></div><link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript" part="3"/></section><section id="inter-generational-pointers" data-type="sect2"><h2>Intergenerational Pointers</h2><p>One complexity of generational collection arises from the fact
       that minor heap sweeps are much more frequent than major heap
       collections. In order to know which blocks in the minor heap are live,
       the collector must track which minor-heap blocks are directly pointed to
@@ -223,10 +223,10 @@
           it can sometimes be slower than simply allocating a fresh value on the fast minor heap and
           doing some extra minor collections.</p><p>Let's see this for ourselves with a simple test program. You'll
         need to install the Core benchmarking suite via <code>opam install core_bench</code> before you compile
-        this code:</p><link rel="import" data-code-language="ocaml" href="gc/barrier_bench.ml"/><p>This program defines a type <code>t1</code> that is mutable and <code>t2</code> that is immutable. The benchmark loop
+        this code:</p><link rel="import" data-code-language="ocaml" href="code/gc/barrier_bench.ml"/><p>This program defines a type <code>t1</code> that is mutable and <code>t2</code> that is immutable. The benchmark loop
         iterates over both fields and increments a counter. Compile and
         execute this with some extra options to show the amount of garbage
-        collection occurring:</p><link rel="import" data-code-language="console" href="gc/run_barrier_bench.out"/><p>There is a stark space/time trade-off here. The mutable version takes significantly
+        collection occurring:</p><link rel="import" data-code-language="console" href="code/gc/run_barrier_bench.out"/><p>There is a stark space/time trade-off here. The mutable version takes significantly
           longer to complete than the immutable one but allocates many fewer minor-heap words than
           the immutable version. Minor allocation in OCaml is very fast, and so it is often better
           to use immutable data structures in preference to the more conventional mutable versions.
@@ -234,7 +234,7 @@
           write-barrier hit and not allocate at all.</p><p>The only way to know for sure is to benchmark your program under real-world scenarios
           using <code>Core_bench</code> and experiment with the trade-offs.
           The command-line benchmark binaries have a number of useful options that affect garbage
-          collection behavior:</p><link rel="import" data-code-language="console" href="gc/show_barrier_bench_help.out"/><p>The <code>-no-compactions</code> and <code>-stabilize-gc</code> options can help force a situation where your application has
+          collection behavior:</p><link rel="import" data-code-language="console" href="code/gc/show_barrier_bench_help.out"/><p>The <code>-no-compactions</code> and <code>-stabilize-gc</code> options can help force a situation where your application has
           fragmented memory. This can simulate the behavior of a long-running application without
           you having to actually wait that long to re-create the behavior in a performance unit
             test.<a data-type="indexterm" data-startref="Hmh">&#xa0;</a></p></section></section></section><section id="attaching-finalizer-functions-to-values" data-type="sect1"><h1>Attaching Finalizer Functions to Values</h1><p>OCaml's automatic memory management guarantees that a value will eventually be freed when
@@ -258,7 +258,7 @@
     finalizer safely with respect to all the other concurrent program
     threads.<a data-type="indexterm" data-primary="heaps" data-secondary="Heap_block module">&#xa0;</a></p><p>Let's explore this with a small example that finalizes values of
     different types, some of which are heap-allocated and others which are
-    compile-time constants:</p><link rel="import" data-code-language="ocaml" href="gc/finalizer.ml"/><p>Building and running this should show the following output:</p><link rel="import" data-code-language="console" href="gc/run_finalizer.out"/><p>The GC calls the finalization functions in the order of the deallocation. If several
+    compile-time constants:</p><link rel="import" data-code-language="ocaml" href="code/gc/finalizer.ml"/><p>Building and running this should show the following output:</p><link rel="import" data-code-language="console" href="code/gc/run_finalizer.out"/><p>The GC calls the finalization functions in the order of the deallocation. If several
       values become unreachable during the same GC cycle, the finalization functions will be called
       in the reverse order of the corresponding calls to <code>add_finalizer</code>. Each call to <code>add_finalizer</code> adds
       to the set of functions, which are run when the value becomes unreachable. You can have many

@@ -493,7 +493,7 @@ let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
 
   let rec loop html =
     let import_node_to_html (i:import) : Html.t Deferred.t =
-      let href = import_base_dir/"code"/i.href in
+      let href = import_base_dir/i.href in
       update_code i.data_code_language href
       >>| fun () ->
       Code.find_exn !code ~file:href ?part:i.part

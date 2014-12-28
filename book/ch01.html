@@ -6,8 +6,8 @@
     that lets you type in expressions and evaluate them interactively. <span class="command"><em>utop</em></span> is an easier-to-use version of OCaml's standard toplevel (which you can start
     by typing <em>ocaml</em> at the command line). These instructions will assume you're
     using <span class="command"><em>utop</em></span> specifically.</p><p>Before getting started, make sure you have a working OCaml installation so you can try out
-    the examples as you read through the chapter. </p><section id="ocaml-as-a-calculator" data-type="sect1"><h1>OCaml as a Calculator</h1><p>The first thing you need to do when using Core is to open<a data-type="indexterm" data-primary="OCaml" data-secondary="numerical calculations in">&#xa0;</a><a data-type="indexterm" data-primary="numerical calculations">&#xa0;</a><a data-type="indexterm" data-primary="Core standard library" data-secondary="opening">&#xa0;</a> <code>Core.Std</code>:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript"/><p>This makes the definitions in Core available and is required for
-    many of the examples in the tour and in the remainder of the book.</p><p>Now let's try a few simple numerical calculations:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="1"/><p>By and large, this is pretty similar to what you'd find in any
+    the examples as you read through the chapter. </p><section id="ocaml-as-a-calculator" data-type="sect1"><h1>OCaml as a Calculator</h1><p>The first thing you need to do when using Core is to open<a data-type="indexterm" data-primary="OCaml" data-secondary="numerical calculations in">&#xa0;</a><a data-type="indexterm" data-primary="numerical calculations">&#xa0;</a><a data-type="indexterm" data-primary="Core standard library" data-secondary="opening">&#xa0;</a> <code>Core.Std</code>:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript"/><p>This makes the definitions in Core available and is required for
+    many of the examples in the tour and in the remainder of the book.</p><p>Now let's try a few simple numerical calculations:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="1"/><p>By and large, this is pretty similar to what you'd find in any
     programming language, but a few things jump right out at you:</p><ul><li><p>We needed to type <code>;;</code> in order
         to tell the toplevel that it should evaluate an expression. This is a
         peculiarity of the toplevel that is not required in standalone
@@ -28,14 +28,14 @@
           and <code>float</code>. For example, in many languages, <code>1 / 3</code> is zero, but <code>1 / 3.0</code>
           is a third. OCaml requires you to be explicit about which operation you're doing.</p></li></ul><p>We can also create a variable to name the value of a given
     expression, using the <code>let</code> keyword. This
-    is known as a <em>let binding</em>:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="2"/><p>After a new variable is created, the toplevel tells us the name of
+    is known as a <em>let binding</em>:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="2"/><p>After a new variable is created, the toplevel tells us the name of
     the variable (<code>x</code> or <code>y</code>), in addition to its type (<code>int</code>) and value (<code>7</code> or <code>14</code>).</p><p>Note that there are some constraints on what identifiers can be used
     for variable names. Punctuation is excluded, except for <code>_</code> and <code>'</code>, and
     variables must start with a lowercase letter or an underscore. Thus, these
-    are legal:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="3"/><p>Note that by default, <span class="command"><em>utop</em></span>
-    doesn't bother to print out variables starting with an underscore.</p><p>The following examples, however, are not legal:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="4"/><p>The error messages here are a little confusing, but they'll make
+    are legal:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="3"/><p>Note that by default, <span class="command"><em>utop</em></span>
+    doesn't bother to print out variables starting with an underscore.</p><p>The following examples, however, are not legal:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="4"/><p>The error messages here are a little confusing, but they'll make
     more sense as you learn more about the language.</p></section><section id="functions-and-type-inference" data-type="sect1"><h1>Functions and Type Inference</h1><p>The <code>let</code> syntax can also be used
-    to define a function:<a data-type="indexterm" data-primary="let syntax" data-secondary="function definition with">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="defining">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="5"/><p>Functions in OCaml are values like any other, which is why we use
+    to define a function:<a data-type="indexterm" data-primary="let syntax" data-secondary="function definition with">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="defining">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="5"/><p>Functions in OCaml are values like any other, which is why we use
     the <code>let</code> keyword to bind a function to a
     variable name, just as we use <code>let</code> to
     bind a simple value like an integer to a variable name. When using
@@ -49,7 +49,7 @@
     takes an <code>int</code> and returns an <code>int</code>. We can also write functions that take
     multiple arguments. (Note that the following example will not work if you
     haven't opened <code>Core.Std</code> as was
-    suggested earlier.)<a data-type="indexterm" data-primary="multi-argument functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="with multiple arguments">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="6"/><p>The preceding example also happens to be our first use of modules.
+    suggested earlier.)<a data-type="indexterm" data-primary="multi-argument functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="with multiple arguments">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="6"/><p>The preceding example also happens to be our first use of modules.
     Here, <code>Float.of_int</code> refers to the
     <code>of_int</code> function contained in the
     <code>Float</code> module. This is different from
@@ -64,10 +64,10 @@
     <code>int</code> arguments and returns a <code>float</code>.</p><p>We can also write functions that take other functions as arguments.
     Here's an example of a function that takes three arguments: a test
     function and two integer arguments. The function returns the sum of the
-    integers that pass the test:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="7"/><p>If we look at the inferred type signature in detail, we see that the
+    integers that pass the test:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="7"/><p>If we look at the inferred type signature in detail, we see that the
     first argument is a function that takes an integer and returns a boolean,
     and that the remaining two arguments are integers. Here's an example of
-    this function in action:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="8"/><p>Note that in the definition of <code>even</code>, we used <code>=</code> in two different ways: once as the part of the
+    this function in action:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="8"/><p>Note that in the definition of <code>even</code>, we used <code>=</code> in two different ways: once as the part of the
     <code>let</code> binding that separates the thing being defined from
     its definition; and once as an equality test, when comparing <code>x mod 2</code> to <code>0</code>.
     These are very different operations despite the fact that they share some
@@ -96,11 +96,11 @@
       change the behavior of an OCaml program, but they can serve as useful
       documentation, as well as catch unintended type changes. They can also
       be helpful in figuring out why a given piece of code fails to
-      compile.</p><p>Here's an annotated version of <code>sum_if_true</code>:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="9"/><p>In the above, we've marked every argument to the function with its
+      compile.</p><p>Here's an annotated version of <code>sum_if_true</code>:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="9"/><p>In the above, we've marked every argument to the function with its
       type, with the final annotation indicating the type of the return value.
       Such type annotations can be placed on any expression in an OCaml
       program:</p></section><section id="inferring-generic-types" data-type="sect2"><h2>Inferring Generic Types</h2><p>Sometimes, there isn't enough information to fully determine the
-      concrete type of a given value. Consider this function.<a data-type="indexterm" data-primary="type inference" data-secondary="generic types">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="10"/><p><code>first_if_true</code> takes as its
+      concrete type of a given value. Consider this function.<a data-type="indexterm" data-primary="type inference" data-secondary="generic types">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="10"/><p><code>first_if_true</code> takes as its
       arguments a function <code>test</code>, and two
       values, <code>x</code> and <code>y</code>, where <code>x</code>
       is to be returned if <code>test x</code> evaluates
@@ -120,12 +120,12 @@
         other two arguments, <code>x</code> and <code>y</code>, and of the return value of <code>first_if_true</code>.
         This kind of genericity is called <em>parametric polymorphism</em> because it
         works by parameterizing the type in question with a type variable. It is very similar to
-        generics in C# and Java.<a data-type="indexterm" data-primary="parametric polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="type variables">&#xa0;</a></p><p>The generic type of <code>first_if_true</code> allows us to write this:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="11"/><p>As well as this:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="12"/><p>Both <code>long_string</code> and <code>big_number</code> are functions, and each is passed
+        generics in C# and Java.<a data-type="indexterm" data-primary="parametric polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="type variables">&#xa0;</a></p><p>The generic type of <code>first_if_true</code> allows us to write this:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="11"/><p>As well as this:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="12"/><p>Both <code>long_string</code> and <code>big_number</code> are functions, and each is passed
       to <code>first_if_true</code> with two other
       arguments of the appropriate type (strings in the first example, and
       integers in the second). But we can't mix and match two different
       concrete types for <code>'a</code> in the same use
-      of <code>first_if_true</code>:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="13"/><p>In this example, <code>big_number</code>
+      of <code>first_if_true</code>:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="13"/><p>In this example, <code>big_number</code>
       requires that <code>'a</code> be instantiated as
       <code>int</code>, whereas <code>"short"</code> and <code>"loooooong"</code> require that <code>'a</code> be instantiated as <code>string</code>, and they can't both be right at the
       same time.</p><div data-type="note"><h1>Type Errors Versus Exceptions</h1><p>There's a big difference in OCaml (and really in any compiled
@@ -134,69 +134,69 @@
         possible in the development process, and compilation time is best of
         all.<a data-type="indexterm" data-primary="runtime exceptions vs. type errors">&#xa0;</a><a data-type="indexterm" data-primary="errors" data-secondary="runtime vs. compile time">&#xa0;</a><a data-type="indexterm" data-primary="exceptions" data-secondary="vs. type errors">&#xa0;</a><a data-type="indexterm" data-primary="type errors vs. exceptions">&#xa0;</a></p><p>Working in the toplevel somewhat obscures the difference between
         runtime and compile-time errors, but that difference is still there.
-        Generally, type errors like this one:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="14"/><p>are compile-time errors (because <code>+</code> requires that both its arguments be of
+        Generally, type errors like this one:</p></div><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="14"/><p>are compile-time errors (because <code>+</code> requires that both its arguments be of
         type <code>int</code>), whereas errors that
         can't be caught by the type system, like division by zero, lead to
-        runtime exceptions:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="15"/><p>The distinction here is that type errors will stop you whether
+        runtime exceptions:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="15"/><p>The distinction here is that type errors will stop you whether
         or not the offending code is ever actually executed. Merely defining
         <code>add_potato</code> is an error, whereas
         <code>is_a_multiple</code> only fails when it's
         called, and then, only when it's called with an input that triggers
-        the exception.</p></div></section></section><section id="tuples-lists-options-and-pattern-matching" data-type="sect1"><h1>Tuples, Lists, Options, and Pattern Matching</h1><section id="tuples" data-type="sect2"><h2>Tuples</h2><p>So far we've encountered a handful of basic types like <code>int</code>, <code>float</code>,
+        the exception.</p></section></section><section id="tuples-lists-options-and-pattern-matching" data-type="sect1"><h1>Tuples, Lists, Options, and Pattern Matching</h1><section id="tuples" data-type="sect2"><h2>Tuples</h2><p>So far we've encountered a handful of basic types like <code>int</code>, <code>float</code>,
       and <code>string</code>, as well as function types
       like <code>string -&gt; int</code>. But we haven't
       yet talked about any data structures. We'll start by looking at a
       particularly simple data structure, the tuple. A tuple is an ordered
       collection of values that can each be of a different type. You can
-      create a tuple by joining values together with a comma:<a data-type="indexterm" data-primary="tuples">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="tuples">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="16"/><p>(For the mathematically inclined, the <code>*</code> character is used because the set of all
+      create a tuple by joining values together with a comma:<a data-type="indexterm" data-primary="tuples">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="tuples">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="16"/><p>(For the mathematically inclined, the <code>*</code> character is used because the set of all
       pairs of type <code>t * s</code> corresponds to
       the Cartesian product of the set of elements of type <code>t</code> and the set of elements of type <code>s</code>.)</p><p>You can extract the components of a tuple using OCaml's
-      pattern-matching syntax, as shown below:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="17"/><p>Here, the <code>(x,y)</code> on the lefthand side of the <code>let</code> binding is the pattern. This pattern lets us mint the new
+      pattern-matching syntax, as shown below:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="17"/><p>Here, the <code>(x,y)</code> on the lefthand side of the <code>let</code> binding is the pattern. This pattern lets us mint the new
         variables <code>x</code> and <code>y</code>,
         each bound to different components of the value being matched. These can now be used in
-        subsequent expressions:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="18"/><p>Note that the same syntax is used both for constructing and for
+        subsequent expressions:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="18"/><p>Note that the same syntax is used both for constructing and for
       pattern matching on tuples.</p><p>Pattern matching can also show up in function arguments. Here's a
       function for computing the distance between two points on the plane,
       where each point is represented as a pair of <code>float</code>s. The pattern-matching syntax lets us
-      get at the values we need with a minimum of fuss:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="19"/><p>The <code>**</code> operator used above is
+      get at the values we need with a minimum of fuss:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="19"/><p>The <code>**</code> operator used above is
       for raising a floating-point number to a power.</p><p>This is just a first taste of pattern matching. Pattern matching
       is a pervasive tool in OCaml, and as you'll see, it has surprising
       power.</p></section><section id="lists" data-type="sect2"><h2>Lists</h2><p>Where tuples let you combine a fixed number of items, potentially
       of different types, lists let you hold any number of items of the same
-      type. Consider the following example:<a data-type="indexterm" id="DSlists" data-primary="data structures" data-secondary="lists">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="20"/><p>Note that you can't mix elements of different types in the same
-      list, unlike tuples:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="21"/><section id="the-list-module" data-type="sect3"><h3>The List module</h3><p>Core comes with a <code>List</code> module
+      type. Consider the following example:<a data-type="indexterm" id="DSlists" data-primary="data structures" data-secondary="lists">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="20"/><p>Note that you can't mix elements of different types in the same
+      list, unlike tuples:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="21"/><section id="the-list-module" data-type="sect3"><h3>The List module</h3><p>Core comes with a <code>List</code> module
         that has a rich collection of functions for working with lists. We can
         access values from within a module by using dot notation. For example,
-        this is how we compute the length of a list:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="22"/><p>Here's something a little more complicated. We can compute the
-        list of the lengths of each language as follows:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="23"/><p><code>List.map</code> takes two arguments:
+        this is how we compute the length of a list:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="22"/><p>Here's something a little more complicated. We can compute the
+        list of the lengths of each language as follows:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="23"/><p><code>List.map</code> takes two arguments:
         a list and a function for transforming the elements of that list. It
         returns a new list with the transformed elements and does not modify
         the original list.</p><p>Notably, the function passed to <code>List.map</code> is passed under a <em>labeled
         argument</em> <code>~f</code>. Labeled
         arguments are specified by name rather than by position, and thus
         allow you to change the order in which arguments are presented to a
-        function without changing its behavior, as you can see here:<a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="24"/><p>We'll learn more about labeled arguments and why they're
+        function without changing its behavior, as you can see here:<a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="24"/><p>We'll learn more about labeled arguments and why they're
         important in <a href="#variables-and-functions" data-type="xref">#variables-and-functions</a>.</p></section><section id="constructing-lists-with" data-type="sect3"><h3>Constructing lists with ::</h3><p>In addition to constructing lists using brackets, we can use the
         operator <code>::</code> for adding elements to
-        the front of a list:<a data-type="indexterm" data-primary="operators" data-secondary=": : operator">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="operator : :">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="25"/><p>Here, we're creating a new and extended list, not changing the list we started with,
-          as you can see below:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="26"/><div data-type="note"><h1>Semicolons Versus Commas</h1><p>Unlike many other languages, OCaml uses semicolons to separate
+        the front of a list:<a data-type="indexterm" data-primary="operators" data-secondary=": : operator">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="operator : :">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="25"/><p>Here, we're creating a new and extended list, not changing the list we started with,
+          as you can see below:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="26"/><div data-type="note"><h1>Semicolons Versus Commas</h1><p>Unlike many other languages, OCaml uses semicolons to separate
           list elements in lists rather than commas. Commas, instead, are used
           for separating elements in a tuple. If you try to use commas in a
           list, you'll see that your code compiles but doesn't do quite what
-          you might expect:<a data-type="indexterm" data-primary="commas vs. semicolons">&#xa0;</a><a data-type="indexterm" data-primary="semicolons vs. commas">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="27"/><p>In particular, rather than a list of three strings, what we
+          you might expect:<a data-type="indexterm" data-primary="commas vs. semicolons">&#xa0;</a><a data-type="indexterm" data-primary="semicolons vs. commas">&#xa0;</a></p></div><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="27"/><p>In particular, rather than a list of three strings, what we
           have is a singleton list containing a three-tuple of strings.</p><p>This example uncovers the fact that commas create a tuple,
-          even if there are no surrounding parens. So, we can write:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="28"/><p>to allocate a tuple of integers. This is generally considered
-          poor style and should be avoided.</p></div><p>The bracket notation for lists is really just syntactic sugar
+          even if there are no surrounding parens. So, we can write:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="28"/><p>to allocate a tuple of integers. This is generally considered
+          poor style and should be avoided.</p><p>The bracket notation for lists is really just syntactic sugar
         for <code>::</code>. Thus, the following
         declarations are all equivalent. Note that <code>[]</code> is used to represent the empty list and
         that <code>::</code> is
-        right-associative:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="29"/><p>The <code>::</code> operator can only be
+        right-associative:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="29"/><p>The <code>::</code> operator can only be
         used for adding one element to the front of the list, with the list
         terminating at <code>[]</code>, the empty list.
-        There's also a list concatenation operator, <code>@</code>, which can concatenate two lists:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="30"/><p>It's important to remember that, unlike <code>::</code>, this is not a constant-time operation.
+        There's also a list concatenation operator, <code>@</code>, which can concatenate two lists:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="30"/><p>It's important to remember that, unlike <code>::</code>, this is not a constant-time operation.
         Concatenating two lists takes time proportional to the length of the
         first list.</p></section><section id="list-patterns-using-match" data-type="sect3"><h3>List patterns using match</h3><p>The elements of a list can be accessed through pattern matching.
-        List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here's a simple example:<a data-type="indexterm" data-primary="pattern matching" data-secondary="in lists">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="pattern matching">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="31"/><p>By pattern matching using <code>::</code>,
+        List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here's a simple example:<a data-type="indexterm" data-primary="pattern matching" data-secondary="in lists">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="pattern matching">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="31"/><p>By pattern matching using <code>::</code>,
         we've isolated and named the first element of the list (<code>my_favorite</code>) and the remainder of the list
         (<code>the_rest</code>). If you know Lisp or
         Scheme, what we've done is the equivalent of using the functions
@@ -209,7 +209,7 @@
         particular, <code>[]</code>, the empty list. If
         we try to run <code>my_favorite_language</code>,
         we'll see that it works on nonempty list and fails on empty
-        ones:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="32"/><p>You can avoid these warnings, and more importantly make sure
+        ones:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="32"/><p>You can avoid these warnings, and more importantly make sure
         that your code actually handles all of the possible cases, by using a
         <code>match</code> statement instead.</p><p>A <code>match</code> statement is a kind
         of juiced-up version of the <code>switch</code> statement found
@@ -219,7 +219,7 @@
         first matching pattern. As we've already seen, the pattern can mint
         new variables that correspond to substructures of the value being
         matched.</p><p>Here's a new version of <code>my_favorite_language</code> that uses <code>match</code> and doesn't trigger a compiler
-        warning:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="33"/><p>The preceding code also includes our first comment. OCaml
+        warning:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="33"/><p>The preceding code also includes our first comment. OCaml
         comments are bounded by <code>(*</code> and
         <code>*)</code> and can be nested arbitrarily
         and cover multiple lines. There's no equivalent of C++-style
@@ -238,7 +238,7 @@
         itself to solve those smaller problems.<a data-type="indexterm" data-primary="recursive functions" data-secondary="list functions">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="recursive list functions">&#xa0;</a></p><p>When writing recursive list functions, this separation between
         the base cases and the inductive cases is often done using pattern
         matching. Here's a simple example of a function that sums the elements
-        of a list:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="34"/><p>Following the common OCaml idiom, we use <code>hd</code> to refer to the head of the list and
+        of a list:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="34"/><p>Following the common OCaml idiom, we use <code>hd</code> to refer to the head of the list and
         <code>tl</code> to refer to the tail. Note that
         we had to use the <code>rec</code> keyword to
         allow <code>sum</code> to refer to itself. As
@@ -246,13 +246,13 @@
         of the match.</p><p>Logically, you can think of the evaluation of a simple recursive
         function like <code>sum</code> almost as if it
         were a mathematical equation whose meaning you were unfolding step by
-        step:</p><link rel="import" data-code-language="ocaml" href="guided-tour/recursion.ml"/><p>This suggests a reasonable mental model for what OCaml is
+        step:</p><link rel="import" data-code-language="ocaml" href="code/guided-tour/recursion.ml"/><p>This suggests a reasonable mental model for what OCaml is
         actually doing to evaluate a recursive function.</p><p>We can introduce more complicated list patterns as well. Here's
-        a function for removing sequential duplicates:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="35"/><p>Again, the first arm of the match is the base case, and the
+        a function for removing sequential duplicates:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="35"/><p>Again, the first arm of the match is the base case, and the
         second is the inductive. Unfortunately, this code has a problem, as is
         indicated by the warning message. In particular, we don't handle
         one-element lists. We can fix this warning by adding another case to
-        the match:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="36"/><p>Note that this code used another variant of the list pattern,
+        the match:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="36"/><p>Note that this code used another variant of the list pattern,
         <code>[hd]</code>, to match a list with a single
         element. We can do this to match a list with any fixed number of
         elements; for example, <code>[x;y;z]</code> will
@@ -265,25 +265,25 @@
         But it's good to know how to use recursion when you need to do
         something new.<a data-type="indexterm" data-startref="DSlists">&#xa0;</a></p></section></section><section id="options" data-type="sect2"><h2>Options</h2><p>Another common data structure in OCaml is the option. An option is
       used to express that a value might or might not be present. For
-      example:<a data-type="indexterm" data-primary="options">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="options">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="37"/><p>The function <code>divide</code> either returns <code>None</code> if the divisor is zero, or <code>Some</code> of the result of the division otherwise. <code>Some</code> and
+      example:<a data-type="indexterm" data-primary="options">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="options">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="37"/><p>The function <code>divide</code> either returns <code>None</code> if the divisor is zero, or <code>Some</code> of the result of the division otherwise. <code>Some</code> and
           <code>None</code> are constructors that let you build optional values, just as
           <code>::</code> and <code>[]</code> let you build lists. You can think of an
         option as a specialized list that can only have zero or one elements.</p><p>To examine the contents of an option, we use pattern matching, as
       we did with tuples and lists. Consider the following function for
       creating a log entry string given an optional time and a message. If no
       time is provided (i.e., if the time is <code>None</code>), the current time is computed and used
-      in its place:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="38"/><p>This example uses Core's <code>Time</code>
+      in its place:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="38"/><p>This example uses Core's <code>Time</code>
       module for dealing with time, as well as the <code>^</code> operator for concatenating strings. The
       concatenation operator is provided as part of the <code>Pervasives</code> module, which is automatically
       opened in every OCaml program.</p><div data-type="note"><h1>Nesting lets with let and in</h1><p><code>log_entry</code> was our first use of <code>let</code> to define a new variable within the body of a function. A
             <code>let</code> paired with an <code>in</code> can be used to introduce a new binding within any local scope, including a
           function body. The <code>in</code> marks the beginning of the scope
-          within which the new variable can be used. Thus, we could write:<a data-type="indexterm" data-primary="let syntax" data-secondary="nested let binding">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/local_let.topscript"/><p>Note that the scope of the <code>let</code> binding is
-        terminated by the double-semicolon, so the value of <code>x</code> is no longer available:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/local_let.topscript" part="1"/><p>We can also have multiple <code>let</code> statements in a
+          within which the new variable can be used. Thus, we could write:<a data-type="indexterm" data-primary="let syntax" data-secondary="nested let binding">&#xa0;</a></p></div><link rel="import" data-code-language="ocamltop" href="code/guided-tour/local_let.topscript"/><p>Note that the scope of the <code>let</code> binding is
+        terminated by the double-semicolon, so the value of <code>x</code> is no longer available:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/local_let.topscript" part="1"/><p>We can also have multiple <code>let</code> statements in a
         row, each one adding a new variable binding to what came
-        before:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/local_let.topscript" part="2"/><p>This kind of nested <code>let</code> binding is a common
+        before:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/local_let.topscript" part="2"/><p>This kind of nested <code>let</code> binding is a common
         way of building up a complex expression, with each <code>let</code> naming some component, before combining
-        them in one final expression.</p></div><p>Options are important because they are the standard way in OCaml
+        them in one final expression.</p><p>Options are important because they are the standard way in OCaml
       to encode a value that might not be there; there's no such thing as a
       <code>NullPointerException</code> in OCaml. This
       is different from most other languages, including Java and C#, where
@@ -297,23 +297,23 @@
         the possibility of missing data.</p></section></section><section id="records-and-variants" data-type="sect1"><h1>Records and Variants</h1><p>So far, we've only looked at data structures that were predefined in
     the language, like lists and tuples. But OCaml also allows us to define
     new data types. Here's a toy example of a data type representing a point
-    in two-dimensional space:<a data-type="indexterm" data-primary="datatypes" data-secondary="defining new">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="41"/><p><code>point2d</code> is a
+    in two-dimensional space:<a data-type="indexterm" data-primary="datatypes" data-secondary="defining new">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="41"/><p><code>point2d</code> is a
     <em>record</em> type, which you can think of as a tuple where
     the individual fields are named, rather than being defined positionally.
-    Record types are easy enough to construct:<a data-type="indexterm" data-primary="records" data-secondary="record types">&#xa0;</a><a data-type="indexterm" data-primary="datatypes" data-secondary="record types">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="42"/><p>And we can get access to the contents of these types using pattern
-    matching:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="43"/><p>The pattern match here binds the variable <code>x_pos</code> to the value contained in the <code>x</code> field, and the variable <code>y_pos</code> to the value in the <code>y</code> field.</p><p>We can write this more tersely using what's called <em>field punning</em>. In
+    Record types are easy enough to construct:<a data-type="indexterm" data-primary="records" data-secondary="record types">&#xa0;</a><a data-type="indexterm" data-primary="datatypes" data-secondary="record types">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="42"/><p>And we can get access to the contents of these types using pattern
+    matching:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="43"/><p>The pattern match here binds the variable <code>x_pos</code> to the value contained in the <code>x</code> field, and the variable <code>y_pos</code> to the value in the <code>y</code> field.</p><p>We can write this more tersely using what's called <em>field punning</em>. In
       particular, when the name of the field and the name of the variable it is bound to coincide,
       we don't have to write them both down. Using this, our magnitude function can be rewritten as
-        follows:<a data-type="indexterm" data-primary="fields" data-secondary="field punning">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="44"/><p>Alternatively, we can use dot notation for accessing record fields:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="45"/><p>And we can of course include our newly defined types as components
+        follows:<a data-type="indexterm" data-primary="fields" data-secondary="field punning">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="44"/><p>Alternatively, we can use dot notation for accessing record fields:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="45"/><p>And we can of course include our newly defined types as components
     in larger types. Here, for example, are some types for modeling different
-    geometric objects that contain values of type <code>point2d</code>:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="46"/><p>Now, imagine that you want to combine multiple objects of these
+    geometric objects that contain values of type <code>point2d</code>:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="46"/><p>Now, imagine that you want to combine multiple objects of these
     types together as a description of a multiobject scene. You need some
     unified way of representing these objects together in a single type. One
-    way of doing this is using a <em>variant</em> type:<a data-type="indexterm" data-primary="datatypes" data-secondary="variant types">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="combining multiple object types with">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="47"/><p>The <code>|</code> character separates the
+    way of doing this is using a <em>variant</em> type:<a data-type="indexterm" data-primary="datatypes" data-secondary="variant types">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="combining multiple object types with">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="47"/><p>The <code>|</code> character separates the
     different cases of the variant (the first <code>|</code> is optional), and each case has a capitalized
     tag, like <code>Circle</code>, <code>Rect</code> or <code>Segment</code>, to distinguish that case from the
     others.</p><p>Here's how we might write a function for testing whether a point is
-    in the interior of some element of a list of <code>scene_element</code>s:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="48"/><p>You might at this point notice that the use of <code>match</code> here is reminiscent of how we used
+    in the interior of some element of a list of <code>scene_element</code>s:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="48"/><p>You might at this point notice that the use of <code>match</code> here is reminiscent of how we used
     <code>match</code> with <code>option</code> and <code>list</code>. This is no accident: <code>option</code> and <code>list</code> are really just examples of variant types
     that happen to be important enough to be defined in the standard library
     (and in the case of lists, to have some special syntax).</p><p>We also made our first use of an <em>anonymous
@@ -341,7 +341,7 @@
       indexing starts at 0, and accessing or modifying an array element is a
       constant-time operation. Arrays are more compact in terms of memory
       utilization than most other data structures in OCaml, including lists.
-      Here's an example:<a data-type="indexterm" data-primary="data structures" data-secondary="arrays">&#xa0;</a><a data-type="indexterm" data-primary="arrays" data-secondary="imperative programming and">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="arrays">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="49"/><p>The <code>.(i)</code> syntax is used to
+      Here's an example:<a data-type="indexterm" data-primary="data structures" data-secondary="arrays">&#xa0;</a><a data-type="indexterm" data-primary="arrays" data-secondary="imperative programming and">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="arrays">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="49"/><p>The <code>.(i)</code> syntax is used to
       refer to an element of an array, and the <code>&lt;-</code> syntax is for modification. Because the
       elements of the array are counted starting at zero, element <span class="keep-together"><code>.(2)</code> is</span>
       the third element.</p><p>The <code>unit</code> type that we see in the preceding code is
@@ -353,15 +353,15 @@
         role that <code>void</code> plays in languages like C and Java.</p></section><section id="mutable-record-fields" data-type="sect2"><h2>Mutable Record Fields</h2><p>The array is an important mutable data structure, but it's not the only one. Records,
         which are immutable by default, can have some of their fields explicitly declared as
         mutable. Here's a small example of a data structure for storing a running statistical
-        summary of a collection of numbers. <a data-type="indexterm" data-primary="imperative programming" data-secondary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="mutable record fields">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="50"/><p>The fields in <code>running_sum</code> are
+        summary of a collection of numbers. <a data-type="indexterm" data-primary="imperative programming" data-secondary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="mutable record fields">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="50"/><p>The fields in <code>running_sum</code> are
       designed to be easy to extend incrementally, and sufficient to compute
       means and standard deviations, as shown in the following example. Note
       that there are two <code>let</code> bindings in a row without a
       double semicolon between them. That's because the double semicolon is
       required only to tell <em>utop</em> to process the input,
-      not to separate two declarations:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="51"/><p>We use the function <code>float</code> above, which is a
+      not to separate two declarations:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="51"/><p>We use the function <code>float</code> above, which is a
         convenient equivalent of <code>Float.of_int</code> provided by the
-          <code>Pervasives</code> library.</p><p>We also need functions to create and update <code>running_sum</code>s:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="52"/><p><code>create</code> returns a <code>running_sum</code> corresponding to the empty set, and <code>update
+          <code>Pervasives</code> library.</p><p>We also need functions to create and update <code>running_sum</code>s:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="52"/><p><code>create</code> returns a <code>running_sum</code> corresponding to the empty set, and <code>update
           rsum x</code> changes <code>rsum</code> to reflect the addition
         of <code>x</code> to its set of samples by updating the number of
         samples, the sum, and the sum of squares.</p><p>Note the use of single semicolons to sequence operations. When we were working purely
@@ -370,18 +370,18 @@
       <code>update</code> in action. Note that this code
       uses <code>List.iter</code>, which calls the
       function <code>~f</code> on each element of the
-      provided list:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="53"/><p>It's worth noting that the preceding algorithm is numerically
+      provided list:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="53"/><p>It's worth noting that the preceding algorithm is numerically
       naive and has poor precision in the presence of cancellation. You can
       look at this Wikipedia <a href="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article
       on algorithms for calculating variance</a> for more details, paying
       particular attention to the weighted incremental and parallel
       algorithms.</p></section><section id="refs" data-type="sect2"><h2>Refs</h2><p>We can create a single mutable value by using a <code>ref</code>. The <code>ref</code> type comes predefined in the standard
       library, but there's nothing really special about it. It's just a record
-      type with a single mutable field called <code>contents</code>:<a data-type="indexterm" data-primary="records" data-secondary="record types">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="ref type">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="54"/><p>There are a handful of useful functions and operators defined for
+      type with a single mutable field called <code>contents</code>:<a data-type="indexterm" data-primary="records" data-secondary="record types">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="ref type">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="54"/><p>There are a handful of useful functions and operators defined for
       <code>ref</code>s to make them more convenient to
-      work with:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="55"/><p>There's nothing magical with these operators either. You can
+      work with:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="55"/><p>There's nothing magical with these operators either. You can
       completely reimplement the <code>ref</code> type
-      and all of these operators in just a few lines of code:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="56"/><p>The <code>'a</code> before the
+      and all of these operators in just a few lines of code:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="56"/><p>The <code>'a</code> before the
       <code>ref</code> indicates that the <code>ref</code> type is polymorphic, in the same way that
       lists are polymorphic, meaning it can contain values of any type. The
       parentheses around <code>!</code> and <code>:=</code> are needed because these are operators,
@@ -391,33 +391,33 @@
       languages. For example, we can sum over the elements of a list
       imperatively by calling <code>List.iter</code> to
       call a simple function on every element of a list, using a
-      <code>ref</code> to accumulate the results:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="57"/><p>This isn't the most idiomatic way to sum up a list, but it shows how you can use a
+      <code>ref</code> to accumulate the results:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="57"/><p>This isn't the most idiomatic way to sum up a list, but it shows how you can use a
           <code>ref</code> in place of a mutable variable.</p></section><section id="for-and-while-loops" data-type="sect2"><h2>For and While Loops</h2><p>OCaml also supports traditional imperative control-flow constructs
       like <code>for and while</code> loops. Here, for example, is some
       code for permuting an array that uses a <code>for</code> loop. We
       use the <code>Random</code> module as our source
       of randomness. <code>Random</code> starts with a
       default seed, but you can call <code>Random.self_init</code> to choose a new seed at
-      random:<a data-type="indexterm" data-primary="Random module">&#xa0;</a><a data-type="indexterm" data-primary="while loops">&#xa0;</a><a data-type="indexterm" data-primary="for loops">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="for and while loops">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="58"/><p>From a syntactic perspective, you should note the keywords that
+      random:<a data-type="indexterm" data-primary="Random module">&#xa0;</a><a data-type="indexterm" data-primary="while loops">&#xa0;</a><a data-type="indexterm" data-primary="for loops">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="for and while loops">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="58"/><p>From a syntactic perspective, you should note the keywords that
       distinguish a <code>for</code> loop: <code>for</code>, <code>to</code>,
-      <code>do</code>, and <code>done</code>.</p><p>Here's an example run of this code:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="59"/><p>OCaml also supports <code>while</code> loops, as shown in
+      <code>do</code>, and <code>done</code>.</p><p>Here's an example run of this code:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="59"/><p>OCaml also supports <code>while</code> loops, as shown in
       the following function for finding the position of the first negative
       entry in an array. Note that <code>while</code>
-      (like <code>for</code>) is also a keyword:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="60"/><p>As a side note, the preceding code takes advantage of the fact
+      (like <code>for</code>) is also a keyword:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="60"/><p>As a side note, the preceding code takes advantage of the fact
       that <code>&amp;&amp;</code>, OCaml's And
       operator, short-circuits. In particular, in an expression of the form
       <em><code>expr1</code></em> <code>&amp;&amp;</code> <em><code>expr2</code></em>, <em><code>expr2</code></em> will only be evaluated if
       <em><code>expr1</code></em> evaluated
       to true. Were it not for that, then the preceding function would result
       in an out-of-bounds error. Indeed, we can trigger that out-of-bounds
-      error by rewriting the function to avoid the short-circuiting:</p><link rel="import" data-code-language="ocamltop" href="guided-tour/main.topscript" part="61"/><p>The Or operator, <code>||</code>,
+      error by rewriting the function to avoid the short-circuiting:</p><link rel="import" data-code-language="ocamltop" href="code/guided-tour/main.topscript" part="61"/><p>The Or operator, <code>||</code>,
       short-circuits in a similar way to <code>&amp;&amp;</code>.</p></section></section><section id="a-complete-program" data-type="sect1"><h1>A Complete Program</h1><p>So far, we've played with the basic features of the language via
     <span class="command"><em>utop</em></span>. Now we'll show how to create a
     simple standalone program. In particular, we'll create a program that sums
     up a list of numbers read in from the standard input.<a data-type="indexterm" data-primary="programming" data-secondary="simple standalone example">&#xa0;</a></p><p>Here's the code, which you can save in a file called
     <em class="filename">sum.ml</em>. Note that we don't terminate expressions with
     <code>;;</code> here, since it's not required
-    outside the toplevel:</p><link rel="import" data-code-language="ocaml" href="guided-tour/sum.ml"/><p>This is our first use of OCaml's input and output routines. The
+    outside the toplevel:</p><link rel="import" data-code-language="ocaml" href="code/guided-tour/sum.ml"/><p>This is our first use of OCaml's input and output routines. The
     function <code>read_and_accumulate</code> is a
     recursive function that uses <code>In_channel.input_line</code> to read in lines one by
     one from the standard input, invoking itself at each iteration with its
@@ -433,10 +433,10 @@
         wrapper on top of <span class="command"><em>ocamlbuild</em></span>, a build tool that ships
         with the OCaml compiler. The <span class="command"><em>corebuild</em></span> script is
         installed along with Core, and its purpose is to pass in the flags required for building a
-        program with Core.<a data-type="indexterm" data-primary="corebuild">&#xa0;</a></p><link rel="import" data-code-language="console" href="guided-tour/build_sum.out"/><p>The <code>.native</code> suffix indicates that we're building a
+        program with Core.<a data-type="indexterm" data-primary="corebuild">&#xa0;</a></p><link rel="import" data-code-language="console" href="code/guided-tour/build_sum.out"/><p>The <code>.native</code> suffix indicates that we're building a
         native-code executable, which we'll discuss more in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>. Once the build completes, we can use the resulting
         program like any command-line utility. We can feed input to <code>sum.native</code> by typing in a sequence of numbers, one per line, hitting
-          <strong><code>Ctrl-D</code></strong> when we're done:</p><link rel="import" data-code-language="console" href="guided-tour/sum.out"/><p>More work is needed to make a really usable command-line program,
+          <strong><code>Ctrl-D</code></strong> when we're done:</p><link rel="import" data-code-language="console" href="code/guided-tour/sum.out"/><p>More work is needed to make a really usable command-line program,
       including a proper command-line parsing interface and better error
       handling, all of which is covered in <a href="#command-line-parsing" data-type="xref">#command-line-parsing</a>.</p></section></section><section id="where-to-go-from-here" data-type="sect1"><h1>Where to Go from Here</h1><p>That's it for the guided tour! There are plenty of features left and
     lots of details to explain, but we hope that you now have a sense of what

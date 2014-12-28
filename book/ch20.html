@@ -33,7 +33,7 @@
   values are managed by the runtime later on in <a href="#understanding-the-garbage-collector" data-type="xref">#understanding-the-garbage-collector</a>.<a data-type="indexterm" id="MAPocaml" data-primary="mapping" data-secondary="of OCaml types to runtime values">&#xa0;</a></p><section id="ocaml-blocks-and-values" data-type="sect1"><h1>OCaml Blocks and Values</h1><p>A running OCaml program uses blocks of memory (i.e., contiguous
     sequences of words in RAM) to represent values such as tuples, records,
     closures, or arrays. An OCaml program implicitly allocates a block of
-    memory when such a value is created:<a data-type="indexterm" id="blck" data-primary="blocks (of memory)">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="memory-repr/simple_record.topscript"/><p>The type declaration <code>t</code> doesn't
+    memory when such a value is created:<a data-type="indexterm" id="blck" data-primary="blocks (of memory)">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/simple_record.topscript"/><p>The type declaration <code>t</code> doesn't
     take up any memory at runtime, but the subsequent <code>let</code> binding allocates a new block of memory with
     two words of available space. One word holds the <code>foo</code> field, and the other word holds the <code>bar</code> field. The OCaml compiler translates such an
     expression into an explicit allocation for the block from OCaml's runtime
@@ -126,33 +126,33 @@
     single type of element in the OCaml type system, this is not required by
     the memory representation.<a data-type="indexterm" data-primary="arrays" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="tuples">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="tuples, records, and arrays">&#xa0;</a></p><p>You can check the difference between a block and a direct integer
     yourself using the <code>Obj</code> module, which
-    exposes the internal representation of values to OCaml code:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript"/><p>The <code>Obj.repr</code> function retrieves
+    exposes the internal representation of values to OCaml code:</p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript"/><p>The <code>Obj.repr</code> function retrieves
     the runtime representation of any OCaml value. <code>Obj.is_block</code> checks the bottom bit to determine
     if the value is a block header or an unboxed integer.</p><section id="floating-point-numbers-and-arrays" data-type="sect2"><h2>Floating-Point Numbers and Arrays</h2><p>Floating-point numbers in OCaml are always stored as full, double-precision values.
         Individual floating-point values are stored as a block with a single field that contains the
         number. This block has the <code>Double_tag</code> set, which signals
-        to the collector that the floating-point value is not to be scanned:<a data-type="indexterm" data-primary="floating-point values">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="1"/><p>Since each floating-point value is boxed in a separate memory block, it can be
+        to the collector that the floating-point value is not to be scanned:<a data-type="indexterm" data-primary="floating-point values">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="1"/><p>Since each floating-point value is boxed in a separate memory block, it can be
         inefficient to handle large arrays of floats in comparison to unboxed integers. OCaml
         therefore special-cases records or arrays that contain <em>only</em>
         <code>float</code> types. These are stored in a block that contains
         the floats packed directly in the data section, with <code>Double_array_tag</code> set to signal to the collector that the contents are not OCaml
         values.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/float_array_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2003.png"/><figcaption></figcaption></figure><p>First, let's check that float arrays do in fact have a different
-      tag number from normal floating-point values:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="2"/><p>This tells us that float arrays have a tag value of 254. Now let's
+      tag number from normal floating-point values:</p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="2"/><p>This tells us that float arrays have a tag value of 254. Now let's
       test some sample values using the <code>Obj.tag</code> function to check that the allocated
       block has the expected runtime tag, and also use <code>Obj.double_field</code> to retrieve a float from
-      within the block:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="3"/><p>The first thing we tested was that a float array has the correct unboxed float array tag
+      within the block:</p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="3"/><p>The first thing we tested was that a float array has the correct unboxed float array tag
         value (254). However, the next line tests a tuple of floating-point values instead, which
         are <em>not</em> optimized in the same way and have the normal tuple tag value
         (0).</p><p>Only records and arrays can have the float array optimization, and
       for records, every single field must be a float.</p></section></section><section id="variants-and-lists" data-type="sect1"><h1>Variants and Lists</h1><p>Basic variant types with no extra parameters for any of their
     branches are simply stored as an OCaml integer, starting with <code>0</code> for the first option and in ascending
-    order:<a data-type="indexterm" data-primary="variant types" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="variants and lists">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="4"/><p><code>Obj.magic</code> unsafely forces a type
+    order:<a data-type="indexterm" data-primary="variant types" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="variants and lists">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="4"/><p><code>Obj.magic</code> unsafely forces a type
     cast between any two OCaml types; in this example, the <code>int</code> type hint retrieves the runtime integer
     value. The <code>Obj.is_block</code> confirms that
     the value isn't a more complex block, but just an OCaml <code>int</code>.</p><p>Variants that have parameters arguments are a little more complex.
     They are stored as blocks, with the value <em>tags</em>
     ascending from 0 (counting from leftmost variants with parameters). The
-    parameters are stored as words in the block:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="5"/><p>In the preceding example, the <code>Apple</code> and <code>Kiwi</code> values are still stored as normal OCaml integers with values
+    parameters are stored as words in the block:</p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="5"/><p>In the preceding example, the <code>Apple</code> and <code>Kiwi</code> values are still stored as normal OCaml integers with values
         <code>0</code> and <code>1</code>, respectively.
       The <code>Orange</code> and <code>Pear</code>
       values both have parameters and are stored as blocks whose tags ascend from <code>0</code> (and so <code>Pear</code> has a tag of
@@ -177,7 +177,7 @@
     variant. This integer value is determined by applying a hash function to
     the <em>name</em> of the variant. The hash function isn't
     exposed directly by the compiler, but the <code>type_conv</code> library from Core provides an
-    alternative implementation:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="6"/><p>The hash function is designed to give the same results on 32-bit and
+    alternative implementation:</p><link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="6"/><p>The hash function is designed to give the same results on 32-bit and
     64-bit architectures, so the memory representation is stable across
     different CPUs and host types.</p><p>Polymorphic variants use more memory space than normal variants when parameters are
       included in the data type constructors. Normal variants use the tag byte to encode the variant
@@ -216,7 +216,7 @@
       values. A custom block lives in the OCaml heap like an ordinary block and can be of whatever
       size the user desires. The <code>Custom_tag</code> (255) is higher than
         <code>No_scan_tag</code> and so isn't scanned by the GC.<a data-type="indexterm" data-primary="custom heap blocks">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="custom heap blocks">&#xa0;</a></p><p>The first word of the data within the custom block is a C pointer to a <code>struct</code> of custom operations. The custom block cannot have pointers
-      to OCaml blocks and is opaque to the GC:</p><link rel="import" data-code-language="c" href="memory-repr/custom_ops.c"/><p>The custom operations specify how the runtime should perform polymorphic comparison,
+      to OCaml blocks and is opaque to the GC:</p><link rel="import" data-code-language="c" href="code/memory-repr/custom_ops.c"/><p>The custom operations specify how the runtime should perform polymorphic comparison,
       hashing and binary marshaling. They also optionally contain a <em>finalizer</em>
       that the runtime calls just before the block is garbage-collected. This finalizer has nothing
       to do with ordinary OCaml finalizers (as created by <code>Gc.finalize</code> and explained in <a href="#understanding-the-garbage-collector" data-type="xref">#understanding-the-garbage-collector</a>). They are instead used to call C cleanup functions such as <code>free</code>.<a data-type="indexterm" data-primary="finalizers" data-secondary="for C cleanup functions">&#xa0;</a></p><section id="managing-external-memory-with-bigarray" data-type="sect2"><h2>Managing External Memory with Bigarray</h2><p>A common use of custom blocks is to manage external system memory

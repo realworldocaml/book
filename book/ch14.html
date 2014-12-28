@@ -16,7 +16,7 @@
       elegant way<a data-type="indexterm" data-primary="combinators" data-secondary="functional combinators">&#xa0;</a></p></li></ul><section id="basic-command-line-parsing" data-type="sect1"><h1>Basic Command-Line Parsing</h1><p>Let's start by working through a clone of the <em>md5sum</em> command that is
       present on most Linux installations (the equivalent command on Mac OS X is simply <code>md5</code>). The following function defined below reads in the contents
       of a file, applies the MD5 one-way cryptographic hash function to the data, and outputs an
-      ASCII hex representation of the result:<a data-type="indexterm" data-primary="MD5 one-way cryptographic hash function">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="basic approach to">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5.ml"/><p>The <code>do_hash</code> function accepts a
+      ASCII hex representation of the result:<a data-type="indexterm" data-primary="MD5 one-way cryptographic hash function">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="basic approach to">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5.ml"/><p>The <code>do_hash</code> function accepts a
     <code>filename</code> parameter and prints the
     human-readable MD5 string to the console standard output. The first step
     toward turning this function into a command-line program is to declare all
@@ -26,7 +26,7 @@
     types they should map to, and whether to take special actions (such as
     pausing for interactive input) if certain inputs are encountered.</p><section id="anonymous-arguments" data-type="sect2"><h2>Anonymous Arguments</h2><p>Let's build the specification for a single argument that is passed
       directly on the command line. This is known as an
-      <em>anonymous</em> argument:<a data-type="indexterm" data-primary="arguments" data-secondary="anonymous arguments">&#xa0;</a><a data-type="indexterm" data-primary="anonymous arguments">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5.ml" part="1"/><p>The <code>Command.Spec</code> module defines
+      <em>anonymous</em> argument:<a data-type="indexterm" data-primary="arguments" data-secondary="anonymous arguments">&#xa0;</a><a data-type="indexterm" data-primary="anonymous arguments">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5.ml" part="1"/><p>The <code>Command.Spec</code> module defines
       the tools you'll need to build up a command-line specification. We start
       with the <code>empty</code> value and add
       parameters to that using the <code>+&gt;</code>
@@ -41,7 +41,7 @@
       we'll see more complex conversion options later in the chapter.</p></section><section id="defining-basic-commands" data-type="sect2"><h2>Defining Basic Commands</h2><p>Once we've defined a specification, we need to put it to work on
       real input. The simplest way is to directly create a command-line
       interface via the <code>Command.basic</code>
-      module:<a data-type="indexterm" data-primary="Command.basic module">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5.ml" part="2"/><p><code>Command.basic</code> defines a
+      module:<a data-type="indexterm" data-primary="Command.basic module">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5.ml" part="2"/><p><code>Command.basic</code> defines a
       complete command-line interface that takes the following extra
       arguments, in addition to the ones defined in the specification:</p><dl><dt><code>summary</code></dt><dd><p>A required one-line description to go at the top of the
             command help screen.</p></dd><dt><code>readme</code></dt><dd><p>For longer help text when the command is called with
@@ -57,50 +57,50 @@
         <code>unit</code> guarantees that it will not be
         evaluated immediately as a value if there are no other
         arguments.</p></div></section><section id="running-basic-commands" data-type="sect2"><h2>Running Basic Commands</h2><p>Once we've defined the basic command, running it is just one
-      function call away:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5.ml" part="3"/><p><code>Command.run</code> takes a couple of
+      function call away:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5.ml" part="3"/><p><code>Command.run</code> takes a couple of
       optional arguments that are useful to identify which version of the
       binary you are running in production. You'll need to install Cryptokit
       via <code>opam install cryptokit</code> before
       building this example. Once that's completed, run the following to
-      compile the binary:</p><link rel="import" data-code-language="console" href="command-line-parsing/build_basic_md5.out"/><p>You can now query the version information for the binary you just
-      compiled:</p><link rel="import" data-code-language="console" href="command-line-parsing/get_basic_md5_version.out"/><p>The versions that you see in the output were defined via the
+      compile the binary:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/build_basic_md5.out"/><p>You can now query the version information for the binary you just
+      compiled:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/get_basic_md5_version.out"/><p>The versions that you see in the output were defined via the
       optional arguments to <code>Command.run</code>.
       You can leave these blank in your own programs or get your build system
       to generate them directly from your version control system (e.g., by
       running <code>hg id</code> to generate a build
-      revision number, in the case of Mercurial):</p><link rel="import" data-code-language="console" href="command-line-parsing/get_basic_md5_help.out"/><p>When we invoke this binary without any arguments, it helpfully
+      revision number, in the case of Mercurial):</p><link rel="import" data-code-language="console" href="code/command-line-parsing/get_basic_md5_help.out"/><p>When we invoke this binary without any arguments, it helpfully
       displays all of the command-line options available, along with a message
       to the standard error that informs you that a required argument <code>filename</code> is missing.</p><p>If you do supply the <code>filename</code>
       argument, then <code>do_hash</code> is called with
       the argument and the MD5 output is displayed to the standard
-      output:</p><link rel="import" data-code-language="console" href="command-line-parsing/run_basic_md5.out"/><p>And that's all it took to build our little MD5 utility! Here's a
+      output:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/run_basic_md5.out"/><p>And that's all it took to build our little MD5 utility! Here's a
       complete version of the example we just walked through, made slightly
-      more succinct by removing intermediate variables:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_succinct.ml"/><p>Now that we have the basics in place, the rest of the chapter will
+      more succinct by removing intermediate variables:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_succinct.ml"/><p>Now that we have the basics in place, the rest of the chapter will
       examine some of the more advanced features of Command.</p></section></section><section id="argument-types" data-type="sect1"><h1>Argument Types</h1><p>You aren't just limited to parsing command lines as strings, of
     course. <code>Command.Spec</code> defines several
     other conversion functions (shown in <a href="#table14_1" data-type="xref">#table14_1</a>) that
     validate and parse input into various types.<a data-type="indexterm" data-primary="arguments" data-secondary="argument types">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="argument types">&#xa0;</a></p><table id="table14_1"><caption>Conversion functions defined by
       <code>Command.spec</code></caption><thead><tr><th>Argument type</th><th>OCaml type</th><th>Example</th></tr></thead><tbody><tr><td><code>string</code></td><td><code>string</code></td><td><code>foo</code></td></tr><tr><td><code>int</code></td><td><code>int</code></td><td><code>123</code></td></tr><tr><td><code>float</code></td><td><code>float</code></td><td><code>123.01</code></td></tr><tr><td><code>bool</code></td><td><code>bool</code></td><td><code>true</code></td></tr><tr><td><code>date</code></td><td><code>Date.t</code></td><td><code>2013-12-25</code></td></tr><tr><td><code>time_span</code></td><td><code>Span.t</code></td><td><code>5s</code></td></tr><tr><td><code>file</code></td><td><code>string</code></td><td><code>/etc/passwd</code></td></tr></tbody></table><p>We can tighten up the specification of the command to <code>file</code> to reflect that the argument must be a
-    valid filename, and not just any string:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_as_filename.ml" part="1"/><p>Running this with a nonexistent filename will now output an error if
+    valid filename, and not just any string:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_as_filename.ml" part="1"/><p>Running this with a nonexistent filename will now output an error if
     the file doesn't exist. As a bonus, it also enables interactive
     command-line completion to work on the filename argument (explained later
-    in the chapter):</p><link rel="import" data-code-language="console" href="command-line-parsing/run_basic_md5_as_filename.out"/><section id="defining-custom-argument-types" data-type="sect2"><h2>Defining Custom Argument Types</h2><p>We can also define our own argument types if the predefined ones
+    in the chapter):</p><link rel="import" data-code-language="console" href="code/command-line-parsing/run_basic_md5_as_filename.out"/><section id="defining-custom-argument-types" data-type="sect2"><h2>Defining Custom Argument Types</h2><p>We can also define our own argument types if the predefined ones
       aren't sufficient. For instance, let's make a <code>regular_file</code> argument type that ensures that
       the input file isn't a character device or some other odd UNIX file type
-      that can't be fully read:<a data-type="indexterm" data-primary="arguments" data-secondary="defining custom types">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_with_custom_arg.ml"/><p>The <code>regular_file</code> function
+      that can't be fully read:<a data-type="indexterm" data-primary="arguments" data-secondary="defining custom types">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_with_custom_arg.ml"/><p>The <code>regular_file</code> function
       transforms a <code>filename</code> string
       parameter into the same string but first checks that the file exists and
       is a regular file type. When you build and run this code, you will see
       the new error messages if you try to open a special device such as
-      <code>/dev/null</code>:</p><link rel="import" data-code-language="console" href="command-line-parsing/run_basic_md5_with_custom_arg.out"/></section><section id="optional-and-default-arguments" data-type="sect2"><h2>Optional and Default Arguments</h2><p>A more realistic MD5 binary could also read from the standard
+      <code>/dev/null</code>:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/run_basic_md5_with_custom_arg.out"/></section><section id="optional-and-default-arguments" data-type="sect2"><h2>Optional and Default Arguments</h2><p>A more realistic MD5 binary could also read from the standard
       input if a <code>filename</code> isn't
-      specified:<a data-type="indexterm" data-primary="arguments" data-secondary="default arguments">&#xa0;</a><a data-type="indexterm" data-primary="default arguments">&#xa0;</a><a data-type="indexterm" data-primary="optional arguments" data-secondary="and default arguments">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="optional arguments">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_with_optional_file_broken.ml" part="1"/><p>This just wraps the <code>filename</code>
+      specified:<a data-type="indexterm" data-primary="arguments" data-secondary="default arguments">&#xa0;</a><a data-type="indexterm" data-primary="default arguments">&#xa0;</a><a data-type="indexterm" data-primary="optional arguments" data-secondary="and default arguments">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="optional arguments">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_with_optional_file_broken.ml" part="1"/><p>This just wraps the <code>filename</code>
       argument declaration in the <code>maybe</code>
       function to mark it as an optional argument. However, building this
-      results in a compile-time error:</p><link rel="import" data-code-language="console" href="command-line-parsing/build_basic_md5_with_optional_file_broken.out"/><p>This is because changing the argument type has also changed the
+      results in a compile-time error:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/build_basic_md5_with_optional_file_broken.out"/><p>This is because changing the argument type has also changed the
       type of the callback function. It now wants a <code>string option</code> instead of a <code>string</code>, since the value has become optional.
       We can adapt our example to use the new information and read from
-      standard input if no file is specified:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_with_optional_file.ml"/><p>The <code>filename</code> parameter to
+      standard input if no file is specified:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_with_optional_file.ml"/><p>The <code>filename</code> parameter to
       <code>do_hash</code> is now a <code>string option</code> type. This is resolved into an
       input channel via <code>get_inchan</code> to
       determine whether to open the standard input or a file, and then the
@@ -109,11 +109,11 @@
       with the benefit of not having to change the callback parameter type
       (which may be a problem in more complex applications).</p><p>The following example behaves exactly the same as the previous
       example, but replaces <code>maybe</code> with
-      <code>maybe_with_default</code>:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_with_default_file.ml"/><p>Building and running both against a system file confirms that they
-      have the same behavior:</p><link rel="import" data-code-language="console" href="command-line-parsing/run_basic_and_default_md5.out"/></section><section id="sequences-of-arguments" data-type="sect2"><h2>Sequences of Arguments</h2><p>One last transformation that's useful is to obtain lists of
+      <code>maybe_with_default</code>:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_with_default_file.ml"/><p>Building and running both against a system file confirms that they
+      have the same behavior:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/run_basic_and_default_md5.out"/></section><section id="sequences-of-arguments" data-type="sect2"><h2>Sequences of Arguments</h2><p>One last transformation that's useful is to obtain lists of
       anonymous arguments rather than a single one. As an example, let's
       modify our MD5 code to take a collection of files to process on the
-      command line:<a data-type="indexterm" data-primary="arguments" data-secondary="sequences of">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_sequence.ml"/><p>The callback function is a little more complex now, to handle the
+      command line:<a data-type="indexterm" data-primary="arguments" data-secondary="sequences of">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_sequence.ml"/><p>The callback function is a little more complex now, to handle the
       extra options. The <code>files</code> are now a
       <code>string list</code>, and an empty list
       reverts to using standard input, just as our previous <code>maybe</code> and <code>maybe_with_default</code> examples did. If the list
@@ -125,14 +125,14 @@
     specification.<a data-type="indexterm" data-primary="flags">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="labeled flags and">&#xa0;</a></p><p>Let's add two arguments to our <code>md5</code> command that mimics the Mac OS X version. A
     <code>-s</code> flag specifies
     the string to be hashed directly on the command line and <code>-t</code> runs a self-test. The complete example
-    follows:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/basic_md5_with_flags.ml"/><p>The specification now uses the <code>flag</code> function to define the two new labeled,
+    follows:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/basic_md5_with_flags.ml"/><p>The specification now uses the <code>flag</code> function to define the two new labeled,
     command-line arguments. The <code>doc</code> string
     is formatted so that the first word is the short name that appears in the
     usage text, with the remainder being the full help text. Notice that the
     <code>-t</code> flag has no
     argument, and so we prepend its <code>doc</code>
     text with a blank space. The help text for the preceding code looks like
-    this:</p><link rel="import" data-code-language="console" href="command-line-parsing/run_basic_md5_flags_help.out"/><p>The <code>-s</code> flag in our specification
+    this:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/run_basic_md5_flags_help.out"/><p>The <code>-s</code> flag in our specification
     requires a <code>string</code> argument and isn't
     optional. The Command parser outputs an error message if the flag isn't
     supplied, as with the anonymous arguments in earlier examples. <a href="#table14-2" data-type="xref">#table14-2</a> contains a list of some of the functions that you
@@ -153,27 +153,27 @@
     together and adding some hierarchy to the command-line
     interface.<a data-type="indexterm" data-primary="subcommands, grouping of">&#xa0;</a><a data-type="indexterm" data-primary="OPAM package manager">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="subcommand grouping">&#xa0;</a></p><p>You'll have run across this style already when using the OPAM
     package manager (or, in the non-OCaml world, the Git or Mercurial
-    commands). OPAM exposes commands in this form:</p><link rel="import" data-code-language="console" href="command-line-parsing/opam.out"/><p>The <code>config</code>, <code>remote</code>, and <code>install</code> keywords form a logical grouping of
+    commands). OPAM exposes commands in this form:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/opam.out"/><p>The <code>config</code>, <code>remote</code>, and <code>install</code> keywords form a logical grouping of
     commands that factor out a set of flags and arguments. This lets you
     prevent flags that are specific to a particular subcommand from leaking
     into the general configuration space.<a data-type="indexterm" data-primary="install keyword">&#xa0;</a><a data-type="indexterm" data-primary="remote keyword">&#xa0;</a></p><p>This usually only becomes a concern when your application
     organically grows features. Luckily, it's simple to extend your
     application to do this in Command: just swap the <code>Command.basic</code> for <code>Command.group</code>, which takes an association list
     of specifications and handles the subcommand parsing and help output for
-    you:<a data-type="indexterm" data-primary="Command.group">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="command-line-parsing/group.topscript"/><p>The <code>group</code> signature accepts a
+    you:<a data-type="indexterm" data-primary="Command.group">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/command-line-parsing/group.topscript"/><p>The <code>group</code> signature accepts a
     list of basic <code>Command.t</code> values and
     their corresponding names. When executed, it looks for the appropriate
     subcommand from the name list, and dispatches it to the right command
     handler.</p><p>Let's build the outline of a calendar tool that does a few
     operations over dates from the command line. We first need to define a
     command that adds days to an input date and prints the resulting
-    date:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_add_days.ml"/><p>Everything in this command should be familiar to you by now. Once
+    date:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_add_days.ml"/><p>Everything in this command should be familiar to you by now. Once
     you've tested it and made sure it works, we can define another new command
     that takes the difference of two dates. However, instead of creating a new
-    binary, we group both operations as subcommands using <code>Command.group</code>:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_add_sub_days.ml"/><p>And that's all you really need to add subcommand support! Let's
+    binary, we group both operations as subcommands using <code>Command.group</code>:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_add_sub_days.ml"/><p>And that's all you really need to add subcommand support! Let's
     build the example first in the usual way and inspect the help output,
-    which now reflects the subcommands we just added.</p><link rel="import" data-code-language="console" href="command-line-parsing/build_cal_add_sub_days.out"/><p>We can invoke the two commands we just defined to verify that they
-    work and see the date parsing in action:</p><link rel="import" data-code-language="console" href="command-line-parsing/run_cal_add_sub_days.out"/></section><section id="advanced-control-over-parsing" data-type="sect1"><h1>Advanced Control over Parsing</h1><p>The functions for generating a specification may seem like magic. In
+    which now reflects the subcommands we just added.</p><link rel="import" data-code-language="console" href="code/command-line-parsing/build_cal_add_sub_days.out"/><p>We can invoke the two commands we just defined to verify that they
+    work and see the date parsing in action:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/run_cal_add_sub_days.out"/></section><section id="advanced-control-over-parsing" data-type="sect1"><h1>Advanced Control over Parsing</h1><p>The functions for generating a specification may seem like magic. In
     particular, even if you know how to use them, it's not entirely clear how
     they work, and in particular, why the types work out the way they
     do.<a data-type="indexterm" id="CLPadv" data-primary="command-line parsing" data-secondary="advanced control over">&#xa0;</a></p><p>Understanding the details of how these specifications fit together
@@ -198,28 +198,28 @@
       Spec.t</code>.</p><p>Such a value transforms a main function of type <code>arg1 -&gt; ... -&gt; argN -&gt; 'r</code> by
       supplying all the argument values, leaving a main function that returns
       a value of type <code>'r</code>. Let's look at
-      some examples of specs, and their types:</p><link rel="import" data-code-language="ocamltop" href="command-line-parsing/command_types.topscript"/><p>The empty specification is simple, as it doesn't add any
+      some examples of specs, and their types:</p><link rel="import" data-code-language="ocamltop" href="code/command-line-parsing/command_types.topscript"/><p>The empty specification is simple, as it doesn't add any
       parameters to the callback type. The second example adds an <code>int</code> anonymous parameter that is reflected in
       the inferred type. One forms a command by combining a spec of type
       <code>('main, unit) Spec.t</code> with a function
       of type <code>'main</code>. The combinators we've
       shown so far incrementally build the type of <code>'main</code> according to the command-line parameters
       it expects, so the resulting type of <code>'main</code> is something like <code>arg1 -&gt; ... -&gt; argN -&gt; unit</code>.</p><p>The type of <code>Command.basic</code>
-      should make more sense now:</p><link rel="import" data-code-language="ocamltop" href="command-line-parsing/basic.topscript"/><p>The parameters to <code>Spec.t</code> are important here. They
+      should make more sense now:</p><link rel="import" data-code-language="ocamltop" href="code/command-line-parsing/basic.topscript"/><p>The parameters to <code>Spec.t</code> are important here. They
         show that the callback function for a spec should consume identical arguments to the
         supplied <code>main</code> function, except for an additional <code>unit</code> argument. This final <code>unit</code> is there to make sure the callback is evaluated as a function, since if
         zero command-line arguments are specified (i.e., <span class="keep-together"><code>Spec.empty</code></span>), the callback would otherwise have no
         arguments and be evaluated immediately. That's why you have to supply an additional <code>()</code> to the callback function in all the previous examples.</p></section><section id="composing-specification-fragments-together" data-type="sect2"><h2>Composing Specification Fragments Together</h2><p>If you want to factor out common command-line operations, the
       <code>++</code> operator will append two
       specifications together. Let's add some dummy verbosity and debug flags
-      to our calendar application to illustrate this.</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_append.ml"/><p>The definitions of the specifications are very similar to the
+      to our calendar application to illustrate this.</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_append.ml"/><p>The definitions of the specifications are very similar to the
       earlier example, except that they append a <code>common</code> parameter after each specification. We
-      can supply these flags when defining the groups.</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_append.ml" part="1"/><p>Both of these flags will now be applied and passed to all the
+      can supply these flags when defining the groups.</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_append.ml" part="1"/><p>Both of these flags will now be applied and passed to all the
       callback functions. This makes code refactoring a breeze by using the
       compiler to spot places where you use commands. Just add a parameter to
       the common definition, run the compiler, and fix type errors until
       everything works again.<a data-type="indexterm" data-primary="refactoring">&#xa0;</a></p><p>For example, if we remove the <code>verbose</code> flag and recompile, we'll get this
-      impressively long type error:</p><link rel="import" data-code-language="console" href="command-line-parsing/build_cal_append_broken.out"/><p>While this does look scary, the key line to scan is the last one,
+      impressively long type error:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/build_cal_append_broken.out"/><p>While this does look scary, the key line to scan is the last one,
       where it's telling you that you have supplied too many arguments in the
       callback function (<code>unit -&gt; unit</code>
       versus <code>unit</code>). If you started with a
@@ -229,10 +229,10 @@
       control the normal course of parsing by supplying a function that maps
       callback arguments to a new set of values. For instance, let's revisit
       our first calendar application that added a number of days onto a
-      supplied base date:<a data-type="indexterm" data-primary="interactive input" data-secondary="prompts for">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_add_days.ml"/><p>This program requires you to specify both the <code>base</code> date and the number of <code>days</code> to add onto it. If <code>days</code> isn't supplied on the command line, an
+      supplied base date:<a data-type="indexterm" data-primary="interactive input" data-secondary="prompts for">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_add_days.ml"/><p>This program requires you to specify both the <code>base</code> date and the number of <code>days</code> to add onto it. If <code>days</code> isn't supplied on the command line, an
       error is output. Now let's modify it to interactively prompt for a
       number of days if only the <code>base</code> date
-      is supplied:</p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_add_interactive.ml"/><p>The <code>days</code> anonymous argument is
+      is supplied:</p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_add_interactive.ml"/><p>The <code>days</code> anonymous argument is
       now an optional integer in the spec, and we want to transform it into a
       nonoptional value before calling our <code>add_days</code> callback. The <code>step</code> combinator lets us perform this
       transformation by applying its supplied callback function first. In the
@@ -243,20 +243,20 @@
       <code>m base days</code> to continue processing
       with the new values we've just calculated. The <code>days</code> value that is passed onto the next
       callback now has a nonoptional <code>int</code>
-      type:</p><link rel="import" data-code-language="console" href="command-line-parsing/build_and_run_cal_add_interactive.out"/><p>The transformation means that the <code>add_days</code> callback can just keep its original
+      type:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/build_and_run_cal_add_interactive.out"/><p>The transformation means that the <code>add_days</code> callback can just keep its original
       definition of <code>Date.t -&gt; int -&gt;
       unit</code>. The <code>step</code> function
       transformed the <code>int option</code> argument
       from the parsing into an <code>int</code> suitable
       for <code>add_days</code>. This transformation is
-      explicitly represented in the type of the <code>step</code> return value:</p><link rel="import" data-code-language="ocamltop" href="command-line-parsing/step.topscript"/><p>The first half of the <code>Spec.t</code>
+      explicitly represented in the type of the <code>step</code> return value:</p><link rel="import" data-code-language="ocamltop" href="code/command-line-parsing/step.topscript"/><p>The first half of the <code>Spec.t</code>
       shows that the callback type is <code>Date.t -&gt;
       int</code>, whereas the resulting value expected from the next
       specification in the chain is a <code>Date.t -&gt;
       int option</code>.</p></section><section id="adding-labeled-arguments-to-callbacks" data-type="sect2"><h2>Adding Labeled Arguments to Callbacks</h2><p>The <code>step</code> chaining lets you
       control the types of your callbacks very easily. This can help you match
       existing interfaces or make things more explicit by adding labeled
-      arguments:<a data-type="indexterm" data-primary="callback function">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="command-line-parsing/cal_add_labels.ml"/><p>This <code>cal_add_labels</code> example goes back to our
+      arguments:<a data-type="indexterm" data-primary="callback function">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/command-line-parsing/cal_add_labels.ml"/><p>This <code>cal_add_labels</code> example goes back to our
         noninteractive calendar addition program, but the <code>add_days</code> main function now expects labeled arguments. The <code>step</code>
         <span class="keep-together">function</span> in the specification simply converts the
         default <code>base</code> and <code>days</code>
@@ -292,12 +292,12 @@
       <code>COMMAND_OUTPUT_INSTALLATION_BASH</code> environment variable set
       to any value.</p><p>For example, let's try it on our MD5 example from earlier,
       assuming that the binary is called <span class="command"><em>basic_md5_with_flags</em></span> in the current
-      directory:</p><link rel="import" data-code-language="console" href="command-line-parsing/md5_completion.out"/><p>Recall that we used the <code>Arg_type.file</code> to specify the argument type.
+      directory:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/md5_completion.out"/><p>Recall that we used the <code>Arg_type.file</code> to specify the argument type.
       This also supplies the completion logic so that you can just press Tab
       to complete files in your current directory.</p></section><section id="installing-the-completion-fragment" data-type="sect2"><h2>Installing the Completion Fragment</h2><p>You don't need to worry about what the preceding output script
       actually does (unless you have an unhealthy fascination with shell
       scripting internals, that is). Instead, redirect the output to a file in
-      your current directory and source it into your current shell:</p><link rel="import" data-code-language="console" href="command-line-parsing/cal_completion.out"/><p>Command completion support works for flags and grouped commands
+      your current directory and source it into your current shell:</p><link rel="import" data-code-language="console" href="code/command-line-parsing/cal_completion.out"/><p>Command completion support works for flags and grouped commands
       and is very useful when building larger command-line interfaces. Don't
       forget to install the shell fragment into your global <em class="filename">bash_completion.d</em> directory if you want it to
       be loaded in all of your login shells.<a data-type="indexterm" data-primary="completion handlers">&#xa0;</a></p><div data-type="note"><h1>Installing a Generic Completion Handler</h1><p>Sadly, <span class="command"><em>bash</em></span> doesn't support

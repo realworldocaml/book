@@ -53,13 +53,13 @@
         The compiler emits a <em>syntax error</em> in this situation, with a pointer to
         the filename and line and character number that's as close to the error as
           possible.<a data-type="indexterm" data-primary="errors" data-secondary="syntax errors">&#xa0;</a><a data-type="indexterm" data-primary="syntax errors">&#xa0;</a></p><p>Here's an example syntax error that we obtain by performing a module assignment as a
-        statement instead of as a <code>let</code> binding:</p><link rel="import" data-code-language="ocaml" href="front-end/broken_module.ml"/><p>The code results in a syntax error when compiled:</p><link rel="import" data-code-language="console" href="front-end/build_broken_module.out"/><p>The correct version of this source code creates the <code>MyString</code> module correctly via a local open,
-      and compiles successfully:</p><link rel="import" data-code-language="ocaml" href="front-end/fixed_module.ml"/><p>The syntax error points to the line and character number of the
+        statement instead of as a <code>let</code> binding:</p><link rel="import" data-code-language="ocaml" href="code/front-end/broken_module.ml"/><p>The code results in a syntax error when compiled:</p><link rel="import" data-code-language="console" href="code/front-end/build_broken_module.out"/><p>The correct version of this source code creates the <code>MyString</code> module correctly via a local open,
+      and compiles successfully:</p><link rel="import" data-code-language="ocaml" href="code/front-end/fixed_module.ml"/><p>The syntax error points to the line and character number of the
       first token that couldn't be parsed. In the broken example, the <code>module</code> keyword isn't a valid token at that
       point in parsing, so the error location information is correct.</p></section><section id="automatically-indenting-source-code" data-type="sect2"><h2>Automatically Indenting Source Code</h2><p>Sadly, syntax errors do get more inaccurate sometimes, depending
       on the nature of your mistake. Try to spot the deliberate error in the
-      following function definitions:<a data-type="indexterm" data-primary="source code" data-secondary="automatically indenting">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="front-end/follow_on_function.ml"/><p>When you compile this file, you'll get a syntax error
-      again:</p><link rel="import" data-code-language="console" href="front-end/build_follow_on_function.out"/><p>The line number in the error points to the end of the <code>add_and_print</code> function, but the actual error
+      following function definitions:<a data-type="indexterm" data-primary="source code" data-secondary="automatically indenting">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/front-end/follow_on_function.ml"/><p>When you compile this file, you'll get a syntax error
+      again:</p><link rel="import" data-code-language="console" href="code/front-end/build_follow_on_function.out"/><p>The line number in the error points to the end of the <code>add_and_print</code> function, but the actual error
       is at the end of the <em>first</em> function definition.
       There's an extra semicolon at the end of the first definition that
       causes the second definition to become part of the first <code>let</code> binding. This eventually results in a
@@ -68,11 +68,11 @@
       via OPAM called <span class="command"><em>ocp-indent</em></span> that
       applies structured indenting rules to your source code on a line-by-line
       basis. This not only beautifies your code layout, but it also makes this
-      syntax error much easier to locate.<a data-type="indexterm" data-primary="debugging" data-secondary="single errant characters">&#xa0;</a></p><p>Let's run our erroneous file through <span class="command"><em>ocp-indent</em></span> and see how it processes it:</p><link rel="import" data-code-language="console" href="front-end/indent_follow_on_function.out"/><p>The <code>add_and_print</code> definition has been indented as if
+      syntax error much easier to locate.<a data-type="indexterm" data-primary="debugging" data-secondary="single errant characters">&#xa0;</a></p><p>Let's run our erroneous file through <span class="command"><em>ocp-indent</em></span> and see how it processes it:</p><link rel="import" data-code-language="console" href="code/front-end/indent_follow_on_function.out"/><p>The <code>add_and_print</code> definition has been indented as if
         it were part of the first <code>concat_and_print</code> definition,
         and the errant semicolon is now much easier to spot. We just need to remove that semicolon
         and rerun <span class="command"><em>ocp-indent</em></span> to verify that the syntax is
-        correct:</p><link rel="import" data-code-language="console" href="front-end/indent_follow_on_function_fixed.out"/><p>The <span class="command"><em>ocp-indent</em></span>
+        correct:</p><link rel="import" data-code-language="console" href="code/front-end/indent_follow_on_function_fixed.out"/><p>The <span class="command"><em>ocp-indent</em></span>
         <a href="https://github.com/OCamlPro/ocp-indent">home page</a> documents how to
         integrate it with your favorite editor. All the Core libraries are formatted using it to
         ensure consistency, and it's a good idea to do this before publishing your own source code
@@ -84,12 +84,12 @@
         function definitions and signatures, and output as structured documentation in a variety of
         formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual pages, and even
         module dependency graphs that can be viewed using <a href="http://www.graphviz.org">Graphviz</a>.</p><p>Here's a sample of some source code that's been annotated with
-      <span class="command"><em>ocamldoc</em></span> comments:</p><link rel="import" data-code-language="ocaml" href="front-end/doc.ml"/><p>The <span class="command"><em>ocamldoc</em></span> comments are
+      <span class="command"><em>ocamldoc</em></span> comments:</p><link rel="import" data-code-language="ocaml" href="code/front-end/doc.ml"/><p>The <span class="command"><em>ocamldoc</em></span> comments are
       distinguished by beginning with the double asterisk. There are
       formatting conventions for the contents of the comment to mark metadata.
       For instance, the <code>@tag</code> fields mark
       specific properties such as the author of that section of code.</p><p>Try compiling the HTML documentation and UNIX man pages by running
-      <span class="command"><em>ocamldoc</em></span> over the source file:</p><link rel="import" data-code-language="console" href="front-end/build_ocamldoc.out"/><p>You should now have HTML files inside the <em class="filename">html/</em> directory and also
+      <span class="command"><em>ocamldoc</em></span> over the source file:</p><link rel="import" data-code-language="console" href="code/front-end/build_ocamldoc.out"/><p>You should now have HTML files inside the <em class="filename">html/</em> directory and also
         be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite
         a few comment formats and options to control the output for the various backends. Refer to
         the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml
@@ -112,10 +112,10 @@
     adding a <code>with</code> keyword to type
     declarations to signify that extra code should be generated from that
     declaration. For example, here's a trivial use of Sexplib and
-    Fieldslib:</p><link rel="import" data-code-language="ocaml" href="front-end/type_conv_example.ml"/><p>Compiling this code will normally give you a syntax error if you do so without Camlp4,
+    Fieldslib:</p><link rel="import" data-code-language="ocaml" href="code/front-end/type_conv_example.ml"/><p>Compiling this code will normally give you a syntax error if you do so without Camlp4,
       since the <code>with</code> keyword isn't normally allowed after a type
-      definition:</p><link rel="import" data-code-language="console" href="front-end/build_type_conv_without_camlp4.out"/><p>Now add in the syntax extension packages for Fieldslib and Sexplib,
-    and everything will compile again:</p><link rel="import" data-code-language="console" href="front-end/build_type_conv_with_camlp4.out"/><p>We've specified a couple of additional flags here. The <code>-syntax</code> flag directs <span class="command"><em>ocamlfind</em></span> to add the <code>-pp</code> flag to the compiler command line. This flag
+      definition:</p><link rel="import" data-code-language="console" href="code/front-end/build_type_conv_without_camlp4.out"/><p>Now add in the syntax extension packages for Fieldslib and Sexplib,
+    and everything will compile again:</p><link rel="import" data-code-language="console" href="code/front-end/build_type_conv_with_camlp4.out"/><p>We've specified a couple of additional flags here. The <code>-syntax</code> flag directs <span class="command"><em>ocamlfind</em></span> to add the <code>-pp</code> flag to the compiler command line. This flag
     instructs the compiler to run the preprocessor during its parsing
     phase.</p><p>The <code>-package</code> flag imports other
     OCaml libraries. The <code>.syntax</code> suffix in
@@ -140,7 +140,7 @@
     to do both of these now.</p><section id="using-camlp4-interactively" data-type="sect2"><h2>Using Camlp4 Interactively</h2><p>The <span class="command"><em>utop</em></span> toplevel can run the
       phrases that you type through <span class="command"><em>camlp4</em></span>
       automatically. You should have at least these lines in your <code>~/.ocamlinit</code> file in your home directory (see
-        <a href="http://realworldocaml.org/install">this Real World OCaml page</a> for more information):</p><link rel="import" data-code-language="ocamltop" href="front-end/camlp4_toplevel.topscript"/><p>The first directive loads the <span class="command"><em>ocamlfind</em></span> top-level interface that lets you
+        <a href="http://realworldocaml.org/install">this Real World OCaml page</a> for more information):</p><link rel="import" data-code-language="ocamltop" href="code/front-end/camlp4_toplevel.topscript"/><p>The first directive loads the <span class="command"><em>ocamlfind</em></span> top-level interface that lets you
       require <span class="command"><em>ocamlfind</em></span> packages (including
       all their dependent packages). The second directive instructs the
       toplevel to filter all phrases via Camlp4. You can now run <span class="command"><em>utop</em></span> and load the syntax extensions in. We'll
@@ -149,17 +149,17 @@
         representation of two values to see if they're equal. As we noted in <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>, the polymorphic comparison is less efficient than
         defining explicit comparison functions between values. However, it quickly becomes tedious
         to manually define comparison functions for complex type definitions.<a data-type="indexterm" data-primary="interactive input" data-secondary="with camlp4">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic comparisons">&#xa0;</a></p><p>Let's see how <code>comparelib</code> solves
-      this problem by running it in <span class="command"><em>utop</em></span>:</p><link rel="import" data-code-language="ocamltop" href="front-end/camlp4_toplevel.topscript" part="1"/><p>The first definition of <code>t</code> is a standard OCaml phrase
+      this problem by running it in <span class="command"><em>utop</em></span>:</p><link rel="import" data-code-language="ocamltop" href="code/front-end/camlp4_toplevel.topscript" part="1"/><p>The first definition of <code>t</code> is a standard OCaml phrase
         and results in the expected output. The second one includes the <code>with compare</code> directive. This is intercepted by <code>comparelib</code> and transformed into the original type definition with two new
         functions also <span class="keep-together">included</span>.</p></section><section id="running-camlp4-from-the-command-line" data-type="sect2"><h2>Running Camlp4 from the Command Line</h2><p>The toplevel is a quick way to examine the signatures generated from the extensions, but
         how can we see what these new functions actually do? We can't do this from <span class="command"><em>utop</em></span> directly, since it embeds the Camlp4 invocation as an
         automated part of its operation.<a data-type="indexterm" data-primary="command-line parsing" data-secondary="with Camlp4">&#xa0;</a></p><p>Let's turn to the command line to obtain the result of the
       <code>comparelib</code> transformation instead.
-      Create a file that contains the type declaration from earlier:</p><link rel="import" data-code-language="ocaml" href="front-end/comparelib_test.ml"/><p>We need to run the Camlp4 binary with the library paths to
+      Create a file that contains the type declaration from earlier:</p><link rel="import" data-code-language="ocaml" href="code/front-end/comparelib_test.ml"/><p>We need to run the Camlp4 binary with the library paths to
       Comparelib and Type_conv. Let's use a small shell script to wrap this
-      invocation:</p><link rel="import" data-code-language="sh" href="front-end/camlp4_dump.cmd"/><p>The script uses the <span class="command"><em>ocamlfind</em></span>
+      invocation:</p><link rel="import" data-code-language="sh" href="code/front-end/camlp4_dump.cmd"/><p>The script uses the <span class="command"><em>ocamlfind</em></span>
       package manager to list the include and library paths needed by <code>comparelib</code>. It then invokes the <span class="command"><em>camlp4o</em></span> preprocessor with these paths and
-      outputs the resulting AST to the standard output:</p><link rel="import" data-code-language="console" href="front-end/process_comparelib_test.out"/><p>The output contains the original type definition accompanied by
+      outputs the resulting AST to the standard output:</p><link rel="import" data-code-language="console" href="code/front-end/process_comparelib_test.out"/><p>The output contains the original type definition accompanied by
       some automatically generated code that implements an explicit comparison
       function for each field in the record. If you're using the extension in
       your compiler command line, this generated code is then compiled as if
@@ -178,16 +178,16 @@
         should be avoided in code that you write by hand. If it's a
         unit-returning expression, then write a <code>unit</code> binding explicitly instead. This will
         cause a type error if the expression changes type in the future (e.g.,
-        due to code refactoring):</p><link rel="import" data-code-language="ocamlsyntax" href="front-end/let_unit.syntax"/><p>If the expression has a different type, then write it
-        explicitly:</p><link rel="import" data-code-language="ocaml" href="front-end/let_notunit.ml"/><p>The last one is used to ignore Async expressions that should run
+        due to code refactoring):</p></div><link rel="import" data-code-language="ocamlsyntax" href="code/front-end/let_unit.syntax"/><p>If the expression has a different type, then write it
+        explicitly:</p><link rel="import" data-code-language="ocaml" href="code/front-end/let_notunit.ml"/><p>The last one is used to ignore Async expressions that should run
         in the background rather than blocking in the current thread.</p><p>One other important reason for using wildcard matches is to bind
         a variable name to something that you want to use in future code but
         don't want to use right away. This would normally generate an "unused
         value" compiler warning. These warnings are suppressed for any
-        variable name that's prepended with an underscore:</p><link rel="import" data-code-language="ocaml" href="front-end/unused_var.ml"/><p>Although you don't use <code>_z</code> in
-        your code, this will never generate an unused variable warning.</p></div></section><section id="preprocessing-module-signatures" data-type="sect2"><h2>Preprocessing Module Signatures</h2><p>Another useful feature of <code>type_conv</code> is that it can
-        generate module signatures, too. Copy the earlier type definition into a <code>comparelib_test.mli</code> that's got exactly the same <span class="keep-together">content</span>:<a data-type="indexterm" data-primary="signatures" data-secondary="preprocessing module signatures">&#xa0;</a><a data-type="indexterm" data-primary="modules" data-secondary="preprocessing signatures of">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="front-end/comparelib_test.mli"/><p>If you rerun the Camlp4 dumper script now, you'll see that
-      different code is produced for signature files:</p><link rel="import" data-code-language="console" href="front-end/process_comparelib_interface.out"/><p>The external signature generated by <code>comparelib</code> is much simpler than the actual
+        variable name that's prepended with an underscore:</p><link rel="import" data-code-language="ocaml" href="code/front-end/unused_var.ml"/><p>Although you don't use <code>_z</code> in
+        your code, this will never generate an unused variable warning.</p></section><section id="preprocessing-module-signatures" data-type="sect2"><h2>Preprocessing Module Signatures</h2><p>Another useful feature of <code>type_conv</code> is that it can
+        generate module signatures, too. Copy the earlier type definition into a <code>comparelib_test.mli</code> that's got exactly the same <span class="keep-together">content</span>:<a data-type="indexterm" data-primary="signatures" data-secondary="preprocessing module signatures">&#xa0;</a><a data-type="indexterm" data-primary="modules" data-secondary="preprocessing signatures of">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="code/front-end/comparelib_test.mli"/><p>If you rerun the Camlp4 dumper script now, you'll see that
+      different code is produced for signature files:</p><link rel="import" data-code-language="console" href="code/front-end/process_comparelib_interface.out"/><p>The external signature generated by <code>comparelib</code> is much simpler than the actual
       code. Running Camlp4 directly on the original source code lets you see
       these all these transformations precisely.<a data-type="indexterm" data-primary="grammars" data-secondary="avoiding grammar clashes">&#xa0;</a><a data-type="indexterm" data-primary="macros">&#xa0;</a><a data-type="indexterm" data-primary="conditional compilation">&#xa0;</a><a data-type="indexterm" data-primary="whitespace-sensitive indentation">&#xa0;</a><a data-type="indexterm" data-primary="syntax extension" data-secondary="potential overuse of">&#xa0;</a></p><div class="allow_break" data-type="caution"><h1>Don't Overdo the Syntax Extensions</h1><p>Syntax extensions are a powerful extension mechanism that can
         completely alter your source code's layout and style. Core includes a
@@ -230,9 +230,9 @@
     separate concern.</p><section id="displaying-inferred-types-from-the-compiler" data-type="sect2"><h2>Displaying Inferred Types from the Compiler</h2><p>We've already seen how you can explore type inference directly
       from the toplevel. It's also possible to generate type signatures for an
       entire file by asking the compiler to do the work for you. Create a file
-      with a single type definition and value:</p><link rel="import" data-code-language="ocaml" href="front-end/typedef.ml"/><p>Now run the compiler with the <code>-i</code> flag to infer the type signature for that
+      with a single type definition and value:</p><link rel="import" data-code-language="ocaml" href="code/front-end/typedef.ml"/><p>Now run the compiler with the <code>-i</code> flag to infer the type signature for that
       file. This runs the type checker but doesn't compile the code any
-      further after displaying the interface to the standard output:</p><link rel="import" data-code-language="console" href="front-end/infer_typedef.out"/><p>The output is the default signature for the module that represents the input file. It's
+      further after displaying the interface to the standard output:</p><link rel="import" data-code-language="console" href="code/front-end/infer_typedef.out"/><p>The output is the default signature for the module that represents the input file. It's
         often useful to redirect this output to an <code>mli</code> file to
         give you a starting signature to edit the external interface without having to type it all
         in by hand.</p><p>The compiler stores a compiled version of the interface as a
@@ -241,7 +241,7 @@
       signature file for a module, or by the inferred type if there is only an
       <code>ml</code> implementation present.</p><p>The compiler makes sure that your <code>ml</code> and <code>mli</code>
       files have compatible signatures. The type checker throws an immediate
-      error if this isn't the case:</p><link rel="import" data-code-language="console" href="front-end/conflicting_interfaces.out"/><div class="allow_break" data-type="note"><h1>Which Comes First: The ml or the mli?</h1><p>There are two schools of thought on which order OCaml code
+      error if this isn't the case:</p><link rel="import" data-code-language="console" href="code/front-end/conflicting_interfaces.out"/><div class="allow_break" data-type="note"><h1>Which Comes First: The ml or the mli?</h1><p>There are two schools of thought on which order OCaml code
         should be written in. It's very easy to begin writing code by starting
         with an <code>ml</code> file and using the type
         inference to guide you as you build up your functions. The <code>mli</code> file can then be generated as described,
@@ -292,9 +292,9 @@
         polymorphism can generate some very large signatures, and errors tend
         to propagate more widely than if you are using more explicitly typed
         variants or classes.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="type checking and">&#xa0;</a><a data-type="indexterm" data-primary="row polymorphism">&#xa0;</a></p><p>For instance, consider this broken example that expresses some
-        simple algebraic operations over integers:</p><link rel="import" data-code-language="ocaml" href="front-end/broken_poly.ml"/><p>There's a single character typo in the code so that it uses
+        simple algebraic operations over integers:</p><link rel="import" data-code-language="ocaml" href="code/front-end/broken_poly.ml"/><p>There's a single character typo in the code so that it uses
         <code>Nu</code> instead of <code>Num</code>. The resulting type error is
-        impressive:</p><link rel="import" data-code-language="console" href="front-end/build_broken_poly.out"/><p>The type error is perfectly accurate, but rather verbose and
+        impressive:</p><link rel="import" data-code-language="console" href="code/front-end/build_broken_poly.out"/><p>The type error is perfectly accurate, but rather verbose and
         with a line number that doesn't point to the exact location of the
         incorrect variant name. The best the compiler can do is to point you
         in the general direction of the <code>algebra</code> function application.</p><p>This is because the type checker doesn't have enough information
@@ -302,10 +302,10 @@
         lines down. It calculates types for both expressions separately, and
         when they don't match up, outputs the difference as best it
         can.</p><p>Let's see what happens with an explicit type annotation to help
-        the compiler out:</p><link rel="import" data-code-language="ocaml" href="front-end/broken_poly_with_annot.ml"/><p>This code contains exactly the same error as before, but we've
+        the compiler out:</p><link rel="import" data-code-language="ocaml" href="code/front-end/broken_poly_with_annot.ml"/><p>This code contains exactly the same error as before, but we've
         added a closed type definition of the polymorphic variants, and a type
         annotation to the <code>algebra</code>
-        definition. The compiler error we get is much more useful now:</p><link rel="import" data-code-language="console" href="front-end/build_broken_poly_with_annot.out"/><p>This error points directly to the correct line number that
+        definition. The compiler error we get is much more useful now:</p><link rel="import" data-code-language="console" href="code/front-end/build_broken_poly_with_annot.out"/><p>This error points directly to the correct line number that
         contains the typo. Once you fix the problem, you can remove the manual
         annotations if you prefer more succinct code. You can also leave the
         annotations there, of course, to help with future refactoring and
@@ -317,8 +317,8 @@
         features:</p><ul><li><p>Polymorphic methods for objects</p></li><li><p>Permuting the order of labeled arguments in a function from
             their type definition</p></li><li><p>Discarding optional labeled arguments</p></li><li><p>Generalized algebraic data types (GADTs) present from OCaml 4.0 onward</p></li><li><p>Automatic disambiguation of record field and constructor
             names (since OCaml 4.1)</p></li></ul><p>Here's an example of principality warnings when used with record
-        disambiguation.</p><link rel="import" data-code-language="ocaml" href="front-end/non_principal.ml"/><p>Inferring the signature with <code>-principal</code> will show you a new
-        warning:</p><link rel="import" data-code-language="console" href="front-end/build_non_principal.out"/><p>This example isn't principal, since the inferred type for
+        disambiguation.</p><link rel="import" data-code-language="ocaml" href="code/front-end/non_principal.ml"/><p>Inferring the signature with <code>-principal</code> will show you a new
+        warning:</p><link rel="import" data-code-language="console" href="code/front-end/build_non_principal.out"/><p>This example isn't principal, since the inferred type for
         <code>x.foo</code> is guided by the inferred
         type of <code>x.bar</code>, whereas principal
         typing requires that each subexpression's type can be calculated
@@ -326,12 +326,12 @@
         removed from the definition of <code>f</code>,
         its argument would be of type <code>t</code> and
         not <code>type s</code>.</p><p>You can fix this either by permuting the order of the type
-        declarations, or by adding an explicit type annotation:</p><link rel="import" data-code-language="ocaml" href="front-end/principal.ml"/><p>There is now no ambiguity about the inferred types, since we've
+        declarations, or by adding an explicit type annotation:</p><link rel="import" data-code-language="ocaml" href="code/front-end/principal.ml"/><p>There is now no ambiguity about the inferred types, since we've
         explicitly given the argument a type, and the order of inference of
-        the subexpressions no longer matters.</p><link rel="import" data-code-language="console" href="front-end/build_principal.out"/><p>The <span class="command"><em>ocamlbuild</em></span> equivalent is to add the tag
+        the subexpressions no longer matters.</p><link rel="import" data-code-language="console" href="code/front-end/build_principal.out"/><p>The <span class="command"><em>ocamlbuild</em></span> equivalent is to add the tag
             <code>principal</code> to your build. The
             <em>corebuild</em> wrapper script actually adds this by default, but it does
-          no harm to explicitly repeat it:</p><link rel="import" data-code-language="console" href="principal/build_principal.out"/><p>Ideally, all code should systematically use <code>-principal</code>. It reduces variance in type inference and enforces the notion of
+          no harm to explicitly repeat it:</p><link rel="import" data-code-language="console" href="code/principal/build_principal.out"/><p>Ideally, all code should systematically use <code>-principal</code>. It reduces variance in type inference and enforces the notion of
           a single known type. However, there are drawbacks to this mode: type inference is slower,
           and the <code>cmi</code> files become larger. This is generally only
           a problem if you extensively use objects, which usually have larger type signatures to
@@ -358,8 +358,8 @@
         up a big module hierarchy into a collection of files. The relationship
         between files and modules can be explained directly in terms of the
         module system.<a data-type="indexterm" data-primary="files" data-secondary="relationship with modules">&#xa0;</a></p><p>Create a file called <code>alice.ml</code>
-        with the following contents:</p><link rel="import" data-code-language="ocaml" href="front-end/alice.ml"/><p>and a corresponding signature file:</p><link rel="import" data-code-language="ocaml" href="front-end/alice.mli"/><p>These two files are exactly analogous to including the following
-        code directly in another module that references <code>Alice</code>:</p><link rel="import" data-code-language="ocaml" href="front-end/alice_combined.ml"/></section><section id="defining-a-module-search-path" data-type="sect3"><h3>Defining a module search path</h3><p>In the preceding example, <code>Alice</code> also has a reference to another module
+        with the following contents:</p><link rel="import" data-code-language="ocaml" href="code/front-end/alice.ml"/><p>and a corresponding signature file:</p><link rel="import" data-code-language="ocaml" href="code/front-end/alice.mli"/><p>These two files are exactly analogous to including the following
+        code directly in another module that references <code>Alice</code>:</p><link rel="import" data-code-language="ocaml" href="code/front-end/alice_combined.ml"/></section><section id="defining-a-module-search-path" data-type="sect3"><h3>Defining a module search path</h3><p>In the preceding example, <code>Alice</code> also has a reference to another module
         <code>Bob</code>. For the overall type of
         <code>Alice</code> to be valid, the compiler
         also needs to check that the <code>Bob</code>
@@ -395,7 +395,7 @@
           lets the program completely violate the static type system and can
           lead to memory corruption and crashes.</p><p>OCaml guards against this by recording a MD5 checksum in every
           <code>cmi</code>. Let's examine our earlier
-          <code>typedef.ml</code> more closely:</p><link rel="import" data-code-language="console" href="front-end/typedef_objinfo.out"/><p><code>ocamlobjinfo</code> examines the
+          <code>typedef.ml</code> more closely:</p><link rel="import" data-code-language="console" href="code/front-end/typedef_objinfo.out"/><p><code>ocamlobjinfo</code> examines the
           compiled interface and displays what other compilation units it
           depends on. In this case, we don't use any external modules other
           than <code>Pervasives</code>. Every module
@@ -409,7 +409,7 @@
           consistently against one another. A difference in the hashes means
           that a compilation unit with the same module name may have
           conflicting type signatures in different modules. The compiler will
-          reject such programs with an error similar to this:</p><link rel="import" data-code-language="console" href="front-end/inconsistent_compilation_units.out"/><p>This hash check is very conservative, but ensures that
+          reject such programs with an error similar to this:</p><link rel="import" data-code-language="console" href="code/front-end/inconsistent_compilation_units.out"/><p>This hash check is very conservative, but ensures that
           separate compilation remains type-safe all the way up to the final
           link phase. Your build system should ensure that you never see the
           preceding error messages, but if you do run into it, just clean out
@@ -433,13 +433,13 @@
       file contains the list of modules that are intended to be packed under
       module <code>X</code>. There are special rules in
       <span class="command"><em>ocamlbuild</em></span> that tell it how to map
-      <code>%.mlpack</code> files to the packed <code>%.cmx</code> or <code>%.cmo</code> equivalent:</p><link rel="import" data-code-language="console" href="packing/show_files.out"/><p>You can now run <em>corebuild</em> to build the <code>X.cmx</code> file directly, but let's create a new module to link against <code>X</code> to complete the example:</p><link rel="import" data-code-language="ocaml" href="packing/test.ml"/><p>You can now compile this test module and see that its inferred
+      <code>%.mlpack</code> files to the packed <code>%.cmx</code> or <code>%.cmo</code> equivalent:</p><link rel="import" data-code-language="console" href="code/packing/show_files.out"/><p>You can now run <em>corebuild</em> to build the <code>X.cmx</code> file directly, but let's create a new module to link against <code>X</code> to complete the example:</p><link rel="import" data-code-language="ocaml" href="code/packing/test.ml"/><p>You can now compile this test module and see that its inferred
       interface is the result of using the packed contents of <code>X</code>. We further verify this by examining the
       imported interfaces in <code>Test</code> and
       confirming that neither <code>A</code> nor
       <code>B</code> are mentioned in there and that
       only the packed <code>X</code> module is
-      used:</p><link rel="import" data-code-language="console" href="packing/build_test.out"/><div data-type="warning"><h1>Packing and Search Paths</h1><p>One very common build error that happens with packing is
+      used:</p><link rel="import" data-code-language="console" href="code/packing/build_test.out"/><div data-type="warning"><h1>Packing and Search Paths</h1><p>One very common build error that happens with packing is
         confusion resulting from building the packed <code>cmi</code> in the same directory as the submodules.
         When you add this directory to your module search path, the submodules
         are also visible. If you forget to include the top-level prefix (e.g.,
@@ -454,15 +454,15 @@
         standard library. It collects these modules into a single <code>Std</code> module, which provides a single module that needs to be opened to import
         the replacement modules and functions.<a data-type="indexterm" data-primary="errors" data-secondary="reducing verbosity in">&#xa0;</a></p><p>There's one downside to this approach: type errors suddenly get
       much more verbose. We can see this if you run the vanilla OCaml toplevel
-      (not <span class="command"><em>utop</em></span>).</p><link rel="import" data-code-language="console" href="front-end/short_paths_1.out"/><p>This type error without <code>Core.Std</code> has a straightforward type error.
-      When we switch to Core, though, it gets more verbose:</p><link rel="import" data-code-language="console" href="front-end/short_paths_2.out"/><p>The default <code>List</code> module in
+      (not <span class="command"><em>utop</em></span>).</p><link rel="import" data-code-language="console" href="code/front-end/short_paths_1.out"/><p>This type error without <code>Core.Std</code> has a straightforward type error.
+      When we switch to Core, though, it gets more verbose:</p><link rel="import" data-code-language="console" href="code/front-end/short_paths_2.out"/><p>The default <code>List</code> module in
       OCaml is overridden by <code>Core.Std.List</code>.
       The compiler does its best to show the type equivalence, but at the cost
       of a more verbose error message.</p><p>The compiler can remedy this via a so-called short paths
       heuristic. This causes the compiler to search all the type aliases for
       the shortest module path and use that as the preferred output type. The
       option is activated by passing <code>-short-paths</code> to the compiler, and works on the
-      toplevel, too.<a data-type="indexterm" data-primary="short paths heuristic">&#xa0;</a></p><link rel="import" data-code-language="console" href="front-end/short_paths_3.out"/><p>The <span class="command"><em>utop</em></span> enhanced toplevel activates short paths by
+      toplevel, too.<a data-type="indexterm" data-primary="short paths heuristic">&#xa0;</a></p><link rel="import" data-code-language="console" href="code/front-end/short_paths_3.out"/><p>The <span class="command"><em>utop</em></span> enhanced toplevel activates short paths by
         default, which is why we have not had to do this before in our interactive examples.
         However, the compiler doesn't default to the short path heuristic, since there are some
         situations where the type aliasing information is useful to know, and it would be lost in
@@ -478,11 +478,11 @@
     useful for IDE tools to match up OCaml source code at a specific location
     to the inferred or external types.</p><section id="using-ocp-index-for-auto-completion" data-type="sect2"><h2>Using ocp-index for Autocompletion</h2><p>One such command-line tool to display autocompletion information
       in your editor is <span class="command"><em>ocp-index</em></span>. Install
-      it via OPAM as follows:<a data-type="indexterm" data-primary="autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="ocp-index">&#xa0;</a></p><link rel="import" data-code-language="console" href="front-end/install_ocp_index.out"/><p>Let's refer back to our Ncurses binding example from the beginning
+      it via OPAM as follows:<a data-type="indexterm" data-primary="autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="ocp-index">&#xa0;</a></p><link rel="import" data-code-language="console" href="code/front-end/install_ocp_index.out"/><p>Let's refer back to our Ncurses binding example from the beginning
       of <a href="#foreign-function-interface" data-type="xref">#foreign-function-interface</a>. This module defined
       bindings for the Ncurses library. First, compile the interfaces with
       <span><code>-bin-annot</code></span> so that we can obtain the
-        <code>cmt</code> and <code>cmti</code> files, and then run <span class="command"><em>ocp-index</em></span> in completion mode:</p><link rel="import" data-code-language="console" href="ocp-index/index_ncurses.out"/><p>You need to pass <span class="command"><em>ocp-index</em></span> a set of directories to
+        <code>cmt</code> and <code>cmti</code> files, and then run <span class="command"><em>ocp-index</em></span> in completion mode:</p><link rel="import" data-code-language="console" href="code/ocp-index/index_ncurses.out"/><p>You need to pass <span class="command"><em>ocp-index</em></span> a set of directories to
         search for <code>cmt</code> files in, and a fragment of text to
         autocomplete. As you can imagine, autocompletion is invaluable on larger codebases. See the
           <a href="https://github.com/ocamlpro/ocp-index"><em>ocp-index</em></a>
@@ -490,13 +490,13 @@
       output of the internal AST representation. You can't depend on these
       flags to give the same output across compiler revisions, but they are a
       useful learning tool.<a data-type="indexterm" data-primary="flags">&#xa0;</a></p><p>We'll use our toy <code>typedef.ml</code>
-      again:</p><link rel="import" data-code-language="ocaml" href="front-end/typedef.ml"/><p>Let's first look at the untyped syntax tree that's generated from
-      the parsing phase:</p><link rel="import" data-code-language="console" href="front-end/parsetree_typedef.out"/><p>This is rather a lot of output for a simple two-line program, but
+      again:</p><link rel="import" data-code-language="ocaml" href="code/front-end/typedef.ml"/><p>Let's first look at the untyped syntax tree that's generated from
+      the parsing phase:</p><link rel="import" data-code-language="console" href="code/front-end/parsetree_typedef.out"/><p>This is rather a lot of output for a simple two-line program, but
       it shows just how much structure the OCaml parser generates even from a
       small source file.</p><p>Each portion of the AST is decorated with the precise location information (including
         the filename and character location of the token). This code hasn't been type checked yet,
         so the raw tokens are all included.</p><p>The typed AST that is normally output as a compiled <code>cmt</code> file can be displayed in a more
-      developer-readable form via the <code>-dtypedtree</code> option:</p><link rel="import" data-code-language="console" href="front-end/typedtree_typedef.out"/><p>The typed AST is more explicit than the untyped syntax tree. For
+      developer-readable form via the <code>-dtypedtree</code> option:</p><link rel="import" data-code-language="console" href="code/front-end/typedtree_typedef.out"/><p>The typed AST is more explicit than the untyped syntax tree. For
       instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>).<a data-type="indexterm" data-startref="typesyntree">&#xa0;</a><a data-type="indexterm" data-startref="CPtypsyn">&#xa0;</a></p><p>You'll rarely need to look at this raw output from the compiler unless you're building
         IDE tools such as <span class="command"><em>ocp-index</em></span>, or are hacking on extensions
         to the core compiler itself. However, it's useful to know that this intermediate form exists
