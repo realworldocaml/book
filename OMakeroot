@@ -23,6 +23,9 @@ LIB_PACKAGES = core async sexplib.syntax \
 
 APP_PACKAGES = $(LIB_PACKAGES)
 
+HTML_PAGES[] =
+  $(basename $(ls book/*.html))
+
 
 ################################################################################
 # Build Parameters
@@ -48,6 +51,7 @@ OCAMLFINDFLAGS = -syntax camlp4o
 .SUBDIRS: .
   mkdir -p _build/lib
   mkdir -p _build/app
+  mkdir -p _build/book-html
   vmount(-l, lib/, _build/lib/)
   vmount(-l, app/, _build/app/)
 
@@ -88,6 +92,16 @@ OCAMLFINDFLAGS = -syntax camlp4o
     rwo_app: $(OCamlProgram rwo_app, rwo_app)
 
     .DEFAULT: rwo_app run_core_toplevel rwo_runtop
+
+
+  ##############################################################################
+  # HTML Book
+  .SUBDIRS: _build/book-html
+
+    %.html: $(ROOT)/book/%.html
+      $(ROOT)/_build/app/rwo_app build -o ./ -repo-root $(ROOT) $<
+
+    .DEFAULT: rwo_app $(HTML_PAGES)
 
 
 ################################################################################

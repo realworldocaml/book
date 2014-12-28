@@ -13,7 +13,11 @@ open Async.Std
 
     The output is written to a file of the same name in [out_dir].
 *)
-val to_HTMLBook_exn : string -> string -> unit Deferred.t
+val to_HTMLBook_exn
+  :  ?repo_root:string
+  -> string
+  -> string
+  -> unit Deferred.t
 
 
 (******************************************************************************)

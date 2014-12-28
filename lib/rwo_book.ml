@@ -473,7 +473,7 @@ let extract_code_from_1e_exn chapter =
 (******************************************************************************)
 (* Main Functions                                                             *)
 (******************************************************************************)
-let html_to_HTMLBook_exn import_base_dir (html:Html.t) : Html.t Deferred.t =
+let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
   let (/) = Filename.concat in
 
   (* OCaml code blocks *)
@@ -485,7 +485,7 @@ let html_to_HTMLBook_exn import_base_dir (html:Html.t) : Html.t Deferred.t =
     | false ->
       Code.add_file_exn
         ~lang
-        ~run:(Code.run_file_exn ~lang)
+        ~run:(Code.run_file_exn ~repo_root ~lang)
         !code href
       >>| fun new_code ->
       code := new_code
@@ -517,9 +517,9 @@ let html_to_HTMLBook_exn import_base_dir (html:Html.t) : Html.t Deferred.t =
   loop html
 ;;
 
-let to_HTMLBook_exn in_file out_dir =
+let to_HTMLBook_exn ?(repo_root=".") in_file out_dir =
   let out_file = Filename.(concat out_dir (basename in_file)) in
   Html.of_file in_file >>=
-  html_to_HTMLBook_exn (Filename.dirname in_file) >>= fun html ->
+  html_to_HTMLBook_exn repo_root (Filename.dirname in_file) >>= fun html ->
   return (Html.to_string html) >>= fun contents ->
   Writer.save out_file ~contents

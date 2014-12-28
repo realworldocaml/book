@@ -110,20 +110,22 @@ val split_ocaml_toplevel_phrases
   -> string list Or_error.t
 
 (** Run given file through the OCaml toplevel. This function is
-    suitable as the [run] argument of [add_file_exn]. It assumes
-    you're running in the root of the repo: temp files are written to
-    _build and a system call to rwo_runtop is made. The answer is a
-    list consisting of pairs, each containing the part number and
-    evaluated phrases for that part. *)
+    suitable as the [run] argument of [add_file_exn]. Temporary files
+    are written to [repo_root/_build] and a system call to
+    [repo_root/_build/app/rwo_runtop] is made. The answer is a list
+    consisting of pairs, each containing the part number and evaluated
+    phrases for that part. Default: [repo_root = "."]. *)
 val run_ocaml_toplevel_file_exn
-  :  string
+  :  ?repo_root:string
+  -> string
   -> (int * phrase list) list Deferred.t
 
 (** [run_file_exn file lang] evaluates [file] through an appropriate
     evaluator for [lang]. This function is suitable as the [run]
     argument of [add_file_exn]. *)
 val run_file_exn
-  :  string
+  :  ?repo_root:string
+  -> string
   -> lang:lang
   -> (int * phrase list) list Deferred.t
 

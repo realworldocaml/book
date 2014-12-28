@@ -316,12 +316,21 @@ let parse_ocaml_toplevel_phrases file
   | (_, None) -> return None
 ;;
 
-let run_ocaml_toplevel_file_exn file =
+let run_ocaml_toplevel_file_exn ?(repo_root=".") file =
+  let (/) = Filename.concat in
+
+  let to_abs cwd file =
+    if Filename.is_relative file
+    then cwd/file
+    else file
+  in
+
   let f rwo_runtop temp_dir =
     (* run [file] through toplevel *)
     let runtop_cmd =
       sprintf "%s -o %s %s" rwo_runtop temp_dir (Filename.basename file)
     in
+    printf "%s\n" runtop_cmd;
     Sys.command_exn runtop_cmd >>= fun () ->
 
     (* parse files output in previous step *)
@@ -331,32 +340,32 @@ let run_ocaml_toplevel_file_exn file =
     Deferred.List.filter_map files ~f:parse_ocaml_toplevel_phrases
     >>= fun alist ->
 
-    (* delete temp_dir *)
+    (* delete files generated above *)
     Deferred.List.iter files ~f:Unix.unlink >>= fun () ->
     Unix.rmdir temp_dir >>= fun () ->
 
     return alist
   in
-  Sys.getcwd() >>= fun cwd ->
-  try_with (fun () ->
-    let temp_dir =
-      Filename.temp_dir ~in_dir:"_build" "" ""
-      |> Filename.concat cwd
-    in
-    let rwo_runtop = Filename.concat cwd "_build/app/rwo_runtop" in
-    Sys.chdir (Filename.dirname file) >>= fun () ->
-    f rwo_runtop temp_dir >>= fun ans ->
-    return ans
-  )
-  >>= fun x ->
-  Sys.chdir cwd >>| fun () ->
-  Result.ok_exn x
 
+  Sys.getcwd() >>= fun cwd ->
+  let repo_root = to_abs cwd repo_root in
+  let file = to_abs cwd file in
+  let build_dir = repo_root/"_build" in
+  let rwo_runtop = build_dir/"app"/"rwo_runtop" in
+  let work_dir = Filename.dirname file in
+
+  try_with (fun () ->
+    let temp_dir = Filename.temp_dir ~in_dir:build_dir "" "" in
+    Sys.chdir work_dir >>= fun () ->
+    f rwo_runtop temp_dir
+  ) >>= fun ans ->
+  Sys.chdir cwd >>| fun () ->
+  Result.ok_exn ans
 ;;
 
-let run_file_exn file ~lang = match lang with
+let run_file_exn ?(repo_root=".") file ~lang = match lang with
   | `OCaml_toplevel ->
-    run_ocaml_toplevel_file_exn file
+    run_ocaml_toplevel_file_exn ~repo_root file
   | _ ->
     (
       split_parts_of_file_exn ~lang ~filename:file >>|
