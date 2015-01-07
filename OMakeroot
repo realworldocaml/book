@@ -102,6 +102,7 @@ OCAMLFINDFLAGS = -syntax camlp4o
       $(ROOT)/_build/app/rwo_app build -o ./ -repo-root $(ROOT) $<
 
     .DEFAULT: rwo_app $(HTML_PAGES)
+      rsync -av $(ROOT)/book/images ./
 
 
 ################################################################################
