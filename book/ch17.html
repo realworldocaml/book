@@ -82,7 +82,7 @@
     the escape character; and semicolons are used to introduce single-line
     comments. Thus, the following file, <em class="filename">example.scm</em>:<a data-type="indexterm" data-primary="s-expressions" data-secondary="format of">&#xa0;</a></p><link rel="import" data-code-language="scheme" href="code/sexpr/example.scm"/><p>can be loaded using Sexplib. As you can see, the commented data is
     not part of the resulting s-expression:</p><link rel="import" data-code-language="ocamltop" href="code/sexpr/example_load.topscript"/><p>All in, the s-expression format supports three comment
-    syntaxes:</p><dl><dt><code>;</code></dt><dd><p>Comments out everything to the end of line</p></dd><dt><code>#|</code></dt><dt><code>|#</code></dt><dd><p>Delimiters for commenting out a block</p></dd><dt><code>#;</code></dt><dd><p>Comments out the first complete s-expression that
+    syntaxes:</p><dl><dt><code>;</code></dt><dd><p>Comments out everything to the end of line</p></dd><dt><code>#|,|#</code></dt><dd><p>Delimiters for commenting out a block</p></dd><dt><code>#;</code></dt><dd><p>Comments out the first complete s-expression that
           follows</p></dd></dl><p>The following example shows all of these in action:</p><link rel="import" data-code-language="scheme" href="code/sexpr/comment_heavy.scm"/><p>Again, loading the file as an s-expression drops the
     comments:</p><link rel="import" data-code-language="ocamltop" href="code/sexpr/example_load.topscript" part="1"/><p>If we introduce an error into our s-expression, by, say, creating a
     file <code>broken_example.scm</code> which is
