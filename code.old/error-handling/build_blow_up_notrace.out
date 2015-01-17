@@ -1,4 +1,0 @@
-$ corebuild blow_up.byte
-$ OCAMLRUNPARAM= ./blow_up.byte
-3
-Fatal error: exception Blow_up.Empty_list

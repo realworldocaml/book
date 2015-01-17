@@ -1,6 +1,0 @@
-$ ./echo.native &
-$ nc 127.0.0.1 8765
-This is an echo server
-This is an echo server
-It repeats whatever I write.
-It repeats whatever I write.

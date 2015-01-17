@@ -1,3 +1,0 @@
-$ echo type t = Foo > test.ml
-$ echo type t = Bar > test.mli
-$ ocamlc -c test.mli test.ml

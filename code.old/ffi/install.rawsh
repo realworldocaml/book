@@ -1,4 +1,0 @@
-$ brew install libffi     # for MacOS X users
-$ opam install ctypes
-$ utop
-# require "ctypes.foreign" ;;

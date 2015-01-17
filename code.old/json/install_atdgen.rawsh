@@ -1,3 +1,0 @@
-$ opam install atdgen
-$ atdgen -version
-1.2.3

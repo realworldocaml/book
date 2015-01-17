@@ -1,6 +1,0 @@
-Edit the filename in `chapters.scm`, following the sexpr format of the
-other chapters.  If a chapter is ready for public review, set the `public`
-field to `true`.
-
-You may need to `make clean` to remove temporary build files of old chapters,
-as well.

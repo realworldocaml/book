@@ -1,4 +1,0 @@
-$ corebuild freq.byte
-Circular dependencies: "freq.cmo" already seen in
-  [ "counter.cmo"; "freq.cmo" ]
-

@@ -1,2 +1,0 @@
-$ ocamllex lexer.mll
-49 states, 1640 transitions, table size 6854 bytes

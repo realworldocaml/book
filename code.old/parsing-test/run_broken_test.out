@@ -1,9 +1,0 @@
-$ cat test2.json
-{ name: "Chicago",
-  zips: [12345,
-}
-{ name: "New York",
-  zips: [10004]
-}
-$ ./test.native test2.json
-test2.json:3:2: syntax error

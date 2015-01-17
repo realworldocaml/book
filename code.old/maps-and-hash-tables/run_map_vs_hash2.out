@@ -1,9 +1,0 @@
-$ corebuild -pkg core_bench map_vs_hash2.native
-$ ./map_vs_hash2.native -clear-columns name time speedup
-Estimated testing time 20s (change using -quota SECS).
-┌───────┬───────────┬─────────┐
-│ Name  │ Time (ns) │ Speedup │
-├───────┼───────────┼─────────┤
-│ map   │   198_556 │   11.71 │
-│ table │ 2_324_590 │    1.00 │
-└───────┴───────────┴─────────┘

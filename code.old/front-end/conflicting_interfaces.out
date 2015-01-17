@@ -1,6 +1,0 @@
-$ $ echo type t = Foo > test.ml
-bash: $: command not found
-$ $ echo type t = Bar > test.mli
-bash: $: command not found
-$ $ ocamlc -c test.mli test.ml
-bash: $: command not found

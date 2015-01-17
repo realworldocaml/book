@@ -1,2 +1,0 @@
-ocamlbuild -use-ocamlfind -tag thread -syntax camlp4o -pkg core,sexplib.syntax read_foo.native
-./read_foo.native foo_example_broken.scm

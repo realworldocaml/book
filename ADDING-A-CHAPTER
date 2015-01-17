@@ -1,3 +1,0 @@
-Add the filename to `chapters.scm`, following the sexpr format of the
-other chapters.  If a chapter is ready for public review, set the `public`
-field to `true`.

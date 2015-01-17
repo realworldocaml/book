@@ -1,1 +1,0 @@
-number_of_words_in_block * sizeof(word) - last_byte_of_block - 1

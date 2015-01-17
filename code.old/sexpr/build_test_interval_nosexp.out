@@ -1,4 +1,0 @@
-$ ocamlbuild -use-ocamlfind -tag thread -syntax camlp4o -pkgs core,sexplib.syntax test_interval_nosexp.native
-File "test_interval_nosexp.ml", line 14, characters 20-42:
-Error: Unbound value Int_interval.sexp_of_t
-Command exited with code 2.

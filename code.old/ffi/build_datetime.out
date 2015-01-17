@@ -1,5 +1,0 @@
-$ corebuild -pkg ctypes.foreign datetime.native
-$ ./datetime.native
-1375659006.077398
-$ ./datetime.native -a
-Mon Aug  5 00:30:06 2013
