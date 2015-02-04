@@ -51,7 +51,7 @@ OCAMLFINDFLAGS = -syntax camlp4o
 .SUBDIRS: .
   mkdir -p _build/lib
   mkdir -p _build/app
-  mkdir -p _build/book-html
+  mkdir -p _build/site
   vmount(-l, lib/, _build/lib/)
   vmount(-l, app/, _build/app/)
 
@@ -96,12 +96,12 @@ OCAMLFINDFLAGS = -syntax camlp4o
 
   ##############################################################################
   # HTML Book
-  .SUBDIRS: _build/book-html
+  .SUBDIRS: _build/site
 
-    %.html: $(ROOT)/book/%.html
+    %.html: $(ROOT)/book/%.html ../app/rwo_app
       $(ROOT)/_build/app/rwo_app build -o ./ -repo-root $(ROOT) $<
 
-    .DEFAULT: rwo_app $(HTML_PAGES)
+    .DEFAULT: $(HTML_PAGES)
       rsync -av $(ROOT)/book/images ./
 
 

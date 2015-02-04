@@ -6,7 +6,6 @@ homepage: "https://github.com/yminsky/OCaml-Book"
 license: "PROPRIETARY"
 
 build: [
-  ["omake" "-j%{jobs}%" "lib" "rwo_runtop" "rwo_app"]
   ["omake" "-j%{jobs}%"]
 ]
 
