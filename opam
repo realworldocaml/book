@@ -1,0 +1,25 @@
+opam-version: "1.2"
+name: "OCaml-Book"
+version: "dev"
+maintainer: "Ashish Agarwal <agarwal1975@gmail.com>"
+homepage: "https://github.com/yminsky/OCaml-Book"
+license: "PROPRIETARY"
+
+build: [
+  ["omake" "-j%{jobs}%" "lib" "rwo_runtop" "rwo_app"]
+  ["omake" "-j%{jobs}%"]
+]
+
+depends: [
+  "omake" {build}
+  "core"
+  "async"
+  "ocamlnet"
+  "cow"
+  "cohttp"
+  "iocaml"
+]
+
+available: [
+  ocaml-version >= "4.02.1"
+]
