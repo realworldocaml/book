@@ -1,182 +1,593 @@
-<section xmlns="http://www.w3.org/1999/xhtml" id="first-class-modules" data-type="chapter"><h1>First-Class Modules</h1><p>You can think of OCaml as being broken up into two parts: a core
-  language that is concerned with values and types, and a module language that
-  is concerned with modules and module signatures. These sublanguages are
-  stratified, in that modules can contain types and values, but ordinary
-  values can't contain modules or module types. That means you can't do things
-  like define a variable whose value is a module, or a function that takes a
-  module as an argument.<a data-type="indexterm" id="MODfirst" data-primary="modules" data-secondary="first-class modules">&#xa0;</a></p><p>OCaml provides a way around this stratification in the form of
-  <em>first-class modules</em>. First-class modules are ordinary
-  values that can be created from and converted back to regular
-  modules.<a data-type="indexterm" id="FCMwork" data-primary="first-class modules" data-secondary="working with">&#xa0;</a></p><p>First-class modules are a sophisticated technique, and you'll need to get comfortable with
-        some advanced aspects of the language to use them effectively. But it's worth learning,
-        because letting modules into the core language is quite powerful, increasing the range of
-        what you can express and making it easier to build flexible and modular <span class="keep-together">systems</span>.</p><section id="working-with-first-class-modules" data-type="sect1"><h1>Working with First-Class Modules</h1><p>We'll start out by covering the basic mechanics of first-class
-    modules by working through some toy examples. We'll get to more realistic
-    examples in the next section.</p><p>In that light, consider the following signature of a module with a
-    single integer variable:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript"/><p>We can also create a module that matches this signature:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="1"/><p>A first-class module is created by packaging up a module with a
-    signature that it satisfies. This is done using the <code>module</code> keyword, using the following
-    syntax:<a data-type="indexterm" data-primary="module keyword">&#xa0;</a></p><link rel="import" data-code-language="ocamlsyntax" href="code/fcm/pack.syntax"/><p>So, we can convert <code>Three</code> into a
-    first-class module as follows:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="2"/><p>The module type doesn't need to be part of the construction of a
-    first-class module if it can be inferred. Thus, we can write:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="3"/><p>We can also create a first-class module from an anonymous
-    module:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="4"/><p>In order to access the contents of a first-class module, you need to
-    unpack it into an ordinary module. This can be done using the <code>val</code> keyword, using this syntax:</p><link rel="import" data-code-language="ocamlsyntax" href="code/fcm/unpack.syntax"/><p>And here's an example:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="5"/><aside data-type="sidebar"><h5>Equality of First-Class Module Types</h5><p>The type of the first-class module, e.g., <code>(module X_int)</code>, is based on the fully
-      qualified name of the signature that was used to construct it. A
-      first-class module based on a signature with a different name, even if
-      it is substantively the same signature, will result in a distinct
-      type:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="6"/><p>Even though their types as first-class modules are distinct, the
-      underlying module types are compatible (indeed, identical), so we can
-      unify the types by unpacking and repacking the module:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="7"/><p>The way in which type equality for first-class modules is determined can be confusing.
-                One common and problematic case is that of creating an alias of a module type
-                defined elsewhere. This is often done to improve readability and can happen both
-                through an explicit declaration of a module type or implicitly through an <code>include</code> declaration. In both cases, this has the
-                unintended side effect of making first-class modules built off the alias
-                incompatible with those built off the original module type. To deal with this, we
-                should be disciplined in how we refer to signatures when constructing first-class
-                    <span class="keep-together">modules</span>.</p></aside><p>We can also write ordinary functions which consume and create
-    first-class modules. The following shows the definition of two functions:
-    <code>to_int</code>, which converts a <code>(module X_int)</code> into an <code>int</code>; and <code>plus</code>, which returns the sum of two <code>(module X_int)</code>:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="8"/><p>With these functions in hand, we can now work with values of type <code>(module X_int)</code> in a more natural style, taking advantage of the concision
-            and simplicity of the core <span class="keep-together">language</span>:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="9"/><p>There are some useful syntactic shortcuts when dealing with
-    first-class modules. One notable one is that you can do the conversion to
-    an ordinary module within a pattern match. Thus, we can rewrite the
-    <code>to_int</code> function as follows:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="10"/><p>First-class modules can contain types and functions in addition to
-    simple values like <code>int</code>. Here's an
-    interface that contains a type and a corresponding <code>bump</code> operation that takes a value of the type
-    and produces a new one:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="11"/><p>We can create multiple instances of this module with different
-    underlying types:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="12"/><p>And we can convert these to first-class modules:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="13"/><p>But you can't do much with <code>int_bumper</code>, since <code>int_bumper</code> is fully abstract, so that we can no longer
-            recover the fact that the type in question is <code>int</code>. </p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="14"/><p>To make <code>int_bumper</code> usable, we
-    need to expose the type, which we can do as follows:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="15"/><p>The sharing constraints we've added above make the resulting
-    first-class modules <span class="keep-together">polymorphic</span> in
-    the type <code>t</code>. As a result, we can now use
-    these values on values of the matching type:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="16"/><p>We can also write functions that use such first-class modules
-    polymorphically. The following function takes two arguments: a <code>Bumpable</code> module and a list of elements of the
-    same type as the type <code>t</code> of the
-    module:<a data-type="indexterm" data-primary="polymorphism" data-secondary="in first-class modules">&#xa0;</a><a data-type="indexterm" data-primary="first-class modules" data-secondary="polymorphism in">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="17"/><p>Here, we used a feature of OCaml that hasn't come up before: a <em>locally abstract
-                type</em>. For any function, you can declare a pseudoparameter of the form
-                <code>(type a)</code> for any type name <code>a</code> which introduces a fresh type. This type acts like an
-            abstract type within the context of the function. In the example above, the locally
-            abstract type was used as part of a sharing constraint that ties the type <code>B.t</code> with the type of the elements of the list passed
-                in.<a data-type="indexterm" data-primary="datatypes" data-secondary="locally abstract types">&#xa0;</a><a data-type="indexterm" data-primary="abstract types">&#xa0;</a><a data-type="indexterm" data-primary="locally abstract types">&#xa0;</a></p><p>The resulting function is polymorphic in both the type of the list
-    element and the type <code>Bumpable.t</code>. We can
-    see this function in action:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="18"/><p>Polymorphic first-class modules are important because they allow you
-    to connect the types associated with a first-class module to the types of
-    other values you're working with.</p><div data-type="note"><h1>More on Locally Abstract Types</h1><p>One of the key properties of locally abstract types is that
-      they're dealt with as abstract types in the function they're defined
-      within, but are polymorphic from the outside. Consider the following
-      example:<a data-type="indexterm" data-primary="polymorphism" data-secondary="in locally abstract types">&#xa0;</a></p></div><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="19"/><p>This compiles successfully because the type <code>a</code> is used in a way that is compatible with it
-      being abstract, but the type of the function that is inferred is
-      polymorphic.</p><p>If, on the other hand, we try to use the type <code>a</code> as equivalent to some concrete type, say,
-      <code>int</code>, then the compiler will
-      complain:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="20"/><p>One common use of locally abstract types is to create a new type
-      that can be used in constructing a module. Here's an example of doing
-      this to create a new first-class module:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="21"/><p>Here, what we effectively do is capture a polymorphic type and
-      export it as a concrete type within a module.</p><p>This technique is useful beyond first-class modules. For example,
-      we can use the same approach to construct a local module to be fed to a
-      functor.<a data-type="indexterm" data-startref="FCMwork">&#xa0;</a></p></section><section id="example-a-query-handling-framework" data-type="sect1"><h1>Example: A Query-Handling Framework</h1><p>Now let's look at first-class modules in the context of a more complete and realistic
-            example. In particular, consider the following signature for a module that implements a
-            system for responding to user-generated queries.<a data-type="indexterm" data-primary="query-handlers" data-secondary="and first-class modules">&#xa0;</a><a data-type="indexterm" id="FCMquery" data-primary="first-class modules" data-secondary="query-handling framework">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript"/><p>Here, we used s-expressions as the format for queries and responses, as well as the
-            configuration for the query handler. S-expressions are a simple, flexible, and
-            human-readable serialization format commonly used in Core. For now, it's enough to think
-            of them as balanced parenthetical expressions whose atomic values are strings, e.g.,
-                <code>(this (is an) (s expression))</code>.<a data-type="indexterm" data-primary="s-expressions" data-secondary="in queries and responses">&#xa0;</a></p><p>In addition, we use the Sexplib syntax extension which extends OCaml
-    by adding the <code>with sexp</code> declaration.
-    When attached to a type in a signature, <code>with
-    sexp</code> adds declarations of s-expression converters, for
-    example:<a data-type="indexterm" data-primary="sexp declaration">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="1"/><p>In a module, <code>with sexp</code> adds the
-    implementation of those functions. Thus, we can write:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="2"/><p>This is all described in more detail in <a href="#data-serialization-with-s-expressions" data-type="xref">#data-serialization-with-s-expressions</a>.</p><section id="implementing-a-query-handler" data-type="sect2"><h2>Implementing a Query Handler</h2><p>Let's look at some examples of query handlers that satisfy the
-      <code>Query_handler</code> interface. The first
-      example is a handler that produces unique integer IDs. It works by
-      keeping an internal counter which it bumps every time it produces a new
-      value. The input to the query in this case is just the trivial
-      s-expression <code>()</code>, otherwise known as
-      <code>Sexp.unit</code>:<a data-type="indexterm" data-primary="query-handlers" data-secondary="implementation of">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="3"/><p>We can use this module to create an instance of the <code>Unique</code> query handler and interact with it
-      directly:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="4"/><p>Here's another example: a query handler that does directory
-      listings. Here, the config is the default directory that relative paths
-      are interpreted within:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="5"/><p>Again, we can create an instance of this query handler and
-      interact with it directly:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="6"/></section><section id="dispatching-to-multiple-query-handlers" data-type="sect2"><h2>Dispatching to Multiple Query Handlers</h2><p>Now, what if we want to dispatch queries to any of an arbitrary
-      collection of handlers? Ideally, we'd just like to pass in the handlers
-      as a simple data structure like a list. This is awkward to do with
-      modules and functors alone, but it's quite natural with first-class
-      modules. The first thing we'll need to do is create a signature that
-      combines a <code>Query_handler</code> module with
-      an instantiated query handler:<a data-type="indexterm" data-primary="query-handlers" data-secondary="dispatching to multiple">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="7"/><p>With this signature, we can create a first-class module that
-      encompasses both an instance of the query and the matching operations
-      for working with that query.</p><p>We can create an instance as follows:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="8"/><p>Constructing instances in this way is a little verbose, but we can
-      write a function that eliminates most of this boilerplate. Note that we
-      are again making use of a locally abstract type:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="9"/><p>Using <code>build_instance</code>,
-      constructing a new instance becomes a one-liner:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="10"/><p>We can now write code that lets you dispatch queries to one of a
-      list of query handler instances. We assume that the shape of the query
-      is as follows:</p><link rel="import" data-code-language="scheme" href="code/fcm/query-syntax"/><p>where <em><code>query-name</code></em> is the name used to
-      determine which query handler to dispatch the query to, and
-      <em><code>query</code></em> is the
-      body of the query.</p><p>The first thing we'll need is a function that takes a list of
-      query handler instances and constructs a dispatch table from it:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="11"/><p>Now, we need a function that dispatches to a handler using a
-      dispatch table:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="12"/><p>This function interacts with an instance by unpacking it into a
-      module <code>I</code> and then using the query
-      handler instance (<code>I.this</code>) in concert
-      with the associated module (<code>I.Query_handler</code>).<a data-type="indexterm" data-primary="I.Query_handler module">&#xa0;</a></p><p>The bundling together of the module and the value is in many ways
-      reminiscent of object-oriented languages. One key difference, is that
-      first-class modules allow you to package up more than just functions or
-      methods. As we've seen, you can also include types and even modules.
-      We've only used it in a small way here, but this extra power allows you
-      to build more sophisticated components that involve multiple
-      interdependent types and values.</p><p>Now let's turn this into a complete, running example by adding a
-      command-line interface:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="13"/><p>We can most effectively run this command-line interface from a
-      standalone program, which we can do by putting the above code in a file
-      along with following command to launch the interface:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler.ml" part="1"/><p>Here's an example of a session with this program:</p><link rel="import" data-code-language="ocamlrawtop" href="code/fcm/query_example.rawscript"/></section><section id="loading-and-unloading-query-handlers" data-type="sect2"><h2>Loading and Unloading Query Handlers</h2><p>One of the advantages of first-class modules is that they afford a
-      great deal of dynamism and flexibility. For example, it's a fairly
-      simple matter to change our design to allow query handlers to be loaded
-      and unloaded at runtime.<a data-type="indexterm" data-primary="query-handlers" data-secondary="loading/unloading of">&#xa0;</a></p><p>We'll do this by creating a query handler whose job is to control
-      the set of active query handlers. The module in question will be called
-      <code>Loader</code>, and its configuration is a
-      list of known <code>Query_handler</code> modules.
-      Here are the basic types:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="1"/><p>Note that a <code>Loader.t</code> has two
-      tables: one containing the known query handler modules, and one
-      containing the active query handler instances. The <code>Loader.t</code> will be responsible for creating new
-      instances and adding them to the table, as well as for removing
-      instances, all in response to user queries.</p><p>Next, we'll need a function for creating a <code>Loader.t</code>. This function requires the list of
-      known query handler modules. Note that the table of active modules
-      starts out as empty:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="2"/><p>Now we'll start writing out the functions for manipulating the
-      table of active query handlers. We'll start with the function for
-      loading an instance. Note that it takes as an argument both the name of
-      the query handler and the configuration for instantiating that handler
-      in the form of an s-expression. These are used for creating a
-      first-class module of type <code>(module
-      Query_handler_instance)</code>, which is then added to the active
-      table:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="3"/><p>Since the <code>load</code> function will
-      refuse to <code>load</code> an already active
-      handler, we also need the ability to unload a handler. Note that the
-      handler explicitly refuses to unload itself:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="4"/><p>Finally, we need to implement the <code>eval</code> function,
-                which will determine the query <span class="keep-together">interface</span>
-                presented to the user. We'll do this by creating a variant type, and using the
-                s-expression converter generated for that type to parse the query from the
-                user:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="5"/><p>The <code>eval</code> function itself is fairly straightforward, dispatching to
-                the appropriate functions to respond to each type of query. Note that we write
-                    <code>&lt;:sexp_of&lt;string list&gt;&gt;</code> to
-                autogenerate a function for converting a list of strings to an s-expression, as
-                described in <a href="#data-serialization-with-s-expressions" data-type="xref">#data-serialization-with-s-expressions</a>.</p><p>This function ends the definition of the <code>Loader</code> module:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="6"/><p>Finally, we can put this all together with the command-line
-      interface. We first create an instance of the loader query handler and
-      then add that instance to the loader's active table. We can then just
-      launch the command-line interface, passing it the active table:</p><link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_loader.ml" part="1"/><p>Now build this into a command-line interface to experiment with it:</p><link rel="import" data-code-language="console" href="code/fcm/build_query_handler_loader.out"/><p>The resulting command-line interface behaves much as you'd expect,
-      starting out with no query handlers available but giving you the ability
-      to load and unload them. Here's an example of it in action. As you can
-      see, we start out with <code>loader</code> itself
-      as the only active handler:</p><link rel="import" data-code-language="console" href="code/fcm/loader_cli1.out"/><p>Any attempt to use an inactive query handler will fail:</p><link rel="import" data-code-language="console" href="code/fcm/loader_cli2.out"/><p>But, we can load the <code>ls</code> handler
-      with a config of our choice, at which point it will be available for
-      use. And once we unload it, it will be unavailable yet again and could
-      be reloaded with a different config:</p><link rel="import" data-code-language="console" href="code/fcm/loader_cli3.out"/><p>Notably, the loader can't be loaded (since it's not on the list of
-      known handlers) and can't be unloaded either:</p><link rel="import" data-code-language="console" href="code/fcm/loader_cli4.out"/><p>Although we won't describe the details here, we can push this dynamism yet further
-                using OCaml's dynamic linking facilities, which allow you to compile and link in new
-                code to a running program. This can be automated using libraries like
-                    <code>ocaml_plugin</code>, which can be installed via OPAM, and which
-                automates much of the workflow around setting up dynamic linking. <a data-type="indexterm" data-startref="FCMquery">&#xa0;</a> </p></section></section><section id="living-without-first-class-modules" data-type="sect1"><h1>Living Without First-Class Modules</h1><p>It's worth noting that most designs that can be done with
-    first-class modules can be simulated without them, with some level of
-    awkwardness. For example, we could rewrite our query handler example
-    without first-class modules using the following types:<a data-type="indexterm" data-primary="first-class modules" data-secondary="alternatives to">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="14"/><p>The idea here is that we hide the true types of the objects in
-    question behind the functions stored in the closure. Thus, we could put
-    the <code>Unique</code> query handler into this
-    framework as follows:</p><link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="15"/><p>For an example on this scale, the preceding approach is completely
-    reasonable, and first-class modules are not really necessary. But the more
-    functionality you need to hide away behind a set of closures, and the more
-    complicated the relationships between the different types in question, the
-    more awkward this approach becomes, and the better it is to use
-    first-class modules.<a data-type="indexterm" data-startref="MODfirst">&#xa0;</a></p></section></section>
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+
+  <title></title>
+</head>
+
+<body>
+  <section xmlns="http://www.w3.org/1999/xhtml" id=
+  "first-class-modules" data-type="chapter">
+    <h1>First-Class Modules</h1>
+
+    <p>You can think of OCaml as being broken up into two parts: a
+    core language that is concerned with values and types, and a
+    module language that is concerned with modules and module
+    signatures. These sublanguages are stratified, in that modules
+    can contain types and values, but ordinary values can't contain
+    modules or module types. That means you can't do things like
+    define a variable whose value is a module, or a function that
+    takes a module as an argument.<a data-type="indexterm" id=
+    "MODfirst" data-primary="modules" data-secondary=
+    "first-class modules">&nbsp;</a></p>
+
+    <p>OCaml provides a way around this stratification in the form
+    of <em>first-class modules</em>. First-class modules are
+    ordinary values that can be created from and converted back to
+    regular modules.<a data-type="indexterm" id="FCMwork"
+    data-primary="first-class modules" data-secondary=
+    "working with">&nbsp;</a></p>
+
+    <p>First-class modules are a sophisticated technique, and
+    you'll need to get comfortable with some advanced aspects of
+    the language to use them effectively. But it's worth learning,
+    because letting modules into the core language is quite
+    powerful, increasing the range of what you can express and
+    making it easier to build flexible and modular <span class=
+    "keep-together">systems</span>.</p>
+
+    <section id="working-with-first-class-modules" data-type=
+    "sect1">
+      <h1>Working with First-Class Modules</h1>
+
+      <p>We'll start out by covering the basic mechanics of
+      first-class modules by working through some toy examples.
+      We'll get to more realistic examples in the next section.</p>
+
+      <p>In that light, consider the following signature of a
+      module with a single integer variable:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript">
+
+      <p>We can also create a module that matches this
+      signature:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="1">
+
+      <p>A first-class module is created by packaging up a module
+      with a signature that it satisfies. This is done using the
+      <code>module</code> keyword, using the following
+      syntax:<a data-type="indexterm" data-primary=
+      "module keyword">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamlsyntax" href=
+      "code/fcm/pack.syntax">
+
+      <p>So, we can convert <code>Three</code> into a first-class
+      module as follows:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="2">
+
+      <p>The module type doesn't need to be part of the
+      construction of a first-class module if it can be inferred.
+      Thus, we can write:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="3">
+
+      <p>We can also create a first-class module from an anonymous
+      module:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="4">
+
+      <p>In order to access the contents of a first-class module,
+      you need to unpack it into an ordinary module. This can be
+      done using the <code>val</code> keyword, using this
+      syntax:</p>
+      <link rel="import" data-code-language="ocamlsyntax" href=
+      "code/fcm/unpack.syntax">
+
+      <p>And here's an example:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="5">
+
+      <aside data-type="sidebar">
+        <h5>Equality of First-Class Module Types</h5>
+
+        <p>The type of the first-class module, e.g., <code>(module
+        X_int)</code>, is based on the fully qualified name of the
+        signature that was used to construct it. A first-class
+        module based on a signature with a different name, even if
+        it is substantively the same signature, will result in a
+        distinct type:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/main.topscript" part="6">
+
+        <p>Even though their types as first-class modules are
+        distinct, the underlying module types are compatible
+        (indeed, identical), so we can unify the types by unpacking
+        and repacking the module:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/main.topscript" part="7">
+
+        <p>The way in which type equality for first-class modules
+        is determined can be confusing. One common and problematic
+        case is that of creating an alias of a module type defined
+        elsewhere. This is often done to improve readability and
+        can happen both through an explicit declaration of a module
+        type or implicitly through an <code>include</code>
+        declaration. In both cases, this has the unintended side
+        effect of making first-class modules built off the alias
+        incompatible with those built off the original module type.
+        To deal with this, we should be disciplined in how we refer
+        to signatures when constructing first-class <span class=
+        "keep-together">modules</span>.</p>
+      </aside>
+
+      <p>We can also write ordinary functions which consume and
+      create first-class modules. The following shows the
+      definition of two functions: <code>to_int</code>, which
+      converts a <code>(module X_int)</code> into an
+      <code>int</code>; and <code>plus</code>, which returns the
+      sum of two <code>(module X_int)</code>:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="8">
+
+      <p>With these functions in hand, we can now work with values
+      of type <code>(module X_int)</code> in a more natural style,
+      taking advantage of the concision and simplicity of the core
+      <span class="keep-together">language</span>:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="9">
+
+      <p>There are some useful syntactic shortcuts when dealing
+      with first-class modules. One notable one is that you can do
+      the conversion to an ordinary module within a pattern match.
+      Thus, we can rewrite the <code>to_int</code> function as
+      follows:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="10">
+
+      <p>First-class modules can contain types and functions in
+      addition to simple values like <code>int</code>. Here's an
+      interface that contains a type and a corresponding
+      <code>bump</code> operation that takes a value of the type
+      and produces a new one:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="11">
+
+      <p>We can create multiple instances of this module with
+      different underlying types:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="12">
+
+      <p>And we can convert these to first-class modules:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="13">
+
+      <p>But you can't do much with <code>int_bumper</code>, since
+      <code>int_bumper</code> is fully abstract, so that we can no
+      longer recover the fact that the type in question is
+      <code>int</code>.</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="14">
+
+      <p>To make <code>int_bumper</code> usable, we need to expose
+      the type, which we can do as follows:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="15">
+
+      <p>The sharing constraints we've added above make the
+      resulting first-class modules <span class=
+      "keep-together">polymorphic</span> in the type
+      <code>t</code>. As a result, we can now use these values on
+      values of the matching type:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="16">
+
+      <p>We can also write functions that use such first-class
+      modules polymorphically. The following function takes two
+      arguments: a <code>Bumpable</code> module and a list of
+      elements of the same type as the type <code>t</code> of the
+      module:<a data-type="indexterm" data-primary="polymorphism"
+      data-secondary=
+      "in first-class modules">&nbsp;</a><a data-type="indexterm"
+      data-primary="first-class modules" data-secondary=
+      "polymorphism in">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="17">
+
+      <p>Here, we used a feature of OCaml that hasn't come up
+      before: a <em>locally abstract type</em>. For any function,
+      you can declare a pseudoparameter of the form <code>(type
+      a)</code> for any type name <code>a</code> which introduces a
+      fresh type. This type acts like an abstract type within the
+      context of the function. In the example above, the locally
+      abstract type was used as part of a sharing constraint that
+      ties the type <code>B.t</code> with the type of the elements
+      of the list passed in.<a data-type="indexterm" data-primary=
+      "datatypes" data-secondary=
+      "locally abstract types">&nbsp;</a><a data-type="indexterm"
+      data-primary="abstract types">&nbsp;</a><a data-type=
+      "indexterm" data-primary=
+      "locally abstract types">&nbsp;</a></p>
+
+      <p>The resulting function is polymorphic in both the type of
+      the list element and the type <code>Bumpable.t</code>. We can
+      see this function in action:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="18">
+
+      <p>Polymorphic first-class modules are important because they
+      allow you to connect the types associated with a first-class
+      module to the types of other values you're working with.</p>
+
+      <div data-type="note">
+        <h1>More on Locally Abstract Types</h1>
+
+        <p>One of the key properties of locally abstract types is
+        that they're dealt with as abstract types in the function
+        they're defined within, but are polymorphic from the
+        outside. Consider the following example:<a data-type=
+        "indexterm" data-primary="polymorphism" data-secondary=
+        "in locally abstract types">&nbsp;</a></p>
+      </div>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="19">
+
+      <p>This compiles successfully because the type <code>a</code>
+      is used in a way that is compatible with it being abstract,
+      but the type of the function that is inferred is
+      polymorphic.</p>
+
+      <p>If, on the other hand, we try to use the type
+      <code>a</code> as equivalent to some concrete type, say,
+      <code>int</code>, then the compiler will complain:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="20">
+
+      <p>One common use of locally abstract types is to create a
+      new type that can be used in constructing a module. Here's an
+      example of doing this to create a new first-class module:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="21">
+
+      <p>Here, what we effectively do is capture a polymorphic type
+      and export it as a concrete type within a module.</p>
+
+      <p>This technique is useful beyond first-class modules. For
+      example, we can use the same approach to construct a local
+      module to be fed to a functor.<a data-type="indexterm"
+      data-startref="FCMwork">&nbsp;</a></p>
+    </section>
+
+    <section id="example-a-query-handling-framework" data-type=
+    "sect1">
+      <h1>Example: A Query-Handling Framework</h1>
+
+      <p>Now let's look at first-class modules in the context of a
+      more complete and realistic example. In particular, consider
+      the following signature for a module that implements a system
+      for responding to user-generated queries.<a data-type=
+      "indexterm" data-primary="query-handlers" data-secondary=
+      "and first-class modules">&nbsp;</a><a data-type="indexterm"
+      id="FCMquery" data-primary="first-class modules"
+      data-secondary="query-handling framework">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/query_handler.topscript">
+
+      <p>Here, we used s-expressions as the format for queries and
+      responses, as well as the configuration for the query
+      handler. S-expressions are a simple, flexible, and
+      human-readable serialization format commonly used in Core.
+      For now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings,
+      e.g., <code>(this (is an) (s
+      expression))</code>.<a data-type="indexterm" data-primary=
+      "s-expressions" data-secondary=
+      "in queries and responses">&nbsp;</a></p>
+
+      <p>In addition, we use the Sexplib syntax extension which
+      extends OCaml by adding the <code>with sexp</code>
+      declaration. When attached to a type in a signature,
+      <code>with sexp</code> adds declarations of s-expression
+      converters, for example:<a data-type="indexterm"
+      data-primary="sexp declaration">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/query_handler.topscript" part="1">
+
+      <p>In a module, <code>with sexp</code> adds the
+      implementation of those functions. Thus, we can write:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/query_handler.topscript" part="2">
+
+      <p>This is all described in more detail in <a href=
+      "#data-serialization-with-s-expressions" data-type=
+      "xref">#data-serialization-with-s-expressions</a>.</p>
+
+      <section id="implementing-a-query-handler" data-type="sect2">
+        <h2>Implementing a Query Handler</h2>
+
+        <p>Let's look at some examples of query handlers that
+        satisfy the <code>Query_handler</code> interface. The first
+        example is a handler that produces unique integer IDs. It
+        works by keeping an internal counter which it bumps every
+        time it produces a new value. The input to the query in
+        this case is just the trivial s-expression <code>()</code>,
+        otherwise known as <code>Sexp.unit</code>:<a data-type=
+        "indexterm" data-primary="query-handlers" data-secondary=
+        "implementation of">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="3">
+
+        <p>We can use this module to create an instance of the
+        <code>Unique</code> query handler and interact with it
+        directly:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="4">
+
+        <p>Here's another example: a query handler that does
+        directory listings. Here, the config is the default
+        directory that relative paths are interpreted within:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="5">
+
+        <p>Again, we can create an instance of this query handler
+        and interact with it directly:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="6">
+      </section>
+
+      <section id="dispatching-to-multiple-query-handlers"
+      data-type="sect2">
+        <h2>Dispatching to Multiple Query Handlers</h2>
+
+        <p>Now, what if we want to dispatch queries to any of an
+        arbitrary collection of handlers? Ideally, we'd just like
+        to pass in the handlers as a simple data structure like a
+        list. This is awkward to do with modules and functors
+        alone, but it's quite natural with first-class modules. The
+        first thing we'll need to do is create a signature that
+        combines a <code>Query_handler</code> module with an
+        instantiated query handler:<a data-type="indexterm"
+        data-primary="query-handlers" data-secondary=
+        "dispatching to multiple">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="7">
+
+        <p>With this signature, we can create a first-class module
+        that encompasses both an instance of the query and the
+        matching operations for working with that query.</p>
+
+        <p>We can create an instance as follows:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="8">
+
+        <p>Constructing instances in this way is a little verbose,
+        but we can write a function that eliminates most of this
+        boilerplate. Note that we are again making use of a locally
+        abstract type:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="9">
+
+        <p>Using <code>build_instance</code>, constructing a new
+        instance becomes a one-liner:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="10">
+
+        <p>We can now write code that lets you dispatch queries to
+        one of a list of query handler instances. We assume that
+        the shape of the query is as follows:</p>
+        <link rel="import" data-code-language="scheme" href=
+        "code/fcm/query-syntax">
+
+        <p>where <em><code>query-name</code></em> is the name used
+        to determine which query handler to dispatch the query to,
+        and <em><code>query</code></em> is the body of the
+        query.</p>
+
+        <p>The first thing we'll need is a function that takes a
+        list of query handler instances and constructs a dispatch
+        table from it:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="11">
+
+        <p>Now, we need a function that dispatches to a handler
+        using a dispatch table:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="12">
+
+        <p>This function interacts with an instance by unpacking it
+        into a module <code>I</code> and then using the query
+        handler instance (<code>I.this</code>) in concert with the
+        associated module
+        (<code>I.Query_handler</code>).<a data-type="indexterm"
+        data-primary="I.Query_handler module">&nbsp;</a></p>
+
+        <p>The bundling together of the module and the value is in
+        many ways reminiscent of object-oriented languages. One key
+        difference, is that first-class modules allow you to
+        package up more than just functions or methods. As we've
+        seen, you can also include types and even modules. We've
+        only used it in a small way here, but this extra power
+        allows you to build more sophisticated components that
+        involve multiple interdependent types and values.</p>
+
+        <p>Now let's turn this into a complete, running example by
+        adding a command-line interface:</p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/fcm/query_handler.topscript" part="13">
+
+        <p>We can most effectively run this command-line interface
+        from a standalone program, which we can do by putting the
+        above code in a file along with following command to launch
+        the interface:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler.ml" part="1">
+
+        <p>Here's an example of a session with this program:</p>
+        <link rel="import" data-code-language="ocamlrawtop" href=
+        "code/fcm/query_example.rawscript">
+      </section>
+
+      <section id="loading-and-unloading-query-handlers" data-type=
+      "sect2">
+        <h2>Loading and Unloading Query Handlers</h2>
+
+        <p>One of the advantages of first-class modules is that
+        they afford a great deal of dynamism and flexibility. For
+        example, it's a fairly simple matter to change our design
+        to allow query handlers to be loaded and unloaded at
+        runtime.<a data-type="indexterm" data-primary=
+        "query-handlers" data-secondary=
+        "loading/unloading of">&nbsp;</a></p>
+
+        <p>We'll do this by creating a query handler whose job is
+        to control the set of active query handlers. The module in
+        question will be called <code>Loader</code>, and its
+        configuration is a list of known <code>Query_handler</code>
+        modules. Here are the basic types:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_core.ml" part="1">
+
+        <p>Note that a <code>Loader.t</code> has two tables: one
+        containing the known query handler modules, and one
+        containing the active query handler instances. The
+        <code>Loader.t</code> will be responsible for creating new
+        instances and adding them to the table, as well as for
+        removing instances, all in response to user queries.</p>
+
+        <p>Next, we'll need a function for creating a
+        <code>Loader.t</code>. This function requires the list of
+        known query handler modules. Note that the table of active
+        modules starts out as empty:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_core.ml" part="2">
+
+        <p>Now we'll start writing out the functions for
+        manipulating the table of active query handlers. We'll
+        start with the function for loading an instance. Note that
+        it takes as an argument both the name of the query handler
+        and the configuration for instantiating that handler in the
+        form of an s-expression. These are used for creating a
+        first-class module of type <code>(module
+        Query_handler_instance)</code>, which is then added to the
+        active table:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_core.ml" part="3">
+
+        <p>Since the <code>load</code> function will refuse to
+        <code>load</code> an already active handler, we also need
+        the ability to unload a handler. Note that the handler
+        explicitly refuses to unload itself:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_core.ml" part="4">
+
+        <p>Finally, we need to implement the <code>eval</code>
+        function, which will determine the query <span class=
+        "keep-together">interface</span> presented to the user.
+        We'll do this by creating a variant type, and using the
+        s-expression converter generated for that type to parse the
+        query from the user:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_core.ml" part="5">
+
+        <p>The <code>eval</code> function itself is fairly
+        straightforward, dispatching to the appropriate functions
+        to respond to each type of query. Note that we write
+        <code>&lt;:sexp_of&lt;string list&gt;&gt;</code> to
+        autogenerate a function for converting a list of strings to
+        an s-expression, as described in <a href=
+        "#data-serialization-with-s-expressions" data-type=
+        "xref">#data-serialization-with-s-expressions</a>.</p>
+
+        <p>This function ends the definition of the
+        <code>Loader</code> module:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_core.ml" part="6">
+
+        <p>Finally, we can put this all together with the
+        command-line interface. We first create an instance of the
+        loader query handler and then add that instance to the
+        loader's active table. We can then just launch the
+        command-line interface, passing it the active table:</p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/fcm/query_handler_loader.ml" part="1">
+
+        <p>Now build this into a command-line interface to
+        experiment with it:</p>
+        <link rel="import" data-code-language="console" href=
+        "code/fcm/build_query_handler_loader.out">
+
+        <p>The resulting command-line interface behaves much as
+        you'd expect, starting out with no query handlers available
+        but giving you the ability to load and unload them. Here's
+        an example of it in action. As you can see, we start out
+        with <code>loader</code> itself as the only active
+        handler:</p>
+        <link rel="import" data-code-language="console" href=
+        "code/fcm/loader_cli1.out">
+
+        <p>Any attempt to use an inactive query handler will
+        fail:</p>
+        <link rel="import" data-code-language="console" href=
+        "code/fcm/loader_cli2.out">
+
+        <p>But, we can load the <code>ls</code> handler with a
+        config of our choice, at which point it will be available
+        for use. And once we unload it, it will be unavailable yet
+        again and could be reloaded with a different config:</p>
+        <link rel="import" data-code-language="console" href=
+        "code/fcm/loader_cli3.out">
+
+        <p>Notably, the loader can't be loaded (since it's not on
+        the list of known handlers) and can't be unloaded
+        either:</p>
+        <link rel="import" data-code-language="console" href=
+        "code/fcm/loader_cli4.out">
+
+        <p>Although we won't describe the details here, we can push
+        this dynamism yet further using OCaml's dynamic linking
+        facilities, which allow you to compile and link in new code
+        to a running program. This can be automated using libraries
+        like <code>ocaml_plugin</code>, which can be installed via
+        OPAM, and which automates much of the workflow around
+        setting up dynamic linking. <a data-type="indexterm"
+        data-startref="FCMquery">&nbsp;</a></p>
+      </section>
+    </section>
+
+    <section id="living-without-first-class-modules" data-type=
+    "sect1">
+      <h1>Living Without First-Class Modules</h1>
+
+      <p>It's worth noting that most designs that can be done with
+      first-class modules can be simulated without them, with some
+      level of awkwardness. For example, we could rewrite our query
+      handler example without first-class modules using the
+      following types:<a data-type="indexterm" data-primary=
+      "first-class modules" data-secondary=
+      "alternatives to">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/query_handler.topscript" part="14">
+
+      <p>The idea here is that we hide the true types of the
+      objects in question behind the functions stored in the
+      closure. Thus, we could put the <code>Unique</code> query
+      handler into this framework as follows:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/query_handler.topscript" part="15">
+
+      <p>For an example on this scale, the preceding approach is
+      completely reasonable, and first-class modules are not really
+      necessary. But the more functionality you need to hide away
+      behind a set of closures, and the more complicated the
+      relationships between the different types in question, the
+      more awkward this approach becomes, and the better it is to
+      use first-class modules.<a data-type="indexterm"
+      data-startref="MODfirst">&nbsp;</a></p>
+    </section>
+  </section>
+</body>
+</html>
