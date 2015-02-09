@@ -14,12 +14,12 @@
     <h1>Records</h1>
 
     <p>One of OCaml's best features is its concise and expressive
-    system for declaring new data types, and records are a key
-    element of that system. We discussed records briefly in
-    <a href="#a-guided-tour" data-type="xref">#a-guided-tour</a>,
-    but this chapter will go into more depth, covering the details
-    of how records work, as well as advice on how to use them
-    effectively in your software designs.</p>
+    system for declaring new data types, and records are a key element
+    of that system. We discussed records briefly
+    in <a href="#a-guided-tour" data-type="xref">#a-guided-tour</a>,
+    but this chapter will go into more depth, covering more of the
+    technical details, as well as providing advice on how to use
+    records effectively in your software designs.</p>
 
     <p>A record represents a collection of values stored together
     as one, where each component is identified by a different field
@@ -32,19 +32,23 @@
     <p>Note that record field names must start with a lowercase
     letter.</p>
 
-    <p>Here's a simple example, a <code>host_info</code> record
-    that summarizes information about a given computer:</p>
+    <!-- This example doesn't work on Windows.  Should our policy on
+         examples change to avoid unix-only things, at least in the
+         early chapters? -->
+
+    <p>Here's a simple example, a <code>host_info</code> record that
+    summarizes information about a given computer:</p>
     <link rel="import" data-code-language="ocamltop" href=
     "code/records/main.topscript" />
 
-    <p>We can construct a <code>host_info</code> just as easily.
-    The following code uses the <code>Shell</code> module from
-    <code>Core_extended</code> to dispatch commands to the shell to
-    extract the information we need about the computer we're
+    <p>We can construct a <code>host_info</code> just as easily as we
+    declared it.  The following code uses the <code>Shell</code>
+    module from <code>Core_extended</code> to dispatch commands to the
+    shell to extract the information we need about the computer we're
     running on. It also uses the <code>Time.now</code> call from
-    Core's <code>Time</code> module:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="1" />
+    Core's <code>Time</code> module:</p> <link rel="import"
+    data-code-language="ocamltop" href= "code/records/main.topscript"
+    part="1" />
 
     <p>You might wonder how the compiler inferred that
     <code>my_host</code> is of type <code>host_info</code>. The
@@ -59,11 +63,11 @@
     "code/records/main.topscript" part="2" />
 
     <p>When declaring an OCaml type, you always have the option of
-    parameterizing it by a polymorphic type. Records are no
-    different in this regard. So, for example, here's a type one
-    might use to timestamp arbitrary items:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="3" />
+    parameterizing it by a polymorphic type. Records are no different
+    in this regard. As an example, here's a type one might use to
+    timestamp arbitrary items:</p> <link rel="import"
+    data-code-language="ocamltop" href= "code/records/main.topscript"
+    part="3" />
 
     <p>We can then write polymorphic functions that operate over
     this parameterized type:</p>
@@ -154,11 +158,12 @@
       <link rel="import" data-code-language="console" href=
       "code/records/warn_help.out" />
 
-      <p>You should think of OCaml's warnings as a powerful set of
-      optional static analysis tools, and you should eagerly enable
-      them in your build environment. You don't typically enable
-      all warnings, but the defaults that ship with the compiler
-      are pretty good.</p>
+      <p>You can think of OCaml's warnings as a powerful set of
+      optional static analysis tools.  They're enormously helpful in
+      catching all sorts of bugs, and and you should enable them in
+      your build environment. You don't typically enable all warnings,
+      but the defaults that ship with the compiler are pretty
+      good.</p>
 
       <p>The warnings used for building the examples in this book
       are specified with the following flag: <code>-w
@@ -286,18 +291,20 @@
       <code>t.status_message</code> no longer made sense.</p>
 
       <p>We can avoid this ambiguity altogether, either by using
-      nonoverlapping field names or, more generally, by minting a
-      module for each type. Packing types into modules is a broadly
-      useful idiom (and one used quite extensively by Core),
-      providing for each type a namespace within which to put
-      related values. When using this style, it is standard
-      practice to name the type associated with the module
-      <code>t</code>. Using this style we would write:</p>
+      nonoverlapping field names or by putting different record types
+      in different modules. Packing types into modules is a broadly
+      useful idiom (and one used quite extensively by Core), providing
+      for each type a namespace within which to put related
+      values. When using this style, it is standard practice to name
+      the type associated with the module <code>t</code>. Using this
+      style we would write:</p> 
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="17" />
 
       <p>Now, our log-entry-creation function can be rendered as
       follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="18" />
 
@@ -308,29 +315,31 @@
       field, however, so we can write this more concisely. Note
       that we are allowed to insert whitespace between the module
       path and the field name:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="19" />
 
       <p>This is not restricted to constructing a record; we can
       use the same trick when pattern matching:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="20" />
 
-      <p>When using dot notation for accessing record fields, we
-      can qualify the field by the module directly:</p>
+      <p>When using dot notation for accessing record fields, we can
+      qualify the field by the module directly:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="21" />
 
       <p>The syntax here is a little surprising when you first
-      encounter it. The thing to keep in mind is that the dot is
-      being used in two ways: the first dot is a record field
-      access, with everything to the right of the dot being
-      interpreted as a field name; the second dot is accessing the
-      contents of a module, referring to the record field
-      <code>important</code> from within the module
-      <code>Log_entry</code>. The fact that <code>Log_entry</code>
-      is capitalized and so can't be a field name is what
-      disambiguates the two uses.</p>
+      encounter it. The thing to keep in mind is that the dot is being
+      used in two ways: the first dot is a record field access, with
+      everything to the right of the dot being interpreted as a field
+      name; the second dot is accessing the contents of a module,
+      referring to the record field <code>important</code> from within
+      the module <code>Log_entry</code>. The fact
+      that <code>Log_entry</code> is capitalized and so can't be a
+      field name is what disambiguates the two uses.</p>
 
       <p>For functions defined within the module where a given
       record is defined, the module qualification goes away
