@@ -319,13 +319,16 @@
   data-primary="OCaml" data-secondary=
   "installation instructions">&nbsp;</a></p>
 
-  <p>As of publication time, the Windows operating system is
-  unsupported by Core, and so only Mac OS X, Linux, FreeBSD, and
-  OpenBSD can be expected to work reliably. Please check the online
-  installation instructions for updates regarding Windows, or
-  install a Linux virtual machine to work through the book as it
-  stands.<a data-type="indexterm" data-primary="OCaml"
-  data-secondary="operating system support">&nbsp;</a></p>
+  <p>
+    The full Core library assumes requires a UNIX based operating
+    system, and so only works on Mac OS X, Linux, FreeBSD, and
+    OpenBSD.  Core includes a portable subset
+    called <code>Core_kernel</code> which is portable anywhere OCaml
+    is, and in particular works on Windows and when compiling to
+    Javascript.  Most of the examples in this book will work
+    with <code>Core_kernel</code>.<a data-type="indexterm"
+    data-primary="OCaml" data-secondary="operating system
+    support">&nbsp;</a></p>
 
   <p>This book is not intended as a reference manual. We aim to
   teach you about the language and about libraries tools and
