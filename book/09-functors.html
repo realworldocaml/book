@@ -19,8 +19,7 @@
     OCaml's module system can do much more than that, serving as a
     powerful tool for building generic code and structuring
     large-scale systems. Much of that power comes from
-    functors.<a data-type="indexterm" data-primary="functors"
-    data-secondary="benefits of">&nbsp;</a></p>
+    functors.</p>
 
     <p>Functors are, roughly speaking, functions from modules to
     modules, and they can be used to solve a variety of
@@ -74,8 +73,7 @@
       module with <code>x</code> incremented by one. This is
       intended to serve as a way to walk through the basic
       mechanics of functors, even though it's not something you'd
-      want to do in practice.<a data-type="indexterm" data-primary=
-      "functors" data-secondary="basic mechanics of">&nbsp;</a></p>
+      want to do in practice.</p>
 
       <p>First, let's define a signature for a module that contains
       a single value of type <code>int</code>:</p>
@@ -149,11 +147,7 @@
       <p>Let's see how to use functors to build a generic interval
       library that can be used with any type that supports a total
       ordering on the underlying set over which you want to build
-      intervals.<a data-type="indexterm" data-primary=
-      "interval computation" data-secondary=
-      "generic library for">&nbsp;</a><a data-type="indexterm" id=
-      "FUNCTinterv" data-primary="functors" data-secondary=
-      "interval computation with">&nbsp;</a></p>
+      intervals.</p>
 
       <p>First we'll define a module type that captures the
       information we'll need about the endpoints of the intervals.
@@ -220,9 +214,7 @@
       <p>This design gives us the freedom to use any comparison
       function we want for comparing the endpoints. We could, for
       example, create a type of integer interval with the order of
-      the comparison reversed, as follows:<a data-type="indexterm"
-      data-primary="interval computation" data-secondary=
-      "comparison function for">&nbsp;</a></p>
+      the comparison reversed, as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/functors/main.topscript" part="10" />
 
@@ -252,9 +244,7 @@
         invariant can be violated. The invariant is enforced by the
         <code>create</code> function, but because
         <code>Interval.t</code> is not abstract, we can bypass the
-        <code>create</code> function:<a data-type="indexterm"
-        data-primary="interval computation" data-secondary=
-        "abstract functor for">&nbsp;</a></p>
+        <code>create</code> function:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="13" />
 
@@ -281,10 +271,7 @@
         <p>The resulting module is abstract, but it's unfortunately
         too abstract. In particular, we haven't exposed the type
         <code>endpoint</code>, which means that we can't even
-        construct an interval anymore:<a data-type="indexterm"
-        data-primary="sharing constraint">&nbsp;</a><a data-type=
-        "indexterm" data-primary="interval computation"
-        data-secondary="sharing constraints">&nbsp;</a></p>
+        construct an interval anymore:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="16" />
 
@@ -351,11 +338,7 @@
         everywhere it shows up, and deleting the definition of
         <code>endpoint</code> from the signature. We can do just
         this using what's called <em>destructive substitution</em>.
-        Here's the basic syntax:<a data-type="indexterm"
-        data-primary=
-        "destructive substitution">&nbsp;</a><a data-type=
-        "indexterm" data-primary="interval computation"
-        data-secondary="destructive substitution">&nbsp;</a></p>
+        Here's the basic syntax:</p>
         <link rel="import" data-code-language="ocamlsyntax" href=
         "code/functors/destructive_sub.syntax" />
 
@@ -403,11 +386,7 @@
         recall, an s-expression is essentially a parenthesized
         expression whose atoms are strings, and it is a
         serialization format that is used commonly in Core. Here's
-        an example:<a data-type="indexterm" data-primary=
-        "s-expressions" data-secondary=
-        "example of">&nbsp;</a><a data-type="indexterm"
-        data-primary="interval computation" data-secondary=
-        "multiple interfaces and">&nbsp;</a></p>
+        an example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="23" />
 
@@ -415,8 +394,7 @@
         can autogenerate s-expression conversion functions from a
         type declaration. Attaching <code>with sexp</code> to a
         type definition signals to the extension to generate the
-        converters. Thus, we can write:<a data-type="indexterm"
-        data-primary="sexp declaration">&nbsp;</a></p>
+        converters. Thus, we can write:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="24" />
 
@@ -489,13 +467,7 @@
       a functional queue, which is just a functional version of a
       FIFO (first-in, first-out) queue. Being functional,
       operations on the queue return new queues, rather than
-      modifying the queues that were passed in.<a data-type=
-      "indexterm" data-primary="modules" data-secondary=
-      "type-specific functionality in">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "FIFO (first-in, first-out) queue">&nbsp;</a><a data-type=
-      "indexterm" data-primary="functors" data-secondary=
-      "module extension with">&nbsp;</a></p>
+      modifying the queues that were passed in.</p>
 
       <p>Here's a reasonable <code>mli</code> for such a
       module:</p>
@@ -567,13 +539,7 @@
       "code/functors/extended_fqueue.ml" />
 
       <p>Core comes with a number of functors for extending modules
-      that follow this same basic pattern, including:<a data-type=
-      "indexterm" data-primary="Monad.Make">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "Hashable.Make">&nbsp;</a><a data-type="indexterm"
-      data-primary="Comparable module" data-secondary=
-      "Comparable.Make">&nbsp;</a><a data-type="indexterm"
-      data-primary="Container.Make">&nbsp;</a></p>
+      that follow this same basic pattern, including:</p>
 
       <dl>
         <dt><code>Container.Make</code></dt>

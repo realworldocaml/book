@@ -16,7 +16,7 @@ with sexp
 let of_string s =
   Netchannels.with_in_obj_channel
     (new Netchannels.input_string s)
-    Nethtml.parse
+    (Nethtml.parse ~dtd:[])
 
 let of_file file =
   Reader.file_contents file >>| of_string
@@ -44,6 +44,9 @@ let to_string docs =
   ;
   Buffer.contents buf
 
+let is_elem_node item name = match item with
+  | Nethtml.Data _ -> false
+  | Nethtml.Element (name', _, _) -> name = name'
 
 let has_html_extension file =
   Filename.split_extension file
@@ -108,6 +111,22 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   List.iter t ~f:(print_item 0)
 
 
+let filter_whitespace t =
+  let rec f item : item option = match item with
+    | Nethtml.Data x -> (
+      if String.for_all x ~f:Char.is_whitespace
+      then None
+      else Some item
+    )
+    | Nethtml.Element (name, attrs, childs) ->
+      Some (Nethtml.Element (
+        name,
+        attrs,
+        List.filter_map childs ~f
+      ) )
+  in
+  List.filter_map t ~f
+
 
 (******************************************************************************)
 (* Constructors                                                               *)
@@ -120,6 +139,9 @@ let data s = Nethtml.Data s
 let div = item "div"
 let span = item "span"
 let pre = item "pre"
+let article = item "article"
+let body = item "body"
+let html = item "html"
 
 let a = item "a"
 let i = item "i"
@@ -135,6 +157,8 @@ let h4 = item "h4"
 let h5 = item "h5"
 let h6 = item "h6"
 
+let small = item "small"
+
 let table = item "table"
 let thead = item "thead"
 let th = item "th"
@@ -145,8 +169,13 @@ let td = item "td"
 let dl = item "dl"
 let dd = item "dd"
 
+let head = item "head"
+let meta = item "meta"
+let title = item "title"
 let script = item "script"
 let link = item "link"
+
+let nav = item "nav"
 
 
 (******************************************************************************)

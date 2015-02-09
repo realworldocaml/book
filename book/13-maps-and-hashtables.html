@@ -18,14 +18,7 @@
     representing such data in OCaml is an <em>association
     list</em>, which is simply a list of pairs of keys and values.
     For example, you could represent a mapping between the 10
-    digits and their English names as follows:<a data-type=
-    "indexterm" data-primary=
-    "key/value pairs">&nbsp;</a><a data-type="indexterm"
-    data-primary="data structures" data-secondary=
-    "key/value pairs">&nbsp;</a><a data-type="indexterm"
-    data-primary="lists" data-secondary=
-    "association lists">&nbsp;</a><a data-type="indexterm"
-    data-primary="association lists">&nbsp;</a></p>
+    digits and their English names as follows:</p>
     <link rel="import" data-code-language="ocamltop" href=
     "code/maps-and-hash-tables/main.topscript" part="1" />
 
@@ -46,10 +39,7 @@
     map, whereas a hash table is a mutable data structure where
     most operations have constant time complexity. We'll describe
     both of these data structures in detail and provide some advice
-    as to how to choose between them.<a data-type="indexterm"
-    data-primary="hash tables" data-secondary=
-    "basics of">&nbsp;</a><a data-type="indexterm" data-primary=
-    "maps" data-secondary="basics of">&nbsp;</a></p>
+    as to how to choose between them.</p>
 
     <section id="maps" data-type="sect1">
       <h1>Maps</h1>
@@ -105,13 +95,7 @@
         <code>Map.t</code>. The information required to compare
         values of a given type is wrapped up in a value called a
         <em>comparator</em> that can be used to create maps using
-        the <code>Map</code> module directly:<a data-type=
-        "indexterm" data-primary=
-        "comparators, creating maps with">&nbsp;</a><a data-type=
-        "indexterm" data-primary="Map module" data-secondary=
-        "Map.of_alist_exn">&nbsp;</a><a data-type="indexterm"
-        data-primary="maps" data-secondary=
-        "creating with comparators">&nbsp;</a></p>
+        the <code>Map</code> module directly:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/maps-and-hash-tables/main.topscript" part="3" />
 
@@ -160,10 +144,7 @@
         compared, sexp converter functions, and a comparison
         function. The sexp converters are included in the
         comparator to make it possible for users of the comparator
-        to generate better error messages. Here's an
-        example:<a data-type="indexterm" data-primary=
-        "Sexplib package" data-secondary=
-        "sexp converter">&nbsp;</a></p>
+        to generate better error messages. Here's an example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/maps-and-hash-tables/main.topscript" part="7" />
 
@@ -196,11 +177,7 @@
         data structure that doesn't include the comparator. You can
         get such a representation with <code>Map.to_tree</code>,
         which returns just the tree underlying the map, without the
-        comparator:<a data-type="indexterm" data-primary=
-        "Map module" data-secondary=
-        "Map.to_tree">&nbsp;</a><a data-type="indexterm"
-        data-primary="maps" data-secondary=
-        "tree structure">&nbsp;</a></p>
+        comparator:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/maps-and-hash-tables/main.topscript" part="11" />
 
@@ -238,12 +215,7 @@
         "#lists-and-patterns" data-type=
         "xref">#lists-and-patterns</a>. This comparator is found in
         the <code>Comparator.Poly</code> module, allowing us to
-        write:<a data-type="indexterm" data-primary="maps"
-        data-secondary=
-        "polymorphic comparison in">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "Comparator.Poly module">&nbsp;</a><a data-type="indexterm"
-        data-primary="polymorphic comparisons">&nbsp;</a></p>
+        write:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/maps-and-hash-tables/main.topscript" part="14" />
 
@@ -341,8 +313,7 @@
         efficient) solution is to use Core's set type, which is
         similar in design and spirit to the map type, while having
         an API better tuned to working with sets and a lower memory
-        footprint. Here's a simple example:<a data-type="indexterm"
-        data-primary="set types">&nbsp;</a></p>
+        footprint. Here's a simple example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/maps-and-hash-tables/main.topscript" part="17" />
 
@@ -362,15 +333,7 @@
         with maps and sets. In particular,
         <code>Comparable.S</code> requires the presence of the
         <code>Map</code> and <code>Set</code> submodules, as well
-        as a comparator.<a data-type="indexterm" data-primary=
-        "interfaces" data-secondary=
-        "Comparable.S">&nbsp;</a><a data-type="indexterm"
-        data-primary="Comparable module" data-secondary=
-        "Comparable.Make">&nbsp;</a><a data-type="indexterm"
-        data-primary="Comparable module" data-secondary=
-        "Comparable.S">&nbsp;</a><a data-type="indexterm"
-        data-primary="maps" data-secondary=
-        "comparable.S interface">&nbsp;</a></p>
+        as a comparator.</p>
 
         <p><code>Comparable.S</code> is satisfied by most of the
         types in Core, but the question arises of how to satisfy
@@ -494,8 +457,7 @@
       we'll mostly discuss the pragmatics of Core's
       <code>Hashtbl</code> module. We'll cover this material more
       briefly than we did with maps because many of the concepts
-      are shared.<a data-type="indexterm" data-primary=
-      "hash tables" data-secondary="basics of">&nbsp;</a></p>
+      are shared.</p>
 
       <p>Hash tables differ from maps in a few key ways. First,
       hash tables are mutable, meaning that adding a key/value pair
@@ -507,12 +469,7 @@
       having a comparison function for creating the ordered binary
       tree that underlies a map, hash tables depend on having a
       <em>hash function</em>, i.e., a function for converting a key
-      to an integer.<a data-type="indexterm" data-primary=
-      "functions" data-secondary=
-      "hash functions">&nbsp;</a><a data-type="indexterm"
-      data-primary="Hashtbl module">&nbsp;</a><a data-type=
-      "indexterm" data-primary="hash tables" data-secondary=
-      "time complexity of">&nbsp;</a></p>
+      to an integer.</p>
 
       <div class="allow_break" data-type="warning">
         <h1>Time Complexity of Hash Tables</h1>
@@ -546,12 +503,7 @@
         behavior of most hashtables, can cause the service to
         become unresponsive due to high CPU load. Core's hash
         tables would be much less susceptible to such an attack
-        because the amount of degradation would be far
-        less.<a data-type="indexterm" data-primary=
-        "security issues" data-secondary=
-        "denial-of-service attacks">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "denial-of-service attacks, avoiding">&nbsp;</a></p>
+        because the amount of degradation would be far less.</p>
       </div>
 
       <p>When creating a hash table, we need to provide a value of
@@ -587,9 +539,7 @@
       on those tables having the same hash function, in the way
       that <code>Map.symmetric_diff</code> and
       <code>Set.union</code> depend on their arguments using the
-      same comparison function.<a data-type="indexterm"
-      data-primary="polymorphism" data-secondary=
-      "in hash functions">&nbsp;</a></p>
+      same comparison function.</p>
 
       <div data-type="warning">
         <h1>Collisions with the Polymorphic Hash Function</h1>
@@ -598,9 +548,7 @@
         the data structure it’s given using a breadth-first
         traversal that is bounded in the number of nodes it’s
         willing to traverse. By default, that bound is set at 10
-        "meaningful" nodes.<a data-type="indexterm" data-primary=
-        "hash tables" data-secondary=
-        "polymorphic hash function">&nbsp;</a></p>
+        "meaningful" nodes.</p>
 
         <p>The bound on the traversal means that the hash function
         may ignore part of the data structure, and this can lead to
@@ -631,13 +579,7 @@
         in this case, <code>Hashable.Make</code>. Note that we use
         OCaml's <code>lxor</code> operator for doing the "logical"
         (i.e., bitwise) exclusive Or of the hashes from the
-        component values:<a data-type="indexterm" data-primary=
-        "Hashable.Make">&nbsp;</a><a data-type="indexterm"
-        data-primary="interfaces" data-secondary=
-        "Hashable.S">&nbsp;</a><a data-type="indexterm"
-        data-primary="Hashable.S interface">&nbsp;</a><a data-type=
-        "indexterm" data-primary="hash tables" data-secondary=
-        "satisfying Hashable.S interface">&nbsp;</a></p>
+        component values:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/maps-and-hash-tables/main.topscript" part="30" />
 
@@ -665,11 +607,7 @@
       by virtue of being immutable, are generally the default
       choice in OCaml. OCaml also has good support for imperative
       programming, though, and when programming in an imperative
-      idiom, hash tables are often the more natural
-      choice.<a data-type="indexterm" data-primary="maps"
-      data-secondary="vs. hashtables">&nbsp;</a><a data-type=
-      "indexterm" data-primary="hash tables" data-secondary=
-      "vs. maps">&nbsp;</a></p>
+      idiom, hash tables are often the more natural choice.</p>
 
       <p>Programming idioms aside, there are significant
       performance differences between maps and hash tables. For
@@ -733,17 +671,7 @@
       <p>As you can see, the relative performance of trees and maps
       depends a great deal on the details of how they're used, and
       so whether to choose one data structure or the other will
-      depend on the details of the application.<a data-type=
-      "indexterm" data-primary=
-      "phys_equal function">&nbsp;</a><a data-type="indexterm"
-      data-primary=
-      "equal equal (= =) operator">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "equal (=) operator">&nbsp;</a><a data-type="indexterm"
-      data-primary="structural equality">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "physical equality">&nbsp;</a><a data-type="indexterm"
-      data-primary="equality, tests of">&nbsp;</a></p>
+      depend on the details of the application.</p>
     </section>
   </section>
 </body>

@@ -37,12 +37,7 @@
       <h1>OCaml as a Calculator</h1>
 
       <p>The first thing you need to do when using Core is to
-      open<a data-type="indexterm" data-primary="OCaml"
-      data-secondary= "numerical calculations
-      in">&nbsp;</a><a data-type= "indexterm" data-primary= "numerical
-      calculations">&nbsp;</a><a data-type="indexterm"
-      data-primary="Core standard library" data-secondary=
-      "opening">&nbsp;</a> <code>Core_kernel.Std</code>:</p>
+      open <code>Core_kernel.Std</code>:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" />
@@ -151,11 +146,7 @@
       <h1>Functions and Type Inference</h1>
 
       <p>The <code>let</code> syntax can also be used to define a
-      function:<a data-type="indexterm" data-primary="let syntax"
-      data-secondary=
-      "function definition with">&nbsp;</a><a data-type="indexterm"
-      data-primary="functions" data-secondary=
-      "defining">&nbsp;</a></p>
+      function:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="5" />
@@ -177,10 +168,7 @@
       returns an <code>int</code>. We can also write functions that
       take multiple arguments. (Note that the following example
       will not work if you haven't opened <code>Core.Std</code> as
-      was suggested earlier.)<a data-type="indexterm" data-primary=
-      "multi-argument functions">&nbsp;</a><a data-type="indexterm"
-      data-primary="functions" data-secondary=
-      "with multiple arguments">&nbsp;</a></p>
+      was suggested earlier.)</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="6" />
 
@@ -236,8 +224,7 @@
         <p>As the types we encounter get more complicated, you
         might ask yourself how OCaml is able to figure them out,
         given that we didn't write down any explicit type
-        information.<a data-type="indexterm" data-primary=
-        "type inference" data-secondary="process of">&nbsp;</a></p>
+        information.</p>
 
         <p>OCaml determines the type of an expression using a
         technique called <em>type inference</em>, by which the type
@@ -311,9 +298,7 @@
 
         <p>Sometimes, there isn't enough information to fully
         determine the concrete type of a given value. Consider this
-        function.<a data-type="indexterm" data-primary=
-        "type inference" data-secondary=
-        "generic types">&nbsp;</a></p>
+        function.</p>
 
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="10" />
@@ -345,10 +330,7 @@
         kind of genericity is called <em>parametric
         polymorphism</em> because it works by parameterizing the
         type in question with a type variable. It is very similar
-        to generics in C# and Java.<a data-type="indexterm"
-        data-primary=
-        "parametric polymorphism">&nbsp;</a><a data-type=
-        "indexterm" data-primary="type variables">&nbsp;</a></p>
+        to generics in C# and Java.</p>
 
         <p>The generic type of <code>first_if_true</code> allows us
         to write this:</p>
@@ -387,13 +369,7 @@
           compile time and those that are caught at runtime. It's
           better to catch errors as early as possible in the
           development process, and compilation time is best of
-          all.<a data-type="indexterm" data-primary=
-          "runtime exceptions vs. type errors">&nbsp;</a><a data-type="indexterm"
-          data-primary="errors" data-secondary=
-          "runtime vs. compile time">&nbsp;</a><a data-type=
-          "indexterm" data-primary="exceptions" data-secondary=
-          "vs. type errors">&nbsp;</a><a data-type="indexterm"
-          data-primary="type errors vs. exceptions">&nbsp;</a></p>
+          all.</p>
 
           <p>Working in the toplevel somewhat obscures the
           difference between runtime and compile-time errors, but
@@ -436,10 +412,7 @@
         particularly simple data structure, the tuple. A tuple is
         an ordered collection of values that can each be of a
         different type. You can create a tuple by joining values
-        together with a comma:<a data-type="indexterm"
-        data-primary="tuples">&nbsp;</a><a data-type="indexterm"
-        data-primary="data structures" data-secondary=
-        "tuples">&nbsp;</a></p>
+        together with a comma:</p>
 
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="16" />
@@ -493,8 +466,7 @@
         <p>Where tuples let you combine a fixed number of items,
         potentially of different types, lists let you hold any
         number of items of the same type. Consider the following
-        example:<a data-type="indexterm" id="DSlists" data-primary=
-        "data structures" data-secondary="lists">&nbsp;</a></p>
+        example:</p>
 
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="20" />
@@ -534,11 +506,7 @@
           <code>~f</code>. Labeled arguments are specified by name
           rather than by position, and thus allow you to change the
           order in which arguments are presented to a function
-          without changing its behavior, as you can see
-          here:<a data-type="indexterm" data-primary="arguments"
-          data-secondary=
-          "labeled arguments">&nbsp;</a><a data-type="indexterm"
-          data-primary="labeled arguments">&nbsp;</a></p>
+          without changing its behavior, as you can see here:</p>
 
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="24" />
@@ -553,11 +521,7 @@
 
           <p>In addition to constructing lists using brackets, we
           can use the operator <code>::</code> for adding elements
-          to the front of a list:<a data-type="indexterm"
-          data-primary="operators" data-secondary=
-          ": : operator">&nbsp;</a><a data-type="indexterm"
-          data-primary="lists" data-secondary=
-          "operator : :">&nbsp;</a></p>
+          to the front of a list:</p>
 
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="25" />
@@ -577,10 +541,7 @@
             Commas, instead, are used for separating elements in a
             tuple. If you try to use commas in a list, you'll see
             that your code compiles but doesn't do quite what you
-            might expect:<a data-type="indexterm" data-primary=
-            "commas vs. semicolons">&nbsp;</a><a data-type=
-            "indexterm" data-primary=
-            "semicolons vs. commas">&nbsp;</a></p>
+            might expect:</p>
           </div>
 
           <link rel="import" data-code-language="ocamltop" href=
@@ -630,11 +591,7 @@
           <p>The elements of a list can be accessed through pattern
           matching. List patterns are based on the two list
           constructors, <code>[]</code> and <code>::</code>. Here's
-          a simple example:<a data-type="indexterm" data-primary=
-          "pattern matching" data-secondary=
-          "in lists">&nbsp;</a><a data-type="indexterm"
-          data-primary="lists" data-secondary=
-          "pattern matching">&nbsp;</a></p>
+          a simple example:</p>
 
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="31" />
@@ -710,12 +667,7 @@
           into a set of <em>base cases</em> that can be solved
           directly and a set of <em>inductive cases</em>, where the
           function breaks the problem down into smaller pieces and
-          then calls itself to solve those smaller
-          problems.<a data-type="indexterm" data-primary=
-          "recursive functions" data-secondary=
-          "list functions">&nbsp;</a><a data-type="indexterm"
-          data-primary="lists" data-secondary=
-          "recursive list functions">&nbsp;</a></p>
+          then calls itself to solve those smaller problems.</p>
 
           <p>When writing recursive list functions, this separation
           between the base cases and the inductive cases is often
@@ -769,9 +721,7 @@
           isn't usually necessary. Most of the time, you'll find
           yourself happy to use the iteration functions found in
           the <code>List</code> module. But it's good to know how
-          to use recursion when you need to do something
-          new.<a data-type="indexterm" data-startref=
-          "DSlists">&nbsp;</a></p>
+          to use recursion when you need to do something new.</p>
         </section>
       </section>
 
@@ -780,10 +730,7 @@
 
         <p>Another common data structure in OCaml is the option. An
         option is used to express that a value might or might not
-        be present. For example:<a data-type="indexterm"
-        data-primary="options">&nbsp;</a><a data-type="indexterm"
-        data-primary="data structures" data-secondary=
-        "options">&nbsp;</a></p>
+        be present. For example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="37" />
 
@@ -825,8 +772,7 @@
           within any local scope, including a function body. The
           <code>in</code> marks the beginning of the scope within
           which the new variable can be used. Thus, we could
-          write:<a data-type="indexterm" data-primary="let syntax"
-          data-secondary="nested let binding">&nbsp;</a></p>
+          write:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/local_let.topscript" />
@@ -856,8 +802,7 @@
         <em>nullable</em>, meaning that, whatever their type is,
         any given value also contains the possibility of being a
         null value. In such languages, null is lurking
-        everywhere.<a data-type="indexterm" data-primary=
-        "datatypes" data-secondary="nullable">&nbsp;</a></p>
+        everywhere.</p>
 
         <p>In OCaml, however, missing values are explicit. A value
         of type <code>string * string</code> always contains two
@@ -879,19 +824,14 @@
       predefined in the language, like lists and tuples. But OCaml
       also allows us to define new data types. Here's a toy example
       of a data type representing a point in two-dimensional
-      space:<a data-type="indexterm" data-primary="datatypes"
-      data-secondary="defining new">&nbsp;</a></p>
+      space:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="41" />
 
       <p><code>point2d</code> is a <em>record</em> type, which you
       can think of as a tuple where the individual fields are
       named, rather than being defined positionally. Record types
-      are easy enough to construct:<a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "record types">&nbsp;</a><a data-type="indexterm"
-      data-primary="datatypes" data-secondary=
-      "record types">&nbsp;</a></p>
+      are easy enough to construct:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="42" />
 
@@ -909,9 +849,7 @@
       <em>field punning</em>. In particular, when the name of the
       field and the name of the variable it is bound to coincide,
       we don't have to write them both down. Using this, our
-      magnitude function can be rewritten as follows:<a data-type=
-      "indexterm" data-primary="fields" data-secondary=
-      "field punning">&nbsp;</a></p>
+      magnitude function can be rewritten as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="44" />
 
@@ -931,11 +869,7 @@
       these types together as a description of a multiobject scene.
       You need some unified way of representing these objects
       together in a single type. One way of doing this is using a
-      <em>variant</em> type:<a data-type="indexterm" data-primary=
-      "datatypes" data-secondary=
-      "variant types">&nbsp;</a><a data-type="indexterm"
-      data-primary="variant types" data-secondary=
-      "combining multiple object types with">&nbsp;</a></p>
+      <em>variant</em> type:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="47" />
 
@@ -965,11 +899,7 @@
       Anonymous functions are declared using the <code>fun</code>
       keyword, and don't need to be explicitly named. Such
       functions are common in OCaml, particularly when using
-      iteration functions like
-      <code>List.exists</code>.<a data-type="indexterm"
-      data-primary="anonymous functions">&nbsp;</a><a data-type=
-      "indexterm" data-primary="functions" data-secondary=
-      "anonymous functions">&nbsp;</a></p>
+      iteration functions like <code>List.exists</code>.</p>
 
       <p>The purpose of <code>List.exists</code> is to check if
       there are any elements of the list in question on which the
@@ -990,13 +920,7 @@
       This is a quite different style from <em>imperative</em>
       programming, where computations are structured as sequences
       of instructions that operate by making modifications to the
-      state of the program.<a data-type="indexterm" data-primary=
-      "functional code">&nbsp;</a><a data-type="indexterm"
-      data-primary="pure code">&nbsp;</a><a data-type="indexterm"
-      data-primary="data structures" data-secondary=
-      "immutable">&nbsp;</a><a data-type="indexterm" data-primary=
-      "programming" data-secondary=
-      "immutable vs. imperative">&nbsp;</a></p>
+      state of the program.</p>
 
       <p>Functional code is the default in OCaml, with variable
       bindings and most data structures being immutable. But OCaml
@@ -1014,13 +938,7 @@
         or modifying an array element is a constant-time operation.
         Arrays are more compact in terms of memory utilization than
         most other data structures in OCaml, including lists.
-        Here's an example:<a data-type="indexterm" data-primary=
-        "data structures" data-secondary=
-        "arrays">&nbsp;</a><a data-type="indexterm" data-primary=
-        "arrays" data-secondary=
-        "imperative programming and">&nbsp;</a><a data-type=
-        "indexterm" data-primary="imperative programming"
-        data-secondary="arrays">&nbsp;</a></p>
+        Here's an example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="49" />
 
@@ -1052,13 +970,7 @@
         default, can have some of their fields explicitly declared
         as mutable. Here's a small example of a data structure for
         storing a running statistical summary of a collection of
-        numbers. <a data-type="indexterm" data-primary=
-        "imperative programming" data-secondary=
-        "mutable record fields">&nbsp;</a><a data-type="indexterm"
-        data-primary=
-        "mutable record fields">&nbsp;</a><a data-type="indexterm"
-        data-primary="data structures" data-secondary=
-        "mutable record fields">&nbsp;</a></p>
+        numbers.</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="50" />
 
@@ -1116,12 +1028,7 @@
         <code>ref</code>. The <code>ref</code> type comes
         predefined in the standard library, but there's nothing
         really special about it. It's just a record type with a
-        single mutable field called
-        <code>contents</code>:<a data-type="indexterm"
-        data-primary="records" data-secondary=
-        "record types">&nbsp;</a><a data-type="indexterm"
-        data-primary="imperative programming" data-secondary=
-        "ref type">&nbsp;</a></p>
+        single mutable field called <code>contents</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="54" />
 
@@ -1142,9 +1049,7 @@
         the same way that lists are polymorphic, meaning it can
         contain values of any type. The parentheses around
         <code>!</code> and <code>:=</code> are needed because these
-        are operators, rather than ordinary functions.<a data-type=
-        "indexterm" data-primary=
-        "parametric polymorphism">&nbsp;</a></p>
+        are operators, rather than ordinary functions.</p>
 
         <p>Even though a <code>ref</code> is just another record
         type, it's important because it is the standard way of
@@ -1171,13 +1076,7 @@
         module as our source of randomness. <code>Random</code>
         starts with a default seed, but you can call
         <code>Random.self_init</code> to choose a new seed at
-        random:<a data-type="indexterm" data-primary=
-        "Random module">&nbsp;</a><a data-type="indexterm"
-        data-primary="while loops">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "for loops">&nbsp;</a><a data-type="indexterm"
-        data-primary="imperative programming" data-secondary=
-        "for and while loops">&nbsp;</a></p>
+        random:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="58" />
 
@@ -1224,9 +1123,7 @@
       language via <span class="command"><em>utop</em></span>. Now
       we'll show how to create a simple standalone program. In
       particular, we'll create a program that sums up a list of
-      numbers read in from the standard input.<a data-type=
-      "indexterm" data-primary="programming" data-secondary=
-      "simple standalone example">&nbsp;</a></p>
+      numbers read in from the standard input.</p>
 
       <p>Here's the code, which you can save in a file called
       <em class="filename">sum.ml</em>. Note that we don't
@@ -1265,9 +1162,7 @@
         build tool that ships with the OCaml compiler. The
         <span class="command"><em>corebuild</em></span> script is
         installed along with Core, and its purpose is to pass in
-        the flags required for building a program with
-        Core.<a data-type="indexterm" data-primary=
-        "corebuild">&nbsp;</a></p>
+        the flags required for building a program with Core.</p>
         <link rel="import" data-code-language="console" href=
         "code/guided-tour/build_sum.out" />
 

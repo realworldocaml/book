@@ -25,6 +25,10 @@ val of_file : string -> t Deferred.t
 
 val to_string : t -> string
 
+(** [is_elem_node item name] returns true if [item] is a [name]
+    element node. *)
+val is_elem_node : item -> string -> bool
+
 (** True if given filename has .html extension. *)
 val has_html_extension : string -> bool
 
@@ -53,6 +57,9 @@ val print_elements_only
   -> t
   -> unit
 
+(** Filter out pure whitespace Data nodes. *)
+val filter_whitespace : t -> t
+
 
 (******************************************************************************)
 (** {2 Constructors} *)
@@ -63,6 +70,9 @@ val data : string -> item
 val div : ?a:attributes -> t -> item
 val span : ?a:attributes -> t -> item
 val pre : ?a:attributes -> t -> item
+val article : ?a:attributes -> t -> item
+val body : ?a:attributes -> t -> item
+val html : ?a:attributes -> t -> item
 
 val a : ?a:attributes -> t -> item
 val i : ?a:attributes -> t -> item
@@ -78,6 +88,8 @@ val h4 : ?a:attributes -> t -> item
 val h5 : ?a:attributes -> t -> item
 val h6 : ?a:attributes -> t -> item
 
+val small : ?a:attributes -> t -> item
+
 val table : ?a:attributes -> t -> item
 val thead : ?a:attributes -> t -> item
 val th : ?a:attributes -> t -> item
@@ -88,8 +100,13 @@ val td : ?a:attributes -> t -> item
 val dl : ?a:attributes -> t -> item
 val dd : ?a:attributes -> t -> item
 
+val head : ?a:attributes -> t -> item
+val meta : ?a:attributes -> t -> item
+val title : ?a:attributes -> t -> item
 val script : ?a:attributes -> t -> item
 val link : ?a:attributes -> t -> item
+
+val nav : ?a:attributes -> t -> item
 
 
 (******************************************************************************)

@@ -1,5 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -10,8 +9,11 @@
 </head>
 
 <body>
+  <section xmlns="http://www.w3.org/1999/xhtml" id=
+  "prologue" data-type="chapter">
   <h1>Prologue</h1>
 
+  <section id="why-ocaml" data-type="sect1">
   <h1>Why OCaml?</h1>
 
   <p>Programming languages matter. They affect the reliability,
@@ -35,9 +37,8 @@
   combination of efficiency, expressiveness and practicality that
   is matched by no other language. That is in large part because
   OCaml is an elegant combination of a few key language features
-  that have been developed over the last 40 years.<a data-type=
-  "indexterm" data-primary="OCaml" data-secondary=
-  "key features of">&nbsp;</a> These include:</p>
+  that have been developed over the last 40 years. These
+  include:</p>
 
   <ul>
     <li>
@@ -102,8 +103,7 @@
   and awkward form. The only languages that completely embody these
   ideas are <em>statically typed, functional programming
   languages</em> like OCaml, F#, Haskell, Scala, and Standard
-  ML.<a data-type="indexterm" data-primary="OCaml" data-secondary=
-  "benefits of">&nbsp;</a></p>
+  ML.</p>
 
   <p>Among this worthy set of languages, OCaml stands apart because
   it manages to provide a great deal of power while remaining
@@ -122,14 +122,14 @@
   want to step up to a better programming language, and at the same
   time get practical work done.</p>
 
+  <section id="a-brief-history" data-type="sect2">
   <h2>A Brief History</h2>
 
   <p>OCaml was written in 1996 by Xavier Leroy, Jérôme Vouillon,
   Damien Doligez, and Didier Rémy at INRIA in France. It was
   inspired by a long line of research into ML starting in the
   1960s, and continues to have deep links to the academic
-  community.<a data-type="indexterm" data-primary="OCaml"
-  data-secondary="history of">&nbsp;</a></p>
+  community.</p>
 
   <p>ML was originally the <em>meta language</em> of the LCF (Logic
   for Computable Functions) proof assistant released by Robin
@@ -173,7 +173,9 @@
   native code support for x86_64, ARM, PowerPC, and Sparc, making
   OCaml a good choice for systems where resource usage,
   predictability, and performance all matter.</p>
+  </section>
 
+  <section id="the-core-standard-library" data-type="sect2">
   <h2>The Core Standard Library</h2>
 
   <p>A language on its own isn't enough. You also need a rich set
@@ -184,10 +186,7 @@
   general-purpose standard library. That's because the standard
   library isn't a general-purpose tool; it was developed for use in
   bootstrapping the compiler and is purposefully kept small and
-  simple.<a data-type="indexterm" data-primary=
-  "Core standard library" data-secondary=
-  "development of">&nbsp;</a><a data-type="indexterm" data-primary=
-  "OCaml" data-secondary="Core standard library">&nbsp;</a></p>
+  simple.</p>
 
   <p>Happily, in the world of open source software, nothing stops
   alternative libraries from being written to supplement the
@@ -208,7 +207,9 @@
   these libraries are distributed under a liberal Apache 2 license
   to permit free use in hobby, academic, and commercial
   settings.</p>
+  </section>
 
+  <section id="the-ocaml-platform" data-type="sect2">
   <h2>The OCaml Platform</h2>
 
   <p>Core is a comprehensive and effective standard library, but
@@ -216,8 +217,7 @@
   programmers has been using OCaml since its first release in 1996,
   and has generated many useful libraries and tools. We'll
   introduce some of these libraries in the course of the examples
-  presented in the book.<a data-type="indexterm" data-primary=
-  "OCaml" data-secondary="third-party libraries for">&nbsp;</a></p>
+  presented in the book.</p>
 
   <p>The installation and management of these third-party libraries
   is made much easier via a package management tool known as
@@ -234,7 +234,10 @@
   much more pleasant to work with the language. We'll be using
   <span class="command"><em>utop</em></span> throughout the book to
   let you step through the examples interactively.</p>
+  </section>
+  </section>
 
+  <section id="about-this-book" data-type="sect1">
   <h1>About This Book</h1>
 
   <p><em>Real World OCaml</em> is aimed at programmers who have
@@ -261,6 +264,7 @@
   techniques the authors have used in their personal experience to
   construct scalable, robust software systems.</p>
 
+  <section id="what-to-expect" data-type="sect2">
   <h2>What to Expect</h2>
 
   <p><em>Real World OCaml</em> is split into three parts:</p>
@@ -303,7 +307,9 @@
       "command"><em>gdb</em></span>.</p>
     </li>
   </ul>
+  </section>
 
+  <section id="installation-instructions" data-type="sect2">
   <h2>Installation Instructions</h2>
 
   <p><em>Real World OCaml</em> uses some tools that we've developed
@@ -314,10 +320,7 @@
   largely automated through the OPAM package manager. Instructions
   on how to it set up and what packages to install can be found at
   <a href="http://realworldocaml.org/install">this Real World OCaml
-  page</a>.<a data-type="indexterm" data-primary=
-  "installation instructions">&nbsp;</a><a data-type="indexterm"
-  data-primary="OCaml" data-secondary=
-  "installation instructions">&nbsp;</a></p>
+  page</a>.</p>
 
   <p>
     The full Core library assumes requires a UNIX based operating
@@ -326,9 +329,7 @@
     called <code>Core_kernel</code> which is portable anywhere OCaml
     is, and in particular works on Windows and when compiling to
     Javascript.  Most of the examples in this book will work
-    with <code>Core_kernel</code>.<a data-type="indexterm"
-    data-primary="OCaml" data-secondary="operating system
-    support">&nbsp;</a></p>
+    with <code>Core_kernel</code>.
 
   <p>This book is not intended as a reference manual. We aim to
   teach you about the language and about libraries tools and
@@ -337,15 +338,16 @@
   OCaml manual and man pages. You can find documentation for all of
   the libraries and tools referenced in the book <a href=
   "https://realworldocaml.org/doc">online</a>.</p>
+  </section>
 
+  <section id="code-examples" data-type="sect2">
   <h2>Code Examples</h2>
 
   <p>All of the code examples in this book are available freely
   online under a public-domain-like license. You are most welcome
   to copy and use any of the snippets as you see fit in your own
   code, without any attribution or other restrictions on their
-  use.<a data-type="indexterm" data-primary="OCaml" data-secondary=
-  "code examples for">&nbsp;</a></p>
+  use.</p>
 
   <p>The code repository is available online at <a href=
   "https://github.com/realworldocaml/examples"><em class=
@@ -354,14 +356,15 @@
   you the filename in that repository to find the source code,
   shell script, or ancillary data file that the snippet was sourced
   from.</p>
-  <!--PROD: The above was written by the authors, the below is the
-      boilerplate. Probably want to edit the below as needed.TOOLS-->
 
   <p>If you feel your use of code examples falls outside fair use
   or the permission given above, feel free to contact us at
   <a class="email" href=
   "mailto:permissions@oreilly.com"><em>permissions@oreilly.com</em></a>.</p>
+  </section>
+  </section>
 
+  <section id="safari-books-online" data-type="sect1">
   <h1>Safari® Books Online</h1>
 
   <div class="safarienabled">
@@ -400,8 +403,10 @@
   "orm:hideurl">more</a>. For more information about Safari Books
   Online, please visit us <a href=
   "http://www.safaribooksonline.com/" class=
-  "orm:hideurl">online</a>.</p><?hard-pagebreak?>
+  "orm:hideurl">online</a>.</p>
+  </section>
 
+  <section id="how-to-contact-us" data-type="sect1">
   <h1>How to Contact Us</h1>
 
   <p>Please address comments and questions concerning this book to
@@ -443,23 +448,24 @@
   </ul>
 
   <p>For more information about our books, courses, conferences,
-  and news, see our website at 
-  <!--ULINK WITHOUT TEXT NODE.--><a href=
+  and news, see our website at <a href=
   "http://www.oreilly.com"><em class=
   "hyperlink">http://www.oreilly.com</em></a>.</p>
 
-  <p>Find us on Facebook: <!--ULINK WITHOUT TEXT NODE.--><a href=
+  <p>Find us on Facebook: <a href=
   "http://facebook.com/oreilly"><em class=
   "hyperlink">http://facebook.com/oreilly</em></a></p>
 
-  <p>Follow us on Twitter: <!--ULINK WITHOUT TEXT
-    NODE.--><a href="http://twitter.com/oreillymedia"><em class=
-"hyperlink">http://twitter.com/oreillymedia</em></a></p>
+  <p>Follow us on Twitter: <a href=
+  "http://twitter.com/oreillymedia"><em class=
+  "hyperlink">http://twitter.com/oreillymedia</em></a></p>
 
-  <p>Watch us on YouTube: <!--ULINK WITHOUT TEXT NODE.--><a href=
+  <p>Watch us on YouTube: <a href=
   "http://www.youtube.com/oreillymedia"><em class=
   "hyperlink">http://www.youtube.com/oreillymedia</em></a></p>
+  </section>
 
+  <section id="contributors" data-type="sect1">
   <h1>Contributors</h1>
 
   <p>We would especially like to thank the following individuals
@@ -501,5 +507,7 @@
       countless errors were found and fixed.</p>
     </li>
   </ul>
+  </section>
+</section>
 </body>
 </html>

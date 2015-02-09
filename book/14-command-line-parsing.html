@@ -41,9 +41,7 @@
     for every program you write. Core provides the Command library,
     which simplifies all of this by letting you declare all your
     command-line options in one place and by deriving all of the
-    above functionality from these declarations.<a data-type=
-    "indexterm" data-primary="command-line parsing" data-secondary=
-    "Command library for">&nbsp;</a></p>
+    above functionality from these declarations.</p>
 
     <p>Command is simple to use for simple applications but also
     scales well as your needs grow more complex. In particular,
@@ -69,9 +67,7 @@
       <li>
         <p>Demonstrate how <em>functional combinators</em> can be
         used to declare complex command-line interfaces in a
-        type-safe and elegant way<a data-type="indexterm"
-        data-primary="combinators" data-secondary=
-        "functional combinators">&nbsp;</a></p>
+        type-safe and elegant way</p>
       </li>
     </ul>
 
@@ -84,11 +80,7 @@
       <code>md5</code>). The following function defined below reads
       in the contents of a file, applies the MD5 one-way
       cryptographic hash function to the data, and outputs an ASCII
-      hex representation of the result:<a data-type="indexterm"
-      data-primary=
-      "MD5 one-way cryptographic hash function">&nbsp;</a><a data-type="indexterm"
-      data-primary="command-line parsing" data-secondary=
-      "basic approach to">&nbsp;</a></p>
+      hex representation of the result:</p>
       <link rel="import" data-code-language="ocaml" href=
       "code/command-line-parsing/basic_md5.ml" />
 
@@ -108,10 +100,7 @@
 
         <p>Let's build the specification for a single argument that
         is passed directly on the command line. This is known as an
-        <em>anonymous</em> argument:<a data-type="indexterm"
-        data-primary="arguments" data-secondary=
-        "anonymous arguments">&nbsp;</a><a data-type="indexterm"
-        data-primary="anonymous arguments">&nbsp;</a></p>
+        <em>anonymous</em> argument:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/basic_md5.ml" part="1" />
 
@@ -139,8 +128,7 @@
         <p>Once we've defined a specification, we need to put it to
         work on real input. The simplest way is to directly create
         a command-line interface via the <code>Command.basic</code>
-        module:<a data-type="indexterm" data-primary=
-        "Command.basic module">&nbsp;</a></p>
+        module:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/basic_md5.ml" part="2" />
 
@@ -176,12 +164,7 @@
         command-line values, and it takes over as the main thread
         of the application. The callback's arguments are passed in
         the same order as they were bound in the specification
-        (using the <code>+&gt;</code> operator).<a data-type=
-        "indexterm" data-primary="arguments" data-secondary=
-        "unit argument to callbacks">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "unit argument">&nbsp;</a><a data-type="indexterm"
-        data-primary="callback function">&nbsp;</a></p>
+        (using the <code>+&gt;</code> operator).</p>
 
         <div data-type="note">
           <h1>The Extra unit Argument to Callbacks</h1>
@@ -262,11 +245,7 @@
       strings, of course. <code>Command.Spec</code> defines several
       other conversion functions (shown in <a href="#table14_1"
       data-type="xref">#table14_1</a>) that validate and parse
-      input into various types.<a data-type="indexterm"
-      data-primary="arguments" data-secondary=
-      "argument types">&nbsp;</a><a data-type="indexterm"
-      data-primary="command-line parsing" data-secondary=
-      "argument types">&nbsp;</a></p>
+      input into various types.</p>
 
       <table id="table14_1">
         <caption>
@@ -364,9 +343,7 @@
         predefined ones aren't sufficient. For instance, let's make
         a <code>regular_file</code> argument type that ensures that
         the input file isn't a character device or some other odd
-        UNIX file type that can't be fully read:<a data-type=
-        "indexterm" data-primary="arguments" data-secondary=
-        "defining custom types">&nbsp;</a></p>
+        UNIX file type that can't be fully read:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/basic_md5_with_custom_arg.ml" />
 
@@ -386,14 +363,7 @@
 
         <p>A more realistic MD5 binary could also read from the
         standard input if a <code>filename</code> isn't
-        specified:<a data-type="indexterm" data-primary="arguments"
-        data-secondary="default arguments">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "default arguments">&nbsp;</a><a data-type="indexterm"
-        data-primary="optional arguments" data-secondary=
-        "and default arguments">&nbsp;</a><a data-type="indexterm"
-        data-primary="arguments" data-secondary=
-        "optional arguments">&nbsp;</a></p>
+        specified:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/basic_md5_with_optional_file_broken.ml"
         part="1" />
@@ -446,9 +416,7 @@
         <p>One last transformation that's useful is to obtain lists
         of anonymous arguments rather than a single one. As an
         example, let's modify our MD5 code to take a collection of
-        files to process on the command line:<a data-type=
-        "indexterm" data-primary="arguments" data-secondary=
-        "sequences of">&nbsp;</a></p>
+        files to process on the command line:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/basic_md5_sequence.ml" />
 
@@ -471,10 +439,7 @@
       command line. A <em>flag</em> is a named field that can be
       followed by an optional argument. These flags can appear in
       any order on the command line, or multiple times, depending
-      on how they're declared in the specification.<a data-type=
-      "indexterm" data-primary="flags">&nbsp;</a><a data-type=
-      "indexterm" data-primary="command-line parsing"
-      data-secondary="labeled flags and">&nbsp;</a></p>
+      on how they're declared in the specification.</p>
 
       <p>Let's add two arguments to our <code>md5</code> command
       that mimics the Mac OS X version. A <code>-s</code> flag
@@ -501,8 +466,7 @@
       as with the anonymous arguments in earlier examples. <a href=
       "#table14-2" data-type="xref">#table14-2</a> contains a list
       of some of the functions that you can wrap flags in to
-      control how they are parsed.<a data-type="indexterm"
-      data-primary="flag functions">&nbsp;</a></p>
+      control how they are parsed.</p>
 
       <table id="table14-2">
         <caption>
@@ -569,12 +533,7 @@
       a while, though, too many options can make the program very
       confusing for newcomers to your application. One way to solve
       this is by grouping common operations together and adding
-      some hierarchy to the command-line interface.<a data-type=
-      "indexterm" data-primary=
-      "subcommands, grouping of">&nbsp;</a><a data-type="indexterm"
-      data-primary="OPAM package manager">&nbsp;</a><a data-type=
-      "indexterm" data-primary="command-line parsing"
-      data-secondary="subcommand grouping">&nbsp;</a></p>
+      some hierarchy to the command-line interface.</p>
 
       <p>You'll have run across this style already when using the
       OPAM package manager (or, in the non-OCaml world, the Git or
@@ -587,17 +546,14 @@
       commands that factor out a set of flags and arguments. This
       lets you prevent flags that are specific to a particular
       subcommand from leaking into the general configuration
-      space.<a data-type="indexterm" data-primary=
-      "install keyword">&nbsp;</a><a data-type="indexterm"
-      data-primary="remote keyword">&nbsp;</a></p>
+      space.</p>
 
       <p>This usually only becomes a concern when your application
       organically grows features. Luckily, it's simple to extend
       your application to do this in Command: just swap the
       <code>Command.basic</code> for <code>Command.group</code>,
       which takes an association list of specifications and handles
-      the subcommand parsing and help output for you:<a data-type=
-      "indexterm" data-primary="Command.group">&nbsp;</a></p>
+      the subcommand parsing and help output for you:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/command-line-parsing/group.topscript" />
 
@@ -642,9 +598,7 @@
       <p>The functions for generating a specification may seem like
       magic. In particular, even if you know how to use them, it's
       not entirely clear how they work, and in particular, why the
-      types work out the way they do.<a data-type="indexterm" id=
-      "CLPadv" data-primary="command-line parsing" data-secondary=
-      "advanced control over">&nbsp;</a></p>
+      types work out the way they do.</p>
 
       <p>Understanding the details of how these specifications fit
       together becomes more useful as your command-line interfaces
@@ -671,11 +625,7 @@
         interesting type machinery to guarantee they remain in
         sync. You don't have to understand this section to use the
         more advanced combinators, but it'll help you debug type
-        errors as you use Command more.<a data-type="indexterm"
-        data-primary="callback function">&nbsp;</a><a data-type=
-        "indexterm" data-primary="debugging" data-secondary=
-        "Command mode">&nbsp;</a><a data-type="indexterm"
-        data-primary="Command module">&nbsp;</a></p>
+        errors as you use Command more.</p>
 
         <p>The <code>Command.Spec.t</code> type looks deceptively
         simple: <code>('a, 'b) t</code>. You can think of
@@ -765,8 +715,7 @@
         breeze by using the compiler to spot places where you use
         commands. Just add a parameter to the common definition,
         run the compiler, and fix type errors until everything
-        works again.<a data-type="indexterm" data-primary=
-        "refactoring">&nbsp;</a></p>
+        works again.</p>
 
         <p>For example, if we remove the <code>verbose</code> flag
         and recompile, we'll get this impressively long type
@@ -792,9 +741,7 @@
         normal course of parsing by supplying a function that maps
         callback arguments to a new set of values. For instance,
         let's revisit our first calendar application that added a
-        number of days onto a supplied base date:<a data-type=
-        "indexterm" data-primary="interactive input"
-        data-secondary="prompts for">&nbsp;</a></p>
+        number of days onto a supplied base date:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/cal_add_days.ml" />
 
@@ -851,11 +798,7 @@
         <p>The <code>step</code> chaining lets you control the
         types of your callbacks very easily. This can help you
         match existing interfaces or make things more explicit by
-        adding labeled arguments:<a data-type="indexterm"
-        data-primary="callback function">&nbsp;</a><a data-type=
-        "indexterm" data-primary="arguments" data-secondary=
-        "labeled arguments">&nbsp;</a><a data-type="indexterm"
-        data-primary="labeled arguments">&nbsp;</a></p>
+        adding labeled arguments:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/command-line-parsing/cal_add_labels.ml" />
 
@@ -871,9 +814,7 @@
         prevent errors with command-line arguments with similar
         types but different names and purposes. It's good form to
         use labels when you have a lot of otherwise anonymous
-        <code>int</code> and <code>string</code>
-        arguments.<a data-type="indexterm" data-startref=
-        "CLPadv">&nbsp;</a></p>
+        <code>int</code> and <code>string</code> arguments.</p>
       </section>
     </section>
 
@@ -887,12 +828,7 @@
       typing a command, and seeing the options that pop up. You've
       probably used this most often to find the files in the
       current directory, but it can actually be extended for other
-      parts of the command, too.<a data-type="indexterm"
-      data-primary="tab-autocompletion">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "autocompletion">&nbsp;</a><a data-type="indexterm"
-      data-primary="command-line parsing" data-secondary=
-      "autocompletion with bash">&nbsp;</a></p>
+      parts of the command, too.</p>
 
       <p>The precise mechanism for autocompletion varies depending
       on what shell you are using, but we'll assume you are using
@@ -901,9 +837,7 @@
       interactive shell on most Linux distributions and Mac OS X,
       but you may need to switch to it on *BSD or Windows (when
       using Cygwin). The rest of this section assumes that you're
-      using <span class=
-      "command"><em>bash</em></span>.<a data-type="indexterm"
-      data-primary="bash autocompletion">&nbsp;</a></p>
+      using <span class="command"><em>bash</em></span>.</p>
 
       <p>Bash autocompletion isn't always installed by default, so
       check your OS package manager to see if you have it
@@ -1008,9 +942,7 @@
         command-line interfaces. Don't forget to install the shell
         fragment into your global <em class=
         "filename">bash_completion.d</em> directory if you want it
-        to be loaded in all of your login shells.<a data-type=
-        "indexterm" data-primary=
-        "completion handlers">&nbsp;</a></p>
+        to be loaded in all of your login shells.</p>
 
         <div data-type="note">
           <h1>Installing a Generic Completion Handler</h1>
@@ -1036,15 +968,7 @@
       <p>This rounds up our tour of the Command library. This isn't
       the only way to parse command-line arguments of course; there
       are several alternatives available on OPAM. Three of the most
-      prominent ones follow:<a data-type="indexterm" data-primary=
-      "Cmdliner">&nbsp;</a><a data-type="indexterm" data-primary=
-      "OCaml toolchain" data-secondary=
-      "ocaml-getopt">&nbsp;</a><a data-type="indexterm"
-      data-primary="Arg module">&nbsp;</a><a data-type="indexterm"
-      data-primary="command-line parsing" data-secondary=
-      "alternatives to Command library">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "OPAM package manager">&nbsp;</a></p>
+      prominent ones follow:</p>
 
       <dl>
         <dt>The <code>Arg</code> module</dt>
