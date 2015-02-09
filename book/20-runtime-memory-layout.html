@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -112,7 +112,7 @@
       value is created:<a data-type="indexterm" id="blck"
       data-primary="blocks (of memory)">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/simple_record.topscript">
+      "code/memory-repr/simple_record.topscript" />
 
       <p>The type declaration <code>t</code> doesn't take up any
       memory at runtime, but the subsequent <code>let</code>
@@ -259,7 +259,7 @@
       "hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2001.png">
+        <img src="images/rwoc_2001.png" />
       </figure>
 
       <p>The <code>size</code> field records the length of the
@@ -420,7 +420,7 @@
       "hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2002.png">
+        <img src="images/rwoc_2002.png" />
       </figure>
 
       <p>Tuples, records, and arrays are all represented
@@ -443,7 +443,7 @@
       exposes the internal representation of values to OCaml
       code:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript">
+      "code/memory-repr/reprs.topscript" />
 
       <p>The <code>Obj.repr</code> function retrieves the runtime
       representation of any OCaml value. <code>Obj.is_block</code>
@@ -463,7 +463,7 @@
         scanned:<a data-type="indexterm" data-primary=
         "floating-point values">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/memory-repr/reprs.topscript" part="1">
+        "code/memory-repr/reprs.topscript" part="1" />
 
         <p>Since each floating-point value is boxed in a separate
         memory block, it can be inefficient to handle large arrays
@@ -481,13 +481,13 @@
         "hyperlink">Diagram</em></a></p>
 
         <figure style="float: 0">
-          <img src="images/rwoc_2003.png">
+          <img src="images/rwoc_2003.png" />
         </figure>
 
         <p>First, let's check that float arrays do in fact have a
         different tag number from normal floating-point values:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/memory-repr/reprs.topscript" part="2">
+        "code/memory-repr/reprs.topscript" part="2" />
 
         <p>This tells us that float arrays have a tag value of 254.
         Now let's test some sample values using the
@@ -496,7 +496,7 @@
         <code>Obj.double_field</code> to retrieve a float from
         within the block:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/memory-repr/reprs.topscript" part="3">
+        "code/memory-repr/reprs.topscript" part="3" />
 
         <p>The first thing we tested was that a float array has the
         correct unboxed float array tag value (254). However, the
@@ -524,7 +524,7 @@
       data-primary="runtime memory representation" data-secondary=
       "variants and lists">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" part="4">
+      "code/memory-repr/reprs.topscript" part="4" />
 
       <p><code>Obj.magic</code> unsafely forces a type cast between
       any two OCaml types; in this example, the <code>int</code>
@@ -538,7 +538,7 @@
       variants with parameters). The parameters are stored as words
       in the block:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" part="5">
+      "code/memory-repr/reprs.topscript" part="5" />
 
       <p>In the preceding example, the <code>Apple</code> and
       <code>Kiwi</code> values are still stored as normal OCaml
@@ -611,7 +611,7 @@
       compiler, but the <code>type_conv</code> library from Core
       provides an alternative implementation:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" part="6">
+      "code/memory-repr/reprs.topscript" part="6" />
 
       <p>The hash function is designed to give the same results on
       32-bit and 64-bit architectures, so the memory representation
@@ -670,7 +670,7 @@
       "hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2004.png">
+        <img src="images/rwoc_2004.png" />
       </figure>
 
       <p>On a 32-bit machine, the padding is calculated based on
@@ -731,7 +731,7 @@
       "hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2005.png">
+        <img src="images/rwoc_2005.png" />
       </figure>
 
       <p>The guaranteed <code>NULL</code> termination comes in
@@ -771,7 +771,7 @@
       custom block cannot have pointers to OCaml blocks and is
       opaque to the GC:</p>
       <link rel="import" data-code-language="c" href=
-      "code/memory-repr/custom_ops.c">
+      "code/memory-repr/custom_ops.c" />
 
       <p>The custom operations specify how the runtime should
       perform polymorphic comparison, hashing and binary

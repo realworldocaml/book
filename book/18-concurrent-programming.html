@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -75,7 +75,7 @@
       example:<a data-type="indexterm" id="ALbas" data-primary=
       "Async library" data-secondary="basics of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="1">
+      "code/async/main.topscript" part="1" />
 
       <p>From the type of <code>In_channel.read_all</code>, you can
       see that it must be a blocking operation. In particular, the
@@ -92,7 +92,7 @@
       equivalent of <code>In_channel.read_all</code>:<a data-type=
       "indexterm" data-primary="Deferred.t">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="3">
+      "code/async/main.topscript" part="3" />
 
       <p>We first load the Async package in the toplevel using
       <code>#require</code>, and then open <code>Async.Std</code>,
@@ -110,7 +110,7 @@
       deferred:<a data-type="indexterm" data-primary=
       "Deferred.peek">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="4">
+      "code/async/main.topscript" part="4" />
 
       <p>The value in <code>contents</code> isn't yet determined
       partly because nothing running could do the necessary I/O.
@@ -125,19 +125,19 @@
       running and block until the deferred is determined. Thus, we
       can write:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="5">
+      "code/async/main.topscript" part="5" />
 
       <p>If we peek again, we'll see that the value of
       <code>contents</code> has been determined:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="6">
+      "code/async/main.topscript" part="6" />
 
       <p>In order to do real work with deferreds, we need a way of
       waiting for a deferred computation to finish, which we do
       using <code>Deferred.bind</code>. First, let's consider the
       type-signature of <code>bind</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="7">
+      "code/async/main.topscript" part="7" />
 
       <p><code>Deferred.bind d f</code> takes a deferred value
       <code>d</code> and a function <code>f</code> that is to be
@@ -161,7 +161,7 @@
       that replaces a file with an uppercase version of its
       contents:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="8">
+      "code/async/main.topscript" part="8" />
 
       <p>Writing out <code>Deferred.bind</code> explicitly can be
       rather verbose, and so <code>Async.Std</code> includes an
@@ -169,7 +169,7 @@
       operator, we can rewrite <code>uppercase_file</code> as
       follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="9">
+      "code/async/main.topscript" part="9" />
 
       <p>In the preceding code, we've dropped the parentheses
       around the function on the righthand side of the bind, and we
@@ -182,7 +182,7 @@
       <code>bind</code>. In this case, we'll write a function that
       counts the number of lines in a file:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="10">
+      "code/async/main.topscript" part="10" />
 
       <p>This looks reasonable enough, but as you can see, the
       compiler is unhappy. The issue here is that <code>bind</code>
@@ -194,12 +194,12 @@
       <code>return</code>:<a data-type="indexterm" data-primary=
       "return function">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="11">
+      "code/async/main.topscript" part="11" />
 
       <p>Using <code>return</code>, we can make
       <code>count_lines</code> compile:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="12">
+      "code/async/main.topscript" part="12" />
 
       <p>Together, <code>bind</code> and <code>return</code> form a
       design pattern in functional programming known as a
@@ -215,13 +215,13 @@
       shortcut for it called <code>Deferred.map</code>, which has
       the following signature:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="13">
+      "code/async/main.topscript" part="13" />
 
       <p>and comes with its own infix equivalent,
       <code>&gt;&gt;|</code>. Using it, we can rewrite
       <code>count_lines</code> again a bit more succinctly:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="14">
+      "code/async/main.topscript" part="14" />
 
       <p>Note that <code>count_lines</code> returns a deferred, but
       <span class="command"><em>utop</em></span> waits for that
@@ -251,7 +251,7 @@
         using <code>Ivar.fill</code>. These operations are
         illustrated below:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="15">
+        "code/async/main.topscript" part="15" />
 
         <p>Ivars are something of a low-level feature; operators
         like <code>map</code>, <code>bind</code> and
@@ -266,7 +266,7 @@
         are executed in the same order they were scheduled in.
         Here's a reasonable signature that captures this idea:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="16">
+        "code/async/main.topscript" part="16" />
 
         <p>An action is handed to <code>schedule</code> in the form
         of a deferred-returning thunk (a thunk is a function whose
@@ -278,7 +278,7 @@
         following signature:<a data-type="indexterm" data-primary=
         "thunks">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="17">
+        "code/async/main.topscript" part="17" />
 
         <p>Like <code>bind</code> and <code>return</code>,
         <code>upon</code> schedules a callback to be executed when
@@ -294,7 +294,7 @@
         a time span and returns a deferred which becomes determined
         after that time span elapses:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="18">
+        "code/async/main.topscript" part="18" />
 
         <p>This code isn't particularly long, but it is subtle. In
         particular, note how the queue of thunks is used to ensure
@@ -330,7 +330,7 @@
       "indexterm" data-primary="I/O (input/output) operations"
       data-secondary="copying data">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/echo.ml">
+      "code/async/echo.ml" />
 
       <p>Bind is used in the code to sequence the operations:
       first, we call <code>Reader.read</code> to get a block of
@@ -375,7 +375,7 @@
       for creating TCP clients and servers:<a data-type="indexterm"
       data-primary="TCP clients/servers">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/echo.ml" part="1">
+      "code/async/echo.ml" part="1" />
 
       <p>The result of calling <code>Tcp.Server.create</code> is a
       <code>Tcp.Server.t</code>, which is a handle to the server
@@ -397,7 +397,7 @@
       <p>Finally, we need to initiate the server and start the
       Async scheduler:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/echo.ml" part="2">
+      "code/async/echo.ml" part="2" />
 
       <p>One of the most common newbie errors with Async is to
       forget to run the scheduler. It can be a bewildering mistake,
@@ -414,7 +414,7 @@
       echo server using the netcat tool, which is invoked as
       <code>nc</code>:</p>
       <link rel="import" data-code-language="console" href=
-      "code/async/run_echo.out">
+      "code/async/run_echo.out" />
 
       <aside data-type="sidebar">
         <h5>Functions that Never Return</h5>
@@ -432,13 +432,13 @@
         data-primary="functions" data-secondary=
         "non-returning">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="19">
+        "code/async/main.topscript" part="19" />
 
         <p>This can be surprising when you call a function like
         this expecting it to return <code>unit</code>. The
         type-checker won't necessarily complain in such a case:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="20">
+        "code/async/main.topscript" part="20" />
 
         <p>With a name like <code>loop_forever</code>, the meaning
         is clear enough. But with something like
@@ -448,7 +448,7 @@
         <code>never_returns</code>. Let's do the same trick with
         <code>loop_forever</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="21">
+        "code/async/main.topscript" part="21" />
 
         <p>The type <code>never_returns</code> is uninhabited, so a
         function can't return a value of type
@@ -458,12 +458,12 @@
         <code>do_stuff</code> function, we'll get a helpful type
         error:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="22">
+        "code/async/main.topscript" part="22" />
 
         <p>We can resolve the error by calling the function
         <code>never_returns</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="23">
+        "code/async/main.topscript" part="23" />
 
         <p>Thus, we got the compilation to go through by explicitly
         marking in the source that the call to
@@ -497,7 +497,7 @@
 
         <p>The following code does all of this:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/better_echo.ml">
+        "code/async/better_echo.ml" />
 
         <p>Note the use of <code>Deferred.never</code> in the
         <code>run</code> function. As you might guess from the
@@ -519,7 +519,7 @@
 
         <p>Pipes are created in connected read/write pairs:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="24">
+        "code/async/main.topscript" part="24" />
 
         <p><code>r</code> and <code>w</code> are really just read
         and write handles to the same underlying object. Note that
@@ -535,12 +535,12 @@
         wait by hitting
         <strong><code>Control-C</code></strong>:</p>
         <link rel="import" data-code-language="ocamlrawtop" href=
-        "code/async/pipe_write_break.rawscript">
+        "code/async/pipe_write_break.rawscript" />
 
         <p>The deferred returned by write completes on its own once
         the value written into the pipe has been read out:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="25">
+        "code/async/main.topscript" part="25" />
 
         <p>In the function <code>run</code>, we're taking advantage
         of one of the many utility functions provided for pipes in
@@ -549,7 +549,7 @@
         data from a reader-pipe and moves it to a writer-pipe.
         Here's the type of <code>Pipe.transfer</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="26">
+        "code/async/main.topscript" part="26" />
 
         <p>The two pipes being connected are generated by the
         <code>Reader.pipe</code> and <code>Writer.pipe</code> call
@@ -575,7 +575,7 @@
         module with an extended version that contains the
         <code>async_basic</code> call:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="27">
+        "code/async/main.topscript" part="27" />
 
         <p>This differs from the ordinary
         <code>Command.basic</code> call in that the main function
@@ -666,7 +666,7 @@
         <p>We'll need a function for generating the URIs that we're
         going to use to query the DuckDuckGo servers:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search.ml">
+        "code/async/search.ml" />
 
         <p>A <code>Uri.t</code> is constructed from the
         <code>Uri.of_string</code> function, and a query parameter
@@ -698,7 +698,7 @@
         under both keys, returning the first one for which a
         nonempty value is defined:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search.ml" part="1">
+        "code/async/search.ml" part="1" />
       </section>
 
       <section id="executing-an-http-client-query" data-type=
@@ -716,14 +716,14 @@
         data-secondary=
         "executing an HTTP client query in">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search.ml" part="2">
+        "code/async/search.ml" part="2" />
 
         <p>To better understand what's going on, it's useful to
         look at the type for <code>Cohttp_async.Client.get</code>,
         which we can do in <span class=
         "command"><em>utop</em></span>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="28">
+        "code/async/main.topscript" part="28" />
 
         <p>The <code>get</code> call takes as a required argument a
         URI and returns a deferred value containing a
@@ -742,7 +742,7 @@
         dispatching multiple searches in parallel. First, we need
         code for formatting and printing out the search result:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search.ml" part="3">
+        "code/async/search.ml" part="3" />
 
         <p>We use the <code>Wrapper</code> module from the
         <code>textwrap</code> package to do the line wrapping. It
@@ -760,14 +760,14 @@
         <p>The next function dispatches the searches in parallel,
         waits for the results, and then prints:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search.ml" part="4">
+        "code/async/search.ml" part="4" />
 
         <p>We used <code>List.map</code> to call
         <code>get_definition</code> on each word, and
         <code>Deferred.all</code> to wait for all the results.
         Here's the type of <code>Deferred.all</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="29">
+        "code/async/main.topscript" part="29" />
 
         <p>Note that the list returned by <code>Deferred.all</code>
         reflects the order of the deferreds passed to it. As such,
@@ -777,7 +777,7 @@
         the results as they're received (and thus potentially out
         of order) as follows:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search_out_of_order.ml" part="1">
+        "code/async/search_out_of_order.ml" part="1" />
 
         <p>The difference is that we both dispatch the query and
         print out the result in the closure passed to
@@ -790,18 +790,18 @@
         the type of this function in <span class=
         "command"><em>utop</em></span>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="30">
+        "code/async/main.topscript" part="30" />
 
         <p>Finally, we create a command-line interface using
         <code>Command.async_basic</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search.ml" part="5">
+        "code/async/search.ml" part="5" />
 
         <p>And that's all we need for a simple but usable
         definition searcher:<a data-type="indexterm" data-startref=
         "ALduckduck">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
-        "code/async/run_search.out">
+        "code/async/run_search.out" />
       </section>
     </section>
 
@@ -833,7 +833,7 @@
       or returns <code>unit</code>, alternating between the two
       behaviors on subsequent calls:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="31">
+      "code/async/main.topscript" part="31" />
 
       <p>In <span class="command"><em>utop</em></span>, the
       exception thrown by <code>maybe_raise ()</code> terminates
@@ -846,7 +846,7 @@
       <code>try/with</code> statement, but as you can see that
       doesn't quite do the trick:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="32">
+      "code/async/main.topscript" part="32" />
 
       <p>This didn't work because <code>try/with</code> only
       captures exceptions that are thrown in the code directly
@@ -859,7 +859,7 @@
       Async:<a data-type="indexterm" data-primary="exceptions"
       data-secondary="asynchronous errors">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="33">
+      "code/async/main.topscript" part="33" />
 
       <p><code>try_with f</code> takes as its argument a
       deferred-returning thunk <code>f</code> and returns a
@@ -898,7 +898,7 @@
         <code>within'</code>, which takes a thunk that returns a
         deferred. Here's an example:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="34">
+        "code/async/main.topscript" part="34" />
 
         <p>In addition to the ordinary stack-trace, the exception
         displays the trace of monitors through which the exception
@@ -919,7 +919,7 @@
         function that captures and ignores errors in the processes
         it spawns:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="35">
+        "code/async/main.topscript" part="35" />
 
         <p>The message "an error happened" is printed out, but the
         deferred returned by <code>swallow_error</code> is never
@@ -937,7 +937,7 @@
         current monitor, which is the parent of the newly created
         monitor:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="36">
+        "code/async/main.topscript" part="36" />
 
         <p>Note that we use <code>Monitor.extract_exn</code> to
         grab the underlying exception that was thrown. Async wraps
@@ -950,13 +950,13 @@
         <code>Not_found</code>, then the exception will be passed
         to the parent monitor and delivered as usual:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="37">
+        "code/async/main.topscript" part="37" />
 
         <p>If instead we use <code>Ignore_me</code>, the exception
         will be ignorred, and the deferred never becomes
         determined:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/async/main.topscript" part="38">
+        "code/async/main.topscript" part="38" />
 
         <p>In practice, you should rarely use monitors directly,
         and instead use functions like <code>try_with</code> and
@@ -994,7 +994,7 @@
         <p>First we'll need to change <code>query_uri</code> to
         take an argument specifying the server to connect to:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search_with_configurable_server.ml" part="1">
+        "code/async/search_with_configurable_server.ml" part="1" />
 
         <p>In addition, we'll make the necessary changes to get the
         list of servers on the command-line, and to distribute the
@@ -1003,7 +1003,7 @@
         run it giving it a list of servers, some of which won't
         respond to the query:</p>
         <link rel="import" data-code-language="console" href=
-        "code/async/run_search_with_configurable_server.out">
+        "code/async/run_search_with_configurable_server.out" />
 
         <p>As you can see, we got a "Connection refused" failure,
         which ends the entire program, even though one of the two
@@ -1013,7 +1013,7 @@
         within each call to <code>get_definition</code>, as
         follows:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search_with_error_handling.ml" part="1">
+        "code/async/search_with_error_handling.ml" part="1" />
 
         <p>Here, we first use <code>try_with</code> to capture the
         exception, and then use map (the <code>&gt;&gt;|</code>
@@ -1026,12 +1026,12 @@
         <code>print_result</code> so that it can handle the new
         type:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/async/search_with_error_handling.ml" part="2">
+        "code/async/search_with_error_handling.ml" part="2" />
 
         <p>Now, if we run that same query, we'll get individualized
         handling of the connection failures:</p>
         <link rel="import" data-code-language="console" href=
-        "code/async/run_search_with_error_handling.out">
+        "code/async/run_search_with_error_handling.out" />
 
         <p>Now, only the query that went to <code>localhost</code>
         failed.</p>
@@ -1073,7 +1073,7 @@
       "indexterm" data-primary="Async library" data-secondary=
       "timeouts and cancellations">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="39">
+      "code/async/main.topscript" part="39" />
 
       <p>Sometimes, however, we want to wait only for the first of
       multiple events to occur. This happens particularly when
@@ -1082,7 +1082,7 @@
       returns a single deferred that will become determined once
       any of the values on the list is determined:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="40">
+      "code/async/main.topscript" part="40" />
 
       <p>Let's use this to add timeouts to our DuckDuckGo searches.
       The following code is a wrapper for
@@ -1090,7 +1090,7 @@
       of a <code>Time.Span.t</code>) and returns either the
       definition, or, if that takes too long, an error:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/search_with_timeout.ml" part="1">
+      "code/async/search_with_timeout.ml" part="1" />
 
       <p>We use <code>&gt;&gt;|</code> above to transform the
       deferred values we're waiting for so that
@@ -1113,14 +1113,16 @@
       <code>get_definition_with_timeout</code> to cancel the
       <code>get</code> call if the timeout expires:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/search_with_timeout_no_leak_simple.ml" part="1">
+      "code/async/search_with_timeout_no_leak_simple.ml" part=
+      "1" />
 
       <p>Next, we'll modify
       <code>get_definition_with_timeout</code> to create a deferred
       to pass in to <code>get_definition</code>, which will become
       determined when our timeout expires:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/search_with_timeout_no_leak_simple.ml" part="2">
+      "code/async/search_with_timeout_no_leak_simple.ml" part=
+      "2" />
 
       <p>This will work and will cause the connection to shutdown
       cleanly when we time out; but our code no longer explicitly
@@ -1137,7 +1139,7 @@
       if and only if that deferred is chosen. Here's the type
       signature of <code>choice</code> and <code>choose</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="41">
+      "code/async/main.topscript" part="41" />
 
       <p>Note that there's no guarantee that the winning deferred
       will be the one that becomes determined first. But
@@ -1150,13 +1152,13 @@
       determined if and only if the timeout deferred is chosen.
       Here's the code:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/async/search_with_timeout_no_leak.ml" part="2">
+      "code/async/search_with_timeout_no_leak.ml" part="2" />
 
       <p>Now, if we run this with a suitably small timeout, we'll
       see that one query succeeds and the other fails reporting a
       timeout:</p>
       <link rel="import" data-code-language="console" href=
-      "code/async/run_search_with_timeout_no_leak.out">
+      "code/async/run_search_with_timeout_no_leak.out" />
     </section>
 
     <section id="working-with-system-threads" data-type="sect1">
@@ -1224,7 +1226,7 @@
       write:<a data-type="indexterm" data-primary=
       "In_thread module">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="42">
+      "code/async/main.topscript" part="42" />
 
       <p>to cause <code>List.range 1 10</code> to be run on one of
       Async's worker threads. When the computation is complete, the
@@ -1240,18 +1242,18 @@
       becomes determined, at which point it prints out one last
       timestamp:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="43">
+      "code/async/main.topscript" part="43" />
 
       <p>If we feed this function a simple timeout deferred, it
       works as you might expect, waking up roughly every 100
       milliseconds:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="44">
+      "code/async/main.topscript" part="44" />
 
       <p>Now see what happens if, instead of waiting on a clock
       event, we wait for a busy loop to finish running:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="45">
+      "code/async/main.topscript" part="45" />
 
       <p>As you can see, instead of waking up 10 times a second,
       <code>log_delays</code> is blocked out entirely while
@@ -1261,7 +1263,7 @@
       to offload this to a different system thread, the behavior
       will be different:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="46">
+      "code/async/main.topscript" part="46" />
 
       <p>Now <code>log_delays</code> does get a chance to run, but
       not nearly as often as every 100 milliseconds. The reason is
@@ -1279,13 +1281,13 @@
       behavior, so if we run a nonallocating loop in bytecode, our
       timer process will get to run:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/async/main.topscript" part="47">
+      "code/async/main.topscript" part="47" />
 
       <p>But if we compile this to a native-code executable, then
       the nonallocating busy loop will block anything else from
       running:</p>
       <link rel="import" data-code-language="console" href=
-      "code/async/run_native_code_log_delays.out">
+      "code/async/run_native_code_log_delays.out" />
 
       <p>The takeaway from these examples is that predicting thread
       interleavings is a subtle business. Staying within the bounds

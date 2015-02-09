@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -41,12 +41,12 @@
       <code>find</code> function in the <code>List</code>
       module:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript">
+      "code/error-handling/main.topscript" />
 
       <p>The option in the return type indicates that the function
       may not succeed in finding a suitable element:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="1">
+      "code/error-handling/main.topscript" part="1" />
 
       <p>Including errors in the return values of your functions
       requires the caller to handle the error explicitly, allowing
@@ -61,7 +61,7 @@
       they encounter an empty list, are used to extract the largest
       and smallest element of the list:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="2">
+      "code/error-handling/main.topscript" part="2" />
 
       <p>The <code>match</code> statement is used to handle the
       error cases, propagating a <code>None</code> in
@@ -76,7 +76,7 @@
       one table than in the other. As such, the failure to find a
       key in one table isn't a failure of any sort:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="3">
+      "code/error-handling/main.topscript" part="3" />
 
       <p>The use of options to encode errors underlines the fact
       that it's not clear whether a particular outcome, like not
@@ -99,7 +99,7 @@
         deficiency. The type is defined as follows:<a data-type=
         "indexterm" data-primary="Result.t option">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/error-handling/result.mli">
+        "code/error-handling/result.mli" />
 
         <p>A <code>Result.t</code> is essentially an option
         augmented with the ability to store other information in
@@ -109,7 +109,7 @@
         toplevel by <code>Core.Std</code>. As such, we can
         write:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="4">
+        "code/error-handling/main.topscript" part="4" />
 
         <p>without first opening the <code>Result</code>
         module.</p>
@@ -148,14 +148,14 @@
         to construct it at all. You can of course construct an
         error directly from a string:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="5">
+        "code/error-handling/main.topscript" part="5" />
 
         <p>But you can also construct an <code>Error.t</code> from
         a <em>thunk</em>, i.e., a function that takes a single
         argument of type <code>unit</code>:<a data-type="indexterm"
         data-primary="thunks">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="6">
+        "code/error-handling/main.topscript" part="6" />
 
         <p>In this case, we can benefit from the laziness of
         <code>Error</code>, since the thunk won't be called unless
@@ -168,7 +168,7 @@
         example:<a data-type="indexterm" data-primary=
         "s-expressions" data-secondary="example of">&nbsp;</a></p>
         <link rel="import" data-code-language="scheme" href=
-        "code/error-handling/sexpr.scm">
+        "code/error-handling/sexpr.scm" />
 
         <p>S-expressions are supported by the Sexplib package that
         is distributed with Core and is the most common
@@ -179,7 +179,7 @@
         data-primary="Sexplib package" data-secondary=
         "sexp converter">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="7">
+        "code/error-handling/main.topscript" part="7" />
 
         <p>Note that the time isn't actually serialized into an
         s-expression until the error is printed out.</p>
@@ -192,11 +192,11 @@
         Sexplib comes with a language extension that can
         autogenerate sexp converters for newly generated types:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="8">
+        "code/error-handling/main.topscript" part="8" />
 
         <p>We can use this same idiom for generating an error:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="9">
+        "code/error-handling/main.topscript" part="9" />
 
         <p><code>Error</code> also supports operations for
         transforming errors. For example, it's often useful to
@@ -209,7 +209,7 @@
         data-primary="errors" data-secondary=
         "transformation of">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="10">
+        "code/error-handling/main.topscript" part="10" />
 
         <p>The type <code>'a Or_error.t</code> is just a shorthand
         for <code>('a,Error.t) Result.t</code>, and it is, after
@@ -232,7 +232,7 @@
         options:<a data-type="indexterm" data-primary=
         "bind function">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="11">
+        "code/error-handling/main.topscript" part="11" />
 
         <p>As you can see, <code>bind None f</code> returns
         <code>None</code> without calling <code>f</code>, and
@@ -243,7 +243,7 @@
         rewrite of <code>compute_bounds</code> to use a nested
         series of <code>bind</code>s:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="12">
+        "code/error-handling/main.topscript" part="12" />
 
         <p>The preceding code is a little bit hard to swallow,
         however, on a syntactic level. We can make it easier to
@@ -256,7 +256,7 @@
         "#concurrent-programming-with-async" data-type=
         "xref">#concurrent-programming-with-async</a>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="13">
+        "code/error-handling/main.topscript" part="13" />
 
         <p>This use of <code>bind</code> isn't really materially
         better than the one we started with, and indeed, for small
@@ -274,7 +274,7 @@
         <code>Option.both</code>, we can make
         <code>compute_bounds</code> even shorter:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="14">
+        "code/error-handling/main.topscript" part="14" />
 
         <p>These error-handling functions are valuable because they
         let you express your error handling both explicitly and
@@ -305,30 +305,30 @@
       <p>You can trigger an exception by, for example, dividing an
       integer by zero:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="15">
+      "code/error-handling/main.topscript" part="15" />
 
       <p>And an exception can terminate a computation even if it
       happens nested somewhere deep within it:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="16">
+      "code/error-handling/main.topscript" part="16" />
 
       <p>If we put a <code>printf</code> in the middle of the
       computation, we can see that <code>List.map</code> is
       interrupted partway through its execution, never getting to
       the end of the list:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="17">
+      "code/error-handling/main.topscript" part="17" />
 
       <p>In addition to built-in exceptions like
       <code>Divide_by_zero</code>, OCaml lets you define your
       own:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="18">
+      "code/error-handling/main.topscript" part="18" />
 
       <p>Exceptions are ordinary values and can be manipulated just
       like other OCaml values:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="19">
+      "code/error-handling/main.topscript" part="19" />
 
       <p>Exceptions are all of the same type, <code>exn</code>. The
       <code>exn</code> type is something of a special case in the
@@ -348,7 +348,7 @@
       <p>The following function uses the <code>Key_not_found</code>
       exception we defined above to signal an error:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="20">
+      "code/error-handling/main.topscript" part="20" />
 
       <p>Note that we named the function <code>find_exn</code> to
       warn the user that the function routinely throws exceptions,
@@ -361,7 +361,7 @@
       exception, thus terminating the computation. The type of
       raise is a bit surprising when you first see it:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="21">
+      "code/error-handling/main.topscript" part="21" />
 
       <p>The return type of <code>'a</code> makes it look like
       <code>raise</code> manufactures a value to return that is
@@ -373,7 +373,7 @@
       Here's another example of a function that doesn't return a
       value:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="22">
+      "code/error-handling/main.topscript" part="22" />
 
       <p><code>forever</code> doesn't return a value for a
       different reason: it's an infinite loop.</p>
@@ -394,13 +394,13 @@
         representation of an exception. For example:</p>
       </div>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="23">
+      "code/error-handling/main.topscript" part="23" />
 
       <p>But if we declare the exception using <code>with
       sexp</code> (and the constituent types have sexp converters),
       we'll get something with more information:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/error-handling/main.topscript" part="24">
+      "code/error-handling/main.topscript" part="24" />
 
       <p>The period in front of <code>Wrong_date</code> is there
       because the representation generated by <code>with
@@ -429,7 +429,7 @@
         data-primary="error handling" data-secondary=
         "exception helper functions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="25">
+        "code/error-handling/main.topscript" part="25" />
 
         <p>There are several other useful functions for raising
         exceptions, which can be found in the API documentation for
@@ -443,7 +443,7 @@
         code for zipping together two lists:<a data-type=
         "indexterm" data-primary="assert directive">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="26">
+        "code/error-handling/main.topscript" part="26" />
 
         <p>Here we use <code>assert false</code>, which means that
         the <code>assert</code> is guaranteed to trigger. In
@@ -456,7 +456,7 @@
         <code>loop</code>. If we change the code so that we drop
         this test, then we can trigger the <code>assert</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="27">
+        "code/error-handling/main.topscript" part="27" />
 
         <p>This shows what's special about <code>assert</code>: it
         captures the line number and character offset of the source
@@ -480,7 +480,7 @@
         <code>try</code>/<code>with</code> statement. Here's the
         basic syntax.</p>
         <link rel="import" data-code-language="ocamlsyntax" href=
-        "code/error-handling/try_with.syntax">
+        "code/error-handling/try_with.syntax" />
 
         <p>A <code>try/with</code> clause first evaluates its body,
         <em><code>expr</code></em>. If no exception is thrown, then
@@ -515,7 +515,7 @@
         data-primary="error handling" data-secondary=
         "exception clean up">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="28">
+        "code/error-handling/main.topscript" part="28" />
 
         <p>The problem with this code is that the function that
         loads the s-expression and parses it into a list of
@@ -536,13 +536,13 @@
         rather than being a built-in primitive. Here's how it could
         be used to fix <code>load_reminders</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="29">
+        "code/error-handling/main.topscript" part="29" />
 
         <p>This is a common enough problem that
         <code>In_channel</code> has a function called
         <code>with_file</code> that automates this pattern:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="30">
+        "code/error-handling/main.topscript" part="30" />
 
         <p><code>In_channel.with_file</code> is built on top of
         <code>protect</code> so that it can clean up after itself
@@ -563,7 +563,7 @@
         "indexterm" data-primary="error handling" data-secondary=
         "exception detection">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="31">
+        "code/error-handling/main.topscript" part="31" />
 
         <p>As you can see from the type, <code>lookup_weight</code>
         takes an association list, a key for looking up a
@@ -580,7 +580,7 @@
         <code>Not_found</code>, then that's not what will
         happen:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="32">
+        "code/error-handling/main.topscript" part="32" />
 
         <p>This kind of problem is hard to detect in advance
         because the type system doesn't tell you what exceptions a
@@ -590,13 +590,13 @@
         narrow the scope of the exception handler, so that when it
         fires it's very clear what part of the code failed:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="33">
+        "code/error-handling/main.topscript" part="33" />
 
         <p>At this point, it makes sense to simply use the
         nonexception-throwing function,
         <code>List.Assoc.find</code>, instead:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="34">
+        "code/error-handling/main.topscript" part="34" />
       </section>
 
       <section id="backtraces" data-type="sect2">
@@ -615,14 +615,14 @@
         data-primary="error handling" data-secondary=
         "exception backtracing">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/error-handling/blow_up.ml">
+        "code/error-handling/blow_up.ml" />
 
         <p>If we build and run this program, we'll get a stack
         backtrace that will provide some information about where
         the error occurred and the stack of function calls that
         were in place at the time of the error:</p>
         <link rel="import" data-code-language="console" href=
-        "code/error-handling/build_blow_up.out">
+        "code/error-handling/build_blow_up.out" />
 
         <p>You can also capture a backtrace within your program by
         calling <code>Exn.backtrace</code>, which returns the
@@ -645,7 +645,7 @@
         <code>OCAMLRUNPARAM</code> environment variable to be
         empty:</p>
         <link rel="import" data-code-language="console" href=
-        "code/error-handling/build_blow_up_notrace.out">
+        "code/error-handling/build_blow_up_notrace.out" />
 
         <p>The resulting error message is considerably less
         informative. You can also turn backtraces off in your code
@@ -660,7 +660,7 @@
         benchmark that shows the effect, using the
         <code>core_bench</code> package:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/error-handling/exn_cost.ml">
+        "code/error-handling/exn_cost.ml" />
 
         <p>We're testing three cases here: a simple computation
         with no exceptions; the same computation with an exception
@@ -671,14 +671,14 @@
         <p>If we run this with stacktraces on, the benchmark
         results look like this:</p>
         <link rel="import" data-code-language="console" href=
-        "code/error-handling/run_exn_cost.out">
+        "code/error-handling/run_exn_cost.out" />
 
         <p>Here, we see that we lose something like 30 cycles to
         adding an exception handler, and 60 more to actually
         throwing and catching an exception. If we turn backtraces
         off, then the results look like this:</p>
         <link rel="import" data-code-language="console" href=
-        "code/error-handling/run_exn_cost_notrace.out">
+        "code/error-handling/run_exn_cost_notrace.out" />
 
         <p>Here, the handler costs about the same, but the
         exception itself costs only 25, as opposed to 60 additional
@@ -707,17 +707,17 @@
         "indexterm" data-primary="error handling" data-secondary=
         "combining exceptions and error-aware types">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="35">
+        "code/error-handling/main.topscript" part="35" />
 
         <p>And <code>Result</code> and <code>Or_error</code> have
         similar <code>try_with</code> functions. So, we could
         write:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="36">
+        "code/error-handling/main.topscript" part="36" />
 
         <p>And then we can reraise that exception:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="37">
+        "code/error-handling/main.topscript" part="37" />
       </section>
     </section>
 

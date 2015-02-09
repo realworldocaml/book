@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -43,7 +43,7 @@
       data-primary="let syntax" data-secondary=
       "top-level bindings">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/variables-and-functions/let.syntax">
+      "code/variables-and-functions/let.syntax" />
 
       <p>As we'll see when we get to the module system in <a href=
       "#files-modules-and-programs" data-type=
@@ -64,13 +64,13 @@
 
       <p>Here's a simple example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript">
+      "code/variables-and-functions/main.topscript" />
 
       <p><code>let</code> can also be used to create a variable
       binding whose scope is limited to a particular expression,
       using the following syntax:</p>
       <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/variables-and-functions/let_in.syntax">
+      "code/variables-and-functions/let_in.syntax" />
 
       <p>This first evaluates <em><code>expr1</code></em> and then
       evaluates <em><code>expr2</code></em> with
@@ -78,14 +78,14 @@
       produced by the evaluation of <em><code>expr1</code></em>.
       Here's how it looks in practice:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="1">
+      "code/variables-and-functions/main.topscript" part="1" />
 
       <p>Note that the scope of <code>language_list</code> is just
       the expression <code>String.concat ~sep:"-"
       language_list</code> and is not available at the toplevel, as
       we can see if we try to access it now:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="2">
+      "code/variables-and-functions/main.topscript" part="2" />
 
       <p>A <code>let</code> binding in an inner scope can
       <em>shadow</em>, or hide, the definition from an outer scope.
@@ -95,7 +95,7 @@
       data-secondary="shadowing of">&nbsp;</a><a data-type=
       "indexterm" data-primary="shadowing">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="3">
+      "code/variables-and-functions/main.topscript" part="3" />
 
       <p>This time, in the inner scope we called the list of
       strings <code>languages</code> instead of
@@ -105,7 +105,7 @@
       has closed and the original definition of languages
       reappears:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="4">
+      "code/variables-and-functions/main.topscript" part="4" />
 
       <p>One common idiom is to use a series of nested
       <code>let</code>/<code>in</code> expressions to build up the
@@ -114,7 +114,7 @@
       data-secondary="nested bindings">&nbsp;</a><a data-type=
       "indexterm" data-primary="nested let binding">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="5">
+      "code/variables-and-functions/main.topscript" part="5" />
 
       <p>It's important not to confuse a sequence of
       <code>let</code> bindings with the modification of a mutable
@@ -122,7 +122,7 @@
       would work if we had instead written this purposefully
       confusing bit of code:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="6">
+      "code/variables-and-functions/main.topscript" part="6" />
 
       <p>Here, we redefined <code>pi</code> to be zero after the
       definition of <code>area_of_circle</code>. You might think
@@ -184,7 +184,7 @@
         data-primary="variables" data-secondary=
         "pattern matching in">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="7">
+        "code/variables-and-functions/main.topscript" part="7" />
 
         <p>Here, <code>(ints,strings)</code> is a pattern, and the
         <code>let</code> binding assigns values to both of the
@@ -207,7 +207,7 @@
         "indexterm" data-primary=
         "irrefutable patterns">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="8">
+        "code/variables-and-functions/main.topscript" part="8" />
 
         <p>This case can't really come up in practice, because
         <code>String.split</code> always returns a list with at
@@ -216,7 +216,7 @@
         <code>match</code> statement to handle such cases
         explicitly:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="9">
+        "code/variables-and-functions/main.topscript" part="9" />
 
         <p>Note that this is our first use of <code>assert</code>,
         which is useful for marking cases that should be
@@ -251,23 +251,23 @@
         "indexterm" data-primary="functions" data-secondary=
         "anonymous functions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="10">
+        "code/variables-and-functions/main.topscript" part="10" />
 
         <p>Anonymous functions operate in much the same way as
         named functions. For example, we can apply an anonymous
         function to an argument:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="11">
+        "code/variables-and-functions/main.topscript" part="11" />
 
         <p>Or pass it to another function. Passing functions to
         iteration functions like <code>List.map</code> is probably
         the most common use case for anonymous functions:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="12">
+        "code/variables-and-functions/main.topscript" part="12" />
 
         <p>You can even stuff them into a data structure:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="13">
+        "code/variables-and-functions/main.topscript" part="13" />
 
         <p>It's worth stopping for a moment to puzzle this example
         out, since this kind of higher-order use of functions can
@@ -288,14 +288,14 @@
         the same way that we name other values, by using a
         <code>let</code> binding:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="14">
+        "code/variables-and-functions/main.topscript" part="14" />
 
         <p>Defining named functions is so common that there is some
         syntactic sugar for it. Thus, the following definition of
         <code>plusone</code> is equivalent to the previous
         definition:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="15">
+        "code/variables-and-functions/main.topscript" part="15" />
 
         <p>This is the most common and convenient way to declare a
         function, but syntactic niceties aside, the two styles of
@@ -313,7 +313,7 @@
           "functions and">&nbsp;</a></p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="16">
+        "code/variables-and-functions/main.topscript" part="16" />
 
         <p>This connection is important, and will come up more when
         programming in a monadic style, as we'll see in <a href=
@@ -333,7 +333,7 @@
         "indexterm" data-primary="functions" data-secondary=
         "multi-argument functions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="17">
+        "code/variables-and-functions/main.topscript" part="17" />
 
         <p>You may find the type signature of <code>abs_diff</code>
         with all of its arrows a little hard to parse. To
@@ -341,7 +341,7 @@
         <code>abs_diff</code> in an equivalent form, using the
         <code>fun</code> keyword:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="18">
+        "code/variables-and-functions/main.topscript" part="18" />
 
         <p>This rewrite makes it explicit that
         <code>abs_diff</code> is actually a function of one
@@ -364,7 +364,7 @@
         "indexterm" data-primary="functions" data-secondary=
         "curried functions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/variables-and-functions/abs_diff.mli">
+        "code/variables-and-functions/abs_diff.mli" />
 
         <p>The parentheses don't change the meaning of the
         signature, but they make it easier to see the currying.</p>
@@ -376,7 +376,7 @@
         that measures the distance of a given number from
         <code>3</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="19">
+        "code/variables-and-functions/main.topscript" part="19" />
 
         <p>The practice of applying some of the arguments of a
         curried function to get a new function is called
@@ -389,7 +389,7 @@
         one.<a data-type="indexterm" data-primary="fun keyword"
         data-secondary="currying syntax">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="20">
+        "code/variables-and-functions/main.topscript" part="20" />
 
         <p>You might worry that curried functions are terribly
         expensive, but this is not the case. In OCaml, there is no
@@ -402,7 +402,7 @@
         parts of a tuple as different arguments. So, we could
         write:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="21">
+        "code/variables-and-functions/main.topscript" part="21" />
 
         <p>OCaml handles this calling convention efficiently as
         well. In particular it does not generally have to allocate
@@ -440,7 +440,7 @@
         list:<a data-type="indexterm" data-primary=
         "rec keyword">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="22">
+        "code/variables-and-functions/main.topscript" part="22" />
 
         <p>Note that in the code, the pattern <code>| [] |
         [_]</code> is what's called an <em>or-pattern</em>, which
@@ -457,7 +457,7 @@
         <code>and</code> keyword. Here's a (gratuitously
         inefficient) example:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="23">
+        "code/variables-and-functions/main.topscript" part="23" />
 
         <p>OCaml distinguishes between nonrecursive definitions
         (using <code>let</code>) and recursive definitions (using
@@ -496,7 +496,7 @@
         "indexterm" id="FNCprf" data-primary="functions"
         data-secondary="prefix and infix operators">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="24">
+        "code/variables-and-functions/main.topscript" part="24" />
 
         <p>You might not have thought of the second example as an
         ordinary function, but it very much is. Infix operators
@@ -505,7 +505,7 @@
         infix operator, you can use it as an ordinary prefix
         function:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="25">
+        "code/variables-and-functions/main.topscript" part="25" />
 
         <p>In the second expression, we've partially applied
         <code>(+)</code> to create a function that increments its
@@ -517,7 +517,7 @@
         identifiers that are sequences of characters from the
         following set:</p>
         <link rel="import" data-code-language="ocamlsyntax" href=
-        "code/variables-and-functions/operators.syntax">
+        "code/variables-and-functions/operators.syntax" />
 
         <p><code>or</code> is one of a handful of predetermined
         strings, including <code>mod</code>, the modulus operator,
@@ -528,20 +528,20 @@
         Here's an example of a simple vector-addition operator on
         <code>int</code> pairs:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="26">
+        "code/variables-and-functions/main.topscript" part="26" />
 
         <p>Note that you have to be careful when dealing with
         operators containing <code>*</code>. Consider the following
         example:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="27">
+        "code/variables-and-functions/main.topscript" part="27" />
 
         <p>What's going on is that <code>(***)</code> isn't
         interpreted as an operator at all; it's read as a comment!
         To get this to work properly, we need to put spaces around
         any operator that begins or ends with <code>*</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="28">
+        "code/variables-and-functions/main.topscript" part="28" />
 
         <p>The syntactic role of an operator is typically
         determined by its first character or two, though there are
@@ -690,12 +690,12 @@
         "subtraction operators">&nbsp;</a><a data-type="indexterm"
         data-primary="negation operators">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="29">
+        "code/variables-and-functions/main.topscript" part="29" />
 
         <p>Here, OCaml is interpreting the second expression as
         equivalent to:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="30">
+        "code/variables-and-functions/main.topscript" part="30" />
 
         <p>which obviously doesn't make sense.</p>
 
@@ -703,7 +703,7 @@
         standard library whose behavior depends critically on the
         precedence rules described previously:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="31">
+        "code/variables-and-functions/main.topscript" part="31" />
 
         <p>It's not quite obvious at first what the purpose of this
         operator is: it just takes a value and a function and
@@ -723,12 +723,12 @@
         data-primary="operators" data-secondary=
         "sequencing operators">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="32">
+        "code/variables-and-functions/main.topscript" part="32" />
 
         <p>Note that we can do this without <code>|&gt;</code>, but
         the result is a bit more verbose:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="33">
+        "code/variables-and-functions/main.topscript" part="33" />
 
         <p>An important part of what's happening here is partial
         application. For example, <code>List.iter</code> normally
@@ -738,12 +738,12 @@
         arguments:<a data-type="indexterm" data-primary=
         "partial application">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="34">
+        "code/variables-and-functions/main.topscript" part="34" />
 
         <p>Or, we can pass it just the function argument, leaving
         us with a function for printing out a list of strings:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="35">
+        "code/variables-and-functions/main.topscript" part="35" />
 
         <p>It is this later form that we're using in the preceding
         <code>|&gt;</code> pipeline.</p>
@@ -753,7 +753,7 @@
         we try using a right-associative operator, like
         (^&gt;):</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="36">
+        "code/variables-and-functions/main.topscript" part="36" />
 
         <p>The type error is a little bewildering at first glance.
         What's going on is that, because <code>^&gt;</code> is
@@ -784,19 +784,19 @@
         data-primary="functions" data-secondary=
         "declaring with function keyword">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="37">
+        "code/variables-and-functions/main.topscript" part="37" />
 
         <p>This is equivalent to combining an ordinary function
         definition with a <code>match</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="38">
+        "code/variables-and-functions/main.topscript" part="38" />
 
         <p>We can also combine the different styles of function
         declaration together, as in the following example, where we
         declare a two-argument (curried) function with a pattern
         match on the second argument:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="39">
+        "code/variables-and-functions/main.topscript" part="39" />
 
         <p>Also, note the use of partial application to generate
         the function passed to <code>List.map</code>. In other
@@ -824,13 +824,13 @@
         data-primary="functions" data-secondary=
         "labeled arguments">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="40">
+        "code/variables-and-functions/main.topscript" part="40" />
 
         <p>We can then provide a labeled argument using a similar
         convention. As you can see, the arguments can be provided
         in any order:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="41">
+        "code/variables-and-functions/main.topscript" part="41" />
 
         <p>OCaml also supports <em>label punning</em>, meaning that
         you get to drop the text after the <code>:</code> if the
@@ -841,7 +841,7 @@
         "indexterm" data-primary="punning">&nbsp;</a><a data-type=
         "indexterm" data-primary="label punning">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="42">
+        "code/variables-and-functions/main.topscript" part="42" />
 
         <p>Labeled arguments are useful in a few different
         cases:</p>
@@ -867,13 +867,13 @@
           </li>
         </ul>
         <link rel="import" data-code-language="ocaml" href=
-        "code/variables-and-functions/htable_sig1.ml">
+        "code/variables-and-functions/htable_sig1.ml" />
 
         <p>The signature makes it hard to divine the meaning of
         those two arguments. but with labeled arguments, we can
         make the intent immediately clear:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/variables-and-functions/htable_sig2.ml">
+        "code/variables-and-functions/htable_sig2.ml" />
 
         <p>Choosing label names well is especially important for
         Boolean values, since it's often easy to get confused about
@@ -891,14 +891,14 @@
 
           <li style="list-style: none; display: inline">
             <link rel="import" data-code-language="ocaml" href=
-            "code/variables-and-functions/substring_sig1.ml">
+            "code/variables-and-functions/substring_sig1.ml" />
 
             <p>Here, the two <code>ints</code> are the starting
             position and length of the substring to extract,
             respectively. We can make this fact more obvious from
             the signature by adding labeled:</p>
             <link rel="import" data-code-language="ocaml" href=
-            "code/variables-and-functions/substring_sig2.ml">
+            "code/variables-and-functions/substring_sig2.ml" />
 
             <p>This improves the readability of both the signature
             and of client code that makes use of
@@ -920,7 +920,7 @@
           <li style="list-style: none; display: inline">
             <link rel="import" data-code-language="ocamltop" href=
             "code/variables-and-functions/main.topscript" part=
-            "43">
+            "43" />
 
             <p>This requires that we put the function argument
             first. In other cases, you want to put the function
@@ -945,7 +945,7 @@
               "higher-order and labels">&nbsp;</a></p>
               <link rel="import" data-code-language="ocamltop"
               href="code/variables-and-functions/main.topscript"
-              part="44">
+              part="44" />
 
               <p>Here, the definition of
               <code>apply_to_tuple</code> sets up the expectation
@@ -957,25 +957,25 @@
               were listed:</p>
               <link rel="import" data-code-language="ocamltop"
               href="code/variables-and-functions/main.topscript"
-              part="45">
+              part="45" />
 
               <p>It turns out this order matters. In particular, if
               we define a function that has a different order</p>
               <link rel="import" data-code-language="ocamltop"
               href="code/variables-and-functions/main.topscript"
-              part="46">
+              part="46" />
 
               <p>we'll find that it can't be passed in to
               <code>apply_to_tuple_2</code>.</p>
               <link rel="import" data-code-language="ocamltop"
               href="code/variables-and-functions/main.topscript"
-              part="47">
+              part="47" />
 
               <p>But, it works smoothly with the original
               <code>apply_to_tuple</code>:</p>
               <link rel="import" data-code-language="ocamltop"
               href="code/variables-and-functions/main.topscript"
-              part="48">
+              part="48" />
 
               <p>As a result, when passing labeled functions as
               arguments, you need to take care to be consistent in
@@ -1003,7 +1003,7 @@
         <code>^</code> operator for pairwise string
         concatenation:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="49">
+        "code/variables-and-functions/main.topscript" part="49" />
 
         <p>Here, <code>?</code> is used in the definition of the
         function to mark <code>sep</code> as optional. And while
@@ -1019,7 +1019,7 @@
         providing a default value, which allows us to write
         <code>concat</code> more concisely:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="50">
+        "code/variables-and-functions/main.topscript" part="50" />
 
         <p>Optional arguments are very useful, but they're also
         easy to abuse. The key advantage of optional arguments is
@@ -1065,13 +1065,15 @@
           data-primary="optional arguments" data-secondary=
           "explicit passing of">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="51">
+          "code/variables-and-functions/main.topscript" part=
+          "51" />
 
           <p>And the following two lines are equivalent ways of
           calling <code>concat</code> without specifying
           <code>sep</code>:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="52">
+          "code/variables-and-functions/main.topscript" part=
+          "52" />
 
           <p>One use case for this is when you want to define a
           wrapper function that mimics the optional arguments of
@@ -1082,7 +1084,8 @@
           string that it's passed to uppercase. We could write the
           function as follows:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="53">
+          "code/variables-and-functions/main.topscript" part=
+          "53" />
 
           <p>In the way we've written it, we've been forced to
           separately make the decision as to what the default
@@ -1095,7 +1098,8 @@
           simply pass through the optional argument to
           <code>concat</code> using the <code>?</code> syntax:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="54">
+          "code/variables-and-functions/main.topscript" part=
+          "54" />
 
           <p>Now, if someone calls <code>uppercase_concat</code>
           without an argument, an explicit <code>None</code> will
@@ -1130,7 +1134,8 @@
           data-primary="optional arguments" data-secondary=
           "inference of">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="55">
+          "code/variables-and-functions/main.topscript" part=
+          "55" />
 
           <p>In principle, it's not obvious how the order of the
           arguments to <code>f</code> should be chosen. Since
@@ -1144,7 +1149,7 @@
           labeled one, which could lead to this type signature for
           <code>numeric_deriv</code>:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/variables-and-functions/numerical_deriv_alt_sig.mli">
+          "code/variables-and-functions/numerical_deriv_alt_sig.mli" />
 
           <p>Since there are multiple plausible types to choose
           from, OCaml needs some heuristic for choosing between
@@ -1158,7 +1163,8 @@
           of <code>f</code> list the arguments in different
           orders:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="56">
+          "code/variables-and-functions/main.topscript" part=
+          "56" />
 
           <p>As suggested by the error message, we can get OCaml to
           accept the fact that <code>f</code> is used with
@@ -1168,7 +1174,8 @@
           <code>f</code>:<a data-type="indexterm" data-primary=
           "type annotations">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="57">
+          "code/variables-and-functions/main.topscript" part=
+          "57" />
         </section>
 
         <section id="optional-arguments-and-partial-application"
@@ -1179,19 +1186,22 @@
           presence of partial application. We can of course
           partially apply the optional argument itself:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="58">
+          "code/variables-and-functions/main.topscript" part=
+          "58" />
 
           <p>But what happens if we partially apply just the first
           argument?</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="59">
+          "code/variables-and-functions/main.topscript" part=
+          "59" />
 
           <p>The optional argument <code>?sep</code> has now
           disappeared, or been <em>erased</em>. Indeed, if we try
           to pass in that optional argument now, it will be
           rejected:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="60">
+          "code/variables-and-functions/main.topscript" part=
+          "60" />
 
           <p>So when does OCaml decide to erase an optional
           argument?</p>
@@ -1204,12 +1214,14 @@
           <code>concat</code> with the optional argument in the
           second position:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="61">
+          "code/variables-and-functions/main.topscript" part=
+          "61" />
 
           <p>then application of the first argument would not cause
           the optional argument to be erased.</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="62">
+          "code/variables-and-functions/main.topscript" part=
+          "62" />
 
           <p>However, if all arguments to a function are presented
           at once, then erasure of optional arguments isn't applied
@@ -1217,20 +1229,23 @@
           our ability to pass in optional arguments anywhere on the
           argument list. Thus, we can write:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="63">
+          "code/variables-and-functions/main.topscript" part=
+          "63" />
 
           <p>An optional argument that doesn't have any following
           positional arguments can't be erased at all, which leads
           to a compiler warning:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="64">
+          "code/variables-and-functions/main.topscript" part=
+          "64" />
 
           <p>And indeed, when we provide the two positional
           arguments, the <code>sep</code> argument is not erased,
           instead returning a function that expects the
           <code>sep</code> argument to be provided:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part="65">
+          "code/variables-and-functions/main.topscript" part=
+          "65" />
 
           <p>As you can see, OCaml's support for labeled and
           optional arguments is not without its complexities. But

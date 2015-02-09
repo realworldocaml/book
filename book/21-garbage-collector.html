@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -181,7 +181,7 @@
         "hyperlink">Diagram</em></a></p>
 
         <figure style="float: 0">
-          <img src="images/rwoc_2101.png">
+          <img src="images/rwoc_2101.png" />
         </figure>
 
         <p>The runtime stores the boundaries of the minor heap in
@@ -235,7 +235,7 @@
           function:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/gc/tune.topscript">
+        "code/gc/tune.topscript" />
 
         <p>Changing the GC size dynamically will trigger an
         immediate minor heap collection. Note that Core increases
@@ -370,7 +370,7 @@
           them:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/gc/tune.topscript" part="1">
+        "code/gc/tune.topscript" part="1" />
 
         <p>Allocating an OCaml value on the major heap first checks
         the free list of blocks for a suitable region to place it.
@@ -585,7 +585,7 @@
           can modify it in future calls if necessary:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/gc/tune.topscript" part="2">
+        "code/gc/tune.topscript" part="2" />
 
         <p>The <code>space_overhead</code> setting controls how
         aggressive the GC is about setting the slice size to a
@@ -639,7 +639,7 @@
           higher-than-usual rate of compactions:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/gc/tune.topscript" part="3">
+        "code/gc/tune.topscript" part="3" />
       </section>
 
       <section id="inter-generational-pointers" data-type="sect2">
@@ -693,7 +693,7 @@
           suite via <code>opam install core_bench</code> before you
           compile this code:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/gc/barrier_bench.ml">
+          "code/gc/barrier_bench.ml" />
 
           <p>This program defines a type <code>t1</code> that is
           mutable and <code>t2</code> that is immutable. The
@@ -701,7 +701,7 @@
           counter. Compile and execute this with some extra options
           to show the amount of garbage collection occurring:</p>
           <link rel="import" data-code-language="console" href=
-          "code/gc/run_barrier_bench.out">
+          "code/gc/run_barrier_bench.out" />
 
           <p>There is a stark space/time trade-off here. The
           mutable version takes significantly longer to complete
@@ -721,7 +721,7 @@
           number of useful options that affect garbage collection
           behavior:</p>
           <link rel="import" data-code-language="console" href=
-          "code/gc/show_barrier_bench_help.out">
+          "code/gc/show_barrier_bench_help.out" />
 
           <p>The <code>-no-compactions</code> and
           <code>-stabilize-gc</code> options can help force a
@@ -799,12 +799,12 @@
       values of different types, some of which are heap-allocated
       and others which are compile-time constants:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/gc/finalizer.ml">
+      "code/gc/finalizer.ml" />
 
       <p>Building and running this should show the following
       output:</p>
       <link rel="import" data-code-language="console" href=
-      "code/gc/run_finalizer.out">
+      "code/gc/run_finalizer.out" />
 
       <p>The GC calls the finalization functions in the order of
       the deallocation. If several values become unreachable during

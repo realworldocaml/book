@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -84,7 +84,7 @@
       a dictionary with keys of type <code>'a</code> and data of
       type <code>'b</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.mli" part="1">
+      "code/imperative-programming/dictionary.mli" part="1" />
 
       <p>The <code>mli</code> also includes a collection of helper
       functions whose purpose and behavior should be largely
@@ -102,7 +102,7 @@
       <p>Our first step is to define the type of a dictionary as a
       record with two fields:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="1">
+      "code/imperative-programming/dictionary.ml" part="1" />
 
       <p>The first field, <code>length</code>, is declared as
       mutable. In OCaml, records are immutable by default, but
@@ -115,7 +115,7 @@
       <p>Now we'll start putting together the basic functions for
       manipulating a dictionary:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="2">
+      "code/imperative-programming/dictionary.ml" part="2" />
 
       <p>Note that <code>num_buckets</code> is a constant, which
       means our bucket array is of fixed length. A practical
@@ -163,7 +163,7 @@
       <code>List.find_map</code>, which you can see the type of by
       typing it into the toplevel:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/examples.topscript" part="1">
+      "code/imperative-programming/examples.topscript" part="1" />
 
       <p><code>List.find_map</code> iterates over the elements of
       the list, calling <code>f</code> on each one until a
@@ -175,7 +175,7 @@
       <p>Now let's look at the implementation of
       <code>iter</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="3">
+      "code/imperative-programming/dictionary.ml" part="3" />
 
       <p><code>iter</code> is designed to walk over all the entries
       in the dictionary. In particular, <code>iter t ~f</code> will
@@ -198,7 +198,7 @@
       <p>The following code is for adding and removing mappings
       from the dictionary:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="4">
+      "code/imperative-programming/dictionary.ml" part="4" />
 
       <p>This preceding code is made more complicated by the fact
       that we need to detect whether we are overwriting or removing
@@ -217,16 +217,16 @@
       express a sequence of imperative actions. We could have done
       the same using <code>let</code> bindings:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary2.ml" part="1">
+      "code/imperative-programming/dictionary2.ml" part="1" />
 
       <p>but <code>;</code> is more concise and idiomatic. More
       generally,</p>
       <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/imperative-programming/semicolon.syntax">
+      "code/imperative-programming/semicolon.syntax" />
 
       <p>is equivalent to</p>
       <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/imperative-programming/let-unit.syntax">
+      "code/imperative-programming/let-unit.syntax" />
 
       <p>When a sequence expression <code>expr1; expr2</code> is
       evaluated, <code>expr1</code> is evaluated first, and then
@@ -300,11 +300,11 @@
           <p>Arrays also come with special syntax for retrieving an
           element from an array:</p>
           <link rel="import" data-code-language="ocamlsyntax" href=
-          "code/imperative-programming/array-get.syntax">
+          "code/imperative-programming/array-get.syntax" />
 
           <p>and for setting an element in an array:</p>
           <link rel="import" data-code-language="ocamlsyntax" href=
-          "code/imperative-programming/array-set.syntax">
+          "code/imperative-programming/array-set.syntax" />
 
           <p>Out-of-bounds accesses for arrays (and indeed for all
           the array-like data structures) will lead to an exception
@@ -333,7 +333,7 @@
           <p>Strings also come with their own syntax for getting
           and setting values:</p>
           <link rel="import" data-code-language="ocamlsyntax" href=
-          "code/imperative-programming/string.syntax">
+          "code/imperative-programming/string.syntax" />
 
           <p>And string literals are bounded by quotes. There's
           also a module <code>String</code> where you'll find
@@ -353,7 +353,7 @@
           syntax:<a data-type="indexterm" data-primary=
           "bigarrays">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamlsyntax" href=
-          "code/imperative-programming/bigarray.syntax">
+          "code/imperative-programming/bigarray.syntax" />
         </section>
       </section>
 
@@ -391,7 +391,7 @@
           <p>The definition for the <code>ref</code> type is as
           follows:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/ref.topscript" part="1">
+          "code/imperative-programming/ref.topscript" part="1" />
 
           <p>The standard library defines the following operators
           for working with <code>ref</code>s.</p>
@@ -419,12 +419,12 @@
 
           <p>You can see these in action:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/ref.topscript" part="3">
+          "code/imperative-programming/ref.topscript" part="3" />
 
           <p>The preceding are just ordinary OCaml functions, which
           could be defined as follows:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/ref.topscript" part="2">
+          "code/imperative-programming/ref.topscript" part="2" />
         </section>
       </section>
 
@@ -477,13 +477,13 @@
       <code>Dictionary</code> is built using it. Here's a simple
       example of <code>for</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/for.topscript" part="1">
+      "code/imperative-programming/for.topscript" part="1" />
 
       <p>As you can see, the upper and lower bounds are inclusive.
       We can also use <code>downto</code> to iterate in the other
       direction:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/for.topscript" part="2">
+      "code/imperative-programming/for.topscript" part="2" />
 
       <p>Note that the loop variable of a <code>for</code> loop,
       <code>i</code> in this case, is immutable in the scope of the
@@ -496,7 +496,7 @@
       body and starts the loop again. Here's a simple example of a
       function for reversing an array in place:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/for.topscript" part="3">
+      "code/imperative-programming/for.topscript" part="3" />
 
       <p>In the preceding example, we used <code>incr</code> and
       <code>decr</code>, which are built-in functions for
@@ -522,7 +522,7 @@
 
       <p>Here's the <code>mli</code> of the module we'll build:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dlist.mli">
+      "code/imperative-programming/dlist.mli" />
 
       <p>Note that there are two types defined here: <code>'a
       t</code>, the type of a list; and <code>'a element</code>,
@@ -533,7 +533,7 @@
       <p>Now let's look at the implementation. We'll start by
       defining <code>'a element</code> and <code>'a t</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dlist.ml" part="1">
+      "code/imperative-programming/dlist.ml" part="1" />
 
       <p>An <code>'a element</code> is a record containing the
       value to be stored in that node as well as optional (and
@@ -550,7 +550,7 @@
       <p>Now we can define a few basic functions that operate on
       lists and elements:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dlist.ml" part="2">
+      "code/imperative-programming/dlist.ml" part="2" />
 
       <p>These all follow relatively straightforwardly from our
       type definitions.</p>
@@ -574,7 +574,7 @@
         rec</code>:</p>
       </div>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/examples.topscript" part="2">
+      "code/imperative-programming/examples.topscript" part="2" />
 
       <p>This approach is quite limited, however. General-purpose
       cyclic data structures require mutation.</p>
@@ -588,7 +588,7 @@
         "indexterm" data-primary="elements" data-secondary=
         "inserting in lists">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/dlist.ml" part="3">
+        "code/imperative-programming/dlist.ml" part="3" />
 
         <p><code>insert_first</code> first defines a new element
         <code>new_elt</code>, and then links it into the list,
@@ -609,11 +609,11 @@
         arguments both an <code>element</code> after which to
         insert the new node and a value to insert:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/dlist.ml" part="4">
+        "code/imperative-programming/dlist.ml" part="4" />
 
         <p>Finally, we need a <code>remove</code> function:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/dlist.ml" part="5">
+        "code/imperative-programming/dlist.ml" part="5" />
 
         <p>Note that the preceding code is careful to change the
         <code>prev</code> pointer of the following element and the
@@ -644,7 +644,7 @@
         "indexterm" data-primary=
         "Doubly-linked module">&nbsp;</a><a data-type="indexterm"
         data-primary="error handling" data-secondary=
-        "and imperative data  structures">&nbsp;</a></p>
+        "and imperative data structures">&nbsp;</a></p>
       </section>
 
       <section id="iteration-functions" data-type="sect2">
@@ -671,7 +671,7 @@
         <code>value</code> to extract the element from a given
         node:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/dlist.ml" part="6">
+        "code/imperative-programming/dlist.ml" part="6" />
 
         <p>This completes our implementation, but there's still
         considerably more work to be done to make a really usable
@@ -714,7 +714,7 @@
       <code>s Lazy.t</code>. The evaluation of that expression is
       delayed until forced with <code>Lazy.force</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/lazy.topscript" part="1">
+      "code/imperative-programming/lazy.topscript" part="1" />
 
       <p>You can see from the <code>print</code> statement that the
       actual computation was performed only once, and only after
@@ -724,7 +724,7 @@
       through the implementation of our own lazy type. We'll start
       by declaring types to represent a lazy value:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/lazy.topscript" part="2">
+      "code/imperative-programming/lazy.topscript" part="2" />
 
       <p>A <code>lazy_state</code> represents the possible states
       of a lazy value. A lazy value is <code>Delayed</code> before
@@ -745,17 +745,17 @@
       expression:<a data-type="indexterm" data-primary=
       "thunks">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/lazy.topscript" part="3">
+      "code/imperative-programming/lazy.topscript" part="3" />
 
       <p>Now we just need a way to force a lazy value. The
       following function does just that:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/lazy.topscript" part="4">
+      "code/imperative-programming/lazy.topscript" part="4" />
 
       <p>Which we can use in the same way we used
       <code>Lazy.force</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/lazy.topscript" part="5">
+      "code/imperative-programming/lazy.topscript" part="5" />
 
       <p>The main user-visible difference between our
       implementation of laziness and the built-in version is
@@ -783,7 +783,7 @@
         that function. Here we'll use Core's <code>Hashtbl</code>
         module, rather than our toy <code>Dictionary</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="1">
+        "code/imperative-programming/memo.topscript" part="1" />
 
         <p>The preceding code is a bit tricky. <code>memoize</code>
         takes as its argument a function <code>f</code> and then
@@ -826,7 +826,7 @@
         recursive calls:<a data-type="indexterm" data-primary=
         "memoization" data-secondary="example of">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="2">
+        "code/imperative-programming/memo.topscript" part="2" />
 
         <p>The thing to note is that if you call
         <code>edit_distance "OCaml" "ocaml"</code>, then that will
@@ -838,7 +838,7 @@
         "hyperlink">Diagram</em></a></p>
 
         <figure style="float: 0">
-          <img src="images/rwoc_0801.png">
+          <img src="images/rwoc_0801.png" />
         </figure>
 
         <p>And these calls will in turn dispatch other calls:</p>
@@ -849,7 +849,7 @@
         "hyperlink">Diagram</em></a></p>
 
         <figure style="float: 0">
-          <img src="images/rwoc_0802.png">
+          <img src="images/rwoc_0802.png" />
         </figure>
 
         <p>As you can see, some of these calls are repeats. For
@@ -861,11 +861,11 @@
         strings. We can see this by writing a small timing
         function:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="3">
+        "code/imperative-programming/memo.topscript" part="3" />
 
         <p>And now we can use this to try out some examples:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="4">
+        "code/imperative-programming/memo.topscript" part="4" />
 
         <p>Just those few extra characters made it thousands of
         times slower!</p>
@@ -886,14 +886,14 @@
         "dynamic programming">&nbsp;</a><a data-type="indexterm"
         data-primary="dynamic programming">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="1">
+        "code/imperative-programming/fib.topscript" part="1" />
 
         <p>This is, however, exponentially slow, for the same
         reason that <code>edit_distance</code> was slow: we end up
         making many redundant calls to <code>fib</code>. It shows
         up quite dramatically in the performance:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="2">
+        "code/imperative-programming/fib.topscript" part="2" />
 
         <p>As you can see, <code>fib 40</code> takes thousands of
         times longer to compute than <code>fib 20</code>.</p>
@@ -905,7 +905,7 @@
         after the fact and expect the first call to
         <code>fib</code> to be improved:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="3">
+        "code/imperative-programming/fib.topscript" part="3" />
 
         <p>In order to make <code>fib</code> fast, our first step
         will be to rewrite <code>fib</code> in a way that unwinds
@@ -913,18 +913,18 @@
         argument a function (called <code>fib</code>) that will be
         called in lieu of the usual recursive call:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="4">
+        "code/imperative-programming/fib.topscript" part="4" />
 
         <p>We can now turn this back into an ordinary Fibonacci
         function by tying the recursive knot:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="5">
+        "code/imperative-programming/fib.topscript" part="5" />
 
         <p>We can even write a polymorphic function that we'll call
         <code>make_rec</code> that can tie the recursive knot for
         any function of this form:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="6">
+        "code/imperative-programming/fib.topscript" part="6" />
 
         <p>This is a pretty strange piece of code, and it may take
         a few moments of thought to figure out what's going on.
@@ -942,7 +942,7 @@
         the recursive knot. We'll call that function
         <code>memo_rec</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="7">
+        "code/imperative-programming/fib.topscript" part="7" />
 
         <p>Note that <code>memo_rec</code> has the same signature
         as <code>make_rec</code>.</p>
@@ -954,7 +954,7 @@
         <p>Using <code>memo_rec</code>, we can now build an
         efficient version of <code>fib</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="8">
+        "code/imperative-programming/fib.topscript" part="8" />
 
         <p>And as you can see, the exponential time complexity is
         now gone.</p>
@@ -975,7 +975,7 @@
         declaration that makes this look like it's little more than
         a special form of <code>let rec</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="9">
+        "code/imperative-programming/fib.topscript" part="9" />
 
         <p>Memoization is overkill for implementing Fibonacci, and
         indeed, the <code>fib</code> defined above is not
@@ -995,14 +995,14 @@
         call, we can get a memoized version of
         <code>edit_distance</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="6">
+        "code/imperative-programming/memo.topscript" part="6" />
 
         <p>This new version of <code>edit_distance</code> is much
         more efficient than the one we started with; the following
         call is many thousands of times faster than it was without
         memoization:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="7">
+        "code/imperative-programming/memo.topscript" part="7" />
 
         <div class="allow_break" data-type="note">
           <h1>Limitations of let rec</h1>
@@ -1014,14 +1014,14 @@
           data-primary="let rec">&nbsp;</a></p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="1">
+        "code/imperative-programming/letrec.topscript" part="1" />
 
         <p>OCaml rejects the definition because OCaml, as a strict
         language, has limits on what it can put on the righthand
         side of a <code>let rec</code>. In particular, imagine how
         the following code snippet would be compiled:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/let_rec.ml">
+        "code/imperative-programming/let_rec.ml" />
 
         <p>Note that <code>x</code> is an ordinary value, not a
         function. As such, it's not clear how this definition
@@ -1044,21 +1044,21 @@
         something like our definition of <code>x</code> work if we
         use OCaml's laziness:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="2">
+        "code/imperative-programming/letrec.topscript" part="2" />
 
         <p>Of course, actually trying to compute this will fail.
         OCaml's <code>lazy</code> throws an exception when a lazy
         value tries to force itself as part of its own
         evaluation.</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="3">
+        "code/imperative-programming/letrec.topscript" part="3" />
 
         <p>But we can also create useful recursive definitions with
         <code>lazy</code>. In particular, we can use laziness to
         make our definition of <code>memo_rec</code> work without
         explicit mutation:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="5">
+        "code/imperative-programming/letrec.topscript" part="5" />
 
         <p>Laziness is more constrained than explicit mutation, and
         so in some cases can lead to code whose behavior is easier
@@ -1162,19 +1162,19 @@
         for computing the current time and printing it out in the
         time zone in question:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/time_converter.ml">
+        "code/imperative-programming/time_converter.ml" />
 
         <p>We can build this program using <span class=
         "command"><em>corebuild</em></span> and run it. You'll see
         that it prompts you for input, as follows:</p>
         <link rel="import" data-code-language="console" href=
-        "code/imperative-programming/time_converter.out">
+        "code/imperative-programming/time_converter.out" />
 
         <p>You can then type in the name of a time zone and hit
         Return, and it will print out the current time in the time
         zone in question:</p>
         <link rel="import" data-code-language="console" href=
-        "code/imperative-programming/time_converter2.out">
+        "code/imperative-programming/time_converter2.out" />
 
         <p>We called <code>Out_channel.flush</code> on
         <code>stdout</code> because <code>out_channel</code>s are
@@ -1220,14 +1220,14 @@
         data-primary="I/O (input/output) operations"
         data-secondary="formatted output">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/printf.topscript" part="1">
+        "code/imperative-programming/printf.topscript" part="1" />
 
         <p>Unlike C's <code>printf</code>, the <code>printf</code>
         in OCaml is type-safe. In particular, if we provide an
         argument whose type doesn't match what's presented in the
         format string, we'll get a type error:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/printf.topscript" part="2">
+        "code/imperative-programming/printf.topscript" part="2" />
 
         <aside data-type="sidebar">
           <h5>Understanding Format Strings</h5>
@@ -1247,7 +1247,8 @@
           string to <code>printf</code>, the compiler will
           complain:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/printf.topscript" part="3">
+          "code/imperative-programming/printf.topscript" part=
+          "3" />
 
           <p>If OCaml infers that a given string literal is a
           format string, then it parses it at compile time as such,
@@ -1256,12 +1257,14 @@
           indicating that the string we're defining is actually a
           format string, it will be interpreted as such:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/printf.topscript" part="4">
+          "code/imperative-programming/printf.topscript" part=
+          "4" />
 
           <p>And accordingly, we can pass it to
           <code>printf</code>:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/printf.topscript" part="5">
+          "code/imperative-programming/printf.topscript" part=
+          "5" />
 
           <p>If this looks different from everything else you've
           seen so far, that's because it is. This is really a
@@ -1276,7 +1279,7 @@
         program to be a little more concise using
         <code>printf</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/time_converter2.ml">
+        "code/imperative-programming/time_converter2.ml" />
 
         <p>In the preceding example, we've used only two formatting
         directives: <code>%s</code>, for including a string, and
@@ -1355,7 +1358,7 @@
         "I/O (input/output) operations" data-secondary=
         "file I/O">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file.topscript" part="1">
+        "code/imperative-programming/file.topscript" part="1" />
 
         <p>For both of these functions, we followed the same basic
         sequence: we first create the channel, then use the
@@ -1369,12 +1372,12 @@
         close the file. If we try to read a file that doesn't
         actually contain numbers, we'll see such an error:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file.topscript" part="2">
+        "code/imperative-programming/file.topscript" part="2" />
 
         <p>And if we do this over and over in a loop, we'll
         eventually run out of file descriptors:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file.topscript" part="3">
+        "code/imperative-programming/file.topscript" part="3" />
 
         <p>And now, you'll need to restart your toplevel if you
         want to open any more files!</p>
@@ -1385,11 +1388,11 @@
         "#error-handling" data-type="xref">#error-handling</a>, as
         follows:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file2.topscript" part="1">
+        "code/imperative-programming/file2.topscript" part="1" />
 
         <p>And now, the file descriptor leak is gone:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file2.topscript" part="2">
+        "code/imperative-programming/file2.topscript" part="2" />
 
         <p>This is really an example of a more general issue with
         imperative programming. When programming imperatively, you
@@ -1405,7 +1408,7 @@
         rewrite <code>sum_file</code> using this function, as shown
         here:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file2.topscript" part="3">
+        "code/imperative-programming/file2.topscript" part="3" />
 
         <p>Another misfeature of our implementation of
         <code>sum_file</code> is that we read the entire file into
@@ -1414,7 +1417,7 @@
         <code>In_channel.fold_lines</code> function to do just
         that:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file2.topscript" part="4">
+        "code/imperative-programming/file2.topscript" part="4" />
 
         <p>This is just a taste of the functionality of
         <code>In_channel</code> and <code>Out_channel</code>. To
@@ -1451,7 +1454,7 @@
       have a negative <code>sin</code>. The following snippet of
       code would answer that question:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="1">
+      "code/imperative-programming/order.topscript" part="1" />
 
       <p>In some sense, we don't really need to compute the
       <code>sin 128.</code> because <code>sin 75.</code> is
@@ -1463,12 +1466,12 @@
       computation so that <code>sin 128.</code> won't ever be
       computed:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="2">
+      "code/imperative-programming/order.topscript" part="2" />
 
       <p>We can confirm that fact by a few well-placed
       <code>printf</code>s:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="3">
+      "code/imperative-programming/order.topscript" part="3" />
 
       <p>OCaml is strict by default for a good reason: lazy
       evaluation and imperative programming generally don't mix
@@ -1489,7 +1492,7 @@
 
       <p>Consider the following example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="4">
+      "code/imperative-programming/order.topscript" part="4" />
 
       <p>Here, you can see that the subexpression that came last
       was actually evaluated first! This is generally the case for
@@ -1513,7 +1516,7 @@
       "imperative programming" data-secondary=
       "side effects/weak polymorphism">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/weak.topscript" part="1">
+      "code/imperative-programming/weak.topscript" part="1" />
 
       <p><code>remember</code> simply caches the first value that's
       passed to it, returning that value on every call. That's
@@ -1536,7 +1539,7 @@
       identity function, as an example, gets a polymorphic type in
       this way:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/weak.topscript" part="2">
+      "code/imperative-programming/weak.topscript" part="2" />
 
       <p>As you can see, the polymorphic type of
       <code>identity</code> lets it operate on values with
@@ -1548,7 +1551,7 @@
       quite, like the type of the identity function. Here it is
       again:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/remember_type.ml">
+      "code/imperative-programming/remember_type.ml" />
 
       <p>The underscore in the type variable <code>'_a</code> tells
       us that the variable is only <em>weakly polymorphic</em>,
@@ -1563,7 +1566,7 @@
       concrete type as soon as it gets a clue as to what concrete
       type it is to be used as:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/weak.topscript" part="3">
+      "code/imperative-programming/weak.topscript" part="3" />
 
       <p>Note that the type of <code>remember</code> was settled by
       the definition of <code>remember_three</code>, even though
@@ -1620,7 +1623,7 @@
         allowed to be polymorphic:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="1">
+        part="1" />
 
         <p>But, if we write down an expression that isn't a simple
         value by the preceding definition, we'll get different
@@ -1628,7 +1631,7 @@
         memoize the function defined previously.</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="2">
+        part="2" />
 
         <p>The memoized version of the function does in fact need
         to be restricted to a single type because it uses mutable
@@ -1638,7 +1641,7 @@
         no such thing. Consider this example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="3">
+        part="3" />
 
         <p>It would be safe to infer a fully polymorphic variable
         here, but because OCaml's type system doesn't distinguish
@@ -1653,7 +1656,7 @@
         polymorphic type:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="4">
+        part="4" />
 
         <p>But a function that has a mutable cache that persists
         across calls, like <code>memoize</code>, can only be weakly
@@ -1680,7 +1683,7 @@
         calling a function on the index of that element:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="5">
+        part="5" />
 
         <p>Imagine we wanted to create a specialized version of
         <code>List.init</code> that always created lists of length
@@ -1688,7 +1691,7 @@
         follows:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="6">
+        part="6" />
 
         <p>As you can see, we now infer a weakly polymorphic type
         for the resulting function. That's because there's nothing
@@ -1700,7 +1703,7 @@
         a polymorphic type, by avoiding partial application:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="7">
+        part="7" />
 
         <p>This transformation is referred to as <em>eta
         expansion</em> and is often useful to resolve problems that
@@ -1729,20 +1732,20 @@
         weakly polymorphic one:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="8">
+        part="8" />
 
         <p>But that's not always the case. When the type of the
         returned value is immutable, then OCaml can typically infer
         a fully polymorphic type:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="9">
+        part="9" />
 
         <p>On the other hand, if the returned type is potentially
         mutable, then the result will be weakly polymorphic:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="10">
+        part="10" />
 
         <p>A more important example of this comes up when defining
         abstract data types. Consider the following simple data
@@ -1750,7 +1753,7 @@
         constant-time concatenation:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="11">
+        part="11" />
 
         <p>The details of the implementation don't matter so much,
         but it's important to note that a
@@ -1759,7 +1762,7 @@
         OCaml treats it as if it were mutable:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="12">
+        part="12" />
 
         <p>The issue here is that the signature, by virtue of being
         abstract, has obscured the fact that
@@ -1784,14 +1787,14 @@
         simple values:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="13">
+        part="13" />
 
         <p>Now, we can apply the identity function to
         <code>Concat_list.empty</code> without without losing any
         polymorphism:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
-        part="14">
+        part="14" />
       </section>
     </section>
 

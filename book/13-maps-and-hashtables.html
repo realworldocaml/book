@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -27,12 +27,12 @@
     "association lists">&nbsp;</a><a data-type="indexterm"
     data-primary="association lists">&nbsp;</a></p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/maps-and-hash-tables/main.topscript" part="1">
+    "code/maps-and-hash-tables/main.topscript" part="1" />
 
     <p>We can use functions from the <code>List.Assoc</code> module
     to manipulate this data:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/maps-and-hash-tables/main.topscript" part="2">
+    "code/maps-and-hash-tables/main.topscript" part="2" />
 
     <p>Association lists are simple and easy to use, but their
     performance is not ideal, since almost every nontrivial
@@ -60,7 +60,7 @@
       <code>Counter</code> for keeping frequency counts on a set of
       strings. Here's the interface:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs-freq-fast/counter.mli">
+      "code/files-modules-and-programs-freq-fast/counter.mli" />
 
       <p>The intended behavior here is straightforward.
       <code>Counter.empty</code> represents an empty collection of
@@ -70,7 +70,7 @@
 
       <p>Here's the implementation:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs-freq-fast/counter.ml">
+      "code/files-modules-and-programs-freq-fast/counter.ml" />
 
       <p>Note that in some places the preceding code refers to
       <code>String.Map.t</code>, and in others <code>Map.t</code>.
@@ -113,7 +113,7 @@
         data-primary="maps" data-secondary=
         "creating with comparators">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="3">
+        "code/maps-and-hash-tables/main.topscript" part="3" />
 
         <p>The preceding code uses <code>Map.of_alist_exn</code>,
         which creates a map from an association list, throwing an
@@ -124,7 +124,7 @@
         existing map simply inherit the comparator of the map they
         start with:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="4">
+        "code/maps-and-hash-tables/main.topscript" part="4" />
 
         <p>The type <code>Map.t</code> has three type parameters:
         one for the key, one for the value, and one to identify the
@@ -139,7 +139,7 @@
         <code>Map.symmetric_diff</code>, which computes a summary
         of the differences between two maps:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="5">
+        "code/maps-and-hash-tables/main.topscript" part="5" />
 
         <p>The type of <code>Map.symmetric_diff</code>, which
         follows, requires that the two maps it compares have the
@@ -147,7 +147,7 @@
         type, so the type of a comparator identifies the comparator
         uniquely:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="6">
+        "code/maps-and-hash-tables/main.topscript" part="6" />
 
         <p>This constraint is important because the algorithm that
         <code>Map.symmetric_diff</code> uses depends for its
@@ -165,26 +165,26 @@
         "Sexplib package" data-secondary=
         "sexp converter">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="7">
+        "code/maps-and-hash-tables/main.topscript" part="7" />
 
         <p>As you can see in the following code, both
         <code>Reverse.comparator</code> and
         <code>String.comparator</code> can be used to create maps
         with a key type of <code>string</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="8">
+        "code/maps-and-hash-tables/main.topscript" part="8" />
 
         <p><code>Map.min_elt</code> returns the key and value for
         the smallest key in the map, which lets us see that these
         two maps do indeed use different comparison functions:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="9">
+        "code/maps-and-hash-tables/main.topscript" part="9" />
 
         <p>Accordingly, if we try to use
         <code>Map.symmetric_diff</code> on these two maps, we'll
         get a compile-time error:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="10">
+        "code/maps-and-hash-tables/main.topscript" part="10" />
       </section>
 
       <section id="trees" data-type="sect2">
@@ -202,7 +202,7 @@
         data-primary="maps" data-secondary=
         "tree structure">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="11">
+        "code/maps-and-hash-tables/main.topscript" part="11" />
 
         <p>Even though a <code>Map.Tree.t</code> doesn't physically
         include a comparator, it does include the comparator in its
@@ -216,7 +216,7 @@
         to provide the comparator explicitly when we, say, search
         for a key, as shown below:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="12">
+        "code/maps-and-hash-tables/main.topscript" part="12" />
 
         <p>The algorithm of <code>Map.Tree.find</code> depends on
         the fact that it's using the same comparator when looking
@@ -225,7 +225,7 @@
         can see in the following example, using the wrong
         comparator will lead to a type error:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="13">
+        "code/maps-and-hash-tables/main.topscript" part="13" />
       </section>
 
       <section id="the-polymorphic-comparator" data-type="sect2">
@@ -245,18 +245,18 @@
         "Comparator.Poly module">&nbsp;</a><a data-type="indexterm"
         data-primary="polymorphic comparisons">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="14">
+        "code/maps-and-hash-tables/main.topscript" part="14" />
 
         <p>Or, equivalently:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="15">
+        "code/maps-and-hash-tables/main.topscript" part="15" />
 
         <p>Note that maps based on the polymorphic comparator are
         not equivalent to those based on the type-specific
         comparators from the point of view of the type system.
         Thus, the compiler rejects the following:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="16">
+        "code/maps-and-hash-tables/main.topscript" part="16" />
 
         <p>This is rejected for good reason: there's no guarantee
         that the comparator associated with a given type will order
@@ -292,13 +292,13 @@
           want. Sets are a great example of this. Consider the
           following two sets:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/maps-and-hash-tables/main.topscript" part="18">
+          "code/maps-and-hash-tables/main.topscript" part="18" />
 
           <p>Logically, these two sets should be equal, and that's
           the result that you get if you call
           <code>Set.equal</code> on them:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/maps-and-hash-tables/main.topscript" part="19">
+          "code/maps-and-hash-tables/main.topscript" part="19" />
 
           <p>But because the elements were added in different
           orders, the layout of the trees underlying the sets will
@@ -311,13 +311,13 @@
           runtime because the comparators stored within the sets
           contain function values:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/maps-and-hash-tables/main.topscript" part="20">
+          "code/maps-and-hash-tables/main.topscript" part="20" />
 
           <p>We can, however, use the function
           <code>Set.to_tree</code> to expose the underlying tree
           without the attached comparator:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/maps-and-hash-tables/main.topscript" part="21">
+          "code/maps-and-hash-tables/main.topscript" part="21" />
 
           <p>This can cause real and quite subtle bugs. If, for
           example, you use a map whose keys contain sets, then the
@@ -344,7 +344,7 @@
         footprint. Here's a simple example:<a data-type="indexterm"
         data-primary="set types">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="17">
+        "code/maps-and-hash-tables/main.topscript" part="17" />
 
         <p>In addition to the operators you would expect to have
         for maps, sets support the traditional set operations,
@@ -384,7 +384,7 @@
         input any module that satisfies the following
         interface:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/maps-and-hash-tables/comparable.ml">
+        "code/maps-and-hash-tables/comparable.ml" />
 
         <p>In other words, it expects a type with a comparison
         function, as well as functions for converting to and from
@@ -404,7 +404,7 @@
         described in <a href="#extending-modules" data-type=
         "xref">#extending-modules</a>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="22">
+        "code/maps-and-hash-tables/main.topscript" part="22" />
 
         <p>We don't include the full response from the toplevel
         because it is quite lengthy, but <code>Foo_and_bar</code>
@@ -417,7 +417,7 @@
         Using it, we can rewrite the previous example as
         follows:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="23">
+        "code/maps-and-hash-tables/main.topscript" part="23" />
 
         <p>The comparison function created by
         <code>comparelib</code> for a given type will call out to
@@ -436,7 +436,7 @@
         <p>You can also satisfy the <code>Comparable.S</code>
         interface using polymorphic compare:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="24">
+        "code/maps-and-hash-tables/main.topscript" part="24" />
 
         <p>That said, for reasons we discussed earlier, polymorphic
         compare should be used sparingly.</p>
@@ -473,13 +473,13 @@
           type error if you use <code>==</code> anywhere in code
           that opens <code>Core.Std</code>:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/maps-and-hash-tables/core_phys_equal.topscript">
+          "code/maps-and-hash-tables/core_phys_equal.topscript" />
 
           <p>If you feel like hanging your OCaml interpreter, you
           can verify what happens with recursive values and
           structural equality for yourself:</p>
           <link rel="import" data-code-language="ocamlrawtop" href=
-          "code/maps-and-hash-tables/phys_equal.rawscript">
+          "code/maps-and-hash-tables/phys_equal.rawscript" />
         </aside>
       </section>
     </section>
@@ -559,7 +559,7 @@
       function for hashing the key type. This is analogous to the
       comparator used for creating maps:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/maps-and-hash-tables/main.topscript" part="25">
+      "code/maps-and-hash-tables/main.topscript" part="25" />
 
       <p>The <code>hashable</code> value is included as part of the
       <code>Hashable.S</code> interface, which is satisfied by most
@@ -567,18 +567,18 @@
       includes a <code>Table</code> submodule which provides more
       convenient creation functions:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/maps-and-hash-tables/main.topscript" part="26">
+      "code/maps-and-hash-tables/main.topscript" part="26" />
 
       <p>There is also a polymorphic <code>hashable</code> value,
       corresponding to the polymorphic hash function provided by
       the OCaml runtime, for cases where you don't have a hash
       function for your specific type:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/maps-and-hash-tables/main.topscript" part="27">
+      "code/maps-and-hash-tables/main.topscript" part="27" />
 
       <p>Or, equivalently:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/maps-and-hash-tables/main.topscript" part="28">
+      "code/maps-and-hash-tables/main.topscript" part="28" />
 
       <p>Note that, unlike the comparators used with maps and sets,
       hashables don't show up in the type of a
@@ -611,7 +611,7 @@
         different length:</p>
       </div>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/maps-and-hash-tables/main.topscript" part="29">
+      "code/maps-and-hash-tables/main.topscript" part="29" />
 
       <p>As you can see, the hash function stops after the first 10
       elements. The same can happen with any large data structure,
@@ -639,7 +639,7 @@
         "indexterm" data-primary="hash tables" data-secondary=
         "satisfying Hashable.S interface">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/maps-and-hash-tables/main.topscript" part="30">
+        "code/maps-and-hash-tables/main.topscript" part="30" />
 
         <p>Note that in order to satisfy hashable, one also needs
         to provide a comparison function. That's because Core's
@@ -687,12 +687,12 @@
       <code>Hashtbl.change</code> functions to update the
       respective data structures:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/maps-and-hash-tables/map_vs_hash.ml">
+      "code/maps-and-hash-tables/map_vs_hash.ml" />
 
       <p>The results show the hash table version to be around four
       times faster than the map version:</p>
       <link rel="import" data-code-language="console" href=
-      "code/maps-and-hash-tables/run_map_vs_hash.out">
+      "code/maps-and-hash-tables/run_map_vs_hash.out" />
 
       <p>We can make the speedup smaller or larger depending on the
       details of the test; for example, it will vary with the
@@ -719,13 +719,13 @@
       <code>Hashtbl.change</code>, but we also need to call
       <code>Hashtbl.copy</code> to take snapshots of the table:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/maps-and-hash-tables/map_vs_hash2.ml">
+      "code/maps-and-hash-tables/map_vs_hash2.ml" />
 
       <p>Unsurprisingly, maps perform far better than hash tables
       on this benchmark, in this case by more than a factor of
       10:</p>
       <link rel="import" data-code-language="console" href=
-      "code/maps-and-hash-tables/run_map_vs_hash2.out">
+      "code/maps-and-hash-tables/run_map_vs_hash2.out" />
 
       <p>These numbers can be made more extreme by increasing the
       size of the tables or the length of the list.</p>

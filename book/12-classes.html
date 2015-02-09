@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -32,7 +32,7 @@
       data-primary="classes" data-secondary=
       "basic syntax for">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/istack.topscript">
+      "code/classes/istack.topscript" />
 
       <p>The <code>class istack : object ... end</code> result
       shows that we have created a class <code>istack</code> with
@@ -52,7 +52,7 @@
       <p>To produce an object, classes are instantiated with the
       keyword <code>new</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/istack.topscript" part="1">
+      "code/classes/istack.topscript" part="1" />
 
       <p>You may have noticed that the object <code>s</code> has
       been given the type <code>istack</code>. But wait, we've
@@ -63,7 +63,7 @@
       an object type <code>istack</code> with the same methods as
       the class. This type definition is equivalent to:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/istack.topscript" part="2">
+      "code/classes/istack.topscript" part="2" />
 
       <p>Note that this type represents any object with these
       methods: objects created using the <code>istack</code> class
@@ -91,7 +91,7 @@
       parameter <code>init</code> for the initial contents of the
       stack:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/stack.topscript">
+      "code/classes/stack.topscript" />
 
       <p>Note that the type parameter <code>['a]</code> in the
       definition uses square brackets, but for other uses of the
@@ -104,7 +104,7 @@
       polymorphic": <code>init</code> could have some type <code>'b
       list</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/stack.topscript" part="1">
+      "code/classes/stack.topscript" part="1" />
 
       <p>In general, we need to provide enough constraints so that
       the compiler will infer the correct type. We can add type
@@ -139,14 +139,14 @@
       specified with an interface, which specifies a set of method
       types:</p>
       <link rel="import" data-code-language="java" href=
-      "code/classes/Iterator.java">
+      "code/classes/Iterator.java" />
 
       <p>In languages without interfaces, like C++, the
       specification would normally use <em>abstract</em> classes to
       specify the methods without implementing them (C++ uses the
       "= 0" definition to mean "not implemented"):</p>
       <link rel="import" data-code-language="c" href=
-      "code/classes/citerator.cpp">
+      "code/classes/citerator.cpp" />
 
       <p>OCaml supports both styles. In fact, OCaml is more
       flexible than these approaches because an object type can be
@@ -158,24 +158,24 @@
       <p>First, we'll define an object type <code>iterator</code>
       that specifies the methods in an iterator:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/iter.topscript">
+      "code/classes/iter.topscript" />
 
       <p>Next, we'll define an actual iterator for lists. We can
       use this to iterate over the contents of our stack:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/iter.topscript" part="1">
+      "code/classes/iter.topscript" part="1" />
 
       <p>Finally, we add a method <code>iterator</code> to the
       <code>stack</code> class to produce an iterator. To do so, we
       construct a <code>list_iterator</code> that refers to the
       current contents of the stack:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/iter.topscript" part="2">
+      "code/classes/iter.topscript" part="2" />
 
       <p>Now we can build a new stack, push some values to it, and
       iterate over them:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/iter.topscript" part="3">
+      "code/classes/iter.topscript" part="3" />
 
       <section id="functional-iterators" data-type="sect2">
         <h2>Functional Iterators</h2>
@@ -187,7 +187,7 @@
         each of the elements on the stack:<a data-type="indexterm"
         data-primary="functional iterators">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/classes/iter.topscript" part="4">
+        "code/classes/iter.topscript" part="4" />
 
         <p>What about functional operations like <code>map</code>
         and <code>fold</code>? In general, these methods take a
@@ -201,7 +201,7 @@
         method type like this, we must use a type quantifier, as
         shown in the following example:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/classes/iter.topscript" part="5">
+        "code/classes/iter.topscript" part="5" />
 
         <p>The type quantifier <code>'b.</code> can be read as "for
         all <code>'b</code>.” Type quantifiers can only be used
@@ -223,13 +223,13 @@
       data-primary="classes" data-secondary=
       "inheritance in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/stack.topscript" part="2">
+      "code/classes/stack.topscript" part="2" />
 
       <p>A class can override methods from classes it inherits. For
       example, this class creates stacks of integers that double
       the integers before they are pushed onto the stack:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/stack.topscript" part="3">
+      "code/classes/stack.topscript" part="3" />
 
       <p>The preceding <code>as super</code> statement creates a
       special object called <code>super</code> which can be used to
@@ -252,14 +252,14 @@
       style for modules, we define a type <code>'a t</code> to
       represent the type of our stacks:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/class_types_stack.ml">
+      "code/classes/class_types_stack.ml" />
 
       <p>We have multiple choices in defining the module type,
       depending on how much of the implementation we want to
       expose. At one extreme, a maximally abstract signature would
       completely hide the class definitions:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/class_types_stack.ml" part="1">
+      "code/classes/class_types_stack.ml" part="1" />
 
       <p>The abstract signature is simple because we ignore the
       classes. But what if we want to include them in the signature
@@ -275,7 +275,7 @@
       have to give a type for everything; anything you omit will be
       hidden:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/class_types_stack.ml" part="2">
+      "code/classes/class_types_stack.ml" part="2" />
 
       <p>In this signature, we've chosen to make everything
       visible. The class type for <code>stack</code> specifies the
@@ -307,7 +307,7 @@
       simple document format. This format is represented as a tree
       with three different types of node:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/doc.ml">
+      "code/classes/doc.ml" />
 
       <p>It is quite easy to write a function that operates by
       recursively traversing this data. However, what if you need
@@ -319,7 +319,7 @@
       example, the following class defines objects that fold over
       the document data:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/doc.ml" part="1">
+      "code/classes/doc.ml" part="1" />
 
       <p>The <code>object (self)</code> syntax binds
       <code>self</code> to the current object, allowing the
@@ -331,7 +331,7 @@
       <code>count_doc</code> function counts the number of bold
       tags in the document that are not within a list:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/doc.ml" part="2">
+      "code/classes/doc.ml" part="2" />
 
       <p>Note how the <code>super</code> special object is used in
       <code>text_item</code> to call the <code>[int] folder</code>
@@ -360,7 +360,7 @@
       <code>folder</code> to expose these methods, as they probably
       shouldn't be called directly:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/doc.ml" part="3">
+      "code/classes/doc.ml" part="3" />
 
       <p>The final statement that builds the value <code>f</code>
       shows how the instantiation of a <code>folder2</code> object
@@ -373,7 +373,7 @@
       to subclasses: we can use them to simplify our
       <code>counter</code> class:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/doc.ml" part="4">
+      "code/classes/doc.ml" part="4" />
 
       <p>The key property of private methods is that they are
       visible to subclasses, but not anywhere else. If you want the
@@ -384,7 +384,7 @@
       <code>counter_with_sig</code> and can't be invoked in
       subclasses of <code>counter_with_sig</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/doc.ml" part="5">
+      "code/classes/doc.ml" part="5" />
     </section>
 
     <section id="binary-methods" data-type="sect1">
@@ -399,7 +399,7 @@
       "binary methods for">&nbsp;</a><a data-type="indexterm"
       data-primary="binary methods">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/binary.topscript">
+      "code/classes/binary.topscript" />
 
       <p>Note how we can use the type annotation <code>(self:
       'self)</code> to obtain the type of the current object.</p>
@@ -407,7 +407,7 @@
       <p>We can now test different object instances for equality by
       using the <code>equals</code> binary method:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/binary.topscript" part="1">
+      "code/classes/binary.topscript" part="1" />
 
       <p>This works, but there is a problem lurking here. The
       method <code>equals</code> takes an object of the exact type
@@ -415,7 +415,7 @@
       we can't define a common base class <code>shape</code> that
       also includes an equality method:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/binary.topscript" part="2">
+      "code/classes/binary.topscript" part="2" />
 
       <p>The problem is that a <code>square</code> expects to be
       compared with a <code>square</code>, not an arbitrary shape;
@@ -436,7 +436,7 @@
       However, the built-in polymorphic equality has very poor
       behavior when applied to objects:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/binary.topscript" part="3">
+      "code/classes/binary.topscript" part="3" />
 
       <p>The problem here is that two objects are considered equal
       by the built-in polymorphic equality if and only if they are
@@ -452,7 +452,7 @@
       type:<a data-type="indexterm" data-primary=
       "representation types">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/binary.topscript" part="4">
+      "code/classes/binary.topscript" part="4" />
 
       <p>The binary method <code>equals</code> is now implemented
       in terms of the concrete type <code>shape_repr</code>. When
@@ -460,7 +460,7 @@
       <code>repr</code> method, but you can hide the type
       definition using the module system:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/binary_module.ml">
+      "code/classes/binary_module.ml" />
 
       <p>Note that this solution prevents us from adding new kinds
       of shapes without adding new constructors to the
@@ -475,7 +475,7 @@
       information about the object. For instance, a method that
       compares shapes by their sizes:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes/binary_larger.ml">
+      "code/classes/binary_larger.ml" />
 
       <p>In this case, there is no one-to-one correspondence
       between the objects and their sizes, and we can still easily
@@ -525,7 +525,7 @@
       describes how to draw the shape on the
       <code>Async_graphics</code> display:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes-async/shapes.ml">
+      "code/classes-async/shapes.ml" />
 
       <section id="create-some-simple-shapes" data-type="sect2">
         <h2>Create Some Simple Shapes</h2>
@@ -535,13 +535,13 @@
         handlers to the shapes:<a data-type="indexterm"
         data-primary="geometric shapes">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/verbose_shapes.ml" part="1">
+        "code/classes-async/verbose_shapes.ml" part="1" />
 
         <p>The <code>square</code> class is pretty straightforward,
         and the <code>circle</code> class below also looks very
         similar:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/verbose_shapes.ml" part="2">
+        "code/classes-async/verbose_shapes.ml" part="2" />
 
         <p>These classes have a lot in common, and it would be
         useful to factor out this common functionality into a
@@ -557,13 +557,13 @@
         virtual <code>shape</code> class that implements
         <code>on_click</code> and <code>on_mousedown</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="1">
+        "code/classes-async/shapes.ml" part="1" />
 
         <p>Now we can define <code>square</code> and
         <code>circle</code> by inheriting from
         <code>shape</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="2">
+        "code/classes-async/shapes.ml" part="2" />
 
         <p>One way to view a <code>virtual</code> class is that it
         is like a functor, where the "inputs" are the declared—but
@@ -583,7 +583,7 @@
       "indexterm" data-primary="classes" data-secondary=
       "initializers for">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/classes/initializer.topscript">
+      "code/classes/initializer.topscript" />
 
       <p>However, these expressions are executed before the object
       has been created and cannot refer to the methods of the
@@ -598,7 +598,7 @@
       <code>circle</code> and used the inherited
       <code>on_click</code> to add a handler for click events:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/classes-async/shapes.ml" part="3">
+      "code/classes-async/shapes.ml" part="3" />
     </section>
 
     <section id="multiple-inheritance" data-type="sect1">
@@ -634,7 +634,7 @@
         method that uses <code>draw_rect</code> instead of
         <code>fill_rect</code> to draw the square:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/multiple_inheritance.ml" part="1">
+        "code/classes-async/multiple_inheritance.ml" part="1" />
 
         <p>Since the <code>inherit</code> declaration comes before
         the method definition, the new <code>draw</code> method
@@ -643,7 +643,7 @@
         <code>square_outline</code> as follows?</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/classes-async/multiple_inheritance_wrong.ml" part=
-        "1">
+        "1" />
 
         <p>Here the <code>inherit</code> declaration comes after
         the method definition, so the <code>draw</code> method from
@@ -691,12 +691,12 @@
         <code>y</code> fields and an <code>on_mousedown</code>
         method for adding event handlers:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="4">
+        "code/classes-async/shapes.ml" part="4" />
 
         <p>This allows us to create draggable shapes using multiple
         inheritance:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="5">
+        "code/classes-async/shapes.ml" part="5" />
 
         <p>We can also use mixins to create animated shapes. Each
         animated shape has a list of update functions to be called
@@ -706,17 +706,17 @@
         animated:<a data-type="indexterm" data-primary="animation"
         data-secondary="creating with mixins">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="6">
+        "code/classes-async/shapes.ml" part="6" />
 
         <p>We use initializers to add functions to this update
         list. For example, this class will produce circles that
         move to the right for a second when clicked:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="7">
+        "code/classes-async/shapes.ml" part="7" />
 
         <p>These initializers can also be added using mixins:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="8">
+        "code/classes-async/shapes.ml" part="8" />
 
         <p>Since the <code>linear</code> and <code>harmonic</code>
         mixins are only used for their side effects, they can be
@@ -724,7 +724,7 @@
         a variety of different animations:<a data-type="indexterm"
         data-primary="linear mixins">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="9">
+        "code/classes-async/shapes.ml" part="9" />
       </section>
 
       <section id="displaying-the-animated-shapes" data-type=
@@ -741,7 +741,7 @@
         data-secondary=
         "displaying animated shapes with">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/classes-async/shapes.ml" part="10">
+        "code/classes-async/shapes.ml" part="10" />
 
         <p>Our <code>main</code> function creates a list of shapes
         to be displayed and defines a <code>repaint</code> function
@@ -753,7 +753,7 @@
         <code>async_graphics</code> package, which will pull in all
         the other dependencies:</p>
         <link rel="import" data-code-language="console" href=
-        "code/classes-async/build_shapes.out">
+        "code/classes-async/build_shapes.out" />
 
         <p>When you run the binary, a new graphical window should
         appear (on Mac OS X, you will need to install the X11

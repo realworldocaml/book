@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -111,7 +111,7 @@
       array containing two objects, each with a name and array of
       zip codes:</p>
       <link rel="import" data-code-language="json" href=
-      "code/parsing/example.json">
+      "code/parsing/example.json" />
 
       <p>At a syntactic level, we can think of a JSON file as a
       series of simple logical units, like curly braces, square
@@ -119,7 +119,7 @@
       strings. Thus, we could represent our JSON text as a sequence
       of tokens of the following type:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing/manual_token_type.ml">
+      "code/parsing/manual_token_type.ml" />
 
       <p>Note that this representation loses some information about
       the original text. For example, whitespace is not
@@ -130,7 +130,7 @@
       <p>If we converted the preceding example into a list of these
       tokens, it would look something like this:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing/tokens.ml">
+      "code/parsing/tokens.ml" />
 
       <p>This kind of representation is easier to work with than
       the original text, since it gets rid of some unimportant
@@ -139,7 +139,7 @@
       representing JSON data in <a href="#handling-json-data"
       data-type="xref">#handling-json-data</a>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing/json.ml">
+      "code/parsing/json.ml" />
 
       <p>This representation is much richer than our token stream,
       capturing the fact that JSON values can be nested inside each
@@ -148,7 +148,7 @@
       will convert a token stream into a value of this AST type, as
       shown below for our earlier JSON example:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing/parsed_example.ml">
+      "code/parsing/parsed_example.ml" />
     </section>
 
     <section id="defining-a-parser" data-type="sect1">
@@ -176,7 +176,7 @@
       punctuation:<a data-type="indexterm" data-primary=
       "tokens, declaration of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing/parser.mly">
+      "code/parsing/parser.mly" />
 
       <p>The
       <code>&lt;</code><em><code>type</code></em><code>&gt;</code>
@@ -228,7 +228,7 @@
         the declaration section of the parser with a
         <code>%%</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/parser.mly" part="1">
+        "code/parsing/parser.mly" part="1" />
 
         <p>Once that's in place, we can start specifying the
         productions. In <span class=
@@ -237,7 +237,7 @@
         productions for a given nonterminal symbols. Here, for
         example, is the rule for <code>prog</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/parser.mly" part="2">
+        "code/parsing/parser.mly" part="2" />
 
         <p>The syntax for this is reminiscent of an OCaml
         <code>match</code> statement. The pipes separate the
@@ -266,7 +266,7 @@
         <p>Now let's consider a more complex example, the rule for
         the <code>value</code> symbol:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/parser.mly" part="3">
+        "code/parsing/parser.mly" part="3" />
 
         <p>According to these rules, a JSON <code>value</code> is
         either:<a data-type="indexterm" data-primary="values"
@@ -308,7 +308,7 @@
         data-primary="rev_object_fields">&nbsp;</a><a data-type=
         "indexterm" data-primary="object_fields">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/parser.mly" part="4">
+        "code/parsing/parser.mly" part="4" />
 
         <p>The rules are structured as they are because
         <span class="command"><em>menhir</em></span> generates
@@ -321,7 +321,7 @@
         "Menhir parser generator" data-secondary=
         "left-recursive definitions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/right_rec_rule.mly" part="4">
+        "code/parsing/right_rec_rule.mly" part="4" />
 
         <p>Alternatively, we could keep the left-recursive
         definition and simply construct the returned value in
@@ -329,7 +329,7 @@
         complexity of building the list incrementally in this way
         is quadratic in the length of the list:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/quadratic_rule.mly" part="4">
+        "code/parsing/quadratic_rule.mly" part="4" />
 
         <p>Assembling lists like this is a pretty common
         requirement in most realistic grammars, and the preceding
@@ -348,7 +348,7 @@
         <code>separated_list</code> to parse both JSON objects and
         lists with one rule:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/short_parser.mly" part="1">
+        "code/parsing/short_parser.mly" part="1" />
 
         <p>We can invoke <span class=
         "command"><em>menhir</em></span> by using <span class=
@@ -364,7 +364,7 @@
         "invoking">&nbsp;</a><a data-type="indexterm"
         data-startref="PARSparsdef">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
-        "code/parsing/build_short_parser.out">
+        "code/parsing/build_short_parser.out" />
       </section>
     </section>
 
@@ -393,7 +393,7 @@
         braces:<a data-type="indexterm" data-primary="lexers"
         data-secondary="optional OCaml code for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer.mll">
+        "code/parsing/lexer.mll" />
 
         <p>This code is there to define utility functions used by
         later snippets of OCaml code and to set up the environment
@@ -422,7 +422,7 @@
         data-primary="lexers" data-secondary=
         "regular expressions collection">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer.mll" part="1">
+        "code/parsing/lexer.mll" part="1" />
 
         <p>The syntax here is something of a hybrid between OCaml
         syntax and traditional regular expression syntax. The
@@ -441,12 +441,12 @@
         named regular expressions, rather than creating one big and
         impenetrable expression:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer.mll" part="2">
+        "code/parsing/lexer.mll" part="2" />
 
         <p>Finally, we define whitespace, newlines, and
         identifiers:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer.mll" part="3">
+        "code/parsing/lexer.mll" part="3" />
 
         <p>The <code>newline</code> introduces the <code>|</code>
         operator, which lets one of several alternative regular
@@ -466,7 +466,7 @@
         data-primary="lexers" data-secondary=
         "rules for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer.mll" part="4">
+        "code/parsing/lexer.mll" part="4" />
 
         <p>The rules are structured very similarly to pattern
         matches, except that the variants are replaced by regular
@@ -487,7 +487,7 @@
         utility function that we defined at the top of the file.
         Let's skip to the third action:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer_int_fragment.mll">
+        "code/parsing/lexer_int_fragment.mll" />
 
         <p>This action specifies that when the input matches the
         <code>int</code> regular expression, then the lexer should
@@ -545,7 +545,7 @@
         data-primary="lexers" data-secondary=
         "recursive rules">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/parsing/lexer.mll" part="5">
+        "code/parsing/lexer.mll" part="5" />
 
         <p>This rule takes a <code>buf : Buffer.t</code> as an
         argument. If we reach the terminating double quote
@@ -634,7 +634,7 @@
       "parsing" data-secondary=
       "lexer and parser composition">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing/prog.mli">
+      "code/parsing/prog.mli" />
 
       <p>Before we start with the lexing, let's first define some
       functions to handle parsing errors. There are currently two
@@ -643,9 +643,9 @@
       encountering an error is to print the error and give
       up:<a data-type="indexterm" data-primary="errors"
       data-secondary=
-      "&quot;give up on first error&quot;  approach">&nbsp;</a></p>
+      "&quot;give up on first error&quot; approach">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing-test/test.ml">
+      "code/parsing-test/test.ml" />
 
       <p>The "give up on the first error" approach is easy to
       implement but isn't very friendly. In general, error handling
@@ -668,23 +668,23 @@
       define a function <code>Json.output_value</code>, not shown
       here, to print a <code>Json.value</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/parsing-test/test.ml" part="1">
+      "code/parsing-test/test.ml" part="1" />
 
       <p>Here's a test input file we can use to test the code we
       just wrote:</p>
       <link rel="import" data-code-language="json" href=
-      "code/parsing-test/test1.json">
+      "code/parsing-test/test1.json" />
 
       <p>Now build and run the example using this file, and you can
       see the full parser in action:</p>
       <link rel="import" data-code-language="console" href=
-      "code/parsing-test/build_test.out">
+      "code/parsing-test/build_test.out" />
 
       <p>With our simple error handling scheme, errors are fatal
       and cause the program to terminate with a nonzero exit
       code:</p>
       <link rel="import" data-code-language="console" href=
-      "code/parsing-test/run_broken_test.out">
+      "code/parsing-test/run_broken_test.out" />
 
       <p>That wraps up our parsing tutorial. As an aside, notice
       that the JSON polymorphic variant type that we defined in

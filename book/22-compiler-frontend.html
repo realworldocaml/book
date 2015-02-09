@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -105,7 +105,7 @@
       "hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2201.png">
+        <img src="images/rwoc_2201.png" />
       </figure>
 
       <p>Notice that the pipeline branches toward the end. OCaml
@@ -308,17 +308,17 @@
         performing a module assignment as a statement instead of as
         a <code>let</code> binding:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/broken_module.ml">
+        "code/front-end/broken_module.ml" />
 
         <p>The code results in a syntax error when compiled:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/build_broken_module.out">
+        "code/front-end/build_broken_module.out" />
 
         <p>The correct version of this source code creates the
         <code>MyString</code> module correctly via a local open,
         and compiles successfully:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/fixed_module.ml">
+        "code/front-end/fixed_module.ml" />
 
         <p>The syntax error points to the line and character number
         of the first token that couldn't be parsed. In the broken
@@ -338,12 +338,12 @@
         "source code" data-secondary=
         "automatically indenting">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/follow_on_function.ml">
+        "code/front-end/follow_on_function.ml" />
 
         <p>When you compile this file, you'll get a syntax error
         again:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/build_follow_on_function.out">
+        "code/front-end/build_follow_on_function.out" />
 
         <p>The line number in the error points to the end of the
         <code>add_and_print</code> function, but the actual error
@@ -368,7 +368,7 @@
         "command"><em>ocp-indent</em></span> and see how it
         processes it:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/indent_follow_on_function.out">
+        "code/front-end/indent_follow_on_function.out" />
 
         <p>The <code>add_and_print</code> definition has been
         indented as if it were part of the first
@@ -378,7 +378,7 @@
         "command"><em>ocp-indent</em></span> to verify that the
         syntax is correct:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/indent_follow_on_function_fixed.out">
+        "code/front-end/indent_follow_on_function_fixed.out" />
 
         <p>The <span class="command"><em>ocp-indent</em></span>
         <a href="https://github.com/OCamlPro/ocp-indent">home
@@ -417,7 +417,7 @@
         annotated with <span class=
         "command"><em>ocamldoc</em></span> comments:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/doc.ml">
+        "code/front-end/doc.ml" />
 
         <p>The <span class="command"><em>ocamldoc</em></span>
         comments are distinguished by beginning with the double
@@ -430,7 +430,7 @@
         by running <span class="command"><em>ocamldoc</em></span>
         over the source file:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/build_ocamldoc.out">
+        "code/front-end/build_ocamldoc.out" />
 
         <p>You should now have HTML files inside the <em class=
         "filename">html/</em> directory and also be able to view
@@ -557,18 +557,18 @@
       from that declaration. For example, here's a trivial use of
       Sexplib and Fieldslib:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/front-end/type_conv_example.ml">
+      "code/front-end/type_conv_example.ml" />
 
       <p>Compiling this code will normally give you a syntax error
       if you do so without Camlp4, since the <code>with</code>
       keyword isn't normally allowed after a type definition:</p>
       <link rel="import" data-code-language="console" href=
-      "code/front-end/build_type_conv_without_camlp4.out">
+      "code/front-end/build_type_conv_without_camlp4.out" />
 
       <p>Now add in the syntax extension packages for Fieldslib and
       Sexplib, and everything will compile again:</p>
       <link rel="import" data-code-language="console" href=
-      "code/front-end/build_type_conv_with_camlp4.out">
+      "code/front-end/build_type_conv_with_camlp4.out" />
 
       <p>We've specified a couple of additional flags here. The
       <code>-syntax</code> flag directs <span class=
@@ -627,7 +627,7 @@
         "http://realworldocaml.org/install">this Real World OCaml
         page</a> for more information):</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/front-end/camlp4_toplevel.topscript">
+        "code/front-end/camlp4_toplevel.topscript" />
 
         <p>The first directive loads the <span class=
         "command"><em>ocamlfind</em></span> top-level interface
@@ -656,7 +656,7 @@
         problem by running it in <span class=
         "command"><em>utop</em></span>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/front-end/camlp4_toplevel.topscript" part="1">
+        "code/front-end/camlp4_toplevel.topscript" part="1" />
 
         <p>The first definition of <code>t</code> is a standard
         OCaml phrase and results in the expected output. The second
@@ -683,13 +683,13 @@
         the <code>comparelib</code> transformation instead. Create
         a file that contains the type declaration from earlier:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/comparelib_test.ml">
+        "code/front-end/comparelib_test.ml" />
 
         <p>We need to run the Camlp4 binary with the library paths
         to Comparelib and Type_conv. Let's use a small shell script
         to wrap this invocation:</p>
         <link rel="import" data-code-language="sh" href=
-        "code/front-end/camlp4_dump.cmd">
+        "code/front-end/camlp4_dump.cmd" />
 
         <p>The script uses the <span class=
         "command"><em>ocamlfind</em></span> package manager to list
@@ -699,7 +699,7 @@
         paths and outputs the resulting AST to the standard
         output:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/process_comparelib_test.out">
+        "code/front-end/process_comparelib_test.out" />
 
         <p>The output contains the original type definition
         accompanied by some automatically generated code that
@@ -744,12 +744,12 @@
           future (e.g., due to code refactoring):</p>
         </div>
         <link rel="import" data-code-language="ocamlsyntax" href=
-        "code/front-end/let_unit.syntax">
+        "code/front-end/let_unit.syntax" />
 
         <p>If the expression has a different type, then write it
         explicitly:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/let_notunit.ml">
+        "code/front-end/let_notunit.ml" />
 
         <p>The last one is used to ignore Async expressions that
         should run in the background rather than blocking in the
@@ -762,7 +762,7 @@
         warnings are suppressed for any variable name that's
         prepended with an underscore:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/unused_var.ml">
+        "code/front-end/unused_var.ml" />
 
         <p>Although you don't use <code>_z</code> in your code,
         this will never generate an unused variable warning.</p>
@@ -782,12 +782,12 @@
         "indexterm" data-primary="modules" data-secondary=
         "preprocessing signatures of">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/comparelib_test.mli">
+        "code/front-end/comparelib_test.mli" />
 
         <p>If you rerun the Camlp4 dumper script now, you'll see
         that different code is produced for signature files:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/process_comparelib_interface.out">
+        "code/front-end/process_comparelib_interface.out" />
 
         <p>The external signature generated by
         <code>comparelib</code> is much simpler than the actual
@@ -955,14 +955,14 @@
         to do the work for you. Create a file with a single type
         definition and value:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/typedef.ml">
+        "code/front-end/typedef.ml" />
 
         <p>Now run the compiler with the <code>-i</code> flag to
         infer the type signature for that file. This runs the type
         checker but doesn't compile the code any further after
         displaying the interface to the standard output:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/infer_typedef.out">
+        "code/front-end/infer_typedef.out" />
 
         <p>The output is the default signature for the module that
         represents the input file. It's often useful to redirect
@@ -981,7 +981,7 @@
         checker throws an immediate error if this isn't the
         case:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/conflicting_interfaces.out">
+        "code/front-end/conflicting_interfaces.out" />
 
         <div class="allow_break" data-type="note">
           <h1>Which Comes First: The ml or the mli?</h1>
@@ -1110,13 +1110,13 @@
           expresses some simple algebraic operations over
           integers:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/broken_poly.ml">
+          "code/front-end/broken_poly.ml" />
 
           <p>There's a single character typo in the code so that it
           uses <code>Nu</code> instead of <code>Num</code>. The
           resulting type error is impressive:</p>
           <link rel="import" data-code-language="console" href=
-          "code/front-end/build_broken_poly.out">
+          "code/front-end/build_broken_poly.out" />
 
           <p>The type error is perfectly accurate, but rather
           verbose and with a line number that doesn't point to the
@@ -1135,7 +1135,7 @@
           <p>Let's see what happens with an explicit type
           annotation to help the compiler out:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/broken_poly_with_annot.ml">
+          "code/front-end/broken_poly_with_annot.ml" />
 
           <p>This code contains exactly the same error as before,
           but we've added a closed type definition of the
@@ -1143,7 +1143,7 @@
           <code>algebra</code> definition. The compiler error we
           get is much more useful now:</p>
           <link rel="import" data-code-language="console" href=
-          "code/front-end/build_broken_poly_with_annot.out">
+          "code/front-end/build_broken_poly_with_annot.out" />
 
           <p>This error points directly to the correct line number
           that contains the typo. Once you fix the problem, you can
@@ -1201,12 +1201,12 @@
           <p>Here's an example of principality warnings when used
           with record disambiguation.</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/non_principal.ml">
+          "code/front-end/non_principal.ml" />
 
           <p>Inferring the signature with <code>-principal</code>
           will show you a new warning:</p>
           <link rel="import" data-code-language="console" href=
-          "code/front-end/build_non_principal.out">
+          "code/front-end/build_non_principal.out" />
 
           <p>This example isn't principal, since the inferred type
           for <code>x.foo</code> is guided by the inferred type of
@@ -1221,14 +1221,14 @@
           type declarations, or by adding an explicit type
           annotation:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/principal.ml">
+          "code/front-end/principal.ml" />
 
           <p>There is now no ambiguity about the inferred types,
           since we've explicitly given the argument a type, and the
           order of inference of the subexpressions no longer
           matters.</p>
           <link rel="import" data-code-language="console" href=
-          "code/front-end/build_principal.out">
+          "code/front-end/build_principal.out" />
 
           <p>The <span class="command"><em>ocamlbuild</em></span>
           equivalent is to add the tag <code>principal</code> to
@@ -1236,7 +1236,7 @@
           actually adds this by default, but it does no harm to
           explicitly repeat it:</p>
           <link rel="import" data-code-language="console" href=
-          "code/principal/build_principal.out">
+          "code/principal/build_principal.out" />
 
           <p>Ideally, all code should systematically use
           <code>-principal</code>. It reduces variance in type
@@ -1306,17 +1306,17 @@
           <p>Create a file called <code>alice.ml</code> with the
           following contents:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/alice.ml">
+          "code/front-end/alice.ml" />
 
           <p>and a corresponding signature file:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/alice.mli">
+          "code/front-end/alice.mli" />
 
           <p>These two files are exactly analogous to including the
           following code directly in another module that references
           <code>Alice</code>:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/front-end/alice_combined.ml">
+          "code/front-end/alice_combined.ml" />
         </section>
 
         <section id="defining-a-module-search-path" data-type=
@@ -1385,7 +1385,7 @@
             checksum in every <code>cmi</code>. Let's examine our
             earlier <code>typedef.ml</code> more closely:</p>
             <link rel="import" data-code-language="console" href=
-            "code/front-end/typedef_objinfo.out">
+            "code/front-end/typedef_objinfo.out" />
 
             <p><code>ocamlobjinfo</code> examines the compiled
             interface and displays what other compilation units it
@@ -1407,7 +1407,7 @@
             The compiler will reject such programs with an error
             similar to this:</p>
             <link rel="import" data-code-language="console" href=
-            "code/front-end/inconsistent_compilation_units.out">
+            "code/front-end/inconsistent_compilation_units.out" />
 
             <p>This hash check is very conservative, but ensures
             that separate compilation remains type-safe all the way
@@ -1460,14 +1460,14 @@
         it how to map <code>%.mlpack</code> files to the packed
         <code>%.cmx</code> or <code>%.cmo</code> equivalent:</p>
         <link rel="import" data-code-language="console" href=
-        "code/packing/show_files.out">
+        "code/packing/show_files.out" />
 
         <p>You can now run <em>corebuild</em> to build the
         <code>X.cmx</code> file directly, but let's create a new
         module to link against <code>X</code> to complete the
         example:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/packing/test.ml">
+        "code/packing/test.ml" />
 
         <p>You can now compile this test module and see that its
         inferred interface is the result of using the packed
@@ -1477,7 +1477,7 @@
         are mentioned in there and that only the packed
         <code>X</code> module is used:</p>
         <link rel="import" data-code-language="console" href=
-        "code/packing/build_test.out">
+        "code/packing/build_test.out" />
 
         <div data-type="warning">
           <h1>Packing and Search Paths</h1>
@@ -1523,13 +1523,13 @@
         the vanilla OCaml toplevel (not <span class=
         "command"><em>utop</em></span>).</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/short_paths_1.out">
+        "code/front-end/short_paths_1.out" />
 
         <p>This type error without <code>Core.Std</code> has a
         straightforward type error. When we switch to Core, though,
         it gets more verbose:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/short_paths_2.out">
+        "code/front-end/short_paths_2.out" />
 
         <p>The default <code>List</code> module in OCaml is
         overridden by <code>Core.Std.List</code>. The compiler does
@@ -1544,7 +1544,7 @@
         toplevel, too.<a data-type="indexterm" data-primary=
         "short paths heuristic">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/short_paths_3.out">
+        "code/front-end/short_paths_3.out" />
 
         <p>The <span class="command"><em>utop</em></span> enhanced
         toplevel activates short paths by default, which is why we
@@ -1604,7 +1604,7 @@
         "autocompletion">&nbsp;</a><a data-type="indexterm"
         data-primary="ocp-index">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/install_ocp_index.out">
+        "code/front-end/install_ocp_index.out" />
 
         <p>Let's refer back to our Ncurses binding example from the
         beginning of <a href="#foreign-function-interface"
@@ -1616,7 +1616,7 @@
         run <span class="command"><em>ocp-index</em></span> in
         completion mode:</p>
         <link rel="import" data-code-language="console" href=
-        "code/ocp-index/index_ncurses.out">
+        "code/ocp-index/index_ncurses.out" />
 
         <p>You need to pass <span class=
         "command"><em>ocp-index</em></span> a set of directories to
@@ -1641,12 +1641,12 @@
 
         <p>We'll use our toy <code>typedef.ml</code> again:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/front-end/typedef.ml">
+        "code/front-end/typedef.ml" />
 
         <p>Let's first look at the untyped syntax tree that's
         generated from the parsing phase:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/parsetree_typedef.out">
+        "code/front-end/parsetree_typedef.out" />
 
         <p>This is rather a lot of output for a simple two-line
         program, but it shows just how much structure the OCaml
@@ -1662,7 +1662,7 @@
         developer-readable form via the <code>-dtypedtree</code>
         option:</p>
         <link rel="import" data-code-language="console" href=
-        "code/front-end/typedtree_typedef.out">
+        "code/front-end/typedtree_typedef.out" />
 
         <p>The typed AST is more explicit than the untyped syntax
         tree. For instance, the type declaration has been given a

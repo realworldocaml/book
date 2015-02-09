@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -27,7 +27,7 @@
     follows:<a data-type="indexterm" data-primary="records"
     data-secondary="basic syntax for">&nbsp;</a></p>
     <link rel="import" data-code-language="ocamlsyntax" href=
-    "code/records/record.syntax">
+    "code/records/record.syntax" />
 
     <p>Note that record field names must start with a lowercase
     letter.</p>
@@ -35,7 +35,7 @@
     <p>Here's a simple example, a <code>host_info</code> record
     that summarizes information about a given computer:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript">
+    "code/records/main.topscript" />
 
     <p>We can construct a <code>host_info</code> just as easily.
     The following code uses the <code>Shell</code> module from
@@ -44,7 +44,7 @@
     running on. It also uses the <code>Time.now</code> call from
     Core's <code>Time</code> module:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="1">
+    "code/records/main.topscript" part="1" />
 
     <p>You might wonder how the compiler inferred that
     <code>my_host</code> is of type <code>host_info</code>. The
@@ -56,19 +56,19 @@
     <p>Once we have a record value in hand, we can extract elements
     from the record field using dot notation:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="2">
+    "code/records/main.topscript" part="2" />
 
     <p>When declaring an OCaml type, you always have the option of
     parameterizing it by a polymorphic type. Records are no
     different in this regard. So, for example, here's a type one
     might use to timestamp arbitrary items:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="3">
+    "code/records/main.topscript" part="3" />
 
     <p>We can then write polymorphic functions that operate over
     this parameterized type:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="4">
+    "code/records/main.topscript" part="4" />
 
     <section id="patterns-and-exhaustiveness" data-type="sect1">
       <h1>Patterns and Exhaustiveness</h1>
@@ -81,7 +81,7 @@
       data-primary="records" data-secondary=
       "patterns and exhaustiveness in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="5">
+      "code/records/main.topscript" part="5" />
 
       <p>Note that the pattern we used had only a single case,
       rather than using several cases separated by
@@ -109,7 +109,7 @@
       to our <code>host_info</code> record called
       <code>os_release</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="6">
+      "code/records/main.topscript" part="6" />
 
       <p>The code for <code>host_info_to_string</code> would
       continue to compile without change. In this particular case,
@@ -131,13 +131,13 @@
       data-primary="records" data-secondary=
       "missing field warnings">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="7">
+      "code/records/main.topscript" part="7" />
 
       <p>We can disable the warning for a given pattern by
       explicitly acknowledging that we are ignoring extra fields.
       This is done by adding an underscore to the pattern:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="8">
+      "code/records/main.topscript" part="8" />
 
       <p>It's a good idea to enable the warning for incomplete
       record matches and to explicitly disable it with an
@@ -152,7 +152,7 @@
         out about warning 9 as follows:</p>
       </div>
       <link rel="import" data-code-language="console" href=
-      "code/records/warn_help.out">
+      "code/records/warn_help.out" />
 
       <p>You should think of OCaml's warnings as a powerful set of
       optional static analysis tools, and you should eagerly enable
@@ -192,7 +192,7 @@
       data-primary="records" data-secondary=
       "field punning in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="9">
+      "code/records/main.topscript" part="9" />
 
       <p>Field punning can also be used to construct a record.
       Consider the following code for generating a
@@ -200,7 +200,7 @@
       data-primary="records" data-secondary=
       "construction of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="10">
+      "code/records/main.topscript" part="10" />
 
       <p>In the preceding code, we defined variables corresponding
       to the record fields first, and then the record declaration
@@ -214,12 +214,12 @@
       data-primary="records" data-secondary=
       "label punning in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="11">
+      "code/records/main.topscript" part="11" />
 
       <p>This is considerably more concise than what you would get
       without punning:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="12">
+      "code/records/main.topscript" part="12" />
 
       <p>Together, labeled arguments, field names, and field and
       label punning encourage a style where you propagate the same
@@ -252,28 +252,28 @@
       and connected. All of these messages include a session ID and
       the time the message was generated:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="13">
+      "code/records/main.topscript" part="13" />
 
       <p>Reusing field names can lead to some ambiguity. For
       example, if we want to write a function to grab the
       <code>session_id</code> from a record, what type will it
       have?</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="14">
+      "code/records/main.topscript" part="14" />
 
       <p>In this case, OCaml just picks the most recent definition
       of that record field. We can force OCaml to assume we're
       dealing with a different type (say, a <code>heartbeat</code>)
       using a type annotation:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="15">
+      "code/records/main.topscript" part="15" />
 
       <p>While it's possible to resolve ambiguous field names using
       type annotations, the ambiguity can be a bit confusing.
       Consider the following functions for grabbing the session ID
       and status from a heartbeat:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="16">
+      "code/records/main.topscript" part="16" />
 
       <p>Why did the first definition succeed without a type
       annotation and the second one fail? The difference is that in
@@ -294,12 +294,12 @@
       practice to name the type associated with the module
       <code>t</code>. Using this style we would write:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="17">
+      "code/records/main.topscript" part="17" />
 
       <p>Now, our log-entry-creation function can be rendered as
       follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="18">
+      "code/records/main.topscript" part="18" />
 
       <p>The module name <code>Log_entry</code> is required to
       qualify the fields, because this function is outside of the
@@ -309,17 +309,17 @@
       that we are allowed to insert whitespace between the module
       path and the field name:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="19">
+      "code/records/main.topscript" part="19" />
 
       <p>This is not restricted to constructing a record; we can
       use the same trick when pattern matching:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="20">
+      "code/records/main.topscript" part="20" />
 
       <p>When using dot notation for accessing record fields, we
       can qualify the field by the module directly:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="21">
+      "code/records/main.topscript" part="21" />
 
       <p>The syntax here is a little surprising when you first
       encounter it. The thing to keep in mind is that the dot is
@@ -355,7 +355,7 @@
       data-primary="records" data-secondary=
       "functional updates to">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="22">
+      "code/records/main.topscript" part="22" />
 
       <p>This is fairly verbose, given that there's only one field
       that we actually want to change, and all the others are just
@@ -363,7 +363,7 @@
       <em>functional update</em> syntax to do this more tersely.
       The syntax of a functional update is as follows:</p>
       <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/records/functional_update.syntax">
+      "code/records/functional_update.syntax" />
 
       <p>The purpose of the functional update is to create a new
       record based on an existing one, with a set of field changes
@@ -372,7 +372,7 @@
       <p>Given this, we can rewrite <code>register_heartbeat</code>
       more concisely:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="23">
+      "code/records/main.topscript" part="23" />
 
       <p>Functional updates make your code independent of the
       identity of the fields in the record that are not changing.
@@ -384,7 +384,7 @@
       field for the status message received on the last
       heartbeat:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="24">
+      "code/records/main.topscript" part="24" />
 
       <p>The original implementation of
       <code>register_heartbeat</code> would now be invalid, and
@@ -394,7 +394,7 @@
       incorrectly ignores the new field. The correct thing to do
       would be to update the code as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="25">
+      "code/records/main.topscript" part="25" />
     </section>
 
     <section id="mutable-fields" data-type="sect1">
@@ -409,14 +409,14 @@
       data-primary="records" data-secondary=
       "mutable fields in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="26">
+      "code/records/main.topscript" part="26" />
 
       <p>The <code>&lt;-</code> operator is used for setting a
       mutable field. The side-effecting version of
       <code>register_heartbeat</code> would be written as
       follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="27">
+      "code/records/main.topscript" part="27" />
 
       <p>Note that mutable assignment, and thus the
       <code>&lt;-</code> operator, is not needed for initialization
@@ -444,7 +444,7 @@
       "RECfirstclass" data-primary="records" data-secondary=
       "first-class fields in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="28">
+      "code/records/main.topscript" part="28" />
 
       <p>Here, we wrote a small function <code>(fun x -&gt;
       x.Logon.user)</code> to access the <code>user</code> field.
@@ -459,7 +459,7 @@
       applied to a given type declaration. So, for example, we
       could have defined <code>Logon</code> as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="29">
+      "code/records/main.topscript" part="29" />
 
       <p>Note that this will generate <em>a lot</em> of output
       because <code>fieldslib</code> generates a large collection
@@ -472,7 +472,7 @@
       which we can use to extract the user field from a logon
       message:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="30">
+      "code/records/main.topscript" part="30" />
 
       <p>In addition to generating field accessor functions,
       <code>fieldslib</code> also creates a submodule called
@@ -529,7 +529,7 @@
       extracting the <code>user</code> field from a
       <code>Logon.t</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="31">
+      "code/records/main.topscript" part="31" />
 
       <p>Thus, the first parameter of the <code>Field.t</code>
       corresponds to the record you pass to <code>get</code>, and
@@ -541,7 +541,7 @@
       complicated than you might naively expect from the preceding
       one:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="32">
+      "code/records/main.topscript" part="32" />
 
       <p>The type is <code>Field.t_with_perm</code> rather than
       <code>Field.t</code> because fields have a notion of access
@@ -553,7 +553,7 @@
       <p>We can use first-class fields to do things like write a
       generic function for displaying a record field:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="33">
+      "code/records/main.topscript" part="33" />
 
       <p>This takes three arguments: the <code>Field.t</code>, a
       function for converting the contents of the field in question
@@ -563,7 +563,7 @@
       <p>Here's an example of <code>show_field</code> in
       action:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="34">
+      "code/records/main.topscript" part="34" />
 
       <p>As a side note, the preceding example is our first use of
       the <code>Fn</code> module (short for "function"), which
@@ -577,7 +577,7 @@
       <code>Logon.t</code>, the field iterator has the following
       type:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="35">
+      "code/records/main.topscript" part="35" />
 
       <p>This is a bit daunting to look at, largely because of the
       access control markers, but the structure is actually pretty
@@ -593,7 +593,7 @@
       <code>show_field</code> to print out all the fields of a
       <code>Logon</code> record:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="36">
+      "code/records/main.topscript" part="36" />
 
       <p>One nice side effect of this approach is that it helps you
       adapt your code when the fields of a record change. If you

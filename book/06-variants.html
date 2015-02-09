@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -29,7 +29,7 @@
     follows:<a data-type="indexterm" data-primary="variant types"
     data-secondary="basic syntax of">&nbsp;</a></p>
     <link rel="import" data-code-language="ocamlsyntax" href=
-    "code/variants/variant.syntax">
+    "code/variants/variant.syntax" />
 
     <p>Each row essentially represents a case of the variant. Each
     case has an associated tag and may optionally have a sequence
@@ -42,20 +42,20 @@
     the different cases. Note that variant tags must be
     capitalized:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript">
+    "code/variants/main.topscript" />
 
     <p>The following function uses pattern matching to convert a
     <code>basic_color</code> to a corresponding integer. The
     exhaustiveness checking on pattern matches means that the
     compiler will warn us if we miss a color:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="1">
+    "code/variants/main.topscript" part="1" />
 
     <p>Using the preceding function, we can generate escape codes
     to change the color of a given string displayed in a
     terminal:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="2">
+    "code/variants/main.topscript" part="2" />
 
     <p>On most terminals, that word "Blue" will be rendered in
     blue.</p>
@@ -90,19 +90,19 @@
     variants can have multiple arguments, which are separated by
     <code>*</code>s:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="3">
+    "code/variants/main.topscript" part="3" />
 
     <p>Once again, we'll use pattern matching to convert a color to
     a corresponding integer. But in this case, the pattern matching
     does more than separate out the different cases; it also allows
     us to extract the data associated with each tag:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="4">
+    "code/variants/main.topscript" part="4" />
 
     <p>Now, we can print text using the full set of available
     colors:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="5">
+    "code/variants/main.topscript" part="5" />
 
     <section id="catch-all-cases-and-refactoring" data-type=
     "sect1">
@@ -125,7 +125,7 @@
       <p>Consider what would happen if we were to change the
       definition of <code>color</code> to the following:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/catch_all.topscript" part="1">
+      "code/variants/catch_all.topscript" part="1" />
 
       <p>We've essentially broken out the <code>Basic</code> case
       into two cases, <code>Basic</code> and <code>Bold</code>, and
@@ -135,7 +135,7 @@
       that same code again, the compiler will notice the
       discrepancy:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/catch_all.topscript" part="2">
+      "code/variants/catch_all.topscript" part="2" />
 
       <p>Here, the compiler is complaining that the
       <code>Basic</code> tag is used with the wrong number of
@@ -143,12 +143,12 @@
       flag a second problem, which is that we haven't handled the
       new <code>Bold</code> tag:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/catch_all.topscript" part="3">
+      "code/variants/catch_all.topscript" part="3" />
 
       <p>Fixing this now leads us to the correct
       implementation:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/catch_all.topscript" part="4">
+      "code/variants/catch_all.topscript" part="4" />
 
       <p>As we've seen, the type errors identified the things that
       needed to be fixed to complete the refactoring of the code.
@@ -167,7 +167,7 @@
       written the function as follows:<a data-type="indexterm"
       data-primary="exhaustion checks">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/catch_all.topscript" part="5">
+      "code/variants/catch_all.topscript" part="5" />
 
       <p>But because the catch-all case encompasses all
       possibilities, the type system will no longer warn us that we
@@ -210,7 +210,7 @@
       by reminding ourselves of the definition of
       <code>Log_entry.t</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="1">
+      "code/variants/logger.topscript" part="1" />
 
       <p>This record type combines multiple pieces of data into one
       value. In particular, a single <code>Log_entry.t</code> has a
@@ -221,7 +221,7 @@
       disjunctions, letting you represent multiple possibilities,
       as in the following example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="2">
+      "code/variants/logger.topscript" part="2" />
 
       <p>A <code>client_message</code> is a <code>Logon</code>
       <em>or</em> a <code>Heartbeat</code> <em>or</em> a
@@ -255,7 +255,7 @@
 
       <p>Here's the concrete code:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="3">
+      "code/variants/logger.topscript" part="3" />
 
       <p>There's one awkward part of the preceding code, which is
       the logic that determines the session ID. The code is
@@ -272,23 +272,23 @@
       definitions of each per-message record to contain just the
       information unique to that record:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="4">
+      "code/variants/logger.topscript" part="4" />
 
       <p>We can then define a variant type that combines these
       types:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="5">
+      "code/variants/logger.topscript" part="5" />
 
       <p>Separately, we need a record that contains the fields that
       are common across all messages:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="6">
+      "code/variants/logger.topscript" part="6" />
 
       <p>A full message can then be represented as a pair of a
       <code>Common.t</code> and a <code>details</code>. Using this,
       we can rewrite our preceding example as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="7">
+      "code/variants/logger.topscript" part="7" />
 
       <p>As you can see, the code for extracting the session ID has
       been replaced with the simple expression
@@ -303,7 +303,7 @@
       Thus, if we had functions for handling individual message
       types, we could write a dispatch function as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="8">
+      "code/variants/logger.topscript" part="8" />
 
       <p>And it's explicit at the type level that
       <code>handle_log_entry</code> sees only
@@ -328,13 +328,13 @@
       "indexterm" data-primary="data structures" data-secondary=
       "recursive">&nbsp;</a><a data-type="indexterm" data-primary=
       "variant types" data-secondary=
-      "and recursive data  structures">&nbsp;</a></p>
+      "and recursive data structures">&nbsp;</a></p>
 
       <p>An expression in this language will be defined by the
       variant <code>expr</code>, with one tag for each kind of
       expression we want to support:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript">
+      "code/variants/blang.topscript" />
 
       <p>Note that the definition of the type <code>expr</code> is
       recursive, meaning that a <code>expr</code> may contain other
@@ -357,19 +357,19 @@
       predicates might specify the tests you would run against an
       email, as in the following example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="1">
+      "code/variants/blang.topscript" part="1" />
 
       <p>Using the preceding code, we can construct a simple
       expression with <code>mail_predicate</code> as its base
       predicate:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="2">
+      "code/variants/blang.topscript" part="2" />
 
       <p>Being able to construct such expressions isn't enough; we
       also need to be able to evaluate them. Here's a function for
       doing just that:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="3">
+      "code/variants/blang.topscript" part="3" />
 
       <p>The structure of the code is pretty straightforward—we're
       just pattern matching over the structure of the data, doing
@@ -382,17 +382,17 @@
       The following is a set of simplifying construction functions
       that mirror the tags of an <code>expr</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="4">
+      "code/variants/blang.topscript" part="4" />
 
       <p>We can now write a simplification routine that is based on
       the preceding functions.</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="5">
+      "code/variants/blang.topscript" part="5" />
 
       <p>We can apply this to a Boolean expression and see how good
       a job it does at simplifying it:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="6">
+      "code/variants/blang.topscript" part="6" />
 
       <p>Here, it correctly converted the <code>Or</code> branch to
       <code>Const true</code> and then eliminated the
@@ -403,7 +403,7 @@
       particular, see what happens if we add a double negation
       in:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="7">
+      "code/variants/blang.topscript" part="7" />
 
       <p>It fails to remove the double negation, and it's easy to
       see why. The <code>not_</code> function has a catch-all case,
@@ -413,12 +413,12 @@
       explicit, we see that the missing of the double negation is
       more obvious:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="8">
+      "code/variants/blang.topscript" part="8" />
 
       <p>We can of course fix this by simply adding an explicit
       case for double negation:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/blang.topscript" part="9">
+      "code/variants/blang.topscript" part="9" />
 
       <p>The example of a Boolean expression language is more than
       a toy. There's a module very much in this spirit in Core
@@ -453,7 +453,7 @@
       ordinary variants, polymorphic variants can be used without
       an explicit type declaration:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/main.topscript" part="6">
+      "code/variants/main.topscript" part="6" />
 
       <p>As you can see, polymorphic variant types are inferred
       automatically, and when we combine variants with different
@@ -468,7 +468,7 @@
       <p>The type system will complain if it sees incompatible uses
       of the same tag:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/main.topscript" part="7">
+      "code/variants/main.topscript" part="7" />
 
       <p>The <code>&gt;</code> at the beginning of the variant
       types above is critical because it marks the types as being
@@ -484,7 +484,7 @@
       <code>&lt;</code>, to indicate "these tags or less," as in
       the following example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/main.topscript" part="8">
+      "code/variants/main.topscript" part="8" />
 
       <p>The <code>&lt;</code> is there because
       <code>is_positive</code> has no way of dealing with values
@@ -498,7 +498,7 @@
       polymorphic variant type, which has neither marker. For
       example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/main.topscript" part="9">
+      "code/variants/main.topscript" part="9" />
 
       <p>Perhaps surprisingly, we can also create polymorphic
       variant types that have different upper and lower bounds.
@@ -508,7 +508,7 @@
       "polymorphic variant types" data-secondary=
       "upper/lower bounds of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/main.topscript" part="10">
+      "code/variants/main.topscript" part="10" />
 
       <p>Here, the inferred type states that the tags can be no
       more than <code>`Float</code>, <code>`Int</code>, and
@@ -530,7 +530,7 @@
         "polymorphic variant types" data-secondary=
         "vs. ordinary variants">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="11">
+        "code/variants/main.topscript" part="11" />
 
         <p>We want to write a function
         <code>extended_color_to_int</code>, that works like
@@ -539,7 +539,7 @@
         include an alpha channel. One might try to write such a
         function as follows.</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="12">
+        "code/variants/main.topscript" part="12" />
 
         <p>The code looks reasonable enough, but it leads to a type
         error because <code>extended_color</code> and
@@ -555,7 +555,7 @@
         <code>color_to_int</code> using polymorphic variants. The
         translation here is pretty straightforward:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="13">
+        "code/variants/main.topscript" part="13" />
 
         <p>Now we can try writing
         <code>extended_color_to_int</code>. The key issue with this
@@ -568,14 +568,14 @@
         <code>`Basic</code>, <code>`RGB</code>, and
         <code>`Gray</code>, and not <code>`RGBA</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="14">
+        "code/variants/main.topscript" part="14" />
 
         <p>The preceding code is more delicately balanced than one
         might imagine. In particular, if we use a catch-all case
         instead of an explicit enumeration of the cases, the type
         is no longer narrowed, and so compilation fails:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="15">
+        "code/variants/main.topscript" part="15" />
 
         <div class="allow_break" data-type="note">
           <h1>Polymorphic Variants and Catch-all Cases</h1>
@@ -591,10 +591,10 @@
           "catch-all cases">&nbsp;</a><a data-type="indexterm"
           data-primary="catch-all cases">&nbsp;</a><a data-type=
           "indexterm" data-primary="polymorphic variant types"
-          data-secondary="and catch-all  cases">&nbsp;</a></p>
+          data-secondary="and catch-all cases">&nbsp;</a></p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="16">
+        "code/variants/main.topscript" part="16" />
 
         <p>Catch-all cases are error-prone even with ordinary
         variants, but they are especially so with polymorphic
@@ -605,7 +605,7 @@
         <code>Float</code> misspelled as <code>Floot</code>, the
         erroneous code will compile without complaint:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="17">
+        "code/variants/main.topscript" part="17" />
 
         <p>With ordinary variants, such a typo would have been
         caught as an unknown tag. As a general matter, one should
@@ -619,14 +619,14 @@
         "xref">#files-modules-and-programs</a>. Let's start with
         the <code>mli</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/variants-termcol/terminal_color.mli">
+        "code/variants-termcol/terminal_color.mli" />
 
         <p>Here, <code>extended_color</code> is defined as an
         explicit extension of <code>color</code>. Also, notice that
         we defined all of these types as exact variants. We can
         implement this library as follows:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/variants-termcol/terminal_color.ml">
+        "code/variants-termcol/terminal_color.ml" />
 
         <p>In the preceding code, we did something funny to the
         definition of <code>extended_color_to_int</code> that
@@ -647,12 +647,12 @@
         compiler has enough information to warn us:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/variants-termcol-annotated/terminal_color.ml" part=
-        "1">
+        "1" />
 
         <p>In particular, the compiler will complain that the
         <code>`Grey</code> case is unused:</p>
         <link rel="import" data-code-language="console" href=
-        "code/variants-termcol-annotated/build.out">
+        "code/variants-termcol-annotated/build.out" />
 
         <p>Once we have type definitions at our disposal, we can
         revisit the question of how we write the pattern match that
@@ -660,7 +660,7 @@
         type name as part of the pattern match, by prefixing it
         with a <code>#</code>:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/variants-termcol-fixed/terminal_color.ml" part="1">
+        "code/variants-termcol-fixed/terminal_color.ml" part="1" />
 
         <p>This is useful when you want to narrow down to a type
         whose definition is long, and you don't want the verbosity

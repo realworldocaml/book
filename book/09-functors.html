@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -80,14 +80,14 @@
       <p>First, let's define a signature for a module that contains
       a single value of type <code>int</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript">
+      "code/functors/main.topscript" />
 
       <p>Now we can define our functor. We'll use
       <code>X_int</code> both to constrain the argument to the
       functor and to constrain the module returned by the
       functor:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="1">
+      "code/functors/main.topscript" part="1" />
 
       <p>One thing that immediately jumps out is that functors are
       more syntactically heavyweight than ordinary functions. For
@@ -101,7 +101,7 @@
       <p>The following shows what happens when we omit the module
       type for the output of the functor:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="2">
+      "code/functors/main.topscript" part="2" />
 
       <p>We can see that the inferred module type of the output is
       now written out explicitly, rather than being a reference to
@@ -110,7 +110,7 @@
       <p>We can use <code>Increment</code> to define new
       modules:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="3">
+      "code/functors/main.topscript" part="3" />
 
       <p>In this case, we applied <code>Increment</code> to a
       module whose signature is exactly equal to
@@ -122,7 +122,7 @@
       available in the module, either by dropping fields or by
       leaving some fields abstract. Here's an example:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="4">
+      "code/functors/main.topscript" part="4" />
 
       <p>The rules for determining whether a module matches a given
       signature are similar in spirit to the rules in an
@@ -161,7 +161,7 @@
       contains just two things: a comparison function and the type
       of the values to be compared:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="5">
+      "code/functors/main.topscript" part="5" />
 
       <p>The comparison function follows the standard OCaml idiom
       for such functions, returning <code>0</code> if the two
@@ -171,7 +171,7 @@
       the standard comparison functions on top of
       <code>compare</code>.</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/functors/compare_example.ml">
+      "code/functors/compare_example.ml" />
 
       <p>(This idiom is a bit of a historical error. It would be
       better if <code>compare</code> returned a variant with three
@@ -187,14 +187,14 @@
       contains implementations of a number of useful primitives for
       interacting with intervals:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="6">
+      "code/functors/main.topscript" part="6" />
 
       <p>We can instantiate the functor by applying it to a module
       with the right signature. In the following code, rather than
       name the module first and then call the functor, we provide
       the functor input as an anonymous module:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="7">
+      "code/functors/main.topscript" part="7" />
 
       <p>If the input interface for your functor is aligned with
       the standards of the libraries you use, then you don't need
@@ -202,7 +202,7 @@
       case, we can directly use the <code>Int</code> or
       <code>String</code> modules provided by Core:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="8">
+      "code/functors/main.topscript" part="8" />
 
       <p>This works because many modules in Core, including
       <code>Int</code> and <code>String</code>, satisfy an extended
@@ -215,7 +215,7 @@
       <p>We can use the newly defined <code>Int_interval</code>
       module like any ordinary module:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="9">
+      "code/functors/main.topscript" part="9" />
 
       <p>This design gives us the freedom to use any comparison
       function we want for comparing the endpoints. We could, for
@@ -224,19 +224,19 @@
       data-primary="interval computation" data-secondary=
       "comparison function for">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="10">
+      "code/functors/main.topscript" part="10" />
 
       <p>The behavior of <code>Rev_int_interval</code> is of course
       different from <code>Int_interval</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="11">
+      "code/functors/main.topscript" part="11" />
 
       <p>Importantly, <code>Rev_int_interval.t</code> is a
       different type than <code>Int_interval.t</code>, even though
       its physical representation is the same. Indeed, the type
       system will prevent us from confusing them.</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/functors/main.topscript" part="12">
+      "code/functors/main.topscript" part="12" />
 
       <p>This is important, because confusing the two kinds of
       intervals would be a semantic error, and it's an easy one to
@@ -256,14 +256,14 @@
         data-primary="interval computation" data-secondary=
         "abstract functor for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="13">
+        "code/functors/main.topscript" part="13" />
 
         <p>To make <code>Int_interval.t</code> abstract, we need to
         restrict the output of <code>Make_interval</code> with an
         interface. Here's an explicit interface that we can use for
         that purpose:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="14">
+        "code/functors/main.topscript" part="14" />
 
         <p>This interface includes the type <code>endpoint</code>
         to give us a way of referring to the endpoint type. Given
@@ -272,7 +272,7 @@
         <code>endpoint</code> to the implementation of the module
         to match <code>Interval_intf</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="15">
+        "code/functors/main.topscript" part="15" />
       </section>
 
       <section id="sharing-constraints" data-type="sect2">
@@ -286,7 +286,7 @@
         "indexterm" data-primary="interval computation"
         data-secondary="sharing constraints">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="16">
+        "code/functors/main.topscript" part="16" />
 
         <p>To fix this, we need to expose the fact that
         <code>endpoint</code> is equal to <code>Int.t</code> (or
@@ -297,7 +297,7 @@
         that a given type is equal to some other type. The syntax
         for a simple sharing constraint is as follows:</p>
         <link rel="import" data-code-language="ocamlsyntax" href=
-        "code/functors/sharing_constraint.syntax">
+        "code/functors/sharing_constraint.syntax" />
 
         <p>The result of this expression is a new signature that's
         been modified so that it exposes the fact that
@@ -306,13 +306,13 @@
         definition is outside of it. One can also apply multiple
         sharing constraints to the same signature:</p>
         <link rel="import" data-code-language="ocamlsyntax" href=
-        "code/functors/multi_sharing_constraint.syntax">
+        "code/functors/multi_sharing_constraint.syntax" />
 
         <p>We can use a sharing constraint to create a specialized
         version of <code>Interval_intf</code> for integer
         intervals:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="17">
+        "code/functors/main.topscript" part="17" />
 
         <p>We can also use sharing constraints in the context of a
         functor. The most common use case is where you want to
@@ -326,7 +326,7 @@
         <code>Endpoint</code> that is the functor argument. We can
         do this as follows:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="18">
+        "code/functors/main.topscript" part="18" />
 
         <p>So now, the interface is as it was, except that
         <code>endpoint</code> is known to be equal to
@@ -335,7 +335,7 @@
         <code>endpoint</code> be exposed, like constructing
         intervals:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="19">
+        "code/functors/main.topscript" part="19" />
       </section>
 
       <section id="destructive-substitution" data-type="sect2">
@@ -357,19 +357,19 @@
         "indexterm" data-primary="interval computation"
         data-secondary="destructive substitution">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamlsyntax" href=
-        "code/functors/destructive_sub.syntax">
+        "code/functors/destructive_sub.syntax" />
 
         <p>The following shows how we could use this with
         <code>Make_interval</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="20">
+        "code/functors/main.topscript" part="20" />
 
         <p>There's now no <code>endpoint</code> type: all of its
         occurrences of have been replaced by <code>int</code>. As
         with sharing constraints, we can also use this in the
         context of a functor:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="21">
+        "code/functors/main.topscript" part="21" />
 
         <p>The interface is precisely what we want: the type
         <code>t</code> is abstract, and the type of the endpoint is
@@ -378,7 +378,7 @@
         but not directly using the constructors and thereby
         violating the invariants of the module:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="22">
+        "code/functors/main.topscript" part="22" />
 
         <p>In addition, the <code>endpoint</code> type is gone from
         the interface, meaning we no longer need to define the
@@ -409,7 +409,7 @@
         data-primary="interval computation" data-secondary=
         "multiple interfaces and">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="23">
+        "code/functors/main.topscript" part="23" />
 
         <p>Core comes with a syntax extension called Sexplib which
         can autogenerate s-expression conversion functions from a
@@ -418,7 +418,7 @@
         converters. Thus, we can write:<a data-type="indexterm"
         data-primary="sexp declaration">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="24">
+        "code/functors/main.topscript" part="24" />
 
         <p>We'll discuss s-expressions and Sexplib in more detail
         in <a href="#data-serialization-with-s-expressions"
@@ -428,7 +428,7 @@
         sexp</code> declaration to the definition of <code>t</code>
         within the functor:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="25">
+        "code/functors/main.topscript" part="25" />
 
         <p>The problem is that <code>with sexp</code> adds code for
         defining the s-expression converters, and that code assumes
@@ -442,7 +442,7 @@
         this purpose called <code>Sexpable</code>, which is defined
         as follows:</p>
         <link rel="import" data-code-language="ocaml" href=
-        "code/functors/sexpable.ml">
+        "code/functors/sexpable.ml" />
 
         <p>We can modify <code>Make_interval</code> to use the
         <code>Sexpable</code> interface, for both its input and its
@@ -454,7 +454,7 @@
         distinct type <code>t</code>'s clashing with each
         other:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="26">
+        "code/functors/main.topscript" part="26" />
 
         <p>Equivalently, we can define a type <code>t</code> within
         our new module, and apply destructive substitutions to all
@@ -464,19 +464,19 @@
         it correctly reflects that all of the signatures are being
         handled equivalently:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="27">
+        "code/functors/main.topscript" part="27" />
 
         <p>Now we can write the functor itself. We have been
         careful to override the sexp converter here to ensure that
         the data structure's invariants are still maintained when
         reading in from an s-expression:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="28">
+        "code/functors/main.topscript" part="28" />
 
         <p>And now, we can use that sexp converter in the ordinary
         way:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/functors/main.topscript" part="29">
+        "code/functors/main.topscript" part="29" />
       </section>
     </section>
 
@@ -500,7 +500,7 @@
       <p>Here's a reasonable <code>mli</code> for such a
       module:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/functors/fqueue.mli">
+      "code/functors/fqueue.mli" />
 
       <p>The preceding <code>Fqueue.fold</code> function requires
       some explanation. It follows the same pattern as the
@@ -522,7 +522,7 @@
       output list is empty, the input list is reversed and becomes
       the new output list. Here's the implementation:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/functors/fqueue.ml">
+      "code/functors/fqueue.ml" />
 
       <p>One problem with <code>Fqueue</code> is that the interface
       is quite skeletal. There are lots of useful helper functions
@@ -552,19 +552,19 @@
       allows one to extend any module that matches
       <code>Foldable.S</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/functors/foldable.ml">
+      "code/functors/foldable.ml" />
 
       <p>Now we can apply this to <code>Fqueue</code>. We can
       create an interface for an extended version of
       <code>Fqueue</code> as follows:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/functors/extended_fqueue.mli">
+      "code/functors/extended_fqueue.mli" />
 
       <p>In order to apply the functor, we'll put the definition of
       <code>Fqueue</code> in a submodule called <code>T</code>, and
       then call <code>Foldable.Extend</code> on <code>T</code>:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/functors/extended_fqueue.ml">
+      "code/functors/extended_fqueue.ml" />
 
       <p>Core comes with a number of functors for extending modules
       that follow this same basic pattern, including:<a data-type=

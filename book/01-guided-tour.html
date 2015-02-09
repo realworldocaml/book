@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39">
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -14,9 +14,9 @@
     <h1>A Guided Tour</h1>
 
     <p>This chapter gives an overview of OCaml by walking through a
-    series of small examples that cover most of the major features of
-    the language. This should provide a sense of what OCaml can do,
-    without getting too deep into any one topic.</p>
+    series of small examples that cover most of the major features
+    of the language. This should provide a sense of what OCaml can
+    do, without getting too deep into any one topic.</p>
 
     <p>Throughout the book we're going to use Core, a more
     full-featured and capable replacement for OCaml's standard
@@ -45,7 +45,7 @@
       data-primary="Core standard library" data-secondary=
       "opening">&nbsp;</a> <code>Core.Std</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript">
+      "code/guided-tour/main.topscript" />
 
       <p>This makes the definitions in Core available and is
       required for many of the examples in the tour and in the
@@ -53,7 +53,7 @@
 
       <p>Now let's try a few simple numerical calculations:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="1">
+      "code/guided-tour/main.topscript" part="1" />
 
       <p>By and large, this is pretty similar to what you'd find in
       any programming language, but a few things jump right out at
@@ -112,7 +112,7 @@
       expression, using the <code>let</code> keyword. This is known
       as a <em>let binding</em>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="2">
+      "code/guided-tour/main.topscript" part="2" />
 
       <p>After a new variable is created, the toplevel tells us the
       name of the variable (<code>x</code> or <code>y</code>), in
@@ -125,7 +125,7 @@
       must start with a lowercase letter or an underscore. Thus,
       these are legal:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="3">
+      "code/guided-tour/main.topscript" part="3" />
 
       <p>Note that by default, <span class=
       "command"><em>utop</em></span> doesn't bother to print out
@@ -133,7 +133,7 @@
 
       <p>The following examples, however, are not legal:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="4">
+      "code/guided-tour/main.topscript" part="4" />
 
       <p>The error messages here are a little confusing, but
       they'll make more sense as you learn more about the
@@ -150,7 +150,7 @@
       data-primary="functions" data-secondary=
       "defining">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="5">
+      "code/guided-tour/main.topscript" part="5" />
 
       <p>Functions in OCaml are values like any other, which is why
       we use the <code>let</code> keyword to bind a function to a
@@ -174,7 +174,7 @@
       data-primary="functions" data-secondary=
       "with multiple arguments">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="6">
+      "code/guided-tour/main.topscript" part="6" />
 
       <p>The preceding example also happens to be our first use of
       modules. Here, <code>Float.of_int</code> refers to the
@@ -202,7 +202,7 @@
       function returns the sum of the integers that pass the
       test:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="7">
+      "code/guided-tour/main.topscript" part="7" />
 
       <p>If we look at the inferred type signature in detail, we
       see that the first argument is a function that takes an
@@ -210,7 +210,7 @@
       arguments are integers. Here's an example of this function in
       action:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="8">
+      "code/guided-tour/main.topscript" part="8" />
 
       <p>Note that in the definition of <code>even</code>, we used
       <code>=</code> in two different ways: once as the part of the
@@ -286,7 +286,7 @@
         <p>Here's an annotated version of
         <code>sum_if_true</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="9">
+        "code/guided-tour/main.topscript" part="9" />
 
         <p>In the above, we've marked every argument to the
         function with its type, with the final annotation
@@ -304,7 +304,7 @@
         "type inference" data-secondary=
         "generic types">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="10">
+        "code/guided-tour/main.topscript" part="10" />
 
         <p><code>first_if_true</code> takes as its arguments a
         function <code>test</code>, and two values, <code>x</code>
@@ -341,11 +341,11 @@
         <p>The generic type of <code>first_if_true</code> allows us
         to write this:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="11">
+        "code/guided-tour/main.topscript" part="11" />
 
         <p>As well as this:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="12">
+        "code/guided-tour/main.topscript" part="12" />
 
         <p>Both <code>long_string</code> and
         <code>big_number</code> are functions, and each is passed
@@ -355,7 +355,7 @@
         different concrete types for <code>'a</code> in the same
         use of <code>first_if_true</code>:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="13">
+        "code/guided-tour/main.topscript" part="13" />
 
         <p>In this example, <code>big_number</code> requires that
         <code>'a</code> be instantiated as <code>int</code>,
@@ -386,14 +386,14 @@
           like this one:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="14">
+        "code/guided-tour/main.topscript" part="14" />
 
         <p>are compile-time errors (because <code>+</code> requires
         that both its arguments be of type <code>int</code>),
         whereas errors that can't be caught by the type system,
         like division by zero, lead to runtime exceptions:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="15">
+        "code/guided-tour/main.topscript" part="15" />
 
         <p>The distinction here is that type errors will stop you
         whether or not the offending code is ever actually
@@ -424,7 +424,7 @@
         data-primary="data structures" data-secondary=
         "tuples">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="16">
+        "code/guided-tour/main.topscript" part="16" />
 
         <p>(For the mathematically inclined, the <code>*</code>
         character is used because the set of all pairs of type
@@ -435,7 +435,7 @@
         <p>You can extract the components of a tuple using OCaml's
         pattern-matching syntax, as shown below:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="17">
+        "code/guided-tour/main.topscript" part="17" />
 
         <p>Here, the <code>(x,y)</code> on the lefthand side of the
         <code>let</code> binding is the pattern. This pattern lets
@@ -444,7 +444,7 @@
         value being matched. These can now be used in subsequent
         expressions:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="18">
+        "code/guided-tour/main.topscript" part="18" />
 
         <p>Note that the same syntax is used both for constructing
         and for pattern matching on tuples.</p>
@@ -456,7 +456,7 @@
         lets us get at the values we need with a minimum of
         fuss:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="19">
+        "code/guided-tour/main.topscript" part="19" />
 
         <p>The <code>**</code> operator used above is for raising a
         floating-point number to a power.</p>
@@ -475,12 +475,12 @@
         example:<a data-type="indexterm" id="DSlists" data-primary=
         "data structures" data-secondary="lists">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="20">
+        "code/guided-tour/main.topscript" part="20" />
 
         <p>Note that you can't mix elements of different types in
         the same list, unlike tuples:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="21">
+        "code/guided-tour/main.topscript" part="21" />
 
         <section id="the-list-module" data-type="sect3">
           <h3>The List module</h3>
@@ -491,13 +491,13 @@
           notation. For example, this is how we compute the length
           of a list:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="22">
+          "code/guided-tour/main.topscript" part="22" />
 
           <p>Here's something a little more complicated. We can
           compute the list of the lengths of each language as
           follows:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="23">
+          "code/guided-tour/main.topscript" part="23" />
 
           <p><code>List.map</code> takes two arguments: a list and
           a function for transforming the elements of that list. It
@@ -515,7 +515,7 @@
           "labeled arguments">&nbsp;</a><a data-type="indexterm"
           data-primary="labeled arguments">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="24">
+          "code/guided-tour/main.topscript" part="24" />
 
           <p>We'll learn more about labeled arguments and why
           they're important in <a href="#variables-and-functions"
@@ -533,13 +533,13 @@
           data-primary="lists" data-secondary=
           "operator : :">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="25">
+          "code/guided-tour/main.topscript" part="25" />
 
           <p>Here, we're creating a new and extended list, not
           changing the list we started with, as you can see
           below:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="26">
+          "code/guided-tour/main.topscript" part="26" />
 
           <div data-type="note">
             <h1>Semicolons Versus Commas</h1>
@@ -555,7 +555,7 @@
             "semicolons vs. commas">&nbsp;</a></p>
           </div>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="27">
+          "code/guided-tour/main.topscript" part="27" />
 
           <p>In particular, rather than a list of three strings,
           what we have is a singleton list containing a three-tuple
@@ -565,7 +565,7 @@
           tuple, even if there are no surrounding parens. So, we
           can write:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="28">
+          "code/guided-tour/main.topscript" part="28" />
 
           <p>to allocate a tuple of integers. This is generally
           considered poor style and should be avoided.</p>
@@ -576,7 +576,7 @@
           <code>[]</code> is used to represent the empty list and
           that <code>::</code> is right-associative:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="29">
+          "code/guided-tour/main.topscript" part="29" />
 
           <p>The <code>::</code> operator can only be used for
           adding one element to the front of the list, with the
@@ -584,7 +584,7 @@
           There's also a list concatenation operator,
           <code>@</code>, which can concatenate two lists:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="30">
+          "code/guided-tour/main.topscript" part="30" />
 
           <p>It's important to remember that, unlike
           <code>::</code>, this is not a constant-time operation.
@@ -604,7 +604,7 @@
           data-primary="lists" data-secondary=
           "pattern matching">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="31">
+          "code/guided-tour/main.topscript" part="31" />
 
           <p>By pattern matching using <code>::</code>, we've
           isolated and named the first element of the list
@@ -625,7 +625,7 @@
           <code>my_favorite_language</code>, we'll see that it
           works on nonempty list and fails on empty ones:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="32">
+          "code/guided-tour/main.topscript" part="32" />
 
           <p>You can avoid these warnings, and more importantly
           make sure that your code actually handles all of the
@@ -647,7 +647,7 @@
           <code>match</code> and doesn't trigger a compiler
           warning:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="33">
+          "code/guided-tour/main.topscript" part="33" />
 
           <p>The preceding code also includes our first comment.
           OCaml comments are bounded by <code>(*</code> and
@@ -688,7 +688,7 @@
           done using pattern matching. Here's a simple example of a
           function that sums the elements of a list:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="34">
+          "code/guided-tour/main.topscript" part="34" />
 
           <p>Following the common OCaml idiom, we use
           <code>hd</code> to refer to the head of the list and
@@ -703,7 +703,7 @@
           were a mathematical equation whose meaning you were
           unfolding step by step:</p>
           <link rel="import" data-code-language="ocaml" href=
-          "code/guided-tour/recursion.ml">
+          "code/guided-tour/recursion.ml" />
 
           <p>This suggests a reasonable mental model for what OCaml
           is actually doing to evaluate a recursive function.</p>
@@ -712,7 +712,7 @@
           well. Here's a function for removing sequential
           duplicates:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="35">
+          "code/guided-tour/main.topscript" part="35" />
 
           <p>Again, the first arm of the match is the base case,
           and the second is the inductive. Unfortunately, this code
@@ -720,7 +720,7 @@
           particular, we don't handle one-element lists. We can fix
           this warning by adding another case to the match:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="36">
+          "code/guided-tour/main.topscript" part="36" />
 
           <p>Note that this code used another variant of the list
           pattern, <code>[hd]</code>, to match a list with a single
@@ -751,7 +751,7 @@
         data-primary="data structures" data-secondary=
         "options">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="37">
+        "code/guided-tour/main.topscript" part="37" />
 
         <p>The function <code>divide</code> either returns
         <code>None</code> if the divisor is zero, or
@@ -769,7 +769,7 @@
         if the time is <code>None</code>), the current time is
         computed and used in its place:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="38">
+        "code/guided-tour/main.topscript" part="38" />
 
         <p>This example uses Core's <code>Time</code> module for
         dealing with time, as well as the <code>^</code> operator
@@ -791,19 +791,19 @@
           data-secondary="nested let binding">&nbsp;</a></p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/local_let.topscript">
+        "code/guided-tour/local_let.topscript" />
 
         <p>Note that the scope of the <code>let</code> binding is
         terminated by the double-semicolon, so the value of
         <code>x</code> is no longer available:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/local_let.topscript" part="1">
+        "code/guided-tour/local_let.topscript" part="1" />
 
         <p>We can also have multiple <code>let</code> statements in
         a row, each one adding a new variable binding to what came
         before:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/local_let.topscript" part="2">
+        "code/guided-tour/local_let.topscript" part="2" />
 
         <p>This kind of nested <code>let</code> binding is a common
         way of building up a complex expression, with each
@@ -844,7 +844,7 @@
       space:<a data-type="indexterm" data-primary="datatypes"
       data-secondary="defining new">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="41">
+      "code/guided-tour/main.topscript" part="41" />
 
       <p><code>point2d</code> is a <em>record</em> type, which you
       can think of as a tuple where the individual fields are
@@ -855,12 +855,12 @@
       data-primary="datatypes" data-secondary=
       "record types">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="42">
+      "code/guided-tour/main.topscript" part="42" />
 
       <p>And we can get access to the contents of these types using
       pattern matching:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="43">
+      "code/guided-tour/main.topscript" part="43" />
 
       <p>The pattern match here binds the variable
       <code>x_pos</code> to the value contained in the
@@ -875,19 +875,19 @@
       "indexterm" data-primary="fields" data-secondary=
       "field punning">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="44">
+      "code/guided-tour/main.topscript" part="44" />
 
       <p>Alternatively, we can use dot notation for accessing
       record fields:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="45">
+      "code/guided-tour/main.topscript" part="45" />
 
       <p>And we can of course include our newly defined types as
       components in larger types. Here, for example, are some types
       for modeling different geometric objects that contain values
       of type <code>point2d</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="46">
+      "code/guided-tour/main.topscript" part="46" />
 
       <p>Now, imagine that you want to combine multiple objects of
       these types together as a description of a multiobject scene.
@@ -899,7 +899,7 @@
       data-primary="variant types" data-secondary=
       "combining multiple object types with">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="47">
+      "code/guided-tour/main.topscript" part="47" />
 
       <p>The <code>|</code> character separates the different cases
       of the variant (the first <code>|</code> is optional), and
@@ -911,7 +911,7 @@
       point is in the interior of some element of a list of
       <code>scene_element</code>s:</p>
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="48">
+      "code/guided-tour/main.topscript" part="48" />
 
       <p>You might at this point notice that the use of
       <code>match</code> here is reminiscent of how we used
@@ -984,7 +984,7 @@
         "indexterm" data-primary="imperative programming"
         data-secondary="arrays">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="49">
+        "code/guided-tour/main.topscript" part="49" />
 
         <p>The <code>.(i)</code> syntax is used to refer to an
         element of an array, and the <code>&lt;-</code> syntax is
@@ -1022,7 +1022,7 @@
         data-primary="data structures" data-secondary=
         "mutable record fields">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="50">
+        "code/guided-tour/main.topscript" part="50" />
 
         <p>The fields in <code>running_sum</code> are designed to
         be easy to extend incrementally, and sufficient to compute
@@ -1033,7 +1033,7 @@
         <em>utop</em> to process the input, not to separate two
         declarations:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="51">
+        "code/guided-tour/main.topscript" part="51" />
 
         <p>We use the function <code>float</code> above, which is a
         convenient equivalent of <code>Float.of_int</code> provided
@@ -1042,7 +1042,7 @@
         <p>We also need functions to create and update
         <code>running_sum</code>s:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="52">
+        "code/guided-tour/main.topscript" part="52" />
 
         <p><code>create</code> returns a <code>running_sum</code>
         corresponding to the empty set, and <code>update rsum
@@ -1060,7 +1060,7 @@
         <code>List.iter</code>, which calls the function
         <code>~f</code> on each element of the provided list:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="53">
+        "code/guided-tour/main.topscript" part="53" />
 
         <p>It's worth noting that the preceding algorithm is
         numerically naive and has poor precision in the presence of
@@ -1085,19 +1085,19 @@
         data-primary="imperative programming" data-secondary=
         "ref type">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="54">
+        "code/guided-tour/main.topscript" part="54" />
 
         <p>There are a handful of useful functions and operators
         defined for <code>ref</code>s to make them more convenient
         to work with:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="55">
+        "code/guided-tour/main.topscript" part="55" />
 
         <p>There's nothing magical with these operators either. You
         can completely reimplement the <code>ref</code> type and
         all of these operators in just a few lines of code:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="56">
+        "code/guided-tour/main.topscript" part="56" />
 
         <p>The <code>'a</code> before the <code>ref</code>
         indicates that the <code>ref</code> type is polymorphic, in
@@ -1116,7 +1116,7 @@
         call a simple function on every element of a list, using a
         <code>ref</code> to accumulate the results:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="57">
+        "code/guided-tour/main.topscript" part="57" />
 
         <p>This isn't the most idiomatic way to sum up a list, but
         it shows how you can use a <code>ref</code> in place of a
@@ -1141,7 +1141,7 @@
         data-primary="imperative programming" data-secondary=
         "for and while loops">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="58">
+        "code/guided-tour/main.topscript" part="58" />
 
         <p>From a syntactic perspective, you should note the
         keywords that distinguish a <code>for</code> loop:
@@ -1150,7 +1150,7 @@
 
         <p>Here's an example run of this code:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="59">
+        "code/guided-tour/main.topscript" part="59" />
 
         <p>OCaml also supports <code>while</code> loops, as shown
         in the following function for finding the position of the
@@ -1158,7 +1158,7 @@
         <code>while</code> (like <code>for</code>) is also a
         keyword:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="60">
+        "code/guided-tour/main.topscript" part="60" />
 
         <p>As a side note, the preceding code takes advantage of
         the fact that <code>&amp;&amp;</code>, OCaml's And
@@ -1172,7 +1172,7 @@
         out-of-bounds error by rewriting the function to avoid the
         short-circuiting:</p>
         <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="61">
+        "code/guided-tour/main.topscript" part="61" />
 
         <p>The Or operator, <code>||</code>, short-circuits in a
         similar way to <code>&amp;&amp;</code>.</p>
@@ -1195,7 +1195,7 @@
       terminate expressions with <code>;;</code> here, since it's
       not required outside the toplevel:</p>
       <link rel="import" data-code-language="ocaml" href=
-      "code/guided-tour/sum.ml">
+      "code/guided-tour/sum.ml" />
 
       <p>This is our first use of OCaml's input and output
       routines. The function <code>read_and_accumulate</code> is a
@@ -1231,7 +1231,7 @@
         Core.<a data-type="indexterm" data-primary=
         "corebuild">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
-        "code/guided-tour/build_sum.out">
+        "code/guided-tour/build_sum.out" />
 
         <p>The <code>.native</code> suffix indicates that we're
         building a native-code executable, which we'll discuss more
@@ -1243,7 +1243,7 @@
         one per line, hitting <strong><code>Ctrl-D</code></strong>
         when we're done:</p>
         <link rel="import" data-code-language="console" href=
-        "code/guided-tour/sum.out">
+        "code/guided-tour/sum.out" />
 
         <p>More work is needed to make a really usable command-line
         program, including a proper command-line parsing interface
