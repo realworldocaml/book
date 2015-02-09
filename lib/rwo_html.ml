@@ -16,7 +16,7 @@ with sexp
 let of_string s =
   Netchannels.with_in_obj_channel
     (new Netchannels.input_string s)
-    Nethtml.parse
+    (Nethtml.parse ~dtd:[])
 
 let of_file file =
   Reader.file_contents file >>| of_string
