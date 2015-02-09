@@ -19,15 +19,10 @@
     marked by an explicit tag. As we'll see, when combined with
     pattern matching, variants give you a powerful way of
     representing complex data and of organizing the case-analysis
-    on that information.<a data-type="indexterm" data-primary=
-    "variant types" data-secondary=
-    "usefulness of">&nbsp;</a><a data-type="indexterm" id="DTvar"
-    data-primary="datatypes" data-secondary=
-    "variant types">&nbsp;</a></p>
+    on that information.</p>
 
     <p>The basic syntax of a variant type declaration is as
-    follows:<a data-type="indexterm" data-primary="variant types"
-    data-secondary="basic syntax of">&nbsp;</a></p>
+    follows:</p>
     <link rel="import" data-code-language="ocamlsyntax" href=
     "code/variants/variant.syntax" />
 
@@ -111,16 +106,7 @@
       <p>OCaml's type system can act as a refactoring tool, warning
       you of places where your code needs to be updated to match an
       interface change. This is particularly valuable in the
-      context of variants.<a data-type="indexterm" data-primary=
-      "errors" data-secondary=
-      "catch-all cases and refactoring">&nbsp;</a><a data-type=
-      "indexterm" data-primary="pattern matching" data-secondary=
-      "catch-all cases">&nbsp;</a><a data-type="indexterm"
-      data-primary="functional updates">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "refactoring">&nbsp;</a><a data-type="indexterm"
-      data-primary="variant types" data-secondary=
-      "catch-all cases and refactoring">&nbsp;</a></p>
+      context of variants.</p>
 
       <p>Consider what would happen if we were to change the
       definition of <code>color</code> to the following:</p>
@@ -164,8 +150,7 @@
       rendering the first 16 colors (the eight
       <code>basic_color</code>s in regular and bold) in the normal
       way, but renders everything else as white. We might have
-      written the function as follows:<a data-type="indexterm"
-      data-primary="exhaustion checks">&nbsp;</a></p>
+      written the function as follows:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/variants/catch_all.topscript" part="5" />
 
@@ -190,17 +175,7 @@
       and are mathematically similar to Cartesian products; and
       <em>sum types</em>, like variants, which let you combine
       multiple different possibilities into one type, and are
-      mathematically similar to disjoint unions.<a data-type=
-      "indexterm" id="RECvartyp" data-primary="records"
-      data-secondary="and variant types">&nbsp;</a><a data-type=
-      "indexterm" data-primary="sum types">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "product types">&nbsp;</a><a data-type="indexterm"
-      data-primary="datatypes" data-secondary=
-      "algebraic types">&nbsp;</a><a data-type="indexterm"
-      data-primary="algebraic data types">&nbsp;</a><a data-type=
-      "indexterm" id="VARTYPrec" data-primary="variant types"
-      data-secondary="and records">&nbsp;</a></p>
+      mathematically similar to disjoint unions.</p>
 
       <p>Algebraic data types gain much of their power from the
       ability to construct layered combinations of sums and
@@ -308,9 +283,7 @@
       <p>And it's explicit at the type level that
       <code>handle_log_entry</code> sees only
       <code>Log_entry</code> messages, <code>handle_logon</code>
-      sees only <code>Logon</code> messages, etc.<a data-type=
-      "indexterm" data-startref="RECvartyp">&nbsp;</a><a data-type=
-      "indexterm" data-startref="VARTYPrec">&nbsp;</a></p>
+      sees only <code>Logon</code> messages, etc.</p>
     </section>
 
     <section id="variants-and-recursive-data-structures" data-type=
@@ -322,13 +295,7 @@
       be done by walking through the design of a simple Boolean
       expression language. Such a language can be useful anywhere
       you need to specify filters, which are used in everything
-      from packet analyzers to mail clients.<a data-type=
-      "indexterm" data-primary=
-      "recursive data structures">&nbsp;</a><a data-type=
-      "indexterm" data-primary="data structures" data-secondary=
-      "recursive">&nbsp;</a><a data-type="indexterm" data-primary=
-      "variant types" data-secondary=
-      "and recursive data structures">&nbsp;</a></p>
+      from packet analyzers to mail clients.</p>
 
       <p>An expression in this language will be defined by the
       variant <code>expr</code>, with one tag for each kind of
@@ -442,11 +409,7 @@
       OCaml also supports so-called <em>polymorphic variants</em>.
       As we'll see, polymorphic variants are more flexible and
       syntactically more lightweight than ordinary variants, but
-      that extra power comes at a cost.<a data-type="indexterm"
-      data-primary="polymorphic variant types" data-secondary=
-      "basic syntax of">&nbsp;</a><a data-type="indexterm" id=
-      "VARTYPpoly" data-primary="variant types" data-secondary=
-      "polymorphic">&nbsp;</a></p>
+      that extra power comes at a cost.</p>
 
       <p>Syntactically, polymorphic variants are distinguished from
       ordinary variants by the leading backtick. And unlike
@@ -460,10 +423,7 @@
       tags, the compiler infers a new type that knows about all of
       those tags. Note that in the preceding example, the tag name
       (e.g., <code>`Int</code>) matches the type name
-      (<code>int</code>). This is a common convention in
-      OCaml.<a data-type="indexterm" data-primary=
-      "polymorphic variant types" data-secondary=
-      "automatic inference of">&nbsp;</a></p>
+      (<code>int</code>). This is a common convention in OCaml.</p>
 
       <p>The type system will complain if it sees incompatible uses
       of the same tag:</p>
@@ -504,9 +464,7 @@
       variant types that have different upper and lower bounds.
       Note that <code>Ok</code> and <code>Error</code> in the
       following example come from the <code>Result.t</code> type
-      from Core:<a data-type="indexterm" data-primary=
-      "polymorphic variant types" data-secondary=
-      "upper/lower bounds of">&nbsp;</a></p>
+      from Core:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/variants/main.topscript" part="10" />
 
@@ -526,9 +484,7 @@
         terminal type that adds yet more colors, say, by adding an
         alpha channel so you can specify translucent colors. We
         could model this extended set of colors as follows, using
-        an ordinary variant:<a data-type="indexterm" data-primary=
-        "polymorphic variant types" data-secondary=
-        "vs. ordinary variants">&nbsp;</a></p>
+        an ordinary variant:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/variants/main.topscript" part="11" />
 
@@ -586,12 +542,7 @@
           type, limiting the possible tags to those that can be
           handled by the match. If we add a catch-all case to our
           <code>match</code> statement, we end up with a type with
-          a lower bound:<a data-type="indexterm" data-primary=
-          "pattern matching" data-secondary=
-          "catch-all cases">&nbsp;</a><a data-type="indexterm"
-          data-primary="catch-all cases">&nbsp;</a><a data-type=
-          "indexterm" data-primary="polymorphic variant types"
-          data-secondary="and catch-all cases">&nbsp;</a></p>
+          a lower bound:</p>
         </div>
         <link rel="import" data-code-language="ocamltop" href=
         "code/variants/main.topscript" part="16" />
@@ -674,11 +625,7 @@
         <p>At first glance, polymorphic variants look like a strict
         improvement over ordinary variants. You can do everything
         that ordinary variants can do, plus it's more flexible and
-        more concise. What's not to like?<a data-type="indexterm"
-        data-primary="polymorphic variant types" data-secondary=
-        "vs. ordinary variants">&nbsp;</a><a data-type="indexterm"
-        data-primary="polymorphic variant types" data-secondary=
-        "drawbacks of">&nbsp;</a></p>
+        more concise. What's not to like?</p>
 
         <p>In reality, regular variants are the more pragmatic
         choice most of the time. That's because the flexibility of
@@ -742,9 +689,7 @@
         cover objects in <a href="#objects" data-type=
         "xref">#objects</a>, subtyping brings in a lot of
         complexity, and most of the time, that's complexity you
-        want to avoid.<a data-type="indexterm" data-startref=
-        "VARTYPpoly">&nbsp;</a><a data-type="indexterm"
-        data-startref="DTvar">&nbsp;</a></p>
+        want to avoid.</p>
       </section>
     </section>
   </section>

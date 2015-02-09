@@ -21,12 +21,7 @@
     format, and other times you want something that is easy for
     humans to edit. To this end, OCaml libraries provide several
     techniques for data serialization depending on what your
-    problem is.<a data-type="indexterm" data-primary="JSON data"
-    data-secondary="basics of">&nbsp;</a><a data-type="indexterm"
-    id="SERjson" data-primary="serialization formats"
-    data-secondary="JSON">&nbsp;</a><a data-type="indexterm" id=
-    "DATjson" data-primary="data serialization" data-secondary=
-    "with JSON">&nbsp;</a></p>
+    problem is.</p>
 
     <p>We'll start by using the popular and simple JSON data format
     and then look at other serialization formats later in the book.
@@ -61,16 +56,13 @@
       easier to parse and generate than alternatives such as XML.
       You'll run into JSON very often when working with modern web
       APIs, so we'll cover several different ways to manipulate it
-      in this chapter.<a data-type="indexterm" data-primary=
-      "RFC4627">&nbsp;</a></p>
+      in this chapter.</p>
 
       <p>JSON consists of two basic structures: an unordered
       collection of key/value pairs, and an ordered list of values.
       Values can be strings, Booleans, floats, integers, or null.
       Let's see what a JSON record for an example book description
-      looks like:<a data-type="indexterm" data-primary="values"
-      data-secondary="in JSON data">&nbsp;</a><a data-type=
-      "indexterm" data-primary="key/value pairs">&nbsp;</a></p>
+      looks like:</p>
       <link rel="import" data-code-language="json" href=
       "code/json/book.json" />
 
@@ -88,8 +80,7 @@
       the values are represented. For example, what if the
       preceding <code>pages</code> value is actually represented as
       a string value of "<code>450</code>" instead of an
-      integer?<a data-type="indexterm" data-primary="JSON data"
-      data-secondary="benefits and drawbacks of">&nbsp;</a></p>
+      integer?</p>
 
       <p>Our first task is to parse the JSON into a more structured
       OCaml type so that we can use static typing more effectively.
@@ -98,13 +89,7 @@
       OCaml model prefers compile-time static checking as well as
       unit tests. For example, using pattern matching can warn you
       if you've not checked that a value can be <code>Null</code>
-      as well as contain an actual value.<a data-type="indexterm"
-      data-primary="Yojson library" data-secondary=
-      "installation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="static checking">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "compile-time static checking">&nbsp;</a><a data-type=
-      "indexterm" data-primary="unit tests">&nbsp;</a></p>
+      as well as contain an actual value.</p>
 
       <div data-type="note">
         <h1>Installing the Yojson Library</h1>
@@ -128,11 +113,7 @@
 
       <p>The JSON specification has very few data types, and the
       <code>Yojson.Basic.json</code> type that follows is
-      sufficient to express any valid JSON structure:<a data-type=
-      "indexterm" data-primary="JSON data" data-secondary=
-      "parsing with Yojson">&nbsp;</a><a data-type="indexterm"
-      data-primary="Yojson library" data-secondary=
-      "parsing JSON with">&nbsp;</a></p>
+      sufficient to express any valid JSON structure:</p>
       <link rel="import" data-code-language="ocaml" href=
       "code/json/yojson_basic.mli" />
 
@@ -147,9 +128,7 @@
           <code>Assoc</code> and <code>List</code> types can
           contain references to further JSON values of different
           types. This is unlike the OCaml lists, whose contents
-          must be of a uniform type.<a data-type="indexterm"
-          data-primary="recursion" data-secondary=
-          "in json types">&nbsp;</a></p>
+          must be of a uniform type.</p>
         </li>
 
         <li>
@@ -163,9 +142,7 @@
           <p>The type definition uses polymorphic variants and not
           normal variants. This will become significant later, when
           we extend it with custom extensions to the JSON
-          format.<a data-type="indexterm" data-primary=
-          "polymorphic variant types" data-secondary=
-          "in JSON data">&nbsp;</a></p>
+          format.</p>
         </li>
       </ul>
 
@@ -217,11 +194,7 @@
 
       <p>Now that we've figured out how to parse the example JSON
       into an OCaml value, let's manipulate it from OCaml code and
-      extract specific fields:<a data-type="indexterm" id="VALjson"
-      data-primary="values" data-secondary=
-      "selecting from JSON structures">&nbsp;</a><a data-type=
-      "indexterm" id="JSONselval" data-primary="JSON data"
-      data-secondary="selecting values from">&nbsp;</a></p>
+      extract specific fields:</p>
       <link rel="import" data-code-language="ocaml" href=
       "code/json/parse_book.ml" />
 
@@ -233,10 +206,7 @@
       <p>This code introduces the <code>Yojson.Basic.Util</code>
       module, which contains <em>combinator</em> functions that let
       you easily map a JSON object into a more strongly typed OCaml
-      value.<a data-type="indexterm" data-primary="combinators"
-      data-secondary=
-      "functional combinators">&nbsp;</a><a data-type="indexterm"
-      data-primary="functional combinators">&nbsp;</a></p>
+      value.</p>
 
       <aside data-type="sidebar">
         <h5>Functional Combinators</h5>
@@ -274,11 +244,7 @@
       <p><code>Yojson</code> provides several combinators in the
       <code>Yojson.Basic.Util</code> module, some of which are
       listed in <a href="#table15_1" data-type=
-      "xref">#table15_1</a>.<a data-type="indexterm" data-primary=
-      "combinators" data-secondary=
-      "in Yojson library">&nbsp;</a><a data-type="indexterm"
-      data-primary="Yojson library" data-secondary=
-      "combinators in">&nbsp;</a></p>
+      "xref">#table15_1</a>.</p>
 
       <table id="table15_1">
         <caption>
@@ -342,18 +308,7 @@
       "xref">#variables-and-functions</a>. This lets us chain
       together multiple JSON selection functions and feed the
       output from one into the next one, without having to create
-      separate <code>let</code> bindings for each one.<a data-type=
-      "indexterm" data-primary=
-      "filter_string function">&nbsp;</a><a data-type="indexterm"
-      data-primary="to_init function">&nbsp;</a><a data-type=
-      "indexterm" data-primary="functions" data-secondary=
-      "to_init function">&nbsp;</a><a data-type="indexterm"
-      data-primary="to_string function">&nbsp;</a><a data-type=
-      "indexterm" data-primary="functions" data-secondary=
-      "to_string function">&nbsp;</a><a data-type="indexterm"
-      data-primary="functions" data-secondary=
-      "member functions">&nbsp;</a><a data-type="indexterm"
-      data-primary="member function">&nbsp;</a></p>
+      separate <code>let</code> bindings for each one.</p>
 
       <p>Let's start with selecting a single <code>title</code>
       field from the record:</p>
@@ -420,9 +375,7 @@
       is very powerful in combination with the OCaml type system.
       Many errors that don't make sense at runtime (for example,
       mixing up lists and objects) will be caught statically via a
-      type error.<a data-type="indexterm" data-startref=
-      "JSONselval">&nbsp;</a><a data-type="indexterm"
-      data-startref="VALjson">&nbsp;</a></p>
+      type error.</p>
     </section>
 
     <section id="constructing-json-values" data-type="sect1">
@@ -433,10 +386,7 @@
       type. You can just construct values of type <code>json</code>
       and call the <code>to_string</code> function on them. Let's
       remind ourselves of the <code>Yojson.Basic.json</code> type
-      again:<a data-type="indexterm" data-primary="values"
-      data-secondary="in JSON data">&nbsp;</a><a data-type=
-      "indexterm" data-primary="JSON data" data-secondary=
-      "constructing values">&nbsp;</a></p>
+      again:</p>
       <link rel="import" data-code-language="ocaml" href=
       "code/json/yojson_basic.mli" />
 
@@ -480,15 +430,7 @@
       specify a type for <code>person</code>. Type inference lets
       you write more succinct code without sacrificing runtime
       reliability, as all the uses of polymorphic variants are
-      still checked at compile time.<a data-type="indexterm"
-      data-primary="errors" data-secondary="type errors"
-      data-seealso="error handling">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "type checking">&nbsp;</a><a data-type="indexterm"
-      data-primary="polymorphic variant types" data-secondary=
-      "type checking and">&nbsp;</a><a data-type="indexterm"
-      data-primary="type inference" data-secondary=
-      "benefits of">&nbsp;</a></p>
+      still checked at compile time.</p>
 
       <aside data-type="sidebar">
         <h5>Polymorphic Variants and Easier Type Checking</h5>
@@ -537,11 +479,7 @@
       convenient human-readable, local format. The
       <code>Yojson.Safe.json</code> type is a superset of the
       <code>Basic</code> polymorphic variant and looks like
-      this:<a data-type="indexterm" data-primary="Yojson library"
-      data-secondary=
-      "extended JSON format support">&nbsp;</a><a data-type=
-      "indexterm" data-primary="JSON data" data-secondary=
-      "nonstandard extensions for">&nbsp;</a></p>
+      this:</p>
       <link rel="import" data-code-language="ocaml" href=
       "code/json/yojson_safe.mli" />
 
@@ -555,12 +493,7 @@
       reject your code until you make it compliant with the
       portable subset of JSON.</p>
 
-      <p>Yojson supports the following JSON
-      extensions:<a data-type="indexterm" data-primary=
-      "variant types" data-secondary=
-      "Yojson support for">&nbsp;</a><a data-type="indexterm"
-      data-primary="tuples">&nbsp;</a><a data-type="indexterm"
-      data-primary="lit suffix">&nbsp;</a></p>
+      <p>Yojson supports the following JSON extensions:</p>
 
       <dl>
         <dt>The <code>lit</code> suffix</dt>
@@ -610,23 +543,14 @@
       process is still pretty manual. When you implement larger
       specifications, it's much easier to generate the mappings
       from JSON schemas to OCaml values more mechanically than
-      writing conversion functions individually.<a data-type=
-      "indexterm" id="MAPjson" data-primary="mapping"
-      data-secondary=
-      "of JSON to OCaml types">&nbsp;</a><a data-type="indexterm"
-      id="JSONautomap" data-primary="JSON data" data-secondary=
-      "automatic mapping of">&nbsp;</a></p>
+      writing conversion functions individually.</p>
 
       <p>We'll cover an alternative JSON processing method that is
       better for larger-scale JSON handling now, using the <a href=
       "http://mjambon.com/atd-biniou-intro.html">OCaml</a> tool.
       This will introduce our first <em>Domain Specific
       Language</em> that compiles JSON specifications into OCaml
-      modules, which are then used throughout your
-      application.<a data-type="indexterm" data-primary=
-      "ATDgen Library" data-secondary=
-      "installation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="Domain Specific Language">&nbsp;</a></p>
+      modules, which are then used throughout your application.</p>
 
       <div data-type="note">
         <h1>Installing the ATDgen Library and Tool</h1>
@@ -653,9 +577,7 @@
         "command"><em>atdgen</em></span>) that outputs OCaml code
         to construct and parse JSON values. This means that you
         don't need to write any OCaml parsing code at all, as it
-        will all be autogenerated for you.<a data-type="indexterm"
-        data-primary="ATDgen Library" data-secondary=
-        "basics of">&nbsp;</a></p>
+        will all be autogenerated for you.</p>
 
         <p>Let's go straight into looking at an example of how this
         works, by using a small portion of the GitHub API. GitHub
@@ -664,9 +586,7 @@
         "http://developer.github.com">API</a>. The following ATD
         code fragment describes the GitHub authorization API (which
         is based on a pseudostandard web protocol known as
-        OAuth):<a data-type="indexterm" data-primary=
-        "GitHub API">&nbsp;</a><a data-type="indexterm"
-        data-primary="OAuth web protocol">&nbsp;</a></p>
+        OAuth):</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/json/github.atd" />
 
@@ -685,8 +605,7 @@
         for annotations within the specification. The annotations
         can customize the code that is generated for a particular
         target (of which the OCaml backend is of most interest to
-        us).<a data-type="indexterm" data-primary="ATDgen Library"
-        data-secondary="annotations in">&nbsp;</a></p>
+        us).</p>
 
         <p>For example, the preceding GitHub <code>scope</code>
         field is defined as a variant type, with each option
@@ -712,9 +631,7 @@
         "command"><em>atdgen</em></span> command-line tool. Let's
         run the compiler twice to generate some OCaml type
         definitions and a JSON serializing module that converts
-        between input data and those type definitions.<a data-type=
-        "indexterm" data-primary="ATDgen Library" data-secondary=
-        "compiling specifications to OCaml">&nbsp;</a></p>
+        between input data and those type definitions.</p>
 
         <p>The <span class="command"><em>atdgen</em></span> command
         will generate some new files in your current directory.
@@ -750,14 +667,7 @@
         You can control various aspects of the serializer by
         passing flags to <span class=
         "command"><em>atdgen</em></span>. The important ones for
-        JSON are:<a data-type="indexterm" data-primary=
-        "-j-defaults" data-primary-sortas=
-        "j-defaults">&nbsp;</a><a data-type="indexterm"
-        data-primary="-j-custom-fields FUNCTION"
-        data-primary-sortas="j-custom">&nbsp;</a><a data-type=
-        "indexterm" data-primary="-j-std flag" data-primary-sortas=
-        "j-std">&nbsp;</a><a data-type="indexterm" data-primary=
-        "flags">&nbsp;</a></p>
+        JSON are:</p>
 
         <dl>
           <dt><code>-j-std</code></dt>
@@ -811,11 +721,7 @@
         information via their API. Start by looking at the online
         <a href="http://developer.github.com/v3/orgs/">API
         documentation</a> for GitHub to see what the JSON schema
-        for retrieving the organization information looks
-        like.<a data-type="indexterm" data-primary=
-        "GitHub API">&nbsp;</a><a data-type="indexterm"
-        data-primary="ATDgen Library" data-secondary=
-        "example of">&nbsp;</a></p>
+        for retrieving the organization information looks like.</p>
 
         <p>Now create an ATD file that covers the fields we need.
         Any extra fields present in the response will be ignored by
@@ -888,11 +794,7 @@
         API in the <a href=
         "http://github.com/avsm/ocaml-github"><code>ocaml-github</code></a>
         repository online, which has lots of quirks typical in
-        real-world web APIs.<a data-type="indexterm" data-startref=
-        "MAPjson">&nbsp;</a><a data-type="indexterm" data-startref=
-        "JSONautomap">&nbsp;</a><a data-type="indexterm"
-        data-startref="SERjson">&nbsp;</a><a data-type="indexterm"
-        data-startref="DATjson">&nbsp;</a></p>
+        real-world web APIs.</p>
 
         <p>Our example shells out to <code>curl</code> on the
         command line to obtain the JSON, which is rather

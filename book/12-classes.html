@@ -19,18 +19,14 @@
     we need to introduce <em>classes</em>. In object-oriented
     programming, a class is a "recipe" for creating objects. The
     recipe can be changed by adding new methods and fields, or it
-    can be changed by modifying existing methods.<a data-type=
-    "indexterm" data-primary="programming" data-secondary=
-    "object-oriented programming (OOP)">&nbsp;</a></p>
+    can be changed by modifying existing methods.</p>
 
     <section id="ocaml-classes" data-type="sect1">
       <h1>OCaml Classes</h1>
 
       <p>In OCaml, class definitions must be defined as toplevel
       statements in a module. The syntax for a class definition
-      uses the keyword <code>class</code>:<a data-type="indexterm"
-      data-primary="classes" data-secondary=
-      "basic syntax for">&nbsp;</a></p>
+      uses the keyword <code>class</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/classes/istack.topscript" />
 
@@ -78,11 +74,7 @@
       <p>A class definition serves as the <em>constructor</em> for
       the class. In general, a class definition may have parameters
       that must be provided as arguments when the object is created
-      with <code>new</code>.<a data-type="indexterm" data-primary=
-      "polymorphism" data-secondary=
-      "class parameters and">&nbsp;</a><a data-type="indexterm"
-      data-primary="classes" data-secondary=
-      "class parameters and polymorphism">&nbsp;</a></p>
+      with <code>new</code>.</p>
 
       <p>Let's implement a variant of the <code>istack</code> class
       that can hold any values, not just integers. When defining
@@ -123,16 +115,7 @@
       common style for doing this in object-oriented languages is
       to define a class for an <code>iterator</code> object. An
       iterator provides a generic mechanism to inspect and traverse
-      the elements of a collection.<a data-type="indexterm"
-      data-primary="elements" data-secondary=
-      "traversing with iterator objects">&nbsp;</a><a data-type=
-      "indexterm" data-primary="iterators">&nbsp;</a><a data-type=
-      "indexterm" data-primary="objects" data-secondary=
-      "object types as interfaces">&nbsp;</a><a data-type=
-      "indexterm" data-primary="interfaces" data-secondary=
-      "object types as">&nbsp;</a><a data-type="indexterm"
-      data-primary="classes" data-secondary=
-      "object types as interfaces">&nbsp;</a></p>
+      the elements of a collection.</p>
 
       <p>There are two common styles for defining abstract
       interfaces like this. In Java, an iterator would normally be
@@ -184,8 +167,7 @@
         objects in favor of functional-style techniques. For
         example, the alternative <code>stack</code> class that
         follows takes a function <code>f</code> and applies it to
-        each of the elements on the stack:<a data-type="indexterm"
-        data-primary="functional iterators">&nbsp;</a></p>
+        each of the elements on the stack:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/classes/iter.topscript" part="4" />
 
@@ -218,10 +200,7 @@
       For example, the following class definition inherits from our
       <code>stack</code> class for strings and adds a new method
       <code>print</code> that prints all the strings on the
-      stack:<a data-type="indexterm" data-primary=
-      "inheritance">&nbsp;</a><a data-type="indexterm"
-      data-primary="classes" data-secondary=
-      "inheritance in">&nbsp;</a></p>
+      stack:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/classes/stack.topscript" part="2" />
 
@@ -242,8 +221,7 @@
 
       <p>To allow code in a different file or module to inherit
       from a class, we must expose it and give it a class type.
-      What is the class type?<a data-type="indexterm" data-primary=
-      "classes" data-secondary="class types">&nbsp;</a></p>
+      What is the class type?</p>
 
       <p>As an example, let's wrap up our <code>stack</code> class
       in an explicit module (we'll use explicit modules for
@@ -291,12 +269,7 @@
       dynamically, allowing a method in one class to call a method
       from another class, if both classes are inherited by the same
       object. This allows mutually recursive parts of an object to
-      be defined separately.<a data-type="indexterm" data-primary=
-      "recursion" data-secondary=
-      "open recursion">&nbsp;</a><a data-type="indexterm"
-      data-primary="open recursion">&nbsp;</a><a data-type=
-      "indexterm" data-primary="classes" data-secondary=
-      "open recursion in">&nbsp;</a></p>
+      be defined separately.</p>
 
       <p>This ability to define mutually recursive methods from
       separate components is a key feature of classes: achieving
@@ -345,13 +318,7 @@
       <p>Methods can be declared <em>private</em>, which means that
       they may be called by subclasses, but they are not visible
       otherwise (similar to a <em>protected</em> method in
-      C++).<a data-type="indexterm" data-primary="methods"
-      data-secondary="private methods">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "protected methods">&nbsp;</a><a data-type="indexterm"
-      data-primary="private methods">&nbsp;</a><a data-type=
-      "indexterm" data-primary="classes" data-secondary=
-      "private methods for">&nbsp;</a></p>
+      C++).</p>
 
       <p>For example, we may want to include methods in our
       <code>folder</code> class for handling each of the different
@@ -392,12 +359,7 @@
 
       <p>A <em>binary method</em> is a method that takes an object
       of <code>self</code> type. One common example is defining a
-      method for equality:<a data-type="indexterm" data-primary=
-      "methods" data-secondary=
-      "binary methods">&nbsp;</a><a data-type="indexterm"
-      data-primary="classes" data-secondary=
-      "binary methods for">&nbsp;</a><a data-type="indexterm"
-      data-primary="binary methods">&nbsp;</a></p>
+      method for equality:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/classes/binary.topscript" />
 
@@ -422,13 +384,7 @@
       likewise for <code>circle</code>. This problem is
       fundamental. Many languages solve it either with narrowing
       (with dynamic type checking), or by method overloading. Since
-      OCaml has neither of these, what can we do?<a data-type=
-      "indexterm" data-primary="methods" data-secondary=
-      "method overloading">&nbsp;</a><a data-type="indexterm"
-      data-primary="dynamic type checking">&nbsp;</a><a data-type=
-      "indexterm" data-primary="narrowing">&nbsp;</a><a data-type=
-      "indexterm" data-primary="polymorphism" data-secondary=
-      "polymorphic equality">&nbsp;</a></p>
+      OCaml has neither of these, what can we do?</p>
 
       <p>Since the problematic method is equality, one proposal we
       could consider is to just drop it from the base type
@@ -449,8 +405,7 @@
       described for narrowing. That is, introduce a
       <em>representation</em> type implemented using variants, and
       implement the comparison based on the representation
-      type:<a data-type="indexterm" data-primary=
-      "representation types">&nbsp;</a></p>
+      type:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/classes/binary.topscript" part="4" />
 
@@ -495,18 +450,7 @@
       method or field is not implemented. A class containing
       virtual methods must also be flagged <code>virtual</code> and
       cannot be directly instantiated (i.e., no object of this
-      class can be created).<a data-type="indexterm" data-primary=
-      "dispatching, dynamic vs. static">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "static dispatch">&nbsp;</a><a data-type="indexterm"
-      data-primary="dynamic dispatch">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "virtual methods">&nbsp;</a><a data-type="indexterm"
-      data-primary="methods" data-secondary=
-      "and virtual classes">&nbsp;</a><a data-type="indexterm"
-      data-primary="virtual classes">&nbsp;</a><a data-type=
-      "indexterm" data-primary="classes" data-secondary=
-      "virtual classes">&nbsp;</a></p>
+      class can be created).</p>
 
       <p>To explore this, let's extend our shapes examples to
       simple, interactive graphics. We will use the Async
@@ -532,8 +476,7 @@
 
         <p>Now let's add classes for making squares and circles. We
         include an <code>on_click</code> method for adding event
-        handlers to the shapes:<a data-type="indexterm"
-        data-primary="geometric shapes">&nbsp;</a></p>
+        handlers to the shapes:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/classes-async/verbose_shapes.ml" part="1" />
 
@@ -578,10 +521,7 @@
 
       <p>You can execute expressions during the instantiation of a
       class by placing them before the object expression or in the
-      initial value of a field:<a data-type="indexterm"
-      data-primary="initializers">&nbsp;</a><a data-type=
-      "indexterm" data-primary="classes" data-secondary=
-      "initializers for">&nbsp;</a></p>
+      initial value of a field:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/classes/initializer.topscript" />
 
@@ -610,12 +550,7 @@
       it can be quite useful, particularly with virtual classes.
       However, it can be tricky to use, particularly when the
       inheritance hierarchy is a graph rather than a tree, so it
-      should be used with care.<a data-type="indexterm"
-      data-primary="multiple inheritance" data-secondary=
-      "name resolution in">&nbsp;</a><a data-type="indexterm"
-      data-primary="inheritance">&nbsp;</a><a data-type="indexterm"
-      data-primary="classes" data-secondary=
-      "multiple inheritance in">&nbsp;</a></p>
+      should be used with care.</p>
 
       <section id="how-names-are-resolved" data-type="sect2">
         <h2>How Names Are Resolved</h2>
@@ -669,10 +604,7 @@
         is problematic in general, and one should use object
         composition instead. But regardless of who you talk to, you
         will rarely hear that multiple inheritance is great and
-        that you should use it widely.<a data-type="indexterm"
-        data-primary="mixin patterns">&nbsp;</a><a data-type=
-        "indexterm" data-primary="multiple inheritance"
-        data-secondary="mixin pattern and">&nbsp;</a></p>
+        that you should use it widely.</p>
 
         <p>In any case, if you're programming with objects, there's
         one general pattern for multiple inheritance that is both
@@ -703,8 +635,7 @@
         during animation. We create an <code>animated</code> mixin
         to provide this update list and ensure that the functions
         in it are called regular intervals when the shape is
-        animated:<a data-type="indexterm" data-primary="animation"
-        data-secondary="creating with mixins">&nbsp;</a></p>
+        animated:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/classes-async/shapes.ml" part="6" />
 
@@ -721,8 +652,7 @@
         <p>Since the <code>linear</code> and <code>harmonic</code>
         mixins are only used for their side effects, they can be
         inherited multiple times within the same object to produce
-        a variety of different animations:<a data-type="indexterm"
-        data-primary="linear mixins">&nbsp;</a></p>
+        a variety of different animations:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/classes-async/shapes.ml" part="9" />
       </section>
@@ -734,12 +664,7 @@
         <p>We finish our shapes module by creating a
         <code>main</code> function to draw some shapes on the
         graphical display and running that function using the Async
-        scheduler:<a data-type="indexterm" data-primary="animation"
-        data-secondary=
-        "displaying animated shapes">&nbsp;</a><a data-type=
-        "indexterm" data-primary="multiple inheritance"
-        data-secondary=
-        "displaying animated shapes with">&nbsp;</a></p>
+        scheduler:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/classes-async/shapes.ml" part="10" />
 
@@ -765,16 +690,7 @@
         into OCaml and is more useful as a learning tool than
         anything else. There are several third-party libraries that
         provide more sophisticated bindings to various graphics
-        subsystems:<a data-type="indexterm" data-primary=
-        "js_of_ocaml library">&nbsp;</a><a data-type="indexterm"
-        data-primary="LabIGL library">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "Lablgtk library">&nbsp;</a><a data-type="indexterm"
-        data-primary="graphics libraries">&nbsp;</a><a data-type=
-        "indexterm" data-primary="libraries" data-secondary=
-        "for graphics">&nbsp;</a><a data-type="indexterm"
-        data-primary="external libraries" data-secondary=
-        "for graphics">&nbsp;</a></p>
+        subsystems:</p>
 
         <dl>
           <dt>
