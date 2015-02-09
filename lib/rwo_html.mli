@@ -53,6 +53,9 @@ val print_elements_only
   -> t
   -> unit
 
+(** Filter out pure whitespace Data nodes. *)
+val filter_whitespace : t -> t
+
 
 (******************************************************************************)
 (** {2 Constructors} *)

@@ -108,6 +108,22 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   List.iter t ~f:(print_item 0)
 
 
+let filter_whitespace t =
+  let rec f item : item option = match item with
+    | Nethtml.Data x -> (
+      if String.for_all x ~f:Char.is_whitespace
+      then None
+      else Some item
+    )
+    | Nethtml.Element (name, attrs, childs) ->
+      Some (Nethtml.Element (
+        name,
+        attrs,
+        List.filter_map childs ~f
+      ) )
+  in
+  List.filter_map t ~f
+
 
 (******************************************************************************)
 (* Constructors                                                               *)
