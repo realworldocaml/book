@@ -1,10 +1,10 @@
 (** Code blocks. Book can contain code blocks for various languages. A
-    code block might be a complete compiliation unit, but more
+    code block might be a complete compilation unit, but more
     generally it is only a part of a larger compilation unit.
 
     Code is kept in separate files and imported into the HTMLBook
     source with <link rel="import"> nodes. Each source file must
-    represent a complete compliation unit if you intend to
+    represent a complete compilation unit if you intend to
     auto-evaluate the code.
 
     The syntax for indicating the start of a new part in a source file
