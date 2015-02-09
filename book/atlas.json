@@ -1,8 +1,8 @@
 {
   "branch": "master",
   "files": [
-    "01-titlepage.html",
-    "03-toc.html",
+    "titlepage.html",
+    "toc.html",
     "dedication.html",
     "ch00.html",
     "part1.html",
