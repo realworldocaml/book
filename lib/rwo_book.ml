@@ -473,6 +473,43 @@ let extract_code_from_1e_exn chapter =
 (******************************************************************************)
 (* Main Functions                                                             *)
 (******************************************************************************)
+let head : Html.item =
+  let open Html in
+  head [
+    meta ~a:["charset","utf-8"] [];
+    meta ~a:[
+      "name","viewport";
+      "content","width=device-width, initial-scale=1.0"
+    ] [];
+    title [data "Real World OCaml"];
+    link ~a:["rel","stylesheet"; "href","css/app.css"] [];
+    script ~a:["src","js/min/modernizr-min.js"] [];
+    script ~a:["src","//use.typekit.net/gfj8wez.js"] [];
+    script [data "try{Typekit.load();}catch(e){}"];
+  ]
+
+let title_bar : Html.item =
+  let open Html in
+  div ~a:["class","title-bar"] [
+    div ~a:["class","title"] [
+      h1 [data "Real World OCaml"];
+      nav [
+        a ~a:["href","#"] [data "Home"];
+        a ~a:["href","#"] [data "Table of Contents"];
+        a ~a:["href","#"] [data "Next chapter"];
+      ]
+    ]
+  ]
+
+let left_bar : Html.item =
+  let open Html in
+  div ~a:["class","left-column"] [
+    a ~a:["href","#"; "class","to-chapter"] [
+      small [data "Next Chapter"];
+      h5 [data "Next chapter"];
+    ]
+  ]
+
 let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
   let (/) = Filename.concat in
 
@@ -506,7 +543,38 @@ let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
     | Nethtml.Element (name, attrs, childs) -> (
       if is_import_node item then
         import_node_to_html (ok_exn (parse_import item))
-      else (
+
+      else match item with
+      | Nethtml.Element ("head",_,_) ->
+        return [head]
+
+      | Nethtml.Element ("html",attrs,childs) -> (
+        Deferred.List.map childs ~f:(fun x -> loop [x])
+        >>| List.concat
+        >>| fun childs ->
+        let attrs = ("class","no-js")::("lang","en")::attrs in
+        [Html.html ~a:attrs childs]
+      )
+
+      | Nethtml.Element ("body", attrs, childs) -> (
+        Deferred.List.map childs ~f:(fun x -> loop [x])
+        >>| List.concat
+        >>| fun childs ->
+        let main_content =
+          Html.div ~a:["class","wrap"] [
+            left_bar;
+            Html.article ~a:["class","main-body"] childs;
+          ]
+        in
+        [Html.body ~a:attrs [
+          title_bar;
+          main_content;
+          Html.script ~a:["src","js/jquery.min.js"] [];
+          Html.script ~a:["src","js/min/app-min.js"] [];
+        ] ]
+      )
+
+      | _ -> (
         Deferred.List.map childs ~f:(fun x -> loop [x])
         >>| List.concat
         >>| fun childs -> [Nethtml.Element (name, attrs, childs)]
