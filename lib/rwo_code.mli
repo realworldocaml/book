@@ -21,7 +21,7 @@
     consider the entire file to be a single part, numbered 0.
 
     In all functions taking an optional [?part] argument, the default
-    value is 0.
+    value is 0. Part numbers can be fractional.
 *)
 open Core.Std
 open Async.Std
@@ -80,7 +80,7 @@ type phrase = {
 val add_file_exn
   :  'a t
   -> lang:lang
-  -> run:(string -> (int * 'a) list Deferred.t)
+  -> run:(string -> (float * 'a) list Deferred.t)
   -> string
   -> 'a t Deferred.t
 
@@ -90,7 +90,7 @@ val split_parts_exn
   :  lang:lang
   -> filename:string
   -> string
-  -> (int * string) list
+  -> (float * string) list
 
 (** Split given file into its parts. The function
     [split_parts_file_exn ~lang] is suitable as the [run] argument of
@@ -98,7 +98,7 @@ val split_parts_exn
 val split_parts_of_file_exn
   :  lang:lang
   -> filename:string
-  -> (int * string) list Deferred.t
+  -> (float * string) list Deferred.t
 
 (** Split the given string on the delimiter ";;". The delimiter is
     retained in the output strings. Give [`Eol] to consider only ";;"
@@ -118,7 +118,7 @@ val split_ocaml_toplevel_phrases
 val run_ocaml_toplevel_file_exn
   :  ?repo_root:string
   -> string
-  -> (int * phrase list) list Deferred.t
+  -> (float * phrase list) list Deferred.t
 
 (** [run_file_exn file lang] evaluates [file] through an appropriate
     evaluator for [lang]. This function is suitable as the [run]
@@ -127,7 +127,7 @@ val run_file_exn
   :  ?repo_root:string
   -> string
   -> lang:lang
-  -> (int * phrase list) list Deferred.t
+  -> (float * phrase list) list Deferred.t
 
 
 (******************************************************************************)
@@ -144,7 +144,7 @@ val concat_toplevel_phrases : string list -> string list Or_error.t
 
 (** [wrap_in_pretty_box ~part lang file buf] *)
 val wrap_in_pretty_box
-  :  part:int
+  :  part:float
   -> string
   -> string
   -> Cow.Xml.t
@@ -155,9 +155,9 @@ val wrap_in_pretty_box
 (** {2 Map-style Operations } *)
 (******************************************************************************)
 val empty : _ t
-val find : 'a t -> ?part:int -> file:string -> 'a option
-val find_exn : 'a t -> ?part:int -> file:string -> 'a
-val files_langs_parts : _ t -> (string * lang * int) list
+val find : 'a t -> ?part:float -> file:string -> 'a option
+val find_exn : 'a t -> ?part:float -> file:string -> 'a
+val files_langs_parts : _ t -> (string * lang * float) list
 val file_is_mem : _ t -> string -> bool
 val lang_of_file : _ t -> string -> lang option
 

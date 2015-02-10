@@ -45,7 +45,7 @@ val chapters : ?repo_root:string -> unit -> chapter list Deferred.t
 type import = {
   data_code_language : Rwo_code.lang;
   href : string;
-  part : int option;
+  part : float option;
   childs : Rwo_html.item list;
 }
 
@@ -96,7 +96,7 @@ type p = {
   a_class : string; (** class value in main <a> *)
   em_data : string; (** data of <em> node under main <a> *)
   data1 : string option; (** data node before main <a> *)
-  part : int option; (** part number from data node after main <a> *)
+  part : float option; (** part number from data node after main <a> *)
   a2 : Rwo_html.item option; (** 2nd <a> node, i.e. 1st after main <a> *)
   a3 : Rwo_html.item option; (** 3rd <a> node, i.e. 2nd after main <a> *)
 }

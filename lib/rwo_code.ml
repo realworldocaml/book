@@ -22,8 +22,12 @@ type lang = [
 
 (* Map from file name to part number to value of type ['a]. In the
    code below we often refer to the outer map as [files] and the inner
-   map as [parts]. *)
-type 'a t = (lang * 'a Int.Map.t) String.Map.t
+   map as [parts].
+
+   We use float keys for part numbers, thus relying on floating point
+   equality. This should be okay given our usage of part numbers is
+   fairly simple. *)
+type 'a t = (lang * 'a Float.Map.t) String.Map.t
 
 type phrase = {
   input : string;
@@ -94,18 +98,18 @@ let lang_to_pygmentize_language x = Ok (lang_to_string x)
 (******************************************************************************)
 let empty = String.Map.empty
 
-let find files ?(part = 0) ~file =
+let find files ?(part = 0.) ~file =
   match String.Map.find files file with
   | None -> None
-  | Some (_,parts) -> Int.Map.find parts part
+  | Some (_,parts) -> Float.Map.find parts part
 
-let find_exn files ?(part = 0) ~file =
+let find_exn files ?(part = 0.) ~file =
   match String.Map.find files file with
   | None -> ok_exn (error "no data for file" file sexp_of_string)
-  | Some (_,parts) -> match Int.Map.find parts part with
+  | Some (_,parts) -> match Float.Map.find parts part with
     | None -> ok_exn (
       error "no data for requested part of file"
-        (file,part) <:sexp_of< string * int >>
+        (file,part) <:sexp_of< string * float >>
     )
     | Some x -> x
 
@@ -131,13 +135,13 @@ let lang_of_file files file =
     returned if the line does indicate start of a new part, but there
     is an error in the formatting. The [filename] is only for error
     messages. *)
-let line_to_part filename lang line : int option Or_error.t =
+let line_to_part filename lang line : float option Or_error.t =
   match lang with
   | `OCaml_toplevel
     -> (
       let lstripped = String.lstrip line in
       if String.is_prefix ~prefix:"#part " lstripped then (
-        try Ok (Some (Scanf.sscanf lstripped "#part %d" ident))
+        try Ok (Some (Scanf.sscanf lstripped "#part %f" ident))
         with _ ->
           error "invalid \"#part N\" line"
             (filename,line) <:sexp_of< string * string >>
@@ -149,7 +153,7 @@ let line_to_part filename lang line : int option Or_error.t =
     -> (
       let lstripped = String.lstrip line in
       if String.is_prefix ~prefix:"(* part " lstripped then (
-        try Ok (Some (Scanf.sscanf lstripped "(* part %d *)" ident))
+        try Ok (Some (Scanf.sscanf lstripped "(* part %f *)" ident))
         with _ ->
           error "invalid (* part N *) line"
             (filename,line) <:sexp_of< string * string >>
@@ -182,13 +186,13 @@ let split_parts_exn ~lang ~filename contents =
   | `Gas
   | `OCaml_rawtoplevel
     ->
-    [0,contents]
+    [0.,contents]
 
   | `OCaml_toplevel
   | `OCaml -> (
     String.split ~on:'\n' contents
     |> List.fold
-        ~init:(0, [ (0, Buffer.create 100) ])
+        ~init:(0., [ (0., Buffer.create 100) ])
         ~f:(fun (part,parts) line ->
           match ok_exn (line_to_part filename lang line) with
           | Some part ->
@@ -217,7 +221,7 @@ let split_parts_of_file_exn ~lang ~filename =
 
 let add_file_exn t ~lang ~run file =
   run file >>|
-  Int.Map.of_alist_exn >>| fun parts ->
+  Float.Map.of_alist_exn >>| fun parts ->
   String.Map.add t ~key:file ~data:(lang,parts)
 ;;
 
@@ -296,19 +300,19 @@ let split_ocaml_toplevel_phrases where s = match where with
     extension is not ".sexp". Raises exception in case of any
     error. *)
 let parse_ocaml_toplevel_phrases file
-    : (int * phrase list) option Deferred.t
+    : (float * phrase list) option Deferred.t
     =
   let base = Filename.basename file in
   match Filename.split_extension base with
   | (base, Some "sexp") -> (
-    match Filename.split_extension base with
-    | _, Some part -> (
-      let part = Int.of_string part in
+    match String.split ~on:'.' base with
+    | _::(_::_ as part_pieces) ->
+      let part = String.concat part_pieces ~sep:"." |> Float.of_string in
       Reader.file_contents file >>| fun contents ->
       let phrases = Sexp.of_string contents |> <:of_sexp< phrase list >> in
       Some (part, phrases)
-    )
-    | _, None ->
+    | [] -> assert false
+    | _ ->
       ok_exn (error "unexpected filename output by run_core_toplevel"
                 file sexp_of_string)
   )
@@ -443,10 +447,11 @@ let wrap_in_pretty_box ~part lang file (buf:Cow.Xml.t) =
       "http://github.com/realworldocaml/examples/blob/master/code/%s"
       file
   in
+  let string_of_float = Float.to_string in
   let part =
     match part with
-    | 0 -> []
-    | part -> <:html<, continued (part $int:part$)>>
+    | 0. -> []
+    | part -> <:html<, continued (part $flo:part$)>>
   in
   let info = <:html<$str:lang$ &lowast; <a href=$str:fileurl$>$str:file$</a> $part$ &lowast; <a href=$str:repourl$>all code</a>&>> in
   <:html<<div class="rwocode"><pre><code>$buf$</code></pre><div class="rwocodeinfo">$info$</div></div>&>>

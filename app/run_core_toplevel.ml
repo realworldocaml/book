@@ -22,8 +22,8 @@ let reset_toplevel () =
   Clflags.real_paths := false
 
 let build_dir = ref "."
-let ofile file part = sprintf "%s/%s.%d.md" !build_dir file part
-let ofile_html file part = sprintf "%s/%s.%d.html" !build_dir file part
+let ofile file part = sprintf "%s/%s.%f.md" !build_dir file part
+let ofile_html file part = sprintf "%s/%s.%f.html" !build_dir file part
 
 type outcome = [
   | `Normal of string * string * string (* exec output, stdout, stderr *)
@@ -193,9 +193,9 @@ let parse_file fullfile file =
       | `Normal _ -> ()
       | `Error s -> eprintf "Failed (%s): %s\n" s phrase; exit (-1)
     );
-  let parts = Int.Table.create () in
-  let html_parts = Int.Table.create () in
-  let part = ref 0 in
+  let parts = Float.Table.create () in
+  let html_parts = Float.Table.create () in
+  let part = ref 0. in
   let print_part key s =
     match Hashtbl.find parts key with
     | None ->
@@ -218,8 +218,8 @@ let parse_file fullfile file =
       In_channel.fold_lines ~init:[] ~f:(
         fun acc line ->
           if String.is_prefix line ~prefix:"#part" then begin
-            part := Scanf.sscanf line "#part %d" (fun p -> p);
-            eprintf "C: part %d -> %s\n%!" !part (ofile file !part); 
+            part := Scanf.sscanf line "#part %f" (fun p -> p);
+            eprintf "C: part %f -> %s\n%!" !part (ofile file !part); 
             []
           end else begin
             if String.is_suffix ~suffix:";;" line then begin

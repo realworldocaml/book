@@ -204,7 +204,7 @@ let run ?out_dir filename =
   In_channel.read_all filename
   |> Code.split_parts_exn ~lang:`OCaml_toplevel ~filename
   |> List.iter ~f:(fun (part,content) ->
-    eprintf "X: %s, part %d\n%s\n\n%!" filename part content;
+    eprintf "X: %s, part %f\n%s\n\n%!" filename part content;
     let data =
       ok_exn (Code.split_ocaml_toplevel_phrases `Anywhere content)
       |> List.map ~f:toploop_eval
@@ -212,7 +212,7 @@ let run ?out_dir filename =
       |> Sexp.to_string
     in
     let base = Filename.(basename filename |> chop_extension) in
-    let out_file = sprintf "%s/%s.%d.sexp" out_dir base part in
+    let out_file = sprintf "%s/%s.%f.sexp" out_dir base part in
     Out_channel.write_all out_file ~data
   )
 

@@ -10,7 +10,7 @@ module Html = Rwo_html
 type import = {
   data_code_language : Rwo_code.lang;
   href : string;
-  part : int option;
+  part : float option;
   childs : Rwo_html.item list;
 } with sexp
 
@@ -39,7 +39,7 @@ let parse_import item =
       >>= fun () ->
 
       (
-        try Ok (find "part" |> Option.map ~f:Int.of_string)
+        try Ok (find "part" |> Option.map ~f:Float.of_string)
         with exn -> error "invalid part" exn sexp_of_exn
       ) >>= fun part ->
 
@@ -64,7 +64,7 @@ let import_to_item x =
     Some ("rel", "import");
     Some ("data-code-language", Code.lang_to_string x.data_code_language);
     Some ("href", x.href);
-    (Option.map x.part ~f:(fun x -> "part", Int.to_string x));
+    (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
   ]
   |> List.filter_map ~f:ident
   |> fun a -> Html.link ~a []
@@ -93,7 +93,7 @@ type p = {
   a_class : string;
   em_data : string;
   data1 : string option;
-  part : int option;
+  part : float option;
   a2 : Rwo_html.item option;
   a3 : Rwo_html.item option;
 }
@@ -157,12 +157,12 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
 
   (** The 2nd data field, i.e. the one after the main <a>, optionally
       contains the part number. Parse it out. *)
-  let parse_data2 (x : string option) : int option Or_error.t =
+  let parse_data2 (x : string option) : float option Or_error.t =
     match x with
     | None -> Ok None
     | Some x -> (
       try
-        Ok (Some (Scanf.sscanf (String.strip x) "(part %d)" ident))
+        Ok (Some (Scanf.sscanf (String.strip x) "(part %f)" ident))
       with
         exn ->
           error "error parsing part number from data2 node"
@@ -418,13 +418,13 @@ let extract_code_from_1e_exn chapter =
 
   let code_block_to_string code_block lang part : string =
     let part = match part with
-      | None | Some 0 -> ""
+      | None | Some 0. -> ""
       | Some part -> (match lang with
-        | `OCaml_toplevel -> sprintf "\n#part %d\n" part
-        | `OCaml -> sprintf "\n\n(* part %d *)\n" part
+        | `OCaml_toplevel -> sprintf "\n#part %f\n" part
+        | `OCaml -> sprintf "\n\n(* part %f *)\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
-                    (part, lang) <:sexp_of< int * Code.lang >>
+                    (part, lang) <:sexp_of< float * Code.lang >>
           )
       )
     in
@@ -455,8 +455,8 @@ let extract_code_from_1e_exn chapter =
   let f (x:code_section) : Html.item =
     let i:import = ok_exn (code_section_to_import x) in
     (if Map.mem !imports i then
-        printf "WARNING: duplicate import for file %s part %d\n"
-          i.href (match i.part with Some x -> x | None -> (-1))
+        printf "WARNING: duplicate import for file %s part %f\n"
+          i.href (match i.part with Some x -> x | None -> (-1.))
      else
         imports := Map.add !imports ~key:i ~data:x.pre.code_block;
     );
