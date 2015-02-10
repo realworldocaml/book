@@ -69,6 +69,7 @@ val data : string -> item
 
 val div : ?a:attributes -> t -> item
 val span : ?a:attributes -> t -> item
+val p : ?a:attributes -> t -> item
 val pre : ?a:attributes -> t -> item
 val article : ?a:attributes -> t -> item
 val body : ?a:attributes -> t -> item
@@ -89,6 +90,7 @@ val h5 : ?a:attributes -> t -> item
 val h6 : ?a:attributes -> t -> item
 
 val small : ?a:attributes -> t -> item
+val sup : ?a:attributes -> t -> item
 
 val table : ?a:attributes -> t -> item
 val thead : ?a:attributes -> t -> item
@@ -107,6 +109,7 @@ val script : ?a:attributes -> t -> item
 val link : ?a:attributes -> t -> item
 
 val nav : ?a:attributes -> t -> item
+val footer : ?a:attributes -> t -> item
 
 
 (******************************************************************************)

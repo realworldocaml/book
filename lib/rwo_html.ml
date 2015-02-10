@@ -138,6 +138,7 @@ let data s = Nethtml.Data s
 
 let div = item "div"
 let span = item "span"
+let p = item "p"
 let pre = item "pre"
 let article = item "article"
 let body = item "body"
@@ -158,6 +159,7 @@ let h5 = item "h5"
 let h6 = item "h6"
 
 let small = item "small"
+let sup = item "sup"
 
 let table = item "table"
 let thead = item "thead"
@@ -176,6 +178,7 @@ let script = item "script"
 let link = item "link"
 
 let nav = item "nav"
+let footer = item "footer"
 
 
 (******************************************************************************)

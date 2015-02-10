@@ -545,31 +545,58 @@ let head : Html.item =
     script [data "try{Typekit.load();}catch(e){}"];
   ]
 
-let title_bar : Html.item =
+let title_bar next_chapter : Html.item =
   let open Html in
   div ~a:["class","title-bar"] [
     div ~a:["class","title"] [
       h1 [data "Real World OCaml"];
-      nav [
-        a ~a:["href","#"] [data "Home"];
-        a ~a:["href","#"] [data "Table of Contents"];
-        a ~a:["href","#"] [data "Next chapter"];
-      ]
+      h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
+      nav (
+        (a ~a:["href","toc.html"] [data "Table of Contents"])::
+        (a ~a:["href","faqs.html"] [data "FAQs"])::
+        (match next_chapter with
+        | None -> []
+        | Some x -> [a ~a:["href",x.filename] [data ("Next: " ^ x.title)]]
+        )
+      )
     ]
   ]
 
-let left_bar next_chapter : Html.item =
+let next_chapter_footer next_chapter : Html.item option =
   let open Html in
-  div ~a:["class","left-column"] (
-    match next_chapter with
-    | None -> []
-    | Some x ->
-      [a ~a:["href",x.filename; "class","to-chapter"] [
-        small [data "Next Chapter"];
-        h5 [data x.title];
-       ]
+  match next_chapter with
+  | None -> None
+  | Some x -> Some (
+    a ~a:["class","next-chapter"; "href", x.filename] [
+      div ~a:["class","content"] [
+        h1 [
+          small [data (sprintf "Next: Chapter %d" x.number)];
+          data x.title
+        ]
       ]
+    ]
   )
+
+let footer : Html.item =
+  let open Html in
+  let links = [
+    "http://twitter.com/realworldocaml", "@realworldocaml";
+    "http://twitter.com/yminsky", "@yminsky";
+    "http://twitter.com/avsm", "@avsm";
+    "https://plus.google.com/111219778721183890368", "+hickey";
+    "https://github.com/realworldocaml", "Source on Github";
+    "http://www.goodreads.com/book/show/16087552-real-world-ocaml", "Goodreads";
+  ]
+  |> List.map ~f:(fun (href,text) -> li [a ~a:["href",href] [data text]])
+  |> ul
+  in
+  footer [
+    div ~a:["class","content"] [
+      links;
+      p [data "Copyright 2012-2014 \
+         Jason Hickey, Anil Madhavapeddy and Yaron Minsky."];
+    ]
+  ]
 
 let chapter_to_HTMLBook_exn repo_root chapters chapter_file
     : Html.t Deferred.t
@@ -579,6 +606,7 @@ let chapter_to_HTMLBook_exn repo_root chapters chapter_file
   let chapter = List.find_exn chapters ~f:(fun x ->
     x.filename = Filename.basename chapter_file)
   in
+  let next_chapter = next_chapter chapters chapter in
 
   (* OCaml code blocks *)
   let code : Code.phrase list Code.t ref = ref Code.empty in
@@ -629,16 +657,19 @@ let chapter_to_HTMLBook_exn repo_root chapters chapter_file
       | Nethtml.Element ("body", attrs, childs) -> (
         Deferred.List.map childs ~f:(fun x -> loop [x]) >>= fun childs ->
         return (List.concat childs) >>= fun childs ->
-        return (Html.div ~a:["class","wrap"] [
-          left_bar (next_chapter chapters chapter);
-          Html.article ~a:["class","main-body"] childs;
+        return Html.(div ~a:["class","wrap"] [
+          div ~a:["class","left-column"] [];
+          article ~a:["class","main-body"] childs;
         ]) >>| fun main_content ->
-        [Html.body ~a:attrs [
-          title_bar;
-          main_content;
-          Html.script ~a:["src","js/jquery.min.js"] [];
-          Html.script ~a:["src","js/min/app-min.js"] [];
-        ] ]
+        [Html.body ~a:attrs (List.filter_map ~f:ident [
+          Some (title_bar next_chapter);
+          Some (main_content);
+          next_chapter_footer next_chapter;
+          Some footer;
+          Some (Html.script ~a:["src","js/jquery.min.js"] []);
+          Some (Html.script ~a:["src","js/min/app-min.js"] []);
+         ] )
+        ]
       )
 
       | _ -> (
