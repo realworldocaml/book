@@ -24,10 +24,10 @@
     "command"><em>utop</em></span>, a shell that lets you type in
     expressions and evaluate them interactively. <span class=
     "command"><em>utop</em></span> is an easier-to-use version of
-    OCaml's standard toplevel (which you can start by typing
-    <em>ocaml</em> at the command line). These instructions will
-    assume you're using <span class="command"><em>utop</em></span>
-    specifically.</p>
+    OCaml's standard toplevel (which you can start by
+    typing <em>ocaml</em> at the command line). These instructions
+    will assume you're
+    using <span class="command"><em>utop</em></span> specifically.</p>
 
     <p>Before getting started, make sure you have a working OCaml
     installation so you can try out the examples as you read
@@ -36,16 +36,21 @@
     <section id="ocaml-as-a-calculator" data-type="sect1">
       <h1>OCaml as a Calculator</h1>
 
-      <p>The first thing you need to do when using Core is to open
-      <code>Core.Std</code>:</p>
+      <p>The first thing you need to do when using Core is to
+      open <code>Core_kernel.Std</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" />
 
-      <p>This makes the definitions in Core available and is
-      required for many of the examples in the tour and in the
-      remainder of the book.</p>
+      <p><code>Core_kernel</code> is a highly subset of the full
+	<code>Core</code> library.  By opening it, we make the
+	definitions it contains available without having to
+	reference <code>Core_kernel</code> explicitly.  This is
+	required for many of the examples in the tour and in the
+	remainder of the book.</p>
 
       <p>Now let's try a few simple numerical calculations:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="1" />
 
@@ -105,6 +110,7 @@
       <p>We can also create a variable to name the value of a given
       expression, using the <code>let</code> keyword. This is known
       as a <em>let binding</em>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="2" />
 
@@ -118,6 +124,7 @@
       except for <code>_</code> and <code>'</code>, and variables
       must start with a lowercase letter or an underscore. Thus,
       these are legal:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="3" />
 
@@ -126,6 +133,7 @@
       variables starting with an underscore.</p>
 
       <p>The following examples, however, are not legal:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="4" />
 
@@ -139,6 +147,7 @@
 
       <p>The <code>let</code> syntax can also be used to define a
       function:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="5" />
 
@@ -188,6 +197,7 @@
       arguments: a test function and two integer arguments. The
       function returns the sum of the integers that pass the
       test:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="7" />
 
@@ -196,6 +206,7 @@
       integer and returns a boolean, and that the remaining two
       arguments are integers. Here's an example of this function in
       action:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="8" />
 
@@ -271,6 +282,7 @@
 
         <p>Here's an annotated version of
         <code>sum_if_true</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="9" />
 
@@ -287,6 +299,7 @@
         <p>Sometimes, there isn't enough information to fully
         determine the concrete type of a given value. Consider this
         function.</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="10" />
 
@@ -321,10 +334,12 @@
 
         <p>The generic type of <code>first_if_true</code> allows us
         to write this:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="11" />
 
         <p>As well as this:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="12" />
 
@@ -335,6 +350,7 @@
         integers in the second). But we can't mix and match two
         different concrete types for <code>'a</code> in the same
         use of <code>first_if_true</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="13" />
 
@@ -360,6 +376,7 @@
           that difference is still there. Generally, type errors
           like this one:</p>
         </div>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="14" />
 
@@ -367,6 +384,7 @@
         that both its arguments be of type <code>int</code>),
         whereas errors that can't be caught by the type system,
         like division by zero, lead to runtime exceptions:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="15" />
 
@@ -395,6 +413,7 @@
         an ordered collection of values that can each be of a
         different type. You can create a tuple by joining values
         together with a comma:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="16" />
 
@@ -406,6 +425,7 @@
 
         <p>You can extract the components of a tuple using OCaml's
         pattern-matching syntax, as shown below:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="17" />
 
@@ -415,6 +435,7 @@
         <code>y</code>, each bound to different components of the
         value being matched. These can now be used in subsequent
         expressions:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="18" />
 
@@ -427,6 +448,7 @@
         pair of <code>float</code>s. The pattern-matching syntax
         lets us get at the values we need with a minimum of
         fuss:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="19" />
 
@@ -445,11 +467,13 @@
         potentially of different types, lists let you hold any
         number of items of the same type. Consider the following
         example:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="20" />
 
         <p>Note that you can't mix elements of different types in
         the same list, unlike tuples:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="21" />
 
@@ -461,12 +485,14 @@
           can access values from within a module by using dot
           notation. For example, this is how we compute the length
           of a list:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="22" />
 
           <p>Here's something a little more complicated. We can
           compute the list of the lengths of each language as
           follows:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="23" />
 
@@ -481,6 +507,7 @@
           rather than by position, and thus allow you to change the
           order in which arguments are presented to a function
           without changing its behavior, as you can see here:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="24" />
 
@@ -495,12 +522,14 @@
           <p>In addition to constructing lists using brackets, we
           can use the operator <code>::</code> for adding elements
           to the front of a list:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="25" />
 
           <p>Here, we're creating a new and extended list, not
           changing the list we started with, as you can see
           below:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="26" />
 
@@ -514,6 +543,7 @@
             that your code compiles but doesn't do quite what you
             might expect:</p>
           </div>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="27" />
 
@@ -524,6 +554,7 @@
           <p>This example uncovers the fact that commas create a
           tuple, even if there are no surrounding parens. So, we
           can write:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="28" />
 
@@ -535,6 +566,7 @@
           declarations are all equivalent. Note that
           <code>[]</code> is used to represent the empty list and
           that <code>::</code> is right-associative:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="29" />
 
@@ -543,6 +575,7 @@
           list terminating at <code>[]</code>, the empty list.
           There's also a list concatenation operator,
           <code>@</code>, which can concatenate two lists:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="30" />
 
@@ -559,6 +592,7 @@
           matching. List patterns are based on the two list
           constructors, <code>[]</code> and <code>::</code>. Here's
           a simple example:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="31" />
 
@@ -580,6 +614,7 @@
           <code>[]</code>, the empty list. If we try to run
           <code>my_favorite_language</code>, we'll see that it
           works on nonempty list and fails on empty ones:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="32" />
 
@@ -714,14 +749,18 @@
         optional time and a message. If no time is provided (i.e.,
         if the time is <code>None</code>), the current time is
         computed and used in its place:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="38" />
 
-        <p>This example uses Core's <code>Time</code> module for
-        dealing with time, as well as the <code>^</code> operator
-        for concatenating strings. The concatenation operator is
-        provided as part of the <code>Pervasives</code> module,
-        which is automatically opened in every OCaml program.</p>
+        <p>
+	  Note that we opened <code>Core.Std</code> here so we could
+	  make use of Core's <code>Time</code> module for dealing with
+	  time, which is only available on Unix.  We also used
+	  the <code>^</code> operator for concatenating strings. The
+	  concatenation operator is provided as part of
+          the <code>Pervasives</code> module, which is automatically
+          opened in every OCaml program.</p>
 
         <div data-type="note">
           <h1>Nesting lets with let and in</h1>
