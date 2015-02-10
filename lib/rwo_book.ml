@@ -471,6 +471,63 @@ let extract_code_from_1e_exn chapter =
 
 
 (******************************************************************************)
+(* Chapters                                                                   *)
+(******************************************************************************)
+type chapter = {
+  number : int;
+  filename : string;
+  title : string;
+}
+
+let get_title file (t:Html.t) : string =
+  let rec item_to_string = function
+    | Nethtml.Data x -> x
+    | Nethtml.Element ("span", _, childs) -> items_to_string childs
+    | _ -> failwithf "%s: can't extract title string from h1 element" file ()
+  and items_to_string items =
+    String.concat ~sep:"" (List.map items ~f:item_to_string)
+  in
+  Html.get_all_nodes "h1" t
+  |> function
+    | [] ->
+      failwithf "%s: cannot get title, no h1 element found" file ()
+    | (Nethtml.Element ("h1", _, childs))::_ -> items_to_string childs
+    | _ -> assert false
+
+let is_chapter_file file : bool =
+  Filename.basename file
+  |> String.split ~on:'-'
+  |> List.hd_exn
+  |> fun x ->
+    try ignore (Int.of_string x); true
+    with _ -> false
+
+let chapters ?(repo_root=".") () : chapter list Deferred.t =
+  let (/) = Filename.concat in
+  let book_dir = repo_root/"book" in
+  let number basename =
+    String.split basename ~on:'-'
+    |> List.hd_exn
+    |> Int.of_string
+  in
+  Sys.readdir book_dir >>= fun a ->
+  return (Array.to_list a) >>= fun l ->
+  return (List.filter l ~f:is_chapter_file) >>=
+  Deferred.List.map ~f:(fun basename ->
+    Html.of_file (book_dir/basename) >>| fun html ->
+    {
+      number = number basename;
+      filename = basename;
+      title = get_title (book_dir/basename) html;
+    }
+  ) >>|
+  List.sort ~cmp:(fun a b -> Int.compare a.number b.number)
+
+let next_chapter chapters curr_chapter : chapter option =
+  List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)
+
+
+(******************************************************************************)
 (* Main Functions                                                             *)
 (******************************************************************************)
 let head : Html.item =
@@ -501,17 +558,27 @@ let title_bar : Html.item =
     ]
   ]
 
-let left_bar : Html.item =
+let left_bar next_chapter : Html.item =
   let open Html in
-  div ~a:["class","left-column"] [
-    a ~a:["href","#"; "class","to-chapter"] [
-      small [data "Next Chapter"];
-      h5 [data "Next chapter"];
-    ]
-  ]
+  div ~a:["class","left-column"] (
+    match next_chapter with
+    | None -> []
+    | Some x ->
+      [a ~a:["href",x.filename; "class","to-chapter"] [
+        small [data "Next Chapter"];
+        h5 [data x.title];
+       ]
+      ]
+  )
 
-let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
+let chapter_to_HTMLBook_exn repo_root chapters chapter_file
+    : Html.t Deferred.t
+    =
   let (/) = Filename.concat in
+  let import_base_dir = Filename.dirname chapter_file in
+  let chapter = List.find_exn chapters ~f:(fun x ->
+    x.filename = Filename.basename chapter_file)
+  in
 
   (* OCaml code blocks *)
   let code : Code.phrase list Code.t ref = ref Code.empty in
@@ -528,23 +595,26 @@ let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
       code := new_code
   in
 
-  let rec loop html =
-    let import_node_to_html (i:import) : Html.t Deferred.t =
-      let href = import_base_dir/i.href in
-      update_code i.data_code_language href
-      >>| fun () ->
-      Code.find_exn !code ~file:href ?part:i.part
-      |> Code.phrases_to_html i.data_code_language
-      |> fun x -> [x]
-    in
+  let import_node_to_html (i:import) : Html.t Deferred.t =
+    let href = import_base_dir/i.href in
+    update_code i.data_code_language href
+    >>| fun () ->
+    Code.find_exn !code ~file:href ?part:i.part
+    |> Code.phrases_to_html i.data_code_language
+    |> fun x -> [x]
+  in
 
+  let rec loop html =
     (Deferred.List.map html ~f:(fun item -> match item with
-    | Nethtml.Data _ -> return [item]
+    | Nethtml.Data _ ->
+      return [item]
+
     | Nethtml.Element (name, attrs, childs) -> (
       if is_import_node item then
         import_node_to_html (ok_exn (parse_import item))
 
       else match item with
+
       | Nethtml.Element ("head",_,_) ->
         return [head]
 
@@ -557,15 +627,12 @@ let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
       )
 
       | Nethtml.Element ("body", attrs, childs) -> (
-        Deferred.List.map childs ~f:(fun x -> loop [x])
-        >>| List.concat
-        >>| fun childs ->
-        let main_content =
-          Html.div ~a:["class","wrap"] [
-            left_bar;
-            Html.article ~a:["class","main-body"] childs;
-          ]
-        in
+        Deferred.List.map childs ~f:(fun x -> loop [x]) >>= fun childs ->
+        return (List.concat childs) >>= fun childs ->
+        return (Html.div ~a:["class","wrap"] [
+          left_bar (next_chapter chapters chapter);
+          Html.article ~a:["class","main-body"] childs;
+        ]) >>| fun main_content ->
         [Html.body ~a:attrs [
           title_bar;
           main_content;
@@ -582,12 +649,23 @@ let html_to_HTMLBook_exn repo_root import_base_dir html : Html.t Deferred.t =
     ) ) )
     >>| List.concat
   in
+  Html.of_file chapter_file >>= fun html ->
   loop html
 ;;
 
+let non_chapter_to_HTMLBook_exn filename : Html.t Deferred.t =
+  Html.of_file filename
+
+let file_to_HTMLBook_exn repo_root filename =
+  if is_chapter_file filename then (
+    chapters ~repo_root () >>= fun chapters ->
+    chapter_to_HTMLBook_exn repo_root chapters filename
+  )
+  else
+    non_chapter_to_HTMLBook_exn filename
+
 let to_HTMLBook_exn ?(repo_root=".") in_file out_dir =
   let out_file = Filename.(concat out_dir (basename in_file)) in
-  Html.of_file in_file >>=
-  html_to_HTMLBook_exn repo_root (Filename.dirname in_file) >>= fun html ->
+  file_to_HTMLBook_exn repo_root in_file >>= fun html ->
   return (Html.to_string html) >>= fun contents ->
   Writer.save out_file ~contents

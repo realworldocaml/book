@@ -11,13 +11,32 @@ open Async.Std
 
     - replacing <link rel="import"> nodes with <pre> nodes.
 
-    The output is written to a file of the same name in [out_dir].
+    - adding standard header, footer, etc.
+
+    The output is written to a file of the same name in [out_dir]. You
+    must provide [in_file] as a path relative to the current working
+    directory.
 *)
 val to_HTMLBook_exn
   :  ?repo_root:string
   -> string
   -> string
   -> unit Deferred.t
+
+
+
+(******************************************************************************)
+(** {2 Chapters *)
+(******************************************************************************)
+type chapter = {
+  number : int;
+  filename : string; (** basename *)
+  title : string;
+}
+
+(** Return all chapter numbers and names, ordered by chapter
+    number. *)
+val chapters : ?repo_root:string -> unit -> chapter list Deferred.t
 
 
 (******************************************************************************)
