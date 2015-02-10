@@ -38,8 +38,8 @@ end
 (******************************************************************************)
 (* `build` command                                                            *)
 (******************************************************************************)
-let build : Command.t = Command.async
-  ~summary:"build commands"
+let build_chapter : Command.t = Command.async
+  ~summary:"build chapter"
   Command.Spec.(
     empty
     +> Param.repo_root
@@ -49,6 +49,26 @@ let build : Command.t = Command.async
   (fun repo_root out_dir file () ->
     Book.to_HTMLBook_exn ~repo_root file out_dir
   )
+
+let build_frontpage : Command.t = Command.async
+  ~summary:"build frontpage"
+  Command.Spec.(
+    empty
+    +> Param.repo_root
+    +> Param.out_dir
+  )
+  (fun repo_root out_dir () ->
+    Book.frontpage ~repo_root () >>= fun item ->
+    return (Html.to_string [item]) >>= fun contents ->
+    Writer.save (Filename.concat out_dir "index.html") ~contents
+  )
+
+let build : Command.t = Command.group
+  ~summary:"build commands"
+  [
+    "chapter", build_chapter;
+    "frontpage", build_frontpage;
+  ]
 
 
 (******************************************************************************)

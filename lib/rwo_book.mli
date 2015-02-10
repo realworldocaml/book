@@ -23,6 +23,8 @@ val to_HTMLBook_exn
   -> string
   -> unit Deferred.t
 
+(** Make frontpage. *)
+val frontpage : ?repo_root:string -> unit -> Rwo_html.item Deferred.t
 
 
 (******************************************************************************)

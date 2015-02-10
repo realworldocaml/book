@@ -23,9 +23,10 @@ LIB_PACKAGES = core async sexplib.syntax \
 
 APP_PACKAGES = $(LIB_PACKAGES)
 
-HTML_PAGES[] =
-  $(basename $(ls book/*.html))
-
+HTML_CHAPTER_FILES[] = $(basename $(ls book/[0-9][0-9]*.html))
+HTML_FILES[] =
+  $(HTML_CHAPTER_FILES)
+  index.html
 
 ################################################################################
 # Build Parameters
@@ -98,10 +99,15 @@ OCAMLFINDFLAGS = -syntax camlp4o
   # HTML Book
   .SUBDIRS: _build/site
 
-    %.html: $(ROOT)/book/%.html ../app/rwo_app
-      $(ROOT)/_build/app/rwo_app build -o ./ -repo-root $(ROOT) $<
+    foreach(file => ..., $(HTML_CHAPTER_FILES))
+      $(file): $(ROOT)/book/$(file) ../app/rwo_app
+        $(ROOT)/_build/app/rwo_app build chapter -o ./ -repo-root $(ROOT) $<
 
-    .DEFAULT: $(HTML_PAGES)
+
+    index.html: ../app/rwo_app
+      $(ROOT)/_build/app/rwo_app build frontpage -o ./ -repo-root $(ROOT)
+
+    .DEFAULT: $(HTML_FILES)
       rsync -av $(ROOT)/book/images ./
 
 
