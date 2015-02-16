@@ -1,5 +1,5 @@
 type <record-name> =
-    { <field> : <type> ;
-    <field> : <type> ;
-    ...
+    { <field> : <type>;
+      <field> : <type>;
+      ...
     }

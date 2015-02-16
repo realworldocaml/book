@@ -49,12 +49,13 @@
     data-code-language="ocamltop" href= "code/records/main.topscript"
     part="1" />
 
-    <p>You might wonder how the compiler inferred that
-    <code>my_host</code> is of type <code>host_info</code>. The
-    hook that the compiler uses in this case to figure out the type
-    is the record field name. Later in the chapter, we'll talk
-    about what happens when there is more than one record type in
-    scope with the same field name.</p>
+    <p>You might wonder how the compiler inferred
+    that <code>my_host</code> is of type <code>host_info</code>.  The
+    compiler bases its inference, it turns out, on the field names
+    used in constructing the record.  That inference is most
+    straightforward when each field name belongs uniquely to a single
+    record type.  We'll discuss later in the chapter what happens when
+    field names are shared across different record types.</p>
 
     <p>Once we have a record value in hand, we can extract elements
     from the record field using dot notation:</p>
@@ -212,29 +213,31 @@
       <h1>Reusing Field Names</h1>
 
       <p>Defining records with the same field names can be
-      problematic. Let's consider a simple example: building types
-      to represent the protocol used for a logging server.</p>
+      problematic. As a simple example, let's consider a collection of
+      types representing the protocol of a logging server.</p>
 
-      <p>We'll describe three message types:
-      <code>log_entry</code>, <code>heartbeat</code>, and
-      <code>logon</code>. The <code>log_entry</code> message is
-      used to deliver a log entry to the server; the
-      <code>logon</code> message is sent to initiate a connection
-      and includes the identity of the user connecting and
-      credentials used for authentication; and the
-      <code>heartbeat</code> message is periodically sent by the
-      client to demonstrate to the server that the client is alive
-      and connected. All of these messages include a session ID and
-      the time the message was generated:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="13" />
+      <p>We'll describe three message
+      types: <code>log_entry</code>, <code>heartbeat</code>,
+      and <code>logon</code>. The <code>log_entry</code> message is
+      used to deliver a log entry to the server;
+      the <code>logon</code> message is sent when initiating a
+      connection and includes the identity of the user connecting and
+      credentials used for authentication; and
+      the <code>heartbeat</code> message is periodically sent by the
+      client to demonstrate to the server that the client is alive and
+      connected. All of these messages include a session ID and the
+      time the message was generated:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/records/main.topscript" part="13" />
 
       <p>Reusing field names can lead to some ambiguity. For
       example, if we want to write a function to grab the
       <code>session_id</code> from a record, what type will it
       have?</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="14" />
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/records/main.topscript" part="14" />
 
       <p>In this case, OCaml just picks the most recent definition
       of that record field. We can force OCaml to assume we're
@@ -252,22 +255,22 @@
 
       <p>Why did the first definition succeed without a type
       annotation and the second one fail? The difference is that in
-      the first case, the type-checker considered the
-      <code>status_message</code> field first and thus concluded
-      that the record was a <code>heartbeat</code>. When the order
-      was switched, the <code>session_id</code> field was
-      considered first, and so that drove the type to be considered
-      to be a <code>logon</code>, at which point
-      <code>t.status_message</code> no longer made sense.</p>
+      the first case, the type-checker considered
+      the <code>status_message</code> field first and thus concluded
+      that the record was a <code>heartbeat</code>. When the order was
+      switched, the <code>session_id</code> field was considered
+      first, and so that drove the type to be considered to be
+      a <code>logon</code>, at which
+      point <code>t.status_message</code> no longer made sense.</p>
 
       <p>We can avoid this ambiguity altogether, either by using
       nonoverlapping field names or by putting different record types
-      in different modules. Packing types into modules is a broadly
-      useful idiom (and one used quite extensively by Core), providing
-      for each type a namespace within which to put related
+      in different modules. Indeed, packing types into modules is a
+      broadly useful idiom (and one used quite extensively by Core),
+      providing for each type a namespace within which to put related
       values. When using this style, it is standard practice to name
       the type associated with the module <code>t</code>. Using this
-      style we would write:</p> 
+      style we would write:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="17" />
@@ -296,7 +299,7 @@
       "code/records/main2.topscript" part="20" />
 
       <p>When using dot notation for accessing record fields, we can
-      qualify the field by the module directly:</p>
+      qualify the field by the module as well.</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="21" />
@@ -311,25 +314,23 @@
       that <code>Log_entry</code> is capitalized and so can't be a
       field name is what disambiguates the two uses.</p>
 
-      Qualifying a record field by the module that it comes from can
-      be awkward.  OCaml doesn't require that the record
-      field be qualified if it can otherwise infer the type of the
-      record in question, for example, because of a type annotation.
-
-      For example...
-
-      <link rel="import" data-code-language="ocamltop" 
-	    href="code/records/main2.topscript" part="21.2" />
-      
-      But if we use a type annotation mark the type, then the
-      qualification becomes unnecessary.
+      Qualifying a record field by the module it comes from can be
+      awkward.  Happily, OCaml doesn't require that the record field
+      be qualified if it can otherwise infer the type of the record in
+      question.  In particular, we can rewrite the above declarations
+      by adding type annotations and removing the module
+      qualifications.
 
       <link rel="import" data-code-language="ocamltop" 
-	    href="code/records/main2.topscript" part="21.3" />
+	    href="code/records/main2.topscript" part="21.1" />
 
-      <p>For functions defined within the module where a given
-      record is defined, the module qualification goes away
-      entirely.</p>
+      This feature of the language, known by the somewhat imposing
+      name of <em>type-directed constructor disambiguation</em>,
+      applies to variant constructors as well as record fields, as
+      we'll see in <a href="#variants" data-type="xref">#variants</a>.
+
+      <p>For functions defined within the module where a given record
+      is defined, the module qualification goes away entirely.</p>
 
     </section>
 
