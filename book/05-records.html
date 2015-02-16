@@ -71,8 +71,9 @@
 
     <p>We can then write polymorphic functions that operate over
     this parameterized type:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="4" />
+
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="4" />
 
     <section id="patterns-and-exhaustiveness" data-type="sect1">
       <h1>Patterns and Exhaustiveness</h1>
@@ -80,6 +81,7 @@
       <p>Another way of getting information out of a record is by
       using a pattern match, as in the definition of
       <code>host_info_to_string</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="5" />
 
@@ -104,6 +106,7 @@
       <p>As an example, imagine that we wanted to add a new field
       to our <code>host_info</code> record called
       <code>os_release</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="6" />
 
@@ -119,12 +122,14 @@
       (which you can do in the toplevel by typing <code>#warnings
       "+9"</code>), the compiler will warn about the missing
       field:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="7" />
 
       <p>We can disable the warning for a given pattern by
       explicitly acknowledging that we are ignoring extra fields.
       This is done by adding an underscore to the pattern:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="8" />
 
@@ -140,6 +145,7 @@
         documented in the compiler itself, so we could have found
         out about warning 9 as follows:</p>
       </div>
+
       <link rel="import" data-code-language="console" href=
       "code/records/warn_help.out" />
 
@@ -177,12 +183,14 @@
       For example, the pattern in the following function binds all
       of the fields in question to variables of the same name. This
       is called <em>field punning</em>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="9" />
 
       <p>Field punning can also be used to construct a record.
       Consider the following code for generating a
       <code>host_info</code> record:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="10" />
 
@@ -194,11 +202,13 @@
       <p>You can take advantage of both field punning and label
       punning when writing a function for constructing a record
       from labeled arguments:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="11" />
 
       <p>This is considerably more concise than what you would get
       without punning:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="12" />
 
@@ -243,6 +253,7 @@
       of that record field. We can force OCaml to assume we're
       dealing with a different type (say, a <code>heartbeat</code>)
       using a type annotation:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="15" />
 
@@ -250,6 +261,7 @@
       type annotations, the ambiguity can be a bit confusing.
       Consider the following functions for grabbing the session ID
       and status from a heartbeat:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="16" />
 
@@ -345,6 +357,7 @@
       that client. The following defines a type for representing
       this information, as well as a function for updating the
       client information when a new heartbeat arrives:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="22" />
 
@@ -353,6 +366,7 @@
       being copied over from <code>t</code>. We can use OCaml's
       <em>functional update</em> syntax to do this more tersely.
       The syntax of a functional update is as follows:</p>
+
       <link rel="import" data-code-language="ocamlsyntax" href=
       "code/records/functional_update.syntax" />
 
@@ -362,6 +376,7 @@
 
       <p>Given this, we can rewrite <code>register_heartbeat</code>
       more concisely:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="23" />
 
@@ -374,6 +389,7 @@
       the new fields. Consider what happens if we decided to add a
       field for the status message received on the last
       heartbeat:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="24" />
 
@@ -384,6 +400,7 @@
       functional update continues to compile as is, even though it
       incorrectly ignores the new field. The correct thing to do
       would be to update the code as follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="25" />
     </section>
@@ -395,6 +412,7 @@
       You can, however, declare individual record fields as
       mutable. In the following code, we've made the last two
       fields of <code>client_info</code> mutable:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="26" />
 
@@ -402,6 +420,7 @@
       mutable field. The side-effecting version of
       <code>register_heartbeat</code> would be written as
       follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="27" />
 
@@ -423,6 +442,7 @@
 
       <p>Consider the following function for extracting the
       usernames from a list of <code>Logon</code> messages:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="28" />
 
@@ -437,6 +457,7 @@
       declaration of a record type will cause the extension to be
       applied to a given type declaration. So, for example, we
       could have defined <code>Logon</code> as follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="29" />
 
@@ -450,6 +471,7 @@
       <p>One of the functions we obtain is <code>Logon.user</code>,
       which we can use to extract the user field from a logon
       message:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="30" />
 
@@ -498,6 +520,7 @@
       <code>Logon.Fields.user</code>, you'll get a function for
       extracting the <code>user</code> field from a
       <code>Logon.t</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="31" />
 
@@ -510,6 +533,7 @@
       <p>The type of <code>Field.get</code> is a little more
       complicated than you might naively expect from the preceding
       one:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="32" />
 
@@ -522,6 +546,7 @@
 
       <p>We can use first-class fields to do things like write a
       generic function for displaying a record field:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="33" />
 
@@ -532,6 +557,7 @@
 
       <p>Here's an example of <code>show_field</code> in
       action:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="34" />
 
@@ -546,6 +572,7 @@
       of a record. So, for example, in the case of
       <code>Logon.t</code>, the field iterator has the following
       type:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="35" />
 
@@ -562,6 +589,7 @@
       <p>Now, let's use <code>Logon.Fields.iter</code> and
       <code>show_field</code> to print out all the fields of a
       <code>Logon</code> record:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="36" />
 
