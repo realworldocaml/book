@@ -1,5 +1,4 @@
 open Core.Std;;
-#warnings "-40";;;;
 
 #part 17
 module Log_entry = struct
