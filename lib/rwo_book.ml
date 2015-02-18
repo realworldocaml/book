@@ -743,19 +743,22 @@ let chapter_to_HTMLBook_exn repo_root chapters chapter_file
 (******************************************************************************)
 (* Main Functions                                                             *)
 (******************************************************************************)
-let non_chapter_to_HTMLBook_exn filename : Html.t Deferred.t =
-  Html.of_file filename
+type src = [
+| `Chapter of string
+| `Frontpage
+]
 
-let file_to_HTMLBook_exn repo_root filename =
-  if is_chapter_file filename then (
-    chapters ~repo_root () >>= fun chapters ->
-    chapter_to_HTMLBook_exn repo_root chapters filename
+let make ?(repo_root=".") ~out_dir = function
+  | `Frontpage -> (
+    let out_file = Filename.concat out_dir "index.html" in
+    frontpage ~repo_root () >>= fun item ->
+    return (Html.to_string [item]) >>= fun contents ->
+    Writer.save out_file ~contents
   )
-  else
-    non_chapter_to_HTMLBook_exn filename
-
-let to_HTMLBook_exn ?(repo_root=".") in_file out_dir =
-  let out_file = Filename.(concat out_dir (basename in_file)) in
-  file_to_HTMLBook_exn repo_root in_file >>= fun html ->
-  return (Html.to_string html) >>= fun contents ->
-  Writer.save out_file ~contents
+  | `Chapter in_file -> (
+    let out_file = Filename.(concat out_dir (basename in_file)) in
+    chapters ~repo_root () >>= fun chapters ->
+    chapter_to_HTMLBook_exn repo_root chapters in_file >>= fun html ->
+    return (Html.to_string html) >>= fun contents ->
+    Writer.save out_file ~contents
+  )

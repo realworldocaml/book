@@ -47,7 +47,7 @@ let build_chapter : Command.t = Command.async
     +> Param.file
   )
   (fun repo_root out_dir file () ->
-    Book.to_HTMLBook_exn ~repo_root file out_dir
+    Book.make ~repo_root ~out_dir (`Chapter file)
   )
 
 let build_frontpage : Command.t = Command.async
@@ -58,9 +58,7 @@ let build_frontpage : Command.t = Command.async
     +> Param.out_dir
   )
   (fun repo_root out_dir () ->
-    Book.frontpage ~repo_root () >>= fun item ->
-    return (Html.to_string [item]) >>= fun contents ->
-    Writer.save (Filename.concat out_dir "index.html") ~contents
+    Book.make ~repo_root ~out_dir `Frontpage
   )
 
 let build : Command.t = Command.group

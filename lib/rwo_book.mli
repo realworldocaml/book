@@ -6,25 +6,25 @@
 open Core.Std
 open Async.Std
 
-(** [to_HTMLBook in_file out_dir] converts [in_file] to fully
-    compliant HTMLBook by:
+(** Source from which to build an HTML page.
 
-    - replacing <link rel="import"> nodes with <pre> nodes.
+    - [`Chapter file] - The file for a chapter. Path must be relative
+    to current working directory.
 
-    - adding standard header, footer, etc.
-
-    The output is written to a file of the same name in [out_dir]. You
-    must provide [in_file] as a path relative to the current working
-    directory.
+    - [`Frontpage] - No other information needed. We generate the
+    whole page programmatically. Output file is named "index.html".
 *)
-val to_HTMLBook_exn
-  :  ?repo_root:string
-  -> string
-  -> string
-  -> unit Deferred.t
+type src = [
+| `Chapter of string
+| `Frontpage
+]
 
-(** Make frontpage. *)
-val frontpage : ?repo_root:string -> unit -> Rwo_html.item Deferred.t
+(** Make an HTML page from the given [src] and save it to [out_dir]. *)
+val make
+  :  ?repo_root:string
+  -> out_dir:string
+  -> src
+  -> unit Deferred.t
 
 
 (******************************************************************************)
