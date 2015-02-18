@@ -1,0 +1,682 @@
+<html>
+<head></head>
+
+<body>
+  <h1>Installation Instructions</h1>
+
+  <p>These instructions are aimed at readers of Real World OCaml,
+  though much of what you find here will be useful for anyone who
+  wants to get a good working OCaml installation.</p>
+
+  <p>At the highest level, here's what you need to do:</p>
+
+  <ul>
+    <li>Get <a href="http://opam.ocaml.org">OPAM</a> installed</li>
+
+    <li>Build OCaml 4.01 or later using OPAM</li>
+
+    <li>With OPAM, install the key libraries that you need to work
+    through the examples in the book</li>
+
+    <li>Install <a href="https://github.com/diml/utop">Utop</a>, a
+    modern interactive toplevel with command history, tab
+    completion, and defaults that are tuned to work with the
+    examples in Real World OCaml,</li>
+
+    <li>Set up your editing environment.</li>
+
+    <li>Optionally install <a href=
+    "https://github.com/the-lambda-church/merlin">merlin</a>, a
+    tool for providing IDE-like functionality like auto-completion,
+    as well as <a href=
+    "https://github.com/OCamlPro/ocp-indent">ocp-indent</a>, a
+    source code indenter. Both work with emacs and vim, and can be
+    adapted to other editors.</li>
+  </ul>
+
+  <p>Note that Windows is not currently supported by the examples
+  in Real World OCaml or by OPAM, although it is being worked on.
+  Until that's ready, we recommend using a virtual machine running
+  Debian Linux on your local machine.</p>
+
+  <p>Let's get started.</p>
+
+  <h1>Getting OPAM</h1>
+
+  <p>The easiest way to install OPAM is through your OS's package
+  manager. In most cases, installing OPAM will also trigger the
+  installation of OCaml. The version installed isn't important,
+  since we can use OPAM itself to install other versions of the
+  compiler.</p>
+
+  <p>Here are platform-specific instructions.</p>
+
+  <h2>Mac OS X</h2>
+
+  <p>If you don't already have a package manager set up, try
+  installing homebrew. You can find information on installing
+  homebrew <a href="http://brew.sh/">here</a>. make sure you have
+  the latest XCode (and Command Line Tools for XCode) installed
+  from the App Store first.</p>
+
+  <p>You can then install OPAM using brew.</p>
+  <pre>
+$ brew install opam
+</pre>
+
+  <p>(NB: If you're using Mountain Lion or lower, you may need to
+  use <code>brew install opam --without-aspcud</code>, instead)</p>
+
+  <p>Another popular package manager on Mac OS X is <a href=
+  "http://macports.org">MacPorts</a>, which also has an OPAM
+  package.</p>
+  <pre>
+$ sudo port install opam
+</pre>
+
+  <h2>Ubuntu Linux</h2>
+
+  <p>Ubuntu has have a PPA (Personal Package Archive) that you can
+  use for installing OPAM as a binary package.</p>
+  <pre>
+$ sudo add-apt-repository ppa:avsm/ppa
+$ sudo apt-get update
+$ sudo apt-get install curl build-essential m4 ocaml opam
+</pre>
+
+  <h3>Ubuntu 14.04</h3>
+
+  <p>14.04 comes with recent versions of ocaml and opam. No PPA
+  needed.</p>
+  <pre>
+$ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-native-compilers opam
+</pre>
+
+  <h2>Debian Linux</h2>
+
+  <p>Debian's OCaml packages aren't yet at 4.01.0, and so you will
+  need to compile it from sources. If you are using the
+  <code>unstable</code> (<code>sid</code>) stream, then OPAM will
+  be available. On Wheezy, you need to compile OPAM from source
+  (see the instructions below).</p>
+
+  <h2>Arch Linux</h2>
+
+  <p>OPAM is available from the AUR (Arch User Repository). You can
+  install OPAM using <code>yaourt</code>:</p>
+  <pre>
+$ sudo yaourt -S opam
+</pre>
+
+  <p>Or directly using <code>pacman</code>.</p>
+  <pre>
+$ sudo pacman -S base-devel
+$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
+$ tar -xvf opam.tar.gz <span class=
+"pl-k">&amp;&amp;</span> <span class="pl-s3">cd</span> opam
+$ makepkg
+$ sudo pacman -U opam-<span class=
+"pl-k">&lt;</span>version<span class="pl-k">&gt;</span>.pkg.tar.xz
+</pre>
+
+  <h2>Building from source</h2>
+
+  <p>On platforms not listed above, you'll need to install OPAM
+  from source, and to do that you'll need OCaml installed first.
+  Some platforms, including Fedora Linux, have OCaml packages that
+  you can install but not OPAM packages. You can build OPAM on
+  OCaml version 3.12.1 or later.</p>
+
+  <p>To install OCaml from source, you'll first need a C compiler,
+  generally <code>gcc</code> or <code>llvm</code>.</p>
+
+  <p>The following is enough to get OCaml installed on most
+  platforms.</p>
+  <pre>
+$ curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
+$ tar -zxvf 4.01.tar.gz
+$ cd ocaml-4.01
+$ ./configure
+$ make world world.opt
+$ sudo make install
+</pre>
+
+  <p>If you have problems with any of the above, read the
+  <code>INSTALL</code> file in the tar file.</p>
+
+  <h3>Installing OCaml locally</h3>
+
+  <p>The installation step described above requires administrator
+  privileges. You can also install it in your home directory by
+  passing the <code>prefix</code> option to the configuration
+  script:</p>
+  <pre>
+$ ./configure -prefix $HOME/my-ocaml
+</pre>
+
+  <p>Once the installation is completed into this custom location,
+  you will need to add <code>$HOME/my-ocaml/bin</code> to your
+  <code>PATH</code>, normally by editing <code>~/.bashrc</code> or
+  <code>~/.profile</code>. You shouldn't really do this unless you
+  have special reasons, so try to install binary packages before
+  trying a source installation.</p>
+
+  <h3>Installing OPAM</h3>
+
+  <p>If the binary packages aren't available for your system,
+  you'll need to install the latest OPAM release from source. You
+  can follow the online <a href=
+  "http://opam.ocaml.org/doc/Quick_Install.html">quick install
+  guide</a>.</p>
+
+  <h1>Configuring OPAM</h1>
+
+  <p>The entire OPAM package database is held in the
+  <code>.opam</code> directory in your home directory, including
+  compiler installations. On Linux and Mac OS X, this will be the
+  <code>~/.opam</code> directory, which means you don't need
+  administrative privileges to configure it. If you run into
+  problems configuring OPAM, just delete the whole
+  <code>~/.opam</code> directory and start over.</p>
+
+  <p>Let's begin by initialising the OPAM package database. This
+  will ask you a few interactive questions at the end. It's safe to
+  answer yes to these unless you want to manually control the
+  configuration steps yourself as an advanced user.</p>
+  <pre>
+$ opam init
+&lt;...&gt;
+=-=-=-= Configuring OPAM =-=-=-=
+Do you want to update your configuration to use OPAM ? [Y/n] y
+[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
+[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
+[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
+[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
+User configuration:
+  ~/.ocamlinit is already up-to-date.
+  ~/.profile is already up-to-date.
+Gloabal configuration:
+  Updating &lt;root&gt;/opam-init/init.sh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating &lt;root&gt;/opam-init/init.zsh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating &lt;root&gt;/opam-init/init.csh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+</pre>
+
+  <p>You only need to run this command once, and it will create the
+  <code>~/.opam</code> directory and sync with the latest package
+  list from the online OPAM database.</p>
+
+  <p>When the <code>init</code> command finishes, you'll see some
+  instructions about environment variables. OPAM never installs
+  files into your system directories (which would require
+  administrator privileges). Instead, it puts them into your home
+  directory by default, and can output a set of shell commands
+  which configures your shell with the right <code>PATH</code>
+  variables so that packages will just work.</p>
+
+  <p>If you choose not to follow the OPAM instructions to add
+  itself to your shell profile, you can still configure it
+  on-the-fly in your current shell with just one command.</p>
+  <pre>
+eval `opam config env`
+</pre>
+
+  <p>This evaluates the results of running <code>opam config
+  env</code> in your current shell and sets the variables so that
+  subsequent commands will use them. This <em>only</em> works with
+  your current shell and it can only be automated for future shells
+  by adding the line to your login scripts. On Mac OS X you should
+  typically use <code>~/.profile</code>, and <code>~/.bashrc</code>
+  on most Linux setups.</p>
+
+  <p>OPAM isn't unusual in this approach; the SSH
+  <code>ssh-agent</code> also works similarly, so if you're having
+  any problems just hunt around in your configuration scripts to
+  see how that's being invoked.</p>
+
+  <p>If you answered <code>yes</code> to the auto-complete scripts
+  question during <code>opam init</code>, this should have all been
+  set up for you. You can verify this worked by seeing if the
+  <code>OCAML_TOPLEVEL_PATH</code> environment variable is set. You
+  can do this in <code>bash</code> as follows.</p>
+  <pre>
+$ printenv OCAML_TOPLEVEL_PATH
+/Users/myusername/.opam/4.01.0/lib/toplevel
+</pre>
+
+  <p>The next step is to make sure we have the right compiler
+  version installed.</p>
+  <pre>
+$ opam switch
+system  C system                      System compiler (4.00.1)
+--     -- 3.11.2                      Official 3.11.2 release
+--     -- 3.12.1                      Official 3.12.1 release
+--     -- 4.00.0                      Official 4.00.0 release
+--     -- 4.00.1                      Official 4.00.1 release
+--     -- 4.01.0                      Official 4.01.0 release
+</pre>
+
+  <p>If, as in this case, your system compiler is older than
+  <code>4.01.0</code>, you should install a more up to date version
+  of the compiler, as shown below.</p>
+  <pre>
+$ opam switch 4.01.0
+$ eval `opam config env`
+</pre>
+
+  <p>The <code>switch</code> itself will take around ten or fifteen
+  minutes on a modern machine, and will download and install the
+  OCaml compiler within the <code>~/.opam</code> directory). You
+  can install multiple compilers at once, and switching between
+  them once they're installed is fast.</p>
+
+  <p>The new compiler and all libraries associated with it will be
+  installed in <code>~/.opam/4.01.0</code>.</p>
+
+  <p>Finally, we're ready to install the libraries and tools we'll
+  need for the book. The most important ones are <code>core</code>,
+  which provides the standard library that all the examples in the
+  book are based on, and <code>utop</code>, which is the
+  interactive toplevel that you can use for working through the
+  examples.</p>
+  <pre>
+$ opam install core utop
+</pre>
+
+  <p>This will take about five or ten minutes to build, and will
+  install the requested packages along with a bunch of
+  dependencies. But there are other libraries that will be useful
+  as you go through the book that you might as well install
+  now.</p>
+  <pre>
+$ opam install \
+   async yojson core_extended core_bench \
+   cohttp async_graphics cryptokit menhir
+</pre>
+
+  <p>If some of the above don't work, don't worry too much. Most of
+  them come up in only a few places in the book. (There are some
+  known problems right now: in particular,
+  <code>core_extended</code> doesn't install cleanly on recent
+  versions of OS X, due to an issue with the <code>re2</code>
+  library it depends on. That is expected to be resolved soon.)</p>
+
+  <p>Note that if you've installed <code>utop</code> and can't
+  launch it from the shell, make sure you've run <code>eval `opam
+  config env`</code> in this shell. In general, you should just get
+  this set up as part of your shell init scripts, as described
+  earlier.</p>
+
+  <h1>Setting up and using <code>utop</code></h1>
+
+  <p>When you first run <code>utop</code>, you'll find yourself at
+  an interactive prompt with a bar at the bottom of the screen. The
+  bottom bar dynamically updates as you write text, and contains
+  the possible names of modules or variables that are valid at that
+  point in the phrase you are entering. You can press the
+  <code>&lt;tab&gt;</code> key to complete the phrase with the
+  first choice.</p>
+
+  <p>The <code>~/.ocamlinit</code> file in your home directory
+  initializes <code>utop</code> with common libraries and syntax
+  extensions so you don't need to type them in every time. Given
+  that you have Core installed, you should update your
+  <code>ocamlinit</code> to load Core every time you start
+  <code>utop</code>, by adding the following lines.</p>
+  <pre>
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core.top";;
+#require "core.syntax";;
+</pre>
+
+  <p>For <code>utop</code> only you could get away with just the
+  last two lines, but you need the whole thing if you want the
+  traditional <code>ocaml</code> toplevel to work too.</p>
+
+  <p>Note that <code>opam</code> will have already added some lines
+  to the file. Also, notice that <code>#</code> is used to mark a
+  toplevel directive, not a comment.</p>
+
+  <p>If you want to use Core as your primary standard library, then
+  you should open the <code>Core.Std</code> module by default,
+  which you can do by appending the following to the end of your
+  <code>.ocamlinit</code>.</p>
+  <pre>
+open Core.Std
+</pre>
+
+  <p>When you run <code>utop</code> with these initialization
+  rules, it should start up with Core opened and ready to use. If
+  you don't open <code>Core.Std</code> by default, then you must
+  remember to open it before running any of the interactive
+  examples in the book.</p>
+
+  <h1>Editors</h1>
+
+  <h2>Emacs</h2>
+
+  <p>These instructions have been tested on emacs 24.2 and should
+  work for that version and newer. There are some reports of
+  problems with earlier emacsen.</p>
+
+  <p><code>tuareg</code> is the most commonly used mode for editing
+  OCaml code in emacs. You can download it <a href=
+  "https://github.com/ocaml/tuareg">here</a>. You should download
+  it and untar it into some subdirectory of your home
+  directory.</p>
+
+  <p>Once you've done that, you can add the following rather
+  lengthy snippet to your <code>.emacs</code> file.</p>
+  <pre>
+;; -- common-lisp compatibility if not added earlier in your .emacs
+(require 'cl)
+
+;; -- Tuareg mode -----------------------------------------
+;; Add Tuareg to your search path
+(add-to-list
+ 'load-path
+ ;; Change the path below to be wherever you've put your tuareg installation.
+ (expand-file-name "~/lib/elisp/tuareg"))
+(require 'tuareg)
+(setq auto-mode-alist 
+      (append '(("\\.ml[ily]?$" . tuareg-mode))
+          auto-mode-alist))
+
+;; -- Tweaks for OS X -------------------------------------
+;; Tweak for problem on OS X where Emacs.app doesn't run the right
+;; init scripts when invoking a sub-shell
+(cond
+ ((eq window-system 'ns) ; macosx
+  ;; Invoke login shells, so that .profile or .bash_profile is read
+  (setq shell-command-switch "-lc")))
+
+;; -- opam and utop setup --------------------------------
+;; Setup environment variables using opam
+(dolist
+   (var (car (read-from-string
+           (shell-command-to-string "opam config env --sexp"))))
+ (setenv (car var) (cadr var)))
+;; Update the emacs path
+(setq exec-path (split-string (getenv "PATH") path-separator))
+;; Update the emacs load path
+(push (concat (getenv "OCAML_TOPLEVEL_PATH")
+          "/../../share/emacs/site-lisp") load-path)
+;; Automatically load utop.el
+(autoload 'utop "utop" "Toplevel for OCaml" t)
+(autoload 'utop-setup-ocaml-buffer "utop" "Toplevel for OCaml" t)
+(add-hook 'tuareg-mode-hook 'utop-setup-ocaml-buffer)
+</pre>
+
+  <p>Once this successfully loads in Emacs, you can run
+  <code>utop</code> by doing <code>M-x utop</code> in Emacs. You
+  can also use commands like <code>Ctrl-c Ctrl-b</code> to evaluate
+  your current buffer in <code>utop</code>, or <code>Ctrl-c
+  Ctrl-e</code> to just evaluate a single expression.</p>
+
+  <p>There are more detailed instructions at the <a href=
+  "https://github.com/diml/utop#integration-with-emacs">utop
+  homepage</a>.</p>
+
+  <h3>Using Emacs24 packages</h3>
+
+  <p>As an alternative to the setup above, here is a simplified
+  OCaml setup using <a href="http://melpa.milkbox.net/#/">MELPA</a>
+  packages.</p>
+
+  <p>Add to <code>.emacs.d/init.el</code></p>
+  <pre>
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/") t)
+</pre>
+
+  <p>Now do <code>M-x package-install</code> and install
+  <code>tuareg</code>, <code>utop</code> and
+  <code>merlin</code>.</p>
+
+  <p>Then add the rest of the configuration to
+  <code>.emacs.d/init.el</code></p>
+  <pre>
+(add-hook 'tuareg-mode-hook 'tuareg-imenu-set-imenu)
+(setq auto-mode-alist
+      (append '(("\\.ml[ily]?$" . tuareg-mode)
+                ("\\.topml$" . tuareg-mode))
+              auto-mode-alist)) 
+(autoload 'utop-setup-ocaml-buffer "utop" "Toplevel for OCaml" t)
+(add-hook 'tuareg-mode-hook 'utop-setup-ocaml-buffer)
+(add-hook 'tuareg-mode-hook 'merlin-mode)
+(setq merlin-use-auto-complete-mode t)
+(setq merlin-error-after-save nil)
+</pre>
+
+  <h2>Vim</h2>
+
+  <p>Vim users can use the built-in style, and <a href=
+  "http://github.com/avsm/ocaml-annot">ocaml-annot</a> may also be
+  useful. For a more richly-featured setup, see the section on
+  Merlin below.</p>
+
+  <h2>Eclipse</h2>
+
+  <p>Eclipse is a popular IDE usually used for Java development.
+  The <a href="http://ocamldt.free.fr">OCaml Development Tools
+  (ODT)</a> project provides equivalent IDE features for editing
+  and compiling OCaml code, such as automatic compilation and name
+  completion. Installation instructions can be found <a href=
+  "http://ocamldt.free.fr/spip.php?article5">here</a></p>
+
+  <h2>Other editors</h2>
+
+  <p>There are lots of other editors, and many of them come with
+  built-in OCaml modes. These includes TextMate and Sublime Text
+  for the Mac, and countless others.</p>
+
+  <h2>Cross-editor tools</h2>
+
+  <p>There are a number of tools that are compatible with multiple
+  editors that can help you work more effectively with OCaml. Two
+  of the best are <code>merlin</code> and <code>ocp-indent</code>,
+  which we'll describe below. Note that these are very much
+  optional. You might want to get started with the book before
+  getting back to setting these up.</p>
+
+  <h3>Merlin</h3>
+
+  <p>Merlin provides a number of advanced IDE-like features,
+  including:</p>
+
+  <ul>
+    <li>context-sensitive auto-completion</li>
+
+    <li>interactive type-querying (i.e., you can ask it, "what is
+    the type of this expression")</li>
+
+    <li>error reporting -- it will highlight parts of your code
+    that don't compile as you go.</li>
+  </ul>
+
+  <p>You can install merlin with OPAM:</p>
+  <pre>
+$ opam install merlin
+</pre>
+
+  <p>Then you will need to add configuration for your editor. The
+  following examples assume Merlin has been installed through OPAM
+  as above.</p>
+
+  <h4>Emacs</h4>
+
+  <p>A summary follows -- for more complete information, see
+  <a href=
+  "https://github.com/the-lambda-church/merlin/wiki/emacs-from-scratch">
+  Merlin's Emacs documentation</a>.</p>
+  <pre>
+;; -- merlin setup ---------------------------------------
+
+(setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
+(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
+(require 'merlin)
+
+;; Enable Merlin for ML buffers
+(add-hook 'tuareg-mode-hook 'merlin-mode)
+
+;; So you can do it on a mac, where `C-&lt;up&gt;` and `C-&lt;down&gt;` are used
+;; by spaces.
+(define-key merlin-mode-map
+  (kbd "C-c &lt;up&gt;") 'merlin-type-enclosing-go-up)
+(define-key merlin-mode-map
+  (kbd "C-c &lt;down&gt;") 'merlin-type-enclosing-go-down)
+(set-face-background 'merlin-type-face "#88FF44")
+
+;; -- enable auto-complete -------------------------------
+;; Not required, but useful along with merlin-mode
+(require 'auto-complete)
+(add-hook 'tuareg-mode-hook 'auto-complete-mode)
+</pre>
+
+  <p>Here are some of the more useful key commands that merlin
+  provides:</p>
+
+  <ul>
+    <li><code>C-c C-t</code>: <code>merlin-type-enclosing</code>:
+    show you the type of the current expression.
+    <code>C-&lt;up&gt;</code> and <code>C-&lt;down&gt;</code> can
+    then be used to look at the types of enclosing expressions, or
+    drill down to smaller ones.</li>
+
+    <li><code>C-c &lt;TAB&gt;</code>: if you have auto-complete set
+    up, this gives you a list of possible auto-completions, along
+    with their types. You can use <code>C-s</code> to search within
+    that list.</li>
+
+    <li><code>C-c C-l</code>: to go to the definition of the value
+    under your cursor.</li>
+
+    <li><code>C-c r</code>: to restart merlin if it gets
+    confused</li>
+  </ul>
+
+  <h4>Vim</h4>
+
+  <p>A summary follows -- for more complete information, see
+  <a href=
+  "https://github.com/the-lambda-church/merlin/wiki/vim-from-scratch">
+  Merlin's Vim documentation</a> and <code>:h merlin.txt</code>
+  after installing.</p>
+  <pre>
+" Your vimrc
+filetype plugin indent on
+syntax enable
+
+" Vim needs to be built with Python scripting support, and must be
+" able to find Merlin's executable on PATH.
+if executable('ocamlmerlin') &amp;&amp; has('python')
+  let s:ocamlmerlin = substitute(system('opam config var share'), '\n$', '', '''') . "/ocamlmerlin"
+  execute "set rtp+=".s:ocamlmerlin."/vim"
+  execute "set rtp+=".s:ocamlmerlin."/vimbufsync"
+endif
+</pre>
+
+  <p>As a one-time step after installation, index the documentation
+  in Vim's help system:</p>
+  <pre>
+:execute "helptags " . substitute(system('opam config var share'), '\n$', '', '''')
+</pre>
+
+  <p>Some highlights of the functionality this enables:</p>
+
+  <ul>
+    <li>Autocompletion with Vim's omnicomplete system:
+    <code>&lt;C-x&gt;&lt;C-o&gt;</code></li>
+
+    <li>Quick type checking with keybindings -- the defaults use
+    <code>LocalLeader</code>, which is normally backslash
+    (<code>\</code>) by default:
+
+      <ul>
+        <li><code>\t</code>: type of expression under the cursor
+        (also works with a visual selection).</li>
+
+        <li><code>\n</code> / <code>\p</code>: expand/contract the
+        expression(s) to type check.</li>
+      </ul>
+    </li>
+
+    <li><code>:Locate [identifier]</code>: go to the definition of
+    given identifier or the one under the cursor.</li>
+
+    <li><code>:Reload</code>: if Merlin gets confused following
+    build changes like new packages.</li>
+
+    <li><code>:GotoDotMerlin</code>: edit the <code>.merlin</code>
+    project configuration (see below).</li>
+  </ul>
+
+  <p>The plugin can integrate with some other popular Vim plugins
+  such as Syntastic and neocomplcache -- see <code>:help
+  merlin.txt</code> for pointers.</p>
+
+  <h4>Tell Merlin about your project layout</h4>
+
+  <p>Regardless of which editor you use, you need to tell Merlin a
+  bit about the build environment you're working with in order for
+  it to work properly. This is done by creating a
+  <code>.merlin</code> file. If you're building applications based
+  on Core and Async using the <code>corebuild</code> script (which
+  is built on top of <code>ocamlbuild</code>), then the following
+  is a good starting point.</p>
+  <pre>
+<code>S .
+B _build
+PKG core
+PKG async
+PKG core_extended
+EXT nonrec
+</code>
+</pre>
+
+  <p>See the Merlin README for complete details of the file
+  format.</p>
+
+  <h3><a id="user-content-ocp-indent" class="anchor" href=
+  "#ocp-indent" aria-hidden="true" name=
+  "user-content-ocp-indent"></a>ocp-indent</h3>
+
+  <p><code>ocp-indent</code> is a source-code indenter which
+  includes a command-line tool, library and integration with emacs
+  and vi. It does a better job than most editor modes, including
+  tuareg, and has the advantage that it can be used as a
+  command-line tool and be integrated into multiple editors, so you
+  get consistent indentation across tools.</p>
+
+  <p>You can install it with <code>opam</code>:</p>
+  <pre>
+$ opam install ocp-indent
+</pre>
+
+  <h4>Emacs</h4>
+
+  <p>After installing through OPAM, simply load the file as follows
+  to override tuareg-mode's indentation:</p>
+  <pre>
+(setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
+(load-file (concat opam-share "/typerex/ocp-indent/ocp-indent.el"))
+</pre>
+
+  <h4>Vim</h4>
+
+  <p>After installing through OPAM, simply add this
+  <code>autocmd</code> to your Vim configuration:</p>
+  <pre>
+" Your vimrc
+autocmd FileType ocaml source substitute(system('opam config var share'), '\n$', '', '''') . "/typerex/ocp-indent/ocp-indent.vim"
+</pre>
+</body>
+</html>

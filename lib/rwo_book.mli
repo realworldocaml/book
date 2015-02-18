@@ -18,6 +18,7 @@ type src = [
 | `Chapter of string
 | `Frontpage
 | `FAQs
+| `Install
 ]
 
 (** Make an HTML page from the given [src] and save it to [out_dir]. *)

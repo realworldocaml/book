@@ -727,6 +727,7 @@ type src = [
 | `Chapter of string
 | `Frontpage
 | `FAQs
+| `Install
 ]
 
 let make ?(repo_root=".") ~out_dir = function
@@ -745,6 +746,15 @@ let make ?(repo_root=".") ~out_dir = function
   )
   | `FAQs -> (
     let base = "faqs.html" in
+    let in_file = repo_root/"book"/base in
+    let out_file = out_dir/base in
+    Html.of_file in_file >>= fun html ->
+    return (main_template html) >>= fun html ->
+    return (Html.to_string html) >>= fun contents ->
+    Writer.save out_file ~contents
+  )
+  | `Install -> (
+    let base = "install.html" in
     let in_file = repo_root/"book"/base in
     let out_file = out_dir/base in
     Html.of_file in_file >>= fun html ->

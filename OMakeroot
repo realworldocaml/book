@@ -28,6 +28,7 @@ HTML_FILES[] =
   $(HTML_CHAPTER_FILES)
   index.html
   faqs.html
+  install.html
 
 ################################################################################
 # Build Parameters
@@ -110,6 +111,9 @@ OCAMLFINDFLAGS = -syntax camlp4o
 
     faqs.html: $(ROOT)/book/faqs.html ../app/rwo_app
       $(ROOT)/_build/app/rwo_app build faqs -o ./ -repo-root $(ROOT)
+
+    install.html: $(ROOT)/book/install.html ../app/rwo_app
+      $(ROOT)/_build/app/rwo_app build install -o ./ -repo-root $(ROOT)
 
     .DEFAULT: $(HTML_FILES)
       rsync -av $(ROOT)/book/images ./
