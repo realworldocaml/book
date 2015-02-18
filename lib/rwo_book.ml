@@ -545,18 +545,32 @@ let head_item : Html.item =
     script [data "try{Typekit.load();}catch(e){}"];
   ]
 
-let title_bar : Html.item =
+let title_bar,title_bar_frontpage =
   let open Html in
-  div ~a:["class","title-bar"] [
-    div ~a:["class","title"] [
-      h1 [data "Real World OCaml"];
-      h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
-      nav [
-        a ~a:["href","toc.html"] [data "Table of Contents"];
-        a ~a:["href","faqs.html"] [data "FAQs"];
-      ]
-    ]
+  let nav = nav [
+    a ~a:["href","toc.html"] [data "Table of Contents"];
+    a ~a:["href","faqs.html"] [data "FAQs"];
+    a ~a:["href","install.html"] [data "Install"];
+    a ~a:["href","https://ocaml.janestreet.com/ocaml-core/"]
+      [data "API Docs"];
   ]
+  in
+  let h1 = h1 [data "Real World OCaml"] in
+  let h4 = h4 [data "Functional programming for the masses"] in
+  let h5 = h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"] in
+  let title_bar =
+    div ~a:["class","title-bar"] [
+      div ~a:["class","title"] [h1; h5; nav]
+    ]
+  in
+  let title_bar_frontpage =
+    div ~a:["class","splash"] [
+      div ~a:["class","image"] [];
+      div ~a:["class","title"] [h1; h4; h5; nav]
+    ]
+  in
+  title_bar,title_bar_frontpage
+
 
 let footer_item : Html.item =
   let open Html in
@@ -643,35 +657,16 @@ let main_template ?(next_chapter=None) ?(title_bar=title_bar) html : Html.t =
 
 
 (******************************************************************************)
-(* Non-chapter Pages                                                          *)
+(* Make Pages                                                                 *)
 (******************************************************************************)
 let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
-  let open Html in
-  let title_bar =
-    body [
-      div ~a:["class","splash"] [
-        div ~a:["class","image"] [];
-        div ~a:["class","title"] [
-          h1 [data "Real World OCaml"];
-          h4 [data "Functional programming for the masses"];
-          h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
-          nav [
-            a ~a:["href","toc.html"] [data "Table of Contents"];
-            a ~a:["href","faqs.html"] [data "FAQs"];
-          ]
-        ];
-      ];
-    ]
-  in
   chapters ~repo_root () >>| fun chapters ->
-  main_template ~title_bar [
-    html [head []; body [toc chapters]]
-  ]
+  main_template ~title_bar:title_bar_frontpage
+    Html.[
+      html [head []; body [toc chapters]]
+    ]
+;;
 
-
-(******************************************************************************)
-(* Chapter Pages                                                              *)
-(******************************************************************************)
 let make_chapter repo_root chapters chapter_file
     : Html.t Deferred.t
     =
