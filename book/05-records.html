@@ -49,12 +49,13 @@
     data-code-language="ocamltop" href= "code/records/main.topscript"
     part="1" />
 
-    <p>You might wonder how the compiler inferred that
-    <code>my_host</code> is of type <code>host_info</code>. The
-    hook that the compiler uses in this case to figure out the type
-    is the record field name. Later in the chapter, we'll talk
-    about what happens when there is more than one record type in
-    scope with the same field name.</p>
+    <p>You might wonder how the compiler inferred
+    that <code>my_host</code> is of type <code>host_info</code>.  The
+    compiler bases its inference, it turns out, on the field names
+    used in constructing the record.  That inference is most
+    straightforward when each field name belongs uniquely to a single
+    record type.  We'll discuss later in the chapter what happens when
+    field names are shared across different record types.</p>
 
     <p>Once we have a record value in hand, we can extract elements
     from the record field using dot notation:</p>
@@ -70,8 +71,9 @@
 
     <p>We can then write polymorphic functions that operate over
     this parameterized type:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="4" />
+
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="4" />
 
     <section id="patterns-and-exhaustiveness" data-type="sect1">
       <h1>Patterns and Exhaustiveness</h1>
@@ -79,6 +81,7 @@
       <p>Another way of getting information out of a record is by
       using a pattern match, as in the definition of
       <code>host_info_to_string</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="5" />
 
@@ -103,6 +106,7 @@
       <p>As an example, imagine that we wanted to add a new field
       to our <code>host_info</code> record called
       <code>os_release</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="6" />
 
@@ -118,12 +122,14 @@
       (which you can do in the toplevel by typing <code>#warnings
       "+9"</code>), the compiler will warn about the missing
       field:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="7" />
 
       <p>We can disable the warning for a given pattern by
       explicitly acknowledging that we are ignoring extra fields.
       This is done by adding an underscore to the pattern:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="8" />
 
@@ -139,6 +145,7 @@
         documented in the compiler itself, so we could have found
         out about warning 9 as follows:</p>
       </div>
+
       <link rel="import" data-code-language="console" href=
       "code/records/warn_help.out" />
 
@@ -151,7 +158,7 @@
 
       <p>The warnings used for building the examples in this book
       are specified with the following flag: <code>-w
-      @A-4-33-41-42-43-34-44</code>.</p>
+      @A-4-33-40-41-42-43-34-44</code>.</p>
 
       <p>The syntax of this can be found by running <code>ocaml
       -help</code>, but this particular invocation turns on all
@@ -176,12 +183,14 @@
       For example, the pattern in the following function binds all
       of the fields in question to variables of the same name. This
       is called <em>field punning</em>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="9" />
 
       <p>Field punning can also be used to construct a record.
       Consider the following code for generating a
       <code>host_info</code> record:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="10" />
 
@@ -193,11 +202,13 @@
       <p>You can take advantage of both field punning and label
       punning when writing a function for constructing a record
       from labeled arguments:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="11" />
 
       <p>This is considerably more concise than what you would get
       without punning:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="12" />
 
@@ -212,34 +223,37 @@
       <h1>Reusing Field Names</h1>
 
       <p>Defining records with the same field names can be
-      problematic. Let's consider a simple example: building types
-      to represent the protocol used for a logging server.</p>
+      problematic. As a simple example, let's consider a collection of
+      types representing the protocol of a logging server.</p>
 
-      <p>We'll describe three message types:
-      <code>log_entry</code>, <code>heartbeat</code>, and
-      <code>logon</code>. The <code>log_entry</code> message is
-      used to deliver a log entry to the server; the
-      <code>logon</code> message is sent to initiate a connection
-      and includes the identity of the user connecting and
-      credentials used for authentication; and the
-      <code>heartbeat</code> message is periodically sent by the
-      client to demonstrate to the server that the client is alive
-      and connected. All of these messages include a session ID and
-      the time the message was generated:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="13" />
+      <p>We'll describe three message
+      types: <code>log_entry</code>, <code>heartbeat</code>,
+      and <code>logon</code>. The <code>log_entry</code> message is
+      used to deliver a log entry to the server;
+      the <code>logon</code> message is sent when initiating a
+      connection and includes the identity of the user connecting and
+      credentials used for authentication; and
+      the <code>heartbeat</code> message is periodically sent by the
+      client to demonstrate to the server that the client is alive and
+      connected. All of these messages include a session ID and the
+      time the message was generated:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/records/main.topscript" part="13" />
 
       <p>Reusing field names can lead to some ambiguity. For
       example, if we want to write a function to grab the
       <code>session_id</code> from a record, what type will it
       have?</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="14" />
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/records/main.topscript" part="14" />
 
       <p>In this case, OCaml just picks the most recent definition
       of that record field. We can force OCaml to assume we're
       dealing with a different type (say, a <code>heartbeat</code>)
       using a type annotation:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="15" />
 
@@ -247,27 +261,28 @@
       type annotations, the ambiguity can be a bit confusing.
       Consider the following functions for grabbing the session ID
       and status from a heartbeat:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="16" />
 
       <p>Why did the first definition succeed without a type
       annotation and the second one fail? The difference is that in
-      the first case, the type-checker considered the
-      <code>status_message</code> field first and thus concluded
-      that the record was a <code>heartbeat</code>. When the order
-      was switched, the <code>session_id</code> field was
-      considered first, and so that drove the type to be considered
-      to be a <code>logon</code>, at which point
-      <code>t.status_message</code> no longer made sense.</p>
+      the first case, the type-checker considered
+      the <code>status_message</code> field first and thus concluded
+      that the record was a <code>heartbeat</code>. When the order was
+      switched, the <code>session_id</code> field was considered
+      first, and so that drove the type to be considered to be
+      a <code>logon</code>, at which
+      point <code>t.status_message</code> no longer made sense.</p>
 
       <p>We can avoid this ambiguity altogether, either by using
       nonoverlapping field names or by putting different record types
-      in different modules. Packing types into modules is a broadly
-      useful idiom (and one used quite extensively by Core), providing
-      for each type a namespace within which to put related
+      in different modules. Indeed, packing types into modules is a
+      broadly useful idiom (and one used quite extensively by Core),
+      providing for each type a namespace within which to put related
       values. When using this style, it is standard practice to name
       the type associated with the module <code>t</code>. Using this
-      style we would write:</p> 
+      style we would write:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="17" />
@@ -296,7 +311,7 @@
       "code/records/main2.topscript" part="20" />
 
       <p>When using dot notation for accessing record fields, we can
-      qualify the field by the module directly:</p>
+      qualify the field by the module as well.</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="21" />
@@ -311,25 +326,23 @@
       that <code>Log_entry</code> is capitalized and so can't be a
       field name is what disambiguates the two uses.</p>
 
-      Qualifying a record field by the module that it comes from can
-      be awkward.  OCaml doesn't require that the record
-      field be qualified if it can otherwise infer the type of the
-      record in question, for example, because of a type annotation.
-
-      For example...
-
-      <link rel="import" data-code-language="ocamltop" 
-	    href="code/records/main2.topscript" part="21.2" />
-      
-      But if we use a type annotation mark the type, then the
-      qualification becomes unnecessary.
+      Qualifying a record field by the module it comes from can be
+      awkward.  Happily, OCaml doesn't require that the record field
+      be qualified if it can otherwise infer the type of the record in
+      question.  In particular, we can rewrite the above declarations
+      by adding type annotations and removing the module
+      qualifications.
 
       <link rel="import" data-code-language="ocamltop" 
-	    href="code/records/main2.topscript" part="21.3" />
+	    href="code/records/main2.topscript" part="21.1" />
 
-      <p>For functions defined within the module where a given
-      record is defined, the module qualification goes away
-      entirely.</p>
+      This feature of the language, known by the somewhat imposing
+      name of <em>type-directed constructor disambiguation</em>,
+      applies to variant constructors as well as record fields, as
+      we'll see in <a href="#variants" data-type="xref">#variants</a>.
+
+      <p>For functions defined within the module where a given record
+      is defined, the module qualification goes away entirely.</p>
 
     </section>
 
@@ -344,6 +357,7 @@
       that client. The following defines a type for representing
       this information, as well as a function for updating the
       client information when a new heartbeat arrives:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="22" />
 
@@ -352,6 +366,7 @@
       being copied over from <code>t</code>. We can use OCaml's
       <em>functional update</em> syntax to do this more tersely.
       The syntax of a functional update is as follows:</p>
+
       <link rel="import" data-code-language="ocamlsyntax" href=
       "code/records/functional_update.syntax" />
 
@@ -361,6 +376,7 @@
 
       <p>Given this, we can rewrite <code>register_heartbeat</code>
       more concisely:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="23" />
 
@@ -373,6 +389,7 @@
       the new fields. Consider what happens if we decided to add a
       field for the status message received on the last
       heartbeat:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="24" />
 
@@ -383,6 +400,7 @@
       functional update continues to compile as is, even though it
       incorrectly ignores the new field. The correct thing to do
       would be to update the code as follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="25" />
     </section>
@@ -394,6 +412,7 @@
       You can, however, declare individual record fields as
       mutable. In the following code, we've made the last two
       fields of <code>client_info</code> mutable:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="26" />
 
@@ -401,6 +420,7 @@
       mutable field. The side-effecting version of
       <code>register_heartbeat</code> would be written as
       follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="27" />
 
@@ -422,6 +442,7 @@
 
       <p>Consider the following function for extracting the
       usernames from a list of <code>Logon</code> messages:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="28" />
 
@@ -436,6 +457,7 @@
       declaration of a record type will cause the extension to be
       applied to a given type declaration. So, for example, we
       could have defined <code>Logon</code> as follows:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="29" />
 
@@ -449,6 +471,7 @@
       <p>One of the functions we obtain is <code>Logon.user</code>,
       which we can use to extract the user field from a logon
       message:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="30" />
 
@@ -497,6 +520,7 @@
       <code>Logon.Fields.user</code>, you'll get a function for
       extracting the <code>user</code> field from a
       <code>Logon.t</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="31" />
 
@@ -509,6 +533,7 @@
       <p>The type of <code>Field.get</code> is a little more
       complicated than you might naively expect from the preceding
       one:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="32" />
 
@@ -521,6 +546,7 @@
 
       <p>We can use first-class fields to do things like write a
       generic function for displaying a record field:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="33" />
 
@@ -531,6 +557,7 @@
 
       <p>Here's an example of <code>show_field</code> in
       action:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="34" />
 
@@ -545,6 +572,7 @@
       of a record. So, for example, in the case of
       <code>Logon.t</code>, the field iterator has the following
       type:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="35" />
 
@@ -561,6 +589,7 @@
       <p>Now, let's use <code>Logon.Fields.iter</code> and
       <code>show_field</code> to print out all the fields of a
       <code>Logon</code> record:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="36" />
 
