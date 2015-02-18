@@ -545,6 +545,19 @@ let head_item : Html.item =
     script [data "try{Typekit.load();}catch(e){}"];
   ]
 
+let title_bar : Html.item =
+  let open Html in
+  div ~a:["class","title-bar"] [
+    div ~a:["class","title"] [
+      h1 [data "Real World OCaml"];
+      h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
+      nav [
+        a ~a:["href","toc.html"] [data "Table of Contents"];
+        a ~a:["href","faqs.html"] [data "FAQs"];
+      ]
+    ]
+  ]
+
 let footer_item : Html.item =
   let open Html in
   let links = [
@@ -579,65 +592,6 @@ let toc chapters : Html.item =
     ]
   ) )
 
-
-(******************************************************************************)
-(* Whole Pages                                                                *)
-(******************************************************************************)
-let frontpage_item chapters : Html.item =
-  let open Html in
-  html ~a:["class","no-js"; "lang","en"] [
-    head_item;
-
-    body [
-      div ~a:["class","splash"] [
-        div ~a:["class","image"] [];
-        div ~a:["class","title"] [
-          h1 [data "Real World OCaml"];
-          h4 [data "Functional programming for the masses"];
-          h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
-          nav [
-            a ~a:["href","toc.html"] [data "Table of Contents"];
-            a ~a:["href","faqs.html"] [data "FAQs"];
-          ]
-        ];
-      ];
-
-      div ~a:["class","wrap"] [
-        div ~a:["class","left-column"] [];
-        article ~a:["class","main-body"] [toc chapters];
-      ]
-    ];
-
-    footer_item;
-    script ~a:["src","js/jquery.min.js"] [];
-    script ~a:["src","js/min/app-min.js"] [];
-  ]
-
-let frontpage ?(repo_root=".") () =
-  chapters ~repo_root () >>|
-  frontpage_item
-
-
-(******************************************************************************)
-(* Chapter Pages                                                              *)
-(******************************************************************************)
-let title_bar next_chapter : Html.item =
-  let open Html in
-  div ~a:["class","title-bar"] [
-    div ~a:["class","title"] [
-      h1 [data "Real World OCaml"];
-      h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
-      nav (
-        (a ~a:["href","toc.html"] [data "Table of Contents"])::
-        (a ~a:["href","faqs.html"] [data "FAQs"])::
-        (match next_chapter with
-        | None -> []
-        | Some x -> [a ~a:["href",x.filename] [data ("Next: " ^ x.title)]]
-        )
-      )
-    ]
-  ]
-
 let next_chapter_footer next_chapter : Html.item option =
   let open Html in
   match next_chapter with
@@ -653,7 +607,72 @@ let next_chapter_footer next_chapter : Html.item option =
     ]
   )
 
-let chapter_to_HTMLBook_exn repo_root chapters chapter_file
+(** Process the given [html], adding or replacing elements to satisfy
+    our main template. *)
+let main_template ?(next_chapter=None) ?(title_bar=title_bar) html : Html.t =
+  let rec f item = match item with
+    | Nethtml.Data _ -> item
+    | Nethtml.Element ("head", _, _) -> head_item
+    | Nethtml.Element ("html",attrs,childs) ->
+      Nethtml.Element (
+        "html",
+        (("class","no-js")::("lang","en")::attrs),
+        (List.map childs ~f)
+      )
+    | Nethtml.Element ("body",attrs,childs) ->
+      let childs = List.map childs ~f in
+      let main_content = Html.(
+        div ~a:["class","wrap"] [
+          div ~a:["class","left-column"] [];
+          article ~a:["class","main-body"] childs;
+        ])
+      in
+      Html.body ~a:attrs (List.filter_map ~f:ident [
+        Some title_bar;
+        Some main_content;
+        next_chapter_footer next_chapter;
+        Some footer_item;
+        Some (Html.script ~a:["src","js/jquery.min.js"] []);
+        Some (Html.script ~a:["src","js/min/app-min.js"] []);
+      ]
+      )
+    | Nethtml.Element (name,attrs,childs) ->
+      Nethtml.Element (name, attrs, List.map ~f childs)
+  in
+  List.map ~f html
+
+
+(******************************************************************************)
+(* Non-chapter Pages                                                          *)
+(******************************************************************************)
+let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
+  let open Html in
+  let title_bar =
+    body [
+      div ~a:["class","splash"] [
+        div ~a:["class","image"] [];
+        div ~a:["class","title"] [
+          h1 [data "Real World OCaml"];
+          h4 [data "Functional programming for the masses"];
+          h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"];
+          nav [
+            a ~a:["href","toc.html"] [data "Table of Contents"];
+            a ~a:["href","faqs.html"] [data "FAQs"];
+          ]
+        ];
+      ];
+    ]
+  in
+  chapters ~repo_root () >>| fun chapters ->
+  main_template ~title_bar [
+    html [head []; body [toc chapters]]
+  ]
+
+
+(******************************************************************************)
+(* Chapter Pages                                                              *)
+(******************************************************************************)
+let make_chapter repo_root chapters chapter_file
     : Html.t Deferred.t
     =
   let (/) = Filename.concat in
@@ -688,55 +707,23 @@ let chapter_to_HTMLBook_exn repo_root chapters chapter_file
   in
 
   let rec loop html =
-    (Deferred.List.map html ~f:(fun item -> match item with
-    | Nethtml.Data _ ->
-      return [item]
-
-    | Nethtml.Element (name, attrs, childs) -> (
+    (Deferred.List.map html ~f:(fun item ->
       if is_import_node item then
         import_node_to_html (ok_exn (parse_import item))
-
       else match item with
-
-      | Nethtml.Element ("head",_,_) ->
-        return [head_item]
-
-      | Nethtml.Element ("html",attrs,childs) -> (
-        Deferred.List.map childs ~f:(fun x -> loop [x])
-        >>| List.concat
-        >>| fun childs ->
-        let attrs = ("class","no-js")::("lang","en")::attrs in
-        [Html.html ~a:attrs childs]
-      )
-
-      | Nethtml.Element ("body", attrs, childs) -> (
-        Deferred.List.map childs ~f:(fun x -> loop [x]) >>= fun childs ->
-        return (List.concat childs) >>= fun childs ->
-        return Html.(div ~a:["class","wrap"] [
-          div ~a:["class","left-column"] [];
-          article ~a:["class","main-body"] childs;
-        ]) >>| fun main_content ->
-        [Html.body ~a:attrs (List.filter_map ~f:ident [
-          Some (title_bar next_chapter);
-          Some (main_content);
-          next_chapter_footer next_chapter;
-          Some footer_item;
-          Some (Html.script ~a:["src","js/jquery.min.js"] []);
-          Some (Html.script ~a:["src","js/min/app-min.js"] []);
-         ] )
-        ]
-      )
-
-      | _ -> (
+      | Nethtml.Data _ -> return [item]
+      | Nethtml.Element (name, attrs, childs) -> (
         Deferred.List.map childs ~f:(fun x -> loop [x])
         >>| List.concat
         >>| fun childs -> [Nethtml.Element (name, attrs, childs)]
       )
-    ) ) )
+     )
+    )
     >>| List.concat
   in
   Html.of_file chapter_file >>= fun html ->
-  loop html
+  loop html >>| fun html ->
+  main_template ~next_chapter html
 ;;
 
 
@@ -751,14 +738,14 @@ type src = [
 let make ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
     let out_file = Filename.concat out_dir "index.html" in
-    frontpage ~repo_root () >>= fun item ->
-    return (Html.to_string [item]) >>= fun contents ->
+    make_frontpage ~repo_root () >>= fun html ->
+    return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
   | `Chapter in_file -> (
     let out_file = Filename.(concat out_dir (basename in_file)) in
     chapters ~repo_root () >>= fun chapters ->
-    chapter_to_HTMLBook_exn repo_root chapters in_file >>= fun html ->
+    make_chapter repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
