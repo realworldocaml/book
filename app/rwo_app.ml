@@ -61,11 +61,23 @@ let build_frontpage : Command.t = Command.async
     Book.make ~repo_root ~out_dir `Frontpage
   )
 
+let build_faqs_page : Command.t = Command.async
+  ~summary:"build FAQs page"
+  Command.Spec.(
+    empty
+    +> Param.repo_root
+    +> Param.out_dir
+  )
+  (fun repo_root out_dir () ->
+    Book.make ~repo_root ~out_dir `FAQs
+  )
+
 let build : Command.t = Command.group
   ~summary:"build commands"
   [
     "chapter", build_chapter;
     "frontpage", build_frontpage;
+    "faqs", build_faqs_page;
   ]
 
 

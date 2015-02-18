@@ -17,6 +17,7 @@ open Async.Std
 type src = [
 | `Chapter of string
 | `Frontpage
+| `FAQs
 ]
 
 (** Make an HTML page from the given [src] and save it to [out_dir]. *)

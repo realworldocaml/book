@@ -27,6 +27,7 @@ HTML_CHAPTER_FILES[] = $(basename $(ls book/[0-9][0-9]*.html))
 HTML_FILES[] =
   $(HTML_CHAPTER_FILES)
   index.html
+  faqs.html
 
 ################################################################################
 # Build Parameters
@@ -104,8 +105,11 @@ OCAMLFINDFLAGS = -syntax camlp4o
         $(ROOT)/_build/app/rwo_app build chapter -o ./ -repo-root $(ROOT) $<
 
 
-    index.html: ../app/rwo_app
+    index.html: $(ROOT)/book/index.html ../app/rwo_app
       $(ROOT)/_build/app/rwo_app build frontpage -o ./ -repo-root $(ROOT)
+
+    faqs.html: $(ROOT)/book/faqs.html ../app/rwo_app
+      $(ROOT)/_build/app/rwo_app build faqs -o ./ -repo-root $(ROOT)
 
     .DEFAULT: $(HTML_FILES)
       rsync -av $(ROOT)/book/images ./

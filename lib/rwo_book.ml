@@ -3,6 +3,7 @@ open Rwo_core2
 open Async.Std
 module Code = Rwo_code
 module Html = Rwo_html
+let (/) = Filename.concat
 
 (******************************************************************************)
 (* <link rel="import"> nodes                                                  *)
@@ -409,7 +410,6 @@ module ImportMap = Map.Make(
 )
 
 let extract_code_from_1e_exn chapter =
-  let (/) = Filename.concat in
   let base = sprintf "ch%02d" chapter in
   let in_file = "book"/(base ^ ".html") in
   let out_file = "tmp"/"book"/(base ^ ".html") in
@@ -503,7 +503,6 @@ let is_chapter_file file : bool =
     with _ -> false
 
 let chapters ?(repo_root=".") () : chapter list Deferred.t =
-  let (/) = Filename.concat in
   let book_dir = repo_root/"book" in
   let number basename =
     String.split basename ~on:'-'
@@ -670,7 +669,6 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
 let make_chapter repo_root chapters chapter_file
     : Html.t Deferred.t
     =
-  let (/) = Filename.concat in
   let import_base_dir = Filename.dirname chapter_file in
   let chapter = List.find_exn chapters ~f:(fun x ->
     x.filename = Filename.basename chapter_file)
@@ -728,19 +726,29 @@ let make_chapter repo_root chapters chapter_file
 type src = [
 | `Chapter of string
 | `Frontpage
+| `FAQs
 ]
 
 let make ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
-    let out_file = Filename.concat out_dir "index.html" in
+    let out_file = out_dir/"index.html" in
     make_frontpage ~repo_root () >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
   | `Chapter in_file -> (
-    let out_file = Filename.(concat out_dir (basename in_file)) in
+    let out_file = out_dir/(Filename.basename in_file) in
     chapters ~repo_root () >>= fun chapters ->
     make_chapter repo_root chapters in_file >>= fun html ->
+    return (Html.to_string html) >>= fun contents ->
+    Writer.save out_file ~contents
+  )
+  | `FAQs -> (
+    let base = "faqs.html" in
+    let in_file = repo_root/"book"/base in
+    let out_file = out_dir/base in
+    Html.of_file in_file >>= fun html ->
+    return (main_template html) >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
