@@ -30,24 +30,29 @@ val make
 
 
 (******************************************************************************)
-(** {2 Chapters *)
+(** {2 Parts and Chapters *)
 (******************************************************************************)
+type part_info = {
+  number : int;
+  title : string;
+}
+
 type chapter = {
   number : int;
   filename : string; (** basename *)
   title : string;
-  part : int option;
+  part_info : part_info option;
+}
+
+type part = {
+  info : part_info option;
+  chapters : chapter list
 }
 
 (** Return all chapter numbers and names, ordered by chapter
     number. *)
 val chapters : ?repo_root:string -> unit -> chapter list Deferred.t
 
-
-(******************************************************************************)
-(** {2 Parts *)
-(******************************************************************************)
-type part = {part : int option; chapters : chapter list}
 val group_chapters_by_part : chapter list -> part list
 
 

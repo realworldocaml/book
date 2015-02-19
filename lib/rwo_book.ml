@@ -471,30 +471,49 @@ let extract_code_from_1e_exn chapter =
 
 
 (******************************************************************************)
-(* Chapters                                                                   *)
+(* Parts and Chapters                                                         *)
 (******************************************************************************)
+type part_info = {
+  number : int;
+  title : string;
+}
+
 type chapter = {
   number : int;
   filename : string;
   title : string;
-  part : int option;
+  part_info : part_info option;
 }
 
-(** Return part number for the given chapter number, if the chapter is
+type part = {
+  info : part_info option;
+  chapters : chapter list
+}
+
+(** Return part info for the given chapter number, if the chapter is
     in a part. *)
-let part_of_chapter chapter_num : int option =
+let part_info_of_chapter chapter_num : part_info option =
   let parts = [
-    (1, [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12]);
-    (2, [13; 14; 15; 16; 17; 18]);
-    (3, [19; 20; 21; 22; 23]);
+    (
+      {number=1; title="Language Concepts"},
+      [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12]
+    );
+    (
+      {number=2; title="Tools and Techniques"},
+      [13; 14; 15; 16; 17; 18]
+    );
+    (
+      {number=3; title="The Runtime System"},
+      [19; 20; 21; 22; 23]
+    );
   ]
   in
-  List.fold parts ~init:None ~f:(fun accum (part,chapters) ->
+  List.fold parts ~init:None ~f:(fun accum (info,chapters) ->
     match accum with
     | Some _ as x -> x
     | None ->
       if List.mem chapters chapter_num
-      then Some part
+      then Some info
       else None
   )
 
@@ -538,7 +557,7 @@ let chapters ?(repo_root=".") () : chapter list Deferred.t =
       number;
       filename = basename;
       title = get_title (book_dir/basename) html;
-      part = part_of_chapter number;
+      part_info = part_info_of_chapter number;
     }
   ) >>|
   List.sort ~cmp:(fun a b -> Int.compare a.number b.number)
@@ -546,24 +565,18 @@ let chapters ?(repo_root=".") () : chapter list Deferred.t =
 let next_chapter chapters curr_chapter : chapter option =
   List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)
 
-
-(******************************************************************************)
-(* Parts                                                                      *)
-(******************************************************************************)
-type part = {part : int option; chapters : chapter list}
-
-let group_chapters_by_part chapters =
+let group_chapters_by_part (chapters : chapter list) : part list =
   List.fold_right chapters ~init:[] ~f:(fun x accum ->
     match accum with
     | [] -> (* not building a part yet *)
-      [{part = part_of_chapter x.number; chapters = [x]}]
+      [{info = part_info_of_chapter x.number; chapters = [x]}]
     | p::rest ->
-      let prev_part = p.part in
-      let curr_part = part_of_chapter x.number in
+      let prev_part = p.info in
+      let curr_part = (part_info_of_chapter x.number) in
       if prev_part = curr_part then
         {p with chapters = x::p.chapters}::rest
       else
-        {part = curr_part; chapters = [x]}::p::rest
+        {info = curr_part; chapters = [x]}::p::rest
   )
 
 
@@ -633,18 +646,26 @@ let footer_item : Html.item =
     ]
   ]
 
-let toc chapters : Html.item =
+let toc chapters : Html.item list =
   let open Html in
-  ul ~a:["class","toc"] (List.map chapters ~f:(fun x ->
-    li [
-      a ~a:["href",x.filename] [
-        h2 [
-          small [data (sprintf "Chapter %02d" x.number)];
-          data x.title;
+  let parts = group_chapters_by_part chapters in
+  List.map parts ~f:(fun {info;chapters} ->
+    let ul = ul ~a:["class","toc"] (List.map chapters ~f:(fun x ->
+      li [
+        a ~a:["href",x.filename] [
+          h2 [
+            small [data (sprintf "Chapter %02d" x.number)];
+            data x.title;
+          ]
         ]
       ]
-    ]
-  ) )
+    ) )
+    in
+    match info with
+    | None -> [ul]
+    | Some x -> [h5 [data (sprintf "Part %d: %s" x.number x.title)]; ul]
+  )
+  |> List.concat
 
 let next_chapter_footer next_chapter : Html.item option =
   let open Html in
@@ -703,7 +724,7 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
   chapters ~repo_root () >>| fun chapters ->
   main_template ~title_bar:title_bar_frontpage
     Html.[
-      html [head []; body [toc chapters]]
+      html [head []; body (toc chapters)]
     ]
 ;;
 
