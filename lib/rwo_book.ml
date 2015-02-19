@@ -601,7 +601,7 @@ let head_item : Html.item =
 let title_bar,title_bar_frontpage =
   let open Html in
   let nav = nav [
-    a ~a:["href","toc.html"] [data "Table of Contents"];
+    a ~a:["href","index.html"] [data "Table of Contents"];
     a ~a:["href","faqs.html"] [data "FAQs"];
     a ~a:["href","install.html"] [data "Install"];
     a ~a:["href","https://ocaml.janestreet.com/ocaml-core/"]
