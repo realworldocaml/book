@@ -106,7 +106,7 @@ OCAMLFINDFLAGS = -syntax camlp4o
         $(ROOT)/_build/app/rwo_app build chapter -o ./ -repo-root $(ROOT) $<
 
 
-    index.html: $(ROOT)/book/index.html ../app/rwo_app
+    index.html: ../app/rwo_app
       $(ROOT)/_build/app/rwo_app build frontpage -o ./ -repo-root $(ROOT)
 
     faqs.html: $(ROOT)/book/faqs.html ../app/rwo_app
