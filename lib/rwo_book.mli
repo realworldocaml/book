@@ -36,11 +36,19 @@ type chapter = {
   number : int;
   filename : string; (** basename *)
   title : string;
+  part : int option;
 }
 
 (** Return all chapter numbers and names, ordered by chapter
     number. *)
 val chapters : ?repo_root:string -> unit -> chapter list Deferred.t
+
+
+(******************************************************************************)
+(** {2 Parts *)
+(******************************************************************************)
+type part = {part : int option; chapters : chapter list}
+val group_chapters_by_part : chapter list -> part list
 
 
 (******************************************************************************)

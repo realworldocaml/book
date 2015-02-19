@@ -477,7 +477,26 @@ type chapter = {
   number : int;
   filename : string;
   title : string;
+  part : int option;
 }
+
+(** Return part number for the given chapter number, if the chapter is
+    in a part. *)
+let part_of_chapter chapter_num : int option =
+  let parts = [
+    (1, [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12]);
+    (2, [13; 14; 15; 16; 17; 18]);
+    (3, [19; 20; 21; 22; 23]);
+  ]
+  in
+  List.fold parts ~init:None ~f:(fun accum (part,chapters) ->
+    match accum with
+    | Some _ as x -> x
+    | None ->
+      if List.mem chapters chapter_num
+      then Some part
+      else None
+  )
 
 let get_title file (t:Html.t) : string =
   let rec item_to_string = function
@@ -514,16 +533,38 @@ let chapters ?(repo_root=".") () : chapter list Deferred.t =
   return (List.filter l ~f:is_chapter_file) >>=
   Deferred.List.map ~f:(fun basename ->
     Html.of_file (book_dir/basename) >>| fun html ->
+    let number = number basename in
     {
-      number = number basename;
+      number;
       filename = basename;
       title = get_title (book_dir/basename) html;
+      part = part_of_chapter number;
     }
   ) >>|
   List.sort ~cmp:(fun a b -> Int.compare a.number b.number)
 
 let next_chapter chapters curr_chapter : chapter option =
   List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)
+
+
+(******************************************************************************)
+(* Parts                                                                      *)
+(******************************************************************************)
+type part = {part : int option; chapters : chapter list}
+
+let group_chapters_by_part chapters =
+  List.fold_right chapters ~init:[] ~f:(fun x accum ->
+    match accum with
+    | [] -> (* not building a part yet *)
+      [{part = part_of_chapter x.number; chapters = [x]}]
+    | p::rest ->
+      let prev_part = p.part in
+      let curr_part = part_of_chapter x.number in
+      if prev_part = curr_part then
+        {p with chapters = x::p.chapters}::rest
+      else
+        {part = curr_part; chapters = [x]}::p::rest
+  )
 
 
 (******************************************************************************)
