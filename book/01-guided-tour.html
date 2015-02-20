@@ -766,33 +766,34 @@
           <h1>Nesting lets with let and in</h1>
 
           <p><code>log_entry</code> was our first use of
-          <code>let</code> to define a new variable within the body
-          of a function. A <code>let</code> paired with an
-          <code>in</code> can be used to introduce a new binding
-          within any local scope, including a function body. The
-          <code>in</code> marks the beginning of the scope within
-          which the new variable can be used. Thus, we could
-          write:</p>
+            <code>let</code> to define a new variable within the body
+            of a function. A <code>let</code> paired with an
+            <code>in</code> can be used to introduce a new binding
+            within any local scope, including a function body. The
+            <code>in</code> marks the beginning of the scope within
+            which the new variable can be used. Thus, we could
+            write:</p>
+
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/guided-tour/local_let.topscript" />
+
+          <p>Note that the scope of the <code>let</code> binding is
+            terminated by the double-semicolon, so the value of
+            <code>x</code> is no longer available:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/guided-tour/local_let.topscript" part="1" />
+
+          <p>We can also have multiple <code>let</code> statements in
+            a row, each one adding a new variable binding to what came
+            before:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/guided-tour/local_let.topscript" part="2" />
+
+          <p>This kind of nested <code>let</code> binding is a common
+            way of building up a complex expression, with each
+            <code>let</code> naming some component, before combining
+            them in one final expression.</p>
         </div>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/local_let.topscript" />
-
-        <p>Note that the scope of the <code>let</code> binding is
-        terminated by the double-semicolon, so the value of
-        <code>x</code> is no longer available:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/local_let.topscript" part="1" />
-
-        <p>We can also have multiple <code>let</code> statements in
-        a row, each one adding a new variable binding to what came
-        before:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/local_let.topscript" part="2" />
-
-        <p>This kind of nested <code>let</code> binding is a common
-        way of building up a complex expression, with each
-        <code>let</code> naming some component, before combining
-        them in one final expression.</p>
 
         <p>Options are important because they are the standard way
         in OCaml to encode a value that might not be there; there's
