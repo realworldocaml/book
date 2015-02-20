@@ -375,25 +375,25 @@
           difference between runtime and compile-time errors, but
           that difference is still there. Generally, type errors
           like this one:</p>
-        </div>
 
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="14" />
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/guided-tour/main.topscript" part="14" />
 
-        <p>are compile-time errors (because <code>+</code> requires
-        that both its arguments be of type <code>int</code>),
-        whereas errors that can't be caught by the type system,
-        like division by zero, lead to runtime exceptions:</p>
+          <p>are compile-time errors (because <code>+</code> requires
+            that both its arguments be of type <code>int</code>),
+            whereas errors that can't be caught by the type system,
+            like division by zero, lead to runtime exceptions:</p>
 
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/guided-tour/main.topscript" part="15" />
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/guided-tour/main.topscript" part="15" />
 
-        <p>The distinction here is that type errors will stop you
-        whether or not the offending code is ever actually
-        executed. Merely defining <code>add_potato</code> is an
-        error, whereas <code>is_a_multiple</code> only fails when
-        it's called, and then, only when it's called with an input
-        that triggers the exception.</p>
+          <p>The distinction here is that type errors will stop you
+            whether or not the offending code is ever actually
+            executed. Merely defining <code>add_potato</code> is an
+            error, whereas <code>is_a_multiple</code> only fails when
+            it's called, and then, only when it's called with an input
+            that triggers the exception.</p>
+	</div>
       </section>
     </section>
 
@@ -537,29 +537,29 @@
             <h1>Semicolons Versus Commas</h1>
 
             <p>Unlike many other languages, OCaml uses semicolons
-            to separate list elements in lists rather than commas.
-            Commas, instead, are used for separating elements in a
-            tuple. If you try to use commas in a list, you'll see
-            that your code compiles but doesn't do quite what you
-            might expect:</p>
+              to separate list elements in lists rather than commas.
+              Commas, instead, are used for separating elements in a
+              tuple. If you try to use commas in a list, you'll see
+              that your code compiles but doesn't do quite what you
+              might expect:</p>
+
+            <link rel="import" data-code-language="ocamltop" href=
+		  "code/guided-tour/main.topscript" part="27" />
+
+            <p>In particular, rather than a list of three strings,
+              what we have is a singleton list containing a three-tuple
+              of strings.</p>
+
+            <p>This example uncovers the fact that commas create a
+              tuple, even if there are no surrounding parens. So, we
+              can write:</p>
+
+            <link rel="import" data-code-language="ocamltop" href=
+		  "code/guided-tour/main.topscript" part="28" />
+
+            <p>to allocate a tuple of integers. This is generally
+              considered poor style and should be avoided.</p>
           </div>
-
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="27" />
-
-          <p>In particular, rather than a list of three strings,
-          what we have is a singleton list containing a three-tuple
-          of strings.</p>
-
-          <p>This example uncovers the fact that commas create a
-          tuple, even if there are no surrounding parens. So, we
-          can write:</p>
-
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/main.topscript" part="28" />
-
-          <p>to allocate a tuple of integers. This is generally
-          considered poor style and should be avoided.</p>
 
           <p>The bracket notation for lists is really just
           syntactic sugar for <code>::</code>. Thus, the following
