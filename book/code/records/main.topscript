@@ -1,25 +1,30 @@
-open Core.Std;;
+open Core_kernel.Std;;
 
-type host_info =
-    { hostname   : string;
-      os_name    : string;
-      cpu_arch   : string;
-      timestamp  : Time.t;
-    };;
+type service_info =
+    { service_name : string;
+      port         : int;
+      protocol     : string;
+    }
+  ;;
 
 #part 1
-#require "core_extended";;
-open Core_extended.Std;;
-let my_host =
-    let sh = Shell.sh_one_exn in
-    { hostname   = sh "hostname";
-      os_name    = sh "uname -s";
-      cpu_arch   = sh "uname -p";
-      timestamp  = Time.now ();
-    };;
+#require "re.pcre";;
+let service_info_of_string line =
+    let matches = 
+      Re.exec (Re_pcre.regexp "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    in
+    { service_name = Re.get matches 1;
+      port = Int.of_string (Re.get matches 2);
+      protocol = Re.get matches 3;
+    }
+  ;;
+
+#part 1.1
+let service_info = service_info_of_string
+  "ssh              22/udp     # SSH Remote Login Protocol";;
 
 #part 2
-my_host.cpu_arch;;
+service_info.port;;
 
 #part 3
 type 'a timestamped = { item: 'a; time: Time.t };;
@@ -31,10 +36,9 @@ let first_timestamped list =
 
 
 #part 5
-let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts;
-                          } =
-       sprintf "%s (%s / %s, on %s)" h os c (Time.to_string ts);;
+let host_info_to_string { hostname = h; os_name = os; cpu_arch = c } =
+       sprintf "%s (%s / %s)" h os c
+  ;;
 
 host_info_to_string my_host;;
 
@@ -45,26 +49,23 @@ type host_info =
       os_name    : string;
       cpu_arch   : string;
       os_release : string;
-      timestamp  : Time.t;
     } ;;
 
 #part 7
 #warnings "+9";;
-let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts;
-                          } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+let host_info_to_string { hostname = h; os_name = os; cpu_arch = c } =
+    sprintf "%s (%s / %s)" h os c
+  ;;
 
 #part 8
-let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts; _
-                          } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+let host_info_to_string { hostname = h; os_name = os; cpu_arch = c } =
+    sprintf "%s (%s / %s)" h os c
+  ;;
 
 #part 9
-let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =
-     sprintf "%s (%s / %s) <%s>" hostname os_name cpu_arch
-       (Time.to_string timestamp);;
+let host_info_to_string { hostname; os_name; cpu_arch; _ } =
+     sprintf "%s (%s / %s)" hostname os_name cpu_arch
+  ;;
 
 #part 10
 let my_host =
@@ -73,7 +74,6 @@ let my_host =
     let os_name    = sh "uname -s" in
     let cpu_arch   = sh "uname -p" in
     let os_release = sh "uname -r" in
-    let timestamp  = Time.now () in
     { hostname; os_name; cpu_arch; os_release; timestamp };;
 
 #part 11

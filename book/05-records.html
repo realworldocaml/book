@@ -14,8 +14,8 @@
     <h1>Records</h1>
 
     <p>One of OCaml's best features is its concise and expressive
-    system for declaring new data types, and records are a key element
-    of that system. We discussed records briefly
+    system for declaring new data types.  <em>Records</em> are a key element of
+    that system. We discussed records briefly
     in <a href="#a-guided-tour" data-type="xref">#a-guided-tour</a>,
     but this chapter will go into more depth, covering more of the
     technical details, as well as providing advice on how to use
@@ -25,49 +25,58 @@
     as one, where each component is identified by a different field
     name. The basic syntax for a record type declaration is as
     follows:</p>
+
     <link rel="import" data-code-language="ocamlsyntax" href=
     "code/records/record.syntax" />
 
     <p>Note that record field names must start with a lowercase
     letter.</p>
 
-    <!-- This example doesn't work on Windows.  Should our policy on
-         examples change to avoid unix-only things, at least in the
-         early chapters? -->
+    <p>Here's a simple example, a <code>service_info</code> record that
+      represents an entry from the <pre>/etc/services</pre> on a Unix
+      system.  That file is used for keeping track of the well-known
+      port and protocol name for protocols such as ftp or ssh.</p>
 
-    <p>Here's a simple example, a <code>host_info</code> record that
-    summarizes information about a given computer:</p>
     <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" />
+	  "code/records/main.topscript" />
 
-    <p>We can construct a <code>host_info</code> just as easily as we
-    declared it.  The following code uses the <code>Shell</code>
-    module from <code>Core_extended</code> to dispatch commands to the
-    shell to extract the information we need about the computer we're
-    running on. It also uses the <code>Time.now</code> call from
-    Core's <code>Time</code> module:</p> <link rel="import"
-    data-code-language="ocamltop" href= "code/records/main.topscript"
-    part="1" />
+    <p>We can construct a <code>service_info</code> just as easily as
+      we declared its type.  The following function tries to construct
+      such a record given as input a line
+      from <code>/etc/services</code> file.  To do this, we'll
+      use <code>Re</code>, a regular expression package written in
+      pure OCaml.</p>
 
-    <p>You might wonder how the compiler inferred
-    that <code>my_host</code> is of type <code>host_info</code>.  The
-    compiler bases its inference, it turns out, on the field names
-    used in constructing the record.  That inference is most
-    straightforward when each field name belongs uniquely to a single
-    record type.  We'll discuss later in the chapter what happens when
-    field names are shared across different record types.</p>
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="1" />
+
+    <p>We can construct a concrete record by calling the function on a
+    line from the file.</p>
+
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="1.1" />
+
+    <p>You might wonder how the compiler inferred that our function
+    returns a value of type <code>service_info</code>.  In this case,
+    the compiler bases its inference on the field names used in
+    constructing the record.  That inference is most straightforward
+    when each field name belongs to only one record type.  We'll
+    discuss later in the chapter what happens when field names are
+    shared across different record types.</p>
 
     <p>Once we have a record value in hand, we can extract elements
     from the record field using dot notation:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" part="2" />
+
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="2" />
 
     <p>When declaring an OCaml type, you always have the option of
     parameterizing it by a polymorphic type. Records are no different
-    in this regard. As an example, here's a type one might use to
-    timestamp arbitrary items:</p> <link rel="import"
-    data-code-language="ocamltop" href= "code/records/main.topscript"
-    part="3" />
+    in this regard. As an example, here's a type you might use to
+    timestamp arbitrary items:</p>
+
+    <link rel="import" data-code-language="ocamltop" href=
+	  "code/records/main.topscript" part="3" />
 
     <p>We can then write polymorphic functions that operate over
     this parameterized type:</p>
