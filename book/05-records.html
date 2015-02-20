@@ -14,8 +14,8 @@
     <h1>Records</h1>
 
     <p>One of OCaml's best features is its concise and expressive
-    system for declaring new data types.  <em>Records</em> are a key element of
-    that system. We discussed records briefly
+    system for declaring new data types.  <em>Records</em> are a key
+    element of that system. We discussed records briefly
     in <a href="#a-guided-tour" data-type="xref">#a-guided-tour</a>,
     but this chapter will go into more depth, covering more of the
     technical details, as well as providing advice on how to use
@@ -32,11 +32,11 @@
     <p>Note that record field names must start with a lowercase
     letter.</p>
  
-    <p>Here's a simple example, a <code>service_info</code> record that
-      represents an entry from the <code>/etc/services</code> on a
-      typical Unix system.  That file is used for keeping track of the
-      well-known port and protocol name for protocols such as ftp or
-      ssh.</p>
+    <p>Here's a simple example: a <code>service_info</code> record that
+      represents an entry from the <code>/etc/services</code> file on
+      a typical Unix system.  That file is used for keeping track of
+      the well-known port and protocol name for protocols such as ftp
+      or ssh.</p>
  
     <link rel="import" data-code-language="ocamltop" href=
 	  "code/records/main.topscript" />
@@ -47,7 +47,8 @@
       from <code>/etc/services</code> file.  To do this, we'll
       use <code>Re</code>, a regular expression engine for OCaml.  If
       you don't know how regular expressions work, you can just think
-      of them as a simple language for specifying parsers.</p>
+      of them as a simple pattern language you can use for parsing a
+      string.</p>
 
     <link rel="import" data-code-language="ocamltop" 
 	  href="code/records/main.topscript" part="1" />
@@ -74,8 +75,8 @@
 
     <p>When declaring an OCaml type, you always have the option of
       parameterizing it by a polymorphic type. Records are no
-      different in this regard. As an example, here's a type you might
-      use to timestamp arbitrary items:</p>
+      different in this regard. As an example, here's a type that
+      represents an arbitrary item tagged with a line number.</p>
 
     <link rel="import" data-code-language="ocamltop" href=
 	  "code/records/main.topscript" part="3" />
@@ -94,25 +95,31 @@
     <link rel="import" data-code-language="ocamltop" 
 	  href="code/records/main.topscript" part="4.1" />
 
+    <p>The polymorphism lets us use the same function when parsing a
+      different format, like this function for parsing a file
+      containing an integer on every line.</p>
+
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="4.2" />
+
     <section id="patterns-and-exhaustiveness" data-type="sect1">
       <h1>Patterns and Exhaustiveness</h1>
 
       <p>Another way of getting information out of a record is by
-      using a pattern match, as in the definition of
-      <code>service_info_to_string</code>:</p>
+      using a pattern match, as shown in the following function.</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="5" />
 
-      <p>Note that the pattern we used had only a single case,
-      rather than using several cases separated by
-      <code>|</code>'s. We needed only one pattern because record
-      patterns are <em>irrefutable</em>, meaning that a record
-      pattern match will never fail at runtime. This makes sense,
-      because the set of fields available in a record is always the
-      same. In general, patterns for types with a fixed structure,
-      like records and tuples, are irrefutable, unlike types with
-      variable structures like lists and variants.</p>
+      <p>Note that the pattern we used had only a single case, rather
+      than using several cases separated by <code>|</code>'s. We
+      needed only one pattern because record patterns
+      are <em>irrefutable</em>, meaning that a record pattern match
+      will never fail at runtime. That's because the set of fields
+      available in a record is always the same. In general, patterns
+      for types with a fixed structure, like records and tuples, are
+      irrefutable, unlike types with variable structures like lists
+      and variants.</p>
 
       <p>Another important characteristic of record patterns is
       that they don't need to be complete; a pattern can mention
@@ -123,33 +130,31 @@
       fields will not be flagged by the compiler.</p>
 
       <p>As an example, imagine that we wanted to change
-      our <code>service_info</code> record so that it preserved the
-      comment from the original file.  We can do this by providing a
-	new definition of <code>service_info</code> that includes
-	a <code>comment</code> field:</p>
+      our <code>service_info</code> record so that it preserves
+      comments.  We can do this by providing anew definition
+      of <code>service_info</code> that includes
+      a <code>comment</code> field:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="6" />
 
       <p>The code for <code>service_info_to_string</code> would
-      continue to compile without change. In this particular case,
-      it's pretty clear that you might want to update
-      <code>service_info_to_string</code> in order to include
-      <code>os_release</code>, and it would be nice if the type
-      system would give you a warning about the change.</p>
+      continue to compile without change. But in this case, we should
+      probably update the code so that the generated string includes
+      the comment if it's there.  It would be nice if the type system
+      would warn us that we should consider updating the function.</p>
 
-      <p>Happily, OCaml does offer an optional warning for missing
-      fields in a record pattern. With that warning turned on
-      (which you can do in the toplevel by typing <code>#warnings
-      "+9"</code>), the compiler will warn about the missing
-      field:</p>
+      <p>Happily, OCaml offers an optional warning for missing fields
+      in record patterns. With that warning turned on (which you can
+      do in the toplevel by typing <code>#warnings "+9"</code>), the
+      compiler will indeed warn us.</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="7" />
 
-      <p>We can disable the warning for a given pattern by
-      explicitly acknowledging that we are ignoring extra fields.
-      This is done by adding an underscore to the pattern:</p>
+      <p>We can disable the warning for a given pattern by explicitly
+      acknowledging that we are ignoring extra fields.  This is done
+      by adding an underscore to the pattern:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="8" />
@@ -180,7 +185,7 @@
 	  are specified with the following flag: <code>-w
 	    @A-4-33-40-41-42-43-34-44</code>.</p> 
 
-	<p>The syntax of this can be found by running <code>ocaml
+	<p>The syntax of <code>-w</code> can be found by running <code>ocaml
 	    -help</code>, but this particular invocation turns on all
 	  warnings as errors, disabling only the numbers listed
 	  explicitly after the <code>A</code>.</p>
@@ -202,43 +207,40 @@
 
       <p>When the name of a variable coincides with the name of a
       record field, OCaml provides some handy syntactic shortcuts.
-      For example, the pattern in the following function binds all
-      of the fields in question to variables of the same name. This
-      is called <em>field punning</em>:</p>
+      For example, the pattern in the following function binds all of
+      the fields in question to variables of the same name. This is
+      called <em>field punning</em>:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="9" />
+	    "code/records/main.topscript" part="9" />
 
       <p>Field punning can also be used to construct a record.
-      Consider the following code for generating a
-      <code>service_info</code> record:</p>
+	Consider the following updated version
+	of <code>service_info_of_string</code>.
 
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="10" />
+	    "code/records/main.topscript" part="10" />
 
-      <p>In the preceding code, we defined variables corresponding
-      to the record fields first, and then the record declaration
-      itself simply listed the fields that needed to be
-      included.</p>
-
-      <p>You can take advantage of both field punning and label
-      punning when writing a function for constructing a record
-      from labeled arguments:</p>
+      <p>In the preceding code, we defined variables corresponding to
+      the record fields first, and then the record declaration itself
+      simply listed the fields that needed to be included.  You can
+      take advantage of both field punning and label punning when
+      writing a function for constructing a record from labeled
+      arguments:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="11" />
+	    "code/records/main.topscript" part="11" />
 
       <p>This is considerably more concise than what you would get
       without punning:</p>
 
       <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="12" />
+	    "code/records/main.topscript" part="12" />
 
-      <p>Together, labeled arguments, field names, and field and
-      label punning encourage a style where you propagate the same
-      names throughout your codebase. This is generally good
-      practice, since it encourages consistent naming, which makes
-      it easier to navigate the source.</p>
+      <p>Together, field and label punning encourage a style where you
+      propagate the same names throughout your codebase. This is
+      generally good practice, since it encourages consistent naming,
+      which makes it easier to navigate the source.</p>
     </section>
 
     <section id="reusing-field-names" data-type="sect1">

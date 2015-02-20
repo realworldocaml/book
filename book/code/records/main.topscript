@@ -8,10 +8,10 @@ type service_info =
   ;;
 
 #part 1
-#require "re.pcre";;
+#require "re.posix";;
 let service_info_of_string line =
     let matches = 
-      Re.exec (Re_pcre.regexp "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+      Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
     in
     { service_name = Re.get matches 1;
       port = Int.of_string (Re.get matches 2);
@@ -46,6 +46,9 @@ parse_lines service_info_of_string
      tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
 
+#part 4.2
+
+parse_lines Int.of_string "1\n10\n100\n1000";;
 
 #part 5
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
@@ -59,7 +62,7 @@ type service_info =
     { service_name : string;
       port         : int;
       protocol     : string;
-      comment      : string;
+      comment      : string option;
     }
   ;;
 
@@ -70,59 +73,71 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
   ;;
 
 #part 8
-let service_info_to_string { service_name = name;
-                             port = port; 
-                             protocol = prot;
-                             comment = comment;
-                           } =
-       sprintf "%s %i/%s #%s" name port prot comment
-  ;;
-
-#part 9
 let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
        sprintf "%s %i/%s" name port prot
   ;;
 
+#part 9
+let service_info_to_string { service_name; port; protocol; comment } =
+  let base = sprintf "%s %i/%s" service_name port protocol in
+  match comment with
+  | None -> base
+  | Some text -> base ^ " #" ^ comment
+;;
+
 #part 10
-let my_host =
-    let sh cmd = Shell.sh_one_exn cmd in
-    let hostname   = sh "hostname" in
-    let os_name    = sh "uname -s" in
-    let cpu_arch   = sh "uname -p" in
-    let os_release = sh "uname -r" in
-    { hostname; os_name; cpu_arch; os_release; timestamp };;
+let service_info_of_string line =
+    (* first, split off any comment *)
+    let (line,comment) =
+      match String.rsplit2 line ~on:'#' with
+      | None -> (line,None)
+      | Some (ordinary,comment) -> (ordinary, Some comment)
+    in
+    (* now, use a regular expression to break up the service definition *)
+    let matches = 
+      Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    in
+    let service_name = Re.get matches 1 in
+    let port = Int.of_string (Re.get matches 2) in
+    let protocol = Re.get matches 3 in
+    { service_name; port; protocol; comment }
+  ;;
+
+#part 10.1
+service_info_of_string "ssh 22/tcp # some comment";;
+service_info_of_string "ssh 22/tcp";;
 
 #part 11
-let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =
-    { os_name; cpu_arch; os_release;
-      hostname = String.lowercase hostname;
-      timestamp = Time.now () };;
+let create_service_info ~service_name ~port ~protocol ~comment =
+    { service_name; port; protocol; comment }
+  ;;
 
 #part 12
-let create_host_info
-    ~hostname:hostname ~os_name:os_name
-    ~cpu_arch:cpu_arch ~os_release:os_release =
-    { os_name = os_name;
-      cpu_arch = cpu_arch;
-      os_release = os_release;
-      hostname = String.lowercase hostname;
-      timestamp = Time.now () };;
+let create_service_info
+        ~service_name:service_name ~port:port
+        ~protocol:protocol ~comment:comment =
+    { service_name = service_name;
+      port = port; 
+      protocol = protocol; 
+      comment = comment;
+    }
+;;
 
 #part 13
 type log_entry =
     { session_id: string;
-      time: Time.t;
+      time: float;
       important: bool;
       message: string;
     };;
   type heartbeat =
     { session_id: string;
-      time: Time.t;
+      time: float;
       status_message: string;
     };;
   type logon =
     { session_id: string;
-      time: Time.t;
+      time: float;
       user: string;
       credentials: string;
     }
