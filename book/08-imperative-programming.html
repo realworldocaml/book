@@ -899,60 +899,65 @@
           <h1>Limitations of let rec</h1>
 
           <p>You might wonder why we didn't tie the recursive knot
-          in <code>memo_rec</code> using <code>let rec</code>, as
-          we did for <code>make_rec</code> earlier. Here's code
-          that tries to do just that:</p>
+            in <code>memo_rec</code> using <code>let rec</code>, as
+            we did for <code>make_rec</code> earlier. Here's code
+            that tries to do just that:</p>
+
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/imperative-programming/letrec.topscript" part="1" />
+
+          <p>OCaml rejects the definition because OCaml, as a strict
+            language, has limits on what it can put on the righthand
+            side of a <code>let rec</code>. In particular, imagine how
+            the following code snippet would be compiled:</p>
+
+          <link rel="import" data-code-language="ocaml" href=
+		"code/imperative-programming/let_rec.ml" />
+
+          <p>Note that <code>x</code> is an ordinary value, not a
+            function. As such, it's not clear how this definition
+            should be handled by the compiler. You could imagine it
+            compiling down to an infinite loop, but <code>x</code> is
+            of type <code>int</code>, and there's no <code>int</code>
+            that corresponds to an infinite loop. As such, this
+            construct is effectively impossible to compile.</p>
+
+          <p>To avoid such impossible cases, the compiler only allows
+            three possible constructs to show up on the righthand side
+            of a <code>let rec</code>: a function definition, a
+            constructor, or the lazy keyword. This excludes some
+            reasonable things, like our definition of
+            <code>memo_rec</code>, but it also blocks things that don't
+            make sense, like our definition of <code>x</code>.</p>
+
+          <p>It's worth noting that these restrictions don't show up
+            in a lazy language like Haskell. Indeed, we can make
+            something like our definition of <code>x</code> work if we
+            use OCaml's laziness:</p>
+
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/imperative-programming/letrec.topscript" part="2" />
+
+          <p>Of course, actually trying to compute this will fail.
+            OCaml's <code>lazy</code> throws an exception when a lazy
+            value tries to force itself as part of its own
+            evaluation.</p>
+
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/imperative-programming/letrec.topscript" part="3" />
+
+          <p>But we can also create useful recursive definitions with
+            <code>lazy</code>. In particular, we can use laziness to
+            make our definition of <code>memo_rec</code> work without
+            explicit mutation:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+		"code/imperative-programming/letrec.topscript" part="5" />
+
+          <p>Laziness is more constrained than explicit mutation, and
+            so in some cases can lead to code whose behavior is easier
+            to think about.</p>
         </div>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="1" />
 
-        <p>OCaml rejects the definition because OCaml, as a strict
-        language, has limits on what it can put on the righthand
-        side of a <code>let rec</code>. In particular, imagine how
-        the following code snippet would be compiled:</p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/let_rec.ml" />
-
-        <p>Note that <code>x</code> is an ordinary value, not a
-        function. As such, it's not clear how this definition
-        should be handled by the compiler. You could imagine it
-        compiling down to an infinite loop, but <code>x</code> is
-        of type <code>int</code>, and there's no <code>int</code>
-        that corresponds to an infinite loop. As such, this
-        construct is effectively impossible to compile.</p>
-
-        <p>To avoid such impossible cases, the compiler only allows
-        three possible constructs to show up on the righthand side
-        of a <code>let rec</code>: a function definition, a
-        constructor, or the lazy keyword. This excludes some
-        reasonable things, like our definition of
-        <code>memo_rec</code>, but it also blocks things that don't
-        make sense, like our definition of <code>x</code>.</p>
-
-        <p>It's worth noting that these restrictions don't show up
-        in a lazy language like Haskell. Indeed, we can make
-        something like our definition of <code>x</code> work if we
-        use OCaml's laziness:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="2" />
-
-        <p>Of course, actually trying to compute this will fail.
-        OCaml's <code>lazy</code> throws an exception when a lazy
-        value tries to force itself as part of its own
-        evaluation.</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="3" />
-
-        <p>But we can also create useful recursive definitions with
-        <code>lazy</code>. In particular, we can use laziness to
-        make our definition of <code>memo_rec</code> work without
-        explicit mutation:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/letrec.topscript" part="5" />
-
-        <p>Laziness is more constrained than explicit mutation, and
-        so in some cases can lead to code whose behavior is easier
-        to think about.</p>
       </section>
     </section>
 
