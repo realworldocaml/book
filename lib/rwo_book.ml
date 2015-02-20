@@ -471,7 +471,7 @@ let extract_code_from_1e_exn chapter =
 
 
 (******************************************************************************)
-(* Parts and Chapters                                                         *)
+(* Parts, Chapters, and Sections                                              *)
 (******************************************************************************)
 type part_info = {
   number : int;
