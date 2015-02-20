@@ -367,19 +367,21 @@
         pairwise operator. You should avoid <code>^</code> for
         joining long numbers of strings, since it allocates a new
         string every time it runs. Thus, the following code</p>
+
+	<link rel="import" data-code-language="ocamltop" href=
+	      "code/lists-and-patterns/main.topscript" part="22" />
+
+	<p>will allocate strings of length 2, 3, 4, 5, 6 and 7,
+	  whereas this code</p>
+
+	<link rel="import" data-code-language="ocamltop" href=
+	      "code/lists-and-patterns/main.topscript" part="23" />
+
+	<p>allocates one string of size 7, as well as a list of
+	  length 7. At these small sizes, the differences don't amount
+	  to much, but for assembling large strings, it can be a
+	  serious performance issue.</p>
       </div>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="22" />
-
-      <p>will allocate strings of length 2, 3, 4, 5, 6 and 7,
-      whereas this code</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="23" />
-
-      <p>allocates one string of size 7, as well as a list of
-      length 7. At these small sizes, the differences don't amount
-      to much, but for assembling large strings, it can be a
-      serious performance issue.</p>
 
       <p>Now we need code for rendering a row with data in it.
       We'll first write a function called <code>pad</code>, for
@@ -704,6 +706,7 @@
         <p>Polymorphic compare does have some limitations. For
         example, it will fail at runtime if it encounters a
         function value:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/lists-and-patterns/main.topscript" part="47" />
 
