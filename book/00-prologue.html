@@ -176,48 +176,49 @@
   </section>
 
   <section id="the-core-standard-library" data-type="sect2">
-  <h2>The Core Standard Library</h2>
+    <h2>The <code>Core</code> Standard Library</h2>
 
-  <p>A language on its own isn't enough. You also need a rich set
-  of libraries to base your applications on. A common source of
-  frustration for those learning OCaml is that the standard library
-  that ships with the compiler is limited, covering only a small
-  subset of the functionality you would expect from a
-  general-purpose standard library. That's because the standard
-  library isn't a general-purpose tool; it was developed for use in
-  bootstrapping the compiler and is purposefully kept small and
-  simple.</p>
+    <p>A language on its own isn't enough. You also need a rich set
+      of libraries to base your applications on. A common source of
+      frustration for those learning OCaml is that the standard library
+      that ships with the compiler is limited, covering only a small
+      subset of the functionality you would expect from a
+      general-purpose standard library. That's because the standard
+      library isn't a general-purpose tool; it was developed for use in
+      bootstrapping the compiler and is purposefully kept small and
+      simple.</p>
 
-  <p>Happily, in the world of open source software, nothing stops
-  alternative libraries from being written to supplement the
-  compiler-supplied standard library, and this is exactly what the
-  Core distribution is.</p>
+    <p>Happily, in the world of open source software, nothing stops
+      alternative libraries from being written to supplement the
+      compiler-supplied standard library, and this is exactly what 
+      <code>Core</code> is.</p>
 
-  <p>Jane Street, a company that has been using OCaml for more than
-  a decade, developed Core for its own internal use, but designed
-  it from the start with an eye toward being a general-purpose
-  standard library. Like the OCaml language itself, Core is
-  engineered with correctness, reliability, and performance in
-  mind.</p>
+    <p>Jane Street, a company that has been using OCaml for more than a
+      decade, developed <code>Core</code> for its own internal use, but
+      designed it from the start with an eye toward being a
+      general-purpose standard library. Like the OCaml language
+      itself, <code>Core</code> is engineered with correctness,
+      reliability, and performance in mind.</p>
 
-  <p>Core is distributed with syntax extensions that provide useful
-  new functionality to OCaml, and there are additional libraries
-  such as the Async network communications library that extend the
-  reach of Core into building complex distributed systems. All of
-  these libraries are distributed under a liberal Apache 2 license
-  to permit free use in hobby, academic, and commercial
-  settings.</p>
+    <p><code>Core</code> is distributed with syntax extensions that
+      provide useful new functionality to OCaml, and there are
+      additional libraries such as the <code>Async</code> network
+      communications library that extend the reach
+      of <code>Core</code> into building complex distributed
+      systems. All of these libraries are distributed under a liberal
+      Apache 2 license to permit free use in hobby, academic, and
+      commercial settings.</p>
   </section>
 
   <section id="the-ocaml-platform" data-type="sect2">
   <h2>The OCaml Platform</h2>
 
-  <p>Core is a comprehensive and effective standard library, but
-  there's much more OCaml software out there. A large community of
-  programmers has been using OCaml since its first release in 1996,
-  and has generated many useful libraries and tools. We'll
-  introduce some of these libraries in the course of the examples
-  presented in the book.</p>
+  <p><code>Core</code> is a comprehensive and effective standard
+  library, but there's much more OCaml software out there. A large
+  community of programmers has been using OCaml since its first
+  release in 1996, and has generated many useful libraries and
+  tools. We'll introduce some of these libraries in the course of the
+  examples presented in the book.</p>
 
   <p>The installation and management of these third-party libraries
   is made much easier via a package management tool known as
@@ -310,35 +311,35 @@
   </section>
 
   <section id="installation-instructions" data-type="sect2">
-  <h2>Installation Instructions</h2>
+    <h2>Installation Instructions</h2>
 
-  <p><em>Real World OCaml</em> uses some tools that we've developed
-  while writing this book. Some of these resulted in improvements
-  to the OCaml compiler, which means that you will need to ensure
-  that you have an up-to-date development environment (using the
-  4.01 version of the compiler). The installation process is
-  largely automated through the OPAM package manager. Instructions
-  on how to it set up and what packages to install can be found at
-  <a href="http://realworldocaml.org/install">this Real World OCaml
-  page</a>.</p>
+    <p><em>Real World OCaml</em> uses some tools that we've developed
+      while writing this book. Some of these resulted in improvements
+      to the OCaml compiler, which means that you will need to ensure
+      that you have an up-to-date development environment (using the
+      4.02.1 version of the compiler). The installation process is
+      largely automated through the OPAM package manager. Instructions
+      on how to it set up and what packages to install can be found at
+      <a href="http://realworldocaml.org/install">this Real World OCaml
+	page</a>.</p>
 
-  <p>
-    The full Core library assumes requires a UNIX based operating
-    system, and so only works on Mac OS X, Linux, FreeBSD, and
-    OpenBSD.  Core includes a portable subset
-    called <code>Core_kernel</code> which is portable anywhere OCaml
-    is, and in particular works on Windows and when compiling to
-    Javascript.  Most of the examples in this book will work
-    with <code>Core_kernel</code>.
+    <p>
+      <code>Core</code> requires a UNIX based operating system, and so
+      only works on systems like Mac OS X, Linux, FreeBSD, and
+      OpenBSD.  Core includes a portable subset
+      called <code>Core_kernel</code> which works anywhere OCaml is,
+      and in particular works on Windows and Javascript.  The examples
+      in Part I of the book will only use <code>Core_kernel</code> and
+      other highly portable libraries.
 
-  <p>This book is not intended as a reference manual. We aim to
-  teach you about the language and about libraries tools and
-  techniques that will help you be a more effective OCaml
-  programmer. But it's no replacement for API documentation or the
-  OCaml manual and man pages. You can find documentation for all of
-  the libraries and tools referenced in the book <a href=
-  "https://realworldocaml.org/doc">online</a>.</p>
-  </section>
+    <p>This book is not intended as a reference manual. We aim to
+      teach you about the language and about libraries tools and
+      techniques that will help you be a more effective OCaml
+      programmer. But it's no replacement for API documentation or the
+      OCaml manual and man pages. You can find documentation for all
+      of the libraries and tools referenced in the
+      book <a href="https://realworldocaml.org/doc">online</a>.</p>
+    </section>
 
   <section id="code-examples" data-type="sect2">
   <h2>Code Examples</h2>
