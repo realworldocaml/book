@@ -11,8 +11,8 @@ let initial_phrases = [
   "#camlp4o";
   "#require \"core\"";
   "#require \"core.syntax\"";
-  "#require \"core.top\"";
-  "open Core.Std" ]
+  "#require \"core.top\""
+]
 
 (* Initialise toploop and turn on short-paths *)
 let reset_toplevel () =
