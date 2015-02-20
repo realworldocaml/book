@@ -478,11 +478,19 @@ type part_info = {
   title : string;
 }
 
+type section = {
+  id : string;
+  title : string;
+}
+
+type sections = (section * (section * section list) list) list
+
 type chapter = {
   number : int;
   filename : string;
   title : string;
   part_info : part_info option;
+  sections : sections;
 }
 
 type part = {
@@ -532,6 +540,92 @@ let get_title file (t:Html.t) : string =
     | (Nethtml.Element ("h1", _, childs))::_ -> items_to_string childs
     | _ -> assert false
 
+let get_sections file html =
+
+  let title_to_id s =
+    String.filter s ~f:(fun c -> Char.is_alphanum c || c = ' ')
+    |> String.map ~f:(function ' ' -> '-' | c -> c)
+  in
+
+  let get_sections_helper data_type (item:Html.item)
+      : (section * Html.item) list
+      =
+    let title_elem = match data_type with
+      | "chapter" -> "h1"
+      | "sect1" -> "h1"
+      | "sect2" -> "h2"
+      | "sect3" -> "h3"
+      | _ ->
+        failwithf "%s: unsupported section data-type = %s"
+          file data_type ()
+    in
+    let rec loop accum = function
+      | [] -> accum
+      | (Nethtml.Element("section",attrs,childs) as item)::rest -> (
+        if List.mem attrs ("data-type",data_type) then (
+          let childs = List.filter childs ~f:(function
+            | Nethtml.Data _ -> false | Nethtml.Element _ -> true)
+          in
+          match childs with
+          | Nethtml.Element(name,_,[Nethtml.Data title])::_ -> (
+            if name = title_elem then
+              let id = match List.Assoc.find attrs "id" with
+                | Some x -> x
+                | None -> title_to_id title
+              in
+              loop (({title;id},item)::accum) rest
+            else
+              failwithf "%s: <section data-type=\"%s\"> must have <%s> as \
+                         first child" file data_type title_elem ()
+          )
+          | _ ->
+            failwithf "%s: <section data-type=\"%s\"> must have <%s> as \
+                       first child" file data_type title_elem ()
+        )
+        else
+          failwithf "%s: expected <section> with data-type=\"%s"
+            file data_type ()
+      )
+      | _::rest ->
+        loop accum rest
+    in
+    match item with
+    | Nethtml.Data _ -> assert false (* only applied to [Element]s *)
+    | Nethtml.Element(_,_,childs) -> (loop [] childs |> List.rev)
+  in
+
+  let body = match Html.get_all_nodes "body" html with
+    | item::[] -> item
+    | [] -> failwithf "%s: <body> element not found" file ()
+    | _::_::_ -> failwithf "%s: multiple <body> elements found" file ()
+  in
+
+  let chapter_section = match get_sections_helper "chapter" body with
+    | (_,item)::[] -> item
+    | [] ->
+      failwithf "%s: <section data-type=\"chapter\"> element not found"
+        file ()
+    | _::_::_ ->
+      failwithf "%s: multiple <section data-type=\"chapter\"> elements found"
+        file ()
+  in
+
+  get_sections_helper "sect1" chapter_section
+  |> List.map ~f:(fun (sect,item) ->
+    sect,
+    (
+      get_sections_helper "sect2" item
+      |> List.map ~f:(fun (sect,item) ->
+        sect,
+        (
+          get_sections_helper "sect3" item
+          |> List.map ~f:fst
+        )
+      )
+    )
+  )
+;;
+
 let is_chapter_file file : bool =
   Filename.basename file
   |> String.split ~on:'-'
@@ -551,13 +645,15 @@ let chapters ?(repo_root=".") () : chapter list Deferred.t =
   return (Array.to_list a) >>= fun l ->
   return (List.filter l ~f:is_chapter_file) >>=
   Deferred.List.map ~f:(fun basename ->
-    Html.of_file (book_dir/basename) >>| fun html ->
+    let in_file = book_dir/basename in
+    Html.of_file in_file >>| fun html ->
     let number = number basename in
     {
       number;
       filename = basename;
       title = get_title (book_dir/basename) html;
       part_info = part_info_of_chapter number;
+      sections = get_sections in_file html;
     }
   ) >>|
   List.sort ~cmp:(fun a b -> Int.compare a.number b.number)
