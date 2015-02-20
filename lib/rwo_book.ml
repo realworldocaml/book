@@ -746,14 +746,19 @@ let toc chapters : Html.item list =
   let open Html in
   let parts = group_chapters_by_part chapters in
   List.map parts ~f:(fun {info;chapters} ->
-    let ul = ul ~a:["class","toc"] (List.map chapters ~f:(fun x ->
+    let ul = ul ~a:["class","toc"] (List.map chapters ~f:(fun chapter ->
       li [
-        a ~a:["href",x.filename] [
+        a ~a:["href",chapter.filename] [
           h2 [
-            small [data (sprintf "Chapter %02d" x.number)];
-            data x.title;
+            small [data (sprintf "Chapter %02d" chapter.number)];
+            data chapter.title;
           ]
-        ]
+        ];
+        ul ~a:["class","children"] (
+          List.map chapter.sections ~f:(fun (section,_) ->
+            let href = sprintf "%s#%s" chapter.filename section.id in
+            li [a ~a:["href",href] [h5 [data section.title]]]
+          ) );
       ]
     ) )
     in
