@@ -162,38 +162,39 @@
         <h1>Compiler Warnings</h1>
 
         <p>The OCaml compiler is packed full of useful warnings
-        that can be enabled and disabled separately. These are
-        documented in the compiler itself, so we could have found
-        out about warning 9 as follows:</p>
+          that can be enabled and disabled separately. These are
+          documented in the compiler itself, so we could have found
+          out about warning 9 as follows:</p>
+
+	<link rel="import" data-code-language="console" href=
+	      "code/records/warn_help.out" />
+
+	<p>You can think of OCaml's warnings as a powerful set of
+	  optional static analysis tools.  They're enormously helpful in
+	  catching all sorts of bugs, and and you should enable them in
+	  your build environment. You don't typically enable all warnings,
+	  but the defaults that ship with the compiler are pretty
+	  good.</p>
+
+	<p>The warnings used for building the examples in this book
+	  are specified with the following flag: <code>-w
+	    @A-4-33-40-41-42-43-34-44</code>.</p> 
+
+	<p>The syntax of this can be found by running <code>ocaml
+	    -help</code>, but this particular invocation turns on all
+	  warnings as errors, disabling only the numbers listed
+	  explicitly after the <code>A</code>.</p>
+
+	<p>Treating warnings as errors (i.e., making OCaml fail to
+	  compile any code that triggers a warning) is good practice,
+	  since without it, warnings are too often ignored during
+	  development. When preparing a package for distribution,
+	  however, this is a bad idea, since the list of warnings may
+	  grow from one release of the compiler to another, and so this
+	  may lead your package to fail to compile on newer compiler
+	  releases.</p>
+
       </div>
-
-      <link rel="import" data-code-language="console" href=
-      "code/records/warn_help.out" />
-
-      <p>You can think of OCaml's warnings as a powerful set of
-      optional static analysis tools.  They're enormously helpful in
-      catching all sorts of bugs, and and you should enable them in
-      your build environment. You don't typically enable all warnings,
-      but the defaults that ship with the compiler are pretty
-      good.</p>
-
-      <p>The warnings used for building the examples in this book
-      are specified with the following flag: <code>-w
-      @A-4-33-40-41-42-43-34-44</code>.</p> 
-
-      <p>The syntax of this can be found by running <code>ocaml
-      -help</code>, but this particular invocation turns on all
-      warnings as errors, disabling only the numbers listed
-      explicitly after the <code>A</code>.</p>
-
-      <p>Treating warnings as errors (i.e., making OCaml fail to
-      compile any code that triggers a warning) is good practice,
-      since without it, warnings are too often ignored during
-      development. When preparing a package for distribution,
-      however, this is a bad idea, since the list of warnings may
-      grow from one release of the compiler to another, and so this
-      may lead your package to fail to compile on newer compiler
-      releases.</p>
     </section>
 
     <section id="field-punning" data-type="sect1">
