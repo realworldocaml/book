@@ -20,19 +20,31 @@ let service_info_of_string line =
   ;;
 
 #part 1.1
-let service_info = service_info_of_string
-  "ssh              22/udp     # SSH Remote Login Protocol";;
+let ssh = service_info_of_string
+  "ssh 22/udp # SSH Remote Login Protocol";;
 
 #part 2
-service_info.port;;
+ssh.port;;
 
 #part 3
-type 'a timestamped = { item: 'a; time: Time.t };;
+type 'a with_line_num = { item: 'a; line_num: int };;
 
 #part 4
-let first_timestamped list =
-    List.reduce list ~f:(fun a b -> if a.time < b.time then a else b)
+let parse_with_line_nums parse file_contents =
+    let lines = String.split ~on:'\n' file_contents in
+    List.mapi lines ~f:(fun line_num line ->
+      { item = parse line;
+        line_num = line_num + 1;
+      })
   ;;
+
+#part 4.1
+
+parse_with_line_nums service_info_of_string
+    "rtmp              1/ddp    #Routing Table Maintenance Protocol\n\
+     tcpmux            1/udp     # TCP Port Service Multiplexer\n\
+     tcpmux            1/tcp     # TCP Port Service Multiplexer"
+;;
 
 
 #part 5

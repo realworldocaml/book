@@ -71,18 +71,26 @@
 	  href="code/records/main.topscript" part="2" />
 
     <p>When declaring an OCaml type, you always have the option of
-    parameterizing it by a polymorphic type. Records are no different
-    in this regard. As an example, here's a type you might use to
-    timestamp arbitrary items:</p>
+      parameterizing it by a polymorphic type. Records are no
+      different in this regard. As an example, here's a type you might
+      use to timestamp arbitrary items:</p>
 
     <link rel="import" data-code-language="ocamltop" href=
 	  "code/records/main.topscript" part="3" />
 
     <p>We can then write polymorphic functions that operate over
-    this parameterized type:</p>
+      this parameterized type.  For example, this function takes a
+      file and parses it as a series of lines, using the provided
+      function for parsing each individual line.</p>
 
     <link rel="import" data-code-language="ocamltop" 
 	  href="code/records/main.topscript" part="4" />
+
+    <p>We can then use this function for parsing a snippet of a
+      real <code>/etc/services</code> file.
+
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/records/main.topscript" part="4.1" />
 
     <section id="patterns-and-exhaustiveness" data-type="sect1">
       <h1>Patterns and Exhaustiveness</h1>
