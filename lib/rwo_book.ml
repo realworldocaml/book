@@ -563,10 +563,7 @@ let get_sections file html =
       | [] -> accum
       | (Nethtml.Element("section",attrs,childs) as item)::rest -> (
         if List.mem attrs ("data-type",data_type) then (
-          let childs = List.filter childs ~f:(function
-            | Nethtml.Data _ -> false | Nethtml.Element _ -> true)
-          in
-          match childs with
+          match Html.filter_whitespace childs with
           | Nethtml.Element(name,_,[Nethtml.Data title])::_ -> (
             if name = title_elem then
               let id = match List.Assoc.find attrs "id" with
