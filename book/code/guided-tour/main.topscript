@@ -262,8 +262,7 @@ let divide x y =
 
 
 #part 38
-open Core.Std
-  let log_entry maybe_time message =
+let log_entry maybe_time message =
     let time =
       match maybe_time with
       | Some x -> x
