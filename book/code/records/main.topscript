@@ -30,7 +30,7 @@ ssh.port;;
 type 'a with_line_num = { item: 'a; line_num: int };;
 
 #part 4
-let parse_with_line_nums parse file_contents =
+let parse_lines parse file_contents =
     let lines = String.split ~on:'\n' file_contents in
     List.mapi lines ~f:(fun line_num line ->
       { item = parse line;
@@ -40,7 +40,7 @@ let parse_with_line_nums parse file_contents =
 
 #part 4.1
 
-parse_with_line_nums service_info_of_string
+parse_lines service_info_of_string
     "rtmp              1/ddp    #Routing Table Maintenance Protocol\n\
      tcpmux            1/udp     # TCP Port Service Multiplexer\n\
      tcpmux            1/tcp     # TCP Port Service Multiplexer"
@@ -48,35 +48,39 @@ parse_with_line_nums service_info_of_string
 
 
 #part 5
-let host_info_to_string { hostname = h; os_name = os; cpu_arch = c } =
-       sprintf "%s (%s / %s)" h os c
+let service_info_to_string { service_name = name; port = port; protocol = prot  } =
+       sprintf "%s %i/%s" name port prot
   ;;
 
-host_info_to_string my_host;;
-
+service_info_to_string ssh;;
 
 #part 6
-type host_info =
-    { hostname   : string;
-      os_name    : string;
-      cpu_arch   : string;
-      os_release : string;
-    } ;;
+type service_info =
+    { service_name : string;
+      port         : int;
+      protocol     : string;
+      comment      : string;
+    }
+  ;;
 
 #part 7
 #warnings "+9";;
-let host_info_to_string { hostname = h; os_name = os; cpu_arch = c } =
-    sprintf "%s (%s / %s)" h os c
+let service_info_to_string { service_name = name; port = port; protocol = prot  } =
+       sprintf "%s %i/%s" name port prot
   ;;
 
 #part 8
-let host_info_to_string { hostname = h; os_name = os; cpu_arch = c } =
-    sprintf "%s (%s / %s)" h os c
+let service_info_to_string { service_name = name;
+                             port = port; 
+                             protocol = prot;
+                             comment = comment;
+                           } =
+       sprintf "%s %i/%s #%s" name port prot comment
   ;;
 
 #part 9
-let host_info_to_string { hostname; os_name; cpu_arch; _ } =
-     sprintf "%s (%s / %s)" hostname os_name cpu_arch
+let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+       sprintf "%s %i/%s" name port prot
   ;;
 
 #part 10
