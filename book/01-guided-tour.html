@@ -18,16 +18,38 @@
     of the language. This should provide a sense of what OCaml can
     do, without getting too deep into any one topic.</p>
 
-    <p>Throughout the book we're going to use Core, a more
-    full-featured and capable replacement for OCaml's standard
-    library. We'll also use <span class=
-    "command"><em>utop</em></span>, a shell that lets you type in
-    expressions and evaluate them interactively. <span class=
-    "command"><em>utop</em></span> is an easier-to-use version of
-    OCaml's standard toplevel (which you can start by
-    typing <em>ocaml</em> at the command line). These instructions
-    will assume you're
-    using <span class="command"><em>utop</em></span> specifically.</p>
+    <p>Throughout the book we're going to
+      use <code>Core_kernel</code>, a more full-featured and capable
+      replacement for OCaml's standard library.  We'll also
+      use <span class= "command"><em>utop</em></span>, a shell that
+      lets you type in expressions and evaluate them
+      interactively. <span class= "command"><em>utop</em></span> is an
+      easier-to-use version of OCaml's standard toplevel (which you
+      can start by typing <em>ocaml</em> at the command line). These
+      instructions will assume you're
+      using <span class="command"><em>utop</em></span>, but the
+      ordinary toplevel should mostly work fine.</p>
+
+    <div data-type="note">
+      <h1><code>Core</code>, <code>Core_kernel</code> and
+      portability </h1>
+
+      <p><code>Core_kernel</code> is actually part of a more expansive
+	library called <code>Core</code>.  We
+	use <code>Core_kernel</code> here because it is portable to
+	every platform that OCaml runs on, unlike <code>Core</code>,
+	which only works on Unix-like platforms, including Linux and
+	MacOS, but not including Windows or Javascript, two important
+	compilation targets for OCaml.</p>
+
+      <p>If your applications are Unix only, you should check
+	out <code>Core</code>.  It includes a lot of useful
+	functionality, including a rich library for dealing with time,
+	an excellent command line parsing library, and access to various
+	bits of low-level operating systems facilities from mutexes to
+	sockets.  We'll discuss some of <code>Core</code>'s unique
+	features later in the book.</p>
+    </div>
 
     <p>Before getting started, make sure you have a working OCaml
     installation so you can try out the examples as you read
@@ -42,8 +64,7 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" />
 
-      <p><code>Core_kernel</code> is a highly subset of the full
-	<code>Core</code> library.  By opening it, we make the
+      <p>By opening <code>Core_kernel.Std</code>, we make the
 	definitions it contains available without having to
 	reference <code>Core_kernel</code> explicitly.  This is
 	required for many of the examples in the tour and in the
@@ -162,15 +183,16 @@
       single argument.</p>
 
       <p>Now that we're creating more interesting values like
-      functions, the types have gotten more interesting too.
-      <code>int -&gt; int</code> is a function type, in this case
-      indicating a function that takes an <code>int</code> and
+      functions, the types have gotten more interesting
+      too.  <code>int -&gt; int</code> is a function type, in this
+      case indicating a function that takes an <code>int</code> and
       returns an <code>int</code>. We can also write functions that
-      take multiple arguments. (Note that the following example
-      will not work if you haven't opened <code>Core.Std</code> as
-      was suggested earlier.)</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" part="6" />
+      take multiple arguments. (Note that the following example will
+      not work if you haven't opened <code>Core_kernel.Std</code> as
+      was suggested earlier.)</p>  
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/guided-tour/main.topscript" part="6" />
 
       <p>The preceding example also happens to be our first use of
       modules. Here, <code>Float.of_int</code> refers to the
@@ -210,13 +232,13 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="8" />
 
-      <p>Note that in the definition of <code>even</code>, we used
-      <code>=</code> in two different ways: once as the part of the
-      <code>let</code> binding that separates the thing being
-      defined from its definition; and once as an equality test,
-      when comparing <code>x mod 2</code> to <code>0</code>. These
-      are very different operations despite the fact that they
-      share some syntax.</p>
+      <p>Note that in the definition of <code>even</code>, we
+      used <code>=</code> in two different ways: once as part of
+      the <code>let</code> binding that separates the thing being
+      defined from its definition; and once as an equality test, when
+      comparing <code>x mod 2</code> to <code>0</code>. These are very
+      different operations despite the fact that they share some
+      syntax.</p>
 
       <section id="type-inference" data-type="sect2">
         <h2>Type Inference</h2>
@@ -480,11 +502,11 @@
         <section id="the-list-module" data-type="sect3">
           <h3>The List module</h3>
 
-          <p>Core comes with a <code>List</code> module that has a
-          rich collection of functions for working with lists. We
-          can access values from within a module by using dot
-          notation. For example, this is how we compute the length
-          of a list:</p>
+          <p><code>Core_kernel</code> comes with a <code>List</code>
+          module that has a rich collection of functions for working
+          with lists. We can access values from within a module by
+          using dot notation. For example, this is how we compute the
+          length of a list:</p>
 
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/main.topscript" part="22" />
@@ -753,14 +775,10 @@
         <link rel="import" data-code-language="ocamltop" href=
               "code/guided-tour/main.topscript" part="38" />
 
-        <p>
-	  Note that we opened <code>Core.Std</code> here so we could
-	  make use of Core's <code>Time</code> module for dealing with
-	  time, which is only available on Unix.  We also used
-	  the <code>^</code> operator for concatenating strings. The
-	  concatenation operator is provided as part of
-          the <code>Pervasives</code> module, which is automatically
-          opened in every OCaml program.</p>
+        <p> Note that We used the <code>^</code> operator for
+          concatenating strings. The concatenation operator is
+          provided as part of the <code>Pervasives</code> module,
+          which is automatically opened in every OCaml program.</p>
 
         <div data-type="note">
           <h1>Nesting lets with let and in</h1>
@@ -1159,25 +1177,28 @@
 
         <p>We'll compile our program using <span class=
         "command"><em>corebuild</em></span>, a small wrapper on top
-        of <span class="command"><em>ocamlbuild</em></span>, a
-        build tool that ships with the OCaml compiler. The
-        <span class="command"><em>corebuild</em></span> script is
-        installed along with Core, and its purpose is to pass in
-        the flags required for building a program with Core.</p>
-        <link rel="import" data-code-language="console" href=
-        "code/guided-tour/build_sum.out" />
+        of <span class="command"><em>ocamlbuild</em></span>, a build
+        tool that ships with the OCaml
+        compiler. The <span class="command"><em>corebuild</em></span>
+        script is installed along with <code>Core_kernel</code>, and
+        its purpose is to pass in the flags required for building a
+        program with <code>Core</code>.</p>
+	
+	<link rel="import" data-code-language="console" 
+	      href="code/guided-tour/build_sum.out" />
 
         <p>The <code>.native</code> suffix indicates that we're
         building a native-code executable, which we'll discuss more
         in <a href="#files-modules-and-programs" data-type=
         "xref">#files-modules-and-programs</a>. Once the build
         completes, we can use the resulting program like any
-        command-line utility. We can feed input to
-        <code>sum.native</code> by typing in a sequence of numbers,
+        command-line utility. We can feed input
+        to <code>sum.native</code> by typing in a sequence of numbers,
         one per line, hitting <strong><code>Ctrl-D</code></strong>
-        when we're done:</p>
-        <link rel="import" data-code-language="console" href=
-        "code/guided-tour/sum.out" />
+        when we're done:</p> 
+
+	<link rel="import" data-code-language="console"
+	      href="code/guided-tour/sum.out" />
 
         <p>More work is needed to make a really usable command-line
         program, including a proper command-line parsing interface
