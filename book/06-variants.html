@@ -537,32 +537,30 @@
           <h1>Polymorphic Variants and Catch-all Cases</h1>
 
           <p>As we saw with the definition of
-            <code>is_positive</code>, a <code>match</code> statement
-            can lead to the inference of an upper bound on a variant
-            type, limiting the possible tags to those that can be
-            handled by the match. If we add a catch-all case to our
-            <code>match</code> statement, we end up with a type with
-            a lower bound:</p>
-
+          <code>is_positive</code>, a <code>match</code> statement
+          can lead to the inference of an upper bound on a variant
+          type, limiting the possible tags to those that can be
+          handled by the match. If we add a catch-all case to our
+          <code>match</code> statement, we end up with a type with
+          a lower bound:</p>
           <link rel="import" data-code-language="ocamltop" href=
-		"code/variants/main.topscript" part="16" />
+          "code/variants/main.topscript" part="16" />
 
           <p>Catch-all cases are error-prone even with ordinary
-            variants, but they are especially so with polymorphic
-            variants. That's because you have no way of bounding what
-            tags your function might have to deal with. Such code is
-            particularly vulnerable to typos. For instance, if code
-            that uses <code>is_positive_permissive</code> passes in
-            <code>Float</code> misspelled as <code>Floot</code>, the
-            erroneous code will compile without complaint:</p>
+          variants, but they are especially so with polymorphic
+          variants. That's because you have no way of bounding what
+          tags your function might have to deal with. Such code is
+          particularly vulnerable to typos. For instance, if code
+          that uses <code>is_positive_permissive</code> passes in
+          <code>Float</code> misspelled as <code>Floot</code>, the
+          erroneous code will compile without complaint:</p>
           <link rel="import" data-code-language="ocamltop" href=
-		"code/variants/main.topscript" part="17" />
+          "code/variants/main.topscript" part="17" />
 
           <p>With ordinary variants, such a typo would have been
-            caught as an unknown tag. As a general matter, one should
-            be wary about mixing catch-all cases and polymorphic
-            variants.</p>
-
+          caught as an unknown tag. As a general matter, one should
+          be wary about mixing catch-all cases and polymorphic
+          variants.</p>
         </div>
 
         <p>Let's consider how we might turn our code into a proper
