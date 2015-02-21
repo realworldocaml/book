@@ -69,6 +69,9 @@ val group_chapters_by_part : chapter list -> part list
     for error messages. *)
 val get_sections : string -> Rwo_html.t -> sections
 
+(** Useful for debugging. *)
+val flatten_sections : sections -> section list
+
 
 (******************************************************************************)
 (** {2 <link rel="import"> nodes} *)

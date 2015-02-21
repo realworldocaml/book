@@ -623,6 +623,15 @@ let get_sections file html =
   )
 ;;
 
+let flatten_sections sections =
+  List.fold sections ~init:[] ~f:(fun accum (section,childs) ->
+    List.fold ~init:(section::accum) childs ~f:(fun accum (section,childs) ->
+      List.fold ~init:(section::accum) childs ~f:(fun accum section ->
+        section::accum
+      )
+    )
+  )
+
 let is_chapter_file file : bool =
   Filename.basename file
   |> String.split ~on:'-'
