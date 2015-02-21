@@ -775,13 +775,10 @@
         <link rel="import" data-code-language="ocamltop" href=
               "code/guided-tour/main.topscript" part="38" />
 
-        <p> Note that we opened <code>Core.Std</code> here so we could
-	  make use of Core's <code>Time</code> module for dealing with
-	  time, which is only available on Unix.  We also used
-	  the <code>^</code> operator for concatenating strings. The
-	  concatenation operator is provided as part of
-          the <code>Pervasives</code> module, which is automatically
-          opened in every OCaml program.</p>
+        <p> Note that We used the <code>^</code> operator for
+          concatenating strings. The concatenation operator is
+          provided as part of the <code>Pervasives</code> module,
+          which is automatically opened in every OCaml program.</p>
 
         <div data-type="note">
           <h1>Nesting lets with let and in</h1>
@@ -1185,7 +1182,7 @@
         compiler. The <span class="command"><em>corebuild</em></span>
         script is installed along with <code>Core_kernel</code>, and
         its purpose is to pass in the flags required for building a
-        program with <code>Core</code>.</p>  
+        program with <code>Core</code>.</p>
 	
 	<link rel="import" data-code-language="console" 
 	      href="code/guided-tour/build_sum.out" />
