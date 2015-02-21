@@ -382,11 +382,11 @@
         able to read and write intervals as a stream of bytes. In
         this case, we'll do this by converting to and from
         s-expressions, which were mentioned already in <a href=
-        "#error-handling" data-type="xref">#error-handling</a>. To
-        recall, an s-expression is essentially a parenthesized
-        expression whose atoms are strings, and it is a
-        serialization format that is used commonly in Core. Here's
-        an example:</p>
+        "07-error-handling.html#error-handling" data-type=
+        "xref">Error Handling</a>. To recall, an s-expression is
+        essentially a parenthesized expression whose atoms are
+        strings, and it is a serialization format that is used
+        commonly in Core. Here's an example:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="23" />
 
@@ -399,12 +399,12 @@
         "code/functors/main.topscript" part="24" />
 
         <p>We'll discuss s-expressions and Sexplib in more detail
-        in <a href="#data-serialization-with-s-expressions"
-        data-type=
-        "xref">#data-serialization-with-s-expressions</a>, but for
-        now, let's see what happens if we attach the <code>with
-        sexp</code> declaration to the definition of <code>t</code>
-        within the functor:</p>
+        in <a href=
+        "17-data-serialization.html#data-serialization-with-s-expressions"
+        data-type="xref">Data Serialization With S Expressions</a>,
+        but for now, let's see what happens if we attach the
+        <code>with sexp</code> declaration to the definition of
+        <code>t</code> within the functor:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="25" />
 
@@ -477,15 +477,15 @@
       <p>The preceding <code>Fqueue.fold</code> function requires
       some explanation. It follows the same pattern as the
       <code>List.fold</code> function we described in <a href=
-      "#using-the-list-module-effectively" data-type=
-      "xref">#using-the-list-module-effectively</a>. Essentially,
-      <code>Fqueue.fold q ~init ~f</code> walks over the elements
-      of <code>q</code> from front to back, starting with an
-      accumulator of <code>init</code> and using <code>f</code> to
-      update the accumulator value as it walks over the queue,
-      returning the final value of the accumulator at the end of
-      the computation. <code>fold</code> is a quite powerful
-      operation, as we'll see.</p>
+      "03-lists-and-patterns.html#using-the-list-module-effectively"
+      data-type="xref">Using The List Module Effectively</a>.
+      Essentially, <code>Fqueue.fold q ~init ~f</code> walks over
+      the elements of <code>q</code> from front to back, starting
+      with an accumulator of <code>init</code> and using
+      <code>f</code> to update the accumulator value as it walks
+      over the queue, returning the final value of the accumulator
+      at the end of the computation. <code>fold</code> is a quite
+      powerful operation, as we'll see.</p>
 
       <p>We'll implement <code>Fqueue</code> the well known trick
       of maintaining an input and an output list so that one can
@@ -567,14 +567,16 @@
 
         <dd>
           <p>For so-called monadic libraries, like those discussed
-          in Chapters <a href="#error-handling" data-type="xref"
-          data-xrefstyle="select: labelnumber">#error-handling</a>
-          and <a href="#concurrent-programming-with-async"
+          in Chapters <a href=
+          "07-error-handling.html#error-handling" data-type="xref"
+          data-xrefstyle="select: labelnumber">Error Handling</a>
+          and <a href=
+          "18-concurrent-programming.html#concurrent-programming-with-async"
           data-type="xref" data-xrefstyle=
-          "select: labelnumber">#concurrent-programming-with-async</a>.
-          Here, the functor is used to provide a collection of
-          standard helper functions based on the <code>bind</code>
-          and <code>return</code> operators.</p>
+          "select: labelnumber">Concurrent Programming With
+          Async</a>. Here, the functor is used to provide a
+          collection of standard helper functions based on the
+          <code>bind</code> and <code>return</code> operators.</p>
         </dd>
       </dl>
 

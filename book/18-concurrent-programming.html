@@ -187,8 +187,9 @@
       <em>monad</em>. You'll run across this signature in many
       applications beyond just threads. Indeed, we already ran
       across monads in <a href=
-      "#bind-and-other-error-handling-idioms" data-type=
-      "xref">#bind-and-other-error-handling-idioms</a>.</p>
+      "07-error-handling.html#bind-and-other-error-handling-idioms"
+      data-type="xref">Bind And Other Error Handling
+      Idioms</a>.</p>
 
       <p>Calling <code>bind</code> and <code>return</code> together
       is a fairly common pattern, and as such there is a standard
@@ -481,10 +482,10 @@
         <p><code>r</code> and <code>w</code> are really just read
         and write handles to the same underlying object. Note that
         <code>r</code> and <code>w</code> have weakly polymorphic
-        types, as discussed in <a href="#imperative-programming"
-        data-type="xref">#imperative-programming</a>, and so can
-        only contain values of a single, yet-to-be-determined
-        type.</p>
+        types, as discussed in <a href=
+        "01-guided-tour.html#imperative-programming" data-type=
+        "xref">Imperative Programming</a>, and so can only contain
+        values of a single, yet-to-be-determined type.</p>
 
         <p>If we just try and write to the writer, we'll see that
         we block indefinitely in <span class=
@@ -526,8 +527,8 @@
 
         <p>The command-line parsing for this program is based on
         the Command library that we introduced in <a href=
-        "#command-line-parsing" data-type=
-        "xref">#command-line-parsing</a>. Opening
+        "14-command-line-parsing.html#command-line-parsing"
+        data-type="xref">Command Line Parsing</a>. Opening
         <code>Async.Std</code>, shadows the <code>Command</code>
         module with an extended version that contains the
         <code>async_basic</code> call:</p>
@@ -577,8 +578,8 @@
 
         <dd>
           <p>A JSON parsing library that was described in <a href=
-          "#handling-json-data" data-type=
-          "xref">#handling-json-data</a>.</p>
+          "15-json.html#handling-json-data" data-type=
+          "xref">Handling Json Data</a>.</p>
         </dd>
 
         <dt><code>cohttp</code></dt>
@@ -623,8 +624,8 @@
         (and thankfully simple) format that is specified in
         <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</a>.
         We'll parse the JSON data using the Yojson library, which
-        was introduced in <a href="#handling-json-data" data-type=
-        "xref">#handling-json-data</a>.</p>
+        was introduced in <a href="15-json.html#handling-json-data"
+        data-type="xref">Handling Json Data</a>.</p>
 
         <p>We expect the response from DuckDuckGo to come across as
         a JSON record, which is represented by the
@@ -741,8 +742,9 @@
       error. When programming in OCaml, some of these errors will
       show up explicitly in a function's return type, and some of
       them will show up as exceptions. We covered exception
-      handling in OCaml in <a href="#exceptions" data-type=
-      "xref">#exceptions</a>, but as we'll see, exception handling
+      handling in OCaml in <a href=
+      "07-error-handling.html#exceptions" data-type=
+      "xref">Exceptions</a>, but as we'll see, exception handling
       in a concurrent program presents some new challenges.</p>
 
       <p>Let's get a better sense of how exceptions work in Async
@@ -956,8 +958,9 @@
         functionality directly, you may want to use the
         <code>Monitor.protect</code> call, which is analogous to
         the <code>protect</code> call described in <a href=
-        "#cleaning-up-in-the-presence-of-exceptions" data-type=
-        "xref">#cleaning-up-in-the-presence-of-exceptions</a>.</p>
+        "07-error-handling.html#cleaning-up-in-the-presence-of-exceptions"
+        data-type="xref">Cleaning Up In The Presence Of
+        Exceptions</a>.</p>
       </section>
     </section>
 
@@ -1100,8 +1103,9 @@
       sometimes useful to run some OCaml code on the foreign thread
       as part of the communication to your main program. OCaml's
       foreign function interface is discussed in more detail in
-      <a href="#foreign-function-interface" data-type=
-      "xref">#foreign-function-interface</a>.</p>
+      <a href=
+      "19-foreign-function-interface.html#foreign-function-interface"
+      data-type="xref">Foreign Function Interface</a>.</p>
 
       <p>Another occasional use for system threads is to better
       interoperate with compute-intensive OCaml code. In Async, if

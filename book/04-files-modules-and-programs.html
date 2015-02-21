@@ -58,11 +58,11 @@
       association list with the frequencies of each line. It does
       this by invoking <code>In_channel.fold_lines</code> (similar
       to the function <code>List.fold</code> described in <a href=
-      "#lists-and-patterns" data-type=
-      "xref">#lists-and-patterns</a>), which reads through the
-      lines one by one, calling the provided <code>fold</code>
-      function for each line to update the accumulator. That
-      accumulator is initialized to the empty list.</p>
+      "03-lists-and-patterns.html#lists-and-patterns" data-type=
+      "xref">Lists And Patterns</a>), which reads through the lines
+      one by one, calling the provided <code>fold</code> function
+      for each line to update the accumulator. That accumulator is
+      initialized to the empty list.</p>
 
       <p>With <code>build_counts</code> defined, we then call the
       function to build the association list, sort that list by
@@ -70,8 +70,8 @@
       the list, and then iterate over those 10 elements and print
       them to the screen. These operations are tied together using
       the <code>|&gt;</code> operator described in <a href=
-      "#variables-and-functions" data-type=
-      "xref">#variables-and-functions</a>.</p>
+      "02-variables-and-functions.html#variables-and-functions"
+      data-type="xref">Variables And Functions</a>.</p>
 
       <div class="allow_break" data-type="note">
         <h1>Where Is the Main Function?</h1>
@@ -126,13 +126,13 @@
       "command"><em>ocamlbuild</em></span>, which is shipped with
       the OCaml compiler. We'll talk more about <span class=
       "command"><em>ocamlbuild</em></span> in <a href=
-      "#the-compiler-frontend-parsing-and-type-checking" data-type=
-      "xref">#the-compiler-frontend-parsing-and-type-checking</a>,
-      but for now, we'll just use a simple wrapper around
-      <span class="command"><em>ocamlbuild</em></span> called
-      <span class="command"><em>corebuild</em></span> that sets
-      build parameters appropriately for building against Core and
-      its related libraries:</p>
+      "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
+      data-type="xref">The Compiler Frontend Parsing And Type
+      Checking</a>, but for now, we'll just use a simple wrapper
+      around <span class="command"><em>ocamlbuild</em></span>
+      called <span class="command"><em>corebuild</em></span> that
+      sets build parameters appropriately for building against Core
+      and its related libraries:</p>
       <link rel="import" data-code-language="console" href=
       "code/files-modules-and-programs-freq-obuild/build.out" />
 
@@ -188,8 +188,9 @@
         builds. And, of course, bytecode makes sense when targeting
         a platform not supported by the native-code compiler. We'll
         cover both compilers in more detail in <a href=
-        "#the-compiler-backend-byte-code-and-native-code"
-        data-type="xref">#the-compiler-backend-byte-code-and-native-code</a>.</p>
+        "23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
+        data-type="xref">The Compiler Backend Byte Code And Native
+        Code</a>.</p>
       </div>
     </section>
 
@@ -327,8 +328,9 @@
       "command"><em>ocamldoc</em></span> tool when generating API
       documentation. We'll discuss <span class=
       "command"><em>ocamldoc</em></span> more in <a href=
-      "#the-compiler-frontend-parsing-and-type-checking" data-type=
-      "xref">#the-compiler-frontend-parsing-and-type-checking</a>.</p>
+      "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
+      data-type="xref">The Compiler Frontend Parsing And Type
+      Checking</a>.</p>
 
       <p>Here's a rewrite of <code>counter.ml</code> to match the
       new <code>counter.mli</code>:</p>
@@ -364,8 +366,8 @@
       need access to type-specialized information, and for others,
       like looking something up in <code>Map.t</code>, you don't.
       This is covered in more detail in <a href=
-      "#maps-and-hash-tables" data-type=
-      "xref">#maps-and-hash-tables</a>.</p>
+      "13-maps-and-hashtables.html#maps-and-hash-tables" data-type=
+      "xref">Maps And Hash Tables</a>.</p>
     </section>
 
     <section id="concrete-types-in-signatures" data-type="sect1">
@@ -392,9 +394,10 @@
       <p>In the preceding implementation, we use
       <code>failwith</code> to throw an exception for the case of
       the empty list. We'll discuss exceptions more in <a href=
-      "#error-handling" data-type="xref">#error-handling</a>. Note
-      also that the function <code>fst</code> simply returns the
-      first element of any two-tuple.</p>
+      "07-error-handling.html#error-handling" data-type=
+      "xref">Error Handling</a>. Note also that the function
+      <code>fst</code> simply returns the first element of any
+      two-tuple.</p>
 
       <p>Now, to expose this usefully in the interface, we need to
       expose both the function and the type <code>median</code>
@@ -702,9 +705,10 @@
         typically have to mark them specially. For example, when
         defining a set of mutually recursive values (like the
         definition of <code>is_even</code> and <code>is_odd</code>
-        in <a href="#recursive-functions" data-type=
-        "xref">#recursive-functions</a>), you need to define them
-        using <code>let rec</code> rather than ordinary
+        in <a href=
+        "02-variables-and-functions.html#recursive-functions"
+        data-type="xref">Recursive Functions</a>), you need to
+        define them using <code>let rec</code> rather than ordinary
         <code>let</code>.</p>
 
         <p>The same is true at the module level. By default, cyclic
@@ -787,13 +791,14 @@
         <p>Despite these benefits, there is a trade-off here. In
         particular, exposing types concretely makes it possible to
         use pattern-matching with those types, which as we saw in
-        <span class="keep-together"><a href="#lists-and-patterns"
-        data-type="xref">#lists-and-patterns</a></span> is a
-        powerful and important tool. You should generally only
-        expose the concrete implementation of your types when
-        there's significant value in the ability to pattern match,
-        and when the invariants that you care about are already
-        enforced by the data type itself.</p>
+        <span class="keep-together"><a href=
+        "03-lists-and-patterns.html#lists-and-patterns" data-type=
+        "xref">Lists And Patterns</a></span> is a powerful and
+        important tool. You should generally only expose the
+        concrete implementation of your types when there's
+        significant value in the ability to pattern match, and when
+        the invariants that you care about are already enforced by
+        the data type itself.</p>
       </section>
 
       <section data-type="sect2">
@@ -815,9 +820,9 @@
 
         <p>There are many ways of improving readability at the call
         site. One example is labeled arguments (discussed in
-        <a href="#labeled-arguments" data-type=
-        "xref">#labeled-arguments</a>), which act as documentation
-        that is available at the call site.</p>
+        <a href="02-variables-and-functions.html#labeled-arguments"
+        data-type="xref">Labeled Arguments</a>), which act as
+        documentation that is available at the call site.</p>
 
         <p>You can also improve readability simply by choosing good
         names for your functions, variant tags and record fields.
@@ -872,8 +877,8 @@
             end in <code>_exn</code>. Otherwise, errors should be
             signaled by returning an <code>option</code> or an
             <code>Or_error.t</code> (both of which are discussed in
-            <a href="#error-handling" data-type=
-            "xref">#error-handling</a> ).</p>
+            <a href="07-error-handling.html#error-handling"
+            data-type="xref">Error Handling</a> ).</p>
           </li>
         </ul>
 
@@ -885,8 +890,8 @@
         achieved through the use of <em>signature includes</em>,
         which allow for different modules to share components of
         their interface. This approach is described in <a href=
-        "#using-multiple-interfaces" data-type=
-        "xref">#using-multiple-interfaces</a>.</p>
+        "09-functors.html#using-multiple-interfaces" data-type=
+        "xref">Using Multiple Interfaces</a>.</p>
 
         <p>Core's standards may or may not fit your projects, but
         you can improve the usability of your codebase by finding

@@ -41,10 +41,10 @@
       "code/variables-and-functions/let.syntax" />
 
       <p>As we'll see when we get to the module system in <a href=
-      "#files-modules-and-programs" data-type=
-      "xref">#files-modules-and-programs</a>, this same syntax is
-      used for <code>let</code> bindings at the top level of a
-      module.</p>
+      "04-files-modules-and-programs.html#files-modules-and-programs"
+      data-type="xref">Files Modules And Programs</a>, this same
+      syntax is used for <code>let</code> bindings at the top level
+      of a module.</p>
 
       <p>Every variable binding has a <em>scope</em>, which is the
       portion of the code that can refer to that binding. When
@@ -125,9 +125,10 @@
 
       <p>In OCaml, <code>let</code> bindings are immutable. There
       are many kinds of mutable values in OCaml, which we'll
-      discuss in <a href="#imperative-programming-1" data-type=
-      "xref">#imperative-programming-1</a>, but there are no
-      mutable variables.</p>
+      discuss in <a href=
+      "08-imperative-programming.html#imperative-programming-1"
+      data-type="xref">Imperative Programming 1</a>, but there are
+      no mutable variables.</p>
 
       <div data-type="note">
         <h1>Why Don't Variables Vary?</h1>
@@ -168,11 +169,11 @@
         identifiers that show up in that pattern. A pattern is
         essentially a description of the shape of a data structure,
         where some components are identifiers to be bound. As we
-        saw in <a href="#tuples-lists-options-and-pattern-matching"
-        data-type=
-        "xref">#tuples-lists-options-and-pattern-matching</a>,
-        OCaml has patterns for a variety of different data
-        types.</p>
+        saw in <a href=
+        "01-guided-tour.html#tuples-lists-options-and-pattern-matching"
+        data-type="xref">Tuples Lists Options And Pattern
+        Matching</a>, OCaml has patterns for a variety of different
+        data types.</p>
 
         <p>Using a pattern in a <code>let</code> binding makes the
         most sense for a pattern that is <em>irrefutable</em>,
@@ -196,8 +197,8 @@
         <p>Note that this is our first use of <code>assert</code>,
         which is useful for marking cases that should be
         impossible. We'll discuss <code>assert</code> in more
-        detail in <a href="#error-handling" data-type=
-        "xref">#error-handling</a>.</p>
+        detail in <a href="07-error-handling.html#error-handling"
+        data-type="xref">Error Handling</a>.</p>
       </section>
     </section>
 
@@ -285,8 +286,10 @@
 
           <p>This connection is important, and will come up more
           when programming in a monadic style, as we'll see in
-          <a href="#concurrent-programming-with-async" data-type=
-          "xref">#concurrent-programming-with-async</a>.</p>
+          <a href=
+          "18-concurrent-programming.html#concurrent-programming-with-async"
+          data-type="xref">Concurrent Programming With
+          Async</a>.</p>
         </div>
       </section>
 
@@ -381,11 +384,12 @@
         programming language, but is particularly important in
         functional languages, because it is the way that you build
         looping constructs. (As will be discussed in more detail in
-        <a href="#imperative-programming-1" data-type=
-        "xref">#imperative-programming-1</a>, OCaml also supports
-        imperative looping constructs like <code>for</code> and
-        <code>while</code>, but these are only useful when using
-        OCaml's imperative features.)</p>
+        <a href=
+        "08-imperative-programming.html#imperative-programming-1"
+        data-type="xref">Imperative Programming 1</a>, OCaml also
+        supports imperative looping constructs like
+        <code>for</code> and <code>while</code>, but these are only
+        useful when using OCaml's imperative features.)</p>
 
         <p>In order to define a recursive function, you need to
         mark the <code>let</code> binding as recursive with the
@@ -487,8 +491,9 @@
 
         <p>The syntactic role of an operator is typically
         determined by its first character or two, though there are
-        a few exceptions. <a href="#table2_1" data-type=
-        "xref">#table2_1</a> breaks the different operators and
+        a few exceptions. <a href=
+        "02-variables-and-functions.html#table2_1" data-type=
+        "xref">Table2_1</a> breaks the different operators and
         other syntactic forms into groups from highest to lowest
         precedence, explaining how each behaves syntactically. We
         write <code>!</code>... to indicate the class of operators
@@ -944,8 +949,8 @@
         <em>i.e.</em>, functions that are not included in the
         module's interface, or <code>mli</code> file. We'll learn
         more about <code>mli</code>s in <a href=
-        "#files-modules-and-programs" data-type=
-        "xref">#files-modules-and-programs</a>.</p>
+        "04-files-modules-and-programs.html#files-modules-and-programs"
+        data-type="xref">Files Modules And Programs</a>.</p>
 
         <section id="explicit-passing-of-an-optional-argument"
         data-type="sect3">

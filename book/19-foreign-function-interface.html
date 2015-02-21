@@ -735,8 +735,8 @@
         library <code>Array</code> module except that they operate
         on arrays stored using the flat C representation rather
         than the OCaml representation described in <a href=
-        "#memory-representation-of-values" data-type=
-        "xref">#memory-representation-of-values</a>.</p>
+        "20-runtime-memory-layout.html#memory-representation-of-values"
+        data-type="xref">Memory Representation Of Values</a>.</p>
 
         <p>As with standard OCaml arrays, the conversion between
         arrays and lists requires copying the values, which can be
@@ -757,8 +757,9 @@
           <p>Ctypes defines a number of operators that let you
           manipulate pointers and arrays just as you would in C.
           The Ctypes equivalents do have the benefit of being more
-          strongly typed, of course (see <a href="#Table19sub1"
-          data-type="xref">#Table19sub1</a>).</p>
+          strongly typed, of course (see <a href=
+          "19-foreign-function-interface.html#Table19sub1"
+          data-type="xref">Table19sub1</a>).</p>
 
           <table id="Table19sub1">
             <caption>
@@ -973,11 +974,12 @@
       innards of OCaml at all. Ctypes does its best to make
       function bindings easy, but the rest of this part will also
       fill you in about interactions with OCaml memory layout in
-      <a href="#memory-representation-of-values" data-type=
-      "xref">#memory-representation-of-values</a> and automatic
-      memory management in <a href=
-      "#understanding-the-garbage-collector" data-type=
-      "xref">#understanding-the-garbage-collector</a>.</p>
+      <a href=
+      "20-runtime-memory-layout.html#memory-representation-of-values"
+      data-type="xref">Memory Representation Of Values</a> and
+      automatic memory management in <a href=
+      "21-garbage-collector.html#understanding-the-garbage-collector"
+      data-type="xref">Understanding The Garbage Collector</a>.</p>
 
       <p>Ctypes gives OCaml programs access to the C representation
       of values, shielding you from the details of the OCaml value

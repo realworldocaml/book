@@ -199,13 +199,15 @@
       <p>The notation for the type-signature of a multiargument
       function may be a little surprising at first, but we'll
       explain where it comes from when we get to function currying
-      in <a href="#multi-argument-functions" data-type=
-      "xref">#multi-argument-functions</a>. For the moment, think
-      of the arrows as separating different arguments of the
-      function, with the type after the final arrow being the
-      return value. Thus, <code>int -&gt; int -&gt; float</code>
-      describes a function that takes two <code>int</code>
-      arguments and returns a <code>float</code>.</p>
+      in <a href=
+      "02-variables-and-functions.html#multi-argument-functions"
+      data-type="xref">Multi Argument Functions</a>. For the
+      moment, think of the arrows as separating different arguments
+      of the function, with the type after the final arrow being
+      the return value. Thus, <code>int -&gt; int -&gt;
+      float</code> describes a function that takes two
+      <code>int</code> arguments and returns a
+      <code>float</code>.</p>
 
       <p>We can also write functions that take other functions as
       arguments. Here's an example of a function that takes three
@@ -510,8 +512,9 @@
           "code/guided-tour/main.topscript" part="24" />
 
           <p>We'll learn more about labeled arguments and why
-          they're important in <a href="#variables-and-functions"
-          data-type="xref">#variables-and-functions</a>.</p>
+          they're important in <a href=
+          "02-variables-and-functions.html#variables-and-functions"
+          data-type="xref">Variables And Functions</a>.</p>
         </section>
 
         <section id="constructing-lists-with" data-type="sect3">
@@ -794,11 +797,12 @@
         well-defined values of type <code>string</code>. If you
         want to allow, say, the first of those to be absent, then
         you need to change the type to <code>string option *
-        string</code>. As we'll see in <a href="#error-handling"
-        data-type="xref">#error-handling</a>, this explicitness
-        allows the compiler to provide a great deal of help in
-        making sure you're correctly handling the possibility of
-        missing data.</p>
+        string</code>. As we'll see in <a href=
+        "07-error-handling.html#error-handling" data-type=
+        "xref">Error Handling</a>, this explicitness allows the
+        compiler to provide a great deal of help in making sure
+        you're correctly handling the possibility of missing
+        data.</p>
       </section>
     </section>
 
@@ -1154,9 +1158,10 @@
 
         <p>The <code>.native</code> suffix indicates that we're
         building a native-code executable, which we'll discuss more
-        in <a href="#files-modules-and-programs" data-type=
-        "xref">#files-modules-and-programs</a>. Once the build
-        completes, we can use the resulting program like any
+        in <a href=
+        "04-files-modules-and-programs.html#files-modules-and-programs"
+        data-type="xref">Files Modules And Programs</a>. Once the
+        build completes, we can use the resulting program like any
         command-line utility. We can feed input to
         <code>sum.native</code> by typing in a sequence of numbers,
         one per line, hitting <strong><code>Ctrl-D</code></strong>
@@ -1167,8 +1172,8 @@
         <p>More work is needed to make a really usable command-line
         program, including a proper command-line parsing interface
         and better error handling, all of which is covered in
-        <a href="#command-line-parsing" data-type=
-        "xref">#command-line-parsing</a>.</p>
+        <a href="14-command-line-parsing.html#command-line-parsing"
+        data-type="xref">Command Line Parsing</a>.</p>
       </section>
     </section>
 

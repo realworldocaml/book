@@ -60,8 +60,9 @@
 
     <p>The details of the compilation process into executable code
     can be found next, in <a href=
-    "#the-compiler-backend-byte-code-and-native-code" data-type=
-    "xref">#the-compiler-backend-byte-code-and-native-code</a>.</p>
+    "23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
+    data-type="xref">The Compiler Backend Byte Code And Native
+    Code</a>.</p>
 
     <section id="an-overview-of-the-toolchain" data-type="sect1">
       <h1>An Overview of the Toolchain</h1>
@@ -70,9 +71,10 @@
       the filename extensions <code>.ml</code> and
       <code>.mli</code> for modules and signatures, respectively.
       We explained the basics of the build process in <a href=
-      "#files-modules-and-programs" data-type=
-      "xref">#files-modules-and-programs</a>, so we'll assume
-      you've built a few OCaml programs already by this point.</p>
+      "04-files-modules-and-programs.html#files-modules-and-programs"
+      data-type="xref">Files Modules And Programs</a>, so we'll
+      assume you've built a few OCaml programs already by this
+      point.</p>
 
       <p>Each source file represents a <em>compilation unit</em>
       that is built separately. The compiler generates intermediate
@@ -259,10 +261,12 @@
       first task is to parse the text into a more structured
       abstract syntax tree (AST). The parsing logic is implemented
       in OCaml itself using the techniques described earlier in
-      <a href="#parsing-with-ocamllex-and-menhir" data-type=
-      "xref">#parsing-with-ocamllex-and-menhir</a>. The lexer and
-      parser rules can be found in the <code>parsing</code>
-      directory in the source distribution.</p>
+      <a href=
+      "16-parsing-with-ocamllex-and-menhir.html#parsing-with-ocamllex-and-menhir"
+      data-type="xref">Parsing With Ocamllex And Menhir</a>. The
+      lexer and parser rules can be found in the
+      <code>parsing</code> directory in the source
+      distribution.</p>
 
       <section id="syntax-errors" data-type="sect2">
         <h2>Syntax Errors</h2>
@@ -567,8 +571,8 @@
         <p>OCaml provides a built-in polymorphic comparison
         operator that inspects the runtime representation of two
         values to see if they're equal. As we noted in <a href=
-        "#maps-and-hash-tables" data-type=
-        "xref">#maps-and-hash-tables</a>, the polymorphic
+        "13-maps-and-hashtables.html#maps-and-hash-tables"
+        data-type="xref">Maps And Hash Tables</a>, the polymorphic
         comparison is less efficient than defining explicit
         comparison functions between values. However, it quickly
         becomes tedious to manually define comparison functions for
@@ -634,8 +638,8 @@
         specialized string comparison function and not actually
         call the runtime polymorphic comparison function. This has
         implications for correctness, too: recall from <a href=
-        "#maps-and-hash-tables" data-type=
-        "xref">#maps-and-hash-tables</a> that
+        "13-maps-and-hashtables.html#maps-and-hash-tables"
+        data-type="xref">Maps And Hash Tables</a> that
         <code>comparelib</code> provides reliable comparison
         functions that work for values that are logically the same
         but that have differing internal representations (e.g.,
@@ -1118,13 +1122,14 @@
         reused effectively in large projects while still retaining
         all the benefits of static type safety. We covered the
         basics of using modules earlier in <a href=
-        "#files-modules-and-programs" data-type=
-        "xref">#files-modules-and-programs</a>. The module language
-        that operates over these signatures also extends to
-        functors and first-class modules, described in <a href=
-        "#functors" data-type="xref">#functors</a> and <a href=
-        "#first-class-modules" data-type=
-        "xref">#first-class-modules</a>, respectively.</p>
+        "04-files-modules-and-programs.html#files-modules-and-programs"
+        data-type="xref">Files Modules And Programs</a>. The module
+        language that operates over these signatures also extends
+        to functors and first-class modules, described in <a href=
+        "09-functors.html#functors" data-type="xref">Functors</a>
+        and <a href=
+        "10-first-class-modules.html#first-class-modules"
+        data-type="xref">First Class Modules</a>, respectively.</p>
 
         <p>This section discusses how the compiler implements them
         in more detail. Modules are essential for larger projects
@@ -1420,8 +1425,9 @@
         "code/front-end/install_ocp_index.out" />
 
         <p>Let's refer back to our Ncurses binding example from the
-        beginning of <a href="#foreign-function-interface"
-        data-type="xref">#foreign-function-interface</a>. This
+        beginning of <a href=
+        "19-foreign-function-interface.html#foreign-function-interface"
+        data-type="xref">Foreign Function Interface</a>. This
         module defined bindings for the Ncurses library. First,
         compile the interfaces with
         <span><code>-bin-annot</code></span> so that we can obtain
@@ -1488,8 +1494,9 @@
         it's useful to know that this intermediate form exists
         before we delve further into the code generation process
         next, in <a href=
-        "#the-compiler-backend-byte-code-and-native-code"
-        data-type="xref">#the-compiler-backend-byte-code-and-native-code</a>.</p>
+        "23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
+        data-type="xref">The Compiler Backend Byte Code And Native
+        Code</a>.</p>
 
         <p>There are several new integrated tools emerging that
         combine these typed AST files with common editors such as

@@ -182,10 +182,11 @@
       It's far more common to use <code>from_string</code> to
       construct JSON values though, since these strings come in via
       a network connection (we'll see more of this in <a href=
-      "#concurrent-programming-with-async" data-type=
-      "xref">#concurrent-programming-with-async</a>) or a database.
-      Finally, the example checks that the two input mechanisms
-      actually resulted in the same OCaml data structure.</p>
+      "18-concurrent-programming.html#concurrent-programming-with-async"
+      data-type="xref">Concurrent Programming With Async</a>) or a
+      database. Finally, the example checks that the two input
+      mechanisms actually resulted in the same OCaml data
+      structure.</p>
     </section>
 
     <section id="selecting-values-from-json-structures" data-type=
@@ -243,8 +244,8 @@
 
       <p><code>Yojson</code> provides several combinators in the
       <code>Yojson.Basic.Util</code> module, some of which are
-      listed in <a href="#table15_1" data-type=
-      "xref">#table15_1</a>.</p>
+      listed in <a href="15-json.html#table15_1" data-type=
+      "xref">Table15_1</a>.</p>
 
       <table id="table15_1">
         <caption>
@@ -304,9 +305,9 @@
       <p>We'll go through each of these uses one by one now. The
       following examples also use the <code>|&gt;</code>
       pipe-forward operator that we explained in <a href=
-      "#variables-and-functions" data-type=
-      "xref">#variables-and-functions</a>. This lets us chain
-      together multiple JSON selection functions and feed the
+      "02-variables-and-functions.html#variables-and-functions"
+      data-type="xref">Variables And Functions</a>. This lets us
+      chain together multiple JSON selection functions and feed the
       output from one into the next one, without having to create
       separate <code>let</code> bindings for each one.</p>
 
@@ -462,9 +463,9 @@
 
         <p>We'll discuss more techniques like this that help you
         interpret type errors more easily in <a href=
-        "#the-compiler-frontend-parsing-and-type-checking"
-        data-type=
-        "xref">#the-compiler-frontend-parsing-and-type-checking</a>.</p>
+        "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
+        data-type="xref">The Compiler Frontend Parsing And Type
+        Checking</a>.</p>
       </aside>
     </section>
 
@@ -800,8 +801,8 @@
         command line to obtain the JSON, which is rather
         inefficient. We'll explain how to integrate the HTTP fetch
         directly into your OCaml application in <a href=
-        "#concurrent-programming-with-async" data-type=
-        "xref">#concurrent-programming-with-async</a>.</p>
+        "18-concurrent-programming.html#concurrent-programming-with-async"
+        data-type="xref">Concurrent Programming With Async</a>.</p>
       </section>
     </section>
   </section>

@@ -28,10 +28,11 @@
     <p>S-expressions play a major role in Core, effectively acting
     as the default serialization format. Indeed, we've encountered
     s-expressions multiple times already, including in <a href=
-    "#error-handling" data-type="xref">#error-handling</a>,
-    <a href="#functors" data-type="xref">#functors</a>, and
-    <a href="#first-class-modules" data-type=
-    "xref">#first-class-modules</a>.</p>
+    "07-error-handling.html#error-handling" data-type="xref">Error
+    Handling</a>, <a href="09-functors.html#functors" data-type=
+    "xref">Functors</a>, and <a href=
+    "10-first-class-modules.html#first-class-modules" data-type=
+    "xref">First Class Modules</a>.</p>
 
     <p>This chapter will go into s-expressions in more depth. In
     particular, we'll discuss:</p>
@@ -174,10 +175,11 @@
 
         <p>The syntax extension can be used outside of type
         declarations as well. As discussed in <a href=
-        "#error-handling" data-type="xref">#error-handling</a>,
-        <code>with sexp</code> can be attached to the declaration
-        of an exception, which will improve the ability of Core to
-        generate a useful string representation:</p>
+        "07-error-handling.html#error-handling" data-type=
+        "xref">Error Handling</a>, <code>with sexp</code> can be
+        attached to the declaration of an exception, which will
+        improve the ability of Core to generate a useful string
+        representation:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/auto_making_sexp.topscript" part="1" />
 
@@ -212,10 +214,10 @@
 
           <p>Sexplib is part of a family of syntax extensions,
           including Comparelib, described in <a href=
-          "#maps-and-hash-tables" data-type=
-          "xref">#maps-and-hash-tables</a>, and Fieldslib,
-          described in <a href="#records" data-type=
-          "xref">#records</a>, that generate code based on type
+          "13-maps-and-hashtables.html#maps-and-hash-tables"
+          data-type="xref">Maps And Hash Tables</a>, and Fieldslib,
+          described in <a href="05-records.html#records" data-type=
+          "xref">Records</a>, that generate code based on type
           declarations and are all based on a common library called
           Type_conv. This library provides a common language for
           annotating types (e.g., using the <code>with</code>
@@ -301,8 +303,8 @@
       bit of how this works already, but let's walk through a
       complete example. Here's the source for a simple library for
       representing integer intervals, very similar to the one
-      described in <a href="#functors" data-type=
-      "xref">#functors</a>:</p>
+      described in <a href="09-functors.html#functors" data-type=
+      "xref">Functors</a>:</p>
       <link rel="import" data-code-language="ocaml" href=
       "code/sexpr/int_interval.ml" />
 

@@ -15,10 +15,10 @@
 
     <p>This chapter will focus on two common elements of
     programming in OCaml: lists and pattern matching. Both of these
-    were discussed in <a href="#a-guided-tour" data-type=
-    "xref">#a-guided-tour</a>, but we'll go into more depth here,
-    presenting the two topics together and using one to help
-    illustrate the other.</p>
+    were discussed in <a href="01-guided-tour.html#a-guided-tour"
+    data-type="xref">A Guided Tour</a>, but we'll go into more
+    depth here, presenting the two topics together and using one to
+    help illustrate the other.</p>
 
     <section id="list-basics" data-type="sect1">
       <h1>List Basics</h1>
@@ -249,12 +249,13 @@
 
         <p>Even for simple examples like this, exhaustiveness
         checks are pretty useful. But as we'll see in <a href=
-        "#variants" data-type="xref">#variants</a>, they become yet
-        more valuable as you get to more complicated examples,
-        especially those involving user-defined types. In addition
-        to catching outright errors, they act as a sort of
-        refactoring tool, guiding you to the locations where you
-        need to adapt your code to deal with changing types.</p>
+        "06-variants.html#variants" data-type="xref">Variants</a>,
+        they become yet more valuable as you get to more
+        complicated examples, especially those involving
+        user-defined types. In addition to catching outright
+        errors, they act as a sort of refactoring tool, guiding you
+        to the locations where you need to adapt your code to deal
+        with changing types.</p>
       </section>
     </section>
 
@@ -451,8 +452,8 @@
 
           <p>Note that the <code>mod</code> used above is an infix
           operator, as described in <a href=
-          "#variables-and-functions" data-type=
-          "xref">#variables-and-functions</a>.</p>
+          "02-variables-and-functions.html#variables-and-functions"
+          data-type="xref">Variables And Functions</a>.</p>
 
           <p>Sometimes, you want to both transform and filter as
           part of the same computation. In that case,
@@ -629,8 +630,8 @@
 
       <p>Now that we know more about how lists and patterns work,
       let's consider how we can improve on an example from <a href=
-      "#recursive-list-functions" data-type=
-      "xref">#recursive-list-functions</a>: the function
+      "01-guided-tour.html#recursive-list-functions" data-type=
+      "xref">Recursive List Functions</a>: the function
       <code>destutter</code>, which removes sequential duplicates
       from a list. Here's the implementation that was described
       earlier:</p>
@@ -722,8 +723,8 @@
         have your own notion of equality and ordering that you want
         to impose. We'll discuss this issue more, as well as some
         of the other downsides of polymorphic compare, in <a href=
-        "#maps-and-hash-tables" data-type=
-        "xref">#maps-and-hash-tables</a>.</p>
+        "13-maps-and-hashtables.html#maps-and-hash-tables"
+        data-type="xref">Maps And Hash Tables</a>.</p>
       </aside>
 
       <p>Note that <code>when</code> clauses have some downsides.

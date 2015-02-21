@@ -54,8 +54,8 @@
       most real-world tasks, you should use one of those
       implementations. There's more advice on using Core's
       implementation in particular in <a href=
-      "#maps-and-hash-tables" data-type=
-      "xref">#maps-and-hash-tables</a>.</p>
+      "13-maps-and-hashtables.html#maps-and-hash-tables" data-type=
+      "xref">Maps And Hash Tables</a>.</p>
 
       <p>The dictionary we'll describe now, like those in Core and
       the standard library, will be implemented as a hash table. In
@@ -307,9 +307,10 @@
           memory stored outside of the OCaml heap. These are mostly
           useful for interacting with C or Fortran libraries, and
           are discussed in <a href=
-          "#memory-representation-of-values" data-type=
-          "xref">#memory-representation-of-values</a>. Bigarrays
-          too have their own getting and setting syntax:</p>
+          "20-runtime-memory-layout.html#memory-representation-of-values"
+          data-type="xref">Memory Representation Of Values</a>.
+          Bigarrays too have their own getting and setting
+          syntax:</p>
           <link rel="import" data-code-language="ocamlsyntax" href=
           "code/imperative-programming/bigarray.syntax" />
         </section>
@@ -324,10 +325,10 @@
         mutable fields can be set using the <code>&lt;-</code>
         operator, i.e., <code>record.field &lt;- expr</code>.</p>
 
-        <p>As we'll see in <a href="#objects" data-type=
-        "xref">#objects</a>, fields of an object can similarly be
-        declared as mutable, and can then be modified in much the
-        same way as record fields.</p>
+        <p>As we'll see in <a href="11-objects.html#objects"
+        data-type="xref">Objects</a>, fields of an object can
+        similarly be declared as mutable, and can then be modified
+        in much the same way as record fields.</p>
 
         <section id="ref-cells" data-type="sect3">
           <h3>Ref cells</h3>
@@ -393,8 +394,9 @@
         <code>write</code> system call or to the
         <code>clock</code>, while others come from user libraries,
         like LAPACK bindings. OCaml's FFI is discussed in more
-        detail in <a href="#foreign-function-interface" data-type=
-        "xref">#foreign-function-interface</a>.</p>
+        detail in <a href=
+        "19-foreign-function-interface.html#foreign-function-interface"
+        data-type="xref">Foreign Function Interface</a>.</p>
       </section>
     </section>
 
@@ -984,9 +986,9 @@
       primitives are also available through the <code>Unix</code>
       module in Core as well as <code>Async</code>, the
       asynchronous I/O library that is covered in <a href=
-      "#concurrent-programming-with-async" data-type=
-      "xref">#concurrent-programming-with-async</a>. Most of the
-      functionality in Core's <code>In_channel</code> and
+      "18-concurrent-programming.html#concurrent-programming-with-async"
+      data-type="xref">Concurrent Programming With Async</a>. Most
+      of the functionality in Core's <code>In_channel</code> and
       <code>Out_channel</code> (and in Core's <code>Unix</code>
       module) derives from the standard library, but we'll use
       Core's interfaces here.</p>
@@ -1251,8 +1253,8 @@
         <p>To avoid this, we need to make sure that our code cleans
         up after itself. We can do this using the
         <code>protect</code> function described in <a href=
-        "#error-handling" data-type="xref">#error-handling</a>, as
-        follows:</p>
+        "07-error-handling.html#error-handling" data-type=
+        "xref">Error Handling</a>, as follows:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/file2.topscript" part="1" />
 
@@ -1618,10 +1620,10 @@
         in the <code>mli</code>), which is often not desirable; or
         by marking the type variable in question as
         <em>covariant</em>. We'll learn more about covariance and
-        contravariance in <a href="#objects" data-type=
-        "xref">#objects</a>, but for now, you can think of it as an
-        annotation that can be put in the interface of a pure data
-        structure.</p>
+        contravariance in <a href="11-objects.html#objects"
+        data-type="xref">Objects</a>, but for now, you can think of
+        it as an annotation that can be put in the interface of a
+        pure data structure.</p>
 
         <p>In particular, if we replace <code>type 'a t</code> in
         the interface with <code>type +'a t</code>, that will make

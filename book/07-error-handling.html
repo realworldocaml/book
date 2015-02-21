@@ -176,9 +176,9 @@
         <p>We're not restricted to doing this kind of error
         reporting with built-in types. This will be discussed in
         more detail in <a href=
-        "#data-serialization-with-s-expressions" data-type=
-        "xref">#data-serialization-with-s-expressions</a>, but
-        Sexplib comes with a language extension that can
+        "17-data-serialization.html#data-serialization-with-s-expressions"
+        data-type="xref">Data Serialization With S Expressions</a>,
+        but Sexplib comes with a language extension that can
         autogenerate sexp converters for newly generated types:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="8" />
@@ -236,8 +236,8 @@
         module is called <code>Monad_infix</code> because the
         <code>bind</code> operator is part of a subinterface called
         <code>Monad</code>, which we'll see again in <a href=
-        "#concurrent-programming-with-async" data-type=
-        "xref">#concurrent-programming-with-async</a>:</p>
+        "18-concurrent-programming.html#concurrent-programming-with-async"
+        data-type="xref">Concurrent Programming With Async</a>:</p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="13" />
 
@@ -309,16 +309,15 @@
       <p>Exceptions are all of the same type, <code>exn</code>. The
       <code>exn</code> type is something of a special case in the
       OCaml type system. It is similar to the variant types we
-      encountered in <a href="#variants" data-type=
-      "xref">#variants</a>, except that it is <em>open</em>,
-      meaning that it's not fully defined in any one place. In
-      particular, new tags (specifically, new exceptions) can be
-      added to it by different parts of the program. This is in
-      contrast to ordinary variants, which are defined with a
-      closed universe of available tags. One result of this is that
-      you can never have an exhaustive match on an
-      <code>exn</code>, since the full set of possible exceptions
-      is not known.</p>
+      encountered in <a href="06-variants.html#variants" data-type=
+      "xref">Variants</a>, except that it is <em>open</em>, meaning
+      that it's not fully defined in any one place. In particular,
+      new tags (specifically, new exceptions) can be added to it by
+      different parts of the program. This is in contrast to
+      ordinary variants, which are defined with a closed universe
+      of available tags. One result of this is that you can never
+      have an exhaustive match on an <code>exn</code>, since the
+      full set of possible exceptions is not known.</p>
 
       <p>The following function uses the <code>Key_not_found</code>
       exception we defined above to signal an error:</p>
@@ -380,8 +379,9 @@
         <p>This is all part of the support for s-expressions
         provided by the Sexplib library and syntax extension, which
         is described in more detail in <a href=
-        "#data-serialization-with-s-expressions" data-type=
-        "xref">#data-serialization-with-s-expressions</a>.</p>
+        "17-data-serialization.html#data-serialization-with-s-expressions"
+        data-type="xref">Data Serialization With S
+        Expressions</a>.</p>
       </div>
 
       <section id="helper-functions-for-throwing-exceptions"
