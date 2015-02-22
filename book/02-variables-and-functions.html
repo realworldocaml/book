@@ -779,20 +779,19 @@
             the array backing the hash table, and the second is a
             Boolean flag, which indicates whether that array will
             ever shrink when elements are removed:</p>
+            <link rel="import" data-code-language="ocaml" href=
+            "code/variables-and-functions/htable_sig1.ml" />
 
-        <link rel="import" data-code-language="ocaml" href=
-        "code/variables-and-functions/htable_sig1.ml" />
+            <p>The signature makes it hard to divine the meaning of
+            those two arguments. but with labeled arguments, we can
+            make the intent immediately clear:</p>
+            <link rel="import" data-code-language="ocaml" href=
+            "code/variables-and-functions/htable_sig2.ml" />
 
-        <p>The signature makes it hard to divine the meaning of
-        those two arguments. but with labeled arguments, we can
-        make the intent immediately clear:</p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/variables-and-functions/htable_sig2.ml" />
-
-        <p>Choosing label names well is especially important for
-        Boolean values, since it's often easy to get confused about
-        whether a value being true is meant to enable or disable a
-        given feature.</p>
+            <p>Choosing label names well is especially important
+            for Boolean values, since it's often easy to get
+            confused about whether a value being true is meant to
+            enable or disable a given feature.</p>
           </li>
 
           <li>
@@ -801,7 +800,6 @@
             at issue when the arguments are of the same type. For
             example, consider this signature for a function that
             extracts a substring:</p>
-
             <link rel="import" data-code-language="ocaml" href=
             "code/variables-and-functions/substring_sig1.ml" />
 
@@ -809,7 +807,6 @@
             position and length of the substring to extract,
             respectively. We can make this fact more obvious from
             the signature by adding labeled:</p>
-
             <link rel="import" data-code-language="ocaml" href=
             "code/variables-and-functions/substring_sig2.ml" />
 
@@ -828,7 +825,6 @@
             <code>List.iter</code> by giving it just the function,
             as in the following example from earlier in the
             chapter:</p>
-
             <link rel="import" data-code-language="ocamltop" href=
             "code/variables-and-functions/main.topscript" part=
             "43" />
@@ -842,54 +838,53 @@
           </li>
         </ul>
 
-            <section id="higher-order-functions-and-labels"
-            data-type="sect3">
-              <h3>Higher-order functions and labels</h3>
+        <section id="higher-order-functions-and-labels" data-type=
+        "sect3">
+          <h3>Higher-order functions and labels</h3>
 
-              <p>One surprising gotcha with labeled arguments is
-              that while order doesn't matter when calling a
-              function with labeled arguments, it does matter in a
-              higher-order context, <em>e.g.</em>, when passing a
-              function with labeled arguments to another function.
-              Here's an example:</p>
-              <link rel="import" data-code-language="ocamltop"
-              href="code/variables-and-functions/main.topscript"
-              part="44" />
+          <p>One surprising gotcha with labeled arguments is that
+          while order doesn't matter when calling a function with
+          labeled arguments, it does matter in a higher-order
+          context, <em>e.g.</em>, when passing a function with
+          labeled arguments to another function. Here's an
+          example:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "44" />
 
-              <p>Here, the definition of
-              <code>apply_to_tuple</code> sets up the expectation
-              that its first argument is a function with two
-              labeled arguments, <code>first</code> and
-              <code>second</code>, listed in that order. We could
-              have defined <code>apply_to_tuple</code> differently
-              to change the order in which the labeled arguments
-              were listed:</p>
-              <link rel="import" data-code-language="ocamltop"
-              href="code/variables-and-functions/main.topscript"
-              part="45" />
+          <p>Here, the definition of <code>apply_to_tuple</code>
+          sets up the expectation that its first argument is a
+          function with two labeled arguments, <code>first</code>
+          and <code>second</code>, listed in that order. We could
+          have defined <code>apply_to_tuple</code> differently to
+          change the order in which the labeled arguments were
+          listed:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "45" />
 
-              <p>It turns out this order matters. In particular, if
-              we define a function that has a different order</p>
-              <link rel="import" data-code-language="ocamltop"
-              href="code/variables-and-functions/main.topscript"
-              part="46" />
+          <p>It turns out this order matters. In particular, if we
+          define a function that has a different order</p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "46" />
 
-              <p>we'll find that it can't be passed in to
-              <code>apply_to_tuple_2</code>.</p>
-              <link rel="import" data-code-language="ocamltop"
-              href="code/variables-and-functions/main.topscript"
-              part="47" />
+          <p>we'll find that it can't be passed in to
+          <code>apply_to_tuple_2</code>.</p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "47" />
 
-              <p>But, it works smoothly with the original
-              <code>apply_to_tuple</code>:</p>
-              <link rel="import" data-code-language="ocamltop"
-              href="code/variables-and-functions/main.topscript"
-              part="48" />
+          <p>But, it works smoothly with the original
+          <code>apply_to_tuple</code>:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "48" />
 
-              <p>As a result, when passing labeled functions as
-              arguments, you need to take care to be consistent in
-              your ordering of labeled arguments.</p>
-            </section>
+          <p>As a result, when passing labeled functions as
+          arguments, you need to take care to be consistent in your
+          ordering of labeled arguments.</p>
+        </section>
       </section>
 
       <section id="optional-arguments" data-type="sect2">
