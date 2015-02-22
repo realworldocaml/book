@@ -133,10 +133,11 @@ val run_file_exn
 (******************************************************************************)
 (** {2 Printers} *)
 (******************************************************************************)
-val phrases_to_html : lang -> phrase list -> Rwo_html.item
+val phrases_to_html : lang -> phrase list -> Rwo_html.item Deferred.t
 
 (** [run_through_pygmentize lang contents] *)
 val run_through_pygmentize : lang -> string -> Cow.Xml.t Or_error.t
+val pygmentize : lang -> string -> Rwo_html.item Deferred.t
 
 (** Concat lines of toplevel phrases so that each toplevel phrase
     always starts with a double semicolon. *)

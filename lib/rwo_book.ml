@@ -862,10 +862,9 @@ let make_chapter repo_root chapters chapter_file
   let import_node_to_html (i:import) : Html.t Deferred.t =
     let href = import_base_dir/i.href in
     update_code i.data_code_language href
-    >>| fun () ->
-    Code.find_exn !code ~file:href ?part:i.part
-    |> Code.phrases_to_html i.data_code_language
-    |> fun x -> [x]
+    >>= fun () -> return (Code.find_exn !code ~file:href ?part:i.part)
+    >>= fun contents -> Code.phrases_to_html i.data_code_language contents
+    >>| fun x -> [x]
   in
 
   let rec loop html =

@@ -90,7 +90,22 @@ let lang_to_docbook_language lang = match lang with
   | `Ascii ->
     error "language not supported by docbook" lang sexp_of_lang
 
-let lang_to_pygmentize_language x = Ok (lang_to_string x)
+let lang_to_pygmentize_language lang = match lang with
+  | `OCaml
+  | `OCaml_toplevel
+  | `OCaml_rawtoplevel
+  | `ATD               -> Ok "ocaml"
+  | `JSON              -> Ok "json"
+  | `Scheme            -> Ok "scheme"
+  | `Java              -> Ok "java"
+  | `C                 -> Ok "c"
+  | `Bash              -> Ok "bash"
+  | `CPP               -> Ok "c"
+  | `Gas               -> Ok "gas"
+  | `Console
+  | `OCaml_syntax
+  | `Ascii ->
+    error "we are not supporting this language for pygmentize" lang sexp_of_lang
 
 
 (******************************************************************************)
@@ -382,6 +397,30 @@ let run_file_exn ?(repo_root=".") file ~lang = match lang with
 (******************************************************************************)
 (* Printers                                                                   *)
 (******************************************************************************)
+let pygmentize lang contents =
+  match lang_to_pygmentize_language lang with
+  | Error _ -> return (Html.(pre [data contents]))
+  | Ok lang ->
+    Process.create ~prog:"pygmentize" ~args:["-l"; lang; "-f"; "html"] ()
+    >>= fun proc ->
+    match proc with
+    | Error e -> raise (Error.to_exn e)
+    | Ok proc -> (
+      Writer.write (Process.stdin proc) contents;
+      Process.wait proc >>| fun {Process.Output.stdout; stderr; exit_status} ->
+      match exit_status with
+      | Error (`Exit_non_zero x) ->
+        failwithf "pygmentize exited with %d on:\n%s" x contents ()
+      | Error (`Signal x) ->
+        failwithf "pymentize exited with signal %s on:\n%s"
+          (Signal.to_string x) contents ()
+      | Ok () ->
+        if stderr <> "" then
+          failwithf "pymentize exited with errors:\n%s\n%s" contents stderr ()
+        else
+          Html.pre (Html.of_string stdout)
+    )
+
 let phrases_to_html lang xs =
   (
     match lang with
@@ -395,9 +434,7 @@ let phrases_to_html lang xs =
       )
   )
   |> String.concat ~sep:""
-  |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
-  |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
-  |> fun x -> Html.(pre [data x])
+  |> pygmentize lang
 
 
 (* TODO: implement with Async *)
