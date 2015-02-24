@@ -835,7 +835,7 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
     ]
 ;;
 
-let make_chapter repo_root chapters chapter_file
+let make_chapter ?run_pygmentize repo_root chapters chapter_file
     : Html.t Deferred.t
     =
   let import_base_dir = Filename.dirname chapter_file in
@@ -863,7 +863,8 @@ let make_chapter repo_root chapters chapter_file
     let href = import_base_dir/i.href in
     update_code i.data_code_language href
     >>= fun () -> return (Code.find_exn !code ~file:href ?part:i.part)
-    >>= fun contents -> Code.phrases_to_html i.data_code_language contents
+    >>= fun contents ->
+    Code.phrases_to_html ?run_pygmentize i.data_code_language contents
     >>| fun x -> [x]
   in
 
@@ -898,7 +899,7 @@ type src = [
 | `Install
 ]
 
-let make ?(repo_root=".") ~out_dir = function
+let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
     let out_file = out_dir/"index.html" in
     make_frontpage ~repo_root () >>= fun html ->
@@ -908,7 +909,7 @@ let make ?(repo_root=".") ~out_dir = function
   | `Chapter in_file -> (
     let out_file = out_dir/(Filename.basename in_file) in
     chapters ~repo_root () >>= fun chapters ->
-    make_chapter repo_root chapters in_file >>= fun html ->
+    make_chapter ?run_pygmentize repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )

@@ -32,6 +32,11 @@ module Param = struct
   let file =
     anon ("file" %: file)
 
+  let pygmentize =
+    flag "-pygmentize" no_arg
+      ~doc:" Syntax highlight code with pygmentize. \
+             By default, this is not done."
+
 end
 
 
@@ -42,12 +47,13 @@ let build_chapter : Command.t = Command.async
   ~summary:"build chapter"
   Command.Spec.(
     empty
+    +> Param.pygmentize
     +> Param.repo_root
     +> Param.out_dir
     +> Param.file
   )
-  (fun repo_root out_dir file () ->
-    Book.make ~repo_root ~out_dir (`Chapter file)
+  (fun run_pygmentize repo_root out_dir file () ->
+    Book.make ~run_pygmentize ~repo_root ~out_dir (`Chapter file)
   )
 
 let build_frontpage : Command.t = Command.async

@@ -133,7 +133,9 @@ val run_file_exn
 (******************************************************************************)
 (** {2 Printers} *)
 (******************************************************************************)
-val phrases_to_html : lang -> phrase list -> Rwo_html.item Deferred.t
+val phrases_to_html
+  :  ?run_pygmentize:bool
+  -> lang -> phrase list -> Rwo_html.item Deferred.t
 
 (** [run_through_pygmentize lang contents] *)
 val run_through_pygmentize : lang -> string -> Cow.Xml.t Or_error.t

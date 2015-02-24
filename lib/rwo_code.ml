@@ -421,7 +421,7 @@ let pygmentize lang contents =
           Html.pre (Html.of_string stdout)
     )
 
-let phrases_to_html lang xs =
+let phrases_to_html ?(run_pygmentize=false) lang xs =
   (
     match lang with
     | `OCaml_toplevel ->
@@ -434,7 +434,10 @@ let phrases_to_html lang xs =
       )
   )
   |> String.concat ~sep:""
-  |> pygmentize lang
+  |> fun x ->
+    if run_pygmentize
+    then pygmentize lang x
+    else return (Html.(pre [data x]))
 
 
 (* TODO: implement with Async *)
