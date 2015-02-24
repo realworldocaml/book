@@ -262,19 +262,17 @@ let divide x y =
 
 
 #part 38
-let log_entry maybe_time message =
-    let time =
-      match maybe_time with
-      | Some x -> x
-      | None -> Time.now ()
-    in
-    Time.to_sec_string time ^ " -- " ^ message
-  ;;
 
-log_entry (Some Time.epoch) "A long long time ago";;
+let downcase_extension filename =
+  match String.rsplit2 filename ~on:'.' with
+  | None -> filename
+  | Some (base,ext) -> 
+    base ^ "." ^ String.lowercase ext
+;;
 
-log_entry None "Up to the minute";;
-
+List.map ~f:downcase_exception
+  [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
+;;
 
 #part 41
 type point2d = { x : float; y : float };;

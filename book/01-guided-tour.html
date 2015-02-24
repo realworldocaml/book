@@ -737,18 +737,27 @@
         one elements.</p>
 
         <p>To examine the contents of an option, we use pattern
-        matching, as we did with tuples and lists. Consider the
-        following function for creating a log entry string given an
-        optional time and a message. If no time is provided (i.e.,
-        if the time is <code>None</code>), the current time is
-        computed and used in its place:</p>
+          matching, as we did with tuples and lists.  Let's see how
+          this plays out in a small example.  We'll write a function
+          that takes a filename, and returns a version of that
+          filename with the file extension (the part after the dot)
+          downcased.  We'll base this on the
+          function <code>String.rsplit2</code> to split the string
+          based on the rightmost period found in the string.  Note
+          that <code>String.rsplit2</code> has return
+          type <code>(string * string) option</code>,
+          returning <code>None</code> when no character was found to
+          split on.
+	</p>
+
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="38" />
 
         <p>Note that We used the <code>^</code> operator for
-        concatenating strings. The concatenation operator is
-        provided as part of the <code>Pervasives</code> module,
-        which is automatically opened in every OCaml program.</p>
+          concatenating strings. The concatenation operator is
+          provided as part of the <code>Pervasives</code> module,
+          which is automatically opened in every OCaml program.</p>
 
         <div data-type="note">
           <h1>Nesting lets with let and in</h1>
