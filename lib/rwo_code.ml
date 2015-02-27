@@ -437,8 +437,12 @@ let phrases_to_html ?(run_pygmentize=false) lang xs =
   |> fun x ->
     if run_pygmentize
     then pygmentize lang x
-    else return (Html.(pre [data x]))
-
+    else return (
+      x
+      |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
+      |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+      |> fun x -> Html.(pre [data x])
+    )
 
 (* TODO: implement with Async *)
 let run_through_pygmentize lang contents =
