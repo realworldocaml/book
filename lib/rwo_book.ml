@@ -844,11 +844,12 @@ let main_template ?(next_chapter=None) ?(title_bar=title_bar) html : Html.t =
 (* Make Pages                                                                 *)
 (******************************************************************************)
 let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
-  chapters ~repo_root () >>| fun chapters ->
+  return (
   main_template ~title_bar:title_bar_frontpage
     Html.[
-      html [head []; body (toc chapters)]
+      html [head []; body [data "empty for now"]]
     ]
+  )
 ;;
 
 let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
