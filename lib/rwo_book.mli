@@ -17,6 +17,7 @@ open Async.Std
 type src = [
 | `Chapter of string
 | `Frontpage
+| `Toc_page
 | `FAQs
 | `Install
 ]

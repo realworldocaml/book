@@ -56,9 +56,11 @@ p, pre, ul, ol, dl
 code
 {
 	border-radius: $global-radius;
-	display: inline-block;
+	//display: inline-block;
 	line-height: 1.2;
 	vertical-align: baseline;
+	text-transform: none !important;
+	font-size: 95%;
 }
 
 a

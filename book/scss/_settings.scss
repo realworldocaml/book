@@ -247,14 +247,17 @@ $paragraph-line-height: 1.8;
 // $paragraph-text-rendering: optimizeLegibility;
 
 // We use these to style <code> tags
-// $code-color: $oil;
-// $code-font-family: $font-family-monospace;
-// $code-font-weight: $font-weight-normal;
-// $code-background-color: scale-color($secondary-color, $lightness: 70%);
-// $code-border-size: 1px;
-// $code-border-style: solid;
-// $code-border-color: scale-color($code-background-color, $lightness: -10%);
-// $code-padding: rem-calc(2) rem-calc(5) rem-calc(1);
+$code-color: $oil;
+$code-font-family: $font-family-monospace;
+$code-font-weight: $font-weight-normal;
+$code-background-color: scale-color($secondary-color, $lightness: 70%);
+//$code-background-color: transparent;
+$code-border-size: 1px;
+$code-border-size: 0;
+$code-border-style: solid;
+$code-border-color: scale-color($code-background-color, $lightness: -10%);
+$code-padding: rem-calc(2) rem-calc(5) rem-calc(1);
+//$code-padding: 0;
 
 // We use these to style anchors
 // $anchor-text-decoration: none;
@@ -273,7 +276,7 @@ $paragraph-line-height: 1.8;
 // $list-font-size: $paragraph-font-size;
 // $list-line-height: $paragraph-line-height;
 // $list-margin-bottom: $paragraph-margin-bottom;
-// $list-style-position: outside;
+$list-style-position: inside;
 // $list-side-margin: 1.1rem;
 // $list-ordered-side-margin: 1.4rem;
 // $list-side-margin-no-bullet: 0;

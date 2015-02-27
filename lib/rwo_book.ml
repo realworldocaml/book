@@ -703,7 +703,8 @@ let head_item : Html.item =
 let title_bar,title_bar_frontpage =
   let open Html in
   let nav = nav [
-    a ~a:["href","index.html"] [data "Table of Contents"];
+    a ~a:["href","index.html"] [data "Home"];
+    a ~a:["href","toc.html"] [data "Table of Contents"];
     a ~a:["href","faqs.html"] [data "FAQs"];
     a ~a:["href","install.html"] [data "Install"];
     a ~a:["href","https://ocaml.janestreet.com/ocaml-core/"]
@@ -752,18 +753,33 @@ let toc chapters : Html.item list =
   let open Html in
   let parts = group_chapters_by_part chapters in
   List.map parts ~f:(fun {info;chapters} ->
-    let ul = ul ~a:["class","toc"] (List.map chapters ~f:(fun chapter ->
+    let ul = ul ~a:["class","toc-full"] (List.map chapters ~f:(fun chapter ->
       li [
         a ~a:["href",chapter.filename] [
-          h2 [
-            small [data (sprintf "Chapter %02d" chapter.number)];
-            data chapter.title;
-          ]
+          h2 [data (
+            if chapter.number = 0
+            then sprintf "%s" chapter.title
+            else sprintf "%d. %s" chapter.number chapter.title
+          )]
         ];
         ul ~a:["class","children"] (
-          List.map chapter.sections ~f:(fun (section,_) ->
-            let href = sprintf "%s#%s" chapter.filename section.id in
-            li [a ~a:["href",href] [h5 [data section.title]]]
+          List.map chapter.sections ~f:(fun (sect1,sect2s) ->
+            let href = sprintf "%s#%s" chapter.filename sect1.id in
+            li [
+              a ~a:["href",href] [h5 [data sect1.title]];
+              ul ~a:["class","children"] (
+                List.map sect2s ~f:(fun (sect2,sect3s) ->
+                  let href = sprintf "%s#%s" chapter.filename sect2.id in
+                  li [
+                    a ~a:["href",href] [data sect2.title];
+                    ul ~a:["class","children"] (
+                      List.map sect3s ~f:(fun sect3 ->
+                        let href = sprintf "%s#%s" chapter.filename sect3.id in
+                        li [a ~a:["href",href] [data sect3.title]]
+                      ) );
+                  ]
+                ) );
+            ]
           ) );
       ]
     ) )
@@ -835,6 +851,13 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
     ]
 ;;
 
+let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
+  chapters ~repo_root () >>| fun chapters ->
+  main_template Html.[
+    html [head []; body (toc chapters)]
+  ]
+;;
+
 let make_chapter ?run_pygmentize repo_root chapters chapter_file
     : Html.t Deferred.t
     =
@@ -895,6 +918,7 @@ let make_chapter ?run_pygmentize repo_root chapters chapter_file
 type src = [
 | `Chapter of string
 | `Frontpage
+| `Toc_page
 | `FAQs
 | `Install
 ]
@@ -903,6 +927,12 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
     let out_file = out_dir/"index.html" in
     make_frontpage ~repo_root () >>= fun html ->
+    return (Html.to_string html) >>= fun contents ->
+    Writer.save out_file ~contents
+  )
+  | `Toc_page -> (
+    let out_file = out_dir/"toc.html" in
+    make_toc_page ~repo_root () >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )

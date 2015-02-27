@@ -4,6 +4,15 @@
 	margin: 0;
 	padding: 0;
 	
+	&+h5
+	{
+		margin-top: $column-gutter/2;
+		margin-bottom: 0;
+		border-bottom: 1px solid $hr-border-color;
+		padding-bottom: 1rem;
+		color: $aluminum;
+	}
+	
 	&>li
 	{
 		display: block;
@@ -18,11 +27,17 @@
 		a
 		{
 			display: block;
-			padding: 1rem 0;
+			padding: 1rem 3.4rem 1rem 0;
 		
 			h2
 			{
 				margin: 0;
+				font-size: $h3-font-size;
+				
+				@media #{$small-only}
+				{
+					font-size: $h3-font-size*0.875;
+				}
 					
 				small
 				{
@@ -40,10 +55,9 @@
 		
 		i
 		{
-			display: none;
 			position: absolute;
 			right: 1rem;
-			top: 2rem;
+			top: 1.4rem;
 			
 			background: $white;
 			width: 2rem;
@@ -78,12 +92,7 @@
 	}
 		
 	.children
-	{
-		@media #{$small-only}
-		{
-			display: none !important;
-		}
-		
+	{		
 		list-style: none;
 		margin: 0 0 1.5rem $column-gutter;
 		padding: 0;
@@ -95,7 +104,7 @@
 			a
 			{
 				display: block;
-				padding: 0.75rem 0;
+				padding: 0.55rem 0;
 				
 				h5
 				{
@@ -104,6 +113,7 @@
 					font-weight: $font-weight-normal;
 					font-family: $font-family-serif;
 					font-style: italic;
+					font-size: 1rem;
 					color: lighten(desaturate($info-color, 100), 10);
 				}
 				
@@ -120,18 +130,13 @@
 	
 @media #{$medium}
 {
+	&+h5
+	{
+		margin-top: $column-gutter;
+	}
+	
 	&>li
 	{
-		i
-		{
-			display: block;
-			opacity: 0;
-		}
-		
-		&:hover i, i.on
-		{
-			opacity: 1;
-		}
 	}
 }
 

@@ -330,7 +330,7 @@ ul, ol, dl {
   font-size: 1.2rem;
   line-height: 1.8;
   margin-bottom: 1.25rem;
-  list-style-position: outside;
+  list-style-position: inside;
   font-family: inherit; }
 
 ul {
@@ -474,10 +474,10 @@ p:last-child, pre:last-child, ul:last-child, ol:last-child, dl:last-child {
 
 code {
   border-radius: 3px;
-  display: inline-block;
   line-height: 1.2;
   vertical-align: baseline;
-  text-transform: none !important; }
+  text-transform: none !important;
+  font-size: 95%; }
 
 a h1 {
   color: #8e44ad; }
@@ -506,16 +506,14 @@ a h1 {
     float: left;
     padding-bottom: 1.6875rem; }
   @media only screen and (min-width:40.063em) {
-    .wrap {
-      margin-top: 3.375rem; }
-      .wrap .left-column {
-        padding-left: 0;
-        padding-right: 0;
-        width: 25%;
-        float: left; }
-      .wrap .main-body {
-        max-width: 54rem;
-        padding-bottom: 3.375rem; } }
+    .wrap .left-column {
+      padding-left: 0;
+      padding-right: 0;
+      width: 25%;
+      float: left; }
+    .wrap .main-body {
+      max-width: 54rem;
+      padding-bottom: 3.375rem; } }
   @media only screen and (min-width:64.063em) {
     .wrap .left-column {
       display: block;
@@ -1173,6 +1171,7 @@ pre .il {
     font-size: 0.875rem;
     display: inline-block;
     margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
     padding: 0.1rem 0.6rem;
     -webkit-transition: background 0.2s;
             transition: background 0.2s;
@@ -1336,6 +1335,53 @@ pre .il {
     .toc + h5 {
       margin-top: 3.375rem; } }
 
+.toc-full {
+  list-style: none;
+  margin: 0 0 1.6875rem;
+  padding: 0; }
+  .toc-full + h5 {
+    color: #6f6f6f; }
+  .toc-full h2 {
+    font-size: 1.5625rem;
+    margin: 0; }
+  .toc-full h5 {
+    font-size: 1rem;
+    text-transform: none;
+    font-weight: 300;
+    font-family: "rooney-web", Georgia, Cambria, "Times New Roman", Times, serif;
+    font-style: italic;
+    margin: 0; }
+  .toc-full li {
+    display: block;
+    margin: 0; }
+  .toc-full > li {
+    margin: 0 0 0.84375rem; }
+  .toc-full a {
+    padding: 0.3rem 0; }
+  .toc-full .children {
+    list-style: none;
+    margin: 0 0 0 1.6875rem;
+    padding: 0; }
+    .toc-full .children .children a {
+      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+      color: #6f6f6f;
+      font-size: 1rem;
+      line-height: 1; }
+      .toc-full .children .children a:hover {
+        color: #8e44ad; }
+    .toc-full .children .children .children a {
+      font-size: 0.75rem;
+      text-transform: uppercase; }
+  .toc-full a {
+    display: block; }
+    .toc-full a:hover {
+      color: #8e44ad; }
+      .toc-full a:hover h2, .toc-full a:hover h5 {
+        color: #8e44ad; }
+  @media only screen and (min-width:40.063em) {
+    .toc-full .children {
+      margin: 0 0 0 2.25rem; } }
+
 .question {
   font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
   font-weight: 300;
@@ -1432,6 +1478,8 @@ section[data-type=chapter] div[data-type=note] {
     font-size: 1.953125rem; }
   section[data-type=chapter] div[data-type=note] p {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
+  section[data-type=chapter] div[data-type=note] code {
+    background: rgba(255, 255, 255, 0.5); }
 section[data-type=chapter] aside {
   margin-left: -1.6875rem;
   margin-right: -1.6875rem;
@@ -1466,17 +1514,17 @@ section[data-type=chapter] dl dd {
     top: 0; }
 section[data-type=chapter] ul {
   list-style: circle;
-  margin: 0 0 1.25rem; }
+  margin-bottom: 1.25rem; }
   section[data-type=chapter] ul li {
-    padding-bottom: 1.25rem;
-    margin-bottom: 1.25rem;
+    padding-bottom: 0.4166666667rem;
+    margin-bottom: 0.4166666667rem;
     border-bottom: 1px dotted #DDDDDD; }
     section[data-type=chapter] ul li:last-child {
       padding-bottom: 0;
       margin-bottom: 0;
       border-bottom: 0; }
 section[data-type=chapter] ol {
-  margin: 0 0 1.25rem; }
+  margin-bottom: 1.25rem; }
   section[data-type=chapter] ol li {
     margin-bottom: 1.25rem; }
 section[data-type=chapter] table {
@@ -1535,7 +1583,7 @@ section[data-type=chapter] table {
       color: #FFFFFF; }
       .next-chapter:hover .content h1 small {
         color: #ba87d0; }
-  @media only screen and (min-width:40.063em) {
+  @media only screen and (min-width:64.063em) {
     .next-chapter .content {
       padding-left: 1.6875rem;
       padding-right: 1.6875rem;

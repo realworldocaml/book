@@ -22,17 +22,9 @@
 	
 	.title
 	{
-		@include grid-column(8, $offset: 3.5);
+		@include grid-column(8, $offset: 1.5);
 		max-width: 54rem;
-		margin: $column-gutter*1.5 0;
-	}
-}
-
-@media #{$large}
-{
-	.title
-	{
-		margin-top: $column-gutter*3;
+		//margin: $column-gutter*1.5 0;
 	}
 }
 

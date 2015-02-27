@@ -8,7 +8,7 @@
 			font-weight: 100;
 			margin: 0 0 0.3rem;
 			color: $white;
-			text-shadow: 3px 7px 12px rgba(black, 0.6);
+			//text-shadow: 3px 7px 12px rgba(black, 0.6);
 		}
 		
 		h4
@@ -25,14 +25,13 @@
 			font-family: $font-family-serif;
 			font-style: italic;
 			font-weight: $font-weight-normal;
-			border-bottom: 1px solid rgba($white, 0.4);
-			padding-bottom: $column-gutter/2;
+			//border-bottom: 1px solid rgba($white, 0.4);
+			//padding-bottom: $column-gutter/2;
 		}
 	}
 	
 	nav
 	{
-		margin-left: -0.6rem;
 		margin-top: $column-gutter/4;
 		
 		a
@@ -44,13 +43,15 @@
 			font-size: 0.875rem;
 			display: inline-block;
 			margin-right: 0.5rem;
+			margin-bottom: 0.5rem;
 			padding: 0.1rem 0.6rem;
 			transition: background 0.2s;
+			background: rgba(black, 0.1);
+			border-radius: $global-radius;
 			
 			&:hover
 			{
 				background: rgba(black, 0.2);
-				border-radius: $global-radius;
 			}
 			
 			&.active
@@ -97,7 +98,7 @@
 		
 		h1
 		{
-			font-size: ($h1-font-size - $h1-font-reduction) * 1.25 * 1.25;
+			font-size: ($h1-font-size - $h1-font-reduction) * 1.25;
 		}
 	}
 	
@@ -109,9 +110,9 @@
 	
 	.image
 	{
-		@include grid-column(4.5, $float: none);
+		@include grid-column(3.5, $float: none);
 		display: table-cell;
-		padding-bottom: 40%;
+		padding-bottom: 30%;
 		background-size: auto 100%;
 		
 		&:after
@@ -123,7 +124,7 @@
 	.title
 	{
 		padding: 5% 0;
-		@include grid-column(7.5, $float: none);
+		@include grid-column(8.5, $float: none);
 		display: table-cell;
 		vertical-align: bottom;
 		background: transparent;
@@ -136,7 +137,7 @@
 	{
 		h1
 		{
-			font-size: $h1-font-size * 1.25 * 1.25;
+			font-size: $h1-font-size * 1.25;
 		}
 	}
 }

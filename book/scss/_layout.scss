@@ -18,17 +18,15 @@
 	
 @media #{$medium}
 {	
-	margin-top: $column-gutter;
+	//margin-top: $column-gutter;
 	
 	.left-column
 	{
-		display: block;
 		@include grid-column(3, $collapse: true);
 	}
 	
 	.main-body
 	{
-		@include grid-column(8, $offset: 3.5);
 		max-width: 54rem;
 		padding-bottom: $column-gutter;
 	}
@@ -38,12 +36,14 @@
 {
 	.left-column
 	{
+		display: block;
 		margin-left: $column-gutter/2;
 		padding-right: $column-gutter/2;
 	}
 	
 	.main-body
 	{
+		@include grid-column(8, $offset: 3.5);
 		padding-bottom: $column-gutter*2;
 	}
 }

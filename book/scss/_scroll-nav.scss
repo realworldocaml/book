@@ -90,6 +90,14 @@
 						color: $monsoon;
 					}
 				}
+				
+				&.active
+				{
+					.scroll-nav__sub-link
+					{
+						color: $black;
+					}
+				}
 			}
 		}
 	}

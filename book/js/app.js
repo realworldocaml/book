@@ -1,31 +1,36 @@
 $(document).foundation();
 
 var isScrolled = false, $sn = $('.left-column'), snTop, snInHeight, snScroll = 0;
-var $snSide = $('.main-body'), wS, wD;
+var $snSide = $('.main-body'), wS = 0, wD = true, ww = $(window).width(), wh = $(window).height();
 
 function checkScroll() {
 	if (isScrolled)
 	{
 		if ($sn)
 		{
-			if (snTop < $(window).scrollTop() && $snSide.offset().top + $snSide.outerHeight() > $(window).scrollTop() + $(window).height())
+			if (snTop < wS && $snSide.offset().top + $snSide.outerHeight() > wS + wh)
 			{
-				$sn.addClass('true-fixed').removeClass('top bottom');
-				if ($sn.scrollTop() > $(window).scrollTop() - $snSide.offset().top && !wD)
+				if (!$sn.hasClass('true-fixed'))
 				{
-					snScroll = $(window).scrollTop() - $snSide.offset().top;
+					$sn.addClass('true-fixed').removeClass('top bottom');
 				}
-				else if ($sn.scrollTop() < $(window).scrollTop() - $snSide.offset().top - $snSide.outerHeight() + snInHeight && wD)
+				
+				if ($sn.scrollTop() > wS - $snSide.offset().top && !wD)
 				{
-					snScroll = $(window).scrollTop() - $snSide.offset().top - $snSide.outerHeight() + snInHeight;
+					snScroll = wS - $snSide.offset().top;
+				}
+				else if ($sn.scrollTop() < wS - $snSide.offset().top - $snSide.outerHeight() + snInHeight && wD)
+				{
+					snScroll = wS - $snSide.offset().top - $snSide.outerHeight() + snInHeight;
 				}
 				$sn.scrollTop(snScroll);
+				
 			}
 			else
 			{
 				$sn.removeClass('true-fixed');
 				
-				if ($snSide.offset().top + $snSide.outerHeight() > $(window).scrollTop() + $(window).height())
+				if ($snSide.offset().top + $snSide.outerHeight() > wS + wh)
 				{
 					$sn.addClass('top').removeClass('bottom');
 					snScroll = 0;
@@ -35,6 +40,7 @@ function checkScroll() {
 					$sn.addClass('bottom').removeClass('top');
 					snScroll = snInHeight - $(window).height();
 				}
+				
 			}
 		}
 		isScrolled = false;
@@ -114,12 +120,15 @@ $sn.scroll(function(){
 });
 
 $(window).resize(function(){
+	ww = $(window).width();
+	wh = $(window).height();
 	if ($sn)
 	{
-		$sn.removeClass('true-fixed');
+		isScrolled = false;
+		$sn.removeClass('true-fixed').addClass('top').removeClass('bottom');
 		snTop = $sn.offset().top;
 		snInHeight = $sn.outerHeight();
-		if ($sn.hasClass('bottom'))
+		if ($sn.hasClass('bottom') && false)
 		{
 			snScroll = snInHeight - $(window).height();
 		}

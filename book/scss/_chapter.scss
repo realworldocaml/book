@@ -39,8 +39,8 @@ section[data-type=chapter]
 	
 	section[data-type=sect1]
 	{
-		margin-top: $column-gutter;
-		padding-top: $column-gutter;
+		margin-top: $column-gutter*.75;
+		padding-top: $column-gutter*.75;
 		border-top: 1px solid $hr-border-color;
 	}
 	
@@ -68,6 +68,11 @@ section[data-type=chapter]
 		{
 			font-family: $header-font-family;
 		}
+		
+		code
+		{
+			background: rgba($white, 0.5);
+		}
 	}
 	
 	aside
@@ -93,7 +98,7 @@ section[data-type=chapter]
 		pre
 		{
 			font-size: 0.875rem;
-			padding: $column-gutter/4;
+			//padding: $column-gutter/4;
 		}
 	}
 
@@ -101,8 +106,11 @@ section[data-type=chapter]
 	{
 		position: relative;
 		display: block;
-		padding: $column-gutter/2;
-		border: 1px solid $hr-border-color;
+		//padding: 0 $column-gutter/2;
+		//border: 1px solid $code-background-color;
+		//border: 0;
+		//border-left: 2px solid $hr-border-color;
+		background: transparent;
 		border-radius: $global-radius;
 		margin-bottom: $paragraph-margin-bottom;
 		white-space: pre-wrap;
@@ -123,7 +131,7 @@ section[data-type=chapter]
 			
 			&:before
 			{
-				content: '⤷';
+				content: '↪';
 				position: absolute;
 				left: 0.5rem;
 				top: 0;
@@ -134,12 +142,12 @@ section[data-type=chapter]
 	ul
 	{
 		list-style: circle;
-		margin: 0 0 $paragraph-margin-bottom;
+		margin-bottom: $paragraph-margin-bottom;
 		
 		li
 		{
-			padding-bottom: $paragraph-margin-bottom;
-			margin-bottom: $paragraph-margin-bottom;
+			padding-bottom: $paragraph-margin-bottom/3;
+			margin-bottom: $paragraph-margin-bottom/3;
 			border-bottom: 1px dotted $hr-border-color;
 			
 			&:last-child
@@ -153,7 +161,7 @@ section[data-type=chapter]
 	
 	ol
 	{
-		margin: 0 0 $paragraph-margin-bottom;
+		margin-bottom: $paragraph-margin-bottom;
 		
 		li
 		{
@@ -199,14 +207,14 @@ section[data-type=chapter]
 {
 	section[data-type=sect1]
 	{
-		margin-top: $column-gutter*1.5;
-		padding-top: $column-gutter*1.5;
+		margin-top: $column-gutter;
+		padding-top: $column-gutter;
 	}
 	
 	pre
 	{
-		margin-left: -$column-gutter/2;
-		margin-right: -$column-gutter/2;
+		//margin-left: -$column-gutter/2;
+		//margin-right: -$column-gutter/2;
 	}
 	
 	aside
