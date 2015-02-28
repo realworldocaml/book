@@ -34,21 +34,21 @@
       <h1><code>Core</code>, <code>Core_kernel</code> and
       portability</h1>
 
-      <p><code>Core_kernel</code> is actually part of a more
-      expansive library called <code>Core</code>. We use
-      <code>Core_kernel</code> here because it is portable to every
-      platform that OCaml runs on, unlike <code>Core</code>, which
-      only works on Unix-like platforms, including Linux and MacOS,
-      but not including Windows or Javascript, two important
-      compilation targets for OCaml.</p>
+      <p><code>Core_kernel</code> is actually part of a more expansive
+	library called <code>Core</code>. We
+	use <code>Core_kernel</code> here because it is portable to
+	every platform that OCaml runs on, unlike <code>Core</code>,
+	which only works on Unix-like platforms, including Linux and
+	MacOS.  If you want your code to run on Windows or Javascript,
+	you need to stick to <code>Core_kernel</code>.</p>
 
-      <p>If your applications are Unix only, you should check out
-      <code>Core</code>. It includes a lot of useful functionality,
-      including a rich library for dealing with time, an excellent
-      command line parsing library, and access to various bits of
-      low-level operating systems facilities from mutexes to
-      sockets. We'll discuss some of <code>Core</code>'s unique
-      features later in the book.</p>
+      <p>You should check out <code>Core</code> if you'll be running
+	only on Unix. <code>Core</code> includes a lot of useful
+	functionality, including a set of time libraries, an excellent
+	command line parsing library, and modules that provide access
+	to low-level operating systems facilities from mutexes to
+	sockets. We'll discuss some of the additional functionality
+	provided by <code>Core</code> later in the book.</p>
     </div>
 
     <p>Before getting started, make sure you have a working OCaml
@@ -58,8 +58,8 @@
     <section id="ocaml-as-a-calculator" data-type="sect1">
       <h1>OCaml as a Calculator</h1>
 
-      <p>The first thing you need to do when using Core is to open
-      <code>Core_kernel.Std</code>:</p>
+      <p>Our first step is to open <code>Core_kernel.Std</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" />
 
