@@ -33,15 +33,27 @@
       lines. At the end, the 10 lines with the highest frequency
       counts are written out. We'll start with a simple
       implementation, which we'll save as the file
-      <em>freq.ml</em>.</p>
+      <em>freq.ml</em>.<a data-type="indexterm" id="FILEsnglprog"
+      data-primary="files" data-secondary= "single-file
+      programs">&nbsp;</a><a data-type="indexterm" id= "Psingfil"
+      data-primary="programs" data-secondary= "single-file
+      programs">&nbsp;</a></p>
 
       <p>This implementation will use two functions from the
       <code>List.Assoc</code> module, which provides utility
       functions for interacting with association lists, i.e., lists
       of key/value pairs. In particular, we use the function
       <code>List.Assoc.find</code>, which looks up a key in an
-      association list; and <code>List.Assoc.add</code>, which adds
-      a new binding to an association list, as shown here:</p>
+      association list; and <code>List.Assoc.add</code>, which adds a
+      new binding to an association list, as shown
+      here:<a data-type="indexterm" data-primary= "List.Assoc module"
+      data-secondary=
+      "List.Assoc.add">&nbsp;</a><a data-type="indexterm"
+      data-primary="List.Assoc module" data-secondary=
+      "List.Assoc.find">&nbsp;</a><a data-type="indexterm"
+      data-primary="lists" data-secondary= "adding new bindings
+      in">&nbsp;</a><a data-type="indexterm" data-primary="lists"
+      data-secondary= "finding key associations in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/files-modules-and-programs/intro.topscript" />
 
@@ -67,11 +79,14 @@
       <p>With <code>build_counts</code> defined, we then call the
       function to build the association list, sort that list by
       frequency in descending order, grab the first 10 elements off
-      the list, and then iterate over those 10 elements and print
-      them to the screen. These operations are tied together using
+      the list, and then iterate over those 10 elements and print them
+      to the screen. These operations are tied together using
       the <code>|&gt;</code> operator described in <a href=
       "02-variables-and-functions.html#variables-and-functions"
-      data-type="xref">Variables And Functions</a>.</p>
+      data-type="xref">Variables And
+      Functions</a>.<a data-type="indexterm" data-primary="let ( )
+      declaration">&nbsp;</a><a data-type= "indexterm"
+      data-primary="main function">&nbsp;</a></p>
 
       <div class="allow_break" data-type="note">
         <h1>Where Is the Main Function?</h1>
@@ -102,10 +117,15 @@
       <link rel="import" data-code-language="console" href=
       "code/files-modules-and-programs-freq/simple_build_fail.out" />
 
-      <p>But as you can see, it fails because it can't find Core.
-      We need a somewhat more complex invocation to get Core linked
-      in:</p>
-      <link rel="import" data-code-language="console" href=
+      <p>But as you can see, it fails because it can't find Core.  We
+      need a somewhat more complex invocation to get Core linked
+      in:<a data-type="indexterm" data-primary="OCaml toolchain"
+      data-secondary="ocamlc">&nbsp;</a><a data-type="indexterm"
+      data-primary="OCaml toolchain" data-secondary=
+      "ocamlfind">&nbsp;</a><a data-type="indexterm" data-primary=
+      "Core standard library" data-secondary= "finding with
+      ocamlfind">&nbsp;</a></p> <link rel="import"
+      data-code-language="console" href=
       "code/files-modules-and-programs-freq/simple_build.out" />
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>,
@@ -118,22 +138,27 @@
       library; <code>-linkpkg</code> asks ocamlfind to link in the
       packages as is necessary for building an executable, while
       <code>-thread</code> turns on threading support (which is
-      required for Core).</p>
+      required for Core).<a data-type="indexterm" data-primary=
+      "threads" data-secondary= "turning on with
+      -thread">&nbsp;</a><a data-type="indexterm"
+      data-primary="-linkpkg" data-primary-sortas=
+      "linkpkg">&nbsp;</a></p>
 
       <p>While this works well enough for a one-file project, more
       complicated projects require a tool to orchestrate the build.
       One good tool for this task is <span class=
-      "command"><em>ocamlbuild</em></span>, which is shipped with
-      the OCaml compiler. We'll talk more about <span class=
+      "command"><em>ocamlbuild</em></span>, which is shipped with the
+      OCaml compiler. We'll talk more about <span class=
       "command"><em>ocamlbuild</em></span> in <a href=
       "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
       data-type="xref">The Compiler Frontend Parsing And Type
       Checking</a>, but for now, we'll just use a simple wrapper
       around <span class="command"><em>ocamlbuild</em></span>
-      called <span class="command"><em>corebuild</em></span> that
-      sets build parameters appropriately for building against Core
-      and its related libraries:</p>
-      <link rel="import" data-code-language="console" href=
+      called <span class="command"><em>corebuild</em></span> that sets
+      build parameters appropriately for building against Core and its
+      related libraries::<a data-type="indexterm" data-primary=
+      "corebuild">&nbsp;</a></p> <link rel="import"
+      data-code-language="console" href=
       "code/files-modules-and-programs-freq-obuild/build.out" />
 
       <p>If we'd invoked <span class=
@@ -144,10 +169,24 @@
       <p>We can run the resulting executable from the command line.
       The following line extracts strings from the <span class=
       "command"><em>ocamlopt</em></span> binary, reporting the most
-      frequently occurring ones. Note that the specific results
-      will vary from platform to platform, since the binary itself
-      will differ between platforms:</p>
-      <link rel="import" data-code-language="console" href=
+      frequently occurring ones. Note that the specific results will
+      vary from platform to platform, since the binary itself will
+      differ between platforms:<a data-type="indexterm"
+      data-primary="OCaml toolchain" data-secondary=
+      "ocamlbuild">&nbsp;</a><a data-type="indexterm" data-primary=
+      "native-code compiler" data-secondary= "vs. bytecode
+      compiler">&nbsp;</a><a data-type="indexterm"
+      data-primary="bytecode compiler" data-secondary=
+      "vs. native-code compiler">&nbsp;</a><a data-type="indexterm"
+      data-primary="OCaml toolchain" data-secondary=
+      "ocamlopt">&nbsp;</a><a data-type="indexterm" data-primary=
+      "OCaml toolchain" data-secondary=
+      "ocamlc">&nbsp;</a><a data-type="indexterm" data-primary= "code
+      compilers" data-secondary= "bytecode vs. native
+      code">&nbsp;</a><a data-type="indexterm"
+      data-startref="FILEsnglprog">&nbsp;</a><a data-type= "indexterm"
+      data-startref="Psingfil">&nbsp;</a></p> <link rel="import"
+      data-code-language="console" href=
       "code/files-modules-and-programs-freq-obuild/test.out" />
 
       <div data-type="note">
@@ -198,13 +237,19 @@
     "sect1">
       <h1>Multifile Programs and Modules</h1>
 
-      <p>Source files in OCaml are tied into the module system,
-      with each file compiling down into a module whose name is
-      derived from the name of the file. We've encountered modules
-      before, such as when we used functions like <code>find</code>
+      <p>Source files in OCaml are tied into the module system, with
+      each file compiling down into a module whose name is derived
+      from the name of the file. We've encountered modules before,
+      such as when we used functions like <code>find</code>
       and <code>add</code> from the <code>List.Assoc</code> module.
       At its simplest, you can think of a module as a collection of
-      definitions that are stored within a namespace.</p>
+      definitions that are stored within a namespace.<a data-type=
+      "indexterm" data-primary="modules" data-secondary= "basics
+      of">&nbsp;</a><a data-type="indexterm" data-primary= "files"
+      data-secondary= "multi-file
+      programs">&nbsp;</a><a data-type="indexterm"
+      data-primary="programs" data-secondary= "multi-file
+      programs">&nbsp;</a></p>
 
       <p>Let's consider how we can use modules to refactor the
       implementation of <code>freq.ml</code>. Remember that the
@@ -230,11 +275,13 @@
       <link rel="import" data-code-language="ocaml" href=
       "code/files-modules-and-programs-freq-with-counter/counter.ml" />
 
-      <p>The file <em>counter.ml</em> will be compiled into a
-      module named <code>Counter</code>, where the name of the
-      module is derived automatically from the filename. The module
-      name is capitalized even if the file is not. Indeed, module
-      names are always capitalized.</p>
+      <p>The file <em>counter.ml</em> will be compiled into a module
+      named <code>Counter</code>, where the name of the module is
+      derived automatically from the filename. The module name is
+      capitalized even if the file is not. Indeed, module names are
+      always capitalized..<a data-type="indexterm"
+      data-primary="modules" data-secondary= "naming
+      of">&nbsp;</a></p>
 
       <p>We can now rewrite <code>freq.ml</code> to use
       <code>Counter</code>. Note that the resulting code can still
@@ -257,8 +304,17 @@
       the fact that the empty set of frequency counts is
       represented as an empty list. We'd like to prevent this kind
       of dependency, so we can change the implementation of
-      <code>Counter</code> without needing to change client code
-      like that in <code>freq.ml</code>.</p>
+      <code>Counter</code> without needing to change client code like
+      that in <code>freq.ml</code>.<a data-type="indexterm"
+      data-primary="abstract types">&nbsp;</a><a data-type=
+      "indexterm" data-primary="modules" data-secondary= "module
+      type">&nbsp;</a><a data-type="indexterm"
+      data-primary="signatures" data-secondary= "abstract
+      types">&nbsp;</a><a data-type="indexterm"
+      data-primary="interfaces" data-secondary= "hiding implementation
+      details with">&nbsp;</a><a data-type= "indexterm"
+      data-primary="modules" data-secondary= "hiding implementation
+      details">&nbsp;</a></p>
 
       <p>The implementation details of a module can be hidden by
       attaching an <em>interface</em>. (Note that in the context of
@@ -266,7 +322,9 @@
       <em>module type</em> are all used interchangeably.) A module
       defined by a file <code>filename.ml</code> can be constrained
       by a signature placed in a file called
-      <code>filename.mli</code>.</p>
+      <code>filename.mli</code>.<a data-type="indexterm"
+      data-primary="interfaces" data-secondary= "synonyms
+      for">&nbsp;</a></p>
 
       <p>For <code>counter.mli</code>, we'll start by writing down
       an interface that describes what's currently available in
@@ -293,9 +351,11 @@
         entirely by hand, you can ask OCaml to autogenerate one for
         you from the source, which you can then adjust to fit your
         needs. Here's how you can do that using
-        <em>corebuild</em>:</p>
+        <em>corebuild</em>:<a data-type="indexterm" data-primary=
+        "files" data-secondary="mli files">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs-freq-with-counter/infer_mli.out" />
+        "code/files-modules-and-programs-freq-with-counter/infer_mli.out"
+        />
 
         <p>The generated code is basically equivalent to the
         <code>mli</code> that we wrote by hand but is a bit uglier
@@ -376,9 +436,12 @@
       <p>In our frequency-count example, the module
       <code>Counter</code> had an abstract type
       <code>Counter.t</code> for representing a collection of
-      frequency counts. Sometimes, you'll want to make a type in
-      your interface <em>concrete</em>, by including the type
-      definition in the interface.</p>
+      frequency counts. Sometimes, you'll want to make a type in your
+      interface <em>concrete</em>, by including the type definition in
+      the interface.<a data-type="indexterm" data-primary="concrete
+      types">&nbsp;</a><a data-type= "indexterm"
+      data-primary="signatures" data-secondary= "concrete
+      types">&nbsp;</a></p>
 
       <p>For example, imagine we wanted to add a function to
       <code>Counter</code> for returning the line with the median
@@ -421,13 +484,18 @@
     <section id="nested-modules" data-type="sect1">
       <h1>Nested Modules</h1>
 
-      <p>Up until now, we've only considered modules that
-      correspond to files, like <code>counter.ml</code>. But
-      modules (and module signatures) can be nested inside other
-      modules. As a simple example, consider a program that needs
-      to deal with multiple identifiers like usernames and
-      hostnames. If you just represent these as strings, then it
-      becomes easy to confuse one with the other.</p>
+      <p>Up until now, we've only considered modules that correspond
+      to files, like <code>counter.ml</code>. But modules (and module
+      signatures) can be nested inside other modules. As a simple
+      example, consider a program that needs to deal with multiple
+      identifiers like usernames and hostnames. If you just represent
+      these as strings, then it becomes easy to confuse one with the
+      other.<a data-type= "indexterm" data-primary="identifiers"
+      data-secondary= "dealing with
+      multiple">&nbsp;</a><a data-type="indexterm"
+      data-primary="nested modules">&nbsp;</a><a data-type=
+      "indexterm" data-primary="modules" data-secondary="nested
+      modules">&nbsp;</a></p>
 
       <p>A better approach is to mint new abstract types for each
       identifier, where those types are under the covers just
@@ -436,9 +504,10 @@
       you do need to convert, you can do so using explicit
       conversions to and from the string type.</p>
 
-      <p>Here's how you might create such an abstract type, within
-      a submodule:</p>
-      <link rel="import" data-code-language="ocaml" href=
+      <p>Here's how you might create such an abstract type, within a
+      submodule:<a data-type="indexterm" data-primary= "abstract
+      types">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocaml" href=
       "code/files-modules-and-programs/abstract_username.ml" />
 
       <p>Note that the <code>to_string</code> and
@@ -481,9 +550,12 @@
       module by using the module name as an explicit qualifier. For
       example, you write <code>List.map</code> to refer to the
       <code>map</code> function in the <code>List</code> module.
-      Sometimes, though, you want to be able to refer to the
-      contents of a module without this explicit qualification.
-      That's what the <code>open</code> statement is for.</p>
+      Sometimes, though, you want to be able to refer to the contents
+      of a module without this explicit qualification.  That's what
+      the <code>open</code> statement is for.<a data-type="indexterm"
+      data-primary="identifiers" data-secondary="open modules
+      and">&nbsp;</a><a data-type= "indexterm" data-primary="modules"
+      data-secondary= "opening">&nbsp;</a></p>
 
       <p>We've encountered <code>open</code> already, specifically
       where we've written <code>open Core.Std</code> to get access
@@ -503,7 +575,8 @@
       look at an identifier and figure out where it comes from.</p>
 
       <p>Here's some general advice on how to deal with
-      <code>open</code>s:</p>
+      <code>open</code>s:<a data-type="indexterm" data-primary= "local
+      opens">&nbsp;</a></p>
 
       <ul>
         <li>
@@ -562,12 +635,15 @@
     <section id="including-modules" data-type="sect1">
       <h1>Including Modules</h1>
 
-      <p>While opening a module affects the environment used to
-      search for identifiers, <em>including</em> a module is a way
-      of actually adding new identifiers to a module proper.
-      Consider the following simple module for representing a range
-      of integer values:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>While opening a module affects the environment used to search
+      for identifiers, <em>including</em> a module is a way of
+      actually adding new identifiers to a module proper.  Consider
+      the following simple module for representing a range of integer
+      values:<a data-type="indexterm" data-primary= "modules"
+      data-secondary="including">&nbsp;</a><a data-type= "indexterm"
+      data-primary="identifiers" data-secondary= "adding to
+      modules">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/files-modules-and-programs/main.topscript" part="3" />
 
       <p>We can use the <code>include</code> directive to create a
@@ -641,8 +717,13 @@
         implementation of the module. As an example, if we replace
         the <code>val</code> declaration in
         <code>counter.mli</code> by swapping the types of the first
-        two arguments:</p>
-        <link rel="import" data-code-language="ocaml" href=
+        two arguments:<a data-type="indexterm" data-primary= "errors"
+        data-secondary= "module type
+        mismatches">&nbsp;</a><a data-type="indexterm"
+        data-primary="type mismatches">&nbsp;</a><a data-type=
+        "indexterm" data-primary="modules" data-secondary= "type
+        mismatches in">&nbsp;</a></p> <link rel="import"
+        data-code-language="ocaml" href=
         "code/files-modules-and-programs-freq-with-sig-mismatch/counter.mli"
         part="1" />
 
@@ -656,10 +737,14 @@
         <h2>Missing Definitions</h2>
 
         <p>We might decide that we want a new function in
-        <code>Counter</code> for pulling out the frequency count of
-        a given string. We can update the <code>mli</code> by
-        adding the following line:</p>
-        <link rel="import" data-code-language="ocaml" href=
+        <code>Counter</code> for pulling out the frequency count of a
+        given string. We can update the <code>mli</code> by adding the
+        following line:<a data-type="indexterm" data-primary="errors"
+        data-secondary= "missing module
+        definitions">&nbsp;</a><a data-type= "indexterm"
+        data-primary="modules" data-secondary= "missing definitions
+        in">&nbsp;</a></p> <link rel="import"
+        data-code-language="ocaml" href=
         "code/files-modules-and-programs-freq-with-missing-def/counter.mli"
         part="1" />
 
@@ -678,11 +763,17 @@
         <p>Type definitions that show up in an <code>mli</code>
         need to match up with corresponding definitions in the
         <code>ml</code>. Consider again the example of the type
-        <code>median</code>. The order of the declaration of
-        variants matters to the OCaml compiler, so the definition
+        <code>median</code>. The order of the declaration of variants
+        matters to the OCaml compiler, so the definition
         of <code>median</code> in the implementation listing those
-        options in a different order:</p>
-        <link rel="import" data-code-language="ocaml" href=
+        options in a different order:<a data-type="indexterm"
+        data-primary= "type definition
+        mismatches">&nbsp;</a><a data-type= "indexterm"
+        data-primary="errors" data-secondary= "module type definition
+        mismatches">&nbsp;</a><a data-type= "indexterm"
+        data-primary="modules" data-secondary= "type definition
+        mismatches">&nbsp;</a></p> <link rel="import"
+        data-code-language="ocaml" href=
         "code/files-modules-and-programs-freq-with-type-mismatch/counter.mli"
         part="1" />
 
@@ -709,7 +800,13 @@
         "02-variables-and-functions.html#recursive-functions"
         data-type="xref">Recursive Functions</a>), you need to
         define them using <code>let rec</code> rather than ordinary
-        <code>let</code>.</p>
+        <code>let</code>.<a data-type="indexterm" data-primary=
+        "dependencies, cyclic">&nbsp;</a><a data-type="indexterm"
+        data-primary="cyclic dependencies">&nbsp;</a><a data-type=
+        "indexterm" data-primary="errors" data-secondary= "cyclic
+        dependencies">&nbsp;</a><a data-type="indexterm"
+        data-primary="modules" data-secondary= "cyclic
+        dependencies">&nbsp;</a></p>
 
         <p>The same is true at the module level. By default, cyclic
         dependencies between modules are not allowed, and cyclic
