@@ -23,15 +23,21 @@
     <section id="list-basics" data-type="sect1">
       <h1>List Basics</h1>
 
-      <p>An OCaml list is an immutable, finite sequence of elements
-      of the same type. As we've seen, OCaml lists can be generated
-      using a bracket-and-semicolon notation:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>An OCaml list is an immutable, finite sequence of elements of
+      the same type. As we've seen, OCaml lists can be generated using
+      a bracket-and-semicolon notation:<a data-type= "indexterm"
+      data-primary="lists" data-secondary= "generation
+      of">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" />
 
       <p>And they can also be generated using the equivalent
-      <code>::</code> notation:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <code>::</code> notation:<a data-type="indexterm"
+      data-primary="operators" data-secondary= ": :
+      operator">&nbsp;</a><a data-type="indexterm"
+      data-primary="lists" data-secondary= "operator :
+      :">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="1" />
 
       <p>As you can see, the <code>::</code> operator is
@@ -49,7 +55,9 @@
       below is a rough graphical representation of how the list
       <code>1 :: 2 :: 3 :: []</code> is laid out as a data
       structure. The final arrow (from the box containing
-      <code>3</code>) points to the empty list.</p>
+      <code>3</code>) points to the empty list.<a data-type=
+      "indexterm" data-primary="lists" data-secondary= "structure
+      of">&nbsp;</a></p>
 
       <p><a href=
       "https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/lists_layout.ascii"
@@ -61,13 +69,14 @@
       </figure>
 
       <p>Each <code>::</code> essentially adds a new block to the
-      proceding picture. Such a block contains two things: a
-      reference to the data in that list element, and a reference
-      to the remainder of the list. This is why <code>::</code> can
-      extend a list without modifying it; extension allocates a new
-      list element but change any of the existing ones, as you can
-      see:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      proceding picture. Such a block contains two things: a reference
+      to the data in that list element, and a reference to the
+      remainder of the list. This is why <code>::</code> can extend a
+      list without modifying it; extension allocates a new list
+      element but change any of the existing ones, as you can
+      see:<a data-type="indexterm" data-primary="lists"
+      data-secondary="extension of">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="3" />
     </section>
 
@@ -76,8 +85,13 @@
       <h1>Using Patterns to Extract Data from a List</h1>
 
       <p>We can read data out of a list using a <code>match</code>
-      statement. Here's a simple example of a recursive function
-      that computes the sum of all elements of a list:</p>
+      statement. Here's a simple example of a recursive function that
+      computes the sum of all elements of a list:<a data-type=
+      "indexterm" data-primary= "match
+      statements">&nbsp;</a><a data-type="indexterm" id= "PATMAT"
+      data-primary="pattern matching" data-secondary= "extracting data
+      with">&nbsp;</a><a data-type="indexterm" data-primary="lists"
+      data-secondary= "extracting data from">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="4" />
 
@@ -149,8 +163,10 @@
       arbitrary conditions. Patterns can characterize the layout of
       a data structure and can even include literals, as in the
       <code>drop_zero</code> example, but that's where they stop. A
-      pattern can check if a list has two elements, but it can't
-      check if the first two elements are equal to each other.</p>
+      pattern can check if a list has two elements, but it can't check
+      if the first two elements are equal to each
+      other.<a data-type="indexterm" data-primary="data structures"
+      data-secondary="pattern matching and">&nbsp;</a></p>
 
       <p>You can think of patterns as a specialized sublanguage
       that can express a limited (though still quite rich) set of
@@ -230,13 +246,16 @@
 
         <p>The error-detecting capabilities of <code>match</code>
         statements are if anything more important than their
-        performance. We've already seen one example of OCaml's
-        ability to find problems in a pattern match: in our broken
+        performance. We've already seen one example of OCaml's ability
+        to find problems in a pattern match: in our broken
         implementation of <code>drop_value</code>, OCaml warned us
-        that the final case was redundant. There are no algorithms
-        for determining if a predicate written in a general-purpose
+        that the final case was redundant. There are no algorithms for
+        determining if a predicate written in a general-purpose
         language is redundant, but it can be solved reliably in the
-        context of patterns.</p>
+        context of patterns.<a data-type="indexterm" data-primary=
+        "match statements">&nbsp;</a><a data-type="indexterm"
+        data-primary="errors" data-secondary= "detecting with match
+        statements">&nbsp;</a></p>
 
         <p>OCaml also checks <code>match</code> statements for
         exhaustiveness. Consider what happens if we modify
@@ -247,15 +266,16 @@
         <link rel="import" data-code-language="ocamltop" href=
         "code/lists-and-patterns/main.topscript" part="13" />
 
-        <p>Even for simple examples like this, exhaustiveness
-        checks are pretty useful. But as we'll see in <a href=
+        <p>Even for simple examples like this, exhaustiveness checks
+        are pretty useful. But as we'll see in <a href=
         "06-variants.html#variants" data-type="xref">Variants</a>,
-        they become yet more valuable as you get to more
-        complicated examples, especially those involving
-        user-defined types. In addition to catching outright
-        errors, they act as a sort of refactoring tool, guiding you
-        to the locations where you need to adapt your code to deal
-        with changing types.</p>
+        they become yet more valuable as you get to more complicated
+        examples, especially those involving user-defined types. In
+        addition to catching outright errors, they act as a sort of
+        refactoring tool, guiding you to the locations where you need
+        to adapt your code to deal with changing
+        types.<a data-type="indexterm" data-startref=
+        "PATMAT">&nbsp;</a></p>
       </section>
     </section>
 
@@ -263,11 +283,17 @@
     "sect1">
       <h1>Using the List Module Effectively</h1>
 
-      <p>We've so far written a fair amount of list-munging code
-      using pattern matching and recursive functions. But in real
-      life, you're usually better off using the <code>List</code>
-      module, which is full of reusable functions that abstract out
-      common patterns for computing with lists.</p>
+      <p>We've so far written a fair amount of list-munging code using
+      pattern matching and recursive functions. But in real life,
+      you're usually better off using the <code>List</code> module,
+      which is full of reusable functions that abstract out common
+      patterns for computing with lists.<a data-type= "indexterm"
+      data-primary= "tables, creating with List
+      module">&nbsp;</a><a data-type= "indexterm" data-primary="List
+      module" data-secondary= "creating tables
+      with">&nbsp;</a><a data-type="indexterm" id= "Llistmod"
+      data-primary="lists" data-secondary= "List
+      module">&nbsp;</a></p>
 
       <p>Let's work through a concrete example to see this in
       action. We'll write a function <code>render_table</code>
@@ -287,17 +313,20 @@
       module: <code>map</code>, <code>map2_exn</code>, and
       <code>fold</code>.</p>
 
-      <p><code>List.map</code> is the simplest to explain. It takes
-      a list and a function for transforming elements of that list,
-      and returns a new list with the transformed elements. Thus,
-      we can write:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p><code>List.map</code> is the simplest to explain. It takes a
+      list and a function for transforming elements of that list, and
+      returns a new list with the transformed elements. Thus, we can
+      write:<a data-type="indexterm" data-primary= "List module"
+      data-secondary="List.map">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="14" />
 
       <p><code>List.map2_exn</code> is similar to
       <code>List.map</code>, except that it takes two lists and a
-      function for combining them. Thus, we might write:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      function for combining them. Thus, we might
+      write:<a data-type="indexterm" data-primary="List module"
+      data-secondary="List.map2_exn">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="15" />
 
       <p>The <code>_exn</code> is there because the function throws
@@ -312,7 +341,8 @@
       left to right, updating the accumulator at each step and
       returning the final value of the accumulator when it's done.
       You can see some of this by looking at the type-signature for
-      <code>fold</code>:</p>
+      <code>fold</code>:<a data-type="indexterm" data-primary= "List
+      module" data-secondary="List.fold">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="17" />
 
@@ -356,8 +386,13 @@
       "code/lists-and-patterns/main.topscript" part="21" />
 
       <p>Note that we make the line of dashes two larger than the
-      provided width to provide some whitespace around each entry
-      in the table.</p>
+      provided width to provide some whitespace around each entry in
+      the table.<a data-type="indexterm" data-primary="strings"
+      data-secondary="concatenation of">&nbsp;</a><a data-type=
+      "indexterm" data-primary=
+      "String.concat">&nbsp;</a><a data-type="indexterm"
+      data-primary="List module" data-secondary= "String.concat
+      and">&nbsp;</a></p>
 
       <div data-type="note">
         <h1>Performance of String.concat and ^</h1>
@@ -382,11 +417,12 @@
         a serious performance issue.</p>
       </div>
 
-      <p>Now we need code for rendering a row with data in it.
-      We'll first write a function called <code>pad</code>, for
-      padding out a string to a specified length plus one blank
-      space on both sides:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>Now we need code for rendering a row with data in it.  We'll
+      first write a function called <code>pad</code>, for padding out
+      a string to a specified length plus one blank space on both
+      sides:<a data-type="indexterm" data-primary= "strings"
+      data-secondary="padding of">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="24" />
 
       <p>We can render a row of data by merging together the padded
@@ -422,8 +458,14 @@
           essentially a specialized version of
           <code>List.fold</code> that doesn't require an explicit
           starting value, and whose accumulator has to consume and
-          produce values of the same type as the elements of the
-          list it applies to.</p>
+          produce values of the same type as the elements of the list
+          it applies to.<a data-type="indexterm" data-primary=
+          "elements" data-secondary= "combining with
+          List.reduce">&nbsp;</a><a data-type= "indexterm"
+          data-primary="List module" data-secondary=
+          "List.reduce">&nbsp;</a><a data-type="indexterm"
+          data-primary="lists" data-secondary= "combining elements
+          in">&nbsp;</a></p>
 
           <p>Here's the type signature:</p>
           <link rel="import" data-code-language="ocamltop" href=
@@ -443,11 +485,17 @@
         "sect3">
           <h3>Filtering with List.filter and List.filter_map</h3>
 
-          <p>Very often when processing lists, you wants to
-          restrict your attention to a subset of the values on your
+          <p>Very often when processing lists, you wants to restrict
+          your attention to a subset of the values on your
           list. The <code>List.filter</code> function is one way of
-          doing that:</p>
-          <link rel="import" data-code-language="ocamltop" href=
+          doing that:<a data-type="indexterm" data-primary="lists"
+          data-secondary= "filtering values
+          in">&nbsp;</a><a data-type="indexterm" data-primary="values"
+          data-secondary= "filtering with
+          List.filter">&nbsp;</a><a data-type= "indexterm"
+          data-primary="List module" data-secondary=
+          "List.filter">&nbsp;</a></p> <link rel="import"
+          data-code-language="ocamltop" href=
           "code/lists-and-patterns/main.topscript" part="29" />
 
           <p>Note that the <code>mod</code> used above is an infix
@@ -469,7 +517,10 @@
           functions from other modules, including
           <code>Sys.ls_dir</code> to get a directory listing, and
           <code>String.rsplit2</code> to split a string on the
-          rightmost appearance of a given character:</p>
+          rightmost appearance of a given character:<a data-type=
+          "indexterm" data-primary="lists" data-secondary= "duplicate
+          removal">&nbsp;</a><a data-type="indexterm"
+          data-primary="duplicates, removing">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
           "code/lists-and-patterns/main.topscript" part="30" />
 
@@ -493,7 +544,12 @@
           the name is a mnemonic to remind the user that
           <code>true</code> elements go to the first list and
           <code>false</code> ones go to the second. Here's an
-          example:</p>
+          example:<a data-type="indexterm" data-primary="elements"
+          data-secondary= "partitioning with
+          List.partition_tf">&nbsp;</a><a data-type="indexterm"
+          data-primary="lists" data-secondary= "partitioning elements
+          in">&nbsp;</a><a data-type= "indexterm" data-primary="List
+          module" data-secondary= "List.partition_tf">&nbsp;</a></p>
           <link rel="import" data-code-language="ocamltop" href=
           "code/lists-and-patterns/main.topscript" part="31" />
         </section>
@@ -505,8 +561,11 @@
           concatenation. The list module actually comes with a few
           different ways of doing this. First, there's
           <code>List.append</code>, for concatenating a pair of
-          lists:</p>
-          <link rel="import" data-code-language="ocamltop" href=
+          lists:<a data-type="indexterm" data-primary="lists"
+          data-secondary="combining">&nbsp;</a><a data-type=
+          "indexterm" data-primary="List module" data-secondary=
+          "List.append">&nbsp;</a></p> <link rel="import"
+          data-code-language="ocamltop" href=
           "code/lists-and-patterns/main.topscript" part="32" />
 
           <p>There's also <code>@</code>, an operator equivalent of
@@ -544,10 +603,17 @@
       <h1>Tail Recursion</h1>
 
       <p>The only way to compute the length of an OCaml list is to
-      walk the list from beginning to end. As a result, computing
-      the length of a list takes time linear in the size of the
-      list. Here's a simple function for doing so:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      walk the list from beginning to end. As a result, computing the
+      length of a list takes time linear in the size of the
+      list. Here's a simple function for doing so:<a data-type=
+      "indexterm" data-primary="List module" data-secondary=
+      "List.init">&nbsp;</a><a data-type="indexterm" data-primary=
+      "lists" data-secondary= "computing length
+      of">&nbsp;</a><a data-type="indexterm" data-primary="tail
+      recursion">&nbsp;</a> <a data-type= "indexterm"
+      data-primary="recursion" data-secondary= "tail
+      recursion">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="37" />
 
       <p>This looks simple enough, but you'll discover that this
@@ -570,9 +636,10 @@
       that needs to start executing when the function call is
       complete. To allow for nested function calls, this
       information is typically organized in a stack, where a new
-      <em>stack frame</em> is allocated for each nested function
-      call, and then deallocated when the function call is
-      complete.</p>
+      <em>stack frame</em> is allocated for each nested function call,
+      and then deallocated when the function call is
+      complete.<a data-type="indexterm" data-primary= "stack
+      frames">&nbsp;</a></p>
 
       <p>And that's the problem with our call to
       <code>length</code>: it tried to allocate 10 million stack
@@ -601,8 +668,9 @@
       all of its recursive calls are tail calls.
       <code>length_plus_n</code> is indeed tail recursive, and as a
       result, <code>length</code> can take a long list as input
-      without blowing the stack:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      without blowing the stack:<a data-type="indexterm"
+      data-primary="tail calls">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="40" />
 
       <p>So when is a call a tail call? Let's think about the
@@ -632,9 +700,15 @@
       let's consider how we can improve on an example from <a href=
       "01-guided-tour.html#recursive-list-functions" data-type=
       "xref">Recursive List Functions</a>: the function
-      <code>destutter</code>, which removes sequential duplicates
-      from a list. Here's the implementation that was described
-      earlier:</p>
+      <code>destutter</code>, which removes sequential duplicates from
+      a list. Here's the implementation that was described
+      earlier:<a data-type="indexterm" data-primary= "destutter
+      function">&nbsp;</a><a data-type="indexterm" id= "PTTRNMAT"
+      data-primary="pattern matching" data-secondary= "terser and
+      faster patterns">&nbsp;</a><a data-type= "indexterm"
+      data-primary="lists" data-secondary= "duplicate
+      removal">&nbsp;</a><a data-type="indexterm"
+      data-primary="duplicates, removing">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="41" />
 
@@ -648,10 +722,11 @@
       <code>[hd] -&gt; [hd]</code> actually allocates a new list
       element, when really, it should be able to just return the
       list being matched. We can reduce allocation here by using an
-      <code>as</code> pattern, which allows us to declare a name
-      for the thing matched by a pattern or subpattern. While we're
-      at it, we'll use the <code>function</code> keyword to
-      eliminate the need for an explicit match:</p>
+      <code>as</code> pattern, which allows us to declare a name for
+      the thing matched by a pattern or subpattern. While we're at it,
+      we'll use the <code>function</code> keyword to eliminate the
+      need for an explicit match:<a data-type= "indexterm"
+      data-primary="function keyword">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="42" />
 
