@@ -13,13 +13,14 @@
   data-type="chapter">
     <h1>Functors</h1>
 
-    <p>Up until now, we've seen OCaml's modules play an important
-    but limited role. In particular, we've seen them as a mechanism
-    for organizing code into units with specified interfaces. But
-    OCaml's module system can do much more than that, serving as a
-    powerful tool for building generic code and structuring
-    large-scale systems. Much of that power comes from
-    functors.</p>
+    <p>Up until now, we've seen OCaml's modules play an important but
+    limited role. In particular, we've seen them as a mechanism for
+    organizing code into units with specified interfaces. But OCaml's
+    module system can do much more than that, serving as a powerful
+    tool for building generic code and structuring large-scale
+    systems. Much of that power comes from
+    functors.<a data-type="indexterm" data-primary="functors"
+    data-secondary="benefits of">&nbsp;</a></p>
 
     <p>Functors are, roughly speaking, functions from modules to
     modules, and they can be used to solve a variety of
@@ -69,11 +70,12 @@
       <h1>A Trivial Example</h1>
 
       <p>Let's create a functor that takes a module containing a
-      single integer variable <code>x</code> and returns a new
-      module with <code>x</code> incremented by one. This is
-      intended to serve as a way to walk through the basic
-      mechanics of functors, even though it's not something you'd
-      want to do in practice.</p>
+      single integer variable <code>x</code> and returns a new module
+      with <code>x</code> incremented by one. This is intended to
+      serve as a way to walk through the basic mechanics of functors,
+      even though it's not something you'd want to do in
+      practice.<a data-type="indexterm" data-primary= "functors"
+      data-secondary="basic mechanics of">&nbsp;</a></p>
 
       <p>First, let's define a signature for a module that contains
       a single value of type <code>int</code>:</p>
@@ -147,7 +149,11 @@
       <p>Let's see how to use functors to build a generic interval
       library that can be used with any type that supports a total
       ordering on the underlying set over which you want to build
-      intervals.</p>
+      intervals.<a data-type="indexterm" data-primary= "interval
+      computation" data-secondary= "generic library
+      for">&nbsp;</a><a data-type="indexterm" id= "FUNCTinterv"
+      data-primary="functors" data-secondary= "interval computation
+      with">&nbsp;</a></p>
 
       <p>First we'll define a module type that captures the
       information we'll need about the endpoints of the intervals.
@@ -213,9 +219,11 @@
 
       <p>This design gives us the freedom to use any comparison
       function we want for comparing the endpoints. We could, for
-      example, create a type of integer interval with the order of
-      the comparison reversed, as follows:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      example, create a type of integer interval with the order of the
+      comparison reversed, as follows:<a data-type="indexterm"
+      data-primary="interval computation" data-secondary= "comparison
+      function for">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/functors/main.topscript" part="10" />
 
       <p>The behavior of <code>Rev_int_interval</code> is of course
@@ -244,8 +252,10 @@
         invariant can be violated. The invariant is enforced by the
         <code>create</code> function, but because
         <code>Interval.t</code> is not abstract, we can bypass the
-        <code>create</code> function:</p>
-        <link rel="import" data-code-language="ocamltop" href=
+        <code>create</code> function:<a data-type="indexterm"
+        data-primary="interval computation" data-secondary= "abstract
+        functor for">&nbsp;</a></p> <link rel="import"
+        data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="13" />
 
         <p>To make <code>Int_interval.t</code> abstract, we need to
@@ -271,7 +281,10 @@
         <p>The resulting module is abstract, but it's unfortunately
         too abstract. In particular, we haven't exposed the type
         <code>endpoint</code>, which means that we can't even
-        construct an interval anymore:</p>
+        construct an interval anymore:<a data-type="indexterm"
+        data-primary="sharing constraint">&nbsp;</a><a data-type=
+        "indexterm" data-primary="interval computation"
+        data-secondary="sharing constraints">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="16" />
 
@@ -336,9 +349,12 @@
         <code>Interval_intf</code> signature by replacing
         <code>endpoint</code> with <code>Endpoint.t</code>
         everywhere it shows up, and deleting the definition of
-        <code>endpoint</code> from the signature. We can do just
-        this using what's called <em>destructive substitution</em>.
-        Here's the basic syntax:</p>
+        <code>endpoint</code> from the signature. We can do just this
+        using what's called <em>destructive substitution</em>.  Here's
+        the basic syntax:<a data-type="indexterm" data-primary=
+        "destructive substitution">&nbsp;</a><a data-type= "indexterm"
+        data-primary="interval computation"
+        data-secondary="destructive substitution">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamlsyntax" href=
         "code/functors/destructive_sub.syntax" />
 
@@ -377,24 +393,29 @@
       <section id="using-multiple-interfaces" data-type="sect2">
         <h2>Using Multiple Interfaces</h2>
 
-        <p>Another feature that we might want for our interval
-        module is the ability to <em>serialize</em>, i.e., to be
-        able to read and write intervals as a stream of bytes. In
-        this case, we'll do this by converting to and from
-        s-expressions, which were mentioned already in <a href=
+        <p>Another feature that we might want for our interval module
+        is the ability to <em>serialize</em>, i.e., to be able to read
+        and write intervals as a stream of bytes. In this case, we'll
+        do this by converting to and from s-expressions, which were
+        mentioned already in <a href=
         "07-error-handling.html#error-handling" data-type=
         "xref">Error Handling</a>. To recall, an s-expression is
         essentially a parenthesized expression whose atoms are
         strings, and it is a serialization format that is used
-        commonly in Core. Here's an example:</p>
-        <link rel="import" data-code-language="ocamltop" href=
+        commonly in Core. Here's an example:<a data-type="indexterm"
+        data-primary= "s-expressions" data-secondary= "example
+        of">&nbsp;</a><a data-type="indexterm" data-primary="interval
+        computation" data-secondary= "multiple interfaces
+        and">&nbsp;</a></p> <link rel="import"
+        data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="23" />
 
-        <p>Core comes with a syntax extension called Sexplib which
-        can autogenerate s-expression conversion functions from a
-        type declaration. Attaching <code>with sexp</code> to a
-        type definition signals to the extension to generate the
-        converters. Thus, we can write:</p>
+        <p>Core comes with a syntax extension called Sexplib which can
+        autogenerate s-expression conversion functions from a type
+        declaration. Attaching <code>with sexp</code> to a type
+        definition signals to the extension to generate the
+        converters. Thus, we can write:<a data-type="indexterm"
+        data-primary="sexp declaration">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/functors/main.topscript" part="24" />
 
@@ -461,13 +482,18 @@
     <section id="extending-modules" data-type="sect1">
       <h1>Extending Modules</h1>
 
-      <p>Another common use of functors is to generate
-      type-specific functionality for a given module in a
-      standardized way. Let's see how this works in the context of
-      a functional queue, which is just a functional version of a
-      FIFO (first-in, first-out) queue. Being functional,
-      operations on the queue return new queues, rather than
-      modifying the queues that were passed in.</p>
+      <p>Another common use of functors is to generate type-specific
+      functionality for a given module in a standardized way. Let's
+      see how this works in the context of a functional queue, which
+      is just a functional version of a FIFO (first-in, first-out)
+      queue. Being functional, operations on the queue return new
+      queues, rather than modifying the queues that were passed
+      in.<a data-type= "indexterm" data-primary="modules"
+      data-secondary= "type-specific functionality
+      in">&nbsp;</a><a data-type= "indexterm" data-primary= "FIFO
+      (first-in, first-out) queue">&nbsp;</a><a data-type= "indexterm"
+      data-primary="functors" data-secondary= "module extension
+      with">&nbsp;</a></p>
 
       <p>Here's a reasonable <code>mli</code> for such a
       module:</p>
@@ -539,7 +565,13 @@
       "code/functors/extended_fqueue.ml" />
 
       <p>Core comes with a number of functors for extending modules
-      that follow this same basic pattern, including:</p>
+      that follow this same basic pattern, including:<a data-type=
+      "indexterm" data-primary="Monad.Make">&nbsp;</a><a data-type=
+      "indexterm" data-primary=
+      "Hashable.Make">&nbsp;</a><a data-type="indexterm"
+      data-primary="Comparable module" data-secondary=
+      "Comparable.Make">&nbsp;</a><a data-type="indexterm"
+      data-primary="Container.Make">&nbsp;</a></p>
 
       <dl>
         <dt><code>Container.Make</code></dt>
