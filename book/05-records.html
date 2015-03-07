@@ -22,10 +22,11 @@
     advice on how to use records effectively in your software
     designs.</p>
 
-    <p>A record represents a collection of values stored together
-    as one, where each component is identified by a different field
+    <p>A record represents a collection of values stored together as
+    one, where each component is identified by a different field
     name. The basic syntax for a record type declaration is as
-    follows:</p>
+    follows:<a data-type="indexterm" data-primary="records"
+    data-secondary="basic syntax for">&nbsp;</a></p>
     <link rel="import" data-code-language="ocamlsyntax" href=
     "code/records/record.syntax" />
 
@@ -99,19 +100,26 @@
 
       <p>Another way of getting information out of a record is by
       using a pattern match, as shown in the following
-      function.</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      function.<a data-type="indexterm" data-primary="pattern
+      matching" data-secondary= "and
+      exhaustiveness">&nbsp;</a><a data-type="indexterm"
+      data-primary="records" data-secondary= "patterns and
+      exhaustiveness in">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main.topscript" part="5" />
 
       <p>Note that the pattern we used had only a single case,
       rather than using several cases separated by
       <code>|</code>'s. We needed only one pattern because record
-      patterns are <em>irrefutable</em>, meaning that a record
-      pattern match will never fail at runtime. That's because the
-      set of fields available in a record is always the same. In
-      general, patterns for types with a fixed structure, like
-      records and tuples, are irrefutable, unlike types with
-      variable structures like lists and variants.</p>
+      patterns are <em>irrefutable</em>, meaning that a record pattern
+      match will never fail at runtime. That's because the set of
+      fields available in a record is always the same. In general,
+      patterns for types with a fixed structure, like records and
+      tuples, are irrefutable, unlike types with variable structures
+      like lists and variants.<a data-type= "indexterm" data-primary=
+      "irrefutable patterns">&nbsp;</a><a data-type="indexterm"
+      data-primary="datatypes" data-secondary= "fixed vs. variable
+      structure of">&nbsp;</a></p>
 
       <p>Another important characteristic of record patterns is
       that they don't need to be complete; a pattern can mention
@@ -136,11 +144,19 @@
       type system would warn us that we should consider updating
       the function.</p>
 
-      <p>Happily, OCaml offers an optional warning for missing
-      fields in record patterns. With that warning turned on (which
-      you can do in the toplevel by typing <code>#warnings
-      "+9"</code>), the compiler will indeed warn us.</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>Happily, OCaml offers an optional warning for missing fields
+      in record patterns. With that warning turned on (which you can
+      do in the toplevel by typing <code>#warnings "+9"</code>), the
+      compiler will indeed warn us.<a data-type="indexterm"
+      data-primary="errors" data-secondary="compiler
+      warnings">&nbsp;</a><a data-type= "indexterm" data-primary="code
+      compilers" data-secondary= "warning
+      enable/disable">&nbsp;</a><a data-type="indexterm"
+      data-primary="errors" data-secondary= "missing field
+      warnings">&nbsp;</a><a data-type="indexterm"
+      data-primary="records" data-secondary= "missing field
+      warnings">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main.topscript" part="7" />
 
       <p>We can disable the warning for a given pattern by
@@ -195,25 +211,34 @@
 
       <p>When the name of a variable coincides with the name of a
       record field, OCaml provides some handy syntactic shortcuts.
-      For example, the pattern in the following function binds all
-      of the fields in question to variables of the same name. This
-      is called <em>field punning</em>:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main.topscript" part="9" />
+      For example, the pattern in the following function binds all of
+      the fields in question to variables of the same name. This is
+      called <em>field punning</em>:<a data-type="indexterm"
+      data-primary="fields" data-secondary="field
+      punning">&nbsp;</a><a data-type="indexterm"
+      data-primary="records" data-secondary="field punning
+      in">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href="code/records/main.topscript"
+      part="9" />
 
       <p>Field punning can also be used to construct a record.
       Consider the following updated version of
-      <code>service_info_of_string</code>.</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <code>service_info_of_string</code>.<a data-type="indexterm"
+      data-primary="records" data-secondary= "construction
+      of">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main.topscript" part="10" />
 
-      <p>In the preceding code, we defined variables corresponding
-      to the record fields first, and then the record declaration
-      itself simply listed the fields that needed to be included.
-      You can take advantage of both field punning and label
-      punning when writing a function for constructing a record
-      from labeled arguments:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>In the preceding code, we defined variables corresponding to
+      the record fields first, and then the record declaration itself
+      simply listed the fields that needed to be included.  You can
+      take advantage of both field punning and label punning when
+      writing a function for constructing a record from labeled
+      arguments:<a data-type="indexterm" data-primary= "label
+      punning">&nbsp;</a><a data-type="indexterm"
+      data-primary="records" data-secondary= "label punning
+      in">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main.topscript" part="11" />
 
       <p>This is considerably more concise than what you would get
@@ -231,8 +256,13 @@
       <h1>Reusing Field Names</h1>
 
       <p>Defining records with the same field names can be
-      problematic. As a simple example, let's consider a collection
-      of types representing the protocol of a logging server.</p>
+      problematic. As a simple example, let's consider a collection of
+      types representing the protocol of a logging
+      server.<a data-type="indexterm" id="FNreus" data-primary=
+      "fields" data-secondary= "reusing field
+      names">&nbsp;</a><a data-type="indexterm" id= "RECreusfn"
+      data-primary="records" data-secondary= "reusing field
+      names">&nbsp;</a></p>
 
       <p>We'll describe three message types:
       <code>log_entry</code>, <code>heartbeat</code>, and
@@ -338,23 +368,28 @@
       in <a href="06-variants.html#variants" data-type=
       "xref">Variants</a>.
 
-      <p>For functions defined within the module where a given
-      record is defined, the module qualification goes away
-      entirely.</p>
+      <p>For functions defined within the module where a given record
+      is defined, the module qualification goes away
+      entirely.<a data-type="indexterm" data-startref=
+      "RECreusfn">&nbsp;</a><a data-type="indexterm" data-startref=
+      "FNreus">&nbsp;</a></p>
     </section>
 
     <section id="functional-updates" data-type="sect1">
       <h1>Functional Updates</h1>
 
-      <p>Fairly often, you will find yourself wanting to create a
-      new record that differs from an existing record in only a
-      subset of the fields. For example, imagine our logging server
-      had a record type for representing the state of a given
-      client, including when the last heartbeat was received from
-      that client. The following defines a type for representing
-      this information, as well as a function for updating the
-      client information when a new heartbeat arrives:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>Fairly often, you will find yourself wanting to create a new
+      record that differs from an existing record in only a subset of
+      the fields. For example, imagine our logging server had a record
+      type for representing the state of a given client, including
+      when the last heartbeat was received from that client. The
+      following defines a type for representing this information, as
+      well as a function for updating the client information when a
+      new heartbeat arrives:<a data-type= "indexterm" data-primary=
+      "functional updates">&nbsp;</a><a data-type="indexterm"
+      data-primary="records" data-secondary= "functional updates
+      to">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="22" />
 
       <p>This is fairly verbose, given that there's only one field
@@ -402,9 +437,13 @@
 
       <p>Like most OCaml values, records are immutable by default.
       You can, however, declare individual record fields as
-      mutable. In the following code, we've made the last two
-      fields of <code>client_info</code> mutable:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      mutable. In the following code, we've made the last two fields
+      of <code>client_info</code> mutable:<a data-type= "indexterm"
+      data-primary= "mutable record
+      fields">&nbsp;</a><a data-type="indexterm"
+      data-primary="records" data-secondary= "mutable fields
+      in">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="26" />
 
       <p>The <code>&lt;-</code> operator is used for setting a
@@ -430,9 +469,16 @@
     <section id="first-class-fields" data-type="sect1">
       <h1>First-Class Fields</h1>
 
-      <p>Consider the following function for extracting the
-      usernames from a list of <code>Logon</code> messages:</p>
-      <link rel="import" data-code-language="ocamltop" href=
+      <p>Consider the following function for extracting the usernames
+      from a list of <code>Logon</code>
+      messages:<a data-type="indexterm" id="Ffc" data-primary=
+      "fields" data-secondary= "first-class
+      fields">&nbsp;</a><a data-type="indexterm" id= "firstclass"
+      data-primary= "first-class
+      fields">&nbsp;</a><a data-type="indexterm" id= "RECfirstclass"
+      data-primary="records" data-secondary= "first-class fields
+      in">&nbsp;</a></p> <link rel="import"
+      data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="28" />
 
       <p>Here, we wrote a small function <code>(fun x -&gt;
@@ -440,7 +486,8 @@
       This kind of accessor function is a common enough pattern
       that it would be convenient to generate it automatically. The
       <code>fieldslib</code> syntax extension that ships with Core
-      does just that.</p>
+      does just that.<a data-type="indexterm" data-primary= "record
+      field accessor functions">&nbsp;</a></p>
 
       <p>The <code>with fields</code> annotation at the end of the
       declaration of a record type will cause the extension to be
@@ -466,8 +513,17 @@
       <code>fieldslib</code> also creates a submodule called
       <code>Fields</code> that contains a first-class
       representative of each field, in the form of a value of type
-      <code>Field.t</code>. The <code>Field</code> module provides
-      the following functions:</p>
+      <code>Field.t</code>. The <code>Field</code> module provides the
+      following functions:<a data-type="indexterm" data-primary="Field
+      module" data-secondary=
+      "Field.setter">&nbsp;</a><a data-type="indexterm"
+      data-primary="Field module" data-secondary=
+      "Field.fset">&nbsp;</a><a data-type="indexterm" data-primary=
+      "Field module" data-secondary=
+      "Field.get">&nbsp;</a><a data-type="indexterm" data-primary=
+      "Field module" data-secondary=
+      "Field.name">&nbsp;</a><a data-type="indexterm" data-primary=
+      "fieldslib">&nbsp;</a></p>
 
       <dl>
         <dt><code>Field.name</code></dt>
@@ -583,11 +639,14 @@
       to take this new argument into account.</p>
 
       <p>Field iterators are useful for a variety of record-related
-      tasks, from building record-validation functions to
-      scaffolding the definition of a web form from a record type.
-      Such applications can benefit from the guarantee that all
-      fields of the record type in question have been
-      considered.</p>
+      tasks, from building record-validation functions to scaffolding
+      the definition of a web form from a record type.  Such
+      applications can benefit from the guarantee that all fields of
+      the record type in question have been
+      considered.<a data-type="indexterm" data-startref=
+      "Ffc">&nbsp;</a><a data-type="indexterm" data-startref=
+      "firstclass">&nbsp;</a><a data-type="indexterm"
+      data-startref="RECfirstclass">&nbsp;</a></p>
     </section>
   </section>
 </body>
