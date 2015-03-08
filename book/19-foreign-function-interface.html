@@ -17,7 +17,15 @@
     non-OCaml code. The compiler can link with external system
     libraries via C code and also can produce standalone native
     object files that can be embedded within other non-OCaml
-    applications.</p>
+    applications.<a data-type="indexterm" data-primary=
+    "programming" data-secondary=
+		    "language interfaces">&nbsp;</a>
+      
+      <a data-type="indexterm"
+	 data-primary="foreign function interface (FFI)" data-secondary=
+	 "basics of">&nbsp;</a><a data-type="indexterm" id="INTERffi"
+    data-primary="interfaces" data-secondary=
+    "foreign function interface (FFI)">&nbsp;</a></p>
 
     <p>The mechanism by which code in one programming language can
     invoke routines in a different programming language is called a
@@ -44,7 +52,11 @@
     even require you to write any C code at all! The Ctypes library
     lets you define the C interface in pure OCaml, and the library
     then takes care of loading the C symbols and invoking the
-    foreign function call.</p>
+    foreign function call.<a data-type="indexterm" data-primary=
+    "libffi library">&nbsp;</a><a data-type="indexterm"
+    data-primary="Ncurses terminal toolkit">&nbsp;</a><a data-type=
+    "indexterm" data-primary="Ctypes library" data-secondary=
+    "installation of">&nbsp;</a></p>
 
     <p>Let's dive straight into a realistic example to show you how
     the library looks. We'll create a binding to the Ncurses
@@ -83,13 +95,18 @@
       <p>Ncurses is a library to help build terminal-independent
       text interfaces in a reasonably efficient way. It's used in
       console mail clients like Mutt and Pine, and console web
-      browsers such as Lynx.</p>
+      browsers such as Lynx.<a data-type="indexterm" id=
+			       "FFItermint"
+			       data-primary="foreign function interface (FFI)"
+      data-secondary="terminal interface example">&nbsp;</a></p>
 
       <p>The full C interface is quite large and is explained in
       the online <a href=
       "http://www.gnu.org/software/ncurses/">documentation</a>.
       We'll just use the small excerpt, since we just want to
-      demonstrate Ctypes in action:</p>
+      demonstrate Ctypes in action:<a data-type="indexterm"
+				      data-primary="Ctypes library" data-secondary=
+				      "terminal interface example">&nbsp;</a></p>
       <link rel="import" data-code-language="c" href=
       "code/ffi/ncurses.h" />
 
@@ -207,7 +224,9 @@
       "code/ffi/build_hello.out" />
 
       <p>Running <code>./hello.native</code> should now display a
-      Hello World in your terminal!</p>
+      Hello World in your terminal!<a data-type="indexterm"
+				      data-primary="Ctypes library" data-secondary=
+				      "build directives for">&nbsp;</a></p>
 
       <div data-type="note">
         <h1>On Build Directives for Ctypes</h1>
@@ -257,7 +276,8 @@
 
       <p>We'll go over some of these features in more detail for
       the remainder of the chapter by using some POSIX date
-      functions as running examples.</p>
+      functions as running examples.<a data-type="indexterm"
+				       data-startref="FFItermint">&nbsp;</a></p>
     </section>
 
     <section id="basic-scalar-c-types" data-type="sect1">
@@ -265,7 +285,12 @@
 
       <p>First, let's look at how to define basic scalar C types.
       Every C type is represented by an OCaml equivalent via the
-      single type definition:</p>
+      single type definition:<a data-type="indexterm" data-primary=
+      "scalar C types">&nbsp;</a><a data-type="indexterm"
+				    data-primary="foreign function interface (FFI)"
+				    data-secondary="basic scalar C
+						    types">&nbsp;</a>
+      </p>
       <link rel="import" data-code-language="ocaml" href=
       "code/ctypes/ctypes.mli" />
 
@@ -308,7 +333,9 @@
       </ul>
 
       <p>Here are the definitions for most of the standard C99
-      scalar types, including some platform-dependent ones:</p>
+	scalar types, including some platform-dependent ones:
+	<a data-type="indexterm" data-primary=
+	   "C99 scalar types">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/ctypes/ctypes.mli" part="1" />
 
@@ -356,7 +383,15 @@
       part of Ctypes, which provides support for pointer
       arithmetic, pointer conversions, reading and writing through
       pointers, and passing and returning pointers to and from
-      functions.</p>
+      functions.<a data-type="indexterm" data-primary=
+		   "POSIX functions">&nbsp;</a>
+	<a data-type="indexterm"
+	   data-primary="arrays" data-secondary=
+	   "pointers and">&nbsp;</a><a data-type="indexterm"
+				       data-primary="pointers" data-secondary=
+      "support for in Ctypes">&nbsp;</a><a data-type="indexterm"
+      data-primary="foreign function interface (FFI)"
+      data-secondary="pointers and arrays">&nbsp;</a></p>
 
       <p>We've already seen a simple use of pointers in the Ncurses
       example. Let's start a new example by binding the following
@@ -437,7 +472,11 @@
         pass a nonnull pointer to a function. Continuing with the
         theme from earlier, we'll bind to the <code>ctime</code>
         function, which converts a <code>time_t</code> value to a
-        human-readable string:</p>
+        human-readable string:<a data-type="indexterm"
+				 data-primary="memory" data-secondary=
+				 "allocation for pointers">&nbsp;</a><a data-type=
+        "indexterm" data-primary="pointers" data-secondary=
+        "allocating typed memory for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/ffi/posix.topscript" part="4" />
 
@@ -469,7 +508,11 @@
         <p>While scalar types typically have a 1:1 representation,
         other C types require extra work to convert them into
         OCaml. Views create new C type descriptions that have
-        special behavior when used to read or write C values.</p>
+          special behavior when used to read or write C values.
+	<a data-type="indexterm" data-primary="mapping"
+           data-secondary="complex values with views">&nbsp;</a>
+	<a data-type="indexterm" data-primary="values" data-secondary=
+        "mapping complex with views">&nbsp;</a></p>
 
         <p>We've already used one view in the definition of
         <code>ctime</code> earlier. The <code>string</code> view
@@ -537,7 +580,12 @@
       <p>The C constructs <code>struct</code> and
       <code>union</code> make it possible to build new types from
       existing types. Ctypes contains counterparts that work
-      similarly.</p>
+      similarly.<a data-type="indexterm" data-primary="unions"
+      data-see="structs and unions">&nbsp;</a><a data-type=
+      "indexterm" data-primary="structs and unions" data-secondary=
+      "structure definition">&nbsp;</a><a data-type="indexterm"
+      data-primary="foreign function interface (FFI)"
+      data-secondary="structs and unions">&nbsp;</a></p>
 
       <section id="defining-a-structure" data-type="sect2">
         <h2>Defining a Structure</h2>
@@ -576,7 +624,14 @@
         <h2>Adding Fields to Structures</h2>
 
         <p>The <code>timeval</code> structure definition still
-        doesn't have any fields, so we need to add those next:</p>
+          doesn't have any fields, so we need to add those next:
+	  <a data-type="indexterm" data-primary="fields"
+             data-secondary=
+             "adding to structures">&nbsp;</a>
+	  
+	  <a data-type="indexterm"
+	     data-primary="structs and unions"
+	     data-secondary="field addition">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/ffi/posix.topscript" part="9" />
 
@@ -600,7 +655,10 @@
 
         <p>Since <code>gettimeofday</code> needs a <code>struct
         timezone</code> pointer for its second argument, we also
-        need to define a second structure type:</p>
+          need to define a second structure type:
+	  <a data-type="indexterm"
+	     data-primary="structs and unions"
+             data-secondary="incomplete structure definitions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/ffi/posix.topscript" part="10" />
 
@@ -648,11 +706,15 @@
 
           <p>We built up a lot of bindings in the previous section,
           so let's recap them with a complete example that ties it
-          together with a command-line frontend:</p>
+            together with a command-line frontend:
+	    <a data-type="indexterm" data-primary="structs and unions"
+               data-secondary="time-printing command">&nbsp;</a></p>
           <link rel="import" data-code-language="ocaml" href=
           "code/ffi/datetime.ml" />
 
-          <p>This can be compiled and run in the usual way:</p>
+          <p>This can be compiled and run in the usual way:
+	    <a data-type="indexterm" data-primary=
+               "returning function">&nbsp;</a></p>
           <link rel="import" data-code-language="console" href=
           "code/ffi/build_datetime.out" />
 
@@ -727,7 +789,11 @@
 
         <p>Arrays in C are contiguous blocks of the same type of
         value. Any of the basic types defined previously can be
-        allocated as blocks via the <code>Array</code> module:</p>
+          allocated as blocks via the <code>Array</code> module:
+	  <a data-type="indexterm" data-primary="arrays"
+             data-secondary="definition of">&nbsp;</a><a data-type=
+        "indexterm" data-primary="structs and unions"
+        data-secondary="array definition">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/ctypes/ctypes.mli" part="5" />
 
@@ -748,7 +814,12 @@
 
         <p>Unions in C are named structures that can be mapped onto
         the same underlying memory. They are also fully supported
-        in Ctypes, but we won't go into more detail here.</p>
+          in Ctypes, but we won't go into more detail here.
+	  <a data-type="indexterm" data-primary="operators"
+             data-secondary="controlling pointers">&nbsp;</a>
+	  <a data-type="indexterm"
+        data-primary="pointers" data-secondary=
+        "operators controlling">&nbsp;</a></p>
 
         <aside data-type="sidebar">
           <h5>Pointer Operators for Dereferencing and
@@ -820,7 +891,10 @@
       C. The C standard library function <code>qsort</code> sorts
       arrays of elements using a comparison function passed in as a
       function pointer. The signature for <code>qsort</code>
-      is:</p>
+      is:<a data-type="indexterm" data-primary="functions"
+	    data-secondary="passing to C">&nbsp;</a>
+	<a data-type="indexterm" data-primary="foreign function interface (FFI)"
+      data-secondary="passing functions to C">&nbsp;</a></p>
       <link rel="import" data-code-language="c" href=
       "code/ffi/qsort.h" />
 
@@ -861,7 +935,9 @@
 
         <p>The following is a command-line tool that uses the
         <code>qsort</code> binding to sort all of the integers
-        supplied on the standard input:</p>
+        supplied on the standard input:
+	<a data-type="indexterm"
+	   data-primary="qsort binding">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/ffi/qsort.ml" />
 
@@ -894,7 +970,14 @@
         <code>Ctypes.Array</code> module with the
         <code>Core.Std.Array</code> module: the former is in scope
         since we opened <code>Ctypes</code> at the start of the
-        file.</p>
+        file.<a data-type="indexterm"
+		data-primary="memory"
+		data-secondary="and allocated Ctypes">&nbsp;</a>
+	<a data-type="indexterm"
+        data-primary="Ctypes library" data-secondary=
+        "lifetime of allocated Ctypes">&nbsp;</a><a data-type=
+        "indexterm" data-primary="garbage collection"
+        data-secondary="of allocated Ctypes">&nbsp;</a></p>
 
         <aside data-type="sidebar">
           <h5>Lifetime of Allocated Ctypes</h5>
@@ -950,8 +1033,10 @@
 
       <p>The Ctypes <a href=
       "http://github.com/ocamllabs/ocaml-ctypes">distribution</a>
-      contains a number of larger-scale examples, including:</p>
-
+	contains a number of larger-scale examples, including:
+	<a data-type="indexterm"
+	   data-primary="foreign function interface (FFI)"
+	   data-secondary="C bindings">&nbsp;</a></p>
       <ul>
         <li>
           <p>Bindings to the POSIX <code>fts</code> API, which
@@ -1036,7 +1121,12 @@
         replicate the struct layout process. OCaml and C will have
         consistent views about the layout of the struct as long as
         you declare the fields of a struct in the same order and
-        with the same types as the C library you're binding to.</p>
+          with the same types as the C library you're binding to.
+	  <a data-type="indexterm" data-primary="memory"
+             data-secondary="layout for structs">&nbsp;</a>
+	  <a data-type="indexterm"
+	     data-primary="structs and unions"
+        data-secondary="memory layout of">&nbsp;</a></p>
 
         <p>However, this approach can lead to difficulties when the
         fields of a struct aren't fully specified in the interface
@@ -1069,7 +1159,8 @@
         "https://ocamllabs.github.io/ocaml-ctypes">documentation</a>,
         along with instructions on integration with <span class=
         "command"><em>autoconf</em></span> platform portability
-        instructions.</p>
+        instructions.<a data-type="indexterm" data-startref=
+			"INTERffi">&nbsp;</a></p>
       </section>
     </section>
   </section>
