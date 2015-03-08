@@ -228,7 +228,9 @@
         One particularly useful pattern is built around the
         function <code>bind</code>, which is both an ordinary
         function and an infix operator <code>&gt;&gt;=</code>.
-        Here's the definition of <code>bind</code> for options:</p>
+          Here's the definition of <code>bind</code> for options:
+	  <a data-type="indexterm"
+	     data-primary="bind function">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="11" />
 
@@ -378,10 +380,13 @@
       <p>This all matters because it means that the return type of
       <code>raise</code> can be whatever it needs to be to fit into
       the context it is called in. Thus, the type system will let
-      us throw an exception anywhere in a program. <a data-type=
-      "index term" data-primary="sexp declaration">&nbsp;</a>
-      <a data-type="indexterm" data-primary="exceptions"
-      data-secondary="textual representation of">&nbsp;</a></p>
+      us throw an exception anywhere in a program.
+      <a data-type="indexterm"
+	 data-primary="sexp declaration">&nbsp;</a>
+      <a data-type="indexterm"
+	 data-primary="exceptions"
+	 data-secondary="textual representation of">&nbsp;</a>
+      </p>
 
       <div class="allow_break" data-type="note">
         <h1>Declaring Exceptions Using with sexp</h1>
