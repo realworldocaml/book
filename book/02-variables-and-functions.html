@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -31,18 +29,18 @@
     <section id="variables" data-type="sect1">
       <h1>Variables</h1>
 
-      <p>At its simplest, a variable is an identifier whose meaning is
-      bound to a particular value. In OCaml these bindings are often
-      introduced using the <code>let</code> keyword. We can type a
-      so-called <em>top-level</em> <code>let</code> binding with the
-      following syntax. Note that variable names must start with a
-      lowercase letter or an underscore:<a data-type= "indexterm"
-      data-primary="bindings" data-secondary=
+      <p>At its simplest, a variable is an identifier whose meaning
+      is bound to a particular value. In OCaml these bindings are
+      often introduced using the <code>let</code> keyword. We can
+      type a so-called <em>top-level</em> <code>let</code> binding
+      with the following syntax. Note that variable names must
+      start with a lowercase letter or an underscore:<a data-type=
+      "indexterm" data-primary="bindings" data-secondary=
       "top-level">&nbsp;</a><a data-type="indexterm" data-primary=
       "top-level bindings">&nbsp;</a><a data-type="indexterm"
-      data-primary="let syntax" data-secondary= "top-level
-      bindings">&nbsp;</a></p> <link rel="import"
-      data-code-language="ocamlsyntax" href=
+      data-primary="let syntax" data-secondary=
+      "top-level bindings">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamlsyntax" href=
       "code/variables-and-functions/let.syntax" />
 
       <p>As we'll see when we get to the module system in <a href=
@@ -53,14 +51,14 @@
 
       <p>Every variable binding has a <em>scope</em>, which is the
       portion of the code that can refer to that binding. When
-      using <span class="command"><em>utop</em></span>, the scope of a
-      top-level <code>let</code> binding is everything that follows it
-      in the session. When it shows up in a module, the scope is the
-      remainder of that module.<a data-type= "indexterm"
-      data-primary="variables" data-secondary= "scope
-      of">&nbsp;</a><a data-type="indexterm" data-primary= "bindings"
-      data-secondary="scope of">&nbsp;</a><a data-type= "indexterm"
-      data-primary="scope">&nbsp;</a></p>
+      using <span class="command"><em>utop</em></span>, the scope
+      of a top-level <code>let</code> binding is everything that
+      follows it in the session. When it shows up in a module, the
+      scope is the remainder of that module.<a data-type=
+      "indexterm" data-primary="variables" data-secondary=
+      "scope of">&nbsp;</a><a data-type="indexterm" data-primary=
+      "bindings" data-secondary="scope of">&nbsp;</a><a data-type=
+      "indexterm" data-primary="scope">&nbsp;</a></p>
 
       <p>Here's a simple example:</p>
       <link rel="import" data-code-language="ocamltop" href=
@@ -148,12 +146,12 @@
       <div data-type="note">
         <h1>Why Don't Variables Vary?</h1>
 
-        <p>One source of confusion for people new to OCaml is the fact
-        that variables are immutable. This seems pretty surprising
-        even on linguistic terms. Isn't the whole point of a variable
-        that it can vary?<a data-type="indexterm"
-        data-primary="variables" data-secondary= "immutability
-        of">&nbsp;</a></p>
+        <p>One source of confusion for people new to OCaml is the
+        fact that variables are immutable. This seems pretty
+        surprising even on linguistic terms. Isn't the whole point
+        of a variable that it can vary?<a data-type="indexterm"
+        data-primary="variables" data-secondary=
+        "immutability of">&nbsp;</a></p>
 
         <p>The answer to this is that variables in OCaml (and
         generally in functional languages) are really more like
@@ -176,15 +174,15 @@
         <p>Another useful feature of <code>let</code> bindings is
         that they support the use of <em>patterns</em> on the
         lefthand side. Consider the following code, which uses
-        <code>List.unzip</code>, a function for converting a list of
-        pairs into a pair of lists:<a data-type="indexterm"
-        data-primary="pattern matching" data-secondary= "and
-        let">&nbsp;</a><a data-type="indexterm" data-primary= "let
-        syntax" data-secondary= "pattern
-        matching">&nbsp;</a><a data-type="indexterm"
-        data-primary="variables" data-secondary= "pattern matching
-        in">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        <code>List.unzip</code>, a function for converting a list
+        of pairs into a pair of lists:<a data-type="indexterm"
+        data-primary="pattern matching" data-secondary=
+        "and let">&nbsp;</a><a data-type="indexterm" data-primary=
+        "let syntax" data-secondary=
+        "pattern matching">&nbsp;</a><a data-type="indexterm"
+        data-primary="variables" data-secondary=
+        "pattern matching in">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="7" />
 
         <p>Here, <code>(ints,strings)</code> is a pattern, and the
@@ -201,11 +199,12 @@
         <p>Using a pattern in a <code>let</code> binding makes the
         most sense for a pattern that is <em>irrefutable</em>,
         <em>i.e.</em>, where any value of the type in question is
-        guaranteed to match the pattern. Tuple and record patterns are
-        irrefutable, but list patterns are not. Consider the following
-        code that implements a function for upper casing the first
-        element of a comma-separated list:<a data-type= "indexterm"
-        data-primary= "irrefutable patterns">&nbsp;</a></p>
+        guaranteed to match the pattern. Tuple and record patterns
+        are irrefutable, but list patterns are not. Consider the
+        following code that implements a function for upper casing
+        the first element of a comma-separated list:<a data-type=
+        "indexterm" data-primary=
+        "irrefutable patterns">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="8" />
 
@@ -240,17 +239,17 @@
       <section id="anonymous-functions" data-type="sect2">
         <h2>Anonymous Functions</h2>
 
-        <p>We'll start by looking at the most basic style of function
-        declaration in OCaml: the <em>anonymous function</em>. An
-        anonymous function is a function that is declared without
-        being named. These can be declared using the <code>fun</code>
-        keyword, as shown here:<a data-type= "indexterm"
-        data-primary="fun keyword" data-secondary= "anonymous
-        functions">&nbsp;</a><a data-type="indexterm"
+        <p>We'll start by looking at the most basic style of
+        function declaration in OCaml: the <em>anonymous
+        function</em>. An anonymous function is a function that is
+        declared without being named. These can be declared using
+        the <code>fun</code> keyword, as shown here:<a data-type=
+        "indexterm" data-primary="fun keyword" data-secondary=
+        "anonymous functions">&nbsp;</a><a data-type="indexterm"
         data-primary="anonymous functions">&nbsp;</a><a data-type=
         "indexterm" data-primary="functions" data-secondary=
-        "anonymous functions">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        "anonymous functions">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="10" />
 
         <p>Anonymous functions operate in much the same way as
@@ -304,15 +303,16 @@
         <div data-type="note">
           <h1>let and fun</h1>
 
-          <p>Functions and <code>let</code> bindings have a lot to do
-          with each other. In some sense, you can think of the
+          <p>Functions and <code>let</code> bindings have a lot to
+          do with each other. In some sense, you can think of the
           parameter of a function as a variable being bound to the
           value passed by the caller. Indeed, the following two
-          expressions are nearly equivalent:<a data-type= "indexterm"
-          data-primary="let syntax" data-secondary= "functions
-          and">&nbsp;</a></p> <link rel="import"
-          data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part= "16" />
+          expressions are nearly equivalent:<a data-type=
+          "indexterm" data-primary="let syntax" data-secondary=
+          "functions and">&nbsp;</a></p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "16" />
 
           <p>This connection is important, and will come up more
           when programming in a monadic style, as we'll see in
@@ -326,14 +326,15 @@
       <section id="multi-argument-functions" data-type="sect2">
         <h2>Multiargument functions</h2>
 
-        <p>OCaml of course also supports multiargument functions, such
-        as:<a data-type="indexterm" data-primary="fun keyword"
-        data-secondary= "multi-argument
-        functions">&nbsp;</a><a data-type= "indexterm" data-primary=
-        "multi-argument functions">&nbsp;</a><a data-type= "indexterm"
-        data-primary="functions" data-secondary= "multi-argument
-        functions">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        <p>OCaml of course also supports multiargument functions,
+        such as:<a data-type="indexterm" data-primary="fun keyword"
+        data-secondary=
+        "multi-argument functions">&nbsp;</a><a data-type=
+        "indexterm" data-primary=
+        "multi-argument functions">&nbsp;</a><a data-type=
+        "indexterm" data-primary="functions" data-secondary=
+        "multi-argument functions">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="17" />
 
         <p>You may find the type signature of <code>abs_diff</code>
@@ -354,17 +355,17 @@
         <code>y</code>, which was bound by the inner one.</p>
 
         <p>This style of function is called a <em>curried</em>
-        function. (Currying is named after Haskell Curry, a logician
-        who had a significant impact on the design and theory of
-        programming languages.) The key to interpreting the type
-        signature of a curried function is the observation
+        function. (Currying is named after Haskell Curry, a
+        logician who had a significant impact on the design and
+        theory of programming languages.) The key to interpreting
+        the type signature of a curried function is the observation
         that <code>-&gt;</code> is right-associative. The type
         signature of <code>abs_diff</code> can therefore be
         parenthesized as follows:<a data-type="indexterm"
         data-primary="curried functions">&nbsp;</a><a data-type=
-        "indexterm" data-primary="functions" data-secondary= "curried
-        functions">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocaml" href=
+        "indexterm" data-primary="functions" data-secondary=
+        "curried functions">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocaml" href=
         "code/variables-and-functions/abs_diff.mli" />
 
         <p>The parentheses don't change the meaning of the
@@ -430,19 +431,19 @@
         supports imperative looping constructs like
         <code>for</code> and <code>while</code>, but these are only
         useful when using OCaml's imperative
-        features.)<a data-type="indexterm" data-primary="recursive
-        functions" data-secondary= "definition
-        of">&nbsp;</a><a data-type="indexterm"
-        data-primary="functions" data-secondary= "recursive
-        functions">&nbsp;</a></p>
+        features.)<a data-type="indexterm" data-primary=
+        "recursive functions" data-secondary=
+        "definition of">&nbsp;</a><a data-type="indexterm"
+        data-primary="functions" data-secondary=
+        "recursive functions">&nbsp;</a></p>
 
         <p>In order to define a recursive function, you need to
         mark the <code>let</code> binding as recursive with the
         <code>rec</code> keyword, as shown in this function for
         finding the first sequentially repeated element in a
-        list:<a data-type="indexterm" data-primary= "rec
-        keyword">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        list:<a data-type="indexterm" data-primary=
+        "rec keyword">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="22" />
 
         <p>Note that in the code, the pattern <code>| [] |
@@ -465,12 +466,13 @@
         <p>OCaml distinguishes between nonrecursive definitions
         (using <code>let</code>) and recursive definitions (using
         <code>let rec</code>) largely for technical reasons: the
-        type-inference algorithm needs to know when a set of function
-        definitions are mutually recursive, and for reasons that don't
-        apply to a pure language like Haskell, these have to be marked
-        explicitly by the programmer.<a data-type="indexterm"
-        data-primary= "let syntax" data-secondary= "nonrecursive
-        vs. recursive functions">&nbsp;</a></p>
+        type-inference algorithm needs to know when a set of
+        function definitions are mutually recursive, and for
+        reasons that don't apply to a pure language like Haskell,
+        these have to be marked explicitly by the
+        programmer.<a data-type="indexterm" data-primary=
+        "let syntax" data-secondary=
+        "nonrecursive vs. recursive functions">&nbsp;</a></p>
 
         <p>But this decision has some good effects. For one thing,
         recursive (and especially mutually recursive) definitions
@@ -490,8 +492,9 @@
 
         <p>So far, we've seen examples of functions used in both
         prefix and infix style:<a data-type="indexterm"
-        data-primary="operators" data-secondary= "prefix and infix
-        operators">&nbsp;</a><a data-type= "indexterm" data-primary=
+        data-primary="operators" data-secondary=
+        "prefix and infix operators">&nbsp;</a><a data-type=
+        "indexterm" data-primary=
         "infix operators">&nbsp;</a><a data-type="indexterm"
         data-primary="prefix operators">&nbsp;</a><a data-type=
         "indexterm" id="FNCprf" data-primary="functions"
@@ -680,16 +683,16 @@
         subtraction operators, and can act as both prefix operators
         (for negation) and infix operators (for subtraction). So,
         both <code>-x</code> and <code>x - y</code> are meaningful
-        expressions. Another thing to remember about negation is that
-        it has lower precedence than function application, which means
-        that if you want to pass a negative value, you need to wrap it
-        in parentheses, as you can see in this
+        expressions. Another thing to remember about negation is
+        that it has lower precedence than function application,
+        which means that if you want to pass a negative value, you
+        need to wrap it in parentheses, as you can see in this
         code:<a data-type="indexterm" data-primary="operators"
         data-secondary="negation operators">&nbsp;</a><a data-type=
         "indexterm" data-primary="operators" data-secondary=
         "subtraction operators">&nbsp;</a><a data-type="indexterm"
-        data-primary= "subtraction
-        operators">&nbsp;</a><a data-type="indexterm"
+        data-primary=
+        "subtraction operators">&nbsp;</a><a data-type="indexterm"
         data-primary="negation operators">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="29" />
@@ -717,14 +720,14 @@
         <code>PATH</code>. Note that <code>List.dedup</code> that
         follows removes duplicates from a list by sorting the list
         using the provided comparison function:<a data-type=
-        "indexterm" data-primary="lists" data-secondary= "duplicate
-        removal">&nbsp;</a><a data-type="indexterm"
+        "indexterm" data-primary="lists" data-secondary=
+        "duplicate removal">&nbsp;</a><a data-type="indexterm"
         data-primary="duplicates, removing">&nbsp;</a><a data-type=
         "indexterm" data-primary=
         "List.dedup">&nbsp;</a><a data-type="indexterm"
-        data-primary="operators" data-secondary= "sequencing
-        operators">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        data-primary="operators" data-secondary=
+        "sequencing operators">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="32" />
 
         <p>Note that we can do this without <code>|&gt;</code>, but
@@ -776,14 +779,14 @@
         <p>Another way to define a function is using the
         <code>function</code> keyword. Instead of having syntactic
         support for declaring multiargument (curried) functions,
-        <code>function</code> has built-in pattern matching. Here's an
-        example:<a data-type="indexterm" data-primary= "functions"
-        data-secondary= "defining">&nbsp;</a><a data-type="indexterm"
-        data-primary= "function
-        keyword">&nbsp;</a><a data-type="indexterm"
-        data-primary="functions" data-secondary= "declaring with
-        function keyword">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        <code>function</code> has built-in pattern matching. Here's
+        an example:<a data-type="indexterm" data-primary=
+        "functions" data-secondary=
+        "defining">&nbsp;</a><a data-type="indexterm" data-primary=
+        "function keyword">&nbsp;</a><a data-type="indexterm"
+        data-primary="functions" data-secondary=
+        "declaring with function keyword">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="37" />
 
         <p>This is equivalent to combining an ordinary function
@@ -809,21 +812,21 @@
         <h2>Labeled Arguments</h2>
 
         <p>Up until now, the functions we've defined have specified
-        their arguments positionally, <em>i.e.</em>, by the order in
-        which the arguments are passed to the function. OCaml also
-        supports labeled arguments, which let you identify a function
-        argument by name. Indeed, we've already encountered functions
-        from Core like <code>List.map</code> that use labeled
-        arguments. Labeled arguments are marked by a leading tilde,
-        and a label (followed by a colon) is put in front of the
-        variable to be labeled. Here's an
-        example:<a data-type="indexterm" data-primary= "labeled
-        arguments">&nbsp;</a><a data-type="indexterm"
-        data-primary="arguments" data-secondary= "labeled
-        arguments">&nbsp;</a><a data-type="indexterm"
-        data-primary="functions" data-secondary= "labeled
-        arguments">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        their arguments positionally, <em>i.e.</em>, by the order
+        in which the arguments are passed to the function. OCaml
+        also supports labeled arguments, which let you identify a
+        function argument by name. Indeed, we've already
+        encountered functions from Core like <code>List.map</code>
+        that use labeled arguments. Labeled arguments are marked by
+        a leading tilde, and a label (followed by a colon) is put
+        in front of the variable to be labeled. Here's an
+        example:<a data-type="indexterm" data-primary=
+        "labeled arguments">&nbsp;</a><a data-type="indexterm"
+        data-primary="arguments" data-secondary=
+        "labeled arguments">&nbsp;</a><a data-type="indexterm"
+        data-primary="functions" data-secondary=
+        "labeled arguments">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="40" />
 
         <p>We can then provide a labeled argument using a similar
@@ -833,14 +836,14 @@
         "code/variables-and-functions/main.topscript" part="41" />
 
         <p>OCaml also supports <em>label punning</em>, meaning that
-        you get to drop the text after the <code>:</code> if the name
-        of the label and the name of the variable being used are the
-        same. We were actually already using label punning when
-        defining <code>ratio</code>. The following shows how punning
-        can be used when invoking a function:<a data-type= "indexterm"
-        data-primary="punning">&nbsp;</a><a data-type= "indexterm"
-        data-primary="label punning">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        you get to drop the text after the <code>:</code> if the
+        name of the label and the name of the variable being used
+        are the same. We were actually already using label punning
+        when defining <code>ratio</code>. The following shows how
+        punning can be used when invoking a function:<a data-type=
+        "indexterm" data-primary="punning">&nbsp;</a><a data-type=
+        "indexterm" data-primary="label punning">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="42" />
 
         <p>Labeled arguments are useful in a few different
@@ -849,11 +852,12 @@
         <ul>
           <li>
             <p>When defining a function with lots of arguments.
-            Beyond a certain number, arguments are easier to remember
-            by name than by position.<a data-type= "indexterm"
-            data-primary="functions" data-secondary= "with multiple
-            arguments">&nbsp;</a><a data-type= "indexterm"
-            data-primary= "multi-argument functions">&nbsp;</a></p>
+            Beyond a certain number, arguments are easier to
+            remember by name than by position.<a data-type=
+            "indexterm" data-primary="functions" data-secondary=
+            "with multiple arguments">&nbsp;</a><a data-type=
+            "indexterm" data-primary=
+            "multi-argument functions">&nbsp;</a></p>
           </li>
 
           <li>
@@ -929,14 +933,15 @@
           <p>One surprising gotcha with labeled arguments is that
           while order doesn't matter when calling a function with
           labeled arguments, it does matter in a higher-order
-          context, <em>e.g.</em>, when passing a function with labeled
-          arguments to another function. Here's an
-          example:<a data-type="indexterm" data-primary= "higher-order
-          functions, and labels">&nbsp;</a><a data-type="indexterm"
-          data-primary="functions" data-secondary= "higher-order and
-          labels">&nbsp;</a></p> <link rel="import"
-          data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part= "44" />
+          context, <em>e.g.</em>, when passing a function with
+          labeled arguments to another function. Here's an
+          example:<a data-type="indexterm" data-primary=
+          "higher-order functions, and labels">&nbsp;</a><a data-type="indexterm"
+          data-primary="functions" data-secondary=
+          "higher-order and labels">&nbsp;</a></p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "44" />
 
           <p>Here, the definition of <code>apply_to_tuple</code>
           sets up the expectation that its first argument is a
@@ -979,12 +984,12 @@
         <p>An optional argument is like a labeled argument that the
         caller can choose whether or not to provide. Optional
         arguments are passed in using the same syntax as labeled
-        arguments, and, like labeled arguments, can be provided in any
-        order.<a data-type="indexterm" id="ARGopt"
-        data-primary="arguments" data-secondary= "optional
-        arguments">&nbsp;</a><a data-type="indexterm" id= "FNCopt"
-        data-primary="functions" data-secondary= "optional
-        arguments">&nbsp;</a></p>
+        arguments, and, like labeled arguments, can be provided in
+        any order.<a data-type="indexterm" id="ARGopt"
+        data-primary="arguments" data-secondary=
+        "optional arguments">&nbsp;</a><a data-type="indexterm" id=
+        "FNCopt" data-primary="functions" data-secondary=
+        "optional arguments">&nbsp;</a></p>
 
         <p>Here's an example of a string concatenation function
         with an optional separator. This function uses the
@@ -1048,12 +1053,13 @@
           OCaml lets you do this by using <code>?</code> instead of
           <code>~</code> to mark the argument. Thus, the following
           two lines are equivalent ways of specifying the
-          <code>sep</code> argument
-          to <code>concat</code>:<a data-type="indexterm"
-          data-primary="optional arguments" data-secondary= "explicit
-          passing of">&nbsp;</a></p> <link rel="import"
-          data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part= "51" />
+          <code>sep</code> argument to
+          <code>concat</code>:<a data-type="indexterm"
+          data-primary="optional arguments" data-secondary=
+          "explicit passing of">&nbsp;</a></p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "51" />
 
           <p>And the following two lines are equivalent ways of
           calling <code>concat</code> without specifying
@@ -1112,16 +1118,17 @@
           <code>x</code> and <code>y</code>. Note that you can use
           an apostrophe as part of a variable name, so
           <code>x'</code> and <code>y'</code> are just ordinary
-          variables:<a data-type="indexterm" data-primary= "functions"
-          data-secondary= "argument
-          inference">&nbsp;</a><a data-type="indexterm"
+          variables:<a data-type="indexterm" data-primary=
+          "functions" data-secondary=
+          "argument inference">&nbsp;</a><a data-type="indexterm"
           data-primary="labeled arguments">&nbsp;</a><a data-type=
           "indexterm" data-primary="arguments" data-secondary=
           "inference of">&nbsp;</a><a data-type="indexterm"
-          data-primary="optional arguments" data-secondary= "inference
-          of">&nbsp;</a></p> <link rel="import"
-          data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part= "55" />
+          data-primary="optional arguments" data-secondary=
+          "inference of">&nbsp;</a></p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "55" />
 
           <p>In principle, it's not obvious how the order of the
           arguments to <code>f</code> should be chosen. Since
@@ -1153,14 +1160,15 @@
           "56" />
 
           <p>As suggested by the error message, we can get OCaml to
-          accept the fact that <code>f</code> is used with different
-          argument orders if we provide explicit type
+          accept the fact that <code>f</code> is used with
+          different argument orders if we provide explicit type
           information. Thus, the following code compiles without
-          error, due to the type annotation
-          on <code>f</code>:<a data-type="indexterm" data-primary=
-          "type annotations">&nbsp;</a></p> <link rel="import"
-          data-code-language="ocamltop" href=
-          "code/variables-and-functions/main.topscript" part= "57" />
+          error, due to the type annotation on
+          <code>f</code>:<a data-type="indexterm" data-primary=
+          "type annotations">&nbsp;</a></p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/variables-and-functions/main.topscript" part=
+          "57" />
         </section>
 
         <section id="optional-arguments-and-partial-application"
@@ -1232,13 +1240,13 @@
           "code/variables-and-functions/main.topscript" part=
           "65" />
 
-          <p>As you can see, OCaml's support for labeled and optional
-          arguments is not without its complexities. But don't let
-          these complexities obscure the usefulness of these
-          features. Labels and optional arguments are very effective
-          tools for making your APIs both more convenient and safer,
-          and it's worth the effort of learning how to use them
-          effectively.<a data-type="indexterm"
+          <p>As you can see, OCaml's support for labeled and
+          optional arguments is not without its complexities. But
+          don't let these complexities obscure the usefulness of
+          these features. Labels and optional arguments are very
+          effective tools for making your APIs both more convenient
+          and safer, and it's worth the effort of learning how to
+          use them effectively.<a data-type="indexterm"
           data-startref="ARGopt">&nbsp;</a><a data-type="indexterm"
           data-startref="FNCopt">&nbsp;</a></p>
         </section>

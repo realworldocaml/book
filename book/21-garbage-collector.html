@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -23,8 +21,8 @@
     your applications don't need to manually implement memory
     management, and it greatly reduces the likelihood of memory
     leaks creeping into your code.<a data-type="indexterm"
-				     data-primary="memory" data-secondary=
-				     "memory management">&nbsp;</a></p>
+    data-primary="memory" data-secondary=
+    "memory management">&nbsp;</a></p>
 
     <p>The OCaml runtime is a C library that provides routines that
     can be called from running OCaml programs. The runtime manages
@@ -33,7 +31,7 @@
     memory to hold <em>heap blocks</em> that it fills up with OCaml
     values in response to allocation requests by the OCaml
     program.<a data-type="indexterm" data-primary="values"
-	       data-secondary=
+    data-secondary=
     "allocation requests and">&nbsp;</a><a data-type="indexterm"
     data-primary="heaps" data-secondary=
     "heap blocks">&nbsp;</a><a data-type="indexterm" data-primary=
@@ -82,17 +80,15 @@
       then never accessed again. OCaml takes advantage of this fact
       to improve performance by using a <em>generational</em>
       GC.<a data-type="indexterm" data-primary=
-	    "generational garbage collection">&nbsp;</a>
-	
-	<a data-type="indexterm"
-	   data-primary="garbage collection"
-	   data-secondary="generational collection">&nbsp;</a></p>
+      "generational garbage collection">&nbsp;</a> <a data-type=
+      "indexterm" data-primary="garbage collection" data-secondary=
+      "generational collection">&nbsp;</a></p>
 
       <p>A generational GC maintains separate memory regions to
       hold blocks based on how long the blocks have been live.
-	OCaml's heap is split into two such regions:
-	<a data-type="indexterm" data-primary="heaps"
-	   data-secondary="regions of">&nbsp;</a></p>
+      OCaml's heap is split into two such regions: <a data-type=
+      "indexterm" data-primary="heaps" data-secondary=
+      "regions of">&nbsp;</a></p>
 
       <ul>
         <li>
@@ -109,19 +105,16 @@
       <p>A typical functional programming style means that young
       blocks tend to die young and old blocks tend to stay around
       for longer than young ones. This is often referred to as the
-	<em>generational hypothesis</em>.
-	<a data-type="indexterm"
-	   data-primary="generational hypothesis">&nbsp;</a></p>
+      <em>generational hypothesis</em>. <a data-type="indexterm"
+      data-primary="generational hypothesis">&nbsp;</a></p>
 
       <p>OCaml uses different memory layouts and garbage-collection
       algorithms for the major and minor heaps to account for this
       generational difference. We'll explain how they differ in
-	more detail next.
-	<a data-type="indexterm" data-primary=
-	   "OCAMLRUNPARAM">&nbsp;</a>
-	<a data-type="indexterm"
-	   data-primary="Gc module"
-	   data-seealso="garbage collection">&nbsp;</a></p>
+      more detail next. <a data-type="indexterm" data-primary=
+      "OCAMLRUNPARAM">&nbsp;</a> <a data-type="indexterm"
+      data-primary="Gc module" data-seealso=
+      "garbage collection">&nbsp;</a></p>
 
       <aside data-type="sidebar">
         <h5>The Gc Module and OCAMLRUNPARAM</h5>
@@ -155,7 +148,7 @@
       space, allocating a new block is a fast, constant-time
       operation that requires just a couple of CPU
       instructions.<a data-type="indexterm" data-primary="heaps"
-		      data-secondary="minor heaps">&nbsp;</a><a data-type=
+      data-secondary="minor heaps">&nbsp;</a><a data-type=
       "indexterm" data-primary="minor heaps" data-secondary=
       "garbage collection in">&nbsp;</a><a data-type="indexterm"
       data-primary="copying collection">&nbsp;</a><a data-type=
@@ -178,7 +171,7 @@
         <p>The minor heap is a contiguous chunk of virtual memory
         that is usually a few megabytes in size so that it can be
         scanned quickly.<a data-type="indexterm" data-primary=
-			   "minor heaps" data-secondary="allocating on">&nbsp;</a></p>
+        "minor heaps" data-secondary="allocating on">&nbsp;</a></p>
 
         <p><a href=
         "https://github.com/realworldocaml/examples/tree/v1/code/gc/minor_heap.ascii"
@@ -224,7 +217,7 @@
         such early collections, such as handling pending UNIX
         signals, and they don't ordinarily matter for application
         code.<a data-type="indexterm" data-primary="minor heaps"
-		data-secondary="setting size of">&nbsp;</a></p>
+        data-secondary="setting size of">&nbsp;</a></p>
 
         <div data-type="note">
           <h1>Setting the Size of the Minor Heap</h1>
@@ -349,8 +342,8 @@
         its size is a multiple of the page size (4 KB). It contains
         a contiguous sequence of heap blocks that can be as small
         as one or two 4 KB pages, but are usually allocated in 1 MB
-          chunks (or 512 KB on 32-bit architectures).
-	  <a data-type="indexterm" data-primary="major heaps" data-secondary=
+        chunks (or 512 KB on 32-bit architectures). <a data-type=
+        "indexterm" data-primary="major heaps" data-secondary=
         "controlling growth of">&nbsp;</a></p>
 
         <div data-type="note">
@@ -404,7 +397,7 @@
         default allocation policy normally works fine for most
         applications, but it's worth bearing in mind that there are
         other options, too.<a data-type="indexterm" data-primary=
-			      "memory" data-secondary=
+        "memory" data-secondary=
         "major heap allocation strategies">&nbsp;</a><a data-type=
         "indexterm" data-primary="major heaps" data-secondary=
         "memory allocation strategies">&nbsp;</a></p>
@@ -413,10 +406,9 @@
         allocating a new block in the major heap. The default free
         list search is called <em>next-fit allocation</em>, with an
         alternative <em>first-fit</em> algorithm also
-          available.<a data-type="indexterm"
-		       data-primary="first-fit allocation">&nbsp;</a>
-	  <a data-type="indexterm"
-             data-primary="next-fit allocation">&nbsp;</a></p>
+        available.<a data-type="indexterm" data-primary=
+        "first-fit allocation">&nbsp;</a> <a data-type="indexterm"
+        data-primary="next-fit allocation">&nbsp;</a></p>
 
         <section id="next-fit-allocation" data-type="sect3">
           <h3>Next-fit allocation</h3>
@@ -450,10 +442,9 @@
           at the expense of slower memory allocation. Every
           allocation scans the free list from the beginning for a
           suitable free chunk, instead of reusing the most recent
-            heap chunk as the next-fit allocator does.
-	    <a data-type=
-	       "indexterm" data-primary="memory" data-secondary=
-               "reducing fragmentation of">&nbsp;</a></p>
+          heap chunk as the next-fit allocator does. <a data-type=
+          "indexterm" data-primary="memory" data-secondary=
+          "reducing fragmentation of">&nbsp;</a></p>
 
           <p>For some workloads that need more real-time behavior
           under load, the reduction in the frequency of heap
@@ -484,9 +475,9 @@
         marking the heap in <em>slices</em>. Each value in the heap
         has a 2-bit <em>color</em> field in its header that is used
         to store information about whether the value has been
-          marked so that the GC can resume easily between slices.
-	  <a data-type="indexterm" data-primary="major heaps"
-             data-secondary="marking and scanning">&nbsp;</a></p>
+        marked so that the GC can resume easily between slices.
+        <a data-type="indexterm" data-primary="major heaps"
+        data-secondary="marking and scanning">&nbsp;</a></p>
 
         <table>
           <caption>
@@ -553,9 +544,8 @@
         encountered white blocks onto an intermediate stack of
         <em>gray values</em> while it follows their fields. When a
         gray value's fields have all been followed, it is popped
-        off the stack and colored black.
-	<a data-type="indexterm"
-	   data-primary="root values">&nbsp;</a><a data-type=
+        off the stack and colored black. <a data-type="indexterm"
+        data-primary="root values">&nbsp;</a><a data-type=
         "indexterm" data-primary="gray values">&nbsp;</a></p>
 
         <p>This process is repeated until the gray value stack is
@@ -567,7 +557,7 @@
         this happens, the heap is marked as <em>impure</em> and a
         more expensive check is initiated once the existing gray
         values have been processed.<a data-type="indexterm"
-				      data-primary="impure heaps">&nbsp;</a></p>
+        data-primary="impure heaps">&nbsp;</a></p>
 
         <p>To mark an impure heap, the GC first marks it as pure
         and walks through the entire heap block-by-block in
@@ -579,8 +569,8 @@
         scan until it is pure again. These full-heap scans will
         continue until a successful scan completes without
         overflowing the gray list.<a data-type="indexterm"
-				     data-primary="major heaps" data-secondary=
-				     "controlling collections">&nbsp;</a></p>
+        data-primary="major heaps" data-secondary=
+        "controlling collections">&nbsp;</a></p>
 
         <div data-type="note">
           <h1>Controlling Major Heap Collections</h1>
@@ -615,12 +605,11 @@
         values being deallocated out of order from how they were
         allocated. This makes it harder for the GC to find a
         contiguous block of memory for fresh allocations, which in
-          turn would require the heap to be grown unnecessarily.
-	  <a data-type="indexterm" data-primary=
-             "memory" data-secondary=
-             "reducing fragmentation of">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="compaction">&nbsp;</a><a data-type="indexterm"
+        turn would require the heap to be grown unnecessarily.
+        <a data-type="indexterm" data-primary="memory"
+        data-secondary="reducing fragmentation of">&nbsp;</a>
+        <a data-type="indexterm" data-primary=
+        "compaction">&nbsp;</a><a data-type="indexterm"
         data-primary="major heaps" data-secondary=
         "heap compaction">&nbsp;</a></p>
 
@@ -659,22 +648,22 @@
         the minor heap are live, the collector must track which
         minor-heap blocks are directly pointed to by major-heap
         blocks. Without this information, each minor collection
-          would also require scanning the much larger major heap.
-	  <a data-type="indexterm" data-primary="pointers"
-             data-secondary="intergenerational pointers">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="intergenerational pointers">&nbsp;</a>
-	  <a data-type="indexterm" data-primary="major heaps"
-	     data-secondary="intergenerational pointers in">&nbsp;</a></p>
+        would also require scanning the much larger major heap.
+        <a data-type="indexterm" data-primary="pointers"
+        data-secondary="intergenerational pointers">&nbsp;</a>
+        <a data-type="indexterm" data-primary=
+        "intergenerational pointers">&nbsp;</a> <a data-type=
+        "indexterm" data-primary="major heaps" data-secondary=
+        "intergenerational pointers in">&nbsp;</a></p>
+
         <p>OCaml maintains a set of such <em>intergenerational
         pointers</em> to avoid this dependency between a major and
         minor heap collection. The compiler introduces a write
         barrier to update this so-called <em>remembered set</em>
         whenever a major-heap block is modified to point at a
         minor-heap block.<a data-type="indexterm" data-primary=
-			    "write barriers">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="remembered sets">&nbsp;</a></p>
+        "write barriers">&nbsp;</a> <a data-type="indexterm"
+        data-primary="remembered sets">&nbsp;</a></p>
 
         <section id="the-mutable-write-barrier" data-type="sect3">
           <h3>The mutable write barrier</h3>
@@ -736,8 +725,8 @@
           This can simulate the behavior of a long-running
           application without you having to actually wait that long
           to re-create the behavior in a performance unit test.
-	  <a data-type="indexterm"
-	     data-startref="Hmh">&nbsp;</a></p>
+          <a data-type="indexterm" data-startref=
+          "Hmh">&nbsp;</a></p>
         </section>
       </section>
     </section>
@@ -800,7 +789,7 @@
       <code>Gc.add_finalizer</code> function that schedules the
       finalizer safely with respect to all the other concurrent
       program threads.<a data-type="indexterm" data-primary="heaps"
-			 data-secondary="Heap_block module">&nbsp;</a></p>
+      data-secondary="Heap_block module">&nbsp;</a></p>
 
       <p>Let's explore this with a small example that finalizes
       values of different types, some of which are heap-allocated

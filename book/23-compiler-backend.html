@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -48,7 +46,7 @@
       values such as records and function pointers. Pattern matches
       are also analyzed and compiled into highly optimized
       automata.<a data-type="indexterm" data-primary=
-		  "lambda form code" data-secondary=
+      "lambda form code" data-secondary=
       "basics of">&nbsp;</a><a data-type="indexterm" id="CPuntype"
       data-primary="compilation process" data-secondary=
       "untyped lambda form">&nbsp;</a></p>
@@ -160,10 +158,9 @@
         the variant name, and so the compiler can't use a jump
         table as it does for normal variants. Instead, it creates a
         decision tree that compares the hash values against the
-          input variable in as few comparisons as possible.
-	  <a data-type="indexterm"
-	     data-primary="pattern matching"
-	     data-secondary="fundamental algorithms in">&nbsp;</a></p>
+        input variable in as few comparisons as possible.
+        <a data-type="indexterm" data-primary="pattern matching"
+        data-secondary="fundamental algorithms in">&nbsp;</a></p>
 
         <div data-type="note">
           <h1>Learning More About Pattern Matching Compilation</h1>
@@ -194,17 +191,17 @@
       "sect2">
         <h2>Benchmarking Pattern Matching</h2>
 
-        <p>Let's benchmark these three pattern-matching techniques to
-        quantify their runtime costs more
-        accurately. The <code>Core_bench</code> module runs the tests
-        thousands of times and also calculates statistical variance of
-        the results. You'll need to <code>opam install
+        <p>Let's benchmark these three pattern-matching techniques
+        to quantify their runtime costs more accurately. The
+        <code>Core_bench</code> module runs the tests thousands of
+        times and also calculates statistical variance of the
+        results. You'll need to <code>opam install
         core_bench</code> to get the library:<a data-type=
         "indexterm" data-primary="pattern matching" data-secondary=
         "benchmarking of">&nbsp;</a><a data-type="indexterm"
         data-primary="lambda form code" data-secondary=
-        "pattern matching benchmarking">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocaml" href=
+        "pattern matching benchmarking">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocaml" href=
         "code/back-end-bench/bench_patterns.ml" />
 
         <p>Building and executing this example will run for around
@@ -227,7 +224,7 @@
         often easier to look at the textual output from this stage
         than to wade through the native assembly code from compiled
         executables.<a data-type="indexterm" data-startref=
-		       "CPuntype">&nbsp;</a></p>
+        "CPuntype">&nbsp;</a></p>
       </section>
     </section>
 
@@ -237,23 +234,19 @@
       <p>After the lambda form has been generated, we are very
       close to having executable code. The OCaml toolchain branches
       into two separate compilers at this point. We'll describe the
-	bytecode compiler first, which consists of two pieces:
-	<a data-type="indexterm" data-primary=
-	   "OCaml toolchain" data-secondary=
-	   "ocamlrun">&nbsp;</a>
-	<a data-type="indexterm" data-primary=
-	   "OCaml toolchain" data-secondary=
-	   "ocamlc">&nbsp;</a>
-	<a data-type="indexterm" data-primary=
-	   "bytecode compiler" data-secondary=
-	   "tools used">&nbsp;</a>
-	<a data-type="indexterm" id=
-	   "CPportbyte" data-primary="compilation process"
-	   data-secondary="portable bytecode">&nbsp;</a></p>
-      
+      bytecode compiler first, which consists of two pieces:
+      <a data-type="indexterm" data-primary="OCaml toolchain"
+      data-secondary="ocamlrun">&nbsp;</a> <a data-type="indexterm"
+      data-primary="OCaml toolchain" data-secondary=
+      "ocamlc">&nbsp;</a> <a data-type="indexterm" data-primary=
+      "bytecode compiler" data-secondary="tools used">&nbsp;</a>
+      <a data-type="indexterm" id="CPportbyte" data-primary=
+      "compilation process" data-secondary=
+      "portable bytecode">&nbsp;</a></p>
+
       <dl>
         <dt><span class="command"><em>ocamlc</em></span></dt>
-	
+
         <dd>
           <p>Compiles files into a bytecode that is a close mapping
           to the lambda form</p>
@@ -324,10 +317,10 @@
       just minor variants of commonly encountered operations (e.g.,
       function application at a specific arity). You can find full
       details <a href=
-		 "http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>.
-	<a data-type="indexterm"
-	   data-primary="bytecode compiler"
-	   data-secondary="instruction set for">&nbsp;</a></p>
+      "http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>.
+      <a data-type="indexterm" data-primary="bytecode compiler"
+      data-secondary="instruction set for">&nbsp;</a></p>
+
       <div data-type="note">
         <h1>Where Did the Bytecode Instruction Set Come From?</h1>
 
@@ -365,9 +358,8 @@
         bytecode files are matched with the associated
         <code>cmi</code> interface, which contains the type
         signature exported to other compilation units.
-	<a data-type="indexterm"
-	   data-primary="bytecode compiler"
-           data-secondary="compiling and linking code">&nbsp;</a></p>
+        <a data-type="indexterm" data-primary="bytecode compiler"
+        data-secondary="compiling and linking code">&nbsp;</a></p>
 
         <p>A typical OCaml library consists of multiple source
         files, and hence multiple <code>cmo</code> files that all
@@ -424,9 +416,9 @@
         that bundles the <span class=
         "command"><em>ocamlrun</em></span> interpreter with the
         bytecode in a single binary. This is known as a <em>custom
-            runtime</em> mode and is built as follows:
-	  <a data-type="indexterm"
-	     data-primary="custom runtime mode">&nbsp;</a></p>
+        runtime</em> mode and is built as follows: <a data-type=
+        "indexterm" data-primary=
+        "custom runtime mode">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
         "code/back-end-embed/link_custom.out" />
 
@@ -434,8 +426,8 @@
         built-in rules. The <code>%.byte</code> rule that you've
         been using throughout the book builds a bytecode
         executable, and adding the <code>custom</code> tag will
-          bundle the interpreter with it, too.
-	  <a data-type="indexterm" data-primary="%.byte rule">&nbsp;</a></p>
+        bundle the interpreter with it, too. <a data-type=
+        "indexterm" data-primary="%.byte rule">&nbsp;</a></p>
 
         <p>The custom mode is the most similar mode to native code
         compilation, as both generate standalone executables. There
@@ -458,7 +450,7 @@
         via the <span class=
         "keep-together"><code>-output-obj</code></span>
         directive.<a data-type="indexterm" data-primary=
-		     "C object files">&nbsp;</a></p>
+        "C object files">&nbsp;</a></p>
 
         <p>This mode causes <span class=
         "command"><em>ocamlc</em></span> to output an object file
@@ -516,9 +508,9 @@
         named entry points in the OCaml code. This is explained in
         detail in the <a href=
         "http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149">
-            interfacing with C</a> section of the OCaml manual.
-	  <a data-type="indexterm"
-	     data-startref="CPportbyte">&nbsp;</a></p>
+        interfacing with C</a> section of the OCaml manual.
+        <a data-type="indexterm" data-startref=
+        "CPportbyte">&nbsp;</a></p>
       </section>
     </section>
 
@@ -597,8 +589,8 @@
         "command"><em>ocamlopt</em></span> to output the assembly
         by passing the <code>-S</code> flag to the compiler command
         line.<a data-type="indexterm" data-primary=
-		"native-code compiler" data-secondary=
-		"inspecting assembly output">&nbsp;</a></p>
+        "native-code compiler" data-secondary=
+        "inspecting assembly output">&nbsp;</a></p>
 
         <p>The assembly code is highly architecture-specific, so
         the following discussion assumes an Intel or AMD 64-bit
@@ -678,9 +670,8 @@
           stack (the <code>%rsp</code> register), and a C function
           call is invoked by placing a pointer to
           <code>caml_greaterthan</code> in <code>%rax</code> and
-          jumping to <code>caml_c_call</code>.
-	  <a data-type="indexterm"
-	     data-primary="backtraces">&nbsp;</a></p>
+          jumping to <code>caml_c_call</code>. <a data-type=
+          "indexterm" data-primary="backtraces">&nbsp;</a></p>
 
           <p>OCaml on x86_64 architectures caches the location of
           the minor heap in the <code>%r15</code> register since
@@ -731,13 +722,12 @@
         <span class="command"><em>gdb</em></span>. You need to
         compile your libraries with the <code>-g</code> option to
         add the debug information to the output, just as you need
-        to with C compilers.
-	<a data-type="indexterm" data-primary=
-           "debugging" data-secondary=
-           "native code binaries">&nbsp;</a>
-	<a data-type="indexterm"
-	   data-primary="native-code compiler"
-	   data-secondary="debugging binaries">&nbsp;</a></p>
+        to with C compilers. <a data-type="indexterm" data-primary=
+        "debugging" data-secondary=
+        "native code binaries">&nbsp;</a> <a data-type="indexterm"
+        data-primary="native-code compiler" data-secondary=
+        "debugging binaries">&nbsp;</a></p>
+
         <p>Extra debugging information is inserted into the output
         assembly when the library is compiled in debug mode. These
         include the CFI stubs you will have noticed in the
@@ -810,10 +800,10 @@
           <h3>Interactive breakpoints with the GNU debugger</h3>
 
           <p>Let's see name mangling in action with some
-            interactive debugging using GNU
-	    <span class="command"><em>gdb</em></span>.
-	    <a data-type="indexterm"
-	       data-primary="GNU debugger">&nbsp;</a></p>
+          interactive debugging using GNU <span class=
+          "command"><em>gdb</em></span>. <a data-type="indexterm"
+          data-primary="GNU debugger">&nbsp;</a></p>
+
           <div data-type="caution">
             <h1>Beware gdb on Mac OS X</h1>
 
@@ -914,14 +904,13 @@
         profiling</em>. OCaml native code binaries can be profiled
         just like any other C binary, by using the name mangling
         described earlier to map between OCaml variable names and
-          the profiler output.
-	  <a data-type="indexterm" data-primary=
-	     "profiling">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="performance profiling">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="native-code compiler" data-secondary=
-	     "performance profiling">&nbsp;</a></p>
+        the profiler output. <a data-type="indexterm" data-primary=
+        "profiling">&nbsp;</a> <a data-type="indexterm"
+        data-primary="performance profiling">&nbsp;</a>
+        <a data-type="indexterm" data-primary=
+        "native-code compiler" data-secondary=
+        "performance profiling">&nbsp;</a></p>
+
         <p>Most profiling tools benefit from having some
         instrumentation included in the binary. OCaml supports two
         such tools:</p>
@@ -951,7 +940,7 @@
           call graph of which functions call one another, and
           recording the time these calls take during the program
           execution.<a data-type="indexterm" data-primary=
-		       "gprof code profiler">&nbsp;</a></p>
+          "gprof code profiler">&nbsp;</a></p>
 
           <p>Getting precise information out of <span class=
           "command"><em>gprof</em></span> requires passing the
@@ -993,11 +982,11 @@
 
           <p>Perf has a growing collection of other commands that
           let you archive these runs and compare them against each
-            other. You can read more on the
-	    <a href=
-	       "http://perf.wiki.kernel.org">home page</a>.
-	    <a data-type="indexterm"
-	       data-primary="frame pointers">&nbsp;</a></p>
+          other. You can read more on the <a href=
+          "http://perf.wiki.kernel.org">home page</a>.
+          <a data-type="indexterm" data-primary=
+          "frame pointers">&nbsp;</a></p>
+
           <aside data-type="sidebar">
             <h5>Using the Frame Pointer to Get More Accurate
             Traces</h5>
@@ -1044,10 +1033,10 @@
         file just as the bytecode compiler can. This object file
         has no further dependencies on OCaml except for the runtime
         library.<a data-type="indexterm" data-primary=
-		   "libasmrun.a library">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="native-code compiler"
-	     data-secondary="embedding code in C">&nbsp;</a></p>
+        "libasmrun.a library">&nbsp;</a> <a data-type="indexterm"
+        data-primary="native-code compiler" data-secondary=
+        "embedding code in C">&nbsp;</a></p>
+
         <p>The native code runtime is a different library from the
         bytecode one, and is installed as <code>libasmrun.a</code>
         in the OCaml standard library directory.</p>
@@ -1091,9 +1080,8 @@
         not found, it's probably because you're using OCaml 4.00
         and not 4.01. It's only installed by default in the very
         latest version, which you should be using via the
-          <code>4.01.0</code> OPAM switch.
-	  <a data-type="indexterm"
-	     data-startref="CPfast">&nbsp;</a></p>
+        <code>4.01.0</code> OPAM switch. <a data-type="indexterm"
+        data-startref="CPfast">&nbsp;</a></p>
       </section>
     </section>
 
@@ -1103,13 +1091,12 @@
 
       <p>We've seen how the compiler uses intermediate files to
       store various stages of the compilation toolchain. Here's a
-	cheat sheet of all them in one place.
-	<a data-type="indexterm"
-	   data-primary="files" data-secondary=
-	   "chart of file extensions">&nbsp;</a>
-	<a data-type="indexterm"
-	   data-primary="compilation process"
-	   data-secondary="file extensions">&nbsp;</a></p>
+      cheat sheet of all them in one place. <a data-type=
+      "indexterm" data-primary="files" data-secondary=
+      "chart of file extensions">&nbsp;</a> <a data-type=
+      "indexterm" data-primary="compilation process"
+      data-secondary="file extensions">&nbsp;</a></p>
+
       <p><a href="23-compiler-backend.html#Table2301" data-type=
       "xref">Table2301</a> shows the intermediate files generated
       by <span class="command"><em>ocamlc</em></span>.</p>
@@ -1199,8 +1186,8 @@
       <p>The native code compiler generates some additional files
       (see <a href="23-compiler-backend.html#Table2302" data-type=
       "xref">Table2302</a>).<a data-type="indexterm" data-primary=
-			       "native-code compiler" data-secondary=
-			       "files generated by">&nbsp;</a></p>
+      "native-code compiler" data-secondary=
+      "files generated by">&nbsp;</a></p>
 
       <table id="Table2302">
         <caption>

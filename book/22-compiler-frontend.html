@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -19,8 +17,8 @@
     understand how these fit together to help with your day-to-day
     workflow of developing, debugging, and deploying
     applications.<a data-type="indexterm" data-primary=
-		    "compilation process" data-secondary=
-		    "toolchain for">&nbsp;</a></p>
+    "compilation process" data-secondary=
+    "toolchain for">&nbsp;</a></p>
 
     <p>OCaml has a strong emphasis on static type safety and
     rejects source code that doesn't meet its requirements as early
@@ -42,8 +40,8 @@
     need to dive into the toolchain to hunt down a bug or
     investigate a performance problem. This chapter explains the
     compiler pipeline in more depth so you understand how to
-    harness the command-line tools effectively.
-    <a data-type="indexterm" data-primary="OCaml toolchain" data-secondary=
+    harness the command-line tools effectively. <a data-type=
+    "indexterm" data-primary="OCaml toolchain" data-secondary=
     "ocamlc">&nbsp;</a><a data-type="indexterm" data-primary=
     "OCaml toolchain" data-secondary="ocamlopt">&nbsp;</a></p>
 
@@ -83,7 +81,7 @@
       data-type="xref">Files Modules And Programs</a>, so we'll
       assume you've built a few OCaml programs already by this
       point.<a data-type="indexterm" data-primary="OCaml toolchain"
-	       data-secondary="overview of">&nbsp;</a></p>
+      data-secondary="overview of">&nbsp;</a></p>
 
       <p>Each source file represents a <em>compilation unit</em>
       that is built separately. The compiler generates intermediate
@@ -92,12 +90,11 @@
       collection of compiled units and produces a standalone
       executable or library archive that can be reused by other
       applications.<a data-type="indexterm" data-primary=
-		      "compilation units">&nbsp;</a></p>
+      "compilation units">&nbsp;</a></p>
 
       <p>The overall compilation pipeline looks like this:
-	<a data-type="indexterm"
-	   data-primary="compilation process"
-	   data-secondary="diagram of">&nbsp;</a></p>
+      <a data-type="indexterm" data-primary="compilation process"
+      data-secondary="diagram of">&nbsp;</a></p>
 
       <p><a href=
       "https://github.com/realworldocaml/examples/tree/v1/code/front-end/pipeline.ascii"
@@ -119,7 +116,7 @@
       <em>native code</em> compiler generates specialized
       executable binaries suitable for high-performance
       applications.<a data-type="indexterm" data-primary=
-		      "compilation process" data-secondary=
+      "compilation process" data-secondary=
       "compiler source code">&nbsp;</a><a data-type="indexterm"
       data-primary="code compilers" data-secondary=
       "bytecode vs. native code">&nbsp;</a></p>
@@ -283,10 +280,9 @@
       data-type="xref">Parsing With Ocamllex And Menhir</a>. The
       lexer and parser rules can be found in the
       <code>parsing</code> directory in the source
-      distribution.<a data-type="indexterm"
-		      data-primary="AST (abstract syntax-tree)">&nbsp;</a>
-      
-      <a data-type="indexterm" id="SCpras" data-primary="source code"
+      distribution.<a data-type="indexterm" data-primary=
+      "AST (abstract syntax-tree)">&nbsp;</a> <a data-type=
+      "indexterm" id="SCpras" data-primary="source code"
       data-secondary="parsing of">&nbsp;</a><a data-type=
       "indexterm" id="PARSsource" data-primary="parsing"
       data-secondary="of source code">&nbsp;</a><a data-type=
@@ -335,10 +331,9 @@
 
         <p>Sadly, syntax errors do get more inaccurate sometimes,
         depending on the nature of your mistake. Try to spot the
-          deliberate error in the following function definitions:
-	  <a data-type="indexterm"
-	     data-primary="source code"
-	     data-secondary="automatically indenting">&nbsp;</a></p>
+        deliberate error in the following function definitions:
+        <a data-type="indexterm" data-primary="source code"
+        data-secondary="automatically indenting">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/front-end/follow_on_function.ml" />
 
@@ -364,7 +359,7 @@
         line-by-line basis. This not only beautifies your code
         layout, but it also makes this syntax error much easier to
         locate.<a data-type="indexterm" data-primary="debugging"
-		  data-secondary="single errant characters">&nbsp;</a></p>
+        data-secondary="single errant characters">&nbsp;</a></p>
 
         <p>Let's run our erroneous file through <span class=
         "command"><em>ocp-indent</em></span> and see how it
@@ -397,11 +392,10 @@
         <p>Whitespace and source code comments are removed during
         parsing and aren't significant in determining the semantics
         of the program. However, other tools in the OCaml
-          distribution can interpret comments for their own ends.
-	  <a data-type="indexterm"
-	     data-primary="OCaml toolchain" data-secondary=
-        "ocamldoc">&nbsp;</a><a data-type="indexterm" data-primary=
-        "interfaces" data-secondary=
+        distribution can interpret comments for their own ends.
+        <a data-type="indexterm" data-primary="OCaml toolchain"
+        data-secondary="ocamldoc">&nbsp;</a><a data-type=
+        "indexterm" data-primary="interfaces" data-secondary=
         "generating documentation from">&nbsp;</a><a data-type=
         "indexterm" data-primary=
         "documentation, generating from interfaces">&nbsp;</a></p>
@@ -649,10 +643,9 @@
         comparison is less efficient than defining explicit
         comparison functions between values. However, it quickly
         becomes tedious to manually define comparison functions for
-          complex type definitions.
-	  <a data-type="indexterm"
-	     data-primary="interactive input" data-secondary=
-	     "with camlp4">&nbsp;</a><a data-type="indexterm"
+        complex type definitions. <a data-type="indexterm"
+        data-primary="interactive input" data-secondary=
+        "with camlp4">&nbsp;</a><a data-type="indexterm"
         data-primary="polymorphic comparisons">&nbsp;</a></p>
 
         <p>Let's see how <code>comparelib</code> solves this
@@ -679,8 +672,8 @@
         <span class="command"><em>utop</em></span> directly, since
         it embeds the Camlp4 invocation as an automated part of its
         operation.<a data-type="indexterm" data-primary=
-		     "command-line parsing" data-secondary=
-		     "with Camlp4">&nbsp;</a></p>
+        "command-line parsing" data-secondary=
+        "with Camlp4">&nbsp;</a></p>
 
         <p>Let's turn to the command line to obtain the result of
         the <code>comparelib</code> transformation instead. Create
@@ -796,8 +789,9 @@
         <code>comparelib</code> is much simpler than the actual
         code. Running Camlp4 directly on the original source code
         lets you see these all these transformations precisely.
-	<a data-type="indexterm" data-primary="grammars"
-        data-secondary="avoiding grammar clashes">&nbsp;</a><a data-type=
+        <a data-type="indexterm" data-primary="grammars"
+        data-secondary=
+        "avoiding grammar clashes">&nbsp;</a><a data-type=
         "indexterm" data-primary="macros">&nbsp;</a><a data-type=
         "indexterm" data-primary=
         "conditional compilation">&nbsp;</a><a data-type=
@@ -1040,12 +1034,11 @@
         appropriate types for expressions based on their use. It's
         a feature that's partially present in many other languages
         such as Haskell and Scala, but OCaml embeds it as a
-          fundamental feature throughout the core language.
-	  <a data-type="indexterm" data-primary=
-             "Hindley-Milner algorithm">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="type inference"
-	     data-secondary="algorithm basis of">&nbsp;</a></p>
+        fundamental feature throughout the core language.
+        <a data-type="indexterm" data-primary=
+        "Hindley-Milner algorithm">&nbsp;</a> <a data-type=
+        "indexterm" data-primary="type inference" data-secondary=
+        "algorithm basis of">&nbsp;</a></p>
 
         <p>OCaml type inference is based on the Hindley-Milner
         algorithm, which is notable for its ability to infer the
@@ -1283,9 +1276,9 @@
         "09-functors.html#functors" data-type="xref">Functors</a>
         and <a href=
         "10-first-class-modules.html#first-class-modules"
-               data-type="xref">First Class Modules</a>, respectively.
-	  <a data-type="indexterm" data-primary="modules" data-secondary=
-        "separate compilation in">&nbsp;</a></p>
+        data-type="xref">First Class Modules</a>, respectively.
+        <a data-type="indexterm" data-primary="modules"
+        data-secondary="separate compilation in">&nbsp;</a></p>
 
         <p>This section discusses how the compiler implements them
         in more detail. Modules are essential for larger projects
@@ -1293,9 +1286,8 @@
         <em>compilation units</em>). It's impractical to recompile
         every single source file when changing just one or two
         files, and the module system minimizes such recompilation
-        while still encouraging code reuse.
-	<a data-type="indexterm"
-	   data-primary="compilation units">&nbsp;</a></p>
+        while still encouraging code reuse. <a data-type=
+        "indexterm" data-primary="compilation units">&nbsp;</a></p>
 
         <section id="the-mapping-between-files-and-modules"
         data-type="sect3">
@@ -1304,9 +1296,9 @@
           <p>Individual compilation units provide a convenient way
           to break up a big module hierarchy into a collection of
           files. The relationship between files and modules can be
-            explained directly in terms of the module system.
-	    <a data-type="indexterm" data-primary="files"
-               data-secondary="relationship with modules">&nbsp;</a></p>
+          explained directly in terms of the module system.
+          <a data-type="indexterm" data-primary="files"
+          data-secondary="relationship with modules">&nbsp;</a></p>
 
           <p>Create a file called <code>alice.ml</code> with the
           following contents:</p>
@@ -1333,10 +1325,10 @@
           overall type of <code>Alice</code> to be valid, the
           compiler also needs to check that the <code>Bob</code>
           module contains at least a <code>Bob.name</code> value
-            and defines a <code>Bob.t</code> type.
-	    <a data-type="indexterm"
-	       data-primary="modules"
-	       data-secondary="defining search paths">&nbsp;</a></p>
+          and defines a <code>Bob.t</code> type. <a data-type=
+          "indexterm" data-primary="modules" data-secondary=
+          "defining search paths">&nbsp;</a></p>
+
           <p>The type checker resolves such module references into
           concrete structures and signatures in order to unify
           types across module boundaries. It does this by searching
@@ -1366,15 +1358,14 @@
           overridden by setting the <code>CAMLLIB</code>
           environment variable. Needless to say, don't override the
           default path unless you have a good reason to (such as
-            setting up a cross-compilation environment).
-	    <a data-type="indexterm"
-	       data-primary="cmi files">&nbsp;</a>
-	    <a data-type="indexterm"
-               data-primary="files"
-	       data-secondary="cmi files">&nbsp;</a>
-	    <a data-type="indexterm"
-               data-primary="OCaml toolchain"
-	       data-secondary="ocamlogjinfo">&nbsp;</a></p>
+          setting up a cross-compilation environment).
+          <a data-type="indexterm" data-primary=
+          "cmi files">&nbsp;</a> <a data-type="indexterm"
+          data-primary="files" data-secondary=
+          "cmi files">&nbsp;</a> <a data-type="indexterm"
+          data-primary="OCaml toolchain" data-secondary=
+          "ocamlogjinfo">&nbsp;</a></p>
+
           <aside data-type="sidebar">
             <h5>Inspecting Compilation Units with ocamlobjinfo</h5>
 
@@ -1432,10 +1423,9 @@
         enforces a 1:1 mapping between a top-level module and a
         file. It's often convenient to split larger modules into
         separate files to make editing easier, but still compile
-          them all into a single OCaml module.
-	  <a data-type="indexterm"
-	     data-primary="modules"
-	     data-secondary="packing together">&nbsp;</a></p>
+        them all into a single OCaml module. <a data-type=
+        "indexterm" data-primary="modules" data-secondary=
+        "packing together">&nbsp;</a></p>
 
         <p>The <code>-pack</code> compiler option accepts a list of
         compiled object files (<code>.cmo</code> in bytecode and
@@ -1521,9 +1511,9 @@
         provide a complete replacement standard library. It
         collects these modules into a single <code>Std</code>
         module, which provides a single module that needs to be
-          opened to import the replacement modules and functions.
-	  <a data-type="indexterm" data-primary="errors"
-             data-secondary="reducing verbosity in">&nbsp;</a></p>
+        opened to import the replacement modules and functions.
+        <a data-type="indexterm" data-primary="errors"
+        data-secondary="reducing verbosity in">&nbsp;</a></p>
 
         <p>There's one downside to this approach: type errors
         suddenly get much more verbose. We can see this if you run
@@ -1549,7 +1539,7 @@
         preferred output type. The option is activated by passing
         <code>-short-paths</code> to the compiler, and works on the
         toplevel, too.<a data-type="indexterm" data-primary=
-			 "short paths heuristic">&nbsp;</a></p>
+        "short paths heuristic">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
         "code/front-end/short_paths_3.out" />
 
@@ -1565,8 +1555,8 @@
         <p>You'll need to choose for yourself if you prefer short
         paths or the default behavior in your own projects, and
         pass the <code>-short-paths</code> flag to the compiler if
-          you need it.<a data-type="indexterm"
-			 data-startref="CPstatictype">&nbsp;</a></p>
+        you need it.<a data-type="indexterm" data-startref=
+        "CPstatictype">&nbsp;</a></p>
       </section>
     </section>
 
@@ -1608,7 +1598,7 @@
         information in your editor is <span class=
         "command"><em>ocp-index</em></span>. Install it via OPAM as
         follows:<a data-type="indexterm" data-primary=
-		   "autocompletion">&nbsp;</a><a data-type="indexterm"
+        "autocompletion">&nbsp;</a><a data-type="indexterm"
         data-primary="ocp-index">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
         "code/front-end/install_ocp_index.out" />
@@ -1644,8 +1634,9 @@
         dump the raw output of the internal AST representation. You
         can't depend on these flags to give the same output across
         compiler revisions, but they are a useful learning
-          tool.<a data-type="indexterm"
-		  data-primary="flags">&nbsp;</a></p>
+        tool.<a data-type="indexterm" data-primary=
+        "flags">&nbsp;</a></p>
+
         <p>We'll use our toy <code>typedef.ml</code> again:</p>
         <link rel="import" data-code-language="ocaml" href=
         "code/front-end/typedef.ml" />
@@ -1674,11 +1665,10 @@
         <p>The typed AST is more explicit than the untyped syntax
         tree. For instance, the type declaration has been given a
         unique name (<code>t/1008</code>), as has the
-          <code>v</code> value (<code>v/1011</code>).
-	  <a data-type="indexterm"
-	     data-startref="typesyntree">&nbsp;</a>
-	  <a data-type="indexterm"
-             data-startref="CPtypsyn">&nbsp;</a></p>
+        <code>v</code> value (<code>v/1011</code>). <a data-type=
+        "indexterm" data-startref="typesyntree">&nbsp;</a>
+        <a data-type="indexterm" data-startref=
+        "CPtypsyn">&nbsp;</a></p>
 
         <p>You'll rarely need to look at this raw output from the
         compiler unless you're building IDE tools such as

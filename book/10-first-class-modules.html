@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -16,20 +14,20 @@
     <p>You can think of OCaml as being broken up into two parts: a
     core language that is concerned with values and types, and a
     module language that is concerned with modules and module
-    signatures. These sublanguages are stratified, in that modules can
-    contain types and values, but ordinary values can't contain
+    signatures. These sublanguages are stratified, in that modules
+    can contain types and values, but ordinary values can't contain
     modules or module types. That means you can't do things like
     define a variable whose value is a module, or a function that
     takes a module as an argument.<a data-type="indexterm" id=
-    "MODfirst" data-primary="modules" data-secondary= "first-class
-    modules">&nbsp;</a></p>
+    "MODfirst" data-primary="modules" data-secondary=
+    "first-class modules">&nbsp;</a></p>
 
     <p>OCaml provides a way around this stratification in the form
-    of <em>first-class modules</em>. First-class modules are ordinary
-    values that can be created from and converted back to regular
-    modules.<a data-type="indexterm" id="FCMwork"
-    data-primary="first-class modules" data-secondary= "working
-    with">&nbsp;</a></p>
+    of <em>first-class modules</em>. First-class modules are
+    ordinary values that can be created from and converted back to
+    regular modules.<a data-type="indexterm" id="FCMwork"
+    data-primary="first-class modules" data-secondary=
+    "working with">&nbsp;</a></p>
 
     <p>First-class modules are a sophisticated technique, and
     you'll need to get comfortable with some advanced aspects of
@@ -60,9 +58,10 @@
       <p>A first-class module is created by packaging up a module
       with a signature that it satisfies. This is done using the
       <code>module</code> keyword, using the following
-      syntax:<a data-type="indexterm" data-primary="module
-      keyword">&nbsp;</a></p> <link rel="import"
-      data-code-language="ocamlsyntax" href= "code/fcm/pack.syntax" />
+      syntax:<a data-type="indexterm" data-primary=
+      "module keyword">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamlsyntax" href=
+      "code/fcm/pack.syntax" />
 
       <p>So, we can convert <code>Three</code> into a first-class
       module as follows:</p>
@@ -185,30 +184,31 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/fcm/main.topscript" part="16" />
 
-      <p>We can also write functions that use such first-class modules
-      polymorphically. The following function takes two arguments:
-      a <code>Bumpable</code> module and a list of elements of the
-      same type as the type <code>t</code> of the
+      <p>We can also write functions that use such first-class
+      modules polymorphically. The following function takes two
+      arguments: a <code>Bumpable</code> module and a list of
+      elements of the same type as the type <code>t</code> of the
       module:<a data-type="indexterm" data-primary="polymorphism"
-      data-secondary= "in first-class
-      modules">&nbsp;</a><a data-type="indexterm"
-      data-primary="first-class modules" data-secondary= "polymorphism
-      in">&nbsp;</a></p> <link rel="import"
-      data-code-language="ocamltop" href= "code/fcm/main.topscript"
-      part="17" />
+      data-secondary=
+      "in first-class modules">&nbsp;</a><a data-type="indexterm"
+      data-primary="first-class modules" data-secondary=
+      "polymorphism in">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/fcm/main.topscript" part="17" />
 
-      <p>Here, we used a feature of OCaml that hasn't come up before:
-      a <em>locally abstract type</em>. For any function, you can
-      declare a pseudoparameter of the form <code>(type a)</code> for
-      any type name <code>a</code> which introduces a fresh type. This
-      type acts like an abstract type within the context of the
-      function. In the example above, the locally abstract type was
-      used as part of a sharing constraint that ties the
-      type <code>B.t</code> with the type of the elements of the list
-      passed in.<a data-type="indexterm" data-primary= "datatypes"
-      data-secondary= "locally abstract
-      types">&nbsp;</a><a data-type="indexterm" data-primary="abstract
-      types">&nbsp;</a><a data-type= "indexterm" data-primary=
+      <p>Here, we used a feature of OCaml that hasn't come up
+      before: a <em>locally abstract type</em>. For any function,
+      you can declare a pseudoparameter of the form <code>(type
+      a)</code> for any type name <code>a</code> which introduces a
+      fresh type. This type acts like an abstract type within the
+      context of the function. In the example above, the locally
+      abstract type was used as part of a sharing constraint that
+      ties the type <code>B.t</code> with the type of the elements
+      of the list passed in.<a data-type="indexterm" data-primary=
+      "datatypes" data-secondary=
+      "locally abstract types">&nbsp;</a><a data-type="indexterm"
+      data-primary="abstract types">&nbsp;</a><a data-type=
+      "indexterm" data-primary=
       "locally abstract types">&nbsp;</a></p>
 
       <p>The resulting function is polymorphic in both the type of
@@ -224,12 +224,12 @@
       <div data-type="note">
         <h1>More on Locally Abstract Types</h1>
 
-        <p>One of the key properties of locally abstract types is that
-        they're dealt with as abstract types in the function they're
-        defined within, but are polymorphic from the outside. Consider
-        the following example:<a data-type= "indexterm"
-        data-primary="polymorphism" data-secondary= "in locally
-        abstract types">&nbsp;</a></p>
+        <p>One of the key properties of locally abstract types is
+        that they're dealt with as abstract types in the function
+        they're defined within, but are polymorphic from the
+        outside. Consider the following example:<a data-type=
+        "indexterm" data-primary="polymorphism" data-secondary=
+        "in locally abstract types">&nbsp;</a></p>
       </div>
       <link rel="import" data-code-language="ocamltop" href=
       "code/fcm/main.topscript" part="19" />
@@ -265,12 +265,12 @@
       <h1>Example: A Query-Handling Framework</h1>
 
       <p>Now let's look at first-class modules in the context of a
-      more complete and realistic example. In particular, consider the
-      following signature for a module that implements a system for
-      responding to user-generated queries.<a data-type= "indexterm"
-      data-primary="query-handlers" data-secondary="and first-class
-      modules">&nbsp;</a><a data-type="indexterm" id="FCMquery"
-      data-primary="first-class modules"
+      more complete and realistic example. In particular, consider
+      the following signature for a module that implements a system
+      for responding to user-generated queries.<a data-type=
+      "indexterm" data-primary="query-handlers" data-secondary=
+      "and first-class modules">&nbsp;</a><a data-type="indexterm"
+      id="FCMquery" data-primary="first-class modules"
       data-secondary="query-handling framework">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/fcm/query_handler.topscript" />
@@ -278,12 +278,13 @@
       <p>Here, we used s-expressions as the format for queries and
       responses, as well as the configuration for the query
       handler. S-expressions are a simple, flexible, and
-      human-readable serialization format commonly used in Core.  For
-      now, it's enough to think of them as balanced parenthetical
-      expressions whose atomic values are strings, e.g., <code>(this
-      (is an) (s expression))</code>.<a data-type="indexterm"
-      data-primary= "s-expressions" data-secondary= "in queries and
-      responses">&nbsp;</a></p>
+      human-readable serialization format commonly used in Core.
+      For now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings,
+      e.g., <code>(this (is an) (s
+      expression))</code>.<a data-type="indexterm" data-primary=
+      "s-expressions" data-secondary=
+      "in queries and responses">&nbsp;</a></p>
 
       <p>In addition, we use the Sexplib syntax extension which
       extends OCaml by adding the <code>with sexp</code>
@@ -307,16 +308,16 @@
       <section id="implementing-a-query-handler" data-type="sect2">
         <h2>Implementing a Query Handler</h2>
 
-        <p>Let's look at some examples of query handlers that satisfy
-        the <code>Query_handler</code> interface. The first example is
-        a handler that produces unique integer IDs. It works by
-        keeping an internal counter which it bumps every time it
-        produces a new value. The input to the query in this case is
-        just the trivial s-expression <code>()</code>, otherwise known
-        as <code>Sexp.unit</code>:<a data-type= "indexterm"
-        data-primary="query-handlers" data-secondary= "implementation
-        of">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        <p>Let's look at some examples of query handlers that
+        satisfy the <code>Query_handler</code> interface. The first
+        example is a handler that produces unique integer IDs. It
+        works by keeping an internal counter which it bumps every
+        time it produces a new value. The input to the query in
+        this case is just the trivial s-expression <code>()</code>,
+        otherwise known as <code>Sexp.unit</code>:<a data-type=
+        "indexterm" data-primary="query-handlers" data-secondary=
+        "implementation of">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/fcm/query_handler.topscript" part="3" />
 
         <p>We can use this module to create an instance of the
@@ -342,14 +343,15 @@
         <h2>Dispatching to Multiple Query Handlers</h2>
 
         <p>Now, what if we want to dispatch queries to any of an
-        arbitrary collection of handlers? Ideally, we'd just like to
-        pass in the handlers as a simple data structure like a
-        list. This is awkward to do with modules and functors alone,
-        but it's quite natural with first-class modules. The first
-        thing we'll need to do is create a signature that combines
-        a <code>Query_handler</code> module with an instantiated query
-        handler:<a data-type="indexterm" data-primary="query-handlers"
-        data-secondary= "dispatching to multiple">&nbsp;</a></p>
+        arbitrary collection of handlers? Ideally, we'd just like
+        to pass in the handlers as a simple data structure like a
+        list. This is awkward to do with modules and functors
+        alone, but it's quite natural with first-class modules. The
+        first thing we'll need to do is create a signature that
+        combines a <code>Query_handler</code> module with an
+        instantiated query handler:<a data-type="indexterm"
+        data-primary="query-handlers" data-secondary=
+        "dispatching to multiple">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/fcm/query_handler.topscript" part="7" />
 
@@ -396,9 +398,10 @@
         "code/fcm/query_handler.topscript" part="12" />
 
         <p>This function interacts with an instance by unpacking it
-        into a module <code>I</code> and then using the query handler
-        instance (<code>I.this</code>) in concert with the associated
-        module (<code>I.Query_handler</code>).<a data-type="indexterm"
+        into a module <code>I</code> and then using the query
+        handler instance (<code>I.this</code>) in concert with the
+        associated module
+        (<code>I.Query_handler</code>).<a data-type="indexterm"
         data-primary="I.Query_handler module">&nbsp;</a></p>
 
         <p>The bundling together of the module and the value is in
@@ -431,13 +434,13 @@
       "sect2">
         <h2>Loading and Unloading Query Handlers</h2>
 
-        <p>One of the advantages of first-class modules is that they
-        afford a great deal of dynamism and flexibility. For example,
-        it's a fairly simple matter to change our design to allow
-        query handlers to be loaded and unloaded at
+        <p>One of the advantages of first-class modules is that
+        they afford a great deal of dynamism and flexibility. For
+        example, it's a fairly simple matter to change our design
+        to allow query handlers to be loaded and unloaded at
         runtime.<a data-type="indexterm" data-primary=
-        "query-handlers" data-secondary="loading/unloading
-        of">&nbsp;</a></p>
+        "query-handlers" data-secondary=
+        "loading/unloading of">&nbsp;</a></p>
 
         <p>We'll do this by creating a query handler whose job is
         to control the set of active query handlers. The module in
@@ -546,11 +549,11 @@
 
         <p>Although we won't describe the details here, we can push
         this dynamism yet further using OCaml's dynamic linking
-        facilities, which allow you to compile and link in new code to
-        a running program. This can be automated using libraries
+        facilities, which allow you to compile and link in new code
+        to a running program. This can be automated using libraries
         like <code>ocaml_plugin</code>, which can be installed via
-        OPAM, and which automates much of the workflow around setting
-        up dynamic linking.<a data-type="indexterm"
+        OPAM, and which automates much of the workflow around
+        setting up dynamic linking.<a data-type="indexterm"
         data-startref="FCMquery">&nbsp;</a></p>
       </section>
     </section>
@@ -562,9 +565,10 @@
       <p>It's worth noting that most designs that can be done with
       first-class modules can be simulated without them, with some
       level of awkwardness. For example, we could rewrite our query
-      handler example without first-class modules using the following
-      types:<a data-type="indexterm" data-primary= "first-class
-      modules" data-secondary= "alternatives to">&nbsp;</a></p>
+      handler example without first-class modules using the
+      following types:<a data-type="indexterm" data-primary=
+      "first-class modules" data-secondary=
+      "alternatives to">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/fcm/query_handler.topscript" part="14" />
 
@@ -579,9 +583,9 @@
       completely reasonable, and first-class modules are not really
       necessary. But the more functionality you need to hide away
       behind a set of closures, and the more complicated the
-      relationships between the different types in question, the more
-      awkward this approach becomes, and the better it is to use
-      first-class modules.<a data-type="indexterm"
+      relationships between the different types in question, the
+      more awkward this approach becomes, and the better it is to
+      use first-class modules.<a data-type="indexterm"
       data-startref="MODfirst">&nbsp;</a></p>
     </section>
   </section>

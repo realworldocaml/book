@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -14,15 +12,16 @@
     <h1>Objects</h1>
 
     <p>We've already seen several tools that OCaml provides for
-    organizing programs, particularly modules. In addition, OCaml also
-    supports object-oriented programming. There are objects, classes,
-    and their associated types. In this chapter, we'll introduce you
-    to OCaml objects and subtyping. In the next
+    organizing programs, particularly modules. In addition, OCaml
+    also supports object-oriented programming. There are objects,
+    classes, and their associated types. In this chapter, we'll
+    introduce you to OCaml objects and subtyping. In the next
     chapter, <a href="12-classes.html#classes" data-type=
     "xref">Classes</a>, we'll introduce you to classes and
-    inheritance.<a data-type= "indexterm" data-primary="objects"
-    data-secondary= "in object-oriented
-    programming">&nbsp;</a><a data-type= "indexterm" data-primary=
+    inheritance.<a data-type="indexterm" data-primary="objects"
+    data-secondary=
+    "in object-oriented programming">&nbsp;</a><a data-type=
+    "indexterm" data-primary=
     "object-oriented programming (OOP)">&nbsp;</a><a data-type=
     "indexterm" data-primary="programming" data-secondary=
     "object-oriented programming (OOP)">&nbsp;</a></p>
@@ -112,9 +111,10 @@
       the relationships between these object types correspond to
       inheritance. For example, if we implement a class
       <code>Deque</code> in Java by inheriting from a class
-      <code>Stack</code>, we would be allowed to pass a deque anywhere
-      a stack is expected.<a data-type="indexterm"
-      data-primary="objects" data-secondary= "in OCaml">&nbsp;</a></p>
+      <code>Stack</code>, we would be allowed to pass a deque
+      anywhere a stack is expected.<a data-type="indexterm"
+      data-primary="objects" data-secondary=
+      "in OCaml">&nbsp;</a></p>
 
       <p>OCaml is entirely different. Classes are used to construct
       objects and support inheritance, but classes are not types.
@@ -163,8 +163,8 @@
 
       <p>Like polymorphic variants, methods can be used without an
       explicit type declaration:<a data-type="indexterm"
-      data-primary="polymorphism" data-secondary= "in
-      objects">&nbsp;</a><a data-type="indexterm" data-primary=
+      data-primary="polymorphism" data-secondary=
+      "in objects">&nbsp;</a><a data-type="indexterm" data-primary=
       "objects" data-secondary="polymorphism of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/objects/polymorphism.topscript" part="1" />
@@ -193,15 +193,15 @@
       <div data-type="note">
         <h1>Elisions Are Polymorphic</h1>
 
-        <p>The <code>..</code> in an open object type is an elision,
-        standing for "possibly more methods." It may not be apparent
-        from the syntax, but an elided object type is actually
-        polymorphic. For example, if we try to write a type
-        definition, we get an "unbound type variable"
+        <p>The <code>..</code> in an open object type is an
+        elision, standing for "possibly more methods." It may not
+        be apparent from the syntax, but an elided object type is
+        actually polymorphic. For example, if we try to write a
+        type definition, we get an "unbound type variable"
         error:<a data-type="indexterm" data-primary="polymorphism"
         data-secondary="row polymorphism">&nbsp;</a><a data-type=
-        "indexterm" data-primary= "row
-        polymorphism">&nbsp;</a><a data-type="indexterm"
+        "indexterm" data-primary=
+        "row polymorphism">&nbsp;</a><a data-type="indexterm"
         data-primary="ellipses (..)">&nbsp;</a><a data-type=
         "indexterm" data-primary="type variables">&nbsp;</a></p>
       </div>
@@ -267,15 +267,16 @@
 
       <p>You might wonder when to use objects in OCaml, which has a
       multitude of alternative mechanisms to express the similar
-      concepts. First-class modules are more expressive (a module can
-      include types, while classes and objects cannot).  Modules,
-      functors, and data types also offer a wide range of ways to
-      express program structure. In fact, many seasoned OCaml
-      programmers rarely use classes and objects, if at
-      all.<a data-type="indexterm" data-primary= "first-class modules"
-      data-secondary= "vs. objects">&nbsp;</a><a data-type="indexterm"
-      data-primary="objects" data-secondary= "benefits and drawbacks
-      of">&nbsp;</a></p>
+      concepts. First-class modules are more expressive (a module
+      can include types, while classes and objects cannot).
+      Modules, functors, and data types also offer a wide range of
+      ways to express program structure. In fact, many seasoned
+      OCaml programmers rarely use classes and objects, if at
+      all.<a data-type="indexterm" data-primary=
+      "first-class modules" data-secondary=
+      "vs. objects">&nbsp;</a><a data-type="indexterm"
+      data-primary="objects" data-secondary=
+      "benefits and drawbacks of">&nbsp;</a></p>
 
       <p>Objects have some advantages over records: they don't
       require type definitions, and their support for row
@@ -284,20 +285,20 @@
       rarely used in place of records.</p>
 
       <p>The real benefits of objects come from the class system.
-      Classes support inheritance and open recursion. Open recursion
-      allows interdependent parts of an object to be defined
-      separately. This works because calls between the methods of an
-      object are determined when the object is instantiated, a form
-      of <em>late</em> binding. This makes it possible (and necessary)
-      for one method to refer to other methods in the object without
-      knowing statically how they will be
-      implemented.<a data-type="indexterm" data-primary="late
-      binding">&nbsp;</a><a data-type="indexterm"
-      data-primary="recursion" data-secondary= "open
-      recursion">&nbsp;</a><a data-type="indexterm" data-primary="open
-      recursion">&nbsp;</a><a data-type= "indexterm"
-      data-primary="classes" data-secondary= "benefits
-      of">&nbsp;</a></p>
+      Classes support inheritance and open recursion. Open
+      recursion allows interdependent parts of an object to be
+      defined separately. This works because calls between the
+      methods of an object are determined when the object is
+      instantiated, a form of <em>late</em> binding. This makes it
+      possible (and necessary) for one method to refer to other
+      methods in the object without knowing statically how they
+      will be implemented.<a data-type="indexterm" data-primary=
+      "late binding">&nbsp;</a><a data-type="indexterm"
+      data-primary="recursion" data-secondary=
+      "open recursion">&nbsp;</a><a data-type="indexterm"
+      data-primary="open recursion">&nbsp;</a><a data-type=
+      "indexterm" data-primary="classes" data-secondary=
+      "benefits of">&nbsp;</a></p>
 
       <p>In contrast, modules use early binding. If you want to
       parameterize your module code so that some part of it can be
@@ -306,18 +307,18 @@
       a method in a class.</p>
 
       <p>In general, a rule of thumb is: use classes and objects in
-      situations where open recursion is a big win. Two good examples
-      are Xavier Leroy's <a href=
+      situations where open recursion is a big win. Two good
+      examples are Xavier Leroy's <a href=
       "http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</a>,
-      which provides a variety of cryptographic primitives that can be
-      combined in building-block style; and the <a href=
+      which provides a variety of cryptographic primitives that can
+      be combined in building-block style; and the <a href=
       "http://cristal.inria.fr/camlimages/">Camlimages</a> library,
       which manipulates various graphical file formats. Camlimages
       also provides a module-based version of the same library,
-      letting you choose between functional and object-oriented styles
-      depending on your problem domain.<a data-type= "indexterm"
-      data-primary= "Camlimages
-      library">&nbsp;</a><a data-type="indexterm"
+      letting you choose between functional and object-oriented
+      styles depending on your problem domain.<a data-type=
+      "indexterm" data-primary=
+      "Camlimages library">&nbsp;</a><a data-type="indexterm"
       data-primary="Cryptokit library">&nbsp;</a><a data-type=
       "indexterm" data-primary="libraries" data-secondary=
       "Cryptokit">&nbsp;</a><a data-type="indexterm" data-primary=
@@ -325,7 +326,8 @@
       "Camlimages">&nbsp;</a><a data-type="indexterm" data-primary=
       "external libraries" data-secondary=
       "Camlimages">&nbsp;</a><a data-type="indexterm" data-primary=
-      "external libraries" data-secondary= "Cryptokit">&nbsp;</a></p>
+      "external libraries" data-secondary=
+      "Cryptokit">&nbsp;</a></p>
 
       <p>We'll introduce you to classes, and examples using open
       recursion, in <a href="12-classes.html#classes" data-type=
@@ -344,25 +346,25 @@
       <code>e :&gt; t</code> can be applied. This coercion works
       only if the type of <code>e</code> is a subtype of
       <code>t</code>.<a data-type="indexterm" data-primary=
-      "subtyping" data-secondary= "basics
-      of">&nbsp;</a><a data-type="indexterm" id="OBsub"
-      data-primary="objects" data-secondary= "subtyping
-      and">&nbsp;</a></p>
+      "subtyping" data-secondary=
+      "basics of">&nbsp;</a><a data-type="indexterm" id="OBsub"
+      data-primary="objects" data-secondary=
+      "subtyping and">&nbsp;</a></p>
 
       <section id="width-subtyping" data-type="sect2">
         <h2>Width Subtyping</h2>
 
-        <p>To explore this, let's define some simple object types for
-        geometric shapes. The generic type <code>shape</code> has a
-        method to compute the area, and <code>square</code>
+        <p>To explore this, let's define some simple object types
+        for geometric shapes. The generic type <code>shape</code>
+        has a method to compute the area, and <code>square</code>
         and <code>circle</code> are specific kinds of
-        shapes:<a data-type="indexterm" data-primary= "geometric
-        shapes">&nbsp;</a><a data-type="indexterm" data-primary="width
-        subtyping">&nbsp;</a><a data-type= "indexterm"
-        data-primary="subtyping" data-secondary= "width
-        subtyping">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocaml" href= "code/objects/subtyping.ml"
-        part="1" />
+        shapes:<a data-type="indexterm" data-primary=
+        "geometric shapes">&nbsp;</a><a data-type="indexterm"
+        data-primary="width subtyping">&nbsp;</a><a data-type=
+        "indexterm" data-primary="subtyping" data-secondary=
+        "width subtyping">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocaml" href=
+        "code/objects/subtyping.ml" part="1" />
 
         <p>A <code>square</code> has a method <code>area</code>
         just like a <code>shape</code>, and an additional method
@@ -388,11 +390,11 @@
         Depth subtyping allows us coerce an object if its
         individual methods could safely be coerced. So an object
         type <code>&lt; m: t1 &gt;</code> is a subtype of
-        <code>&lt; m: t2 &gt;</code> if <code>t1</code> is a subtype
-        of <code>t2</code>.<a data-type="indexterm"
+        <code>&lt; m: t2 &gt;</code> if <code>t1</code> is a
+        subtype of <code>t2</code>.<a data-type="indexterm"
         data-primary="depth subtyping">&nbsp;</a><a data-type=
-        "indexterm" data-primary="subtyping" data-secondary= "depth
-        subtyping">&nbsp;</a></p>
+        "indexterm" data-primary="subtyping" data-secondary=
+        "depth subtyping">&nbsp;</a></p>
 
         <p>For example, we can create two objects with a
         <code>shape</code> method:</p>
@@ -428,9 +430,9 @@
         OCaml does indeed allow such coercions:<a data-type=
         "indexterm" id="var" data-primary=
         "variance">&nbsp;</a><a data-type="indexterm" id="SUBvar"
-        data-primary="subtyping" data-secondary= "variance
-        and">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        data-primary="subtyping" data-secondary=
+        "variance and">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/objects/subtyping.topscript" part="5" />
 
         <p>Note that this relies on lists being immutable. It would
@@ -541,8 +543,8 @@
         so it is simply not possible to use
         <code>list&lt;square&gt;</code> where
         <code>list&lt;shape&gt;</code> is expected (at least
-        safely). The situation is similar in Java, although Java has
-        an escape hatch that allows the program to fall back to
+        safely). The situation is similar in Java, although Java
+        has an escape hatch that allows the program to fall back to
         dynamic typing. The situation in OCaml is much better: it
         works, it is statically checked, and the annotations are
         pretty simple.<a data-type="indexterm" data-startref=
@@ -566,13 +568,13 @@
         coercion <code>(Square) x</code> is allowed if the value
         <code>x</code> has type <code>Square</code> or one of its
         subtypes; otherwise the coercion throws an
-        exception.<a data-type="indexterm" data-primary= "dynamic type
-        checking">&nbsp;</a><a data-type="indexterm"
+        exception.<a data-type="indexterm" data-primary=
+        "dynamic type checking">&nbsp;</a><a data-type="indexterm"
         data-primary="down casting">&nbsp;</a><a data-type=
         "indexterm" data-primary=
         "narrowing">&nbsp;</a><a data-type="indexterm"
-        data-primary="objects" data-secondary= "narrowing
-        and">&nbsp;</a></p>
+        data-primary="objects" data-secondary=
+        "narrowing and">&nbsp;</a></p>
 
         <p>Narrowing is <em>not permitted</em> in OCaml.
         Period.</p>
@@ -640,14 +642,14 @@
         that can be applied to objects of different types. In these
         cases, row polymorphism is usually preferred over subtyping
         because it does not require explicit coercions, and it
-        preserves more type information, allowing functions like the
-        following:<a data-type="indexterm" data-primary=
-        "polymorphism" data-secondary= "row
-        polymorphism">&nbsp;</a><a data-type="indexterm"
+        preserves more type information, allowing functions like
+        the following:<a data-type="indexterm" data-primary=
+        "polymorphism" data-secondary=
+        "row polymorphism">&nbsp;</a><a data-type="indexterm"
         data-primary="row polymorphism">&nbsp;</a><a data-type=
-        "indexterm" data-primary="subtyping" data-secondary= "vs. row
-        polymorphism">&nbsp;</a></p> <link rel="import"
-        data-code-language="ocamltop" href=
+        "indexterm" data-primary="subtyping" data-secondary=
+        "vs. row polymorphism">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href=
         "code/objects/row_polymorphism.topscript" part="1" />
 
         <p>The return type of this function is built from the open

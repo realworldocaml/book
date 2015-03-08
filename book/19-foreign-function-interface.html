@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -18,12 +16,10 @@
     libraries via C code and also can produce standalone native
     object files that can be embedded within other non-OCaml
     applications.<a data-type="indexterm" data-primary=
-    "programming" data-secondary=
-		    "language interfaces">&nbsp;</a>
-      
-      <a data-type="indexterm"
-	 data-primary="foreign function interface (FFI)" data-secondary=
-	 "basics of">&nbsp;</a><a data-type="indexterm" id="INTERffi"
+    "programming" data-secondary="language interfaces">&nbsp;</a>
+    <a data-type="indexterm" data-primary=
+    "foreign function interface (FFI)" data-secondary=
+    "basics of">&nbsp;</a><a data-type="indexterm" id="INTERffi"
     data-primary="interfaces" data-secondary=
     "foreign function interface (FFI)">&nbsp;</a></p>
 
@@ -96,8 +92,7 @@
       text interfaces in a reasonably efficient way. It's used in
       console mail clients like Mutt and Pine, and console web
       browsers such as Lynx.<a data-type="indexterm" id=
-			       "FFItermint"
-			       data-primary="foreign function interface (FFI)"
+      "FFItermint" data-primary="foreign function interface (FFI)"
       data-secondary="terminal interface example">&nbsp;</a></p>
 
       <p>The full C interface is quite large and is explained in
@@ -105,8 +100,8 @@
       "http://www.gnu.org/software/ncurses/">documentation</a>.
       We'll just use the small excerpt, since we just want to
       demonstrate Ctypes in action:<a data-type="indexterm"
-				      data-primary="Ctypes library" data-secondary=
-				      "terminal interface example">&nbsp;</a></p>
+      data-primary="Ctypes library" data-secondary=
+      "terminal interface example">&nbsp;</a></p>
       <link rel="import" data-code-language="c" href=
       "code/ffi/ncurses.h" />
 
@@ -225,8 +220,8 @@
 
       <p>Running <code>./hello.native</code> should now display a
       Hello World in your terminal!<a data-type="indexterm"
-				      data-primary="Ctypes library" data-secondary=
-				      "build directives for">&nbsp;</a></p>
+      data-primary="Ctypes library" data-secondary=
+      "build directives for">&nbsp;</a></p>
 
       <div data-type="note">
         <h1>On Build Directives for Ctypes</h1>
@@ -277,7 +272,7 @@
       <p>We'll go over some of these features in more detail for
       the remainder of the chapter by using some POSIX date
       functions as running examples.<a data-type="indexterm"
-				       data-startref="FFItermint">&nbsp;</a></p>
+      data-startref="FFItermint">&nbsp;</a></p>
     </section>
 
     <section id="basic-scalar-c-types" data-type="sect1">
@@ -287,10 +282,8 @@
       Every C type is represented by an OCaml equivalent via the
       single type definition:<a data-type="indexterm" data-primary=
       "scalar C types">&nbsp;</a><a data-type="indexterm"
-				    data-primary="foreign function interface (FFI)"
-				    data-secondary="basic scalar C
-						    types">&nbsp;</a>
-      </p>
+      data-primary="foreign function interface (FFI)"
+      data-secondary="basic scalar C types">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/ctypes/ctypes.mli" />
 
@@ -333,9 +326,9 @@
       </ul>
 
       <p>Here are the definitions for most of the standard C99
-	scalar types, including some platform-dependent ones:
-	<a data-type="indexterm" data-primary=
-	   "C99 scalar types">&nbsp;</a></p>
+      scalar types, including some platform-dependent ones:
+      <a data-type="indexterm" data-primary=
+      "C99 scalar types">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/ctypes/ctypes.mli" part="1" />
 
@@ -384,11 +377,10 @@
       arithmetic, pointer conversions, reading and writing through
       pointers, and passing and returning pointers to and from
       functions.<a data-type="indexterm" data-primary=
-		   "POSIX functions">&nbsp;</a>
-	<a data-type="indexterm"
-	   data-primary="arrays" data-secondary=
-	   "pointers and">&nbsp;</a><a data-type="indexterm"
-				       data-primary="pointers" data-secondary=
+      "POSIX functions">&nbsp;</a> <a data-type="indexterm"
+      data-primary="arrays" data-secondary=
+      "pointers and">&nbsp;</a><a data-type="indexterm"
+      data-primary="pointers" data-secondary=
       "support for in Ctypes">&nbsp;</a><a data-type="indexterm"
       data-primary="foreign function interface (FFI)"
       data-secondary="pointers and arrays">&nbsp;</a></p>
@@ -473,8 +465,8 @@
         theme from earlier, we'll bind to the <code>ctime</code>
         function, which converts a <code>time_t</code> value to a
         human-readable string:<a data-type="indexterm"
-				 data-primary="memory" data-secondary=
-				 "allocation for pointers">&nbsp;</a><a data-type=
+        data-primary="memory" data-secondary=
+        "allocation for pointers">&nbsp;</a><a data-type=
         "indexterm" data-primary="pointers" data-secondary=
         "allocating typed memory for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
@@ -508,11 +500,11 @@
         <p>While scalar types typically have a 1:1 representation,
         other C types require extra work to convert them into
         OCaml. Views create new C type descriptions that have
-          special behavior when used to read or write C values.
-	<a data-type="indexterm" data-primary="mapping"
-           data-secondary="complex values with views">&nbsp;</a>
-	<a data-type="indexterm" data-primary="values" data-secondary=
-        "mapping complex with views">&nbsp;</a></p>
+        special behavior when used to read or write C values.
+        <a data-type="indexterm" data-primary="mapping"
+        data-secondary="complex values with views">&nbsp;</a>
+        <a data-type="indexterm" data-primary="values"
+        data-secondary="mapping complex with views">&nbsp;</a></p>
 
         <p>We've already used one view in the definition of
         <code>ctime</code> earlier. The <code>string</code> view
@@ -624,14 +616,11 @@
         <h2>Adding Fields to Structures</h2>
 
         <p>The <code>timeval</code> structure definition still
-          doesn't have any fields, so we need to add those next:
-	  <a data-type="indexterm" data-primary="fields"
-             data-secondary=
-             "adding to structures">&nbsp;</a>
-	  
-	  <a data-type="indexterm"
-	     data-primary="structs and unions"
-	     data-secondary="field addition">&nbsp;</a></p>
+        doesn't have any fields, so we need to add those next:
+        <a data-type="indexterm" data-primary="fields"
+        data-secondary="adding to structures">&nbsp;</a>
+        <a data-type="indexterm" data-primary="structs and unions"
+        data-secondary="field addition">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/ffi/posix.topscript" part="9" />
 
@@ -655,10 +644,10 @@
 
         <p>Since <code>gettimeofday</code> needs a <code>struct
         timezone</code> pointer for its second argument, we also
-          need to define a second structure type:
-	  <a data-type="indexterm"
-	     data-primary="structs and unions"
-             data-secondary="incomplete structure definitions">&nbsp;</a></p>
+        need to define a second structure type: <a data-type=
+        "indexterm" data-primary="structs and unions"
+        data-secondary=
+        "incomplete structure definitions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/ffi/posix.topscript" part="10" />
 
@@ -706,15 +695,15 @@
 
           <p>We built up a lot of bindings in the previous section,
           so let's recap them with a complete example that ties it
-            together with a command-line frontend:
-	    <a data-type="indexterm" data-primary="structs and unions"
-               data-secondary="time-printing command">&nbsp;</a></p>
+          together with a command-line frontend: <a data-type=
+          "indexterm" data-primary="structs and unions"
+          data-secondary="time-printing command">&nbsp;</a></p>
           <link rel="import" data-code-language="ocaml" href=
           "code/ffi/datetime.ml" />
 
           <p>This can be compiled and run in the usual way:
-	    <a data-type="indexterm" data-primary=
-               "returning function">&nbsp;</a></p>
+          <a data-type="indexterm" data-primary=
+          "returning function">&nbsp;</a></p>
           <link rel="import" data-code-language="console" href=
           "code/ffi/build_datetime.out" />
 
@@ -789,9 +778,9 @@
 
         <p>Arrays in C are contiguous blocks of the same type of
         value. Any of the basic types defined previously can be
-          allocated as blocks via the <code>Array</code> module:
-	  <a data-type="indexterm" data-primary="arrays"
-             data-secondary="definition of">&nbsp;</a><a data-type=
+        allocated as blocks via the <code>Array</code> module:
+        <a data-type="indexterm" data-primary="arrays"
+        data-secondary="definition of">&nbsp;</a><a data-type=
         "indexterm" data-primary="structs and unions"
         data-secondary="array definition">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
@@ -814,12 +803,11 @@
 
         <p>Unions in C are named structures that can be mapped onto
         the same underlying memory. They are also fully supported
-          in Ctypes, but we won't go into more detail here.
-	  <a data-type="indexterm" data-primary="operators"
-             data-secondary="controlling pointers">&nbsp;</a>
-	  <a data-type="indexterm"
-        data-primary="pointers" data-secondary=
-        "operators controlling">&nbsp;</a></p>
+        in Ctypes, but we won't go into more detail here.
+        <a data-type="indexterm" data-primary="operators"
+        data-secondary="controlling pointers">&nbsp;</a>
+        <a data-type="indexterm" data-primary="pointers"
+        data-secondary="operators controlling">&nbsp;</a></p>
 
         <aside data-type="sidebar">
           <h5>Pointer Operators for Dereferencing and
@@ -892,8 +880,8 @@
       arrays of elements using a comparison function passed in as a
       function pointer. The signature for <code>qsort</code>
       is:<a data-type="indexterm" data-primary="functions"
-	    data-secondary="passing to C">&nbsp;</a>
-	<a data-type="indexterm" data-primary="foreign function interface (FFI)"
+      data-secondary="passing to C">&nbsp;</a> <a data-type=
+      "indexterm" data-primary="foreign function interface (FFI)"
       data-secondary="passing functions to C">&nbsp;</a></p>
       <link rel="import" data-code-language="c" href=
       "code/ffi/qsort.h" />
@@ -935,9 +923,8 @@
 
         <p>The following is a command-line tool that uses the
         <code>qsort</code> binding to sort all of the integers
-        supplied on the standard input:
-	<a data-type="indexterm"
-	   data-primary="qsort binding">&nbsp;</a></p>
+        supplied on the standard input: <a data-type="indexterm"
+        data-primary="qsort binding">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/ffi/qsort.ml" />
 
@@ -970,11 +957,10 @@
         <code>Ctypes.Array</code> module with the
         <code>Core.Std.Array</code> module: the former is in scope
         since we opened <code>Ctypes</code> at the start of the
-        file.<a data-type="indexterm"
-		data-primary="memory"
-		data-secondary="and allocated Ctypes">&nbsp;</a>
-	<a data-type="indexterm"
-        data-primary="Ctypes library" data-secondary=
+        file.<a data-type="indexterm" data-primary="memory"
+        data-secondary="and allocated Ctypes">&nbsp;</a>
+        <a data-type="indexterm" data-primary="Ctypes library"
+        data-secondary=
         "lifetime of allocated Ctypes">&nbsp;</a><a data-type=
         "indexterm" data-primary="garbage collection"
         data-secondary="of allocated Ctypes">&nbsp;</a></p>
@@ -1033,10 +1019,11 @@
 
       <p>The Ctypes <a href=
       "http://github.com/ocamllabs/ocaml-ctypes">distribution</a>
-	contains a number of larger-scale examples, including:
-	<a data-type="indexterm"
-	   data-primary="foreign function interface (FFI)"
-	   data-secondary="C bindings">&nbsp;</a></p>
+      contains a number of larger-scale examples, including:
+      <a data-type="indexterm" data-primary=
+      "foreign function interface (FFI)" data-secondary=
+      "C bindings">&nbsp;</a></p>
+
       <ul>
         <li>
           <p>Bindings to the POSIX <code>fts</code> API, which
@@ -1121,11 +1108,10 @@
         replicate the struct layout process. OCaml and C will have
         consistent views about the layout of the struct as long as
         you declare the fields of a struct in the same order and
-          with the same types as the C library you're binding to.
-	  <a data-type="indexterm" data-primary="memory"
-             data-secondary="layout for structs">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="structs and unions"
+        with the same types as the C library you're binding to.
+        <a data-type="indexterm" data-primary="memory"
+        data-secondary="layout for structs">&nbsp;</a>
+        <a data-type="indexterm" data-primary="structs and unions"
         data-secondary="memory layout of">&nbsp;</a></p>
 
         <p>However, this approach can lead to difficulties when the
@@ -1160,7 +1146,7 @@
         along with instructions on integration with <span class=
         "command"><em>autoconf</em></span> platform portability
         instructions.<a data-type="indexterm" data-startref=
-			"INTERffi">&nbsp;</a></p>
+        "INTERffi">&nbsp;</a></p>
       </section>
     </section>
   </section>

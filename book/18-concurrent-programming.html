@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -21,22 +19,21 @@
     <em>concurrent</em>: needing to wait for multiple different
     events at the same time, responding immediately to whatever
     event happens first.<a data-type="indexterm" data-primary=
-			   "interactive input" data-secondary=
-			   "concurrent programming for">&nbsp;</a>
-    <a data-type="indexterm"
-       data-primary="concurrent programming">&nbsp;</a>
-    <a data-type=
-       "indexterm" data-primary="programming" data-secondary=
+    "interactive input" data-secondary=
+    "concurrent programming for">&nbsp;</a> <a data-type=
+    "indexterm" data-primary="concurrent programming">&nbsp;</a>
+    <a data-type="indexterm" data-primary="programming"
+    data-secondary=
     "concurrent programming with Async">&nbsp;</a></p>
 
     <p>One approach to concurrency is to use preemptive system
     threads, which is the dominant approach in languages like Java
     or C#. In this model, each task that may require simultaneous
     waiting is given an operating system thread of its own so it
-      can block without stopping the entire program.
-      <a data-type="indexterm"
-	 data-primary="threads"
-	 data-secondary="preemptive vs. single-threaded programs">&nbsp;</a></p>
+    can block without stopping the entire program. <a data-type=
+    "indexterm" data-primary="threads" data-secondary=
+    "preemptive vs. single-threaded programs">&nbsp;</a></p>
+
     <p>Another approach is to have a single-threaded program, where
     that single thread runs an <em>event loop</em> whose job is to
     react to external events like timeouts or mouse clicks by
@@ -75,7 +72,7 @@
 
       <p>Recall how I/O is typically done in Core. Here's a simple
       example:<a data-type="indexterm" id="ALbas" data-primary=
-		 "Async library" data-secondary="basics of">&nbsp;</a></p>
+      "Async library" data-secondary="basics of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/async/main.topscript" part="1" />
 
@@ -84,8 +81,8 @@
       fact that it returns a concrete string means it can't return
       until the read has completed. The blocking nature of the call
       means that no progress can be made on anything else until the
-	read is completed.<a data-type="indexterm"
-			     data-primary="blocking">&nbsp;</a></p>
+      read is completed.<a data-type="indexterm" data-primary=
+      "blocking">&nbsp;</a></p>
 
       <p>In Async, well-behaved functions never block. Instead,
       they return a value of type <code>Deferred.t</code> that acts
@@ -109,8 +106,8 @@
       <code>Reader.file_contents</code>, the resulting deferred
       will initially be empty, as you can see by calling
       <code>Deferred.peek</code> on the resulting deferred:
-      <a data-type="indexterm"
-	 data-primary="Deferred.peek">&nbsp;</a></p>
+      <a data-type="indexterm" data-primary=
+      "Deferred.peek">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/async/main.topscript" part="4" />
 
@@ -149,7 +146,7 @@
       taking an asynchronous computation <code>d</code> and tacking
       on another stage comprised by the actions of the function
       <code>f</code>.<a data-type="indexterm" data-primary=
-			"Deferred.bind">&nbsp;</a></p>
+      "Deferred.bind">&nbsp;</a></p>
 
       <p>At a more concrete level, the call to
       <code>Deferred.bind</code> returns a new deferred that
@@ -178,10 +175,8 @@
       didn't add a level of indentation for the contents of that
       function. This is standard practice for using the
       <code>bind</code> operator.<a data-type="indexterm"
-				    data-primary="bind
-						  function">&nbsp;</a>
-      
-      </p>
+      data-primary="bind function">&nbsp;</a></p>
+
       <p>Now let's look at another potential use of
       <code>bind</code>. In this case, we'll write a function that
       counts the number of lines in a file:</p>
@@ -196,7 +191,7 @@
       for taking an ordinary value and wrapping it in a deferred.
       This function is a standard part of Async and is called
       <code>return</code>:<a data-type="indexterm" data-primary=
-			     "return function">&nbsp;</a></p>
+      "return function">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/async/main.topscript" part="11" />
 
@@ -212,8 +207,8 @@
       across monads in <a href=
       "07-error-handling.html#bind-and-other-error-handling-idioms"
       data-type="xref">Bind And Other Error Handling
-      Idioms</a>.<a data-type="indexterm"
-		    data-primary="monads">&nbsp;</a></p>
+      Idioms</a>.<a data-type="indexterm" data-primary=
+      "monads">&nbsp;</a></p>
 
       <p>Calling <code>bind</code> and <code>return</code> together
       is a fairly common pattern, and as such there is a standard
@@ -244,9 +239,8 @@
         back to a language called Concurrent ML that was developed
         by John Reppy in the early '90s. The "i" in ivar stands for
         incremental.)<a data-type="indexterm" data-primary=
-			"ivars">&nbsp;</a><a data-type="indexterm" data-primary=
-					     "Async library"
-					     data-secondary="ivars">&nbsp;</a></p>
+        "ivars">&nbsp;</a><a data-type="indexterm" data-primary=
+        "Async library" data-secondary="ivars">&nbsp;</a></p>
 
         <p>There are three fundamental operations for working with
         an ivar: you can create one, using
@@ -282,7 +276,7 @@
         value returned by the thunk. To implement this, we'll use
         an operator called <code>upon</code>, which has the
         following signature:<a data-type="indexterm" data-primary=
-			       "thunks">&nbsp;</a></p>
+        "thunks">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/async/main.topscript" part="17" />
 
@@ -309,9 +303,8 @@
         This kind of subtlety is typical of code that involves
         ivars and <code>upon</code>, and because of this, you
         should stick to the simpler map/bind/return style of
-          working with deferreds when you can.<a data-type="indexterm"
-						 data-startref="ALbas">&nbsp;</a>
-	</p>
+        working with deferreds when you can.<a data-type=
+        "indexterm" data-startref="ALbas">&nbsp;</a></p>
       </section>
     </section>
 
@@ -323,20 +316,18 @@
       we'll write an echo server, i.e., a program that accepts
       connections from clients and spits back whatever is sent to
       it.<a data-type="indexterm" id="echo" data-primary=
-	    "echo servers">&nbsp;</a>
-	<a data-type="indexterm" id="ALecho"
-	   data-primary="Async library"
-	   data-secondary="echo server example">&nbsp;</a></p>
+      "echo servers">&nbsp;</a> <a data-type="indexterm" id=
+      "ALecho" data-primary="Async library" data-secondary=
+      "echo server example">&nbsp;</a></p>
 
       <p>The first step is to create a function that can copy data
       from an input to an output. Here, we'll use Async's
       <code>Reader</code> and <code>Writer</code> modules, which
       provide a convenient abstraction for working with input and
       output channels:<a data-type="indexterm" data-primary=
-			 "Writer module">&nbsp;</a>
-      <a data-type="indexterm"
-	 data-primary="Reader module">&nbsp;</a>
-      <a data-type="indexterm" data-primary="I/O (input/output) operations"
+      "Writer module">&nbsp;</a> <a data-type="indexterm"
+      data-primary="Reader module">&nbsp;</a> <a data-type=
+      "indexterm" data-primary="I/O (input/output) operations"
       data-secondary="copying data">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/async/echo.ml" />
@@ -360,7 +351,7 @@
       client can cause your program to leak memory, since you'll
       need to allocate space for the data that's been read in but
       not yet written out.<a data-type="indexterm" data-primary=
-			     "pushback">&nbsp;</a></p>
+      "pushback">&nbsp;</a></p>
 
       <p>You might also be concerned that the chain of deferreds
       that is built up as you go through the loop would lead to a
@@ -374,7 +365,7 @@
       this, and so there's no memory leak after all. This is
       essentially a form of tail-call optimization, lifted to the
       Async monad.<a data-type="indexterm" data-primary=
-		     "tail calls">&nbsp;</a></p>
+      "tail calls">&nbsp;</a></p>
 
       <p><code>copy_blocks</code> provides the logic for handling a
       client connection, but we still need to set up a server to
@@ -524,8 +515,7 @@
         written to. Our use of pipes is fairly minimal here, but
         they are an important part of Async, so it's worth
         discussing them in some detail.<a data-type="indexterm"
-					  data-primary="pipes">&nbsp;</a>
-	</p>
+        data-primary="pipes">&nbsp;</a></p>
 
         <p>Pipes are created in connected read/write pairs:</p>
         <link rel="import" data-code-language="ocamltop" href=
@@ -693,8 +683,8 @@
         <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</a>.
         We'll parse the JSON data using the Yojson library, which
         was introduced in <a href="15-json.html#handling-json-data"
-        data-type="xref">Handling Json Data</a>.<a data-type="indexterm"
-        data-primary="Yojson library" data-secondary=
+        data-type="xref">Handling Json Data</a>.<a data-type=
+        "indexterm" data-primary="Yojson library" data-secondary=
         "parsing JSON with">&nbsp;</a><a data-type="indexterm"
         data-primary="DuckDuckGo search engine" data-secondary=
         "parsing JSON strings in">&nbsp;</a><a data-type=
@@ -809,7 +799,7 @@
 
         <p>And that's all we need for a simple but usable
         definition searcher:<a data-type="indexterm" data-startref=
-			       "ALduckduck">&nbsp;</a></p>
+        "ALduckduck">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
         "code/async/run_search.out" />
       </section>
@@ -827,16 +817,13 @@
       handling in OCaml in <a href=
       "07-error-handling.html#exceptions" data-type=
       "xref">Exceptions</a>, but as we'll see, exception handling
-	in a concurrent program presents some new challenges.
-	<a data-type="indexterm" data-primary="exceptions"
-	   data-secondary=
-	   "in concurrent programming">&nbsp;</a>
-	<a data-type=
-	   "indexterm" data-primary=
-	   "concurrent programming">&nbsp;</a>
-	<a data-type="indexterm"
-	   id="ALexcept" data-primary="Async library" data-secondary=
-	   "exception handling in">&nbsp;</a></p>
+      in a concurrent program presents some new challenges.
+      <a data-type="indexterm" data-primary="exceptions"
+      data-secondary="in concurrent programming">&nbsp;</a>
+      <a data-type="indexterm" data-primary=
+      "concurrent programming">&nbsp;</a> <a data-type="indexterm"
+      id="ALexcept" data-primary="Async library" data-secondary=
+      "exception handling in">&nbsp;</a></p>
 
       <p>Let's get a better sense of how exceptions work in Async
       by creating an asynchronous computation that (sometimes)
@@ -868,9 +855,9 @@
       throws an exception.</p>
 
       <p>We can capture this kind of asynchronous error using the
-	<code>try_with</code> function provided by Async:
-	<a data-type="indexterm" data-primary="exceptions"
-	   data-secondary="asynchronous errors">&nbsp;</a></p>
+      <code>try_with</code> function provided by Async:
+      <a data-type="indexterm" data-primary="exceptions"
+      data-secondary="asynchronous errors">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/async/main.topscript" part="33" />
 
@@ -893,7 +880,7 @@
         Monitors are fairly low-level and are only occasionally
         used directly, but it's nonetheless worth understanding how
         they work.<a data-type="indexterm" data-primary=
-		     "monitors">&nbsp;</a></p>
+        "monitors">&nbsp;</a></p>
 
         <p>In Async, a monitor is a context that determines what to
         do when there is an unhandled exception. Every Async job
@@ -991,13 +978,12 @@
         <p>Let's now go back and improve the exception handling of
         our DuckDuckGo client. In particular, we'll change it so
         that any query that fails is reported without preventing
-          other queries from completing.
-	  <a data-type="indexterm"
-	     data-primary="exceptions"
-	     data-secondary="search engine example">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="DuckDuckGo search engine"
-	     data-secondary="exception handling in">&nbsp;</a></p>
+        other queries from completing. <a data-type="indexterm"
+        data-primary="exceptions" data-secondary=
+        "search engine example">&nbsp;</a> <a data-type="indexterm"
+        data-primary="DuckDuckGo search engine" data-secondary=
+        "exception handling in">&nbsp;</a></p>
+
         <p>The search code as it is fails rarely, so let's make a
         change that allows us to trigger failures more predictably.
         We'll do this by making it possible to distribute the
@@ -1059,8 +1045,8 @@
         the <code>protect</code> call described in <a href=
         "07-error-handling.html#cleaning-up-in-the-presence-of-exceptions"
         data-type="xref">Cleaning Up In The Presence Of
-        Exceptions</a>.<a data-type="indexterm"
-			  data-startref="ALexcept">&nbsp;</a></p>
+        Exceptions</a>.<a data-type="indexterm" data-startref=
+        "ALexcept">&nbsp;</a></p>
       </section>
     </section>
 
@@ -1185,11 +1171,10 @@
       system. We discussed in the beginning of the chapter why
       Async is generally a better choice than system threads, but
       even if you mostly use Async, OCaml's system threads are
-	sometimes necessary, and it's worth understanding them.
-	<a data-type="indexterm" data-primary=
-	   "parallelism">&nbsp;</a>
-	<a data-type="indexterm"
-	   data-primary="kernel-level threads">&nbsp;</a><a data-type=
+      sometimes necessary, and it's worth understanding them.
+      <a data-type="indexterm" data-primary=
+      "parallelism">&nbsp;</a> <a data-type="indexterm"
+      data-primary="kernel-level threads">&nbsp;</a><a data-type=
       "indexterm" data-primary="threads" data-secondary=
       "kernel-level threads">&nbsp;</a><a data-type="indexterm" id=
       "systhrd" data-primary=
@@ -1214,7 +1199,7 @@
       running such calls. Most of the time, as a user of Async you
       don't need to think about this, but it is happening under the
       covers.<a data-type="indexterm" data-primary="threads"
-		data-secondary="benefits of">&nbsp;</a></p>
+      data-secondary="benefits of">&nbsp;</a></p>
 
       <p>Another reason to have multiple threads is to deal with
       non-OCaml libraries that have their own event loop or for
@@ -1241,7 +1226,7 @@
       multiple facilities for doing just this,
       <code>In_thread.run</code> being the simplest. We can simply
       write:<a data-type="indexterm" data-primary=
-	       "In_thread module">&nbsp;</a></p>
+      "In_thread module">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/async/main.topscript" part="42" />
 
@@ -1324,13 +1309,12 @@
         data between different systems threads. Even data
         structures that seem like they should be safe but are
         mutable under the covers, like lazy values, can have
-          undefined behavior when accessed from multiple threads.
-	  <a data-type="indexterm" data-primary=
-             "mutexes">&nbsp;</a><a data-type="indexterm" data-primary=
-				    "segfaults">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="threads" data-secondary=
-	     "locking and">&nbsp;</a><a data-type="indexterm"
+        undefined behavior when accessed from multiple threads.
+        <a data-type="indexterm" data-primary=
+        "mutexes">&nbsp;</a><a data-type="indexterm" data-primary=
+        "segfaults">&nbsp;</a> <a data-type="indexterm"
+        data-primary="threads" data-secondary=
+        "locking and">&nbsp;</a><a data-type="indexterm"
         data-primary="threads" data-secondary=
         "thread-safety">&nbsp;</a></p>
 
@@ -1368,9 +1352,9 @@
         Async computations safely. This is a very flexible way of
         connecting threads to the Async world, but it's a complex
         use case that is beyond the scope of this chapter.
-	<a data-type="indexterm" data-startref=
-           "systhrd">&nbsp;</a><a data-type="indexterm" data-startref=
-				  "ALsysthr">&nbsp;</a></p>
+        <a data-type="indexterm" data-startref=
+        "systhrd">&nbsp;</a><a data-type="indexterm" data-startref=
+        "ALsysthr">&nbsp;</a></p>
       </section>
     </section>
   </section>

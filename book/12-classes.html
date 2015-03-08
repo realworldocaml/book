@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -13,25 +11,25 @@
   data-type="chapter">
     <h1>Classes</h1>
 
-    <p>Programming with objects directly is great for encapsulation,
-    but one of the main goals of object-oriented programming is code
-    reuse through inheritance. For inheritance, we need to
-    introduce <em>classes</em>. In object-oriented programming, a
-    class is a "recipe" for creating objects. The recipe can be
-    changed by adding new methods and fields, or it can be changed by
-    modifying existing methods.<a data-type= "indexterm"
-    data-primary="programming" data-secondary="object-oriented
-    programming (OOP)">&nbsp;</a></p>
+    <p>Programming with objects directly is great for
+    encapsulation, but one of the main goals of object-oriented
+    programming is code reuse through inheritance. For inheritance,
+    we need to introduce <em>classes</em>. In object-oriented
+    programming, a class is a "recipe" for creating objects. The
+    recipe can be changed by adding new methods and fields, or it
+    can be changed by modifying existing methods.<a data-type=
+    "indexterm" data-primary="programming" data-secondary=
+    "object-oriented programming (OOP)">&nbsp;</a></p>
 
     <section id="ocaml-classes" data-type="sect1">
       <h1>OCaml Classes</h1>
 
       <p>In OCaml, class definitions must be defined as toplevel
-      statements in a module. The syntax for a class definition uses
-      the keyword <code>class</code>:<a data-type="indexterm"
-      data-primary="classes" data-secondary="basic syntax
-      for">&nbsp;</a></p> <link rel="import"
-      data-code-language="ocamltop" href=
+      statements in a module. The syntax for a class definition
+      uses the keyword <code>class</code>:<a data-type="indexterm"
+      data-primary="classes" data-secondary=
+      "basic syntax for">&nbsp;</a></p>
+      <link rel="import" data-code-language="ocamltop" href=
       "code/classes/istack.topscript" />
 
       <p>The <code>class istack : object ... end</code> result
@@ -75,15 +73,14 @@
     "sect1">
       <h1>Class Parameters and Polymorphism</h1>
 
-      <p>A class definition serves as the <em>constructor</em> for the
-      class. In general, a class definition may have parameters that
-      must be provided as arguments when the object is created
-	with <code>new</code>.<a data-type="indexterm"
-				 data-primary="polymorphism"
-				 data-secondary="class parameters
-						 and">&nbsp;
-	</a><a data-type="indexterm" data-primary="classes"
-      data-secondary= "class parameters and polymorphism">&nbsp;</a></p>
+      <p>A class definition serves as the <em>constructor</em> for
+      the class. In general, a class definition may have parameters
+      that must be provided as arguments when the object is created
+      with <code>new</code>.<a data-type="indexterm" data-primary=
+      "polymorphism" data-secondary=
+      "class parameters and">&nbsp;</a> <a data-type="indexterm"
+      data-primary="classes" data-secondary=
+      "class parameters and polymorphism">&nbsp;</a></p>
 
       <p>Let's implement a variant of the <code>istack</code> class
       that can hold any values, not just integers. When defining
@@ -739,7 +736,8 @@
         data-secondary=
         "displaying animated shapes">&nbsp;</a><a data-type=
         "indexterm" data-primary="multiple inheritance"
-        data-secondary="displaying animated shapes with">&nbsp;</a></p>
+        data-secondary=
+        "displaying animated shapes with">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/classes-async/shapes.ml" part="10" />
 

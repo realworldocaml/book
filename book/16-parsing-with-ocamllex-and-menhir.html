@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -34,8 +32,7 @@
     generators</em>. A parser generator creates a parser from a
     specification of the data format that you want to parse, and
     uses that to generate a parser.<a data-type="indexterm"
-				      data-primary="parsing"
-				      data-secondary=
+    data-primary="parsing" data-secondary=
     "parser generators">&nbsp;</a></p>
 
     <p>Parser generators have a long history, including tools like
@@ -94,8 +91,7 @@
       converting a stream of tokens into the final representation,
       which is often in the form of a tree-like data structure
       called an <em>abstract syntax tree</em>, or AST.
-      <a data-type=
-      "indexterm" data-primary=
+      <a data-type="indexterm" data-primary=
       "AST (abstract syntax-tree)">&nbsp;</a><a data-type=
       "indexterm" data-primary=
       "lexical analysis (lexing)">&nbsp;</a></p>
@@ -211,8 +207,7 @@
         apply the grammar's rules to produce a series of
         transformations, starting at a distinguished <em>start
         symbol</em> that produces the token sequence in
-          <span class="keep-together">question</span>.
-	<a data-type=
+        <span class="keep-together">question</span>. <a data-type=
         "indexterm" data-primary="grammars" data-secondary=
         "context-free">&nbsp;</a><a data-type="indexterm"
         data-primary="LR(1) grammars">&nbsp;</a><a data-type=
@@ -274,7 +269,7 @@
 
         <p>According to these rules, a JSON <code>value</code> is
         either:<a data-type="indexterm" data-primary="values"
-		  data-secondary="in JSON data">&nbsp;</a></p>
+        data-secondary="in JSON data">&nbsp;</a></p>
 
         <ul>
           <li>
@@ -342,8 +337,8 @@
         library of built-in rules to simplify this handling. These
         rules are detailed in the Menhir manual and include
         optional values, pairs of values with optional separators,
-          and lists of elements (also with optional separators).
-	  <a data-type="indexterm" data-primary=
+        and lists of elements (also with optional separators).
+        <a data-type="indexterm" data-primary=
         "Menhir parser generator" data-secondary=
         "built-in rules of">&nbsp;</a></p>
 
@@ -378,7 +373,7 @@
       <p>Now we can define a lexer, using <span class=
       "command"><em>ocamllex</em></span>, to convert our input text
       into a stream of tokens. The specification of the lexer is
-	placed in a file with an <code>.mll</code> suffix.
+      placed in a file with an <code>.mll</code> suffix.
       <a data-type="indexterm" data-primary="lexers"
       data-secondary="specification of">&nbsp;</a><a data-type=
       "indexterm" data-primary="OCaml toolchain" data-secondary=
@@ -393,8 +388,8 @@
 
         <p>Let's walk through the definition of a lexer section by
         section. The first section is on optional chunk of OCaml
-          code that is bounded by a pair of curly braces:
-	  <a data-type="indexterm" data-primary="lexers"
+        code that is bounded by a pair of curly braces:
+        <a data-type="indexterm" data-primary="lexers"
         data-secondary="optional OCaml code for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/lexer.mll" />
@@ -479,10 +474,9 @@
         code for the rules has a parameter called
         <code>lexbuf</code> that defines the input, including the
         position in the input file, as well as the text that was
-        matched by the regular expression.
-	<a data-type="indexterm"
-	   data-primary="pattern matching"
-	   data-secondary="vs. lexing rules">&nbsp;</a></p>
+        matched by the regular expression. <a data-type="indexterm"
+        data-primary="pattern matching" data-secondary=
+        "vs. lexing rules">&nbsp;</a></p>
 
         <p>The first <code>white { read lexbuf }</code> calls the
         lexer recursively. That is, it skips the input whitespace
@@ -543,11 +537,10 @@
         "command"><em>ocamllex</em></span> allows the definition of
         multiple lexers in the same file, and the definitions can
         be recursive. In this case, we use recursion to match
-          string literals using the following rule definition:
-	<a data-type="indexterm" data-primary=
-        "recursion" data-secondary=
-        "in lexers">&nbsp;</a><a data-type="indexterm"
-        data-primary="lexers" data-secondary=
+        string literals using the following rule definition:
+        <a data-type="indexterm" data-primary="recursion"
+        data-secondary="in lexers">&nbsp;</a><a data-type=
+        "indexterm" data-primary="lexers" data-secondary=
         "recursive rules">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/lexer.mll" part="5" />
@@ -566,20 +559,17 @@
         call to the lexer.</p>
 
         <p>That covers the lexer. Next, we need to combine the
-          lexer with the parser to bring it all together.
-	  <a data-type="indexterm" data-primary="lexers"
-             data-secondary="Unicode parsing">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="Uutf Unicode codec">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="OCaml toolchain"
-	     data-secondary="ocamllex">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="Ulex lexer generator">&nbsp;</a>
-	  <a data-type="indexterm"
-             data-primary="Camomile unicode parser">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="Unicode, parsing solutions for">&nbsp;</a></p>
+        lexer with the parser to bring it all together.
+        <a data-type="indexterm" data-primary="lexers"
+        data-secondary="Unicode parsing">&nbsp;</a> <a data-type=
+        "indexterm" data-primary="Uutf Unicode codec">&nbsp;</a>
+        <a data-type="indexterm" data-primary="OCaml toolchain"
+        data-secondary="ocamllex">&nbsp;</a> <a data-type=
+        "indexterm" data-primary="Ulex lexer generator">&nbsp;</a>
+        <a data-type="indexterm" data-primary=
+        "Camomile unicode parser">&nbsp;</a> <a data-type=
+        "indexterm" data-primary=
+        "Unicode, parsing solutions for">&nbsp;</a></p>
 
         <div data-type="note">
           <h1>Handling Unicode</h1>
@@ -649,8 +639,7 @@
       <code>Lexer.SyntaxError</code>. A simple solution when
       encountering an error is to print the error and give up:
       <a data-type="indexterm" data-primary="errors"
-      data-secondary="&quot;give up on first error&quot; approach">&nbsp;</a>
-      </p>
+      data-secondary="&quot;give up on first error&quot; approach">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/parsing-test/test.ml" />
 

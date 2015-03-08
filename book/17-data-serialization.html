@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
 
   <title></title>
 </head>
@@ -490,9 +488,8 @@
         with <code>sexp_opaque</code> will be presented as the atom
         <code>&lt;opaque&gt;</code> by the to-sexp converter, and
         will trigger an exception from the from-sexp converter.
-	<a data-type="indexterm"
-	   data-primary="Sexplib package"
-	   data-secondary="sexp_opaque">&nbsp;</a></p>
+        <a data-type="indexterm" data-primary="Sexplib package"
+        data-secondary="sexp_opaque">&nbsp;</a></p>
 
         <p>Note that the type of a component marked as opaque
         doesn't need to have a sexp converter defined. Here, if we
@@ -543,8 +540,8 @@
         <p>Sometimes, sexp converters have more parentheses than
         one would ideally like. Consider, for example, the
         following variant type:<a data-type="indexterm"
-				  data-primary="Sexplib package"
-				  data-secondary="sexp_list">&nbsp;</a></p>
+        data-primary="Sexplib package" data-secondary=
+        "sexp_list">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/sexp_list.topscript" />
 
@@ -567,8 +564,8 @@
         <code>(x)</code> for <code>Some x</code>, and a record
         field containing an option would be rendered accordingly.
         For example:<a data-type="indexterm" data-primary=
-		       "Sexplib package" data-secondary=
-		       "sexp_option">&nbsp;</a></p>
+        "Sexplib package" data-secondary=
+        "sexp_option">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/sexp_option.topscript" />
 
@@ -589,8 +586,8 @@
         <code>sexp_option</code> fills in absent fields with
         <code>None</code>. But you might want to allow other ways
         of filling in default values.<a data-type="indexterm"
-					data-primary="s-expressions" data-secondary=
-					"specifying defaults in">&nbsp;</a></p>
+        data-primary="s-expressions" data-secondary=
+        "specifying defaults in">&nbsp;</a></p>
 
         <p>Consider the following type, which represents the
         configuration of a very simple web server:</p>
@@ -634,12 +631,11 @@
         maintain. It can also be useful for backwards
         compatibility: if you add a new field to your config
         record, but you make that field optional, then you should
-          still be able to parse older version of your config.
-	  <a data-type="indexterm" data-startref=
-             "SERFORMsexp">&nbsp;</a><a data-type="indexterm"
-					data-primary="files" data-secondary=
-					"config files">&nbsp;</a>
-	  <a data-type="indexterm"
+        still be able to parse older version of your config.
+        <a data-type="indexterm" data-startref=
+        "SERFORMsexp">&nbsp;</a><a data-type="indexterm"
+        data-primary="files" data-secondary=
+        "config files">&nbsp;</a> <a data-type="indexterm"
         data-primary="config file formats">&nbsp;</a></p>
       </section>
     </section>
