@@ -17,7 +17,14 @@
     atomic values are strings. They were first popularized by the
     Lisp programming language in the 1960s. They have remained one
     of the simplest and most effective ways to encode structured
-    data in a human-readable and editable form.</p>
+    data in a human-readable and editable form.<a data-type=
+    "indexterm" id="SERFORMsexp" data-primary=
+    "serialization formats" data-secondary=
+    "s-expressions">&nbsp;</a><a data-type="indexterm"
+    data-primary="s-expressions" data-secondary=
+    "uses for">&nbsp;</a><a data-type="indexterm" data-primary=
+    "data serialization" data-secondary=
+    "with s-expressions">&nbsp;</a></p>
 
     <p>There's a full definition of s-expressions available
     <a href="http://people.csail.mit.edu/rivest/Sexp.txt">online</a>.
@@ -69,7 +76,8 @@
       <h1>Basic Usage</h1>
 
       <p>The type used to represent an s-expression is quite
-      simple:</p>
+      simple:<a data-type="indexterm" data-primary="s-expressions"
+      data-secondary="basic usage of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/sexpr/sexp.mli" />
 
@@ -86,7 +94,8 @@
       <p>This prints out nicely because Core registers a pretty
       printer with the toplevel. This pretty printer is based on
       the functions in <code>Sexp</code> for converting
-      s-expressions to and from strings:</p>
+      s-expressions to and from strings:<a data-type="indexterm"
+      data-primary="pretty printers">&nbsp;</a></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/sexpr/sexp_printer.topscript" />
 
@@ -126,7 +135,9 @@
         <p>The values of the s-expressions that we created were
         printed properly as s-expressions in the toplevel, instead
         of as the tree of <code>Atom</code> and <code>List</code>
-        variants that they're actually made of.</p>
+        variants that they're actually made of.<a data-type=
+        "indexterm" data-primary=
+        "top-level printers">&nbsp;</a></p>
 
         <p>This is due to OCaml's facility for installing custom
         <em>top-level printers</em> that can rewrite some values
@@ -150,7 +161,9 @@
 
         <p>But what if you want a function to convert a brand new
         type to an s-expression? You can of course write it
-        yourself manually. Here's an example:</p>
+        yourself manually. Here's an example:<a data-type=
+        "indexterm" data-primary="s-expressions" data-secondary=
+        "generating from OCaml types">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/manually_making_sexp.topscript" />
 
@@ -169,7 +182,11 @@
         for generating such conversion functions. With that syntax
         extension enabled, any type that has <code>with sexp</code>
         as an annotation will trigger the generation of the
-        functions we want:</p>
+        functions we want:<a data-type="indexterm" data-primary=
+        "Sexplib package" data-secondary=
+        "syntax extension in">&nbsp;</a><a data-type="indexterm"
+        data-primary="syntax extension" data-secondary=
+        "in Sexplib package">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/auto_making_sexp.topscript" />
 
@@ -210,7 +227,11 @@
           extend the grammar of the language. Camlp4 is well
           integrated into the OCaml toolchain and can be activated
           within the toplevel and also included in compilation
-          using the <code>-pp</code> compiler flag.</p>
+          using the <code>-pp</code> compiler flag.<a data-type=
+          "indexterm" data-primary=
+          "Camlp4 syntax extension mechanism">&nbsp;</a><a data-type="indexterm"
+          data-primary="syntax extension" data-secondary=
+          "in Camlp4">&nbsp;</a></p>
 
           <p>Sexplib is part of a family of syntax extensions,
           including Comparelib, described in <a href=
@@ -224,7 +245,10 @@
           notation) and utilities for working with type
           definitions. If you want to build your own type-driven
           syntax extension, you should consider basing it on
-          Type_conv.</p>
+          Type_conv.<a data-type="indexterm" data-primary=
+          "Type_conv library">&nbsp;</a><a data-type="indexterm"
+          data-primary="Sexplib package" data-secondary=
+          "Type_conv library and">&nbsp;</a></p>
         </div>
       </section>
     </section>
@@ -239,7 +263,9 @@
       parentheses or spaces themselves; backslash is the escape
       character; and semicolons are used to introduce single-line
       comments. Thus, the following file, <em class=
-      "filename">example.scm</em>:</p>
+      "filename">example.scm</em>:<a data-type="indexterm"
+      data-primary="s-expressions" data-secondary=
+      "format of">&nbsp;</a></p>
       <link rel="import" data-code-language="scheme" href=
       "code/sexpr/example.scm" />
 
@@ -304,7 +330,9 @@
       complete example. Here's the source for a simple library for
       representing integer intervals, very similar to the one
       described in <a href="09-functors.html#functors" data-type=
-      "xref">Functors</a>:</p>
+      "xref">Functors</a>:<a data-type="indexterm" data-primary=
+      "s-expressions" data-secondary=
+      "preserving invariants in">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/sexpr/int_interval.ml" />
 
@@ -354,7 +382,8 @@
       value <code>Range (x,y)</code>, <code>y</code> is greater
       than or equal to <code>x</code>. The <code>create</code>
       function preserves this invariant, but the
-      <code>t_of_sexp</code> function does not.</p>
+      <code>t_of_sexp</code> function does not.<a data-type=
+      "indexterm" data-primary="invariant checks">&nbsp;</a></p>
 
       <p>We can fix this problem by overriding the autogenerated
       function and writing a custom sexp converter that wraps the
@@ -386,7 +415,13 @@
       s-expression; and the second, converting that s-expression
       into the type in question. One problem with this is that it
       can be hard to localize errors to the right place using this
-      scheme. Consider the following example:</p>
+      scheme. Consider the following example:<a data-type=
+      "indexterm" data-primary="debugging" data-secondary=
+      "s-expressions">&nbsp;</a><a data-type="indexterm"
+      data-primary="errors" data-secondary=
+      "error messages with s-expressions">&nbsp;</a><a data-type=
+      "indexterm" data-primary="s-expressions" data-secondary=
+      "deserializing a type from">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/sexpr/read_foo.ml" />
 
@@ -435,7 +470,9 @@
       the default behavior of the autogenerated sexp converters.
       These directives allow you to customize the way in which
       types are represented as s-expressions without having to
-      write a custom converter.</p>
+      write a custom converter.<a data-type="indexterm"
+      data-primary="s-expressions" data-secondary=
+      "modifying default behavior of">&nbsp;</a></p>
 
       <p>Note that the extra directives aren't part of the standard
       OCaml syntax, but are added via the Sexplib syntax extension.
@@ -452,7 +489,10 @@
         component of a type as being unconvertible. Anything marked
         with <code>sexp_opaque</code> will be presented as the atom
         <code>&lt;opaque&gt;</code> by the to-sexp converter, and
-        will trigger an exception from the from-sexp converter.</p>
+        will trigger an exception from the from-sexp converter.
+	<a data-type="indexterm"
+	   data-primary="Sexplib package"
+	   data-secondary="sexp_opaque">&nbsp;</a></p>
 
         <p>Note that the type of a component marked as opaque
         doesn't need to have a sexp converter defined. Here, if we
@@ -502,7 +542,9 @@
 
         <p>Sometimes, sexp converters have more parentheses than
         one would ideally like. Consider, for example, the
-        following variant type:</p>
+        following variant type:<a data-type="indexterm"
+				  data-primary="Sexplib package"
+				  data-secondary="sexp_list">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/sexp_list.topscript" />
 
@@ -524,7 +566,9 @@
         either as <code>()</code> for <code>None</code>, or as
         <code>(x)</code> for <code>Some x</code>, and a record
         field containing an option would be rendered accordingly.
-        For example:</p>
+        For example:<a data-type="indexterm" data-primary=
+		       "Sexplib package" data-secondary=
+		       "sexp_option">&nbsp;</a></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/sexpr/sexp_option.topscript" />
 
@@ -544,7 +588,9 @@
         with an unspecified field. In particular,
         <code>sexp_option</code> fills in absent fields with
         <code>None</code>. But you might want to allow other ways
-        of filling in default values.</p>
+        of filling in default values.<a data-type="indexterm"
+					data-primary="s-expressions" data-secondary=
+					"specifying defaults in">&nbsp;</a></p>
 
         <p>Consider the following type, which represents the
         configuration of a very simple web server:</p>
@@ -588,7 +634,13 @@
         maintain. It can also be useful for backwards
         compatibility: if you add a new field to your config
         record, but you make that field optional, then you should
-        still be able to parse older version of your config.</p>
+          still be able to parse older version of your config.
+	  <a data-type="indexterm" data-startref=
+             "SERFORMsexp">&nbsp;</a><a data-type="indexterm"
+					data-primary="files" data-secondary=
+					"config files">&nbsp;</a>
+	  <a data-type="indexterm"
+        data-primary="config file formats">&nbsp;</a></p>
       </section>
     </section>
   </section>
