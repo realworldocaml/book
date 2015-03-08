@@ -33,7 +33,10 @@
     when you do need to write a parser, in the form of <em>parser
     generators</em>. A parser generator creates a parser from a
     specification of the data format that you want to parse, and
-    uses that to generate a parser.</p>
+    uses that to generate a parser.<a data-type="indexterm"
+				      data-primary="parsing"
+				      data-secondary=
+    "parser generators">&nbsp;</a></p>
 
     <p>Parser generators have a long history, including tools like
     <span class="command"><em>lex</em></span> and <span class=
@@ -52,7 +55,10 @@
     <p>Parsing is a broad and often intricate topic, and our
     purpose here is not to teach all of the theoretical issues, but
     to provide a pragmatic introduction of how to build a parser in
-    OCaml.</p>
+    OCaml.<a data-type="indexterm" data-primary=
+    "ocamlyacc parser generator">&nbsp;</a><a data-type="indexterm"
+    data-primary="Menhir parser generator" data-secondary=
+    "vs. ocamlyacc">&nbsp;</a></p>
 
     <div data-type="note">
       <h1>Menhir Versus ocamlyacc</h1>
@@ -87,7 +93,12 @@
       stream of logical tokens; and full-on parsing, which involves
       converting a stream of tokens into the final representation,
       which is often in the form of a tree-like data structure
-      called an <em>abstract syntax tree</em>, or AST.</p>
+      called an <em>abstract syntax tree</em>, or AST.
+      <a data-type=
+      "indexterm" data-primary=
+      "AST (abstract syntax-tree)">&nbsp;</a><a data-type=
+      "indexterm" data-primary=
+      "lexical analysis (lexing)">&nbsp;</a></p>
 
       <p>It's confusing that the term parsing is applied to both
       the overall process of converting textual data to structured
@@ -153,7 +164,10 @@
       declarations, including token and type specifications,
       precedence directives, and other output directives; and the
       second section is for specifying the grammar of the language
-      to be parsed.</p>
+      to be parsed.<a data-type="indexterm" data-primary="files"
+      data-secondary="mly files">&nbsp;</a><a data-type="indexterm"
+      id="PARSparsdef" data-primary="parsing" data-secondary=
+      "parser definition">&nbsp;</a></p>
 
       <p>We'll start by declaring the list of tokens. A token is
       declared using the syntax <code>%token
@@ -162,7 +176,8 @@
       <em><code>&lt;type&gt;</code></em> is optional and
       <em><code>uid</code></em> is a capitalized identifier. For
       JSON, we need tokens for numbers, strings, identifiers, and
-      punctuation:</p>
+      punctuation:<a data-type="indexterm" data-primary=
+      "tokens, declaration of">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/parsing/parser.mly" />
 
@@ -196,7 +211,18 @@
         apply the grammar's rules to produce a series of
         transformations, starting at a distinguished <em>start
         symbol</em> that produces the token sequence in
-        <span class="keep-together">question</span>.</p>
+          <span class="keep-together">question</span>.
+	<a data-type=
+        "indexterm" data-primary="grammars" data-secondary=
+        "context-free">&nbsp;</a><a data-type="indexterm"
+        data-primary="LR(1) grammars">&nbsp;</a><a data-type=
+        "indexterm" data-primary=
+        "start symbols">&nbsp;</a><a data-type="indexterm"
+        data-primary="non-terminal symbols">&nbsp;</a><a data-type=
+        "indexterm" data-primary=
+        "context-free grammars">&nbsp;</a><a data-type="indexterm"
+        data-primary="Menhir parser generator" data-secondary=
+        "context-free grammars in">&nbsp;</a></p>
 
         <p>We'll start describing the JSON grammar by declaring the
         start symbol to be the non-terminal symbol
@@ -224,7 +250,10 @@
         OCaml value corresponding to the production in question.
         Semantic actions are arbitrary OCaml expressions that are
         evaluated during parsing to produce values that are
-        attached to the non-terminal in the rule.</p>
+        attached to the non-terminal in the rule.<a data-type=
+        "indexterm" data-primary=
+        "semantic actions">&nbsp;</a><a data-type="indexterm"
+        data-primary="curly braces ({ })">&nbsp;</a></p>
 
         <p>We have two cases for <code>prog</code>: either there's
         an <code>EOF</code>, which means the text is empty, and so
@@ -244,7 +273,8 @@
         "code/parsing/parser.mly" part="3" />
 
         <p>According to these rules, a JSON <code>value</code> is
-        either:</p>
+        either:<a data-type="indexterm" data-primary="values"
+		  data-secondary="in JSON data">&nbsp;</a></p>
 
         <ul>
           <li>
@@ -278,7 +308,9 @@
         <code>rev_object_fields</code> has an empty lefthand side,
         because what we're matching on in this case is an empty
         sequence of tokens. The comment <code>(* empty *)</code> is
-        used to make this clear:</p>
+        used to make this clear:<a data-type="indexterm"
+        data-primary="rev_object_fields">&nbsp;</a><a data-type=
+        "indexterm" data-primary="object_fields">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/parser.mly" part="4" />
 
@@ -289,7 +321,9 @@
         left-recursive definitions. The following right-recursive
         rule accepts the same input, but during parsing, it
         requires linear stack space to read object field
-        definitions:</p>
+        definitions:<a data-type="indexterm" data-primary=
+        "Menhir parser generator" data-secondary=
+        "left-recursive definitions">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/right_rec_rule.mly" part="4" />
 
@@ -308,7 +342,10 @@
         library of built-in rules to simplify this handling. These
         rules are detailed in the Menhir manual and include
         optional values, pairs of values with optional separators,
-        and lists of elements (also with optional separators).</p>
+          and lists of elements (also with optional separators).
+	  <a data-type="indexterm" data-primary=
+        "Menhir parser generator" data-secondary=
+        "built-in rules of">&nbsp;</a></p>
 
         <p>A version of the JSON grammar using these more succinct
         Menhir rules follows. Notice the use of
@@ -324,7 +361,12 @@
         to switch to using <span class=
         "command"><em>menhir</em></span> instead of <span class=
         "command"><em>ocamlyacc</em></span> to handle files with
-        the <code>.mly</code> suffix:</p>
+        the <code>.mly</code> suffix:<a data-type="indexterm"
+        data-primary="-use-menhir flag" data-primary-sortas=
+        "use">&nbsp;</a><a data-type="indexterm" data-primary=
+        "Menhir parser generator" data-secondary=
+        "invoking">&nbsp;</a><a data-type="indexterm"
+        data-startref="PARSparsdef">&nbsp;</a></p>
         <link rel="import" data-code-language="console" href=
         "code/parsing/build_short_parser.out" />
       </section>
@@ -336,14 +378,24 @@
       <p>Now we can define a lexer, using <span class=
       "command"><em>ocamllex</em></span>, to convert our input text
       into a stream of tokens. The specification of the lexer is
-      placed in a file with an <code>.mll</code> suffix.</p>
+	placed in a file with an <code>.mll</code> suffix.
+      <a data-type="indexterm" data-primary="lexers"
+      data-secondary="specification of">&nbsp;</a><a data-type=
+      "indexterm" data-primary="OCaml toolchain" data-secondary=
+      "ocamllex">&nbsp;</a><a data-type="indexterm" data-primary=
+      "mll files">&nbsp;</a><a data-type="indexterm" data-primary=
+      "files" data-secondary="mll files">&nbsp;</a><a data-type=
+      "indexterm" id="PARlex" data-primary="parsing"
+      data-secondary="lexer definition">&nbsp;</a></p>
 
       <section id="ocaml-prelude" data-type="sect2">
         <h2>OCaml Prelude</h2>
 
         <p>Let's walk through the definition of a lexer section by
         section. The first section is on optional chunk of OCaml
-        code that is bounded by a pair of curly braces:</p>
+          code that is bounded by a pair of curly braces:
+	  <a data-type="indexterm" data-primary="lexers"
+        data-secondary="optional OCaml code for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/lexer.mll" />
 
@@ -369,7 +421,10 @@
         named regular expressions. These look syntactically like
         ordinary OCaml <code>let</code> bindings, but really this
         is a specialized syntax for declaring regular expressions.
-        Here's an example:</p>
+        Here's an example:<a data-type="indexterm" data-primary=
+        "regular expressions">&nbsp;</a><a data-type="indexterm"
+        data-primary="lexers" data-secondary=
+        "regular expressions collection">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/lexer.mll" part="1" />
 
@@ -411,7 +466,9 @@
         tokens. These OCaml expressions can be quite complicated,
         using side effects and invoking other rules as part of the
         body of the rule. Let's look at the <code>read</code> rule
-        for parsing a JSON expression:</p>
+        for parsing a JSON expression:<a data-type="indexterm"
+        data-primary="lexers" data-secondary=
+        "rules for">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/lexer.mll" part="4" />
 
@@ -422,7 +479,10 @@
         code for the rules has a parameter called
         <code>lexbuf</code> that defines the input, including the
         position in the input file, as well as the text that was
-        matched by the regular expression.</p>
+        matched by the regular expression.
+	<a data-type="indexterm"
+	   data-primary="pattern matching"
+	   data-secondary="vs. lexing rules">&nbsp;</a></p>
 
         <p>The first <code>white { read lexbuf }</code> calls the
         lexer recursively. That is, it skips the input whitespace
@@ -483,7 +543,12 @@
         "command"><em>ocamllex</em></span> allows the definition of
         multiple lexers in the same file, and the definitions can
         be recursive. In this case, we use recursion to match
-        string literals using the following rule definition:</p>
+          string literals using the following rule definition:
+	<a data-type="indexterm" data-primary=
+        "recursion" data-secondary=
+        "in lexers">&nbsp;</a><a data-type="indexterm"
+        data-primary="lexers" data-secondary=
+        "recursive rules">&nbsp;</a></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/parsing/lexer.mll" part="5" />
 
@@ -501,7 +566,20 @@
         call to the lexer.</p>
 
         <p>That covers the lexer. Next, we need to combine the
-        lexer with the parser to bring it all together.</p>
+          lexer with the parser to bring it all together.
+	  <a data-type="indexterm" data-primary="lexers"
+             data-secondary="Unicode parsing">&nbsp;</a>
+	  <a data-type="indexterm"
+	     data-primary="Uutf Unicode codec">&nbsp;</a>
+	  <a data-type="indexterm"
+	     data-primary="OCaml toolchain"
+	     data-secondary="ocamllex">&nbsp;</a>
+	  <a data-type="indexterm"
+	     data-primary="Ulex lexer generator">&nbsp;</a>
+	  <a data-type="indexterm"
+             data-primary="Camomile unicode parser">&nbsp;</a>
+	  <a data-type="indexterm"
+	     data-primary="Unicode, parsing solutions for">&nbsp;</a></p>
 
         <div data-type="note">
           <h1>Handling Unicode</h1>
@@ -546,7 +624,8 @@
           </ul>
 
           <p>All of these libraries are available via OPAM under
-          their respective names.</p>
+          their respective names.<a data-type="indexterm"
+          data-startref="PARlex">&nbsp;</a></p>
         </div>
       </section>
     </section>
@@ -558,7 +637,9 @@
       parser. As we saw in the type definition in
       <code>parser.mli</code>, the parsing function expects a lexer
       of type <code>Lexing.lexbuf -&gt; token</code>, and a
-      <code>lexbuf</code>:</p>
+      <code>lexbuf</code>:<a data-type="indexterm" data-primary=
+      "parsing" data-secondary=
+      "lexer and parser composition">&nbsp;</a></p>
       <link rel="import" data-code-language="ocaml" href=
       "code/parsing/prog.mli" />
 
@@ -566,7 +647,10 @@
       functions to handle parsing errors. There are currently two
       errors: <code>Parser.Error</code> and
       <code>Lexer.SyntaxError</code>. A simple solution when
-      encountering an error is to print the error and give up:</p>
+      encountering an error is to print the error and give up:
+      <a data-type="indexterm" data-primary="errors"
+      data-secondary="&quot;give up on first error&quot; approach">&nbsp;</a>
+      </p>
       <link rel="import" data-code-language="ocaml" href=
       "code/parsing-test/test.ml" />
 
@@ -576,7 +660,9 @@
       However, the Menhir parser defines additional mechanisms you
       can use to try and recover from errors. These are described
       in detail in its reference <a href=
-      "http://gallium.inria.fr/~fpottier/menhir/">manual</a>.</p>
+      "http://gallium.inria.fr/~fpottier/menhir/">manual</a>.<a data-type="indexterm"
+      data-primary="Menhir parser generator" data-secondary=
+      "error handling in">&nbsp;</a></p>
 
       <p>The standard lexing library <code>Lexing</code> provides a
       function <code>from_channel</code> to read the input from a
