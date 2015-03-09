@@ -60,6 +60,8 @@ val print_elements_only
 (** Filter out pure whitespace Data nodes. *)
 val filter_whitespace : t -> t
 
+val fold : t -> init:'a -> f:('a -> item -> 'a) -> 'a
+
 
 (******************************************************************************)
 (** {2 Constructors} *)

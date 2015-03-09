@@ -127,6 +127,15 @@ let filter_whitespace t =
   in
   List.filter_map t ~f
 
+let fold t ~init ~f =
+  let rec loop accum item = match item with
+    | Nethtml.Data _ ->
+      f accum item
+    | Nethtml.Element (_,_,childs) ->
+      List.fold childs ~init:(f accum item) ~f:loop
+  in
+  List.fold t ~init ~f:loop
+
 
 (******************************************************************************)
 (* Constructors                                                               *)
