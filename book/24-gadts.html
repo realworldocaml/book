@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+
+  <title></title>
+</head>
+
+<body>
+  <section xmlns="http://www.w3.org/1999/xhtml" id="gadts"
+	   data-type="chapter"> 
+    <h1>GADTs</h1>
+
+    <p>
+      OCaml's variants, which we discussed
+      in <a href="06-variants.html#variants" data-type="xref">Chapter
+	6</a>, are a powerful tool for representing data that has
+      multiple different forms.  But variants have some important
+      limitations in terms of how precise they are about enumerating
+      these possibilities.  </p>
+
+    <p>
+      In this chapter, we'll discuss <em>generalized
+	algebraic data types</em>, or GADTs, a generalization of
+      variants which provide extra power, as well as imposing some
+      extra complexity.</p>
+
+    <p>
+      Before we explain what GADTs are, let's look at an example where
+      they come in handy.  In particular, we'll consider the question
+      of how to build a more compact array type.  We haven't talked
+      much about memory representations thus far (we'll get to that in
+      more depth in <a href="20-runtime-memory-layout.html"
+	 data-type="xref">Chapter 20</a>), but for now it suffices to note
+      that OCaml's <code>array</code> type requires at least a word of memory per
+      element, even for objects that are small enough to fit in a
+      single byte, like characters.  OCaml also has a more compact
+      array-like type called <code>bytes</code>, which stores elements of type
+      <code>char</code> and which only require a single byte per element.
+    </p>
+
+    <p>
+      Despite the similarities, the <code>array</code>
+      and <code>bytes</code> types are entirely distinct from OCaml's
+      perspective, which means that you can't use them interchangeably
+      in a polymorphic way.  Your code has to commit concretely to
+      using one or the other.
+    </p>
+
+    <p>
+      Let's see what happens if we try to write a general purpose
+      array, <em>i.e.</em>, one that can support values of any type,
+      which can use the <code>bytes</code> when storing values of
+      type <code>char</code>.  Supporting two possible representations
+      seems like a natural job for a variant.
+    </p>
+
+    <link rel="import" data-code-language="ocamltop" href=
+	  "code/gadts/main.topscript" part="1" />
+
+    <p> 
+      At first glance, this looks good: the type is polymorphic, and
+      it has the two representations we're looking for.  But if we
+      take this type and fill out the functions we'd need for a useful
+      library, we start running into problems.
+    </p>
+
+    <link rel="import" data-code-language="ocamltop" href=
+	  "code/gadts/main.topscript" part="1.1" />
+
+    <p>
+      If you look closely, you'll see that the inferred types of this
+      module are not what you'd hope for.  The first worrisome note is
+      that the type of <code>of_bytes</code> is too general.  It
+      should return a <code>char t</code>, but returns a <code>'a
+      t</code> instead.
+    </p>
+
+    <p>
+      On the other hand, the types of <code>get</code>
+      and <code>set</code> are too specific, only allowing us to
+      operate on `char t`s.  This follows from how OCaml's type
+      inference works.  Consider the <code>match</code> statement in
+      the code for <code>get</code>.  Normally, when OCaml considers a
+      match statement, it requires that the value returned by every
+      branch be of the same type.  Given that the second branch is
+      specialized to <code>char</code>, all branches of the match must
+      be too.
+    </p>
+    
+    <p>
+      What we've essentially done is build a container for characters
+      that can use either an <code>array</code> or <code>bytes</code>
+      as its store.
+    </p>
+
+
+  </section>
+</body>
+</html>
