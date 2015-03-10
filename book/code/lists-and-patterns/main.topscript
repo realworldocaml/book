@@ -117,6 +117,8 @@ let run_bench tests =
 
 
 #part 11
+open Core_kernel.Std;;
+
 let rec sum_if l =
     if List.is_empty l then 0
     else List.hd_exn l + sum_if (List.tl_exn l)

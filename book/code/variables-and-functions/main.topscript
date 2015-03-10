@@ -1,7 +1,6 @@
+open Core_kernel.Std;;
 let x = 3;;
-
 let y = 4;;
-
 let z = x + y;;
 
 
@@ -247,17 +246,11 @@ List.iter ~f:print_endline;;
 #part 36
 let (^>) x f = f x;;
 
-Sys.getenv_exn "PATH"
+Sys.getenv "PATH"
   ^> String.split ~on:':' path
   ^> List.dedup ~compare:String.compare
   ^> List.iter ~f:print_endline
   ;;
-
-
-
-
-
-
 
 #part 37
 let some_or_zero = function

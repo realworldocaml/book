@@ -208,14 +208,17 @@
         <link rel="import" data-code-language="ocamltop" href=
         "code/lists-and-patterns/main.topscript" part="10" />
 
-        <p>Here's another, less artificial example. We can rewrite
-        the <code>sum</code> function we described earlier in the
-        chapter using an <code>if</code> statement rather than a
-        match. We can then use the functions <code>is_empty</code>,
-        <code>hd_exn</code>, and <code>tl_exn</code> from the
-        <code>List</code> module to deconstruct the list, allowing
-        us to implement the entire function without pattern
-        matching:</p>
+        <p>
+	  Here's another, less artificial example. We can rewrite
+          the <code>sum</code> function we described earlier in the
+          chapter using an <code>if</code> statement rather than a
+          match. We can then use the
+          functions <code>is_empty</code>, <code>hd_exn</code>,
+          and <code>tl_exn</code>
+          from <code>Core_kernel</code>'s <code>List</code> module to
+          deconstruct the list, allowing us to implement the entire
+          function without pattern matching:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/lists-and-patterns/main.topscript" part="11" />
 
@@ -584,10 +587,11 @@
           <link rel="import" data-code-language="ocamltop" href=
           "code/lists-and-patterns/main.topscript" part="35" />
 
-          <p>Note that <code>^/</code> is an infix operator
-          provided by Core for adding a new element to a string
-          representing a file path. It is equivalent to Core's
-          <code>Filename.concat</code>.</p>
+          <p>
+	    Note that <code>^/</code> is an infix operator provided
+            by <code>Core_kernel</code> for adding a new element to a
+            string representing a file path. It is equivalent
+            to <code>Core_kernel</code>'s <code>Filename.concat</code>.</p>
 
           <p>The preceding combination of <code>List.map</code> and
           <code>List.concat</code> is common enough that there is a
@@ -849,7 +853,7 @@
       <code>count_some</code> is longer than necessary; even worse,
       it is not tail recursive. In real life, you would probably
       just use the <code>List.count</code> function from
-      <code>Core</code>:</p>
+      <code>Core_kernel</code>:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/lists-and-patterns/main.topscript" part="53" />
     </section>

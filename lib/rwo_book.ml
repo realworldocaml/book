@@ -512,7 +512,7 @@ let part_info_of_chapter chapter_num : part_info option =
     );
     (
       {number=3; title="The Runtime System"},
-      [19; 20; 21; 22; 23]
+      [19; 20; 21; 22; 23; 24 ]
     );
   ]
   in
