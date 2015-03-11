@@ -1,4 +1,4 @@
-open Core.Std
+open Core_kernel.Std
 
 (** A collection of string frequency counts *)
 type t
