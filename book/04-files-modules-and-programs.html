@@ -26,33 +26,37 @@
     <section id="single-file-programs" data-type="sect1">
       <h1>Single-File Programs</h1>
 
-      <p>We'll start with an example: a utility that reads lines
-      from <code>stdin</code> and computes a frequency count of the
-      lines. At the end, the 10 lines with the highest frequency
-      counts are written out. We'll start with a simple
-      implementation, which we'll save as the file
-      <em>freq.ml</em>.<a data-type="indexterm" id="FILEsnglprog"
-      data-primary="files" data-secondary=
-      "single-file programs">&nbsp;</a><a data-type="indexterm" id=
-      "Psingfil" data-primary="programs" data-secondary=
-      "single-file programs">&nbsp;</a></p>
+      <p>
+	We'll start with an example: a utility that reads lines
+	from <code>stdin</code> and computes a frequency count of the
+	lines. At the end, the 10 lines with the highest frequency
+	counts are written out. We'll start with a simple
+	implementation, which we'll save as the file <em>freq.ml</em>.
+	<a data-type="indexterm" id="FILEsnglprog" data-primary="files"
+	   data-secondary="single-file programs">&nbsp;</a>
+	<a data-type="indexterm" id="Psingfil" data-primary="programs"
+	   data-secondary="single-file programs">&nbsp;</a>
+      </p>
 
-      <p>This implementation will use two functions from the
-      <code>List.Assoc</code> module, which provides utility
-      functions for interacting with association lists, i.e., lists
-      of key/value pairs. In particular, we use the function
-      <code>List.Assoc.find</code>, which looks up a key in an
-      association list; and <code>List.Assoc.add</code>, which adds
-      a new binding to an association list, as shown
-      here:<a data-type="indexterm" data-primary=
-      "List.Assoc module" data-secondary=
-      "List.Assoc.add">&nbsp;</a><a data-type="indexterm"
-      data-primary="List.Assoc module" data-secondary=
-      "List.Assoc.find">&nbsp;</a><a data-type="indexterm"
-      data-primary="lists" data-secondary=
-      "adding new bindings in">&nbsp;</a><a data-type="indexterm"
-      data-primary="lists" data-secondary=
-      "finding key associations in">&nbsp;</a></p>
+      <p>
+	This implementation will use two functions from the
+	<code>List.Assoc</code> module, which provides utility
+	functions for interacting with association lists, i.e., lists
+	of key/value pairs. In particular, we use the function
+	<code>List.Assoc.find</code>, which looks up a key in an
+	association list; and <code>List.Assoc.add</code>, which adds
+	a new binding to an association list, as shown
+	here:
+	<a data-type="indexterm" data-primary="List.Assoc module"
+	   data-secondary="List.Assoc.add">&nbsp;</a>
+	<a data-type="indexterm" data-primary="List.Assoc module"
+	   data-secondary="List.Assoc.find">&nbsp;</a>
+	<a data-type="indexterm" data-primary="lists" 
+	   data-secondary="adding new bindings in">&nbsp;</a>
+	<a data-type="indexterm" data-primary="lists" 
+	   data-secondary="finding key associations in">&nbsp;</a>
+      </p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/files-modules-and-programs/intro.topscript" />
 
@@ -158,8 +162,9 @@
       Checking</a>, but for now, we'll just use a simple wrapper
       around <span class="command"><em>ocamlbuild</em></span>
       called <span class="command"><em>corebuild</em></span> that
-      sets build parameters appropriately for building against Core
-      and its related libraries::<a data-type="indexterm"
+      sets build parameters appropriately for building against <code>Core</code>
+	and its related libraries,
+	including <code>Core_kernel</code>.<a data-type="indexterm"
       data-primary="corebuild">&nbsp;</a></p>
       <link rel="import" data-code-language="console" href=
       "code/files-modules-and-programs/freq-obuild/build.out" />
@@ -195,44 +200,49 @@
       <div data-type="note">
         <h1>Bytecode Versus Native Code</h1>
 
-        <p>OCaml ships with two compilers: the <span class=
-        "command"><em>ocamlc</em></span> bytecode compiler and the
-        <span class="command"><em>ocamlopt</em></span> native-code
-        compiler. Programs compiled with <span class=
-        "command"><em>ocamlc</em></span> are interpreted by a
-        virtual machine, while programs compiled with <span class=
-        "command"><em>ocamlopt</em></span> are compiled to native
-        machine code to be run on a specific operating system and
-        processor architecture. With <span class=
-        "command"><em>ocamlbuild</em></span>, targets ending with
-        <code>.byte</code> are build as bytecode executables, and
-        those ending with <code>.native</code> are built as native
-        code.</p>
+        <p>
+	  OCaml ships with two compilers: the 
+	  <span class="command"><em>ocamlc</em></span> bytecode
+          compiler and
+          the <span class="command"><em>ocamlopt</em></span>
+          native-code compiler. Programs compiled
+          with <span class="command"><em>ocamlc</em></span> are
+          interpreted by a virtual machine, while programs compiled
+          with <span class="command"><em>ocamlopt</em></span> are
+          compiled to native machine code to be run on a specific
+          operating system and processor
+          architecture. With <span class="command"><em>ocamlbuild</em></span>,
+          targets ending with <code>.byte</code> are build as bytecode
+          executables, and those ending with <code>.native</code> are
+          built as native code.</p>
 
-        <p>Aside from performance, executables generated by the two
-        compilers have nearly identical behavior. There are a few
-        things to be aware of. First, the bytecode compiler can be
-        used on more architectures, and has some tools that are not
-        available for native code. For example, the OCaml debugger
-        only works with bytecode (although <span class=
-        "command"><em>gdb</em></span>, the GNU Debugger, works with
-        OCaml native-code applications). The bytecode compiler is
-        also quicker than the native-code compiler. In addition, in
-        order to run a bytecode executable, you typically need to
-        have OCaml installed on the system in question. That's not
-        strictly required, though, since you can build a bytecode
-        executable with an embedded runtime, using the
-        <code>-custom</code> compiler flag.</p>
+        <p>
+	  Aside from performance, executables generated by the two
+          compilers have nearly identical behavior. There are a few
+          things to be aware of. First, the bytecode compiler can be
+          used on more architectures, and has some tools that are not
+          available for native code. For example, the OCaml debugger
+          only works with bytecode
+          (although <span class="command"><em>gdb</em></span>, the GNU
+          Debugger, works with OCaml native-code applications). The
+          bytecode compiler is also quicker than the native-code
+          compiler. In addition, in order to run a bytecode
+          executable, you typically need to have OCaml installed on
+          the system in question. That's not strictly required,
+          though, since you can build a bytecode executable with an
+          embedded runtime, using the <code>-custom</code> compiler
+          flag.</p>
 
-        <p>As a general matter, production executables should
-        usually be built using the native-code compiler, but it
-        sometimes makes sense to use bytecode for development
-        builds. And, of course, bytecode makes sense when targeting
-        a platform not supported by the native-code compiler. We'll
-        cover both compilers in more detail in <a href=
-        "23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
-        data-type="xref">The Compiler Backend Byte Code And Native
-        Code</a>.</p>
+        <p>
+	  As a general matter, production executables should usually
+          be built using the native-code compiler, but it sometimes
+          makes sense to use bytecode for development builds. And, of
+          course, bytecode makes sense when targeting a platform not
+          supported by the native-code compiler. We'll cover both
+          compilers in more detail in
+          <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
+	     data-type="xref">The Compiler Backend Byte Code And
+	     Native Code</a>.</p>
       </div>
     </section>
 
@@ -299,35 +309,40 @@
     <section id="signatures-and-abstract-types" data-type="sect1">
       <h1>Signatures and Abstract Types</h1>
 
-      <p>While we've pushed some of the logic to the
-      <code>Counter</code> module, the code in <code>freq.ml</code>
-      can still depend on the details of the implementation of
-      <code>Counter</code>. Indeed, if you look at the definition
-      of <code>build_counts</code>, you'll see that it depends on
-      the fact that the empty set of frequency counts is
-      represented as an empty list. We'd like to prevent this kind
-      of dependency, so we can change the implementation of
-      <code>Counter</code> without needing to change client code
-      like that in <code>freq.ml</code>.<a data-type="indexterm"
-      data-primary="abstract types">&nbsp;</a><a data-type=
-      "indexterm" data-primary="modules" data-secondary=
-      "module type">&nbsp;</a><a data-type="indexterm"
-      data-primary="signatures" data-secondary=
-      "abstract types">&nbsp;</a><a data-type="indexterm"
-      data-primary="interfaces" data-secondary=
-      "hiding implementation details with">&nbsp;</a><a data-type=
-      "indexterm" data-primary="modules" data-secondary=
-      "hiding implementation details">&nbsp;</a></p>
+      <p>
+	While we've pushed some of the logic to
+	the <code>Counter</code> module, the code
+	in <code>freq.ml</code> can still depend on the details of the
+	implementation of <code>Counter</code>. Indeed, if you look at
+	the definition of <code>build_counts</code>, you'll see that
+	it depends on the fact that the empty set of frequency counts
+	is represented as an empty list. We'd like to prevent this
+	kind of dependency, so we can change the implementation
+	of <code>Counter</code> without needing to change client code
+	like that in <code>freq.ml</code>.  
+	<a data-type="indexterm"
+	   data-primary="abstract types">&nbsp;</a>
+	<a data-type= "indexterm" data-primary="modules" 
+	   data-secondary="module type">&nbsp;</a>
+	<a data-type="indexterm" data-primary="signatures" 
+	   data-secondary="abstract types">&nbsp;</a>
+	<a data-type="indexterm" data-primary="interfaces" 
+	   data-secondary="hiding implementation details with">&nbsp;</a> 
+	<a data-type="indexterm" data-primary="modules" 
+	   data-secondary="hiding implementation details">&nbsp;</a>
+      </p>
 
-      <p>The implementation details of a module can be hidden by
-      attaching an <em>interface</em>. (Note that in the context of
-      OCaml, the terms <em>interface</em>, <em>signature</em>, and
-      <em>module type</em> are all used interchangeably.) A module
-      defined by a file <code>filename.ml</code> can be constrained
-      by a signature placed in a file called
-      <code>filename.mli</code>.<a data-type="indexterm"
-      data-primary="interfaces" data-secondary=
-      "synonyms for">&nbsp;</a></p>
+      <p>
+	The implementation details of a module can be hidden by
+	attaching an <em>interface</em>. (Note that in the context of
+	OCaml, the terms <em>interface</em>, <em>signature</em>,
+	and <em>module type</em> are all used interchangeably.) A
+	module defined by a file <code>filename.ml</code> can be
+	constrained by a signature placed in a file
+	called <code>filename.mli</code>.
+	<a data-type="indexterm" data-primary="interfaces" 
+	   data-secondary="synonyms for">&nbsp;</a>
+      </p>
 
       <p>For <code>counter.mli</code>, we'll start by writing down
       an interface that describes what's currently available in
@@ -335,6 +350,7 @@
       <code>val</code> declarations are used to specify values in a
       signature. The syntax of a <code>val</code> declaration is as
       follows:</p>
+
       <link rel="import" data-code-language="ocamlsyntax" href=
       "code/files-modules-and-programs/val.syntax" />
 
