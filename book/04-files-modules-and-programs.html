@@ -111,21 +111,25 @@
         effect.</p>
       </div>
 
-      <p>If we weren't using Core or any other external libraries,
-      we could build the executable like this:</p>
+      <p>If we weren't using <code>Core_kernel</code> or any other
+      external libraries, we could build the executable like this:</p>
+
       <link rel="import" data-code-language="console" href=
       "code/files-modules-and-programs-freq/simple_build_fail.out" />
 
-      <p>But as you can see, it fails because it can't find Core.
-      We need a somewhat more complex invocation to get Core linked
-      in:<a data-type="indexterm" data-primary="OCaml toolchain"
-      data-secondary="ocamlc">&nbsp;</a><a data-type="indexterm"
-      data-primary="OCaml toolchain" data-secondary=
-      "ocamlfind">&nbsp;</a><a data-type="indexterm" data-primary=
-      "Core standard library" data-secondary=
-      "finding with ocamlfind">&nbsp;</a></p>
+      <p>But as you can see, it fails because it can't find
+	<code>Core_kernel</code>.  We need a somewhat more complex
+	invocation to get <code>Core_kernel</code> linked
+	in:
+	<a data-type="indexterm" data-primary="OCaml toolchain"
+	   data-secondary="ocamlc">&nbsp;</a>
+	<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary=
+	   "ocamlfind">&nbsp;</a>
+	<a data-type="indexterm" data-primary= "Core standard library" 
+	   data-secondary= "finding with ocamlfind">&nbsp;</a></p> 
+
       <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs-freq/simple_build.out" />
+	    "code/files-modules-and-programs-freq/simple_build.out" />
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>,
       a tool which itself invokes other parts of the OCaml
