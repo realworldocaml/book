@@ -1,27 +1,19 @@
+open Core_kernel.Std;;
 [1;2;3];;
-
 
 #part 1
 1 :: (2 :: (3 :: [])) ;;
-
 1 :: 2 :: 3 :: [] ;;
-
 
 #part 2
 let empty = [];;
-
 3 :: empty;;
-
 "three" :: empty;;
-
 
 #part 3
 let l = 1 :: 2 :: 3 :: [];;
-
 let m = 0 :: l;;
-
 l;;
-
 
 #part 4
 let rec sum l =
@@ -89,56 +81,28 @@ let plus_one_match x =
     else x + 1
   ;;
 
-
-
 #part 10
 #require "core_bench";;
 open Core_bench.Std;;
-let run_bench tests =
-  Bench.bench
-    ~ascii_table:true
-    ~display:Textutils.Ascii_table.Display.column_titles
-    tests
-;;
-
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
       ignore (plus_one_match 10))
   ; Bench.Test.create ~name:"plus_one_if" (fun () ->
       ignore (plus_one_if 10)) ]
-  |> run_bench
+  |> Bench.bench
   ;;
 
-
-
-
-
-
-
-
-
 #part 11
-open Core_kernel.Std;;
-
 let rec sum_if l =
     if List.is_empty l then 0
     else List.hd_exn l + sum_if (List.tl_exn l)
   ;;
 
-
 #part 12
 let numbers = List.range 0 1000 in
   [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
   ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
-  |> run_bench
+  |> Bench.bench
   ;;
-
-
-
-
-
-
-
-
 
 #part 13
 let rec drop_zero l =
@@ -147,34 +111,23 @@ let rec drop_zero l =
     | 0  :: tl -> drop_zero tl
   ;;
 
-
-
-
-
-
 #part 14
 List.map ~f:String.length ["Hello"; "World!"];;
-
 
 #part 15
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
 
-
 #part 16
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
-
 
 #part 17
 List.fold;;
 
-
 #part 18
 List.fold ~init:0 ~f:(+) [1;2;3;4];;
 
-
 #part 19
 List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4];;
-
 
 #part 20
 let max_widths header rows =
@@ -185,7 +138,6 @@ let max_widths header rows =
         List.map2_exn ~f:Int.max acc (lengths row))
   ;;
 
-
 #part 21
 let render_separator widths =
     let pieces = List.map widths
@@ -193,32 +145,25 @@ let render_separator widths =
     in
     "|" ^ String.concat ~sep:"+" pieces ^ "|"
   ;;
-
 render_separator [3;6;2];;
-
 
 #part 22
 let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 
-
 #part 23
 let s = String.concat [".";".";".";".";".";".";"."];;
-
 
 #part 24
 let pad s length =
     " " ^ s ^ String.make (length - String.length s + 1) ' '
   ;;
-
 pad "hello" 10;;
-
 
 #part 25
 let render_row row widths =
     let padded = List.map2_exn row widths ~f:pad in
     "|" ^ String.concat ~sep:"|" padded ^ "|"
   ;;
-
 render_row ["Hello";"World"] [10;15];;
 
 
@@ -236,16 +181,13 @@ let render_table header rows =
 #part 27
 List.reduce;;
 
-
 #part 28
 List.reduce ~f:(+) [1;2;3;4;5];;
 
 List.reduce ~f:(+) [];;
 
-
 #part 29
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
-
 
 #part 30
 List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
@@ -255,7 +197,6 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
   |> List.dedup
   ;;
-
 
 #part 31
 let is_ocaml_source s =
@@ -267,19 +208,14 @@ let is_ocaml_source s =
 let (ml_files,other_files) =
     List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
 
-
-
 #part 32
 List.append [1;2;3] [4;5;6];;
-
 
 #part 33
 [1;2;3] @ [4;5;6];;
 
-
 #part 34
 List.concat [[1;2];[3;4;5];[6];[]];;
-
 
 #part 35
 let rec ls_rec s =
@@ -291,7 +227,6 @@ let rec ls_rec s =
       |> List.concat
   ;;
 
-
 #part 36
 let rec ls_rec s =
     if Sys.is_file_exn ~follow_symlinks:true s
@@ -300,7 +235,6 @@ let rec ls_rec s =
       Sys.ls_dir s
       |> List.concat_map ~f:(fun sub -> ls_rec (s ^/ sub))
   ;;
-
 
 #part 37
 let rec length = function

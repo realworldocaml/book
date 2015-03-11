@@ -4,7 +4,7 @@ open Core.Std;;
 module Log_entry = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: float;
         important: bool;
         message: string;
       }
@@ -12,14 +12,14 @@ module Log_entry = struct
   module Heartbeat = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: float;
         status_message: string;
       }
   end;;
   module Logon = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: float;
         user: string;
         credentials: string;
       }
