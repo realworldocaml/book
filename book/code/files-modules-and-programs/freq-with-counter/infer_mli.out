@@ -1,4 +1,5 @@
 $ corebuild counter.inferred.mli
 $ cat _build/counter.inferred.mli
 val touch :
-  ('a, int) Core.Std.List.Assoc.t -> 'a -> ('a, int) Core.Std.List.Assoc.t
+  ('a, int) Core_kernel.Std.List.Assoc.t -> 'a ->
+     ('a, int) Core_kernel.Std.List.Assoc.t

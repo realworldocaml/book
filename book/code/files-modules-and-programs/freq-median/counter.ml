@@ -1,6 +1,4 @@
-
-
-(* part 1 *)
+open Core_kernel.Std
 type median = | Median of string
               | Before_and_after of string * string
 
