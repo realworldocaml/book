@@ -418,14 +418,15 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/variants/blang.topscript" part="9" />
 
-      <p>The example of a Boolean expression language is more than
-      a toy. There's a module very much in this spirit in Core
-      called <code>Blang</code> (short for "Boolean language"), and
-      it gets a lot of practical use in a variety of applications.
-      The simplification algorithm in particular is useful when you
-      want to use it to specialize the evaluation of expressions
-      for which the evaluation of some of the base predicates is
-      already known.</p>
+      <p>
+	The example of a Boolean expression language is more than a
+	toy. There's a module very much in this spirit
+	in <code>Core_kernel</code> called <code>Blang</code> (short
+	for "Boolean language"), and it gets a lot of practical use in
+	a variety of applications.  The simplification algorithm in
+	particular is useful when you want to use it to specialize the
+	evaluation of expressions for which the evaluation of some of
+	the base predicates is already known.</p>
 
       <p>More generally, using variants to build recursive data
       structures is a common technique, and shows up everywhere
@@ -498,15 +499,18 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/variants/main.topscript" part="9" />
 
-      <p>Perhaps surprisingly, we can also create polymorphic
-      variant types that have different upper and lower bounds.
-      Note that <code>Ok</code> and <code>Error</code> in the
-      following example come from the <code>Result.t</code> type
-      from Core:<a data-type="indexterm" data-primary=
-      "polymorphic variant types" data-secondary=
-      "upper/lower bounds of">&nbsp;</a></p>
+      <p>
+	Perhaps surprisingly, we can also create polymorphic variant
+	types that have different upper and lower bounds.  Note
+	that <code>Ok</code> and <code>Error</code> in the following
+	example come from the <code>Result.t</code> type
+	from <code>Core_kernel</code>: 
+	<a data-type="indexterm" 
+	   data-primary="polymorphic variant types" 
+	   data-secondary="upper/lower bounds of">&nbsp;</a></p>
+
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/main.topscript" part="10" />
+	    "code/variants/main.topscript" part="10" />
 
       <p>Here, the inferred type states that the tags can be no
       more than <code>`Float</code>, <code>`Int</code>, and

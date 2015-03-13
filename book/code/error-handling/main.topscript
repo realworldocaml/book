@@ -1,3 +1,4 @@
+open Core_kernel.Std;;
 List.find;;
 
 
@@ -42,9 +43,7 @@ Error.of_thunk (fun () ->
 
 
 #part 7
-Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
-
-
+Error.create "Unexpected character" 'z' Char.sexp_of_t;;
 
 #part 8
 let custom_to_sexp = <:sexp_of<float * string list * int>>;;

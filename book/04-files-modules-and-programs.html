@@ -433,12 +433,13 @@
       <link rel="import" data-code-language="ocaml" href=
       "code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml" />
 
-      <p>Now we can turn to optimizing the implementation of
-      <code>Counter</code>. Here's an alternate and far more
+      <p>Now we can turn to optimizing the implementation
+      of <code>Counter</code>. Here's an alternate and far more
       efficient implementation, based on the <code>Map</code> data
-      structure in Core:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-fast/counter.ml" />
+      structure in <code>Core_kernel</code>:</p> 
+
+      <link rel="import" data-code-language="ocaml"
+	    href="code/files-modules-and-programs/freq-fast/counter.ml" /> 
 
       <p>Note that in the preceding example we use
       <code>String.Map</code> in some places and simply
@@ -579,22 +580,27 @@
       "indexterm" data-primary="modules" data-secondary=
       "opening">&nbsp;</a></p>
 
-      <p>We've encountered <code>open</code> already, specifically
-      where we've written <code>open Core.Std</code> to get access
-      to the standard definitions in the Core library. In general,
-      opening a module adds the contents of that module to the
-      environment that the compiler looks at to find the definition
-      of various identifiers. Here's an example:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" />
+      <p>
+	We've encountered <code>open</code> already, specifically
+	where we've written <code>open Core_kernel.Std</code> to get
+	access to the standard definitions in
+	the <code>Core_kernel</code> library. In
+	general, opening a module adds the contents of that module to
+	the environment that the compiler looks at to find the
+	definition of various identifiers. Here's an example:</p>
+      
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/files-modules-and-programs/main.topscript" />
 
-      <p><code>open</code> is essential when you want to modify
-      your environment for a standard library like Core, but it's
-      generally good style to keep the opening of modules to a
-      minimum. Opening a module is basically a trade-off between
-      terseness and explicitness—the more modules you open, the
-      fewer module qualifications you need, and the harder it is to
-      look at an identifier and figure out where it comes from.</p>
+      <p>
+	<code>open</code> is essential when you want to modify your
+	environment for a standard library
+	like <code>Core_kernel</code>, but it's generally good style
+	to keep the opening of modules to a minimum. Opening a module
+	is basically a trade-off between terseness and
+	explicitness—the more modules you open, the fewer module
+	qualifications you need, and the harder it is to look at an
+	identifier and figure out where it comes from.</p>
 
       <p>Here's some general advice on how to deal with
       <code>open</code>s:<a data-type="indexterm" data-primary=
@@ -605,7 +611,7 @@
           <p>Opening modules at the toplevel of a module should be
           done quite sparingly, and generally only with modules
           that have been specifically designed to be opened, like
-          <code>Core.Std</code> or
+          <code>Core_kernel.Std</code> or
           <code>Option.Monad_infix</code>.</p>
         </li>
 
@@ -682,13 +688,15 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/files-modules-and-programs/main.topscript" part="5" />
 
-      <p>To consider a more realistic example, imagine you wanted
-      to build an extended version of the <code>List</code> module,
-      where you've added some functionality not present in the
-      module as distributed in Core. <code>include</code> allows us
-      to do just that:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/ext_list.ml" />
+      <p>
+	To consider a more realistic example, imagine you wanted
+	to build an extended version of the <code>List</code> module,
+	where you've added some functionality not present in the
+	module as distributed
+	in <code>Core_kernel</code>. <code>include</code> allows us
+	to do just that:</p>
+      <link rel="import" data-code-language="ocaml" 
+	    href="code/files-modules-and-programs/ext_list.ml" />
 
       <p>Now, how do we write an interface for this new module? It
       turns out that <code>include</code> works on signatures as
@@ -717,10 +725,10 @@
       <link rel="import" data-code-language="ocaml" href=
       "code/files-modules-and-programs/common.ml" />
 
-      <p>And if we then put <code>open Common</code> after
-      <code>open Core.Std</code> at the top of each file in our
-      project, then references to <code>List</code> will
-      automatically go to <code>Ext_list</code> instead.</p>
+      <p>And if we then put <code>open Common</code> after <code>open
+      Core_kernel.Std</code> at the top of each file in our project,
+      then references to <code>List</code> will automatically go
+      to <code>Ext_list</code> instead.</p>
     </section>
 
     <section id="common-errors-with-modules" data-type="sect1">
@@ -972,9 +980,10 @@
         Part of achieving that is standardizing aspects of those
         interfaces.</p>
 
-        <p>Core itself is a library that works hard to create
-        uniform interfaces. Here are some of the guidelines that
-        are used in Core.</p>
+        <p>
+	  <code>Core</code> and <code>Core_kernel</code> are libraries
+	  that work hard to create uniform interfaces. Here are some
+	  of the guidelines that they use.
 
         <ul>
           <li>
@@ -1002,16 +1011,17 @@
           </li>
         </ul>
 
-        <p>There are also standards in Core about what the type
-        signature for specific functions should be. For example,
-        the signature for <code>map</code> is always essentially
-        the same, no matter what the underlying type it is applied
-        to. This kind of function-by-function API uniformity is
-        achieved through the use of <em>signature includes</em>,
-        which allow for different modules to share components of
-        their interface. This approach is described in <a href=
-        "09-functors.html#using-multiple-interfaces" data-type=
-        "xref">Using Multiple Interfaces</a>.</p>
+        <p>
+	  There are also standards in Core about what the type
+          signature for specific functions should be. For example, the
+          signature for <code>map</code> is always essentially the
+          same, no matter what the underlying type it is applied
+          to. This kind of function-by-function API uniformity is
+          achieved through the use of <em>signature includes</em>,
+          which allow for different modules to share components of
+          their interface. This approach is described in
+          <a href="09-functors.html#using-multiple-interfaces"
+             data-type="xref">Using Multiple Interfaces</a>.</p>
 
         <p>Core's standards may or may not fit your projects, but
         you can improve the usability of your codebase by finding
