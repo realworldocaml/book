@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -28,12 +28,9 @@
 
     <p>We'll start by describing the two basic approaches for
     reporting errors in OCaml: error-aware return types and
-    exceptions.
-      <a data-type="indexterm" id="erraware" 
-	 data-primary="error-aware return types">&nbsp;</a>
-      <a data-type="indexterm" id="EHeraware" 
-	 data-primary="error handling" 
-	 data-secondary="error-aware return types">&nbsp;</a></p>
+    exceptions. <idx id="erraware">error-aware return types</idx>
+    <idx id="EHeraware">error handling/error-aware return
+    types</idx></p>
 
     <section id="error-aware-return-types" data-type="sect1">
       <h1>Error-Aware Return Types</h1>
@@ -42,7 +39,6 @@
       that error in your return value. Consider the type of the
       <code>find</code> function in the <code>List</code>
       module:</p>
-
       <link rel="import" data-code-language="ocamltop" href=
       "code/error-handling/main.topscript" />
 
@@ -56,17 +52,15 @@
       the caller to make the choice of whether to recover from the
       error or propagate it onward.</p>
 
-      <p>
-	Consider the <code>compute_bounds</code> function below, which
-	takes a list and a comparison function and returns upper and
-	lower bounds for the list by finding the smallest and largest
-	element on the list. <code>List.hd</code>
-	and <code>List.last</code>, which return <code>None</code>
-	when they encounter an empty list, are used to extract the
-	largest and smallest element of the list:</p>
-
-      <link rel="import" data-code-language="ocamltop" 
-	    href="code/error-handling/main.topscript" part="2" />
+      <p>Consider the <code>compute_bounds</code> function below,
+      which takes a list and a comparison function and returns
+      upper and lower bounds for the list by finding the smallest
+      and largest element on the list. <code>List.hd</code> and
+      <code>List.last</code>, which return <code>None</code> when
+      they encounter an empty list, are used to extract the largest
+      and smallest element of the list:</p>
+      <link rel="import" data-code-language="ocamltop" href=
+      "code/error-handling/main.topscript" part="2" />
 
       <p>The <code>match</code> statement is used to handle the
       error cases, propagating a <code>None</code> in
@@ -101,8 +95,8 @@
         the nature of the error.</p>
 
         <p><code>Result.t</code> is meant to address this
-        deficiency. The type is defined as follows:<a data-type=
-        "indexterm" data-primary="Result.t option">&nbsp;</a></p>
+        deficiency. The type is defined as follows:<idx>Result.t
+        option</idx></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/error-handling/result.mli" />
 
@@ -128,17 +122,16 @@
         it's often useful to standardize on an error type. Among
         other things, this makes it easier to write utility
         functions to automate common error handling
-        patterns.<a data-type="indexterm" data-primary=
-        "Error.t type">&nbsp;</a></p>
+        patterns.<idx>Error.t type</idx></p>
 
         <p>But which type to choose? Is it better to represent
         errors as strings? Some more structured representation like
         XML? Or something else entirely?</p>
 
-        <p>Core's answer to this question is the <code>Error.t</code>
-        type, which tries to forge a good compromise between
-        efficiency, convenience, and control over the presentation of
-        errors.</p>
+        <p>Core's answer to this question is the
+        <code>Error.t</code> type, which tries to forge a good
+        compromise between efficiency, convenience, and control
+        over the presentation of errors.</p>
 
         <p>It might not be obvious at first why efficiency is an
         issue at all. But generating error messages is an expensive
@@ -157,8 +150,7 @@
 
         <p>But you can also construct an <code>Error.t</code> from
         a <em>thunk</em>, i.e., a function that takes a single
-        argument of type <code>unit</code>:<a data-type="indexterm"
-        data-primary="thunks">&nbsp;</a></p>
+        argument of type <code>unit</code>:<idx>thunks</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="6" />
 
@@ -166,27 +158,21 @@
         <code>Error</code>, since the thunk won't be called unless
         the <code>Error.t</code> is converted to a string.</p>
 
-        <p>
-	  The most common way to create <code>Error.t</code>s is
-          using <em>s-expressions</em>. An s-expression is a balanced
-          parenthetical expression where the leaves of the expressions
-          are strings. Here's a simple example:
-	  <a data-type="indexterm" data-primary="s-expressions"
-	     data-secondary="example of">&nbsp;</a></p> 
-
+        <p>The most common way to create <code>Error.t</code>s is
+        using <em>s-expressions</em>. An s-expression is a balanced
+        parenthetical expression where the leaves of the
+        expressions are strings. Here's a simple example:
+        <idx>s-expressions/example of</idx></p>
         <link rel="import" data-code-language="scheme" href=
-              "code/error-handling/sexpr.scm" />
- 
-        <p>
-	  S-expressions are supported by the Sexplib package that is
-          distributed with Core and is the most common serialization
-          format used in Core.  Indeed, most types in Core come with
-          built-in s-expression converters.
-	  <a data-type="indexterm" data-primary="Sexplib package" 
-	     data-secondary="sexp converter">&nbsp;</a></p>
+        "code/error-handling/sexpr.scm" />
 
-        <link rel="import" data-code-language="ocamltop" 
-	      href="code/error-handling/main.topscript" part="7" />
+        <p>S-expressions are supported by the Sexplib package that
+        is distributed with Core and is the most common
+        serialization format used in Core. Indeed, most types in
+        Core come with built-in s-expression converters.
+        <idx>Sexplib package/sexp converter</idx></p>
+        <link rel="import" data-code-language="ocamltop" href=
+        "code/error-handling/main.topscript" part="7" />
 
         <p>Note that the time isn't actually serialized into an
         s-expression until the error is printed out.</p>
@@ -210,11 +196,9 @@
         augment an error with information about the context of the
         error or to combine multiple errors together.
         <code>Error.tag</code> and <code>Error.of_list</code>
-        fulfill these roles:<a data-type="indexterm" data-primary=
-        "Error.of_list">&nbsp;</a><a data-type="indexterm"
-        data-primary="Error.tag">&nbsp;</a><a data-type="indexterm"
-        data-primary="errors" data-secondary=
-        "transformation of">&nbsp;</a></p>
+        fulfill these
+        roles:<idx>Error.of_list</idx><idx>Error.tag</idx><idx>errors/transformation
+        of</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="10" />
 
@@ -235,9 +219,8 @@
         One particularly useful pattern is built around the
         function <code>bind</code>, which is both an ordinary
         function and an infix operator <code>&gt;&gt;=</code>.
-          Here's the definition of <code>bind</code> for options:
-	  <a data-type="indexterm"
-	     data-primary="bind function">&nbsp;</a></p>
+        Here's the definition of <code>bind</code> for options:
+        <idx>bind function</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="11" />
 
@@ -303,11 +286,8 @@
       Exceptions are a way to terminate a computation and report an
       error, while providing a mechanism to catch and handle (and
       possibly recover from) exceptions that are triggered by
-      subcomputations.<a data-type="indexterm" data-primary=
-      "exceptions" data-secondary=
-      "usefulness of">&nbsp;</a><a data-type="indexterm"
-      data-primary="error handling" data-secondary=
-      "exceptions">&nbsp;</a></p>
+      subcomputations.<idx>exceptions/usefulness of</idx><idx>error
+      handling/exceptions</idx></p>
 
       <p>You can trigger an exception by, for example, dividing an
       integer by zero:</p>
@@ -348,8 +328,8 @@
       ordinary variants, which are defined with a closed universe
       of available tags. One result of this is that you can never
       have an exhaustive match on an <code>exn</code>, since the
-      full set of possible exceptions is not known.<a data-type=
-      "indexterm" data-primary="exn type">&nbsp;</a></p>
+      full set of possible exceptions is not known.<idx>exn
+      type</idx></p>
 
       <p>The following function uses the <code>Key_not_found</code>
       exception we defined above to signal an error:</p>
@@ -358,10 +338,9 @@
 
       <p>Note that we named the function <code>find_exn</code> to
       warn the user that the function routinely throws exceptions,
-      a convention that is used heavily in Core.<a data-type=
-      "indexterm" data-primary="functions" data-secondary=
-      "exception warnings for">&nbsp;</a><a data-type="indexterm"
-      data-primary="find_exn function">&nbsp;</a></p>
+      a convention that is used heavily in
+      Core.<idx>functions/exception warnings for</idx><idx>find_exn
+      function</idx></p>
 
       <p>In the preceding example, <code>raise</code> throws the
       exception, thus terminating the computation. The type of
@@ -387,13 +366,9 @@
       <p>This all matters because it means that the return type of
       <code>raise</code> can be whatever it needs to be to fit into
       the context it is called in. Thus, the type system will let
-      us throw an exception anywhere in a program.
-      <a data-type="indexterm"
-	 data-primary="sexp declaration">&nbsp;</a>
-      <a data-type="indexterm"
-	 data-primary="exceptions"
-	 data-secondary="textual representation of">&nbsp;</a>
-      </p>
+      us throw an exception anywhere in a program. <idx>sexp
+      declaration</idx> <idx>exceptions/textual representation
+      of</idx></p>
 
       <div class="allow_break" data-type="note">
         <h1>Declaring Exceptions Using with sexp</h1>
@@ -432,11 +407,9 @@
         <p>OCaml and Core provide a number of helper functions to
         simplify the task of throwing exceptions. The simplest one
         is <code>failwith</code>, which could be defined as
-        follows:<a data-type="indexterm" data-primary="exceptions"
-        data-secondary=
-        "helper functions for">&nbsp;</a><a data-type="indexterm"
-        data-primary="error handling" data-secondary=
-        "exception helper functions">&nbsp;</a></p>
+        follows:<idx>exceptions/helper functions
+        for</idx><idx>error handling/exception helper
+        functions</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="25" />
 
@@ -449,8 +422,8 @@
         <code>assert</code> directive. <code>assert</code> is used
         for situations where a violation of the condition in
         question indicates a bug. Consider the following piece of
-        code for zipping together two lists:<a data-type=
-        "indexterm" data-primary="assert directive">&nbsp;</a></p>
+        code for zipping together two lists:<idx>assert
+        directive</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="26" />
 
@@ -479,11 +452,9 @@
         execution of a computation. But often, we want a program to
         be able to respond to and recover from an exception. This
         is achieved through the use of <em>exception
-        handlers</em>.<a data-type="indexterm" data-primary=
-        "exceptions" data-secondary=
-        "exception handlers">&nbsp;</a><a data-type="indexterm"
-        data-primary="error handling" data-secondary=
-        "exception handlers">&nbsp;</a></p>
+        handlers</em>.<idx>exceptions/exception
+        handlers</idx><idx>error handling/exception
+        handlers</idx></p>
 
         <p>In OCaml, an exception handler is declared using a
         <code>try</code>/<code>with</code> statement. Here's the
@@ -518,11 +489,8 @@
         your execution at unexpected places, leaving your program
         in an awkward state. Consider the following function for
         loading a file full of reminders, formatted as
-        s-expressions:<a data-type="indexterm" data-primary=
-        "exceptions" data-secondary=
-        "exception clean up">&nbsp;</a><a data-type="indexterm"
-        data-primary="error handling" data-secondary=
-        "exception clean up">&nbsp;</a></p>
+        s-expressions:<idx>exceptions/exception clean
+        up</idx><idx>error handling/exception clean up</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="28" />
 
@@ -567,10 +535,8 @@
         <code>Not_found</code> when the element in question can't
         be found. Let's look at an example of how you could take
         advantage of this. In particular, consider the following
-        function:<a data-type="indexterm" data-primary="exceptions"
-        data-secondary="catching specific">&nbsp;</a><a data-type=
-        "indexterm" data-primary="error handling" data-secondary=
-        "exception detection">&nbsp;</a></p>
+        function:<idx>exceptions/catching specific</idx><idx>error
+        handling/exception detection</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="31" />
 
@@ -614,15 +580,10 @@
         <p>A big part of the value of exceptions is that they
         provide useful debugging information in the form of a stack
         backtrace. Consider the following simple
-        program:<a data-type="indexterm" data-primary="debugging"
-        data-secondary="stack backtraces">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "stack backtraces">&nbsp;</a><a data-type="indexterm"
-        data-primary="backtraces">&nbsp;</a>:<a data-type=
-        "indexterm" data-primary="exceptions" data-secondary=
-        "stack backtraces for">&nbsp;</a><a data-type="indexterm"
-        data-primary="error handling" data-secondary=
-        "exception backtracing">&nbsp;</a></p>
+        program:<idx>debugging/stack backtraces</idx><idx>stack
+        backtraces</idx><idx>backtraces</idx>:<idx>exceptions/stack
+        backtraces for</idx><idx>error handling/exception
+        backtracing</idx></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/error-handling/blow_up.ml" />
 
@@ -637,9 +598,8 @@
         calling <code>Exn.backtrace</code>, which returns the
         backtrace of the most recently thrown exception. This is
         useful for reporting detailed information on errors that
-        did not cause your program to fail.<a data-type="indexterm"
-        data-primary="Exn module" data-secondary=
-        "Exn.backtrace">&nbsp;</a></p>
+        did not cause your program to fail.<idx>Exn
+        module/Exn.backtrace</idx></p>
 
         <p>This works well if you have backtraces enabled, but that
         isn't always the case. In fact, by default, OCaml has
@@ -659,9 +619,8 @@
         <p>The resulting error message is considerably less
         informative. You can also turn backtraces off in your code
         by calling <code>Backtrace.Exn.set_recording
-        false</code>.<a data-type="indexterm" data-primary=
-        "Exn module" data-secondary=
-        "Backtrace.Exn.set_recording false">&nbsp;</a></p>
+        false</code>.<idx>Exn module/Backtrace.Exn.set_recording
+        false</idx></p>
 
         <p>There is a legitimate reasons to run without backtraces:
         speed. OCaml's exceptions are fairly fast, but they're even
@@ -708,13 +667,10 @@
         some useful helper functions to help you do just that. For
         example, given a piece of code that can throw an exception,
         you can capture that exception into an option as
-        follows:<a data-type="indexterm" data-primary="exceptions"
-        data-secondary=
-        "and error-aware types">&nbsp;</a><a data-type="indexterm"
-        data-primary=
-        "error-aware return types">&nbsp;</a><a data-type=
-        "indexterm" data-primary="error handling" data-secondary=
-        "combining exceptions and error-aware types">&nbsp;</a></p>
+        follows:<idx>exceptions/and error-aware
+        types</idx><idx>error-aware return types</idx><idx>error
+        handling/combining exceptions and error-aware
+        types</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="35" />
 
@@ -737,9 +693,8 @@
       <p>Given that OCaml supports both exceptions and error-aware
       return types, how do you choose between them? The key is to
       think about the trade-off between concision and
-      explicitness.<a data-type="indexterm" data-primary=
-      "error handling" data-secondary="strategy choice"
-      data-seealso="errors">&nbsp;</a></p>
+      explicitness.<idx data-seealso="errors">error
+      handling/strategy choice</idx></p>
 
       <p>Exceptions are more concise because they allow you to
       defer the job of error handling to some larger scope, and
@@ -748,8 +703,7 @@
       Error-aware return types, on the other hand, are fully
       manifest in your type definitions, making the errors that
       your code might generate explicit and impossible to
-      ignore.<a data-type="indexterm" data-primary="exceptions"
-      data-secondary="benefits and drawbacks of">&nbsp;</a></p>
+      ignore.<idx>exceptions/benefits and drawbacks of</idx></p>
 
       <p>The right trade-off depends on your application. If you're
       writing a rough-and-ready program where getting it done

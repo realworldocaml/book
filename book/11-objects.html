@@ -1,14 +1,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
+  <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/>
 
   <title></title>
 </head>
 
 <body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id="objects"
-  data-type="chapter">
+  <section xmlns="http://www.w3.org/1999/xhtml" id="objects" data-type="chapter">
     <h1>Objects</h1>
 
     <p>We've already seen several tools that OCaml provides for
@@ -16,15 +14,8 @@
     also supports object-oriented programming. There are objects,
     classes, and their associated types. In this chapter, we'll
     introduce you to OCaml objects and subtyping. In the next
-    chapter, <a href="12-classes.html#classes" data-type=
-    "xref">Classes</a>, we'll introduce you to classes and
-    inheritance.<a data-type="indexterm" data-primary="objects"
-    data-secondary=
-    "in object-oriented programming">&nbsp;</a><a data-type=
-    "indexterm" data-primary=
-    "object-oriented programming (OOP)">&nbsp;</a><a data-type=
-    "indexterm" data-primary="programming" data-secondary=
-    "object-oriented programming (OOP)">&nbsp;</a></p>
+    chapter, <a href="12-classes.html#classes" data-type="xref">Classes</a>, we'll introduce you to classes and
+    inheritance.<idx>objects/in object-oriented programming</idx><idx>object-oriented programming (OOP)</idx><idx>programming/object-oriented programming (OOP)</idx></p>
 
     <aside data-type="sidebar">
       <h5>What Is Object-Oriented Programming?</h5>
@@ -112,17 +103,14 @@
       inheritance. For example, if we implement a class
       <code>Deque</code> in Java by inheriting from a class
       <code>Stack</code>, we would be allowed to pass a deque
-      anywhere a stack is expected.<a data-type="indexterm"
-      data-primary="objects" data-secondary=
-      "in OCaml">&nbsp;</a></p>
+      anywhere a stack is expected.<idx>objects/in OCaml</idx></p>
 
       <p>OCaml is entirely different. Classes are used to construct
       objects and support inheritance, but classes are not types.
       Instead, objects have <em>object types</em>, and if you want
       to use objects, you aren't required to use classes at all.
       Here's an example of a simple object:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/stack.topscript" part="1" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/stack.topscript" part="1"/>
 
       <p>The object has an integer list value <code>v</code>, a
       method <code>pop</code> that returns the head of
@@ -135,8 +123,7 @@
       interface of an object. All interaction with an object is
       through its methods. The syntax for a method invocation uses
       the <code>#</code> character:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/stack.topscript" part="2" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/stack.topscript" part="2"/>
 
       <p>Note that unlike functions, methods can have zero
       parameters, since the method call is routed to a concrete
@@ -147,8 +134,7 @@
       <p>Objects can also be constructed by functions. If we want
       to specify the initial value of the object, we can define a
       function that takes the value and returns an object:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/stack.topscript" part="3" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/stack.topscript" part="3"/>
 
       <p>Note that the types of the function <code>stack</code> and
       the returned object now use the polymorphic type
@@ -162,33 +148,26 @@
       <h1>Object Polymorphism</h1>
 
       <p>Like polymorphic variants, methods can be used without an
-      explicit type declaration:<a data-type="indexterm"
-      data-primary="polymorphism" data-secondary=
-      "in objects">&nbsp;</a><a data-type="indexterm" data-primary=
-      "objects" data-secondary="polymorphism of">&nbsp;</a></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/polymorphism.topscript" part="1" />
+      explicit type declaration:<idx>polymorphism/in objects</idx><idx>objects/polymorphism of</idx></p>
+      <link rel="import" data-code-language="ocamltop" href="code/objects/polymorphism.topscript" part="1"/>
 
       <p>As you can see, object types are inferred automatically
       from the methods that are invoked on them.</p>
 
       <p>The type system will complain if it sees incompatible uses
       of the same method:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/polymorphism.topscript" part="2" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/polymorphism.topscript" part="2"/>
 
       <p>The <code>..</code> in the inferred object types are
       ellipses, standing for other unspecified methods that the
       object may have. The type <code>&lt; width : float; ..
       &gt;</code> specifies an object that must have at least a
       <code>width</code> method, and possibly some others as well.
-      Such object types are said to be <em>open</em>.<a data-type=
-      "indexterm" data-primary="open object types">&nbsp;</a></p>
+      Such object types are said to be <em>open</em>.<idx>open object types</idx></p>
 
       <p>We can manually <em>close</em> an object type using a type
       annotation:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/polymorphism.topscript" part="3" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/polymorphism.topscript" part="3"/>
 
       <div data-type="note">
         <h1>Elisions Are Polymorphic</h1>
@@ -198,15 +177,9 @@
         be apparent from the syntax, but an elided object type is
         actually polymorphic. For example, if we try to write a
         type definition, we get an "unbound type variable"
-        error:<a data-type="indexterm" data-primary="polymorphism"
-        data-secondary="row polymorphism">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "row polymorphism">&nbsp;</a><a data-type="indexterm"
-        data-primary="ellipses (..)">&nbsp;</a><a data-type=
-        "indexterm" data-primary="type variables">&nbsp;</a></p>
+        error:<idx>polymorphism/row polymorphism</idx><idx>row polymorphism</idx><idx>ellipses (..)</idx><idx>type variables</idx></p>
       </div>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/polymorphism.topscript" part="4" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/polymorphism.topscript" part="4"/>
 
       <p>This is because <code>..</code> is really a special kind
       of type variable called a <em>row variable</em>.</p>
@@ -223,8 +196,7 @@
       option</code>; it doesn't matter how it is implemented. When
       the method <code>#pop</code> is invoked, the actual method
       that is run is determined by the object:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/stack.topscript" part="4" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/stack.topscript" part="4"/>
     </section>
 
     <section id="immutable-objects" data-type="sect1">
@@ -234,14 +206,12 @@
       intrinsically imperative, where an object is like a state
       machine. Sending a message to an object causes it to change
       state, possibly sending messages to other
-      objects.<a data-type="indexterm" data-primary="objects"
-      data-secondary="immutabile">&nbsp;</a></p>
+      objects.<idx>objects/immutabile</idx></p>
 
       <p>Indeed, in many programs this makes sense, but it is by no
       means required. Let's define a function that creates
       immutable stack objects:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/immutable.topscript" part="1" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/immutable.topscript" part="1"/>
 
       <p>The key parts of this implementation are in the
       <code>pop</code> and <code>push</code> methods. The
@@ -251,15 +221,13 @@
       method produces a copy of the object, with <code>v</code>
       replaced by <code>hd :: v</code>. The original object is not
       modified:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/objects/immutable.topscript" part="2" />
+      <link rel="import" data-code-language="ocamltop" href="code/objects/immutable.topscript" part="2"/>
 
       <p>There are some restrictions on the use of the expression
       <code>{&lt; ... &gt;}</code>. It can be used only within a
       method body, and only the values of fields may be updated.
       Method implementations are fixed at the time the object is
-      created; they cannot be changed <span class=
-      "keep-together">dynamically</span>.</p>
+      created; they cannot be changed <span class="keep-together">dynamically</span>.</p>
     </section>
 
     <section id="when-to-use-objects" data-type="sect1">
@@ -272,11 +240,7 @@
       Modules, functors, and data types also offer a wide range of
       ways to express program structure. In fact, many seasoned
       OCaml programmers rarely use classes and objects, if at
-      all.<a data-type="indexterm" data-primary=
-      "first-class modules" data-secondary=
-      "vs. objects">&nbsp;</a><a data-type="indexterm"
-      data-primary="objects" data-secondary=
-      "benefits and drawbacks of">&nbsp;</a></p>
+      all.<idx>first-class modules/vs. objects</idx><idx>objects/benefits and drawbacks of</idx></p>
 
       <p>Objects have some advantages over records: they don't
       require type definitions, and their support for row
@@ -292,13 +256,7 @@
       instantiated, a form of <em>late</em> binding. This makes it
       possible (and necessary) for one method to refer to other
       methods in the object without knowing statically how they
-      will be implemented.<a data-type="indexterm" data-primary=
-      "late binding">&nbsp;</a><a data-type="indexterm"
-      data-primary="recursion" data-secondary=
-      "open recursion">&nbsp;</a><a data-type="indexterm"
-      data-primary="open recursion">&nbsp;</a><a data-type=
-      "indexterm" data-primary="classes" data-secondary=
-      "benefits of">&nbsp;</a></p>
+      will be implemented.<idx>late binding</idx><idx>recursion/open recursion</idx><idx>open recursion</idx><idx>classes/benefits of</idx></p>
 
       <p>In contrast, modules use early binding. If you want to
       parameterize your module code so that some part of it can be
@@ -308,30 +266,16 @@
 
       <p>In general, a rule of thumb is: use classes and objects in
       situations where open recursion is a big win. Two good
-      examples are Xavier Leroy's <a href=
-      "http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</a>,
+      examples are Xavier Leroy's <a href="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</a>,
       which provides a variety of cryptographic primitives that can
-      be combined in building-block style; and the <a href=
-      "http://cristal.inria.fr/camlimages/">Camlimages</a> library,
+      be combined in building-block style; and the <a href="http://cristal.inria.fr/camlimages/">Camlimages</a> library,
       which manipulates various graphical file formats. Camlimages
       also provides a module-based version of the same library,
       letting you choose between functional and object-oriented
-      styles depending on your problem domain.<a data-type=
-      "indexterm" data-primary=
-      "Camlimages library">&nbsp;</a><a data-type="indexterm"
-      data-primary="Cryptokit library">&nbsp;</a><a data-type=
-      "indexterm" data-primary="libraries" data-secondary=
-      "Cryptokit">&nbsp;</a><a data-type="indexterm" data-primary=
-      "libraries" data-secondary=
-      "Camlimages">&nbsp;</a><a data-type="indexterm" data-primary=
-      "external libraries" data-secondary=
-      "Camlimages">&nbsp;</a><a data-type="indexterm" data-primary=
-      "external libraries" data-secondary=
-      "Cryptokit">&nbsp;</a></p>
+      styles depending on your problem domain.<idx>Camlimages library</idx><idx>Cryptokit library</idx><idx>libraries/Cryptokit</idx><idx>libraries/Camlimages</idx><idx>external libraries/Camlimages</idx><idx>external libraries/Cryptokit</idx></p>
 
       <p>We'll introduce you to classes, and examples using open
-      recursion, in <a href="12-classes.html#classes" data-type=
-      "xref">Classes</a>.</p>
+      recursion, in <a href="12-classes.html#classes" data-type="xref">Classes</a>.</p>
     </section>
 
     <section id="subtyping" data-type="sect1">
@@ -345,11 +289,7 @@
       concretely, subtyping restricts when the coercion operator
       <code>e :&gt; t</code> can be applied. This coercion works
       only if the type of <code>e</code> is a subtype of
-      <code>t</code>.<a data-type="indexterm" data-primary=
-      "subtyping" data-secondary=
-      "basics of">&nbsp;</a><a data-type="indexterm" id="OBsub"
-      data-primary="objects" data-secondary=
-      "subtyping and">&nbsp;</a></p>
+      <code>t</code>.<idx>subtyping/basics of</idx><idx id="OBsub">objects/subtyping and</idx></p>
 
       <section id="width-subtyping" data-type="sect2">
         <h2>Width Subtyping</h2>
@@ -358,21 +298,15 @@
         for geometric shapes. The generic type <code>shape</code>
         has a method to compute the area, and <code>square</code>
         and <code>circle</code> are specific kinds of
-        shapes:<a data-type="indexterm" data-primary=
-        "geometric shapes">&nbsp;</a><a data-type="indexterm"
-        data-primary="width subtyping">&nbsp;</a><a data-type=
-        "indexterm" data-primary="subtyping" data-secondary=
-        "width subtyping">&nbsp;</a></p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/objects/subtyping.ml" part="1" />
+        shapes:<idx>geometric shapes</idx><idx>width subtyping</idx><idx>subtyping/width subtyping</idx></p>
+        <link rel="import" data-code-language="ocaml" href="code/objects/subtyping.ml" part="1"/>
 
         <p>A <code>square</code> has a method <code>area</code>
         just like a <code>shape</code>, and an additional method
         <code>width</code>. Still, we expect a <code>square</code>
         to be a <code>shape</code>, and it is. The coercion
         <code>:&gt;</code> must be explicit:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="1" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="1"/>
 
         <p>This form of object subtyping is called <em>width</em>
         subtyping. Width subtyping means that an object type
@@ -391,22 +325,17 @@
         individual methods could safely be coerced. So an object
         type <code>&lt; m: t1 &gt;</code> is a subtype of
         <code>&lt; m: t2 &gt;</code> if <code>t1</code> is a
-        subtype of <code>t2</code>.<a data-type="indexterm"
-        data-primary="depth subtyping">&nbsp;</a><a data-type=
-        "indexterm" data-primary="subtyping" data-secondary=
-        "depth subtyping">&nbsp;</a></p>
+        subtype of <code>t2</code>.<idx>depth subtyping</idx><idx>subtyping/depth subtyping</idx></p>
 
         <p>For example, we can create two objects with a
         <code>shape</code> method:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="2" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="2"/>
 
         <p>Both these objects have a <code>shape</code> method
         whose type is a subtype of the <code>shape</code> type, so
         they can both be coerced into the object type <code>&lt;
         shape : shape &gt;</code>:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="3" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="3"/>
 
         <div data-type="note">
           <h1>Polymorphic Variant Subtyping</h1>
@@ -417,8 +346,7 @@
           <em>B</em>, if the tags of <em>A</em> are a subset of the
           tags of <em>B</em>:</p>
         </div>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="4" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="4"/>
       </section>
 
       <section id="variance" data-type="sect2">
@@ -427,13 +355,8 @@
         <p>What about types built from object types? If a
         <code>square</code> is a <code>shape</code>, we expect a
         <code>square list</code> to be a <code>shape list</code>.
-        OCaml does indeed allow such coercions:<a data-type=
-        "indexterm" id="var" data-primary=
-        "variance">&nbsp;</a><a data-type="indexterm" id="SUBvar"
-        data-primary="subtyping" data-secondary=
-        "variance and">&nbsp;</a></p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="5" />
+        OCaml does indeed allow such coercions:<idx id="var">variance</idx><idx id="SUBvar">subtyping/variance and</idx></p>
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="5"/>
 
         <p>Note that this relies on lists being immutable. It would
         not be safe to treat a <code>square array</code> as a
@@ -441,14 +364,11 @@
         store nonsquare shapes into what should be an array of
         squares. OCaml recognizes this and does not allow the
         coercion:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="6" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="6"/>
 
         <p>We say that <code>'a list</code> is <em>covariant</em>
         (in <code>'a</code>), while <code>'a array</code> is
-        <em>invariant</em>.<a data-type="indexterm" data-primary=
-        "invariance">&nbsp;</a><a data-type="indexterm"
-        data-primary="covariance">&nbsp;</a></p>
+        <em>invariant</em>.<idx>invariance</idx><idx>covariance</idx></p>
 
         <p>Subtyping function types requires a third class of
         variance. A function with type <code>square -&gt;
@@ -458,54 +378,46 @@
         <code>circle</code>. However, a function with type
         <code>shape -&gt; string</code> <em>can</em> safely be used
         with type <code>square -&gt; string</code>:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="7" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="7"/>
 
         <p>We say that <code>'a -&gt; string</code> is
         <em>contravariant</em> in <code>'a</code>. In general,
         function types are contravariant in their arguments and
-        covariant in their results.<a data-type="indexterm"
-        data-primary="contravariance">&nbsp;</a></p>
+        covariant in their results.<idx>contravariance</idx></p>
 
         <aside data-type="sidebar">
           <h5>Variance Annotations</h5>
 
           <p>OCaml works out the variance of a type using that
           type's definition:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/objects/subtyping.topscript" part="8" />
+          <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="8"/>
 
           <p>However, if the definition is hidden by a signature,
           then OCaml is forced to assume that the type is
           invariant:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/objects/subtyping.topscript" part="9" />
+          <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="9"/>
 
           <p>We can fix this by adding <em>variance
           annotations</em> to the type's parameters in the
           signature: <code>+</code> for covariance or
           <code>-</code> for contravariance:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/objects/subtyping.topscript" part="10" />
+          <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="10"/>
         </aside>
 
         <p>For a more concrete example of variance, let's create
         some stacks containing shapes by applying our
         <code>stack</code> function to some squares and some
         circles:</p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/objects/subtyping.ml" part="2" />
+        <link rel="import" data-code-language="ocaml" href="code/objects/subtyping.ml" part="2"/>
 
         <p>If we wanted to write a function that took a list of
         such stacks and found the total area of their shapes, we
         might try:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="11" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="11"/>
 
         <p>However, when we try to apply this function to our
         objects, we get an error:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="12" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="12"/>
 
         <p>As you can see, <code>square stack</code> and
         <code>circle stack</code> are not subtypes of <code>shape
@@ -531,8 +443,7 @@
         using the <code>set</code> method. We define a type
         <code>readonly_stack</code> and confirm that we can coerce
         the list of <code>stack</code>s to it:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/subtyping.topscript" part="13" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/subtyping.topscript" part="13"/>
 
         <p>Aspects of this section may seem fairly complicated, but
         it should be pointed out that this typing <em>works</em>,
@@ -547,9 +458,7 @@
         has an escape hatch that allows the program to fall back to
         dynamic typing. The situation in OCaml is much better: it
         works, it is statically checked, and the annotations are
-        pretty simple.<a data-type="indexterm" data-startref=
-        "var">&nbsp;</a><a data-type="indexterm" data-startref=
-        "SUBvar">&nbsp;</a></p>
+        pretty simple.<a data-type="indexterm" data-startref="var">&nbsp;</a><a data-type="indexterm" data-startref="SUBvar">&nbsp;</a></p>
       </section>
 
       <section id="narrowing" data-type="sect2">
@@ -568,13 +477,7 @@
         coercion <code>(Square) x</code> is allowed if the value
         <code>x</code> has type <code>Square</code> or one of its
         subtypes; otherwise the coercion throws an
-        exception.<a data-type="indexterm" data-primary=
-        "dynamic type checking">&nbsp;</a><a data-type="indexterm"
-        data-primary="down casting">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "narrowing">&nbsp;</a><a data-type="indexterm"
-        data-primary="objects" data-secondary=
-        "narrowing and">&nbsp;</a></p>
+        exception.<idx>dynamic type checking</idx><idx>down casting</idx><idx>narrowing</idx><idx>objects/narrowing and</idx></p>
 
         <p>Narrowing is <em>not permitted</em> in OCaml.
         Period.</p>
@@ -594,8 +497,7 @@
         <p>More pragmatically, narrowing leads to poor
         object-oriented style. Consider the following Java code,
         which returns the name of a shape object:</p>
-        <link rel="import" data-code-language="java" href=
-        "code/objects/Shape.java" />
+        <link rel="import" data-code-language="java" href="code/objects/Shape.java"/>
 
         <p>Most programmers would consider this code to be "wrong."
         Instead of performing a case analysis on the type of
@@ -609,23 +511,20 @@
         a "barbell," composed of two <code>Circle</code> objects
         separated by a <code>Line</code>, where the circles have
         the same radius:</p>
-        <link rel="import" data-code-language="java" href=
-        "code/objects/IsBarbell.java" />
+        <link rel="import" data-code-language="java" href="code/objects/IsBarbell.java"/>
 
         <p>In this case, it is much less clear how to augment the
         <code>Shape</code> class to support this kind of pattern
         analysis. It is also not obvious that object-oriented
         programming is well-suited for this situation. Pattern
         matching seems like a better fit:</p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/objects/is_barbell.ml" />
+        <link rel="import" data-code-language="ocaml" href="code/objects/is_barbell.ml"/>
 
         <p>Regardless, there is a solution if you find yourself in
         this situation, which is to augment the classes with
         variants. You can define a method <code>variant</code> that
         injects the actual object into a variant type:</p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/objects/narrowing.ml" part="1" />
+        <link rel="import" data-code-language="ocaml" href="code/objects/narrowing.ml" part="1"/>
 
         <p>This pattern works, but it has drawbacks. In particular,
         the recursive type definition should make it clear that
@@ -633,8 +532,7 @@
         and that objects do not provide much value here.</p>
       </section>
 
-      <section id="subtyping-vs.-row-polymorphism" data-type=
-      "sect2">
+      <section id="subtyping-vs.-row-polymorphism" data-type="sect2">
         <h2>Subtyping Versus Row Polymorphism</h2>
 
         <p>There is considerable overlap between subtyping and row
@@ -643,45 +541,33 @@
         cases, row polymorphism is usually preferred over subtyping
         because it does not require explicit coercions, and it
         preserves more type information, allowing functions like
-        the following:<a data-type="indexterm" data-primary=
-        "polymorphism" data-secondary=
-        "row polymorphism">&nbsp;</a><a data-type="indexterm"
-        data-primary="row polymorphism">&nbsp;</a><a data-type=
-        "indexterm" data-primary="subtyping" data-secondary=
-        "vs. row polymorphism">&nbsp;</a></p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/row_polymorphism.topscript" part="1" />
+        the following:<idx>polymorphism/row polymorphism</idx><idx>row polymorphism</idx><idx>subtyping/vs. row polymorphism</idx></p>
+        <link rel="import" data-code-language="ocamltop" href="code/objects/row_polymorphism.topscript" part="1"/>
 
         <p>The return type of this function is built from the open
         object type of its argument, preserving any additional
         methods that it may have:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/row_polymorphism.topscript" part="2" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/row_polymorphism.topscript" part="2"/>
 
         <p>Writing a similar function with a closed type and
         applying it using subtyping does not preserve the methods
         of the argument: the returned object is only known to have
         an <code>area</code> method:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/row_polymorphism.topscript" part="3" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/row_polymorphism.topscript" part="3"/>
 
         <p>However, there are some situations where we cannot use
         row polymorphism. In particular, row polymorphism cannot be
         used to place different types of object in the same
         container. For example, lists of heterogeneous elements
         cannot be created using row polymorphism:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/row_polymorphism.topscript" part="4" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/row_polymorphism.topscript" part="4"/>
 
         <p>Similarly, we cannot use row polymorphism to store
         different types of object in the same reference:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/row_polymorphism.topscript" part="5" />
+        <link rel="import" data-code-language="ocamltop" href="code/objects/row_polymorphism.topscript" part="5"/>
 
-        <p>In both these cases we must use subtyping:<a data-type=
-        "indexterm" data-startref="OBsub">&nbsp;</a></p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/objects/row_polymorphism.topscript" part="6" />
+        <p>In both these cases we must use subtyping:<a data-type="indexterm" data-startref="OBsub">&nbsp;</a></p>
+        <link rel="import" data-code-language="ocamltop" href="code/objects/row_polymorphism.topscript" part="6"/>
 
         <div data-type="note">
           <h1>Production Note</h1>

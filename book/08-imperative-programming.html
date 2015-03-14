@@ -1,7 +1,9 @@
+<!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -23,14 +25,10 @@
     effects that modify a program's internal state or interact with
     the outside world. An imperative function has a new effect, and
     potentially returns different results, every time it's
-    called.<a data-type="indexterm" data-primary=
-    "imperative programming" data-secondary=
-    "benefits of">&nbsp;</a><a data-type="indexterm" data-primary=
-    "pure code">&nbsp;</a><a data-type="indexterm" data-primary=
-    "programming" data-secondary=
-    "immutable vs. imperative">&nbsp;</a><a data-type="indexterm"
-    id="PROGimper" data-primary="programming" data-secondary=
-    "imperative programming">&nbsp;</a></p>
+    called.<idx>imperative programming/benefits of</idx><idx>pure
+    code</idx><idx>programming/immutable vs.
+    imperative</idx><idx id="PROGimper">programming/imperative
+    programming</idx></p>
 
     <p>Pure code is the default in OCaml, and for good reason—it's
     generally easier to reason about, less error prone and more
@@ -60,22 +58,18 @@
       implementations. There's more advice on using Core's
       implementation in particular in <a href=
       "13-maps-and-hashtables.html#maps-and-hash-tables" data-type=
-      "xref">Maps And Hash Tables</a>.<a data-type="indexterm" id=
-      "DICTimper" data-primary=
-      "dictionaries, imperative">&nbsp;</a><a data-type="indexterm"
-      data-primary="Core standard library" data-secondary=
-      "imperative dictionaries in">&nbsp;</a><a data-type=
-      "indexterm" id="IPimpdict" data-primary=
-      "imperative programming" data-secondary=
-      "imperative dictionaries">&nbsp;</a></p>
+      "xref">Maps And Hash Tables</a>.<idx id=
+      "DICTimper">dictionaries, imperative</idx><idx>Core standard
+      library/imperative dictionaries in</idx><idx id=
+      "IPimpdict">imperative programming/imperative
+      dictionaries</idx></p>
 
       <p>The dictionary we'll describe now, like those in Core and
       the standard library, will be implemented as a hash table. In
       particular, we'll use an <em>open hashing</em> scheme, where
       the hash table will be an array of buckets, each bucket
       containing a list of key/value pairs that have been hashed
-      into that bucket.<a data-type="indexterm" data-primary=
-      "open hashing">&nbsp;</a></p>
+      into that bucket.<idx>open hashing</idx></p>
 
       <p>Here's the interface we'll match, provided as an
       <code>mli</code>. The type <code>('a, 'b) t</code> represents
@@ -106,9 +100,8 @@
       mutable. In OCaml, records are immutable by default, but
       individual fields are mutable when marked as such. The second
       field, <code>buckets</code>, is immutable but contains an
-      array, which is itself a mutable data structure.<a data-type=
-      "indexterm" data-primary="fields" data-secondary=
-      "mutability of">&nbsp;</a></p>
+      array, which is itself a mutable data
+      structure.<idx>fields/mutability of</idx></p>
 
       <p>Now we'll start putting together the basic functions for
       manipulating a dictionary:</p>
@@ -255,16 +248,11 @@
       encountered two different forms of mutable data above:
       records with mutable fields and arrays. We'll now discuss
       these in more detail, along with the other primitive forms of
-      mutable data that are available in OCaml.<a data-type=
-      "indexterm" data-primary=
-      "array-like data">&nbsp;</a><a data-type="indexterm"
-      data-primary="data structures" data-secondary=
-      "primitive mutable data">&nbsp;</a><a data-type="indexterm"
-      data-primary="mutable data">&nbsp;</a><a data-type=
-      "indexterm" data-primary="primitive mutable data"
-      data-secondary="array-like data">&nbsp;</a><a data-type=
-      "indexterm" data-primary="imperative programming"
-      data-secondary="primitive mutable data">&nbsp;</a></p>
+      mutable data that are available in OCaml.<idx>array-like
+      data</idx><idx>data structures/primitive mutable
+      data</idx><idx>mutable data</idx><idx>primitive mutable
+      data/array-like data</idx><idx>imperative
+      programming/primitive mutable data</idx></p>
 
       <section id="array-like-data" data-type="sect2">
         <h2>Array-Like Data</h2>
@@ -285,15 +273,11 @@
           <code>Array.set</code>, for setting an individual
           element, and <code>Array.blit</code>, for efficiently
           copying values from one range of indices to
-          another.<a data-type="indexterm" data-primary="values"
-          data-secondary=
-          "copying with Array.blit">&nbsp;</a><a data-type=
-          "indexterm" data-primary="elements" data-secondary=
-          "setting with Array.set">&nbsp;</a><a data-type=
-          "indexterm" data-primary="Array module" data-secondary=
-          "Array.blit">&nbsp;</a><a data-type="indexterm"
-          data-primary="Array module" data-secondary=
-          "Array.set">&nbsp;</a></p>
+          another.<idx>values/copying with
+          Array.blit</idx><idx>elements/setting with
+          Array.set</idx><idx>Array
+          module/Array.blit</idx><idx>Array
+          module/Array.set</idx></p>
 
           <p>Arrays also come with special syntax for retrieving an
           element from an array:</p>
@@ -323,10 +307,8 @@
           character) is that the former is considerably more
           space-efficient; an array uses one word—8 bytes on a
           64-bit machine—to store a single entry, whereas strings
-          use 1 byte per character.<a data-type="indexterm"
-          data-primary="byte arrays">&nbsp;</a><a data-type=
-          "indexterm" data-primary="strings" data-secondary=
-          "vs. Char.t arrays">&nbsp;</a></p>
+          use 1 byte per character.<idx>byte
+          arrays</idx><idx>strings/vs. Char.t arrays</idx></p>
 
           <p>Strings also come with their own syntax for getting
           and setting values:</p>
@@ -348,8 +330,7 @@
           "20-runtime-memory-layout.html#memory-representation-of-values"
           data-type="xref">Memory Representation Of Values</a>.
           Bigarrays too have their own getting and setting
-          syntax:<a data-type="indexterm" data-primary=
-          "bigarrays">&nbsp;</a></p>
+          syntax:<idx>bigarrays</idx></p>
           <link rel="import" data-code-language="ocamlsyntax" href=
           "code/imperative-programming/bigarray.syntax" />
         </section>
@@ -363,16 +344,13 @@
         individual record fields can be declared as mutable. These
         mutable fields can be set using the <code>&lt;-</code>
         operator, i.e., <code>record.field &lt;-
-        expr</code>.<a data-type="indexterm" data-primary="fields"
-        data-secondary="mutability of">&nbsp;</a></p>
+        expr</code>.<idx>fields/mutability of</idx></p>
 
         <p>As we'll see in <a href="11-objects.html#objects"
         data-type="xref">Objects</a>, fields of an object can
         similarly be declared as mutable, and can then be modified
-        in much the same way as record fields.<a data-type=
-        "indexterm" data-primary="primitive mutable data"
-        data-secondary=
-        "record/object fields and ref cells">&nbsp;</a></p>
+        in much the same way as record fields.<idx>primitive
+        mutable data/record/object fields and ref cells</idx></p>
 
         <section id="ref-cells" data-type="sect3">
           <h3>Ref cells</h3>
@@ -384,8 +362,7 @@
           define a single, mutable value. In OCaml this is
           typically achieved using a <code>ref</code>, which is
           essentially a container with a single mutable polymorphic
-          field.<a data-type="indexterm" data-primary=
-          "ref cells">&nbsp;</a></p>
+          field.<idx>ref cells</idx></p>
 
           <p>The definition for the <code>ref</code> type is as
           follows:</p>
@@ -442,18 +419,12 @@
         detail in <a href=
         "19-foreign-function-interface.html#foreign-function-interface"
         data-type="xref">Foreign Function
-        Interface</a>.<a data-type="indexterm" data-primary=
-        "libraries" data-secondary=
-        "interfacing with external">&nbsp;</a><a data-type=
-        "indexterm" data-primary="external libraries"
-        data-secondary="interfacing with">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "LAPACK bindings">&nbsp;</a><a data-type="indexterm"
-        data-primary="foreign function interface (FFI)"
-        data-secondary=
-        "imperative operations and">&nbsp;</a><a data-type=
-        "indexterm" data-primary="primitive mutable data"
-        data-secondary="foreign functions">&nbsp;</a></p>
+        Interface</a>.<idx>libraries/interfacing with
+        external</idx><idx>external libraries/interfacing
+        with</idx><idx>LAPACK bindings</idx><idx>foreign function
+        interface (FFI)/imperative operations
+        and</idx><idx>primitive mutable data/foreign
+        functions</idx></p>
       </section>
     </section>
 
@@ -466,11 +437,9 @@
       strictly necessary, since they can be simulated with
       recursive functions. Nonetheless, explicit <code>for</code>
       and <code>while</code> loops are both more concise and more
-      idiomatic when programming imperatively.<a data-type=
-      "indexterm" data-primary=
-      "looping constructs">&nbsp;</a><a data-type="indexterm"
-      data-primary="while loops">&nbsp;</a><a data-type="indexterm"
-      data-primary="for loops">&nbsp;</a></p>
+      idiomatic when programming imperatively.<idx>looping
+      constructs</idx><idx>while loops</idx><idx>for
+      loops</idx></p>
 
       <p>The <code>for</code> loop is the simpler of the two.
       Indeed, we've already seen the <code>for</code> loop in
@@ -514,12 +483,10 @@
       list in constant time. Core defines a doubly linked list (the
       module is called <code>Doubly_linked</code>), but we'll
       define our own linked list library as an
-      illustration.<a data-type="indexterm" data-primary="lists"
-      data-secondary="doubly-linked lists">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "doubly-linked lists">&nbsp;</a><a data-type="indexterm" id=
-      "IPdoublink" data-primary="imperative programming"
-      data-secondary="doubly-linked lists">&nbsp;</a></p>
+      illustration.<idx>lists/doubly-linked
+      lists</idx><idx>doubly-linked lists</idx><idx id=
+      "IPdoublink">imperative programming/doubly-linked
+      lists</idx></p>
 
       <p>Here's the <code>mli</code> of the module we'll build:</p>
       <link rel="import" data-code-language="ocaml" href=
@@ -564,11 +531,9 @@
         pointers that closes in on itself. In general, building
         cyclic data structures requires the use of side effects.
         This is done by constructing the data elements first, and
-        then adding cycles using assignment afterward.<a data-type=
-        "indexterm" data-primary="let rec">&nbsp;</a><a data-type=
-        "indexterm" data-primary="data structures" data-secondary=
-        "cyclic">&nbsp;</a><a data-type="indexterm" data-primary=
-        "cyclic data structures">&nbsp;</a></p>
+        then adding cycles using assignment afterward.<idx>let
+        rec</idx><idx>data structures/cyclic</idx><idx>cyclic data
+        structures</idx></p>
 
         <p>There is an exception to this, though: you can construct
         fixed-size cyclic data structures using <code>let
@@ -586,9 +551,8 @@
 
         <p>Now, we'll start considering operations that mutate the
         list, starting with <code>insert_first</code>, which
-        inserts an element at the front of the list:<a data-type=
-        "indexterm" data-primary="elements" data-secondary=
-        "inserting in lists">&nbsp;</a></p>
+        inserts an element at the front of the
+        list:<idx>elements/inserting in lists</idx></p>
         <link rel="import" data-code-language="ocaml" href=
         "code/imperative-programming/dlist.ml" part="3" />
 
@@ -602,9 +566,7 @@
         end</code>. We could have used parentheses for the same
         purpose. Without some kind of bracketing, the final
         assignment would incorrectly become part of the
-        <code>None</code> case.<a data-type="indexterm"
-        data-primary="elements" data-secondary=
-        "defining new">&nbsp;</a></p>
+        <code>None</code> case.<idx>elements/defining new</idx></p>
 
         <p>We can use <code>insert_after</code> to insert elements
         later in the list. <code>insert_after</code> takes as
@@ -640,13 +602,10 @@
         modules like Core's <code>Doubly_linked</code>. You should
         use imperative data structures from a well-designed library
         when you can. And when you can't, you should make sure to
-        put great care into your error handling.<a data-type=
-        "indexterm" data-primary="imperative programming"
-        data-secondary="drawbacks of">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "Doubly-linked module">&nbsp;</a><a data-type="indexterm"
-        data-primary="error handling" data-secondary=
-        "and imperative data structures">&nbsp;</a></p>
+        put great care into your error handling.<idx>imperative
+        programming/drawbacks of</idx><idx>Doubly-linked
+        module</idx><idx>error handling/and imperative data
+        structures</idx></p>
       </section>
 
       <section id="iteration-functions" data-type="sect2">
@@ -656,10 +615,8 @@
         trees, you'll typically want to define a set of iteration
         functions like <code>iter</code>, <code>map</code>, and
         <code>fold</code>, which let you concisely express common
-        iteration patterns.<a data-type="indexterm" data-primary=
-        "functions" data-secondary=
-        "iteration functions">&nbsp;</a><a data-type="indexterm"
-        data-primary="iteration functions">&nbsp;</a></p>
+        iteration patterns.<idx>functions/iteration
+        functions</idx><idx>iteration functions</idx></p>
 
         <p><code>Dlist</code> has two such iterators:
         <code>iter</code>, the goal of which is to call a
@@ -699,14 +656,10 @@
       side effects are sometimes called <em>benign effects</em>,
       and they are a useful way of leveraging OCaml's imperative
       features while still maintaining most of the benefits of pure
-      programming.<a data-type="indexterm" data-primary=
-      "lazy keyword">&nbsp;</a><a data-type="indexterm"
-      data-primary="side effects">&nbsp;</a><a data-type=
-      "indexterm" data-primary="laziness">&nbsp;</a><a data-type=
-      "indexterm" data-primary="benign effects" data-secondary=
-      "laziness">&nbsp;</a><a data-type="indexterm" data-primary=
-      "imperative programming" data-secondary=
-      "benign effects and">&nbsp;</a></p>
+      programming.<idx>lazy keyword</idx><idx>side
+      effects</idx><idx>laziness</idx><idx>benign
+      effects/laziness</idx><idx>imperative programming/benign
+      effects and</idx></p>
 
       <p>One of the simplest benign effects is <em>laziness</em>. A
       lazy value is one that is not computed until it is actually
@@ -744,8 +697,7 @@
       <p>We can create a lazy value from a thunk, i.e., a function
       that takes a unit argument. Wrapping an expression in a thunk
       is another way to suspend the computation of an
-      expression:<a data-type="indexterm" data-primary=
-      "thunks">&nbsp;</a></p>
+      expression:<idx>thunks</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/lazy.topscript" part="3" />
 
@@ -774,11 +726,8 @@
         memoized function remembers the result of previous
         invocations of the function so that they can be returned
         without further computation when the same arguments are
-        presented again.<a data-type="indexterm" data-primary=
-        "memoization" data-secondary=
-        "function of">&nbsp;</a><a data-type="indexterm" id="BEmem"
-        data-primary="benign effects" data-secondary=
-        "memoization">&nbsp;</a></p>
+        presented again.<idx>memoization/function of</idx><idx id=
+        "BEmem">benign effects/memoization</idx></p>
 
         <p>Here's a function that takes as an argument an arbitrary
         single-argument function and returns a memoized version of
@@ -796,9 +745,8 @@
         calls <code>f</code> and stashes the result in
         <code>table</code>. Note that <code>table</code> doesn't go
         out of scope as long as the function returned by
-        <code>memoize</code> is in scope.<a data-type="indexterm"
-        data-primary="memoization" data-secondary=
-        "benefits and drawbacks of">&nbsp;</a></p>
+        <code>memoize</code> is in scope.<idx>memoization/benefits
+        and drawbacks of</idx></p>
 
         <p>Memoization can be useful whenever you have a function
         that is expensive to recompute and you don't mind caching
@@ -816,17 +764,14 @@
         required to <span class="keep-together">convert</span> one
         string to the other. This kind of distance metric can be
         useful for a variety of approximate string-matching
-        problems, like spellcheckers.<a data-type="indexterm"
-        data-primary="string matching">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "Levenshtein distance">&nbsp;</a><a data-type="indexterm"
-        data-primary="edit distance">&nbsp;</a></p>
+        problems, like spellcheckers.<idx>string
+        matching</idx><idx>Levenshtein distance</idx><idx>edit
+        distance</idx></p>
 
         <p>Consider the following code for computing the edit
         distance. Understanding the algorithm isn't important here,
         but you should pay attention to the structure of the
-        recursive calls:<a data-type="indexterm" data-primary=
-        "memoization" data-secondary="example of">&nbsp;</a></p>
+        recursive calls:<idx>memoization/example of</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/memo.topscript" part="2" />
 
@@ -883,10 +828,8 @@
         starts out with two <code>1</code>s, with every subsequent
         element being the sum of the previous two. The classic
         recursive definition of Fibonacci is as
-        follows:<a data-type="indexterm" data-primary="programming"
-        data-secondary=
-        "dynamic programming">&nbsp;</a><a data-type="indexterm"
-        data-primary="dynamic programming">&nbsp;</a></p>
+        follows:<idx>programming/dynamic
+        programming</idx><idx>dynamic programming</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="1" />
 
@@ -1012,8 +955,7 @@
           <p>You might wonder why we didn't tie the recursive knot
           in <code>memo_rec</code> using <code>let rec</code>, as
           we did for <code>make_rec</code> earlier. Here's code
-          that tries to do just that:<a data-type="indexterm"
-          data-primary="let rec">&nbsp;</a></p>
+          that tries to do just that:<idx>let rec</idx></p>
           <link rel="import" data-code-language="ocamltop" href=
           "code/imperative-programming/letrec.topscript" part=
           "1" />
@@ -1087,11 +1029,9 @@
       program. An important example of this kind of interaction is
       I/O, i.e., operations for reading or writing data to things
       like files, terminal input and output, and network
-      sockets.<a data-type="indexterm" data-primary=
-      "I/O (input/output) operations" data-secondary=
-      "terminal I/O">&nbsp;</a><a data-type="indexterm" id=
-      "IPinpout" data-primary="imperative programming"
-      data-secondary="input and output">&nbsp;</a></p>
+      sockets.<idx>I/O (input/output) operations/terminal
+      I/O</idx><idx id="IPinpout">imperative programming/input and
+      output</idx></p>
 
       <p>There are multiple I/O libraries in OCaml. In this section
       we'll discuss OCaml's buffered I/O library that can be used
@@ -1116,15 +1056,11 @@
         The <code>In_channel</code> and <code>Out_channel</code>
         modules only have direct support for channels corresponding
         to files and terminals; other kinds of channels can be
-          created through the <code>Unix</code> module.
-	  <a data-type="indexterm"
-	     data-primary="Out_channel module"
-             data-secondary="Out_channel.stderr">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="Out_channel module"
-             data-secondary="Out_channel.stdout">&nbsp;</a>
-	  <a data-type="indexterm"
-	     data-primary="In_channel module">&nbsp;</a></p>
+        created through the <code>Unix</code> module.
+        <idx>Out_channel module/Out_channel.stderr</idx>
+        <idx>Out_channel module/Out_channel.stdout</idx>
+        <idx>In_channel module</idx></p>
+
         <p>We'll start our discussion of I/O by focusing on the
         terminal. Following the UNIX model, communication with the
         terminal is organized around three channels, which
@@ -1221,14 +1157,10 @@
         string</em> that describes what to print and how to format
         it, as well as arguments to be printed, as determined by
         the formatting directives embedded in the format string.
-        So, for example, we can write:<a data-type="indexterm"
-        data-primary="strings" data-secondary=
-        "format strings">&nbsp;</a><a data-type="indexterm"
-        data-primary="format strings">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "printf function">&nbsp;</a><a data-type="indexterm"
-        data-primary="I/O (input/output) operations"
-        data-secondary="formatted output">&nbsp;</a></p>
+        So, for example, we can write:<idx>strings/format
+        strings</idx><idx>format strings</idx><idx>printf
+        function</idx><idx>I/O (input/output) operations/formatted
+        output</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/printf.topscript" part="1" />
 
@@ -1298,14 +1230,11 @@
 
         <p><code>printf</code>'s formatting directives offer a
         significant amount of control, allowing you to specify
-        things like:<a data-type="indexterm" data-primary=
-        "binary numbers, formatting with printf">&nbsp;</a><a data-type="indexterm"
-        data-primary=
-        "hex numbers, formatting with printf">&nbsp;</a><a data-type="indexterm"
-        data-primary=
-        "decimals, formatting with printf">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "alignment, formatting with printf">&nbsp;</a></p>
+        things like:<idx>binary numbers, formatting with
+        printf</idx><idx>hex numbers, formatting with
+        printf</idx><idx>decimals, formatting with
+        printf</idx><idx>alignment, formatting with
+        printf</idx></p>
 
         <ul>
           <li>
@@ -1328,10 +1257,8 @@
 
         <p>There are also <code>printf</code>-style functions that
         target outputs other than <code>stdout</code>,
-        including:<a data-type="indexterm" data-primary=
-        "sprintf function">&nbsp;</a><a data-type="indexterm"
-        data-primary="fprintf function">&nbsp;</a><a data-type=
-        "indexterm" data-primary="eprintf function">&nbsp;</a></p>
+        including:<idx>sprintf function</idx><idx>fprintf
+        function</idx><idx>eprintf function</idx></p>
 
         <ul>
           <li>
@@ -1362,11 +1289,9 @@
         <code>out_channel</code>s is for working with files. Here
         are a couple of functions—one that creates a file full of
         numbers, and the other that reads in such a file and
-        returns the sum of those numbers:<a data-type="indexterm"
-        data-primary="files" data-secondary=
-        "file I/O">&nbsp;</a><a data-type="indexterm" data-primary=
-        "I/O (input/output) operations" data-secondary=
-        "file I/O">&nbsp;</a></p>
+        returns the sum of those numbers:<idx>files/file
+        I/O</idx><idx>I/O (input/output) operations/file
+        I/O</idx></p>
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/file.topscript" part="1" />
 
@@ -1449,15 +1374,11 @@
       some expression, the expression is evaluated before the
       variable is bound. Similarly, if you call a function on a set
       of arguments, those arguments are evaluated before they are
-      passed to the function.<a data-type="indexterm" data-primary=
-      "strict evaluation">&nbsp;</a><a data-type="indexterm"
-      data-primary=
-      "expressions, order of evaluation">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "evaluation, order of">&nbsp;</a><a data-type="indexterm"
-      data-primary="order of evaluation">&nbsp;</a><a data-type=
-      "indexterm" data-primary="imperative programming"
-      data-secondary="order of evaluation">&nbsp;</a></p>
+      passed to the function.<idx>strict
+      evaluation</idx><idx>expressions, order of
+      evaluation</idx><idx>evaluation, order of</idx><idx>order of
+      evaluation</idx><idx>imperative programming/order of
+      evaluation</idx></p>
 
       <p>Consider the following simple example. Here, we have a
       collection of angles, and we want to determine if any of them
@@ -1517,14 +1438,10 @@
       <h1>Side Effects and Weak Polymorphism</h1>
 
       <p>Consider the following simple, imperative
-      function:<a data-type="indexterm" data-primary="polymorphism"
-      data-secondary="weak polymorphism">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "weak polymorphism">&nbsp;</a><a data-type="indexterm"
-      data-primary="side effects">&nbsp;</a><a data-type=
-      "indexterm" id="IPsideweak" data-primary=
-      "imperative programming" data-secondary=
-      "side effects/weak polymorphism">&nbsp;</a></p>
+      function:<idx>polymorphism/weak polymorphism</idx><idx>weak
+      polymorphism</idx><idx>side effects</idx><idx id=
+      "IPsideweak">imperative programming/side effects/weak
+      polymorphism</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/weak.topscript" part="1" />
 
@@ -1569,8 +1486,7 @@
       type. That makes sense because, unlike <code>identity</code>,
       <code>remember</code> always returns the value it was passed
       on its first invocation, which means its return value must
-      always have the same type.<a data-type="indexterm"
-      data-primary="type variables">&nbsp;</a></p>
+      always have the same type.<idx>type variables</idx></p>
 
       <p>OCaml will convert a weakly polymorphic variable to a
       concrete type as soon as it gets a clue as to what concrete
@@ -1593,8 +1509,7 @@
         rough rule to flag cases that don't introduce any
         persistent mutable cells, and to only infer polymorphic
         types in those cases. This rule is called <em>the value
-        restriction</em>.<a data-type="indexterm" data-primary=
-        "value restriction">&nbsp;</a></p>
+        restriction</em>.<idx>value restriction</idx></p>
 
         <p>The core of the value restriction is the observation
         that some kinds of expressions, which we'll refer to as
@@ -1685,8 +1600,8 @@
         applied functions. A partially applied function, like any
         function application, is not a simple value, and as such,
         functions created by partial application are sometimes less
-        general than you might expect.<a data-type="indexterm"
-        data-primary="partial application">&nbsp;</a></p>
+        general than you might expect.<idx>partial
+        application</idx></p>
 
         <p>Consider the <code>List.init</code> function, which is
         used for creating lists where each element is created by
@@ -1785,8 +1700,7 @@
         contravariance in <a href="11-objects.html#objects"
         data-type="xref">Objects</a>, but for now, you can think of
         it as an annotation that can be put in the interface of a
-        pure data structure.<a data-type="indexterm" data-primary=
-        "datatypes" data-secondary="covariant">&nbsp;</a></p>
+        pure data structure.<idx>datatypes/covariant</idx></p>
 
         <p>In particular, if we replace <code>type 'a t</code> in
         the interface with <code>type +'a t</code>, that will make
@@ -1812,9 +1726,7 @@
       <h1>Summary</h1>
 
       <p>This chapter has covered quite a lot of ground,
-      including:<a data-type="indexterm" data-primary=
-      "imperative programming" data-secondary=
-      "overview of">&nbsp;</a></p>
+      including:<idx>imperative programming/overview of</idx></p>
 
       <ul>
         <li>

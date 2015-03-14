@@ -1,7 +1,9 @@
+<!DOCTYPE html>
+
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta name="generator" content=
-  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
+  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
 
   <title></title>
 </head>
@@ -23,8 +25,7 @@
     <p>A record represents a collection of values stored together
     as one, where each component is identified by a different field
     name. The basic syntax for a record type declaration is as
-    follows:<a data-type="indexterm" data-primary="records"
-    data-secondary="basic syntax for">&nbsp;</a></p>
+    follows:<idx>records/basic syntax for</idx></p>
     <link rel="import" data-code-language="ocamlsyntax" href=
     "code/records/record.syntax" />
 
@@ -98,11 +99,9 @@
 
       <p>Another way of getting information out of a record is by
       using a pattern match, as shown in the following
-      function.<a data-type="indexterm" data-primary=
-      "pattern matching" data-secondary=
-      "and exhaustiveness">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "patterns and exhaustiveness in">&nbsp;</a></p>
+      function.<idx>pattern matching/and
+      exhaustiveness</idx><idx>records/patterns and exhaustiveness
+      in</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="5" />
 
@@ -114,11 +113,9 @@
       set of fields available in a record is always the same. In
       general, patterns for types with a fixed structure, like
       records and tuples, are irrefutable, unlike types with
-      variable structures like lists and variants.<a data-type=
-      "indexterm" data-primary=
-      "irrefutable patterns">&nbsp;</a><a data-type="indexterm"
-      data-primary="datatypes" data-secondary=
-      "fixed vs. variable structure of">&nbsp;</a></p>
+      variable structures like lists and variants.<idx>irrefutable
+      patterns</idx><idx>datatypes/fixed vs. variable structure
+      of</idx></p>
 
       <p>Another important characteristic of record patterns is
       that they don't need to be complete; a pattern can mention
@@ -146,15 +143,11 @@
       <p>Happily, OCaml offers an optional warning for missing
       fields in record patterns. With that warning turned on (which
       you can do in the toplevel by typing <code>#warnings
-      "+9"</code>), the compiler will indeed warn us.<a data-type=
-      "indexterm" data-primary="errors" data-secondary=
-      "compiler warnings">&nbsp;</a><a data-type="indexterm"
-      data-primary="code compilers" data-secondary=
-      "warning enable/disable">&nbsp;</a><a data-type="indexterm"
-      data-primary="errors" data-secondary=
-      "missing field warnings">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "missing field warnings">&nbsp;</a></p>
+      "+9"</code>), the compiler will indeed warn
+      us.<idx>errors/compiler warnings</idx><idx>code
+      compilers/warning enable/disable</idx><idx>errors/missing
+      field warnings</idx><idx>records/missing field
+      warnings</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="7" />
 
@@ -212,19 +205,15 @@
       record field, OCaml provides some handy syntactic shortcuts.
       For example, the pattern in the following function binds all
       of the fields in question to variables of the same name. This
-      is called <em>field punning</em>:<a data-type="indexterm"
-      data-primary="fields" data-secondary=
-      "field punning">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "field punning in">&nbsp;</a></p>
+      is called <em>field punning</em>:<idx>fields/field
+      punning</idx><idx>records/field punning in</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="9" />
 
       <p>Field punning can also be used to construct a record.
       Consider the following updated version of
-      <code>service_info_of_string</code>.<a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "construction of">&nbsp;</a></p>
+      <code>service_info_of_string</code>.<idx>records/construction
+      of</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="10" />
 
@@ -233,10 +222,8 @@
       itself simply listed the fields that needed to be included.
       You can take advantage of both field punning and label
       punning when writing a function for constructing a record
-      from labeled arguments:<a data-type="indexterm" data-primary=
-      "label punning">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "label punning in">&nbsp;</a></p>
+      from labeled arguments:<idx>label
+      punning</idx><idx>records/label punning in</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="11" />
 
@@ -255,26 +242,24 @@
       <h1>Reusing Field Names</h1>
 
       <p>Defining records with the same field names can be
-      problematic. As a simple example, let's consider a collection of
-      types representing the protocol of a logging
-      server.<a data-type="indexterm" id="FNreus" data-primary=
-      "fields" data-secondary= "reusing field
-      names">&nbsp;</a><a data-type="indexterm" id= "RECreusfn"
-      data-primary="records" data-secondary= "reusing field
-      names">&nbsp;</a></p>
+      problematic. As a simple example, let's consider a collection
+      of types representing the protocol of a logging
+      server.<idx id="FNreus">fields/reusing field
+      names</idx><idx id="RECreusfn">records/reusing field
+      names</idx></p>
 
-      <p>We'll describe three message
-      types: <code>log_entry</code>, <code>heartbeat</code>,
-      and <code>logon</code>. The <code>log_entry</code> message is
-      used to deliver a log entry to the server;
-      the <code>logon</code> message is sent when initiating a
-      connection and includes the identity of the user connecting and
-      credentials used for authentication; and
-      the <code>heartbeat</code> message is periodically sent by the
-      client to demonstrate to the server that the client is alive and
-      connected. All of these messages include a session ID and the
-      time the message was generated, measured in seconds from the
-      start of the Unix epoch (January 1st, 1970.)</p>
+      <p>We'll describe three message types:
+      <code>log_entry</code>, <code>heartbeat</code>, and
+      <code>logon</code>. The <code>log_entry</code> message is
+      used to deliver a log entry to the server; the
+      <code>logon</code> message is sent when initiating a
+      connection and includes the identity of the user connecting
+      and credentials used for authentication; and the
+      <code>heartbeat</code> message is periodically sent by the
+      client to demonstrate to the server that the client is alive
+      and connected. All of these messages include a session ID and
+      the time the message was generated, measured in seconds from
+      the start of the Unix epoch (January 1st, 1970.)</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="13" />
 
@@ -313,11 +298,11 @@
       nonoverlapping field names or by putting different record
       types in different modules. Indeed, packing types into
       modules is a broadly useful idiom (and one used quite
-	extensively by <code>Core</code>), providing for each type a
-	namespace
-      within which to put related values. When using this style, it
-      is standard practice to name the type associated with the
-      module <code>t</code>. Using this style we would write:</p>
+      extensively by <code>Core</code>), providing for each type a
+      namespace within which to put related values. When using this
+      style, it is standard practice to name the type associated
+      with the module <code>t</code>. Using this style we would
+      write:</p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="17" />
 
@@ -386,11 +371,9 @@
       client, including when the last heartbeat was received from
       that client. The following defines a type for representing
       this information, as well as a function for updating the
-      client information when a new heartbeat arrives:<a data-type=
-      "indexterm" data-primary=
-      "functional updates">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "functional updates to">&nbsp;</a></p>
+      client information when a new heartbeat
+      arrives:<idx>functional updates</idx><idx>records/functional
+      updates to</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="22" />
 
@@ -440,11 +423,8 @@
       <p>Like most OCaml values, records are immutable by default.
       You can, however, declare individual record fields as
       mutable. In the following code, we've made the last two
-      fields of <code>client_info</code> mutable:<a data-type=
-      "indexterm" data-primary=
-      "mutable record fields">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "mutable fields in">&nbsp;</a></p>
+      fields of <code>client_info</code> mutable:<idx>mutable
+      record fields</idx><idx>records/mutable fields in</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="26" />
 
@@ -472,14 +452,10 @@
       <h1>First-Class Fields</h1>
 
       <p>Consider the following function for extracting the
-      usernames from a list of <code>Logon</code>
-      messages:<a data-type="indexterm" id="Ffc" data-primary=
-      "fields" data-secondary=
-      "first-class fields">&nbsp;</a><a data-type="indexterm" id=
-      "firstclass" data-primary=
-      "first-class fields">&nbsp;</a><a data-type="indexterm" id=
-      "RECfirstclass" data-primary="records" data-secondary=
-      "first-class fields in">&nbsp;</a></p>
+      usernames from a list of <code>Logon</code> messages:<idx id=
+      "Ffc">fields/first-class fields</idx><idx id=
+      "firstclass">first-class fields</idx><idx id=
+      "RECfirstclass">records/first-class fields in</idx></p>
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main2.topscript" part="28" />
 
@@ -487,10 +463,9 @@
       x.Logon.user)</code> to access the <code>user</code> field.
       This kind of accessor function is a common enough pattern
       that it would be convenient to generate it automatically. The
-	<code>fieldslib</code> syntax extension that ships
-	with <code>Core</code>
-      does just that.<a data-type="indexterm" data-primary=
-      "record field accessor functions">&nbsp;</a></p>
+      <code>fieldslib</code> syntax extension that ships with
+      <code>Core</code> does just that.<idx>record field accessor
+      functions</idx></p>
 
       <p>The <code>with fields</code> annotation at the end of the
       declaration of a record type will cause the extension to be
@@ -517,16 +492,11 @@
       <code>Fields</code> that contains a first-class
       representative of each field, in the form of a value of type
       <code>Field.t</code>. The <code>Field</code> module provides
-      the following functions:<a data-type="indexterm"
-      data-primary="Field module" data-secondary=
-      "Field.setter">&nbsp;</a><a data-type="indexterm"
-      data-primary="Field module" data-secondary=
-      "Field.fset">&nbsp;</a><a data-type="indexterm" data-primary=
-      "Field module" data-secondary=
-      "Field.get">&nbsp;</a><a data-type="indexterm" data-primary=
-      "Field module" data-secondary=
-      "Field.name">&nbsp;</a><a data-type="indexterm" data-primary=
-      "fieldslib">&nbsp;</a></p>
+      the following functions:<idx>Field
+      module/Field.setter</idx><idx>Field
+      module/Field.fset</idx><idx>Field
+      module/Field.get</idx><idx>Field
+      module/Field.name</idx><idx>fieldslib</idx></p>
 
       <dl>
         <dt><code>Field.name</code></dt>

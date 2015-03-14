@@ -1,19 +1,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Mac OS X version 4.9.20" />
+  <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/>
 
   <title></title>
 </head>
 
 <body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id=
-  "memory-representation-of-values" data-type="chapter">
+  <section xmlns="http://www.w3.org/1999/xhtml" id="memory-representation-of-values" data-type="chapter">
     <h1>Memory Representation of Values</h1>
 
-    <p>The FFI interface we described in <a href=
-    "19-foreign-function-interface.html#foreign-function-interface"
-    data-type="xref">Foreign Function Interface</a> hides the
+    <p>The FFI interface we described in <a href="19-foreign-function-interface.html#foreign-function-interface" data-type="xref">Foreign Function Interface</a> hides the
     precise details of how values are exchanged across C libraries
     and the OCaml runtime. There is a simple reason for this: using
     this interface directly is a delicate operation that requires
@@ -21,11 +17,7 @@
     it right. You first need to know the mapping between OCaml
     types and their runtime memory representation. You also need to
     ensure that your code is interfacing correctly with OCaml
-    runtime's memory management. <a data-type="indexterm"
-    data-primary="runtime memory representation" data-secondary=
-    "importance of">&nbsp;</a> <a data-type="indexterm" id=
-    "VALmemory" data-primary="values" data-secondary=
-    "memory representation of">&nbsp;</a></p>
+    runtime's memory management. <idx>runtime memory representation/importance of</idx> <idx id="VALmemory">values/memory representation of</idx></p>
 
     <p>However, knowledge of the OCaml internals is useful beyond
     just writing foreign function interfaces. As you build and
@@ -35,18 +27,14 @@
     output based on the runtime memory layout, and debuggers
     execute binaries without any knowledge of the static OCaml
     types. To use these tools effectively, you'll need to do some
-    translation between the OCaml and C worlds. <a data-type=
-    "indexterm" data-primary="interfaces" data-secondary=
-    "with OCaml binaries">&nbsp;</a></p>
+    translation between the OCaml and C worlds. <idx>interfaces/with OCaml binaries</idx></p>
 
     <p>Luckily, the OCaml toolchain is very predictable. The
     compiler minimizes the amount of optimization magic that it
     performs, and relies instead on its straightforward execution
     model for good performance. With some experience, you can know
     rather precisely where a block of performance-critical OCaml
-    code is spending its time.<a data-type="indexterm"
-    data-primary="OCaml toolchain" data-secondary=
-    "benefits of">&nbsp;</a></p>
+    code is spending its time.<idx>OCaml toolchain/benefits of</idx></p>
 
     <div data-type="note">
       <h1>Why Do OCaml Types Disappear at Runtime?</h1>
@@ -59,12 +47,7 @@
       be applied with an unexpected type. For example, the
       <code>print_endline</code> function must receive a single
       <code>string</code> argument, and an <code>int</code> will
-      result in a type error.<a data-type="indexterm" data-primary=
-      "type checking">&nbsp;</a><a data-type="indexterm"
-      data-primary=
-      "AST (abstract syntax-tree)">&nbsp;</a><a data-type=
-      "indexterm" data-primary="compilation process"
-      data-secondary="phases of">&nbsp;</a></p>
+      result in a type error.<idx>type checking</idx><idx>AST (abstract syntax-tree)</idx><idx>compilation process/phases of</idx></p>
 
       <p>Since OCaml verifies these properties at compile time, it
       doesn't need to keep track of as much information at runtime.
@@ -76,32 +59,19 @@
       up the concrete instance of the object and dispatch the
       method call. Those languages amortize some of the cost via
       "Just-in-Time" dynamic patching, but OCaml prefers runtime
-      simplicity instead.<a data-type="indexterm" data-primary=
-      "&quot;Just-in-Time&quot; dynamic patching"
-      data-primary-sortas="Just">&nbsp;</a><a data-type="indexterm"
-      data-primary="dynamic type checking">&nbsp;</a><a data-type=
-      "indexterm" data-primary=
-      "compile-time static checking">&nbsp;</a></p>
+      simplicity instead.<idx data-primary-sortas="Just">&quot;Just-in-Time&quot; dynamic patching</idx><idx>dynamic type checking</idx><idx>compile-time static checking</idx></p>
 
       <p>We'll explain this compilation pipeline in more detail in
-      <a href=
-      "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
-      data-type="xref">The Compiler Frontend Parsing And Type
-      Checking</a> and <a href=
-      "23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
-      data-type="xref">The Compiler Backend Byte Code And Native
+      <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
+      Checking</a> and <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code" data-type="xref">The Compiler Backend Byte Code And Native
       Code</a>.</p>
     </div>
 
     <p>This chapter covers the precise mapping from OCaml types to
     runtime values and walks you through them via the toplevel.
     We'll cover how these values are managed by the runtime later
-    on in <a href=
-    "21-garbage-collector.html#understanding-the-garbage-collector"
-    data-type="xref">Understanding The Garbage Collector</a>.
-    <a data-type="indexterm" id="MAPocaml" data-primary="mapping"
-    data-secondary=
-    "of OCaml types to runtime values">&nbsp;</a></p>
+    on in <a href="21-garbage-collector.html#understanding-the-garbage-collector" data-type="xref">Understanding The Garbage Collector</a>.
+    <idx id="MAPocaml">mapping/of OCaml types to runtime values</idx></p>
 
     <section id="ocaml-blocks-and-values" data-type="sect1">
       <h1>OCaml Blocks and Values</h1>
@@ -110,10 +80,8 @@
       contiguous sequences of words in RAM) to represent values
       such as tuples, records, closures, or arrays. An OCaml
       program implicitly allocates a block of memory when such a
-      value is created:<a data-type="indexterm" id="blck"
-      data-primary="blocks (of memory)">&nbsp;</a></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/simple_record.topscript" />
+      value is created:<idx id="blck">blocks (of memory)</idx></p>
+      <link rel="import" data-code-language="ocamltop" href="code/memory-repr/simple_record.topscript"/>
 
       <p>The type declaration <code>t</code> doesn't take up any
       memory at runtime, but the subsequent <code>let</code>
@@ -132,14 +100,9 @@
       integer and pointer values, since it scans pointers to find
       further values but doesn't follow integers that don't point
       to anything meaningful beyond their immediate value.
-      <a data-type="indexterm" data-primary="pointers"
-      data-secondary="values for">&nbsp;</a> <a data-type=
-      "indexterm" data-primary="integers">&nbsp;</a><a data-type=
-      "indexterm" data-primary="values" data-secondary=
-      "integer vs. pointer">&nbsp;</a></p>
+      <idx>pointers/values for</idx> <idx>integers</idx><idx>values/integer vs. pointer</idx></p>
 
-      <section id="distinguishing-integer-and-pointers-at-runtime"
-      data-type="sect2">
+      <section id="distinguishing-integer-and-pointers-at-runtime" data-type="sect2">
         <h2>Distinguishing Integers and Pointers at Runtime</h2>
 
         <p>Wrapping primitives types (such as integers) inside
@@ -148,12 +111,7 @@
         order to make it easier for the garbage collector (GC) to
         do its job, but at the expense of an extra level of
         indirection to access the data within the boxed value.
-        <a data-type="indexterm" data-primary="garbage collection"
-        data-secondary="and boxed values">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "boxing (of values)">&nbsp;</a><a data-type="indexterm"
-        data-primary="values" data-secondary=
-        "boxing of">&nbsp;</a></p>
+        <idx>garbage collection/and boxed values</idx><idx>boxing (of values)</idx><idx>values/boxing of</idx></p>
 
         <p>OCaml values don't all have to be boxed at runtime.
         Instead, values use a single tag bit per word to
@@ -189,11 +147,7 @@
         marked as being managed by the OCaml runtime, it is assumed
         to point to an OCaml value. If it points outside the OCaml
         runtime area, it is treated as an opaque C pointer to some
-        other system resource. <a data-type="indexterm"
-        data-primary=
-        "word-aligned pointers">&nbsp;</a><a data-type="indexterm"
-        data-primary="pointers" data-secondary=
-        "word-aligned">&nbsp;</a></p>
+        other system resource. <idx>word-aligned pointers</idx><idx>pointers/word-aligned</idx></p>
 
         <div data-type="note">
           <h1>Some History About OCaml's Word-Aligned Pointers</h1>
@@ -206,8 +160,7 @@
           result in a CPU exception that terminated the program.
           Thus, all pointers were historically rounded off to the
           architecture word size (usually 32 or 64 bits).
-          <a data-type="indexterm" data-primary=
-          "unaligned memory access">&nbsp;</a></p>
+          <idx>unaligned memory access</idx></p>
 
           <p>Modern CISC processors such as the Intel x86 do
           support unaligned memory accesses, but the chip still
@@ -242,26 +195,18 @@
       variable-length data that is either opaque bytes or an array
       of <em>fields</em>. The header has a multipurpose tag byte
       that defines whether to interpret the subsequent data as
-      opaque bytes or OCaml fields. <a data-type="indexterm"
-      data-primary="runtime memory representation" data-secondary=
-      "blocks and values">&nbsp;</a></p>
+      opaque bytes or OCaml fields. <idx>runtime memory representation/blocks and values</idx></p>
 
       <p>The GC never inspects opaque bytes. If the tag indicates
       an array of OCaml fields are present, their contents are all
       treated as more valid OCaml values. The GC always inspects
       fields and follows them as part of the collection process
-      described earlier.<a data-type="indexterm" data-primary=
-      "garbage collection" data-secondary=
-      "opaque bytes and">&nbsp;</a><a data-type="indexterm"
-      data-primary="opaque bytes">&nbsp;</a></p>
+      described earlier.<idx>garbage collection/opaque bytes and</idx><idx>opaque bytes</idx></p>
 
-      <p><a href=
-      "https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/block.ascii"
-      class="orm:hideurl:ital"><em class=
-      "hyperlink">Diagram</em></a></p>
+      <p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/block.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2001.png" />
+        <img src="images/rwoc_2001.png"/>
       </figure>
 
       <p>The <code>size</code> field records the length of the
@@ -273,9 +218,7 @@
 
       <p>The 2-bit <code>color</code> field is used by the GC to
       keep track of its state during mark-and-sweep collection.
-      We'll come back to this field in <a href=
-      "21-garbage-collector.html#understanding-the-garbage-collector"
-      data-type="xref">Understanding The Garbage Collector</a>.
+      We'll come back to this field in <a href="21-garbage-collector.html#understanding-the-garbage-collector" data-type="xref">Understanding The Garbage Collector</a>.
       This tag isn't exposed to OCaml source code in any case.</p>
 
       <p>A block's tag byte is multipurpose, and indicates whether
@@ -288,10 +231,7 @@
 
       <p>The exact representation of values inside a block depends
       on their static OCaml type. All OCaml types are distilled
-      down into <code>values</code>, and summarized in <a href=
-      "20-runtime-memory-layout.html#table20-1_ocaml" data-type=
-      "xref">Table20 1_ocaml</a>.<a data-type="indexterm"
-      data-startref="blck">&nbsp;</a></p>
+      down into <code>values</code>, and summarized in <a href="20-runtime-memory-layout.html#table20-1_ocaml" data-type="xref">Table20 1_ocaml</a>.<a data-type="indexterm" data-startref="blck">&nbsp;</a></p>
 
       <table id="table20-1_ocaml">
         <caption>
@@ -386,8 +326,7 @@
         </tbody>
       </table>
 
-      <section id="integers-characters-and-other-basic-types"
-      data-type="sect2">
+      <section id="integers-characters-and-other-basic-types" data-type="sect2">
         <h2>Integers, Characters, and Other Basic Types</h2>
 
         <p>Many basic types are efficiently stored as unboxed
@@ -398,9 +337,7 @@
         are stored as constant integers. Boolean values have a
         value of <code>1</code> and <code>0</code> for
         <code>true</code> and <code>false</code>, respectively.
-        <a data-type="indexterm" data-primary=
-        "integers">&nbsp;</a><a data-type="indexterm" data-primary=
-        "unboxed integers">&nbsp;</a></p>
+        <idx>integers</idx><idx>unboxed integers</idx></p>
 
         <p>These basic types such as empty lists and
         <code>unit</code> are very efficient to use, since integers
@@ -416,13 +353,10 @@
     <section id="tuples-records-and-arrays" data-type="sect1">
       <h1>Tuples, Records, and Arrays</h1>
 
-      <p><a href=
-      "https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/tuple_layout.ascii"
-      class="orm:hideurl:ital"><em class=
-      "hyperlink">Diagram</em></a></p>
+      <p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/tuple_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2002.png" />
+        <img src="images/rwoc_2002.png"/>
       </figure>
 
       <p>Tuples, records, and arrays are all represented
@@ -431,29 +365,20 @@
       time, whereas arrays can be of variable length. While arrays
       are restricted to containing a single type of element in the
       OCaml type system, this is not required by the memory
-      representation.<a data-type="indexterm" data-primary="arrays"
-      data-secondary=
-      "memory representation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="records" data-secondary=
-      "memory representation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="tuples">&nbsp;</a><a data-type="indexterm"
-      data-primary="runtime memory representation" data-secondary=
-      "tuples, records, and arrays">&nbsp;</a></p>
+      representation.<idx>arrays/memory representation of</idx><idx>records/memory representation of</idx><idx>tuples</idx><idx>runtime memory representation/tuples, records, and arrays</idx></p>
 
       <p>You can check the difference between a block and a direct
       integer yourself using the <code>Obj</code> module, which
       exposes the internal representation of values to OCaml
       code:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" />
+      <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript"/>
 
       <p>The <code>Obj.repr</code> function retrieves the runtime
       representation of any OCaml value. <code>Obj.is_block</code>
       checks the bottom bit to determine if the value is a block
       header or an unboxed integer.</p>
 
-      <section id="floating-point-numbers-and-arrays" data-type=
-      "sect2">
+      <section id="floating-point-numbers-and-arrays" data-type="sect2">
         <h2>Floating-Point Numbers and Arrays</h2>
 
         <p>Floating-point numbers in OCaml are always stored as
@@ -462,10 +387,8 @@
         contains the number. This block has the
         <code>Double_tag</code> set, which signals to the collector
         that the floating-point value is not to be scanned:
-        <a data-type="indexterm" data-primary=
-        "floating-point values">&nbsp;</a></p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/memory-repr/reprs.topscript" part="1" />
+        <idx>floating-point values</idx></p>
+        <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="1"/>
 
         <p>Since each floating-point value is boxed in a separate
         memory block, it can be inefficient to handle large arrays
@@ -477,19 +400,15 @@
         signal to the collector that the contents are not OCaml
         values.</p>
 
-        <p><a href=
-        "https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/float_array_layout.ascii"
-        class="orm:hideurl:ital"><em class=
-        "hyperlink">Diagram</em></a></p>
+        <p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/float_array_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p>
 
         <figure style="float: 0">
-          <img src="images/rwoc_2003.png" />
+          <img src="images/rwoc_2003.png"/>
         </figure>
 
         <p>First, let's check that float arrays do in fact have a
         different tag number from normal floating-point values:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/memory-repr/reprs.topscript" part="2" />
+        <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="2"/>
 
         <p>This tells us that float arrays have a tag value of 254.
         Now let's test some sample values using the
@@ -497,8 +416,7 @@
         block has the expected runtime tag, and also use
         <code>Obj.double_field</code> to retrieve a float from
         within the block:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/memory-repr/reprs.topscript" part="3" />
+        <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="3"/>
 
         <p>The first thing we tested was that a float array has the
         correct unboxed float array tag value (254). However, the
@@ -518,15 +436,8 @@
       <p>Basic variant types with no extra parameters for any of
       their branches are simply stored as an OCaml integer,
       starting with <code>0</code> for the first option and in
-      ascending order:<a data-type="indexterm" data-primary=
-      "variant types" data-secondary=
-      "memory representation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="lists" data-secondary=
-      "memory representation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="runtime memory representation" data-secondary=
-      "variants and lists">&nbsp;</a></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" part="4" />
+      ascending order:<idx>variant types/memory representation of</idx><idx>lists/memory representation of</idx><idx>runtime memory representation/variants and lists</idx></p>
+      <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="4"/>
 
       <p><code>Obj.magic</code> unsafely forces a type cast between
       any two OCaml types; in this example, the <code>int</code>
@@ -539,8 +450,7 @@
       <em>tags</em> ascending from 0 (counting from leftmost
       variants with parameters). The parameters are stored as words
       in the block:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" part="5" />
+      <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="5"/>
 
       <p>In the preceding example, the <code>Apple</code> and
       <code>Kiwi</code> values are still stored as normal OCaml
@@ -559,11 +469,7 @@
       <code>[]</code> is an integer <code>0</code>, and subsequent
       blocks have tag <code>0</code> and two parameters: a block
       with the current value, and a pointer to the rest of the
-      list.<a data-type="indexterm" data-primary="debugging"
-      data-secondary="Obj module warning">&nbsp;</a><a data-type=
-      "indexterm" data-primary="security issues" data-secondary=
-      "Obj module warning">&nbsp;</a><a data-type="indexterm"
-      data-primary="Obj module">&nbsp;</a></p>
+      list.<idx>debugging/Obj module warning</idx><idx>security issues/Obj module warning</idx><idx>Obj module</idx></p>
 
       <div data-type="warning">
         <h1>Obj Module Considered Harmful</h1>
@@ -599,11 +505,7 @@
       variants when writing code but are slightly less efficient at
       runtime. This is because there isn't as much static
       compile-time information available to optimize their memory
-      layout.<a data-type="indexterm" data-primary=
-      "polymorphic variant types" data-secondary=
-      "memory representation of">&nbsp;</a><a data-type="indexterm"
-      data-primary="runtime memory representation" data-secondary=
-      "polymorphic variants">&nbsp;</a></p>
+      layout.<idx>polymorphic variant types/memory representation of</idx><idx>runtime memory representation/polymorphic variants</idx></p>
 
       <p>A polymorphic variant without any parameters is stored as
       an unboxed integer and so only takes up one word of memory,
@@ -612,8 +514,7 @@
       variant. The hash function isn't exposed directly by the
       compiler, but the <code>type_conv</code> library from Core
       provides an alternative implementation:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/memory-repr/reprs.topscript" part="6" />
+      <link rel="import" data-code-language="ocamltop" href="code/memory-repr/reprs.topscript" part="6"/>
 
       <p>The hash function is designed to give the same results on
       32-bit and 64-bit architectures, so the memory representation
@@ -660,27 +561,18 @@
       <code>No_scan_tag</code>, indicating that the contents of the
       block are opaque to the collector. The block contents are the
       contents of the string, with padding bytes to align the block
-      on a word boundary. <a data-type="indexterm" data-primary=
-      "strings" data-secondary=
-      "memory representation of">&nbsp;</a> <a data-type=
-      "indexterm" data-primary="runtime memory representation"
-      data-secondary="string values">&nbsp;</a></p>
+      on a word boundary. <idx>strings/memory representation of</idx> <idx>runtime memory representation/string values</idx></p>
 
-      <p><a href=
-      "https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_block.ascii"
-      class="orm:hideurl:ital"><em class=
-      "hyperlink">Diagram</em></a></p>
+      <p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_block.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2004.png" />
+        <img src="images/rwoc_2004.png"/>
       </figure>
 
       <p>On a 32-bit machine, the padding is calculated based on
       the modulo of the string length and word size to ensure the
       result is word-aligned. A 64-bit machine extends the
-      potential padding up to 7 bytes instead of 3 (see <a href=
-      "20-runtime-memory-layout.html#chapter_20_table" data-type=
-      "xref">Chapter_20_table</a>).</p>
+      potential padding up to 7 bytes instead of 3 (see <a href="20-runtime-memory-layout.html#chapter_20_table" data-type="xref">Chapter_20_table</a>).</p>
 
       <table id="chapter_20_table">
         <caption>
@@ -727,13 +619,10 @@
       and to still compute its length efficiently without scanning
       the whole string. The following formula is used:</p>
 
-      <p><a href=
-      "https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_size_calc.ascii"
-      class="orm:hideurl:ital"><em class=
-      "hyperlink">Diagram</em></a></p>
+      <p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_size_calc.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p>
 
       <figure style="float: 0">
-        <img src="images/rwoc_2005.png" />
+        <img src="images/rwoc_2005.png"/>
       </figure>
 
       <p>The guaranteed <code>NULL</code> termination comes in
@@ -763,17 +652,13 @@
       lives in the OCaml heap like an ordinary block and can be of
       whatever size the user desires. The <code>Custom_tag</code>
       (255) is higher than <code>No_scan_tag</code> and so isn't
-      scanned by the GC.<a data-type="indexterm" data-primary=
-      "custom heap blocks">&nbsp;</a> <a data-type="indexterm"
-      data-primary="runtime memory representation" data-secondary=
-      "custom heap blocks">&nbsp;</a></p>
+      scanned by the GC.<idx>custom heap blocks</idx> <idx>runtime memory representation/custom heap blocks</idx></p>
 
       <p>The first word of the data within the custom block is a C
       pointer to a <code>struct</code> of custom operations. The
       custom block cannot have pointers to OCaml blocks and is
       opaque to the GC:</p>
-      <link rel="import" data-code-language="c" href=
-      "code/memory-repr/custom_ops.c" />
+      <link rel="import" data-code-language="c" href="code/memory-repr/custom_ops.c"/>
 
       <p>The custom operations specify how the runtime should
       perform polymorphic comparison, hashing and binary
@@ -781,16 +666,11 @@
       that the runtime calls just before the block is
       garbage-collected. This finalizer has nothing to do with
       ordinary OCaml finalizers (as created by
-      <code>Gc.finalize</code> and explained in <a href=
-      "21-garbage-collector.html#understanding-the-garbage-collector"
-      data-type="xref">Understanding The Garbage Collector</a>).
+      <code>Gc.finalize</code> and explained in <a href="21-garbage-collector.html#understanding-the-garbage-collector" data-type="xref">Understanding The Garbage Collector</a>).
       They are instead used to call C cleanup functions such as
-      <code>free</code>.<a data-type="indexterm" data-primary=
-      "finalizers" data-secondary=
-      "for C cleanup functions">&nbsp;</a></p>
+      <code>free</code>.<idx>finalizers/for C cleanup functions</idx></p>
 
-      <section id="managing-external-memory-with-bigarray"
-      data-type="sect2">
+      <section id="managing-external-memory-with-bigarray" data-type="sect2">
         <h2>Managing External Memory with Bigarray</h2>
 
         <p>A common use of custom blocks is to manage external
@@ -801,22 +681,7 @@
         Bigarray operations work directly on the external memory
         without requiring it to be copied into the OCaml heap
         (which is a potentially expensive operation for large
-        arrays).<a data-type="indexterm" data-primary=
-        "Fortran libraries">&nbsp;</a><a data-type="indexterm"
-        data-primary="linear algebra">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "LAPACK mathematical library">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "BLAS mathematical library">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "Lacaml library">&nbsp;</a><a data-type="indexterm"
-        data-primary="Bigstring module">&nbsp;</a><a data-type=
-        "indexterm" data-primary=
-        "Iobuf module">&nbsp;</a><a data-type="indexterm"
-        data-primary="external memory">&nbsp;</a><a data-type=
-        "indexterm" data-primary="memory" data-secondary=
-        "managing external">&nbsp;</a><a data-type="indexterm"
-        data-primary="bigarrays">&nbsp;</a></p>
+        arrays).<idx>Fortran libraries</idx><idx>linear algebra</idx><idx>LAPACK mathematical library</idx><idx>BLAS mathematical library</idx><idx>Lacaml library</idx><idx>Bigstring module</idx><idx>Iobuf module</idx><idx>external memory</idx><idx>memory/managing external</idx><idx>bigarrays</idx></p>
 
         <p>Bigarray sees a lot of use beyond just scientific
         computing, and several Core libraries use it for
@@ -847,17 +712,14 @@
           </dd>
         </dl>
 
-        <p>The <a href=
-        "https://bitbucket.org/mmottl/lacaml">OCaml</a> library
+        <p>The <a href="https://bitbucket.org/mmottl/lacaml">OCaml</a> library
         isn't part of Core but provides the recommended interfaces
         to the widely used BLAS and LAPACK mathematical Fortran
         libraries. These allow developers to write high-performance
         numerical code for applications that require linear
         algebra. It supports large vectors and matrices, but with
         static typing safety of OCaml to make it easier to write
-        safe algorithms.<a data-type="indexterm" data-startref=
-        "MAPocaml">&nbsp;</a> <a data-type="indexterm"
-        data-startref="VALmemory">&nbsp;</a></p>
+        safe algorithms.<a data-type="indexterm" data-startref="MAPocaml">&nbsp;</a> <a data-type="indexterm" data-startref="VALmemory">&nbsp;</a></p>
       </section>
     </section>
   </section>

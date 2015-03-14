@@ -1,16 +1,14 @@
-<!DOCTYPE html>
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39"/>
 
   <title></title>
 </head>
 
 <body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id="gadts"
-	   data-type="chapter"> 
+  <section xmlns="http://www.w3.org/1999/xhtml" id="gadts" data-type="chapter"> 
     <h1>GADTs</h1>
 
     <p>
@@ -32,8 +30,7 @@
       they come in handy.  In particular, we'll consider the question
       of how to build a more compact array type.  We haven't talked
       much about memory representations thus far (we'll get to that in
-      more depth in <a href="20-runtime-memory-layout.html"
-	 data-type="xref">Chapter 20</a>), but for now it suffices to note
+      more depth in <a href="20-runtime-memory-layout.html" data-type="xref">Chapter 20</a>), but for now it suffices to note
       that OCaml's <code>array</code> type requires at least a word of memory per
       element, even for objects that are small enough to fit in a
       single byte, like characters.  OCaml also has a more compact
@@ -57,8 +54,7 @@
       seems like a natural job for a variant.
     </p>
 
-    <link rel="import" data-code-language="ocamltop" href=
-	  "code/gadts/main.topscript" part="1" />
+    <link rel="import" data-code-language="ocamltop" href="code/gadts/main.topscript" part="1"/>
 
     <p> 
       At first glance, this looks good: the type is polymorphic, and
@@ -67,8 +63,7 @@
       library, we start running into problems.
     </p>
 
-    <link rel="import" data-code-language="ocamltop" href=
-	  "code/gadts/main.topscript" part="1.1" />
+    <link rel="import" data-code-language="ocamltop" href="code/gadts/main.topscript" part="1.1"/>
 
     <p>
       If you look closely, you'll see that the inferred types of this
