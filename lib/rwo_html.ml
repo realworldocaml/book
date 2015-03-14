@@ -45,8 +45,8 @@ let to_string docs =
   Buffer.contents buf
 
 let is_elem_node item name = match item with
-  | Nethtml.Data _ -> false
-  | Nethtml.Element (name', _, _) -> name = name'
+  | Data _ -> false
+  | Element (name', _, _) -> name = name'
 
 let has_html_extension file =
   Filename.split_extension file
@@ -63,12 +63,12 @@ let get_all_nodes tag t =
   let rec helper t =
     List.fold t ~init:[] ~f:(fun accum item ->
       match item with
-      | Nethtml.Element (name,_,childs) ->
+      | Element (name,_,childs) ->
         if name = tag then
           item::accum
         else
           (helper childs)@accum
-      | Nethtml.Data _ -> accum
+      | Data _ -> accum
     )
   in
   helper t |> List.rev
@@ -76,8 +76,8 @@ let get_all_nodes tag t =
 
 let is_nested name t =
   let rec loop have_seen = function
-    | Nethtml.Data _ -> false
-    | Nethtml.Element (name', _, childs) ->
+    | Data _ -> false
+    | Element (name', _, childs) ->
       if have_seen && (name = name') then
         true
       else
@@ -89,8 +89,8 @@ let is_nested name t =
 
 let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   let rec print_item depth = function
-    | Nethtml.Data _ -> ()
-    | Nethtml.Element (name, attrs, childs) ->
+    | Data _ -> ()
+    | Element (name, attrs, childs) ->
       if List.mem exclude_elements name then
         ()
       else (
@@ -113,13 +113,13 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
 
 let filter_whitespace t =
   let rec f item : item option = match item with
-    | Nethtml.Data x -> (
+    | Data x -> (
       if String.for_all x ~f:Char.is_whitespace
       then None
       else Some item
     )
-    | Nethtml.Element (name, attrs, childs) ->
-      Some (Nethtml.Element (
+    | Element (name, attrs, childs) ->
+      Some (Element (
         name,
         attrs,
         List.filter_map childs ~f
@@ -129,9 +129,9 @@ let filter_whitespace t =
 
 let fold t ~init ~f =
   let rec loop accum item = match item with
-    | Nethtml.Data _ ->
+    | Data _ ->
       f accum item
-    | Nethtml.Element (_,_,childs) ->
+    | Element (_,_,childs) ->
       List.fold childs ~init:(f accum item) ~f:loop
   in
   List.fold t ~init ~f:loop
@@ -141,9 +141,9 @@ let fold t ~init ~f =
 (* Constructors                                                               *)
 (******************************************************************************)
 let item tag ?(a=[]) childs =
-  Nethtml.Element(tag, a, childs)
+  Element(tag, a, childs)
 
-let data s = Nethtml.Data s
+let data s = Data s
 
 let div = item "div"
 let span = item "span"
@@ -196,8 +196,8 @@ let footer = item "footer"
 let get_all_attributes t =
   let rec helper t =
     List.fold t ~init:String.Set.empty ~f:(fun accum item -> match item with
-    | Nethtml.Data _ -> accum
-    | Nethtml.Element (_, attrs, childs) -> (
+    | Data _ -> accum
+    | Element (_, attrs, childs) -> (
       List.fold attrs ~init:accum ~f:(fun accum (name,_) -> Set.add accum name)
       |> Set.union (helper childs)
     ) )
