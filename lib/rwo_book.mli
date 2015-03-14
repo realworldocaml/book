@@ -156,3 +156,10 @@ val code_section_to_import : code_section -> import Or_error.t
     code is written to external files. Raise exception in case of any
     error. *)
 val extract_code_from_1e_exn : int -> unit Deferred.t
+
+
+(******************************************************************************)
+(** {2 indexterm nodes} *)
+(******************************************************************************)
+val indexterm_to_idx : Rwo_html.t -> Rwo_html.t
+val idx_to_indexterm : Rwo_html.t -> Rwo_html.t
