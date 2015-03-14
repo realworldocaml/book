@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-tidy -im -asxhtml $*
+tidy -im -asxhtml --new-inline-tags idx $*
