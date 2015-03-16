@@ -1,0 +1,29 @@
+.extras
+{
+	@include grid-row(nest);
+	
+	a
+	{
+		display: block;
+		@include grid-column(6);
+		padding: $column-gutter/2;
+		
+		&:hover
+		{
+			h5
+			{
+				color: $primary-color;
+			}
+		}
+	}
+
+@media #{$medium}
+{
+	a
+	{
+		@include grid-column(4);
+		padding: $column-gutter/2;
+	}
+}
+
+}
