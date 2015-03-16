@@ -1,3 +1,5 @@
+open Core_kernel.Std;;
+
 type 'a expr =
     | Base  of 'a
     | Const of bool
@@ -6,19 +8,11 @@ type 'a expr =
     | Not   of 'a expr
   ;;
 
-
-
-
-
-
-
 #part 1
 type mail_field = To | From | CC | Date | Subject;;
   type mail_predicate = { field: mail_field;
                           contains: string }
   ;;
-
-
 
 #part 2
 let test field contains = Base { field; contains };;
@@ -27,12 +21,6 @@ And [ Or [ test To "doligez"; test CC "doligez" ];
         test Subject "runtime";
       ]
   ;;
-
-
-
-
-
-
 
 #part 3
 let rec eval expr base_eval =

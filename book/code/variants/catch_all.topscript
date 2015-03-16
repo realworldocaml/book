@@ -1,3 +1,5 @@
+open Core_kernel.Std;;
+
 type basic_color =
    | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 let basic_color_to_int = function

@@ -1,18 +1,10 @@
+open Core_kernel.Std;;
 type basic_color =
    | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
-
-
-
-
-
-
-
-
 
 Cyan ;;
 
 [Blue; Magenta; Red] ;;
-
 
 #part 1
 let basic_color_to_int = function
@@ -28,8 +20,6 @@ let color_by_number number text =
 let blue = color_by_number (basic_color_to_int Blue) "Blue";;
 
 printf "Hello %s World!\n" blue;;
-
-
 
 #part 3
 type weight = Regular | Bold;;
