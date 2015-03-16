@@ -440,13 +440,22 @@
       <h1>Compiling Fast Native Code</h1>
 
       <p>The native code compiler is ultimately the tool that most
-      production OCaml code goes through. It compiles the lambda
-      form into fast native code executables, with cross-module
-      inlining and additional optimization passes that the bytecode
-      interpreter doesn't perform. Care is taken to ensure
-      compatibility with the bytecode runtime, so the same code
-      should run identically when compiled with either
-      toolchain.<idx>cmi files</idx><idx>files/cmi files</idx><idx>cmx files</idx><idx>files/cmx files</idx><idx>o files</idx><idx>files/o files</idx><idx>OCaml toolchain/ocamlopt</idx><idx>native-code compiler/benefits of</idx><idx id="CPfast">compilation process/fast native code</idx></p>
+      production OCaml code goes through. It compiles the lambda form
+      into fast native code executables, with cross-module inlining
+      and additional optimization passes that the bytecode interpreter
+      doesn't perform. Care is taken to ensure compatibility with the
+      bytecode runtime, so the same code should run identically when
+      compiled with either toolchain.
+
+	<idx>cmi files</idx>
+	<idx>files/cmi files</idx>
+	<idx>cmx files</idx>
+	<idx>files/cmx files</idx>
+	<idx>o files</idx>
+	<idx>files/o files</idx>
+	<idx>OCaml toolchain/ocamlopt</idx>
+	<idx>native-code compiler/benefits of</idx>
+	<idx id="CPfast">compilation process/fast native code</idx></p> 
 
       <p>The <span class="command"><em>ocamlopt</em></span> command
       is the frontend to the native code compiler and has a very
