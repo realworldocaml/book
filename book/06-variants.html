@@ -13,13 +13,14 @@
   data-type="chapter">
     <h1>Variants</h1>
 
-    <p>Variant types are one of the most useful features of OCaml
-    and also one of the most unusual. They let you represent data
-    that may take on multiple different forms, where each form is
-    marked by an explicit tag. As we'll see, when combined with
-    pattern matching, variants give you a powerful way of
-    representing complex data and of organizing the case-analysis
-    on that information.
+    <p>
+      Variant types are one of the most useful features of OCaml and
+      also one of the most unusual. They let you represent data that
+      may take on multiple different forms, where each form is marked
+      by an explicit tag. As we'll see, when combined with pattern
+      matching, variants give you a powerful way of representing
+      complex data and of organizing the case-analysis on that
+      information.
 
       <idx>variant types/usefulness of</idx>
       <idx id="DTvar">datatypes/variant types</idx></p>
@@ -33,72 +34,78 @@
     <link rel="import" data-code-language="ocamlsyntax" href=
     "code/variants/variant.syntax" />
 
-    <p>Each row essentially represents a case of the variant. Each
-    case has an associated tag and may optionally have a sequence
-    of fields, where each field has a specified type.</p>
+    <p>
+      Each row essentially represents a case of the variant. Each
+      case has an associated tag and may optionally have a sequence
+      of fields, where each field has a specified type.</p>
 
-    <p>Let's consider a concrete example of how variants can be
-    useful. Almost all terminals support a set of eight basic
-    colors, and we can represent those colors using a variant. Each
-    color is declared as a simple tag, with pipes used to separate
-    the different cases. Note that variant tags must be
-    capitalized:</p>
+    <p>
+      Let's consider a concrete example of how variants can be
+      useful. Almost all terminals support a set of eight basic
+      colors, and we can represent those colors using a variant. Each
+      color is declared as a simple tag, with pipes used to separate
+      the different cases. Note that variant tags must be
+      capitalized:</p>
 
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" />
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/variants/main.topscript" />
 
-    <p>The following function uses pattern matching to convert a
-    <code>basic_color</code> to a corresponding integer. The
-    exhaustiveness checking on pattern matches means that the
-    compiler will warn us if we miss a color:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="1" />
+    <p>
+      The following function uses pattern matching to convert
+      a <code>basic_color</code> to a corresponding integer. The
+      exhaustiveness checking on pattern matches means that the
+      compiler will warn us if we miss a color:</p>
 
-    <p>Using the preceding function, we can generate escape codes
-    to change the color of a given string displayed in a
-    terminal:</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/variants/main.topscript" part="2" />
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/variants/main.topscript" part="1" />
 
-    <p>On most terminals, that word "Blue" will be rendered in
-    blue.</p>
+    <p>
+      Using the preceding function, we can generate escape codes to
+      change the color of a given string displayed in a terminal:</p>
+    
+    <link rel="import" data-code-language="ocamltop" 
+	  href="code/variants/main.topscript" part="2" />
 
-    <p>In this example, the cases of the variant are simple tags
-    with no associated data. This is substantively the same as the
-    enumerations found in languages like C and Java. But as we'll
-    see, variants can do considerably more than represent a simple
-    enumeration. As it happens, an enumeration isn't enough to
-    effectively describe the full set of colors that a modern
-    terminal can display. Many terminals, including the venerable
-    <code>xterm</code>, support 256 different colors, broken up
-    into the following groups:</p>
+    <p>
+      On most terminals, that word "Blue" will be rendered in
+      blue.</p>
+
+    <p>
+      In this example, the cases of the variant are simple tags with
+      no associated data. This is substantively the same as the
+      enumerations found in languages like C and Java. But as we'll
+      see, variants can do considerably more than represent a simple
+      enumeration. As it happens, an enumeration isn't enough to
+      effectively describe the full set of colors that a modern
+      terminal can display. Many terminals, including the
+      venerable <code>xterm</code>, support 256 different colors,
+      broken up into the following groups:</p>
 
     <ul>
-      <li>
-        <p>The eight basic colors, in regular and bold versions</p>
-      </li>
+      <li> <p>The eight basic colors, in regular and bold
+	  versions</p> </li>
 
-      <li>
-        <p>A 6 × 6 × 6 RGB color cube</p>
-      </li>
+      <li> <p>A 6 × 6 × 6 RGB color cube</p> </li> 
 
-      <li>
-        <p>A 24-level grayscale ramp</p>
-      </li>
+      <li> <p>A 24-level grayscale ramp</p> </li>
     </ul>
 
-    <p>We'll also represent this more complicated color space as a
-    variant, but this time, the different tags will have arguments
-    that describe the data available in each case. Note that
-    variants can have multiple arguments, which are separated by
-    <code>*</code>s:</p>
+    <p>
+      We'll also represent this more complicated color space as a
+      variant, but this time, the different tags will have arguments
+      that describe the data available in each case. Note that
+      variants can have multiple arguments, which are separated
+      by <code>*</code>s:</p>
+
     <link rel="import" data-code-language="ocamltop" href=
     "code/variants/main.topscript" part="3" />
 
-    <p>Once again, we'll use pattern matching to convert a color to
-    a corresponding integer. But in this case, the pattern matching
-    does more than separate out the different cases; it also allows
-    us to extract the data associated with each tag:</p>
+    <p>
+      Once again, we'll use pattern matching to convert a color to a
+      corresponding integer. But in this case, the pattern matching
+      does more than separate out the different cases; it also allows
+      us to extract the data associated with each tag:</p>
+
     <link rel="import" data-code-language="ocamltop" href=
     "code/variants/main.topscript" part="4" />
 
@@ -169,17 +176,20 @@
       rendering the first 16 colors (the eight
       <code>basic_color</code>s in regular and bold) in the normal
       way, but renders everything else as white. We might have
-      written the function as follows:<idx>exhaustion
-      checks</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/catch_all.topscript" part="5" />
+      written the function as follows:
 
-      <p>But because the catch-all case encompasses all
-      possibilities, the type system will no longer warn us that we
-      have missed the new <code>Bold</code> case when we change the
-      type to include it. We can get this check back by avoiding
-      the catch-all case, and instead being explicit about the tags
-      that are ignored.</p>
+      <idx>exhaustion checks</idx></p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/variants/catch_all.topscript" part="5" />
+
+      <p>
+	But because the catch-all case encompasses all possibilities,
+	the type system will no longer warn us that we have missed the
+	new <code>Bold</code> case when we change the type to include
+	it. We can get this check back by avoiding the catch-all case,
+	and instead being explicit about the tags that are
+	ignored.</p>
     </section>
 
     <section id="combining-records-and-variants" data-type="sect1">
