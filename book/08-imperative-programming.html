@@ -1188,71 +1188,75 @@
           compile time. Indeed, if you try to pass an ordinary
           string to <code>printf</code>, the compiler will
           complain:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/printf.topscript" part=
-          "3" />
 
-          <p>If OCaml infers that a given string literal is a
-          format string, then it parses it at compile time as such,
-          choosing its type in accordance with the formatting
-          directives it finds. Thus, if we add a type annotation
-          indicating that the string we're defining is actually a
-          format string, it will be interpreted as such:</p>
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/printf.topscript" part=
-          "4" />
+          "code/imperative-programming/printf.topscript" part= "3" />
 
-          <p>And accordingly, we can pass it to
-          <code>printf</code>:</p>
+          <p>
+	    If OCaml infers that a given string literal is a format
+            string, then it parses it at compile time as such,
+            choosing its type in accordance with the formatting
+            directives it finds. Thus, if we add a type annotation
+            indicating that the string we're defining is actually a
+            format string, it will be interpreted as such.  (Here, we
+            open the CamlinternalFormatBasics so that the
+            representation of the format string that's printed out
+            won't fill the whole page.)</p>
+
           <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/printf.topscript" part=
-          "5" />
+          "code/imperative-programming/printf.topscript" part="4" />
 
-          <p>If this looks different from everything else you've
-          seen so far, that's because it is. This is really a
-          special case in the type system. Most of the time, you
-          don't need to worry about this special handling of format
-          strings—you can just use <code>printf</code> and not
-          worry about the details. But it's useful to keep the
-          broad outlines of the story in the back of your head.</p>
+          <p>
+	    And accordingly, we can pass it to
+            <code>printf</code>:</p>
+
+          <link rel="import" data-code-language="ocamltop" 
+		href="code/imperative-programming/printf.topscript"
+		part="5" />
+
+          <p>
+	    If this looks different from everything else you've seen
+            so far, that's because it is. This is really a special
+            case in the type system. Most of the time, you don't need
+            to worry about this special handling of format strings—you
+            can just use <code>printf</code> and not worry about the
+            details. But it's useful to keep the broad outlines of the
+            story in the back of your head.</p>
         </aside>
 
-        <p>Now let's see how we can rewrite our time conversion
-        program to be a little more concise using
-        <code>printf</code>:</p>
-        <link rel="import" data-code-language="ocaml" href=
-        "code/imperative-programming/time_converter2.ml" />
+        <p>
+	  Now let's see how we can rewrite our time conversion
+          program to be a little more concise using
+          <code>printf</code>:</p>
 
-        <p>In the preceding example, we've used only two formatting
-        directives: <code>%s</code>, for including a string, and
-        <code>%!</code> which causes <code>printf</code> to flush
-        the channel.</p>
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/imperative-programming/time_converter2.ml" />
 
-        <p><code>printf</code>'s formatting directives offer a
-        significant amount of control, allowing you to specify
-        things like:<idx>binary numbers, formatting with
-        printf</idx><idx>hex numbers, formatting with
-        printf</idx><idx>decimals, formatting with
-        printf</idx><idx>alignment, formatting with
-        printf</idx></p>
+        <p>
+	  In the preceding example, we've used only two formatting
+          directives: <code>%s</code>, for including a string,
+          and <code>%!</code> which causes <code>printf</code> to
+          flush the channel.</p>
+
+        <p>
+	  <code>printf</code>'s formatting directives offer a
+          significant amount of control, allowing you to specify
+          things like:
+
+	  <idx>binary numbers, formatting with printf</idx>
+	  <idx>hex numbers, formatting with printf</idx>
+	  <idx>decimals, formatting with printf</idx>
+	  <idx>alignment, formatting with printf</idx></p>
 
         <ul>
-          <li>
-            <p>Alignment and padding</p>
-          </li>
+          <li> <p>Alignment and padding</p> </li>
 
-          <li>
-            <p>Escaping rules for strings</p>
-          </li>
+          <li> <p>Escaping rules for strings</p> </li>
 
-          <li>
-            <p>Whether numbers should be formatted in decimal, hex,
-            or binary</p>
-          </li>
+          <li> <p>Whether numbers should be formatted in decimal, hex,
+            or binary</p> </li>
 
-          <li>
-            <p>Precision of float conversions</p>
-          </li>
+          <li> <p>Precision of float conversions</p> </li>
         </ul>
 
         <p>There are also <code>printf</code>-style functions that
