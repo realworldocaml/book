@@ -4,29 +4,26 @@ open Core_kernel.Std;;
 module Log_entry = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: float;
         important: bool;
         message: string;
       }
   end
   ;;
 
-
-
-
 #part 100
 
 module Heartbeat = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: float;
         status_message: string;
       }
   end;;
   module Logon = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: float;
         user: string;
         credentials: string;
       }
@@ -102,7 +99,7 @@ type details =
 #part 6
 module Common = struct
     type t = { session_id: string;
-               time: Time.t;
+               time: float;
              }
   end ;;
 
@@ -128,6 +125,12 @@ let messages_for_user user messages =
   ;;
 
 
+#part 7.9
+
+type server_state;;
+let handle_log_entry (_:server_state) ((_:Common.t),_) = ();;
+let handle_logon _ (_,_) = ();;
+let handle_heartbeat _ (_,_) = ();;
 
 #part 8
 let handle_message server_state (common,details) =

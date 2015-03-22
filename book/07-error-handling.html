@@ -489,10 +489,13 @@
         your execution at unexpected places, leaving your program
         in an awkward state. Consider the following function for
         loading a file full of reminders, formatted as
-        s-expressions:<idx>exceptions/exception clean
-        up</idx><idx>error handling/exception clean up</idx></p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/error-handling/main.topscript" part="28" />
+        s-expressions:
+
+	  <idx>exceptions/exception clean up</idx>
+	  <idx>error handling/exception clean up</idx></p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/error-handling/main.topscript" part="28" />
 
         <p>The problem with this code is that the function that
         loads the s-expression and parses it into a list of
@@ -535,8 +538,11 @@
         <code>Not_found</code> when the element in question can't
         be found. Let's look at an example of how you could take
         advantage of this. In particular, consider the following
-        function:<idx>exceptions/catching specific</idx><idx>error
-        handling/exception detection</idx></p>
+        function:
+
+	<idx>exceptions/catching specific</idx>
+	<idx>error handling/exception detection</idx></p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/error-handling/main.topscript" part="31" />
 
