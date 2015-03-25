@@ -39,14 +39,15 @@ edit_distance "OCaml" "ocaml";;
 
 
 #part 3
-let time f =
-    let open Core.Std in
-    let start = Time.now () in
-    let x = f () in
-    let stop = Time.now () in
-    printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
-    x ;;
+#require "mtime.os.top";;
 
+let time f =
+    let counter = Mtime.counter () in
+    let x = f () in
+    let elapsed = Mtime.count counter in
+    printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+    x 
+;;
 
 #part 4
 time (fun () -> edit_distance "OCaml" "ocaml");;

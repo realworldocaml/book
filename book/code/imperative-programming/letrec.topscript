@@ -1,12 +1,14 @@
 open Core_kernel.Std
 
+#require "mtime.os.top";;
+
 let time f =
-    let open Core.Std in
-    let start = Time.now () in
+    let counter = Mtime.counter () in
     let x = f () in
-    let stop = Time.now () in
-    printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
-    x ;;
+    let elapsed = Mtime.count counter in
+    printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+    x 
+;;
 
 let memoize f =
     let table = Hashtbl.Poly.create () in

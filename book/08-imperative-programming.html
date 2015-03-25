@@ -881,13 +881,14 @@
           <img src="images/rwoc_0802.png" />
         </figure>
 
-        <p>As you can see, some of these calls are repeats. For
-        example, there are two different calls to <code>edit_distance
-        "OCam" "oca"</code>. The number of redundant calls grows
-        exponentially with the size of the strings, meaning that our
-        implementation of <code>edit_distance</code> is brutally slow
-        for large strings. We can see this by writing a small timing
-        function:</p>
+        <p>
+	  As you can see, some of these calls are repeats. For
+          example, there are two different calls to <code>edit_distance
+            "OCam" "oca"</code>. The number of redundant calls grows
+          exponentially with the size of the strings, meaning that our
+          implementation of <code>edit_distance</code> is brutally
+          slow for large strings. We can see this by writing a small
+          timing function:</p>
 
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/memo.topscript" part="3" />
@@ -1154,68 +1155,76 @@
     <section id="input-and-output" data-type="sect1">
       <h1>Input and Output</h1>
 
-      <p>Imperative programming is about more than modifying
-      in-memory data structures. Any function that doesn't boil
-      down to a deterministic transformation from its arguments to
-      its return value is imperative in nature. That includes not
-      only things that mutate your program's data, but also
-      operations that interact with the world outside of your
-      program. An important example of this kind of interaction is
-      I/O, i.e., operations for reading or writing data to things
-      like files, terminal input and output, and network
-      sockets.<idx>I/O (input/output) operations/terminal
-      I/O</idx><idx id="IPinpout">imperative programming/input and
-      output</idx></p>
+      <p>
+	Imperative programming is about more than modifying
+	in-memory data structures. Any function that doesn't boil
+	down to a deterministic transformation from its arguments to
+	its return value is imperative in nature. That includes not
+	only things that mutate your program's data, but also
+	operations that interact with the world outside of your
+	program. An important example of this kind of interaction is
+	I/O, i.e., operations for reading or writing data to things
+	like files, terminal input and output, and network
+	sockets.
 
-      <p>There are multiple I/O libraries in OCaml. In this section
-      we'll discuss OCaml's buffered I/O library that can be used
-      through the <code>In_channel</code> and
-      <code>Out_channel</code> modules in Core. Other I/O
-      primitives are also available through the <code>Unix</code>
-      module in Core as well as <code>Async</code>, the
-      asynchronous I/O library that is covered in <a href=
-      "18-concurrent-programming.html#concurrent-programming-with-async"
-      data-type="xref">Concurrent Programming With Async</a>. Most
-      of the functionality in Core's <code>In_channel</code> and
-      <code>Out_channel</code> (and in Core's <code>Unix</code>
-      module) derives from the standard library, but we'll use
-      Core's interfaces here.</p>
+	<idx>I/O (input/output) operations/terminal I/O</idx>
+	<idx id="IPinpout">imperative programming/input and output</idx>
+      </p>
+
+      <p>
+	There are multiple I/O libraries in OCaml. In this section
+	we'll discuss OCaml's buffered I/O library that can be used
+	through the <code>In_channel</code> and
+	<code>Out_channel</code> modules in Core. Other I/O
+	primitives are also available through the <code>Unix</code>
+	module in Core as well as <code>Async</code>, the
+	asynchronous I/O library that is covered in
+	<a href="18-concurrent-programming.html#concurrent-programming-with-async"
+	   data-type="xref">Concurrent Programming With Async</a>. 
+	Most of the functionality in Core's <code>In_channel</code>
+	and <code>Out_channel</code> (and in Core's <code>Unix</code>
+	module) derives from the standard library, but we'll use
+	Core's interfaces here.</p>
 
       <section id="terminal-io" data-type="sect2">
         <h2>Terminal I/O</h2>
 
-        <p>OCaml's buffered I/O library is organized around two
-        types: <code>in_channel</code>, for channels you read from,
-        and <code>out_channel</code>, for channels you write to.
-        The <code>In_channel</code> and <code>Out_channel</code>
-        modules only have direct support for channels corresponding
-        to files and terminals; other kinds of channels can be
-        created through the <code>Unix</code> module.
-        <idx>Out_channel module/Out_channel.stderr</idx>
-        <idx>Out_channel module/Out_channel.stdout</idx>
-        <idx>In_channel module</idx></p>
+        <p>
+	  OCaml's buffered I/O library is organized around two
+          types: <code>in_channel</code>, for channels you read from,
+          and <code>out_channel</code>, for channels you write to.
+          The <code>In_channel</code> and <code>Out_channel</code>
+          modules only have direct support for channels corresponding
+          to files and terminals; other kinds of channels can be
+          created through the <code>Unix</code> module.
 
-        <p>We'll start our discussion of I/O by focusing on the
-        terminal. Following the UNIX model, communication with the
-        terminal is organized around three channels, which
-        correspond to the three standard file descriptors in
-        Unix:</p>
+          <idx>Out_channel module/Out_channel.stderr</idx>
+          <idx>Out_channel module/Out_channel.stdout</idx>
+          <idx>In_channel module</idx>
+	</p>
+
+        <p>
+	  We'll start our discussion of I/O by focusing on the
+          terminal. Following the UNIX model, communication with the
+          terminal is organized around three channels, which
+          correspond to the three standard file descriptors in
+          Unix:</p>
 
         <dl>
           <dt><code>In_channel.stdin</code></dt>
 
-          <dd>
-            <p>The "standard input" channel. By default, input
-            comes from the terminal, which handles keyboard
-            input.</p>
+          <dd><p>
+	      The "standard input" channel. By default, input
+              comes from the terminal, which handles keyboard
+              input.</p>
           </dd>
 
           <dt><code>Out_channel.stdout</code></dt>
 
-          <dd>
-            <p>The "standard output" channel. By default, output
-            written to <code>stdout</code> appears on the user
-            terminal.</p>
+          <dd><p>
+	      The "standard output" channel. By default, output
+              written to <code>stdout</code> appears on the user
+              terminal.</p>
           </dd>
 
           <dt><code>Out_channel.stderr</code></dt>
@@ -1227,34 +1236,40 @@
           </dd>
         </dl>
 
-        <p>The values <code>stdin</code>, <code>stdout</code>, and
-        <code>stderr</code> are useful enough that they are also
-        available in the global namespace directly, without having
-        to go through the <code>In_channel</code> and
-        <code>Out_channel</code> modules.</p>
+        <p>
+	  The values <code>stdin</code>, <code>stdout</code>,
+          and <code>stderr</code> are useful enough that they are also
+          available in the global namespace directly, without having
+          to go through the <code>In_channel</code>
+          and <code>Out_channel</code> modules.</p>
 
-        <p>Let's see this in action in a simple interactive
-        application. The following
-        program, <code>time_converter</code>, prompts the user for a
-        time zone, and then prints out the current time in that time
-        zone. Here, we use Core's <code>Zone</code> module for looking
-        up a time zone, and the <code>Time</code> module for computing
-        the current time and printing it out in the time zone in
-        question:</p>
+        <p>
+	  Let's see this in action in a simple interactive
+          application. The following
+          program, <code>time_converter</code>, prompts the user for a
+          time zone, and then prints out the current time in that time
+          zone. Here, we use Core's <code>Zone</code> module for
+          looking up a time zone, and the <code>Time</code> module for
+          computing the current time and printing it out in the time
+          zone in question:</p>
 
         <link rel="import" data-code-language="ocaml" href=
         "code/imperative-programming/time_converter.ml" />
 
-        <p>We can build this program using <span class=
-        "command"><em>corebuild</em></span> and run it. You'll see
-        that it prompts you for input, as follows:</p>
+        <p>
+	  We can build this program
+	  using <span class="command"><em>corebuild</em></span> and
+	  run it. You'll see that it prompts you for input, as
+	  follows:</p>
 
         <link rel="import" data-code-language="console" href=
         "code/imperative-programming/time_converter.out" />
 
-        <p>You can then type in the name of a time zone and hit
-        Return, and it will print out the current time in the time
-        zone in question:</p>
+        <p>
+	  You can then type in the name of a time zone and hit
+          Return, and it will print out the current time in the time
+          zone in question:</p>
+
         <link rel="import" data-code-language="console" href=
         "code/imperative-programming/time_converter2.out" />
 
