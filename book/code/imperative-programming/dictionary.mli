@@ -2,7 +2,7 @@
 
 (* part 1 *)
 (* file: dictionary.mli *)
-open Core.Std
+open Core_kernel.Std
 
 type ('a, 'b) t
 

@@ -1,4 +1,4 @@
-;;
+open Core_kernel.Std;;
 #part 1
 let memoize f =
     let table = Hashtbl.Poly.create () in
@@ -40,6 +40,7 @@ edit_distance "OCaml" "ocaml";;
 
 #part 3
 let time f =
+    let open Core.Std in
     let start = Time.now () in
     let x = f () in
     let stop = Time.now () in

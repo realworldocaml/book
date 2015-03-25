@@ -13,124 +13,149 @@
   "imperative-programming-1" data-type="chapter">
     <h1>Imperative Programming</h1>
 
-    <p>Most of the code shown so far in this book, and indeed, most
-    OCaml code in general, is <em>pure</em>. Pure code works
-    without mutating the program's internal state, performing I/O,
-    reading the clock, or in any other way interacting with
-    changeable parts of the world. Thus, a pure function behaves
-    like a mathematical function, always returning the same results
-    when given the same inputs, and never affecting the world
-    except insofar as it returns the value of its computation.
-    <em>Imperative</em> code, on the other hand, operates by side
-    effects that modify a program's internal state or interact with
-    the outside world. An imperative function has a new effect, and
-    potentially returns different results, every time it's
-    called.<idx>imperative programming/benefits of</idx><idx>pure
-    code</idx><idx>programming/immutable vs.
-    imperative</idx><idx id="PROGimper">programming/imperative
-    programming</idx></p>
+    <p>
+      Most of the code shown so far in this book, and indeed, most
+      OCaml code in general, is <em>pure</em>. Pure code works
+      without mutating the program's internal state, performing I/O,
+      reading the clock, or in any other way interacting with
+      changeable parts of the world. Thus, a pure function behaves
+      like a mathematical function, always returning the same results
+      when given the same inputs, and never affecting the world
+      except insofar as it returns the value of its computation.
+      <em>Imperative</em> code, on the other hand, operates by side
+      effects that modify a program's internal state or interact with
+      the outside world. An imperative function has a new effect, and
+      potentially returns different results, every time it's
+      called.
 
-    <p>Pure code is the default in OCaml, and for good reason—it's
-    generally easier to reason about, less error prone and more
-    composable. But imperative code is of fundamental importance to
-    any practical programming language, because real-world tasks
-    require that you interact with the outside world, which is by
-    its nature imperative. Imperative programming can also be
-    important for performance. While pure code is quite efficient
-    in OCaml, there are many algorithms that can only be
-    implemented efficiently using imperative techniques.</p>
+      <idx>imperative programming/benefits of</idx>
+      <idx>pure	code</idx>
+      <idx>programming/immutable vs. imperative</idx>
+      <idx id="PROGimper">programming/imperative programming</idx>
+    </p>
 
-    <p>OCaml offers a happy compromise here, making it easy and
-    natural to program in a pure style, but also providing great
-    support for imperative programming. This chapter will walk you
-    through OCaml's imperative features, and help you use them to
-    their fullest.</p>
+    <p>
+      Pure code is the default in OCaml, and for good reason—it's
+      generally easier to reason about, less error prone and more
+      composable. But imperative code is of fundamental importance to
+      any practical programming language, because real-world tasks
+      require that you interact with the outside world, which is by
+      its nature imperative. Imperative programming can also be
+      important for performance. While pure code is quite efficient in
+      OCaml, there are many algorithms that can only be implemented
+      efficiently using imperative techniques.</p>
 
-    <section id="example-imperative-dictionaries" data-type=
-    "sect1">
+    <p>
+      OCaml offers a happy compromise here, making it easy and
+      natural to program in a pure style, but also providing great
+      support for imperative programming. This chapter will walk you
+      through OCaml's imperative features, and help you use them to
+      their fullest.</p>
+
+    <section id="example-imperative-dictionaries" 
+	     data-type="sect1">
       <h1>Example: Imperative Dictionaries</h1>
 
-      <p>We'll start with the implementation of a simple imperative
-      dictionary, i.e., a mutable mapping from keys to values. This
-      is really for illustration purposes; both Core and the
-      standard library provide imperative dictionaries, and for
-      most real-world tasks, you should use one of those
-      implementations. There's more advice on using Core's
-      implementation in particular in <a href=
-      "13-maps-and-hashtables.html#maps-and-hash-tables" data-type=
-      "xref">Maps And Hash Tables</a>.<idx id=
-      "DICTimper">dictionaries, imperative</idx><idx>Core standard
-      library/imperative dictionaries in</idx><idx id=
-      "IPimpdict">imperative programming/imperative
-      dictionaries</idx></p>
+      <p>
+	We'll start with the implementation of a simple imperative
+	dictionary, i.e., a mutable mapping from keys to values. This
+	is really for illustration purposes; both Core and the
+	standard library provide imperative dictionaries, and for
+	most real-world tasks, you should use one of those
+	implementations. There's more advice on using Core's
+	implementation in particular in 
+	<a href="13-maps-and-hashtables.html#maps-and-hash-tables" 
+	   data-type="xref">Maps And Hash Tables</a>.
 
-      <p>The dictionary we'll describe now, like those in Core and
-      the standard library, will be implemented as a hash table. In
-      particular, we'll use an <em>open hashing</em> scheme, where
-      the hash table will be an array of buckets, each bucket
-      containing a list of key/value pairs that have been hashed
-      into that bucket.<idx>open hashing</idx></p>
+	<idx id="DICTimper">dictionaries, imperative</idx>
+	<idx>Core standard library/imperative dictionaries in</idx>
+	<idx id="IPimpdict">imperative programming/imperative
+	  dictionaries</idx> 
+      </p>
 
-      <p>Here's the interface we'll match, provided as an
-      <code>mli</code>. The type <code>('a, 'b) t</code> represents
-      a dictionary with keys of type <code>'a</code> and data of
-      type <code>'b</code>:</p>
+      <p>
+	The dictionary we'll describe now, like those in Core and
+	the standard library, will be implemented as a hash table. In
+	particular, we'll use an <em>open hashing</em> scheme, where
+	the hash table will be an array of buckets, each bucket
+	containing a list of key/value pairs that have been hashed
+	into that bucket.
+
+	<idx>open hashing</idx>
+      </p>
+
+      <p>
+	Here's the interface we'll match, provided as
+	an <code>mli</code>. The type <code>('a, 'b) t</code> represents
+	a dictionary with keys of type <code>'a</code> and data of
+	type <code>'b</code>:</p>
+
       <link rel="import" data-code-language="ocaml" href=
       "code/imperative-programming/dictionary.mli" part="1" />
 
-      <p>The <code>mli</code> also includes a collection of helper
-      functions whose purpose and behavior should be largely
-      inferrable from their names and type signatures. Notice that
-      a number of the functions, in particular, ones like
-      <code>add</code> that modify the dictionary, return
-      <code>unit</code>. This is typical of functions that act by
-      side effect.</p>
+      <p>
+	The <code>mli</code> also includes a collection of helper
+	functions whose purpose and behavior should be largely
+	inferrable from their names and type signatures. Notice that
+	a number of the functions, in particular, ones like
+	<code>add</code> that modify the dictionary, return
+	<code>unit</code>. This is typical of functions that act by
+	side effect.</p>
 
-      <p>We'll now walk through the implementation (contained in
-      the corresponding <code>ml</code> file) piece by piece,
-      explaining different imperative constructs as they come
-      up.</p>
+      <p>
+	We'll now walk through the implementation (contained in
+	the corresponding <code>ml</code> file) piece by piece,
+	explaining different imperative constructs as they come
+	up.</p>
 
-      <p>Our first step is to define the type of a dictionary as a
-      record with two fields:</p>
+      <p>
+	Our first step is to define the type of a dictionary as a
+	record with two fields:</p>
+
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="1" />
+	    "code/imperative-programming/dictionary.ml" part="1" />
 
-      <p>The first field, <code>length</code>, is declared as
-      mutable. In OCaml, records are immutable by default, but
-      individual fields are mutable when marked as such. The second
-      field, <code>buckets</code>, is immutable but contains an
-      array, which is itself a mutable data
-      structure.<idx>fields/mutability of</idx></p>
+      <p>
+	The first field, <code>length</code>, is declared as
+	mutable. In OCaml, records are immutable by default, but
+	individual fields are mutable when marked as such. The second
+	field, <code>buckets</code>, is immutable but contains an
+	array, which is itself a mutable data
+	structure.
 
-      <p>Now we'll start putting together the basic functions for
-      manipulating a dictionary:</p>
+	<idx>fields/mutability of</idx></p>
+
+      <p>
+	Now we'll start putting together the basic functions for
+	manipulating a dictionary:</p>
+
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="2" />
+	    "code/imperative-programming/dictionary.ml" part="2" />
 
-      <p>Note that <code>num_buckets</code> is a constant, which
-      means our bucket array is of fixed length. A practical
-      implementation would need to be able to grow the array as the
-      number of elements in the dictionary increases, but we'll
-      omit this to simplify the presentation.</p>
+      <p>
+	Note that <code>num_buckets</code> is a constant, which
+	means our bucket array is of fixed length. A practical
+	implementation would need to be able to grow the array as the
+	number of elements in the dictionary increases, but we'll
+	omit this to simplify the presentation.</p>
 
-      <p>The function <code>hash_bucket</code> is used throughout
-      the rest of the module to choose the position in the array
-      that a given key should be stored at. It is implemented on
-      top of <code>Hashtbl.hash</code>, which is a hash function
-      provided by the OCaml runtime that can be applied to values
-      of any type. Thus, its own type is polymorphic: <code>'a
-      -&gt; int</code>.</p>
+      <p>
+	The function <code>hash_bucket</code> is used throughout the
+	rest of the module to choose the position in the array that a
+	given key should be stored at. It is implemented on top
+	of <code>Hashtbl.hash</code>, which is a hash function
+	provided by the OCaml runtime that can be applied to values of
+	any type. Thus, its own type is polymorphic: <code>'a
+	  -&gt; int</code>.</p>
 
-      <p>The other functions defined above are fairly
-      straightforward:</p>
+      <p>
+	The other functions defined above are fairly
+	straightforward:</p>
 
       <dl>
         <dt><code>create</code></dt>
 
-        <dd>
-          <p>Creates an empty dictionary.</p>
-        </dd>
+        <dd> <p>Creates an empty dictionary.</p> </dd>
 
         <dt><code>length</code></dt>
 
@@ -148,96 +173,114 @@
         </dd>
       </dl>
 
-      <p>Another important piece of imperative syntax shows up in
-      <code>find</code>: we write <code>array.(index)</code> to
-      grab a value from an array. <code>find</code> also uses
-      <code>List.find_map</code>, which you can see the type of by
-      typing it into the toplevel:</p>
+      <p>
+	Another important piece of imperative syntax shows up in
+	<code>find</code>: we write <code>array.(index)</code> to
+	grab a value from an array. <code>find</code> also uses
+	<code>List.find_map</code>, which you can see the type of by
+	typing it into the toplevel:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/examples.topscript" part="1" />
 
-      <p><code>List.find_map</code> iterates over the elements of
-      the list, calling <code>f</code> on each one until a
-      <code>Some</code> is returned by <code>f</code>, at which
-      point that value is returned. If <code>f</code> returns
-      <code>None</code> on all values, then <code>None</code> is
-      returned.</p>
+      <p>
+	<code>List.find_map</code> iterates over the elements of
+	the list, calling <code>f</code> on each one until a
+	<code>Some</code> is returned by <code>f</code>, at which
+	point that value is returned. If <code>f</code> returns
+	<code>None</code> on all values, then <code>None</code> is
+	returned.</p>
 
-      <p>Now let's look at the implementation of
-      <code>iter</code>:</p>
+      <p>
+	Now let's look at the implementation of <code>iter</code>:</p>
+
       <link rel="import" data-code-language="ocaml" href=
-      "code/imperative-programming/dictionary.ml" part="3" />
+	    "code/imperative-programming/dictionary.ml" part="3" />
 
-      <p><code>iter</code> is designed to walk over all the entries
-      in the dictionary. In particular, <code>iter t ~f</code> will
-      call <code>f</code> for each key/value pair in dictionary
-      <code>t</code>. Note that <code>f</code> must return
-      <code>unit</code>, since it is expected to work by side
-      effect rather than by returning a value, and the overall
-      <code>iter</code> function returns <code>unit</code> as
-      well.</p>
+      <p>
+	<code>iter</code> is designed to walk over all the entries in
+	the dictionary. In particular, <code>iter t ~f</code> will
+	call <code>f</code> for each key/value pair in
+	dictionary <code>t</code>. Note that <code>f</code> must
+	return <code>unit</code>, since it is expected to work by side
+	effect rather than by returning a value, and the
+	overall <code>iter</code> function returns <code>unit</code>
+	as well.</p>
 
-      <p>The code for <code>iter</code> uses two forms of
-      iteration: a <code>for</code> loop to walk over the array of
-      buckets; and within that loop a call to
-      <code>List.iter</code> to walk over the values in a given
-      bucket. We could have done the outer loop with a recursive
-      function instead of a <code>for</code> loop, but
-      <code>for</code> loops are syntactically convenient, and are
-      more familiar and idiomatic in imperative contexts.</p>
+      <p>
+	The code for <code>iter</code> uses two forms of iteration:
+	a <code>for</code> loop to walk over the array of buckets; and
+	within that loop a call to <code>List.iter</code> to walk over
+	the values in a given bucket. We could have done the outer
+	loop with a recursive function instead of a <code>for</code>
+	loop, but <code>for</code> loops are syntactically convenient,
+	and are more familiar and idiomatic in imperative
+	contexts.</p>
 
-      <p>The following code is for adding and removing mappings
-      from the dictionary:</p>
+      <p>
+	The following code is for adding and removing mappings from
+	the dictionary:</p>
+
       <link rel="import" data-code-language="ocaml" href=
       "code/imperative-programming/dictionary.ml" part="4" />
 
-      <p>This preceding code is made more complicated by the fact
-      that we need to detect whether we are overwriting or removing
-      an existing binding, so we can decide whether
-      <code>t.length</code> needs to be changed. The helper
-      function <code>bucket_has_key</code> is used for this
-      purpose.</p>
+      <p>
+	This preceding code is made more complicated by the fact that
+	we need to detect whether we are overwriting or removing an
+	existing binding, so we can decide
+	whether <code>t.length</code> needs to be changed. The helper
+	function <code>bucket_has_key</code> is used for this
+	purpose.</p>
 
-      <p>Another piece of syntax shows up in both <code>add</code>
-      and <code>remove</code>: the use of the <code>&lt;-</code>
-      operator to update elements of an array (<code>array.(i)
-      &lt;- expr</code>) and for updating a record field
-      (<code>record.field &lt;- expression</code>).</p>
+      <p>
+	Another piece of syntax shows up in both <code>add</code>
+	and <code>remove</code>: the use of the <code>&lt;-</code>
+	operator to update elements of an array (<code>array.(i)
+	  &lt;- expr</code>) and for updating a record field
+	(<code>record.field &lt;- expression</code>).</p>
 
-      <p>We also use <code>;</code>, the sequencing operator, to
-      express a sequence of imperative actions. We could have done
-      the same using <code>let</code> bindings:</p>
+      <p>
+	We also use <code>;</code>, the sequencing operator, to
+	express a sequence of imperative actions. We could have done
+	the same using <code>let</code> bindings:</p>
+
       <link rel="import" data-code-language="ocaml" href=
       "code/imperative-programming/dictionary2.ml" part="1" />
 
       <p>but <code>;</code> is more concise and idiomatic. More
       generally,</p>
+
       <link rel="import" data-code-language="ocamlsyntax" href=
       "code/imperative-programming/semicolon.syntax" />
 
       <p>is equivalent to</p>
+
       <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/imperative-programming/let-unit.syntax" />
+	    "code/imperative-programming/let-unit.syntax" />
 
-      <p>When a sequence expression <code>expr1; expr2</code> is
-      evaluated, <code>expr1</code> is evaluated first, and then
-      <code>expr2</code>. The expression <code>expr1</code> should
-      have type <code>unit</code> (though this is a warning rather
-      than a hard restriction. The <code>-strict-sequence</code>
-      compiler flag makes this a hard restriction, which is
-      generally a good idea), and the value of <code>expr2</code>
-      is returned as the value of the entire sequence. For example,
-      the sequence <code>print_string "hello world"; 1 + 2</code>
-      first prints the string <code>"hello world"</code>, then
-      returns the integer <code>3</code>.</p>
+      <p>
+	When a sequence expression <code>expr1; expr2</code> is
+	evaluated, <code>expr1</code> is evaluated first, and
+	then <code>expr2</code>. The expression <code>expr1</code>
+	should have type <code>unit</code> (though this is a warning
+	rather than a hard restriction.
+	The <code>-strict-sequence</code> compiler flag makes this a
+	hard restriction, which is generally a good idea), and the
+	value of <code>expr2</code> is returned as the value of the
+	entire sequence. For example, the sequence <code>print_string
+	"hello world"; 1 + 2</code> first prints the
+	string <code>"hello world"</code>, then returns the
+	integer <code>3</code>.</p>
 
-      <p>Note also that we do all of the side-effecting operations
-      at the very end of each function. This is good practice
-      because it minimizes the chance that such operations will be
-      interrupted with an exception, leaving the data structure in
-      an inconsistent state.<a data-type="indexterm" data-startref=
-      "DICTimper">&nbsp;</a><a data-type="indexterm" data-startref=
-      "IPimpdict">&nbsp;</a></p>
+      <p>
+	Note also that we do all of the side-effecting operations
+	at the very end of each function. This is good practice
+	because it minimizes the chance that such operations will be
+	interrupted with an exception, leaving the data structure in
+	an inconsistent state.
+
+	<a data-type="indexterm" data-startref="DICTimper">&nbsp;</a>
+	<a data-type="indexterm" data-startref="IPimpdict">&nbsp;</a></p>
     </section>
 
     <section id="primitive-mutable-data" data-type="sect1">
@@ -245,14 +288,16 @@
 
       <p>Now that we've looked at a complete example, let's take a
       more systematic look at imperative programming in OCaml. We
-      encountered two different forms of mutable data above:
-      records with mutable fields and arrays. We'll now discuss
-      these in more detail, along with the other primitive forms of
-      mutable data that are available in OCaml.<idx>array-like
-      data</idx><idx>data structures/primitive mutable
-      data</idx><idx>mutable data</idx><idx>primitive mutable
-      data/array-like data</idx><idx>imperative
-      programming/primitive mutable data</idx></p>
+      encountered two different forms of mutable data above: records
+      with mutable fields and arrays. We'll now discuss these in more
+      detail, along with the other primitive forms of mutable data
+      that are available in OCaml.
+
+	<idx>array-like data</idx>
+	<idx>data structures/primitive mutable data</idx>
+	<idx>mutable data</idx>
+	<idx>primitive mutable data/array-like data</idx>
+	<idx>imperative programming/primitive mutable data</idx></p>
 
       <section id="array-like-data" data-type="sect2">
         <h2>Array-Like Data</h2>
@@ -265,36 +310,42 @@
         <section id="ordinary-arrays" data-type="sect3">
           <h3>Ordinary arrays</h3>
 
-          <p>The <code>array</code> type is used for
-          general-purpose polymorphic arrays. The
-          <code>Array</code> module has a variety of utility
-          functions for interacting with arrays, including a number
-          of mutating operations. These include
-          <code>Array.set</code>, for setting an individual
-          element, and <code>Array.blit</code>, for efficiently
-          copying values from one range of indices to
-          another.<idx>values/copying with
-          Array.blit</idx><idx>elements/setting with
-          Array.set</idx><idx>Array
-          module/Array.blit</idx><idx>Array
-          module/Array.set</idx></p>
+          <p>
+	    The <code>array</code> type is used for general-purpose
+            polymorphic arrays. The <code>Array</code> module has a
+            variety of utility functions for interacting with arrays,
+            including a number of mutating operations. These
+            include <code>Array.set</code>, for setting an individual
+            element, and <code>Array.blit</code>, for efficiently
+            copying values from one range of indices to
+            another.
+
+	    <idx>values/copying with Array.blit</idx>
+	    <idx>elements/setting with Array.set</idx>
+	    <idx>Array module/Array.blit</idx>
+	    <idx>Array module/Array.set</idx>
+	  </p>
 
           <p>Arrays also come with special syntax for retrieving an
-          element from an array:</p>
+            element from an array:</p>
+
           <link rel="import" data-code-language="ocamlsyntax" href=
           "code/imperative-programming/array-get.syntax" />
 
           <p>and for setting an element in an array:</p>
+
           <link rel="import" data-code-language="ocamlsyntax" href=
           "code/imperative-programming/array-set.syntax" />
 
-          <p>Out-of-bounds accesses for arrays (and indeed for all
-          the array-like data structures) will lead to an exception
-          being thrown.</p>
+          <p>
+	    Out-of-bounds accesses for arrays (and indeed for all the
+            array-like data structures) will lead to an exception
+            being thrown.</p>
 
-          <p>Array literals are written using <code>[|</code> and
-          <code>|]</code> as delimiters. Thus, <code>[| 1; 2; 3
-          |]</code> is a literal integer array.</p>
+          <p>
+	    Array literals are written using <code>[|</code>
+            and <code>|]</code> as delimiters. Thus, <code>[| 1; 2; 3
+              |]</code> is a literal integer array.</p>
         </section>
 
         <section id="strings" data-type="sect3">
@@ -650,134 +701,165 @@
     "sect1">
       <h1>Laziness and Other Benign Effects</h1>
 
-      <p>There are many instances where you basically want to
-      program in a pure style, but you want to make limited use of
-      side effects to improve the performance of your code. Such
-      side effects are sometimes called <em>benign effects</em>,
-      and they are a useful way of leveraging OCaml's imperative
-      features while still maintaining most of the benefits of pure
-      programming.<idx>lazy keyword</idx><idx>side
-      effects</idx><idx>laziness</idx><idx>benign
-      effects/laziness</idx><idx>imperative programming/benign
-      effects and</idx></p>
+      <p>
+	There are many instances where you basically want to program
+	in a pure style, but you want to make limited use of side
+	effects to improve the performance of your code. Such side
+	effects are sometimes called <em>benign effects</em>, and they
+	are a useful way of leveraging OCaml's imperative features
+	while still maintaining most of the benefits of pure
+	programming.
 
-      <p>One of the simplest benign effects is <em>laziness</em>. A
-      lazy value is one that is not computed until it is actually
-      needed. In OCaml, lazy values are created using the
-      <code>lazy</code> keyword, which can be used to convert any
-      expression of type <code>s</code> into a lazy value of type
-      <code>s Lazy.t</code>. The evaluation of that expression is
-      delayed until forced with <code>Lazy.force</code>:</p>
+	<idx>lazy keyword</idx>
+	<idx>side effects</idx>
+	<idx>laziness</idx>
+	<idx>benign effects/laziness</idx>
+	<idx>imperative programming/benign effects and</idx>
+      </p>
+
+      <p>
+	One of the simplest benign effects is <em>laziness</em>. A
+	lazy value is one that is not computed until it is actually
+	needed. In OCaml, lazy values are created using
+	the <code>lazy</code> keyword, which can be used to convert any
+	expression of type <code>s</code> into a lazy value of
+	type <code>s Lazy.t</code>. The evaluation of that expression is
+	delayed until forced with <code>Lazy.force</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/lazy.topscript" part="1" />
 
       <p>You can see from the <code>print</code> statement that the
-      actual computation was performed only once, and only after
-      <code>force</code> had been called.</p>
+      actual computation was performed only once, and only
+      after <code>force</code> had been called.</p>
 
-      <p>To better understand how laziness works, let's walk
-      through the implementation of our own lazy type. We'll start
-      by declaring types to represent a lazy value:</p>
+      <p>To better understand how laziness works, let's walk through
+      the implementation of our own lazy type. We'll start by
+      declaring types to represent a lazy value:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/lazy.topscript" part="2" />
 
-      <p>A <code>lazy_state</code> represents the possible states
-      of a lazy value. A lazy value is <code>Delayed</code> before
-      it has been run, where <code>Delayed</code> holds a function
-      for computing the value in question. A lazy value is in the
-      <code>Value</code> state when it has been forced and the
+      <p>A <code>lazy_state</code> represents the possible states of a
+      lazy value. A lazy value is <code>Delayed</code> before it has
+      been run, where <code>Delayed</code> holds a function for
+      computing the value in question. A lazy value is in
+      the <code>Value</code> state when it has been forced and the
       computation ended normally. The <code>Exn</code> case is for
-      when the lazy value has been forced, but the computation
-      ended with an exception. A lazy value is simply a
-      <code>ref</code> containing a <code>lazy_state</code>, where
-      the <code>ref</code> makes it possible to change from being
-      in the <code>Delayed</code> state to being in the
-      <code>Value</code> or <code>Exn</code> states.</p>
+      when the lazy value has been forced, but the computation ended
+      with an exception. A lazy value is simply a <code>ref</code>
+      containing a <code>lazy_state</code>, where the <code>ref</code>
+      makes it possible to change from being in
+      the <code>Delayed</code> state to being in
+      the <code>Value</code> or <code>Exn</code> states.</p>
 
-      <p>We can create a lazy value from a thunk, i.e., a function
-      that takes a unit argument. Wrapping an expression in a thunk
-      is another way to suspend the computation of an
-      expression:<idx>thunks</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/lazy.topscript" part="3" />
+      <p>
+	We can create a lazy value from a thunk, i.e., a function that
+	takes a unit argument. Wrapping an expression in a thunk is
+	another way to suspend the computation of an expression:
+	
+	<idx>thunks</idx>
+      </p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/imperative-programming/lazy.topscript" part="3"
+	    />
 
       <p>Now we just need a way to force a lazy value. The
       following function does just that:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/lazy.topscript" part="4" />
 
       <p>Which we can use in the same way we used
-      <code>Lazy.force</code>:</p>
+	<code>Lazy.force</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/lazy.topscript" part="5" />
 
-      <p>The main user-visible difference between our
-      implementation of laziness and the built-in version is
-      syntax. Rather than writing <code>create_lazy (fun () -&gt;
-      sqrt 16.)</code>, we can (with the built-in
-      <code>lazy</code>) just write <code>lazy (sqrt
-      16.)</code>.</p>
+      <p>
+	The main user-visible difference between our
+	implementation of laziness and the built-in version is
+	syntax. Rather than writing <code>create_lazy (fun () -&gt;
+	  sqrt 16.)</code>, we can (with the built-in
+	<code>lazy</code>) just write <code>lazy (sqrt
+	16.)</code>.</p>
 
       <section id="memoization-and-dynamic-programming" data-type=
       "sect2">
         <h2>Memoization and Dynamic Programming</h2>
 
-        <p>Another benign effect is <em>memoization</em>. A
-        memoized function remembers the result of previous
-        invocations of the function so that they can be returned
-        without further computation when the same arguments are
-        presented again.<idx>memoization/function of</idx><idx id=
-        "BEmem">benign effects/memoization</idx></p>
+        <p>
+	  Another benign effect is <em>memoization</em>. A memoized
+          function remembers the result of previous invocations of the
+          function so that they can be returned without further
+          computation when the same arguments are presented again.
 
-        <p>Here's a function that takes as an argument an arbitrary
-        single-argument function and returns a memoized version of
-        that function. Here we'll use Core's <code>Hashtbl</code>
-        module, rather than our toy <code>Dictionary</code>:</p>
+	  <idx>memoization/of function</idx>
+	  <idx id="BEmem">benign effects/memoization</idx>
+	</p>
+
+        <p>
+	  Here's a function that takes as an argument an arbitrary
+          single-argument function and returns a memoized version of
+          that function. Here we'll use Core's <code>Hashtbl</code>
+          module, rather than our toy <code>Dictionary</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="1" />
+              "code/imperative-programming/memo.topscript" part="1" />
 
-        <p>The preceding code is a bit tricky. <code>memoize</code>
-        takes as its argument a function <code>f</code> and then
-        allocates a hash table (called <code>table</code>) and
-        returns a new function as the memoized version of
-        <code>f</code>. When called, this new function looks in
-        <code>table</code> first, and if it fails to find a value,
-        calls <code>f</code> and stashes the result in
-        <code>table</code>. Note that <code>table</code> doesn't go
-        out of scope as long as the function returned by
-        <code>memoize</code> is in scope.<idx>memoization/benefits
-        and drawbacks of</idx></p>
+        <p>
+	  The preceding code is a bit tricky. <code>memoize</code>
+          takes as its argument a function <code>f</code> and then
+          allocates a hash table (called <code>table</code>) and
+          returns a new function as the memoized version
+          of <code>f</code>. When called, this new function looks
+          in <code>table</code> first, and if it fails to find a
+          value, calls <code>f</code> and stashes the result
+          in <code>table</code>. Note that <code>table</code> doesn't
+          go out of scope as long as the function returned
+          by <code>memoize</code> is in scope.
 
-        <p>Memoization can be useful whenever you have a function
-        that is expensive to recompute and you don't mind caching
-        old values indefinitely. One important caution: a memoized
-        function by its nature leaks memory. As long as you hold on
-        to the memoized function, you're holding every result it
-        has returned thus far.</p>
+	  <idx>memoization/benefits and drawbacks of</idx></p>
 
-        <p>Memoization is also useful for efficiently implementing
-        some recursive algorithms. One good example is the
-        algorithm for computing the <em>edit distance</em> (also
-        called the Levenshtein distance) between two strings. The
-        edit distance is the number of single-character changes
-        (including letter switches, insertions, and deletions)
-        required to <span class="keep-together">convert</span> one
-        string to the other. This kind of distance metric can be
-        useful for a variety of approximate string-matching
-        problems, like spellcheckers.<idx>string
-        matching</idx><idx>Levenshtein distance</idx><idx>edit
-        distance</idx></p>
+        <p>
+	  Memoization can be useful whenever you have a function that
+          is expensive to recompute and you don't mind caching old
+          values indefinitely. One important caution: a memoized
+          function by its nature leaks memory. As long as you hold on
+          to the memoized function, you're holding every result it has
+          returned thus far.</p>
 
-        <p>Consider the following code for computing the edit
-        distance. Understanding the algorithm isn't important here,
-        but you should pay attention to the structure of the
-        recursive calls:<idx>memoization/example of</idx></p>
+        <p>
+	  Memoization is also useful for efficiently implementing some
+          recursive algorithms. One good example is the algorithm for
+          computing the <em>edit distance</em> (also called the
+          Levenshtein distance) between two strings. The edit distance
+          is the number of single-character changes (including letter
+          switches, insertions, and deletions) required
+          to <span class="keep-together">convert</span> one string to
+          the other. This kind of distance metric can be useful for a
+          variety of approximate string-matching problems, like
+          spellcheckers.
+
+	  <idx>string matching</idx>
+	  <idx>Levenshtein distance</idx>
+	  <idx>edit distance</idx></p>
+
+        <p>
+	  Consider the following code for computing the edit
+          distance. Understanding the algorithm isn't important here,
+          but you should pay attention to the structure of the
+          recursive calls:
+
+	  <idx>memoization/example of</idx></p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="2" />
+              "code/imperative-programming/memo.topscript" part="2" />
 
-        <p>The thing to note is that if you call
-        <code>edit_distance "OCaml" "ocaml"</code>, then that will
-        in turn dispatch the following calls:</p>
+        <p>The thing to note is that if you call <code>edit_distance
+        "OCaml" "ocaml"</code>, then that will in turn dispatch the
+        following calls:</p>
 
         <p><a href=
         "https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/edit_distance.ascii"
@@ -800,219 +882,271 @@
         </figure>
 
         <p>As you can see, some of these calls are repeats. For
-        example, there are two different calls to
-        <code>edit_distance "OCam" "oca"</code>. The number of
-        redundant calls grows exponentially with the size of the
-        strings, meaning that our implementation of
-        <code>edit_distance</code> is brutally slow for large
-        strings. We can see this by writing a small timing
+        example, there are two different calls to <code>edit_distance
+        "OCam" "oca"</code>. The number of redundant calls grows
+        exponentially with the size of the strings, meaning that our
+        implementation of <code>edit_distance</code> is brutally slow
+        for large strings. We can see this by writing a small timing
         function:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/memo.topscript" part="3" />
 
         <p>And now we can use this to try out some examples:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/memo.topscript" part="4" />
 
         <p>Just those few extra characters made it thousands of
-        times slower!</p>
+          times slower!</p>
 
-        <p>Memoization would be a huge help here, but to fix the
-        problem, we need to memoize the calls that
-        <code>edit_distance</code> makes to itself. This technique
-        is sometimes referred to as <em>dynamic programming</em>.
-        To see how to do this, let's step away from
-        <code>edit_distance</code> and instead consider a much
-        simpler example: computing the <em>n</em>th element of the
-        Fibonacci sequence. The Fibonacci sequence by definition
-        starts out with two <code>1</code>s, with every subsequent
-        element being the sum of the previous two. The classic
-        recursive definition of Fibonacci is as
-        follows:<idx>programming/dynamic
-        programming</idx><idx>dynamic programming</idx></p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="1" />
+        <p>
+	  Memoization would be a huge help here, but to fix the
+          problem, we need to memoize the calls
+          that <code>edit_distance</code> makes to itself.  Such
+          recursive memoization is closely related to a common
+          algorithmic technique called <em>dynamic programming</em>,
+          except that with dynamic programming, you do the necessary
+          sub-computations bottom-up, in anticipation of needing them.
+          With recursive memoization, you go top-down, only doing a
+          sub-computation when you discover that you need it.
 
-        <p>This is, however, exponentially slow, for the same
-        reason that <code>edit_distance</code> was slow: we end up
-        making many redundant calls to <code>fib</code>. It shows
-        up quite dramatically in the performance:</p>
+	  <idx>memoization/recursive</idx>
+	  <idx>dynamic programming</idx>
+	</p>
+
+        <p>
+	  To see how to do this, let's step away
+          from <code>edit_distance</code> and instead consider a much
+          simpler example: computing the <em>n</em>th element of the
+          Fibonacci sequence. The Fibonacci sequence by definition
+          starts out with two <code>1</code>s, with every subsequent
+          element being the sum of the previous two. The classic
+          recursive definition of Fibonacci is as follows:
+	</p> 
+
+	<link rel="import" data-code-language="ocamltop" href=
+              "code/imperative-programming/fib.topscript" part="1" />
+
+        <p>
+	  This is, however, exponentially slow, for the same reason
+          that <code>edit_distance</code> was slow: we end up making
+          many redundant calls to <code>fib</code>. It shows up quite
+          dramatically in the performance:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="2" />
 
-        <p>As you can see, <code>fib 40</code> takes thousands of
-        times longer to compute than <code>fib 20</code>.</p>
+        <p>
+	  As you can see, <code>fib 40</code> takes thousands of
+          times longer to compute than <code>fib 20</code>.</p>
 
-        <p>So, how can we use memoization to make this faster? The
-        tricky bit is that we need to insert the memoization before
-        the recursive calls within <code>fib</code>. We can't just
-        define <code>fib</code> in the ordinary way and memoize it
-        after the fact and expect the first call to
-        <code>fib</code> to be improved:</p>
+        <p>
+	  So, how can we use memoization to make this faster? The
+          tricky bit is that we need to insert the memoization before
+          the recursive calls within <code>fib</code>. We can't just
+          define <code>fib</code> in the ordinary way and memoize it
+          after the fact and expect the first call to
+          <code>fib</code> to be improved:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="3" />
+              "code/imperative-programming/fib.topscript" part="3" />
 
-        <p>In order to make <code>fib</code> fast, our first step
-        will be to rewrite <code>fib</code> in a way that unwinds
-        the recursion. The following version expects as its first
-        argument a function (called <code>fib</code>) that will be
-        called in lieu of the usual recursive call:</p>
+        <p>
+	  In order to make <code>fib</code> fast, our first step will
+          be to rewrite <code>fib</code> in a way that unwinds the
+          recursion. The following version expects as its first
+          argument a function (called <code>fib</code>) that will be
+          called in lieu of the usual recursive call:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="4" />
 
-        <p>We can now turn this back into an ordinary Fibonacci
-        function by tying the recursive knot:</p>
+        <p>
+	  We can now turn this back into an ordinary Fibonacci
+          function by tying the recursive knot:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="5" />
 
-        <p>We can even write a polymorphic function that we'll call
-        <code>make_rec</code> that can tie the recursive knot for
-        any function of this form:</p>
+        <p>
+	  We can even write a polymorphic function that we'll call
+          <code>make_rec</code> that can tie the recursive knot for
+          any function of this form:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="6" />
 
-        <p>This is a pretty strange piece of code, and it may take
-        a few moments of thought to figure out what's going on.
-        Like <code>fib_norec</code>, the function
-        <code>f_norec</code> passed into <code>make_rec</code> is a
-        function that isn't recursive but takes as an argument a
-        function that it will call. What <code>make_rec</code> does
-        is to essentially feed <code>f_norec</code> to itself, thus
-        making it a true recursive function.</p>
+        <p>
+	  This is a pretty strange piece of code, and it may take
+          a few moments of thought to figure out what's going on.
+          Like <code>fib_norec</code>, the function
+          <code>f_norec</code> passed into <code>make_rec</code> is a
+          function that isn't recursive but takes as an argument a
+          function that it will call. What <code>make_rec</code> does
+          is to essentially feed <code>f_norec</code> to itself, thus
+          making it a true recursive function.</p>
 
-        <p>This is clever enough, but all we've really done is find
-        a new way to implement the same old slow Fibonacci
-        function. To make it faster, we need a variant of
-        <code>make_rec</code> that inserts memoization when it ties
-        the recursive knot. We'll call that function
-        <code>memo_rec</code>:</p>
+        <p>
+	  This is clever enough, but all we've really done is find a
+          new way to implement the same old slow Fibonacci
+          function. To make it faster, we need a variant
+          of <code>make_rec</code> that inserts memoization when it
+          ties the recursive knot. We'll call that
+          function <code>memo_rec</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="7" />
 
-        <p>Note that <code>memo_rec</code> has the same signature
-        as <code>make_rec</code>.</p>
+        <p>
+	  Note that <code>memo_rec</code> has the same signature
+          as <code>make_rec</code>.</p>
 
-        <p>We're using the reference here as a way of tying the
-        recursive knot without using a <code>let rec</code>, which
-        for reasons we'll describe later wouldn't work here.</p>
+        <p>
+	  We're using the reference here as a way of tying the
+          recursive knot without using a <code>let rec</code>, which
+          for reasons we'll describe later wouldn't work here.</p>
 
-        <p>Using <code>memo_rec</code>, we can now build an
-        efficient version of <code>fib</code>:</p>
+        <p>
+	  Using <code>memo_rec</code>, we can now build an
+          efficient version of <code>fib</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="8" />
+              "code/imperative-programming/fib.topscript" part="8" />
 
-        <p>And as you can see, the exponential time complexity is
-        now gone.</p>
+        <p>
+	  And as you can see, the exponential time complexity is now
+          gone.</p>
 
-        <p>The memory behavior here is important. If you look back
-        at the definition of <code>memo_rec</code>, you'll see that
-        the call <code>memo_rec fib_norec</code> does not trigger a
-        call to <code>memoize</code>. Only when <code>fib</code> is
-        called and thereby the final argument to
-        <code>memo_rec</code> is presented does
-        <code>memoize</code> get called. The result of that call
-        falls out of scope when the <code>fib</code> call returns,
-        and so calling <code>memo_rec</code> on a function does not
-        create a memory leak—the memoization table is collected
-        after the computation completes.</p>
+        <p>
+	  The memory behavior here is important. If you look back at
+          the definition of <code>memo_rec</code>, you'll see that the
+          call <code>memo_rec fib_norec</code> does not trigger a call
+          to <code>memoize</code>. Only when <code>fib</code> is
+          called and thereby the final argument
+          to <code>memo_rec</code> is presented
+          does <code>memoize</code> get called. The result of that
+          call falls out of scope when the <code>fib</code> call
+          returns, and so calling <code>memo_rec</code> on a function
+          does not create a memory leak—the memoization table is
+          collected after the computation completes.</p>
 
-        <p>We can use <code>memo_rec</code> as part of a single
-        declaration that makes this look like it's little more than
-        a special form of <code>let rec</code>:</p>
+        <p>
+	  We can use <code>memo_rec</code> as part of a single
+          declaration that makes this look like it's little more than
+          a special form of <code>let rec</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/fib.topscript" part="9" />
+              "code/imperative-programming/fib.topscript" part="9" />
 
-        <p>Memoization is overkill for implementing Fibonacci, and
-        indeed, the <code>fib</code> defined above is not
-        especially efficient, allocating space linear in the number
-        passed in to <code>fib</code>. It's easy enough to write a
-        Fibonacci function that takes a constant amount of
-        space.</p>
+        <p>
+	  Memoization is overkill for implementing Fibonacci, and
+          indeed, the <code>fib</code> defined above is not especially
+          efficient, allocating space linear in the number passed in
+          to <code>fib</code>. It's easy enough to write a Fibonacci
+          function that takes a constant amount of space.</p>
 
-        <p>But memoization is a good approach for optimizing
-        <code>edit_distance</code>, and we can apply the same
-        approach we used on <code>fib</code> here. We will need to
-        change <code>edit_distance</code> to take a pair of strings
-        as a single argument, since <code>memo_rec</code> only
-        works on single-argument functions. (We can always recover
-        the original interface with a wrapper function.) With just
-        that change and the addition of the <code>memo_rec</code>
-        call, we can get a memoized version of
-        <code>edit_distance</code>:</p>
+        <p>
+	  But memoization is a good approach for
+          optimizing <code>edit_distance</code>, and we can apply the
+          same approach we used on <code>fib</code> here. We will need
+          to change <code>edit_distance</code> to take a pair of
+          strings as a single argument, since <code>memo_rec</code>
+          only works on single-argument functions. (We can always
+          recover the original interface with a wrapper function.)
+          With just that change and the addition of
+          the <code>memo_rec</code> call, we can get a memoized
+          version of <code>edit_distance</code>:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="6" />
+              "code/imperative-programming/memo.topscript" part="6" />
 
-        <p>This new version of <code>edit_distance</code> is much
-        more efficient than the one we started with; the following
-        call is many thousands of times faster than it was without
-        memoization:</p>
+        <p>
+	  This new version of <code>edit_distance</code> is much more
+          efficient than the one we started with; the following call
+          is many thousands of times faster than it was without
+          memoization:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/memo.topscript" part="7" />
+              "code/imperative-programming/memo.topscript" part="7" />
 
         <div class="allow_break" data-type="note">
           <h1>Limitations of let rec</h1>
 
-          <p>You might wonder why we didn't tie the recursive knot
-          in <code>memo_rec</code> using <code>let rec</code>, as
-          we did for <code>make_rec</code> earlier. Here's code
-          that tries to do just that:<idx>let rec</idx></p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/letrec.topscript" part=
-          "1" />
+          <p>
+	    You might wonder why we didn't tie the recursive knot
+            in <code>memo_rec</code> using <code>let rec</code>, as
+            we did for <code>make_rec</code> earlier. Here's code
+            that tries to do just that:<idx>let rec</idx></p>
 
-          <p>OCaml rejects the definition because OCaml, as a
-          strict language, has limits on what it can put on the
-          righthand side of a <code>let rec</code>. In particular,
-          imagine how the following code snippet would be
-          compiled:</p>
+          <link rel="import" data-code-language="ocamltop" href=
+          "code/imperative-programming/letrec.topscript" part= "1" />
+
+          <p>
+	    OCaml rejects the definition because OCaml, as a
+            strict language, has limits on what it can put on the
+            righthand side of a <code>let rec</code>. In particular,
+            imagine how the following code snippet would be
+            compiled:</p>
+
           <link rel="import" data-code-language="ocaml" href=
           "code/imperative-programming/let_rec.ml" />
 
-          <p>Note that <code>x</code> is an ordinary value, not a
-          function. As such, it's not clear how this definition
-          should be handled by the compiler. You could imagine it
-          compiling down to an infinite loop, but <code>x</code> is
-          of type <code>int</code>, and there's no <code>int</code>
-          that corresponds to an infinite loop. As such, this
-          construct is effectively impossible to compile.</p>
+          <p>
+	    Note that <code>x</code> is an ordinary value, not a
+            function. As such, it's not clear how this definition
+            should be handled by the compiler. You could imagine it
+            compiling down to an infinite loop, but <code>x</code> is
+            of type <code>int</code>, and there's no <code>int</code>
+            that corresponds to an infinite loop. As such, this
+            construct is effectively impossible to compile.</p>
 
-          <p>To avoid such impossible cases, the compiler only
-          allows three possible constructs to show up on the
-          righthand side of a <code>let rec</code>: a function
-          definition, a constructor, or the lazy keyword. This
-          excludes some reasonable things, like our definition of
-          <code>memo_rec</code>, but it also blocks things that
-          don't make sense, like our definition of
-          <code>x</code>.</p>
+          <p>
+	    To avoid such impossible cases, the compiler only allows
+            three possible constructs to show up on the righthand side
+            of a <code>let rec</code>: a function definition, a
+            constructor, or the lazy keyword. This excludes some
+            reasonable things, like our definition
+            of <code>memo_rec</code>, but it also blocks things that
+            don't make sense, like our definition
+            of <code>x</code>.</p>
 
-          <p>It's worth noting that these restrictions don't show
-          up in a lazy language like Haskell. Indeed, we can make
-          something like our definition of <code>x</code> work if
-          we use OCaml's laziness:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/letrec.topscript" part=
-          "2" />
+          <p>
+	    It's worth noting that these restrictions don't show
+            up in a lazy language like Haskell. Indeed, we can make
+            something like our definition of <code>x</code> work if
+            we use OCaml's laziness:</p>
 
-          <p>Of course, actually trying to compute this will fail.
-          OCaml's <code>lazy</code> throws an exception when a lazy
-          value tries to force itself as part of its own
-          evaluation.</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/letrec.topscript" part=
-          "3" />
+          <link rel="import" data-code-language="ocamltop" 
+		href="code/imperative-programming/letrec.topscript"
+		part="2" />
 
-          <p>But we can also create useful recursive definitions
-          with <code>lazy</code>. In particular, we can use
-          laziness to make our definition of <code>memo_rec</code>
-          work without explicit mutation:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/letrec.topscript" part=
-          "5" />
+          <p>
+	    Of course, actually trying to compute this will fail.
+            OCaml's <code>lazy</code> throws an exception when a lazy
+            value tries to force itself as part of its own
+            evaluation.</p>
 
-          <p>Laziness is more constrained than explicit mutation,
-          and so in some cases can lead to code whose behavior is
-          easier to think about.<a data-type="indexterm"
-          data-startref="BEmem">&nbsp;</a></p>
+          <link rel="import" data-code-language="ocamltop" 
+		href="code/imperative-programming/letrec.topscript"
+		part="3" />
+
+          <p>
+	    But we can also create useful recursive definitions
+            with <code>lazy</code>. In particular, we can use laziness
+            to make our definition of <code>memo_rec</code> work
+            without explicit mutation:</p>
+
+          <link rel="import" data-code-language="ocamltop" 
+		href="code/imperative-programming/letrec.topscript"
+		part="5" />
+
+          <p>
+	    Laziness is more constrained than explicit mutation,
+            and so in some cases can lead to code whose behavior is
+            easier to think about.
+
+	    <a data-type="indexterm" data-startref="BEmem">&nbsp;</a></p>
         </div>
       </section>
     </section>
@@ -1100,19 +1234,21 @@
         <code>Out_channel</code> modules.</p>
 
         <p>Let's see this in action in a simple interactive
-        application. The following program,
-        <code>time_converter</code>, prompts the user for a time
-        zone, and then prints out the current time in that time
-        zone. Here, we use Core's <code>Zone</code> module for
-        looking up a time zone, and the <code>Time</code> module
-        for computing the current time and printing it out in the
-        time zone in question:</p>
+        application. The following
+        program, <code>time_converter</code>, prompts the user for a
+        time zone, and then prints out the current time in that time
+        zone. Here, we use Core's <code>Zone</code> module for looking
+        up a time zone, and the <code>Time</code> module for computing
+        the current time and printing it out in the time zone in
+        question:</p>
+
         <link rel="import" data-code-language="ocaml" href=
         "code/imperative-programming/time_converter.ml" />
 
         <p>We can build this program using <span class=
         "command"><em>corebuild</em></span> and run it. You'll see
         that it prompts you for input, as follows:</p>
+
         <link rel="import" data-code-language="console" href=
         "code/imperative-programming/time_converter.out" />
 

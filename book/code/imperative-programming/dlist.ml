@@ -2,7 +2,7 @@
 
 (* part 1 *)
 (* file: dlist.ml *)
-open Core.Std
+open Core_kernel.Std
 
 type 'a element =
   { value : 'a;

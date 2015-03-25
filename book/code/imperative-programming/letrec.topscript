@@ -1,4 +1,7 @@
+open Core_kernel.Std
+
 let time f =
+    let open Core.Std in
     let start = Time.now () in
     let x = f () in
     let stop = Time.now () in
@@ -26,15 +29,11 @@ let memo_rec f_norec =
     f
   ;;
 
-
-
 #part 2
 let rec x = lazy (Lazy.force x + 1);;
 
-
 #part 3
 Lazy.force x;;
-
 
 #part 5
 let lazy_memo_rec f_norec x =

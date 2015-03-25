@@ -1,4 +1,7 @@
+open Core_kernel.Std;;
+
 let time f =
+    let open Core.Std in
     let start = Time.now () in
     let x = f () in
     let stop = Time.now () in

@@ -1,4 +1,4 @@
-;;
+open Core_kernel.Std;;
 
 #part 1
 for i = 0 to 3 do printf "i = %d\n" i done;;

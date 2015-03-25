@@ -1,4 +1,4 @@
-;;
+open Core_kernel.Std;;
 #part 1
 let create_number_file filename numbers =
     let outc = Out_channel.create filename in
