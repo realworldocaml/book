@@ -811,14 +811,16 @@
         <p>
 	  The preceding code is a bit tricky. <code>memoize</code>
           takes as its argument a function <code>f</code> and then
-          allocates a hash table (called <code>table</code>) and
-          returns a new function as the memoized version
-          of <code>f</code>. When called, this new function looks
-          in <code>table</code> first, and if it fails to find a
-          value, calls <code>f</code> and stashes the result
-          in <code>table</code>. Note that <code>table</code> doesn't
-          go out of scope as long as the function returned
-          by <code>memoize</code> is in scope.
+          allocates a polymorphic hash table
+          (called <code>memo_table</code>), and returns a new function
+          which is the memoized version of <code>f</code>. When
+          called, this new function
+          uses <code>Hashtbl.find_or_add</code> to try to find a value
+          in the <code>memo_table</code>, and if it fails, to
+          call <code>f</code> and store the result. Note
+          that <code>memo_table</code> is referred to by the function,
+          and so won't be collected until the function returned
+          by <code>memoize</code> is itself collected.
 
 	  <idx>memoization/benefits and drawbacks of</idx></p>
 
@@ -888,7 +890,7 @@
           exponentially with the size of the strings, meaning that our
           implementation of <code>edit_distance</code> is brutally
           slow for large strings. We can see this by writing a small
-          timing function:</p>
+          timing function, using the <code>Mtime</code> package.</p>
 
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/memo.topscript" part="3" />
@@ -948,7 +950,7 @@
           the recursive calls within <code>fib</code>. We can't just
           define <code>fib</code> in the ordinary way and memoize it
           after the fact and expect the first call to
-          <code>fib</code> to be improved:</p>
+          <code>fib</code> to be improved.</p>
 
         <link rel="import" data-code-language="ocamltop" href=
               "code/imperative-programming/fib.topscript" part="3" />
@@ -958,7 +960,7 @@
           be to rewrite <code>fib</code> in a way that unwinds the
           recursion. The following version expects as its first
           argument a function (called <code>fib</code>) that will be
-          called in lieu of the usual recursive call:</p>
+          called in lieu of the usual recursive call.</p>
 
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/fib.topscript" part="4" />
@@ -1080,8 +1082,9 @@
             we did for <code>make_rec</code> earlier. Here's code
             that tries to do just that:<idx>let rec</idx></p>
 
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/imperative-programming/letrec.topscript" part= "1" />
+          <link rel="import" data-code-language="ocamltop" 
+		href="code/imperative-programming/letrec.topscript"
+		part="1" />
 
           <p>
 	    OCaml rejects the definition because OCaml, as a
@@ -1090,8 +1093,8 @@
             imagine how the following code snippet would be
             compiled:</p>
 
-          <link rel="import" data-code-language="ocaml" href=
-          "code/imperative-programming/let_rec.ml" />
+          <link rel="import" data-code-language="ocaml" 
+		href="code/imperative-programming/let_rec.ml" />
 
           <p>
 	    Note that <code>x</code> is an ordinary value, not a
@@ -1368,8 +1371,8 @@
           <p>
 	    If this looks different from everything else you've seen
             so far, that's because it is. This is really a special
-            case in the type system. Most of the time, you don't need
-            to worry about this special handling of format strings—you
+            case in the type system.  Most of the time, you don't need
+            to know about this special handling of format strings—you
             can just use <code>printf</code> and not worry about the
             details. But it's useful to keep the broad outlines of the
             story in the back of your head.</p>
@@ -1466,6 +1469,7 @@
 
         <p>And if we do this over and over in a loop, we'll
         eventually run out of file descriptors:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/file.topscript" part="3" />
 
@@ -1481,24 +1485,31 @@
         "code/imperative-programming/file2.topscript" part="1" />
 
         <p>And now, the file descriptor leak is gone:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file2.topscript" part="2" />
 
-        <p>This is really an example of a more general issue with
-        imperative programming. When programming imperatively, you
-        need to be quite careful to make sure that exceptions don't
-        leave you in an awkward state.</p>
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/file2.topscript"
+	      part="2" /> 
 
-        <p><code>In_channel</code> has functions that automate the
-        handling of some of these details. For example,
-        <code>In_channel.with_file</code> takes a filename and a
-        function for processing data from an
-        <code>in_channel</code> and takes care of the bookkeeping
-        associated with opening and closing the file. We can
-        rewrite <code>sum_file</code> using this function, as shown
-        here:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/file2.topscript" part="3" />
+        <p>
+	  This is really an example of a more general issue with
+          imperative programming and exceptions. If you're changing the
+          internal state of your program and you're interrupted by an
+          exception, you need to consider quite carefully if it's
+          safe to continue working from your current state.</p>
+
+        <p>
+	  <code>In_channel</code> has functions that automate the
+          handling of some of these details. For
+          example, <code>In_channel.with_file</code> takes a filename
+          and a function for processing data from
+          an <code>in_channel</code> and takes care of the bookkeeping
+          associated with opening and closing the file. We can
+          rewrite <code>sum_file</code> using this function, as shown
+          here:</p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/file2.topscript"
+	      part="3" />
 
         <p>Another misfeature of our implementation of
         <code>sum_file</code> is that we read the entire file into
@@ -1520,83 +1531,99 @@
     <section id="order-of-evaluation" data-type="sect1">
       <h1>Order of Evaluation</h1>
 
-      <p>The order in which expressions are evaluated is an
-      important part of the definition of a programming language,
-      and it is particularly important when programming
-      imperatively. Most programming languages you're likely to
-      have encountered are <em>strict</em>, and OCaml is, too. In a
-      strict language, when you bind an identifier to the result of
-      some expression, the expression is evaluated before the
-      variable is bound. Similarly, if you call a function on a set
-      of arguments, those arguments are evaluated before they are
-      passed to the function.<idx>strict
-      evaluation</idx><idx>expressions, order of
-      evaluation</idx><idx>evaluation, order of</idx><idx>order of
-      evaluation</idx><idx>imperative programming/order of
-      evaluation</idx></p>
+      <p>
+	The order in which expressions are evaluated is an important
+	part of the definition of a programming language, and it is
+	particularly important when programming imperatively. Most
+	programming languages you're likely to have encountered
+	are <em>strict</em>, and OCaml is too. In a strict language,
+	when you bind an identifier to the result of some expression,
+	the expression is evaluated before the variable is
+	bound. Similarly, if you call a function on a set of arguments,
+	those arguments are evaluated before they are passed to the
+	function.
 
-      <p>Consider the following simple example. Here, we have a
-      collection of angles, and we want to determine if any of them
-      have a negative <code>sin</code>. The following snippet of
-      code would answer that question:</p>
+	<idx>strict evaluation</idx>
+	<idx>expressions, order of evaluation</idx>
+	<idx>evaluation, order of</idx>
+	<idx>order of evaluation</idx>
+	<idx>imperative programming/order of evaluation</idx></p>
+
+      <p>
+	Consider the following simple example. Here, we have a
+	collection of angles, and we want to determine if any of them
+	have a negative <code>sin</code>. The following snippet of
+	code would answer that question:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/imperative-programming/order.topscript" part="1" />
+
+      <p>
+	In some sense, we don't really need to compute the <code>sin
+	128.</code> because <code>sin 75.</code> is negative, so we
+	could know the answer before even computing <code>sin
+	128.</code>.</p>
+
+      <p>
+	It doesn't have to be this way. Using the <code>lazy</code>
+	keyword, we can write the original computation so
+	that <code>sin 128.</code> won't ever be computed:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="1" />
-
-      <p>In some sense, we don't really need to compute the
-      <code>sin 128.</code> because <code>sin 75.</code> is
-      negative, so we could know the answer before even computing
-      <code>sin 128.</code>.</p>
-
-      <p>It doesn't have to be this way. Using the
-      <code>lazy</code> keyword, we can write the original
-      computation so that <code>sin 128.</code> won't ever be
-      computed:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="2" />
+	    "code/imperative-programming/order.topscript" part="2" />
 
       <p>We can confirm that fact by a few well-placed
       <code>printf</code>s:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
-      "code/imperative-programming/order.topscript" part="3" />
+	    "code/imperative-programming/order.topscript" part="3" />
 
-      <p>OCaml is strict by default for a good reason: lazy
-      evaluation and imperative programming generally don't mix
-      well because laziness makes it harder to reason about when a
-      given side effect is going to occur. Understanding the order
-      of side effects is essential to reasoning about the behavior
-      of an imperative program.</p>
+      <p>
+	OCaml is strict by default for a good reason: lazy evaluation
+	and imperative programming generally don't mix well because
+	laziness makes it harder to reason about when a given side
+	effect is going to occur. Understanding the order of side
+	effects is essential to reasoning about the behavior of an
+	imperative program.</p>
 
-      <p>In a strict language, we know that expressions that are
-      bound by a sequence of <code>let</code> bindings will be
-      evaluated in the order that they're defined. But what about
-      the evaluation order within a single expression? Officially,
-      the answer is that evaluation order within an expression is
-      undefined. In practice, OCaml has only one compiler, and that
-      behavior is a kind of de facto standard. Unfortunately, the
-      evaluation order in this case is often the opposite of what
-      one might expect.</p>
+      <p>
+	Because OCaml is strict, we know that expressions that are
+	bound by a sequence of <code>let</code> bindings will be
+	evaluated in the order that they're defined. But what about
+	the evaluation order within a single expression? Officially,
+	the answer is that evaluation order within an expression is
+	undefined. In practice, OCaml has only one compiler, and that
+	behavior is a kind of <em>de facto</em> standard. Unfortunately, the
+	evaluation order in this case is often the opposite of what
+	one might expect.</p>
 
       <p>Consider the following example:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/order.topscript" part="4" />
 
-      <p>Here, you can see that the subexpression that came last
-      was actually evaluated first! This is generally the case for
-      many different kinds of expressions. If you want to make sure
-      of the evaluation order of different subexpressions, you
-      should express them as a series of <code>let</code>
-      bindings.</p>
+      <p>
+	Here, you can see that the subexpression that came last was
+	actually evaluated first! This is generally the case for many
+	different kinds of expressions. If you want to make sure of
+	the evaluation order of different subexpressions, you should
+	express them as a series of <code>let</code> bindings.</p>
     </section>
 
     <section id="side-effects-and-weak-polymorphism" data-type=
     "sect1">
       <h1>Side Effects and Weak Polymorphism</h1>
 
-      <p>Consider the following simple, imperative
-      function:<idx>polymorphism/weak polymorphism</idx><idx>weak
-      polymorphism</idx><idx>side effects</idx><idx id=
-      "IPsideweak">imperative programming/side effects/weak
-      polymorphism</idx></p>
+      <p>Consider the following simple, imperative function:
+
+	<idx>polymorphism/weak polymorphism</idx>
+	<idx>weak polymorphism</idx>
+	<idx>side effects</idx>
+	<idx id= "IPsideweak">
+	  imperative programming/side effects/weak polymorphism
+	</idx>
+      </p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/weak.topscript" part="1" />
 
@@ -1620,6 +1647,7 @@
       that gives us polymorphic types in the first place. The
       identity function, as an example, gets a polymorphic type in
       this way:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/weak.topscript" part="2" />
 
@@ -1641,11 +1669,14 @@
       type. That makes sense because, unlike <code>identity</code>,
       <code>remember</code> always returns the value it was passed
       on its first invocation, which means its return value must
-      always have the same type.<idx>type variables</idx></p>
+      always have the same type.
+
+      <idx>type variables</idx></p>
 
       <p>OCaml will convert a weakly polymorphic variable to a
       concrete type as soon as it gets a clue as to what concrete
       type it is to be used as:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/weak.topscript" part="3" />
 
@@ -1656,20 +1687,23 @@
       <section id="the-value-restriction" data-type="sect2">
         <h2>The Value Restriction</h2>
 
-        <p>So, when does the compiler infer weakly polymorphic
-        types? As we've seen, we need weakly polymorphic types when
-        a value of unknown type is stored in a persistent mutable
-        cell. Because the type system isn't precise enough to
-        determine all cases where this might happen, OCaml uses a
-        rough rule to flag cases that don't introduce any
-        persistent mutable cells, and to only infer polymorphic
-        types in those cases. This rule is called <em>the value
-        restriction</em>.<idx>value restriction</idx></p>
+        <p>
+	  So, when does the compiler infer weakly polymorphic types?
+          As we've seen, we need weakly polymorphic types when a value
+          of unknown type is stored in a persistent mutable
+          cell. Because the type system isn't precise enough to
+          determine all cases where this might happen, OCaml uses a
+          rough rule to flag cases that don't introduce any persistent
+          mutable cells, and to only infer polymorphic types in those
+          cases. This rule is called <em>the value restriction</em>.
 
-        <p>The core of the value restriction is the observation
-        that some kinds of expressions, which we'll refer to as
-        <em>simple values</em>, by their nature can't introduce
-        persistent mutable cells, including:</p>
+	  <idx>value restriction</idx></p>
+
+        <p>
+	  The core of the value restriction is the observation that
+          some kinds of expressions, which we'll refer to
+          as <em>simple values</em>, by their nature can't introduce
+          persistent mutable cells, including:</p>
 
         <ul>
           <li>
