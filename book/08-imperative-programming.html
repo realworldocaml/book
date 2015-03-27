@@ -1651,15 +1651,16 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/weak.topscript" part="2" />
 
-      <p>As you can see, the polymorphic type of
-      <code>identity</code> lets it operate on values with
-      different types.</p>
+      <p>
+	As you can see, the polymorphic type of <code>identity</code>
+	lets it operate on values with different types.</p>
 
-      <p>This is not what happens with <code>remember</code>,
-      though. As you can see from the above examples, the type that
-      OCaml infers for <code>remember</code> looks almost, but not
-      quite, like the type of the identity function. Here it is
-      again:</p>
+      <p>
+	This is not what happens with <code>remember</code>, though.
+	As you can see from the above examples, the type that OCaml
+	infers for <code>remember</code> looks almost, but not quite,
+	like the type of the identity function. Here it is again:</p>
+
       <link rel="import" data-code-language="ocaml" href=
       "code/imperative-programming/remember_type.ml" />
 
@@ -1743,19 +1744,22 @@
         value by the preceding definition, we'll get different
         results. For example, consider what happens if we try to
         memoize the function defined previously.</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/value_restriction.topscript"
-        part="2" />
 
-        <p>The memoized version of the function does in fact need
-        to be restricted to a single type because it uses mutable
-        state behind the scenes to cache values returned by
-        previous invocations of the function. But OCaml would make
-        the same determination even if the function in question did
-        no such thing. Consider this example:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/value_restriction.topscript"
-        part="3" />
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/value_restriction.topscript"
+              part="2" />
+
+        <p>
+	  The memoized version of the function does in fact need to be
+          restricted to a single type because it uses mutable state
+          behind the scenes to cache values returned by previous
+          invocations of the function. But OCaml would make the same
+          determination even if the function in question did no such
+          thing. Consider this example:</p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/value_restriction.topscript"
+              part="3" />
 
         <p>It would be safe to infer a fully polymorphic variable
         here, but because OCaml's type system doesn't distinguish
@@ -1844,6 +1848,7 @@
         simple application of the identity function, is not a
         simple value and thus can turn a polymorphic value into a
         weakly polymorphic one:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
         part="8" />
@@ -1851,60 +1856,71 @@
         <p>But that's not always the case. When the type of the
         returned value is immutable, then OCaml can typically infer
         a fully polymorphic type:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
         part="9" />
 
-        <p>On the other hand, if the returned type is potentially
-        mutable, then the result will be weakly polymorphic:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/value_restriction.topscript"
-        part="10" />
+        <p>On the other hand, if the returned type is mutable, then
+        the result will be weakly polymorphic:</p> 
 
-        <p>A more important example of this comes up when defining
-        abstract data types. Consider the following simple data
-        structure for an immutable list type that supports
-        constant-time concatenation:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/value_restriction.topscript"
-        part="11" />
+	<link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/value_restriction.topscript"
+              part="10" />
 
-        <p>The details of the implementation don't matter so much,
-        but it's important to note that a
-        <code>Concat_list.t</code> is unquestionably an immutable
-        value. However, when it comes to the value restriction,
-        OCaml treats it as if it were mutable:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/value_restriction.topscript"
-        part="12" />
+        <p>
+	  A more important example of this comes up when defining
+          abstract data types. Consider the following simple data
+          structure for an immutable list type that supports
+          constant-time concatenation:</p>
 
-        <p>The issue here is that the signature, by virtue of being
-        abstract, has obscured the fact that
-        <code>Concat_list.t</code> is in fact an immutable data
-        type. We can resolve this in one of two ways: either by
-        making the type concrete (i.e., exposing the implementation
-        in the <code>mli</code>), which is often not desirable; or
-        by marking the type variable in question as
-        <em>covariant</em>. We'll learn more about covariance and
-        contravariance in <a href="11-objects.html#objects"
-        data-type="xref">Objects</a>, but for now, you can think of
-        it as an annotation that can be put in the interface of a
-        pure data structure.<idx>datatypes/covariant</idx></p>
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/value_restriction.topscript"
+              part="11" />
 
-        <p>In particular, if we replace <code>type 'a t</code> in
-        the interface with <code>type +'a t</code>, that will make
-        it explicit in the interface that the data structure
-        doesn't contain any persistent references to values of type
-        <code>'a</code>, at which point, OCaml can infer
-        polymorphic types for expressions of this type that are not
-        simple values:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/imperative-programming/value_restriction.topscript"
-        part="13" />
+        <p>The details of the implementation don't matter so much, but
+        it's important to note that a <code>Concat_list.t</code> is
+        unquestionably an immutable value. However, when it comes to
+        the value restriction, OCaml treats it as if it were
+        mutable:</p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/value_restriction.topscript"
+              part="12" />
+
+        <p>
+	  The issue here is that the signature, by virtue of being
+          abstract, has obscured the fact that
+          <code>Concat_list.t</code> is in fact an immutable data
+          type. We can resolve this in one of two ways: either by
+          making the type concrete (i.e., exposing the implementation
+          in the <code>mli</code>), which is often not desirable; or
+          by marking the type variable in question as
+          <em>covariant</em>. We'll learn more about covariance and
+          contravariance in <a href="11-objects.html#objects"
+	  data-type="xref">Objects</a>, but for now, you can think of
+          it as an annotation that can be put in the interface of a
+          pure data structure.
+
+	  <idx>datatypes/covariant</idx></p>
+
+        <p>
+	  In particular, if we replace <code>type 'a t</code> in
+          the interface with <code>type +'a t</code>, that will make
+          it explicit in the interface that the data structure
+          doesn't contain any persistent references to values of type
+          <code>'a</code>, at which point, OCaml can infer
+          polymorphic types for expressions of this type that are not
+          simple values:</p>
+	
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/imperative-programming/value_restriction.topscript"
+              part="13" />
 
         <p>Now, we can apply the identity function to
         <code>Concat_list.empty</code> without without losing any
         polymorphism:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/value_restriction.topscript"
         part="14" />

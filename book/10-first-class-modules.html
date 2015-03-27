@@ -9,60 +9,84 @@
   <section xmlns="http://www.w3.org/1999/xhtml" id="first-class-modules" data-type="chapter">
     <h1>First-Class Modules</h1>
 
-    <p>You can think of OCaml as being broken up into two parts: a
-    core language that is concerned with values and types, and a
-    module language that is concerned with modules and module
-    signatures. These sublanguages are stratified, in that modules
-    can contain types and values, but ordinary values can't contain
-    modules or module types. That means you can't do things like
-    define a variable whose value is a module, or a function that
-    takes a module as an argument.<idx id="MODfirst">modules/first-class modules</idx></p>
+    <p>
+      You can think of OCaml as being broken up into two parts: a core
+      language that is concerned with values and types, and a module
+      language that is concerned with modules and module
+      signatures. These sublanguages are stratified, in that modules
+      can contain types and values, but ordinary values can't contain
+      modules or module types. That means you can't do things like
+      define a variable whose value is a module, or a function that
+      takes a module as an argument.
 
-    <p>OCaml provides a way around this stratification in the form
-    of <em>first-class modules</em>. First-class modules are
-    ordinary values that can be created from and converted back to
-    regular modules.<idx id="FCMwork">first-class modules/working with</idx></p>
+      <idx id="MODfirst">modules/first-class modules</idx></p>
 
-    <p>First-class modules are a sophisticated technique, and
-    you'll need to get comfortable with some advanced aspects of
-    the language to use them effectively. But it's worth learning,
-    because letting modules into the core language is quite
-    powerful, increasing the range of what you can express and
-    making it easier to build flexible and modular <span class="keep-together">systems</span>.</p>
+    <p>
+      OCaml provides a way around this stratification in the form
+      of <em>first-class modules</em>. First-class modules are
+      ordinary values that can be created from and converted back to
+      regular modules.
+
+      <idx id="FCMwork">first-class modules/working with</idx></p>
+
+    <p>
+      First-class modules are a sophisticated technique, and you'll
+      need to get comfortable with some advanced aspects of the
+      language to use them effectively. But it's worth learning,
+      because letting modules into the core language is quite
+      powerful, increasing the range of what you can express and
+      making it easier to build flexible and
+      modular <span class="keep-together">systems</span>.</p>
 
     <section id="working-with-first-class-modules" data-type="sect1">
       <h1>Working with First-Class Modules</h1>
 
-      <p>We'll start out by covering the basic mechanics of
-      first-class modules by working through some toy examples.
-      We'll get to more realistic examples in the next section.</p>
+      <p>
+	We'll start out by covering the basic mechanics of
+	first-class modules by working through some toy examples.
+	We'll get to more realistic examples in the next section.</p>
 
-      <p>In that light, consider the following signature of a
-      module with a single integer variable:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript"/>
+      <p>
+	In that light, consider the following signature of a module
+	with a single integer variable:</p>
 
-      <p>We can also create a module that matches this
-      signature:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="1"/>
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/fcm/main.topscript"/> 
 
-      <p>A first-class module is created by packaging up a module
-      with a signature that it satisfies. This is done using the
-      <code>module</code> keyword, using the following
-      syntax:<idx>module keyword</idx></p>
-      <link rel="import" data-code-language="ocamlsyntax" href="code/fcm/pack.syntax"/>
+      <p>We can also create a module that matches this signature:</p>
+
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/fcm/main.topscript" part="1"/> 
+
+      <p>
+	A first-class module is created by packaging up a module with
+	a signature that it satisfies. This is done using
+	the <code>module</code> keyword, using the following
+	syntax:
+
+	<idx>module keyword</idx></p>
+
+      <link rel="import" data-code-language="ocamlsyntax"
+	    href="code/fcm/pack.syntax"/> 
 
       <p>So, we can convert <code>Three</code> into a first-class
       module as follows:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="2"/>
+
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/fcm/main.topscript" part="2"/> 
 
       <p>The module type doesn't need to be part of the
       construction of a first-class module if it can be inferred.
       Thus, we can write:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="3"/>
+
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/fcm/main.topscript" part="3"/> 
 
       <p>We can also create a first-class module from an anonymous
       module:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="4"/>
+
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/fcm/main.topscript" part="4"/> 
 
       <p>In order to access the contents of a first-class module,
       you need to unpack it into an ordinary module. This can be
@@ -76,53 +100,68 @@
       <aside data-type="sidebar">
         <h5>Equality of First-Class Module Types</h5>
 
-        <p>The type of the first-class module, e.g., <code>(module
-        X_int)</code>, is based on the fully qualified name of the
-        signature that was used to construct it. A first-class
-        module based on a signature with a different name, even if
-        it is substantively the same signature, will result in a
-        distinct type:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="6"/>
+        <p>
+	  The type of the first-class module, e.g., <code>(module
+            X_int)</code>, is based on the fully qualified name of the
+          signature that was used to construct it. A first-class
+          module based on a signature with a different name, even if
+          it is substantively the same signature, will result in a
+          distinct type:</p>
 
-        <p>Even though their types as first-class modules are
-        distinct, the underlying module types are compatible
-        (indeed, identical), so we can unify the types by unpacking
-        and repacking the module:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="7"/>
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/main.topscript" part="6"/>
 
-        <p>The way in which type equality for first-class modules
-        is determined can be confusing. One common and problematic
-        case is that of creating an alias of a module type defined
-        elsewhere. This is often done to improve readability and
-        can happen both through an explicit declaration of a module
-        type or implicitly through an <code>include</code>
-        declaration. In both cases, this has the unintended side
-        effect of making first-class modules built off the alias
-        incompatible with those built off the original module type.
-        To deal with this, we should be disciplined in how we refer
-        to signatures when constructing first-class <span class="keep-together">modules</span>.</p>
+        <p>
+	  Even though their types as first-class modules are
+          distinct, the underlying module types are compatible
+          (indeed, identical), so we can unify the types by unpacking
+          and repacking the module:</p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/main.topscript" part="7"/>
+
+        <p>
+	  The way in which type equality for first-class modules
+          is determined can be confusing. One common and problematic
+          case is that of creating an alias of a module type defined
+          elsewhere. This is often done to improve readability and
+          can happen both through an explicit declaration of a module
+          type or implicitly through an <code>include</code>
+          declaration. In both cases, this has the unintended side
+          effect of making first-class modules built off the alias
+          incompatible with those built off the original module type.
+          To deal with this, we should be disciplined in how we refer
+          to signatures when constructing first-class
+	  <span class="keep-together">modules</span>.</p>
       </aside>
 
-      <p>We can also write ordinary functions which consume and
-      create first-class modules. The following shows the
-      definition of two functions: <code>to_int</code>, which
-      converts a <code>(module X_int)</code> into an
-      <code>int</code>; and <code>plus</code>, which returns the
-      sum of two <code>(module X_int)</code>:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="8"/>
+      <p>
+	We can also write ordinary functions which consume and create
+	first-class modules. The following shows the definition of two
+	functions: <code>to_int</code>, which converts a <code>(module
+	X_int)</code> into an <code>int</code>; and <code>plus</code>,
+	which returns the sum of two <code>(module X_int)</code>:</p>
 
-      <p>With these functions in hand, we can now work with values
-      of type <code>(module X_int)</code> in a more natural style,
-      taking advantage of the concision and simplicity of the core
-      <span class="keep-together">language</span>:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="9"/>
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="8"/>
 
-      <p>There are some useful syntactic shortcuts when dealing
-      with first-class modules. One notable one is that you can do
-      the conversion to an ordinary module within a pattern match.
-      Thus, we can rewrite the <code>to_int</code> function as
-      follows:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="10"/>
+      <p>With these functions in hand, we can now work with values of
+      type <code>(module X_int)</code> in a more natural style, taking
+      advantage of the concision and simplicity of the
+      core <span class="keep-together">language</span>:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="9"/>
+
+      <p>
+	There are some useful syntactic shortcuts when dealing
+	with first-class modules. One notable one is that you can do
+	the conversion to an ordinary module within a pattern match.
+	Thus, we can rewrite the <code>to_int</code> function as
+	follows:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="10"/>
 
       <p>First-class modules can contain types and functions in
       addition to simple values like <code>int</code>. Here's an
@@ -154,41 +193,63 @@
       values of the matching type:</p>
       <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="16"/>
 
-      <p>We can also write functions that use such first-class
-      modules polymorphically. The following function takes two
-      arguments: a <code>Bumpable</code> module and a list of
-      elements of the same type as the type <code>t</code> of the
-      module:<idx>polymorphism/in first-class modules</idx><idx>first-class modules/polymorphism in</idx></p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="17"/>
+      <p>
+	We can also write functions that use such first-class
+	modules polymorphically. The following function takes two
+	arguments: a <code>Bumpable</code> module and a list of
+	elements of the same type as the type <code>t</code> of the
+	module:
 
-      <p>Here, we used a feature of OCaml that hasn't come up
-      before: a <em>locally abstract type</em>. For any function,
-      you can declare a pseudoparameter of the form <code>(type
-      a)</code> for any type name <code>a</code> which introduces a
-      fresh type. This type acts like an abstract type within the
-      context of the function. In the example above, the locally
-      abstract type was used as part of a sharing constraint that
-      ties the type <code>B.t</code> with the type of the elements
-      of the list passed in.<idx>datatypes/locally abstract types</idx><idx>abstract types</idx><idx>locally abstract types</idx></p>
+	<idx>polymorphism/in first-class modules</idx>
+	<idx>first-class modules/polymorphism in</idx></p>
 
-      <p>The resulting function is polymorphic in both the type of
-      the list element and the type <code>Bumpable.t</code>. We can
-      see this function in action:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="18"/>
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="17"/>
 
-      <p>Polymorphic first-class modules are important because they
-      allow you to connect the types associated with a first-class
-      module to the types of other values you're working with.</p>
+      <p>
+	Here, we used a feature of OCaml that hasn't come up
+	before: a <em>locally abstract type</em>. For any function,
+	you can declare a pseudoparameter of the form <code>(type
+	  a)</code> which introduces a
+	fresh type named <code>a</code>. This type acts like an
+	abstract type within the context of the function. In the
+	example above, the locally abstract type was used as part of a
+	sharing constraint that ties the type <code>B.t</code> with
+	the type of the elements of the list passed in.
+
+	<idx>datatypes/locally abstract types</idx>
+	<idx>abstract types</idx>
+	<idx>locally abstract types</idx>
+	<idx>sharing constraint</idx>
+      </p>
+
+      <p>
+	The resulting function is polymorphic in both the type of the
+	list element and the type <code>Bumpable.t</code>. We can see
+	this function in action:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="18"/>
+
+      <p>
+	Polymorphic first-class modules are important because they
+	allow you to connect the types associated with a first-class
+	module to the types of other values you're working with.</p>
 
       <div data-type="note">
         <h1>More on Locally Abstract Types</h1>
 
-        <p>One of the key properties of locally abstract types is
-        that they're dealt with as abstract types in the function
-        they're defined within, but are polymorphic from the
-        outside. Consider the following example:<idx>polymorphism/in locally abstract types</idx></p>
+        <p>
+	  One of the key properties of locally abstract types is
+          that they're dealt with as abstract types in the function
+          they're defined within, but are polymorphic from the
+          outside. Consider the following example:
+
+	  <idx>polymorphism/in locally abstract types</idx></p>
       </div>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="19"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="19"/>
 
       <p>This compiles successfully because the type <code>a</code>
       is used in a way that is compatible with it being abstract,

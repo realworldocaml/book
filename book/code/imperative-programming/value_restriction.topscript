@@ -1,13 +1,21 @@
+open Core_kernel.Std;;
+
+#require "mtime.os.top";;
+
+let time f =
+    let counter = Mtime.counter () in
+    let x = f () in
+    let elapsed = Mtime.count counter in
+    printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+    x 
+;;
+
 let memoize f =
-    let table = Hashtbl.Poly.create () in
-    (fun x ->
-      match Hashtbl.find table x with
-      | Some y -> y
-      | None ->
-        let y = f x in
-        Hashtbl.add_exn table ~key:x ~data:y;
-        y
-    );;
+  let memo_table = Hashtbl.Poly.create () in
+  (fun x ->
+     Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
+;;
+
 let identity x = x;;
 
 #part 1

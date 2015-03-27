@@ -1,3 +1,4 @@
+open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
 
