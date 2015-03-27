@@ -136,6 +136,14 @@ let fold t ~init ~f =
   in
   List.fold t ~init ~f:loop
 
+let get_body_childs ~filename t =
+  match get_all_nodes "body" t with
+  | [] -> failwithf "%s: <body> not found" filename ()
+  | _::_::_ -> failwithf "%s: multiple <body> tags found" filename ()
+  | (Data _)::[] -> assert false
+  | (Element ("body",_,childs))::[] -> childs
+  | (Element (_,_,_))::[] -> assert false
+
 
 (******************************************************************************)
 (* Constructors                                                               *)

@@ -460,7 +460,7 @@ h3 {
   text-transform: lowercase;
   font-variant: small-caps;
   font-weight: bold;
-  color: #AAAAAA; }
+  color: #777777; }
 
 h4, h5, h6 {
   text-transform: uppercase;
@@ -508,30 +508,21 @@ a h1 {
     float: none;
     padding-bottom: 1.6875rem;
     margin-top: 1.6875rem; }
-  .wrap .index-toc, .wrap .author-holder, .wrap .extras-holder {
+  .wrap .index-toc-holder, .wrap .author-holder, .wrap .extras-holder {
+    clear: both;
     padding-left: 1.6875rem;
     padding-right: 1.6875rem;
     width: 100%;
     float: none;
     margin-top: 1.6875rem;
     margin-bottom: 1.6875rem; }
-  .wrap .extras-holder {
-    border-top: 1px solid #DDDDDD; }
+  .wrap .author-holder, .wrap .extras-holder {
+    border-top: 1px solid #DDDDDD;
+    overflow: hidden; }
   @media only screen and (min-width:40.063em) {
     .wrap .main-body {
       max-width: 54rem;
-      padding-bottom: 3.375rem; }
-    .wrap .index-toc {
-      padding-left: 1.6875rem;
-      padding-right: 1.6875rem;
-      width: 50%;
-      float: left; }
-    .wrap .author-holder, .wrap .extras-holder {
-      padding-left: 1.6875rem;
-      padding-right: 1.6875rem;
-      width: 50%;
-      float: right;
-      margin-bottom: 0; } }
+      padding-bottom: 3.375rem; } }
   @media only screen and (min-width:64.063em) {
     .wrap .left-column {
       display: block;
@@ -548,23 +539,7 @@ a h1 {
       width: 66.6666666667%;
       float: left;
       margin-left: 29.1666666667% !important;
-      padding-bottom: 6.75rem; }
-    .wrap .index-toc {
-      padding-left: 1.6875rem;
-      padding-right: 1.6875rem;
-      width: 41.6666666667%;
-      float: left; }
-    .wrap .author-holder {
-      padding-left: 1.6875rem;
-      padding-right: 1.6875rem;
-      width: 29.1666666667%;
-      float: left;
-      border-left: 1px solid #DDDDDD; }
-    .wrap .extras-holder {
-      padding-left: 1.6875rem;
-      padding-right: 1.6875rem;
-      width: 58.3333333333%;
-      float: right; } }
+      padding-bottom: 6.75rem; } }
   @media only screen and (min-width:90.063em) {
     .wrap .left-column {
       width: 32rem;
@@ -1364,7 +1339,7 @@ pre .il {
           margin: 0;
           text-transform: none;
           font-weight: 300;
-          font-family: "rooney-web", Georgia, Cambria, "Times New Roman", Times, serif;
+          font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
           font-style: italic;
           font-size: 1rem;
           color: #929aa6; }
@@ -1387,7 +1362,6 @@ pre .il {
     font-size: 1rem;
     text-transform: none;
     font-weight: 300;
-    font-family: "rooney-web", Georgia, Cambria, "Times New Roman", Times, serif;
     font-style: italic;
     margin: 0; }
   .toc-full li {
@@ -1445,21 +1419,15 @@ pre .il {
     font-size: 1rem;
     color: #6f6f6f;
     margin: 0 0 0.625rem; }
+  @media only screen and (min-width:40.063em) {
+    .index-toc {
+      padding-left: 1.6875rem;
+      padding-right: 1.6875rem;
+      width: 33.3333333333%;
+      float: left; } }
 
 .author {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 0;
-  margin-bottom: 0;
-  max-width: 573.75rem;
-  border-top: 1px solid #DDDDDD;
   padding-top: 1.6875rem; }
-  .author:before, .author:after {
-    content: " ";
-    display: table; }
-  .author:after {
-    clear: both; }
   .author .author-image {
     padding-left: 0;
     padding-right: 0;
@@ -1474,14 +1442,15 @@ pre .il {
     .author .author-meta p a {
       font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
   @media only screen and (min-width:40.063em) {
-    .author .author-meta h4 {
-      font-size: 1.2rem; }
-    .author .author-meta p {
-      font-size: 1rem; } }
-  @media only screen and (min-width:64.063em) {
     .author {
-      border-top: none;
-      padding-top: 0; } }
+      padding-left: 1.6875rem;
+      padding-right: 1.6875rem;
+      width: 33.3333333333%;
+      float: left; }
+      .author .author-meta h4 {
+        font-size: 1.2rem; }
+      .author .author-meta p {
+        font-size: 1rem; } }
 
 .extras {
   width: auto;
@@ -1502,6 +1471,9 @@ pre .il {
     width: 50%;
     float: left;
     padding: 1.6875rem; }
+    .extras a img {
+      width: 50%;
+      margin-bottom: 1rem; }
     .extras a:hover h5 {
       color: #8e44ad; }
   @media only screen and (min-width:40.063em) {
@@ -1510,7 +1482,8 @@ pre .il {
       padding-right: 1.6875rem;
       width: 33.3333333333%;
       float: left;
-      padding: 1.6875rem; } }
+      padding: 1.6875rem;
+      text-align: center; } }
 
 .question {
   font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
@@ -1562,14 +1535,15 @@ pre .il {
         .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item .scroll-nav__sub-link {
           display: block;
           font-size: 0.875em;
+          font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
           padding: 0.4375rem 1rem;
           line-height: 1.2;
-          color: #929aa6;
+          color: dimgray;
           font-style: italic;
           -webkit-transition: color 0.2s;
                   transition: color 0.2s; }
           .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item .scroll-nav__sub-link:hover {
-            color: #777777; }
+            color: #363636; }
         .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item.active .scroll-nav__sub-link {
           color: #000000; }
 
@@ -1609,7 +1583,7 @@ section[data-type=chapter] div[data-type=note] {
   section[data-type=chapter] div[data-type=note] p {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
   section[data-type=chapter] div[data-type=note] code {
-    background: rgba(255, 255, 255, 0.5); }
+    background: #f8e2bf; }
 section[data-type=chapter] aside {
   margin-left: -1.6875rem;
   margin-right: -1.6875rem;
@@ -1644,15 +1618,8 @@ section[data-type=chapter] dl dd {
     top: 0; }
 section[data-type=chapter] ul {
   list-style: circle;
+  margin-left: 1.6875rem;
   margin-bottom: 1.25rem; }
-  section[data-type=chapter] ul li {
-    padding-bottom: 0.4166666667rem;
-    margin-bottom: 0.4166666667rem;
-    border-bottom: 1px dotted #DDDDDD; }
-    section[data-type=chapter] ul li:last-child {
-      padding-bottom: 0;
-      margin-bottom: 0;
-      border-bottom: 0; }
 section[data-type=chapter] ol {
   margin-bottom: 1.25rem; }
   section[data-type=chapter] ol li {
@@ -1680,16 +1647,9 @@ section[data-type=chapter] table {
   section[data-type=chapter] section[data-type=sect1] {
     margin-top: 3.375rem;
     padding-top: 3.375rem; }
-  section[data-type=chapter] aside {
-    -webkit-column-count: 2;
-       -moz-column-count: 2;
-            column-count: 2;
-    -webkit-column-gap: 1.6875rem;
-       -moz-column-gap: 1.6875rem;
-            column-gap: 1.6875rem; }
-    section[data-type=chapter] aside pre {
-      margin-left: 0;
-      margin-right: 0; }
+  section[data-type=chapter] aside pre {
+    margin-left: 0;
+    margin-right: 0; }
   section[data-type=chapter] dl dd {
     padding-left: 2.53125rem; } }
 

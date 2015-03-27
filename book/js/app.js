@@ -10,6 +10,7 @@ function checkScroll() {
 		{
 			if (snTop < wS && $snSide.offset().top + $snSide.outerHeight() > wS + wh)
 			{
+				$sn.css('min-height', '');
 				if (!$sn.hasClass('true-fixed'))
 				{
 					$sn.addClass('true-fixed').removeClass('top bottom');
@@ -38,6 +39,7 @@ function checkScroll() {
 				else
 				{
 					$sn.addClass('bottom').removeClass('top');
+					$sn.css('min-height', wh);
 					snScroll = snInHeight - $(window).height();
 				}
 				
@@ -65,7 +67,7 @@ $(document).ready(function(){
 	}
 	
 	if ($('.toc').length > 0)
-	{
+	{		
 		$('.toc .children').slideUp(0).before($('<i>+</i>'));
 		$('.toc i').on('click', function(e){
 			e.preventDefault();
@@ -85,6 +87,21 @@ $(document).ready(function(){
 			{
 				$(this).toggleClass('on').next().slideToggle();
 			}
+		});
+	}
+	
+	if ($('.toc-full').length > 0)
+	{
+		$('.main-body').scrollNav({
+			sections:		'.part-link',
+			subSections:	'.toc-full>li',
+			sectionElem:	'div',
+			insertTarget:	$('.left-column').get(0),
+			insertLocation:	'prependTo',
+			fixedMargin:	1000,
+			showHeadline:	false,
+			scrollToHash:	false,
+			showTopLink:	false
 		});
 	}
 	
