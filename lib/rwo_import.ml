@@ -2,12 +2,21 @@ open Core.Std
 module Code = Rwo_code
 module Html = Rwo_html
 
-type t = {
-  data_code_language : Rwo_code.lang;
-  href : string;
-  part : float option;
-  childs : Rwo_html.item list;
-} with sexp
+module T = struct
+  type t = {
+    data_code_language : Rwo_code.lang;
+    href : string;
+    part : float option;
+    childs : Rwo_html.item list;
+  } with sexp
+
+  (* Ignore [data_code_language] and [childs]. *)
+  let compare (x:t) (y:t) =
+    compare (x.href, x.part) (y.href, y.part)
+
+end
+include T
+include Comparable.Make(T)
 
 let is_import_html = function
   | Nethtml.Data _ -> false

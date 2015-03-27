@@ -330,23 +330,12 @@ let to_import (x:t) : Import.t Or_error.t =
     childs = List.filter_map ~f:ident [x.p.a2; x.p.a3];
   }
 
-module ImportMap = Map.Make(
-  struct
-    type t = Import.t
-    with sexp
-
-    (* Ignore [data_code_language] and [childs]. *)
-    let compare (x:t) (y:t) =
-      compare (x.href, x.part) (y.href, y.part)
-  end
-)
-
 let extract_code_from_1e_exn chapter =
   let base = sprintf "ch%02d" chapter in
   let in_file = "book"/(base ^ ".html") in
   let out_file = "tmp"/"book"/(base ^ ".html") in
   let code_dir = "tmp"/"book"/"code" in
-  let imports : code_block ImportMap.t ref = ref ImportMap.empty in
+  let imports : code_block Import.Map.t ref = ref Import.Map.empty in
 
   let code_block_to_string code_block lang part : string =
     let part = match part with
