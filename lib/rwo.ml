@@ -5,3 +5,4 @@ module Html = Rwo_html
 
 module Import = Rwo_import
 module Ppre = Rwo_ppre
+module Toc = Rwo_toc
