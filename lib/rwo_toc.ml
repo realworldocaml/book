@@ -28,6 +28,8 @@ type part = {
   chapters : chapter list
 }
 
+type t = part list
+
 (** Return part info for the given chapter number, if the chapter is
     in a part. *)
 let part_info_of_chapter chapter_num : part_info option =
@@ -197,7 +199,7 @@ let get_chapters ?(repo_root=".") () : chapter list Deferred.t =
 let get_next_chapter chapters curr_chapter : chapter option =
   List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)
 
-let group_chapters_by_part (chapters : chapter list) : part list =
+let of_chapters (chapters : chapter list) : part list =
   List.fold_right chapters ~init:[] ~f:(fun x accum ->
     match accum with
     | [] -> (* not building a part yet *)
@@ -210,3 +212,7 @@ let group_chapters_by_part (chapters : chapter list) : part list =
       else
         {info = curr_part; chapters = [x]}::p::rest
   )
+
+let get ?repo_root () =
+  get_chapters ?repo_root () >>|
+  of_chapters

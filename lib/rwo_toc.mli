@@ -30,13 +30,17 @@ type part = {
   chapters : chapter list
 }
 
+type t = part list
+
+val get : ?repo_root:string -> unit -> t Deferred.t
+val of_chapters : chapter list -> part list
+
 (** Return all chapter numbers and names, ordered by chapter
     number. *)
 val get_chapters : ?repo_root:string -> unit -> chapter list Deferred.t
 
 val get_next_chapter : chapter list -> chapter -> chapter option
 
-val group_chapters_by_part : chapter list -> part list
 
 (** [get_sections filename html] returns the section structure within
     the chapter of the given file, to depth 3. The [filename] is only

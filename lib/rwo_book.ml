@@ -76,7 +76,7 @@ let footer_item : Html.item =
 let toc chapters : Html.item list =
   let open Html in
   let open Toc in
-  let parts = Toc.group_chapters_by_part chapters in
+  let parts = Toc.of_chapters chapters in
   List.map parts ~f:(fun {info;chapters} ->
     let ul = ul ~a:["class","toc-full"] (List.map chapters ~f:(fun chapter ->
       li [
