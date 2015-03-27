@@ -62,6 +62,8 @@ val filter_whitespace : t -> t
 
 val fold : t -> init:'a -> f:('a -> item -> 'a) -> 'a
 
+val get_body_childs : filename:string -> t -> item list
+
 
 (******************************************************************************)
 (** {2 Constructors} *)

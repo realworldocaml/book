@@ -51,7 +51,6 @@ let title_bar,title_bar_frontpage =
   in
   title_bar,title_bar_frontpage
 
-
 let footer_item : Html.item =
   let open Html in
   let links = [
@@ -131,68 +130,55 @@ let next_chapter_footer next_chapter : Html.item option =
     ]
   )
 
-(** Process the given [html], adding or replacing elements to satisfy
-    our main template. *)
-let main_template ?(next_chapter=None) ?(title_bar=title_bar) html : Html.t =
-  let rec f item = match item with
-    | Nethtml.Data _ -> item
-    | Nethtml.Element ("head", _, _) -> head_item
-    | Nethtml.Element ("html",attrs,childs) ->
-      Nethtml.Element (
-        "html",
-        (("class","no-js")::("lang","en")::attrs),
-        (List.map childs ~f)
-      )
-    | Nethtml.Element ("body",attrs,childs) ->
-      let childs = List.map childs ~f in
-      let main_content = Html.(
-        div ~a:["class","wrap"] [
-          div ~a:["class","left-column"] [];
-          article ~a:["class","main-body"] childs;
-        ])
-      in
-      Html.body ~a:attrs (List.filter_map ~f:ident [
-        Some title_bar;
-        Some main_content;
-        next_chapter_footer next_chapter;
-        Some footer_item;
-        Some (Html.script ~a:["src","js/jquery.min.js"] []);
-        Some (Html.script ~a:["src","js/min/app-min.js"] []);
-      ]
-      )
-    | Nethtml.Element (name,attrs,childs) ->
-      Nethtml.Element (name, attrs, List.map ~f childs)
-  in
-  List.map ~f html
-
+(** Insert [content] into main template. The title bar differs on
+    front page and only chapter pages contain links to a next chapter,
+    so these are additional arguments. *)
+let main_template ?(next_chapter_footer=None)
+    ~title_bar ~content () : Html.t =
+  let open Html in
+  [html ~a:["class", "js flexbox fontface"; "lang", "en"; "style", ""] [
+    head [head_item];
+    body ~a:["class","sn-active"] (List.filter_map ~f:Fn.id [
+      Some title_bar;
+      Some (div ~a:["class","wrap"] content);
+      next_chapter_footer;
+      Some footer_item;
+      Some (Html.script ~a:["src","js/jquery.min.js"] []);
+      Some (Html.script ~a:["src","js/min/app-min.js"] []);
+    ])
+  ]]
 
 (******************************************************************************)
 (* Make Pages                                                                 *)
 (******************************************************************************)
 let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
-  return (
-  main_template ~title_bar:title_bar_frontpage
-    Html.[
-      html [head []; body [data "empty for now"]]
-    ]
-  )
-;;
+  let content = Html.[
+    div ~a:["class","left-column bottom"] [];
+    article ~a:["class","main-body"] [data "empty for now"];
+  ]
+  in
+  return (main_template ~title_bar:title_bar_frontpage ~content ())
 
 let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   Toc.get_chapters ~repo_root () >>| fun chapters ->
-  main_template Html.[
-    html [head []; body (toc chapters)]
+  let content = Html.[
+    div ~a:["class","left-column top"] [];
+    article ~a:["class","main-body"] (toc chapters);
   ]
-;;
+  in
+  main_template ~title_bar:title_bar ~content ()
 
-let make_chapter ?run_pygmentize repo_root chapters chapter_file
+let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
     : Html.t Deferred.t
     =
+
   let import_base_dir = Filename.dirname chapter_file in
   let chapter = List.find_exn chapters ~f:(fun x ->
     x.Toc.filename = Filename.basename chapter_file)
   in
-  let next_chapter = Toc.get_next_chapter chapters chapter in
+  let next_chapter_footer =
+    next_chapter_footer (Toc.get_next_chapter chapters chapter)
+  in
 
   (* OCaml code blocks *)
   let code : Code.phrase list Code.t ref = ref Code.empty in
@@ -234,9 +220,30 @@ let make_chapter ?run_pygmentize repo_root chapters chapter_file
     >>| List.concat
   in
   Html.of_file chapter_file >>= fun html ->
-  loop html >>| fun html ->
-  main_template ~next_chapter html
-;;
+  let html = Html.get_body_childs ~filename:chapter_file html in
+  loop html >>| fun content ->
+  let content = Html.[
+    div ~a:["class","left-column"] [
+      a ~a:["href","toc.html"; "class","to-chapter"] [
+        small [data "Back"];
+        h5 [data "Table of Conents"];
+      ]
+    ];
+    article ~a:["class","main-body"] content;
+  ]
+  in
+  main_template ~title_bar:title_bar ~next_chapter_footer ~content ()
+
+let make_simple_page file =
+  Html.of_file file >>= fun content ->
+  let content = Html.[
+    div ~a:["class","left-column"] [];
+    article ~a:["class","main-body"] (
+      get_body_childs ~filename:file content;
+    )
+  ]
+  in
+  return (main_template ~title_bar:title_bar ~content ())
 
 
 (******************************************************************************)
@@ -266,7 +273,7 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
   | `Chapter in_file -> (
     let out_file = out_dir/(Filename.basename in_file) in
     Toc.get_chapters ~repo_root () >>= fun chapters ->
-    make_chapter ?run_pygmentize repo_root chapters in_file >>= fun html ->
+    make_chapter_page ?run_pygmentize repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
@@ -274,8 +281,7 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
     let base = "faqs.html" in
     let in_file = repo_root/"book"/base in
     let out_file = out_dir/base in
-    Html.of_file in_file >>= fun html ->
-    return (main_template html) >>= fun html ->
+    make_simple_page in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
@@ -283,8 +289,7 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
     let base = "install.html" in
     let in_file = repo_root/"book"/base in
     let out_file = out_dir/base in
-    Html.of_file in_file >>= fun html ->
-    return (main_template html) >>= fun html ->
+    make_simple_page in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
