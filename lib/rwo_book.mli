@@ -29,9 +29,3 @@ val make
   -> out_dir:string
   -> src
   -> unit Deferred.t
-
-(******************************************************************************)
-(** {2 indexterm nodes} *)
-(******************************************************************************)
-val indexterm_to_idx : Rwo_html.t -> Rwo_html.t
-val idx_to_indexterm : Rwo_html.t -> Rwo_html.t
