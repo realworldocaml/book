@@ -3,73 +3,8 @@ open Rwo_core2
 open Async.Std
 module Code = Rwo_code
 module Html = Rwo_html
+module Import = Rwo_import
 let (/) = Filename.concat
-
-(******************************************************************************)
-(* <link rel="import"> nodes                                                  *)
-(******************************************************************************)
-type import = {
-  data_code_language : Rwo_code.lang;
-  href : string;
-  part : float option;
-  childs : Rwo_html.item list;
-} with sexp
-
-let is_import_node = function
-  | Nethtml.Data _ -> false
-  | Nethtml.Element ("link", attrs, _) -> (
-    match List.Assoc.find attrs "rel" with
-    | Some "import" -> true
-    | Some _
-    | None -> false
-  )
-  | Nethtml.Element (_,_,_) -> false
-
-let parse_import item =
-  let open Result.Monad_infix in
-  if not (is_import_node item) then
-    error "attempting to parse non-import node as an import node"
-      item Html.sexp_of_item
-  else (
-    match item with
-    | Nethtml.Element ("link", attrs, childs) -> (
-      let find x = List.Assoc.find attrs x in
-      Html.check_attrs attrs
-        ~required:["data-code-language"; "href"; "rel"]
-        ~allowed:(`Some ["part"])
-      >>= fun () ->
-
-      (
-        try Ok (find "part" |> Option.map ~f:Float.of_string)
-        with exn -> error "invalid part" exn sexp_of_exn
-      ) >>= fun part ->
-
-      Code.lang_of_string (Option.value_exn (find "data-code-language"))
-      >>= fun data_code_language ->
-
-      Ok {
-        data_code_language;
-        href = Option.value_exn (find "href");
-        part;
-        childs;
-      }
-    )
-    | Nethtml.Element (_,_,_)
-    | Nethtml.Data _ ->
-      assert false
-  )
-;;
-
-let import_to_item x =
-  [
-    Some ("rel", "import");
-    Some ("data-code-language", Code.lang_to_string x.data_code_language);
-    Some ("href", x.href);
-    (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
-  ]
-  |> List.filter_map ~f:ident
-  |> fun a -> Html.link ~a []
-
 
 (******************************************************************************)
 (* <p></p><pre></pre> sections                                                *)
@@ -356,7 +291,7 @@ let map_code_sections (html:Html.t) ~f =
    - x.pre.code_block ignored because it is not part of [import]
    type. Must be printed to external file referred to in [href].
 *)
-let code_section_to_import (x:code_section) : import Or_error.t =
+let code_section_to_import (x:code_section) : Import.t Or_error.t =
   let open Result.Monad_infix in
   (
     match x.pre.data_code_language, x.p.em_data, x.p.data1 with
@@ -390,7 +325,7 @@ let code_section_to_import (x:code_section) : import Or_error.t =
         <:sexp_of< string option * string * string option >>
   ) >>| fun data_code_language ->
   {
-    data_code_language;
+    Import.data_code_language;
     href = String.chop_prefix_exn x.p.a_href
       ~prefix:"https://github.com/realworldocaml/examples/tree/v1/code/"
     ;
@@ -400,7 +335,7 @@ let code_section_to_import (x:code_section) : import Or_error.t =
 
 module ImportMap = Map.Make(
   struct
-    type t = import
+    type t = Import.t
     with sexp
 
     (* Ignore [data_code_language] and [childs]. *)
@@ -444,8 +379,10 @@ let extract_code_from_1e_exn chapter =
   let write_imports () : unit Deferred.t =
     Map.to_alist !imports
     |> Deferred.List.iter ~f:(fun (i,blk) ->
-      let out_file = code_dir/i.href in
-      let contents = code_block_to_string blk i.data_code_language i.part in
+      let out_file = code_dir/i.Import.href in
+      let contents =
+        code_block_to_string blk i.Import.data_code_language i.Import.part
+      in
       Unix.mkdir ~p:() (Filename.dirname out_file) >>= fun () ->
       Writer.with_file ~append:true out_file ~f:(fun wrtr ->
         return (Writer.write wrtr contents))
@@ -453,14 +390,14 @@ let extract_code_from_1e_exn chapter =
   in
 
   let f (x:code_section) : Html.item =
-    let i:import = ok_exn (code_section_to_import x) in
+    let i:Import.t = ok_exn (code_section_to_import x) in
     (if Map.mem !imports i then
         printf "WARNING: duplicate import for file %s part %f\n"
           i.href (match i.part with Some x -> x | None -> (-1.))
      else
         imports := Map.add !imports ~key:i ~data:x.pre.code_block;
     );
-    import_to_item i
+    Import.to_html i
   in
 
   Html.of_file in_file >>= fun t ->
@@ -883,7 +820,7 @@ let make_chapter ?run_pygmentize repo_root chapters chapter_file
       code := new_code
   in
 
-  let import_node_to_html (i:import) : Html.t Deferred.t =
+  let import_node_to_html (i:Import.t) : Html.t Deferred.t =
     let href = import_base_dir/i.href in
     update_code i.data_code_language href
     >>= fun () -> return (Code.find_exn !code ~file:href ?part:i.part)
@@ -894,8 +831,8 @@ let make_chapter ?run_pygmentize repo_root chapters chapter_file
 
   let rec loop html =
     (Deferred.List.map html ~f:(fun item ->
-      if is_import_node item then
-        import_node_to_html (ok_exn (parse_import item))
+      if Import.is_import_html item then
+        import_node_to_html (ok_exn (Import.of_html item))
       else match item with
       | Nethtml.Data _ -> return [item]
       | Nethtml.Element (name, attrs, childs) -> (

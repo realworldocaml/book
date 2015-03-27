@@ -76,27 +76,6 @@ val flatten_sections : sections -> section list
 
 
 (******************************************************************************)
-(** {2 <link rel="import"> nodes} *)
-(******************************************************************************)
-type import = {
-  data_code_language : Rwo_code.lang;
-  href : string;
-  part : float option;
-  childs : Rwo_html.item list;
-}
-
-val parse_import : Rwo_html.item -> import Or_error.t
-
-val import_to_item : import -> Rwo_html.item
-
-(** Return true if given [item] should be parseable as an import node
-    and nothing else. A true result doesn't guarantee that
-    [parse_import item] will succceed, only that it should because it
-    can't be anything else. *)
-val is_import_node : Rwo_html.item -> bool
-
-
-(******************************************************************************)
 (** {2 <p></p><pre></pre> sections}
 
     O'Reilly's HTMLBook version of edition 1 used such nodes to encode
@@ -148,7 +127,7 @@ val map_code_sections
   -> Rwo_html.t Or_error.t
 
 (** This conversion needed to implement [extract_code_from_1e_exn]. *)
-val code_section_to_import : code_section -> import Or_error.t
+val code_section_to_import : code_section -> Rwo_import.t Or_error.t
 
 (** [extract_code_from_1e n] extracts code from chapter [n] of the
     HTMLBook sources provided by O'Reilly for edition 1. All <pre>
