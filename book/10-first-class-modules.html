@@ -246,32 +246,41 @@
           outside. Consider the following example:
 
 	  <idx>polymorphism/in locally abstract types</idx></p>
-      </div>
 
       <link rel="import" data-code-language="ocamltop" 
 	    href="code/fcm/main.topscript" part="19"/>
 
-      <p>This compiles successfully because the type <code>a</code>
-      is used in a way that is compatible with it being abstract,
-      but the type of the function that is inferred is
-      polymorphic.</p>
+      <p>
+	This compiles successfully because the type <code>a</code> is
+	used in a way that is compatible with it being abstract, but the
+	type of the function that is inferred is polymorphic.</p>
 
-      <p>If, on the other hand, we try to use the type
-      <code>a</code> as equivalent to some concrete type, say,
-      <code>int</code>, then the compiler will complain:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="20"/>
+	<p>
+	  If, on the other hand, we try to use the type <code>a</code>
+	  as equivalent to some concrete type, say, <code>int</code>, then
+	  the compiler will complain:</p>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="20"/>
 
       <p>One common use of locally abstract types is to create a
       new type that can be used in constructing a module. Here's an
       example of doing this to create a new first-class module:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="21"/>
 
-      <p>Here, what we effectively do is capture a polymorphic type
-      and export it as a concrete type within a module.</p>
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="21"/>
 
-      <p>This technique is useful beyond first-class modules. For
-      example, we can use the same approach to construct a local
-      module to be fed to a functor.<a data-type="indexterm" data-startref="FCMwork">&nbsp;</a></p>
+	<p>
+	  Here, what we effectively do is capture a polymorphic type
+	  and export it as a concrete type within a module.</p>
+
+	<p>
+	  This technique is useful beyond first-class modules. For
+	  example, we can use the same approach to construct a local
+	  module to be fed to a functor.
+
+	<a data-type="indexterm" data-startref="FCMwork">&nbsp;</a></p>
+      </div>
     </section>
 
     <section id="example-a-query-handling-framework" data-type="sect1">
