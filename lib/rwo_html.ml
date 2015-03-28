@@ -165,6 +165,18 @@ let get_body_childs ~filename t =
   | (`Element {name="body";childs;_})::[] -> childs
   | (`Element _)::[] -> assert false
 
+let replace_id_node_with t ~id ~with_ =
+  let rec loop = function
+    | [] -> []
+    | (`Data _ as x)::rest -> x::(loop rest)
+    | (`Element {name;attrs;childs;_})::rest ->
+      if List.mem attrs ("id",id) then
+        with_@(loop rest)
+      else
+        (`Element {name; attrs; childs = loop childs})::(loop rest)
+  in
+  loop t
+
 
 (******************************************************************************)
 (* Constructors                                                               *)
