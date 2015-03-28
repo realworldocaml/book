@@ -111,7 +111,12 @@ let toc chapters : Html.item list =
     in
     match info with
     | None -> [ul]
-    | Some x -> [h5 [`Data (sprintf "Part %d: %s" x.number x.title)]; ul]
+    | Some x -> [
+      h5 ~a:["class","part-link"] [
+        `Data (sprintf "Part %d: %s" x.number x.title)
+      ];
+      ul;
+    ]
   )
   |> List.concat
 
@@ -163,7 +168,7 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
 let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   Toc.get_chapters ~repo_root () >>| fun chapters ->
   let content = Html.[
-    div ~a:["class","left-column top"] [];
+    div ~a:["class","left-column"] [];
     article ~a:["class","main-body"] (toc chapters);
   ]
   in
