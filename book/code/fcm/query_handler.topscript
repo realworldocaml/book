@@ -1,3 +1,6 @@
+open Core_kernel.Std;;
+
+#part 0.5
 module type Query_handler = sig
 
     (** Configuration for a query handler.  Note that this can be
@@ -18,30 +21,15 @@ module type Query_handler = sig
     val eval : t -> Sexp.t -> Sexp.t Or_error.t
   end;;
 
-
-
-
-
-
-
-
-
-
-
 #part 1
 module type M = sig type t with sexp end;;
-
-
 
 #part 2
 type u = { a: int; b: float } with sexp;;
 
-
-
 sexp_of_u {a=3;b=7.};;
 
 u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
-
 
 #part 3
 module Unique = struct
@@ -59,15 +47,6 @@ module Unique = struct
         t.next_id <- t.next_id + 1;
         response
   end;;
-
-
-
-
-
-
-
-
-
 
 
 #part 4
