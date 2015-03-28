@@ -3,6 +3,7 @@ open Async.Std
 module Code = Rwo_code
 module Html = Rwo_html
 module Import = Rwo_import
+module Index = Rwo_index
 module Toc = Rwo_toc
 let (/) = Filename.concat
 
@@ -232,6 +233,7 @@ let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
     article ~a:["class","main-body"] content;
   ]
   in
+  let content = Index.idx_to_indexterm content in
   main_template ~title_bar:title_bar ~next_chapter_footer ~content ()
 
 let make_simple_page file =
