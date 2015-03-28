@@ -59,8 +59,8 @@ let part_info_of_chapter chapter_num : part_info option =
 
 let get_title file (t:Html.t) : string =
   let rec item_to_string = function
-    | Nethtml.Data x -> x
-    | Nethtml.Element ("span", _, childs) -> items_to_string childs
+    | `Data x -> x
+    | `Element {Html.name="span"; attrs=_; childs} -> items_to_string childs
     | _ -> failwithf "%s: can't extract title string from h1 element" file ()
   and items_to_string items =
     String.concat ~sep:"" (List.map items ~f:item_to_string)
@@ -69,7 +69,7 @@ let get_title file (t:Html.t) : string =
   |> function
     | [] ->
       failwithf "%s: cannot get title, no h1 element found" file ()
-    | (Nethtml.Element ("h1", _, childs))::_ -> items_to_string childs
+    | (`Element {Html.name="h1"; attrs=_; childs})::_ -> items_to_string childs
     | _ -> assert false
 
 let get_sections file html =
@@ -93,10 +93,10 @@ let get_sections file html =
     in
     let rec loop accum = function
       | [] -> accum
-      | (Nethtml.Element("section",attrs,childs) as item)::rest -> (
+      | (`Element{Html.name="section";attrs;childs} as item)::rest -> (
         if List.mem attrs ("data-type",data_type) then (
           match Html.filter_whitespace childs with
-          | Nethtml.Element(name,_,[Nethtml.Data title])::_ -> (
+          | `Element{Html.name; attrs=_; childs=[`Data title]}::_ -> (
             if name = title_elem then
               let id = match List.Assoc.find attrs "id" with
                 | Some x -> x
@@ -119,8 +119,8 @@ let get_sections file html =
         loop accum rest
     in
     match item with
-    | Nethtml.Data _ -> assert false (* only applied to [Element]s *)
-    | Nethtml.Element(_,_,childs) -> (loop [] childs |> List.rev)
+    | `Data _ -> assert false (* only applied to [Element]s *)
+    | `Element{childs;_} -> (loop [] childs |> List.rev)
   in
 
   let body = match Html.get_all_nodes "body" html with

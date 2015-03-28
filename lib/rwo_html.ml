@@ -1,22 +1,42 @@
 open Core.Std
 open Async.Std
 
-type item
-= Nethtml.document =
-  | Element of (string * (string * string) list * item list)
-  | Data of string
+type attributes = (string * string) list
 with sexp
+
+type element = {
+  name : string;
+  attrs : attributes;
+  childs : item list;
+}
+
+and item = [
+| `Element of element
+| `Data of string
+] with sexp
 
 type t = item list
 with sexp
 
-type attributes = (string * string) list
-with sexp
+let rec item_of_nethtml (doc:Nethtml.document) : item =
+  match doc with
+  | Nethtml.Element(name,attrs,childs) ->
+    `Element {name; attrs; childs = List.map childs ~f:item_of_nethtml}
+  | Nethtml.Data x ->
+    `Data x
+
+let rec item_to_nethtml (item:item) : Nethtml.document =
+  match item with
+  | `Element x ->
+    Nethtml.Element(x.name, x.attrs, List.map x.childs ~f:item_to_nethtml)
+  | `Data x ->
+    Nethtml.Data x
 
 let of_string s =
   Netchannels.with_in_obj_channel
     (new Netchannels.input_string s)
     (Nethtml.parse ~dtd:[])
+  |> List.map ~f:item_of_nethtml
 
 let of_file file =
   Reader.file_contents file >>| of_string
@@ -37,16 +57,17 @@ let item_of_file filename =
   Reader.file_contents filename
   >>| item_of_string_helper ~filename
 
-let to_string docs =
+let to_string t =
+  let docs = List.map t ~f:item_to_nethtml in
   let buf = Buffer.create 2048 in
   Netchannels.with_out_obj_channel (new Netchannels.output_buffer buf)
     (Fn.flip Nethtml.write docs)
   ;
   Buffer.contents buf
 
-let is_elem_node item name = match item with
-  | Data _ -> false
-  | Element (name', _, _) -> name = name'
+let is_elem_node item name' = match item with
+  | `Data _ -> false
+  | `Element {name; _} -> name' = name
 
 let has_html_extension file =
   Filename.split_extension file
@@ -63,12 +84,12 @@ let get_all_nodes tag t =
   let rec helper t =
     List.fold t ~init:[] ~f:(fun accum item ->
       match item with
-      | Element (name,_,childs) ->
+      | `Element {name; childs; _} ->
         if name = tag then
           item::accum
         else
           (helper childs)@accum
-      | Data _ -> accum
+      | `Data _ -> accum
     )
   in
   helper t |> List.rev
@@ -76,8 +97,8 @@ let get_all_nodes tag t =
 
 let is_nested name t =
   let rec loop have_seen = function
-    | Data _ -> false
-    | Element (name', _, childs) ->
+    | `Data _ -> false
+    | `Element {name=name'; childs; _} ->
       if have_seen && (name = name') then
         true
       else
@@ -89,8 +110,8 @@ let is_nested name t =
 
 let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   let rec print_item depth = function
-    | Data _ -> ()
-    | Element (name, attrs, childs) ->
+    | `Data _ -> ()
+    | `Element {name; attrs; childs} ->
       if List.mem exclude_elements name then
         ()
       else (
@@ -113,25 +134,25 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
 
 let filter_whitespace t =
   let rec f item : item option = match item with
-    | Data x -> (
+    | `Data x -> (
       if String.for_all x ~f:Char.is_whitespace
       then None
       else Some item
     )
-    | Element (name, attrs, childs) ->
-      Some (Element (
-        name,
-        attrs,
-        List.filter_map childs ~f
-      ) )
+    | `Element {name; attrs; childs} ->
+      Some (`Element {
+        name;
+        attrs;
+        childs = List.filter_map childs ~f
+      } )
   in
   List.filter_map t ~f
 
 let fold t ~init ~f =
   let rec loop accum item = match item with
-    | Data _ ->
+    | `Data _ ->
       f accum item
-    | Element (_,_,childs) ->
+    | `Element {childs;_} ->
       List.fold childs ~init:(f accum item) ~f:loop
   in
   List.fold t ~init ~f:loop
@@ -140,62 +161,59 @@ let get_body_childs ~filename t =
   match get_all_nodes "body" t with
   | [] -> failwithf "%s: <body> not found" filename ()
   | _::_::_ -> failwithf "%s: multiple <body> tags found" filename ()
-  | (Data _)::[] -> assert false
-  | (Element ("body",_,childs))::[] -> childs
-  | (Element (_,_,_))::[] -> assert false
+  | (`Data _)::[] -> assert false
+  | (`Element {name="body";childs;_})::[] -> childs
+  | (`Element _)::[] -> assert false
 
 
 (******************************************************************************)
 (* Constructors                                                               *)
 (******************************************************************************)
-let item tag ?(a=[]) childs =
-  Element(tag, a, childs)
+let elem tag ?(a=[]) childs = `Element{name=tag; attrs=a; childs}
 
-let data s = Data s
+let div = elem "div"
+let span = elem "span"
+let p = elem "p"
+let pre = elem "pre"
+let article = elem "article"
+let body = elem "body"
+let html = elem "html"
 
-let div = item "div"
-let span = item "span"
-let p = item "p"
-let pre = item "pre"
-let article = item "article"
-let body = item "body"
-let html = item "html"
+let a = elem "a"
+let i = elem "i"
+let br = elem "br" []
 
-let a = item "a"
-let i = item "i"
-let br = item "br" []
+let ul = elem "ul"
+let li = elem "li"
 
-let ul = item "ul"
-let li = item "li"
+let h1 = elem "h1"
+let h2 = elem "h2"
+let h3 = elem "h3"
+let h4 = elem "h4"
+let h5 = elem "h5"
+let h6 = elem "h6"
 
-let h1 = item "h1"
-let h2 = item "h2"
-let h3 = item "h3"
-let h4 = item "h4"
-let h5 = item "h5"
-let h6 = item "h6"
+let small = elem "small"
+let sup = elem "sup"
 
-let small = item "small"
-let sup = item "sup"
+let table = elem "table"
+let thead = elem "thead"
+let th = elem "th"
+let tbody = elem "tbody"
+let tr = elem "tr"
+let td = elem "td"
 
-let table = item "table"
-let thead = item "thead"
-let th = item "th"
-let tbody = item "tbody"
-let tr = item "tr"
-let td = item "td"
+let dl = elem "dl"
+let dd = elem "dd"
 
-let dl = item "dl"
-let dd = item "dd"
+let head = elem "head"
+let meta = elem "meta"
+let title = elem "title"
+let script = elem "script"
+let link = elem "link"
 
-let head = item "head"
-let meta = item "meta"
-let title = item "title"
-let script = item "script"
-let link = item "link"
-
-let nav = item "nav"
-let footer = item "footer"
+let nav = elem "nav"
+let footer = elem "footer"
 
 
 (******************************************************************************)
@@ -204,8 +222,8 @@ let footer = item "footer"
 let get_all_attributes t =
   let rec helper t =
     List.fold t ~init:String.Set.empty ~f:(fun accum item -> match item with
-    | Data _ -> accum
-    | Element (_, attrs, childs) -> (
+    | `Data _ -> accum
+    | `Element {name=_; attrs; childs} -> (
       List.fold attrs ~init:accum ~f:(fun accum (name,_) -> Set.add accum name)
       |> Set.union (helper childs)
     ) )

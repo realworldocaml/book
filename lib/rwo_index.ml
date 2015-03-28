@@ -3,8 +3,8 @@ open Rwo_html
 
 let indexterm_to_idx docs =
   let rec loop item = match item with
-    | Data _ -> item
-    | Element ("a", attrs, [Data "&nbsp;"]) -> (
+    | `Data _ -> item
+    | `Element {name="a"; attrs; childs=[`Data "&nbsp;"]} -> (
       if List.mem attrs ("data-type", "indexterm") then (
         match
           check_attrs attrs ~required:["data-type"; "data-primary"]
@@ -25,45 +25,45 @@ let indexterm_to_idx docs =
             | _ -> true
           )
           in
-          Element("idx", attrs, [Data data])
+          `Element {name="idx"; attrs; childs=[`Data data]}
       )
       else
         item (* no point in recursing to single Data child *)
     )
-    | Element (name, attrs, children) ->
-      Element(name, attrs, List.map children ~f:loop)
+    | `Element {name; attrs; childs} ->
+      `Element {name; attrs; childs = List.map childs ~f:loop}
   in
   List.map docs ~f:loop
 
 let idx_to_indexterm t =
   let rec loop item = match item with
-    | Data _ -> item
-    | Element ("idx", attrs, [Data data]) -> (
+    | `Data _ -> item
+    | `Element {name="idx"; attrs; childs=[`Data data]} -> (
       match String.split data ~on:'/' with
       | x::[] ->
-        Element (
-          "a",
-          ["data-type","indexterm"; "data-primary",x]@attrs,
-          [Data "&nbsp;"]
-        )
+        `Element {
+          name = "a";
+          attrs = ["data-type","indexterm"; "data-primary",x]@attrs;
+          childs = [`Data "&nbsp;"];
+        }
       | x::y ->
-        Element (
-          "a",
-          [
+        `Element {
+          name = "a";
+          attrs = [
             "data-type", "indexterm";
             "data-primary", x;
             "data-secondary", String.concat ~sep:"/" y;
-          ]@attrs,
-          [Data "&nbsp;"]
-        )
+          ]@attrs;
+          childs = [`Data "&nbsp;"];
+        }
       | _ ->
         failwithf
           "<idx> node's child must be slash separated string but got %s"
           data ()
     )
-    | Element ("idx", _, _) ->
+    | `Element {name="idx"; _} ->
       failwith "<idx> node should have single Data child"
-    | Element (name, attrs, childs) ->
-      Element (name, attrs, List.map childs ~f:loop)
+    | `Element {name; attrs; childs} ->
+      `Element {name; attrs; childs = List.map childs ~f:loop}
   in
   List.map t ~f:loop

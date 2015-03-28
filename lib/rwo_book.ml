@@ -17,27 +17,27 @@ let head_item : Html.item =
       "name","viewport";
       "content","width=device-width, initial-scale=1.0"
     ] [];
-    title [data "Real World OCaml"];
+    title [`Data "Real World OCaml"];
     link ~a:["rel","stylesheet"; "href","css/app.css"] [];
     script ~a:["src","js/min/modernizr-min.js"] [];
     script ~a:["src","//use.typekit.net/gfj8wez.js"] [];
-    script [data "try{Typekit.load();}catch(e){}"];
+    script [`Data "try{Typekit.load();}catch(e){}"];
   ]
 
 let title_bar,title_bar_frontpage =
   let open Html in
   let nav = nav [
-    a ~a:["href","index.html"] [data "Home"];
-    a ~a:["href","toc.html"] [data "Table of Contents"];
-    a ~a:["href","faqs.html"] [data "FAQs"];
-    a ~a:["href","install.html"] [data "Install"];
+    a ~a:["href","index.html"] [`Data "Home"];
+    a ~a:["href","toc.html"] [`Data "Table of Contents"];
+    a ~a:["href","faqs.html"] [`Data "FAQs"];
+    a ~a:["href","install.html"] [`Data "Install"];
     a ~a:["href","https://ocaml.janestreet.com/ocaml-core/"]
-      [data "API Docs"];
+      [`Data "API Docs"];
   ]
   in
-  let h1 = h1 [data "Real World OCaml"] in
-  let h4 = h4 [data "Functional programming for the masses"] in
-  let h5 = h5 [data "2"; sup [data "nd"]; data " Edition (in progress)"] in
+  let h1 = h1 [`Data "Real World OCaml"] in
+  let h4 = h4 [`Data "Functional programming for the masses"] in
+  let h5 = h5 [`Data "2"; sup [`Data "nd"]; `Data " Edition (in progress)"] in
   let title_bar =
     div ~a:["class","title-bar"] [
       div ~a:["class","title"] [h1; h5; nav]
@@ -61,13 +61,13 @@ let footer_item : Html.item =
     "https://github.com/realworldocaml", "GitHub";
     "http://www.goodreads.com/book/show/16087552-real-world-ocaml", "goodreads";
   ]
-  |> List.map ~f:(fun (href,text) -> li [a ~a:["href",href] [data text]])
+  |> List.map ~f:(fun (href,text) -> li [a ~a:["href",href] [`Data text]])
   |> ul
   in
   footer [
     div ~a:["class","content"] [
       links;
-      p [data "Copyright 2012-2014 \
+      p [`Data "Copyright 2012-2014 \
          Jason Hickey, Anil Madhavapeddy and Yaron Minsky."];
     ]
   ]
@@ -80,7 +80,7 @@ let toc chapters : Html.item list =
     let ul = ul ~a:["class","toc-full"] (List.map chapters ~f:(fun chapter ->
       li [
         a ~a:["href",chapter.filename] [
-          h2 [data (
+          h2 [`Data (
             if chapter.number = 0
             then sprintf "%s" chapter.title
             else sprintf "%d. %s" chapter.number chapter.title
@@ -90,16 +90,16 @@ let toc chapters : Html.item list =
           List.map chapter.sections ~f:(fun (sect1,sect2s) ->
             let href = sprintf "%s#%s" chapter.filename sect1.id in
             li [
-              a ~a:["href",href] [h5 [data sect1.title]];
+              a ~a:["href",href] [h5 [`Data sect1.title]];
               ul ~a:["class","children"] (
                 List.map sect2s ~f:(fun (sect2,sect3s) ->
                   let href = sprintf "%s#%s" chapter.filename sect2.id in
                   li [
-                    a ~a:["href",href] [data sect2.title];
+                    a ~a:["href",href] [`Data sect2.title];
                     ul ~a:["class","children"] (
                       List.map sect3s ~f:(fun sect3 ->
                         let href = sprintf "%s#%s" chapter.filename sect3.id in
-                        li [a ~a:["href",href] [data sect3.title]]
+                        li [a ~a:["href",href] [`Data sect3.title]]
                       ) );
                   ]
                 ) );
@@ -110,7 +110,7 @@ let toc chapters : Html.item list =
     in
     match info with
     | None -> [ul]
-    | Some x -> [h5 [data (sprintf "Part %d: %s" x.number x.title)]; ul]
+    | Some x -> [h5 [`Data (sprintf "Part %d: %s" x.number x.title)]; ul]
   )
   |> List.concat
 
@@ -123,8 +123,8 @@ let next_chapter_footer next_chapter : Html.item option =
     a ~a:["class","next-chapter"; "href", x.filename] [
       div ~a:["class","content"] [
         h1 [
-          small [data (sprintf "Next: Chapter %02d" x.number)];
-          data x.title
+          small [`Data (sprintf "Next: Chapter %02d" x.number)];
+          `Data x.title
         ]
       ]
     ]
@@ -154,7 +154,7 @@ let main_template ?(next_chapter_footer=None)
 let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
   let content = Html.[
     div ~a:["class","left-column bottom"] [];
-    article ~a:["class","main-body"] [data "empty for now"];
+    article ~a:["class","main-body"] [`Data "empty for now"];
   ]
   in
   return (main_template ~title_bar:title_bar_frontpage ~content ())
@@ -209,11 +209,11 @@ let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
       if Import.is_import_html item then
         import_node_to_html (ok_exn (Import.of_html item))
       else match item with
-      | Nethtml.Data _ -> return [item]
-      | Nethtml.Element (name, attrs, childs) -> (
+      | `Data _ -> return [item]
+      | `Element {Html.name; attrs; childs} -> (
         Deferred.List.map childs ~f:(fun x -> loop [x])
         >>| List.concat
-        >>| fun childs -> [Nethtml.Element (name, attrs, childs)]
+        >>| fun childs -> [`Element {Html.name; attrs; childs}]
       )
      )
     )
@@ -225,8 +225,8 @@ let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
   let content = Html.[
     div ~a:["class","left-column"] [
       a ~a:["href","toc.html"; "class","to-chapter"] [
-        small [data "Back"];
-        h5 [data "Table of Conents"];
+        small [`Data "Back"];
+        h5 [`Data "Table of Conents"];
       ]
     ];
     article ~a:["class","main-body"] content;

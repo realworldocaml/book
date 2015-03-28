@@ -46,12 +46,12 @@ let decode_html_string (s:string) : string =
 let rec item_to_string (item:Html.item) : string Or_error.t =
   let open Result.Monad_infix in
   match item with
-  | Nethtml.Data x -> Ok x
-  | Nethtml.Element ("em", [], childs) -> (
+  | `Data x -> Ok x
+  | `Element {name="em"; attrs=[]; childs} -> (
     Result.List.map childs ~f:item_to_string
     >>| String.concat ~sep:""
   )
-  | Nethtml.Element _ ->
+  | `Element _ ->
     error "cannot treat node as data" item Html.sexp_of_item
 
 (** Like [item_to_string but for list of items. *)
@@ -62,12 +62,15 @@ let items_to_string (items : Html.item list) : string Or_error.t =
 
 let parse_p_before_pre (item:Html.item) : p Or_error.t =
   let open Result.Monad_infix in
-  let open Nethtml in
 
   (** Return DATA under <em>. *)
   let parse_em item : string Or_error.t =
     match item with
-    | Element ("em", ["class","hyperlink"], [Data em_data]) ->
+    | `Element {
+      Html.name="em";
+      attrs=["class","hyperlink"];
+      childs=[`Data em_data]}
+      ->
       Ok em_data
     | _ ->
       error "unexpected form for <em> node" item Html.sexp_of_item
@@ -77,7 +80,7 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
       under the <em> child of it. *)
   let parse_main_a item : (string * string * string) Or_error.t =
     match item with
-    | Element ("a", attrs, [em]) -> (
+    | `Element {Html.name="a"; attrs; childs=[em]} -> (
       let find x = Option.value_exn (List.Assoc.find attrs x) in
       Html.check_attrs attrs ~required:["href";"class"] ~allowed:(`Some [])
       >>= fun () ->
@@ -104,19 +107,35 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
   in
 
   let values = match item with
-    | Element ("p", [], main_a::[]) ->
+    | `Element {Html.name="p"; attrs=[]; childs=main_a::[]} ->
       Ok (main_a, None, None, None, None)
-    | Element ("p", [], main_a::(Data data2)::[]) ->
+    | `Element {Html.name="p"; attrs=[]; childs=main_a::(`Data data2)::[]} ->
       Ok (main_a, None, Some data2, None, None)
-    | Element ("p", [], (Data data1)::main_a::[]) ->
+    | `Element {Html.name="p"; attrs=[]; childs=(`Data data1)::main_a::[]} ->
       Ok (main_a, Some data1, None, None, None)
-    | Element ("p", [], (Data data1)::main_a::(Data data2)::[]) ->
+    | `Element {
+      Html.name="p";
+      attrs=[];
+      childs=(`Data data1)::main_a::(`Data data2)::[];
+    } ->
       Ok (main_a, Some data1, Some data2, None, None)
-    | Element ("p", [], main_a::(Data data2)::((Element("a",_,_)) as a2)::[]) ->
+    | `Element {
+      Html.name="p";
+      attrs=[];
+      childs=main_a::(`Data data2)::((`Element{name="a";_}) as a2)::[];
+    } ->
       Ok (main_a, None, Some data2, Some a2, None)
-    | Element (
-      "p", [], main_a::(Data data2)::((Element("a",_,_)) as a2)::((Element("a",_,_)) as a3)::[]
-    ) ->
+    | `Element {
+      Html.name="p";
+      attrs=[];
+      childs =
+        main_a
+        ::(`Data data2)
+        ::((`Element{name="a";_}) as a2)
+        ::((`Element{name="a";_}) as a3)
+        ::[]
+      ;
+    } ->
       Ok (main_a, None, Some data2, Some a2, Some a3)
     | _ ->
       error "unexpected format of <p> before <pre>"
@@ -131,10 +150,10 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
 (** Parse <code> element, requiring exactly the given attributes. *)
 let parse_code_helper expected_attrs item : string Or_error.t =
   match item with
-  | Nethtml.Data _ ->
+  | `Data _ ->
     error "expected <code> but got DATA"
       (expected_attrs,item) <:sexp_of< Html.attributes * Html.item >>
-  | Nethtml.Element ("code", attrs, childs) -> (
+  | `Element {Html.name="code"; attrs; childs} -> (
     if attrs = expected_attrs then
       Result.map (items_to_string childs) ~f:decode_html_string
     else
@@ -142,7 +161,7 @@ let parse_code_helper expected_attrs item : string Or_error.t =
         (expected_attrs, item)
         <:sexp_of< Html.attributes * Html.item >>
   )
-  | Nethtml.Element (_,_,_) ->
+  | `Element _ ->
     error "expected <code> but got other type of node"
       (expected_attrs,item) <:sexp_of< Html.attributes * Html.item >>
 
@@ -163,18 +182,18 @@ let parse_code_computeroutput item : [> `Output of string] Or_error.t =
 (** Parse <strong><code>DATA</code></strong> element.*)
 let parse_strong_code item : [> `Input of string] Or_error.t =
   match item with
-  | Nethtml.Data x ->
+  | `Data x ->
     error "expected <strong> but got DATA" x sexp_of_string
-  | Nethtml.Element ("strong", [], [elem]) -> (
+  | `Element {Html.name="strong"; attrs=[]; childs=[elem]} -> (
     match parse_code elem with
     | Ok x -> Ok (`Input x)
     | Error _ as e -> Or_error.tag e "within <strong>"
   )
-  | Nethtml.Element ("strong", [], _) ->
+  | `Element {Html.name="strong"; attrs=[]; childs=_} ->
     Or_error.error_string "expected exactly one child of <strong>"
-  | Nethtml.Element ("strong", attrs, _::[]) ->
+  | `Element {Html.name="strong"; attrs; childs=_::[]} ->
     error "unexpected attributes in <strong>" attrs Html.sexp_of_attributes
-  | Nethtml.Element (name, _, _) ->
+  | `Element {Html.name; _} ->
     error "expected <strong> but got other type of node" name sexp_of_string
 
 let parse_data item : [> `Data of string] Or_error.t =
@@ -235,9 +254,9 @@ let parse_pre item =
   let required = ["data-type"] in
   let allowed = `Some ["data-code-language"] in
   match item with
-  | Nethtml.Data x ->
+  | `Data x ->
     error "expected <pre> but got DATA" x sexp_of_string
-  | Nethtml.Element ("pre", attrs, childs) -> (
+  | `Element {Html.name="pre"; attrs; childs} -> (
     let find x = List.Assoc.find attrs x in
     Html.check_attrs attrs ~required ~allowed >>= fun () ->
     parse_code_block childs >>| fun code_block ->
@@ -247,7 +266,7 @@ let parse_pre item =
       code_block;
     }
   )
-  | Nethtml.Element (name, _, _) ->
+  | `Element {Html.name; _} ->
     error "expected <pre> but got other type of node" name sexp_of_string
 
 
@@ -255,11 +274,10 @@ let parse_pre item =
     should be extracted by searching for sibling <p> node that has
     this information. *)
 let map (html:Html.t) ~f =
-  let open Nethtml in
   let open Result.Monad_infix in
   let rec loop = function
-    | ((Element ("p",_,_)) as p_node)
-      ::((Element ("pre",_,_)) as pre_node)
+    | ((`Element {Html.name="p";_}) as p_node)
+      ::((`Element {Html.name="pre";_}) as pre_node)
       ::rest
        -> (
          parse_p_before_pre p_node >>= fun p ->
@@ -269,14 +287,14 @@ let map (html:Html.t) ~f =
        )
     | [] ->
       Ok []
-    | (Data _ as x)::rest -> (
+    | (`Data _ as x)::rest -> (
       loop rest >>= fun rest ->
       Ok (x::rest)
     )
-    | (Element (name,attrs,childs))::rest -> (
+    | (`Element {Html.name;attrs;childs})::rest -> (
       loop childs >>= fun childs ->
       loop rest >>= fun rest ->
-      Ok ((Element(name,attrs,childs))::rest)
+      Ok ((`Element{Html.name;attrs;childs})::rest)
     )
   in
   loop html

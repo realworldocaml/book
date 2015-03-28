@@ -2,19 +2,21 @@
 open Core.Std
 open Async.Std
 
-(** Html element. *)
-type item
-= Nethtml.document =
-  | Element of (string * (string * string) list * item list)
-  | Data of string
-with sexp
-
-(** Html document. Note: nethtml's terminology is incorrect. An html
-    document is really a list of what it calls a document. *)
-type t = item list
-with sexp
-
 type attributes = (string * string) list
+with sexp
+
+type element = {
+  name : string;
+  attrs : attributes;
+  childs : item list;
+}
+
+and item = [
+| `Element of element
+| `Data of string
+] with sexp
+
+type t = item list
 with sexp
 
 val item_of_string : string -> item Or_error.t
@@ -68,9 +70,6 @@ val get_body_childs : filename:string -> t -> item list
 (******************************************************************************)
 (** {2 Constructors} *)
 (******************************************************************************)
-val item : string -> ?a:attributes -> t -> item
-val data : string -> item
-
 val div : ?a:attributes -> t -> item
 val span : ?a:attributes -> t -> item
 val p : ?a:attributes -> t -> item

@@ -399,7 +399,7 @@ let run_file_exn ?(repo_root=".") file ~lang = match lang with
 (******************************************************************************)
 let pygmentize lang contents =
   match lang_to_pygmentize_language lang with
-  | Error _ -> return (Html.(pre [data contents]))
+  | Error _ -> return (Html.(pre [`Data contents]))
   | Ok lang ->
     Process.create ~prog:"pygmentize" ~args:["-l"; lang; "-f"; "html"] ()
     >>= fun proc ->
@@ -441,7 +441,7 @@ let phrases_to_html ?(run_pygmentize=false) lang xs =
       x
       |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
       |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
-      |> fun x -> Html.(pre [data x])
+      |> fun x -> Html.(pre [`Data x])
     )
 
 (* TODO: implement with Async *)

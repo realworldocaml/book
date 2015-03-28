@@ -19,14 +19,14 @@ include T
 include Comparable.Make(T)
 
 let is_import_html = function
-  | Nethtml.Data _ -> false
-  | Nethtml.Element ("link", attrs, _) -> (
+  | `Data _ -> false
+  | `Element {Html.name="link"; attrs; _} -> (
     match List.Assoc.find attrs "rel" with
     | Some "import" -> true
     | Some _
     | None -> false
   )
-  | Nethtml.Element (_,_,_) -> false
+  | `Element _ -> false
 
 let of_html item =
   let open Result.Monad_infix in
@@ -35,7 +35,7 @@ let of_html item =
       item Html.sexp_of_item
   else (
     match item with
-    | Nethtml.Element ("link", attrs, childs) -> (
+    | `Element {name="link"; attrs; childs} -> (
       let find x = List.Assoc.find attrs x in
       Html.check_attrs attrs
         ~required:["data-code-language"; "href"; "rel"]
@@ -57,8 +57,8 @@ let of_html item =
         childs;
       }
     )
-    | Nethtml.Element (_,_,_)
-    | Nethtml.Data _ ->
+    | `Element _
+    | `Data _ ->
       assert false
   )
 ;;
