@@ -227,7 +227,7 @@ let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
     div ~a:["class","left-column"] [
       a ~a:["href","toc.html"; "class","to-chapter"] [
         small [`Data "Back"];
-        h5 [`Data "Table of Conents"];
+        h5 [`Data "Table of Contents"];
       ]
     ];
     article ~a:["class","main-body"] content;
