@@ -144,7 +144,7 @@ let main_template ?(next_chapter_footer=None)
   let open Html in
   [html ~a:["class", "js flexbox fontface"; "lang", "en"; "style", ""] [
     head [head_item];
-    body ~a:["class","sn-active"] (List.filter_map ~f:Fn.id [
+    body (List.filter_map ~f:Fn.id [
       Some title_bar;
       Some (div ~a:["class","wrap"] content);
       next_chapter_footer;
