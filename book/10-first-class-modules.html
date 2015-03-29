@@ -61,16 +61,15 @@
       <p>
 	A first-class module is created by packaging up a module with
 	a signature that it satisfies. This is done using
-	the <code>module</code> keyword, using the following
-	syntax:
+	the <code>module</code> keyword.
 
 	<idx>module keyword</idx></p>
 
       <link rel="import" data-code-language="ocamlsyntax"
 	    href="code/fcm/pack.syntax"/> 
 
-      <p>So, we can convert <code>Three</code> into a first-class
-      module as follows:</p>
+      <p>We can convert <code>Three</code> into a first-class module
+      as follows:</p>
 
       <link rel="import" data-code-language="ocamltop"
 	    href="code/fcm/main.topscript" part="2"/> 
@@ -94,8 +93,10 @@
       syntax:</p>
       <link rel="import" data-code-language="ocamlsyntax" href="code/fcm/unpack.syntax"/>
 
-      <p>And here's an example:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="5"/>
+      <p>Here's an example:</p> 
+
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/fcm/main.topscript" part="5"/>
 
       <p>
 	We can also write ordinary functions which consume and create
@@ -158,10 +159,12 @@
       <link rel="import" data-code-language="ocamltop" 
 	    href="code/fcm/main.topscript" part="15"/>
 
-      <p>The sharing constraints we've added above make the
-      resulting first-class modules <span class="keep-together">polymorphic</span> in the type
-      <code>t</code>. As a result, we can now use these values on
-      values of the matching type:</p>
+      <p>
+	The sharing constraints we've added above make the resulting
+	first-class
+	modules <span class="keep-together">polymorphic</span> in the
+	type <code>t</code>. As a result, we can now use these
+	first-class modules on values of the matching type:</p>
 
       <link rel="import" data-code-language="ocamltop" 
 	    href="code/fcm/main.topscript" part="16"/>
@@ -566,11 +569,14 @@
 
         <p>Although we won't describe the details here, we can push
         this dynamism yet further using OCaml's dynamic linking
-        facilities, which allow you to compile and link in new code
-        to a running program. This can be automated using libraries
+        facilities, which allow you to compile and link in new code to
+        a running program. This can be automated using libraries
         like <code>ocaml_plugin</code>, which can be installed via
-        OPAM, and which automates much of the workflow around
-        setting up dynamic linking.<a data-type="indexterm" data-startref="FCMquery">&nbsp;</a></p>
+        OPAM, and which takes care of much of the workflow around
+        setting up dynamic linking.
+
+	  <a data-type="indexterm"
+	     data-startref="FCMquery">&nbsp;</a></p> 
       </section>
     </section>
 
