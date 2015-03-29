@@ -130,30 +130,40 @@
       interface that contains a type and a corresponding
       <code>bump</code> operation that takes a value of the type
       and produces a new one:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="11"/>
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="11"/>
 
       <p>We can create multiple instances of this module with
       different underlying types:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="12"/>
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="12"/>
 
       <p>And we can convert these to first-class modules:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="13"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="13"/>
 
       <p>But you can't do much with <code>int_bumper</code>, since
       <code>int_bumper</code> is fully abstract, so that we can no
       longer recover the fact that the type in question is
       <code>int</code>.</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="14"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="14"/>
 
       <p>To make <code>int_bumper</code> usable, we need to expose
       the type, which we can do as follows:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="15"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="15"/>
 
       <p>The sharing constraints we've added above make the
       resulting first-class modules <span class="keep-together">polymorphic</span> in the type
       <code>t</code>. As a result, we can now use these values on
       values of the matching type:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="16"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/main.topscript" part="16"/>
 
       <p>
 	We can also write functions that use such first-class
@@ -321,11 +331,15 @@
         <p>Here's another example: a query handler that does
         directory listings. Here, the config is the default
         directory that relative paths are interpreted within:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="5"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="5"/>
 
         <p>Again, we can create an instance of this query handler
         and interact with it directly:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="6"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="6"/>
       </section>
 
       <section id="dispatching-to-multiple-query-handlers" data-type="sect2">
@@ -339,29 +353,39 @@
         first thing we'll need to do is create a signature that
         combines a <code>Query_handler</code> module with an
         instantiated query handler:<idx>query-handlers/dispatching to multiple</idx></p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="7"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="7"/>
 
         <p>With this signature, we can create a first-class module
         that encompasses both an instance of the query and the
         matching operations for working with that query.</p>
 
         <p>We can create an instance as follows:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="8"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="8"/>
 
         <p>Constructing instances in this way is a little verbose,
         but we can write a function that eliminates most of this
         boilerplate. Note that we are again making use of a locally
         abstract type:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="9"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="9"/>
 
         <p>Using <code>build_instance</code>, constructing a new
         instance becomes a one-liner:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="10"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="10"/>
 
         <p>We can now write code that lets you dispatch queries to
         one of a list of query handler instances. We assume that
         the shape of the query is as follows:</p>
-        <link rel="import" data-code-language="scheme" href="code/fcm/query-syntax"/>
+
+        <link rel="import" data-code-language="scheme" 
+	      href="code/fcm/query-syntax"/>
 
         <p>where <em><code>query-name</code></em> is the name used
         to determine which query handler to dispatch the query to,
@@ -371,11 +395,15 @@
         <p>The first thing we'll need is a function that takes a
         list of query handler instances and constructs a dispatch
         table from it:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="11"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="11"/>
 
         <p>Now, we need a function that dispatches to a handler
         using a dispatch table:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="12"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="12"/>
 
         <p>This function interacts with an instance by unpacking it
         into a module <code>I</code> and then using the query
@@ -394,16 +422,22 @@
 
         <p>Now let's turn this into a complete, running example by
         adding a command-line interface:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="13"/>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/fcm/query_handler.topscript" part="13"/>
 
         <p>We can most effectively run this command-line interface
         from a standalone program, which we can do by putting the
         above code in a file along with following command to launch
         the interface:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler.ml" part="1"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler.ml" part="1"/>
 
         <p>Here's an example of a session with this program:</p>
-        <link rel="import" data-code-language="ocamlrawtop" href="code/fcm/query_example.rawscript"/>
+
+        <link rel="import" data-code-language="ocamlrawtop" 
+	      href="code/fcm/query_example.rawscript"/>
       </section>
 
       <section id="loading-and-unloading-query-handlers" data-type="sect2">
@@ -420,7 +454,9 @@
         question will be called <code>Loader</code>, and its
         configuration is a list of known <code>Query_handler</code>
         modules. Here are the basic types:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="1"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_core.ml" part="1"/>
 
         <p>Note that a <code>Loader.t</code> has two tables: one
         containing the known query handler modules, and one
@@ -433,7 +469,9 @@
         <code>Loader.t</code>. This function requires the list of
         known query handler modules. Note that the table of active
         modules starts out as empty:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="2"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_core.ml" part="2"/>
 
         <p>Now we'll start writing out the functions for
         manipulating the table of active query handlers. We'll
@@ -444,20 +482,26 @@
         first-class module of type <code>(module
         Query_handler_instance)</code>, which is then added to the
         active table:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="3"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_core.ml" part="3"/>
 
         <p>Since the <code>load</code> function will refuse to
         <code>load</code> an already active handler, we also need
         the ability to unload a handler. Note that the handler
         explicitly refuses to unload itself:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="4"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_core.ml" part="4"/>
 
         <p>Finally, we need to implement the <code>eval</code>
         function, which will determine the query <span class="keep-together">interface</span> presented to the user.
         We'll do this by creating a variant type, and using the
         s-expression converter generated for that type to parse the
         query from the user:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="5"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_core.ml" part="5"/>
 
         <p>The <code>eval</code> function itself is fairly
         straightforward, dispatching to the appropriate functions
@@ -469,18 +513,24 @@
 
         <p>This function ends the definition of the
         <code>Loader</code> module:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_core.ml" part="6"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_core.ml" part="6"/>
 
         <p>Finally, we can put this all together with the
         command-line interface. We first create an instance of the
         loader query handler and then add that instance to the
         loader's active table. We can then just launch the
         command-line interface, passing it the active table:</p>
-        <link rel="import" data-code-language="ocaml" href="code/fcm/query_handler_loader.ml" part="1"/>
+
+        <link rel="import" data-code-language="ocaml" 
+	      href="code/fcm/query_handler_loader.ml" part="1"/>
 
         <p>Now build this into a command-line interface to
         experiment with it:</p>
-        <link rel="import" data-code-language="console" href="code/fcm/build_query_handler_loader.out"/>
+
+        <link rel="import" data-code-language="console" 
+	      href="code/fcm/build_query_handler_loader.out"/>
 
         <p>The resulting command-line interface behaves much as
         you'd expect, starting out with no query handlers available
@@ -488,22 +538,30 @@
         an example of it in action. As you can see, we start out
         with <code>loader</code> itself as the only active
         handler:</p>
-        <link rel="import" data-code-language="console" href="code/fcm/loader_cli1.out"/>
+
+        <link rel="import" data-code-language="console" 
+	      href="code/fcm/loader_cli1.out"/>
 
         <p>Any attempt to use an inactive query handler will
         fail:</p>
-        <link rel="import" data-code-language="console" href="code/fcm/loader_cli2.out"/>
+
+        <link rel="import" data-code-language="console" 
+	      href="code/fcm/loader_cli2.out"/>
 
         <p>But, we can load the <code>ls</code> handler with a
         config of our choice, at which point it will be available
         for use. And once we unload it, it will be unavailable yet
         again and could be reloaded with a different config:</p>
-        <link rel="import" data-code-language="console" href="code/fcm/loader_cli3.out"/>
+
+        <link rel="import" data-code-language="console" 
+	      href="code/fcm/loader_cli3.out"/>
 
         <p>Notably, the loader can't be loaded (since it's not on
         the list of known handlers) and can't be unloaded
         either:</p>
-        <link rel="import" data-code-language="console" href="code/fcm/loader_cli4.out"/>
+
+        <link rel="import" data-code-language="console" 
+	      href="code/fcm/loader_cli4.out"/>
 
         <p>Although we won't describe the details here, we can push
         this dynamism yet further using OCaml's dynamic linking
@@ -523,13 +581,17 @@
       level of awkwardness. For example, we could rewrite our query
       handler example without first-class modules using the
       following types:<idx>first-class modules/alternatives to</idx></p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="14"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/query_handler.topscript" part="14"/>
 
       <p>The idea here is that we hide the true types of the
       objects in question behind the functions stored in the
       closure. Thus, we could put the <code>Unique</code> query
       handler into this framework as follows:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/fcm/query_handler.topscript" part="15"/>
+
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/fcm/query_handler.topscript" part="15"/>
 
       <p>For an example on this scale, the preceding approach is
       completely reasonable, and first-class modules are not really
@@ -537,7 +599,9 @@
       behind a set of closures, and the more complicated the
       relationships between the different types in question, the
       more awkward this approach becomes, and the better it is to
-      use first-class modules.<a data-type="indexterm" data-startref="MODfirst">&nbsp;</a></p>
+      use first-class modules.
+
+	<a data-type="indexterm" data-startref="MODfirst">&nbsp;</a></p>
     </section>
   </section>
 </body>
