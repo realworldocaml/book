@@ -97,44 +97,6 @@
       <p>And here's an example:</p>
       <link rel="import" data-code-language="ocamltop" href="code/fcm/main.topscript" part="5"/>
 
-      <aside data-type="sidebar">
-        <h5>Equality of First-Class Module Types</h5>
-
-        <p>
-	  The type of the first-class module, e.g., <code>(module
-            X_int)</code>, is based on the fully qualified name of the
-          signature that was used to construct it. A first-class
-          module based on a signature with a different name, even if
-          it is substantively the same signature, will result in a
-          distinct type:</p>
-
-        <link rel="import" data-code-language="ocamltop" 
-	      href="code/fcm/main.topscript" part="6"/>
-
-        <p>
-	  Even though their types as first-class modules are
-          distinct, the underlying module types are compatible
-          (indeed, identical), so we can unify the types by unpacking
-          and repacking the module:</p>
-
-        <link rel="import" data-code-language="ocamltop" 
-	      href="code/fcm/main.topscript" part="7"/>
-
-        <p>
-	  The way in which type equality for first-class modules
-          is determined can be confusing. One common and problematic
-          case is that of creating an alias of a module type defined
-          elsewhere. This is often done to improve readability and
-          can happen both through an explicit declaration of a module
-          type or implicitly through an <code>include</code>
-          declaration. In both cases, this has the unintended side
-          effect of making first-class modules built off the alias
-          incompatible with those built off the original module type.
-          To deal with this, we should be disciplined in how we refer
-          to signatures when constructing first-class
-	  <span class="keep-together">modules</span>.</p>
-      </aside>
-
       <p>
 	We can also write ordinary functions which consume and create
 	first-class modules. The following shows the definition of two
