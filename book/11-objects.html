@@ -27,7 +27,7 @@
     <aside data-type="sidebar">
       <h5>What Is Object-Oriented Programming?</h5>
 
-      <p>Object-oriented programming (often shorted to OOP) is a
+      <p>Object-oriented programming (often shortened to OOP) is a
       programming style that encapsulates computation and data
       within logical <em>objects</em>. Each object contains some
       data stored in <em>fields</em> and has <em>method</em>
@@ -199,31 +199,35 @@
       <div data-type="note">
         <h1>Elisions Are Polymorphic</h1>
 
-        <p>The <code>..</code> in an open object type is an
-        elision, standing for "possibly more methods." It may not
-        be apparent from the syntax, but an elided object type is
-        actually polymorphic. For example, if we try to write a
-        type definition, we get an "unbound type variable"
-        error:
+        <p>
+	  The <code>..</code> in an open object type is an
+          elision, standing for "possibly more methods." It may not
+          be apparent from the syntax, but an elided object type is
+          actually polymorphic. For example, if we try to write a
+          type definition, we get an "unbound type variable"
+          error:
 
 	  <idx>polymorphism/row polymorphism</idx>
 	  <idx>row polymorphism</idx>
 	  <idx>ellipses (..)</idx>
 	  <idx>type variables</idx></p>
+
+	<link rel="import" data-code-language="ocamltop" 
+	      href="code/objects/polymorphism.topscript" part="4"/>
+
+	<p>
+	  This is because <code>..</code> is really a special kind of
+	  type variable called a <em>row variable</em>.</p>
+
+	<p>
+	  This kind of typing scheme using row variables is
+	  called <em>row polymorphism</em>. Row polymorphism is also
+	  used in polymorphic variant types, and there is a close
+	  relationship between objects and polymorphic variants:
+	  objects are to records what polymorphic variants are to
+	  ordinary variants.</p>
+
       </div>
-
-      <link rel="import" data-code-language="ocamltop" 
-	    href="code/objects/polymorphism.topscript" part="4"/>
-
-      <p>This is because <code>..</code> is really a special kind
-      of type variable called a <em>row variable</em>.</p>
-
-      <p>This kind of typing scheme using row variables is called
-      <em>row polymorphism</em>. Row polymorphism is also used in
-      polymorphic variant types, and there is a close relationship
-      between objects and polymorphic variants: objects are to
-      records what polymorphic variants are to ordinary
-      variants.</p>
 
       <p>An object of type <code>&lt; pop : int option; ..
       &gt;</code> can be any object with a method <code>pop : int
@@ -233,6 +237,7 @@
 
       <link rel="import" data-code-language="ocamltop" 
 	    href="code/objects/stack.topscript" part="4"/>
+
     </section>
 
     <section id="immutable-objects" data-type="sect1">

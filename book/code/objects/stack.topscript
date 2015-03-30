@@ -52,7 +52,7 @@ print_pop (stack [5;4;3;2;1]) ;;
 
 
 let t = object
-    method pop = Some (Float.to_int (Time.to_float (Time.now ())))
+    method pop = Some (Float.to_int (Time_ns.to_float (Time_ns.now ())))
   end ;;
 
 print_pop t ;;

@@ -4,7 +4,7 @@ open Core.Std;;
 module Log_entry = struct
     type t =
       { session_id: string;
-        time: float;
+        time: Time_ns.t;
         important: bool;
         message: string;
       }
@@ -12,14 +12,14 @@ module Log_entry = struct
   module Heartbeat = struct
     type t =
       { session_id: string;
-        time: float;
+        time: Time_ns.t;
         status_message: string;
       }
   end;;
   module Logon = struct
     type t =
       { session_id: string;
-        time: float;
+        time: Time_ns.t;
         user: string;
         credentials: string;
       }
@@ -27,7 +27,7 @@ module Log_entry = struct
 
 #part 18
 let create_log_entry ~session_id ~important message =
-     { Log_entry.time = Time.now (); 
+     { Log_entry.time = Time_ns.now (); 
        Log_entry.session_id; 
        Log_entry.important; 
        Log_entry.message
@@ -37,7 +37,7 @@ let create_log_entry ~session_id ~important message =
 #part 19
 let create_log_entry ~session_id ~important message =
      { Log_entry.
-       time = Time.now (); session_id; important; message }
+       time = Time_ns.now (); session_id; important; message }
   ;;
 
 #part 20
@@ -51,7 +51,7 @@ let is_important t = t.Log_entry.important;;
 #part 21.1
 
 let create_log_entry ~session_id ~important message : Log_entry.t =
-     { time = Time.now (); session_id; important; message }
+     { time = Time_ns.now (); session_id; important; message }
   let message_to_string ({ important; message; _ } : Log_entry.t) =
     if important then String.uppercase message else message
   let is_important (t:Log_entry.t) = t.important ;;
@@ -62,7 +62,7 @@ type client_info =
      port: int;
      user: string;
      credentials: string;
-     last_heartbeat_time: Time.t;
+     last_heartbeat_time: Time_ns.t;
    };;
 
 let register_heartbeat t hb =
@@ -83,7 +83,7 @@ type client_info =
      port: int;
      user: string;
      credentials: string;
-     last_heartbeat_time: Time.t;
+     last_heartbeat_time: Time_ns.t;
      last_heartbeat_status: string;
    };;
 
@@ -99,7 +99,7 @@ type client_info =
      port: int;
      user: string;
      credentials: string;
-     mutable last_heartbeat_time: Time.t;
+     mutable last_heartbeat_time: Time_ns.t;
      mutable last_heartbeat_status: string;
    };;
 
@@ -117,7 +117,7 @@ let get_users logons =
 module Logon = struct
     type t =
       { session_id: string;
-        time: Time.t;
+        time: Time_ns.t;
         user: string;
         credentials: string;
       }
@@ -143,14 +143,14 @@ let show_field field to_string record =
 #part 34
 let logon = { Logon.
                 session_id = "26685";
-                time = Time.now ();
+                time = Time_ns.now ();
                 user = "yminsky";
                 credentials = "Xy2d9W"; }
   ;;
 
 show_field Logon.Fields.user Fn.id logon;;
 
-show_field Logon.Fields.time Time.to_string logon;;
+show_field Logon.Fields.time Time_ns.to_string logon;;
 
 #part 35
 Logon.Fields.iter;;
@@ -162,7 +162,7 @@ let print_logon logon =
     in
     Logon.Fields.iter
       ~session_id:(print Fn.id)
-      ~time:(print Time.to_string)
+      ~time:(print Time_ns.to_string)
       ~user:(print Fn.id)
       ~credentials:(print Fn.id)
   ;;

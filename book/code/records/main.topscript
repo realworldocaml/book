@@ -126,18 +126,18 @@ let create_service_info
 #part 13
 type log_entry =
     { session_id: string;
-      time: float;
+      time: Time_ns.t;
       important: bool;
       message: string;
     };;
   type heartbeat =
     { session_id: string;
-      time: float;
+      time: Time_ns.t;
       status_message: string;
     };;
   type logon =
     { session_id: string;
-      time: float;
+      time: Time_ns.t;
       user: string;
       credentials: string;
     }

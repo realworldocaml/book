@@ -1,3 +1,4 @@
+open Core_kernel.Std;;
 type shape = < area : float > ;;
 
 type square = < area : float; width : int > ;;

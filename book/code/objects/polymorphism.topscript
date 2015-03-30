@@ -1,4 +1,4 @@
-;;
+open Core_kernel.Std;;
 
 #part 1
 let area sq = sq#width * sq#width ;;
