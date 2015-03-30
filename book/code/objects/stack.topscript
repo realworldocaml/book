@@ -1,6 +1,7 @@
 ;;
 
 #part 1
+open Core_kernel.Std;;
 let s = object
     val mutable v = [0; 2]
 

@@ -117,18 +117,18 @@
       "code/variables-and-functions/main.topscript" part="6" />
 
       <p>Here, we redefined <code>pi</code> to be zero after the
-      definition of <code>area_of_circle</code>. You might think
-      that this would mean that the result of the computation would
-      now be zero, but in fact, the behavior of the function is
-      unchanged. That's because the original definition of
-      <code>pi</code> wasn't changed; it was just shadowed, which
-      means that any subsequent reference to <code>pi</code> would
-      see the new definition of <code>pi</code> as <code>0</code>,
-      but earlier references would be unchanged. But there is no
-      later use of <code>pi</code>, so the binding of
-      <code>pi</code> to <code>0.</code> made no difference. This
-      explains the warning produced by the toplevel telling us that
-      there is an unused definition of <code>pi</code>.</p>
+      definition of <code>area_of_circle</code>. You might think that
+      this would mean that the result of the computation would now be
+      zero, but in fact, the behavior of the function is
+      unchanged. That's because the original definition
+      of <code>pi</code> wasn't changed; it was just shadowed, which
+      means that any subsequent reference to <code>pi</code> would see
+      the new definition of <code>pi</code> as <code>0</code>, but
+      earlier references would still see the old one. But there is no
+      later use of <code>pi</code>, so the binding of <code>pi</code>
+      to <code>0.</code> made no difference at all. This explains the
+      warning produced by the toplevel telling us that there is an
+      unused definition of <code>pi</code>.</p>
 
       <p>In OCaml, <code>let</code> bindings are immutable. There
       are many kinds of mutable values in OCaml, which we'll
@@ -174,11 +174,11 @@
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="7" />
 
-        <p>Here, <code>(ints,strings)</code> is a pattern, and the
-        <code>let</code> binding assigns values to both of the
+        <p>Here, <code>(ints,strings)</code> is a pattern, and
+        the <code>let</code> binding assigns values to both of the
         identifiers that show up in that pattern. A pattern is
         essentially a description of the shape of a data structure,
-        where some components are identifiers to be bound. As we
+        where some components are names to be bound to values. As we
         saw in <a href=
         "01-guided-tour.html#tuples-lists-options-and-pattern-matching"
         data-type="xref">Tuples Lists Options And Pattern
