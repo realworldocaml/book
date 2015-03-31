@@ -1,4 +1,4 @@
-open Core.Std
+open Core_kernel.Std
 open Core_bench.Std
 
 let map_iter ~num_keys ~iterations =
