@@ -5,8 +5,19 @@
 	a
 	{
 		display: block;
-		@include grid-column(6);
+		@include grid-column(12, $float: none);
 		padding: $column-gutter/2;
+		
+		h5
+		{
+			margin: 0;
+		}
+		
+		img
+		{
+			width: 50%;
+			margin-bottom: 1rem;
+		}
 		
 		&:hover
 		{
@@ -23,6 +34,7 @@
 	{
 		@include grid-column(4);
 		padding: $column-gutter/2;
+		text-align: center;
 	}
 }
 

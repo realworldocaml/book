@@ -23,16 +23,18 @@
 		margin-top: $column-gutter/2;
 	}
 	
-	.index-toc, .author-holder, .extras-holder
+	.index-toc-holder, .author-holder, .extras-holder
 	{
+		clear: both;
 		@include grid-column(12, $float: none);
 		margin-top: $column-gutter/2;
 		margin-bottom: $column-gutter/2;
 	}
 	
-	.extras-holder
+	.author-holder, .extras-holder
 	{
 		border-top: 1px solid $hr-border-color;
+		overflow: hidden;
 	}
 	
 @media #{$medium}
@@ -47,17 +49,6 @@
 	{
 		max-width: 54rem;
 		padding-bottom: $column-gutter;
-	}
-	
-	.index-toc
-	{
-		@include grid-column(6);
-	}
-	
-	.author-holder, .extras-holder
-	{
-		@include grid-column(6, $float:right);
-		margin-bottom: 0;
 	}
 }
 
@@ -76,22 +67,6 @@
 	{
 		@include grid-column(8, $offset: 3.5);
 		padding-bottom: $column-gutter*2;
-	}
-	
-	.index-toc
-	{
-		@include grid-column(5);
-	}
-	
-	.author-holder
-	{
-		@include grid-column(3.5);
-		border-left: 1px solid $hr-border-color;
-	}
-	
-	.extras-holder
-	{
-		@include grid-column(7, $float:right);
 	}
 }
 

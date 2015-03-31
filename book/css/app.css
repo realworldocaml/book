@@ -277,7 +277,7 @@ h2 {
   font-size: 1.19140625rem; }
 
 h3 {
-  font-size: 1.153125rem; }
+  font-size: 0.7625rem; }
 
 h4 {
   font-size: 1.0505rem; }
@@ -434,7 +434,7 @@ blockquote, blockquote p {
   h2 {
     font-size: 2.44140625rem; }
   h3 {
-    font-size: 1.953125rem; }
+    font-size: 1.5625rem; }
   h4 {
     font-size: 1.5625rem; }
   h5 {
@@ -451,14 +451,21 @@ body:after {
   width: 100%;
   border-top: 3px solid #8e44ad; }
 
+h1, h2, h3, h4, h5, h6, p, ul li, ol li {
+  -webkit-font-feature-settings: "kern" 1;
+     -moz-font-feature-settings: "kern" 1;
+          font-feature-settings: "kern" 1;
+  -webkit-font-kerning: normal;
+     -moz-font-kerning: normal;
+          font-kerning: normal; }
+
 h1 small {
   display: block;
   text-transform: uppercase;
   line-height: 1.4; }
 
 h3 {
-  text-transform: lowercase;
-  font-variant: small-caps;
+  text-transform: uppercase;
   font-weight: bold;
   color: #777777; }
 
@@ -1289,10 +1296,10 @@ pre .il {
       padding: 1rem 3.4rem 1rem 0; }
       .toc > li a h2 {
         margin: 0;
-        font-size: 1.953125rem; }
+        font-size: 1.5625rem; }
         @media only screen and (max-width: 40em) {
           .toc > li a h2 {
-            font-size: 1.708984375rem; } }
+            font-size: 1.3671875rem; } }
         .toc > li a h2 small {
           display: block;
           text-transform: uppercase;
@@ -1468,9 +1475,11 @@ pre .il {
     display: block;
     padding-left: 1.6875rem;
     padding-right: 1.6875rem;
-    width: 50%;
-    float: left;
+    width: 100%;
+    float: none;
     padding: 1.6875rem; }
+    .extras a h5 {
+      margin: 0; }
     .extras a img {
       width: 50%;
       margin-bottom: 1rem; }
@@ -1488,7 +1497,7 @@ pre .il {
 .question {
   font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
   font-weight: 300;
-  font-size: 1.953125rem;
+  font-size: 1.5625rem;
   line-height: 1.25; }
   .question:nth-child(n+2) {
     border-top: 1px solid #DDDDDD;
@@ -1579,7 +1588,7 @@ section[data-type=chapter] div[data-type=note] {
   margin-bottom: 1.6875rem;
   padding: 1.6875rem; }
   section[data-type=chapter] div[data-type=note] h1 {
-    font-size: 1.953125rem; }
+    font-size: 1.5625rem; }
   section[data-type=chapter] div[data-type=note] p {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
   section[data-type=chapter] div[data-type=note] code {

@@ -1,7 +1,5 @@
 .author
 {
-	@include grid-row;
-	border-top: 1px solid $hr-border-color;
 	padding-top: $column-gutter/2;
 	
 	.author-image
@@ -31,6 +29,7 @@
 	
 @media #{$medium}
 {	
+	@include grid-column(4);
 	.author-meta
 	{
 		//@include grid-column(7, $collapse:true);
@@ -46,12 +45,6 @@
 			font-size: 1rem;
 		}
 	}
-}
-
-@media #{$large}
-{
-	border-top: none;
-	padding-top: 0;
 }
 
 }

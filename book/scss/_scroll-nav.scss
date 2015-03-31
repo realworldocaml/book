@@ -78,16 +78,17 @@
 				{
 					display: block;
 					font-size: 0.875em;
+					font-family: $font-family-sans-serif;
 					padding: 0.4375rem 1rem;
 					line-height: 1.2;
 					
-					color: lighten(desaturate($info-color, 100), 10);
+					color: darken(desaturate($info-color, 90), 10);
 					font-style: italic;
 					transition: color 0.2s;
 					
 					&:hover
 					{
-						color: $monsoon;
+						color: darken(desaturate($info-color, 90), 30);
 					}
 				}
 				
