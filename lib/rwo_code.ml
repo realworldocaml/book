@@ -407,7 +407,8 @@ let pygmentize lang contents =
     | Error e -> raise (Error.to_exn e)
     | Ok proc -> (
       Writer.write (Process.stdin proc) contents;
-      Process.wait proc >>| fun {Process.Output.stdout; stderr; exit_status} ->
+      Process.collect_output_and_wait proc
+      >>| fun {Process.Output.stdout; stderr; exit_status} ->
       match exit_status with
       | Error (`Exit_non_zero x) ->
         failwithf "pygmentize exited with %d on:\n%s" x contents ()
