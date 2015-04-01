@@ -1,4 +1,5 @@
 open Core_kernel.Std;;
+module Time_ns = Core_kernel.Time_ns;;
 
 type service_info =
     { service_name : string;

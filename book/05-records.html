@@ -248,18 +248,18 @@
       names</idx><idx id="RECreusfn">records/reusing field
       names</idx></p>
 
-      <p>We'll describe three message types:
-      <code>log_entry</code>, <code>heartbeat</code>, and
-      <code>logon</code>. The <code>log_entry</code> message is
-      used to deliver a log entry to the server; the
-      <code>logon</code> message is sent when initiating a
-      connection and includes the identity of the user connecting
-      and credentials used for authentication; and the
-      <code>heartbeat</code> message is periodically sent by the
-      client to demonstrate to the server that the client is alive
-      and connected. All of these messages include a session ID and
-      the time the message was generated, measured in seconds from
-      the start of the Unix epoch (January 1st, 1970.)</p>
+      <p>We'll describe three message
+      types: <code>log_entry</code>, <code>heartbeat</code>,
+      and <code>logon</code>. The <code>log_entry</code> message is
+      used to deliver a log entry to the server;
+      the <code>logon</code> message is sent when initiating a
+      connection and includes the identity of the user connecting and
+      credentials used for authentication; and
+      the <code>heartbeat</code> message is periodically sent by the
+      client to demonstrate to the server that the client is alive and
+      connected. All of these messages include a session ID and the
+      time the message was generated.</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="13" />
 
