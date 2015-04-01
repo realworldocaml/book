@@ -43,4 +43,10 @@
 		color: $small-font-color;
 		margin: 0 0 $paragraph-margin-bottom/2;
 	}
+
+@media #{$medium}
+{
+	@include grid-column(4);
+}
+
 }

@@ -16,6 +16,12 @@ body
 	}
 }
 
+h1, h2, h3, h4, h5, h6, p, ul li, ol li
+{
+	font-feature-settings: "kern" 1;
+	font-kerning: normal;
+}
+
 h1
 {	
 	small
@@ -28,10 +34,10 @@ h1
 
 h3
 {
-	text-transform: lowercase;
-	font-variant: small-caps;
+	text-transform: uppercase;
+	//font-variant: small-caps;
 	font-weight: $font-weight-bold;
-	color: $base;
+	color: darken($base, 20);
 }
 
 h4, h5, h6

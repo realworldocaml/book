@@ -71,7 +71,7 @@ section[data-type=chapter]
 		
 		code
 		{
-			background: rgba($white, 0.5);
+			background: desaturate(lighten($info-color, 35), 10);
 		}
 	}
 	
@@ -142,20 +142,11 @@ section[data-type=chapter]
 	ul
 	{
 		list-style: circle;
+		margin-left: $column-gutter/2;
 		margin-bottom: $paragraph-margin-bottom;
 		
 		li
 		{
-			padding-bottom: $paragraph-margin-bottom/3;
-			margin-bottom: $paragraph-margin-bottom/3;
-			border-bottom: 1px dotted $hr-border-color;
-			
-			&:last-child
-			{
-				padding-bottom: 0;
-				margin-bottom: 0;
-				border-bottom: 0;
-			}
 		}
 	}
 	
@@ -222,8 +213,8 @@ section[data-type=chapter]
 		//float: right;
 		//width: 50%;
 		//margin-left: $column-gutter/2;
-		column-count: 2;
-		column-gap: $column-gutter/2;
+		//column-count: 2;
+		//column-gap: $column-gutter/2;
 	
 		pre
 		{
