@@ -33,8 +33,7 @@ let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
 #part 5
 let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
   let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
-  let diff = Map.symmetric_diff ~data_equal:Int.equal left right
-  ;;
+  Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 
 
 

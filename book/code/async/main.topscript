@@ -1,11 +1,11 @@
 ;;
 #part 1
+open Core_kernel.Std;;
 In_channel.read_all;;
 
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 
 In_channel.read_all "test.txt";;
-
 
 #part 3
 #require "async";;

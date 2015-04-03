@@ -219,8 +219,8 @@
       "xref">Records</a>. We'll start by reminding ourselves of the
       definition of <code>Log_entry.t</code>:</p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/variants/logger.topscript" part="1" />
+      <link rel="import" data-code-language="ocamltop" 
+	    href="code/variants/logger.topscript" part="1" />
 
       <p>This record type combines multiple pieces of data into one
       value. In particular, a single <code>Log_entry.t</code> has a
@@ -584,12 +584,14 @@
         <link rel="import" data-code-language="ocamltop" href=
         "code/variants/main.topscript" part="14" />
 
-        <p>The preceding code is more delicately balanced than one
-        might imagine. In particular, if we use a catch-all case
-        instead of an explicit enumeration of the cases, the type
-        is no longer narrowed, and so compilation fails:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/variants/main.topscript" part="15" />
+        <p>
+	  The preceding code is more delicately balanced than one
+          might imagine. In particular, if we use a catch-all case
+          instead of an explicit enumeration of the cases, the type is
+          no longer narrowed, and so compilation fails:</p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/variants/main.topscript" part="15" />
 
         <div class="allow_break" data-type="note">
           <h1>Polymorphic Variants and Catch-all Cases</h1>

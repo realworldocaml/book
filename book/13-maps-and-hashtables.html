@@ -67,7 +67,7 @@
       <p>Here's the implementation:</p>
 
       <link rel="import" data-code-language="ocaml"
-      href="code/files-modules-and-programs/freq-fast/counter.ml"/> 
+	    href="code/files-modules-and-programs/freq-fast/counter.ml"/> 
 
       <p>Note that in some places the preceding code refers to
       <code>String.Map.t</code>, and in others <code>Map.t</code>.
@@ -128,29 +128,31 @@
         just a type alias for <code>(int,'a,Int.comparator)
         Map.t</code>.</p>
 
-        <p>Including the comparator in the type is important
-        because operations that work on multiple maps at the same
-        time often require that the maps share their comparison
-        function. Consider, for example,
-        <code>Map.symmetric_diff</code>, which computes a summary
-        of the differences between two maps:</p>
+        <p>
+	  Including the comparator in the type is important because
+          operations that work on multiple maps at the same time often
+          require that the maps share their comparison function.
+          Consider, for example, <code>Map.symmetric_diff</code>,
+          which computes the difference between two maps.</p>
 
         <link rel="import" data-code-language="ocamltop"
               href="code/maps-and-hash-tables/main.topscript" part="5"/> 
 
-        <p>The type of <code>Map.symmetric_diff</code>, which
-        follows, requires that the two maps it compares have the
-        same comparator type. Each comparator has a fresh abstract
-        type, so the type of a comparator identifies the comparator
-        uniquely:</p>
+        <p>
+	  The type of <code>Map.symmetric_diff</code>, which follows,
+          requires that the two maps it compares have the same
+          comparator type. Each comparator has a fresh abstract type,
+          so the type of a comparator identifies the comparator
+          uniquely.</p>
 
         <link rel="import" data-code-language="ocamltop"
               href="code/maps-and-hash-tables/main.topscript" part="6"/> 
 
-        <p>This constraint is important because the algorithm that
-        <code>Map.symmetric_diff</code> uses depends for its
-        correctness on the fact that both maps have the same
-        comparator.</p>
+        <p>
+	  This constraint is important because the algorithm
+          that <code>Map.symmetric_diff</code> uses depends for its
+          correctness on the fact that both maps have the same
+          comparator.</p>
 
         <p>We can create a new comparator using the
         <code>Comparator.Make</code> functor, which takes as its
@@ -404,8 +406,9 @@
         s-expression conversion functions for the marked type.</p>
 
         <p>The following example shows how this all fits together,
-        following the same basic pattern for using functors
-        described in <a href="09-functors.html#extending-modules" data-type="xref">Extending Modules</a>:</p>
+        following the same basic pattern for using functors described
+        in <a href="09-functors.html#extending-modules"
+        data-type="xref">Extending Modules</a>:</p>
 
         <link rel="import" data-code-language="ocamltop"
               href="code/maps-and-hash-tables/main.topscript" part="22"/> 
@@ -424,13 +427,12 @@
         <link rel="import" data-code-language="ocamltop"
               href="code/maps-and-hash-tables/main.topscript" part="23"/> 
 
-        <p>The comparison function created by
-        <code>comparelib</code> for a given type will call out to
-        the comparison functions for its component types. As a
-        result, the <code>foo</code> field will be compared using
-        <code>Int.Set.compare</code>. This is different, and saner
-        than the structural comparison done by polymorphic
-        compare.</p>
+        <p>The comparison function created by <code>comparelib</code>
+        for a given type will call out to the comparison functions for
+        its component types. As a result, the <code>foo</code> field
+        will be compared using <code>Int.Set.compare</code>. This is
+        different, and saner than the structural comparison done by
+        polymorphic compare.</p>
 
         <p>If you want your comparison function to behave in a
         specific way, you should still write your own comparison
