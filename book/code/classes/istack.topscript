@@ -1,3 +1,6 @@
+;;
+#part 1
+open Core_kernel.Std;;
 class istack = object
     val mutable v = [0; 2]
 
@@ -18,7 +21,7 @@ class istack = object
 
 
 
-#part 1
+#part 2
 let s = new istack ;;
 
 s#pop ;;
@@ -28,6 +31,6 @@ s#push 5 ;;
 s#pop ;;
 
 
-#part 2
+#part 3
 type istack = < pop: int option; push: int -> unit > ;;
 

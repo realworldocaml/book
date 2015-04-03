@@ -1,3 +1,5 @@
+open Core_kernel.Std
+#part 0.5
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 
 
@@ -18,14 +20,6 @@ class ['a] list_iterator init = object
       | [] -> raise (Invalid_argument "no value")
    end  ;;
 
-
-
-
-
-
-
-
-
 #part 2
 class ['a] stack init = object
     val mutable v : 'a list = init
@@ -43,14 +37,6 @@ class ['a] stack init = object
     method iterator : 'a iterator =
       new list_iterator v
   end ;;
-
-
-
-
-
-
-
-
 
 #part 3
 let s = new stack [] ;;

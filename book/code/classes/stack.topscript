@@ -1,3 +1,5 @@
+open Core_kernel.Std;;
+#part 0.5
 class ['a] stack init = object
     val mutable v : 'a list = init
 
@@ -11,13 +13,6 @@ class ['a] stack init = object
     method push hd =
       v <- hd :: v
   end ;;
-
-
-
-
-
-
-
 
 #part 1
 class ['a] stack init = object
@@ -34,16 +29,6 @@ class ['a] stack init = object
         v <- hd :: v
   end ;;
 
-
-
-
-
-
-
-
-
-
-
 #part 2
 class sstack init = object
     inherit [string] stack init
@@ -52,14 +37,6 @@ class sstack init = object
       List.iter ~f:print_string v
   end ;;
 
-
-
-
-
-
-
-
-
 #part 3
 class double_stack init = object
     inherit [int] stack init as super
@@ -67,10 +44,3 @@ class double_stack init = object
     method push hd =
       super#push (hd * 2)
   end ;;
-
-
-
-
-
-
-
