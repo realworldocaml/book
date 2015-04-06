@@ -1,3 +1,4 @@
+open Core_kernel.Std;;
 #require "yojson";;
 let json = Yojson.Basic.from_file "book.json" ;;
 
