@@ -123,14 +123,16 @@ raise;;
 let rec forever () = forever ();;
 
 #part 23
-exception Wrong_date of Date.t;;
+type 'a bounds = { lower: 'a; upper: 'a };;
+exception Crossed_bounds of int bounds;;
 
-Wrong_date (Date.of_string "2011-02-23");;
+Crossed_bounds { lower=10; upper=0 };;
 
 #part 24
-exception Wrong_date of Date.t with sexp;;
+type 'a bounds = { lower: 'a; upper: 'a } with sexp;;
+exception Crossed_bounds of int bounds with sexp;;
 
-Wrong_date (Date.of_string "2011-02-23");;
+Crossed_bounds { lower=10; upper=0 };;
 
 #part 25
 let failwith msg = raise (Failure msg);;
@@ -201,13 +203,9 @@ let lookup_weight ~compute_weight alist key =
     with
       Not_found -> 0. ;;
 
-
-
-
 #part 32
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
     ["a",3; "b",4] "a" ;;
-
 
 #part 33
 let lookup_weight ~compute_weight alist key =
@@ -218,17 +216,17 @@ let lookup_weight ~compute_weight alist key =
     | None -> 0.
     | Some data -> compute_weight data ;;
 
-
-
+#part 33.1
+let lookup_weight ~compute_weight alist key =
+    match List.Assoc.find_exn alist key with
+    | exception _ -> 0.
+    | data -> compute_weight data ;;
 
 #part 34
 let lookup_weight ~compute_weight alist key =
     match List.Assoc.find alist key with
     | None -> 0.
     | Some data -> compute_weight data ;;
-
-
-
 
 #part 35
 let find alist key =
