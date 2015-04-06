@@ -1,8 +1,7 @@
+;;
+#part 1
+open Core.Std;;
 Command.basic ;;
-
-
-
-
 Command.group ;;
 
 

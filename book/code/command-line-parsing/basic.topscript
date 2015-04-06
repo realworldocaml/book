@@ -1,4 +1,6 @@
-Command.basic ;;
+open Core.Std;;
+#part 1
+Command.basic;;
 
 
 

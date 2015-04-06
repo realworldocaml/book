@@ -1,3 +1,5 @@
+open Core.Std;;
+#part 1
 open Command.Spec ;;
 step (fun m (base:Date.t) days ->
   match days with
