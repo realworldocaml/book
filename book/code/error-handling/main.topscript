@@ -1,3 +1,5 @@
+;;
+#part 0.5
 open Core_kernel.Std;;
 List.find;;
 
@@ -169,7 +171,7 @@ merge_lists [1;2;3] [-1] ~f:(+);;
 
 #part 28
 let reminders_of_sexp =
-    <:of_sexp<(Time.t * string) list>>
+    <:of_sexp<(Time_ns.t * string) list>>
   ;;
 
 let load_reminders filename =
