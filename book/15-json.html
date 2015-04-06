@@ -56,12 +56,13 @@
 	<h1>JSON Basics</h1>
 
 	<p>
-	  JSON is a lightweight data-interchange format often used
-	  in web services and browsers. It's described in <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</a> and is
-	  easier to parse and generate than alternatives such as XML.
-	  You'll run into JSON very often when working with modern web
-	  APIs, so we'll cover several different ways to manipulate it
-	  in this chapter.
+	  JSON is a lightweight data-interchange format often used in
+	  web services and browsers. It's described
+	  in <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</a>
+	  and is easier to parse and generate than alternatives such
+	  as XML.  You'll run into JSON very often when working with
+	  modern web APIs, so we'll cover several different ways to
+	  manipulate it in this chapter.
 
 	  <idx>RFC4627</idx></p>
 
@@ -117,10 +118,13 @@
           <h1>Installing the Yojson Library</h1>
 
           <p>
-	    There are several JSON libraries available for OCaml.
-            For this chapter, we've picked the <a href="http://mjambon.com/yojson.html">OCaml</a> library by
-            Martin Jambon. It's easiest to install via OPAM by running
-            <code>opam install yojson</code>. See <a href="http://realworldocaml.org/install">this Real World OCaml
+	    There are several JSON libraries available for OCaml.  For
+            this chapter, we've picked
+            the <a href="http://mjambon.com/yojson.html">OCaml</a>
+            library by Martin Jambon. It's easiest to install via OPAM
+            by running <code>opam install
+            yojson</code>. See <a href="http://realworldocaml.org/install">this
+            Real World OCaml
               page</a> for installation instructions if you haven't
             already got OPAM. Once installed, you can open it in the
             <span class="command"><em>utop</em></span> toplevel by:</p>
@@ -215,7 +219,8 @@
 	      href="code/json/read_json.ml"/> 
 
 	<p>
-	  You can build this by running <span class="command"><em>corebuild</em></span>:</p>
+	  You can build this by
+	  running <span class="command"><em>corebuild</em></span>:</p>
 
 	<link rel="import" data-code-language="console"
 	      href="code/json/run_read_json.out"/> 
@@ -224,8 +229,10 @@
 	  The <code>from_file</code> function accepts an input
 	  filename and takes care of opening and closing it for you.
 	  It's far more common to use <code>from_string</code> to
-	  construct JSON values though, since these strings come in via
-	  a network connection (we'll see more of this in <a href="18-concurrent-programming.html#concurrent-programming-with-async" data-type="xref">Concurrent Programming With Async</a>) or a
+	  construct JSON values though, since these strings come in
+	  via a network connection (we'll see more of this
+	  in <a href="18-concurrent-programming.html#concurrent-programming-with-async"
+	  data-type="xref">Concurrent Programming With Async</a>) or a
 	  database. Finally, the example checks that the two input
 	  mechanisms actually resulted in the same OCaml data
 	  structure.</p>
@@ -301,9 +308,10 @@
 	</aside>
 
 	<p>
-	  <code>Yojson</code> provides several combinators in the
-	  <code>Yojson.Basic.Util</code> module, some of which are
-	  listed in <a href="15-json.html#table15_1" data-type="xref">Table15_1</a>.
+	  <code>Yojson</code> provides several combinators in
+	  the <code>Yojson.Basic.Util</code> module, some of which are
+	  listed in <a href="15-json.html#table15_1"
+	  data-type="xref">Table15_1</a>.
 
 	  <idx>combinators/in Yojson library</idx>
 	  <idx>Yojson library/combinators in</idx></p>
@@ -366,10 +374,12 @@
 	<p>
 	  We'll go through each of these uses one by one now. The
 	  following examples also use the <code>|&gt;</code>
-	  pipe-forward operator that we explained in <a href="02-variables-and-functions.html#variables-and-functions" data-type="xref">Variables And Functions</a>. This lets us
-	  chain together multiple JSON selection functions and feed the
-	  output from one into the next one, without having to create
-	  separate <code>let</code> bindings for each one.
+	  pipe-forward operator that we explained
+	  in <a href="02-variables-and-functions.html#variables-and-functions"
+	  data-type="xref">Variables And Functions</a>. This lets us
+	  chain together multiple JSON selection functions and feed
+	  the output from one into the next one, without having to
+	  create separate <code>let</code> bindings for each one.
 
 	  <idx>filter_string function</idx>
 	  <idx>to_init function</idx>
@@ -389,13 +399,14 @@
 	<p>
 	  The <code>member</code> function accepts a JSON object and
 	  named key and returns the JSON field associated with that
-	  key, or <code>Null</code>. Since we know that the
-	  <code>title</code> value is always a string in our example
-	  schema, we want to convert it to an OCaml string. The
-	  <code>to_string</code> function performs this conversion and
-	  raises an exception if there is an unexpected JSON type. The
-	  <code>|&gt;</code> operator provides a convenient way to
-	  chain these operations <span class="keep-together">together</span>:</p>
+	  key, or <code>Null</code>. Since we know that
+	  the <code>title</code> value is always a string in our
+	  example schema, we want to convert it to an OCaml
+	  string. The <code>to_string</code> function performs this
+	  conversion and raises an exception if there is an unexpected
+	  JSON type. The <code>|&gt;</code> operator provides a
+	  convenient way to chain these
+	  operations <span class="keep-together">together</span>:</p>
 
 	<link rel="import" data-code-language="ocamltop"
 	      href="code/json/parse_book.topscript" part="2"/> 
@@ -444,17 +455,21 @@
 	  chains functions together, is known as <em>point-free
 	    programming</em>. It's a succinct style but shouldn't be
 	  overused due to the increased difficulty of debugging
-	  intermediate values. If an explicit <span class="keep-together">name</span> is assigned to each stage of the
-	  transformations, debuggers in particular have an easier time
-	  making the program flow simpler to represent to the
-	  programmer.</p>
+	  intermediate values. If an
+	  explicit <span class="keep-together">name</span> is assigned
+	  to each stage of the transformations, debuggers in
+	  particular have an easier time making the program flow
+	  simpler to represent to the programmer.</p>
 
 	<p>
 	  This technique of using statically typed parsing functions
 	  is very powerful in combination with the OCaml type system.
 	  Many errors that don't make sense at runtime (for example,
 	  mixing up lists and objects) will be caught statically via a
-	  type error.<a data-type="indexterm" data-startref="JSONselval">&nbsp;</a><a data-type="indexterm" data-startref="VALjson">&nbsp;</a></p>
+	  type error.
+
+	  <a data-type="indexterm" data-startref="JSONselval">&nbsp;</a>
+	  <a data-type="indexterm" data-startref="VALjson">&nbsp;</a></p>
       </section>
 
       <section id="constructing-json-values" data-type="sect1">
@@ -564,7 +579,9 @@
 
           <p>
 	    We'll discuss more techniques like this that help you
-            interpret type errors more easily in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
+            interpret type errors more easily
+            in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
+            data-type="xref">The Compiler Frontend Parsing And Type
               Checking</a>.</p>
 	</aside>
       </section>
@@ -667,8 +684,9 @@
 
 	<p>
 	  We'll cover an alternative JSON processing method that is
-	  better for larger-scale JSON handling now, using the <a href="http://mjambon.com/atd-biniou-intro.html">OCaml</a> tool.
-	  This will introduce our first <em>Domain Specific
+	  better for larger-scale JSON handling now, using
+	  the <a href="http://mjambon.com/atd-biniou-intro.html">OCaml</a>
+	  tool.  This will introduce our first <em>Domain Specific
 	    Language</em> that compiles JSON specifications into OCaml
 	  modules, which are then used throughout your application.
 	  
@@ -700,21 +718,24 @@
 
           <p>
 	    The idea behind ATD is to specify the format of the JSON
-            in a separate file and then run a compiler (<span class="command"><em>atdgen</em></span>) that outputs OCaml code
-            to construct and parse JSON values. This means that you
-            don't need to write any OCaml parsing code at all, as it
-            will all be autogenerated for you.
+            in a separate file and then run a compiler
+            (<span class="command"><em>atdgen</em></span>) that
+            outputs OCaml code to construct and parse JSON
+            values. This means that you don't need to write any OCaml
+            parsing code at all, as it will all be autogenerated for
+            you.
 
 	    <idx>ATDgen Library/basics of</idx></p>
 
           <p>
 	    Let's go straight into looking at an example of how this
             works, by using a small portion of the GitHub API. GitHub
-            is a popular code hosting and sharing website that provides
-            a JSON-based web <a href="http://developer.github.com">API</a>. The following ATD
-            code fragment describes the GitHub authorization API (which
-            is based on a pseudostandard web protocol known as
-            OAuth):
+            is a popular code hosting and sharing website that
+            provides a JSON-based
+            web <a href="http://developer.github.com">API</a>. The
+            following ATD code fragment describes the GitHub
+            authorization API (which is based on a pseudostandard web
+            protocol known as OAuth):
 
 	    <idx>GitHub API</idx>
 	    <idx>OAuth web protocol</idx></p>
@@ -764,11 +785,13 @@
           <h2>Compiling ATD Specifications to OCaml</h2>
 
           <p>
-	    The ATD specification we defined can be compiled to
-            OCaml code using the <span class="command"><em>atdgen</em></span> command-line tool. Let's
-            run the compiler twice to generate some OCaml type
-            definitions and a JSON serializing module that converts
-            between input data and those type definitions.
+	    The ATD specification we defined can be compiled to OCaml
+            code using
+            the <span class="command"><em>atdgen</em></span>
+            command-line tool. Let's run the compiler twice to
+            generate some OCaml type definitions and a JSON
+            serializing module that converts between input data and
+            those type definitions.
 
 	    <idx>ATDgen Library/compiling specifications to OCaml</idx></p>
 
@@ -806,12 +829,13 @@
 		href="code/json/github_j_excerpt.mli"/> 
 
           <p>
-	    This is pretty convenient! We've now written a single
-            ATD file, and all the OCaml boilerplate to convert between
-            JSON and a strongly typed record has been generated for us.
-            You can control various aspects of the serializer by
-            passing flags to <span class="command"><em>atdgen</em></span>. The important ones for
-            JSON are:
+	    This is pretty convenient! We've now written a single ATD
+            file, and all the OCaml boilerplate to convert between
+            JSON and a strongly typed record has been generated for
+            us.  You can control various aspects of the serializer by
+            passing flags
+            to <span class="command"><em>atdgen</em></span>. The
+            important ones for JSON are:
 
 	    <idx data-primary-sortas="j-defaults">-j-defaults</idx>
 	    <idx data-primary-sortas="j-custom">-j-custom-fields FUNCTION</idx>
@@ -856,10 +880,13 @@
             you need more interoperability.</p>
 
           <p>
-	    There are also several similar projects that automate
-            the code generation process. <a href="http://piqi.org">Piqi</a> supports conversions between
-            XML, JSON, and the Google protobuf format; and <a href="http://thrift.apache.org">Thrift</a> supports many other
-            programming languages and includes OCaml bindings.</p>
+	    There are also several similar projects that automate the
+            code generation
+            process. <a href="http://piqi.org">Piqi</a> supports
+            conversions between XML, JSON, and the Google protobuf
+            format; and <a href="http://thrift.apache.org">Thrift</a>
+            supports many other programming languages and includes
+            OCaml bindings.</p>
 	</section>
 
 	<section id="example-querying-github-organization-information" data-type="sect2">
@@ -961,7 +988,7 @@
             specify optional and default fields is very powerful.
             Take a look at the full ATD specification for the GitHub
             API in
-            the <a href="http://github.com/avsm/ocaml-github"><code>ocaml-github</code></a>
+	    the <a href="http://github.com/avsm/ocaml-github"><code>ocaml-github</code></a>
             repository online, which has lots of quirks typical in
             real-world web APIs.
 
