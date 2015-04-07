@@ -1,6 +1,6 @@
 ;;
 #part 1
-open Core_kernel.Std;;
+open Core.Std;;
 In_channel.read_all;;
 
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
@@ -292,8 +292,8 @@ blow_up ();;
 #part 35
 let swallow_error () =
     let monitor = Monitor.create () in
-    Stream.iter (Monitor.errors monitor) ~f:(fun _exn ->
-      printf "an error happened\n");
+    Stream.iter (Monitor.detach_and_get_error_stream monitor)
+      ~f:(fun _exn -> printf "an error happened\n");
     within' ~monitor (fun () ->
       after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
   ;;
@@ -308,13 +308,14 @@ exception Ignore_me;;
 let swallow_some_errors exn_to_raise =
     let child_monitor  = Monitor.create  () in
     let parent_monitor = Monitor.current () in
-    Stream.iter (Monitor.errors child_monitor) ~f:(fun error ->
-      match Monitor.extract_exn error with
-      | Ignore_me -> printf "ignoring exn\n"
-      | _ -> Monitor.send_exn parent_monitor error);
+    Stream.iter (Monitor.detach_and_get_error_stream child_monitor)
+      ~f:(fun error ->
+        match Monitor.extract_exn error with
+        | Ignore_me -> printf "ignoring exn\n"
+        | _ -> Monitor.send_exn parent_monitor error);
     within' ~monitor:child_monitor (fun () ->
-       after (Time.Span.of_sec 0.5)
-       >>= fun () -> raise exn_to_raise)
+      after (Time.Span.of_sec 0.5)
+      >>= fun () -> raise exn_to_raise)
   ;;
 
 
