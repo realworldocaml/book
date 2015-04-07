@@ -1,3 +1,5 @@
+open Core_kernel.Std;;
+#part 0.5
 type compatible_versions =
   | Specific of string list
   | All with sexp ;;

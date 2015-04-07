@@ -1,3 +1,6 @@
+;;
+#part 1
+open Core_kernel.Std;;
 Sexp.List [
     Sexp.Atom "this";
     Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];

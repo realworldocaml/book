@@ -1,3 +1,5 @@
+open Core_kernel.Std;;
+#part 0.5
 Int.sexp_of_t 3;;
 
 String.sexp_of_t "hello";;

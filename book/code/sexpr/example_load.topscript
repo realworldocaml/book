@@ -1,3 +1,5 @@
+open Core_kernel.Std;;
+#part 0.5
 Sexp.load_sexp "example.scm" ;;
 
 
