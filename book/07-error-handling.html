@@ -40,9 +40,9 @@
 	<h1>Error-Aware Return Types</h1>
 
 	<p>
-	  The best way in OCaml to signal an error is to include
-	  that error in your return value. Consider the type of the
-	  <code>find</code> function in the <code>List</code>
+	  The best way in OCaml to signal an error is to include that
+	  error in your return value. Consider the type of
+	  the <code>find</code> function in the <code>List</code>
 	  module:</p>
 
 	<link rel="import" data-code-language="ocamltop" 
@@ -553,10 +553,12 @@
           <h2>Cleaning Up in the Presence of Exceptions</h2>
 
           <p>
-	    One headache with exceptions is that they can terminate your
-            execution at unexpected places, leaving your program in an
-            awkward state. Consider the following function for loading a
-            file full of reminders, formatted as s-expressions:
+	    One headache with exceptions is that they can terminate
+            your execution at unexpected places, leaving your program
+            in an awkward state. Consider the following function for
+            loading a file full of numerical data.  This code parses
+            data that matches a simple comma-separated file format,
+            where each field is a floating point number.
 
 	    <idx>exceptions/exception clean up</idx>
 	    <idx>error handling/exception clean up</idx></p>
@@ -565,40 +567,41 @@
 		href="code/error-handling/main.topscript" part="28" />
 
           <p>
-	    The problem with this code is that the function that
-            loads the s-expression and parses it into a list of
-            <code>Time.t</code>/<code>string</code> pairs might throw
-            an exception if the file in question is malformed.
-            Unfortunately, that means that the
-            <code>In_channel.t</code> that was opened will never be
-            closed, leading to a file-descriptor leak.</p>
+	    One problem with this code is that the parsing function
+	    can throw an exception if the file in question is
+	    malformed.  Unfortunately, that means that
+            the <code>In_channel.t</code> that was opened will never
+            be closed, leading to a file-descriptor leak.</p>
 
           <p>
-	    We can fix this using Core's <code>protect</code>
-            function, which takes two arguments: a thunk
-            <code>f</code>, which is the main body of the computation
-            to be run; and a thunk <code>finally</code>, which is to be
-            called when <code>f</code> exits, whether it exits normally
-            or with an exception. This is similar to the
-            <code>try/finally</code> construct available in many
+	    We can fix this using Core_kernel's <code>protect</code>
+            function, which takes two arguments: a
+            thunk <code>f</code>, which is the main body of the
+            computation to be run; and a thunk <code>finally</code>,
+            which is to be called when <code>f</code> exits, whether
+            it exits normally or with an exception. This is similar to
+            the <code>try/finally</code> construct available in many
             programming languages, but it is implemented in a library,
-            rather than being a built-in primitive. Here's how it could
-            be used to fix <code>load_reminders</code>:</p>
+            rather than being a built-in primitive. Here's how it
+            could be used to fix our <code>load</code> function:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
 		"code/error-handling/main.topscript" part="29" />
 
           <p>
-	    This is a common enough problem that
-            <code>In_channel</code> has a function called
-            <code>with_file</code> that automates this pattern:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-		"code/error-handling/main.topscript" part="30" />
+	    This is a common enough problem
+            that <code>In_channel</code> has a function
+            called <code>with_file</code> that automates this
+            pattern:</p>
+
+          <link rel="import" data-code-language="ocamltop" 
+		href="code/error-handling/main.topscript" part="30" />
 
           <p>
-	    <code>In_channel.with_file</code> is built on top of
-            <code>protect</code> so that it can clean up after itself
-            in the presence of exceptions.</p>
-	</section>
+	    <code>In_channel.with_file</code> is built on top
+            of <code>protect</code> so that it can clean up after
+            itself in the presence of exceptions.</p>
+	</section> 
 
 	<section id="catching-specific-exceptions" data-type="sect2">
           <h2>Catching Specific Exceptions</h2>

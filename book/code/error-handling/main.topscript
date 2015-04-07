@@ -170,32 +170,32 @@ let merge_lists xs ys ~f =
 merge_lists [1;2;3] [-1] ~f:(+);;
 
 #part 28
-let reminders_of_sexp =
-    <:of_sexp<(Time_ns.t * string) list>>
-  ;;
 
-let load_reminders filename =
-    let inc = In_channel.create filename in
-    let reminders = reminders_of_sexp (Sexp.input_sexp inc) in
-    In_channel.close inc;
-    reminders
-  ;;
+let parse_line line =
+  String.split_on_chars ~on:[','] line
+  |> List.map ~f:Float.of_string
+;;
 
+let load filename =
+  let inc = In_channel.create filename in
+  let data = In_channel.input_lines inc |> List.map ~f:parse_line in
+  In_channel.close inc;
+  data
+;;
 
 #part 29
-let load_reminders filename =
-    let inc = In_channel.create filename in
-    protect ~f:(fun () -> reminders_of_sexp (Sexp.input_sexp inc))
-      ~finally:(fun () -> In_channel.close inc)
-  ;;
-
+let load filename =
+  let inc = In_channel.create filename in
+  protect ~f:(fun () ->
+    In_channel.input_lines inc |> List.map ~f:parse_line)
+    ~finally:(fun () -> In_channel.close inc)
+;;
 
 #part 30
-let reminders_of_sexp filename =
-    In_channel.with_file filename ~f:(fun inc ->
-      reminders_of_sexp (Sexp.input_sexp inc))
-  ;;
-
+let load filename =
+  In_channel.with_file filename ~f:(fun inc ->
+    In_channel.input_lines inc |> List.map ~f:parse_line)
+;;
 
 #part 31
 let lookup_weight ~compute_weight alist key =

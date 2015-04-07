@@ -9,13 +9,13 @@
 
 <body>
   <section xmlns="http://www.w3.org/1999/xhtml" id="gadts" data-type="chapter"> 
-    <h1>GADTs</h1>
+    <h1>Generalized Algebraic Data Types</h1>
 
     <p>
       OCaml's variants, which we discussed
       in <a href="06-variants.html#variants" data-type="xref">Chapter
-	6</a>, are a powerful tool for representing data that has
-      multiple different forms.  But variants have some important
+	6</a>, are a powerful tool for representing data that can take
+      on multiple different forms.  But variants have some important
       limitations in terms of how precise they are about enumerating
       these possibilities.  </p>
 
@@ -38,8 +38,7 @@
       like characters.  OCaml also has a more compact array-like type
       called <code>bytes</code>, which stores elements of
       type <code>char</code> and which only require a single byte per
-      element.
-    </p>
+      element. </p>
 
     <p>
       Despite the similarities, the <code>array</code>
