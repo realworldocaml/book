@@ -19,7 +19,8 @@ LIB_MODULES[] =
   $(removesuffix $(basename $(ls lib/*.ml)))
   $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
 LIB_PACKAGES = core async sexplib.syntax \
-               netstring cow cow.syntax
+               netstring cow cow.syntax \
+               compiler-libs oloop
 
 APP_PACKAGES = $(LIB_PACKAGES)
 
