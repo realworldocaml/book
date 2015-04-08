@@ -13,7 +13,7 @@ depends: [
   "omake" {build}
   "camlp4" {>= "4.02.1+2"}
   "core"
-  "async"
+  "async" {>= "112.24.00"}
   "ocamlnet"
   "cow"
   "cohttp"
