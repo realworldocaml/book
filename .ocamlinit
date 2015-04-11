@@ -1,6 +1,6 @@
 #use "topfind";;
 #thread;;
-#require "core async netstring cow";;
+#require "core async netstring cow oloop";;
 #directory "_build/lib";;
 #load "rwo.cma";;
 open Core.Std;;
