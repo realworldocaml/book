@@ -9,34 +9,28 @@ type 'a compact_array =
 
 #part 1.1
 
-module Compact_array = struct
+let of_bytes x = Bytes x
+let of_array x = Array x
 
-  type 'a t = | Array of 'a array
-              | Bytes of bytes
+let length = function
+  | Array a -> Array.length a
+  | Bytes s -> Bytes.length s
 
-  let of_bytes x = Bytes x
-  let of_array x = Array x
+let get t i =
+  match t with
+  | Array a -> a.(i)
+  | Bytes s -> s.[i]
 
-  let length = function
-    | Array a -> Array.length a
-    | Bytes s -> Bytes.length s
-
-  let get t i =
-    match t with
-    | Array a -> a.(i)
-    | Bytes s -> s.[i]
-
-  let set t i v =
-    match t with
-    | Array a -> a.(i) <- v
-    | Bytes s -> s.[i] <- v
-
-end;;
+let set t i v =
+  match t with
+  | Array a -> a.(i) <- v
+  | Bytes s -> s.[i] <- v
 
 #part 2
 
-type 'a t = | Array : 'a array -> 'a t
-            | Bytes : bytes -> 'a t
+type 'a gadt_compact_array =
+  | Array : 'a array -> 'a t
+  | Bytes : bytes -> 'a t
 ;;
 
 #part 2.1
