@@ -1,12 +1,12 @@
 open Core_kernel.Std;;
-#part 1
+(* part 1 *)
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
   (fun x ->
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
 
-#part 2
+(* part 2 *)
 let rec edit_distance s t =
     match String.length s, String.length t with
     | (0,x) | (x,0) -> x
@@ -26,7 +26,7 @@ let rec edit_distance s t =
 edit_distance "OCaml" "ocaml";;
 
 
-#part 3
+(* part 3 *)
 #require "mtime.os.top";;
 
 let time f =
@@ -37,13 +37,13 @@ let time f =
     x 
 ;;
 
-#part 4
+(* part 4 *)
 time (fun () -> edit_distance "OCaml" "ocaml");;
 
 
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 
-#part 5
+(* part 5 *)
 
 let memo_rec f_norec x =
     let fref = ref (fun _ -> assert false) in
@@ -52,7 +52,7 @@ let memo_rec f_norec x =
     f x
   ;;
 
-#part 6
+(* part 6 *)
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
     match String.length s, String.length t with
     | (0,x) | (x,0) -> x
@@ -69,7 +69,7 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
         ]) ;;
 
 
-#part 7
+(* part 7 *)
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 
 

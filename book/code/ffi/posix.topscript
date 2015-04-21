@@ -6,15 +6,15 @@ open Foreign ;;
 let time = foreign "time" (ptr time_t @-> returning time_t) ;;
 
 
-#part 1
+(* part 1 *)
 let cur_time = time (from_voidp time_t null) ;;
 
 
-#part 2
+(* part 2 *)
 let time' () = time (from_voidp time_t null) ;;
 
 
-#part 3
+(* part 3 *)
 let difftime =
     foreign "difftime" (time_t @-> time_t @-> returning double) ;;
 
@@ -25,31 +25,31 @@ let t1 =
     difftime t2 t1 ;;
 
 
-#part 4
+(* part 4 *)
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
 
 
-#part 5
+(* part 5 *)
 ctime (time' ()) ;;
 
 
 
 
-#part 6
+(* part 6 *)
 let t_ptr = allocate time_t (time' ()) ;;
 
 
-#part 7
+(* part 7 *)
 ctime t_ptr ;;
 
 
-#part 8
+(* part 8 *)
 type timeval ;;
 
 let timeval : timeval structure typ = structure "timeval" ;;
 
 
-#part 9
+(* part 9 *)
 let tv_sec  = field timeval "tv_sec" long ;;
 
 let tv_usec = field timeval "tv_usec" long ;;
@@ -58,19 +58,19 @@ let tv_usec = field timeval "tv_usec" long ;;
 seal timeval ;;
 
 
-#part 10
+(* part 10 *)
 type timezone ;;
 
 let timezone : timezone structure typ = structure "timezone" ;;
 
 
-#part 11
+(* part 11 *)
 let gettimeofday = foreign "gettimeofday"
     (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
 
 
 
-#part 12
+(* part 12 *)
 let gettimeofday' () =
   let tv = make timeval in
   ignore(gettimeofday (addr tv) (from_voidp timezone null));

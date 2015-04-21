@@ -1,6 +1,6 @@
 open Core_kernel.Std;;
 
-#part 1
+(* part 1 *)
 let area sq = sq#width * sq#width ;;
 
 let minimize sq : unit = sq#resize 1 ;;
@@ -9,7 +9,7 @@ let limit sq =
     if (area sq) > 100 then minimize sq ;;
 
 
-#part 2
+(* part 2 *)
 let toggle sq b : unit = 
     if b then sq#resize `Fullscreen
     else minimize sq ;;
@@ -18,7 +18,7 @@ let toggle sq b : unit =
 
 
 
-#part 3
+(* part 3 *)
 let area_closed (sq: < width : int >) = sq#width * sq#width ;;
 
 let sq = object
@@ -32,7 +32,7 @@ area_closed sq ;;
 
 
 
-#part 4
+(* part 4 *)
 type square = < width : int; ..> ;;
 
 

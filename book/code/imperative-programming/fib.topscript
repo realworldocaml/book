@@ -21,12 +21,12 @@ let memoize f =
         y
     );;
 
-#part 1
+(* part 1 *)
 let rec fib i =
     if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
 
 
-#part 2
+(* part 2 *)
 time (fun () -> fib 20);;
 
 
@@ -34,7 +34,7 @@ time (fun () -> fib 40);;
 
 
 
-#part 3
+(* part 3 *)
 let fib = memoize fib;;
 
 time (fun () -> fib 40);;
@@ -44,19 +44,19 @@ time (fun () -> fib 40);;
 
 
 
-#part 4
+(* part 4 *)
 let fib_norec fib i =
     if i <= 1 then i
     else fib (i - 1) + fib (i - 2) ;;
 
 
-#part 5
+(* part 5 *)
 let rec fib i = fib_norec fib i;;
 
 fib 20;;
 
 
-#part 6
+(* part 6 *)
 let make_rec f_norec =
     let rec f x = f_norec f x in
     f
@@ -67,7 +67,7 @@ let fib = make_rec fib_norec;;
 fib 20;;
 
 
-#part 7
+(* part 7 *)
 let memo_rec f_norec x =
     let fref = ref (fun _ -> assert false) in
     let f = memoize (fun x -> f_norec !fref x) in
@@ -76,14 +76,14 @@ let memo_rec f_norec x =
   ;;
 
 
-#part 8
+(* part 8 *)
 let fib = memo_rec fib_norec;;
 
 time (fun () -> fib 40);;
 
 
 
-#part 9
+(* part 9 *)
 let fib = memo_rec (fun fib i ->
     if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
 

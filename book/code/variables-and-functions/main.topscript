@@ -4,7 +4,7 @@ let y = 4;;
 let z = x + y;;
 
 
-#part 1
+(* part 1 *)
 let languages = "OCaml,Perl,C++,C";;
 
 let dashed_languages =
@@ -13,12 +13,12 @@ let dashed_languages =
   ;;
 
 
-#part 2
+(* part 2 *)
 language_list;;
 
 
 
-#part 3
+(* part 3 *)
 let languages = "OCaml,Perl,C++,C";;
 
 let dashed_languages =
@@ -27,11 +27,11 @@ let dashed_languages =
   ;;
 
 
-#part 4
+(* part 4 *)
 languages;;
 
 
-#part 5
+(* part 5 *)
 let area_of_ring inner_radius outer_radius =
      let pi = acos (-1.) in
      let area_of_circle r = pi *. r *. r in
@@ -41,7 +41,7 @@ let area_of_ring inner_radius outer_radius =
 area_of_ring 1. 3.;;
 
 
-#part 6
+(* part 6 *)
 let area_of_ring inner_radius outer_radius =
      let pi = acos (-1.) in
      let area_of_circle r = pi *. r *. r in
@@ -52,12 +52,12 @@ let area_of_ring inner_radius outer_radius =
 
 
 
-#part 7
+(* part 7 *)
 let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 
 
 
-#part 8
+(* part 8 *)
 let upcase_first_entry line =
      let (first :: rest) = String.split ~on:',' line in
      String.concat ~sep:"," (String.uppercase first :: rest)
@@ -68,7 +68,7 @@ let upcase_first_entry line =
 
 
 
-#part 9
+(* part 9 *)
 let upcase_first_entry line =
      match String.split ~on:',' line with
      | [] -> assert false (* String.split returns at least one element *)
@@ -76,52 +76,52 @@ let upcase_first_entry line =
   ;;
 
 
-#part 10
+(* part 10 *)
 (fun x -> x + 1);;
 
 
-#part 11
+(* part 11 *)
 (fun x -> x + 1) 7;;
 
 
-#part 12
+(* part 12 *)
 List.map ~f:(fun x -> x + 1) [1;2;3];;
 
 
-#part 13
+(* part 13 *)
 let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
 
 List.map ~f:(fun g -> g 5) increments;;
 
 
-#part 14
+(* part 14 *)
 let plusone = (fun x -> x + 1);;
 
 plusone 3;;
 
 
-#part 15
+(* part 15 *)
 let plusone x = x + 1;;
 
 
-#part 16
+(* part 16 *)
 (fun x -> x + 1) 7;;
 
 let x = 7 in x + 1;;
 
 
-#part 17
+(* part 17 *)
 let abs_diff x y = abs (x - y);;
 
 abs_diff 3 4;;
 
 
-#part 18
+(* part 18 *)
 let abs_diff =
     (fun x -> (fun y -> abs (x - y)));;
 
 
-#part 19
+(* part 19 *)
 let dist_from_3 = abs_diff 3;;
 
 dist_from_3 8;;
@@ -129,17 +129,17 @@ dist_from_3 8;;
 dist_from_3 (-1);;
 
 
-#part 20
+(* part 20 *)
 let abs_diff = (fun x y -> abs (x - y));;
 
 
-#part 21
+(* part 21 *)
 let abs_diff (x,y) = abs (x - y);;
 
 abs_diff (3,4);;
 
 
-#part 22
+(* part 22 *)
 let rec find_first_stutter list =
     match list with
     | [] | [_] ->
@@ -150,7 +150,7 @@ let rec find_first_stutter list =
    ;;
 
 
-#part 23
+(* part 23 *)
 let rec is_even x =
     if x = 0 then true else is_odd (x - 1)
   and is_odd x =
@@ -163,35 +163,35 @@ List.map ~f:is_even [0;1;2;3;4;5];;
 List.map ~f:is_odd [0;1;2;3;4;5];;
 
 
-#part 24
+(* part 24 *)
 Int.max 3 4  (* prefix *);;
 
 3 + 4        (* infix  *);;
 
 
-#part 25
+(* part 25 *)
 (+) 3 4;;
 
 List.map ~f:((+) 3) [4;5;6];;
 
 
-#part 26
+(* part 26 *)
 let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 
 (3,2) +! (-2,4);;
 
 
-#part 27
+(* part 27 *)
 let (***) x y = (x ** y) ** y;;
 
 
 
 
-#part 28
+(* part 28 *)
 let ( *** ) x y = (x ** y) ** y;;
 
 
-#part 29
+(* part 29 *)
 Int.max 3 (-4);;
 
 Int.max 3 -4;;
@@ -199,17 +199,17 @@ Int.max 3 -4;;
 
 
 
-#part 30
+(* part 30 *)
 (Int.max 3) - 4;;
 
 
 
 
-#part 31
+(* part 31 *)
 let (|>) x f = f x ;;
 
 
-#part 32
+(* part 32 *)
 let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;
 
 String.split ~on:':' path
@@ -222,7 +222,7 @@ String.split ~on:':' path
 
 
 
-#part 33
+(* part 33 *)
 let split_path = String.split ~on:':' path in
   let deduped_path = List.dedup ~compare:String.compare split_path in
   List.iter ~f:print_endline deduped_path
@@ -233,17 +233,17 @@ let split_path = String.split ~on:':' path in
 
 
 
-#part 34
+(* part 34 *)
 List.iter ~f:print_endline ["Two"; "lines"];;
 
 
 
 
-#part 35
+(* part 35 *)
 List.iter ~f:print_endline;;
 
 
-#part 36
+(* part 36 *)
 let (^>) x f = f x;;
 
 Sys.getenv "PATH"
@@ -252,7 +252,7 @@ Sys.getenv "PATH"
   ^> List.iter ~f:print_endline
   ;;
 
-#part 37
+(* part 37 *)
 let some_or_zero = function
      | Some x -> x
      | None -> 0
@@ -261,7 +261,7 @@ let some_or_zero = function
 List.map ~f:some_or_zero [Some 3; None; Some 4];;
 
 
-#part 38
+(* part 38 *)
 let some_or_zero num_opt =
     match num_opt with
     | Some x -> x
@@ -269,7 +269,7 @@ let some_or_zero num_opt =
   ;;
 
 
-#part 39
+(* part 39 *)
 let some_or_default default = function
      | Some x -> x
      | None -> default
@@ -280,23 +280,23 @@ some_or_default 3 (Some 5);;
 List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 
 
-#part 40
+(* part 40 *)
 let ratio ~num ~denom = float num /. float denom;;
 
 
-#part 41
+(* part 41 *)
 ratio ~num:3 ~denom:10;;
 
 ratio ~denom:10 ~num:3;;
 
 
-#part 42
+(* part 42 *)
 let num = 3 in
   let denom = 4 in
   ratio ~num ~denom;;
 
 
-#part 43
+(* part 43 *)
 String.split ~on:':' path
   |> List.dedup ~compare:String.compare
   |> List.iter ~f:print_endline
@@ -307,31 +307,31 @@ String.split ~on:':' path
 
 
 
-#part 44
+(* part 44 *)
 let apply_to_tuple f (first,second) = f ~first ~second;;
 
 
-#part 45
+(* part 45 *)
 let apply_to_tuple_2 f (first,second) = f ~second ~first;;
 
 
-#part 46
+(* part 46 *)
 let divide ~first ~second = first / second;;
 
 
-#part 47
+(* part 47 *)
 apply_to_tuple_2 divide (3,4);;
 
 
 
 
-#part 48
+(* part 48 *)
 let apply_to_tuple f (first,second) = f ~first ~second;;
 
 apply_to_tuple divide (3,4);;
 
 
-#part 49
+(* part 49 *)
 let concat ?sep x y =
      let sep = match sep with None -> "" | Some x -> x in
      x ^ sep ^ y
@@ -342,23 +342,23 @@ concat "foo" "bar"             (* without the optional argument *);;
 concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;
 
 
-#part 50
+(* part 50 *)
 let concat ?(sep="") x y = x ^ sep ^ y ;;
 
 
-#part 51
+(* part 51 *)
 concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
 
 concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
 
 
-#part 52
+(* part 52 *)
 concat "foo" "bar" (* don't provide the optional argument *);;
 
 concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
 
 
-#part 53
+(* part 53 *)
 let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
 
 uppercase_concat "foo" "bar";;
@@ -366,11 +366,11 @@ uppercase_concat "foo" "bar";;
 uppercase_concat "foo" "bar" ~sep:":";;
 
 
-#part 54
+(* part 54 *)
 let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
 
 
-#part 55
+(* part 55 *)
 let numeric_deriv ~delta ~x ~y ~f =
     let x' = x +. delta in
     let y' = y +. delta in
@@ -384,7 +384,7 @@ let numeric_deriv ~delta ~x ~y ~f =
 
 
 
-#part 56
+(* part 56 *)
 let numeric_deriv ~delta ~x ~y ~f =
     let x' = x +. delta in
     let y' = y +. delta in
@@ -398,7 +398,7 @@ let numeric_deriv ~delta ~x ~y ~f =
 
 
 
-#part 57
+(* part 57 *)
 let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
     let x' = x +. delta in
     let y' = y +. delta in
@@ -412,29 +412,29 @@ let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
 
 
 
-#part 58
+(* part 58 *)
 let colon_concat = concat ~sep:":";;
 
 colon_concat "a" "b";;
 
 
-#part 59
+(* part 59 *)
 let prepend_pound = concat "# ";;
 
 prepend_pound "a BASH comment";;
 
 
-#part 60
+(* part 60 *)
 prepend_pound "a BASH comment" ~sep:":";;
 
 
 
 
-#part 61
+(* part 61 *)
 let concat x ?(sep="") y = x ^ sep ^ y ;;
 
 
-#part 62
+(* part 62 *)
 let prepend_pound = concat "# ";;
 
 prepend_pound "a BASH comment";;
@@ -442,16 +442,16 @@ prepend_pound "a BASH comment";;
 prepend_pound "a BASH comment" ~sep:"--- ";;
 
 
-#part 63
+(* part 63 *)
 concat "a" "b" ~sep:"=";;
 
 
-#part 64
+(* part 64 *)
 let concat x y ?(sep="") = x ^ sep ^ y ;;
 
 
 
 
-#part 65
+(* part 65 *)
 concat "a" "b";;
 

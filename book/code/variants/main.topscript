@@ -6,14 +6,14 @@ Cyan ;;
 
 [Blue; Magenta; Red] ;;
 
-#part 1
+(* part 1 *)
 let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
 
 List.map ~f:basic_color_to_int [Blue;Red];;
 
-#part 2
+(* part 2 *)
 let color_by_number number text =
   sprintf "\027[38;5;%dm%s\027[0m" number text;;
 
@@ -21,7 +21,7 @@ let blue = color_by_number (basic_color_to_int Blue) "Blue";;
 
 printf "Hello %s World!\n" blue;;
 
-#part 3
+(* part 3 *)
 type weight = Regular | Bold;;
   type color =
   | Basic of basic_color * weight (* basic colors, regular and bold *)
@@ -36,7 +36,7 @@ type weight = Regular | Bold;;
 [RGB (250,70,70); Basic (Green, Regular)];;
 
 
-#part 4
+(* part 4 *)
 let color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
@@ -44,7 +44,7 @@ let color_to_int = function
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i ;;
 
-#part 5
+(* part 5 *)
 let color_print color s =
   printf "%s\n" (color_by_number (color_to_int color) s);;
 
@@ -53,7 +53,7 @@ color_print (Basic (Red,Bold)) "A bold red!";;
 color_print (Gray 4) "A muted gray...";;
 
 
-#part 6
+(* part 6 *)
 let three = `Int 3;;
 
 let four = `Float 4.;;
@@ -64,7 +64,7 @@ let nan = `Not_a_number;;
 
 
 
-#part 7
+(* part 7 *)
 let five = `Int "five";;
 
 [three; four; five];;
@@ -74,18 +74,18 @@ let five = `Int "five";;
 
 
 
-#part 8
+(* part 8 *)
 let is_positive = function
      | `Int   x -> x > 0
      | `Float x -> x > 0.
   ;;
 
 
-#part 9
+(* part 9 *)
 let exact = List.filter ~f:is_positive [three;four];;
 
 
-#part 10
+(* part 10 *)
 let is_positive = function
      | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
@@ -98,7 +98,7 @@ List.filter [three; four] ~f:(fun x ->
 
 
 
-#part 11
+(* part 11 *)
 type extended_color =
     | Basic of basic_color * weight  (* basic colors, regular and bold *)
     | RGB   of int * int * int       (* 6x6x6 color space *)
@@ -111,7 +111,7 @@ type extended_color =
 
 
 
-#part 12
+(* part 12 *)
 let extended_color_to_int = function
     | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
@@ -120,7 +120,7 @@ let extended_color_to_int = function
 
 
 
-#part 13
+(* part 13 *)
 let basic_color_to_int = function
     | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
     | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
@@ -150,7 +150,7 @@ let basic_color_to_int = function
 
 
 
-#part 14
+(* part 14 *)
 let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
@@ -171,7 +171,7 @@ let extended_color_to_int = function
 
 
 
-#part 15
+(* part 15 *)
 let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | color -> color_to_int color
@@ -193,7 +193,7 @@ let extended_color_to_int = function
 
 
 
-#part 16
+(* part 16 *)
 let is_positive_permissive = function
      | `Int   x -> Ok (x > 0)
      | `Float x -> Ok (x > 0.)
@@ -206,6 +206,6 @@ is_positive_permissive (`Int 0);;
 is_positive_permissive (`Ratio (3,4));;
 
 
-#part 17
+(* part 17 *)
 is_positive_permissive (`Floot 3.5);;
 

@@ -1,5 +1,5 @@
 ;;
-#part 1
+(* part 1 *)
 open Core.Std;;
 Command.basic ;;
 Command.group ;;

@@ -2,33 +2,33 @@ open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
 
-#part 1
+(* part 1 *)
 module Three : X_int = struct let x = 3 end;;
 
 Three.x;;
 
 
-#part 2
+(* part 2 *)
 let three = (module Three : X_int);;
 
 
-#part 3
+(* part 3 *)
 module Four = struct let x = 4 end;;
 
 let numbers = [ three; (module Four) ];;
 
 
-#part 4
+(* part 4 *)
 let numbers = [three; (module struct let x = 4 end)];;
 
 
-#part 5
+(* part 5 *)
 module New_three = (val three : X_int) ;;
 
 New_three.x;;
 
 
-#part 6
+(* part 6 *)
 module type Y_int = X_int;;
 
 let five = (module struct let x = 5 end : Y_int);;
@@ -38,11 +38,11 @@ let five = (module struct let x = 5 end : Y_int);;
 
 
 
-#part 7
+(* part 7 *)
 [three; (module (val five))];;
 
 
-#part 8
+(* part 8 *)
 let to_int m =
     let module M = (val m : X_int) in
     M.x
@@ -55,24 +55,24 @@ let plus m1 m2 =
   ;;
 
 
-#part 9
+(* part 9 *)
 let six = plus three three;;
 
 to_int (List.fold ~init:six ~f:plus [three;three]);;
 
 
-#part 10
+(* part 10 *)
 let to_int (module M : X_int) = M.x ;;
 
 
-#part 11
+(* part 11 *)
 module type Bumpable = sig
     type t
     val bump : t -> t
   end;;
 
 
-#part 12
+(* part 12 *)
 module Int_bumper = struct
     type t = int
     let bump n = n + 1
@@ -84,29 +84,29 @@ module Float_bumper = struct
   end;;
 
 
-#part 13
+(* part 13 *)
 let int_bumper = (module Int_bumper : Bumpable);;
 
 
-#part 14
+(* part 14 *)
 let (module Bumpable) = int_bumper in Bumpable.bump 3;;
 
 
 
 
-#part 15
+(* part 15 *)
 let int_bumper = (module Int_bumper : Bumpable with type t = int);;
 
 let float_bumper = (module Float_bumper : Bumpable with type t = float);;
 
 
-#part 16
+(* part 16 *)
 let (module Bumpable) = int_bumper in Bumpable.bump 3;;
 
 let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;
 
 
-#part 17
+(* part 17 *)
 let bump_list
        (type a)
        (module B : Bumpable with type t = a)
@@ -117,22 +117,22 @@ let bump_list
 
 
 
-#part 18
+(* part 18 *)
 bump_list int_bumper [1;2;3];;
 
 bump_list float_bumper [1.5;2.5;3.5];;
 
 
-#part 19
+(* part 19 *)
 let wrap_in_list (type a) (x:a) = [x];;
 
 
-#part 20
+(* part 20 *)
 let double_int (type a) (x:a) = x + x;;
 
 
 
-#part 21
+(* part 21 *)
 module type Comparable = sig
     type t
     val compare : t -> t -> int

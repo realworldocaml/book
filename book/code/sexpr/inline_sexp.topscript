@@ -1,5 +1,5 @@
 open Core_kernel.Std;;
-#part 1
+(* part 1 *)
 let l = [(1,"one"); (2,"two")] ;;
 
 List.iter l ~f:(fun x ->

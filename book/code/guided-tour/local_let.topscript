@@ -3,12 +3,12 @@ let x = 7 in
   ;;
 
 
-#part 1
+(* part 1 *)
 x;;
 
 
 
-#part 2
+(* part 2 *)
 let x = 7 in
   let y = x * x in
   x + y

@@ -20,7 +20,7 @@ LIB_MODULES[] =
   $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
 LIB_PACKAGES = core async sexplib.syntax \
                netstring cow cow.syntax \
-               compiler-libs oloop
+               compiler-libs.toplevel oloop
 
 APP_PACKAGES = $(LIB_PACKAGES)
 
@@ -39,7 +39,7 @@ if $(not $(OCAMLFIND_EXISTS))
    eprintln(Required package ocamlfind not found.)
    exit 1
 
-NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+NATIVE_ENABLED = false #$(OCAMLOPT_EXISTS)
 BYTE_ENABLED = $(OCAMLC_EXISTS)
 
 OCAMLFLAGS = -bin-annot -annot -w A-4-33-40-41-42-44-45-48 -thread -safe-string -short-paths
@@ -79,23 +79,9 @@ OCAMLFINDFLAGS = -syntax camlp4o
     OCAMLINCLUDES += $(dir ../lib/)
     OCAMLPACKS[] = $(APP_PACKAGES)
 
-    run_core_toplevel: run_core_toplevel.ml ../lib/rwo.cma
-      ocamlfind ocamlc \
-        -linkpkg -thread -syntax camlp4o \
-        -package $(concat \,, $(APP_PACKAGES) compiler-libs.toplevel) \
-        -I . -I ../lib $(LIB_NAME).cma \
-        run_core_toplevel.ml -o $@
-
-    rwo_runtop: rwo_runtop.ml ../lib/rwo.cma
-      ocamlfind ocamlc \
-        -g -safe-string -linkpkg -thread -syntax camlp4o \
-        -package $(concat \,, $(APP_PACKAGES) compiler-libs.toplevel) \
-        -I . -I ../lib $(LIB_NAME).cma \
-        rwo_runtop.ml -o $@
-
     rwo_app: $(OCamlProgram rwo_app, rwo_app)
 
-    .DEFAULT: rwo_app run_core_toplevel rwo_runtop
+    .DEFAULT: rwo_app
 
 
   ##############################################################################

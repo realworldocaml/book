@@ -12,7 +12,7 @@
 
 #camlp4o ;;
 
-#part 1
+(* part 1 *)
 #require "comparelib.syntax" ;;
 type t = { foo: string; bar : t } ;;
 
