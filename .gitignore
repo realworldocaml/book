@@ -1,9 +1,5 @@
 /_build
-/rwo-app
 /tmp
 /.omakedb
 /.omakedb.lock
 /OMakeroot.omc
-book/code/async/test.txt
-book/code/imperative-programming/numbers.txt
-_build
