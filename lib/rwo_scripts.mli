@@ -2,12 +2,9 @@
 open Core.Std
 open Async.Std
 
-type phrase = {input : string; outcome : Oloop.Output.merged Oloop.Outcome.t}
-type part = float * phrase list
-
 type script = [
 | `OCaml of Oloop.Script.t
-| `OCaml_toplevel of part list
+| `OCaml_toplevel of Oloop.Script.Evaluated.t
 | `OCaml_rawtoplevel of Oloop.Script.t
 | `Other of string
 ]
@@ -34,7 +31,7 @@ val of_html : filename:string -> Rwo_html.t -> t Or_error.t Deferred.t
 (******************************************************************************)
 (** {2 Printers} *)
 (******************************************************************************)
-val phrases_to_html : phrase list -> Rwo_html.item
+val phrases_to_html : Oloop.Script.Evaluated.phrase list -> Rwo_html.item
 
 
 (******************************************************************************)
@@ -49,7 +46,7 @@ val find
   ->
   [
   | `OCaml of string
-  | `OCaml_toplevel of phrase list
+  | `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
   | `OCaml_rawtoplevel of string
   | `Other of string
   ] option
@@ -61,7 +58,7 @@ val find_exn
   ->
   [
   | `OCaml of string
-  | `OCaml_toplevel of phrase list
+  | `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
   | `OCaml_rawtoplevel of string
   | `Other of string
   ]

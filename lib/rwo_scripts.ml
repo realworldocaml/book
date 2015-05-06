@@ -4,12 +4,9 @@ module Html = Rwo_html
 module Import = Rwo_import
 let (/) = Filename.concat
 
-type phrase = {input : string; outcome : Oloop.Output.merged Oloop.Outcome.t}
-type part = float * phrase list
-
 type script = [
 | `OCaml of Oloop.Script.t
-| `OCaml_toplevel of part list
+| `OCaml_toplevel of Oloop.Script.Evaluated.t
 | `OCaml_rawtoplevel of Oloop.Script.t
 | `Other of string
 ]
@@ -35,10 +32,10 @@ let find (t:t) ?(part=0.) ~filename =
     | None -> None
     | Some x -> Some (`OCaml x)
   )
-  | Some (`OCaml_toplevel parts) -> (
-    match List.Assoc.find ~equal:Float.equal parts part with
+  | Some (`OCaml_toplevel script) -> (
+    match Oloop.Script.Evaluated.nth script part with
     | None -> None
-    | Some x -> Some (`OCaml_toplevel x)
+    | Some x -> Some (`OCaml_toplevel x.Oloop.Script.Evaluated.phrases)
   )
   | Some (`OCaml_rawtoplevel parts) -> (
     match List.Assoc.find ~equal:Float.equal (of_script parts) part with
@@ -63,10 +60,10 @@ let find_exn t ?(part=0.) ~filename =
     | None -> no_part_err()
     | Some x -> `OCaml x
   )
-  | Some (`OCaml_toplevel parts) -> (
-    match List.Assoc.find ~equal:Float.equal parts part with
+  | Some (`OCaml_toplevel script) -> (
+    match Oloop.Script.Evaluated.nth script part with
     | None -> no_part_err()
-    | Some x -> `OCaml_toplevel x
+    | Some x -> `OCaml_toplevel x.Oloop.Script.Evaluated.phrases
   )
   | Some (`OCaml_rawtoplevel parts) -> (
     match List.Assoc.find ~equal:Float.equal (of_script parts) part with
@@ -90,15 +87,15 @@ let phrases_to_html phrases =
     Buffer.contents buf
   in
   List.map phrases ~f:(fun x ->
-    let outcome = match x.outcome with
-      | `Eval (out_phrase,output) ->
+    let outcome = match x.Oloop.Script.Evaluated.outcome with
+      | `Eval eval ->
          sprintf "%s\n%s\n"
-                 (out_phrase_to_string out_phrase)
-                 (Oloop.Output.stdout output)
+           (out_phrase_to_string (Oloop.Outcome.result eval))
+           (Oloop.Outcome.stdout eval)
       | `Uneval (_,msg) ->
          sprintf "%s\n" msg
     in
-    sprintf "# %s\n%s\n" x.input outcome
+    sprintf "# %s\n%s\n" x.Oloop.Script.Evaluated.phrase outcome
   )
   |> String.concat ~sep:""
   |> fun x ->
@@ -111,41 +108,6 @@ let phrases_to_html phrases =
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
-let initial_phrases = [
-  "#use \"topfind\"";
-  "#thread";
-  "#camlp4o";
-  "#require \"core\"";
-  "#require \"core.syntax\"";
-  "#require \"core.top\""
-]
-
-let eval_ocaml_script ~filename : part list Or_error.t Deferred.t =
-  Log.Global.info "evaluating script %s" filename;
-  let f_ok oloop : part list Deferred.t =
-    let add_phrase_to_part (number,phrases) (phrase:string) : part Deferred.t =
-      Oloop.eval oloop phrase >>| fun outcome ->
-      (number, {input=phrase; outcome}::phrases)
-    in
-    let add_part_to_parts parts {Oloop.Script.number; content}
-        : part list Deferred.t
-        =
-      let phrases : string list = Oloop.Script.phrases_of_string content in
-      Deferred.List.fold phrases ~init:(number, [])
-        ~f:add_phrase_to_part
-      >>= fun (number,phrases) -> return (number, List.rev phrases)
-      >>| fun part -> part::parts
-    in
-    Reader.file_contents filename >>= fun contents ->
-    let contents = String.concat ~sep:";;\n" (initial_phrases@[contents]) in
-    let parts = Oloop.Script.of_string ~filename contents in
-    let parts = (ok_exn parts : Oloop.Script.t :> Oloop.Script.part list) in
-    Deferred.List.fold parts ~init:[] ~f:add_part_to_parts
-    >>| List.rev
-  in
-  let f oloop = f_ok oloop >>| fun x -> Ok x in
-  Oloop.with_toploop Oloop.Output.merged ~f
-
 let eval_script lang ~filename =
   match lang with
   | `OCaml -> (
@@ -157,7 +119,8 @@ let eval_script lang ~filename =
       Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )
     else (
-      eval_ocaml_script ~filename >>|? fun parts -> `OCaml_toplevel parts
+      Oloop.Script.of_file filename >>=?
+      Oloop.eval_script >>|? fun script -> `OCaml_toplevel script
     )
   )
   | `OCaml_rawtoplevel -> (
