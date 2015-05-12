@@ -145,8 +145,21 @@ $(OPAM_PACKAGE_NAME).install:
 
 
 ################################################################################
+# Merlin support
+.merlin: :value: $(LIB_PACKAGES)
+  echo "B +threads" > $@
+  echo "S lib" >> $@
+  echo "B _build/lib" >> $@
+  foreach(pkg => ..., $(LIB_PACKAGES))
+    echo "PKG $(pkg)" >> $@
+  echo "FLG -short-paths" >> $@
+  echo "FLG -opened-paths" >> $@
+
+.DEFAULT: .merlin
+
+
+################################################################################
 # Clean Up
 clean:
   rm -rf _build $(OPAM_PACKAGE_NAME).install numbers.txt
-  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock
-
+  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin
