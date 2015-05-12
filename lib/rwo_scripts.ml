@@ -113,7 +113,9 @@ let phrases_to_html phrases =
 let initial_phrases = [
   "#use \"topfind\";;";
   "#thread;;";
+  "#camlp4o;;";
   "#require \"core\";;";
+  "#require \"core.syntax\";;";
   "#require \"async\";;";
 ]
 
