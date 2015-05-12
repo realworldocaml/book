@@ -108,6 +108,13 @@ let phrases_to_html phrases =
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
+let initial_phrases = [
+  "#use \"topfind\";;";
+  "#thread;;";
+  "#require \"core\";;";
+  "#require \"async\";;";
+]
+
 let eval_script lang ~filename =
   match lang with
   | `OCaml -> (
@@ -119,8 +126,15 @@ let eval_script lang ~filename =
       Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )
     else (
-      Oloop.Script.of_file filename >>=?
-      Oloop.eval_script >>|? fun script -> `OCaml_toplevel script
+      Reader.file_lines filename >>= fun lines ->
+      (
+        initial_phrases@lines
+        |> String.concat ~sep:"\n"
+        |> Oloop.Script.of_string ~filename
+        |> return
+      ) >>=?
+      Oloop.eval_script ~silent_directives:() >>|? fun script ->
+      `OCaml_toplevel script
     )
   )
   | `OCaml_rawtoplevel -> (
