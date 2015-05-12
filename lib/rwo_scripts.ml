@@ -84,7 +84,9 @@ let phrases_to_html phrases =
   let fmt = Format.formatter_of_buffer buf in
   let out_phrase_to_string x =
     !Toploop.print_out_phrase fmt x;
-    Buffer.contents buf
+    let ans = Buffer.contents buf in
+    Buffer.clear buf;
+    ans
   in
   List.map phrases ~f:(fun x ->
     let outcome = match x.Oloop.Script.Evaluated.outcome with
