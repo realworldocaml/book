@@ -80,31 +80,29 @@ let file_is_mem = Map.mem
 (* Printers                                                                   *)
 (******************************************************************************)
 let phrases_to_html phrases =
-  let buf = Buffer.create 1000 in
+  let buf = Buffer.create 2048 in
   let fmt = Format.formatter_of_buffer buf in
-  let out_phrase_to_string x =
-    !Oprint.out_phrase fmt x;
-    let ans = Buffer.contents buf in
-    Buffer.clear buf;
-    ans
-  in
-  List.map phrases ~f:(fun x ->
-    let outcome = match x.Oloop.Script.Evaluated.outcome with
-      | `Eval eval ->
-         sprintf "%s\n%s\n"
-           (out_phrase_to_string (Oloop.Outcome.result eval))
-           (Oloop.Outcome.stdout eval)
-      | `Uneval (_,msg) ->
-         sprintf "%s\n" msg
-    in
-    sprintf "# %s\n%s\n" x.Oloop.Script.Evaluated.phrase outcome
-  )
-  |> String.concat ~sep:""
-  |> fun x ->
-     x
-     |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
-     |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
-     |> fun x -> Html.pre [`Data x]
+  let add_string x = Buffer.add_string buf x in
+  let add_stringl x = Buffer.add_string buf x; Buffer.add_char buf '\n' in
+  List.iter phrases ~f:(fun {Oloop.Script.Evaluated.phrase; outcome} ->
+    add_string "# "; add_stringl phrase;
+    (
+      match outcome with
+      | `Uneval (_, msg) -> add_stringl msg
+      | `Eval e -> (
+        List.iter (Oloop.Outcome.warnings e) ~f:(fun (loc,warning) ->
+          Location.print_loc fmt loc;
+	  ignore (Warnings.print fmt warning)
+	);
+        !Oprint.out_phrase fmt (Oloop.Outcome.result e);
+        add_stringl (Oloop.Outcome.stdout e)
+      )
+    )
+  );
+  Buffer.contents buf
+  |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
+  |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+  |> fun x -> Html.pre [`Data x]
 
 
 (******************************************************************************)
