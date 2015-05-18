@@ -83,7 +83,7 @@ let phrases_to_html phrases =
   let buf = Buffer.create 1000 in
   let fmt = Format.formatter_of_buffer buf in
   let out_phrase_to_string x =
-    !Toploop.print_out_phrase fmt x;
+    !Oprint.out_phrase fmt x;
     let ans = Buffer.contents buf in
     Buffer.clear buf;
     ans

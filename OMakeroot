@@ -22,7 +22,7 @@ LIB_MODULES[] =
   $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
 LIB_PACKAGES = core async sexplib.syntax \
                netstring cow cow.syntax \
-               compiler-libs.toplevel oloop
+               oloop
 
 APP_NAME = $(PROJECT)
 APP_MODULES[] = $(removesuffix $(basename $(ls app/*.ml)))
@@ -43,7 +43,7 @@ if $(not $(OCAMLFIND_EXISTS))
    eprintln(Required package ocamlfind not found.)
    exit 1
 
-NATIVE_ENABLED = false #$(OCAMLOPT_EXISTS)
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = $(OCAMLC_EXISTS)
 
 OCAMLFLAGS = -bin-annot -annot -w A-4-33-40-41-42-44-45-48 -thread -safe-string -short-paths
