@@ -193,7 +193,7 @@ let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   in
   main_template ~title_bar:title_bar ~content ()
 
-let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
+let make_chapter_page ?pygmentize repo_root chapters chapter_file
     : Html.t Deferred.t
     =
 
@@ -208,7 +208,7 @@ let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
   let import_node_to_html scripts (i:Import.t) : Html.t Deferred.t =
     match Scripts.find_exn scripts ~filename:i.href ?part:i.part with
     | `OCaml_toplevel phrases ->
-      return [Scripts.phrases_to_html phrases]
+      Scripts.phrases_to_html ?pygmentize phrases
     | `OCaml x
     | `OCaml_rawtoplevel x
     | `Other x -> return [Html.pre [`Data x]]
@@ -270,7 +270,7 @@ type src = [
 | `Install
 ]
 
-let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
+let make ?pygmentize ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
     let base = "index.html" in
     let out_file = out_dir/base in
@@ -292,7 +292,7 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
     Toc.get_chapters ~repo_root () >>= fun chapters ->
-    make_chapter_page ?run_pygmentize repo_root chapters in_file >>= fun html ->
+    make_chapter_page ?pygmentize repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )

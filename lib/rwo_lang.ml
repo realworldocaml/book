@@ -67,20 +67,3 @@ let to_docbook lang = match lang with
   | `OCaml_syntax
   | `Ascii ->
     error "language not supported by docbook" lang sexp_of_t
-
-let to_pygmentize lang = match lang with
-  | `OCaml
-  | `OCaml_toplevel
-  | `OCaml_rawtoplevel
-  | `ATD               -> Ok "ocaml"
-  | `JSON              -> Ok "json"
-  | `Scheme            -> Ok "scheme"
-  | `Java              -> Ok "java"
-  | `C                 -> Ok "c"
-  | `Bash              -> Ok "bash"
-  | `CPP               -> Ok "c"
-  | `Gas               -> Ok "gas"
-  | `Console
-  | `OCaml_syntax
-  | `Ascii ->
-    error "we are not supporting this language for pygmentize" lang sexp_of_t

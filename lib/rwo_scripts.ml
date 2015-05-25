@@ -2,6 +2,7 @@ open Core.Std
 open Async.Std
 module Html = Rwo_html
 module Import = Rwo_import
+module Pygments = Rwo_pygments
 let (/) = Filename.concat
 
 type script = [
@@ -79,30 +80,68 @@ let file_is_mem = Map.mem
 (******************************************************************************)
 (* Printers                                                                   *)
 (******************************************************************************)
-let phrases_to_html phrases =
-  let buf = Buffer.create 2048 in
+let phrases_to_html ?(pygmentize=false) phrases =
+
+  (* create and reuse the same buffer for efficiency *)
+  let buf = Buffer.create 256 in
   let fmt = Format.formatter_of_buffer buf in
-  let add_string x = Buffer.add_string buf x in
-  let add_stringl x = Buffer.add_string buf x; Buffer.add_char buf '\n' in
-  List.iter phrases ~f:(fun {Oloop.Script.Evaluated.phrase; outcome} ->
-    add_string "# "; add_stringl phrase;
-    (
-      match outcome with
-      | `Uneval (_, msg) -> add_stringl msg
-      | `Eval e -> (
-        List.iter (Oloop.Outcome.warnings e) ~f:(fun (loc,warning) ->
+
+  (* Return string representation of any warnings within the given
+     evaluated phrase. *)
+  let warnings (e : Oloop.Outcome.merged Oloop.Outcome.eval) : string list =
+    Oloop.Outcome.warnings e
+    |> List.map ~f:(fun (loc,warning) ->
+        try
           Location.print_loc fmt loc;
-	  ignore (Warnings.print fmt warning)
-	);
-        !Oprint.out_phrase fmt (Oloop.Outcome.result e);
-        add_stringl (Oloop.Outcome.stdout e)
+ 	  ignore (Warnings.print fmt warning);
+          Buffer.contents buf
+        with e -> (Buffer.clear buf; raise e)
       )
-    )
-  );
-  Buffer.contents buf
-  |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
-  |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
-  |> fun x -> Html.pre [`Data x]
+  in
+
+  (* return HTML [div] element *)
+  let out_phrase e : Html.item Deferred.t =
+    try
+      !Oprint.out_phrase fmt (Oloop.Outcome.result e);
+      Buffer.contents buf
+      |> fun x -> match pygmentize with
+      | true ->
+        Pygments.pygmentize `OCaml x
+      | false ->
+        (* return [div] to match pygmentize's output *)
+        return Html.(div [pre [`Data x]])
+    with e -> (Buffer.clear buf; raise e)
+  in
+
+  let phrase_to_html {Oloop.Script.Evaluated.phrase; outcome}
+    : Html.t Deferred.t
+    =
+    (
+      sprintf "# %s" phrase
+      |> fun x -> match pygmentize with
+      | true ->
+        Pygments.pygmentize `OCaml x
+      | false ->
+        (* return [div] to match pygmentize's output *)
+        return Html.(div [pre [`Data x]])
+    ) >>= fun phrase ->
+    (match outcome with
+     | `Uneval (_,msg) ->
+       return Html.[div [pre [`Data msg]]]
+     | `Eval e -> (
+         let output =
+           (warnings e)@[Oloop.Outcome.stdout e]
+           |> String.concat ~sep:"\n"
+           |> fun x -> Html.(div [pre [`Data x]])
+         in
+         out_phrase e >>| fun out_phrase ->
+         [output; out_phrase]
+       )
+    ) >>| fun outcome ->
+    phrase::outcome
+  in
+  Deferred.List.map phrases ~f:phrase_to_html
+  >>| List.concat
 
 
 (******************************************************************************)

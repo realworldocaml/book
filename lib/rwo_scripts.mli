@@ -31,7 +31,10 @@ val of_html : filename:string -> Rwo_html.t -> t Or_error.t Deferred.t
 (******************************************************************************)
 (** {2 Printers} *)
 (******************************************************************************)
-val phrases_to_html : Oloop.Script.Evaluated.phrase list -> Rwo_html.item
+val phrases_to_html
+  :  ?pygmentize:bool
+  -> Oloop.Script.Evaluated.phrase list
+  -> Rwo_html.t Deferred.t
 
 
 (******************************************************************************)
