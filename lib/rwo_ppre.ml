@@ -1,9 +1,9 @@
 open Core.Std
 open Rwo_core2
 open Async.Std
-module Code = Rwo_code
 module Html = Rwo_html
 module Import = Rwo_import
+module Lang = Rwo_lang
 let (/) = Filename.concat
 
 type code_item = [
@@ -363,7 +363,7 @@ let extract_code_from_1e_exn chapter =
         | `OCaml -> sprintf "\n\n(* part %f *)\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
-                    (part, lang) <:sexp_of< float * Code.lang >>
+                    (part, lang) <:sexp_of< float * Lang.t >>
           )
       )
     in
