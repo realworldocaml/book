@@ -1,4 +1,4 @@
-(** Collection of OCaml scripts. *)
+(** Collection of scripts. *)
 open Core.Std
 open Async.Std
 
