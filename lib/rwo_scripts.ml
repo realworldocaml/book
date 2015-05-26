@@ -89,18 +89,9 @@ let file_is_mem = Map.mem
 (******************************************************************************)
 let phrases_to_html ?(pygmentize=false) phrases =
 
-  let pygmentize (x:string) : Html.item Deferred.t =
-    match pygmentize with
-    | true ->
-      Pygments.pygmentize `OCaml x
-    | false ->
-      (* return [div] to match pygmentize's output *)
-      return Html.(div [pre [`Data x]])
-  in
-
   let in_phrase (x:Oloop.Script.Evaluated.phrase) : Html.item Deferred.t =
     sprintf "# %s" x.Oloop.Script.Evaluated.phrase
-    |> pygmentize
+    |> Pygments.pygmentize ~pygmentize `OCaml
   in
 
   (* get warnings or errors *)
@@ -141,7 +132,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
       let fmt = Format.formatter_of_buffer buf in
       !Oprint.out_phrase fmt (Oloop.Outcome.result e);
       Buffer.contents buf
-      |> pygmentize
+      |> Pygments.pygmentize ~pygmentize `OCaml
       >>| Option.some
   in
 
@@ -154,6 +145,15 @@ let phrases_to_html ?(pygmentize=false) phrases =
 
   Deferred.List.map phrases ~f:phrase_to_html
   >>| List.concat
+
+
+let script_part_to_html ?(pygmentize=false) = function
+  | `OCaml_toplevel phrases -> phrases_to_html ~pygmentize phrases
+  | `OCaml x
+  | `OCaml_rawtoplevel x ->
+     (Pygments.pygmentize ~pygmentize `OCaml x >>| fun x -> [x])
+  | `Other x ->
+     (Pygments.pygmentize ~pygmentize:false `OCaml x >>| fun x -> [x])
 
 
 (******************************************************************************)

@@ -40,7 +40,7 @@ let lang_to_string = function
   | `Json -> "json"
   | `Scheme -> "scheme"
 
-let pygmentize lang contents =
+let really_pygmentize lang contents =
   Process.create ~prog:"pygmentize"
     ~args:["-l"; lang_to_string lang; "-f"; "html"] ()
   >>= fun proc ->
@@ -62,3 +62,14 @@ let pygmentize lang contents =
         else
           Html.of_string stdout |> List.hd_exn
     )
+
+let pygmentize ?(pygmentize=true) lang contents =
+  if pygmentize then
+    really_pygmentize lang contents
+  else
+    contents
+    |> String.substr_replace_all ~pattern:"&" ~with_:"&amp;"
+    |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
+    |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+    |> (fun x -> Html.pre [`Data x])
+    |> return

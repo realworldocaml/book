@@ -206,18 +206,8 @@ let make_chapter_page ?pygmentize repo_root chapters chapter_file
   in
 
   let import_node_to_html scripts (i:Import.t) : Html.t Deferred.t =
-    match Scripts.find_exn scripts ~filename:i.href ?part:i.part with
-    | `OCaml_toplevel phrases ->
-      Scripts.phrases_to_html ?pygmentize phrases
-    | `OCaml x
-    | `OCaml_rawtoplevel x
-    | `Other x ->
-      x
-      |> String.substr_replace_all ~pattern:"&" ~with_:"&amp;"
-      |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
-      |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
-      |> (fun x -> [Html.pre [`Data x]])
-      |> return
+    Scripts.find_exn scripts ~filename:i.href ?part:i.part |>
+    Scripts.script_part_to_html ?pygmentize
   in
 
   let rec loop scripts html =

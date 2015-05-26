@@ -44,6 +44,11 @@ val phrases_to_html
   -> Oloop.Script.Evaluated.phrase list
   -> Rwo_html.t Deferred.t
 
+val script_part_to_html
+  :  ?pygmentize:bool
+  -> script_part
+  -> Rwo_html.t Deferred.t
+
 
 (******************************************************************************)
 (** {2 Map-style Operations } *)
