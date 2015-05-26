@@ -211,7 +211,13 @@ let make_chapter_page ?pygmentize repo_root chapters chapter_file
       Scripts.phrases_to_html ?pygmentize phrases
     | `OCaml x
     | `OCaml_rawtoplevel x
-    | `Other x -> return [Html.pre [`Data x]]
+    | `Other x ->
+      x
+      |> String.substr_replace_all ~pattern:"&" ~with_:"&amp;"
+      |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
+      |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+      |> (fun x -> [Html.pre [`Data x]])
+      |> return
   in
 
   let rec loop scripts html =
