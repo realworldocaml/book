@@ -186,7 +186,8 @@ let eval_script lang ~filename =
         |> Oloop.Script.of_string ~filename
         |> return
       ) >>=?
-      Oloop.eval_script ~silent_directives:() >>|? fun script ->
+      Oloop.eval_script ~silent_directives:() ~short_paths:()
+      >>|? fun script ->
       `OCaml_toplevel script
     )
   )
