@@ -12,6 +12,13 @@ type script = [
 | `Other of string
 ]
 
+type script_part = [
+| `OCaml of string
+| `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
+| `OCaml_rawtoplevel of string
+| `Other of string
+]
+
 type t = script String.Map.t
 
 

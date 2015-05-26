@@ -9,6 +9,14 @@ type script = [
 | `Other of string
 ]
 
+(** One part of a script. *)
+type script_part = [
+| `OCaml of string
+| `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
+| `OCaml_rawtoplevel of string
+| `Other of string
+]
+
 type t = script String.Map.t (** key is filename *)
 
 val eval_script
@@ -41,29 +49,6 @@ val phrases_to_html
 (** {2 Map-style Operations } *)
 (******************************************************************************)
 val empty : t
-
-val find
-  :  t
-  -> ?part:float
-  -> filename:string
-  ->
-  [
-  | `OCaml of string
-  | `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
-  | `OCaml_rawtoplevel of string
-  | `Other of string
-  ] option
-
-val find_exn
-  :  t
-  -> ?part:float
-  -> filename:string
-  ->
-  [
-  | `OCaml of string
-  | `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
-  | `OCaml_rawtoplevel of string
-  | `Other of string
-  ]
-
+val find : t -> ?part:float -> filename:string -> script_part option
+val find_exn : t -> ?part:float -> filename:string -> script_part
 val file_is_mem : t -> string -> bool
