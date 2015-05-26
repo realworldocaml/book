@@ -102,7 +102,12 @@ let phrases_to_html ?(pygmentize=false) phrases =
   let messages (x:Oloop.Script.Evaluated.phrase) : Html.item option =
     (
       match x.Oloop.Script.Evaluated.outcome with
-      | `Uneval (_,msg) -> [msg]
+      | `Uneval (x,_) ->
+	 (
+	   Oloop.Outcome.report_uneval
+	     ~msg_with_location:true Format.str_formatter x;
+	   [Format.flush_str_formatter()]
+	 )
       | `Eval e ->
         Oloop.Outcome.warnings e
         |> List.map ~f:(fun (loc,warning) ->
