@@ -1,9 +1,9 @@
 open Core.Std
 open Async.Std
-module Code = Rwo_code
 module Html = Rwo_html
 module Import = Rwo_import
 module Index = Rwo_index
+module Scripts = Rwo_scripts
 module Toc = Rwo_toc
 let (/) = Filename.concat
 
@@ -193,50 +193,31 @@ let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   in
   main_template ~title_bar:title_bar ~content ()
 
-let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
+let make_chapter_page ?pygmentize repo_root chapters chapter_file
     : Html.t Deferred.t
     =
 
-  let import_base_dir = Filename.dirname chapter_file in
   let chapter = List.find_exn chapters ~f:(fun x ->
     x.Toc.filename = Filename.basename chapter_file)
   in
+
   let next_chapter_footer =
     next_chapter_footer (Toc.get_next_chapter chapters chapter)
   in
 
-  (* OCaml code blocks *)
-  let code : Code.phrase list Code.t ref = ref Code.empty in
-
-  let update_code lang href : unit Deferred.t =
-    match Code.file_is_mem !code href with
-    | true -> return ()
-    | false ->
-      Code.add_file_exn
-        ~lang
-        ~run:(Code.run_file_exn ~repo_root ~lang)
-        !code href
-      >>| fun new_code ->
-      code := new_code
+  let import_node_to_html scripts (i:Import.t) : Html.t Deferred.t =
+    Scripts.find_exn scripts ~filename:i.href ?part:i.part |>
+    Scripts.script_part_to_html ?pygmentize
   in
 
-  let import_node_to_html (i:Import.t) : Html.t Deferred.t =
-    let href = import_base_dir/i.href in
-    update_code i.data_code_language href
-    >>= fun () -> return (Code.find_exn !code ~file:href ?part:i.part)
-    >>= fun contents ->
-    Code.phrases_to_html ?run_pygmentize i.data_code_language contents
-    >>| fun x -> [x]
-  in
-
-  let rec loop html =
+  let rec loop scripts html =
     (Deferred.List.map html ~f:(fun item ->
       if Import.is_import_html item then
-        import_node_to_html (ok_exn (Import.of_html item))
+        import_node_to_html scripts (ok_exn (Import.of_html item))
       else match item with
       | `Data _ -> return [item]
       | `Element {Html.name; attrs; childs} -> (
-        Deferred.List.map childs ~f:(fun x -> loop [x])
+        Deferred.List.map childs ~f:(fun x -> loop scripts [x])
         >>| List.concat
         >>| fun childs -> [`Element {Html.name; attrs; childs}]
       )
@@ -244,9 +225,11 @@ let make_chapter_page ?run_pygmentize repo_root chapters chapter_file
     )
     >>| List.concat
   in
+
   Html.of_file chapter_file >>= fun html ->
   let html = Html.get_body_childs ~filename:chapter_file html in
-  loop html >>| fun content ->
+  (Scripts.of_html ~filename:chapter_file html >>| ok_exn) >>= fun scripts ->
+  loop scripts html >>| fun content ->
   let content = Html.[
     div ~a:["class","left-column"] [
       a ~a:["href","toc.html"; "class","to-chapter"] [
@@ -283,23 +266,29 @@ type src = [
 | `Install
 ]
 
-let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
+let make ?pygmentize ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
-    let out_file = out_dir/"index.html" in
+    let base = "index.html" in
+    let out_file = out_dir/base in
+    Log.Global.info "making %s" out_file;
     make_frontpage ~repo_root () >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
   | `Toc_page -> (
-    let out_file = out_dir/"toc.html" in
+    let base = "toc.html" in
+    let out_file = out_dir/base in
+    Log.Global.info "making %s" out_file;
     make_toc_page ~repo_root () >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
   | `Chapter in_file -> (
-    let out_file = out_dir/(Filename.basename in_file) in
+    let base = Filename.basename in_file in
+    let out_file = out_dir/base in
+    Log.Global.info "making %s" out_file;
     Toc.get_chapters ~repo_root () >>= fun chapters ->
-    make_chapter_page ?run_pygmentize repo_root chapters in_file >>= fun html ->
+    make_chapter_page ?pygmentize repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
@@ -307,6 +296,7 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
     let base = "faqs.html" in
     let in_file = repo_root/"book"/base in
     let out_file = out_dir/base in
+    Log.Global.info "making %s" out_file;
     make_simple_page in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
@@ -315,6 +305,7 @@ let make ?run_pygmentize ?(repo_root=".") ~out_dir = function
     let base = "install.html" in
     let in_file = repo_root/"book"/base in
     let out_file = out_dir/base in
+    Log.Global.info "making %s" out_file;
     make_simple_page in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents

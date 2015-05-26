@@ -9,6 +9,15 @@ build: [
   ["omake" "-j%{jobs}%"]
 ]
 
+install: [
+  ["omake" "OCaml-Book.install"]
+  ["omake" "install_lib"]
+]
+
+remove: [
+  ["ocamlfind" "remove" "OCaml-Book"]
+]
+
 depends: [
   "omake" {build}
   "camlp4" {>= "4.02.1+2"}

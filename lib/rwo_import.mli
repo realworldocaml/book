@@ -12,7 +12,7 @@
 open Core.Std
 
 type t = {
-  data_code_language : Rwo_code.lang;
+  data_code_language : Rwo_lang.t;
   href : string;
   part : float option;
   childs : Rwo_html.item list;
@@ -27,5 +27,7 @@ val to_html : t -> Rwo_html.item
     [parse_import item] will succceed, only that it should because it
     can't be anything else. *)
 val is_import_html : Rwo_html.item -> bool
+
+val find_all : Rwo_html.t -> t list
 
 include Comparable.S with type t := t

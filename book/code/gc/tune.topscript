@@ -2,13 +2,13 @@ open Core_kernel.Std;;
 let c = Gc.get () ;;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 
-#part 1
+(* part 1 *)
 Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
 
-#part 2
+(* part 2 *)
 Gc.major_slice 0 ;;
 Gc.full_major () ;;
 
-#part 3
+(* part 3 *)
 Gc.tune ~max_overhead:0 () ;;
 

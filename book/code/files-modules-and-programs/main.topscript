@@ -4,16 +4,16 @@ foo;;
 open M;;
 foo;;
 
-#part 1
+(* part 1 *)
 let average x y =
     let open Int64 in
     x + y / of_int 2;;
 
-#part 2
+(* part 2 *)
 let average x y =
     Int64.(x + y / of_int 2);;
 
-#part 3
+(* part 3 *)
 module Interval = struct
     type t = | Interval of int * int
              | Empty
@@ -22,7 +22,7 @@ module Interval = struct
       if high < low then Empty else Interval (low,high)
   end;;
 
-#part 4
+(* part 4 *)
 module Extended_interval = struct
     include Interval
 
@@ -34,7 +34,7 @@ module Extended_interval = struct
 
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
 
-#part 5
+(* part 5 *)
 module Extended_interval = struct
     open Interval
 

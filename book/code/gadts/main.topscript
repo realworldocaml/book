@@ -1,13 +1,13 @@
 open Core_kernel.Std;;
 
-#part 1
+(* part 1 *)
 
 type 'a compact_array = 
   | Array of 'a array
   | Bytes of bytes
 ;;
 
-#part 1.1
+(* part 1.1 *)
 
 let of_bytes x = Bytes x
 let of_array x = Array x
@@ -26,14 +26,14 @@ let set t i v =
   | Array a -> a.(i) <- v
   | Bytes s -> s.[i] <- v
 
-#part 2
+(* part 2 *)
 
 type 'a gadt_compact_array =
   | Array : 'a array -> 'a t
   | Bytes : bytes -> 'a t
 ;;
 
-#part 2.1
+(* part 2.1 *)
 
 Array [|1;2;3|];;
 Array [|1.0;2.0;3.0|];;
@@ -42,13 +42,13 @@ Array [|1.0;2.0;3.0|];;
 
 Bytes "foo";;
 
-#part 3
+(* part 3 *)
 
 type 'a t = | Array : 'a array -> 'a t
             | Bytes : bytes -> char t
 ;;
 
-#part 3.1
+(* part 3.1 *)
 
 let length t = 
   match t with
@@ -56,7 +56,7 @@ let length t =
   | Array a -> Array.length a
 ;;
 
-#part 3.2
+(* part 3.2 *)
 
 let length (type el) (t:el t) = 
   match t with
@@ -64,7 +64,7 @@ let length (type el) (t:el t) =
   | Array a -> Array.length a
 ;;
 
-#part 3.3
+(* part 3.3 *)
 
 module Compact_array = struct
 
@@ -91,7 +91,7 @@ module Compact_array = struct
 
 end;;
 
-#part 10
+(* part 10 *)
 
 type value =
   | Int of int
@@ -104,7 +104,7 @@ type expr =
   | Plus  of expr * expr
 ;;
 
-#part 11
+(* part 11 *)
 
 let max_expr x y =
   let i x = Value (Int x) in
@@ -114,7 +114,7 @@ let max_expr x y =
 ;;
 max_expr 3 4;;
 
-#part 12
+(* part 12 *)
 
 let ill_typed x y =
   let i x = Value (Int x) in
@@ -124,7 +124,7 @@ let ill_typed x y =
 ;;
 ill_typed 3 4;;
 
-#part 13
+(* part 13 *)
 
 let rec eval expr =
   let eval_int expr =
@@ -144,12 +144,12 @@ let rec eval expr =
   | Plus (x,y) -> Int (eval_int x + eval_int y)
 ;;
 
-#part 14
+(* part 14 *)
 
 eval (max_expr  3 4);;
 eval (ill_typed 3 4);;
 
-#part 15
+(* part 15 *)
 
 type _ value =
   | Int  : int  -> int value
@@ -161,7 +161,7 @@ type _ expr =
   | Gt    : 'a expr * 'a expr             -> bool expr
   | Plus  : int expr * int expr           -> int expr
 ;;
-#part 16
+(* part 16 *)
 
 let max_expr x y =
   let i x = Value (Int x) in
@@ -171,7 +171,7 @@ let max_expr x y =
 ;;
 max_expr 3 4;;
 
-#part 17
+(* part 17 *)
 
 let ill_typed x y =
   let i x = Value (Int x) in
@@ -180,7 +180,7 @@ let ill_typed x y =
   Plus (Gt (x,y), y)
 ;;
 
-#part 18
+(* part 18 *)
 
 let rec eval = function
   | Value (Int x)  -> x
@@ -190,7 +190,7 @@ let rec eval = function
   | Plus  (x,y)    -> eval x + eval y
 ;;
 
-#part 19
+(* part 19 *)
 
 let rec eval : type a . a expr -> a = function
   | Value (Int x)  -> x

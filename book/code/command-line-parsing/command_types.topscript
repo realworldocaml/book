@@ -1,5 +1,5 @@
 open Core.Std;;
-#part 1
+(* part 1 *)
 Command.Spec.empty ;;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
 

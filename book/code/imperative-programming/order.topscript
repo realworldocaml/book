@@ -1,6 +1,6 @@
 open Core_kernel.Std;;
 
-#part 1
+(* part 1 *)
 let x = sin 120. in
   let y = sin 75.  in
   let z = sin 128. in
@@ -8,7 +8,7 @@ let x = sin 120. in
   ;;
 
 
-#part 2
+(* part 2 *)
 let x = lazy (sin 120.) in
   let y = lazy (sin 75.)  in
   let z = lazy (sin 128.) in
@@ -16,7 +16,7 @@ let x = lazy (sin 120.) in
   ;;
 
 
-#part 3
+(* part 3 *)
 let x = lazy (printf "1\n"; sin 120.) in
   let y = lazy (printf "2\n"; sin 75.)  in
   let z = lazy (printf "3\n"; sin 128.) in
@@ -26,7 +26,7 @@ let x = lazy (printf "1\n"; sin 120.) in
 
 
 
-#part 4
+(* part 4 *)
 List.exists ~f:(fun x -> x < 0.)
   [ (printf "1\n"; sin 120.);
     (printf "2\n"; sin 75.);

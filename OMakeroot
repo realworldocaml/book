@@ -1,11 +1,13 @@
 open build/OCaml
 DefineCommandVars()
 
-.PHONY: lib clean rwo_app
+.PHONY: lib clean app \
+        install_lib uninstall_lib
 
 ################################################################################
 # General Project Information
 PROJECT = rwo
+VERSION = dev
 
 if $(test -e .git)
   GIT_COMMIT = 'Some "$(shell git rev-parse HEAD)"'
@@ -20,8 +22,10 @@ LIB_MODULES[] =
   $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
 LIB_PACKAGES = core async sexplib.syntax \
                netstring cow cow.syntax \
-               compiler-libs oloop
+               oloop
 
+APP_NAME = $(PROJECT)
+APP_MODULES[] = $(removesuffix $(basename $(ls app/*.ml)))
 APP_PACKAGES = $(LIB_PACKAGES)
 
 HTML_CHAPTER_FILES[] = $(basename $(ls book/[0-9][0-9]*.html))
@@ -79,23 +83,9 @@ OCAMLFINDFLAGS = -syntax camlp4o
     OCAMLINCLUDES += $(dir ../lib/)
     OCAMLPACKS[] = $(APP_PACKAGES)
 
-    run_core_toplevel: run_core_toplevel.ml ../lib/rwo.cma
-      ocamlfind ocamlc \
-        -linkpkg -thread -syntax camlp4o \
-        -package $(concat \,, $(APP_PACKAGES) compiler-libs.toplevel) \
-        -I . -I ../lib $(LIB_NAME).cma \
-        run_core_toplevel.ml -o $@
+    app: $(OCamlProgram $(APP_NAME), $(APP_MODULES))
 
-    rwo_runtop: rwo_runtop.ml ../lib/rwo.cma
-      ocamlfind ocamlc \
-        -g -safe-string -linkpkg -thread -syntax camlp4o \
-        -package $(concat \,, $(APP_PACKAGES) compiler-libs.toplevel) \
-        -I . -I ../lib $(LIB_NAME).cma \
-        rwo_runtop.ml -o $@
-
-    rwo_app: $(OCamlProgram rwo_app, rwo_app)
-
-    .DEFAULT: rwo_app run_core_toplevel rwo_runtop
+    .DEFAULT: app
 
 
   ##############################################################################
@@ -103,30 +93,73 @@ OCAMLFINDFLAGS = -syntax camlp4o
   .SUBDIRS: _build/site
 
     foreach(file => ..., $(HTML_CHAPTER_FILES))
-      $(file): $(ROOT)/book/$(file) ../app/rwo_app
+      $(file): $(ROOT)/book/$(file) ../app/$(APP_NAME)
         if $(defined PYGMENTIZE)
-          $(ROOT)/_build/app/rwo_app build chapter -pygmentize -o ./ -repo-root $(ROOT) $<
+          $(ROOT)/_build/app/$(APP_NAME) build chapter -pygmentize -o ./ -repo-root $(ROOT) $<
         else
-          $(ROOT)/_build/app/rwo_app build chapter -o ./ -repo-root $(ROOT) $<
+          $(ROOT)/_build/app/$(APP_NAME) build chapter -o ./ -repo-root $(ROOT) $<
 
-    index.html: ../app/rwo_app
-      $(ROOT)/_build/app/rwo_app build frontpage -o ./ -repo-root $(ROOT)
+    index.html: ../app/$(APP_NAME)
+      $(ROOT)/_build/app/$(APP_NAME) build frontpage -o ./ -repo-root $(ROOT)
 
-    faqs.html: $(ROOT)/book/faqs.html ../app/rwo_app
-      $(ROOT)/_build/app/rwo_app build faqs -o ./ -repo-root $(ROOT)
+    faqs.html: $(ROOT)/book/faqs.html ../app/$(APP_NAME)
+      $(ROOT)/_build/app/$(APP_NAME) build faqs -o ./ -repo-root $(ROOT)
 
-    install.html: $(ROOT)/book/install.html ../app/rwo_app
-      $(ROOT)/_build/app/rwo_app build install -o ./ -repo-root $(ROOT)
+    install.html: $(ROOT)/book/install.html ../app/$(APP_NAME)
+      $(ROOT)/_build/app/$(APP_NAME) build install -o ./ -repo-root $(ROOT)
 
-    toc.html: ../app/rwo_app
-      $(ROOT)/_build/app/rwo_app build toc -o ./ -repo-root $(ROOT)
+    toc.html: ../app/$(APP_NAME)
+      $(ROOT)/_build/app/$(APP_NAME) build toc -o ./ -repo-root $(ROOT)
 
     .DEFAULT: $(HTML_FILES)
       rsync -av $(ROOT)/book/images $(ROOT)/book/css $(ROOT)/book/js ./
 
 
 ################################################################################
+# Install and Uninstall
+
+if $(not $(defined OPAM_PACKAGE_NAME))
+  OPAM_PACKAGE_NAME = OCaml-Book
+  export
+
+OCAMLFIND_PACKAGE_NAME = $(OPAM_PACKAGE_NAME)
+
+_build/META: :value: $(VERSION)
+  echo version = \"$(VERSION)\" > $@
+  echo "archive(byte) = \"$(LIB_NAME).cma\"" >> $@
+  echo "requires = \"$(LIB_PACKAGES)\"" >> $@
+
+install_lib: uninstall_lib _build/META
+  ocamlfind install $(OCAMLFIND_PACKAGE_NAME) \
+    _build/META \
+    _build/lib/*.cm[aix]
+
+uninstall_lib:
+  ocamlfind remove $(OCAMLFIND_PACKAGE_NAME)
+
+$(OPAM_PACKAGE_NAME).install:
+  echo $"bin: [" > $@
+  echo "  "\"?_build/app/$(APP_NAME).run\" {\"$(APP_NAME)\"} >> $@
+  echo "  "\"?_build/app/$(APP_NAME).opt\" {\"$(APP_NAME)\"} >> $@
+  echo $"]" >> $@
+
+
+################################################################################
+# Merlin support
+.merlin: :value: $(LIB_PACKAGES)
+  echo "B +threads" > $@
+  echo "S lib" >> $@
+  echo "B _build/lib" >> $@
+  foreach(pkg => ..., $(LIB_PACKAGES))
+    echo "PKG $(pkg)" >> $@
+  echo "FLG -short-paths" >> $@
+  echo "FLG -opened-paths" >> $@
+
+.DEFAULT: .merlin
+
+
+################################################################################
 # Clean Up
 clean:
-  rm -rf _build
-  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock
+  rm -rf _build $(OPAM_PACKAGE_NAME).install numbers.txt
+  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin

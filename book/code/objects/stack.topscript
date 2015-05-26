@@ -1,6 +1,6 @@
 ;;
 
-#part 1
+(* part 1 *)
 open Core_kernel.Std;;
 let s = object
     val mutable v = [0; 2]
@@ -17,7 +17,7 @@ let s = object
   end ;;
 
 
-#part 2
+(* part 2 *)
 s#pop ;;
 
 s#push 4 ;;
@@ -25,7 +25,7 @@ s#push 4 ;;
 s#pop ;;
 
 
-#part 3
+(* part 3 *)
 let stack init = object
     val mutable v = init
 
@@ -45,7 +45,7 @@ let s = stack [3; 2; 1] ;;
 s#pop ;;
 
 
-#part 4
+(* part 4 *)
 let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
 
 print_pop (stack [5;4;3;2;1]) ;;

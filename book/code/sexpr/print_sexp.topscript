@@ -1,5 +1,5 @@
 ;;
-#part 1
+(* part 1 *)
 open Core_kernel.Std;;
 Sexp.List [
     Sexp.Atom "this";

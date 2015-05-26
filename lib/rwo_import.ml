@@ -1,10 +1,10 @@
 open Core.Std
-module Code = Rwo_code
+module Lang = Rwo_lang
 module Html = Rwo_html
 
 module T = struct
   type t = {
-    data_code_language : Rwo_code.lang;
+    data_code_language : Rwo_lang.t;
     href : string;
     part : float option;
     childs : Rwo_html.item list;
@@ -47,7 +47,7 @@ let of_html item =
         with exn -> error "invalid part" exn sexp_of_exn
       ) >>= fun part ->
 
-      Code.lang_of_string (Option.value_exn (find "data-code-language"))
+      Lang.of_string (Option.value_exn (find "data-code-language"))
       >>= fun data_code_language ->
 
       Ok {
@@ -66,9 +66,24 @@ let of_html item =
 let to_html x =
   [
     Some ("rel", "import");
-    Some ("data-code-language", Code.lang_to_string x.data_code_language);
+    Some ("data-code-language", Lang.to_string x.data_code_language);
     Some ("href", x.href);
     (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
   ]
   |> List.filter_map ~f:ident
   |> fun a -> Html.link ~a []
+
+let find_all html =
+  let rec loop accum = function
+    | [] -> accum
+    | (`Data _)::rest ->
+      loop accum rest
+    | (`Element {Html.childs;_} as item)::rest ->
+      let accum =
+        if is_import_html item
+        then (ok_exn (of_html item))::accum
+        else accum
+      in
+      loop (loop accum childs) rest
+  in
+  loop [] html

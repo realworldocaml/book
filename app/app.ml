@@ -52,8 +52,8 @@ let build_chapter : Command.t = Command.async
     +> Param.out_dir
     +> Param.file
   )
-  (fun run_pygmentize repo_root out_dir file () ->
-    Book.make ~run_pygmentize ~repo_root ~out_dir (`Chapter file)
+  (fun pygmentize repo_root out_dir file () ->
+    Book.make ~pygmentize ~repo_root ~out_dir (`Chapter file)
   )
 
 let build_frontpage : Command.t = Command.async
