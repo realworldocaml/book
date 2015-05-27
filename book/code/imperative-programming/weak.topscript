@@ -1,12 +1,12 @@
 ;;
 (* part 1 *)
 let remember =
-    let cache = ref None in
-    (fun x ->
-       match !cache with
-       | Some y -> y
-       | None -> cache := Some x; x)
-  ;;
+  let cache = ref None in
+  (fun x ->
+     match !cache with
+     | Some y -> y
+     | None -> cache := Some x; x)
+;;
 
 
 (* part 2 *)

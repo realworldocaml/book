@@ -6,13 +6,13 @@ let area sq = sq#width * sq#width ;;
 let minimize sq : unit = sq#resize 1 ;;
 
 let limit sq = 
-    if (area sq) > 100 then minimize sq ;;
+  if (area sq) > 100 then minimize sq ;;
 
 
 (* part 2 *)
 let toggle sq b : unit = 
-    if b then sq#resize `Fullscreen
-    else minimize sq ;;
+  if b then sq#resize `Fullscreen
+  else minimize sq ;;
 
 
 
@@ -22,9 +22,9 @@ let toggle sq b : unit =
 let area_closed (sq: < width : int >) = sq#width * sq#width ;;
 
 let sq = object
-    method width = 30 
-    method name = "sq" 
-  end ;;
+  method width = 30 
+  method name = "sq" 
+end ;;
 
 area_closed sq ;;
 

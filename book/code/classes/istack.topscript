@@ -2,18 +2,18 @@
 (* part 1 *)
 open Core_kernel.Std;;
 class istack = object
-    val mutable v = [0; 2]
+  val mutable v = [0; 2]
 
-    method pop =
-      match v with
-      | hd :: tl ->
-          v <- tl;
-          Some hd
-      | [] -> None
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
 
-    method push hd =
-      v <- hd :: v
-  end ;;
+  method push hd =
+    v <- hd :: v
+end ;;
 
 
 

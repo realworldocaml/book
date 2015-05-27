@@ -1,33 +1,33 @@
 open Core_kernel.Std;;
 let stack init = object
-    val mutable v = init
+  val mutable v = init
 
-    method pop =
-      match v with
-      | hd :: tl -> 
-        v <- tl;
-        Some hd
-      | [] -> None
-  
-    method push hd = 
-      v <- hd :: v
-  end ;;
-  
+  method pop =
+    match v with
+    | hd :: tl -> 
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd = 
+    v <- hd :: v
+end ;;
+
 type shape = < area : float > ;;
 
 type square = < area : float; width : int > ;;
 
 let square w = object
-    method area = Float.of_int (w * w)
-    method width = w
-  end ;;
+  method area = Float.of_int (w * w)
+  method width = w
+end ;;
 
 type circle = < area : float; radius : int > ;;
 
 let circle r = object
-    method area = 3.14 *. (Float.of_int r) ** 2.0
-    method radius = r
-  end ;;
+  method area = 3.14 *. (Float.of_int r) ** 2.0
+  method radius = r
+end ;;
 
 type 'a stack = < pop: 'a option; push: 'a -> unit > ;;
 
@@ -46,13 +46,13 @@ let shape w : shape = (square w :> shape) ;;
 
 (* part 2 *)
 let coin = object
-    method shape = circle 5
-    method color = "silver"
-  end ;;
+  method shape = circle 5
+  method color = "silver"
+end ;;
 
 let map = object
-    method shape = square 10
-  end ;;
+  method shape = square 10
+end ;;
 
 
 (* part 3 *)
@@ -89,20 +89,20 @@ let shape_array: shape array = (square_array :> shape array) ;;
 
 (* part 7 *)
 let shape_to_string: shape -> string = 
-    fun s -> sprintf "Shape(%F)" s#area ;;
+  fun s -> sprintf "Shape(%F)" s#area ;;
 
 let square_to_string: square -> string = 
-    (shape_to_string :> square -> string) ;;
+  (shape_to_string :> square -> string) ;;
 
 
 (* part 8 *)
 module Either = struct
-    type ('a, 'b) t = 
-      | Left of 'a
-      | Right of 'b
-    let left x = Left x
-    let right x = Right x
-  end ;;
+  type ('a, 'b) t = 
+    | Left of 'a
+    | Right of 'b
+  let left x = Left x
+  let right x = Right x
+end ;;
 
 
 
@@ -114,10 +114,10 @@ module Either = struct
 
 (* part 9 *)
 module AbstractEither : sig 
-    type ('a, 'b) t
-    val left: 'a -> ('a, 'b) t
-    val right: 'b -> ('a, 'b) t
-  end = Either ;;
+  type ('a, 'b) t
+  val left: 'a -> ('a, 'b) t
+  val right: 'b -> ('a, 'b) t
+end = Either ;;
 
 
 
@@ -136,10 +136,10 @@ module AbstractEither : sig
 
 (* part 10 *)
 module VarEither : sig 
-    type (+'a, +'b) t
-    val left: 'a -> ('a, 'b) t
-    val right: 'b -> ('a, 'b) t
-  end = Either ;;
+  type (+'a, +'b) t
+  val left: 'a -> ('a, 'b) t
+  val right: 'b -> ('a, 'b) t
+end = Either ;;
 
 
 
@@ -151,15 +151,15 @@ module VarEither : sig
 
 (* part 11 *)
 let total_area (shape_stacks: shape stack list) =
-    let stack_area acc st = 
-      let rec loop acc =
-        match st#pop with
-        | Some s -> loop (acc +. s#area)
-        | None -> acc
-      in
-      loop acc
+  let stack_area acc st = 
+    let rec loop acc =
+      match st#pop with
+      | Some s -> loop (acc +. s#area)
+      | None -> acc
     in
-      List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
+    loop acc
+  in
+  List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
 
 
 (* part 12 *)
@@ -175,16 +175,16 @@ total_area [(square_stack :> shape stack); (circle_stack :> shape stack)] ;;
 type 'a readonly_stack = < pop : 'a option > ;;
 
 let total_area (shape_stacks: shape readonly_stack list) =
-    let stack_area acc st = 
-      let rec loop acc =
-        match st#pop with
-        | Some s -> loop (acc +. s#area)
-        | None -> acc
-      in
-        loop acc
+  let stack_area acc st = 
+    let rec loop acc =
+      match st#pop with
+      | Some s -> loop (acc +. s#area)
+      | None -> acc
     in
-      List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
+    loop acc
+  in
+  List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
 
 total_area [(square_stack :> shape readonly_stack); (circle_stack :> 
-    shape readonly_stack)] ;;
+                                                       shape readonly_stack)] ;;
 

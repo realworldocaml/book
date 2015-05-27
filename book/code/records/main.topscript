@@ -2,27 +2,27 @@ open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
 
 type service_info =
-    { service_name : string;
-      port         : int;
-      protocol     : string;
-    }
-  ;;
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+  }
+;;
 
 (* part 1 *)
 #require "re.posix";;
 let service_info_of_string line =
-    let matches = 
-      Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
-    in
-    { service_name = Re.get matches 1;
-      port = Int.of_string (Re.get matches 2);
-      protocol = Re.get matches 3;
-    }
-  ;;
+  let matches = 
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  { service_name = Re.get matches 1;
+    port = Int.of_string (Re.get matches 2);
+    protocol = Re.get matches 3;
+  }
+;;
 
 (* part 1.1 *)
 let ssh = service_info_of_string
-  "ssh 22/udp # SSH Remote Login Protocol";;
+            "ssh 22/udp # SSH Remote Login Protocol";;
 
 (* part 2 *)
 ssh.port;;
@@ -32,19 +32,19 @@ type 'a with_line_num = { item: 'a; line_num: int };;
 
 (* part 4 *)
 let parse_lines parse file_contents =
-    let lines = String.split ~on:'\n' file_contents in
-    List.mapi lines ~f:(fun line_num line ->
-      { item = parse line;
-        line_num = line_num + 1;
-      })
-  ;;
+  let lines = String.split ~on:'\n' file_contents in
+  List.mapi lines ~f:(fun line_num line ->
+    { item = parse line;
+      line_num = line_num + 1;
+    })
+;;
 
 (* part 4.1 *)
 
 parse_lines service_info_of_string
-    "rtmp              1/ddp    #Routing Table Maintenance Protocol\n\
-     tcpmux            1/udp     # TCP Port Service Multiplexer\n\
-     tcpmux            1/tcp     # TCP Port Service Multiplexer"
+  "rtmp              1/ddp    #Routing Table Maintenance Protocol\n\
+   tcpmux            1/udp     # TCP Port Service Multiplexer\n\
+   tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
 
 (* part 4.2 *)
@@ -53,30 +53,30 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 
 (* part 5 *)
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-       sprintf "%s %i/%s" name port prot
-  ;;
+  sprintf "%s %i/%s" name port prot
+;;
 
 service_info_to_string ssh;;
 
 (* part 6 *)
 type service_info =
-    { service_name : string;
-      port         : int;
-      protocol     : string;
-      comment      : string option;
-    }
-  ;;
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+    comment      : string option;
+  }
+;;
 
 (* part 7 *)
 #warnings "+9";;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
-       sprintf "%s %i/%s" name port prot
-  ;;
+  sprintf "%s %i/%s" name port prot
+;;
 
 (* part 8 *)
 let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
-       sprintf "%s %i/%s" name port prot
-  ;;
+  sprintf "%s %i/%s" name port prot
+;;
 
 (* part 9 *)
 let service_info_to_string { service_name; port; protocol; comment } =
@@ -88,21 +88,21 @@ let service_info_to_string { service_name; port; protocol; comment } =
 
 (* part 10 *)
 let service_info_of_string line =
-    (* first, split off any comment *)
-    let (line,comment) =
-      match String.rsplit2 line ~on:'#' with
-      | None -> (line,None)
-      | Some (ordinary,comment) -> (ordinary, Some comment)
-    in
-    (* now, use a regular expression to break up the service definition *)
-    let matches = 
-      Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
-    in
-    let service_name = Re.get matches 1 in
-    let port = Int.of_string (Re.get matches 2) in
-    let protocol = Re.get matches 3 in
-    { service_name; port; protocol; comment }
-  ;;
+  (* first, split off any comment *)
+  let (line,comment) =
+    match String.rsplit2 line ~on:'#' with
+    | None -> (line,None)
+    | Some (ordinary,comment) -> (ordinary, Some comment)
+  in
+  (* now, use a regular expression to break up the service definition *)
+  let matches = 
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  let service_name = Re.get matches 1 in
+  let port = Int.of_string (Re.get matches 2) in
+  let protocol = Re.get matches 3 in
+  { service_name; port; protocol; comment }
+;;
 
 (* part 10.1 *)
 service_info_of_string "ssh 22/tcp # some comment";;
@@ -110,38 +110,38 @@ service_info_of_string "ssh 22/tcp";;
 
 (* part 11 *)
 let create_service_info ~service_name ~port ~protocol ~comment =
-    { service_name; port; protocol; comment }
-  ;;
+  { service_name; port; protocol; comment }
+;;
 
 (* part 12 *)
 let create_service_info
-        ~service_name:service_name ~port:port
-        ~protocol:protocol ~comment:comment =
-    { service_name = service_name;
-      port = port; 
-      protocol = protocol; 
-      comment = comment;
-    }
+      ~service_name:service_name ~port:port
+      ~protocol:protocol ~comment:comment =
+  { service_name = service_name;
+    port = port; 
+    protocol = protocol; 
+    comment = comment;
+  }
 ;;
 
 (* part 13 *)
 type log_entry =
-    { session_id: string;
-      time: Time_ns.t;
-      important: bool;
-      message: string;
-    };;
-  type heartbeat =
-    { session_id: string;
-      time: Time_ns.t;
-      status_message: string;
-    };;
-  type logon =
-    { session_id: string;
-      time: Time_ns.t;
-      user: string;
-      credentials: string;
-    }
+  { session_id: string;
+    time: Time_ns.t;
+    important: bool;
+    message: string;
+  };;
+type heartbeat =
+  { session_id: string;
+    time: Time_ns.t;
+    status_message: string;
+  };;
+type logon =
+  { session_id: string;
+    time: Time_ns.t;
+    user: string;
+    credentials: string;
+  }
 ;;
 
 (* part 14 *)

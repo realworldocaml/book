@@ -44,15 +44,15 @@ let five = (module struct let x = 5 end : Y_int);;
 
 (* part 8 *)
 let to_int m =
-    let module M = (val m : X_int) in
-    M.x
-  ;;
+  let module M = (val m : X_int) in
+  M.x
+;;
 
 let plus m1 m2 =
-    (module struct
-       let x = to_int m1 + to_int m2
-     end : X_int)
-  ;;
+  (module struct
+    let x = to_int m1 + to_int m2
+  end : X_int)
+;;
 
 
 (* part 9 *)
@@ -67,21 +67,21 @@ let to_int (module M : X_int) = M.x ;;
 
 (* part 11 *)
 module type Bumpable = sig
-    type t
-    val bump : t -> t
-  end;;
+  type t
+  val bump : t -> t
+end;;
 
 
 (* part 12 *)
 module Int_bumper = struct
-    type t = int
-    let bump n = n + 1
-  end;;
+  type t = int
+  let bump n = n + 1
+end;;
 
 module Float_bumper = struct
-     type t = float
-     let bump n = n +. 1.
-  end;;
+  type t = float
+  let bump n = n +. 1.
+end;;
 
 
 (* part 13 *)
@@ -108,12 +108,12 @@ let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;
 
 (* part 17 *)
 let bump_list
-       (type a)
-       (module B : Bumpable with type t = a)
-       (l: a list)
-    =
-    List.map ~f:B.bump l
-  ;;
+      (type a)
+      (module B : Bumpable with type t = a)
+      (l: a list)
+  =
+  List.map ~f:B.bump l
+;;
 
 
 
@@ -134,16 +134,16 @@ let double_int (type a) (x:a) = x + x;;
 
 (* part 21 *)
 module type Comparable = sig
-    type t
-    val compare : t -> t -> int
-  end ;;
+  type t
+  val compare : t -> t -> int
+end ;;
 
 let create_comparable (type a) compare =
-    (module struct
-       type t = a
-       let compare = compare
-     end : Comparable with type t = a)
-  ;;
+  (module struct
+    type t = a
+    let compare = compare
+  end : Comparable with type t = a)
+;;
 
 
 create_comparable Int.compare;;

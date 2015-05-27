@@ -10,20 +10,20 @@ List.find [1;2;3] ~f:(fun x -> x >= 10) ;;
 
 (* part 2 *)
 let compute_bounds ~cmp list =
-    let sorted = List.sort ~cmp list in
-    match List.hd sorted, List.last sorted with
-    | None,_ | _, None -> None
-    | Some x, Some y -> Some (x,y)
-  ;;
+  let sorted = List.sort ~cmp list in
+  match List.hd sorted, List.last sorted with
+  | None,_ | _, None -> None
+  | Some x, Some y -> Some (x,y)
+;;
 
 (* part 3 *)
 let find_mismatches table1 table2 =
-     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data mismatches ->
-        match Hashtbl.find table2 key with
-        | Some data' when data' <> data -> key :: mismatches
-        | _ -> mismatches
-     )
- ;;
+  Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data mismatches ->
+    match Hashtbl.find table2 key with
+    | Some data' when data' <> data -> key :: mismatches
+    | _ -> mismatches
+  )
+;;
 
 (* part 4 *)
 [ Ok 3; Error "abject failure"; Ok 4 ];;
@@ -33,7 +33,7 @@ Error.of_string "something went wrong";;
 
 (* part 6 *)
 Error.of_thunk (fun () ->
-    sprintf "something went wrong: %f" 32.3343);;
+  sprintf "something went wrong: %f" 32.3343);;
 
 (* part 7 *)
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
@@ -45,45 +45,45 @@ custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 
 (* part 9 *)
 Error.create "Something went terribly wrong"
-    (3.5, ["a";"b";"c"], 6034)
-    <:sexp_of<float * string list * int>> ;;
+  (3.5, ["a";"b";"c"], 6034)
+  <:sexp_of<float * string list * int>> ;;
 
 (* part 10 *)
 Error.tag
-    (Error.of_list [ Error.of_string "Your tires were slashed";
-                     Error.of_string "Your windshield was smashed" ])
-    "over the weekend"
-  ;;
+  (Error.of_list [ Error.of_string "Your tires were slashed";
+                   Error.of_string "Your windshield was smashed" ])
+  "over the weekend"
+;;
 
 (* part 11 *)
 let bind option f =
-    match option with
-    | None -> None
-    | Some x -> f x
-  ;;
+  match option with
+  | None -> None
+  | Some x -> f x
+;;
 
 (* part 12 *)
 let compute_bounds ~cmp list =
-    let sorted = List.sort ~cmp list in
-    Option.bind (List.hd sorted) (fun first ->
-      Option.bind (List.last sorted) (fun last ->
-        Some (first,last)))
-  ;;
+  let sorted = List.sort ~cmp list in
+  Option.bind (List.hd sorted) (fun first ->
+    Option.bind (List.last sorted) (fun last ->
+      Some (first,last)))
+;;
 
 (* part 13 *)
 let compute_bounds ~cmp list =
-    let open Option.Monad_infix in
-    let sorted = List.sort ~cmp list in
-    List.hd sorted   >>= fun first ->
-    List.last sorted >>= fun last  ->
-    Some (first,last)
-  ;;
+  let open Option.Monad_infix in
+  let sorted = List.sort ~cmp list in
+  List.hd sorted   >>= fun first ->
+  List.last sorted >>= fun last  ->
+  Some (first,last)
+;;
 
 (* part 14 *)
 let compute_bounds ~cmp list =
-    let sorted = List.sort ~cmp list in
-    Option.both (List.hd sorted) (List.last sorted)
-  ;;
+  let sorted = List.sort ~cmp list in
+  Option.both (List.hd sorted) (List.last sorted)
+;;
 
 (* part 15 *)
 3 / 0;;
@@ -103,14 +103,14 @@ raise (Key_not_found "a");;
 let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;
 
 List.filter exceptions  ~f:(function
-    | Key_not_found _ | Not_found -> true
-    | _ -> false);;
+  | Key_not_found _ | Not_found -> true
+  | _ -> false);;
 
 (* part 20 *)
 let rec find_exn alist key = match alist with
-    | [] -> raise (Key_not_found key)
-    | (key',data) :: tl -> if key = key' then data else find_exn tl key
-  ;;
+  | [] -> raise (Key_not_found key)
+  | (key',data) :: tl -> if key = key' then data else find_exn tl key
+;;
 
 let alist = [("a",1); ("b",2)];;
 
@@ -141,16 +141,16 @@ let failwith msg = raise (Failure msg);;
 
 (* part 26 *)
 let merge_lists xs ys ~f =
-    if List.length xs <> List.length ys then None
-    else
-      let rec loop xs ys =
-        match xs,ys with
-        | [],[] -> []
-        | x::xs, y::ys -> f x y :: loop xs ys
-        | _ -> assert false
-      in
-      Some (loop xs ys)
-   ;;
+  if List.length xs <> List.length ys then None
+  else
+    let rec loop xs ys =
+      match xs,ys with
+      | [],[] -> []
+      | x::xs, y::ys -> f x y :: loop xs ys
+      | _ -> assert false
+    in
+    Some (loop xs ys)
+;;
 
 merge_lists [1;2;3] [-1;1;2] ~f:(+);;
 
@@ -158,14 +158,14 @@ merge_lists [1;2;3] [-1;1] ~f:(+);;
 
 (* part 27 *)
 let merge_lists xs ys ~f =
-    let rec loop xs ys =
-      match xs,ys with
-      | [],[] -> []
-      | x::xs, y::ys -> f x y :: loop xs ys
-      | _ -> assert false
-    in
-    loop xs ys
-  ;;
+  let rec loop xs ys =
+    match xs,ys with
+    | [],[] -> []
+    | x::xs, y::ys -> f x y :: loop xs ys
+    | _ -> assert false
+  in
+  loop xs ys
+;;
 
 merge_lists [1;2;3] [-1] ~f:(+);;
 
@@ -199,40 +199,40 @@ let load filename =
 
 (* part 31 *)
 let lookup_weight ~compute_weight alist key =
-    try
-      let data = List.Assoc.find_exn alist key in
-      compute_weight data
-    with
-      Not_found -> 0. ;;
+  try
+    let data = List.Assoc.find_exn alist key in
+    compute_weight data
+  with
+    Not_found -> 0. ;;
 
 (* part 32 *)
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
-    ["a",3; "b",4] "a" ;;
+  ["a",3; "b",4] "a" ;;
 
 (* part 33 *)
 let lookup_weight ~compute_weight alist key =
-    match
-      try Some (List.Assoc.find_exn alist key)
-      with _ -> None
-    with
-    | None -> 0.
-    | Some data -> compute_weight data ;;
+  match
+    try Some (List.Assoc.find_exn alist key)
+    with _ -> None
+  with
+  | None -> 0.
+  | Some data -> compute_weight data ;;
 
 (* part 33.1 *)
 let lookup_weight ~compute_weight alist key =
-    match List.Assoc.find_exn alist key with
-    | exception _ -> 0.
-    | data -> compute_weight data ;;
+  match List.Assoc.find_exn alist key with
+  | exception _ -> 0.
+  | data -> compute_weight data ;;
 
 (* part 34 *)
 let lookup_weight ~compute_weight alist key =
-    match List.Assoc.find alist key with
-    | None -> 0.
-    | Some data -> compute_weight data ;;
+  match List.Assoc.find alist key with
+  | None -> 0.
+  | Some data -> compute_weight data ;;
 
 (* part 35 *)
 let find alist key =
-    Option.try_with (fun () -> find_exn alist key) ;;
+  Option.try_with (fun () -> find_exn alist key) ;;
 
 find ["a",1; "b",2] "c";;
 
@@ -241,7 +241,7 @@ find ["a",1; "b",2] "b";;
 
 (* part 36 *)
 let find alist key =
-    Or_error.try_with (fun () -> find_exn alist key) ;;
+  Or_error.try_with (fun () -> find_exn alist key) ;;
 
 find ["a",1; "b",2] "c";;
 

@@ -11,33 +11,33 @@ Lazy.force v;;
 
 (* part 2 *)
 type 'a lazy_state =
-    | Delayed of (unit -> 'a)
-    | Value of 'a
-    | Exn of exn
-  ;;
+  | Delayed of (unit -> 'a)
+  | Value of 'a
+  | Exn of exn
+;;
 
 
 (* part 3 *)
 let create_lazy f = ref (Delayed f);;
 
 let v = create_lazy
-    (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
+          (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
 
 
 (* part 4 *)
 let force v =
-    match !v with
-    | Value x -> x
-    | Exn e -> raise e
-    | Delayed f ->
-      try
-        let x = f () in
-        v := Value x;
-        x
-      with exn ->
-        v := Exn exn;
-        raise exn
-     ;;
+  match !v with
+  | Value x -> x
+  | Exn e -> raise e
+  | Delayed f ->
+    try
+      let x = f () in
+      v := Value x;
+      x
+    with exn ->
+      v := Exn exn;
+      raise exn
+;;
 
 
 (* part 5 *)

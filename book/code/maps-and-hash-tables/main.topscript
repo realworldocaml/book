@@ -2,9 +2,9 @@
 (* part 1 *)
 open Core_kernel.Std;;
 let digit_alist =
-    [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
-    ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
-  ;;
+  [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
+  ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
+;;
 
 
 
@@ -21,7 +21,7 @@ List.Assoc.add digit_alist 0 "zilch";;
 
 (* part 3 *)
 let digit_map = Map.of_alist_exn digit_alist
-                     ~comparator:Int.comparator;;
+                  ~comparator:Int.comparator;;
 
 Map.find digit_map 3;;
 
@@ -32,8 +32,8 @@ let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
 
 (* part 5 *)
 let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
-  let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
-  Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
+let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
+Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 
 
 
@@ -113,7 +113,7 @@ Map.Poly.of_alist_exn digit_alist;;
 
 (* part 16 *)
 Map.symmetric_diff (Map.Poly.singleton 3 "three")
-                     (Int.Map.singleton  3 "four" ) ;;
+  (Int.Map.singleton  3 "four" ) ;;
 
 
 
@@ -124,9 +124,9 @@ Map.symmetric_diff (Map.Poly.singleton 3 "three")
 
 (* part 17 *)
 let dedup ~comparator l =
-    List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
-    |> Set.to_list
-  ;;
+  List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
+  |> Set.to_list
+;;
 
 
 dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
@@ -134,7 +134,7 @@ dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
 
 (* part 18 *)
 let (s1,s2) = (Int.Set.of_list [1;2],
-                 Int.Set.of_list [2;1]);;
+               Int.Set.of_list [2;1]);;
 
 
 
@@ -151,42 +151,42 @@ Set.to_tree s1 = Set.to_tree s2;;
 
 (* part 22 *)
 module Foo_and_bar : sig
-    type t = { foo: Int.Set.t; bar: string }
-    include Comparable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: Int.Set.t; bar: string } with sexp
-      let compare t1 t2 =
-        let c = Int.Set.compare t1.foo t2.foo in
-        if c <> 0 then c else String.compare t1.bar t2.bar
-    end
-    include T
-    include Comparable.Make(T)
-  end;;
+  type t = { foo: Int.Set.t; bar: string }
+  include Comparable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: Int.Set.t; bar: string } with sexp
+    let compare t1 t2 =
+      let c = Int.Set.compare t1.foo t2.foo in
+      if c <> 0 then c else String.compare t1.bar t2.bar
+  end
+  include T
+  include Comparable.Make(T)
+end;;
 
 (* part 23 *)
 module Foo_and_bar : sig
-    type t = { foo: Int.Set.t; bar: string }
-    include Comparable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: Int.Set.t; bar: string } with sexp, compare
-    end
-    include T
-    include Comparable.Make(T)
-  end;;
+  type t = { foo: Int.Set.t; bar: string }
+  include Comparable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: Int.Set.t; bar: string } with sexp, compare
+  end
+  include T
+  include Comparable.Make(T)
+end;;
 
 (* part 24 *)
 module Foo_and_bar : sig
-    type t = { foo: int; bar: string }
-    include Comparable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: int; bar: string } with sexp
-    end
-    include T
-    include Comparable.Poly(T)
-  end;;
+  type t = { foo: int; bar: string }
+  include Comparable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: int; bar: string } with sexp
+  end
+  include T
+  include Comparable.Poly(T)
+end;;
 
 
 
@@ -221,14 +221,14 @@ Caml.Hashtbl.hash (List.range 0 100);;
 
 (* part 30 *)
 module Foo_and_bar : sig
-    type t = { foo: int; bar: string }
-    include Hashable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: int; bar: string } with sexp, compare
-      let hash t =
-        (Int.hash t.foo) lxor (String.hash t.bar)
-    end
-    include T
-    include Hashable.Make(T)
-  end;;
+  type t = { foo: int; bar: string }
+  include Hashable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: int; bar: string } with sexp, compare
+    let hash t =
+      (Int.hash t.foo) lxor (String.hash t.bar)
+  end
+  include T
+  include Hashable.Make(T)
+end;;

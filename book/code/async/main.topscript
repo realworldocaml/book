@@ -33,10 +33,10 @@ Deferred.bind ;;
 
 (* part 8 *)
 let uppercase_file filename =
-    Deferred.bind (Reader.file_contents filename)
-     (fun text ->
-         Writer.save filename ~contents:(String.uppercase text))
-  ;;
+  Deferred.bind (Reader.file_contents filename)
+    (fun text ->
+       Writer.save filename ~contents:(String.uppercase text))
+;;
 
 uppercase_file "test.txt";;
 
@@ -45,18 +45,18 @@ Reader.file_contents "test.txt";;
 
 (* part 9 *)
 let uppercase_file filename =
-    Reader.file_contents filename
-    >>= fun text ->
-    Writer.save filename ~contents:(String.uppercase text)
-  ;;
+  Reader.file_contents filename
+  >>= fun text ->
+  Writer.save filename ~contents:(String.uppercase text)
+;;
 
 
 (* part 10 *)
 let count_lines filename =
-    Reader.file_contents filename
-    >>= fun text ->
-    List.length (String.split text ~on:'\n')
-  ;;
+  Reader.file_contents filename
+  >>= fun text ->
+  List.length (String.split text ~on:'\n')
+;;
 
 
 
@@ -71,10 +71,10 @@ three;;
 
 (* part 12 *)
 let count_lines filename =
-    Reader.file_contents filename
-    >>= fun text ->
-    return (List.length (String.split text ~on:'\n'))
-  ;;
+  Reader.file_contents filename
+  >>= fun text ->
+  return (List.length (String.split text ~on:'\n'))
+;;
 
 
 (* part 13 *)
@@ -83,10 +83,10 @@ Deferred.map;;
 
 (* part 14 *)
 let count_lines filename =
-    Reader.file_contents filename
-    >>| fun text ->
-    List.length (String.split text ~on:'\n')
-  ;;
+  Reader.file_contents filename
+  >>| fun text ->
+  List.length (String.split text ~on:'\n')
+;;
 
 count_lines "/etc/hosts";;
 
@@ -105,10 +105,10 @@ Deferred.peek def;;
 
 (* part 16 *)
 module type Delayer_intf = sig
-    type t
-    val create : Time.Span.t -> t
-    val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
-  end;;
+  type t
+  val create : Time.Span.t -> t
+  val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
+end;;
 
 
 
@@ -122,22 +122,22 @@ upon;;
 
 (* part 18 *)
 module Delayer : Delayer_intf = struct
-    type t = { delay: Time.Span.t;
-               jobs: (unit -> unit) Queue.t;
-             }
+  type t = { delay: Time.Span.t;
+             jobs: (unit -> unit) Queue.t;
+           }
 
-    let create delay =
-      { delay; jobs = Queue.create () }
+  let create delay =
+    { delay; jobs = Queue.create () }
 
-    let schedule t thunk =
-      let ivar = Ivar.create () in
-      Queue.enqueue t.jobs (fun () ->
-        upon (thunk ()) (fun x -> Ivar.fill ivar x));
-      upon (after t.delay) (fun () ->
-        let job = Queue.dequeue_exn t.jobs in
-        job ());
-      Ivar.read ivar
-  end;;
+  let schedule t thunk =
+    let ivar = Ivar.create () in
+    Queue.enqueue t.jobs (fun () ->
+      upon (thunk ()) (fun x -> Ivar.fill ivar x));
+    upon (after t.delay) (fun () ->
+      let job = Queue.dequeue_exn t.jobs in
+      job ());
+    Ivar.read ivar
+end;;
 
 
 (* part 19 *)
@@ -148,10 +148,10 @@ let always_fail () = assert false;;
 
 (* part 20 *)
 let do_stuff n =
-    let x = 3 in
-    if n > 0 then loop_forever ();
-    x + n
-  ;;
+  let x = 3 in
+  if n > 0 then loop_forever ();
+  x + n
+;;
 
 
 (* part 21 *)
@@ -160,10 +160,10 @@ let rec loop_forever () : never_returns = loop_forever ();;
 
 (* part 22 *)
 let do_stuff n =
-    let x = 3 in
-    if n > 0 then loop_forever ();
-    x + n
-  ;;
+  let x = 3 in
+  if n > 0 then loop_forever ();
+  x + n
+;;
 
 
 
@@ -172,10 +172,10 @@ let do_stuff n =
 never_returns;;
 
 let do_stuff n =
-    let x = 3 in
-    if n > 0 then never_returns (loop_forever ());
-    x + n
-  ;;
+  let x = 3 in
+  if n > 0 then never_returns (loop_forever ());
+  x + n
+;;
 
 
 (* part 24 *)
@@ -224,14 +224,14 @@ Deferred.all_unit;;
 
 (* part 31 *)
 let maybe_raise =
-    let should_fail = ref false in
-    fun () ->
-      let will_fail = !should_fail in
-      should_fail := not will_fail;
-      after (Time.Span.of_sec 0.5)
-      >>= fun () ->
-      if will_fail then raise Exit else return ()
- ;;
+  let should_fail = ref false in
+  fun () ->
+    let will_fail = !should_fail in
+    should_fail := not will_fail;
+    after (Time.Span.of_sec 0.5)
+    >>= fun () ->
+    if will_fail then raise Exit else return ()
+;;
 
 maybe_raise ();;
 
@@ -247,11 +247,11 @@ maybe_raise ();;
 
 (* part 32 *)
 let handle_error () =
-    try
-      maybe_raise ()
-      >>| fun () -> "success"
-    with _ -> return "failure"
-  ;;
+  try
+    maybe_raise ()
+    >>| fun () -> "success"
+  with _ -> return "failure"
+;;
 
 handle_error ();;
 
@@ -267,11 +267,11 @@ handle_error ();;
 
 (* part 33 *)
 let handle_error () =
-    try_with (fun () -> maybe_raise ())
-    >>| function
-    | Ok ()   -> "success"
-    | Error _ -> "failure"
-  ;;
+  try_with (fun () -> maybe_raise ())
+  >>| function
+  | Ok ()   -> "success"
+  | Error _ -> "failure"
+;;
 
 handle_error ();;
 
@@ -280,9 +280,9 @@ handle_error ();;
 
 (* part 34 *)
 let blow_up () =
-    let monitor = Monitor.create ~name:"blow up monitor" () in
-    within' ~monitor maybe_raise
-  ;;
+  let monitor = Monitor.create ~name:"blow up monitor" () in
+  within' ~monitor maybe_raise
+;;
 
 blow_up ();;
 
@@ -291,12 +291,12 @@ blow_up ();;
 
 (* part 35 *)
 let swallow_error () =
-    let monitor = Monitor.create () in
-    Stream.iter (Monitor.detach_and_get_error_stream monitor)
-      ~f:(fun _exn -> printf "an error happened\n");
-    within' ~monitor (fun () ->
-      after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
-  ;;
+  let monitor = Monitor.create () in
+  Stream.iter (Monitor.detach_and_get_error_stream monitor)
+    ~f:(fun _exn -> printf "an error happened\n");
+  within' ~monitor (fun () ->
+    after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
+;;
 
 swallow_error ();;
 
@@ -306,17 +306,17 @@ swallow_error ();;
 exception Ignore_me;;
 
 let swallow_some_errors exn_to_raise =
-    let child_monitor  = Monitor.create  () in
-    let parent_monitor = Monitor.current () in
-    Stream.iter (Monitor.detach_and_get_error_stream child_monitor)
-      ~f:(fun error ->
-        match Monitor.extract_exn error with
-        | Ignore_me -> printf "ignoring exn\n"
-        | _ -> Monitor.send_exn parent_monitor error);
-    within' ~monitor:child_monitor (fun () ->
-      after (Time.Span.of_sec 0.5)
-      >>= fun () -> raise exn_to_raise)
-  ;;
+  let child_monitor  = Monitor.create  () in
+  let parent_monitor = Monitor.current () in
+  Stream.iter (Monitor.detach_and_get_error_stream child_monitor)
+    ~f:(fun error ->
+      match Monitor.extract_exn error with
+      | Ignore_me -> printf "ignoring exn\n"
+      | _ -> Monitor.send_exn parent_monitor error);
+  within' ~monitor:child_monitor (fun () ->
+    after (Time.Span.of_sec 0.5)
+    >>= fun () -> raise exn_to_raise)
+;;
 
 
 (* part 37 *)
@@ -329,15 +329,15 @@ swallow_some_errors Ignore_me;;
 
 (* part 39 *)
 let string_and_float = Deferred.both
-   (after (sec 0.5)  >>| fun () -> "A")
-   (after (sec 0.25) >>| fun () -> 32.33);;
+                         (after (sec 0.5)  >>| fun () -> "A")
+                         (after (sec 0.25) >>| fun () -> 32.33);;
 
 string_and_float;;
 
 
 (* part 40 *)
 Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
-               ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
+             ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
 
 
 (* part 41 *)
@@ -354,15 +354,15 @@ def;;
 
 (* part 43 *)
 let log_delays thunk =
-    let start = Time.now () in
-    let print_time () =
-      let diff = Time.diff (Time.now ()) start in
-      printf "%s, " (Time.Span.to_string diff)
-    in
-    let d = thunk () in
-    Clock.every (sec 0.1) ~stop:d print_time;
-    d >>| fun () -> print_time (); printf "\n"
-  ;;
+  let start = Time.now () in
+  let print_time () =
+    let diff = Time.diff (Time.now ()) start in
+    printf "%s, " (Time.Span.to_string diff)
+  in
+  let d = thunk () in
+  Clock.every (sec 0.1) ~stop:d print_time;
+  d >>| fun () -> print_time (); printf "\n"
+;;
 
 
 (* part 44 *)
@@ -370,9 +370,9 @@ log_delays (fun () -> after (sec 0.5));;
 
 (* part 45 *)
 let busy_loop () =
-    let x = ref None in
-    for i = 1 to 100_000_000 do x := Some i done
-  ;;
+  let x = ref None in
+  for i = 1 to 100_000_000 do x := Some i done
+;;
 
 log_delays (fun () -> return (busy_loop ()));;
 
@@ -382,7 +382,7 @@ log_delays (fun () -> In_thread.run busy_loop);;
 
 (* part 47 *)
 let noalloc_busy_loop () =
-    for i = 0 to 100_000_000 do () done
+  for i = 0 to 100_000_000 do () done
 ;;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;

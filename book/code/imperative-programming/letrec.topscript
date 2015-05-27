@@ -3,11 +3,11 @@ open Core_kernel.Std;;
 #require "mtime.os.top";;
 
 let time f =
-    let counter = Mtime.counter () in
-    let x = f () in
-    let elapsed = Mtime.count counter in
-    printf "Time: %F ms\n" (Mtime.to_ms elapsed);
-    x 
+  let counter = Mtime.counter () in
+  let x = f () in
+  let elapsed = Mtime.count counter in
+  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  x 
 ;;
 
 let memoize f =
@@ -17,16 +17,16 @@ let memoize f =
 ;;
 
 let fib_norec fib i =
-    if i <= 1 then i
-    else fib (i - 1) + fib (i - 2) ;;
+  if i <= 1 then i
+  else fib (i - 1) + fib (i - 2) ;;
 
 
 (* part 1 *)
 
 let memo_rec f_norec =
-    let rec f = memoize (fun x -> f_norec f x) in
-    f
-  ;;
+  let rec f = memoize (fun x -> f_norec f x) in
+  f
+;;
 
 (* part 2 *)
 let rec x = lazy (force x + 1);;
@@ -36,9 +36,9 @@ force x;;
 
 (* part 5 *)
 let lazy_memo_rec f_norec x =
-    let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
-    (force f) x
-  ;;
+  let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
+  (force f) x
+;;
 
 time (fun () -> lazy_memo_rec fib_norec 40);;
 

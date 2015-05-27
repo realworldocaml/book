@@ -1,18 +1,18 @@
 open Core_kernel.Std;;
 (* part 1 *)
 let create_number_file filename numbers =
-    let outc = Out_channel.create filename in
-    List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
-    Out_channel.close outc
-  ;;
+  let outc = Out_channel.create filename in
+  List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
+  Out_channel.close outc
+;;
 
 let sum_file filename =
-     let file = In_channel.create filename in
-     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
-     let sum = List.fold ~init:0 ~f:(+) numbers in
-     In_channel.close file;
-     sum
-  ;;
+  let file = In_channel.create filename in
+  let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+  let sum = List.fold ~init:0 ~f:(+) numbers in
+  In_channel.close file;
+  sum
+;;
 
 create_number_file "numbers.txt" [1;2;3;4;5];;
 

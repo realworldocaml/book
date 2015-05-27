@@ -40,7 +40,7 @@ Array [|1.0;2.0;3.0|];;
 
 # part 2.2
 
-Bytes "foo";;
+  Bytes "foo";;
 
 (* part 3 *)
 

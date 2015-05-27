@@ -5,6 +5,6 @@ step (fun m (base:Date.t) days ->
   match days with
   | Some days -> m base days
   | None ->
-     print_endline "enter days: ";
-     m base (read_int ())) ;;
+    print_endline "enter days: ";
+    m base (read_int ())) ;;
 

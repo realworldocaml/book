@@ -3,96 +3,96 @@ open Core_kernel.Std;;
 (* part 0.5 *)
 
 type 'a expr =
-    | Base  of 'a
-    | Const of bool
-    | And   of 'a expr list
-    | Or    of 'a expr list
-    | Not   of 'a expr
-  ;;
+  | Base  of 'a
+  | Const of bool
+  | And   of 'a expr list
+  | Or    of 'a expr list
+  | Not   of 'a expr
+;;
 
 (* part 1 *)
 type mail_field = To | From | CC | Date | Subject;;
-  type mail_predicate = { field: mail_field;
-                          contains: string }
-  ;;
+type mail_predicate = { field: mail_field;
+                        contains: string }
+;;
 
 (* part 2 *)
 let test field contains = Base { field; contains };;
 
 And [ Or [ test To "doligez"; test CC "doligez" ];
-        test Subject "runtime";
-      ]
-  ;;
+      test Subject "runtime";
+    ]
+;;
 
 (* part 3 *)
 let rec eval expr base_eval =
-    (* a shortcut, so we don't need to repeatedly pass [base_eval]
-        explicitly to [eval] *)
-    let eval' expr = eval expr base_eval in
-    match expr with
-    | Base  base  -> base_eval base
-    | Const bool  -> bool
-    | And   exprs -> List.for_all exprs ~f:eval'
-    | Or    exprs -> List.exists  exprs ~f:eval'
-    | Not   expr  -> not (eval' expr)
-  ;;
+  (* a shortcut, so we don't need to repeatedly pass [base_eval]
+     explicitly to [eval] *)
+  let eval' expr = eval expr base_eval in
+  match expr with
+  | Base  base  -> base_eval base
+  | Const bool  -> bool
+  | And   exprs -> List.for_all exprs ~f:eval'
+  | Or    exprs -> List.exists  exprs ~f:eval'
+  | Not   expr  -> not (eval' expr)
+;;
 
 
 (* part 4 *)
 let and_ l =
-    if List.mem l (Const false) then Const false
-    else
-      match List.filter l ~f:((<>) (Const true)) with
-      | [] -> Const true
-      | [ x ] -> x
-      | l -> And l
+  if List.mem l (Const false) then Const false
+  else
+    match List.filter l ~f:((<>) (Const true)) with
+    | [] -> Const true
+    | [ x ] -> x
+    | l -> And l
 ;;
-  let or_ l =
-    if List.mem l (Const true) then Const true
-    else
-      match List.filter l ~f:((<>) (Const false)) with
-      | [] -> Const false
-      | [x] -> x
-      | l -> Or l
+let or_ l =
+  if List.mem l (Const true) then Const true
+  else
+    match List.filter l ~f:((<>) (Const false)) with
+    | [] -> Const false
+    | [x] -> x
+    | l -> Or l
 ;;
-  let not_ = function
-    | Const b -> Const (not b)
-    | e -> Not e
-  ;;
+let not_ = function
+  | Const b -> Const (not b)
+  | e -> Not e
+;;
 
 
 
 
 (* part 5 *)
 let rec simplify = function
-    | Base _ | Const _ as x -> x
-    | And l -> and_ (List.map ~f:simplify l)
-    | Or l  -> or_  (List.map ~f:simplify l)
-    | Not e -> not_ (simplify e)
-  ;;
+  | Base _ | Const _ as x -> x
+  | And l -> and_ (List.map ~f:simplify l)
+  | Or l  -> or_  (List.map ~f:simplify l)
+  | Not e -> not_ (simplify e)
+;;
 
 
 (* part 6 *)
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
-                       Base "it's raining"]));;
+                     Base "it's raining"]));;
 
 
 (* part 7 *)
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
-                       Not (Not (Base "it's raining"))]));;
+                     Not (Not (Base "it's raining"))]));;
 
 
 (* part 8 *)
 let not_ = function
-    | Const b -> Const (not b)
-    | (Base _ | And _ | Or _ | Not _) as e -> Not e
-  ;;
+  | Const b -> Const (not b)
+  | (Base _ | And _ | Or _ | Not _) as e -> Not e
+;;
 
 
 (* part 9 *)
 let not_ = function
-    | Const b -> Const (not b)
-    | Not e -> e
-    | (Base _ | And _ | Or _ ) as e -> Not e
-  ;;
+  | Const b -> Const (not b)
+  | Not e -> e
+  | (Base _ | And _ | Or _ ) as e -> Not e
+;;
 

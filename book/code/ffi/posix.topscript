@@ -16,13 +16,13 @@ let time' () = time (from_voidp time_t null) ;;
 
 (* part 3 *)
 let difftime =
-    foreign "difftime" (time_t @-> time_t @-> returning double) ;;
+  foreign "difftime" (time_t @-> time_t @-> returning double) ;;
 
 let t1 =
-    time' () in
-    Unix.sleep 2;
-    let t2 = time' () in 
-    difftime t2 t1 ;;
+  time' () in
+Unix.sleep 2;
+let t2 = time' () in 
+difftime t2 t1 ;;
 
 
 (* part 4 *)
@@ -66,7 +66,7 @@ let timezone : timezone structure typ = structure "timezone" ;;
 
 (* part 11 *)
 let gettimeofday = foreign "gettimeofday"
-    (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
+                     (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
 
 
 
