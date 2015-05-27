@@ -54,6 +54,14 @@ OCAML_BYTE_LINK_FLAGS =
 OCAML_NATIVE_LINK_FLAGS =
 OCAMLFINDFLAGS = -syntax camlp4o
 
+if $(and $(defined PYGMENTIZE), $(or $(equal $(PYGMENTIZE), true), $(equal $(PYGMENTIZE), TRUE), $(equal $(PYGMENTIZE), t), $(equal $(PYGMENTIZE), T) ))
+  PYGMENTIZE = true
+  export PYGMENTIZE
+else
+  PYGMENTIZE = false
+  export PYGMENTIZE
+
+
 ################################################################################
 # Sub-directories
 .SUBDIRS: .
@@ -94,7 +102,7 @@ OCAMLFINDFLAGS = -syntax camlp4o
 
     foreach(file => ..., $(HTML_CHAPTER_FILES))
       $(file): $(ROOT)/book/$(file) ../app/$(APP_NAME)
-        if $(defined PYGMENTIZE)
+        if $(PYGMENTIZE)
           $(ROOT)/_build/app/$(APP_NAME) build chapter -pygmentize -o ./ -repo-root $(ROOT) $<
         else
           $(ROOT)/_build/app/$(APP_NAME) build chapter -o ./ -repo-root $(ROOT) $<

@@ -21,7 +21,9 @@ on other OCaml projects that may have conflicting requirements.
 
 Build Instructions
 ==================
-Run `omake`. All output goes under `_build`.
+Run `omake`. All output goes under `_build`. By default, code blocks
+are not highlighted. To pass them through `pygmentize`, run `omake
+PYGMENTIZE="true"`.
 
 Run `omake clean` to remove generated files.
 
