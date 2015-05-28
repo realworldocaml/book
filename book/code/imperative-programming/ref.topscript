@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 ;;
 
 (* part 1 *)

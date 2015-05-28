@@ -60,7 +60,8 @@ pre .bp { color: #007020 } /* Name.Builtin.Pseudo */
 pre .vc { color: #bb60d5 } /* Name.Variable.Class */
 pre .vg { color: #bb60d5 } /* Name.Variable.Global */
 pre .vi { color: #bb60d5 } /* Name.Variable.Instance */
-pre .il { color: #40a070 } /* Literal.Number.Integer.Long */.syntax pre .hll { background-color: #ffffcc }
+pre .il { color: #40a070 } /* Literal.Number.Integer.Long */
+.syntax pre .hll { background-color: #ffffcc }
 .syntax pre  { background: #f0f0f0; }
 .syntax pre .c { color: #60a0b0; font-style: italic } /* Comment */
 .syntax pre .err { border: 1px solid #FF0000 } /* Error */

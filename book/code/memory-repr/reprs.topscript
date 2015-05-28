@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 Obj.is_block (Obj.repr (1,2,3)) ;;
 
 Obj.is_block (Obj.repr 1) ;;

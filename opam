@@ -27,9 +27,12 @@ depends: [
   "cow"
   "cohttp"
   "iocaml"
-  "mtime"
   "websocket" {>= "0.9.2"}
   "oloop"
+
+  # Required for code blocks within book.
+  "core_bench"
+  "mtime"
 ]
 
 available: [

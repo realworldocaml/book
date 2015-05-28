@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 open Core_kernel.Std;;
 (* part 0.5 *)
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;

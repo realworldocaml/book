@@ -1,5 +1,10 @@
-open Core_kernel.Std
-     #require "yojson";;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
+open Core_kernel.Std;;
+#require "yojson";;
 
 (* part 1 *)
 let person = `Assoc [ ("name", `String "Anil") ] ;;

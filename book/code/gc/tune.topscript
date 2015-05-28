@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 open Core_kernel.Std;;
 let c = Gc.get () ;;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
