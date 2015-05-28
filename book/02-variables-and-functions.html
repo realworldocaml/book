@@ -420,14 +420,14 @@
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="22" />
 
-        <p>Note that in the code, the pattern <code>| [] |
-        [_]</code> is what's called an <em>or-pattern</em>, which
-        is a disjunction of two patterns, meaning that it will be
-        considered a match if either pattern matches. In this case,
-        <code>[]</code> matches the empty list, and
-        <code>[_]</code> matches any single element list. The
-        <code>_</code> is there so we don't have to put an explicit
-        name on that single element.<idx>or patterns</idx></p>
+        <p>The pattern <code>[] | [_]</code> is an example of
+        an <em>or-pattern</em>, which is a disjunction of multiple
+        patterns. An or-pattern matches as a whole if any of the
+        sub-patterns match. In this case, <code>[]</code> matches
+        the empty list, and <code>[_]</code> matches any single
+        element list. The <code>_</code> is there so we don't have to
+        put an explicit name on that single element.<idx>or
+        patterns</idx></p>
 
         <p>We can also define multiple mutually recursive values by
         using <code>let rec</code> combined with the

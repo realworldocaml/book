@@ -185,7 +185,7 @@ let downcase_extension filename =
   | Some (base,ext) -> 
     base ^ "." ^ String.lowercase ext
 ;;
-List.map ~f:downcase_exception
+List.map ~f:downcase_extension
   [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
 ;;
 

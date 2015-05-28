@@ -29,12 +29,7 @@ type color =
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
 
-
-
-
-
 [RGB (250,70,70); Basic (Green, Regular)];;
-
 
 (* part 4 *)
 let color_to_int = function
@@ -68,11 +63,6 @@ let nan = `Not_a_number;;
 let five = `Int "five";;
 
 [three; four; five];;
-
-
-
-
-
 
 (* part 8 *)
 let is_positive = function
