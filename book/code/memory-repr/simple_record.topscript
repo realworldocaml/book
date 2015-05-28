@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 type t = { foo: int; bar: int } ;;
 
 let x = { foo = 13; bar = 14 } ;;

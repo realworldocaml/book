@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 open Core_kernel.Std;;
 (* part 1 *)
 let l = [(1,"one"); (2,"two")] ;;

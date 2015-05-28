@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 let x = 7 in
 x + x
 ;;

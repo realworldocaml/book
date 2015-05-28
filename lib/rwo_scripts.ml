@@ -159,15 +159,6 @@ let script_part_to_html ?(pygmentize=false) = function
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
-let initial_phrases = [
-  "#use \"topfind\";;";
-  "#thread;;";
-  "#camlp4o;;";
-  "#require \"core\";;";
-  "#require \"core.syntax\";;";
-  "#require \"async\";;";
-]
-
 let eval_script lang ~filename =
   match lang with
   | `OCaml -> (
@@ -179,13 +170,7 @@ let eval_script lang ~filename =
       Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )
     else (
-      Reader.file_lines filename >>= fun lines ->
-      (
-        initial_phrases@lines
-        |> String.concat ~sep:"\n"
-        |> Oloop.Script.of_string ~filename
-        |> return
-      ) >>=?
+      Oloop.Script.of_file filename >>=?
       Oloop.eval_script ~silent_directives:() ~short_paths:()
       >>|? fun script ->
       `OCaml_toplevel script

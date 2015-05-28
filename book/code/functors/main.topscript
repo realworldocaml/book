@@ -1,3 +1,8 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.syntax";;
 open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
