@@ -885,7 +885,7 @@
       "code/guided-tour/main.topscript" part="46" />
 
       <p>Now, imagine that you want to combine multiple objects of
-      these types together as a description of a multiobject scene.
+      these types together as a description of a multi-object scene.
       You need some unified way of representing these objects
       together in a single type. One way of doing this is using a
       <em>variant</em> type:<idx>datatypes/variant
@@ -906,14 +906,13 @@
       <link rel="import" data-code-language="ocamltop" href=
       "code/guided-tour/main.topscript" part="48" />
 
-      <p>You might at this point notice that the use of
-      <code>match</code> here is reminiscent of how we used
-      <code>match</code> with <code>option</code> and
-      <code>list</code>. This is no accident: <code>option</code>
-      and <code>list</code> are really just examples of variant
-      types that happen to be important enough to be defined in the
-      standard library (and in the case of lists, to have some
-      special syntax).</p>
+      <p>You might at this point notice that the use
+      of <code>match</code> here is reminiscent of how we
+      used <code>match</code> with <code>option</code>
+      and <code>list</code>. This is no accident: <code>option</code>
+      and <code>list</code> are just examples of variant types that
+      are important enough to be defined in the standard library (and
+      in the case of lists, to have some special syntax).</p>
 
       <p>We also made our first use of an <em>anonymous
       function</em> in the call to <code>List.exists</code>.
@@ -924,11 +923,11 @@
       <code>List.exists</code>.<idx>anonymous
       functions</idx><idx>functions/anonymous functions</idx></p>
 
-      <p>The purpose of <code>List.exists</code> is to check if
-      there are any elements of the list in question on which the
-      provided function evaluates to <code>true</code>. In this
-      case, we're using <code>List.exists</code> to check if there
-      is a scene element within which our point resides.</p>
+      <p>The purpose of <code>List.exists</code> is to check if there
+      are any elements of the list in question for which the provided
+      function evaluates to <code>true</code>. In this case, we're
+      using <code>List.exists</code> to check if there is a scene
+      element within which our point resides.</p>
     </section>
 
     <section id="imperative-programming" data-type="sect1">
@@ -993,15 +992,15 @@
       <section id="mutable-record-fields" data-type="sect2">
         <h2>Mutable Record Fields</h2>
 
-        <p>The array is an important mutable data structure, but
-        it's not the only one. Records, which are immutable by
-        default, can have some of their fields explicitly declared
-        as mutable. Here's a small example of a data structure for
+        <p>The array is an important mutable data structure, but it's
+        not the only one. Records, which are immutable by default, can
+        have some of their fields explicitly declared as
+        mutable. Here's an example of a mutable data structure for
         storing a running statistical summary of a collection of
         numbers.<idx>imperative programming/mutable record
         fields</idx><idx>mutable record fields</idx><idx>data
-        structures/mutable record fields</idx></p>
-        <link rel="import" data-code-language="ocamltop" href=
+        structures/mutable record fields</idx></p> <link rel="import"
+        data-code-language="ocamltop" href=
         "code/guided-tour/main.topscript" part="50" />
 
         <p>The fields in <code>running_sum</code> are designed to
