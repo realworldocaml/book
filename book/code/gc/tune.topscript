@@ -3,6 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
+(* part 0.5 *)
 open Core_kernel.Std;;
 let c = Gc.get () ;;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;

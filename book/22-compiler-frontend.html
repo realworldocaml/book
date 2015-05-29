@@ -494,7 +494,11 @@
       a source of unpredictable dynamic behavior. Instead, all the
       extra code is simply generated at compilation time via
       Camlp4, and type information can be discarded from the
-      runtime image.<idx data-primary-sortas="Just">&quot;Just-in-Time&quot; dynamic patching</idx></p>
+      runtime image.
+
+	<idx data-primary-sortas="Just">&quot;Just-in-Time&quot; 
+	  dynamic patching</idx>
+      </p>
 
       <p>The syntax extensions accept an input AST and output a
       modified one. If you're not familiar with the Camlp4 module
@@ -508,17 +512,24 @@
       <section id="using-camlp4-interactively" data-type="sect2">
         <h2>Using Camlp4 Interactively</h2>
 
-        <p>The <span class="command"><em>utop</em></span> toplevel
-        can run the phrases that you type through <span class="command"><em>camlp4</em></span> automatically. You should
-        have at least these lines in your <code>~/.ocamlinit</code>
-        file in your home directory (see <a href="http://realworldocaml.org/install">this Real World OCaml
-        page</a> for more information):</p>
-        <link rel="import" data-code-language="ocamltop" href="code/front-end/camlp4_toplevel.topscript"/>
+        <p>The <span class="command"><em>utop</em></span> toplevel can
+        run the phrases that you type
+        through <span class="command"><em>camlp4</em></span>
+        automatically. You should have at least these lines in
+        your <code>~/.ocamlinit</code> file in your home directory
+        (see <a href="http://realworldocaml.org/install">this Real
+        World OCaml page</a> for more information):</p>
 
-        <p>The first directive loads the <span class="command"><em>ocamlfind</em></span> top-level interface
-        that lets you require <span class="command"><em>ocamlfind</em></span> packages (including all
-        their dependent packages). The second directive instructs
-        the toplevel to filter all phrases via Camlp4. You can now
+        <link rel="import" data-code-language="ocamltop" part="0.5"
+              href="code/front-end/camlp4_toplevel.topscript"/>
+
+        <p>The first directive loads
+        the <span class="command"><em>ocamlfind</em></span> top-level
+        interface that lets you
+        require <span class="command"><em>ocamlfind</em></span>
+        packages (including all their dependent packages). The second
+        directive instructs the toplevel to filter all phrases via
+        Camlp4. You can now
         run <span class="command"><em>utop</em></span> and load the
         syntax extensions in. We'll use the <code>comparelib</code>
         syntax extension for our experiments.</p>
