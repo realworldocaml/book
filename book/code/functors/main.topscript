@@ -3,6 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
+(* part 0.5 *)
 open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 

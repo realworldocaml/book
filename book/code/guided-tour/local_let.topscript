@@ -3,6 +3,8 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
+
+(* part 0.5 *)
 let x = 7 in
 x + x
 ;;

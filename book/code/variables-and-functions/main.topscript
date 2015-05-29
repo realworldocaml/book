@@ -3,6 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
+(* part 0.5 *)
 open Core_kernel.Std;;
 let x = 3;;
 let y = 4;;

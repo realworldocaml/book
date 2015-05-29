@@ -59,12 +59,12 @@
     <section id="ocaml-as-a-calculator" data-type="sect1">
       <h1>OCaml as a Calculator</h1>
 
-      <p>Our first step is to open <idx>OCaml/numerical
-      calculations in</idx><idx>numerical
-      calculations</idx><idx>Core standard library/opening</idx>
-      <code>Core_kernel.Std</code>:</p>
+      <p>Our first step is to open <idx>OCaml/numerical calculations
+      in</idx><idx>numerical calculations</idx><idx>Core standard
+      library/opening</idx> <code>Core_kernel.Std</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
-      "code/guided-tour/main.topscript" />
+      "code/guided-tour/main.topscript" part="0.5" />
 
       <p>By opening <code>Core_kernel.Std</code>, we make the
       definitions it contains available without having to reference
@@ -789,18 +789,21 @@
           <code>in</code> marks the beginning of the scope within
           which the new variable can be used. Thus, we could
           write:<idx>let syntax/nested let binding</idx></p>
+
           <link rel="import" data-code-language="ocamltop" href=
-          "code/guided-tour/local_let.topscript" />
+          "code/guided-tour/local_let.topscript" part="0.5" />
 
           <p>Note that the scope of the <code>let</code> binding is
           terminated by the double-semicolon, so the value of
           <code>x</code> is no longer available:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/local_let.topscript" part="1" />
 
           <p>We can also have multiple <code>let</code> statements
           in a row, each one adding a new variable binding to what
           came before:</p>
+
           <link rel="import" data-code-language="ocamltop" href=
           "code/guided-tour/local_let.topscript" part="2" />
 
