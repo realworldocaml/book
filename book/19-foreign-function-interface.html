@@ -373,7 +373,9 @@
 
       <p>We can now create a binding to <code>time</code> directly
       from the toplevel.</p>
-      <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript"/>
+
+      <link rel="import" data-code-language="ocamltop" part="0.5"
+	    href="code/ffi/posix.topscript"/> 
 
       <p>The <code>foreign</code> function is the main link between
       OCaml and C. It takes two arguments: the name of the C
@@ -785,7 +787,9 @@
       regular values, we can just use <code>let</code> in place of
       <code>typedef</code> and end up with working OCaml bindings
       to <code>qsort</code>:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/ffi/qsort.topscript"/>
+
+      <link rel="import" data-code-language="ocamltop" part="1"
+	    href="code/ffi/qsort.topscript"/> 
 
       <p>We only use <code>compare_t</code> once (in the
       <code>qsort</code> definition), so you can choose to inline
