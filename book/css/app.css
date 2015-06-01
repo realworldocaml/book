@@ -349,7 +349,7 @@ code {
   background-color: transparent;
   border-width: 0;
   border-style: solid;
-  border-color: transparent;
+  border-color: #adadad;
   padding: 0.125rem 0.3125rem 0.0625rem; }
 
 /* Lists */
@@ -1706,6 +1706,8 @@ section[data-type=chapter] aside {
 section[data-type=chapter] pre {
   position: relative;
   display: block;
+  padding: 0 1.6875rem;
+  border: 1px solid #adadad;
   background: transparent;
   border-radius: 3px;
   margin-bottom: 1.25rem;

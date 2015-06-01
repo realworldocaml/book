@@ -255,7 +255,7 @@ $code-background-color: transparent;
 $code-border-size: 1px;
 $code-border-size: 0;
 $code-border-style: solid;
-$code-border-color: scale-color($code-background-color, $lightness: -10%);
+$code-border-color: scale-color($code-color, $lightness: 60%);
 $code-padding: rem-calc(2) rem-calc(5) rem-calc(1);
 //$code-padding: 0;
 
