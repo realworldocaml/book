@@ -346,10 +346,10 @@ code {
   font-family: Consolas, "Liberation Mono", Courier, monospace;
   font-weight: 300;
   color: #333333;
-  background-color: #f9fbfb;
+  background-color: transparent;
   border-width: 0;
   border-style: solid;
-  border-color: #dde4e6;
+  border-color: transparent;
   padding: 0.125rem 0.3125rem 0.0625rem; }
 
 /* Lists */
@@ -1689,8 +1689,6 @@ section[data-type=chapter] div[data-type=note] {
     font-size: 1.5625rem; }
   section[data-type=chapter] div[data-type=note] p {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
-  section[data-type=chapter] div[data-type=note] code {
-    background: #f8e2bf; }
 section[data-type=chapter] aside {
   margin-left: -1.6875rem;
   margin-right: -1.6875rem;
