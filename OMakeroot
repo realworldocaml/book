@@ -1,7 +1,7 @@
 open build/OCaml
 DefineCommandVars()
 
-.PHONY: lib clean app \
+.PHONY: lib clean clean-everything app \
         install_lib uninstall_lib
 
 ################################################################################
@@ -68,6 +68,7 @@ else
   mkdir -p _build/lib
   mkdir -p _build/app
   mkdir -p _build/site
+  mkdir -p _build/site/css
   vmount(-l, lib/, _build/lib/)
   vmount(-l, app/, _build/app/)
 
@@ -97,6 +98,14 @@ else
 
 
   ##############################################################################
+  # CSS
+  .SUBDIRS: book/css
+
+    app.css: $(ls ../scss/*.scss)
+      sass -q -I $(shell opam config var foundation:lib)/scss ../scss/app.scss > $@
+
+
+  ##############################################################################
   # HTML Book
   .SUBDIRS: _build/site
 
@@ -119,8 +128,11 @@ else
     toc.html: ../app/$(APP_NAME)
       $(ROOT)/_build/app/$(APP_NAME) build toc -o ./ -repo-root $(ROOT)
 
-    .DEFAULT: $(HTML_FILES)
-      rsync -av $(ROOT)/book/images $(ROOT)/book/css $(ROOT)/book/js ./
+    css/app.css: $(ROOT)/book/css/app.css
+      cp $< $@
+
+    .DEFAULT: $(HTML_FILES) css/app.css
+      rsync -av $(ROOT)/book/images $(ROOT)/book/js ./
 
 
 ################################################################################
@@ -171,3 +183,9 @@ $(OPAM_PACKAGE_NAME).install:
 clean:
   rm -rf _build $(OPAM_PACKAGE_NAME).install numbers.txt
   rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin
+  rm -rf book/css/.sass-cache/
+
+# Should rarely need to run this. Regenerating these files requires a
+# lot of additional software.
+clean-everything: clean
+  rm -f book/css/app.css
