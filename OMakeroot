@@ -72,6 +72,11 @@ else
   vmount(-l, lib/, _build/lib/)
   vmount(-l, app/, _build/app/)
 
+  .SUBDIRS: _build
+    .INCLUDE: .depend: $(addprefix $(ROOT)/book/, $(HTML_CHAPTER_FILES))
+      $(ROOT)/app/rwo-deps.ml deps site -repo-root $(ROOT) > $@
+
+
   ##############################################################################
   # Library
   .SUBDIRS: _build/lib
@@ -183,6 +188,7 @@ $(OPAM_PACKAGE_NAME).install:
 clean:
   rm -rf \
     _build $(OPAM_PACKAGE_NAME).install \
+    app/rwo-deps.ml.exe \
     book/code/async/test.txt \
     book/code/imperative-programming/numbers.txt \
     OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin \
