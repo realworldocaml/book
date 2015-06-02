@@ -25,7 +25,7 @@ LIB_PACKAGES = core async sexplib.syntax \
                oloop
 
 APP_NAME = $(PROJECT)
-APP_MODULES[] = $(removesuffix $(basename $(ls app/*.ml)))
+APP_MODULES[] = app
 APP_PACKAGES = $(LIB_PACKAGES)
 
 HTML_CHAPTER_FILES[] = $(basename $(ls book/[0-9][0-9]*.html))
