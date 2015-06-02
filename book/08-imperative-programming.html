@@ -358,8 +358,10 @@
           character) is that the former is considerably more
           space-efficient; an array uses one word—8 bytes on a
           64-bit machine—to store a single entry, whereas strings
-          use 1 byte per character.<idx>byte
-          arrays</idx><idx>strings/vs. Char.t arrays</idx></p>
+          use 1 byte per character.
+
+	  <idx>byte arrays</idx>
+	  <idx>strings/vs. Char.t arrays</idx></p>
 
           <p>Strings also come with their own syntax for getting
           and setting values:</p>
@@ -381,7 +383,10 @@
           "20-runtime-memory-layout.html#memory-representation-of-values"
           data-type="xref">Memory Representation Of Values</a>.
           Bigarrays too have their own getting and setting
-          syntax:<idx>bigarrays</idx></p>
+          syntax:
+
+	    <idx>bigarrays</idx></p>
+
           <link rel="import" data-code-language="ocamlsyntax" href=
           "code/imperative-programming/bigarray.syntax" />
         </section>
@@ -395,13 +400,16 @@
         individual record fields can be declared as mutable. These
         mutable fields can be set using the <code>&lt;-</code>
         operator, i.e., <code>record.field &lt;-
-        expr</code>.<idx>fields/mutability of</idx></p>
+        expr</code>.
+
+	  <idx>fields/mutability of</idx></p>
 
         <p>As we'll see in <a href="11-objects.html#objects"
         data-type="xref">Objects</a>, fields of an object can
         similarly be declared as mutable, and can then be modified
-        in much the same way as record fields.<idx>primitive
-        mutable data/record/object fields and ref cells</idx></p>
+        in much the same way as record fields.
+
+	  <idx>primitive mutable data/record/object fields and ref cells</idx></p>
 
         <section id="ref-cells" data-type="sect3">
           <h3>Ref cells</h3>
@@ -413,7 +421,9 @@
           define a single, mutable value. In OCaml this is
           typically achieved using a <code>ref</code>, which is
           essentially a container with a single mutable polymorphic
-          field.<idx>ref cells</idx></p>
+          field.
+
+	    <idx>ref cells</idx></p>
 
           <p>The definition for the <code>ref</code> type is as
           follows:</p>
@@ -470,12 +480,13 @@
         detail in <a href=
         "19-foreign-function-interface.html#foreign-function-interface"
         data-type="xref">Foreign Function
-        Interface</a>.<idx>libraries/interfacing with
-        external</idx><idx>external libraries/interfacing
-        with</idx><idx>LAPACK bindings</idx><idx>foreign function
-        interface (FFI)/imperative operations
-        and</idx><idx>primitive mutable data/foreign
-        functions</idx></p>
+        Interface</a>.
+
+	<idx>libraries/interfacing with external</idx>
+	<idx>external libraries/interfacing with</idx>
+	<idx>LAPACK bindings</idx>
+	<idx>foreign function interface (FFI)/imperative operations and</idx>
+	<idx>primitive mutable data/foreign functions</idx></p>
       </section>
     </section>
 
@@ -488,15 +499,18 @@
       strictly necessary, since they can be simulated with
       recursive functions. Nonetheless, explicit <code>for</code>
       and <code>while</code> loops are both more concise and more
-      idiomatic when programming imperatively.<idx>looping
-      constructs</idx><idx>while loops</idx><idx>for
-      loops</idx></p>
+      idiomatic when programming imperatively.
+
+      <idx>looping constructs</idx>
+      <idx>while loops</idx>
+      <idx>for loops</idx></p>
 
       <p>The <code>for</code> loop is the simpler of the two.
       Indeed, we've already seen the <code>for</code> loop in
       action—the <code>iter</code> function in
       <code>Dictionary</code> is built using it. Here's a simple
       example of <code>for</code>:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/imperative-programming/for.topscript" part="1" />
 
@@ -534,10 +548,11 @@
       list in constant time. Core defines a doubly linked list (the
       module is called <code>Doubly_linked</code>), but we'll
       define our own linked list library as an
-      illustration.<idx>lists/doubly-linked
-      lists</idx><idx>doubly-linked lists</idx><idx id=
-      "IPdoublink">imperative programming/doubly-linked
-      lists</idx></p>
+      illustration.
+
+	<idx>lists/doubly-linked lists</idx>
+	<idx>doubly-linked lists</idx>
+	<idx id="IPdoublink">imperative programming/doubly-linked lists</idx></p>
 
       <p>Here's the <code>mli</code> of the module we'll build:</p>
       <link rel="import" data-code-language="ocaml" href=
@@ -582,9 +597,11 @@
         pointers that closes in on itself. In general, building
         cyclic data structures requires the use of side effects.
         This is done by constructing the data elements first, and
-        then adding cycles using assignment afterward.<idx>let
-        rec</idx><idx>data structures/cyclic</idx><idx>cyclic data
-        structures</idx></p>
+        then adding cycles using assignment afterward.
+
+	  <idx>let rec</idx>
+	  <idx>data structures/cyclic</idx>
+	  <idx>cyclic data structures</idx></p>
 
         <p>There is an exception to this, though: you can construct
         fixed-size cyclic data structures using <code>let
@@ -603,7 +620,10 @@
         <p>Now, we'll start considering operations that mutate the
         list, starting with <code>insert_first</code>, which
         inserts an element at the front of the
-        list:<idx>elements/inserting in lists</idx></p>
+        list:
+
+	  <idx>elements/inserting in lists</idx></p>
+
         <link rel="import" data-code-language="ocaml" href=
         "code/imperative-programming/dlist.ml" part="3" />
 
@@ -617,7 +637,9 @@
         end</code>. We could have used parentheses for the same
         purpose. Without some kind of bracketing, the final
         assignment would incorrectly become part of the
-        <code>None</code> case.<idx>elements/defining new</idx></p>
+        <code>None</code> case.
+
+	<idx>elements/defining new</idx></p>
 
         <p>We can use <code>insert_after</code> to insert elements
         later in the list. <code>insert_after</code> takes as
@@ -653,10 +675,11 @@
         modules like Core's <code>Doubly_linked</code>. You should
         use imperative data structures from a well-designed library
         when you can. And when you can't, you should make sure to
-        put great care into your error handling.<idx>imperative
-        programming/drawbacks of</idx><idx>Doubly-linked
-        module</idx><idx>error handling/and imperative data
-        structures</idx></p>
+        put great care into your error handling.
+
+	  <idx>imperative programming/drawbacks of</idx>
+	  <idx>Doubly-linked module</idx>
+	  <idx>error handling/and imperative data structures</idx></p>
       </section>
 
       <section id="iteration-functions" data-type="sect2">
@@ -666,8 +689,10 @@
         trees, you'll typically want to define a set of iteration
         functions like <code>iter</code>, <code>map</code>, and
         <code>fold</code>, which let you concisely express common
-        iteration patterns.<idx>functions/iteration
-        functions</idx><idx>iteration functions</idx></p>
+        iteration patterns.
+
+	<idx>functions/iteration functions</idx>
+	<idx>iteration functions</idx></p>
 
         <p><code>Dlist</code> has two such iterators:
         <code>iter</code>, the goal of which is to call a
@@ -1080,7 +1105,9 @@
 	    You might wonder why we didn't tie the recursive knot
             in <code>memo_rec</code> using <code>let rec</code>, as
             we did for <code>make_rec</code> earlier. Here's code
-            that tries to do just that:<idx>let rec</idx></p>
+            that tries to do just that:
+
+	    <idx>let rec</idx></p>
 
           <link rel="import" data-code-language="ocamltop" 
 		href="code/imperative-programming/letrec.topscript"
@@ -1311,10 +1338,13 @@
         string</em> that describes what to print and how to format
         it, as well as arguments to be printed, as determined by
         the formatting directives embedded in the format string.
-        So, for example, we can write:<idx>strings/format
-        strings</idx><idx>format strings</idx><idx>printf
-        function</idx><idx>I/O (input/output) operations/formatted
-        output</idx></p>
+        So, for example, we can write:
+
+	<idx>strings/format strings</idx>
+	<idx>format strings</idx>
+	<idx>printf function</idx>
+	<idx>I/O (input/output) operations/formatted output</idx></p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/printf.topscript" part="1" />
 
@@ -1415,8 +1445,11 @@
 
         <p>There are also <code>printf</code>-style functions that
         target outputs other than <code>stdout</code>,
-        including:<idx>sprintf function</idx><idx>fprintf
-        function</idx><idx>eprintf function</idx></p>
+        including:
+
+	  <idx>sprintf function</idx>
+	  <idx>fprintf function</idx>
+	  <idx>eprintf function</idx></p>
 
         <ul>
           <li>
@@ -1447,9 +1480,11 @@
         <code>out_channel</code>s is for working with files. Here
         are a couple of functions—one that creates a file full of
         numbers, and the other that reads in such a file and
-        returns the sum of those numbers:<idx>files/file
-        I/O</idx><idx>I/O (input/output) operations/file
-        I/O</idx></p>
+        returns the sum of those numbers:
+
+	<idx>files/file I/O</idx>
+	<idx>I/O (input/output) operations/file I/O</idx></p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/imperative-programming/file.topscript" part="1" />
 
@@ -1793,8 +1828,9 @@
         applied functions. A partially applied function, like any
         function application, is not a simple value, and as such,
         functions created by partial application are sometimes less
-        general than you might expect.<idx>partial
-        application</idx></p>
+        general than you might expect.
+
+	  <idx>partial application</idx></p>
 
         <p>Consider the <code>List.init</code> function, which is
         used for creating lists where each element is created by
@@ -1931,7 +1967,9 @@
       <h1>Summary</h1>
 
       <p>This chapter has covered quite a lot of ground,
-      including:<idx>imperative programming/overview of</idx></p>
+      including:
+
+	<idx>imperative programming/overview of</idx></p>
 
       <ul>
         <li>

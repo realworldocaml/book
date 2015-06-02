@@ -3,10 +3,9 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
 
 (* part 0.5 *)
-
+open Core_kernel.Std;;
 type 'a expr =
   | Base  of 'a
   | Const of bool
