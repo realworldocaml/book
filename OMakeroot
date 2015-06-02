@@ -181,9 +181,12 @@ $(OPAM_PACKAGE_NAME).install:
 ################################################################################
 # Clean Up
 clean:
-  rm -rf _build $(OPAM_PACKAGE_NAME).install numbers.txt
-  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin
-  rm -rf book/css/.sass-cache/
+  rm -rf \
+    _build $(OPAM_PACKAGE_NAME).install \
+    book/code/async/test.txt \
+    book/code/imperative-programming/numbers.txt \
+    OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin \
+    book/css/.sass-cache
 
 # Should rarely need to run this. Regenerating these files requires a
 # lot of additional software.
