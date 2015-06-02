@@ -4,3 +4,4 @@
 /.omakedb.lock
 /OMakeroot.omc
 /.merlin
+/book/css/.sass-cache

@@ -250,12 +250,12 @@ $paragraph-line-height: 1.8;
 $code-color: $oil;
 $code-font-family: $font-family-monospace;
 $code-font-weight: $font-weight-normal;
-$code-background-color: scale-color($secondary-color, $lightness: 70%);
-//$code-background-color: transparent;
+//$code-background-color: scale-color($secondary-color, $lightness: 70%);
+$code-background-color: transparent;
 $code-border-size: 1px;
 $code-border-size: 0;
 $code-border-style: solid;
-$code-border-color: scale-color($code-background-color, $lightness: -10%);
+$code-border-color: scale-color($code-color, $lightness: 60%);
 $code-padding: rem-calc(2) rem-calc(5) rem-calc(1);
 //$code-padding: 0;
 
