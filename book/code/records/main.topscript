@@ -3,6 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
+(* part 0.5 *)
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
 
@@ -135,12 +136,12 @@ type log_entry =
     time: Time_ns.t;
     important: bool;
     message: string;
-  };;
+  }
 type heartbeat =
   { session_id: string;
     time: Time_ns.t;
     status_message: string;
-  };;
+  }
 type logon =
   { session_id: string;
     time: Time_ns.t;

@@ -257,13 +257,13 @@ type running_sum =
 ;;
 
 (* part 51 *)
-let mean rsum = rsum.sum /. float rsum.samples;;
+let mean rsum = rsum.sum /. float rsum.samples
 let stdev rsum =
   sqrt (rsum.sum_sq /. float rsum.samples
         -. (rsum.sum /. float rsum.samples) ** 2.) ;;
 
 (* part 52 *)
-let create () = { sum = 0.; sum_sq = 0.; samples = 0 };;
+let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
 let update rsum x =
   rsum.samples <- rsum.samples + 1;
   rsum.sum     <- rsum.sum     +. x;

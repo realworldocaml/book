@@ -13,14 +13,14 @@ module Log_entry = struct
       important: bool;
       message: string;
     }
-end;;
+end
 module Heartbeat = struct
   type t =
     { session_id: string;
       time: Time_ns.t;
       status_message: string;
     }
-end;;
+end
 module Logon = struct
   type t =
     { session_id: string;
@@ -28,7 +28,8 @@ module Logon = struct
       user: string;
       credentials: string;
     }
-end;;
+end
+;;
 
 (* part 18 *)
 let create_log_entry ~session_id ~important message =

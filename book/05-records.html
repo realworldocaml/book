@@ -25,9 +25,13 @@
     <p>A record represents a collection of values stored together
     as one, where each component is identified by a different field
     name. The basic syntax for a record type declaration is as
-    follows:<idx>records/basic syntax for</idx></p>
-    <link rel="import" data-code-language="ocamlsyntax" href=
-    "code/records/record.syntax" />
+    follows:
+
+      <idx>records/basic syntax for</idx>
+    </p>
+
+    <link rel="import" data-code-language="ocamlsyntax" 
+	  href="code/records/record.syntax" />
 
     <p>Note that record field names must start with a lowercase
     letter.</p>
@@ -37,8 +41,9 @@
     file on a typical Unix system. That file is used for keeping
     track of the well-known port and protocol name for protocols
     such as ftp or ssh.</p>
-    <link rel="import" data-code-language="ocamltop" href=
-    "code/records/main.topscript" />
+
+    <link rel="import" data-code-language="ocamltop" part="0.5"
+	  href="code/records/main.topscript" />
 
     <p>We can construct a <code>service_info</code> just as easily
     as we declared its type. The following function tries to
@@ -130,6 +135,7 @@
       comments. We can do this by providing anew definition of
       <code>service_info</code> that includes a
       <code>comment</code> field:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
       "code/records/main.topscript" part="6" />
 
@@ -340,25 +346,31 @@
       <code>important</code> from within the module
       <code>Log_entry</code>. The fact that <code>Log_entry</code>
       is capitalized and so can't be a field name is what
-      disambiguates the two uses.</p>Qualifying a record field by
-      the module it comes from can be awkward. Happily, OCaml
-      doesn't require that the record field be qualified if it can
-      otherwise infer the type of the record in question. In
-      particular, we can rewrite the above declarations by adding
-      type annotations and removing the module qualifications.
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/records/main2.topscript" part="21.1" />This feature of
-      the language, known by the somewhat imposing name of
-      <em>type-directed constructor disambiguation</em>, applies to
-      variant constructors as well as record fields, as we'll see
-      in <a href="06-variants.html#variants" data-type=
-      "xref">Variants</a>.
+      disambiguates the two uses.</p>
 
-      <p>For functions defined within the module where a given
-      record is defined, the module qualification goes away
-      entirely.<a data-type="indexterm" data-startref=
-      "RECreusfn">&nbsp;</a><a data-type="indexterm" data-startref=
-      "FNreus">&nbsp;</a></p>
+      <p>Qualifying a record field by the module it comes from can be
+      awkward. Happily, OCaml doesn't require that the record field be
+      qualified if it can otherwise infer the type of the record in
+      question. In particular, we can rewrite the above declarations
+      by adding type annotations and removing the module
+      qualifications.</p>
+
+      <link rel="import" data-code-language="ocamltop"
+	    href="code/records/main2.topscript" part="21.1" />
+
+      <p>This feature of the language, known by the somewhat imposing
+      name of <em>type-directed constructor disambiguation</em>,
+      applies to variant constructors as well as record fields, as
+      we'll see in <a href="06-variants.html#variants"
+	    data-type="xref">Variants</a>.
+      </p>
+
+      <p>For functions defined within the module where a given record
+      is defined, the module qualification goes away entirely.
+
+	<a data-type="indexterm" data-startref="RECreusfn">&nbsp;</a>
+	<a data-type="indexterm" data-startref="FNreus">&nbsp;</a>
+      </p>
     </section>
 
     <section id="functional-updates" data-type="sect1">
