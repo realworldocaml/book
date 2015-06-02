@@ -74,6 +74,19 @@ let get_title file (t:Html.t) : string =
 
 let get_sections file html =
 
+  (** Convert arbitrary HTML to a section title, under the reasonable
+      assumption that we don't put overly complex HTML within section
+      titles. *)
+  let html_to_title html =
+    let rec loop accum = function
+      | [] -> accum
+      | (`Data x)::html -> loop (x::accum) html
+      | (`Element {Html.childs;_})::html -> loop (loop accum childs) html
+    in
+    loop [] html |> List.rev |> String.concat ~sep:""
+  in
+
+  (** Convert section title to a valid HTML ID. *)
   let title_to_id s =
     String.filter s ~f:(fun c -> Char.is_alphanum c || c = ' ')
     |> String.map ~f:(function ' ' -> '-' | c -> c)
@@ -96,8 +109,9 @@ let get_sections file html =
       | (`Element{Html.name="section";attrs;childs} as item)::rest -> (
         if List.mem attrs ("data-type",data_type) then (
           match Html.filter_whitespace childs with
-          | `Element{Html.name; attrs=_; childs=[`Data title]}::_ -> (
+          | `Element{Html.name; attrs=_; childs}::_ -> (
             if name = title_elem then
+              let title = html_to_title childs in
               let id = match List.Assoc.find attrs "id" with
                 | Some x -> x
                 | None -> title_to_id title
