@@ -170,10 +170,15 @@ let eval_script lang ~filename =
       Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )
     else (
-      Oloop.Script.of_file filename >>=?
-      Oloop.eval_script ~silent_directives:() ~short_paths:()
-      >>|? fun script ->
-      `OCaml_toplevel script
+      Oloop.Script.of_file filename >>=? fun script ->
+      Sys.getcwd() >>= fun cwd ->
+      Sys.chdir (Filename.dirname filename) >>= fun () ->
+      Oloop.eval_script ~silent_directives:() ~short_paths:() script
+      >>= function
+      | Ok script ->
+	 (Sys.chdir cwd >>| fun () -> Ok (`OCaml_toplevel script))
+      | Error _ as e ->
+	 (Sys.chdir cwd >>| fun () -> e)
     )
   )
   | `OCaml_rawtoplevel -> (

@@ -25,7 +25,7 @@ LIB_PACKAGES = core async sexplib.syntax \
                oloop
 
 APP_NAME = $(PROJECT)
-APP_MODULES[] = $(removesuffix $(basename $(ls app/*.ml)))
+APP_MODULES[] = app
 APP_PACKAGES = $(LIB_PACKAGES)
 
 HTML_CHAPTER_FILES[] = $(basename $(ls book/[0-9][0-9]*.html))
@@ -71,6 +71,11 @@ else
   mkdir -p _build/site/css
   vmount(-l, lib/, _build/lib/)
   vmount(-l, app/, _build/app/)
+
+  .SUBDIRS: _build
+    .INCLUDE: .depend: $(addprefix $(ROOT)/book/, $(HTML_CHAPTER_FILES))
+      $(ROOT)/app/rwo-deps.ml deps site -repo-root $(ROOT) > $@
+
 
   ##############################################################################
   # Library
@@ -181,9 +186,13 @@ $(OPAM_PACKAGE_NAME).install:
 ################################################################################
 # Clean Up
 clean:
-  rm -rf _build $(OPAM_PACKAGE_NAME).install numbers.txt
-  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin
-  rm -rf book/css/.sass-cache/
+  rm -rf \
+    _build $(OPAM_PACKAGE_NAME).install \
+    app/rwo-deps.ml.exe \
+    book/code/async/test.txt \
+    book/code/imperative-programming/numbers.txt \
+    OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock .merlin \
+    book/css/.sass-cache
 
 # Should rarely need to run this. Regenerating these files requires a
 # lot of additional software.
