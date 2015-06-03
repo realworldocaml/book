@@ -5,6 +5,7 @@
 #require "core.syntax";;
 
 open Core_kernel.Std;;
+(* part 0.5 *)
 type 'a expr =
   | Base  of 'a
   | Const of bool
