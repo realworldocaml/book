@@ -136,7 +136,7 @@ else
     css/app.css: $(ROOT)/book/css/app.css
       cp $< $@
 
-    .DEFAULT: $(HTML_FILES) css/app.css
+    .DEFAULT: $(HTML_FILES)
       rsync -av $(ROOT)/book/images $(ROOT)/book/js ./
 
 
