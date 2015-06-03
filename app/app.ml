@@ -136,8 +136,24 @@ let validate : Command.t = Command.async
 	      (Lang.sexp_of_t i.Import.data_code_language |> Sexp.to_string_hum)
      )
    in
-   Toc.get_chapters ~repo_root () >>=
-   Deferred.List.iter ~f:validate_chapter
+   let validate_chapters () =
+     Toc.get_chapters ~repo_root () >>=
+     Deferred.List.iter ~f:validate_chapter
+   in
+   let validate_code_files () =
+     Toc.imported_files ~repo_root () >>= fun imported_files ->
+     Toc.code_files ~repo_root () >>| fun code_files ->
+     let imported_files = String.Set.of_list imported_files in
+     let code_files = String.Set.of_list code_files in
+     let diff = Set.diff code_files imported_files |> Set.to_list in
+     if List.length diff <> 0 then
+       Log.Global.error
+	 "following files are not used:%s"
+	 (List.map diff ~f:(fun x -> "\n  "^x) |> String.concat ~sep:"")
+   in
+   validate_chapters() >>= fun () ->
+   validate_code_files() >>= fun () ->
+   return()
   )
 
 (******************************************************************************)

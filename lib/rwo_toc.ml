@@ -1,6 +1,8 @@
 open Core.Std
 open Async.Std
 module Html = Rwo_html
+module Import = Rwo_import
+module Util = Rwo_util
 let (/) = Filename.concat
 
 type part_info = {
@@ -230,3 +232,22 @@ let of_chapters (chapters : chapter list) : part list =
 let get ?repo_root () =
   get_chapters ?repo_root () >>|
   of_chapters
+
+let imported_files ?(repo_root=".") () =
+  get_chapters ~repo_root () >>= fun chapters ->
+  Deferred.List.map chapters ~f:(fun chapter ->
+      Html.of_file ("book"/chapter.filename) >>| fun html ->
+      Import.find_all html |> fun l ->
+      List.map l ~f:(fun x -> repo_root/"book"/x.Import.href)
+    ) >>| fun ll ->
+  List.concat ll |> fun l ->
+  List.dedup l
+
+let code_files ?(repo_root=".") () =
+  Util.find_files (repo_root/"book"/"code") >>|
+  List.filter ~f:(function
+      (* ignore auto-generated files *)
+      | "./book/code/async/test.txt"
+      | "./book/code/imperative-programming/numbers.txt" -> false
+      | _ -> true
+    )
