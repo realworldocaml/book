@@ -67,3 +67,31 @@ let to_docbook lang = match lang with
   | `OCaml_syntax
   | `Ascii ->
     error "language not supported by docbook" lang sexp_of_t
+
+let to_extensions = function
+  | `Bash -> ["cmd"]
+  | `C -> ["c"; "cpp"; "h"]
+  | `Console -> ["out"]
+  | `Scheme -> ["scm"]
+  | `Gas -> ["S"]
+  | `JSON -> ["json"]
+  | `Java -> ["java"]
+  | `OCaml -> ["atd"; "ml"; "mli"; "mll"; "mly"]
+  | `OCaml_rawtoplevel -> ["rawscript"]
+  | `OCaml_syntax -> ["syntax"]
+  | `OCaml_toplevel -> ["topscript"]
+  | `ATD | `CPP | `Ascii -> []
+
+let of_extension = function
+  | "cmd" -> Ok `Bash
+  | "c" | "cpp" | "h" -> Ok `C
+  | "out" -> Ok `Console
+  | "scm" -> Ok `Scheme
+  | "S" -> Ok `Gas
+  | "json" -> Ok `JSON
+  | "java" -> Ok `Java
+  | "atd" | "ml" | "mli" | "mll" | "mly" -> Ok `OCaml
+  | "rawscript" -> Ok `OCaml_rawtoplevel
+  | "syntax" -> Ok `OCaml_syntax
+  | "topscript" -> Ok `OCaml_toplevel
+  | x -> error "unknown extension" x sexp_of_string

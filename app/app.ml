@@ -2,6 +2,7 @@ open Core.Std
 open Async.Std
 open Sexplib
 open Rwo
+let (/) = Filename.concat
 
 module Param = struct
   open Command.Spec
@@ -112,12 +113,41 @@ let build : Command.t = Command.group
 
 
 (******************************************************************************)
+(* `validate` command                                                         *)
+(******************************************************************************)
+let validate : Command.t = Command.async
+  ~summary:"validate various things"
+  Command.Spec.(empty +> Param.repo_root)
+  (fun repo_root () ->
+   let validate_chapter (x:Toc.chapter) : unit Deferred.t =
+     Html.of_file ("book"/x.Toc.filename) >>| fun html ->
+     Import.find_all html |>
+     List.iter ~f:(fun i ->
+       match Filename.split_extension i.Import.href |> snd with
+       | None -> Log.Global.error "%s missing file extension" i.Import.href
+       | Some x ->
+	  let valid_extensions =
+            Lang.to_extensions i.Import.data_code_language
+	  in
+          if not (List.mem valid_extensions x) then
+	    Log.Global.error
+	      "invalid extension %s for language %s"
+	      x
+	      (Lang.sexp_of_t i.Import.data_code_language |> Sexp.to_string_hum)
+     )
+   in
+   Toc.get_chapters ~repo_root () >>=
+   Deferred.List.iter ~f:validate_chapter
+  )
+
+(******************************************************************************)
 (* `main` command                                                             *)
 (******************************************************************************)
 let main = Command.group
   ~summary:"Real World OCaml authoring and publication tools"
   [
     "build", build;
+    "validate", validate;
   ]
 
 ;;
