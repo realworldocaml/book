@@ -1,5 +1,5 @@
 opam-version: "1.2"
-name: "OCaml-Book"
+name: "Real-World-OCaml"
 version: "dev"
 maintainer: "Ashish Agarwal <agarwal1975@gmail.com>"
 homepage: "https://github.com/yminsky/OCaml-Book"
@@ -10,12 +10,12 @@ build: [
 ]
 
 install: [
-  ["omake" "OCaml-Book.install"]
+  ["omake" "%{name}%.install"]
   ["omake" "install_lib"]
 ]
 
 remove: [
-  ["ocamlfind" "remove" "OCaml-Book"]
+  ["ocamlfind" "remove" "%{name}%"]
 ]
 
 depends: [

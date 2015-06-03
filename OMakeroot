@@ -141,7 +141,7 @@ else
 # Install and Uninstall
 
 if $(not $(defined OPAM_PACKAGE_NAME))
-  OPAM_PACKAGE_NAME = OCaml-Book
+  OPAM_PACKAGE_NAME = Real-World-OCaml
   export
 
 OCAMLFIND_PACKAGE_NAME = $(OPAM_PACKAGE_NAME)
