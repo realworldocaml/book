@@ -39,15 +39,18 @@ val of_html : filename:string -> Rwo_html.t -> t Or_error.t Deferred.t
 (******************************************************************************)
 (** {2 Printers} *)
 (******************************************************************************)
+(** Returns a list of <pre> elements. *)
 val phrases_to_html
   :  ?pygmentize:bool
   -> Oloop.Script.Evaluated.phrase list
   -> Rwo_html.t Deferred.t
 
+(** Returns a single <div> element. If [pygmentize = true], then the
+    element has attribute class="highlight". *)
 val script_part_to_html
   :  ?pygmentize:bool
   -> script_part
-  -> Rwo_html.t Deferred.t
+  -> Rwo_html.item Deferred.t
 
 
 (******************************************************************************)

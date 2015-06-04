@@ -60,7 +60,15 @@ let really_pygmentize lang contents =
         if stderr <> "" then
           failwithf "pymentize exited with errors:\n%s\n%s" contents stderr ()
         else
-          Html.of_string stdout |> List.hd_exn
+          Html.of_string stdout |> List.hd_exn |> function
+          | `Element {
+              Html.name="div";
+              attrs=["class","highlight"];
+              childs=[`Element {Html.name="pre";_} as x];
+            } ->
+            x
+          | _ ->
+            failwith "pygmentize output HTML not in form"
     )
 
 let pygmentize ?(pygmentize=true) lang contents =

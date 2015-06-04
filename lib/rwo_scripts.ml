@@ -111,7 +111,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
     )
     |> function
     | [] -> None
-    | l -> Some Html.(div [pre [`Data (String.concat l ~sep:"\n")]])
+    | l -> Some Html.(pre [`Data (String.concat l ~sep:"\n")])
   in
 
   let stdout (x:Oloop.Script.Evaluated.phrase) : Html.item option =
@@ -119,7 +119,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
     | `Uneval _ -> None
     | `Eval e -> match Oloop.Outcome.stdout e with
       | "" -> None
-      | x -> Some Html.(div [pre [`Data x]])
+      | x -> Some Html.(pre [`Data x])
   in
 
   let out_phrase (x:Oloop.Script.Evaluated.phrase)
@@ -147,13 +147,18 @@ let phrases_to_html ?(pygmentize=false) phrases =
   >>| List.concat
 
 
-let script_part_to_html ?(pygmentize=false) = function
+let script_part_to_html ?(pygmentize=false) x =
+  (
+  match x with
   | `OCaml_toplevel phrases -> phrases_to_html ~pygmentize phrases
   | `OCaml x
   | `OCaml_rawtoplevel x ->
      (Pygments.pygmentize ~pygmentize `OCaml x >>| fun x -> [x])
   | `Other x ->
      (Pygments.pygmentize ~pygmentize:false `OCaml x >>| fun x -> [x])
+  ) >>| fun l ->
+  let a = if pygmentize then ["class","highlight"] else [] in
+  Html.div ~a l
 
 
 (******************************************************************************)

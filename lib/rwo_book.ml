@@ -205,25 +205,24 @@ let make_chapter_page ?pygmentize repo_root chapters chapter_file
     next_chapter_footer (Toc.get_next_chapter chapters chapter)
   in
 
-  let import_node_to_html scripts (i:Import.t) : Html.t Deferred.t =
+  let import_node_to_html scripts (i:Import.t) : Html.item Deferred.t =
     Scripts.find_exn scripts ~filename:i.href ?part:i.part |>
     Scripts.script_part_to_html ?pygmentize
   in
 
-  let rec loop scripts html =
+  let rec loop scripts html : Html.t Deferred.t =
     (Deferred.List.map html ~f:(fun item ->
       if Import.is_import_html item then
         import_node_to_html scripts (ok_exn (Import.of_html item))
       else match item with
-      | `Data _ -> return [item]
+      | `Data _ -> return item
       | `Element {Html.name; attrs; childs} -> (
         Deferred.List.map childs ~f:(fun x -> loop scripts [x])
         >>| List.concat
-        >>| fun childs -> [`Element {Html.name; attrs; childs}]
+        >>| fun childs -> `Element {Html.name; attrs; childs}
       )
      )
     )
-    >>| List.concat
   in
 
   Html.of_file chapter_file >>= fun html ->
