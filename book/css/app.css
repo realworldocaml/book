@@ -1703,16 +1703,18 @@ section[data-type=chapter] aside {
     font-weight: normal; }
   section[data-type=chapter] aside pre {
     font-size: 0.875rem; }
-section[data-type=chapter] pre {
+section[data-type=chapter] div.highlight {
   position: relative;
   display: block;
   padding: 0 1.6875rem;
   border: 1px solid #adadad;
-  background: transparent;
   border-radius: 3px;
   margin-bottom: 1.25rem;
+  margin-left: 0;
   white-space: pre-wrap;
   overflow: scroll; }
+  section[data-type=chapter] div.highlight pre {
+    background: transparent; }
 section[data-type=chapter] dl dt {
   margin: 0; }
 section[data-type=chapter] dl dd {

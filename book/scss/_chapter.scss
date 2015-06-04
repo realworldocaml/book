@@ -102,7 +102,7 @@ section[data-type=chapter]
 		}
 	}
 
-	pre
+	div.highlight
 	{
 		position: relative;
 		display: block;
@@ -110,12 +110,17 @@ section[data-type=chapter]
 		border: 1px solid $code-border-color;
 		//border: 0;
 		//border-left: 2px solid $hr-border-color;
-		background: transparent;
 		border-radius: $global-radius;
 		margin-bottom: $paragraph-margin-bottom;
+		margin-left: 0;
 		white-space: pre-wrap;
 		overflow: scroll;
-	}
+
+                pre
+		{
+		  background: transparent;
+		}
+        }
 	
 	dl
 	{
