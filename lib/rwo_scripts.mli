@@ -45,8 +45,7 @@ val phrases_to_html
   -> Oloop.Script.Evaluated.phrase list
   -> Rwo_html.t Deferred.t
 
-(** Returns a single <div> element. If [pygmentize = true], then the
-    element has attribute class="highlight". *)
+(** Returns a single <div class="highlight"> element. *)
 val script_part_to_html
   :  ?pygmentize:bool
   -> script_part

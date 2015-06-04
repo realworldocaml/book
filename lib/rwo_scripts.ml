@@ -157,8 +157,7 @@ let script_part_to_html ?(pygmentize=false) x =
   | `Other x ->
      (Pygments.pygmentize ~pygmentize:false `OCaml x >>| fun x -> [x])
   ) >>| fun l ->
-  let a = if pygmentize then ["class","highlight"] else [] in
-  Html.div ~a l
+  Html.div ~a:["class","highlight"] l
 
 
 (******************************************************************************)
