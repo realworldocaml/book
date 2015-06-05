@@ -73,6 +73,11 @@ section[data-type=chapter]
 		{
 			//background: desaturate(lighten($info-color, 35), 10);
 		}
+
+		pre
+		{
+		  background:transparent;
+		}
 	}
 	
 	aside
@@ -98,6 +103,7 @@ section[data-type=chapter]
 		pre
 		{
 			font-size: 0.875rem;
+			background: transparent;
 			//padding: $column-gutter/4;
 		}
 	}
@@ -106,8 +112,8 @@ section[data-type=chapter]
 	{
 		position: relative;
 		display: block;
-		padding: 0 $column-gutter/2;
-		border: 1px solid $code-border-color;
+		padding: 0;
+		//border: 1px solid $code-border-color;
 		//border: 0;
 		//border-left: 2px solid $hr-border-color;
 		border-radius: $global-radius;
@@ -118,7 +124,7 @@ section[data-type=chapter]
 
                 pre
 		{
-		  background: transparent;
+		  padding: 0 $column-gutter/2;
 		}
         }
 	
