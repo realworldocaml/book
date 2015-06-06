@@ -1689,6 +1689,8 @@ section[data-type=chapter] div[data-type=note] {
     font-size: 1.5625rem; }
   section[data-type=chapter] div[data-type=note] p {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
+  section[data-type=chapter] div[data-type=note] pre {
+    background: transparent; }
 section[data-type=chapter] aside {
   margin-left: -1.6875rem;
   margin-right: -1.6875rem;
@@ -1702,19 +1704,19 @@ section[data-type=chapter] aside {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
     font-weight: normal; }
   section[data-type=chapter] aside pre {
-    font-size: 0.875rem; }
+    font-size: 0.875rem;
+    background: transparent; }
 section[data-type=chapter] div.highlight {
   position: relative;
   display: block;
-  padding: 0 1.6875rem;
-  border: 1px solid #adadad;
+  padding: 0;
   border-radius: 3px;
   margin-bottom: 1.25rem;
   margin-left: 0;
   white-space: pre-wrap;
   overflow: scroll; }
   section[data-type=chapter] div.highlight pre {
-    background: transparent; }
+    padding: 0 1.6875rem; }
 section[data-type=chapter] dl dt {
   margin: 0; }
 section[data-type=chapter] dl dd {
