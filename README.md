@@ -54,8 +54,3 @@ Directory Structure
 
 * `exercises/`
   Unused exercises.
-
-* `scripts/`
-  Scripts from the 1st edition of the book. These need to be ported
-  into the new library implemented under lib/. Leaving here until the
-  port is complete.
