@@ -90,8 +90,12 @@ let file_is_mem = Map.mem
 let phrases_to_html ?(pygmentize=false) phrases =
 
   let in_phrase (x:Oloop.Script.Evaluated.phrase) : Html.item Deferred.t =
-    sprintf "# %s" x.Oloop.Script.Evaluated.phrase
-    |> Pygments.pygmentize ~pygmentize `OCaml
+    match String.split x.Oloop.Script.Evaluated.phrase ~on:'\n' with
+    | [] -> assert false
+    | x::xs ->
+      let x = sprintf "# %s" x in
+      let phrase = String.concat ~sep:"\n  " (x::xs) in
+      Pygments.pygmentize ~pygmentize `OCaml phrase
   in
 
   (* get warnings or errors *)
