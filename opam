@@ -2,7 +2,7 @@ opam-version: "1.2"
 name: "Real-World-OCaml"
 version: "dev"
 maintainer: "Ashish Agarwal <agarwal1975@gmail.com>"
-homepage: "https://github.com/yminsky/OCaml-Book"
+homepage: "https://github.com/yminsky/Real-World-OCaml"
 license: "PROPRIETARY"
 
 build: [

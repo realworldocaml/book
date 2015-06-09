@@ -9,10 +9,10 @@ recommended you do the following to install all necessary
 dependencies:
 
 ```
-opam switch rwo -A 4.02.1
+opam switch Real-World-OCaml -A 4.02.1
 cd /to/your/working/directory
-opam pin add OCaml-Book .
-opam install OCaml-Book --deps-only
+opam pin add Real-World-OCaml .
+opam install Real-World-OCaml --deps-only
 ```
 
 The `switch` step is optional, but recommended if you are also working
@@ -48,9 +48,9 @@ Directory Structure
 * `archive/`
   Mostly stuff from the 1st edition of the book. Could delete all of
   this as it is accessible by going to tag
-  [pre-2e](https://github.com/yminsky/OCaml-Book/releases/tag/pre-2e). However,
-  leaving here for now for more clear access until we're sure we've
-  ported everything needed.
+  [pre-2e](https://github.com/yminsky/Real-World-OCaml/releases/tag/pre-2e).
+  However, leaving here for now for more clear access until we're sure
+  we've ported everything needed.
 
 * `exercises/`
   Unused exercises.
