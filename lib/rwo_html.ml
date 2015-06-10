@@ -182,6 +182,7 @@ let encode x =
   |> String.substr_replace_all ~pattern:"&" ~with_:"&amp;"
   |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
   |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+  |> String.substr_replace_all ~pattern:"\027" ~with_:"^["
 
 
 (******************************************************************************)
