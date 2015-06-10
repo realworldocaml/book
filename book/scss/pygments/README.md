@@ -9,3 +9,5 @@ where <style> is any of the styles listed in `all.txt`.
 The exception is `solarized-dark` and `solarized-light`, which are not
 provided by pygments. As noted in their headers, these files were
 obtained [here](https://gist.github.com/nicolashery/5765395).
+
+Variations of the above styles are suffixed with 2, 3, etc.
