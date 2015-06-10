@@ -70,6 +70,9 @@ val get_body_childs : filename:string -> t -> item list
     given [id], and replaces that node entirely with [with_] items. *)
 val replace_id_node_with : t -> id:string -> with_:(item list) -> t
 
+(** Encode html characters within given string. *)
+val encode : string -> string
+
 
 (******************************************************************************)
 (** {2 Constructors} *)

@@ -177,6 +177,12 @@ let replace_id_node_with t ~id ~with_ =
   in
   loop t
 
+let encode x =
+  x
+  |> String.substr_replace_all ~pattern:"&" ~with_:"&amp;"
+  |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
+  |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+
 
 (******************************************************************************)
 (* Constructors                                                               *)

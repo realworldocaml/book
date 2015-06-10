@@ -75,9 +75,6 @@ let pygmentize ?(pygmentize=true) lang contents =
   if pygmentize then
     really_pygmentize lang contents
   else
-    contents
-    |> String.substr_replace_all ~pattern:"&" ~with_:"&amp;"
-    |> String.substr_replace_all ~pattern:"<" ~with_:"&lt;"
-    |> String.substr_replace_all ~pattern:">" ~with_:"&gt;"
+    Html.encode contents
     |> (fun x -> Html.pre [`Data x])
     |> return
