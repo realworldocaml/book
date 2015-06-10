@@ -115,7 +115,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
     )
     |> function
     | [] -> None
-    | l -> Some Html.(pre [`Data (String.concat l ~sep:"\n")])
+    | l -> Some Html.(pre [`Data (String.concat l ~sep:"\n" |> Html.encode)])
   in
 
   let stdout (x:Oloop.Script.Evaluated.phrase) : Html.item option =
@@ -123,7 +123,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
     | `Uneval _ -> None
     | `Eval e -> match Oloop.Outcome.stdout e with
       | "" -> None
-      | x -> Some Html.(pre [`Data x])
+      | x -> Some Html.(pre [`Data (Html.encode x)])
   in
 
   let out_phrase (x:Oloop.Script.Evaluated.phrase)
