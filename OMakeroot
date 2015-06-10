@@ -1,7 +1,7 @@
 open build/OCaml
 DefineCommandVars()
 
-.PHONY: lib clean clean-everything app \
+.PHONY: lib clean clean-everything app atlas \
         install_lib uninstall_lib
 
 ################################################################################
@@ -69,6 +69,7 @@ else
   mkdir -p _build/app
   mkdir -p _build/site
   mkdir -p _build/site/css
+  mkdir -p _build/atlas
   vmount(-l, lib/, _build/lib/)
   vmount(-l, app/, _build/app/)
 
@@ -135,6 +136,16 @@ else
 
     .DEFAULT: $(HTML_FILES)
       rsync -av $(ROOT)/book/images $(ROOT)/book/js $(ROOT)/book/css ./
+
+
+##############################################################################
+  # Book in format required by O'Reilly's Atlas
+  .SUBDIRS: _build/atlas
+    foreach(file => ..., $(HTML_CHAPTER_FILES))
+      $(file): $(ROOT)/book/$(file) ../app/$(APP_NAME)
+        $(ROOT)/_build/app/$(APP_NAME) build chapter -o ./ -repo-root $(ROOT) $<
+
+    atlas: $(HTML_CHAPTER_FILES)
 
 
 ################################################################################
