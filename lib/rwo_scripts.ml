@@ -103,11 +103,20 @@ let phrases_to_html ?(pygmentize=false) phrases =
     (
       match x.Oloop.Script.Evaluated.outcome with
       | `Uneval (x,_) ->
-	 (
-	   Oloop.Outcome.report_uneval
-	     ~msg_with_location:true Format.str_formatter x;
-	   [Format.flush_str_formatter()]
-	 )
+        (
+          try (
+            Oloop.Outcome.report_uneval
+              ~msg_with_location:true Format.str_formatter x;
+            [Format.flush_str_formatter()]
+          )
+          with exn -> (
+              Log.Global.error
+                "Oloop.Outcome.report_uneval raised exception: %s"
+                (Exn.to_string exn)
+              ;
+              ["Oloop error: unable to show correct OCaml output"]
+            )
+	)
       | `Eval e ->
         Oloop.Outcome.warnings e
         |> List.map ~f:(fun (loc,warning) ->
