@@ -136,7 +136,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
       let fmt = Format.formatter_of_buffer buf in
       !Oprint.out_phrase fmt (Oloop.Outcome.result e);
       Buffer.contents buf
-      |> Pygments.pygmentize ~pygmentize `OCaml
+      |> Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml
       >>| Option.some
   in
 

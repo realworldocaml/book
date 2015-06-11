@@ -766,6 +766,10 @@ pre .ge {
   font-style: italic; }
 
 /* Generic.Emph */
+pre.ge {
+  font-style: italic; }
+
+/* Generic.Emph */
 pre .gh {
   font-weight: bold; }
 
