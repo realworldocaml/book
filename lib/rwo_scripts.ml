@@ -134,7 +134,9 @@ let phrases_to_html ?(pygmentize=false) phrases =
     | `Eval e ->
       let buf = Buffer.create 256 in
       let fmt = Format.formatter_of_buffer buf in
-      !Oprint.out_phrase fmt (Oloop.Outcome.result e);
+      !Oprint.out_phrase fmt (
+        Oloop.Outcome.result e |> Oloop.phrase_remove_underscore_names
+      );
       Buffer.contents buf
       |> Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml
       >>| Option.some
