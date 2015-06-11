@@ -40,7 +40,7 @@ let lang_to_string = function
   | `Json -> "json"
   | `Scheme -> "scheme"
 
-let really_pygmentize lang contents =
+let really_pygmentize ~add_attrs lang contents =
   Process.create ~prog:"pygmentize"
     ~args:["-l"; lang_to_string lang; "-f"; "html"] ()
   >>= fun proc ->
@@ -64,17 +64,17 @@ let really_pygmentize lang contents =
           | `Element {
               Html.name="div";
               attrs=["class","highlight"];
-              childs=[`Element {Html.name="pre";_} as x];
+              childs=[`Element {Html.name="pre" as name; attrs; childs}];
             } ->
-            x
+            `Element {Html.name; attrs=attrs@add_attrs; childs}
           | _ ->
             failwith "pygmentize output HTML not in form"
     )
 
-let pygmentize ?(pygmentize=true) lang contents =
+let pygmentize ?(add_attrs=[]) ?(pygmentize=true) lang contents =
   if pygmentize then
-    really_pygmentize lang contents
+    really_pygmentize ~add_attrs lang contents
   else
     Html.encode contents
-    |> (fun x -> Html.pre [`Data x])
+    |> (fun x -> Html.pre ~a:add_attrs [`Data x])
     |> return

@@ -24,5 +24,12 @@ val of_lang : Rwo_lang.t -> lang Or_error.t
     simply return the given string wrapped in an HTML <pre> tag to be
     consistent with what pygmentize returns. Also some characters are
     properly escaped.
+
+    If given, [add_attrs] will be added to the attributes <pre>.
 *)
-val pygmentize : ?pygmentize:bool -> lang -> string -> Rwo_html.item Deferred.t
+val pygmentize
+  :  ?add_attrs:Rwo_html.attributes
+  -> ?pygmentize:bool
+  -> lang
+  -> string
+  -> Rwo_html.item Deferred.t
