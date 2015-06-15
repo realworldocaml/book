@@ -1285,6 +1285,8 @@ section[data-type=chapter] div[data-type=note] {
     font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif; }
   section[data-type=chapter] div[data-type=note] pre, section[data-type=chapter] div[data-type=note] div.highlight {
     background: transparent; }
+  section[data-type=chapter] div[data-type=note] div.highlight {
+    padding: 0 1.6875rem; }
 section[data-type=chapter] aside {
   margin-left: -1.6875rem;
   margin-right: -1.6875rem;
@@ -1300,11 +1302,13 @@ section[data-type=chapter] aside {
   section[data-type=chapter] aside pre, section[data-type=chapter] aside div.highlight {
     font-size: 0.875rem;
     background: transparent; }
+  section[data-type=chapter] aside div.highlight {
+    padding: 0 1.6875rem; }
 section[data-type=chapter] div.highlight {
   background: whitesmoke;
   position: relative;
   display: block;
-  padding: 0 1.6875rem;
+  padding: 0.84375rem 1.6875rem;
   border-radius: 3px;
   margin-bottom: 1.25rem;
   margin-left: 0;

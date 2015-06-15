@@ -78,6 +78,10 @@ section[data-type=chapter]
 		{
 		  background:transparent;
 		}
+		div.highlight
+		{
+		  padding: 0 $column-gutter/2;
+		}
 	}
 	
 	aside
@@ -106,6 +110,10 @@ section[data-type=chapter]
 			background: transparent;
 			//padding: $column-gutter/4;
 		}
+		div.highlight
+		{
+		  padding: 0 $column-gutter/2;
+		}
 	}
 
 	div.highlight
@@ -113,7 +121,7 @@ section[data-type=chapter]
 		background: $pygments-background-color;
 		position: relative;
 		display: block;
-		padding: 0 $column-gutter/2;
+		padding: $column-gutter/4 $column-gutter/2;
 		//border: 1px solid $code-border-color;
 		//border: 0;
 		//border-left: 2px solid $hr-border-color;
