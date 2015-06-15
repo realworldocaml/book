@@ -1,5 +1,7 @@
+$pygments-background-color: scale-color(#ffffff, $lightness: -4%);
+
 pre .hll { background-color: #ffffcc }
-pre  { background: scale-color(#ffffff, $lightness: -4%); }
+pre  { background: $pygments-background-color; }
 pre .c { color: #008000 } /* Comment */
 pre .err { border: 1px solid #FF0000 } /* Error */
 pre .k { color: #0000ff } /* Keyword */

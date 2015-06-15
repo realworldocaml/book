@@ -74,7 +74,7 @@ section[data-type=chapter]
 			//background: desaturate(lighten($info-color, 35), 10);
 		}
 
-		pre
+		pre,div.highlight
 		{
 		  background:transparent;
 		}
@@ -100,7 +100,7 @@ section[data-type=chapter]
 			font-weight: normal;
 		}
 		
-		pre
+		pre,div.highlight
 		{
 			font-size: 0.875rem;
 			background: transparent;
@@ -110,9 +110,10 @@ section[data-type=chapter]
 
 	div.highlight
 	{
+		background: $pygments-background-color;
 		position: relative;
 		display: block;
-		padding: 0;
+		padding: 0 $column-gutter/2;
 		//border: 1px solid $code-border-color;
 		//border: 0;
 		//border-left: 2px solid $hr-border-color;
@@ -121,11 +122,6 @@ section[data-type=chapter]
 		margin-left: 0;
 		white-space: pre-wrap;
 		overflow: scroll;
-
-                pre
-		{
-		  padding: 0 $column-gutter/2;
-		}
         }
 	
 	dl
