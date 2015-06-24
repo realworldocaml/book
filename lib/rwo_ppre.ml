@@ -327,7 +327,7 @@ let extract_code_from_1e_exn chapter =
       | None | Some 0. -> ""
       | Some part -> (match lang with
         | `OCaml_toplevel -> sprintf "\n#part %f\n" part
-        | `OCaml -> sprintf "\n\n(* part %f *)\n" part
+        | `OCaml_ml -> sprintf "\n\n(* part %f *)\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
                     (part, lang) <:sexp_of< float * Lang.t >>

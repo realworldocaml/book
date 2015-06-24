@@ -7,28 +7,28 @@ type t = [
 | `ATD
 | `Bash
 | `C
+| `C_header
 | `Console
 | `CPP
 | `Gas
 | `Java
 | `JSON
-| `OCaml
+| `OCaml_ml
+| `OCaml_lex
+| `OCaml_mli
+| `OCaml_pack
 | `OCaml_rawtoplevel
 | `OCaml_syntax
 | `OCaml_toplevel
+| `OCaml_yacc
 | `Scheme
+| `Shell
+| `Shell_err
+| `Shell_raw
+| `Text
 ] with sexp
 
 val to_docbook : t -> string Or_error.t
 
-(** Return file extensions for the given language. We return a list
-    because sometimes multiple extensions are used for the same
-    language, e.g. both ml and mli files are for OCaml.
-
-    The empty list is also returned because some languages aren't
-    actually supported, e.g. all .atd files are actually marked as
-    OCaml files in import nodes. Probably we should thus delete [`ATD]
-    from this module, but leaving it in case it is needed later. *)
-val to_extensions : t -> string list
-
+val to_extension : t -> string
 val of_extension : string -> t Or_error.t

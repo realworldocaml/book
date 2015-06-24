@@ -185,9 +185,15 @@ let script_part_to_html ?(pygmentize=false) x =
 (******************************************************************************)
 let eval_script lang ~filename =
   match lang with
-  | `OCaml -> (
+  | `OCaml_ml | `OCaml_mli | `OCaml_lex | `OCaml_yacc -> (
+    (* Hack: Oloop.Script.of_file intended only for ml files but
+       happens to work for mli, mll, and mly files. *)
     Oloop.Script.of_file filename >>|? fun parts ->
     `OCaml parts
+    )
+  | `OCaml_rawtoplevel -> (
+    Oloop.Script.of_file filename >>|? fun parts ->
+    `OCaml_rawtoplevel parts
   )
   | `OCaml_toplevel -> (
     if String.is_suffix filename ~suffix:"async/main.topscript" then (
@@ -204,10 +210,6 @@ let eval_script lang ~filename =
       | Error _ as e ->
 	 (Sys.chdir cwd >>| fun () -> e)
     )
-  )
-  | `OCaml_rawtoplevel -> (
-    Oloop.Script.of_file filename >>|? fun parts ->
-    `OCaml_rawtoplevel parts
   )
   | _ -> (
     Reader.file_contents filename >>| fun x ->
