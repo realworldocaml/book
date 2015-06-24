@@ -7,14 +7,12 @@
   </head>
 
   <body>
-    <section xmlns="http://www.w3.org/1999/xhtml"
-	     id="memory-representation-of-values" data-type="chapter"> 
+    <section xmlns="http://www.w3.org/1999/xhtml" id="memory-representation-of-values" data-type="chapter"> 
       <h1>Memory Representation of Values</h1>
 
       <p>
 	The FFI interface we described
-	in <a href="19-foreign-function-interface.html#foreign-function-interface"
-	data-type="xref">Foreign Function Interface</a> hides the
+	in <a href="19-foreign-function-interface.html#foreign-function-interface" data-type="xref">Foreign Function Interface</a> hides the
 	precise details of how values are exchanged across C libraries
 	and the OCaml runtime. There is a simple reason for this:
 	using this interface directly is a delicate operation that
@@ -87,11 +85,9 @@
 
 	<p>
 	  We'll explain this compilation pipeline in more detail
-	  in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
-	  data-type="xref">The Compiler Frontend Parsing And Type
+	  in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
 	    Checking</a>
-	    and <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
-	    data-type="xref">The Compiler Backend Byte Code And Native
+	    and <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code" data-type="xref">The Compiler Backend Byte Code And Native
 	    Code</a>.</p>
       </div>
 
@@ -116,8 +112,7 @@
 
 	  <idx id="blck">blocks (of memory)</idx></p>
 
-	<link rel="import" data-code-language="ocamltop" part="1"
-	      href="code/memory-repr/simple_record.topscript"/> 
+	<link rel="import" part="1" href="code/memory-repr/simple_record.topscript"/> 
 
 	<p>
 	  The type declaration <code>t</code> doesn't take up any
@@ -298,10 +293,8 @@
 	  The exact representation of values inside a block depends on
 	  their static OCaml type. All OCaml types are distilled down
 	  into <code>values</code>, and summarized
-	  in <a href="20-runtime-memory-layout.html#table20-1_ocaml"
-	  data-type="xref">Table20
-	  1_ocaml</a>.<a data-type="indexterm"
-	  data-startref="blck">&nbsp;</a></p>
+	  in <a href="20-runtime-memory-layout.html#table20-1_ocaml" data-type="xref">Table20
+	  1_ocaml</a>.<a data-type="indexterm" data-startref="blck">&nbsp;</a></p>
 
 	<table id="table20-1_ocaml">
           <caption>
@@ -451,8 +444,7 @@
 	  exposes the internal representation of values to OCaml
 	  code:</p>
 
-	<link rel="import" data-code-language="ocamltop" part="0.5"
-	      href="code/memory-repr/reprs.topscript"/> 
+	<link rel="import" part="0.5" href="code/memory-repr/reprs.topscript"/> 
 
 	<p>
 	  The <code>Obj.repr</code> function retrieves the runtime
@@ -473,8 +465,7 @@
             
 	    <idx>floating-point values</idx></p>
 
-          <link rel="import" data-code-language="ocamltop"
-		href="code/memory-repr/reprs.topscript" part="1"/> 
+          <link rel="import" href="code/memory-repr/reprs.topscript" part="1"/> 
 
           <p>
 	    Since each floating-point value is boxed in a separate
@@ -495,8 +486,7 @@
 	    First, let's check that float arrays do in fact have a
             different tag number from normal floating-point values:</p>
 
-          <link rel="import" data-code-language="ocamltop"
-		href="code/memory-repr/reprs.topscript" part="2"/> 
+          <link rel="import" href="code/memory-repr/reprs.topscript" part="2"/> 
 
           <p>
 	    This tells us that float arrays have a tag value of 254.
@@ -506,8 +496,7 @@
             <code>Obj.double_field</code> to retrieve a float from
             within the block:</p>
 
-          <link rel="import" data-code-language="ocamltop"
-		href="code/memory-repr/reprs.topscript" part="3"/> 
+          <link rel="import" href="code/memory-repr/reprs.topscript" part="3"/> 
 
           <p>
 	    The first thing we tested was that a float array has the
@@ -536,8 +525,7 @@
 	  <idx>lists/memory representation of</idx>
 	  <idx>runtime memory representation/variants and lists</idx></p>
 
-	<link rel="import" data-code-language="ocamltop"
-	      href="code/memory-repr/reprs.topscript" part="4"/> 
+	<link rel="import" href="code/memory-repr/reprs.topscript" part="4"/> 
 
 	<p>
 	  <code>Obj.magic</code> unsafely forces a type cast between
@@ -553,8 +541,7 @@
 	  variants with parameters). The parameters are stored as words
 	  in the block:</p>
 
-	<link rel="import" data-code-language="ocamltop"
-	      href="code/memory-repr/reprs.topscript" part="5"/> 
+	<link rel="import" href="code/memory-repr/reprs.topscript" part="5"/> 
 
 	<p>
 	  In the preceding example, the <code>Apple</code> and
@@ -633,8 +620,7 @@
 	  compiler, but the <code>type_conv</code> library from Core
 	  provides an alternative implementation:</p>
 
-	<link rel="import" data-code-language="ocamltop"
-	      href="code/memory-repr/reprs.topscript" part="6"/> 
+	<link rel="import" href="code/memory-repr/reprs.topscript" part="6"/> 
 
 	<p>
 	  The hash function is designed to give the same results on
@@ -700,8 +686,7 @@
 	  the modulo of the string length and word size to ensure the
 	  result is word-aligned. A 64-bit machine extends the
 	  potential padding up to 7 bytes instead of 3
-	  (see <a href="20-runtime-memory-layout.html#chapter_20_table"
-	  data-type="xref">Chapter_20_table</a>).</p> 
+	  (see <a href="20-runtime-memory-layout.html#chapter_20_table" data-type="xref">Chapter_20_table</a>).</p> 
 
 	<table id="chapter_20_table">
           <caption>
@@ -794,8 +779,7 @@
 	  custom block cannot have pointers to OCaml blocks and is
 	  opaque to the GC:</p>
 
-	<link rel="import" data-code-language="c"
-	      href="code/memory-repr/custom_ops.c"/> 
+	<link rel="import" href="code/memory-repr/custom_ops.c"/> 
 
 	<p>
 	  The custom operations specify how the runtime should perform
@@ -805,8 +789,7 @@
 	  garbage-collected. This finalizer has nothing to do with
 	  ordinary OCaml finalizers (as created
 	  by <code>Gc.finalize</code> and explained
-	  in <a href="21-garbage-collector.html#understanding-the-garbage-collector"
-	  data-type="xref">Understanding The Garbage Collector</a>).
+	  in <a href="21-garbage-collector.html#understanding-the-garbage-collector" data-type="xref">Understanding The Garbage Collector</a>).
 	  They are instead used to call C cleanup functions such
 	  as <code>free</code>.
 

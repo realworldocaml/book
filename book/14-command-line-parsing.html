@@ -88,8 +88,7 @@
 	  <idx>MD5 one-way cryptographic hash function</idx>
 	  <idx>command-line parsing/basic approach to</idx></p>
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/command-line-parsing/basic_md5.ml"/> 
+	<link rel="import" href="code/command-line-parsing/basic_md5.ml"/> 
 
 	<p>
 	  The <code>do_hash</code> function accepts a
@@ -114,8 +113,7 @@
 	    <idx>arguments/anonymous arguments</idx>
 	    <idx>anonymous arguments</idx></p>
 
-          <link rel="import" data-code-language="ocaml" 
-		href="code/command-line-parsing/basic_md5.ml" part="1"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5.ml" part="1"/> 
 
           <p>
 	    The <code>Command.Spec</code> module defines the tools
@@ -148,8 +146,7 @@
 
 	    <idx>Command.basic module</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5.ml" part="2"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5.ml" part="2"/> 
 
           <p>
 	    <code>Command.basic</code> defines a complete
@@ -219,8 +216,7 @@
 	    Once we've defined the basic command, running it is just
             one function call away:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5.ml" part="3"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5.ml" part="3"/> 
 
           <p>
 	    <code>Command.run</code> takes a couple of optional
@@ -230,15 +226,13 @@
             before building this example. Once that's completed, run
             the following to compile the binary:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/build_basic_md5.out"/> 
+          <link rel="import" href="code/command-line-parsing/build_basic_md5.out"/> 
 
           <p>
 	    You can now query the version information for the binary
             you just compiled:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/get_basic_md5_version.out"/> 
+          <link rel="import" href="code/command-line-parsing/get_basic_md5_version.out"/> 
 
           <p>
 	    The versions that you see in the output were defined via
@@ -248,8 +242,7 @@
             system (e.g., by running <code>hg id</code> to generate a
             build revision number, in the case of Mercurial):</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/get_basic_md5_help.out"/> 
+          <link rel="import" href="code/command-line-parsing/get_basic_md5_help.out"/> 
 
           <p>
 	    When we invoke this binary without any arguments, it
@@ -263,8 +256,7 @@
             then <code>do_hash</code> is called with the argument and
             the MD5 output is displayed to the standard output:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/run_basic_md5.out"/> 
+          <link rel="import" href="code/command-line-parsing/run_basic_md5.out"/> 
 
           <p>
 	    And that's all it took to build our little MD5 utility!
@@ -272,8 +264,7 @@
             through, made slightly more succinct by removing
             intermediate variables:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5_succinct.ml"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5_succinct.ml"/> 
 
           <p>
 	    Now that we have the basics in place, the rest of the
@@ -373,9 +364,7 @@
 	  <code>file</code> to reflect that the argument must be a
 	  valid filename, and not just any string:</p>
 
-	<link rel="import" data-code-language="ocaml"
-	href="code/command-line-parsing/basic_md5_as_filename.ml"
-	      part="1"/> 
+	<link rel="import" href="code/command-line-parsing/basic_md5_as_filename.ml" part="1"/> 
 
 	<p>
 	  Running this with a nonexistent filename will now output
@@ -383,8 +372,7 @@
 	  enables interactive command-line completion to work on the
 	  filename argument (explained later in the chapter):</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/command-line-parsing/run_basic_md5_as_filename.out"/> 
+	<link rel="import" href="code/command-line-parsing/run_basic_md5_as_filename.out"/> 
 
 	<section id="defining-custom-argument-types" data-type="sect2">
           <h2>Defining Custom Argument Types</h2>
@@ -398,8 +386,7 @@
 
 	    <idx>arguments/defining custom types</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5_with_custom_arg.ml"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_custom_arg.ml"/> 
 
           <p>
 	    The <code>regular_file</code> function transforms a
@@ -409,8 +396,7 @@
             new error messages if you try to open a special device such
             as <code>/dev/null</code>:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/run_basic_md5_with_custom_arg.out"/> 
+          <link rel="import" href="code/command-line-parsing/run_basic_md5_with_custom_arg.out"/> 
         </section>
 
 	<section id="optional-and-default-arguments" data-type="sect2">
@@ -426,9 +412,7 @@
 	    <idx>optional arguments/and default arguments</idx>
 	    <idx>arguments/optional arguments</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-          href="code/command-line-parsing/basic_md5_with_optional_file_broken.ml"
-		part="1"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken.ml" part="1"/> 
 
           <p>
 	    This just wraps the <code>filename</code> argument
@@ -436,8 +420,7 @@
             as an optional argument. However, building this results in
             a compile-time error:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/build_basic_md5_with_optional_file_broken.out"/> 
+          <link rel="import" href="code/command-line-parsing/build_basic_md5_with_optional_file_broken.out"/> 
 
           <p>
 	    This is because changing the argument type has also
@@ -447,8 +430,7 @@
             We can adapt our example to use the new information and
             read from standard input if no file is specified:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5_with_optional_file.ml"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file.ml"/> 
 
           <p>
 	    The <code>filename</code> parameter to
@@ -471,15 +453,13 @@
             previous example, but replaces <code>maybe</code> with
             <code>maybe_with_default</code>:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5_with_default_file.ml"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_default_file.ml"/> 
 
           <p>
 	    Building and running both against a system file confirms
             that they have the same behavior:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/run_basic_and_default_md5.out"/> 
+          <link rel="import" href="code/command-line-parsing/run_basic_and_default_md5.out"/> 
         </section>
 
 	<section id="sequences-of-arguments" data-type="sect2">
@@ -493,8 +473,7 @@
 
 	    <idx>arguments/sequences of</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/basic_md5_sequence.ml"/> 
+          <link rel="import" href="code/command-line-parsing/basic_md5_sequence.ml"/> 
 
           <p>
 	    The callback function is a little more complex now, to
@@ -528,8 +507,7 @@
 	  line and <code>-t</code> runs a self-test. The complete
 	  example follows:</p>
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/command-line-parsing/basic_md5_with_flags.ml"/> 
+	<link rel="import" href="code/command-line-parsing/basic_md5_with_flags.ml"/> 
 
 	<p>
 	  The specification now uses the <code>flag</code> function
@@ -541,8 +519,7 @@
 	  <code>doc</code> text with a blank space. The help text for
 	  the preceding code looks like this:</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/command-line-parsing/run_basic_md5_flags_help.out"/> 
+	<link rel="import" href="code/command-line-parsing/run_basic_md5_flags_help.out"/> 
 
 	<p>
 	  The <code>-s</code> flag in our specification requires a
@@ -632,8 +609,7 @@
 	  OPAM package manager (or, in the non-OCaml world, the Git or
 	  Mercurial commands). OPAM exposes commands in this form:</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/command-line-parsing/opam.out"/> 
+	<link rel="import" href="code/command-line-parsing/opam.out"/> 
 
 	<p>
 	  The <code>config</code>, <code>remote</code>, and
@@ -656,8 +632,7 @@
 
 	  <idx>Command.group</idx></p>
 
-	<link rel="import" data-code-language="ocamltop"
-	      href="code/command-line-parsing/group.topscript" part="1"/> 
+	<link rel="import" href="code/command-line-parsing/group.topscript" part="1"/> 
 
 	<p>
 	  The <code>group</code> signature accepts a list of basic
@@ -672,8 +647,7 @@
 	  define a command that adds days to an input date and prints
 	  the resulting date:</p>
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/command-line-parsing/cal_add_days.ml"/> 
+	<link rel="import" href="code/command-line-parsing/cal_add_days.ml"/> 
 
 	<p>
 	  Everything in this command should be familiar to you by
@@ -683,8 +657,7 @@
 	  both operations as subcommands using
 	  <code>Command.group</code>:</p>
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/command-line-parsing/cal_add_sub_days.ml"/> 
+	<link rel="import" href="code/command-line-parsing/cal_add_sub_days.ml"/> 
 
 	<p>
 	  And that's all you really need to add subcommand support!
@@ -692,15 +665,13 @@
 	  the help output, which now reflects the subcommands we just
 	  added.</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/command-line-parsing/build_cal_add_sub_days.out"/> 
+	<link rel="import" href="code/command-line-parsing/build_cal_add_sub_days.out"/> 
 
 	<p>
 	  We can invoke the two commands we just defined to verify
 	  that they work and see the date parsing in action:</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/command-line-parsing/run_cal_add_sub_days.out"/> 
+	<link rel="import" href="code/command-line-parsing/run_cal_add_sub_days.out"/> 
       </section>
 
       <section id="advanced-control-over-parsing" data-type="sect1">
@@ -784,9 +755,7 @@
             that returns a value of type <code>'r</code>. Let's look at
             some examples of specs, and their types:</p>
 
-          <link rel="import" data-code-language="ocamltop"
-		href="code/command-line-parsing/command_types.topscript"
-		part="1"/> 
+          <link rel="import" href="code/command-line-parsing/command_types.topscript" part="1"/> 
 
           <p>
 	    The empty specification is simple, as it doesn't add any
@@ -804,9 +773,7 @@
 	    The type of <code>Command.basic</code> should make more
             sense now:</p>
 
-          <link rel="import" data-code-language="ocamltop"
-		href="code/command-line-parsing/basic.topscript"
-		part="1"/> 
+          <link rel="import" href="code/command-line-parsing/basic.topscript" part="1"/> 
 
           <p>
 	    The parameters to <code>Spec.t</code> are important
@@ -833,8 +800,7 @@
             debug flags to our calendar application to illustrate
             this.</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/cal_append.ml"/> 
+          <link rel="import" href="code/command-line-parsing/cal_append.ml"/> 
 
           <p>
 	    The definitions of the specifications are very similar
@@ -842,8 +808,7 @@
             <code>common</code> parameter after each specification. We
             can supply these flags when defining the groups.</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/cal_append.ml" part="1"/> 
+          <link rel="import" href="code/command-line-parsing/cal_append.ml" part="1"/> 
 
           <p>
 	    Both of these flags will now be applied and passed to
@@ -860,8 +825,7 @@
             and recompile, we'll get this impressively long type
             error:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/build_cal_append_broken.out"/> 
+          <link rel="import" href="code/command-line-parsing/build_cal_append_broken.out"/> 
 
           <p>
 	    While this does look scary, the key line to scan is the
@@ -886,8 +850,7 @@
 
 	    <idx>interactive input/prompts for</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/cal_add_days.ml"/> 
+          <link rel="import" href="code/command-line-parsing/cal_add_days.ml"/> 
 
           <p>
 	    This program requires you to specify both the
@@ -897,8 +860,7 @@
             interactively prompt for a number of days if only the
             <code>base</code> date is supplied:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/cal_add_interactive.ml"/> 
+          <link rel="import" href="code/command-line-parsing/cal_add_interactive.ml"/> 
 
           <p>
 	    The <code>days</code> anonymous argument is now an
@@ -920,8 +882,7 @@
             value that is passed onto the next callback now has a
             nonoptional <code>int</code> type:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/build_and_run_cal_add_interactive.out"/> 
+          <link rel="import" href="code/command-line-parsing/build_and_run_cal_add_interactive.out"/> 
 
           <p>
 	    The transformation means that the <code>add_days</code>
@@ -933,9 +894,7 @@
             transformation is explicitly represented in the type of the
             <code>step</code> return value:</p>
 
-          <link rel="import" data-code-language="ocamltop"
-		href="code/command-line-parsing/step.topscript"
-		part="1"/> 
+          <link rel="import" href="code/command-line-parsing/step.topscript" part="1"/> 
 
           <p>
 	    The first half of the <code>Spec.t</code> shows that the
@@ -957,8 +916,7 @@
 	    <idx>arguments/labeled arguments</idx>
 	    <idx>labeled arguments</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/command-line-parsing/cal_add_labels.ml"/> 
+          <link rel="import" href="code/command-line-parsing/cal_add_labels.ml"/> 
 
           <p>
 	    This <code>cal_add_labels</code> example goes back to
@@ -1084,8 +1042,7 @@
             earlier, assuming that the binary is called <span class="command"><em>basic_md5_with_flags</em></span> in the
             current directory:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/md5_completion.out"/> 
+          <link rel="import" href="code/command-line-parsing/md5_completion.out"/> 
 
           <p>
 	    Recall that we used the <code>Arg_type.file</code> to
@@ -1104,8 +1061,7 @@
             Instead, redirect the output to a file in your current
             directory and source it into your current shell:</p>
 
-          <link rel="import" data-code-language="console"
-		href="code/command-line-parsing/cal_completion.out"/> 
+          <link rel="import" href="code/command-line-parsing/cal_completion.out"/> 
 
           <p>
 	    Command completion support works for flags and grouped

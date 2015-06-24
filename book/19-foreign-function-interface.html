@@ -65,7 +65,7 @@
       <p>Once that's done, Ctypes is available via OPAM as
       usual:</p>
     </div>
-    <link rel="import" data-code-language="console" href="code/ffi/install.out"/>
+    <link rel="import" href="code/ffi/install.out"/>
 
     <p>You'll also need the Ncurses library for the first example.
     This comes preinstalled on many operating systems such as Mac
@@ -84,7 +84,7 @@
       the online <a href="http://www.gnu.org/software/ncurses/">documentation</a>.
       We'll just use the small excerpt, since we just want to
       demonstrate Ctypes in action:<idx>Ctypes library/terminal interface example</idx></p>
-      <link rel="import" data-code-language="c" href="code/ffi/ncurses.h"/>
+      <link rel="import" href="code/ffi/ncurses.h"/>
 
       <p>The Ncurses functions either operate on the current
       pseudoterminal or on a window that has been created via
@@ -112,7 +112,7 @@
 
       <p>Let's begin by defining the basic values we need, starting
       with the <code>WINDOW</code> state pointer:</p>
-      <link rel="import" data-code-language="ocaml" href="code/ffi/ncurses.ml"/>
+      <link rel="import" href="code/ffi/ncurses.ml"/>
 
       <p>We don't know the internal representation of the window
       pointer, so we treat it as a C void pointer. We'll improve on
@@ -120,7 +120,7 @@
       The second statement defines an OCaml value that represents
       the <code>WINDOW</code> C pointer. This value is used later
       in the Ctypes function definitions:</p>
-      <link rel="import" data-code-language="ocaml" href="code/ffi/ncurses.ml" part="1"/>
+      <link rel="import" href="code/ffi/ncurses.ml" part="1"/>
 
       <p>That's all we need to invoke our first function call to
       <code>initscr</code> to initialize the terminal. The
@@ -143,7 +143,7 @@
 
       <p>The remainder of the Ncurses binding simply expands on
       these definitions:</p>
-      <link rel="import" data-code-language="ocaml" href="code/ffi/ncurses.ml" part="2"/>
+      <link rel="import" href="code/ffi/ncurses.ml" part="2"/>
 
       <p>These definitions are all straightforward mappings from
       the C declarations in the Ncurses header file. Note that the
@@ -164,7 +164,7 @@
       much like a normal OCaml signature. You can infer it directly
       from the <code>ncurses.ml</code> by running a special build
       target:</p>
-      <link rel="import" data-code-language="console" href="code/ffi/infer_ncurses.out"/>
+      <link rel="import" href="code/ffi/infer_ncurses.out"/>
 
       <p>The <code>inferred.mli</code> target instructs the
       compiler to generate the default signature for a module file
@@ -176,7 +176,7 @@
 
       <p>Here's the customized interface that we can safely use
       from other libraries:</p>
-      <link rel="import" data-code-language="ocaml" href="code/ffi/ncurses.mli"/>
+      <link rel="import" href="code/ffi/ncurses.mli"/>
 
       <p>The <code>window</code> type is left abstract in the
       signature to ensure that window pointers can only be
@@ -186,11 +186,11 @@
 
       <p>Now compile a "hello world" terminal drawing program to
       tie this all together:</p>
-      <link rel="import" data-code-language="ocaml" href="code/ffi/hello.ml"/>
+      <link rel="import" href="code/ffi/hello.ml"/>
 
       <p>The <code>hello</code> executable is compiled by linking
       with the <code>ctypes.foreign</code> OCamlfind package:</p>
-      <link rel="import" data-code-language="console" href="code/ffi/build_hello.out"/>
+      <link rel="import" href="code/ffi/build_hello.out"/>
 
       <p>Running <code>./hello.native</code> should now display a
       Hello World in your terminal!<idx>Ctypes library/build directives for</idx></p>
@@ -247,7 +247,7 @@
       <p>First, let's look at how to define basic scalar C types.
       Every C type is represented by an OCaml equivalent via the
       single type definition:<idx>scalar C types</idx><idx>foreign function interface (FFI)/basic scalar C types</idx></p>
-      <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes.mli"/>
+      <link rel="import" href="code/ctypes/ctypes.mli"/>
 
       <p><code>Ctypes.typ</code> is the type of values that
       represents C types to OCaml. There are two types associated
@@ -290,7 +290,7 @@
       <p>Here are the definitions for most of the standard C99
       scalar types, including some platform-dependent ones:
       <idx>C99 scalar types</idx></p>
-      <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes.mli" part="1"/>
+      <link rel="import" href="code/ctypes/ctypes.mli" part="1"/>
 
       <p>These values are all of type <code>'a typ</code>, where
       the value name (e.g., <code>void</code>) tells you the C type
@@ -341,7 +341,7 @@
       <p>We've already seen a simple use of pointers in the Ncurses
       example. Let's start a new example by binding the following
       POSIX functions:</p>
-      <link rel="import" data-code-language="c" href="code/ffi/posix_headers.h"/>
+      <link rel="import" href="code/ffi/posix_headers.h"/>
 
       <p>The <code>time</code> function returns the current
       calendar time and is a simple start. The first step is to
@@ -374,8 +374,7 @@
       <p>We can now create a binding to <code>time</code> directly
       from the toplevel.</p>
 
-      <link rel="import" data-code-language="ocamltop" part="0.5"
-	    href="code/ffi/posix.topscript"/> 
+      <link rel="import" part="0.5" href="code/ffi/posix.topscript"/> 
 
       <p>The <code>foreign</code> function is the main link between
       OCaml and C. It takes two arguments: the name of the C
@@ -388,12 +387,12 @@
       toplevel. The argument is actually optional, so we'll just
       pass a null pointer that has been coerced into becoming a
       null pointer to <code>time_t</code>:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="1"/>
+      <link rel="import" href="code/ffi/posix.topscript" part="1"/>
 
       <p>Since we're going to call <code>time</code> a few times,
       let's create a wrapper function that passes the null pointer
       through:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="2"/>
+      <link rel="import" href="code/ffi/posix.topscript" part="2"/>
 
       <p>Since <code>time_t</code> is an abstract type, we can't
       actually do anything useful with it directly. We need to bind
@@ -401,7 +400,7 @@
       values from <code>time</code>. We'll move on to
       <code>difftime</code>; the second C function in our prototype
       list:</p>
-      <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="3"/>
+      <link rel="import" href="code/ffi/posix.topscript" part="3"/>
 
       <p>The binding to <code>difftime</code> above is sufficient
       to compare two <code>time_t</code> values.</p>
@@ -414,24 +413,24 @@
         theme from earlier, we'll bind to the <code>ctime</code>
         function, which converts a <code>time_t</code> value to a
         human-readable string:<idx>memory/allocation for pointers</idx><idx>pointers/allocating typed memory for</idx></p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="4"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="4"/>
 
         <p>The binding is continued in the toplevel to add to our
         growing collection. However, we can't just pass the result
         of <code>time</code> to <code>ctime</code>:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="5"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="5"/>
 
         <p>This is because <code>ctime</code> needs a pointer to
         the <code>time_t</code> rather than passing it by value. We
         thus need to allocate some memory for the
         <code>time_t</code> and obtain its memory address:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="6"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="6"/>
 
         <p>The <code>allocate</code> function takes the type of the
         memory to be allocated and the initial value and it returns
         a suitably typed pointer. We can now call
         <code>ctime</code> passing the pointer as an argument:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="7"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="7"/>
       </section>
 
       <section id="using-views-to-map-complex-values" data-type="sect2">
@@ -453,24 +452,24 @@
 
         <p>Here is the type signature of the
         <code>Ctypes.view</code> function:</p>
-        <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes.mli" part="2"/>
+        <link rel="import" href="code/ctypes/ctypes.mli" part="2"/>
 
         <p>Ctypes has some internal low-level conversion functions
         that map between an OCaml <code>string</code> and a C
         character buffer by copying the contents into the
         respective data structure. They have the following type
         signature:</p>
-        <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes.mli" part="3"/>
+        <link rel="import" href="code/ctypes/ctypes.mli" part="3"/>
 
         <p>Given these functions, the definition of the
         <code>Ctypes.string</code> value that uses views is quite
         simple:</p>
-        <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes_impl.ml"/>
+        <link rel="import" href="code/ctypes/ctypes_impl.ml"/>
 
         <p>The type of this <code>string</code> function is a
         normal <code>typ</code> with no external sign of the use of
         the view function:</p>
-        <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes.mli" part="4"/>
+        <link rel="import" href="code/ctypes/ctypes.mli" part="4"/>
 
         <div data-type="note">
           <h1>OCaml Strings Versus C Character Buffers</h1>
@@ -516,12 +515,12 @@
         time with microsecond resolution. The signature of
         <code>gettimeofday</code> is as follows, including the
         structure definitions:</p>
-        <link rel="import" data-code-language="c" href="code/ffi/timeval_headers.h"/>
+        <link rel="import" href="code/ffi/timeval_headers.h"/>
 
         <p>Using Ctypes, we can describe this type as follows in
         our toplevel, continuing on from the previous
         definitions:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="8"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="8"/>
 
         <p>The first command defines a new OCaml type
         <code>timeval</code> that we'll use to instantiate the
@@ -546,7 +545,7 @@
         doesn't have any fields, so we need to add those next:
         <idx>fields/adding to structures</idx>
         <idx>structs and unions/field addition</idx></p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="9"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="9"/>
 
         <p>The <code>field</code> function appends a field to the
         structure, as shown with <code>tv_sec</code> and
@@ -568,7 +567,7 @@
         <p>Since <code>gettimeofday</code> needs a <code>struct
         timezone</code> pointer for its second argument, we also
         need to define a second structure type: <idx>structs and unions/incomplete structure definitions</idx></p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="10"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="10"/>
 
         <p>We don't ever need to create <code>struct
         timezone</code> values, so we can leave this struct as
@@ -579,7 +578,7 @@
 
         <p>We're finally ready to bind to <code>gettimeofday</code>
         now:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="11"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="11"/>
 
         <p>There's one other new feature here: the
         <code>returning_checking_errno</code> function behaves like
@@ -595,7 +594,7 @@
         create a structure value, retrieve the address of a
         structure value, and retrieve the value of a field from a
         structure:</p>
-        <link rel="import" data-code-language="ocamltop" href="code/ffi/posix.topscript" part="12"/>
+        <link rel="import" href="code/ffi/posix.topscript" part="12"/>
 
         <p>You need to be a little careful not to get all the open
         modules mixed up here. Both <code>Pervasives</code> and
@@ -612,11 +611,11 @@
           <p>We built up a lot of bindings in the previous section,
           so let's recap them with a complete example that ties it
           together with a command-line frontend: <idx>structs and unions/time-printing command</idx></p>
-          <link rel="import" data-code-language="ocaml" href="code/ffi/datetime.ml"/>
+          <link rel="import" href="code/ffi/datetime.ml"/>
 
           <p>This can be compiled and run in the usual way:
           <idx>returning function</idx></p>
-          <link rel="import" data-code-language="console" href="code/ffi/build_datetime.out"/>
+          <link rel="import" href="code/ffi/build_datetime.out"/>
 
           <aside data-type="sidebar">
             <h5>Why Do We Need to Use returning?</h5>
@@ -624,12 +623,12 @@
             <p>The alert reader may be curious about why all these
             function definitions have to be terminated by
             <code>returning</code>:</p>
-            <link rel="import" data-code-language="ocaml" href="code/ffi/return_frag.ml"/>
+            <link rel="import" href="code/ffi/return_frag.ml"/>
 
             <p>The <code>returning</code> function may appear
             superfluous here. Why couldn't we simply give the types
             as follows?</p>
-            <link rel="import" data-code-language="ocaml" href="code/ffi/return_frag.ml" part="1"/>
+            <link rel="import" href="code/ffi/return_frag.ml" part="1"/>
 
             <p>The reason involves higher types and two differences
             between the way that functions are treated in OCaml and
@@ -641,24 +640,24 @@
             <p>Secondly, OCaml functions are typically defined in a
             curried style. The signature of a two-argument function
             is written as follows:</p>
-            <link rel="import" data-code-language="ocaml" href="code/ffi/return_frag.ml" part="2"/>
+            <link rel="import" href="code/ffi/return_frag.ml" part="2"/>
 
             <p>but this really means:</p>
-            <link rel="import" data-code-language="ocaml" href="code/ffi/return_frag.ml" part="3"/>
+            <link rel="import" href="code/ffi/return_frag.ml" part="3"/>
 
             <p>and the arguments can be supplied one at a time to
             create a closure. In contrast, C functions receive
             their arguments all at once. The equivalent C function
             type is the following:</p>
-            <link rel="import" data-code-language="c" href="code/ffi/return_c_frag.h"/>
+            <link rel="import" href="code/ffi/return_c_frag.h"/>
 
             <p>and the arguments must always be supplied
             together:</p>
-            <link rel="import" data-code-language="c" href="code/ffi/return_c_frag.c"/>
+            <link rel="import" href="code/ffi/return_c_frag.c"/>
 
             <p>A C function that's written in curried style looks
             very different:</p>
-            <link rel="import" data-code-language="c" href="code/ffi/return_c_uncurried.c"/>
+            <link rel="import" href="code/ffi/return_c_uncurried.c"/>
 
             <p>The OCaml type of <code>uncurried_C</code> when
             bound by Ctypes is <code>int -&gt; int -&gt;
@@ -684,7 +683,7 @@
         value. Any of the basic types defined previously can be
         allocated as blocks via the <code>Array</code> module:
         <idx>arrays/definition of</idx><idx>structs and unions/array definition</idx></p>
-        <link rel="import" data-code-language="ocaml" href="code/ctypes/ctypes.mli" part="5"/>
+        <link rel="import" href="code/ctypes/ctypes.mli" part="5"/>
 
         <p>The array functions are similar to those in the standard
         library <code>Array</code> module except that they operate
@@ -774,13 +773,13 @@
       arrays of elements using a comparison function passed in as a
       function pointer. The signature for <code>qsort</code>
       is:<idx>functions/passing to C</idx> <idx>foreign function interface (FFI)/passing functions to C</idx></p>
-      <link rel="import" data-code-language="c" href="code/ffi/qsort.h"/>
+      <link rel="import" href="code/ffi/qsort.h"/>
 
       <p>C programmers often use <code>typedef</code> to make type
       definitions involving function pointers easier to read. Using
       a typedef, the type of <code>qsort</code> looks a little more
       palatable:</p>
-      <link rel="import" data-code-language="c" href="code/ffi/qsort_typedef.h"/>
+      <link rel="import" href="code/ffi/qsort_typedef.h"/>
 
       <p>This also happens to be a close mapping to the
       corresponding Ctypes definition. Since type descriptions are
@@ -788,8 +787,7 @@
       <code>typedef</code> and end up with working OCaml bindings
       to <code>qsort</code>:</p>
 
-      <link rel="import" data-code-language="ocamltop" part="1"
-	    href="code/ffi/qsort.topscript"/> 
+      <link rel="import" part="1" href="code/ffi/qsort.topscript"/> 
 
       <p>We only use <code>compare_t</code> once (in the
       <code>qsort</code> definition), so you can choose to inline
@@ -813,17 +811,17 @@
         <p>The following is a command-line tool that uses the
         <code>qsort</code> binding to sort all of the integers
         supplied on the standard input: <idx>qsort binding</idx></p>
-        <link rel="import" data-code-language="ocaml" href="code/ffi/qsort.ml"/>
+        <link rel="import" href="code/ffi/qsort.ml"/>
 
         <p>Compile it in the usual way with <em>corebuild</em> and
         test it against some input data, and also build the
         inferred interface so we can examine it more closely:</p>
-        <link rel="import" data-code-language="console" href="code/ffi/build_qsort.out"/>
+        <link rel="import" href="code/ffi/build_qsort.out"/>
 
         <p>The inferred interface shows us the types of the raw
         <code>qsort</code> binding and also the <code>qsort'</code>
         wrapper function:</p>
-        <link rel="import" data-code-language="ocaml" href="code/ffi/qsort.mli"/>
+        <link rel="import" href="code/ffi/qsort.mli"/>
 
         <p>The <code>qsort'</code> wrapper function has a much more
         canonical OCaml interface than the raw binding. It accepts

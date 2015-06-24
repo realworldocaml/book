@@ -1,22 +1,19 @@
-<!DOCTYPE html>
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39"/>
 
   <title></title>
 </head>
 
 <body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id=
-  "lists-and-patterns" data-type="chapter">
+  <section xmlns="http://www.w3.org/1999/xhtml" id="lists-and-patterns" data-type="chapter">
     <h1>Lists and Patterns</h1>
 
     <p>This chapter will focus on two common elements of
     programming in OCaml: lists and pattern matching. Both of these
-    were discussed in <a href="01-guided-tour.html#a-guided-tour"
-    data-type="xref">A Guided Tour</a>, but we'll go into more
+    were discussed in <a href="01-guided-tour.html#a-guided-tour" data-type="xref">A Guided Tour</a>, but we'll go into more
     depth here, presenting the two topics together and using one to
     help illustrate the other.</p>
 
@@ -28,14 +25,12 @@
       using a bracket-and-semicolon notation:<idx>lists/generation
       of</idx></p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="0.5" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="0.5"/>
 
       <p>And they can also be generated using the equivalent
       <code>::</code> notation:<idx>operators/: :
       operator</idx><idx>lists/operator : :</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="1" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="1"/>
 
       <p>As you can see, the <code>::</code> operator is
       right-associative, which means that we can build up lists
@@ -43,8 +38,7 @@
       to terminate a list. Note that the empty list is polymorphic,
       meaning it can be used with elements of any type, as you can
       see here:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="2" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="2"/>
 
       <p>The way in which the <code>::</code> operator attaches
       elements to the front of a list reflects the fact that
@@ -56,7 +50,7 @@
       of</idx></p>
 
       <figure style="float: 0">
-        <img src="images/lists-and-patterns/lists_layout.png" />
+        <img src="images/lists-and-patterns/lists_layout.png"/>
       </figure>
 
       <p>Each <code>::</code> essentially adds a new block to the
@@ -66,12 +60,10 @@
       extend a list without modifying it; extension allocates a new
       list element but change any of the existing ones, as you can
       see:<idx>lists/extension of</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="3" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="3"/>
     </section>
 
-    <section id="using-patterns-to-extract-data-from-a-list"
-    data-type="sect1">
+    <section id="using-patterns-to-extract-data-from-a-list" data-type="sect1">
       <h1>Using Patterns to Extract Data from a List</h1>
 
       <p>We can read data out of a list using a <code>match</code>
@@ -79,8 +71,7 @@
       that computes the sum of all elements of a list:<idx>match
       statements</idx><idx id="PATMAT">pattern matching/extracting
       data with</idx><idx>lists/extracting data from</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="4" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="4"/>
 
       <p>This code follows the convention of using <code>hd</code>
       to represent the first element (or head) of the list, and
@@ -104,14 +95,12 @@
       tempted to write that code as follows, but when you do, the
       compiler will immediately warn you that something is
       wrong:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="5" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="5"/>
 
       <p>Moreover, the function clearly does the wrong thing,
       filtering out all elements of the list rather than just those
       equal to the provided value, as you can see here:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="6" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="6"/>
 
       <p>So, what's going on?</p>
 
@@ -130,19 +119,16 @@
       matching for determining whether the first element is equal
       to <code>to_drop</code>, but to instead use an ordinary
       <code>if</code> statement:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="7" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="7"/>
 
       <p>Note that if we wanted to drop a particular literal value
       (rather than a value that was passed in), we could do this
       using something like our original implementation of
       <code>drop_value</code>:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="8" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="8"/>
     </section>
 
-    <section id="limitations-and-blessings-of-pattern-matching"
-    data-type="sect1">
+    <section id="limitations-and-blessings-of-pattern-matching" data-type="sect1">
       <h1>Limitations (and Blessings) of Pattern Matching</h1>
 
       <p>The preceding example highlights an important fact about
@@ -178,8 +164,7 @@
         functions for incrementing an integer by one. The first is
         implemented with a <code>match</code> statement, and the
         second with a sequence of <code>if</code> statements:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="9" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="9"/>
 
         <p>Note the use of <code>_</code> in the above match. This
         is a wildcard pattern that matches any value, but without
@@ -192,8 +177,7 @@
         these functions using the <code>core_bench</code> library,
         which can be installed by running <code>opam install
         core_bench</code> from the command line.</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="10" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="10"/>
 
         <p>Here's another, less artificial example. We can rewrite
         the <code>sum</code> function we described earlier in the
@@ -203,12 +187,10 @@
         <code>List</code> module to deconstruct the list, allowing
         us to implement the entire function without pattern
         matching:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="11" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="11"/>
 
         <p>Again, we can benchmark these to see the difference:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="12" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="12"/>
 
         <p>In this case, the <code>match</code>-based
         implementation is many times faster than the
@@ -248,24 +230,20 @@
         the cases. As you can see, the compiler will produce a
         warning that we've missed a case, along with an example of
         an unmatched pattern:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="13" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="13"/>
 
         <p>Even for simple examples like this, exhaustiveness
-        checks are pretty useful. But as we'll see in <a href=
-        "06-variants.html#variants" data-type="xref">Variants</a>,
+        checks are pretty useful. But as we'll see in <a href="06-variants.html#variants" data-type="xref">Variants</a>,
         they become yet more valuable as you get to more
         complicated examples, especially those involving
         user-defined types. In addition to catching outright
         errors, they act as a sort of refactoring tool, guiding you
         to the locations where you need to adapt your code to deal
-        with changing types.<a data-type="indexterm" data-startref=
-        "PATMAT">&nbsp;</a></p>
+        with changing types.<a data-type="indexterm" data-startref="PATMAT">&nbsp;</a></p>
       </section>
     </section>
 
-    <section id="using-the-list-module-effectively" data-type=
-    "sect1">
+    <section id="using-the-list-module-effectively" data-type="sect1">
       <h1>Using the List Module Effectively</h1>
 
       <p>We've so far written a fair amount of list-munging code
@@ -282,8 +260,7 @@
       that, given a list of column headers and a list of rows,
       prints them out in a well-formatted text table, as
       follows:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="69" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="69"/>
 
       <p>The first step is to write a function to compute the
       maximum width of each column of data. We can do this by
@@ -299,20 +276,17 @@
       a list and a function for transforming elements of that list,
       and returns a new list with the transformed elements. Thus,
       we can write:<idx>List module/List.map</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="14" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="14"/>
 
       <p><code>List.map2_exn</code> is similar to
       <code>List.map</code>, except that it takes two lists and a
       function for combining them. Thus, we might write:<idx>List
       module/List.map2_exn</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="15" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="15"/>
 
       <p>The <code>_exn</code> is there because the function throws
       an exception if the lists are of mismatched length:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="16" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="16"/>
 
       <p><code>List.fold</code> is the most complicated of the
       three, taking three arguments: a list to process, an initial
@@ -322,26 +296,22 @@
       returning the final value of the accumulator when it's done.
       You can see some of this by looking at the type-signature for
       <code>fold</code>:<idx>List module/List.fold</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="17" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="17"/>
 
       <p>We can use <code>List.fold</code> for something as simple
       as summing up a list:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="18" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="18"/>
 
       <p>This example is particularly simple because the
       accumulator and the list elements are of the same type. But
       <code>fold</code> is not limited to such cases. We can for
       example use <code>fold</code> to reverse a list, in which
       case the accumulator is itself a list:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="19" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="19"/>
 
       <p>Let's bring our three functions together to compute the
       maximum column widths:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="20" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="20"/>
 
       <p>Using <code>List.map</code> we define the function
       <code>lengths</code>, which converts a list of strings to a
@@ -361,8 +331,7 @@
       of strings with an optional separator string, and
       <code>^</code>, which is a pairwise string concatenation
       function, to add the delimiters on the outside:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="21" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="21"/>
 
       <p>Note that we make the line of dashes two larger than the
       provided width to provide some whitespace around each entry
@@ -379,13 +348,11 @@
         pairwise operator. You should avoid <code>^</code> for
         joining long numbers of strings, since it allocates a new
         string every time it runs. Thus, the following code</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="22" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="22"/>
 
         <p>will allocate strings of length 2, 3, 4, 5, 6 and 7,
         whereas this code</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="23" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="23"/>
 
         <p>allocates one string of size 7, as well as a list of
         length 7. At these small sizes, the differences don't
@@ -397,20 +364,17 @@
       We'll first write a function called <code>pad</code>, for
       padding out a string to a specified length plus one blank
       space on both sides:<idx>strings/padding of</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="24" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="24"/>
 
       <p>We can render a row of data by merging together the padded
       strings. Again, we'll use <code>List.map2_exn</code> for
       combining the list of data in the row with the list of
       widths:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="25" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="25"/>
 
       <p>Now we can bring this all together in a single function
       that renders the table:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="26" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="26"/>
 
       <section id="more-useful-list-functions" data-type="sect2">
         <h2>More Useful List Functions</h2>
@@ -422,8 +386,7 @@
         but a few more functions are useful enough to mention
         here.</p>
 
-        <section id="combining-list-elements-with-list.reduce"
-        data-type="sect3">
+        <section id="combining-list-elements-with-list.reduce" data-type="sect3">
           <h3>Combining list elements with List.reduce</h3>
 
           <p><code>List.fold</code>, which we described earlier, is
@@ -440,21 +403,17 @@
           in</idx></p>
 
           <p>Here's the type signature:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="27" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="27"/>
 
           <p><code>reduce</code> returns an optional result,
           returning <code>None</code> when the input list is
           empty.</p>
 
           <p>Now we can see <code>reduce</code> in action:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="28" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="28"/>
         </section>
 
-        <section id=
-        "filtering-with-list.filter-and-list.filter_map" data-type=
-        "sect3">
+        <section id="filtering-with-list.filter-and-list.filter_map" data-type="sect3">
           <h3>Filtering with List.filter and List.filter_map</h3>
 
           <p>Very often when processing lists, you wants to
@@ -463,13 +422,10 @@
           doing that:<idx>lists/filtering values
           in</idx><idx>values/filtering with
           List.filter</idx><idx>List module/List.filter</idx></p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="29" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="29"/>
 
           <p>Note that the <code>mod</code> used above is an infix
-          operator, as described in <a href=
-          "02-variables-and-functions.html#variables-and-functions"
-          data-type="xref">Variables And Functions</a>.</p>
+          operator, as described in <a href="02-variables-and-functions.html#variables-and-functions" data-type="xref">Variables And Functions</a>.</p>
 
           <p>Sometimes, you want to both transform and filter as
           part of the same computation. In that case,
@@ -488,8 +444,7 @@
           rightmost appearance of a given
           character:<idx>lists/duplicate
           removal</idx><idx>duplicates, removing</idx></p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="30" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="30"/>
 
           <p>The preceding code is also an example of an Or
           pattern, which allows you to have multiple subpatterns
@@ -499,8 +454,7 @@
           patterns.</p>
         </section>
 
-        <section id="partitioning-with-list.partition_tf"
-        data-type="sect3">
+        <section id="partitioning-with-list.partition_tf" data-type="sect3">
           <h3>Partitioning with List.partition_tf</h3>
 
           <p>Another useful operation that's closely related to
@@ -514,8 +468,7 @@
           example:<idx>elements/partitioning with
           List.partition_tf</idx><idx>lists/partitioning elements
           in</idx><idx>List module/List.partition_tf</idx></p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="31" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="31"/>
         </section>
 
         <section id="combining-lists" data-type="sect3">
@@ -527,24 +480,20 @@
           <code>List.append</code>, for concatenating a pair of
           lists:<idx>lists/combining</idx><idx>List
           module/List.append</idx></p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="32" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="32"/>
 
           <p>There's also <code>@</code>, an operator equivalent of
           <code>List.append</code>:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="33" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="33"/>
 
           <p>In addition, there is <code>List.concat</code>, for
           concatenating a list of lists:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="34" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="34"/>
 
           <p>Here's an example of using <code>List.concat</code>
           along with <code>List.map</code> to compute a recursive
           listing of a directory tree:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="35" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="35"/>
 
           <p>Note that <code>^/</code> is an infix operator
           provided by <code>Core_kernel</code> for adding a new
@@ -556,8 +505,7 @@
           <code>List.concat</code> is common enough that there is a
           function <code>List.concat_map</code> that combines these
           into one, more efficient operation:</p>
-          <link rel="import" data-code-language="ocamltop" href=
-          "code/lists-and-patterns/main.topscript" part="36" />
+          <link rel="import" href="code/lists-and-patterns/main.topscript" part="36"/>
         </section>
       </section>
     </section>
@@ -572,14 +520,12 @@
       module/List.init</idx><idx>lists/computing length
       of</idx><idx>tail recursion</idx> <idx>recursion/tail
       recursion</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="37" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="37"/>
 
       <p>This looks simple enough, but you'll discover that this
       implementation runs into problems on very large lists, as
       we'll show in the following code:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="38" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="38"/>
 
       <p>The preceding example creates lists using
       <code>List.init</code>, which takes an integer <code>n</code>
@@ -604,8 +550,7 @@
       frames, which exhausted the available stack space. Happily,
       there's a way around this problem. Consider the following
       alternative implementation:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="39" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="39"/>
 
       <p>This implementation depends on a helper function,
       <code>length_plus_n</code>, that computes the length of a
@@ -627,8 +572,7 @@
       <code>length_plus_n</code> is indeed tail recursive, and as a
       result, <code>length</code> can take a long list as input
       without blowing the stack:<idx>tail calls</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="40" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="40"/>
 
       <p>So when is a call a tail call? Let's think about the
       situation where one function (the <em>caller</em>) invokes
@@ -654,17 +598,13 @@
       <h1>Terser and Faster Patterns</h1>
 
       <p>Now that we know more about how lists and patterns work,
-      let's consider how we can improve on an example from <a href=
-      "01-guided-tour.html#recursive-list-functions" data-type=
-      "xref">Recursive List Functions</a>: the function
+      let's consider how we can improve on an example from <a href="01-guided-tour.html#recursive-list-functions" data-type="xref">Recursive List Functions</a>: the function
       <code>destutter</code>, which removes sequential duplicates
       from a list. Here's the implementation that was described
-      earlier:<idx>destutter function</idx><idx id=
-      "PTTRNMAT">pattern matching/terser and faster
+      earlier:<idx>destutter function</idx><idx id="PTTRNMAT">pattern matching/terser and faster
       patterns</idx><idx>lists/duplicate
       removal</idx><idx>duplicates, removing</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="41" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="41"/>
 
       <p>We'll consider some ways of making this code more concise
       and more efficient.</p>
@@ -681,13 +621,11 @@
       at it, we'll use the <code>function</code> keyword to
       eliminate the need for an explicit match:<idx>function
       keyword</idx></p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="42" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="42"/>
 
       <p>We can further collapse this by combining the first two
       cases into one, using an Or pattern:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="43" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="43"/>
 
       <p>We can make the code slightly terser now by using a
       <code>when</code> clause. A <code>when</code> clause allows
@@ -695,8 +633,7 @@
       an arbitrary OCaml expression. In this case, we can use it to
       include the check on whether the first two elements are
       equal:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="44" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="44"/>
 
       <aside data-type="sidebar">
         <h5>Polymorphic Compare</h5>
@@ -705,13 +642,11 @@
         use of the fact that OCaml lets us test equality between
         values of any type, using the <code>=</code> operator.
         Thus, we can write:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="45" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="45"/>
 
         <p>Indeed, if we look at the type of the equality operator,
         we'll see that it is polymorphic:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="46" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="46"/>
 
         <p>OCaml comes with a whole family of polymorphic
         comparison operators, including the standard infix
@@ -734,8 +669,7 @@
         <p>Polymorphic compare does have some limitations. For
         example, it will fail at runtime if it encounters a
         function value:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/lists-and-patterns/main.topscript" part="47" />
+        <link rel="import" href="code/lists-and-patterns/main.topscript" part="47"/>
 
         <p>Similarly, it will fail on values that come from outside
         the OCaml heap, like values from C bindings. But it will
@@ -751,9 +685,7 @@
         polymorphic compare is a problem, particularly when you
         have your own notion of equality and ordering that you want
         to impose. We'll discuss this issue more, as well as some
-        of the other downsides of polymorphic compare, in <a href=
-        "13-maps-and-hashtables.html#maps-and-hash-tables"
-        data-type="xref">Maps And Hash Tables</a>.</p>
+        of the other downsides of polymorphic compare, in <a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>.</p>
       </aside>
 
       <p>Note that <code>when</code> clauses have some downsides.
@@ -770,30 +702,25 @@
       are <code>Some</code>. Because this implementation uses
       <code>when</code> clauses, the compiler can't tell that the
       code is exhaustive:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="48" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="48"/>
 
       <p>Despite the warning, the function does work fine:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="49" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="49"/>
 
       <p>If we add another redundant case without a
       <code>when</code> clause, the compiler will stop complaining
       about exhaustiveness and won't produce a warning about the
       redundancy.</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="50" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="50"/>
 
       <p>Probably a better approach is to simply drop the second
       <code>when</code> clause:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="51" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="51"/>
 
       <p>This is a little less clear, however, than the direct
       pattern-matching solution, where the meaning of each pattern
       is clearer on its own:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="52" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="52"/>
 
       <p>The takeaway from all of this is although
       <code>when</code> clauses can be useful, we should prefer
@@ -804,8 +731,7 @@
       it is not tail recursive. In real life, you would probably
       just use the <code>List.count</code> function from
       <code>Core_kernel</code>:</p>
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/lists-and-patterns/main.topscript" part="53" />
+      <link rel="import" href="code/lists-and-patterns/main.topscript" part="53"/>
     </section>
   </section>
 </body>

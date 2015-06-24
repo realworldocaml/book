@@ -6,8 +6,7 @@
   </head>
 
   <body>
-    <section xmlns="http://www.w3.org/1999/xhtml"
-    id="parsing-with-ocamllex-and-menhir" data-type="chapter"> 
+    <section xmlns="http://www.w3.org/1999/xhtml" id="parsing-with-ocamllex-and-menhir" data-type="chapter"> 
       <h1>Parsing with OCamllex and Menhir</h1>
 
       <p>
@@ -50,8 +49,7 @@
 	replace <span class="command"><em>yacc</em></span>. We'll
 	explore these tools in the course of walking through the
 	implementation of a parser for the JSON serialization format
-	that we discussed in <a href="15-json.html#handling-json-data"
-				data-type="xref">Handling
+	that we discussed in <a href="15-json.html#handling-json-data" data-type="xref">Handling
 	  Json Data</a>.</p>
 
       <p>
@@ -121,8 +119,7 @@
 	  array containing two objects, each with a name and array of
 	  zip codes:</p>
 
-	<link rel="import" data-code-language="json"
-	      href="code/parsing/example.json"/>
+	<link rel="import" href="code/parsing/example.json"/>
 
 	<p>
 	  At a syntactic level, we can think of a JSON file as a
@@ -131,8 +128,7 @@
 	  strings. Thus, we could represent our JSON text as a sequence
 	  of tokens of the following type:</p>
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing/manual_token_type.ml"/> 
+	<link rel="import" href="code/parsing/manual_token_type.ml"/> 
 
 	<p>
 	  Note that this representation loses some information about
@@ -144,8 +140,7 @@
 	<p>
 	  If we converted the preceding example into a list of these
 	  tokens, it would look something like this:</p>
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing/tokens.ml"/> 
+	<link rel="import" href="code/parsing/tokens.ml"/> 
 
 	<p>
 	  This kind of representation is easier to work with than the
@@ -153,12 +148,10 @@
 	  syntactic details and adds useful structure. But it's still
 	  a good deal more low-level than the simple AST we used for
 	  representing JSON data
-	  in <a href="15-json.html#handling-json-data"
-	  data-type="xref">Handling
+	  in <a href="15-json.html#handling-json-data" data-type="xref">Handling
 	    Json Data</a>:</p>
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing/json.ml"/> 
+	<link rel="import" href="code/parsing/json.ml"/> 
 
 	<p>
 	  This representation is much richer than our token stream,
@@ -167,8 +160,7 @@
 	  numbers, strings, arrays, and objects. The parser we'll write
 	  will convert a token stream into a value of this AST type, as
 	  shown below for our earlier JSON example:</p>
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing/parsed_example.ml"/> 
+	<link rel="import" href="code/parsing/parsed_example.ml"/> 
       </section>
 
       <section id="defining-a-parser" data-type="sect1">
@@ -200,8 +192,7 @@
 	  <idx>tokens, declaration of</idx></p>
 
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing/parser.mly"/> 
+	<link rel="import" href="code/parsing/parser.mly"/> 
 
 	<p>
 	  The
@@ -254,8 +245,7 @@
             value of type <code>Json.value option</code>. We then end
             the declaration section of the parser with a
             <code>%%</code>:</p>
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/parser.mly" part="1"/> 
+          <link rel="import" href="code/parsing/parser.mly" part="1"/> 
 
           <p>
 	    Once that's in place, we can start specifying the
@@ -265,8 +255,7 @@
             nonterminal symbols. Here, for example, is the rule
             for <code>prog</code>:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/parser.mly" part="2"/> 
+          <link rel="import" href="code/parsing/parser.mly" part="2"/> 
 
           <p>
 	    The syntax for this is reminiscent of an OCaml
@@ -297,8 +286,7 @@
           <p>
 	    Now let's consider a more complex example, the rule for
             the <code>value</code> symbol:</p>
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/parser.mly" part="3"/> 
+          <link rel="import" href="code/parsing/parser.mly" part="3"/> 
 
           <p>
 	    According to these rules, a JSON <code>value</code> is
@@ -349,8 +337,7 @@
 	    <idx>object_fields</idx></p>
 
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/parser.mly" part="4"/> 
+          <link rel="import" href="code/parsing/parser.mly" part="4"/> 
 
           <p>
 	    The rules are structured as they are because
@@ -364,8 +351,7 @@
 
 	    <idx>Menhir parser generator/left-recursive definitions</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/right_rec_rule.mly" part="4"/> 
+          <link rel="import" href="code/parsing/right_rec_rule.mly" part="4"/> 
 
           <p>
 	    Alternatively, we could keep the left-recursive
@@ -374,8 +360,7 @@
             complexity of building the list incrementally in this way
             is quadratic in the length of the list:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/quadratic_rule.mly" part="4"/> 
+          <link rel="import" href="code/parsing/quadratic_rule.mly" part="4"/> 
 
           <p>
 	    Assembling lists like this is a pretty common
@@ -394,8 +379,7 @@
             Menhir rules follows. Notice the use of
             <code>separated_list</code> to parse both JSON objects and
             lists with one rule:</p>
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/short_parser.mly" part="1"/> 
+          <link rel="import" href="code/parsing/short_parser.mly" part="1"/> 
 
           <p>
 	    We can invoke <span class="command"><em>menhir</em></span>
@@ -411,8 +395,7 @@
 	    <a data-type="indexterm" data-startref="PARSparsdef">&nbsp;</a></p>
 
 
-          <link rel="import" data-code-language="console"
-		href="code/parsing/build_short_parser.out"/> 
+          <link rel="import" href="code/parsing/build_short_parser.out"/> 
 	</section>
       </section>
 
@@ -441,8 +424,7 @@
             code that is bounded by a pair of curly braces:
             
 	    <idx>lexers/optional OCaml code for</idx></p>
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer.mll"/> 
+          <link rel="import" href="code/parsing/lexer.mll"/> 
 
           <p>
 	    This code is there to define utility functions used by
@@ -474,8 +456,7 @@
 	    <idx>regular expressions</idx>
 	    <idx>lexers/regular expressions collection</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer.mll" part="1"/> 
+          <link rel="import" href="code/parsing/lexer.mll" part="1"/> 
 
           <p>
 	    The syntax here is something of a hybrid between OCaml
@@ -495,15 +476,13 @@
             expression easier to read by building up a sequence of
             named regular expressions, rather than creating one big and
             impenetrable expression:</p>
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer.mll" part="2"/> 
+          <link rel="import" href="code/parsing/lexer.mll" part="2"/> 
 
           <p>
 	    Finally, we define whitespace, newlines, and
             identifiers:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer.mll" part="3"/> 
+          <link rel="import" href="code/parsing/lexer.mll" part="3"/> 
 
           <p>
 	    The <code>newline</code> introduces the <code>|</code>
@@ -525,8 +504,7 @@
 
 	    <idx>lexers/rules for</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer.mll" part="4"/> 
+          <link rel="import" href="code/parsing/lexer.mll" part="4"/> 
 
           <p>
 	    The rules are structured very similarly to pattern
@@ -549,8 +527,7 @@
             utility function that we defined at the top of the file.
             Let's skip to the third action:</p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer_int_fragment.mll"/> 
+          <link rel="import" href="code/parsing/lexer_int_fragment.mll"/> 
 
           <p>
 	    This action specifies that when the input matches the
@@ -613,8 +590,7 @@
 	    <idx>recursion/in lexers</idx>
 	    <idx>lexers/recursive rules</idx></p>
 
-          <link rel="import" data-code-language="ocaml"
-		href="code/parsing/lexer.mll" part="5"/> 
+          <link rel="import" href="code/parsing/lexer.mll" part="5"/> 
 
           <p>
 	    This rule takes a <code>buf : Buffer.t</code> as an
@@ -685,8 +661,7 @@
 
             <p>
 	      All of these libraries are available via OPAM under
-              their respective names.<a data-type="indexterm"
-              data-startref="PARlex">&nbsp;</a></p>
+              their respective names.<a data-type="indexterm" data-startref="PARlex">&nbsp;</a></p>
           </div>
 	</section>
       </section>
@@ -704,8 +679,7 @@
 	  <idx>parsing/lexer and parser composition</idx></p>
 
 
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing/prog.mli"/> 
+	<link rel="import" href="code/parsing/prog.mli"/> 
 
 	<p>
 	  Before we start with the lexing, let's first define some
@@ -715,8 +689,7 @@
 	  encountering an error is to print the error and give up:
 	  
 	  <idx>errors/&quot;give up on first error&quot; approach</idx></p>
-	<link rel="import" data-code-language="ocaml"
-	      href="code/parsing-test/test.ml"/> 
+	<link rel="import" href="code/parsing-test/test.ml"/> 
 
 	<p>
 	  The "give up on the first error" approach is easy to
@@ -741,38 +714,33 @@
 	  define a function <code>Json.output_value</code>, not shown
 	  here, to print a <code>Json.value</code>:</p>
 
-	<link rel="import" data-code-language="ocaml" 
-	      href="code/parsing-test/test.ml" part="1"/> 
+	<link rel="import" href="code/parsing-test/test.ml" part="1"/> 
 
 	<p>
 	  Here's a test input file we can use to test the code we
 	  just wrote:</p>
 
-	<link rel="import" data-code-language="json"
-	      href="code/parsing-test/test1.json"/> 
+	<link rel="import" href="code/parsing-test/test1.json"/> 
 
 	<p>
 	  Now build and run the example using this file, and you can
 	  see the full parser in action:</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/parsing-test/build_test.out"/> 
+	<link rel="import" href="code/parsing-test/build_test.out"/> 
 
 	<p>
 	  With our simple error handling scheme, errors are fatal
 	  and cause the program to terminate with a nonzero exit
 	  code:</p>
 
-	<link rel="import" data-code-language="console"
-	      href="code/parsing-test/run_broken_test.out"/> 
+	<link rel="import" href="code/parsing-test/run_broken_test.out"/> 
 
 	<p>
 	  That wraps up our parsing tutorial. As an aside, notice that
 	  the JSON polymorphic variant type that we defined in this
 	  chapter is actually structurally compatible with the Yojson
 	  representation explained
-	  in <a href="15-json.html#handling-json-data"
-	  data-type="xref">Handling
+	  in <a href="15-json.html#handling-json-data" data-type="xref">Handling
 	    Json Data</a>. That means that you can take this parser and
 	  use it with the helper functions in Yojson to build more
 	  sophisticated applications.</p>

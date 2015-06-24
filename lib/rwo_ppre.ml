@@ -307,41 +307,8 @@ let map (html:Html.t) ~f =
    type. Must be printed to external file referred to in [href].
 *)
 let to_import (x:t) : Import.t Or_error.t =
-  let open Result.Monad_infix in
-  (
-    match x.pre.data_code_language, x.p.em_data, x.p.data1 with
-    | (None, "Scheme", None) -> Ok `Scheme
-    | (None, "Syntax", None) -> Ok `OCaml_syntax
-    | (Some "bash", "Shell script", None) -> Ok `Bash
-    | (Some "c", "C", None) -> Ok `C
-    | (Some "c", "C:", None) -> Ok `C
-    | (Some "console", "Terminal", None) -> Ok `Console
-    | (Some "gas", "Assembly", None) -> Ok `Gas
-    | (Some "java", "Java", None) -> Ok `Java
-    | (Some "java", "objects/Shape.java", Some "Java: ") -> Ok `Java
-    | (Some "json", "JSON", None) -> Ok `JSON
-    | (Some "ocaml", "OCaml", None) -> Ok `OCaml
-    | (Some "ocaml", "OCaml", Some "OCaml: ") -> Ok `OCaml
-    | (Some "ocaml", "OCaml utop", None) -> Ok `OCaml_toplevel
-    | (Some "ocaml", "Syntax", None) -> Ok `OCaml_syntax
-    | (Some "ocaml", "Syntax", Some "\n      ") -> Ok `OCaml_syntax
-    | (Some "ocaml", "guided-tour/recursion.ml", Some "OCaml: ") ->
-      Ok `OCaml
-    | (Some "ocaml",
-       "variables-and-functions/abs_diff.mli",
-       Some "OCaml: "
-    ) ->
-      Ok `OCaml
-    | (Some "scheme", "Scheme", None) ->
-      Ok `Scheme
-    | _ ->
-      error "unable to determine language"
-        (x.pre.data_code_language, x.p.em_data, x.p.data1)
-        <:sexp_of< string option * string * string option >>
-  ) >>| fun data_code_language ->
-  {
-    Import.data_code_language;
-    href = String.chop_prefix_exn x.p.a_href
+  Ok {
+    Import.href = String.chop_prefix_exn x.p.a_href
       ~prefix:"https://github.com/realworldocaml/examples/tree/v1/code/"
     ;
     part = x.p.part;
@@ -385,7 +352,7 @@ let extract_code_from_1e_exn chapter =
     |> Deferred.List.iter ~f:(fun (i,blk) ->
       let out_file = code_dir/i.Import.href in
       let contents =
-        code_block_to_string blk i.Import.data_code_language i.Import.part
+        code_block_to_string blk (Import.lang_of i |> ok_exn) i.Import.part
       in
       Unix.mkdir ~p:() (Filename.dirname out_file) >>= fun () ->
       Writer.with_file ~append:true out_file ~f:(fun wrtr ->

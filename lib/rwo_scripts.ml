@@ -230,5 +230,5 @@ let of_html ~filename html =
     |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
-    add_script accum i.Import.data_code_language ~filename:(dir,i.Import.href)
+    add_script accum (Import.lang_of i |> ok_exn) ~filename:(dir,i.Import.href)
   )
