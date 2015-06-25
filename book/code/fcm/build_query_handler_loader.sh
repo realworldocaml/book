@@ -1,2 +1,1 @@
-$ corebuild query_handler_loader.byte
-
+corebuild query_handler_loader.byte

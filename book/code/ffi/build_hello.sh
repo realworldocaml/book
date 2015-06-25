@@ -1,2 +1,1 @@
-$ corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses hello.native 
-
+corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses hello.native 

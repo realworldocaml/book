@@ -1,2 +1,1 @@
-$ corebuild -use-menhir short_parser.mli
-
+corebuild -use-menhir short_parser.mli

@@ -1,2 +1,1 @@
-$ corebuild sum.native
-  
+corebuild sum.native
