@@ -22,7 +22,7 @@ let lang_of t =
   | _, None ->
     error "href missing file extension" t.href sexp_of_string
   | _, Some ext ->
-    Lang.of_extension ext |> fun x ->
+    Lang.of_string ext |> fun x ->
     Or_error.tag_arg x "invalid file extension" t.href sexp_of_string
 
 let is_import_html = function

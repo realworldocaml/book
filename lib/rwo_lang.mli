@@ -1,34 +1,61 @@
-(** Code languages. *)
+(** Code languages. The language of code files which can be imported
+    into the book is defined by its extension. The language dictates
+    how the imports are processed, as follows:
+
+    {b OCaml files:}
+
+    - "ml": OCaml file, which will be parsed by Oloop.
+    - "mli": OCaml file, which will be parsed by Oloop.
+    - "mll": OCaml file, which will be parsed by Oloop.
+    - "mly": OCaml file, which will be parsed by Oloop.
+    - "mlpack"
+
+    - "topscript": OCaml toplevel commands that will be auto-evaluated
+      via Oloop.
+
+    - "rawscript": OCaml toplevel script, which should not be
+      auto-evaluated, e.g. because it contains some manually ellided
+      code.
+
+    - "syntax": OCaml syntax descriptions.
+
+
+    {b Bash files:}
+
+    - "cmd": Full bash scripts to be imported verbatim.
+
+    - "sh": Lines of bash commands, which will be auto-evaluated
+      and are expected to exit with zero.
+
+    - "errsh": Lines of bash commands, which will be auto-evaluated
+      and are expected to exit with non-zero.
+
+    - "rawsh": Bash commands executed in terminal and the
+      corresponding output. Such files will not be auto-evaluated, so
+      thus can include manually ellided code.
+
+
+    {b Other files:}
+
+    - "ascii": Plain ascii file, used for ASCII art.
+    - "atd"
+    - "c"
+    - "cpp"
+    - "h"
+    - "java"
+    - "json"
+    - "out": Console files as provided in O'Reilly source.
+    - "S" or "s": GNU assembly code.
+    - "scm"
+    - "txt"
+*)
 open Core.Std
 open Async.Std
 
-type t = [
-| `Ascii
-| `ATD
-| `Bash
-| `C
-| `C_header
-| `Console
-| `CPP
-| `Gas
-| `Java
-| `JSON
-| `OCaml_ml
-| `OCaml_lex
-| `OCaml_mli
-| `OCaml_pack
-| `OCaml_rawtoplevel
-| `OCaml_syntax
-| `OCaml_toplevel
-| `OCaml_yacc
-| `Scheme
-| `Shell
-| `Shell_err
-| `Shell_raw
-| `Text
-] with sexp
+type t = private string
+with sexp
 
-val to_docbook : t -> string Or_error.t
+val of_string : string -> t Or_error.t
+val to_string : t -> string
 
-val to_extension : t -> string
-val of_extension : string -> t Or_error.t
+val to_docbook_lang : t -> string Or_error.t

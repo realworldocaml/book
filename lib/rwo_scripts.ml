@@ -2,6 +2,7 @@ open Core.Std
 open Async.Std
 module Html = Rwo_html
 module Import = Rwo_import
+module Lang = Rwo_lang
 module Pygments = Rwo_pygments
 let (/) = Filename.concat
 
@@ -184,18 +185,18 @@ let script_part_to_html ?(pygmentize=false) x =
 (* Main Operations                                                            *)
 (******************************************************************************)
 let eval_script lang ~filename =
-  match lang with
-  | `OCaml_ml | `OCaml_mli | `OCaml_lex | `OCaml_yacc -> (
+  match (lang : Lang.t :> string) with
+  | "ml" | "mli" | "mll" | "mly" -> (
     (* Hack: Oloop.Script.of_file intended only for ml files but
        happens to work for mli, mll, and mly files. *)
     Oloop.Script.of_file filename >>|? fun parts ->
     `OCaml parts
     )
-  | `OCaml_rawtoplevel -> (
+  | "rawtopscript" -> (
     Oloop.Script.of_file filename >>|? fun parts ->
     `OCaml_rawtoplevel parts
   )
-  | `OCaml_toplevel -> (
+  | "topscript" -> (
     if String.is_suffix filename ~suffix:"async/main.topscript" then (
       Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )

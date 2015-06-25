@@ -322,12 +322,12 @@ let extract_code_from_1e_exn chapter =
   let code_dir = "tmp"/"book"/"code" in
   let imports : code_block Import.Map.t ref = ref Import.Map.empty in
 
-  let code_block_to_string code_block lang part : string =
+  let code_block_to_string code_block (lang:Lang.t) part : string =
     let part = match part with
       | None | Some 0. -> ""
-      | Some part -> (match lang with
-        | `OCaml_toplevel -> sprintf "\n#part %f\n" part
-        | `OCaml_ml -> sprintf "\n\n(* part %f *)\n" part
+      | Some part -> (match (lang :> string) with
+        | "topscript" -> sprintf "\n#part %f\n" part
+        | "ml" -> sprintf "\n\n(* part %f *)\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
                     (part, lang) <:sexp_of< float * Lang.t >>
@@ -336,8 +336,8 @@ let extract_code_from_1e_exn chapter =
     in
 
     let f = function
-      | `Output x | `Prompt x -> (match lang with
-        | `OCaml_toplevel -> ""
+      | `Output x | `Prompt x -> (match (lang :> string) with
+        | "topscript" -> ""
         | _ -> x
       )
       | `Input x | `Data x -> x
