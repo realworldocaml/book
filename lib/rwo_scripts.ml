@@ -213,10 +213,27 @@ let eval_script lang ~filename =
 	 (Sys.chdir cwd >>| fun () -> e)
     )
   )
-  | "sh" | "errsh" -> (
-      Bash_script.eval_file filename >>|?
-      Bash_script.Evaluated.to_string >>|? fun output ->
-      `Other output
+  | "sh" -> (
+      Bash_script.eval_file filename >>|? fun x ->
+      if not (List.for_all x.Bash_script.Evaluated.commands
+                ~f:(fun x -> x.Bash_script.Evaluated.exit_code = 0))
+      then
+        Log.Global.error
+          "all commands in %s expected to exit with 0 but got non-zero"
+          filename
+      ;
+      `Other (Bash_script.Evaluated.to_string x)
+  )
+  | "errsh" -> (
+      Bash_script.eval_file filename >>|? fun x ->
+      if not (List.exists x.Bash_script.Evaluated.commands
+                ~f:(fun x -> x.Bash_script.Evaluated.exit_code <> 0))
+      then
+        Log.Global.error
+          "all commands in %s exited with 0 but expected at least one non-zero"
+          filename
+      ;
+      `Other (Bash_script.Evaluated.to_string x)
   )
   | _ -> (
     Reader.file_contents filename >>| fun x ->
