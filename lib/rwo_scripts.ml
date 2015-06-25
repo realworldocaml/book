@@ -1,5 +1,6 @@
 open Core.Std
 open Async.Std
+module Bash_script = Rwo_bash_script
 module Html = Rwo_html
 module Import = Rwo_import
 module Lang = Rwo_lang
@@ -211,6 +212,11 @@ let eval_script lang ~filename =
       | Error _ as e ->
 	 (Sys.chdir cwd >>| fun () -> e)
     )
+  )
+  | "sh" | "errsh" -> (
+      Bash_script.eval_file filename >>|?
+      Bash_script.Evaluated.to_string >>|? fun output ->
+      `Other output
   )
   | _ -> (
     Reader.file_contents filename >>| fun x ->
