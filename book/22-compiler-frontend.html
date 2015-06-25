@@ -266,7 +266,7 @@
         <link rel="import" href="code/front-end/broken_module.ml"/>
 
         <p>The code results in a syntax error when compiled:</p>
-        <link rel="import" href="code/front-end/build_broken_module.out"/>
+        <link rel="import" href="code/front-end/build_broken_module.errsh"/>
 
         <p>The correct version of this source code creates the
         <code>MyString</code> module correctly via a local open,
@@ -291,7 +291,7 @@
 
         <p>When you compile this file, you'll get a syntax error
         again:</p>
-        <link rel="import" href="code/front-end/build_follow_on_function.out"/>
+        <link rel="import" href="code/front-end/build_follow_on_function.errsh"/>
 
         <p>The line number in the error points to the end of the
         <code>add_and_print</code> function, but the actual error
@@ -454,7 +454,7 @@
       <p>Compiling this code will normally give you a syntax error
       if you do so without Camlp4, since the <code>with</code>
       keyword isn't normally allowed after a type definition:</p>
-      <link rel="import" href="code/front-end/build_type_conv_without_camlp4.out"/>
+      <link rel="import" href="code/front-end/build_type_conv_without_camlp4.errsh"/>
 
       <p>Now add in the syntax extension packages for Fieldslib and
       Sexplib, and everything will compile again:</p>
@@ -800,7 +800,7 @@
         <code>mli</code> files have compatible signatures. The type
         checker throws an immediate error if this isn't the
         case:</p>
-        <link rel="import" href="code/front-end/conflicting_interfaces.out"/>
+        <link rel="import" href="code/front-end/conflicting_interfaces.errsh"/>
 
         <div class="allow_break" data-type="note">
           <h1>Which Comes First: The ml or the mli?</h1>
@@ -907,7 +907,7 @@
           <p>There's a single character typo in the code so that it
           uses <code>Nu</code> instead of <code>Num</code>. The
           resulting type error is impressive:</p>
-          <link rel="import" href="code/front-end/build_broken_poly.out"/>
+          <link rel="import" href="code/front-end/build_broken_poly.errsh"/>
 
           <p>The type error is perfectly accurate, but rather
           verbose and with a line number that doesn't point to the
@@ -932,7 +932,7 @@
           polymorphic variants, and a type annotation to the
           <code>algebra</code> definition. The compiler error we
           get is much more useful now:</p>
-          <link rel="import" href="code/front-end/build_broken_poly_with_annot.out"/>
+          <link rel="import" href="code/front-end/build_broken_poly_with_annot.errsh"/>
 
           <p>This error points directly to the correct line number
           that contains the typo. Once you fix the problem, you can

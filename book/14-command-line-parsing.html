@@ -242,7 +242,7 @@
             system (e.g., by running <code>hg id</code> to generate a
             build revision number, in the case of Mercurial):</p>
 
-          <link rel="import" href="code/command-line-parsing/get_basic_md5_help.out"/> 
+          <link rel="import" href="code/command-line-parsing/get_basic_md5_help.errsh"/> 
 
           <p>
 	    When we invoke this binary without any arguments, it
@@ -372,7 +372,7 @@
 	  enables interactive command-line completion to work on the
 	  filename argument (explained later in the chapter):</p>
 
-	<link rel="import" href="code/command-line-parsing/run_basic_md5_as_filename.out"/> 
+	<link rel="import" href="code/command-line-parsing/run_basic_md5_as_filename.errsh"/> 
 
 	<section id="defining-custom-argument-types" data-type="sect2">
           <h2>Defining Custom Argument Types</h2>
@@ -396,7 +396,7 @@
             new error messages if you try to open a special device such
             as <code>/dev/null</code>:</p>
 
-          <link rel="import" href="code/command-line-parsing/run_basic_md5_with_custom_arg.out"/> 
+          <link rel="import" href="code/command-line-parsing/run_basic_md5_with_custom_arg.errsh"/> 
         </section>
 
 	<section id="optional-and-default-arguments" data-type="sect2">
@@ -420,7 +420,7 @@
             as an optional argument. However, building this results in
             a compile-time error:</p>
 
-          <link rel="import" href="code/command-line-parsing/build_basic_md5_with_optional_file_broken.out"/> 
+          <link rel="import" href="code/command-line-parsing/build_basic_md5_with_optional_file_broken.errsh"/> 
 
           <p>
 	    This is because changing the argument type has also
@@ -825,7 +825,7 @@
             and recompile, we'll get this impressively long type
             error:</p>
 
-          <link rel="import" href="code/command-line-parsing/build_cal_append_broken.out"/> 
+          <link rel="import" href="code/command-line-parsing/build_cal_append_broken.errsh"/> 
 
           <p>
 	    While this does look scary, the key line to scan is the
