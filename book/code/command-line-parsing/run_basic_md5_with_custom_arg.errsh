@@ -1,4 +1,2 @@
-$ ./basic_md5_with_custom_arg.native /etc/passwd
-8cfb68a5622dd12932df658a54698aad
-$ ./basic_md5_with_custom_arg.native /dev/null
-'/dev/null' is not a regular file.
+./basic_md5_with_custom_arg.native /etc/passwd
+./basic_md5_with_custom_arg.native /dev/null

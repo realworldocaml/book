@@ -1,11 +1,3 @@
-$ echo type t = Foo > test.ml
-$ echo type t = Bar > test.mli
-$ ocamlc -c test.mli test.ml
-File "test.ml", line 1:
-Error: The implementation test.ml does not match the interface test.cmi:
-       Type declarations do not match:
-         type t = Foo
-       is not included in
-         type t = Bar
-       File "test.ml", line 1, characters 5-12: Actual declaration
-       Fields number 1 have different names, Foo and Bar.
+echo type t = Foo > test.ml
+echo type t = Bar > test.mli
+ocamlc -c test.mli test.ml
