@@ -216,7 +216,7 @@
 	  You can build this by
 	  running <span class="command"><em>corebuild</em></span>:</p>
 
-	<link rel="import" href="code/json/run_read_json.out"/> 
+	<link rel="import" href="code/json/run_read_json.sh"/> 
 
 	<p>
 	  The <code>from_file</code> function accepts an input
@@ -247,7 +247,7 @@
 	  Now build and run this in the same way as the previous
 	  example:</p>
 
-	<link rel="import" href="code/json/run_parse_book.out"/> 
+	<link rel="import" href="code/json/run_parse_book.sh"/> 
 
 	<p>
 	  This code introduces the <code>Yojson.Basic.Util</code>
@@ -772,7 +772,7 @@
             contain an OCaml module with types defined that correspond
             to the ATD file:</p>
 
-          <link rel="import" href="code/json/build_github_atd.out"/> 
+          <link rel="import" href="code/json/build_github_atd.sh"/> 
 
           <p>
 	    There is an obvious correspondence to the ATD
@@ -884,7 +884,7 @@
 	    Let's build the OCaml type declaration first by calling
             <code>atdgen -t</code> on the specification file:</p>
 
-          <link rel="import" href="code/json/generate_github_org_types.out"/> 
+          <link rel="import" href="code/json/generate_github_org_types.sh"/> 
 
           <p>
 	    The OCaml type has an obvious mapping to the ATD spec,
@@ -893,7 +893,7 @@
             generate this serialization code for us in a new file
             called <code>github_org_j.ml</code>:</p>
 
-          <link rel="import" href="code/json/generate_github_org_json.out"/> 
+          <link rel="import" href="code/json/generate_github_org_json.sh"/> 
 
           <p>
 	    The <code>Github_org_j</code> serializer interface
@@ -925,7 +925,7 @@
 	    The following is a short shell script that generates all
             of the OCaml code and also builds the final executable:</p>
 
-          <link rel="import" href="code/json/build_github_org.out"/> 
+          <link rel="import" href="code/json/build_github_org.sh"/> 
 
           <p>
 	    You can now run the command-line tool with a single
@@ -933,7 +933,7 @@
             will dynamically fetch the JSON from the web, parse it, and
             render the summary to your console:</p>
 
-          <link rel="import" href="code/json/run_github_org.out"/> 
+          <link rel="import" href="code/json/run_github_org.sh"/> 
 
           <p>
 	    The JSON returned from the <code>janestreet</code> query

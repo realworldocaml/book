@@ -696,14 +696,14 @@
           <p>
 	    If we run this with stacktraces on, the benchmark
             results look like this:</p>
-          <link rel="import" href="code/error-handling/run_exn_cost.out"/>
+          <link rel="import" href="code/error-handling/run_exn_cost.sh"/>
 
           <p>
 	    Here, we see that we lose something like 30 cycles to
             adding an exception handler, and 60 more to actually
             throwing and catching an exception. If we turn backtraces
             off, then the results look like this:</p>
-          <link rel="import" href="code/error-handling/run_exn_cost_notrace.out"/>
+          <link rel="import" href="code/error-handling/run_exn_cost_notrace.sh"/>
 
           <p>
 	    Here, the handler costs about the same, but the

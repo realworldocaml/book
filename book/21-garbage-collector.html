@@ -736,7 +736,7 @@
               benchmark loop iterates over both fields and increments a
               counter. Compile and execute this with some extra options
               to show the amount of garbage collection occurring:</p>
-            <link rel="import" href="code/gc/run_barrier_bench.out"/>
+            <link rel="import" href="code/gc/run_barrier_bench.sh"/>
 
             <p>
 	      There is a stark space/time trade-off here. The
@@ -757,7 +757,7 @@
               trade-offs. The command-line benchmark binaries have a
               number of useful options that affect garbage collection
               behavior:</p>
-            <link rel="import" href="code/gc/show_barrier_bench_help.out"/>
+            <link rel="import" href="code/gc/show_barrier_bench_help.sh"/>
 
             <p>
 	      The <code>-no-compactions</code> and
@@ -842,7 +842,7 @@
 	<p>
 	  Building and running this should show the following
 	  output:</p>
-	<link rel="import" href="code/gc/run_finalizer.out"/>
+	<link rel="import" href="code/gc/run_finalizer.sh"/>
 
 	<p>
 	  The GC calls the finalization functions in the order of

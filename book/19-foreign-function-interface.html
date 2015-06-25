@@ -164,7 +164,7 @@
       much like a normal OCaml signature. You can infer it directly
       from the <code>ncurses.ml</code> by running a special build
       target:</p>
-      <link rel="import" href="code/ffi/infer_ncurses.out"/>
+      <link rel="import" href="code/ffi/infer_ncurses.sh"/>
 
       <p>The <code>inferred.mli</code> target instructs the
       compiler to generate the default signature for a module file
@@ -190,7 +190,7 @@
 
       <p>The <code>hello</code> executable is compiled by linking
       with the <code>ctypes.foreign</code> OCamlfind package:</p>
-      <link rel="import" href="code/ffi/build_hello.out"/>
+      <link rel="import" href="code/ffi/build_hello.sh"/>
 
       <p>Running <code>./hello.native</code> should now display a
       Hello World in your terminal!<idx>Ctypes library/build directives for</idx></p>
@@ -615,7 +615,7 @@
 
           <p>This can be compiled and run in the usual way:
           <idx>returning function</idx></p>
-          <link rel="import" href="code/ffi/build_datetime.out"/>
+          <link rel="import" href="code/ffi/build_datetime.sh"/>
 
           <aside data-type="sidebar">
             <h5>Why Do We Need to Use returning?</h5>
@@ -816,7 +816,7 @@
         <p>Compile it in the usual way with <em>corebuild</em> and
         test it against some input data, and also build the
         inferred interface so we can examine it more closely:</p>
-        <link rel="import" href="code/ffi/build_qsort.out"/>
+        <link rel="import" href="code/ffi/build_qsort.sh"/>
 
         <p>The inferred interface shows us the types of the raw
         <code>qsort</code> binding and also the <code>qsort'</code>

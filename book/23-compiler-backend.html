@@ -64,7 +64,7 @@
         <link rel="import" href="code/back-end/pattern_monomorphic_large.ml"/>
 
         <p>The lambda output for this code looks like this:</p>
-        <link rel="import" href="code/back-end/lambda_for_pattern_monomorphic_large.out"/>
+        <link rel="import" href="code/back-end/lambda_for_pattern_monomorphic_large.sh"/>
 
         <p>It's not important to understand every detail of this
         internal form, and it is explicitly undocumented since it
@@ -112,7 +112,7 @@
 
         <p>The lambda output for this code is now quite
         different:</p>
-        <link rel="import" href="code/back-end/lambda_for_pattern_monomorphic_small.out"/>
+        <link rel="import" href="code/back-end/lambda_for_pattern_monomorphic_small.sh"/>
 
         <p>The compiler emits simpler conditional jumps rather than
         setting up a jump table, since it statically determines
@@ -123,7 +123,7 @@
 
         <p>The lambda form for this also shows up the runtime
         representation of polymorphic variants:</p>
-        <link rel="import" href="code/back-end/lambda_for_pattern_polymorphic.out"/>
+        <link rel="import" href="code/back-end/lambda_for_pattern_polymorphic.sh"/>
 
         <p>We mentioned in <a href="06-variants.html#variants" data-type="xref">Variants</a> that pattern matching over
         polymorphic variants is slightly less efficient, and it
@@ -173,7 +173,7 @@
         <p>Building and executing this example will run for around
         30 seconds by default, and you'll see the results
         summarized in a neat table:</p>
-        <link rel="import" href="code/back-end-bench/run_bench_patterns.out"/>
+        <link rel="import" href="code/back-end-bench/run_bench_patterns.sh"/>
 
         <p>These results confirm the performance hypothesis that we
         obtained earlier by inspecting the lambda code. The
@@ -256,7 +256,7 @@
       data. You can display the bytecode instructions in textual
       form via <code>-dinstr</code>. Try this on one of our earlier
       pattern-matching examples:</p>
-      <link rel="import" href="code/back-end/instr_for_pattern_monomorphic_small.out"/>
+      <link rel="import" href="code/back-end/instr_for_pattern_monomorphic_small.sh"/>
 
       <p>The preceding bytecode has been simplified from the lambda
       form into a set of simple instructions that are executed
@@ -408,7 +408,7 @@
 
         <p>Now compile the OCaml files into a standalone object
         file:</p>
-        <link rel="import" href="code/back-end-embed/build_embed.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed.sh"/>
 
         <p>After this point, you no longer need the OCaml compiler,
         as <code>embed_out.o</code> has all of the OCaml code
@@ -423,7 +423,7 @@
         result by specifying a <code>.c</code> output file
         extension instead of the <code>.o</code> we used
         earlier:</p>
-        <link rel="import" href="code/back-end-embed/build_embed_c.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed_c.sh"/>
 
         <p>Embedding OCaml code like this lets you write OCaml that
         interfaces with any environment that works with a C
@@ -534,7 +534,7 @@
           <p>Now compile this into assembly and read the resulting
           <code>compare_mono.S</code> file. This file extension may
           be lowercase on some platforms such as Linux:</p>
-          <link rel="import" href="code/back-end/asm_from_compare_mono.out"/>
+          <link rel="import" href="code/back-end/asm_from_compare_mono.sh"/>
 
           <p>If you've never seen assembly language before, then
           the contents may be rather scary. While you'll need to
@@ -601,7 +601,7 @@
 
           <p>Running this shows quite a significant runtime
           difference between the two:</p>
-          <link rel="import" href="code/back-end-bench/run_bench_poly_and_mono.out"/>
+          <link rel="import" href="code/back-end-bench/run_bench_poly_and_mono.sh"/>
 
           <p>We see that the polymorphic comparison is close to 20
           times slower! These results shouldn't be taken too
@@ -722,7 +722,7 @@
 
           <p>Compile and run this with debugging symbols. You
           should see the following output:</p>
-          <link rel="import" href="code/back-end-bench/run_alternate_list.out"/>
+          <link rel="import" href="code/back-end-bench/run_alternate_list.sh"/>
 
           <p>Now we can run this interactively within <span class="command"><em>gdb</em></span>:</p>
           <link rel="import" href="code/back-end/gdb_alternate0.rawsh"/>
@@ -926,7 +926,7 @@
           <p>To use the debug library, just link your program with
           the <code>-runtime-variant d</code> flag:</p>
         </div>
-        <link rel="import" href="code/back-end-embed/run_debug_hello.out"/>
+        <link rel="import" href="code/back-end-embed/run_debug_hello.sh"/>
 
         <p>If you get an error that <code>libasmrund.a</code> is
         not found, it's probably because you're using OCaml 4.00
