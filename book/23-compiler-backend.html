@@ -347,7 +347,7 @@
 
         <p>Information about these extra libraries can be specified
         while linking a bytecode archive:</p>
-        <link rel="import" href="code/back-end-embed/link_dllib.out"/>
+        <link rel="import" href="code/back-end-embed/link_dllib.rawsh"/>
 
         <p>The <code>dllib</code> flag embeds the arguments in the
         archive file. Any subsequent packages linking this archive
@@ -359,7 +359,7 @@
         that bundles the <span class="command"><em>ocamlrun</em></span> interpreter with the
         bytecode in a single binary. This is known as a <em>custom
         runtime</em> mode and is built as follows: <idx>custom runtime mode</idx></p>
-        <link rel="import" href="code/back-end-embed/link_custom.out"/>
+        <link rel="import" href="code/back-end-embed/link_custom.rawsh"/>
 
         <p>OCamlbuild takes care of many of these details with its
         built-in rules. The <code>%.byte</code> rule that you've
@@ -414,7 +414,7 @@
         as <code>embed_out.o</code> has all of the OCaml code
         compiled and linked into a single object file. Compile an
         output binary using <span class="command"><em>gcc</em></span> to test this out:</p>
-        <link rel="import" href="code/back-end-embed/build_embed_binary.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed_binary.rawsh"/>
 
         <p>You can inspect the commands that <span class="command"><em>ocamlc</em></span> is invoking by adding
         <code>-verbose</code> to the command line to help figure
@@ -725,13 +725,13 @@
           <link rel="import" href="code/back-end-bench/run_alternate_list.out"/>
 
           <p>Now we can run this interactively within <span class="command"><em>gdb</em></span>:</p>
-          <link rel="import" href="code/back-end/gdb_alternate0.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate0.rawsh"/>
 
           <p>The <span class="command"><em>gdb</em></span> prompt
           lets you enter debug directives. Let's set the program to
           break just before the first call to
           <code>take</code>:</p>
-          <link rel="import" href="code/back-end/gdb_alternate1.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate1.rawsh"/>
 
           <p>We used the C symbol name by following the name
           mangling rules defined earlier. A convenient way to
@@ -741,13 +741,13 @@
 
           <p>Once you've set the breakpoint, start the program
           executing:</p>
-          <link rel="import" href="code/back-end/gdb_alternate2.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate2.rawsh"/>
 
           <p>The binary has run until the first take invocation and
           stopped, waiting for further instructions. GDB has lots
           of features, so let's continue the program and check the
           stacktrace after a couple of recursions:</p>
-          <link rel="import" href="code/back-end/gdb_alternate3.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate3.rawsh"/>
 
           <p>The <code>cont</code> command resumes execution after
           a breakpoint has paused it, <code>bt</code> displays a
@@ -830,11 +830,11 @@
           first. We'll use our write barrier benchmark from
           earlier, which measures memory allocation versus in-place
           modification:</p>
-          <link rel="import" href="code/back-end/perf_record.out"/>
+          <link rel="import" href="code/back-end/perf_record.rawsh"/>
 
           <p>When this completes, you can interactively explore the
           results:</p>
-          <link rel="import" href="code/back-end/perf_report.out"/>
+          <link rel="import" href="code/back-end/perf_report.rawsh"/>
 
           <p>This trace broadly reflects the results of the
           benchmark itself. The mutable benchmark consists of the
@@ -873,7 +873,7 @@
 
             <p>OPAM provides a compiler switch that compiles OCaml
             with the frame pointer activated:</p>
-            <link rel="import" href="code/back-end/opam_switch.out"/>
+            <link rel="import" href="code/back-end/opam_switch.rawsh"/>
 
             <p>Using the frame pointer changes the OCaml calling
             convention, but OPAM takes care of recompiling all your
@@ -900,7 +900,7 @@
         <p>Try this custom linking by using the same source files
         from the bytecode embedding example earlier in this
         chapter:</p>
-        <link rel="import" href="code/back-end-embed/build_embed_native.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed_native.rawsh"/>
 
         <p>The <code>embed_native.o</code> is a standalone object
         file that has no further references to OCaml code beyond

@@ -465,7 +465,7 @@
 	  echo server using the netcat tool, which is invoked as
 	  <code>nc</code>:</p>
 
-	<link rel="import" href="code/async/run_echo.out"/> 
+	<link rel="import" href="code/async/run_echo.rawsh"/> 
 
 	<aside data-type="sidebar">
           <h5>Functions that Never Return</h5>
@@ -876,7 +876,7 @@
 	    And that's all we need for a simple but usable
             definition searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a></p>
 
-          <link rel="import" href="code/async/run_search.out"/> 
+          <link rel="import" href="code/async/run_search.rawsh"/> 
 	</section>
       </section>
 
@@ -1096,7 +1096,7 @@
             run it giving it a list of servers, some of which won't
             respond to the query:</p>
 
-          <link rel="import" href="code/async/run_search_with_configurable_server.out"/> 
+          <link rel="import" href="code/async/run_search_with_configurable_server.rawsh"/> 
 
           <p>
 	    As you can see, we got a "Connection refused" failure,
@@ -1128,7 +1128,7 @@
 	    Now, if we run that same query, we'll get individualized
             handling of the connection failures:</p>
 
-          <link rel="import" href="code/async/run_search_with_error_handling.out"/> 
+          <link rel="import" href="code/async/run_search_with_error_handling.rawsh"/> 
 
           <p>
 	    Now, only the query that went to <code>localhost</code>
@@ -1263,7 +1263,7 @@
 	  see that one query succeeds and the other fails reporting a
 	  timeout:</p>
 
-	<link rel="import" href="code/async/run_search_with_timeout_no_leak.out"/> 
+	<link rel="import" href="code/async/run_search_with_timeout_no_leak.rawsh"/> 
       </section>
 
       <section id="working-with-system-threads" data-type="sect1">
@@ -1407,7 +1407,7 @@
 	  the nonallocating busy loop will block anything else from
 	  running:</p>
 
-	<link rel="import" href="code/async/run_native_code_log_delays.out"/> 
+	<link rel="import" href="code/async/run_native_code_log_delays.rawsh"/> 
 
 	<p>
 	  The takeaway from these examples is that predicting thread

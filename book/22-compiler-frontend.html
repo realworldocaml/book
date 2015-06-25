@@ -362,7 +362,7 @@
         <p>Try compiling the HTML documentation and UNIX man pages
         by running <span class="command"><em>ocamldoc</em></span>
         over the source file:</p>
-        <link rel="import" href="code/front-end/build_ocamldoc.out"/>
+        <link rel="import" href="code/front-end/build_ocamldoc.rawsh"/>
 
         <p>You should now have HTML files inside the <em class="filename">html/</em> directory and also be able to view
         the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite a few comment
@@ -458,7 +458,7 @@
 
       <p>Now add in the syntax extension packages for Fieldslib and
       Sexplib, and everything will compile again:</p>
-      <link rel="import" href="code/front-end/build_type_conv_with_camlp4.out"/>
+      <link rel="import" href="code/front-end/build_type_conv_with_camlp4.rawsh"/>
 
       <p>We've specified a couple of additional flags here. The
       <code>-syntax</code> flag directs <span class="command"><em>ocamlfind</em></span> to add the
@@ -1162,7 +1162,7 @@
             have conflicting type signatures in different modules.
             The compiler will reject such programs with an error
             similar to this:</p>
-            <link rel="import" href="code/front-end/inconsistent_compilation_units.out"/>
+            <link rel="import" href="code/front-end/inconsistent_compilation_units.rawsh"/>
 
             <p>This hash check is very conservative, but ensures
             that separate compilation remains type-safe all the way
@@ -1268,12 +1268,12 @@
         <p>There's one downside to this approach: type errors
         suddenly get much more verbose. We can see this if you run
         the vanilla OCaml toplevel (not <span class="command"><em>utop</em></span>).</p>
-        <link rel="import" href="code/front-end/short_paths_1.out"/>
+        <link rel="import" href="code/front-end/short_paths_1.rawsh"/>
 
         <p>This type error without <code>Core.Std</code> has a
         straightforward type error. When we switch to Core, though,
         it gets more verbose:</p>
-        <link rel="import" href="code/front-end/short_paths_2.out"/>
+        <link rel="import" href="code/front-end/short_paths_2.rawsh"/>
 
         <p>The default <code>List</code> module in OCaml is
         overridden by <code>Core.Std.List</code>. The compiler does
@@ -1286,7 +1286,7 @@
         preferred output type. The option is activated by passing
         <code>-short-paths</code> to the compiler, and works on the
         toplevel, too.<idx>short paths heuristic</idx></p>
-        <link rel="import" href="code/front-end/short_paths_3.out"/>
+        <link rel="import" href="code/front-end/short_paths_3.rawsh"/>
 
         <p>The <span class="command"><em>utop</em></span> enhanced
         toplevel activates short paths by default, which is why we
@@ -1329,7 +1329,7 @@
         <p>One such command-line tool to display autocompletion
         information in your editor is <span class="command"><em>ocp-index</em></span>. Install it via OPAM as
         follows:<idx>autocompletion</idx><idx>ocp-index</idx></p>
-        <link rel="import" href="code/front-end/install_ocp_index.out"/>
+        <link rel="import" href="code/front-end/install_ocp_index.rawsh"/>
 
         <p>Let's refer back to our Ncurses binding example from the
         beginning of <a href="19-foreign-function-interface.html#foreign-function-interface" data-type="xref">Foreign Function Interface</a>. This
