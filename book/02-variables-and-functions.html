@@ -67,12 +67,13 @@
       "code/variables-and-functions/let_in.syntax" />
 
       <p>This first evaluates <em><code>expr1</code></em> and then
-      evaluates <em><code>expr2</code></em> with
-      <em><code>variable</code></em> bound to whatever value was
+      evaluates <em><code>expr2</code></em>
+      with <em><code>variable</code></em> bound to whatever value was
       produced by the evaluation of <em><code>expr1</code></em>.
       Here's how it looks in practice:</p>
+
       <link rel="import" data-code-language="ocamltop" href=
-      "code/variables-and-functions/main.topscript" part="1" />
+	    "code/variables-and-functions/main.topscript" part="1" />
 
       <p>Note that the scope of <code>language_list</code> is just
       the expression <code>String.concat ~sep:"-"
@@ -202,6 +203,7 @@
         so it emits the warning. It's generally better to use a
         <code>match</code> statement to handle such cases
         explicitly:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="9" />
 
@@ -209,7 +211,7 @@
         which is useful for marking cases that should be
         impossible. We'll discuss <code>assert</code> in more
         detail in <a href="07-error-handling.html#error-handling"
-        data-type="xref">Error Handling</a>.</p>
+		     data-type="xref">Error Handling</a>.</p>
       </section>
     </section>
 
@@ -246,23 +248,28 @@
         <p>Or pass it to another function. Passing functions to
         iteration functions like <code>List.map</code> is probably
         the most common use case for anonymous functions:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="12" />
 
-        <p>You can even stuff them into a data structure:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="13" />
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/variables-and-functions/main.topscript"
+	      part="12" />
 
-        <p>It's worth stopping for a moment to puzzle this example
-        out, since this kind of higher-order use of functions can
-        be a bit obscure at first. Notice that <code>(fun g -&gt; g
-        5)</code> is a function that takes a function as an
-        argument, and then applies that function to the number
-        <code>5</code>. The invocation of <code>List.map</code>
-        applies <code>(fun g -&gt; g 5)</code> to the elements of
-        the <code>increments</code> list (which are themselves
-        functions) and returns the list containing the results of
-        these function applications.</p>
+        <p>You can even stuff a function into a data structure:</p>
+
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/variables-and-functions/main.topscript"
+	      part="13" />
+
+        <p>
+	  It's worth stopping for a moment to puzzle this example
+          out, since this kind of higher-order use of functions can be a
+          bit obscure at first. Notice that <code>(fun g -&gt; g "Hello
+            World")</code> is a function that takes a function as an
+          argument, and then applies that function to the
+          string <code>"Hello World"</code>. The invocation
+          of <code>List.map</code> applies <code>(fun g -&gt; g "Hello
+            World")</code> to the elements of <code>transforms</code>,
+          which are themselves functions.  The returned list
+          containing the results of these function applications.</p>
 
         <p>The key thing to understand is that functions are
         ordinary values in OCaml, and you can do everything with
@@ -271,6 +278,7 @@
         storing them in data structures. We even name functions in
         the same way that we name other values, by using a
         <code>let</code> binding:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="14" />
 
@@ -335,29 +343,35 @@
         bound by the outer function application, and
         <code>y</code>, which was bound by the inner one.</p>
 
-        <p>This style of function is called a <em>curried</em>
-        function. (Currying is named after Haskell Curry, a
-        logician who had a significant impact on the design and
-        theory of programming languages.) The key to interpreting
-        the type signature of a curried function is the observation
-        that <code>-&gt;</code> is right-associative. The type
-        signature of <code>abs_diff</code> can therefore be
-        parenthesized as follows:<idx>curried
-        functions</idx><idx>functions/curried functions</idx></p>
+        <p>
+	  This style of function is called a <em>curried</em>
+          function. (Currying is named after Haskell Curry, a logician
+          who had a significant impact on the design and theory of
+          programming languages.) The key to interpreting the type
+          signature of a curried function is the observation
+          that <code>-&gt;</code> is right-associative. The type
+          signature of <code>abs_diff</code> can therefore be
+          parenthesized as follows:
+
+	  <idx>curried functions</idx>
+	  <idx>functions/curried functions</idx></p>
+
         <link rel="import" data-code-language="ocaml" href=
         "code/variables-and-functions/abs_diff.mli" />
 
         <p>The parentheses don't change the meaning of the
         signature, but they make it easier to see the currying.</p>
 
-        <p>Currying is more than just a theoretical curiosity. You
-        can make use of currying to specialize a function by
-        feeding in some of the arguments. Here's an example where
-        we create a specialized version of <code>abs_diff</code>
-        that measures the distance of a given number from
-        <code>3</code>:</p>
-        <link rel="import" data-code-language="ocamltop" href=
-        "code/variables-and-functions/main.topscript" part="19" />
+        <p>
+	  Currying is more than just a theoretical curiosity. You can
+          make use of currying to specialize a function by feeding in
+          some of the arguments. Here's an example where we create a
+          specialized version of <code>abs_diff</code> that measures
+          the distance of a given number from <code>3</code>:</p>
+	
+        <link rel="import" data-code-language="ocamltop" 
+	      href="code/variables-and-functions/main.topscript"
+	      part="19" /> 
 
         <p>The practice of applying some of the arguments of a
         curried function to get a new function is called
@@ -420,43 +434,49 @@
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="22" />
 
-        <p>The pattern <code>[] | [_]</code> is an example of
-        an <em>or-pattern</em>, which is a disjunction of multiple
-        patterns. An or-pattern matches as a whole if any of the
-        sub-patterns match. In this case, <code>[]</code> matches
-        the empty list, and <code>[_]</code> matches any single
-        element list. The <code>_</code> is there so we don't have to
-        put an explicit name on that single element.<idx>or
-        patterns</idx></p>
+        <p>
+	  The pattern <code>[] | [_]</code> is itself a disjunction of
+          multiple patterns, otherwise known as an <em>or
+          pattern</em>. An or pattern matches as a whole if any of the
+          sub-patterns match. In this case, <code>[]</code> matches
+          the empty list, and <code>[_]</code> matches any single
+          element list. The <code>_</code> is there so we don't have
+          to put an explicit name on that single element.<idx>or
+            patterns</idx></p>
 
-        <p>We can also define multiple mutually recursive values by
-        using <code>let rec</code> combined with the
-        <code>and</code> keyword. Here's a (gratuitously
-        inefficient) example:</p>
+        <p>
+	  We can also define multiple mutually recursive values by
+          using <code>let rec</code> combined with
+          the <code>and</code> keyword. Here's a (gratuitously
+          inefficient) example:</p>
+
         <link rel="import" data-code-language="ocamltop" href=
         "code/variables-and-functions/main.topscript" part="23" />
 
-        <p>OCaml distinguishes between nonrecursive definitions
-        (using <code>let</code>) and recursive definitions (using
-        <code>let rec</code>) largely for technical reasons: the
-        type-inference algorithm needs to know when a set of
-        function definitions are mutually recursive, and for
-        reasons that don't apply to a pure language like Haskell,
-        these have to be marked explicitly by the
-        programmer.<idx>let syntax/nonrecursive vs. recursive
-        functions</idx></p>
+        <p>
+	  OCaml distinguishes between nonrecursive definitions
+          (using <code>let</code>) and recursive definitions
+          (using <code>let rec</code>) largely for technical reasons:
+          the type-inference algorithm needs to know when a set of
+          function definitions are mutually recursive, and for reasons
+          that don't apply to a pure language like Haskell, these have
+          to be marked explicitly by the programmer.
+	  
+	  <idx>let syntax/nonrecursive vs. recursive functions</idx></p>
 
-        <p>But this decision has some good effects. For one thing,
-        recursive (and especially mutually recursive) definitions
-        are harder to reason about than nonrecursive ones. It's
-        therefore useful that, in the absence of an explicit
-        <code>rec</code>, you can assume that a <code>let</code>
-        binding is nonrecursive, and so can only build upon
-        previous bindings.</p>
+        <p>
+	  But this decision has some good effects. For one thing,
+          recursive (and especially mutually recursive) definitions
+          are harder to reason about than nonrecursive ones. It's
+          therefore useful that, in the absence of an
+          explicit <code>rec</code>, you can assume that
+          a <code>let</code> binding is nonrecursive, and so can only
+          build upon previous definitions.</p>
 
-        <p>In addition, having a nonrecursive form makes it easier
-        to create a new definition that extends and supersedes an
-        existing one by shadowing it.</p>
+        <p>
+	  In addition, having a nonrecursive form makes it easier to
+          create a new definition that extends and supersedes an
+          existing one by shadowing it.</p>
       </section>
 
       <section id="prefix-and-infix-operators" data-type="sect2">

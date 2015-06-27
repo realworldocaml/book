@@ -69,18 +69,12 @@ let upcase_first_entry line =
   String.concat ~sep:"," (String.uppercase first :: rest)
 ;;
 
-
-
-
-
-
 (* part 9 *)
 let upcase_first_entry line =
   match String.split ~on:',' line with
   | [] -> assert false (* String.split returns at least one element *)
   | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
 ;;
-
 
 (* part 10 *)
 (fun x -> x + 1);;
@@ -95,9 +89,8 @@ List.map ~f:(fun x -> x + 1) [1;2;3];;
 
 
 (* part 13 *)
-let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
-
-List.map ~f:(fun g -> g 5) increments;;
+let transforms = [ String.uppercase; String.lowercase ];;
+List.map ~f:(fun g -> g "Hello World") transforms;;
 
 
 (* part 14 *)
