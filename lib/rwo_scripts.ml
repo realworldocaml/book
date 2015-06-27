@@ -2,6 +2,7 @@ open Core.Std
 open Async.Std
 module Html = Rwo_html
 module Import = Rwo_import
+module Lang = Rwo_lang
 module Pygments = Rwo_pygments
 let (/) = Filename.concat
 
@@ -184,12 +185,18 @@ let script_part_to_html ?(pygmentize=false) x =
 (* Main Operations                                                            *)
 (******************************************************************************)
 let eval_script lang ~filename =
-  match lang with
-  | `OCaml -> (
+  match (lang : Lang.t :> string) with
+  | "ml" | "mli" | "mll" | "mly" -> (
+    (* Hack: Oloop.Script.of_file intended only for ml files but
+       happens to work for mli, mll, and mly files. *)
     Oloop.Script.of_file filename >>|? fun parts ->
     `OCaml parts
+    )
+  | "rawtopscript" -> (
+    Oloop.Script.of_file filename >>|? fun parts ->
+    `OCaml_rawtoplevel parts
   )
-  | `OCaml_toplevel -> (
+  | "topscript" -> (
     if String.is_suffix filename ~suffix:"async/main.topscript" then (
       Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )
@@ -204,10 +211,6 @@ let eval_script lang ~filename =
       | Error _ as e ->
 	 (Sys.chdir cwd >>| fun () -> e)
     )
-  )
-  | `OCaml_rawtoplevel -> (
-    Oloop.Script.of_file filename >>|? fun parts ->
-    `OCaml_rawtoplevel parts
   )
   | _ -> (
     Reader.file_contents filename >>| fun x ->
@@ -230,5 +233,5 @@ let of_html ~filename html =
     |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
-    add_script accum i.Import.data_code_language ~filename:(dir,i.Import.href)
+    add_script accum (Import.lang_of i |> ok_exn) ~filename:(dir,i.Import.href)
   )

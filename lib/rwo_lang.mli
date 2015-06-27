@@ -1,36 +1,61 @@
-(** Code languages. *)
+(** Code languages. The language of code files which can be imported
+    into the book is defined by its extension. The language dictates
+    how the imports are processed, as follows:
+
+    {b OCaml files:}
+
+    - "ml": OCaml file, which will be parsed by Oloop.
+    - "mli": OCaml file, which will be parsed by Oloop.
+    - "mll": OCaml file, which will be parsed by Oloop.
+    - "mly": OCaml file, which will be parsed by Oloop.
+    - "mlpack"
+
+    - "topscript": OCaml toplevel commands that will be auto-evaluated
+      via Oloop.
+
+    - "rawscript": OCaml toplevel script, which should not be
+      auto-evaluated, e.g. because it contains some manually ellided
+      code.
+
+    - "syntax": OCaml syntax descriptions.
+
+
+    {b Bash files:}
+
+    - "cmd": Full bash scripts to be imported verbatim.
+
+    - "sh": Lines of bash commands, which will be auto-evaluated
+      and are expected to exit with zero.
+
+    - "errsh": Lines of bash commands, which will be auto-evaluated
+      and are expected to exit with non-zero.
+
+    - "rawsh": Bash commands executed in terminal and the
+      corresponding output. Such files will not be auto-evaluated, so
+      thus can include manually ellided code.
+
+
+    {b Other files:}
+
+    - "ascii": Plain ascii file, used for ASCII art.
+    - "atd"
+    - "c"
+    - "cpp"
+    - "h"
+    - "java"
+    - "json"
+    - "out": Console files as provided in O'Reilly source.
+    - "S" or "s": GNU assembly code.
+    - "scm"
+    - "txt"
+*)
 open Core.Std
 open Async.Std
 
-type t = [
-| `OCaml
-| `OCaml_toplevel
-| `OCaml_rawtoplevel
-| `OCaml_syntax
-| `Console
-| `JSON
-| `ATD
-| `Scheme
-| `C
-| `Bash
-| `CPP
-| `Java
-| `Ascii
-| `Gas
-] with sexp
+type t = private string
+with sexp
 
 val of_string : string -> t Or_error.t
 val to_string : t -> string
-val to_docbook : t -> string Or_error.t
 
-(** Return file extensions for the given language. We return a list
-    because sometimes multiple extensions are used for the same
-    language, e.g. both ml and mli files are for OCaml.
-
-    The empty list is also returned because some languages aren't
-    actually supported, e.g. all .atd files are actually marked as
-    OCaml files in import nodes. Probably we should thus delete [`ATD]
-    from this module, but leaving it in case it is needed later. *)
-val to_extensions : t -> string list
-
-val of_extension : string -> t Or_error.t
+val to_docbook_lang : t -> string Or_error.t

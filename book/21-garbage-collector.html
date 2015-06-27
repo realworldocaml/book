@@ -1,7 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta name="generator" 
-	  content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/> 
+    <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/> 
 
     <title></title>
   </head>
@@ -182,11 +181,8 @@
 
 	    <idx>minor heaps/allocating on</idx></p>
 
-          <p>
-	    <a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/minor_heap.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p>
-
           <figure style="float: 0">
-            <img src="images/rwoc_2101.png"/>
+            <img src="images/gc/minor_heap.png"/>
           </figure>
 
           <p>
@@ -246,8 +242,7 @@
               function:</p>
           </div>
 
-          <link rel="import" data-code-language="ocamltop" part="0.5"
-		href="code/gc/tune.topscript" />
+          <link rel="import" part="0.5" href="code/gc/tune.topscript"/>
 
           <p>
 	    Changing the GC size dynamically will trigger an
@@ -390,7 +385,7 @@
               housekeeping in the OCaml runtime to keep track of
               them:</p>
           </div>
-          <link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript" part="1"/>
+          <link rel="import" href="code/gc/tune.topscript" part="1"/>
 
           <p>
 	    Allocating an OCaml value on the major heap first checks
@@ -622,7 +617,7 @@
               an appropriate value and returns this value so that you
               can modify it in future calls if necessary:</p>
           </div>
-          <link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript" part="2"/>
+          <link rel="import" href="code/gc/tune.topscript" part="2"/>
 
           <p>
 	    The <code>space_overhead</code> setting controls how
@@ -677,7 +672,7 @@
               you have unusual allocation patterns that are causing a
               higher-than-usual rate of compactions:</p>
           </div>
-          <link rel="import" data-code-language="ocamltop" href="code/gc/tune.topscript" part="3"/>
+          <link rel="import" href="code/gc/tune.topscript" part="3"/>
 	</section>
 
 	<section id="inter-generational-pointers" data-type="sect2">
@@ -733,7 +728,7 @@
               program. You'll need to install the Core benchmarking
               suite via <code>opam install core_bench</code> before you
               compile this code:</p>
-            <link rel="import" data-code-language="ocaml" href="code/gc/barrier_bench.ml"/>
+            <link rel="import" href="code/gc/barrier_bench.ml"/>
 
             <p>
 	      This program defines a type <code>t1</code> that is
@@ -741,7 +736,7 @@
               benchmark loop iterates over both fields and increments a
               counter. Compile and execute this with some extra options
               to show the amount of garbage collection occurring:</p>
-            <link rel="import" data-code-language="console" href="code/gc/run_barrier_bench.out"/>
+            <link rel="import" href="code/gc/run_barrier_bench.out"/>
 
             <p>
 	      There is a stark space/time trade-off here. The
@@ -762,7 +757,7 @@
               trade-offs. The command-line benchmark binaries have a
               number of useful options that affect garbage collection
               behavior:</p>
-            <link rel="import" data-code-language="console" href="code/gc/show_barrier_bench_help.out"/>
+            <link rel="import" href="code/gc/show_barrier_bench_help.out"/>
 
             <p>
 	      The <code>-no-compactions</code> and
@@ -842,12 +837,12 @@
 	  Let's explore this with a small example that finalizes
 	  values of different types, some of which are heap-allocated
 	  and others which are compile-time constants:</p>
-	<link rel="import" data-code-language="ocaml" href="code/gc/finalizer.ml"/>
+	<link rel="import" href="code/gc/finalizer.ml"/>
 
 	<p>
 	  Building and running this should show the following
 	  output:</p>
-	<link rel="import" data-code-language="console" href="code/gc/run_finalizer.out"/>
+	<link rel="import" href="code/gc/run_finalizer.out"/>
 
 	<p>
 	  The GC calls the finalization functions in the order of

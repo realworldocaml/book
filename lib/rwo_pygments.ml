@@ -14,21 +14,22 @@ type lang = [
 ]
 with sexp
 
-let of_lang x = match x with
-  | `OCaml
-  | `OCaml_toplevel
-  | `OCaml_rawtoplevel
-  | `ATD               -> Ok `OCaml
-  | `JSON              -> Ok `Json
-  | `Scheme            -> Ok `Scheme
-  | `Java              -> Ok `Java
-  | `C                 -> Ok `C
-  | `Bash              -> Ok `Bash
-  | `CPP               -> Ok `C
-  | `Gas               -> Ok `Gas
-  | `Console
-  | `OCaml_syntax
-  | `Ascii ->
+let of_lang (x:Lang.t) = match (x :> string) with
+  | "atd"          -> Ok `OCaml
+  | "cmd"          -> Ok `Bash
+  | "c"            -> Ok `C
+  | "cpp"          -> Ok `C
+  | "h"            -> Ok `C
+  | "S"
+  | "s"            -> Ok `Gas
+  | "java"         -> Ok `Java
+  | "json"         -> Ok `Json
+  | "ml"
+  | "mli"
+  | "topscript"
+  | "rawtopscript" -> Ok `OCaml
+  | "scm"          -> Ok `Scheme
+  | _ ->
     error "we are not supporting this language for pygmentize" x Lang.sexp_of_t
 
 let lang_to_string = function

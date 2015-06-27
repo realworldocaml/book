@@ -4,19 +4,26 @@ module Html = Rwo_html
 
 module T = struct
   type t = {
-    data_code_language : Rwo_lang.t;
     href : string;
     part : float option;
     childs : Rwo_html.item list;
   } with sexp
 
-  (* Ignore [data_code_language] and [childs]. *)
+  (* Ignore [childs]. *)
   let compare (x:t) (y:t) =
     compare (x.href, x.part) (y.href, y.part)
 
 end
 include T
 include Comparable.Make(T)
+
+let lang_of t =
+  match Filename.split_extension t.href with
+  | _, None ->
+    error "href missing file extension" t.href sexp_of_string
+  | _, Some ext ->
+    Lang.of_string ext |> fun x ->
+    Or_error.tag_arg x "invalid file extension" t.href sexp_of_string
 
 let is_import_html = function
   | `Data _ -> false
@@ -38,7 +45,7 @@ let of_html item =
     | `Element {name="link"; attrs; childs} -> (
       let find x = List.Assoc.find attrs x in
       Html.check_attrs attrs
-        ~required:["data-code-language"; "href"; "rel"]
+        ~required:["href"; "rel"]
         ~allowed:(`Some ["part"])
       >>= fun () ->
 
@@ -47,15 +54,17 @@ let of_html item =
         with exn -> error "invalid part" exn sexp_of_exn
       ) >>= fun part ->
 
-      Lang.of_string (Option.value_exn (find "data-code-language"))
-      >>= fun data_code_language ->
-
-      Ok {
-        data_code_language;
+      let ans =
+      {
         href = Option.value_exn (find "href");
         part;
         childs;
       }
+      in
+
+      lang_of ans >>= fun _ -> (* validate language *)
+
+      Ok ans
     )
     | `Element _
     | `Data _ ->
@@ -66,7 +75,6 @@ let of_html item =
 let to_html x =
   [
     Some ("rel", "import");
-    Some ("data-code-language", Lang.to_string x.data_code_language);
     Some ("href", x.href);
     (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
   ]

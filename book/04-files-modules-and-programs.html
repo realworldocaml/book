@@ -1,16 +1,14 @@
-<!DOCTYPE html>
+
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39" />
+  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39"/>
 
   <title></title>
 </head>
 
 <body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id=
-  "files-modules-and-programs" data-type="chapter">
+  <section xmlns="http://www.w3.org/1999/xhtml" id="files-modules-and-programs" data-type="chapter">
     <h1>Files, Modules, and Programs</h1>
 
     <p>We've so far experienced OCaml largely through the toplevel.
@@ -51,24 +49,20 @@
       <idx>lists/adding new bindings in</idx> 
       <idx>lists/finding key associations in</idx></p>
 
-      <link rel="import" data-code-language="ocamltop" part="1"
-	    href="code/files-modules-and-programs/intro.topscript" />
+      <link rel="import" part="1" href="code/files-modules-and-programs/intro.topscript"/>
 
       <p>Note that <code>List.Assoc.add</code> doesn't modify the
       original list, but instead allocates a new list with the
       requisite key/value pair added.</p>
 
       <p>Now we can write <code>freq.ml</code>:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq/freq.ml" />
+      <link rel="import" href="code/files-modules-and-programs/freq/freq.ml"/>
 
       <p>The function <code>build_counts</code> reads in lines from
       <code>stdin</code>, constructing from those lines an
       association list with the frequencies of each line. It does
       this by invoking <code>In_channel.fold_lines</code> (similar
-      to the function <code>List.fold</code> described in <a href=
-      "03-lists-and-patterns.html#lists-and-patterns" data-type=
-      "xref">Lists And Patterns</a>), which reads through the lines
+      to the function <code>List.fold</code> described in <a href="03-lists-and-patterns.html#lists-and-patterns" data-type="xref">Lists And Patterns</a>), which reads through the lines
       one by one, calling the provided <code>fold</code> function
       for each line to update the accumulator. That accumulator is
       initialized to the empty list.</p>
@@ -78,9 +72,7 @@
       frequency in descending order, grab the first 10 elements off
       the list, and then iterate over those 10 elements and print
       them to the screen. These operations are tied together using
-      the <code>|&gt;</code> operator described in <a href=
-      "02-variables-and-functions.html#variables-and-functions"
-      data-type="xref">Variables And Functions</a>.
+      the <code>|&gt;</code> operator described in <a href="02-variables-and-functions.html#variables-and-functions" data-type="xref">Variables And Functions</a>.
 
 	<idx>let ( ) declaration</idx>
 	<idx>main function</idx></p>
@@ -112,8 +104,7 @@
       <p>If we weren't using <code>Core_kernel</code> or any other
       external libraries, we could build the executable like
       this:</p>
-      <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs/freq/simple_build_fail.out" />
+      <link rel="import" href="code/files-modules-and-programs/freq/simple_build_fail.out"/>
 
       <p>But as you can see, it fails because it can't find
       <code>Core_kernel</code>. We need a somewhat more complex
@@ -123,16 +114,13 @@
       <idx>OCaml toolchain/ocamlfind</idx> 
       <idx>Core standard library/finding with ocamlfind</idx></p>
 
-      <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs/freq/simple_build.out" />
+      <link rel="import" href="code/files-modules-and-programs/freq/simple_build.out"/>
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>,
       a tool which itself invokes other parts of the OCaml
-      toolchain (in this case, <span class=
-      "command"><em>ocamlc</em></span>) with the appropriate flags
+      toolchain (in this case, <span class="command"><em>ocamlc</em></span>) with the appropriate flags
       to link in particular libraries and packages. Here,
-      <code>-package core</code> is asking <span class=
-      "command"><em>ocamlfind</em></span> to link in the Core
+      <code>-package core</code> is asking <span class="command"><em>ocamlfind</em></span> to link in the Core
       library; <code>-linkpkg</code> asks ocamlfind to link in the
       packages as is necessary for building an executable, while
       <code>-thread</code> turns on threading support (which is
@@ -143,12 +131,8 @@
 
       <p>While this works well enough for a one-file project, more
       complicated projects require a tool to orchestrate the build.
-      One good tool for this task is <span class=
-      "command"><em>ocamlbuild</em></span>, which is shipped with
-      the OCaml compiler. We'll talk more about <span class=
-      "command"><em>ocamlbuild</em></span> in <a href=
-      "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
-      data-type="xref">The Compiler Frontend Parsing And Type
+      One good tool for this task is <span class="command"><em>ocamlbuild</em></span>, which is shipped with
+      the OCaml compiler. We'll talk more about <span class="command"><em>ocamlbuild</em></span> in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
       Checking</a>, but for now, we'll just use a simple wrapper
       around <span class="command"><em>ocamlbuild</em></span>
       called <span class="command"><em>corebuild</em></span> that
@@ -158,17 +142,14 @@
 
       <idx>corebuild</idx></p>
 
-      <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs/freq-obuild/build.out" />
+      <link rel="import" href="code/files-modules-and-programs/freq-obuild/build.out"/>
 
-      <p>If we'd invoked <span class=
-      "command"><em>corebuild</em></span> with a target of
+      <p>If we'd invoked <span class="command"><em>corebuild</em></span> with a target of
       <code>freq.native</code> instead of <code>freq.byte</code>,
       we would have gotten native code instead.</p>
 
       <p>We can run the resulting executable from the command line.
-      The following line extracts strings from the <span class=
-      "command"><em>ocamlopt</em></span> binary, reporting the most
+      The following line extracts strings from the <span class="command"><em>ocamlopt</em></span> binary, reporting the most
       frequently occurring ones. Note that the specific results will
       vary from platform to platform, since the binary itself will
       differ between platforms:
@@ -179,26 +160,21 @@
 	<idx>OCaml toolchain/ocamlopt</idx>
 	<idx>OCaml toolchain/ocamlc</idx>
 	<idx>code compilers/bytecode vs. native code</idx>
-	<a data-type="indexterm" data-startref= "FILEsnglprog">&nbsp;</a>
+	<a data-type="indexterm" data-startref="FILEsnglprog">&nbsp;</a>
 	<a data-type="indexterm" data-startref="Psingfil">&nbsp;</a>
       </p>
 
-      <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs/freq-obuild/test.out" />
+      <link rel="import" href="code/files-modules-and-programs/freq-obuild/test.out"/>
 
       <div data-type="note">
         <h1>Bytecode Versus Native Code</h1>
 
-        <p>OCaml ships with two compilers: the <span class=
-        "command"><em>ocamlc</em></span> bytecode compiler and the
+        <p>OCaml ships with two compilers: the <span class="command"><em>ocamlc</em></span> bytecode compiler and the
         <span class="command"><em>ocamlopt</em></span> native-code
-        compiler. Programs compiled with <span class=
-        "command"><em>ocamlc</em></span> are interpreted by a
-        virtual machine, while programs compiled with <span class=
-        "command"><em>ocamlopt</em></span> are compiled to native
+        compiler. Programs compiled with <span class="command"><em>ocamlc</em></span> are interpreted by a
+        virtual machine, while programs compiled with <span class="command"><em>ocamlopt</em></span> are compiled to native
         machine code to be run on a specific operating system and
-        processor architecture. With <span class=
-        "command"><em>ocamlbuild</em></span>, targets ending with
+        processor architecture. With <span class="command"><em>ocamlbuild</em></span>, targets ending with
         <code>.byte</code> are build as bytecode executables, and
         those ending with <code>.native</code> are built as native
         code.</p>
@@ -208,8 +184,7 @@
         things to be aware of. First, the bytecode compiler can be
         used on more architectures, and has some tools that are not
         available for native code. For example, the OCaml debugger
-        only works with bytecode (although <span class=
-        "command"><em>gdb</em></span>, the GNU Debugger, works with
+        only works with bytecode (although <span class="command"><em>gdb</em></span>, the GNU Debugger, works with
         OCaml native-code applications). The bytecode compiler is
         also quicker than the native-code compiler. In addition, in
         order to run a bytecode executable, you typically need to
@@ -223,15 +198,12 @@
         sometimes makes sense to use bytecode for development
         builds. And, of course, bytecode makes sense when targeting
         a platform not supported by the native-code compiler. We'll
-        cover both compilers in more detail in <a href=
-        "23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
-        data-type="xref">The Compiler Backend Byte Code And Native
+        cover both compilers in more detail in <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code" data-type="xref">The Compiler Backend Byte Code And Native
         Code</a>.</p>
       </div>
     </section>
 
-    <section id="multi-file-programs-and-modules" data-type=
-    "sect1">
+    <section id="multi-file-programs-and-modules" data-type="sect1">
       <h1>Multifile Programs and Modules</h1>
 
       <p>Source files in OCaml are tied into the module system,
@@ -268,8 +240,7 @@
       used to represent the frequency counts. The key function,
       called <code>touch</code>, bumps the frequency count of a
       given line by one:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-with-counter/counter.ml" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-counter/counter.ml"/>
 
       <p>The file <em>counter.ml</em> will be compiled into a
       module named <code>Counter</code>, where the name of the
@@ -281,13 +252,11 @@
 
       <p>We can now rewrite <code>freq.ml</code> to use
       <code>Counter</code>. Note that the resulting code can still
-      be built with <span class=
-      "command"><em>ocamlbuild</em></span>, which will discover
+      be built with <span class="command"><em>ocamlbuild</em></span>, which will discover
       dependencies and realize that <code>counter.ml</code> needs
       to be compiled:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-with-counter/freq.ml" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml"/>
       </section>
 
     <section id="signatures-and-abstract-types" data-type="sect1">
@@ -326,13 +295,11 @@
       <code>val</code> declarations are used to specify values in a
       signature. The syntax of a <code>val</code> declaration is as
       follows:</p>
-      <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/files-modules-and-programs/val.syntax" />
+      <link rel="import" href="code/files-modules-and-programs/val.syntax"/>
 
       <p>Using this syntax, we can write the signature of
       <code>counter.ml</code> as follows:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-with-sig/counter.mli" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig/counter.mli"/>
 
       <p>Note that <span class="command"><em>ocamlbuild</em></span>
       will detect the presence of the <code>mli</code> file
@@ -348,8 +315,7 @@
 
         <idx>files/mli files</idx></p>
 
-        <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs/freq-with-counter/infer_mli.out" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-counter/infer_mli.out"/>
 
         <p>The generated code is basically equivalent to
         the <code>mli</code> that we wrote by hand but is a bit uglier
@@ -366,8 +332,7 @@
       exposed in the interface, but its definition is not. Here's
       an abstract interface for <code>Counter</code>:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-with-sig-abstract/counter.mli" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/counter.mli"/>
 
       <p>Note that we needed to add <code>empty</code> and
       <code>to_list</code> to <code>Counter</code>, since otherwise
@@ -378,23 +343,17 @@
       <code>mli</code> file is the place where you specify your
       module's interface, and as such is a natural place to put
       documentation. We started our comments with a double asterisk
-      to cause them to be picked up by the <span class=
-      "command"><em>ocamldoc</em></span> tool when generating API
-      documentation. We'll discuss <span class=
-      "command"><em>ocamldoc</em></span> more in <a href=
-      "22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
-      data-type="xref">The Compiler Frontend Parsing And Type
+      to cause them to be picked up by the <span class="command"><em>ocamldoc</em></span> tool when generating API
+      documentation. We'll discuss <span class="command"><em>ocamldoc</em></span> more in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
       Checking</a>.</p>
 
       <p>Here's a rewrite of <code>counter.ml</code> to match the
       new <code>counter.mli</code>:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-with-sig-abstract/counter.ml" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/counter.ml"/>
 
       <p>If we now try to compile <code>freq.ml</code>, we'll get
       the following error:</p>
-      <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs/freq-with-sig-abstract/build.out" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/build.out"/>
 
       <p>This is because <code>freq.ml</code> depends on the fact
       that frequency counts are represented as association lists, a
@@ -403,15 +362,13 @@
       instead of <code>[]</code> and <code>Counter.to_list</code>
       to get the association list out at the end for processing and
       printing. The resulting implementation is shown below:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml" />
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml"/>
 
       <p>Now we can turn to optimizing the implementation of
       <code>Counter</code>. Here's an alternate and far more
       efficient implementation, based on the <code>Map</code> data
       structure in <code>Core_kernel</code>:</p>
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-fast/counter.ml" />
+      <link rel="import" href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
       <p>Note that in the preceding example we use
       <code>String.Map</code> in some places and simply
@@ -419,9 +376,7 @@
       for some operations, like creating a <code>Map.t</code>, you
       need access to type-specialized information, and for others,
       like looking something up in <code>Map.t</code>, you don't.
-      This is covered in more detail in <a href=
-      "13-maps-and-hashtables.html#maps-and-hash-tables" data-type=
-      "xref">Maps And Hash Tables</a>.</p>
+      This is covered in more detail in <a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>.</p>
     </section>
 
     <section id="concrete-types-in-signatures" data-type="sect1">
@@ -445,15 +400,11 @@
       to represent the fact that there are two possible return
       values. Here's a possible implementation:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-median/counter.ml"
-      part="1" />
+      <link rel="import" href="code/files-modules-and-programs/freq-median/counter.ml" part="1"/>
 
       <p>In the preceding implementation, we use
       <code>failwith</code> to throw an exception for the case of
-      the empty list. We'll discuss exceptions more in <a href=
-      "07-error-handling.html#error-handling" data-type=
-      "xref">Error Handling</a>. Note also that the function
+      the empty list. We'll discuss exceptions more in <a href="07-error-handling.html#error-handling" data-type="xref">Error Handling</a>. Note also that the function
       <code>fst</code> simply returns the first element of any
       two-tuple.</p>
 
@@ -464,9 +415,7 @@
       name clash here. Adding the following two lines added to
       <code>counter.mli</code> does the trick:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/freq-median/counter.mli"
-      part="1" />
+      <link rel="import" href="code/files-modules-and-programs/freq-median/counter.mli" part="1"/>
 
       <p>The decision of whether a given type should be abstract or
       concrete is an important one. Abstract types give you more
@@ -505,8 +454,7 @@
 
 	<idx>abstract types</idx></p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/abstract_username.ml" />
+      <link rel="import" href="code/files-modules-and-programs/abstract_username.ml"/>
 
       <p>Note that the <code>to_string</code> and
       <code>of_string</code> functions above are implemented simply
@@ -517,8 +465,7 @@
       <p>The basic structure of a module declaration like this
       is:</p>
 
-      <link rel="import" data-code-language="ocamlsyntax" href=
-      "code/files-modules-and-programs/module.syntax" />
+      <link rel="import" href="code/files-modules-and-programs/module.syntax"/>
 
       <p>We could have written this slightly differently, by giving
       the signature its own top-level <code>module type</code>
@@ -526,8 +473,7 @@
       types with the same underlying implementation in a
       lightweight way:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/session_info.ml" />
+      <link rel="import" href="code/files-modules-and-programs/session_info.ml"/>
 
       <p>The preceding code has a bug: it compares the username in
       one session to the host in the other session, when it should
@@ -535,8 +481,7 @@
       defined our types, however, the compiler will flag this bug
       for us:</p>
 
-      <link rel="import" data-code-language="console" href=
-      "code/files-modules-and-programs/build_session_info.out" />
+      <link rel="import" href="code/files-modules-and-programs/build_session_info.out"/>
 
       <p>This is a trivial example, but confusing different kinds
       of identifiers is a very real source of bugs, and the
@@ -567,8 +512,7 @@
       that the compiler looks at to find the definition of various
       identifiers. Here's an example:</p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" part="0.5" />
+      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="0.5"/>
 
       <p><code>open</code> is essential when you want to modify
       your environment for a standard library like
@@ -600,8 +544,7 @@
         </li>
       </ul>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" part="1" />
+      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="1"/>
 
       <p>Here, <code>of_int</code> and the infix operators are the
       ones from the <code>Int64</code> module.</p>
@@ -610,8 +553,7 @@
       <code>open</code>s, which is particularly useful for small
       expressions:</p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" part="2" />
+      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="2"/>
 
       <ul>
         <li>
@@ -623,15 +565,11 @@
 
         <li style="list-style: none; display: inline">
 
-          <link rel="import" data-code-language="ocaml" href=
-          "code/files-modules-and-programs/freq-median/use_median_1.ml"
-          part="1" />
+          <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_1.ml" part="1"/>
 
           <p>you could write:</p>
 
-          <link rel="import" data-code-language="ocaml" href=
-          "code/files-modules-and-programs/freq-median/use_median_2.ml"
-          part="1" />
+          <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_2.ml" part="1"/>
 
           <p>Because the module name <code>C</code> only exists for
           a short scope, it's easy to read and remember what
@@ -655,15 +593,13 @@
 	<idx>modules/including</idx>
 	<idx>identifiers/adding to modules</idx></p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" part="3" />
+      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="3"/>
 
       <p>We can use the <code>include</code> directive to create a
       new, extended version of the <code>Interval</code>
       module:</p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" part="4" />
+      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="4"/>
 
       <p>The difference between <code>include</code> and
       <code>open</code> is that we've done more than change how
@@ -671,8 +607,7 @@
       module. If we'd used <code>open</code>, we'd have gotten a
       quite different result:</p>
 
-      <link rel="import" data-code-language="ocamltop" href=
-      "code/files-modules-and-programs/main.topscript" part="5" />
+      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="5"/>
 
       <p>To consider a more realistic example, imagine you wanted
       to build an extended version of the <code>List</code> module,
@@ -680,8 +615,7 @@
       module as distributed in <code>Core_kernel</code>.
       <code>include</code> allows us to do just that:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/ext_list.ml" />
+      <link rel="import" href="code/files-modules-and-programs/ext_list.ml"/>
 
       <p>Now, how do we write an interface for this new module? It
       turns out that <code>include</code> works on signatures as
@@ -691,8 +625,7 @@
       can be done using <code>module type of</code>, which computes
       a signature from a module:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/ext_list.mli" />
+      <link rel="import" href="code/files-modules-and-programs/ext_list.mli"/>
 
       <p>Note that the order of declarations in the
       <code>mli</code> does not need to match the order of
@@ -709,8 +642,7 @@
       preference to <code>List</code> in our project, we can create
       a file of common definitions:</p>
 
-      <link rel="import" data-code-language="ocaml" href=
-      "code/files-modules-and-programs/common.ml" />
+      <link rel="import" href="code/files-modules-and-programs/common.ml"/>
 
       <p>And if we then put <code>open Common</code> after
       <code>open Core_kernel.Std</code> at the top of each file in
@@ -740,15 +672,12 @@
 	<idx>type mismatches</idx>
 	<idx>modules/type mismatches in</idx></p>
 
-        <link rel="import" data-code-language="ocaml" href=
-        "code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli"
-        part="1" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli" part="1"/>
 
         <p>and we try to compile, we'll get the following
         error:</p>
 
-        <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs/freq-with-sig-mismatch/build.out" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.out"/>
         </section>
 
       <section id="missing-definitions" data-type="sect2">
@@ -762,15 +691,12 @@
 	<idx>errors/missing module definitions</idx>
 	<idx>modules/missing definitions in</idx></p>
 
-        <link rel="import" data-code-language="ocaml" href=
-        "code/files-modules-and-programs/freq-with-missing-def/counter.mli"
-        part="1" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/counter.mli" part="1"/>
 
         <p>Now, if we try to compile without actually adding the
         implementation, we'll get this error:</p>
 
-        <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs/freq-with-missing-def/build.out" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/build.out"/>
 
         <p>A missing type definition will lead to a similar
         error.</p>
@@ -790,14 +716,11 @@
 	<idx>errors/module type definition mismatches</idx>
 	<idx>modules/type definition mismatches</idx></p>
 
-        <link rel="import" data-code-language="ocaml" href=
-        "code/files-modules-and-programs/freq-with-type-mismatch/counter.mli"
-        part="1" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/counter.mli" part="1"/>
 
         <p>will lead to a compilation error:</p>
 
-        <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs/freq-with-type-mismatch/build.out" />
+        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/build.out"/>
 
         <p>Order is similarly important to other type declarations,
         including the order in which record fields are declared and
@@ -814,9 +737,7 @@
         typically have to mark them specially. For example, when
         defining a set of mutually recursive values (like the
         definition of <code>is_even</code> and <code>is_odd</code>
-        in <a href=
-        "02-variables-and-functions.html#recursive-functions"
-        data-type="xref">Recursive Functions</a>), you need to
+        in <a href="02-variables-and-functions.html#recursive-functions" data-type="xref">Recursive Functions</a>), you need to
         define them using <code>let rec</code> rather than ordinary
         <code>let</code>.
 
@@ -836,14 +757,11 @@
         tried to add a reference to <code>Counter</code> from
         within <code>counter.ml</code>:</p>
 
-        <link rel="import" data-code-language="ocaml" href=
-        "code/files-modules-and-programs/freq-cyclic1/counter.ml"
-        part="1" />
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/counter.ml" part="1"/>
 
         <p>we'll see this error when we try to build:</p>
 
-        <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs/freq-cyclic1/build.out" />
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/build.out"/>
 
         <p>The problem manifests in a different way if we create
         cyclic references between files. We could create such a
@@ -851,18 +769,14 @@
         <code>counter.ml</code>, e.g., by adding the following
         line:</p>
 
-        <link rel="import" data-code-language="ocaml" href=
-        "code/files-modules-and-programs/freq-cyclic2/counter.ml"
-        part="1" />
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/counter.ml" part="1"/>
 
-        <p>In this case, <span class=
-        "command"><em>ocamlbuild</em></span> (which is invoked by
+        <p>In this case, <span class="command"><em>ocamlbuild</em></span> (which is invoked by
         the <span class="command"><em>corebuild</em></span> script)
         will notice the error and complain explicitly about the
         cycle:</p>
 
-        <link rel="import" data-code-language="console" href=
-        "code/files-modules-and-programs/freq-cyclic2/build.out" />
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.out"/>
       </section>
     </section>
 
@@ -909,9 +823,7 @@
         <p>Despite these benefits, there is a trade-off here. In
         particular, exposing types concretely makes it possible to
         use pattern-matching with those types, which as we saw in
-        <span class="keep-together"><a href=
-        "03-lists-and-patterns.html#lists-and-patterns" data-type=
-        "xref">Lists And Patterns</a></span> is a powerful and
+        <span class="keep-together"><a href="03-lists-and-patterns.html#lists-and-patterns" data-type="xref">Lists And Patterns</a></span> is a powerful and
         important tool. You should generally only expose the
         concrete implementation of your types when there's
         significant value in the ability to pattern match, and when
@@ -938,8 +850,7 @@
 
         <p>There are many ways of improving readability at the call
         site. One example is labeled arguments (discussed in
-        <a href="02-variables-and-functions.html#labeled-arguments"
-        data-type="xref">Labeled Arguments</a>), which act as
+        <a href="02-variables-and-functions.html#labeled-arguments" data-type="xref">Labeled Arguments</a>), which act as
         documentation that is available at the call site.</p>
 
         <p>You can also improve readability simply by choosing good
@@ -995,8 +906,7 @@
             end in <code>_exn</code>. Otherwise, errors should be
             signaled by returning an <code>option</code> or an
             <code>Or_error.t</code> (both of which are discussed in
-            <a href="07-error-handling.html#error-handling"
-            data-type="xref">Error Handling</a> ).</p>
+            <a href="07-error-handling.html#error-handling" data-type="xref">Error Handling</a> ).</p>
           </li>
         </ul>
 
@@ -1007,9 +917,7 @@
         to. This kind of function-by-function API uniformity is
         achieved through the use of <em>signature includes</em>,
         which allow for different modules to share components of
-        their interface. This approach is described in <a href=
-        "09-functors.html#using-multiple-interfaces" data-type=
-        "xref">Using Multiple Interfaces</a>.</p>
+        their interface. This approach is described in <a href="09-functors.html#using-multiple-interfaces" data-type="xref">Using Multiple Interfaces</a>.</p>
 
         <p>Core's standards may or may not fit your projects, but
         you can improve the usability of your codebase by finding

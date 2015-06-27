@@ -61,10 +61,10 @@
 
         <p>Let's start by creating a straightforward exhaustive
         pattern match using four normal variants:</p>
-        <link rel="import" data-code-language="ocaml" href="code/back-end/pattern_monomorphic_large.ml"/>
+        <link rel="import" href="code/back-end/pattern_monomorphic_large.ml"/>
 
         <p>The lambda output for this code looks like this:</p>
-        <link rel="import" data-code-language="console" href="code/back-end/lambda_for_pattern_monomorphic_large.out"/>
+        <link rel="import" href="code/back-end/lambda_for_pattern_monomorphic_large.out"/>
 
         <p>It's not important to understand every detail of this
         internal form, and it is explicitly undocumented since it
@@ -108,22 +108,22 @@
         all four cases. If we drop the number of variants to just
         two, then there's no need for the complexity of computing
         this table:</p>
-        <link rel="import" data-code-language="ocaml" href="code/back-end/pattern_monomorphic_small.ml"/>
+        <link rel="import" href="code/back-end/pattern_monomorphic_small.ml"/>
 
         <p>The lambda output for this code is now quite
         different:</p>
-        <link rel="import" data-code-language="console" href="code/back-end/lambda_for_pattern_monomorphic_small.out"/>
+        <link rel="import" href="code/back-end/lambda_for_pattern_monomorphic_small.out"/>
 
         <p>The compiler emits simpler conditional jumps rather than
         setting up a jump table, since it statically determines
         that the range of possible variants is small enough.
         Finally, let's look at the same code, but with polymorphic
         variants instead of normal variants:</p>
-        <link rel="import" data-code-language="ocaml" href="code/back-end/pattern_polymorphic.ml"/>
+        <link rel="import" href="code/back-end/pattern_polymorphic.ml"/>
 
         <p>The lambda form for this also shows up the runtime
         representation of polymorphic variants:</p>
-        <link rel="import" data-code-language="console" href="code/back-end/lambda_for_pattern_polymorphic.out"/>
+        <link rel="import" href="code/back-end/lambda_for_pattern_polymorphic.out"/>
 
         <p>We mentioned in <a href="06-variants.html#variants" data-type="xref">Variants</a> that pattern matching over
         polymorphic variants is slightly less efficient, and it
@@ -168,12 +168,12 @@
         times and also calculates statistical variance of the
         results. You'll need to <code>opam install
         core_bench</code> to get the library:<idx>pattern matching/benchmarking of</idx><idx>lambda form code/pattern matching benchmarking</idx></p>
-        <link rel="import" data-code-language="ocaml" href="code/back-end-bench/bench_patterns.ml"/>
+        <link rel="import" href="code/back-end-bench/bench_patterns.ml"/>
 
         <p>Building and executing this example will run for around
         30 seconds by default, and you'll see the results
         summarized in a neat table:</p>
-        <link rel="import" data-code-language="console" href="code/back-end-bench/run_bench_patterns.out"/>
+        <link rel="import" href="code/back-end-bench/run_bench_patterns.out"/>
 
         <p>These results confirm the performance hypothesis that we
         obtained earlier by inspecting the lambda code. The
@@ -256,7 +256,7 @@
       data. You can display the bytecode instructions in textual
       form via <code>-dinstr</code>. Try this on one of our earlier
       pattern-matching examples:</p>
-      <link rel="import" data-code-language="console" href="code/back-end/instr_for_pattern_monomorphic_small.out"/>
+      <link rel="import" href="code/back-end/instr_for_pattern_monomorphic_small.out"/>
 
       <p>The preceding bytecode has been simplified from the lambda
       form into a set of simple instructions that are executed
@@ -347,7 +347,7 @@
 
         <p>Information about these extra libraries can be specified
         while linking a bytecode archive:</p>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/link_dllib.out"/>
+        <link rel="import" href="code/back-end-embed/link_dllib.out"/>
 
         <p>The <code>dllib</code> flag embeds the arguments in the
         archive file. Any subsequent packages linking this archive
@@ -359,7 +359,7 @@
         that bundles the <span class="command"><em>ocamlrun</em></span> interpreter with the
         bytecode in a single binary. This is known as a <em>custom
         runtime</em> mode and is built as follows: <idx>custom runtime mode</idx></p>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/link_custom.out"/>
+        <link rel="import" href="code/back-end-embed/link_custom.out"/>
 
         <p>OCamlbuild takes care of many of these details with its
         built-in rules. The <code>%.byte</code> rule that you've
@@ -400,21 +400,21 @@
 
         <p>Create two OCaml source files that contain a single
         print line:</p>
-        <link rel="import" data-code-language="ocaml" href="code/back-end-embed/embed_me1.ml"/>
-        <link rel="import" data-code-language="ocaml" href="code/back-end-embed/embed_me2.ml"/>
+        <link rel="import" href="code/back-end-embed/embed_me1.ml"/>
+        <link rel="import" href="code/back-end-embed/embed_me2.ml"/>
 
         <p>Next, create a C file to be your main entry point:</p>
-        <link rel="import" data-code-language="c" href="code/back-end-embed/main.c"/>
+        <link rel="import" href="code/back-end-embed/main.c"/>
 
         <p>Now compile the OCaml files into a standalone object
         file:</p>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/build_embed.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed.out"/>
 
         <p>After this point, you no longer need the OCaml compiler,
         as <code>embed_out.o</code> has all of the OCaml code
         compiled and linked into a single object file. Compile an
         output binary using <span class="command"><em>gcc</em></span> to test this out:</p>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/build_embed_binary.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed_binary.out"/>
 
         <p>You can inspect the commands that <span class="command"><em>ocamlc</em></span> is invoking by adding
         <code>-verbose</code> to the command line to help figure
@@ -423,7 +423,7 @@
         result by specifying a <code>.c</code> output file
         extension instead of the <code>.o</code> we used
         earlier:</p>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/build_embed_c.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed_c.out"/>
 
         <p>Embedding OCaml code like this lets you write OCaml that
         interfaces with any environment that works with a C
@@ -529,12 +529,12 @@
           <p>First let's create a comparison function where we've
           explicitly annotated the types, so the compiler knows
           that only integers are being compared:</p>
-          <link rel="import" data-code-language="ocaml" href="code/back-end/compare_mono.ml"/>
+          <link rel="import" href="code/back-end/compare_mono.ml"/>
 
           <p>Now compile this into assembly and read the resulting
           <code>compare_mono.S</code> file. This file extension may
           be lowercase on some platforms such as Linux:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/asm_from_compare_mono.out"/>
+          <link rel="import" href="code/back-end/asm_from_compare_mono.out"/>
 
           <p>If you've never seen assembly language before, then
           the contents may be rather scary. While you'll need to
@@ -542,7 +542,7 @@
           give you some basic instructions to spot patterns in this
           section. The excerpt of the implementation of the
           <code>cmp</code> function can be found below:</p>
-          <link rel="import" data-code-language="gas" href="code/back-end/cmp.S"/>
+          <link rel="import" href="code/back-end/cmp.S"/>
 
           <p>The <code>_camlCompare_mono__cmp_1008</code> is an
           assembly label that has been computed from the module
@@ -559,12 +559,12 @@
           be immediate integers to work. Now let's see what happens
           if our OCaml code omits the type annotations and is a
           polymorphic comparison instead:</p>
-          <link rel="import" data-code-language="ocaml" href="code/back-end/compare_poly.ml"/>
+          <link rel="import" href="code/back-end/compare_poly.ml"/>
 
           <p>Compiling this code with <code>-S</code> results in a
           significantly more complex assembly output for the same
           function:</p>
-          <link rel="import" data-code-language="gas" href="code/back-end/compare_poly_asm.S"/>
+          <link rel="import" href="code/back-end/compare_poly_asm.S"/>
 
           <p>The <code>.cfi</code> directives are assembler hints
           that contain Call Frame Information that lets the
@@ -597,11 +597,11 @@
           comparison from earlier. Let's confirm this hypothesis
           again by writing a quick <code>Core_bench</code> test
           with both functions:</p>
-          <link rel="import" data-code-language="ocaml" href="code/back-end-bench/bench_poly_and_mono.ml"/>
+          <link rel="import" href="code/back-end-bench/bench_poly_and_mono.ml"/>
 
           <p>Running this shows quite a significant runtime
           difference between the two:</p>
-          <link rel="import" data-code-language="console" href="code/back-end-bench/run_bench_poly_and_mono.out"/>
+          <link rel="import" href="code/back-end-bench/run_bench_poly_and_mono.out"/>
 
           <p>We see that the polymorphic comparison is close to 20
           times slower! These results shouldn't be taken too
@@ -718,20 +718,20 @@
           alternating values from a list. This isn't
           tail-recursive, so our stack size will grow as we
           single-step through the execution:</p>
-          <link rel="import" data-code-language="ocaml" href="code/back-end/alternate_list.ml"/>
+          <link rel="import" href="code/back-end/alternate_list.ml"/>
 
           <p>Compile and run this with debugging symbols. You
           should see the following output:</p>
-          <link rel="import" data-code-language="console" href="code/back-end-bench/run_alternate_list.out"/>
+          <link rel="import" href="code/back-end-bench/run_alternate_list.out"/>
 
           <p>Now we can run this interactively within <span class="command"><em>gdb</em></span>:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/gdb_alternate0.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate0.out"/>
 
           <p>The <span class="command"><em>gdb</em></span> prompt
           lets you enter debug directives. Let's set the program to
           break just before the first call to
           <code>take</code>:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/gdb_alternate1.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate1.out"/>
 
           <p>We used the C symbol name by following the name
           mangling rules defined earlier. A convenient way to
@@ -741,13 +741,13 @@
 
           <p>Once you've set the breakpoint, start the program
           executing:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/gdb_alternate2.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate2.out"/>
 
           <p>The binary has run until the first take invocation and
           stopped, waiting for further instructions. GDB has lots
           of features, so let's continue the program and check the
           stacktrace after a couple of recursions:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/gdb_alternate3.out"/>
+          <link rel="import" href="code/back-end/gdb_alternate3.out"/>
 
           <p>The <code>cont</code> command resumes execution after
           a breakpoint has paused it, <code>bt</code> displays a
@@ -830,11 +830,11 @@
           first. We'll use our write barrier benchmark from
           earlier, which measures memory allocation versus in-place
           modification:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/perf_record.out"/>
+          <link rel="import" href="code/back-end/perf_record.out"/>
 
           <p>When this completes, you can interactively explore the
           results:</p>
-          <link rel="import" data-code-language="console" href="code/back-end/perf_report.out"/>
+          <link rel="import" href="code/back-end/perf_report.out"/>
 
           <p>This trace broadly reflects the results of the
           benchmark itself. The mutable benchmark consists of the
@@ -873,7 +873,7 @@
 
             <p>OPAM provides a compiler switch that compiles OCaml
             with the frame pointer activated:</p>
-            <link rel="import" data-code-language="console" href="code/back-end/opam_switch.out"/>
+            <link rel="import" href="code/back-end/opam_switch.out"/>
 
             <p>Using the frame pointer changes the OCaml calling
             convention, but OPAM takes care of recompiling all your
@@ -900,7 +900,7 @@
         <p>Try this custom linking by using the same source files
         from the bytecode embedding example earlier in this
         chapter:</p>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/build_embed_native.out"/>
+        <link rel="import" href="code/back-end-embed/build_embed_native.out"/>
 
         <p>The <code>embed_native.o</code> is a standalone object
         file that has no further references to OCaml code beyond
@@ -926,7 +926,7 @@
           <p>To use the debug library, just link your program with
           the <code>-runtime-variant d</code> flag:</p>
         </div>
-        <link rel="import" data-code-language="console" href="code/back-end-embed/run_debug_hello.out"/>
+        <link rel="import" href="code/back-end-embed/run_debug_hello.out"/>
 
         <p>If you get an error that <code>libasmrund.a</code> is
         not found, it's probably because you're using OCaml 4.00
