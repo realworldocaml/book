@@ -24,7 +24,6 @@ depends: [
   "core"
   "async" {>= "112.24.00"}
   "ocamlnet"
-  "cow"
   "cohttp"
   "oloop"
 
