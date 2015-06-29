@@ -21,7 +21,6 @@ remove: [
 depends: [
   "omake" {build}
   "ocamlscript" {build}
-  "camlp4" {>= "4.02.1+2"}
   "core"
   "async" {>= "112.24.00"}
   "ocamlnet"
