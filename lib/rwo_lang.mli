@@ -58,4 +58,7 @@ with sexp
 val of_string : string -> t Or_error.t
 val to_string : t -> string
 
+val of_filename : string -> t Or_error.t
+(** Return lang based on extension of given filename. *)
+
 val to_docbook_lang : t -> string Or_error.t

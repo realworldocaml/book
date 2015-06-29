@@ -32,6 +32,14 @@ let of_string x = match x with
   | "txt" -> Ok x
   | _ -> error "invalid extension" x sexp_of_string
 
+let of_filename filename =
+  match Filename.split_extension filename with
+  | _, Some ext -> of_string ext
+  | _, None ->
+     error
+       "cannot infer lang of filename without extension"
+       filename sexp_of_string
+
 let to_docbook_lang t = match t with
   | "atd"   -> Ok "ocaml"
   | "cmd"   -> Ok "bash"
