@@ -206,7 +206,14 @@ let make_chapter_page ?pygmentize repo_root chapters chapter_file
   in
 
   let import_node_to_html scripts (i:Import.t) : Html.item Deferred.t =
-    Scripts.find_exn scripts ~filename:i.href ?part:i.part |>
+    (
+      match i.Import.alt with
+      | None ->
+	 return (Scripts.find_exn scripts ~filename:i.href ?part:i.part)
+      | Some alt ->
+	 Reader.file_contents (repo_root/"book"/alt) >>| fun x ->
+	 `Other x
+    ) >>=
     Scripts.script_part_to_html ?pygmentize
   in
 

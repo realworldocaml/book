@@ -6,6 +6,7 @@ module T = struct
   type t = {
     href : string;
     part : float option;
+    alt : string option;
     childs : Rwo_html.item list;
   } with sexp
 
@@ -46,7 +47,7 @@ let of_html item =
       let find x = List.Assoc.find attrs x in
       Html.check_attrs attrs
         ~required:["href"; "rel"]
-        ~allowed:(`Some ["part"])
+        ~allowed:(`Some ["part"; "alt"])
       >>= fun () ->
 
       (
@@ -58,6 +59,7 @@ let of_html item =
       {
         href = Option.value_exn (find "href");
         part;
+	alt = find "alt";
         childs;
       }
       in
@@ -77,6 +79,7 @@ let to_html x =
     Some ("rel", "import");
     Some ("href", x.href);
     (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
+    (Option.map x.alt ~f:(fun x -> "alt", x));
   ]
   |> List.filter_map ~f:ident
   |> fun a -> Html.link ~a []

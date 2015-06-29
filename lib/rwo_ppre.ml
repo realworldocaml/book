@@ -312,6 +312,7 @@ let to_import (x:t) : Import.t Or_error.t =
       ~prefix:"https://github.com/realworldocaml/examples/tree/v1/code/"
     ;
     part = x.p.part;
+    alt = None;
     childs = List.filter_map ~f:ident [x.p.a2; x.p.a3];
   }
 

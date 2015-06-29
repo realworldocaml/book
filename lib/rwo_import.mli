@@ -14,6 +14,7 @@ open Core.Std
 type t = {
   href : string;
   part : float option;
+  alt : string option;
   childs : Rwo_html.item list;
 } with sexp
 
