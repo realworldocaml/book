@@ -76,12 +76,12 @@ def parse_args():
     )
     parser.add_argument("--github-user",
         dest = "github_user",
-        default = "ocamllabs",  # TODO: Make the public repo owner default.
+        default = "realworldocaml",  # TODO: Make the public repo owner default.
         help = "The user that owns the GitHub repo to use for issues.",
     )
     parser.add_argument("--github-repo",
         dest = "github_repo",
-        default = "rwo-comments",
+        default = "book",
         help = "The name of the GitHub repo to use for issues.",
     )
     parser.add_argument("--github-milestone",
@@ -215,7 +215,7 @@ def render_locale_index_html(html_name, soup, navigation_list, args):
     
 def process_locale_chapter_page_section(html_name, section):
     """Sanitises the given section from a chapter page."""
-    logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
+    #logging.debug("Processing section '{}' in {}".format(section["title"], html_name))
     # Make into HTML5 section.
     section.name = "section"
     del section["class"]
@@ -323,13 +323,16 @@ def process_locale_html(locale_src_dir, locale_dst_dir, html_name, navigation_li
         locale_dst_html = render_locale_chapter_page(html_name, "appendix", soup, navigation_list, args)
     elif soup.find("div", "preface"):
         locale_dst_html = render_locale_chapter_page(html_name, "preface", soup, navigation_list, args)
+    elif soup.find("div", "colophon"):
+        locale_dst_html = render_locale_chapter_page(html_name, "colophon", soup, navigation_list, args)
+    elif soup.find("div", "index"):
+        locale_dst_html = render_locale_chapter_page(html_name, "index", soup, navigation_list, args)
     else:
         panic("Unknown page type: {}".format(html_name))
     # Write the destination HTML to disc.
     logging.debug("Writing processed HTML for {}".format(html_name))
     with open(locale_dst_path, "wb") as locale_dst_handle:
         locale_dst_handle.write(locale_dst_html.encode("utf-8"))
-
 
 def parse_locale_toc_element(html_name, soup):
     """Parse the table of contents from a soup."""

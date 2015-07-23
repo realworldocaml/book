@@ -22,7 +22,8 @@ open Cohttp_lwt_unix
 
 (* main callback function *)
 let callback con_id ?body req =
-  Server.respond_redirect ~uri:(Uri.of_string "https://realworldocaml.org/") ()
+  let path = Uri.path (Request.uri req) in
+  Server.respond_redirect ~uri:(Uri.of_string ("https://realworldocaml.org" ^ path))  ()
 
 let _ =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;

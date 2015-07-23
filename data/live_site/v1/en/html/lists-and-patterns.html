@@ -1,0 +1,745 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"></meta>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29546208-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+        
+        <title>Chapter 3. Lists and Patterns / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"></link>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'realworldocaml',
+                        repo: 'book',
+                        milestone: 'v1',
+                        page: 'lists\u002Dand\u002Dpatterns.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html" class="here">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules, and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First-Class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="ix01.html">Index</a>
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+            <header class="header">
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/coversmall.png" width="120" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+                <p><i>Buy in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook.</a></i></p>
+            </header>
+        
+            <article class="page">
+        
+                <h1>Chapter 3. Lists and Patterns</h1>
+                
+                
+
+    <p id="idm181619620880">This chapter will focus on two common elements of programming in
+  OCaml: lists and pattern matching. Both of these were discussed in <a href="a-guided-tour.html">Chapter 1, <i>A Guided Tour</i></a>, but we'll go into more depth here, presenting
+  the two topics together and using one to help illustrate the other.</p><section id="list-basics"><h1>List Basics</h1><p id="idm181619618832">An OCaml list is an immutable, finite sequence of elements of the
+    same type. As we've seen, OCaml lists can be generated using a
+    bracket-and-semicolon notation:<a name="idm181619618400"></a></p><div class="rwocode"><pre><code># <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619613232">And they can also be generated using the equivalent <code>::</code> notation:<a name="idm181619612272"></a><a name="idm181619610976"></a></p><div class="rwocode"><pre><code># <span class="keyword8">1</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword8">2</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword8">3</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
+</div># <span class="keyword8">1</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">2</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">3</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619603840">As you can see, the <code>::</code> operator
+    is right-associative, which means that we can build up lists without
+    parentheses. The empty list <code>[]</code> is used
+    to terminate a list. Note that the empty list is polymorphic, meaning it
+    can be used with elements of any type, as you can see here:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> empty <span class="keyword2">=</span> <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val empty : 'a list = []
+</div># <span class="keyword8">3</span> <span class="keyword2">:</span><span class="keyword2">:</span> empty<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [3]
+</div># <span class="keyword7">&quot;three&quot;</span> <span class="keyword2">:</span><span class="keyword2">:</span> empty<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list = [&quot;three&quot;]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619594384">The way in which the <code>::</code> operator
+    attaches elements to the front of a list reflects the fact that OCaml's
+    lists are in fact singly linked lists. The figure below is a
+    rough graphical representation of how the list <code>1
+    :: 2 :: 3 :: []</code> is laid out as a data structure. The final arrow
+    (from the box containing <code>3</code>) points to
+    the empty list.<a name="idm181619591872"></a></p><div class="rwocode"><pre><code><pre>+---+---+   +---+---+   +---+---+
+| 1 | *----&gt;| 2 | *----&gt;| 3 | *----&gt;||
++---+---+   +---+---+   +---+---+
+</pre></code></pre><div class="rwocodeinfo">Diagram ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/lists_layout.ascii">lists-and-patterns/lists_layout.ascii</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><div><div></div></div><p id="idm181619586992">Each <code>::</code> essentially adds a new block to the proceding
+      picture. Such a block contains two things: a reference to the data in that list element, and a
+      reference to the remainder of the list. This is why <code>::</code> can
+      extend a list without modifying it; extension allocates a new list element but change any of
+      the existing ones, as you can see:<a name="idm181619585104"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> l <span class="keyword2">=</span> <span class="keyword8">1</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">2</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">3</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val l : int list = [1; 2; 3]
+</div># <span class="keyword4">let</span> m <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">:</span><span class="keyword2">:</span> l<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val m : int list = [0; 1; 2; 3]
+</div># l<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="using-patterns-to-extract-data-from-a-list"><h1>Using Patterns to Extract Data from a List</h1><p id="idm181619575072">We can read data out of a list using a <code>match</code>
+    statement. Here's a simple example of a recursive function that computes
+    the sum of all elements of a list:<a name="idm181619574240"></a><a name="PATMAT"></a><a name="idm181619571760"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> sum l <span class="keyword2">=</span>
+    <span class="keyword1">match</span> l <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> hd <span class="keyword2">+</span> sum tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sum : int list -&gt; int = &lt;fun&gt;
+</div># sum <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 6
+</div># sum <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 0
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619560208">This code follows the convention of using <code>hd</code> to represent the first element (or head) of
+    the list, and <code>tl</code> to represent the
+    remainder (or tail).</p><p id="idm181619558416">The <code>match</code> statement in <code>sum</code> is really doing two things: first, it's
+    acting as a case-analysis tool, breaking down the possibilities into a
+    pattern-indexed list of cases. Second, it lets you name substructures
+    within the data structure being matched. In this case, the variables
+    <code>hd</code> and <code>tl</code> are bound by the pattern that defines the
+    second case of the match statement. Variables that are bound in this way
+    can be used in the expression to the right of the arrow for the pattern in
+    question.</p><p id="idm181619555216">The fact that <code>match</code> statements can be used to
+    bind new variables can be a source of confusion. To see how, imagine we
+    wanted to write a function that filtered out from a list all elements
+    equal to a particular value. You might be tempted to write that code as
+    follows, but when you do, the compiler will immediately warn you that
+    something is wrong:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> drop_value l to_drop <span class="keyword2">=</span>
+    <span class="keyword1">match</span> l <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+    <span class="keyword2">|</span> to_drop <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> drop_value tl to_drop
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> drop_value tl to_drop
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 114-122:
+Warning 11: this match case is unused.val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619545424">Moreover, the function clearly does the wrong thing, filtering out
+    all elements of the list rather than just those equal to the provided
+    value, as you can see here:</p><div class="rwocode"><pre><code># drop_value <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = []
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619540992">So, what's going on?</p><p id="idm181619540576">The key observation is that the appearance of <code>to_drop</code> in the second case doesn't imply a check
+    that the first element is equal to the value <code>to_drop</code> passed in as an argument to <code>drop_value</code>. Instead, it just causes a new
+    variable <code>to_drop</code> to be bound to
+    whatever happens to be in the first element of the list, shadowing the
+    earlier definition of <code>to_drop</code>. The
+    third case is unused because it is essentially the same pattern as we had
+    in the second case.</p><p id="idm181619536528">A better way to write this code is not to use pattern matching for
+    determining whether the first element is equal to <code>to_drop</code>, but to instead use an ordinary
+    <code>if</code> statement:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> drop_value l to_drop <span class="keyword2">=</span>
+    <span class="keyword1">match</span> l <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span>
+      <span class="keyword4">let</span> new_tl <span class="keyword2">=</span> drop_value tl to_drop <span class="keyword4">in</span>
+      <span class="keyword1">if</span> hd <span class="keyword2">=</span> to_drop <span class="keyword1">then</span> new_tl <span class="keyword1">else</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> new_tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
+</div># drop_value <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 3]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619525200">Note that if we wanted to drop a particular literal value (rather
+    than a value that was passed in), we could do this using something like
+    our original implementation of <code>drop_value</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> drop_zero l <span class="keyword2">=</span>
+    <span class="keyword1">match</span> l <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+    <span class="keyword2">|</span> <span class="keyword8">0</span>  <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> drop_zero tl
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> drop_zero tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val drop_zero : int list -&gt; int list = &lt;fun&gt;
+</div># drop_zero <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="limitations-and-blessings-of-pattern-matching"><h1>Limitations (and Blessings) of Pattern Matching</h1><p id="idm181619513792">The preceding example highlights an important fact about patterns,
+    which is that they can't be used to express arbitrary conditions. Patterns
+    can characterize the layout of a data structure and can even include
+    literals, as in the <code>drop_zero</code> example,
+    but that's where they stop. A pattern can check if a list has two
+    elements, but it can't check if the first two elements are equal to each
+    other.<a name="idm181619512464"></a></p><p id="idm181619511024">You can think of patterns as a specialized sublanguage that can
+    express a limited (though still quite rich) set of conditions. The fact
+    that the pattern language is limited turns out to be a very good thing,
+    making it possible to build better support for patterns in the compiler.
+    In particular, both the efficiency of <code>match</code> statements
+    and the ability of the compiler to detect errors in matches depend on the
+    constrained nature of patterns.</p><section id="performance"><h1>Performance</h1><p id="idm181619508880">Naively, you might think that it would be necessary to check each
+      case in a <code>match</code> in sequence to figure
+      out which one fires. If the cases of a match were guarded by arbitrary
+      code, that would be the case. But OCaml is often able to generate
+      machine code that jumps directly to the matched case based on an
+      efficiently chosen set of runtime checks.</p><p id="idm181619507456">As an example, consider the following rather silly functions for
+      incrementing an integer by one. The first is implemented with a
+      <code>match</code> statement, and the second with a sequence of
+      <code>if</code> statements:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> plus_one_match x <span class="keyword2">=</span>
+    <span class="keyword1">match</span> x <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword8">0</span> -<span class="keyword2">&gt;</span> <span class="keyword8">1</span>
+    <span class="keyword2">|</span> <span class="keyword8">1</span> -<span class="keyword2">&gt;</span> <span class="keyword8">2</span>
+    <span class="keyword2">|</span> <span class="keyword8">2</span> -<span class="keyword2">&gt;</span> <span class="keyword8">3</span>
+    <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span>
+
+  <span class="keyword4">let</span> plus_one_if x <span class="keyword2">=</span>
+    <span class="keyword1">if</span>      x <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> <span class="keyword8">1</span>
+    <span class="keyword1">else</span> <span class="keyword1">if</span> x <span class="keyword2">=</span> <span class="keyword8">1</span> <span class="keyword1">then</span> <span class="keyword8">2</span>
+    <span class="keyword1">else</span> <span class="keyword1">if</span> x <span class="keyword2">=</span> <span class="keyword8">2</span> <span class="keyword1">then</span> <span class="keyword8">3</span>
+    <span class="keyword1">else</span> x <span class="keyword2">+</span> <span class="keyword8">1</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val plus_one_match : int -&gt; int = &lt;fun&gt;
+val plus_one_if : int -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619493728">Note the use of <code>_</code> in the above
+      match. This is a wildcard pattern that matches any value, but without
+      binding a variable name to the value in question.</p><p id="idm181619492560">If you benchmark these functions, you'll see that <code>plus_one_if</code> is considerably slower than
+      <code>plus_one_match</code>, and the advantage
+      gets larger as the number of cases increases. Here, we'll benchmark
+      these functions using the <code>core_bench</code>
+      library, which can be installed by running <code>opam
+      install core_bench</code> from the command line:</p><div class="rwocode"><pre><code># <span class="keyword7">#require</span> <span class="keyword7">&quot;core_bench&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword1">open</span> <span class="keyword5">Core_bench.</span>Std<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword4">let</span> run_bench tests <span class="keyword2">=</span>
+  <span class="keyword5">Bench.</span>bench
+    ~ascii_table<span class="keyword2">:</span>true
+    ~display<span class="keyword2">:</span><span class="keyword5">Textutils.</span><span class="keyword5">Ascii_table.</span><span class="keyword5">Display.</span>column_titles
+    tests
+<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val run_bench : Bench.Test.t list -&gt; unit = &lt;fun&gt;
+</div># <span class="keyword2">[</span> <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;plus_one_match&quot;</span> <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      ignore <span class="keyword2">(</span>plus_one_match <span class="keyword8">10</span><span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span> <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;plus_one_if&quot;</span> <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      ignore <span class="keyword2">(</span>plus_one_if <span class="keyword8">10</span><span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">]</span>
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> run_bench
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Estimated testing time 20s (change using -quota SECS).
+                                        
+  Name             Time/Run   % of max  
+ ---------------- ---------- ---------- 
+  plus_one_match      23.68      76.44  
+  plus_one_if         30.98     100.00  
+                                        
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619469824">Here's another, less artificial example. We can rewrite the
+      <code>sum</code> function we described earlier in
+      the chapter using an <code>if</code> statement
+      rather than a match. We can then use the functions <code>is_empty</code>, <code>hd_exn</code>, and <code>tl_exn</code> from the <code>List</code> module to deconstruct the list, allowing
+      us to implement the entire function without pattern matching:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> sum_if l <span class="keyword2">=</span>
+    <span class="keyword1">if</span> <span class="keyword5">List.</span>is_empty l <span class="keyword1">then</span> <span class="keyword8">0</span>
+    <span class="keyword1">else</span> <span class="keyword5">List.</span>hd_exn l <span class="keyword2">+</span> sum_if <span class="keyword2">(</span><span class="keyword5">List.</span>tl_exn l<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sum_if : int list -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619459312">Again, we can benchmark these to see the difference:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numbers <span class="keyword2">=</span> <span class="keyword5">List.</span>range <span class="keyword8">0</span> <span class="keyword8">1000</span> <span class="keyword4">in</span>
+  <span class="keyword2">[</span> <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;sum_if&quot;</span> <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> ignore <span class="keyword2">(</span>sum_if numbers<span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span> <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;sum&quot;</span>    <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> ignore <span class="keyword2">(</span>sum numbers<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">]</span>
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> run_bench
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Estimated testing time 20s (change using -quota SECS).
+                                
+  Name     Time/Run   % of max  
+ -------- ---------- ---------- 
+  sum_if     71_005     100.00  
+  sum        11_788      16.60  
+                                
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619447568">In this case, the <code>match</code>-based
+      implementation is many times faster than the <code>if</code>-based implementation. The difference comes
+      because we need to effectively do the same work multiple times, since
+      each function we call has to reexamine the first element of the list to
+      determine whether or not it's the empty cell. With a
+      <code>match</code> statement, this work happens exactly once per
+      list element.</p><p id="idm181619445072">Generally, pattern matching is more efficient than the
+      alternatives you might code by hand. One notable exception is matches
+      over strings, which are in fact tested sequentially, so matches
+      containing a long sequence of strings can be outperformed by a hash
+      table. But most of the time, pattern matching is a clear performance
+      win.</p></section><section id="detecting-errors"><h1>Detecting Errors</h1><p id="idm181619443264">The error-detecting capabilities of <code>match</code>
+      statements are if anything more important than their performance. We've
+      already seen one example of OCaml's ability to find problems in a
+      pattern match: in our broken implementation of <code>drop_value</code>, OCaml warned us that the final
+      case was redundant. There are no algorithms for determining if a
+      predicate written in a general-purpose language is redundant, but it can
+      be solved reliably in the context of patterns.<a name="idm181619441472"></a><a name="idm181619440560"></a></p><p id="idm181619439120">OCaml also checks <code>match</code> statements for
+      exhaustiveness. Consider what happens if we modify <code>drop_zero</code> by deleting the handler for one of
+      the cases. As you can see, the compiler will produce a warning that
+      we've missed a case, along with an example of an unmatched
+      pattern:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> drop_zero l <span class="keyword2">=</span>
+    <span class="keyword1">match</span> l <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+    <span class="keyword2">|</span> <span class="keyword8">0</span>  <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> drop_zero tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 26-84:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+1::_val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619428112">Even for simple examples like this, exhaustiveness checks are
+      pretty useful. But as we'll see in <a href="variants.html">Chapter 6, <i>Variants</i></a>, they
+      become yet more valuable as you get to more complicated examples,
+      especially those involving user-defined types. In addition to catching
+      outright errors, they act as a sort of refactoring tool, guiding you to
+      the locations where you need to adapt your code to deal with changing
+      types.<a name="idm181619426912"></a></p></section></section><section id="using-the-list-module-effectively"><h1>Using the List Module Effectively</h1><p id="idm181619424960">We've so far written a fair amount of list-munging code using
+    pattern matching and recursive functions. But in real life, you're usually
+    better off using the <code>List</code> module, which
+    is full of reusable functions that abstract out common patterns for
+    computing with lists.<a name="idm181619423760"></a><a name="idm181619422832"></a><a name="Llistmod"></a></p><p id="idm181619419888">Let's work through a concrete example to see this in action. We'll
+    write a function <code>render_table</code> that,
+    given a list of column headers and a list of rows, prints them out in a
+    well-formatted text table, as follows:</p><div class="rwocode"><pre><code># printf <span class="keyword7">&quot;%s\n&quot;</span>
+   <span class="keyword2">(</span>render_table
+     <span class="keyword2">[</span><span class="keyword7">&quot;language&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;architect&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;first release&quot;</span><span class="keyword2">]</span>
+     <span class="keyword2">[</span> <span class="keyword2">[</span><span class="keyword7">&quot;Lisp&quot;</span> <span class="keyword2">;</span><span class="keyword7">&quot;John McCarthy&quot;</span> <span class="keyword2">;</span><span class="keyword7">&quot;1958&quot;</span><span class="keyword2">]</span> <span class="keyword2">;</span>
+       <span class="keyword2">[</span><span class="keyword7">&quot;C&quot;</span>    <span class="keyword2">;</span><span class="keyword7">&quot;Dennis Ritchie&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;1969&quot;</span><span class="keyword2">]</span> <span class="keyword2">;</span>
+       <span class="keyword2">[</span><span class="keyword7">&quot;ML&quot;</span>   <span class="keyword2">;</span><span class="keyword7">&quot;Robin Milner&quot;</span>  <span class="keyword2">;</span><span class="keyword7">&quot;1973&quot;</span><span class="keyword2">]</span> <span class="keyword2">;</span>
+       <span class="keyword2">[</span><span class="keyword7">&quot;OCaml&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;Xavier Leroy&quot;</span>  <span class="keyword2">;</span><span class="keyword7">&quot;1996&quot;</span><span class="keyword2">]</span> <span class="keyword2">;</span>
+     <span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 69) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619406080">The first step is to write a function to compute the maximum width
+    of each column of data. We can do this by converting the header and each
+    row into a list of integer lengths, and then taking the element-wise max
+    of those lists of lengths. Writing the code for all of this directly would
+    be a bit of a chore, but we can do it quite concisely by making use of
+    three functions from the <code>List</code> module:
+    <code>map</code>, <code>map2_exn</code>, and <code>fold</code>.</p><p id="idm181619402704"><code>List.map</code> is the simplest to
+    explain. It takes a list and a function for transforming elements of that
+    list, and returns a new list with the transformed elements. Thus, we can
+    write:<a name="idm181619401744"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword5">String.</span>length <span class="keyword2">[</span><span class="keyword7">&quot;Hello&quot;</span><span class="keyword2">;</span> <span class="keyword7">&quot;World!&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [5; 6]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619396400"><code>List.map2_exn</code> is similar to
+    <code>List.map</code>, except that it takes two
+    lists and a function for combining them. Thus, we might write:<a name="idm181619394864"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map2_exn ~f<span class="keyword2">:</span><span class="keyword5">Int.</span>max <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [3; 2; 3]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619389520">The <code>_exn</code> is there because the
+    function throws an exception if the lists are of mismatched length:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map2_exn ~f<span class="keyword2">:</span><span class="keyword5">Int.</span>max <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: (Invalid_argument &quot;length mismatch in rev_map2_exn: 3 &lt;&gt; 4 &quot;).
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619384272"><code>List.fold</code> is the most complicated of the three, taking
+      three arguments: a list to process, an initial accumulator value, and a function for updating
+      the accumulator. <code>List.fold</code> walks over the list from left to
+      right, updating the accumulator at each step and returning the final value of the accumulator
+      when it's done. You can see some of this by looking at the type-signature for <code>fold</code>:<a name="idm181619381824"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>fold<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619376400">We can use <code>List.fold</code> for
+    something as simple as summing up a list:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>fold ~init<span class="keyword2">:</span><span class="keyword8">0</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 10
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619371520">This example is particularly simple because the accumulator and the
+    list elements are of the same type. But <code>fold</code> is not limited to such cases. We can for
+    example use <code>fold</code> to reverse a list, in
+    which case the accumulator is itself a list:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>fold ~init<span class="keyword2">:</span><span class="keyword2">[</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword3">list</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword3">list</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [4; 3; 2; 1]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619365584">Let's bring our three functions together to compute the maximum
+    column widths:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> max_widths header rows <span class="keyword2">=</span>
+    <span class="keyword4">let</span> lengths l <span class="keyword2">=</span> <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword5">String.</span>length l <span class="keyword4">in</span>
+    <span class="keyword5">List.</span>fold rows
+      ~init<span class="keyword2">:</span><span class="keyword2">(</span>lengths header<span class="keyword2">)</span>
+      ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> acc row -<span class="keyword2">&gt;</span>
+        <span class="keyword5">List.</span>map2_exn ~f<span class="keyword2">:</span><span class="keyword5">Int.</span>max acc <span class="keyword2">(</span>lengths row<span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val max_widths : string list -&gt; string list list -&gt; int list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619357024">Using <code>List.map</code> we define the
+    function <code>lengths</code>, which converts a list
+    of strings to a list of integer lengths. <code>List.fold</code> is then used to iterate over the rows,
+    using <code>map2_exn</code> to take the max of the
+    accumulator with the lengths of the strings in each row of the table, with
+    the accumulator initialized to the lengths of the header row.</p><p id="idm181619353808">Now that we know how to compute column widths, we can write the code
+    to generate the line that separates the header from the rest of the text
+    table. We'll do this in part by mapping <code>String.make</code> over the lengths of the columns to
+    generate a string of dashes of the appropriate length. We'll then join
+    these sequences of dashes together using <code>String.concat</code>, which concatenates a list of
+    strings with an optional separator string, and <code>^</code>, which is a pairwise string concatenation
+    function, to add the delimiters on the outside:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> render_separator widths <span class="keyword2">=</span>
+    <span class="keyword4">let</span> pieces <span class="keyword2">=</span> <span class="keyword5">List.</span>map widths
+      ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> w -<span class="keyword2">&gt;</span> <span class="keyword5">String.</span>make <span class="keyword2">(</span>w <span class="keyword2">+</span> <span class="keyword8">2</span><span class="keyword2">)</span> '-'<span class="keyword2">)</span>
+    <span class="keyword4">in</span>
+    <span class="keyword7">&quot;|&quot;</span> <span class="keyword2">^</span> <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;+&quot;</span> pieces <span class="keyword2">^</span> <span class="keyword7">&quot;|&quot;</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val render_separator : int list -&gt; string = &lt;fun&gt;
+</div># render_separator <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">6</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;|-----+--------+----|&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619341824">Note that we make the line of dashes two larger than the provided
+    width to provide some whitespace around each entry in the table.<a name="idm181619341424"></a><a name="idm181619340112"></a><a name="idm181619339216"></a></p><aside class="note"><h1>Performance of String.concat and ^</h1><p id="idm181619337088">In the preceding code we’ve concatenated strings two different
+      ways: <code>String.concat</code>, which operates
+      on lists of strings; and <code>^</code>, which is
+      a pairwise operator. You should avoid <code>^</code> for joining long numbers of strings, since
+      it allocates a new string every time it runs. Thus, the following
+      code</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> s <span class="keyword2">=</span> <span class="keyword7">&quot;.&quot;</span> <span class="keyword2">^</span> <span class="keyword7">&quot;.&quot;</span>  <span class="keyword2">^</span> <span class="keyword7">&quot;.&quot;</span>  <span class="keyword2">^</span> <span class="keyword7">&quot;.&quot;</span>  <span class="keyword2">^</span> <span class="keyword7">&quot;.&quot;</span>  <span class="keyword2">^</span> <span class="keyword7">&quot;.&quot;</span>  <span class="keyword2">^</span> <span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val s : string = &quot;.......&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619330448">will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
+      code</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> s <span class="keyword2">=</span> <span class="keyword5">String.</span>concat <span class="keyword2">[</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;.&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val s : string = &quot;.......&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619326032">allocates one string of size 7, as well as a list of length 7. At
+      these small sizes, the differences don't amount to much, but for
+      assembling large strings, it can be a serious performance issue.</p></aside><p id="idm181619325312">Now we need code for rendering a row with data in it. We'll first write a function called
+        <code>pad</code>, for padding out a string to a specified length plus
+      one blank space on both sides:<a name="idm181619324192"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> pad s length <span class="keyword2">=</span>
+    <span class="keyword7">&quot; &quot;</span> <span class="keyword2">^</span> s <span class="keyword2">^</span> <span class="keyword5">String.</span>make <span class="keyword2">(</span>length - <span class="keyword5">String.</span>length s <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span> ' '
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val pad : string -&gt; int -&gt; string = &lt;fun&gt;
+</div># pad <span class="keyword7">&quot;hello&quot;</span> <span class="keyword8">10</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot; hello      &quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619315616">We can render a row of data by merging together the padded strings.
+    Again, we'll use <code>List.map2_exn</code> for
+    combining the list of data in the row with the list of widths:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> render_row row widths <span class="keyword2">=</span>
+    <span class="keyword4">let</span> padded <span class="keyword2">=</span> <span class="keyword5">List.</span>map2_exn row widths ~f<span class="keyword2">:</span>pad <span class="keyword4">in</span>
+    <span class="keyword7">&quot;|&quot;</span> <span class="keyword2">^</span> <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;|&quot;</span> padded <span class="keyword2">^</span> <span class="keyword7">&quot;|&quot;</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val render_row : string list -&gt; int list -&gt; string = &lt;fun&gt;
+</div># render_row <span class="keyword2">[</span><span class="keyword7">&quot;Hello&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;World&quot;</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">10</span><span class="keyword2">;</span><span class="keyword8">15</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;| Hello      | World           |&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619306656">Now we can bring this all together in a single function that renders
+    the table:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> render_table header rows <span class="keyword2">=</span>
+    <span class="keyword4">let</span> widths <span class="keyword2">=</span> max_widths header rows <span class="keyword4">in</span>
+    <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;\n&quot;</span>
+      <span class="keyword2">(</span>render_row header widths
+       <span class="keyword2">:</span><span class="keyword2">:</span> render_separator widths
+       <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword5">List.</span>map rows ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> row -<span class="keyword2">&gt;</span> render_row row widths<span class="keyword2">)</span>
+      <span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section id="more-useful-list-functions"><h1>More Useful List Functions</h1><p id="idm181619296528">The previous example we worked through touched on only three of
+      the functions in <code>List</code>. We won't cover
+      the entire interface (for that you should look at the <a href="http://realworldocaml.org/doc" target="_top">online docs</a>), but a few more
+      functions are useful enough to mention here.</p><section id="combining-list-elements-with-list.reduce"><h1>Combining list elements with List.reduce</h1><p id="idm181619293728"><code>List.fold</code>, which we described
+        earlier, is a very general and powerful function. Sometimes, however,
+        you want something simpler and easier to use. One such function is
+        <code>List.reduce</code>, which is essentially a
+        specialized version of <code>List.fold</code>
+        that doesn't require an explicit starting value, and whose accumulator
+        has to consume and produce values of the same type as the elements of
+        the list it applies to.<a name="idm181619291232"></a><a name="idm181619289920"></a><a name="idm181619288624"></a></p><p id="idm181619287184">Here's the type signature:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>reduce<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619282768"><code>reduce</code> returns an optional
+        result, returning <code>None</code> when the
+        input list is empty.</p><p id="idm181619281152">Now we can see <code>reduce</code> in action:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>reduce ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 15
+</div># <span class="keyword5">List.</span>reduce ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = None
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="filtering-with-list.filter-and-list.filter_map"><h1>Filtering with List.filter and List.filter_map</h1><p id="idm181619273536">Very often when processing lists, you wants to restrict your attention to a subset of
+          the values on your list. The <code>List.filter</code> function is
+          one way of doing that:<a name="idm181619272464"></a><a name="idm181619271152"></a><a name="idm181619269840"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>filter ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">mod</span> <span class="keyword8">2</span> <span class="keyword2">=</span> <span class="keyword8">0</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [2; 4]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 29) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619264288">Note that the <code>mod</code> used above
+        is an infix operator, as described in <a href="variables-and-functions.html">Chapter 2, <i>Variables and Functions</i></a>.</p><p id="idm181619262768">Sometimes, you want to both transform and filter as part of the
+        same computation. In that case, <code>List.filter_map</code> is what you need. The
+        function passed to <code>List.filter_map</code>
+        returns an optional value, and <code>List.filter_map</code> drops all elements for which
+        <code>None</code> is returned.</p><p id="idm181619259536">Here's an example. The following expression computes the list of
+        file extensions in the current directory, piping the results through
+        <code>List.dedup</code> to remove duplicates.
+        Note that this example also uses some functions from other modules,
+        including <code>Sys.ls_dir</code> to get a
+        directory listing, and <code>String.rsplit2</code> to split a string on the
+        rightmost appearance of a given character:<a name="idm181619256944"></a><a name="idm181619255632"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>filter_map <span class="keyword2">(</span><span class="keyword5">Sys.</span>ls_dir <span class="keyword7">&quot;.&quot;</span><span class="keyword2">)</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> fname -<span class="keyword2">&gt;</span>
+    <span class="keyword1">match</span> <span class="keyword5">String.</span>rsplit2 ~on<span class="keyword2">:</span>'.' fname <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">None </span> <span class="keyword2">|</span> <span class="keyword6">Some </span><span class="keyword2">(</span><span class="keyword7">&quot;&quot;</span>,<span class="keyword8">_</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>    <span class="keyword2">|</span> <span class="keyword6">Some </span><span class="keyword2">(</span><span class="keyword8">_</span>,ext<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword6">Some </span>ext<span class="keyword2">)</span>
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>dedup
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list = [&quot;ascii&quot;; &quot;ml&quot;; &quot;mli&quot;; &quot;topscript&quot;]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619246576">The preceding code is also an example of an Or pattern, which
+        allows you to have multiple subpatterns within a larger pattern. In
+        this case, <code>None | Some (&quot;&quot;,_)</code> is an
+        Or pattern. As we'll see later, Or patterns can be nested anywhere
+        within larger patterns.</p></section><section id="partitioning-with-list.partition_tf"><h1>Partitioning with List.partition_tf</h1><p id="idm181619244160">Another useful operation that's closely related to filtering is
+        partitioning. The function <code>List.partition_tf</code> takes a list and a
+        function for computing a Boolean condition on the list elements, and
+        returns two lists. The <code>tf</code> in the
+        name is a mnemonic to remind the user that <code>true</code> elements go to the first list and
+        <code>false</code> ones go to the second. Here's
+        an example:<a name="idm181619240912"></a><a name="idm181619239584"></a><a name="idm181619238272"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_ocaml_source s <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword5">String.</span>rsplit2 s ~on<span class="keyword2">:</span>'.' <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">Some </span><span class="keyword2">(</span><span class="keyword8">_</span>,<span class="keyword2">(</span><span class="keyword7">&quot;ml&quot;</span><span class="keyword2">|</span><span class="keyword7">&quot;mli&quot;</span><span class="keyword2">)</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> true
+    <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_ocaml_source : string -&gt; bool = &lt;fun&gt;
+</div># <span class="keyword4">let</span> <span class="keyword2">(</span>ml_files,other_files<span class="keyword2">)</span> <span class="keyword2">=</span>
+    <span class="keyword5">List.</span>partition_tf <span class="keyword2">(</span><span class="keyword5">Sys.</span>ls_dir <span class="keyword7">&quot;.&quot;</span><span class="keyword2">)</span>  ~f<span class="keyword2">:</span>is_ocaml_source<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ml_files : string list = [&quot;example.ml&quot;; &quot;example.mli&quot;]
+val other_files : string list = [&quot;lists_layout.ascii&quot;; &quot;main.topscript&quot;]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="combining-lists"><h1>Combining lists</h1><p id="idm181619225968">Another very common operation on lists is concatenation. The
+        list module actually comes with a few different ways of doing this.
+        First, there's <code>List.append</code>, for
+        concatenating a pair of lists:<a name="idm181619224848"></a><a name="idm181619223552"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>append <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">;</span><span class="keyword8">6</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3; 4; 5; 6]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619218192">There's also <code>@</code>, an operator
+        equivalent of <code>List.append</code>:</p><div class="rwocode"><pre><code># <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">@</span> <span class="keyword2">[</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">;</span><span class="keyword8">6</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3; 4; 5; 6]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619212544">In addition, there is <code>List.concat</code>, for concatenating a list of
+        lists:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>concat <span class="keyword2">[</span><span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">[</span><span class="keyword8">6</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3; 4; 5; 6]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619207488">Here's an example of using <code>List.concat</code> along with <code>List.map</code> to compute a recursive listing of a
+        directory tree:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> ls_rec s <span class="keyword2">=</span>
+    <span class="keyword1">if</span> <span class="keyword5">Sys.</span>is_file_exn ~follow_symlinks<span class="keyword2">:</span>true s
+    <span class="keyword1">then</span> <span class="keyword2">[</span>s<span class="keyword2">]</span>
+    <span class="keyword1">else</span>
+      <span class="keyword5">Sys.</span>ls_dir s
+      <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> sub -<span class="keyword2">&gt;</span> ls_rec <span class="keyword2">(</span>s <span class="keyword2">^</span>/ sub<span class="keyword2">)</span><span class="keyword2">)</span>
+      <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>concat
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ls_rec : string -&gt; string list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619197088">Note that <code>^/</code> is an infix
+        operator provided by Core for adding a new element to a string
+        representing a file path. It is equivalent to Core's <code>Filename.concat</code>.</p><p id="idm181619195264">The preceding combination of <code>List.map</code> and <code>List.concat</code> is common enough that there is a
+        function <code>List.concat_map</code> that
+        combines these into one, more efficient operation:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> ls_rec s <span class="keyword2">=</span>
+    <span class="keyword1">if</span> <span class="keyword5">Sys.</span>is_file_exn ~follow_symlinks<span class="keyword2">:</span>true s
+    <span class="keyword1">then</span> <span class="keyword2">[</span>s<span class="keyword2">]</span>
+    <span class="keyword1">else</span>
+      <span class="keyword5">Sys.</span>ls_dir s
+      <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>concat_map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> sub -<span class="keyword2">&gt;</span> ls_rec <span class="keyword2">(</span>s <span class="keyword2">^</span>/ sub<span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ls_rec : string -&gt; string list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section></section></section><section id="tail-recursion"><h1>Tail Recursion</h1><p id="idm181619182944">The only way to compute the length of an OCaml list is to walk the
+    list from beginning to end. As a result, computing the length of a list
+    takes time linear in the size of the list. Here's a simple function for
+    doing so:<a name="idm181619182448"></a><a name="idm181619181152"></a><a name="idm181619179872"></a>
+<a name="idm181619178848"></a>
+</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> length <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+    <span class="keyword2">|</span> <span class="keyword8">_</span> <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">+</span> length tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val length : 'a list -&gt; int = &lt;fun&gt;
+</div># length <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 3
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 37) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619169856">This looks simple enough, but you'll discover that this
+    implementation runs into problems on very large lists, as we'll show in
+    the following code:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> make_list n <span class="keyword2">=</span> <span class="keyword5">List.</span>init n ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val make_list : int -&gt; int list = &lt;fun&gt;
+</div># length <span class="keyword2">(</span>make_list <span class="keyword8">10</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 10
+</div># length <span class="keyword2">(</span>make_list <span class="keyword8">10_000_000</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Stack overflow during evaluation (looping recursion?).
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 38) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619161696">The preceding example creates lists using <code>List.init</code>, which takes an integer <code>n</code> and a function <code>f</code> and creates a list of length <code>n</code>, where the data for each element is created by
+    calling <code>f</code> on the index of that
+    element.</p><p id="idm181619157920">To understand where the error in the above example comes from, you
+    need to learn a bit more about how function calls work. Typically, a
+    function call needs some space to keep track of information associated
+    with the call, such as the arguments passed to the function, or the
+    location of the code that needs to start executing when the function call
+    is complete. To allow for nested function calls, this information is
+    typically organized in a stack, where a new <span><em>stack
+    frame</em></span> is allocated for each nested function call, and then
+    deallocated when the function call is complete.<a name="idm181619156656"></a></p><p id="idm181619155632">And that's the problem with our call to <code>length</code>: it tried to allocate 10 million stack
+    frames, which exhausted the available stack space. Happily, there's a way
+    around this problem. Consider the following alternative
+    implementation:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> length_plus_n l n <span class="keyword2">=</span>
+    <span class="keyword1">match</span> l <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> n
+    <span class="keyword2">|</span> <span class="keyword8">_</span> <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> length_plus_n tl <span class="keyword2">(</span>n <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val length_plus_n : 'a list -&gt; int -&gt; int = &lt;fun&gt;
+</div># <span class="keyword4">let</span> length l <span class="keyword2">=</span> length_plus_n l <span class="keyword8">0</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val length : 'a list -&gt; int = &lt;fun&gt;
+</div># length <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 39) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619144080">This implementation depends on a helper function, <code>length_plus_n</code>, that computes the length of a
+    given list plus a given <code>n</code>. In practice,
+    <code>n</code> acts as an accumulator in which the
+    answer is built up, step by step. As a result, we can do the additions
+    along the way rather than doing them as we unwind the nested sequence of
+    function calls, as we did in our first implementation of <code>length</code>.</p><p id="idm181619140752">The advantage of this approach is that the recursive call in
+    <code>length_plus_n</code> is a <span><em>tail
+    call</em></span>. We'll explain more precisely what it means to be a tail
+    call shortly, but the reason it's important is that tail calls don't
+    require the allocation of a new stack frame, due to what is called the
+    <span><em>tail-call optimization</em></span>. A recursive function is said
+    to be <span><em>tail recursive</em></span> if all of its recursive calls
+    are tail calls. <code>length_plus_n</code> is indeed
+    tail recursive, and as a result, <code>length</code>
+    can take a long list as input without blowing the stack:<a name="idm181619136800"></a></p><div class="rwocode"><pre><code># length <span class="keyword2">(</span>make_list <span class="keyword8">10_000_000</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 10000000
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 40) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619131872">So when is a call a tail call? Let's think about the situation where one function (the
+        <span><em>caller</em></span>) invokes another (the <span><em>callee</em></span>). The
+      invocation is considered a tail call when the caller doesn't do anything with the value
+      returned by the callee except to return it. The tail-call optimization makes sense because,
+      when a caller makes a tail call, the caller's stack frame need never be used again, and so you
+      don't need to keep it around. Thus, instead of allocating a new stack frame for the callee,
+      the compiler is free to reuse the caller's stack frame.</p><p id="idm181619130096">Tail recursion is important for more than just lists. Ordinary nontail recursive calls are
+      reasonable when dealing with data structures like binary trees, where the depth of the tree is
+      logarithmic in the size of your data. But when dealing with situations where the depth of the
+      sequence of nested calls is on the order of the size of your data, tail recursion is usually
+      the right approach.</p></section><section id="terser-and-faster-patterns"><h1>Terser and Faster Patterns</h1><p id="idm181619128224">Now that we know more about how lists and patterns work, let's
+    consider how we can improve on an example from <a href="a-guided-tour.html#recursive-list-functions">the section called “Recursive list functions”</a>: the function <code>destutter</code>, which removes sequential duplicates
+    from a list. Here's the implementation that was described
+    earlier:<a name="idm181619126544"></a><a name="PTTRNMAT"></a><a name="idm181619124064"></a><a name="idm181619122752"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> destutter <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span>hd<span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span>hd<span class="keyword2">]</span>
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> hd' <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span>
+      <span class="keyword1">if</span> hd <span class="keyword2">=</span> hd' <span class="keyword1">then</span> destutter <span class="keyword2">(</span>hd' <span class="keyword2">:</span><span class="keyword2">:</span> tl<span class="keyword2">)</span>
+      <span class="keyword1">else</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> destutter <span class="keyword2">(</span>hd' <span class="keyword2">:</span><span class="keyword2">:</span> tl<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 41) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619113104">We'll consider some ways of making this code more concise and more
+    efficient.</p><p id="idm181619112624">First, let's consider efficiency. One problem with the <code>destutter</code> code above is that it in some cases
+    re-creates on the righthand side of the arrow a value that already existed
+    on the lefthand side. Thus, the pattern <code>[hd]
+    -&gt; [hd]</code> actually allocates a new list element, when really,
+    it should be able to just return the list being matched. We can reduce
+    allocation here by using an <code>as</code> pattern,
+    which allows us to declare a name for the thing matched by a pattern or
+    subpattern. While we're at it, we'll use the <code>function</code> keyword to eliminate the need for an
+    explicit match:<a name="idm181619109216"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> destutter <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword1">as</span> l -<span class="keyword2">&gt;</span> l
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword8">_</span><span class="keyword2">]</span> <span class="keyword1">as</span> l -<span class="keyword2">&gt;</span> l
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span>hd' <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">_</span> <span class="keyword1">as</span> tl<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword1">if</span> hd <span class="keyword2">=</span> hd' <span class="keyword1">then</span> destutter tl
+      <span class="keyword1">else</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> destutter tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 42) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619100208">We can further collapse this by combining the first two cases into
+    one, using an Or pattern:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> destutter <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword8">_</span><span class="keyword2">]</span> <span class="keyword1">as</span> l -<span class="keyword2">&gt;</span> l
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span>hd' <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">_</span> <span class="keyword1">as</span> tl<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword1">if</span> hd <span class="keyword2">=</span> hd' <span class="keyword1">then</span> destutter tl
+      <span class="keyword1">else</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> destutter tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 43) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619092448">We can make the code slightly terser now by using a <code>when</code> clause. A <code>when</code> clause allows us to add an extra
+    precondition to a pattern in the form of an arbitrary OCaml expression. In
+    this case, we can use it to include the check on whether the first two
+    elements are equal:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> destutter <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword8">_</span><span class="keyword2">]</span> <span class="keyword1">as</span> l -<span class="keyword2">&gt;</span> l
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span>hd' <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">_</span> <span class="keyword1">as</span> tl<span class="keyword2">)</span> <span class="keyword1">when</span> hd <span class="keyword2">=</span> hd' -<span class="keyword2">&gt;</span> destutter tl
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> destutter tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 44) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section><h1><b>Polymorphic Compare</b></h1><p id="idm181619080848">In the preceding <code>destutter</code>
+      example, we made use of the fact that OCaml lets us test equality
+      between values of any type, using the <code>=</code> operator. Thus, we can write:</p><div class="rwocode"><pre><code># <span class="keyword8">3</span> <span class="keyword2">=</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = false
+</div># <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span> <span class="keyword2">=</span> <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = true
+</div># <span class="keyword2">[</span><span class="keyword6">Some </span><span class="keyword8">3</span><span class="keyword2">;</span> None<span class="keyword2">]</span> <span class="keyword2">=</span> <span class="keyword2">[</span>None<span class="keyword2">;</span> <span class="keyword6">Some </span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = false
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 45) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619071536">Indeed, if we look at the type of the equality operator, we'll see
+      that it is polymorphic:</p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword2">=</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 46) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619067056">OCaml comes with a whole family of polymorphic comparison operators, including the
+        standard infix comparators, <code>&lt;</code>, <code>&gt;=</code>, etc., as well as the function <code>compare</code> that returns <code>-1</code>, <code>0</code>, or <code>1</code> to flag whether the
+        first operand is smaller than, equal to, or greater than the second, respectively.</p><p id="idm181619062576">You might wonder how you could build functions like these yourself if OCaml didn't come
+        with them built in. It turns out that you <span><em>can't</em></span> build these functions
+        on your own. OCaml's polymorphic comparison functions are built into the runtime to a low
+        level. These comparisons are polymorphic on the basis of ignoring almost everything about
+        the types of the values that are being compared, paying attention only to the structure of
+        the values as they're laid out in memory.</p><p id="idm181619061280">Polymorphic compare does have some limitations. For example, it
+      will fail at runtime if it encounters a function value:</p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: (Invalid_argument &quot;equal: functional value&quot;).
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 47) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619056736">Similarly, it will fail on values that come from outside the OCaml
+      heap, like values from C bindings. But it will work in a reasonable way
+      for other kinds of values.</p><p id="idm181619056160">For simple atomic types, polymorphic compare has the semantics you
+      would expect: for floating-point numbers and integers, polymorphic
+      compare corresponds to the expected numerical comparison functions. For
+      strings, it's a lexicographic comparison.</p><p id="idm181619055504">Sometimes, however, the type-ignoring nature of polymorphic
+      compare is a problem, particularly when you have your own notion of
+      equality and ordering that you want to impose. We'll discuss this issue
+      more, as well as some of the other downsides of polymorphic compare, in
+      <a href="maps-and-hash-tables.html">Chapter 13, <i>Maps and Hash Tables</i></a>.</p></section><p id="idm181619054208">Note that <code>when</code> clauses have some
+    downsides. As we noted earlier, the static checks associated with pattern
+    matches rely on the fact that patterns are restricted in what they can
+    express. Once we add the ability to add an arbitrary condition to a
+    pattern, something will be lost. In particular, the ability of the
+    compiler to determine if a match is exhaustive, or if some case is
+    redundant, is compromised.</p><p id="idm181619052736">Consider the following function, which takes a list of optional
+    values, and returns the number of those values that are <code>Some</code>. Because this implementation uses <code>when</code> clauses, the compiler can't tell that the
+    code is exhaustive:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> count_some <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> tl <span class="keyword1">when</span> <span class="keyword5">Option.</span>is_none x -<span class="keyword2">&gt;</span> count_some tl
+    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> tl <span class="keyword1">when</span> <span class="keyword5">Option.</span>is_some x -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">+</span> count_some tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 30-169:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::_
+(However, some guarded clause may match this value.)val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 48) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619040096">Despite the warning, the function does work fine:</p><div class="rwocode"><pre><code># count_some <span class="keyword2">[</span><span class="keyword6">Some </span><span class="keyword8">3</span><span class="keyword2">;</span> None<span class="keyword2">;</span> <span class="keyword6">Some </span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 2
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 49) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619035792">If we add another redundant case without a <code>when</code> clause, the compiler will stop complaining
+    about exhaustiveness and won't produce a warning about the
+    redundancy.</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> count_some <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> tl <span class="keyword1">when</span> <span class="keyword5">Option.</span>is_none x -<span class="keyword2">&gt;</span> count_some tl
+    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> tl <span class="keyword1">when</span> <span class="keyword5">Option.</span>is_some x -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">+</span> count_some tl
+    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword8">-1</span> <span class="comments">(* unreachable *)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 50) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619026496">Probably a better approach is to simply drop the second <code>when</code> clause:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> count_some <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> tl <span class="keyword1">when</span> <span class="keyword5">Option.</span>is_none x -<span class="keyword2">&gt;</span> count_some tl
+    <span class="keyword2">|</span> <span class="keyword8">_</span> <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">+</span> count_some tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 51) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619018048">This is a little less clear, however, than the direct
+    pattern-matching solution, where the meaning of each pattern is clearer on
+    its own:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> count_some <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+    <span class="keyword2">|</span> <span class="keyword6">None </span>  <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> count_some tl
+    <span class="keyword2">|</span> <span class="keyword6">Some </span><span class="keyword8">_</span> <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">+</span> count_some tl
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 52) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181619010224">The takeaway from all of this is although <code>when</code> clauses can be useful, we should prefer
+    patterns wherever they are sufficient.</p><p id="idm181619009136">As a side note, the above implementation of <code>count_some</code> is longer than necessary; even worse,
+    it is not tail recursive. In real life, you would probably just use the
+    <code>List.count</code> function from <code>Core</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> count_some l <span class="keyword2">=</span> <span class="keyword5">List.</span>count ~f<span class="keyword2">:</span><span class="keyword5">Option.</span>is_some l<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</a> , continued (part 53) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="variables-and-functions.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="files-modules-and-programs.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
