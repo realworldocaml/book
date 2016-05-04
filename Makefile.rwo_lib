@@ -1,0 +1,57 @@
+OCAMLMAKEFILE = ./OCamlMakefile
+
+all: native-code-library
+
+RESULT = rwo
+
+## Logic to compute and update git hash
+
+_git_commit::
+	@if test -e .git; then                             \
+	  GIT_COMMIT='Some "$(shell git rev-parse HEAD)"'; \
+	else                                               \
+	  GIT_COMMIT='None';                               \
+	fi;                                                \
+	if echo "$$GIT_COMMIT" | cmp --quiet - $@; then    \
+	  echo "# GIT_COMMIT='$$GIT_COMMIT' (unchanged)";  \
+	else                                               \
+	  echo "# GIT_COMMIT='$$GIT_COMMIT' (UPDATED)";    \
+	  echo "$$GIT_COMMIT" > $@;                        \
+	fi
+
+clean::
+	rm -f _git_commit
+
+## Update rwo_about according to git hash
+
+native-code-library byte-code-library: lib/rwo_about.ml
+
+lib/rwo_about.ml: lib/rwo_about.ml.m4 _git_commit
+	m4 -D GIT_COMMIT="$$(cat _git_commit)" $< > $@
+
+clean::
+	rm -f lib/rwo_about.ml
+
+## Library description
+
+SOURCES =                                        \
+  lib/rwo_about.ml                               \
+  lib/rwo_bash_script.mli lib/rwo_bash_script.ml \
+  lib/rwo_book.mli        lib/rwo_book.ml        \
+  lib/rwo_core2.mli       lib/rwo_core2.ml       \
+  lib/rwo_html.mli        lib/rwo_html.ml        \
+  lib/rwo_import.mli      lib/rwo_import.ml      \
+  lib/rwo_index.mli       lib/rwo_index.ml       \
+  lib/rwo_lang.mli        lib/rwo_lang.ml        \
+  lib/rwo_ppre.mli        lib/rwo_ppre.ml        \
+  lib/rwo_pygments.mli    lib/rwo_pygments.ml    \
+  lib/rwo_scripts.mli     lib/rwo_scripts.ml     \
+  lib/rwo_toc.mli         lib/rwo_toc.ml         \
+  lib/rwo_util.mli        lib/rwo_util.ml        \
+  lib/rwo.ml
+
+THREADS = 1 
+PACKS = core async ppx_sexp_conv netstring oloop
+OCAMLFLAGS = -bin-annot -annot -w A-4-33-40-41-42-44-45-48 -safe-string -short-paths
+
+include $(OCAMLMAKEFILE)
