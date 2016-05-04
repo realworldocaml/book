@@ -11,8 +11,7 @@ type lang = [
   | `Java
   | `Json
   | `Scheme
-]
-with sexp
+] [@@deriving sexp]
 
 let of_lang (x:Lang.t) = match (x :> string) with
   | "atd"          -> Ok `OCaml

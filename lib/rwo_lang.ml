@@ -2,7 +2,7 @@ open Core.Std
 open Async.Std
 
 type t = string
-with sexp
+  [@@deriving sexp]
 
 let to_string = Fn.id
 

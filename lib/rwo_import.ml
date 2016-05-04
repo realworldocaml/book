@@ -8,7 +8,7 @@ module T = struct
     part : float option;
     alt : string option;
     childs : Rwo_html.item list;
-  } with sexp
+  } [@@deriving sexp]
 
   (* Ignore [childs]. *)
   let compare (x:t) (y:t) =

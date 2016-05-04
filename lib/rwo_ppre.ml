@@ -102,7 +102,7 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
       with
         exn ->
           error "error parsing part number from data2 node"
-            (x, exn) <:sexp_of< string * exn >>
+            (x, exn) [%sexp_of: string * exn]
     )
   in
 
@@ -152,18 +152,18 @@ let parse_code_helper expected_attrs item : string Or_error.t =
   match item with
   | `Data _ ->
     error "expected <code> but got DATA"
-      (expected_attrs,item) <:sexp_of< Html.attributes * Html.item >>
+      (expected_attrs,item) [%sexp_of: Html.attributes * Html.item]
   | `Element {Html.name="code"; attrs; childs} -> (
     if attrs = expected_attrs then
       Result.map (items_to_string childs) ~f:decode_html_string
     else
       error "expected attributes differ from the ones found"
         (expected_attrs, item)
-        <:sexp_of< Html.attributes * Html.item >>
+        [%sexp_of:Html.attributes * Html.item]
   )
   | `Element _ ->
     error "expected <code> but got other type of node"
-      (expected_attrs,item) <:sexp_of< Html.attributes * Html.item >>
+      (expected_attrs,item) [%sexp_of: Html.attributes * Html.item]
 
 (** Parse <code> element. *)
 let parse_code item : string Or_error.t =
@@ -216,7 +216,7 @@ let code_items_to_code_block code_items =
       error "prompt followed by data" x sexp_of_string
     | (`Prompt x)::(`Prompt y)::_ ->
       error "two successive code prompts"
-        (x,y) <:sexp_of< string * string >>
+        (x,y) [%sexp_of: string * string]
     | (`Prompt _)::[] ->
       Or_error.error_string "prompt not followed by anything"
   in
@@ -331,7 +331,7 @@ let extract_code_from_1e_exn chapter =
         | "ml" -> sprintf "\n\n(* part %f *)\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
-                    (part, lang) <:sexp_of< float * Lang.t >>
+                    (part, lang) [%sexp_of: float * Lang.t]
           )
       )
     in

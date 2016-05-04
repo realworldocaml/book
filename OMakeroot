@@ -20,8 +20,7 @@ LIB_NAME = $(PROJECT)
 LIB_MODULES[] =
   $(removesuffix $(basename $(ls lib/*.ml)))
   $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
-LIB_PACKAGES = core async sexplib.syntax \
-               netstring oloop
+LIB_PACKAGES = core async ppx_sexp_conv netstring oloop
 
 APP_NAME = $(PROJECT)
 APP_MODULES[] = app
@@ -51,7 +50,6 @@ OCAMLOPTFLAGS =
 OCAML_LINK_FLAGS = -linkpkg
 OCAML_BYTE_LINK_FLAGS =
 OCAML_NATIVE_LINK_FLAGS =
-OCAMLFINDFLAGS = -syntax camlp4o
 
 if $(and $(defined PYGMENTIZE), $(or $(equal $(PYGMENTIZE), true), $(equal $(PYGMENTIZE), TRUE), $(equal $(PYGMENTIZE), t), $(equal $(PYGMENTIZE), T) ))
   PYGMENTIZE = true

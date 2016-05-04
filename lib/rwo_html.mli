@@ -3,7 +3,7 @@ open Core.Std
 open Async.Std
 
 type attributes = (string * string) list
-with sexp
+  [@@deriving sexp]
 
 type element = {
   name : string;
@@ -14,10 +14,10 @@ type element = {
 and item = [
 | `Element of element
 | `Data of string
-] with sexp
+] [@@deriving sexp]
 
 type t = item list
-with sexp
+  [@@deriving sexp]
 
 val item_of_string : string -> item Or_error.t
 val item_of_file : string -> item Or_error.t Deferred.t

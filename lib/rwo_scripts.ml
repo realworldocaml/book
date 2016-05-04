@@ -61,7 +61,7 @@ let find_exn t ?(part=0.) ~filename =
   in
   let no_part_err() = ok_exn (
     error "no data for requested part of file"
-      (filename,part) <:sexp_of< string * float >> )
+      (filename,part) [%sexp_of: string * float] )
   in
   match String.Map.find t filename with
   | None -> no_file_err()

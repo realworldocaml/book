@@ -37,7 +37,7 @@ module Evaluated = struct
         else
           error "expected exit code = 0"
             (t.filename, x.command, x.exit_code)
-            <:sexp_of< string * string * int >>
+            [%sexp_of: string * string * int]
       )
     |> Or_error.combine_errors_unit
     |> function

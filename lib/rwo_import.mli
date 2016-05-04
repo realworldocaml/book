@@ -16,7 +16,7 @@ type t = {
   part : float option;
   alt : string option;
   childs : Rwo_html.item list;
-} with sexp
+} [@@deriving sexp]
 
 val of_html : Rwo_html.item -> t Or_error.t
 
