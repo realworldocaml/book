@@ -1,8 +1,0 @@
-EPS_FILES = $(glob *.eps)
-
-RSRC_FILES[] = $(addsuffix .rsrc, $(EPS_FILES))
-
-%.rsrc: %
-    cp $</rsrc $@
-
-.DEFAULT: $(RSRC_FILES)
