@@ -1,0 +1,18 @@
+# General Project Information
+PROJECT = rwo
+VERSION = dev
+
+HTML_CHAPTER_FILES = $(shell cd book && echo [0-9][0-9]*.html)
+
+HTML_FILES =            \
+  $(HTML_CHAPTER_FILES) \
+  index.html            \
+  faqs.html             \
+  install.html          \
+  toc.html
+
+THREADS = 1 
+PACKS = core async ppx_sexp_conv netstring oloop
+OCAMLFLAGS = -bin-annot -annot -w A-4-33-40-41-42-44-45-48 -safe-string -short-paths
+
+export PACKS
