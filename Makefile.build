@@ -25,3 +25,4 @@ clean:
 
 include Makefile.shared
 include Makefile.derived
+-include .depend
