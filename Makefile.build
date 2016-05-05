@@ -1,4 +1,4 @@
-.PHONY: all app lib clean
+.PHONY: all app lib atlas site clean
 
 all: app
 
@@ -9,12 +9,64 @@ app: lib
 	$(MAKE) -C app
 
 ################################################################################
-# Install and Uninstall
+# General Project Information
 
-OPAM_PACKAGE_NAME ?= Real-World-OCaml
-export OPAM_PACKAGE_NAME
+include Makefile.shared
 
-OCAMLFIND_PACKAGE_NAME = $(OPAM_PACKAGE_NAME)
+################################################################################
+# Compute chapters dependencies
+
+.depend: $(foreach file,$(HTML_CHAPTER_FILES),book/$(file))
+	./app/rwo-deps.ml deps site -repo-root ./ > $@
+
+################################################################################
+# SASS to CSS style sheet preprocessing
+
+ifndef SASS
+	SASS := $(shell command -v sassc 2> /dev/null)
+endif
+ifndef SASS
+	SASSC := $(shell command -v sassc 2> /dev/null)
+endif
+
+book/css/app.css: $(wildcard	book/scss/*.scss)
+ifndef SASS
+	$(error "Couldn't find sass or sassc binary, install one or adjust SASS variable")
+endif
+	sass -q -I $(shell opam config var foundation:lib)/scss book/scss/app.scss > $@
+
+################################################################################
+# HTML Book
+
+site/%.html: book/%.html app/rwo
+ifdef PYGMENTIZE
+	app/rwo build chapter -pygmentize -o site/ -repo-root ./ $<
+else
+	app/rwo build chapter -o site/ -repo-root ./ $<
+endif
+
+site/index.html: app/rwo
+	app/rwo build frontpage -o site/ -repo-root $(ROOT)
+
+site/faqs.html: book/faqs.html app/rwo
+	app/rwo build faqs -o site/ -repo-root $(ROOT)
+
+site/install.html: book/install.html app/rwo
+	app/rwo build install -o site/ -repo-root $(ROOT)
+
+site/toc.html: app/rwo
+	app/rwo build toc -o site/ -repo-root $(ROOT)
+
+site: $(foreach file,$(HTML_FILES),site/$(file))
+	rsync -av book/images book/js book/css site/
+
+################################################################################
+# Book in format required by O'Reilly's Atlas
+
+atlas/%.html: book/%.html app/rwo
+	app/rwo build chapter -o atlas/ -repo-root ./ $<
+
+atlas: $(foreach file,$(HTML_CHAPTER_FILES),atlas/$(file))
 
 ################################################################################
 # Clean Up
@@ -23,6 +75,5 @@ clean:
 	$(MAKE) -C lib clean
 	$(MAKE) -C app clean
 
-include Makefile.shared
 include Makefile.derived
 -include .depend

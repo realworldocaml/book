@@ -71,36 +71,6 @@ else
   vmount(-l, app/, _build/app/)
   rsync -a --delete book _build/
 
-  .SUBDIRS: _build
-    .INCLUDE: .depend: $(addprefix $(ROOT)/book/, $(HTML_CHAPTER_FILES))
-      $(ROOT)/app/rwo-deps.ml deps site -repo-root $(ROOT) > $@
-
-
-  ##############################################################################
-  # Library
-  .SUBDIRS: _build/lib
-    OCAMLPACKS[] = $(LIB_PACKAGES)
-
-    %.ml: %.ml.m4 :value: $(GIT_COMMIT)
-      m4 -D GIT_COMMIT=$(GIT_COMMIT) $< > $@
-
-    lib: $(OCamlLibrary $(LIB_NAME), $(LIB_MODULES))
-
-    .DEFAULT: lib
-
-
-  ##############################################################################
-  # Command Line App
-  .SUBDIRS: _build/app
-    OCAML_LIBS = ../lib/$(LIB_NAME)
-    OCAMLINCLUDES += $(dir ../lib/)
-    OCAMLPACKS[] = $(APP_PACKAGES)
-
-    app: $(OCamlProgram $(APP_NAME), $(APP_MODULES))
-
-    .DEFAULT: app
-
-
   ##############################################################################
   # CSS
   .SUBDIRS: book/css

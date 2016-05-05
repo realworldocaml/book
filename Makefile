@@ -1,13 +1,13 @@
 ################################################################################
 # Main targets
 
-.PHONY: app lib atlas \
+.PHONY: app lib atlas site \
         install_lib uninstall_lib \
 				clean clean-everything
 
 all:: app
 
-app lib: _build
+app lib atlas site: _build
 	$(MAKE) -C _build $@
 
 ################################################################################
