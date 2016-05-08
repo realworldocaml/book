@@ -4,7 +4,7 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[@@@part "0.5"]
 type compatible_versions =
   | Specific of string list
   | All with sexp ;;
@@ -15,7 +15,7 @@ sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 
 
-(* part 1 *)
+[@@@part "1"]
 type compatible_versions =
   | Specific of string sexp_list
   | All with sexp ;;

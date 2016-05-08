@@ -4,11 +4,11 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[@@@part "0.5"]
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 
 
-(* part 1 *)
+[@@@part "1"]
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
 
@@ -25,7 +25,7 @@ class ['a] list_iterator init = object
     | [] -> raise (Invalid_argument "no value")
 end  ;;
 
-(* part 2 *)
+[@@@part "2"]
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -43,7 +43,7 @@ class ['a] stack init = object
     new list_iterator v
 end ;;
 
-(* part 3 *)
+[@@@part "3"]
 let s = new stack [] ;;
 
 s#push 5 ;;
@@ -63,7 +63,7 @@ it#next ;;
 it#has_value ;;
 
 
-(* part 4 *)
+[@@@part "4"]
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -89,7 +89,7 @@ end ;;
 
 
 
-(* part 5 *)
+[@@@part "5"]
 class ['a] stack init = object
   val mutable v : 'a list = init
 

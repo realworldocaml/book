@@ -4,7 +4,7 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 1 *)
+[@@@part "1"]
 type t = { foo: int; bar: float } ;;
 
 let sexp_of_t t =

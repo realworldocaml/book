@@ -4,7 +4,7 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 1 *)
+[@@@part "1"]
 let sum_file filename =
   let file = In_channel.create filename in
   protect ~f:(fun () ->
@@ -14,13 +14,13 @@ let sum_file filename =
 ;;
 
 
-(* part 2 *)
+[@@@part "2"]
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
 
 sum_file "numbers.txt";;
 
 
-(* part 3 *)
+[@@@part "3"]
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
@@ -28,7 +28,7 @@ let sum_file filename =
 ;;
 
 
-(* part 4 *)
+[@@@part "4"]
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     In_channel.fold_lines file ~init:0 ~f:(fun sum line ->

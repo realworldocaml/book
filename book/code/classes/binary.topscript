@@ -4,7 +4,7 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[@@@part "0.5"]
 class square w = object(self : 'self) 
   method width = w
   method area = Float.of_int (self#width * self#width)
@@ -17,21 +17,21 @@ class circle r = object(self : 'self)
   method equals (other : 'self) = other#radius = self#radius
 end ;;
 
-(* part 1 *)
+[@@@part "1"]
 (new square 5)#equals (new square 5) ;;
 
 (new circle 10)#equals (new circle 7) ;;
 
 
-(* part 2 *)
+[@@@part "2"]
 type shape = < equals : shape -> bool; area : float > ;;
 
 (new square 5 :> shape) ;;
 
-(* part 3 *)
+[@@@part "3"]
 (object method area = 5 end) = (object method area = 5 end) ;;
 
-(* part 4 *)
+[@@@part "4"]
 type shape_repr =
   | Square of int
   | Circle of int ;;

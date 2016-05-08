@@ -3,11 +3,11 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 0.5 *)
+[@@@part "0.5"]
 #use "topfind" ;;
 #camlp4o ;;
 
-(* part 1 *)
+[@@@part "1"]
 #require "comparelib.syntax" ;;
 type t = { foo: string; bar : t } ;;
 

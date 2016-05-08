@@ -4,7 +4,7 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[@@@part "0.5"]
 type t = { foo: int; bar: float } with sexp ;;
 
 
@@ -12,7 +12,7 @@ type t = { foo: int; bar: float } with sexp ;;
 t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
 
 
-(* part 1 *)
+[@@@part "1"]
 exception Bad_message of string list ;;
 
 Exn.to_string (Bad_message ["1";"2";"3"]) ;;

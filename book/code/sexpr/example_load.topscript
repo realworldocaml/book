@@ -4,15 +4,15 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[@@@part "0.5"]
 Sexp.load_sexp "example.scm" ;;
 
 
-(* part 1 *)
+[@@@part "1"]
 Sexp.load_sexp "comment_heavy.scm" ;;
 
 
-(* part 2 *)
+[@@@part "2"]
 Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm")) ;;
 

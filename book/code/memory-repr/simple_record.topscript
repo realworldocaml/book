@@ -3,7 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 1 *)
+[@@@part "1"]
 type t = { foo: int; bar: int } ;;
 
 let x = { foo = 13; bar = 14 } ;;

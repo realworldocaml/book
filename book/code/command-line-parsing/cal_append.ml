@@ -28,7 +28,7 @@ let diff ~common =
     )
 
 
-(* part 1 *)
+[@@@part "1"]
 let () =
   let common =
     Command.Spec.(

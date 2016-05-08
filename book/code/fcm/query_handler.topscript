@@ -5,7 +5,7 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-(* part 0.5 *)
+[@@@part "0.5"]
 module type Query_handler = sig
 
   (** Configuration for a query handler.  Note that this can be
@@ -26,17 +26,17 @@ module type Query_handler = sig
   val eval : t -> Sexp.t -> Sexp.t Or_error.t
 end;;
 
-(* part 1 *)
+[@@@part "1"]
 module type M = sig type t with sexp end;;
 
-(* part 2 *)
+[@@@part "2"]
 type u = { a: int; b: float } with sexp;;
 
 sexp_of_u {a=3;b=7.};;
 
 u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
 
-(* part 3 *)
+[@@@part "3"]
 module Unique = struct
   type config = int with sexp
   type t = { mutable next_id: int }
@@ -54,7 +54,7 @@ module Unique = struct
 end;;
 
 
-(* part 4 *)
+[@@@part "4"]
 let unique = Unique.create 0;;
 
 Unique.eval unique Sexp.unit;;
@@ -62,7 +62,7 @@ Unique.eval unique Sexp.unit;;
 Unique.eval unique Sexp.unit;;
 
 
-(* part 5 *)
+[@@@part "5"]
 module List_dir = struct
   type config = string with sexp
   type t = { cwd: string }
@@ -96,7 +96,7 @@ end;;
 
 
 
-(* part 6 *)
+[@@@part "6"]
 let list_dir = List_dir.create "/var";;
 
 List_dir.eval list_dir (sexp_of_string ".");;
@@ -105,7 +105,7 @@ List_dir.eval list_dir (sexp_of_string ".");;
 List_dir.eval list_dir (sexp_of_string "yp");;
 
 
-(* part 7 *)
+[@@@part "7"]
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
   val this : Query_handler.t
@@ -113,7 +113,7 @@ end;;
 
 
 
-(* part 8 *)
+[@@@part "8"]
 let unique_instance =
   (module struct
     module Query_handler = Unique
@@ -121,7 +121,7 @@ let unique_instance =
   end : Query_handler_instance);;
 
 
-(* part 9 *)
+[@@@part "9"]
 let build_instance
       (type a)
       (module Q : Query_handler with type config = a)
@@ -136,13 +136,13 @@ let build_instance
 
 
 
-(* part 10 *)
+[@@@part "10"]
 let unique_instance = build_instance (module Unique) 0;;
 
 let list_dir_instance = build_instance (module List_dir)  "/var";;
 
 
-(* part 11 *)
+[@@@part "11"]
 let build_dispatch_table handlers =
   let table = String.Table.create () in
   List.iter handlers
@@ -154,7 +154,7 @@ let build_dispatch_table handlers =
 
 
 
-(* part 12 *)
+[@@@part "12"]
 let dispatch dispatch_table name_and_query =
   match name_and_query with
   | Sexp.List [Sexp.Atom name; query] ->
@@ -172,7 +172,7 @@ let dispatch dispatch_table name_and_query =
 
 
 
-(* part 13 *)
+[@@@part "13"]
 let rec cli dispatch_table =
   printf ">>> %!";
   let result =
@@ -196,7 +196,7 @@ let rec cli dispatch_table =
 ;;
 
 
-(* part 14 *)
+[@@@part "14"]
 type query_handler_instance = { name : string
                               ; eval : Sexp.t -> Sexp.t Or_error.t
                               };;
@@ -208,7 +208,7 @@ type query_handler = Sexp.t -> query_handler_instance
 
 
 
-(* part 15 *)
+[@@@part "15"]
 let unique_handler config_sexp =
   let config = Unique.config_of_sexp config_sexp in
   let unique = Unique.create config in

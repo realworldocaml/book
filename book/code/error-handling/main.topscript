@@ -4,16 +4,16 @@
 #require "core";;
 #require "core.syntax";;
 ;;
-(* part 0.5 *)
+[@@@part "0.5"]
 open Core_kernel.Std;;
 List.find;;
 
-(* part 1 *)
+[@@@part "1"]
 List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
 
 List.find [1;2;3] ~f:(fun x -> x >= 10) ;;
 
-(* part 2 *)
+[@@@part "2"]
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
   match List.hd sorted, List.last sorted with
@@ -21,7 +21,7 @@ let compute_bounds ~cmp list =
   | Some x, Some y -> Some (x,y)
 ;;
 
-(* part 3 *)
+[@@@part "3"]
 let find_mismatches table1 table2 =
   Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data mismatches ->
     match Hashtbl.find table2 key with
@@ -30,44 +30,44 @@ let find_mismatches table1 table2 =
   )
 ;;
 
-(* part 4 *)
+[@@@part "4"]
 [ Ok 3; Error "abject failure"; Ok 4 ];;
 
-(* part 5 *)
+[@@@part "5"]
 Error.of_string "something went wrong";;
 
-(* part 6 *)
+[@@@part "6"]
 Error.of_thunk (fun () ->
   sprintf "something went wrong: %f" 32.3343);;
 
-(* part 7 *)
+[@@@part "7"]
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
 
-(* part 8 *)
+[@@@part "8"]
 let custom_to_sexp = <:sexp_of<float * string list * int>>;;
 
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 
-(* part 9 *)
+[@@@part "9"]
 Error.create "Something went terribly wrong"
   (3.5, ["a";"b";"c"], 6034)
   <:sexp_of<float * string list * int>> ;;
 
-(* part 10 *)
+[@@@part "10"]
 Error.tag
   (Error.of_list [ Error.of_string "Your tires were slashed";
                    Error.of_string "Your windshield was smashed" ])
   "over the weekend"
 ;;
 
-(* part 11 *)
+[@@@part "11"]
 let bind option f =
   match option with
   | None -> None
   | Some x -> f x
 ;;
 
-(* part 12 *)
+[@@@part "12"]
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
   Option.bind (List.hd sorted) (fun first ->
@@ -75,7 +75,7 @@ let compute_bounds ~cmp list =
       Some (first,last)))
 ;;
 
-(* part 13 *)
+[@@@part "13"]
 let compute_bounds ~cmp list =
   let open Option.Monad_infix in
   let sorted = List.sort ~cmp list in
@@ -84,34 +84,34 @@ let compute_bounds ~cmp list =
   Some (first,last)
 ;;
 
-(* part 14 *)
+[@@@part "14"]
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
   Option.both (List.hd sorted) (List.last sorted)
 ;;
 
-(* part 15 *)
+[@@@part "15"]
 3 / 0;;
 
-(* part 16 *)
+[@@@part "16"]
 List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
 
-(* part 17 *)
+[@@@part "17"]
 List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 
-(* part 18 *)
+[@@@part "18"]
 exception Key_not_found of string;;
 
 raise (Key_not_found "a");;
 
-(* part 19 *)
+[@@@part "19"]
 let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;
 
 List.filter exceptions  ~f:(function
   | Key_not_found _ | Not_found -> true
   | _ -> false);;
 
-(* part 20 *)
+[@@@part "20"]
 let rec find_exn alist key = match alist with
   | [] -> raise (Key_not_found key)
   | (key',data) :: tl -> if key = key' then data else find_exn tl key
@@ -123,28 +123,28 @@ find_exn alist "a";;
 
 find_exn alist "c";;
 
-(* part 21 *)
+[@@@part "21"]
 raise;;
 
-(* part 22 *)
+[@@@part "22"]
 let rec forever () = forever ();;
 
-(* part 23 *)
+[@@@part "23"]
 type 'a bounds = { lower: 'a; upper: 'a };;
 exception Crossed_bounds of int bounds;;
 
 Crossed_bounds { lower=10; upper=0 };;
 
-(* part 24 *)
+[@@@part "24"]
 type 'a bounds = { lower: 'a; upper: 'a } with sexp;;
 exception Crossed_bounds of int bounds with sexp;;
 
 Crossed_bounds { lower=10; upper=0 };;
 
-(* part 25 *)
+[@@@part "25"]
 let failwith msg = raise (Failure msg);;
 
-(* part 26 *)
+[@@@part "26"]
 let merge_lists xs ys ~f =
   if List.length xs <> List.length ys then None
   else
@@ -161,7 +161,7 @@ merge_lists [1;2;3] [-1;1;2] ~f:(+);;
 
 merge_lists [1;2;3] [-1;1] ~f:(+);;
 
-(* part 27 *)
+[@@@part "27"]
 let merge_lists xs ys ~f =
   let rec loop xs ys =
     match xs,ys with
@@ -174,7 +174,7 @@ let merge_lists xs ys ~f =
 
 merge_lists [1;2;3] [-1] ~f:(+);;
 
-(* part 28 *)
+[@@@part "28"]
 
 let parse_line line =
   String.split_on_chars ~on:[','] line
@@ -188,7 +188,7 @@ let load filename =
   data
 ;;
 
-(* part 29 *)
+[@@@part "29"]
 let load filename =
   let inc = In_channel.create filename in
   protect ~f:(fun () ->
@@ -196,13 +196,13 @@ let load filename =
     ~finally:(fun () -> In_channel.close inc)
 ;;
 
-(* part 30 *)
+[@@@part "30"]
 let load filename =
   In_channel.with_file filename ~f:(fun inc ->
     In_channel.input_lines inc |> List.map ~f:parse_line)
 ;;
 
-(* part 31 *)
+[@@@part "31"]
 let lookup_weight ~compute_weight alist key =
   try
     let data = List.Assoc.find_exn alist key in
@@ -210,11 +210,11 @@ let lookup_weight ~compute_weight alist key =
   with
     Not_found -> 0. ;;
 
-(* part 32 *)
+[@@@part "32"]
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
   ["a",3; "b",4] "a" ;;
 
-(* part 33 *)
+[@@@part "33"]
 let lookup_weight ~compute_weight alist key =
   match
     try Some (List.Assoc.find_exn alist key)
@@ -223,19 +223,19 @@ let lookup_weight ~compute_weight alist key =
   | None -> 0.
   | Some data -> compute_weight data ;;
 
-(* part 33.1 *)
+[@@@part "33.1"]
 let lookup_weight ~compute_weight alist key =
   match List.Assoc.find_exn alist key with
   | exception _ -> 0.
   | data -> compute_weight data ;;
 
-(* part 34 *)
+[@@@part "34"]
 let lookup_weight ~compute_weight alist key =
   match List.Assoc.find alist key with
   | None -> 0.
   | Some data -> compute_weight data ;;
 
-(* part 35 *)
+[@@@part "35"]
 let find alist key =
   Option.try_with (fun () -> find_exn alist key) ;;
 
@@ -244,14 +244,14 @@ find ["a",1; "b",2] "c";;
 find ["a",1; "b",2] "b";;
 
 
-(* part 36 *)
+[@@@part "36"]
 let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;
 
 find ["a",1; "b",2] "c";;
 
 
-(* part 37 *)
+[@@@part "37"]
 Or_error.ok_exn (find ["a",1; "b",2] "b");;
 
 Or_error.ok_exn (find ["a",1; "b",2] "c");;

@@ -23,51 +23,51 @@ let memoize f =
 
 let identity x = x;;
 
-(* part 1 *)
+[@@@part "1"]
 (fun x -> [x;x]);;
 
 
-(* part 2 *)
+[@@@part "2"]
 memoize (fun x -> [x;x]);;
 
 
-(* part 3 *)
+[@@@part "3"]
 identity (fun x -> [x;x]);;
 
 
-(* part 4 *)
+[@@@part "4"]
 let f () = ref None;;
 
 
-(* part 5 *)
+[@@@part "5"]
 List.init;;
 
 List.init 10 ~f:Int.to_string;;
 
 
-(* part 6 *)
+[@@@part "6"]
 let list_init_10 = List.init 10;;
 
 
-(* part 7 *)
+[@@@part "7"]
 let list_init_10 ~f = List.init 10 ~f;;
 
 
-(* part 8 *)
+[@@@part "8"]
 identity (fun x -> [x;x]);;
 
 
-(* part 9 *)
+[@@@part "9"]
 identity [];;
 
 
-(* part 10 *)
+[@@@part "10"]
 [||];;
 
 identity [||];;
 
 
-(* part 11 *)
+[@@@part "11"]
 module Concat_list : sig
   type 'a t
   val empty : 'a t
@@ -101,12 +101,12 @@ end;;
 
 
 
-(* part 12 *)
+[@@@part "12"]
 Concat_list.empty;;
 
 identity Concat_list.empty;;
 
-(* part 13 *)
+[@@@part "13"]
 module Concat_list : sig
   type +'a t
   val empty : 'a t
@@ -132,6 +132,6 @@ end = struct
 
 end;;
 
-(* part 14 *)
+[@@@part "14"]
 identity Concat_list.empty;;
 

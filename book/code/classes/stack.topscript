@@ -4,7 +4,7 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[@@@part "0.5"]
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -19,7 +19,7 @@ class ['a] stack init = object
     v <- hd :: v
 end ;;
 
-(* part 1 *)
+[@@@part "1"]
 class ['a] stack init = object
   val mutable v = init
 
@@ -34,7 +34,7 @@ class ['a] stack init = object
     v <- hd :: v
 end ;;
 
-(* part 2 *)
+[@@@part "2"]
 class sstack init = object
   inherit [string] stack init
 
@@ -42,7 +42,7 @@ class sstack init = object
     List.iter ~f:print_string v
 end ;;
 
-(* part 3 *)
+[@@@part "3"]
 class double_stack init = object
   inherit [int] stack init as super
 

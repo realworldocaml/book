@@ -3,7 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 1 *)
+[@@@part "1"]
 open Core_kernel.Std;;
 let assoc = [("one", 1); ("two",2); ("three",3)] ;;
 List.Assoc.find assoc "two" ;;

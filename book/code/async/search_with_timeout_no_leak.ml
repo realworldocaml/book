@@ -1,6 +1,6 @@
 
 
-(* part 2 *)
+[@@@part "2"]
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
