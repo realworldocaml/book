@@ -1,13 +1,20 @@
+.PHONY: all clean
+
 OCAMLMAKEFILE = ../OCamlMakefile
 
-all: byte-code
+all: byte-code rwo-expect
 
 RESULT = rwo
 
-## Update rwo_about according to git hash
+## Producing a toplevel for Rwo_scripts
+
+rwo-expect: rwo_expect.ml
+	$(OCAMLFIND) c -g -linkpkg -linkall -predicates create_toploop \
+		-package toplevel_expect_test $^ -o $@
+
 
 clean::
-	rm -f *.cmt *.cmti
+	rm -f *.cmt *.cmti rwo-expect rwo_expect.cm*
 
 ## App description
 

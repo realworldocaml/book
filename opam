@@ -25,7 +25,8 @@ depends: [
   "async" {>= "112.24.00"}
   "ocamlnet"
   "cohttp"
-  "oloop"
+  "ppx_sexp_conv"
+  "toplevel_expect_test"
 
   # Required for code blocks within book.
   "core_bench"
