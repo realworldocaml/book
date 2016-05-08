@@ -14,19 +14,19 @@
 %token EOF
 
 
-(* part 1 *)
+[@@@part "1"]
 %start <Json.value option> prog
 %%
 
 
-(* part 2 *)
+[@@@part "2"]
 prog:
   | EOF       { None }
   | v = value { Some v }
   ;
 
 
-(* part 3 *)
+[@@@part "3"]
 value:
   | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
     { `Assoc obj }
@@ -47,7 +47,7 @@ value:
   ;
 
 
-(* part 4 *)
+[@@@part "4"]
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
