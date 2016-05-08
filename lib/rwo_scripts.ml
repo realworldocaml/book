@@ -7,6 +7,8 @@ module Lang = Rwo_lang
 module Pygments = Rwo_pygments
 let (/) = Filename.concat
 
+type part = string
+
 (* type oloop_script = Oloop.Script.t *)
 (* type oloop_script_evaluated = Oloop.Script.Evaluated.t *)
 (* type oloop_script_evaluated_phrase = Oloop.Script.Evaluated.phrase  *)
@@ -55,7 +57,7 @@ type t = script String.Map.t
 (******************************************************************************)
 let empty = String.Map.empty
 
-(*let of_script (parts:Oloop.Script.t) : (float * string) list =
+(*let of_script (parts:Oloop.Script.t) : (part * string) list =
   List.map
     (parts : Oloop.Script.t :> Oloop.Script.part list)
     ~f:(fun {Oloop.Script.number; content} -> number,content)
@@ -87,7 +89,7 @@ let find_exn t ?(part=0.) ~filename =
   in
   let no_part_err() = ok_exn (
     error "no data for requested part of file"
-      (filename,part) [%sexp_of: string * float] )
+      (filename,part) [%sexp_of: string * part] )
   in
   match String.Map.find t filename with
   | None -> no_file_err()

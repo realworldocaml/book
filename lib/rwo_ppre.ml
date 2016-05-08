@@ -26,7 +26,7 @@ type p = {
   a_class : string;
   em_data : string;
   data1 : string option;
-  part : float option;
+  part : Import.part option;
   a2 : Rwo_html.item option;
   a3 : Rwo_html.item option;
 }
@@ -93,15 +93,15 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
 
   (** The 2nd data field, i.e. the one after the main <a>, optionally
       contains the part number. Parse it out. *)
-  let parse_data2 (x : string option) : float option Or_error.t =
+  let parse_data2 (x : string option) : string option Or_error.t =
     match x with
     | None -> Ok None
     | Some x -> (
       try
-        Ok (Some (Scanf.sscanf (String.strip x) "(part %f)" ident))
+        Ok (Some (Scanf.sscanf (String.strip x) "(part %s)" ident))
       with
         exn ->
-          error "error parsing part number from data2 node"
+          error "error parsing part name from data2 node"
             (x, exn) [%sexp_of: string * exn]
     )
   in
@@ -325,13 +325,13 @@ let extract_code_from_1e_exn chapter =
 
   let code_block_to_string code_block (lang:Lang.t) part : string =
     let part = match part with
-      | None | Some 0. -> ""
+      | None | Some "" -> ""
       | Some part -> (match (lang :> string) with
-        | "topscript" -> sprintf "\n#part %f\n" part
-        | "ml" -> sprintf "\n\n(* part %f *)\n" part
+        | "topscript" -> sprintf "\n[@@@part %S]\n" part
+        | "ml" -> sprintf "\n\n[@@@part %S]\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
-                    (part, lang) [%sexp_of: float * Lang.t]
+                    (part, lang) [%sexp_of: string * Lang.t]
           )
       )
     in
@@ -364,8 +364,8 @@ let extract_code_from_1e_exn chapter =
   let f (x:t) : Html.item =
     let i:Import.t = ok_exn (to_import x) in
     (if Map.mem !imports i then
-        printf "WARNING: duplicate import for file %s part %f\n"
-          i.href (match i.part with Some x -> x | None -> (-1.))
+        printf "WARNING: duplicate import for file %s part %S\n"
+          i.href (match i.part with Some x -> x | None -> "")
      else
         imports := Map.add !imports ~key:i ~data:x.pre.code_block;
     );

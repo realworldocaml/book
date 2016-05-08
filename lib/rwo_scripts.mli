@@ -2,6 +2,8 @@
 open Core.Std
 open Async.Std
 
+type part = string
+
 type oloop_script
 type oloop_script_evaluated
 type oloop_script_evaluated_phrase
@@ -47,6 +49,6 @@ val script_part_to_html
 (** {2 Map-style Operations } *)
 (******************************************************************************)
 (*val empty : t
-  val find : t -> ?part:float -> filename:string -> script_part option
+  val find : t -> ?part:string -> filename:string -> script_part option
   val file_is_mem : t -> string -> bool*)
-val find_exn : t -> ?part:float -> filename:string -> script_part
+val find_exn : t -> ?part:string -> filename:string -> script_part
