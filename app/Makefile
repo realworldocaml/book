@@ -13,7 +13,10 @@ clean::
 
 SOURCES = app.ml
 
-LIBS = ../lib/rwo
+# Don't use LIBS...
+# The rebuilding behavior annoys more than it helps
+# LIBS = ../lib/rwo
+OCAMLLDFLAGS += ../lib/rwo.cma
 INCDIRS = ../lib
 
 include $(OCAMLMAKEFILE)
