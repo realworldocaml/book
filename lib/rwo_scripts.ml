@@ -7,29 +7,55 @@ module Lang = Rwo_lang
 module Pygments = Rwo_pygments
 let (/) = Filename.concat
 
+(* type oloop_script = Oloop.Script.t *)
+(* type oloop_script_evaluated = Oloop.Script.Evaluated.t *)
+(* type oloop_script_evaluated_phrase = Oloop.Script.Evaluated.phrase  *)
+type oloop_script = SCRIPT
+type oloop_script_evaluated = EVALUATED
+type oloop_script_evaluated_phrase = PHRASE
+type oloop_outcome = OUTCOME
+
+let oloop_script_evaluated_phrase PHRASE = ""
+
+let oloop_script_evaluated_outcome PHRASE
+  : [ `Uneval of [`UNEVAL] * unit | `Eval of oloop_outcome ]
+  = `Uneval (`UNEVAL, ())
+
+let oloop_outcome_stdout OUTCOME = ""
+let oloop_outcome_warnings OUTCOME : (Location.t * Warnings.t) list = []
+let oloop_outcome_report_uneval ~msg_with_location:_ _ppf `UNEVAL = ()
+let oloop_outcome_result OUTCOME = Outcometree.Ophr_signature []
+let oloop_phrase_remove_underscore_names (x : Outcometree.out_phrase) = x
+
+let oloop_script_of_file (_ : string) =
+  Deferred.Or_error.return SCRIPT
+
+let oloop_eval_script ~silent_directives:() ~short_paths:() SCRIPT =
+  Deferred.Result.return EVALUATED
+
+
 type script = [
-| `OCaml of Oloop.Script.t
-| `OCaml_toplevel of Oloop.Script.Evaluated.t
-| `OCaml_rawtoplevel of Oloop.Script.t
+| `OCaml of oloop_script
+| `OCaml_toplevel of oloop_script_evaluated
+| `OCaml_rawtoplevel of oloop_script
 | `Other of string
 ]
 
 type script_part = [
 | `OCaml of string
-| `OCaml_toplevel of Oloop.Script.Evaluated.phrase list
+| `OCaml_toplevel of oloop_script_evaluated_phrase list
 | `OCaml_rawtoplevel of string
 | `Other of string
 ]
 
 type t = script String.Map.t
 
-
 (******************************************************************************)
 (* Map-style Operations                                                       *)
 (******************************************************************************)
 let empty = String.Map.empty
 
-let of_script (parts:Oloop.Script.t) : (float * string) list =
+(*let of_script (parts:Oloop.Script.t) : (float * string) list =
   List.map
     (parts : Oloop.Script.t :> Oloop.Script.part list)
     ~f:(fun {Oloop.Script.number; content} -> number,content)
@@ -81,7 +107,10 @@ let find_exn t ?(part=0.) ~filename =
     | Some x -> `OCaml_rawtoplevel x
   )
   | Some (`Other _ as x) ->
-    if part = 0. then x else no_part_err()
+    if part = 0. then x else no_part_err()*)
+
+let find_exn _ ?part:_ ~filename:_ =
+  raise Not_found
 
 let file_is_mem = Map.mem
 
@@ -91,8 +120,8 @@ let file_is_mem = Map.mem
 (******************************************************************************)
 let phrases_to_html ?(pygmentize=false) phrases =
 
-  let in_phrase (x:Oloop.Script.Evaluated.phrase) : Html.item Deferred.t =
-    match String.split x.Oloop.Script.Evaluated.phrase ~on:'\n' with
+  let in_phrase (x:oloop_script_evaluated_phrase) : Html.item Deferred.t =
+    match String.split (oloop_script_evaluated_phrase x) ~on:'\n' with
     | [] -> assert false
     | x::xs ->
       let x = sprintf "# %s" x in
@@ -101,13 +130,13 @@ let phrases_to_html ?(pygmentize=false) phrases =
   in
 
   (* get warnings or errors *)
-  let messages (x:Oloop.Script.Evaluated.phrase) : Html.item option =
+  let messages (x:oloop_script_evaluated_phrase) : Html.item option =
     (
-      match x.Oloop.Script.Evaluated.outcome with
+      match oloop_script_evaluated_outcome x with
       | `Uneval (x,_) ->
         (
           try (
-            Oloop.Outcome.report_uneval
+            oloop_outcome_report_uneval
               ~msg_with_location:true Format.str_formatter x;
             [Format.flush_str_formatter()]
           )
@@ -118,9 +147,9 @@ let phrases_to_html ?(pygmentize=false) phrases =
               ;
               ["Oloop error: unable to show correct OCaml output"]
             )
-	)
+        )
       | `Eval e ->
-        Oloop.Outcome.warnings e
+        oloop_outcome_warnings e
         |> List.map ~f:(fun (loc,warning) ->
             let buf = Buffer.create 256 in
             let fmt = Format.formatter_of_buffer buf in
@@ -134,31 +163,31 @@ let phrases_to_html ?(pygmentize=false) phrases =
     | l -> Some Html.(pre [`Data (String.concat l ~sep:"\n" |> Html.encode)])
   in
 
-  let stdout (x:Oloop.Script.Evaluated.phrase) : Html.item option =
-    match x.Oloop.Script.Evaluated.outcome with
+  let stdout (x:oloop_script_evaluated_phrase) : Html.item option =
+    match oloop_script_evaluated_outcome x with
     | `Uneval _ -> None
-    | `Eval e -> match Oloop.Outcome.stdout e with
+    | `Eval e -> match oloop_outcome_stdout e with
       | "" -> None
       | x -> Some Html.(pre [`Data (Html.encode x)])
   in
 
-  let out_phrase (x:Oloop.Script.Evaluated.phrase)
+  let out_phrase (x:oloop_script_evaluated_phrase)
     : Html.item option Deferred.t
     =
-    match x.Oloop.Script.Evaluated.outcome with
+    match oloop_script_evaluated_outcome x with
     | `Uneval _ -> return None
     | `Eval e ->
       let buf = Buffer.create 256 in
       let fmt = Format.formatter_of_buffer buf in
       !Oprint.out_phrase fmt (
-        Oloop.Outcome.result e |> Oloop.phrase_remove_underscore_names
+        oloop_outcome_result e |> oloop_phrase_remove_underscore_names
       );
       Buffer.contents buf
       |> Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml
       >>| Option.some
   in
 
-  let phrase_to_html (x:Oloop.Script.Evaluated.phrase) : Html.t Deferred.t =
+  let phrase_to_html (x:oloop_script_evaluated_phrase) : Html.t Deferred.t =
     (in_phrase x >>| Option.some) >>= fun in_phrase ->
     out_phrase x >>| fun out_phrase ->
     [in_phrase; messages x; stdout x; out_phrase]
@@ -190,22 +219,22 @@ let eval_script lang ~filename =
   | "ml" | "mli" | "mll" | "mly" -> (
     (* Hack: Oloop.Script.of_file intended only for ml files but
        happens to work for mli, mll, and mly files. *)
-    Oloop.Script.of_file filename >>|? fun parts ->
+    oloop_script_of_file filename >>|? fun parts ->
     `OCaml parts
     )
   | "rawtopscript" -> (
-    Oloop.Script.of_file filename >>|? fun parts ->
+    oloop_script_of_file filename >>|? fun parts ->
     `OCaml_rawtoplevel parts
   )
   | "topscript" -> (
     if String.is_suffix filename ~suffix:"async/main.topscript" then (
-      Oloop.Script.of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
+      oloop_script_of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
     )
     else (
-      Oloop.Script.of_file filename >>=? fun script ->
+      oloop_script_of_file filename >>=? fun script ->
       Sys.getcwd() >>= fun cwd ->
       Sys.chdir (Filename.dirname filename) >>= fun () ->
-      Oloop.eval_script ~silent_directives:() ~short_paths:() script
+      oloop_eval_script ~silent_directives:() ~short_paths:() script
       >>= function
       | Ok script ->
 	 (Sys.chdir cwd >>| fun () -> Ok (`OCaml_toplevel script))
