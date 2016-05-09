@@ -3,7 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
+
 [%%expect]
 [@@@part "1"];;
 open Core_kernel.Std;;
@@ -182,7 +182,7 @@ module Foo_and_bar : sig
   include Comparable.S with type t := t
 end = struct
   module T = struct
-    type t = { foo: Int.Set.t; bar: string } with sexp
+    type t = { foo: Int.Set.t; bar: string } [@@deriving sexp]
     let compare t1 t2 =
       let c = Int.Set.compare t1.foo t2.foo in
       if c <> 0 then c else String.compare t1.bar t2.bar
@@ -198,7 +198,7 @@ module Foo_and_bar : sig
   include Comparable.S with type t := t
 end = struct
   module T = struct
-    type t = { foo: Int.Set.t; bar: string } with sexp, compare
+    type t = { foo: Int.Set.t; bar: string } [@@deriving sexp, compare]
   end
   include T
   include Comparable.Make(T)
@@ -211,7 +211,7 @@ module Foo_and_bar : sig
   include Comparable.S with type t := t
 end = struct
   module T = struct
-    type t = { foo: int; bar: string } with sexp
+    type t = { foo: int; bar: string } [@@deriving sexp]
   end
   include T
   include Comparable.Poly(T)
@@ -260,7 +260,7 @@ module Foo_and_bar : sig
   include Hashable.S with type t := t
 end = struct
   module T = struct
-    type t = { foo: int; bar: string } with sexp, compare
+    type t = { foo: int; bar: string } [@@deriving sexp, compare]
     let hash t =
       (Int.hash t.foo) lxor (String.hash t.bar)
   end

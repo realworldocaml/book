@@ -9,7 +9,7 @@ open Core_kernel.Std;;
 let l = [(1,"one"); (2,"two")] ;;
 
 List.iter l ~f:(fun x ->
-  <:sexp_of<int * string>> x
+  [%sexp_of: int * string ] x
   |> Sexp.to_string
   |> print_endline) ;;
 

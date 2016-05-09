@@ -263,7 +263,8 @@ module type Int_interval_intf =
 
 [%%expect]
 [@@@part "21"];;
-# module Make_interval(Endpoint : Comparable)
+(* Suspicious # ? *)
+module Make_interval(Endpoint : Comparable)
   : Interval_intf with type endpoint := Endpoint.t =
   struct
 
@@ -302,7 +303,7 @@ Sexp.of_string "(This is (an s-expression))";;
 
 [%%expect]
 [@@@part "24"];;
-type some_type = int * string list with sexp;;
+type some_type = int * string list [@@deriving sexp];;
 
 
 
@@ -317,7 +318,7 @@ module Make_interval(Endpoint : Comparable)
 
   type t = | Interval of Endpoint.t * Endpoint.t
            | Empty
-  with sexp
+  [@@deriving sexp]
 
   (* ... *)
 
@@ -373,7 +374,7 @@ module Make_interval(Endpoint : sig
 
   type t = | Interval of Endpoint.t * Endpoint.t
            | Empty
-  with sexp
+  [@@deriving sexp]
 
   (** [create low high] creates a new interval from [low] to
       [high].  If [low > high], then the interval is empty *)

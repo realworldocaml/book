@@ -141,7 +141,7 @@ module Logon = struct
       user: string;
       credentials: string;
     }
-  with fields
+  [@@deriving fields]
 end;;
 
 [%%expect]

@@ -13,7 +13,7 @@
 #require "comparelib.syntax" ;;
 type t = { foo: string; bar : t } ;;
 
-type t = { foo: string; bar: t } with compare ;;
+type t = { foo: string; bar: t } [@@deriving compare] ;;
 
 
 

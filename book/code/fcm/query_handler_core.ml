@@ -3,7 +3,7 @@
 [@@@part "1"];;
 module Loader = struct
   type config = (module Query_handler) list sexp_opaque
-  with sexp
+  [@@deriving sexp]
 
   type t = { known  : (module Query_handler)          String.Table.t
            ; active : (module Query_handler_instance) String.Table.t
@@ -60,7 +60,7 @@ type request =
     | Unload of string
     | Known_services
     | Active_services
-  with sexp
+  [@@deriving sexp]
 
 
 [@@@part "6"];;

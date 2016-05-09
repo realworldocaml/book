@@ -8,13 +8,13 @@ open Core_kernel.Std;;
 [@@@part "0.5"];;
 type no_converter = int * int ;;
 
-type t = { a: no_converter; b: string } with sexp ;;
+type t = { a: no_converter; b: string } [@@deriving sexp] ;;
 
 
 
 [%%expect]
 [@@@part "1"];;
-type t = { a: no_converter sexp_opaque; b: string } with sexp ;;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 
 
 
@@ -33,7 +33,7 @@ t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
 
 [%%expect]
 [@@@part "4"];;
-type t = { a: no_converter sexp_opaque list; b: string } with sexp ;;
+type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;
 
 
 
@@ -42,9 +42,9 @@ t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
 
 [%%expect]
 [@@@part "5"];;
-type t = { a: no_converter sexp_opaque; b: string } with sexp_of ;;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp_of] ;;
 
 
-type t = { a: no_converter sexp_opaque; b: string } with of_sexp ;;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving of_sexp] ;;
 
 

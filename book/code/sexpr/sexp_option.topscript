@@ -6,7 +6,7 @@
 open Core_kernel.Std;;
 [%%expect]
 [@@@part "0.5"];;
-type t = { a: int option; b: string } with sexp ;;
+type t = { a: int option; b: string } [@@deriving sexp] ;;
 
 
 
@@ -17,7 +17,7 @@ sexp_of_t { a = Some 3; b = "hello" } ;;
 
 [%%expect]
 [@@@part "1"];;
-type t = { a: int sexp_option; b: string } with sexp ;;
+type t = { a: int sexp_option; b: string } [@@deriving sexp] ;;
 
 
 

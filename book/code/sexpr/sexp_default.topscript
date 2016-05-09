@@ -10,7 +10,7 @@ type http_server_config = {
   web_root: string;
   port: int;
   addr: string;
-} with sexp ;;
+} [@@deriving sexp] ;;
 
 
 
@@ -19,9 +19,9 @@ type http_server_config = {
 [@@@part "1"];;
 type http_server_config = {
   web_root: string;
-  port: int with default(80);
-  addr: string with default("localhost");
-} with sexp ;;
+  port: int [@default 80];
+  addr: string [@default "localhost"];
+} [@@deriving sexp] ;;
 
 
 
@@ -42,9 +42,9 @@ sexp_of_http_server_config cfg ;;
 [@@@part "4"];;
 type http_server_config = {
   web_root: string;
-  port: int with default(80), sexp_drop_default;
-  addr: string with default("localhost"), sexp_drop_default;
-} with sexp ;;
+  port: int [@default 80] [@sexp_drop_default];
+  addr: string [@default "localhost"] [@sexp_drop_default];
+} [@@deriving sexp] ;;
 
 
 

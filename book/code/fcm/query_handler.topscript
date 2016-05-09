@@ -11,7 +11,7 @@ module type Query_handler = sig
 
   (** Configuration for a query handler.  Note that this can be
       converted to and from an s-expression *)
-  type config with sexp
+  type config [@@deriving sexp]
 
   (** The name of the query-handling service *)
   val name : string
@@ -29,11 +29,11 @@ end;;
 
 [%%expect]
 [@@@part "1"];;
-module type M = sig type t with sexp end;;
+module type M = sig type t [@@deriving sexp] end;;
 
 [%%expect]
 [@@@part "2"];;
-type u = { a: int; b: float } with sexp;;
+type u = { a: int; b: float } [@@deriving sexp];;
 
 sexp_of_u {a=3;b=7.};;
 
@@ -42,7 +42,7 @@ u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
 [%%expect]
 [@@@part "3"];;
 module Unique = struct
-  type config = int with sexp
+  type config = int [@@deriving sexp]
   type t = { mutable next_id: int }
 
   let name = "unique"
@@ -70,7 +70,7 @@ Unique.eval unique Sexp.unit;;
 [%%expect]
 [@@@part "5"];;
 module List_dir = struct
-  type config = string with sexp
+  type config = string [@@deriving sexp]
   type t = { cwd: string }
 
   (** [is_abs p] Returns true if [p] is an absolute path  *)

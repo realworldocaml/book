@@ -3,7 +3,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
+
 [%%expect]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
@@ -53,7 +53,7 @@ Error.create "Unexpected character" 'z' Char.sexp_of_t;;
 
 [%%expect]
 [@@@part "8"];;
-let custom_to_sexp = <:sexp_of<float * string list * int>>;;
+let custom_to_sexp = [%sexp_of: float * string list * int];;
 
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 
@@ -61,7 +61,7 @@ custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 [@@@part "9"];;
 Error.create "Something went terribly wrong"
   (3.5, ["a";"b";"c"], 6034)
-  <:sexp_of<float * string list * int>> ;;
+  [%sexp_of: float * string list * int] ;;
 
 [%%expect]
 [@@@part "10"];;
@@ -161,8 +161,8 @@ Crossed_bounds { lower=10; upper=0 };;
 
 [%%expect]
 [@@@part "24"];;
-type 'a bounds = { lower: 'a; upper: 'a } with sexp;;
-exception Crossed_bounds of int bounds with sexp;;
+type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
+exception Crossed_bounds of int bounds [@@deriving sexp];;
 
 Crossed_bounds { lower=10; upper=0 };;
 

@@ -8,7 +8,7 @@ open Core_kernel.Std;;
 [@@@part "0.5"];;
 type compatible_versions =
   | Specific of string list
-  | All with sexp ;;
+  | All [@@deriving sexp] ;;
 
 
 
@@ -20,7 +20,7 @@ sexp_of_compatible_versions
 [@@@part "1"];;
 type compatible_versions =
   | Specific of string sexp_list
-  | All with sexp ;;
+  | All [@@deriving sexp] ;;
 
 
 

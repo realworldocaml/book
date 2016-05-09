@@ -3,7 +3,6 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
 
 [%%expect]
 [@@@part "1"];;

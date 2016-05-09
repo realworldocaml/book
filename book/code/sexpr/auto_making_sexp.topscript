@@ -6,7 +6,7 @@
 open Core_kernel.Std;;
 [%%expect]
 [@@@part "0.5"];;
-type t = { foo: int; bar: float } with sexp ;;
+type t = { foo: int; bar: float } [@@deriving sexp] ;;
 
 
 
@@ -19,7 +19,7 @@ exception Bad_message of string list ;;
 
 Exn.to_string (Bad_message ["1";"2";"3"]) ;;
 
-exception Good_message of string list with sexp;;
+exception Good_message of string list [@@deriving sexp];;
 
 Exn.to_string (Good_message ["1";"2";"3"]) ;;
 

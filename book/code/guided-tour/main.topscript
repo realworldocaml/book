@@ -31,8 +31,8 @@ _x';;
 [%%expect]
 [@@@part "4"];;
 let Seven = 3 + 4;;
-let 7x = 7;;
-let x-plus-y = x + y;;
+(*let 7x = 7;;*)
+(*let x-plus-y = x + y;;*)
 
 [%%expect]
 [@@@part "5"];;
