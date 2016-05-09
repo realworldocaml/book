@@ -1,6 +1,6 @@
 
 
-[@@@part "1"]
+(* part 1 *)
 prog:
   | v = value { Some v }
   | EOF       { None   } ;

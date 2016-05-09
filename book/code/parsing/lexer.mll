@@ -13,24 +13,24 @@ let next_line lexbuf =
 }
 
 
-[@@@part "1"]
+(* part 1 *)
 let int = '-'? ['0'-'9'] ['0'-'9']*
 
 
-[@@@part "2"]
+(* part 2 *)
 let digit = ['0'-'9']
 let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
 let float = digit* frac? exp?
 
 
-[@@@part "3"]
+(* part 3 *)
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | “\r\n”
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 
 
-[@@@part "4"]
+(* part 4 *)
 rule read =
   parse
   | white    { read lexbuf }
@@ -51,7 +51,7 @@ rule read =
   | eof      { EOF }
 
 
-[@@@part "5"]
+(* part 5 *)
 and read_string buf =
   parse
   | '"'       { STRING (Buffer.contents buf) }

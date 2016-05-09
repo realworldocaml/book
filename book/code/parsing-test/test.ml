@@ -17,7 +17,7 @@ let parse_with_error lexbuf =
     exit (-1)
 
 
-[@@@part "1"]
+(* part 1 *)
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
