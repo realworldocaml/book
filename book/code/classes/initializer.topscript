@@ -4,7 +4,8 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 class obj x = 
   let () = printf "Creating obj %d\n" x in
   object 

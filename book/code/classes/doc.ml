@@ -14,7 +14,7 @@ and 'a list_item =
     text: text_item list }
 
 
-[@@@part "1"]
+[@@@part "1"];;
 open Core.Std
 
 class ['a] folder = object(self)
@@ -35,7 +35,7 @@ class ['a] folder = object(self)
 end
 
 
-[@@@part "2"]
+[@@@part "2"];;
 class counter = object
   inherit [int] folder as super
 
@@ -51,7 +51,7 @@ end
 let count_doc = (new counter)#doc
 
 
-[@@@part "3"]
+[@@@part "3"];;
 class ['a] folder2 = object(self)
   method doc acc = function
   | Heading str -> self#heading acc str
@@ -88,7 +88,7 @@ let f :
     text_item : int -> text_item -> int >  = new folder2
 
 
-[@@@part "4"]
+[@@@part "4"];;
 class counter_with_private_method = object
   inherit [int] folder2 as super
 
@@ -100,7 +100,7 @@ class counter_with_private_method = object
 end
 
 
-[@@@part "5"]
+[@@@part "5"];;
 class counter_with_sig : object
   method doc : int -> doc -> int
   method list_item : int -> 'b list_item -> int

@@ -4,7 +4,8 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 let l = [(1,"one"); (2,"two")] ;;
 
 List.iter l ~f:(fun x ->

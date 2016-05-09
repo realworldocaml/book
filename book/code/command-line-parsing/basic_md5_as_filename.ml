@@ -1,6 +1,6 @@
 
 
-[@@@part "1"]
+[@@@part "1"];;
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"

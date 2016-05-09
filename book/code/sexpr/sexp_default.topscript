@@ -4,7 +4,8 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 type http_server_config = {
   web_root: string;
   port: int;
@@ -14,7 +15,8 @@ type http_server_config = {
 
 
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 type http_server_config = {
   web_root: string;
   port: int with default(80);
@@ -24,17 +26,20 @@ type http_server_config = {
 
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let cfg = http_server_config_of_sexp
             (Sexp.of_string "((web_root /var/www/html))") ;;
 
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 sexp_of_http_server_config cfg ;;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 type http_server_config = {
   web_root: string;
   port: int with default(80), sexp_drop_default;
@@ -50,7 +55,8 @@ let cfg = http_server_config_of_sexp
 sexp_of_http_server_config cfg ;;
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 sexp_of_http_server_config { cfg with port = 8080 } ;;
 
 sexp_of_http_server_config

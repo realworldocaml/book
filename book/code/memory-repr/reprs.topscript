@@ -3,25 +3,29 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 Obj.is_block (Obj.repr (1,2,3)) ;;
 
 Obj.is_block (Obj.repr 1) ;;
 
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 Obj.tag (Obj.repr 1.0) ;;
 
 Obj.double_tag ;;
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 Obj.double_tag ;;
 
 Obj.double_array_tag ;;
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]) ;;
 
 Obj.tag (Obj.repr (1.0, 2.0, 3.0) ) ;;
@@ -31,7 +35,8 @@ Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1 ;;
 Obj.double_field (Obj.repr 1.234) 0 ;;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 type t = Apple | Orange | Pear ;;
 
 ((Obj.magic (Obj.repr Apple)) : int) ;;
@@ -41,7 +46,8 @@ type t = Apple | Orange | Pear ;;
 Obj.is_block (Obj.repr Apple) ;;
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 type t = Apple | Orange of int | Pear of string | Kiwi ;;
 
 Obj.is_block (Obj.repr (Orange 1234)) ;;
@@ -55,7 +61,8 @@ Obj.tag (Obj.repr (Pear "xyz")) ;;
 (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;
 
 
-[@@@part "6"]
+[%%expect]
+[@@@part "6"];;
 Pa_type_conv.hash_variant "Foo" ;;
 
 (Obj.magic (Obj.repr `Foo) : int) ;;

@@ -3,7 +3,8 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
 
@@ -14,7 +15,8 @@ type service_info =
   }
 ;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 #require "re.posix";;
 let service_info_of_string line =
   let matches = 
@@ -26,17 +28,21 @@ let service_info_of_string line =
   }
 ;;
 
-[@@@part "1.1"]
+[%%expect]
+[@@@part "1.1"];;
 let ssh = service_info_of_string
             "ssh 22/udp # SSH Remote Login Protocol";;
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 ssh.port;;
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 type 'a with_line_num = { item: 'a; line_num: int };;
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let parse_lines parse file_contents =
   let lines = String.split ~on:'\n' file_contents in
   List.mapi lines ~f:(fun line_num line ->
@@ -45,7 +51,8 @@ let parse_lines parse file_contents =
     })
 ;;
 
-[@@@part "4.1"]
+[%%expect]
+[@@@part "4.1"];;
 
 parse_lines service_info_of_string
   "rtmp              1/ddp    #Routing Table Maintenance Protocol\n\
@@ -53,18 +60,21 @@ parse_lines service_info_of_string
    tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
 
-[@@@part "4.2"]
+[%%expect]
+[@@@part "4.2"];;
 
 parse_lines Int.of_string "1\n10\n100\n1000";;
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
 ;;
 
 service_info_to_string ssh;;
 
-[@@@part "6"]
+[%%expect]
+[@@@part "6"];;
 type service_info =
   { service_name : string;
     port         : int;
@@ -73,18 +83,21 @@ type service_info =
   }
 ;;
 
-[@@@part "7"]
+[%%expect]
+[@@@part "7"];;
 #warnings "+9";;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
 ;;
 
-[@@@part "8"]
+[%%expect]
+[@@@part "8"];;
 let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
   sprintf "%s %i/%s" name port prot
 ;;
 
-[@@@part "9"]
+[%%expect]
+[@@@part "9"];;
 let service_info_to_string { service_name; port; protocol; comment } =
   let base = sprintf "%s %i/%s" service_name port protocol in
   match comment with
@@ -92,7 +105,8 @@ let service_info_to_string { service_name; port; protocol; comment } =
   | Some text -> base ^ " #" ^ comment
 ;;
 
-[@@@part "10"]
+[%%expect]
+[@@@part "10"];;
 let service_info_of_string line =
   (* first, split off any comment *)
   let (line,comment) =
@@ -110,16 +124,19 @@ let service_info_of_string line =
   { service_name; port; protocol; comment }
 ;;
 
-[@@@part "10.1"]
+[%%expect]
+[@@@part "10.1"];;
 service_info_of_string "ssh 22/tcp # some comment";;
 service_info_of_string "ssh 22/tcp";;
 
-[@@@part "11"]
+[%%expect]
+[@@@part "11"];;
 let create_service_info ~service_name ~port ~protocol ~comment =
   { service_name; port; protocol; comment }
 ;;
 
-[@@@part "12"]
+[%%expect]
+[@@@part "12"];;
 let create_service_info
       ~service_name:service_name ~port:port
       ~protocol:protocol ~comment:comment =
@@ -130,7 +147,8 @@ let create_service_info
   }
 ;;
 
-[@@@part "13"]
+[%%expect]
+[@@@part "13"];;
 type log_entry =
   { session_id: string;
     time: Time_ns.t;
@@ -150,13 +168,16 @@ type logon =
   }
 ;;
 
-[@@@part "14"]
+[%%expect]
+[@@@part "14"];;
 let get_session_id t = t.session_id;;
 
-[@@@part "15"]
+[%%expect]
+[@@@part "15"];;
 let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
 
-[@@@part "16"]
+[%%expect]
+[@@@part "16"];;
 let status_and_session t = (t.status_message, t.session_id);;
 
 let session_and_status t = (t.session_id, t.status_message);;

@@ -9,7 +9,7 @@ type json = [
 ]
 
 
-(* part 1 *)
+[@@@part "1"]
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int ->
    string -> json
 (* Read a JSON value from a string.

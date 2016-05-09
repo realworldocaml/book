@@ -4,18 +4,21 @@
 #require "core";;
 #require "core.syntax";;
 
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 let x = 7 in
 x + x
 ;;
 
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 x;;
 
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let x = 7 in
 let y = x * x in
 x + y

@@ -4,7 +4,8 @@
 #require "core";;
 #require "core.syntax";;
 #require "ctypes.foreign" ;;
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;

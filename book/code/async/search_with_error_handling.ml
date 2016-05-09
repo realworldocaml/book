@@ -1,6 +1,6 @@
 
 
-[@@@part "1"]
+[@@@part "1"];;
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
@@ -14,7 +14,7 @@ let get_definition ~server word =
   | Error _          -> (word, Error "Unexpected failure")
 
 
-[@@@part "2"]
+[@@@part "2"];;
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"

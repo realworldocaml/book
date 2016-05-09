@@ -3,23 +3,27 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 open Core_kernel.Std;;
 module M = struct let foo = 3 end;;
 foo;;
 open M;;
 foo;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 let average x y =
   let open Int64 in
   x + y / of_int 2;;
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let average x y =
   Int64.(x + y / of_int 2);;
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 module Interval = struct
   type t = | Interval of int * int
            | Empty
@@ -28,7 +32,8 @@ module Interval = struct
     if high < low then Empty else Interval (low,high)
 end;;
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 module Extended_interval = struct
   include Interval
 
@@ -40,7 +45,8 @@ end;;
 
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 module Extended_interval = struct
   open Interval
 

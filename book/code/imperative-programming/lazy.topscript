@@ -5,7 +5,8 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
 
 Lazy.force v;;
@@ -14,7 +15,8 @@ Lazy.force v;;
 Lazy.force v;;
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 type 'a lazy_state =
   | Delayed of (unit -> 'a)
   | Value of 'a
@@ -22,14 +24,16 @@ type 'a lazy_state =
 ;;
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let create_lazy f = ref (Delayed f);;
 
 let v = create_lazy
           (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let force v =
   match !v with
   | Value x -> x
@@ -45,7 +49,8 @@ let force v =
 ;;
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 force v;;
 
 

@@ -1,6 +1,6 @@
 
 
-[@@@part "1"]
+[@@@part "1"];;
 type shape = < variant : repr; area : float>
 and circle = < variant : repr; area : float; radius : int >
 and line = < variant : repr; area : float; length : int >

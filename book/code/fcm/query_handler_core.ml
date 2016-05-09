@@ -1,6 +1,6 @@
 
 
-[@@@part "1"]
+[@@@part "1"];;
 module Loader = struct
   type config = (module Query_handler) list sexp_opaque
   with sexp
@@ -12,7 +12,7 @@ module Loader = struct
   let name = "loader"
 
 
-[@@@part "2"]
+[@@@part "2"];;
 let create known_list =
     let active = String.Table.create () in
     let known  = String.Table.create () in
@@ -22,7 +22,7 @@ let create known_list =
     { known; active }
 
 
-[@@@part "3"]
+[@@@part "3"];;
 let load t handler_name config =
     if Hashtbl.mem t.active handler_name then
       Or_error.error "Can't re-register an active handler"
@@ -42,7 +42,7 @@ let load t handler_name config =
         Ok Sexp.unit
 
 
-[@@@part "4"]
+[@@@part "4"];;
 let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
       Or_error.error "Handler not active" handler_name String.sexp_of_t
@@ -54,7 +54,7 @@ let unload t handler_name =
     )
 
 
-[@@@part "5"]
+[@@@part "5"];;
 type request =
     | Load of string * Sexp.t
     | Unload of string
@@ -63,7 +63,7 @@ type request =
   with sexp
 
 
-[@@@part "6"]
+[@@@part "6"];;
 let eval t sexp =
     match Or_error.try_with (fun () -> request_of_sexp sexp) with
     | Error _ as err -> err

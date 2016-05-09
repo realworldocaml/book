@@ -26,20 +26,24 @@ let fib_norec fib i =
   else fib (i - 1) + fib (i - 2) ;;
 
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 
 let memo_rec f_norec =
   let rec f = memoize (fun x -> f_norec f x) in
   f
 ;;
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let rec x = lazy (force x + 1);;
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 force x;;
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let lazy_memo_rec f_norec x =
   let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
   (force f) x

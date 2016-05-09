@@ -6,23 +6,27 @@
 open Core_kernel.Std;;
 #require "yojson";;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 let person = `Assoc [ ("name", `String "Anil") ] ;;
 
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 Yojson.Basic.pretty_to_string ;;
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 Yojson.Basic.pretty_to_string person ;;
 
 Yojson.Basic.pretty_to_channel stdout person ;;
 
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let person = `Assoc ("name", `String "Anil");;
 
 
@@ -33,7 +37,8 @@ Yojson.Basic.pretty_to_string person ;;
 
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let (person : Yojson.Basic.json) =
   `Assoc ("name", `String "Anil");;
 

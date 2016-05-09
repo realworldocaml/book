@@ -3,25 +3,30 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 open Core_kernel.Std;;
 [1;2;3];;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 1 :: (2 :: (3 :: [])) ;;
 1 :: 2 :: 3 :: [] ;;
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let empty = [];;
 3 :: empty;;
 "three" :: empty;;
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let l = 1 :: 2 :: 3 :: [];;
 let m = 0 :: l;;
 l;;
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let rec sum l =
   match l with
   | [] -> 0
@@ -33,7 +38,8 @@ sum [1;2;3];;
 sum [];;
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let rec drop_value l to_drop =
   match l with
   | [] -> []
@@ -44,11 +50,13 @@ let rec drop_value l to_drop =
 
 
 
-[@@@part "6"]
+[%%expect]
+[@@@part "6"];;
 drop_value [1;2;3] 2;;
 
 
-[@@@part "7"]
+[%%expect]
+[@@@part "7"];;
 let rec drop_value l to_drop =
   match l with
   | [] -> []
@@ -60,7 +68,8 @@ let rec drop_value l to_drop =
 drop_value [1;2;3] 2;;
 
 
-[@@@part "8"]
+[%%expect]
+[@@@part "8"];;
 let rec drop_zero l =
   match l with
   | [] -> []
@@ -71,7 +80,8 @@ let rec drop_zero l =
 drop_zero [1;2;0;3];;
 
 
-[@@@part "9"]
+[%%expect]
+[@@@part "9"];;
 let plus_one_match x =
   match x with
   | 0 -> 1
@@ -87,7 +97,8 @@ let plus_one_if x =
   else x + 1
 ;;
 
-[@@@part "10"]
+[%%expect]
+[@@@part "10"];;
 #require "core_bench";;
 open Core_bench.Std;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
@@ -97,45 +108,55 @@ open Core_bench.Std;;
 |> Bench.bench
 ;;
 
-[@@@part "11"]
+[%%expect]
+[@@@part "11"];;
 let rec sum_if l =
   if List.is_empty l then 0
   else List.hd_exn l + sum_if (List.tl_exn l)
 ;;
 
-[@@@part "12"]
+[%%expect]
+[@@@part "12"];;
 let numbers = List.range 0 1000 in
 [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
 ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
 |> Bench.bench
 ;;
 
-[@@@part "13"]
+[%%expect]
+[@@@part "13"];;
 let rec drop_zero l =
   match l with
   | [] -> []
   | 0  :: tl -> drop_zero tl
 ;;
 
-[@@@part "14"]
+[%%expect]
+[@@@part "14"];;
 List.map ~f:String.length ["Hello"; "World!"];;
 
-[@@@part "15"]
+[%%expect]
+[@@@part "15"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
 
-[@@@part "16"]
+[%%expect]
+[@@@part "16"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
 
-[@@@part "17"]
+[%%expect]
+[@@@part "17"];;
 List.fold;;
 
-[@@@part "18"]
+[%%expect]
+[@@@part "18"];;
 List.fold ~init:0 ~f:(+) [1;2;3;4];;
 
-[@@@part "19"]
+[%%expect]
+[@@@part "19"];;
 List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4];;
 
-[@@@part "20"]
+[%%expect]
+[@@@part "20"];;
 let max_widths header rows =
   let lengths l = List.map ~f:String.length l in
   List.fold rows
@@ -144,7 +165,8 @@ let max_widths header rows =
       List.map2_exn ~f:Int.max acc (lengths row))
 ;;
 
-[@@@part "21"]
+[%%expect]
+[@@@part "21"];;
 let render_separator widths =
   let pieces = List.map widths
                  ~f:(fun w -> String.make (w + 2) '-')
@@ -153,19 +175,23 @@ let render_separator widths =
 ;;
 render_separator [3;6;2];;
 
-[@@@part "22"]
+[%%expect]
+[@@@part "22"];;
 let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 
-[@@@part "23"]
+[%%expect]
+[@@@part "23"];;
 let s = String.concat [".";".";".";".";".";".";"."];;
 
-[@@@part "24"]
+[%%expect]
+[@@@part "24"];;
 let pad s length =
   " " ^ s ^ String.make (length - String.length s + 1) ' '
 ;;
 pad "hello" 10;;
 
-[@@@part "25"]
+[%%expect]
+[@@@part "25"];;
 let render_row row widths =
   let padded = List.map2_exn row widths ~f:pad in
   "|" ^ String.concat ~sep:"|" padded ^ "|"
@@ -173,7 +199,8 @@ let render_row row widths =
 render_row ["Hello";"World"] [10;15];;
 
 
-[@@@part "26"]
+[%%expect]
+[@@@part "26"];;
 let render_table header rows =
   let widths = max_widths header rows in
   String.concat ~sep:"\n"
@@ -184,18 +211,22 @@ let render_table header rows =
 ;;
 
 
-[@@@part "27"]
+[%%expect]
+[@@@part "27"];;
 List.reduce;;
 
-[@@@part "28"]
+[%%expect]
+[@@@part "28"];;
 List.reduce ~f:(+) [1;2;3;4;5];;
 
 List.reduce ~f:(+) [];;
 
-[@@@part "29"]
+[%%expect]
+[@@@part "29"];;
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 
-[@@@part "30"]
+[%%expect]
+[@@@part "30"];;
 List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
   match String.rsplit2 ~on:'.' fname with
   | None  | Some ("",_) -> None
@@ -204,7 +235,8 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
 |> List.dedup
 ;;
 
-[@@@part "31"]
+[%%expect]
+[@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
   | Some (_,("ml"|"mli")) -> true
@@ -214,16 +246,20 @@ let is_ocaml_source s =
 let (ml_files,other_files) =
   List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
 
-[@@@part "32"]
+[%%expect]
+[@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
 
-[@@@part "33"]
+[%%expect]
+[@@@part "33"];;
 [1;2;3] @ [4;5;6];;
 
-[@@@part "34"]
+[%%expect]
+[@@@part "34"];;
 List.concat [[1;2];[3;4;5];[6];[]];;
 
-[@@@part "35"]
+[%%expect]
+[@@@part "35"];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
   then [s]
@@ -233,7 +269,8 @@ let rec ls_rec s =
     |> List.concat
 ;;
 
-[@@@part "36"]
+[%%expect]
+[@@@part "36"];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
   then [s]
@@ -242,7 +279,8 @@ let rec ls_rec s =
     |> List.concat_map ~f:(fun sub -> ls_rec (s ^/ sub))
 ;;
 
-[@@@part "37"]
+[%%expect]
+[@@@part "37"];;
 let rec length = function
   | [] -> 0
   | _ :: tl -> 1 + length tl
@@ -251,7 +289,8 @@ let rec length = function
 length [1;2;3];;
 
 
-[@@@part "38"]
+[%%expect]
+[@@@part "38"];;
 let make_list n = List.init n ~f:(fun x -> x);;
 
 length (make_list 10);;
@@ -259,7 +298,8 @@ length (make_list 10);;
 length (make_list 10_000_000);;
 
 
-[@@@part "39"]
+[%%expect]
+[@@@part "39"];;
 let rec length_plus_n l n =
   match l with
   | [] -> n
@@ -271,11 +311,13 @@ let length l = length_plus_n l 0 ;;
 length [1;2;3;4];;
 
 
-[@@@part "40"]
+[%%expect]
+[@@@part "40"];;
 length (make_list 10_000_000);;
 
 
-[@@@part "41"]
+[%%expect]
+[@@@part "41"];;
 let rec destutter list =
   match list with
   | [] -> []
@@ -286,7 +328,8 @@ let rec destutter list =
 ;;
 
 
-[@@@part "42"]
+[%%expect]
+[@@@part "42"];;
 let rec destutter = function
   | [] as l -> l
   | [_] as l -> l
@@ -296,7 +339,8 @@ let rec destutter = function
 ;;
 
 
-[@@@part "43"]
+[%%expect]
+[@@@part "43"];;
 let rec destutter = function
   | [] | [_] as l -> l
   | hd :: (hd' :: _ as tl) ->
@@ -305,7 +349,8 @@ let rec destutter = function
 ;;
 
 
-[@@@part "44"]
+[%%expect]
+[@@@part "44"];;
 let rec destutter = function
   | [] | [_] as l -> l
   | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
@@ -313,7 +358,8 @@ let rec destutter = function
 ;;
 
 
-[@@@part "45"]
+[%%expect]
+[@@@part "45"];;
 3 = 4;;
 
 [3;4;5] = [3;4;5];;
@@ -321,15 +367,18 @@ let rec destutter = function
 [Some 3; None] = [None; Some 3];;
 
 
-[@@@part "46"]
+[%%expect]
+[@@@part "46"];;
 (=);;
 
 
-[@@@part "47"]
+[%%expect]
+[@@@part "47"];;
 (fun x -> x + 1) = (fun x -> x + 1);;
 
 
-[@@@part "48"]
+[%%expect]
+[@@@part "48"];;
 let rec count_some list =
   match list with
   | [] -> 0
@@ -343,11 +392,13 @@ let rec count_some list =
 
 
 
-[@@@part "49"]
+[%%expect]
+[@@@part "49"];;
 count_some [Some 3; None; Some 4];;
 
 
-[@@@part "50"]
+[%%expect]
+[@@@part "50"];;
 let rec count_some list =
   match list with
   | [] -> 0
@@ -357,7 +408,8 @@ let rec count_some list =
 ;;
 
 
-[@@@part "51"]
+[%%expect]
+[@@@part "51"];;
 let rec count_some list =
   match list with
   | [] -> 0
@@ -366,7 +418,8 @@ let rec count_some list =
 ;;
 
 
-[@@@part "52"]
+[%%expect]
+[@@@part "52"];;
 let rec count_some list =
   match list with
   | [] -> 0
@@ -375,11 +428,13 @@ let rec count_some list =
 ;;
 
 
-[@@@part "53"]
+[%%expect]
+[@@@part "53"];;
 let count_some l = List.count ~f:Option.is_some l;;
 
 
-[@@@part "69"]
+[%%expect]
+[@@@part "69"];;
 printf "%s\n"
   (render_table
      ["language";"architect";"first release"]

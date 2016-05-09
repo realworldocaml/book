@@ -5,27 +5,32 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 printf "%i is an integer, %F is a float, \"%s\" is a string\n"
   3 4.5 "five";;
 
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 printf "An integer: %i\n" 4.5;;
 
 
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let fmt = "%i is an integer\n";;
 
 printf fmt 3;;
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 open CamlinternalFormatBasics;;
 let fmt : ('a, 'b, 'c) format =
   "%i is an integer\n";;
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 printf fmt 3;;

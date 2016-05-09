@@ -5,7 +5,8 @@
 #require "core.syntax";;
 ;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 let imm_stack init = object
   val v = init
 
@@ -20,7 +21,8 @@ end ;;
 
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let s = imm_stack [3; 2; 1] ;;
 
 let t = s#push 4 ;;

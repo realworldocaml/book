@@ -4,7 +4,8 @@
 #require "core";;
 #require "core.syntax";;
 ;;
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 open Core_kernel.Std;;
 let digit_alist =
   [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
@@ -14,7 +15,8 @@ let digit_alist =
 
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 List.Assoc.find digit_alist 6;;
 
 List.Assoc.find digit_alist 22;;
@@ -24,18 +26,21 @@ List.Assoc.add digit_alist 0 "zilch";;
 
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let digit_map = Map.of_alist_exn digit_alist
                   ~comparator:Int.comparator;;
 
 Map.find digit_map 3;;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
 let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
 Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
@@ -45,7 +50,8 @@ Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 
 
 
-[@@@part "6"]
+[%%expect]
+[@@@part "6"];;
 Map.symmetric_diff;;
 
 
@@ -53,7 +59,8 @@ Map.symmetric_diff;;
 
 
 
-[@@@part "7"]
+[%%expect]
+[@@@part "7"];;
 module Reverse = Comparator.Make(struct
     type t = string
     let sexp_of_t = String.sexp_of_t
@@ -70,7 +77,8 @@ module Reverse = Comparator.Make(struct
 
 
 
-[@@@part "8"]
+[%%expect]
+[@@@part "8"];;
 let alist = ["foo", 0; "snoo", 3];;
 
 let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
@@ -78,13 +86,15 @@ let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
 let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
 
 
-[@@@part "9"]
+[%%expect]
+[@@@part "9"];;
 Map.min_elt ord_map;;
 
 Map.min_elt rev_map;;
 
 
-[@@@part "10"]
+[%%expect]
+[@@@part "10"];;
 Map.symmetric_diff ord_map rev_map;;
 
 
@@ -92,15 +102,18 @@ Map.symmetric_diff ord_map rev_map;;
 
 
 
-[@@@part "11"]
+[%%expect]
+[@@@part "11"];;
 let ord_tree = Map.to_tree ord_map;;
 
 
-[@@@part "12"]
+[%%expect]
+[@@@part "12"];;
 Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
 
 
-[@@@part "13"]
+[%%expect]
+[@@@part "13"];;
 Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 
 
@@ -108,15 +121,18 @@ Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 
 
 
-[@@@part "14"]
+[%%expect]
+[@@@part "14"];;
 Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
 
 
-[@@@part "15"]
+[%%expect]
+[@@@part "15"];;
 Map.Poly.of_alist_exn digit_alist;;
 
 
-[@@@part "16"]
+[%%expect]
+[@@@part "16"];;
 Map.symmetric_diff (Map.Poly.singleton 3 "three")
   (Int.Map.singleton  3 "four" ) ;;
 
@@ -127,7 +143,8 @@ Map.symmetric_diff (Map.Poly.singleton 3 "three")
 
 
 
-[@@@part "17"]
+[%%expect]
+[@@@part "17"];;
 let dedup ~comparator l =
   List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
   |> Set.to_list
@@ -137,24 +154,29 @@ let dedup ~comparator l =
 dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
 
 
-[@@@part "18"]
+[%%expect]
+[@@@part "18"];;
 let (s1,s2) = (Int.Set.of_list [1;2],
                Int.Set.of_list [2;1]);;
 
 
 
-[@@@part "19"]
+[%%expect]
+[@@@part "19"];;
 Set.equal s1 s2;;
 
 
-[@@@part "20"]
+[%%expect]
+[@@@part "20"];;
 s1 = s2;;
 
 
-[@@@part "21"]
+[%%expect]
+[@@@part "21"];;
 Set.to_tree s1 = Set.to_tree s2;;
 
-[@@@part "22"]
+[%%expect]
+[@@@part "22"];;
 module Foo_and_bar : sig
   type t = { foo: Int.Set.t; bar: string }
   include Comparable.S with type t := t
@@ -169,7 +191,8 @@ end = struct
   include Comparable.Make(T)
 end;;
 
-[@@@part "23"]
+[%%expect]
+[@@@part "23"];;
 module Foo_and_bar : sig
   type t = { foo: Int.Set.t; bar: string }
   include Comparable.S with type t := t
@@ -181,7 +204,8 @@ end = struct
   include Comparable.Make(T)
 end;;
 
-[@@@part "24"]
+[%%expect]
+[@@@part "24"];;
 module Foo_and_bar : sig
   type t = { foo: int; bar: string }
   include Comparable.S with type t := t
@@ -195,7 +219,8 @@ end;;
 
 
 
-[@@@part "25"]
+[%%expect]
+[@@@part "25"];;
 let table = Hashtbl.create ~hashable:String.hashable ();;
 
 Hashtbl.replace table ~key:"three" ~data:3;;
@@ -203,19 +228,23 @@ Hashtbl.replace table ~key:"three" ~data:3;;
 Hashtbl.find table "three";;
 
 
-[@@@part "26"]
+[%%expect]
+[@@@part "26"];;
 let table = String.Table.create ();;
 
 
-[@@@part "27"]
+[%%expect]
+[@@@part "27"];;
 let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
 
 
-[@@@part "28"]
+[%%expect]
+[@@@part "28"];;
 let table = Hashtbl.Poly.create ();;
 
 
-[@@@part "29"]
+[%%expect]
+[@@@part "29"];;
 Caml.Hashtbl.hash (List.range 0 9);;
 
 Caml.Hashtbl.hash (List.range 0 10);;
@@ -224,7 +253,8 @@ Caml.Hashtbl.hash (List.range 0 11);;
 
 Caml.Hashtbl.hash (List.range 0 100);;
 
-[@@@part "30"]
+[%%expect]
+[@@@part "30"];;
 module Foo_and_bar : sig
   type t = { foo: int; bar: string }
   include Hashable.S with type t := t

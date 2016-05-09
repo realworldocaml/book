@@ -3,24 +3,28 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 module Increment (M : X_int) : X_int = struct
   let x = M.x + 1
 end;;
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 module Increment (M : X_int) = struct
   let x = M.x + 1
 end;;
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 module Three = struct let x = 3 end;;
 
 module Four = Increment(Three);;
@@ -28,7 +32,8 @@ module Four = Increment(Three);;
 Four.x - Three.x;;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 module Three_and_more = struct
   let x = 3
   let y = "three"
@@ -37,14 +42,16 @@ end;;
 module Four = Increment(Three_and_more);;
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 module type Comparable = sig
   type t
   val compare : t -> t -> int
 end ;;
 
 
-[@@@part "6"]
+[%%expect]
+[@@@part "6"];;
 module Make_interval(Endpoint : Comparable) = struct
 
   type t = | Interval of Endpoint.t * Endpoint.t
@@ -88,7 +95,8 @@ end ;;
 
 
 
-[@@@part "7"]
+[%%expect]
+[@@@part "7"];;
 module Int_interval =
   Make_interval(struct
     type t = int
@@ -103,7 +111,8 @@ module Int_interval =
 
 
 
-[@@@part "8"]
+[%%expect]
+[@@@part "8"];;
 module Int_interval = Make_interval(Int) ;;
 
 
@@ -126,7 +135,8 @@ module String_interval = Make_interval(String) ;;
 
 
 
-[@@@part "9"]
+[%%expect]
+[@@@part "9"];;
 let i1 = Int_interval.create 3 8;;
 
 let i2 = Int_interval.create 4 10;;
@@ -134,7 +144,8 @@ let i2 = Int_interval.create 4 10;;
 Int_interval.intersect i1 i2;;
 
 
-[@@@part "10"]
+[%%expect]
+[@@@part "10"];;
 module Rev_int_interval =
   Make_interval(struct
     type t = int
@@ -149,19 +160,22 @@ module Rev_int_interval =
 
 
 
-[@@@part "11"]
+[%%expect]
+[@@@part "11"];;
 let interval = Int_interval.create 4 3;;
 
 let rev_interval = Rev_int_interval.create 4 3;;
 
 
-[@@@part "12"]
+[%%expect]
+[@@@part "12"];;
 Int_interval.contains rev_interval 3;;
 
 
 
 
-[@@@part "13"]
+[%%expect]
+[@@@part "13"];;
 Int_interval.is_empty (* going through create *)
   (Int_interval.create 4 3) ;;
 
@@ -169,7 +183,8 @@ Int_interval.is_empty (* bypassing create *)
   (Int_interval.Interval (4,3)) ;;
 
 
-[@@@part "14"]
+[%%expect]
+[@@@part "14"];;
 module type Interval_intf = sig
   type t
   type endpoint
@@ -180,7 +195,8 @@ module type Interval_intf = sig
 end;;
 
 
-[@@@part "15"]
+[%%expect]
+[@@@part "15"];;
 
 module Make_interval(Endpoint : Comparable) : Interval_intf = struct
   type endpoint = Endpoint.t
@@ -192,7 +208,8 @@ module Make_interval(Endpoint : Comparable) : Interval_intf = struct
 end ;;
 
 
-[@@@part "16"]
+[%%expect]
+[@@@part "16"];;
 module Int_interval = Make_interval(Int);;
 
 
@@ -208,11 +225,13 @@ Int_interval.create 3 4;;
 
 
 
-[@@@part "17"]
+[%%expect]
+[@@@part "17"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint = int;;
 
-[@@@part "18"]
+[%%expect]
+[@@@part "18"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint = Endpoint.t)
 = struct
@@ -226,7 +245,8 @@ module Make_interval(Endpoint : Comparable)
 end ;;
 
 
-[@@@part "19"]
+[%%expect]
+[@@@part "19"];;
 module Int_interval = Make_interval(Int);;
 
 
@@ -235,12 +255,14 @@ let i = Int_interval.create 3 4;;
 Int_interval.contains i 5;;
 
 
-[@@@part "20"]
+[%%expect]
+[@@@part "20"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint := int;;
 
 
-[@@@part "21"]
+[%%expect]
+[@@@part "21"];;
 # module Make_interval(Endpoint : Comparable)
   : Interval_intf with type endpoint := Endpoint.t =
   struct
@@ -254,7 +276,8 @@ module type Int_interval_intf =
 
 
 
-[@@@part "22"]
+[%%expect]
+[@@@part "22"];;
 module Int_interval = Make_interval(Int);;
 
 
@@ -272,11 +295,13 @@ Int_interval.is_empty
 
 
 
-[@@@part "23"]
+[%%expect]
+[@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
 
 
-[@@@part "24"]
+[%%expect]
+[@@@part "24"];;
 type some_type = int * string list with sexp;;
 
 
@@ -285,7 +310,8 @@ sexp_of_some_type (33, ["one"; "two"]);;
 
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
 
-[@@@part "25"]
+[%%expect]
+[@@@part "25"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint := Endpoint.t) = struct
 
@@ -298,7 +324,8 @@ module Make_interval(Endpoint : Comparable)
 end ;;
 
 
-[@@@part "26"]
+[%%expect]
+[@@@part "26"];;
 module type Interval_intf_with_sexp = sig
   include Interval_intf
   include Sexpable with type t := t
@@ -315,7 +342,8 @@ end;;
 
 
 
-[@@@part "27"]
+[%%expect]
+[@@@part "27"];;
 module type Interval_intf_with_sexp = sig
   type t
   include Interval_intf with type t := t
@@ -333,7 +361,8 @@ end;;
 
 
 
-[@@@part "28"]
+[%%expect]
+[@@@part "28"];;
 module Make_interval(Endpoint : sig
     type t
     include Comparable with type t := t
@@ -400,7 +429,8 @@ end;;
 
 
 
-[@@@part "29"]
+[%%expect]
+[@@@part "29"];;
 module Int_interval = Make_interval(Int) ;;
 
 

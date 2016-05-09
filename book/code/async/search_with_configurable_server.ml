@@ -1,6 +1,6 @@
 
 
-[@@@part "1"]
+[@@@part "1"];;
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =

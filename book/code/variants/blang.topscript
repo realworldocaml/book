@@ -5,7 +5,8 @@
 #require "core.syntax";;
 
 open Core_kernel.Std;;
-[@@@part "0.5"]
+[%%expect]
+[@@@part "0.5"];;
 type 'a expr =
   | Base  of 'a
   | Const of bool
@@ -14,13 +15,15 @@ type 'a expr =
   | Not   of 'a expr
 ;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 type mail_field = To | From | CC | Date | Subject;;
 type mail_predicate = { field: mail_field;
                         contains: string }
 ;;
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let test field contains = Base { field; contains };;
 
 And [ Or [ test To "doligez"; test CC "doligez" ];
@@ -28,7 +31,8 @@ And [ Or [ test To "doligez"; test CC "doligez" ];
     ]
 ;;
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let rec eval expr base_eval =
   (* a shortcut, so we don't need to repeatedly pass [base_eval]
      explicitly to [eval] *)
@@ -42,7 +46,8 @@ let rec eval expr base_eval =
 ;;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let and_ l =
   if List.mem l (Const false) then Const false
   else
@@ -67,7 +72,8 @@ let not_ = function
 
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let rec simplify = function
   | Base _ | Const _ as x -> x
   | And l -> and_ (List.map ~f:simplify l)
@@ -76,24 +82,28 @@ let rec simplify = function
 ;;
 
 
-[@@@part "6"]
+[%%expect]
+[@@@part "6"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Base "it's raining"]));;
 
 
-[@@@part "7"]
+[%%expect]
+[@@@part "7"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Not (Not (Base "it's raining"))]));;
 
 
-[@@@part "8"]
+[%%expect]
+[@@@part "8"];;
 let not_ = function
   | Const b -> Const (not b)
   | (Base _ | And _ | Or _ | Not _) as e -> Not e
 ;;
 
 
-[@@@part "9"]
+[%%expect]
+[@@@part "9"];;
 let not_ = function
   | Const b -> Const (not b)
   | Not e -> e

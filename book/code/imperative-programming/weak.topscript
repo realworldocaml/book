@@ -4,7 +4,8 @@
 #require "core";;
 #require "core.syntax";;
 ;;
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 let remember =
   let cache = ref None in
   (fun x ->
@@ -14,7 +15,8 @@ let remember =
 ;;
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let identity x = x;;
 
 identity 3;;
@@ -22,7 +24,8 @@ identity 3;;
 identity "five";;
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let remember_three () = remember 3;;
 
 remember;;

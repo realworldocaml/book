@@ -5,7 +5,8 @@
 #require "core.syntax";;
 open Core.Std;;
 
-[@@@part "17"]
+[%%expect]
+[@@@part "17"];;
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -31,7 +32,8 @@ module Logon = struct
 end
 ;;
 
-[@@@part "18"]
+[%%expect]
+[@@@part "18"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.time = Time_ns.now (); 
     Log_entry.session_id; 
@@ -40,21 +42,25 @@ let create_log_entry ~session_id ~important message =
   }
 ;;
 
-[@@@part "19"]
+[%%expect]
+[@@@part "19"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.
     time = Time_ns.now (); session_id; important; message }
 ;;
 
-[@@@part "20"]
+[%%expect]
+[@@@part "20"];;
 let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
 ;;
 
-[@@@part "21"]
+[%%expect]
+[@@@part "21"];;
 let is_important t = t.Log_entry.important;;
 
-[@@@part "21.1"]
+[%%expect]
+[@@@part "21.1"];;
 
 let create_log_entry ~session_id ~important message : Log_entry.t =
   { time = Time_ns.now (); session_id; important; message }
@@ -62,7 +68,8 @@ let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message
 let is_important (t:Log_entry.t) = t.important ;;
 
-[@@@part "22"]
+[%%expect]
+[@@@part "22"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
     port: int;
@@ -79,11 +86,13 @@ let register_heartbeat t hb =
     last_heartbeat_time = hb.Heartbeat.time;
   };;
 
-[@@@part "23"]
+[%%expect]
+[@@@part "23"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time };;
 
-[@@@part "24"]
+[%%expect]
+[@@@part "24"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
     port: int;
@@ -93,13 +102,15 @@ type client_info =
     last_heartbeat_status: string;
   };;
 
-[@@@part "25"]
+[%%expect]
+[@@@part "25"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
            last_heartbeat_status = hb.Heartbeat.status_message;
   };;
 
-[@@@part "26"]
+[%%expect]
+[@@@part "26"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
     port: int;
@@ -109,17 +120,20 @@ type client_info =
     mutable last_heartbeat_status: string;
   };;
 
-[@@@part "27"]
+[%%expect]
+[@@@part "27"];;
 let register_heartbeat t hb =
   t.last_heartbeat_time   <- hb.Heartbeat.time;
   t.last_heartbeat_status <- hb.Heartbeat.status_message
 ;;
 
-[@@@part "28"]
+[%%expect]
+[@@@part "28"];;
 let get_users logons =
   List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
 
-[@@@part "29"]
+[%%expect]
+[@@@part "29"];;
 module Logon = struct
   type t =
     { session_id: string;
@@ -130,23 +144,28 @@ module Logon = struct
   with fields
 end;;
 
-[@@@part "30"]
+[%%expect]
+[@@@part "30"];;
 let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 
-[@@@part "31"]
+[%%expect]
+[@@@part "31"];;
 Field.get Logon.Fields.user;;
 
-[@@@part "32"]
+[%%expect]
+[@@@part "32"];;
 Field.get;;
 
-[@@@part "33"]
+[%%expect]
+[@@@part "33"];;
 let show_field field to_string record =
   let name = Field.name field in
   let field_string = to_string (Field.get field record) in
   name ^ ": " ^ field_string
 ;;
 
-[@@@part "34"]
+[%%expect]
+[@@@part "34"];;
 let logon = { Logon.
               session_id = "26685";
               time = Time_ns.now ();
@@ -158,10 +177,12 @@ show_field Logon.Fields.user Fn.id logon;;
 
 show_field Logon.Fields.time Time_ns.to_string logon;;
 
-[@@@part "35"]
+[%%expect]
+[@@@part "35"];;
 Logon.Fields.iter;;
 
-[@@@part "36"]
+[%%expect]
+[@@@part "36"];;
 let print_logon logon =
   let print to_string field =
     printf "%s\n" (show_field field to_string logon)

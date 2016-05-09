@@ -7,24 +7,28 @@ open Core_kernel.Std;;
 #require "yojson";;
 let json = Yojson.Basic.from_file "book.json" ;;
 
-[@@@part "1"]
+[%%expect]
+[@@@part "1"];;
 open Yojson.Basic.Util ;;
 let title = json |> member "title" |> to_string ;;
 
 
-[@@@part "2"]
+[%%expect]
+[@@@part "2"];;
 let tags = json |> member "tags" |> to_list |> filter_string ;;
 
 let pages = json |> member "pages" |> to_int ;;
 
 
-[@@@part "3"]
+[%%expect]
+[@@@part "3"];;
 let is_online = json |> member "is_online" |> to_bool_option ;;
 
 let is_translated = json |> member "is_translated" |> to_bool_option ;;
 
 
-[@@@part "4"]
+[%%expect]
+[@@@part "4"];;
 let authors = json |> member "authors" |> to_list ;;
 
 
@@ -36,7 +40,8 @@ let authors = json |> member "authors" |> to_list ;;
 
 
 
-[@@@part "5"]
+[%%expect]
+[@@@part "5"];;
 let names =
   json |> member "authors" |> to_list 
   |> List.map ~f:(fun json -> member "name" json |> to_string) ;;
