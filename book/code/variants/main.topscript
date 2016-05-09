@@ -3,7 +3,19 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 type basic_color =
@@ -13,7 +25,8 @@ Cyan ;;
 
 [Blue; Magenta; Red] ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1"];;
 let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
@@ -21,7 +34,8 @@ let basic_color_to_int = function
 
 List.map ~f:basic_color_to_int [Blue;Red];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 let color_by_number number text =
   sprintf "\027[38;5;%dm%s\027[0m" number text;;
@@ -30,7 +44,9 @@ let blue = color_by_number (basic_color_to_int Blue) "Blue";;
 
 printf "Hello %s World!\n" blue;;
 
-[%%expect]
+[%%expect{|
+Hello [38;5;4mBlue[0m World!
+|}]
 [@@@part "3"];;
 type weight = Regular | Bold;;
 type color =
@@ -60,7 +76,10 @@ color_print (Basic (Red,Bold)) "A bold red!";;
 color_print (Gray 4) "A muted gray...";;
 
 
-[%%expect]
+[%%expect{|
+[38;5;9mA bold red![0m
+[38;5;236mA muted gray...[0m
+|}]
 [@@@part "6"];;
 let three = `Int 3;;
 
@@ -78,7 +97,13 @@ let five = `Int "five";;
 
 [three; four; five];;
 
-[%%expect]
+[%%expect{|
+Line _, characters 14-18:
+Error: This expression has type [> `Int of string ]
+       but an expression was expected of type
+         [> `Float of float | `Int of int ]
+       Types for tag `Int are incompatible
+|}]
 [@@@part "8"];;
 let is_positive = function
   | `Int   x -> x > 0
@@ -91,7 +116,8 @@ let is_positive = function
 let exact = List.filter ~f:is_positive [three;four];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "10"];;
 let is_positive = function
   | `Int   x -> Ok (x > 0)
@@ -105,7 +131,8 @@ List.filter [three; four] ~f:(fun x ->
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "11"];;
 type extended_color =
   | Basic of basic_color * weight  (* basic colors, regular and bold *)
@@ -129,7 +156,11 @@ let extended_color_to_int = function
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 56-61:
+Error: This expression has type extended_color
+       but an expression was expected of type color
+|}]
 [@@@part "13"];;
 let basic_color_to_int = function
   | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
@@ -205,7 +236,24 @@ let extended_color_to_int = function
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 26-31:
+Error: This expression has type [> `RGBA of int * int * int * int ]
+       but an expression was expected of type
+         [< `Basic of
+              [< `Black
+               | `Blue
+               | `Cyan
+               | `Green
+               | `Magenta
+               | `Red
+               | `White
+               | `Yellow ] *
+              [< `Bold | `Regular ]
+          | `Gray of int
+          | `RGB of int * int * int ]
+       The second variant type does not allow tag(s) `RGBA
+|}]
 [@@@part "16"];;
 let is_positive_permissive = function
   | `Int   x -> Ok (x > 0)
@@ -219,7 +267,10 @@ is_positive_permissive (`Int 0);;
 is_positive_permissive (`Ratio (3,4));;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "17"];;
 is_positive_permissive (`Floot 3.5);;
 
+[%%expect{|
+|}]

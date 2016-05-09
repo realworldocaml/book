@@ -5,7 +5,19 @@
 #require "core.syntax";;
 
 open Core_kernel.Std;;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 type 'a expr =
   | Base  of 'a
@@ -46,7 +58,8 @@ let rec eval expr base_eval =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4"];;
 let and_ l =
   if List.mem l (Const false) then Const false
@@ -72,7 +85,8 @@ let not_ = function
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "5"];;
 let rec simplify = function
   | Base _ | Const _ as x -> x
@@ -82,19 +96,22 @@ let rec simplify = function
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "6"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Base "it's raining"]));;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "7"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Not (Not (Base "it's raining"))]));;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "8"];;
 let not_ = function
   | Const b -> Const (not b)

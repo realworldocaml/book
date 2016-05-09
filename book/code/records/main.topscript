@@ -3,7 +3,19 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
@@ -15,7 +27,8 @@ type service_info =
   }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1"];;
 #require "re.posix";;
 let service_info_of_string line =
@@ -28,16 +41,19 @@ let service_info_of_string line =
   }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1.1"];;
 let ssh = service_info_of_string
             "ssh 22/udp # SSH Remote Login Protocol";;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 ssh.port;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "3"];;
 type 'a with_line_num = { item: 'a; line_num: int };;
 
@@ -51,7 +67,8 @@ let parse_lines parse file_contents =
     })
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4.1"];;
 
 parse_lines service_info_of_string
@@ -60,12 +77,14 @@ parse_lines service_info_of_string
    tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4.2"];;
 
 parse_lines Int.of_string "1\n10\n100\n1000";;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
@@ -73,7 +92,8 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 
 service_info_to_string ssh;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "6"];;
 type service_info =
   { service_name : string;
@@ -90,13 +110,21 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
   sprintf "%s %i/%s" name port prot
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 27-81:
+Warning 9: the following labels are not bound in this record pattern:
+comment
+Either bind these labels explicitly or add '; _' to the pattern.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "8"];;
 let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
   sprintf "%s %i/%s" name port prot
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "9"];;
 let service_info_to_string { service_name; port; protocol; comment } =
   let base = sprintf "%s %i/%s" service_name port protocol in
@@ -105,7 +133,11 @@ let service_info_to_string { service_name; port; protocol; comment } =
   | Some text -> base ^ " #" ^ comment
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 31-38:
+Error: This expression has type string option
+       but an expression was expected of type string
+|}]
 [@@@part "10"];;
 let service_info_of_string line =
   (* first, split off any comment *)
@@ -124,18 +156,21 @@ let service_info_of_string line =
   { service_name; port; protocol; comment }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "10.1"];;
 service_info_of_string "ssh 22/tcp # some comment";;
 service_info_of_string "ssh 22/tcp";;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "11"];;
 let create_service_info ~service_name ~port ~protocol ~comment =
   { service_name; port; protocol; comment }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "12"];;
 let create_service_info
       ~service_name:service_name ~port:port
@@ -168,15 +203,18 @@ type logon =
   }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "14"];;
 let get_session_id t = t.session_id;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "15"];;
 let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "16"];;
 let status_and_session t = (t.status_message, t.session_id);;
 
@@ -184,3 +222,8 @@ let session_and_status t = (t.session_id, t.status_message);;
 
 let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
 
+[%%expect{|
+Line _, characters 44-58:
+Error: This expression has type logon
+       The field status_message does not belong to type logon
+|}]

@@ -3,13 +3,26 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1"];;
 module Three : X_int = struct let x = 3 end;;
 
@@ -77,7 +90,8 @@ let six = plus three three;;
 to_int (List.fold ~init:six ~f:plus [three;three]);;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "10"];;
 let to_int (module M : X_int) = M.x ;;
 
@@ -115,7 +129,11 @@ let (module Bumpable) = int_bumper in Bumpable.bump 3;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 52-53:
+Error: This expression has type int but an expression was expected of type
+         Bumpable.t
+|}]
 [@@@part "15"];;
 let int_bumper = (module Int_bumper : Bumpable with type t = int);;
 
@@ -141,14 +159,16 @@ let bump_list
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "18"];;
 bump_list int_bumper [1;2;3];;
 
 bump_list float_bumper [1.5;2.5;3.5];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "19"];;
 let wrap_in_list (type a) (x:a) = [x];;
 
@@ -159,7 +179,10 @@ let double_int (type a) (x:a) = x + x;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 32-33:
+Error: This expression has type a but an expression was expected of type int
+|}]
 [@@@part "21"];;
 module type Comparable = sig
   type t
@@ -178,3 +201,5 @@ create_comparable Int.compare;;
 
 create_comparable Float.compare;;
 
+[%%expect{|
+|}]

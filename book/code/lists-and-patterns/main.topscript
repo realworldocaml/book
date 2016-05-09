@@ -3,12 +3,25 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 [1;2;3];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1"];;
 1 :: (2 :: (3 :: [])) ;;
 1 :: 2 :: 3 :: [] ;;
@@ -50,12 +63,20 @@ let rec drop_value l to_drop =
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 4-12:
+Warning 11: this match case is unused.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "6"];;
 drop_value [1;2;3] 2;;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-10:
+Error: Unbound value drop_value
+|}]
 [@@@part "7"];;
 let rec drop_value l to_drop =
   match l with
@@ -108,14 +129,23 @@ open Core_bench.Std;;
 |> Bench.bench
 ;;
 
-[%%expect]
+[%%expect{|
+Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+┌────────────────┬──────────┐
+│ Name           │ Time/Run │
+├────────────────┼──────────┤
+│ plus_one_match │  66.58ns │
+│ plus_one_if    │  77.04ns │
+└────────────────┴──────────┘
+|}]
 [@@@part "11"];;
 let rec sum_if l =
   if List.is_empty l then 0
   else List.hd_exn l + sum_if (List.tl_exn l)
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "12"];;
 let numbers = List.range 0 1000 in
 [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
@@ -123,7 +153,15 @@ let numbers = List.range 0 1000 in
 |> Bench.bench
 ;;
 
-[%%expect]
+[%%expect{|
+Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+┌────────┬──────────┐
+│ Name   │ Time/Run │
+├────────┼──────────┤
+│ sum_if │ 126.80us │
+│ sum    │  28.36us │
+└────────┴──────────┘
+|}]
 [@@@part "13"];;
 let rec drop_zero l =
   match l with
@@ -131,31 +169,45 @@ let rec drop_zero l =
   | 0  :: tl -> drop_zero tl
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 2-56:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+1::_
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "14"];;
 List.map ~f:String.length ["Hello"; "World!"];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "15"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "16"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
 
-[%%expect]
+[%%expect{|
+Exception: Invalid_argument "length mismatch in rev_map2_exn: 3 <> 4 ".
+|}]
 [@@@part "17"];;
 List.fold;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "18"];;
 List.fold ~init:0 ~f:(+) [1;2;3;4];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "19"];;
 List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "20"];;
 let max_widths header rows =
   let lengths l = List.map ~f:String.length l in
@@ -165,7 +217,8 @@ let max_widths header rows =
       List.map2_exn ~f:Int.max acc (lengths row))
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "21"];;
 let render_separator widths =
   let pieces = List.map widths
@@ -175,7 +228,8 @@ let render_separator widths =
 ;;
 render_separator [3;6;2];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "22"];;
 let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 
@@ -183,7 +237,8 @@ let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
 [@@@part "23"];;
 let s = String.concat [".";".";".";".";".";".";"."];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "24"];;
 let pad s length =
   " " ^ s ^ String.make (length - String.length s + 1) ' '
@@ -199,7 +254,8 @@ let render_row row widths =
 render_row ["Hello";"World"] [10;15];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "26"];;
 let render_table header rows =
   let widths = max_widths header rows in
@@ -211,21 +267,25 @@ let render_table header rows =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "27"];;
 List.reduce;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "28"];;
 List.reduce ~f:(+) [1;2;3;4;5];;
 
 List.reduce ~f:(+) [];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "29"];;
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "30"];;
 List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
   match String.rsplit2 ~on:'.' fname with
@@ -235,7 +295,10 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
 |> List.dedup
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 17-27:
+Error: Unbound value Sys.ls_dir
+|}]
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -246,7 +309,10 @@ let is_ocaml_source s =
 let (ml_files,other_files) =
   List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 21-31:
+Error: Unbound value Sys.ls_dir
+|}]
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
 
@@ -269,7 +335,10 @@ let rec ls_rec s =
     |> List.concat
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 5-20:
+Error: Unbound value Sys.is_file_exn
+|}]
 [@@@part "36"];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
@@ -279,7 +348,10 @@ let rec ls_rec s =
     |> List.concat_map ~f:(fun sub -> ls_rec (s ^/ sub))
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 5-20:
+Error: Unbound value Sys.is_file_exn
+|}]
 [@@@part "37"];;
 let rec length = function
   | [] -> 0
@@ -298,7 +370,9 @@ length (make_list 10);;
 length (make_list 10_000_000);;
 
 
-[%%expect]
+[%%expect{|
+Stack overflow during evaluation (looping recursion?).
+|}]
 [@@@part "39"];;
 let rec length_plus_n l n =
   match l with
@@ -316,7 +390,8 @@ length [1;2;3;4];;
 length (make_list 10_000_000);;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "41"];;
 let rec destutter list =
   match list with
@@ -377,7 +452,9 @@ let rec destutter = function
 (fun x -> x + 1) = (fun x -> x + 1);;
 
 
-[%%expect]
+[%%expect{|
+Exception: Invalid_argument "equal: functional value".
+|}]
 [@@@part "48"];;
 let rec count_some list =
   match list with
@@ -392,12 +469,23 @@ let rec count_some list =
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 2-135:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::_
+(However, some guarded clause may match this value.)
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "49"];;
 count_some [Some 3; None; Some 4];;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-10:
+Error: Unbound value count_some
+|}]
 [@@@part "50"];;
 let rec count_some list =
   match list with
@@ -408,7 +496,14 @@ let rec count_some list =
 ;;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 4-5:
+Warning 27: unused variable x.
+Line _, characters 9-11:
+Warning 27: unused variable tl.
+Line _:
+Error: Some fatal warnings were triggered (2 occurrences)
+|}]
 [@@@part "51"];;
 let rec count_some list =
   match list with
@@ -418,7 +513,8 @@ let rec count_some list =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "52"];;
 let rec count_some list =
   match list with
@@ -433,7 +529,8 @@ let rec count_some list =
 let count_some l = List.count ~f:Option.is_some l;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "69"];;
 printf "%s\n"
   (render_table
@@ -450,3 +547,11 @@ printf "%s\n"
 
 
 
+[%%expect{|
+| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
+|}]

@@ -26,7 +26,19 @@ let memoize f =
        y
   );;
 
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 let rec fib i =
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
@@ -41,7 +53,10 @@ time (fun () -> fib 40);;
 
 
 
-[%%expect]
+[%%expect{|
+Time: 0.751632 ms
+Time: 9872.985882 ms
+|}]
 [@@@part "3"];;
 let fib = memoize fib;;
 
@@ -52,7 +67,10 @@ time (fun () -> fib 40);;
 
 
 
-[%%expect]
+[%%expect{|
+Time: 10693.530227 ms
+Time: 0.007144 ms
+|}]
 [@@@part "4"];;
 let fib_norec fib i =
   if i <= 1 then i
@@ -88,7 +106,8 @@ let memo_rec f_norec x =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "8"];;
 let fib = memo_rec fib_norec;;
 
@@ -96,8 +115,12 @@ time (fun () -> fib 40);;
 
 
 
-[%%expect]
+[%%expect{|
+Time: 0.091368 ms
+|}]
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
 
+[%%expect{|
+|}]

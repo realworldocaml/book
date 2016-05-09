@@ -20,13 +20,26 @@ let circle r = object
   method radius = r
 end ;;
 
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 let remove_large l =
   List.filter ~f:(fun s -> s#area <= 100.) l ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 let squares : < area : float; width : int > list = 
   [square 5; square 15; square 10] ;;
@@ -34,7 +47,8 @@ let squares : < area : float; width : int > list =
 remove_large squares ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "3"];;
 let remove_large (l: < area : float > list) = 
   List.filter ~f:(fun s -> s#area <= 100.) l ;;
@@ -42,7 +56,8 @@ let remove_large (l: < area : float > list) =
 remove_large (squares :> < area : float > list ) ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4"];;
 let hlist: < area: float; ..> list = [square 10; circle 30] ;;
 
@@ -50,7 +65,12 @@ let hlist: < area: float; ..> list = [square 10; circle 30] ;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 49-58:
+Error: This expression has type < area : float; radius : int >
+       but an expression was expected of type < area : float; width : int >
+       The second object type has no method radius
+|}]
 [@@@part "5"];;
 let shape_ref: < area: float; ..> ref = ref (square 40) ;;
 
@@ -60,7 +80,12 @@ shape_ref := circle 20 ;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 13-22:
+Error: This expression has type < area : float; radius : int >
+       but an expression was expected of type < area : float; width : int >
+       The second object type has no method radius
+|}]
 [@@@part "6"];;
 let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)] ;;
 
@@ -68,3 +93,5 @@ let shape_ref: shape ref = ref (square 40 :> shape) ;;
 
 shape_ref := (circle 20 :> shape) ;;
 
+[%%expect{|
+|}]

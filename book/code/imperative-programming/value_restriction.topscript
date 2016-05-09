@@ -23,7 +23,19 @@ let memoize f =
 
 let identity x = x;;
 
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 (fun x -> [x;x]);;
 
@@ -33,7 +45,8 @@ let identity x = x;;
 memoize (fun x -> [x;x]);;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "3"];;
 identity (fun x -> [x;x]);;
 
@@ -50,17 +63,20 @@ List.init;;
 List.init 10 ~f:Int.to_string;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "6"];;
 let list_init_10 = List.init 10;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "7"];;
 let list_init_10 ~f = List.init 10 ~f;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "8"];;
 identity (fun x -> [x;x]);;
 

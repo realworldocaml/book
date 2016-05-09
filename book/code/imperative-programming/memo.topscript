@@ -4,7 +4,19 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
@@ -12,7 +24,8 @@ let memoize f =
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 let rec edit_distance s t =
   match String.length s, String.length t with
@@ -33,7 +46,8 @@ let rec edit_distance s t =
 edit_distance "OCaml" "ocaml";;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "3"];;
 #require "mtime.os.top";;
 
@@ -45,14 +59,18 @@ let time f =
   x 
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4"];;
 time (fun () -> edit_distance "OCaml" "ocaml");;
 
 
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 
-[%%expect]
+[%%expect{|
+Time: 1.41297 ms
+Time: 4912.965319 ms
+|}]
 [@@@part "5"];;
 
 let memo_rec f_norec x =
@@ -62,7 +80,8 @@ let memo_rec f_norec x =
   f x
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "6"];;
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
   match String.length s, String.length t with
@@ -80,8 +99,12 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
       ]) ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "7"];;
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 
 
+[%%expect{|
+Time: 0.532365 ms
+|}]

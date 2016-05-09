@@ -6,7 +6,19 @@
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
 
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 module Log_entry = struct
   type t =
@@ -18,7 +30,8 @@ module Log_entry = struct
 end
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1.5"];;
 
 module Heartbeat = struct
@@ -39,7 +52,8 @@ end;;
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 type client_message = | Logon of Logon.t
                       | Heartbeat of Heartbeat.t
@@ -50,7 +64,8 @@ type client_message = | Logon of Logon.t
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "3"];;
 let messages_for_user user messages =
   let (user_messages,_) =
@@ -77,7 +92,8 @@ let messages_for_user user messages =
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4"];;
 module Log_entry = struct
   type t = { important: bool;
@@ -117,7 +133,8 @@ module Common = struct
 end ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "7"];;
 let messages_for_user user messages =
   let (user_messages,_) =
@@ -139,7 +156,8 @@ let messages_for_user user messages =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "7.9"];;
 
 type server_state;;
@@ -147,7 +165,8 @@ let handle_log_entry (_:server_state) ((_:Common.t),_) = ();;
 let handle_logon _ (_,_) = ();;
 let handle_heartbeat _ (_,_) = ();;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "8"];;
 let handle_message server_state (common,details) =
   match details with
@@ -155,3 +174,5 @@ let handle_message server_state (common,details) =
   | Logon     m -> handle_logon     server_state (common,m)
   | Heartbeat m -> handle_heartbeat server_state (common,m)
 ;;
+[%%expect{|
+|}]

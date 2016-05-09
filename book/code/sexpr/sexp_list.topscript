@@ -4,7 +4,19 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 type compatible_versions =
   | Specific of string list
@@ -16,7 +28,12 @@ sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 11-19:
+Attribute `deriving' was not used
+Line _, characters 0-27:
+Error: Unbound value sexp_of_compatible_versions
+|}]
 [@@@part "1"];;
 type compatible_versions =
   | Specific of string sexp_list
@@ -27,3 +44,9 @@ type compatible_versions =
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 
+[%%expect{|
+Line _, characters 11-19:
+Attribute `deriving' was not used
+Line _, characters 0-27:
+Error: Unbound value sexp_of_compatible_versions
+|}]

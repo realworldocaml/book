@@ -4,17 +4,33 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 Sexp.load_sexp "example.scm" ;;
 
 
-[%%expect]
+[%%expect{|
+Exception: Sys_error "example.scm: No such file or directory".
+|}]
 [@@@part "1"];;
 Sexp.load_sexp "comment_heavy.scm" ;;
 
 
-[%%expect]
+[%%expect{|
+Exception: Sys_error "comment_heavy.scm: No such file or directory".
+|}]
 [@@@part "2"];;
 Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm")) ;;
@@ -24,3 +40,12 @@ Exn.handle_uncaught ~exit:false (fun () ->
 
 
 
+[%%expect{|
+Uncaught exception:
+
+  (Sys_error "example_broken.scm: No such file or directory")
+
+Raised by primitive operation at file "pervasives.ml", line 335, characters 20-46
+Called from file "src/pre_sexp.ml", line 1151, characters 11-23
+Called from file "src/exn.ml", line 90, characters 6-10
+|}]

@@ -3,11 +3,24 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1"];;
 3 + 4;;
 8 / 3;;
@@ -34,7 +47,10 @@ let Seven = 3 + 4;;
 (*let 7x = 7;;*)
 (*let x-plus-y = x + y;;*)
 
-[%%expect]
+[%%expect{|
+Line _, characters 4-9:
+Error: Unbound constructor Seven
+|}]
 [@@@part "5"];;
 let square x = x * x ;;
 square 2;;
@@ -47,7 +63,8 @@ let ratio x y =
 ;;
 ratio 4 7;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "7"];;
 let sum_if_true test first second =
   (if test first then first else 0)
@@ -88,19 +105,29 @@ first_if_true big_number 4 3;;
 [@@@part "13"];;
 first_if_true big_number "short" "loooooong";;
 
-[%%expect]
+[%%expect{|
+Line _, characters 25-32:
+Error: This expression has type string but an expression was expected of type
+         int
+|}]
 [@@@part "14"];;
 let add_potato x =
   x + "potato";;
 
-[%%expect]
+[%%expect{|
+Line _, characters 6-14:
+Error: This expression has type string but an expression was expected of type
+         int
+|}]
 [@@@part "15"];;
 let is_a_multiple x y =
   x mod y = 0 ;;
 is_a_multiple 8 2;;
 is_a_multiple 8 0;;
 
-[%%expect]
+[%%expect{|
+Exception: Division_by_zero.
+|}]
 [@@@part "16"];;
 let a_tuple = (3,"three");;
 let another_tuple = (3,"four",5.);;
@@ -127,7 +154,11 @@ let languages = ["OCaml";"Perl";"C"];;
 [@@@part "21"];;
 let numbers = [3;"four";5];;
 
-[%%expect]
+[%%expect{|
+Line _, characters 17-23:
+Error: This expression has type string but an expression was expected of type
+         int
+|}]
 [@@@part "22"];;
 List.length languages;;
 
@@ -135,11 +166,13 @@ List.length languages;;
 [@@@part "23"];;
 List.map languages ~f:String.length;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "24"];;
 List.map ~f:String.length languages;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "25"];;
 "French" :: "Spanish" :: languages;;
 
@@ -171,12 +204,26 @@ let my_favorite_language (my_favorite :: the_rest) =
   my_favorite
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 25-66:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+Line _, characters 41-49:
+Warning 27: unused variable the_rest.
+Line _:
+Error: Some fatal warnings were triggered (2 occurrences)
+|}]
 [@@@part "32"];;
 my_favorite_language ["English";"Spanish";"French"];;
 my_favorite_language [];;
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-20:
+Error: Unbound value my_favorite_language
+Line _, characters 0-20:
+Error: Unbound value my_favorite_language
+|}]
 [@@@part "33"];;
 let my_favorite_language languages =
   match languages with
@@ -186,7 +233,16 @@ let my_favorite_language languages =
 my_favorite_language ["English";"Spanish";"French"];;
 my_favorite_language [];;
 
-[%%expect]
+[%%expect{|
+Line _, characters 13-21:
+Warning 27: unused variable the_rest.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+Line _, characters 0-20:
+Error: Unbound value my_favorite_language
+Line _, characters 0-20:
+Error: Unbound value my_favorite_language
+|}]
 [@@@part "34"];;
 let rec sum l =
   match l with
@@ -205,7 +261,14 @@ let rec destutter list =
     else hd1 :: destutter (hd2 :: tl)
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 2-136:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::[]
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "36"];;
 let rec destutter list =
   match list with
@@ -234,7 +297,8 @@ List.map ~f:downcase_extension
   [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "41"];;
 type point2d = { x : float; y : float };;
 
@@ -290,7 +354,20 @@ is_inside_scene {x=3.;y=7.}
 is_inside_scene {x=3.;y=7.}
   [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
 
-[%%expect]
+[%%expect{|
+Line _, characters 14-23:
+Warning 27: unused variable endpoint1.
+Line _, characters 25-34:
+Warning 27: unused variable endpoint2.
+Line _:
+Error: Some fatal warnings were triggered (2 occurrences)
+Line _, characters 18-41:
+Error: Unbound value is_inside_scene_element
+Line _, characters 0-15:
+Error: Unbound value is_inside_scene
+Line _, characters 0-15:
+Error: Unbound value is_inside_scene
+|}]
 [@@@part "49"];;
 let numbers = [| 1; 2; 3; 4 |];;
 numbers.(2) <- 4;;
@@ -328,7 +405,8 @@ List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
 mean rsum;;
 stdev rsum;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "54"];;
 let x = { contents = 0 };;
 x.contents <- x.contents + 1;;
@@ -356,7 +434,8 @@ let sum list =
   !sum
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "58"];;
 let permute array =
   let length = Array.length array in
@@ -376,7 +455,8 @@ let ar = Array.init 20 ~f:(fun i -> i);;
 permute ar;;
 ar;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "60"];;
 let find_first_negative_entry array =
   let pos = ref 0 in
@@ -403,3 +483,6 @@ let find_first_negative_entry array =
 ;;
 find_first_negative_entry [|1;2;0;3|];;
 
+[%%expect{|
+Exception: Invalid_argument "index out of bounds".
+|}]

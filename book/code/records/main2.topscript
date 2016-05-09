@@ -5,7 +5,19 @@
 #require "core.syntax";;
 open Core.Std;;
 
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "17"];;
 module Log_entry = struct
   type t =
@@ -32,7 +44,8 @@ module Logon = struct
 end
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "18"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.time = Time_ns.now (); 
@@ -42,24 +55,28 @@ let create_log_entry ~session_id ~important message =
   }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "19"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.
     time = Time_ns.now (); session_id; important; message }
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "20"];;
 let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "21"];;
 let is_important t = t.Log_entry.important;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "21.1"];;
 
 let create_log_entry ~session_id ~important message : Log_entry.t =
@@ -68,7 +85,8 @@ let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message
 let is_important (t:Log_entry.t) = t.important ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "22"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -86,12 +104,14 @@ let register_heartbeat t hb =
     last_heartbeat_time = hb.Heartbeat.time;
   };;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "23"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time };;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "24"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -102,14 +122,16 @@ type client_info =
     last_heartbeat_status: string;
   };;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "25"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
            last_heartbeat_status = hb.Heartbeat.status_message;
   };;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "26"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -120,19 +142,22 @@ type client_info =
     mutable last_heartbeat_status: string;
   };;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "27"];;
 let register_heartbeat t hb =
   t.last_heartbeat_time   <- hb.Heartbeat.time;
   t.last_heartbeat_status <- hb.Heartbeat.status_message
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "28"];;
 let get_users logons =
   List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "29"];;
 module Logon = struct
   type t =
@@ -144,19 +169,29 @@ module Logon = struct
   [@@deriving fields]
 end;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 5-13:
+Attribute `deriving' was not used
+|}]
 [@@@part "30"];;
 let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 
-[%%expect]
+[%%expect{|
+Line _, characters 54-64:
+Error: Unbound value Logon.user
+|}]
 [@@@part "31"];;
 Field.get Logon.Fields.user;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 10-27:
+Error: Unbound module Logon.Fields
+|}]
 [@@@part "32"];;
 Field.get;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "33"];;
 let show_field field to_string record =
   let name = Field.name field in
@@ -164,7 +199,8 @@ let show_field field to_string record =
   name ^ ": " ^ field_string
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "34"];;
 let logon = { Logon.
               session_id = "26685";
@@ -177,11 +213,19 @@ show_field Logon.Fields.user Fn.id logon;;
 
 show_field Logon.Fields.time Time_ns.to_string logon;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 11-28:
+Error: Unbound module Logon.Fields
+Line _, characters 11-28:
+Error: Unbound module Logon.Fields
+|}]
 [@@@part "35"];;
 Logon.Fields.iter;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-17:
+Error: Unbound module Logon.Fields
+|}]
 [@@@part "36"];;
 let print_logon logon =
   let print to_string field =
@@ -196,3 +240,9 @@ let print_logon logon =
 
 print_logon logon;;
 
+[%%expect{|
+Line _, characters 2-19:
+Error: Unbound module Logon.Fields
+Line _, characters 0-11:
+Error: Unbound value print_logon
+|}]

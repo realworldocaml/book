@@ -3,7 +3,19 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 let x = 3;;
@@ -11,7 +23,8 @@ let y = 4;;
 let z = x + y;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "1"];;
 let languages = "OCaml,Perl,C++,C";;
 
@@ -21,13 +34,17 @@ let dashed_languages =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 language_list;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-13:
+Error: Unbound value language_list
+|}]
 [@@@part "3"];;
 let languages = "OCaml,Perl,C++,C";;
 
@@ -37,7 +54,8 @@ let dashed_languages =
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "4"];;
 languages;;
 
@@ -65,20 +83,33 @@ let area_of_ring inner_radius outer_radius =
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 6-8:
+Warning 26: unused variable pi.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "7"];;
 let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "8"];;
 let upcase_first_entry line =
   let (first :: rest) = String.split ~on:',' line in
   String.concat ~sep:"," (String.uppercase first :: rest)
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 6-21:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "9"];;
 let upcase_first_entry line =
   match String.split ~on:',' line with
@@ -86,7 +117,8 @@ let upcase_first_entry line =
   | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
 ;;
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "10"];;
 (fun x -> x + 1);;
 
@@ -101,13 +133,15 @@ let upcase_first_entry line =
 List.map ~f:(fun x -> x + 1) [1;2;3];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "13"];;
 let transforms = [ String.uppercase; String.lowercase ];;
 List.map ~f:(fun g -> g "Hello World") transforms;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "14"];;
 let plusone = (fun x -> x + 1);;
 
@@ -186,21 +220,24 @@ List.map ~f:is_even [0;1;2;3;4;5];;
 List.map ~f:is_odd [0;1;2;3;4;5];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "24"];;
 Int.max 3 4  (* prefix *);;
 
 3 + 4        (* infix  *);;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "25"];;
 (+) 3 4;;
 
 List.map ~f:((+) 3) [4;5;6];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "26"];;
 let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 
@@ -214,7 +251,11 @@ let (***) x y = (x ** y) ** y;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 17-18:
+Error: This expression has type int but an expression was expected of type
+         float
+|}]
 [@@@part "28"];;
 let ( *** ) x y = (x ** y) ** y;;
 
@@ -228,14 +269,22 @@ Int.max 3 -4;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-9:
+Error: This expression has type int -> int
+       but an expression was expected of type int
+|}]
 [@@@part "30"];;
 (Int.max 3) - 4;;
 
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-11:
+Error: This expression has type int -> int
+       but an expression was expected of type int
+|}]
 [@@@part "31"];;
 let (|>) x f = f x ;;
 
@@ -254,7 +303,12 @@ String.split ~on:':' path
 
 
 
-[%%expect]
+[%%expect{|
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+|}]
 [@@@part "33"];;
 let split_path = String.split ~on:':' path in
 let deduped_path = List.dedup ~compare:String.compare split_path in
@@ -266,19 +320,28 @@ List.iter ~f:print_endline deduped_path
 
 
 
-[%%expect]
+[%%expect{|
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+|}]
 [@@@part "34"];;
 List.iter ~f:print_endline ["Two"; "lines"];;
 
 
 
 
-[%%expect]
+[%%expect{|
+Two
+lines
+|}]
 [@@@part "35"];;
 List.iter ~f:print_endline;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "36"];;
 let (^>) x f = f x;;
 
@@ -288,7 +351,14 @@ Sys.getenv "PATH"
 ^> List.iter ~f:print_endline
 ;;
 
-[%%expect]
+[%%expect{|
+Line _, characters 3-29:
+Error: This expression has type string list -> unit
+       but an expression was expected of type
+         (string list -> string list) -> 'a
+       Type string list is not compatible with type
+         string list -> string list
+|}]
 [@@@part "37"];;
 let some_or_zero = function
   | Some x -> x
@@ -298,7 +368,8 @@ let some_or_zero = function
 List.map ~f:some_or_zero [Some 3; None; Some 4];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "38"];;
 let some_or_zero num_opt =
   match num_opt with
@@ -319,7 +390,8 @@ some_or_default 3 (Some 5);;
 List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "40"];;
 let ratio ~num ~denom = float num /. float denom;;
 
@@ -350,7 +422,12 @@ String.split ~on:':' path
 
 
 
-[%%expect]
+[%%expect{|
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+|}]
 [@@@part "44"];;
 let apply_to_tuple f (first,second) = f ~first ~second;;
 
@@ -372,7 +449,11 @@ apply_to_tuple_2 divide (3,4);;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 17-23:
+Error: This expression has type first:int -> second:int -> int
+       but an expression was expected of type second:'a -> first:'b -> 'c
+|}]
 [@@@part "48"];;
 let apply_to_tuple f (first,second) = f ~first ~second;;
 
@@ -454,7 +535,12 @@ let numeric_deriv ~delta ~x ~y ~f =
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 12-13:
+Error: This function is applied to arguments
+in an order different from other calls.
+This is only allowed when the real type is known.
+|}]
 [@@@part "57"];;
 let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
   let x' = x +. delta in
@@ -490,7 +576,11 @@ prepend_pound "a BASH comment" ~sep:":";;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 0-13:
+Error: This function has type string -> string
+       It is applied to too many arguments; maybe you forgot a `;'.
+|}]
 [@@@part "61"];;
 let concat x ?(sep="") y = x ^ sep ^ y ;;
 
@@ -516,7 +606,12 @@ let concat x y ?(sep="") = x ^ sep ^ y ;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 15-38:
+Warning 16: this optional argument cannot be erased.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]
 [@@@part "65"];;
 concat "a" "b";;
 

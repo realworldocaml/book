@@ -5,7 +5,19 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-[%%expect]
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 let x = sin 120. in
 let y = sin 75.  in
@@ -14,7 +26,8 @@ List.exists ~f:(fun x -> x < 0.) [x;y;z]
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "2"];;
 let x = lazy (sin 120.) in
 let y = lazy (sin 75.)  in
@@ -23,7 +36,8 @@ List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
 ;;
 
 
-[%%expect]
+[%%expect{|
+|}]
 [@@@part "3"];;
 let x = lazy (printf "1\n"; sin 120.) in
 let y = lazy (printf "2\n"; sin 75.)  in
@@ -34,7 +48,10 @@ List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
 
 
 
-[%%expect]
+[%%expect{|
+1
+2
+|}]
 [@@@part "4"];;
 List.exists ~f:(fun x -> x < 0.)
   [ (printf "1\n"; sin 120.);
@@ -45,3 +62,8 @@ List.exists ~f:(fun x -> x < 0.)
 
 
 
+[%%expect{|
+3
+2
+1
+|}]

@@ -7,27 +7,53 @@ open Core_kernel.Std;;
 #require "yojson";;
 let json = Yojson.Basic.from_file "book.json" ;;
 
-[%%expect]
+[%%expect{|
+Exception: Sys_error "book.json: No such file or directory".
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
 [@@@part "1"];;
 open Yojson.Basic.Util ;;
 let title = json |> member "title" |> to_string ;;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 12-16:
+Error: Unbound value json
+|}]
 [@@@part "2"];;
 let tags = json |> member "tags" |> to_list |> filter_string ;;
 
 let pages = json |> member "pages" |> to_int ;;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 11-15:
+Error: Unbound value json
+Line _, characters 12-16:
+Error: Unbound value json
+|}]
 [@@@part "3"];;
 let is_online = json |> member "is_online" |> to_bool_option ;;
 
 let is_translated = json |> member "is_translated" |> to_bool_option ;;
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 16-20:
+Error: Unbound value json
+Line _, characters 20-24:
+Error: Unbound value json
+|}]
 [@@@part "4"];;
 let authors = json |> member "authors" |> to_list ;;
 
@@ -40,10 +66,17 @@ let authors = json |> member "authors" |> to_list ;;
 
 
 
-[%%expect]
+[%%expect{|
+Line _, characters 14-18:
+Error: Unbound value json
+|}]
 [@@@part "5"];;
 let names =
   json |> member "authors" |> to_list 
   |> List.map ~f:(fun json -> member "name" json |> to_string) ;;
 
 
+[%%expect{|
+Line _, characters 2-6:
+Error: Unbound value json
+|}]
