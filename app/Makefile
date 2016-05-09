@@ -20,11 +20,12 @@ clean::
 
 SOURCES = app.ml
 
-# Don't use LIBS...
-# The rebuilding behavior annoys more than it helps
-# LIBS = ../lib/rwo
-OCAMLLDFLAGS += ../lib/rwo.cma
-INCDIRS = ../lib
+LIBS = ../lib/rwo
+
+# Don't use INCDIRS for ../lib:
+# it causes ocamldep to scan ../lib, discover dependencies erroneously
+# interpreted by OCamlMakefile making the build unstable.
+OCAMLFLAGS = -I ../lib
 
 include $(OCAMLMAKEFILE)
 include ../Makefile.derived

@@ -5,7 +5,7 @@
         install_lib uninstall_lib \
 				clean clean-everything
 
-all:: app
+all:: site
 
 app lib atlas site: _build
 	$(MAKE) -C _build $@
@@ -91,7 +91,9 @@ $(OPAM_PACKAGE_NAME).install:
 clean:
 	rm -rf \
 	  _build $(OPAM_PACKAGE_NAME).install .merlin \
-	  app/rwo-deps.ml.exe book/css/.sass-cache
+	  app/rwo-deps.ml.exe book/css/.sass-cache app/*.cm* lib/*.cm*
+	$(MAKE) -C app clean
+	$(MAKE) -C lib clean
 
 # Should rarely need to run this. Regenerating these files requires a
 # lot of additional software.

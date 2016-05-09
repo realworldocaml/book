@@ -1,12 +1,16 @@
 .PHONY: all app lib atlas site clean
 
-all: app
+all: site
 
 lib:
 	$(MAKE) -C lib
 
+lib/rwo.cma: lib
+
 app: lib
 	$(MAKE) -C app
+
+atlas site app/rwo-expect app/rwo: app
 
 ################################################################################
 # General Project Information
@@ -23,47 +27,51 @@ include Makefile.shared
 # SASS to CSS style sheet preprocessing
 
 ifndef SASS
-	SASS := $(shell command -v sassc 2> /dev/null)
+SASS:=$(shell command -v sassc 2> /dev/null)
 endif
 ifndef SASS
-	SASSC := $(shell command -v sassc 2> /dev/null)
+SASS:=$(shell command -v sassc 2> /dev/null)
 endif
 
 book/css/app.css: $(wildcard	book/scss/*.scss)
 ifndef SASS
 	$(error "Couldn't find sass or sassc binary, install one or adjust SASS variable")
 endif
-	sass -q -I $(shell opam config var foundation:lib)/scss book/scss/app.scss > $@
+	$(SASS) -q -I $(shell opam config var foundation:lib)/scss book/scss/app.scss > $@
 
 ################################################################################
 # HTML Book
 
-site/%.html: book/%.html app/rwo
+ROOT = ./
+
+site/%.html: book/%.html app
 ifdef PYGMENTIZE
-	app/rwo build chapter -pygmentize -o site/ -repo-root ./ $<
+	app/rwo build chapter -pygmentize -o site/ -repo-root $(ROOT) $<
 else
-	app/rwo build chapter -o site/ -repo-root ./ $<
+	app/rwo build chapter -o site/ -repo-root $(ROOT) $<
 endif
 
-site/index.html: app/rwo
+site/index.html: app
 	app/rwo build frontpage -o site/ -repo-root $(ROOT)
 
-site/faqs.html: book/faqs.html app/rwo
+site/faqs.html: book/faqs.html app
 	app/rwo build faqs -o site/ -repo-root $(ROOT)
 
-site/install.html: book/install.html app/rwo
+site/install.html: book/install.html app
 	app/rwo build install -o site/ -repo-root $(ROOT)
 
-site/toc.html: app/rwo
+site/toc.html: app
 	app/rwo build toc -o site/ -repo-root $(ROOT)
 
-site: $(foreach file,$(HTML_FILES),site/$(file))
+site-aux::
 	rsync -av book/images book/js book/css site/
+
+site: $(foreach file,$(HTML_FILES),site/$(file)) site-aux
 
 ################################################################################
 # Book in format required by O'Reilly's Atlas
 
-atlas/%.html: book/%.html app/rwo
+atlas/%.html: book/%.html app
 	app/rwo build chapter -o atlas/ -repo-root ./ $<
 
 atlas: $(foreach file,$(HTML_CHAPTER_FILES),atlas/$(file))
