@@ -37,12 +37,7 @@ module Raw_script = struct
 
 end
 
-let program_path =
-  Filename.(concat (dirname Sys.executable_name) "rwo-expect")
-
-let () =
-  if not (Caml.Sys.file_exists program_path) then
-    failwithf "Rwo_expect: cannot find %S program" program_path ()
+let program_path = "ocaml-expect"
 
 module Chunk = struct
   type t = Toplevel_expect_test_types.Chunk.t =

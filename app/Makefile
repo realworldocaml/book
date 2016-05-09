@@ -2,19 +2,9 @@
 
 OCAMLMAKEFILE = ../OCamlMakefile
 
-all: byte-code rwo-expect
+all: byte-code
 
 RESULT = rwo
-
-## Producing a toplevel for Rwo_scripts
-
-rwo-expect: rwo_expect.ml
-	$(OCAMLFIND) c -g -linkpkg -linkall -predicates create_toploop \
-		-package toplevel_expect_test $^ -o $@
-
-
-clean::
-	rm -f *.cmt *.cmti rwo-expect rwo_expect.cm*
 
 ## App description
 

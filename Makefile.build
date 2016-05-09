@@ -10,7 +10,7 @@ lib/rwo.cma: lib
 app: lib
 	$(MAKE) -C app
 
-atlas site app/rwo-expect app/rwo: app
+atlas site app/rwo: app
 
 ################################################################################
 # General Project Information
