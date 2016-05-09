@@ -3,24 +3,21 @@ open Core.Std
 open Async.Std
 
 type part = string
-
-type oloop_script
-type oloop_script_evaluated
-type oloop_script_evaluated_phrase
+  [@@deriving sexp]
 
 type script = [
-| `OCaml of oloop_script
-| `OCaml_toplevel of oloop_script_evaluated
-| `OCaml_rawtoplevel of oloop_script
-| `Other of string
+  | `OCaml of Rwo_expect.Raw_script.t
+  | `OCaml_toplevel of Rwo_expect.Document.t
+  | `OCaml_rawtoplevel of Rwo_expect.Raw_script.t
+  | `Other of string
 ]
 
 (** One part of a script. *)
 type script_part = [
-| `OCaml of string
-| `OCaml_toplevel of oloop_script_evaluated_phrase list
-| `OCaml_rawtoplevel of string
-| `Other of string
+  | `OCaml of Rwo_expect.Raw_script.part
+  | `OCaml_toplevel of Rwo_expect.Chunk.t list
+  | `OCaml_rawtoplevel of Rwo_expect.Raw_script.part
+  | `Other of string
 ]
 
 type t = script String.Map.t (** key is filename *)
@@ -35,7 +32,7 @@ val of_html : filename:string -> Rwo_html.t -> t Or_error.t Deferred.t
 (** Returns a list of <pre> elements. *)
 val phrases_to_html
   :  ?pygmentize:bool
-  -> oloop_script_evaluated_phrase list
+  -> Rwo_expect.Chunk.t list
   -> Rwo_html.t Deferred.t
 
 (** Returns a single <div class="highlight"> element. *)
@@ -48,7 +45,6 @@ val script_part_to_html
 (******************************************************************************)
 (** {2 Map-style Operations } *)
 (******************************************************************************)
-(*val empty : t
-  val find : t -> ?part:string -> filename:string -> script_part option
-  val file_is_mem : t -> string -> bool*)
+val empty : t
+val file_is_mem : t -> string -> bool
 val find_exn : t -> ?part:string -> filename:string -> script_part

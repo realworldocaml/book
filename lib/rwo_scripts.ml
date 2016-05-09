@@ -5,49 +5,23 @@ module Html = Rwo_html
 module Import = Rwo_import
 module Lang = Rwo_lang
 module Pygments = Rwo_pygments
-let (/) = Filename.concat
+module Expect = Rwo_expect
 
 type part = string
-
-(* type oloop_script = Oloop.Script.t *)
-(* type oloop_script_evaluated = Oloop.Script.Evaluated.t *)
-(* type oloop_script_evaluated_phrase = Oloop.Script.Evaluated.phrase  *)
-type oloop_script = SCRIPT
-type oloop_script_evaluated = EVALUATED
-type oloop_script_evaluated_phrase = PHRASE
-type oloop_outcome = OUTCOME
-
-let oloop_script_evaluated_phrase PHRASE = ""
-
-let oloop_script_evaluated_outcome PHRASE
-  : [ `Uneval of [`UNEVAL] * unit | `Eval of oloop_outcome ]
-  = `Uneval (`UNEVAL, ())
-
-let oloop_outcome_stdout OUTCOME = ""
-let oloop_outcome_warnings OUTCOME : (Location.t * Warnings.t) list = []
-let oloop_outcome_report_uneval ~msg_with_location:_ _ppf `UNEVAL = ()
-let oloop_outcome_result OUTCOME = Outcometree.Ophr_signature []
-let oloop_phrase_remove_underscore_names (x : Outcometree.out_phrase) = x
-
-let oloop_script_of_file (_ : string) =
-  Deferred.Or_error.return SCRIPT
-
-let oloop_eval_script ~silent_directives:() ~short_paths:() SCRIPT =
-  Deferred.Result.return EVALUATED
-
+  [@@deriving sexp]
 
 type script = [
-| `OCaml of oloop_script
-| `OCaml_toplevel of oloop_script_evaluated
-| `OCaml_rawtoplevel of oloop_script
-| `Other of string
+  | `OCaml of Expect.Raw_script.t
+  | `OCaml_toplevel of Expect.Document.t
+  | `OCaml_rawtoplevel of Expect.Raw_script.t
+  | `Other of string
 ]
 
 type script_part = [
-| `OCaml of string
-| `OCaml_toplevel of oloop_script_evaluated_phrase list
-| `OCaml_rawtoplevel of string
-| `Other of string
+  | `OCaml of Expect.Raw_script.part
+  | `OCaml_toplevel of Expect.Chunk.t list
+  | `OCaml_rawtoplevel of Expect.Raw_script.part
+  | `Other of string
 ]
 
 type t = script String.Map.t
@@ -55,64 +29,62 @@ type t = script String.Map.t
 (******************************************************************************)
 (* Map-style Operations                                                       *)
 (******************************************************************************)
+
 let empty = String.Map.empty
 
-(*let of_script (parts:Oloop.Script.t) : (part * string) list =
-  List.map
-    (parts : Oloop.Script.t :> Oloop.Script.part list)
-    ~f:(fun {Oloop.Script.number; content} -> number,content)
+let is_rawpart ~name p = name = p.Expect.Raw_script.name
 
-let find (t:t) ?(part=0.) ~filename =
+let is_part ~name p = name = p.Expect.Part.name
+
+(*let find (t:t) ?part:(name="") ~filename =
   match String.Map.find t filename with
   | None -> None
   | Some (`OCaml parts) -> (
-    match List.Assoc.find ~equal:Float.equal (of_script parts) part with
-    | None -> None
-    | Some x -> Some (`OCaml x)
-  )
-  | Some (`OCaml_toplevel script) -> (
-    match Oloop.Script.Evaluated.nth script part with
-    | None -> None
-    | Some x -> Some (`OCaml_toplevel x.Oloop.Script.Evaluated.phrases)
-  )
+      match List.find ~f:(is_rawpart ~name) parts with
+      | None -> None
+      | Some x -> Some (`OCaml x)
+    )
+  | Some (`OCaml_toplevel doc) -> (
+      match List.find ~f:(is_part ~name) (Expect.Document.parts doc) with
+      | None -> None
+      | Some x -> Some (`OCaml_toplevel x.Expect.Part.chunks)
+    )
   | Some (`OCaml_rawtoplevel parts) -> (
-    match List.Assoc.find ~equal:Float.equal (of_script parts) part with
-    | None -> None
-    | Some x -> Some (`OCaml_rawtoplevel x)
-  )
+      match List.find ~f:(is_rawpart ~name) parts with
+      | None -> None
+      | Some x -> Some (`OCaml_rawtoplevel x)
+    )
   | Some (`Other _ as x) ->
-    if part = 0. then Some x else None
+    if name = "" then Some x else None
+*)
 
-let find_exn t ?(part=0.) ~filename =
+let find_exn t ?part:(name="") ~filename =
   let no_file_err() =
     ok_exn (error "no data for file" filename sexp_of_string)
   in
   let no_part_err() = ok_exn (
-    error "no data for requested part of file"
-      (filename,part) [%sexp_of: string * part] )
+      error "no data for requested part of file"
+        (filename,name) [%sexp_of: string * part] )
   in
   match String.Map.find t filename with
   | None -> no_file_err()
   | Some (`OCaml parts) -> (
-    match List.Assoc.find ~equal:Float.equal (of_script parts) part with
-    | None -> no_part_err()
-    | Some x -> `OCaml x
-  )
-  | Some (`OCaml_toplevel script) -> (
-    match Oloop.Script.Evaluated.nth script part with
-    | None -> no_part_err()
-    | Some x -> `OCaml_toplevel x.Oloop.Script.Evaluated.phrases
-  )
+      match List.find ~f:(is_rawpart ~name) parts with
+      | None -> no_part_err()
+      | Some x -> `OCaml x
+    )
+  | Some (`OCaml_toplevel doc) -> (
+      match List.find ~f:(is_part ~name) (Expect.Document.parts doc) with
+      | None -> no_part_err()
+      | Some x -> `OCaml_toplevel x.Expect.Part.chunks
+    )
   | Some (`OCaml_rawtoplevel parts) -> (
-    match List.Assoc.find ~equal:Float.equal (of_script parts) part with
-    | None -> no_part_err()
-    | Some x -> `OCaml_rawtoplevel x
-  )
+      match List.find ~f:(is_rawpart ~name) parts with
+      | None -> no_part_err()
+      | Some x -> `OCaml_rawtoplevel x
+    )
   | Some (`Other _ as x) ->
-    if part = 0. then x else no_part_err()*)
-
-let find_exn _ ?part:_ ~filename:_ =
-  raise Not_found
+    if name = "" then x else no_part_err()
 
 let file_is_mem = Map.mem
 
@@ -122,8 +94,8 @@ let file_is_mem = Map.mem
 (******************************************************************************)
 let phrases_to_html ?(pygmentize=false) phrases =
 
-  let in_phrase (x:oloop_script_evaluated_phrase) : Html.item Deferred.t =
-    match String.split (oloop_script_evaluated_phrase x) ~on:'\n' with
+  let in_phrase (x : Expect.Chunk.t) : Html.item Deferred.t =
+    match String.split (Expect.Chunk.code x) ~on:'\n' with
     | [] -> assert false
     | x::xs ->
       let x = sprintf "# %s" x in
@@ -132,64 +104,40 @@ let phrases_to_html ?(pygmentize=false) phrases =
   in
 
   (* get warnings or errors *)
-  let messages (x:oloop_script_evaluated_phrase) : Html.item option =
-    (
-      match oloop_script_evaluated_outcome x with
-      | `Uneval (x,_) ->
-        (
-          try (
-            oloop_outcome_report_uneval
-              ~msg_with_location:true Format.str_formatter x;
-            [Format.flush_str_formatter()]
-          )
-          with exn -> (
-              Log.Global.error
-                "Oloop.Outcome.report_uneval raised exception: %s"
-                (Exn.to_string exn)
-              ;
-              ["Oloop error: unable to show correct OCaml output"]
-            )
-        )
-      | `Eval e ->
-        oloop_outcome_warnings e
-        |> List.map ~f:(fun (loc,warning) ->
-            let buf = Buffer.create 256 in
-            let fmt = Format.formatter_of_buffer buf in
-            Location.print_loc fmt loc;
- 	    ignore (Warnings.print fmt warning);
-            Buffer.contents buf
-          )
-    )
-    |> function
-    | [] -> None
-    | l -> Some Html.(pre [`Data (String.concat l ~sep:"\n" |> Html.encode)])
+  let messages x : Html.item option =
+     (
+       if Expect.Chunk.evaluated x then
+         Expect.Chunk.warnings x
+       else
+         Expect.Chunk.response x
+     )
+     |> function
+     | "" -> None
+     | x -> Some Html.(pre [`Data (x |> Html.encode)])
   in
 
-  let stdout (x:oloop_script_evaluated_phrase) : Html.item option =
-    match oloop_script_evaluated_outcome x with
-    | `Uneval _ -> None
-    | `Eval e -> match oloop_outcome_stdout e with
+  let stdout x : Html.item option =
+    if Expect.Chunk.evaluated x then
+      match Expect.Chunk.stdout x with
       | "" -> None
       | x -> Some Html.(pre [`Data (Html.encode x)])
+    else None
   in
 
-  let out_phrase (x:oloop_script_evaluated_phrase)
+  let out_phrase (x : Expect.Chunk.t)
     : Html.item option Deferred.t
     =
-    match oloop_script_evaluated_outcome x with
-    | `Uneval _ -> return None
-    | `Eval e ->
-      let buf = Buffer.create 256 in
-      let fmt = Format.formatter_of_buffer buf in
-      !Oprint.out_phrase fmt (
-        oloop_outcome_result e |> oloop_phrase_remove_underscore_names
-      );
-      Buffer.contents buf
-      |> Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml
-      >>| Option.some
+    if Expect.Chunk.evaluated x then (
+      match Expect.Chunk.response x with
+      | "" -> return None
+      | str ->
+        str |> Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml
+        >>| Option.some
+    ) else
+      return None
   in
 
-  let phrase_to_html (x:oloop_script_evaluated_phrase) : Html.t Deferred.t =
+  let phrase_to_html (x : Expect.Chunk.t) : Html.t Deferred.t =
     (in_phrase x >>| Option.some) >>= fun in_phrase ->
     out_phrase x >>| fun out_phrase ->
     [in_phrase; messages x; stdout x; out_phrase]
@@ -200,15 +148,16 @@ let phrases_to_html ?(pygmentize=false) phrases =
   >>| List.concat
 
 
-let script_part_to_html ?(pygmentize=false) x =
+let script_part_to_html ?(pygmentize=false) (x : script_part) =
   (
-  match x with
-  | `OCaml_toplevel phrases -> phrases_to_html ~pygmentize phrases
-  | `OCaml x
-  | `OCaml_rawtoplevel x ->
-     (Pygments.pygmentize ~pygmentize `OCaml x >>| fun x -> [x])
-  | `Other x ->
-     (Pygments.pygmentize ~pygmentize:false `OCaml x >>| fun x -> [x])
+    match x with
+    | `OCaml_toplevel phrases -> phrases_to_html ~pygmentize phrases
+    | `OCaml x
+    | `OCaml_rawtoplevel x ->
+      let content = x.Expect.Raw_script.content in
+      (Pygments.pygmentize ~pygmentize `OCaml content >>| fun x -> [x])
+    | `Other x ->
+      (Pygments.pygmentize ~pygmentize:false `OCaml x >>| fun x -> [x])
   ) >>| fun l ->
   Html.div ~a:["class","highlight"] l
 
@@ -218,32 +167,26 @@ let script_part_to_html ?(pygmentize=false) x =
 (******************************************************************************)
 let eval_script lang ~filename =
   match (lang : Lang.t :> string) with
-  | "ml" | "mli" | "mll" | "mly" -> (
-    (* Hack: Oloop.Script.of_file intended only for ml files but
-       happens to work for mli, mll, and mly files. *)
-    oloop_script_of_file filename >>|? fun parts ->
-    `OCaml parts
+  | "ml" | "mli" | "mly" | "mll" -> (
+      (* Hack: Oloop.Script.of_file intended only for ml files but
+         happens to work for mli, mll, and mly files. *)
+      Expect.Raw_script.of_file ~filename
+      >>|? fun script -> `OCaml script
     )
   | "rawtopscript" -> (
-    oloop_script_of_file filename >>|? fun parts ->
-    `OCaml_rawtoplevel parts
-  )
+      Expect.Raw_script.of_file ~filename
+      >>|? fun script -> `OCaml_rawtoplevel script
+    )
   | "topscript" -> (
-    if String.is_suffix filename ~suffix:"async/main.topscript" then (
-      oloop_script_of_file filename >>|? fun parts -> `OCaml_rawtoplevel parts
+      if String.is_suffix filename ~suffix:"async/main.topscript" then (
+        Expect.Raw_script.of_file ~filename
+        >>|? fun script -> `OCaml_rawtoplevel script
+      )
+      else (
+        Rwo_expect.Document.of_file ~filename
+        >>|? fun doc -> `OCaml_toplevel doc
+      )
     )
-    else (
-      oloop_script_of_file filename >>=? fun script ->
-      Sys.getcwd() >>= fun cwd ->
-      Sys.chdir (Filename.dirname filename) >>= fun () ->
-      oloop_eval_script ~silent_directives:() ~short_paths:() script
-      >>= function
-      | Ok script ->
-	 (Sys.chdir cwd >>| fun () -> Ok (`OCaml_toplevel script))
-      | Error _ as e ->
-	 (Sys.chdir cwd >>| fun () -> e)
-    )
-  )
   | "sh" -> (
       Bash_script.eval_file filename >>|? fun x ->
       if not (List.for_all x.Bash_script.Evaluated.commands
@@ -254,7 +197,7 @@ let eval_script lang ~filename =
           filename
       ;
       `Other (Bash_script.Evaluated.to_string x)
-  )
+    )
   | "errsh" -> (
       Bash_script.eval_file filename >>|? fun x ->
       if not (List.exists x.Bash_script.Evaluated.commands
@@ -265,15 +208,15 @@ let eval_script lang ~filename =
           filename
       ;
       `Other (Bash_script.Evaluated.to_string x)
-  )
+    )
   | _ -> (
-    Reader.file_contents filename >>| fun x ->
-    Ok (`Other x)
-  )
+      Reader.file_contents filename >>| fun x ->
+      Ok (`Other x)
+    )
 
 let add_script t lang ~filename =
   let dir,file = filename in
-  let filename = dir/file in
+  let filename = Filename.concat dir file in
   if file_is_mem t file then
     return (error "script already exists" file sexp_of_string)
   else
@@ -287,5 +230,5 @@ let of_html ~filename html =
     |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
-    add_script accum (Import.lang_of i |> ok_exn) ~filename:(dir,i.Import.href)
-  )
+      add_script accum (Import.lang_of i |> ok_exn) ~filename:(dir,i.Import.href)
+    )
