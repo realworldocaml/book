@@ -16,8 +16,11 @@ module Raw_script = struct
       { name ; content = String.concat ~sep:"\n" (List.rev lines) } :: parts
     in
     let is_part line =
-      match List.map (String.split line ~on:'"') ~f:String.strip with
-      | ["(* part"; name; "*)"] | ["[@@@part"; name; "]"] -> Some name
+      match List.map ~f:String.strip (String.split line ~on:'"') with
+      | ["(* part"; name; "*)"]
+      | ["[@@@part"; name; "]"]
+      | ["[@@@part"; name; "];;"]
+        -> Some name
       | _ -> None
     in
     let rec split_parts parts name lines = function
@@ -26,9 +29,9 @@ module Raw_script = struct
         match is_part line with
         | None ->
           split_parts parts name (line :: lines) rest
-        | Some name ->
+        | Some name' ->
           let parts = add_part parts name lines in
-          split_parts parts name [] rest
+          split_parts parts name' [] rest
     in
     split_parts [] "" [] lines
 
@@ -68,7 +71,6 @@ module Document = struct
 
   let of_file ~filename =
     Process.run ~prog:program_path ~args:["-sexp"; filename] ()
-    >>|? Sexp.of_string
-    >>|? t_of_sexp
+    >>|? fun str -> t_of_sexp (Sexp.of_string (String.strip str))
 end
 
