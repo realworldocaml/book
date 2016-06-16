@@ -321,4 +321,4 @@ let _ =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let conn_closed con_id () = () in
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
-  Lwt_main.run (Cohttp_lwt_unix.Server.create ~address:"127.0.0.1" ~port:8000 spec)
+  Lwt_main.run (Cohttp_lwt_unix.Server.create ~address:"0.0.0.0" ~port:8000 spec)
