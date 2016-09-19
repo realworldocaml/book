@@ -295,7 +295,11 @@ let callback con_id ?body req =
       |[] -> Server.respond_string ~status:`OK ~body:Comment.index ()
       | "install"::_ -> Server.respond_redirect ~uri:install_uri ()
       | "doc"::_ -> Server.respond_redirect ~uri:doc_uri ()
-      | [".well-known";"acme-challenge";token] -> Server.respond_file ~fname:"./token" ()
+      | [".well-known";"acme-challenge";token] ->
+          let docroot = "./tokens" in
+          let uri = Uri.of_string token in
+          let fname = Server.resolve_file ~docroot ~uri in
+          Server.respond_file ~fname ()
       | ["robots.txt"] -> Server.respond_string ~status:`OK ~body:robots_txt ()
       | ["googled11900591fe397c2.html"] -> Server.respond_string ~status:`OK ~body:"google-site-verification: googled11900591fe397c2.html" ()
       | "media"::_ -> dispatch_static req (* No auth required for support files *)
