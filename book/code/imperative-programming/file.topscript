@@ -4,7 +4,20 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 let create_number_file filename numbers =
   let outc = Out_channel.create filename in
   List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
@@ -24,12 +37,23 @@ create_number_file "numbers.txt" [1;2;3;4;5];;
 sum_file "numbers.txt";;
 
 
-(* part 2 *)
+[%%expect{|
+|}]
+[@@@part "2"];;
 sum_file "/etc/hosts";;
 
 
-(* part 3 *)
+[%%expect{|
+Exception: Failure "Int.of_string: \"#\"".
+|}]
+[@@@part "3"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
 
 sum_file "numbers.txt";;
 
+[%%expect{|
+Line _, characters 0-74:
+Warning 35: unused for-loop index i.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]

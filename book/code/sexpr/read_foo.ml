@@ -4,7 +4,7 @@ type t = {
   a: string;
   b: int;
   c: float option 
-} with sexp
+} [@@deriving sexp]
 
 let run () =
   let t =

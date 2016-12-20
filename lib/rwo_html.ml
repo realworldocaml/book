@@ -2,7 +2,7 @@ open Core.Std
 open Async.Std
 
 type attributes = (string * string) list
-with sexp
+  [@@deriving sexp]
 
 type element = {
   name : string;
@@ -13,10 +13,10 @@ type element = {
 and item = [
 | `Element of element
 | `Data of string
-] with sexp
+] [@@deriving sexp]
 
 type t = item list
-with sexp
+  [@@deriving sexp]
 
 let rec item_of_nethtml (doc:Nethtml.document) : item =
   match doc with
@@ -48,7 +48,7 @@ let item_of_string_helper ?filename s = match of_string s with
     let n = List.length l in
     match filename with
     | None -> error msg n sexp_of_int
-    | Some filename -> error msg (filename,n) <:sexp_of< string * int >>
+    | Some filename -> error msg (filename,n) [%sexp_of: string * int]
   )
 
 let item_of_string s = item_of_string_helper s

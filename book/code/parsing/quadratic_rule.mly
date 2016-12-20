@@ -1,6 +1,6 @@
 
 
-(* part 4 *)
+(* part "4" *)
 (* Quadratic left-recursive rule *)
 object_fields:
   | (* empty *) { [] }

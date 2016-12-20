@@ -1,6 +1,6 @@
 
 
-(* part 1 *)
+[@@@part "1"];;
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
   try_with (fun () ->
@@ -14,7 +14,7 @@ let get_definition ~server ~interrupt word =
   | Error exn        -> (word, Error exn)
 
 
-(* part 2 *)
+[@@@part "2"];;
 let get_definition_with_timeout ~server ~timeout word =
   get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->

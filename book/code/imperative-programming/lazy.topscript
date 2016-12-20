@@ -5,7 +5,20 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
 
 Lazy.force v;;
@@ -14,7 +27,10 @@ Lazy.force v;;
 Lazy.force v;;
 
 
-(* part 2 *)
+[%%expect{|
+performing lazy computation
+|}]
+[@@@part "2"];;
 type 'a lazy_state =
   | Delayed of (unit -> 'a)
   | Value of 'a
@@ -22,14 +38,16 @@ type 'a lazy_state =
 ;;
 
 
-(* part 3 *)
+[%%expect]
+[@@@part "3"];;
 let create_lazy f = ref (Delayed f);;
 
 let v = create_lazy
           (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
 
 
-(* part 4 *)
+[%%expect]
+[@@@part "4"];;
 let force v =
   match !v with
   | Value x -> x
@@ -45,9 +63,13 @@ let force v =
 ;;
 
 
-(* part 5 *)
+[%%expect]
+[@@@part "5"];;
 force v;;
 
 
 force v;;
 
+[%%expect{|
+performing lazy computation
+|}]

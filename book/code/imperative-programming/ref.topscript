@@ -3,13 +3,26 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
 
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 type 'a ref = { mutable contents : 'a };;
 
 
-(* part 2 *)
+[%%expect]
+[@@@part "2"];;
 let ref x = { contents = x };;
 
 let (!) r = r.contents;;
@@ -17,7 +30,8 @@ let (!) r = r.contents;;
 let (:=) r x = r.contents <- x;;
 
 
-(* part 3 *)
+[%%expect]
+[@@@part "3"];;
 let x = ref 1;;
 
 !x;;

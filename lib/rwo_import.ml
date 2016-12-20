@@ -3,12 +3,16 @@ module Lang = Rwo_lang
 module Html = Rwo_html
 
 module T = struct
+
+  type part = string
+    [@@deriving sexp]
+
   type t = {
     href : string;
-    part : float option;
+    part : part option;
     alt : string option;
     childs : Rwo_html.item list;
-  } with sexp
+  } [@@deriving sexp]
 
   (* Ignore [childs]. *)
   let compare (x:t) (y:t) =
@@ -51,7 +55,7 @@ let of_html item =
       >>= fun () ->
 
       (
-        try Ok (find "part" |> Option.map ~f:Float.of_string)
+        try Ok (find "part")
         with exn -> error "invalid part" exn sexp_of_exn
       ) >>= fun part ->
 
@@ -78,7 +82,7 @@ let to_html x =
   [
     Some ("rel", "import");
     Some ("href", x.href);
-    (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
+    (Option.map x.part ~f:(fun x -> "part", x));
     (Option.map x.alt ~f:(fun x -> "alt", x));
   ]
   |> List.filter_map ~f:ident

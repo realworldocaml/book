@@ -4,7 +4,20 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "0.5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -19,7 +32,8 @@ class ['a] stack init = object
     v <- hd :: v
 end ;;
 
-(* part 1 *)
+[%%expect]
+[@@@part "1"];;
 class ['a] stack init = object
   val mutable v = init
 
@@ -34,7 +48,19 @@ class ['a] stack init = object
     v <- hd :: v
 end ;;
 
-(* part 2 *)
+[%%expect{|
+Line _, characters 0-194:
+Error: Some type variables are unbound in this type:
+         class ['a] stack :
+           'b list ->
+           object
+             val mutable v : 'b list
+             method pop : 'b option
+             method push : 'b -> unit
+           end
+       The method pop has type 'b option where 'b is unbound
+|}]
+[@@@part "2"];;
 class sstack init = object
   inherit [string] stack init
 
@@ -42,10 +68,18 @@ class sstack init = object
     List.iter ~f:print_string v
 end ;;
 
-(* part 3 *)
+[%%expect{|
+|}]
+[@@@part "3"];;
 class double_stack init = object
   inherit [int] stack init as super
 
   method push hd =
     super#push (hd * 2)
 end ;;
+[%%expect{|
+Line _, characters 2-42:
+Warning 7: the method push is overridden.
+Line _:
+Error: Some fatal warnings were triggered (1 occurrences)
+|}]

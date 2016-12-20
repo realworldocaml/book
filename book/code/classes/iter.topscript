@@ -4,11 +4,25 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "0.5"];;
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 
 
-(* part 1 *)
+[%%expect]
+[@@@part "1"];;
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
 
@@ -25,7 +39,15 @@ class ['a] list_iterator init = object
     | [] -> raise (Invalid_argument "no value")
 end  ;;
 
-(* part 2 *)
+[%%expect{|
+Line _, characters 12-14:
+Warning 27: unused variable tl.
+Line _, characters 6-8:
+Warning 27: unused variable hd.
+Line _:
+Error: Some fatal warnings were triggered (2 occurrences)
+|}]
+[@@@part "2"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -43,7 +65,11 @@ class ['a] stack init = object
     new list_iterator v
 end ;;
 
-(* part 3 *)
+[%%expect{|
+Line _, characters 4-21:
+Error: Unbound class list_iterator
+|}]
+[@@@part "3"];;
 let s = new stack [] ;;
 
 s#push 5 ;;
@@ -63,7 +89,27 @@ it#next ;;
 it#has_value ;;
 
 
-(* part 4 *)
+[%%expect{|
+Line _, characters 8-17:
+Error: Unbound class stack
+Line _, characters 0-1:
+Error: Unbound value s
+Line _, characters 0-1:
+Error: Unbound value s
+Line _, characters 9-10:
+Error: Unbound value s
+Line _, characters 0-2:
+Error: Unbound value it
+Line _, characters 0-2:
+Error: Unbound value it
+Line _, characters 0-2:
+Error: Unbound value it
+Line _, characters 0-2:
+Error: Unbound value it
+Line _, characters 0-2:
+Error: Unbound value it
+|}]
+[@@@part "4"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -89,7 +135,9 @@ end ;;
 
 
 
-(* part 5 *)
+[%%expect{|
+|}]
+[@@@part "5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -114,3 +162,5 @@ end ;;
 
 
 
+[%%expect{|
+|}]

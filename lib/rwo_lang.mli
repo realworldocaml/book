@@ -53,7 +53,7 @@ open Core.Std
 open Async.Std
 
 type t = private string
-with sexp
+  [@@deriving sexp]
 
 val of_string : string -> t Or_error.t
 val to_string : t -> string

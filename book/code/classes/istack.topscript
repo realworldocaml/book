@@ -3,8 +3,21 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
-(* part 1 *)
+
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 open Core_kernel.Std;;
 class istack = object
   val mutable v = [0; 2]
@@ -26,7 +39,9 @@ end ;;
 
 
 
-(* part 2 *)
+[%%expect{|
+|}]
+[@@@part "2"];;
 let s = new istack ;;
 
 s#pop ;;
@@ -36,6 +51,7 @@ s#push 5 ;;
 s#pop ;;
 
 
-(* part 3 *)
+[%%expect]
+[@@@part "3"];;
 type istack = < pop: int option; push: int -> unit > ;;
 

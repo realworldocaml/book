@@ -4,20 +4,48 @@
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-(* part 0.5 *)
-type t = { foo: int; bar: float } with sexp ;;
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "0.5"];;
+type t = { foo: int; bar: float } [@@deriving sexp] ;;
 
 
 
 t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
 
 
-(* part 1 *)
+[%%expect{|
+Line _, characters 37-45:
+Attribute `deriving' was not used
+Line _, characters 0-9:
+Error: Unbound value t_of_sexp
+Hint: Did you mean int_of_sexp or mat_of_sexp?
+|}]
+[@@@part "1"];;
 exception Bad_message of string list ;;
 
 Exn.to_string (Bad_message ["1";"2";"3"]) ;;
 
-exception Good_message of string list with sexp;;
+exception Good_message of string list [@@deriving sexp];;
 
 Exn.to_string (Good_message ["1";"2";"3"]) ;;
 
+[%%expect{|
+Line _, characters 41-49:
+Attribute `deriving' was not used
+Line _, characters 15-27:
+Error: This variant expression is expected to have type exn
+       The constructor Good_message does not belong to type exn
+Hint: Did you mean Bad_message?
+|}]

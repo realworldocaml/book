@@ -5,7 +5,20 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 for i = 0 to 3 do printf "i = %d\n" i done;;
 
 
@@ -13,7 +26,13 @@ for i = 0 to 3 do printf "i = %d\n" i done;;
 
 
 
-(* part 2 *)
+[%%expect{|
+i = 0
+i = 1
+i = 2
+i = 3
+|}]
+[@@@part "2"];;
 for i = 3 downto 0 do printf "i = %d\n" i done;;
 
 
@@ -21,7 +40,13 @@ for i = 3 downto 0 do printf "i = %d\n" i done;;
 
 
 
-(* part 3 *)
+[%%expect{|
+i = 3
+i = 2
+i = 1
+i = 0
+|}]
+[@@@part "3"];;
 let rev_inplace ar =
   let i = ref 0 in
   let j = ref (Array.length ar - 1) in

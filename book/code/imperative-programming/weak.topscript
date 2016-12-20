@@ -3,8 +3,21 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
-(* part 1 *)
+
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 let remember =
   let cache = ref None in
   (fun x ->
@@ -14,7 +27,8 @@ let remember =
 ;;
 
 
-(* part 2 *)
+[%%expect]
+[@@@part "2"];;
 let identity x = x;;
 
 identity 3;;
@@ -22,7 +36,8 @@ identity 3;;
 identity "five";;
 
 
-(* part 3 *)
+[%%expect]
+[@@@part "3"];;
 let remember_three () = remember 3;;
 
 remember;;
@@ -31,3 +46,8 @@ remember "avocado";;
 
 
 
+[%%expect{|
+Line _, characters 9-18:
+Error: This expression has type bytes but an expression was expected of type
+         int
+|}]

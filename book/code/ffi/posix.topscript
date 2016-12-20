@@ -3,7 +3,20 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 0.5 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "0.5"];;
 #require "ctypes.foreign" ;;
 #require "ctypes.top" ;;
 open Ctypes ;;
@@ -12,15 +25,35 @@ open Foreign ;;
 let time = foreign "time" (ptr time_t @-> returning time_t) ;;
 
 
-(* part 1 *)
+[%%expect{|
+Line _, characters 5-11:
+Error: Unbound module Ctypes
+Line _, characters 5-15:
+Error: Unbound module PosixTypes
+Line _, characters 5-12:
+Error: Unbound module Foreign
+Line _, characters 11-18:
+Error: Unbound value foreign
+No such package: ctypes.foreign
+No such package: ctypes.top
+|}]
+[@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
 
 
-(* part 2 *)
+[%%expect{|
+Line _, characters 15-19:
+Error: Unbound value time
+|}]
+[@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
 
 
-(* part 3 *)
+[%%expect{|
+Line _, characters 15-19:
+Error: Unbound value time
+|}]
+[@@@part "3"];;
 let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double) ;;
 
@@ -31,31 +64,57 @@ let t2 = time' () in
 difftime t2 t1 ;;
 
 
-(* part 4 *)
+[%%expect{|
+Line _, characters 2-9:
+Error: Unbound value foreign
+Line _, characters 2-7:
+Error: Unbound value time'
+|}]
+[@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
 
 
-(* part 5 *)
+[%%expect{|
+Line _, characters 12-19:
+Error: Unbound value foreign
+|}]
+[@@@part "5"];;
 ctime (time' ()) ;;
 
 
 
 
-(* part 6 *)
+[%%expect{|
+Line _, characters 0-5:
+Error: Unbound value ctime
+|}]
+[@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
 
 
-(* part 7 *)
+[%%expect{|
+Line _, characters 12-20:
+Error: Unbound value allocate
+|}]
+[@@@part "7"];;
 ctime t_ptr ;;
 
 
-(* part 8 *)
+[%%expect{|
+Line _, characters 0-5:
+Error: Unbound value ctime
+|}]
+[@@@part "8"];;
 type timeval ;;
 
 let timeval : timeval structure typ = structure "timeval" ;;
 
 
-(* part 9 *)
+[%%expect{|
+Line _, characters 14-35:
+Error: Unbound type constructor typ
+|}]
+[@@@part "9"];;
 let tv_sec  = field timeval "tv_sec" long ;;
 
 let tv_usec = field timeval "tv_usec" long ;;
@@ -64,19 +123,35 @@ let tv_usec = field timeval "tv_usec" long ;;
 seal timeval ;;
 
 
-(* part 10 *)
+[%%expect{|
+Line _, characters 14-19:
+Error: Unbound value field
+Line _, characters 14-19:
+Error: Unbound value field
+Line _, characters 0-4:
+Error: Unbound value seal
+|}]
+[@@@part "10"];;
 type timezone ;;
 
 let timezone : timezone structure typ = structure "timezone" ;;
 
 
-(* part 11 *)
+[%%expect{|
+Line _, characters 15-37:
+Error: Unbound type constructor typ
+|}]
+[@@@part "11"];;
 let gettimeofday = foreign "gettimeofday"
                      (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
 
 
 
-(* part 12 *)
+[%%expect{|
+Line _, characters 19-26:
+Error: Unbound value foreign
+|}]
+[@@@part "12"];;
 let gettimeofday' () =
   let tv = make timeval in
   ignore(gettimeofday (addr tv) (from_voidp timezone null));
@@ -86,3 +161,9 @@ let gettimeofday' () =
 
 gettimeofday' () ;;
 
+[%%expect{|
+Line _, characters 11-15:
+Error: Unbound value make
+Line _, characters 0-13:
+Error: Unbound value gettimeofday'
+|}]

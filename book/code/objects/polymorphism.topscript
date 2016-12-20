@@ -5,7 +5,20 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 let area sq = sq#width * sq#width ;;
 
 let minimize sq : unit = sq#resize 1 ;;
@@ -14,7 +27,8 @@ let limit sq =
   if (area sq) > 100 then minimize sq ;;
 
 
-(* part 2 *)
+[%%expect]
+[@@@part "2"];;
 let toggle sq b : unit = 
   if b then sq#resize `Fullscreen
   else minimize sq ;;
@@ -23,7 +37,13 @@ let toggle sq b : unit =
 
 
 
-(* part 3 *)
+[%%expect{|
+Line _, characters 16-18:
+Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
+       but an expression was expected of type < resize : int -> unit; .. >
+       Types for method resize are incompatible
+|}]
+[@@@part "3"];;
 let area_closed (sq: < width : int >) = sq#width * sq#width ;;
 
 let sq = object
@@ -37,8 +57,19 @@ area_closed sq ;;
 
 
 
-(* part 4 *)
+[%%expect{|
+Line _, characters 12-14:
+Error: This expression has type < name : string; width : int >
+       but an expression was expected of type < width : int >
+       The second object type has no method name
+|}]
+[@@@part "4"];;
 type square = < width : int; ..> ;;
 
 
 
+[%%expect{|
+Line _, characters 0-32:
+Error: A type variable is unbound in this type declaration.
+In type < width : int; .. > as 'a the variable 'a is unbound
+|}]

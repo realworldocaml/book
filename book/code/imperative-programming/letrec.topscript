@@ -26,20 +26,42 @@ let fib_norec fib i =
   else fib (i - 1) + fib (i - 2) ;;
 
 
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 
 let memo_rec f_norec =
   let rec f = memoize (fun x -> f_norec f x) in
   f
 ;;
 
-(* part 2 *)
+[%%expect{|
+Line _, characters 14-44:
+Error: This kind of expression is not allowed as right-hand side of `let rec'
+|}]
+[@@@part "2"];;
 let rec x = lazy (force x + 1);;
 
-(* part 3 *)
+[%%expect{|
+|}]
+[@@@part "3"];;
 force x;;
 
-(* part 5 *)
+[%%expect{|
+Exception: CamlinternalLazy.Undefined.
+|}]
+[@@@part "5"];;
 let lazy_memo_rec f_norec x =
   let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
   (force f) x
@@ -48,3 +70,6 @@ let lazy_memo_rec f_norec x =
 time (fun () -> lazy_memo_rec fib_norec 40);;
 
 
+[%%expect{|
+Time: 0.078588 ms
+|}]

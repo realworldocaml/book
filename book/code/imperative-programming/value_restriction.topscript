@@ -23,51 +23,78 @@ let memoize f =
 
 let identity x = x;;
 
-(* part 1 *)
+[%%expect{|
+- : unit = ()
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+- : unit = ()
+|}]
+[@@@part "1"];;
 (fun x -> [x;x]);;
 
 
-(* part 2 *)
+[%%expect]
+[@@@part "2"];;
 memoize (fun x -> [x;x]);;
 
 
-(* part 3 *)
+[%%expect{|
+|}]
+[@@@part "3"];;
 identity (fun x -> [x;x]);;
 
 
-(* part 4 *)
+[%%expect]
+[@@@part "4"];;
 let f () = ref None;;
 
 
-(* part 5 *)
+[%%expect]
+[@@@part "5"];;
 List.init;;
 
 List.init 10 ~f:Int.to_string;;
 
 
-(* part 6 *)
+[%%expect{|
+|}]
+[@@@part "6"];;
 let list_init_10 = List.init 10;;
 
 
-(* part 7 *)
+[%%expect{|
+|}]
+[@@@part "7"];;
 let list_init_10 ~f = List.init 10 ~f;;
 
 
-(* part 8 *)
+[%%expect{|
+|}]
+[@@@part "8"];;
 identity (fun x -> [x;x]);;
 
 
-(* part 9 *)
+[%%expect]
+[@@@part "9"];;
 identity [];;
 
 
-(* part 10 *)
+[%%expect]
+[@@@part "10"];;
 [||];;
 
 identity [||];;
 
 
-(* part 11 *)
+[%%expect]
+[@@@part "11"];;
 module Concat_list : sig
   type 'a t
   val empty : 'a t
@@ -101,12 +128,14 @@ end;;
 
 
 
-(* part 12 *)
+[%%expect]
+[@@@part "12"];;
 Concat_list.empty;;
 
 identity Concat_list.empty;;
 
-(* part 13 *)
+[%%expect]
+[@@@part "13"];;
 module Concat_list : sig
   type +'a t
   val empty : 'a t
@@ -132,6 +161,7 @@ end = struct
 
 end;;
 
-(* part 14 *)
+[%%expect]
+[@@@part "14"];;
 identity Concat_list.empty;;
 

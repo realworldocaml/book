@@ -11,12 +11,15 @@
 *)
 open Core.Std
 
+type part = string
+  [@@deriving sexp]
+
 type t = {
   href : string;
-  part : float option;
+  part : part option;
   alt : string option;
   childs : Rwo_html.item list;
-} with sexp
+} [@@deriving sexp]
 
 val of_html : Rwo_html.item -> t Or_error.t
 
