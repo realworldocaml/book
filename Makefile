@@ -27,7 +27,7 @@ Makefile.derived::
 	  GIT_COMMIT='None';                               \
 	fi;                                                \
 	OUTPUT="GIT_COMMIT = $$GIT_COMMIT";                 \
-	if ! echo "$$OUTPUT" | cmp --quiet - $@; then      \
+	if ! echo "$$OUTPUT" | cmp -s - $@; then      \
 	  echo "# $$OUTPUT (UPDATED)";     								 \
 	  echo "$$OUTPUT" > $@;            								 \
 	fi
