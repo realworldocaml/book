@@ -42,7 +42,7 @@ _build::
 	@mkdir -p _build 
 	@mkdir -p _build/site/css
 	@rsync -a Makefile.build _build/Makefile
-	@rsync -a $(BUILD_FILES) _build
+	@cp -r $(BUILD_FILES) _build
 
 ################################################################################
 # Install and Uninstall
