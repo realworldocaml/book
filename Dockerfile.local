@@ -1,0 +1,7 @@
+FROM ocaml/opam:alpine_ocaml-4.03.0
+RUN opam remote add js git://github.com/janestreet/opam-repository && opam update
+RUN opam depext -ui core async ocamlnet cohttp mtime
+RUN opam depext -i toplevel_expect_test ocamlscript
+RUN sudo apk add tzdata
+WORKDIR /home/opam/src
+ENTRYPOINT ["opam","config","exec","--","make"]
