@@ -112,13 +112,14 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   let rec print_item depth = function
     | `Data _ -> ()
     | `Element {name; attrs; childs} ->
-      if List.mem exclude_elements name then
+      let equal = String.equal in
+      if List.mem ~equal exclude_elements name then
         ()
       else (
         let padding = String.init (2*depth) ~f:(fun _ -> ' ') in
         let attrs =
           List.filter_map attrs ~f:(fun (attr,value) ->
-            if List.mem keep_attrs attr then
+            if List.mem ~equal keep_attrs attr then
               Some (sprintf "%s=%s" attr value)
             else
               None
@@ -170,7 +171,7 @@ let replace_id_node_with t ~id ~with_ =
     | [] -> []
     | (`Data _ as x)::rest -> x::(loop rest)
     | (`Element {name;attrs;childs;_})::rest ->
-      if List.mem attrs ("id",id) then
+      if List.mem ~equal:Rwo_util.string_pair_equal attrs ("id",id) then
         with_@(loop rest)
       else
         (`Element {name; attrs; childs = loop childs})::(loop rest)
