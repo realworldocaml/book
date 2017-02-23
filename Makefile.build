@@ -44,7 +44,7 @@ endif
 
 ROOT = ./
 
-site/%.html: book/%.html app
+site/%.html: book/%.html app/rwo
 ifdef PYGMENTIZE
 	app/rwo build chapter -pygmentize -o site/ -repo-root $(ROOT) $<
 else
