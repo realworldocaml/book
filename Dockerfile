@@ -9,5 +9,4 @@ WORKDIR /home/opam/src
 RUN opam pin add -n Real-World-OCaml /home/opam/src
 RUN opam config exec -- make
 EXPOSE 8080
-ENTRYPOINT ["opam","config","exec","--","cohttp-server-async","-v","true","/home/opam/src/book"]
-
+ENTRYPOINT ["opam","config","exec","--","cohttp-server-async","-v","true","/home/opam/src/_build/site"]

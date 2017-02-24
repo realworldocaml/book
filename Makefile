@@ -42,7 +42,7 @@ _build::
 	@mkdir -p _build 
 	@mkdir -p _build/site/css
 	@rsync -a Makefile.build _build/Makefile
-	@cp -r $(BUILD_FILES) _build
+	@cp -ru $(BUILD_FILES) _build
 
 ################################################################################
 # Install and Uninstall
@@ -52,10 +52,10 @@ export OPAM_PACKAGE_NAME
 
 OCAMLFIND_PACKAGE_NAME = $(OPAM_PACKAGE_NAME)
 
-_build/META: Makefile.config
+_build/META:
 	echo version = \"$(VERSION)\" > $@
-	echo "archive(byte) = \"$(LIB_NAME).cma\"" >> $@
-	echo "requires = \"$(LIB_PACKAGES)\"" >> $@
+	echo "archive(byte) = \"rwo.cma\"" >> $@
+	echo "requires = \"$(PACKS)\"" >> $@
 
 install_lib: uninstall_lib _build/META
 	ocamlfind install $(OCAMLFIND_PACKAGE_NAME) \
@@ -66,10 +66,9 @@ uninstall_lib:
 	ocamlfind remove $(OCAMLFIND_PACKAGE_NAME)
 
 $(OPAM_PACKAGE_NAME).install:
-	echo $"bin: [" > $@
-	echo "  "\"?_build/app/$(APP_NAME).run\" {\"$(APP_NAME)\"} >> $@
-	echo "  "\"?_build/app/$(APP_NAME).opt\" {\"$(APP_NAME)\"} >> $@
-	echo $"]" >> $@
+	echo "bin: [" > $@
+	echo "  "\"?_build/app/rwo\" {\"rwo\"} >> $@
+	echo "]" >> $@
 
 ################################################################################
 # Merlin support

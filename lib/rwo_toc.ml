@@ -54,7 +54,7 @@ let part_info_of_chapter chapter_num : part_info option =
     match accum with
     | Some _ as x -> x
     | None ->
-      if List.mem chapters chapter_num
+      if List.mem ~equal:Int.equal chapters chapter_num
       then Some info
       else None
   )
@@ -109,7 +109,8 @@ let get_sections file html =
     let rec loop accum = function
       | [] -> accum
       | (`Element{Html.name="section";attrs;childs} as item)::rest -> (
-        if List.mem attrs ("data-type",data_type) then (
+        if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type",data_type)
+        then (
           match Html.filter_whitespace childs with
           | `Element{Html.name; attrs=_; childs}::_ -> (
             if name = title_elem then

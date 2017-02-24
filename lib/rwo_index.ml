@@ -5,7 +5,8 @@ let indexterm_to_idx docs =
   let rec loop item = match item with
     | `Data _ -> item
     | `Element {name="a"; attrs; childs=[`Data "&nbsp;"]} -> (
-      if List.mem attrs ("data-type", "indexterm") then (
+      if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type", "indexterm")
+      then (
         match
           check_attrs attrs ~required:["data-type"; "data-primary"]
         with

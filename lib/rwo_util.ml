@@ -30,3 +30,6 @@ let find_files dir =
   in
   loop dir >>| fun () ->
   List.concat !accum
+
+let string_pair_equal (a1,a2) (b1,b2) =
+  String.equal a1 b1 && String.equal a2 b2
