@@ -115,7 +115,7 @@ let get_sections file html =
           | `Element{Html.name; attrs=_; childs}::_ -> (
             if name = title_elem then
               let title = html_to_title childs in
-              let id = match List.Assoc.find attrs "id" with
+              let id = match List.Assoc.find ~equal:String.equal attrs "id" with
                 | Some x -> x
                 | None -> title_to_id title
               in
