@@ -14,9 +14,9 @@ let indexterm_to_idx docs =
           item (* no point in recursing to single Data child *)
         | Ok () ->
           let data = sprintf "%s%s"
-            (List.Assoc.find_exn attrs "data-primary")
+            (List.Assoc.find_exn ~equal:String.equal attrs "data-primary")
             (
-              try ("/" ^ List.Assoc.find_exn attrs "data-secondary")
+              try ("/" ^ List.Assoc.find_exn ~equal:String.equal attrs "data-secondary")
               with Not_found -> ""
             )
           in

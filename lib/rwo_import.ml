@@ -33,7 +33,7 @@ let lang_of t =
 let is_import_html = function
   | `Data _ -> false
   | `Element {Html.name="link"; attrs; _} -> (
-    match List.Assoc.find attrs "rel" with
+    match List.Assoc.find ~equal:String.equal attrs "rel" with
     | Some "import" -> true
     | Some _
     | None -> false
@@ -48,7 +48,7 @@ let of_html item =
   else (
     match item with
     | `Element {name="link"; attrs; childs} -> (
-      let find x = List.Assoc.find attrs x in
+      let find x = List.Assoc.find ~equal:String.equal attrs x in
       Html.check_attrs attrs
         ~required:["href"; "rel"]
         ~allowed:(`Some ["part"; "alt"])
