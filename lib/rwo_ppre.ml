@@ -81,7 +81,7 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
   let parse_main_a item : (string * string * string) Or_error.t =
     match item with
     | `Element {Html.name="a"; attrs; childs=[em]} -> (
-      let find x = Option.value_exn (List.Assoc.find attrs x) in
+      let find x = Option.value_exn (List.Assoc.find ~equal:String.equal attrs x) in
       Html.check_attrs attrs ~required:["href";"class"] ~allowed:(`Some [])
       >>= fun () ->
       parse_em em >>= fun em_data ->
@@ -257,7 +257,7 @@ let parse_pre item =
   | `Data x ->
     error "expected <pre> but got DATA" x sexp_of_string
   | `Element {Html.name="pre"; attrs; childs} -> (
-    let find x = List.Assoc.find attrs x in
+    let find x = List.Assoc.find ~equal:String.equal attrs x in
     Html.check_attrs attrs ~required ~allowed >>= fun () ->
     parse_code_block childs >>| fun code_block ->
     {
