@@ -258,7 +258,7 @@ let check_attrs ?(required=[]) ?(allowed=`Any) attrs_list =
   | Some x ->
     error "attribute repeated" x sexp_of_string
   | None ->
-    if not (Set.subset required attrs) then
+    if not (Set.is_subset required ~of_:attrs) then
       error "expected attributes not present"
         (Set.diff required attrs) String.Set.sexp_of_t
     else
@@ -267,7 +267,7 @@ let check_attrs ?(required=[]) ?(allowed=`Any) attrs_list =
       | `Some allowed ->
         let allowed = String.Set.of_list allowed in
         let remaining = Set.diff attrs required in
-        if Set.subset remaining allowed then
+        if Set.is_subset remaining ~of_:allowed then
           Ok ()
         else
           error "unexpected attributes present"
