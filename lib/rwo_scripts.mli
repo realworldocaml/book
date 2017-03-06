@@ -1,6 +1,6 @@
 (** Collection of scripts. *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type part = string
   [@@deriving sexp]

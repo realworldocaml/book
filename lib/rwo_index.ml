@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Rwo_html
 
 let indexterm_to_idx docs =

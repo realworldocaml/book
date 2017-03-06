@@ -1,6 +1,6 @@
 (** Miscellaneous utilities. *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 (** Return all files in the given directory, including files in its
     sub-directories. *)

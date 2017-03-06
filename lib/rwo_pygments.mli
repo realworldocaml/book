@@ -1,7 +1,7 @@
 (** Pygments support. Call out to the [pygmentize] command line
     tool. *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 (** Pygments languages, just the ones we need. *)
 type lang = [

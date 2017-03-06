@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 let (/) = Filename.concat
 
 let find_files dir =

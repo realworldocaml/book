@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 module Bash_script = Rwo_bash_script
 module Html = Rwo_html
 module Import = Rwo_import

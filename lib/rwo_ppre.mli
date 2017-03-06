@@ -11,8 +11,8 @@
     files, and may also need to generate such sections when converting
     back to pure HTMLBook.
 *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 (** An item within a <pre> node*)
 type code_item = [

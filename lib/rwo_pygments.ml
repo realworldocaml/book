@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 module Html = Rwo_html
 module Lang = Rwo_lang
 

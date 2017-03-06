@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 module Lang = Rwo_lang
 module Html = Rwo_html
 

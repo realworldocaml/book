@@ -1,6 +1,6 @@
-open Core.Std
+open Core
 open Rwo_core2
-open Async.Std
+open Async
 module Html = Rwo_html
 module Import = Rwo_import
 module Lang = Rwo_lang

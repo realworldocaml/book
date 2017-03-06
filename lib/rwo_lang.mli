@@ -49,8 +49,8 @@
     - "scm"
     - "txt"
 *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type t = private string
   [@@deriving sexp]

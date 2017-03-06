@@ -9,7 +9,7 @@
     path to a code file, ["N"] is a part number within that file. The
     [part] attribute is optional.
 *)
-open Core.Std
+open Core
 
 type part = string
   [@@deriving sexp]
