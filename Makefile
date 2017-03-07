@@ -3,7 +3,7 @@
 
 .PHONY: app lib atlas site \
         install_lib uninstall_lib \
-				clean clean-everything
+	clean clean-everything
 
 all:: site
 
