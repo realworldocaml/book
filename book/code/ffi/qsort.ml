@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Ctypes
 open PosixTypes
 open Foreign

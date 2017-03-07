@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let () =
   Out_channel.output_string stdout "Pick a timezone: ";

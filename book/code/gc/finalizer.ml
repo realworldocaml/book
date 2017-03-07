@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Async.Std
 
 let attach_finalizer n v =

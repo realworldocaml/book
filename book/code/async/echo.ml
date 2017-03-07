@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Async.Std
 
 (* Copy data from the reader to the writer, using the provided buffer

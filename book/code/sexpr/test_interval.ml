@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let intervals =
   let module I = Int_interval in

@@ -15,7 +15,7 @@ and 'a list_item =
 
 
 [@@@part "1"];;
-open Core.Std
+open Core
 
 class ['a] folder = object(self)
   method doc acc = function

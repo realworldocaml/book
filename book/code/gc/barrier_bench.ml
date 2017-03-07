@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Core_bench.Std
 
 type t1 = { mutable iters1: int; mutable count1: float }

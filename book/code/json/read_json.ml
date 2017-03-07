@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let () =
   (* Read JSON file into an OCaml string *)

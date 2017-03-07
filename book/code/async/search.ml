@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Async.Std
 
 (* Generate a DuckDuckGo search URI from a query string *)

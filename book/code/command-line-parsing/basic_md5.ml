@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let do_hash file =
   In_channel.with_file file ~f:(fun ic ->

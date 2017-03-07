@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Cryptokit
 
 let checksum_from_string buf =

@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let get_inchan = function
   | "-"      -> In_channel.stdin

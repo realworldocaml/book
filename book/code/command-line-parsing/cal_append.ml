@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let add ~common =
   Command.basic ~summary:"Add [days] to the [base] date"

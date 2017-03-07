@@ -1,5 +1,5 @@
 (* Module for representing closed integer intervals *)
-open Core.Std
+open Core
 
 (* Invariant: For any Range (x,y), y >= x *)
 type t =
