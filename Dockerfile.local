@@ -4,6 +4,6 @@ RUN opam remote add js git://github.com/janestreet/opam-repository && opam updat
 RUN opam pin add -n uri --dev
 RUN opam pin add -n ipaddr --dev
 RUN opam depext -ui core async ocamlnet cohttp mtime toplevel_expect_test sexplib ppx_tools
-RUN sudo apk add tzdata vim
+RUN sudo apk add tzdata vim py-pygments
 WORKDIR /home/opam/src
 ENTRYPOINT ["opam","config","exec","--","make"]
