@@ -1,7 +1,7 @@
 opam-version: "1.2"
 name: "Real-World-OCaml"
 version: "dev"
-maintainer: "Ashish Agarwal <agarwal1975@gmail.com>"
+maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/yminsky/Real-World-OCaml"
 license: "PROPRIETARY"
 
@@ -30,8 +30,10 @@ depends: [
   # Required for code blocks within book.
   "core_bench"
   "mtime"
+  "yojson"
+  "astring"
 ]
 
 available: [
-  ocaml-version >= "4.02.1"
+  ocaml-version >= "4.03.0"
 ]
