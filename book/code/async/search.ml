@@ -1,5 +1,5 @@
 open Core
-open Async.Std
+open Async
 
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri query =

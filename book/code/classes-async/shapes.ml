@@ -1,5 +1,5 @@
 open Core
-open Async.Std
+open Async
 open Async_graphics
 
 type drawable = < draw: unit >

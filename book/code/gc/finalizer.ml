@@ -1,5 +1,5 @@
 open Core
-open Async.Std
+open Async
 
 let attach_finalizer n v =
   match Heap_block.create v with

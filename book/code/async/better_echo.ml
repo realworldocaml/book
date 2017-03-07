@@ -1,5 +1,5 @@
 open Core
-open Async.Std
+open Async
 
 let run ~uppercase ~port =
   let host_and_port =

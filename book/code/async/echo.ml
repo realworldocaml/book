@@ -1,5 +1,5 @@
 open Core
-open Async.Std
+open Async
 
 (* Copy data from the reader to the writer, using the provided buffer
    as scratch space *)
