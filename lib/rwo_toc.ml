@@ -76,7 +76,7 @@ let get_title file (t:Html.t) : string =
 
 let get_sections file html =
 
-  (** Convert arbitrary HTML to a section title, under the reasonable
+  (* Convert arbitrary HTML to a section title, under the reasonable
       assumption that we don't put overly complex HTML within section
       titles. *)
   let html_to_title html =
@@ -88,7 +88,7 @@ let get_sections file html =
     loop [] html |> List.rev |> String.concat ~sep:""
   in
 
-  (** Convert section title to a valid HTML ID. *)
+  (* Convert section title to a valid HTML ID. *)
   let title_to_id s =
     String.filter s ~f:(fun c -> Char.is_alphanum c || c = ' ')
     |> String.map ~f:(function ' ' -> '-' | c -> c)

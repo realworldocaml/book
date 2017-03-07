@@ -33,7 +33,7 @@ type p = {
 
 type t = {p:p; pre:pre}
 
-(** Replace ampersand encoded HTML sub-strings with their ASCII
+(* Replace ampersand encoded HTML sub-strings with their ASCII
     counterparts. *)
 let decode_html_string (s:string) : string =
   s
@@ -41,7 +41,7 @@ let decode_html_string (s:string) : string =
   |> String.substr_replace_all ~pattern:"&lt;" ~with_:"<"
   |> String.substr_replace_all ~pattern:"&gt;" ~with_:">"
 
-(** Extract data from an HTML node. Be tolerant and accept some
+(* Extract data from an HTML node. Be tolerant and accept some
     non-DATA nodes. *)
 let rec item_to_string (item:Html.item) : string Or_error.t =
   let open Result.Monad_infix in
@@ -54,7 +54,7 @@ let rec item_to_string (item:Html.item) : string Or_error.t =
   | `Element _ ->
     error "cannot treat node as data" item Html.sexp_of_item
 
-(** Like [item_to_string but for list of items. *)
+(* Like [item_to_string but for list of items. *)
 let items_to_string (items : Html.item list) : string Or_error.t =
   let open Result.Monad_infix in
   Result.List.map items ~f:item_to_string
@@ -63,7 +63,7 @@ let items_to_string (items : Html.item list) : string Or_error.t =
 let parse_p_before_pre (item:Html.item) : p Or_error.t =
   let open Result.Monad_infix in
 
-  (** Return DATA under <em>. *)
+  (* Return DATA under <em>. *)
   let parse_em item : string Or_error.t =
     match item with
     | `Element {
@@ -76,7 +76,7 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
       error "unexpected form for <em> node" item Html.sexp_of_item
   in
 
-  (** Return href and class attribute values of main <a>, and the data
+  (* Return href and class attribute values of main <a>, and the data
       under the <em> child of it. *)
   let parse_main_a item : (string * string * string) Or_error.t =
     match item with
@@ -91,7 +91,7 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
       error "unexpected form for main <a> node" item Html.sexp_of_item
   in
 
-  (** The 2nd data field, i.e. the one after the main <a>, optionally
+  (* The 2nd data field, i.e. the one after the main <a>, optionally
       contains the part number. Parse it out. *)
   let parse_data2 (x : string option) : string option Or_error.t =
     match x with
@@ -147,7 +147,7 @@ let parse_p_before_pre (item:Html.item) : p Or_error.t =
   Ok {a_href;a_class;em_data;data1;part;a2;a3}
 
 
-(** Parse <code> element, requiring exactly the given attributes. *)
+(* Parse <code> element, requiring exactly the given attributes. *)
 let parse_code_helper expected_attrs item : string Or_error.t =
   match item with
   | `Data _ ->
@@ -165,21 +165,21 @@ let parse_code_helper expected_attrs item : string Or_error.t =
     error "expected <code> but got other type of node"
       (expected_attrs,item) [%sexp_of: Html.attributes * Html.item]
 
-(** Parse <code> element. *)
+(* Parse <code> element. *)
 let parse_code item : string Or_error.t =
   parse_code_helper [] item
 
-(** Parse <code class="prompt"> element. *)
+(* Parse <code class="prompt"> element. *)
 let parse_code_prompt item : [> `Prompt of string] Or_error.t =
   parse_code_helper ["class","prompt"] item
   |> Result.map ~f:(fun x -> `Prompt x)
 
-(** Parse <code class="computeroutput"> element. *)
+(* Parse <code class="computeroutput"> element. *)
 let parse_code_computeroutput item : [> `Output of string] Or_error.t =
   parse_code_helper ["class","computeroutput"] item
   |> Result.map ~f:(fun x -> `Output x)
 
-(** Parse <strong><code>DATA</code></strong> element.*)
+(* Parse <strong><code>DATA</code></strong> element.*)
 let parse_strong_code item : [> `Input of string] Or_error.t =
   match item with
   | `Data x ->
@@ -187,7 +187,7 @@ let parse_strong_code item : [> `Input of string] Or_error.t =
   | `Element {Html.name="strong"; attrs=[]; childs=[elem]} -> (
     match parse_code elem with
     | Ok x -> Ok (`Input x)
-    | Error _ as e -> Or_error.tag e "within <strong>"
+    | Error _ as e -> Or_error.tag e ~tag:"within <strong>"
   )
   | `Element {Html.name="strong"; attrs=[]; childs=_} ->
     Or_error.error_string "expected exactly one child of <strong>"
@@ -240,7 +240,7 @@ let parse_code_block (items : Html.item list) : code_block Or_error.t =
           | Error _ as e4 ->
             Or_error.(
               tag (combine_errors [e1;e2;e3;e4])
-                "expected one of these to not happen but all happened"
+                ~tag:"expected one of these to not happen but all happened"
             )
    )
   )
@@ -248,7 +248,7 @@ let parse_code_block (items : Html.item list) : code_block Or_error.t =
   >>= code_items_to_code_block
 
 
-(** Parse <pre> element. *)
+(* Parse <pre> element. *)
 let parse_pre item =
   let open Result.Monad_infix in
   let required = ["data-type"] in
@@ -270,7 +270,7 @@ let parse_pre item =
     error "expected <pre> but got other type of node" name sexp_of_string
 
 
-(** Find all <pre> nodes in [html]. Also find filename to which code
+(* Find all <pre> nodes in [html]. Also find filename to which code
     should be extracted by searching for sibling <p> node that has
     this information. *)
 let map (html:Html.t) ~f =
