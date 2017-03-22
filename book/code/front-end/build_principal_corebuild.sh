@@ -1,1 +1,1 @@
-corebuild -tag principal principal.cmi non_principal.cmi
+corebuild -no-hygiene -tag principal principal.cmi non_principal.cmi

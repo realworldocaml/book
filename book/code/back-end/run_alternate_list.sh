@@ -1,2 +1,2 @@
-corebuild -tag debug alternate_list.native
+corebuild -no-hygiene -tag debug alternate_list.native
 ./alternate_list.native -ascii
