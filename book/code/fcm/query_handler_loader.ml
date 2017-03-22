@@ -1,4 +1,4 @@
-
+open Query_handler_core
 
 [@@@part "1"];;
 let () =

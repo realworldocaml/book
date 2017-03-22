@@ -55,3 +55,8 @@ rev_object_fields:
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
+
+(* part "5" *)
+(* TODO ? *)
+array_values:
+  | (* empty *) { [] }

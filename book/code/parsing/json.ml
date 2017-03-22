@@ -7,3 +7,6 @@ type value = [
   | `Null
   | `String of string
 ]
+
+(*TODO*)
+let output_value _ _ = ()
