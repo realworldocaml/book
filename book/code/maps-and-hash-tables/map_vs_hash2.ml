@@ -35,4 +35,4 @@ let tests ~num_keys ~iterations =
 let () =
   tests ~num_keys:50 ~iterations:1000
   |> Bench.make_command
-  |> Command.run
+  |> Core.Command.run
