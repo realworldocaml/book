@@ -7,6 +7,8 @@ A patch is needed to corebuild (adding -no-check to ppx):
 
 Some TODOS have been left in the book content.
 
+The `compare_lib` example, using camlp4, didn't get ported. Building fails, what should be done with it?!
+
 We should check chapter by chapter for differences, some information got lost in the conversion.
 
 
