@@ -1,4 +1,4 @@
-
+open Core.Std
 
 [@@@part "1"];;
 module Loader = struct
@@ -72,7 +72,7 @@ let eval t sexp =
       | Load (name,config) -> load   t name config
       | Unload name        -> unload t name
       | Known_services ->
-        Ok (<:sexp_of<string list>> (Hashtbl.keys t.known))
+        Ok ([%sexp_of: string list] (Hashtbl.keys t.known))
       | Active_services ->
-        Ok (<:sexp_of<string list>> (Hashtbl.keys t.active))
+        Ok ([%sexp_of: string list] (Hashtbl.keys t.active))
 end
