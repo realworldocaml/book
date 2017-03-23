@@ -3,10 +3,10 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
+
 [%%expect]
 [@@@part "1"];;
-open Core.Std;;
+open Core;;
 In_channel.read_all;;
 
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
@@ -16,7 +16,7 @@ In_channel.read_all "test.txt";;
 [%%expect]
 [@@@part "3"];;
 #require "async";;
-open Async.Std;;
+open Async;;
 Reader.file_contents;;
 
 
