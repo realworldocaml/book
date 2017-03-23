@@ -67,5 +67,35 @@ module Document = struct
   let of_file ~filename =
     Process.run ~prog:program_path ~args:["-sexp"; filename] ()
     >>|? fun str -> t_of_sexp (Sexp.of_string (String.strip str))
+
+  let output_corrected {parts; matched = _} chan =
+    let rec iter_last ~f = function
+      | x :: xs ->
+        f ~last:(List.is_empty xs) x;
+        iter_last ~f xs
+      | [] -> ()
+    in
+    let output_string = Out_channel.output_string chan in
+    let output_chunk ~last {Chunk. ocaml_code; toplevel_response} =
+      output_string ocaml_code;
+      if toplevel_response = "" || toplevel_response = "\n" then (
+        if not last then
+          output_string "[%%expect]\n";
+      ) else (
+        output_string "[%%expect{|";
+        output_string toplevel_response;
+        output_string "|}]\n";
+      );
+    in
+    let output_part ~last {Part. name; chunks} =
+      if name <> "" then
+        output_string (Printf.sprintf "[@@@part %S];;\n" name);
+      if last then
+        iter_last ~f:output_chunk chunks
+      else
+        List.iter ~f:(output_chunk ~last:false) chunks
+    in
+    iter_last ~f:output_part parts
+
 end
 

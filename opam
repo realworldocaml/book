@@ -26,6 +26,7 @@ depends: [
   "cohttp"
   "ppx_sexp_conv"
   "toplevel_expect_test"
+  "patdiff"
 
   # Required for code blocks within book.
   "core_bench"

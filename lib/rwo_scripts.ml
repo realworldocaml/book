@@ -183,8 +183,27 @@ let eval_script lang ~filename =
         >>|? fun script -> `OCaml_rawtoplevel script
       )
       else (
-        Rwo_expect.Document.of_file ~filename
-        >>|? fun doc -> `OCaml_toplevel doc
+        Expect.Document.of_file ~filename
+        >>=? fun doc ->
+        let corrected_filename =
+          (Filename.realpath filename ^ ".corrected")
+          |> Filename.parts
+          |> List.filter ~f:(fun x -> x <> "_build")
+          |> Filename.of_parts
+        in
+        Deferred.ok (
+          if not doc.Expect.Document.matched then (
+            prerr_endline (filename ^ " failed expect test");
+            Out_channel.with_file corrected_filename
+              ~f:(Expect.Document.output_corrected doc);
+            return ()
+          ) else (
+            Sys.file_exists corrected_filename >>= function
+            | `Yes -> Sys.remove corrected_filename
+            | `No | `Unknown -> return ()
+          )
+        ) >>|? fun () ->
+          `OCaml_toplevel doc
       )
     )
   | "sh" -> (
