@@ -185,25 +185,28 @@ let eval_script lang ~filename =
       else (
         Expect.Document.of_file ~filename
         >>=? fun doc ->
+        let corrected_built_filename =
+          Filename.realpath filename ^ ".corrected"
+        in
         let corrected_filename =
-          (Filename.realpath filename ^ ".corrected")
+          corrected_built_filename
           |> Filename.parts
           |> List.filter ~f:(fun x -> x <> "_build")
           |> Filename.of_parts
         in
-        Deferred.ok (
-          if not doc.Expect.Document.matched then (
-            prerr_endline (filename ^ " failed expect test");
-            Out_channel.with_file corrected_filename
-              ~f:(Expect.Document.output_corrected doc);
-            return ()
-          ) else (
+        if not doc.Expect.Document.matched then
+          Log.Global.error "%s didn't match expect test" filename;
+        Deferred.ok begin
+          Sys.file_exists corrected_built_filename >>= function
+          | `Yes ->
+            Sys.rename corrected_built_filename corrected_filename;
+          | `Unknown -> return ()
+          | `No ->
             Sys.file_exists corrected_filename >>= function
             | `Yes -> Sys.remove corrected_filename
-            | `No | `Unknown -> return ()
-          )
-        ) >>|? fun () ->
-          `OCaml_toplevel doc
+            | _ -> return ()
+        end
+        >>|? fun () -> `OCaml_toplevel doc
       )
     )
   | "sh" -> (

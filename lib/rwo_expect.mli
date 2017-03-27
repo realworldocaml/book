@@ -36,6 +36,5 @@ module Document : sig
 
   val parts : t -> Part.t list
   val of_file : filename:string -> t Deferred.Or_error.t
-  val output_corrected : t -> Out_channel.t -> unit
 end
 
