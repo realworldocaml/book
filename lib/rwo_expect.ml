@@ -66,6 +66,7 @@ module Document = struct
 
   let of_file ~filename =
     Process.run
+      ~env:(`Extend ["OCAMLRUNPARAM",""])
       ~accept_nonzero_exit:[1] ~prog:program_path
       ~args:["-sexp"; "-verbose"; filename] ()
     >>|? fun str -> t_of_sexp (Sexp.of_string (String.strip str))
