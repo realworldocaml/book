@@ -37,7 +37,7 @@ module Raw_script = struct
 
 end
 
-let program_path = "ocaml-expect"
+let program_path = "ocaml-topexpect"
 
 module Chunk = struct
   type t = Toplevel_expect_test_types.Chunk.t =
