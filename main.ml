@@ -371,13 +371,6 @@ let override_sys_argv args =
   Arg.current := 0;
 ;;
 
-let setup_config () =
-  Clflags.real_paths      := false;
-  Clflags.strict_sequence := true;
-  Clflags.strict_formats  := true;
-  Warnings.parse_options false "@a-4-29-40-41-42-44-45-48-58";
-;;
-
 let use_color   = ref true
 let in_place    = ref false
 let sexp_output = ref false
@@ -386,7 +379,6 @@ let process_file fname =
   let cmd_line =
     Array.sub Sys.argv !Arg.current (Array.length Sys.argv - !Arg.current)
   in
-  setup_config ();
   override_sys_argv cmd_line;
   Toploop.set_paths ();
   Compmisc.init_path true;
