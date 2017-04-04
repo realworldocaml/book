@@ -1,3 +1,9 @@
+module Linked = struct
+  include Topdirs
+  include Ephemeron
+  include Uchar
+end
+
 open Lexing
 open Parsetree
 
