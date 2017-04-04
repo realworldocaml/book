@@ -117,9 +117,11 @@ let payload_constant = function
     Some const
   | _ -> None
 
-let payload_string x = match payload_constant x with
-  | Some (Pconst_string (str, _)) -> Some str
-  | _ -> None
+let payload_string = function
+  | PStr [] -> Some ""
+  | x -> match payload_constant x with
+    | Some (Pconst_string (str, _)) -> Some str
+    | _ -> None
 
 let constant_payload const = PStr [Ast_helper.(Str.eval (Exp.constant const))]
 let string_payload x = constant_payload (Pconst_string (x, None))
@@ -279,11 +281,11 @@ let output_phrases oc =
   let rec aux = function
     | [] -> ()
     | (_, Phrase_part x) :: rest ->
-      Printf.fprintf oc "[@@@part %S]\n" x;
+      Printf.fprintf oc "[@@@part %S];;\n" x;
       aux rest
     | (phrase, Phrase_code outcome) :: rest ->
       Printf.fprintf oc "%s\n" phrase.code;
-      Printf.fprintf oc "[%%%%expect{|%s|}]\n;;\n" outcome;
+      Printf.fprintf oc "[%%%%expect{|%s|}];;\n" outcome;
       aux rest
     | (_, Phrase_expect _) :: rest ->
       aux rest
