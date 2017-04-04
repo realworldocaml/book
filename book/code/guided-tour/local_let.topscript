@@ -16,14 +16,14 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 let x = 7 in
 x + x
 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "1"];;
 x;;
 
@@ -32,7 +32,7 @@ x;;
 [%%expect{|
 Line _, characters 0-1:
 Error: Unbound value x
-|}]
+|}];;
 [@@@part "2"];;
 let x = 7 in
 let y = x * x in
