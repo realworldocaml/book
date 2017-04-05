@@ -269,12 +269,23 @@ let eval_phrases ~fname fcontents =
     t :: chunks_of_phrases part rest
 *)
 
+let is_whitespace str =
+  try for i = 0 to String.length str - 1 do
+      match str.[i] with
+      | ' ' | '\n' -> ()
+      | _ -> raise Exit
+    done;
+    true
+  with Exit -> false
+
+
 let rec valid_phrases = function
   | [] -> true
   | (_, Phrase_part _) :: rest -> valid_phrases rest
   | (_, Phrase_code outcome) :: (_, Phrase_expect outcome') :: rest ->
     outcome = outcome' && valid_phrases rest
-  | (_, Phrase_code _) :: rest -> false
+  | (_, Phrase_code outcome) :: rest ->
+    is_whitespace outcome && valid_phrases rest
   | (_, Phrase_expect _) :: _ -> false
 
 let output_phrases oc =
@@ -285,7 +296,8 @@ let output_phrases oc =
       aux rest
     | (phrase, Phrase_code outcome) :: rest ->
       Printf.fprintf oc "%s\n" phrase.code;
-      Printf.fprintf oc "[%%%%expect{|%s|}];;\n" outcome;
+      if not (is_whitespace outcome) then
+        Printf.fprintf oc "[%%%%expect{|%s|}];;\n" outcome;
       aux rest
     | (_, Phrase_expect _) :: rest ->
       aux rest
