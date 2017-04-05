@@ -23,7 +23,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 type color =
   | Basic of basic_color     (* basic colors *)
@@ -32,7 +32,7 @@ type color =
   | Gray  of int             (* 24 grayscale levels *)
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let color_to_int = function
   | Basic (basic_color,weight) ->
@@ -45,7 +45,7 @@ let color_to_int = function
 Line _, characters 10-30:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
-|}]
+|}];;
 [@@@part "3"];;
 let color_to_int = function
   | Basic basic_color -> basic_color_to_int basic_color
@@ -59,7 +59,7 @@ Here is an example of a value that is not matched:
 Bold _
 Line _:
 Error: Some fatal warnings were triggered (1 occurrences)
-|}]
+|}];;
 [@@@part "4"];;
 let color_to_int = function
   | Basic basic_color -> basic_color_to_int basic_color
@@ -67,7 +67,7 @@ let color_to_int = function
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 let oldschool_color_to_int = function
   | Basic (basic_color,weight) ->
@@ -79,4 +79,4 @@ let oldschool_color_to_int = function
 Line _, characters 10-30:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
-|}]
+|}];;

@@ -5,7 +5,7 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 
-[%%expect]
+[%%expect];;
 [@@@part "1"];;
 
 type 'a compact_array = 
@@ -13,7 +13,7 @@ type 'a compact_array =
   | Bytes of bytes
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "1.1"];;
 
 let of_bytes x = Bytes x
@@ -33,7 +33,7 @@ let set t i v =
   | Array a -> a.(i) <- v
   | Bytes s -> s.[i] <- v
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 
 type 'a gadt_compact_array =
@@ -41,7 +41,7 @@ type 'a gadt_compact_array =
   | Bytes : bytes -> 'a t
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "2.1"];;
 
 Array [|1;2;3|];;
@@ -51,14 +51,14 @@ Array [|1.0;2.0;3.0|];;
 
   Bytes "foo";;
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 
 type 'a t = | Array : 'a array -> 'a t
             | Bytes : bytes -> char t
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "3.1"];;
 
 let length t = 
@@ -67,7 +67,7 @@ let length t =
   | Array a -> Array.length a
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "3.2"];;
 
 let length (type el) (t:el t) = 
@@ -76,7 +76,7 @@ let length (type el) (t:el t) =
   | Array a -> Array.length a
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "3.3"];;
 
 module Compact_array = struct
@@ -104,7 +104,7 @@ module Compact_array = struct
 
 end;;
 
-[%%expect]
+[%%expect];;
 [@@@part "10"];;
 
 type value =
@@ -118,7 +118,7 @@ type expr =
   | Plus  of expr * expr
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "11"];;
 
 let max_expr x y =
@@ -129,7 +129,7 @@ let max_expr x y =
 ;;
 max_expr 3 4;;
 
-[%%expect]
+[%%expect];;
 [@@@part "12"];;
 
 let ill_typed x y =
@@ -140,7 +140,7 @@ let ill_typed x y =
 ;;
 ill_typed 3 4;;
 
-[%%expect]
+[%%expect];;
 [@@@part "13"];;
 
 let rec eval expr =
@@ -161,13 +161,13 @@ let rec eval expr =
   | Plus (x,y) -> Int (eval_int x + eval_int y)
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "14"];;
 
 eval (max_expr  3 4);;
 eval (ill_typed 3 4);;
 
-[%%expect]
+[%%expect];;
 [@@@part "15"];;
 
 type _ value =
@@ -180,7 +180,7 @@ type _ expr =
   | Gt    : 'a expr * 'a expr             -> bool expr
   | Plus  : int expr * int expr           -> int expr
 ;;
-[%%expect]
+[%%expect];;
 [@@@part "16"];;
 
 let max_expr x y =
@@ -191,7 +191,7 @@ let max_expr x y =
 ;;
 max_expr 3 4;;
 
-[%%expect]
+[%%expect];;
 [@@@part "17"];;
 
 let ill_typed x y =
@@ -201,7 +201,7 @@ let ill_typed x y =
   Plus (Gt (x,y), y)
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "18"];;
 
 let rec eval = function
@@ -212,7 +212,7 @@ let rec eval = function
   | Plus  (x,y)    -> eval x + eval y
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "19"];;
 
 let rec eval : type a . a expr -> a = function

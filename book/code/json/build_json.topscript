@@ -18,18 +18,18 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let person = `Assoc [ ("name", `String "Anil") ] ;;
 
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 Yojson.Basic.pretty_to_string ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 Yojson.Basic.pretty_to_string person ;;
 
@@ -39,7 +39,7 @@ Yojson.Basic.pretty_to_channel stdout person ;;
 
 [%%expect{|
 { "name": "Anil" }
-|}]
+|}];;
 [@@@part "4"];;
 let person = `Assoc ("name", `String "Anil");;
 
@@ -57,7 +57,7 @@ Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
        Types for tag `Assoc are incompatible
-|}]
+|}];;
 [@@@part "5"];;
 let (person : Yojson.Basic.json) =
   `Assoc ("name", `String "Anil");;
@@ -70,4 +70,4 @@ Line _, characters 9-33:
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
-|}]
+|}];;

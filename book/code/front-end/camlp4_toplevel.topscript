@@ -15,7 +15,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 #use "topfind" ;;
 #camlp4o ;;
@@ -32,7 +32,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 #require "comparelib.syntax" ;;
 type t = { foo: string; bar : t } ;;
@@ -44,4 +44,4 @@ type t = { foo: string; bar: t } [@@deriving compare] ;;
 [%%expect{|
 Line _, characters 36-44:
 Attribute `deriving' was not used
-|}]
+|}];;

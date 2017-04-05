@@ -16,21 +16,21 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 Sexp.load_sexp "example.scm" ;;
 
 
 [%%expect{|
 Exception: Sys_error "example.scm: No such file or directory".
-|}]
+|}];;
 [@@@part "1"];;
 Sexp.load_sexp "comment_heavy.scm" ;;
 
 
 [%%expect{|
 Exception: Sys_error "comment_heavy.scm: No such file or directory".
-|}]
+|}];;
 [@@@part "2"];;
 Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm")) ;;
@@ -48,4 +48,4 @@ Uncaught exception:
 Raised by primitive operation at file "pervasives.ml", line 335, characters 20-46
 Called from file "src/pre_sexp.ml", line 1151, characters 11-23
 Called from file "src/exn.ml", line 90, characters 6-10
-|}]
+|}];;

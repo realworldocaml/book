@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 type no_converter = int * int ;;
 
@@ -27,7 +27,7 @@ type t = { a: no_converter; b: string } [@@deriving sexp] ;;
 [%%expect{|
 Line _, characters 43-51:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "1"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 
@@ -37,7 +37,7 @@ type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 [%%expect{|
 Line _, characters 55-63:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;
 
@@ -46,7 +46,7 @@ sexp_of_t { a = (3,4); b = "foo" } ;;
 Line _, characters 0-9:
 Error: Unbound value sexp_of_t
 Hint: Did you mean sexp_of_int or sexp_of_mat?
-|}]
+|}];;
 [@@@part "3"];;
 t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
 
@@ -57,7 +57,7 @@ t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
 Line _, characters 0-9:
 Error: Unbound value t_of_sexp
 Hint: Did you mean int_of_sexp or mat_of_sexp?
-|}]
+|}];;
 [@@@part "4"];;
 type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;
 
@@ -72,7 +72,7 @@ Attribute `deriving' was not used
 Line _, characters 0-9:
 Error: Unbound value t_of_sexp
 Hint: Did you mean int_of_sexp or mat_of_sexp?
-|}]
+|}];;
 [@@@part "5"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp_of] ;;
 
@@ -85,4 +85,4 @@ Line _, characters 55-63:
 Attribute `deriving' was not used
 Line _, characters 55-63:
 Attribute `deriving' was not used
-|}]
+|}];;

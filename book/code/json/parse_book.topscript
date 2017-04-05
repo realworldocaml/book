@@ -20,7 +20,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 open Yojson.Basic.Util ;;
 let title = json |> member "title" |> to_string ;;
@@ -29,7 +29,7 @@ let title = json |> member "title" |> to_string ;;
 [%%expect{|
 Line _, characters 12-16:
 Error: Unbound value json
-|}]
+|}];;
 [@@@part "2"];;
 let tags = json |> member "tags" |> to_list |> filter_string ;;
 
@@ -41,7 +41,7 @@ Line _, characters 11-15:
 Error: Unbound value json
 Line _, characters 12-16:
 Error: Unbound value json
-|}]
+|}];;
 [@@@part "3"];;
 let is_online = json |> member "is_online" |> to_bool_option ;;
 
@@ -53,7 +53,7 @@ Line _, characters 16-20:
 Error: Unbound value json
 Line _, characters 20-24:
 Error: Unbound value json
-|}]
+|}];;
 [@@@part "4"];;
 let authors = json |> member "authors" |> to_list ;;
 
@@ -69,7 +69,7 @@ let authors = json |> member "authors" |> to_list ;;
 [%%expect{|
 Line _, characters 14-18:
 Error: Unbound value json
-|}]
+|}];;
 [@@@part "5"];;
 let names =
   json |> member "authors" |> to_list 
@@ -79,4 +79,4 @@ let names =
 [%%expect{|
 Line _, characters 2-6:
 Error: Unbound value json
-|}]
+|}];;

@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 type t = { foo: int; bar: float } ;;
 
@@ -28,4 +28,4 @@ let sexp_of_t t =
 sexp_of_t { foo = 3; bar = -5.5 } ;;
 
 [%%expect{|
-|}]
+|}];;

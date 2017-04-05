@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 Command.basic;;
 
@@ -24,4 +24,4 @@ Command.basic;;
 
 
 [%%expect{|
-|}]
+|}];;

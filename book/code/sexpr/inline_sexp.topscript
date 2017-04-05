@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let l = [(1,"one"); (2,"two")] ;;
 
@@ -30,4 +30,4 @@ List.iter l ~f:(fun x ->
 [%%expect{|
 Line _, characters 4-11:
 Extension `sexp_of' was not translated
-|}]
+|}];;

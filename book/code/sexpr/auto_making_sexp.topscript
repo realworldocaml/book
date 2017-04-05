@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 type t = { foo: int; bar: float } [@@deriving sexp] ;;
 
@@ -31,7 +31,7 @@ Attribute `deriving' was not used
 Line _, characters 0-9:
 Error: Unbound value t_of_sexp
 Hint: Did you mean int_of_sexp or mat_of_sexp?
-|}]
+|}];;
 [@@@part "1"];;
 exception Bad_message of string list ;;
 
@@ -48,4 +48,4 @@ Line _, characters 15-27:
 Error: This variant expression is expected to have type exn
        The constructor Good_message does not belong to type exn
 Hint: Did you mean Bad_message?
-|}]
+|}];;

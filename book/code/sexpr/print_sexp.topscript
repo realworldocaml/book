@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 Sexp.List [
@@ -26,4 +26,4 @@ Sexp.List [
 ];;
 
 [%%expect{|
-|}]
+|}];;

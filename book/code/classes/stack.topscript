@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
@@ -32,7 +32,7 @@ class ['a] stack init = object
     v <- hd :: v
 end ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "1"];;
 class ['a] stack init = object
   val mutable v = init
@@ -59,7 +59,7 @@ Error: Some type variables are unbound in this type:
              method push : 'b -> unit
            end
        The method pop has type 'b option where 'b is unbound
-|}]
+|}];;
 [@@@part "2"];;
 class sstack init = object
   inherit [string] stack init
@@ -69,7 +69,7 @@ class sstack init = object
 end ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 class double_stack init = object
   inherit [int] stack init as super
@@ -82,4 +82,4 @@ Line _, characters 2-42:
 Warning 7: the method push is overridden.
 Line _:
 Error: Some fatal warnings were triggered (1 occurrences)
-|}]
+|}];;

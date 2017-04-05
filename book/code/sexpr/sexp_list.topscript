@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 type compatible_versions =
   | Specific of string list
@@ -33,7 +33,7 @@ Line _, characters 11-19:
 Attribute `deriving' was not used
 Line _, characters 0-27:
 Error: Unbound value sexp_of_compatible_versions
-|}]
+|}];;
 [@@@part "1"];;
 type compatible_versions =
   | Specific of string sexp_list
@@ -49,4 +49,4 @@ Line _, characters 11-19:
 Attribute `deriving' was not used
 Line _, characters 0-27:
 Error: Unbound value sexp_of_compatible_versions
-|}]
+|}];;

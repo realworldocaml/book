@@ -16,12 +16,12 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 type 'a ref = { mutable contents : 'a };;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let ref x = { contents = x };;
 
@@ -30,7 +30,7 @@ let (!) r = r.contents;;
 let (:=) r x = r.contents <- x;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 let x = ref 1;;
 

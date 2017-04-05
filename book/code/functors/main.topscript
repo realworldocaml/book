@@ -15,28 +15,28 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1"];;
 module Increment (M : X_int) : X_int = struct
   let x = M.x + 1
 end;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 module Increment (M : X_int) = struct
   let x = M.x + 1
 end;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 module Three = struct let x = 3 end;;
 
@@ -45,7 +45,7 @@ module Four = Increment(Three);;
 Four.x - Three.x;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 module Three_and_more = struct
   let x = 3
@@ -55,7 +55,7 @@ end;;
 module Four = Increment(Three_and_more);;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 module type Comparable = sig
   type t
@@ -63,7 +63,7 @@ module type Comparable = sig
 end ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "6"];;
 module Make_interval(Endpoint : Comparable) = struct
 
@@ -108,7 +108,7 @@ end ;;
 
 
 
-[%%expect]
+[%%expect];;
 [@@@part "7"];;
 module Int_interval =
   Make_interval(struct
@@ -125,7 +125,7 @@ module Int_interval =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "8"];;
 module Int_interval = Make_interval(Int) ;;
 
@@ -150,7 +150,7 @@ module String_interval = Make_interval(String) ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "9"];;
 let i1 = Int_interval.create 3 8;;
 
@@ -160,7 +160,7 @@ Int_interval.intersect i1 i2;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "10"];;
 module Rev_int_interval =
   Make_interval(struct
@@ -177,7 +177,7 @@ module Rev_int_interval =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "11"];;
 let interval = Int_interval.create 4 3;;
 
@@ -185,7 +185,7 @@ let rev_interval = Rev_int_interval.create 4 3;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "12"];;
 Int_interval.contains rev_interval 3;;
 
@@ -196,7 +196,7 @@ Int_interval.contains rev_interval 3;;
 Line _, characters 22-34:
 Error: This expression has type Rev_int_interval.t
        but an expression was expected of type Int_interval.t
-|}]
+|}];;
 [@@@part "13"];;
 Int_interval.is_empty (* going through create *)
   (Int_interval.create 4 3) ;;
@@ -206,7 +206,7 @@ Int_interval.is_empty (* bypassing create *)
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "14"];;
 module type Interval_intf = sig
   type t
@@ -218,7 +218,7 @@ module type Interval_intf = sig
 end;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "15"];;
 
 module Make_interval(Endpoint : Comparable) : Interval_intf = struct
@@ -253,7 +253,7 @@ Error: Signature mismatch:
        The value `create' is required but not provided
        File "./functors/main.topscript", line 214, characters 2-40:
          Expected declaration
-|}]
+|}];;
 [@@@part "16"];;
 module Int_interval = Make_interval(Int);;
 
@@ -271,12 +271,12 @@ Int_interval.create 3 4;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "17"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint = int;;
 
-[%%expect]
+[%%expect];;
 [@@@part "18"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint = Endpoint.t)
@@ -307,7 +307,7 @@ Error: Signature mismatch:
        The value `create' is required but not provided
        File "./functors/main.topscript", line 214, characters 2-40:
          Expected declaration
-|}]
+|}];;
 [@@@part "19"];;
 module Int_interval = Make_interval(Int);;
 
@@ -318,13 +318,13 @@ Int_interval.contains i 5;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "20"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint := int;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "21"];;
 (* Suspicious # ? *)
 module Make_interval(Endpoint : Comparable)
@@ -356,7 +356,7 @@ Error: Signature mismatch:
        The value `create' is required but not provided
        File "./functors/main.topscript", line 214, characters 2-40:
          Expected declaration
-|}]
+|}];;
 [@@@part "22"];;
 module Int_interval = Make_interval(Int);;
 
@@ -376,13 +376,13 @@ Int_interval.is_empty
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "24"];;
 type some_type = int * string list [@@deriving sexp];;
 
@@ -399,7 +399,7 @@ Line _, characters 0-17:
 Error: Unbound value sexp_of_some_type
 Line _, characters 36-53:
 Error: Unbound value some_type_of_sexp
-|}]
+|}];;
 [@@@part "25"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint := Endpoint.t) = struct
@@ -416,7 +416,7 @@ end ;;
 [%%expect{|
 Line _, characters 5-13:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "26"];;
 module type Interval_intf_with_sexp = sig
   include Interval_intf
@@ -435,7 +435,7 @@ end;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "27"];;
 module type Interval_intf_with_sexp = sig
   type t
@@ -455,7 +455,7 @@ end;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "28"];;
 module Make_interval(Endpoint : sig
     type t
@@ -526,7 +526,7 @@ end;;
 [%%expect{|
 Line _, characters 5-13:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "29"];;
 module Int_interval = Make_interval(Int) ;;
 
@@ -548,4 +548,4 @@ Line _, characters 0-22:
 Error: Unbound value Int_interval.sexp_of_t
 Line _, characters 0-22:
 Error: Unbound value Int_interval.sexp_of_t
-|}]
+|}];;

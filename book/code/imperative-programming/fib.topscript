@@ -38,13 +38,13 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let rec fib i =
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 time (fun () -> fib 20);;
 
@@ -56,7 +56,7 @@ time (fun () -> fib 40);;
 [%%expect{|
 Time: 0.751632 ms
 Time: 9872.985882 ms
-|}]
+|}];;
 [@@@part "3"];;
 let fib = memoize fib;;
 
@@ -70,21 +70,21 @@ time (fun () -> fib 40);;
 [%%expect{|
 Time: 10693.530227 ms
 Time: 0.007144 ms
-|}]
+|}];;
 [@@@part "4"];;
 let fib_norec fib i =
   if i <= 1 then i
   else fib (i - 1) + fib (i - 2) ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 let rec fib i = fib_norec fib i;;
 
 fib 20;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "6"];;
 let make_rec f_norec =
   let rec f x = f_norec f x in
@@ -96,7 +96,7 @@ let fib = make_rec fib_norec;;
 fib 20;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "7"];;
 let memo_rec f_norec x =
   let fref = ref (fun _ -> assert false) in
@@ -107,7 +107,7 @@ let memo_rec f_norec x =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "8"];;
 let fib = memo_rec fib_norec;;
 
@@ -117,10 +117,10 @@ time (fun () -> fib 40);;
 
 [%%expect{|
 Time: 0.091368 ms
-|}]
+|}];;
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
 
 [%%expect{|
-|}]
+|}];;

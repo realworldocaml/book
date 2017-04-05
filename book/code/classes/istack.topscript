@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 class istack = object
@@ -40,7 +40,7 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 let s = new istack ;;
 
@@ -51,7 +51,7 @@ s#push 5 ;;
 s#pop ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 type istack = < pop: int option; push: int -> unit > ;;
 

@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 class obj x = 
   let () = printf "Creating obj %d\n" x in
@@ -31,4 +31,4 @@ let o = new obj 3 ;;
 [%%expect{|
 Creating obj 3
 Initializing field
-|}]
+|}];;

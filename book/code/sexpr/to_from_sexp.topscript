@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 Int.sexp_of_t 3;;
 
@@ -26,7 +26,7 @@ Exn.sexp_of_t (Invalid_argument "foo");;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1"];;
 List.sexp_of_t;;
 
@@ -34,7 +34,7 @@ List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 List.t_of_sexp;;
 
@@ -46,4 +46,4 @@ List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 
 [%%expect{|
 Exception: Pre_sexp.Of_sexp_error (_, _).
-|}]
+|}];;

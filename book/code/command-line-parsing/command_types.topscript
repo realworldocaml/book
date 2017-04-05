@@ -16,10 +16,10 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 Command.Spec.empty ;;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
 
 [%%expect{|
-|}]
+|}];;

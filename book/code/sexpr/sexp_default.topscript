@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 type http_server_config = {
   web_root: string;
@@ -30,7 +30,7 @@ type http_server_config = {
 [%%expect{|
 Line _, characters 5-13:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "1"];;
 type http_server_config = {
   web_root: string;
@@ -44,7 +44,7 @@ type http_server_config = {
 [%%expect{|
 Line _, characters 5-13:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "2"];;
 let cfg = http_server_config_of_sexp
             (Sexp.of_string "((web_root /var/www/html))") ;;
@@ -54,7 +54,7 @@ let cfg = http_server_config_of_sexp
 [%%expect{|
 Line _, characters 10-36:
 Error: Unbound value http_server_config_of_sexp
-|}]
+|}];;
 [@@@part "3"];;
 sexp_of_http_server_config cfg ;;
 
@@ -62,7 +62,7 @@ sexp_of_http_server_config cfg ;;
 [%%expect{|
 Line _, characters 0-26:
 Error: Unbound value sexp_of_http_server_config
-|}]
+|}];;
 [@@@part "4"];;
 type http_server_config = {
   web_root: string;
@@ -86,7 +86,7 @@ Line _, characters 10-36:
 Error: Unbound value http_server_config_of_sexp
 Line _, characters 0-26:
 Error: Unbound value sexp_of_http_server_config
-|}]
+|}];;
 [@@@part "5"];;
 sexp_of_http_server_config { cfg with port = 8080 } ;;
 
@@ -98,4 +98,4 @@ Line _, characters 0-26:
 Error: Unbound value sexp_of_http_server_config
 Line _, characters 0-26:
 Error: Unbound value sexp_of_http_server_config
-|}]
+|}];;

@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 type 'a expr =
   | Base  of 'a
@@ -27,14 +27,14 @@ type 'a expr =
   | Not   of 'a expr
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "1"];;
 type mail_field = To | From | CC | Date | Subject;;
 type mail_predicate = { field: mail_field;
                         contains: string }
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let test field contains = Base { field; contains };;
 
@@ -43,7 +43,7 @@ And [ Or [ test To "doligez"; test CC "doligez" ];
     ]
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 let rec eval expr base_eval =
   (* a shortcut, so we don't need to repeatedly pass [base_eval]
@@ -59,7 +59,7 @@ let rec eval expr base_eval =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "4"];;
 let and_ l =
   if List.mem l (Const false) then Const false
@@ -86,7 +86,7 @@ let not_ = function
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "5"];;
 let rec simplify = function
   | Base _ | Const _ as x -> x
@@ -97,21 +97,21 @@ let rec simplify = function
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "6"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Base "it's raining"]));;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "7"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Not (Not (Base "it's raining"))]));;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "8"];;
 let not_ = function
   | Const b -> Const (not b)
@@ -119,7 +119,7 @@ let not_ = function
 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "9"];;
 let not_ = function
   | Const b -> Const (not b)

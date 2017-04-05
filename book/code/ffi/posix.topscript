@@ -15,7 +15,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 #require "ctypes.foreign" ;;
 #require "ctypes.top" ;;
@@ -36,7 +36,7 @@ Line _, characters 11-18:
 Error: Unbound value foreign
 No such package: ctypes.foreign
 No such package: ctypes.top
-|}]
+|}];;
 [@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
 
@@ -44,7 +44,7 @@ let cur_time = time (from_voidp time_t null) ;;
 [%%expect{|
 Line _, characters 15-19:
 Error: Unbound value time
-|}]
+|}];;
 [@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
 
@@ -52,7 +52,7 @@ let time' () = time (from_voidp time_t null) ;;
 [%%expect{|
 Line _, characters 15-19:
 Error: Unbound value time
-|}]
+|}];;
 [@@@part "3"];;
 let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double) ;;
@@ -69,7 +69,7 @@ Line _, characters 2-9:
 Error: Unbound value foreign
 Line _, characters 2-7:
 Error: Unbound value time'
-|}]
+|}];;
 [@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
 
@@ -77,7 +77,7 @@ let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
 [%%expect{|
 Line _, characters 12-19:
 Error: Unbound value foreign
-|}]
+|}];;
 [@@@part "5"];;
 ctime (time' ()) ;;
 
@@ -87,7 +87,7 @@ ctime (time' ()) ;;
 [%%expect{|
 Line _, characters 0-5:
 Error: Unbound value ctime
-|}]
+|}];;
 [@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
 
@@ -95,7 +95,7 @@ let t_ptr = allocate time_t (time' ()) ;;
 [%%expect{|
 Line _, characters 12-20:
 Error: Unbound value allocate
-|}]
+|}];;
 [@@@part "7"];;
 ctime t_ptr ;;
 
@@ -103,7 +103,7 @@ ctime t_ptr ;;
 [%%expect{|
 Line _, characters 0-5:
 Error: Unbound value ctime
-|}]
+|}];;
 [@@@part "8"];;
 type timeval ;;
 
@@ -113,7 +113,7 @@ let timeval : timeval structure typ = structure "timeval" ;;
 [%%expect{|
 Line _, characters 14-35:
 Error: Unbound type constructor typ
-|}]
+|}];;
 [@@@part "9"];;
 let tv_sec  = field timeval "tv_sec" long ;;
 
@@ -130,7 +130,7 @@ Line _, characters 14-19:
 Error: Unbound value field
 Line _, characters 0-4:
 Error: Unbound value seal
-|}]
+|}];;
 [@@@part "10"];;
 type timezone ;;
 
@@ -140,7 +140,7 @@ let timezone : timezone structure typ = structure "timezone" ;;
 [%%expect{|
 Line _, characters 15-37:
 Error: Unbound type constructor typ
-|}]
+|}];;
 [@@@part "11"];;
 let gettimeofday = foreign "gettimeofday"
                      (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
@@ -150,7 +150,7 @@ let gettimeofday = foreign "gettimeofday"
 [%%expect{|
 Line _, characters 19-26:
 Error: Unbound value foreign
-|}]
+|}];;
 [@@@part "12"];;
 let gettimeofday' () =
   let tv = make timeval in
@@ -166,4 +166,4 @@ Line _, characters 11-15:
 Error: Unbound value make
 Line _, characters 0-13:
 Error: Unbound value gettimeofday'
-|}]
+|}];;

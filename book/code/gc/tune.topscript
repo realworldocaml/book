@@ -15,26 +15,26 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 let c = Gc.get () ;;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1"];;
 Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 Gc.major_slice 0 ;;
 Gc.full_major () ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 Gc.tune ~max_overhead:0 () ;;
 
 [%%expect{|
-|}]
+|}];;

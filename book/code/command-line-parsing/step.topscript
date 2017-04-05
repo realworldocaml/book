@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 open Command.Spec ;;
 step (fun m (base:Date.t) days ->
@@ -27,4 +27,4 @@ step (fun m (base:Date.t) days ->
     m base (read_int ())) ;;
 
 [%%expect{|
-|}]
+|}];;

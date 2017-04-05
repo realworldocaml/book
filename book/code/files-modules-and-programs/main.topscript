@@ -15,7 +15,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module M = struct let foo = 3 end;;
@@ -26,20 +26,20 @@ foo;;
 [%%expect{|
 Line _, characters 0-3:
 Error: Unbound value foo
-|}]
+|}];;
 [@@@part "1"];;
 let average x y =
   let open Int64 in
   x + y / of_int 2;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 let average x y =
   Int64.(x + y / of_int 2);;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 module Interval = struct
   type t = | Interval of int * int
@@ -49,7 +49,7 @@ module Interval = struct
     if high < low then Empty else Interval (low,high)
 end;;
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 module Extended_interval = struct
   include Interval
@@ -62,7 +62,7 @@ end;;
 
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 module Extended_interval = struct
   open Interval
@@ -77,4 +77,4 @@ Extended_interval.contains (Extended_interval.create 3 10) 4;;
 [%%expect{|
 Line _, characters 28-52:
 Error: Unbound value Extended_interval.create
-|}]
+|}];;

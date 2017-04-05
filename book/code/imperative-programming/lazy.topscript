@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
 
@@ -29,7 +29,7 @@ Lazy.force v;;
 
 [%%expect{|
 performing lazy computation
-|}]
+|}];;
 [@@@part "2"];;
 type 'a lazy_state =
   | Delayed of (unit -> 'a)
@@ -38,7 +38,7 @@ type 'a lazy_state =
 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 let create_lazy f = ref (Delayed f);;
 
@@ -46,7 +46,7 @@ let v = create_lazy
           (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 let force v =
   match !v with
@@ -63,7 +63,7 @@ let force v =
 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 force v;;
 
@@ -72,4 +72,4 @@ force v;;
 
 [%%expect{|
 performing lazy computation
-|}]
+|}];;

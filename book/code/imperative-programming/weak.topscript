@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let remember =
   let cache = ref None in
@@ -27,7 +27,7 @@ let remember =
 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let identity x = x;;
 
@@ -36,7 +36,7 @@ identity 3;;
 identity "five";;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 let remember_three () = remember 3;;
 
@@ -50,4 +50,4 @@ remember "avocado";;
 Line _, characters 9-18:
 Error: This expression has type bytes but an expression was expected of type
          int
-|}]
+|}];;

@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let area sq = sq#width * sq#width ;;
 
@@ -27,7 +27,7 @@ let limit sq =
   if (area sq) > 100 then minimize sq ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let toggle sq b : unit = 
   if b then sq#resize `Fullscreen
@@ -42,7 +42,7 @@ Line _, characters 16-18:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
        Types for method resize are incompatible
-|}]
+|}];;
 [@@@part "3"];;
 let area_closed (sq: < width : int >) = sq#width * sq#width ;;
 
@@ -62,7 +62,7 @@ Line _, characters 12-14:
 Error: This expression has type < name : string; width : int >
        but an expression was expected of type < width : int >
        The second object type has no method name
-|}]
+|}];;
 [@@@part "4"];;
 type square = < width : int; ..> ;;
 
@@ -72,4 +72,4 @@ type square = < width : int; ..> ;;
 Line _, characters 0-32:
 Error: A type variable is unbound in this type declaration.
 In type < width : int; .. > as 'a the variable 'a is unbound
-|}]
+|}];;

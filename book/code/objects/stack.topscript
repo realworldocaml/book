@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 let s = object
@@ -35,7 +35,7 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 s#pop ;;
 
@@ -44,7 +44,7 @@ s#push 4 ;;
 s#pop ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 let stack init = object
   val mutable v = init
@@ -65,7 +65,7 @@ let s = stack [3; 2; 1] ;;
 s#pop ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
 
@@ -85,4 +85,4 @@ Error: Unbound value Time_ns.to_float
 Line _, characters 10-11:
 Error: Unbound value t
 Popped: 5
-|}]
+|}];;

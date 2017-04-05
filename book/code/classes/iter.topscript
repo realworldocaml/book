@@ -16,12 +16,12 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "1"];;
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
@@ -46,7 +46,7 @@ Line _, characters 6-8:
 Warning 27: unused variable hd.
 Line _:
 Error: Some fatal warnings were triggered (2 occurrences)
-|}]
+|}];;
 [@@@part "2"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
@@ -68,7 +68,7 @@ end ;;
 [%%expect{|
 Line _, characters 4-21:
 Error: Unbound class list_iterator
-|}]
+|}];;
 [@@@part "3"];;
 let s = new stack [] ;;
 
@@ -108,7 +108,7 @@ Line _, characters 0-2:
 Error: Unbound value it
 Line _, characters 0-2:
 Error: Unbound value it
-|}]
+|}];;
 [@@@part "4"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
@@ -136,7 +136,7 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
@@ -163,4 +163,4 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;

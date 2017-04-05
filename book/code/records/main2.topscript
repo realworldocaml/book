@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "17"];;
 module Log_entry = struct
   type t =
@@ -45,7 +45,7 @@ end
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "18"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.time = Time_ns.now (); 
@@ -56,7 +56,7 @@ let create_log_entry ~session_id ~important message =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "19"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.
@@ -64,19 +64,19 @@ let create_log_entry ~session_id ~important message =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "20"];;
 let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "21"];;
 let is_important t = t.Log_entry.important;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "21.1"];;
 
 let create_log_entry ~session_id ~important message : Log_entry.t =
@@ -86,7 +86,7 @@ let message_to_string ({ important; message; _ } : Log_entry.t) =
 let is_important (t:Log_entry.t) = t.important ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "22"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -105,13 +105,13 @@ let register_heartbeat t hb =
   };;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "23"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time };;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "24"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -123,7 +123,7 @@ type client_info =
   };;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "25"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
@@ -131,7 +131,7 @@ let register_heartbeat t hb =
   };;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "26"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -143,7 +143,7 @@ type client_info =
   };;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "27"];;
 let register_heartbeat t hb =
   t.last_heartbeat_time   <- hb.Heartbeat.time;
@@ -151,13 +151,13 @@ let register_heartbeat t hb =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "28"];;
 let get_users logons =
   List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "29"];;
 module Logon = struct
   type t =
@@ -172,26 +172,26 @@ end;;
 [%%expect{|
 Line _, characters 5-13:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "30"];;
 let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 
 [%%expect{|
 Line _, characters 54-64:
 Error: Unbound value Logon.user
-|}]
+|}];;
 [@@@part "31"];;
 Field.get Logon.Fields.user;;
 
 [%%expect{|
 Line _, characters 10-27:
 Error: Unbound module Logon.Fields
-|}]
+|}];;
 [@@@part "32"];;
 Field.get;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "33"];;
 let show_field field to_string record =
   let name = Field.name field in
@@ -200,7 +200,7 @@ let show_field field to_string record =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "34"];;
 let logon = { Logon.
               session_id = "26685";
@@ -218,14 +218,14 @@ Line _, characters 11-28:
 Error: Unbound module Logon.Fields
 Line _, characters 11-28:
 Error: Unbound module Logon.Fields
-|}]
+|}];;
 [@@@part "35"];;
 Logon.Fields.iter;;
 
 [%%expect{|
 Line _, characters 0-17:
 Error: Unbound module Logon.Fields
-|}]
+|}];;
 [@@@part "36"];;
 let print_logon logon =
   let print to_string field =
@@ -245,4 +245,4 @@ Line _, characters 2-19:
 Error: Unbound module Logon.Fields
 Line _, characters 0-11:
 Error: Unbound value print_logon
-|}]
+|}];;

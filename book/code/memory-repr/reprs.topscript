@@ -15,28 +15,28 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 Obj.is_block (Obj.repr (1,2,3)) ;;
 
 Obj.is_block (Obj.repr 1) ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "1"];;
 Obj.tag (Obj.repr 1.0) ;;
 
 Obj.double_tag ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 Obj.double_tag ;;
 
 Obj.double_array_tag ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]) ;;
 
@@ -47,7 +47,7 @@ Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1 ;;
 Obj.double_field (Obj.repr 1.234) 0 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 type t = Apple | Orange | Pear ;;
 
@@ -58,7 +58,7 @@ type t = Apple | Orange | Pear ;;
 Obj.is_block (Obj.repr Apple) ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 type t = Apple | Orange of int | Pear of string | Kiwi ;;
 
@@ -73,7 +73,7 @@ Obj.tag (Obj.repr (Pear "xyz")) ;;
 (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "6"];;
 Pa_type_conv.hash_variant "Foo" ;;
 
@@ -82,4 +82,4 @@ Pa_type_conv.hash_variant "Foo" ;;
 [%%expect{|
 Line _, characters 0-25:
 Error: Unbound module Pa_type_conv
-|}]
+|}];;

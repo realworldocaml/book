@@ -18,7 +18,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 module Log_entry = struct
   type t =
@@ -31,7 +31,7 @@ end
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1.5"];;
 
 module Heartbeat = struct
@@ -53,7 +53,7 @@ end;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 type client_message = | Logon of Logon.t
                       | Heartbeat of Heartbeat.t
@@ -65,7 +65,7 @@ type client_message = | Logon of Logon.t
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 let messages_for_user user messages =
   let (user_messages,_) =
@@ -93,7 +93,7 @@ let messages_for_user user messages =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "4"];;
 module Log_entry = struct
   type t = { important: bool;
@@ -112,7 +112,7 @@ end ;;
 
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 type details =
   | Logon of Logon.t
@@ -124,7 +124,7 @@ type details =
 
 
 
-[%%expect]
+[%%expect];;
 [@@@part "6"];;
 module Common = struct
   type t = { session_id: string;
@@ -134,7 +134,7 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "7"];;
 let messages_for_user user messages =
   let (user_messages,_) =
@@ -157,7 +157,7 @@ let messages_for_user user messages =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "7.9"];;
 
 type server_state;;
@@ -166,7 +166,7 @@ let handle_logon _ (_,_) = ();;
 let handle_heartbeat _ (_,_) = ();;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "8"];;
 let handle_message server_state (common,details) =
   match details with
@@ -175,4 +175,4 @@ let handle_message server_state (common,details) =
   | Heartbeat m -> handle_heartbeat server_state (common,m)
 ;;
 [%%expect{|
-|}]
+|}];;

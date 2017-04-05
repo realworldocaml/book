@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
 
 - : unit = ()
 No such package: ctypes.foreign
-|}]
+|}];;
 [@@@part "1"];;
 open Ctypes ;;
 open PosixTypes ;;
@@ -41,4 +41,4 @@ Line _, characters 25-28:
 Error: Unbound value @->
 Line _, characters 12-19:
 Error: Unbound value foreign
-|}]
+|}];;

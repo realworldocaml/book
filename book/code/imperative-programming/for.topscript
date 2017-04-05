@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 for i = 0 to 3 do printf "i = %d\n" i done;;
 
@@ -31,7 +31,7 @@ i = 0
 i = 1
 i = 2
 i = 3
-|}]
+|}];;
 [@@@part "2"];;
 for i = 3 downto 0 do printf "i = %d\n" i done;;
 
@@ -45,7 +45,7 @@ i = 3
 i = 2
 i = 1
 i = 0
-|}]
+|}];;
 [@@@part "3"];;
 let rev_inplace ar =
   let i = ref 0 in

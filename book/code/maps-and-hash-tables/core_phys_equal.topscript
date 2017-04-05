@@ -15,7 +15,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 open Core_kernel.Std ;;
 1 == 2 ;;
@@ -27,4 +27,4 @@ Warning 3: deprecated: Core_kernel.Std.==
 [since 2014-10] Use [phys_equal]
 Line _:
 Error: Some fatal warnings were triggered (1 occurrences)
-|}]
+|}];;

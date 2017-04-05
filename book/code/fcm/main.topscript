@@ -15,45 +15,45 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module type X_int = sig val x : int end;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1"];;
 module Three : X_int = struct let x = 3 end;;
 
 Three.x;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let three = (module Three : X_int);;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "3"];;
 module Four = struct let x = 4 end;;
 
 let numbers = [ three; (module Four) ];;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 let numbers = [three; (module struct let x = 4 end)];;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 module New_three = (val three : X_int) ;;
 
 New_three.x;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "6"];;
 module type Y_int = X_int;;
 
@@ -64,12 +64,12 @@ let five = (module struct let x = 5 end : Y_int);;
 
 
 
-[%%expect]
+[%%expect];;
 [@@@part "7"];;
 [three; (module (val five))];;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "8"];;
 let to_int m =
   let module M = (val m : X_int) in
@@ -83,7 +83,7 @@ let plus m1 m2 =
 ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "9"];;
 let six = plus three three;;
 
@@ -91,12 +91,12 @@ to_int (List.fold ~init:six ~f:plus [three;three]);;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "10"];;
 let to_int (module M : X_int) = M.x ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "11"];;
 module type Bumpable = sig
   type t
@@ -104,7 +104,7 @@ module type Bumpable = sig
 end;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "12"];;
 module Int_bumper = struct
   type t = int
@@ -117,12 +117,12 @@ module Float_bumper = struct
 end;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "13"];;
 let int_bumper = (module Int_bumper : Bumpable);;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "14"];;
 let (module Bumpable) = int_bumper in Bumpable.bump 3;;
 
@@ -133,21 +133,21 @@ let (module Bumpable) = int_bumper in Bumpable.bump 3;;
 Line _, characters 52-53:
 Error: This expression has type int but an expression was expected of type
          Bumpable.t
-|}]
+|}];;
 [@@@part "15"];;
 let int_bumper = (module Int_bumper : Bumpable with type t = int);;
 
 let float_bumper = (module Float_bumper : Bumpable with type t = float);;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "16"];;
 let (module Bumpable) = int_bumper in Bumpable.bump 3;;
 
 let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "17"];;
 let bump_list
       (type a)
@@ -160,7 +160,7 @@ let bump_list
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "18"];;
 bump_list int_bumper [1;2;3];;
 
@@ -168,12 +168,12 @@ bump_list float_bumper [1.5;2.5;3.5];;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "19"];;
 let wrap_in_list (type a) (x:a) = [x];;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "20"];;
 let double_int (type a) (x:a) = x + x;;
 
@@ -182,7 +182,7 @@ let double_int (type a) (x:a) = x + x;;
 [%%expect{|
 Line _, characters 32-33:
 Error: This expression has type a but an expression was expected of type int
-|}]
+|}];;
 [@@@part "21"];;
 module type Comparable = sig
   type t
@@ -202,4 +202,4 @@ create_comparable Int.compare;;
 create_comparable Float.compare;;
 
 [%%expect{|
-|}]
+|}];;

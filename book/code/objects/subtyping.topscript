@@ -52,7 +52,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let shape w : shape = square w ;;
 
@@ -67,7 +67,7 @@ Line _, characters 22-30:
 Error: This expression has type < area : float; width : int >
        but an expression was expected of type shape
        The second object type has no method width
-|}]
+|}];;
 [@@@part "2"];;
 let coin = object
   method shape = circle 5
@@ -80,7 +80,7 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 type item = < shape : shape > ;;
 
@@ -88,7 +88,7 @@ let items = [ (coin :> item) ; (map :> item) ] ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "4"];;
 type num = [ `Int of int | `Float of float ] ;;
 
@@ -99,7 +99,7 @@ let n : num = `Int 3 ;;
 let c : const = (n :> const) ;;
 
 
-[%%expect]
+[%%expect];;
 [@@@part "5"];;
 let squares: square list = [ square 10; square 20 ] ;;
 
@@ -107,7 +107,7 @@ let shapes: shape list = (squares :> shape list) ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "6"];;
 let square_array: square array = [| square 10; square 20 |] ;;
 
@@ -124,7 +124,7 @@ Error: Type square array is not a subtype of shape array
        Type square = < area : float; width : int >
        is not compatible with type shape = < area : float >
        The second object type has no method width
-|}]
+|}];;
 [@@@part "7"];;
 let shape_to_string: shape -> string = 
   fun s -> sprintf "Shape(%F)" s#area ;;
@@ -134,7 +134,7 @@ let square_to_string: square -> string =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "8"];;
 module Either = struct
   type ('a, 'b) t = 
@@ -153,7 +153,7 @@ end ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "9"];;
 module AbstractEither : sig 
   type ('a, 'b) t
@@ -185,7 +185,7 @@ Error: This expression cannot be coerced to type
        Type < area : float; width : int > is not compatible with type
          shape = < area : float >
        The second object type has no method width
-|}]
+|}];;
 [@@@part "10"];;
 module VarEither : sig 
   type (+'a, +'b) t
@@ -202,7 +202,7 @@ end = Either ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "11"];;
 let total_area (shape_stacks: shape stack list) =
   let stack_area acc st = 
@@ -217,7 +217,7 @@ let total_area (shape_stacks: shape stack list) =
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "12"];;
 total_area [(square_stack :> shape stack); (circle_stack :> shape stack)] ;;
 
@@ -234,7 +234,7 @@ Error: Type square stack = < pop : square option; push : square -> unit >
          shape stack = < pop : shape option; push : shape -> unit >
        Type shape = < area : float > is not a subtype of
          square = < area : float; width : int >
-|}]
+|}];;
 [@@@part "13"];;
 type 'a readonly_stack = < pop : 'a option > ;;
 
@@ -253,4 +253,4 @@ total_area [(square_stack :> shape readonly_stack); (circle_stack :>
                                                        shape readonly_stack)] ;;
 
 [%%expect{|
-|}]
+|}];;

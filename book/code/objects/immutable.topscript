@@ -16,7 +16,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let imm_stack init = object
   val v = init
@@ -32,7 +32,7 @@ end ;;
 
 
 
-[%%expect]
+[%%expect];;
 [@@@part "2"];;
 let s = imm_stack [3; 2; 1] ;;
 

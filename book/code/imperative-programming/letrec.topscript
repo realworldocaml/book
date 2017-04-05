@@ -38,7 +38,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 
 let memo_rec f_norec =
@@ -49,18 +49,18 @@ let memo_rec f_norec =
 [%%expect{|
 Line _, characters 14-44:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
-|}]
+|}];;
 [@@@part "2"];;
 let rec x = lazy (force x + 1);;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 force x;;
 
 [%%expect{|
 Exception: CamlinternalLazy.Undefined.
-|}]
+|}];;
 [@@@part "5"];;
 let lazy_memo_rec f_norec x =
   let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
@@ -72,4 +72,4 @@ time (fun () -> lazy_memo_rec fib_norec 40);;
 
 [%%expect{|
 Time: 0.078588 ms
-|}]
+|}];;

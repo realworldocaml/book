@@ -32,14 +32,14 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "1"];;
 let remove_large l =
   List.filter ~f:(fun s -> s#area <= 100.) l ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 let squares : < area : float; width : int > list = 
   [square 5; square 15; square 10] ;;
@@ -48,7 +48,7 @@ remove_large squares ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 let remove_large (l: < area : float > list) = 
   List.filter ~f:(fun s -> s#area <= 100.) l ;;
@@ -57,7 +57,7 @@ remove_large (squares :> < area : float > list ) ;;
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "4"];;
 let hlist: < area: float; ..> list = [square 10; circle 30] ;;
 
@@ -70,7 +70,7 @@ Line _, characters 49-58:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
        The second object type has no method radius
-|}]
+|}];;
 [@@@part "5"];;
 let shape_ref: < area: float; ..> ref = ref (square 40) ;;
 
@@ -85,7 +85,7 @@ Line _, characters 13-22:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
        The second object type has no method radius
-|}]
+|}];;
 [@@@part "6"];;
 let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)] ;;
 
@@ -94,4 +94,4 @@ let shape_ref: shape ref = ref (square 40 :> shape) ;;
 shape_ref := (circle 20 :> shape) ;;
 
 [%%expect{|
-|}]
+|}];;

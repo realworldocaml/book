@@ -15,7 +15,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
@@ -28,7 +28,7 @@ type service_info =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1"];;
 #require "re.posix";;
 let service_info_of_string line =
@@ -42,22 +42,22 @@ let service_info_of_string line =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "1.1"];;
 let ssh = service_info_of_string
             "ssh 22/udp # SSH Remote Login Protocol";;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "2"];;
 ssh.port;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "3"];;
 type 'a with_line_num = { item: 'a; line_num: int };;
 
-[%%expect]
+[%%expect];;
 [@@@part "4"];;
 let parse_lines parse file_contents =
   let lines = String.split ~on:'\n' file_contents in
@@ -68,7 +68,7 @@ let parse_lines parse file_contents =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "4.1"];;
 
 parse_lines service_info_of_string
@@ -78,13 +78,13 @@ parse_lines service_info_of_string
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "4.2"];;
 
 parse_lines Int.of_string "1\n10\n100\n1000";;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
@@ -93,7 +93,7 @@ let service_info_to_string { service_name = name; port = port; protocol = prot  
 service_info_to_string ssh;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "6"];;
 type service_info =
   { service_name : string;
@@ -103,7 +103,7 @@ type service_info =
   }
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "7"];;
 #warnings "+9";;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
@@ -117,14 +117,14 @@ comment
 Either bind these labels explicitly or add '; _' to the pattern.
 Line _:
 Error: Some fatal warnings were triggered (1 occurrences)
-|}]
+|}];;
 [@@@part "8"];;
 let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
   sprintf "%s %i/%s" name port prot
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "9"];;
 let service_info_to_string { service_name; port; protocol; comment } =
   let base = sprintf "%s %i/%s" service_name port protocol in
@@ -137,7 +137,7 @@ let service_info_to_string { service_name; port; protocol; comment } =
 Line _, characters 31-38:
 Error: This expression has type string option
        but an expression was expected of type string
-|}]
+|}];;
 [@@@part "10"];;
 let service_info_of_string line =
   (* first, split off any comment *)
@@ -157,20 +157,20 @@ let service_info_of_string line =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "10.1"];;
 service_info_of_string "ssh 22/tcp # some comment";;
 service_info_of_string "ssh 22/tcp";;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "11"];;
 let create_service_info ~service_name ~port ~protocol ~comment =
   { service_name; port; protocol; comment }
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "12"];;
 let create_service_info
       ~service_name:service_name ~port:port
@@ -182,7 +182,7 @@ let create_service_info
   }
 ;;
 
-[%%expect]
+[%%expect];;
 [@@@part "13"];;
 type log_entry =
   { session_id: string;
@@ -204,17 +204,17 @@ type logon =
 ;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "14"];;
 let get_session_id t = t.session_id;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "15"];;
 let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "16"];;
 let status_and_session t = (t.status_message, t.session_id);;
 
@@ -226,4 +226,4 @@ let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
 Line _, characters 44-58:
 Error: This expression has type logon
        The field status_message does not belong to type logon
-|}]
+|}];;

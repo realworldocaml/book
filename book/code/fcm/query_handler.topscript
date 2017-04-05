@@ -17,7 +17,7 @@ Findlib has been successfully loaded. Additional directives:
   #thread;;                 to enable threads
 
 - : unit = ()
-|}]
+|}];;
 [@@@part "0.5"];;
 module type Query_handler = sig
 
@@ -42,14 +42,14 @@ end;;
 [%%expect{|
 Line _, characters 17-25:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "1"];;
 module type M = sig type t [@@deriving sexp] end;;
 
 [%%expect{|
 Line _, characters 30-38:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "2"];;
 type u = { a: int; b: float } [@@deriving sexp];;
 
@@ -66,7 +66,7 @@ Hint: Did you mean sexp_of_exn, sexp_of_int, sexp_of_mat, sexp_of_ref, sexp_of_u
 Line _, characters 0-9:
 Error: Unbound value u_of_sexp
 Hint: Did you mean int_of_sexp, mat_of_sexp, ref_of_sexp, unit_of_sexp or vec_of_sexp?
-|}]
+|}];;
 [@@@part "3"];;
 module Unique = struct
   type config = int [@@deriving sexp]
@@ -88,7 +88,7 @@ end;;
 [%%expect{|
 Line _, characters 23-31:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "4"];;
 let unique = Unique.create 0;;
 
@@ -104,7 +104,7 @@ Line _, characters 0-11:
 Error: Unbound module Unique
 Line _, characters 0-11:
 Error: Unbound module Unique
-|}]
+|}];;
 [@@@part "5"];;
 module List_dir = struct
   type config = string [@@deriving sexp]
@@ -142,7 +142,7 @@ end;;
 [%%expect{|
 Line _, characters 26-34:
 Attribute `deriving' was not used
-|}]
+|}];;
 [@@@part "6"];;
 let list_dir = List_dir.create "/var";;
 
@@ -159,7 +159,7 @@ Line _, characters 0-13:
 Error: Unbound module List_dir
 Line _, characters 0-13:
 Error: Unbound module List_dir
-|}]
+|}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
@@ -171,7 +171,7 @@ end;;
 [%%expect{|
 Line _, characters 25-38:
 Error: Unbound module type Query_handler
-|}]
+|}];;
 [@@@part "8"];;
 let unique_instance =
   (module struct
@@ -183,7 +183,7 @@ let unique_instance =
 [%%expect{|
 Line _, characters 2-113:
 Error: Unbound module type Query_handler_instance
-|}]
+|}];;
 [@@@part "9"];;
 let build_instance
       (type a)
@@ -202,7 +202,7 @@ let build_instance
 [%%expect{|
 Line _, characters 6-53:
 Error: Unbound module type Query_handler
-|}]
+|}];;
 [@@@part "10"];;
 let unique_instance = build_instance (module Unique) 0;;
 
@@ -214,7 +214,7 @@ Line _, characters 22-36:
 Error: Unbound value build_instance
 Line _, characters 24-38:
 Error: Unbound value build_instance
-|}]
+|}];;
 [@@@part "11"];;
 let build_dispatch_table handlers =
   let table = String.Table.create () in
@@ -230,7 +230,7 @@ let build_dispatch_table handlers =
 [%%expect{|
 Line _, characters 13-48:
 Error: Unbound module type Query_handler_instance
-|}]
+|}];;
 [@@@part "12"];;
 let dispatch dispatch_table name_and_query =
   match name_and_query with
@@ -252,7 +252,7 @@ let dispatch dispatch_table name_and_query =
 [%%expect{|
 Line _, characters 11-46:
 Error: Unbound module type Query_handler_instance
-|}]
+|}];;
 [@@@part "13"];;
 let rec cli dispatch_table =
   printf ">>> %!";
@@ -280,7 +280,7 @@ let rec cli dispatch_table =
 [%%expect{|
 Line _, characters 20-28:
 Error: Unbound value dispatch
-|}]
+|}];;
 [@@@part "14"];;
 type query_handler_instance = { name : string
                               ; eval : Sexp.t -> Sexp.t Or_error.t
@@ -294,7 +294,7 @@ type query_handler = Sexp.t -> query_handler_instance
 
 
 [%%expect{|
-|}]
+|}];;
 [@@@part "15"];;
 let unique_handler config_sexp =
   let config = Unique.config_of_sexp config_sexp in
@@ -307,4 +307,4 @@ let unique_handler config_sexp =
 [%%expect{|
 Line _, characters 15-36:
 Error: Unbound module Unique
-|}]
+|}];;
