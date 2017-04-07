@@ -1,4 +1,7 @@
 # General Project Information
+
+export PATH := $(shell pwd)/bin:$(PATH)
+
 PROJECT = rwo
 VERSION = dev
 
