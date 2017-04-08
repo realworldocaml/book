@@ -19,13 +19,11 @@ List.Assoc.find assoc "two" ;;
 |}];;
 List.Assoc.add assoc "four" 4 (* add a new key *) ;;
 [%%expect{|
-- : equal:(string -> string -> bool) ->
-    (string, int) Core_kernel.Std.List.Assoc.t
-= <fun>
+- : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =
+<fun>
 |}];;
 List.Assoc.add assoc "two"  4 (* overwrite an existing key *) ;;
 [%%expect{|
-- : equal:(string -> string -> bool) ->
-    (string, int) Core_kernel.Std.List.Assoc.t
-= <fun>
+- : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =
+<fun>
 |}];;

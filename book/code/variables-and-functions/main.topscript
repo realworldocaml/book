@@ -31,7 +31,7 @@ let dashed_languages =
   String.concat ~sep:"-" language_list
 ;;
 [%%expect{|
-val dashed_languages : Core_kernel.Std.String.t = "OCaml-Perl-C++-C"
+val dashed_languages : string = "OCaml-Perl-C++-C"
 |}];;
 [@@@part "2"];;
 language_list;;
@@ -49,7 +49,7 @@ let dashed_languages =
   String.concat ~sep:"-" languages
 ;;
 [%%expect{|
-val dashed_languages : Core_kernel.Std.String.t = "OCaml-Perl-C++-C"
+val dashed_languages : string = "OCaml-Perl-C++-C"
 |}];;
 [@@@part "4"];;
 languages;;
@@ -90,8 +90,8 @@ val area_of_ring : float -> float -> float = <fun>
 [@@@part "7"];;
 let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
 [%%expect{|
-val ints : int Core_kernel.Std.List.t = [1; 2; 3]
-val strings : string Core_kernel.Std.List.t = ["one"; "two"; "three"]
+val ints : int list = [1; 2; 3]
+val strings : string list = ["one"; "two"; "three"]
 |}];;
 [@@@part "8"];;
 let upcase_first_entry line =
@@ -103,8 +103,7 @@ Characters 36-51:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
-val upcase_first_entry : Core_kernel.Std.String.t -> Core_kernel.Std.String.t =
-  <fun>
+val upcase_first_entry : string -> string = <fun>
 |}];;
 [@@@part "9"];;
 let upcase_first_entry line =
@@ -113,8 +112,7 @@ let upcase_first_entry line =
   | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
 ;;
 [%%expect{|
-val upcase_first_entry : Core_kernel.Std.String.t -> Core_kernel.Std.String.t =
-  <fun>
+val upcase_first_entry : string -> string = <fun>
 |}];;
 [@@@part "10"];;
 (fun x -> x + 1);;
@@ -129,18 +127,16 @@ val upcase_first_entry : Core_kernel.Std.String.t -> Core_kernel.Std.String.t =
 [@@@part "12"];;
 List.map ~f:(fun x -> x + 1) [1;2;3];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [2; 3; 4]
+- : int list = [2; 3; 4]
 |}];;
 [@@@part "13"];;
 let transforms = [ String.uppercase; String.lowercase ];;
 [%%expect{|
-val transforms : (Core_kernel.Std.String.t -> Core_kernel.Std.String.t) list =
-  [<fun>; <fun>]
+val transforms : (string -> string) list = [<fun>; <fun>]
 |}];;
 List.map ~f:(fun g -> g "Hello World") transforms;;
 [%%expect{|
-- : Core_kernel.Std.String.t Core_kernel.Std.List.t =
-["HELLO WORLD"; "hello world"]
+- : string list = ["HELLO WORLD"; "hello world"]
 |}];;
 [@@@part "14"];;
 let plusone = (fun x -> x + 1);;
@@ -231,16 +227,16 @@ val is_odd : int -> bool = <fun>
 |}];;
 List.map ~f:is_even [0;1;2;3;4;5];;
 [%%expect{|
-- : bool Core_kernel.Std.List.t = [true; false; true; false; true; false]
+- : bool list = [true; false; true; false; true; false]
 |}];;
 List.map ~f:is_odd [0;1;2;3;4;5];;
 [%%expect{|
-- : bool Core_kernel.Std.List.t = [false; true; false; true; false; true]
+- : bool list = [false; true; false; true; false; true]
 |}];;
 [@@@part "24"];;
 Int.max 3 4  (* prefix *);;
 [%%expect{|
-- : Core_kernel.Std.Int.t = 4
+- : int = 4
 |}];;
 3 + 4        (* infix  *);;
 [%%expect{|
@@ -253,7 +249,7 @@ Int.max 3 4  (* prefix *);;
 |}];;
 List.map ~f:((+) 3) [4;5;6];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [7; 8; 9]
+- : int list = [7; 8; 9]
 |}];;
 [@@@part "26"];;
 let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
@@ -279,21 +275,19 @@ val ( *** ) : float -> float -> float = <fun>
 [@@@part "29"];;
 Int.max 3 (-4);;
 [%%expect{|
-- : Core_kernel.Std.Int.t = 3
+- : int = 3
 |}];;
 Int.max 3 -4;;
 [%%expect{|
-Characters 1-10:
-Error: This expression has type
-         Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t
+Characters 0-9:
+Error: This expression has type int -> int
        but an expression was expected of type int
 |}];;
 [@@@part "30"];;
 (Int.max 3) - 4;;
 [%%expect{|
 Characters 0-11:
-Error: This expression has type
-         Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t
+Error: This expression has type int -> int
        but an expression was expected of type int
 |}];;
 [@@@part "31"];;
@@ -339,7 +333,7 @@ lines
 [@@@part "35"];;
 List.iter ~f:print_endline;;
 [%%expect{|
-- : string Core_kernel.Std.List.t -> unit = <fun>
+- : string list -> unit = <fun>
 |}];;
 [@@@part "36"];;
 let (^>) x f = f x;;
@@ -352,16 +346,12 @@ Sys.getenv "PATH"
 ^> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 89-115:
-Error: This expression has type string Core_kernel.Std.List.t -> unit
+Characters 88-114:
+Error: This expression has type string list -> unit
        but an expression was expected of type
-         (Core_kernel.Std.String.t Core_kernel.Std.List.t ->
-          Core_kernel.Std.String.t Core_kernel.Std.List.t) ->
-         'a
-       Type string Core_kernel.Std.List.t = string list
-       is not compatible with type
-         Core_kernel.Std.String.t Core_kernel.Std.List.t ->
-         Core_kernel.Std.String.t Core_kernel.Std.List.t 
+         (string list -> string list) -> 'a
+       Type string list is not compatible with type
+         string list -> string list 
 |}];;
 [@@@part "37"];;
 let some_or_zero = function
@@ -373,7 +363,7 @@ val some_or_zero : int option -> int = <fun>
 |}];;
 List.map ~f:some_or_zero [Some 3; None; Some 4];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [3; 0; 4]
+- : int list = [3; 0; 4]
 |}];;
 [@@@part "38"];;
 let some_or_zero num_opt =
@@ -398,7 +388,7 @@ some_or_default 3 (Some 5);;
 |}];;
 List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [3; 100; 4]
+- : int list = [3; 100; 4]
 |}];;
 [@@@part "40"];;
 let ratio ~num ~denom = float num /. float denom;;
@@ -506,8 +496,7 @@ concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
 [@@@part "53"];;
 let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
 [%%expect{|
-val uppercase_concat :
-  ?sep:string -> Core_kernel.Std.String.t -> string -> string = <fun>
+val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 |}];;
 uppercase_concat "foo" "bar";;
 [%%expect{|
@@ -520,8 +509,7 @@ uppercase_concat "foo" "bar" ~sep:":";;
 [@@@part "54"];;
 let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
 [%%expect{|
-val uppercase_concat :
-  ?sep:string -> Core_kernel.Std.String.t -> string -> string = <fun>
+val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
 |}];;
 [@@@part "55"];;
 let numeric_deriv ~delta ~x ~y ~f =

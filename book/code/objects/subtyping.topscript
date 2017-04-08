@@ -37,7 +37,7 @@ let square w = object
   method width = w
 end ;;
 [%%expect{|
-val square : int -> < area : Core_kernel.Std.Float.t; width : int > = <fun>
+val square : int -> < area : float; width : int > = <fun>
 |}];;
 type circle = < area : float; radius : int > ;;
 [%%expect{|
@@ -66,8 +66,7 @@ val circle_stack : circle stack = <obj>
 let shape w : shape = square w ;;
 [%%expect{|
 Characters 22-30:
-Error: This expression has type
-         < area : Core_kernel.Std.Float.t; width : int >
+Error: This expression has type < area : float; width : int >
        but an expression was expected of type shape
        The second object type has no method width
 |}];;
@@ -87,7 +86,7 @@ let map = object
   method shape = square 10
 end ;;
 [%%expect{|
-val map : < shape : < area : Core_kernel.Std.Float.t; width : int > > = <obj>
+val map : < shape : < area : float; width : int > > = <obj>
 |}];;
 [@@@part "3"];;
 type item = < shape : shape > ;;
@@ -131,7 +130,7 @@ val square_array : square array = [|<obj>; <obj>|]
 |}];;
 let shape_array: shape array = (square_array :> shape array) ;;
 [%%expect{|
-Characters 32-61:
+Characters 31-60:
 Error: Type square array is not a subtype of shape array 
        Type square = < area : float; width : int >
        is not compatible with type shape = < area : float > 
@@ -184,15 +183,13 @@ module AbstractEither :
 |}];;
 (AbstractEither.left (square 40) :> (shape, shape) AbstractEither.t) ;;
 [%%expect{|
-Characters 7-38:
+Characters 1-32:
 Error: This expression cannot be coerced to type
          (shape, shape) AbstractEither.t;
-       it has type
-         (< area : Core_kernel.Std.Float.t; width : int >, 'a)
-         AbstractEither.t
+       it has type (< area : float; width : int >, 'a) AbstractEither.t
        but is here used with type (shape, shape) AbstractEither.t
-       Type < area : Core_kernel.Std.Float.t; width : int >
-       is not compatible with type shape = < area : float > 
+       Type < area : float; width : int > is not compatible with type
+         shape = < area : float > 
        The second object type has no method width
 |}];;
 [@@@part "10"];;

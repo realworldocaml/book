@@ -28,17 +28,13 @@ let average x y =
   let open Int64 in
   x + y / of_int 2;;
 [%%expect{|
-val average :
-  Core_kernel.Std.Int64.t ->
-  Core_kernel.Std.Int64.t -> Core_kernel.Std.Int64.t = <fun>
+val average : int64 -> int64 -> int64 = <fun>
 |}];;
 [@@@part "2"];;
 let average x y =
   Int64.(x + y / of_int 2);;
 [%%expect{|
-val average :
-  Core_kernel.Std.Int64.t ->
-  Core_kernel.Std.Int64.t -> Core_kernel.Std.Int64.t = <fun>
+val average : int64 -> int64 -> int64 = <fun>
 |}];;
 [@@@part "3"];;
 module Interval = struct
@@ -83,10 +79,11 @@ module Extended_interval = struct
     | Interval (low,high) -> x >= low && x <= high
 end;;
 [%%expect{|
-module Extended_interval : sig val contains : Interval.t -> int -> bool end
+module Extended_interval :
+  sig val contains : Extended_interval.t -> int -> bool end
 |}];;
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
 [%%expect{|
-Characters 29-53:
+Characters 28-52:
 Error: Unbound value Extended_interval.create
 |}];;

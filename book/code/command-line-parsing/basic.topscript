@@ -16,5 +16,5 @@ Warning 3: deprecated: module Core.Std
 [@@@part "1"];;
 Command.basic;;
 [%%expect{|
-- : ('main, unit) Core.Std.Command.basic_command = <fun>
+- : ('main, unit) Command.basic_command = <fun>
 |}];;

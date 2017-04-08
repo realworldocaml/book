@@ -26,7 +26,5 @@ Characters 139-147:
 Warning 3: deprecated: Core.Std.read_int
 [since 2016-04] Use
 [Out_channel.(flush stdout); Int.of_string In_channel.(input_line_exn stdin)]
-- : (Core.Std.Date.t -> int -> '_a, Core.Std.Date.t -> int option -> '_a)
-    Core.Std.Command.Spec.t
-= <abstr>
+- : (Date.t -> int -> '_a, Date.t -> int option -> '_a) t = <abstr>
 |}];;

@@ -15,30 +15,30 @@ type t = { a : int option; b : string; }
 |}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect{|
-Characters 3-12:
+Characters 0-9:
 Error: Unbound value sexp_of_t
 Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;
 sexp_of_t { a = Some 3; b = "hello" } ;;
 [%%expect{|
-Characters 1-10:
+Characters 0-9:
 Error: Unbound value sexp_of_t
 Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;
 [@@@part "1"];;
 type t = { a: int sexp_option; b: string } [@@deriving sexp] ;;
 [%%expect{|
-type t = { a : int Core_kernel.Std.sexp_option; b : string; }
+type t = { a : int option; b : string; }
 |}];;
 sexp_of_t { a = Some 3; b = "hello" } ;;
 [%%expect{|
-Characters 3-12:
+Characters 0-9:
 Error: Unbound value sexp_of_t
 Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect{|
-Characters 1-10:
+Characters 0-9:
 Error: Unbound value sexp_of_t
 Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;

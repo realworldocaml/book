@@ -21,7 +21,7 @@ let square w = object
   method width = w
 end ;;
 [%%expect{|
-val square : int -> < area : Core_kernel.Std.Float.t; width : int > = <fun>
+val square : int -> < area : float; width : int > = <fun>
 |}];;
 type circle = < area : float; radius : int > ;;
 [%%expect{|
@@ -38,9 +38,7 @@ val circle : int -> < area : float; radius : int > = <fun>
 let remove_large l =
   List.filter ~f:(fun s -> s#area <= 100.) l ;;
 [%%expect{|
-val remove_large :
-  (< area : float; .. > as 'a) Core_kernel.Std.List.t ->
-  'a Core_kernel.Std.List.t = <fun>
+val remove_large : (< area : float; .. > as 'a) list -> 'a list = <fun>
 |}];;
 [@@@part "2"];;
 let squares : < area : float; width : int > list = 
@@ -50,37 +48,34 @@ val squares : < area : float; width : int > list = [<obj>; <obj>; <obj>]
 |}];;
 remove_large squares ;;
 [%%expect{|
-- : < area : float; width : int > Core_kernel.Std.List.t = [<obj>; <obj>]
+- : < area : float; width : int > list = [<obj>; <obj>]
 |}];;
 [@@@part "3"];;
 let remove_large (l: < area : float > list) = 
   List.filter ~f:(fun s -> s#area <= 100.) l ;;
 [%%expect{|
-val remove_large :
-  < area : float > list -> < area : float > Core_kernel.Std.List.t = <fun>
+val remove_large : < area : float > list -> < area : float > list = <fun>
 |}];;
 remove_large (squares :> < area : float > list ) ;;
 [%%expect{|
-- : < area : float > Core_kernel.Std.List.t = [<obj>; <obj>]
+- : < area : float > list = [<obj>; <obj>]
 |}];;
 [@@@part "4"];;
 let hlist: < area: float; ..> list = [square 10; circle 30] ;;
 [%%expect{|
 Characters 49-58:
 Error: This expression has type < area : float; radius : int >
-       but an expression was expected of type
-         < area : Core_kernel.Std.Float.t; width : int >
+       but an expression was expected of type < area : float; width : int >
        The second object type has no method radius
 |}];;
 [@@@part "5"];;
 let shape_ref: < area: float; ..> ref = ref (square 40) ;;
 [%%expect{|
-val shape_ref : < area : float; width : int > Core_kernel.Std.ref =
-  {contents = <obj>}
+val shape_ref : < area : float; width : int > ref = {contents = <obj>}
 |}];;
 shape_ref := circle 20 ;;
 [%%expect{|
-Characters 14-23:
+Characters 13-22:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
        The second object type has no method radius
@@ -92,7 +87,7 @@ val hlist : shape list = [<obj>; <obj>]
 |}];;
 let shape_ref: shape ref = ref (square 40 :> shape) ;;
 [%%expect{|
-val shape_ref : shape Core_kernel.Std.ref = {contents = <obj>}
+val shape_ref : shape ref = {contents = <obj>}
 |}];;
 shape_ref := (circle 20 :> shape) ;;
 [%%expect{|

@@ -11,7 +11,7 @@
 open Core_kernel.Std;;
 List.find;;
 [%%expect{|
-- : 'a Core_kernel.Std.List.t -> f:('a -> bool) -> 'a option = <fun>
+- : 'a list -> f:('a -> bool) -> 'a option = <fun>
 |}];;
 [@@@part "1"];;
 List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
@@ -30,8 +30,7 @@ let compute_bounds ~cmp list =
   | Some x, Some y -> Some (x,y)
 ;;
 [%%expect{|
-val compute_bounds :
-  cmp:('a -> 'a -> int) -> 'a Core_kernel.Std.List.t -> ('a * 'a) option =
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
 [@@@part "3"];;
@@ -43,32 +42,29 @@ let find_mismatches table1 table2 =
   )
 ;;
 [%%expect{|
-val find_mismatches :
-  ('a Core_kernel.Std.Hashtbl.key, 'b) Core_kernel.Std.Hashtbl.t ->
-  ('a, 'b) Core_kernel.Std.Hashtbl.t ->
-  'a Core_kernel.Std.Hashtbl.key Core_kernel.Std.Hashtbl.key list = <fun>
+val find_mismatches : ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list =
+  <fun>
 |}];;
 [@@@part "4"];;
 [ Ok 3; Error "abject failure"; Ok 4 ];;
 [%%expect{|
-- : (int, string) Core_kernel.Std._result list =
-[Ok 3; Error "abject failure"; Ok 4]
+- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]
 |}];;
 [@@@part "5"];;
 Error.of_string "something went wrong";;
 [%%expect{|
-- : Core_kernel.Std.Error.t = <abstr>
+- : Error.t = <abstr>
 |}];;
 [@@@part "6"];;
 Error.of_thunk (fun () ->
   sprintf "something went wrong: %f" 32.3343);;
 [%%expect{|
-- : Core_kernel.Std.Error.t = <abstr>
+- : Error.t = <abstr>
 |}];;
 [@@@part "7"];;
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
 [%%expect{|
-- : Core_kernel.Std.Error.t = <abstr>
+- : Error.t = <abstr>
 |}];;
 [@@@part "8"];;
 let custom_to_sexp = [%sexp_of: float * string list * int];;
@@ -78,7 +74,7 @@ Error: Uninterpreted extension 'sexp_of'.
 |}];;
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 [%%expect{|
-Characters 1-15:
+Characters 0-14:
 Error: Unbound value custom_to_sexp
 |}];;
 [@@@part "9"];;
@@ -96,7 +92,7 @@ Error.tag
   "over the weekend"
 ;;
 [%%expect{|
-- : Core_kernel.Std.Error.t = <abstr>
+- : Error.t = <abstr>
 |}];;
 [@@@part "11"];;
 let bind option f =
@@ -116,8 +112,7 @@ let compute_bounds ~cmp list =
 ;;
 [%%expect{|
 val compute_bounds :
-  cmp:('a -> 'a -> int) ->
-  'a Core_kernel.Std.List.t -> ('a * 'a) Core_kernel.Std.Option.t = <fun>
+  cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) Base.option = <fun>
 |}];;
 [@@@part "13"];;
 let compute_bounds ~cmp list =
@@ -128,9 +123,8 @@ let compute_bounds ~cmp list =
   Some (first,last)
 ;;
 [%%expect{|
-val compute_bounds :
-  cmp:('a -> 'a -> int) ->
-  'a Core_kernel.Std.List.t -> ('a * 'a) Base__Option.t = <fun>
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 |}];;
 [@@@part "14"];;
 let compute_bounds ~cmp list =
@@ -139,8 +133,7 @@ let compute_bounds ~cmp list =
 ;;
 [%%expect{|
 val compute_bounds :
-  cmp:('a -> 'a -> int) ->
-  'a Core_kernel.Std.List.t -> ('a * 'a) Core_kernel.Std.Option.t = <fun>
+  cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) Base.option = <fun>
 |}];;
 [@@@part "15"];;
 3 / 0;;
@@ -178,7 +171,7 @@ List.filter exceptions  ~f:(function
   | Key_not_found _ | Not_found -> true
   | _ -> false);;
 [%%expect{|
-- : exn Core_kernel.Std.List.t = [Not_found; Key_not_found "b"]
+- : exn list = [Not_found; Key_not_found "b"]
 |}];;
 [@@@part "20"];;
 let rec find_exn alist key = match alist with
@@ -254,9 +247,8 @@ let merge_lists xs ys ~f =
     Some (loop xs ys)
 ;;
 [%%expect{|
-val merge_lists :
-  'a Core_kernel.Std.List.t ->
-  'b Core_kernel.Std.List.t -> f:('a -> 'b -> 'c) -> 'c list option = <fun>
+val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
+  <fun>
 |}];;
 merge_lists [1;2;3] [-1;1;2] ~f:(+);;
 [%%expect{|
@@ -289,9 +281,7 @@ let parse_line line =
   |> List.map ~f:Float.of_string
 ;;
 [%%expect{|
-val parse_line :
-  Core_kernel.Std.String.t -> Core_kernel.Std.Float.t Core_kernel.Std.List.t =
-  <fun>
+val parse_line : string -> Float.t list = <fun>
 |}];;
 let load filename =
   let inc = In_channel.create filename in
@@ -300,10 +290,8 @@ let load filename =
   data
 ;;
 [%%expect{|
-val load :
-  Stdio__.Import.string ->
-  Core_kernel.Std.Float.t Core_kernel.Std.List.t Core_kernel.Std.List.t =
-  <fun>
+Characters 32-49:
+Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
 |}];;
 [@@@part "29"];;
 let load filename =
@@ -313,10 +301,8 @@ let load filename =
     ~finally:(fun () -> In_channel.close inc)
 ;;
 [%%expect{|
-val load :
-  Stdio__.Import.string ->
-  Core_kernel.Std.Float.t Core_kernel.Std.List.t Core_kernel.Std.List.t =
-  <fun>
+Characters 32-49:
+Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
 |}];;
 [@@@part "30"];;
 let load filename =
@@ -324,10 +310,8 @@ let load filename =
     In_channel.input_lines inc |> List.map ~f:parse_line)
 ;;
 [%%expect{|
-val load :
-  Stdio__.Import.string ->
-  Core_kernel.Std.Float.t Core_kernel.Std.List.t Core_kernel.Std.List.t =
-  <fun>
+Characters 22-42:
+Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
 |}];;
 [@@@part "31"];;
 let lookup_weight ~compute_weight alist key =
@@ -339,7 +323,7 @@ let lookup_weight ~compute_weight alist key =
 [%%expect{|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) Core_kernel.Std.List.Assoc.t -> 'a -> float = <fun>
+  ('a, 'b) List.Assoc.t -> 'a -> float = <fun>
 |}];;
 [@@@part "32"];;
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
@@ -358,7 +342,7 @@ let lookup_weight ~compute_weight alist key =
 [%%expect{|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) Core_kernel.Std.List.Assoc.t -> 'a -> float = <fun>
+  ('a, 'b) List.Assoc.t -> 'a -> float = <fun>
 |}];;
 [@@@part "33.1"];;
 let lookup_weight ~compute_weight alist key =
@@ -368,7 +352,7 @@ let lookup_weight ~compute_weight alist key =
 [%%expect{|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) Core_kernel.Std.List.Assoc.t -> 'a -> float = <fun>
+  ('a, 'b) List.Assoc.t -> 'a -> float = <fun>
 |}];;
 [@@@part "34"];;
 let lookup_weight ~compute_weight alist key =
@@ -385,27 +369,25 @@ Error: This pattern matches values of type 'a option
 let find alist key =
   Option.try_with (fun () -> find_exn alist key) ;;
 [%%expect{|
-val find : (string * 'a) list -> string -> 'a Core_kernel.Std.Option.t =
-  <fun>
+val find : (string * 'a) list -> string -> 'a Base.option = <fun>
 |}];;
 find ["a",1; "b",2] "c";;
 [%%expect{|
-- : int Core_kernel.Std.Option.t = None
+- : int Base.option = <abstr>
 |}];;
 find ["a",1; "b",2] "b";;
 [%%expect{|
-- : int Core_kernel.Std.Option.t = Some 2
+- : int Base.option = <abstr>
 |}];;
 [@@@part "36"];;
 let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;
 [%%expect{|
-val find : (string * 'a) list -> string -> 'a Core_kernel.Std.Or_error.t =
-  <fun>
+val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
 |}];;
 find ["a",1; "b",2] "c";;
 [%%expect{|
-- : int Core_kernel.Std.Or_error.t = Core_kernel__.Result.Error <abstr>
+- : int Or_error.t = Core_kernel__.Result.Error <abstr>
 |}];;
 [@@@part "37"];;
 Or_error.ok_exn (find ["a",1; "b",2] "b");;

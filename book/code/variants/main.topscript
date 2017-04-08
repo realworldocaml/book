@@ -39,7 +39,7 @@ val basic_color_to_int : basic_color -> int = <fun>
 |}];;
 List.map ~f:basic_color_to_int [Blue;Red];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [4; 1]
+- : int list = [4; 1]
 |}];;
 [@@@part "2"];;
 let color_by_number number text =
@@ -127,7 +127,7 @@ val five : [> `Int of string ] = `Int "five"
 |}];;
 [three; four; five];;
 [%%expect{|
-Characters 15-19:
+Characters 14-18:
 Error: This expression has type [> `Int of string ]
        but an expression was expected of type
          [> `Float of float | `Int of int ]
@@ -144,8 +144,7 @@ val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
 [@@@part "9"];;
 let exact = List.filter ~f:is_positive [three;four];;
 [%%expect{|
-val exact : [ `Float of float | `Int of int ] Core_kernel.Std.List.t =
-  [`Int 3; `Float 4.]
+val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
 |}];;
 [@@@part "10"];;
 let is_positive = function
@@ -154,15 +153,14 @@ let is_positive = function
   | `Not_a_number -> Error "not a number";;
 [%%expect{|
 val is_positive :
-  [< `Float of float | `Int of int | `Not_a_number ] ->
-  (bool, string) Core_kernel.Std._result = <fun>
+  [< `Float of float | `Int of int | `Not_a_number ] -> (bool, string) result =
+  <fun>
 |}];;
 List.filter [three; four] ~f:(fun x ->
   match is_positive x with Error _ -> false | Ok b -> b);;
 [%%expect{|
-- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ]
-    Core_kernel.Std.List.t
-= [`Int 3; `Float 4.]
+- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
+[`Int 3; `Float 4.]
 |}];;
 [@@@part "11"];;
 type extended_color =
@@ -274,19 +272,18 @@ let is_positive_permissive = function
 ;;
 [%%expect{|
 val is_positive_permissive :
-  [> `Float of float | `Int of int ] ->
-  (bool, string) Core_kernel.Std._result = <fun>
+  [> `Float of float | `Int of int ] -> (bool, string) result = <fun>
 |}];;
 is_positive_permissive (`Int 0);;
 [%%expect{|
-- : (bool, string) Core_kernel.Std._result = Ok false
+- : (bool, string) result = Ok false
 |}];;
 is_positive_permissive (`Ratio (3,4));;
 [%%expect{|
-- : (bool, string) Core_kernel.Std._result = Error "Unknown number type"
+- : (bool, string) result = Error "Unknown number type"
 |}];;
 [@@@part "17"];;
 is_positive_permissive (`Floot 3.5);;
 [%%expect{|
-- : (bool, string) Core_kernel.Std._result = Error "Unknown number type"
+- : (bool, string) result = Error "Unknown number type"
 |}];;

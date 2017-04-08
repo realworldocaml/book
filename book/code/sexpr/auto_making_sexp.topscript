@@ -15,7 +15,7 @@ type t = { foo : int; bar : float; }
 |}];;
 t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
 [%%expect{|
-Characters 3-12:
+Characters 0-9:
 Error: Unbound value t_of_sexp
 Hint: Did you mean mat_of_sexp or int_of_sexp?
 |}];;

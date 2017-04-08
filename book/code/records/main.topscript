@@ -61,9 +61,7 @@ let parse_lines parse file_contents =
     })
 ;;
 [%%expect{|
-val parse_lines :
-  (Core_kernel.Std.String.t -> 'a) ->
-  Core_kernel.Std.String.t -> 'a with_line_num Core_kernel.Std.List.t = <fun>
+val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>
 |}];;
 [@@@part "4.1"];;
 parse_lines service_info_of_string
@@ -72,7 +70,7 @@ parse_lines service_info_of_string
    tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
 [%%expect{|
-- : service_info with_line_num Core_kernel.Std.List.t =
+- : service_info with_line_num list =
 [{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
  {item = {service_name = "tcpmux"; port = 1; protocol = "udp"}; line_num = 2};
  {item = {service_name = "tcpmux"; port = 1; protocol = "tcp"}; line_num = 3}]
@@ -80,7 +78,7 @@ parse_lines service_info_of_string
 [@@@part "4.2"];;
 parse_lines Int.of_string "1\n10\n100\n1000";;
 [%%expect{|
-- : Core_kernel.Std.Int.t with_line_num Core_kernel.Std.List.t =
+- : int with_line_num list =
 [{item = 1; line_num = 1}; {item = 10; line_num = 2};
  {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
 |}];;
@@ -160,7 +158,7 @@ let service_info_of_string line =
   { service_name; port; protocol; comment }
 ;;
 [%%expect{|
-val service_info_of_string : Core_kernel.Std.String.t -> service_info = <fun>
+val service_info_of_string : string -> service_info = <fun>
 |}];;
 [@@@part "10.1"];;
 service_info_of_string "ssh 22/tcp # some comment";;
@@ -255,7 +253,7 @@ val status_and_session : heartbeat -> string * string = <fun>
 |}];;
 let session_and_status t = (t.session_id, t.status_message);;
 [%%expect{|
-Characters 45-59:
+Characters 44-58:
 Error: This expression has type logon
        The field status_message does not belong to type logon
 |}];;

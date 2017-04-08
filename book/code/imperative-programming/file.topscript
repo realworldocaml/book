@@ -15,9 +15,7 @@ let create_number_file filename numbers =
   Out_channel.close outc
 ;;
 [%%expect{|
-val create_number_file :
-  Stdio__.Import.string -> int Core_kernel.Std.List.t -> Stdio__.Import.unit =
-  <fun>
+val create_number_file : string -> int list -> unit = <fun>
 |}];;
 let sum_file filename =
   let file = In_channel.create filename in
@@ -27,11 +25,11 @@ let sum_file filename =
   sum
 ;;
 [%%expect{|
-val sum_file : Stdio__.Import.string -> int = <fun>
+val sum_file : string -> int = <fun>
 |}];;
 create_number_file "numbers.txt" [1;2;3;4;5];;
 [%%expect{|
-- : Stdio__.Import.unit = ()
+- : unit = ()
 |}];;
 sum_file "numbers.txt";;
 [%%expect{|

@@ -35,10 +35,7 @@ module type Query_handler =
     val name : string
     type t
     val create : config -> t
-    val eval :
-      t ->
-      Core_kernel.Std.Sexp.t ->
-      Core_kernel.Std.Sexp.t Core_kernel.Std.Or_error.t
+    val eval : t -> Sexp.t -> Sexp.t Or_error.t
   end
 |}];;
 [@@@part "1"];;
@@ -53,13 +50,13 @@ type u = { a : int; b : float; }
 |}];;
 sexp_of_u {a=3;b=7.};;
 [%%expect{|
-Characters 1-10:
+Characters 0-9:
 Error: Unbound value sexp_of_u
 Hint: Did you mean sexp_of_vec, sexp_of_unit, sexp_of_ref, sexp_of_mat, sexp_of_int or sexp_of_exn?
 |}];;
 u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
 [%%expect{|
-Characters 1-10:
+Characters 0-9:
 Error: Unbound value u_of_sexp
 Hint: Did you mean vec_of_sexp, unit_of_sexp, ref_of_sexp, mat_of_sexp or int_of_sexp?
 |}];;
@@ -83,13 +80,11 @@ end;;
 module Unique :
   sig
     type config = int
-    type t = { mutable next_id : int; }
+    type t = { mutable next_id : config; }
     val name : string
-    val create : int -> t
+    val create : config -> t
     val eval :
-      t ->
-      Sexplib.Sexp.t ->
-      (Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result
+      t -> Sexplib.Type.t -> (Sexplib.Type.t, Core_kernel__Error.t) result
   end
 |}];;
 [@@@part "4"];;
@@ -99,12 +94,12 @@ val unique : Unique.t = {Unique.next_id = 0}
 |}];;
 Unique.eval unique Sexp.unit;;
 [%%expect{|
-- : (Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result =
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
 Ok (Sexplib.Sexp.Atom "0")
 |}];;
 Unique.eval unique Sexp.unit;;
 [%%expect{|
-- : (Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result =
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
 Ok (Sexplib.Sexp.Atom "1")
 |}];;
 [@@@part "5"];;
@@ -133,14 +128,12 @@ end;;
 module List_dir :
   sig
     type config = string
-    type t = { cwd : string; }
-    val is_abs : Core_kernel.Std.String.t -> bool
-    val name : string
-    val create : string -> t
+    type t = { cwd : config; }
+    val is_abs : config -> bool
+    val name : config
+    val create : config -> t
     val eval :
-      t ->
-      Sexplib.Sexp.t ->
-      (Base__.Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result
+      t -> Sexplib.Type.t -> (Sexplib.Type.t, Core_kernel__Error.t) result
   end
 |}];;
 [@@@part "6"];;
@@ -150,7 +143,7 @@ val list_dir : List_dir.t = {List_dir.cwd = "/var"}
 |}];;
 List_dir.eval list_dir (sexp_of_string ".");;
 [%%expect{|
-- : (Base__.Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result =
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
 Ok
  (Base__.Sexplib.Sexp.List
    [Base__.Sexplib.Sexp.Atom "mail"; Base__.Sexplib.Sexp.Atom "local";
@@ -222,9 +215,8 @@ Characters 168-183:
 Warning 3: deprecated: Core_kernel.Std.Hashtbl.replace
 [since 2015-10] Use set instead
 val build_dispatch_table :
-  (module Query_handler_instance) Core_kernel.Std.List.t ->
-  ('a, (module Query_handler_instance)) Core_kernel.Std.String.Table.t_ =
-  <fun>
+  (module Query_handler_instance) list ->
+  (module Query_handler_instance) String.Table.t = <fun>
 |}];;
 [@@@part "12"];;
 let dispatch dispatch_table name_and_query =
@@ -242,10 +234,8 @@ let dispatch dispatch_table name_and_query =
 ;;
 [%%expect{|
 val dispatch :
-  (Core_kernel__.Import.string, (module Query_handler_instance))
-  Core_kernel.Std.Hashtbl.t ->
-  Core_kernel.Std.Sexp.t -> Core_kernel.Std.Sexp.t Core_kernel.Std.Or_error.t =
-  <fun>
+  (Core_kernel__Import.string, (module Query_handler_instance)) Hashtbl.t ->
+  Sexp.t -> Sexp.t Or_error.t = <fun>
 |}];;
 [@@@part "13"];;
 let rec cli dispatch_table =
@@ -270,12 +260,8 @@ let rec cli dispatch_table =
     cli dispatch_table
 ;;
 [%%expect{|
-Characters 95-100:
-Warning 3: deprecated: Core_kernel.Std.stdin
-[since 2016-04] Use [In_channel.stdin]
-val cli :
-  (Core_kernel__.Import.string, (module Query_handler_instance))
-  Core_kernel.Std.Hashtbl.t -> unit = <fun>
+Characters 73-94:
+Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
 |}];;
 [@@@part "14"];;
 type query_handler_instance = { name : string
@@ -284,15 +270,13 @@ type query_handler_instance = { name : string
 [%%expect{|
 type query_handler_instance = {
   name : string;
-  eval :
-    Core_kernel.Std.Sexp.t ->
-    Core_kernel.Std.Sexp.t Core_kernel.Std.Or_error.t;
+  eval : Sexp.t -> Sexp.t Or_error.t;
 }
 |}];;
 type query_handler = Sexp.t -> query_handler_instance
 ;;
 [%%expect{|
-type query_handler = Core_kernel.Std.Sexp.t -> query_handler_instance
+type query_handler = Sexp.t -> query_handler_instance
 |}];;
 [@@@part "15"];;
 let unique_handler config_sexp =

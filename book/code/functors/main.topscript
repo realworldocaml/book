@@ -129,12 +129,12 @@ module Int_interval = Make_interval(Int) ;;
 module Int_interval :
   sig
     type t =
-      Make_interval(Core_kernel.Std.Int).t =
-        Interval of Core_kernel.Std.Int.t * Core_kernel.Std.Int.t
+      Make_interval(Core_kernel__Core_int).t =
+        Interval of int * int
       | Empty
-    val create : Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t -> t
+    val create : int -> int -> t
     val is_empty : t -> bool
-    val contains : t -> Core_kernel.Std.Int.t -> bool
+    val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
 |}];;
@@ -143,12 +143,12 @@ module String_interval = Make_interval(String) ;;
 module String_interval :
   sig
     type t =
-      Make_interval(Core_kernel.Std.String).t =
-        Interval of Core_kernel.Std.String.t * Core_kernel.Std.String.t
+      Make_interval(Core_kernel__Core_string).t =
+        Interval of string * string
       | Empty
-    val create : Core_kernel.Std.String.t -> Core_kernel.Std.String.t -> t
+    val create : string -> string -> t
     val is_empty : t -> bool
-    val contains : t -> Core_kernel.Std.String.t -> bool
+    val contains : t -> string -> bool
     val intersect : t -> t -> t
   end
 |}];;
@@ -195,8 +195,7 @@ Int_interval.contains rev_interval 3;;
 [%%expect{|
 Characters 22-34:
 Error: This expression has type Rev_int_interval.t
-       but an expression was expected of type
-         Int_interval.t = Make_interval(Core_kernel__Core_int).t
+       but an expression was expected of type Int_interval.t
 |}];;
 [@@@part "13"];;
 Int_interval.is_empty (* going through create *)
@@ -239,12 +238,12 @@ module Make_interval(Endpoint : Comparable) : Interval_intf = struct
 
 end ;;
 [%%expect{|
-Characters 63-184:
+Characters 62-183:
 Error: Signature mismatch:
        Modules do not match:
          sig
            type endpoint = Endpoint.t
-           type t = Interval of Endpoint.t * Endpoint.t | Empty
+           type t = Interval of endpoint * endpoint | Empty
          end
        is not included in
          Interval_intf
@@ -258,13 +257,10 @@ module Int_interval = Make_interval(Int);;
 [%%expect{|
 module Int_interval :
   sig
-    type t =
-      Make_interval(Core_kernel.Std.Int).t =
-        Interval of Core_kernel.Std.Int.t * Core_kernel.Std.Int.t
-      | Empty
-    val create : Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t -> t
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
     val is_empty : t -> bool
-    val contains : t -> Core_kernel.Std.Int.t -> bool
+    val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
 |}];;
@@ -312,13 +308,10 @@ module Int_interval = Make_interval(Int);;
 [%%expect{|
 module Int_interval :
   sig
-    type t =
-      Make_interval(Core_kernel.Std.Int).t =
-        Interval of Core_kernel.Std.Int.t * Core_kernel.Std.Int.t
-      | Empty
-    val create : Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t -> t
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
     val is_empty : t -> bool
-    val contains : t -> Core_kernel.Std.Int.t -> bool
+    val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
 |}];;
@@ -369,13 +362,10 @@ module Int_interval = Make_interval(Int);;
 [%%expect{|
 module Int_interval :
   sig
-    type t =
-      Make_interval(Core_kernel.Std.Int).t =
-        Interval of Core_kernel.Std.Int.t * Core_kernel.Std.Int.t
-      | Empty
-    val create : Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t -> t
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
     val is_empty : t -> bool
-    val contains : t -> Core_kernel.Std.Int.t -> bool
+    val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
 |}];;
@@ -392,7 +382,7 @@ Int_interval.is_empty
 [@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
 [%%expect{|
-- : Core_kernel.Std.Sexp.t = Core_kernel.Std.Sexp.List <abstr>
+- : Sexp.t = Core_kernel.Std.Sexp.List <abstr>
 |}];;
 [@@@part "24"];;
 type some_type = int * string list [@@deriving sexp];;
@@ -401,12 +391,12 @@ type some_type = int * string list
 |}];;
 sexp_of_some_type (33, ["one"; "two"]);;
 [%%expect{|
-Characters 3-20:
+Characters 0-17:
 Error: Unbound value sexp_of_some_type
 |}];;
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
 [%%expect{|
-Characters 37-54:
+Characters 36-53:
 Error: Unbound value some_type_of_sexp
 |}];;
 [@@@part "25"];;
@@ -443,8 +433,8 @@ module type Interval_intf_with_sexp =
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
-    val t_of_sexp : Base__.Sexplib.Sexp.t -> t
-    val sexp_of_t : t -> Base__.Sexplib.Sexp.t
+    val t_of_sexp : Sexplib.Type.t -> t
+    val sexp_of_t : t -> Sexplib.Type.t
   end
 |}];;
 [@@@part "27"];;
@@ -462,8 +452,8 @@ module type Interval_intf_with_sexp =
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
-    val t_of_sexp : Base__.Sexplib.Sexp.t -> t
-    val sexp_of_t : t -> Base__.Sexplib.Sexp.t
+    val t_of_sexp : Sexplib.Type.t -> t
+    val sexp_of_t : t -> Sexplib.Type.t
   end
 |}];;
 [@@@part "28"];;
@@ -525,23 +515,20 @@ module Int_interval = Make_interval(Int) ;;
 [%%expect{|
 module Int_interval :
   sig
-    type t =
-      Make_interval(Core_kernel.Std.Int).t =
-        Interval of Core_kernel.Std.Int.t * Core_kernel.Std.Int.t
-      | Empty
-    val create : Core_kernel.Std.Int.t -> Core_kernel.Std.Int.t -> t
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
     val is_empty : t -> bool
-    val contains : t -> Core_kernel.Std.Int.t -> bool
+    val contains : t -> int -> bool
     val intersect : t -> t -> t
   end
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 3 4);;
 [%%expect{|
-Characters 10-32:
+Characters 0-22:
 Error: Unbound value Int_interval.sexp_of_t
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 4 3);;
 [%%expect{|
-Characters 1-23:
+Characters 0-22:
 Error: Unbound value Int_interval.sexp_of_t
 |}];;

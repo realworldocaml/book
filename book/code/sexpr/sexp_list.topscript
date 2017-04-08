@@ -18,7 +18,7 @@ type compatible_versions = Specific of string list | All
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 [%%expect{|
-Characters 3-30:
+Characters 0-27:
 Error: Unbound value sexp_of_compatible_versions
 |}];;
 [@@@part "1"];;
@@ -26,11 +26,11 @@ type compatible_versions =
   | Specific of string sexp_list
   | All [@@deriving sexp] ;;
 [%%expect{|
-type compatible_versions = Specific of string Core_kernel.Std.sexp_list | All
+type compatible_versions = Specific of string list | All
 |}];;
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 [%%expect{|
-Characters 3-30:
+Characters 0-27:
 Error: Unbound value sexp_of_compatible_versions
 |}];;

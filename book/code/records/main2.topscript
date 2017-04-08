@@ -43,7 +43,7 @@ module Log_entry :
   sig
     type t = {
       session_id : string;
-      time : Core.Std.Time_ns.t;
+      time : Time_ns.t;
       important : bool;
       message : string;
     }
@@ -52,7 +52,7 @@ module Heartbeat :
   sig
     type t = {
       session_id : string;
-      time : Core.Std.Time_ns.t;
+      time : Time_ns.t;
       status_message : string;
     }
   end
@@ -60,7 +60,7 @@ module Logon :
   sig
     type t = {
       session_id : string;
-      time : Core.Std.Time_ns.t;
+      time : Time_ns.t;
       user : string;
       credentials : string;
     }
@@ -92,7 +92,7 @@ let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
 ;;
 [%%expect{|
-val message_to_string : Log_entry.t -> Core.Std.String.t = <fun>
+val message_to_string : Log_entry.t -> string = <fun>
 |}];;
 [@@@part "21"];;
 let is_important t = t.Log_entry.important;;
@@ -106,21 +106,21 @@ let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message
 let is_important (t:Log_entry.t) = t.important ;;
 [%%expect{|
-Characters 71-128:
+Characters 70-127:
 Warning 40: this record of type Log_entry.t contains fields that are 
 not visible in the current scope: time session_id important message.
 They will not be selected if the type becomes unknown.
-Characters 152-177:
+Characters 151-176:
 Warning 40: this record of type Log_entry.t contains fields that are 
 not visible in the current scope: important message.
 They will not be selected if the type becomes unknown.
-Characters 290-299:
+Characters 289-298:
 Warning 40: important was selected from type Log_entry.t.
 It is not visible in the current scope, and will not 
 be selected if the type becomes unknown.
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
-val message_to_string : Log_entry.t -> Core.Std.String.t = <fun>
+val message_to_string : Log_entry.t -> string = <fun>
 val is_important : Log_entry.t -> bool = <fun>
 |}];;
 [@@@part "22"];;
@@ -133,11 +133,11 @@ type client_info =
   };;
 [%%expect{|
 type client_info = {
-  addr : Core.Std.Unix.Inet_addr.t;
+  addr : Unix.inet_addr;
   port : int;
   user : string;
   credentials : string;
-  last_heartbeat_time : Core.Std.Time_ns.t;
+  last_heartbeat_time : Time_ns.t;
 }
 |}];;
 let register_heartbeat t hb =
@@ -167,11 +167,11 @@ type client_info =
   };;
 [%%expect{|
 type client_info = {
-  addr : Core.Std.Unix.Inet_addr.t;
+  addr : Unix.inet_addr;
   port : int;
   user : string;
   credentials : string;
-  last_heartbeat_time : Core.Std.Time_ns.t;
+  last_heartbeat_time : Time_ns.t;
   last_heartbeat_status : string;
 }
 |}];;
@@ -194,11 +194,11 @@ type client_info =
   };;
 [%%expect{|
 type client_info = {
-  addr : Core.Std.Unix.Inet_addr.t;
+  addr : Unix.inet_addr;
   port : int;
   user : string;
   credentials : string;
-  mutable last_heartbeat_time : Core.Std.Time_ns.t;
+  mutable last_heartbeat_time : Time_ns.t;
   mutable last_heartbeat_status : string;
 }
 |}];;
@@ -214,7 +214,7 @@ val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
 let get_users logons =
   List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
 [%%expect{|
-val get_users : Logon.t Core.Std.List.t -> string Core.Std.List.t = <fun>
+val get_users : Logon.t list -> string list = <fun>
 |}];;
 [@@@part "29"];;
 module Logon = struct
@@ -231,7 +231,7 @@ module Logon :
   sig
     type t = {
       session_id : string;
-      time : Core.Std.Time_ns.t;
+      time : Time_ns.t;
       user : string;
       credentials : string;
     }
@@ -246,13 +246,14 @@ Error: Unbound value Logon.user
 [@@@part "31"];;
 Field.get Logon.Fields.user;;
 [%%expect{|
-Characters 10-27:
-Error: Unbound module Logon.Fields
+Characters 0-9:
+Error: The module Field is an alias for module Core_kernel__.Import.Field, which is missing
 |}];;
 [@@@part "32"];;
 Field.get;;
 [%%expect{|
-- : ('b, 'r, 'a) Core.Std.Field.t_with_perm -> 'r -> 'a = <fun>
+Characters 0-9:
+Error: The module Field is an alias for module Core_kernel__.Import.Field, which is missing
 |}];;
 [@@@part "33"];;
 let show_field field to_string record =
@@ -261,9 +262,8 @@ let show_field field to_string record =
   name ^ ": " ^ field_string
 ;;
 [%%expect{|
-val show_field :
-  ('a, 'b, 'c) Core.Std.Field.t_with_perm -> ('c -> string) -> 'b -> string =
-  <fun>
+Characters 53-63:
+Error: The module Field is an alias for module Core_kernel__.Import.Field, which is missing
 |}];;
 [@@@part "34"];;
 let logon = { Logon.
@@ -279,13 +279,13 @@ val logon : Logon.t =
 |}];;
 show_field Logon.Fields.user Fn.id logon;;
 [%%expect{|
-Characters 12-29:
-Error: Unbound module Logon.Fields
+Characters 0-10:
+Error: Unbound value show_field
 |}];;
 show_field Logon.Fields.time Time_ns.to_string logon;;
 [%%expect{|
-Characters 12-29:
-Error: Unbound module Logon.Fields
+Characters 0-10:
+Error: Unbound value show_field
 |}];;
 [@@@part "35"];;
 Logon.Fields.iter;;
@@ -305,11 +305,11 @@ let print_logon logon =
     ~credentials:(print Fn.id)
 ;;
 [%%expect{|
-Characters 114-131:
-Error: Unbound module Logon.Fields
+Characters 73-83:
+Error: Unbound value show_field
 |}];;
 print_logon logon;;
 [%%expect{|
-Characters 1-12:
+Characters 0-11:
 Error: Unbound value print_logon
 |}];;

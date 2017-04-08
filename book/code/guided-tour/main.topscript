@@ -130,11 +130,11 @@ val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 [@@@part "11"];;
 let long_string s = String.length s > 6;;
 [%%expect{|
-val long_string : Core_kernel.Std.String.t -> bool = <fun>
+val long_string : string -> bool = <fun>
 |}];;
 first_if_true long_string "short" "loooooong";;
 [%%expect{|
-- : Core_kernel.Std.String.t = "loooooong"
+- : string = "loooooong"
 |}];;
 [@@@part "12"];;
 let big_number x = x > 3;;
@@ -221,12 +221,12 @@ List.length languages;;
 [@@@part "23"];;
 List.map languages ~f:String.length;;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [5; 4; 1]
+- : int list = [5; 4; 1]
 |}];;
 [@@@part "24"];;
 List.map ~f:String.length languages;;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [5; 4; 1]
+- : int list = [5; 4; 1]
 |}];;
 [@@@part "25"];;
 "French" :: "Spanish" :: languages;;
@@ -264,7 +264,7 @@ languages;;
 [@@@part "30"];;
 [1;2;3] @ [4;5;6];;
 [%%expect{|
-- : int Base__List.t = [1; 2; 3; 4; 5; 6]
+- : int list = [1; 2; 3; 4; 5; 6]
 |}];;
 [@@@part "31"];;
 let my_favorite_language (my_favorite :: the_rest) =
@@ -361,15 +361,13 @@ let downcase_extension filename =
     base ^ "." ^ String.lowercase ext
 ;;
 [%%expect{|
-val downcase_extension : Core_kernel.Std.String.t -> Core_kernel.Std.String.t =
-  <fun>
+val downcase_extension : string -> string = <fun>
 |}];;
 List.map ~f:downcase_extension
   [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
 ;;
 [%%expect{|
-- : Core_kernel.Std.String.t Core_kernel.Std.List.t =
-["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
+- : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
 |}];;
 [@@@part "41"];;
 type point2d = { x : float; y : float };;
@@ -441,8 +439,7 @@ let is_inside_scene point scene =
     ~f:(fun el -> is_inside_scene_element point el)
 ;;
 [%%expect{|
-val is_inside_scene : point2d -> scene_element Core_kernel.Std.List.t -> bool =
-  <fun>
+val is_inside_scene : point2d -> scene_element list -> bool = <fun>
 |}];;
 is_inside_scene {x=3.;y=7.}
   [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
@@ -521,7 +518,7 @@ stdev rsum;;
 [@@@part "54"];;
 let x = { contents = 0 };;
 [%%expect{|
-val x : int Core_kernel.Std.ref = {contents = 0}
+val x : int ref = {contents = 0}
 |}];;
 x.contents <- x.contents + 1;;
 [%%expect{|
@@ -529,12 +526,12 @@ x.contents <- x.contents + 1;;
 |}];;
 x;;
 [%%expect{|
-- : int Core_kernel.Std.ref = {contents = 1}
+- : int ref = {contents = 1}
 |}];;
 [@@@part "55"];;
 let x = ref 0  (* create a ref, i.e., { contents = 0 } *) ;;
 [%%expect{|
-val x : int Core_kernel.Std.ref = {contents = 0}
+val x : int ref = {contents = 0}
 |}];;
 !x             (* get the contents of a ref, i.e., x.contents *) ;;
 [%%expect{|
@@ -572,7 +569,7 @@ let sum list =
   !sum
 ;;
 [%%expect{|
-val sum : int Core_kernel.Std.List.t -> int = <fun>
+val sum : int list -> int = <fun>
 |}];;
 [@@@part "58"];;
 let permute array =
@@ -587,13 +584,12 @@ let permute array =
   done
 ;;
 [%%expect{|
-val permute : 'a Core_kernel.Std.Array.t -> unit = <fun>
+val permute : 'a sexp_array -> unit = <fun>
 |}];;
 [@@@part "59"];;
 let ar = Array.init 20 ~f:(fun i -> i);;
 [%%expect{|
-val ar : int Core_kernel.Std.Array.t =
-  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
+val ar : int sexp_array = <abstr>
 |}];;
 permute ar;;
 [%%expect{|
@@ -601,8 +597,7 @@ permute ar;;
 |}];;
 ar;;
 [%%expect{|
-- : int Core_kernel.Std.Array.t =
-[|6; 0; 7; 17; 2; 11; 8; 19; 5; 1; 3; 16; 12; 18; 13; 10; 15; 14; 9; 4|]
+- : int sexp_array = <abstr>
 |}];;
 [@@@part "60"];;
 let find_first_negative_entry array =
@@ -613,8 +608,7 @@ let find_first_negative_entry array =
   if !pos = Array.length array then None else Some !pos
 ;;
 [%%expect{|
-val find_first_negative_entry : int Core_kernel.Std.Array.t -> int option =
-  <fun>
+val find_first_negative_entry : int sexp_array -> int option = <fun>
 |}];;
 find_first_negative_entry [|1;2;0;3|];;
 [%%expect{|
@@ -637,8 +631,7 @@ let find_first_negative_entry array =
   if !pos = Array.length array then None else Some !pos
 ;;
 [%%expect{|
-val find_first_negative_entry : int Core_kernel.Std.Array.t -> int option =
-  <fun>
+val find_first_negative_entry : int sexp_array -> int option = <fun>
 |}];;
 find_first_negative_entry [|1;2;0;3|];;
 [%%expect{|

@@ -124,7 +124,7 @@ end ;;
 class ['a] stack :
   'a list ->
   object
-    val mutable v : 'a Core_kernel.Std.List.t
+    val mutable v : 'a list
     method iter : ('a -> unit) -> unit
     method pop : 'a option
     method push : 'a -> unit
@@ -151,7 +151,7 @@ end ;;
 class ['a] stack :
   'a list ->
   object
-    val mutable v : 'a Core_kernel.Std.List.t
+    val mutable v : 'a list
     method fold : ('b -> 'a -> 'b) -> 'b -> 'b
     method pop : 'a option
     method push : 'a -> unit

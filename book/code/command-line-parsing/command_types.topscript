@@ -16,9 +16,9 @@ Warning 3: deprecated: module Core.Std
 [@@@part "1"];;
 Command.Spec.empty ;;
 [%%expect{|
-- : ('m, 'm) Core.Std.Command.Spec.t = <abstr>
+- : ('m, 'm) Command.Spec.t = <abstr>
 |}];;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
 [%%expect{|
-- : (int -> '_a, '_a) Core.Std.Command.Spec.t = <abstr>
+- : (int -> '_a, '_a) Command.Spec.t = <abstr>
 |}];;

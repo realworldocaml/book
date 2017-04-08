@@ -42,7 +42,7 @@ remember;;
 |}];;
 remember "avocado";;
 [%%expect{|
-Characters 10-19:
+Characters 9-18:
 Error: This expression has type string but an expression was expected of type
          int
 |}];;

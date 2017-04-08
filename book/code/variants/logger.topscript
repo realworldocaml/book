@@ -105,10 +105,8 @@ let messages_for_user user messages =
   List.rev user_messages
 ;;
 [%%expect{|
-val messages_for_user :
-  string ->
-  client_message Core_kernel.Std.List.t ->
-  client_message Core_kernel.Std.List.t = <fun>
+val messages_for_user : string -> client_message list -> client_message list =
+  <fun>
 |}];;
 [@@@part "4"];;
 module Log_entry = struct
@@ -175,9 +173,7 @@ let messages_for_user user messages =
 ;;
 [%%expect{|
 val messages_for_user :
-  string ->
-  (Common.t * details) Core_kernel.Std.List.t ->
-  (Common.t * details) Core_kernel.Std.List.t = <fun>
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 |}];;
 [@@@part "7.9"];;
 type server_state;;

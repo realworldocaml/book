@@ -30,9 +30,7 @@ let memoize f =
        y
   );;
 [%%expect{|
-val memoize :
-  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
-  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 |}];;
 [@@@part "1"];;
 let rec fib i =
@@ -44,27 +42,27 @@ val fib : int -> int = <fun>
 time (fun () -> fib 20);;
 [%%expect{|
 - : int = 10946
-Time: 0.301539 ms
+Time: 0.29749 ms
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 4593.487378 ms
+Time: 4649.410886 ms
 |}];;
 [@@@part "3"];;
 let fib = memoize fib;;
 [%%expect{|
-val fib : int Core_kernel.Std.Hashtbl.key -> int = <fun>
+val fib : int -> int = <fun>
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 4833.356819 ms
+Time: 4453.708442 ms
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 0.004908 ms
+Time: 0.004211 ms
 |}];;
 [@@@part "4"];;
 let fib_norec fib i =
@@ -106,25 +104,21 @@ let memo_rec f_norec x =
   f x
 ;;
 [%%expect{|
-val memo_rec :
-  (('a Core_kernel.Std.Hashtbl.key -> 'b) ->
-   'a Core_kernel.Std.Hashtbl.key -> 'b) ->
-  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 |}];;
 [@@@part "8"];;
 let fib = memo_rec fib_norec;;
 [%%expect{|
-val fib : int Core_kernel.Std.Hashtbl.key -> int Core_kernel.Std.Hashtbl.key =
-  <fun>
+val fib : int -> int = <fun>
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
-- : int Core_kernel.Std.Hashtbl.key = 102334155
-Time: 0.052034 ms
+- : int = 102334155
+Time: 0.046758 ms
 |}];;
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
 [%%expect{|
-val fib : int Core_kernel.Std.Hashtbl.key -> int = <fun>
+val fib : int -> int = <fun>
 |}];;

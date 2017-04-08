@@ -15,9 +15,7 @@ let memoize f =
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
 [%%expect{|
-val memoize :
-  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
-  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 |}];;
 [@@@part "2"];;
 let rec edit_distance s t =
@@ -36,13 +34,11 @@ let rec edit_distance s t =
       ]
 ;;
 [%%expect{|
-val edit_distance :
-  Core_kernel.Std.String.t ->
-  Core_kernel.Std.String.t -> Core_kernel.Std.Int.t = <fun>
+val edit_distance : string -> string -> int = <fun>
 |}];;
 edit_distance "OCaml" "ocaml";;
 [%%expect{|
-- : Core_kernel.Std.Int.t = 2
+- : int = 2
 |}];;
 [@@@part "3"];;
 #require "mtime.os.top";;
@@ -59,13 +55,13 @@ val time : (unit -> 'a) -> 'a = <fun>
 [@@@part "4"];;
 time (fun () -> edit_distance "OCaml" "ocaml");;
 [%%expect{|
-- : Core_kernel.Std.Int.t = 2
-Time: 0.848163 ms
+- : int = 2
+Time: 0.699772 ms
 |}];;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 [%%expect{|
-- : Core_kernel.Std.Int.t = 2
-Time: 3909.898767 ms
+- : int = 2
+Time: 3473.483739 ms
 |}];;
 [@@@part "5"];;
 let memo_rec f_norec x =
@@ -75,10 +71,7 @@ let memo_rec f_norec x =
   f x
 ;;
 [%%expect{|
-val memo_rec :
-  (('a Core_kernel.Std.Hashtbl.key -> 'b) ->
-   'a Core_kernel.Std.Hashtbl.key -> 'b) ->
-  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 |}];;
 [@@@part "6"];;
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
@@ -96,13 +89,11 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
       ; edit_distance (s',t') + cost_to_drop_both
       ]) ;;
 [%%expect{|
-val edit_distance :
-  (Core_kernel.Std.String.t * Core_kernel.Std.String.t)
-  Core_kernel.Std.Hashtbl.key -> Core_kernel.Std.Int.t = <fun>
+val edit_distance : string * string -> int = <fun>
 |}];;
 [@@@part "7"];;
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 [%%expect{|
-- : Core_kernel.Std.Int.t = 2
-Time: 0.384097 ms
+- : int = 2
+Time: 0.331982 ms
 |}];;

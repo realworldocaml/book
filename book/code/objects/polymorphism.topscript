@@ -46,7 +46,7 @@ val sq : < name : string; width : int > = <obj>
 |}];;
 area_closed sq ;;
 [%%expect{|
-Characters 13-15:
+Characters 12-14:
 Error: This expression has type < name : string; width : int >
        but an expression was expected of type < width : int >
        The second object type has no method name

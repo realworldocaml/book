@@ -37,7 +37,7 @@ val person : [> `Assoc of string * [> `String of string ] ] =
 |}];;
 Yojson.Basic.pretty_to_string person ;;
 [%%expect{|
-Characters 32-38:
+Characters 30-36:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.json

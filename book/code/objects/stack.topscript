@@ -66,7 +66,7 @@ s#pop ;;
 [@@@part "4"];;
 let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
 [%%expect{|
-val print_pop : < pop : int Core_kernel.Std.Option.t; .. > -> unit = <fun>
+val print_pop : < pop : int option; .. > -> unit = <fun>
 |}];;
 print_pop (stack [5;4;3;2;1]) ;;
 [%%expect{|
@@ -77,11 +77,11 @@ let t = object
   method pop = Some (Float.to_int (Time_ns.to_float (Time_ns.now ())))
 end ;;
 [%%expect{|
-Characters 52-68:
+Characters 50-66:
 Error: Unbound value Time_ns.to_float
 |}];;
 print_pop t ;;
 [%%expect{|
-Characters 11-12:
+Characters 10-11:
 Error: Unbound value t
 |}];;

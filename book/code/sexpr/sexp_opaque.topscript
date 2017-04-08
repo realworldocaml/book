@@ -20,7 +20,7 @@ type t = { a : no_converter; b : string; }
 [@@@part "1"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 [%%expect{|
-type t = { a : no_converter Core_kernel.Std.sexp_opaque; b : string; }
+type t = { a : no_converter; b : string; }
 |}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;
@@ -39,20 +39,20 @@ Hint: Did you mean mat_of_sexp or int_of_sexp?
 [@@@part "4"];;
 type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;
 [%%expect{|
-type t = { a : no_converter Core_kernel.Std.sexp_opaque list; b : string; }
+type t = { a : no_converter list; b : string; }
 |}];;
 t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
 [%%expect{|
-Characters 3-12:
+Characters 0-9:
 Error: Unbound value t_of_sexp
 Hint: Did you mean mat_of_sexp or int_of_sexp?
 |}];;
 [@@@part "5"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp_of] ;;
 [%%expect{|
-type t = { a : no_converter Core_kernel.Std.sexp_opaque; b : string; }
+type t = { a : no_converter; b : string; }
 |}];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving of_sexp] ;;
 [%%expect{|
-type t = { a : no_converter Core_kernel.Std.sexp_opaque; b : string; }
+type t = { a : no_converter; b : string; }
 |}];;

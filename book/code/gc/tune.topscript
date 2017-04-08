@@ -11,7 +11,7 @@
 open Core_kernel.Std;;
 let c = Gc.get () ;;
 [%%expect{|
-val c : Core_kernel.Std.Gc.control =
+val c : Gc.control =
   {Core_kernel.Std.Gc.Control.minor_heap_size = <abstr>;
    major_heap_increment = <abstr>; space_overhead = <abstr>;
    verbose = <abstr>; max_overhead = <abstr>; stack_limit = <abstr>;
@@ -19,24 +19,24 @@ val c : Core_kernel.Std.Gc.control =
 |}];;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 [%%expect{|
-- : Core_kernel__.Import.unit = ()
+- : unit = ()
 |}];;
 [@@@part "1"];;
 Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
 [%%expect{|
-- : Core_kernel__.Import.unit = ()
+- : unit = ()
 |}];;
 [@@@part "2"];;
 Gc.major_slice 0 ;;
 [%%expect{|
-- : Core_kernel__.Import.int = 0
+- : Base.int = 0
 |}];;
 Gc.full_major () ;;
 [%%expect{|
-- : Core_kernel__.Import.unit = ()
+- : unit = ()
 |}];;
 [@@@part "3"];;
 Gc.tune ~max_overhead:0 () ;;
 [%%expect{|
-- : Core_kernel__.Import.unit = ()
+- : unit = ()
 |}];;

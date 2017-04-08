@@ -157,7 +157,7 @@ let rec sum_if l =
   else List.hd_exn l + sum_if (List.tl_exn l)
 ;;
 [%%expect{|
-val sum_if : int Core_kernel.Std.List.t -> int = <fun>
+val sum_if : int list -> int = <fun>
 |}];;
 [@@@part "12"];;
 let numbers = List.range 0 1000 in
@@ -185,12 +185,12 @@ val drop_zero : int list -> 'a list = <fun>
 [@@@part "14"];;
 List.map ~f:String.length ["Hello"; "World!"];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [5; 6]
+- : int list = [5; 6]
 |}];;
 [@@@part "15"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
 [%%expect{|
-- : Core_kernel.Std.Int.t Core_kernel.Std.List.t = [3; 2; 3]
+- : int list = [3; 2; 3]
 |}];;
 [@@@part "16"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
@@ -200,9 +200,7 @@ Exception: Invalid_argument "length mismatch in map2_exn: 3 <> 4 ".
 [@@@part "17"];;
 List.fold;;
 [%%expect{|
-- : 'a Core_kernel.Std.List.t ->
-    init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
-= <fun>
+- : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum = <fun>
 |}];;
 [@@@part "18"];;
 List.fold ~init:0 ~f:(+) [1;2;3;4];;
@@ -223,10 +221,7 @@ let max_widths header rows =
       List.map2_exn ~f:Int.max acc (lengths row))
 ;;
 [%%expect{|
-val max_widths :
-  Core_kernel.Std.String.t Core_kernel.Std.List.t ->
-  Core_kernel.Std.String.t Core_kernel.Std.List.t Core_kernel.Std.List.t ->
-  Core_kernel.Std.Int.t Core_kernel.Std.List.t = <fun>
+val max_widths : string list -> string list list -> int list = <fun>
 |}];;
 [@@@part "21"];;
 let render_separator widths =
@@ -236,7 +231,7 @@ let render_separator widths =
   "|" ^ String.concat ~sep:"+" pieces ^ "|"
 ;;
 [%%expect{|
-val render_separator : int Core_kernel.Std.List.t -> string = <fun>
+val render_separator : int list -> string = <fun>
 |}];;
 render_separator [3;6;2];;
 [%%expect{|
@@ -250,14 +245,14 @@ val s : string = "......."
 [@@@part "23"];;
 let s = String.concat [".";".";".";".";".";".";"."];;
 [%%expect{|
-val s : Core_kernel.Std.String.t = "......."
+val s : string = "......."
 |}];;
 [@@@part "24"];;
 let pad s length =
   " " ^ s ^ String.make (length - String.length s + 1) ' '
 ;;
 [%%expect{|
-val pad : Core_kernel.Std.String.t -> int -> string = <fun>
+val pad : string -> int -> string = <fun>
 |}];;
 pad "hello" 10;;
 [%%expect{|
@@ -269,9 +264,7 @@ let render_row row widths =
   "|" ^ String.concat ~sep:"|" padded ^ "|"
 ;;
 [%%expect{|
-val render_row :
-  Core_kernel.Std.String.t Core_kernel.Std.List.t ->
-  int Core_kernel.Std.List.t -> string = <fun>
+val render_row : string list -> int list -> string = <fun>
 |}];;
 render_row ["Hello";"World"] [10;15];;
 [%%expect{|
@@ -287,15 +280,12 @@ let render_table header rows =
     )
 ;;
 [%%expect{|
-val render_table :
-  Core_kernel.Std.String.t Core_kernel.Std.List.t ->
-  Core_kernel.Std.String.t Core_kernel.Std.List.t Core_kernel.Std.List.t ->
-  Core_kernel.Std.String.t = <fun>
+val render_table : string list -> string list list -> string = <fun>
 |}];;
 [@@@part "27"];;
 List.reduce;;
 [%%expect{|
-- : 'a Core_kernel.Std.List.t -> f:('a -> 'a -> 'a) -> 'a option = <fun>
+- : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
 |}];;
 [@@@part "28"];;
 List.reduce ~f:(+) [1;2;3;4;5];;
@@ -309,7 +299,7 @@ List.reduce ~f:(+) [];;
 [@@@part "29"];;
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [2; 4]
+- : int list = [2; 4]
 |}];;
 [@@@part "30"];;
 List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
@@ -330,28 +320,28 @@ let is_ocaml_source s =
   | _ -> false
 ;;
 [%%expect{|
-val is_ocaml_source : Core_kernel.Std.String.t -> bool = <fun>
+val is_ocaml_source : string -> bool = <fun>
 |}];;
 let (ml_files,other_files) =
   List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
 [%%expect{|
-Characters 51-61:
+Characters 50-60:
 Error: Unbound value Sys.ls_dir
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [1; 2; 3; 4; 5; 6]
+- : int list = [1; 2; 3; 4; 5; 6]
 |}];;
 [@@@part "33"];;
 [1;2;3] @ [4;5;6];;
 [%%expect{|
-- : int Base__List.t = [1; 2; 3; 4; 5; 6]
+- : int list = [1; 2; 3; 4; 5; 6]
 |}];;
 [@@@part "34"];;
 List.concat [[1;2];[3;4;5];[6];[]];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [1; 2; 3; 4; 5; 6]
+- : int list = [1; 2; 3; 4; 5; 6]
 |}];;
 [@@@part "35"];;
 let rec ls_rec s =
@@ -393,7 +383,7 @@ length [1;2;3];;
 [@@@part "38"];;
 let make_list n = List.init n ~f:(fun x -> x);;
 [%%expect{|
-val make_list : int -> int Core_kernel.Std.List.t = <fun>
+val make_list : int -> int list = <fun>
 |}];;
 length (make_list 10);;
 [%%expect{|
@@ -503,7 +493,7 @@ Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_
 (However, some guarded clause may match this value.)
-val count_some : 'a Core_kernel.Std.Option.t list -> int = <fun>
+val count_some : 'a option list -> int = <fun>
 |}];;
 [@@@part "49"];;
 count_some [Some 3; None; Some 4];;
@@ -519,7 +509,7 @@ let rec count_some list =
   | x :: tl -> -1 (* unreachable *)
 ;;
 [%%expect{|
-val count_some : 'a Core_kernel.Std.Option.t list -> int = <fun>
+val count_some : 'a option list -> int = <fun>
 |}];;
 [@@@part "51"];;
 let rec count_some list =
@@ -529,7 +519,7 @@ let rec count_some list =
   | _ :: tl -> 1 + count_some tl
 ;;
 [%%expect{|
-val count_some : 'a Core_kernel.Std.Option.t list -> int = <fun>
+val count_some : 'a option list -> int = <fun>
 |}];;
 [@@@part "52"];;
 let rec count_some list =
@@ -544,8 +534,7 @@ val count_some : 'a option list -> int = <fun>
 [@@@part "53"];;
 let count_some l = List.count ~f:Option.is_some l;;
 [%%expect{|
-val count_some : 'a Core_kernel.Std.Option.t Core_kernel.Std.List.t -> int =
-  <fun>
+val count_some : 'a option list -> int = <fun>
 |}];;
 [@@@part "69"];;
 printf "%s\n"

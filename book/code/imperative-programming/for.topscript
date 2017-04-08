@@ -42,7 +42,7 @@ let rev_inplace ar =
   done
 ;;
 [%%expect{|
-val rev_inplace : 'a Core_kernel.Std.Array.t -> unit = <fun>
+val rev_inplace : 'a array -> unit = <fun>
 |}];;
 let nums = [|1;2;3;4;5|];;
 [%%expect{|

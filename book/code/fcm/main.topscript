@@ -112,14 +112,14 @@ module Int_bumper = struct
   let bump n = n + 1
 end;;
 [%%expect{|
-module Int_bumper : sig type t = int val bump : int -> int end
+module Int_bumper : sig type t = int val bump : t -> t end
 |}];;
 module Float_bumper = struct
   type t = float
   let bump n = n +. 1.
 end;;
 [%%expect{|
-module Float_bumper : sig type t = float val bump : float -> float end
+module Float_bumper : sig type t = float val bump : t -> t end
 |}];;
 [@@@part "13"];;
 let int_bumper = (module Int_bumper : Bumpable);;
@@ -160,18 +160,17 @@ let bump_list
   List.map ~f:B.bump l
 ;;
 [%%expect{|
-val bump_list :
-  (module Bumpable with type t = 'a) -> 'a list -> 'a Core_kernel.Std.List.t =
+val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
   <fun>
 |}];;
 [@@@part "18"];;
 bump_list int_bumper [1;2;3];;
 [%%expect{|
-- : int Core_kernel.Std.List.t = [2; 3; 4]
+- : int list = [2; 3; 4]
 |}];;
 bump_list float_bumper [1.5;2.5;3.5];;
 [%%expect{|
-- : float Core_kernel.Std.List.t = [2.5; 3.5; 4.5]
+- : float list = [2.5; 3.5; 4.5]
 |}];;
 [@@@part "19"];;
 let wrap_in_list (type a) (x:a) = [x];;
@@ -204,9 +203,9 @@ val create_comparable :
 |}];;
 create_comparable Int.compare;;
 [%%expect{|
-- : (module Comparable with type t = Core_kernel.Std.Int.t) = <module>
+- : (module Comparable with type t = int) = <module>
 |}];;
 create_comparable Float.compare;;
 [%%expect{|
-- : (module Comparable with type t = Core_kernel.Std.Float.t) = <module>
+- : (module Comparable with type t = Float.t) = <module>
 |}];;

@@ -15,7 +15,7 @@ Sexp.List [
   Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
 ];;
 [%%expect{|
-- : Core_kernel.Std.Sexp.t =
+- : Sexp.t =
 Core_kernel.Std.Sexp.List
  [Core_kernel.Std.Sexp.Atom "this";
   Core_kernel.Std.Sexp.List

@@ -28,7 +28,7 @@ Error: Unbound value json
 |}];;
 let pages = json |> member "pages" |> to_int ;;
 [%%expect{|
-Characters 13-17:
+Characters 12-16:
 Error: Unbound value json
 |}];;
 [@@@part "3"];;
@@ -39,7 +39,7 @@ Error: Unbound value json
 |}];;
 let is_translated = json |> member "is_translated" |> to_bool_option ;;
 [%%expect{|
-Characters 21-25:
+Characters 20-24:
 Error: Unbound value json
 |}];;
 [@@@part "4"];;

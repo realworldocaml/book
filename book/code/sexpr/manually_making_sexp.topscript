@@ -18,11 +18,11 @@ let sexp_of_t t =
   l [ l [a "foo"; Int.sexp_of_t t.foo  ];
       l [a "bar"; Float.sexp_of_t t.bar]; ] ;;
 [%%expect{|
-val sexp_of_t : t -> Core_kernel.Std.Sexp.t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 |}];;
 sexp_of_t { foo = 3; bar = -5.5 } ;;
 [%%expect{|
-- : Core_kernel.Std.Sexp.t =
+- : Sexp.t =
 Core_kernel.Std.Sexp.List
  [Core_kernel.Std.Sexp.List
    [Core_kernel.Std.Sexp.Atom "foo"; Core_kernel.Std.Sexp.Atom "3"];

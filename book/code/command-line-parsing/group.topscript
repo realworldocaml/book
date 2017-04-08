@@ -16,7 +16,7 @@ Warning 3: deprecated: module Core.Std
 |}];;
 Command.basic ;;
 [%%expect{|
-- : ('main, unit) Core.Std.Command.basic_command = <fun>
+- : ('main, unit) Command.basic_command = <fun>
 |}];;
 Command.group ;;
 [%%expect{|
@@ -24,6 +24,6 @@ Command.group ;;
     ?readme:(unit -> string) ->
     ?preserve_subcommand_order:unit ->
     ?body:(path:string list -> unit) ->
-    (string * Core.Std.Command.t) list -> Core.Std.Command.t
+    (string * Command.t) list -> Command.t
 = <fun>
 |}];;

@@ -14,8 +14,7 @@ open PosixTypes ;;
 open Foreign ;;
 let compare_t = ptr void @-> ptr void @-> returning int ;;
 [%%expect{|
-val compare_t :
-  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) Ctypes.fn =
+val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
   int(void*, void*)
 |}];;
 let qsort = foreign "qsort"
@@ -24,7 +23,7 @@ let qsort = foreign "qsort"
 [%%expect{|
 val qsort :
   unit Ctypes_static.ptr ->
-  PosixTypes.size_t ->
-  PosixTypes.size_t ->
-  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) -> unit = <fun>
+  size_t ->
+  size_t -> (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) -> unit =
+  <fun>
 |}];;

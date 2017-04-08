@@ -25,9 +25,7 @@ let memoize f =
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
 [%%expect{|
-val memoize :
-  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
-  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 |}];;
 let fib_norec fib i =
   if i <= 1 then i
@@ -41,13 +39,13 @@ let memo_rec f_norec =
   f
 ;;
 [%%expect{|
-Characters 38-68:
+Characters 37-67:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 |}];;
 [@@@part "2"];;
 let rec x = lazy (force x + 1);;
 [%%expect{|
-val x : int Base.Lazy.t = <lazy>
+val x : int lazy_t = <lazy>
 |}];;
 [@@@part "3"];;
 force x;;
@@ -60,13 +58,10 @@ let lazy_memo_rec f_norec x =
   (force f) x
 ;;
 [%%expect{|
-val lazy_memo_rec :
-  (('a Core_kernel.Std.Hashtbl.key -> 'b) ->
-   'a Core_kernel.Std.Hashtbl.key -> 'b) ->
-  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
 |}];;
 time (fun () -> lazy_memo_rec fib_norec 40);;
 [%%expect{|
-- : int Core_kernel.Std.Hashtbl.key = 102334155
-Time: 0.052049 ms
+- : int = 102334155
+Time: 0.048508 ms
 |}];;

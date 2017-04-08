@@ -15,7 +15,7 @@ Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;
 |}];;
 Sexp.of_string ("(1 2 (3 4))") ;;
 [%%expect{|
-- : Core_kernel.Std.Sexp.t =
+- : Sexp.t =
 Core_kernel.Std.Sexp.List
  [Core_kernel.Std.Sexp.Atom "1"; Core_kernel.Std.Sexp.Atom "2";
   Core_kernel.Std.Sexp.List

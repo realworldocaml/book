@@ -17,7 +17,7 @@ let sum_file filename =
     ~finally:(fun () -> In_channel.close file)
 ;;
 [%%expect{|
-val sum_file : Stdio__.Import.string -> int = <fun>
+val sum_file : string -> int = <fun>
 |}];;
 [@@@part "2"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
@@ -35,7 +35,7 @@ let sum_file filename =
     List.fold ~init:0 ~f:(+) numbers)
 ;;
 [%%expect{|
-val sum_file : Stdio__.Import.string -> int = <fun>
+val sum_file : string -> int = <fun>
 |}];;
 [@@@part "4"];;
 let sum_file filename =
@@ -44,5 +44,5 @@ let sum_file filename =
       sum + Int.of_string line))
 ;;
 [%%expect{|
-val sum_file : Stdio__.Import.string -> int = <fun>
+val sum_file : string -> int = <fun>
 |}];;

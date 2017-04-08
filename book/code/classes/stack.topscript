@@ -68,7 +68,7 @@ end ;;
 class sstack :
   string list ->
   object
-    val mutable v : string Core_kernel.Std.List.t
+    val mutable v : string list
     method pop : string option
     method print : unit
     method push : string -> unit

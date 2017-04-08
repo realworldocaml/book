@@ -11,7 +11,7 @@ open Core_kernel.Std;;
 [@@@part "1"];;
 List.find_map;;
 [%%expect{|
-- : 'a Core_kernel.Std.List.t -> f:('a -> 'b option) -> 'b option = <fun>
+- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>
 |}];;
 [@@@part "2"];;
 let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;

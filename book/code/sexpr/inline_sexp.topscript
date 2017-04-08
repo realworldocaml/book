@@ -18,6 +18,6 @@ List.iter l ~f:(fun x ->
   |> Sexp.to_string
   |> print_endline) ;;
 [%%expect{|
-Characters 30-37:
+Characters 29-36:
 Error: Uninterpreted extension 'sexp_of'.
 |}];;

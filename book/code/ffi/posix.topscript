@@ -15,23 +15,23 @@ open PosixTypes ;;
 open Foreign ;;
 let time = foreign "time" (ptr time_t @-> returning time_t) ;;
 [%%expect{|
-val time : PosixTypes.time_t Ctypes_static.ptr -> PosixTypes.time_t = <fun>
+val time : time_t Ctypes_static.ptr -> time_t = <fun>
 |}];;
 [@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
 [%%expect{|
-val cur_time : PosixTypes.time_t = 1491685166
+val cur_time : time_t = 1491687799
 |}];;
 [@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
 [%%expect{|
-val time' : unit -> PosixTypes.time_t = <fun>
+val time' : unit -> time_t = <fun>
 |}];;
 [@@@part "3"];;
 let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double) ;;
 [%%expect{|
-val difftime : PosixTypes.time_t -> PosixTypes.time_t -> float = <fun>
+val difftime : time_t -> time_t -> float = <fun>
 |}];;
 let t1 =
   time' () in
@@ -44,26 +44,24 @@ difftime t2 t1 ;;
 [@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
 [%%expect{|
-val ctime : PosixTypes.time_t Ctypes_static.ptr -> string = <fun>
+val ctime : time_t Ctypes_static.ptr -> string = <fun>
 |}];;
 [@@@part "5"];;
 ctime (time' ()) ;;
 [%%expect{|
 Characters 6-16:
-Error: This expression has type PosixTypes.time_t = PosixTypes.Time.t
-       but an expression was expected of type
-         PosixTypes.time_t Ctypes_static.ptr =
-           (PosixTypes.time_t, [ `C ]) Ctypes_static.pointer
+Error: This expression has type time_t but an expression was expected of type
+         time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
 |}];;
 [@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
 [%%expect{|
-val t_ptr : PosixTypes.time_t Ctypes.ptr = (time_t*) 0x59f9b70
+val t_ptr : time_t ptr = (time_t*) 0x4babb90
 |}];;
 [@@@part "7"];;
 ctime t_ptr ;;
 [%%expect{|
-- : string = "Sat Apr  8 22:59:28 2017\n"
+- : string = "Sat Apr  8 23:43:21 2017\n"
 |}];;
 [@@@part "8"];;
 type timeval ;;
@@ -72,17 +70,17 @@ type timeval
 |}];;
 let timeval : timeval structure typ = structure "timeval" ;;
 [%%expect{|
-val timeval : timeval Ctypes.structure Ctypes.typ = struct timeval
+val timeval : timeval structure typ = struct timeval
 |}];;
 [@@@part "9"];;
 let tv_sec  = field timeval "tv_sec" long ;;
 [%%expect{|
-val tv_sec : (Signed.long, timeval Ctypes.structure) Ctypes.field =
+val tv_sec : (Signed.long, timeval structure) field =
   {Ctypes_static.ftype = long; foffset = 0; fname = "tv_sec"}
 |}];;
 let tv_usec = field timeval "tv_usec" long ;;
 [%%expect{|
-val tv_usec : (Signed.long, timeval Ctypes.structure) Ctypes.field =
+val tv_usec : (Signed.long, timeval structure) field =
   {Ctypes_static.ftype = long; foffset = 8; fname = "tv_usec"}
 |}];;
 seal timeval ;;
@@ -96,7 +94,7 @@ type timezone
 |}];;
 let timezone : timezone structure typ = structure "timezone" ;;
 [%%expect{|
-val timezone : timezone Ctypes.structure Ctypes.typ = struct timezone
+val timezone : timezone structure typ = struct timezone
 |}];;
 [@@@part "11"];;
 let gettimeofday = foreign "gettimeofday"
@@ -118,6 +116,6 @@ Error: Unbound value gettimeofday
 |}];;
 gettimeofday' () ;;
 [%%expect{|
-Characters 1-14:
+Characters 0-13:
 Error: Unbound value gettimeofday'
 |}];;
