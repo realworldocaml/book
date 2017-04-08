@@ -1,22 +1,13 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let sum_file filename =
   let file = In_channel.create filename in
@@ -25,21 +16,17 @@ let sum_file filename =
     List.fold ~init:0 ~f:(+) numbers)
     ~finally:(fun () -> In_channel.close file)
 ;;
-
-
 [%%expect{|
+val sum_file : Stdio__.Import.string -> int = <fun>
 |}];;
 [@@@part "2"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-
-sum_file "numbers.txt";;
-
-
 [%%expect{|
-Line _, characters 0-74:
-Warning 35: unused for-loop index i.
-Line _:
-Error: Some fatal warnings were triggered (1 occurrences)
+- : unit = ()
+|}];;
+sum_file "numbers.txt";;
+[%%expect{|
+- : int = 15
 |}];;
 [@@@part "3"];;
 let sum_file filename =
@@ -47,9 +34,8 @@ let sum_file filename =
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
     List.fold ~init:0 ~f:(+) numbers)
 ;;
-
-
 [%%expect{|
+val sum_file : Stdio__.Import.string -> int = <fun>
 |}];;
 [@@@part "4"];;
 let sum_file filename =
@@ -57,6 +43,6 @@ let sum_file filename =
     In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
       sum + Int.of_string line))
 ;;
-
 [%%expect{|
+val sum_file : Stdio__.Import.string -> int = <fun>
 |}];;

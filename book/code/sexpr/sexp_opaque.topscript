@@ -1,88 +1,58 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 type no_converter = int * int ;;
-
-type t = { a: no_converter; b: string } [@@deriving sexp] ;;
-
-
-
 [%%expect{|
-Line _, characters 43-51:
-Attribute `deriving' was not used
+type no_converter = int * int
+|}];;
+type t = { a: no_converter; b: string } [@@deriving sexp] ;;
+[%%expect{|
+type t = { a : no_converter; b : string; }
 |}];;
 [@@@part "1"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
-
-
-
-
 [%%expect{|
-Line _, characters 55-63:
-Attribute `deriving' was not used
+type t = { a : no_converter Core_kernel.Std.sexp_opaque; b : string; }
 |}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;
-
-
 [%%expect{|
-Line _, characters 0-9:
+Characters 0-9:
 Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_int or sexp_of_mat?
+Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;
 [@@@part "3"];;
 t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
-
-
-
-
 [%%expect{|
-Line _, characters 0-9:
+Characters 0-9:
 Error: Unbound value t_of_sexp
-Hint: Did you mean int_of_sexp or mat_of_sexp?
+Hint: Did you mean mat_of_sexp or int_of_sexp?
 |}];;
 [@@@part "4"];;
 type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;
-
-
-
-t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
-
-
 [%%expect{|
-Line _, characters 60-68:
-Attribute `deriving' was not used
-Line _, characters 0-9:
+type t = { a : no_converter Core_kernel.Std.sexp_opaque list; b : string; }
+|}];;
+t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
+[%%expect{|
+Characters 3-12:
 Error: Unbound value t_of_sexp
-Hint: Did you mean int_of_sexp or mat_of_sexp?
+Hint: Did you mean mat_of_sexp or int_of_sexp?
 |}];;
 [@@@part "5"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp_of] ;;
-
-
-type t = { a: no_converter sexp_opaque; b: string } [@@deriving of_sexp] ;;
-
-
 [%%expect{|
-Line _, characters 55-63:
-Attribute `deriving' was not used
-Line _, characters 55-63:
-Attribute `deriving' was not used
+type t = { a : no_converter Core_kernel.Std.sexp_opaque; b : string; }
+|}];;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving of_sexp] ;;
+[%%expect{|
+type t = { a : no_converter Core_kernel.Std.sexp_opaque; b : string; }
 |}];;

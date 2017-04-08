@@ -1,33 +1,23 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let l = [(1,"one"); (2,"two")] ;;
-
+[%%expect{|
+val l : (int * string) list = [(1, "one"); (2, "two")]
+|}];;
 List.iter l ~f:(fun x ->
   [%sexp_of: int * string ] x
   |> Sexp.to_string
   |> print_endline) ;;
-
-
-
 [%%expect{|
-Line _, characters 4-11:
-Extension `sexp_of' was not translated
+Characters 30-37:
+Error: Uninterpreted extension 'sexp_of'.
 |}];;

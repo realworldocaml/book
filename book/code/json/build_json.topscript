@@ -1,58 +1,43 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
 #require "yojson";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let person = `Assoc [ ("name", `String "Anil") ] ;;
-
-
-
-[%%expect];;
+[%%expect{|
+val person : [> `Assoc of (string * [> `String of string ]) list ] =
+  `Assoc [("name", `String "Anil")]
+|}];;
 [@@@part "2"];;
 Yojson.Basic.pretty_to_string ;;
-
-
-[%%expect];;
+[%%expect{|
+- : ?std:bool -> Yojson.Basic.json -> string = <fun>
+|}];;
 [@@@part "3"];;
 Yojson.Basic.pretty_to_string person ;;
-
-Yojson.Basic.pretty_to_channel stdout person ;;
-
-
-
 [%%expect{|
-{ "name": "Anil" }
+- : string = "{ \"name\": \"Anil\" }"
 |}];;
+Yojson.Basic.pretty_to_channel stdout person ;;
+[%%expect{|
+- : unit = ()
+{ "name": "Anil" }|}];;
 [@@@part "4"];;
 let person = `Assoc ("name", `String "Anil");;
-
-
-Yojson.Basic.pretty_to_string person ;;
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 30-36:
+val person : [> `Assoc of string * [> `String of string ] ] =
+  `Assoc ("name", `String "Anil")
+|}];;
+Yojson.Basic.pretty_to_string person ;;
+[%%expect{|
+Characters 32-38:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
@@ -61,12 +46,8 @@ Error: This expression has type
 [@@@part "5"];;
 let (person : Yojson.Basic.json) =
   `Assoc ("name", `String "Anil");;
-
-
-
-
 [%%expect{|
-Line _, characters 9-33:
+Characters 44-68:
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list

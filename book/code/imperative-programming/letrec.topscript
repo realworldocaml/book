@@ -1,12 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
 #require "mtime.os.top";;
-
 let time f =
   let counter = Mtime.counter () in
   let x = f () in
@@ -14,50 +16,41 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-
+[%%expect{|
+val time : (unit -> 'a) -> 'a = <fun>
+|}];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
   (fun x ->
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
-
+[%%expect{|
+val memoize :
+  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+|}];;
 let fib_norec fib i =
   if i <= 1 then i
   else fib (i - 1) + fib (i - 2) ;;
-
-
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+val fib_norec : (int -> int) -> int -> int = <fun>
 |}];;
 [@@@part "1"];;
-
 let memo_rec f_norec =
   let rec f = memoize (fun x -> f_norec f x) in
   f
 ;;
-
 [%%expect{|
-Line _, characters 14-44:
+Characters 38-68:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 |}];;
 [@@@part "2"];;
 let rec x = lazy (force x + 1);;
-
 [%%expect{|
+val x : int Base.Lazy.t = <lazy>
 |}];;
 [@@@part "3"];;
 force x;;
-
 [%%expect{|
 Exception: CamlinternalLazy.Undefined.
 |}];;
@@ -66,10 +59,14 @@ let lazy_memo_rec f_norec x =
   let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
   (force f) x
 ;;
-
-time (fun () -> lazy_memo_rec fib_norec 40);;
-
-
 [%%expect{|
-Time: 0.078588 ms
+val lazy_memo_rec :
+  (('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+   'a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+|}];;
+time (fun () -> lazy_memo_rec fib_norec 40);;
+[%%expect{|
+- : int Core_kernel.Std.Hashtbl.key = 102334155
+Time: 0.052049 ms
 |}];;

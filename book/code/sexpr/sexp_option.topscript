@@ -1,58 +1,44 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 type t = { a: int option; b: string } [@@deriving sexp] ;;
-
-
-
-sexp_of_t { a = None; b = "hello" } ;;
-
-sexp_of_t { a = Some 3; b = "hello" } ;;
-
-
 [%%expect{|
-Line _, characters 41-49:
-Attribute `deriving' was not used
-Line _, characters 0-9:
+type t = { a : int option; b : string; }
+|}];;
+sexp_of_t { a = None; b = "hello" } ;;
+[%%expect{|
+Characters 3-12:
 Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_int or sexp_of_mat?
-Line _, characters 0-9:
+Hint: Did you mean sexp_of_mat or sexp_of_int?
+|}];;
+sexp_of_t { a = Some 3; b = "hello" } ;;
+[%%expect{|
+Characters 1-10:
 Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_int or sexp_of_mat?
+Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;
 [@@@part "1"];;
 type t = { a: int sexp_option; b: string } [@@deriving sexp] ;;
-
-
-
-sexp_of_t { a = Some 3; b = "hello" } ;;
-
-sexp_of_t { a = None; b = "hello" } ;;
-
 [%%expect{|
-Line _, characters 46-54:
-Attribute `deriving' was not used
-Line _, characters 0-9:
+type t = { a : int Core_kernel.Std.sexp_option; b : string; }
+|}];;
+sexp_of_t { a = Some 3; b = "hello" } ;;
+[%%expect{|
+Characters 3-12:
 Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_int or sexp_of_mat?
-Line _, characters 0-9:
+Hint: Did you mean sexp_of_mat or sexp_of_int?
+|}];;
+sexp_of_t { a = None; b = "hello" } ;;
+[%%expect{|
+Characters 1-10:
 Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_int or sexp_of_mat?
+Hint: Did you mean sexp_of_mat or sexp_of_int?
 |}];;

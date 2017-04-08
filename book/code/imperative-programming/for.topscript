@@ -1,32 +1,17 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 for i = 0 to 3 do printf "i = %d\n" i done;;
-
-
-
-
-
-
 [%%expect{|
+- : unit = ()
 i = 0
 i = 1
 i = 2
@@ -34,13 +19,8 @@ i = 3
 |}];;
 [@@@part "2"];;
 for i = 3 downto 0 do printf "i = %d\n" i done;;
-
-
-
-
-
-
 [%%expect{|
+- : unit = ()
 i = 3
 i = 2
 i = 1
@@ -61,10 +41,18 @@ let rev_inplace ar =
     decr j
   done
 ;;
-
+[%%expect{|
+val rev_inplace : 'a Core_kernel.Std.Array.t -> unit = <fun>
+|}];;
 let nums = [|1;2;3;4;5|];;
-
+[%%expect{|
+val nums : int array = [|1; 2; 3; 4; 5|]
+|}];;
 rev_inplace nums;;
-
+[%%expect{|
+- : unit = ()
+|}];;
 nums;;
-
+[%%expect{|
+- : int array = [|5; 4; 3; 2; 1|]
+|}];;

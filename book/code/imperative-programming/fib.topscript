@@ -1,12 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
 #require "mtime.os.top";;
-
 let time f =
   let counter = Mtime.counter () in
   let x = f () in
@@ -14,7 +16,9 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-
+[%%expect{|
+val time : (unit -> 'a) -> 'a = <fun>
+|}];;
 let memoize f =
   let table = Hashtbl.Poly.create () in
   (fun x ->
@@ -25,78 +29,75 @@ let memoize f =
        Hashtbl.add_exn table ~key:x ~data:y;
        y
   );;
-
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+val memoize :
+  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
 |}];;
 [@@@part "1"];;
 let rec fib i =
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
-
-
-[%%expect];;
+[%%expect{|
+val fib : int -> int = <fun>
+|}];;
 [@@@part "2"];;
 time (fun () -> fib 20);;
-
-
-time (fun () -> fib 40);;
-
-
-
 [%%expect{|
-Time: 0.751632 ms
-Time: 9872.985882 ms
+- : int = 10946
+Time: 0.301539 ms
+|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+- : int = 165580141
+Time: 4593.487378 ms
 |}];;
 [@@@part "3"];;
 let fib = memoize fib;;
-
-time (fun () -> fib 40);;
-
-
-time (fun () -> fib 40);;
-
-
-
 [%%expect{|
-Time: 10693.530227 ms
-Time: 0.007144 ms
+val fib : int Core_kernel.Std.Hashtbl.key -> int = <fun>
+|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+- : int = 165580141
+Time: 4833.356819 ms
+|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+- : int = 165580141
+Time: 0.004908 ms
 |}];;
 [@@@part "4"];;
 let fib_norec fib i =
   if i <= 1 then i
   else fib (i - 1) + fib (i - 2) ;;
-
-
-[%%expect];;
+[%%expect{|
+val fib_norec : (int -> int) -> int -> int = <fun>
+|}];;
 [@@@part "5"];;
 let rec fib i = fib_norec fib i;;
-
+[%%expect{|
+val fib : int -> int = <fun>
+|}];;
 fib 20;;
-
-
-[%%expect];;
+[%%expect{|
+- : int = 6765
+|}];;
 [@@@part "6"];;
 let make_rec f_norec =
   let rec f x = f_norec f x in
   f
 ;;
-
+[%%expect{|
+val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+|}];;
 let fib = make_rec fib_norec;;
-
+[%%expect{|
+val fib : int -> int = <fun>
+|}];;
 fib 20;;
-
-
-[%%expect];;
+[%%expect{|
+- : int = 6765
+|}];;
 [@@@part "7"];;
 let memo_rec f_norec x =
   let fref = ref (fun _ -> assert false) in
@@ -104,23 +105,26 @@ let memo_rec f_norec x =
   fref := f;
   f x
 ;;
-
-
 [%%expect{|
+val memo_rec :
+  (('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+   'a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
 |}];;
 [@@@part "8"];;
 let fib = memo_rec fib_norec;;
-
-time (fun () -> fib 40);;
-
-
-
 [%%expect{|
-Time: 0.091368 ms
+val fib : int Core_kernel.Std.Hashtbl.key -> int Core_kernel.Std.Hashtbl.key =
+  <fun>
+|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+- : int Core_kernel.Std.Hashtbl.key = 102334155
+Time: 0.052034 ms
 |}];;
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
-
 [%%expect{|
+val fib : int Core_kernel.Std.Hashtbl.key -> int = <fun>
 |}];;

@@ -1,40 +1,42 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 let c = Gc.get () ;;
-Gc.tune ~minor_heap_size:(262144 * 2) () ;;
-
 [%%expect{|
+val c : Core_kernel.Std.Gc.control =
+  {Core_kernel.Std.Gc.Control.minor_heap_size = <abstr>;
+   major_heap_increment = <abstr>; space_overhead = <abstr>;
+   verbose = <abstr>; max_overhead = <abstr>; stack_limit = <abstr>;
+   allocation_policy = <abstr>; window_size = <abstr>}
+|}];;
+Gc.tune ~minor_heap_size:(262144 * 2) () ;;
+[%%expect{|
+- : Core_kernel__.Import.unit = ()
 |}];;
 [@@@part "1"];;
 Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
-
 [%%expect{|
+- : Core_kernel__.Import.unit = ()
 |}];;
 [@@@part "2"];;
 Gc.major_slice 0 ;;
+[%%expect{|
+- : Core_kernel__.Import.int = 0
+|}];;
 Gc.full_major () ;;
-
-[%%expect];;
+[%%expect{|
+- : Core_kernel__.Import.unit = ()
+|}];;
 [@@@part "3"];;
 Gc.tune ~max_overhead:0 () ;;
-
 [%%expect{|
+- : Core_kernel__.Import.unit = ()
 |}];;

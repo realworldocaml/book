@@ -1,85 +1,105 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 Obj.is_block (Obj.repr (1,2,3)) ;;
-
+[%%expect{|
+- : bool = true
+|}];;
 Obj.is_block (Obj.repr 1) ;;
-
-
-[%%expect];;
+[%%expect{|
+- : bool = false
+|}];;
 [@@@part "1"];;
 Obj.tag (Obj.repr 1.0) ;;
-
+[%%expect{|
+- : int = 253
+|}];;
 Obj.double_tag ;;
-
-
-[%%expect];;
+[%%expect{|
+- : int = 253
+|}];;
 [@@@part "2"];;
 Obj.double_tag ;;
-
+[%%expect{|
+- : int = 253
+|}];;
 Obj.double_array_tag ;;
-
-
-[%%expect];;
+[%%expect{|
+- : int = 254
+|}];;
 [@@@part "3"];;
 Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]) ;;
-
+[%%expect{|
+- : int = 254
+|}];;
 Obj.tag (Obj.repr (1.0, 2.0, 3.0) ) ;;
-
+[%%expect{|
+- : int = 0
+|}];;
 Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1 ;;
-
+[%%expect{|
+- : float = 2.2
+|}];;
 Obj.double_field (Obj.repr 1.234) 0 ;;
-
-
-[%%expect];;
+[%%expect{|
+- : float = 1.234
+|}];;
 [@@@part "4"];;
 type t = Apple | Orange | Pear ;;
-
+[%%expect{|
+type t = Apple | Orange | Pear
+|}];;
 ((Obj.magic (Obj.repr Apple)) : int) ;;
-
+[%%expect{|
+- : int = 0
+|}];;
 ((Obj.magic (Obj.repr Pear)) : int) ;;
-
+[%%expect{|
+- : int = 2
+|}];;
 Obj.is_block (Obj.repr Apple) ;;
-
-
-[%%expect];;
+[%%expect{|
+- : bool = false
+|}];;
 [@@@part "5"];;
 type t = Apple | Orange of int | Pear of string | Kiwi ;;
-
+[%%expect{|
+type t = Apple | Orange of int | Pear of string | Kiwi
+|}];;
 Obj.is_block (Obj.repr (Orange 1234)) ;;
-
+[%%expect{|
+- : bool = true
+|}];;
 Obj.tag (Obj.repr (Orange 1234)) ;;
-
+[%%expect{|
+- : int = 0
+|}];;
 Obj.tag (Obj.repr (Pear "xyz")) ;;
-
+[%%expect{|
+- : int = 1
+|}];;
 (Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int) ;;
-
+[%%expect{|
+- : int = 1234
+|}];;
 (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;
-
-
-[%%expect];;
+[%%expect{|
+- : string = "xyz"
+|}];;
 [@@@part "6"];;
 Pa_type_conv.hash_variant "Foo" ;;
-
-(Obj.magic (Obj.repr `Foo) : int) ;;
-
 [%%expect{|
-Line _, characters 0-25:
+Characters 0-25:
 Error: Unbound module Pa_type_conv
+|}];;
+(Obj.magic (Obj.repr `Foo) : int) ;;
+[%%expect{|
+- : int = 3505894
 |}];;

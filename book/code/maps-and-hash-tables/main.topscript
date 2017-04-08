@@ -1,82 +1,80 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 let digit_alist =
   [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
   ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
 ;;
-
-
-
-
 [%%expect{|
+val digit_alist : (int * string) list =
+  [(0, "zero"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
+   (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
 |}];;
 [@@@part "2"];;
 List.Assoc.find digit_alist 6;;
-
-List.Assoc.find digit_alist 22;;
-
-List.Assoc.add digit_alist 0 "zilch";;
-
-
-
-
 [%%expect{|
+- : equal:(int -> int -> bool) -> string option = <fun>
+|}];;
+List.Assoc.find digit_alist 22;;
+[%%expect{|
+- : equal:(int -> int -> bool) -> string option = <fun>
+|}];;
+List.Assoc.add digit_alist 0 "zilch";;
+[%%expect{|
+- : equal:(int -> int -> bool) -> (int, string) Core_kernel.Std.List.Assoc.t
+= <fun>
 |}];;
 [@@@part "3"];;
 let digit_map = Map.of_alist_exn digit_alist
                   ~comparator:Int.comparator;;
-
-Map.find digit_map 3;;
-
-
 [%%expect{|
+val digit_map :
+  (Core_kernel.Std.Int.t, string, Core_kernel.Std.Int.comparator_witness)
+  Core_kernel.Std.Map.t = <abstr>
+|}];;
+Map.find digit_map 3;;
+[%%expect{|
+- : string Core_kernel__.Import.option = Some "three"
 |}];;
 [@@@part "4"];;
 let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
-
-
 [%%expect{|
+val zilch_map :
+  (Core_kernel.Std.Int.t, string, Core_kernel.Std.Int.comparator_witness)
+  Core_kernel.Std.Map.t = <abstr>
 |}];;
 [@@@part "5"];;
 let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
-let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
-Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
-
-
-
-
-
-
 [%%expect{|
+val left : int Core_kernel.Std.String.Map.t = <abstr>
+|}];;
+let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
+[%%expect{|
+val right : int Core_kernel.Std.String.Map.t = <abstr>
+|}];;
+Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
+[%%expect{|
+- : (Core_kernel.Std.String.Map.Key.t, Core_kernel.Std.Int.t)
+    Core_kernel.Std.Map.Symmetric_diff_element.t list
+= [("bar", `Left 3); ("foo", `Unequal (1, 0))]
 |}];;
 [@@@part "6"];;
 Map.symmetric_diff;;
-
-
-
-
-
-
 [%%expect{|
+- : ('k, 'v, 'cmp) Core_kernel.Std.Map.t ->
+    ('k, 'v, 'cmp) Core_kernel.Std.Map.t ->
+    data_equal:('v -> 'v -> Core_kernel__.Import.bool) ->
+    ('k, 'v) Core_kernel.Std.Map.Symmetric_diff_element.t
+    Core_kernel__.Sequence.t
+= <fun>
 |}];;
 [@@@part "7"];;
 module Reverse = Comparator.Make(struct
@@ -85,151 +83,164 @@ module Reverse = Comparator.Make(struct
     let t_of_sexp = String.t_of_sexp
     let compare x y = String.compare y x
   end);;
-
-
-
-
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 8-17:
-Warning 32: unused value t_of_sexp.
-Line _:
-Error: Some fatal warnings were triggered (1 occurrences)
+module Reverse :
+  sig
+    type comparator_witness
+    val comparator : (string, comparator_witness) Base__Comparator.comparator
+  end
 |}];;
 [@@@part "8"];;
 let alist = ["foo", 0; "snoo", 3];;
-
-let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
-
-let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
-
-
 [%%expect{|
-Line _, characters 43-61:
-Error: Unbound module Reverse
+val alist : (string * int) list = [("foo", 0); ("snoo", 3)]
+|}];;
+let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
+[%%expect{|
+val ord_map :
+  (Core_kernel.Std.String.t, int, Core_kernel.Std.String.comparator_witness)
+  Core_kernel.Std.Map.t = <abstr>
+|}];;
+let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
+[%%expect{|
+val rev_map : (string, int, Reverse.comparator_witness) Core_kernel.Std.Map.t =
+  <abstr>
 |}];;
 [@@@part "9"];;
 Map.min_elt ord_map;;
-
-Map.min_elt rev_map;;
-
-
 [%%expect{|
-Line _, characters 12-19:
-Error: Unbound value rev_map
-Hint: Did you mean ord_map?
+- : (Core_kernel.Std.String.t * int) Core_kernel__.Import.option =
+Some ("foo", 0)
+|}];;
+Map.min_elt rev_map;;
+[%%expect{|
+- : (string * int) Core_kernel__.Import.option = Some ("snoo", 3)
 |}];;
 [@@@part "10"];;
 Map.symmetric_diff ord_map rev_map;;
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 27-34:
-Error: Unbound value rev_map
-Hint: Did you mean ord_map?
+Characters 27-34:
+Error: This expression has type
+         (Core_kernel.Std.String.t, int, Reverse.comparator_witness)
+         Core_kernel.Std.Map.t =
+           (Core_kernel.Std.String.t, int, Reverse.comparator_witness)
+           Base__Map.t
+       but an expression was expected of type
+         (Core_kernel.Std.String.t, int,
+          Core_kernel.Std.String.comparator_witness)
+         Core_kernel.Std.Map.t =
+           (Core_kernel.Std.String.t, int,
+            Core_kernel.Std.String.comparator_witness)
+           Base__Map.t
+       Type Reverse.comparator_witness is not compatible with type
+         Core_kernel.Std.String.comparator_witness =
+           Base__String.comparator_witness 
 |}];;
 [@@@part "11"];;
 let ord_tree = Map.to_tree ord_map;;
-
-
 [%%expect{|
+val ord_tree :
+  (Core_kernel.Std.String.t, int, Core_kernel.Std.String.comparator_witness)
+  Core_kernel.Std.Map.Tree.t = <abstr>
 |}];;
 [@@@part "12"];;
 Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
-
-
 [%%expect{|
+- : int option = Some 3
 |}];;
 [@@@part "13"];;
 Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 26-44:
-Error: Unbound module Reverse
+Characters 45-53:
+Error: This expression has type
+         (Core_kernel.Std.String.t, int,
+          Core_kernel.Std.String.comparator_witness)
+         Core_kernel.Std.Map.Tree.t =
+           (Core_kernel.Std.String.t, int,
+            Core_kernel.Std.String.comparator_witness)
+           Base__Map.Using_comparator.Tree.t
+       but an expression was expected of type
+         (Core_kernel.Std.String.t, int, Reverse.comparator_witness)
+         Core_kernel.Std.Map.Tree.t =
+           (Core_kernel.Std.String.t, int, Reverse.comparator_witness)
+           Base__Map.Using_comparator.Tree.t
+       Type
+         Core_kernel.Std.String.comparator_witness =
+           Base__String.comparator_witness
+       is not compatible with type Reverse.comparator_witness 
 |}];;
 [@@@part "14"];;
 Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
-
-
 [%%expect{|
+- : (int Core_kernel.Std.Comparator.Poly.t, string,
+     Core_kernel.Std.Comparator.Poly.comparator_witness)
+    Core_kernel.Std.Map.t
+= <abstr>
 |}];;
 [@@@part "15"];;
 Map.Poly.of_alist_exn digit_alist;;
-
-
 [%%expect{|
+- : (int, string) Core_kernel.Std.Map.Poly.t = <abstr>
 |}];;
 [@@@part "16"];;
 Map.symmetric_diff (Map.Poly.singleton 3 "three")
   (Int.Map.singleton  3 "four" ) ;;
-
-
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 2-32:
+Characters 52-82:
 Error: This expression has type
-         string Int.Map.t = (int, string, Int.comparator_witness) Map.t
+         string Core_kernel.Std.Int.Map.t =
+           (Core_kernel.Std.Int.Map.Key.t, string,
+            Core_kernel.Std.Int.Map.Key.comparator_witness)
+           Base__Map.t
        but an expression was expected of type
-         (int, string, Comparator.Poly.comparator_witness) Map.t
-       Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness
+         (Core_kernel.Std.Int.Map.Key.t, string,
+          Core_kernel__.Comparator.Poly.comparator_witness)
+         Core_kernel.Std.Map.t =
+           (Core_kernel.Std.Int.Map.Key.t, string,
+            Core_kernel__.Comparator.Poly.comparator_witness)
+           Base__Map.t
+       Type
+         Core_kernel.Std.Int.Map.Key.comparator_witness =
+           Base__Int.comparator_witness
+       is not compatible with type
+         Core_kernel__.Comparator.Poly.comparator_witness =
+           Base__Comparator.Poly.comparator_witness 
 |}];;
 [@@@part "17"];;
 let dedup ~comparator l =
   List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
   |> Set.to_list
 ;;
-
-
-dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
-
-
 [%%expect{|
+val dedup :
+  comparator:('a, 'b) Core_kernel__.Comparator.t ->
+  'a Core_kernel.Std.List.t -> 'a Core_kernel__.Import.list = <fun>
+|}];;
+dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
+[%%expect{|
+- : Core_kernel.Std.Int.t Core_kernel__.Import.list = [2; 3; 7; 8; 10]
 |}];;
 [@@@part "18"];;
 let (s1,s2) = (Int.Set.of_list [1;2],
                Int.Set.of_list [2;1]);;
-
-
-
 [%%expect{|
+val s1 : Core_kernel.Std.Int.Set.t = <abstr>
+val s2 : Core_kernel.Std.Int.Set.t = <abstr>
 |}];;
 [@@@part "19"];;
 Set.equal s1 s2;;
-
-
 [%%expect{|
+- : Core_kernel__.Import.bool = true
 |}];;
 [@@@part "20"];;
 s1 = s2;;
-
-
 [%%expect{|
-Exception: Invalid_argument "equal: functional value".
+Exception: Invalid_argument "compare: functional value".
 |}];;
 [@@@part "21"];;
 Set.to_tree s1 = Set.to_tree s2;;
-
 [%%expect{|
+- : bool = false
 |}];;
 [@@@part "22"];;
 module Foo_and_bar : sig
@@ -245,10 +256,12 @@ end = struct
   include T
   include Comparable.Make(T)
 end;;
-
 [%%expect{|
-Line _, characters 48-56:
-Attribute `deriving' was not used
+Characters 376-377:
+Error: Signature mismatch:
+       ...
+       The value `sexp_of_t' is required but not provided
+       The value `t_of_sexp' is required but not provided
 |}];;
 [@@@part "23"];;
 module Foo_and_bar : sig
@@ -261,10 +274,13 @@ end = struct
   include T
   include Comparable.Make(T)
 end;;
-
 [%%expect{|
-Line _, characters 48-56:
-Attribute `deriving' was not used
+Characters 257-258:
+Error: Signature mismatch:
+       ...
+       The value `compare' is required but not provided
+       The value `sexp_of_t' is required but not provided
+       The value `t_of_sexp' is required but not provided
 |}];;
 [@@@part "24"];;
 module Foo_and_bar : sig
@@ -277,56 +293,61 @@ end = struct
   include T
   include Comparable.Poly(T)
 end;;
-
-
-
 [%%expect{|
-Line _, characters 42-50:
-Attribute `deriving' was not used
+Characters 236-237:
+Error: Signature mismatch:
+       ...
+       The value `sexp_of_t' is required but not provided
+       The value `t_of_sexp' is required but not provided
 |}];;
 [@@@part "25"];;
 let table = Hashtbl.create ~hashable:String.hashable ();;
-
-Hashtbl.replace table ~key:"three" ~data:3;;
-
-Hashtbl.find table "three";;
-
-
 [%%expect{|
-Line _, characters 0-15:
+val table : (Core_kernel.Std.String.t, '_a) Core_kernel.Std.Hashtbl.t =
+  <abstr>
+|}];;
+Hashtbl.replace table ~key:"three" ~data:3;;
+[%%expect{|
+Characters 1-16:
 Warning 3: deprecated: Core_kernel.Std.Hashtbl.replace
 [since 2015-10] Use set instead
-Line _:
-Error: Some fatal warnings were triggered (1 occurrences)
+- : unit = ()
+|}];;
+Hashtbl.find table "three";;
+[%%expect{|
+- : int option = Some 3
 |}];;
 [@@@part "26"];;
 let table = String.Table.create ();;
-
-
 [%%expect{|
+val table : ('a, '_b) Core_kernel.Std.String.Table.t_ = <abstr>
 |}];;
 [@@@part "27"];;
 let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
-
-
 [%%expect{|
+val table : ('_a, '_b) Core_kernel.Std.Hashtbl.t = <abstr>
 |}];;
 [@@@part "28"];;
 let table = Hashtbl.Poly.create ();;
-
-
 [%%expect{|
+val table : ('_a, '_b) Core_kernel.Std.Hashtbl.Poly.t = <abstr>
 |}];;
 [@@@part "29"];;
 Caml.Hashtbl.hash (List.range 0 9);;
-
-Caml.Hashtbl.hash (List.range 0 10);;
-
-Caml.Hashtbl.hash (List.range 0 11);;
-
-Caml.Hashtbl.hash (List.range 0 100);;
-
 [%%expect{|
+- : int = 209331808
+|}];;
+Caml.Hashtbl.hash (List.range 0 10);;
+[%%expect{|
+- : int = 182325193
+|}];;
+Caml.Hashtbl.hash (List.range 0 11);;
+[%%expect{|
+- : int = 182325193
+|}];;
+Caml.Hashtbl.hash (List.range 0 100);;
+[%%expect{|
+- : int = 182325193
 |}];;
 [@@@part "30"];;
 module Foo_and_bar : sig
@@ -342,6 +363,10 @@ end = struct
   include Hashable.Make(T)
 end;;
 [%%expect{|
-Line _, characters 42-50:
-Attribute `deriving' was not used
+Characters 306-307:
+Error: Signature mismatch:
+       ...
+       The value `compare' is required but not provided
+       The value `sexp_of_t' is required but not provided
+       The value `t_of_sexp' is required but not provided
 |}];;

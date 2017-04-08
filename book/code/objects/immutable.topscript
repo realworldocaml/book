@@ -1,22 +1,12 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let imm_stack init = object
   val v = init
@@ -29,18 +19,26 @@ let imm_stack init = object
   method push hd = 
     {< v = hd :: v >}
 end ;;
-
-
-
-[%%expect];;
+[%%expect{|
+val imm_stack :
+  'a list -> (< pop : ('a * 'b) option; push : 'a -> 'b > as 'b) = <fun>
+|}];;
 [@@@part "2"];;
 let s = imm_stack [3; 2; 1] ;;
-
+[%%expect{|
+val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
+|}];;
 let t = s#push 4 ;;
-
+[%%expect{|
+val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
+|}];;
 s#pop ;;
-
-
+[%%expect{|
+- : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
+Some (3, <obj>)
+|}];;
 t#pop ;;
-
-
+[%%expect{|
+- : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
+Some (4, <obj>)
+|}];;

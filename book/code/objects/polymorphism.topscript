@@ -1,75 +1,60 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let area sq = sq#width * sq#width ;;
-
+[%%expect{|
+val area : < width : int; .. > -> int = <fun>
+|}];;
 let minimize sq : unit = sq#resize 1 ;;
-
+[%%expect{|
+val minimize : < resize : int -> unit; .. > -> unit = <fun>
+|}];;
 let limit sq = 
   if (area sq) > 100 then minimize sq ;;
-
-
-[%%expect];;
+[%%expect{|
+val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>
+|}];;
 [@@@part "2"];;
 let toggle sq b : unit = 
   if b then sq#resize `Fullscreen
   else minimize sq ;;
-
-
-
-
-
 [%%expect{|
-Line _, characters 16-18:
+Characters 76-78:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
        Types for method resize are incompatible
 |}];;
 [@@@part "3"];;
 let area_closed (sq: < width : int >) = sq#width * sq#width ;;
-
+[%%expect{|
+val area_closed : < width : int > -> int = <fun>
+|}];;
 let sq = object
   method width = 30 
   method name = "sq" 
 end ;;
-
-area_closed sq ;;
-
-
-
-
-
 [%%expect{|
-Line _, characters 12-14:
+val sq : < name : string; width : int > = <obj>
+|}];;
+area_closed sq ;;
+[%%expect{|
+Characters 13-15:
 Error: This expression has type < name : string; width : int >
        but an expression was expected of type < width : int >
        The second object type has no method name
 |}];;
 [@@@part "4"];;
 type square = < width : int; ..> ;;
-
-
-
 [%%expect{|
-Line _, characters 0-32:
+Characters 0-32:
 Error: A type variable is unbound in this type declaration.
 In type < width : int; .. > as 'a the variable 'a is unbound
 |}];;

@@ -1,27 +1,20 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core.Std;;
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+Characters 5-13:
+Warning 3: deprecated: module Core.Std
+[since 2017-02] Use Core. The Std sub-module is no longer needed
 |}];;
 [@@@part "1"];;
 Command.basic;;
-
-
-
-
 [%%expect{|
+- : ('main, unit) Core.Std.Command.basic_command = <fun>
 |}];;

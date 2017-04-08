@@ -1,22 +1,12 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 class istack = object
@@ -32,26 +22,33 @@ class istack = object
   method push hd =
     v <- hd :: v
 end ;;
-
-
-
-
-
-
-
 [%%expect{|
+class istack :
+  object
+    val mutable v : int list
+    method pop : int option
+    method push : int -> unit
+  end
 |}];;
 [@@@part "2"];;
 let s = new istack ;;
-
+[%%expect{|
+val s : istack = <obj>
+|}];;
 s#pop ;;
-
+[%%expect{|
+- : int option = Some 0
+|}];;
 s#push 5 ;;
-
+[%%expect{|
+- : unit = ()
+|}];;
 s#pop ;;
-
-
-[%%expect];;
+[%%expect{|
+- : int option = Some 5
+|}];;
 [@@@part "3"];;
 type istack = < pop: int option; push: int -> unit > ;;
-
+[%%expect{|
+type istack = < pop : int option; push : int -> unit >
+|}];;

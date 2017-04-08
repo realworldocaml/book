@@ -1,30 +1,23 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
   (fun x ->
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
-
 [%%expect{|
+val memoize :
+  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
 |}];;
 [@@@part "2"];;
 let rec edit_distance s t =
@@ -42,15 +35,17 @@ let rec edit_distance s t =
       ; edit_distance s' t' + cost_to_drop_both
       ]
 ;;
-
-edit_distance "OCaml" "ocaml";;
-
-
 [%%expect{|
+val edit_distance :
+  Core_kernel.Std.String.t ->
+  Core_kernel.Std.String.t -> Core_kernel.Std.Int.t = <fun>
+|}];;
+edit_distance "OCaml" "ocaml";;
+[%%expect{|
+- : Core_kernel.Std.Int.t = 2
 |}];;
 [@@@part "3"];;
 #require "mtime.os.top";;
-
 let time f =
   let counter = Mtime.counter () in
   let x = f () in
@@ -58,29 +53,32 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-
 [%%expect{|
+val time : (unit -> 'a) -> 'a = <fun>
 |}];;
 [@@@part "4"];;
 time (fun () -> edit_distance "OCaml" "ocaml");;
-
-
-time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
-
 [%%expect{|
-Time: 1.41297 ms
-Time: 4912.965319 ms
+- : Core_kernel.Std.Int.t = 2
+Time: 0.848163 ms
+|}];;
+time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
+[%%expect{|
+- : Core_kernel.Std.Int.t = 2
+Time: 3909.898767 ms
 |}];;
 [@@@part "5"];;
-
 let memo_rec f_norec x =
   let fref = ref (fun _ -> assert false) in
   let f = memoize (fun x -> f_norec !fref x) in
   fref := f;
   f x
 ;;
-
 [%%expect{|
+val memo_rec :
+  (('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+   'a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
 |}];;
 [@@@part "6"];;
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
@@ -97,14 +95,14 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
       ; edit_distance (s ,t') + 1
       ; edit_distance (s',t') + cost_to_drop_both
       ]) ;;
-
-
 [%%expect{|
+val edit_distance :
+  (Core_kernel.Std.String.t * Core_kernel.Std.String.t)
+  Core_kernel.Std.Hashtbl.key -> Core_kernel.Std.Int.t = <fun>
 |}];;
 [@@@part "7"];;
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
-
-
 [%%expect{|
-Time: 0.532365 ms
+- : Core_kernel.Std.Int.t = 2
+Time: 0.384097 ms
 |}];;

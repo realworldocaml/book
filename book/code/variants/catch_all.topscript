@@ -1,28 +1,31 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
+[%%expect{|
+type basic_color =
+    Black
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+  | White
+|}];;
 let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
-
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+val basic_color_to_int : basic_color -> int = <fun>
 |}];;
 [@@@part "1"];;
 type color =
@@ -31,8 +34,13 @@ type color =
   | RGB   of int * int * int (* 6x6x6 color cube *)
   | Gray  of int             (* 24 grayscale levels *)
 ;;
-
-[%%expect];;
+[%%expect{|
+type color =
+    Basic of basic_color
+  | Bold of basic_color
+  | RGB of int * int * int
+  | Gray of int
+|}];;
 [@@@part "2"];;
 let color_to_int = function
   | Basic (basic_color,weight) ->
@@ -40,9 +48,8 @@ let color_to_int = function
     base + basic_color_to_int basic_color
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
-
 [%%expect{|
-Line _, characters 10-30:
+Characters 38-58:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 |}];;
@@ -51,14 +58,12 @@ let color_to_int = function
   | Basic basic_color -> basic_color_to_int basic_color
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
-
 [%%expect{|
-Line _, characters 19-148:
+Characters 19-148:
 Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
+Here is an example of a case that is not matched:
 Bold _
-Line _:
-Error: Some fatal warnings were triggered (1 occurrences)
+val color_to_int : color -> int = <fun>
 |}];;
 [@@@part "4"];;
 let color_to_int = function
@@ -66,17 +71,17 @@ let color_to_int = function
   | Bold  basic_color -> 8 + basic_color_to_int basic_color
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
-
-[%%expect];;
+[%%expect{|
+val color_to_int : color -> int = <fun>
+|}];;
 [@@@part "5"];;
 let oldschool_color_to_int = function
   | Basic (basic_color,weight) ->
     let base = match weight with Bold -> 8 | Regular -> 0 in
     base + basic_color_to_int basic_color
   | _ -> basic_color_to_int White;;
-
 [%%expect{|
-Line _, characters 10-30:
+Characters 48-68:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 |}];;

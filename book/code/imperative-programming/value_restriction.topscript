@@ -1,12 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
 #require "mtime.os.top";;
-
 let time f =
   let counter = Mtime.counter () in
   let x = f () in
@@ -14,86 +16,83 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-
+[%%expect{|
+val time : (unit -> 'a) -> 'a = <fun>
+|}];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
   (fun x ->
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
-
-let identity x = x;;
-
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+val memoize :
+  ('a Core_kernel.Std.Hashtbl.key -> 'b) ->
+  'a Core_kernel.Std.Hashtbl.key -> 'b = <fun>
+|}];;
+let identity x = x;;
+[%%expect{|
+val identity : 'a -> 'a = <fun>
 |}];;
 [@@@part "1"];;
 (fun x -> [x;x]);;
-
-
-[%%expect];;
+[%%expect{|
+- : 'a -> 'a list = <fun>
+|}];;
 [@@@part "2"];;
 memoize (fun x -> [x;x]);;
-
-
 [%%expect{|
+- : '_a Core_kernel.Std.Hashtbl.key -> '_a Core_kernel.Std.Hashtbl.key list =
+<fun>
 |}];;
 [@@@part "3"];;
 identity (fun x -> [x;x]);;
-
-
-[%%expect];;
+[%%expect{|
+- : '_a -> '_a list = <fun>
+|}];;
 [@@@part "4"];;
 let f () = ref None;;
-
-
-[%%expect];;
+[%%expect{|
+val f : unit -> 'a option Core_kernel.Std.ref = <fun>
+|}];;
 [@@@part "5"];;
 List.init;;
-
-List.init 10 ~f:Int.to_string;;
-
-
 [%%expect{|
+- : int -> f:(int -> 'a) -> 'a Core_kernel.Std.List.t = <fun>
+|}];;
+List.init 10 ~f:Int.to_string;;
+[%%expect{|
+- : string Core_kernel.Std.List.t =
+["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 |}];;
 [@@@part "6"];;
 let list_init_10 = List.init 10;;
-
-
 [%%expect{|
+val list_init_10 : f:(int -> '_a) -> '_a Core_kernel.Std.List.t = <fun>
 |}];;
 [@@@part "7"];;
 let list_init_10 ~f = List.init 10 ~f;;
-
-
 [%%expect{|
+val list_init_10 : f:(int -> 'a) -> 'a Core_kernel.Std.List.t = <fun>
 |}];;
 [@@@part "8"];;
 identity (fun x -> [x;x]);;
-
-
-[%%expect];;
+[%%expect{|
+- : '_a -> '_a list = <fun>
+|}];;
 [@@@part "9"];;
 identity [];;
-
-
-[%%expect];;
+[%%expect{|
+- : 'a list = []
+|}];;
 [@@@part "10"];;
 [||];;
-
+[%%expect{|
+- : 'a array = [||]
+|}];;
 identity [||];;
-
-
-[%%expect];;
+[%%expect{|
+- : '_a array = [||]
+|}];;
 [@@@part "11"];;
 module Concat_list : sig
   type 'a t
@@ -119,22 +118,25 @@ end = struct
     to_list_with_tail t []
 
 end;;
-
-
-
-
-
-
-
-
-
-[%%expect];;
+[%%expect{|
+module Concat_list :
+  sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat : 'a t -> 'a t -> 'a t
+    val to_list : 'a t -> 'a list
+  end
+|}];;
 [@@@part "12"];;
 Concat_list.empty;;
-
+[%%expect{|
+- : 'a Concat_list.t = <abstr>
+|}];;
 identity Concat_list.empty;;
-
-[%%expect];;
+[%%expect{|
+- : '_a Concat_list.t = <abstr>
+|}];;
 [@@@part "13"];;
 module Concat_list : sig
   type +'a t
@@ -160,8 +162,18 @@ end = struct
     to_list_with_tail t []
 
 end;;
-
-[%%expect];;
+[%%expect{|
+module Concat_list :
+  sig
+    type +'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat : 'a t -> 'a t -> 'a t
+    val to_list : 'a t -> 'a list
+  end
+|}];;
 [@@@part "14"];;
 identity Concat_list.empty;;
-
+[%%expect{|
+- : 'a Concat_list.t = <abstr>
+|}];;

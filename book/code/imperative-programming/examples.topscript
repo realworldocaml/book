@@ -1,31 +1,20 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 List.find_map;;
-
-
 [%%expect{|
+- : 'a Core_kernel.Std.List.t -> f:('a -> 'b option) -> 'b option = <fun>
 |}];;
 [@@@part "2"];;
 let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
-
-
-
+[%%expect{|
+val endless_loop : int list = [1; 2; 3; <cycle>]
+|}];;

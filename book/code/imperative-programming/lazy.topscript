@@ -1,34 +1,26 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
-
-Lazy.force v;;
-
-
-Lazy.force v;;
-
-
 [%%expect{|
+val v : float lazy_t = <lazy>
+|}];;
+Lazy.force v;;
+[%%expect{|
+- : float = 4.
 performing lazy computation
+|}];;
+Lazy.force v;;
+[%%expect{|
+- : float = 4.
 |}];;
 [@@@part "2"];;
 type 'a lazy_state =
@@ -36,17 +28,19 @@ type 'a lazy_state =
   | Value of 'a
   | Exn of exn
 ;;
-
-
-[%%expect];;
+[%%expect{|
+type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
+|}];;
 [@@@part "3"];;
 let create_lazy f = ref (Delayed f);;
-
+[%%expect{|
+val create_lazy : (unit -> 'a) -> 'a lazy_state Core_kernel.Std.ref = <fun>
+|}];;
 let v = create_lazy
           (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
-
-
-[%%expect];;
+[%%expect{|
+val v : float lazy_state Core_kernel.Std.ref = {contents = Delayed <fun>}
+|}];;
 [@@@part "4"];;
 let force v =
   match !v with
@@ -61,15 +55,16 @@ let force v =
       v := Exn exn;
       raise exn
 ;;
-
-
-[%%expect];;
+[%%expect{|
+val force : 'a lazy_state Core_kernel.Std.ref -> 'a = <fun>
+|}];;
 [@@@part "5"];;
 force v;;
-
-
-force v;;
-
 [%%expect{|
+- : float = 4.
 performing lazy computation
+|}];;
+force v;;
+[%%expect{|
+- : float = 4.
 |}];;

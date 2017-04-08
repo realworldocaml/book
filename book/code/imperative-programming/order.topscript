@@ -1,32 +1,30 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 let x = sin 120. in
 let y = sin 75.  in
 let z = sin 128. in
 List.exists ~f:(fun x -> x < 0.) [x;y;z]
 ;;
-
-
 [%%expect{|
+Characters 8-11:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 28-31:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 48-51:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+- : bool = true
 |}];;
 [@@@part "2"];;
 let x = lazy (sin 120.) in
@@ -34,9 +32,17 @@ let y = lazy (sin 75.)  in
 let z = lazy (sin 128.) in
 List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
 ;;
-
-
 [%%expect{|
+Characters 14-17:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 41-44:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 68-71:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+- : bool = true
 |}];;
 [@@@part "3"];;
 let x = lazy (printf "1\n"; sin 120.) in
@@ -44,11 +50,17 @@ let y = lazy (printf "2\n"; sin 75.)  in
 let z = lazy (printf "3\n"; sin 128.) in
 List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
 ;;
-
-
-
-
 [%%expect{|
+Characters 28-31:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 69-72:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 110-113:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+- : bool = true
 1
 2
 |}];;
@@ -58,11 +70,17 @@ List.exists ~f:(fun x -> x < 0.)
     (printf "2\n"; sin 75.);
     (printf "3\n"; sin 128.); ]
 ;;
-
-
-
-
 [%%expect{|
+Characters 52-55:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 82-85:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+Characters 111-114:
+Warning 3: deprecated: Core_kernel.Std.sin
+[since 2016-07] Use [Float.sin]
+- : bool = true
 3
 2
 1

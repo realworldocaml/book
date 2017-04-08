@@ -1,83 +1,100 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 class square w = object(self : 'self) 
   method width = w
   method area = Float.of_int (self#width * self#width)
   method equals (other : 'self) = other#width = self#width
 end ;;
-
+[%%expect{|
+class square :
+  int ->
+  object ('a)
+    method area : Core_kernel.Std.Float.t
+    method equals : 'a -> bool
+    method width : int
+  end
+|}];;
 class circle r = object(self : 'self)
   method radius = r
   method area = 3.14 *. (Float.of_int self#radius) ** 2.0
   method equals (other : 'self) = other#radius = self#radius
 end ;;
-
 [%%expect{|
+class circle :
+  int ->
+  object ('a)
+    method area : float
+    method equals : 'a -> bool
+    method radius : int
+  end
 |}];;
 [@@@part "1"];;
 (new square 5)#equals (new square 5) ;;
-
-(new circle 10)#equals (new circle 7) ;;
-
-
 [%%expect{|
+- : bool = true
+|}];;
+(new circle 10)#equals (new circle 7) ;;
+[%%expect{|
+- : bool = false
 |}];;
 [@@@part "2"];;
 type shape = < equals : shape -> bool; area : float > ;;
-
-(new square 5 :> shape) ;;
-
 [%%expect{|
-Line _, characters 0-23:
-Error: Type square = < area : float; equals : square -> bool; width : int >
-       is not a subtype of shape = < area : float; equals : shape -> bool >
+type shape = < area : float; equals : shape -> bool >
+|}];;
+(new square 5 :> shape) ;;
+[%%expect{|
+Characters 1-24:
+Error: Type
+         square =
+           < area : Core_kernel.Std.Float.t; equals : square -> bool;
+             width : int >
+       is not a subtype of shape = < area : float; equals : shape -> bool > 
        Type shape = < area : float; equals : shape -> bool >
        is not a subtype of
-         square = < area : float; equals : square -> bool; width : int >
+         square =
+           < area : Core_kernel.Std.Float.t; equals : square -> bool;
+             width : int > 
 |}];;
 [@@@part "3"];;
 (object method area = 5 end) = (object method area = 5 end) ;;
-
-[%%expect];;
+[%%expect{|
+- : bool = false
+|}];;
 [@@@part "4"];;
 type shape_repr =
   | Square of int
   | Circle of int ;;
-
+[%%expect{|
+type shape_repr = Square of int | Circle of int
+|}];;
 type shape =
   < repr : shape_repr; equals : shape -> bool; area : float > ;;
-
+[%%expect{|
+type shape = < area : float; equals : shape -> bool; repr : shape_repr >
+|}];;
 class square w = object(self) 
   method width = w
   method area = Float.of_int (self#width * self#width)
   method repr = Square self#width
   method equals (other : shape) = other#repr = self#repr
 end ;;
-
-
-
-
-
-
-
-
 [%%expect{|
+class square :
+  int ->
+  object
+    method area : Core_kernel.Std.Float.t
+    method equals : shape -> bool
+    method repr : shape_repr
+    method width : int
+  end
 |}];;

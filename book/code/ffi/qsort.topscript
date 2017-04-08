@@ -1,44 +1,30 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 #require "ctypes.foreign" ;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-No such package: ctypes.foreign
-|}];;
 [@@@part "1"];;
 open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;
 let compare_t = ptr void @-> ptr void @-> returning int ;;
-
+[%%expect{|
+val compare_t :
+  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) Ctypes.fn =
+  int(void*, void*)
+|}];;
 let qsort = foreign "qsort"
               (ptr void @-> size_t @-> size_t @->
                funptr compare_t @-> returning void) ;;
-
-
-
 [%%expect{|
-Line _, characters 5-11:
-Error: Unbound module Ctypes
-Line _, characters 5-15:
-Error: Unbound module PosixTypes
-Line _, characters 5-12:
-Error: Unbound module Foreign
-Line _, characters 25-28:
-Error: Unbound value @->
-Line _, characters 12-19:
-Error: Unbound value foreign
+val qsort :
+  unit Ctypes_static.ptr ->
+  PosixTypes.size_t ->
+  PosixTypes.size_t ->
+  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) -> unit = <fun>
 |}];;

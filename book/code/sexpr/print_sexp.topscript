@@ -1,22 +1,12 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 Sexp.List [
@@ -24,6 +14,12 @@ Sexp.List [
   Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
   Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
 ];;
-
 [%%expect{|
+- : Core_kernel.Std.Sexp.t =
+Core_kernel.Std.Sexp.List
+ [Core_kernel.Std.Sexp.Atom "this";
+  Core_kernel.Std.Sexp.List
+   [Core_kernel.Std.Sexp.Atom "is"; Core_kernel.Std.Sexp.Atom "an"];
+  Core_kernel.Std.Sexp.List
+   [Core_kernel.Std.Sexp.Atom "s"; Core_kernel.Std.Sexp.Atom "expression"]]
 |}];;

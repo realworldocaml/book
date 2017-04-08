@@ -1,63 +1,81 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
-
-Cyan ;;
-
-[Blue; Magenta; Red] ;;
-
 [%%expect{|
+type basic_color =
+    Black
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+  | White
+|}];;
+Cyan ;;
+[%%expect{|
+- : basic_color = Cyan
+|}];;
+[Blue; Magenta; Red] ;;
+[%%expect{|
+- : basic_color list = [Blue; Magenta; Red]
 |}];;
 [@@@part "1"];;
 let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
-
-List.map ~f:basic_color_to_int [Blue;Red];;
-
 [%%expect{|
+val basic_color_to_int : basic_color -> int = <fun>
+|}];;
+List.map ~f:basic_color_to_int [Blue;Red];;
+[%%expect{|
+- : int Core_kernel.Std.List.t = [4; 1]
 |}];;
 [@@@part "2"];;
 let color_by_number number text =
   sprintf "\027[38;5;%dm%s\027[0m" number text;;
-
-let blue = color_by_number (basic_color_to_int Blue) "Blue";;
-
-printf "Hello %s World!\n" blue;;
-
 [%%expect{|
+val color_by_number : int -> string -> string = <fun>
+|}];;
+let blue = color_by_number (basic_color_to_int Blue) "Blue";;
+[%%expect{|
+val blue : string = "\027[38;5;4mBlue\027[0m"
+|}];;
+printf "Hello %s World!\n" blue;;
+[%%expect{|
+- : unit = ()
 Hello [38;5;4mBlue[0m World!
 |}];;
 [@@@part "3"];;
 type weight = Regular | Bold;;
+[%%expect{|
+type weight = Regular | Bold
+|}];;
 type color =
   | Basic of basic_color * weight (* basic colors, regular and bold *)
   | RGB   of int * int * int       (* 6x6x6 color cube *)
   | Gray  of int                   (* 24 grayscale levels *)
 ;;
-
+[%%expect{|
+type color =
+    Basic of basic_color * weight
+  | RGB of int * int * int
+  | Gray of int
+|}];;
 [RGB (250,70,70); Basic (Green, Regular)];;
-
-[%%expect];;
+[%%expect{|
+- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
+|}];;
 [@@@part "4"];;
 let color_to_int = function
   | Basic (basic_color,weight) ->
@@ -65,40 +83,51 @@ let color_to_int = function
     base + basic_color_to_int basic_color
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
-
-[%%expect];;
+[%%expect{|
+val color_to_int : color -> int = <fun>
+|}];;
 [@@@part "5"];;
 let color_print color s =
   printf "%s\n" (color_by_number (color_to_int color) s);;
-
-color_print (Basic (Red,Bold)) "A bold red!";;
-
-color_print (Gray 4) "A muted gray...";;
-
-
 [%%expect{|
+val color_print : color -> string -> unit = <fun>
+|}];;
+color_print (Basic (Red,Bold)) "A bold red!";;
+[%%expect{|
+- : unit = ()
 [38;5;9mA bold red![0m
+|}];;
+color_print (Gray 4) "A muted gray...";;
+[%%expect{|
+- : unit = ()
 [38;5;236mA muted gray...[0m
 |}];;
 [@@@part "6"];;
 let three = `Int 3;;
-
+[%%expect{|
+val three : [> `Int of int ] = `Int 3
+|}];;
 let four = `Float 4.;;
-
+[%%expect{|
+val four : [> `Float of float ] = `Float 4.
+|}];;
 let nan = `Not_a_number;;
-
+[%%expect{|
+val nan : [> `Not_a_number ] = `Not_a_number
+|}];;
 [three; four; nan];;
-
-
-
-[%%expect];;
+[%%expect{|
+- : [> `Float of float | `Int of int | `Not_a_number ] list =
+[`Int 3; `Float 4.; `Not_a_number]
+|}];;
 [@@@part "7"];;
 let five = `Int "five";;
-
-[three; four; five];;
-
 [%%expect{|
-Line _, characters 14-18:
+val five : [> `Int of string ] = `Int "five"
+|}];;
+[three; four; five];;
+[%%expect{|
+Characters 15-19:
 Error: This expression has type [> `Int of string ]
        but an expression was expected of type
          [> `Float of float | `Int of int ]
@@ -109,29 +138,31 @@ let is_positive = function
   | `Int   x -> x > 0
   | `Float x -> x > 0.
 ;;
-
-
-[%%expect];;
+[%%expect{|
+val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
+|}];;
 [@@@part "9"];;
 let exact = List.filter ~f:is_positive [three;four];;
-
-
 [%%expect{|
+val exact : [ `Float of float | `Int of int ] Core_kernel.Std.List.t =
+  [`Int 3; `Float 4.]
 |}];;
 [@@@part "10"];;
 let is_positive = function
   | `Int   x -> Ok (x > 0)
   | `Float x -> Ok (x > 0.)
   | `Not_a_number -> Error "not a number";;
-
-
-
+[%%expect{|
+val is_positive :
+  [< `Float of float | `Int of int | `Not_a_number ] ->
+  (bool, string) Core_kernel.Std._result = <fun>
+|}];;
 List.filter [three; four] ~f:(fun x ->
   match is_positive x with Error _ -> false | Ok b -> b);;
-
-
-
 [%%expect{|
+- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ]
+    Core_kernel.Std.List.t
+= [`Int 3; `Float 4.]
 |}];;
 [@@@part "11"];;
 type extended_color =
@@ -140,24 +171,20 @@ type extended_color =
   | Gray  of int                   (* 24 grayscale levels *)
   | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
 ;;
-
-
-
-
-
-
-[%%expect];;
+[%%expect{|
+type extended_color =
+    Basic of basic_color * weight
+  | RGB of int * int * int
+  | Gray of int
+  | RGBA of int * int * int * int
+|}];;
 [@@@part "12"];;
 let extended_color_to_int = function
   | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
 ;;
-
-
-
-
 [%%expect{|
-Line _, characters 56-61:
+Characters 150-155:
 Error: This expression has type extended_color
        but an expression was expected of type color
 |}];;
@@ -166,6 +193,11 @@ let basic_color_to_int = function
   | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
   | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
 ;;
+[%%expect{|
+val basic_color_to_int :
+  [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
+  int = <fun>
+|}];;
 let color_to_int = function
   | `Basic (basic_color,weight) ->
     let base = match weight with `Bold -> 8 | `Regular -> 0 in
@@ -173,71 +205,51 @@ let color_to_int = function
   | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | `Gray i -> 232 + i
 ;;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[%%expect];;
+[%%expect{|
+val color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [< `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int ] ->
+  int = <fun>
+|}];;
 [@@@part "14"];;
 let extended_color_to_int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
 ;;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-[%%expect];;
+[%%expect{|
+val extended_color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [< `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int
+   | `RGBA of int * int * int * int ] ->
+  int = <fun>
+|}];;
 [@@@part "15"];;
 let extended_color_to_int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | color -> color_to_int color
 ;;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 26-31:
+Characters 121-126:
 Error: This expression has type [> `RGBA of int * int * int * int ]
        but an expression was expected of type
          [< `Basic of
@@ -260,17 +272,21 @@ let is_positive_permissive = function
   | `Float x -> Ok (x > 0.)
   | _ -> Error "Unknown number type"
 ;;
-
-
-is_positive_permissive (`Int 0);;
-
-is_positive_permissive (`Ratio (3,4));;
-
-
 [%%expect{|
+val is_positive_permissive :
+  [> `Float of float | `Int of int ] ->
+  (bool, string) Core_kernel.Std._result = <fun>
+|}];;
+is_positive_permissive (`Int 0);;
+[%%expect{|
+- : (bool, string) Core_kernel.Std._result = Ok false
+|}];;
+is_positive_permissive (`Ratio (3,4));;
+[%%expect{|
+- : (bool, string) Core_kernel.Std._result = Error "Unknown number type"
 |}];;
 [@@@part "17"];;
 is_positive_permissive (`Floot 3.5);;
-
 [%%expect{|
+- : (bool, string) Core_kernel.Std._result = Error "Unknown number type"
 |}];;

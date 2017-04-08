@@ -1,22 +1,12 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 open Core_kernel.Std;;
 let s = object
@@ -32,19 +22,22 @@ let s = object
   method push hd = 
     v <- hd :: v
 end ;;
-
-
 [%%expect{|
+val s : < pop : int option; push : int -> unit > = <obj>
 |}];;
 [@@@part "2"];;
 s#pop ;;
-
+[%%expect{|
+- : int option = Some 0
+|}];;
 s#push 4 ;;
-
+[%%expect{|
+- : unit = ()
+|}];;
 s#pop ;;
-
-
-[%%expect];;
+[%%expect{|
+- : int option = Some 4
+|}];;
 [@@@part "3"];;
 let stack init = object
   val mutable v = init
@@ -59,30 +52,36 @@ let stack init = object
   method push hd = 
     v <- hd :: v
 end ;;
-
+[%%expect{|
+val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>
+|}];;
 let s = stack [3; 2; 1] ;;
-
+[%%expect{|
+val s : < pop : int option; push : int -> unit > = <obj>
+|}];;
 s#pop ;;
-
-
-[%%expect];;
+[%%expect{|
+- : int option = Some 3
+|}];;
 [@@@part "4"];;
 let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
-
+[%%expect{|
+val print_pop : < pop : int Core_kernel.Std.Option.t; .. > -> unit = <fun>
+|}];;
 print_pop (stack [5;4;3;2;1]) ;;
-
-
+[%%expect{|
+- : unit = ()
+Popped: 5
+|}];;
 let t = object
   method pop = Some (Float.to_int (Time_ns.to_float (Time_ns.now ())))
 end ;;
-
-print_pop t ;;
-
-
 [%%expect{|
-Line _, characters 35-51:
+Characters 52-68:
 Error: Unbound value Time_ns.to_float
-Line _, characters 10-11:
+|}];;
+print_pop t ;;
+[%%expect{|
+Characters 11-12:
 Error: Unbound value t
-Popped: 5
 |}];;

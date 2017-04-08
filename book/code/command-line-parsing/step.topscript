@@ -1,21 +1,17 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core.Std;;
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+Characters 5-13:
+Warning 3: deprecated: module Core.Std
+[since 2017-02] Use Core. The Std sub-module is no longer needed
 |}];;
 [@@@part "1"];;
 open Command.Spec ;;
@@ -25,6 +21,12 @@ step (fun m (base:Date.t) days ->
   | None ->
     print_endline "enter days: ";
     m base (read_int ())) ;;
-
 [%%expect{|
+Characters 139-147:
+Warning 3: deprecated: Core.Std.read_int
+[since 2016-04] Use
+[Out_channel.(flush stdout); Int.of_string In_channel.(input_line_exn stdin)]
+- : (Core.Std.Date.t -> int -> '_a, Core.Std.Date.t -> int option -> '_a)
+    Core.Std.Command.Spec.t
+= <abstr>
 |}];;

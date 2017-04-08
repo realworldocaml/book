@@ -1,42 +1,44 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 type 'a ref = { mutable contents : 'a };;
-
-
-[%%expect];;
+[%%expect{|
+type 'a ref = { mutable contents : 'a; }
+|}];;
 [@@@part "2"];;
 let ref x = { contents = x };;
-
+[%%expect{|
+val ref : 'a -> 'a ref = <fun>
+|}];;
 let (!) r = r.contents;;
-
+[%%expect{|
+val ( ! ) : 'a ref -> 'a = <fun>
+|}];;
 let (:=) r x = r.contents <- x;;
-
-
-[%%expect];;
+[%%expect{|
+val ( := ) : 'a ref -> 'a -> unit = <fun>
+|}];;
 [@@@part "3"];;
 let x = ref 1;;
-
+[%%expect{|
+val x : int ref = {contents = 1}
+|}];;
 !x;;
-
+[%%expect{|
+- : int = 1
+|}];;
 x := !x + 1;;
-
+[%%expect{|
+- : unit = ()
+|}];;
 !x;;
-
+[%%expect{|
+- : int = 2
+|}];;

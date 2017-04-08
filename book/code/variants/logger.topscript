@@ -1,23 +1,16 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
-
 [%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
+module Time_ns = Core_kernel.Time_ns
 |}];;
 [@@@part "1"];;
 module Log_entry = struct
@@ -29,11 +22,18 @@ module Log_entry = struct
     }
 end
 ;;
-
 [%%expect{|
+module Log_entry :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      important : bool;
+      message : string;
+    }
+  end
 |}];;
 [@@@part "1.5"];;
-
 module Heartbeat = struct
   type t =
     { session_id: string;
@@ -41,6 +41,16 @@ module Heartbeat = struct
       status_message: string;
     }
 end;;
+[%%expect{|
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
+|}];;
 module Logon = struct
   type t =
     { session_id: string;
@@ -49,22 +59,27 @@ module Logon = struct
       credentials: string;
     }
 end;;
-
-
-
 [%%expect{|
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
 |}];;
 [@@@part "2"];;
 type client_message = | Logon of Logon.t
                       | Heartbeat of Heartbeat.t
                       | Log_entry of Log_entry.t
 ;;
-
-
-
-
-
 [%%expect{|
+type client_message =
+    Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
 |}];;
 [@@@part "3"];;
 let messages_for_user user messages =
@@ -89,10 +104,11 @@ let messages_for_user user messages =
   in
   List.rev user_messages
 ;;
-
-
-
 [%%expect{|
+val messages_for_user :
+  string ->
+  client_message Core_kernel.Std.List.t ->
+  client_message Core_kernel.Std.List.t = <fun>
 |}];;
 [@@@part "4"];;
 module Log_entry = struct
@@ -100,40 +116,43 @@ module Log_entry = struct
              message: string;
            }
 end;;
+[%%expect{|
+module Log_entry : sig type t = { important : bool; message : string; } end
+|}];;
 module Heartbeat = struct
   type t = { status_message: string; }
 end;;
+[%%expect{|
+module Heartbeat : sig type t = { status_message : string; } end
+|}];;
 module Logon = struct
   type t = { user: string;
              credentials: string;
            }
 end ;;
-
-
-
-
-[%%expect];;
+[%%expect{|
+module Logon : sig type t = { user : string; credentials : string; } end
+|}];;
 [@@@part "5"];;
 type details =
   | Logon of Logon.t
   | Heartbeat of Heartbeat.t
   | Log_entry of Log_entry.t
 ;;
-
-
-
-
-
-[%%expect];;
+[%%expect{|
+type details =
+    Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+|}];;
 [@@@part "6"];;
 module Common = struct
   type t = { session_id: string;
              time: Time_ns.t;
            }
 end ;;
-
-
 [%%expect{|
+module Common : sig type t = { session_id : string; time : Time_ns.t; } end
 |}];;
 [@@@part "7"];;
 let messages_for_user user messages =
@@ -154,18 +173,28 @@ let messages_for_user user messages =
   in
   List.rev user_messages
 ;;
-
-
 [%%expect{|
+val messages_for_user :
+  string ->
+  (Common.t * details) Core_kernel.Std.List.t ->
+  (Common.t * details) Core_kernel.Std.List.t = <fun>
 |}];;
 [@@@part "7.9"];;
-
 type server_state;;
-let handle_log_entry (_:server_state) ((_:Common.t),_) = ();;
-let handle_logon _ (_,_) = ();;
-let handle_heartbeat _ (_,_) = ();;
-
 [%%expect{|
+type server_state
+|}];;
+let handle_log_entry (_:server_state) ((_:Common.t),_) = ();;
+[%%expect{|
+val handle_log_entry : server_state -> Common.t * 'a -> unit = <fun>
+|}];;
+let handle_logon _ (_,_) = ();;
+[%%expect{|
+val handle_logon : 'a -> 'b * 'c -> unit = <fun>
+|}];;
+let handle_heartbeat _ (_,_) = ();;
+[%%expect{|
+val handle_heartbeat : 'a -> 'b * 'c -> unit = <fun>
 |}];;
 [@@@part "8"];;
 let handle_message server_state (common,details) =
@@ -175,4 +204,5 @@ let handle_message server_state (common,details) =
   | Heartbeat m -> handle_heartbeat server_state (common,m)
 ;;
 [%%expect{|
+val handle_message : server_state -> Common.t * details -> unit = <fun>
 |}];;

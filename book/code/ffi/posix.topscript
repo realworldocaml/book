@@ -1,21 +1,12 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 #require "ctypes.foreign" ;;
 #require "ctypes.top" ;;
@@ -23,133 +14,96 @@ open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;
 let time = foreign "time" (ptr time_t @-> returning time_t) ;;
-
-
 [%%expect{|
-Line _, characters 5-11:
-Error: Unbound module Ctypes
-Line _, characters 5-15:
-Error: Unbound module PosixTypes
-Line _, characters 5-12:
-Error: Unbound module Foreign
-Line _, characters 11-18:
-Error: Unbound value foreign
-No such package: ctypes.foreign
-No such package: ctypes.top
+val time : PosixTypes.time_t Ctypes_static.ptr -> PosixTypes.time_t = <fun>
 |}];;
 [@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
-
-
 [%%expect{|
-Line _, characters 15-19:
-Error: Unbound value time
+val cur_time : PosixTypes.time_t = 1491685166
 |}];;
 [@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
-
-
 [%%expect{|
-Line _, characters 15-19:
-Error: Unbound value time
+val time' : unit -> PosixTypes.time_t = <fun>
 |}];;
 [@@@part "3"];;
 let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double) ;;
-
+[%%expect{|
+val difftime : PosixTypes.time_t -> PosixTypes.time_t -> float = <fun>
+|}];;
 let t1 =
   time' () in
 Unix.sleep 2;
 let t2 = time' () in 
 difftime t2 t1 ;;
-
-
 [%%expect{|
-Line _, characters 2-9:
-Error: Unbound value foreign
-Line _, characters 2-7:
-Error: Unbound value time'
+- : float = 2.
 |}];;
 [@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
-
-
 [%%expect{|
-Line _, characters 12-19:
-Error: Unbound value foreign
+val ctime : PosixTypes.time_t Ctypes_static.ptr -> string = <fun>
 |}];;
 [@@@part "5"];;
 ctime (time' ()) ;;
-
-
-
-
 [%%expect{|
-Line _, characters 0-5:
-Error: Unbound value ctime
+Characters 6-16:
+Error: This expression has type PosixTypes.time_t = PosixTypes.Time.t
+       but an expression was expected of type
+         PosixTypes.time_t Ctypes_static.ptr =
+           (PosixTypes.time_t, [ `C ]) Ctypes_static.pointer
 |}];;
 [@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
-
-
 [%%expect{|
-Line _, characters 12-20:
-Error: Unbound value allocate
+val t_ptr : PosixTypes.time_t Ctypes.ptr = (time_t*) 0x59f9b70
 |}];;
 [@@@part "7"];;
 ctime t_ptr ;;
-
-
 [%%expect{|
-Line _, characters 0-5:
-Error: Unbound value ctime
+- : string = "Sat Apr  8 22:59:28 2017\n"
 |}];;
 [@@@part "8"];;
 type timeval ;;
-
-let timeval : timeval structure typ = structure "timeval" ;;
-
-
 [%%expect{|
-Line _, characters 14-35:
-Error: Unbound type constructor typ
+type timeval
+|}];;
+let timeval : timeval structure typ = structure "timeval" ;;
+[%%expect{|
+val timeval : timeval Ctypes.structure Ctypes.typ = struct timeval
 |}];;
 [@@@part "9"];;
 let tv_sec  = field timeval "tv_sec" long ;;
-
-let tv_usec = field timeval "tv_usec" long ;;
-
-
-seal timeval ;;
-
-
 [%%expect{|
-Line _, characters 14-19:
-Error: Unbound value field
-Line _, characters 14-19:
-Error: Unbound value field
-Line _, characters 0-4:
-Error: Unbound value seal
+val tv_sec : (Signed.long, timeval Ctypes.structure) Ctypes.field =
+  {Ctypes_static.ftype = long; foffset = 0; fname = "tv_sec"}
+|}];;
+let tv_usec = field timeval "tv_usec" long ;;
+[%%expect{|
+val tv_usec : (Signed.long, timeval Ctypes.structure) Ctypes.field =
+  {Ctypes_static.ftype = long; foffset = 8; fname = "tv_usec"}
+|}];;
+seal timeval ;;
+[%%expect{|
+- : unit = ()
 |}];;
 [@@@part "10"];;
 type timezone ;;
-
-let timezone : timezone structure typ = structure "timezone" ;;
-
-
 [%%expect{|
-Line _, characters 15-37:
-Error: Unbound type constructor typ
+type timezone
+|}];;
+let timezone : timezone structure typ = structure "timezone" ;;
+[%%expect{|
+val timezone : timezone Ctypes.structure Ctypes.typ = struct timezone
 |}];;
 [@@@part "11"];;
 let gettimeofday = foreign "gettimeofday"
                      (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
-
-
-
 [%%expect{|
-Line _, characters 19-26:
-Error: Unbound value foreign
+Characters 97-121:
+Error: Unbound value returning_checking_errno
 |}];;
 [@@@part "12"];;
 let gettimeofday' () =
@@ -158,12 +112,12 @@ let gettimeofday' () =
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1000000.0) ;;
-
-gettimeofday' () ;;
-
 [%%expect{|
-Line _, characters 11-15:
-Error: Unbound value make
-Line _, characters 0-13:
+Characters 59-71:
+Error: Unbound value gettimeofday
+|}];;
+gettimeofday' () ;;
+[%%expect{|
+Characters 1-14:
 Error: Unbound value gettimeofday'
 |}];;

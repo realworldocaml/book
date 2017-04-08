@@ -1,23 +1,13 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "0.5"];;
 module type Query_handler = sig
 
@@ -38,34 +28,40 @@ module type Query_handler = sig
       s-expressions *)
   val eval : t -> Sexp.t -> Sexp.t Or_error.t
 end;;
-
 [%%expect{|
-Line _, characters 17-25:
-Attribute `deriving' was not used
+module type Query_handler =
+  sig
+    type config
+    val name : string
+    type t
+    val create : config -> t
+    val eval :
+      t ->
+      Core_kernel.Std.Sexp.t ->
+      Core_kernel.Std.Sexp.t Core_kernel.Std.Or_error.t
+  end
 |}];;
 [@@@part "1"];;
 module type M = sig type t [@@deriving sexp] end;;
-
 [%%expect{|
-Line _, characters 30-38:
-Attribute `deriving' was not used
+module type M = sig type t end
 |}];;
 [@@@part "2"];;
 type u = { a: int; b: float } [@@deriving sexp];;
-
-sexp_of_u {a=3;b=7.};;
-
-u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
-
 [%%expect{|
-Line _, characters 33-41:
-Attribute `deriving' was not used
-Line _, characters 0-9:
+type u = { a : int; b : float; }
+|}];;
+sexp_of_u {a=3;b=7.};;
+[%%expect{|
+Characters 1-10:
 Error: Unbound value sexp_of_u
-Hint: Did you mean sexp_of_exn, sexp_of_int, sexp_of_mat, sexp_of_ref, sexp_of_unit or sexp_of_vec?
-Line _, characters 0-9:
+Hint: Did you mean sexp_of_vec, sexp_of_unit, sexp_of_ref, sexp_of_mat, sexp_of_int or sexp_of_exn?
+|}];;
+u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
+[%%expect{|
+Characters 1-10:
 Error: Unbound value u_of_sexp
-Hint: Did you mean int_of_sexp, mat_of_sexp, ref_of_sexp, unit_of_sexp or vec_of_sexp?
+Hint: Did you mean vec_of_sexp, unit_of_sexp, ref_of_sexp, mat_of_sexp or int_of_sexp?
 |}];;
 [@@@part "3"];;
 module Unique = struct
@@ -83,27 +79,33 @@ module Unique = struct
       t.next_id <- t.next_id + 1;
       response
 end;;
-
-
 [%%expect{|
-Line _, characters 23-31:
-Attribute `deriving' was not used
+module Unique :
+  sig
+    type config = int
+    type t = { mutable next_id : int; }
+    val name : string
+    val create : int -> t
+    val eval :
+      t ->
+      Sexplib.Sexp.t ->
+      (Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result
+  end
 |}];;
 [@@@part "4"];;
 let unique = Unique.create 0;;
-
-Unique.eval unique Sexp.unit;;
-
-Unique.eval unique Sexp.unit;;
-
-
 [%%expect{|
-Line _, characters 13-26:
-Error: Unbound module Unique
-Line _, characters 0-11:
-Error: Unbound module Unique
-Line _, characters 0-11:
-Error: Unbound module Unique
+val unique : Unique.t = {Unique.next_id = 0}
+|}];;
+Unique.eval unique Sexp.unit;;
+[%%expect{|
+- : (Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result =
+Ok (Sexplib.Sexp.Atom "0")
+|}];;
+Unique.eval unique Sexp.unit;;
+[%%expect{|
+- : (Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result =
+Ok (Sexplib.Sexp.Atom "1")
 |}];;
 [@@@part "5"];;
 module List_dir = struct
@@ -127,50 +129,51 @@ module List_dir = struct
       in
       Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
 end;;
-
-
-
-
-
-
-
-
-
-
-
-
 [%%expect{|
-Line _, characters 26-34:
-Attribute `deriving' was not used
+module List_dir :
+  sig
+    type config = string
+    type t = { cwd : string; }
+    val is_abs : Core_kernel.Std.String.t -> bool
+    val name : string
+    val create : string -> t
+    val eval :
+      t ->
+      Sexplib.Sexp.t ->
+      (Base__.Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result
+  end
 |}];;
 [@@@part "6"];;
 let list_dir = List_dir.create "/var";;
-
-List_dir.eval list_dir (sexp_of_string ".");;
-
-
-List_dir.eval list_dir (sexp_of_string "yp");;
-
-
 [%%expect{|
-Line _, characters 15-30:
-Error: Unbound module List_dir
-Line _, characters 0-13:
-Error: Unbound module List_dir
-Line _, characters 0-13:
-Error: Unbound module List_dir
+val list_dir : List_dir.t = {List_dir.cwd = "/var"}
+|}];;
+List_dir.eval list_dir (sexp_of_string ".");;
+[%%expect{|
+- : (Base__.Sexplib.Sexp.t, Core_kernel__.Error.t) Core_kernel.Std._result =
+Ok
+ (Base__.Sexplib.Sexp.List
+   [Base__.Sexplib.Sexp.Atom "mail"; Base__.Sexplib.Sexp.Atom "local";
+    Base__.Sexplib.Sexp.Atom "net-snmp"; Base__.Sexplib.Sexp.Atom "tmp";
+    Base__.Sexplib.Sexp.Atom ".updated"; Base__.Sexplib.Sexp.Atom "empty";
+    Base__.Sexplib.Sexp.Atom "lock"; Base__.Sexplib.Sexp.Atom "log";
+    Base__.Sexplib.Sexp.Atom "cache"; Base__.Sexplib.Sexp.Atom "lib";
+    Base__.Sexplib.Sexp.Atom "opt"; Base__.Sexplib.Sexp.Atom "db";
+    Base__.Sexplib.Sexp.Atom "spool"; Base__.Sexplib.Sexp.Atom "run";
+    Base__.Sexplib.Sexp.Atom "games"])
+|}];;
+List_dir.eval list_dir (sexp_of_string "yp");;
+[%%expect{|
+Exception: Sys_error "/var/yp: No such file or directory".
 |}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
   val this : Query_handler.t
 end;;
-
-
-
 [%%expect{|
-Line _, characters 25-38:
-Error: Unbound module type Query_handler
+module type Query_handler_instance =
+  sig module Query_handler : Query_handler val this : Query_handler.t end
 |}];;
 [@@@part "8"];;
 let unique_instance =
@@ -178,11 +181,8 @@ let unique_instance =
     module Query_handler = Unique
     let this = Unique.create 0
   end : Query_handler_instance);;
-
-
 [%%expect{|
-Line _, characters 2-113:
-Error: Unbound module type Query_handler_instance
+val unique_instance : (module Query_handler_instance) = <module>
 |}];;
 [@@@part "9"];;
 let build_instance
@@ -195,25 +195,19 @@ let build_instance
     let this = Q.create config
   end : Query_handler_instance)
 ;;
-
-
-
-
 [%%expect{|
-Line _, characters 6-53:
-Error: Unbound module type Query_handler
+val build_instance :
+  (module Query_handler with type config = 'a) ->
+  'a -> (module Query_handler_instance) = <fun>
 |}];;
 [@@@part "10"];;
 let unique_instance = build_instance (module Unique) 0;;
-
-let list_dir_instance = build_instance (module List_dir)  "/var";;
-
-
 [%%expect{|
-Line _, characters 22-36:
-Error: Unbound value build_instance
-Line _, characters 24-38:
-Error: Unbound value build_instance
+val unique_instance : (module Query_handler_instance) = <module>
+|}];;
+let list_dir_instance = build_instance (module List_dir)  "/var";;
+[%%expect{|
+val list_dir_instance : (module Query_handler_instance) = <module>
 |}];;
 [@@@part "11"];;
 let build_dispatch_table handlers =
@@ -223,13 +217,14 @@ let build_dispatch_table handlers =
       Hashtbl.replace table ~key:I.Query_handler.name ~data:instance);
   table
 ;;
-
-
-
-
 [%%expect{|
-Line _, characters 13-48:
-Error: Unbound module type Query_handler_instance
+Characters 168-183:
+Warning 3: deprecated: Core_kernel.Std.Hashtbl.replace
+[since 2015-10] Use set instead
+val build_dispatch_table :
+  (module Query_handler_instance) Core_kernel.Std.List.t ->
+  ('a, (module Query_handler_instance)) Core_kernel.Std.String.Table.t_ =
+  <fun>
 |}];;
 [@@@part "12"];;
 let dispatch dispatch_table name_and_query =
@@ -245,13 +240,12 @@ let dispatch dispatch_table name_and_query =
   | _ ->
     Or_error.error_string "malformed query"
 ;;
-
-
-
-
 [%%expect{|
-Line _, characters 11-46:
-Error: Unbound module type Query_handler_instance
+val dispatch :
+  (Core_kernel__.Import.string, (module Query_handler_instance))
+  Core_kernel.Std.Hashtbl.t ->
+  Core_kernel.Std.Sexp.t -> Core_kernel.Std.Sexp.t Core_kernel.Std.Or_error.t =
+  <fun>
 |}];;
 [@@@part "13"];;
 let rec cli dispatch_table =
@@ -275,25 +269,30 @@ let rec cli dispatch_table =
     printf "%s\n%!" msg;
     cli dispatch_table
 ;;
-
-
 [%%expect{|
-Line _, characters 20-28:
-Error: Unbound value dispatch
+Characters 95-100:
+Warning 3: deprecated: Core_kernel.Std.stdin
+[since 2016-04] Use [In_channel.stdin]
+val cli :
+  (Core_kernel__.Import.string, (module Query_handler_instance))
+  Core_kernel.Std.Hashtbl.t -> unit = <fun>
 |}];;
 [@@@part "14"];;
 type query_handler_instance = { name : string
                               ; eval : Sexp.t -> Sexp.t Or_error.t
                               };;
+[%%expect{|
+type query_handler_instance = {
+  name : string;
+  eval :
+    Core_kernel.Std.Sexp.t ->
+    Core_kernel.Std.Sexp.t Core_kernel.Std.Or_error.t;
+}
+|}];;
 type query_handler = Sexp.t -> query_handler_instance
 ;;
-
-
-
-
-
-
 [%%expect{|
+type query_handler = Core_kernel.Std.Sexp.t -> query_handler_instance
 |}];;
 [@@@part "15"];;
 let unique_handler config_sexp =
@@ -303,8 +302,7 @@ let unique_handler config_sexp =
   ; eval = (fun config -> Unique.eval unique config)
   }
 ;;
-
 [%%expect{|
-Line _, characters 15-36:
-Error: Unbound module Unique
+Characters 48-69:
+Error: Unbound value Unique.config_of_sexp
 |}];;

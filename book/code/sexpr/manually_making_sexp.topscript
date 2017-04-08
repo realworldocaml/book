@@ -1,31 +1,31 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 open Core_kernel.Std;;
-[%%expect{|
-- : unit = ()
-Findlib has been successfully loaded. Additional directives:
-  #require "package";;      to load a package
-  #list;;                   to list the available packages
-  #camlp4o;;                to load camlp4 (standard syntax)
-  #camlp4r;;                to load camlp4 (revised syntax)
-  #predicates "p,q,...";;   to set these predicates
-  Topfind.reset();;         to force that packages will be reloaded
-  #thread;;                 to enable threads
-
-- : unit = ()
-|}];;
 [@@@part "1"];;
 type t = { foo: int; bar: float } ;;
-
+[%%expect{|
+type t = { foo : int; bar : float; }
+|}];;
 let sexp_of_t t =
   let a x = Sexp.Atom x and l x = Sexp.List x in
   l [ l [a "foo"; Int.sexp_of_t t.foo  ];
       l [a "bar"; Float.sexp_of_t t.bar]; ] ;;
-
-sexp_of_t { foo = 3; bar = -5.5 } ;;
-
 [%%expect{|
+val sexp_of_t : t -> Core_kernel.Std.Sexp.t = <fun>
+|}];;
+sexp_of_t { foo = 3; bar = -5.5 } ;;
+[%%expect{|
+- : Core_kernel.Std.Sexp.t =
+Core_kernel.Std.Sexp.List
+ [Core_kernel.Std.Sexp.List
+   [Core_kernel.Std.Sexp.Atom "foo"; Core_kernel.Std.Sexp.Atom "3"];
+  Core_kernel.Std.Sexp.List
+   [Core_kernel.Std.Sexp.Atom "bar"; Core_kernel.Std.Sexp.Atom "-5.5"]]
 |}];;
