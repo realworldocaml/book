@@ -95,12 +95,7 @@ let plus_one_if x =
 [%%expect{|val plus_one_if : int -> int = <fun>|}];;
 [@@@part "10"];;
 #require "core_bench";;
-[%%expect{|No such package: core_bench|}];;
 open Core_bench.Std;;
-[%%expect{|
-Characters 5-19:
-Error: Unbound module Core_bench
-|}];;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
     ignore (plus_one_match 10))
 ; Bench.Test.create ~name:"plus_one_if" (fun () ->
@@ -108,8 +103,14 @@ Error: Unbound module Core_bench
 |> Bench.bench
 ;;
 [%%expect{|
-Characters 2-19:
-Error: Unbound module Bench
+- : unit = ()
+Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+┌────────────────┬──────────┐
+│ Name           │ Time/Run │
+├────────────────┼──────────┤
+│ plus_one_match │  26.57ns │
+│ plus_one_if    │  33.85ns │
+└────────────────┴──────────┘
 |}];;
 [@@@part "11"];;
 let rec sum_if l =
@@ -124,8 +125,14 @@ let numbers = List.range 0 1000 in
 |> Bench.bench
 ;;
 [%%expect{|
-Characters 37-54:
-Error: Unbound module Bench
+- : unit = ()
+Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+┌────────┬──────────┐
+│ Name   │ Time/Run │
+├────────┼──────────┤
+│ sum_if │  52.07us │
+│ sum    │  11.71us │
+└────────┴──────────┘
 |}];;
 [@@@part "13"];;
 let rec drop_zero l =
