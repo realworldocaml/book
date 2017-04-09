@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 #require "yojson";;
 [@@@part "1"];;
 let person = `Assoc [ ("name", `String "Anil") ] ;;
@@ -17,14 +17,10 @@ val person : [> `Assoc of (string * [> `String of string ]) list ] =
 |}];;
 [@@@part "2"];;
 Yojson.Basic.pretty_to_string ;;
-[%%expect{|
-- : ?std:bool -> Yojson.Basic.json -> string = <fun>
-|}];;
+[%%expect{|- : ?std:bool -> Yojson.Basic.json -> string = <fun>|}];;
 [@@@part "3"];;
 Yojson.Basic.pretty_to_string person ;;
-[%%expect{|
-- : string = "{ \"name\": \"Anil\" }"
-|}];;
+[%%expect{|- : string = "{ \"name\": \"Anil\" }"|}];;
 Yojson.Basic.pretty_to_channel stdout person ;;
 [%%expect{|
 - : unit = ()

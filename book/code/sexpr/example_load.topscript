@@ -7,17 +7,13 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "0.5"];;
 Sexp.load_sexp "example.scm" ;;
-[%%expect{|
-Exception: Sys_error "example.scm: No such file or directory".
-|}];;
+[%%expect{|Exception: Sys_error "example.scm: No such file or directory".|}];;
 [@@@part "1"];;
 Sexp.load_sexp "comment_heavy.scm" ;;
-[%%expect{|
-Exception: Sys_error "comment_heavy.scm: No such file or directory".
-|}];;
+[%%expect{|Exception: Sys_error "comment_heavy.scm: No such file or directory".|}];;
 [@@@part "2"];;
 Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm")) ;;

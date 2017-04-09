@@ -16,14 +16,8 @@
 #camlp4o ;;
 [@@@part "1"];;
 #require "comparelib.syntax" ;;
-[%%expect{|
-No such package: comparelib.syntax
-|}];;
+[%%expect{|No such package: comparelib.syntax|}];;
 type t = { foo: string; bar : t } ;;
-[%%expect{|
-type t = { foo : string; bar : t; }
-|}];;
+[%%expect{|type t = { foo : string; bar : t; }|}];;
 type t = { foo: string; bar: t } [@@deriving compare] ;;
-[%%expect{|
-type t = { foo : string; bar : t; }
-|}];;
+[%%expect{|type t = { foo : string; bar : t; }|}];;

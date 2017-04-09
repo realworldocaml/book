@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "0.5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init

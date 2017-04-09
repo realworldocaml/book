@@ -7,18 +7,9 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core.Std;;
-[%%expect{|
-Characters 5-13:
-Warning 3: deprecated: module Core.Std
-[since 2017-02] Use Core. The Std sub-module is no longer needed
-|}];;
+open Core;;
 [@@@part "1"];;
 Command.Spec.empty ;;
-[%%expect{|
-- : ('m, 'm) Command.Spec.t = <abstr>
-|}];;
+[%%expect{|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
-[%%expect{|
-- : (int -> '_a, '_a) Command.Spec.t = <abstr>
-|}];;
+[%%expect{|- : (int -> '_a, '_a) Command.Spec.t = <abstr>|}];;

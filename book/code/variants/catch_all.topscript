@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 [%%expect{|

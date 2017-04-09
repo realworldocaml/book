@@ -8,7 +8,7 @@
 #require "core";;
 #require "core.syntax";;
 [@@@part "1"];;
-open Core_kernel.Std;;
+open Core_kernel;;
 Sexp.List [
   Sexp.Atom "this";
   Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
@@ -16,10 +16,10 @@ Sexp.List [
 ];;
 [%%expect{|
 - : Sexp.t =
-Core_kernel.Std.Sexp.List
- [Core_kernel.Std.Sexp.Atom "this";
-  Core_kernel.Std.Sexp.List
-   [Core_kernel.Std.Sexp.Atom "is"; Core_kernel.Std.Sexp.Atom "an"];
-  Core_kernel.Std.Sexp.List
-   [Core_kernel.Std.Sexp.Atom "s"; Core_kernel.Std.Sexp.Atom "expression"]]
+Core_kernel.Sexp.List
+ [Core_kernel.Sexp.Atom "this";
+  Core_kernel.Sexp.List
+   [Core_kernel.Sexp.Atom "is"; Core_kernel.Sexp.Atom "an"];
+  Core_kernel.Sexp.List
+   [Core_kernel.Sexp.Atom "s"; Core_kernel.Sexp.Atom "expression"]]
 |}];;

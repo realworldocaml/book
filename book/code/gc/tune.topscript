@@ -8,35 +8,25 @@
 #require "core";;
 #require "core.syntax";;
 [@@@part "0.5"];;
-open Core_kernel.Std;;
+open Core_kernel;;
 let c = Gc.get () ;;
 [%%expect{|
 val c : Gc.control =
-  {Core_kernel.Std.Gc.Control.minor_heap_size = <abstr>;
+  {Core_kernel.Gc.Control.minor_heap_size = <abstr>;
    major_heap_increment = <abstr>; space_overhead = <abstr>;
    verbose = <abstr>; max_overhead = <abstr>; stack_limit = <abstr>;
    allocation_policy = <abstr>; window_size = <abstr>}
 |}];;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 [@@@part "1"];;
 Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 [@@@part "2"];;
 Gc.major_slice 0 ;;
-[%%expect{|
-- : Base.int = 0
-|}];;
+[%%expect{|- : Base.int = 0|}];;
 Gc.full_major () ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 [@@@part "3"];;
 Gc.tune ~max_overhead:0 () ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;

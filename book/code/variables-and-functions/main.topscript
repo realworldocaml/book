@@ -9,7 +9,7 @@
 #require "core.syntax";;
 
 [@@@part "0.5"];;
-open Core_kernel.Std;;
+open Core_kernel;;
 let x = 3;;
 [%%expect{|val x : int = 3|}];;
 let y = 4;;

@@ -7,16 +7,12 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "0.5"];;
 Int.sexp_of_t 3;;
-[%%expect{|
-- : Sexplib.Type.t = Sexplib.Sexp.Atom "3"
-|}];;
+[%%expect{|- : Sexplib.Type.t = Sexplib.Sexp.Atom "3"|}];;
 String.sexp_of_t "hello";;
-[%%expect{|
-- : Sexplib.Type.t = Sexplib.Sexp.Atom "hello"
-|}];;
+[%%expect{|- : Sexplib.Type.t = Sexplib.Sexp.Atom "hello"|}];;
 Exn.sexp_of_t (Invalid_argument "foo");;
 [%%expect{|
 - : Sexplib.Type.t =
@@ -26,9 +22,7 @@ Base__.Sexplib.Sexp.List
 |}];;
 [@@@part "1"];;
 List.sexp_of_t;;
-[%%expect{|
-- : ('a -> Sexplib.Type.t) -> 'a list -> Sexplib.Type.t = <fun>
-|}];;
+[%%expect{|- : ('a -> Sexplib.Type.t) -> 'a list -> Sexplib.Type.t = <fun>|}];;
 List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
 [%%expect{|
 - : Sexplib.Type.t =
@@ -38,13 +32,9 @@ Base__.Sexplib.Sexp.List
 |}];;
 [@@@part "2"];;
 List.t_of_sexp;;
-[%%expect{|
-- : (Sexplib.Type.t -> 'a) -> Sexplib.Type.t -> 'a list = <fun>
-|}];;
+[%%expect{|- : (Sexplib.Type.t -> 'a) -> Sexplib.Type.t -> 'a list = <fun>|}];;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
-[%%expect{|
-- : int list = [1; 2; 3]
-|}];;
+[%%expect{|- : int list = [1; 2; 3]|}];;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 [%%expect{|
 Exception:

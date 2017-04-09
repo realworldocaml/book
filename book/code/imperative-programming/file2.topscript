@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 let sum_file filename =
   let file = In_channel.create filename in

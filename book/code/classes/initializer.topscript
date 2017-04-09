@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 class obj x = 
   let () = printf "Creating obj %d\n" x in

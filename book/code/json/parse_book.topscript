@@ -7,12 +7,10 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 #require "yojson";;
 let json = Yojson.Basic.from_file "book.json" ;;
-[%%expect{|
-Exception: Sys_error "book.json: No such file or directory".
-|}];;
+[%%expect{|Exception: Sys_error "book.json: No such file or directory".|}];;
 [@@@part "1"];;
 open Yojson.Basic.Util ;;
 let title = json |> member "title" |> to_string ;;

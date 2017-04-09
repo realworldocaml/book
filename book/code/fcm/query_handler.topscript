@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "0.5"];;
 module type Query_handler = sig
 
@@ -138,17 +138,24 @@ List_dir.eval list_dir (sexp_of_string ".");;
 - : (Sexplib.Type.t, Core_kernel__Error.t) result =
 Ok
  (Base__.Sexplib.Sexp.List
-   [Base__.Sexplib.Sexp.Atom "mail"; Base__.Sexplib.Sexp.Atom "local";
-    Base__.Sexplib.Sexp.Atom "net-snmp"; Base__.Sexplib.Sexp.Atom "tmp";
-    Base__.Sexplib.Sexp.Atom ".updated"; Base__.Sexplib.Sexp.Atom "empty";
-    Base__.Sexplib.Sexp.Atom "lock"; Base__.Sexplib.Sexp.Atom "log";
-    Base__.Sexplib.Sexp.Atom "cache"; Base__.Sexplib.Sexp.Atom "lib";
-    Base__.Sexplib.Sexp.Atom "opt"; Base__.Sexplib.Sexp.Atom "db";
-    Base__.Sexplib.Sexp.Atom "spool"; Base__.Sexplib.Sexp.Atom "run";
-    Base__.Sexplib.Sexp.Atom "games"])
+   [Base__.Sexplib.Sexp.Atom "agentx"; Base__.Sexplib.Sexp.Atom "at";
+    Base__.Sexplib.Sexp.Atom "audit"; Base__.Sexplib.Sexp.Atom "backups";
+    Base__.Sexplib.Sexp.Atom "db"; Base__.Sexplib.Sexp.Atom "empty";
+    Base__.Sexplib.Sexp.Atom "folders"; Base__.Sexplib.Sexp.Atom "jabberd";
+    Base__.Sexplib.Sexp.Atom "lib"; Base__.Sexplib.Sexp.Atom "log";
+    Base__.Sexplib.Sexp.Atom "ma"; Base__.Sexplib.Sexp.Atom "mail";
+    Base__.Sexplib.Sexp.Atom "msgs"; Base__.Sexplib.Sexp.Atom "netboot";
+    Base__.Sexplib.Sexp.Atom "networkd"; Base__.Sexplib.Sexp.Atom "root";
+    Base__.Sexplib.Sexp.Atom "rpc"; Base__.Sexplib.Sexp.Atom "run";
+    Base__.Sexplib.Sexp.Atom "rwho"; Base__.Sexplib.Sexp.Atom "spool";
+    Base__.Sexplib.Sexp.Atom "tmp"; Base__.Sexplib.Sexp.Atom "vm";
+    Base__.Sexplib.Sexp.Atom "yp"])
 |}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-[%%expect{|Exception: Sys_error "/var/yp: No such file or directory".|}];;
+[%%expect{|
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
+Ok (Base__.Sexplib.Sexp.List [Base__.Sexplib.Sexp.Atom "binding"])
+|}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
@@ -196,7 +203,7 @@ let build_dispatch_table handlers =
 ;;
 [%%expect{|
 Characters 168-183:
-Warning 3: deprecated: Core_kernel.Std.Hashtbl.replace
+Warning 3: deprecated: Core_kernel.Hashtbl.replace
 [since 2015-10] Use set instead
 val build_dispatch_table :
   (module Query_handler_instance) list ->

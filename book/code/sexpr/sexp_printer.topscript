@@ -7,17 +7,15 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;
-[%%expect{|
-- : string = "(1 2)"
-|}];;
+[%%expect{|- : string = "(1 2)"|}];;
 Sexp.of_string ("(1 2 (3 4))") ;;
 [%%expect{|
 - : Sexp.t =
-Core_kernel.Std.Sexp.List
- [Core_kernel.Std.Sexp.Atom "1"; Core_kernel.Std.Sexp.Atom "2";
-  Core_kernel.Std.Sexp.List
-   [Core_kernel.Std.Sexp.Atom "3"; Core_kernel.Std.Sexp.Atom "4"]]
+Core_kernel.Sexp.List
+ [Core_kernel.Sexp.Atom "1"; Core_kernel.Sexp.Atom "2";
+  Core_kernel.Sexp.List
+   [Core_kernel.Sexp.Atom "3"; Core_kernel.Sexp.Atom "4"]]
 |}];;

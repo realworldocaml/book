@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 #require "mtime.os.top";;
 let time f =
   let counter = Mtime.counter () in

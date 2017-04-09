@@ -8,7 +8,7 @@
 #require "core";;
 #require "core.syntax";;
 [@@@part "0.5"];;
-open Core_kernel.Std;;
+open Core_kernel;;
 [1;2;3];;
 [%%expect{|- : int list = [1; 2; 3]|}];;
 [@@@part "1"];;
@@ -95,7 +95,7 @@ let plus_one_if x =
 [%%expect{|val plus_one_if : int -> int = <fun>|}];;
 [@@@part "10"];;
 #require "core_bench";;
-open Core_bench.Std;;
+open Core_bench;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
     ignore (plus_one_match 10))
 ; Bench.Test.create ~name:"plus_one_if" (fun () ->
@@ -108,8 +108,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
-│ plus_one_match │  26.57ns │
-│ plus_one_if    │  33.85ns │
+│ plus_one_match │  25.26ns │
+│ plus_one_if    │  33.48ns │
 └────────────────┴──────────┘
 |}];;
 [@@@part "11"];;
@@ -130,8 +130,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
-│ sum_if │  52.07us │
-│ sum    │  11.71us │
+│ sum_if │  54.04us │
+│ sum    │  13.60us │
 └────────┴──────────┘
 |}];;
 [@@@part "13"];;

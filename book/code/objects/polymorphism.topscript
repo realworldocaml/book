@@ -7,21 +7,15 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 let area sq = sq#width * sq#width ;;
-[%%expect{|
-val area : < width : int; .. > -> int = <fun>
-|}];;
+[%%expect{|val area : < width : int; .. > -> int = <fun>|}];;
 let minimize sq : unit = sq#resize 1 ;;
-[%%expect{|
-val minimize : < resize : int -> unit; .. > -> unit = <fun>
-|}];;
+[%%expect{|val minimize : < resize : int -> unit; .. > -> unit = <fun>|}];;
 let limit sq = 
   if (area sq) > 100 then minimize sq ;;
-[%%expect{|
-val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>
-|}];;
+[%%expect{|val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>|}];;
 [@@@part "2"];;
 let toggle sq b : unit = 
   if b then sq#resize `Fullscreen
@@ -34,16 +28,12 @@ Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
 |}];;
 [@@@part "3"];;
 let area_closed (sq: < width : int >) = sq#width * sq#width ;;
-[%%expect{|
-val area_closed : < width : int > -> int = <fun>
-|}];;
+[%%expect{|val area_closed : < width : int > -> int = <fun>|}];;
 let sq = object
   method width = 30 
   method name = "sq" 
 end ;;
-[%%expect{|
-val sq : < name : string; width : int > = <obj>
-|}];;
+[%%expect{|val sq : < name : string; width : int > = <obj>|}];;
 area_closed sq ;;
 [%%expect{|
 Characters 12-14:

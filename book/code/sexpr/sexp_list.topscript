@@ -7,14 +7,12 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "0.5"];;
 type compatible_versions =
   | Specific of string list
   | All [@@deriving sexp] ;;
-[%%expect{|
-type compatible_versions = Specific of string list | All
-|}];;
+[%%expect{|type compatible_versions = Specific of string list | All|}];;
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 [%%expect{|
@@ -25,9 +23,7 @@ Error: Unbound value sexp_of_compatible_versions
 type compatible_versions =
   | Specific of string sexp_list
   | All [@@deriving sexp] ;;
-[%%expect{|
-type compatible_versions = Specific of string list | All
-|}];;
+[%%expect{|type compatible_versions = Specific of string list | All|}];;
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 [%%expect{|

@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 for i = 0 to 3 do printf "i = %d\n" i done;;
 [%%expect{|

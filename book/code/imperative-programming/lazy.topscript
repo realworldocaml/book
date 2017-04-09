@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
 [%%expect{|val v : float lazy_t = <lazy>|}];;

@@ -8,7 +8,7 @@
 #require "core";;
 #require "core.syntax";;
 [@@@part "1"];;
-open Core_kernel.Std;;
+open Core_kernel;;
 let digit_alist =
   [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
   ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
@@ -20,41 +20,25 @@ val digit_alist : (int * string) list =
 |}];;
 [@@@part "2"];;
 List.Assoc.find digit_alist 6;;
-[%%expect{|
-- : equal:(int -> int -> bool) -> string option = <fun>
-|}];;
+[%%expect{|- : equal:(int -> int -> bool) -> string option = <fun>|}];;
 List.Assoc.find digit_alist 22;;
-[%%expect{|
-- : equal:(int -> int -> bool) -> string option = <fun>
-|}];;
+[%%expect{|- : equal:(int -> int -> bool) -> string option = <fun>|}];;
 List.Assoc.add digit_alist 0 "zilch";;
-[%%expect{|
-- : equal:(int -> int -> bool) -> (int, string) Base__List.Assoc.t = <fun>
-|}];;
+[%%expect{|- : equal:(int -> int -> bool) -> (int, string) Base__List.Assoc.t = <fun>|}];;
 [@@@part "3"];;
 let digit_map = Map.of_alist_exn digit_alist
                   ~comparator:Int.comparator;;
-[%%expect{|
-val digit_map : (int, string, Int.comparator_witness) Map.t = <abstr>
-|}];;
+[%%expect{|val digit_map : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
 Map.find digit_map 3;;
-[%%expect{|
-- : string sexp_option = <abstr>
-|}];;
+[%%expect{|- : string sexp_option = <abstr>|}];;
 [@@@part "4"];;
 let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
-[%%expect{|
-val zilch_map : (int, string, Int.comparator_witness) Map.t = <abstr>
-|}];;
+[%%expect{|val zilch_map : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
 [@@@part "5"];;
 let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
-[%%expect{|
-val left : int String.Map.t = <abstr>
-|}];;
+[%%expect{|val left : int String.Map.t = <abstr>|}];;
 let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
-[%%expect{|
-val right : int String.Map.t = <abstr>
-|}];;
+[%%expect{|val right : int String.Map.t = <abstr>|}];;
 Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 [%%expect{|
 - : (string, int) Map.Symmetric_diff_element.t list =
@@ -85,26 +69,16 @@ module Reverse :
 |}];;
 [@@@part "8"];;
 let alist = ["foo", 0; "snoo", 3];;
-[%%expect{|
-val alist : (string * int) list = [("foo", 0); ("snoo", 3)]
-|}];;
+[%%expect{|val alist : (string * int) list = [("foo", 0); ("snoo", 3)]|}];;
 let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
-[%%expect{|
-val ord_map : (string, int, String.comparator_witness) Map.t = <abstr>
-|}];;
+[%%expect{|val ord_map : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
 let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
-[%%expect{|
-val rev_map : (string, int, Reverse.comparator_witness) Map.t = <abstr>
-|}];;
+[%%expect{|val rev_map : (string, int, Reverse.comparator_witness) Map.t = <abstr>|}];;
 [@@@part "9"];;
 Map.min_elt ord_map;;
-[%%expect{|
-- : (string * int) sexp_option = <abstr>
-|}];;
+[%%expect{|- : (string * int) sexp_option = <abstr>|}];;
 Map.min_elt rev_map;;
-[%%expect{|
-- : (string * int) sexp_option = <abstr>
-|}];;
+[%%expect{|- : (string * int) sexp_option = <abstr>|}];;
 [@@@part "10"];;
 Map.symmetric_diff ord_map rev_map;;
 [%%expect{|
@@ -118,14 +92,10 @@ Error: This expression has type
 |}];;
 [@@@part "11"];;
 let ord_tree = Map.to_tree ord_map;;
-[%%expect{|
-val ord_tree : (string, int, String.comparator_witness) Map.Tree.t = <abstr>
-|}];;
+[%%expect{|val ord_tree : (string, int, String.comparator_witness) Map.Tree.t = <abstr>|}];;
 [@@@part "12"];;
 Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
-[%%expect{|
-- : int option = Some 3
-|}];;
+[%%expect{|- : int option = Some 3|}];;
 [@@@part "13"];;
 Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 [%%expect{|
@@ -139,14 +109,10 @@ Error: This expression has type
 |}];;
 [@@@part "14"];;
 Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
-[%%expect{|
-- : (int, string, Comparator.Poly.comparator_witness) Map.t = <abstr>
-|}];;
+[%%expect{|- : (int, string, Comparator.Poly.comparator_witness) Map.t = <abstr>|}];;
 [@@@part "15"];;
 Map.Poly.of_alist_exn digit_alist;;
-[%%expect{|
-- : (int, string) Map.Poly.t = <abstr>
-|}];;
+[%%expect{|- : (int, string) Map.Poly.t = <abstr>|}];;
 [@@@part "16"];;
 Map.symmetric_diff (Map.Poly.singleton 3 "three")
   (Int.Map.singleton  3 "four" ) ;;
@@ -164,13 +130,9 @@ let dedup ~comparator l =
   List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
   |> Set.to_list
 ;;
-[%%expect{|
-val dedup : comparator:('a, 'b) Comparator.t -> 'a list -> 'a list = <fun>
-|}];;
+[%%expect{|val dedup : comparator:('a, 'b) Comparator.t -> 'a list -> 'a list = <fun>|}];;
 dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
-[%%expect{|
-- : int list = [2; 3; 7; 8; 10]
-|}];;
+[%%expect{|- : int list = [2; 3; 7; 8; 10]|}];;
 [@@@part "18"];;
 let (s1,s2) = (Int.Set.of_list [1;2],
                Int.Set.of_list [2;1]);;
@@ -180,19 +142,13 @@ val s2 : Int.Set.t = <abstr>
 |}];;
 [@@@part "19"];;
 Set.equal s1 s2;;
-[%%expect{|
-- : sexp_bool = <abstr>
-|}];;
+[%%expect{|- : sexp_bool = <abstr>|}];;
 [@@@part "20"];;
 s1 = s2;;
-[%%expect{|
-Exception: Invalid_argument "compare: functional value".
-|}];;
+[%%expect{|Exception: Invalid_argument "compare: functional value".|}];;
 [@@@part "21"];;
 Set.to_tree s1 = Set.to_tree s2;;
-[%%expect{|
-- : bool = false
-|}];;
+[%%expect{|- : bool = false|}];;
 [@@@part "22"];;
 module Foo_and_bar : sig
   type t = { foo: Int.Set.t; bar: string }
@@ -253,52 +209,34 @@ Error: Signature mismatch:
 |}];;
 [@@@part "25"];;
 let table = Hashtbl.create ~hashable:String.hashable ();;
-[%%expect{|
-val table : (string, '_a) Hashtbl.t = <abstr>
-|}];;
+[%%expect{|val table : (string, '_a) Hashtbl.t = <abstr>|}];;
 Hashtbl.replace table ~key:"three" ~data:3;;
 [%%expect{|
 Characters 0-15:
-Warning 3: deprecated: Core_kernel.Std.Hashtbl.replace
+Warning 3: deprecated: Core_kernel.Hashtbl.replace
 [since 2015-10] Use set instead
 - : unit = ()
 |}];;
 Hashtbl.find table "three";;
-[%%expect{|
-- : int option = Some 3
-|}];;
+[%%expect{|- : int option = Some 3|}];;
 [@@@part "26"];;
 let table = String.Table.create ();;
-[%%expect{|
-val table : '_a String.Table.t = <abstr>
-|}];;
+[%%expect{|val table : '_a String.Table.t = <abstr>|}];;
 [@@@part "27"];;
 let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
-[%%expect{|
-val table : ('_a, '_b) Hashtbl.t = <abstr>
-|}];;
+[%%expect{|val table : ('_a, '_b) Hashtbl.t = <abstr>|}];;
 [@@@part "28"];;
 let table = Hashtbl.Poly.create ();;
-[%%expect{|
-val table : ('_a, '_b) Hashtbl.t = <abstr>
-|}];;
+[%%expect{|val table : ('_a, '_b) Hashtbl.t = <abstr>|}];;
 [@@@part "29"];;
 Caml.Hashtbl.hash (List.range 0 9);;
-[%%expect{|
-- : int = 209331808
-|}];;
+[%%expect{|- : int = 209331808|}];;
 Caml.Hashtbl.hash (List.range 0 10);;
-[%%expect{|
-- : int = 182325193
-|}];;
+[%%expect{|- : int = 182325193|}];;
 Caml.Hashtbl.hash (List.range 0 11);;
-[%%expect{|
-- : int = 182325193
-|}];;
+[%%expect{|- : int = 182325193|}];;
 Caml.Hashtbl.hash (List.range 0 100);;
-[%%expect{|
-- : int = 182325193
-|}];;
+[%%expect{|- : int = 182325193|}];;
 [@@@part "30"];;
 module Foo_and_bar : sig
   type t = { foo: int; bar: string }

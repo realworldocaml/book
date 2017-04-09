@@ -25,13 +25,9 @@ val imm_stack :
 |}];;
 [@@@part "2"];;
 let s = imm_stack [3; 2; 1] ;;
-[%%expect{|
-val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-|}];;
+[%%expect{|val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>|}];;
 let t = s#push 4 ;;
-[%%expect{|
-val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-|}];;
+[%%expect{|val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>|}];;
 s#pop ;;
 [%%expect{|
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =

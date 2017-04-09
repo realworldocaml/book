@@ -8,7 +8,7 @@
 #require "core";;
 #require "core.syntax";;
 [@@@part "0.5"];;
-open Core_kernel.Std;;
+open Core_kernel;;
 module Time_ns = Core_kernel.Time_ns;;
 [%%expect{|module Time_ns = Core_kernel.Time_ns|}];;
 type service_info =

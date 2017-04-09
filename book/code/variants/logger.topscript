@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 module Time_ns = Core_kernel.Time_ns;;
 [%%expect{|module Time_ns = Core_kernel.Time_ns|}];;
 [@@@part "1"];;

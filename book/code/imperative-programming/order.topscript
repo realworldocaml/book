@@ -7,7 +7,7 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 [@@@part "1"];;
 let x = sin 120. in
 let y = sin 75.  in
@@ -16,13 +16,13 @@ List.exists ~f:(fun x -> x < 0.) [x;y;z]
 ;;
 [%%expect{|
 Characters 8-11:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 28-31:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 48-51:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 - : bool = true
 |}];;
@@ -34,13 +34,13 @@ List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
 ;;
 [%%expect{|
 Characters 14-17:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 41-44:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 68-71:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 - : bool = true
 |}];;
@@ -52,13 +52,13 @@ List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
 ;;
 [%%expect{|
 Characters 28-31:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 69-72:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 110-113:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 - : bool = true
 1
@@ -72,13 +72,13 @@ List.exists ~f:(fun x -> x < 0.)
 ;;
 [%%expect{|
 Characters 52-55:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 82-85:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 Characters 111-114:
-Warning 3: deprecated: Core_kernel.Std.sin
+Warning 3: deprecated: Core_kernel.sin
 [since 2016-07] Use [Float.sin]
 - : bool = true
 3
