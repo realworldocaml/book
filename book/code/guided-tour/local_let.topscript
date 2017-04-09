@@ -1,23 +1,26 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-(* part 0.5 *)
+[@@@part "0.5"];;
 let x = 7 in
 x + x
 ;;
-
-
-(* part 1 *)
+[%%expect{|- : int = 14|}];;
+[@@@part "1"];;
 x;;
-
-
-
-(* part 2 *)
+[%%expect{|
+Characters 0-1:
+Error: Unbound value x
+|}];;
+[@@@part "2"];;
 let x = 7 in
 let y = x * x in
 x + y
 ;;
-
+[%%expect{|- : int = 56|}];;

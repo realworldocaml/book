@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 open Ctypes
 open PosixTypes
 open Foreign
@@ -16,8 +16,8 @@ let ()       = seal timeval
 type timezone
 let timezone : timezone structure typ = structure "timezone"
 
-let gettimeofday = foreign "gettimeofday"
-    (ptr timeval @-> ptr timezone @-> returning_checking_errno int)
+let gettimeofday = foreign "gettimeofday" ~check_errno:true
+    (ptr timeval @-> ptr timezone @-> returning int)
 
 let time' () = time (from_voidp time_t null)
 

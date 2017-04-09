@@ -1,0 +1,2 @@
+corebuild -pkg cryptokit basic_md5_with_optional_file.native
+corebuild -pkg cryptokit basic_md5_with_default_file.native

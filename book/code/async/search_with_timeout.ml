@@ -1,6 +1,6 @@
 
 
-(* part 1 *)
+[@@@part "1"];;
 let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
     [ (after timeout >>| fun () -> (word,Error "Timed out"))

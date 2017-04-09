@@ -1,6 +1,6 @@
 (** Bash script parsing and evaluation. *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type t = {
   filename : string;

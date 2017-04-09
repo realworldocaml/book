@@ -497,11 +497,12 @@
 
             <p>
 	      It's quite easy to mix up the use of <code>=</code>
-              and <code>==</code>, so Core disables the <code>==</code>
-              operator and provides the more explicit
-              <code>phys_equal</code> function instead. You'll see a
-              type error if you use <code>==</code> anywhere in code
-              that opens <code>Core.Std</code>:</p>
+              and <code>==</code>, so Core_kernel discourages the use
+              of <code>==</code> and provides the more
+              explicit <code>phys_equal</code> function
+              instead. You'll see a warning if you use <code>==</code>
+              anywhere in code that
+              opens <code>Core_kernel</code>:</p>
 
             <link rel="import" href="code/maps-and-hash-tables/core_phys_equal.topscript" part="1"/> 
 

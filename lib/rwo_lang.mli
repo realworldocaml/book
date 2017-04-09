@@ -49,11 +49,11 @@
     - "scm"
     - "txt"
 *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type t = private string
-with sexp
+  [@@deriving sexp]
 
 val of_string : string -> t Or_error.t
 val to_string : t -> string

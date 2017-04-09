@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 module Html = Rwo_html
 module Lang = Rwo_lang
 
@@ -11,8 +11,7 @@ type lang = [
   | `Java
   | `Json
   | `Scheme
-]
-with sexp
+] 
 
 let of_lang (x:Lang.t) = match (x :> string) with
   | "atd"          -> Ok `OCaml

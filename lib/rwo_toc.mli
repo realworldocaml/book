@@ -1,8 +1,8 @@
 (** Table of contents. Representation of the hierarchical structure of
     the book.
 *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type part_info = {
   number : int;

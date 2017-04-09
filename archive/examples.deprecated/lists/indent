@@ -1,6 +1,0 @@
-#!/bin/sh
-
-for file in *.ml; do
-  ocp-indent ${file} > ${file}.tmp
-  mv ${file}.tmp ${file}
-done

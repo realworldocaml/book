@@ -1,25 +1,34 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 0.5 *)
-open Core_kernel.Std;;
+[@@@part "0.5"];;
+open Core_kernel;;
 module M = struct let foo = 3 end;;
+[%%expect{|module M : sig val foo : int end|}];;
 foo;;
+[%%expect{|
+Characters 0-3:
+Error: Unbound value foo
+|}];;
 open M;;
 foo;;
-
-(* part 1 *)
+[%%expect{|- : int = 3|}];;
+[@@@part "1"];;
 let average x y =
   let open Int64 in
   x + y / of_int 2;;
-
-(* part 2 *)
+[%%expect{|val average : int64 -> int64 -> int64 = <fun>|}];;
+[@@@part "2"];;
 let average x y =
   Int64.(x + y / of_int 2);;
-
-(* part 3 *)
+[%%expect{|val average : int64 -> int64 -> int64 = <fun>|}];;
+[@@@part "3"];;
 module Interval = struct
   type t = | Interval of int * int
            | Empty
@@ -27,8 +36,11 @@ module Interval = struct
   let create low high =
     if high < low then Empty else Interval (low,high)
 end;;
-
-(* part 4 *)
+[%%expect{|
+module Interval :
+  sig type t = Interval of int * int | Empty val create : int -> int -> t end
+|}];;
+[@@@part "4"];;
 module Extended_interval = struct
   include Interval
 
@@ -37,10 +49,17 @@ module Extended_interval = struct
     | Empty -> false
     | Interval (low,high) -> x >= low && x <= high
 end;;
-
+[%%expect{|
+module Extended_interval :
+  sig
+    type t = Interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val contains : t -> int -> bool
+  end
+|}];;
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
-
-(* part 5 *)
+[%%expect{|- : bool = true|}];;
+[@@@part "5"];;
 module Extended_interval = struct
   open Interval
 
@@ -49,5 +68,12 @@ module Extended_interval = struct
     | Empty -> false
     | Interval (low,high) -> x >= low && x <= high
 end;;
-
+[%%expect{|
+module Extended_interval :
+  sig val contains : Extended_interval.t -> int -> bool end
+|}];;
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
+[%%expect{|
+Characters 28-52:
+Error: Unbound value Extended_interval.create
+|}];;

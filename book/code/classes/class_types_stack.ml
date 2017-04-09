@@ -9,7 +9,7 @@ module Stack = struct
 end
 
 
-(* part 1 *)
+[@@@part "1"];;
 module AbstractStack : sig
    type 'a t = < pop: 'a option; push: 'a -> unit >
 
@@ -17,7 +17,7 @@ module AbstractStack : sig
 end = Stack
 
 
-(* part 2 *)
+[@@@part "2"];;
 module VisibleStack : sig
   
   type 'a t = < pop: 'a option; push: 'a -> unit >

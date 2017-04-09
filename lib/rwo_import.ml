@@ -1,14 +1,18 @@
-open Core.Std
+open Core
 module Lang = Rwo_lang
 module Html = Rwo_html
 
 module T = struct
+
+  type part = string
+    [@@deriving sexp]
+
   type t = {
     href : string;
-    part : float option;
+    part : part option;
     alt : string option;
     childs : Rwo_html.item list;
-  } with sexp
+  } [@@deriving sexp]
 
   (* Ignore [childs]. *)
   let compare (x:t) (y:t) =
@@ -29,7 +33,7 @@ let lang_of t =
 let is_import_html = function
   | `Data _ -> false
   | `Element {Html.name="link"; attrs; _} -> (
-    match List.Assoc.find attrs "rel" with
+    match List.Assoc.find ~equal:String.equal attrs "rel" with
     | Some "import" -> true
     | Some _
     | None -> false
@@ -44,14 +48,14 @@ let of_html item =
   else (
     match item with
     | `Element {name="link"; attrs; childs} -> (
-      let find x = List.Assoc.find attrs x in
+      let find x = List.Assoc.find ~equal:String.equal attrs x in
       Html.check_attrs attrs
         ~required:["href"; "rel"]
         ~allowed:(`Some ["part"; "alt"])
       >>= fun () ->
 
       (
-        try Ok (find "part" |> Option.map ~f:Float.of_string)
+        try Ok (find "part")
         with exn -> error "invalid part" exn sexp_of_exn
       ) >>= fun part ->
 
@@ -78,7 +82,7 @@ let to_html x =
   [
     Some ("rel", "import");
     Some ("href", x.href);
-    (Option.map x.part ~f:(fun x -> "part", Float.to_string x));
+    (Option.map x.part ~f:(fun x -> "part", x));
     (Option.map x.alt ~f:(fun x -> "alt", x));
   ]
   |> List.filter_map ~f:ident

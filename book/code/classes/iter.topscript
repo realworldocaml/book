@@ -1,14 +1,17 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
-(* part 0.5 *)
+open Core_kernel;;
+[@@@part "0.5"];;
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
-
-
-(* part 1 *)
+[%%expect{|type 'a iterator = < get : 'a; has_value : bool; next : unit >|}];;
+[@@@part "1"];;
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
 
@@ -24,8 +27,17 @@ class ['a] list_iterator init = object
     | hd :: tl -> current <- tl
     | [] -> raise (Invalid_argument "no value")
 end  ;;
-
-(* part 2 *)
+[%%expect{|
+class ['a] list_iterator :
+  'a list ->
+  object
+    val mutable current : 'a list
+    method get : 'a
+    method has_value : bool
+    method next : unit
+  end
+|}];;
+[@@@part "2"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -42,28 +54,36 @@ class ['a] stack init = object
   method iterator : 'a iterator =
     new list_iterator v
 end ;;
-
-(* part 3 *)
+[%%expect{|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method iterator : 'a iterator
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;
+[@@@part "3"];;
 let s = new stack [] ;;
-
+[%%expect{|val s : '_a stack = <obj>|}];;
 s#push 5 ;;
-
+[%%expect{|- : unit = ()|}];;
 s#push 4 ;;
-
+[%%expect{|- : unit = ()|}];;
 let it = s#iterator ;;
-
+[%%expect{|val it : int iterator = <obj>|}];;
 it#get ;;
-
+[%%expect{|- : int = 4|}];;
 it#next ;;
-
+[%%expect{|- : unit = ()|}];;
 it#get ;;
-
+[%%expect{|- : int = 5|}];;
 it#next ;;
-
+[%%expect{|- : unit = ()|}];;
 it#has_value ;;
-
-
-(* part 4 *)
+[%%expect{|- : bool = false|}];;
+[@@@part "4"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -80,16 +100,17 @@ class ['a] stack init = object
   method iter f = 
     List.iter ~f v 
 end ;;
-
-
-
-
-
-
-
-
-
-(* part 5 *)
+[%%expect{|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method iter : ('a -> unit) -> unit
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;
+[@@@part "5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
 
@@ -106,11 +127,13 @@ class ['a] stack init = object
   method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
     (fun f init -> List.fold ~f ~init v) 
 end ;;
-
-
-
-
-
-
-
-
+[%%expect{|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method fold : ('b -> 'a -> 'b) -> 'b -> 'b
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;

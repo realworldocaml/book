@@ -1,18 +1,29 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
 #require "ctypes.foreign" ;;
-(* part 1 *)
+[@@@part "1"];;
 open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;
 let compare_t = ptr void @-> ptr void @-> returning int ;;
-
+[%%expect{|
+val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
+  int(void*, void*)
+|}];;
 let qsort = foreign "qsort"
               (ptr void @-> size_t @-> size_t @->
                funptr compare_t @-> returning void) ;;
-
-
-
+[%%expect{|
+val qsort :
+  unit Ctypes_static.ptr ->
+  size_t ->
+  size_t -> (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) -> unit =
+  <fun>
+|}];;

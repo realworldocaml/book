@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let print_org file () =
   let url = sprintf "https://api.github.com/orgs/%s" file in

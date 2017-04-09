@@ -1,44 +1,56 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
+open Core_kernel;;
 #require "yojson";;
 let json = Yojson.Basic.from_file "book.json" ;;
-
-(* part 1 *)
+[%%expect{|Exception: Sys_error "book.json: No such file or directory".|}];;
+[@@@part "1"];;
 open Yojson.Basic.Util ;;
 let title = json |> member "title" |> to_string ;;
-
-
-(* part 2 *)
+[%%expect{|
+Characters 12-16:
+Error: Unbound value json
+|}];;
+[@@@part "2"];;
 let tags = json |> member "tags" |> to_list |> filter_string ;;
-
+[%%expect{|
+Characters 11-15:
+Error: Unbound value json
+|}];;
 let pages = json |> member "pages" |> to_int ;;
-
-
-(* part 3 *)
+[%%expect{|
+Characters 12-16:
+Error: Unbound value json
+|}];;
+[@@@part "3"];;
 let is_online = json |> member "is_online" |> to_bool_option ;;
-
+[%%expect{|
+Characters 16-20:
+Error: Unbound value json
+|}];;
 let is_translated = json |> member "is_translated" |> to_bool_option ;;
-
-
-(* part 4 *)
+[%%expect{|
+Characters 20-24:
+Error: Unbound value json
+|}];;
+[@@@part "4"];;
 let authors = json |> member "authors" |> to_list ;;
-
-
-
-
-
-
-
-
-
-
-(* part 5 *)
+[%%expect{|
+Characters 14-18:
+Error: Unbound value json
+|}];;
+[@@@part "5"];;
 let names =
   json |> member "authors" |> to_list 
   |> List.map ~f:(fun json -> member "name" json |> to_string) ;;
-
-
+[%%expect{|
+Characters 14-18:
+Error: Unbound value json
+|}];;

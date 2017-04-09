@@ -9,7 +9,7 @@
 
     This module supports conversion between the two forms.
 *)
-open Core.Std
+open Core
 
 val indexterm_to_idx : Rwo_html.t -> Rwo_html.t
 val idx_to_indexterm : Rwo_html.t -> Rwo_html.t

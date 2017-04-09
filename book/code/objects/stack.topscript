@@ -1,12 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
-
-(* part 1 *)
-open Core_kernel.Std;;
+[@@@part "1"];;
+open Core_kernel;;
 let s = object
   val mutable v = [0; 2]
 
@@ -20,17 +22,15 @@ let s = object
   method push hd = 
     v <- hd :: v
 end ;;
-
-
-(* part 2 *)
+[%%expect{|val s : < pop : int option; push : int -> unit > = <obj>|}];;
+[@@@part "2"];;
 s#pop ;;
-
+[%%expect{|- : int option = Some 0|}];;
 s#push 4 ;;
-
+[%%expect{|- : unit = ()|}];;
 s#pop ;;
-
-
-(* part 3 *)
+[%%expect{|- : int option = Some 4|}];;
+[@@@part "3"];;
 let stack init = object
   val mutable v = init
 
@@ -44,22 +44,25 @@ let stack init = object
   method push hd = 
     v <- hd :: v
 end ;;
-
+[%%expect{|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
 let s = stack [3; 2; 1] ;;
-
+[%%expect{|val s : < pop : int option; push : int -> unit > = <obj>|}];;
 s#pop ;;
-
-
-(* part 4 *)
+[%%expect{|- : int option = Some 3|}];;
+[@@@part "4"];;
 let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
-
+[%%expect{|val print_pop : < pop : int option; .. > -> unit = <fun>|}];;
 print_pop (stack [5;4;3;2;1]) ;;
-
-
+[%%expect{|
+- : unit = ()
+Popped: 5
+|}];;
 let t = object
-  method pop = Some (Float.to_int (Time_ns.to_float (Time_ns.now ())))
+  method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
 end ;;
-
+[%%expect{|val t : < pop : Core_kernel__Import.int option > = <obj>|}];;
 print_pop t ;;
-
-
+[%%expect{|
+- : unit = ()
+Popped: 1491764651762608000
+|}];;

@@ -1,17 +1,17 @@
 opam-version: "1.2"
 name: "Real-World-OCaml"
 version: "dev"
-maintainer: "Ashish Agarwal <agarwal1975@gmail.com>"
+maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/yminsky/Real-World-OCaml"
 license: "PROPRIETARY"
 
 build: [
-  ["omake" "-j%{jobs}%"]
+  ["make" "-j%{jobs}%"]
 ]
 
 install: [
-  ["omake" "%{name}%.install"]
-  ["omake" "install_lib"]
+  ["make" "%{name}%.install"]
+  ["make" "install_lib"]
 ]
 
 remove: [
@@ -19,19 +19,30 @@ remove: [
 ]
 
 depends: [
-  "omake" {build}
   "ocamlscript" {build}
   "core"
   "async" {>= "112.24.00"}
   "ocamlnet"
   "cohttp"
-  "oloop"
+  "ppx_sexp_conv"
+  "toplevel_expect_test"
+  "ocaml-topexpect"
+  "patdiff"
 
   # Required for code blocks within book.
   "core_bench"
   "mtime"
+  "yojson"
+  "astring"
+  "cryptokit"
+  "async_graphics"
+  "ocp-index"
+  "atd"
+  "atdgen"
+  "ctypes"
+  "ctypes-foreign"
 ]
 
 available: [
-  ocaml-version >= "4.02.1"
+  ocaml-version >= "4.03.0"
 ]

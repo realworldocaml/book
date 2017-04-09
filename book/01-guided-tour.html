@@ -56,7 +56,7 @@
     <section id="ocaml-as-a-calculator" data-type="sect1">
       <h1>OCaml as a Calculator</h1>
 
-      <p>Our first step is to open <code>Core_kernel.Std</code>:
+      <p>Our first step is to open <code>Core_kernel</code>:
 
 	<idx>OCaml/numerical calculations in</idx>
 	<idx>numerical calculations</idx>
@@ -65,7 +65,7 @@
 
       <link rel="import" href="code/guided-tour/main.topscript" part="0.5"/>
 
-      <p>By opening <code>Core_kernel.Std</code>, we make the
+      <p>By opening <code>Core_kernel</code>, we make the
       definitions it contains available without having to reference
       <code>Core_kernel</code> explicitly. This is required for
       many of the examples in the tour and in the remainder of the
@@ -123,7 +123,7 @@
           <code>int</code> and <code>float</code>. For example, in
           many languages, <code>1 / 3</code> is zero, but <code>1 /
           3.0</code> is a third. OCaml requires you to be explicit
-          about which operation you're doing.</p>
+          about which operation you're using.</p>
         </li>
       </ul>
 
@@ -150,9 +150,8 @@
       <p>The following examples, however, are not legal:</p>
       <link rel="import" href="code/guided-tour/main.topscript" part="4"/>
 
-      <p>The error messages here are a little confusing, but
-      they'll make more sense as you learn more about the
-      language.</p>
+      <p>This highlights that variables can't be capitalized, can't
+      begin with numbers, and can't contain dashes.</p>
     </section>
 
     <section id="functions-and-type-inference" data-type="sect1">
@@ -180,7 +179,7 @@
       returns an <code>int</code>. We can also write functions that
       take multiple arguments. (Note that the following example
       will not work if you haven't opened
-      <code>Core_kernel.Std</code> as was suggested
+      <code>Core_kernel</code> as was suggested
       earlier.)<idx>multi-argument
       functions</idx><idx>functions/with multiple
       arguments</idx></p>
@@ -248,12 +247,17 @@
           <li>
             <p>OCaml requires that both branches of an
             <code>if</code> statement have the same type, so the
-            expression <code>if test first then first else 0</code>
-            requires that <code>first</code> must be the same type
+            expression </p>
+
+	    <p><code>if test first then first else 0</code></p>
+
+	    <p> requires that <code>first</code> must be the same type
             as <code>0</code>, and so <code>first</code> must be of
-            type <code>int</code>. Similarly, from <code>if test
-            second then second else 0</code> we can infer that
-            <code>second</code> has type <code>int</code>.</p>
+            type <code>int</code>. Similarly, from</p> 
+
+	    <p><code>if test second then second else 0</code> </p>
+
+	    <p>we can infer that <code>second</code> has type <code>int</code>.</p>
           </li>
 
           <li>

@@ -1,8 +1,8 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type t = string
-with sexp
+  [@@deriving sexp]
 
 let to_string = Fn.id
 

@@ -1,10 +1,10 @@
-open Core.Std
+open Core
 
 type t = { 
   a: string;
   b: int;
   c: float option 
-} with sexp
+} [@@deriving sexp]
 
 let run () =
   let t = Sexp.load_sexp_conv_exn "foo_broken_example.scm" t_of_sexp in

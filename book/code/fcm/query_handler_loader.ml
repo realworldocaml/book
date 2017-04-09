@@ -1,6 +1,6 @@
+open Query_handler_core
 
-
-(* part 1 *)
+[@@@part "1"];;
 let () =
   let loader = Loader.create [(module Unique); (module List_dir)] in
   let loader_instance =

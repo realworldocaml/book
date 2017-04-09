@@ -1,5 +1,0 @@
-* TODO Convert remaining chapters
-* TODO address remaining github issues
-* TODO installation and packaging web pages
-* TODO improved version of Core and Async doc (and reference in book)
-* TODO Final read-throughs

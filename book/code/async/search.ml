@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri query =
@@ -7,7 +7,7 @@ let query_uri query =
   Uri.add_query_param base_uri ("q", [query])
 
 
-(* part 1 *)
+[@@@part "1"];;
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
 let get_definition_from_json json =
   match Yojson.Safe.from_string json with
@@ -25,7 +25,7 @@ let get_definition_from_json json =
   | _ -> None
 
 
-(* part 2 *)
+[@@@part "2"];;
 (* Execute the DuckDuckGo search *)
 let get_definition word =
   Cohttp_async.Client.get (query_uri word)
@@ -35,7 +35,7 @@ let get_definition word =
   (word, get_definition_from_json (String.concat strings))
 
 
-(* part 3 *)
+[@@@part "3"];;
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -48,7 +48,7 @@ let print_result (word,definition) =
         (Wrapper.wrap (Wrapper.make 70) def))
 
 
-(* part 4 *)
+[@@@part "4"];;
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
 let search_and_print words =
@@ -57,7 +57,7 @@ let search_and_print words =
   List.iter results ~f:print_result
 
 
-(* part 5 *)
+[@@@part "5"];;
 let () =
   Command.async_basic
     ~summary:"Retrieve definitions from duckduckgo search engine"

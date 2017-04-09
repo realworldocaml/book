@@ -3,40 +3,47 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
-(* part 1 *)
-open Core.Std;;
+
+[%%expect];;
+[@@@part "1"];;
+open Core;;
 In_channel.read_all;;
 
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
 
 In_channel.read_all "test.txt";;
 
-(* part 3 *)
+[%%expect];;
+[@@@part "3"];;
 #require "async";;
-open Async.Std;;
+open Async;;
 Reader.file_contents;;
 
 
-(* part 4 *)
+[%%expect];;
+[@@@part "4"];;
 let contents = Reader.file_contents "test.txt";;
 
 Deferred.peek contents;;
 
 
-(* part 5 *)
+[%%expect];;
+[@@@part "5"];;
 contents;;
 
 
-(* part 6 *)
+[%%expect];;
+[@@@part "6"];;
 Deferred.peek contents;;
 
 
-(* part 7 *)
+[%%expect];;
+[@@@part "7"];;
 Deferred.bind ;;
 
 
-(* part 8 *)
+[%%expect];;
+[@@@part "8"];;
 let uppercase_file filename =
   Deferred.bind (Reader.file_contents filename)
     (fun text ->
@@ -48,7 +55,8 @@ uppercase_file "test.txt";;
 Reader.file_contents "test.txt";;
 
 
-(* part 9 *)
+[%%expect];;
+[@@@part "9"];;
 let uppercase_file filename =
   Reader.file_contents filename
   >>= fun text ->
@@ -56,7 +64,8 @@ let uppercase_file filename =
 ;;
 
 
-(* part 10 *)
+[%%expect];;
+[@@@part "10"];;
 let count_lines filename =
   Reader.file_contents filename
   >>= fun text ->
@@ -66,7 +75,8 @@ let count_lines filename =
 
 
 
-(* part 11 *)
+[%%expect];;
+[@@@part "11"];;
 return;;
 
 let three = return 3;;
@@ -74,7 +84,8 @@ let three = return 3;;
 three;;
 
 
-(* part 12 *)
+[%%expect];;
+[@@@part "12"];;
 let count_lines filename =
   Reader.file_contents filename
   >>= fun text ->
@@ -82,11 +93,13 @@ let count_lines filename =
 ;;
 
 
-(* part 13 *)
+[%%expect];;
+[@@@part "13"];;
 Deferred.map;;
 
 
-(* part 14 *)
+[%%expect];;
+[@@@part "14"];;
 let count_lines filename =
   Reader.file_contents filename
   >>| fun text ->
@@ -96,7 +109,8 @@ let count_lines filename =
 count_lines "/etc/hosts";;
 
 
-(* part 15 *)
+[%%expect];;
+[@@@part "15"];;
 let ivar = Ivar.create ();;
 
 let def = Ivar.read ivar;;
@@ -108,7 +122,8 @@ Ivar.fill ivar "Hello";;
 Deferred.peek def;;
 
 
-(* part 16 *)
+[%%expect];;
+[@@@part "16"];;
 module type Delayer_intf = sig
   type t
   val create : Time.Span.t -> t
@@ -121,11 +136,13 @@ end;;
 
 
 
-(* part 17 *)
+[%%expect];;
+[@@@part "17"];;
 upon;;
 
 
-(* part 18 *)
+[%%expect];;
+[@@@part "18"];;
 module Delayer : Delayer_intf = struct
   type t = { delay: Time.Span.t;
              jobs: (unit -> unit) Queue.t;
@@ -145,13 +162,15 @@ module Delayer : Delayer_intf = struct
 end;;
 
 
-(* part 19 *)
+[%%expect];;
+[@@@part "19"];;
 let rec loop_forever () = loop_forever ();;
 
 let always_fail () = assert false;;
 
 
-(* part 20 *)
+[%%expect];;
+[@@@part "20"];;
 let do_stuff n =
   let x = 3 in
   if n > 0 then loop_forever ();
@@ -159,11 +178,13 @@ let do_stuff n =
 ;;
 
 
-(* part 21 *)
+[%%expect];;
+[@@@part "21"];;
 let rec loop_forever () : never_returns = loop_forever ();;
 
 
-(* part 22 *)
+[%%expect];;
+[@@@part "22"];;
 let do_stuff n =
   let x = 3 in
   if n > 0 then loop_forever ();
@@ -173,7 +194,8 @@ let do_stuff n =
 
 
 
-(* part 23 *)
+[%%expect];;
+[@@@part "23"];;
 never_returns;;
 
 let do_stuff n =
@@ -183,12 +205,14 @@ let do_stuff n =
 ;;
 
 
-(* part 24 *)
+[%%expect];;
+[@@@part "24"];;
 let (r,w) = Pipe.create ();;
 
 
 
-(* part 25 *)
+[%%expect];;
+[@@@part "25"];;
 let (r,w) = Pipe.create ();;
 
 
@@ -199,19 +223,22 @@ Pipe.read r;;
 write_complete;;
 
 
-(* part 26 *)
+[%%expect];;
+[@@@part "26"];;
 Pipe.transfer;;
 
 
 
-(* part 27 *)
+[%%expect];;
+[@@@part "27"];;
 Command.async_basic;;
 
 
 
 
 
-(* part 28 *)
+[%%expect];;
+[@@@part "28"];;
 #require "cohttp.async";;
 Cohttp_async.Client.get;;
 
@@ -219,15 +246,18 @@ Cohttp_async.Client.get;;
 
 
 
-(* part 29 *)
+[%%expect];;
+[@@@part "29"];;
 Deferred.all;;
 
 
-(* part 30 *)
+[%%expect];;
+[@@@part "30"];;
 Deferred.all_unit;;
 
 
-(* part 31 *)
+[%%expect];;
+[@@@part "31"];;
 let maybe_raise =
   let should_fail = ref false in
   fun () ->
@@ -250,7 +280,8 @@ maybe_raise ();;
 
 
 
-(* part 32 *)
+[%%expect];;
+[@@@part "32"];;
 let handle_error () =
   try
     maybe_raise ()
@@ -270,7 +301,8 @@ handle_error ();;
 
 
 
-(* part 33 *)
+[%%expect];;
+[@@@part "33"];;
 let handle_error () =
   try_with (fun () -> maybe_raise ())
   >>| function
@@ -283,7 +315,8 @@ handle_error ();;
 handle_error ();;
 
 
-(* part 34 *)
+[%%expect];;
+[@@@part "34"];;
 let blow_up () =
   let monitor = Monitor.create ~name:"blow up monitor" () in
   within' ~monitor maybe_raise
@@ -294,7 +327,8 @@ blow_up ();;
 blow_up ();;
 
 
-(* part 35 *)
+[%%expect];;
+[@@@part "35"];;
 let swallow_error () =
   let monitor = Monitor.create () in
   Stream.iter (Monitor.detach_and_get_error_stream monitor)
@@ -307,7 +341,8 @@ swallow_error ();;
 
 
 
-(* part 36 *)
+[%%expect];;
+[@@@part "36"];;
 exception Ignore_me;;
 
 let swallow_some_errors exn_to_raise =
@@ -324,15 +359,18 @@ let swallow_some_errors exn_to_raise =
 ;;
 
 
-(* part 37 *)
+[%%expect];;
+[@@@part "37"];;
 swallow_some_errors Not_found;;
 
 
-(* part 38 *)
+[%%expect];;
+[@@@part "38"];;
 swallow_some_errors Ignore_me;;
 
 
-(* part 39 *)
+[%%expect];;
+[@@@part "39"];;
 let string_and_float = Deferred.both
                          (after (sec 0.5)  >>| fun () -> "A")
                          (after (sec 0.25) >>| fun () -> 32.33);;
@@ -340,24 +378,28 @@ let string_and_float = Deferred.both
 string_and_float;;
 
 
-(* part 40 *)
+[%%expect];;
+[@@@part "40"];;
 Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
              ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
 
 
-(* part 41 *)
+[%%expect];;
+[@@@part "41"];;
 choice;;
 
 choose;;
 
 
-(* part 42 *)
+[%%expect];;
+[@@@part "42"];;
 let def = In_thread.run (fun () -> List.range 1 10);;
 
 def;;
 
 
-(* part 43 *)
+[%%expect];;
+[@@@part "43"];;
 let log_delays thunk =
   let start = Time.now () in
   let print_time () =
@@ -370,10 +412,12 @@ let log_delays thunk =
 ;;
 
 
-(* part 44 *)
+[%%expect];;
+[@@@part "44"];;
 log_delays (fun () -> after (sec 0.5));;
 
-(* part 45 *)
+[%%expect];;
+[@@@part "45"];;
 let busy_loop () =
   let x = ref None in
   for i = 1 to 100_000_000 do x := Some i done
@@ -382,10 +426,12 @@ let busy_loop () =
 log_delays (fun () -> return (busy_loop ()));;
 
 
-(* part 46 *)
+[%%expect];;
+[@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;
 
-(* part 47 *)
+[%%expect];;
+[@@@part "47"];;
 let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
 ;;

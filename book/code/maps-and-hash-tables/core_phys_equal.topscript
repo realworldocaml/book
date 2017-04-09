@@ -1,10 +1,21 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 1 *)
-open Core_kernel.Std ;;
-1 == 2 ;;
-phys_equal 1 2 ;;
 
+[@@@part "1"];;
+open Core_kernel;;
+1 == 2 ;;
+[%%expect{|
+Characters 2-4:
+Warning 3: deprecated: Core_kernel.==
+[since 2014-10] Use [phys_equal]
+- : bool = false
+|}];;
+phys_equal 1 2 ;;
+[%%expect{|- : bool = false|}];;

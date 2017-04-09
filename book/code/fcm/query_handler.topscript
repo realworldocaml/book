@@ -1,16 +1,19 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
-
-(* part 0.5 *)
+open Core_kernel;;
+[@@@part "0.5"];;
 module type Query_handler = sig
 
   (** Configuration for a query handler.  Note that this can be
       converted to and from an s-expression *)
-  type config with sexp
+  type config [@@deriving sexp]
 
   (** The name of the query-handling service *)
   val name : string
@@ -25,20 +28,37 @@ module type Query_handler = sig
       s-expressions *)
   val eval : t -> Sexp.t -> Sexp.t Or_error.t
 end;;
-
-(* part 1 *)
-module type M = sig type t with sexp end;;
-
-(* part 2 *)
-type u = { a: int; b: float } with sexp;;
-
+[%%expect{|
+module type Query_handler =
+  sig
+    type config
+    val name : string
+    type t
+    val create : config -> t
+    val eval : t -> Sexp.t -> Sexp.t Or_error.t
+  end
+|}];;
+[@@@part "1"];;
+module type M = sig type t [@@deriving sexp] end;;
+[%%expect{|module type M = sig type t end|}];;
+[@@@part "2"];;
+type u = { a: int; b: float } [@@deriving sexp];;
+[%%expect{|type u = { a : int; b : float; }|}];;
 sexp_of_u {a=3;b=7.};;
-
+[%%expect{|
+Characters 0-9:
+Error: Unbound value sexp_of_u
+Hint: Did you mean sexp_of_vec, sexp_of_unit, sexp_of_ref, sexp_of_mat, sexp_of_int or sexp_of_exn?
+|}];;
 u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
-
-(* part 3 *)
+[%%expect{|
+Characters 0-9:
+Error: Unbound value u_of_sexp
+Hint: Did you mean vec_of_sexp, unit_of_sexp, ref_of_sexp, mat_of_sexp or int_of_sexp?
+|}];;
+[@@@part "3"];;
 module Unique = struct
-  type config = int with sexp
+  type config = int [@@deriving sexp]
   type t = { mutable next_id: int }
 
   let name = "unique"
@@ -52,19 +72,33 @@ module Unique = struct
       t.next_id <- t.next_id + 1;
       response
 end;;
-
-
-(* part 4 *)
+[%%expect{|
+module Unique :
+  sig
+    type config = int
+    type t = { mutable next_id : config; }
+    val name : string
+    val create : config -> t
+    val eval :
+      t -> Sexplib.Type.t -> (Sexplib.Type.t, Core_kernel__Error.t) result
+  end
+|}];;
+[@@@part "4"];;
 let unique = Unique.create 0;;
-
+[%%expect{|val unique : Unique.t = {Unique.next_id = 0}|}];;
 Unique.eval unique Sexp.unit;;
-
+[%%expect{|
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
+Ok (Sexplib.Sexp.Atom "0")
+|}];;
 Unique.eval unique Sexp.unit;;
-
-
-(* part 5 *)
+[%%expect{|
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
+Ok (Sexplib.Sexp.Atom "1")
+|}];;
+[@@@part "5"];;
 module List_dir = struct
-  type config = string with sexp
+  type config = string [@@deriving sexp]
   type t = { cwd: string }
 
   (** [is_abs p] Returns true if [p] is an absolute path  *)
@@ -84,44 +118,61 @@ module List_dir = struct
       in
       Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
 end;;
-
-
-
-
-
-
-
-
-
-
-
-
-(* part 6 *)
+[%%expect{|
+module List_dir :
+  sig
+    type config = string
+    type t = { cwd : config; }
+    val is_abs : config -> bool
+    val name : config
+    val create : config -> t
+    val eval :
+      t -> Sexplib.Type.t -> (Sexplib.Type.t, Core_kernel__Error.t) result
+  end
+|}];;
+[@@@part "6"];;
 let list_dir = List_dir.create "/var";;
-
+[%%expect{|val list_dir : List_dir.t = {List_dir.cwd = "/var"}|}];;
 List_dir.eval list_dir (sexp_of_string ".");;
-
-
+[%%expect{|
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
+Ok
+ (Base__.Sexplib.Sexp.List
+   [Base__.Sexplib.Sexp.Atom "agentx"; Base__.Sexplib.Sexp.Atom "at";
+    Base__.Sexplib.Sexp.Atom "audit"; Base__.Sexplib.Sexp.Atom "backups";
+    Base__.Sexplib.Sexp.Atom "db"; Base__.Sexplib.Sexp.Atom "empty";
+    Base__.Sexplib.Sexp.Atom "folders"; Base__.Sexplib.Sexp.Atom "jabberd";
+    Base__.Sexplib.Sexp.Atom "lib"; Base__.Sexplib.Sexp.Atom "log";
+    Base__.Sexplib.Sexp.Atom "ma"; Base__.Sexplib.Sexp.Atom "mail";
+    Base__.Sexplib.Sexp.Atom "msgs"; Base__.Sexplib.Sexp.Atom "netboot";
+    Base__.Sexplib.Sexp.Atom "networkd"; Base__.Sexplib.Sexp.Atom "root";
+    Base__.Sexplib.Sexp.Atom "rpc"; Base__.Sexplib.Sexp.Atom "run";
+    Base__.Sexplib.Sexp.Atom "rwho"; Base__.Sexplib.Sexp.Atom "spool";
+    Base__.Sexplib.Sexp.Atom "tmp"; Base__.Sexplib.Sexp.Atom "vm";
+    Base__.Sexplib.Sexp.Atom "yp"])
+|}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-
-
-(* part 7 *)
+[%%expect{|
+- : (Sexplib.Type.t, Core_kernel__Error.t) result =
+Ok (Base__.Sexplib.Sexp.List [Base__.Sexplib.Sexp.Atom "binding"])
+|}];;
+[@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
   val this : Query_handler.t
 end;;
-
-
-
-(* part 8 *)
+[%%expect{|
+module type Query_handler_instance =
+  sig module Query_handler : Query_handler val this : Query_handler.t end
+|}];;
+[@@@part "8"];;
 let unique_instance =
   (module struct
     module Query_handler = Unique
     let this = Unique.create 0
   end : Query_handler_instance);;
-
-
-(* part 9 *)
+[%%expect{|val unique_instance : (module Query_handler_instance) = <module>|}];;
+[@@@part "9"];;
 let build_instance
       (type a)
       (module Q : Query_handler with type config = a)
@@ -132,29 +183,30 @@ let build_instance
     let this = Q.create config
   end : Query_handler_instance)
 ;;
-
-
-
-
-(* part 10 *)
+[%%expect{|
+val build_instance :
+  (module Query_handler with type config = 'a) ->
+  'a -> (module Query_handler_instance) = <fun>
+|}];;
+[@@@part "10"];;
 let unique_instance = build_instance (module Unique) 0;;
-
+[%%expect{|val unique_instance : (module Query_handler_instance) = <module>|}];;
 let list_dir_instance = build_instance (module List_dir)  "/var";;
-
-
-(* part 11 *)
+[%%expect{|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
+[@@@part "11"];;
 let build_dispatch_table handlers =
   let table = String.Table.create () in
   List.iter handlers
     ~f:(fun ((module I : Query_handler_instance) as instance) ->
-      Hashtbl.replace table ~key:I.Query_handler.name ~data:instance);
+      Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
   table
 ;;
-
-
-
-
-(* part 12 *)
+[%%expect{|
+val build_dispatch_table :
+  (module Query_handler_instance) list ->
+  (module Query_handler_instance) String.Table.t = <fun>
+|}];;
+[@@@part "12"];;
 let dispatch dispatch_table name_and_query =
   match name_and_query with
   | Sexp.List [Sexp.Atom name; query] ->
@@ -168,11 +220,12 @@ let dispatch dispatch_table name_and_query =
   | _ ->
     Or_error.error_string "malformed query"
 ;;
-
-
-
-
-(* part 13 *)
+[%%expect{|
+val dispatch :
+  (Core_kernel__Import.string, (module Query_handler_instance)) Hashtbl.t ->
+  Sexp.t -> Sexp.t Or_error.t = <fun>
+|}];;
+[@@@part "13"];;
 let rec cli dispatch_table =
   printf ">>> %!";
   let result =
@@ -194,21 +247,24 @@ let rec cli dispatch_table =
     printf "%s\n%!" msg;
     cli dispatch_table
 ;;
-
-
-(* part 14 *)
+[%%expect{|
+Characters 73-94:
+Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
+|}];;
+[@@@part "14"];;
 type query_handler_instance = { name : string
                               ; eval : Sexp.t -> Sexp.t Or_error.t
                               };;
+[%%expect{|
+type query_handler_instance = {
+  name : string;
+  eval : Sexp.t -> Sexp.t Or_error.t;
+}
+|}];;
 type query_handler = Sexp.t -> query_handler_instance
 ;;
-
-
-
-
-
-
-(* part 15 *)
+[%%expect{|type query_handler = Sexp.t -> query_handler_instance|}];;
+[@@@part "15"];;
 let unique_handler config_sexp =
   let config = Unique.config_of_sexp config_sexp in
   let unique = Unique.create config in
@@ -216,4 +272,7 @@ let unique_handler config_sexp =
   ; eval = (fun config -> Unique.eval unique config)
   }
 ;;
-
+[%%expect{|
+Characters 48-69:
+Error: Unbound value Unique.config_of_sexp
+|}];;

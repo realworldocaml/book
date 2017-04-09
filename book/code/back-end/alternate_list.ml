@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let rec take =
   function

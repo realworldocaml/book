@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let add_days base span () =
   Date.add_days base span

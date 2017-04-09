@@ -1,27 +1,32 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
-
-(* part 1 *)
+open Core_kernel;;
+[@@@part "1"];;
 for i = 0 to 3 do printf "i = %d\n" i done;;
-
-
-
-
-
-
-(* part 2 *)
+[%%expect{|
+- : unit = ()
+i = 0
+i = 1
+i = 2
+i = 3
+|}];;
+[@@@part "2"];;
 for i = 3 downto 0 do printf "i = %d\n" i done;;
-
-
-
-
-
-
-(* part 3 *)
+[%%expect{|
+- : unit = ()
+i = 3
+i = 2
+i = 1
+i = 0
+|}];;
+[@@@part "3"];;
 let rev_inplace ar =
   let i = ref 0 in
   let j = ref (Array.length ar - 1) in
@@ -36,10 +41,10 @@ let rev_inplace ar =
     decr j
   done
 ;;
-
+[%%expect{|val rev_inplace : 'a array -> unit = <fun>|}];;
 let nums = [|1;2;3;4;5|];;
-
+[%%expect{|val nums : int array = [|1; 2; 3; 4; 5|]|}];;
 rev_inplace nums;;
-
+[%%expect{|- : unit = ()|}];;
 nums;;
-
+[%%expect{|- : int array = [|5; 4; 3; 2; 1|]|}];;

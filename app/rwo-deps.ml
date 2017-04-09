@@ -53,7 +53,7 @@ end = struct
       | (Nethtml.Data _)::html -> loop accum html
       | (Nethtml.Element ("link", attrs, childs))::html ->
         (
-          match List.Assoc.find attrs "href" with
+          match List.Assoc.find ~equal:String.equal attrs "href" with
           | Some x -> loop (loop (x::accum) childs) html
           | None -> loop (loop accum childs) html
         )

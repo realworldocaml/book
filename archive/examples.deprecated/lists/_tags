@@ -1,3 +1,0 @@
-true:package(async,core,sexplib,bin_prot,sexplib.syntax,bin_prot.syntax,fieldslib.syntax,variantslib.syntax,cohttp.async,yojson,textwrap,core_bench)
-true:syntax(camlp4o)
-true:thread,debug,annot

@@ -1,11 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
-(* part 1 *)
-open Core_kernel.Std;;
+[@@@part "1"];;
+open Core_kernel;;
 class istack = object
   val mutable v = [0; 2]
 
@@ -19,23 +22,23 @@ class istack = object
   method push hd =
     v <- hd :: v
 end ;;
-
-
-
-
-
-
-
-(* part 2 *)
+[%%expect{|
+class istack :
+  object
+    val mutable v : int list
+    method pop : int option
+    method push : int -> unit
+  end
+|}];;
+[@@@part "2"];;
 let s = new istack ;;
-
+[%%expect{|val s : istack = <obj>|}];;
 s#pop ;;
-
+[%%expect{|- : int option = Some 0|}];;
 s#push 5 ;;
-
+[%%expect{|- : unit = ()|}];;
 s#pop ;;
-
-
-(* part 3 *)
+[%%expect{|- : int option = Some 5|}];;
+[@@@part "3"];;
 type istack = < pop: int option; push: int -> unit > ;;
-
+[%%expect{|type istack = < pop : int option; push : int -> unit >|}];;

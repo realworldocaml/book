@@ -1,10 +1,15 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core.Std;;
-(* part 1 *)
+open Core;;
+[@@@part "1"];;
 Command.Spec.empty ;;
+[%%expect{|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
-
+[%%expect{|- : (int -> '_a, '_a) Command.Spec.t = <abstr>|}];;

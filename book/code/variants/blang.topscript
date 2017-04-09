@@ -1,11 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
-open Core_kernel.Std;;
-(* part 0.5 *)
+open Core_kernel;;
+[@@@part "0.5"];;
 type 'a expr =
   | Base  of 'a
   | Const of bool
@@ -13,22 +16,37 @@ type 'a expr =
   | Or    of 'a expr list
   | Not   of 'a expr
 ;;
-
-(* part 1 *)
+[%%expect{|
+type 'a expr =
+    Base of 'a
+  | Const of bool
+  | And of 'a expr list
+  | Or of 'a expr list
+  | Not of 'a expr
+|}];;
+[@@@part "1"];;
 type mail_field = To | From | CC | Date | Subject;;
+[%%expect{|type mail_field = To | From | CC | Date | Subject|}];;
 type mail_predicate = { field: mail_field;
                         contains: string }
 ;;
-
-(* part 2 *)
+[%%expect{|type mail_predicate = { field : mail_field; contains : string; }|}];;
+[@@@part "2"];;
 let test field contains = Base { field; contains };;
-
+[%%expect{|val test : mail_field -> string -> mail_predicate expr = <fun>|}];;
 And [ Or [ test To "doligez"; test CC "doligez" ];
       test Subject "runtime";
     ]
 ;;
-
-(* part 3 *)
+[%%expect{|
+- : mail_predicate expr =
+And
+ [Or
+   [Base {field = To; contains = "doligez"};
+    Base {field = CC; contains = "doligez"}];
+  Base {field = Subject; contains = "runtime"}]
+|}];;
+[@@@part "3"];;
 let rec eval expr base_eval =
   (* a shortcut, so we don't need to repeatedly pass [base_eval]
      explicitly to [eval] *)
@@ -40,9 +58,8 @@ let rec eval expr base_eval =
   | Or    exprs -> List.exists  exprs ~f:eval'
   | Not   expr  -> not (eval' expr)
 ;;
-
-
-(* part 4 *)
+[%%expect{|val eval : 'a expr -> ('a -> bool) -> bool = <fun>|}];;
+[@@@part "4"];;
 let and_ l =
   if List.mem l (Const false) then Const false
   else
@@ -51,6 +68,11 @@ let and_ l =
     | [ x ] -> x
     | l -> And l
 ;;
+[%%expect{|
+Characters 18-42:
+Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
+       but an expression was expected of type bool
+|}];;
 let or_ l =
   if List.mem l (Const true) then Const true
   else
@@ -59,44 +81,51 @@ let or_ l =
     | [x] -> x
     | l -> Or l
 ;;
+[%%expect{|
+Characters 17-40:
+Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
+       but an expression was expected of type bool
+|}];;
 let not_ = function
   | Const b -> Const (not b)
   | e -> Not e
 ;;
-
-
-
-
-(* part 5 *)
+[%%expect{|val not_ : 'a expr -> 'a expr = <fun>|}];;
+[@@@part "5"];;
 let rec simplify = function
   | Base _ | Const _ as x -> x
   | And l -> and_ (List.map ~f:simplify l)
   | Or l  -> or_  (List.map ~f:simplify l)
   | Not e -> not_ (simplify e)
 ;;
-
-
-(* part 6 *)
+[%%expect{|
+Characters 72-76:
+Error: Unbound value and_
+|}];;
+[@@@part "6"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Base "it's raining"]));;
-
-
-(* part 7 *)
+[%%expect{|
+Characters 0-8:
+Error: Unbound value simplify
+|}];;
+[@@@part "7"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Not (Not (Base "it's raining"))]));;
-
-
-(* part 8 *)
+[%%expect{|
+Characters 0-8:
+Error: Unbound value simplify
+|}];;
+[@@@part "8"];;
 let not_ = function
   | Const b -> Const (not b)
   | (Base _ | And _ | Or _ | Not _) as e -> Not e
 ;;
-
-
-(* part 9 *)
+[%%expect{|val not_ : 'a expr -> 'a expr = <fun>|}];;
+[@@@part "9"];;
 let not_ = function
   | Const b -> Const (not b)
   | Not e -> e
   | (Base _ | And _ | Or _ ) as e -> Not e
 ;;
-
+[%%expect{|val not_ : 'a expr -> 'a expr = <fun>|}];;

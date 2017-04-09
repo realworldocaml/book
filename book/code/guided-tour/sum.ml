@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let rec read_and_accumulate accum =
   let line = In_channel.input_line In_channel.stdin in

@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let do_hash filename ic =
   let open Cryptokit in

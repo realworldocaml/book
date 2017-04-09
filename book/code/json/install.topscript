@@ -1,9 +1,13 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 1 *)
-open Core_kernel.Std ;;
+[@@@part "1"];;
+open Core_kernel ;;
 #require "yojson" ;;
 open Yojson ;;

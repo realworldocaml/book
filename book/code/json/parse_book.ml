@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let () =
   (* Read the JSON file *)

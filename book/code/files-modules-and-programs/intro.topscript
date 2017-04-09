@@ -1,12 +1,25 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 1 *)
-open Core_kernel.Std;;
+[@@@part "1"];;
+open Core_kernel;;
 let assoc = [("one", 1); ("two",2); ("three",3)] ;;
+[%%expect{|val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]|}];;
 List.Assoc.find assoc "two" ;;
+[%%expect{|- : equal:(string -> string -> bool) -> int option = <fun>|}];;
 List.Assoc.add assoc "four" 4 (* add a new key *) ;;
+[%%expect{|
+- : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =
+<fun>
+|}];;
 List.Assoc.add assoc "two"  4 (* overwrite an existing key *) ;;
-
+[%%expect{|
+- : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =
+<fun>
+|}];;

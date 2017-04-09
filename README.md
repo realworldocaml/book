@@ -9,7 +9,7 @@ recommended you do the following to install all necessary
 dependencies:
 
 ```
-opam switch Real-World-OCaml -A 4.02.1
+opam switch Real-World-OCaml -A 4.03.0
 cd /to/your/working/directory
 opam pin add Real-World-OCaml .
 opam install Real-World-OCaml --deps-only
@@ -17,15 +17,6 @@ opam install Real-World-OCaml --deps-only
 
 The `switch` step is optional, but recommended if you are also working
 on other OCaml projects that may have conflicting requirements.
-
-
-Build Instructions
-==================
-Run `omake`. All output goes under `_build`. By default, code blocks
-are not highlighted. To pass them through `pygmentize`, run `omake
-PYGMENTIZE="true"`.
-
-Run `omake clean` to remove generated files.
 
 
 Directory Structure

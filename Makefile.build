@@ -1,0 +1,87 @@
+.PHONY: all app lib atlas site clean
+
+all: site
+
+lib:
+	$(MAKE) -C lib
+
+lib/rwo.cma: lib
+
+app: lib
+	$(MAKE) -C app
+
+atlas site app/rwo: app
+
+################################################################################
+# General Project Information
+
+include Makefile.shared
+
+################################################################################
+# Compute chapters dependencies
+
+.depend: $(foreach file,$(HTML_CHAPTER_FILES),book/$(file))
+	./app/rwo-deps.ml deps site -repo-root ./ > $@
+
+################################################################################
+# SASS to CSS style sheet preprocessing
+
+ifndef SASS
+SASS:=$(shell command -v sassc 2> /dev/null)
+endif
+ifndef SASS
+SASS:=$(shell command -v sassc 2> /dev/null)
+endif
+
+book/css/app.css: $(wildcard	book/scss/*.scss)
+ifndef SASS
+	$(error "Couldn't find sass or sassc binary, install one or adjust SASS variable")
+endif
+	$(SASS) -q -I $(shell opam config var foundation:lib)/scss book/scss/app.scss > $@
+
+################################################################################
+# HTML Book
+
+ROOT = ./
+
+site/%.html: book/%.html app/rwo
+ifdef PYGMENTIZE
+	app/rwo build chapter -pygmentize -o site/ -repo-root $(ROOT) $<
+else
+	app/rwo build chapter -o site/ -repo-root $(ROOT) $<
+endif
+
+site/index.html: app
+	app/rwo build frontpage -o site/ -repo-root $(ROOT)
+
+site/faqs.html: book/faqs.html app
+	app/rwo build faqs -o site/ -repo-root $(ROOT)
+
+site/install.html: book/install.html app
+	app/rwo build install -o site/ -repo-root $(ROOT)
+
+site/toc.html: app
+	app/rwo build toc -o site/ -repo-root $(ROOT)
+
+site-aux::
+	rsync -av book/images book/js book/css site/
+
+site: $(foreach file,$(HTML_FILES),site/$(file)) site-aux
+
+################################################################################
+# Book in format required by O'Reilly's Atlas
+
+atlas/%.html: book/%.html app
+	app/rwo build chapter -o atlas/ -repo-root ./ $<
+
+atlas: $(foreach file,$(HTML_CHAPTER_FILES),atlas/$(file))
+
+################################################################################
+# Clean Up
+
+clean:
+	$(MAKE) -C lib clean
+	$(MAKE) -C app clean
+
+include Makefile.derived
+-include .depend

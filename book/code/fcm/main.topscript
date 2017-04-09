@@ -1,118 +1,105 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 0.5 *)
-open Core_kernel.Std;;
+[@@@part "0.5"];;
+open Core_kernel;;
 module type X_int = sig val x : int end;;
-
-
-(* part 1 *)
+[%%expect{|module type X_int = sig val x : int end|}];;
+[@@@part "1"];;
 module Three : X_int = struct let x = 3 end;;
-
+[%%expect{|module Three : X_int|}];;
 Three.x;;
-
-
-(* part 2 *)
+[%%expect{|- : int = 3|}];;
+[@@@part "2"];;
 let three = (module Three : X_int);;
-
-
-(* part 3 *)
+[%%expect{|val three : (module X_int) = <module>|}];;
+[@@@part "3"];;
 module Four = struct let x = 4 end;;
-
+[%%expect{|module Four : sig val x : int end|}];;
 let numbers = [ three; (module Four) ];;
-
-
-(* part 4 *)
+[%%expect{|val numbers : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "4"];;
 let numbers = [three; (module struct let x = 4 end)];;
-
-
-(* part 5 *)
+[%%expect{|val numbers : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "5"];;
 module New_three = (val three : X_int) ;;
-
+[%%expect{|module New_three : X_int|}];;
 New_three.x;;
-
-
-(* part 6 *)
+[%%expect{|- : int = 3|}];;
+[@@@part "6"];;
 module type Y_int = X_int;;
-
+[%%expect{|module type Y_int = X_int|}];;
 let five = (module struct let x = 5 end : Y_int);;
-
+[%%expect{|val five : (module Y_int) = <module>|}];;
 [three; five];;
-
-
-
-
-(* part 7 *)
+[%%expect{|- : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "7"];;
 [three; (module (val five))];;
-
-
-(* part 8 *)
+[%%expect{|- : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "8"];;
 let to_int m =
   let module M = (val m : X_int) in
   M.x
 ;;
-
+[%%expect{|val to_int : (module X_int) -> int = <fun>|}];;
 let plus m1 m2 =
   (module struct
     let x = to_int m1 + to_int m2
   end : X_int)
 ;;
-
-
-(* part 9 *)
+[%%expect{|val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>|}];;
+[@@@part "9"];;
 let six = plus three three;;
-
+[%%expect{|val six : (module X_int) = <module>|}];;
 to_int (List.fold ~init:six ~f:plus [three;three]);;
-
-
-(* part 10 *)
+[%%expect{|- : int = 12|}];;
+[@@@part "10"];;
 let to_int (module M : X_int) = M.x ;;
-
-
-(* part 11 *)
+[%%expect{|val to_int : (module X_int) -> int = <fun>|}];;
+[@@@part "11"];;
 module type Bumpable = sig
   type t
   val bump : t -> t
 end;;
-
-
-(* part 12 *)
+[%%expect{|module type Bumpable = sig type t val bump : t -> t end|}];;
+[@@@part "12"];;
 module Int_bumper = struct
   type t = int
   let bump n = n + 1
 end;;
-
+[%%expect{|module Int_bumper : sig type t = int val bump : t -> t end|}];;
 module Float_bumper = struct
   type t = float
   let bump n = n +. 1.
 end;;
-
-
-(* part 13 *)
+[%%expect{|module Float_bumper : sig type t = float val bump : t -> t end|}];;
+[@@@part "13"];;
 let int_bumper = (module Int_bumper : Bumpable);;
-
-
-(* part 14 *)
+[%%expect{|val int_bumper : (module Bumpable) = <module>|}];;
+[@@@part "14"];;
 let (module Bumpable) = int_bumper in Bumpable.bump 3;;
-
-
-
-
-(* part 15 *)
+[%%expect{|
+Characters 52-53:
+Error: This expression has type int but an expression was expected of type
+         Bumpable.t
+|}];;
+[@@@part "15"];;
 let int_bumper = (module Int_bumper : Bumpable with type t = int);;
-
+[%%expect{|val int_bumper : (module Bumpable with type t = int) = <module>|}];;
 let float_bumper = (module Float_bumper : Bumpable with type t = float);;
-
-
-(* part 16 *)
+[%%expect{|val float_bumper : (module Bumpable with type t = float) = <module>|}];;
+[@@@part "16"];;
 let (module Bumpable) = int_bumper in Bumpable.bump 3;;
-
+[%%expect{|- : int = 4|}];;
 let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;
-
-
-(* part 17 *)
+[%%expect{|- : float = 4.5|}];;
+[@@@part "17"];;
 let bump_list
       (type a)
       (module B : Bumpable with type t = a)
@@ -120,39 +107,41 @@ let bump_list
   =
   List.map ~f:B.bump l
 ;;
-
-
-
-(* part 18 *)
+[%%expect{|
+val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
+  <fun>
+|}];;
+[@@@part "18"];;
 bump_list int_bumper [1;2;3];;
-
+[%%expect{|- : int list = [2; 3; 4]|}];;
 bump_list float_bumper [1.5;2.5;3.5];;
-
-
-(* part 19 *)
+[%%expect{|- : float list = [2.5; 3.5; 4.5]|}];;
+[@@@part "19"];;
 let wrap_in_list (type a) (x:a) = [x];;
-
-
-(* part 20 *)
+[%%expect{|val wrap_in_list : 'a -> 'a list = <fun>|}];;
+[@@@part "20"];;
 let double_int (type a) (x:a) = x + x;;
-
-
-
-(* part 21 *)
+[%%expect{|
+Characters 32-33:
+Error: This expression has type a but an expression was expected of type int
+|}];;
+[@@@part "21"];;
 module type Comparable = sig
   type t
   val compare : t -> t -> int
 end ;;
-
+[%%expect{|module type Comparable = sig type t val compare : t -> t -> int end|}];;
 let create_comparable (type a) compare =
   (module struct
     type t = a
     let compare = compare
   end : Comparable with type t = a)
 ;;
-
-
+[%%expect{|
+val create_comparable :
+  ('a -> 'a -> int) -> (module Comparable with type t = 'a) = <fun>
+|}];;
 create_comparable Int.compare;;
-
+[%%expect{|- : (module Comparable with type t = int) = <module>|}];;
 create_comparable Float.compare;;
-
+[%%expect{|- : (module Comparable with type t = Float.t) = <module>|}];;

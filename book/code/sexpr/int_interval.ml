@@ -1,21 +1,21 @@
 (* Module for representing closed integer intervals *)
-open Core.Std
+open Core
 
 (* Invariant: For any Range (x,y), y >= x *)
 type t =
   | Range of int * int
   | Empty
-with sexp
+[@@deriving sexp]
 
 let is_empty =
-  function 
-  | Empty -> true 
+  function
+  | Empty -> true
   | Range _ -> false
 
 let create x y =
   if x > y then
-    Empty 
-  else 
+    Empty
+  else
     Range (x,y)
 
 let contains i x =

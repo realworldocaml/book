@@ -1,23 +1,26 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
-(* part 0.5 *)
+open Core_kernel;;
+[@@@part "0.5"];;
 Sexp.load_sexp "example.scm" ;;
-
-
-(* part 1 *)
+[%%expect{|Exception: Sys_error "example.scm: No such file or directory".|}];;
+[@@@part "1"];;
 Sexp.load_sexp "comment_heavy.scm" ;;
-
-
-(* part 2 *)
+[%%expect{|Exception: Sys_error "comment_heavy.scm: No such file or directory".|}];;
+[@@@part "2"];;
 Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm")) ;;
+[%%expect{|
+- : unit = ()
+Uncaught exception:
+  
+  (Sys_error "example_broken.scm: No such file or directory")
 
-
-
-
-
-
+|}];;

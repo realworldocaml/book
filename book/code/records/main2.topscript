@@ -1,11 +1,14 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core.Std;;
-
-(* part 17 *)
+open Core;;
+[@@@part "17"];;
 module Log_entry = struct
   type t =
     { session_id: string;
@@ -30,8 +33,35 @@ module Logon = struct
     }
 end
 ;;
-
-(* part 18 *)
+[%%expect{|
+module Log_entry :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      important : bool;
+      message : string;
+    }
+  end
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
+|}];;
+[@@@part "18"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.time = Time_ns.now (); 
     Log_entry.session_id; 
@@ -39,30 +69,52 @@ let create_log_entry ~session_id ~important message =
     Log_entry.message
   }
 ;;
-
-(* part 19 *)
+[%%expect{|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "19"];;
 let create_log_entry ~session_id ~important message =
   { Log_entry.
     time = Time_ns.now (); session_id; important; message }
 ;;
-
-(* part 20 *)
+[%%expect{|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "20"];;
 let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
 ;;
-
-(* part 21 *)
+[%%expect{|val message_to_string : Log_entry.t -> string = <fun>|}];;
+[@@@part "21"];;
 let is_important t = t.Log_entry.important;;
-
-(* part 21.1 *)
-
+[%%expect{|val is_important : Log_entry.t -> bool = <fun>|}];;
+[@@@part "21.1"];;
 let create_log_entry ~session_id ~important message : Log_entry.t =
   { time = Time_ns.now (); session_id; important; message }
 let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message
 let is_important (t:Log_entry.t) = t.important ;;
-
-(* part 22 *)
+[%%expect{|
+Characters 70-127:
+Warning 40: this record of type Log_entry.t contains fields that are 
+not visible in the current scope: time session_id important message.
+They will not be selected if the type becomes unknown.
+Characters 151-176:
+Warning 40: this record of type Log_entry.t contains fields that are 
+not visible in the current scope: important message.
+They will not be selected if the type becomes unknown.
+Characters 289-298:
+Warning 40: important was selected from type Log_entry.t.
+It is not visible in the current scope, and will not 
+be selected if the type becomes unknown.
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+val message_to_string : Log_entry.t -> string = <fun>
+val is_important : Log_entry.t -> bool = <fun>
+|}];;
+[@@@part "22"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
     port: int;
@@ -70,7 +122,15 @@ type client_info =
     credentials: string;
     last_heartbeat_time: Time_ns.t;
   };;
-
+[%%expect{|
+type client_info = {
+  addr : Unix.inet_addr;
+  port : int;
+  user : string;
+  credentials : string;
+  last_heartbeat_time : Time_ns.t;
+}
+|}];;
 let register_heartbeat t hb =
   { addr = t.addr;
     port = t.port;
@@ -78,12 +138,12 @@ let register_heartbeat t hb =
     credentials = t.credentials;
     last_heartbeat_time = hb.Heartbeat.time;
   };;
-
-(* part 23 *)
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
+[@@@part "23"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time };;
-
-(* part 24 *)
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
+[@@@part "24"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
     port: int;
@@ -92,14 +152,23 @@ type client_info =
     last_heartbeat_time: Time_ns.t;
     last_heartbeat_status: string;
   };;
-
-(* part 25 *)
+[%%expect{|
+type client_info = {
+  addr : Unix.inet_addr;
+  port : int;
+  user : string;
+  credentials : string;
+  last_heartbeat_time : Time_ns.t;
+  last_heartbeat_status : string;
+}
+|}];;
+[@@@part "25"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
            last_heartbeat_status = hb.Heartbeat.status_message;
   };;
-
-(* part 26 *)
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
+[@@@part "26"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
     port: int;
@@ -108,18 +177,27 @@ type client_info =
     mutable last_heartbeat_time: Time_ns.t;
     mutable last_heartbeat_status: string;
   };;
-
-(* part 27 *)
+[%%expect{|
+type client_info = {
+  addr : Unix.inet_addr;
+  port : int;
+  user : string;
+  credentials : string;
+  mutable last_heartbeat_time : Time_ns.t;
+  mutable last_heartbeat_status : string;
+}
+|}];;
+[@@@part "27"];;
 let register_heartbeat t hb =
   t.last_heartbeat_time   <- hb.Heartbeat.time;
   t.last_heartbeat_status <- hb.Heartbeat.status_message
 ;;
-
-(* part 28 *)
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>|}];;
+[@@@part "28"];;
 let get_users logons =
   List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
-
-(* part 29 *)
+[%%expect{|val get_users : Logon.t list -> string list = <fun>|}];;
+[@@@part "29"];;
 module Logon = struct
   type t =
     { session_id: string;
@@ -127,41 +205,76 @@ module Logon = struct
       user: string;
       credentials: string;
     }
-  with fields
+  [@@deriving fields]
 end;;
-
-(* part 30 *)
+[%%expect{|
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
+|}];;
+[@@@part "30"];;
 let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
-
-(* part 31 *)
+[%%expect{|
+Characters 54-64:
+Error: Unbound value Logon.user
+|}];;
+[@@@part "31"];;
 Field.get Logon.Fields.user;;
-
-(* part 32 *)
+[%%expect{|
+Characters 0-9:
+Error: The module Field is an alias for module Core_kernel__.Import.Field, which is missing
+|}];;
+[@@@part "32"];;
 Field.get;;
-
-(* part 33 *)
+[%%expect{|
+Characters 0-9:
+Error: The module Field is an alias for module Core_kernel__.Import.Field, which is missing
+|}];;
+[@@@part "33"];;
 let show_field field to_string record =
   let name = Field.name field in
   let field_string = to_string (Field.get field record) in
   name ^ ": " ^ field_string
 ;;
-
-(* part 34 *)
+[%%expect{|
+Characters 53-63:
+Error: The module Field is an alias for module Core_kernel__.Import.Field, which is missing
+|}];;
+[@@@part "34"];;
 let logon = { Logon.
               session_id = "26685";
               time = Time_ns.now ();
               user = "yminsky";
               credentials = "Xy2d9W"; }
 ;;
-
+[%%expect{|
+val logon : Logon.t =
+  {Logon.session_id = "26685"; time = <abstr>; user = "yminsky";
+   credentials = "Xy2d9W"}
+|}];;
 show_field Logon.Fields.user Fn.id logon;;
-
+[%%expect{|
+Characters 0-10:
+Error: Unbound value show_field
+|}];;
 show_field Logon.Fields.time Time_ns.to_string logon;;
-
-(* part 35 *)
+[%%expect{|
+Characters 0-10:
+Error: Unbound value show_field
+|}];;
+[@@@part "35"];;
 Logon.Fields.iter;;
-
-(* part 36 *)
+[%%expect{|
+Characters 0-17:
+Error: Unbound module Logon.Fields
+|}];;
+[@@@part "36"];;
 let print_logon logon =
   let print to_string field =
     printf "%s\n" (show_field field to_string logon)
@@ -172,6 +285,12 @@ let print_logon logon =
     ~user:(print Fn.id)
     ~credentials:(print Fn.id)
 ;;
-
+[%%expect{|
+Characters 73-83:
+Error: Unbound value show_field
+|}];;
 print_logon logon;;
-
+[%%expect{|
+Characters 0-11:
+Error: Unbound value print_logon
+|}];;

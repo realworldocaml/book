@@ -1,16 +1,20 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core_kernel.Std;;
-(* part 1 *)
+open Core_kernel;;
+[@@@part "1"];;
 let create_number_file filename numbers =
   let outc = Out_channel.create filename in
   List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
   Out_channel.close outc
 ;;
-
+[%%expect{|val create_number_file : string -> int list -> unit = <fun>|}];;
 let sum_file filename =
   let file = In_channel.create filename in
   let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
@@ -18,18 +22,16 @@ let sum_file filename =
   In_channel.close file;
   sum
 ;;
-
+[%%expect{|val sum_file : string -> int = <fun>|}];;
 create_number_file "numbers.txt" [1;2;3;4;5];;
-
+[%%expect{|- : unit = ()|}];;
 sum_file "numbers.txt";;
-
-
-(* part 2 *)
+[%%expect{|- : int = 15|}];;
+[@@@part "2"];;
 sum_file "/etc/hosts";;
-
-
-(* part 3 *)
+[%%expect{|Exception: Failure "Int.of_string: \"##\"".|}];;
+[@@@part "3"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-
+[%%expect{|- : unit = ()|}];;
 sum_file "numbers.txt";;
-
+[%%expect{|Exception: Sys_error "numbers.txt: Too many open files".|}];;

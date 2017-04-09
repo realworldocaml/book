@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let add_days ~base_date ~num_days () =
   Date.add_days base_date num_days

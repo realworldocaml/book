@@ -1,50 +1,48 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 0.5 *)
-open Core_kernel.Std;;
+[@@@part "0.5"];;
+open Core_kernel;;
 module type X_int = sig val x : int end;;
-
-
-(* part 1 *)
+[%%expect{|module type X_int = sig val x : int end|}];;
+[@@@part "1"];;
 module Increment (M : X_int) : X_int = struct
   let x = M.x + 1
 end;;
-
-
-(* part 2 *)
+[%%expect{|module Increment : functor (M : X_int) -> X_int|}];;
+[@@@part "2"];;
 module Increment (M : X_int) = struct
   let x = M.x + 1
 end;;
-
-
-(* part 3 *)
+[%%expect{|module Increment : functor (M : X_int) -> sig val x : int end|}];;
+[@@@part "3"];;
 module Three = struct let x = 3 end;;
-
+[%%expect{|module Three : sig val x : int end|}];;
 module Four = Increment(Three);;
-
+[%%expect{|module Four : sig val x : int end|}];;
 Four.x - Three.x;;
-
-
-(* part 4 *)
+[%%expect{|- : int = 1|}];;
+[@@@part "4"];;
 module Three_and_more = struct
   let x = 3
   let y = "three"
 end;;
-
+[%%expect{|module Three_and_more : sig val x : int val y : string end|}];;
 module Four = Increment(Three_and_more);;
-
-
-(* part 5 *)
+[%%expect{|module Four : sig val x : int end|}];;
+[@@@part "5"];;
 module type Comparable = sig
   type t
   val compare : t -> t -> int
 end ;;
-
-
-(* part 6 *)
+[%%expect{|module type Comparable = sig type t val compare : t -> t -> int end|}];;
+[@@@part "6"];;
 module Make_interval(Endpoint : Comparable) = struct
 
   type t = | Interval of Endpoint.t * Endpoint.t
@@ -80,96 +78,105 @@ module Make_interval(Endpoint : Comparable) = struct
       create (max l1 l2) (min h1 h2)
 
 end ;;
-
-
-
-
-
-
-
-
-(* part 7 *)
+[%%expect{|
+module Make_interval :
+  functor (Endpoint : Comparable) ->
+    sig
+      type t = Interval of Endpoint.t * Endpoint.t | Empty
+      val create : Endpoint.t -> Endpoint.t -> t
+      val is_empty : t -> bool
+      val contains : t -> Endpoint.t -> bool
+      val intersect : t -> t -> t
+    end
+|}];;
+[@@@part "7"];;
 module Int_interval =
   Make_interval(struct
     type t = int
     let compare = Int.compare
   end);;
-
-
-
-
-
-
-
-
-
-(* part 8 *)
+[%%expect{|
+module Int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
+[@@@part "8"];;
 module Int_interval = Make_interval(Int) ;;
-
-
-
-
-
-
-
-
+[%%expect{|
+module Int_interval :
+  sig
+    type t =
+      Make_interval(Core_kernel__Core_int).t =
+        Interval of int * int
+      | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
 module String_interval = Make_interval(String) ;;
-
-
-
-
-
-
-
-
-
-
-
-
-(* part 9 *)
+[%%expect{|
+module String_interval :
+  sig
+    type t =
+      Make_interval(Core_kernel__Core_string).t =
+        Interval of string * string
+      | Empty
+    val create : string -> string -> t
+    val is_empty : t -> bool
+    val contains : t -> string -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
+[@@@part "9"];;
 let i1 = Int_interval.create 3 8;;
-
+[%%expect{|val i1 : Int_interval.t = Int_interval.Interval (3, 8)|}];;
 let i2 = Int_interval.create 4 10;;
-
+[%%expect{|val i2 : Int_interval.t = Int_interval.Interval (4, 10)|}];;
 Int_interval.intersect i1 i2;;
-
-
-(* part 10 *)
+[%%expect{|- : Int_interval.t = Int_interval.Interval (4, 8)|}];;
+[@@@part "10"];;
 module Rev_int_interval =
   Make_interval(struct
     type t = int
     let compare x y = Int.compare y x
   end);;
-
-
-
-
-
-
-
-
-
-(* part 11 *)
+[%%expect{|
+module Rev_int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
+[@@@part "11"];;
 let interval = Int_interval.create 4 3;;
-
+[%%expect{|val interval : Int_interval.t = Int_interval.Empty|}];;
 let rev_interval = Rev_int_interval.create 4 3;;
-
-
-(* part 12 *)
+[%%expect{|val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)|}];;
+[@@@part "12"];;
 Int_interval.contains rev_interval 3;;
-
-
-
-
-(* part 13 *)
+[%%expect{|
+Characters 22-34:
+Error: This expression has type Rev_int_interval.t
+       but an expression was expected of type Int_interval.t
+|}];;
+[@@@part "13"];;
 Int_interval.is_empty (* going through create *)
   (Int_interval.create 4 3) ;;
-
+[%%expect{|- : bool = true|}];;
 Int_interval.is_empty (* bypassing create *)
   (Int_interval.Interval (4,3)) ;;
-
-
-(* part 14 *)
+[%%expect{|- : bool = false|}];;
+[@@@part "14"];;
 module type Interval_intf = sig
   type t
   type endpoint
@@ -178,10 +185,18 @@ module type Interval_intf = sig
   val contains : t -> endpoint -> bool
   val intersect : t -> t -> t
 end;;
-
-
-(* part 15 *)
-
+[%%expect{|
+module type Interval_intf =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -> endpoint -> t
+    val is_empty : t -> bool
+    val contains : t -> endpoint -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
+[@@@part "15"];;
 module Make_interval(Endpoint : Comparable) : Interval_intf = struct
   type endpoint = Endpoint.t
   type t = | Interval of Endpoint.t * Endpoint.t
@@ -190,29 +205,50 @@ module Make_interval(Endpoint : Comparable) : Interval_intf = struct
   (* ... *)
 
 end ;;
-
-
-(* part 16 *)
+[%%expect{|
+Characters 62-183:
+Error: Signature mismatch:
+       Modules do not match:
+         sig
+           type endpoint = Endpoint.t
+           type t = Interval of endpoint * endpoint | Empty
+         end
+       is not included in
+         Interval_intf
+       The value `intersect' is required but not provided
+       The value `contains' is required but not provided
+       The value `is_empty' is required but not provided
+       The value `create' is required but not provided
+|}];;
+[@@@part "16"];;
 module Int_interval = Make_interval(Int);;
-
-
-
-
-
-
-
-
-
+[%%expect{|
+module Int_interval :
+  sig
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
 Int_interval.create 3 4;;
-
-
-
-
-(* part 17 *)
+[%%expect{|- : Int_interval.t = Int_interval.Interval (3, 4)|}];;
+[@@@part "17"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint = int;;
-
-(* part 18 *)
+[%%expect{|
+module type Int_interval_intf =
+  sig
+    type t
+    type endpoint = int
+    val create : endpoint -> endpoint -> t
+    val is_empty : t -> bool
+    val contains : t -> endpoint -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
+[@@@part "18"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint = Endpoint.t)
 = struct
@@ -224,24 +260,47 @@ module Make_interval(Endpoint : Comparable)
   (* ... *)
 
 end ;;
-
-
-(* part 19 *)
+[%%expect{|
+Characters 98-220:
+Error: Signature mismatch:
+       ...
+       The value `intersect' is required but not provided
+       The value `contains' is required but not provided
+       The value `is_empty' is required but not provided
+       The value `create' is required but not provided
+|}];;
+[@@@part "19"];;
 module Int_interval = Make_interval(Int);;
-
-
+[%%expect{|
+module Int_interval :
+  sig
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
 let i = Int_interval.create 3 4;;
-
+[%%expect{|val i : Int_interval.t = Int_interval.Interval (3, 4)|}];;
 Int_interval.contains i 5;;
-
-
-(* part 20 *)
+[%%expect{|- : bool = false|}];;
+[@@@part "20"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint := int;;
-
-
-(* part 21 *)
-# module Make_interval(Endpoint : Comparable)
+[%%expect{|
+module type Int_interval_intf =
+  sig
+    type t
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
+[@@@part "21"];;
+(* Suspicious # ? *)
+module Make_interval(Endpoint : Comparable)
   : Interval_intf with type endpoint := Endpoint.t =
   struct
 
@@ -251,89 +310,107 @@ module type Int_interval_intf =
     (* ... *)
 
   end ;;
-
-
-
-(* part 22 *)
+[%%expect{|
+Characters 120-221:
+Error: Signature mismatch:
+       ...
+       The value `intersect' is required but not provided
+       The value `contains' is required but not provided
+       The value `is_empty' is required but not provided
+       The value `create' is required but not provided
+|}];;
+[@@@part "22"];;
 module Int_interval = Make_interval(Int);;
-
-
-
-
-
-
-
-
+[%%expect{|
+module Int_interval :
+  sig
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
 Int_interval.is_empty
   (Int_interval.create 3 4);;
-
+[%%expect{|- : bool = false|}];;
 Int_interval.is_empty
   (Int_interval.Interval (4,3));;
-
-
-
-(* part 23 *)
+[%%expect{|- : bool = false|}];;
+[@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
-
-
-(* part 24 *)
-type some_type = int * string list with sexp;;
-
-
-
+[%%expect{|- : Sexp.t = Core_kernel.Sexp.List <abstr>|}];;
+[@@@part "24"];;
+type some_type = int * string list [@@deriving sexp];;
+[%%expect{|type some_type = int * string list|}];;
 sexp_of_some_type (33, ["one"; "two"]);;
-
+[%%expect{|
+Characters 0-17:
+Error: Unbound value sexp_of_some_type
+|}];;
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
-
-(* part 25 *)
+[%%expect{|
+Characters 36-53:
+Error: Unbound value some_type_of_sexp
+|}];;
+[@@@part "25"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint := Endpoint.t) = struct
 
   type t = | Interval of Endpoint.t * Endpoint.t
            | Empty
-  with sexp
+  [@@deriving sexp]
 
   (* ... *)
 
 end ;;
-
-
-(* part 26 *)
+[%%expect{|
+Characters 99-212:
+Error: Signature mismatch:
+       ...
+       The value `intersect' is required but not provided
+       The value `contains' is required but not provided
+       The value `is_empty' is required but not provided
+       The value `create' is required but not provided
+|}];;
+[@@@part "26"];;
 module type Interval_intf_with_sexp = sig
   include Interval_intf
   include Sexpable with type t := t
 end;;
-
-
-
-
-
-
-
-
-
-
-
-
-(* part 27 *)
+[%%expect{|
+module type Interval_intf_with_sexp =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -> endpoint -> t
+    val is_empty : t -> bool
+    val contains : t -> endpoint -> bool
+    val intersect : t -> t -> t
+    val t_of_sexp : Sexplib.Type.t -> t
+    val sexp_of_t : t -> Sexplib.Type.t
+  end
+|}];;
+[@@@part "27"];;
 module type Interval_intf_with_sexp = sig
   type t
   include Interval_intf with type t := t
   include Sexpable      with type t := t
 end;;
-
-
-
-
-
-
-
-
-
-
-
-
-(* part 28 *)
+[%%expect{|
+module type Interval_intf_with_sexp =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -> endpoint -> t
+    val is_empty : t -> bool
+    val contains : t -> endpoint -> bool
+    val intersect : t -> t -> t
+    val t_of_sexp : Sexplib.Type.t -> t
+    val sexp_of_t : t -> Sexplib.Type.t
+  end
+|}];;
+[@@@part "28"];;
 module Make_interval(Endpoint : sig
     type t
     include Comparable with type t := t
@@ -344,7 +421,7 @@ module Make_interval(Endpoint : sig
 
   type t = | Interval of Endpoint.t * Endpoint.t
            | Empty
-  with sexp
+  [@@deriving sexp]
 
   (** [create low high] creates a new interval from [low] to
       [high].  If [low > high], then the interval is empty *)
@@ -382,37 +459,30 @@ module Make_interval(Endpoint : sig
     | Interval (l1,h1), Interval (l2,h2) ->
       create (max l1 l2) (min h1 h2)
 end;;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-(* part 29 *)
+[%%expect{|
+Characters 666-675:
+Error: Unbound value t_of_sexp
+Hint: Did you mean mat_of_sexp or int_of_sexp?
+|}];;
+[@@@part "29"];;
 module Int_interval = Make_interval(Int) ;;
-
-
-
-
-
-
-
-
-
-
+[%%expect{|
+module Int_interval :
+  sig
+    type t = Int_interval.t = Interval of int * int | Empty
+    val create : int -> int -> t
+    val is_empty : t -> bool
+    val contains : t -> int -> bool
+    val intersect : t -> t -> t
+  end
+|}];;
 Int_interval.sexp_of_t (Int_interval.create 3 4);;
-
+[%%expect{|
+Characters 0-22:
+Error: Unbound value Int_interval.sexp_of_t
+|}];;
 Int_interval.sexp_of_t (Int_interval.create 4 3);;
-
+[%%expect{|
+Characters 0-22:
+Error: Unbound value Int_interval.sexp_of_t
+|}];;

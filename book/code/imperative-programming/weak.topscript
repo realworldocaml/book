@@ -1,10 +1,13 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-;;
-(* part 1 *)
+[@@@part "1"];;
 let remember =
   let cache = ref None in
   (fun x ->
@@ -12,22 +15,22 @@ let remember =
      | Some y -> y
      | None -> cache := Some x; x)
 ;;
-
-
-(* part 2 *)
+[%%expect{|val remember : '_a -> '_a = <fun>|}];;
+[@@@part "2"];;
 let identity x = x;;
-
+[%%expect{|val identity : 'a -> 'a = <fun>|}];;
 identity 3;;
-
+[%%expect{|- : int = 3|}];;
 identity "five";;
-
-
-(* part 3 *)
+[%%expect{|- : string = "five"|}];;
+[@@@part "3"];;
 let remember_three () = remember 3;;
-
+[%%expect{|val remember_three : unit -> int = <fun>|}];;
 remember;;
-
+[%%expect{|- : int -> int = <fun>|}];;
 remember "avocado";;
-
-
-
+[%%expect{|
+Characters 9-18:
+Error: This expression has type string but an expression was expected of type
+         int
+|}];;

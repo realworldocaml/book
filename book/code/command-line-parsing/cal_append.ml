@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 let add ~common =
   Command.basic ~summary:"Add [days] to the [base] date"
@@ -28,7 +28,7 @@ let diff ~common =
     )
 
 
-(* part 1 *)
+[@@@part "1"];;
 let () =
   let common =
     Command.Spec.(

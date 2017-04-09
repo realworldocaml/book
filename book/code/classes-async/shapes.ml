@@ -1,11 +1,11 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 open Async_graphics
 
 type drawable = < draw: unit >
 
 
-(* part 1 *)
+[@@@part "1"];;
 class virtual shape x y = object(self)
   method virtual private contains: int -> int -> bool
 
@@ -29,7 +29,7 @@ class virtual shape x y = object(self)
 end
 
 
-(* part 2 *)
+[@@@part "2"];;
 class square w x y = object
   inherit shape x y
 
@@ -59,7 +59,7 @@ class circle r x y = object
 end
 
 
-(* part 3 *)
+[@@@part "3"];;
 class growing_circle r x y = object(self)
   inherit circle r x y
 
@@ -68,7 +68,7 @@ class growing_circle r x y = object(self)
 end
 
 
-(* part 4 *)
+[@@@part "4"];;
 class virtual draggable = object(self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -> 
@@ -99,14 +99,14 @@ class virtual draggable = object(self)
 end
 
 
-(* part 5 *)
+[@@@part "5"];;
 class small_square = object
   inherit square 20 40 40
   inherit draggable 
 end
 
 
-(* part 6 *)
+[@@@part "6"];;
 class virtual animated span = object(self)
   method virtual on_click: 
     ?start:unit Deferred.t -> 
@@ -136,7 +136,7 @@ class virtual animated span = object(self)
 end
 
 
-(* part 7 *)
+[@@@part "7"];;
 class my_circle = object
   inherit circle 20 50 50
   inherit animated Time.Span.second
@@ -144,7 +144,7 @@ class my_circle = object
 end
 
 
-(* part 8 *)
+[@@@part "8"];;
 class virtual linear x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
@@ -177,7 +177,7 @@ class virtual harmonic offset x' y' = object
 end
 
 
-(* part 9 *)
+[@@@part "9"];;
 class my_square x y = object
   inherit square 40 x y
   inherit draggable
@@ -194,7 +194,7 @@ let my_circle = object
 end
 
 
-(* part 10 *)
+[@@@part "10"];;
 let main () =
   let shapes = [ 
      (my_circle :> drawable); 

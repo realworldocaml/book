@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 (* Copy data from the reader to the writer, using the provided buffer
    as scratch space *)
@@ -14,7 +14,7 @@ let rec copy_blocks buffer r w =
     copy_blocks buffer r w
 
 
-(* part 1 *)
+[@@@part "1"];;
 (** Starts a TCP server, which listens on the specified port, invoking
     copy_blocks every time a client connects. *)
 let run () =
@@ -29,7 +29,7 @@ let run () =
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 
 
-(* part 2 *)
+[@@@part "2"];;
 (* Call [run], and then start the scheduler *)
 let () =
   run ();

@@ -1,8 +1,8 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 type attributes = (string * string) list
-with sexp
+  [@@deriving sexp]
 
 type element = {
   name : string;
@@ -13,10 +13,10 @@ type element = {
 and item = [
 | `Element of element
 | `Data of string
-] with sexp
+] [@@deriving sexp]
 
 type t = item list
-with sexp
+  [@@deriving sexp]
 
 let rec item_of_nethtml (doc:Nethtml.document) : item =
   match doc with
@@ -48,7 +48,7 @@ let item_of_string_helper ?filename s = match of_string s with
     let n = List.length l in
     match filename with
     | None -> error msg n sexp_of_int
-    | Some filename -> error msg (filename,n) <:sexp_of< string * int >>
+    | Some filename -> error msg (filename,n) [%sexp_of: string * int]
   )
 
 let item_of_string s = item_of_string_helper s
@@ -112,13 +112,14 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   let rec print_item depth = function
     | `Data _ -> ()
     | `Element {name; attrs; childs} ->
-      if List.mem exclude_elements name then
+      let equal = String.equal in
+      if List.mem ~equal exclude_elements name then
         ()
       else (
         let padding = String.init (2*depth) ~f:(fun _ -> ' ') in
         let attrs =
           List.filter_map attrs ~f:(fun (attr,value) ->
-            if List.mem keep_attrs attr then
+            if List.mem ~equal keep_attrs attr then
               Some (sprintf "%s=%s" attr value)
             else
               None
@@ -170,7 +171,7 @@ let replace_id_node_with t ~id ~with_ =
     | [] -> []
     | (`Data _ as x)::rest -> x::(loop rest)
     | (`Element {name;attrs;childs;_})::rest ->
-      if List.mem attrs ("id",id) then
+      if List.mem ~equal:Rwo_util.string_pair_equal attrs ("id",id) then
         with_@(loop rest)
       else
         (`Element {name; attrs; childs = loop childs})::(loop rest)
@@ -257,7 +258,7 @@ let check_attrs ?(required=[]) ?(allowed=`Any) attrs_list =
   | Some x ->
     error "attribute repeated" x sexp_of_string
   | None ->
-    if not (Set.subset required attrs) then
+    if not (Set.is_subset required ~of_:attrs) then
       error "expected attributes not present"
         (Set.diff required attrs) String.Set.sexp_of_t
     else
@@ -266,7 +267,7 @@ let check_attrs ?(required=[]) ?(allowed=`Any) attrs_list =
       | `Some allowed ->
         let allowed = String.Set.of_list allowed in
         let remaining = Set.diff attrs required in
-        if Set.subset remaining allowed then
+        if Set.is_subset remaining ~of_:allowed then
           Ok ()
         else
           error "unexpected attributes present"

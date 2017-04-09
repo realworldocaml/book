@@ -1,88 +1,95 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-(* part 0.5 *)
+[@@@part "0.5"];;
 #require "ctypes.foreign" ;;
 #require "ctypes.top" ;;
 open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;
 let time = foreign "time" (ptr time_t @-> returning time_t) ;;
-
-
-(* part 1 *)
+[%%expect{|val time : time_t Ctypes_static.ptr -> time_t = <fun>|}];;
+[@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
-
-
-(* part 2 *)
+[%%expect{|val cur_time : time_t = 1491741918|}];;
+[@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
-
-
-(* part 3 *)
+[%%expect{|val time' : unit -> time_t = <fun>|}];;
+[@@@part "3"];;
 let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double) ;;
-
+[%%expect{|val difftime : time_t -> time_t -> float = <fun>|}];;
 let t1 =
   time' () in
 Unix.sleep 2;
 let t2 = time' () in 
 difftime t2 t1 ;;
-
-
-(* part 4 *)
+[%%expect{|- : float = 2.|}];;
+[@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
-
-
-(* part 5 *)
+[%%expect{|val ctime : time_t Ctypes_static.ptr -> string = <fun>|}];;
+[@@@part "5"];;
 ctime (time' ()) ;;
-
-
-
-
-(* part 6 *)
+[%%expect{|
+Characters 6-16:
+Error: This expression has type time_t but an expression was expected of type
+         time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
+|}];;
+[@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
-
-
-(* part 7 *)
+[%%expect{|val t_ptr : time_t ptr = (time_t*) 0x7fa28b09e040|}];;
+[@@@part "7"];;
 ctime t_ptr ;;
-
-
-(* part 8 *)
+[%%expect{|- : string = "Sun Apr  9 08:45:20 2017\n"|}];;
+[@@@part "8"];;
 type timeval ;;
-
+[%%expect{|type timeval|}];;
 let timeval : timeval structure typ = structure "timeval" ;;
-
-
-(* part 9 *)
+[%%expect{|val timeval : timeval structure typ = struct timeval|}];;
+[@@@part "9"];;
 let tv_sec  = field timeval "tv_sec" long ;;
-
+[%%expect{|
+val tv_sec : (Signed.long, timeval structure) field =
+  {Ctypes_static.ftype = long; foffset = 0; fname = "tv_sec"}
+|}];;
 let tv_usec = field timeval "tv_usec" long ;;
-
-
+[%%expect{|
+val tv_usec : (Signed.long, timeval structure) field =
+  {Ctypes_static.ftype = long; foffset = 8; fname = "tv_usec"}
+|}];;
 seal timeval ;;
-
-
-(* part 10 *)
+[%%expect{|- : unit = ()|}];;
+[@@@part "10"];;
 type timezone ;;
-
+[%%expect{|type timezone|}];;
 let timezone : timezone structure typ = structure "timezone" ;;
-
-
-(* part 11 *)
+[%%expect{|val timezone : timezone structure typ = struct timezone|}];;
+[@@@part "11"];;
 let gettimeofday = foreign "gettimeofday"
                      (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
-
-
-
-(* part 12 *)
+[%%expect{|
+Characters 97-121:
+Error: Unbound value returning_checking_errno
+|}];;
+[@@@part "12"];;
 let gettimeofday' () =
   let tv = make timeval in
   ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
   Pervasives.(float secs +. float usecs /. 1000000.0) ;;
-
+[%%expect{|
+Characters 59-71:
+Error: Unbound value gettimeofday
+|}];;
 gettimeofday' () ;;
-
+[%%expect{|
+Characters 0-13:
+Error: Unbound value gettimeofday'
+|}];;

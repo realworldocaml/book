@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 module Html = Rwo_html
 module Import = Rwo_import
 module Util = Rwo_util
@@ -54,7 +54,7 @@ let part_info_of_chapter chapter_num : part_info option =
     match accum with
     | Some _ as x -> x
     | None ->
-      if List.mem chapters chapter_num
+      if List.mem ~equal:Int.equal chapters chapter_num
       then Some info
       else None
   )
@@ -76,7 +76,7 @@ let get_title file (t:Html.t) : string =
 
 let get_sections file html =
 
-  (** Convert arbitrary HTML to a section title, under the reasonable
+  (* Convert arbitrary HTML to a section title, under the reasonable
       assumption that we don't put overly complex HTML within section
       titles. *)
   let html_to_title html =
@@ -88,7 +88,7 @@ let get_sections file html =
     loop [] html |> List.rev |> String.concat ~sep:""
   in
 
-  (** Convert section title to a valid HTML ID. *)
+  (* Convert section title to a valid HTML ID. *)
   let title_to_id s =
     String.filter s ~f:(fun c -> Char.is_alphanum c || c = ' ')
     |> String.map ~f:(function ' ' -> '-' | c -> c)
@@ -109,12 +109,13 @@ let get_sections file html =
     let rec loop accum = function
       | [] -> accum
       | (`Element{Html.name="section";attrs;childs} as item)::rest -> (
-        if List.mem attrs ("data-type",data_type) then (
+        if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type",data_type)
+        then (
           match Html.filter_whitespace childs with
           | `Element{Html.name; attrs=_; childs}::_ -> (
             if name = title_elem then
               let title = html_to_title childs in
-              let id = match List.Assoc.find attrs "id" with
+              let id = match List.Assoc.find ~equal:String.equal attrs "id" with
                 | Some x -> x
                 | None -> title_to_id title
               in

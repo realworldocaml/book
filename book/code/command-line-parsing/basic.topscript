@@ -1,12 +1,13 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-open Core.Std;;
-(* part 1 *)
+open Core;;
+[@@@part "1"];;
 Command.basic;;
-
-
-
-
+[%%expect{|- : ('main, unit) Command.basic_command = <fun>|}];;

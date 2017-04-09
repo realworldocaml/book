@@ -11,8 +11,8 @@
     files, and may also need to generate such sections when converting
     back to pure HTMLBook.
 *)
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 (** An item within a <pre> node*)
 type code_item = [
@@ -39,7 +39,7 @@ type p = {
   a_class : string; (** class value in main <a> *)
   em_data : string; (** data of <em> node under main <a> *)
   data1 : string option; (** data node before main <a> *)
-  part : float option; (** part number from data node after main <a> *)
+  part : Rwo_import.part option; (** part number from data node after main <a> *)
   a2 : Rwo_html.item option; (** 2nd <a> node, i.e. 1st after main <a> *)
   a3 : Rwo_html.item option; (** 3rd <a> node, i.e. 2nd after main <a> *)
 }
