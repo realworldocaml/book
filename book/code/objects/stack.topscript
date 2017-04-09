@@ -58,14 +58,11 @@ print_pop (stack [5;4;3;2;1]) ;;
 Popped: 5
 |}];;
 let t = object
-  method pop = Some (Float.to_int (Time_ns.to_float (Time_ns.now ())))
+  method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
 end ;;
-[%%expect{|
-Characters 50-66:
-Error: Unbound value Time_ns.to_float
-|}];;
+[%%expect{|val t : < pop : Core_kernel__Import.int option > = <obj>|}];;
 print_pop t ;;
 [%%expect{|
-Characters 10-11:
-Error: Unbound value t
+- : unit = ()
+Popped: 1491764651762608000
 |}];;

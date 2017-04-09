@@ -97,9 +97,9 @@ let plus_one_if x =
 #require "core_bench";;
 open Core_bench;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
-    ignore (plus_one_match 10))
+      ignore (plus_one_match 10))
 ; Bench.Test.create ~name:"plus_one_if" (fun () ->
-    ignore (plus_one_if 10)) ]
+      ignore (plus_one_if 10)) ]
 |> Bench.bench
 ;;
 [%%expect{|
@@ -171,13 +171,13 @@ let max_widths header rows =
   List.fold rows
     ~init:(lengths header)
     ~f:(fun acc row ->
-      List.map2_exn ~f:Int.max acc (lengths row))
+        List.map2_exn ~f:Int.max acc (lengths row))
 ;;
 [%%expect{|val max_widths : string list -> string list list -> int list = <fun>|}];;
 [@@@part "21"];;
 let render_separator widths =
   let pieces = List.map widths
-                 ~f:(fun w -> String.make (w + 2) '-')
+      ~f:(fun w -> String.make (w + 2) '-')
   in
   "|" ^ String.concat ~sep:"+" pieces ^ "|"
 ;;
@@ -227,11 +227,12 @@ List.reduce ~f:(+) [];;
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 [%%expect{|- : int list = [2; 4]|}];;
 [@@@part "30"];;
+module Sys = Core.Sys;;
 List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
-  match String.rsplit2 ~on:'.' fname with
-  | None  | Some ("",_) -> None
-  | Some (_,ext) ->
-    Some ext)
+    match String.rsplit2 ~on:'.' fname with
+    | None  | Some ("",_) -> None
+    | Some (_,ext) ->
+      Some ext)
 |> List.dedup
 ;;
 [%%expect{|
