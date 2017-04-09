@@ -207,6 +207,18 @@ let redirect ~f =
        Sys.remove filename)
 ;;
 
+let cleanup_singleline str =
+  if str = "" then str
+  else
+    let trim_from = if str.[0] = '\n' then 1 else 0 in
+    let len = String.length str in
+    match String.index_from str 1 '\n' with
+    | exception Not_found ->
+      String.sub str trim_from (len - trim_from)
+    | x when x = len - 1 ->
+      String.sub str trim_from (x - trim_from)
+    | _ -> str
+
 let eval_phrases ~fname fcontents =
   (* 4.03: Warnings.reset_fatal (); *)
   let buf = Buffer.create 1024 in
@@ -232,7 +244,7 @@ let eval_phrases ~fname fcontents =
         Buffer.add_char buf '\n';
       let s = Buffer.contents buf in
       Buffer.clear buf;
-      Phrase_code s
+      Phrase_code (cleanup_singleline s)
   in
   let parser = init_parser ~fname fcontents in
   redirect ~f:(fun ~capture ->
@@ -277,7 +289,6 @@ let is_whitespace str =
     done;
     true
   with Exit -> false
-
 
 let rec valid_phrases = function
   | [] -> true
