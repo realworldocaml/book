@@ -8,3 +8,5 @@
 /app/rwo-deps.ml.exe
 /Makefile.derived
 .*.swp
+*.corrected
+*~
