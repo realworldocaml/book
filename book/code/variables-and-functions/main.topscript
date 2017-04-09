@@ -42,7 +42,7 @@ languages;;
 [%%expect{|- : string = "OCaml,Perl,C++,C"|}];;
 [@@@part "5"];;
 let area_of_ring inner_radius outer_radius =
-  let pi = Float.acos (-1.) in
+  let pi = Float.pi in
   let area_of_circle r = pi *. r *. r in
   area_of_circle outer_radius -. area_of_circle inner_radius
 ;;
@@ -51,7 +51,7 @@ area_of_ring 1. 3.;;
 [%%expect{|- : float = 25.1327412287183449|}];;
 [@@@part "6"];;
 let area_of_ring inner_radius outer_radius =
-  let pi = acos (-1.) in
+  let pi = Float.pi in
   let area_of_circle r = pi *. r *. r in
   let pi = 0. in
   area_of_circle outer_radius -. area_of_circle inner_radius
