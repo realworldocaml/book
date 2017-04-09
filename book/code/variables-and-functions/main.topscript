@@ -57,10 +57,7 @@ let area_of_ring inner_radius outer_radius =
   area_of_circle outer_radius -. area_of_circle inner_radius
 ;;
 [%%expect{|
-Characters 56-60:
-Warning 3: deprecated: Core_kernel.Std.acos
-[since 2016-07] Use [Float.acos]
-Characters 117-119:
+Characters 115-117:
 Warning 26: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
 |}];;
