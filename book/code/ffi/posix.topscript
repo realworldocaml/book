@@ -20,7 +20,7 @@ val time : time_t Ctypes_static.ptr -> time_t = <fun>
 [@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
 [%%expect{|
-val cur_time : time_t = 1491687799
+val cur_time : time_t = 1491721915
 |}];;
 [@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
@@ -56,12 +56,12 @@ Error: This expression has type time_t but an expression was expected of type
 [@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
 [%%expect{|
-val t_ptr : time_t ptr = (time_t*) 0x4babb90
+val t_ptr : time_t ptr = (time_t*) 0x5048b90
 |}];;
 [@@@part "7"];;
 ctime t_ptr ;;
 [%%expect{|
-- : string = "Sat Apr  8 23:43:21 2017\n"
+- : string = "Sun Apr  9 09:11:57 2017\n"
 |}];;
 [@@@part "8"];;
 type timeval ;;

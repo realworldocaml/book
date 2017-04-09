@@ -14,9 +14,7 @@ let memoize f =
   (fun x ->
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
-[%%expect{|
-val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
-|}];;
+[%%expect{|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
 [@@@part "2"];;
 let rec edit_distance s t =
   match String.length s, String.length t with
@@ -33,13 +31,9 @@ let rec edit_distance s t =
       ; edit_distance s' t' + cost_to_drop_both
       ]
 ;;
-[%%expect{|
-val edit_distance : string -> string -> int = <fun>
-|}];;
+[%%expect{|val edit_distance : string -> string -> int = <fun>|}];;
 edit_distance "OCaml" "ocaml";;
-[%%expect{|
-- : int = 2
-|}];;
+[%%expect{|- : int = 2|}];;
 [@@@part "3"];;
 #require "mtime.os.top";;
 let time f =
@@ -49,19 +43,17 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-[%%expect{|
-val time : (unit -> 'a) -> 'a = <fun>
-|}];;
+[%%expect{|val time : (unit -> 'a) -> 'a = <fun>|}];;
 [@@@part "4"];;
 time (fun () -> edit_distance "OCaml" "ocaml");;
 [%%expect{|
 - : int = 2
-Time: 0.699772 ms
+Time: 0.690121 ms
 |}];;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 [%%expect{|
 - : int = 2
-Time: 3473.483739 ms
+Time: 3295.724729 ms
 |}];;
 [@@@part "5"];;
 let memo_rec f_norec x =
@@ -70,9 +62,7 @@ let memo_rec f_norec x =
   fref := f;
   f x
 ;;
-[%%expect{|
-val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-|}];;
+[%%expect{|val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
 [@@@part "6"];;
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
   match String.length s, String.length t with
@@ -88,12 +78,10 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
       ; edit_distance (s ,t') + 1
       ; edit_distance (s',t') + cost_to_drop_both
       ]) ;;
-[%%expect{|
-val edit_distance : string * string -> int = <fun>
-|}];;
+[%%expect{|val edit_distance : string * string -> int = <fun>|}];;
 [@@@part "7"];;
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 [%%expect{|
 - : int = 2
-Time: 0.331982 ms
+Time: 0.336453 ms
 |}];;

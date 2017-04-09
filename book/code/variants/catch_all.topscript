@@ -24,9 +24,7 @@ type basic_color =
 let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
-[%%expect{|
-val basic_color_to_int : basic_color -> int = <fun>
-|}];;
+[%%expect{|val basic_color_to_int : basic_color -> int = <fun>|}];;
 [@@@part "1"];;
 type color =
   | Basic of basic_color     (* basic colors *)
@@ -71,9 +69,7 @@ let color_to_int = function
   | Bold  basic_color -> 8 + basic_color_to_int basic_color
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
-[%%expect{|
-val color_to_int : color -> int = <fun>
-|}];;
+[%%expect{|val color_to_int : color -> int = <fun>|}];;
 [@@@part "5"];;
 let oldschool_color_to_int = function
   | Basic (basic_color,weight) ->

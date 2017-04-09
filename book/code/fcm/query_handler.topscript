@@ -40,14 +40,10 @@ module type Query_handler =
 |}];;
 [@@@part "1"];;
 module type M = sig type t [@@deriving sexp] end;;
-[%%expect{|
-module type M = sig type t end
-|}];;
+[%%expect{|module type M = sig type t end|}];;
 [@@@part "2"];;
 type u = { a: int; b: float } [@@deriving sexp];;
-[%%expect{|
-type u = { a : int; b : float; }
-|}];;
+[%%expect{|type u = { a : int; b : float; }|}];;
 sexp_of_u {a=3;b=7.};;
 [%%expect{|
 Characters 0-9:
@@ -89,9 +85,7 @@ module Unique :
 |}];;
 [@@@part "4"];;
 let unique = Unique.create 0;;
-[%%expect{|
-val unique : Unique.t = {Unique.next_id = 0}
-|}];;
+[%%expect{|val unique : Unique.t = {Unique.next_id = 0}|}];;
 Unique.eval unique Sexp.unit;;
 [%%expect{|
 - : (Sexplib.Type.t, Core_kernel__Error.t) result =
@@ -138,9 +132,7 @@ module List_dir :
 |}];;
 [@@@part "6"];;
 let list_dir = List_dir.create "/var";;
-[%%expect{|
-val list_dir : List_dir.t = {List_dir.cwd = "/var"}
-|}];;
+[%%expect{|val list_dir : List_dir.t = {List_dir.cwd = "/var"}|}];;
 List_dir.eval list_dir (sexp_of_string ".");;
 [%%expect{|
 - : (Sexplib.Type.t, Core_kernel__Error.t) result =
@@ -156,9 +148,7 @@ Ok
     Base__.Sexplib.Sexp.Atom "games"])
 |}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-[%%expect{|
-Exception: Sys_error "/var/yp: No such file or directory".
-|}];;
+[%%expect{|Exception: Sys_error "/var/yp: No such file or directory".|}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
@@ -174,9 +164,7 @@ let unique_instance =
     module Query_handler = Unique
     let this = Unique.create 0
   end : Query_handler_instance);;
-[%%expect{|
-val unique_instance : (module Query_handler_instance) = <module>
-|}];;
+[%%expect{|val unique_instance : (module Query_handler_instance) = <module>|}];;
 [@@@part "9"];;
 let build_instance
       (type a)
@@ -195,13 +183,9 @@ val build_instance :
 |}];;
 [@@@part "10"];;
 let unique_instance = build_instance (module Unique) 0;;
-[%%expect{|
-val unique_instance : (module Query_handler_instance) = <module>
-|}];;
+[%%expect{|val unique_instance : (module Query_handler_instance) = <module>|}];;
 let list_dir_instance = build_instance (module List_dir)  "/var";;
-[%%expect{|
-val list_dir_instance : (module Query_handler_instance) = <module>
-|}];;
+[%%expect{|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
 [@@@part "11"];;
 let build_dispatch_table handlers =
   let table = String.Table.create () in
@@ -275,9 +259,7 @@ type query_handler_instance = {
 |}];;
 type query_handler = Sexp.t -> query_handler_instance
 ;;
-[%%expect{|
-type query_handler = Sexp.t -> query_handler_instance
-|}];;
+[%%expect{|type query_handler = Sexp.t -> query_handler_instance|}];;
 [@@@part "15"];;
 let unique_handler config_sexp =
   let config = Unique.config_of_sexp config_sexp in

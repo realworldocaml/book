@@ -10,18 +10,12 @@
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 List.find;;
-[%%expect{|
-- : 'a list -> f:('a -> bool) -> 'a option = <fun>
-|}];;
+[%%expect{|- : 'a list -> f:('a -> bool) -> 'a option = <fun>|}];;
 [@@@part "1"];;
 List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
-[%%expect{|
-- : int option = Some 2
-|}];;
+[%%expect{|- : int option = Some 2|}];;
 List.find [1;2;3] ~f:(fun x -> x >= 10) ;;
-[%%expect{|
-- : int option = None
-|}];;
+[%%expect{|- : int option = None|}];;
 [@@@part "2"];;
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
@@ -47,25 +41,17 @@ val find_mismatches : ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list =
 |}];;
 [@@@part "4"];;
 [ Ok 3; Error "abject failure"; Ok 4 ];;
-[%%expect{|
-- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]
-|}];;
+[%%expect{|- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]|}];;
 [@@@part "5"];;
 Error.of_string "something went wrong";;
-[%%expect{|
-- : Error.t = <abstr>
-|}];;
+[%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "6"];;
 Error.of_thunk (fun () ->
   sprintf "something went wrong: %f" 32.3343);;
-[%%expect{|
-- : Error.t = <abstr>
-|}];;
+[%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "7"];;
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
-[%%expect{|
-- : Error.t = <abstr>
-|}];;
+[%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "8"];;
 let custom_to_sexp = [%sexp_of: float * string list * int];;
 [%%expect{|
@@ -91,18 +77,14 @@ Error.tag
                    Error.of_string "Your windshield was smashed" ])
   "over the weekend"
 ;;
-[%%expect{|
-- : Error.t = <abstr>
-|}];;
+[%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "11"];;
 let bind option f =
   match option with
   | None -> None
   | Some x -> f x
 ;;
-[%%expect{|
-val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
-|}];;
+[%%expect{|val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>|}];;
 [@@@part "12"];;
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
@@ -137,14 +119,10 @@ val compute_bounds :
 |}];;
 [@@@part "15"];;
 3 / 0;;
-[%%expect{|
-Exception: Division_by_zero.
-|}];;
+[%%expect{|Exception: Division_by_zero.|}];;
 [@@@part "16"];;
 List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
-[%%expect{|
-Exception: Division_by_zero.
-|}];;
+[%%expect{|Exception: Division_by_zero.|}];;
 [@@@part "17"];;
 List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 [%%expect{|
@@ -155,85 +133,51 @@ Exception: Division_by_zero.
 |}];;
 [@@@part "18"];;
 exception Key_not_found of string;;
-[%%expect{|
-exception Key_not_found of string
-|}];;
+[%%expect{|exception Key_not_found of string|}];;
 raise (Key_not_found "a");;
-[%%expect{|
-Exception: Key_not_found "a".
-|}];;
+[%%expect{|Exception: Key_not_found "a".|}];;
 [@@@part "19"];;
 let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;
-[%%expect{|
-val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found "b"]
-|}];;
+[%%expect{|val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found "b"]|}];;
 List.filter exceptions  ~f:(function
   | Key_not_found _ | Not_found -> true
   | _ -> false);;
-[%%expect{|
-- : exn list = [Not_found; Key_not_found "b"]
-|}];;
+[%%expect{|- : exn list = [Not_found; Key_not_found "b"]|}];;
 [@@@part "20"];;
 let rec find_exn alist key = match alist with
   | [] -> raise (Key_not_found key)
   | (key',data) :: tl -> if key = key' then data else find_exn tl key
 ;;
-[%%expect{|
-val find_exn : (string * 'a) list -> string -> 'a = <fun>
-|}];;
+[%%expect{|val find_exn : (string * 'a) list -> string -> 'a = <fun>|}];;
 let alist = [("a",1); ("b",2)];;
-[%%expect{|
-val alist : (string * int) list = [("a", 1); ("b", 2)]
-|}];;
+[%%expect{|val alist : (string * int) list = [("a", 1); ("b", 2)]|}];;
 find_exn alist "a";;
-[%%expect{|
-- : int = 1
-|}];;
+[%%expect{|- : int = 1|}];;
 find_exn alist "c";;
-[%%expect{|
-Exception: Key_not_found "c".
-|}];;
+[%%expect{|Exception: Key_not_found "c".|}];;
 [@@@part "21"];;
 raise;;
-[%%expect{|
-- : exn -> 'a = <fun>
-|}];;
+[%%expect{|- : exn -> 'a = <fun>|}];;
 [@@@part "22"];;
 let rec forever () = forever ();;
-[%%expect{|
-val forever : unit -> 'a = <fun>
-|}];;
+[%%expect{|val forever : unit -> 'a = <fun>|}];;
 [@@@part "23"];;
 type 'a bounds = { lower: 'a; upper: 'a };;
-[%%expect{|
-type 'a bounds = { lower : 'a; upper : 'a; }
-|}];;
+[%%expect{|type 'a bounds = { lower : 'a; upper : 'a; }|}];;
 exception Crossed_bounds of int bounds;;
-[%%expect{|
-exception Crossed_bounds of int bounds
-|}];;
+[%%expect{|exception Crossed_bounds of int bounds|}];;
 Crossed_bounds { lower=10; upper=0 };;
-[%%expect{|
-- : exn = Crossed_bounds {lower = 10; upper = 0}
-|}];;
+[%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "24"];;
 type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
-[%%expect{|
-type 'a bounds = { lower : 'a; upper : 'a; }
-|}];;
+[%%expect{|type 'a bounds = { lower : 'a; upper : 'a; }|}];;
 exception Crossed_bounds of int bounds [@@deriving sexp];;
-[%%expect{|
-exception Crossed_bounds of int bounds
-|}];;
+[%%expect{|exception Crossed_bounds of int bounds|}];;
 Crossed_bounds { lower=10; upper=0 };;
-[%%expect{|
-- : exn = Crossed_bounds {lower = 10; upper = 0}
-|}];;
+[%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "25"];;
 let failwith msg = raise (Failure msg);;
-[%%expect{|
-val failwith : string -> 'a = <fun>
-|}];;
+[%%expect{|val failwith : string -> 'a = <fun>|}];;
 [@@@part "26"];;
 let merge_lists xs ys ~f =
   if List.length xs <> List.length ys then None
@@ -251,13 +195,9 @@ val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
   <fun>
 |}];;
 merge_lists [1;2;3] [-1;1;2] ~f:(+);;
-[%%expect{|
-- : int list option = Some [0; 3; 5]
-|}];;
+[%%expect{|- : int list option = Some [0; 3; 5]|}];;
 merge_lists [1;2;3] [-1;1] ~f:(+);;
-[%%expect{|
-- : int list option = None
-|}];;
+[%%expect{|- : int list option = None|}];;
 [@@@part "27"];;
 let merge_lists xs ys ~f =
   let rec loop xs ys =
@@ -268,21 +208,15 @@ let merge_lists xs ys ~f =
   in
   loop xs ys
 ;;
-[%%expect{|
-val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
-|}];;
+[%%expect{|val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>|}];;
 merge_lists [1;2;3] [-1] ~f:(+);;
-[%%expect{|
-Exception: Assert_failure ("//toplevel//", 7, 11).
-|}];;
+[%%expect{|Exception: Assert_failure ("//toplevel//", 7, 11).|}];;
 [@@@part "28"];;
 let parse_line line =
   String.split_on_chars ~on:[','] line
   |> List.map ~f:Float.of_string
 ;;
-[%%expect{|
-val parse_line : string -> Float.t list = <fun>
-|}];;
+[%%expect{|val parse_line : string -> Float.t list = <fun>|}];;
 let load filename =
   let inc = In_channel.create filename in
   let data = In_channel.input_lines inc |> List.map ~f:parse_line in
@@ -328,9 +262,7 @@ val lookup_weight :
 [@@@part "32"];;
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
   ["a",3; "b",4] "a" ;;
-[%%expect{|
-- : float = 0.
-|}];;
+[%%expect{|- : float = 0.|}];;
 [@@@part "33"];;
 let lookup_weight ~compute_weight alist key =
   match
@@ -368,33 +300,19 @@ Error: This pattern matches values of type 'a option
 [@@@part "35"];;
 let find alist key =
   Option.try_with (fun () -> find_exn alist key) ;;
-[%%expect{|
-val find : (string * 'a) list -> string -> 'a Base.option = <fun>
-|}];;
+[%%expect{|val find : (string * 'a) list -> string -> 'a Base.option = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect{|
-- : int Base.option = <abstr>
-|}];;
+[%%expect{|- : int Base.option = <abstr>|}];;
 find ["a",1; "b",2] "b";;
-[%%expect{|
-- : int Base.option = <abstr>
-|}];;
+[%%expect{|- : int Base.option = <abstr>|}];;
 [@@@part "36"];;
 let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;
-[%%expect{|
-val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
-|}];;
+[%%expect{|val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect{|
-- : int Or_error.t = Core_kernel__.Result.Error <abstr>
-|}];;
+[%%expect{|- : int Or_error.t = Core_kernel__.Result.Error <abstr>|}];;
 [@@@part "37"];;
 Or_error.ok_exn (find ["a",1; "b",2] "b");;
-[%%expect{|
-- : int = 2
-|}];;
+[%%expect{|- : int = 2|}];;
 Or_error.ok_exn (find ["a",1; "b",2] "c");;
-[%%expect{|
-Exception: Key_not_found "c".
-|}];;
+[%%expect{|Exception: Key_not_found "c".|}];;

@@ -16,9 +16,7 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-[%%expect{|
-val time : (unit -> 'a) -> 'a = <fun>
-|}];;
+[%%expect{|val time : (unit -> 'a) -> 'a = <fun>|}];;
 let memoize f =
   let table = Hashtbl.Poly.create () in
   (fun x ->
@@ -29,73 +27,55 @@ let memoize f =
        Hashtbl.add_exn table ~key:x ~data:y;
        y
   );;
-[%%expect{|
-val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
-|}];;
+[%%expect{|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
 [@@@part "1"];;
 let rec fib i =
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
-[%%expect{|
-val fib : int -> int = <fun>
-|}];;
+[%%expect{|val fib : int -> int = <fun>|}];;
 [@@@part "2"];;
 time (fun () -> fib 20);;
 [%%expect{|
 - : int = 10946
-Time: 0.29749 ms
+Time: 1.920916 ms
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 4649.410886 ms
+Time: 32483.651622 ms
 |}];;
 [@@@part "3"];;
 let fib = memoize fib;;
+[%%expect{|val fib : int -> int = <fun>|}];;
+time (fun () -> fib 40);;
 [%%expect{|
-val fib : int -> int = <fun>
+- : int = 165580141
+Time: 20783.510969 ms
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 4453.708442 ms
-|}];;
-time (fun () -> fib 40);;
-[%%expect{|
-- : int = 165580141
-Time: 0.004211 ms
+Time: 0.002001 ms
 |}];;
 [@@@part "4"];;
 let fib_norec fib i =
   if i <= 1 then i
   else fib (i - 1) + fib (i - 2) ;;
-[%%expect{|
-val fib_norec : (int -> int) -> int -> int = <fun>
-|}];;
+[%%expect{|val fib_norec : (int -> int) -> int -> int = <fun>|}];;
 [@@@part "5"];;
 let rec fib i = fib_norec fib i;;
-[%%expect{|
-val fib : int -> int = <fun>
-|}];;
+[%%expect{|val fib : int -> int = <fun>|}];;
 fib 20;;
-[%%expect{|
-- : int = 6765
-|}];;
+[%%expect{|- : int = 6765|}];;
 [@@@part "6"];;
 let make_rec f_norec =
   let rec f x = f_norec f x in
   f
 ;;
-[%%expect{|
-val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-|}];;
+[%%expect{|val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
 let fib = make_rec fib_norec;;
-[%%expect{|
-val fib : int -> int = <fun>
-|}];;
+[%%expect{|val fib : int -> int = <fun>|}];;
 fib 20;;
-[%%expect{|
-- : int = 6765
-|}];;
+[%%expect{|- : int = 6765|}];;
 [@@@part "7"];;
 let memo_rec f_norec x =
   let fref = ref (fun _ -> assert false) in
@@ -103,22 +83,16 @@ let memo_rec f_norec x =
   fref := f;
   f x
 ;;
-[%%expect{|
-val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-|}];;
+[%%expect{|val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
 [@@@part "8"];;
 let fib = memo_rec fib_norec;;
-[%%expect{|
-val fib : int -> int = <fun>
-|}];;
+[%%expect{|val fib : int -> int = <fun>|}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 102334155
-Time: 0.046758 ms
+Time: 0.041809 ms
 |}];;
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
-[%%expect{|
-val fib : int -> int = <fun>
-|}];;
+[%%expect{|val fib : int -> int = <fun>|}];;

@@ -14,9 +14,7 @@ class obj x =
   object 
     val field = printf "Initializing field\n"; x
   end ;;
-[%%expect{|
-class obj : int -> object val field : int end
-|}];;
+[%%expect{|class obj : int -> object val field : int end|}];;
 let o = new obj 3 ;;
 [%%expect{|
 val o : obj = <obj>

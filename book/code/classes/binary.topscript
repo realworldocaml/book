@@ -39,18 +39,12 @@ class circle :
 |}];;
 [@@@part "1"];;
 (new square 5)#equals (new square 5) ;;
-[%%expect{|
-- : bool = true
-|}];;
+[%%expect{|- : bool = true|}];;
 (new circle 10)#equals (new circle 7) ;;
-[%%expect{|
-- : bool = false
-|}];;
+[%%expect{|- : bool = false|}];;
 [@@@part "2"];;
 type shape = < equals : shape -> bool; area : float > ;;
-[%%expect{|
-type shape = < area : float; equals : shape -> bool >
-|}];;
+[%%expect{|type shape = < area : float; equals : shape -> bool >|}];;
 (new square 5 :> shape) ;;
 [%%expect{|
 Characters 0-23:
@@ -62,21 +56,15 @@ Error: Type square = < area : float; equals : square -> bool; width : int >
 |}];;
 [@@@part "3"];;
 (object method area = 5 end) = (object method area = 5 end) ;;
-[%%expect{|
-- : bool = false
-|}];;
+[%%expect{|- : bool = false|}];;
 [@@@part "4"];;
 type shape_repr =
   | Square of int
   | Circle of int ;;
-[%%expect{|
-type shape_repr = Square of int | Circle of int
-|}];;
+[%%expect{|type shape_repr = Square of int | Circle of int|}];;
 type shape =
   < repr : shape_repr; equals : shape -> bool; area : float > ;;
-[%%expect{|
-type shape = < area : float; equals : shape -> bool; repr : shape_repr >
-|}];;
+[%%expect{|type shape = < area : float; equals : shape -> bool; repr : shape_repr >|}];;
 class square w = object(self) 
   method width = w
   method area = Float.of_int (self#width * self#width)

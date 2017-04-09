@@ -91,14 +91,10 @@ val create_log_entry :
 let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
 ;;
-[%%expect{|
-val message_to_string : Log_entry.t -> string = <fun>
-|}];;
+[%%expect{|val message_to_string : Log_entry.t -> string = <fun>|}];;
 [@@@part "21"];;
 let is_important t = t.Log_entry.important;;
-[%%expect{|
-val is_important : Log_entry.t -> bool = <fun>
-|}];;
+[%%expect{|val is_important : Log_entry.t -> bool = <fun>|}];;
 [@@@part "21.1"];;
 let create_log_entry ~session_id ~important message : Log_entry.t =
   { time = Time_ns.now (); session_id; important; message }
@@ -147,15 +143,11 @@ let register_heartbeat t hb =
     credentials = t.credentials;
     last_heartbeat_time = hb.Heartbeat.time;
   };;
-[%%expect{|
-val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
-|}];;
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
 [@@@part "23"];;
 let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time };;
-[%%expect{|
-val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
-|}];;
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
 [@@@part "24"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -180,9 +172,7 @@ let register_heartbeat t hb =
   { t with last_heartbeat_time   = hb.Heartbeat.time;
            last_heartbeat_status = hb.Heartbeat.status_message;
   };;
-[%%expect{|
-val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
-|}];;
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
 [@@@part "26"];;
 type client_info =
   { addr: Unix.Inet_addr.t;
@@ -207,15 +197,11 @@ let register_heartbeat t hb =
   t.last_heartbeat_time   <- hb.Heartbeat.time;
   t.last_heartbeat_status <- hb.Heartbeat.status_message
 ;;
-[%%expect{|
-val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
-|}];;
+[%%expect{|val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>|}];;
 [@@@part "28"];;
 let get_users logons =
   List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
-[%%expect{|
-val get_users : Logon.t list -> string list = <fun>
-|}];;
+[%%expect{|val get_users : Logon.t list -> string list = <fun>|}];;
 [@@@part "29"];;
 module Logon = struct
   type t =

@@ -10,9 +10,7 @@
 open Core_kernel.Std;;
 [@@@part "0.5"];;
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
-[%%expect{|
-type 'a iterator = < get : 'a; has_value : bool; next : unit >
-|}];;
+[%%expect{|type 'a iterator = < get : 'a; has_value : bool; next : unit >|}];;
 [@@@part "1"];;
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
@@ -68,41 +66,23 @@ class ['a] stack :
 |}];;
 [@@@part "3"];;
 let s = new stack [] ;;
-[%%expect{|
-val s : '_a stack = <obj>
-|}];;
+[%%expect{|val s : '_a stack = <obj>|}];;
 s#push 5 ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 s#push 4 ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 let it = s#iterator ;;
-[%%expect{|
-val it : int iterator = <obj>
-|}];;
+[%%expect{|val it : int iterator = <obj>|}];;
 it#get ;;
-[%%expect{|
-- : int = 4
-|}];;
+[%%expect{|- : int = 4|}];;
 it#next ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 it#get ;;
-[%%expect{|
-- : int = 5
-|}];;
+[%%expect{|- : int = 5|}];;
 it#next ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 it#has_value ;;
-[%%expect{|
-- : bool = false
-|}];;
+[%%expect{|- : bool = false|}];;
 [@@@part "4"];;
 class ['a] stack init = object
   val mutable v : 'a list = init

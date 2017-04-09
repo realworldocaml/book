@@ -41,18 +41,10 @@ let rev_inplace ar =
     decr j
   done
 ;;
-[%%expect{|
-val rev_inplace : 'a array -> unit = <fun>
-|}];;
+[%%expect{|val rev_inplace : 'a array -> unit = <fun>|}];;
 let nums = [|1;2;3;4;5|];;
-[%%expect{|
-val nums : int array = [|1; 2; 3; 4; 5|]
-|}];;
+[%%expect{|val nums : int array = [|1; 2; 3; 4; 5|]|}];;
 rev_inplace nums;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 nums;;
-[%%expect{|
-- : int array = [|5; 4; 3; 2; 1|]
-|}];;
+[%%expect{|- : int array = [|5; 4; 3; 2; 1|]|}];;

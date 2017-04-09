@@ -32,23 +32,13 @@ class istack :
 |}];;
 [@@@part "2"];;
 let s = new istack ;;
-[%%expect{|
-val s : istack = <obj>
-|}];;
+[%%expect{|val s : istack = <obj>|}];;
 s#pop ;;
-[%%expect{|
-- : int option = Some 0
-|}];;
+[%%expect{|- : int option = Some 0|}];;
 s#push 5 ;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 s#pop ;;
-[%%expect{|
-- : int option = Some 5
-|}];;
+[%%expect{|- : int option = Some 5|}];;
 [@@@part "3"];;
 type istack = < pop: int option; push: int -> unit > ;;
-[%%expect{|
-type istack = < pop : int option; push : int -> unit >
-|}];;
+[%%expect{|type istack = < pop : int option; push : int -> unit >|}];;

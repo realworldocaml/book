@@ -10,13 +10,9 @@
 [@@@part "1"];;
 open Core_kernel.Std;;
 let assoc = [("one", 1); ("two",2); ("three",3)] ;;
-[%%expect{|
-val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
-|}];;
+[%%expect{|val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]|}];;
 List.Assoc.find assoc "two" ;;
-[%%expect{|
-- : equal:(string -> string -> bool) -> int option = <fun>
-|}];;
+[%%expect{|- : equal:(string -> string -> bool) -> int option = <fun>|}];;
 List.Assoc.add assoc "four" 4 (* add a new key *) ;;
 [%%expect{|
 - : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =

@@ -9,9 +9,7 @@
 #require "core.syntax";;
 open Core_kernel.Std;;
 module Time_ns = Core_kernel.Time_ns;;
-[%%expect{|
-module Time_ns = Core_kernel.Time_ns
-|}];;
+[%%expect{|module Time_ns = Core_kernel.Time_ns|}];;
 [@@@part "1"];;
 module Log_entry = struct
   type t =
@@ -114,23 +112,17 @@ module Log_entry = struct
              message: string;
            }
 end;;
-[%%expect{|
-module Log_entry : sig type t = { important : bool; message : string; } end
-|}];;
+[%%expect{|module Log_entry : sig type t = { important : bool; message : string; } end|}];;
 module Heartbeat = struct
   type t = { status_message: string; }
 end;;
-[%%expect{|
-module Heartbeat : sig type t = { status_message : string; } end
-|}];;
+[%%expect{|module Heartbeat : sig type t = { status_message : string; } end|}];;
 module Logon = struct
   type t = { user: string;
              credentials: string;
            }
 end ;;
-[%%expect{|
-module Logon : sig type t = { user : string; credentials : string; } end
-|}];;
+[%%expect{|module Logon : sig type t = { user : string; credentials : string; } end|}];;
 [@@@part "5"];;
 type details =
   | Logon of Logon.t
@@ -149,9 +141,7 @@ module Common = struct
              time: Time_ns.t;
            }
 end ;;
-[%%expect{|
-module Common : sig type t = { session_id : string; time : Time_ns.t; } end
-|}];;
+[%%expect{|module Common : sig type t = { session_id : string; time : Time_ns.t; } end|}];;
 [@@@part "7"];;
 let messages_for_user user messages =
   let (user_messages,_) =
@@ -177,21 +167,13 @@ val messages_for_user :
 |}];;
 [@@@part "7.9"];;
 type server_state;;
-[%%expect{|
-type server_state
-|}];;
+[%%expect{|type server_state|}];;
 let handle_log_entry (_:server_state) ((_:Common.t),_) = ();;
-[%%expect{|
-val handle_log_entry : server_state -> Common.t * 'a -> unit = <fun>
-|}];;
+[%%expect{|val handle_log_entry : server_state -> Common.t * 'a -> unit = <fun>|}];;
 let handle_logon _ (_,_) = ();;
-[%%expect{|
-val handle_logon : 'a -> 'b * 'c -> unit = <fun>
-|}];;
+[%%expect{|val handle_logon : 'a -> 'b * 'c -> unit = <fun>|}];;
 let handle_heartbeat _ (_,_) = ();;
-[%%expect{|
-val handle_heartbeat : 'a -> 'b * 'c -> unit = <fun>
-|}];;
+[%%expect{|val handle_heartbeat : 'a -> 'b * 'c -> unit = <fun>|}];;
 [@@@part "8"];;
 let handle_message server_state (common,details) =
   match details with
@@ -199,6 +181,4 @@ let handle_message server_state (common,details) =
   | Logon     m -> handle_logon     server_state (common,m)
   | Heartbeat m -> handle_heartbeat server_state (common,m)
 ;;
-[%%expect{|
-val handle_message : server_state -> Common.t * details -> unit = <fun>
-|}];;
+[%%expect{|val handle_message : server_state -> Common.t * details -> unit = <fun>|}];;

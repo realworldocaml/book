@@ -9,36 +9,20 @@
 #require "core.syntax";;
 [@@@part "1"];;
 type 'a ref = { mutable contents : 'a };;
-[%%expect{|
-type 'a ref = { mutable contents : 'a; }
-|}];;
+[%%expect{|type 'a ref = { mutable contents : 'a; }|}];;
 [@@@part "2"];;
 let ref x = { contents = x };;
-[%%expect{|
-val ref : 'a -> 'a ref = <fun>
-|}];;
+[%%expect{|val ref : 'a -> 'a ref = <fun>|}];;
 let (!) r = r.contents;;
-[%%expect{|
-val ( ! ) : 'a ref -> 'a = <fun>
-|}];;
+[%%expect{|val ( ! ) : 'a ref -> 'a = <fun>|}];;
 let (:=) r x = r.contents <- x;;
-[%%expect{|
-val ( := ) : 'a ref -> 'a -> unit = <fun>
-|}];;
+[%%expect{|val ( := ) : 'a ref -> 'a -> unit = <fun>|}];;
 [@@@part "3"];;
 let x = ref 1;;
-[%%expect{|
-val x : int ref = {contents = 1}
-|}];;
+[%%expect{|val x : int ref = {contents = 1}|}];;
 !x;;
-[%%expect{|
-- : int = 1
-|}];;
+[%%expect{|- : int = 1|}];;
 x := !x + 1;;
-[%%expect{|
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 !x;;
-[%%expect{|
-- : int = 2
-|}];;
+[%%expect{|- : int = 2|}];;

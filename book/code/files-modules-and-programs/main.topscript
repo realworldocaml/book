@@ -10,9 +10,7 @@
 [@@@part "0.5"];;
 open Core_kernel.Std;;
 module M = struct let foo = 3 end;;
-[%%expect{|
-module M : sig val foo : int end
-|}];;
+[%%expect{|module M : sig val foo : int end|}];;
 foo;;
 [%%expect{|
 Characters 0-3:
@@ -20,22 +18,16 @@ Error: Unbound value foo
 |}];;
 open M;;
 foo;;
-[%%expect{|
-- : int = 3
-|}];;
+[%%expect{|- : int = 3|}];;
 [@@@part "1"];;
 let average x y =
   let open Int64 in
   x + y / of_int 2;;
-[%%expect{|
-val average : int64 -> int64 -> int64 = <fun>
-|}];;
+[%%expect{|val average : int64 -> int64 -> int64 = <fun>|}];;
 [@@@part "2"];;
 let average x y =
   Int64.(x + y / of_int 2);;
-[%%expect{|
-val average : int64 -> int64 -> int64 = <fun>
-|}];;
+[%%expect{|val average : int64 -> int64 -> int64 = <fun>|}];;
 [@@@part "3"];;
 module Interval = struct
   type t = | Interval of int * int
@@ -66,9 +58,7 @@ module Extended_interval :
   end
 |}];;
 Extended_interval.contains (Extended_interval.create 3 10) 4;;
-[%%expect{|
-- : bool = true
-|}];;
+[%%expect{|- : bool = true|}];;
 [@@@part "5"];;
 module Extended_interval = struct
   open Interval

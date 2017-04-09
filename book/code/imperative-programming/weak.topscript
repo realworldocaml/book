@@ -15,31 +15,19 @@ let remember =
      | Some y -> y
      | None -> cache := Some x; x)
 ;;
-[%%expect{|
-val remember : '_a -> '_a = <fun>
-|}];;
+[%%expect{|val remember : '_a -> '_a = <fun>|}];;
 [@@@part "2"];;
 let identity x = x;;
-[%%expect{|
-val identity : 'a -> 'a = <fun>
-|}];;
+[%%expect{|val identity : 'a -> 'a = <fun>|}];;
 identity 3;;
-[%%expect{|
-- : int = 3
-|}];;
+[%%expect{|- : int = 3|}];;
 identity "five";;
-[%%expect{|
-- : string = "five"
-|}];;
+[%%expect{|- : string = "five"|}];;
 [@@@part "3"];;
 let remember_three () = remember 3;;
-[%%expect{|
-val remember_three : unit -> int = <fun>
-|}];;
+[%%expect{|val remember_three : unit -> int = <fun>|}];;
 remember;;
-[%%expect{|
-- : int -> int = <fun>
-|}];;
+[%%expect{|- : int -> int = <fun>|}];;
 remember "avocado";;
 [%%expect{|
 Characters 9-18:

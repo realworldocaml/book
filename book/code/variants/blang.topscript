@@ -26,20 +26,14 @@ type 'a expr =
 |}];;
 [@@@part "1"];;
 type mail_field = To | From | CC | Date | Subject;;
-[%%expect{|
-type mail_field = To | From | CC | Date | Subject
-|}];;
+[%%expect{|type mail_field = To | From | CC | Date | Subject|}];;
 type mail_predicate = { field: mail_field;
                         contains: string }
 ;;
-[%%expect{|
-type mail_predicate = { field : mail_field; contains : string; }
-|}];;
+[%%expect{|type mail_predicate = { field : mail_field; contains : string; }|}];;
 [@@@part "2"];;
 let test field contains = Base { field; contains };;
-[%%expect{|
-val test : mail_field -> string -> mail_predicate expr = <fun>
-|}];;
+[%%expect{|val test : mail_field -> string -> mail_predicate expr = <fun>|}];;
 And [ Or [ test To "doligez"; test CC "doligez" ];
       test Subject "runtime";
     ]
@@ -64,9 +58,7 @@ let rec eval expr base_eval =
   | Or    exprs -> List.exists  exprs ~f:eval'
   | Not   expr  -> not (eval' expr)
 ;;
-[%%expect{|
-val eval : 'a expr -> ('a -> bool) -> bool = <fun>
-|}];;
+[%%expect{|val eval : 'a expr -> ('a -> bool) -> bool = <fun>|}];;
 [@@@part "4"];;
 let and_ l =
   if List.mem l (Const false) then Const false
@@ -98,9 +90,7 @@ let not_ = function
   | Const b -> Const (not b)
   | e -> Not e
 ;;
-[%%expect{|
-val not_ : 'a expr -> 'a expr = <fun>
-|}];;
+[%%expect{|val not_ : 'a expr -> 'a expr = <fun>|}];;
 [@@@part "5"];;
 let rec simplify = function
   | Base _ | Const _ as x -> x
@@ -131,15 +121,11 @@ let not_ = function
   | Const b -> Const (not b)
   | (Base _ | And _ | Or _ | Not _) as e -> Not e
 ;;
-[%%expect{|
-val not_ : 'a expr -> 'a expr = <fun>
-|}];;
+[%%expect{|val not_ : 'a expr -> 'a expr = <fun>|}];;
 [@@@part "9"];;
 let not_ = function
   | Const b -> Const (not b)
   | Not e -> e
   | (Base _ | And _ | Or _ ) as e -> Not e
 ;;
-[%%expect{|
-val not_ : 'a expr -> 'a expr = <fun>
-|}];;
+[%%expect{|val not_ : 'a expr -> 'a expr = <fun>|}];;

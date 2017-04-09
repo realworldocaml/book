@@ -16,79 +16,49 @@ let time f =
   printf "Time: %F ms\n" (Mtime.to_ms elapsed);
   x 
 ;;
-[%%expect{|
-val time : (unit -> 'a) -> 'a = <fun>
-|}];;
+[%%expect{|val time : (unit -> 'a) -> 'a = <fun>|}];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
   (fun x ->
      Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 ;;
-[%%expect{|
-val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
-|}];;
+[%%expect{|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
 let identity x = x;;
-[%%expect{|
-val identity : 'a -> 'a = <fun>
-|}];;
+[%%expect{|val identity : 'a -> 'a = <fun>|}];;
 [@@@part "1"];;
 (fun x -> [x;x]);;
-[%%expect{|
-- : 'a -> 'a list = <fun>
-|}];;
+[%%expect{|- : 'a -> 'a list = <fun>|}];;
 [@@@part "2"];;
 memoize (fun x -> [x;x]);;
-[%%expect{|
-- : '_a -> '_a list = <fun>
-|}];;
+[%%expect{|- : '_a -> '_a list = <fun>|}];;
 [@@@part "3"];;
 identity (fun x -> [x;x]);;
-[%%expect{|
-- : '_a -> '_a list = <fun>
-|}];;
+[%%expect{|- : '_a -> '_a list = <fun>|}];;
 [@@@part "4"];;
 let f () = ref None;;
-[%%expect{|
-val f : unit -> 'a option ref = <fun>
-|}];;
+[%%expect{|val f : unit -> 'a option ref = <fun>|}];;
 [@@@part "5"];;
 List.init;;
-[%%expect{|
-- : int -> f:(int -> 'a) -> 'a list = <fun>
-|}];;
+[%%expect{|- : int -> f:(int -> 'a) -> 'a list = <fun>|}];;
 List.init 10 ~f:Int.to_string;;
-[%%expect{|
-- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
-|}];;
+[%%expect{|- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]|}];;
 [@@@part "6"];;
 let list_init_10 = List.init 10;;
-[%%expect{|
-val list_init_10 : f:(int -> '_a) -> '_a list = <fun>
-|}];;
+[%%expect{|val list_init_10 : f:(int -> '_a) -> '_a list = <fun>|}];;
 [@@@part "7"];;
 let list_init_10 ~f = List.init 10 ~f;;
-[%%expect{|
-val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
-|}];;
+[%%expect{|val list_init_10 : f:(int -> 'a) -> 'a list = <fun>|}];;
 [@@@part "8"];;
 identity (fun x -> [x;x]);;
-[%%expect{|
-- : '_a -> '_a list = <fun>
-|}];;
+[%%expect{|- : '_a -> '_a list = <fun>|}];;
 [@@@part "9"];;
 identity [];;
-[%%expect{|
-- : 'a list = []
-|}];;
+[%%expect{|- : 'a list = []|}];;
 [@@@part "10"];;
 [||];;
-[%%expect{|
-- : 'a array = [||]
-|}];;
+[%%expect{|- : 'a array = [||]|}];;
 identity [||];;
-[%%expect{|
-- : '_a array = [||]
-|}];;
+[%%expect{|- : '_a array = [||]|}];;
 [@@@part "11"];;
 module Concat_list : sig
   type 'a t
@@ -126,13 +96,9 @@ module Concat_list :
 |}];;
 [@@@part "12"];;
 Concat_list.empty;;
-[%%expect{|
-- : 'a Concat_list.t = <abstr>
-|}];;
+[%%expect{|- : 'a Concat_list.t = <abstr>|}];;
 identity Concat_list.empty;;
-[%%expect{|
-- : '_a Concat_list.t = <abstr>
-|}];;
+[%%expect{|- : '_a Concat_list.t = <abstr>|}];;
 [@@@part "13"];;
 module Concat_list : sig
   type +'a t
@@ -170,6 +136,4 @@ module Concat_list :
 |}];;
 [@@@part "14"];;
 identity Concat_list.empty;;
-[%%expect{|
-- : 'a Concat_list.t = <abstr>
-|}];;
+[%%expect{|- : 'a Concat_list.t = <abstr>|}];;

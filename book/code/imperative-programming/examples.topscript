@@ -10,11 +10,7 @@
 open Core_kernel.Std;;
 [@@@part "1"];;
 List.find_map;;
-[%%expect{|
-- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>
-|}];;
+[%%expect{|- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>|}];;
 [@@@part "2"];;
 let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
-[%%expect{|
-val endless_loop : int list = [1; 2; 3; <cycle>]
-|}];;
+[%%expect{|val endless_loop : int list = [1; 2; 3; <cycle>]|}];;

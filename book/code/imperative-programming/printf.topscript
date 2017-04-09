@@ -24,9 +24,7 @@ Error: This expression has type float but an expression was expected of type
 |}];;
 [@@@part "3"];;
 let fmt = "%i is an integer\n";;
-[%%expect{|
-val fmt : string = "%i is an integer\n"
-|}];;
+[%%expect{|val fmt : string = "%i is an integer\n"|}];;
 printf fmt 3;;
 [%%expect{|
 Characters 7-10:
