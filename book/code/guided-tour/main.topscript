@@ -42,6 +42,16 @@ let Seven = 3 + 4;;
 Characters 4-9:
 Error: Unbound constructor Seven
 |}];;
+let 7x = 7;;
+[%%expect{|
+Characters 4-6:
+Error: Unknown modifier 'x' for literal 7x
+|}];;
+let x-plus-y = x + y;;
+[%%expect{|
+Characters 6-10:
+Error: Syntax error
+|}];;
 [@@@part "5"];;
 let square x = x * x ;;
 [%%expect{|val square : int -> int = <fun>|}];;
