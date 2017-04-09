@@ -51,5 +51,5 @@ let lazy_memo_rec f_norec x =
 time (fun () -> lazy_memo_rec fib_norec 40);;
 [%%expect{|
 - : int = 102334155
-Time: 0.043776 ms
+Time: 0.039924 ms
 |}];;

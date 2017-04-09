@@ -7,8 +7,9 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
+
 [@@@part "1"];;
-open Core_kernel ;;
+open Core_kernel;;
 1 == 2 ;;
 [%%expect{|
 Characters 2-4:

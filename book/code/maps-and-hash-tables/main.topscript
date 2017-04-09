@@ -210,13 +210,8 @@ Error: Signature mismatch:
 [@@@part "25"];;
 let table = Hashtbl.create ~hashable:String.hashable ();;
 [%%expect{|val table : (string, '_a) Hashtbl.t = <abstr>|}];;
-Hashtbl.replace table ~key:"three" ~data:3;;
-[%%expect{|
-Characters 0-15:
-Warning 3: deprecated: Core_kernel.Hashtbl.replace
-[since 2015-10] Use set instead
-- : unit = ()
-|}];;
+Hashtbl.set table ~key:"three" ~data:3;;
+[%%expect{|- : unit = ()|}];;
 Hashtbl.find table "three";;
 [%%expect{|- : int option = Some 3|}];;
 [@@@part "26"];;

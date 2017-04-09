@@ -198,13 +198,10 @@ let build_dispatch_table handlers =
   let table = String.Table.create () in
   List.iter handlers
     ~f:(fun ((module I : Query_handler_instance) as instance) ->
-      Hashtbl.replace table ~key:I.Query_handler.name ~data:instance);
+      Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
   table
 ;;
 [%%expect{|
-Characters 168-183:
-Warning 3: deprecated: Core_kernel.Hashtbl.replace
-[since 2015-10] Use set instead
 val build_dispatch_table :
   (module Query_handler_instance) list ->
   (module Query_handler_instance) String.Table.t = <fun>

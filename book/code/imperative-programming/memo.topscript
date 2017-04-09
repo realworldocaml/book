@@ -48,12 +48,12 @@ let time f =
 time (fun () -> edit_distance "OCaml" "ocaml");;
 [%%expect{|
 - : int = 2
-Time: 0.635018 ms
+Time: 0.637054 ms
 |}];;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 [%%expect{|
 - : int = 2
-Time: 2839.395843 ms
+Time: 2805.910792 ms
 |}];;
 [@@@part "5"];;
 let memo_rec f_norec x =
@@ -83,5 +83,5 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 [%%expect{|
 - : int = 2
-Time: 0.297352 ms
+Time: 0.293131 ms
 |}];;
