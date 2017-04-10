@@ -249,7 +249,7 @@ remove_sequential_duplicates ["hey";"hey";"hey";"man!"];;
 [%%expect{|- : string list = ["hey"; "man!"]|}];;
 [@@@part "37"];;
 let divide x y =
-  if y = 0 then None else Some (x/y) ;;
+  if y = 0 then None else Some (x / y) ;;
 [%%expect{|val divide : int -> int -> int option = <fun>|}];;
 [@@@part "38"];;
 let downcase_extension filename =
@@ -308,13 +308,15 @@ let is_inside_scene_element point scene_element =
     point.x    > lower_left.x && point.x < lower_left.x +. width
     && point.y > lower_left.y && point.y < lower_left.y +. height
   | Segment { endpoint1; endpoint2 } -> false
-;;
-[%%expect{|val is_inside_scene_element : point2d -> scene_element -> bool = <fun>|}];;
+
 let is_inside_scene point scene =
   List.exists scene
     ~f:(fun el -> is_inside_scene_element point el)
 ;;
-[%%expect{|val is_inside_scene : point2d -> scene_element list -> bool = <fun>|}];;
+[%%expect{|
+val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
+val is_inside_scene : point2d -> scene_element list -> bool = <fun>
+|}];;
 is_inside_scene {x=3.;y=7.}
   [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
 [%%expect{|- : bool = false|}];;

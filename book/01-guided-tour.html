@@ -673,12 +673,13 @@
           duplicates:</p>
           <link rel="import" href="code/guided-tour/main.topscript" part="35"/>
 
-          <p>Again, the first arm of the match is the base case,
-          and the second is the inductive. Unfortunately, this code
-          has a problem, as is indicated by the warning message. In
-          particular, we don't handle one-element lists. We can fix
+          <p>Again, the first arm of the match is the base case, and
+          the second is the inductive case. Unfortunately, this code
+          has a problem, as indicated by the warning message. In
+          particular, it doesn't handle one-element lists. We can fix
           this warning by adding another case to the match:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="36"/>
+          <link rel="import" href="code/guided-tour/main.topscript"
+          part="36"/>
 
           <p>Note that this code used another variant of the list
           pattern, <code>[hd]</code>, to match a list with a single
@@ -701,11 +702,12 @@
       <section id="options" data-type="sect2">
         <h2>Options</h2>
 
-        <p>Another common data structure in OCaml is the option. An
-        option is used to express that a value might or might not
-        be present. For example:<idx>options</idx><idx>data
-        structures/options</idx></p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="37"/>
+        <p>Another common data structure in OCaml is
+        the <em>option</em>. An option is used to express that a value
+        might or might not be present. For
+        example:<idx>options</idx><idx>data
+        structures/options</idx></p> <link rel="import"
+        href="code/guided-tour/main.topscript" part="37"/>
 
         <p>The function <code>divide</code> either returns
         <code>None</code> if the divisor is zero, or
@@ -1076,7 +1078,7 @@
         short-circuiting:</p>
         <link rel="import" href="code/guided-tour/main.topscript" part="61"/>
 
-        <p>The Or operator, <code>||</code>, short-circuits in a
+        <p>The or operator, <code>||</code>, short-circuits in a
         similar way to <code>&amp;&amp;</code>.</p>
       </section>
     </section>
