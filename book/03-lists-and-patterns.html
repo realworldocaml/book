@@ -201,12 +201,9 @@
         the empty cell. With a <code>match</code> statement, this
         work happens exactly once per list element.</p>
 
-        <p>Generally, pattern matching is more efficient than the
-        alternatives you might code by hand. One notable exception
-        is matches over strings, which are in fact tested
-        sequentially, so matches containing a long sequence of
-        strings can be outperformed by a hash table. But most of
-        the time, pattern matching is a clear performance win.</p>
+        <p>This is a more general phenomena: pattern matching is very
+        efficient, and pattern matching code is usually a win over
+        what you might write by hand.</p>
       </section>
 
       <section id="detecting-errors" data-type="sect2">
