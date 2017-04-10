@@ -16,16 +16,17 @@
     of the language. This should provide a sense of what OCaml can
     do, without getting too deep into any one topic.</p>
 
-    <p>Throughout the book we're going to use
-    <code>Core_kernel</code>, a more full-featured and capable
-    replacement for OCaml's standard library. We'll also use
-    <span class="command"><em>utop</em></span>, a shell that lets
+    <p>Throughout the book we're going to
+    use <code>Core_kernel</code>, a more full-featured and capable
+    replacement for OCaml's standard library. We'll also
+    use <span class="command"><em>utop</em></span>, a shell that lets
     you type in expressions and evaluate them interactively.
-    <span class="command"><em>utop</em></span> is an easier-to-use
-    version of OCaml's standard toplevel (which you can start by
-    typing <em>ocaml</em> at the command line). These instructions
-    will assume you're using <span class="command"><em>utop</em></span>, but the ordinary toplevel
-    should mostly work fine.</p>
+      <span class="command"><em>utop</em></span> is an
+    easier-to-use version of OCaml's standard toplevel (which you can
+    start by typing <em>ocaml</em> at the command line). These
+    instructions will assume you're
+    using <span class="command"><em>utop</em></span>, but the ordinary
+    toplevel should mostly work fine.</p>
 
     <div data-type="note">
       <h1><code>Core</code>, <code>Core_kernel</code> and
@@ -39,14 +40,13 @@
       If you want your code to run on Windows or Javascript, you
       need to stick to <code>Core_kernel</code>.</p>
 
-      <p>You should check out <code>Core</code> if you'll be
-      running only on Unix. <code>Core</code> includes a lot of
-      useful functionality, including a set of time libraries, an
-      excellent command line parsing library, and modules that
-      provide access to low-level operating systems facilities from
-      mutexes to sockets. We'll discuss some of the additional
-      functionality provided by <code>Core</code> later in the
-      book.</p>
+      <p>You should check out <code>Core</code> if you'll be running
+      only on Unix. <code>Core</code> includes a lot of useful
+      functionality, including an excellent command line parsing
+      library and modules that provide access to low-level operating
+      systems facilities from mutexes to sockets. We'll discuss some
+      of the additional functionality provided by <code>Core</code>
+      later in the book.</p>
     </div>
 
     <p>Before getting started, make sure you have a working OCaml
@@ -316,35 +316,34 @@
         <p><code>first_if_true</code> takes as its arguments a
         function <code>test</code>, and two values, <code>x</code>
         and <code>y</code>, where <code>x</code> is to be returned
-        if <code>test x</code> evaluates to <code>true</code>, and
-        <code>y</code> otherwise. So what's the type of
-        <code>first_if_true</code>? There are no obvious clues such
-        as arithmetic operators or literals to tell you what the
-        type of <code>x</code> and <code>y</code> are. That makes
-        it seem like one could use <code>first_if_true</code> on
-        values of any type.</p>
+        if <code>test x</code> evaluates to <code>true</code>,
+        and <code>y</code> otherwise. So what's the type of
+        the <code>x</code> argument to <code>first_if_true</code>?
+        There are no obvious clues such as arithmetic operators or
+        literals to narrow it down. That makes it seem
+        like <code>first_if_true</code> would work on values of any
+        type.</p>
 
-        <p>Indeed, if we look at the type returned by the toplevel,
-        we see that rather than choose a single concrete type,
-        OCaml has introduced a <em>type variable</em>
-        <code>'a</code> to express that the type is generic. (You
-        can tell it's a type variable by the leading single quote
-        mark.) In particular, the type of the <code>test</code>
-        argument is <code>('a -&gt; bool)</code>, which means that
-        <code>test</code> is a one-argument function whose return
-        value is <code>bool</code> and whose argument could be of
-        any type <code>'a</code>. But, whatever type
-        <code>'a</code> is, it has to be the same as the type of
-        the other two arguments, <code>x</code> and <code>y</code>,
-        and of the return value of <code>first_if_true</code>. This
-        kind of genericity is called <em>parametric
-        polymorphism</em> because it works by parameterizing the
-        type in question with a type variable. It is very similar
-        to generics in C# and Java..<idx>parametric
+        <p>Indeed, if we look at the type returned by the toplevel, we
+        see that rather than choose a single concrete type, OCaml has
+        introduced a <em>type variable</em> <code>'a</code> to express
+        that the type is generic. (You can tell it's a type variable
+        by the leading single quote mark.) In particular, the type of
+        the <code>test</code> argument is <code>('a -&gt;
+        bool)</code>, which means that <code>test</code> is a
+        one-argument function whose return value is <code>bool</code>
+        and whose argument could be of any type <code>'a</code>. But,
+        whatever type <code>'a</code> is, it has to be the same as the
+        type of the other two arguments, <code>x</code>
+        and <code>y</code>, and of the return value
+        of <code>first_if_true</code>. This kind of genericity is
+        called <em>parametric polymorphism</em> because it works by
+        parameterizing the type in question with a type variable. It
+        is very similar to generics in C# and Java. <idx>parametric
         polymorphism</idx><idx>type variables</idx></p>
 
-        <p>The generic type of <code>first_if_true</code> allows us
-        to write this:</p>
+        <p>Because the type of <code>first_if_true</code> is generic,
+        we can write this:</p>
         <link rel="import" href="code/guided-tour/main.topscript" part="11"/>
 
         <p>As well as this:</p>
@@ -420,23 +419,25 @@
         structures/tuples</idx></p>
         <link rel="import" href="code/guided-tour/main.topscript" part="16"/>
 
-        <p>(For the mathematically inclined, the <code>*</code>
-        character is used because the set of all pairs of type
-        <code>t * s</code> corresponds to the Cartesian product of
-        the set of elements of type <code>t</code> and the set of
-        elements of type <code>s</code>.)</p>
+        <p>(For the mathematically inclined, <code>*</code>
+          is used in the type <code>t * s</code> because that type
+          corresponds to the set of all pairs containing one value of
+          type <code>t</code> and one of type <code>s</code>. In other
+          words, it's the <em>Cartesian product</em> of the two types,
+          which is why we use <code> * </code>, the symbol for
+          product.)</p>
 
         <p>You can extract the components of a tuple using OCaml's
         pattern-matching syntax, as shown below:</p>
         <link rel="import" href="code/guided-tour/main.topscript" part="17"/>
 
-        <p>Here, the <code>(x,y)</code> on the lefthand side of the
-        <code>let</code> binding is the pattern. This pattern lets
-        us mint the new variables <code>x</code> and
-        <code>y</code>, each bound to different components of the
-        value being matched. These can now be used in subsequent
-        expressions:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="18"/>
+        <p>Here, the <code>(x,y)</code> on the left-hand side of
+        the <code>let</code> binding is the pattern. This pattern lets
+        us mint the new variables <code>x</code> and <code>y</code>,
+        each bound to different components of the value being
+        matched. These can now be used in subsequent expressions:</p>
+        <link rel="import" href="code/guided-tour/main.topscript"
+        part="18"/>
 
         <p>Note that the same syntax is used both for constructing
         and for pattern matching on tuples.</p>
@@ -507,11 +508,12 @@
         <section id="constructing-lists-with" data-type="sect3">
           <h3>Constructing lists with ::</h3>
 
-          <p>In addition to constructing lists using brackets, we
-          can use the operator <code>::</code> for adding elements
+          <p>In addition to constructing lists using brackets, we can
+          use the list constructor <code>::</code> for adding elements
           to the front of a list:<idx>operators/: :
           operator</idx><idx>lists/operator : :</idx></p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="25"/>
+          <link rel="import" href="code/guided-tour/main.topscript"
+          part="25"/>
 
           <p>Here, we're creating a new and extended list, not
           changing the list we started with, as you can see
@@ -550,7 +552,7 @@
           that <code>::</code> is right-associative:</p>
           <link rel="import" href="code/guided-tour/main.topscript" part="29"/>
 
-          <p>The <code>::</code> operator can only be used for
+          <p>The <code>::</code> constructor can only be used for
           adding one element to the front of the list, with the
           list terminating at <code>[]</code>, the empty list.
           There's also a list concatenation operator,

@@ -393,10 +393,10 @@ type running_sum = {
 |}];;
 
 [@@@part "51"];;
-let mean rsum = rsum.sum /. float rsum.samples
+let mean rsum = rsum.sum /. Float.of_int rsum.samples
 let stdev rsum =
-  sqrt (rsum.sum_sq /. float rsum.samples
-        -. (rsum.sum /. float rsum.samples) ** 2.) ;;
+  sqrt (rsum.sum_sq /. Float.of_int rsum.samples
+        -. (rsum.sum /. Float.of_int rsum.samples) ** 2.) ;;
 [%%expect{|
 val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
