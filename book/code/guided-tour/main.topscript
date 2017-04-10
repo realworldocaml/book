@@ -7,10 +7,8 @@
 #camlp4o;;
 #require "core";;
 #require "core.syntax";;
-
 [@@@part "0.5"];;
 open Core_kernel;;
-
 [@@@part "1"];;
 3 + 4;;
 [%%expect{|- : int = 7|}];;
@@ -22,13 +20,11 @@ open Core_kernel;;
 [%%expect{|- : int = 100|}];;
 sqrt 9.;;
 [%%expect{|- : float = 3.|}];;
-
 [@@@part "2"];;
 let x = 3 + 4;;
 [%%expect{|val x : int = 7|}];;
 let y = x + x;;
 [%%expect{|val y : int = 14|}];;
-
 [@@@part "3"];;
 let x7 = 3 + 4;;
 [%%expect{|val x7 : int = 7|}];;
@@ -40,7 +36,6 @@ let _x' = x' + x';;
 [%%expect{|val _x' : int = 16|}];;
 _x';;
 [%%expect{|- : int = 16|}];;
-
 [@@@part "4"];;
 let Seven = 3 + 4;;
 [%%expect{|
@@ -57,7 +52,6 @@ let x-plus-y = x + y;;
 Characters 6-10:
 Error: Syntax error
 |}];;
-
 [@@@part "5"];;
 let square x = x * x ;;
 [%%expect{|val square : int -> int = <fun>|}];;
@@ -65,7 +59,6 @@ square 2;;
 [%%expect{|- : int = 4|}];;
 square (square 2);;
 [%%expect{|- : int = 16|}];;
-
 [@@@part "6"];;
 let ratio x y =
   Float.of_int x /. Float.of_int y
@@ -73,14 +66,12 @@ let ratio x y =
 [%%expect{|val ratio : int -> int -> float = <fun>|}];;
 ratio 4 7;;
 [%%expect{|- : float = 0.571428571428571397|}];;
-
 [@@@part "7"];;
 let sum_if_true test first second =
   (if test first then first else 0)
   + (if test second then second else 0)
 ;;
 [%%expect{|val sum_if_true : (int -> bool) -> int -> int -> int = <fun>|}];;
-
 [@@@part "8"];;
 let even x =
   x mod 2 = 0 ;;
@@ -89,32 +80,27 @@ sum_if_true even 3 4;;
 [%%expect{|- : int = 4|}];;
 sum_if_true even 2 4;;
 [%%expect{|- : int = 6|}];;
-
 [@@@part "9"];;
 let sum_if_true (test : int -> bool) (x : int) (y : int) : int =
   (if test x then x else 0)
   + (if test y then y else 0)
 ;;
 [%%expect{|val sum_if_true : (int -> bool) -> int -> int -> int = <fun>|}];;
-
 [@@@part "10"];;
 let first_if_true test x y =
   if test x then x else y
 ;;
 [%%expect{|val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>|}];;
-
 [@@@part "11"];;
 let long_string s = String.length s > 6;;
 [%%expect{|val long_string : string -> bool = <fun>|}];;
 first_if_true long_string "short" "loooooong";;
 [%%expect{|- : string = "loooooong"|}];;
-
 [@@@part "12"];;
 let big_number x = x > 3;;
 [%%expect{|val big_number : int -> bool = <fun>|}];;
 first_if_true big_number 4 3;;
 [%%expect{|- : int = 4|}];;
-
 [@@@part "13"];;
 first_if_true big_number "short" "loooooong";;
 [%%expect{|
@@ -122,7 +108,6 @@ Characters 25-32:
 Error: This expression has type string but an expression was expected of type
          int
 |}];;
-
 [@@@part "14"];;
 let add_potato x =
   x + "potato";;
@@ -131,7 +116,6 @@ Characters 25-33:
 Error: This expression has type string but an expression was expected of type
          int
 |}];;
-
 [@@@part "15"];;
 let is_a_multiple x y =
   x mod y = 0 ;;
@@ -140,34 +124,28 @@ is_a_multiple 8 2;;
 [%%expect{|- : bool = true|}];;
 is_a_multiple 8 0;;
 [%%expect{|Exception: Division_by_zero.|}];;
-
 [@@@part "16"];;
 let a_tuple = (3,"three");;
 [%%expect{|val a_tuple : int * string = (3, "three")|}];;
 let another_tuple = (3,"four",5.);;
 [%%expect{|val another_tuple : int * string * float = (3, "four", 5.)|}];;
-
 [@@@part "17"];;
 let (x,y) = a_tuple;;
 [%%expect{|
 val x : int = 3
 val y : string = "three"
 |}];;
-
 [@@@part "18"];;
 x + String.length y;;
 [%%expect{|- : int = 8|}];;
-
 [@@@part "19"];;
 let distance (x1,y1) (x2,y2) =
   sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
 ;;
 [%%expect{|val distance : float * float -> float * float -> float = <fun>|}];;
-
 [@@@part "20"];;
 let languages = ["OCaml";"Perl";"C"];;
 [%%expect{|val languages : string list = ["OCaml"; "Perl"; "C"]|}];;
-
 [@@@part "21"];;
 let numbers = [3;"four";5];;
 [%%expect{|
@@ -175,35 +153,27 @@ Characters 17-23:
 Error: This expression has type string but an expression was expected of type
          int
 |}];;
-
 [@@@part "22"];;
 List.length languages;;
 [%%expect{|- : int = 3|}];;
-
 [@@@part "23"];;
 List.map languages ~f:String.length;;
 [%%expect{|- : int list = [5; 4; 1]|}];;
-
 [@@@part "24"];;
 List.map ~f:String.length languages;;
 [%%expect{|- : int list = [5; 4; 1]|}];;
-
 [@@@part "25"];;
 "French" :: "Spanish" :: languages;;
 [%%expect{|- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]|}];;
-
 [@@@part "26"];;
 languages;;
 [%%expect{|- : string list = ["OCaml"; "Perl"; "C"]|}];;
-
 [@@@part "27"];;
 ["OCaml", "Perl", "C"];;
 [%%expect{|- : (string * string * string) list = [("OCaml", "Perl", "C")]|}];;
-
 [@@@part "28"];;
 1,2,3;;
 [%%expect{|- : int * int * int = (1, 2, 3)|}];;
-
 [@@@part "29"];;
 [1; 2; 3];;
 [%%expect{|- : int list = [1; 2; 3]|}];;
@@ -211,11 +181,9 @@ languages;;
 [%%expect{|- : int list = [1; 2; 3]|}];;
 1 :: 2 :: 3 :: [];;
 [%%expect{|- : int list = [1; 2; 3]|}];;
-
 [@@@part "30"];;
 [1;2;3] @ [4;5;6];;
 [%%expect{|- : int list = [1; 2; 3; 4; 5; 6]|}];;
-
 [@@@part "31"];;
 let my_favorite_language (my_favorite :: the_rest) =
   my_favorite
@@ -227,13 +195,11 @@ Here is an example of a case that is not matched:
 []
 val my_favorite_language : 'a list -> 'a = <fun>
 |}];;
-
 [@@@part "32"];;
 my_favorite_language ["English";"Spanish";"French"];;
 [%%expect{|- : string = "English"|}];;
 my_favorite_language [];;
 [%%expect{|Exception: Match_failure ("//toplevel//", 2, 25).|}];;
-
 [@@@part "33"];;
 let my_favorite_language languages =
   match languages with
@@ -245,7 +211,6 @@ my_favorite_language ["English";"Spanish";"French"];;
 [%%expect{|- : string = "English"|}];;
 my_favorite_language [];;
 [%%expect{|- : string = "OCaml"|}];;
-
 [@@@part "34"];;
 let rec sum l =
   match l with
@@ -255,41 +220,37 @@ let rec sum l =
 [%%expect{|val sum : int list -> int = <fun>|}];;
 sum [1;2;3];;
 [%%expect{|- : int = 6|}];;
-
 [@@@part "35"];;
-let rec destutter list =
+let rec remove_sequential_duplicates list =
   match list with
   | [] -> []
-  | hd1 :: hd2 :: tl ->
-    if hd1 = hd2 then destutter (hd2 :: tl)
-    else hd1 :: destutter (hd2 :: tl)
+  | first :: second :: tl ->
+    if first = second then remove_sequential_duplicates (second :: tl)
+    else first :: remove_sequential_duplicates (second :: tl)
 ;;
 [%%expect{|
-Characters 27-161:
+Characters 46-236:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
-val destutter : 'a list -> 'a list = <fun>
+val remove_sequential_duplicates : 'a list -> 'a list = <fun>
 |}];;
-
 [@@@part "36"];;
-let rec destutter list =
+let rec remove_sequential_duplicates list =
   match list with
   | [] -> []
   | [hd] -> [hd]
   | hd1 :: hd2 :: tl ->
-    if hd1 = hd2 then destutter (hd2 :: tl)
-    else hd1 :: destutter (hd2 :: tl)
+    if hd1 = hd2 then remove_sequential_duplicates (hd2 :: tl)
+    else hd1 :: remove_sequential_duplicates (hd2 :: tl)
 ;;
-[%%expect{|val destutter : 'a list -> 'a list = <fun>|}];;
-destutter ["hey";"hey";"hey";"man!"];;
+[%%expect{|val remove_sequential_duplicates : 'a list -> 'a list = <fun>|}];;
+remove_sequential_duplicates ["hey";"hey";"hey";"man!"];;
 [%%expect{|- : string list = ["hey"; "man!"]|}];;
-
 [@@@part "37"];;
 let divide x y =
   if y = 0 then None else Some (x/y) ;;
 [%%expect{|val divide : int -> int -> int option = <fun>|}];;
-
 [@@@part "38"];;
 let downcase_extension filename =
   match String.rsplit2 filename ~on:'.' with
@@ -302,29 +263,23 @@ List.map ~f:downcase_extension
   [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
 ;;
 [%%expect{|- : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]|}];;
-
 [@@@part "41"];;
 type point2d = { x : float; y : float };;
 [%%expect{|type point2d = { x : float; y : float; }|}];;
-
 [@@@part "42"];;
 let p = { x = 3.; y = -4. };;
 [%%expect{|val p : point2d = {x = 3.; y = -4.}|}];;
-
 [@@@part "43"];;
 let magnitude { x = x_pos; y = y_pos } =
   sqrt (x_pos ** 2. +. y_pos ** 2.);;
 [%%expect{|val magnitude : point2d -> float = <fun>|}];;
-
 [@@@part "44"];;
 let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
 [%%expect{|val magnitude : point2d -> float = <fun>|}];;
-
 [@@@part "45"];;
 let distance v1 v2 =
   magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
 [%%expect{|val distance : point2d -> point2d -> float = <fun>|}];;
-
 [@@@part "46"];;
 type circle_desc  = { center: point2d; radius: float };;
 [%%expect{|type circle_desc = { center : point2d; radius : float; }|}];;
@@ -332,7 +287,6 @@ type rect_desc    = { lower_left: point2d; width: float; height: float };;
 [%%expect{|type rect_desc = { lower_left : point2d; width : float; height : float; }|}];;
 type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
 [%%expect{|type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }|}];;
-
 [@@@part "47"];;
 type scene_element =
   | Circle  of circle_desc
@@ -345,7 +299,6 @@ type scene_element =
   | Rect of rect_desc
   | Segment of segment_desc
 |}];;
-
 [@@@part "48"];;
 let is_inside_scene_element point scene_element =
   match scene_element with
@@ -368,7 +321,6 @@ is_inside_scene {x=3.;y=7.}
 is_inside_scene {x=3.;y=7.}
   [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
 [%%expect{|- : bool = true|}];;
-
 [@@@part "49"];;
 let numbers = [| 1; 2; 3; 4 |];;
 [%%expect{|val numbers : int array = [|1; 2; 3; 4|]|}];;
@@ -376,7 +328,6 @@ numbers.(2) <- 4;;
 [%%expect{|- : unit = ()|}];;
 numbers;;
 [%%expect{|- : int array = [|1; 2; 4; 4|]|}];;
-
 [@@@part "50"];;
 type running_sum =
   { mutable sum: float;
@@ -391,7 +342,6 @@ type running_sum = {
   mutable samples : int;
 }
 |}];;
-
 [@@@part "51"];;
 let mean rsum = rsum.sum /. Float.of_int rsum.samples
 let stdev rsum =
@@ -401,7 +351,6 @@ let stdev rsum =
 val mean : running_sum -> float = <fun>
 val stdev : running_sum -> float = <fun>
 |}];;
-
 [@@@part "52"];;
 let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
 let update rsum x =
@@ -413,7 +362,6 @@ let update rsum x =
 val create : unit -> running_sum = <fun>
 val update : running_sum -> float -> unit = <fun>
 |}];;
-
 [@@@part "53"];;
 let rsum = create ();;
 [%%expect{|val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}|}];;
@@ -423,7 +371,6 @@ mean rsum;;
 [%%expect{|- : float = 1.33333333333333326|}];;
 stdev rsum;;
 [%%expect{|- : float = 3.94405318873307698|}];;
-
 [@@@part "54"];;
 let x = { contents = 0 };;
 [%%expect{|val x : int ref = {contents = 0}|}];;
@@ -431,7 +378,6 @@ x.contents <- x.contents + 1;;
 [%%expect{|- : unit = ()|}];;
 x;;
 [%%expect{|- : int ref = {contents = 1}|}];;
-
 [@@@part "55"];;
 let x = ref 0  (* create a ref, i.e., { contents = 0 } *) ;;
 [%%expect{|val x : int ref = {contents = 0}|}];;
@@ -441,7 +387,6 @@ x := !x + 1    (* assignment, i.e., x.contents <- ... *) ;;
 [%%expect{|- : unit = ()|}];;
 !x ;;
 [%%expect{|- : int = 1|}];;
-
 [@@@part "56"];;
 type 'a ref = { mutable contents : 'a };;
 [%%expect{|type 'a ref = { mutable contents : 'a; }|}];;
@@ -451,7 +396,6 @@ let (!) r = r.contents;;
 [%%expect{|val ( ! ) : 'a ref -> 'a = <fun>|}];;
 let (:=) r x = r.contents <- x;;
 [%%expect{|val ( := ) : 'a ref -> 'a -> unit = <fun>|}];;
-
 [@@@part "57"];;
 let sum list =
   let sum = ref 0 in
@@ -459,7 +403,6 @@ let sum list =
   !sum
 ;;
 [%%expect{|val sum : int list -> int = <fun>|}];;
-
 [@@@part "58"];;
 let permute array =
   let length = Array.length array in
@@ -473,7 +416,6 @@ let permute array =
   done
 ;;
 [%%expect{|val permute : 'a sexp_array -> unit = <fun>|}];;
-
 [@@@part "59"];;
 let ar = Array.init 20 ~f:(fun i -> i);;
 [%%expect{|val ar : int sexp_array = <abstr>|}];;
@@ -481,7 +423,6 @@ permute ar;;
 [%%expect{|- : unit = ()|}];;
 ar;;
 [%%expect{|- : int sexp_array = <abstr>|}];;
-
 [@@@part "60"];;
 let find_first_negative_entry array =
   let pos = ref 0 in
@@ -495,7 +436,6 @@ find_first_negative_entry [|1;2;0;3|];;
 [%%expect{|- : int option = None|}];;
 find_first_negative_entry [|1;-2;0;3|];;
 [%%expect{|- : int option = Some 1|}];;
-
 [@@@part "61"];;
 let find_first_negative_entry array =
   let pos = ref 0 in

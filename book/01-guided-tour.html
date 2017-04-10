@@ -601,14 +601,13 @@
           instead.</p>
 
           <p>A <code>match</code> statement is a kind of juiced-up
-          version of the <code>switch</code> statement found in C
-          and Java. It essentially lets you list a sequence of
-          patterns, separated by pipe characters (|). (The one
-          before the first case is optional.) The compiler then
-          dispatches to the code following the first matching
-          pattern. As we've already seen, the pattern can mint new
-          variables that correspond to substructures of the value
-          being matched.</p>
+          version of the <code>switch</code> statement found in C and
+          Java. It essentially lets you list a sequence of patterns,
+          separated by pipe characters. Note that the one before the
+          first case is optional. The compiler then dispatches to the
+          code following the first matching pattern. As we've already
+          seen, the pattern can mint new variables that correspond to
+          parts of the value being matched.</p>
 
           <p>Here's a new version of
           <code>my_favorite_language</code> that uses
@@ -636,17 +635,15 @@
         <section id="recursive-list-functions" data-type="sect3">
           <h3>Recursive list functions</h3>
 
-          <p>Recursive functions, or functions that call
-          themselves, are an important technique in OCaml and in
-          any functional language. The typical approach to
-          designing a recursive function is to separate the logic
-          into a set of <em>base cases</em> that can be solved
-          directly and a set of <em>inductive cases</em>, where the
-          function breaks the problem down into smaller pieces and
-          then calls itself to solve those smaller
-          problems.<idx>recursive functions/list
-          functions</idx><idx>lists/recursive list
-          functions</idx></p>
+          <p>Recursive functions, or functions that call themselves,
+          are an important part of working in OCaml or really any
+          functional language. The typical approach to designing a
+          recursive function is to separate the logic into a set
+          of <em>base cases</em> that can be solved directly and a set
+          of <em>inductive cases</em>, where the function breaks the
+          problem down into smaller pieces and then calls itself to
+          solve those smaller problems.<idx>recursive functions/list
+          functions</idx><idx>lists/recursive list functions</idx></p>
 
           <p>When writing recursive list functions, this separation
           between the base cases and the inductive cases is often
