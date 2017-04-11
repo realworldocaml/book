@@ -88,7 +88,7 @@
       definition of <code>languages</code>. But once the definition
       of <code>dashed_languages</code> is complete, the inner scope
       has closed and the original definition of languages
-      reappears:</p>
+      is still available:</p>
       <link rel="import" href="code/variables-and-functions/main.topscript" part="4"/>
 
       <p>One common idiom is to use a series of nested
@@ -117,7 +117,7 @@
       later use of <code>pi</code>, so the binding of <code>pi</code>
       to <code>0.</code> made no difference at all. This explains the
       warning produced by the toplevel telling us that there is an
-      unused definition of <code>pi</code>.</p>
+      unused variable.</p>
 
       <p>In OCaml, <code>let</code> bindings are immutable. There
       are many kinds of mutable values in OCaml, which we'll
@@ -151,14 +151,15 @@
       <section id="pattern-matching-and-let" data-type="sect2">
         <h2>Pattern Matching and let</h2>
 
-        <p>Another useful feature of <code>let</code> bindings is
-        that they support the use of <em>patterns</em> on the
-        lefthand side. Consider the following code, which uses
-        <code>List.unzip</code>, a function for converting a list
+        <p>Another useful feature of <code>let</code> bindings is that
+        they support the use of <em>patterns</em> on the left-hand
+        side. Consider the following code, which
+        uses <code>List.unzip</code>, a function for converting a list
         of pairs into a pair of lists:<idx>pattern matching/and
         let</idx><idx>let syntax/pattern
         matching</idx><idx>variables/pattern matching in</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="7"/>
+        <link rel="import"
+        href="code/variables-and-functions/main.topscript" part="7"/>
 
         <p>Here, <code>(ints,strings)</code> is a pattern, and
         the <code>let</code> binding assigns values to both of the

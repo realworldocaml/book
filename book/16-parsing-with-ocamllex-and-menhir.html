@@ -327,11 +327,11 @@
 	    The rule for <code>object_fields</code> follows, and is
             really just a thin wrapper that reverses the list returned
             by the following rule for <code>rev_object_fields</code>.
-            Note that the first production in
-            <code>rev_object_fields</code> has an empty lefthand side,
-            because what we're matching on in this case is an empty
-            sequence of tokens. The comment <code>(* empty *)</code> is
-            used to make this clear:
+            Note that the first production
+            in <code>rev_object_fields</code> has an empty left-hand
+            side, because what we're matching on in this case is an
+            empty sequence of tokens. The comment <code>(* empty
+            *)</code> is used to make this clear:
 
 	    <idx>rev_object_fields</idx>
 	    <idx>object_fields</idx></p>
@@ -509,7 +509,7 @@
           <p>
 	    The rules are structured very similarly to pattern
             matches, except that the variants are replaced by regular
-            expressions on the lefthand side. The righthand-side clause
+            expressions on the left-hand side. The righthand-side clause
             is the parsed OCaml return value of that rule. The OCaml
             code for the rules has a parameter called
             <code>lexbuf</code> that defines the input, including the
