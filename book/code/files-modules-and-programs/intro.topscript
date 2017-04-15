@@ -11,15 +11,12 @@
 open Core_kernel;;
 let assoc = [("one", 1); ("two",2); ("three",3)] ;;
 [%%expect{|val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]|}];;
-List.Assoc.find assoc "two" ;;
-[%%expect{|- : equal:(string -> string -> bool) -> int option = <fun>|}];;
-List.Assoc.add assoc "four" 4 (* add a new key *) ;;
+List.Assoc.find ~equal:String.equal assoc "two" ;;
+[%%expect{|- : int option = Some 2|}];;
+List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *) ;;
 [%%expect{|
-- : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =
-<fun>
+- : (string, int) Base__List.Assoc.t =
+[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
 |}];;
-List.Assoc.add assoc "two"  4 (* overwrite an existing key *) ;;
-[%%expect{|
-- : equal:(string -> string -> bool) -> (string, int) Base__List.Assoc.t =
-<fun>
-|}];;
+List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *) ;;
+[%%expect{|- : (string, int) Base__List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]|}];;
