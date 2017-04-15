@@ -78,19 +78,19 @@
 	<idx>main function</idx></p>
 
       <div class="allow_break" data-type="note">
-        <h1>Where Is the Main Function?</h1>
+        <h1>Where Is <code>main</code>?</h1>
 
-        <p>Unlike C, programs in OCaml do not have a unique
-        <code>main</code> function. When an OCaml program is
-        evaluated, all the statements in the implementation files
-        are evaluated in the order in which they were linked
+        <p>Unlike programs in C, Java or C#, programs in OCaml do not
+        have a unique <code>main</code> function. When an OCaml
+        program is evaluated, all the statements in the implementation
+        files are evaluated in the order in which they were linked
         together. These implementation files can contain arbitrary
-        expressions, not just function definitions. In this
-        example, the declaration starting with <code>let ()
-        =</code> plays the role of the <code>main</code> function,
-        kicking off the processing. But really the entire file is
-        evaluated at startup, and so in some sense the full
-        codebase is one big <code>main</code> function.</p>
+        expressions, not just function definitions. In this example,
+        the declaration starting with <code>let () =</code> plays the
+        role of the <code>main</code> function, kicking off the
+        processing. But really the entire file is evaluated at
+        startup, and so in some sense the full codebase is one
+        big <code>main</code> function.</p>
 
         <p>The idiom of writing <code>let () =</code> may seem a
         bit odd, but it has a purpose. The <code>let</code> binding

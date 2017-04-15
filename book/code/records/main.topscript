@@ -51,7 +51,7 @@ let parse_lines parse file_contents =
 [%%expect{|val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>|}];;
 [@@@part "4.1"];;
 parse_lines service_info_of_string
-  "rtmp              1/ddp    #Routing Table Maintenance Protocol\n\
+  "rtmp              1/ddp     # Routing Table Maintenance Protocol\n\
    tcpmux            1/udp     # TCP Port Service Multiplexer\n\
    tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
