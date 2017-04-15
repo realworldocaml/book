@@ -403,13 +403,13 @@
 
         <p>
 	  The pattern <code>[] | [_]</code> is itself a disjunction of
-          multiple patterns, otherwise known as an <em>or
-          pattern</em>. An or pattern matches as a whole if any of the
+          multiple patterns, otherwise known as
+          an <em>or-pattern</em>. An or-pattern matches if any of the
           sub-patterns match. In this case, <code>[]</code> matches
           the empty list, and <code>[_]</code> matches any single
           element list. The <code>_</code> is there so we don't have
-          to put an explicit name on that single element.<idx>or
-            patterns</idx></p>
+          to put an explicit name on that single
+          element.<idx>or-patterns</idx></p>
 
         <p>
 	  We can also define multiple mutually recursive values by
@@ -424,8 +424,7 @@
           (using <code>let</code>) and recursive definitions
           (using <code>let rec</code>) largely for technical reasons:
           the type-inference algorithm needs to know when a set of
-          function definitions are mutually recursive, and for reasons
-          that don't apply to a pure language like Haskell, these have
+          function definitions are mutually recursive, and these have
           to be marked explicitly by the programmer.
 	  
 	  <idx>let syntax/nonrecursive vs. recursive functions</idx></p>
@@ -471,13 +470,13 @@
         the name of that function is chosen from one of a
         specialized set of identifiers. This set includes
         identifiers that are sequences of characters from the
-        following set.</p>
+        following set:</p>
         <link rel="import" href="code/variables-and-functions/operators.syntax"/>
 
-        <p><code>or</code> is one of a handful of predetermined
-        strings, including <code>mod</code>, the modulus operator,
-        and <code>lsl</code>, for "logical shift left," a
-        bit-shifting operation.</p>
+        <p>or is one of a handful of predetermined strings,
+        including <code>mod</code>, the modulus operator,
+        and <code>lsl</code>, for "logical shift left," a bit-shifting
+        operation.</p>
 
         <p>We can define (or redefine) the meaning of an operator.
         Here's an example of a simple vector-addition operator on
@@ -665,17 +664,19 @@
         operators</idx></p>
         <link rel="import" href="code/variables-and-functions/main.topscript" part="32"/>
 
-        <p>Note that we can do this without <code>|&gt;</code>, but
-        the result is a bit more verbose.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="33"/>
+        <p>We can do this without <code>|&gt;</code> by naming the
+        intermediate values, but the result is a bit more verbose.</p>
+        <link rel="import"
+        href="code/variables-and-functions/main.topscript" part="33"/>
 
         <p>An important part of what's happening here is partial
-        application. For example, <code>List.iter</code> normally
-        takes two arguments: a function to be called on each
-        element of the list, and the list to iterate over. We can
-        call <code>List.iter</code> with all its arguments.
-        <idx>partial application</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="34"/>
+        application. For example, <code>List.iter</code> takes two
+        arguments: a function to be called on each element of the
+        list, and the list to iterate over. We can
+        call <code>List.iter</code> with all its
+        arguments.  <idx>partial application</idx></p>
+        <link rel="import"
+        href="code/variables-and-functions/main.topscript" part="34"/>
 
         <p>Or, we can pass it just the function argument, leaving
         us with a function for printing out a list of strings.</p>
@@ -736,17 +737,18 @@
         <h2>Labeled Arguments</h2>
 
         <p>Up until now, the functions we've defined have specified
-        their arguments positionally, <em>i.e.</em>, by the order
-        in which the arguments are passed to the function. OCaml
-        also supports labeled arguments, which let you identify a
-        function argument by name. Indeed, we've already
-        encountered functions from Core like <code>List.map</code>
-        that use labeled arguments. Labeled arguments are marked by
-        a leading tilde, and a label (followed by a colon) is put
-        in front of the variable to be labeled. Here's an
-        example.<idx>labeled arguments</idx><idx>arguments/labeled
+        their arguments positionally, <em>i.e.</em>, by the order in
+        which the arguments are passed to the function. OCaml also
+        supports labeled arguments, which let you identify a function
+        argument by name. Indeed, we've already encountered functions
+        from Core_kernel like <code>List.map</code> that use labeled
+        arguments. Labeled arguments are marked by a leading tilde,
+        and a label (followed by a colon) is put in front of the
+        variable to be labeled. Here's an example.<idx>labeled
+        arguments</idx><idx>arguments/labeled
         arguments</idx><idx>functions/labeled arguments</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="40"/>
+        <link rel="import"
+        href="code/variables-and-functions/main.topscript" part="40"/>
 
         <p>We can then provide a labeled argument using a similar
         convention. As you can see, the arguments can be provided

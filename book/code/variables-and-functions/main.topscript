@@ -211,8 +211,8 @@ Error: This expression has type int -> int
 let (|>) x f = f x ;;
 [%%expect{|val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
 [@@@part "32"];;
-let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;
-[%%expect{|val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin"|}];;
+let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
+[%%expect{|val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"|}];;
 String.split ~on:':' path
 |> List.dedup ~compare:String.compare
 |> List.iter ~f:print_endline

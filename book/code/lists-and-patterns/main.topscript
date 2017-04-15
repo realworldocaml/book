@@ -83,6 +83,9 @@ let plus_one_match x =
   | 0 -> 1
   | 1 -> 2
   | 2 -> 3
+  | 3 -> 4
+  | 4 -> 5
+  | 5 -> 6
   | _ -> x + 1
 ;;
 [%%expect{|val plus_one_match : int -> int = <fun>|}];;
@@ -90,6 +93,9 @@ let plus_one_if x =
   if      x = 0 then 1
   else if x = 1 then 2
   else if x = 2 then 3
+  else if x = 3 then 4
+  else if x = 4 then 5
+  else if x = 5 then 6
   else x + 1
 ;;
 [%%expect{|val plus_one_if : int -> int = <fun>|}];;
@@ -108,8 +114,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
-│ plus_one_match │  25.26ns │
-│ plus_one_if    │  33.48ns │
+│ plus_one_match │  25.44ns │
+│ plus_one_if    │  43.57ns │
 └────────────────┴──────────┘
 |}];;
 [@@@part "11"];;
@@ -130,8 +136,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
-│ sum_if │  54.04us │
-│ sum    │  13.60us │
+│ sum_if │  53.30us │
+│ sum    │  12.01us │
 └────────┴──────────┘
 |}];;
 [@@@part "13"];;
@@ -228,6 +234,7 @@ List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 [%%expect{|- : int list = [2; 4]|}];;
 [@@@part "30"];;
 module Sys = Core.Sys;;
+[%%expect{|module Sys = Core.Sys|}];;
 List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
     match String.rsplit2 ~on:'.' fname with
     | None  | Some ("",_) -> None
@@ -235,10 +242,7 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
 |> List.dedup
 ;;
-[%%expect{|
-Characters 17-27:
-Error: Unbound value Sys.ls_dir
-|}];;
+[%%expect{|- : string list = ["derived"; "shared"; "txt"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -249,8 +253,10 @@ let is_ocaml_source s =
 let (ml_files,other_files) =
   List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
 [%%expect{|
-Characters 50-60:
-Error: Unbound value Sys.ls_dir
+val ml_files : string list = []
+val other_files : string list =
+  [".depend"; "app"; "book"; "lib"; "Makefile"; "Makefile.derived";
+   "Makefile.shared"; "numbers.txt"; "OCamlMakefile"; "site"]
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
@@ -267,25 +273,19 @@ let rec ls_rec s =
   then [s]
   else
     Sys.ls_dir s
-    |> List.map ~f:(fun sub -> ls_rec (s ^/ sub))
+    |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
     |> List.concat
 ;;
-[%%expect{|
-Characters 24-39:
-Error: Unbound value Sys.is_file_exn
-|}];;
+[%%expect{|val ls_rec : string -> string list = <fun>|}];;
 [@@@part "36"];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
   then [s]
   else
     Sys.ls_dir s
-    |> List.concat_map ~f:(fun sub -> ls_rec (s ^/ sub))
+    |> List.concat_map ~f:(fun sub -> ls_rec (Filename.concat s sub))
 ;;
-[%%expect{|
-Characters 24-39:
-Error: Unbound value Sys.is_file_exn
-|}];;
+[%%expect{|val ls_rec : string -> string list = <fun>|}];;
 [@@@part "37"];;
 let rec length = function
   | [] -> 0
