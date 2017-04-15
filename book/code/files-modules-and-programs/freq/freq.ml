@@ -1,4 +1,4 @@
-open Core_kernel.Std
+open Core_kernel
 
 let build_counts () =
   In_channel.fold_lines stdin ~init:[] ~f:(fun counts line ->
