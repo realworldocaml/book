@@ -113,13 +113,9 @@ let service_info_to_string { service_name; port; protocol; comment } =
   let base = sprintf "%s %i/%s" service_name port protocol in
   match comment with
   | None -> base
-  | Some text -> base ^ " #" ^ comment
+  | Some text -> base ^ " #" ^ text
 ;;
-[%%expect{|
-Characters 202-209:
-Error: This expression has type string option
-       but an expression was expected of type string
-|}];;
+[%%expect{|val service_info_to_string : service_info -> string = <fun>|}];;
 [@@@part "10"];;
 let service_info_of_string line =
   (* first, split off any comment *)

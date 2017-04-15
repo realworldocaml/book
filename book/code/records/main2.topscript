@@ -82,6 +82,27 @@ let create_log_entry ~session_id ~important message =
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 |}];;
+[@@@part "19.1"];;
+let create_log_entry ~session_id ~important message : Log_entry.t =
+  { time = Time_ns.now (); session_id; important; message }
+;;
+[%%expect{|
+Characters 70-127:
+Warning 40: this record of type Log_entry.t contains fields that are 
+not visible in the current scope: time session_id important message.
+They will not be selected if the type becomes unknown.
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "19.2"];;
+#warnings "-40";;
+let create_log_entry ~session_id ~important message : Log_entry.t =
+  { time = Time_ns.now (); session_id; important; message }
+;;
+[%%expect{|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
 [@@@part "20"];;
 let message_to_string { Log_entry.important; message; _ } =
   if important then String.uppercase message else message
@@ -97,18 +118,6 @@ let message_to_string ({ important; message; _ } : Log_entry.t) =
   if important then String.uppercase message else message
 let is_important (t:Log_entry.t) = t.important ;;
 [%%expect{|
-Characters 70-127:
-Warning 40: this record of type Log_entry.t contains fields that are 
-not visible in the current scope: time session_id important message.
-They will not be selected if the type becomes unknown.
-Characters 151-176:
-Warning 40: this record of type Log_entry.t contains fields that are 
-not visible in the current scope: important message.
-They will not be selected if the type becomes unknown.
-Characters 289-298:
-Warning 40: important was selected from type Log_entry.t.
-It is not visible in the current scope, and will not 
-be selected if the type becomes unknown.
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 val message_to_string : Log_entry.t -> string = <fun>

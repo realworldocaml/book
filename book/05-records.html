@@ -300,6 +300,18 @@
       path and the field name:</p>
       <link rel="import" href="code/records/main2.topscript" part="19"/>
 
+      <p>Earlier, we saw that you could help OCaml understand which
+      record field was intended by adding a type annotation. Let's see
+      what happens if we try that here.</p>
+      <link rel="import" href="code/records/main2.topscript"
+	    part="19.1"/>
+
+      <p>This triggers warning 40, showing that a type annotation
+      causes the selection of an identifier in a diffuerent module. If
+      we disable warning 40, this definition goes through without
+      issue.</p>  
+      <link rel="import" href="code/records/main2.topscript" part="19.2"/>
+
       <p>This is not restricted to constructing a record; we can
       use the same trick when pattern matching:</p>
       <link rel="import" href="code/records/main2.topscript" part="20"/>
