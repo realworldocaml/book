@@ -441,17 +441,18 @@
 
       <p>Here, we wrote a small function <code>(fun x -&gt;
       x.Logon.user)</code> to access the <code>user</code> field.
-      This kind of accessor function is a common enough pattern
-      that it would be convenient to generate it automatically. The
-      <code>fieldslib</code> syntax extension that ships with
-      <code>Core</code> does just that.<idx>record field accessor
+      This kind of accessor function is a common enough pattern that
+      it would be convenient to generate it automatically.
+      The <code>ppx_fields_conv</code> syntax extension that ships
+      with <code>Core</code> does just that.<idx>record field accessor
       functions</idx></p>
 
-      <p>The <code>with fields</code> annotation at the end of the
-      declaration of a record type will cause the extension to be
-      applied to a given type declaration. So, for example, we
-      could have defined <code>Logon</code> as follows:</p>
-      <link rel="import" href="code/records/main2.topscript" part="29"/>
+      <p>The <code>[@@deriving fields]</code> annotation at the end of
+      the declaration of a record type will cause the extension to be
+      applied to a given type declaration. So, for example, we could
+      have defined <code>Logon</code> as follows:</p>
+      <link rel="import" href="code/records/main2.topscript"
+      part="29"/>
 
       <p>Note that this will generate <em>a lot</em> of output
       because <code>fieldslib</code> generates a large collection
