@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "0.5"];;
 Obj.is_block (Obj.repr (1,2,3)) ;;
 [%%expect{|- : bool = true|}];;

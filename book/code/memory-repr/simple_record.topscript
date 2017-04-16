@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "1"];;
 type t = { foo: int; bar: int } ;;
 [%%expect{|type t = { foo : int; bar : int; }|}];;

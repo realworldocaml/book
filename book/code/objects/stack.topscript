@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "1"];;
 open Core_kernel;;
 let s = object

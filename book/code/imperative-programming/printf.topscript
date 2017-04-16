@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 open Core_kernel;;
 [@@@part "1"];;
 printf "%i is an integer, %F is a float, \"%s\" is a string\n"

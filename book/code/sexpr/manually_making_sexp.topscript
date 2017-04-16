@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 open Core_kernel;;
 [@@@part "1"];;
 type t = { foo: int; bar: float } ;;

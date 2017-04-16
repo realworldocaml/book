@@ -6,7 +6,7 @@ use "topfind";;
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "0.5"];;
 open Core_kernel;;
 module M = struct let foo = 3 end;;
