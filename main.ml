@@ -13,7 +13,6 @@ type phrase = {
   startpos: position;
   endpos: position;
   parsed: (toplevel_phrase, exn) result;
-  code: string;
 }
 
 let toplevel_fname = "//toplevel//"
@@ -102,8 +101,7 @@ let parse_phrase (contents, lexbuf) =
       Error exn
   in
   let endpos = lexbuf.Lexing.lex_curr_p in
-  { startpos; endpos; parsed;
-    code = sub_file contents startpos.pos_cnum endpos.pos_cnum }
+  { startpos; endpos; parsed }
 
 (** *)
 
@@ -299,14 +297,22 @@ let rec valid_phrases = function
     is_whitespace outcome && valid_phrases rest
   | (_, Phrase_expect _) :: _ -> false
 
-let output_phrases oc =
+let phrase_code contents phrase rest =
+  let start = phrase.startpos.pos_cnum in
+  let stop = match rest with
+    | [] -> String.length contents
+    | (phrase', _) :: _ -> phrase'.startpos.pos_cnum
+  in
+  sub_file contents ~start ~stop
+
+let output_phrases oc contents =
   let rec aux = function
     | [] -> ()
     | (_, Phrase_part x) :: rest ->
       Printf.fprintf oc "[@@@part %S];;\n" x;
       aux rest
     | (phrase, Phrase_code outcome) :: rest ->
-      Printf.fprintf oc "%s\n" phrase.code;
+      Printf.fprintf oc "%s" (phrase_code contents phrase rest);
       if not (is_whitespace outcome) then
         Printf.fprintf oc "[%%%%expect{|%s|}];;\n" outcome;
       aux rest
@@ -314,31 +320,7 @@ let output_phrases oc =
       aux rest
   in aux
 
-(*module Chunk : sig
-  type t =
-    { ocaml_code        : string
-    ; toplevel_response : string
-    }
-  [@@deriving sexp]
-end
-
-module Part : sig
-  type t =
-    { name   : string
-    ; chunks : Chunk.t list
-    }
-  [@@deriving sexp]
-end
-
-module Document : sig
-  type t =
-    { parts   : Part.t list
-    ; matched : bool (** Whether the actual output matched the expectations *)
-    }
-  [@@deriving sexp]
-end*)
-
-let document_of_phrases matched phrases =
+let document_of_phrases contents matched phrases =
   let open Toplevel_expect_test_types in
   let rec parts_of_phrase part acc = function
     | (_, Phrase_part part') :: rest ->
@@ -346,7 +328,8 @@ let document_of_phrases matched phrases =
       parts_of_phrase part' [] rest
     | (_, Phrase_expect _) :: rest ->
       parts_of_phrase part acc rest
-    | ({code = ocaml_code; _}, Phrase_code toplevel_response) :: rest ->
+    | (phrase, Phrase_code toplevel_response) :: rest ->
+      let ocaml_code = phrase_code contents phrase rest in
       let chunk = {Chunk. ocaml_code; toplevel_response} in
       parts_of_phrase part (chunk :: acc) rest
     | [] ->
@@ -373,13 +356,13 @@ let process_expect_file ~fname ~use_color ~in_place ~sexp_output =
     Sys.remove oname;
   if not success then (
     let oc = open_out_bin (oname ^ ".tmp") in
-    output_phrases oc phrases;
+    output_phrases oc file_contents phrases;
     flush oc;
     close_out oc;
     Sys.rename (oname ^ ".tmp") oname
   );
   if sexp_output then (
-    document_of_phrases success phrases
+    document_of_phrases file_contents success phrases
     |> Toplevel_expect_test_types.Document.sexp_of_t
     |> Sexplib.Sexp.output stdout
   );
