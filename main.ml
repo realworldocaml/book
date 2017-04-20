@@ -297,13 +297,18 @@ let rec valid_phrases = function
     is_whitespace outcome && valid_phrases rest
   | (_, Phrase_expect _) :: _ -> false
 
-let phrase_code contents phrase rest =
+let phrase_code contents phrase =
   let start = phrase.startpos.pos_cnum in
+  let stop = phrase.endpos.pos_cnum in
+  sub_file contents ~start ~stop
+
+let phrase_whitespace contents phrase rest =
+  let start = phrase.endpos.pos_cnum in
   let stop = match rest with
     | [] -> String.length contents
     | (phrase', _) :: _ -> phrase'.startpos.pos_cnum
   in
-  sub_file contents ~start ~stop
+  String.sub contents start (stop - start)
 
 let output_phrases oc contents =
   let rec aux = function
@@ -311,10 +316,20 @@ let output_phrases oc contents =
     | (_, Phrase_part x) :: rest ->
       Printf.fprintf oc "[@@@part %S];;\n" x;
       aux rest
-    | (phrase, Phrase_code outcome) :: rest ->
-      Printf.fprintf oc "%s" (phrase_code contents phrase rest);
-      if not (is_whitespace outcome) then
-        Printf.fprintf oc "[%%%%expect{|%s|}];;\n" outcome;
+    | (phrase, Phrase_code expect_code) :: rest ->
+      let phrase_ws, expect_ws = match rest with
+        | (phrase_expect, Phrase_expect _) :: rest' ->
+          (phrase_whitespace contents phrase rest,
+           phrase_whitespace contents phrase_expect rest')
+        | _ ->
+          ("\n", phrase_whitespace contents phrase rest)
+      in
+      let phrase_code = phrase_code contents phrase in
+      if is_whitespace expect_code then
+        Printf.fprintf oc "%s%s" phrase_code expect_ws
+      else
+        Printf.fprintf oc "%s%s[%%%%expect{|%s|}];;%s"
+          phrase_code phrase_ws expect_code expect_ws;
       aux rest
     | (_, Phrase_expect _) :: rest ->
       aux rest
@@ -329,7 +344,7 @@ let document_of_phrases contents matched phrases =
     | (_, Phrase_expect _) :: rest ->
       parts_of_phrase part acc rest
     | (phrase, Phrase_code toplevel_response) :: rest ->
-      let ocaml_code = phrase_code contents phrase rest in
+      let ocaml_code = phrase_code contents phrase in
       let chunk = {Chunk. ocaml_code; toplevel_response} in
       parts_of_phrase part (chunk :: acc) rest
     | [] ->
