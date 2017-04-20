@@ -217,7 +217,7 @@ let cleanup_singleline str =
       String.sub str trim_from (x - trim_from)
     | _ -> str
 
-let eval_phrases ~fname fcontents =
+let eval_phrases ~fname ~dry_run fcontents =
   (* 4.03: Warnings.reset_fatal (); *)
   let buf = Buffer.create 1024 in
   let ppf = Format.formatter_of_buffer buf in
@@ -244,8 +244,29 @@ let eval_phrases ~fname fcontents =
       Buffer.clear buf;
       Phrase_code (cleanup_singleline s)
   in
+  let rec dry_exec phrases = function
+    | [] -> List.rev phrases
+    | (phrase, Phrase_code ()) :: rest ->
+      begin match rest with
+        | (_, Phrase_expect outcome) :: _ ->
+          dry_exec ((phrase, Phrase_code outcome) :: phrases) rest
+        | _ -> dry_exec ((phrase, Phrase_code "") :: phrases) rest
+      end
+    | (_, (Phrase_part _ | Phrase_expect _) as phrase) :: rest ->
+      dry_exec (phrase :: phrases) rest
+  in
   let parser = init_parser ~fname fcontents in
-  redirect ~f:(fun ~capture ->
+  if dry_run then  (
+    let phrases =
+      let rec aux phrases = match parse_phrase parser with
+        | exception End_of_file ->  List.rev phrases
+        | phrase -> aux ((phrase, phrase_role phrase) :: phrases)
+      in
+      aux []
+    in
+    dry_exec [] phrases
+  ) else (
+    redirect ~f:(fun ~capture ->
       capture_compiler_stuff ppf ~f:(fun () ->
           let rec aux chunks = match parse_phrase parser with
             | exception End_of_file ->  List.rev chunks
@@ -255,29 +276,9 @@ let eval_phrases ~fname fcontents =
           in
           aux []
         )
-    )
+      )
+  )
 ;;
-
-(*let rec chunks_of_phrases part = function
-  | [] -> []
-  | (p, Phrase_code outcome) :: (p', Phrase_expect expectation) :: rest ->
-    let phrases = match p.parsed with Ok p -> [p] | Error _ -> [] in
-    let t = { part; phrases; expectation; phrases_loc = phrase_loc p } in
-    t :: chunks_of_phrases part rest
-  | [(p, Phrase_part part)] ->
-    [{ part; phrases = []; expectation = assert false;
-       phrases_loc = phrase_loc p }]
-  | (_, Phrase_part part) :: rest ->
-    chunks_of_phrases part rest
-  | (p, Phrase_code outcome) :: rest ->
-    let phrases = match p.parsed with Ok p -> [p] | Error _ -> [] in
-    let t = { part; phrases; phrases_loc = phrase_loc p;
-              expectation = no_expectation } in
-    t :: chunks_of_phrases part rest
-  | (p, Phrase_expect expectation) :: rest ->
-    let t = { part; phrases = []; expectation; phrases_loc = phrase_loc p } in
-    t :: chunks_of_phrases part rest
-*)
 
 let is_whitespace str =
   try for i = 0 to String.length str - 1 do
@@ -356,7 +357,7 @@ let document_of_phrases contents matched phrases =
   let parts = parts_of_phrase "" [] phrases in
   { Document. matched; parts }
 
-let process_expect_file ~fname ~use_color ~in_place ~sexp_output =
+let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
   let file_contents =
     let ic = open_in fname in
     let len = in_channel_length ic in
@@ -364,7 +365,7 @@ let process_expect_file ~fname ~use_color ~in_place ~sexp_output =
     close_in_noerr ic;
     result
   in
-  let phrases = eval_phrases ~fname file_contents in
+  let phrases = eval_phrases ~fname ~dry_run file_contents in
   let success = valid_phrases phrases in
   let oname = if in_place then fname else fname ^ ".corrected" in
   if success && not in_place && Sys.file_exists oname then
@@ -395,6 +396,7 @@ let override_sys_argv args =
 let use_color   = ref true
 let in_place    = ref false
 let sexp_output = ref false
+let dry_run     = ref false
 
 let process_file fname =
   let cmd_line =
@@ -406,8 +408,9 @@ let process_file fname =
   Toploop.toplevel_env := Compmisc.initial_env ();
   Sys.interactive := false;
   let success =
-    process_expect_file ~fname ~use_color:!use_color ~in_place:!in_place
-      ~sexp_output:!sexp_output
+    process_expect_file ~fname
+    ~dry_run:!dry_run ~use_color:!use_color
+    ~in_place:!in_place ~sexp_output:!sexp_output
   in
   exit (if success then 0 else 1)
 ;;
@@ -417,6 +420,7 @@ let args =
     [ "-in-place", Arg.Set in_place,    " Overwrite file in place"
     ; "-sexp"    , Arg.Set sexp_output, " Output the result as a s-expression instead of diffing"
     ; "-verbose" , Arg.Set verbose, " Include outcome of phrase evaluation (like ocaml toplevel)"
+    ; "-dry-run" , Arg.Set dry_run, " Don't execute code, only return expected outcome"
     ]
 
 let print_version () =
@@ -496,7 +500,8 @@ let main () =
       (Filename.basename Sys.argv.(0))
   in
   try
-    Arg.parse (args @ Options.list) process_file (usage ^ "\nOptions are:");
+    let args = Arg.align (args @ Options.list) in
+    Arg.parse args process_file (usage ^ "\nOptions are:");
     prerr_endline usage;
     exit 2
   with exn ->
