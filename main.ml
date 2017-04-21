@@ -144,6 +144,78 @@ let () = Hashtbl.add Toploop.directive_table "verbose"
     (Toploop.Directive_bool (fun x -> verbose := x))
 ;;
 
+module Async_autorun = struct
+  (* Inspired by Utop auto run rewriter *)
+  let (async_typ, async_runner, async_rewrite) =
+    let typ = Longident.parse "Async.Std.Deferred.t" in
+    let runner = Longident.parse "Async.Std.Thread_safe.block_on_async_exn" in
+    let open Ast_helper in
+    let rewrite loc e =
+      let punit =
+        Pat.construct (Location.mkloc (Longident.Lident "()") loc) None in
+      with_default_loc loc @@ fun () ->
+      Exp.apply
+        (Exp.ident (Location.mkloc runner loc))
+        [(Asttypes.Nolabel, Exp.fun_ Asttypes.Nolabel None punit e)]
+    in
+    (typ, runner, rewrite)
+
+  let rec normalize_type_path env path =
+    match Env.find_type path env with
+    | { Types.type_manifest = Some ty; _ } -> begin
+        match Ctype.expand_head env ty with
+        | { Types.desc = Types.Tconstr (path, _, _) } -> path
+        | _ -> path
+      end
+    | _ -> path
+
+  let is_persistent_value env longident =
+    let rec is_persistent_path = function
+      | Path.Pident id -> Ident.persistent id
+      | Path.Pdot (p, _, _) -> is_persistent_path p
+      | Path.Papply (_, p) -> is_persistent_path p
+    in
+    try is_persistent_path (fst (Env.lookup_value longident env))
+    with Not_found -> false
+
+  let rewrite_item env async_typ pstr_item tstr_item =
+    match pstr_item.Parsetree.pstr_desc, tstr_item.Typedtree.str_desc with
+    | (Parsetree.Pstr_eval (e, _),
+       Typedtree.Tstr_eval ({ Typedtree.exp_type = typ }, _)) ->
+      begin match (Ctype.repr typ).Types.desc with
+        | Types.Tconstr (path, _, _) when
+            Path.same async_typ (normalize_type_path env path) ->
+          let loc = pstr_item.Parsetree.pstr_loc in
+          { Parsetree.pstr_desc = Parsetree.Pstr_eval (async_rewrite loc e, []);
+            Parsetree.pstr_loc = loc }
+        | _ -> pstr_item
+      end
+    | _ -> pstr_item
+
+  let rewrite_phrase =
+    let is_eval = function
+      | { pstr_desc = Pstr_eval _; _ } -> true
+      | _ -> false
+    in
+    function
+    | Ptop_def pstr when is_persistent_value !Toploop.toplevel_env async_runner
+                      && List.exists is_eval pstr ->
+      let snap = Btype.snapshot () in
+      let pstr =
+        try
+          let env = !Toploop.toplevel_env in
+          let path = normalize_type_path env (Env.lookup_type async_typ env) in
+          let tstr, tsg, env =
+            Typemod.type_structure !Toploop.toplevel_env pstr Location.none in
+          List.map2 (rewrite_item env path) pstr tstr.Typedtree.str_items
+        with _ ->
+          pstr
+      in
+      Btype.backtrack snap;
+      Ptop_def pstr
+    | phrase -> phrase
+end
+
 let toplevel_exec_phrase ppf = function
   | { parsed = Error exn; _} -> raise exn
   | { parsed = Ok phrase; startpos; _} ->
@@ -156,6 +228,7 @@ let toplevel_exec_phrase ppf = function
       | Ptop_dir _ as x -> x
       | Ptop_def s -> Ptop_def (Pparse.apply_rewriters_str ~tool_name:"expect" s)
     in
+    let phrase = Async_autorun.rewrite_phrase phrase in
     if !Clflags.dump_parsetree then Printast. top_phrase ppf phrase;
     if !Clflags.dump_source    then Pprintast.top_phrase ppf phrase;
     Toploop.execute_phrase !verbose ppf phrase
