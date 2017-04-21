@@ -64,23 +64,6 @@ let init_parser ~fname contents =
   Location.input_name := fname;
   (contents, lexbuf)
 
-(* Take a part of a file, trimming spaces at the beginning as well as ';;' *)
-let sub_file file_contents ~start ~stop =
-  let rec loop start =
-    if start >= stop then
-      start
-    else
-      match file_contents.[start] with
-      | ' ' | '\t' | '\n' -> loop (start + 1)
-      | ';' when start + 1 < stop && file_contents.[start+1] = ';' ->
-        loop (start + 2)
-      | _ -> start
-  in
-  let start = loop start in
-  String.sub file_contents start (stop - start)
-;;
-
-
 let parse_phrase (contents, lexbuf) =
   let open Lexing in
   let startpos = lexbuf.Lexing.lex_curr_p in
@@ -371,16 +354,29 @@ let rec valid_phrases = function
     is_whitespace outcome && valid_phrases rest
   | (_, Phrase_expect _) :: _ -> false
 
+(* Skip spaces as well as ';;' *)
+let skip_whitespace contents ?(stop=String.length contents) start =
+  let rec loop start =
+    if start >= stop then start else
+      match contents.[start] with
+      | ' ' | '\t' | '\n' -> loop (start + 1)
+      | ';' when start + 1 < stop && contents.[start+1] = ';' ->
+        loop (start + 2)
+      | _ -> start
+  in
+  loop start
+
 let phrase_code contents phrase =
-  let start = phrase.startpos.pos_cnum in
   let stop = phrase.endpos.pos_cnum in
-  sub_file contents ~start ~stop
+  let start = skip_whitespace contents ~stop phrase.startpos.pos_cnum in
+  String.sub contents start (stop - start)
 
 let phrase_whitespace contents phrase rest =
   let start = phrase.endpos.pos_cnum in
   let stop = match rest with
     | [] -> String.length contents
-    | (phrase', _) :: _ -> phrase'.startpos.pos_cnum
+    | (phrase', _) :: _ ->
+      skip_whitespace contents phrase'.startpos.pos_cnum
   in
   String.sub contents start (stop - start)
 
