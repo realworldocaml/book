@@ -181,8 +181,9 @@ module Async_autorun = struct
       | _ -> false
     in
     function
-    | Ptop_def pstr when is_persistent_value !Toploop.toplevel_env async_runner
-                      && List.exists is_eval pstr ->
+    | Ptop_def pstr when List.exists is_eval pstr
+                      && is_persistent_value !Toploop.toplevel_env async_runner ->
+      Env.reset_cache_toplevel ();
       let snap = Btype.snapshot () in
       let pstr =
         try
@@ -202,6 +203,7 @@ end
 let toplevel_exec_phrase ppf = function
   | { parsed = Error exn; _} -> raise exn
   | { parsed = Ok phrase; startpos; _} ->
+    Warnings.reset_fatal ();
     let mapper = position_mapper {startpos with pos_fname = toplevel_fname} in
     let phrase = match phrase with
       | Ptop_def str -> Ptop_def (mapper.Ast_mapper.structure mapper str)
@@ -214,6 +216,7 @@ let toplevel_exec_phrase ppf = function
     let phrase = Async_autorun.rewrite_phrase phrase in
     if !Clflags.dump_parsetree then Printast. top_phrase ppf phrase;
     if !Clflags.dump_source    then Pprintast.top_phrase ppf phrase;
+    Env.reset_cache_toplevel ();
     Toploop.execute_phrase !verbose ppf phrase
 ;;
 
@@ -561,9 +564,32 @@ module Options = Main_args.Make_bytetop_options (struct
     let anonymous s = process_file s
   end);;
 
+(* BLACK MAGIC: patch field of a module at runtime *)
+let monkey_patch (type a) (type b) (m: a) (prj: unit -> b) (v : b) =
+  let m = Obj.repr m in
+  let v = Obj.repr v in
+  let v' = Obj.repr (prj ()) in
+  if v' == v then () else (
+    try
+      for i = 0 to Obj.size m - 1 do
+        if Obj.field m i == v' then (
+          Obj.set_field m i v;
+          if Obj.repr (prj ()) == v then raise Exit;
+          Obj.set_field m i v';
+        )
+      done;
+      invalid_arg "monkey_patch: field not found"
+    with Exit -> ()
+  )
 
 
 let main () =
+  let module M = struct
+    module type T = module type of Env
+    let field () = Env.without_cmis
+    let replacement f x = f x
+    let () = monkey_patch (module Env : T) field replacement
+  end in
   let usage =
     Printf.sprintf "Usage: %s [OPTIONS] FILE [ARGS]\n"
       (Filename.basename Sys.argv.(0))
