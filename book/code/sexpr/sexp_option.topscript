@@ -10,31 +10,43 @@
 open Core_kernel;;
 [@@@part "0.5"];;
 type t = { a: int option; b: string } [@@deriving sexp] ;;
-[%%expect{|type t = { a : int option; b : string; }|}];;
+[%%expect{|
+type t = { a : int option; b : string; }
+val t_of_sexp : Sexplib.Type.t -> t = <fun>
+val sexp_of_t : t -> Sexplib.Type.t = <fun>
+|}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_mat or sexp_of_int?
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.List []];
+  Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;
 sexp_of_t { a = Some 3; b = "hello" } ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_mat or sexp_of_int?
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.List
+   [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.List [Sexplib.Sexp.Atom "3"]];
+  Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;
 [@@@part "1"];;
 type t = { a: int sexp_option; b: string } [@@deriving sexp] ;;
-[%%expect{|type t = { a : int option; b : string; }|}];;
+[%%expect{|
+type t = { a : int option; b : string; }
+val t_of_sexp : Sexplib.Type.t -> t = <fun>
+val sexp_of_t : t -> Sexplib.Type.t = <fun>
+|}];;
 sexp_of_t { a = Some 3; b = "hello" } ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_mat or sexp_of_int?
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "3"];
+  Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_mat or sexp_of_int?
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;

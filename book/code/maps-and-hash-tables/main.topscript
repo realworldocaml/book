@@ -192,11 +192,8 @@ end = struct
   include Comparable.Make(T)
 end;;
 [%%expect{|
-Characters 376-377:
-Error: Signature mismatch:
-       ...
-       The value `sexp_of_t' is required but not provided
-       The value `t_of_sexp' is required but not provided
+Characters 145-203:
+Error: Unbound value Sexplib.Conv.record_check_extra_fields
 |}];;
 
 [@@@part "23"];;
@@ -211,12 +208,8 @@ end = struct
   include Comparable.Make(T)
 end;;
 [%%expect{|
-Characters 257-258:
-Error: Signature mismatch:
-       ...
-       The value `compare' is required but not provided
-       The value `sexp_of_t' is required but not provided
-       The value `t_of_sexp' is required but not provided
+Characters 145-212:
+Error: Unbound value Sexplib.Conv.record_check_extra_fields
 |}];;
 
 [@@@part "24"];;
@@ -231,11 +224,8 @@ end = struct
   include Comparable.Poly(T)
 end;;
 [%%expect{|
-Characters 236-237:
-Error: Signature mismatch:
-       ...
-       The value `sexp_of_t' is required but not provided
-       The value `t_of_sexp' is required but not provided
+Characters 139-191:
+Error: Unbound value Sexplib.Conv.record_check_extra_fields
 |}];;
 
 [@@@part "25"];;
@@ -282,10 +272,6 @@ end = struct
   include Hashable.Make(T)
 end;;
 [%%expect{|
-Characters 306-307:
-Error: Signature mismatch:
-       ...
-       The value `compare' is required but not provided
-       The value `sexp_of_t' is required but not provided
-       The value `t_of_sexp' is required but not provided
+Characters 137-198:
+Error: Unbound value Sexplib.Conv.record_check_extra_fields
 |}];;

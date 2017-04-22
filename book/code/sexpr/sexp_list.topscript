@@ -12,21 +12,38 @@ open Core_kernel;;
 type compatible_versions =
   | Specific of string list
   | All [@@deriving sexp] ;;
-[%%expect{|type compatible_versions = Specific of string list | All|}];;
+[%%expect{|
+type compatible_versions = Specific of string list | All
+val compatible_versions_of_sexp : Sexplib.Type.t -> compatible_versions =
+  <fun>
+val sexp_of_compatible_versions : compatible_versions -> Sexplib.Type.t =
+  <fun>
+|}];;
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 [%%expect{|
-Characters 0-27:
-Error: Unbound value sexp_of_compatible_versions
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.Atom "Specific";
+  Sexplib.Sexp.List
+   [Sexplib.Sexp.Atom "3.12.0"; Sexplib.Sexp.Atom "3.12.1";
+    Sexplib.Sexp.Atom "3.13.0"]]
 |}];;
 [@@@part "1"];;
 type compatible_versions =
   | Specific of string sexp_list
   | All [@@deriving sexp] ;;
-[%%expect{|type compatible_versions = Specific of string list | All|}];;
+[%%expect{|
+Characters 0-85:
+Error: Unbound value Sexplib.Conv.list_map
+|}];;
 sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
 [%%expect{|
-Characters 0-27:
-Error: Unbound value sexp_of_compatible_versions
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.Atom "Specific";
+  Sexplib.Sexp.List
+   [Sexplib.Sexp.Atom "3.12.0"; Sexplib.Sexp.Atom "3.12.1";
+    Sexplib.Sexp.Atom "3.13.0"]]
 |}];;

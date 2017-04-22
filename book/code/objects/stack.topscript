@@ -64,5 +64,5 @@ end ;;
 print_pop t ;;
 [%%expect{|
 - : unit = ()
-Popped: 1491764651762608000
+Popped: 1492823668766055000
 |}];;

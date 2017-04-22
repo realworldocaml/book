@@ -16,6 +16,7 @@ List.iter l ~f:(fun x ->
   |> Sexp.to_string
   |> print_endline) ;;
 [%%expect{|
-Characters 29-36:
-Error: Uninterpreted extension 'sexp_of'.
+- : unit = ()
+(1 one)
+(2 two)
 |}];;

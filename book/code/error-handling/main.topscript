@@ -55,22 +55,24 @@ Error.create "Unexpected character" 'z' Char.sexp_of_t;;
 [@@@part "8"];;
 let custom_to_sexp = [%sexp_of: float * string list * int];;
 [%%expect{|
-Characters 23-30:
-Error: Uninterpreted extension 'sexp_of'.
+val custom_to_sexp :
+  Core_kernel__Import.float * Core_kernel__Import.string sexp_list *
+  Core_kernel__Import.int -> Sexplib.Type.t = <fun>
 |}];;
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 [%%expect{|
-Characters 0-14:
-Error: Unbound value custom_to_sexp
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.Atom "3.5";
+  Sexplib.Sexp.List
+   [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "c"];
+  Sexplib.Sexp.Atom "6034"]
 |}];;
 [@@@part "9"];;
 Error.create "Something went terribly wrong"
   (3.5, ["a";"b";"c"], 6034)
   [%sexp_of: float * string list * int] ;;
-[%%expect{|
-Characters 78-85:
-Error: Uninterpreted extension 'sexp_of'.
-|}];;
+[%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "10"];;
 Error.tag
   (Error.of_list [ Error.of_string "Your tires were slashed";
@@ -170,9 +172,15 @@ Crossed_bounds { lower=10; upper=0 };;
 [%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "24"];;
 type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
-[%%expect{|type 'a bounds = { lower : 'a; upper : 'a; }|}];;
+[%%expect{|
+Characters 0-59:
+Error: Unbound value Sexplib.Conv.record_check_extra_fields
+|}];;
 exception Crossed_bounds of int bounds [@@deriving sexp];;
-[%%expect{|exception Crossed_bounds of int bounds|}];;
+[%%expect{|
+Characters 10-24:
+Error: Unbound module Sexplib.Conv.Exn_converter
+|}];;
 Crossed_bounds { lower=10; upper=0 };;
 [%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "25"];;

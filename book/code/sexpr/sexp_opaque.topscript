@@ -12,35 +12,50 @@ open Core_kernel;;
 type no_converter = int * int ;;
 [%%expect{|type no_converter = int * int|}];;
 type t = { a: no_converter; b: string } [@@deriving sexp] ;;
-[%%expect{|type t = { a : no_converter; b : string; }|}];;
+[%%expect{|
+Characters 14-26:
+Error: Unbound value no_converter_of_sexp
+|}];;
 [@@@part "1"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
-[%%expect{|type t = { a : no_converter; b : string; }|}];;
+[%%expect{|
+type t = { a : no_converter; b : string; }
+val t_of_sexp : Sexplib.Type.t -> t = <fun>
+val sexp_of_t : t -> Sexplib.Type.t = <fun>
+|}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value sexp_of_t
-Hint: Did you mean sexp_of_mat or sexp_of_int?
+- : Sexplib.Type.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "<opaque>"];
+  Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "foo"]]
 |}];;
 [@@@part "3"];;
 t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value t_of_sexp
-Hint: Did you mean mat_of_sexp or int_of_sexp?
+Exception:
+Base__Sexp.Of_sexp_error
+ (Failure "opaque_of_sexp: cannot convert opaque values",
+ Base__Sexp.Atom "whatever").
 |}];;
 [@@@part "4"];;
 type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;
-[%%expect{|type t = { a : no_converter list; b : string; }|}];;
-t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value t_of_sexp
-Hint: Did you mean mat_of_sexp or int_of_sexp?
+type t = { a : no_converter list; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 |}];;
+t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
+[%%expect{|- : t = {a = []; b = "foo"}|}];;
 [@@@part "5"];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp_of] ;;
-[%%expect{|type t = { a : no_converter; b : string; }|}];;
+[%%expect{|
+type t = { a : no_converter; b : string; }
+val sexp_of_t : t -> Sexp.t = <fun>
+|}];;
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving of_sexp] ;;
-[%%expect{|type t = { a : no_converter; b : string; }|}];;
+[%%expect{|
+type t = { a : no_converter; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+|}];;
