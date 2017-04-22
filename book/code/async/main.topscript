@@ -1,6 +1,5 @@
 #use "topfind";;
 #thread;;
-#camlp4o;;
 #require "core";;
 #require "ppx_jane";;
 
@@ -329,7 +328,7 @@ blow_up ();;
 
 [%%expect];;
 [@@@part "35"];;
-let swallow_error () =
+(*let swallow_error () =
   let monitor = Monitor.create () in
   Stream.iter (Monitor.detach_and_get_error_stream monitor)
     ~f:(fun _exn -> printf "an error happened\n");
@@ -337,13 +336,13 @@ let swallow_error () =
     after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
 ;;
 
-swallow_error ();;
+swallow_error ();;*)
 
 
 
 [%%expect];;
 [@@@part "36"];;
-exception Ignore_me;;
+(*exception Ignore_me;;
 
 let swallow_some_errors exn_to_raise =
   let child_monitor  = Monitor.create  () in
@@ -356,7 +355,7 @@ let swallow_some_errors exn_to_raise =
   within' ~monitor:child_monitor (fun () ->
     after (Time.Span.of_sec 0.5)
     >>= fun () -> raise exn_to_raise)
-;;
+;;*)
 
 
 [%%expect];;
