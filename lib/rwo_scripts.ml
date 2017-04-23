@@ -178,11 +178,11 @@ let eval_script lang ~filename =
       >>|? fun script -> `OCaml_rawtoplevel script
     )
   | "topscript" -> (
-      if String.is_suffix filename ~suffix:"async/main.topscript" then (
+      (*if String.is_suffix filename ~suffix:"async/main.topscript" then (
         Expect.Raw_script.of_file ~filename
         >>|? fun script -> `OCaml_rawtoplevel script
-      )
-      else (
+      ) else*)
+      (
         Expect.Document.of_file ~filename
         >>=? fun doc ->
         let corrected_built_filename =
