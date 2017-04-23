@@ -1,60 +1,82 @@
 #use "topfind";;
+[%%expect{|
+- : unit = ()
+- : unit = ()
+|}];;
 #thread;;
 #require "core";;
 #require "ppx_jane";;
-
-[%%expect];;
 [@@@part "1"];;
 open Core;;
 In_channel.read_all;;
+[%%expect{|- : string -> string = <fun>|}];;
 
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
+[%%expect{|- : unit = ()|}];;
 
 In_channel.read_all "test.txt";;
 
-[%%expect];;
+[%%expect{|- : string = "This is only a test."|}];;
 [@@@part "3"];;
 #require "async";;
 open Async;;
 Reader.file_contents;;
 
 
-[%%expect];;
+[%%expect{|- : string -> string Deferred.t = <fun>|}];;
 [@@@part "4"];;
 let contents = Reader.file_contents "test.txt";;
+[%%expect{|val contents : string Deferred.t = <abstr>|}];;
 
 Deferred.peek contents;;
 
 
-[%%expect];;
+[%%expect{|- : string option = None|}];;
 [@@@part "5"];;
 contents;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 0-8:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string = "This is only a test."
+|}];;
 [@@@part "6"];;
 Deferred.peek contents;;
 
 
-[%%expect];;
+[%%expect{|- : string option = Some "This is only a test."|}];;
 [@@@part "7"];;
 Deferred.bind ;;
 
 
-[%%expect];;
+[%%expect{|- : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>|}];;
 [@@@part "8"];;
 let uppercase_file filename =
   Deferred.bind (Reader.file_contents filename)
     (fun text ->
        Writer.save filename ~contents:(String.uppercase text))
 ;;
+[%%expect{|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
 
 uppercase_file "test.txt";;
+[%%expect{|
+Characters 1-26:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+|}];;
 
 Reader.file_contents "test.txt";;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-32:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string = "THIS IS ONLY A TEST."
+|}];;
 [@@@part "9"];;
 let uppercase_file filename =
   Reader.file_contents filename
@@ -63,7 +85,7 @@ let uppercase_file filename =
 ;;
 
 
-[%%expect];;
+[%%expect{|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
 [@@@part "10"];;
 let count_lines filename =
   Reader.file_contents filename
@@ -74,16 +96,27 @@ let count_lines filename =
 
 
 
-[%%expect];;
+[%%expect{|
+Characters 79-119:
+Error: This expression has type int but an expression was expected of type
+         'a Deferred.t
+|}];;
 [@@@part "11"];;
 return;;
+[%%expect{|- : 'a -> 'a Deferred.t = <fun>|}];;
 
 let three = return 3;;
+[%%expect{|val three : int Deferred.t = <abstr>|}];;
 
 three;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-6:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : int = 3
+|}];;
 [@@@part "12"];;
 let count_lines filename =
   Reader.file_contents filename
@@ -92,36 +125,49 @@ let count_lines filename =
 ;;
 
 
-[%%expect];;
+[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
 [@@@part "13"];;
 Deferred.map;;
 
 
-[%%expect];;
+[%%expect{|- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>|}];;
 [@@@part "14"];;
 let count_lines filename =
   Reader.file_contents filename
   >>| fun text ->
   List.length (String.split text ~on:'\n')
 ;;
+[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
 
 count_lines "/etc/hosts";;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-25:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : int = 10
+|}];;
 [@@@part "15"];;
 let ivar = Ivar.create ();;
+[%%expect{|
+val ivar : '_a Ivar.t =
+  {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
+|}];;
 
 let def = Ivar.read ivar;;
+[%%expect{|val def : '_a Deferred.t = <abstr>|}];;
 
 Deferred.peek def;;
+[%%expect{|- : '_a option = None|}];;
 
 Ivar.fill ivar "Hello";;
+[%%expect{|- : unit = ()|}];;
 
 Deferred.peek def;;
 
 
-[%%expect];;
+[%%expect{|- : string option = Some "Hello"|}];;
 [@@@part "16"];;
 module type Delayer_intf = sig
   type t
@@ -135,12 +181,19 @@ end;;
 
 
 
-[%%expect];;
+[%%expect{|
+module type Delayer_intf =
+  sig
+    type t
+    val create : Time.Span.t -> t
+    val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
+  end
+|}];;
 [@@@part "17"];;
 upon;;
 
 
-[%%expect];;
+[%%expect{|- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>|}];;
 [@@@part "18"];;
 module Delayer : Delayer_intf = struct
   type t = { delay: Time.Span.t;
@@ -161,14 +214,15 @@ module Delayer : Delayer_intf = struct
 end;;
 
 
-[%%expect];;
+[%%expect{|module Delayer : Delayer_intf|}];;
 [@@@part "19"];;
 let rec loop_forever () = loop_forever ();;
+[%%expect{|val loop_forever : unit -> 'a = <fun>|}];;
 
 let always_fail () = assert false;;
 
 
-[%%expect];;
+[%%expect{|val always_fail : unit -> 'a = <fun>|}];;
 [@@@part "20"];;
 let do_stuff n =
   let x = 3 in
@@ -177,12 +231,12 @@ let do_stuff n =
 ;;
 
 
-[%%expect];;
+[%%expect{|val do_stuff : int -> int = <fun>|}];;
 [@@@part "21"];;
 let rec loop_forever () : never_returns = loop_forever ();;
 
 
-[%%expect];;
+[%%expect{|val loop_forever : unit -> never_returns = <fun>|}];;
 [@@@part "22"];;
 let do_stuff n =
   let x = 3 in
@@ -193,9 +247,14 @@ let do_stuff n =
 
 
 
-[%%expect];;
+[%%expect{|
+Characters 48-63:
+Error: This expression has type never_returns = (unit, int) Base.Type_equal.t
+       but an expression was expected of type unit
+|}];;
 [@@@part "23"];;
 never_returns;;
+[%%expect{|- : never_returns -> 'a = <fun>|}];;
 
 let do_stuff n =
   let x = 3 in
@@ -204,31 +263,53 @@ let do_stuff n =
 ;;
 
 
-[%%expect];;
+[%%expect{|val do_stuff : int -> int = <fun>|}];;
 [@@@part "24"];;
 let (r,w) = Pipe.create ();;
 
 
 
-[%%expect];;
+[%%expect{|
+val r : '_a Pipe.Reader.t = <abstr>
+val w : '_a Pipe.Writer.t = <abstr>
+|}];;
 [@@@part "25"];;
 let (r,w) = Pipe.create ();;
+[%%expect{|
+val r : '_a Pipe.Reader.t = <abstr>
+val w : '_a Pipe.Writer.t = <abstr>
+|}];;
 
 
 let write_complete = Pipe.write w "Hello World!";;
+[%%expect{|val write_complete : unit Deferred.t = <abstr>|}];;
 
 Pipe.read r;;
+[%%expect{|
+Characters 1-12:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : [ `Eof | `Ok of string ] = `Ok "Hello World!"
+|}];;
 
 write_complete;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-15:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+|}];;
 [@@@part "26"];;
 Pipe.transfer;;
 
 
 
-[%%expect];;
+[%%expect{|
+- : 'a Pipe.Reader.t -> 'b Pipe.Writer.t -> f:('a -> 'b) -> unit Deferred.t =
+<fun>
+|}];;
 [@@@part "27"];;
 Command.async_basic;;
 
@@ -236,7 +317,17 @@ Command.async_basic;;
 
 
 
-[%%expect];;
+[%%expect{|
+Characters 0-19:
+Warning 3: deprecated: Async.Command.async_basic
+[since 2015-10] Use async instead
+Characters 0-19:
+Warning 3: deprecated: Async.Command.async_basic
+[since 2015-10] Use async instead
+- : ('a, unit Deferred.t) Async_extra.Command.basic_command
+    Command.with_options
+= <fun>
+|}];;
 [@@@part "28"];;
 #require "cohttp.async";;
 Cohttp_async.Client.get;;
@@ -245,17 +336,23 @@ Cohttp_async.Client.get;;
 
 
 
-[%%expect];;
+[%%expect{|
+- : ?interrupt:unit Deferred.t ->
+    ?ssl_config:Conduit_async.Ssl.config ->
+    ?headers:Cohttp.Header.t ->
+    Uri.t -> (Cohttp_async.Response.t * Cohttp_async.Body.t) Deferred.t
+= <fun>
+|}];;
 [@@@part "29"];;
 Deferred.all;;
 
 
-[%%expect];;
+[%%expect{|- : 'a Conduit_async.io list -> 'a list Conduit_async.io = <fun>|}];;
 [@@@part "30"];;
 Deferred.all_unit;;
 
 
-[%%expect];;
+[%%expect{|- : unit Conduit_async.io list -> unit Conduit_async.io = <fun>|}];;
 [@@@part "31"];;
 let maybe_raise =
   let should_fail = ref false in
@@ -266,10 +363,18 @@ let maybe_raise =
     >>= fun () ->
     if will_fail then raise Exit else return ()
 ;;
+[%%expect{|val maybe_raise : unit -> unit Conduit_async.io = <fun>|}];;
+
+maybe_raise ();;
+[%%expect{|
+Characters 1-15:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+|}];;
 
 maybe_raise ();;
 
-maybe_raise ();;
 
 
 
@@ -278,8 +383,12 @@ maybe_raise ();;
 
 
 
-
-[%%expect];;
+[%%expect{|
+Characters 1-15:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+Exception: Async_kernel__Monitor.Error_ _.
+|}];;
 [@@@part "32"];;
 let handle_error () =
   try
@@ -287,10 +396,18 @@ let handle_error () =
     >>| fun () -> "success"
   with _ -> return "failure"
 ;;
+[%%expect{|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
+
+handle_error ();;
+[%%expect{|
+Characters 1-16:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string = "success"
+|}];;
 
 handle_error ();;
 
-handle_error ();;
 
 
 
@@ -299,8 +416,12 @@ handle_error ();;
 
 
 
-
-[%%expect];;
+[%%expect{|
+Characters 1-16:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+Exception: Async_kernel__Monitor.Error_ _.
+|}];;
 [@@@part "33"];;
 let handle_error () =
   try_with (fun () -> maybe_raise ())
@@ -308,96 +429,114 @@ let handle_error () =
   | Ok ()   -> "success"
   | Error _ -> "failure"
 ;;
+[%%expect{|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
+
+handle_error ();;
+[%%expect{|
+Characters 1-16:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string = "success"
+|}];;
 
 handle_error ();;
 
-handle_error ();;
 
-
-[%%expect];;
+[%%expect{|
+Characters 1-16:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string = "failure"
+|}];;
 [@@@part "34"];;
 let blow_up () =
   let monitor = Monitor.create ~name:"blow up monitor" () in
   within' ~monitor maybe_raise
 ;;
+[%%expect{|val blow_up : unit -> unit Conduit_async.io = <fun>|}];;
+
+blow_up ();;
+[%%expect{|
+Characters 1-11:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+|}];;
 
 blow_up ();;
 
-blow_up ();;
 
-
-[%%expect];;
+[%%expect{|
+Characters 1-11:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+Exception: Async_kernel__Monitor.Error_ _.
+|}];;
 [@@@part "35"];;
-(*let swallow_error () =
-  let monitor = Monitor.create () in
-  Stream.iter (Monitor.detach_and_get_error_stream monitor)
-    ~f:(fun _exn -> printf "an error happened\n");
-  within' ~monitor (fun () ->
-    after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
-;;
-
-swallow_error ();;*)
-
-
-
-[%%expect];;
 [@@@part "36"];;
-(*exception Ignore_me;;
-
-let swallow_some_errors exn_to_raise =
-  let child_monitor  = Monitor.create  () in
-  let parent_monitor = Monitor.current () in
-  Stream.iter (Monitor.detach_and_get_error_stream child_monitor)
-    ~f:(fun error ->
-      match Monitor.extract_exn error with
-      | Ignore_me -> printf "ignoring exn\n"
-      | _ -> Monitor.send_exn parent_monitor error);
-  within' ~monitor:child_monitor (fun () ->
-    after (Time.Span.of_sec 0.5)
-    >>= fun () -> raise exn_to_raise)
-;;*)
-
-
-[%%expect];;
 [@@@part "37"];;
 swallow_some_errors Not_found;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 0-19:
+Error: Unbound value swallow_some_errors
+|}];;
 [@@@part "38"];;
 swallow_some_errors Ignore_me;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 0-19:
+Error: Unbound value swallow_some_errors
+|}];;
 [@@@part "39"];;
 let string_and_float = Deferred.both
                          (after (sec 0.5)  >>| fun () -> "A")
                          (after (sec 0.25) >>| fun () -> 32.33);;
+[%%expect{|val string_and_float : (string * float) Conduit_async.io = <abstr>|}];;
 
 string_and_float;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-17:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string * float = ("A", 32.33)
+|}];;
 [@@@part "40"];;
 Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
              ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 0-125:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : string = "half a second"
+|}];;
 [@@@part "41"];;
 choice;;
+[%%expect{|- : 'a Conduit_async.io -> ('a -> 'b) -> 'b Deferred.choice = <fun>|}];;
 
 choose;;
 
 
-[%%expect];;
+[%%expect{|- : 'a Deferred.choice list -> 'a Conduit_async.io = <fun>|}];;
 [@@@part "42"];;
 let def = In_thread.run (fun () -> List.range 1 10);;
+[%%expect{|val def : int list Conduit_async.io = <abstr>|}];;
 
 def;;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-4:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
+|}];;
 [@@@part "43"];;
 let log_delays thunk =
   let start = Time.now () in
@@ -411,28 +550,62 @@ let log_delays thunk =
 ;;
 
 
-[%%expect];;
+[%%expect{|
+val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
+  <fun>
+|}];;
 [@@@part "44"];;
 log_delays (fun () -> after (sec 0.5));;
 
-[%%expect];;
+[%%expect{|
+Characters 0-38:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+0.0290871ms, 101.144ms, 206.718ms, 312.254ms, 413.174ms, |}];;
 [@@@part "45"];;
 let busy_loop () =
   let x = ref None in
   for i = 1 to 100_000_000 do x := Some i done
 ;;
+[%%expect{|
+val busy_loop : unit -> unit = <fun>
+500.366ms, 
+|}];;
 
 log_delays (fun () -> return (busy_loop ()));;
 
 
-[%%expect];;
+[%%expect{|
+Characters 1-45:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+|}];;
 [@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;
 
-[%%expect];;
+[%%expect{|
+Characters 0-46:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+1.40864s, 
+0.0588894ms, 181.753ms, 341.493ms, 497.247ms, 602.748ms, 920.052ms, 1.0257s, |}];;
 [@@@part "47"];;
 let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
 ;;
+[%%expect{|
+val noalloc_busy_loop : unit -> unit = <fun>
+1.34245s, |}];;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
+[%%expect{|
+Characters 1-55:
+Warning 3: deprecated: module Async.Std
+[since 2017-02] use Async. The Std sub-module is no longer needed
+- : unit = ()
+1.37062s, 
+0.033617ms, 140.465ms, 243.461ms, 403.061ms, 506.141ms, 717.873ms, 742.163ms, 
+|}];;

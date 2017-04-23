@@ -20,13 +20,13 @@ Error: Unbound value no_converter_of_sexp
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 [%%expect{|
 type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexplib.Type.t -> t = <fun>
-val sexp_of_t : t -> Sexplib.Type.t = <fun>
+val t_of_sexp : Core_kernel.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Core_kernel.Sexp.t = <fun>
 |}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "<opaque>"];
   Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "foo"]]

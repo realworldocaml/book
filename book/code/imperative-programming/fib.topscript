@@ -36,12 +36,12 @@ let rec fib i =
 time (fun () -> fib 20);;
 [%%expect{|
 - : int = 10946
-Time: 0.315124 ms
+Time: 0.31846 ms
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 3942.663534 ms
+Time: 5803.253086 ms
 |}];;
 [@@@part "3"];;
 let fib = memoize fib;;
@@ -49,12 +49,12 @@ let fib = memoize fib;;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 4004.246403 ms
+Time: 4036.092543 ms
 |}];;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 165580141
-Time: 0.004283 ms
+Time: 0.003835 ms
 |}];;
 [@@@part "4"];;
 let fib_norec fib i =
@@ -90,7 +90,7 @@ let fib = memo_rec fib_norec;;
 time (fun () -> fib 40);;
 [%%expect{|
 - : int = 102334155
-Time: 0.05596 ms
+Time: 0.047057 ms
 |}];;
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->

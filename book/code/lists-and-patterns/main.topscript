@@ -114,8 +114,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
-│ plus_one_match │  35.60ns │
-│ plus_one_if    │  43.01ns │
+│ plus_one_match │  35.04ns │
+│ plus_one_if    │  43.19ns │
 └────────────────┴──────────┘
 |}];;
 [@@@part "11"];;
@@ -136,8 +136,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
-│ sum_if │  55.89us │
-│ sum    │  16.69us │
+│ sum_if │  52.57us │
+│ sum    │  13.47us │
 └────────┴──────────┘
 |}];;
 [@@@part "13"];;

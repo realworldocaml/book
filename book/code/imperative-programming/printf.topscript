@@ -29,7 +29,7 @@ printf fmt 3;;
 [%%expect{|
 Characters 7-10:
 Error: This expression has type string but an expression was expected of type
-         ('a -> 'b, out_channel, unit) format =
+         ('a -> 'b, out_channel, unit) Base.format =
            ('a -> 'b, out_channel, unit, unit, unit, unit) format6
 |}];;
 [@@@part "4"];;

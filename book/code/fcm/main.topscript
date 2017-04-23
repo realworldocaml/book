@@ -144,4 +144,4 @@ val create_comparable :
 create_comparable Int.compare;;
 [%%expect{|- : (module Comparable with type t = int) = <module>|}];;
 create_comparable Float.compare;;
-[%%expect{|- : (module Comparable with type t = Float.t) = <module>|}];;
+[%%expect{|- : (module Comparable with type t = float) = <module>|}];;

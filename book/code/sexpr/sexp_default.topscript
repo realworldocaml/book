@@ -16,8 +16,10 @@ type http_server_config = {
 } [@@deriving sexp] ;;
 [%%expect{|
 type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp : Sexplib.Type.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexplib.Type.t = <fun>
+val http_server_config_of_sexp : Core_kernel.Sexp.t -> http_server_config =
+  <fun>
+val sexp_of_http_server_config : http_server_config -> Core_kernel.Sexp.t =
+  <fun>
 |}];;
 [@@@part "1"];;
 type http_server_config = {
@@ -27,8 +29,8 @@ type http_server_config = {
 } [@@deriving sexp] ;;
 [%%expect{|
 type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp : Sexplib.Type.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexplib.Type.t = <fun>
+val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 |}];;
 [@@@part "2"];;
 let cfg = http_server_config_of_sexp

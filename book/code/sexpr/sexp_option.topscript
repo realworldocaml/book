@@ -12,19 +12,19 @@ open Core_kernel;;
 type t = { a: int option; b: string } [@@deriving sexp] ;;
 [%%expect{|
 type t = { a : int option; b : string; }
-val t_of_sexp : Sexplib.Type.t -> t = <fun>
-val sexp_of_t : t -> Sexplib.Type.t = <fun>
+val t_of_sexp : Core_kernel.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Core_kernel.Sexp.t = <fun>
 |}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.List []];
   Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;
 sexp_of_t { a = Some 3; b = "hello" } ;;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List
    [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.List [Sexplib.Sexp.Atom "3"]];
@@ -34,19 +34,19 @@ Sexplib.Sexp.List
 type t = { a: int sexp_option; b: string } [@@deriving sexp] ;;
 [%%expect{|
 type t = { a : int option; b : string; }
-val t_of_sexp : Sexplib.Type.t -> t = <fun>
-val sexp_of_t : t -> Sexplib.Type.t = <fun>
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 |}];;
 sexp_of_t { a = Some 3; b = "hello" } ;;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "3"];
   Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "hello"]]
 |}];;

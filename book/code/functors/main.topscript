@@ -339,17 +339,23 @@ Int_interval.is_empty
 [%%expect{|- : bool = false|}];;
 [@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
-[%%expect{|- : Sexp.t = Core_kernel.Sexp.List <abstr>|}];;
+[%%expect{|
+- : Sexp.t =
+Core_kernel.Sexp.List
+ [Core_kernel.Sexp.Atom "This"; Core_kernel.Sexp.Atom "is";
+  Core_kernel.Sexp.List
+   [Core_kernel.Sexp.Atom "an"; Core_kernel.Sexp.Atom "s-expression"]]
+|}];;
 [@@@part "24"];;
 type some_type = int * string list [@@deriving sexp];;
 [%%expect{|
 type some_type = int * string list
-val some_type_of_sexp : Sexplib.Type.t -> some_type = <fun>
-val sexp_of_some_type : some_type -> Sexplib.Type.t = <fun>
+val some_type_of_sexp : Sexp.t -> some_type = <fun>
+val sexp_of_some_type : some_type -> Sexp.t = <fun>
 |}];;
 sexp_of_some_type (33, ["one"; "two"]);;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.Atom "33";
   Sexplib.Sexp.List [Sexplib.Sexp.Atom "one"; Sexplib.Sexp.Atom "two"]]
@@ -385,8 +391,8 @@ module type Interval_intf_with_sexp =
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
-    val t_of_sexp : Sexplib.Type.t -> t
-    val sexp_of_t : t -> Sexplib.Type.t
+    val t_of_sexp : Sexp.t -> t
+    val sexp_of_t : t -> Sexp.t
   end
 |}];;
 [@@@part "27"];;
@@ -404,8 +410,8 @@ module type Interval_intf_with_sexp =
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
-    val t_of_sexp : Sexplib.Type.t -> t
-    val sexp_of_t : t -> Sexplib.Type.t
+    val t_of_sexp : Sexp.t -> t
+    val sexp_of_t : t -> Sexp.t
   end
 |}];;
 [@@@part "28"];;
@@ -463,8 +469,8 @@ module Make_interval :
     (Endpoint : sig
                   type t
                   val compare : t -> t -> int
-                  val t_of_sexp : Sexplib.Type.t -> t
-                  val sexp_of_t : t -> Sexplib.Type.t
+                  val t_of_sexp : Sexp.t -> t
+                  val sexp_of_t : t -> Sexp.t
                 end) ->
     sig
       type t
@@ -472,8 +478,8 @@ module Make_interval :
       val is_empty : t -> bool
       val contains : t -> Endpoint.t -> bool
       val intersect : t -> t -> t
-      val t_of_sexp : Sexplib.Type.t -> t
-      val sexp_of_t : t -> Sexplib.Type.t
+      val t_of_sexp : Sexp.t -> t
+      val sexp_of_t : t -> Sexp.t
     end
 |}];;
 [@@@part "29"];;
@@ -486,16 +492,16 @@ module Int_interval :
     val is_empty : t -> bool
     val contains : t -> int -> bool
     val intersect : t -> t -> t
-    val t_of_sexp : Sexplib.Type.t -> t
-    val sexp_of_t : t -> Sexplib.Type.t
+    val t_of_sexp : Sexp.t -> t
+    val sexp_of_t : t -> Sexp.t
   end
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 3 4);;
 [%%expect{|
-- : Sexplib.Type.t =
+- : Sexp.t =
 Base__.Sexplib.Sexp.List
  [Base__.Sexplib.Sexp.Atom "Interval"; Base__.Sexplib.Sexp.Atom "3";
   Base__.Sexplib.Sexp.Atom "4"]
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 4 3);;
-[%%expect{|- : Sexplib.Type.t = Base__.Sexplib.Sexp.Atom "Empty"|}];;
+[%%expect{|- : Sexp.t = Base__.Sexplib.Sexp.Atom "Empty"|}];;

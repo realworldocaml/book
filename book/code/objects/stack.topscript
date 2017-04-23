@@ -60,9 +60,9 @@ Popped: 5
 let t = object
   method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
 end ;;
-[%%expect{|val t : < pop : Core_kernel__Import.int option > = <obj>|}];;
+[%%expect{|val t : < pop : int option > = <obj>|}];;
 print_pop t ;;
 [%%expect{|
 - : unit = ()
-Popped: 1492823668766055000
+Popped: 1492950327177072000
 |}];;

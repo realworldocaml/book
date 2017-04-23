@@ -12,8 +12,8 @@ open Core_kernel;;
 type t = { foo: int; bar: float } [@@deriving sexp] ;;
 [%%expect{|
 type t = { foo : int; bar : float; }
-val t_of_sexp : Sexplib.Type.t -> t = <fun>
-val sexp_of_t : t -> Sexplib.Type.t = <fun>
+val t_of_sexp : Core_kernel.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Core_kernel.Sexp.t = <fun>
 |}];;
 t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
 [%%expect{|- : t = {foo = 3; bar = 35.}|}];;
