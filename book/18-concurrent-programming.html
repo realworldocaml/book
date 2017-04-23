@@ -100,20 +100,19 @@
 	<link rel="import" href="code/async/main.topscript" part="3"/> 
 
 	<p>
-	  We first load the Async package in the toplevel using
-	  <code>#require</code>, and then open <code>Async.Std</code>,
-	  which adds a number of new identifiers and modules into our
-	  environment that make using Async more convenient. Opening
-	  <code>Async.Std</code> is standard practice for writing
-	  programs using Async, much like opening <code>Core.Std</code>
-	  is for using Core.</p>
+	  We first load the Async package in the toplevel
+	  using <code>#require</code>, and then open the module. Like
+	  Core, Async is a kind of extension to your fundamental
+	  programming environment, and is therefore designed to be
+	  opened.</p>
 
 	<p>
 	  A deferred is essentially a handle to a value that may be
-	  computed in the future. As such, if we call
-	  <code>Reader.file_contents</code>, the resulting deferred
-	  will initially be empty, as you can see by calling
-	  <code>Deferred.peek</code> on the resulting deferred:
+	  computed in the future. As such, if we
+	  call <code>Reader.file_contents</code>, the resulting
+	  deferred will initially be empty, as you can see by
+	  calling <code>Deferred.peek</code> on the resulting
+	  deferred:
 	  
 	  <idx>Deferred.peek</idx></p>
 

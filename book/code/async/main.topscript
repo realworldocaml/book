@@ -35,7 +35,6 @@ Deferred.peek contents;;
 [@@@part "5"];;
 contents;;
 
-
 [%%expect{|
 Characters 0-8:
 Warning 3: deprecated: module Async.Std
