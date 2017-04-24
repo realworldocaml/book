@@ -35,12 +35,7 @@ Deferred.peek contents;;
 [@@@part "5"];;
 contents;;
 
-[%%expect{|
-Characters 0-8:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string = "This is only a test."
-|}];;
+[%%expect{|- : string = "This is only a test."|}];;
 [@@@part "6"];;
 Deferred.peek contents;;
 
@@ -60,22 +55,12 @@ let uppercase_file filename =
 [%%expect{|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
 
 uppercase_file "test.txt";;
-[%%expect{|
-Characters 1-26:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 
 Reader.file_contents "test.txt";;
 
 
-[%%expect{|
-Characters 1-32:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string = "THIS IS ONLY A TEST."
-|}];;
+[%%expect{|- : string = "THIS IS ONLY A TEST."|}];;
 [@@@part "9"];;
 let uppercase_file filename =
   Reader.file_contents filename
@@ -110,12 +95,7 @@ let three = return 3;;
 three;;
 
 
-[%%expect{|
-Characters 1-6:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : int = 3
-|}];;
+[%%expect{|- : int = 3|}];;
 [@@@part "12"];;
 let count_lines filename =
   Reader.file_contents filename
@@ -141,12 +121,7 @@ let count_lines filename =
 count_lines "/etc/hosts";;
 
 
-[%%expect{|
-Characters 1-25:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : int = 10
-|}];;
+[%%expect{|- : int = 10|}];;
 [@@@part "15"];;
 let ivar = Ivar.create ();;
 [%%expect{|
@@ -284,22 +259,12 @@ let write_complete = Pipe.write w "Hello World!";;
 [%%expect{|val write_complete : unit Deferred.t = <abstr>|}];;
 
 Pipe.read r;;
-[%%expect{|
-Characters 1-12:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : [ `Eof | `Ok of string ] = `Ok "Hello World!"
-|}];;
+[%%expect{|- : [ `Eof | `Ok of string ] = `Ok "Hello World!"|}];;
 
 write_complete;;
 
 
-[%%expect{|
-Characters 1-15:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 [@@@part "26"];;
 Pipe.transfer;;
 
@@ -365,12 +330,7 @@ let maybe_raise =
 [%%expect{|val maybe_raise : unit -> unit Conduit_async.io = <fun>|}];;
 
 maybe_raise ();;
-[%%expect{|
-Characters 1-15:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 
 maybe_raise ();;
 
@@ -382,12 +342,7 @@ maybe_raise ();;
 
 
 
-[%%expect{|
-Characters 1-15:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-Exception: Async_kernel__Monitor.Error_ _.
-|}];;
+[%%expect{|Exception: Async_kernel__Monitor.Error_ _.|}];;
 [@@@part "32"];;
 let handle_error () =
   try
@@ -398,12 +353,7 @@ let handle_error () =
 [%%expect{|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
 
 handle_error ();;
-[%%expect{|
-Characters 1-16:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string = "success"
-|}];;
+[%%expect{|- : string = "success"|}];;
 
 handle_error ();;
 
@@ -415,12 +365,7 @@ handle_error ();;
 
 
 
-[%%expect{|
-Characters 1-16:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-Exception: Async_kernel__Monitor.Error_ _.
-|}];;
+[%%expect{|Exception: Async_kernel__Monitor.Error_ _.|}];;
 [@@@part "33"];;
 let handle_error () =
   try_with (fun () -> maybe_raise ())
@@ -431,22 +376,12 @@ let handle_error () =
 [%%expect{|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
 
 handle_error ();;
-[%%expect{|
-Characters 1-16:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string = "success"
-|}];;
+[%%expect{|- : string = "success"|}];;
 
 handle_error ();;
 
 
-[%%expect{|
-Characters 1-16:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string = "failure"
-|}];;
+[%%expect{|- : string = "failure"|}];;
 [@@@part "34"];;
 let blow_up () =
   let monitor = Monitor.create ~name:"blow up monitor" () in
@@ -455,22 +390,12 @@ let blow_up () =
 [%%expect{|val blow_up : unit -> unit Conduit_async.io = <fun>|}];;
 
 blow_up ();;
-[%%expect{|
-Characters 1-11:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 
 blow_up ();;
 
 
-[%%expect{|
-Characters 1-11:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-Exception: Async_kernel__Monitor.Error_ _.
-|}];;
+[%%expect{|Exception: Async_kernel__Monitor.Error_ _.|}];;
 [@@@part "35"];;
 [@@@part "36"];;
 [@@@part "37"];;
@@ -498,23 +423,13 @@ let string_and_float = Deferred.both
 string_and_float;;
 
 
-[%%expect{|
-Characters 1-17:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string * float = ("A", 32.33)
-|}];;
+[%%expect{|- : string * float = ("A", 32.33)|}];;
 [@@@part "40"];;
 Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
              ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
 
 
-[%%expect{|
-Characters 0-125:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : string = "half a second"
-|}];;
+[%%expect{|- : string = "half a second"|}];;
 [@@@part "41"];;
 choice;;
 [%%expect{|- : 'a Conduit_async.io -> ('a -> 'b) -> 'b Deferred.choice = <fun>|}];;
@@ -530,12 +445,7 @@ let def = In_thread.run (fun () -> List.range 1 10);;
 def;;
 
 
-[%%expect{|
-Characters 1-4:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
-|}];;
+[%%expect{|- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]|}];;
 [@@@part "43"];;
 let log_delays thunk =
   let start = Time.now () in
@@ -557,11 +467,8 @@ val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
 log_delays (fun () -> after (sec 0.5));;
 
 [%%expect{|
-Characters 0-38:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
 - : unit = ()
-0.0290871ms, 101.144ms, 206.718ms, 312.254ms, 413.174ms, |}];;
+0.0357628ms, 105.016ms, 208.16ms, 311.088ms, 412.799ms, |}];;
 [@@@part "45"];;
 let busy_loop () =
   let x = ref None in
@@ -569,42 +476,29 @@ let busy_loop () =
 ;;
 [%%expect{|
 val busy_loop : unit -> unit = <fun>
-500.366ms, 
+500.449ms, 
 |}];;
 
 log_delays (fun () -> return (busy_loop ()));;
 
 
-[%%expect{|
-Characters 1-45:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
-- : unit = ()
-|}];;
+[%%expect{|- : unit = ()|}];;
 [@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;
 
 [%%expect{|
-Characters 0-46:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
 - : unit = ()
-1.40864s, 
-0.0588894ms, 181.753ms, 341.493ms, 497.247ms, 602.748ms, 920.052ms, 1.0257s, |}];;
+1.42635s, 
+0.0588894ms, 125.174ms, 494.26ms, 597.77ms, 702.906ms, 808.6ms, 911.946ms, 1.01691s, 1.12455s, 1.22863s, 1.33203s, |}];;
 [@@@part "47"];;
 let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
 ;;
-[%%expect{|
-val noalloc_busy_loop : unit -> unit = <fun>
-1.34245s, |}];;
+[%%expect{|val noalloc_busy_loop : unit -> unit = <fun>|}];;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
 [%%expect{|
-Characters 1-55:
-Warning 3: deprecated: module Async.Std
-[since 2017-02] use Async. The Std sub-module is no longer needed
 - : unit = ()
-1.37062s, 
-0.033617ms, 140.465ms, 243.461ms, 403.061ms, 506.141ms, 717.873ms, 742.163ms, 
+1.37403s, 
+0.0379086ms, 172.095ms, 386.838ms, 549.659ms, 657.822ms, 791.03ms, 
 |}];;
