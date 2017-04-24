@@ -130,8 +130,8 @@ let () = Hashtbl.add Toploop.directive_table "verbose"
 module Async_autorun = struct
   (* Inspired by Utop auto run rewriter *)
   let (async_typ, async_runner, async_rewrite) =
-    let typ = Longident.parse "Async.Std.Deferred.t" in
-    let runner = Longident.parse "Async.Std.Thread_safe.block_on_async_exn" in
+    let typ = Longident.parse "Async.Deferred.t" in
+    let runner = Longident.parse "Async.Thread_safe.block_on_async_exn" in
     let open Ast_helper in
     let rewrite loc e =
       let punit =
