@@ -83,9 +83,9 @@
 	  From the type of <code>In_channel.read_all</code>, you can
 	  see that it must be a blocking operation. In particular, the
 	  fact that it returns a concrete string means it can't return
-	  until the read has completed. The blocking nature of the call
-	  means that no progress can be made on anything else until the
-	  read is completed.
+	  until the read has completed. The blocking nature of the
+	  call means that no progress can be made on anything else
+	  until the call is complete.
 
 	  <idx>blocking</idx></p>
 
@@ -94,7 +94,7 @@
 	  they return a value of type <code>Deferred.t</code> that acts
 	  as a placeholder that will eventually be filled in with the
 	  result. As an example, consider the signature of the Async
-	  equivalent of <code>In_channel.read_all</code>:
+	  equivalent of <code>In_channel.read_all</code>.
 	  <idx>Deferred.t</idx></p>
 
 	<link rel="import" href="code/async/main.topscript" part="3"/> 
@@ -111,10 +111,7 @@
 	  computed in the future. As such, if we
 	  call <code>Reader.file_contents</code>, the resulting
 	  deferred will initially be empty, as you can see by
-	  calling <code>Deferred.peek</code> on the resulting
-	  deferred:
-	  
-	  <idx>Deferred.peek</idx></p>
+	  calling <code>Deferred.peek</code>.  <idx>Deferred.peek</idx></p>
 
 	<link rel="import" href="code/async/main.topscript" part="4"/> 
 
@@ -134,6 +131,13 @@
 
 	<link rel="import" href="code/async/main.topscript" part="5"/> 
 
+
+	<p>
+	  Slightly confusingly, the type shown here is not the type
+	  of <code>contents</code>, which is <code>string
+	  Deferred.t</code>, but rather the type of the value
+	  contained within that deferred.</p>
+
 	<p>
 	  If we peek again, we'll see that the value of
 	  <code>contents</code> has been determined:</p>
@@ -149,25 +153,17 @@
 	<link rel="import" href="code/async/main.topscript" part="7"/> 
 
 	<p>
-	  <code>Deferred.bind d f</code> takes a deferred value
-	  <code>d</code> and a function <code>f</code> that is to be
-	  run with the value of <code>d</code> once it's determined.
-	  You can think of <code>Deferred.bind</code> as a kind of
-	  sequencing operator, and what we're doing is essentially
-	  taking an asynchronous computation <code>d</code> and tacking
-	  on another stage comprised by the actions of the function
-	  <code>f</code>.
+	  <code>Deferred.bind d ~f</code> takes a deferred
+	  value <code>d</code> and a function <code>f</code>. The
+	  function <code>f</code> is only run once the value
+	  of <code>d</code> has been determined.  You can think
+	  of <code>Deferred.bind</code> as a kind of sequencing
+	  operator, and what we're doing is essentially taking an
+	  asynchronous computation <code>d</code> and tacking on
+	  another stage comprised by the actions of the
+	  function <code>f</code>.
 
 	  <idx>Deferred.bind</idx></p>
-
-	<p>
-	  At a more concrete level, the call to
-	  <code>Deferred.bind</code> returns a new deferred that
-	  becomes determined when the deferred returned by
-	  <code>f</code> is determined. It also implicitly registers
-	  with the scheduler an <em>Async job</em> that is responsible
-	  for running <code>f</code> once <code>d</code> is
-	  determined.</p>
 
 	<p>
 	  Here's a simple use of <code>bind</code> for a function
@@ -341,6 +337,48 @@
             ivars and <code>upon</code>, and because of this, you
             should stick to the simpler map/bind/return style of
             working with deferreds when you can.<a data-type="indexterm" data-startref="ALbas">&nbsp;</a></p>
+
+	  <div data-type="note">
+	    <h1>Understanding <code>bind</code> in terms of ivars
+	    and <code>upon</code></h1>
+
+	    <p>
+	      You can understand what bind does in terms of ivars and
+	      upon.  Here's roughly what happens when you
+	      write <code>let d' = Deferred.bind d ~f</code>.
+	    </p>
+
+	    <ul>
+	      <li><p>A new iver <code>i</code> is created to hold the
+		  final result of the computation. The corresponding
+		  deferred is returned</p></li>
+	      <li><p>A function is registered to be called when the
+		  deferred <code>d</code> becomes determined.</p></li>
+	      <li><p> That function, once run, calls <code>f</code> with the value that was
+		  determined for <code>d</code>.</p></li>
+	      <li><p> Another function is registered to be called when
+		  the deferred returned by <code>f</code> becomes
+		  determined.</p></li>
+	      <li> <p>When that function is called, it uses it to fill
+		  <code>i</code>, causing the corresponding deferred
+		  it to become determined.</p> </li>
+	    </ul>
+
+	    <p>
+	      That sounds like a lot, but we can implement this
+	      relatively concisely.</p>
+            <link rel="import" href="code/async/main.topscript"
+		  part="18.1"/>
+
+	    <p> Async's real implementation has more optimizations and
+	      is therefore more complicated. But the above
+	      implementation is still a useful first-order mental
+	      model for how bind works under the covers. And it
+	      highlights that upon is useful for building new
+	      concurrency primitives.
+	    </p>
+	  </div>
+
 	</section>
       </section>
 
@@ -466,7 +504,7 @@
 
 	<link rel="import" href="code/async/run_echo.rawsh"/> 
 
-	<aside data-type="sidebar">
+	<aside data-type="note">
           <h5>Functions that Never Return</h5>
 
           <p>

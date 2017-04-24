@@ -142,18 +142,13 @@ Deferred.peek def;;
 
 
 [%%expect{|- : string option = Some "Hello"|}];;
+
 [@@@part "16"];;
 module type Delayer_intf = sig
   type t
   val create : Time.Span.t -> t
   val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
 end;;
-
-
-
-
-
-
 
 [%%expect{|
 module type Delayer_intf =
@@ -189,6 +184,18 @@ end;;
 
 
 [%%expect{|module Delayer : Delayer_intf|}];;
+
+[@@@part "18.1"];;
+let my_bind d ~f =
+  let i = Ivar.create () in
+  upon d (fun x -> upon (f x) (fun y -> Ivar.fill i y));
+  Ivar.read i
+;;
+[%%expect{|
+val my_bind : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t =
+  <fun>
+|}];;
+
 [@@@part "19"];;
 let rec loop_forever () = loop_forever ();;
 [%%expect{|val loop_forever : unit -> 'a = <fun>|}];;
@@ -468,7 +475,7 @@ log_delays (fun () -> after (sec 0.5));;
 
 [%%expect{|
 - : unit = ()
-0.0357628ms, 105.016ms, 208.16ms, 311.088ms, 412.799ms, |}];;
+0.0348091ms, 102.198ms, 205.28ms, 310.125ms, 414.026ms, |}];;
 [@@@part "45"];;
 let busy_loop () =
   let x = ref None in
@@ -476,7 +483,7 @@ let busy_loop () =
 ;;
 [%%expect{|
 val busy_loop : unit -> unit = <fun>
-500.449ms, 
+502.224ms, 
 |}];;
 
 log_delays (fun () -> return (busy_loop ()));;
@@ -488,8 +495,8 @@ log_delays (fun () -> In_thread.run busy_loop);;
 
 [%%expect{|
 - : unit = ()
-1.42635s, 
-0.0588894ms, 125.174ms, 494.26ms, 597.77ms, 702.906ms, 808.6ms, 911.946ms, 1.01691s, 1.12455s, 1.22863s, 1.33203s, |}];;
+1.32979s, 
+0.0619888ms, 190.536ms, 298.064ms, 509.639ms, 668.697ms, 879.493ms, 1.14413s, 1.25242s, 1.35789s, |}];;
 [@@@part "47"];;
 let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
@@ -499,6 +506,5 @@ let noalloc_busy_loop () =
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
 [%%expect{|
 - : unit = ()
-1.37403s, 
-0.0379086ms, 172.095ms, 386.838ms, 549.659ms, 657.822ms, 791.03ms, 
-|}];;
+1.38298s, 
+0.0350475ms, 186.982ms, 399.162ms, 666.814ms, |}];;
