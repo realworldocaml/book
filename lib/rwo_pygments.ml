@@ -11,7 +11,7 @@ type lang = [
   | `Java
   | `Json
   | `Scheme
-] 
+]
 
 let of_lang (x:Lang.t) = match (x :> string) with
   | "atd"          -> Ok `OCaml
@@ -32,7 +32,7 @@ let of_lang (x:Lang.t) = match (x :> string) with
     error "we are not supporting this language for pygmentize" x Lang.sexp_of_t
 
 let lang_to_string = function
-  | `OCaml -> "ocaml"
+  | `OCaml -> "book/pygmentize/ocaml-custom.py:OcamlLexer"
   | `Bash -> "bash"
   | `C -> "c"
   | `Gas -> "gas"
@@ -41,8 +41,14 @@ let lang_to_string = function
   | `Scheme -> "scheme"
 
 let really_pygmentize ~add_attrs lang contents =
+  let arg = match lang with
+  | `OCaml ->
+    ["-x"]
+  | _ ->
+    []
+  in
   Process.create ~prog:"pygmentize"
-    ~args:["-l"; lang_to_string lang; "-f"; "html"] ()
+    ~args:(arg @  ["-l"; lang_to_string lang; "-f"; "html"]) ()
   >>= fun proc ->
   match proc with
   | Error e -> raise (Error.to_exn e)
@@ -60,7 +66,12 @@ let really_pygmentize ~add_attrs lang contents =
         if stderr <> "" then
           failwithf "pymentize exited with errors:\n%s\n%s" contents stderr ()
         else
-          Html.of_string stdout |> List.hd_exn |> function
+          String.substr_replace_all ~pattern:"<span class=\"err\">\027</span>" ~with_:"" stdout |>
+          String.substr_replace_all ~pattern:"<span class=\"o\">[0m</span>" ~with_:"</span>" |>
+          String.substr_replace_all ~pattern:"<span class=\"o\">[38;5;236m</span>" ~with_:"<span style=\"color:#303030\">" |>
+          String.substr_replace_all ~pattern:"<span class=\"o\">[38;5;4m</span>" ~with_:"<span style=\"color:#000080\">" |>
+          String.substr_replace_all ~pattern:"<span class=\"o\">[38;5;9m</span>" ~with_:"<span style=\"color:#ff0000\">" |>
+          Html.of_string |> List.hd_exn |> function
           | `Element {
               Html.name="div";
               attrs=["class","highlight"];
@@ -72,9 +83,9 @@ let really_pygmentize ~add_attrs lang contents =
     )
 
 let pygmentize ?(add_attrs=[]) ?(pygmentize=true) lang contents =
-  if pygmentize then
-    really_pygmentize ~add_attrs lang contents
+  if pygmentize then (
+    really_pygmentize ~add_attrs lang contents )
   else
-    Html.encode contents
+    (Html.encode contents
     |> (fun x -> Html.pre ~a:add_attrs [`Data x])
-    |> return
+    |> return)
