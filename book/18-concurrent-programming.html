@@ -343,13 +343,12 @@
 	    and <code>upon</code></h1>
 
 	    <p>
-	      You can understand what bind does in terms of ivars and
-	      upon.  Here's roughly what happens when you
-	      write <code>let d' = Deferred.bind d ~f</code>.
+	      Here's roughly what happens when you write <code>let d'
+	      = Deferred.bind d ~f</code>.
 	    </p>
 
 	    <ul>
-	      <li><p>A new iver <code>i</code> is created to hold the
+	      <li><p>A new ivar <code>i</code> is created to hold the
 		  final result of the computation. The corresponding
 		  deferred is returned</p></li>
 	      <li><p>A function is registered to be called when the
@@ -374,8 +373,8 @@
 	      is therefore more complicated. But the above
 	      implementation is still a useful first-order mental
 	      model for how bind works under the covers. And it
-	      highlights that upon is useful for building new
-	      concurrency primitives.
+	      highlights how <code>upon</code> and ivars can useful
+	      for building concurrency primitives.
 	    </p>
 	  </div>
 
