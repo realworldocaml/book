@@ -372,9 +372,9 @@
 	    <p> Async's real implementation has more optimizations and
 	      is therefore more complicated. But the above
 	      implementation is still a useful first-order mental
-	      model for how bind works under the covers. And it
-	      highlights how <code>upon</code> and ivars can useful
-	      for building concurrency primitives.
+	      model for how bind works under the covers. And it's
+	      another good example of how <code>upon</code> and ivars
+	      can useful for building concurrency primitives.
 	    </p>
 	  </div>
 
@@ -382,14 +382,15 @@
       </section>
 
       <section id="examples-an-echo-server" data-type="sect1">
-	<h1>Examples: An Echo Server</h1>
+	<h1>Example: An Echo Server</h1>
 
 	<p>
 	  Now that we have the basics of Async under our belt, let's
 	  look at a small standalone Async program. In particular,
-	  we'll write an echo server, i.e., a program that accepts
+	  we'll write an echo server, <em>i.e.</em>, a program that accepts
 	  connections from clients and spits back whatever is sent to
-	  it.<idx id="echo">echo servers</idx> <idx id="ALecho">Async library/echo server example</idx></p>
+	  it.<idx id="echo">echo servers</idx> <idx id="ALecho">Async
+	  library/echo server example</idx></p>
 
 	<p>
 	  The first step is to create a function that can copy data

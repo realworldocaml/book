@@ -13,7 +13,7 @@ let get_definition_from_json json =
   match Yojson.Safe.from_string json with
   | `Assoc kv_list ->
     let find key =
-      begin match List.Assoc.find kv_list key with
+      begin match List.Assoc.find ~equal:String.equal kv_list key with
       | None | Some (`String "") -> None
       | Some s -> Some (Yojson.Safe.to_string s)
       end
@@ -30,9 +30,9 @@ let get_definition_from_json json =
 let get_definition word =
   Cohttp_async.Client.get (query_uri word)
   >>= fun (_, body) ->
-  Pipe.to_list body
-  >>| fun strings ->
-  (word, get_definition_from_json (String.concat strings))
+  Cohttp_async.Body.to_string body
+  >>| fun string ->
+  (word, get_definition_from_json string)
 
 
 [@@@part "3"];;
@@ -59,7 +59,7 @@ let search_and_print words =
 
 [@@@part "5"];;
 let () =
-  Command.async_basic
+  Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
       empty
