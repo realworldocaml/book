@@ -1,14 +1,22 @@
 use "topfind";;
 [%%expect{|
-- : unit = ()
-- : unit = ()
+Characters -1-2:
+Error: Unbound value use
 |}];;
 #thread;;
+[%%expect{|Unknown directive `thread'.|}];;
 #camlp4o;;
+[%%expect{|Unknown directive `camlp4o'.|}];;
 #require "core";;
-#require "core.syntax";;
+[%%expect{|Unknown directive `require'.|}];;
+#require "ppx_jane";;
+[%%expect{|Unknown directive `require'.|}];;
 [@@@part "0.5"];;
 open Core_kernel;;
+[%%expect{|
+Characters 5-16:
+Error: Unbound module Core_kernel
+|}];;
 module M = struct let foo = 3 end;;
 [%%expect{|module M : sig val foo : int end|}];;
 foo;;
@@ -23,11 +31,19 @@ foo;;
 let average x y =
   let open Int64 in
   x + y / of_int 2;;
-[%%expect{|val average : int64 -> int64 -> int64 = <fun>|}];;
+[%%expect{|
+Characters 48-56:
+Error: This expression has type int64 but an expression was expected of type
+         int
+|}];;
 [@@@part "2"];;
 let average x y =
   Int64.(x + y / of_int 2);;
-[%%expect{|val average : int64 -> int64 -> int64 = <fun>|}];;
+[%%expect{|
+Characters 35-43:
+Error: This expression has type int64 but an expression was expected of type
+         int
+|}];;
 [@@@part "3"];;
 module Interval = struct
   type t = | Interval of int * int

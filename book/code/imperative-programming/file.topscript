@@ -34,4 +34,7 @@ sum_file "/etc/hosts";;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
 [%%expect{|- : unit = ()|}];;
 sum_file "numbers.txt";;
-[%%expect{|Exception: Sys_error "numbers.txt: Too many open files".|}];;
+[%%expect{|
+File "book/code/imperative-programming/file.topscript", line 1:
+Error: I/O error: /var/folders/z3/7h_5sgf933952482gktqg_gh0000gn/T/camlppx2f223a: Too many open files
+|}];;

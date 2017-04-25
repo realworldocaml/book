@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "0.5"];;
 open Core_kernel;;
 List.find;;
@@ -54,23 +54,21 @@ Error.create "Unexpected character" 'z' Char.sexp_of_t;;
 [%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "8"];;
 let custom_to_sexp = [%sexp_of: float * string list * int];;
-[%%expect{|
-Characters 23-30:
-Error: Uninterpreted extension 'sexp_of'.
-|}];;
+[%%expect{|val custom_to_sexp : float * string list * int -> Sexp.t = <fun>|}];;
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
 [%%expect{|
-Characters 0-14:
-Error: Unbound value custom_to_sexp
+- : Sexp.t =
+Sexplib.Sexp.List
+ [Sexplib.Sexp.Atom "3.5";
+  Sexplib.Sexp.List
+   [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "c"];
+  Sexplib.Sexp.Atom "6034"]
 |}];;
 [@@@part "9"];;
 Error.create "Something went terribly wrong"
   (3.5, ["a";"b";"c"], 6034)
   [%sexp_of: float * string list * int] ;;
-[%%expect{|
-Characters 78-85:
-Error: Uninterpreted extension 'sexp_of'.
-|}];;
+[%%expect{|- : Error.t = <abstr>|}];;
 [@@@part "10"];;
 Error.tag
   (Error.of_list [ Error.of_string "Your tires were slashed";
@@ -93,8 +91,8 @@ let compute_bounds ~cmp list =
       Some (first,last)))
 ;;
 [%%expect{|
-val compute_bounds :
-  cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) Base.option = <fun>
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 |}];;
 [@@@part "13"];;
 let compute_bounds ~cmp list =
@@ -114,8 +112,8 @@ let compute_bounds ~cmp list =
   Option.both (List.hd sorted) (List.last sorted)
 ;;
 [%%expect{|
-val compute_bounds :
-  cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) Base.option = <fun>
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
 |}];;
 [@@@part "15"];;
 3 / 0;;
@@ -170,7 +168,11 @@ Crossed_bounds { lower=10; upper=0 };;
 [%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "24"];;
 type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
-[%%expect{|type 'a bounds = { lower : 'a; upper : 'a; }|}];;
+[%%expect{|
+type 'a bounds = { lower : 'a; upper : 'a; }
+val bounds_of_sexp : (Sexp.t -> 'a) -> Sexp.t -> 'a bounds = <fun>
+val sexp_of_bounds : ('a -> Sexp.t) -> 'a bounds -> Sexp.t = <fun>
+|}];;
 exception Crossed_bounds of int bounds [@@deriving sexp];;
 [%%expect{|exception Crossed_bounds of int bounds|}];;
 Crossed_bounds { lower=10; upper=0 };;
@@ -216,17 +218,14 @@ let parse_line line =
   String.split_on_chars ~on:[','] line
   |> List.map ~f:Float.of_string
 ;;
-[%%expect{|val parse_line : string -> Float.t list = <fun>|}];;
+[%%expect{|val parse_line : string -> float list = <fun>|}];;
 let load filename =
   let inc = In_channel.create filename in
   let data = In_channel.input_lines inc |> List.map ~f:parse_line in
   In_channel.close inc;
   data
 ;;
-[%%expect{|
-Characters 32-49:
-Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
-|}];;
+[%%expect{|val load : string -> float list list = <fun>|}];;
 [@@@part "29"];;
 let load filename =
   let inc = In_channel.create filename in
@@ -234,19 +233,13 @@ let load filename =
     In_channel.input_lines inc |> List.map ~f:parse_line)
     ~finally:(fun () -> In_channel.close inc)
 ;;
-[%%expect{|
-Characters 32-49:
-Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
-|}];;
+[%%expect{|val load : string -> float list list = <fun>|}];;
 [@@@part "30"];;
 let load filename =
   In_channel.with_file filename ~f:(fun inc ->
     In_channel.input_lines inc |> List.map ~f:parse_line)
 ;;
-[%%expect{|
-Characters 22-42:
-Error: The module In_channel is an alias for module Core_kernel__.Import.In_channel, which is missing
-|}];;
+[%%expect{|val load : string -> float list list = <fun>|}];;
 [@@@part "31"];;
 let lookup_weight ~compute_weight alist key =
   try
@@ -257,7 +250,7 @@ let lookup_weight ~compute_weight alist key =
 [%%expect{|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) List.Assoc.t -> 'a -> float = <fun>
+  ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
 |}];;
 [@@@part "32"];;
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
@@ -274,7 +267,7 @@ let lookup_weight ~compute_weight alist key =
 [%%expect{|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) List.Assoc.t -> 'a -> float = <fun>
+  ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
 |}];;
 [@@@part "33.1"];;
 let lookup_weight ~compute_weight alist key =
@@ -284,7 +277,7 @@ let lookup_weight ~compute_weight alist key =
 [%%expect{|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) List.Assoc.t -> 'a -> float = <fun>
+  ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
 |}];;
 [@@@part "34"];;
 let lookup_weight ~compute_weight alist key =
@@ -300,11 +293,11 @@ Error: This pattern matches values of type 'a option
 [@@@part "35"];;
 let find alist key =
   Option.try_with (fun () -> find_exn alist key) ;;
-[%%expect{|val find : (string * 'a) list -> string -> 'a Base.option = <fun>|}];;
+[%%expect{|val find : (string * 'a) list -> string -> 'a option = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect{|- : int Base.option = <abstr>|}];;
+[%%expect{|- : int option = None|}];;
 find ["a",1; "b",2] "b";;
-[%%expect{|- : int Base.option = <abstr>|}];;
+[%%expect{|- : int option = Some 2|}];;
 [@@@part "36"];;
 let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;

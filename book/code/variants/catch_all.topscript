@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 open Core_kernel;;
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;

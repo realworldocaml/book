@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "0.5"];;
 open Core_kernel;;
 [1;2;3];;
@@ -114,8 +114,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
-│ plus_one_match │  25.44ns │
-│ plus_one_if    │  43.57ns │
+│ plus_one_match │  35.04ns │
+│ plus_one_if    │  43.19ns │
 └────────────────┴──────────┘
 |}];;
 [@@@part "11"];;
@@ -136,8 +136,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
-│ sum_if │  53.30us │
-│ sum    │  12.01us │
+│ sum_if │  52.57us │
+│ sum    │  13.47us │
 └────────┴──────────┘
 |}];;
 [@@@part "13"];;
@@ -242,7 +242,7 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
 |> List.dedup
 ;;
-[%%expect{|- : string list = ["derived"; "shared"; "txt"]|}];;
+[%%expect{|- : string list = ["derived"; "shared"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -256,7 +256,7 @@ let (ml_files,other_files) =
 val ml_files : string list = []
 val other_files : string list =
   [".depend"; "app"; "book"; "lib"; "Makefile"; "Makefile.derived";
-   "Makefile.shared"; "numbers.txt"; "OCamlMakefile"; "site"]
+   "Makefile.shared"; "OCamlMakefile"; "site"]
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;

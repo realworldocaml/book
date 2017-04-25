@@ -6,16 +6,16 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "0.5"];;
 open Core_kernel;;
 let c = Gc.get () ;;
 [%%expect{|
 val c : Gc.control =
-  {Core_kernel.Gc.Control.minor_heap_size = <abstr>;
-   major_heap_increment = <abstr>; space_overhead = <abstr>;
-   verbose = <abstr>; max_overhead = <abstr>; stack_limit = <abstr>;
-   allocation_policy = <abstr>; window_size = <abstr>}
+  {Core_kernel.Gc.Control.minor_heap_size = 262144;
+   major_heap_increment = 15; space_overhead = 80; verbose = 0;
+   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
+   window_size = 1}
 |}];;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
 [%%expect{|- : unit = ()|}];;
@@ -24,7 +24,7 @@ Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
 [%%expect{|- : unit = ()|}];;
 [@@@part "2"];;
 Gc.major_slice 0 ;;
-[%%expect{|- : Base.int = 0|}];;
+[%%expect{|- : int = 0|}];;
 Gc.full_major () ;;
 [%%expect{|- : unit = ()|}];;
 [@@@part "3"];;

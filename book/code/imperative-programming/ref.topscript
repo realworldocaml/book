@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "1"];;
 type 'a ref = { mutable contents : 'a };;
 [%%expect{|type 'a ref = { mutable contents : 'a; }|}];;

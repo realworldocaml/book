@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 open Core_kernel;;
 [@@@part "1"];;
 let l = [(1,"one"); (2,"two")] ;;
@@ -16,6 +16,7 @@ List.iter l ~f:(fun x ->
   |> Sexp.to_string
   |> print_endline) ;;
 [%%expect{|
-Characters 29-36:
-Error: Uninterpreted extension 'sexp_of'.
+- : unit = ()
+(1 one)
+(2 two)
 |}];;

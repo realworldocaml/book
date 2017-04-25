@@ -417,14 +417,20 @@ let permute array =
     array.(j) <- tmp
   done
 ;;
-[%%expect{|val permute : 'a sexp_array -> unit = <fun>|}];;
+[%%expect{|val permute : 'a array -> unit = <fun>|}];;
 [@@@part "59"];;
 let ar = Array.init 20 ~f:(fun i -> i);;
-[%%expect{|val ar : int sexp_array = <abstr>|}];;
+[%%expect{|
+val ar : int array =
+  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
+|}];;
 permute ar;;
 [%%expect{|- : unit = ()|}];;
 ar;;
-[%%expect{|- : int sexp_array = <abstr>|}];;
+[%%expect{|
+- : int array =
+[|6; 0; 7; 17; 2; 11; 8; 19; 5; 1; 3; 16; 12; 18; 13; 10; 15; 14; 9; 4|]
+|}];;
 [@@@part "60"];;
 let find_first_negative_entry array =
   let pos = ref 0 in
@@ -433,7 +439,7 @@ let find_first_negative_entry array =
   done;
   if !pos = Array.length array then None else Some !pos
 ;;
-[%%expect{|val find_first_negative_entry : int sexp_array -> int option = <fun>|}];;
+[%%expect{|val find_first_negative_entry : int array -> int option = <fun>|}];;
 find_first_negative_entry [|1;2;0;3|];;
 [%%expect{|- : int option = None|}];;
 find_first_negative_entry [|1;-2;0;3|];;
@@ -450,6 +456,6 @@ let find_first_negative_entry array =
   done;
   if !pos = Array.length array then None else Some !pos
 ;;
-[%%expect{|val find_first_negative_entry : int sexp_array -> int option = <fun>|}];;
+[%%expect{|val find_first_negative_entry : int array -> int option = <fun>|}];;
 find_first_negative_entry [|1;2;0;3|];;
 [%%expect{|Exception: Invalid_argument "index out of bounds".|}];;

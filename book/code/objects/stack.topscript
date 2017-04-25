@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 [@@@part "1"];;
 open Core_kernel;;
 let s = object
@@ -60,9 +60,9 @@ Popped: 5
 let t = object
   method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
 end ;;
-[%%expect{|val t : < pop : Core_kernel__Import.int option > = <obj>|}];;
+[%%expect{|val t : < pop : int option > = <obj>|}];;
 print_pop t ;;
 [%%expect{|
 - : unit = ()
-Popped: 1491764651762608000
+Popped: 1492950327177072000
 |}];;

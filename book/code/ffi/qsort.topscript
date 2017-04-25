@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 #require "ctypes.foreign" ;;
 [@@@part "1"];;
 open Ctypes ;;

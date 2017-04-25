@@ -6,17 +6,17 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 open Core_kernel;;
 [@@@part "0.5"];;
 type t = { foo: int; bar: float } [@@deriving sexp] ;;
-[%%expect{|type t = { foo : int; bar : float; }|}];;
-t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
 [%%expect{|
-Characters 0-9:
-Error: Unbound value t_of_sexp
-Hint: Did you mean mat_of_sexp or int_of_sexp?
+type t = { foo : int; bar : float; }
+val t_of_sexp : Core_kernel.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Core_kernel.Sexp.t = <fun>
 |}];;
+t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
+[%%expect{|- : t = {foo = 3; bar = 35.}|}];;
 [@@@part "1"];;
 exception Bad_message of string list ;;
 [%%expect{|exception Bad_message of string list|}];;
@@ -25,4 +25,4 @@ Exn.to_string (Bad_message ["1";"2";"3"]) ;;
 exception Good_message of string list [@@deriving sexp];;
 [%%expect{|exception Good_message of string list|}];;
 Exn.to_string (Good_message ["1";"2";"3"]) ;;
-[%%expect{|- : string = "(\"Good_message(_)\")"|}];;
+[%%expect{|- : string = "(//toplevel//.Good_message (1 2 3))"|}];;

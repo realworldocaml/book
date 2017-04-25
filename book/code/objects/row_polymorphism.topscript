@@ -6,7 +6,7 @@
 #thread;;
 #camlp4o;;
 #require "core";;
-#require "core.syntax";;
+#require "ppx_jane";;
 open Core_kernel;;
 type shape = < area : float > ;;
 [%%expect{|type shape = < area : float >|}];;
