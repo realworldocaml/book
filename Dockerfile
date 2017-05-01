@@ -1,9 +1,10 @@
-FROM ocaml/opam:alpine_ocaml-4.03.0
+FROM ocaml/opam:alpine_ocaml-4.04.1
 RUN git -C /home/opam/opam-repository pull origin master && opam update
 RUN opam remote add js git://github.com/janestreet/opam-repository && opam update
 RUN opam pin add -n uri --dev
 RUN opam pin add -n ipaddr --dev
-RUN opam depext -ui core async ocamlnet cohttp mtime toplevel_expect_test sexplib ppx_tools
+RUN opam pin add -n -y ocaml-topexpect https://github.com/let-def/topexpect.git
+RUN opam depext -ui core async ocamlnet cohttp mtime toplevel_expect_test ocaml-topexpect sexplib ppx_tools
 RUN sudo apk add tzdata vim py-pygments
 COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src

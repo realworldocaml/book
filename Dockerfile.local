@@ -1,4 +1,4 @@
-FROM ocaml/opam:alpine_ocaml-4.03.0
+FROM ocaml/opam:alpine_ocaml-4.04.1
 RUN git -C /home/opam/opam-repository pull origin master && opam update
 RUN opam remote add js git://github.com/janestreet/opam-repository && opam update
 RUN opam pin add -n uri --dev
