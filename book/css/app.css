@@ -350,7 +350,8 @@ code {
   border-width: 0;
   border-style: solid;
   border-color: #adadad;
-  padding: 0.125rem 0.3125rem 0.0625rem; }
+  padding: 0;
+}
 
 /* Lists */
 ul,
