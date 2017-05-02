@@ -256,7 +256,7 @@
             by locally opening <code>Option.Monad_infix</code>. The
             module is called <code>Monad_infix</code> because the
             <code>bind</code> operator is part of a subinterface called
-            <code>Monad</code>, which we'll see again in <a href="18-concurrent-programming.html#concurrent-programming-with-async" data-type="xref">Concurrent Programming With Async</a>:</p>
+            <code>Monad</code>, which we'll see again in <a href="18-concurrent-programming.html#concurrent-programming-with-async" data-type="xref">Concurrent Programming With Async</a>.</p>
           <link rel="import" href="code/error-handling/main.topscript" part="13"/>
 
           <p>
@@ -267,6 +267,30 @@
             examples with many stages of error handling, the
             <code>bind</code> idiom becomes clearer and easier to
             manage.</p>
+
+	  <div class="allow_break" data-type="sidebar">
+	    <h1>Monads and <code>Let_syntax</code></h1> 
+	    <p>
+	      We can make this look a little bit more ordinary by
+	      using a syntax extension that's designed specifically
+	      for monadic binds, called <code>Let_syntax</code>.
+	      Here's what the above example looks like using this
+	      extension. </p>
+	    <link rel="import" href="code/error-handling/main.topscript" part="13.1"/>
+
+	    <p>To understand what's going on here, you need to know
+	    that <code>let%bind x = some_expr in
+	    some_other_expr</code> is rewritten into <code>some_expr
+	    >>= fun x -> some_other_expr</code>.
+	    </p>
+
+	    <p>The advantage of <code>Let_syntax</code> is that it
+	      makes monadic bind look more like a regular let-binding.
+	      This works nicely because you can think of the monadic
+	      bind in this case as a special form of let binding that
+	      has some built-in error handling semantics.
+	    <p>
+	  </div>
 
           <p>
 	    There are other useful idioms encoded in the functions
