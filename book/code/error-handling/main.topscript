@@ -114,6 +114,10 @@ let compute_bounds ~cmp list =
   let%bind last  = List.last sorted in
   Some (first,last)
 ;;
+[%%expect{|
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
+|}];;
 [@@@part "14"];;
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
