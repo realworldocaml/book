@@ -236,7 +236,21 @@ let capture_compiler_stuff ppf ~f =
     ~f
 ;;
 
+(* Standard outputs should be disable: multi threaded code could print
+ * at anytime, so we just disable output by defaul. *)
+
+let stdout_backup = Unix.out_channel_of_descr (Unix.dup Unix.stdout)
+let stderr_backup = Unix.out_channel_of_descr (Unix.dup Unix.stderr)
+
+let disable_outputs = lazy (
+  let fd_out = Unix.openfile "/dev/null" Unix.[O_WRONLY] 0o600 in
+  Unix.dup2 fd_out Unix.stdout;
+  Unix.dup2 fd_out Unix.stderr;
+  Unix.close fd_out;
+)
+
 let redirect ~f =
+  let lazy () = disable_outputs in
   let stdout_backup = Unix.dup Unix.stdout in
   let stderr_backup = Unix.dup Unix.stdout in
   let filename = Filename.temp_file "expect-test" "stdout" in
@@ -452,7 +466,7 @@ let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
   if sexp_output then (
     document_of_phrases file_contents success phrases
     |> Toplevel_expect_test_types.Document.sexp_of_t
-    |> Sexplib.Sexp.output stdout
+    |> Sexplib.Sexp.output stdout_backup
   );
   success
 ;;
@@ -481,8 +495,8 @@ let process_file fname =
   Sys.interactive := false;
   let success =
     process_expect_file ~fname
-    ~dry_run:!dry_run ~use_color:!use_color
-    ~in_place:!in_place ~sexp_output:!sexp_output
+      ~dry_run:!dry_run ~use_color:!use_color
+      ~in_place:!in_place ~sexp_output:!sexp_output
   in
   exit (if success then 0 else 1)
 ;;
@@ -496,12 +510,12 @@ let args =
     ]
 
 let print_version () =
-  Printf.printf "topexect, version %s\n" Sys.ocaml_version;
+  Printf.fprintf stdout_backup "topexect, version %s\n" Sys.ocaml_version;
   exit 0;
 ;;
 
 let print_version_num () =
-  Printf.printf "%s\n" Sys.ocaml_version;
+  Printf.fprintf stdout_backup "%s\n" Sys.ocaml_version;
   exit 0;
 ;;
 
@@ -582,7 +596,6 @@ let monkey_patch (type a) (type b) (m: a) (prj: unit -> b) (v : b) =
     with Exit -> ()
   )
 
-
 let main () =
   let module M = struct
     module type T = module type of Env
@@ -597,10 +610,12 @@ let main () =
   try
     let args = Arg.align (args @ Options.list) in
     Arg.parse args process_file (usage ^ "\nOptions are:");
-    prerr_endline usage;
+    Printf.fprintf stderr_backup "%s\n%!" usage;
     exit 2
   with exn ->
-    Location.report_exception Format.err_formatter exn;
+    ignore (Format.flush_str_formatter ());
+    Location.report_exception Format.str_formatter exn;
+    Printf.fprintf stderr_backup "%s\n%!" (Format.flush_str_formatter ());
     exit 2
 ;;
 let () = main ()
