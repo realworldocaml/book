@@ -106,6 +106,18 @@ let compute_bounds ~cmp list =
 val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
+[@@@part "13.1"];;
+let compute_bounds ~cmp list =
+  let open Option.Let_syntax in
+  let sorted = List.sort ~cmp list in
+  let%bind first = List.hd sorted in
+  let%bind last  = List.last sorted in
+  Some (first,last)
+;;
+[%%expect{|
+val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+  <fun>
+|}];;
 [@@@part "14"];;
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in

@@ -9,6 +9,7 @@
     <section xmlns="http://www.w3.org/1999/xhtml" id="concurrent-programming-with-async" data-type="chapter">
       <h1>Concurrent Programming with Async</h1>
 
+
       <p>
 	The logic of building programs that interact with the
 	outside world is often dominated by waiting: waiting for the
@@ -101,9 +102,9 @@
 
 	<p>
 	  We first load the Async package in the toplevel
-	  using <code>#require</code>, and then open the module. Like
-	  Core, Async is a kind of extension to your fundamental
-	  programming environment, and is therefore designed to be
+	  using <code>#require</code>, and then open the
+	  module. Async, Like Core, is designed to be an extension to
+	  your basic programming environment, and is intended to be
 	  opened.</p>
 
 	<p>
@@ -135,60 +136,68 @@
 	<p>
 	  Slightly confusingly, the type shown here is not the type
 	  of <code>contents</code>, which is <code>string
-	  Deferred.t</code>, but rather the type of the value
-	  contained within that deferred.</p>
+	  Deferred.t</code>, but rather <code>string</code>, the type
+	  of the value contained within that deferred.</p>
 
 	<p>
-	  If we peek again, we'll see that the value of
-	  <code>contents</code> has been determined:</p>
+	  If we peek again, we'll see that the value
+	  of <code>contents</code> has been filled in.</p>
 
 	<link rel="import" href="code/async/main.topscript" part="6"/> 
 
 	<p>
 	  In order to do real work with deferreds, we need a way of
 	  waiting for a deferred computation to finish, which we do
-	  using <code>Deferred.bind</code>. First, let's consider the
-	  type-signature of <code>bind</code>:</p>
+	  using <code>Deferred.bind</code>. Here's the type-signature
+	  of <code>bind</code>.</p>
 
 	<link rel="import" href="code/async/main.topscript" part="7"/> 
 
 	<p>
-	  <code>Deferred.bind d ~f</code> takes a deferred
-	  value <code>d</code> and a function <code>f</code>. The
-	  function <code>f</code> is only run once the value
-	  of <code>d</code> has been determined.  You can think
-	  of <code>Deferred.bind</code> as a kind of sequencing
-	  operator, and what we're doing is essentially taking an
-	  asynchronous computation <code>d</code> and tacking on
-	  another stage comprised by the actions of the
-	  function <code>f</code>.
-
+	  <code>bind</code> is effectively a way of sequencing
+	  concurrent computations. In particular, <code>Deferred.bind
+	  d ~f</code> causes <code>f</code> to be called after the
+	  value of <code>d</code> has been determined.
 	  <idx>Deferred.bind</idx></p>
 
 	<p>
 	  Here's a simple use of <code>bind</code> for a function
 	  that replaces a file with an uppercase version of its
-	  contents:</p>
+	  contents. </p>
 
 	<link rel="import" href="code/async/main.topscript" part="8"/> 
 
+	<p>Again, <code>bind</code> is acting as a
+	  sequencing operator, causing the file to be saved via the
+	  call to <code>Writer.save</code> only after the contents of
+	  the file were first read
+	  via <code>Reader.file_contents</code>.</p>
+
 	<p>
 	  Writing out <code>Deferred.bind</code> explicitly can be
-	  rather verbose, and so <code>Async.Std</code> includes an
-	  infix operator for it: <code>&gt;&gt;=</code>. Using this
-	  operator, we can rewrite <code>uppercase_file</code> as
-	  follows:</p>
+	  rather verbose, and so Async includes an infix operator for
+	  it: <code>&gt;&gt;=</code>. Using this operator, we can
+	  rewrite <code>uppercase_file</code> as follows:</p>
 
 	<link rel="import" href="code/async/main.topscript" part="9"/> 
 
 	<p>
-	  In the preceding code, we've dropped the parentheses
-	  around the function on the righthand side of the bind, and we
+	  In the preceding code, we've dropped the parentheses around
+	  the function on the righthand side of the bind, and we
 	  didn't add a level of indentation for the contents of that
 	  function. This is standard practice for using the
-	  <code>bind</code> operator.
+	  infix <code>bind</code>operator.
 
 	  <idx>bind function</idx></p>
+
+	<div data-type="note">
+	  <h1>Using <code>Let_syntax</code> with Async</h1>
+
+	  As was discussed in
+	  <a href="07-error-handling.html#bind-and-other-error-handling-idioms"
+	     data-type="xref">,
+	</div>
+
 
 	<p>
 	  Now let's look at another potential use of
@@ -249,6 +258,28 @@
 	  <span class="command"><em>utop</em></span> waits for that
 	  deferred to become determined, and shows us the contents of
 	  the deferred instead.</p>
+
+	<div data-type="note">
+	  <h1>Using <code>Let_syntax</code> with Async</h1>
+
+	  <p>As was discussed in
+	    <a href="07-error-handling.html#bind-and-other-error-handling-idioms"
+	       data-type="xref">, there is a special syntax designed for
+	      working with monads.  Here's the <code>bind</code>-using
+	      version of <code>count_lines</code> in that syntax.</p>
+          <link rel="import" href="code/async/main.topscript" part="12.1"/> 
+
+	  <p>We can also present the <code>map</code> version
+	  of <code>count_lines</code>.</p>
+          <link rel="import" href="code/async/main.topscript" part="14.1"/> 
+
+	  <code>Let_syntax</code> works for any monad, and you decide
+	  which monad is in use by opening the
+	  appropriate <code>Let_syntax</code>
+	  module. Opening <code>Async</code> also implicitly
+	  opens <code>Deferred.Let_syntax</code>, but in some contexts
+	  you may may want to do that explicitly.
+	</div>
 
 	<section id="ivars-and-upon" data-type="sect2">
           <h2>Ivars and Upon</h2>

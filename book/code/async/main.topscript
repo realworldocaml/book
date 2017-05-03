@@ -102,7 +102,13 @@ let count_lines filename =
   >>= fun text ->
   return (List.length (String.split text ~on:'\n'))
 ;;
+[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
 
+[@@@part "12.1"];;
+let count_lines filename =
+  let%bind text = Reader.file_contents filename in
+  return (List.length (String.split text ~on:'\n'))
+;;
 
 [%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
 [@@@part "13"];;
@@ -122,6 +128,13 @@ count_lines "/etc/hosts";;
 
 
 [%%expect{|- : int = 10|}];;
+[@@@part "14.1"];;
+let count_lines filename =
+  let%map text = Reader.file_contents filename in
+  List.length (String.split text ~on:'\n')
+;;
+[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
+
 [@@@part "15"];;
 let ivar = Ivar.create ();;
 [%%expect{|
