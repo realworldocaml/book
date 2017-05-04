@@ -1,4 +1,4 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
+sh<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/>
 
@@ -20,7 +20,7 @@
 	events at the same time, responding immediately to whatever
 	event happens first.
 
-	<idx>interactive input/concurrent programming for</idx> 
+	<idx>interactive input/concurrent programming for</idx>
 	<idx>concurrent programming</idx>
 	<idx>programming/concurrent programming with Async</idx></p>
 
@@ -78,7 +78,7 @@
 	  Recall how I/O is typically done in Core. Here's a simple
 	  example:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="1"/> 
+	<link rel="import" href="code/async/main.topscript" part="1"/>
 
 	<p>
 	  From the type of <code>In_channel.read_all</code>, you can
@@ -98,7 +98,7 @@
 	  equivalent of <code>In_channel.read_all</code>.
 	  <idx>Deferred.t</idx></p>
 
-	<link rel="import" href="code/async/main.topscript" part="3"/> 
+	<link rel="import" href="code/async/main.topscript" part="3"/>
 
 	<p>
 	  We first load the Async package in the toplevel
@@ -114,7 +114,7 @@
 	  deferred will initially be empty, as you can see by
 	  calling <code>Deferred.peek</code>.  <idx>Deferred.peek</idx></p>
 
-	<link rel="import" href="code/async/main.topscript" part="4"/> 
+	<link rel="import" href="code/async/main.topscript" part="4"/>
 
 	<p>
 	  The value in <code>contents</code> isn't yet determined
@@ -130,7 +130,7 @@
 	  running and block until the deferred is determined. Thus, we
 	  can write:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="5"/> 
+	<link rel="import" href="code/async/main.topscript" part="5"/>
 
 
 	<p>
@@ -143,7 +143,7 @@
 	  If we peek again, we'll see that the value
 	  of <code>contents</code> has been filled in.</p>
 
-	<link rel="import" href="code/async/main.topscript" part="6"/> 
+	<link rel="import" href="code/async/main.topscript" part="6"/>
 
 	<p>
 	  In order to do real work with deferreds, we need a way of
@@ -151,7 +151,7 @@
 	  using <code>Deferred.bind</code>. Here's the type-signature
 	  of <code>bind</code>.</p>
 
-	<link rel="import" href="code/async/main.topscript" part="7"/> 
+	<link rel="import" href="code/async/main.topscript" part="7"/>
 
 	<p>
 	  <code>bind</code> is effectively a way of sequencing
@@ -165,7 +165,7 @@
 	  that replaces a file with an uppercase version of its
 	  contents. </p>
 
-	<link rel="import" href="code/async/main.topscript" part="8"/> 
+	<link rel="import" href="code/async/main.topscript" part="8"/>
 
 	<p>Again, <code>bind</code> is acting as a
 	  sequencing operator, causing the file to be saved via the
@@ -179,7 +179,7 @@
 	  it: <code>&gt;&gt;=</code>. Using this operator, we can
 	  rewrite <code>uppercase_file</code> as follows:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="9"/> 
+	<link rel="import" href="code/async/main.topscript" part="9"/>
 
 	<p>
 	  In the preceding code, we've dropped the parentheses around
@@ -204,7 +204,7 @@
 	  <code>bind</code>. In this case, we'll write a function that
 	  counts the number of lines in a file:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="10"/> 
+	<link rel="import" href="code/async/main.topscript" part="10"/>
 
 	<p>
 	  This looks reasonable enough, but as you can see, the
@@ -219,14 +219,14 @@
 	  <idx>return function</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="11"/> 
+	<link rel="import" href="code/async/main.topscript" part="11"/>
 
 	<p>
 	  Using <code>return</code>, we can
 	  make <code>count_lines</code> compile:</p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="12"/> 
+	<link rel="import" href="code/async/main.topscript" part="12"/>
 
 	<p>
 	  Together, <code>bind</code> and <code>return</code> form a
@@ -244,14 +244,14 @@
 	  shortcut for it called <code>Deferred.map</code>, which has
 	  the following signature:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="13"/> 
+	<link rel="import" href="code/async/main.topscript" part="13"/>
 
 	<p>
 	  and comes with its own infix equivalent,
 	  <code>&gt;&gt;|</code>. Using it, we can rewrite
 	  <code>count_lines</code> again a bit more succinctly:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="14"/> 
+	<link rel="import" href="code/async/main.topscript" part="14"/>
 
 	<p>
 	  Note that <code>count_lines</code> returns a deferred, but
@@ -267,11 +267,11 @@
 	       data-type="xref">, there is a special syntax designed for
 	      working with monads.  Here's the <code>bind</code>-using
 	      version of <code>count_lines</code> in that syntax.</p>
-          <link rel="import" href="code/async/main.topscript" part="12.1"/> 
+          <link rel="import" href="code/async/main.topscript" part="12.1"/>
 
 	  <p>We can also present the <code>map</code> version
 	  of <code>count_lines</code>.</p>
-          <link rel="import" href="code/async/main.topscript" part="14.1"/> 
+          <link rel="import" href="code/async/main.topscript" part="14.1"/>
 
 	  <code>Let_syntax</code> works for any monad, and you decide
 	  which monad is in use by opening the
@@ -307,7 +307,7 @@
             using <code>Ivar.fill</code>. These operations are
             illustrated below:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="15"/> 
+          <link rel="import" href="code/async/main.topscript" part="15"/>
 
           <p>
 	    Ivars are something of a low-level feature; operators
@@ -324,7 +324,7 @@
             are executed in the same order they were scheduled in.
             Here's a reasonable signature that captures this idea:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="16"/> 
+          <link rel="import" href="code/async/main.topscript" part="16"/>
 
           <p>
 	    An action is handed to <code>schedule</code> in the form
@@ -339,7 +339,7 @@
 	    <idx>thunks</idx></p>
 
 
-          <link rel="import" href="code/async/main.topscript" part="17"/> 
+          <link rel="import" href="code/async/main.topscript" part="17"/>
 
           <p>
 	    Like <code>bind</code> and <code>return</code>,
@@ -357,7 +357,7 @@
             a time span and returns a deferred which becomes determined
             after that time span elapses:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="18"/> 
+          <link rel="import" href="code/async/main.topscript" part="18"/>
 
           <p>
 	    This code isn't particularly long, but it is subtle. In
@@ -430,12 +430,12 @@
 	  provide a convenient abstraction for working with input and
 	  output channels:
 
-	  <idx>Writer module</idx> 
-	  <idx>Reader module</idx> 
+	  <idx>Writer module</idx>
+	  <idx>Reader module</idx>
 	  <idx>I/O (input/output) operations/copying data</idx></p>
 
 
-	<link rel="import" href="code/async/echo.ml"/> 
+	<link rel="import" href="code/async/echo.ml"/>
 
 	<p>
 	  Bind is used in the code to sequence the operations:
@@ -475,7 +475,7 @@
 	  this, and so there's no memory leak after all. This is
 	  essentially a form of tail-call optimization, lifted to the
 	  Async monad.
-	  
+
 	  <idx>tail calls</idx></p>
 
 	<p>
@@ -485,11 +485,11 @@
 	  <code>copy_blocks</code>. For this, we'll use Async's
 	  <code>Tcp</code> module, which has a collection of utilities
 	  for creating TCP clients and servers:
-	  
+
 	  <idx>TCP clients/servers</idx></p>
 
 
-	<link rel="import" href="code/async/echo.ml" part="1"/> 
+	<link rel="import" href="code/async/echo.ml" part="1"/>
 
 	<p>
 	  The result of calling <code>Tcp.Server.create</code> is a
@@ -513,7 +513,7 @@
 	  Finally, we need to initiate the server and start the
 	  Async scheduler:</p>
 
-	<link rel="import" href="code/async/echo.ml" part="2"/> 
+	<link rel="import" href="code/async/echo.ml" part="2"/>
 
 	<p>
 	  One of the most common newbie errors with Async is to
@@ -533,7 +533,7 @@
 	  echo server using the netcat tool, which is invoked as
 	  <code>nc</code>:</p>
 
-	<link rel="import" href="code/async/run_echo.rawsh"/> 
+	<link rel="import" href="code/async/run_echo.rawsh"/>
 
 	<aside data-type="note">
           <h5>Functions that Never Return</h5>
@@ -551,14 +551,14 @@
 	    <idx>functions/non-returning</idx></p>
 
 
-          <link rel="import" href="code/async/main.topscript" part="19"/> 
+          <link rel="import" href="code/async/main.topscript" part="19"/>
 
           <p>
 	    This can be surprising when you call a function like
             this expecting it to return <code>unit</code>. The
             type-checker won't necessarily complain in such a case:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="20"/> 
+          <link rel="import" href="code/async/main.topscript" part="20"/>
 
           <p>
 	    With a name like <code>loop_forever</code>, the meaning
@@ -569,7 +569,7 @@
             <code>never_returns</code>. Let's do the same trick with
             <code>loop_forever</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="21"/> 
+          <link rel="import" href="code/async/main.topscript" part="21"/>
 
           <p>
 	    The type <code>never_returns</code> is uninhabited, so a
@@ -580,13 +580,13 @@
             <code>do_stuff</code> function, we'll get a helpful type
             error:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="22"/> 
+          <link rel="import" href="code/async/main.topscript" part="22"/>
 
           <p>
 	    We can resolve the error by calling the function
             <code>never_returns</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="23"/> 
+          <link rel="import" href="code/async/main.topscript" part="23"/>
 
           <p>
 	    Thus, we got the compilation to go through by explicitly
@@ -626,7 +626,7 @@
           <p>
 	    The following code does all of this:</p>
 
-          <link rel="import" href="code/async/better_echo.ml"/> 
+          <link rel="import" href="code/async/better_echo.ml"/>
 
           <p>
 	    Note the use of <code>Deferred.never</code> in the
@@ -653,7 +653,7 @@
           <p>
 	    Pipes are created in connected read/write pairs:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="24"/> 
+          <link rel="import" href="code/async/main.topscript" part="24"/>
 
           <p>
 	    <code>r</code> and <code>w</code> are really just read
@@ -668,13 +668,13 @@
             wait by hitting
             <strong><code>Control-C</code></strong>:</p>
 
-          <link rel="import" href="code/async/pipe_write_break.rawscript"/> 
+          <link rel="import" href="code/async/pipe_write_break.rawscript"/>
 
           <p>
 	    The deferred returned by write completes on its own once
             the value written into the pipe has been read out:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="25"/> 
+          <link rel="import" href="code/async/main.topscript" part="25"/>
 
           <p>
 	    In the function <code>run</code>, we're taking advantage
@@ -684,7 +684,7 @@
             data from a reader-pipe and moves it to a writer-pipe.
             Here's the type of <code>Pipe.transfer</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="26"/> 
+          <link rel="import" href="code/async/main.topscript" part="26"/>
 
           <p>
 	    The two pipes being connected are generated by the
@@ -711,7 +711,7 @@
             module with an extended version that contains the
             <code>async_basic</code> call:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="27"/> 
+          <link rel="import" href="code/async/main.topscript" part="27"/>
 
           <p>
 	    This differs from the ordinary
@@ -802,7 +802,7 @@
             going to use to query the DuckDuckGo servers:</p>
 
 
-          <link rel="import" href="code/async/search.ml"/> 
+          <link rel="import" href="code/async/search.ml"/>
 
           <p>
 	    A <code>Uri.t</code> is constructed from the
@@ -835,7 +835,7 @@
             under both keys, returning the first one for which a
             nonempty value is defined:</p>
 
-          <link rel="import" href="code/async/search.ml" part="1"/> 
+          <link rel="import" href="code/async/search.ml" part="1"/>
 	</section>
 
 	<section id="executing-an-http-client-query" data-type="sect2">
@@ -851,14 +851,14 @@
 	    <idx>DuckDuckGo search engine/executing an HTTP client query in</idx></p>
 
 
-          <link rel="import" href="code/async/search.ml" part="2"/> 
+          <link rel="import" href="code/async/search.ml" part="2"/>
 
           <p>
 	    To better understand what's going on, it's useful to
             look at the type for <code>Cohttp_async.Client.get</code>,
             which we can do in <span class="command"><em>utop</em></span>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="28"/> 
+          <link rel="import" href="code/async/main.topscript" part="28"/>
 
           <p>
 	    The <code>get</code> call takes as a required argument a
@@ -880,7 +880,7 @@
             dispatching multiple searches in parallel. First, we need
             code for formatting and printing out the search result:</p>
 
-          <link rel="import" href="code/async/search.ml" part="3"/> 
+          <link rel="import" href="code/async/search.ml" part="3"/>
 
           <p>
 	    We use the <code>Wrapper</code> module from the
@@ -900,7 +900,7 @@
 	    The next function dispatches the searches in parallel,
             waits for the results, and then prints:</p>
 
-          <link rel="import" href="code/async/search.ml" part="4"/> 
+          <link rel="import" href="code/async/search.ml" part="4"/>
 
           <p>
 	    We used <code>List.map</code> to call
@@ -908,7 +908,7 @@
             <code>Deferred.all</code> to wait for all the results.
             Here's the type of <code>Deferred.all</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="29"/> 
+          <link rel="import" href="code/async/main.topscript" part="29"/>
 
           <p>
 	    Note that the list returned by <code>Deferred.all</code>
@@ -919,7 +919,7 @@
             the results as they're received (and thus potentially out
             of order) as follows:</p>
 
-          <link rel="import" href="code/async/search_out_of_order.ml" part="1"/> 
+          <link rel="import" href="code/async/search_out_of_order.ml" part="1"/>
 
           <p>
 	    The difference is that we both dispatch the query and
@@ -932,19 +932,19 @@
             every deferred on the input list is determined. We can see
             the type of this function in <span class="command"><em>utop</em></span>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="30"/> 
+          <link rel="import" href="code/async/main.topscript" part="30"/>
 
           <p>
 	    Finally, we create a command-line interface using
             <code>Command.async_basic</code>:</p>
 
-          <link rel="import" href="code/async/search.ml" part="5"/> 
+          <link rel="import" href="code/async/search.ml" part="5"/>
 
           <p>
 	    And that's all we need for a simple but usable
             definition searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a></p>
 
-          <link rel="import" href="code/async/run_search.rawsh"/> 
+          <link rel="import" href="code/async/run_search.sh"/>
 	</section>
       </section>
 
@@ -960,9 +960,9 @@
 	  them will show up as exceptions. We covered exception
 	  handling in OCaml in <a href="07-error-handling.html#exceptions" data-type="xref">Exceptions</a>, but as we'll see, exception handling
 	  in a concurrent program presents some new challenges.
-	  
+
 	  <idx>exceptions/in concurrent programming</idx>
-	  
+
 	  <idx>concurrent programming</idx> <idx id="ALexcept">Async library/exception handling in</idx></p>
 
 	<p>
@@ -974,7 +974,7 @@
 	  or returns <code>unit</code>, alternating between the two
 	  behaviors on subsequent calls:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="31"/> 
+	<link rel="import" href="code/async/main.topscript" part="31"/>
 
 	<p>
 	  In <span class="command"><em>utop</em></span>, the
@@ -989,7 +989,7 @@
 	  <code>try/with</code> statement, but as you can see that
 	  doesn't quite do the trick:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="32"/> 
+	<link rel="import" href="code/async/main.topscript" part="32"/>
 
 	<p>
 	  This didn't work because <code>try/with</code> only
@@ -1001,11 +1001,11 @@
 	<p>
 	  We can capture this kind of asynchronous error using the
 	  <code>try_with</code> function provided by Async:
-	  
+
 	  <idx>exceptions/asynchronous errors</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="33"/> 
+	<link rel="import" href="code/async/main.topscript" part="33"/>
 
 	<p>
 	  <code>try_with f</code> takes as its argument a
@@ -1028,7 +1028,7 @@
             Monitors are fairly low-level and are only occasionally
             used directly, but it's nonetheless worth understanding how
             they work.
-	    
+
 	    <idx>monitors</idx></p>
 
           <p>
@@ -1049,7 +1049,7 @@
             <code>within'</code>, which takes a thunk that returns a
             deferred. Here's an example:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="34"/> 
+          <link rel="import" href="code/async/main.topscript" part="34"/>
 
           <p>
 	    In addition to the ordinary stack-trace, the exception
@@ -1072,7 +1072,7 @@
             function that captures and ignores errors in the processes
             it spawns:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="35"/> 
+          <link rel="import" href="code/async/main.topscript" part="35"/>
 
           <p>
 	    The message "an error happened" is printed out, but the
@@ -1092,7 +1092,7 @@
             current monitor, which is the parent of the newly created
             monitor:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="36"/> 
+          <link rel="import" href="code/async/main.topscript" part="36"/>
 
           <p>
 	    Note that we use <code>Monitor.extract_exn</code> to
@@ -1107,14 +1107,14 @@
             <code>Not_found</code>, then the exception will be passed
             to the parent monitor and delivered as usual:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="37"/> 
+          <link rel="import" href="code/async/main.topscript" part="37"/>
 
           <p>
 	    If instead we use <code>Ignore_me</code>, the exception
             will be ignorred, and the deferred never becomes
             determined:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="38"/> 
+          <link rel="import" href="code/async/main.topscript" part="38"/>
 
           <p>
 	    In practice, you should rarely use monitors directly,
@@ -1137,9 +1137,9 @@
 	    Let's now go back and improve the exception handling of
             our DuckDuckGo client. In particular, we'll change it so
             that any query that fails is reported without preventing
-            other queries from completing. 
+            other queries from completing.
 
-	    <idx>exceptions/search engine example</idx> 
+	    <idx>exceptions/search engine example</idx>
 	    <idx>DuckDuckGo search engine/exception handling in</idx></p>
 
           <p>
@@ -1154,7 +1154,7 @@
 	    First we'll need to change <code>query_uri</code> to
             take an argument specifying the server to connect to:</p>
 
-          <link rel="import" href="code/async/search_with_configurable_server.ml" part="1"/> 
+          <link rel="import" href="code/async/search_with_configurable_server.ml" part="1"/>
 
           <p>
 	    In addition, we'll make the necessary changes to get the
@@ -1164,7 +1164,7 @@
             run it giving it a list of servers, some of which won't
             respond to the query:</p>
 
-          <link rel="import" href="code/async/run_search_with_configurable_server.rawsh"/> 
+          <link rel="import" href="code/async/run_search_with_configurable_server.errsh"/>
 
           <p>
 	    As you can see, we got a "Connection refused" failure,
@@ -1175,7 +1175,7 @@
             within each call to <code>get_definition</code>, as
             follows:</p>
 
-          <link rel="import" href="code/async/search_with_error_handling.ml" part="1"/> 
+          <link rel="import" href="code/async/search_with_error_handling.ml" part="1"/>
 
           <p>
 	    Here, we first use <code>try_with</code> to capture the
@@ -1190,13 +1190,13 @@
             <code>print_result</code> so that it can handle the new
             type:</p>
 
-          <link rel="import" href="code/async/search_with_error_handling.ml" part="2"/> 
+          <link rel="import" href="code/async/search_with_error_handling.ml" part="2"/>
 
           <p>
 	    Now, if we run that same query, we'll get individualized
             handling of the connection failures:</p>
 
-          <link rel="import" href="code/async/run_search_with_error_handling.rawsh"/> 
+          <link rel="import" href="code/async/run_search_with_error_handling.sh"/>
 
           <p>
 	    Now, only the query that went to <code>localhost</code>
@@ -1237,7 +1237,7 @@
 	  <idx>Async library/timeouts and cancellations</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="39"/> 
+	<link rel="import" href="code/async/main.topscript" part="39"/>
 
 	<p>
 	  Sometimes, however, we want to wait only for the first of
@@ -1247,7 +1247,7 @@
 	  returns a single deferred that will become determined once
 	  any of the values on the list is determined:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="40"/> 
+	<link rel="import" href="code/async/main.topscript" part="40"/>
 
 	<p>
 	  Let's use this to add timeouts to our DuckDuckGo searches.
@@ -1256,7 +1256,7 @@
 	  of a <code>Time.Span.t</code>) and returns either the
 	  definition, or, if that takes too long, an error:</p>
 
-	<link rel="import" href="code/async/search_with_timeout.ml" part="1"/> 
+	<link rel="import" href="code/async/search_with_timeout.ml" part="1"/>
 
 	<p>
 	  We use <code>&gt;&gt;|</code> above to transform the
@@ -1282,7 +1282,7 @@
 	  <code>get_definition_with_timeout</code> to cancel the
 	  <code>get</code> call if the timeout expires:</p>
 
-	<link rel="import" href="code/async/search_with_timeout_no_leak_simple.ml" part="1"/> 
+	<link rel="import" href="code/async/search_with_timeout_no_leak_simple.ml" part="1"/>
 
 	<p>
 	  Next, we'll modify
@@ -1290,7 +1290,7 @@
 	  to pass in to <code>get_definition</code>, which will become
 	  determined when our timeout expires:</p>
 
-	<link rel="import" href="code/async/search_with_timeout_no_leak_simple.ml" part="2"/> 
+	<link rel="import" href="code/async/search_with_timeout_no_leak_simple.ml" part="2"/>
 
 	<p>
 	  This will work and will cause the connection to shutdown
@@ -1309,7 +1309,7 @@
 	  if and only if that deferred is chosen. Here's the type
 	  signature of <code>choice</code> and <code>choose</code>:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="41"/> 
+	<link rel="import" href="code/async/main.topscript" part="41"/>
 
 	<p>
 	  Note that there's no guarantee that the winning deferred
@@ -1324,14 +1324,14 @@
 	  determined if and only if the timeout deferred is chosen.
 	  Here's the code:</p>
 
-	<link rel="import" href="code/async/search_with_timeout_no_leak.ml" part="2"/> 
+	<link rel="import" href="code/async/search_with_timeout_no_leak.ml" part="2"/>
 
 	<p>
 	  Now, if we run this with a suitably small timeout, we'll
 	  see that one query succeeds and the other fails reporting a
 	  timeout:</p>
 
-	<link rel="import" href="code/async/run_search_with_timeout_no_leak.rawsh"/> 
+	<link rel="import" href="code/async/run_search_with_timeout_no_leak.sh"/>
       </section>
 
       <section id="working-with-system-threads" data-type="sect1">
@@ -1345,8 +1345,8 @@
 	  Async is generally a better choice than system threads, but
 	  even if you mostly use Async, OCaml's system threads are
 	  sometimes necessary, and it's worth understanding them.
-	  
-	  <idx>parallelism</idx> 
+
+	  <idx>parallelism</idx>
 	  <idx>kernel-level threads</idx>
 	  <idx>threads/kernel-level threads</idx>
 	  <idx id="systhrd">system threads</idx>
@@ -1372,7 +1372,7 @@
 	  running such calls. Most of the time, as a user of Async you
 	  don't need to think about this, but it is happening under the
 	  covers.
-	  
+
 	  <idx>threads/benefits of</idx></p>
 
 	<p>
@@ -1401,11 +1401,11 @@
 	  multiple facilities for doing just this,
 	  <code>In_thread.run</code> being the simplest. We can simply
 	  write:
-	  
+
 	  <idx>In_thread module</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="42"/> 
+	<link rel="import" href="code/async/main.topscript" part="42"/>
 
 	<p>
 	  to cause <code>List.range 1 10</code> to be run on one of
@@ -1423,20 +1423,20 @@
 	  becomes determined, at which point it prints out one last
 	  timestamp:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="43"/> 
+	<link rel="import" href="code/async/main.topscript" part="43"/>
 
 	<p>
 	  If we feed this function a simple timeout deferred, it
 	  works as you might expect, waking up roughly every 100
 	  milliseconds:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="44"/> 
+	<link rel="import" href="code/async/main.topscript" part="44"/>
 
 	<p>
 	  Now see what happens if, instead of waiting on a clock
 	  event, we wait for a busy loop to finish running:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="45"/> 
+	<link rel="import" href="code/async/main.topscript" part="45"/>
 
 	<p>
 	  As you can see, instead of waking up 10 times a second,
@@ -1448,7 +1448,7 @@
 	  to offload this to a different system thread, the behavior
 	  will be different:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="46"/> 
+	<link rel="import" href="code/async/main.topscript" part="46"/>
 
 	<p>
 	  Now <code>log_delays</code> does get a chance to run, but
@@ -1468,14 +1468,14 @@
 	  behavior, so if we run a nonallocating loop in bytecode, our
 	  timer process will get to run:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="47"/> 
+	<link rel="import" href="code/async/main.topscript" part="47"/>
 
 	<p>
 	  But if we compile this to a native-code executable, then
 	  the nonallocating busy loop will block anything else from
 	  running:</p>
 
-	<link rel="import" href="code/async/run_native_code_log_delays.rawsh"/> 
+	<link rel="import" href="code/async/run_native_code_log_delays.rawsh"/>
 
 	<p>
 	  The takeaway from these examples is that predicting thread
@@ -1498,9 +1498,9 @@
             structures that seem like they should be safe but are
             mutable under the covers, like lazy values, can have
             undefined behavior when accessed from multiple threads.
-            
+
 	    <idx>mutexes</idx>
-	    <idx>segfaults</idx> 
+	    <idx>segfaults</idx>
 	    <idx>threads/locking and</idx>
 	    <idx>threads/thread-safety</idx></p>
 
