@@ -190,15 +190,6 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 
 	  <idx>bind function</idx></p>
 
-	<div data-type="note">
-	  <h1>Using <code>Let_syntax</code> with Async</h1>
-
-	  As was discussed in
-	  <a href="07-error-handling.html#bind-and-other-error-handling-idioms"
-	     data-type="xref">,
-	</div>
-
-
 	<p>
 	  Now let's look at another potential use of
 	  <code>bind</code>. In this case, we'll write a function that
@@ -262,37 +253,56 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	<div data-type="note">
 	  <h1>Using <code>Let_syntax</code> with Async</h1>
 
-	  <p>As was discussed in
-	    <a href="07-error-handling.html#bind-and-other-error-handling-idioms"
-	       data-type="xref">, there is a special syntax designed for
-	      working with monads.  Here's the <code>bind</code>-using
-	      version of <code>count_lines</code> in that syntax.</p>
-          <link rel="import" href="code/async/main.topscript" part="12.1"/>
+	  <p>As was discussed
+	    in <a href="07-error-handling.html#bind-and-other-error-handling-idioms"
+		  data-type="xref">Error Handling</a>,
+	    there is a special syntax designed 
+	    for working with monads, called <code>Let_syntax</code>.
+	    Here's what the <code>bind</code>-using version
+	    of <code>count_lines</code> looks like with that
+	    syntax.</p>
+          <link rel="import" href="code/async/main.topscript" part="12.1"/> 
 
-	  <p>We can also present the <code>map</code> version
-	  of <code>count_lines</code>.</p>
-          <link rel="import" href="code/async/main.topscript" part="14.1"/>
+	  <p>And here's the <code>map</code>-based version
+	    of <code>count_lines</code>.</p>
+          <link rel="import" href="code/async/main.topscript" part="14.1"/> 
 
-	  <code>Let_syntax</code> works for any monad, and you decide
-	  which monad is in use by opening the
-	  appropriate <code>Let_syntax</code>
-	  module. Opening <code>Async</code> also implicitly
-	  opens <code>Deferred.Let_syntax</code>, but in some contexts
-	  you may may want to do that explicitly.
+	  <p>The difference here is just syntactic, with these
+	    examples compiling down to the same thing as the
+	    corresponding examples written using infix
+	    operators. What's nice about <code>Let_syntax</code> is
+	    that it highlights the analogy between monadic bind and
+	    OCaml's built-in let-binding, thereby making your code
+	    more uniform and more readable.
+	  </p>
+
+	  <p> <code>Let_syntax</code> works for any monad, and you
+	    decide which monad is in use by opening the
+	    appropriate <code>Let_syntax</code>
+	    module. Opening <code>Async</code> also implicitly
+	    opens <code>Deferred.Let_syntax</code>, but in some
+	    contexts you may may want to do that explicitly.</p>
+
+	  <p>To keep things simple, we'll use the infix
+	    notation for map and bind for the remainder of the
+	    chapter. But once you get comfortable with Async and
+	    monadic programming, <code>Let_syntax</code> can make your
+	    code easier to read. </p>
+
 	</div>
 
 	<section id="ivars-and-upon" data-type="sect2">
           <h2>Ivars and Upon</h2>
 
           <p>
-	    Deferreds are usually built using combinations of
-            <code>bind</code>, <code>map</code> and
-            <code>return</code>, but sometimes you want to construct a
-            deferred that you can determine explicitly with usercode.
-            This is done using an <em>ivar</em>. (The term ivar dates
-            back to a language called Concurrent ML that was developed
-            by John Reppy in the early '90s. The "i" in ivar stands for
-            incremental.)
+	    Deferreds are usually built using combinations
+            of <code>bind</code>, <code>map</code>
+            and <code>return</code>, but sometimes you want to
+            construct a deferred where you can programmatically decide
+            when it gets filled in.  This can be done using
+            an <em>ivar</em>. (The term ivar dates back to a language
+            called Concurrent ML that was developed by John Reppy in
+            the early '90s. The "i" in ivar stands for incremental.)
 
 	    <idx>ivars</idx>
 	    <idx>Async library/ivars</idx></p>
@@ -320,9 +330,9 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
           <p>
 	    As an example, imagine we wanted a way of scheduling a
             sequence of actions that would run after a fixed delay. In
-            addition, we'd like to guarantee that these delayed actions
-            are executed in the same order they were scheduled in.
-            Here's a reasonable signature that captures this idea:</p>
+            addition, we'd like to guarantee that these delayed
+            actions are executed in the same order they were scheduled
+            in.  Here's a signature that captures this idea:</p>
 
           <link rel="import" href="code/async/main.topscript" part="16"/>
 

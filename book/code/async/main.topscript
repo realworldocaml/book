@@ -488,7 +488,7 @@ log_delays (fun () -> after (sec 0.5));;
 
 [%%expect{|
 - : unit = ()
-0.0348091ms, 102.198ms, 205.28ms, 310.125ms, 414.026ms, |}];;
+0.0360012ms, 104.664ms, 205.872ms, 306.687ms, 407.929ms, |}];;
 [@@@part "45"];;
 let busy_loop () =
   let x = ref None in
@@ -496,7 +496,7 @@ let busy_loop () =
 ;;
 [%%expect{|
 val busy_loop : unit -> unit = <fun>
-502.224ms, 
+505.552ms, 
 |}];;
 
 log_delays (fun () -> return (busy_loop ()));;
@@ -508,16 +508,19 @@ log_delays (fun () -> In_thread.run busy_loop);;
 
 [%%expect{|
 - : unit = ()
-1.32979s, 
-0.0619888ms, 190.536ms, 298.064ms, 509.639ms, 668.697ms, 879.493ms, 1.14413s, 1.25242s, 1.35789s, |}];;
+1.31663s, 
+0.0579357ms, 177.042ms, 282.277ms, 386.692ms, 490.584ms, 649.979ms, 753.007ms, 966.856ms, 1.07057s, |}];;
 [@@@part "47"];;
 let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
 ;;
-[%%expect{|val noalloc_busy_loop : unit -> unit = <fun>|}];;
+[%%expect{|
+val noalloc_busy_loop : unit -> unit = <fun>
+1.22662s, |}];;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
 [%%expect{|
 - : unit = ()
-1.38298s, 
-0.0350475ms, 186.982ms, 399.162ms, 666.814ms, |}];;
+1.31956s, 
+0.038147ms, 178.984ms, 437.613ms, 645.165ms, 741.531ms, 
+|}];;
