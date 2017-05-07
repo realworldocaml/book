@@ -31,9 +31,9 @@
       lines. At the end, the 10 lines with the highest frequency
       counts are written out. We'll start with a simple
       implementation, which we'll save as the file
-      <em>freq.ml</em>. 
+      <em>freq.ml</em>.
 
-      <idx id="FILEsnglprog">files/single-file programs</idx> 
+      <idx id="FILEsnglprog">files/single-file programs</idx>
       <idx id="Psingfil">programs/single-file programs</idx></p>
 
       <p>This implementation will use two functions from the
@@ -43,10 +43,10 @@
       <code>List.Assoc.find</code>, which looks up a key in an
       association list; and <code>List.Assoc.add</code>, which adds
       a new binding to an association list, as shown here:
-      
-      <idx>List.Assoc module/List.Assoc.add</idx> 
-      <idx>List.Assoc module/List.Assoc.find</idx> 
-      <idx>lists/adding new bindings in</idx> 
+
+      <idx>List.Assoc module/List.Assoc.add</idx>
+      <idx>List.Assoc module/List.Assoc.find</idx>
+      <idx>lists/adding new bindings in</idx>
       <idx>lists/finding key associations in</idx></p>
 
       <link rel="import" part="1" href="code/files-modules-and-programs/intro.topscript"/>
@@ -104,17 +104,17 @@
       <p>If we weren't using <code>Core_kernel</code> or any other
       external libraries, we could build the executable like
       this:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq/simple_build_fail.out"/>
+      <link rel="import" href="code/files-modules-and-programs/freq/simple_build_fail.errsh"/>
 
       <p>But as you can see, it fails because it can't find
       <code>Core_kernel</code>. We need a somewhat more complex
       invocation to get <code>Core_kernel</code> linked in:
-      
-      <idx>OCaml toolchain/ocamlc</idx> 
-      <idx>OCaml toolchain/ocamlfind</idx> 
+
+      <idx>OCaml toolchain/ocamlc</idx>
+      <idx>OCaml toolchain/ocamlfind</idx>
       <idx>Core standard library/finding with ocamlfind</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq/simple_build.out"/>
+      <link rel="import" href="code/files-modules-and-programs/freq/simple_build.sh"/>
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>,
       a tool which itself invokes other parts of the OCaml
@@ -142,7 +142,7 @@
 
       <idx>corebuild</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq-obuild/build.out"/>
+      <link rel="import" href="code/files-modules-and-programs/freq-obuild/build.sh"/>
 
       <p>If we'd invoked <span class="command"><em>corebuild</em></span> with a target of
       <code>freq.native</code> instead of <code>freq.byte</code>,
@@ -164,7 +164,7 @@
 	<a data-type="indexterm" data-startref="Psingfil">&nbsp;</a>
       </p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq-obuild/test.out"/>
+      <link rel="import" href="code/files-modules-and-programs/freq-obuild/test.sh"/>
 
       <div data-type="note">
         <h1>Bytecode Versus Native Code</h1>
@@ -271,12 +271,12 @@
       represented as an empty list. We'd like to prevent this kind
       of dependency, so we can change the implementation of
       <code>Counter</code> without needing to change client code
-      like that in <code>freq.ml</code>. 
-      
+      like that in <code>freq.ml</code>.
+
       <idx>abstract types</idx>
-      <idx>modules/module type</idx> 
-      <idx>signatures/abstract types</idx> 
-      <idx>interfaces/hiding implementation details with</idx> 
+      <idx>modules/module type</idx>
+      <idx>signatures/abstract types</idx>
+      <idx>interfaces/hiding implementation details with</idx>
       <idx>modules/hiding implementation details</idx></p>
 
       <p>The implementation details of a module can be hidden by
@@ -285,7 +285,7 @@
       <em>module type</em> are all used interchangeably.) A module
       defined by a file <code>filename.ml</code> can be constrained
       by a signature placed in a file called
-      <code>filename.mli</code>. 
+      <code>filename.mli</code>.
 
       <idx>interfaces/synonyms for</idx></p>
 
@@ -315,7 +315,7 @@
 
         <idx>files/mli files</idx></p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-counter/infer_mli.out"/>
+        <link rel="import" href="code/files-modules-and-programs/freq-with-counter/infer_mli.sh"/>
 
         <p>The generated code is basically equivalent to
         the <code>mli</code> that we wrote by hand but is a bit uglier
@@ -353,7 +353,7 @@
 
       <p>If we now try to compile <code>freq.ml</code>, we'll get
       the following error:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/build.out"/>
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/build.errsh"/>
 
       <p>This is because <code>freq.ml</code> depends on the fact
       that frequency counts are represented as association lists, a
@@ -437,7 +437,7 @@
       hostnames. If you just represent these as strings, then it
       becomes easy to confuse one with the
       other.
-	
+
 	<idx>identifiers/dealing with multiple</idx>
 	<idx>nested modules</idx>
 	<idx>modules/nested modules</idx></p>
@@ -677,7 +677,7 @@
         <p>and we try to compile, we'll get the following
         error:</p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.out"/>
+        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.errsh"/>
         </section>
 
       <section id="missing-definitions" data-type="sect2">
@@ -696,7 +696,7 @@
         <p>Now, if we try to compile without actually adding the
         implementation, we'll get this error:</p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/build.out"/>
+        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/build.errsh"/>
 
         <p>A missing type definition will lead to a similar
         error.</p>
@@ -720,7 +720,7 @@
 
         <p>will lead to a compilation error:</p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/build.out"/>
+        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/build.errsh"/>
 
         <p>Order is similarly important to other type declarations,
         including the order in which record fields are declared and
@@ -761,7 +761,7 @@
 
         <p>we'll see this error when we try to build:</p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/build.out"/>
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/build.errsh"/>
 
         <p>The problem manifests in a different way if we create
         cyclic references between files. We could create such a
@@ -776,7 +776,7 @@
         will notice the error and complain explicitly about the
         cycle:</p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.out"/>
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.errsh"/>
       </section>
     </section>
 

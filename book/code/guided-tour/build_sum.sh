@@ -1,1 +1,2 @@
-corebuild sum.native
+jbuilder build sum.exe
+

@@ -1122,13 +1122,12 @@
       <section id="compiling-and-running" data-type="sect2">
         <h2>Compiling and Running</h2>
 
-        <p>We'll compile our program using <span class="command"><em>corebuild</em></span>, a small wrapper on top
-        of <span class="command"><em>ocamlbuild</em></span>, a
-        build tool that ships with the OCaml compiler. The
-        <span class="command"><em>corebuild</em></span> script is
-        installed along with <code>Core_kernel</code>, and its
-        purpose is to pass in the flags required for building a
-        program with <code>Core</code>.<idx>corebuild</idx></p>
+        <p>We'll compile our program
+        using <span class="command"><em>jbuilder</em></span>, a build
+        system that's designed for use with OCaml projects. </p>
+        <link rel="import" href="code/guided-tour/jbuild"/>
+
+	
         <link rel="import" href="code/guided-tour/build_sum.sh"/>
 
         <p>The <code>.native</code> suffix indicates that we're

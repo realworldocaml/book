@@ -1,4 +1,4 @@
 $ corebuild -pkg async native_code_log_delays.native
 $ ./native_code_log_delays.native
-15.5686s, 
-$ 
+15.5686s,
+$
