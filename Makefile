@@ -39,10 +39,10 @@ _build:: Makefile.derived
 
 _build::
 	@echo "# Update _build"
-	@mkdir -p _build 
+	@mkdir -p _build
 	@mkdir -p _build/site/css
-	@rsync -a Makefile.build _build/Makefile
-	@rsync -a $(BUILD_FILES) _build
+	@rsync -L -a Makefile.build _build/Makefile
+	@rsync -L -a $(BUILD_FILES) _build
 
 ################################################################################
 # Install and Uninstall
