@@ -12,6 +12,7 @@ type lang = [
   | `Java
   | `Json
   | `Scheme
+  | `Sexp
 ]
 
 val of_lang : Rwo_lang.t -> lang Or_error.t

@@ -29,6 +29,7 @@ let of_string x = match x with
   | "sh"
   | "syntax"
   | "topscript"
+  | "sexp"
   | "txt" -> Ok x
   | _ -> error "invalid extension" x sexp_of_string
 
@@ -54,4 +55,5 @@ let to_docbook_lang t = match t with
   | "ml"
   | "mli"   -> Ok "ocaml"
   | "scm"   -> Ok "scheme"
+  | "sexp"  -> Ok "lisp"
   | _ -> error "language not supported by docbook" t sexp_of_t

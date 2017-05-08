@@ -24,8 +24,11 @@ include Comparable.Make(T)
 
 let lang_of t =
   match Filename.split_extension t.href with
-  | _, None ->
-    error "href missing file extension" t.href sexp_of_string
+  | name, None ->
+    (let (_, name) = Filename.split name in
+    match name with
+    | "jbuild" -> Lang.of_string "sexp"
+    | _ -> error "href missing file extension" t.href sexp_of_string)
   | _, Some ext ->
     Lang.of_string ext |> fun x ->
     Or_error.tag_arg x "invalid file extension" t.href sexp_of_string
