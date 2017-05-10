@@ -22,13 +22,7 @@ end
 include T
 include Comparable.Make(T)
 
-let lang_of t =
-  match Filename.split_extension t.href with
-  | _, None ->
-    error "href missing file extension" t.href sexp_of_string
-  | _, Some ext ->
-    Lang.of_string ext |> fun x ->
-    Or_error.tag_arg x "invalid file extension" t.href sexp_of_string
+let lang_of t = Lang.of_filename t.href
 
 let is_import_html = function
   | `Data _ -> false
