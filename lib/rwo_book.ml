@@ -2,6 +2,7 @@ open Core
 open Async
 module Html = Rwo_html
 module Import = Rwo_import
+module References = Rwo_references
 module Index = Rwo_index
 module Scripts = Rwo_scripts
 module Toc = Rwo_toc
@@ -216,11 +217,12 @@ let make_chapter_page ?pygmentize repo_root chapters chapter_file
     ) >>=
     Scripts.script_part_to_html ?pygmentize
   in
-
   let rec loop scripts html : Html.t Deferred.t =
     (Deferred.List.map html ~f:(fun item ->
       if Import.is_import_html item then
         import_node_to_html scripts (ok_exn (Import.of_html item))
+      else if References.is_reference item then
+        return (References.add_reference chapter_file item)
       else match item with
       | `Data _ -> return item
       | `Element {Html.name; attrs; childs} -> (
