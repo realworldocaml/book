@@ -10,10 +10,12 @@ open Parsetree
 (** {1 Phrase parsing} *)
 
 type phrase = {
-  startpos: position;
-  endpos: position;
-  parsed: (toplevel_phrase, exn) result;
+  startpos : position;
+  endpos   : position;
+  parsed   : (toplevel_phrase, exn) result;
 }
+
+type chunk_kind = OCaml_chunk | Raw_chunk
 
 let toplevel_fname = "//toplevel//"
 
@@ -90,35 +92,45 @@ let parse_phrase (contents, lexbuf) =
 
 type 'a phrase_role =
   | Phrase_code of 'a
-  | Phrase_expect of string
+  | Phrase_expect of (chunk_kind * string) list
   | Phrase_part of string
 
-let payload_constant = function
-  | PStr [{pstr_desc = Pstr_eval ({pexp_desc = Pexp_constant const}, _); _}] ->
-    Some const
-  | _ -> None
+let payload_constants = function
+  | PStr [{pstr_desc = Pstr_eval (expr, _); _}] ->
+    let rec consts = function
+      | {pexp_desc=Pexp_sequence({pexp_desc = Pexp_constant const}, rest)} ->
+        const :: consts rest
+      | {pexp_desc = Pexp_constant const} -> [const]
+      | _ -> []
+    in
+    consts expr
+  | _ -> []
 
-let payload_string = function
-  | PStr [] -> Some ""
-  | x -> match payload_constant x with
-    | Some (Pconst_string (str, _)) -> Some str
-    | _ -> None
+let payload_strings = function
+  | PStr [] -> []
+  | x ->
+    let rec aux = function
+      | Pconst_string (str, opt) :: rest -> (str, opt) :: aux rest
+      | _ -> []
+    in
+    aux (payload_constants x)
 
 let constant_payload const = PStr [Ast_helper.(Str.eval (Exp.constant const))]
 let string_payload x = constant_payload (Pconst_string (x, None))
 
 let phrase_role phrase = match phrase.parsed with
   | Ok (Ptop_def [{pstr_desc = Pstr_extension((name, payload), attrs); pstr_loc = loc}])
-      when name.Asttypes.txt = "expect" && payload_string payload <> None ->
-    begin match payload_string payload with
-      | None -> assert false
-      | Some const -> Phrase_expect const
-    end
+    when name.Asttypes.txt = "expect" && payload_strings payload <> [] ->
+    let expect_kind = function
+      | (str, Some "ocaml") -> (OCaml_chunk, str)
+      | (str, _) -> (Raw_chunk, str)
+    in
+    Phrase_expect (List.map expect_kind (payload_strings payload))
   | Ok (Ptop_def [{pstr_desc = Pstr_attribute (name, payload); pstr_loc = loc}])
-      when name.Asttypes.txt = "part" && payload_string payload <> None ->
-    begin match payload_string payload with
-      | None -> Phrase_code ()
-      | Some part -> Phrase_part part
+    when name.Asttypes.txt = "part" && payload_strings payload <> [] ->
+    begin match payload_strings payload with
+      | [part, _] -> Phrase_part part
+      | _ -> Phrase_code ()
     end
   | _ -> Phrase_code ()
 
@@ -290,32 +302,58 @@ let cleanup_singleline str =
       String.sub str trim_from (x - trim_from)
     | _ -> str
 
+let cleanup_chunk (kind, str) =
+  let len = String.length str in
+  if len = 0 then (kind, str) else
+    let trim_from = if str.[0] = '\n' then 1 else 0 in
+    let trim_to = if str.[len - 1] = '\n' then len - 1 else len in
+    (kind, String.sub str trim_from (trim_to - trim_from))
+
+let cleanup_lines lines =
+  let lines = List.map cleanup_chunk lines in
+  let rec join = function
+    | (Raw_chunk, str1) :: (Raw_chunk, str2) :: rest ->
+      join ((Raw_chunk, str1 ^ "\n" ^ str2) :: rest)
+    | (OCaml_chunk, str1) :: (OCaml_chunk, str2) :: rest ->
+      join ((OCaml_chunk, str1 ^ "\n" ^ str2) :: rest)
+    | x :: xs -> x :: join xs
+    | [] -> []
+  in
+  join lines
+
 let eval_phrases ~fname ~dry_run fcontents =
   (* 4.03: Warnings.reset_fatal (); *)
   let buf = Buffer.create 1024 in
   let ppf = Format.formatter_of_buffer buf in
   let exec_phrase ~capture phrase =
+    let lines = ref [] in
+    let capture kind =
+      capture buf;
+      match Buffer.contents buf with
+      | "" -> ()
+      | s -> Buffer.clear buf; lines := (kind, s) :: !lines
+    in
     match phrase_role phrase with
     | (Phrase_expect _ | Phrase_part _) as x -> x
     | Phrase_code () ->
-      (* So that [%expect_exact] nodes look nice *)
-      Buffer.add_char buf '\n';
+      let out_phrase' = !Oprint.out_phrase in
+      let out_phrase ppf phr = match phr with
+        | Outcometree.Ophr_exception _ -> out_phrase' ppf phr
+        | _ ->
+          capture Raw_chunk;
+          out_phrase' ppf phr;
+          capture OCaml_chunk;
+      in
+      Oprint.out_phrase := out_phrase;
       begin match toplevel_exec_phrase ppf phrase with
-        | (_ : bool) -> ()
+        | (_ : bool) -> Oprint.out_phrase := out_phrase'
         | exception exn ->
+          Oprint.out_phrase := out_phrase';
           Location.report_exception ppf exn
       end;
       Format.pp_print_flush ppf ();
-      let len = Buffer.length buf in
-      if len > 0 && Buffer.nth buf (len - 1) <> '\n' then
-        (* So that [%expect_exact] nodes look nice *)
-        Buffer.add_char buf '\n';
-      capture buf;
-      if Buffer.nth buf (len - 1) <> '\n' then
-        Buffer.add_char buf '\n';
-      let s = Buffer.contents buf in
-      Buffer.clear buf;
-      Phrase_code (cleanup_singleline s)
+      capture Raw_chunk;
+      Phrase_code (cleanup_lines (List.rev !lines))
   in
   let rec dry_exec phrases = function
     | [] -> List.rev phrases
@@ -323,7 +361,7 @@ let eval_phrases ~fname ~dry_run fcontents =
       begin match rest with
         | (_, Phrase_expect outcome) :: _ ->
           dry_exec ((phrase, Phrase_code outcome) :: phrases) rest
-        | _ -> dry_exec ((phrase, Phrase_code "") :: phrases) rest
+        | _ -> dry_exec ((phrase, Phrase_code []) :: phrases) rest
       end
     | (_, (Phrase_part _ | Phrase_expect _) as phrase) :: rest ->
       dry_exec (phrase :: phrases) rest
@@ -368,7 +406,7 @@ let rec valid_phrases = function
   | (_, Phrase_code outcome) :: (_, Phrase_expect outcome') :: rest ->
     outcome = outcome' && valid_phrases rest
   | (_, Phrase_code outcome) :: rest ->
-    is_whitespace outcome && valid_phrases rest
+    List.for_all (fun (_,s) -> is_whitespace s) outcome && valid_phrases rest
   | (_, Phrase_expect _) :: _ -> false
 
 (* Skip spaces as well as ';;' *)
@@ -412,11 +450,26 @@ let output_phrases oc contents =
           ("\n", phrase_whitespace contents phrase rest)
       in
       let phrase_code = phrase_code contents phrase in
-      if is_whitespace expect_code then
+      if List.for_all (fun (_,s) -> is_whitespace s) expect_code then
         Printf.fprintf oc "%s%s" phrase_code expect_ws
       else
-        Printf.fprintf oc "%s%s[%%%%expect{|%s|}];;%s"
-          phrase_code phrase_ws expect_code expect_ws;
+        let string_of_kind = function
+          | Raw_chunk -> ""
+          | OCaml_chunk -> "ocaml"
+        in
+        let output_expect oc = function
+          | [] -> ()
+          | [(kind, str)] when not (String.contains str '\n') ->
+            let k = string_of_kind kind in
+            Printf.fprintf oc "{%s|%s|%s}" k str k
+          | xs ->
+            List.iter (fun (k,s) ->
+                let k = string_of_kind k in
+                Printf.fprintf oc "{%s|\n%s\n|%s}" k s k
+              ) xs
+        in
+        Printf.fprintf oc "%s%s[%%%%expect%a];;%s"
+          phrase_code phrase_ws output_expect expect_code expect_ws;
       aux rest
     | (_, Phrase_expect _) :: rest ->
       aux rest
@@ -431,6 +484,7 @@ let document_of_phrases contents matched phrases =
     | (_, Phrase_expect _) :: rest ->
       parts_of_phrase part acc rest
     | (phrase, Phrase_code toplevel_response) :: rest ->
+      let toplevel_response = String.concat "\n" (List.map snd toplevel_response) in
       let ocaml_code = phrase_code contents phrase in
       let chunk = {Chunk. ocaml_code; toplevel_response} in
       parts_of_phrase part (chunk :: acc) rest
