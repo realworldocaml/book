@@ -41,6 +41,8 @@ depends: [
   "atdgen"
   "ctypes"
   "ctypes-foreign"
+  "textwrap"
+  "uri"
 ]
 
 available: [

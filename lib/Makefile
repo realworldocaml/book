@@ -25,6 +25,7 @@ SOURCES =                                \
   rwo_index.mli       rwo_index.ml       \
   rwo_lang.mli        rwo_lang.ml        \
   rwo_import.mli      rwo_import.ml      \
+  rwo_references.mli  rwo_references.ml      \
   rwo_ppre.mli        rwo_ppre.ml        \
   rwo_pygments.mli    rwo_pygments.ml    \
   rwo_expect.mli      rwo_expect.ml      \

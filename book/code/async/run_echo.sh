@@ -1,0 +1,6 @@
+corebuild -pkg async echo.native
+./echo.native &
+sleep 1
+echo "This is an echo server" | nc 127.0.0.1 8765
+echo "It repeats whatever I write" | nc 127.0.0.1 8765
+killall -9 echo.native

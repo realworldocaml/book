@@ -11,6 +11,7 @@ type lang = [
   | `Java
   | `Json
   | `Scheme
+  | `Sexp
 ]
 
 let of_lang (x:Lang.t) = match (x :> string) with
@@ -28,6 +29,7 @@ let of_lang (x:Lang.t) = match (x :> string) with
   | "topscript"
   | "rawtopscript" -> Ok `OCaml
   | "scm"          -> Ok `Scheme
+  | "sexp"         -> Ok `Sexp
   | _ ->
     error "we are not supporting this language for pygmentize" x Lang.sexp_of_t
 
@@ -39,6 +41,7 @@ let lang_to_string = function
   | `Java -> "java"
   | `Json -> "json"
   | `Scheme -> "scheme"
+  | `Sexp -> "lisp"
 
 let really_pygmentize ~add_attrs lang contents =
   let arg = match lang with

@@ -30,11 +30,12 @@ let of_string x = match x with
   | "sh"
   | "syntax"
   | "topscript"
+  | "sexp"
   | "txt" -> Ok x
   | _ -> error "invalid extension" x sexp_of_string
 
 let of_filename filename =
-  if Filename.basename filename = "jbuild" then Ok "jbuild"
+  if Filename.basename filename = "jbuild" then Ok "sexp"
   else match Filename.split_extension filename with
   | _, Some ext -> of_string ext
   | _, None ->
@@ -55,5 +56,6 @@ let to_docbook_lang t = match t with
   | "json"  -> Ok "json"
   | "ml"
   | "mli"   -> Ok "ocaml"
-  | "jbuild" | "scm"   -> Ok "scheme"
+  | "scm"   -> Ok "scheme"
+  | "sexp"  -> Ok "lisp"
   | _ -> error "language not supported by docbook" t sexp_of_t
