@@ -106,7 +106,10 @@ Error: This expression has type
 
 [@@@part "11"];;
 let ord_tree = Map.to_tree ord_map;;
-[%%expect{|val ord_tree : (string, int, String.comparator_witness) Map.Tree.t = <abstr>|}];;
+[%%expect{|
+val ord_tree : (string, int, String.comparator_witness) Map_intf.Tree.t =
+  <abstr>
+|}];;
 
 [@@@part "12"];;
 Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
@@ -117,9 +120,9 @@ Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 [%%expect{|
 Characters 45-53:
 Error: This expression has type
-         (string, int, String.comparator_witness) Map.Tree.t
+         (string, int, String.comparator_witness) Map_intf.Tree.t
        but an expression was expected of type
-         (string, int, Reverse.comparator_witness) Map.Tree.t
+         (string, int, Reverse.comparator_witness) Map_intf.Tree.t
        Type String.comparator_witness is not compatible with type
          Reverse.comparator_witness 
 |}];;
@@ -133,10 +136,12 @@ Map.Poly.of_alist_exn digit_alist;;
 [%%expect{|- : (int, string) Map.Poly.t = <abstr>|}];;
 
 [@@@part "16"];;
-Map.symmetric_diff (Map.Poly.singleton 3 "three")
-  (Int.Map.singleton  3 "four" ) ;;
+Map.symmetric_diff 
+  (Map.Poly.singleton 3 "three")
+  (Int.Map.singleton  3 "four" ) 
+;;
 [%%expect{|
-Characters 52-82:
+Characters 55-85:
 Error: This expression has type
          string Int.Map.t = (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
@@ -155,12 +160,10 @@ dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
 [%%expect{|- : int list = [2; 3; 7; 8; 10]|}];;
 
 [@@@part "18"];;
-let (s1,s2) = (Int.Set.of_list [1;2],
-               Int.Set.of_list [2;1]);;
-[%%expect{|
-val s1 : Int.Set.t = <abstr>
-val s2 : Int.Set.t = <abstr>
-|}];;
+let s1 = Int.Set.of_list [1;2];;
+[%%expect{|val s1 : Int.Set.t = <abstr>|}];;
+let s2 = Int.Set.of_list [2;1];;
+[%%expect{|val s2 : Int.Set.t = <abstr>|}];;
 
 [@@@part "19"];;
 Set.equal s1 s2;;
@@ -239,7 +242,7 @@ module Foo_and_bar :
           end
         module Tree :
           sig
-            type 'a t = (Key.t, 'a, comparator_witness) Map.Tree.t
+            type 'a t = (Key.t, 'a, comparator_witness) Map_intf.Tree.t
             val empty : 'a t
             val singleton : Key.t -> 'a -> 'a t
             val of_alist :
@@ -583,7 +586,7 @@ module Foo_and_bar :
           end
         module Tree :
           sig
-            type t = (Elt.t, comparator_witness) Set.Tree.t
+            type t = (Elt.t, comparator_witness) Set_intf.Tree.t
             val compare : t -> t -> int
             val length : t -> int
             val is_empty : t -> bool
@@ -621,8 +624,8 @@ module Foo_and_bar :
             val fold_until :
               t ->
               init:'b ->
-              f:('b -> Elt.t -> ('b, 'stop) Core_set_intf.Continue_or_stop.t) ->
-              ('b, 'stop) Core_set_intf.Finished_or_stopped_early.t
+              f:('b -> Elt.t -> ('b, 'stop) Set_intf.Continue_or_stop.t) ->
+              ('b, 'stop) Set_intf.Finished_or_stopped_early.t
             val fold_right : t -> init:'b -> f:(Elt.t -> 'b -> 'b) -> 'b
             val iter2 :
               t ->
@@ -655,7 +658,8 @@ module Foo_and_bar :
               ?greater_or_equal_to:Elt.t ->
               ?less_or_equal_to:Elt.t ->
               t ->
-              t -> (Elt.t, Elt.t) Set.Merge_to_sequence_element.t Sequence.t
+              t ->
+              (Elt.t, Elt.t) Set_intf.Merge_to_sequence_element.t Sequence.t
             val to_map :
               t ->
               f:(Elt.t -> 'data) ->
@@ -673,9 +677,9 @@ module Foo_and_bar :
             val of_increasing_iterator_unchecked :
               len:int -> f:(int -> Elt.t) -> t
             val stable_dedup_list : Elt.t list -> Elt.t list
-            val map : ('a, 'b) Set.Tree.t -> f:('a -> Elt.t) -> t
+            val map : ('a, 'b) Set_intf.Tree.t -> f:('a -> Elt.t) -> t
             val filter_map :
-              ('a, 'b) Set.Tree.t -> f:('a -> Elt.t option) -> t
+              ('a, 'b) Set_intf.Tree.t -> f:('a -> Elt.t option) -> t
             val of_tree : t -> t
             val of_hash_set : Elt.t Hash_set.t -> t
             val of_hashtbl_keys : (Elt.t, 'a) Hashtbl.t -> t
@@ -726,8 +730,8 @@ module Foo_and_bar :
         val fold_until :
           t ->
           init:'b ->
-          f:('b -> Elt.t -> ('b, 'stop) Core_set_intf.Continue_or_stop.t) ->
-          ('b, 'stop) Core_set_intf.Finished_or_stopped_early.t
+          f:('b -> Elt.t -> ('b, 'stop) Set_intf.Continue_or_stop.t) ->
+          ('b, 'stop) Set_intf.Finished_or_stopped_early.t
         val fold_right : t -> init:'b -> f:(Elt.t -> 'b -> 'b) -> 'b
         val iter2 :
           t ->
@@ -759,7 +763,8 @@ module Foo_and_bar :
           ?order:[ `Decreasing | `Increasing ] ->
           ?greater_or_equal_to:Elt.t ->
           ?less_or_equal_to:Elt.t ->
-          t -> t -> (Elt.t, Elt.t) Set.Merge_to_sequence_element.t Sequence.t
+          t ->
+          t -> (Elt.t, Elt.t) Set_intf.Merge_to_sequence_element.t Sequence.t
         val to_map :
           t ->
           f:(Elt.t -> 'data) ->
@@ -886,7 +891,7 @@ module Foo_and_bar :
           end
         module Tree :
           sig
-            type 'a t = (Key.t, 'a, comparator_witness) Map.Tree.t
+            type 'a t = (Key.t, 'a, comparator_witness) Map_intf.Tree.t
             val empty : 'a t
             val singleton : Key.t -> 'a -> 'a t
             val of_alist :
@@ -1230,7 +1235,7 @@ module Foo_and_bar :
           end
         module Tree :
           sig
-            type t = (Elt.t, comparator_witness) Set.Tree.t
+            type t = (Elt.t, comparator_witness) Set_intf.Tree.t
             val compare : t -> t -> int
             val length : t -> int
             val is_empty : t -> bool
@@ -1268,8 +1273,8 @@ module Foo_and_bar :
             val fold_until :
               t ->
               init:'b ->
-              f:('b -> Elt.t -> ('b, 'stop) Core_set_intf.Continue_or_stop.t) ->
-              ('b, 'stop) Core_set_intf.Finished_or_stopped_early.t
+              f:('b -> Elt.t -> ('b, 'stop) Set_intf.Continue_or_stop.t) ->
+              ('b, 'stop) Set_intf.Finished_or_stopped_early.t
             val fold_right : t -> init:'b -> f:(Elt.t -> 'b -> 'b) -> 'b
             val iter2 :
               t ->
@@ -1302,7 +1307,8 @@ module Foo_and_bar :
               ?greater_or_equal_to:Elt.t ->
               ?less_or_equal_to:Elt.t ->
               t ->
-              t -> (Elt.t, Elt.t) Set.Merge_to_sequence_element.t Sequence.t
+              t ->
+              (Elt.t, Elt.t) Set_intf.Merge_to_sequence_element.t Sequence.t
             val to_map :
               t ->
               f:(Elt.t -> 'data) ->
@@ -1320,9 +1326,9 @@ module Foo_and_bar :
             val of_increasing_iterator_unchecked :
               len:int -> f:(int -> Elt.t) -> t
             val stable_dedup_list : Elt.t list -> Elt.t list
-            val map : ('a, 'b) Set.Tree.t -> f:('a -> Elt.t) -> t
+            val map : ('a, 'b) Set_intf.Tree.t -> f:('a -> Elt.t) -> t
             val filter_map :
-              ('a, 'b) Set.Tree.t -> f:('a -> Elt.t option) -> t
+              ('a, 'b) Set_intf.Tree.t -> f:('a -> Elt.t option) -> t
             val of_tree : t -> t
             val of_hash_set : Elt.t Hash_set.t -> t
             val of_hashtbl_keys : (Elt.t, 'a) Hashtbl.t -> t
@@ -1373,8 +1379,8 @@ module Foo_and_bar :
         val fold_until :
           t ->
           init:'b ->
-          f:('b -> Elt.t -> ('b, 'stop) Core_set_intf.Continue_or_stop.t) ->
-          ('b, 'stop) Core_set_intf.Finished_or_stopped_early.t
+          f:('b -> Elt.t -> ('b, 'stop) Set_intf.Continue_or_stop.t) ->
+          ('b, 'stop) Set_intf.Finished_or_stopped_early.t
         val fold_right : t -> init:'b -> f:(Elt.t -> 'b -> 'b) -> 'b
         val iter2 :
           t ->
@@ -1406,7 +1412,8 @@ module Foo_and_bar :
           ?order:[ `Decreasing | `Increasing ] ->
           ?greater_or_equal_to:Elt.t ->
           ?less_or_equal_to:Elt.t ->
-          t -> t -> (Elt.t, Elt.t) Set.Merge_to_sequence_element.t Sequence.t
+          t ->
+          t -> (Elt.t, Elt.t) Set_intf.Merge_to_sequence_element.t Sequence.t
         val to_map :
           t ->
           f:(Elt.t -> 'data) ->
@@ -1533,7 +1540,7 @@ module Foo_and_bar :
           end
         module Tree :
           sig
-            type 'a t = (Key.t, 'a, comparator_witness) Map.Tree.t
+            type 'a t = (Key.t, 'a, comparator_witness) Map_intf.Tree.t
             val empty : 'a t
             val singleton : Key.t -> 'a -> 'a t
             val of_alist :
@@ -1877,7 +1884,7 @@ module Foo_and_bar :
           end
         module Tree :
           sig
-            type t = (Elt.t, comparator_witness) Set.Tree.t
+            type t = (Elt.t, comparator_witness) Set_intf.Tree.t
             val compare : t -> t -> int
             val length : t -> int
             val is_empty : t -> bool
@@ -1915,8 +1922,8 @@ module Foo_and_bar :
             val fold_until :
               t ->
               init:'b ->
-              f:('b -> Elt.t -> ('b, 'stop) Core_set_intf.Continue_or_stop.t) ->
-              ('b, 'stop) Core_set_intf.Finished_or_stopped_early.t
+              f:('b -> Elt.t -> ('b, 'stop) Set_intf.Continue_or_stop.t) ->
+              ('b, 'stop) Set_intf.Finished_or_stopped_early.t
             val fold_right : t -> init:'b -> f:(Elt.t -> 'b -> 'b) -> 'b
             val iter2 :
               t ->
@@ -1949,7 +1956,8 @@ module Foo_and_bar :
               ?greater_or_equal_to:Elt.t ->
               ?less_or_equal_to:Elt.t ->
               t ->
-              t -> (Elt.t, Elt.t) Set.Merge_to_sequence_element.t Sequence.t
+              t ->
+              (Elt.t, Elt.t) Set_intf.Merge_to_sequence_element.t Sequence.t
             val to_map :
               t ->
               f:(Elt.t -> 'data) ->
@@ -1967,9 +1975,9 @@ module Foo_and_bar :
             val of_increasing_iterator_unchecked :
               len:int -> f:(int -> Elt.t) -> t
             val stable_dedup_list : Elt.t list -> Elt.t list
-            val map : ('a, 'b) Set.Tree.t -> f:('a -> Elt.t) -> t
+            val map : ('a, 'b) Set_intf.Tree.t -> f:('a -> Elt.t) -> t
             val filter_map :
-              ('a, 'b) Set.Tree.t -> f:('a -> Elt.t option) -> t
+              ('a, 'b) Set_intf.Tree.t -> f:('a -> Elt.t option) -> t
             val of_tree : t -> t
             val of_hash_set : Elt.t Hash_set.t -> t
             val of_hashtbl_keys : (Elt.t, 'a) Hashtbl.t -> t
@@ -2020,8 +2028,8 @@ module Foo_and_bar :
         val fold_until :
           t ->
           init:'b ->
-          f:('b -> Elt.t -> ('b, 'stop) Core_set_intf.Continue_or_stop.t) ->
-          ('b, 'stop) Core_set_intf.Finished_or_stopped_early.t
+          f:('b -> Elt.t -> ('b, 'stop) Set_intf.Continue_or_stop.t) ->
+          ('b, 'stop) Set_intf.Finished_or_stopped_early.t
         val fold_right : t -> init:'b -> f:(Elt.t -> 'b -> 'b) -> 'b
         val iter2 :
           t ->
@@ -2053,7 +2061,8 @@ module Foo_and_bar :
           ?order:[ `Decreasing | `Increasing ] ->
           ?greater_or_equal_to:Elt.t ->
           ?less_or_equal_to:Elt.t ->
-          t -> t -> (Elt.t, Elt.t) Set.Merge_to_sequence_element.t Sequence.t
+          t ->
+          t -> (Elt.t, Elt.t) Set_intf.Merge_to_sequence_element.t Sequence.t
         val to_map :
           t ->
           f:(Elt.t -> 'data) ->
@@ -2406,8 +2415,8 @@ module Foo_and_bar :
         val fold_until :
           'a t ->
           init:'accum ->
-          f:('accum -> 'a -> ('accum, 'stop) Core_set_intf.Continue_or_stop.t) ->
-          ('accum, 'stop) Core_set_intf.Finished_or_stopped_early.t
+          f:('accum -> 'a -> ('accum, 'stop) Set_intf.Continue_or_stop.t) ->
+          ('accum, 'stop) Set_intf.Finished_or_stopped_early.t
         val exists : 'a t -> f:('a -> bool) -> bool
         val for_all : 'a t -> f:('a -> bool) -> bool
         val count : 'a t -> f:('a -> bool) -> int

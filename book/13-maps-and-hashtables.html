@@ -128,11 +128,12 @@
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="4"/> 
 
           <p>
-	    The type <code>Map.t</code> has three type parameters:
-            one for the key, one for the value, and one to identify the
+	    The type <code>Map.t</code> has three type parameters: one
+            for the key, one for the value, and one to identify the
             comparator. Indeed, the type <code>'a Int.Map.t</code> is
-            just a type alias for <code>(int,'a,Int.comparator)
-              Map.t</code>.</p>
+            just a type alias
+            for <code>(int,'a,Int.comparator_witness)
+            Map.t</code>.</p>
 
           <p>
 	    Including the comparator in the type is important because
@@ -144,11 +145,11 @@
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="5"/> 
 
           <p>
-	    The type of <code>Map.symmetric_diff</code>, which follows,
-            requires that the two maps it compares have the same
-            comparator type. Each comparator has a fresh abstract type,
-            so the type of a comparator identifies the comparator
-            uniquely.</p>
+	    The type of <code>Map.symmetric_diff</code>, which
+            follows, requires that the two maps it compares have the
+            same comparator type. Each comparator has a distinct
+            abstract type, so the type of a comparator identifies the
+            comparator uniquely.</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="6"/> 
 
@@ -173,10 +174,10 @@
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="7"/> 
 
           <p>
-	    As you can see in the following code, both
-            <code>Reverse.comparator</code> and
-            <code>String.comparator</code> can be used to create maps
-            with a key type of <code>string</code>:</p>
+	    As you can see in the following code,
+            both <code>Reverse.comparator_witness</code>
+            and <code>String.comparator_witness</code> can be used to
+            create maps with a key type of <code>string</code>:</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="8"/> 
 
@@ -199,12 +200,12 @@
           <h2>Trees</h2>
 
           <p>
-	    As we've discussed, maps carry within them the
-            comparator that they were created with. Sometimes, often
-            for space efficiency reasons, you want a version of the map
-            data structure that doesn't include the comparator. You can
-            get such a representation with <code>Map.to_tree</code>,
-            which returns just the tree underlying the map, without the
+	    As we've discussed, maps carry within them the comparator
+            that they were created with. Sometimes, for space
+            efficiency reasons, you want a version of the map data
+            structure that doesn't include the comparator. You can get
+            such a representation with <code>Map.to_tree</code>, which
+            returns just the tree underlying the map, without the
             comparator:
 
 	    <idx>Map module/Map.to_tree</idx>
@@ -295,13 +296,13 @@
             <p>
 	      This is convenient because it provides a comparison
               function that works for most OCaml values and largely
-              behaves as you would expect. For example, on
-              <code>int</code>s and <code>float</code>s, it acts as you
-              would expect a numeric comparison function to act. For
-              simple containers like strings and lists and arrays, it
-              operates as a lexicographic comparison. And except for
-              functions and values from outside of the OCaml heap, it
-              works on almost every OCaml type.</p>
+              behaves as you would expect. For example,
+              on <code>int</code>s and <code>float</code>s, it acts as
+              you would expect a numeric comparison function to
+              act. For simple containers like strings and lists and
+              arrays, it operates as a lexicographic comparison. And
+              except for values from outside of the OCaml heap and
+              functions, it works on almost every OCaml type.</p>
 
             <p>
 	      But sometimes, a structural comparison is not what you
@@ -355,15 +356,14 @@
           <h2>Sets</h2>
 
           <p>
-	    Sometimes, instead of keeping track of a set of
-            key/value pairs, you just want a data type for keeping
-            track of a set of keys. You could build this on top of a
-            map by representing a set of values by a map whose data
+	    Sometimes, instead of keeping track of a set of key/value
+            pairs, you just want to keep track of a set of keys. You
+            could representing a set of values by a map whose data
             type is <code>unit</code>. But a more idiomatic (and
             efficient) solution is to use Core's set type, which is
             similar in design and spirit to the map type, while having
-            an API better tuned to working with sets and a lower memory
-            footprint. Here's a simple example:
+            an API better tuned to working with sets and a lower
+            memory footprint. Here's a simple example:
 	    <idx>set types</idx></p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="17"/> 
