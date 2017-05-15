@@ -8,6 +8,25 @@ open Lexing
 open Parsetree
 open Sexplib.Conv
 
+(* Standard outputs should be disable: multi threaded code could print
+ * at anytime, so we just disable output by defaul. *)
+
+let stdout_backup = Unix.out_channel_of_descr (Unix.dup Unix.stdout)
+let stderr_backup = Unix.out_channel_of_descr (Unix.dup Unix.stderr)
+
+let prerr_endline str =
+  output_string stderr_backup str;
+  output_char stderr_backup '\n';
+  flush stderr_backup
+
+let disable_outputs = lazy (
+  let fd_out = Unix.openfile "/dev/null" Unix.[O_WRONLY] 0o600 in
+  Unix.dup2 fd_out Unix.stdout;
+  Unix.dup2 fd_out Unix.stderr;
+  Unix.close fd_out;
+)
+
+
 module Chunk = struct
   type kind = OCaml | Raw
     [@@deriving sexp]
@@ -124,42 +143,62 @@ type 'a phrase_role =
   | Phrase_expect of Chunk.response list
   | Phrase_part of string
 
-let payload_constants = function
+exception Cannot_parse_payload of Location.t
+
+let string_of_location {Location.loc_start = {pos_fname; pos_lnum; pos_bol; pos_cnum}} =
+  Printf.sprintf "%s, line %d, col %d" pos_fname pos_lnum (pos_cnum - pos_bol)
+
+let payload_constants loc = function
   | PStr [{pstr_desc = Pstr_eval (expr, _); _}] ->
+    let one {pexp_loc; pexp_desc} = match pexp_desc with
+      | Pexp_apply ({pexp_desc = Pexp_ident ident},
+                    [Asttypes.Nolabel, {pexp_desc = Pexp_constant const}]) ->
+        (pexp_loc, Some ident, const)
+      | Pexp_constant const -> (pexp_loc, None, const)
+      | _ -> raise (Cannot_parse_payload pexp_loc)
+    in
     let rec consts = function
-      | {pexp_desc=Pexp_sequence({pexp_desc = Pexp_constant const}, rest)} ->
-        const :: consts rest
-      | {pexp_desc = Pexp_constant const} -> [const]
-      | _ -> []
+      | {pexp_desc=Pexp_sequence(e, rest)} -> one e :: consts rest
+      | e -> [one e]
     in
     consts expr
-  | _ -> []
+  | PStr [] -> []
+  | _ -> raise (Cannot_parse_payload loc)
 
-let payload_strings = function
+let payload_strings loc = function
   | PStr [] -> []
   | x ->
-    let rec aux = function
-      | Pconst_string (str, opt) :: rest -> (str, opt) :: aux rest
-      | _ -> []
+    let aux = function
+      | _, Some {Location.txt = Longident.Lident "ocaml"},
+        Pconst_string (str, _) -> (Chunk.OCaml, str)
+      | _, None, Pconst_string (str, _) -> (Chunk.Raw, str)
+      | loc, _, _ -> raise (Cannot_parse_payload loc)
     in
-    aux (payload_constants x)
+    List.map aux (payload_constants loc x)
 
 let constant_payload const = PStr [Ast_helper.(Str.eval (Exp.constant const))]
 let string_payload x = constant_payload (Pconst_string (x, None))
 
 let phrase_role phrase = match phrase.parsed with
-  | Ok (Ptop_def [{pstr_desc = Pstr_extension((name, payload), attrs); pstr_loc = loc}])
-    when name.Asttypes.txt = "expect" && payload_strings payload <> [] ->
-    let expect_kind = function
-      | (str, Some "ocaml") -> (Chunk.OCaml, str)
-      | (str, _) -> (Chunk.Raw, str)
-    in
-    Phrase_expect (List.map expect_kind (payload_strings payload))
-  | Ok (Ptop_def [{pstr_desc = Pstr_attribute (name, payload); pstr_loc = loc}])
-    when name.Asttypes.txt = "part" && payload_strings payload <> [] ->
-    begin match payload_strings payload with
-      | [part, _] -> Phrase_part part
-      | _ -> Phrase_code ()
+  | Ok (Ptop_def [{pstr_desc = Pstr_extension((name, payload), attrs); pstr_loc}])
+    when name.Asttypes.txt = "expect" ->
+    begin match payload_strings pstr_loc payload with
+      | x -> Phrase_expect x
+      | exception (Cannot_parse_payload loc) ->
+        prerr_endline (string_of_location loc ^ ": cannot parse [%%expect] payload");
+        Phrase_code ()
+   end
+  | Ok (Ptop_def [{pstr_desc = Pstr_attribute (name, payload); pstr_loc}])
+    when name.Asttypes.txt = "part" ->
+    begin match payload_strings pstr_loc payload with
+      | [Chunk.Raw, part] -> Phrase_part part
+      | _ ->
+        prerr_endline (string_of_location pstr_loc ^ ": cannot parse [@@@part] payload");
+        Phrase_code ()
+      | exception (Cannot_parse_payload loc) ->
+        prerr_endline
+          (string_of_location loc ^ ": cannot parse [@@@part] payload");
+        Phrase_code ()
     end
   | _ -> Phrase_code ()
 
@@ -276,19 +315,6 @@ let capture_compiler_stuff ppf ~f =
     [ V (Location.formatter_for_warnings , ppf) ]
     ~f
 ;;
-
-(* Standard outputs should be disable: multi threaded code could print
- * at anytime, so we just disable output by defaul. *)
-
-let stdout_backup = Unix.out_channel_of_descr (Unix.dup Unix.stdout)
-let stderr_backup = Unix.out_channel_of_descr (Unix.dup Unix.stderr)
-
-let disable_outputs = lazy (
-  let fd_out = Unix.openfile "/dev/null" Unix.[O_WRONLY] 0o600 in
-  Unix.dup2 fd_out Unix.stdout;
-  Unix.dup2 fd_out Unix.stderr;
-  Unix.close fd_out;
-)
 
 let redirect ~f =
   let lazy () = disable_outputs in
@@ -481,24 +507,33 @@ let output_phrases oc contents =
       let phrase_code = phrase_code contents phrase in
       if List.for_all (fun (_,s) -> is_whitespace s) expect_code then
         Printf.fprintf oc "%s%s" phrase_code expect_ws
-      else
+      else (
         let string_of_kind = function
           | Chunk.Raw -> ""
-          | Chunk.OCaml -> "ocaml"
+          | Chunk.OCaml -> "ocaml "
         in
         let output_expect oc = function
           | [] -> ()
           | [(kind, str)] when not (String.contains str '\n') ->
             let k = string_of_kind kind in
-            Printf.fprintf oc "{%s|%s|%s}" k str k
+            Printf.fprintf oc "%s%s{|%s|}" (if k <> "" then " " else "") k str
           | xs ->
-            List.iter (fun (k,s) ->
+            let rec aux first = function
+              | [] -> ()
+              | (k,s) :: xs ->
                 let k = string_of_kind k in
-                Printf.fprintf oc "{%s|\n%s\n|%s}" k s k
-              ) xs
+                let pre = if first then "" else "\n" in
+                let post = if xs = [] then "" else ";" in
+                if not (String.contains s '\n')
+                then Printf.fprintf oc "%s%s{|%s|}%s" pre k s post
+                else Printf.fprintf oc "%s%s{|\n%s\n|}%s" pre k s post;
+                aux false xs
+            in
+            aux true xs
         in
         Printf.fprintf oc "%s%s[%%%%expect%a];;%s"
           phrase_code phrase_ws output_expect expect_code expect_ws;
+      );
       aux rest
     | (_, Phrase_expect _) :: rest ->
       aux rest
