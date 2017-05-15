@@ -6,6 +6,37 @@ end
 
 open Lexing
 open Parsetree
+open Sexplib.Conv
+
+module Chunk = struct
+  type kind = OCaml | Raw
+    [@@deriving sexp]
+
+  type response = (kind * string)
+    [@@deriving sexp]
+
+  type t =
+    { ocaml_code : string; toplevel_responses : response list; }
+    [@@deriving sexp]
+
+  let code c = c.ocaml_code
+  let warnings (_ : t) : string =  ""
+  let responses c = c.toplevel_responses
+  let stdout (_ : t) = ""
+  let evaluated (_ : t) = true
+end
+
+module Part = struct
+  type t =
+    { name : string; chunks : Chunk.t list; }
+    [@@deriving sexp]
+end
+
+module Document = struct
+  type t =
+    { parts : Part.t list; matched : bool; }
+    [@@deriving sexp]
+end
 
 (** {1 Phrase parsing} *)
 
@@ -14,8 +45,6 @@ type phrase = {
   endpos   : position;
   parsed   : (toplevel_phrase, exn) result;
 }
-
-type chunk_kind = OCaml_chunk | Raw_chunk
 
 let toplevel_fname = "//toplevel//"
 
@@ -92,7 +121,7 @@ let parse_phrase (contents, lexbuf) =
 
 type 'a phrase_role =
   | Phrase_code of 'a
-  | Phrase_expect of (chunk_kind * string) list
+  | Phrase_expect of Chunk.response list
   | Phrase_part of string
 
 let payload_constants = function
@@ -122,8 +151,8 @@ let phrase_role phrase = match phrase.parsed with
   | Ok (Ptop_def [{pstr_desc = Pstr_extension((name, payload), attrs); pstr_loc = loc}])
     when name.Asttypes.txt = "expect" && payload_strings payload <> [] ->
     let expect_kind = function
-      | (str, Some "ocaml") -> (OCaml_chunk, str)
-      | (str, _) -> (Raw_chunk, str)
+      | (str, Some "ocaml") -> (Chunk.OCaml, str)
+      | (str, _) -> (Chunk.Raw, str)
     in
     Phrase_expect (List.map expect_kind (payload_strings payload))
   | Ok (Ptop_def [{pstr_desc = Pstr_attribute (name, payload); pstr_loc = loc}])
@@ -312,10 +341,10 @@ let cleanup_chunk (kind, str) =
 let cleanup_lines lines =
   let lines = List.map cleanup_chunk lines in
   let rec join = function
-    | (Raw_chunk, str1) :: (Raw_chunk, str2) :: rest ->
-      join ((Raw_chunk, str1 ^ "\n" ^ str2) :: rest)
-    | (OCaml_chunk, str1) :: (OCaml_chunk, str2) :: rest ->
-      join ((OCaml_chunk, str1 ^ "\n" ^ str2) :: rest)
+    | (Chunk.Raw, str1) :: (Chunk.Raw, str2) :: rest ->
+      join ((Chunk.Raw, str1 ^ "\n" ^ str2) :: rest)
+    | (Chunk.OCaml, str1) :: (Chunk.OCaml, str2) :: rest ->
+      join ((Chunk.OCaml, str1 ^ "\n" ^ str2) :: rest)
     | x :: xs -> x :: join xs
     | [] -> []
   in
@@ -340,9 +369,9 @@ let eval_phrases ~fname ~dry_run fcontents =
       let out_phrase ppf phr = match phr with
         | Outcometree.Ophr_exception _ -> out_phrase' ppf phr
         | _ ->
-          capture Raw_chunk;
+          capture Chunk.Raw;
           out_phrase' ppf phr;
-          capture OCaml_chunk;
+          capture Chunk.OCaml;
       in
       Oprint.out_phrase := out_phrase;
       begin match toplevel_exec_phrase ppf phrase with
@@ -352,7 +381,7 @@ let eval_phrases ~fname ~dry_run fcontents =
           Location.report_exception ppf exn
       end;
       Format.pp_print_flush ppf ();
-      capture Raw_chunk;
+      capture Chunk.Raw;
       Phrase_code (cleanup_lines (List.rev !lines))
   in
   let rec dry_exec phrases = function
@@ -454,8 +483,8 @@ let output_phrases oc contents =
         Printf.fprintf oc "%s%s" phrase_code expect_ws
       else
         let string_of_kind = function
-          | Raw_chunk -> ""
-          | OCaml_chunk -> "ocaml"
+          | Chunk.Raw -> ""
+          | Chunk.OCaml -> "ocaml"
         in
         let output_expect oc = function
           | [] -> ()
@@ -476,17 +505,15 @@ let output_phrases oc contents =
   in aux
 
 let document_of_phrases contents matched phrases =
-  let open Toplevel_expect_test_types in
   let rec parts_of_phrase part acc = function
     | (_, Phrase_part part') :: rest ->
       { Part. name = part; chunks = List.rev acc } ::
       parts_of_phrase part' [] rest
     | (_, Phrase_expect _) :: rest ->
       parts_of_phrase part acc rest
-    | (phrase, Phrase_code toplevel_response) :: rest ->
-      let toplevel_response = String.concat "\n" (List.map snd toplevel_response) in
+    | (phrase, Phrase_code toplevel_responses) :: rest ->
       let ocaml_code = phrase_code contents phrase in
-      let chunk = {Chunk. ocaml_code; toplevel_response} in
+      let chunk = {Chunk. ocaml_code; toplevel_responses} in
       parts_of_phrase part (chunk :: acc) rest
     | [] ->
       if part <> "" || acc <> [] then
@@ -519,7 +546,7 @@ let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
   );
   if sexp_output then (
     document_of_phrases file_contents success phrases
-    |> Toplevel_expect_test_types.Document.sexp_of_t
+    |> Document.sexp_of_t
     |> Sexplib.Sexp.output stdout_backup
   );
   success
