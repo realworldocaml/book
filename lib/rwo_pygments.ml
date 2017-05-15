@@ -63,11 +63,11 @@ let really_pygmentize ~add_attrs lang contents =
       | Error (`Exit_non_zero x) ->
         failwithf "pygmentize exited with %d on:\n%s" x contents ()
       | Error (`Signal x) ->
-        failwithf "pymentize exited with signal %s on:\n%s"
+        failwithf "pygmentize exited with signal %s on:\n%s"
           (Signal.to_string x) contents ()
       | Ok () ->
         if stderr <> "" then
-          failwithf "pymentize exited with errors:\n%s\n%s" contents stderr ()
+          failwithf "pygmentize exited with errors:\n%s\n%s" contents stderr ()
         else
           String.substr_replace_all ~pattern:"<span class=\"err\">\027</span>" ~with_:"" stdout |>
           String.substr_replace_all ~pattern:"<span class=\"o\">[0m</span>" ~with_:"</span>" |>

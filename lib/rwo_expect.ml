@@ -40,25 +40,31 @@ end
 let program_path = "ocaml-topexpect"
 
 module Chunk = struct
-  type t = Toplevel_expect_test_types.Chunk.t =
-    { ocaml_code : string; toplevel_response : string; }
+  type kind = OCaml | Raw
+    [@@deriving sexp]
+
+  type response = (kind * string)
+    [@@deriving sexp]
+
+  type t =
+    { ocaml_code : string; toplevel_responses : response list; }
     [@@deriving sexp]
 
   let code c = c.ocaml_code
   let warnings (_ : t) : string =  ""
-  let response c = c.toplevel_response
+  let responses c = c.toplevel_responses
   let stdout (_ : t) = ""
   let evaluated (_ : t) = true
 end
 
 module Part = struct
-  type t = Toplevel_expect_test_types.Part.t =
+  type t =
     { name : string; chunks : Chunk.t list; }
     [@@deriving sexp]
 end
 
 module Document = struct
-  type t = Toplevel_expect_test_types.Document.t =
+  type t =
     { parts : Part.t list; matched : bool; }
     [@@deriving sexp]
 
@@ -71,4 +77,3 @@ module Document = struct
       ~args:["-sexp"; "-verbose"; "-short-paths"; filename] ()
     >>|? fun str -> t_of_sexp (Sexp.of_string (String.strip str))
 end
-
