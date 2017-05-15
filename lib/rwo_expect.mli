@@ -13,24 +13,31 @@ module Raw_script : sig
 end
 
 module Chunk : sig
-  type t = Toplevel_expect_test_types.Chunk.t =
-    { ocaml_code : string; toplevel_response : string; }
+  type kind = OCaml | Raw
     [@@deriving sexp]
+
+  type response = (kind * string)
+    [@@deriving sexp]
+
+  type t =
+    { ocaml_code : string; toplevel_responses : response list; }
+    [@@deriving sexp]
+
   val code      : t -> string
   val warnings  : t -> string
-  val response  : t -> string
+  val responses : t -> response list
   val stdout    : t -> string
   val evaluated : t -> bool
 end
 
 module Part : sig
-  type t = Toplevel_expect_test_types.Part.t =
+  type t =
     { name : string; chunks : Chunk.t list; }
     [@@deriving sexp]
 end
 
 module Document : sig
-  type t = Toplevel_expect_test_types.Document.t =
+  type t =
     { parts : Part.t list; matched : bool; }
     [@@deriving sexp]
 

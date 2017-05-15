@@ -103,13 +103,17 @@ let phrases_to_html ?(pygmentize=false) phrases =
       Pygments.pygmentize ~pygmentize `OCaml phrase
   in
 
+  let string_of_responses responses =
+    String.concat ~sep:"\n" (List.map ~f:snd responses)
+  in
+
   (* get warnings or errors *)
   let messages x : Html.item option =
      (
        if Expect.Chunk.evaluated x then
          Expect.Chunk.warnings x
        else
-         Expect.Chunk.response x
+         string_of_responses (Expect.Chunk.responses x)
      )
      |> function
      | "" -> None
@@ -125,23 +129,24 @@ let phrases_to_html ?(pygmentize=false) phrases =
   in
 
   let out_phrase (x : Expect.Chunk.t)
-    : Html.item option Deferred.t
+    : Html.item list Deferred.t
     =
     if Expect.Chunk.evaluated x then (
-      match Expect.Chunk.response x with
-      | "" -> return None
-      | str ->
-        str |> Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml
-        >>| Option.some
+      let highlight = function
+        | Expect.Chunk.OCaml, str ->
+          Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml str
+        | Expect.Chunk.Raw, str ->
+          Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize:false `OCaml str
+      in
+      Deferred.all (List.map ~f:highlight (Expect.Chunk.responses x))
     ) else
-      return None
+      Deferred.return []
   in
 
   let phrase_to_html (x : Expect.Chunk.t) : Html.t Deferred.t =
     (in_phrase x >>| Option.some) >>= fun in_phrase ->
     out_phrase x >>| fun out_phrase ->
-    [in_phrase; messages x; stdout x; out_phrase]
-    |> List.filter_map ~f:Fn.id
+    List.filter_map ~f:Fn.id [in_phrase; messages x; stdout x] @ out_phrase
   in
 
   Deferred.List.map phrases ~f:phrase_to_html
