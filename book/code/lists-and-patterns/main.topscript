@@ -113,8 +113,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
-│ plus_one_match │  24.24ns │
-│ plus_one_if    │  41.06ns │
+│ plus_one_match │  24.90ns │
+│ plus_one_if    │  41.92ns │
 └────────────────┴──────────┘
 |};
 ocaml {|- : unit = ()|}];;
@@ -135,8 +135,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
-│ sum_if │  46.62us │
-│ sum    │  13.32us │
+│ sum_if │  47.47us │
+│ sum    │  13.40us │
 └────────┴──────────┘
 |};
 ocaml {|- : unit = ()|}];;
@@ -242,12 +242,7 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
 |> List.dedup_and_sort
 ;;
-[%%expect{|
-Characters 169-179:
-Warning 3: deprecated: Core_kernel.List.dedup
-[since 2017-04] Use [dedup_and_sort] instead
-|};
-ocaml {|- : string list = ["derived"; "shared"]|}];;
+[%%expect ocaml {|- : string list = ["derived"; "shared"; "txt"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -261,7 +256,7 @@ let (ml_files,other_files) =
 val ml_files : string list = []
 val other_files : string list =
   [".depend"; "app"; "book"; "lib"; "Makefile"; "Makefile.derived";
-   "Makefile.shared"; "OCamlMakefile"; "site"]
+   "Makefile.shared"; "numbers.txt"; "OCamlMakefile"; "site"; "test.txt"]
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;

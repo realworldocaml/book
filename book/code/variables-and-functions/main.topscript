@@ -218,9 +218,6 @@ String.split ~on:':' path
 |> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 29-39:
-Warning 3: deprecated: Core_kernel.List.dedup
-[since 2017-04] Use [dedup_and_sort] instead
 /bin
 /sbin
 /usr/bin
@@ -233,9 +230,6 @@ let deduped_path = List.dedup_and_sort ~compare:String.compare split_path in
 List.iter ~f:print_endline deduped_path
 ;;
 [%%expect{|
-Characters 65-75:
-Warning 3: deprecated: Core_kernel.List.dedup
-[since 2017-04] Use [dedup_and_sort] instead
 /bin
 /sbin
 /usr/bin
@@ -261,10 +255,7 @@ Sys.getenv "PATH"
 ^> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 50-60:
-Warning 3: deprecated: Core_kernel.List.dedup
-[since 2017-04] Use [dedup_and_sort] instead
-Characters 88-114:
+Characters 97-123:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
@@ -315,9 +306,6 @@ String.split ~on:':' path
 |> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 29-39:
-Warning 3: deprecated: Core_kernel.List.dedup
-[since 2017-04] Use [dedup_and_sort] instead
 /bin
 /sbin
 /usr/bin
