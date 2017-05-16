@@ -345,18 +345,6 @@ let redirect ~f =
        Sys.remove filename)
 ;;
 
-let cleanup_singleline str =
-  if str = "" then str
-  else
-    let trim_from = if str.[0] = '\n' then 1 else 0 in
-    let len = String.length str in
-    match String.index_from str 1 '\n' with
-    | exception Not_found ->
-      String.sub str trim_from (len - trim_from)
-    | x when x = len - 1 ->
-      String.sub str trim_from (x - trim_from)
-    | _ -> str
-
 let cleanup_chunk (kind, str) =
   let len = String.length str in
   if len = 0 then (kind, str) else
@@ -389,7 +377,8 @@ let eval_phrases ~fname ~dry_run fcontents =
       | s -> Buffer.clear buf; lines := (kind, s) :: !lines
     in
     match phrase_role phrase with
-    | (Phrase_expect _ | Phrase_part _) as x -> x
+    | Phrase_expect x -> Phrase_expect (cleanup_lines x)
+    | Phrase_part _ as x -> x
     | Phrase_code () ->
       let out_phrase' = !Oprint.out_phrase in
       let out_phrase ppf phr = match phr with
