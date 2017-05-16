@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -28,7 +28,7 @@ module type Query_handler = sig
       s-expressions *)
   val eval : t -> Sexp.t -> Sexp.t Or_error.t
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module type Query_handler =
   sig
     type config
@@ -42,26 +42,26 @@ module type Query_handler =
 |}];;
 [@@@part "1"];;
 module type M = sig type t [@@deriving sexp] end;;
-[%%expect{|
+[%%expect ocaml {|
 module type M =
   sig type t val t_of_sexp : Sexp.t -> t val sexp_of_t : t -> Sexp.t end
 |}];;
 [@@@part "2"];;
 type u = { a: int; b: float } [@@deriving sexp];;
-[%%expect{|
+[%%expect ocaml {|
 type u = { a : int; b : float; }
 val u_of_sexp : Sexp.t -> u = <fun>
 val sexp_of_u : u -> Sexp.t = <fun>
 |}];;
 sexp_of_u {a=3;b=7.};;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "3"];
   Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "7"]]
 |}];;
 u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
-[%%expect{|- : u = {a = 43; b = 3.4}|}];;
+[%%expect ocaml {|- : u = {a = 43; b = 3.4}|}];;
 [@@@part "3"];;
 module Unique = struct
   type config = int [@@deriving sexp]
@@ -78,7 +78,7 @@ module Unique = struct
       t.next_id <- t.next_id + 1;
       response
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module Unique :
   sig
     type config = int
@@ -92,11 +92,11 @@ module Unique :
 |}];;
 [@@@part "4"];;
 let unique = Unique.create 0;;
-[%%expect{|val unique : Unique.t = {Unique.next_id = 0}|}];;
+[%%expect ocaml {|val unique : Unique.t = {Unique.next_id = 0}|}];;
 Unique.eval unique Sexp.unit;;
-[%%expect{|- : (Sexp.t, Error.t) result = Ok (Sexplib.Sexp.Atom "0")|}];;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (Sexplib.Sexp.Atom "0")|}];;
 Unique.eval unique Sexp.unit;;
-[%%expect{|- : (Sexp.t, Error.t) result = Ok (Sexplib.Sexp.Atom "1")|}];;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (Sexplib.Sexp.Atom "1")|}];;
 [@@@part "5"];;
 module List_dir = struct
   type config = string [@@deriving sexp]
@@ -119,7 +119,7 @@ module List_dir = struct
       in
       Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module List_dir :
   sig
     type config = string
@@ -134,9 +134,9 @@ module List_dir :
 |}];;
 [@@@part "6"];;
 let list_dir = List_dir.create "/var";;
-[%%expect{|val list_dir : List_dir.t = {List_dir.cwd = "/var"}|}];;
+[%%expect ocaml {|val list_dir : List_dir.t = {List_dir.cwd = "/var"}|}];;
 List_dir.eval list_dir (sexp_of_string ".");;
-[%%expect{|
+[%%expect ocaml {|
 - : (Sexp.t, Error.t) result =
 Ok
  (Base__.Sexplib.Sexp.List
@@ -154,7 +154,7 @@ Ok
     Base__.Sexplib.Sexp.Atom "yp"])
 |}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-[%%expect{|
+[%%expect ocaml {|
 - : (Sexp.t, Error.t) result =
 Ok (Base__.Sexplib.Sexp.List [Base__.Sexplib.Sexp.Atom "binding"])
 |}];;
@@ -163,7 +163,7 @@ module type Query_handler_instance = sig
   module Query_handler : Query_handler
   val this : Query_handler.t
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module type Query_handler_instance =
   sig module Query_handler : Query_handler val this : Query_handler.t end
 |}];;
@@ -173,7 +173,7 @@ let unique_instance =
     module Query_handler = Unique
     let this = Unique.create 0
   end : Query_handler_instance);;
-[%%expect{|val unique_instance : (module Query_handler_instance) = <module>|}];;
+[%%expect ocaml {|val unique_instance : (module Query_handler_instance) = <module>|}];;
 [@@@part "9"];;
 let build_instance
       (type a)
@@ -185,16 +185,16 @@ let build_instance
     let this = Q.create config
   end : Query_handler_instance)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val build_instance :
   (module Query_handler with type config = 'a) ->
   'a -> (module Query_handler_instance) = <fun>
 |}];;
 [@@@part "10"];;
 let unique_instance = build_instance (module Unique) 0;;
-[%%expect{|val unique_instance : (module Query_handler_instance) = <module>|}];;
+[%%expect ocaml {|val unique_instance : (module Query_handler_instance) = <module>|}];;
 let list_dir_instance = build_instance (module List_dir)  "/var";;
-[%%expect{|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
+[%%expect ocaml {|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
 [@@@part "11"];;
 let build_dispatch_table handlers =
   let table = String.Table.create () in
@@ -203,7 +203,7 @@ let build_dispatch_table handlers =
       Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
   table
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val build_dispatch_table :
   (module Query_handler_instance) list ->
   (module Query_handler_instance) String.Table.t = <fun>
@@ -222,7 +222,7 @@ let dispatch dispatch_table name_and_query =
   | _ ->
     Or_error.error_string "malformed query"
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val dispatch :
   (string, (module Query_handler_instance)) Hashtbl.t ->
   Sexp.t -> Sexp.t Or_error.t = <fun>
@@ -253,13 +253,13 @@ let rec cli dispatch_table =
 Characters 95-100:
 Warning 3: deprecated: Core_kernel.stdin
 [since 2016-04] Use [In_channel.stdin]
-val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>
-|}];;
+|};
+ocaml {|val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>|}];;
 [@@@part "14"];;
 type query_handler_instance = { name : string
                               ; eval : Sexp.t -> Sexp.t Or_error.t
                               };;
-[%%expect{|
+[%%expect ocaml {|
 type query_handler_instance = {
   name : string;
   eval : Sexp.t -> Sexp.t Or_error.t;
@@ -267,7 +267,7 @@ type query_handler_instance = {
 |}];;
 type query_handler = Sexp.t -> query_handler_instance
 ;;
-[%%expect{|type query_handler = Sexp.t -> query_handler_instance|}];;
+[%%expect ocaml {|type query_handler = Sexp.t -> query_handler_instance|}];;
 [@@@part "15"];;
 let unique_handler config_sexp =
   let config = Unique.config_of_sexp config_sexp in
@@ -276,4 +276,4 @@ let unique_handler config_sexp =
   ; eval = (fun config -> Unique.eval unique config)
   }
 ;;
-[%%expect{|val unique_handler : Sexp.t -> query_handler_instance = <fun>|}];;
+[%%expect ocaml {|val unique_handler : Sexp.t -> query_handler_instance = <fun>|}];;

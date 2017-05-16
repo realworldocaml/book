@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,7 +10,7 @@
 open Core_kernel;;
 [@@@part "0.5"];;
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
-[%%expect{|type 'a iterator = < get : 'a; has_value : bool; next : unit >|}];;
+[%%expect ocaml {|type 'a iterator = < get : 'a; has_value : bool; next : unit >|}];;
 [@@@part "1"];;
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
@@ -27,7 +27,7 @@ class ['a] list_iterator init = object
     | hd :: tl -> current <- tl
     | [] -> raise (Invalid_argument "no value")
 end  ;;
-[%%expect{|
+[%%expect ocaml {|
 class ['a] list_iterator :
   'a list ->
   object
@@ -54,7 +54,7 @@ class ['a] stack init = object
   method iterator : 'a iterator =
     new list_iterator v
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class ['a] stack :
   'a list ->
   object
@@ -66,23 +66,23 @@ class ['a] stack :
 |}];;
 [@@@part "3"];;
 let s = new stack [] ;;
-[%%expect{|val s : '_a stack = <obj>|}];;
+[%%expect ocaml {|val s : '_a stack = <obj>|}];;
 s#push 5 ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 s#push 4 ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 let it = s#iterator ;;
-[%%expect{|val it : int iterator = <obj>|}];;
+[%%expect ocaml {|val it : int iterator = <obj>|}];;
 it#get ;;
-[%%expect{|- : int = 4|}];;
+[%%expect ocaml {|- : int = 4|}];;
 it#next ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 it#get ;;
-[%%expect{|- : int = 5|}];;
+[%%expect ocaml {|- : int = 5|}];;
 it#next ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 it#has_value ;;
-[%%expect{|- : bool = false|}];;
+[%%expect ocaml {|- : bool = false|}];;
 [@@@part "4"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
@@ -100,7 +100,7 @@ class ['a] stack init = object
   method iter f = 
     List.iter ~f v 
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class ['a] stack :
   'a list ->
   object
@@ -127,7 +127,7 @@ class ['a] stack init = object
   method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
     (fun f init -> List.fold ~f ~init v) 
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class ['a] stack :
   'a list ->
   object

@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -22,7 +22,7 @@ class istack = object
   method push hd =
     v <- hd :: v
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class istack :
   object
     val mutable v : int list
@@ -32,13 +32,13 @@ class istack :
 |}];;
 [@@@part "2"];;
 let s = new istack ;;
-[%%expect{|val s : istack = <obj>|}];;
+[%%expect ocaml {|val s : istack = <obj>|}];;
 s#pop ;;
-[%%expect{|- : int option = Some 0|}];;
+[%%expect ocaml {|- : int option = Some 0|}];;
 s#push 5 ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 s#pop ;;
-[%%expect{|- : int option = Some 5|}];;
+[%%expect ocaml {|- : int option = Some 5|}];;
 [@@@part "3"];;
 type istack = < pop: int option; push: int -> unit > ;;
-[%%expect{|type istack = < pop : int option; push : int -> unit >|}];;
+[%%expect ocaml {|type istack = < pop : int option; push : int -> unit >|}];;

@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -14,26 +14,26 @@ open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;
 let time = foreign "time" (ptr time_t @-> returning time_t) ;;
-[%%expect{|val time : time_t Ctypes_static.ptr -> time_t = <fun>|}];;
+[%%expect ocaml {|val time : time_t Ctypes_static.ptr -> time_t = <fun>|}];;
 [@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
-[%%expect{|val cur_time : time_t = 1492950465|}];;
+[%%expect ocaml {|val cur_time : time_t = 1494935990|}];;
 [@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
-[%%expect{|val time' : unit -> time_t = <fun>|}];;
+[%%expect ocaml {|val time' : unit -> time_t = <fun>|}];;
 [@@@part "3"];;
 let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double) ;;
-[%%expect{|val difftime : time_t -> time_t -> float = <fun>|}];;
+[%%expect ocaml {|val difftime : time_t -> time_t -> float = <fun>|}];;
 let t1 =
   time' () in
 Unix.sleep 2;
 let t2 = time' () in 
 difftime t2 t1 ;;
-[%%expect{|- : float = 2.|}];;
+[%%expect ocaml {|- : float = 2.|}];;
 [@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
-[%%expect{|val ctime : time_t Ctypes_static.ptr -> string = <fun>|}];;
+[%%expect ocaml {|val ctime : time_t Ctypes_static.ptr -> string = <fun>|}];;
 [@@@part "5"];;
 ctime (time' ()) ;;
 [%%expect{|
@@ -43,33 +43,33 @@ Error: This expression has type time_t but an expression was expected of type
 |}];;
 [@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
-[%%expect{|val t_ptr : time_t ptr = (time_t*) 0x7fed626d9060|}];;
+[%%expect ocaml {|val t_ptr : time_t ptr = (time_t*) 0x7fb62197bf40|}];;
 [@@@part "7"];;
 ctime t_ptr ;;
-[%%expect{|- : string = "Sun Apr 23 08:27:47 2017\n"|}];;
+[%%expect ocaml {|- : string = "Tue May 16 07:59:53 2017\n"|}];;
 [@@@part "8"];;
 type timeval ;;
-[%%expect{|type timeval|}];;
+[%%expect ocaml {|type timeval|}];;
 let timeval : timeval structure typ = structure "timeval" ;;
-[%%expect{|val timeval : timeval structure typ = struct timeval|}];;
+[%%expect ocaml {|val timeval : timeval structure typ = struct timeval|}];;
 [@@@part "9"];;
 let tv_sec  = field timeval "tv_sec" long ;;
-[%%expect{|
+[%%expect ocaml {|
 val tv_sec : (Signed.long, timeval structure) field =
   {Ctypes_static.ftype = long; foffset = 0; fname = "tv_sec"}
 |}];;
 let tv_usec = field timeval "tv_usec" long ;;
-[%%expect{|
+[%%expect ocaml {|
 val tv_usec : (Signed.long, timeval structure) field =
   {Ctypes_static.ftype = long; foffset = 8; fname = "tv_usec"}
 |}];;
 seal timeval ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 [@@@part "10"];;
 type timezone ;;
-[%%expect{|type timezone|}];;
+[%%expect ocaml {|type timezone|}];;
 let timezone : timezone structure typ = structure "timezone" ;;
-[%%expect{|val timezone : timezone structure typ = struct timezone|}];;
+[%%expect ocaml {|val timezone : timezone structure typ = struct timezone|}];;
 [@@@part "11"];;
 let gettimeofday = foreign "gettimeofday"
                      (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;

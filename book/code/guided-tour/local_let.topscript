@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -11,7 +11,7 @@
 let x = 7 in
 x + x
 ;;
-[%%expect{|- : int = 14|}];;
+[%%expect ocaml {|- : int = 14|}];;
 [@@@part "1"];;
 x;;
 [%%expect{|
@@ -23,4 +23,4 @@ let x = 7 in
 let y = x * x in
 x + y
 ;;
-[%%expect{|- : int = 56|}];;
+[%%expect ocaml {|- : int = 56|}];;

@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -22,14 +22,14 @@ let s = object
   method push hd = 
     v <- hd :: v
 end ;;
-[%%expect{|val s : < pop : int option; push : int -> unit > = <obj>|}];;
+[%%expect ocaml {|val s : < pop : int option; push : int -> unit > = <obj>|}];;
 [@@@part "2"];;
 s#pop ;;
-[%%expect{|- : int option = Some 0|}];;
+[%%expect ocaml {|- : int option = Some 0|}];;
 s#push 4 ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 s#pop ;;
-[%%expect{|- : int option = Some 4|}];;
+[%%expect ocaml {|- : int option = Some 4|}];;
 [@@@part "3"];;
 let stack init = object
   val mutable v = init
@@ -44,25 +44,21 @@ let stack init = object
   method push hd = 
     v <- hd :: v
 end ;;
-[%%expect{|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
+[%%expect ocaml {|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
 let s = stack [3; 2; 1] ;;
-[%%expect{|val s : < pop : int option; push : int -> unit > = <obj>|}];;
+[%%expect ocaml {|val s : < pop : int option; push : int -> unit > = <obj>|}];;
 s#pop ;;
-[%%expect{|- : int option = Some 3|}];;
+[%%expect ocaml {|- : int option = Some 3|}];;
 [@@@part "4"];;
 let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
-[%%expect{|val print_pop : < pop : int option; .. > -> unit = <fun>|}];;
+[%%expect ocaml {|val print_pop : < pop : int option; .. > -> unit = <fun>|}];;
 print_pop (stack [5;4;3;2;1]) ;;
-[%%expect{|
-- : unit = ()
-Popped: 5
-|}];;
+[%%expect{|Popped: 5|};
+ocaml {|- : unit = ()|}];;
 let t = object
   method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
 end ;;
-[%%expect{|val t : < pop : int option > = <obj>|}];;
+[%%expect ocaml {|val t : < pop : int option > = <obj>|}];;
 print_pop t ;;
-[%%expect{|
-- : unit = ()
-Popped: 1492950327177072000
-|}];;
+[%%expect{|Popped: 1494935825291097000|};
+ocaml {|- : unit = ()|}];;

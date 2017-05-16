@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,6 +10,6 @@
 open Core;;
 [@@@part "1"];;
 Command.Spec.empty ;;
-[%%expect{|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
+[%%expect ocaml {|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
-[%%expect{|- : (int -> '_a, '_a) Command.Spec.t = <abstr>|}];;
+[%%expect ocaml {|- : (int -> '_a, '_a) Command.Spec.t = <abstr>|}];;

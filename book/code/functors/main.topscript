@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,38 +10,38 @@
 [@@@part "0.5"];;
 open Core_kernel;;
 module type X_int = sig val x : int end;;
-[%%expect{|module type X_int = sig val x : int end|}];;
+[%%expect ocaml {|module type X_int = sig val x : int end|}];;
 [@@@part "1"];;
 module Increment (M : X_int) : X_int = struct
   let x = M.x + 1
 end;;
-[%%expect{|module Increment : functor (M : X_int) -> X_int|}];;
+[%%expect ocaml {|module Increment : functor (M : X_int) -> X_int|}];;
 [@@@part "2"];;
 module Increment (M : X_int) = struct
   let x = M.x + 1
 end;;
-[%%expect{|module Increment : functor (M : X_int) -> sig val x : int end|}];;
+[%%expect ocaml {|module Increment : functor (M : X_int) -> sig val x : int end|}];;
 [@@@part "3"];;
 module Three = struct let x = 3 end;;
-[%%expect{|module Three : sig val x : int end|}];;
+[%%expect ocaml {|module Three : sig val x : int end|}];;
 module Four = Increment(Three);;
-[%%expect{|module Four : sig val x : int end|}];;
+[%%expect ocaml {|module Four : sig val x : int end|}];;
 Four.x - Three.x;;
-[%%expect{|- : int = 1|}];;
+[%%expect ocaml {|- : int = 1|}];;
 [@@@part "4"];;
 module Three_and_more = struct
   let x = 3
   let y = "three"
 end;;
-[%%expect{|module Three_and_more : sig val x : int val y : string end|}];;
+[%%expect ocaml {|module Three_and_more : sig val x : int val y : string end|}];;
 module Four = Increment(Three_and_more);;
-[%%expect{|module Four : sig val x : int end|}];;
+[%%expect ocaml {|module Four : sig val x : int end|}];;
 [@@@part "5"];;
 module type Comparable = sig
   type t
   val compare : t -> t -> int
 end ;;
-[%%expect{|module type Comparable = sig type t val compare : t -> t -> int end|}];;
+[%%expect ocaml {|module type Comparable = sig type t val compare : t -> t -> int end|}];;
 [@@@part "6"];;
 module Make_interval(Endpoint : Comparable) = struct
 
@@ -78,7 +78,7 @@ module Make_interval(Endpoint : Comparable) = struct
       create (max l1 l2) (min h1 h2)
 
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 module Make_interval :
   functor (Endpoint : Comparable) ->
     sig
@@ -95,7 +95,7 @@ module Int_interval =
     type t = int
     let compare = Int.compare
   end);;
-[%%expect{|
+[%%expect ocaml {|
 module Int_interval :
   sig
     type t = Interval of int * int | Empty
@@ -107,11 +107,11 @@ module Int_interval :
 |}];;
 [@@@part "8"];;
 module Int_interval = Make_interval(Int) ;;
-[%%expect{|
+[%%expect ocaml {|
 module Int_interval :
   sig
     type t =
-      Make_interval(Core_kernel__Core_int).t =
+      Make_interval(Core_kernel__Int).t =
         Interval of int * int
       | Empty
     val create : int -> int -> t
@@ -121,11 +121,11 @@ module Int_interval :
   end
 |}];;
 module String_interval = Make_interval(String) ;;
-[%%expect{|
+[%%expect ocaml {|
 module String_interval :
   sig
     type t =
-      Make_interval(Core_kernel__Core_string).t =
+      Make_interval(Core_kernel__String).t =
         Interval of string * string
       | Empty
     val create : string -> string -> t
@@ -136,18 +136,18 @@ module String_interval :
 |}];;
 [@@@part "9"];;
 let i1 = Int_interval.create 3 8;;
-[%%expect{|val i1 : Int_interval.t = Int_interval.Interval (3, 8)|}];;
+[%%expect ocaml {|val i1 : Int_interval.t = Int_interval.Interval (3, 8)|}];;
 let i2 = Int_interval.create 4 10;;
-[%%expect{|val i2 : Int_interval.t = Int_interval.Interval (4, 10)|}];;
+[%%expect ocaml {|val i2 : Int_interval.t = Int_interval.Interval (4, 10)|}];;
 Int_interval.intersect i1 i2;;
-[%%expect{|- : Int_interval.t = Int_interval.Interval (4, 8)|}];;
+[%%expect ocaml {|- : Int_interval.t = Int_interval.Interval (4, 8)|}];;
 [@@@part "10"];;
 module Rev_int_interval =
   Make_interval(struct
     type t = int
     let compare x y = Int.compare y x
   end);;
-[%%expect{|
+[%%expect ocaml {|
 module Rev_int_interval :
   sig
     type t = Interval of int * int | Empty
@@ -159,9 +159,9 @@ module Rev_int_interval :
 |}];;
 [@@@part "11"];;
 let interval = Int_interval.create 4 3;;
-[%%expect{|val interval : Int_interval.t = Int_interval.Empty|}];;
+[%%expect ocaml {|val interval : Int_interval.t = Int_interval.Empty|}];;
 let rev_interval = Rev_int_interval.create 4 3;;
-[%%expect{|val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)|}];;
+[%%expect ocaml {|val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)|}];;
 [@@@part "12"];;
 Int_interval.contains rev_interval 3;;
 [%%expect{|
@@ -172,10 +172,10 @@ Error: This expression has type Rev_int_interval.t
 [@@@part "13"];;
 Int_interval.is_empty (* going through create *)
   (Int_interval.create 4 3) ;;
-[%%expect{|- : bool = true|}];;
+[%%expect ocaml {|- : bool = true|}];;
 Int_interval.is_empty (* bypassing create *)
   (Int_interval.Interval (4,3)) ;;
-[%%expect{|- : bool = false|}];;
+[%%expect ocaml {|- : bool = false|}];;
 [@@@part "14"];;
 module type Interval_intf = sig
   type t
@@ -185,7 +185,7 @@ module type Interval_intf = sig
   val contains : t -> endpoint -> bool
   val intersect : t -> t -> t
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module type Interval_intf =
   sig
     type t
@@ -222,7 +222,7 @@ Error: Signature mismatch:
 |}];;
 [@@@part "16"];;
 module Int_interval = Make_interval(Int);;
-[%%expect{|
+[%%expect ocaml {|
 module Int_interval :
   sig
     type t = Int_interval.t = Interval of int * int | Empty
@@ -233,11 +233,11 @@ module Int_interval :
   end
 |}];;
 Int_interval.create 3 4;;
-[%%expect{|- : Int_interval.t = Int_interval.Interval (3, 4)|}];;
+[%%expect ocaml {|- : Int_interval.t = Int_interval.Interval (3, 4)|}];;
 [@@@part "17"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint = int;;
-[%%expect{|
+[%%expect ocaml {|
 module type Int_interval_intf =
   sig
     type t
@@ -271,7 +271,7 @@ Error: Signature mismatch:
 |}];;
 [@@@part "19"];;
 module Int_interval = Make_interval(Int);;
-[%%expect{|
+[%%expect ocaml {|
 module Int_interval :
   sig
     type t = Int_interval.t = Interval of int * int | Empty
@@ -282,13 +282,13 @@ module Int_interval :
   end
 |}];;
 let i = Int_interval.create 3 4;;
-[%%expect{|val i : Int_interval.t = Int_interval.Interval (3, 4)|}];;
+[%%expect ocaml {|val i : Int_interval.t = Int_interval.Interval (3, 4)|}];;
 Int_interval.contains i 5;;
-[%%expect{|- : bool = false|}];;
+[%%expect ocaml {|- : bool = false|}];;
 [@@@part "20"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint := int;;
-[%%expect{|
+[%%expect ocaml {|
 module type Int_interval_intf =
   sig
     type t
@@ -321,7 +321,7 @@ Error: Signature mismatch:
 |}];;
 [@@@part "22"];;
 module Int_interval = Make_interval(Int);;
-[%%expect{|
+[%%expect ocaml {|
 module Int_interval :
   sig
     type t = Int_interval.t = Interval of int * int | Empty
@@ -333,13 +333,13 @@ module Int_interval :
 |}];;
 Int_interval.is_empty
   (Int_interval.create 3 4);;
-[%%expect{|- : bool = false|}];;
+[%%expect ocaml {|- : bool = false|}];;
 Int_interval.is_empty
   (Int_interval.Interval (4,3));;
-[%%expect{|- : bool = false|}];;
+[%%expect ocaml {|- : bool = false|}];;
 [@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Core_kernel.Sexp.List
  [Core_kernel.Sexp.Atom "This"; Core_kernel.Sexp.Atom "is";
@@ -348,20 +348,20 @@ Core_kernel.Sexp.List
 |}];;
 [@@@part "24"];;
 type some_type = int * string list [@@deriving sexp];;
-[%%expect{|
+[%%expect ocaml {|
 type some_type = int * string list
 val some_type_of_sexp : Sexp.t -> some_type = <fun>
 val sexp_of_some_type : some_type -> Sexp.t = <fun>
 |}];;
 sexp_of_some_type (33, ["one"; "two"]);;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.Atom "33";
   Sexplib.Sexp.List [Sexplib.Sexp.Atom "one"; Sexplib.Sexp.Atom "two"]]
 |}];;
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
-[%%expect{|- : some_type = (44, ["five"; "six"])|}];;
+[%%expect ocaml {|- : some_type = (44, ["five"; "six"])|}];;
 [@@@part "25"];;
 module Make_interval(Endpoint : Comparable)
   : (Interval_intf with type endpoint := Endpoint.t) = struct
@@ -382,7 +382,7 @@ module type Interval_intf_with_sexp = sig
   include Interval_intf
   include Sexpable with type t := t
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module type Interval_intf_with_sexp =
   sig
     type t
@@ -401,7 +401,7 @@ module type Interval_intf_with_sexp = sig
   include Interval_intf with type t := t
   include Sexpable      with type t := t
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module type Interval_intf_with_sexp =
   sig
     type t
@@ -463,7 +463,7 @@ module Make_interval(Endpoint : sig
     | Interval (l1,h1), Interval (l2,h2) ->
       create (max l1 l2) (min h1 h2)
 end;;
-[%%expect{|
+[%%expect ocaml {|
 module Make_interval :
   functor
     (Endpoint : sig
@@ -484,10 +484,10 @@ module Make_interval :
 |}];;
 [@@@part "29"];;
 module Int_interval = Make_interval(Int) ;;
-[%%expect{|
+[%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Core_int).t
+    type t = Make_interval(Core_kernel__Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -497,11 +497,11 @@ module Int_interval :
   end
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 3 4);;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Base__.Sexplib.Sexp.List
  [Base__.Sexplib.Sexp.Atom "Interval"; Base__.Sexplib.Sexp.Atom "3";
   Base__.Sexplib.Sexp.Atom "4"]
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 4 3);;
-[%%expect{|- : Sexp.t = Base__.Sexplib.Sexp.Atom "Empty"|}];;
+[%%expect ocaml {|- : Sexp.t = Base__.Sexplib.Sexp.Atom "Empty"|}];;

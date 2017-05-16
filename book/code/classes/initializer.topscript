@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -14,10 +14,10 @@ class obj x =
   object 
     val field = printf "Initializing field\n"; x
   end ;;
-[%%expect{|class obj : int -> object val field : int end|}];;
+[%%expect ocaml {|class obj : int -> object val field : int end|}];;
 let o = new obj 3 ;;
 [%%expect{|
-val o : obj = <obj>
 Creating obj 3
 Initializing field
-|}];;
+|};
+ocaml {|val o : obj = <obj>|}];;

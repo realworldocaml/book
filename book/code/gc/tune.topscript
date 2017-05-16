@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,7 +10,7 @@
 [@@@part "0.5"];;
 open Core_kernel;;
 let c = Gc.get () ;;
-[%%expect{|
+[%%expect ocaml {|
 val c : Gc.control =
   {Core_kernel.Gc.Control.minor_heap_size = 262144;
    major_heap_increment = 15; space_overhead = 80; verbose = 0;
@@ -18,15 +18,15 @@ val c : Gc.control =
    window_size = 1}
 |}];;
 Gc.tune ~minor_heap_size:(262144 * 2) () ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 [@@@part "1"];;
 Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 [@@@part "2"];;
 Gc.major_slice 0 ;;
-[%%expect{|- : int = 0|}];;
+[%%expect ocaml {|- : int = 0|}];;
 Gc.full_major () ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 [@@@part "3"];;
 Gc.tune ~max_overhead:0 () ;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;

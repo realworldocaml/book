@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -18,9 +18,9 @@ Sexp.load_sexp "comment_heavy.scm" ;;
 Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm")) ;;
 [%%expect{|
-- : unit = ()
 Uncaught exception:
   
   (Sys_error "example_broken.scm: No such file or directory")
 
-|}];;
+|};
+ocaml {|- : unit = ()|}];;

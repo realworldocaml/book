@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,7 +10,7 @@
 open Core_kernel;;
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
-[%%expect{|
+[%%expect ocaml {|
 type basic_color =
     Black
   | Red
@@ -24,7 +24,7 @@ type basic_color =
 let basic_color_to_int = function
   | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
   | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
-[%%expect{|val basic_color_to_int : basic_color -> int = <fun>|}];;
+[%%expect ocaml {|val basic_color_to_int : basic_color -> int = <fun>|}];;
 [@@@part "1"];;
 type color =
   | Basic of basic_color     (* basic colors *)
@@ -32,7 +32,7 @@ type color =
   | RGB   of int * int * int (* 6x6x6 color cube *)
   | Gray  of int             (* 24 grayscale levels *)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 type color =
     Basic of basic_color
   | Bold of basic_color
@@ -61,15 +61,15 @@ Characters 19-148:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 Bold _
-val color_to_int : color -> int = <fun>
-|}];;
+|};
+ocaml {|val color_to_int : color -> int = <fun>|}];;
 [@@@part "4"];;
 let color_to_int = function
   | Basic basic_color -> basic_color_to_int basic_color
   | Bold  basic_color -> 8 + basic_color_to_int basic_color
   | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i ;;
-[%%expect{|val color_to_int : color -> int = <fun>|}];;
+[%%expect ocaml {|val color_to_int : color -> int = <fun>|}];;
 [@@@part "5"];;
 let oldschool_color_to_int = function
   | Basic (basic_color,weight) ->

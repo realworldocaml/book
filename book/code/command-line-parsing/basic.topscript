@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,4 +10,4 @@
 open Core;;
 [@@@part "1"];;
 Command.basic;;
-[%%expect{|- : ('main, unit) Command.basic_command = <fun>|}];;
+[%%expect ocaml {|- : ('main, unit) Command.basic_command = <fun>|}];;

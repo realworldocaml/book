@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -9,58 +9,58 @@
 [@@@part "1"];;
 open Core;;
 In_channel.read_all;;
-[%%expect{|- : string -> string = <fun>|}];;
+[%%expect ocaml {|- : string -> string = <fun>|}];;
 
 Out_channel.write_all "test.txt" ~data:"This is only a test.";;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 
 In_channel.read_all "test.txt";;
 
-[%%expect{|- : string = "This is only a test."|}];;
+[%%expect ocaml {|- : string = "This is only a test."|}];;
 [@@@part "3"];;
 #require "async";;
 open Async;;
 Reader.file_contents;;
 
 
-[%%expect{|- : string -> string Deferred.t = <fun>|}];;
+[%%expect ocaml {|- : string -> string Deferred.t = <fun>|}];;
 [@@@part "4"];;
 let contents = Reader.file_contents "test.txt";;
-[%%expect{|val contents : string Deferred.t = <abstr>|}];;
+[%%expect ocaml {|val contents : string Deferred.t = <abstr>|}];;
 
 Deferred.peek contents;;
 
 
-[%%expect{|- : string option = None|}];;
+[%%expect ocaml {|- : string option = None|}];;
 [@@@part "5"];;
 contents;;
 
-[%%expect{|- : string = "This is only a test."|}];;
+[%%expect ocaml {|- : string = "This is only a test."|}];;
 [@@@part "6"];;
 Deferred.peek contents;;
 
 
-[%%expect{|- : string option = Some "This is only a test."|}];;
+[%%expect ocaml {|- : string option = Some "This is only a test."|}];;
 [@@@part "7"];;
 Deferred.bind ;;
 
 
-[%%expect{|- : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>|}];;
+[%%expect ocaml {|- : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>|}];;
 [@@@part "8"];;
 let uppercase_file filename =
   Deferred.bind (Reader.file_contents filename)
     (fun text ->
        Writer.save filename ~contents:(String.uppercase text))
 ;;
-[%%expect{|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
+[%%expect ocaml {|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
 
 uppercase_file "test.txt";;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 
 Reader.file_contents "test.txt";;
 
 
-[%%expect{|- : string = "THIS IS ONLY A TEST."|}];;
+[%%expect ocaml {|- : string = "THIS IS ONLY A TEST."|}];;
 [@@@part "9"];;
 let uppercase_file filename =
   Reader.file_contents filename
@@ -69,7 +69,7 @@ let uppercase_file filename =
 ;;
 
 
-[%%expect{|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
+[%%expect ocaml {|val uppercase_file : string -> unit Deferred.t = <fun>|}];;
 [@@@part "10"];;
 let count_lines filename =
   Reader.file_contents filename
@@ -87,22 +87,22 @@ Error: This expression has type int but an expression was expected of type
 |}];;
 [@@@part "11"];;
 return;;
-[%%expect{|- : 'a -> 'a Deferred.t = <fun>|}];;
+[%%expect ocaml {|- : 'a -> 'a Deferred.t = <fun>|}];;
 
 let three = return 3;;
-[%%expect{|val three : int Deferred.t = <abstr>|}];;
+[%%expect ocaml {|val three : int Deferred.t = <abstr>|}];;
 
 three;;
 
 
-[%%expect{|- : int = 3|}];;
+[%%expect ocaml {|- : int = 3|}];;
 [@@@part "12"];;
 let count_lines filename =
   Reader.file_contents filename
   >>= fun text ->
   return (List.length (String.split text ~on:'\n'))
 ;;
-[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
+[%%expect ocaml {|val count_lines : string -> int Deferred.t = <fun>|}];;
 
 [@@@part "12.1"];;
 let count_lines filename =
@@ -110,51 +110,51 @@ let count_lines filename =
   return (List.length (String.split text ~on:'\n'))
 ;;
 
-[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
+[%%expect ocaml {|val count_lines : string -> int Deferred.t = <fun>|}];;
 [@@@part "13"];;
 Deferred.map;;
 
 
-[%%expect{|- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>|}];;
+[%%expect ocaml {|- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>|}];;
 [@@@part "14"];;
 let count_lines filename =
   Reader.file_contents filename
   >>| fun text ->
   List.length (String.split text ~on:'\n')
 ;;
-[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
+[%%expect ocaml {|val count_lines : string -> int Deferred.t = <fun>|}];;
 
 count_lines "/etc/hosts";;
 
 
-[%%expect{|- : int = 10|}];;
+[%%expect ocaml {|- : int = 10|}];;
 [@@@part "14.1"];;
 let count_lines filename =
   let%map text = Reader.file_contents filename in
   List.length (String.split text ~on:'\n')
 ;;
-[%%expect{|val count_lines : string -> int Deferred.t = <fun>|}];;
+[%%expect ocaml {|val count_lines : string -> int Deferred.t = <fun>|}];;
 
 [@@@part "15"];;
 let ivar = Ivar.create ();;
-[%%expect{|
+[%%expect ocaml {|
 val ivar : '_a Ivar.t =
   {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
 |}];;
 
 let def = Ivar.read ivar;;
-[%%expect{|val def : '_a Deferred.t = <abstr>|}];;
+[%%expect ocaml {|val def : '_a Deferred.t = <abstr>|}];;
 
 Deferred.peek def;;
-[%%expect{|- : '_a option = None|}];;
+[%%expect ocaml {|- : '_a option = None|}];;
 
 Ivar.fill ivar "Hello";;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 
 Deferred.peek def;;
 
 
-[%%expect{|- : string option = Some "Hello"|}];;
+[%%expect ocaml {|- : string option = Some "Hello"|}];;
 
 [@@@part "16"];;
 module type Delayer_intf = sig
@@ -163,7 +163,7 @@ module type Delayer_intf = sig
   val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
 end;;
 
-[%%expect{|
+[%%expect ocaml {|
 module type Delayer_intf =
   sig
     type t
@@ -175,7 +175,7 @@ module type Delayer_intf =
 upon;;
 
 
-[%%expect{|- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>|}];;
+[%%expect ocaml {|- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>|}];;
 [@@@part "18"];;
 module Delayer : Delayer_intf = struct
   type t = { delay: Time.Span.t;
@@ -196,7 +196,7 @@ module Delayer : Delayer_intf = struct
 end;;
 
 
-[%%expect{|module Delayer : Delayer_intf|}];;
+[%%expect ocaml {|module Delayer : Delayer_intf|}];;
 
 [@@@part "18.1"];;
 let my_bind d ~f =
@@ -204,19 +204,19 @@ let my_bind d ~f =
   upon d (fun x -> upon (f x) (fun y -> Ivar.fill i y));
   Ivar.read i
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val my_bind : 'a Deferred.t -> f:('a -> 'b Deferred.t) -> 'b Deferred.t =
   <fun>
 |}];;
 
 [@@@part "19"];;
 let rec loop_forever () = loop_forever ();;
-[%%expect{|val loop_forever : unit -> 'a = <fun>|}];;
+[%%expect ocaml {|val loop_forever : unit -> 'a = <fun>|}];;
 
 let always_fail () = assert false;;
 
 
-[%%expect{|val always_fail : unit -> 'a = <fun>|}];;
+[%%expect ocaml {|val always_fail : unit -> 'a = <fun>|}];;
 [@@@part "20"];;
 let do_stuff n =
   let x = 3 in
@@ -225,12 +225,12 @@ let do_stuff n =
 ;;
 
 
-[%%expect{|val do_stuff : int -> int = <fun>|}];;
+[%%expect ocaml {|val do_stuff : int -> int = <fun>|}];;
 [@@@part "21"];;
 let rec loop_forever () : never_returns = loop_forever ();;
 
 
-[%%expect{|val loop_forever : unit -> never_returns = <fun>|}];;
+[%%expect ocaml {|val loop_forever : unit -> never_returns = <fun>|}];;
 [@@@part "22"];;
 let do_stuff n =
   let x = 3 in
@@ -248,7 +248,7 @@ Error: This expression has type never_returns = (unit, int) Base.Type_equal.t
 |}];;
 [@@@part "23"];;
 never_returns;;
-[%%expect{|- : never_returns -> 'a = <fun>|}];;
+[%%expect ocaml {|- : never_returns -> 'a = <fun>|}];;
 
 let do_stuff n =
   let x = 3 in
@@ -257,40 +257,40 @@ let do_stuff n =
 ;;
 
 
-[%%expect{|val do_stuff : int -> int = <fun>|}];;
+[%%expect ocaml {|val do_stuff : int -> int = <fun>|}];;
 [@@@part "24"];;
 let (r,w) = Pipe.create ();;
 
 
 
-[%%expect{|
+[%%expect ocaml {|
 val r : '_a Pipe.Reader.t = <abstr>
 val w : '_a Pipe.Writer.t = <abstr>
 |}];;
 [@@@part "25"];;
 let (r,w) = Pipe.create ();;
-[%%expect{|
+[%%expect ocaml {|
 val r : '_a Pipe.Reader.t = <abstr>
 val w : '_a Pipe.Writer.t = <abstr>
 |}];;
 
 
 let write_complete = Pipe.write w "Hello World!";;
-[%%expect{|val write_complete : unit Deferred.t = <abstr>|}];;
+[%%expect ocaml {|val write_complete : unit Deferred.t = <abstr>|}];;
 
 Pipe.read r;;
-[%%expect{|- : [ `Eof | `Ok of string ] = `Ok "Hello World!"|}];;
+[%%expect ocaml {|- : [ `Eof | `Ok of string ] = `Ok "Hello World!"|}];;
 
 write_complete;;
 
 
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 [@@@part "26"];;
 Pipe.transfer;;
 
 
 
-[%%expect{|
+[%%expect ocaml {|
 - : 'a Pipe.Reader.t -> 'b Pipe.Writer.t -> f:('a -> 'b) -> unit Deferred.t =
 <fun>
 |}];;
@@ -308,6 +308,8 @@ Warning 3: deprecated: Async.Command.async_basic
 Characters 0-19:
 Warning 3: deprecated: Async.Command.async_basic
 [since 2015-10] Use async instead
+|};
+ocaml {|
 - : ('a, unit Deferred.t) Async_extra.Command.basic_command
     Command.with_options
 = <fun>
@@ -320,7 +322,7 @@ Cohttp_async.Client.get;;
 
 
 
-[%%expect{|
+[%%expect ocaml {|
 - : ?interrupt:unit Deferred.t ->
     ?ssl_config:Conduit_async.Ssl.config ->
     ?headers:Cohttp.Header.t ->
@@ -331,12 +333,12 @@ Cohttp_async.Client.get;;
 Deferred.all;;
 
 
-[%%expect{|- : 'a Conduit_async.io list -> 'a list Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|- : 'a Conduit_async.io list -> 'a list Conduit_async.io = <fun>|}];;
 [@@@part "30"];;
 Deferred.all_unit;;
 
 
-[%%expect{|- : unit Conduit_async.io list -> unit Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|- : unit Conduit_async.io list -> unit Conduit_async.io = <fun>|}];;
 [@@@part "31"];;
 let maybe_raise =
   let should_fail = ref false in
@@ -347,10 +349,10 @@ let maybe_raise =
     >>= fun () ->
     if will_fail then raise Exit else return ()
 ;;
-[%%expect{|val maybe_raise : unit -> unit Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|val maybe_raise : unit -> unit Conduit_async.io = <fun>|}];;
 
 maybe_raise ();;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 
 maybe_raise ();;
 
@@ -370,10 +372,10 @@ let handle_error () =
     >>| fun () -> "success"
   with _ -> return "failure"
 ;;
-[%%expect{|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
 
 handle_error ();;
-[%%expect{|- : string = "success"|}];;
+[%%expect ocaml {|- : string = "success"|}];;
 
 handle_error ();;
 
@@ -393,24 +395,24 @@ let handle_error () =
   | Ok ()   -> "success"
   | Error _ -> "failure"
 ;;
-[%%expect{|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|val handle_error : unit -> string Conduit_async.io = <fun>|}];;
 
 handle_error ();;
-[%%expect{|- : string = "success"|}];;
+[%%expect ocaml {|- : string = "success"|}];;
 
 handle_error ();;
 
 
-[%%expect{|- : string = "failure"|}];;
+[%%expect ocaml {|- : string = "failure"|}];;
 [@@@part "34"];;
 let blow_up () =
   let monitor = Monitor.create ~name:"blow up monitor" () in
   within' ~monitor maybe_raise
 ;;
-[%%expect{|val blow_up : unit -> unit Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|val blow_up : unit -> unit Conduit_async.io = <fun>|}];;
 
 blow_up ();;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 
 blow_up ();;
 
@@ -438,34 +440,34 @@ Error: Unbound value swallow_some_errors
 let string_and_float = Deferred.both
                          (after (sec 0.5)  >>| fun () -> "A")
                          (after (sec 0.25) >>| fun () -> 32.33);;
-[%%expect{|val string_and_float : (string * float) Conduit_async.io = <abstr>|}];;
+[%%expect ocaml {|val string_and_float : (string * float) Conduit_async.io = <abstr>|}];;
 
 string_and_float;;
 
 
-[%%expect{|- : string * float = ("A", 32.33)|}];;
+[%%expect ocaml {|- : string * float = ("A", 32.33)|}];;
 [@@@part "40"];;
 Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
              ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
 
 
-[%%expect{|- : string = "half a second"|}];;
+[%%expect ocaml {|- : string = "half a second"|}];;
 [@@@part "41"];;
 choice;;
-[%%expect{|- : 'a Conduit_async.io -> ('a -> 'b) -> 'b Deferred.choice = <fun>|}];;
+[%%expect ocaml {|- : 'a Conduit_async.io -> ('a -> 'b) -> 'b Deferred.choice = <fun>|}];;
 
 choose;;
 
 
-[%%expect{|- : 'a Deferred.choice list -> 'a Conduit_async.io = <fun>|}];;
+[%%expect ocaml {|- : 'a Deferred.choice list -> 'a Conduit_async.io = <fun>|}];;
 [@@@part "42"];;
 let def = In_thread.run (fun () -> List.range 1 10);;
-[%%expect{|val def : int list Conduit_async.io = <abstr>|}];;
+[%%expect ocaml {|val def : int list Conduit_async.io = <abstr>|}];;
 
 def;;
 
 
-[%%expect{|- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]|}];;
+[%%expect ocaml {|- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]|}];;
 [@@@part "43"];;
 let log_delays thunk =
   let start = Time.now () in
@@ -479,48 +481,47 @@ let log_delays thunk =
 ;;
 
 
-[%%expect{|
+[%%expect ocaml {|
 val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
   <fun>
 |}];;
 [@@@part "44"];;
 log_delays (fun () -> after (sec 0.5));;
 
-[%%expect{|
-- : unit = ()
-0.0360012ms, 104.664ms, 205.872ms, 306.687ms, 407.929ms, |}];;
+[%%expect{|0.0369549ms, 100.368ms, 205.923ms, 311.676ms, 415.41ms, |};
+ocaml {|- : unit = ()|}];;
 [@@@part "45"];;
 let busy_loop () =
   let x = ref None in
   for i = 1 to 100_000_000 do x := Some i done
 ;;
-[%%expect{|
-val busy_loop : unit -> unit = <fun>
-505.552ms, 
-|}];;
+[%%expect{|501.996ms, |};
+ocaml {|val busy_loop : unit -> unit = <fun>|}];;
 
 log_delays (fun () -> return (busy_loop ()));;
 
 
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 [@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;
 
 [%%expect{|
+1.3457s, 
+0.0629425ms, 270.598ms, 375.278ms, 684.264ms, 790.118ms, 893.529ms, 998.063ms, 1.10047s, 
+|};
+ocaml {|
 - : unit = ()
-1.31663s, 
-0.0579357ms, 177.042ms, 282.277ms, 386.692ms, 490.584ms, 649.979ms, 753.007ms, 966.856ms, 1.07057s, |}];;
+1.25805s, 
+|}];;
 [@@@part "47"];;
 let noalloc_busy_loop () =
   for i = 0 to 100_000_000 do () done
 ;;
-[%%expect{|
-val noalloc_busy_loop : unit -> unit = <fun>
-1.22662s, |}];;
+[%%expect ocaml {|val noalloc_busy_loop : unit -> unit = <fun>|}];;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
 [%%expect{|
-- : unit = ()
-1.31956s, 
-0.038147ms, 178.984ms, 437.613ms, 645.165ms, 741.531ms, 
-|}];;
+1.33294s, 
+0.0348091ms, 147.66ms, 252.529ms, 354.295ms, 509.478ms, 
+|};
+ocaml {|- : unit = ()|}];;

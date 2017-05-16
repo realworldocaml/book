@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -22,7 +22,7 @@ class ['a] stack init = object
   method push hd =
     v <- hd :: v
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class ['a] stack :
   'a list ->
   object
@@ -64,7 +64,7 @@ class sstack init = object
   method print =
     List.iter ~f:print_string v
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class sstack :
   string list ->
   object
@@ -81,7 +81,7 @@ class double_stack init = object
   method push hd =
     super#push (hd * 2)
 end ;;
-[%%expect{|
+[%%expect ocaml {|
 class double_stack :
   int list ->
   object

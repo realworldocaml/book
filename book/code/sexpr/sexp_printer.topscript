@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,9 +10,9 @@
 open Core_kernel;;
 [@@@part "1"];;
 Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;
-[%%expect{|- : string = "(1 2)"|}];;
+[%%expect ocaml {|- : string = "(1 2)"|}];;
 Sexp.of_string ("(1 2 (3 4))") ;;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Core_kernel.Sexp.List
  [Core_kernel.Sexp.Atom "1"; Core_kernel.Sexp.Atom "2";

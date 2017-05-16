@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,11 +10,11 @@
 open Core_kernel;;
 [@@@part "0.5"];;
 Int.sexp_of_t 3;;
-[%%expect{|- : Core_kernel.Sexp.t = Sexplib.Sexp.Atom "3"|}];;
+[%%expect ocaml {|- : Core_kernel.Sexp.t = Sexplib.Sexp.Atom "3"|}];;
 String.sexp_of_t "hello";;
-[%%expect{|- : Sexp.t = Sexplib.Sexp.Atom "hello"|}];;
+[%%expect ocaml {|- : Sexp.t = Sexplib.Sexp.Atom "hello"|}];;
 Exn.sexp_of_t (Invalid_argument "foo");;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Base__.Sexplib.Sexp.List
  [Base__.Sexplib.Sexp.Atom "Invalid_argument";
@@ -22,9 +22,9 @@ Base__.Sexplib.Sexp.List
 |}];;
 [@@@part "1"];;
 List.sexp_of_t;;
-[%%expect{|- : ('a -> Sexp.t) -> 'a list -> Sexp.t = <fun>|}];;
+[%%expect ocaml {|- : ('a -> Sexp.t) -> 'a list -> Sexp.t = <fun>|}];;
 List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Base__.Sexplib.Sexp.List
  [Base__.Sexplib.Sexp.Atom "1"; Base__.Sexplib.Sexp.Atom "2";
@@ -32,9 +32,9 @@ Base__.Sexplib.Sexp.List
 |}];;
 [@@@part "2"];;
 List.t_of_sexp;;
-[%%expect{|- : (Sexp.t -> 'a) -> Sexp.t -> 'a list = <fun>|}];;
+[%%expect ocaml {|- : (Sexp.t -> 'a) -> Sexp.t -> 'a list = <fun>|}];;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
-[%%expect{|- : int list = [1; 2; 3]|}];;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 [%%expect{|
 Exception:

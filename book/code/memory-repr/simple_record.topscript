@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -9,6 +9,6 @@
 #require "ppx_jane";;
 [@@@part "1"];;
 type t = { foo: int; bar: int } ;;
-[%%expect{|type t = { foo : int; bar : int; }|}];;
+[%%expect ocaml {|type t = { foo : int; bar : int; }|}];;
 let x = { foo = 13; bar = 14 } ;;
-[%%expect{|val x : t = {foo = 13; bar = 14}|}];;
+[%%expect ocaml {|val x : t = {foo = 13; bar = 14}|}];;

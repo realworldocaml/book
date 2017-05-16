@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -16,23 +16,23 @@ let sum_file filename =
     List.fold ~init:0 ~f:(+) numbers)
     ~finally:(fun () -> In_channel.close file)
 ;;
-[%%expect{|val sum_file : string -> int = <fun>|}];;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
 [@@@part "2"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-[%%expect{|- : unit = ()|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 sum_file "numbers.txt";;
-[%%expect{|- : int = 15|}];;
+[%%expect ocaml {|- : int = 15|}];;
 [@@@part "3"];;
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
     List.fold ~init:0 ~f:(+) numbers)
 ;;
-[%%expect{|val sum_file : string -> int = <fun>|}];;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
 [@@@part "4"];;
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
       sum + Int.of_string line))
 ;;
-[%%expect{|val sum_file : string -> int = <fun>|}];;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;

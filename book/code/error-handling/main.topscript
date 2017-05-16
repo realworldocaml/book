@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -10,12 +10,12 @@
 [@@@part "0.5"];;
 open Core_kernel;;
 List.find;;
-[%%expect{|- : 'a list -> f:('a -> bool) -> 'a option = <fun>|}];;
+[%%expect ocaml {|- : 'a list -> f:('a -> bool) -> 'a option = <fun>|}];;
 [@@@part "1"];;
 List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
-[%%expect{|- : int option = Some 2|}];;
+[%%expect ocaml {|- : int option = Some 2|}];;
 List.find [1;2;3] ~f:(fun x -> x >= 10) ;;
-[%%expect{|- : int option = None|}];;
+[%%expect ocaml {|- : int option = None|}];;
 [@@@part "2"];;
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
@@ -23,7 +23,7 @@ let compute_bounds ~cmp list =
   | None,_ | _, None -> None
   | Some x, Some y -> Some (x,y)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
@@ -35,28 +35,28 @@ let find_mismatches table1 table2 =
     | _ -> mismatches
   )
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val find_mismatches : ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list =
   <fun>
 |}];;
 [@@@part "4"];;
 [ Ok 3; Error "abject failure"; Ok 4 ];;
-[%%expect{|- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]|}];;
+[%%expect ocaml {|- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]|}];;
 [@@@part "5"];;
 Error.of_string "something went wrong";;
-[%%expect{|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = <abstr>|}];;
 [@@@part "6"];;
 Error.of_thunk (fun () ->
   sprintf "something went wrong: %f" 32.3343);;
-[%%expect{|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = <abstr>|}];;
 [@@@part "7"];;
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
-[%%expect{|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = <abstr>|}];;
 [@@@part "8"];;
 let custom_to_sexp = [%sexp_of: float * string list * int];;
-[%%expect{|val custom_to_sexp : float * string list * int -> Sexp.t = <fun>|}];;
+[%%expect ocaml {|val custom_to_sexp : float * string list * int -> Sexp.t = <fun>|}];;
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.Atom "3.5";
@@ -68,21 +68,21 @@ Sexplib.Sexp.List
 Error.create "Something went terribly wrong"
   (3.5, ["a";"b";"c"], 6034)
   [%sexp_of: float * string list * int] ;;
-[%%expect{|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = <abstr>|}];;
 [@@@part "10"];;
 Error.tag
   (Error.of_list [ Error.of_string "Your tires were slashed";
                    Error.of_string "Your windshield was smashed" ])
   "over the weekend"
 ;;
-[%%expect{|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = <abstr>|}];;
 [@@@part "11"];;
 let bind option f =
   match option with
   | None -> None
   | Some x -> f x
 ;;
-[%%expect{|val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>|}];;
+[%%expect ocaml {|val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>|}];;
 [@@@part "12"];;
 let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
@@ -90,7 +90,7 @@ let compute_bounds ~cmp list =
     Option.bind (List.last sorted) (fun last ->
       Some (first,last)))
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
@@ -102,7 +102,7 @@ let compute_bounds ~cmp list =
   List.last sorted >>= fun last  ->
   Some (first,last)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
@@ -114,7 +114,7 @@ let compute_bounds ~cmp list =
   let%bind last  = List.last sorted in
   Some (first,last)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
@@ -123,7 +123,7 @@ let compute_bounds ~cmp list =
   let sorted = List.sort ~cmp list in
   Option.both (List.hd sorted) (List.last sorted)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
@@ -143,55 +143,55 @@ Exception: Division_by_zero.
 |}];;
 [@@@part "18"];;
 exception Key_not_found of string;;
-[%%expect{|exception Key_not_found of string|}];;
+[%%expect ocaml {|exception Key_not_found of string|}];;
 raise (Key_not_found "a");;
 [%%expect{|Exception: Key_not_found "a".|}];;
 [@@@part "19"];;
 let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;
-[%%expect{|val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found "b"]|}];;
+[%%expect ocaml {|val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found "b"]|}];;
 List.filter exceptions  ~f:(function
   | Key_not_found _ | Not_found -> true
   | _ -> false);;
-[%%expect{|- : exn list = [Not_found; Key_not_found "b"]|}];;
+[%%expect ocaml {|- : exn list = [Not_found; Key_not_found "b"]|}];;
 [@@@part "20"];;
 let rec find_exn alist key = match alist with
   | [] -> raise (Key_not_found key)
   | (key',data) :: tl -> if key = key' then data else find_exn tl key
 ;;
-[%%expect{|val find_exn : (string * 'a) list -> string -> 'a = <fun>|}];;
+[%%expect ocaml {|val find_exn : (string * 'a) list -> string -> 'a = <fun>|}];;
 let alist = [("a",1); ("b",2)];;
-[%%expect{|val alist : (string * int) list = [("a", 1); ("b", 2)]|}];;
+[%%expect ocaml {|val alist : (string * int) list = [("a", 1); ("b", 2)]|}];;
 find_exn alist "a";;
-[%%expect{|- : int = 1|}];;
+[%%expect ocaml {|- : int = 1|}];;
 find_exn alist "c";;
 [%%expect{|Exception: Key_not_found "c".|}];;
 [@@@part "21"];;
 raise;;
-[%%expect{|- : exn -> 'a = <fun>|}];;
+[%%expect ocaml {|- : exn -> 'a = <fun>|}];;
 [@@@part "22"];;
 let rec forever () = forever ();;
-[%%expect{|val forever : unit -> 'a = <fun>|}];;
+[%%expect ocaml {|val forever : unit -> 'a = <fun>|}];;
 [@@@part "23"];;
 type 'a bounds = { lower: 'a; upper: 'a };;
-[%%expect{|type 'a bounds = { lower : 'a; upper : 'a; }|}];;
+[%%expect ocaml {|type 'a bounds = { lower : 'a; upper : 'a; }|}];;
 exception Crossed_bounds of int bounds;;
-[%%expect{|exception Crossed_bounds of int bounds|}];;
+[%%expect ocaml {|exception Crossed_bounds of int bounds|}];;
 Crossed_bounds { lower=10; upper=0 };;
-[%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
+[%%expect ocaml {|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "24"];;
 type 'a bounds = { lower: 'a; upper: 'a } [@@deriving sexp];;
-[%%expect{|
+[%%expect ocaml {|
 type 'a bounds = { lower : 'a; upper : 'a; }
 val bounds_of_sexp : (Sexp.t -> 'a) -> Sexp.t -> 'a bounds = <fun>
 val sexp_of_bounds : ('a -> Sexp.t) -> 'a bounds -> Sexp.t = <fun>
 |}];;
 exception Crossed_bounds of int bounds [@@deriving sexp];;
-[%%expect{|exception Crossed_bounds of int bounds|}];;
+[%%expect ocaml {|exception Crossed_bounds of int bounds|}];;
 Crossed_bounds { lower=10; upper=0 };;
-[%%expect{|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
+[%%expect ocaml {|- : exn = Crossed_bounds {lower = 10; upper = 0}|}];;
 [@@@part "25"];;
 let failwith msg = raise (Failure msg);;
-[%%expect{|val failwith : string -> 'a = <fun>|}];;
+[%%expect ocaml {|val failwith : string -> 'a = <fun>|}];;
 [@@@part "26"];;
 let merge_lists xs ys ~f =
   if List.length xs <> List.length ys then None
@@ -204,14 +204,14 @@ let merge_lists xs ys ~f =
     in
     Some (loop xs ys)
 ;;
-[%%expect{|
+[%%expect ocaml {|
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list option =
   <fun>
 |}];;
 merge_lists [1;2;3] [-1;1;2] ~f:(+);;
-[%%expect{|- : int list option = Some [0; 3; 5]|}];;
+[%%expect ocaml {|- : int list option = Some [0; 3; 5]|}];;
 merge_lists [1;2;3] [-1;1] ~f:(+);;
-[%%expect{|- : int list option = None|}];;
+[%%expect ocaml {|- : int list option = None|}];;
 [@@@part "27"];;
 let merge_lists xs ys ~f =
   let rec loop xs ys =
@@ -222,7 +222,7 @@ let merge_lists xs ys ~f =
   in
   loop xs ys
 ;;
-[%%expect{|val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>|}];;
+[%%expect ocaml {|val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>|}];;
 merge_lists [1;2;3] [-1] ~f:(+);;
 [%%expect{|Exception: Assert_failure ("//toplevel//", 7, 11).|}];;
 [@@@part "28"];;
@@ -230,14 +230,14 @@ let parse_line line =
   String.split_on_chars ~on:[','] line
   |> List.map ~f:Float.of_string
 ;;
-[%%expect{|val parse_line : string -> float list = <fun>|}];;
+[%%expect ocaml {|val parse_line : string -> float list = <fun>|}];;
 let load filename =
   let inc = In_channel.create filename in
   let data = In_channel.input_lines inc |> List.map ~f:parse_line in
   In_channel.close inc;
   data
 ;;
-[%%expect{|val load : string -> float list list = <fun>|}];;
+[%%expect ocaml {|val load : string -> float list list = <fun>|}];;
 [@@@part "29"];;
 let load filename =
   let inc = In_channel.create filename in
@@ -245,13 +245,13 @@ let load filename =
     In_channel.input_lines inc |> List.map ~f:parse_line)
     ~finally:(fun () -> In_channel.close inc)
 ;;
-[%%expect{|val load : string -> float list list = <fun>|}];;
+[%%expect ocaml {|val load : string -> float list list = <fun>|}];;
 [@@@part "30"];;
 let load filename =
   In_channel.with_file filename ~f:(fun inc ->
     In_channel.input_lines inc |> List.map ~f:parse_line)
 ;;
-[%%expect{|val load : string -> float list list = <fun>|}];;
+[%%expect ocaml {|val load : string -> float list list = <fun>|}];;
 [@@@part "31"];;
 let lookup_weight ~compute_weight alist key =
   try
@@ -259,7 +259,7 @@ let lookup_weight ~compute_weight alist key =
     compute_weight data
   with
     Not_found -> 0. ;;
-[%%expect{|
+[%%expect ocaml {|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
   ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
@@ -267,7 +267,7 @@ val lookup_weight :
 [@@@part "32"];;
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
   ["a",3; "b",4] "a" ;;
-[%%expect{|- : float = 0.|}];;
+[%%expect ocaml {|- : float = 0.|}];;
 [@@@part "33"];;
 let lookup_weight ~compute_weight alist key =
   match
@@ -276,7 +276,7 @@ let lookup_weight ~compute_weight alist key =
   with
   | None -> 0.
   | Some data -> compute_weight data ;;
-[%%expect{|
+[%%expect ocaml {|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
   ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
@@ -286,7 +286,7 @@ let lookup_weight ~compute_weight alist key =
   match List.Assoc.find_exn alist key with
   | exception _ -> 0.
   | data -> compute_weight data ;;
-[%%expect{|
+[%%expect ocaml {|
 val lookup_weight :
   compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
   ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
@@ -305,19 +305,19 @@ Error: This pattern matches values of type 'a option
 [@@@part "35"];;
 let find alist key =
   Option.try_with (fun () -> find_exn alist key) ;;
-[%%expect{|val find : (string * 'a) list -> string -> 'a option = <fun>|}];;
+[%%expect ocaml {|val find : (string * 'a) list -> string -> 'a option = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect{|- : int option = None|}];;
+[%%expect ocaml {|- : int option = None|}];;
 find ["a",1; "b",2] "b";;
-[%%expect{|- : int option = Some 2|}];;
+[%%expect ocaml {|- : int option = Some 2|}];;
 [@@@part "36"];;
 let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;
-[%%expect{|val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>|}];;
+[%%expect ocaml {|val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect{|- : int Or_error.t = Core_kernel__.Result.Error <abstr>|}];;
+[%%expect ocaml {|- : int Or_error.t = Core_kernel__.Result.Error <abstr>|}];;
 [@@@part "37"];;
 Or_error.ok_exn (find ["a",1; "b",2] "b");;
-[%%expect{|- : int = 2|}];;
+[%%expect ocaml {|- : int = 2|}];;
 Or_error.ok_exn (find ["a",1; "b",2] "c");;
 [%%expect{|Exception: Key_not_found "c".|}];;

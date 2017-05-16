@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -14,7 +14,7 @@ type http_server_config = {
   port: int;
   addr: string;
 } [@@deriving sexp] ;;
-[%%expect{|
+[%%expect ocaml {|
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Core_kernel.Sexp.t -> http_server_config =
   <fun>
@@ -27,7 +27,7 @@ type http_server_config = {
   port: int [@default 80];
   addr: string [@default "localhost"];
 } [@@deriving sexp] ;;
-[%%expect{|
+[%%expect ocaml {|
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
@@ -35,13 +35,13 @@ val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 [@@@part "2"];;
 let cfg = http_server_config_of_sexp
             (Sexp.of_string "((web_root /var/www/html))") ;;
-[%%expect{|
+[%%expect ocaml {|
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 |}];;
 [@@@part "3"];;
 sexp_of_http_server_config cfg ;;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List
@@ -55,19 +55,19 @@ type http_server_config = {
   port: int [@default 80] [@sexp_drop_default];
   addr: string [@default "localhost"] [@sexp_drop_default];
 } [@@deriving sexp] ;;
-[%%expect{|
+[%%expect ocaml {|
 type http_server_config = { web_root : string; port : int; addr : string; }
 val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
 val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 |}];;
 let cfg = http_server_config_of_sexp
             (Sexp.of_string "((web_root /var/www/html))") ;;
-[%%expect{|
+[%%expect ocaml {|
 val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 |}];;
 sexp_of_http_server_config cfg ;;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List
@@ -75,7 +75,7 @@ Sexplib.Sexp.List
 |}];;
 [@@@part "5"];;
 sexp_of_http_server_config { cfg with port = 8080 } ;;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List
@@ -84,7 +84,7 @@ Sexplib.Sexp.List
 |}];;
 sexp_of_http_server_config
   { cfg with port = 8080; addr = "192.168.0.1" } ;;
-[%%expect{|
+[%%expect ocaml {|
 - : Sexp.t =
 Sexplib.Sexp.List
  [Sexplib.Sexp.List

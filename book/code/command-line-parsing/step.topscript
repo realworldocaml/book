@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -21,5 +21,5 @@ Characters 139-147:
 Warning 3: deprecated: Core.read_int
 [since 2016-04] Use
 [Out_channel.(flush stdout); Int.of_string In_channel.(input_line_exn stdin)]
-- : (Date.t -> int -> '_a, Date.t -> int option -> '_a) t = <abstr>
-|}];;
+|};
+ocaml {|- : (Date.t -> int -> '_a, Date.t -> int option -> '_a) t = <abstr>|}];;

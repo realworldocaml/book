@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -15,7 +15,7 @@ open Core_kernel;;
 Characters 2-4:
 Warning 3: deprecated: Core_kernel.==
 [since 2014-10] Use [phys_equal]
-- : bool = false
-|}];;
+|};
+ocaml {|- : bool = false|}];;
 phys_equal 1 2 ;;
-[%%expect{|- : bool = false|}];;
+[%%expect ocaml {|- : bool = false|}];;

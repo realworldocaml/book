@@ -1,5 +1,5 @@
 #use "topfind";;
-[%%expect{|
+[%%expect ocaml {|
 - : unit = ()
 - : unit = ()
 |}];;
@@ -11,10 +11,8 @@ open Core_kernel;;
 [@@@part "1"];;
 printf "%i is an integer, %F is a float, \"%s\" is a string\n"
   3 4.5 "five";;
-[%%expect{|
-- : unit = ()
-3 is an integer, 4.5 is a float, "five" is a string
-|}];;
+[%%expect{|3 is an integer, 4.5 is a float, "five" is a string|};
+ocaml {|- : unit = ()|}];;
 [@@@part "2"];;
 printf "An integer: %i\n" 4.5;;
 [%%expect{|
@@ -24,7 +22,7 @@ Error: This expression has type float but an expression was expected of type
 |}];;
 [@@@part "3"];;
 let fmt = "%i is an integer\n";;
-[%%expect{|val fmt : string = "%i is an integer\n"|}];;
+[%%expect ocaml {|val fmt : string = "%i is an integer\n"|}];;
 printf fmt 3;;
 [%%expect{|
 Characters 7-10:
@@ -36,7 +34,7 @@ Error: This expression has type string but an expression was expected of type
 open CamlinternalFormatBasics;;
 let fmt : ('a, 'b, 'c) format =
   "%i is an integer\n";;
-[%%expect{|
+[%%expect ocaml {|
 val fmt : (int -> 'c, 'b, 'c) Core_kernel.format =
   Format
    (Int (Int_i, No_padding, No_precision,
@@ -45,7 +43,5 @@ val fmt : (int -> 'c, 'b, 'c) Core_kernel.format =
 |}];;
 [@@@part "5"];;
 printf fmt 3;;
-[%%expect{|
-- : unit = ()
-3 is an integer
-|}];;
+[%%expect{|3 is an integer|};
+ocaml {|- : unit = ()|}];;
