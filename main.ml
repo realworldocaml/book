@@ -522,7 +522,7 @@ let output_phrases oc contents =
               | [] -> ()
               | (k,s) :: xs ->
                 let k = string_of_kind k in
-                let pre = if first then "" else "\n" in
+                let pre = if first then (if k <> "" then " " else "") else "\n" in
                 let post = if xs = [] then "" else ";" in
                 if not (String.contains s '\n')
                 then Printf.fprintf oc "%s%s{|%s|}%s" pre k s post
