@@ -433,29 +433,31 @@
             does satisfy <code>Comparable.S</code>.</p>
 
           <p>
-	    In the preceding code we wrote the comparison function
-            by hand, but this isn't strictly necessary. Core ships with
-            a syntax extension called <code>comparelib</code>, which
-            will create a comparison function from a type definition.
-            Using it, we can rewrite the previous example as
-            follows:</p>
+	    In the preceding code we wrote the comparison function by
+            hand, but this isn't strictly necessary. Core ships with a
+            syntax extension which will create a comparison function
+            from a type definition if you write <code>[@@deriving
+            compare]</code> after the type defintion.  We can rewrite
+            the previous example to use this extension</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="23"/> 
 
           <p>
-	    The comparison function created by <code>comparelib</code>
-            for a given type will call out to the comparison functions for
-            its component types. As a result, the <code>foo</code> field
-            will be compared using <code>Int.Set.compare</code>. This is
-            different, and saner than the structural comparison done by
-            polymorphic compare.</p>
+	    The comparison function we get from <code>[@@deriving
+	    compare]</code> will call out to the comparison functions
+	    for its component types. As a result, the <code>foo</code>
+	    field will be compared
+	    using <code>Int.Set.compare</code>. This is different, and
+            saner than the structural comparison done by polymorphic
+            compare.</p>
 
           <p>
-	    If you want your comparison function to behave in a
-            specific way, you should still write your own comparison
-            function by hand; but if all you want is a total order
-            suitable for creating maps and sets with, then
-            <code>comparelib</code> is a good way to go.</p>
+	    If you want your comparison function that orders things in
+	    a particular way, you can always write your own comparison
+            function by hand; but if all you need is a total order
+            suitable for creating maps and sets with,
+            then <code>[@@deriving compare]</code> is a good
+            choice.</p>
 
           <p>
 	    You can also satisfy the <code>Comparable.S</code>
@@ -667,12 +669,11 @@
 	    Most types in Core satisfy the <code>Hashable.S</code>
             interface, but as with the <code>Comparable.S</code>
             interface, the question remains of how one should satisfy
-            this interface when writing a new module. Again, the answer
-            is to use a functor to build the necessary functionality;
-            in this case, <code>Hashable.Make</code>. Note that we use
-            OCaml's <code>lxor</code> operator for doing the "logical"
-            (i.e., bitwise) exclusive Or of the hashes from the
-            component values:
+            this interface when writing a new module. Again, the
+            answer is to use a functor to build the necessary
+            functionality; in this case, <code>Hashable.Make</code>,
+            using <code>[@@deriving hash]</code> to produce the hash
+            function.
 
 	    <idx>Hashable.Make</idx>
 	    <idx>interfaces/Hashable.S</idx>

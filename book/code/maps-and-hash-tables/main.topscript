@@ -2163,9 +2163,7 @@ module Foo_and_bar : sig
   include Hashable.S with type t := t
 end = struct
   module T = struct
-    type t = { foo: int; bar: string } [@@deriving sexp, compare]
-    let hash t =
-      (Int.hash t.foo) lxor (String.hash t.bar)
+    type t = { foo: int; bar: string } [@@deriving sexp, compare, hash]
   end
   include T
   include Hashable.Make(T)
