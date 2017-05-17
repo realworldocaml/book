@@ -24,8 +24,8 @@ let table_iter ~num_keys ~iterations =
 
 let tests ~num_keys ~iterations =
   let test name f = Bench.Test.create f ~name in
-  [ test "map"   (fun () -> map_iter   ~num_keys ~iterations)
-  ; test "table" (fun () -> table_iter ~num_keys ~iterations)
+  [ test "table" (fun () -> table_iter ~num_keys ~iterations)
+  ; test "map"   (fun () -> map_iter   ~num_keys ~iterations)
   ]
 
 let () =

@@ -683,12 +683,9 @@
           <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="30"/> 
 
           <p>
-	    Note that in order to satisfy hashable, one also needs
-            to provide a comparison function. That's because Core's
-            hash tables use an ordered binary tree data structure for
-            the hash-buckets, so that performance of the table degrades
-            gracefully in the case of pathologically bad choice of hash
-            function.</p>
+	    Note that in order to satisfy hashable, a key needs to
+            provide a comparison function, for equality checking, and
+            s-expression conversion, for generating useful errors.</p>
 
           <p>
 	    There is currently no analogue of
@@ -748,14 +745,14 @@
 
 	<p>
 	  Hash tables are not always the faster choice, though. In
-	  particular, maps are often more performant in situations
-	  where you need to keep multiple related versions of the data
-	  structure in memory at once. That's because maps are
-	  immutable, and so operations like <code>Map.add</code> that
-	  modify a map do so by creating a new map, leaving the
-	  original undisturbed. Moreover, the new and old maps share
-	  most of their physical structure, so multiple versions can be
-	  kept around efficiently.</p>
+	  particular, maps excel in situations where you need to keep
+	  multiple related versions of the data structure in memory at
+	  once. That's because maps are immutable, and so operations
+	  like <code>Map.add</code> that modify a map do so by
+	  creating a new map, leaving the original
+	  undisturbed. Moreover, the new and old maps share most of
+	  their physical structure, so multiple versions can be kept
+	  around efficiently.</p>
 
 	<p>
 	  Here's a benchmark that demonstrates this. In it, we
