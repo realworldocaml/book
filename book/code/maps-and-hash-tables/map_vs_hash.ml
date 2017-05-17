@@ -1,11 +1,11 @@
-open Core_kernel.Std
-open Core_bench.Std
+open Core_kernel
+open Core_bench
 
 let map_iter ~num_keys ~iterations =
   let rec loop i map =
     if i <= 0 then ()
     else loop (i - 1)
-           (Map.change map (i mod num_keys) (fun current ->
+           (Map.change map (i mod num_keys) ~f:(fun current ->
               Some (1 + Option.value ~default:0 current)))
   in
   loop iterations Int.Map.empty
@@ -15,7 +15,7 @@ let table_iter ~num_keys ~iterations =
   let rec loop i =
     if i <= 0 then ()
     else (
-      Hashtbl.change table (i mod num_keys) (fun current ->
+      Hashtbl.change table (i mod num_keys) ~f:(fun current ->
         Some (1 + Option.value ~default:0 current));
       loop (i - 1)
     )

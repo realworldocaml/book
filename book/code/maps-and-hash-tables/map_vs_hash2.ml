@@ -1,12 +1,12 @@
-open Core_kernel.Std
-open Core_bench.Std
+open Core_kernel
+open Core_bench
 
 let create_maps ~num_keys ~iterations =
   let rec loop i map =
     if i <= 0 then []
     else
       let new_map =
-        Map.change map (i mod num_keys) (fun current ->
+        Map.change map (i mod num_keys) ~f:(fun current ->
           Some (1 + Option.value ~default:0 current))
       in
       new_map :: loop (i - 1) new_map
@@ -18,7 +18,7 @@ let create_tables ~num_keys ~iterations =
   let rec loop i =
     if i <= 0 then []
     else (
-      Hashtbl.change table (i mod num_keys) (fun current ->
+      Hashtbl.change table (i mod num_keys) ~f:(fun current ->
         Some (1 + Option.value ~default:0 current));
       let new_table = Hashtbl.copy table in
       new_table :: loop (i - 1)
