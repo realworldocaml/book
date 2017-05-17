@@ -28,8 +28,8 @@ let create_tables ~num_keys ~iterations =
 
 let tests ~num_keys ~iterations =
   let test name f = Bench.Test.create f ~name in
-  [ test "map"   (fun () -> ignore (create_maps   ~num_keys ~iterations))
-  ; test "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
+  [ test "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
+  ; test "map"   (fun () -> ignore (create_maps   ~num_keys ~iterations))
   ]
 
 let () =
