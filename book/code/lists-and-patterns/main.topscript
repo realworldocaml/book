@@ -242,7 +242,7 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
 |> List.dedup_and_sort
 ;;
-[%%expect ocaml {|- : string list = ["derived"; "shared"; "txt"]|}];;
+[%%expect ocaml {|- : string list = ["derived"; "shared"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -256,7 +256,7 @@ let (ml_files,other_files) =
 val ml_files : string list = []
 val other_files : string list =
   [".depend"; "app"; "book"; "lib"; "Makefile"; "Makefile.derived";
-   "Makefile.shared"; "numbers.txt"; "OCamlMakefile"; "site"; "test.txt"]
+   "Makefile.shared"; "OCamlMakefile"; "site"]
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
