@@ -7,6 +7,8 @@
 #camlp4o;;
 #require "core";;
 #require "ppx_jane";;
+#install_printer Core.Sexp.pp_hum;;
+#install_printer Core.Error.pp;;
 [@@@part "0.5"];;
 open Core_kernel;;
 List.find;;
@@ -44,38 +46,34 @@ val find_mismatches : ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list =
 [%%expect ocaml {|- : (int, string) result list = [Ok 3; Error "abject failure"; Ok 4]|}];;
 [@@@part "5"];;
 Error.of_string "something went wrong";;
-[%%expect ocaml {|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = something went wrong|}];;
 [@@@part "6"];;
 Error.of_thunk (fun () ->
   sprintf "something went wrong: %f" 32.3343);;
-[%%expect ocaml {|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = something went wrong: 32.334300|}];;
 [@@@part "7"];;
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
-[%%expect ocaml {|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = ("Unexpected character" z)|}];;
 [@@@part "8"];;
 let custom_to_sexp = [%sexp_of: float * string list * int];;
 [%%expect ocaml {|val custom_to_sexp : float * string list * int -> Sexp.t = <fun>|}];;
 custom_to_sexp (3.5, ["a";"b";"c"], 6034);;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.Atom "3.5";
-  Sexplib.Sexp.List
-   [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "c"];
-  Sexplib.Sexp.Atom "6034"]
-|}];;
+[%%expect ocaml {|- : Sexp.t = (3.5 (a b c) 6034)|}];;
 [@@@part "9"];;
 Error.create "Something went terribly wrong"
   (3.5, ["a";"b";"c"], 6034)
   [%sexp_of: float * string list * int] ;;
-[%%expect ocaml {|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|- : Error.t = ("Something went terribly wrong" (3.5 (a b c) 6034))|}];;
 [@@@part "10"];;
 Error.tag
   (Error.of_list [ Error.of_string "Your tires were slashed";
                    Error.of_string "Your windshield was smashed" ])
   "over the weekend"
 ;;
-[%%expect ocaml {|- : Error.t = <abstr>|}];;
+[%%expect ocaml {|
+- : Error.t =
+("over the weekend" "Your tires were slashed" "Your windshield was smashed")
+|}];;
 [@@@part "11"];;
 let bind option f =
   match option with
@@ -315,7 +313,7 @@ let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;
 [%%expect ocaml {|val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect ocaml {|- : int Or_error.t = Core_kernel__.Result.Error <abstr>|}];;
+[%%expect ocaml {|- : int Or_error.t = Core_kernel__.Result.Error ("Key_not_found(\"c\")")|}];;
 [@@@part "37"];;
 Or_error.ok_exn (find ["a",1; "b",2] "b");;
 [%%expect ocaml {|- : int = 2|}];;
