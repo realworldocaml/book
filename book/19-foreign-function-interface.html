@@ -51,16 +51,11 @@
     <div data-type="note">
       <h1>Installing the Ctypes Library</h1>
 
-      <p>You'll need to install the <a href="https://github.com/atgreen/libffi"><code>libffi</code></a>
+      <p>If you want to use Ctypes interactively, you'll also need to
+      install the <a href="https://github.com/atgreen/libffi"><code>libffi</code></a>
       library as a prerequisite to using Ctypes. It's a fairly
       popular library and should be available in your OS package
-      manager.</p>
-
-      <p>A special note for Mac users: the version of
-      <code>libffi</code> installed by default in Mac OS X 10.8 is
-      too old for some of the features that Ctypes needs. Use
-      Homebrew to <code>brew install libffi</code> to get the
-      latest version before installing the OCaml library.</p>
+      manager. Try `opam depext -ui ctypes-foreign`.</p>
 
       <p>Once that's done, Ctypes is available via OPAM as
       usual:</p>
@@ -194,40 +189,6 @@
 
       <p>Running <code>./hello.native</code> should now display a
       Hello World in your terminal!<idx>Ctypes library/build directives for</idx></p>
-
-      <div data-type="note">
-        <h1>On Build Directives for Ctypes</h1>
-
-        <p>The preceding command line includes some important extra
-        link directives. The <code>-lflags</code> instructs
-        <span class="command"><em>ocamlbuild</em></span> to pass
-        the next comma-separated set of arguments through to the
-        <span class="command"><em>ocaml</em></span> command when
-        linking a binary. OCaml in turn uses <code>-cclib</code> to
-        pass directives through to the system compiler (normally
-        <span class="command"><em>gcc</em></span> or <span class="command"><em>clang</em></span>). We first need to link to
-        the <code>ncurses</code> C library to make the symbols
-        available to Ctypes, and <span class="keep-together"><code>-cclib,</code></span><code>-lncurses</code>
-        does that.</p>
-
-        <p>On some distributions such as Ubuntu 11.10 upwards,
-        you'll also need to add <code>-cclib,-Xlinker,-cclib, and
-        --no-as-needed</code> to the <span class="keep-together"><code>-lflags</code></span> directive.
-        <code>-Xlinker</code> is interpreted by the compiler as a
-        directive for the system linker <span class="command"><em>ld</em></span>, to which it passes
-        <code>--no-as-needed</code>. <span class="keep-together">Several</span> modern OS distributions
-        (such as Ubuntu 11.10 onwards) configure the system linker
-        to only link in libraries that directly contain symbols
-        used by the program. However, when we use Ctypes, those
-        symbols are not referenced until runtime, which results an
-        exception due to the library not being available.</p>
-
-        <p>The <code>--no-as-needed</code> flag disables this
-        behavior and ensures all the specified libraries are linked
-        despite not being directly used. The flag unfortunately
-        doesn't work everywhere (notably, Mac OS X should
-        <em>not</em> have this passed to it).</p>
-      </div>
 
       <p>Ctypes wouldn't be very useful if it were limited to only
       defining simple C types, of course. It provides full support
