@@ -460,22 +460,87 @@ let eval_phrases ~fname ~dry_run fcontents =
   )
 ;;
 
-let is_whitespace str =
-  try for i = 0 to String.length str - 1 do
-      match str.[i] with
-      | ' ' | '\n' -> ()
-      | _ -> raise Exit
+let is_whitespace = function
+  | ' ' | '\n' -> true
+  | _ -> false
+
+let is_all_whitespace str =
+  try
+    for i = 0 to String.length str - 1 do
+      if not (is_whitespace str.[i]) then raise Exit
     done;
     true
   with Exit -> false
+
+let is_ellision_line str =
+  let i = ref 0 in
+  let j = String.length str in
+  while !i < j && is_whitespace str.[!i] do incr i done;
+  !i <= j - 3 && str.[!i] = '.' && str.[!i+1] = '.' && str.[!i+2] = '.' && (
+    i := !i + 3;
+    while !i < j && is_whitespace str.[!i] do incr i done;
+    !i = j
+  )
+
+let string_subequal subject str i =
+  let len = String.length subject in
+  String.length str >= len + i &&
+  try
+    for j = 0 to len - 1 do
+      if subject.[j] <> str.[i+j] then
+        raise Exit;
+    done;
+    true
+  with Exit ->
+    false
+
+let match_outcome_chunk (k1,outcome) (k2,expected) =
+  k1 = k2 &&
+  let rec split_chunks acc str i0 i =
+    match String.index_from str i '\n' with
+    | exception Not_found ->
+      let acc =
+        if is_ellision_line (String.sub str i (String.length str - i))
+        then "" :: String.sub str i0 i :: acc
+        else String.sub str i0 (String.length str - i0) :: acc
+      in
+      List.rev acc
+    | j ->
+      if is_ellision_line (String.sub str i (j - i)) then
+        split_chunks (String.sub str i0 (i - i0) :: acc) str (j + 1) (j + 1)
+      else
+        split_chunks acc str i0 (j + 1)
+  in
+  match split_chunks [] expected 0 0 with
+  | [] -> assert false
+  | x :: xs ->
+    string_subequal x outcome 0 &&
+    let rec match_chunks i = function
+      | [] -> i = String.length outcome
+      | [x] ->
+        let i' = String.length outcome - String.length x in
+        i' >= i && string_subequal x outcome i'
+      | x :: xs ->
+        let bound = String.length outcome - String.length x in
+        let i = ref i in
+        while !i <= bound && not (string_subequal x outcome !i)
+        do incr i done;
+        if !i > bound then false
+        else match_chunks (!i + String.length x) xs
+    in
+    match_chunks (String.length x) xs
+
+let match_outcome xs ys =
+  List.length xs = List.length ys &&
+  List.for_all2 match_outcome_chunk xs ys
 
 let rec valid_phrases = function
   | [] -> true
   | (_, Phrase_part _) :: rest -> valid_phrases rest
   | (_, Phrase_code outcome) :: (_, Phrase_expect outcome') :: rest ->
-    outcome = outcome' && valid_phrases rest
+    match_outcome outcome outcome' && valid_phrases rest
   | (_, Phrase_code outcome) :: rest ->
-    List.for_all (fun (_,s) -> is_whitespace s) outcome && valid_phrases rest
+    List.for_all (fun (_,s) -> is_all_whitespace s) outcome && valid_phrases rest
   | (_, Phrase_expect _) :: _ -> false
 
 (* Skip spaces as well as ';;' *)
@@ -519,7 +584,7 @@ let output_phrases oc contents =
           ("\n", phrase_whitespace contents phrase rest)
       in
       let phrase_code = phrase_code contents phrase in
-      if List.for_all (fun (_,s) -> is_whitespace s) expect_code then
+      if List.for_all (fun (_,s) -> is_all_whitespace s) expect_code then
         Printf.fprintf oc "%s%s" phrase_code expect_ws
       else (
         let string_of_kind = function
