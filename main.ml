@@ -374,6 +374,20 @@ let filter_list counter xs =
   in
   if !counter = 0 then [] else aux xs
 
+let dry_exec phrases =
+  let rec aux acc = function
+    | [] -> List.rev acc
+    | (phrase, Phrase_code ()) :: rest ->
+      begin match rest with
+        | (_, Phrase_expect outcome) :: _ ->
+          aux ((phrase, Phrase_code outcome) :: acc) rest
+        | _ -> aux ((phrase, Phrase_code []) :: acc) rest
+      end
+    | (_, (Phrase_part _ | Phrase_expect _) as phrase) :: rest ->
+      aux (phrase :: acc) rest
+  in
+  aux [] phrases
+
 let eval_phrases ~fname ~dry_run fcontents =
   (* 4.03: Warnings.reset_fatal (); *)
   let buf = Buffer.create 1024 in
@@ -424,38 +438,24 @@ let eval_phrases ~fname ~dry_run fcontents =
       capture Chunk.Raw;
       Phrase_code (cleanup_lines (List.rev !lines))
   in
-  let rec dry_exec phrases = function
-    | [] -> List.rev phrases
-    | (phrase, Phrase_code ()) :: rest ->
-      begin match rest with
-        | (_, Phrase_expect outcome) :: _ ->
-          dry_exec ((phrase, Phrase_code outcome) :: phrases) rest
-        | _ -> dry_exec ((phrase, Phrase_code []) :: phrases) rest
-      end
-    | (_, (Phrase_part _ | Phrase_expect _) as phrase) :: rest ->
-      dry_exec (phrase :: phrases) rest
-  in
   let parser = init_parser ~fname fcontents in
   if dry_run then  (
-    let phrases =
-      let rec aux phrases = match parse_phrase parser with
-        | exception End_of_file ->  List.rev phrases
-        | phrase -> aux ((phrase, phrase_role phrase) :: phrases)
-      in
-      aux []
+    let rec aux phrases = match parse_phrase parser with
+      | exception End_of_file ->  List.rev phrases
+      | phrase -> aux ((phrase, phrase_role phrase) :: phrases)
     in
-    dry_exec [] phrases
+    dry_exec (aux [])
   ) else (
     redirect ~f:(fun ~capture ->
-      capture_compiler_stuff ppf ~f:(fun () ->
-          let rec aux chunks = match parse_phrase parser with
-            | exception End_of_file ->  List.rev chunks
-            | phrase ->
-              let role = exec_phrase ~capture phrase in
-              aux ((phrase, role) :: chunks)
-          in
-          aux []
-        )
+        capture_compiler_stuff ppf ~f:(fun () ->
+            let rec aux chunks = match parse_phrase parser with
+              | exception End_of_file ->  List.rev chunks
+              | phrase ->
+                let role = exec_phrase ~capture phrase in
+                aux ((phrase, role) :: chunks)
+            in
+            aux []
+          )
       )
   )
 ;;
@@ -651,13 +651,20 @@ let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
   let oname = if in_place then fname else fname ^ ".corrected" in
   if success && not in_place && Sys.file_exists oname then
     Sys.remove oname;
-  if not success then (
-    let oc = open_out_bin (oname ^ ".tmp") in
-    output_phrases oc file_contents phrases;
-    flush oc;
-    close_out oc;
-    Sys.rename (oname ^ ".tmp") oname
-  );
+  let phrases =
+    if success then (
+      (* If successful, replace output by expectation to preserve ellisions. *)
+      dry_exec (List.map (fun (p, _) -> p, phrase_role p) phrases)
+    ) else (
+      (* Otherwise, generate corrected file and keep toplevel output. *)
+      let oc = open_out_bin (oname ^ ".tmp") in
+      output_phrases oc file_contents phrases;
+      flush oc;
+      close_out oc;
+      Sys.rename (oname ^ ".tmp") oname;
+      phrases
+    )
+  in
   if sexp_output then (
     document_of_phrases file_contents success phrases
     |> Document.sexp_of_t
@@ -813,4 +820,4 @@ let main () =
     Printf.fprintf stderr_backup "%s\n%!" (Format.flush_str_formatter ());
     exit 2
 ;;
-let () = main ()
+let () = main ();;
