@@ -1,3 +1,4 @@
+open Core_kernel
 open Query_handler_core
 
 [@@@part "1"];;
@@ -9,6 +10,6 @@ let () =
        let this = loader
      end : Query_handler_instance)
   in
-  Hashtbl.replace loader.Loader.active
+  Hashtbl.set loader.Loader.active
     ~key:Loader.name ~data:loader_instance;
   cli loader.Loader.active
