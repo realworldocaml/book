@@ -434,7 +434,7 @@ val logon : Logon.t =
 show_field Logon.Fields.user Fn.id logon;;
 [%%expect ocaml {|- : string = "user: yminsky"|}];;
 show_field Logon.Fields.time Time_ns.to_string logon;;
-[%%expect ocaml {|- : string = "time: 2017-05-16 07:54:24.664186-04:00"|}];;
+[%%expect ocaml {|...|}];;
 [@@@part "35"];;
 Logon.Fields.iter;;
 [%%expect ocaml {|
@@ -464,7 +464,7 @@ let print_logon logon =
 print_logon logon;;
 [%%expect{|
 session_id: 26685
-time: 2017-05-16 07:54:24.664186-04:00
+...
 user: yminsky
 credentials: Xy2d9W
 |};
