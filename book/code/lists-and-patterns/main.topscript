@@ -113,8 +113,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
-│ plus_one_match │  24.90ns │
-│ plus_one_if    │  41.92ns │
+ ...
+ ...
 └────────────────┴──────────┘
 |};
 ocaml {|- : unit = ()|}];;
@@ -135,8 +135,8 @@ Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
-│ sum_if │  47.47us │
-│ sum    │  13.40us │
+ ...
+ ...
 └────────┴──────────┘
 |};
 ocaml {|- : unit = ()|}];;

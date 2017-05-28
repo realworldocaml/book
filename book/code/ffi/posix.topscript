@@ -17,7 +17,7 @@ let time = foreign "time" (ptr time_t @-> returning time_t) ;;
 [%%expect ocaml {|val time : time_t Ctypes_static.ptr -> time_t = <fun>|}];;
 [@@@part "1"];;
 let cur_time = time (from_voidp time_t null) ;;
-[%%expect ocaml {|val cur_time : time_t = 1494935990|}];;
+[%%expect ocaml "..."];;
 [@@@part "2"];;
 let time' () = time (from_voidp time_t null) ;;
 [%%expect ocaml {|val time' : unit -> time_t = <fun>|}];;
@@ -28,7 +28,7 @@ let difftime =
 let t1 =
   time' () in
 Unix.sleep 2;
-let t2 = time' () in 
+let t2 = time' () in
 difftime t2 t1 ;;
 [%%expect ocaml {|- : float = 2.|}];;
 [@@@part "4"];;
@@ -43,10 +43,10 @@ Error: This expression has type time_t but an expression was expected of type
 |}];;
 [@@@part "6"];;
 let t_ptr = allocate time_t (time' ()) ;;
-[%%expect ocaml {|val t_ptr : time_t ptr = (time_t*) 0x7fb62197bf40|}];;
+[%%expect ocaml "..."];;
 [@@@part "7"];;
 ctime t_ptr ;;
-[%%expect ocaml {|- : string = "Tue May 16 07:59:53 2017\n"|}];;
+[%%expect ocaml "..."];;
 [@@@part "8"];;
 type timeval ;;
 [%%expect ocaml {|type timeval|}];;

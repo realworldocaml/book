@@ -14,12 +14,12 @@ let s = object
 
   method pop =
     match v with
-    | hd :: tl -> 
+    | hd :: tl ->
       v <- tl;
       Some hd
     | [] -> None
 
-  method push hd = 
+  method push hd =
     v <- hd :: v
 end ;;
 [%%expect ocaml {|val s : < pop : int option; push : int -> unit > = <obj>|}];;
@@ -36,12 +36,12 @@ let stack init = object
 
   method pop =
     match v with
-    | hd :: tl -> 
+    | hd :: tl ->
       v <- tl;
       Some hd
     | [] -> None
 
-  method push hd = 
+  method push hd =
     v <- hd :: v
 end ;;
 [%%expect ocaml {|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
@@ -60,5 +60,5 @@ let t = object
 end ;;
 [%%expect ocaml {|val t : < pop : int option > = <obj>|}];;
 print_pop t ;;
-[%%expect{|Popped: 1494935825291097000|};
+[%%expect{| ... |};
 ocaml {|- : unit = ()|}];;
