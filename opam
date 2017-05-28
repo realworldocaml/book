@@ -37,6 +37,7 @@ depends: [
   "cryptokit"
   "async_graphics"
   "ocp-index"
+  "ocp-indent"
   "atd"
   "atdgen"
   "ctypes"
