@@ -364,16 +364,6 @@ let cleanup_lines lines =
   in
   join lines
 
-let filter_list counter xs =
-  let rec aux = function
-    | x :: xs when !counter > 0 ->
-      decr counter;
-      x :: aux xs
-    | [] -> if !counter = 0 then incr counter; []
-    | _ -> []
-  in
-  if !counter = 0 then [] else aux xs
-
 let dry_exec phrases =
   let rec aux acc = function
     | [] -> List.rev acc
@@ -404,17 +394,7 @@ let eval_phrases ~fname ~dry_run fcontents =
     | Phrase_expect x -> Phrase_expect (cleanup_lines x)
     | Phrase_part _ as x -> x
     | Phrase_code () ->
-      let counter = ref 30 in
       let out_phrase' = !Oprint.out_phrase in
-      let out_signature' = !Oprint.out_signature in
-      let out_signature ppf sg =
-        if !counter = 0 then Format.fprintf ppf "..."
-        else
-          let sg = filter_list counter sg in
-          let ellipsis = !counter = 0 in
-          out_signature' ppf sg;
-          if ellipsis then Format.fprintf ppf "@ ..."
-      in
       let out_phrase ppf phr = match phr with
         | Outcometree.Ophr_exception _ -> out_phrase' ppf phr
         | _ ->
@@ -422,12 +402,8 @@ let eval_phrases ~fname ~dry_run fcontents =
           out_phrase' ppf phr;
           capture Chunk.OCaml;
       in
-      Oprint.out_signature := out_signature;
       Oprint.out_phrase := out_phrase;
-      let restore () =
-        Oprint.out_signature := out_signature';
-        Oprint.out_phrase := out_phrase';
-      in
+      let restore () = Oprint.out_phrase := out_phrase' in
       begin match toplevel_exec_phrase ppf phrase with
         | (_ : bool) -> restore ()
         | exception exn ->
