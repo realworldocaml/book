@@ -30,7 +30,7 @@ let t1 =
 Unix.sleep 2;
 let t2 = time' () in
 difftime t2 t1 ;;
-[%%expect ocaml {|- : float = 2.|}];;
+[%%expect ocaml {| ... |}];;
 [@@@part "4"];;
 let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
 [%%expect ocaml {|val ctime : time_t Ctypes_static.ptr -> string = <fun>|}];;
