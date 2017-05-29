@@ -136,12 +136,12 @@ Map.Poly.of_alist_exn digit_alist;;
 [%%expect ocaml {|- : (int, string) Map.Poly.t = <abstr>|}];;
 
 [@@@part "16"];;
-Map.symmetric_diff 
+Map.symmetric_diff
   (Map.Poly.singleton 3 "three")
-  (Int.Map.singleton  3 "four" ) 
+  (Int.Map.singleton  3 "four" )
 ;;
 [%%expect{|
-Characters 55-85:
+Characters 54-84:
 Error: This expression has type
          string Int.Map.t = (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
@@ -274,6 +274,7 @@ module Foo_and_bar :
             val add : 'a t -> key:Key.t -> data:'a -> 'a t
             val add_multi : 'a list t -> key:Key.t -> data:'a -> 'a list t
             val remove_multi : 'a list t -> Key.t -> 'a list t
+            val find_multi : 'a list t -> Key.t -> 'a list
             val change : 'a t -> Key.t -> f:('a option -> 'a option) -> 'a t
             val update : 'a t -> Key.t -> f:('a option -> 'a) -> 'a t
             val find : 'a t -> Key.t -> 'a option
@@ -425,6 +426,7 @@ module Foo_and_bar :
         val add : 'a t -> key:Key.t -> data:'a -> 'a t
         val add_multi : 'a list t -> key:Key.t -> data:'a -> 'a list t
         val remove_multi : 'a list t -> Key.t -> 'a list t
+        val find_multi : 'a list t -> Key.t -> 'a list
         val change : 'a t -> Key.t -> f:('a option -> 'a option) -> 'a t
         val update : 'a t -> Key.t -> f:('a option -> 'a) -> 'a t
         val find : 'a t -> Key.t -> 'a option
@@ -923,6 +925,7 @@ module Foo_and_bar :
             val add : 'a t -> key:Key.t -> data:'a -> 'a t
             val add_multi : 'a list t -> key:Key.t -> data:'a -> 'a list t
             val remove_multi : 'a list t -> Key.t -> 'a list t
+            val find_multi : 'a list t -> Key.t -> 'a list
             val change : 'a t -> Key.t -> f:('a option -> 'a option) -> 'a t
             val update : 'a t -> Key.t -> f:('a option -> 'a) -> 'a t
             val find : 'a t -> Key.t -> 'a option
@@ -1074,6 +1077,7 @@ module Foo_and_bar :
         val add : 'a t -> key:Key.t -> data:'a -> 'a t
         val add_multi : 'a list t -> key:Key.t -> data:'a -> 'a list t
         val remove_multi : 'a list t -> Key.t -> 'a list t
+        val find_multi : 'a list t -> Key.t -> 'a list
         val change : 'a t -> Key.t -> f:('a option -> 'a option) -> 'a t
         val update : 'a t -> Key.t -> f:('a option -> 'a) -> 'a t
         val find : 'a t -> Key.t -> 'a option
@@ -1572,6 +1576,7 @@ module Foo_and_bar :
             val add : 'a t -> key:Key.t -> data:'a -> 'a t
             val add_multi : 'a list t -> key:Key.t -> data:'a -> 'a list t
             val remove_multi : 'a list t -> Key.t -> 'a list t
+            val find_multi : 'a list t -> Key.t -> 'a list
             val change : 'a t -> Key.t -> f:('a option -> 'a option) -> 'a t
             val update : 'a t -> Key.t -> f:('a option -> 'a) -> 'a t
             val find : 'a t -> Key.t -> 'a option
@@ -1723,6 +1728,7 @@ module Foo_and_bar :
         val add : 'a t -> key:Key.t -> data:'a -> 'a t
         val add_multi : 'a list t -> key:Key.t -> data:'a -> 'a list t
         val remove_multi : 'a list t -> Key.t -> 'a list t
+        val find_multi : 'a list t -> Key.t -> 'a list
         val change : 'a t -> Key.t -> f:('a option -> 'a option) -> 'a t
         val update : 'a t -> Key.t -> f:('a option -> 'a) -> 'a t
         val find : 'a t -> Key.t -> 'a option
@@ -2255,6 +2261,7 @@ module Foo_and_bar :
         val update : 'b t -> key -> f:('b option -> 'b) -> unit
         val add_multi : 'b list t -> key:key -> data:'b -> unit
         val remove_multi : 'a list t -> key -> unit
+        val find_multi : 'b list t -> key -> 'b list
         val map : 'b t -> f:('b -> 'c) -> 'c t
         val mapi : 'b t -> f:(key:key -> data:'b -> 'c) -> 'c t
         val filter_map : 'b t -> f:('b -> 'c option) -> 'c t
