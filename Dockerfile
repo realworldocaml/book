@@ -14,4 +14,4 @@ WORKDIR /home/opam/src
 RUN opam pin add -n Real-World-OCaml /home/opam/src
 RUN opam config exec -- make PYGMENTIZE=1
 EXPOSE 8080
-ENTRYPOINT ["opam","config","exec","--","cohttp-server-async","-v","/home/opam/src/_build/site"]
+ENTRYPOINT ["opam","config","exec","--","cohttp-server-async","-v","/home/opam/src/_build/default/site"]

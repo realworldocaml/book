@@ -1,13 +1,6 @@
 _build
-/_build
-/tmp
-/.omakedb
-/.omakedb.lock
-/OMakeroot.omc
-/.merlin
-/book/css/.sass-cache
-/app/rwo-deps.ml.exe
-/Makefile.derived
 .*.swp
 *.corrected
 *~
+*.install
+site/

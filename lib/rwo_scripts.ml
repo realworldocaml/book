@@ -196,7 +196,13 @@ let eval_script lang ~filename =
         let corrected_filename =
           corrected_built_filename
           |> Filename.parts
-          |> List.filter ~f:(fun x -> x <> "_build")
+          |> (fun parts ->
+               let rec fn acc = function
+                 |[] -> List.rev acc
+                 |"_build"::_::tl -> fn acc tl
+                 |hd::tl -> fn (hd::acc) tl in
+               fn [] parts
+             )
           |> Filename.of_parts
         in
         if not doc.Expect.Document.matched then
@@ -204,6 +210,8 @@ let eval_script lang ~filename =
         Deferred.ok begin
           Sys.file_exists corrected_built_filename >>= function
           | `Yes ->
+prerr_endline corrected_built_filename;
+prerr_endline corrected_filename;
             Sys.rename corrected_built_filename corrected_filename;
           | `Unknown -> return ()
           | `No ->

@@ -5,22 +5,11 @@ maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/yminsky/Real-World-OCaml"
 license: "PROPRIETARY"
 
-build: [
-  ["make" "-j%{jobs}%"]
-]
-
-install: [
-  ["make" "%{name}%.install"]
-  ["make" "install_lib"]
-]
-
-remove: [
-  ["ocamlfind" "remove" "%{name}%"]
-]
+build: [ "jbuilder" "build" "@site/book" ]
 
 depends: [
-  "core"
-  "async" {>= "112.24.00"}
+  "core" {>="v0.9.0"}
+  "jbuilder" {build
   "ocamlnet"
   "cohttp"
   "ppx_sexp_conv"
@@ -36,7 +25,6 @@ depends: [
   "cryptokit"
   "async_graphics"
   "ocp-index"
-  "ocp-indent"
   "atd"
   "atdgen"
   "ctypes"
@@ -46,5 +34,5 @@ depends: [
 ]
 
 available: [
-  ocaml-version >= "4.03.0"
+  ocaml-version >= "4.04.1"
 ]

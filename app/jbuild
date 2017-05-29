@@ -1,0 +1,14 @@
+(jbuild_version 1)
+
+(executables
+ ((names (app))
+  (libraries (rwo))
+  (flags (:standard -short-paths))
+  ))
+
+(install
+ ((section bin)
+  (files
+   ((app.exe as rwo)
+    ))))
+

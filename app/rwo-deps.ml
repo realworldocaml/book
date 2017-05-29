@@ -1,7 +1,3 @@
-#!/usr/bin/env ocamlscript
-Ocaml.ocamlflags := ["-thread"];
-Ocaml.packs := ["netstring"; "async"]
---
 open Core.Std
 open Async.Std
 let (/) = Filename.concat
