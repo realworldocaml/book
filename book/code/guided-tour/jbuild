@@ -2,5 +2,5 @@
 
 (executables
  ((names (sum))
-  (libraries (core))
+  (libraries (core_kernel))
   ))

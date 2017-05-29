@@ -1109,41 +1109,50 @@
       <code>None</code> indicating the end of the input stream.</p>
 
       <p>After <code>read_and_accumulate</code> returns, the total
-      needs to be printed. This is done using the
-      <code>printf</code> command, which provides support for
-      type-safe format strings, similar to what you'll find in a
-      variety of languages. The format string is parsed by the
-      compiler and used to determine the number and type of the
-      remaining arguments that are <span class="keep-together">required</span>. In this case, there is a
-      single formatting directive, <code>%F</code>, so
-      <code>printf</code> expects one additional argument of type
-      <code>float</code>.</p>
+      needs to be printed. This is done using the <code>printf</code>
+      command, which provides support for type-safe format strings,
+      similar to what you'll find in a variety of languages. The
+      format string is parsed by the compiler and used to determine
+      the number and type of the remaining arguments that
+      are <span class="keep-together">required</span>. In this case,
+      there is a single formatting directive, <code>%F</code>,
+      so <code>printf</code> expects one additional argument of
+      type <code>float</code>.</p>
 
       <section id="compiling-and-running" data-type="sect2">
         <h2>Compiling and Running</h2>
 
         <p>We'll compile our program
         using <span class="command"><em>jbuilder</em></span>, a build
-        system that's designed for use with OCaml projects. </p>
+        system that's designed for use with OCaml projects. First, we
+        need to write a <em>/jbuild</em> file to specify the build.</p>
         <link rel="import" href="code/guided-tour/jbuild"/>
 
+	<p>All we really need to specify here is the name of the
+	executable we're building, and the name of the libraries we
+	depend on, in this case, <code>Core_kernel</code>.</p>
 	
+	<p>We can now invoke jbuilder to build the executable.
+	The <code>--dev</code> flag is recommended to get better error
+	messages during the build.</p>
         <link rel="import" href="code/guided-tour/build_sum.sh"/>
 
-        <p>The <code>.native</code> suffix indicates that we're
-        building a native-code executable, which we'll discuss more
-        in <a href="04-files-modules-and-programs.html#files-modules-and-programs" data-type="xref">Files Modules And Programs</a>. Once the
+        <p>The <code>.exe</code> suffix indicates that we're building
+        a native-code executable, which we'll discuss more
+        in <a href="04-files-modules-and-programs.html#files-modules-and-programs"
+        data-type="xref">Files Modules And Programs</a>. Once the
         build completes, we can use the resulting program like any
-        command-line utility. We can feed input to
-        <code>sum.native</code> by typing in a sequence of numbers,
+        command-line utility. We can feed input
+        to <code>sum.native</code> by typing in a sequence of numbers,
         one per line, hitting <strong><code>Ctrl-D</code></strong>
-        when we're done:</p>
-        <link rel="import" href="code/guided-tour/sum.rawsh"/>
+        when we're done:</p> <link rel="import"
+        href="code/guided-tour/sum.rawsh"/>
 
         <p>More work is needed to make a really usable command-line
-        program, including a proper command-line parsing interface
-        and better error handling, all of which is covered in
-        <a href="14-command-line-parsing.html#command-line-parsing" data-type="xref">Command Line Parsing</a>.</p>
+        program, including a proper command-line parsing interface and
+        better error handling, all of which is covered
+        in <a href="14-command-line-parsing.html#command-line-parsing"
+        data-type="xref">Command Line Parsing</a>.</p>
       </section>
     </section>
 
