@@ -106,10 +106,7 @@ Error: This expression has type
 
 [@@@part "11"];;
 let ord_tree = Map.to_tree ord_map;;
-[%%expect ocaml {|
-val ord_tree : (string, int, String.comparator_witness) Map_intf.Tree.t =
-  <abstr>
-|}];;
+[%%expect ocaml {|val ord_tree : (string, int, String.comparator_witness) Map.Tree.t = <abstr>|}];;
 
 [@@@part "12"];;
 Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
@@ -120,9 +117,9 @@ Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 [%%expect{|
 Characters 45-53:
 Error: This expression has type
-         (string, int, String.comparator_witness) Map_intf.Tree.t
+         (string, int, String.comparator_witness) Map.Tree.t
        but an expression was expected of type
-         (string, int, Reverse.comparator_witness) Map_intf.Tree.t
+         (string, int, Reverse.comparator_witness) Map.Tree.t
        Type String.comparator_witness is not compatible with type
          Reverse.comparator_witness 
 |}];;
@@ -203,16 +200,23 @@ module Foo_and_bar :
     val ( <> ) : t -> t -> bool
     val equal : t -> t -> bool
     val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
 ...
+    module Replace_polymorphic_compare :
+      sig
+        val ( >= ) : t -> t -> bool
+        val ( <= ) : t -> t -> bool
+        val ( = ) : t -> t -> bool
+        val ( > ) : t -> t -> bool
+...
+      end
+    module Map :
+      sig
+...
+      end
+    module Set :
+      sig
+...
+      end
   end
 |}];;
 
@@ -235,20 +239,23 @@ module Foo_and_bar :
     val ( <= ) : t -> t -> bool
     val ( = ) : t -> t -> bool
     val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
 ...
+    module Replace_polymorphic_compare :
+      sig
+        val ( >= ) : t -> t -> bool
+        val ( <= ) : t -> t -> bool
+        val ( = ) : t -> t -> bool
+        val ( > ) : t -> t -> bool
+...
+      end
+    module Map :
+      sig
+...
+      end
+    module Set :
+      sig
+...
+      end
   end
 |}];;
 
@@ -275,16 +282,23 @@ module Foo_and_bar :
     val ( <> ) : t -> t -> bool
     val equal : t -> t -> bool
     val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
 ...
+    module Replace_polymorphic_compare :
+      sig
+        val ( >= ) : t -> t -> bool
+        val ( <= ) : t -> t -> bool
+        val ( = ) : t -> t -> bool
+        val ( > ) : t -> t -> bool
+...
+      end
+    module Map :
+      sig
+...
+      end
+    module Set :
+      sig
+...
+      end
   end
 |}];;
 
@@ -340,8 +354,16 @@ module Foo_and_bar :
       sig
         type key = t
         type ('a, 'b) hashtbl = ('a, 'b) Hashtbl.t
-        type 'b t = (key, 'b) hashtbl
-        val sexp_of_t : ('b -> Sexp.t) -> 'b t -> Sexp.t
+...
+      end
+    module Hash_set :
+      sig
+        type elt = t
+        type t = elt Hash_set.t
+...
+      end
+    module Hash_queue :
+      sig
 ...
       end
   end
