@@ -510,14 +510,31 @@ let match_outcome xs ys =
   List.length xs = List.length ys &&
   List.for_all2 match_outcome_chunk xs ys
 
-let rec valid_phrases = function
-  | [] -> true
-  | (_, Phrase_part _) :: rest -> valid_phrases rest
-  | (_, Phrase_code outcome) :: (_, Phrase_expect outcome') :: rest ->
-    match_outcome outcome outcome' && valid_phrases rest
-  | (_, Phrase_code outcome) :: rest ->
-    List.for_all (fun (_,s) -> is_all_whitespace s) outcome && valid_phrases rest
-  | (_, Phrase_expect _) :: _ -> false
+(* Check if output matches expectations and keep ellisions when possible *)
+let validate_phrases =
+  let rec aux success acc = function
+    | [] -> (success, List.rev acc)
+    | (_, Phrase_part _ as entry) :: rest ->
+      aux success (entry :: acc) rest
+    | (p0, Phrase_code outcome) :: (p1, Phrase_expect outcome') :: rest ->
+      let success' = match_outcome outcome outcome' in
+      let acc =
+        if success' then
+          (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome') :: acc
+        else
+          (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome) :: acc
+      in
+      aux (success && success') acc rest
+    | (_, Phrase_code outcome as x) :: rest ->
+      let success =
+        success && List.for_all (fun (_,s) -> is_all_whitespace s) outcome
+      in
+      aux success (x :: acc) rest
+    | (_, Phrase_expect _ as x) :: rest ->
+      aux false (x :: acc) rest
+  in
+  fun phrases -> aux false [] phrases
+
 
 (* Skip spaces as well as ';;' *)
 let skip_whitespace contents ?(stop=String.length contents) start =
@@ -623,15 +640,13 @@ let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
     result
   in
   let phrases = eval_phrases ~fname ~dry_run file_contents in
-  let success = valid_phrases phrases in
+  let success, phrases = validate_phrases phrases in
   let oname = if in_place then fname else fname ^ ".corrected" in
   if success && not in_place && Sys.file_exists oname then
     Sys.remove oname;
   let phrases =
-    if success then (
-      (* If successful, replace output by expectation to preserve ellisions. *)
-      dry_exec (List.map (fun (p, _) -> p, phrase_role p) phrases)
-    ) else (
+    if success then phrases
+    else (
       (* Otherwise, generate corrected file and keep toplevel output. *)
       let oc = open_out_bin (oname ^ ".tmp") in
       output_phrases oc file_contents phrases;
