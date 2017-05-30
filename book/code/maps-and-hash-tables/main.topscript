@@ -240,22 +240,6 @@ module Foo_and_bar :
     val ( = ) : t -> t -> bool
     val ( > ) : t -> t -> bool
 ...
-    module Replace_polymorphic_compare :
-      sig
-        val ( >= ) : t -> t -> bool
-        val ( <= ) : t -> t -> bool
-        val ( = ) : t -> t -> bool
-        val ( > ) : t -> t -> bool
-...
-      end
-    module Map :
-      sig
-...
-      end
-    module Set :
-      sig
-...
-      end
   end
 |}];;
 
@@ -283,22 +267,6 @@ module Foo_and_bar :
     val equal : t -> t -> bool
     val compare : t -> t -> int
 ...
-    module Replace_polymorphic_compare :
-      sig
-        val ( >= ) : t -> t -> bool
-        val ( <= ) : t -> t -> bool
-        val ( = ) : t -> t -> bool
-        val ( > ) : t -> t -> bool
-...
-      end
-    module Map :
-      sig
-...
-      end
-    module Set :
-      sig
-...
-      end
   end
 |}];;
 
@@ -358,8 +326,6 @@ module Foo_and_bar :
       end
     module Hash_set :
       sig
-        type elt = t
-        type t = elt Hash_set.t
 ...
       end
     module Hash_queue :
