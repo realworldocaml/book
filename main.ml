@@ -533,7 +533,7 @@ let validate_phrases =
     | (_, Phrase_expect _ as x) :: rest ->
       aux false (x :: acc) rest
   in
-  fun phrases -> aux false [] phrases
+  fun phrases -> aux true [] phrases
 
 
 (* Skip spaces as well as ';;' *)
