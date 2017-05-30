@@ -1,0 +1,27 @@
+(* -*- tuareg -*- *)
+#require "base"
+#require "stdio"
+open Jbuild_plugin.V1
+open Base
+open Stdio
+
+let rule ~target ~deps ~action = 
+  Printf.sprintf "(rule ((targets (%s)) (deps (../app/app.exe %s)) (action (system \"../app/app.exe build %s -o . -repo-root ${ROOT}\"))))" target deps action
+
+let rule_for_one_file name =
+  Printf.sprintf "(rule ((targets (%s)) (deps (../app/app.exe (files_recursively_in ${ROOT}/book))) (action (chdir ${ROOT} (system \"app/app.exe build chapter -o site/ -repo-root ${ROOT} ${ROOT}/book/%s\")))))" name name
+
+let rsync = "(rule ((targets (.stamp)) (action (progn (system \"rsync -av ${ROOT}/book/images ${ROOT}/book/css ${ROOT}/book/js .\") (system \"touch .stamp\")))))"
+
+let all_html = "(files_recursively_in ${ROOT}/book)"
+let send_rules s = String.concat ~sep:"\n" s |> send
+let source_files = In_channel.read_lines "../book/chapters.txt"
+let alias rules = Printf.sprintf "(alias ((name book) (deps (%s))))" (String.concat ~sep:" " rules)
+let all_targets = ["index.html"; "toc.html"; "faqs.html";"install.html"; ".stamp"] @ source_files 
+
+let () = send_rules ([
+  rule ~target:"index.html" ~deps:all_html ~action:"frontpage";
+  rule ~target:"toc.html" ~deps:all_html ~action:"toc";
+  rule ~target:"faqs.html" ~deps:"${ROOT}/book/faqs.html" ~action:"faqs";
+  rule ~target:"install.html" ~deps:"${ROOT}/book/install.html" ~action:"install";
+] @ (List.map ~f:rule_for_one_file source_files) @ [alias all_targets; rsync])
