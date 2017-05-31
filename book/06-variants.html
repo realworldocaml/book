@@ -245,14 +245,19 @@
       <p>Here's the concrete code:</p>
       <link rel="import" href="code/variants/logger.topscript" part="3"/>
 
-      <p>There's one awkward part of the preceding code, which is
-      the logic that determines the session ID. The code is
-      somewhat repetitive, contemplating each of the possible
-      message types (including the <code>Logon</code> case, which
-      isn't actually possible at that point in the code) and
-      extracting the session ID in each case. This per-message-type
-      handling seems unnecessary, since the session ID works the
-      same way for all of the message types.</p>
+      <p>Note that we take advantage of the fact that the type of the
+      record <code>m</code> is known in the above code, so we don't
+      have to qualify the record fields by the module they come
+      from. <em>e.g.</em>, we write <code>m.user</code> instead
+      of <code>m.Logon.user</code>. </p>
+
+      <p>One annoyance of the above code is that the logic for
+      determining the session ID is somewhat repetitive, contemplating
+      each of the possible message types (including
+      the <code>Logon</code> case, which isn't actually possible at
+      that point in the code) and extracting the session ID in each
+      case. This per-message-type handling seems unnecessary, since
+      the session ID works the same way for all of message types.</p>
 
       <p>We can improve the code by refactoring our types to
       explicitly reflect the information that's shared between the
@@ -269,24 +274,29 @@
       are common across all messages:</p>
       <link rel="import" href="code/variants/logger.topscript" part="6"/>
 
-      <p>A full message can then be represented as a pair of a
-      <code>Common.t</code> and a <code>details</code>. Using this,
-      we can rewrite our preceding example as follows:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="7"/>
+      <p>A full message can then be represented as a pair of
+      a <code>Common.t</code> and a <code>details</code>. Using this,
+      we can rewrite our preceding example as follows. Note that we
+      add extra type annotations so that OCaml recognizes the record
+      fields correctly. Otherwise, we'd need to qualify them
+      explicitly.</p>
+
+      <link rel="import" href="code/variants/logger.topscript"
+	    part="7"/>
 
       <p>As you can see, the code for extracting the session ID has
-      been replaced with the simple expression
-      <code>common.Common.session_id</code>.</p>
+      been replaced with the simple
+      expression <code>common.session_id</code>.</p>
 
-      <p>In addition, this design allows us to essentially downcast
-      to the specific message type once we know what it is and then
-      dispatch code to handle just that message type. In
+      <p>In addition, this design allows us to grab the specific
+      message and dispatch code to handle just that message type. In
       particular, while we use the type <code>Common.t *
-      details</code> to represent an arbitrary message, we can use
-      <code>Common.t * Logon.t</code> to represent a logon message.
-      Thus, if we had functions for handling individual message
-      types, we could write a dispatch function as follows:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="8"/>
+      details</code> to represent an arbitrary message, we can
+      use <code>Common.t * Logon.t</code> to represent a logon
+      message.  Thus, if we had functions for handling individual
+      message types, we could write a dispatch function as
+      follows:</p> <link rel="import"
+      href="code/variants/logger.topscript" part="8"/>
 
       <p>
 	And it's explicit at the type level that
@@ -296,6 +306,40 @@
 
 	<a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a>
 	<a data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a></p>
+
+      <section id="embedded-records" data-type="sect2">
+	<h2>Embedded records</h2>
+
+	<p>If we don't need to be able to pass the record types
+	  separately from the variant, then OCaml allows us to embed
+	  the records directly into the variant.</p>
+
+	<link rel="import" href="code/variants/logger.topscript"
+	      part="9"/>
+
+	<p>Even though the type is different, we can
+	  write <code>messages_for_user</code> in essentially the same
+	  way we did before.</p>
+
+	<link rel="import" href="code/variants/logger.topscript"
+	      part="10"/>
+
+	<p>Variants with inline records are both more concise and more
+	  efficient than having variants containing references to
+	  free-standing record types, because they don't require a
+	  separate allocated object for the contents of the
+	  variant.</p>
+
+	<p>The main downside is the obvious one, which is that an
+	  inline record can't be treated as its own free-standing
+	  object. And, as you can see below, OCaml will reject code
+	  that tries to do so.</p>
+	
+	<link rel="import" href="code/variants/logger.topscript"
+	      part="11"/>
+	
+
+      </section>
     </section>
 
     <section id="variants-and-recursive-data-structures" data-type="sect1">
