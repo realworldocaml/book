@@ -1,2 +1,2 @@
-jbuilder build sum.exe
+jbuilder build sum.exe --dev
 
