@@ -295,12 +295,7 @@ Pipe.transfer;;
 <fun>
 |}];;
 [@@@part "27"];;
-Command.async_basic;;
-
-
-
-
-
+Command.async;;
 [%%expect{|
 Characters 0-19:
 Warning 3: deprecated: Async.Command.async_basic
@@ -317,10 +312,6 @@ ocaml {|
 [@@@part "28"];;
 #require "cohttp.async";;
 Cohttp_async.Client.get;;
-
-
-
-
 
 [%%expect ocaml {|
 - : ?interrupt:unit Deferred.t ->

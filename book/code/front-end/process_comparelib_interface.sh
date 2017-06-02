@@ -1,1 +1,1 @@
-sh camlp4_dump.cmd comparelib_test.mli
+ocamlfind ocamlc -package ppx_compare -dsource comparelib_test.mli

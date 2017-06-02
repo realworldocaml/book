@@ -206,7 +206,7 @@ let register_heartbeat t hb =
 [%%expect ocaml {|val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>|}];;
 [@@@part "28"];;
 let get_users logons =
-  List.dedup_and_sort (List.map logons ~f:(fun x -> x.Logon.user));;
+  List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
 [%%expect ocaml {|val get_users : Logon.t list -> string list = <fun>|}];;
 [@@@part "29"];;
 module Logon = struct
@@ -240,168 +240,12 @@ module Logon :
           ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
         val time :
           ([< `Read | `Set_and_create ], t, Time_ns.t) Field.t_with_perm
-        val session_id :
-          ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
-        val make_creator :
-          session_id:(([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> 'a -> ('b -> string) * 'c) ->
-          time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> 'c -> ('b -> Time_ns.t) * 'd) ->
-          user:(([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                'd -> ('b -> string) * 'e) ->
-          credentials:(([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> 'e -> ('b -> string) * 'f) ->
-          'a -> ('b -> t) * 'f
-        val create :
-          session_id:string ->
-          time:Time_ns.t -> user:string -> credentials:string -> t
-        val map :
-          session_id:(([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> string) ->
-          time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> Time_ns.t) ->
-          user:(([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                string) ->
-          credentials:(([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> string) ->
-          t
-        val iter :
-          session_id:(([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> unit) ->
-          time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> unit) ->
-          user:(([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                unit) ->
-          credentials:(([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> unit) ->
-          unit
-        val fold :
-          init:'a ->
-          session_id:('a ->
-                      ([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> 'b) ->
-          time:('b ->
-                ([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> 'c) ->
-          user:('c ->
-                ([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                'd) ->
-          credentials:('d ->
-                       ([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> 'e) ->
-          'e
-        val map_poly :
-          ([< `Read | `Set_and_create ], t, 'a) Field.user -> 'a list
-        val for_all :
-          session_id:(([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> bool) ->
-          time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> bool) ->
-          user:(([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                bool) ->
-          credentials:(([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> bool) ->
-          bool
-        val exists :
-          session_id:(([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> bool) ->
-          time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> bool) ->
-          user:(([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                bool) ->
-          credentials:(([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> bool) ->
-          bool
-        val to_list :
-          session_id:(([< `Read | `Set_and_create ], t, string)
-                      Field.t_with_perm -> 'a) ->
-          time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                Field.t_with_perm -> 'a) ->
-          user:(([< `Read | `Set_and_create ], t, string) Field.t_with_perm ->
-                'a) ->
-          credentials:(([< `Read | `Set_and_create ], t, string)
-                       Field.t_with_perm -> 'a) ->
-          'a list
-        module Direct :
-          sig
-            val iter :
-              t ->
-              session_id:(([< `Read | `Set_and_create ], t, string)
-                          Field.t_with_perm -> t -> string -> 'a) ->
-              time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                    Field.t_with_perm -> t -> Time_ns.t -> 'b) ->
-              user:(([< `Read | `Set_and_create ], t, string)
-                    Field.t_with_perm -> t -> string -> 'c) ->
-              credentials:(([< `Read | `Set_and_create ], t, string)
-                           Field.t_with_perm -> t -> string -> 'd) ->
-              'd
-            val fold :
-              t ->
-              init:'a ->
-              session_id:('a ->
-                          ([< `Read | `Set_and_create ], t, string)
-                          Field.t_with_perm -> t -> string -> 'b) ->
-              time:('b ->
-                    ([< `Read | `Set_and_create ], t, Time_ns.t)
-                    Field.t_with_perm -> t -> Time_ns.t -> 'c) ->
-              user:('c ->
-                    ([< `Read | `Set_and_create ], t, string)
-                    Field.t_with_perm -> t -> string -> 'd) ->
-              credentials:('d ->
-                           ([< `Read | `Set_and_create ], t, string)
-                           Field.t_with_perm -> t -> string -> 'e) ->
-              'e
-            val for_all :
-              t ->
-              session_id:(([< `Read | `Set_and_create ], t, string)
-                          Field.t_with_perm -> t -> string -> bool) ->
-              time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                    Field.t_with_perm -> t -> Time_ns.t -> bool) ->
-              user:(([< `Read | `Set_and_create ], t, string)
-                    Field.t_with_perm -> t -> string -> bool) ->
-              credentials:(([< `Read | `Set_and_create ], t, string)
-                           Field.t_with_perm -> t -> string -> bool) ->
-              bool
-            val exists :
-              t ->
-              session_id:(([< `Read | `Set_and_create ], t, string)
-                          Field.t_with_perm -> t -> string -> bool) ->
-              time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                    Field.t_with_perm -> t -> Time_ns.t -> bool) ->
-              user:(([< `Read | `Set_and_create ], t, string)
-                    Field.t_with_perm -> t -> string -> bool) ->
-              credentials:(([< `Read | `Set_and_create ], t, string)
-                           Field.t_with_perm -> t -> string -> bool) ->
-              bool
-            val to_list :
-              t ->
-              session_id:(([< `Read | `Set_and_create ], t, string)
-                          Field.t_with_perm -> t -> string -> 'a) ->
-              time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                    Field.t_with_perm -> t -> Time_ns.t -> 'a) ->
-              user:(([< `Read | `Set_and_create ], t, string)
-                    Field.t_with_perm -> t -> string -> 'a) ->
-              credentials:(([< `Read | `Set_and_create ], t, string)
-                           Field.t_with_perm -> t -> string -> 'a) ->
-              'a list
-            val map :
-              t ->
-              session_id:(([< `Read | `Set_and_create ], t, string)
-                          Field.t_with_perm -> t -> string -> string) ->
-              time:(([< `Read | `Set_and_create ], t, Time_ns.t)
-                    Field.t_with_perm -> t -> Time_ns.t -> Time_ns.t) ->
-              user:(([< `Read | `Set_and_create ], t, string)
-                    Field.t_with_perm -> t -> string -> string) ->
-              credentials:(([< `Read | `Set_and_create ], t, string)
-                           Field.t_with_perm -> t -> string -> string) ->
-              t
-            val set_all_mutable_fields : 'a -> unit
-          end
+...
       end
   end
 |}];;
 [@@@part "30"];;
-let get_users logons = List.dedup_and_sort (List.map logons ~f:Logon.user);;
+let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
 [%%expect ocaml {|val get_users : Logon.t list -> string list = <fun>|}];;
 [@@@part "31"];;
 Field.get Logon.Fields.user;;
