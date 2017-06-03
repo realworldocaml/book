@@ -11,6 +11,6 @@ COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src
 WORKDIR /home/opam/src
 RUN opam pin add -n Real-World-OCaml /home/opam/src
-RUN opam config exec -- jbuilder build
+RUN opam config exec -- jbuilder build @site/book
 EXPOSE 8080
 ENTRYPOINT ["opam","config","exec","--","cohttp-server-async","-v","/home/opam/src/_build/default/site"]
