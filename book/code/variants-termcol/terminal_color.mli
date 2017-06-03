@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
