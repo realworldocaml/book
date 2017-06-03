@@ -70,10 +70,14 @@ module Document = struct
 
   let parts t = t.parts
 
-  let of_file ~filename =
-    Process.run
-      ~env:(`Extend ["OCAMLRUNPARAM",""])
-      ~accept_nonzero_exit:[1] ~prog:program_path
-      ~args:["-sexp"; "-verbose"; "-short-paths"; filename] ()
-    >>|? fun str -> t_of_sexp (Sexp.of_string (String.strip str))
+  let of_file ~filename = (
+      let (working_dir, filename) = Filename.split filename in
+      Process.run
+        ~env:(`Extend ["OCAMLRUNPARAM",""])
+        ~accept_nonzero_exit:[1] ~prog:program_path ~working_dir
+        ~args:["-sexp"; "-verbose"; "-short-paths"; filename] ()
+      >>|? fun str -> (
+        t_of_sexp (Sexp.of_string (String.strip str))
+      )
+    )
 end

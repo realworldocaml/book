@@ -8,8 +8,6 @@
 #require "core";;
 #require "ppx_jane";;
 open Core_kernel;;
-let cwd = Sys.getcwd ();;
-Sys.chdir (cwd ^ "/../book/code/sexpr");;
 [@@@part "0.5"];;
 Sexp.load_sexp "example.scm";;
 [%%expect{|Exception: Sys_error "example.scm: No such file or directory".|}];;
@@ -26,5 +24,3 @@ Uncaught exception:
 
 |};
 ocaml {|- : unit = ()|}];;
-[@@@part "ignore"];;
-Sys.chdir cwd;;
