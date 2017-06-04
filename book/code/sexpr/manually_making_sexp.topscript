@@ -19,11 +19,4 @@ let sexp_of_t t =
       l [a "bar"; Float.sexp_of_t t.bar]; ] ;;
 [%%expect ocaml {|val sexp_of_t : t -> Sexp.t = <fun>|}];;
 sexp_of_t { foo = 3; bar = -5.5 } ;;
-[%%expect ocaml {|
-- : Sexp.t =
-Core_kernel.Sexp.List
- [Core_kernel.Sexp.List
-   [Core_kernel.Sexp.Atom "foo"; Core_kernel.Sexp.Atom "3"];
-  Core_kernel.Sexp.List
-   [Core_kernel.Sexp.Atom "bar"; Core_kernel.Sexp.Atom "-5.5"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = ((foo 3) (bar -5.5))|}];;

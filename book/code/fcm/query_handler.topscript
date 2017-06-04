@@ -156,10 +156,7 @@ Ok
 List_dir.eval list_dir (sexp_of_string "yp");;
 [%%expect ocaml {|
 - : (Sexp.t, Error.t) result =
-Ok
- (Base__.Sexplib.Sexp.List
-   [Base__.Sexplib.Sexp.Atom "binding";
-    Base__.Sexplib.Sexp.Atom "binding~orig"])
+Ok (Base__.Sexplib.Sexp.List [Base__.Sexplib.Sexp.Atom "binding"])
 |}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig

@@ -255,7 +255,7 @@ Sys.getenv "PATH"
 ^> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 97-123:
+Characters 88-114:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a

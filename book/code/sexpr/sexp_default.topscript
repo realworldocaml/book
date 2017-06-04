@@ -18,10 +18,8 @@ type http_server_config = {
 } [@@deriving sexp] ;;
 [%%expect ocaml {|
 type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp : Core_kernel.Sexp.t -> http_server_config =
-  <fun>
-val sexp_of_http_server_config : http_server_config -> Core_kernel.Sexp.t =
-  <fun>
+val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 |}];;
 [@@@part "1"];;
 type http_server_config = {
@@ -43,14 +41,7 @@ val cfg : http_server_config =
 |}];;
 [@@@part "3"];;
 sexp_of_http_server_config cfg ;;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.List
-   [Sexplib.Sexp.Atom "web_root"; Sexplib.Sexp.Atom "/var/www/html"];
-  Sexplib.Sexp.List [Sexplib.Sexp.Atom "port"; Sexplib.Sexp.Atom "80"];
-  Sexplib.Sexp.List [Sexplib.Sexp.Atom "addr"; Sexplib.Sexp.Atom "localhost"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))|}];;
 [@@@part "4"];;
 type http_server_config = {
   web_root: string;
@@ -69,29 +60,10 @@ val cfg : http_server_config =
   {web_root = "/var/www/html"; port = 80; addr = "localhost"}
 |}];;
 sexp_of_http_server_config cfg ;;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.List
-   [Sexplib.Sexp.Atom "web_root"; Sexplib.Sexp.Atom "/var/www/html"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html))|}];;
 [@@@part "5"];;
 sexp_of_http_server_config { cfg with port = 8080 } ;;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.List
-   [Sexplib.Sexp.Atom "web_root"; Sexplib.Sexp.Atom "/var/www/html"];
-  Sexplib.Sexp.List [Sexplib.Sexp.Atom "port"; Sexplib.Sexp.Atom "8080"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html) (port 8080))|}];;
 sexp_of_http_server_config
   { cfg with port = 8080; addr = "192.168.0.1" } ;;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.List
-   [Sexplib.Sexp.Atom "web_root"; Sexplib.Sexp.Atom "/var/www/html"];
-  Sexplib.Sexp.List [Sexplib.Sexp.Atom "port"; Sexplib.Sexp.Atom "8080"];
-  Sexplib.Sexp.List
-   [Sexplib.Sexp.Atom "addr"; Sexplib.Sexp.Atom "192.168.0.1"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))|}];;

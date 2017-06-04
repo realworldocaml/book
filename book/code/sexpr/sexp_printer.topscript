@@ -14,10 +14,4 @@ open Core_kernel;;
 Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;
 [%%expect ocaml {|- : string = "(1 2)"|}];;
 Sexp.of_string ("(1 2 (3 4))") ;;
-[%%expect ocaml {|
-- : Sexp.t =
-Core_kernel.Sexp.List
- [Core_kernel.Sexp.Atom "1"; Core_kernel.Sexp.Atom "2";
-  Core_kernel.Sexp.List
-   [Core_kernel.Sexp.Atom "3"; Core_kernel.Sexp.Atom "4"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = (1 2 (3 4))|}];;

@@ -16,12 +16,4 @@ Sexp.List [
   Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
   Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
 ];;
-[%%expect ocaml {|
-- : Sexp.t =
-Core_kernel.Sexp.List
- [Core_kernel.Sexp.Atom "this";
-  Core_kernel.Sexp.List
-   [Core_kernel.Sexp.Atom "is"; Core_kernel.Sexp.Atom "an"];
-  Core_kernel.Sexp.List
-   [Core_kernel.Sexp.Atom "s"; Core_kernel.Sexp.Atom "expression"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = (this (is an) (s expression))|}];;
