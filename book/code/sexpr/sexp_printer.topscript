@@ -7,6 +7,8 @@
 #camlp4o;;
 #require "core";;
 #require "ppx_jane";;
+#install_printer Core.Sexp.pp_hum;;
+#install_printer Core.Error.pp;;
 open Core_kernel;;
 [@@@part "1"];;
 Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;
