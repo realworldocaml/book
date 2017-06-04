@@ -5,7 +5,7 @@ maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/yminsky/Real-World-OCaml"
 license: "PROPRIETARY"
 
-build: [ "jbuilder" "build" "@site/book" ]
+build: [ "jbuilder" "build" ]
 
 depends: [
   "core" {>="v0.9.0"}
@@ -32,6 +32,11 @@ depends: [
   "uri"
 ]
 
+depexts: [
+ [["ubuntu"] ["tzdata"]]
+ [["debian"] ["tzdata"]]
+ [["alpine"] ["tzdata"]]
+]
 available: [
   ocaml-version >= "4.04.1"
 ]
