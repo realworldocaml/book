@@ -9,10 +9,10 @@ recommended you do the following to install all necessary
 dependencies:
 
 ```
-opam switch Real-World-OCaml -A 4.03.0
+opam switch rwo -A 4.04.1
 cd /to/your/working/directory
-opam pin add Real-World-OCaml .
-opam install Real-World-OCaml --deps-only
+opam pin add rwo .
+opam install rwo --deps-only
 ```
 
 The `switch` step is optional, but recommended if you are also working
