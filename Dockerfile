@@ -1,16 +1,13 @@
-FROM ocaml/opam:alpine_ocaml-4.04.1
+FROM ocaml/opam:ubuntu-17.04_ocaml-4.04.1
+RUN sudo apt-get -y install python3-pygments
 RUN git -C /home/opam/opam-repository pull origin master && opam update
-RUN opam depext -i ocaml-migrate-parsetree ppx_sexp_conv
-RUN opam pin add -n uri --dev
-RUN opam pin add -n ipaddr --dev
 RUN opam pin add -n -y ocaml-topexpect https://github.com/let-def/topexpect.git
-RUN opam depext -ui async ocamlnet cohttp mtime ocaml-topexpect sexplib toplevel_expect_test ocamlscript
-RUN sudo apk add tzdata vim
-RUN sudo apk add 'py-pygments=2.2.0-r0' --update-cache --repository http://nl.alpinelinux.org/alpine/edge/main
+RUN opam depext -ui async ocamlnet cohttp mtime ocaml-topexpect sexplib toplevel_expect_test patdiff
 COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src
 WORKDIR /home/opam/src
-RUN opam pin add -n Real-World-OCaml /home/opam/src
+RUN opam pin add -n rwo /home/opam/src
+RUN opam depext -iyj4 rwo
 RUN opam config exec -- jbuilder build @site/book
 EXPOSE 8080
 ENTRYPOINT ["opam","config","exec","--","cohttp-server-async","-v","/home/opam/src/_build/default/site"]
