@@ -9,7 +9,7 @@ let rule ~target ~deps ~action =
   Printf.sprintf "(rule ((targets (%s)) (deps (../app/app.exe %s)) (action (system \"../app/app.exe build %s -o . -repo-root ${ROOT}\"))))" target deps action
 
 let rule_for_one_file name =
-  Printf.sprintf "(rule ((targets (%s)) (deps (../app/app.exe (files_recursively_in ${ROOT}/book))) (action (chdir ${ROOT} (system \"app/app.exe build chapter -o site/ -repo-root ${ROOT} ${ROOT}/book/%s\")))))" name name
+  Printf.sprintf "(rule ((targets (%s)) (deps (../app/app.exe (files_recursively_in ${ROOT}/book))) (action (chdir ${ROOT} (system \"app/app.exe build chapter -pygmentize -o site/ -repo-root ${ROOT} ${ROOT}/book/%s\")))))" name name
 
 let rsync = "(rule ((targets (.stamp)) (action (progn (system \"rsync -av ${ROOT}/book/images ${ROOT}/book/css ${ROOT}/book/js .\") (system \"touch .stamp\")))))"
 
