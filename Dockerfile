@@ -1,5 +1,5 @@
 FROM ocaml/opam:ubuntu-17.04_ocaml-4.04.1
-RUN sudo apt-get -y install python3-pygments
+RUN sudo apt-get -y install python-pygments
 RUN git -C /home/opam/opam-repository pull origin master && opam update
 RUN opam pin add -n -y ocaml-topexpect https://github.com/let-def/topexpect.git
 RUN opam depext -ui async ocamlnet cohttp mtime ocaml-topexpect sexplib toplevel_expect_test patdiff
