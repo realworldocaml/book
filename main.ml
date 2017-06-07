@@ -28,7 +28,7 @@ let disable_outputs = lazy (
 
 
 module Chunk = struct
-  type kind = OCaml | Raw
+  type kind = OCaml | Raw | Nondeterministic
     [@@deriving sexp]
 
   type response = (kind * string)
@@ -171,6 +171,8 @@ let payload_strings loc = function
     let aux = function
       | _, Some {Location.txt = Longident.Lident "ocaml"},
         Pconst_string (str, _) -> (Chunk.OCaml, str)
+      | _, Some {Location.txt = Longident.Lident "non_deterministic"},
+        Pconst_string (str, _) -> (Chunk.Nondeterministic, str)
       | _, None, Pconst_string (str, _) -> (Chunk.Raw, str)
       | loc, _, _ -> raise (Cannot_parse_payload loc)
     in
@@ -357,6 +359,8 @@ let cleanup_lines lines =
   let rec join = function
     | (Chunk.Raw, str1) :: (Chunk.Raw, str2) :: rest ->
       join ((Chunk.Raw, str1 ^ "\n" ^ str2) :: rest)
+    | (Chunk.Nondeterministic, str1) :: (Chunk.Nondeterministic, str2) :: rest ->
+      join ((Chunk.Nondeterministic, str1 ^ "\n" ^ str2) :: rest)
     | (Chunk.OCaml, str1) :: (Chunk.OCaml, str2) :: rest ->
       join ((Chunk.OCaml, str1 ^ "\n" ^ str2) :: rest)
     | x :: xs -> x :: join xs
@@ -511,13 +515,21 @@ let match_outcome xs ys =
   List.for_all2 match_outcome_chunk xs ys
 
 (* Check if output matches expectations and keep ellisions when possible *)
-let validate_phrases =
+let validate_phrases run_nondeterministic =
   let rec aux success acc = function
     | [] -> (success, List.rev acc)
     | (_, Phrase_part _ as entry) :: rest ->
       aux success (entry :: acc) rest
     | (p0, Phrase_code outcome) :: (p1, Phrase_expect outcome') :: rest ->
       let success' = match_outcome outcome outcome' in
+      let success' = match outcome' with
+      | (Chunk.Nondeterministic, _) :: _ ->
+        if run_nondeterministic = false then
+          true
+        else
+          success'
+      | _ -> success'
+      in
       let acc =
         if success' then
           (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome') :: acc
@@ -583,11 +595,17 @@ let output_phrases oc contents =
         let string_of_kind = function
           | Chunk.Raw -> ""
           | Chunk.OCaml -> "ocaml "
+          | Chunk.Nondeterministic -> "non_deterministic "
         in
         let output_expect oc = function
           | [] -> ()
           | [(kind, str)] when not (String.contains str '\n') ->
             let k = string_of_kind kind in
+            (match kind with
+            | Chunk.Raw -> prerr_endline "raw"
+            | Chunk.OCaml -> prerr_endline "ocaml"
+            | Chunk.Nondeterministic -> prerr_endline "Nondeterministic");
+            prerr_endline k;
             Printf.fprintf oc "%s%s{|%s|}" (if k <> "" then " " else "") k str
           | xs ->
             let rec aux first = function
@@ -631,7 +649,7 @@ let document_of_phrases contents matched phrases =
   let parts = parts_of_phrase "" [] phrases in
   { Document. matched; parts }
 
-let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
+let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color ~in_place ~sexp_output =
   let file_contents =
     let ic = open_in fname in
     let len = in_channel_length ic in
@@ -640,7 +658,7 @@ let process_expect_file ~fname ~dry_run ~use_color ~in_place ~sexp_output =
     result
   in
   let phrases = eval_phrases ~fname ~dry_run file_contents in
-  let success, phrases = validate_phrases phrases in
+  let success, phrases = validate_phrases run_nondeterministic phrases in
   let oname = if in_place then fname else fname ^ ".corrected" in
   if success && not in_place && Sys.file_exists oname then
     Sys.remove oname;
@@ -676,6 +694,7 @@ let use_color   = ref true
 let in_place    = ref false
 let sexp_output = ref false
 let dry_run     = ref false
+let run_nondeterministic = ref false
 
 let process_file fname =
   let cmd_line =
@@ -688,6 +707,7 @@ let process_file fname =
   Sys.interactive := false;
   let success =
     process_expect_file ~fname
+      ~run_nondeterministic:!run_nondeterministic
       ~dry_run:!dry_run ~use_color:!use_color
       ~in_place:!in_place ~sexp_output:!sexp_output
   in
@@ -700,6 +720,7 @@ let args =
     ; "-sexp"    , Arg.Set sexp_output, " Output the result as a s-expression instead of diffing"
     ; "-verbose" , Arg.Set verbose, " Include outcome of phrase evaluation (like ocaml toplevel)"
     ; "-dry-run" , Arg.Set dry_run, " Don't execute code, only return expected outcome"
+    ; "-run-nondeterministic" , Arg.Set run_nondeterministic, " Run non-deterministic tests"
     ]
 
 let print_version () =
