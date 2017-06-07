@@ -28,7 +28,7 @@ let disable_outputs = lazy (
 
 
 module Chunk = struct
-  type kind = OCaml | Raw | Nondeterministic
+  type kind = OCaml | Raw
     [@@deriving sexp]
 
   type response = (kind * string)
@@ -140,7 +140,7 @@ let parse_phrase (contents, lexbuf) =
 
 type 'a phrase_role =
   | Phrase_code of 'a
-  | Phrase_expect of Chunk.response list
+  | Phrase_expect of { responses: Chunk.response list; nondeterministic: bool }
   | Phrase_part of string
 
 exception Cannot_parse_payload of Location.t
@@ -171,8 +171,6 @@ let payload_strings loc = function
     let aux = function
       | _, Some {Location.txt = Longident.Lident "ocaml"},
         Pconst_string (str, _) -> (Chunk.OCaml, str)
-      | _, Some {Location.txt = Longident.Lident "non_deterministic"},
-        Pconst_string (str, _) -> (Chunk.Nondeterministic, str)
       | _, None, Pconst_string (str, _) -> (Chunk.Raw, str)
       | loc, _, _ -> raise (Cannot_parse_payload loc)
     in
@@ -181,11 +179,15 @@ let payload_strings loc = function
 let constant_payload const = PStr [Ast_helper.(Str.eval (Exp.constant const))]
 let string_payload x = constant_payload (Pconst_string (x, None))
 
+let attr_is x name = x.Asttypes.txt = name
+
 let phrase_role phrase = match phrase.parsed with
-  | Ok (Ptop_def [{pstr_desc = Pstr_extension((name, payload), attrs); pstr_loc}])
-    when name.Asttypes.txt = "expect" ->
+  | Ok (Ptop_def [{pstr_desc = Pstr_extension((attr, payload), attrs); pstr_loc}])
+    when List.exists (attr_is attr) ["expect"; "expect.nondeterministic"] ->
     begin match payload_strings pstr_loc payload with
-      | x -> Phrase_expect x
+      | responses ->
+        let nondeterministic = attr_is attr "expect.nondeterministic" in
+        Phrase_expect { responses; nondeterministic }
       | exception (Cannot_parse_payload loc) ->
         prerr_endline (string_of_location loc ^ ": cannot parse [%%expect] payload");
         Phrase_code ()
@@ -359,8 +361,6 @@ let cleanup_lines lines =
   let rec join = function
     | (Chunk.Raw, str1) :: (Chunk.Raw, str2) :: rest ->
       join ((Chunk.Raw, str1 ^ "\n" ^ str2) :: rest)
-    | (Chunk.Nondeterministic, str1) :: (Chunk.Nondeterministic, str2) :: rest ->
-      join ((Chunk.Nondeterministic, str1 ^ "\n" ^ str2) :: rest)
     | (Chunk.OCaml, str1) :: (Chunk.OCaml, str2) :: rest ->
       join ((Chunk.OCaml, str1 ^ "\n" ^ str2) :: rest)
     | x :: xs -> x :: join xs
@@ -373,8 +373,8 @@ let dry_exec phrases =
     | [] -> List.rev acc
     | (phrase, Phrase_code ()) :: rest ->
       begin match rest with
-        | (_, Phrase_expect outcome) :: _ ->
-          aux ((phrase, Phrase_code outcome) :: acc) rest
+        | (_, Phrase_expect { responses; _ }) :: _ ->
+          aux ((phrase, Phrase_code responses) :: acc) rest
         | _ -> aux ((phrase, Phrase_code []) :: acc) rest
       end
     | (_, (Phrase_part _ | Phrase_expect _) as phrase) :: rest ->
@@ -395,7 +395,8 @@ let eval_phrases ~fname ~dry_run fcontents =
       | s -> Buffer.clear buf; lines := (kind, s) :: !lines
     in
     match phrase_role phrase with
-    | Phrase_expect x -> Phrase_expect (cleanup_lines x)
+    | Phrase_expect x ->
+      Phrase_expect {x with responses = cleanup_lines x.responses}
     | Phrase_part _ as x -> x
     | Phrase_code () ->
       let out_phrase' = !Oprint.out_phrase in
@@ -521,18 +522,15 @@ let validate_phrases run_nondeterministic =
     | (_, Phrase_part _ as entry) :: rest ->
       aux success (entry :: acc) rest
     | (p0, Phrase_code outcome) :: (p1, Phrase_expect outcome') :: rest ->
-      let success' = match_outcome outcome outcome' in
-      let success' = match outcome' with
-      | (Chunk.Nondeterministic, _) :: _ ->
-        if run_nondeterministic = false then
+      let success' =
+        if outcome'.nondeterministic && not run_nondeterministic then
           true
         else
-          success'
-      | _ -> success'
+          match_outcome outcome outcome'.responses
       in
       let acc =
         if success' then
-          (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome') :: acc
+          (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome'.responses) :: acc
         else
           (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome) :: acc
       in
@@ -581,12 +579,13 @@ let output_phrases oc contents =
       Printf.fprintf oc "[@@@part %S];;\n" x;
       aux rest
     | (phrase, Phrase_code expect_code) :: rest ->
-      let phrase_ws, expect_ws = match rest with
-        | (phrase_expect, Phrase_expect _) :: rest' ->
+      let phrase_ws, expect_ws, nondeterministic = match rest with
+        | (phrase_expect, Phrase_expect x) :: rest' ->
           (phrase_whitespace contents phrase rest,
-           phrase_whitespace contents phrase_expect rest')
+           phrase_whitespace contents phrase_expect rest',
+           x.nondeterministic)
         | _ ->
-          ("\n", phrase_whitespace contents phrase rest)
+          ("\n", phrase_whitespace contents phrase rest, false)
       in
       let phrase_code = phrase_code contents phrase in
       if List.for_all (fun (_,s) -> is_all_whitespace s) expect_code then
@@ -595,17 +594,11 @@ let output_phrases oc contents =
         let string_of_kind = function
           | Chunk.Raw -> ""
           | Chunk.OCaml -> "ocaml "
-          | Chunk.Nondeterministic -> "non_deterministic "
         in
         let output_expect oc = function
           | [] -> ()
           | [(kind, str)] when not (String.contains str '\n') ->
             let k = string_of_kind kind in
-            (match kind with
-            | Chunk.Raw -> prerr_endline "raw"
-            | Chunk.OCaml -> prerr_endline "ocaml"
-            | Chunk.Nondeterministic -> prerr_endline "Nondeterministic");
-            prerr_endline k;
             Printf.fprintf oc "%s%s{|%s|}" (if k <> "" then " " else "") k str
           | xs ->
             let rec aux first = function
@@ -621,8 +614,10 @@ let output_phrases oc contents =
             in
             aux true xs
         in
-        Printf.fprintf oc "%s%s[%%%%expect%a];;%s"
-          phrase_code phrase_ws output_expect expect_code expect_ws;
+        Printf.fprintf oc "%s%s[%%%%expect%s%a];;%s"
+          phrase_code phrase_ws
+          (if nondeterministic then ".nondeterministic" else "")
+          output_expect expect_code expect_ws;
       );
       aux rest
     | (_, Phrase_expect _) :: rest ->
