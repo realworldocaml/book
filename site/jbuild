@@ -1,9 +1,5 @@
 (* -*- tuareg -*- *)
-#require "base"
-#require "stdio"
 open Jbuild_plugin.V1
-open Base
-open Stdio
 
 let rule ~target ~deps ~action = 
   Printf.sprintf {|
@@ -32,8 +28,21 @@ let rsync = {|
 
 let all_html = "(files_recursively_in ${ROOT}/book)"
 let send_rules s = String.concat ~sep:"\n" s |> send
-let source_files = In_channel.read_lines "../book/chapters.txt"
-let alias rules = Printf.sprintf "(alias ((name book) (deps (%s))))" (String.concat ~sep:" " rules)
+
+let input_lines f =
+  let inc = open_in f in
+  let rec read lines = 
+    match input_line inc with
+    | End_of_file -> List.rev lines
+    | line -> read (line :: lines)
+  in
+  let lines = read [] in
+  close_in inc;
+  lines
+
+let source_files = input_lines "../book/chapters.txt"
+let alias rules = Printf.sprintf "(alias ((name book) (deps (%s))))" 
+    (String.concat " " rules)
 let all_targets = ["index.html"; "toc.html"; "faqs.html";"install.html"; ".stamp"] @ source_files 
 
 let () = send_rules ([
