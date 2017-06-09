@@ -382,11 +382,11 @@ let dry_exec phrases =
   in
   aux [] phrases
 
-let eval_phrases ~fname ~dry_run fcontents =
+let eval_phrases ~run_nondeterministic ~fname ~dry_run fcontents =
   (* 4.03: Warnings.reset_fatal (); *)
   let buf = Buffer.create 1024 in
   let ppf = Format.formatter_of_buffer buf in
-  let exec_phrase ~capture phrase =
+  let exec_code ~capture phrase =
     let lines = ref [] in
     let capture kind =
       capture buf;
@@ -394,30 +394,25 @@ let eval_phrases ~fname ~dry_run fcontents =
       | "" -> ()
       | s -> Buffer.clear buf; lines := (kind, s) :: !lines
     in
-    match phrase_role phrase with
-    | Phrase_expect x ->
-      Phrase_expect {x with responses = cleanup_lines x.responses}
-    | Phrase_part _ as x -> x
-    | Phrase_code () ->
-      let out_phrase' = !Oprint.out_phrase in
-      let out_phrase ppf phr = match phr with
-        | Outcometree.Ophr_exception _ -> out_phrase' ppf phr
-        | _ ->
-          capture Chunk.Raw;
-          out_phrase' ppf phr;
-          capture Chunk.OCaml;
-      in
-      Oprint.out_phrase := out_phrase;
-      let restore () = Oprint.out_phrase := out_phrase' in
-      begin match toplevel_exec_phrase ppf phrase with
-        | (_ : bool) -> restore ()
-        | exception exn ->
-          restore ();
-          Location.report_exception ppf exn
-      end;
-      Format.pp_print_flush ppf ();
-      capture Chunk.Raw;
-      Phrase_code (cleanup_lines (List.rev !lines))
+    let out_phrase' = !Oprint.out_phrase in
+    let out_phrase ppf phr = match phr with
+      | Outcometree.Ophr_exception _ -> out_phrase' ppf phr
+      | _ ->
+        capture Chunk.Raw;
+        out_phrase' ppf phr;
+        capture Chunk.OCaml;
+    in
+    Oprint.out_phrase := out_phrase;
+    let restore () = Oprint.out_phrase := out_phrase' in
+    begin match toplevel_exec_phrase ppf phrase with
+      | (_ : bool) -> restore ()
+      | exception exn ->
+        restore ();
+        Location.report_exception ppf exn
+    end;
+    Format.pp_print_flush ppf ();
+    capture Chunk.Raw;
+    Phrase_code (cleanup_lines (List.rev !lines))
   in
   let parser = init_parser ~fname fcontents in
   if dry_run then  (
@@ -429,13 +424,28 @@ let eval_phrases ~fname ~dry_run fcontents =
   ) else (
     redirect ~f:(fun ~capture ->
         capture_compiler_stuff ppf ~f:(fun () ->
-            let rec aux chunks = match parse_phrase parser with
-              | exception End_of_file ->  List.rev chunks
-              | phrase ->
-                let role = exec_phrase ~capture phrase in
-                aux ((phrase, role) :: chunks)
+            let rec process_phrase chunks phrase =
+              match phrase_role phrase with
+              | Phrase_expect x ->
+                next_phrase ((phrase, Phrase_expect {x with responses = cleanup_lines x.responses}) :: chunks)
+              | Phrase_part _ as x ->
+                next_phrase ((phrase, x) :: chunks)
+              | Phrase_code () ->
+                match parse_phrase parser with
+                | exception End_of_file ->
+                  List.rev ((phrase, exec_code ~capture phrase) :: chunks)
+                | phrase' ->
+                  let role = match phrase_role phrase' with
+                    | Phrase_expect { nondeterministic = true; responses }
+                      when not run_nondeterministic -> Phrase_code responses
+                    | _ -> exec_code ~capture phrase
+                  in
+                  process_phrase ((phrase, role) :: chunks) phrase'
+            and next_phrase chunks = match parse_phrase parser with
+              | exception End_of_file -> List.rev chunks
+              | phrase -> process_phrase chunks phrase
             in
-            aux []
+            next_phrase []
           )
       )
   )
@@ -588,7 +598,8 @@ let output_phrases oc contents =
           ("\n", phrase_whitespace contents phrase rest, false)
       in
       let phrase_code = phrase_code contents phrase in
-      if List.for_all (fun (_,s) -> is_all_whitespace s) expect_code then
+      if List.for_all (fun (_,s) -> is_all_whitespace s) expect_code &&
+         not nondeterministic then
         Printf.fprintf oc "%s%s" phrase_code expect_ws
       else (
         let string_of_kind = function
@@ -652,7 +663,7 @@ let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color ~in_pla
     close_in_noerr ic;
     result
   in
-  let phrases = eval_phrases ~fname ~dry_run file_contents in
+  let phrases = eval_phrases ~run_nondeterministic ~fname ~dry_run file_contents in
   let success, phrases = validate_phrases run_nondeterministic phrases in
   let oname = if in_place then fname else fname ^ ".corrected" in
   if success && not in_place && Sys.file_exists oname then
