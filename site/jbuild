@@ -27,13 +27,13 @@ let rsync = {|
 |}
 
 let all_html = "(files_recursively_in ${ROOT}/book)"
-let send_rules s = String.concat ~sep:"\n" s |> send
+let send_rules s = String.concat "\n" s |> send
 
 let input_lines f =
   let inc = open_in f in
   let rec read lines = 
     match input_line inc with
-    | End_of_file -> List.rev lines
+    | exception End_of_file -> List.rev lines
     | line -> read (line :: lines)
   in
   let lines = read [] in
@@ -50,4 +50,4 @@ let () = send_rules ([
   rule ~target:"toc.html" ~deps:all_html ~action:"toc";
   rule ~target:"faqs.html" ~deps:"${ROOT}/book/faqs.html" ~action:"faqs";
   rule ~target:"install.html" ~deps:"${ROOT}/book/install.html" ~action:"install";
-] @ (List.map ~f:rule_for_one_file source_files) @ [alias all_targets; rsync])
+] @ (List.map rule_for_one_file source_files) @ [alias all_targets; rsync])
