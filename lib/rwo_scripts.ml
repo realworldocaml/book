@@ -170,7 +170,7 @@ let script_part_to_html ?(pygmentize=false) (x : script_part) =
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
-let eval_script lang ~filename =
+let eval_script lang ~run_nondeterministic ~filename =
   match (lang : Lang.t :> string) with
   | "ml" | "mli" | "mly" | "mll" -> (
       (* Hack: Oloop.Script.of_file intended only for ml files but
@@ -188,7 +188,7 @@ let eval_script lang ~filename =
         >>|? fun script -> `OCaml_rawtoplevel script
       ) else*)
       (
-        Expect.Document.of_file ~filename
+        Expect.Document.of_file ~run_nondeterministic ~filename
         >>=? fun doc ->
         let corrected_built_filename =
           Filename.realpath filename ^ ".corrected"
@@ -247,21 +247,22 @@ let eval_script lang ~filename =
       Ok (`Other x)
     )
 
-let add_script t lang ~filename =
+let add_script t lang ~run_nondeterministic ~filename =
   let dir,file = filename in
   let filename = Filename.concat dir file in
   if file_is_mem t file then
     return (error "script already exists" file sexp_of_string)
   else
-    eval_script lang ~filename >>|? fun script ->
+    eval_script lang ~run_nondeterministic ~filename >>|? fun script ->
     Map.add t ~key:file ~data:script
 
-let of_html ~filename html =
+let of_html ~run_nondeterministic ~filename html =
   let dir = Filename.dirname filename in
   let imports =
     Import.find_all html
     |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
-      add_script accum (Import.lang_of i |> ok_exn) ~filename:(dir,i.Import.href)
+      add_script accum (Import.lang_of i |> ok_exn)
+        ~run_nondeterministic ~filename:(dir,i.Import.href)
     )

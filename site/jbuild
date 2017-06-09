@@ -1,6 +1,11 @@
 (* -*- tuareg -*- *)
 open Jbuild_plugin.V1
 
+let run_nondeterministic = match Sys.getenv "RUN_NONDETERMINISTIC" with
+  | exception Not_found -> false
+  | "Y" -> true
+  | _ -> invalid_arg "RUN_NONDETERMINISTIC should be unset or set to Y"
+
 let rule ~target ~deps ~action = 
   Printf.sprintf {|
 (rule ((targets (%s)) 
@@ -14,9 +19,9 @@ let rule_for_one_file name =
   Printf.sprintf {|
 (rule ((targets (%s)) 
        (deps (../app/app.exe (files_recursively_in ${ROOT}/book))) 
-       (action (chdir ${ROOT} (system "app/app.exe build chapter -pygmentize -o site/ -repo-root ${ROOT} ${ROOT}/book/%s")))
+       (action (chdir ${ROOT} (system "app/app.exe build chapter %s-pygmentize -o site/ -repo-root ${ROOT} ${ROOT}/book/%s")))
        ))
-|} name name
+|} name (if run_nondeterministic then "-run-nondeterministic " else "") name
 
 let rsync = {|
 (rule ((targets (.stamp)) 

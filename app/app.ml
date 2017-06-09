@@ -38,6 +38,11 @@ module Param = struct
       ~doc:" Syntax highlight code with pygmentize. \
              By default, this is not done."
 
+  let run_nondeterministic =
+    flag "-run-nondeterministic" no_arg
+      ~doc:" In topscripts, run code marked [%%expect.nondeterministic ...]. \
+             By default, they are skipped."
+
 end
 
 
@@ -48,13 +53,15 @@ let build_chapter : Command.t = Command.async
   ~summary:"build chapter"
   Command.Spec.(
     empty
+    +> Param.run_nondeterministic
     +> Param.pygmentize
     +> Param.repo_root
     +> Param.out_dir
     +> Param.file
   )
-  (fun pygmentize repo_root out_dir file () ->
-    Book.make ~pygmentize ~repo_root ~out_dir (`Chapter file)
+  (fun run_nondeterministic pygmentize repo_root out_dir file () ->
+    Book.make ~run_nondeterministic ~pygmentize ~repo_root ~out_dir
+      (`Chapter file)
   )
 
 let build_frontpage : Command.t = Command.async

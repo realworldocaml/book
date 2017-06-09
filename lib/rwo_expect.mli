@@ -42,6 +42,6 @@ module Document : sig
     [@@deriving sexp]
 
   val parts : t -> Part.t list
-  val of_file : filename:string -> t Deferred.Or_error.t
+  val of_file : run_nondeterministic:bool -> filename:string -> t Deferred.Or_error.t
 end
 

@@ -22,7 +22,11 @@ type script_part = [
 
 type t = script String.Map.t (** key is filename *)
 
-val of_html : filename:string -> Rwo_html.t -> t Or_error.t Deferred.t
+val of_html
+  :  run_nondeterministic:bool
+  -> filename:string
+  -> Rwo_html.t
+  -> t Or_error.t Deferred.t
 (** Return all scripts found in given HTML. *)
 
 

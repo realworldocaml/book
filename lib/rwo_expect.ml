@@ -70,12 +70,15 @@ module Document = struct
 
   let parts t = t.parts
 
-  let of_file ~filename = (
+  let of_file ~run_nondeterministic ~filename = (
       let (working_dir, filename) = Filename.split filename in
+      let args =
+        let args = ["-sexp"; "-verbose"; "-short-paths"; filename] in
+        if run_nondeterministic then "-run-nondeterministic" :: args else args
+      in
       Process.run
         ~env:(`Extend ["OCAMLRUNPARAM",""])
-        ~accept_nonzero_exit:[1] ~prog:program_path ~working_dir
-        ~args:["-sexp"; "-verbose"; "-short-paths"; filename] ()
+        ~accept_nonzero_exit:[1] ~prog:program_path ~working_dir ~args ()
       >>|? fun str -> (
         t_of_sexp (Sexp.of_string (String.strip str))
       )
