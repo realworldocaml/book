@@ -108,13 +108,13 @@ open Core_bench;;
       ignore (plus_one_if 10)) ]
 |> Bench.bench
 ;;
-[%%expect{|
+[%%expect.nondeterministic{|
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
 │ Name           │ Time/Run │
 ├────────────────┼──────────┤
- ...
- ...
+│ plus_one_match │  34.86ns │
+│ plus_one_if    │  54.89ns │
 └────────────────┴──────────┘
 |};
 ocaml {|- : unit = ()|}];;
@@ -130,13 +130,13 @@ let numbers = List.range 0 1000 in
 ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
 |> Bench.bench
 ;;
-[%%expect{|
+[%%expect.nondeterministic{|
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
 │ Name   │ Time/Run │
 ├────────┼──────────┤
- ...
- ...
+│ sum_if │  62.00us │
+│ sum    │  17.99us │
 └────────┴──────────┘
 |};
 ocaml {|- : unit = ()|}];;
