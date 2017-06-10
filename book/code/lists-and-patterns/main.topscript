@@ -242,7 +242,7 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
 |> List.dedup
 ;;
-[%%expect ocaml {|- : string list = ["corrected"; "topscript"]|}];;
+[%%expect ocaml {|- : string list = ["topscript"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -254,8 +254,7 @@ let (ml_files,other_files) =
   List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
 [%%expect ocaml {|
 val ml_files : string list = []
-val other_files : string list =
-  ["main.topscript"; "main.topscript.corrected"]
+val other_files : string list = ["main.topscript"]
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
