@@ -233,15 +233,16 @@ List.reduce ~f:(+) [];;
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 [%%expect ocaml {|- : int list = [2; 4]|}];;
 [@@@part "30"];;
-module Sys = Core.Sys;;
 [%%expect ocaml {|module Sys = Core.Sys|}];;
-List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
-    match String.rsplit2 ~on:'.' fname with
-    | None  | Some ("",_) -> None
-    | Some (_,ext) ->
-      Some ext)
-|> List.dedup
+let extensions filenames =
+  List.filter_map filenames ~f:(fun fname ->
+      match String.rsplit2 ~on:'.' fname with
+      | None  | Some ("",_) -> None
+      | Some (_,ext) ->
+        Some ext)
+  |> List.dedup
 ;;
+extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
 [%%expect ocaml {|- : string list = ["topscript"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
@@ -251,7 +252,7 @@ let is_ocaml_source s =
 ;;
 [%%expect ocaml {|val is_ocaml_source : string -> bool = <fun>|}];;
 let (ml_files,other_files) =
-  List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;
+  List.partition_tf ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"]  ~f:is_ocaml_source;;
 [%%expect ocaml {|
 val ml_files : string list = []
 val other_files : string list = ["main.topscript"]
@@ -266,6 +267,7 @@ List.append [1;2;3] [4;5;6];;
 List.concat [[1;2];[3;4;5];[6];[]];;
 [%%expect ocaml {|- : int list = [1; 2; 3; 4; 5; 6]|}];;
 [@@@part "35"];;
+module Sys = Core.Sys
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
   then [s]

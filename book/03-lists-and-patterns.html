@@ -431,16 +431,14 @@
           an optional value, and <code>List.filter_map</code> drops
           all elements for which <code>None</code> is returned.</p>
 
-          <p>Here's an example. The following expression computes
-          the list of file extensions in the current directory,
-          piping the results through <code>List.dedup</code> to
-          remove duplicates. Note that this example also uses some
-          functions from other modules, including
-          <code>Sys.ls_dir</code> to get a directory listing, and
-          <code>String.rsplit2</code> to split a string on the
-          rightmost appearance of a given
-          character:<idx>lists/duplicate
-          removal</idx><idx>duplicates, removing</idx></p>
+          <p>Here's an example. The following function computes
+            a list of file extensions from a list of files, piping the
+            results through <code>List.dedup</code> to remove
+            duplicates. Note that this example
+            uses <code>String.rsplit2</code> from teh String module to
+            split a string on the rightmost appearance of a given
+            character:<idx>lists/duplicate
+              removal</idx><idx>duplicates, removing</idx></p>
           <link rel="import" href="code/lists-and-patterns/main.topscript" part="30"/>
 
           <p>The preceding code is also an example of an Or
@@ -487,21 +485,22 @@
           concatenating a list of lists:</p>
           <link rel="import" href="code/lists-and-patterns/main.topscript" part="34"/>
 
-          <p>Here's an example of using <code>List.concat</code>
-          along with <code>List.map</code> to compute a recursive
-          listing of a directory tree:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="35"/>
+          <p>Here's an example of using <code>List.concat</code> along
+            with <code>List.map</code> to compute a recursive listing of
+            a directory tree. </p> 
+	  <link rel="import" href="code/lists-and-patterns/main.topscript" part="35"/>
 
-          <p>Note that <code>^/</code> is an infix operator
-          provided by <code>Core_kernel</code> for adding a new
-          element to a string representing a file path. It is
-          equivalent to <code>Core_kernel</code>'s
-          <code>Filename.concat</code>.</p>
+          <p>Note that this example uses some functions from
+            the <code>Sys</code> module from <code>Core</code> for
+            accessing the filesystem.  It also uses <code>^/</code>,
+	    an infix operator for adding a new element to a string
+	    representing a file path, which is an alias
+	    of <code>Filename.concat</code>.</p>
 
           <p>The preceding combination of <code>List.map</code> and
-          <code>List.concat</code> is common enough that there is a
-          function <code>List.concat_map</code> that combines these
-          into one, more efficient operation:</p>
+            <code>List.concat</code> is common enough that there is a
+            function <code>List.concat_map</code> that combines these
+            into one, more efficient operation:</p>
           <link rel="import" href="code/lists-and-patterns/main.topscript" part="36"/>
         </section>
       </section>
