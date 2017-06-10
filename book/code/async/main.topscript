@@ -471,7 +471,7 @@ val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
 [@@@part "44"];;
 log_delays (fun () -> after (sec 0.5));;
 
-[%%expect{|0.100851ms, 101.058ms, 204.352ms, 309.617ms, 410.099ms, |};
+[%%expect.nondeterministic {|0.100851ms, 101.058ms, 204.352ms, 309.617ms, 410.099ms, |};
 ocaml {|
 - : unit = ()
 503.289ms, 
@@ -490,7 +490,7 @@ log_delays (fun () -> return (busy_loop ()));;
 [@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;
 
-[%%expect{|
+[%%expect.nondeterministic{|
 2.47055s, 
 0.0860691ms, 112.558ms, 267.046ms, 369.402ms, 475.65ms, 580.918ms, 685.555ms, 788.879ms, 893.889ms, 1.00116s, 1.1039s, 1.20767s, 1.31026s, 1.41831s, 1.52291s, 1.62525s, 1.73101s, 1.8363s, 1.9429s, 2.0965s, 2.19959s, 2.30325s, 2.40799s, 2.51109s, 
 |};
@@ -502,5 +502,5 @@ let noalloc_busy_loop () =
 [%%expect ocaml {|val noalloc_busy_loop : unit -> unit = <fun>|}];;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
-[%%expect{|0.0400543ms, 105.247ms, 208.226ms, 318.26ms, 424.539ms, 531.597ms, 634.632ms, 739.512ms, 844.719ms, 946.656ms, 1.05192s, 1.1628s, 1.26341s, 1.37015s, |};
+[%%expect.nondeterministic{|0.0400543ms, 105.247ms, 208.226ms, 318.26ms, 424.539ms, 531.597ms, 634.632ms, 739.512ms, 844.719ms, 946.656ms, 1.05192s, 1.1628s, 1.26341s, 1.37015s, |};
 ocaml {|- : unit = ()|}];;
