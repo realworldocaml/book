@@ -233,7 +233,6 @@ List.reduce ~f:(+) [];;
 List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
 [%%expect ocaml {|- : int list = [2; 4]|}];;
 [@@@part "30"];;
-[%%expect ocaml {|module Sys = Core.Sys|}];;
 let extensions filenames =
   List.filter_map filenames ~f:(fun fname ->
       match String.rsplit2 ~on:'.' fname with
@@ -242,8 +241,9 @@ let extensions filenames =
         Some ext)
   |> List.dedup
 ;;
+[%%expect ocaml {|val extensions : string list -> string list = <fun>|}];;
 extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
-[%%expect ocaml {|- : string list = ["topscript"]|}];;
+[%%expect ocaml {|- : string list = ["c"; "ml"; "mli"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
@@ -254,8 +254,8 @@ let is_ocaml_source s =
 let (ml_files,other_files) =
   List.partition_tf ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"]  ~f:is_ocaml_source;;
 [%%expect ocaml {|
-val ml_files : string list = []
-val other_files : string list = ["main.topscript"]
+val ml_files : string list = ["foo.ml"; "bar.ml"; "bar.mli"]
+val other_files : string list = ["foo.c"]
 |}];;
 [@@@part "32"];;
 List.append [1;2;3] [4;5;6];;
@@ -276,7 +276,10 @@ let rec ls_rec s =
     |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
     |> List.concat
 ;;
-[%%expect ocaml {|val ls_rec : string -> string list = <fun>|}];;
+[%%expect ocaml {|
+module Sys = Core.Sys
+val ls_rec : string -> string list = <fun>
+|}];;
 [@@@part "36"];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
