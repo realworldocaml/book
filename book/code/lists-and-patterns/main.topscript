@@ -242,10 +242,7 @@ List.filter_map (Sys.ls_dir ".") ~f:(fun fname ->
       Some ext)
 |> List.dedup
 ;;
-[%%expect{|
-Characters 169-188:
-Error: Unbound value List.dedup_and_sort
-|}];;
+[%%expect ocaml {|- : string list = ["corrected"; "topscript"]|}];;
 [@@@part "31"];;
 let is_ocaml_source s =
   match String.rsplit2 s ~on:'.' with
