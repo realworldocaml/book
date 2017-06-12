@@ -460,7 +460,10 @@ let log_delays thunk =
   in
   let d = thunk () in
   Clock.every (sec 0.1) ~stop:d print_time;
-  d >>| fun () -> print_time (); printf "\n"
+  d >>= fun () -> 
+  print_time (); 
+  printf "\n";
+  Writer.flushed (force Writer.stdout);
 ;;
 
 
@@ -471,11 +474,8 @@ val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
 [@@@part "44"];;
 log_delays (fun () -> after (sec 0.5));;
 
-[%%expect.nondeterministic {|0.100851ms, 101.058ms, 204.352ms, 309.617ms, 410.099ms, |};
-ocaml {|
-- : unit = ()
-503.289ms, 
-|}];;
+[%%expect.nondeterministic{|0.038147ms, 101.254ms, 201.826ms, 305.019ms, 410.269ms, 501.83ms, |};
+ocaml {|- : unit = ()|}];;
 [@@@part "45"];;
 let busy_loop () =
   let x = ref None in
@@ -486,14 +486,12 @@ let busy_loop () =
 log_delays (fun () -> return (busy_loop ()));;
 
 
-[%%expect ocaml {|- : unit = ()|}];;
+[%%expect{|2.12909s, |};
+ocaml {|- : unit = ()|}];;
 [@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;
 
-[%%expect.nondeterministic{|
-2.47055s, 
-0.0860691ms, 112.558ms, 267.046ms, 369.402ms, 475.65ms, 580.918ms, 685.555ms, 788.879ms, 893.889ms, 1.00116s, 1.1039s, 1.20767s, 1.31026s, 1.41831s, 1.52291s, 1.62525s, 1.73101s, 1.8363s, 1.9429s, 2.0965s, 2.19959s, 2.30325s, 2.40799s, 2.51109s, 
-|};
+[%%expect.nondeterministic{|0.0460148ms, 312.767ms, 415.486ms, 521.813ms, 631.633ms, 792.659ms, 896.126ms, 1.00168s, 1.10679s, 1.21284s, 1.31803s, 1.42162s, 1.52478s, 1.63463s, 1.7379s, 1.84361s, 1.95302s, 2.13509s, |};
 ocaml {|- : unit = ()|}];;
 [@@@part "47"];;
 let noalloc_busy_loop () =
@@ -502,5 +500,5 @@ let noalloc_busy_loop () =
 [%%expect ocaml {|val noalloc_busy_loop : unit -> unit = <fun>|}];;
 
 log_delays (fun () -> In_thread.run noalloc_busy_loop);;
-[%%expect.nondeterministic{|0.0400543ms, 105.247ms, 208.226ms, 318.26ms, 424.539ms, 531.597ms, 634.632ms, 739.512ms, 844.719ms, 946.656ms, 1.05192s, 1.1628s, 1.26341s, 1.37015s, |};
+[%%expect.nondeterministic{|0.0400543ms, 130.686ms, 239.836ms, 340.546ms, 443.258ms, 605.56ms, 710.801ms, 870.451ms, 980.326ms, 1.03697s, |};
 ocaml {|- : unit = ()|}];;
