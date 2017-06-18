@@ -51,4 +51,4 @@ PKG typerep
 PKG unix
 PKG uri
 PKG variantslib
-S .
+S ../lib
