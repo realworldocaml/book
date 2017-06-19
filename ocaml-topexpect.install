@@ -5,8 +5,12 @@ lib: [
   "ppx-ignore/META"
   "ppx-ignore/topexpect_ignore.cmo"
   "ppx-ignore/topexpect_ignore.cmx"
+  "ppx-ignore/merlin_topexpect_ignore.cmo"
+  "ppx-ignore/merlin_topexpect_ignore.cmx"
 ]
 libexec: [
   "ppx-ignore/topexpect_ignore"
   "ppx-ignore/topexpect_ignore.cmxs"
+  "ppx-ignore/merlin_topexpect_ignore"
+  "ppx-ignore/merlin_topexpect_ignore.cmxs"
 ]
