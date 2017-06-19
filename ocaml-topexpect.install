@@ -1,3 +1,12 @@
 bin: [
   "ocaml-topexpect"
 ]
+lib: [
+  "ppx-ignore/META"
+  "ppx-ignore/topexpect_ignore.cmo"
+  "ppx-ignore/topexpect_ignore.cmx"
+]
+libexec: [
+  "ppx-ignore/topexpect_ignore"
+  "ppx-ignore/topexpect_ignore.cmxs"
+]
