@@ -202,38 +202,58 @@ module Make_interval(Endpoint : Comparable) : Interval_intf = struct
   type t = | Interval of Endpoint.t * Endpoint.t
            | Empty
 
-  (* ... *)
+  (* CR: avoid this duplication *)
+
+  (** [create low high] creates a new interval from [low] to
+      [high].  If [low > high], then the interval is empty *)
+  let create low high =
+    if Endpoint.compare low high > 0 then Empty
+    else Interval (low,high)
+
+  (** Returns true iff the interval is empty *)
+  let is_empty = function
+    | Empty -> true
+    | Interval _ -> false
+
+  (** [contains t x] returns true iff [x] is contained in the
+      interval [t] *)
+  let contains t x =
+    match t with
+    | Empty -> false
+    | Interval (l,h) ->
+      Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
+
+  (** [intersect t1 t2] returns the intersection of the two input
+      intervals *)
+  let intersect t1 t2 =
+    let min x y = if Endpoint.compare x y <= 0 then x else y in
+    let max x y = if Endpoint.compare x y >= 0 then x else y in
+    match t1,t2 with
+    | Empty, _ | _, Empty -> Empty
+    | Interval (l1,h1), Interval (l2,h2) ->
+      create (max l1 l2) (min h1 h2)
 
 end ;;
-[%%expect{|
-Characters 62-183:
-Error: Signature mismatch:
-       Modules do not match:
-         sig
-           type endpoint = Endpoint.t
-           type t = Interval of endpoint * endpoint | Empty
-         end
-       is not included in
-         Interval_intf
-       The value `intersect' is required but not provided
-       The value `contains' is required but not provided
-       The value `is_empty' is required but not provided
-       The value `create' is required but not provided
-|}];;
+[%%expect ocaml {|module Make_interval : functor (Endpoint : Comparable) -> Interval_intf|}];;
 [@@@part "16"];;
 module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Int_interval.t = Interval of int * int | Empty
-    val create : int -> int -> t
+    type t = Make_interval(Core_kernel__Core_int).t
+    type endpoint = Make_interval(Core_kernel__Core_int).endpoint
+    val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
-    val contains : t -> int -> bool
+    val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
   end
 |}];;
 Int_interval.create 3 4;;
-[%%expect ocaml {|- : Int_interval.t = Int_interval.Interval (3, 4)|}];;
+[%%expect{|
+Characters 20-21:
+Error: This expression has type int but an expression was expected of type
+         Int_interval.endpoint
+|}];;
 [@@@part "17"];;
 module type Int_interval_intf =
   Interval_intf with type endpoint = int;;
@@ -257,32 +277,63 @@ module Make_interval(Endpoint : Comparable)
   type t = | Interval of Endpoint.t * Endpoint.t
            | Empty
 
-  (* ... *)
+  (** [create low high] creates a new interval from [low] to
+      [high].  If [low > high], then the interval is empty *)
+  let create low high =
+    if Endpoint.compare low high > 0 then Empty
+    else Interval (low,high)
+
+  (** Returns true iff the interval is empty *)
+  let is_empty = function
+    | Empty -> true
+    | Interval _ -> false
+
+  (** [contains t x] returns true iff [x] is contained in the
+      interval [t] *)
+  let contains t x =
+    match t with
+    | Empty -> false
+    | Interval (l,h) ->
+      Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
+
+  (** [intersect t1 t2] returns the intersection of the two input
+      intervals *)
+  let intersect t1 t2 =
+    let min x y = if Endpoint.compare x y <= 0 then x else y in
+    let max x y = if Endpoint.compare x y >= 0 then x else y in
+    match t1,t2 with
+    | Empty, _ | _, Empty -> Empty
+    | Interval (l1,h1), Interval (l2,h2) ->
+      create (max l1 l2) (min h1 h2)
 
 end ;;
-[%%expect{|
-Characters 98-220:
-Error: Signature mismatch:
-       ...
-       The value `intersect' is required but not provided
-       The value `contains' is required but not provided
-       The value `is_empty' is required but not provided
-       The value `create' is required but not provided
+[%%expect ocaml {|
+module Make_interval :
+  functor (Endpoint : Comparable) ->
+    sig
+      type t
+      type endpoint = Endpoint.t
+      val create : endpoint -> endpoint -> t
+      val is_empty : t -> bool
+      val contains : t -> endpoint -> bool
+      val intersect : t -> t -> t
+    end
 |}];;
 [@@@part "19"];;
 module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Int_interval.t = Interval of int * int | Empty
-    val create : int -> int -> t
+    type t = Make_interval(Core_kernel__Core_int).t
+    type endpoint = int
+    val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
-    val contains : t -> int -> bool
+    val contains : t -> endpoint -> bool
     val intersect : t -> t -> t
   end
 |}];;
 let i = Int_interval.create 3 4;;
-[%%expect ocaml {|val i : Int_interval.t = Int_interval.Interval (3, 4)|}];;
+[%%expect ocaml {|val i : Int_interval.t = <abstr>|}];;
 Int_interval.contains i 5;;
 [%%expect ocaml {|- : bool = false|}];;
 [@@@part "20"];;
@@ -302,29 +353,58 @@ module type Int_interval_intf =
 (* Suspicious # ? *)
 module Make_interval(Endpoint : Comparable)
   : Interval_intf with type endpoint := Endpoint.t =
-  struct
+struct
 
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
+  type t = | Interval of Endpoint.t * Endpoint.t
+           | Empty
 
-    (* ... *)
+  (** [create low high] creates a new interval from [low] to
+      [high].  If [low > high], then the interval is empty *)
+  let create low high =
+    if Endpoint.compare low high > 0 then Empty
+    else Interval (low,high)
 
-  end ;;
-[%%expect{|
-Characters 120-221:
-Error: Signature mismatch:
-       ...
-       The value `intersect' is required but not provided
-       The value `contains' is required but not provided
-       The value `is_empty' is required but not provided
-       The value `create' is required but not provided
+  (** Returns true iff the interval is empty *)
+  let is_empty = function
+    | Empty -> true
+    | Interval _ -> false
+
+  (** [contains t x] returns true iff [x] is contained in the
+      interval [t] *)
+  let contains t x =
+    match t with
+    | Empty -> false
+    | Interval (l,h) ->
+      Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
+
+  (** [intersect t1 t2] returns the intersection of the two input
+      intervals *)
+  let intersect t1 t2 =
+    let min x y = if Endpoint.compare x y <= 0 then x else y in
+    let max x y = if Endpoint.compare x y >= 0 then x else y in
+    match t1,t2 with
+    | Empty, _ | _, Empty -> Empty
+    | Interval (l1,h1), Interval (l2,h2) ->
+      create (max l1 l2) (min h1 h2)
+
+end ;;
+[%%expect ocaml {|
+module Make_interval :
+  functor (Endpoint : Comparable) ->
+    sig
+      type t
+      val create : Endpoint.t -> Endpoint.t -> t
+      val is_empty : t -> bool
+      val contains : t -> Endpoint.t -> bool
+      val intersect : t -> t -> t
+    end
 |}];;
 [@@@part "22"];;
 module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Int_interval.t = Interval of int * int | Empty
+    type t = Make_interval(Core_kernel__Core_int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -334,9 +414,11 @@ module Int_interval :
 Int_interval.is_empty
   (Int_interval.create 3 4);;
 [%%expect ocaml {|- : bool = false|}];;
-Int_interval.is_empty
-  (Int_interval.Interval (4,3));;
-[%%expect ocaml {|- : bool = false|}];;
+Int_interval.is_empty (Int_interval.Interval (4,3));;
+[%%expect{|
+Characters 25-46:
+Error: Unbound constructor Int_interval.Interval
+|}];;
 [@@@part "23"];;
 Sexp.of_string "(This is (an s-expression))";;
 [%%expect ocaml {|
@@ -370,7 +452,34 @@ module Make_interval(Endpoint : Comparable)
            | Empty
   [@@deriving sexp]
 
-  (* ... *)
+  (** [create low high] creates a new interval from [low] to
+      [high].  If [low > high], then the interval is empty *)
+  let create low high =
+    if Endpoint.compare low high > 0 then Empty
+    else Interval (low,high)
+
+  (** Returns true iff the interval is empty *)
+  let is_empty = function
+    | Empty -> true
+    | Interval _ -> false
+
+  (** [contains t x] returns true iff [x] is contained in the
+      interval [t] *)
+  let contains t x =
+    match t with
+    | Empty -> false
+    | Interval (l,h) ->
+      Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
+
+  (** [intersect t1 t2] returns the intersection of the two input
+      intervals *)
+  let intersect t1 t2 =
+    let min x y = if Endpoint.compare x y <= 0 then x else y in
+    let max x y = if Endpoint.compare x y >= 0 then x else y in
+    match t1,t2 with
+    | Empty, _ | _, Empty -> Empty
+    | Interval (l1,h1), Interval (l2,h2) ->
+      create (max l1 l2) (min h1 h2)
 
 end ;;
 [%%expect{|
