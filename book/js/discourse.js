@@ -1,32 +1,47 @@
-var discourseDiv = document.createElement('div');
-discourseDiv.className = 'comments';
-discourseDiv.id = 'discourse-comments';
-discourseDiv.style.position = 'fixed'
-discourseDiv.style.right = 0;
-discourseDiv.style.top = 0;
-discourseDiv.style.bottom = 0;
-discourseDiv.style.borderLeft = 'solid 1px black';
-discourseDiv.style.overflow = 'scroll';
-discourseDiv.style.height = '100%';
-discourseDiv.style.width = '21%';
-discourseDiv.style.zIndex = 10;
+function createElement(opt) {
+  var el = document.createElement(opt.element || 'div');
+  el.className = opt.className || '';
+  el.id = opt.id;
+  for (var key in opt.style) {
+    el.style[key] = opt.style[key];
+  }
+  return el;
+};
+
+var discourseDiv = createElement({
+  className: 'comments',
+  id: 'discourse-comments',
+  style: {
+    position: 'fixed',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    borderLeft: 'solid 1px black',
+    overflow: 'scroll',
+    height: '100%',
+    width: '21%',
+    zIndex: 10,
+    position: 'relative'
+  }
+});
+//
+// document.createElement('div');
+// discourseDiv.className = 'comments';
+// discourseDiv.id = 'discourse-comments';
+//
+//
+// var someDiv = document.createElement
 
 document.body.appendChild(discourseDiv);
 
-let topic = 13;
+let topic = -1;
 
 var loc = location.pathname;
-if (loc === '/00-prologue.html') {
-  topic = 14;
-}
-else if (loc === '/01-guided-tour.html') {
-  topic = 15;
-}
-else if (loc === '/02-variables-and-functions.html') {
-  topic = 16;
+if (loc === '/01-guided-tour.html') {
+  topic = 498;
 }
 
-DiscourseEmbed = { discourseUrl: 'http://rwov2.trydiscourse.com/',
+DiscourseEmbed = { discourseUrl: 'http://discuss.ocaml.org/',
                    topicId: topic };
 
 (function() {
