@@ -1,5 +1,5 @@
 (** Miscellaneous utilities. *)
-open Core
+open! Core
 open Async
 
 (** Return all files in the given directory, including files in its

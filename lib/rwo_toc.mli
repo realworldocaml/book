@@ -1,7 +1,7 @@
 (** Table of contents. Representation of the hierarchical structure of
     the book.
 *)
-open Core
+open! Core
 open Async
 
 type part_info = {

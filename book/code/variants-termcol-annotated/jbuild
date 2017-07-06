@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executable
+  ((name terminal_color)
+   (libraries (core))
+  )
+)

@@ -1,1 +1,1 @@
-corebuild counter.byte
+jbuilder build counter.bc

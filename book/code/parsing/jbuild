@@ -1,0 +1,6 @@
+(jbuild_version 1)
+
+(rule
+ ((targets (short_parser.mli short_parser.ml))
+  (deps (short_parser.mly))
+  (action (ignore-stderr (run menhir --external-tokens Json --explain ${<})))))

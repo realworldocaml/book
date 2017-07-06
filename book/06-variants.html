@@ -56,7 +56,7 @@
     <p>
       Using the preceding function, we can generate escape codes to
       change the color of a given string displayed in a terminal:</p>
-    
+
     <link rel="import" href="code/variants/main.topscript" part="2"/>
 
     <p>
@@ -78,7 +78,7 @@
       <li> <p>The eight basic colors, in regular and bold
 	  versions</p> </li>
 
-      <li> <p>A 6 × 6 × 6 RGB color cube</p> </li> 
+      <li> <p>A 6 × 6 × 6 RGB color cube</p> </li>
 
       <li> <p>A 24-level grayscale ramp</p> </li>
     </ul>
@@ -333,10 +333,10 @@
 	  inline record can't be treated as its own free-standing
 	  object. And, as you can see below, OCaml will reject code
 	  that tries to do so.</p>
-	
+
 	<link rel="import" href="code/variants/logger.topscript"
 	      part="11"/>
-	
+
 
       </section>
     </section>
@@ -476,7 +476,7 @@
 	those tags. Note that in the preceding example, the tag name
 	(e.g., <code>`Int</code>) matches the type name
 	(<code>int</code>). This is a common convention in OCaml.
-	
+
 	<idx>polymorphic variant types/automatic inference of</idx></p>
 
       <p>The type system will complain if it sees incompatible uses
@@ -651,6 +651,7 @@
 
         <p>In particular, the compiler will complain that the
         <code>`Grey</code> case is unused:</p>
+        <link rel="import" href="code/variants-termcol-annotated/jbuild"/>
         <link rel="import" href="code/variants-termcol-annotated/build.errsh"/>
 
         <p>Once we have type definitions at our disposal, we can

@@ -1,1 +1,1 @@
-./barrier_bench.native -help
+./_build/default/barrier_bench.exe -help

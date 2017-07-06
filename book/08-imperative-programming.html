@@ -60,13 +60,13 @@
 	standard library provide imperative dictionaries, and for
 	most real-world tasks, you should use one of those
 	implementations. There's more advice on using Core's
-	implementation in particular in 
+	implementation in particular in
 	<a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>.
 
 	<idx id="DICTimper">dictionaries, imperative</idx>
 	<idx>Core standard library/imperative dictionaries in</idx>
 	<idx id="IPimpdict">imperative programming/imperative
-	  dictionaries</idx> 
+	  dictionaries</idx>
       </p>
 
       <p>
@@ -740,7 +740,7 @@
 	We can create a lazy value from a thunk, i.e., a function that
 	takes a unit argument. Wrapping an expression in a thunk is
 	another way to suspend the computation of an expression:
-	
+
 	<idx>thunks</idx>
       </p>
 
@@ -890,7 +890,7 @@
           starts out with two <code>1</code>s, with every subsequent
           element being the sum of the previous two. The classic
           recursive definition of Fibonacci is as follows:
-	</p> 
+	</p>
 
 	<link rel="import" href="code/imperative-programming/fib.topscript" part="1"/>
 
@@ -1128,7 +1128,7 @@
 	primitives are also available through the <code>Unix</code>
 	module in Core as well as <code>Async</code>, the
 	asynchronous I/O library that is covered in
-	<a href="18-concurrent-programming.html#concurrent-programming-with-async" data-type="xref">Concurrent Programming With Async</a>. 
+	<a href="18-concurrent-programming.html#concurrent-programming-with-async" data-type="xref">Concurrent Programming With Async</a>.
 	Most of the functionality in Core's <code>In_channel</code>
 	and <code>Out_channel</code> (and in Core's <code>Unix</code>
 	module) derives from the standard library, but we'll use
@@ -1205,7 +1205,7 @@
 
         <p>
 	  We can build this program
-	  using <span class="command"><em>corebuild</em></span> and
+	  using <span class="command"><em>jbuilder</em></span> and
 	  run it. You'll see that it prompts you for input, as
 	  follows:</p>
 
@@ -1423,7 +1423,7 @@
 
         <p>And now, the file descriptor leak is gone:</p>
 
-        <link rel="import" href="code/imperative-programming/file2.topscript" part="2"/> 
+        <link rel="import" href="code/imperative-programming/file2.topscript" part="2"/>
 
         <p>
 	  This is really an example of a more general issue with
@@ -1765,7 +1765,7 @@
         <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="9"/>
 
         <p>On the other hand, if the returned type is mutable, then
-        the result will be weakly polymorphic:</p> 
+        the result will be weakly polymorphic:</p>
 
 	<link rel="import" href="code/imperative-programming/value_restriction.topscript" part="10"/>
 
@@ -1808,7 +1808,7 @@
           <code>'a</code>, at which point, OCaml can infer
           polymorphic types for expressions of this type that are not
           simple values:</p>
-	
+
         <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="13"/>
 
         <p>Now, we can apply the identity function to

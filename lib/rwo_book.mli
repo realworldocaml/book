@@ -3,7 +3,7 @@
     enable inclusion of code blocks in external files. This module
     supports the processing of these files.
 *)
-open Core
+open! Core
 open Async
 
 (** Source from which to build an HTML page.

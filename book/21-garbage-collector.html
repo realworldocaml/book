@@ -1,6 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/> 
+    <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/>
 
     <title></title>
   </head>
@@ -79,13 +79,13 @@
 	  to improve performance by using a <em>generational</em>
 	  GC.
 
-	  <idx>generational garbage collection</idx> 
+	  <idx>generational garbage collection</idx>
 	  <idx>garbage collection/generational collection</idx></p>
 
 	<p>
 	  A generational GC maintains separate memory regions to
 	  hold blocks based on how long the blocks have been live.
-	  OCaml's heap is split into two such regions: 
+	  OCaml's heap is split into two such regions:
 
 	  <idx>heaps/regions of</idx></p>
 
@@ -107,7 +107,7 @@
 	  A typical functional programming style means that young
 	  blocks tend to die young and old blocks tend to stay around
 	  for longer than young ones. This is often referred to as the
-	  <em>generational hypothesis</em>. 
+	  <em>generational hypothesis</em>.
 
 	  <idx>generational hypothesis</idx></p>
 
@@ -115,9 +115,9 @@
 	  OCaml uses different memory layouts and garbage-collection
 	  algorithms for the major and minor heaps to account for this
 	  generational difference. We'll explain how they differ in
-	  more detail next. 
+	  more detail next.
 
-	  <idx>OCAMLRUNPARAM</idx> 
+	  <idx>OCAMLRUNPARAM</idx>
 	  <idx data-seealso="garbage collection">Gc module</idx></p>
 
 	<aside data-type="sidebar">
@@ -358,7 +358,7 @@
             its size is a multiple of the page size (4 KB). It contains
             a contiguous sequence of heap blocks that can be as small
             as one or two 4 KB pages, but are usually allocated in 1 MB
-            chunks (or 512 KB on 32-bit architectures). 
+            chunks (or 512 KB on 32-bit architectures).
 
 	    <idx>major heaps/controlling growth of</idx></p>
 
@@ -428,7 +428,7 @@
             alternative <em>first-fit</em> algorithm also
             available.
 
-	    <idx>first-fit allocation</idx> 
+	    <idx>first-fit allocation</idx>
 	    <idx>next-fit allocation</idx></p>
 
           <section id="next-fit-allocation" data-type="sect3">
@@ -467,7 +467,7 @@
               at the expense of slower memory allocation. Every
               allocation scans the free list from the beginning for a
               suitable free chunk, instead of reusing the most recent
-              heap chunk as the next-fit allocator does. 
+              heap chunk as the next-fit allocator does.
 
 	      <idx>memory/reducing fragmentation of</idx></p>
 
@@ -504,7 +504,7 @@
             has a 2-bit <em>color</em> field in its header that is used
             to store information about whether the value has been
             marked so that the GC can resume easily between slices.
-            
+
 	    <idx>major heaps/marking and scanning</idx></p>
 
           <table>
@@ -574,7 +574,7 @@
             encountered white blocks onto an intermediate stack of
             <em>gray values</em> while it follows their fields. When a
             gray value's fields have all been followed, it is popped
-            off the stack and colored black. 
+            off the stack and colored black.
 
 	    <idx>root values</idx>
 	    <idx>gray values</idx></p>
@@ -642,8 +642,8 @@
             allocated. This makes it harder for the GC to find a
             contiguous block of memory for fresh allocations, which in
             turn would require the heap to be grown unnecessarily.
-            
-	    <idx>memory/reducing fragmentation of</idx>            
+
+	    <idx>memory/reducing fragmentation of</idx>
 	    <idx>compaction</idx>
 	    <idx>major heaps/heap compaction</idx></p>
 
@@ -686,9 +686,9 @@
             minor-heap blocks are directly pointed to by major-heap
             blocks. Without this information, each minor collection
             would also require scanning the much larger major heap.
-            
-	    <idx>pointers/intergenerational pointers</idx>            
-	    <idx>intergenerational pointers</idx> 
+
+	    <idx>pointers/intergenerational pointers</idx>
+	    <idx>intergenerational pointers</idx>
 	    <idx>major heaps/intergenerational pointers in</idx></p>
 
           <p>
@@ -699,7 +699,7 @@
             whenever a major-heap block is modified to point at a
             minor-heap block.
 
-	    <idx>write barriers</idx> 
+	    <idx>write barriers</idx>
 	    <idx>remembered sets</idx></p>
 
           <section id="the-mutable-write-barrier" data-type="sect3">
@@ -736,6 +736,7 @@
               benchmark loop iterates over both fields and increments a
               counter. Compile and execute this with some extra options
               to show the amount of garbage collection occurring:</p>
+            <link rel="import" href="code/gc/jbuild"/>
             <link rel="import" href="code/gc/run_barrier_bench.sh"/>
 
             <p>
@@ -842,6 +843,7 @@
 	<p>
 	  Building and running this should show the following
 	  output:</p>
+  <link rel="import" href="code/gc/jbuild"/>
 	<link rel="import" href="code/gc/run_finalizer.sh"/>
 
 	<p>

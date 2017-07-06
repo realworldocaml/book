@@ -416,7 +416,7 @@ Int_interval.is_empty
 [%%expect ocaml {|- : bool = false|}];;
 Int_interval.is_empty (Int_interval.Interval (4,3));;
 [%%expect{|
-Characters 25-46:
+Characters 23-44:
 Error: Unbound constructor Int_interval.Interval
 |}];;
 [@@@part "23"];;

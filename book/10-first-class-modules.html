@@ -50,11 +50,11 @@
 	In that light, consider the following signature of a module
 	with a single integer variable:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="0.5"/> 
+      <link rel="import" href="code/fcm/main.topscript" part="0.5"/>
 
       <p>We can also create a module that matches this signature:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="1"/> 
+      <link rel="import" href="code/fcm/main.topscript" part="1"/>
 
       <p>
 	A first-class module is created by packaging up a module with
@@ -63,23 +63,23 @@
 
 	<idx>module keyword</idx></p>
 
-      <link rel="import" href="code/fcm/pack.syntax"/> 
+      <link rel="import" href="code/fcm/pack.syntax"/>
 
       <p>We can convert <code>Three</code> into a first-class module
       as follows:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="2"/> 
+      <link rel="import" href="code/fcm/main.topscript" part="2"/>
 
       <p>The module type doesn't need to be part of the
       construction of a first-class module if it can be inferred.
       Thus, we can write:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="3"/> 
+      <link rel="import" href="code/fcm/main.topscript" part="3"/>
 
       <p>We can also create a first-class module from an anonymous
       module:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="4"/> 
+      <link rel="import" href="code/fcm/main.topscript" part="4"/>
 
       <p>In order to access the contents of a first-class module,
       you need to unpack it into an ordinary module. This can be
@@ -87,7 +87,7 @@
       syntax:</p>
       <link rel="import" href="code/fcm/unpack.syntax"/>
 
-      <p>Here's an example:</p> 
+      <p>Here's an example:</p>
 
       <link rel="import" href="code/fcm/main.topscript" part="5"/>
 
@@ -296,14 +296,14 @@
 
 	  <idx>query-handlers/implementation of</idx></p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="3"/> 
+        <link rel="import" href="code/fcm/query_handler.topscript" part="3"/>
 
         <p>
 	  We can use this module to create an instance of the
           <code>Unique</code> query handler and interact with it
           directly:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="4"/> 
+        <link rel="import" href="code/fcm/query_handler.topscript" part="4"/>
 
         <p>Here's another example: a query handler that does
         directory listings. Here, the config is the default
@@ -398,7 +398,7 @@
         above code in a file along with following command to launch
         the interface:</p>
 
-        <link rel="import" href="code/fcm/query_handler.ml" part="1"/>
+      <link rel="import" href="code/fcm/query_handler_loader/query_handler.ml" part="1"/>
 
         <p>Here's an example of a session with this program:</p>
 
@@ -420,7 +420,7 @@
         configuration is a list of known <code>Query_handler</code>
         modules. Here are the basic types:</p>
 
-        <link rel="import" href="code/fcm/query_handler_core.ml" part="1"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_core.ml" part="1"/>
 
         <p>Note that a <code>Loader.t</code> has two tables: one
         containing the known query handler modules, and one
@@ -434,7 +434,7 @@
         known query handler modules. Note that the table of active
         modules starts out as empty:</p>
 
-        <link rel="import" href="code/fcm/query_handler_core.ml" part="2"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_core.ml" part="2"/>
 
         <p>Now we'll start writing out the functions for
         manipulating the table of active query handlers. We'll
@@ -446,14 +446,14 @@
         Query_handler_instance)</code>, which is then added to the
         active table:</p>
 
-        <link rel="import" href="code/fcm/query_handler_core.ml" part="3"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_core.ml" part="3"/>
 
         <p>Since the <code>load</code> function will refuse to
         <code>load</code> an already active handler, we also need
         the ability to unload a handler. Note that the handler
         explicitly refuses to unload itself:</p>
 
-        <link rel="import" href="code/fcm/query_handler_core.ml" part="4"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_core.ml" part="4"/>
 
         <p>Finally, we need to implement the <code>eval</code>
         function, which will determine the query <span class="keep-together">interface</span> presented to the user.
@@ -461,7 +461,7 @@
         s-expression converter generated for that type to parse the
         query from the user:</p>
 
-        <link rel="import" href="code/fcm/query_handler_core.ml" part="5"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_core.ml" part="5"/>
 
         <p>The <code>eval</code> function itself is fairly
         straightforward, dispatching to the appropriate functions
@@ -474,7 +474,7 @@
         <p>This function ends the definition of the
         <code>Loader</code> module:</p>
 
-        <link rel="import" href="code/fcm/query_handler_core.ml" part="6"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_core.ml" part="6"/>
 
         <p>Finally, we can put this all together with the
         command-line interface. We first create an instance of the
@@ -482,12 +482,12 @@
         loader's active table. We can then just launch the
         command-line interface, passing it the active table:</p>
 
-        <link rel="import" href="code/fcm/query_handler_loader.ml" part="1"/>
+        <link rel="import" href="code/fcm/query_handler_loader/query_handler_loader.ml" part="1"/>
 
         <p>Now build this into a command-line interface to
         experiment with it:</p>
-
-        <link rel="import" href="code/fcm/build_query_handler_loader.sh"/>
+        <link rel="import" href="code/fcm/query_handler_loader/jbuild"/>
+        <link rel="import" href="code/fcm/query_handler_loader/build_query_handler_loader.sh"/>
 
         <p>The resulting command-line interface behaves much as
         you'd expect, starting out with no query handlers available
@@ -524,7 +524,7 @@
         OPAM, and which takes care of much of the workflow around
         setting up dynamic linking.
 
-	  <a data-type="indexterm" data-startref="FCMquery">&nbsp;</a></p> 
+	  <a data-type="indexterm" data-startref="FCMquery">&nbsp;</a></p>
       </section>
     </section>
 

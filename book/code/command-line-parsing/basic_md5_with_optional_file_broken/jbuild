@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executable
+  ((name basic_md5_with_optional_file_broken)
+   (libraries (core cryptokit))
+  )
+)

@@ -28,7 +28,7 @@
 	We can use functions from the <code>List.Assoc</code> module
 	to manipulate this data:</p>
 
-      <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="2"/> 
+      <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="2"/>
 
       <p>
 	Association lists are simple and easy to use, but their
@@ -57,7 +57,7 @@
 	  module <code>Counter</code> for keeping frequency counts on a
 	  set of strings. Here's the interface:</p>
 
-	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.mli"/> 
+	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.mli"/>
 
 	<p>
 	  The intended behavior here is straightforward.
@@ -68,7 +68,7 @@
 
 	<p>Here's the implementation:</p>
 
-	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.ml"/> 
+	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
 	<p>
 	  Note that in some places the preceding code refers to
@@ -112,7 +112,7 @@
 	    <idx>Map module/Map.of_alist_exn</idx>
 	    <idx>maps/creating with comparators</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="3"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="3"/>
 
           <p>
 	    The preceding code uses <code>Map.of_alist_exn</code>,
@@ -125,7 +125,7 @@
             existing map simply inherit the comparator of the map they
             start with:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="4"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="4"/>
 
           <p>
 	    The type <code>Map.t</code> has three type parameters: one
@@ -142,7 +142,7 @@
             Consider, for example, <code>Map.symmetric_diff</code>,
             which computes the difference between two maps.</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="5"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="5"/>
 
           <p>
 	    The type of <code>Map.symmetric_diff</code>, which
@@ -151,7 +151,7 @@
             abstract type, so the type of a comparator identifies the
             comparator uniquely.</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="6"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="6"/>
 
           <p>
 	    This constraint is important because the algorithm
@@ -171,7 +171,7 @@
 
 	    <idx>Sexplib package/sexp converter</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="7"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="7"/>
 
           <p>
 	    As you can see in the following code,
@@ -179,21 +179,21 @@
             and <code>String.comparator_witness</code> can be used to
             create maps with a key type of <code>string</code>:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="8"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="8"/>
 
           <p>
 	    <code>Map.min_elt</code> returns the key and value for
             the smallest key in the map, which lets us see that these
             two maps do indeed use different comparison functions:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="9"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="9"/>
 
           <p>
 	    Accordingly, if we try to use
             <code>Map.symmetric_diff</code> on these two maps, we'll
             get a compile-time error:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="10"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="10"/>
 	</section>
 
 	<section id="trees" data-type="sect2">
@@ -211,7 +211,7 @@
 	    <idx>Map module/Map.to_tree</idx>
 	    <idx>maps/tree structure</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="11"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="11"/>
 
           <p>
 	    Even though a <code>Map.Tree.t</code> doesn't physically
@@ -227,7 +227,7 @@
             to provide the comparator explicitly when we, say, search
             for a key, as shown below:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="12"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="12"/>
 
           <p>
 	    The algorithm of <code>Map.Tree.find</code> depends on
@@ -237,7 +237,7 @@
             can see in the following example, using the wrong
             comparator will lead to a type error:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="13"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="13"/>
 	</section>
 
 	<section id="the-polymorphic-comparator" data-type="sect2">
@@ -255,12 +255,12 @@
 	    <idx>Comparator.Poly module</idx>
 	    <idx>polymorphic comparisons</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="14"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="14"/>
 
           <p>
 	    Or, equivalently:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="15"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="15"/>
 
           <p>
 	    Note that maps based on the polymorphic comparator are
@@ -268,7 +268,7 @@
             comparators from the point of view of the type system.
             Thus, the compiler rejects the following:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="16"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="16"/>
 
           <p>
 	    This is rejected for good reason: there's no guarantee
@@ -309,14 +309,14 @@
               want. Sets are a great example of this. Consider the
               following two sets:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="18"/> 
+            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="18"/>
 
             <p>
 	      Logically, these two sets should be equal, and that's
               the result that you get if you call
               <code>Set.equal</code> on them:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="19"/> 
+            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="19"/>
 
             <p>
 	      But because the elements were added in different
@@ -331,14 +331,14 @@
               runtime because the comparators stored within the sets
               contain function values:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="20"/> 
+            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="20"/>
 
             <p>
 	      We can, however, use the function
               <code>Set.to_tree</code> to expose the underlying tree
               without the attached comparator:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="21"/> 
+            <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="21"/>
 
             <p>
 	      This can cause real and quite subtle bugs. If, for
@@ -366,7 +366,7 @@
             memory footprint. Here's a simple example:
 	    <idx>set types</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="17"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="17"/>
 
           <p>
 	    In addition to the operators you would expect to have
@@ -406,7 +406,7 @@
             input any module that satisfies the following
             interface:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/comparable.ml"/> 
+          <link rel="import" href="code/maps-and-hash-tables/comparable.ml"/>
 
           <p>
 	    In other words, it expects a type with a comparison
@@ -425,7 +425,7 @@
             following the same basic pattern for using functors described
             in <a href="09-functors.html#extending-modules" data-type="xref">Extending Modules</a>:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="22"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="22"/>
 
           <p>
 	    We don't include the full response from the toplevel
@@ -440,7 +440,7 @@
             compare]</code> after the type defintion.  We can rewrite
             the previous example to use this extension</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="23"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="23"/>
 
           <p>
 	    The comparison function we get from <code>[@@deriving
@@ -463,7 +463,7 @@
 	    You can also satisfy the <code>Comparable.S</code>
             interface using polymorphic compare:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="24"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="24"/>
 
           <p>
 	    That said, for reasons we discussed earlier, polymorphic
@@ -506,14 +506,14 @@
               anywhere in code that
               opens <code>Core_kernel</code>:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/core_phys_equal.topscript" part="1"/> 
+            <link rel="import" href="code/maps-and-hash-tables/core_phys_equal.topscript" part="1"/>
 
             <p>
 	      If you feel like hanging your OCaml interpreter, you
               can verify what happens with recursive values and
               structural equality for yourself:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/phys_equal.rawscript"/> 
+            <link rel="import" href="code/maps-and-hash-tables/phys_equal.rawscript"/>
           </aside>
 	</section>
       </section>
@@ -584,7 +584,7 @@
             become unresponsive due to high CPU load. Core's hash
             tables would be much less susceptible to such an attack
             because the amount of degradation would be far less.
-            
+
 	    <idx>security issues/denial-of-service attacks</idx>
 	    <idx>denial-of-service attacks, avoiding</idx></p>
 	</div>
@@ -595,7 +595,7 @@
 	  function for hashing the key type. This is analogous to the
 	  comparator used for creating maps:</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="25"/> 
+	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="25"/>
 
 	<p>
 	  The <code>hashable</code> value is included as part of the
@@ -604,7 +604,7 @@
 	  includes a <code>Table</code> submodule which provides more
 	  convenient creation functions:</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="26"/> 
+	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="26"/>
 
 	<p>
 	  There is also a polymorphic <code>hashable</code> value,
@@ -612,12 +612,12 @@
 	  the OCaml runtime, for cases where you don't have a hash
 	  function for your specific type:</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="27"/> 
+	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="27"/>
 
 	<p>
 	  Or, equivalently:</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="28"/> 
+	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="28"/>
 
 	<p>
 	  Note that, unlike the comparators used with maps and sets,
@@ -653,7 +653,7 @@
             different length:</p>
 	</div>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="29"/> 
+	<link rel="import" href="code/maps-and-hash-tables/main.topscript" part="29"/>
 
 	<p>
 	  As you can see, the hash function stops after the first 10
@@ -680,7 +680,7 @@
 	    <idx>Hashable.S interface</idx>
 	    <idx>hash tables/satisfying Hashable.S interface</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="30"/> 
+          <link rel="import" href="code/maps-and-hash-tables/main.topscript" part="30"/>
 
           <p>
 	    Note that in order to satisfy hashable, a key needs to
@@ -706,7 +706,7 @@
 	  choice in OCaml. OCaml also has good support for imperative
 	  programming, though, and when programming in an imperative
 	  idiom, hash tables are often the more natural choice.
-	  
+
 	  <idx>maps/vs. hashtables</idx>
 	  <idx>hash tables/vs. maps</idx></p>
 
@@ -728,13 +728,13 @@
 	  <code>Hashtbl.change</code> functions to update the
 	  respective data structures:</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/map_vs_hash.ml"/> 
+	<link rel="import" href="code/maps-and-hash-tables/map_vs_hash/map_vs_hash.ml"/>
 
 	<p>
 	  The results show the hash table version to be around four
 	  times faster than the map version:</p>
-
-	<link rel="import" href="code/maps-and-hash-tables/run_map_vs_hash.sh"/> 
+  <link rel="import" href="code/maps-and-hash-tables/map_vs_hash/jbuild"/>
+	<link rel="import" href="code/maps-and-hash-tables/map_vs_hash/run_map_vs_hash.sh"/>
 
 	<p>
 	  We can make the speedup smaller or larger depending on the
@@ -764,14 +764,14 @@
 	  <code>Hashtbl.change</code>, but we also need to call
 	  <code>Hashtbl.copy</code> to take snapshots of the table:</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/map_vs_hash2.ml"/> 
+	<link rel="import" href="code/maps-and-hash-tables/map_vs_hash2/map_vs_hash2.ml"/>
 
 	<p>
 	  Unsurprisingly, maps perform far better than hash tables
 	  on this benchmark, in this case by more than a factor of
 	  10:</p>
-
-	<link rel="import" href="code/maps-and-hash-tables/run_map_vs_hash2.sh"/> 
+  <link rel="import" href="code/maps-and-hash-tables/map_vs_hash2/jbuild"/>
+	<link rel="import" href="code/maps-and-hash-tables/map_vs_hash2/run_map_vs_hash2.sh"/>
 
 	<p>
 	  These numbers can be made more extreme by increasing the

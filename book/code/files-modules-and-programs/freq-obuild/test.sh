@@ -1,1 +1,1 @@
-strings `which ocamlopt` | ./freq.byte
+strings `which ocamlopt` | ./_build/default/freq.bc

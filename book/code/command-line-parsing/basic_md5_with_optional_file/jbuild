@@ -1,0 +1,15 @@
+(jbuild_version 1)
+
+(executable
+  ((name basic_md5_with_optional_file)
+   (modules basic_md5_with_optional_file)
+   (libraries (core cryptokit))
+  )
+)
+
+(executable
+  ((name basic_md5_with_default_file)
+   (modules basic_md5_with_default_file)
+   (libraries (core cryptokit))
+  )
+)

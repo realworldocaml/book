@@ -1,2 +1,2 @@
-corebuild -pkg core_bench barrier_bench.native
-./barrier_bench.native -ascii alloc
+jbuilder build barrier_bench.exe
+./_build/default/barrier_bench.exe -ascii alloc

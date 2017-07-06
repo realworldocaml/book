@@ -276,7 +276,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    more uniform and more readable.
 	  </p>
 
-	  <p> 
+	  <p>
 	    <code>Let_syntax</code> works for any monad, and you
 	    decide which monad is in use by opening the
 	    appropriate <code>Let_syntax</code>
@@ -446,7 +446,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <idx>I/O (input/output) operations/copying data</idx></p>
 
 
-	<link rel="import" href="code/async/echo.ml"/>
+	<link rel="import" href="code/async/echo/echo.ml"/>
 
 	<p>
 	  Bind is used in the code to sequence the operations:
@@ -500,7 +500,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <idx>TCP clients/servers</idx></p>
 
 
-	<link rel="import" href="code/async/echo.ml" part="1"/>
+	<link rel="import" href="code/async/echo/echo.ml" part="1"/>
 
 	<p>
 	  The result of calling <code>Tcp.Server.create</code> is a
@@ -524,7 +524,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  Finally, we need to initiate the server and start the
 	  Async scheduler:</p>
 
-	<link rel="import" href="code/async/echo.ml" part="2"/>
+	<link rel="import" href="code/async/echo/echo.ml" part="2"/>
 
 	<p>
 	  One of the most common newbie errors with Async is to
@@ -543,8 +543,8 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  Now that we have the echo server, we can connect to the
 	  echo server using the netcat tool, which is invoked as
 	  <code>nc</code>:</p>
-
-	<link rel="import" href="code/async/run_echo.sh"/>
+  <link rel="import" href="code/async/echo/jbuild"/>
+	<link rel="import" href="code/async/echo/run_echo.sh"/>
 
 	<aside data-type="note">
           <h5>Functions that Never Return</h5>
@@ -813,7 +813,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             going to use to query the DuckDuckGo servers:</p>
 
 
-          <link rel="import" href="code/async/search.ml"/>
+          <link rel="import" href="code/async/search/search.ml"/>
 
           <p>
 	    A <code>Uri.t</code> is constructed from the
@@ -846,7 +846,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             under both keys, returning the first one for which a
             nonempty value is defined:</p>
 
-          <link rel="import" href="code/async/search.ml" part="1"/>
+          <link rel="import" href="code/async/search/search.ml" part="1"/>
 	</section>
 
 	<section id="executing-an-http-client-query" data-type="sect2">
@@ -862,7 +862,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    <idx>DuckDuckGo search engine/executing an HTTP client query in</idx></p>
 
 
-          <link rel="import" href="code/async/search.ml" part="2"/>
+          <link rel="import" href="code/async/search/search.ml" part="2"/>
 
           <p>
 	    To better understand what's going on, it's useful to
@@ -891,7 +891,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             dispatching multiple searches in parallel. First, we need
             code for formatting and printing out the search result:</p>
 
-          <link rel="import" href="code/async/search.ml" part="3"/>
+          <link rel="import" href="code/async/search/search.ml" part="3"/>
 
           <p>
 	    We use the <code>Wrapper</code> module from the
@@ -911,7 +911,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    The next function dispatches the searches in parallel,
             waits for the results, and then prints:</p>
 
-          <link rel="import" href="code/async/search.ml" part="4"/>
+          <link rel="import" href="code/async/search/search.ml" part="4"/>
 
           <p>
 	    We used <code>List.map</code> to call
@@ -949,13 +949,13 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    Finally, we create a command-line interface using
             <code>Command.async</code>:</p>
 
-          <link rel="import" href="code/async/search.ml" part="5"/>
+          <link rel="import" href="code/async/search/search.ml" part="5"/>
 
           <p>
 	    And that's all we need for a simple but usable
             definition searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a></p>
-
-          <link rel="import" href="code/async/run_search.sh"/>
+          <link rel="import" href="code/async/search/jbuild"/>
+          <link rel="import" href="code/async/search/run_search.sh"/>
 	</section>
       </section>
 
@@ -1165,7 +1165,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    First we'll need to change <code>query_uri</code> to
             take an argument specifying the server to connect to:</p>
 
-          <link rel="import" href="code/async/search_with_configurable_server.ml" part="1"/>
+          <link rel="import" href="code/async/search_with_configurable_server/search_with_configurable_server.ml" part="1"/>
 
           <p>
 	    In addition, we'll make the necessary changes to get the
@@ -1174,8 +1174,8 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             let's see what happens if we rebuild the application and
             run it giving it a list of servers, some of which won't
             respond to the query:</p>
-
-          <link rel="import" href="code/async/run_search_with_configurable_server.errsh"/>
+          <link rel="import" href="code/async/search_with_configurable_server/jbuild"/>
+          <link rel="import" href="code/async/search_with_configurable_server/run_search_with_configurable_server.errsh"/>
 
           <p>
 	    As you can see, we got a "Connection refused" failure,
@@ -1186,7 +1186,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             within each call to <code>get_definition</code>, as
             follows:</p>
 
-          <link rel="import" href="code/async/search_with_error_handling.ml" part="1"/>
+          <link rel="import" href="code/async/search_with_error_handling/search_with_error_handling.ml" part="1"/>
 
           <p>
 	    Here, we first use <code>try_with</code> to capture the
@@ -1201,13 +1201,13 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             <code>print_result</code> so that it can handle the new
             type:</p>
 
-          <link rel="import" href="code/async/search_with_error_handling.ml" part="2"/>
+          <link rel="import" href="code/async/search_with_error_handling/search_with_error_handling.ml" part="2"/>
 
           <p>
 	    Now, if we run that same query, we'll get individualized
             handling of the connection failures:</p>
-
-          <link rel="import" href="code/async/run_search_with_error_handling.sh"/>
+          <link rel="import" href="code/async/search_with_error_handling/jbuild"/>
+          <link rel="import" href="code/async/search_with_error_handling/run_search_with_error_handling.sh"/>
 
           <p>
 	    Now, only the query that went to <code>localhost</code>
@@ -1293,7 +1293,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <code>get_definition_with_timeout</code> to cancel the
 	  <code>get</code> call if the timeout expires:</p>
 
-	<link rel="import" href="code/async/search_with_timeout_no_leak_simple.ml" part="1"/>
+	<link rel="import" href="code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml" part="1"/>
 
 	<p>
 	  Next, we'll modify
@@ -1301,7 +1301,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  to pass in to <code>get_definition</code>, which will become
 	  determined when our timeout expires:</p>
 
-	<link rel="import" href="code/async/search_with_timeout_no_leak_simple.ml" part="2"/>
+	<link rel="import" href="code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml" part="2"/>
 
 	<p>
 	  This will work and will cause the connection to shutdown
@@ -1335,14 +1335,14 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  determined if and only if the timeout deferred is chosen.
 	  Here's the code:</p>
 
-	<link rel="import" href="code/async/search_with_timeout_no_leak.ml" part="2"/>
+	<link rel="import" href="code/async/search_with_timeout_no_leak/search_with_timeout_no_leak.ml" part="2"/>
 
 	<p>
 	  Now, if we run this with a suitably small timeout, we'll
 	  see that one query succeeds and the other fails reporting a
 	  timeout:</p>
-
-	<link rel="import" href="code/async/run_search_with_timeout_no_leak.sh"/>
+  <link rel="import" href="code/async/search_with_timeout_no_leak/jbuild"/>
+	<link rel="import" href="code/async/search_with_timeout_no_leak/run_search_with_timeout_no_leak.sh"/>
       </section>
 
       <section id="working-with-system-threads" data-type="sect1">

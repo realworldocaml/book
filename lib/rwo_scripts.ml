@@ -242,6 +242,13 @@ let eval_script lang ~run_nondeterministic ~filename =
       ;
       `Other (Bash_script.Evaluated.to_string x)
     )
+  | "sexp" when Filename.basename filename = "jbuild" ->
+    (
+      Reader.file_contents filename >>| fun x ->
+      let regexp = Str.regexp "ppx_sexp_conv -no-check" in
+      let removed_check = Str.replace_first regexp "ppx_sexp_conv" x in
+      Ok (`Other removed_check)
+    )
   | _ -> (
       Reader.file_contents filename >>| fun x ->
       Ok (`Other x)

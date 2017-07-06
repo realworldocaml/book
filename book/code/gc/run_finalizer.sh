@@ -1,2 +1,2 @@
-corebuild -pkg async finalizer.native
-./finalizer.native
+jbuilder build finalizer.exe
+./_build/default/finalizer.exe

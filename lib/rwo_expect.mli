@@ -1,4 +1,4 @@
-open Core
+open! Core
 open Async
 
 module Raw_script : sig
@@ -44,4 +44,3 @@ module Document : sig
   val parts : t -> Part.t list
   val of_file : run_nondeterministic:bool -> filename:string -> t Deferred.Or_error.t
 end
-
