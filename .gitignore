@@ -3,3 +3,4 @@ _build
 *.corrected
 *~
 *.install
+*.byte
