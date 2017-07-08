@@ -53,3 +53,4 @@ val script_part_to_html
 val empty : t
 val file_is_mem : t -> string -> bool
 val find_exn : t -> ?part:string -> filename:string -> script_part
+val exn_of_filename : string -> string -> script_part

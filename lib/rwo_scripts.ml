@@ -167,6 +167,15 @@ let script_part_to_html ?(pygmentize=false) (x : script_part) =
   Html.div ~a:["class","highlight"] l
 
 
+let exn_of_filename filename content =
+  let (filename, extension) = Filename.split_extension filename in
+  match extension with
+  | Some ext -> (match ext with
+    | "ml" | "mli" | "mly" | "mll" -> `OCaml Rwo_expect.Raw_script.{ name = ""; content }
+    | "rawtopscript" -> `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
+    | _ -> `Other content)
+  | None -> `Other content
+
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
