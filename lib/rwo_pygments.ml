@@ -61,7 +61,7 @@ let really_pygmentize ~add_attrs lang contents =
       >>| fun {Process.Output.stdout; stderr; exit_status} ->
       match exit_status with
       | Error (`Exit_non_zero x) ->
-        failwithf "pygmentize exited with %d on:\n%s" x contents ()
+        failwithf "pygmentize for exited with %d on:\n%s\nOutput:%s\nError:%s " x contents stdout stderr ()
       | Error (`Signal x) ->
         failwithf "pygmentize exited with signal %s on:\n%s"
           (Signal.to_string x) contents ()
