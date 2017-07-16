@@ -263,17 +263,18 @@
 	  responses</idx></p>
 
       <p>
-	In addition, we use the Sexplib syntax extension which
-	extends OCaml by adding the <code>with sexp</code>
-	declaration. When attached to a type in a signature,
-	<code>with sexp</code> adds declarations of s-expression
-	converters, for example:<idx>sexp declaration</idx></p>
+	In addition, we use the <code>ppx_sexp_conv</code> syntax
+	extension which interprets the <code>[@@deriving_sexp]</code>
+	annotation. When <code>ppx_sexp_conv</code>
+	sees <code>[@@deriving sexp]</code> attached to a signature,
+	it replaces it with declarations of s-expression converters,
+	for example:<idx>sexp declaration</idx></p>
 
       <link rel="import" href="code/fcm/query_handler.topscript" part="1"/>
 
       <p>
-	In a module, <code>with sexp</code> adds the implementation of
-	those functions. Thus, we can write:</p>
+	In a module, <code>[@@deriving sexp]</code> adds the
+	implementation of those functions. Thus, we can write:</p>
 
       <link rel="import" href="code/fcm/query_handler.topscript" part="2"/>
 

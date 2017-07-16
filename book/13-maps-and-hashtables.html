@@ -410,13 +410,16 @@
 
           <p>
 	    In other words, it expects a type with a comparison
-            function, as well as functions for converting to and from
-            <em>s-expressions</em>. S-expressions are a serialization
-            format used commonly in Core and are required here to
-            enable better error messages. We'll discuss s-expressions
-            more in <a href="17-data-serialization.html#data-serialization-with-s-expressions" data-type="xref">Data Serialization With S Expressions</a>,
-            but in the meantime, we'll use the <code>with sexp</code>
-            declaration that comes from the Sexplib syntax extension.
+            function, as well as functions for converting to and
+            from <em>s-expressions</em>. S-expressions are a
+            serialization format used commonly in Core and are
+            required here to enable better error messages. We'll
+            discuss s-expressions more
+            in <a href="17-data-serialization.html#data-serialization-with-s-expressions"
+            data-type="xref">Data Serialization With S
+            Expressions</a>, but in the meantime, we'll use
+            the <code>[@@deriving sexp]</code> annotation that comes
+            from the <code>ppx_sexp_conv</code> syntax extension.
             This declaration kicks off the automatic generation of
             s-expression conversion functions for the marked type.</p>
 

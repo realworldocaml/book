@@ -395,11 +395,10 @@
         <link rel="import" href="code/functors/main.topscript" part="23"/>
 
         <p>
-	  Core_kernel comes with a syntax extension called Sexplib
-	  which can autogenerate s-expression conversion functions
-	  from a type declaration. Attaching <code>with sexp</code> to
-	  a type definition signals to the extension to generate the
-          converters. Thus, we can write:
+	  Core_kernel comes with a syntax extension
+	  called <code>ppx_sexp_conv</code> which will generate
+	  s-expression conversion functions for any type annotated
+	  with <code>[@@deriving sexp]</code>. Thus, we can write:
 
 	  <idx>sexp declaration</idx></p>
 
@@ -408,11 +407,11 @@
         <p>We'll discuss s-expressions and Sexplib in more detail
         in <a href="17-data-serialization.html#data-serialization-with-s-expressions" data-type="xref">Data Serialization With S Expressions</a>,
         but for now, let's see what happens if we attach the
-        <code>with sexp</code> declaration to the definition of
+        <code>[@@deriving sexp]</code> declaration to the definition of
         <code>t</code> within the functor:</p>
         <link rel="import" href="code/functors/main.topscript" part="25"/>
 
-        <p>The problem is that <code>with sexp</code> adds code for
+        <p>The problem is that <code>[@@deriving sexp]</code> adds code for
         defining the s-expression converters, and that code assumes
         that <code>Endpoint</code> has the appropriate
         sexp-conversion functions for <code>Endpoint.t</code>. But
