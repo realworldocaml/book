@@ -422,7 +422,8 @@ Characters 23-44:
 Error: Unbound constructor Int_interval.Interval
 |}];;
 [@@@part "23"];;
-Sexp.of_string "(This is (an s-expression))";;
+Sexp.List [ Sexp.Atom "This"; Sexp.Atom "is"
+          ; Sexp.List [Sexp.Atom "an"; Sexp.Atom "s-expression"]];;
 [%%expect ocaml {|- : Sexp.t = (This is (an s-expression))|}];;
 [@@@part "24"];;
 type some_type = int * string list [@@deriving sexp];;
