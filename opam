@@ -11,7 +11,7 @@ build: [
   [make]
 ]
 depends: [
-  "ocamlfind" {build}
+  "ocamlfind"
   "ppx_sexp_conv"
   "ppx_deriving"
 ]

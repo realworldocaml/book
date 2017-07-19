@@ -1,7 +1,7 @@
-PKG=unix,compiler-libs.toplevel,ppx_sexp_conv
+PKG=unix,compiler-libs.toplevel,ppx_sexp_conv,findlib.top
 
 all:
-	ocamlfind c -o ocaml-topexpect -linkpkg -linkall -package $(PKG) main.ml
+	ocamlfind c -thread -o ocaml-topexpect -linkpkg -linkall -package $(PKG) main.ml
 	$(MAKE) -C ppx-ignore all
 
 clean:

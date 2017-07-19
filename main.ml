@@ -1,7 +1,8 @@
 module Linked = struct
-  include Topdirs
-  include Ephemeron
-  include Uchar
+  include (Topdirs : sig end)
+  include (Ephemeron : sig end)
+  include (Uchar : sig end)
+  include (Condition : sig end)
 end
 
 open Lexing
@@ -823,6 +824,8 @@ let main () =
     let replacement f x = f x
     let () = monkey_patch (module Env : T) field replacement
   end in
+  Topfind.don't_load_deeply ["unix"; "findlib.top"; "findlib.internal"; "compiler-libs.toplevel"; "ppx_sexp_conv"];
+
   let usage =
     Printf.sprintf "Usage: %s [OPTIONS] FILE [ARGS]\n"
       (Filename.basename Sys.argv.(0))
