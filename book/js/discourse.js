@@ -5,10 +5,22 @@ function createElement(opt) {
   for (var key in opt.style) {
     el.style[key] = opt.style[key];
   }
+  for (var i = 0, l = opt.children ? opt.children.length : 0; i < l; i++) {
+    el.appendChild(opt.children[i]);
+  }
+  if (opt.onClick) {
+    el.addEventListener('click', opt.onClick, true);
+  }
   return el;
 };
 
-var discourseDiv = createElement({
+function div(opt) {
+  opt.element = 'div';
+  return createElement(opt);
+};
+
+var expanded = false;
+var discourseDiv = div({
   className: 'comments',
   id: 'discourse-comments',
   style: {
@@ -17,32 +29,93 @@ var discourseDiv = createElement({
     top: 0,
     bottom: 0,
     borderLeft: 'solid 1px black',
-    overflow: 'scroll',
     height: '100%',
-    width: '21%',
-    zIndex: 10,
-    position: 'relative'
-  }
+    width: '400px',
+    transition: '.4s linear',
+    right: '-400px',
+    zIndex: 10
+  },
+  children: [
+    div({
+      style: {
+        position: 'absolute',
+        backgroundColor: '#8e44ad',
+        color: 'white',
+        width: '107px',
+        height: '26px',
+        left: '-67px',
+        top: '46px',
+        transform: 'rotate(270deg)',
+        textAlign: 'center',
+        fontFamily: '"proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif',
+        cursor: 'pointer'
+      },
+      onClick: function(e) {
+        if (!expanded) {
+          e.target.parentNode.style.right = 0;
+          expanded = true;
+        }
+        else {
+          e.target.parentNode.style.right = '-400px';
+          expanded = false;
+        }
+      },
+      children: [
+        document.createTextNode("Feedback")
+      ]
+    })
+  ]
 });
-//
-// document.createElement('div');
-// discourseDiv.className = 'comments';
-// discourseDiv.id = 'discourse-comments';
-//
-//
-// var someDiv = document.createElement
 
 document.body.appendChild(discourseDiv);
 
 let topic = -1;
 
 var loc = location.pathname;
-if (loc === '/01-guided-tour.html') {
-  topic = 498;
-}
 
-DiscourseEmbed = { discourseUrl: 'http://discuss.ocaml.org/',
-                   topicId: topic };
+var urlTopicMap = {
+  '/00-prologue.html': 579,
+  '/01-guided-tour.html': 580,
+  '/02-variables-and-functions.html': 581,
+  '/03-lists-and-patterns.html': 582,
+  '/04-files-modules-and-programs.html': 583,
+  '/05-records.html': 584,
+  '/06-guided-tour.html': 585,
+  '/07-guided-tour.html': 586,
+  '/08-imperative-programming.html': 587,
+  '/09-functors.html': 588,
+  '/10-first-class-modules.html': 589,
+  '/11-objects.html': 590,
+  '/12-classes.html': 591,
+  '/13-maps-and-hashtables.html': 592,
+  '/14-command-line-parsing.html': 593,
+  '/15-json.html': 594,
+  '/16-parsing-with-ocamllex-and-menhir.html': 595,
+  '/17-data-serialization.html': 596,
+  '/18-concurrent-programming.html': 597,
+  '/19-foreign-function-interface.html': 598,
+  '/20-runtime-memory-layout.html': -1,
+  '/21-garbage-collector.html': -1,
+  '/22-compiler-frontend.html': -1,
+  '/23-compiler-backend.html': -1,
+  '/appa.html': -1,
+  '/author_bio.html': -1,
+  '/colo.html': -1,
+  '/dedication.html': -1,
+  '/faqs.html': -1,
+  '/index.html': -1,
+  '/install.html': -1,
+  '/part1.html': -1,
+  '/part2.html': -1,
+  '/part3.html': -1,
+  '/titlepage.html': -1,
+  '/toc.html': -1
+};
+
+console.info(urlTopicMap[loc]);
+
+DiscourseEmbed = { discourseUrl: 'https://discuss.ocaml.org/',
+                   topicId: urlTopicMap[loc] };
 
 (function() {
 
