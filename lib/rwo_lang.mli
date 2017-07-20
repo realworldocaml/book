@@ -50,7 +50,6 @@
     - "txt"
 *)
 open Core
-open Async
 
 type t = private string
   [@@deriving sexp]

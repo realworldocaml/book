@@ -28,10 +28,9 @@
 
       <p>We'll start with an example: a utility that reads lines
       from <code>stdin</code> and computes a frequency count of the
-      lines. At the end, the 10 lines with the highest frequency
-      counts are written out. We'll start with a simple
-      implementation, which we'll save as the file
-      <em>freq.ml</em>.
+      lines, and prints out the ten most frequent lines. We'll start
+      with a simple implementation, which we'll save as the
+      file <em>freq.ml</em>.
 
       <idx id="FILEsnglprog">files/single-file programs</idx>
       <idx id="Psingfil">programs/single-file programs</idx></p>
@@ -142,6 +141,7 @@
 
       <idx>corebuild</idx></p>
 
+      <link rel="import" href="code/files-modules-and-programs/freq-obuild/jbuild"/>
       <link rel="import" href="code/files-modules-and-programs/freq-obuild/build.sh"/>
 
       <p>If we'd invoked <span class="command"><em>corebuild</em></span> with a target of
@@ -353,6 +353,7 @@
 
       <p>If we now try to compile <code>freq.ml</code>, we'll get
       the following error:</p>
+      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/jbuild"/>
       <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/build.errsh"/>
 
       <p>This is because <code>freq.ml</code> depends on the fact
@@ -473,15 +474,15 @@
       types with the same underlying implementation in a
       lightweight way:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/session_info.ml"/>
+      <link rel="import" href="code/files-modules-and-programs/session_info/session_info.ml"/>
 
       <p>The preceding code has a bug: it compares the username in
       one session to the host in the other session, when it should
       be comparing the usernames in both cases. Because of how we
       defined our types, however, the compiler will flag this bug
       for us:</p>
-
-      <link rel="import" href="code/files-modules-and-programs/build_session_info.errsh"/>
+      <link rel="import" href="code/files-modules-and-programs/session_info/jbuild"/>
+      <link rel="import" href="code/files-modules-and-programs/session_info/build_session_info.errsh"/>
 
       <p>This is a trivial example, but confusing different kinds
       of identifiers is a very real source of bugs, and the
@@ -676,7 +677,7 @@
 
         <p>and we try to compile, we'll get the following
         error:</p>
-
+        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/jbuild"/>
         <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.errsh"/>
         </section>
 
@@ -696,6 +697,7 @@
         <p>Now, if we try to compile without actually adding the
         implementation, we'll get this error:</p>
 
+        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/jbuild"/>
         <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/build.errsh"/>
 
         <p>A missing type definition will lead to a similar
@@ -719,7 +721,7 @@
         <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/counter.mli" part="1"/>
 
         <p>will lead to a compilation error:</p>
-
+        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/jbuild"/>
         <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/build.errsh"/>
 
         <p>Order is similarly important to other type declarations,
@@ -760,7 +762,7 @@
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/counter.ml" part="1"/>
 
         <p>we'll see this error when we try to build:</p>
-
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/jbuild"/>
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/build.errsh"/>
 
         <p>The problem manifests in a different way if we create
@@ -775,7 +777,7 @@
         the <span class="command"><em>corebuild</em></span> script)
         will notice the error and complain explicitly about the
         cycle:</p>
-
+        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/jbuild"/>
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.errsh"/>
       </section>
     </section>

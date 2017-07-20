@@ -168,12 +168,13 @@
         times and also calculates statistical variance of the
         results. You'll need to <code>opam install
         core_bench</code> to get the library:<idx>pattern matching/benchmarking of</idx><idx>lambda form code/pattern matching benchmarking</idx></p>
-        <link rel="import" href="code/back-end/bench_patterns.ml"/>
+        <link rel="import" href="code/back-end/bench_patterns/bench_patterns.ml"/>
 
         <p>Building and executing this example will run for around
         30 seconds by default, and you'll see the results
         summarized in a neat table:</p>
-        <link rel="import" href="code/back-end/run_bench_patterns.sh"/>
+        <link rel="import" href="code/back-end/bench_patterns/jbuild"/>
+        <link rel="import" href="code/back-end/bench_patterns/run_bench_patterns.sh"/>
 
         <p>These results confirm the performance hypothesis that we
         obtained earlier by inspecting the lambda code. The
@@ -455,7 +456,7 @@
 	<idx>files/o files</idx>
 	<idx>OCaml toolchain/ocamlopt</idx>
 	<idx>native-code compiler/benefits of</idx>
-	<idx id="CPfast">compilation process/fast native code</idx></p> 
+	<idx id="CPfast">compilation process/fast native code</idx></p>
 
       <p>The <span class="command"><em>ocamlopt</em></span> command
       is the frontend to the native code compiler and has a very
@@ -597,11 +598,12 @@
           comparison from earlier. Let's confirm this hypothesis
           again by writing a quick <code>Core_bench</code> test
           with both functions:</p>
-          <link rel="import" href="code/back-end/bench_poly_and_mono.ml"/>
+          <link rel="import" href="code/back-end/bench_poly_and_mono/bench_poly_and_mono.ml"/>
 
           <p>Running this shows quite a significant runtime
           difference between the two:</p>
-          <link rel="import" href="code/back-end/run_bench_poly_and_mono.sh"/>
+          <link rel="import" href="code/back-end/bench_poly_and_mono/jbuild"/>
+          <link rel="import" href="code/back-end/bench_poly_and_mono/run_bench_poly_and_mono.sh"/>
 
           <p>We see that the polymorphic comparison is close to 20
           times slower! These results shouldn't be taken too
@@ -718,11 +720,12 @@
           alternating values from a list. This isn't
           tail-recursive, so our stack size will grow as we
           single-step through the execution:</p>
-          <link rel="import" href="code/back-end/alternate_list.ml"/>
+          <link rel="import" href="code/back-end/alternate_list/alternate_list.ml"/>
 
           <p>Compile and run this with debugging symbols. You
           should see the following output:</p>
-          <link rel="import" href="code/back-end/run_alternate_list.sh"/>
+          <link rel="import" href="code/back-end/alternate_list/jbuild"/>
+          <link rel="import" href="code/back-end/alternate_list/run_alternate_list.sh"/>
 
           <p>Now we can run this interactively within <span class="command"><em>gdb</em></span>:</p>
           <link rel="import" href="code/back-end/gdb_alternate0.rawsh"/>

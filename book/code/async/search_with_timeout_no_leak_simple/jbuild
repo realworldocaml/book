@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executable
+  ((name search_with_timeout_no_leak_simple)
+   (libraries (cohttp.async yojson textwrap))
+  )
+)

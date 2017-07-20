@@ -1,0 +1,18 @@
+(jbuild_version 1)
+
+(rule
+ ((targets (github_org_j.ml github_org_j.mli))
+  (deps    (github_org.atd))
+  (action  (run atdgen -j ${<}))))
+
+(rule
+ ((targets (github_org_t.ml github_org_t.mli))
+  (deps    (github_org.atd))
+  (action  (run atdgen -t ${<}))))
+
+(executable
+  ((name github_org_info)
+   (libraries (core yojson atdgen core_extended))
+   (modules (github_org_info github_org_t github_org_j))
+  )
+)

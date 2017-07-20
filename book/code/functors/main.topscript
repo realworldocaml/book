@@ -7,6 +7,8 @@
 #camlp4o;;
 #require "core";;
 #require "ppx_jane";;
+#install_printer Core.Sexp.pp_hum;;
+#install_printer Core.Error.pp;;
 [@@@part "0.5"];;
 open Core_kernel;;
 module type X_int = sig val x : int end;;
@@ -416,18 +418,13 @@ Int_interval.is_empty
 [%%expect ocaml {|- : bool = false|}];;
 Int_interval.is_empty (Int_interval.Interval (4,3));;
 [%%expect{|
-Characters 25-46:
+Characters 23-44:
 Error: Unbound constructor Int_interval.Interval
 |}];;
 [@@@part "23"];;
-Sexp.of_string "(This is (an s-expression))";;
-[%%expect ocaml {|
-- : Sexp.t =
-Core_kernel.Sexp.List
- [Core_kernel.Sexp.Atom "This"; Core_kernel.Sexp.Atom "is";
-  Core_kernel.Sexp.List
-   [Core_kernel.Sexp.Atom "an"; Core_kernel.Sexp.Atom "s-expression"]]
-|}];;
+Sexp.List [ Sexp.Atom "This"; Sexp.Atom "is"
+          ; Sexp.List [Sexp.Atom "an"; Sexp.Atom "s-expression"]];;
+[%%expect ocaml {|- : Sexp.t = (This is (an s-expression))|}];;
 [@@@part "24"];;
 type some_type = int * string list [@@deriving sexp];;
 [%%expect ocaml {|
@@ -436,12 +433,7 @@ val some_type_of_sexp : Sexp.t -> some_type = <fun>
 val sexp_of_some_type : some_type -> Sexp.t = <fun>
 |}];;
 sexp_of_some_type (33, ["one"; "two"]);;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.Atom "33";
-  Sexplib.Sexp.List [Sexplib.Sexp.Atom "one"; Sexplib.Sexp.Atom "two"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = (33 (one two))|}];;
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
 [%%expect ocaml {|- : some_type = (44, ["five"; "six"])|}];;
 [@@@part "25"];;
@@ -606,11 +598,6 @@ module Int_interval :
   end
 |}];;
 Int_interval.sexp_of_t (Int_interval.create 3 4);;
-[%%expect ocaml {|
-- : Sexp.t =
-Base__.Sexplib.Sexp.List
- [Base__.Sexplib.Sexp.Atom "Interval"; Base__.Sexplib.Sexp.Atom "3";
-  Base__.Sexplib.Sexp.Atom "4"]
-|}];;
+[%%expect ocaml {|- : Sexp.t = (Interval 3 4)|}];;
 Int_interval.sexp_of_t (Int_interval.create 4 3);;
-[%%expect ocaml {|- : Sexp.t = Base__.Sexplib.Sexp.Atom "Empty"|}];;
+[%%expect ocaml {|- : Sexp.t = Empty|}];;

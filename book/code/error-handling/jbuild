@@ -1,0 +1,15 @@
+(jbuild_version 1)
+
+(executable
+  ((name blow_up)
+   (modules blow_up)
+   (libraries (core))
+  )
+)
+
+(executable
+  ((name exn_cost)
+   (modules exn_cost)
+   (libraries (core core_bench))
+  )
+)

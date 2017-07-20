@@ -79,7 +79,7 @@
       the online <a href="http://www.gnu.org/software/ncurses/">documentation</a>.
       We'll just use the small excerpt, since we just want to
       demonstrate Ctypes in action:<idx>Ctypes library/terminal interface example</idx></p>
-      <link rel="import" href="code/ffi/ncurses.h"/>
+      <link rel="import" href="code/ffi/ncurses/ncurses.h"/>
 
       <p>The Ncurses functions either operate on the current
       pseudoterminal or on a window that has been created via
@@ -107,7 +107,7 @@
 
       <p>Let's begin by defining the basic values we need, starting
       with the <code>WINDOW</code> state pointer:</p>
-      <link rel="import" href="code/ffi/ncurses.ml"/>
+      <link rel="import" href="code/ffi/ncurses/ncurses.ml"/>
 
       <p>We don't know the internal representation of the window
       pointer, so we treat it as a C void pointer. We'll improve on
@@ -115,7 +115,7 @@
       The second statement defines an OCaml value that represents
       the <code>WINDOW</code> C pointer. This value is used later
       in the Ctypes function definitions:</p>
-      <link rel="import" href="code/ffi/ncurses.ml" part="1"/>
+      <link rel="import" href="code/ffi/ncurses/ncurses.ml" part="1"/>
 
       <p>That's all we need to invoke our first function call to
       <code>initscr</code> to initialize the terminal. The
@@ -138,7 +138,7 @@
 
       <p>The remainder of the Ncurses binding simply expands on
       these definitions:</p>
-      <link rel="import" href="code/ffi/ncurses.ml" part="2"/>
+      <link rel="import" href="code/ffi/ncurses/ncurses.ml" part="2"/>
 
       <p>These definitions are all straightforward mappings from
       the C declarations in the Ncurses header file. Note that the
@@ -159,7 +159,7 @@
       much like a normal OCaml signature. You can infer it directly
       from the <code>ncurses.ml</code> by running a special build
       target:</p>
-      <link rel="import" href="code/ffi/infer_ncurses.sh"/>
+      <link rel="import" href="code/ffi/ncurses/infer_ncurses.sh"/>
 
       <p>The <code>inferred.mli</code> target instructs the
       compiler to generate the default signature for a module file
@@ -171,7 +171,7 @@
 
       <p>Here's the customized interface that we can safely use
       from other libraries:</p>
-      <link rel="import" href="code/ffi/ncurses.mli"/>
+      <link rel="import" href="code/ffi/ncurses/ncurses.mli"/>
 
       <p>The <code>window</code> type is left abstract in the
       signature to ensure that window pointers can only be
@@ -181,11 +181,12 @@
 
       <p>Now compile a "hello world" terminal drawing program to
       tie this all together:</p>
-      <link rel="import" href="code/ffi/hello.ml"/>
+      <link rel="import" href="code/ffi/hello/hello.ml"/>
 
       <p>The <code>hello</code> executable is compiled by linking
       with the <code>ctypes.foreign</code> OCamlfind package:</p>
-      <link rel="import" href="code/ffi/build_hello.sh"/>
+      <link rel="import" href="code/ffi/hello/jbuild"/>
+      <link rel="import" href="code/ffi/hello/build_hello.sh"/>
 
       <p>Running <code>./hello.native</code> should now display a
       Hello World in your terminal!<idx>Ctypes library/build directives for</idx></p>
@@ -335,7 +336,7 @@
       <p>We can now create a binding to <code>time</code> directly
       from the toplevel.</p>
 
-      <link rel="import" part="0.5" href="code/ffi/posix.topscript"/> 
+      <link rel="import" part="0.5" href="code/ffi/posix.topscript"/>
 
       <p>The <code>foreign</code> function is the main link between
       OCaml and C. It takes two arguments: the name of the C
@@ -572,11 +573,12 @@
           <p>We built up a lot of bindings in the previous section,
           so let's recap them with a complete example that ties it
           together with a command-line frontend: <idx>structs and unions/time-printing command</idx></p>
-          <link rel="import" href="code/ffi/datetime.ml"/>
+          <link rel="import" href="code/ffi/datetime/datetime.ml"/>
 
           <p>This can be compiled and run in the usual way:
           <idx>returning function</idx></p>
-          <link rel="import" href="code/ffi/build_datetime.sh"/>
+          <link rel="import" href="code/ffi/datetime/jbuild"/>
+          <link rel="import" href="code/ffi/datetime/build_datetime.sh"/>
 
           <aside data-type="sidebar">
             <h5>Why Do We Need to Use returning?</h5>
@@ -734,13 +736,13 @@
       arrays of elements using a comparison function passed in as a
       function pointer. The signature for <code>qsort</code>
       is:<idx>functions/passing to C</idx> <idx>foreign function interface (FFI)/passing functions to C</idx></p>
-      <link rel="import" href="code/ffi/qsort.h"/>
+      <link rel="import" href="code/ffi/qsort/qsort.h"/>
 
       <p>C programmers often use <code>typedef</code> to make type
       definitions involving function pointers easier to read. Using
       a typedef, the type of <code>qsort</code> looks a little more
       palatable:</p>
-      <link rel="import" href="code/ffi/qsort_typedef.h"/>
+      <link rel="import" href="code/ffi/qsort/qsort_typedef.h"/>
 
       <p>This also happens to be a close mapping to the
       corresponding Ctypes definition. Since type descriptions are
@@ -748,7 +750,7 @@
       <code>typedef</code> and end up with working OCaml bindings
       to <code>qsort</code>:</p>
 
-      <link rel="import" part="1" href="code/ffi/qsort.topscript"/> 
+      <link rel="import" part="1" href="code/ffi/qsort/qsort.topscript"/>
 
       <p>We only use <code>compare_t</code> once (in the
       <code>qsort</code> definition), so you can choose to inline
@@ -772,17 +774,18 @@
         <p>The following is a command-line tool that uses the
         <code>qsort</code> binding to sort all of the integers
         supplied on the standard input: <idx>qsort binding</idx></p>
-        <link rel="import" href="code/ffi/qsort.ml"/>
+        <link rel="import" href="code/ffi/qsort/qsort.ml"/>
 
         <p>Compile it in the usual way with <em>corebuild</em> and
         test it against some input data, and also build the
         inferred interface so we can examine it more closely:</p>
-        <link rel="import" href="code/ffi/build_qsort.sh"/>
+        <link rel="import" href="code/ffi/qsort/jbuild"/>
+        <link rel="import" href="code/ffi/qsort/build_qsort.sh"/>
 
         <p>The inferred interface shows us the types of the raw
         <code>qsort</code> binding and also the <code>qsort'</code>
         wrapper function:</p>
-        <link rel="import" href="code/ffi/qsort.mli"/>
+        <link rel="import" href="code/ffi/qsort/qsort.mli"/>
 
         <p>The <code>qsort'</code> wrapper function has a much more
         canonical OCaml interface than the raw binding. It accepts

@@ -7,6 +7,8 @@
 #camlp4o;;
 #require "core";;
 #require "ppx_jane";;
+#install_printer Core.Sexp.pp_hum;;
+#install_printer Core.Error.pp;;
 open Core_kernel;;
 [@@@part "0.5"];;
 module type Query_handler = sig
@@ -54,12 +56,7 @@ val u_of_sexp : Sexp.t -> u = <fun>
 val sexp_of_u : u -> Sexp.t = <fun>
 |}];;
 sexp_of_u {a=3;b=7.};;
-[%%expect ocaml {|
-- : Sexp.t =
-Sexplib.Sexp.List
- [Sexplib.Sexp.List [Sexplib.Sexp.Atom "a"; Sexplib.Sexp.Atom "3"];
-  Sexplib.Sexp.List [Sexplib.Sexp.Atom "b"; Sexplib.Sexp.Atom "7"]]
-|}];;
+[%%expect ocaml {|- : Sexp.t = ((a 3) (b 7))|}];;
 u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
 [%%expect ocaml {|- : u = {a = 43; b = 3.4}|}];;
 [@@@part "3"];;
@@ -87,16 +84,16 @@ module Unique :
     type t = { mutable next_id : config; }
     val name : string
     val create : config -> t
-    val eval : t -> Sexp.t -> (Sexp.t, Core_kernel.Error.t) result
+    val eval : t -> Sexp.t -> (Sexp.t, Error.t) result
   end
 |}];;
 [@@@part "4"];;
 let unique = Unique.create 0;;
 [%%expect ocaml {|val unique : Unique.t = {Unique.next_id = 0}|}];;
 Unique.eval unique Sexp.unit;;
-[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (Sexplib.Sexp.Atom "0")|}];;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok 0|}];;
 Unique.eval unique Sexp.unit;;
-[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (Sexplib.Sexp.Atom "1")|}];;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok 1|}];;
 [@@@part "5"];;
 module List_dir = struct
   type config = string [@@deriving sexp]
@@ -139,25 +136,11 @@ List_dir.eval list_dir (sexp_of_string ".");;
 [%%expect ocaml {|
 - : (Sexp.t, Error.t) result =
 Ok
- (Base__.Sexplib.Sexp.List
-   [Base__.Sexplib.Sexp.Atom "agentx"; Base__.Sexplib.Sexp.Atom "at";
-    Base__.Sexplib.Sexp.Atom "audit"; Base__.Sexplib.Sexp.Atom "backups";
-    Base__.Sexplib.Sexp.Atom "db"; Base__.Sexplib.Sexp.Atom "empty";
-    Base__.Sexplib.Sexp.Atom "folders"; Base__.Sexplib.Sexp.Atom "jabberd";
-    Base__.Sexplib.Sexp.Atom "lib"; Base__.Sexplib.Sexp.Atom "log";
-    Base__.Sexplib.Sexp.Atom "ma"; Base__.Sexplib.Sexp.Atom "mail";
-    Base__.Sexplib.Sexp.Atom "msgs"; Base__.Sexplib.Sexp.Atom "netboot";
-    Base__.Sexplib.Sexp.Atom "networkd"; Base__.Sexplib.Sexp.Atom "root";
-    Base__.Sexplib.Sexp.Atom "rpc"; Base__.Sexplib.Sexp.Atom "run";
-    Base__.Sexplib.Sexp.Atom "rwho"; Base__.Sexplib.Sexp.Atom "spool";
-    Base__.Sexplib.Sexp.Atom "tmp"; Base__.Sexplib.Sexp.Atom "vm";
-    Base__.Sexplib.Sexp.Atom "yp"])
+ (agentx at audit backups db empty folders jabberd lib log ma mail msgs
+  netboot networkd root rpc run rwho spool tmp vm yp)
 |}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-[%%expect ocaml {|
-- : (Sexp.t, Error.t) result =
-Ok (Base__.Sexplib.Sexp.List [Base__.Sexplib.Sexp.Atom "binding"])
-|}];;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (binding)|}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler

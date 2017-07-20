@@ -57,6 +57,13 @@ rev_object_fields:
   ;
 
 (* part "5" *)
-(* TODO ? *)
 array_values:
   | (* empty *) { [] }
+  | vl = rev_values { List.rev vl }
+  ;
+
+rev_values:
+  | v = value { [v] }
+  | vl = rev_values; COMMA; v = value
+    { v :: vl }
+  ;

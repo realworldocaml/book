@@ -1,5 +1,0 @@
-$ ocamlbuild -use-ocamlfind -tag thread -pkg core cal_add_interactive.native
-$ ./cal_add_interactive.native 2013-12-01
-enter days:
-35
-2014-01-05

@@ -1,5 +1,4 @@
 open Core
-open Async
 
 type t = string
   [@@deriving sexp]

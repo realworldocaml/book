@@ -127,7 +127,7 @@ let count_lines filename =
 count_lines "/etc/hosts";;
 
 
-[%%expect ocaml {|- : int = 10|}];;
+[%%expect.nondeterministic{|- : int = 10|}];;
 [@@@part "14.1"];;
 let count_lines filename =
   let%map text = Reader.file_contents filename in
@@ -460,8 +460,8 @@ let log_delays thunk =
   in
   let d = thunk () in
   Clock.every (sec 0.1) ~stop:d print_time;
-  d >>= fun () -> 
-  print_time (); 
+  d >>= fun () ->
+  print_time ();
   printf "\n";
   Writer.flushed (force Writer.stdout);
 ;;
@@ -486,7 +486,7 @@ let busy_loop () =
 log_delays (fun () -> return (busy_loop ()));;
 
 
-[%%expect{|2.12909s, |};
+[%%expect.nondeterministic{|2.12909s, |};
 ocaml {|- : unit = ()|}];;
 [@@@part "46"];;
 log_delays (fun () -> In_thread.run busy_loop);;

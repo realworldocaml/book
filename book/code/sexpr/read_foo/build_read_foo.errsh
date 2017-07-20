@@ -1,0 +1,2 @@
+jbuilder build read_foo.exe
+./_build/default/read_foo.exe foo_example_broken.scm

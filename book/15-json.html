@@ -76,7 +76,7 @@
 	  <idx>values/in JSON data</idx>
 	  <idx>key/value pairs</idx></p>
 
-	<link rel="import" href="code/json/book.json"/> 
+	<link rel="import" href="code/json/book.json"/>
 
 	<p>
 	  The outermost JSON value is usually a record (delimited by
@@ -129,7 +129,7 @@
             <span class="command"><em>utop</em></span> toplevel by:</p>
 	</div>
 
-	<link rel="import" part="1" href="code/json/install.topscript"/> 
+	<link rel="import" part="1" href="code/json/install.topscript"/>
       </section>
 
       <section id="parsing-json-with-yojson" data-type="sect1">
@@ -143,7 +143,7 @@
 	  <idx>JSON data/parsing with Yojson</idx>
 	  <idx>Yojson library/parsing JSON with</idx></p>
 
-	<link rel="import" href="code/json/yojson_basic.mli"/> 
+	<link rel="import" href="code/json/yojson_basic.mli"/>
 
 	<p>
 	  Some interesting properties should leap out at you after
@@ -187,7 +187,7 @@
 	  The first stop is the <code>Yojson.Basic</code>
 	  documentation, where we find these helpful functions:</p>
 
-	<link rel="import" href="code/json/yojson_basic.mli" part="1"/> 
+	<link rel="import" href="code/json/yojson_basic.mli" part="1"/>
 
 	<p>
 	  When first reading these interfaces, you can generally
@@ -203,20 +203,20 @@
 	  ways of parsing JSON are either directly from a string, from
 	  a file on a filesystem, or via a buffered input channel:</p>
 
-	<link rel="import" href="code/json/yojson_basic_simple.mli"/> 
+	<link rel="import" href="code/json/yojson_basic_simple.mli"/>
 
 	<p>
 	  The next example shows both the <code>string</code> and
 	  <code>file</code> functions in action, assuming the JSON
 	  record is stored in a file called <em>book.json</em>:</p>
 
-	<link rel="import" href="code/json/read_json.ml"/> 
+	<link rel="import" href="code/json/read_json/read_json.ml"/>
 
 	<p>
 	  You can build this by
-	  running <span class="command"><em>corebuild</em></span>:</p>
-
-	<link rel="import" href="code/json/run_read_json.sh"/> 
+	  running <span class="command"><em>jbuilder</em></span>:</p>
+  <link rel="import" href="code/json/read_json/jbuild"/>
+	<link rel="import" href="code/json/read_json/run_read_json.sh"/>
 
 	<p>
 	  The <code>from_file</code> function accepts an input
@@ -241,13 +241,13 @@
 	  <idx id="VALjson">values/selecting from JSON structures</idx>
 	  <idx id="JSONselval">JSON data/selecting values from</idx></p>
 
-	<link rel="import" href="code/json/parse_book.ml"/> 
+	<link rel="import" href="code/json/parse_book/parse_book.ml"/>
 
 	<p>
 	  Now build and run this in the same way as the previous
 	  example:</p>
-
-	<link rel="import" href="code/json/run_parse_book.sh"/> 
+  <link rel="import" href="code/json/parse_book/jbuild"/>
+	<link rel="import" href="code/json/parse_book/run_parse_book.sh"/>
 
 	<p>
 	  This code introduces the <code>Yojson.Basic.Util</code>
@@ -255,7 +255,7 @@
 	  you easily map a JSON object into a more strongly typed OCaml
 	  value.
 
-	  <idx>combinators/functional combinators</idx>	  
+	  <idx>combinators/functional combinators</idx>
 	  <idx>functional combinators</idx></p>
 
 	<aside data-type="sidebar">
@@ -273,7 +273,7 @@
 	    You've already run across several of these in the
             <code>List</code> module:</p>
 
-          <link rel="import" href="code/json/list_excerpt.mli"/> 
+          <link rel="import" href="code/json/list_excerpt.mli"/>
 
           <p>
 	    <code>map</code> and <code>fold</code> are extremely
@@ -284,7 +284,7 @@
             the input list to a function that accumulates a single
             result, and returns that instead:</p>
 
-          <link rel="import" href="code/json/list_excerpt.mli" part="1"/> 
+          <link rel="import" href="code/json/list_excerpt.mli" part="1"/>
 
           <p>
 	    <code>iter</code> is a more specialized combinator that
@@ -379,7 +379,7 @@
 	  Let's start with selecting a single <code>title</code>
 	  field from the record:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="1"/> 
+	<link rel="import" href="code/json/parse_book.topscript" part="1"/>
 
 	<p>
 	  The <code>member</code> function accepts a JSON object and
@@ -393,7 +393,7 @@
 	  convenient way to chain these
 	  operations <span class="keep-together">together</span>:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="2"/> 
+	<link rel="import" href="code/json/parse_book.topscript" part="2"/>
 
 	<p>
 	  The <code>tags</code> field is similar to
@@ -407,7 +407,7 @@
 	  cannot be converted to a <code>string</code> will be skipped
 	  from the output of <code>filter_string</code>:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="3"/> 
+	<link rel="import" href="code/json/parse_book.topscript" part="3"/>
 
 	<p>
 	  The <code>is_online</code> and <code>is_translated</code>
@@ -418,7 +418,7 @@
 	  <code>is_online</code> is present and
 	  <code>is_translated</code> will be <code>None</code>:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="4"/> 
+	<link rel="import" href="code/json/parse_book.topscript" part="4"/>
 
 	<p>
 	  The final use of JSON combinators is to extract all the
@@ -429,7 +429,7 @@
 	  variable name. It can also be written more succinctly using
 	  the pipe-forward operator:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="5"/> 
+	<link rel="import" href="code/json/parse_book.topscript" part="5"/>
 
 	<p>
 	  This style of programming, which omits variable names and
@@ -467,14 +467,14 @@
 	  <idx>values/in JSON data</idx>
 	  <idx>JSON data/constructing values</idx></p>
 
-	<link rel="import" href="code/json/yojson_basic.mli"/> 
+	<link rel="import" href="code/json/yojson_basic.mli"/>
 
 	<p>
 	  We can directly build a JSON value against this type and
 	  use the pretty-printing functions in the
 	  <code>Yojson.Basic</code> module to display JSON output:</p>
 
-	<link rel="import" href="code/json/build_json.topscript" part="1"/> 
+	<link rel="import" href="code/json/build_json.topscript" part="1"/>
 
 	<p>
 	  In the preceding example, we've constructed a simple JSON
@@ -493,7 +493,7 @@
 	  records that you haven't used yet (e.g. <code>Int</code> or
 	  <code>Null</code>):</p>
 
-	<link rel="import" href="code/json/build_json.topscript" part="2"/> 
+	<link rel="import" href="code/json/build_json.topscript" part="2"/>
 
 	<p>
 	  The <code>pretty_to_string</code> function has a more
@@ -504,7 +504,7 @@
 	  structure of the <code>json</code> type to ensure that
 	  they're compatible:</p>
 
-	<link rel="import" href="code/json/build_json.topscript" part="3"/> 
+	<link rel="import" href="code/json/build_json.topscript" part="3"/>
 
 	<p>
 	  In this case, there are no problems. Our
@@ -531,7 +531,7 @@
             mistakenly include a single value instead of a list of
             keys:</p>
 
-          <link rel="import" href="code/json/build_json.topscript" part="4"/> 
+          <link rel="import" href="code/json/build_json.topscript" part="4"/>
 
           <p>
 	    The type error is more verbose than it needs to be,
@@ -540,7 +540,7 @@
             to a shorter form by adding explicit type annotations as a
             hint about your intentions:</p>
 
-          <link rel="import" href="code/json/build_json.topscript" part="5"/> 
+          <link rel="import" href="code/json/build_json.topscript" part="5"/>
 
           <p>
 	    We've annotated <code>person</code> as being of type
@@ -576,7 +576,7 @@
 	  <idx>Yojson library/extended JSON format support</idx>
 	  <idx>JSON data/nonstandard extensions for</idx></p>
 
-	<link rel="import" href="code/json/yojson_safe.mli"/> 
+	<link rel="import" href="code/json/yojson_safe.mli"/>
 
 	<p>
 	  The <code>Safe.json</code> type includes all of the
@@ -591,7 +591,7 @@
 
 	<p>
 	  Yojson supports the following JSON extensions:
-	  
+
 	  <idx>variant types/Yojson support for</idx>
 	  <idx>tuples</idx>
 	  <idx>lit suffix</idx></p>
@@ -637,7 +637,7 @@
 	  <code>Basic.json</code> type by using the
 	  <code>to_basic</code> function as follows:</p>
 
-	<link rel="import" href="code/json/yojson_safe.mli" part="1"/> 
+	<link rel="import" href="code/json/yojson_safe.mli" part="1"/>
       </section>
 
       <section id="automatically-mapping-json-to-ocaml-types" data-type="sect1">
@@ -649,7 +649,7 @@
 	  process is still pretty manual. When you implement larger
 	  specifications, it's much easier to generate the mappings
 	  from JSON schemas to OCaml values more mechanically than
-	  writing conversion functions individually. 
+	  writing conversion functions individually.
 
 	  <idx id="MAPjson">mapping/of JSON to OCaml types</idx>
 	  <idx id="JSONautomap">JSON data/automatic mapping of</idx></p>
@@ -661,7 +661,7 @@
 	  tool.  This will introduce our first <em>Domain Specific
 	    Language</em> that compiles JSON specifications into OCaml
 	  modules, which are then used throughout your application.
-	  
+
 	  <idx>ATDgen Library/installation of</idx>
 	  <idx>Domain Specific Language</idx></p>
 
@@ -674,7 +674,7 @@
             It can all be installed via OPAM:</p>
 	</div>
 
-	<link rel="import" href="code/json/install_atdgen.rawsh"/> 
+	<link rel="import" href="code/json/install_atdgen.rawsh"/>
 
 	<p>
 	  The command-line tool will be installed within your
@@ -711,7 +711,7 @@
 	    <idx>GitHub API</idx>
 	    <idx>OAuth web protocol</idx></p>
 
-          <link rel="import" href="code/json/github.atd"/> 
+          <link rel="import" href="code/json/github.atd"/>
 
           <p>
 	    The ATD specification syntax is deliberately quite
@@ -772,7 +772,7 @@
             contain an OCaml module with types defined that correspond
             to the ATD file:</p>
 
-          <link rel="import" href="code/json/build_github_atd.sh"/> 
+          <link rel="import" href="code/json/build_github_atd.sh"/>
 
           <p>
 	    There is an obvious correspondence to the ATD
@@ -794,7 +794,7 @@
             functions to and from a string. For our preceding example,
             this looks like:</p>
 
-          <link rel="import" href="code/json/github_j_excerpt.mli"/> 
+          <link rel="import" href="code/json/github_j_excerpt.mli"/>
 
           <p>
 	    This is pretty convenient! We've now written a single ATD
@@ -867,7 +867,7 @@
             <a href="http://developer.github.com/v3/orgs/">API
               documentation</a> for GitHub to see what the JSON schema
             for retrieving the organization information looks like.
-            
+
 	    <idx>GitHub API</idx>
 	    <idx>ATDgen Library/example of</idx></p>
 
@@ -878,13 +878,13 @@
             specification of every field that GitHub might send
             back:</p>
 
-          <link rel="import" href="code/json/github_org.atd"/> 
+          <link rel="import" href="code/json/github_org_info/github_org.atd"/>
 
           <p>
 	    Let's build the OCaml type declaration first by calling
             <code>atdgen -t</code> on the specification file:</p>
 
-          <link rel="import" href="code/json/generate_github_org_types.sh"/> 
+          <link rel="import" href="code/json/github_org_info/generate_github_org_types.sh"/>
 
           <p>
 	    The OCaml type has an obvious mapping to the ATD spec,
@@ -893,7 +893,7 @@
             generate this serialization code for us in a new file
             called <code>github_org_j.ml</code>:</p>
 
-          <link rel="import" href="code/json/generate_github_org_json.sh"/> 
+          <link rel="import" href="code/json/github_org_info/generate_github_org_json.sh"/>
 
           <p>
 	    The <code>Github_org_j</code> serializer interface
@@ -919,13 +919,13 @@
             <code>opam install core_extended</code> if you haven't
             installed it previously:</p>
 
-          <link rel="import" href="code/json/github_org_info.ml"/> 
+          <link rel="import" href="code/json/github_org_info/github_org_info.ml"/>
 
           <p>
 	    The following is a short shell script that generates all
             of the OCaml code and also builds the final executable:</p>
-
-          <link rel="import" href="code/json/build_github_org.sh"/> 
+          <link rel="import" href="code/json/github_org_info/jbuild"/>
+          <link rel="import" href="code/json/github_org_info/build_github_org.sh"/>
 
           <p>
 	    You can now run the command-line tool with a single
@@ -933,7 +933,7 @@
             will dynamically fetch the JSON from the web, parse it, and
             render the summary to your console:</p>
 
-          <link rel="import" href="code/json/run_github_org.sh"/> 
+          <link rel="import" href="code/json/github_org_info/run_github_org.sh"/>
 
           <p>
 	    The JSON returned from the <code>janestreet</code> query

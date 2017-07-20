@@ -29,7 +29,7 @@
       <p>
 	We'll start by describing the two basic approaches for
 	reporting errors in OCaml: error-aware return types and
-	exceptions. 
+	exceptions.
 
 	<idx id="erraware">error-aware return types</idx>
 	<idx id="EHeraware">error handling/error-aware return types</idx></p>
@@ -268,7 +268,7 @@
             manage.</p>
 
 	  <div data-type="note">
-	    <h1>Monads and <code>Let_syntax</code></h1> 
+	    <h1>Monads and <code>Let_syntax</code></h1>
 	    <p>
 	      We can make this look a little bit more ordinary by
 	      using a syntax extension that's designed specifically
@@ -415,14 +415,14 @@
 	    OCaml can't always generate a useful textual representation
             of an exception. For example:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="23"/> 
+          <link rel="import" href="code/error-handling/main.topscript" part="23"/>
 
           <p>
 	    But if we declare the exception (and the types it depends
 	    on) using <code>[@@deriving sexp]</code>, we'll get something with
 	    more information:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="24"/> 
+          <link rel="import" href="code/error-handling/main.topscript" part="24"/>
 
           <p>
 	    The period in front of <code>Crossed_bounds</code> is there
@@ -578,7 +578,7 @@
 	    <code>In_channel.with_file</code> is built on top
             of <code>protect</code> so that it can clean up after
             itself in the presence of exceptions.</p>
-	</section> 
+	</section>
 
 	<section id="catching-specific-exceptions" data-type="sect2">
           <h2>Catching Specific Exceptions</h2>
@@ -649,7 +649,7 @@
 	    do by using the exception-free
             function, <code>List.Assoc.find</code>, instead:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="34"/> 
+          <link rel="import" href="code/error-handling/main.topscript" part="34"/>
 	</section>
 
 	<section id="backtraces" data-type="sect2">
@@ -670,6 +670,7 @@
             backtrace that will provide some information about where
             the error occurred and the stack of function calls that
             were in place at the time of the error:</p>
+          <link rel="import" href="code/error-handling/jbuild"/>
           <link rel="import" href="code/error-handling/build_blow_up.errsh"/>
 
           <p>
@@ -694,6 +695,7 @@
             you can turn backtraces off by setting the
             <code>OCAMLRUNPARAM</code> environment variable to be
             empty:</p>
+          <link rel="import" href="code/error-handling/jbuild"/>
           <link rel="import" href="code/error-handling/build_blow_up_notrace.errsh"/>
 
           <p>
@@ -721,6 +723,7 @@
           <p>
 	    If we run this with stacktraces on, the benchmark
             results look like this:</p>
+          <link rel="import" href="code/error-handling/jbuild"/>
           <link rel="import" href="code/error-handling/run_exn_cost.sh"/>
 
           <p>

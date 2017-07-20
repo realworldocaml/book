@@ -215,7 +215,7 @@ let make_chapter_page ?pygmentize ?(run_nondeterministic=false)
 	 return (Scripts.find_exn scripts ~filename:i.href ?part:i.part)
       | Some alt ->
 	 Reader.file_contents (repo_root/"book"/alt) >>| fun x ->
-	 `Other x
+      Scripts.exn_of_filename alt x
     ) >>=
     Scripts.script_part_to_html ?pygmentize
   in
