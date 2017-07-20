@@ -115,46 +115,44 @@
 
       <link rel="import" href="code/files-modules-and-programs/freq/simple_build.sh"/>
 
-      <p>This uses <span class="command"><em>ocamlfind</em></span>,
-      a tool which itself invokes other parts of the OCaml
-      toolchain (in this case, <span class="command"><em>ocamlc</em></span>) with the appropriate flags
-      to link in particular libraries and packages. Here,
-      <code>-package core</code> is asking <span class="command"><em>ocamlfind</em></span> to link in the Core
-      library; <code>-linkpkg</code> asks ocamlfind to link in the
-      packages as is necessary for building an executable, while
-      <code>-thread</code> turns on threading support (which is
+      <p>This uses <span class="command"><em>ocamlfind</em></span>, a
+      tool which itself invokes other parts of the OCaml toolchain (in
+      this case, <span class="command"><em>ocamlc</em></span>) with
+      the appropriate flags to link in particular libraries and
+      packages. Here, <code>-package core</code> is
+      asking <span class="command"><em>ocamlfind</em></span> to link
+      in the Core library; <code>-linkpkg</code> asks ocamlfind to
+      link in the packages as is necessary for building an executable,
+      while <code>-thread</code> turns on threading support (which is
       required for Core).
 
       <idx>threads/turning on with -thread</idx>
       <idx data-primary-sortas="linkpkg">-linkpkg</idx></p>
 
       <p>While this works well enough for a one-file project, more
-      complicated projects require a tool to orchestrate the build.
-      One good tool for this task is <span class="command"><em>ocamlbuild</em></span>, which is shipped with
-      the OCaml compiler. We'll talk more about <span class="command"><em>ocamlbuild</em></span> in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
-      Checking</a>, but for now, we'll just use a simple wrapper
-      around <span class="command"><em>ocamlbuild</em></span>
-      called <span class="command"><em>corebuild</em></span> that
-      sets build parameters appropriately for building against
-      <code>Core</code> and its related libraries, including
-      <code>Core_kernel</code>.
-
-      <idx>corebuild</idx></p>
+	complicated projects require a tool to orchestrate the build.
+	One good tool for this task
+	is <span class="command"><em>jbuilder</em></span>. To
+	invoke <span class="command"><em>jbuilder</em></span>, you
+	need to have a <code>jbuild</code> file that specifies the
+	details of the build.  <idx>jbuilder</idx></p>
 
       <link rel="import" href="code/files-modules-and-programs/freq-obuild/jbuild"/>
+
+      <p>With that in place, we can
+	invoke <span class="command"><em>jbuilder</em></span> as
+	follows.
+
       <link rel="import" href="code/files-modules-and-programs/freq-obuild/build.sh"/>
 
-      <p>If we'd invoked <span class="command"><em>corebuild</em></span> with a target of
-      <code>freq.native</code> instead of <code>freq.byte</code>,
-      we would have gotten native code instead.</p>
-
       <p>We can run the resulting executable from the command line.
-      The following line extracts strings from the <span class="command"><em>ocamlopt</em></span> binary, reporting the most
-      frequently occurring ones. Note that the specific results will
-      vary from platform to platform, since the binary itself will
-      differ between platforms:
+      The following line extracts strings from
+      the <span class="command"><em>ocamlopt</em></span> binary,
+      reporting the most frequently occurring ones. Note that the
+      specific results will vary from platform to platform, since the
+      binary itself will differ between platforms:
 
-	<idx>OCaml toolchain/ocamlbuild</idx>
+	<idx>OCaml toolchain/jbuilder</idx>
 	<idx>native-code compiler/vs. bytecode compiler</idx>
 	<idx>bytecode compiler/vs. native-code compiler</idx>
 	<idx>OCaml toolchain/ocamlopt</idx>
@@ -169,36 +167,44 @@
       <div data-type="note">
         <h1>Bytecode Versus Native Code</h1>
 
-        <p>OCaml ships with two compilers: the <span class="command"><em>ocamlc</em></span> bytecode compiler and the
-        <span class="command"><em>ocamlopt</em></span> native-code
-        compiler. Programs compiled with <span class="command"><em>ocamlc</em></span> are interpreted by a
-        virtual machine, while programs compiled with <span class="command"><em>ocamlopt</em></span> are compiled to native
-        machine code to be run on a specific operating system and
-        processor architecture. With <span class="command"><em>ocamlbuild</em></span>, targets ending with
-        <code>.byte</code> are build as bytecode executables, and
-        those ending with <code>.native</code> are built as native
-        code.</p>
+        <p>OCaml ships with two compilers:
+        the <span class="command"><em>ocamlc</em></span> bytecode
+        compiler and
+        the <span class="command"><em>ocamlopt</em></span> native-code
+        compiler. Programs compiled
+        with <span class="command"><em>ocamlc</em></span> are
+        interpreted by a virtual machine, while programs compiled
+        with <span class="command"><em>ocamlopt</em></span> are
+        compiled to native machine code to be run on a specific
+        operating system and processor
+        architecture. With <span class="command"><em>jbuilder</em></span>,
+        targets ending with <code>.bc</code> are build as bytecode
+        executables, and those ending with <code>.exe</code> are built
+        as native code.</p>
 
         <p>Aside from performance, executables generated by the two
         compilers have nearly identical behavior. There are a few
         things to be aware of. First, the bytecode compiler can be
         used on more architectures, and has some tools that are not
         available for native code. For example, the OCaml debugger
-        only works with bytecode (although <span class="command"><em>gdb</em></span>, the GNU Debugger, works with
-        OCaml native-code applications). The bytecode compiler is
-        also quicker than the native-code compiler. In addition, in
-        order to run a bytecode executable, you typically need to
-        have OCaml installed on the system in question. That's not
-        strictly required, though, since you can build a bytecode
-        executable with an embedded runtime, using the
-        <code>-custom</code> compiler flag.</p>
+        only works with bytecode
+        (although <span class="command"><em>gdb</em></span>, the GNU
+        Debugger, works with OCaml native-code applications). The
+        bytecode compiler is also quicker than the native-code
+        compiler. In addition, in order to run a bytecode executable,
+        you typically need to have OCaml installed on the system in
+        question. That's not strictly required, though, since you can
+        build a bytecode executable with an embedded runtime, using
+        the <code>-custom</code> compiler flag.</p>
 
-        <p>As a general matter, production executables should
-        usually be built using the native-code compiler, but it
-        sometimes makes sense to use bytecode for development
-        builds. And, of course, bytecode makes sense when targeting
-        a platform not supported by the native-code compiler. We'll
-        cover both compilers in more detail in <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code" data-type="xref">The Compiler Backend Byte Code And Native
+        <p>As a general matter, production executables should usually
+        be built using the native-code compiler, but it sometimes
+        makes sense to use bytecode for development builds. And, of
+        course, bytecode makes sense when targeting a platform not
+        supported by the native-code compiler. We'll cover both
+        compilers in more detail
+        in <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
+        data-type="xref">The Compiler Backend Byte Code And Native
         Code</a>.</p>
       </div>
     </section>
@@ -250,11 +256,11 @@
 
 	<idx>modules/naming of</idx></p>
 
-      <p>We can now rewrite <code>freq.ml</code> to use
-      <code>Counter</code>. Note that the resulting code can still
-      be built with <span class="command"><em>ocamlbuild</em></span>, which will discover
-      dependencies and realize that <code>counter.ml</code> needs
-      to be compiled:</p>
+      <p>We can now rewrite <code>freq.ml</code> to
+      use <code>Counter</code>. Note that the resulting code can still
+      be built with <span class="command"><em>jbuilder</em></span>,
+      which will discover dependencies and realize
+      that <code>counter.ml</code> needs to be compiled.</p>
 
       <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml"/>
       </section>
@@ -301,30 +307,31 @@
       <code>counter.ml</code> as follows:</p>
       <link rel="import" href="code/files-modules-and-programs/freq-with-sig/counter.mli"/>
 
-      <p>Note that <span class="command"><em>ocamlbuild</em></span>
+      <p>Note that <span class="command"><em>jbuilder</em></span>
       will detect the presence of the <code>mli</code> file
       automatically and include it in the build.</p>
 
-      <div data-type="note">
-        <h1>Autogenerating mli Files</h1>
+      <!-- <div data-type="note"> -->
+      <!--   <h1>Autogenerating mli Files</h1> -->
 
-        <p>If you don't want to construct an <code>mli</code>
-        entirely by hand, you can ask OCaml to autogenerate one for
-        you from the source, which you can then adjust to fit your
-        needs. Here's how you can do that using <em>corebuild</em>:
+      <!--   <p>If you don't want to construct an <code>mli</code> -->
+      <!--   entirely by hand, you can ask OCaml to autogenerate one for -->
+      <!--   you from the source, which you can then adjust to fit your -->
+      <!--   needs. Here's how you can do that using <em>corebuild</em>: -->
 
-        <idx>files/mli files</idx></p>
+      <!--   <idx>files/mli files</idx></p> -->
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-counter/infer_mli.sh"/>
+      <!--   <link rel="import" -->
+      <!--   href="code/files-modules-and-programs/freq-with-counter/infer_mli.sh"/> -->
 
-        <p>The generated code is basically equivalent to
-        the <code>mli</code> that we wrote by hand but is a bit uglier
-        and more verbose and, of course, has no comments. In general,
-        autogenerated <code>mli</code>s are only useful as a starting
-        point. In OCaml, the <code>mli</code> is the key place where
-        you present and document your interface, and there's no
-        replacement for careful human editing and organization.</p>
-      </div>
+      <!--   <p>The generated code is basically equivalent to -->
+      <!--   the <code>mli</code> that we wrote by hand but is a bit uglier -->
+      <!--   and more verbose and, of course, has no comments. In general, -->
+      <!--   autogenerated <code>mli</code>s are only useful as a starting -->
+      <!--   point. In OCaml, the <code>mli</code> is the key place where -->
+      <!--   you present and document your interface, and there's no -->
+      <!--   replacement for careful human editing and organization.</p> -->
+      <!-- </div> -->
 
       <p>To hide the fact that frequency counts are represented as
       association lists, we'll need to make the type of frequency
@@ -353,7 +360,6 @@
 
       <p>If we now try to compile <code>freq.ml</code>, we'll get
       the following error:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/jbuild"/>
       <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/build.errsh"/>
 
       <p>This is because <code>freq.ml</code> depends on the fact
@@ -676,8 +682,7 @@
         <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli" part="1"/>
 
         <p>and we try to compile, we'll get the following
-        error:</p>
-        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/jbuild"/>
+        error.</p>
         <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.errsh"/>
         </section>
 
@@ -720,8 +725,7 @@
 
         <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/counter.mli" part="1"/>
 
-        <p>will lead to a compilation error:</p>
-        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/jbuild"/>
+        <p>will lead to a compilation error.</p>
         <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/build.errsh"/>
 
         <p>Order is similarly important to other type declarations,
@@ -754,31 +758,29 @@
         modules are possible but are a rare case, and we won't
         discuss them further here.</p>
 
-        <p>The simplest example of a forbidden circular reference
-        is a module referring to its own module name. So, if we
-        tried to add a reference to <code>Counter</code> from
-        within <code>counter.ml</code>:</p>
+        <p>The simplest example of a forbidden circular reference is a
+        module referring to its own module name. So, if we tried to
+        add a reference to <code>Counter</code> from
+        within <code>counter.ml</code>.</p>
 
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/counter.ml" part="1"/>
 
         <p>we'll see this error when we try to build:</p>
-        <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/jbuild"/>
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic1/build.errsh"/>
 
         <p>The problem manifests in a different way if we create
         cyclic references between files. We could create such a
         situation by adding a reference to <code>Freq</code> from
         <code>counter.ml</code>, e.g., by adding the following
-        line:</p>
+        line.</p>
 
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/counter.ml" part="1"/>
 
-        <p>In this case, <span class="command"><em>ocamlbuild</em></span> (which is invoked by
-        the <span class="command"><em>corebuild</em></span> script)
-        will notice the error and complain explicitly about the
-        cycle:</p>
-        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/jbuild"/>
-        <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.errsh"/>
+        <p>In this case, 
+	  <span class="command"><em>jbuilder</em></span> will
+        notice the error and complain explicitly about the cycle:</p>
+        <link rel="import"
+        href="code/files-modules-and-programs/freq-cyclic2/build.errsh"/>
       </section>
     </section>
 

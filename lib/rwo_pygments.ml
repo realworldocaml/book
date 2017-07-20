@@ -51,7 +51,7 @@ let really_pygmentize ~add_attrs lang contents =
     []
   in
   Process.create ~prog:"pygmentize"
-    ~args:(arg @  ["-l"; lang_to_string lang; "-f"; "html"]) ()
+    ~args:(arg @  ["-v";"-l"; lang_to_string lang; "-f"; "html"]) ()
   >>= fun proc ->
   match proc with
   | Error e -> raise (Error.to_exn e)
@@ -86,6 +86,7 @@ let really_pygmentize ~add_attrs lang contents =
     )
 
 let pygmentize ?(add_attrs=[]) ?(pygmentize=true) lang contents =
+  (* ignore pygmentize; *)
   if pygmentize then (
     really_pygmentize ~add_attrs lang contents )
   else

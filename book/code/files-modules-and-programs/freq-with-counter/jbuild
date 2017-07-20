@@ -1,7 +1,6 @@
-(jbuild_version 1)
-
 (executable
-  ((name counter)
-   (libraries (core_kernel))
-  )
-)
+ ((name freq)
+  (libraries (core_kernel))
+  ))
+
+(jbuild_version 1)
