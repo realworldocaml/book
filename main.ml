@@ -210,7 +210,9 @@ let phrase_role phrase = match phrase.parsed with
 let verbose = ref false
 let () = Hashtbl.add Toploop.directive_table "verbose"
     (Toploop.Directive_bool (fun x -> verbose := x))
-;;
+let silent = ref false
+let () = Hashtbl.add Toploop.directive_table "silent"
+    (Toploop.Directive_bool (fun x -> silent := x))
 
 module Async_autorun = struct
   (* Inspired by Utop auto run rewriter *)
@@ -413,7 +415,10 @@ let eval_phrases ~run_nondeterministic ~fname ~dry_run fcontents =
     end;
     Format.pp_print_flush ppf ();
     capture Chunk.Raw;
-    Phrase_code (cleanup_lines (List.rev !lines))
+    if !silent then
+      Phrase_code []
+    else
+      Phrase_code (cleanup_lines (List.rev !lines))
   in
   let parser = init_parser ~fname fcontents in
   if dry_run then  (
