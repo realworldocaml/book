@@ -167,7 +167,7 @@ Set.equal s1 s2;;
 
 [@@@part "20"];;
 s1 = s2;;
-[%%expect{|Exception: Invalid_argument "compare: functional value".|}];;
+[%%expect{|Exception: (Invalid_argument "compare: functional value").|}];;
 
 [@@@part "21"];;
 Set.to_tree s1 = Set.to_tree s2;;
