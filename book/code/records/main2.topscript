@@ -271,8 +271,8 @@ let logon = { Logon.
 ;;
 [%%expect ocaml {|
 val logon : Logon.t =
-  {Logon.session_id = "26685"; time = <abstr>; user = "yminsky";
-   credentials = "Xy2d9W"}
+  {Logon.session_id = "26685"; time = 2017-07-21 20:41:14.617611-04:00;
+   user = "yminsky"; credentials = "Xy2d9W"}
 |}];;
 show_field Logon.Fields.user Fn.id logon;;
 [%%expect ocaml {|- : string = "user: yminsky"|}];;

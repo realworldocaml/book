@@ -45,7 +45,7 @@ let rec x = lazy (force x + 1);;
 [%%expect ocaml {|val x : int lazy_t = <lazy>|}];;
 [@@@part "3"];;
 force x;;
-[%%expect{|Exception: CamlinternalLazy.Undefined.|}];;
+[%%expect{|Exception: Lazy.Undefined.|}];;
 [@@@part "5"];;
 let lazy_memo_rec f_norec x =
   let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in

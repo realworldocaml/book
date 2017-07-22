@@ -64,7 +64,7 @@ let ratio x y =
 ;;
 [%%expect ocaml {|val ratio : int -> int -> float = <fun>|}];;
 ratio 4 7;;
-[%%expect ocaml {|- : float = 0.571428571428571397|}];;
+[%%expect ocaml {|- : float = 0.571428571429|}];;
 [@@@part "7"];;
 let sum_if_true test first second =
   (if test first then first else 0)
@@ -198,7 +198,7 @@ ocaml {|val my_favorite_language : 'a list -> 'a = <fun>|}];;
 my_favorite_language ["English";"Spanish";"French"];;
 [%%expect ocaml {|- : string = "English"|}];;
 my_favorite_language [];;
-[%%expect{|Exception: Match_failure ("//toplevel//", 2, 25).|}];;
+[%%expect{|Exception: "Match_failure //toplevel//:2:25".|}];;
 [@@@part "33"];;
 let my_favorite_language languages =
   match languages with
@@ -369,9 +369,9 @@ let rsum = create ();;
 List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
 [%%expect ocaml {|- : unit = ()|}];;
 mean rsum;;
-[%%expect ocaml {|- : float = 1.33333333333333326|}];;
+[%%expect ocaml {|- : float = 1.33333333333|}];;
 stdev rsum;;
-[%%expect ocaml {|- : float = 3.94405318873307698|}];;
+[%%expect ocaml {|- : float = 3.94405318873|}];;
 [@@@part "54"];;
 let x = { contents = 0 };;
 [%%expect ocaml {|val x : int ref = {contents = 0}|}];;
@@ -457,4 +457,4 @@ let find_first_negative_entry array =
 ;;
 [%%expect ocaml {|val find_first_negative_entry : int array -> int option = <fun>|}];;
 find_first_negative_entry [|1;2;0;3|];;
-[%%expect{|Exception: Invalid_argument "index out of bounds".|}];;
+[%%expect{|Exception: (Invalid_argument "index out of bounds").|}];;

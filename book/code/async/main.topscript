@@ -20,18 +20,6 @@ In_channel.read_all "test.txt";;
 [@@@part "3"];;
 #silent true;;
 #require "async";;
-[%%expect{|
-/Users/yminsky/.opam/4.04.1/lib/async_kernel: added to search path
-/Users/yminsky/.opam/4.04.1/lib/async_kernel/async_kernel.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/async_rpc_kernel: added to search path
-/Users/yminsky/.opam/4.04.1/lib/async_rpc_kernel/async_rpc_kernel.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/async_unix: added to search path
-/Users/yminsky/.opam/4.04.1/lib/async_unix/async_unix.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/async_extra: added to search path
-/Users/yminsky/.opam/4.04.1/lib/async_extra/async_extra.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/async: added to search path
-/Users/yminsky/.opam/4.04.1/lib/async/async.cma: loaded
-|}];;
 #silent false;;
 open Async;;
 Reader.file_contents;;
@@ -395,7 +383,7 @@ maybe_raise ();;
 
 
 
-[%%expect{|Exception: Async_kernel__Monitor.Error_ _.|}];;
+[%%expect{|Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async")).|}];;
 [@@@part "32"];;
 let handle_error () =
   try
@@ -418,7 +406,7 @@ handle_error ();;
 
 
 
-[%%expect{|Exception: Async_kernel__Monitor.Error_ _.|}];;
+[%%expect{|Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async")).|}];;
 [@@@part "33"];;
 let handle_error () =
   try_with (fun () -> maybe_raise ())
@@ -448,7 +436,7 @@ blow_up ();;
 blow_up ();;
 
 
-[%%expect{|Exception: Async_kernel__Monitor.Error_ _.|}];;
+[%%expect{|Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor")).|}];;
 [@@@part "35"];;
 [@@@part "36"];;
 [@@@part "37"];;

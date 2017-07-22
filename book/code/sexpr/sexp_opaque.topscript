@@ -19,8 +19,8 @@ Error: Unbound value no_converter_of_sexp
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 [%%expect ocaml {|
 type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
 |}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;
@@ -29,8 +29,8 @@ sexp_of_t { a = (3,4); b = "foo" } ;;
 t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
 [%%expect{|
 Exception:
-Sexplib0__Sexp.Of_sexp_error
- (Failure "opaque_of_sexp: cannot convert opaque values", whatever).
+(Sexplib.Conv.Of_sexp_error
+ (Failure "opaque_of_sexp: cannot convert opaque values") whatever).
 |}];;
 [@@@part "4"];;
 type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;

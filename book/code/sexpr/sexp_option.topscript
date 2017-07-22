@@ -11,8 +11,8 @@ open Core_kernel;;
 type t = { a: int option; b: string } [@@deriving sexp] ;;
 [%%expect ocaml {|
 type t = { a : int option; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
 |}];;
 sexp_of_t { a = None; b = "hello" } ;;
 [%%expect ocaml {|- : Sexp.t = ((a ()) (b hello))|}];;

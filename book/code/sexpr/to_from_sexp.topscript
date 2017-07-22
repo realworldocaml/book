@@ -9,7 +9,7 @@
 open Core_kernel;;
 [@@@part "0.5"];;
 Int.sexp_of_t 3;;
-[%%expect ocaml {|- : Sexp.t = 3|}];;
+[%%expect ocaml {|- : Sexplib0.Sexp.t = 3|}];;
 String.sexp_of_t "hello";;
 [%%expect ocaml {|- : Sexp.t = hello|}];;
 Exn.sexp_of_t (Invalid_argument "foo");;
@@ -27,6 +27,6 @@ List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
 [%%expect{|
 Exception:
-Sexplib0__Sexp.Of_sexp_error (Failure "int_of_sexp: (Failure int_of_string)",
+(Sexplib.Conv.Of_sexp_error (Failure "int_of_sexp: (Failure int_of_string)")
  three).
 |}];;

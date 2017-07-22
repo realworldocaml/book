@@ -166,7 +166,7 @@ List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
 [%%expect ocaml {|- : int list = [3; 2; 3]|}];;
 [@@@part "16"];;
 List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
-[%%expect{|Exception: Invalid_argument "length mismatch in map2_exn: 3 <> 4 ".|}];;
+[%%expect{|Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ").|}];;
 [@@@part "17"];;
 List.fold;;
 [%%expect ocaml {|- : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum = <fun>|}];;
@@ -369,7 +369,7 @@ let rec destutter = function
 [%%expect ocaml {|- : 'a -> 'a -> bool = <fun>|}];;
 [@@@part "47"];;
 (fun x -> x + 1) = (fun x -> x + 1);;
-[%%expect{|Exception: Invalid_argument "compare: functional value".|}];;
+[%%expect{|Exception: (Invalid_argument "compare: functional value").|}];;
 [@@@part "48"];;
 let rec count_some list =
   match list with
