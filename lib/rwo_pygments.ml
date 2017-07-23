@@ -86,7 +86,6 @@ let really_pygmentize ~add_attrs lang contents =
     )
 
 let pygmentize ?(add_attrs=[]) ?(pygmentize=true) lang contents =
-  (* ignore pygmentize; *)
   if pygmentize then (
     really_pygmentize ~add_attrs lang contents )
   else
