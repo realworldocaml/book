@@ -35,13 +35,14 @@
       <idx id="FILEsnglprog">files/single-file programs</idx>
       <idx id="Psingfil">programs/single-file programs</idx></p>
 
-      <p>This implementation will use two functions from the
-      <code>List.Assoc</code> module, which provides utility
-      functions for interacting with association lists, i.e., lists
-      of key/value pairs. In particular, we use the function
-      <code>List.Assoc.find</code>, which looks up a key in an
-      association list; and <code>List.Assoc.add</code>, which adds
-      a new binding to an association list, as shown here:
+      <p>This implementation will use two functions from
+      the <code>List.Assoc</code> module, which provides utility
+      functions for interacting with <em>association
+      lists</em>, <em>i.e.</em>, lists of key/value pairs. In
+      particular, we use the function <code>List.Assoc.find</code>,
+      which looks up a key in an association list;
+      and <code>List.Assoc.add</code>, which adds a new binding to an
+      association list, as shown here:
 
       <idx>List.Assoc module/List.Assoc.add</idx>
       <idx>List.Assoc module/List.Assoc.find</idx>
@@ -123,8 +124,8 @@
       asking <span class="command"><em>ocamlfind</em></span> to link
       in the Core library; <code>-linkpkg</code> asks ocamlfind to
       link in the packages as is necessary for building an executable,
-      while <code>-thread</code> turns on threading support (which is
-      required for Core).
+      while <code>-thread</code> turns on threading support, which is
+      required for Core.
 
       <idx>threads/turning on with -thread</idx>
       <idx data-primary-sortas="linkpkg">-linkpkg</idx></p>
@@ -145,12 +146,12 @@
 
       <link rel="import" href="code/files-modules-and-programs/freq-obuild/build.sh"/>
 
-      <p>We can run the resulting executable from the command line.
-      The following line extracts strings from
-      the <span class="command"><em>ocamlopt</em></span> binary,
-      reporting the most frequently occurring ones. Note that the
-      specific results will vary from platform to platform, since the
-      binary itself will differ between platforms:
+      <p>We can run the resulting executable, <code>freq.bc</code>,
+      from the command line.  The following invocation extracts
+      strings from the <span class="command"><em>ocamlopt</em></span>
+      binary, reporting the most frequently occurring ones. Note that
+      the specific results will vary from platform to platform, since
+      the binary itself will differ between platforms.
 
 	<idx>OCaml toolchain/jbuilder</idx>
 	<idx>native-code compiler/vs. bytecode compiler</idx>
@@ -178,7 +179,7 @@
         compiled to native machine code to be run on a specific
         operating system and processor
         architecture. With <span class="command"><em>jbuilder</em></span>,
-        targets ending with <code>.bc</code> are build as bytecode
+        targets ending with <code>.bc</code> are built as bytecode
         executables, and those ending with <code>.exe</code> are built
         as native code.</p>
 
@@ -241,28 +242,35 @@
       efficient) implementations once we have a clear interface to
       program against.</p>
 
-      <p>We'll start by creating a file, <code>counter.ml</code>,
-      that contains the logic for maintaining the association list
-      used to represent the frequency counts. The key function,
-      called <code>touch</code>, bumps the frequency count of a
-      given line by one:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-counter/counter.ml"/>
+      <p>We'll start by creating a file, <code>counter.ml</code>, that
+      contains the logic for maintaining the association list used to
+      represent the frequency counts. The key function,
+      called <code>touch</code>, bumps the frequency count of a given
+      line by one.</p> 
+
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq-with-counter/counter.ml"/>
 
       <p>The file <em>counter.ml</em> will be compiled into a
       module named <code>Counter</code>, where the name of the
       module is derived automatically from the filename. The module
       name is capitalized even if the file is not. Indeed, module
-      names are always capitalized..
+      names are always capitalized.
 
 	<idx>modules/naming of</idx></p>
 
       <p>We can now rewrite <code>freq.ml</code> to
-      use <code>Counter</code>. Note that the resulting code can still
+      use <code>Counter</code>. 
+
+      <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml"/>
+
+      <p>The resulting code can still
       be built with <span class="command"><em>jbuilder</em></span>,
       which will discover dependencies and realize
       that <code>counter.ml</code> needs to be compiled.</p>
+      </p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml"/>
+      <link rel="import" href="code/files-modules-and-programs/freq-with-counter/build.sh"/>
       </section>
 
     <section id="signatures-and-abstract-types" data-type="sect1">
@@ -303,9 +311,11 @@
       follows:</p>
       <link rel="import" href="code/files-modules-and-programs/val.syntax"/>
 
-      <p>Using this syntax, we can write the signature of
-      <code>counter.ml</code> as follows:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-sig/counter.mli"/>
+      <p>Using this syntax, we can write the signature
+      of <code>counter.ml</code> as follows. </p> 
+
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq-with-sig/counter.mli"/>
 
       <p>Note that <span class="command"><em>jbuilder</em></span>
       will detect the presence of the <code>mli</code> file
@@ -346,12 +356,16 @@
       there would be no way to create a <code>Counter.t</code> or
       get data out of one.</p>
 
-      <p>We also used this opportunity to document the module. The
-      <code>mli</code> file is the place where you specify your
-      module's interface, and as such is a natural place to put
-      documentation. We started our comments with a double asterisk
-      to cause them to be picked up by the <span class="command"><em>ocamldoc</em></span> tool when generating API
-      documentation. We'll discuss <span class="command"><em>ocamldoc</em></span> more in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking" data-type="xref">The Compiler Frontend Parsing And Type
+      <p>We also used this opportunity to document the
+      module. The <code>mli</code> file is the place where you specify
+      your module's interface, and as such is a natural place to put
+      documentation. We started our comments with a double asterisk to
+      cause them to be picked up by
+      the <span class="command"><em>odoc</em></span> tool when
+      generating API documentation. We'll
+      discuss <span class="command"><em>odoc</em></span> more
+      in <a href="22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking"
+      data-type="xref">The Compiler Frontend Parsing And Type
       Checking</a>.</p>
 
       <p>Here's a rewrite of <code>counter.ml</code> to match the
