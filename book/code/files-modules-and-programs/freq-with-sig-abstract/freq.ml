@@ -1,7 +1,7 @@
 open Core_kernel
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:Counter.empty ~f:Counter.touch
+  In_channel.fold_lines In_channel.stdin ~init:[] ~f:Counter.touch
 
 let () =
   build_counts ()

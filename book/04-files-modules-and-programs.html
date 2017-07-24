@@ -370,26 +370,40 @@
 
       <p>Here's a rewrite of <code>counter.ml</code> to match the
       new <code>counter.mli</code>:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/counter.ml"/>
+
+      <link rel="import"
+      href="code/files-modules-and-programs/freq-with-sig-abstract/counter.ml"/>
 
       <p>If we now try to compile <code>freq.ml</code>, we'll get
       the following error:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract/build.errsh"/>
 
-      <p>This is because <code>freq.ml</code> depends on the fact
-      that frequency counts are represented as association lists, a
-      fact that we've just hidden. We just need to fix
-      <code>build_counts</code> to use <code>Counter.empty</code>
-      instead of <code>[]</code> and <code>Counter.to_list</code>
-      to get the association list out at the end for processing and
-      printing. The resulting implementation is shown below:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml"/>
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq-with-sig-abstract/build.errsh"/>
 
-      <p>Now we can turn to optimizing the implementation of
-      <code>Counter</code>. Here's an alternate and far more
+      <p>This is because <code>freq.ml</code> depends on the fact that
+      frequency counts are represented as association lists, a fact
+      that we've just hidden. We just need to
+      fix <code>build_counts</code> to use <code>Counter.empty</code>
+      instead of <code>[]</code> and to
+      use <code>Counter.to_list</code> to convert the completed counts
+      to an association list. The resulting implementation is shown
+      below.</p>
+
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml"/>
+
+      With this implementation, the build now succeeds!
+
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/build.sh"/>
+
+      <p>Now we can turn to optimizing the implementation
+      of <code>Counter</code>. Here's an alternate and far more
       efficient implementation, based on the <code>Map</code> data
-      structure in <code>Core_kernel</code>:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq-fast/counter.ml"/>
+      structure in <code>Core_kernel</code>.</p> 
+      
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
       <p>Note that in the preceding example we use
       <code>String.Map</code> in some places and simply
@@ -413,21 +427,24 @@
       <idx>concrete types</idx>
       <idx>signatures/concrete types</idx></p>
 
-      <p>For example, imagine we wanted to add a function to
-      <code>Counter</code> for returning the line with the median
-      frequency count. If the number of lines is even, then there
-      is no precise median, and the function would return the lines
-      before and after the median instead. We'll use a custom type
-      to represent the fact that there are two possible return
+      <p>For example, imagine we wanted to add a function
+      to <code>Counter</code> for returning the line with the median
+      frequency count. If the number of lines is even, then there is
+      no precise median, and the function would return the lines
+      before and after the median instead. We'll use a custom type to
+      represent the fact that there are two possible return
       values. Here's a possible implementation:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq-median/counter.ml" part="1"/>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/freq-median/counter.ml" part="1"/>
 
-      <p>In the preceding implementation, we use
-      <code>failwith</code> to throw an exception for the case of
-      the empty list. We'll discuss exceptions more in <a href="07-error-handling.html#error-handling" data-type="xref">Error Handling</a>. Note also that the function
-      <code>fst</code> simply returns the first element of any
-      two-tuple.</p>
+      <p>In the preceding implementation, we use <code>failwith</code>
+      to throw an exception for the case of the empty list. We'll
+      discuss exceptions more
+      in <a href="07-error-handling.html#error-handling"
+      data-type="xref">Error Handling</a>. Note also that the
+      function <code>fst</code> simply returns the first element of
+      any two-tuple.</p>
 
       <p>Now, to expose this usefully in the interface, we need to
       expose both the function and the type <code>median</code> with
@@ -436,7 +453,8 @@
       clash here. Adding the following two lines
       to <code>counter.mli</code> does the trick.</p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq-median/counter.mli" part="1"/>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/freq-median/counter.mli" part="1"/>
 
       <p>The decision of whether a given type should be abstract or
       concrete is an important one. Abstract types give you more
@@ -586,11 +604,13 @@
 
         <li style="list-style: none; display: inline">
 
-          <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_1.ml" part="1"/>
+          <link rel="import" 
+		href="code/files-modules-and-programs/freq-median/use_median_1.ml" part="1"/>
 
           <p>you could write:</p>
 
-          <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_2.ml" part="1"/>
+          <link rel="import" 
+		href="code/files-modules-and-programs/freq-median/use_median_2.ml" part="1"/>
 
           <p>Because the module name <code>C</code> only exists for
           a short scope, it's easy to read and remember what

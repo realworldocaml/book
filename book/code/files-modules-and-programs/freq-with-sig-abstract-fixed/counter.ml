@@ -6,10 +6,10 @@ let empty = []
 
 let to_list x = x
 
-let touch t s =
-  let count =
-    match Map.find t s with
+let touch counts line =
+  let count = 
+    match List.Assoc.find ~equal:String.equal counts line with
     | None -> 0
     | Some x -> x
   in
-  Map.add t ~key:s ~data:(count + 1)
+  List.Assoc.add ~equal:String.equal counts line (count + 1)
