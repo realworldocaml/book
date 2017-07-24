@@ -1,4 +1,4 @@
-
+open! Core_kernel
 
 [@@@part "1"]
 let print_median m =

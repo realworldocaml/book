@@ -1,5 +1,5 @@
-(executable
- ((name freq)
+(executables
+ ((names (freq use_median_1 use_median_2))
   (libraries (core_kernel))
   ))
 
