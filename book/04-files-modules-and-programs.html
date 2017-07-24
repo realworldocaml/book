@@ -544,7 +544,7 @@
       <idx>modules/opening</idx></p>
 
       <p>We've encountered <code>open</code> already, specifically
-      where we've written <code>open Core_kernel.Std</code> to get
+      where we've written <code>open Core_kernel</code> to get
       access to the standard definitions in the
       <code>Core_kernel</code> library. In general, opening a
       module adds the contents of that module to the environment
@@ -572,7 +572,7 @@
           <p>Opening modules at the toplevel of a module should be
           done quite sparingly, and generally only with modules
           that have been specifically designed to be opened, like
-          <code>Core_kernel.Std</code> or
+          <code>Core_kernel</code> or
           <code>Option.Monad_infix</code>.</p>
         </li>
 
@@ -686,7 +686,7 @@
       <link rel="import" href="code/files-modules-and-programs/common.ml"/>
 
       <p>And if we then put <code>open Common</code> after
-      <code>open Core_kernel.Std</code> at the top of each file in
+      <code>open Core_kernel</code> at the top of each file in
       our project, then references to <code>List</code> will
       automatically go to <code>Ext_list</code> instead.</p>
     </section>

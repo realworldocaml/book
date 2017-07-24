@@ -1,5 +1,5 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
 type t1 = { mutable iters1: int; mutable count1: float }
 type t2 = { iters2: int; count2: float }

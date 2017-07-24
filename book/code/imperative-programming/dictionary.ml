@@ -2,7 +2,7 @@
 
 [@@@part "1"];;
 (* file: dictionary.ml *)
-open Core_kernel.Std
+open Core_kernel
 
 type ('a, 'b) t = { mutable length: int;
                     buckets: ('a * 'b) list array;

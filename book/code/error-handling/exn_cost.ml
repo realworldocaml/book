@@ -1,5 +1,5 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
 let simple_computation () =
   List.range 0 10

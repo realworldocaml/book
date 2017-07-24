@@ -718,7 +718,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
           <p>
 	    The command-line parsing for this program is based on
             the Command library that we introduced in <a href="14-command-line-parsing.html#command-line-parsing" data-type="xref">Command Line Parsing</a>. Opening
-            <code>Async.Std</code>, shadows the <code>Command</code>
+            <code>Async</code>, shadows the <code>Command</code>
             module with an extended version that contains the
             <code>async</code> call:</p>
 
@@ -902,7 +902,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             goes through the Async scheduler rather than printing
             directly. The original definition of <code>printf</code> is
             shadowed by this new one when you open
-            <code>Async.Std</code>. An important side effect of this is
+            <code>Async</code>. An important side effect of this is
             that if you write an Async program and forget to start the
             scheduler, calls like <code>printf</code> won't actually
             generate any output!</p>

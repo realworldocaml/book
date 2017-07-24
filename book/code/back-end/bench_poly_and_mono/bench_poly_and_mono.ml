@@ -1,5 +1,5 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
 let polymorphic_compare () =
   let cmp a b = if a > b then a else b in

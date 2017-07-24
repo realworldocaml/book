@@ -1,7 +1,7 @@
 open Core
-open Core_bench.Std
+open Core_bench
 
-type t = | Alice | Bob 
+type t = | Alice | Bob
 type s = | A | B | C | D | E
 
 let polymorphic_pattern () =

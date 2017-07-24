@@ -1273,13 +1273,13 @@
         the vanilla OCaml toplevel (not <span class="command"><em>utop</em></span>).</p>
         <link rel="import" href="code/front-end/short_paths_1.rawsh"/>
 
-        <p>This type error without <code>Core.Std</code> has a
+        <p>This type error without <code>Core</code> has a
         straightforward type error. When we switch to Core, though,
         it gets more verbose:</p>
         <link rel="import" href="code/front-end/short_paths_2.rawsh"/>
 
         <p>The default <code>List</code> module in OCaml is
-        overridden by <code>Core.Std.List</code>. The compiler does
+        overridden by <code>Core.List</code>. The compiler does
         its best to show the type equivalence, but at the cost of a
         more verbose error message.</p>
 

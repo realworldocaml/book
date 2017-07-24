@@ -336,16 +336,16 @@ $ opam install \
   toplevel directive, not a comment.</p>
 
   <p>If you want to use Core as your primary standard library, then
-  you should open the <code>Core.Std</code> module by default,
+  you should open the <code>Core</code> module by default,
   which you can do by appending the following to the end of your
   <code>.ocamlinit</code>.</p>
   <pre>
-open Core.Std
+open Core
 </pre>
 
   <p>When you run <code>utop</code> with these initialization
   rules, it should start up with Core opened and ready to use. If
-  you don't open <code>Core.Std</code> by default, then you must
+  you don't open <code>Core</code> by default, then you must
   remember to open it before running any of the interactive
   examples in the book.</p>
 
