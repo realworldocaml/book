@@ -518,9 +518,9 @@
       one session to the host in the other session, when it should
       be comparing the usernames in both cases. Because of how we
       defined our types, however, the compiler will flag this bug
-      for us:</p>
-      <link rel="import" href="code/files-modules-and-programs/session_info/jbuild"/>
-      <link rel="import" href="code/files-modules-and-programs/session_info/build_session_info.errsh"/>
+      for us.</p>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/session_info/build_session_info.errsh"/>
 
       <p>This is a trivial example, but confusing different kinds
       of identifiers is a very real source of bugs, and the
@@ -713,11 +713,15 @@
 	<idx>type mismatches</idx>
 	<idx>modules/type mismatches in</idx></p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli" part="1"/>
+        <link rel="import"
+        href="code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli"
+        part="1"/>
 
-        <p>and we try to compile, we'll get the following
-        error.</p>
-        <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.errsh"/>
+        <p>and we try to compile, we'll get the following error.</p>
+
+        <link rel="import"
+              href="code/files-modules-and-programs/freq-with-sig-mismatch/build.errsh"/>
+
         </section>
 
       <section id="missing-definitions" data-type="sect2">
@@ -731,13 +735,14 @@
 	<idx>errors/missing module definitions</idx>
 	<idx>modules/missing definitions in</idx></p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/counter.mli" part="1"/>
+        <link rel="import" 
+	      href="code/files-modules-and-programs/freq-with-missing-def/counter.mli" part="1"/>
 
-        <p>Now, if we try to compile without actually adding the
-        implementation, we'll get this error:</p>
+        <p>Now if we try to compile without actually adding the
+        implementation, we'll get this error.</p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/jbuild"/>
-        <link rel="import" href="code/files-modules-and-programs/freq-with-missing-def/build.errsh"/>
+        <link rel="import" 
+	      href="code/files-modules-and-programs/freq-with-missing-def/build.errsh"/>
 
         <p>A missing type definition will lead to a similar
         error.</p>
@@ -757,10 +762,13 @@
 	<idx>errors/module type definition mismatches</idx>
 	<idx>modules/type definition mismatches</idx></p>
 
-        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/counter.mli" part="1"/>
+        <link rel="import" 
+	      href="code/files-modules-and-programs/freq-with-type-mismatch/counter.mli"
+	      part="1"/>
 
         <p>will lead to a compilation error.</p>
-        <link rel="import" href="code/files-modules-and-programs/freq-with-type-mismatch/build.errsh"/>
+        <link rel="import" 
+	      href="code/files-modules-and-programs/freq-with-type-mismatch/build.errsh"/>
 
         <p>Order is similarly important to other type declarations,
         including the order in which record fields are declared and
@@ -773,13 +781,14 @@
 
         <p>In most cases, OCaml doesn't allow cyclic dependencies,
         i.e., a collection of definitions that all refer to one
-        another. If you want to create such definitions, you
-        typically have to mark them specially. For example, when
-        defining a set of mutually recursive values (like the
-        definition of <code>is_even</code> and <code>is_odd</code>
-        in <a href="02-variables-and-functions.html#recursive-functions" data-type="xref">Recursive Functions</a>), you need to
-        define them using <code>let rec</code> rather than ordinary
-        <code>let</code>.
+        another. If you want to create such definitions, you typically
+        have to mark them specially. For example, when defining a set
+        of mutually recursive values (like the definition
+        of <code>is_even</code> and <code>is_odd</code>
+        in <a href="02-variables-and-functions.html#recursive-functions"
+        data-type="xref">Recursive Functions</a>), you need to define
+        them using <code>let rec</code> rather than
+        ordinary <code>let</code>.
 
 	<idx>dependencies, cyclic</idx>
 	<idx>cyclic dependencies</idx>
