@@ -1,8 +1,8 @@
-FROM ocaml/opam:ubuntu-17.04_ocaml-4.04.1
+FROM ocaml/opam:ubuntu-17.04_ocaml-4.04.2
 RUN sudo apt-get -y install python-pygments
 RUN git -C /home/opam/opam-repository pull origin master && opam update
 RUN opam pin add -n -y ocaml-topexpect https://github.com/let-def/topexpect.git
-RUN opam depext -ui async ocamlnet cohttp mtime ocaml-topexpect sexplib toplevel_expect_test patdiff
+RUN opam depext -ui cohttp-async async ocamlnet cohttp mtime ocaml-topexpect sexplib toplevel_expect_test patdiff
 COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src
 WORKDIR /home/opam/src
