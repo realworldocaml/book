@@ -12,6 +12,7 @@ module Chunk = struct
       toplevel_responses : response list; }
     [@@deriving sexp]
 
+  let v ~ocaml_code ~toplevel_responses = {ocaml_code; toplevel_responses}
   let code c = c.ocaml_code
   let warnings (_ : t) : string =  ""
   let responses c = c.toplevel_responses
@@ -25,6 +26,7 @@ module Part = struct
       chunks : Chunk.t list; }
     [@@deriving sexp]
 
+  let v ~name ~chunks = { name; chunks }
   let name {name;_} = name
   let chunks {chunks;_} = chunks
 end
@@ -34,6 +36,7 @@ module Document = struct
     { parts : Part.t list; matched : bool; }
     [@@deriving sexp]
 
+  let v ~parts ~matched = {parts; matched}
   let parts {parts;_} = parts
   let matched {matched;_} = matched
 end

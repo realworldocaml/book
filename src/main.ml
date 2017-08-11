@@ -8,6 +8,7 @@ end
 open Lexing
 open Parsetree
 open Sexplib.Conv
+open Ocaml_topexpect
 
 (* Standard outputs should be disable: multi threaded code could print
  * at anytime, so we just disable output by defaul. *)
@@ -26,37 +27,6 @@ let disable_outputs = lazy (
   Unix.dup2 fd_out Unix.stderr;
   Unix.close fd_out;
 )
-
-
-module Chunk = struct
-  type kind = OCaml | Raw
-    [@@deriving sexp]
-
-  type response = (kind * string)
-    [@@deriving sexp]
-
-  type t =
-    { ocaml_code : string; toplevel_responses : response list; }
-    [@@deriving sexp]
-
-  let code c = c.ocaml_code
-  let warnings (_ : t) : string =  ""
-  let responses c = c.toplevel_responses
-  let stdout (_ : t) = ""
-  let evaluated (_ : t) = true
-end
-
-module Part = struct
-  type t =
-    { name : string; chunks : Chunk.t list; }
-    [@@deriving sexp]
-end
-
-module Document = struct
-  type t =
-    { parts : Part.t list; matched : bool; }
-    [@@deriving sexp]
-end
 
 (** {1 Phrase parsing} *)
 
@@ -644,22 +614,22 @@ let output_phrases oc contents =
 let document_of_phrases contents matched phrases =
   let rec parts_of_phrase part acc = function
     | (_, Phrase_part part') :: rest ->
-      { Part. name = part; chunks = List.rev acc } ::
+      Part.v ~name:part ~chunks:(List.rev acc) ::
       parts_of_phrase part' [] rest
     | (_, Phrase_expect _) :: rest ->
       parts_of_phrase part acc rest
     | (phrase, Phrase_code toplevel_responses) :: rest ->
       let ocaml_code = phrase_code contents phrase in
-      let chunk = {Chunk. ocaml_code; toplevel_responses} in
+      let chunk = Chunk.v ~ocaml_code ~toplevel_responses in
       parts_of_phrase part (chunk :: acc) rest
     | [] ->
       if part <> "" || acc <> [] then
-        [{ Part. name = part; chunks = List.rev acc }]
+        [Part.v ~name:part ~chunks:(List.rev acc)]
       else
         []
   in
   let parts = parts_of_phrase "" [] phrases in
-  { Document. matched; parts }
+  Document.v ~matched ~parts
 
 let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color ~in_place ~sexp_output =
   let file_contents =
