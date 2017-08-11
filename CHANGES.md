@@ -6,6 +6,7 @@
 ## v0.2
 
 * Various API improvements as the tool is integrated into Real World OCaml v2
+* Add support for non-deterministic expect tests which can have different outputs.
 
 ## v0.1
 
