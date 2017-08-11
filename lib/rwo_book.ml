@@ -152,7 +152,7 @@ let main_template ?(next_chapter_footer=None)
       Some footer_item;
       Some (Html.script ~a:["src","js/jquery.min.js"] []);
       Some (Html.script ~a:["src","js/min/app-min.js"] []);
-      (* Some (Html.script ~a:["src","js/discourse.js"] []); *)
+      Some (Html.script ~a:["src","js/discourse.js"] []);
     ])
   ]]
 
