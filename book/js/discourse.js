@@ -94,22 +94,14 @@ var urlTopicMap = {
   '/17-data-serialization.html': 596,
   '/18-concurrent-programming.html': 597,
   '/19-foreign-function-interface.html': 598,
-  '/20-runtime-memory-layout.html': -1,
-  '/21-garbage-collector.html': -1,
-  '/22-compiler-frontend.html': -1,
-  '/23-compiler-backend.html': -1,
-  '/appa.html': -1,
-  '/author_bio.html': -1,
-  '/colo.html': -1,
-  '/dedication.html': -1,
-  '/faqs.html': -1,
-  '/index.html': -1,
-  '/install.html': -1,
-  '/part1.html': -1,
-  '/part2.html': -1,
-  '/part3.html': -1,
-  '/titlepage.html': -1,
-  '/toc.html': -1
+  '/20-runtime-memory-layout.html': 702,
+  '/21-garbage-collector.html': 703,
+  '/22-compiler-frontend.html': 704,
+  '/23-compiler-backend.html': 705,
+  '/faqs.html': 708,
+  '/index.html': 706,
+  '/install.html': 709,
+  '/toc.html': 707
 };
 
 console.info(urlTopicMap[loc]);
