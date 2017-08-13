@@ -80,3 +80,8 @@ Characters 48-68:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 |}];;
+[@@@part "6"];;
+let oldschool_color_to_int = function
+  | Basic basic_color -> basic_color_to_int basic_color
+  | _ -> basic_color_to_int White;;
+[%%expect ocaml {|val oldschool_color_to_int : color -> int = <fun>|}];;

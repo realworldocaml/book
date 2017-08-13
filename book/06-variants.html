@@ -166,13 +166,16 @@
 
       <link rel="import" href="code/variants/catch_all.topscript" part="5"/>
 
+      <p>If we then applied the same fix we did above, we would have
+      ended up with this.</p>
+
+      <link rel="import" href="code/variants/catch_all.topscript" part="6"/>
+
       <p>
-	But because the catch-all case encompasses all possibilities,
-	the type system will no longer warn us that we have missed the
-	new <code>Bold</code> case when we change the type to include
-	it. We can get this check back by avoiding the catch-all case,
-	and instead being explicit about the tags that are
-	ignored.</p>
+	Because of the catch-all case, we'll no longer be warned about
+	missing the <code>Bold</code> case. This highlights the value
+	of avoiding catch-all cases, since they effectively suppress
+	exhaustiveness checking.</p>
     </section>
 
     <section id="combining-records-and-variants" data-type="sect1">
