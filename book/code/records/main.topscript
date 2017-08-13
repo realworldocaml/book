@@ -20,10 +20,10 @@ type service_info =
 [@@@part "1"];;
 #require "re.posix";;
 [%%expect{|
-/Users/yminsky/.opam/4.04.1/lib/bytes: added to search path
-/Users/yminsky/.opam/4.04.1/lib/re: added to search path
-/Users/yminsky/.opam/4.04.1/lib/re/re.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/re/re_posix.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
 |}];;
 let service_info_of_string line =
   let matches = 

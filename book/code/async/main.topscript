@@ -305,47 +305,50 @@ Command.async;;
 [@@@part "28"];;
 #require "cohttp.async";;
 [%%expect{|
-/Users/yminsky/.opam/4.04.1/lib/bytes: added to search path
-/Users/yminsky/.opam/4.04.1/lib/re: added to search path
-/Users/yminsky/.opam/4.04.1/lib/re/re.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/re/re_posix.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/stringext: added to search path
-/Users/yminsky/.opam/4.04.1/lib/stringext/stringext.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/uri: added to search path
-/Users/yminsky/.opam/4.04.1/lib/uri/uri.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/uri/services: added to search path
-/Users/yminsky/.opam/4.04.1/lib/uri/services/uri_services.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/re/re_emacs.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/base64: added to search path
-/Users/yminsky/.opam/4.04.1/lib/base64/base64.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/cohttp: added to search path
-/Users/yminsky/.opam/4.04.1/lib/cohttp/cohttp.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/ipaddr: added to search path
-/Users/yminsky/.opam/4.04.1/lib/ipaddr/ipaddr.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/result: added to search path
-/Users/yminsky/.opam/4.04.1/lib/logs: added to search path
-/Users/yminsky/.opam/4.04.1/lib/logs/logs.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/conduit: added to search path
-/Users/yminsky/.opam/4.04.1/lib/conduit/conduit.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/ipaddr/unix: added to search path
-/Users/yminsky/.opam/4.04.1/lib/ipaddr/unix/ipaddr_unix.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/conduit/conduit-async.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/magic-mime: added to search path
-/Users/yminsky/.opam/4.04.1/lib/magic-mime/magic_mime_library.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/uchar: added to search path
-/Users/yminsky/.opam/4.04.1/lib/fmt: added to search path
-/Users/yminsky/.opam/4.04.1/lib/fmt/fmt.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/logs/logs_fmt.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/fmt/fmt_tty.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/cohttp/cohttp_async.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
+/Users/yminsky/.opam/4.04.2/lib/astring: added to search path
+/Users/yminsky/.opam/4.04.2/lib/astring/astring.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/base64: added to search path
+/Users/yminsky/.opam/4.04.2/lib/base64/base64.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/re: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/re/re_emacs.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/stringext: added to search path
+/Users/yminsky/.opam/4.04.2/lib/stringext/stringext.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/uri: added to search path
+/Users/yminsky/.opam/4.04.2/lib/uri/uri.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/cohttp: added to search path
+/Users/yminsky/.opam/4.04.2/lib/cohttp/cohttp.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ipaddr: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ipaddr/ipaddr.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/conduit: added to search path
+/Users/yminsky/.opam/4.04.2/lib/conduit/conduit.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/conduit-async: added to search path
+/Users/yminsky/.opam/4.04.2/lib/conduit-async/conduit_async.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/uchar: added to search path
+/Users/yminsky/.opam/4.04.2/lib/result: added to search path
+/Users/yminsky/.opam/4.04.2/lib/fmt: added to search path
+/Users/yminsky/.opam/4.04.2/lib/fmt/fmt.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ipaddr/unix: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ipaddr/unix/ipaddr_unix.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/logs: added to search path
+/Users/yminsky/.opam/4.04.2/lib/logs/logs.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/logs/logs_fmt.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/magic-mime: added to search path
+/Users/yminsky/.opam/4.04.2/lib/magic-mime/magic_mime_library.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/uri/services: added to search path
+/Users/yminsky/.opam/4.04.2/lib/uri/services/uri_services.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/cohttp-async: added to search path
+/Users/yminsky/.opam/4.04.2/lib/cohttp-async/cohttp_async.cma: loaded
 |}];;
 Cohttp_async.Client.get;;
 
 [%%expect ocaml {|
 - : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async.Ssl.config ->
-    ?headers:Cohttp.Header.t ->
-    Uri.t -> (Cohttp_async.Response.t * Cohttp_async.Body.t) Deferred.t
+    ?ssl_config:Conduit_async_ssl.Ssl_config.config ->
+    ?headers:Cohttp__Header.t ->
+    Uri.t -> (Cohttp__Response.t * Cohttp_async__Body.t) Deferred.t
 = <fun>
 |}];;
 [@@@part "29"];;

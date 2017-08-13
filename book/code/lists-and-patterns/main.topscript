@@ -101,10 +101,10 @@ let plus_one_if x =
 [@@@part "10"];;
 #require "core_bench";;
 [%%expect{|
-/Users/yminsky/.opam/4.04.1/lib/textutils: added to search path
-/Users/yminsky/.opam/4.04.1/lib/textutils/textutils.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/core_bench: added to search path
-/Users/yminsky/.opam/4.04.1/lib/core_bench/core_bench.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/textutils: added to search path
+/Users/yminsky/.opam/4.04.2/lib/textutils/textutils.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/core_bench: added to search path
+/Users/yminsky/.opam/4.04.2/lib/core_bench/core_bench.cma: loaded
 |}];;
 open Core_bench;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->

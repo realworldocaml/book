@@ -9,18 +9,18 @@
 [@@@part "0.5"];;
 #require "ctypes.foreign" ;;
 [%%expect{|
-/Users/yminsky/.opam/4.04.1/lib/bytes: added to search path
-/Users/yminsky/.opam/4.04.1/lib/integers: added to search path
-/Users/yminsky/.opam/4.04.1/lib/integers/integers.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/integers/integer_printers.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/ctypes: added to search path
-/Users/yminsky/.opam/4.04.1/lib/ctypes/ctypes.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/ctypes/ctypes-top.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/ctypes/ctypes-foreign-base.cma: loaded
-/Users/yminsky/.opam/4.04.1/lib/ctypes/ctypes-foreign-threaded.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
+/Users/yminsky/.opam/4.04.2/lib/integers: added to search path
+/Users/yminsky/.opam/4.04.2/lib/integers/integers.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/integers/integer_printers.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ctypes: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ctypes/ctypes.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ctypes/ctypes-top.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ctypes/ctypes-foreign-base.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ctypes/ctypes-foreign-threaded.cma: loaded
 |}];;
 #require "ctypes.top" ;;
-[%%expect{|/Users/yminsky/.opam/4.04.1/lib/ctypes/ctypes-top.cma: loaded|}];;
+[%%expect{|/Users/yminsky/.opam/4.04.2/lib/ctypes/ctypes-top.cma: loaded|}];;
 open Ctypes ;;
 open PosixTypes ;;
 open Foreign ;;
