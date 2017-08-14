@@ -405,23 +405,53 @@ blow_up ();;
 
 [%%expect{|Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor")).|}];;
 [@@@part "35"];;
+let swallow_error () =
+  let monitor = Monitor.create () in
+  Stream.iter (Monitor.detach_and_get_error_stream monitor)
+    ~f:(fun _exn -> printf "an error happened\n");
+  within' ~monitor (fun () ->
+    after (Time.Span.of_sec 0.25)
+    >>= fun () -> failwith "Kaboom!")
+;;
+[%%expect ocaml {|val swallow_error : unit -> 'a Conduit_async.io = <fun>|}];;
+
+[@@@part "35.5"];;
+Deferred.any [ after (Time.Span.of_sec 0.5) 
+             ; swallow_error () ]
+;;
+[%%expect{|an error happened|};
+ocaml {|- : unit = ()|}];;
+
 [@@@part "36"];;
+exception Ignore_me;;
+[%%expect ocaml {|exception Ignore_me|}];;
+let swallow_some_errors exn_to_raise =
+  let child_monitor  = Monitor.create  () in
+  let parent_monitor = Monitor.current () in
+  Stream.iter
+    (Monitor.detach_and_get_error_stream child_monitor)
+    ~f:(fun error ->
+      match Monitor.extract_exn error with
+      | Ignore_me -> printf "ignoring exn\n"
+      | _ -> Monitor.send_exn parent_monitor error);
+  within' ~monitor:child_monitor (fun () ->
+    after (Time.Span.of_sec 0.25)
+    >>= fun () -> raise exn_to_raise)
+;;
+[%%expect ocaml {|val swallow_some_errors : exn -> 'a Conduit_async.io = <fun>|}];;
+
 [@@@part "37"];;
-swallow_some_errors Not_found;;
-
-
-[%%expect{|
-Characters 0-19:
-Error: Unbound value swallow_some_errors
-|}];;
+Deferred.any [ after (Time.Span.of_sec 0.5)
+             ; swallow_some_errors Not_found ]
+;;
+[%%expect{|Exception: (monitor.ml.Error Not_found ("Caught by monitor (id 61)")).|}];;
 [@@@part "38"];;
-swallow_some_errors Ignore_me;;
+Deferred.any [ after (Time.Span.of_sec 0.5)
+             ; swallow_some_errors Ignore_me ]
+;;
 
-
-[%%expect{|
-Characters 0-19:
-Error: Unbound value swallow_some_errors
-|}];;
+[%%expect{|ignoring exn|};
+ocaml {|- : unit = ()|}];;
 [@@@part "39"];;
 let string_and_float = Deferred.both
                          (after (sec 0.5)  >>| fun () -> "A")

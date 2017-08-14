@@ -1,6 +1,6 @@
 B ../_build/default/lib
 FLG -open Rwo__ -w -40
-FLG -ppx "../_build/default/.ppx/ppx_sexp_conv/ppx.exe --as-ppx --cookie 'library-name="rwo"'"
+FLG -ppx '/Users/yminsky/Documents/code/RWO/_build/default/.ppx/ppx_sexp_conv/ppx.exe --as-ppx --cookie '\''library-name="rwo"'\'''
 PKG async
 PKG async_extra
 PKG async_kernel

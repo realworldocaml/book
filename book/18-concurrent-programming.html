@@ -1071,59 +1071,73 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             handling of deferreds.</p>
 
           <p>
-	    Monitors can do more than just augment the error-trace
-            of an exception. You can also use a monitor to explicitly
-            handle errors delivered to that monitor. The
-            <code>Monitor.errors</code> call is a particularly
-            important one. It detaches the monitor from its parent,
-            handing back the stream of errors that would otherwise have
-            been delivered to the parent monitor. This allows one to do
-            custom handling of errors, which may include reraising
-            errors to the parent. Here is a very simple example of a
-            function that captures and ignores errors in the processes
-            it spawns:</p>
+	    Monitors can do more than just augment the error-trace of
+            an exception. You can also use a monitor to explicitly
+            handle errors delivered to that
+            monitor. The <code>Monitor.detach_and_get_error_stream</code>
+            call is a particularly important one. It detaches the
+            monitor from its parent, handing back the stream of errors
+            that would otherwise have been delivered to the parent
+            monitor. This allows one to do custom handling of errors,
+            which may include reraising errors to the parent. Here is
+            a very simple example of a function that captures and
+            ignores errors in the processes it spawns.</p>
 
           <link rel="import" href="code/async/main.topscript" part="35"/>
 
-          <p>
-	    The message "an error happened" is printed out, but the
-            deferred returned by <code>swallow_error</code> is never
-            determined. This makes sense, since the calculation never
-            actually completes, so there's no value to return. You can
-            break out of this
-            in <span class="command"><em>utop</em></span> by
-            hitting <strong><code>Control+C</code></strong> .</p>
+	  <p>
+	    The deferred returned by this function is never
+	    determined, since the computation ends with an exception
+	    rather than a return value. That means that if we run this
+	    function in <span class="command"><em>utop</em></span>,
+	    we'll never get our prompt back.</p>
+
+	  <p>
+	    We can fix this by using <code>Deferred.any</code> along
+	    with a timeout to get a deferred we know will become
+	    determined eventually. <code>Deferred.any</code> takes a
+	    list of deferreds, and returns a deferred which will
+	    become determined assuming any of its arguments becomes
+	    determined.
+	  </p>
+
+          <link rel="import" href="code/async/main.topscript" part="35.5"/>
 
           <p>
-	    Here's an example of a monitor that passes some
-            exceptions through to the parent and handles others.
-            Exceptions are sent to the parent using
-            <code>Monitor.send_exn</code>, with
-            <code>Monitor.current</code> being called to find the
+	    As you can see, the message "an error happened" is printed
+	    out before the timeout expires. </p>
+
+          <p>
+	    Here's an example of a monitor that passes some exceptions
+            through to the parent and handles others.  Exceptions are
+            sent to the parent using <code>Monitor.send_exn</code>,
+            with <code>Monitor.current</code> being called to find the
             current monitor, which is the parent of the newly created
-            monitor:</p>
+            monitor.</p>
 
           <link rel="import" href="code/async/main.topscript" part="36"/>
 
           <p>
-	    Note that we use <code>Monitor.extract_exn</code> to
-            grab the underlying exception that was thrown. Async wraps
-            exceptions it catches with extra information, including the
-            monitor trace, so you need to grab the underlying exception
-            to match on it.</p>
+	    Note that we use <code>Monitor.extract_exn</code> to grab
+            the underlying exception that was thrown. Async wraps
+            exceptions it catches with extra information, including
+            the monitor trace, so you need to grab the underlying
+            exception if you want to depend on the details of the
+            original exception thrown.</p>
 
           <p>
-	    If we pass in an exception other than
-            <code>Ignore_me</code>, like, say, the built-in exception
-            <code>Not_found</code>, then the exception will be passed
-            to the parent monitor and delivered as usual:</p>
+	    If we pass in an exception other
+            than <code>Ignore_me</code>, like, say, the built-in
+            exception <code>Not_found</code>, then the exception will
+            be passed to the parent monitor and delivered as
+            usual:</p>
 
           <link rel="import" href="code/async/main.topscript" part="37"/>
 
           <p>
 	    If instead we use <code>Ignore_me</code>, the exception
-            will be ignorred, and the deferred never becomes
-            determined:</p>
+            will be ignored, and the computation will finish when the
+            timeout expires.</p>
 
           <link rel="import" href="code/async/main.topscript" part="38"/>
 
@@ -1256,7 +1270,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  dealing with timeouts. In that case, we can use the call
 	  <code>Deferred.any</code>, which, given a list of deferreds,
 	  returns a single deferred that will become determined once
-	  any of the values on the list is determined:</p>
+	  any of the values on the list is determined.</p>
 
 	<link rel="import" href="code/async/main.topscript" part="40"/>
 
