@@ -1,12 +1,8 @@
-PKG=unix,compiler-libs.toplevel,ppx_sexp_conv,findlib.top
+.PHONY: all clean
 
 all:
-	ocamlfind c -thread -o ocaml-topexpect -linkpkg -linkall -package $(PKG) main.ml
-	$(MAKE) -C ppx-ignore all
+	jbuilder build #--dev
+#	$(MAKE) -C ppx-ignore all
 
 clean:
-	rm -f *.cm*
-	$(MAKE) -C ppx-ignore clean
-
-distclean: clean
-	rm -f ocaml-topexpect
+	jbuilder clean
