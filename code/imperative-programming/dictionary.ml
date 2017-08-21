@@ -1,12 +1,15 @@
-(* part 1 *)
+
+
+[@@@part "1"];;
 (* file: dictionary.ml *)
-open Core.Std
+open Core_kernel
 
 type ('a, 'b) t = { mutable length: int;
                     buckets: ('a * 'b) list array;
                   }
 
-(* part 2 *)
+
+[@@@part "2"];;
 let num_buckets = 17
 
 let hash_bucket key = (Hashtbl.hash key) mod num_buckets
@@ -22,13 +25,15 @@ let find t key =
   List.find_map t.buckets.(hash_bucket key)
     ~f:(fun (key',data) -> if key' = key then Some data else None)
 
-(* part 3 *)
+
+[@@@part "3"];;
 let iter t ~f =
   for i = 0 to Array.length t.buckets - 1 do
     List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
   done
 
-(* part 4 *)
+
+[@@@part "4"];;
 let bucket_has_key t i key =
   List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key)
 

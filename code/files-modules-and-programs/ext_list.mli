@@ -1,4 +1,4 @@
-open Core.Std
+open Core_kernel
 
 (* Include the interface of the list module from Core *)
 include (module type of List)

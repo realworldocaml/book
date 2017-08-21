@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 let run ~uppercase ~port =
   let host_and_port =
@@ -14,7 +14,7 @@ let run ~uppercase ~port =
   Deferred.never ()
 
 let () =
-  Command.async_basic
+  Command.async
     ~summary:"Start an echo server"
     Command.Spec.(
       empty

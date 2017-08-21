@@ -1,5 +1,5 @@
 (* file: dlist.mli *)
-open Core.Std
+open Core_kernel
 
 type 'a t
 type 'a element

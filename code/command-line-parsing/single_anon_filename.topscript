@@ -1,2 +1,0 @@
-open Command.Spec ;;
-empty +> anon ("filename" %: string) ;;

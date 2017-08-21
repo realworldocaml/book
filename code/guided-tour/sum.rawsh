@@ -1,4 +1,4 @@
-$ ./sum.native
+$ ./_build/default/sum.exe
 1
 2
 3

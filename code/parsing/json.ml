@@ -9,7 +9,9 @@ type value = [
 ]
 
 (* part 1 *)
-open Core.Std
+open Core
+open Out_channel
+
 let rec output_value outc = function
   | `Assoc obj  -> print_assoc outc obj
   | `List l     -> print_list outc l

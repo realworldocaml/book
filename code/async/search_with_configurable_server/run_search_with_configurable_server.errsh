@@ -1,0 +1,2 @@
+jbuilder build search_with_configurable_server.exe
+./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml

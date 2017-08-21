@@ -1,0 +1,6 @@
+(executables
+ ((names (freq use_median_1 use_median_2))
+  (libraries (core_kernel))
+  ))
+
+(jbuild_version 1)

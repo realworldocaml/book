@@ -1,2 +1,2 @@
-corebuild -pkg core_bench exn_cost.native
-./exn_cost.native -ascii cycles
+jbuilder build exn_cost.exe
+./_build/default/exn_cost.exe -ascii cycles

@@ -1,4 +1,6 @@
-(* part 1 *)
+
+
+[@@@part "1"];;
 type shape = < area : float >
 
 type square = < area : float; width : int >
@@ -15,7 +17,8 @@ let circle r = object
   method radius = r
 end
 
-(* part 2 *)
+
+[@@@part "2"];;
 type 'a stack = < pop: 'a option; push: 'a -> unit >
 
 let square_stack: square stack = stack [square 30; square 10]

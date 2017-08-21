@@ -1,4 +1,6 @@
-type t = { 
-  foo: string; 
+open Core_kernel
+
+type t = {
+  foo: string;
   bar: t
-} with compare
+} [@@deriving compare]

@@ -1,4 +1,4 @@
 { <record> with <field> = <value>;
-                <field> = <value>;
-                ...
+      <field> = <value>;
+      ...
 }

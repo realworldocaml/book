@@ -1,7 +1,0 @@
-# let color_print color s =
-     printf "%s\n" (color_by_number (color_to_int color) s);;
-val color_print : color -> string -> unit = <fun>
-# color_print (Basic (Red,Bold)) "A bold red!";;
-A bold red!
-# color_print (Gray 4) "A muted gray...";;
-A muted gray...

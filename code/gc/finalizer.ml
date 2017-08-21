@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 
 let attach_finalizer n v =
   match Heap_block.create v with
@@ -19,7 +19,6 @@ let main () =
   attach_finalizer "immediate variant" (`Foo "hello");
   attach_finalizer "immediate string" "hello world";
   attach_finalizer "immediate record" { foo=false };
-  attach_finalizer "allocated float" alloced_float;
   attach_finalizer "allocated bool" alloced_bool;
   attach_finalizer "allocated variant" (`Foo alloced_bool);
   attach_finalizer "allocated string" alloced_string;
@@ -28,6 +27,6 @@ let main () =
   return ()
 
 let () =
-  Command.async_basic ~summary:"Testing finalizers"
+  Command.async ~summary:"Testing finalizers"
     Command.Spec.empty main
   |> Command.run

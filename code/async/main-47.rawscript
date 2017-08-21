@@ -1,7 +1,0 @@
-# let noalloc_busy_loop () =
-    for i = 0 to 100_000_000 do () done
-;;
-val noalloc_busy_loop : unit -> unit = <fun>
-# log_delays (fun () -> In_thread.run noalloc_busy_loop);;
-0.169039ms, 4.58345s, 4.77866s, 4.87957s, 12.4723s, 15.0134s,
-- : unit = ()

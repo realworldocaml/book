@@ -8,14 +8,16 @@ module Stack = struct
   let make init = new stack init
 end
 
-(* part 1 *)
+
+[@@@part "1"];;
 module AbstractStack : sig
    type 'a t = < pop: 'a option; push: 'a -> unit >
 
    val make : unit -> 'a t
 end = Stack
 
-(* part 2 *)
+
+[@@@part "2"];;
 module VisibleStack : sig
   
   type 'a t = < pop: 'a option; push: 'a -> unit >

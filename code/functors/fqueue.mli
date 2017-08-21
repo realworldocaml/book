@@ -2,7 +2,7 @@ type 'a t
 
 val empty : 'a t
 
-(** [enqueue el q] adds [el] to the back of [q] *)
+(** [enqueue q el] adds [el] to the back of [q] *)
 val enqueue : 'a t -> 'a -> 'a t
 
 (** [dequeue q] returns None if the [q] is empty, otherwise returns

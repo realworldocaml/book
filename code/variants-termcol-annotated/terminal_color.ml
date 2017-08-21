@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
@@ -24,7 +24,7 @@ let color_to_int = function
   | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | `Gray i -> 232 + i
 
-(* part 1 *)
+[@@@part "1"];;
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Grey x -> 2000 + x

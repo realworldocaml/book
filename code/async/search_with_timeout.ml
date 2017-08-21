@@ -1,19 +1,12 @@
-open Core.Std
-open Async.Std
-
-(* Generate a DuckDuckGo search URI from a query string *)
-let query_uri ~server query =
-  let base_uri =
-    Uri.of_string (String.concat ["http://";server;"/?format=json"])
-  in
-  Uri.add_query_param base_uri ("q", [query])
+open Core
+open Async
 
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
 let get_definition_from_json json =
   match Yojson.Safe.from_string json with
   | `Assoc kv_list ->
     let find key =
-      begin match List.Assoc.find kv_list key with
+      begin match List.Assoc.find ~equal:String.equal kv_list key with
       | None | Some (`String "") -> None
       | Some s -> Some (Yojson.Safe.to_string s)
       end
@@ -34,9 +27,9 @@ let get_definition ~server word =
     (word, get_definition_from_json (String.concat strings)))
   >>| function
   | Ok (word,result) -> (word, Ok result)
-  | Error exn        -> (word, Error exn)
+  | Error _          -> (word, Error "Unexpected failure")
 
-(* part 1 *)
+[@@@part "1"];;
 let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
     [ (after timeout >>| fun () -> (word,Error "Timed out"))
@@ -49,7 +42,8 @@ let get_definition_with_timeout ~server ~timeout word =
        (word,result')
       )
     ]
-(* part 2 *)
+
+[@@@part "2"];;
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -73,10 +67,9 @@ let search_and_print ~servers ~timeout words =
   List.iter results ~f:print_result
 
 let () =
-  Command.async_basic
+  Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
-      let string_list = Arg_type.create (String.split ~on:',') in
       empty
       +> anon (sequence ("word" %: string))
       +> flag "-servers"
@@ -85,6 +78,5 @@ let () =
       +> flag "-timeout" (optional_with_default (sec 5.) time_span)
            ~doc:" Abandon queries that take longer than this time"
     )
-    (fun words servers timeout () ->
-       search_and_print ~servers ~timeout words)
+    (fun words servers timeout () -> search_and_print ~servers ~timeout words)
   |> Command.run

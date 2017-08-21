@@ -1,251 +1,234 @@
-type host_info =
-    { hostname   : string;
-      os_name    : string;
-      cpu_arch   : string;
-      timestamp  : Time.t;
-    };;
-#part 1
-#require "core_extended";;
-open Core_extended.Std;;
-let my_host =
-    let sh = Shell.sh_one_exn in
-    { hostname   = sh "hostname";
-      os_name    = sh "uname -s";
-      cpu_arch   = sh "uname -p";
-      timestamp  = Time.now ();
-    };;
-#part 2
-my_host.cpu_arch;;
-#part 3
-type 'a timestamped = { item: 'a; time: Time.t };;
-#part 4
-let first_timestamped list =
-    List.reduce list ~f:(fun a b -> if a.time < b.time then a else b)
-  ;;
-#part 5
-let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts;
-                          } =
-       sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
-host_info_to_string my_host;;
-#part 6
-type host_info =
-    { hostname   : string;
-      os_name    : string;
-      cpu_arch   : string;
-      os_release : string;
-      timestamp  : Time.t;
-    } ;;
-#part 7
-#warnings "+9";;
-let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts;
-                          } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
-#part 8
-let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts; _
-                          } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
-#part 9
-let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =
-     sprintf "%s (%s / %s) <%s>" hostname os_name cpu_arch
-       (Time.to_string timestamp);;
-#part 10
-let my_host =
-    let sh cmd = Shell.sh_one_exn cmd in
-    let hostname   = sh "hostname" in
-    let os_name    = sh "uname -s" in
-    let cpu_arch   = sh "uname -p" in
-    let os_release = sh "uname -r" in
-    let timestamp  = Time.now () in
-    { hostname; os_name; cpu_arch; os_release; timestamp };;
-#part 11
-let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =
-    { os_name; cpu_arch; os_release;
-      hostname = String.lowercase hostname;
-      timestamp = Time.now () };;
-#part 12
-let create_host_info
-    ~hostname:hostname ~os_name:os_name
-    ~cpu_arch:cpu_arch ~os_release:os_release =
-    { os_name = os_name;
-      cpu_arch = cpu_arch;
-      os_release = os_release;
-      hostname = String.lowercase hostname;
-      timestamp = Time.now () };;
-#part 13
-type log_entry =
-    { session_id: string;
-      time: Time.t;
-      important: bool;
-      message: string;
-    }
-  type heartbeat =
-    { session_id: string;
-      time: Time.t;
-      status_message: string;
-    }
-  type logon =
-    { session_id: string;
-      time: Time.t;
-      user: string;
-      credentials: string;
-    }
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+module Time_ns = Core_kernel.Time_ns;;
+[%%expect ocaml {|module Time_ns = Core_kernel.Time_ns|}];;
+type service_info =
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+  }
 ;;
-#part 14
+[%%expect ocaml {|type service_info = { service_name : string; port : int; protocol : string; }|}];;
+[@@@part "1"];;
+#require "re.posix";;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
+|}];;
+let service_info_of_string line =
+  let matches = 
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  { service_name = Re.get matches 1;
+    port = Int.of_string (Re.get matches 2);
+    protocol = Re.get matches 3;
+  }
+;;
+[%%expect ocaml {|val service_info_of_string : string -> service_info = <fun>|}];;
+[@@@part "1.1"];;
+let ssh = service_info_of_string
+            "ssh 22/udp # SSH Remote Login Protocol";;
+[%%expect ocaml {|val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}|}];;
+[@@@part "2"];;
+ssh.port;;
+[%%expect ocaml {|- : int = 22|}];;
+[@@@part "3"];;
+type 'a with_line_num = { item: 'a; line_num: int };;
+[%%expect ocaml {|type 'a with_line_num = { item : 'a; line_num : int; }|}];;
+[@@@part "4"];;
+let parse_lines parse file_contents =
+  let lines = String.split ~on:'\n' file_contents in
+  List.mapi lines ~f:(fun line_num line ->
+    { item = parse line;
+      line_num = line_num + 1;
+    })
+;;
+[%%expect ocaml {|val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>|}];;
+[@@@part "4.1"];;
+parse_lines service_info_of_string
+  "rtmp              1/ddp     # Routing Table Maintenance Protocol\n\
+   tcpmux            1/udp     # TCP Port Service Multiplexer\n\
+   tcpmux            1/tcp     # TCP Port Service Multiplexer"
+;;
+[%%expect ocaml {|
+- : service_info with_line_num list =
+[{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
+ {item = {service_name = "tcpmux"; port = 1; protocol = "udp"}; line_num = 2};
+ {item = {service_name = "tcpmux"; port = 1; protocol = "tcp"}; line_num = 3}]
+|}];;
+[@@@part "4.2"];;
+parse_lines Int.of_string "1\n10\n100\n1000";;
+[%%expect ocaml {|
+- : int with_line_num list =
+[{item = 1; line_num = 1}; {item = 10; line_num = 2};
+ {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
+|}];;
+[@@@part "5"];;
+let service_info_to_string { service_name = name; port = port; protocol = prot  } =
+  sprintf "%s %i/%s" name port prot
+;;
+[%%expect ocaml {|val service_info_to_string : service_info -> string = <fun>|}];;
+service_info_to_string ssh;;
+[%%expect ocaml {|- : string = "ssh 22/udp"|}];;
+[@@@part "6"];;
+type service_info =
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+    comment      : string option;
+  }
+;;
+[%%expect ocaml {|
+type service_info = {
+  service_name : string;
+  port : int;
+  protocol : string;
+  comment : string option;
+}
+|}];;
+[@@@part "7"];;
+#warnings "+9";;
+let service_info_to_string { service_name = name; port = port; protocol = prot  } =
+  sprintf "%s %i/%s" name port prot
+;;
+[%%expect{|
+Characters 27-81:
+Warning 9: the following labels are not bound in this record pattern:
+comment
+Either bind these labels explicitly or add '; _' to the pattern.
+|};
+ocaml {|val service_info_to_string : service_info -> string = <fun>|}];;
+[@@@part "8"];;
+let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+  sprintf "%s %i/%s" name port prot
+;;
+[%%expect ocaml {|val host_info_to_string : service_info -> string = <fun>|}];;
+[@@@part "9"];;
+let service_info_to_string { service_name; port; protocol; comment } =
+  let base = sprintf "%s %i/%s" service_name port protocol in
+  match comment with
+  | None -> base
+  | Some text -> base ^ " #" ^ text
+;;
+[%%expect ocaml {|val service_info_to_string : service_info -> string = <fun>|}];;
+[@@@part "10"];;
+let service_info_of_string line =
+  (* first, split off any comment *)
+  let (line,comment) =
+    match String.rsplit2 line ~on:'#' with
+    | None -> (line,None)
+    | Some (ordinary,comment) -> (ordinary, Some comment)
+  in
+  (* now, use a regular expression to break up the service definition *)
+  let matches = 
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  let service_name = Re.get matches 1 in
+  let port = Int.of_string (Re.get matches 2) in
+  let protocol = Re.get matches 3 in
+  { service_name; port; protocol; comment }
+;;
+[%%expect ocaml {|val service_info_of_string : string -> service_info = <fun>|}];;
+[@@@part "10.1"];;
+service_info_of_string "ssh 22/tcp # some comment";;
+[%%expect ocaml {|
+- : service_info =
+{service_name = "ssh"; port = 22; protocol = "tcp";
+ comment = Some " some comment"}
+|}];;
+service_info_of_string "ssh 22/tcp";;
+[%%expect ocaml {|
+- : service_info =
+{service_name = "ssh"; port = 22; protocol = "tcp"; comment = None}
+|}];;
+[@@@part "11"];;
+let create_service_info ~service_name ~port ~protocol ~comment =
+  { service_name; port; protocol; comment }
+;;
+[%%expect ocaml {|
+val create_service_info :
+  service_name:string ->
+  port:int -> protocol:string -> comment:string option -> service_info =
+  <fun>
+|}];;
+[@@@part "12"];;
+let create_service_info
+      ~service_name:service_name ~port:port
+      ~protocol:protocol ~comment:comment =
+  { service_name = service_name;
+    port = port; 
+    protocol = protocol; 
+    comment = comment;
+  }
+;;
+[%%expect ocaml {|
+val create_service_info :
+  service_name:string ->
+  port:int -> protocol:string -> comment:string option -> service_info =
+  <fun>
+|}];;
+[@@@part "13"];;
+type log_entry =
+  { session_id: string;
+    time: Time_ns.t;
+    important: bool;
+    message: string;
+  }
+type heartbeat =
+  { session_id: string;
+    time: Time_ns.t;
+    status_message: string;
+  }
+type logon =
+  { session_id: string;
+    time: Time_ns.t;
+    user: string;
+    credentials: string;
+  }
+;;
+[%%expect ocaml {|
+type log_entry = {
+  session_id : string;
+  time : Time_ns.t;
+  important : bool;
+  message : string;
+}
+type heartbeat = {
+  session_id : string;
+  time : Time_ns.t;
+  status_message : string;
+}
+type logon = {
+  session_id : string;
+  time : Time_ns.t;
+  user : string;
+  credentials : string;
+}
+|}];;
+[@@@part "14"];;
 let get_session_id t = t.session_id;;
-#part 15
+[%%expect ocaml {|val get_session_id : logon -> string = <fun>|}];;
+[@@@part "15"];;
 let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
-#part 16
+[%%expect ocaml {|val get_heartbeat_session_id : heartbeat -> string = <fun>|}];;
+[@@@part "16"];;
 let status_and_session t = (t.status_message, t.session_id);;
+[%%expect ocaml {|val status_and_session : heartbeat -> string * string = <fun>|}];;
 let session_and_status t = (t.session_id, t.status_message);;
+[%%expect{|
+Characters 44-58:
+Error: This expression has type logon
+       The field status_message does not belong to type logon
+|}];;
 let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
-#part 17
-module Log_entry = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        important: bool;
-        message: string;
-      }
-  end
-  module Heartbeat = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        status_message: string;
-      }
-  end
-  module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        user: string;
-        credentials: string;
-      }
-  end;;
-#part 18
-let create_log_entry ~session_id ~important message =
-     { Log_entry.time = Time.now (); Log_entry.session_id;
-       Log_entry.important; Log_entry.message }
-  ;;
-#part 19
-let create_log_entry ~session_id ~important message =
-     { Log_entry.
-       time = Time.now (); session_id; important; message }
-  ;;
-#part 20
-let message_to_string { Log_entry.important; message; _ } =
-    if important then String.uppercase message else message
-  ;;
-#part 21
-let is_important t = t.Log_entry.important;;
-#part 22
-type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     last_heartbeat_time: Time.t;
-   };;
-let register_heartbeat t hb =
-      { addr = t.addr;
-        port = t.port;
-        user = t.user;
-        credentials = t.credentials;
-        last_heartbeat_time = hb.Heartbeat.time;
-      };;
-#part 23
-let register_heartbeat t hb =
-    { t with last_heartbeat_time = hb.Heartbeat.time };;
-#part 24
-type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     last_heartbeat_time: Time.t;
-     last_heartbeat_status: string;
-   };;
-#part 25
-let register_heartbeat t hb =
-    { t with last_heartbeat_time   = hb.Heartbeat.time;
-             last_heartbeat_status = hb.Heartbeat.status_message;
-    };;
-#part 26
-type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     mutable last_heartbeat_time: Time.t;
-     mutable last_heartbeat_status: string;
-   };;
-#part 27
-let register_heartbeat t hb =
-    t.last_heartbeat_time   <- hb.Heartbeat.time;
-    t.last_heartbeat_status <- hb.Heartbeat.status_message
-  ;;
-#part 28
-let get_users logons =
-     List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
-#part 29
-module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        user: string;
-        credentials: string;
-      }
-    with fields
-  end;;
-#part 30
-let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
-#part 31
-Field.get Logon.Fields.user;;
-#part 32
-Field.get;;
-#part 33
-let show_field field to_string record =
-    let name = Field.name field in
-    let field_string = to_string (Field.get field record) in
-    name ^ ": " ^ field_string
-  ;;
-#part 34
-let logon = { Logon.
-                session_id = "26685";
-                time = Time.now ();
-                user = "yminsky";
-                credentials = "Xy2d9W"; }
-  ;;
-show_field Logon.Fields.user Fn.id logon;;
-show_field Logon.Fields.time Time.to_string logon;;
-#part 35
-Logon.Fields.iter;;
-#part 36
-let print_logon logon =
-    let print to_string field =
-      printf "%s\n" (show_field field to_string logon)
-    in
-    Logon.Fields.iter
-      ~session_id:(print Fn.id)
-      ~time:(print Time.to_string)
-      ~user:(print Fn.id)
-      ~credentials:(print Fn.id)
-  ;;
-print_logon logon;;
-#part 37
-#part 38
-#part 39
-#part 40
-#part 41
-#part 42
-#part 43
-#part 44
-#part 45
-#part 46
-#part 47
-#part 48
-#part 49
-#part 50
+[%%expect ocaml {|val session_and_status : heartbeat -> string * string = <fun>|}];;

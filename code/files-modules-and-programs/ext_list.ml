@@ -1,4 +1,4 @@
-open Core.Std
+open Core_kernel
 
 (* The new function we're going to add *)
 let rec intersperse list el =

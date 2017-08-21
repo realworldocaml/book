@@ -1,2 +1,0 @@
-$ opam switch 4.01.0dev+trunk
-$ eval `opam config env`

@@ -13,8 +13,9 @@ and 'a list_item =
   { tag: 'a;
     text: text_item list }
 
-(* part 1 *)
-open Core.Std
+
+[@@@part "1"];;
+open Core
 
 class ['a] folder = object(self)
   method doc acc = function
@@ -33,7 +34,8 @@ class ['a] folder = object(self)
   | Quote doc -> self#doc acc doc
 end
 
-(* part 2 *)
+
+[@@@part "2"];;
 class counter = object
   inherit [int] folder as super
 
@@ -48,7 +50,8 @@ end
 
 let count_doc = (new counter)#doc
 
-(* part 3 *)
+
+[@@@part "3"];;
 class ['a] folder2 = object(self)
   method doc acc = function
   | Heading str -> self#heading acc str
@@ -84,7 +87,8 @@ let f :
     list_item : 'a . int -> 'a list_item -> int;
     text_item : int -> text_item -> int >  = new folder2
 
-(* part 4 *)
+
+[@@@part "4"];;
 class counter_with_private_method = object
   inherit [int] folder2 as super
 
@@ -95,7 +99,8 @@ class counter_with_private_method = object
     acc + 1
 end
 
-(* part 5 *)
+
+[@@@part "5"];;
 class counter_with_sig : object
   method doc : int -> doc -> int
   method list_item : int -> 'b list_item -> int

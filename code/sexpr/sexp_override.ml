@@ -1,7 +1,7 @@
 type t =
   | Range of int * int
   | Empty
-with sexp
+[@@deriving sexp]
 
 let create x y =
   if x > y then Empty else Range (x,y)

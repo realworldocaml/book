@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executable
+  ((name map_vs_hash2)
+   (libraries (core_bench))
+  )
+)

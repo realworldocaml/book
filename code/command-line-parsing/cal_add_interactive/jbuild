@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executable
+  ((name cal_add_interactive)
+   (libraries (core))
+  )
+)

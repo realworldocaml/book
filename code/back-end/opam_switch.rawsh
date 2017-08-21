@@ -1,1 +1,2 @@
-$ opam switch 4.01.0dev+fp
+$ opam switch 4.01.0+fp
+

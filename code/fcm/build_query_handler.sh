@@ -1,1 +1,0 @@
-corebuild query_handler.byte

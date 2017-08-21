@@ -1,5 +1,0 @@
-$ sudo pacman -Sy base-devel
-$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
-$ tar -xvf opam.tar.gz && cd opam
-$ makepkg
-$ sudo pacman -U opam-<version>.tar.gz

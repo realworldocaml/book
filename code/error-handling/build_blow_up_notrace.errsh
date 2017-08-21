@@ -1,2 +1,2 @@
-corebuild blow_up.byte
-OCAMLRUNPARAM= ./blow_up.byte
+jbuilder build blow_up.bc
+OCAMLRUNPARAM= ./_build/default/blow_up.bc

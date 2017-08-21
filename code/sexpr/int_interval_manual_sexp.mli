@@ -1,4 +1,4 @@
-open Core.Std
+open Core
 
 type t
 val t_of_sexp : Sexp.t -> t

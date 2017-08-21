@@ -1,1 +1,0 @@
-corebuild freq.byte

@@ -1,5 +1,5 @@
-open Core.Std
-open Core_bench.Std
+open Core
+open Core_bench
 
 let simple_computation () =
   List.range 0 10
@@ -15,6 +15,12 @@ let end_with_exn () =
     raise Exit
   with Exit -> ()
 
+let end_with_exn_notrace () =
+  try
+    simple_computation ();
+    Exn.raise_without_backtrace Exit
+  with Exit -> ()
+
 let () =
   [ Bench.Test.create ~name:"simple computation"
       (fun () -> simple_computation ());
@@ -22,6 +28,8 @@ let () =
       (fun () -> simple_with_handler ());
     Bench.Test.create ~name:"end with exn"
       (fun () -> end_with_exn ());
+    Bench.Test.create ~name:"end with exn notrace"
+      (fun () -> end_with_exn_notrace ());
   ]
   |> Bench.make_command
   |> Command.run
