@@ -4,6 +4,9 @@ version: "dev"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/RealWorldOCaml/scripts"
 license: "ISC"
+authors: ["Yaron Minsky" "Anil Madhavapeddy" "Jason Hickey"]
+dev-repo: "https://github.com/RealWorldOCaml/scripts.git"
+bug-reports: "https://github.com/RealWorldOCaml/scripts/issues"
 
 build: [ "jbuilder" "build" ]
 
