@@ -1,38 +1,19 @@
-# OASIS_START
-# DO NOT EDIT (digest: bc1e05bfc8b39b664f29dae8dbd3ebbb)
+.PHONY: build clean test install uninstall doc clean
 
-SETUP = ocaml setup.ml
+build:
+	jbuilder build @install
 
-build: setup.data
-	$(SETUP) -build $(BUILDFLAGS)
+test:
+	jbuilder runtest
 
-doc: setup.data build
-	$(SETUP) -doc $(DOCFLAGS)
+install:
+	jbuilder install
 
-test: setup.data build
-	$(SETUP) -test $(TESTFLAGS)
+uninstall:
+	jbuilder uninstall
 
-all: 
-	$(SETUP) -all $(ALLFLAGS)
+doc:
+	jbuilder build @doc
 
-install: setup.data
-	$(SETUP) -install $(INSTALLFLAGS)
-
-uninstall: setup.data
-	$(SETUP) -uninstall $(UNINSTALLFLAGS)
-
-reinstall: setup.data
-	$(SETUP) -reinstall $(REINSTALLFLAGS)
-
-clean: 
-	$(SETUP) -clean $(CLEANFLAGS)
-
-distclean: 
-	$(SETUP) -distclean $(DISTCLEANFLAGS)
-
-setup.data:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
-
-.PHONY: build doc test all install uninstall reinstall clean distclean configure
-
-# OASIS_STOP
+clean:
+	jbuilder clean

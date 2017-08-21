@@ -1,0 +1,11 @@
+(library
+ ((name        rwo)
+  (public_name rwo)
+  (libraries   ("core" "async" "netclient" "cohttp"))
+  (preprocess (pps (ppx_sexp_conv)))
+))
+
+(rule
+ ((targets (rwo_about.ml))
+  (action  (with-stdout-to ${@}
+             (echo "let git_commit = Some \"${version:rwo}\"")))))	

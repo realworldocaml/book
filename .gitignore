@@ -1,9 +1,3 @@
-*.swp
-_build/
-dist/
-setup.data
-setup.log
-setup.bin
-*.docdir
-*.native
-*.byte
+_build
+*.install
+.merlin
