@@ -111,8 +111,8 @@ let parse_phrase (contents, lexbuf) =
 
 type 'a phrase_role =
   | Phrase_code of 'a
-  | Phrase_expect of { responses: Chunk.response list; nondeterministic: bool }
-  | Phrase_part of string
+  | Phrase_expect of { location: Location.t; responses: Chunk.response list; nondeterministic: bool }
+  | Phrase_part of { location: Location.t; name: string }
 
 exception Cannot_parse_payload of Location.t
 
@@ -158,7 +158,7 @@ let phrase_role phrase = match phrase.parsed with
     begin match payload_strings pstr_loc payload with
       | responses ->
         let nondeterministic = attr_is attr "expect.nondeterministic" in
-        Phrase_expect { responses; nondeterministic }
+        Phrase_expect { location = pstr_loc; responses; nondeterministic }
       | exception (Cannot_parse_payload loc) ->
         prerr_endline (string_of_location loc ^ ": cannot parse [%%expect] payload");
         Phrase_code ()
@@ -166,7 +166,7 @@ let phrase_role phrase = match phrase.parsed with
   | Ok (Ptop_def [{pstr_desc = Pstr_attribute (name, payload); pstr_loc}])
     when name.Asttypes.txt = "part" ->
     begin match payload_strings pstr_loc payload with
-      | [Chunk.Raw, part] -> Phrase_part part
+      | [Chunk.Raw, part] -> Phrase_part { location = pstr_loc; name = part }
       | _ ->
         prerr_endline (string_of_location pstr_loc ^ ": cannot parse [@@@part] payload");
         Phrase_code ()
@@ -544,9 +544,16 @@ let skip_whitespace contents ?(stop=String.length contents) start =
   in
   loop start
 
-let phrase_code contents phrase =
-  let stop = phrase.endpos.pos_cnum in
-  let start = skip_whitespace contents ~stop phrase.startpos.pos_cnum in
+let phrase_contents contents ?start ?stop phrase =
+  let stop = match stop with
+    | None -> phrase.endpos.pos_cnum
+    | Some stop -> stop
+  in
+  let start = match start with
+    | None -> phrase.startpos.pos_cnum
+    | Some start -> start
+  in
+  let start = skip_whitespace contents ~stop start in
   String.sub contents start (stop - start)
 
 let phrase_whitespace contents phrase rest =
@@ -561,22 +568,26 @@ let phrase_whitespace contents phrase rest =
 let output_phrases oc contents =
   let rec aux = function
     | [] -> ()
-    | (_, Phrase_part x) :: rest ->
-      Printf.fprintf oc "[@@@part %S];;\n" x;
+    | (phrase, Phrase_part {name; location}) :: rest ->
+      Printf.fprintf oc "%s[@@@part %S];;\n"
+        (phrase_contents contents phrase ~stop:location.loc_start.pos_cnum) name;
       aux rest
     | (phrase, Phrase_code expect_code) :: rest ->
-      let phrase_ws, expect_ws, nondeterministic = match rest with
+      let phrase_post, expect_pre, expect_post, nondeterministic, rest =
+        match rest with
         | (phrase_expect, Phrase_expect x) :: rest' ->
           (phrase_whitespace contents phrase rest,
+           phrase_contents contents phrase_expect ~stop:x.location.loc_start.pos_cnum,
            phrase_whitespace contents phrase_expect rest',
-           x.nondeterministic)
+           x.nondeterministic,
+           rest')
         | _ ->
-          ("\n", phrase_whitespace contents phrase rest, false)
+          ("\n", "", phrase_whitespace contents phrase rest, false, rest)
       in
-      let phrase_code = phrase_code contents phrase in
+      let phrase_code = phrase_contents contents phrase in
       if List.for_all (fun (_,s) -> is_all_whitespace s) expect_code &&
          not nondeterministic then
-        Printf.fprintf oc "%s%s" phrase_code expect_ws
+        Printf.fprintf oc "%s%s%s" phrase_code expect_pre expect_post
       else (
         let string_of_kind = function
           | Chunk.Raw -> ""
@@ -601,25 +612,27 @@ let output_phrases oc contents =
             in
             aux true xs
         in
-        Printf.fprintf oc "%s%s[%%%%expect%s%a];;%s"
-          phrase_code phrase_ws
+        Printf.fprintf oc "%s%s%s[%%%%expect%s%a];;%s"
+          phrase_code phrase_post
+          expect_pre
           (if nondeterministic then ".nondeterministic" else "")
-          output_expect expect_code expect_ws;
+          output_expect expect_code expect_post;
       );
       aux rest
-    | (_, Phrase_expect _) :: rest ->
+    | (phrase, Phrase_expect {location}) :: rest ->
+      Printf.fprintf oc "%s" (phrase_contents contents phrase ~stop:location.loc_start.pos_cnum);
       aux rest
   in aux
 
 let document_of_phrases contents matched phrases =
   let rec parts_of_phrase part acc = function
-    | (_, Phrase_part part') :: rest ->
+    | (_, Phrase_part { name }) :: rest ->
       Part.v ~name:part ~chunks:(List.rev acc) ::
-      parts_of_phrase part' [] rest
+      parts_of_phrase name [] rest
     | (_, Phrase_expect _) :: rest ->
       parts_of_phrase part acc rest
     | (phrase, Phrase_code toplevel_responses) :: rest ->
-      let ocaml_code = phrase_code contents phrase in
+      let ocaml_code = phrase_contents contents phrase in
       let chunk = Chunk.v ~ocaml_code ~toplevel_responses in
       parts_of_phrase part (chunk :: acc) rest
     | [] ->
