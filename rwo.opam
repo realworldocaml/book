@@ -1,5 +1,5 @@
 opam-version: "1.2"
-name: "Real-World-OCaml"
+name: "rwo"
 version: "dev"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/RealWorldOCaml/scripts"
