@@ -2,8 +2,7 @@
 
 (executables
  ((names (app rwo_deps))
-  (public_names (rwo rwo-deps))
+  (public_names (rwo-build rwo-deps))
   (libraries (rwo))
   (flags (:standard -short-paths))
   ))
-
