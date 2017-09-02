@@ -1,7 +1,0 @@
-(jbuild_version 1)
-
-(executable
-  ((name read_json)
-   (libraries (core yojson))
-  )
-)

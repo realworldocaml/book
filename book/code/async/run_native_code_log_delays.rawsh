@@ -1,4 +1,0 @@
-$ jbuilder build native_code_log_delays.exe
-$ ./_build/default/native_code_log_delays.exe
-15.5686s,
-$

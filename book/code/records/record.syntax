@@ -1,5 +1,0 @@
-type <record-name> =
-    { <field> : <type>;
-      <field> : <type>;
-      ...
-    }

@@ -1,1 +1,0 @@
-jbuilder build shapes.exe

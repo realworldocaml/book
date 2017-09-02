@@ -1,7 +1,0 @@
-(jbuild_version 1)
-
-(executable
-  ((name cal_append_broken)
-   (libraries (core))
-  )
-)

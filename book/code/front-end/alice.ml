@@ -1,1 +1,0 @@
-let friends = [ Bob.name ]
