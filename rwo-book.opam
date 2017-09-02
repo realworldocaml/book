@@ -10,12 +10,8 @@ build: [ "jbuilder" "build" ]
 depends: [
   "core" {>="v0.9.0"}
   "jbuilder" {build & >="1.0+beta9"}
-  "ocamlnet"
-  "cohttp"
-  "ppx_sexp_conv"
-  "toplevel_expect_test"
+  "rwo"
   "ocaml-topexpect"
-  "patdiff"
   # Required for code blocks within book.
   "core_bench"
   "mtime"
