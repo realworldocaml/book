@@ -1,5 +1,5 @@
-open Core.Std
-open Async.Std
+open Core
+open Async
 let (/) = Filename.concat
 
 module Html : sig
@@ -89,7 +89,7 @@ let deps_site : Command.t = Command.async
        Deferred.List.iter ~f:(fun chapter_file ->
            (
              Deps.of_chapter (repo_root/"book"/chapter_file) >>| fun l ->
-             List.map l ~f:(fun x -> ".."/"book"/x) |> fun l ->
+             List.map l ~f:(fun x -> "book"/x) |> fun l ->
              String.concat l ~sep:" "
            ) >>| fun dependencies ->
            printf "site/%s: %s\n\n" chapter_file dependencies
