@@ -1,14 +1,16 @@
-.PHONY: all depend clean distclean
+.PHONY: all clean
 
-all:
-	cd code && $(MAKE) -j1
+EXTS=topscript rawscript sh errsh rawsh ml mli syntax c h scm S json java cpp mll mly atd cmd
+ALL := $(shell find code -name jbuild $(EXTS:%=-o -name '*.%'))
 
-depend:
-	./INSTALL.sh
+all: $(ALL:%=%.sexp)
+	@ :
 
 clean:
-	rm -rf scripts/_build
-	cd code && $(MAKE) clean
+	rm -f `find . -name '*.sexp'`
 
-distclean: clean
-	cd code && $(MAKE) distclean
+%.sexp: %
+	rwo-build eval $< > $@
+
+%.c.sexp: %.c
+	rwo-build eval $< > $@
