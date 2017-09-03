@@ -245,7 +245,7 @@ let imported_files ?(repo_root=".") () =
   List.dedup l
 
 let code_files ?(repo_root=".") () =
-  Util.find_files (repo_root/"book"/"code") >>|
+  Util.find_files (repo_root/"examples"/"code") >>|
   List.filter ~f:(function
       (* ignore auto-generated files *)
       | "./book/code/async/test.txt"

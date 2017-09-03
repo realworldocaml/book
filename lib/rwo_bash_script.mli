@@ -5,7 +5,7 @@ open Async
 type t = {
   filename : string;
   commands : string list;
-}
+} [@@ deriving sexp]
 (** A script is a sequence of commands. *)
 
 val of_file : string -> t Deferred.t
@@ -16,12 +16,12 @@ module Evaluated : sig
     command : string;
     output : string; (** merged stdout/stderr *)
     exit_code : int;
-  }
+  } [@@deriving sexp]
 
   type t = {
     filename : string;
     commands : command list;
-  }
+  } [@@deriving sexp]
 
   val to_string : t -> string
 

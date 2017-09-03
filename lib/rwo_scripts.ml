@@ -15,14 +15,14 @@ type script = [
   | `OCaml_toplevel of Expect.Document.t
   | `OCaml_rawtoplevel of Expect.Raw_script.t
   | `Other of string
-]
+] [@@deriving sexp]
 
 type script_part = [
   | `OCaml of Expect.Raw_script.part
   | `OCaml_toplevel of Expect.Chunk.t list
   | `OCaml_rawtoplevel of Expect.Raw_script.part
   | `Other of string
-]
+] [@@deriving sexp]
 
 type t = script String.Map.t
 
@@ -263,22 +263,31 @@ let eval_script lang ~run_nondeterministic ~filename =
       Ok (`Other x)
     )
 
+let eval_script_to_sexp lang ~run_nondeterministic ~filename =
+  let open Deferred.Or_error.Monad_infix in
+  eval_script lang ~run_nondeterministic ~filename >>|
+  sexp_of_script
+
 let add_script t lang ~run_nondeterministic ~filename =
   let dir,file = filename in
   let filename = Filename.concat dir file in
   if file_is_mem t file then
     return (error "script already exists" file sexp_of_string)
-  else
-    eval_script lang ~run_nondeterministic ~filename >>|? fun script ->
+  else begin
+    let cache_filename = filename ^ ".sexp" in
+    begin Sys.file_exists cache_filename >>= function
+    |`Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
+    |_ -> eval_script lang ~run_nondeterministic ~filename 
+    end >>|? fun script ->
     Map.add t ~key:file ~data:script
+  end
 
-let of_html ~run_nondeterministic ~filename html =
-  let dir = Filename.dirname filename in
+let of_html ?(code_dir="examples") ~run_nondeterministic ~filename html =
   let imports =
     Import.find_all html
     |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
       add_script accum (Import.lang_of i |> ok_exn)
-        ~run_nondeterministic ~filename:(dir,i.Import.href)
+        ~run_nondeterministic ~filename:(code_dir,i.Import.href)
     )

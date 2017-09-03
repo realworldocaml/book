@@ -29,6 +29,11 @@ module Param = struct
     let doc = sprintf "DIR Output directory. Default: \"%s\"" default in
     flag "-o" (optional_with_default default file) ~doc
 
+  let code_dir =
+    let default = "examples" in
+    let doc = sprintf "DIR Directory with code examples. Default: \"%s\"" default in
+    flag "-code" (optional_with_default default file) ~doc
+
   let file =
     anon ("file" %: file)
 
@@ -55,11 +60,12 @@ let build_chapter : Command.t = Command.async
     +> Param.run_nondeterministic
     +> Param.pygmentize
     +> Param.repo_root
+    +> Param.code_dir
     +> Param.out_dir
     +> Param.file
   )
-  (fun run_nondeterministic pygmentize repo_root out_dir file () ->
-    Book.make ~run_nondeterministic ~pygmentize ~repo_root ~out_dir
+  (fun run_nondeterministic pygmentize repo_root code_dir out_dir file () ->
+    Book.make ~code_dir ~run_nondeterministic ~pygmentize ~repo_root ~out_dir
       (`Chapter file)
   )
 
@@ -114,7 +120,7 @@ let build : Command.t = Command.group
     "frontpage", build_frontpage;
     "toc", build_toc_page;
     "faqs", build_faqs_page;
-    "install",build_install_page;
+    "install", build_install_page;
   ]
 
 
@@ -137,7 +143,22 @@ let validate : Command.t = Command.async
 	 (List.map diff ~f:(fun x -> "\n  "^x) |> String.concat ~sep:"")
    in
    validate_code_files() >>= fun () ->
-   return()
+   return ()
+  )
+
+(******************************************************************************)
+(* `eval` command                                                             *)
+(******************************************************************************)
+
+let eval : Command.t = Command.async
+  ~summary:"evaluate a file into an sexp. This sexp can be used as a memoization cache in future runs."
+  Command.Spec.(empty +> Param.file)
+  (fun filename () ->
+    let lang = Rwo.Lang.of_filename filename |> Or_error.ok_exn in
+    let run_nondeterministic = false in
+    Rwo.Scripts.eval_script_to_sexp lang ~run_nondeterministic ~filename >>= fun sexp ->
+    print_endline (Sexp.to_string_hum (Or_error.ok_exn sexp));
+    return ()
   )
 
 (******************************************************************************)
@@ -148,6 +169,7 @@ let main = Command.group
   [
     "build", build;
     "validate", validate;
+    "eval", eval
   ]
 
 ;;

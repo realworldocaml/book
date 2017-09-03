@@ -4,7 +4,7 @@ open Async
 type t = {
   filename : string;
   commands : string list;
-}
+} [@@deriving sexp]
 
 let of_file filename =
   Reader.file_lines filename >>|
@@ -18,12 +18,12 @@ module Evaluated = struct
     command : string;
     output : string;
     exit_code : int;
-  }
+  } [@@deriving sexp]
 
   type t = {
     filename : string;
     commands : command list;
-  }
+  } [@@deriving sexp]
 
   let to_string t =
     List.map t.commands ~f:(fun x -> ["$ " ^ x.command; "\n"; x.output]) |>

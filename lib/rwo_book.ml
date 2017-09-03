@@ -195,7 +195,7 @@ let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   in
   main_template ~title_bar:title_bar ~content ()
 
-let make_chapter_page ?pygmentize ?(run_nondeterministic=false)
+let make_chapter_page ?code_dir ?pygmentize ?(run_nondeterministic=false)
     repo_root chapters chapter_file
     : Html.t Deferred.t
     =
@@ -238,7 +238,7 @@ let make_chapter_page ?pygmentize ?(run_nondeterministic=false)
 
   Html.of_file chapter_file >>= fun html ->
   let html = Html.get_body_childs ~filename:chapter_file html in
-  Scripts.of_html ~run_nondeterministic ~filename:chapter_file html >>|
+  Scripts.of_html ?code_dir ~run_nondeterministic ~filename:chapter_file html >>|
   ok_exn >>= fun scripts ->
   loop scripts html >>| fun content ->
   let content = Html.[
@@ -277,7 +277,7 @@ type src = [
 | `Install
 ]
 
-let make ?pygmentize ?run_nondeterministic ?(repo_root=".") ~out_dir = function
+let make ?pygmentize ?run_nondeterministic ?(repo_root=".") ?(code_dir="examples") ~out_dir = function
   | `Frontpage -> (
     let base = "index.html" in
     let out_file = out_dir/base in
@@ -299,7 +299,7 @@ let make ?pygmentize ?run_nondeterministic ?(repo_root=".") ~out_dir = function
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
     Toc.get_chapters ~repo_root () >>= fun chapters ->
-    make_chapter_page ?pygmentize ?run_nondeterministic
+    make_chapter_page ~code_dir ?pygmentize ?run_nondeterministic
       repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
