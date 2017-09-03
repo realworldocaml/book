@@ -1,5 +1,6 @@
 _build
 .depend
+site
 examples
 .*.swp
 *.corrected
