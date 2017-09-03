@@ -8,7 +8,7 @@ authors: ["Yaron Minsky" "Anil Madhavapeddy" "Jason Hickey"]
 dev-repo: "https://github.com/realworldocaml/examples.git"
 bug-reports: "https://github.com/realworldocaml/examples/issues"
 
-build: [ make ]
+build: [ make "-j" jobs ]
 
 depends: [
   "rwo"
