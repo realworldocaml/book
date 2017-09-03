@@ -1,5 +1,4 @@
 .*.swp
-*.sexp
 _build
 .merlin
 *.cmi
