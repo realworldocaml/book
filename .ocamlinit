@@ -1,9 +1,0 @@
-#use "topfind";;
-#thread;;
-#require "core async netstring cow oloop";;
-#directory "_build/lib";;
-#load "rwo.cma";;
-open Core.Std;;
-open Rwo_core2;;
-open Async.Std;;
-open Rwo;;
