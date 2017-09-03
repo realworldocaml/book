@@ -1,5 +1,6 @@
 _build
 .depend
+examples
 .*.swp
 *.corrected
 *~
