@@ -13,6 +13,4 @@ WORKDIR /home/opam/src
 RUN opam pin add -n rwo-book /home/opam/src
 RUN opam depext rwo-book
 RUN opam install rwo-book --deps-only
-RUN opam config exec -- make
-EXPOSE 8080
-ENTRYPOINT ["opam","config","exec","--","cohttp-server-lwt","-v","/home/opam/src/site"]
+RUN opam config exec -- make PYGMENTIZE=1 -j2

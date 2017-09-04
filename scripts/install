@@ -3,17 +3,4 @@
 
 set -ex
 
-export OPAMYES=1
-export OPAMJOBS=2
-
-if [ -e $HOME/.opam/4.04.2/bin/ocamlopt.opt ]; then
-  # update the build cache
-  opam update -u
-  opam config exec -- ocaml --version
-else
-  rm -rf $HOME/.opam
-  opam init -a
-  opam switch 4.04.2
-  opam pin add -n rwo https://github.com/realworldocaml/scripts.git#v2
-  opam install ocaml-topexpect rwo
-fi
+docker pull ocaml/opam:ubuntu-16.04_ocaml-4.04.2

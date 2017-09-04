@@ -1,26 +1,10 @@
 language: c
 sudo: false
-dist: trusty
+services:
+  - docker
 branches:
   except:
   - gh-pages
-cache:
-  directories:
-  - $HOME/.opam
-addons:
-  apt:
-    sources:
-    - avsm
-    packages:
-    - opam
-    - aspcud
-    - libpcre3-dev
-    - m4
-    - pkg-config
-    - zlib1g-dev
-    - libgmp-dev
-    - tzdata
-    - python-pygments
 install: scripts/install
 script: scripts/build
 deploy:
