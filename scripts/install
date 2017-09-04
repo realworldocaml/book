@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Designed for the Travis CI build environment. See .travis.yml
 
+set -ex
+
 export OPAMYES=1
 export OPAMJOBS=2
 
