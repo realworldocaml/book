@@ -1,47 +1,53 @@
-Real World OCaml
-----------------
+Real World OCaml v2
+-------------------
 
-Dependencies
-============
-Scripts to build the book and the website are implemented in
-OCaml. Once you have [OPAM](https://opam.ocaml.org/) installed, it is
-recommended you do the following to install all necessary
-dependencies:
+This is the source code for the Real World OCaml 2nd edition, which
+is still a work in progress.  The original edition was written by
+Yaron Minsky, Anil Madhavapeddy and Jason Hickey, and the revised
+edition is being lead by Yaron Minsky and Anil Madhavapeddy.  There
+have been significant contributions to the revised tooling from
+Ashish Agarwal, Jeremy Yallop, Frederic Bour, and Sander Spies.
 
-```
-opam switch rwo -A 4.04.1
-cd /to/your/working/directory
-opam pin add rwo .
-opam install rwo --deps-only
-```
+An online snapshot of the development book is available from
+<https://dev.realworldocaml.org>.  There is a Feedback pane on
+each chapter which leads to a dedicated section on the OCaml
+[discussion forum](https://discuss.ocaml.org) where you can register
+broader feedback.  More specific issues such as typos can be
+reported on the [issue tracker](https://github.com/realworldocaml/book/issues).
 
-The `switch` step is optional, but recommended if you are also working
-on other OCaml projects that may have conflicting requirements.
+## Repository layout
 
+The book is structured as HTML sources that are transformed into
+the online site via OCaml scripts. Code fragments are evaluated
+and inserted into the book via custom `<link>` tags in the source code.
 
-Directory Structure
-===================
-* `book/`
-  Main content of the book. An html file for each chapter along with
-  supporting images and code blocks.
+If you wish to build the book yourself, then you will need to be
+familiar with the [opam](https://opam.ocaml.org) pinning workflow.
 
-  - `pdf/` and `theme/`
-    Copied from the O'Reilly sources. Unsure yet if these are needed.
+There are three main repositories for the book:
 
-* `lib/`
-  OCaml code implementing all the functionality needed to build the
-  book into various formats.
+- <https://github.com/realworldocaml/scripts> contains the `rwo`
+  opam package which provides the binaries for build and dependency
+  analysis of the book sources.  These scripts are currently unreleased
+  and so need to be pinned to master via opam.  The working branch
+  is currently the `v2` branch.
+- <https://github.com/realworldocaml/examples> contain the source
+  code fragments which are evaluated and inserted into this book.
+  They can be checked out separately for easy building by readers.
+  The code fragments are evaluted by the `rwo` tool by using the
+  [ocaml-topexpect](https://github.com/let-def/topexpect) toplevel
+  parser.  The working branch is currently the `v2` branch.
+- <https://github.com/realworldocaml/book> is this repository, whic
+  uses the scripts and examples repositories to compile the HTML
+  site online.
 
-* `app/`
-  Command line app, for convenient access to functions implemented in
-  lib/.
+All of the code and examples are built using OCaml 4.04.2.
 
-* `archive/`
-  Mostly stuff from the 1st edition of the book. Could delete all of
-  this as it is accessible by going to tag
-  [pre-2e](https://github.com/yminsky/Real-World-OCaml/releases/tag/pre-2e).
-  However, leaving here for now for more clear access until we're sure
-  we've ported everything needed.
+## Continuous Integration
 
-* `exercises/`
-  Unused exercises.
+There are three separate Travis CI pipelines that test each
+of the repositories:
+
+- [scripts](https://travis-ci.org/realworldocaml/scripts) : just builds the binaries
+- [examples](https://travis-ci.org/realworldocaml/examples) : evaluates the examples and then commits the results to the `v2-sexp` branch.  The sexp files are used as a cache by the HTML book builder, to incrementally reduce build time.
+- [book](https://travis-ci.org/realworldocaml/book) : builds and deploys the live website to GitHub pages.

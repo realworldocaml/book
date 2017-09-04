@@ -2,30 +2,14 @@ opam-version: "1.2"
 name: "Real-World-OCaml"
 version: "dev"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
-homepage: "https://github.com/yminsky/Real-World-OCaml"
+homepage: "https://github.com/realworldocaml/book"
 license: "PROPRIETARY"
 
-build: [ "jbuilder" "build" ]
+build: []
 
 depends: [
-  "core" {>="v0.9.0"}
-  "jbuilder" {build & >="1.0+beta9"}
   "rwo"
   "ocaml-topexpect"
-  # Required for code blocks within book.
-  "core_bench"
-  "mtime"
-  "yojson"
-  "astring"
-  "cryptokit"
-  "async_graphics"
-  "ocp-index"
-  "atd"
-  "atdgen"
-  "ctypes"
-  "ctypes-foreign"
-  "textwrap"
-  "uri"
 ]
 
 depexts: [
