@@ -1,6 +1,9 @@
 language: c
 sudo: false
 dist: trusty
+branches:
+  except:
+  - v2-sexp
 cache:
   apt: true
   directories:
