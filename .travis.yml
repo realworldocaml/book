@@ -1,10 +1,14 @@
 language: c
 sudo: false
 dist: trusty
+cache:
+  apt: true
+  directories:
+  - $HOME/.opam
 addons:
   apt:
     sources:
-    - avsm/ppa
+    - ppa:avsm/ppa
     packages:
     - ocaml-native-compilers
     - opam
@@ -14,9 +18,6 @@ addons:
     - pkg-config
     - zlib1g-dev
     - libgmp-dev
-cache:
-  directories:
-  - $HOME/.opam
 install: scripts/install
 script: scripts/build
 deploy:
