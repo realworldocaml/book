@@ -6,7 +6,7 @@ set -ex
 export OPAMYES=1
 export OPAMJOBS=2
 
-if [ -d $HOME/.opam ]; then
+if [ -e $HOME/.opam/config ]; then
   # update the build cache
   opam update -u
   opam config exec -- ocaml --version
