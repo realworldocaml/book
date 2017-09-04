@@ -1,15 +1,22 @@
 language: c
 sudo: false
-services:
-  - docker
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
-script: bash -ex ./.travis-docker.sh
-env:
-  global:
-  - PACKAGE="rwo-examples"
-  - PINS="rwo:https://github.com/realworldocaml/scripts.git#v2"
-  - DISTRO="ubuntu-16.04" OCAML_VERSION="4.04.2"
-  - OPAMJOBS=2
+dist: trusty
+addons:
+  apt:
+    packages:
+    - opam
+    - ocaml-native-compilers
+    - camlp4-extra
+    - libpcre3-dev
+    - m4
+    - pkg-config
+    - zlib1g-dev
+    - libgmp-dev
+cache:
+  directories:
+  - $HOME/.opam
+install: scripts/install
+script: scripts/build
 deploy:
   provider: pages
   skip_cleanup: true
