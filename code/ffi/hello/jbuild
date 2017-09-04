@@ -3,6 +3,6 @@
 (executable
   ((name hello)
    (libraries (ctypes.foreign))
-   (flags (:standard -lflags -cclib,-lncurses))
+   (flags (:standard -cclib -lncurses))
   )
 )
