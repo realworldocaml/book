@@ -4,7 +4,7 @@
 export OPAMYES=y
 export OPAMJOBS=2
 export OPAMVERBOSE=y
-opam init -ay
+opam init -a
 opam switch 4.04.2
 eval `opam config env`
 opam depext -i async core_bench core_extended ctypes
