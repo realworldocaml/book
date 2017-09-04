@@ -3,9 +3,11 @@ sudo: false
 dist: trusty
 addons:
   apt:
+    sources:
+    - avsm/ppa
     packages:
-    - opam
     - ocaml-native-compilers
+    - opam
     - camlp4-extra
     - libpcre3-dev
     - m4
