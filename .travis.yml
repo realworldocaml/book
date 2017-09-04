@@ -12,6 +12,7 @@ addons:
     packages:
     - ocaml-native-compilers
     - opam
+    - aspcud
     - camlp4-extra
     - libpcre3-dev
     - m4

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Designed for the Travis CI build environment. See .travis.yml
 
-export OPAMYES=y
+export OPAMYES=1
 export OPAMJOBS=2
-export OPAMVERBOSE=y
+export OPAMVERBOSE=1
 opam init -a
 opam switch 4.04.2
 opam depext -i async core_bench core_extended ctypes
