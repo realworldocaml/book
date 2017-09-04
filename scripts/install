@@ -6,11 +6,12 @@ set -ex
 export OPAMYES=1
 export OPAMJOBS=2
 
-if [ -e $HOME/.opam/config ]; then
+if [ -d $HOME/.opam/4.04.2 ]; then
   # update the build cache
   opam update -u
   opam config exec -- ocaml --version
 else
+  rm -rf $HOME/.opam
   opam init -a --switch=4.04.2
   opam pin add -n rwo https://github.com/realworldocaml/scripts.git#v2
   opam install ocaml-topexpect rwo
