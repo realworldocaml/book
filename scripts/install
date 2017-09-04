@@ -3,6 +3,5 @@
 
 export OPAMYES=1
 export OPAMJOBS=2
-opam init -a
-opam switch 4.04.2
+opam init -a --switch=4.04.2
 opam depext -i async core_bench core_extended ctypes ctypes-foreign ppx_deriving
