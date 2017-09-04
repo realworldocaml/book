@@ -61,7 +61,6 @@ endif
 # HTML Book
 
 ROOT = ./
-PYGMENTIZE:=Y
 
 site/%.html: book/%.html
 ifdef PYGMENTIZE

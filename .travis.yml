@@ -20,6 +20,7 @@ addons:
     - zlib1g-dev
     - libgmp-dev
     - tzdata
+    - python-pygments
 install: scripts/install
 script: scripts/build
 deploy:
