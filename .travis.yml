@@ -8,7 +8,7 @@ cache:
 addons:
   apt:
     sources:
-    - ppa:avsm/ppa
+    - avsm
     packages:
     - ocaml-native-compilers
     - opam
