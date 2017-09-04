@@ -1,0 +1,31 @@
+language: c
+sudo: false
+dist: trusty
+branches:
+  except:
+  - gh-pages
+cache:
+  directories:
+  - $HOME/.opam
+addons:
+  apt:
+    sources:
+    - avsm
+    packages:
+    - opam
+    - aspcud
+    - libpcre3-dev
+    - m4
+    - pkg-config
+    - zlib1g-dev
+    - libgmp-dev
+    - tzdata
+install: scripts/install
+script: scripts/build
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: $TRAVIS_BUILD_DIR/site
+  github_token: $GITHUB_TOKEN
+  on:
+    branch: master

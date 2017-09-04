@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Designed for the Travis CI build environment. See .travis.yml
+
+export OPAMYES=1
+export OPAMJOBS=2
+
+if [ -d $HOME/.opam ]; then
+  # update the build cache
+  opam update -u
+  opam config exec -- ocaml --version
+else
+  opam init -a --switch=4.04.2
+  opam pin add -n rwo https://github.com/realworldocaml/scripts.git#v2
+  opam install ocaml-topexpect rwo
+fi
