@@ -1,7 +1,8 @@
-function createElement(opt) {
+function createDOMElement(opt) {
   var el = document.createElement(opt.element || 'div');
   el.className = opt.className || '';
-  el.id = opt.id;
+  el.id = opt.id || '';
+  el.href = opt.href || '';
   for (var key in opt.style) {
     el.style[key] = opt.style[key];
   }
@@ -15,9 +16,21 @@ function createElement(opt) {
 };
 
 function div(opt) {
-  opt.element = 'div';
-  return createElement(opt);
+  return createDOMElement(opt);
 };
+
+function br() {
+  return createDOMElement({element: 'br'});
+}
+
+function a(opt) {
+  opt.element = 'a';
+  return createDOMElement(opt);
+};
+
+function text(text) {
+  return document.createTextNode(text);
+}
 
 var expanded = false;
 var discourseDiv = div({
@@ -25,10 +38,12 @@ var discourseDiv = div({
   id: 'discourse-comments',
   style: {
     position: 'fixed',
+    backgroundColor: 'white',
     right: 0,
     top: 0,
     bottom: 0,
     borderLeft: 'solid 1px black',
+    fontFamily: '"proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif',
     height: '100%',
     width: '400px',
     transition: '.4s linear',
@@ -36,6 +51,33 @@ var discourseDiv = div({
     zIndex: 10
   },
   children: [
+    div({
+      style: {
+        fontWeight: '400',
+        padding: '10px',
+        backgroundColor: '#ffffa7',
+        marginBottom: '10px',
+        textAlign: 'center',
+        fontSize: '14px',
+        lineHeight: '18px'
+      },
+      children: [
+          text(
+            "Note: Discourse is intended for general discussion of the chapter. " +
+            "For other things like typo's we encourage you to make "
+          ),
+          a({
+            href:"https://github.com/realworldocaml/Real-World-OCaml",
+            children: [
+              text("an issue on GitHub")
+            ]
+          }),
+          text("."),
+          br(),
+          br(),
+          text("When giving feedback please quote the paragraph.")
+      ]
+    }),
     div({
       style: {
         position: 'absolute',
@@ -47,7 +89,7 @@ var discourseDiv = div({
         top: '46px',
         transform: 'rotate(270deg)',
         textAlign: 'center',
-        fontFamily: '"proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif',
+
         cursor: 'pointer'
       },
       onClick: function(e) {
@@ -61,7 +103,7 @@ var discourseDiv = div({
         }
       },
       children: [
-        document.createTextNode("Feedback")
+        text("Feedback")
       ]
     })
   ]
@@ -69,8 +111,8 @@ var discourseDiv = div({
 
 document.body.appendChild(discourseDiv);
 
-let topic = -1;
 
+let topic = -1;
 var loc = location.pathname;
 
 var urlTopicMap = {
@@ -99,6 +141,8 @@ var urlTopicMap = {
   '/22-compiler-frontend.html': 704,
   '/23-compiler-backend.html': 705,
   '/faqs.html': 708,
+  '': 706,
+  '/': 706,
   '/index.html': 706,
   '/install.html': 709,
   '/toc.html': 707
