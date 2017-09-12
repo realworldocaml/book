@@ -216,8 +216,8 @@
           <link rel="import" href="code/sexpr/inline_sexp.topscript" part="1"/>
 
           <p>
-	    The declaration <code>&lt;:sexp_of&lt;int *
-              string&gt;&gt;</code> simply gets expanded to the sexp
+	    The declaration <code>[%sexp_of: int * string]</code>
+	    simply gets expanded to the sexp
             converter for the type <code>int * string</code>. This is
             useful whenever you need a sexp converter for an anonymous
             type.</p>
@@ -230,33 +230,44 @@
             programmer effort.</p>
 
           <div data-type="note">
-            <h1>Syntax Extensions, Camlp4, and Type_conv</h1>
+            <h1>Syntax Extensions and PPX</h1>
 
             <p>
-	      OCaml doesn't directly support generating code from
-              type definitions. Instead, it supplies a powerful syntax
-              extension mechanism known as Camlp4, which lets you
-              extend the grammar of the language. Camlp4 is well
-              integrated into the OCaml toolchain and can be activated
-              within the toplevel and also included in compilation
-              using the <code>-pp</code> compiler flag.
+	      OCaml doesn't directly support deriving s-expression
+	      converters from type definitions. Instead, it provides a
+              mechanism called <em>PPX</em> which allows you to add to
+              the compilation pipeline code for transforming OCaml
+              programs at the syntactic level, via
+              the <code>-ppx</code> compiler flag.
+	    </p>
 
-	      <idx>Camlp4 syntax extension mechanism</idx>
-	      <idx>syntax extension/in Camlp4</idx></p>
+	    <p>
+	      PPXs operate on OCaml's <em>abstract syntax tree</em>,
+	      or AST, which is a data type that represents the syntax
+	      of a well-formed OCaml program. Annotations
+	      like <code>[%sexp_of: int]</code> or <code>[@@deriving
+	      sexp]</code> are part of special extensions to the
+	      syntax, called <em>extension points</em>, which were
+	      added to the language to give a place to put information
+	      that would be consumed by syntax extensions
+	      like <code>ppx_sexp_conv</code>.
+	    </p>
+
+	      
+
+	      <idx>PPX syntax extensions</idx>
+	      <idx>syntax extension with PPX</idx>
 
             <p>
-	      Sexplib is part of a family of syntax extensions,
-              including Comparelib, described
-              in <a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>, and
-              Fieldslib, described
-              in <a href="05-records.html#records" data-type="xref">Records</a>, that generate code based
-              on type declarations and are all based on a common
-              library called Type_conv. This library provides a common
-              language for annotating types (e.g., using
-              the <code>with</code> notation) and utilities for
-              working with type definitions. If you want to build your
-              own type-driven syntax extension, you should consider
-              basing it on Type_conv.
+	      <code>ppx_sexp_conv</code> is part of a family of syntax
+              extensions, including <code>ppx_compare</code>,
+              described
+              in <a href="13-maps-and-hashtables.html#maps-and-hash-tables"
+              data-type="xref">Maps And Hash Tables</a>, and
+              <code>ppx_fields</code>, described
+              in <a href="05-records.html#records"
+              data-type="xref">Records</a>, that generate code based
+              on type declarations.
 
 	      <idx>Type_conv library</idx>
 	      <idx>Sexplib package/Type_conv library and</idx></p>
