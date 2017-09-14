@@ -584,16 +584,17 @@
           first element of a list and the remainder of that
           list.</p>
 
-          <p>As you can see, however, the toplevel did not like
-          this definition and spit out a warning indicating that
-          the pattern is not exhaustive. This means that there are
-          values of the type in question that won't be captured by
-          the pattern. The warning even gives an example of a value
-          that doesn't match the provided pattern, in particular,
-          <code>[]</code>, the empty list. If we try to run
-          <code>my_favorite_language</code>, we'll see that it
-          works on nonempty list and fails on empty ones:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="32"/>
+          <p>As you can see, however, the toplevel did not like this
+          definition and spit out a warning indicating that the
+          pattern is not exhaustive. This means that there are values
+          of the type in question that won't be captured by the
+          pattern. The warning even gives an example of a value that
+          doesn't match the provided pattern, in
+          particular, <code>[]</code>, the empty list. If we try to
+          run <code>my_favorite_language</code>, we'll see that it
+          works on nonempty lists and fails on empty ones:</p>
+          <link rel="import" href="code/guided-tour/main.topscript"
+          part="32"/>
 
           <p>You can avoid these warnings, and more importantly
           make sure that your code actually handles all of the
