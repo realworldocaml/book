@@ -166,7 +166,9 @@
         identifiers that show up in that pattern. A pattern is
         essentially a description of the shape of a data structure,
         where some components are names to be bound to values. As we
-        saw in <a href="01-guided-tour.html#tuples-lists-options-and-pattern-matching" data-type="xref">Tuples Lists Options And Pattern
+        saw
+        in <a href="01-guided-tour.html#tuples-lists-options-and-pattern-matching"
+        data-type="xref">Tuples Lists Options And Pattern
         Matching</a>, OCaml has patterns for a variety of different
         data types.</p>
 
@@ -345,22 +347,22 @@
 	      href="code/variables-and-functions/main.topscript"
 	      part="19" /> 
 
-        <p>The practice of applying some of the arguments of a
-        curried function to get a new function is called
-        <em>partial application</em>.<idx>partial
-        application</idx></p>
+        <p>The practice of applying some of the arguments of a curried
+        function to get a new function is called <em>partial
+        application</em>.<idx>partial application</idx></p>
 
         <p>Note that the <code>fun</code> keyword supports its own
-        syntax for currying, so the following definition of
-        <code>abs_diff</code> is equivalent to the previous
+        syntax for currying, so the following definition
+        of <code>abs_diff</code> is equivalent to the previous
         one.<idx>fun keyword/currying syntax</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="20"/>
+        <link rel="import"
+        href="code/variables-and-functions/main.topscript" part="20"/>
 
         <p>You might worry that curried functions are terribly
         expensive, but this is not the case. In OCaml, there is no
         penalty for calling a curried function with all of its
-        arguments. (Partial application, unsurprisingly, does have
-        a small extra cost.)</p>
+        arguments. (Partial application, unsurprisingly, does have a
+        small extra cost.)</p>
 
         <p>Currying is not the only way of writing a multiargument
         function in OCaml. It's also possible to use the different
@@ -806,9 +808,12 @@
 
             <p>Here, the two <code>ints</code> are the starting
             position and length of the substring to extract,
-            respectively. We can make this fact more obvious from
-            the signature by adding labeled.</p>
-            <link rel="import" href="code/variables-and-functions/substring_sig2.ml"/>
+            respectively, but you wouldn't know that from the type
+            signature.  We can make the signature more informative by
+            adding labels.</p>
+
+	    <link rel="import"
+	    href="code/variables-and-functions/substring_sig2.ml"/>
 
             <p>This improves the readability of both the signature
             and of client code that makes use of
