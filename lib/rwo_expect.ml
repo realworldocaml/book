@@ -73,7 +73,7 @@ module Document = struct
   let of_file ~run_nondeterministic ~filename = (
       let (working_dir, filename) = Filename.split filename in
       let args =
-        let args = ["-sexp"; "-verbose"; "-dry-run"; "-short-paths"; filename] in
+        let args = ["-sexp"; "-verbose"; "-short-paths"; filename] in
         if run_nondeterministic then "-run-nondeterministic" :: args else args
       in
       Process.run
