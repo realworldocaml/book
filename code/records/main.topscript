@@ -56,9 +56,10 @@ let parse_lines parse file_contents =
 [%%expect ocaml {|val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>|}];;
 [@@@part "4.1"];;
 parse_lines service_info_of_string
-  "rtmp              1/ddp     # Routing Table Maintenance Protocol\n\
-   tcpmux            1/udp     # TCP Port Service Multiplexer\n\
-   tcpmux            1/tcp     # TCP Port Service Multiplexer"
+  {|rtmp              1/ddp     # Routing Table Maintenance Protocol
+    tcpmux            1/udp     # TCP Port Service Multiplexer
+    tcpmux            1/tcp     # TCP Port Service Multiplexer
+  |}
 ;;
 [%%expect ocaml {|
 - : service_info with_line_num list =
@@ -73,6 +74,32 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 [{item = 1; line_num = 1}; {item = 10; line_num = 2};
  {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
 |}];;
+
+[@@@part "4.3"];;
+let s = "A string!";;
+
+[@@@part "4.4"];;
+let s = {|A string!|};;
+
+[@@@part "4.5"];;
+let s = "\"A quoted string!\"";;
+let () = print_endline s;;
+
+[@@@part "4.6"];;
+let s = "\"A quoted string!\"";;
+let () = print_endline s;;
+
+[@@@part "4.7"];;
+let s = print_endline {|
+It's possible to put something
+here that spans multiple lines|};;
+
+[@@@part "4.8"];;
+let s = print_endline {x|
+OCaml has multiple kinds of quotations,
+including ", and {| and |}
+|x};;
+
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
