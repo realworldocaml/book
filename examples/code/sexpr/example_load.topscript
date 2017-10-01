@@ -1,0 +1,27 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+Sexp.load_sexp "example.scm";;
+[%%expect ocaml {|- : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))|}];;
+[@@@part "1"];;
+Sexp.load_sexp "comment_heavy.scm" ;;
+[%%expect ocaml {|- : Sexp.t = ((this is included) (this stays) (and now we're done))|}];;
+[@@@part "2"];;
+Exn.handle_uncaught ~exit:false (fun () ->
+  ignore (Sexp.load_sexp "example_broken.scm")) ;;
+[%%expect{|
+Uncaught exception:
+  
+  (Sexplib.Sexp.Parse_error
+   ((location parse) (err_msg "unexpected character: ')'") (text_line 4)
+    (text_char 29) (global_offset 78) (buf_pos 78)))
+
+|};
+ocaml {|- : unit = ()|}];;

@@ -1,0 +1,63 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "1"];;
+open Core_kernel;;
+let s = object
+  val mutable v = [0; 2]
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+end ;;
+[%%expect ocaml {|val s : < pop : int option; push : int -> unit > = <obj>|}];;
+[@@@part "2"];;
+s#pop ;;
+[%%expect ocaml {|- : int option = Some 0|}];;
+s#push 4 ;;
+[%%expect ocaml {|- : unit = ()|}];;
+s#pop ;;
+[%%expect ocaml {|- : int option = Some 4|}];;
+[@@@part "3"];;
+let stack init = object
+  val mutable v = init
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+end ;;
+[%%expect ocaml {|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
+let s = stack [3; 2; 1] ;;
+[%%expect ocaml {|val s : < pop : int option; push : int -> unit > = <obj>|}];;
+s#pop ;;
+[%%expect ocaml {|- : int option = Some 3|}];;
+[@@@part "4"];;
+let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;
+[%%expect ocaml {|val print_pop : < pop : int option; .. > -> unit = <fun>|}];;
+print_pop (stack [5;4;3;2;1]) ;;
+[%%expect{|Popped: 5|};
+ocaml {|- : unit = ()|}];;
+let t = object
+  method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
+end ;;
+[%%expect ocaml {|val t : < pop : int option > = <obj>|}];;
+print_pop t ;;
+[%%expect{| ... |};
+ocaml {|- : unit = ()|}];;

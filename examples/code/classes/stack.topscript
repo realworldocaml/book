@@ -1,0 +1,91 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+end ;;
+[%%expect ocaml {|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;
+[@@@part "1"];;
+class ['a] stack init = object
+  val mutable v = init
+
+  method pop = 
+    match v with
+    | hd :: tl -> 
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd = 
+    v <- hd :: v
+end ;;
+[%%expect{|
+Characters 0-194:
+Error: Some type variables are unbound in this type:
+         class ['a] stack :
+           'b list ->
+           object
+             val mutable v : 'b list
+             method pop : 'b option
+             method push : 'b -> unit
+           end
+       The method pop has type 'b option where 'b is unbound
+|}];;
+[@@@part "2"];;
+class sstack init = object
+  inherit [string] stack init
+
+  method print =
+    List.iter ~f:print_string v
+end ;;
+[%%expect ocaml {|
+class sstack :
+  string list ->
+  object
+    val mutable v : string list
+    method pop : string option
+    method print : unit
+    method push : string -> unit
+  end
+|}];;
+[@@@part "3"];;
+class double_stack init = object
+  inherit [int] stack init as super
+
+  method push hd =
+    super#push (hd * 2)
+end ;;
+[%%expect ocaml {|
+class double_stack :
+  int list ->
+  object
+    val mutable v : int list
+    method pop : int option
+    method push : int -> unit
+  end
+|}];;

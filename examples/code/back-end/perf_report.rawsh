@@ -1,0 +1,4 @@
+$ perf report -g
++  48.86%  barrier.native  barrier.native  [.] camlBarrier__test_immutable_69282
++  30.22%  barrier.native  barrier.native  [.] camlBarrier__test_mutable_69279
++  20.22%  barrier.native  barrier.native  [.] caml_modify

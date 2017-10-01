@@ -1,0 +1,32 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+Int.sexp_of_t 3;;
+[%%expect ocaml {|- : Sexplib0.Sexp.t = 3|}];;
+String.sexp_of_t "hello";;
+[%%expect ocaml {|- : Sexp.t = hello|}];;
+Exn.sexp_of_t (Invalid_argument "foo");;
+[%%expect ocaml {|- : Sexp.t = (Invalid_argument foo)|}];;
+[@@@part "1"];;
+List.sexp_of_t;;
+[%%expect ocaml {|- : ('a -> Sexp.t) -> 'a list -> Sexp.t = <fun>|}];;
+List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
+[%%expect ocaml {|- : Sexp.t = (1 2 3)|}];;
+[@@@part "2"];;
+List.t_of_sexp;;
+[%%expect ocaml {|- : (Sexp.t -> 'a) -> Sexp.t -> 'a list = <fun>|}];;
+List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
+List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
+[%%expect{|
+Exception:
+(Sexplib.Conv.Of_sexp_error (Failure "int_of_sexp: (Failure int_of_string)")
+ three).
+|}];;

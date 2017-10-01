@@ -1,0 +1,10 @@
+true
+false
+null
+[1, 2, 3., 4.0, .5, 5.5e5, 6.3]
+"Hello World"
+{ "field1": "Hello",
+  "field2": 17e13,
+  "field3": [1, 2, 3],
+  "field4": { "fieldA": 1, "fieldB": "Hello" }
+}

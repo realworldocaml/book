@@ -1,0 +1,102 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+#require "mtime.os.top";;
+[%%expect{|No such package: mtime.os.top|}];;
+let time f =
+  let counter = Mtime.counter () in
+  let x = f () in
+  let elapsed = Mtime.count counter in
+  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  x 
+;;
+[%%expect{|
+Characters 29-42:
+Error: Unbound module Mtime
+Hint: Did you mean Time?
+|}];;
+let memoize f =
+  let table = Hashtbl.Poly.create () in
+  (fun x ->
+     match Hashtbl.find table x with
+     | Some y -> y
+     | None ->
+       let y = f x in
+       Hashtbl.add_exn table ~key:x ~data:y;
+       y
+  );;
+[%%expect ocaml {|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
+[@@@part "1"];;
+let rec fib i =
+  if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+[%%expect ocaml {|val fib : int -> int = <fun>|}];;
+[@@@part "2"];;
+time (fun () -> fib 20);;
+[%%expect{|
+Characters 0-4:
+Error: Unbound value time
+|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+Characters 0-4:
+Error: Unbound value time
+|}];;
+[@@@part "3"];;
+let fib = memoize fib;;
+[%%expect ocaml {|val fib : int -> int = <fun>|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+Characters 0-4:
+Error: Unbound value time
+|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+Characters 0-4:
+Error: Unbound value time
+|}];;
+[@@@part "4"];;
+let fib_norec fib i =
+  if i <= 1 then i
+  else fib (i - 1) + fib (i - 2) ;;
+[%%expect ocaml {|val fib_norec : (int -> int) -> int -> int = <fun>|}];;
+[@@@part "5"];;
+let rec fib i = fib_norec fib i;;
+[%%expect ocaml {|val fib : int -> int = <fun>|}];;
+fib 20;;
+[%%expect ocaml {|- : int = 6765|}];;
+[@@@part "6"];;
+let make_rec f_norec =
+  let rec f x = f_norec f x in
+  f
+;;
+[%%expect ocaml {|val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
+let fib = make_rec fib_norec;;
+[%%expect ocaml {|val fib : int -> int = <fun>|}];;
+fib 20;;
+[%%expect ocaml {|- : int = 6765|}];;
+[@@@part "7"];;
+let memo_rec f_norec x =
+  let fref = ref (fun _ -> assert false) in
+  let f = memoize (fun x -> f_norec !fref x) in
+  fref := f;
+  f x
+;;
+[%%expect ocaml {|val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
+[@@@part "8"];;
+let fib = memo_rec fib_norec;;
+[%%expect ocaml {|val fib : int -> int = <fun>|}];;
+time (fun () -> fib 40);;
+[%%expect{|
+Characters 0-4:
+Error: Unbound value time
+|}];;
+[@@@part "9"];;
+let fib = memo_rec (fun fib i ->
+  if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
+[%%expect ocaml {|val fib : int -> int = <fun>|}];;

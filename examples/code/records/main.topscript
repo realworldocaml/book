@@ -1,0 +1,261 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+module Time_ns = Core_kernel.Time_ns;;
+[%%expect ocaml {|module Time_ns = Core_kernel.Time_ns|}];;
+type service_info =
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+  }
+;;
+[%%expect ocaml {|type service_info = { service_name : string; port : int; protocol : string; }|}];;
+[@@@part "1"];;
+#require "re.posix";;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re: added to search path
+/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
+|}];;
+let service_info_of_string line =
+  let matches = 
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  { service_name = Re.get matches 1;
+    port = Int.of_string (Re.get matches 2);
+    protocol = Re.get matches 3;
+  }
+;;
+[%%expect ocaml {|val service_info_of_string : string -> service_info = <fun>|}];;
+[@@@part "1.1"];;
+let ssh = service_info_of_string
+            "ssh 22/udp # SSH Remote Login Protocol";;
+[%%expect ocaml {|val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}|}];;
+[@@@part "2"];;
+ssh.port;;
+[%%expect ocaml {|- : int = 22|}];;
+[@@@part "3"];;
+type 'a with_line_num = { item: 'a; line_num: int };;
+[%%expect ocaml {|type 'a with_line_num = { item : 'a; line_num : int; }|}];;
+[@@@part "4"];;
+let parse_lines parse file_contents =
+  let lines = String.split ~on:'\n' file_contents in
+  List.mapi lines ~f:(fun line_num line ->
+    { item = parse line;
+      line_num = line_num + 1;
+    })
+;;
+[%%expect ocaml {|val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>|}];;
+[@@@part "4.1"];;
+parse_lines service_info_of_string
+  {|rtmp              1/ddp     # Routing Table Maintenance Protocol
+    tcpmux            1/udp     # TCP Port Service Multiplexer
+    tcpmux            1/tcp     # TCP Port Service Multiplexer
+  |}
+;;
+[%%expect ocaml {|
+- : service_info with_line_num list =
+[{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
+ {item = {service_name = "tcpmux"; port = 1; protocol = "udp"}; line_num = 2};
+ {item = {service_name = "tcpmux"; port = 1; protocol = "tcp"}; line_num = 3}]
+|}];;
+[@@@part "4.2"];;
+parse_lines Int.of_string "1\n10\n100\n1000";;
+[%%expect ocaml {|
+- : int with_line_num list =
+[{item = 1; line_num = 1}; {item = 10; line_num = 2};
+ {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
+|}];;
+
+[@@@part "4.3"];;
+let s = "A string!";;
+
+[@@@part "4.4"];;
+let s = {|A string!|};;
+
+[@@@part "4.5"];;
+let s = "\"A quoted string!\"";;
+let () = print_endline s;;
+
+[@@@part "4.6"];;
+let s = "\"A quoted string!\"";;
+let () = print_endline s;;
+
+[@@@part "4.7"];;
+let s = print_endline {|
+It's possible to put something
+here that spans multiple lines|};;
+
+[@@@part "4.8"];;
+let s = print_endline {x|
+OCaml has multiple kinds of quotations,
+including ", and {| and |}
+|x};;
+
+[@@@part "5"];;
+let service_info_to_string { service_name = name; port = port; protocol = prot  } =
+  sprintf "%s %i/%s" name port prot
+;;
+[%%expect ocaml {|val service_info_to_string : service_info -> string = <fun>|}];;
+service_info_to_string ssh;;
+[%%expect ocaml {|- : string = "ssh 22/udp"|}];;
+[@@@part "6"];;
+type service_info =
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+    comment      : string option;
+  }
+;;
+[%%expect ocaml {|
+type service_info = {
+  service_name : string;
+  port : int;
+  protocol : string;
+  comment : string option;
+}
+|}];;
+[@@@part "7"];;
+#warnings "+9";;
+let service_info_to_string { service_name = name; port = port; protocol = prot  } =
+  sprintf "%s %i/%s" name port prot
+;;
+[%%expect{|
+Characters 27-81:
+Warning 9: the following labels are not bound in this record pattern:
+comment
+Either bind these labels explicitly or add '; _' to the pattern.
+|};
+ocaml {|val service_info_to_string : service_info -> string = <fun>|}];;
+[@@@part "8"];;
+let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+  sprintf "%s %i/%s" name port prot
+;;
+[%%expect ocaml {|val host_info_to_string : service_info -> string = <fun>|}];;
+[@@@part "9"];;
+let service_info_to_string { service_name; port; protocol; comment } =
+  let base = sprintf "%s %i/%s" service_name port protocol in
+  match comment with
+  | None -> base
+  | Some text -> base ^ " #" ^ text
+;;
+[%%expect ocaml {|val service_info_to_string : service_info -> string = <fun>|}];;
+[@@@part "10"];;
+let service_info_of_string line =
+  (* first, split off any comment *)
+  let (line,comment) =
+    match String.rsplit2 line ~on:'#' with
+    | None -> (line,None)
+    | Some (ordinary,comment) -> (ordinary, Some comment)
+  in
+  (* now, use a regular expression to break up the service definition *)
+  let matches = 
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  in
+  let service_name = Re.get matches 1 in
+  let port = Int.of_string (Re.get matches 2) in
+  let protocol = Re.get matches 3 in
+  { service_name; port; protocol; comment }
+;;
+[%%expect ocaml {|val service_info_of_string : string -> service_info = <fun>|}];;
+[@@@part "10.1"];;
+service_info_of_string "ssh 22/tcp # some comment";;
+[%%expect ocaml {|
+- : service_info =
+{service_name = "ssh"; port = 22; protocol = "tcp";
+ comment = Some " some comment"}
+|}];;
+service_info_of_string "ssh 22/tcp";;
+[%%expect ocaml {|
+- : service_info =
+{service_name = "ssh"; port = 22; protocol = "tcp"; comment = None}
+|}];;
+[@@@part "11"];;
+let create_service_info ~service_name ~port ~protocol ~comment =
+  { service_name; port; protocol; comment }
+;;
+[%%expect ocaml {|
+val create_service_info :
+  service_name:string ->
+  port:int -> protocol:string -> comment:string option -> service_info =
+  <fun>
+|}];;
+[@@@part "12"];;
+let create_service_info
+      ~service_name:service_name ~port:port
+      ~protocol:protocol ~comment:comment =
+  { service_name = service_name;
+    port = port; 
+    protocol = protocol; 
+    comment = comment;
+  }
+;;
+[%%expect ocaml {|
+val create_service_info :
+  service_name:string ->
+  port:int -> protocol:string -> comment:string option -> service_info =
+  <fun>
+|}];;
+[@@@part "13"];;
+type log_entry =
+  { session_id: string;
+    time: Time_ns.t;
+    important: bool;
+    message: string;
+  }
+type heartbeat =
+  { session_id: string;
+    time: Time_ns.t;
+    status_message: string;
+  }
+type logon =
+  { session_id: string;
+    time: Time_ns.t;
+    user: string;
+    credentials: string;
+  }
+;;
+[%%expect ocaml {|
+type log_entry = {
+  session_id : string;
+  time : Time_ns.t;
+  important : bool;
+  message : string;
+}
+type heartbeat = {
+  session_id : string;
+  time : Time_ns.t;
+  status_message : string;
+}
+type logon = {
+  session_id : string;
+  time : Time_ns.t;
+  user : string;
+  credentials : string;
+}
+|}];;
+[@@@part "14"];;
+let get_session_id t = t.session_id;;
+[%%expect ocaml {|val get_session_id : logon -> string = <fun>|}];;
+[@@@part "15"];;
+let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
+[%%expect ocaml {|val get_heartbeat_session_id : heartbeat -> string = <fun>|}];;
+[@@@part "16"];;
+let status_and_session t = (t.status_message, t.session_id);;
+[%%expect ocaml {|val status_and_session : heartbeat -> string * string = <fun>|}];;
+let session_and_status t = (t.session_id, t.status_message);;
+[%%expect{|
+Characters 44-58:
+Error: This expression has type logon
+       The field status_message does not belong to type logon
+|}];;
+let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
+[%%expect ocaml {|val session_and_status : heartbeat -> string * string = <fun>|}];;

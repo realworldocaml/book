@@ -1,0 +1,46 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+printf "%i is an integer, %F is a float, \"%s\" is a string\n"
+  3 4.5 "five";;
+[%%expect{|3 is an integer, 4.5 is a float, "five" is a string|};
+ocaml {|- : unit = ()|}];;
+[@@@part "2"];;
+printf "An integer: %i\n" 4.5;;
+[%%expect{|
+Characters 26-29:
+Error: This expression has type float but an expression was expected of type
+         int
+|}];;
+[@@@part "3"];;
+let fmt = "%i is an integer\n";;
+[%%expect ocaml {|val fmt : string = "%i is an integer\n"|}];;
+printf fmt 3;;
+[%%expect{|
+Characters 7-10:
+Error: This expression has type string but an expression was expected of type
+         ('a -> 'b, out_channel, unit) format =
+           ('a -> 'b, out_channel, unit, unit, unit, unit) format6
+|}];;
+[@@@part "4"];;
+open CamlinternalFormatBasics;;
+let fmt : ('a, 'b, 'c) format =
+  "%i is an integer\n";;
+[%%expect ocaml {|
+val fmt : (int -> 'c, 'b, 'c) Core_kernel.format =
+  Format
+   (Int (Int_i, No_padding, No_precision,
+     String_literal (" is an integer\n", End_of_format)),
+   "%i is an integer\n")
+|}];;
+[@@@part "5"];;
+printf fmt 3;;
+[%%expect{|3 is an integer|};
+ocaml {|- : unit = ()|}];;

@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executable
+  ((name hello)
+   (libraries (ctypes.foreign))
+   (flags (:standard -cclib -lncurses))
+  )
+)

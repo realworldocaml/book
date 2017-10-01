@@ -1,0 +1,43 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "1"];;
+open Core_kernel;;
+class istack = object
+  val mutable v = [0; 2]
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+end ;;
+[%%expect ocaml {|
+class istack :
+  object
+    val mutable v : int list
+    method pop : int option
+    method push : int -> unit
+  end
+|}];;
+[@@@part "2"];;
+let s = new istack ;;
+[%%expect ocaml {|val s : istack = <obj>|}];;
+s#pop ;;
+[%%expect ocaml {|- : int option = Some 0|}];;
+s#push 5 ;;
+[%%expect ocaml {|- : unit = ()|}];;
+s#pop ;;
+[%%expect ocaml {|- : int option = Some 5|}];;
+[@@@part "3"];;
+type istack = < pop: int option; push: int -> unit > ;;
+[%%expect ocaml {|type istack = < pop : int option; push : int -> unit >|}];;

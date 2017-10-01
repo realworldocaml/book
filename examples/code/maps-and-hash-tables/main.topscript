@@ -1,0 +1,335 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+
+[@@@part "1"];;
+open Core_kernel;;
+let digit_alist =
+  [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
+  ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
+;;
+[%%expect ocaml {|
+val digit_alist : (int * string) list =
+  [(0, "zero"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
+   (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
+|}];;
+
+[@@@part "2"];;
+List.Assoc.find ~equal:Int.equal digit_alist 6;;
+[%%expect ocaml {|- : string option = Some "six"|}];;
+List.Assoc.find ~equal:Int.equal digit_alist 22;;
+[%%expect ocaml {|- : string option = None|}];;
+List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch";;
+[%%expect ocaml {|
+- : (int, string) Base__List.Assoc.t =
+[(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
+ (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
+|}];;
+
+[@@@part "3"];;
+let digit_map = Map.of_alist_exn digit_alist ~comparator:Int.comparator;;
+[%%expect ocaml {|val digit_map : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
+Map.find digit_map 3;;
+[%%expect ocaml {|- : string option = Some "three"|}];;
+
+[@@@part "4"];;
+let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
+[%%expect ocaml {|val zilch_map : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
+
+[@@@part "5"];;
+let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
+[%%expect ocaml {|val left : int String.Map.t = <abstr>|}];;
+let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
+[%%expect ocaml {|val right : int String.Map.t = <abstr>|}];;
+Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
+[%%expect ocaml {|
+- : (string, int) Map.Symmetric_diff_element.t list =
+[("bar", `Left 3); ("foo", `Unequal (1, 0))]
+|}];;
+
+[@@@part "6"];;
+Map.symmetric_diff;;
+[%%expect ocaml {|
+- : ('k, 'v, 'cmp) Map.t ->
+    ('k, 'v, 'cmp) Map.t ->
+    data_equal:('v -> 'v -> bool) ->
+    ('k, 'v) Map.Symmetric_diff_element.t Sequence.t
+= <fun>
+|}];;
+
+[@@@part "7"];;
+module Reverse = Comparator.Make(struct
+    type t = string
+    let sexp_of_t = String.sexp_of_t
+    let t_of_sexp = String.t_of_sexp
+    let compare x y = String.compare y x
+  end);;
+[%%expect ocaml {|
+module Reverse :
+  sig
+    type comparator_witness
+    val comparator : (string, comparator_witness) Comparator.t
+  end
+|}];;
+
+[@@@part "8"];;
+let alist = ["foo", 0; "snoo", 3];;
+[%%expect ocaml {|val alist : (string * int) list = [("foo", 0); ("snoo", 3)]|}];;
+let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
+[%%expect ocaml {|val ord_map : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
+let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
+[%%expect ocaml {|val rev_map : (string, int, Reverse.comparator_witness) Map.t = <abstr>|}];;
+
+[@@@part "9"];;
+Map.min_elt ord_map;;
+[%%expect ocaml {|- : (string * int) option = Some ("foo", 0)|}];;
+Map.min_elt rev_map;;
+[%%expect ocaml {|- : (string * int) option = Some ("snoo", 3)|}];;
+
+[@@@part "10"];;
+Map.symmetric_diff ord_map rev_map;;
+[%%expect{|
+Characters 27-34:
+Error: This expression has type
+         (string, int, Reverse.comparator_witness) Map.t
+       but an expression was expected of type
+         (string, int, String.comparator_witness) Map.t
+       Type Reverse.comparator_witness is not compatible with type
+         String.comparator_witness 
+|}];;
+
+[@@@part "11"];;
+let ord_tree = Map.to_tree ord_map;;
+[%%expect ocaml {|val ord_tree : (string, int, String.comparator_witness) Map.Tree.t = <abstr>|}];;
+
+[@@@part "12"];;
+Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
+[%%expect ocaml {|- : int option = Some 3|}];;
+
+[@@@part "13"];;
+Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
+[%%expect{|
+Characters 45-53:
+Error: This expression has type
+         (string, int, String.comparator_witness) Map.Tree.t
+       but an expression was expected of type
+         (string, int, Reverse.comparator_witness) Map.Tree.t
+       Type String.comparator_witness is not compatible with type
+         Reverse.comparator_witness 
+|}];;
+
+[@@@part "14"];;
+Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
+[%%expect ocaml {|- : (int, string, Comparator.Poly.comparator_witness) Map.t = <abstr>|}];;
+
+[@@@part "15"];;
+Map.Poly.of_alist_exn digit_alist;;
+[%%expect ocaml {|- : (int, string) Map.Poly.t = <abstr>|}];;
+
+[@@@part "16"];;
+Map.symmetric_diff
+  (Map.Poly.singleton 3 "three")
+  (Int.Map.singleton  3 "four" )
+;;
+[%%expect{|
+Characters 54-84:
+Error: This expression has type
+         string Int.Map.t = (int, string, Int.comparator_witness) Map.t
+       but an expression was expected of type
+         (int, string, Comparator.Poly.comparator_witness) Map.t
+       Type Int.comparator_witness is not compatible with type
+         Comparator.Poly.comparator_witness 
+|}];;
+
+[@@@part "17"];;
+let dedup ~comparator l =
+  List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
+  |> Set.to_list
+;;
+[%%expect ocaml {|val dedup : comparator:('a, 'b) Comparator.t -> 'a list -> 'a list = <fun>|}];;
+dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
+[%%expect ocaml {|- : int list = [2; 3; 7; 8; 10]|}];;
+
+[@@@part "18"];;
+let s1 = Int.Set.of_list [1;2];;
+[%%expect ocaml {|val s1 : Int.Set.t = <abstr>|}];;
+let s2 = Int.Set.of_list [2;1];;
+[%%expect ocaml {|val s2 : Int.Set.t = <abstr>|}];;
+
+[@@@part "19"];;
+Set.equal s1 s2;;
+[%%expect ocaml {|- : bool = true|}];;
+
+[@@@part "20"];;
+s1 = s2;;
+[%%expect{|Exception: (Invalid_argument "compare: functional value").|}];;
+
+[@@@part "21"];;
+Set.to_tree s1 = Set.to_tree s2;;
+[%%expect ocaml {|- : bool = false|}];;
+
+[@@@part "22"];;
+module Foo_and_bar : sig
+  type t = { foo: Int.Set.t; bar: string }
+  include Comparable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: Int.Set.t; bar: string } [@@deriving sexp]
+    let compare t1 t2 =
+      let c = Int.Set.compare t1.foo t2.foo in
+      if c <> 0 then c else String.compare t1.bar t2.bar
+  end
+  include T
+  include Comparable.Make(T)
+end;;
+[%%expect ocaml {|
+module Foo_and_bar :
+  sig
+    type t = { foo : Int.Set.t; bar : string; }
+    val ( >= ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( > ) : t -> t -> bool
+    val ( < ) : t -> t -> bool
+    val ( <> ) : t -> t -> bool
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+...
+    module Replace_polymorphic_compare :
+      sig
+        val ( >= ) : t -> t -> bool
+        val ( <= ) : t -> t -> bool
+        val ( = ) : t -> t -> bool
+        val ( > ) : t -> t -> bool
+...
+      end
+    module Map :
+      sig
+...
+      end
+    module Set :
+      sig
+...
+      end
+  end
+|}];;
+
+[@@@part "23"];;
+module Foo_and_bar : sig
+  type t = { foo: Int.Set.t; bar: string }
+  include Comparable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: Int.Set.t; bar: string } [@@deriving sexp, compare]
+  end
+  include T
+  include Comparable.Make(T)
+end;;
+[%%expect ocaml {|
+module Foo_and_bar :
+  sig
+    type t = { foo : Int.Set.t; bar : string; }
+    val ( >= ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( > ) : t -> t -> bool
+...
+  end
+|}];;
+
+[@@@part "24"];;
+module Foo_and_bar : sig
+  type t = { foo: int; bar: string }
+  include Comparable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: int; bar: string } [@@deriving sexp]
+  end
+  include T
+  include Comparable.Poly(T)
+end;;
+[%%expect ocaml {|
+module Foo_and_bar :
+  sig
+    type t = { foo : int; bar : string; }
+    val ( >= ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( > ) : t -> t -> bool
+    val ( < ) : t -> t -> bool
+    val ( <> ) : t -> t -> bool
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+...
+  end
+|}];;
+
+[@@@part "25"];;
+let table = Hashtbl.create ~hashable:String.hashable ();;
+[%%expect ocaml {|val table : (string, '_a) Hashtbl.t = <abstr>|}];;
+Hashtbl.set table ~key:"three" ~data:3;;
+[%%expect ocaml {|- : unit = ()|}];;
+Hashtbl.find table "three";;
+[%%expect ocaml {|- : int option = Some 3|}];;
+
+[@@@part "26"];;
+let table = String.Table.create ();;
+[%%expect ocaml {|val table : '_a String.Table.t = <abstr>|}];;
+
+[@@@part "27"];;
+let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
+[%%expect ocaml {|val table : ('_a, '_b) Hashtbl.t = <abstr>|}];;
+
+[@@@part "28"];;
+let table = Hashtbl.Poly.create ();;
+[%%expect ocaml {|val table : ('_a, '_b) Hashtbl.t = <abstr>|}];;
+
+[@@@part "29"];;
+Caml.Hashtbl.hash (List.range 0 9);;
+[%%expect ocaml {|- : int = 209331808|}];;
+Caml.Hashtbl.hash (List.range 0 10);;
+[%%expect ocaml {|- : int = 182325193|}];;
+Caml.Hashtbl.hash (List.range 0 11);;
+[%%expect ocaml {|- : int = 182325193|}];;
+Caml.Hashtbl.hash (List.range 0 100);;
+[%%expect ocaml {|- : int = 182325193|}];;
+
+[@@@part "30"];;
+module Foo_and_bar : sig
+  type t = { foo: int; bar: string }
+  include Hashable.S with type t := t
+end = struct
+  module T = struct
+    type t = { foo: int; bar: string } [@@deriving sexp, compare, hash]
+  end
+  include T
+  include Hashable.Make(T)
+end;;
+[%%expect ocaml {|
+module Foo_and_bar :
+  sig
+    type t = { foo : int; bar : string; }
+    val hash : t -> int
+    val compare : t -> t -> int
+    val hashable : t Hashtbl_intf.Hashable.t
+    module Table :
+      sig
+        type key = t
+        type ('a, 'b) hashtbl = ('a, 'b) Hashtbl.t
+...
+      end
+    module Hash_set :
+      sig
+...
+      end
+    module Hash_queue :
+      sig
+...
+      end
+  end
+|}];;

@@ -1,0 +1,452 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+let x = 3;;
+[%%expect ocaml {|val x : int = 3|}];;
+let y = 4;;
+[%%expect ocaml {|val y : int = 4|}];;
+let z = x + y;;
+[%%expect ocaml {|val z : int = 7|}];;
+[@@@part "1"];;
+let languages = "OCaml,Perl,C++,C";;
+[%%expect ocaml {|val languages : string = "OCaml,Perl,C++,C"|}];;
+let dashed_languages =
+  let language_list = String.split languages ~on:',' in
+  String.concat ~sep:"-" language_list
+;;
+[%%expect ocaml {|val dashed_languages : string = "OCaml-Perl-C++-C"|}];;
+[@@@part "2"];;
+language_list;;
+[%%expect{|
+Characters 0-13:
+Error: Unbound value language_list
+|}];;
+[@@@part "3"];;
+let languages = "OCaml,Perl,C++,C";;
+[%%expect ocaml {|val languages : string = "OCaml,Perl,C++,C"|}];;
+let dashed_languages =
+  let languages = String.split languages ~on:',' in
+  String.concat ~sep:"-" languages
+;;
+[%%expect ocaml {|val dashed_languages : string = "OCaml-Perl-C++-C"|}];;
+[@@@part "4"];;
+languages;;
+[%%expect ocaml {|- : string = "OCaml,Perl,C++,C"|}];;
+[@@@part "5"];;
+let area_of_ring inner_radius outer_radius =
+  let pi = Float.pi in
+  let area_of_circle r = pi *. r *. r in
+  area_of_circle outer_radius -. area_of_circle inner_radius
+;;
+[%%expect ocaml {|val area_of_ring : float -> float -> float = <fun>|}];;
+area_of_ring 1. 3.;;
+[%%expect ocaml {|- : float = 25.1327412287|}];;
+[@@@part "6"];;
+let area_of_ring inner_radius outer_radius =
+  let pi = Float.pi in
+  let area_of_circle r = pi *. r *. r in
+  let pi = 0. in
+  area_of_circle outer_radius -. area_of_circle inner_radius
+;;
+[%%expect{|
+Characters 115-117:
+Warning 26: unused variable pi.
+|};
+ocaml {|val area_of_ring : float -> float -> float = <fun>|}];;
+[@@@part "7"];;
+let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
+[%%expect ocaml {|
+val ints : int list = [1; 2; 3]
+val strings : string list = ["one"; "two"; "three"]
+|}];;
+[@@@part "8"];;
+let upcase_first_entry line =
+  let (first :: rest) = String.split ~on:',' line in
+  String.concat ~sep:"," (String.uppercase first :: rest)
+;;
+[%%expect{|
+Characters 36-51:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+[]
+|};
+ocaml {|val upcase_first_entry : string -> string = <fun>|}];;
+[@@@part "8.1"];;
+upcase_first_entry "one,two,three";;
+[%%expect ocaml {|- : string = "ONE,two,three"|}];;
+upcase_first_entry "";;
+[%%expect ocaml {|- : string = ""|}];;
+[@@@part "9"];;
+let upcase_first_entry line =
+  match String.split ~on:',' line with
+  | [] -> assert false (* String.split returns at least one element *)
+  | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
+;;
+[%%expect ocaml {|val upcase_first_entry : string -> string = <fun>|}];;
+[@@@part "10"];;
+(fun x -> x + 1);;
+[%%expect ocaml {|- : int -> int = <fun>|}];;
+[@@@part "11"];;
+(fun x -> x + 1) 7;;
+[%%expect ocaml {|- : int = 8|}];;
+[@@@part "12"];;
+List.map ~f:(fun x -> x + 1) [1;2;3];;
+[%%expect ocaml {|- : int list = [2; 3; 4]|}];;
+[@@@part "13"];;
+let transforms = [ String.uppercase; String.lowercase ];;
+[%%expect ocaml {|val transforms : (string -> string) list = [<fun>; <fun>]|}];;
+List.map ~f:(fun g -> g "Hello World") transforms;;
+[%%expect ocaml {|- : string list = ["HELLO WORLD"; "hello world"]|}];;
+[@@@part "14"];;
+let plusone = (fun x -> x + 1);;
+[%%expect ocaml {|val plusone : int -> int = <fun>|}];;
+plusone 3;;
+[%%expect ocaml {|- : int = 4|}];;
+[@@@part "15"];;
+let plusone x = x + 1;;
+[%%expect ocaml {|val plusone : int -> int = <fun>|}];;
+[@@@part "16"];;
+(fun x -> x + 1) 7;;
+[%%expect ocaml {|- : int = 8|}];;
+let x = 7 in x + 1;;
+[%%expect ocaml {|- : int = 8|}];;
+[@@@part "17"];;
+let abs_diff x y = abs (x - y);;
+[%%expect ocaml {|val abs_diff : int -> int -> int = <fun>|}];;
+abs_diff 3 4;;
+[%%expect ocaml {|- : int = 1|}];;
+[@@@part "18"];;
+let abs_diff =
+  (fun x -> (fun y -> abs (x - y)));;
+[%%expect ocaml {|val abs_diff : int -> int -> int = <fun>|}];;
+[@@@part "19"];;
+let dist_from_3 = abs_diff 3;;
+[%%expect ocaml {|val dist_from_3 : int -> int = <fun>|}];;
+dist_from_3 8;;
+[%%expect ocaml {|- : int = 5|}];;
+dist_from_3 (-1);;
+[%%expect ocaml {|- : int = 4|}];;
+[@@@part "20"];;
+let abs_diff = (fun x y -> abs (x - y));;
+[%%expect ocaml {|val abs_diff : int -> int -> int = <fun>|}];;
+[@@@part "21"];;
+let abs_diff (x,y) = abs (x - y);;
+[%%expect ocaml {|val abs_diff : int * int -> int = <fun>|}];;
+abs_diff (3,4);;
+[%%expect ocaml {|- : int = 1|}];;
+[@@@part "22"];;
+let rec find_first_repeat list =
+  match list with
+  | [] | [_] ->
+    (* only zero or one elements, so no repeats *)
+    None
+  | x :: y :: tl ->
+    if x = y then Some x else find_first_repeat (y::tl)
+;;
+[%%expect ocaml {|val find_first_repeat : 'a list -> 'a option = <fun>|}];;
+[@@@part "23"];;
+let rec is_even x =
+  if x = 0 then true else is_odd (x - 1)
+and is_odd x =
+  if x = 0 then false else is_even (x - 1)
+;;
+[%%expect ocaml {|
+val is_even : int -> bool = <fun>
+val is_odd : int -> bool = <fun>
+|}];;
+List.map ~f:is_even [0;1;2;3;4;5];;
+[%%expect ocaml {|- : bool list = [true; false; true; false; true; false]|}];;
+List.map ~f:is_odd [0;1;2;3;4;5];;
+[%%expect ocaml {|- : bool list = [false; true; false; true; false; true]|}];;
+[@@@part "24"];;
+Int.max 3 4  (* prefix *);;
+[%%expect ocaml {|- : int = 4|}];;
+3 + 4        (* infix  *);;
+[%%expect ocaml {|- : int = 7|}];;
+[@@@part "25"];;
+(+) 3 4;;
+[%%expect ocaml {|- : int = 7|}];;
+List.map ~f:((+) 3) [4;5;6];;
+[%%expect ocaml {|- : int list = [7; 8; 9]|}];;
+[@@@part "26"];;
+let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
+[%%expect ocaml {|val ( +! ) : int * int -> int * int -> int * int = <fun>|}];;
+(3,2) +! (-2,4);;
+[%%expect ocaml {|- : int * int = (1, 6)|}];;
+[@@@part "27"];;
+let (***) x y = (x ** y) ** y;;
+[%%expect{|
+Characters 17-18:
+Error: This expression has type int but an expression was expected of type
+         float
+|}];;
+[@@@part "28"];;
+let ( *** ) x y = (x ** y) ** y;;
+[%%expect ocaml {|val ( *** ) : float -> float -> float = <fun>|}];;
+[@@@part "29"];;
+Int.max 3 (-4);;
+[%%expect ocaml {|- : int = 3|}];;
+Int.max 3 -4;;
+[%%expect{|
+Characters 0-9:
+Error: This expression has type int -> int
+       but an expression was expected of type int
+|}];;
+[@@@part "30"];;
+(Int.max 3) - 4;;
+[%%expect{|
+Characters 0-11:
+Error: This expression has type int -> int
+       but an expression was expected of type int
+|}];;
+[@@@part "31"];;
+let (|>) x f = f x ;;
+[%%expect ocaml {|val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
+[@@@part "32"];;
+let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
+[%%expect ocaml {|val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"|}];;
+String.split ~on:':' path
+|> List.dedup ~compare:String.compare
+|> List.iter ~f:print_endline
+;;
+[%%expect{|
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+|};
+ocaml {|- : unit = ()|}];;
+[@@@part "33"];;
+let split_path = String.split ~on:':' path in
+let deduped_path = List.dedup ~compare:String.compare split_path in
+List.iter ~f:print_endline deduped_path
+;;
+[%%expect{|
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+|};
+ocaml {|- : unit = ()|}];;
+[@@@part "34"];;
+List.iter ~f:print_endline ["Two"; "lines"];;
+[%%expect{|
+Two
+lines
+|};
+ocaml {|- : unit = ()|}];;
+[@@@part "35"];;
+List.iter ~f:print_endline;;
+[%%expect ocaml {|- : string list -> unit = <fun>|}];;
+[@@@part "36"];;
+let (^>) x f = f x;;
+[%%expect ocaml {|val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
+Sys.getenv "PATH"
+^> String.split ~on:':' path
+^> List.dedup ~compare:String.compare
+^> List.iter ~f:print_endline
+;;
+[%%expect{|
+Characters 88-114:
+Error: This expression has type string list -> unit
+       but an expression was expected of type
+         (string list -> string list) -> 'a
+       Type string list is not compatible with type
+         string list -> string list 
+|}];;
+[@@@part "37"];;
+let some_or_zero = function
+  | Some x -> x
+  | None -> 0
+;;
+[%%expect ocaml {|val some_or_zero : int option -> int = <fun>|}];;
+List.map ~f:some_or_zero [Some 3; None; Some 4];;
+[%%expect ocaml {|- : int list = [3; 0; 4]|}];;
+[@@@part "38"];;
+let some_or_zero num_opt =
+  match num_opt with
+  | Some x -> x
+  | None -> 0
+;;
+[%%expect ocaml {|val some_or_zero : int option -> int = <fun>|}];;
+[@@@part "39"];;
+let some_or_default default = function
+  | Some x -> x
+  | None -> default
+;;
+[%%expect ocaml {|val some_or_default : 'a -> 'a option -> 'a = <fun>|}];;
+some_or_default 3 (Some 5);;
+[%%expect ocaml {|- : int = 5|}];;
+List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
+[%%expect ocaml {|- : int list = [3; 100; 4]|}];;
+[@@@part "40"];;
+let ratio ~num ~denom = float num /. float denom;;
+[%%expect ocaml {|val ratio : num:int -> denom:int -> float = <fun>|}];;
+[@@@part "41"];;
+ratio ~num:3 ~denom:10;;
+[%%expect ocaml {|- : float = 0.3|}];;
+ratio ~denom:10 ~num:3;;
+[%%expect ocaml {|- : float = 0.3|}];;
+[@@@part "42"];;
+let num = 3 in
+let denom = 4 in
+ratio ~num ~denom;;
+[%%expect ocaml {|- : float = 0.75|}];;
+[@@@part "43"];;
+String.split ~on:':' path
+|> List.dedup ~compare:String.compare
+|> List.iter ~f:print_endline
+;;
+[%%expect{|
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+|};
+ocaml {|- : unit = ()|}];;
+[@@@part "44"];;
+let apply_to_tuple f (first,second) = f ~first ~second;;
+[%%expect ocaml {|val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>|}];;
+[@@@part "45"];;
+let apply_to_tuple_2 f (first,second) = f ~second ~first;;
+[%%expect ocaml {|val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>|}];;
+[@@@part "46"];;
+let divide ~first ~second = first / second;;
+[%%expect ocaml {|val divide : first:int -> second:int -> int = <fun>|}];;
+[@@@part "47"];;
+apply_to_tuple_2 divide (3,4);;
+[%%expect{|
+Characters 17-23:
+Error: This expression has type first:int -> second:int -> int
+       but an expression was expected of type second:'a -> first:'b -> 'c
+|}];;
+[@@@part "48"];;
+let apply_to_tuple f (first,second) = f ~first ~second;;
+[%%expect ocaml {|val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>|}];;
+apply_to_tuple divide (3,4);;
+[%%expect ocaml {|- : int = 0|}];;
+[@@@part "49"];;
+let concat ?sep x y =
+  let sep = match sep with None -> "" | Some x -> x in
+  x ^ sep ^ y
+;;
+[%%expect ocaml {|val concat : ?sep:string -> string -> string -> string = <fun>|}];;
+concat "foo" "bar"             (* without the optional argument *);;
+[%%expect ocaml {|- : string = "foobar"|}];;
+concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;
+[%%expect ocaml {|- : string = "foo:bar"|}];;
+[@@@part "50"];;
+let concat ?(sep="") x y = x ^ sep ^ y ;;
+[%%expect ocaml {|val concat : ?sep:string -> string -> string -> string = <fun>|}];;
+[@@@part "51"];;
+concat ~sep:":" "foo" "bar" (* provide the optional argument *);;
+[%%expect ocaml {|- : string = "foo:bar"|}];;
+concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;
+[%%expect ocaml {|- : string = "foo:bar"|}];;
+[@@@part "52"];;
+concat "foo" "bar" (* don't provide the optional argument *);;
+[%%expect ocaml {|- : string = "foobar"|}];;
+concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;
+[%%expect ocaml {|- : string = "foobar"|}];;
+[@@@part "53"];;
+let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
+[%%expect ocaml {|val uppercase_concat : ?sep:string -> string -> string -> string = <fun>|}];;
+uppercase_concat "foo" "bar";;
+[%%expect ocaml {|- : string = "FOObar"|}];;
+uppercase_concat "foo" "bar" ~sep:":";;
+[%%expect ocaml {|- : string = "FOO:bar"|}];;
+[@@@part "54"];;
+let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
+[%%expect ocaml {|val uppercase_concat : ?sep:string -> string -> string -> string = <fun>|}];;
+[@@@part "55"];;
+let numeric_deriv ~delta ~x ~y ~f =
+  let x' = x +. delta in
+  let y' = y +. delta in
+  let base = f ~x ~y in
+  let dx = (f ~x:x' ~y -. base) /. delta in
+  let dy = (f ~x ~y:y' -. base) /. delta in
+  (dx,dy)
+;;
+[%%expect ocaml {|
+val numeric_deriv :
+  delta:float ->
+  x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
+  <fun>
+|}];;
+[@@@part "56"];;
+let numeric_deriv ~delta ~x ~y ~f =
+  let x' = x +. delta in
+  let y' = y +. delta in
+  let base = f ~x ~y in
+  let dx = (f ~y ~x:x' -. base) /. delta in
+  let dy = (f ~x ~y:y' -. base) /. delta in
+  (dx,dy)
+;;
+[%%expect{|
+Characters 122-123:
+Error: This function is applied to arguments
+in an order different from other calls.
+This is only allowed when the real type is known.
+|}];;
+[@@@part "57"];;
+let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
+  let x' = x +. delta in
+  let y' = y +. delta in
+  let base = f ~x ~y in
+  let dx = (f ~y ~x:x' -. base) /. delta in
+  let dy = (f ~x ~y:y' -. base) /. delta in
+  (dx,dy)
+;;
+[%%expect ocaml {|
+val numeric_deriv :
+  delta:float ->
+  x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
+  <fun>
+|}];;
+[@@@part "58"];;
+let colon_concat = concat ~sep:":";;
+[%%expect ocaml {|val colon_concat : string -> string -> string = <fun>|}];;
+colon_concat "a" "b";;
+[%%expect ocaml {|- : string = "a:b"|}];;
+[@@@part "59"];;
+let prepend_pound = concat "# ";;
+[%%expect ocaml {|val prepend_pound : string -> string = <fun>|}];;
+prepend_pound "a BASH comment";;
+[%%expect ocaml {|- : string = "# a BASH comment"|}];;
+[@@@part "60"];;
+prepend_pound "a BASH comment" ~sep:":";;
+[%%expect{|
+Characters 0-13:
+Error: This function has type string -> string
+       It is applied to too many arguments; maybe you forgot a `;'.
+|}];;
+[@@@part "61"];;
+let concat x ?(sep="") y = x ^ sep ^ y ;;
+[%%expect ocaml {|val concat : string -> ?sep:string -> string -> string = <fun>|}];;
+[@@@part "62"];;
+let prepend_pound = concat "# ";;
+[%%expect ocaml {|val prepend_pound : ?sep:string -> string -> string = <fun>|}];;
+prepend_pound "a BASH comment";;
+[%%expect ocaml {|- : string = "# a BASH comment"|}];;
+prepend_pound "a BASH comment" ~sep:"--- ";;
+[%%expect ocaml {|- : string = "# --- a BASH comment"|}];;
+[@@@part "63"];;
+concat "a" "b" ~sep:"=";;
+[%%expect ocaml {|- : string = "a=b"|}];;
+[@@@part "64"];;
+let concat x y ?(sep="") = x ^ sep ^ y ;;
+[%%expect{|
+Characters 17-23:
+Warning 16: this optional argument cannot be erased.
+|};
+ocaml {|val concat : string -> string -> ?sep:string -> string = <fun>|}];;
+[@@@part "65"];;
+concat "a" "b";;
+[%%expect ocaml {|- : ?sep:string -> string = <fun>|}];;

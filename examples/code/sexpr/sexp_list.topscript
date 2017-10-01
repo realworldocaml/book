@@ -1,0 +1,35 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type compatible_versions =
+  | Specific of string list
+  | All [@@deriving sexp] ;;
+[%%expect ocaml {|
+type compatible_versions = Specific of string list | All
+val compatible_versions_of_sexp : Sexplib0.Sexp.t -> compatible_versions =
+  <fun>
+val sexp_of_compatible_versions : compatible_versions -> Sexplib0.Sexp.t =
+  <fun>
+|}];;
+sexp_of_compatible_versions
+  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
+[%%expect ocaml {|- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))|}];;
+[@@@part "1"];;
+type compatible_versions =
+  | Specific of string sexp_list
+  | All [@@deriving sexp] ;;
+[%%expect ocaml {|
+type compatible_versions = Specific of string list | All
+val compatible_versions_of_sexp : Sexp.t -> compatible_versions = <fun>
+val sexp_of_compatible_versions : compatible_versions -> Sexp.t = <fun>
+|}];;
+sexp_of_compatible_versions
+  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;
+[%%expect ocaml {|- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)|}];;

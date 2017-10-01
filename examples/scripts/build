@@ -1,0 +1,11 @@
+#!/bin/sh
+# Designed for the Travis CI build environment. See .travis.yml
+
+export OPAMYES=1
+export OPAMJOBS=2
+opam pin add -n rwo https://github.com/realworldocaml/scripts.git#v2
+opam pin add -n rwo-examples $TRAVIS_BUILD_DIR
+opam install rwo-examples
+cd $TRAVIS_BUILD_DIR
+opam config exec -- make clean
+opam config exec -- make -j2

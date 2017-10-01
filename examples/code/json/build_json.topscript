@@ -1,0 +1,56 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+#require "yojson";;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/easy-format: added to search path
+/Users/yminsky/.opam/4.04.2/lib/easy-format/easy_format.cmo: loaded
+/Users/yminsky/.opam/4.04.2/lib/biniou: added to search path
+/Users/yminsky/.opam/4.04.2/lib/biniou/biniou.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/yojson: added to search path
+/Users/yminsky/.opam/4.04.2/lib/yojson/yojson.cma: loaded
+|}];;
+[@@@part "1"];;
+let person = `Assoc [ ("name", `String "Anil") ] ;;
+[%%expect ocaml {|
+val person : [> `Assoc of (string * [> `String of string ]) list ] =
+  `Assoc [("name", `String "Anil")]
+|}];;
+[@@@part "2"];;
+Yojson.Basic.pretty_to_string ;;
+[%%expect ocaml {|- : ?std:bool -> Yojson.Basic.json -> string = <fun>|}];;
+[@@@part "3"];;
+Yojson.Basic.pretty_to_string person ;;
+[%%expect ocaml {|- : string = "{ \"name\": \"Anil\" }"|}];;
+Yojson.Basic.pretty_to_channel stdout person ;;
+[%%expect{|{ "name": "Anil" }|};
+ocaml {|- : unit = ()|}];;
+[@@@part "4"];;
+let person = `Assoc ("name", `String "Anil");;
+[%%expect ocaml {|
+val person : [> `Assoc of string * [> `String of string ] ] =
+  `Assoc ("name", `String "Anil")
+|}];;
+Yojson.Basic.pretty_to_string person ;;
+[%%expect{|
+Characters 30-36:
+Error: This expression has type
+         [> `Assoc of string * [> `String of string ] ]
+       but an expression was expected of type Yojson.Basic.json
+       Types for tag `Assoc are incompatible
+|}];;
+[@@@part "5"];;
+let (person : Yojson.Basic.json) =
+  `Assoc ("name", `String "Anil");;
+[%%expect{|
+Characters 44-68:
+Error: This expression has type 'a * 'b
+       but an expression was expected of type
+         (string * Yojson.Basic.json) list
+|}];;

@@ -1,0 +1,2 @@
+>>> (loader (unload loader))
+It's unwise to unload yourself

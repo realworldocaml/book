@@ -1,0 +1,15 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+List.find_map;;
+[%%expect ocaml {|- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>|}];;
+[@@@part "2"];;
+let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
+[%%expect ocaml {|val endless_loop : int list = [1; 2; 3; <cycle>]|}];;

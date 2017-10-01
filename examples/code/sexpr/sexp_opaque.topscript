@@ -1,0 +1,54 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type no_converter = int * int ;;
+[%%expect ocaml {|type no_converter = int * int|}];;
+type t = { a: no_converter; b: string } [@@deriving sexp] ;;
+[%%expect{|
+Characters 14-26:
+Error: Unbound value no_converter_of_sexp
+|}];;
+[@@@part "1"];;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
+[%%expect ocaml {|
+type t = { a : no_converter; b : string; }
+val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
+|}];;
+[@@@part "2"];;
+sexp_of_t { a = (3,4); b = "foo" } ;;
+[%%expect ocaml {|- : Sexp.t = ((a <opaque>) (b foo))|}];;
+[@@@part "3"];;
+t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;
+[%%expect{|
+Exception:
+(Sexplib.Conv.Of_sexp_error
+ (Failure "opaque_of_sexp: cannot convert opaque values") whatever).
+|}];;
+[@@@part "4"];;
+type t = { a: no_converter sexp_opaque list; b: string } [@@deriving sexp] ;;
+[%%expect ocaml {|
+type t = { a : no_converter list; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
+|}];;
+t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;
+[%%expect ocaml {|- : t = {a = []; b = "foo"}|}];;
+[@@@part "5"];;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp_of] ;;
+[%%expect ocaml {|
+type t = { a : no_converter; b : string; }
+val sexp_of_t : t -> Sexp.t = <fun>
+|}];;
+type t = { a: no_converter sexp_opaque; b: string } [@@deriving of_sexp] ;;
+[%%expect ocaml {|
+type t = { a : no_converter; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+|}];;

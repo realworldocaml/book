@@ -1,0 +1,15 @@
+(jbuild_version 1)
+
+(executable
+  ((name barrier_bench)
+   (modules barrier_bench)
+   (libraries (core core_bench))
+  )
+)
+
+(executable
+  ((name finalizer)
+   (modules finalizer)
+   (libraries (core async))
+  )
+)

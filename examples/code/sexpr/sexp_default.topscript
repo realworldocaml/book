@@ -1,0 +1,68 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type http_server_config = {
+  web_root: string;
+  port: int;
+  addr: string;
+} [@@deriving sexp] ;;
+[%%expect ocaml {|
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp : Sexplib0.Sexp.t -> http_server_config =
+  <fun>
+val sexp_of_http_server_config : http_server_config -> Sexplib0.Sexp.t =
+  <fun>
+|}];;
+[@@@part "1"];;
+type http_server_config = {
+  web_root: string;
+  port: int [@default 80];
+  addr: string [@default "localhost"];
+} [@@deriving sexp] ;;
+[%%expect ocaml {|
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
+|}];;
+[@@@part "2"];;
+let cfg = http_server_config_of_sexp
+            (Sexp.of_string "((web_root /var/www/html))") ;;
+[%%expect ocaml {|
+val cfg : http_server_config =
+  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
+|}];;
+[@@@part "3"];;
+sexp_of_http_server_config cfg ;;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))|}];;
+[@@@part "4"];;
+type http_server_config = {
+  web_root: string;
+  port: int [@default 80] [@sexp_drop_default];
+  addr: string [@default "localhost"] [@sexp_drop_default];
+} [@@deriving sexp] ;;
+[%%expect ocaml {|
+type http_server_config = { web_root : string; port : int; addr : string; }
+val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
+|}];;
+let cfg = http_server_config_of_sexp
+            (Sexp.of_string "((web_root /var/www/html))") ;;
+[%%expect ocaml {|
+val cfg : http_server_config =
+  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
+|}];;
+sexp_of_http_server_config cfg ;;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html))|}];;
+[@@@part "5"];;
+sexp_of_http_server_config { cfg with port = 8080 } ;;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html) (port 8080))|}];;
+sexp_of_http_server_config
+  { cfg with port = 8080; addr = "192.168.0.1" } ;;
+[%%expect ocaml {|- : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))|}];;

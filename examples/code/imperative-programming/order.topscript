@@ -1,0 +1,46 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+let x = Float.sin 120. in
+let y = Float.sin 75.  in
+let z = Float.sin 128. in
+List.exists ~f:(fun x -> x < 0.) [x;y;z]
+;;
+[%%expect ocaml {|- : bool = true|}];;
+[@@@part "2"];;
+let x = lazy (Float.sin 120.) in
+let y = lazy (Float.sin 75.)  in
+let z = lazy (Float.sin 128.) in
+List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+;;
+[%%expect ocaml {|- : bool = true|}];;
+[@@@part "3"];;
+let x = lazy (printf "1\n"; Float.sin 120.) in
+let y = lazy (printf "2\n"; Float.sin 75.)  in
+let z = lazy (printf "3\n"; Float.sin 128.) in
+List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
+;;
+[%%expect{|
+1
+2
+|};
+ocaml {|- : bool = true|}];;
+[@@@part "4"];;
+List.exists ~f:(fun x -> x < 0.)
+  [ (printf "1\n"; Float.sin 120.);
+    (printf "2\n"; Float.sin 75.);
+    (printf "3\n"; Float.sin 128.); ]
+;;
+[%%expect{|
+3
+2
+1
+|};
+ocaml {|- : bool = true|}];;

@@ -1,0 +1,200 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+let stack init = object
+  val mutable v = init
+
+  method pop =
+    match v with
+    | hd :: tl -> 
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd = 
+    v <- hd :: v
+end ;;
+[%%expect ocaml {|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
+type shape = < area : float > ;;
+[%%expect ocaml {|type shape = < area : float >|}];;
+type square = < area : float; width : int > ;;
+[%%expect ocaml {|type square = < area : float; width : int >|}];;
+let square w = object
+  method area = Float.of_int (w * w)
+  method width = w
+end ;;
+[%%expect ocaml {|val square : int -> < area : float; width : int > = <fun>|}];;
+type circle = < area : float; radius : int > ;;
+[%%expect ocaml {|type circle = < area : float; radius : int >|}];;
+let circle r = object
+  method area = 3.14 *. (Float.of_int r) ** 2.0
+  method radius = r
+end ;;
+[%%expect ocaml {|val circle : int -> < area : float; radius : int > = <fun>|}];;
+type 'a stack = < pop: 'a option; push: 'a -> unit > ;;
+[%%expect ocaml {|type 'a stack = < pop : 'a option; push : 'a -> unit >|}];;
+let square_stack: square stack = stack [square 30; square 10] ;;
+[%%expect ocaml {|val square_stack : square stack = <obj>|}];;
+let circle_stack: circle stack = stack [circle 20; circle 40] ;;
+[%%expect ocaml {|val circle_stack : circle stack = <obj>|}];;
+[@@@part "1"];;
+let shape w : shape = square w ;;
+[%%expect{|
+Characters 22-30:
+Error: This expression has type < area : float; width : int >
+       but an expression was expected of type shape
+       The second object type has no method width
+|}];;
+let shape w : shape = (square w :> shape) ;;
+[%%expect ocaml {|val shape : int -> shape = <fun>|}];;
+[@@@part "2"];;
+let coin = object
+  method shape = circle 5
+  method color = "silver"
+end ;;
+[%%expect ocaml {|val coin : < color : string; shape : < area : float; radius : int > > = <obj>|}];;
+let map = object
+  method shape = square 10
+end ;;
+[%%expect ocaml {|val map : < shape : < area : float; width : int > > = <obj>|}];;
+[@@@part "3"];;
+type item = < shape : shape > ;;
+[%%expect ocaml {|type item = < shape : shape >|}];;
+let items = [ (coin :> item) ; (map :> item) ] ;;
+[%%expect ocaml {|val items : item list = [<obj>; <obj>]|}];;
+[@@@part "4"];;
+type num = [ `Int of int | `Float of float ] ;;
+[%%expect ocaml {|type num = [ `Float of float | `Int of int ]|}];;
+type const = [ num | `String of string ] ;;
+[%%expect ocaml {|type const = [ `Float of float | `Int of int | `String of string ]|}];;
+let n : num = `Int 3 ;;
+[%%expect ocaml {|val n : num = `Int 3|}];;
+let c : const = (n :> const) ;;
+[%%expect ocaml {|val c : const = `Int 3|}];;
+[@@@part "5"];;
+let squares: square list = [ square 10; square 20 ] ;;
+[%%expect ocaml {|val squares : square list = [<obj>; <obj>]|}];;
+let shapes: shape list = (squares :> shape list) ;;
+[%%expect ocaml {|val shapes : shape list = [<obj>; <obj>]|}];;
+[@@@part "6"];;
+let square_array: square array = [| square 10; square 20 |] ;;
+[%%expect ocaml {|val square_array : square array = [|<obj>; <obj>|]|}];;
+let shape_array: shape array = (square_array :> shape array) ;;
+[%%expect{|
+Characters 31-60:
+Error: Type square array is not a subtype of shape array 
+       Type square = < area : float; width : int >
+       is not compatible with type shape = < area : float > 
+       The second object type has no method width
+|}];;
+[@@@part "7"];;
+let shape_to_string: shape -> string = 
+  fun s -> sprintf "Shape(%F)" s#area ;;
+[%%expect ocaml {|val shape_to_string : shape -> string = <fun>|}];;
+let square_to_string: square -> string = 
+  (shape_to_string :> square -> string) ;;
+[%%expect ocaml {|val square_to_string : square -> string = <fun>|}];;
+[@@@part "8"];;
+module Either = struct
+  type ('a, 'b) t = 
+    | Left of 'a
+    | Right of 'b
+  let left x = Left x
+  let right x = Right x
+end ;;
+[%%expect ocaml {|
+module Either :
+  sig
+    type ('a, 'b) t = Left of 'a | Right of 'b
+    val left : 'a -> ('a, 'b) t
+    val right : 'a -> ('b, 'a) t
+  end
+|}];;
+(Either.left (square 40) :> (shape, shape) Either.t) ;;
+[%%expect ocaml {|- : (shape, shape) Either.t = Either.Left <obj>|}];;
+[@@@part "9"];;
+module AbstractEither : sig 
+  type ('a, 'b) t
+  val left: 'a -> ('a, 'b) t
+  val right: 'b -> ('a, 'b) t
+end = Either ;;
+[%%expect ocaml {|
+module AbstractEither :
+  sig
+    type ('a, 'b) t
+    val left : 'a -> ('a, 'b) t
+    val right : 'b -> ('a, 'b) t
+  end
+|}];;
+(AbstractEither.left (square 40) :> (shape, shape) AbstractEither.t) ;;
+[%%expect{|
+Characters 1-32:
+Error: This expression cannot be coerced to type
+         (shape, shape) AbstractEither.t;
+       it has type (< area : float; width : int >, 'a) AbstractEither.t
+       but is here used with type (shape, shape) AbstractEither.t
+       Type < area : float; width : int > is not compatible with type
+         shape = < area : float > 
+       The second object type has no method width
+|}];;
+[@@@part "10"];;
+module VarEither : sig 
+  type (+'a, +'b) t
+  val left: 'a -> ('a, 'b) t
+  val right: 'b -> ('a, 'b) t
+end = Either ;;
+[%%expect ocaml {|
+module VarEither :
+  sig
+    type (+'a, +'b) t
+    val left : 'a -> ('a, 'b) t
+    val right : 'b -> ('a, 'b) t
+  end
+|}];;
+(VarEither.left (square 40) :> (shape, shape) VarEither.t) ;;
+[%%expect ocaml {|- : (shape, shape) VarEither.t = <abstr>|}];;
+[@@@part "11"];;
+let total_area (shape_stacks: shape stack list) =
+  let stack_area acc st = 
+    let rec loop acc =
+      match st#pop with
+      | Some s -> loop (acc +. s#area)
+      | None -> acc
+    in
+    loop acc
+  in
+  List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
+[%%expect ocaml {|val total_area : shape stack list -> float = <fun>|}];;
+[@@@part "12"];;
+total_area [(square_stack :> shape stack); (circle_stack :> shape stack)] ;;
+[%%expect{|
+Characters 12-41:
+Error: Type square stack = < pop : square option; push : square -> unit >
+       is not a subtype of
+         shape stack = < pop : shape option; push : shape -> unit > 
+       Type shape = < area : float > is not a subtype of
+         square = < area : float; width : int > 
+|}];;
+[@@@part "13"];;
+type 'a readonly_stack = < pop : 'a option > ;;
+[%%expect ocaml {|type 'a readonly_stack = < pop : 'a option >|}];;
+let total_area (shape_stacks: shape readonly_stack list) =
+  let stack_area acc st = 
+    let rec loop acc =
+      match st#pop with
+      | Some s -> loop (acc +. s#area)
+      | None -> acc
+    in
+    loop acc
+  in
+  List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
+[%%expect ocaml {|val total_area : shape readonly_stack list -> float = <fun>|}];;
+total_area [(square_stack :> shape readonly_stack); (circle_stack :> 
+                                                       shape readonly_stack)] ;;
+[%%expect ocaml {|- : float = 7280.|}];;

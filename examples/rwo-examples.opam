@@ -1,0 +1,38 @@
+opam-version: "1.2"
+name: "rwo-examples"
+version: "dev"
+maintainer: "Anil Madhavapeddy <anil@recoil.org>"
+homepage: "https://github.com/realworldocaml/example"
+license: "UNLICENSE"
+authors: ["Yaron Minsky" "Anil Madhavapeddy" "Jason Hickey"]
+dev-repo: "https://github.com/realworldocaml/examples.git"
+bug-reports: "https://github.com/realworldocaml/examples/issues"
+
+build: [ ]
+
+depends: [
+  "rwo"
+  # Required for code blocks within book.
+  "core_bench"
+  "mtime"
+  "yojson"
+  "astring"
+  "cryptokit"
+  "async_graphics"
+  "ocp-index"
+  "atd"
+  "atdgen"
+  "ctypes"
+  "ctypes-foreign"
+  "textwrap"
+  "uri"
+]
+
+depexts: [
+ [["ubuntu"] ["tzdata"]]
+ [["debian"] ["tzdata"]]
+ [["alpine"] ["tzdata"]]
+]
+available: [
+  ocaml-version >= "4.04.2"
+]

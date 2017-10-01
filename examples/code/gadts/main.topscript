@@ -1,0 +1,224 @@
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "ppx_jane";;
+open Core_kernel;;
+
+[%%expect];;
+[@@@part "1"];;
+
+type 'a compact_array = 
+  | Array of 'a array
+  | Bytes of bytes
+;;
+
+[%%expect];;
+[@@@part "1.1"];;
+
+let of_bytes x = Bytes x
+let of_array x = Array x
+
+let length = function
+  | Array a -> Array.length a
+  | Bytes s -> Bytes.length s
+
+let get t i =
+  match t with
+  | Array a -> a.(i)
+  | Bytes s -> s.[i]
+
+let set t i v =
+  match t with
+  | Array a -> a.(i) <- v
+  | Bytes s -> s.[i] <- v
+
+[%%expect];;
+[@@@part "2"];;
+
+type 'a gadt_compact_array =
+  | Array : 'a array -> 'a t
+  | Bytes : bytes -> 'a t
+;;
+
+[%%expect];;
+[@@@part "2.1"];;
+
+Array [|1;2;3|];;
+Array [|1.0;2.0;3.0|];;
+
+# part 2.2
+
+  Bytes "foo";;
+
+[%%expect];;
+[@@@part "3"];;
+
+type 'a t = | Array : 'a array -> 'a t
+            | Bytes : bytes -> char t
+;;
+
+[%%expect];;
+[@@@part "3.1"];;
+
+let length t = 
+  match t with
+  | Bytes b -> Bytes.length b
+  | Array a -> Array.length a
+;;
+
+[%%expect];;
+[@@@part "3.2"];;
+
+let length (type el) (t:el t) = 
+  match t with
+  | Bytes b -> Bytes.length b
+  | Array a -> Array.length a
+;;
+
+[%%expect];;
+[@@@part "3.3"];;
+
+module Compact_array = struct
+
+  type 'a t = | Array : 'a array -> 'a t
+              | Bytes : bytes -> char t
+
+  let of_bytes x = Bytes x
+  let of_array x = Array x
+
+  let length (type el) (t:el t) =
+    match t with
+    | Array a -> Array.length a
+    | Bytes s -> Bytes.length s
+
+  let get (type el) (t:el t) i : el =
+    match t with
+    | Array a -> Array.get a i
+    | Bytes s -> Bytes.get s i
+
+  let set (type el) (t:el t) i (v:el) =
+    match t with
+    | Array a -> Array.set a i v
+    | Bytes s -> Bytes.set s i v
+
+end;;
+
+[%%expect];;
+[@@@part "10"];;
+
+type value =
+  | Int of int
+  | Bool of bool
+
+type expr = 
+  | Value of value
+  | If    of expr * expr * expr
+  | Gt    of expr * expr
+  | Plus  of expr * expr
+;;
+
+[%%expect];;
+[@@@part "11"];;
+
+let max_expr x y =
+  let i x = Value (Int x) in
+  let x = i x in
+  let y = i y in
+  If (Gt (x,y), x, y)
+;;
+max_expr 3 4;;
+
+[%%expect];;
+[@@@part "12"];;
+
+let ill_typed x y =
+  let i x = Value (Int x) in
+  let x = i x in
+  let y = i y in
+  Plus (Gt (x,y), y)
+;;
+ill_typed 3 4;;
+
+[%%expect];;
+[@@@part "13"];;
+
+let rec eval expr =
+  let eval_int expr =
+    match eval expr with
+    | Int x -> x
+    | Bool _ -> failwith "expected int, found bool"
+  in
+  let eval_bool expr =
+    match eval expr with
+    | Bool x -> x
+    | Int _ -> failwith "expected bool, found int"
+  in
+  match expr with
+  | Value v    -> v
+  | If (c,t,e) -> if eval_bool c then eval t else eval e
+  | Gt (x,y)   -> Bool (eval_int x > eval_int y)
+  | Plus (x,y) -> Int (eval_int x + eval_int y)
+;;
+
+[%%expect];;
+[@@@part "14"];;
+
+eval (max_expr  3 4);;
+eval (ill_typed 3 4);;
+
+[%%expect];;
+[@@@part "15"];;
+
+type _ value =
+  | Int  : int  -> int value
+  | Bool : bool -> bool value
+;;
+type _ expr =
+  | Value : 'a value                      -> 'a expr
+  | If    : bool expr * 'a expr * 'a expr -> 'a expr
+  | Gt    : 'a expr * 'a expr             -> bool expr
+  | Plus  : int expr * int expr           -> int expr
+;;
+[%%expect];;
+[@@@part "16"];;
+
+let max_expr x y =
+  let i x = Value (Int x) in
+  let x = i x in
+  let y = i y in
+  If (Gt (x,y), x, y)
+;;
+max_expr 3 4;;
+
+[%%expect];;
+[@@@part "17"];;
+
+let ill_typed x y =
+  let i x = Value (Int x) in
+  let x = i x in
+  let y = i y in
+  Plus (Gt (x,y), y)
+;;
+
+[%%expect];;
+[@@@part "18"];;
+
+let rec eval = function
+  | Value (Int x)  -> x
+  | Value (Bool x) -> x
+  | If    (c,t,e)  -> if eval c then eval t else eval e
+  | Gt    (x,y)    -> eval x > eval y
+  | Plus  (x,y)    -> eval x + eval y
+;;
+
+[%%expect];;
+[@@@part "19"];;
+
+let rec eval : type a . a expr -> a = function
+  | Value (Int x)  -> x
+  | Value (Bool x) -> x
+  | If    (c,t,e)  -> if eval c then eval t else eval e
+  | Gt    (x,y)    -> eval x > eval y
+  | Plus  (x,y)    -> eval x + eval y
+;;

@@ -1,0 +1,25 @@
+(gdb) cont
+Continuing.
+ 
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4         function
+(gdb) cont
+Continuing.
+ 
+Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
+4         function
+(gdb) bt
+#0  camlAlternate_list__take_69242 () at alternate_list.ml:4
+#1  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#2  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
+#3  0x00000000005659f7 in camlAlternate_list__entry () at alternate_list.ml:14
+#4  0x0000000000560029 in caml_program ()
+#5  0x000000000080984a in caml_start_program ()
+#6  0x00000000008099a0 in ?? ()
+#7  0x0000000000000000 in ?? ()
+(gdb) clear camlAlternate_list__take_69242
+Deleted breakpoint 1 
+(gdb) cont
+Continuing.
+1,3,5,7,9
+[Inferior 1 (process 3546) exited normally]

@@ -1,0 +1,7 @@
+{
+  "title": "Cities",
+  "cities": [
+    { "name": "Chicago",  "zips": [60601] },
+    { "name": "New York", "zips": [10004] } 
+  ]
+}

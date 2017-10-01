@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executable
+  ((name bench_poly_and_mono)
+   (modules bench_poly_and_mono)
+   (libraries (core_bench))
+  )
+)

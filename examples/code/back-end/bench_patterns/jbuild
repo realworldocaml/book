@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executable
+  ((name bench_patterns)
+   (modules bench_patterns)
+   (libraries (core_bench))
+  )
+)
