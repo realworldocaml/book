@@ -1,0 +1,13 @@
+language: c
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex ./.travis-docker.sh
+env:
+  global:
+  - PACKAGE="rwo"
+  - PINS="ocaml-topexpect:https://github.com/let-def/topexpect.git"
+  matrix:
+  - DISTRO="ubuntu-16.04" OCAML_VERSION="4.04.2"
+  - DISTRO="alpine" OCAML_VERSION="4.05.0"
