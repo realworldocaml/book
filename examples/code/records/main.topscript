@@ -58,8 +58,7 @@ let parse_lines parse file_contents =
 parse_lines service_info_of_string
   {|rtmp              1/ddp     # Routing Table Maintenance Protocol
     tcpmux            1/udp     # TCP Port Service Multiplexer
-    tcpmux            1/tcp     # TCP Port Service Multiplexer
-  |}
+    tcpmux            1/tcp     # TCP Port Service Multiplexer|}
 ;;
 [%%expect ocaml {|
 - : service_info with_line_num list =
@@ -77,28 +76,45 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 
 [@@@part "4.3"];;
 let s = "A string!";;
+[%%expect ocaml {|val s : string = "A string!"|}];;
 
 [@@@part "4.4"];;
 let s = {|A string!|};;
+[%%expect ocaml {|val s : string = "A string!"|}];;
 
 [@@@part "4.5"];;
 let s = "\"A quoted string!\"";;
+[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
 let () = print_endline s;;
+[%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.6"];;
 let s = "\"A quoted string!\"";;
+[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
 let () = print_endline s;;
+[%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.7"];;
 let s = print_endline {|
 It's possible to put something
 here that spans multiple lines|};;
+[%%expect{|
+It's possible to put something
+here that spans multiple lines
+|};
+ocaml {|val s : unit = ()|}];;
 
 [@@@part "4.8"];;
 let s = print_endline {x|
 OCaml has multiple kinds of quotations,
 including ", and {| and |}
 |x};;
+[%%expect{|
+OCaml has multiple kinds of quotations,
+including ", and {| and |}
+
+|};
+ocaml {|val s : unit = ()|}];;
 
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
