@@ -831,6 +831,10 @@ module Options = Main_args.Make_bytetop_options (struct
     let _dinstr = set dump_instr
 
     let anonymous s = process_file s
+    let _args _ = failwith "Arg.read_arg not implemented"
+    let _args0 _ = failwith "Arg.read_arg0 not implemented"
+    (*let _args = Arg.read_arg
+    let _args0 = Arg.read_arg0*)
   end);;
 
 (* BLACK MAGIC: patch field of a module at runtime *)
