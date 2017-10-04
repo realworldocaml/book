@@ -565,6 +565,49 @@ let phrase_whitespace contents phrase rest =
   in
   String.sub contents start (stop - start)
 
+let find_delim s =
+  let len = String.length s in
+  let delims = ref [] in
+  let beginning = ref (-1) in
+  for i = 0 to len - 1 do
+    match s.[i] with
+    | '{' -> beginning := i
+    | '|' when !beginning = -1 || s.[!beginning] <> '{' -> beginning := i
+    | ('|' | '}' as c) when !beginning <> -1 && (c = '|' || s.[!beginning] = '|') ->
+      let delim = String.sub s (!beginning + 1) (i - !beginning - 1) in
+      begin match !delims with
+        | delim' :: _ when delim' = delim -> ()
+        | delims' -> delims := delim :: delims'
+      end;
+      beginning := -1
+    | 'a'..'z' | '_' -> ()
+    | _ -> beginning := -1
+  done;
+  let delims = !delims in
+  let candidates = [""; "escape"; "x"; "y"; "z"] in
+  match List.find (fun delim -> not (List.mem delim delims)) candidates with
+  | candidate -> candidate
+  | exception Not_found ->
+    (* Generate a string that is not in the list of delimiters *)
+    let next b =
+      try
+        for i = Bytes.length b - 1 downto 0 do
+          match Bytes.get b i with
+          | 'z' -> Bytes.set b i 'a'
+          | c ->
+            Bytes.set b i (Char.chr (Char.code c + 1));
+            raise Exit
+        done;
+        Bytes.cat b (Bytes.unsafe_of_string "a")
+      with Exit -> b
+    in
+    let rec exhaust b =
+      if not (List.mem (Bytes.unsafe_to_string b) delims)
+      then Bytes.unsafe_to_string b
+      else exhaust (next b)
+    in
+    exhaust ""
+
 let output_phrases oc contents =
   let rec aux = function
     | [] -> ()
@@ -597,7 +640,8 @@ let output_phrases oc contents =
           | [] -> ()
           | [(kind, str)] when not (String.contains str '\n') ->
             let k = string_of_kind kind in
-            Printf.fprintf oc "%s%s{|%s|}" (if k <> "" then " " else "") k str
+            let delim = find_delim str in
+            Printf.fprintf oc "%s%s{%s|%s|%s}" (if k <> "" then " " else "") k delim str delim
           | xs ->
             let rec aux first = function
               | [] -> ()
@@ -605,9 +649,11 @@ let output_phrases oc contents =
                 let k = string_of_kind k in
                 let pre = if first then (if k <> "" then " " else "") else "\n" in
                 let post = if xs = [] then "" else ";" in
-                if not (String.contains s '\n')
-                then Printf.fprintf oc "%s%s{|%s|}%s" pre k s post
-                else Printf.fprintf oc "%s%s{|\n%s\n|}%s" pre k s post;
+                let delim = find_delim s in
+                if not (String.contains s '\n') then
+                  Printf.fprintf oc "%s%s{%s|%s|%s}%s" pre k delim s delim post
+                else
+                  Printf.fprintf oc "%s%s{%s|\n%s\n|%s}%s" pre k delim s delim post;
                 aux false xs
             in
             aux true xs
