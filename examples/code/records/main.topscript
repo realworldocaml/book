@@ -107,13 +107,13 @@ ocaml {|val s : unit = ()|}];;
 [@@@part "4.8"];;
 let s = print_endline {x|
 OCaml has multiple kinds of quotations,
-including ", and {| and |}
+including ", {|, and |}
 |x};;
-[%%expect{|
+[%%expect{escape|
 OCaml has multiple kinds of quotations,
-including ", and {| and |}
+including ", {|, and |}
 
-|};
+|escape};
 ocaml {|val s : unit = ()|}];;
 
 [@@@part "5"];;
