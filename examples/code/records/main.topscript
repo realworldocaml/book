@@ -95,9 +95,10 @@ let () = print_endline s;;
 [%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.7"];;
-let s = print_endline {|
+let s = print_string {|
 It's possible to put something
-here that spans multiple lines|};;
+here that spans multiple lines
+|};;
 [%%expect{|
 It's possible to put something
 here that spans multiple lines
@@ -105,14 +106,13 @@ here that spans multiple lines
 ocaml {|val s : unit = ()|}];;
 
 [@@@part "4.8"];;
-let s = print_endline {x|
+let s = print_string {x|
 OCaml has multiple kinds of quotations,
 including ", {|, and |}
 |x};;
 [%%expect{escape|
 OCaml has multiple kinds of quotations,
 including ", {|, and |}
-
 |escape};
 ocaml {|val s : unit = ()|}];;
 
