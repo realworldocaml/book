@@ -75,35 +75,36 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 |}];;
 
 [@@@part "4.3"];;
-let s = "A string!";;
-[%%expect ocaml {|val s : string = "A string!"|}];;
+print_endline "A string!";;
+[%%expect{|A string!|};
+ocaml {|- : unit = ()|}];;
 
 [@@@part "4.4"];;
-let s = {|A string!|};;
-[%%expect ocaml {|val s : string = "A string!"|}];;
+print_endline {|A string!|};;
+[%%expect{|A string!|};
+ocaml {|- : unit = ()|}];;
 
 [@@@part "4.5"];;
-let s = "\"A quoted string!\"";;
-[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
-let () = print_endline s;;
-[%%expect{|"A quoted string!"|}];;
+print_endline "\"A quoted string!\"";;
+[%%expect{|"A quoted string!"|};
+ocaml {|- : unit = ()|}];;
 
 [@@@part "4.6"];;
-let s = "\"A quoted string!\"";;
-[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
-let () = print_endline s;;
-[%%expect{|"A quoted string!"|}];;
+print_endline {|"A quoted string"|};;
+[%%expect{|"A quoted string"|};
+ocaml {|- : unit = ()|}];;
 
 [@@@part "4.7"];;
-let s = print_string {|
-It's possible to put something
-here that spans multiple lines
-|};;
+print_endline "A string with a \n and a \t!";;
 [%%expect{|
-It's possible to put something
-here that spans multiple lines
+A string with a 
+ and a 	!
 |};
-ocaml {|val s : unit = ()|}];;
+ocaml {|- : unit = ()|}];;
+print_endline {|A string with a \n and a \t!|};;
+[%%expect{|A string with a \n and a \t!|};
+ocaml {|- : unit = ()|}];;
+
 
 [@@@part "4.8"];;
 let s = print_string {x|

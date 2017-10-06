@@ -88,6 +88,59 @@
     containing an integer on every line.</p>
     <link rel="import" href="code/records/main.topscript" part="4.2"/>
 
+    <div class="allow_break" data-type="note">
+      <h1>Quoting strings</h1>
+
+      <p>OCaml has more than one way of quoting strings. You can of
+      course use simple quotation marks.</p>  
+
+      <link rel="import" href="code/records/main.topscript"
+      part="4.3"/>
+
+      <p> But there's also an alternative syntax for quotring strings,
+      where you delimit the strings with <code>{|</code>
+      and <code>|}</code>.</p>
+
+      <link rel="import" href="code/records/main.topscript"
+	    part="4.4"/>
+
+      <p>The alternative syntax differs in terms of how special
+      characters are represented. You can't just stick a quotation
+      mark inside a string delimited with quotation marks, so you need
+      to escape them with a backslash.</p>
+
+      <link rel="import" href="code/records/main.topscript"
+	    part="4.5"/>
+
+      <p>When using the alternative syntax, there's no notion of
+      escaping at all. For example, quotation marks can be included
+      directly:</p>
+
+      <link rel="import" href="code/records/main.topscript"
+	    part="4.6"/>
+
+      <p>as can other characters that are handled specially in the
+      ordinary string syntax, like <code>\n</code>
+      and <code>\t</code>, which are treated as newline and tab
+      characters, respectively.</p>
+
+      <link rel="import" href="code/records/main.topscript"
+	    part="4.7"/>
+
+      <p>If we want to embed <code>{|</code> or <code>|}</code> into
+	an alternative-syntax string, we just need to insert an
+	identifier between the brace and the pipe of the outer
+	delimiters.</p>
+
+      <link rel="import" href="code/records/main.topscript"
+	    part="4.7"/>
+
+      <p>The alternative syntax is useful in many cases, but it's
+      especially helpful when you want a string containing code from
+      another language, be it JavaScript or SQL, without having to
+      sprinkle backslashes throughout.</p>
+    </div>
+
     <section id="patterns-and-exhaustiveness" data-type="sect1">
       <h1>Patterns and Exhaustiveness</h1>
 
