@@ -183,6 +183,16 @@ let () = Hashtbl.add Toploop.directive_table "verbose"
 let silent = ref false
 let () = Hashtbl.add Toploop.directive_table "silent"
     (Toploop.Directive_bool (fun x -> silent := x))
+let verbose_findlib = ref false
+
+let is_findlib_directive =
+  let findlib_directive = function
+    | "require" | "use" | "camlp4o" | "camlp4r" | "thread" -> true
+    | _ -> false
+  in
+  function
+  | { parsed = Ok (Ptop_dir (dir, _)); _ } -> findlib_directive dir
+  | _ -> false
 
 module Async_autorun = struct
   (* Inspired by Utop auto run rewriter *)
@@ -385,7 +395,7 @@ let eval_phrases ~run_nondeterministic ~fname ~dry_run fcontents =
     end;
     Format.pp_print_flush ppf ();
     capture Chunk.Raw;
-    if !silent then
+    if !silent || (not !verbose_findlib && is_findlib_directive phrase) then
       Phrase_code []
     else
       Phrase_code (cleanup_lines (List.rev !lines))
@@ -762,6 +772,7 @@ let args =
     ; "-verbose" , Arg.Set verbose, " Include outcome of phrase evaluation (like ocaml toplevel)"
     ; "-dry-run" , Arg.Set dry_run, " Don't execute code, only return expected outcome"
     ; "-run-nondeterministic" , Arg.Set run_nondeterministic, " Run non-deterministic tests"
+    ; "-verbose-findlib", Arg.Set verbose_findlib, " Include outcome of findlib directives (#require, #use, ...)"
     ]
 
 let print_version () =
