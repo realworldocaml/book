@@ -2,8 +2,8 @@
 
 all: site
 
-APP?=rwo-build
-APP_DEPS?=rwo-deps
+APP?=jbuilder exec -- rwo-build
+APP_DEPS?=jbuilder exec -- rwo-deps
 
 HTML_CHAPTER_FILES := \
   00-prologue.html \
@@ -38,6 +38,7 @@ HTML_FILES := $(HTML_CHAPTER_FILES) index.html faqs.html toc.html install.html
 
 .depend: $(foreach file,$(HTML_CHAPTER_FILES),book/$(file))
 	$(APP_DEPS) deps site -repo-root ./ > $@
+	jbuilder build
 	mkdir -p site
 
 ################################################################################
@@ -81,7 +82,8 @@ site/toc.html:
 	$(APP) build toc -o site/ -repo-root $(ROOT)
 
 site-aux::
-	rsync -av static/images static/js static/css site/
+	@rsync -avq static/images static/js static/css site/
+	@echo The site has been generated in site/index.html
 
 site: $(foreach file,$(HTML_FILES),site/$(file)) site-aux
 
@@ -96,5 +98,6 @@ atlas: $(foreach file,$(HTML_CHAPTER_FILES),atlas/$(file))
 clean:
 	rm -f .depend
 	rm -rf site
+	rm -rf _build
 
 -include .depend
