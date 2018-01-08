@@ -38,7 +38,6 @@ HTML_FILES := $(HTML_CHAPTER_FILES) index.html faqs.html toc.html install.html
 
 .depend: $(foreach file,$(HTML_CHAPTER_FILES),book/$(file))
 	$(APP_DEPS) deps site -repo-root ./ > $@
-	if [ ! -e examples ]; then ln -sf ../examples; fi
 	mkdir -p site
 
 ################################################################################
