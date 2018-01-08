@@ -8,6 +8,7 @@ license: "PROPRIETARY"
 build: []
 
 depends: [
+  "jbuilder"
   "rwo"
   "ocaml-topexpect"
 ]
