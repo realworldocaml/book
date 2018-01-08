@@ -1,7 +1,7 @@
 .PHONY: build clean test install uninstall doc clean
 
 build:
-	jbuilder build
+	jbuilder build --dev
 
 test:
 	jbuilder runtest

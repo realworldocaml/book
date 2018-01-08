@@ -53,7 +53,7 @@ end
 (******************************************************************************)
 (* `build` command                                                            *)
 (******************************************************************************)
-let build_chapter : Command.t = Command.async
+let build_chapter : Command.t = Command.async_spec
   ~summary:"build chapter"
   Command.Spec.(
     empty
@@ -69,7 +69,7 @@ let build_chapter : Command.t = Command.async
       (`Chapter file)
   )
 
-let build_frontpage : Command.t = Command.async
+let build_frontpage : Command.t = Command.async_spec
   ~summary:"build frontpage"
   Command.Spec.(
     empty
@@ -80,7 +80,7 @@ let build_frontpage : Command.t = Command.async
     Book.make ~repo_root ~out_dir `Frontpage
   )
 
-let build_toc_page : Command.t = Command.async
+let build_toc_page : Command.t = Command.async_spec
   ~summary:"build TOC page"
   Command.Spec.(
     empty
@@ -91,7 +91,7 @@ let build_toc_page : Command.t = Command.async
     Book.make ~repo_root ~out_dir `Toc_page
   )
 
-let build_faqs_page : Command.t = Command.async
+let build_faqs_page : Command.t = Command.async_spec
   ~summary:"build FAQs page"
   Command.Spec.(
     empty
@@ -102,7 +102,7 @@ let build_faqs_page : Command.t = Command.async
     Book.make ~repo_root ~out_dir `FAQs
   )
 
-let build_install_page : Command.t = Command.async
+let build_install_page : Command.t = Command.async_spec
   ~summary:"build install page"
   Command.Spec.(
     empty
@@ -127,7 +127,7 @@ let build : Command.t = Command.group
 (******************************************************************************)
 (* `validate` command                                                         *)
 (******************************************************************************)
-let validate : Command.t = Command.async
+let validate : Command.t = Command.async_spec
   ~summary:"validate various things"
   Command.Spec.(empty +> Param.repo_root)
   (fun repo_root () ->
@@ -150,7 +150,7 @@ let validate : Command.t = Command.async
 (* `eval` command                                                             *)
 (******************************************************************************)
 
-let eval : Command.t = Command.async
+let eval : Command.t = Command.async_spec
   ~summary:"evaluate a file into an sexp. This sexp can be used as a memoization cache in future runs."
   Command.Spec.(empty +> Param.file)
   (fun filename () ->

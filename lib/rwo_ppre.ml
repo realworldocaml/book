@@ -367,7 +367,7 @@ let extract_code_from_1e_exn chapter =
         printf "WARNING: duplicate import for file %s part %S\n"
           i.href (match i.part with Some x -> x | None -> "")
      else
-        imports := Map.add !imports ~key:i ~data:x.pre.code_block;
+        imports := Map.set !imports ~key:i ~data:x.pre.code_block;
     );
     Import.to_html i
   in

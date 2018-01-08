@@ -57,7 +57,7 @@ end = struct
         loop (loop accum childs) html
     in
     loop [] html |>
-    List.dedup
+    List.dedup_and_sort
 
   let of_chapter file =
     Html.of_file file >>| of_chapter_html
@@ -78,7 +78,7 @@ end
 (******************************************************************************)
 (* `deps` command                                                             *)
 (******************************************************************************)
-let deps_site : Command.t = Command.async
+let deps_site : Command.t = Command.async_spec
     ~summary:"print build dependencies for site files"
     Command.Spec.(
       empty

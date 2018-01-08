@@ -168,7 +168,7 @@ let script_part_to_html ?(pygmentize=false) (x : script_part) =
 
 
 let exn_of_filename filename content =
-  let (filename, extension) = Filename.split_extension filename in
+  let (_filename, extension) = Filename.split_extension filename in
   match extension with
   | Some ext -> (match ext with
     | "ml" | "mli" | "mly" | "mll" -> `OCaml Rwo_expect.Raw_script.{ name = ""; content }
@@ -279,13 +279,13 @@ let add_script t lang ~run_nondeterministic ~filename =
     |`Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
     |_ -> eval_script lang ~run_nondeterministic ~filename 
     end >>|? fun script ->
-    Map.add t ~key:file ~data:script
+    Map.set t ~key:file ~data:script
   end
 
-let of_html ?(code_dir="examples") ~run_nondeterministic ~filename html =
+let of_html ?(code_dir="examples") ~run_nondeterministic ~filename:_  html =
   let imports =
     Import.find_all html
-    |> List.dedup ~compare:(fun i j -> compare i.Import.href j.Import.href)
+    |> List.dedup_and_sort ~compare:(fun i j -> compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
       add_script accum (Import.lang_of i |> ok_exn)
