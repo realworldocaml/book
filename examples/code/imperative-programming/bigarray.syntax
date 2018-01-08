@@ -1,0 +1,2 @@
+<bigarray_expr>.{<index_expr>}
+          <bigarray_expr>.{<index_expr>} <- <value_expr>

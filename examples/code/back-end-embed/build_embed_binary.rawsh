@@ -1,0 +1,7 @@
+$ gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl \
+  -o finalbc.native main.c embed_out.o -lcamlrun
+$ ./finalbc.native
+Before calling OCaml
+hello embedded world 1
+hello embedded world 2
+After calling OCaml

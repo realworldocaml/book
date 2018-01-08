@@ -1,0 +1,82 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+class square w = object(self : 'self) 
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method equals (other : 'self) = other#width = self#width
+end ;;
+[%%expect ocaml {|
+class square :
+  int ->
+  object ('a)
+    method area : float
+    method equals : 'a -> bool
+    method width : int
+  end
+|}];;
+class circle r = object(self : 'self)
+  method radius = r
+  method area = 3.14 *. (Float.of_int self#radius) ** 2.0
+  method equals (other : 'self) = other#radius = self#radius
+end ;;
+[%%expect ocaml {|
+class circle :
+  int ->
+  object ('a)
+    method area : float
+    method equals : 'a -> bool
+    method radius : int
+  end
+|}];;
+[@@@part "1"];;
+(new square 5)#equals (new square 5) ;;
+[%%expect ocaml {|- : bool = true|}];;
+(new circle 10)#equals (new circle 7) ;;
+[%%expect ocaml {|- : bool = false|}];;
+[@@@part "2"];;
+type shape = < equals : shape -> bool; area : float > ;;
+[%%expect ocaml {|type shape = < area : float; equals : shape -> bool >|}];;
+(new square 5 :> shape) ;;
+[%%expect{|
+Characters 0-23:
+Error: Type square = < area : float; equals : square -> bool; width : int >
+       is not a subtype of shape = < area : float; equals : shape -> bool > 
+       Type shape = < area : float; equals : shape -> bool >
+       is not a subtype of
+         square = < area : float; equals : square -> bool; width : int > 
+|}];;
+[@@@part "3"];;
+(object method area = 5 end) = (object method area = 5 end) ;;
+[%%expect ocaml {|- : bool = false|}];;
+[@@@part "4"];;
+type shape_repr =
+  | Square of int
+  | Circle of int ;;
+[%%expect ocaml {|type shape_repr = Square of int | Circle of int|}];;
+type shape =
+  < repr : shape_repr; equals : shape -> bool; area : float > ;;
+[%%expect ocaml {|type shape = < area : float; equals : shape -> bool; repr : shape_repr >|}];;
+class square w = object(self) 
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method repr = Square self#width
+  method equals (other : shape) = other#repr = self#repr
+end ;;
+[%%expect ocaml {|
+class square :
+  int ->
+  object
+    method area : float
+    method equals : shape -> bool
+    method repr : shape_repr
+    method width : int
+  end
+|}];;

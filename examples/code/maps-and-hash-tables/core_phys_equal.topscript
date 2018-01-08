@@ -1,0 +1,20 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+
+[@@@part "1"];;
+open Core_kernel;;
+1 == 2 ;;
+[%%expect{|
+Characters 2-4:
+Warning 3: deprecated: Core_kernel.==
+[since 2014-10] Use [phys_equal]
+|};
+ocaml {|- : bool = false|}];;
+phys_equal 1 2 ;;
+[%%expect ocaml {|- : bool = false|}];;

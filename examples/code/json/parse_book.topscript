@@ -1,0 +1,76 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+#require "yojson";;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/easy-format: added to search path
+/Users/yminsky/.opam/4.04.2/lib/easy-format/easy_format.cmo: loaded
+/Users/yminsky/.opam/4.04.2/lib/biniou: added to search path
+/Users/yminsky/.opam/4.04.2/lib/biniou/biniou.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/yojson: added to search path
+/Users/yminsky/.opam/4.04.2/lib/yojson/yojson.cma: loaded
+|}];;
+let json = Yojson.Basic.from_file "book.json" ;;
+[%%expect ocaml {|
+val json : Yojson.Basic.json =
+  `Assoc
+    [("title", `String "Real World OCaml");
+     ("tags",
+      `List
+        [`String "functional programming"; `String "ocaml";
+         `String "algorithms"]);
+     ("pages", `Int 450);
+     ("authors",
+      `List
+        [`Assoc
+           [("name", `String "Jason Hickey");
+            ("affiliation", `String "Google")];
+         `Assoc
+           [("name", `String "Anil Madhavapeddy");
+            ("affiliation", `String "Cambridge")];
+         `Assoc
+           [("name", `String "Yaron Minsky");
+            ("affiliation", `String "Jane Street")]]);
+     ("is_online", `Bool true)]
+|}];;
+[@@@part "1"];;
+open Yojson.Basic.Util ;;
+let title = json |> member "title" |> to_string ;;
+[%%expect ocaml {|val title : string = "Real World OCaml"|}];;
+[@@@part "2"];;
+let tags = json |> member "tags" |> to_list |> filter_string ;;
+[%%expect ocaml {|val tags : string list = ["functional programming"; "ocaml"; "algorithms"]|}];;
+let pages = json |> member "pages" |> to_int ;;
+[%%expect ocaml {|val pages : int = 450|}];;
+[@@@part "3"];;
+let is_online = json |> member "is_online" |> to_bool_option ;;
+[%%expect ocaml {|val is_online : bool option = Some true|}];;
+let is_translated = json |> member "is_translated" |> to_bool_option ;;
+[%%expect ocaml {|val is_translated : bool option = None|}];;
+[@@@part "4"];;
+let authors = json |> member "authors" |> to_list ;;
+[%%expect ocaml {|
+val authors : Yojson.Basic.json list =
+  [`Assoc
+     [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];
+   `Assoc
+     [("name", `String "Anil Madhavapeddy");
+      ("affiliation", `String "Cambridge")];
+   `Assoc
+     [("name", `String "Yaron Minsky");
+      ("affiliation", `String "Jane Street")]]
+|}];;
+[@@@part "5"];;
+let names =
+  json |> member "authors" |> to_list 
+  |> List.map ~f:(fun json -> member "name" json |> to_string) ;;
+[%%expect ocaml {|
+val names : string list =
+  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]
+|}];;

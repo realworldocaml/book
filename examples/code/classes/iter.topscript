@@ -1,0 +1,138 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
+[%%expect ocaml {|type 'a iterator = < get : 'a; has_value : bool; next : unit >|}];;
+[@@@part "1"];;
+class ['a] list_iterator init = object
+  val mutable current : 'a list = init
+
+  method has_value = current <> []
+
+  method get =
+    match current with
+    | hd :: tl -> hd
+    | [] -> raise (Invalid_argument "no value")
+
+  method next =
+    match current with
+    | hd :: tl -> current <- tl
+    | [] -> raise (Invalid_argument "no value")
+end  ;;
+[%%expect ocaml {|
+class ['a] list_iterator :
+  'a list ->
+  object
+    val mutable current : 'a list
+    method get : 'a
+    method has_value : bool
+    method next : unit
+  end
+|}];;
+[@@@part "2"];;
+class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+
+  method iterator : 'a iterator =
+    new list_iterator v
+end ;;
+[%%expect ocaml {|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method iterator : 'a iterator
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;
+[@@@part "3"];;
+let s = new stack [] ;;
+[%%expect ocaml {|val s : '_a stack = <obj>|}];;
+s#push 5 ;;
+[%%expect ocaml {|- : unit = ()|}];;
+s#push 4 ;;
+[%%expect ocaml {|- : unit = ()|}];;
+let it = s#iterator ;;
+[%%expect ocaml {|val it : int iterator = <obj>|}];;
+it#get ;;
+[%%expect ocaml {|- : int = 4|}];;
+it#next ;;
+[%%expect ocaml {|- : unit = ()|}];;
+it#get ;;
+[%%expect ocaml {|- : int = 5|}];;
+it#next ;;
+[%%expect ocaml {|- : unit = ()|}];;
+it#has_value ;;
+[%%expect ocaml {|- : bool = false|}];;
+[@@@part "4"];;
+class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+
+  method iter f = 
+    List.iter ~f v 
+end ;;
+[%%expect ocaml {|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method iter : ('a -> unit) -> unit
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;
+[@@@part "5"];;
+class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl ->
+      v <- tl;
+      Some hd
+    | [] -> None
+
+  method push hd =
+    v <- hd :: v
+
+  method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
+    (fun f init -> List.fold ~f ~init v) 
+end ;;
+[%%expect ocaml {|
+class ['a] stack :
+  'a list ->
+  object
+    val mutable v : 'a list
+    method fold : ('b -> 'a -> 'b) -> 'b -> 'b
+    method pop : 'a option
+    method push : 'a -> unit
+  end
+|}];;

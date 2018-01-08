@@ -1,0 +1,2 @@
+jbuilder build read_foo_better_errors.exe
+./_build/default/read_foo_better_errors.exe foo_example_broken.scm

@@ -1,0 +1,31 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type t = { a: int option; b: string } [@@deriving sexp] ;;
+[%%expect ocaml {|
+type t = { a : int option; b : string; }
+val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
+|}];;
+sexp_of_t { a = None; b = "hello" } ;;
+[%%expect ocaml {|- : Sexp.t = ((a ()) (b hello))|}];;
+sexp_of_t { a = Some 3; b = "hello" } ;;
+[%%expect ocaml {|- : Sexp.t = ((a (3)) (b hello))|}];;
+[@@@part "1"];;
+type t = { a: int sexp_option; b: string } [@@deriving sexp] ;;
+[%%expect ocaml {|
+type t = { a : int option; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
+|}];;
+sexp_of_t { a = Some 3; b = "hello" } ;;
+[%%expect ocaml {|- : Sexp.t = ((a 3) (b hello))|}];;
+sexp_of_t { a = None; b = "hello" } ;;
+[%%expect ocaml {|- : Sexp.t = ((b hello))|}];;

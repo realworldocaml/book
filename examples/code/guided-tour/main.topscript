@@ -1,0 +1,460 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+[@@@part "1"];;
+3 + 4;;
+[%%expect ocaml {|- : int = 7|}];;
+8 / 3;;
+[%%expect ocaml {|- : int = 2|}];;
+3.5 +. 6.;;
+[%%expect ocaml {|- : float = 9.5|}];;
+30_000_000 / 300_000;;
+[%%expect ocaml {|- : int = 100|}];;
+sqrt 9.;;
+[%%expect ocaml {|- : float = 3.|}];;
+[@@@part "2"];;
+let x = 3 + 4;;
+[%%expect ocaml {|val x : int = 7|}];;
+let y = x + x;;
+[%%expect ocaml {|val y : int = 14|}];;
+[@@@part "3"];;
+let x7 = 3 + 4;;
+[%%expect ocaml {|val x7 : int = 7|}];;
+let x_plus_y = x + y;;
+[%%expect ocaml {|val x_plus_y : int = 21|}];;
+let x' = x + 1;;
+[%%expect ocaml {|val x' : int = 8|}];;
+let _x' = x' + x';;
+[%%expect ocaml {|val _x' : int = 16|}];;
+_x';;
+[%%expect ocaml {|- : int = 16|}];;
+[@@@part "4"];;
+let Seven = 3 + 4;;
+[%%expect{|
+Characters 4-9:
+Error: Unbound constructor Seven
+|}];;
+let 7x = 7;;
+[%%expect{|
+Characters 4-6:
+Error: Unknown modifier 'x' for literal 7x
+|}];;
+let x-plus-y = x + y;;
+[%%expect{|
+Characters 6-10:
+Error: Syntax error
+|}];;
+[@@@part "5"];;
+let square x = x * x ;;
+[%%expect ocaml {|val square : int -> int = <fun>|}];;
+square 2;;
+[%%expect ocaml {|- : int = 4|}];;
+square (square 2);;
+[%%expect ocaml {|- : int = 16|}];;
+[@@@part "6"];;
+let ratio x y =
+  Float.of_int x /. Float.of_int y
+;;
+[%%expect ocaml {|val ratio : int -> int -> float = <fun>|}];;
+ratio 4 7;;
+[%%expect ocaml {|- : float = 0.571428571429|}];;
+[@@@part "7"];;
+let sum_if_true test first second =
+  (if test first then first else 0)
+  + (if test second then second else 0)
+;;
+[%%expect ocaml {|val sum_if_true : (int -> bool) -> int -> int -> int = <fun>|}];;
+[@@@part "8"];;
+let even x =
+  x mod 2 = 0 ;;
+[%%expect ocaml {|val even : int -> bool = <fun>|}];;
+sum_if_true even 3 4;;
+[%%expect ocaml {|- : int = 4|}];;
+sum_if_true even 2 4;;
+[%%expect ocaml {|- : int = 6|}];;
+[@@@part "9"];;
+let sum_if_true (test : int -> bool) (x : int) (y : int) : int =
+  (if test x then x else 0)
+  + (if test y then y else 0)
+;;
+[%%expect ocaml {|val sum_if_true : (int -> bool) -> int -> int -> int = <fun>|}];;
+[@@@part "10"];;
+let first_if_true test x y =
+  if test x then x else y
+;;
+[%%expect ocaml {|val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>|}];;
+[@@@part "11"];;
+let long_string s = String.length s > 6;;
+[%%expect ocaml {|val long_string : string -> bool = <fun>|}];;
+first_if_true long_string "short" "loooooong";;
+[%%expect ocaml {|- : string = "loooooong"|}];;
+[@@@part "12"];;
+let big_number x = x > 3;;
+[%%expect ocaml {|val big_number : int -> bool = <fun>|}];;
+first_if_true big_number 4 3;;
+[%%expect ocaml {|- : int = 4|}];;
+[@@@part "13"];;
+first_if_true big_number "short" "loooooong";;
+[%%expect{|
+Characters 25-32:
+Error: This expression has type string but an expression was expected of type
+         int
+|}];;
+[@@@part "14"];;
+let add_potato x =
+  x + "potato";;
+[%%expect{|
+Characters 25-33:
+Error: This expression has type string but an expression was expected of type
+         int
+|}];;
+[@@@part "15"];;
+let is_a_multiple x y =
+  x mod y = 0 ;;
+[%%expect ocaml {|val is_a_multiple : int -> int -> bool = <fun>|}];;
+is_a_multiple 8 2;;
+[%%expect ocaml {|- : bool = true|}];;
+is_a_multiple 8 0;;
+[%%expect{|Exception: Division_by_zero.|}];;
+[@@@part "16"];;
+let a_tuple = (3,"three");;
+[%%expect ocaml {|val a_tuple : int * string = (3, "three")|}];;
+let another_tuple = (3,"four",5.);;
+[%%expect ocaml {|val another_tuple : int * string * float = (3, "four", 5.)|}];;
+[@@@part "17"];;
+let (x,y) = a_tuple;;
+[%%expect ocaml {|
+val x : int = 3
+val y : string = "three"
+|}];;
+[@@@part "18"];;
+x + String.length y;;
+[%%expect ocaml {|- : int = 8|}];;
+[@@@part "19"];;
+let distance (x1,y1) (x2,y2) =
+  sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
+;;
+[%%expect ocaml {|val distance : float * float -> float * float -> float = <fun>|}];;
+[@@@part "20"];;
+let languages = ["OCaml";"Perl";"C"];;
+[%%expect ocaml {|val languages : string list = ["OCaml"; "Perl"; "C"]|}];;
+[@@@part "21"];;
+let numbers = [3;"four";5];;
+[%%expect{|
+Characters 17-23:
+Error: This expression has type string but an expression was expected of type
+         int
+|}];;
+[@@@part "22"];;
+List.length languages;;
+[%%expect ocaml {|- : int = 3|}];;
+[@@@part "23"];;
+List.map languages ~f:String.length;;
+[%%expect ocaml {|- : int list = [5; 4; 1]|}];;
+[@@@part "24"];;
+List.map ~f:String.length languages;;
+[%%expect ocaml {|- : int list = [5; 4; 1]|}];;
+[@@@part "25"];;
+"French" :: "Spanish" :: languages;;
+[%%expect ocaml {|- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]|}];;
+[@@@part "26"];;
+languages;;
+[%%expect ocaml {|- : string list = ["OCaml"; "Perl"; "C"]|}];;
+[@@@part "27"];;
+["OCaml", "Perl", "C"];;
+[%%expect ocaml {|- : (string * string * string) list = [("OCaml", "Perl", "C")]|}];;
+[@@@part "28"];;
+1,2,3;;
+[%%expect ocaml {|- : int * int * int = (1, 2, 3)|}];;
+[@@@part "29"];;
+[1; 2; 3];;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
+1 :: (2 :: (3 :: []));;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
+1 :: 2 :: 3 :: [];;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
+[@@@part "30"];;
+[1;2;3] @ [4;5;6];;
+[%%expect ocaml {|- : int list = [1; 2; 3; 4; 5; 6]|}];;
+[@@@part "31"];;
+let my_favorite_language (my_favorite :: the_rest) =
+  my_favorite
+;;
+[%%expect{|
+Characters 25-66:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+[]
+|};
+ocaml {|val my_favorite_language : 'a list -> 'a = <fun>|}];;
+[@@@part "32"];;
+my_favorite_language ["English";"Spanish";"French"];;
+[%%expect ocaml {|- : string = "English"|}];;
+my_favorite_language [];;
+[%%expect{|Exception: "Match_failure //toplevel//:2:25".|}];;
+[@@@part "33"];;
+let my_favorite_language languages =
+  match languages with
+  | first :: the_rest -> first
+  | [] -> "OCaml" (* A good default! *)
+;;
+[%%expect ocaml {|val my_favorite_language : string list -> string = <fun>|}];;
+my_favorite_language ["English";"Spanish";"French"];;
+[%%expect ocaml {|- : string = "English"|}];;
+my_favorite_language [];;
+[%%expect ocaml {|- : string = "OCaml"|}];;
+[@@@part "34"];;
+let rec sum l =
+  match l with
+  | [] -> 0                   (* base case *)
+  | hd :: tl -> hd + sum tl   (* inductive case *)
+;;
+[%%expect ocaml {|val sum : int list -> int = <fun>|}];;
+sum [1;2;3];;
+[%%expect ocaml {|- : int = 6|}];;
+[@@@part "35"];;
+let rec remove_sequential_duplicates list =
+  match list with
+  | [] -> []
+  | first :: second :: tl ->
+    if first = second then remove_sequential_duplicates (second :: tl)
+    else first :: remove_sequential_duplicates (second :: tl)
+;;
+[%%expect{|
+Characters 46-236:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+_::[]
+|};
+ocaml {|val remove_sequential_duplicates : 'a list -> 'a list = <fun>|}];;
+[@@@part "36"];;
+let rec remove_sequential_duplicates list =
+  match list with
+  | [] -> []
+  | [hd] -> [hd]
+  | hd1 :: hd2 :: tl ->
+    if hd1 = hd2 then remove_sequential_duplicates (hd2 :: tl)
+    else hd1 :: remove_sequential_duplicates (hd2 :: tl)
+;;
+[%%expect ocaml {|val remove_sequential_duplicates : 'a list -> 'a list = <fun>|}];;
+remove_sequential_duplicates ["hey";"hey";"hey";"man!"];;
+[%%expect ocaml {|- : string list = ["hey"; "man!"]|}];;
+[@@@part "37"];;
+let divide x y =
+  if y = 0 then None else Some (x / y) ;;
+[%%expect ocaml {|val divide : int -> int -> int option = <fun>|}];;
+[@@@part "38"];;
+let downcase_extension filename =
+  match String.rsplit2 filename ~on:'.' with
+  | None -> filename
+  | Some (base,ext) -> 
+    base ^ "." ^ String.lowercase ext
+;;
+[%%expect ocaml {|val downcase_extension : string -> string = <fun>|}];;
+List.map ~f:downcase_extension
+  [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
+;;
+[%%expect ocaml {|- : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]|}];;
+[@@@part "41"];;
+type point2d = { x : float; y : float };;
+[%%expect ocaml {|type point2d = { x : float; y : float; }|}];;
+[@@@part "42"];;
+let p = { x = 3.; y = -4. };;
+[%%expect ocaml {|val p : point2d = {x = 3.; y = -4.}|}];;
+[@@@part "43"];;
+let magnitude { x = x_pos; y = y_pos } =
+  sqrt (x_pos ** 2. +. y_pos ** 2.);;
+[%%expect ocaml {|val magnitude : point2d -> float = <fun>|}];;
+[@@@part "44"];;
+let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
+[%%expect ocaml {|val magnitude : point2d -> float = <fun>|}];;
+[@@@part "45"];;
+let distance v1 v2 =
+  magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
+[%%expect ocaml {|val distance : point2d -> point2d -> float = <fun>|}];;
+[@@@part "46"];;
+type circle_desc  = { center: point2d; radius: float };;
+[%%expect ocaml {|type circle_desc = { center : point2d; radius : float; }|}];;
+type rect_desc    = { lower_left: point2d; width: float; height: float };;
+[%%expect ocaml {|type rect_desc = { lower_left : point2d; width : float; height : float; }|}];;
+type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
+[%%expect ocaml {|type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }|}];;
+[@@@part "47"];;
+type scene_element =
+  | Circle  of circle_desc
+  | Rect    of rect_desc
+  | Segment of segment_desc
+;;
+[%%expect ocaml {|
+type scene_element =
+    Circle of circle_desc
+  | Rect of rect_desc
+  | Segment of segment_desc
+|}];;
+[@@@part "48"];;
+let is_inside_scene_element point scene_element =
+  match scene_element with
+  | Circle { center; radius } ->
+    distance center point < radius
+  | Rect { lower_left; width; height } ->
+    point.x    > lower_left.x && point.x < lower_left.x +. width
+    && point.y > lower_left.y && point.y < lower_left.y +. height
+  | Segment { endpoint1; endpoint2 } -> false
+
+let is_inside_scene point scene =
+  List.exists scene
+    ~f:(fun el -> is_inside_scene_element point el)
+;;
+[%%expect ocaml {|
+val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
+val is_inside_scene : point2d -> scene_element list -> bool = <fun>
+|}];;
+is_inside_scene {x=3.;y=7.}
+  [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
+[%%expect ocaml {|- : bool = false|}];;
+is_inside_scene {x=3.;y=7.}
+  [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
+[%%expect ocaml {|- : bool = true|}];;
+[@@@part "49"];;
+let numbers = [| 1; 2; 3; 4 |];;
+[%%expect ocaml {|val numbers : int array = [|1; 2; 3; 4|]|}];;
+numbers.(2) <- 4;;
+[%%expect ocaml {|- : unit = ()|}];;
+numbers;;
+[%%expect ocaml {|- : int array = [|1; 2; 4; 4|]|}];;
+[@@@part "50"];;
+type running_sum =
+  { mutable sum: float;
+    mutable sum_sq: float; (* sum of squares *)
+    mutable samples: int;
+  }
+;;
+[%%expect ocaml {|
+type running_sum = {
+  mutable sum : float;
+  mutable sum_sq : float;
+  mutable samples : int;
+}
+|}];;
+[@@@part "51"];;
+let mean rsum = rsum.sum /. Float.of_int rsum.samples
+let stdev rsum =
+  sqrt (rsum.sum_sq /. Float.of_int rsum.samples
+        -. (rsum.sum /. Float.of_int rsum.samples) ** 2.) ;;
+[%%expect ocaml {|
+val mean : running_sum -> float = <fun>
+val stdev : running_sum -> float = <fun>
+|}];;
+[@@@part "52"];;
+let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
+let update rsum x =
+  rsum.samples <- rsum.samples + 1;
+  rsum.sum     <- rsum.sum     +. x;
+  rsum.sum_sq  <- rsum.sum_sq  +. x *. x
+;;
+[%%expect ocaml {|
+val create : unit -> running_sum = <fun>
+val update : running_sum -> float -> unit = <fun>
+|}];;
+[@@@part "53"];;
+let rsum = create ();;
+[%%expect ocaml {|val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}|}];;
+List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
+[%%expect ocaml {|- : unit = ()|}];;
+mean rsum;;
+[%%expect ocaml {|- : float = 1.33333333333|}];;
+stdev rsum;;
+[%%expect ocaml {|- : float = 3.94405318873|}];;
+[@@@part "54"];;
+let x = { contents = 0 };;
+[%%expect ocaml {|val x : int ref = {contents = 0}|}];;
+x.contents <- x.contents + 1;;
+[%%expect ocaml {|- : unit = ()|}];;
+x;;
+[%%expect ocaml {|- : int ref = {contents = 1}|}];;
+[@@@part "55"];;
+let x = ref 0  (* create a ref, i.e., { contents = 0 } *) ;;
+[%%expect ocaml {|val x : int ref = {contents = 0}|}];;
+!x             (* get the contents of a ref, i.e., x.contents *) ;;
+[%%expect ocaml {|- : int = 0|}];;
+x := !x + 1    (* assignment, i.e., x.contents <- ... *) ;;
+[%%expect ocaml {|- : unit = ()|}];;
+!x ;;
+[%%expect ocaml {|- : int = 1|}];;
+[@@@part "56"];;
+type 'a ref = { mutable contents : 'a };;
+[%%expect ocaml {|type 'a ref = { mutable contents : 'a; }|}];;
+let ref x = { contents = x };;
+[%%expect ocaml {|val ref : 'a -> 'a ref = <fun>|}];;
+let (!) r = r.contents;;
+[%%expect ocaml {|val ( ! ) : 'a ref -> 'a = <fun>|}];;
+let (:=) r x = r.contents <- x;;
+[%%expect ocaml {|val ( := ) : 'a ref -> 'a -> unit = <fun>|}];;
+[@@@part "57"];;
+let sum list =
+  let sum = ref 0 in
+  List.iter list ~f:(fun x -> sum := !sum + x);
+  !sum
+;;
+[%%expect ocaml {|val sum : int list -> int = <fun>|}];;
+[@@@part "58"];;
+let permute array =
+  let length = Array.length array in
+  for i = 0 to length - 2 do
+    (* pick a j to swap with *)
+    let j = i + Random.int (length - i) in
+    (* Swap i and j *)
+    let tmp = array.(i) in
+    array.(i) <- array.(j);
+    array.(j) <- tmp
+  done
+;;
+[%%expect ocaml {|val permute : 'a array -> unit = <fun>|}];;
+[@@@part "59"];;
+let ar = Array.init 20 ~f:(fun i -> i);;
+[%%expect ocaml {|
+val ar : int array =
+  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
+|}];;
+permute ar;;
+[%%expect ocaml {|- : unit = ()|}];;
+ar;;
+[%%expect ocaml {|
+- : int array =
+[|19; 6; 4; 5; 3; 10; 15; 0; 13; 9; 1; 17; 8; 7; 16; 12; 11; 18; 14; 2|]
+|}];;
+[@@@part "60"];;
+let find_first_negative_entry array =
+  let pos = ref 0 in
+  while !pos < Array.length array && array.(!pos) >= 0 do
+    pos := !pos + 1
+  done;
+  if !pos = Array.length array then None else Some !pos
+;;
+[%%expect ocaml {|val find_first_negative_entry : int array -> int option = <fun>|}];;
+find_first_negative_entry [|1;2;0;3|];;
+[%%expect ocaml {|- : int option = None|}];;
+find_first_negative_entry [|1;-2;0;3|];;
+[%%expect ocaml {|- : int option = Some 1|}];;
+[@@@part "61"];;
+let find_first_negative_entry array =
+  let pos = ref 0 in
+  while
+    let pos_is_good = !pos < Array.length array in
+    let element_is_non_negative = array.(!pos) >= 0 in
+    pos_is_good && element_is_non_negative
+  do
+    pos := !pos + 1
+  done;
+  if !pos = Array.length array then None else Some !pos
+;;
+[%%expect ocaml {|val find_first_negative_entry : int array -> int option = <fun>|}];;
+find_first_negative_entry [|1;2;0;3|];;
+[%%expect{|Exception: (Invalid_argument "index out of bounds").|}];;

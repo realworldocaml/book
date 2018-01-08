@@ -1,0 +1,143 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+#require "mtime.os.top";;
+[%%expect{|No such package: mtime.os.top|}];;
+let time f =
+  let counter = Mtime.counter () in
+  let x = f () in
+  let elapsed = Mtime.count counter in
+  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  x 
+;;
+[%%expect{|
+Characters 29-42:
+Error: Unbound module Mtime
+Hint: Did you mean Time?
+|}];;
+let memoize f =
+  let memo_table = Hashtbl.Poly.create () in
+  (fun x ->
+     Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
+;;
+[%%expect ocaml {|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
+let identity x = x;;
+[%%expect ocaml {|val identity : 'a -> 'a = <fun>|}];;
+[@@@part "1"];;
+(fun x -> [x;x]);;
+[%%expect ocaml {|- : 'a -> 'a list = <fun>|}];;
+[@@@part "2"];;
+memoize (fun x -> [x;x]);;
+[%%expect ocaml {|- : '_a -> '_a list = <fun>|}];;
+[@@@part "3"];;
+identity (fun x -> [x;x]);;
+[%%expect ocaml {|- : '_a -> '_a list = <fun>|}];;
+[@@@part "4"];;
+let f () = ref None;;
+[%%expect ocaml {|val f : unit -> 'a option ref = <fun>|}];;
+[@@@part "5"];;
+List.init;;
+[%%expect ocaml {|- : int -> f:(int -> 'a) -> 'a list = <fun>|}];;
+List.init 10 ~f:Int.to_string;;
+[%%expect ocaml {|- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]|}];;
+[@@@part "6"];;
+let list_init_10 = List.init 10;;
+[%%expect ocaml {|val list_init_10 : f:(int -> '_a) -> '_a list = <fun>|}];;
+[@@@part "7"];;
+let list_init_10 ~f = List.init 10 ~f;;
+[%%expect ocaml {|val list_init_10 : f:(int -> 'a) -> 'a list = <fun>|}];;
+[@@@part "8"];;
+identity (fun x -> [x;x]);;
+[%%expect ocaml {|- : '_a -> '_a list = <fun>|}];;
+[@@@part "9"];;
+identity [];;
+[%%expect ocaml {|- : 'a list = []|}];;
+[@@@part "10"];;
+[||];;
+[%%expect ocaml {|- : 'a array = [||]|}];;
+identity [||];;
+[%%expect ocaml {|- : '_a array = [||]|}];;
+[@@@part "11"];;
+module Concat_list : sig
+  type 'a t
+  val empty : 'a t
+  val singleton : 'a -> 'a t
+  val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+  val to_list : 'a t -> 'a list       (* linear time   *)
+end = struct
+
+  type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+  let empty = Empty
+  let singleton x = Singleton x
+  let concat x y = Concat (x,y)
+
+  let rec to_list_with_tail t tail =
+    match t with
+    | Empty -> tail
+    | Singleton x -> x :: tail
+    | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
+
+  let to_list t =
+    to_list_with_tail t []
+
+end;;
+[%%expect ocaml {|
+module Concat_list :
+  sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat : 'a t -> 'a t -> 'a t
+    val to_list : 'a t -> 'a list
+  end
+|}];;
+[@@@part "12"];;
+Concat_list.empty;;
+[%%expect ocaml {|- : 'a Concat_list.t = <abstr>|}];;
+identity Concat_list.empty;;
+[%%expect ocaml {|- : '_a Concat_list.t = <abstr>|}];;
+[@@@part "13"];;
+module Concat_list : sig
+  type +'a t
+  val empty : 'a t
+  val singleton : 'a -> 'a t
+  val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+  val to_list : 'a t -> 'a list       (* linear time   *)
+end = struct
+
+  type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+  let empty = Empty
+  let singleton x = Singleton x
+  let concat x y = Concat (x,y)
+
+  let rec to_list_with_tail t tail =
+    match t with
+    | Empty -> tail
+    | Singleton x -> x :: tail
+    | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
+
+  let to_list t =
+    to_list_with_tail t []
+
+end;;
+[%%expect ocaml {|
+module Concat_list :
+  sig
+    type +'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat : 'a t -> 'a t -> 'a t
+    val to_list : 'a t -> 'a list
+  end
+|}];;
+[@@@part "14"];;
+identity Concat_list.empty;;
+[%%expect ocaml {|- : 'a Concat_list.t = <abstr>|}];;

@@ -1,0 +1,16 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "1"];;
+open Core_kernel;;
+Sexp.List [
+  Sexp.Atom "this";
+  Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
+  Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
+];;
+[%%expect ocaml {|- : Sexp.t = (this (is an) (s expression))|}];;

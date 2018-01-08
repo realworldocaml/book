@@ -1,0 +1,49 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+let area sq = sq#width * sq#width ;;
+[%%expect ocaml {|val area : < width : int; .. > -> int = <fun>|}];;
+let minimize sq : unit = sq#resize 1 ;;
+[%%expect ocaml {|val minimize : < resize : int -> unit; .. > -> unit = <fun>|}];;
+let limit sq = 
+  if (area sq) > 100 then minimize sq ;;
+[%%expect ocaml {|val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>|}];;
+[@@@part "2"];;
+let toggle sq b : unit = 
+  if b then sq#resize `Fullscreen
+  else minimize sq ;;
+[%%expect{|
+Characters 76-78:
+Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
+       but an expression was expected of type < resize : int -> unit; .. >
+       Types for method resize are incompatible
+|}];;
+[@@@part "3"];;
+let area_closed (sq: < width : int >) = sq#width * sq#width ;;
+[%%expect ocaml {|val area_closed : < width : int > -> int = <fun>|}];;
+let sq = object
+  method width = 30 
+  method name = "sq" 
+end ;;
+[%%expect ocaml {|val sq : < name : string; width : int > = <obj>|}];;
+area_closed sq ;;
+[%%expect{|
+Characters 12-14:
+Error: This expression has type < name : string; width : int >
+       but an expression was expected of type < width : int >
+       The second object type has no method name
+|}];;
+[@@@part "4"];;
+type square = < width : int; ..> ;;
+[%%expect{|
+Characters 0-32:
+Error: A type variable is unbound in this type declaration.
+In type < width : int; .. > as 'a the variable 'a is unbound
+|}];;

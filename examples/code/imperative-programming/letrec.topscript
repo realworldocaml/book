@@ -1,0 +1,59 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+#require "mtime.os.top";;
+[%%expect{|No such package: mtime.os.top|}];;
+let time f =
+  let counter = Mtime.counter () in
+  let x = f () in
+  let elapsed = Mtime.count counter in
+  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  x 
+;;
+[%%expect{|
+Characters 29-42:
+Error: Unbound module Mtime
+Hint: Did you mean Time?
+|}];;
+let memoize f =
+  let memo_table = Hashtbl.Poly.create () in
+  (fun x ->
+     Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
+;;
+[%%expect ocaml {|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
+let fib_norec fib i =
+  if i <= 1 then i
+  else fib (i - 1) + fib (i - 2) ;;
+[%%expect ocaml {|val fib_norec : (int -> int) -> int -> int = <fun>|}];;
+[@@@part "1"];;
+let memo_rec f_norec =
+  let rec f = memoize (fun x -> f_norec f x) in
+  f
+;;
+[%%expect{|
+Characters 37-67:
+Error: This kind of expression is not allowed as right-hand side of `let rec'
+|}];;
+[@@@part "2"];;
+let rec x = lazy (force x + 1);;
+[%%expect ocaml {|val x : int lazy_t = <lazy>|}];;
+[@@@part "3"];;
+force x;;
+[%%expect{|Exception: Lazy.Undefined.|}];;
+[@@@part "5"];;
+let lazy_memo_rec f_norec x =
+  let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
+  (force f) x
+;;
+[%%expect ocaml {|val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
+time (fun () -> lazy_memo_rec fib_norec 40);;
+[%%expect{|
+Characters 0-4:
+Error: Unbound value time
+|}];;

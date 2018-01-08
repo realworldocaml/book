@@ -1,0 +1,30 @@
+language: c
+sudo: false
+dist: trusty
+branches:
+  except:
+  - v2-sexp
+cache:
+  directories:
+  - $HOME/.opam
+addons:
+  apt:
+    sources:
+    - avsm
+    packages:
+    - opam
+    - aspcud
+    - libpcre3-dev
+    - m4
+    - pkg-config
+    - zlib1g-dev
+    - libgmp-dev
+install: scripts/install
+script: scripts/build
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN
+  target_branch: v2-sexp
+  on:
+    branch: v2

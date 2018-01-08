@@ -1,0 +1,20 @@
+$ perf record -g ./barrier_bench.native
+Estimated testing time 20s (change using -quota SECS).
+ 
+  Name        Time (ns)             Time 95ci   Percentage
+  ----        ---------             ---------   ----------
+  mutable     7_306_219   7_250_234-7_372_469        96.83
+  immutable   7_545_126   7_537_837-7_551_193       100.00
+ 
+[ perf record: Woken up 11 times to write data ]
+[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
+perf record -g ./barrier.native
+Estimated testing time 20s (change using -quota SECS).
+ 
+  Name        Time (ns)             Time 95ci   Percentage
+  ----        ---------             ---------   ----------
+  mutable     7_306_219   7_250_234-7_372_469        96.83
+  immutable   7_545_126   7_537_837-7_551_193       100.00
+ 
+[ perf record: Woken up 11 times to write data ]
+[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]

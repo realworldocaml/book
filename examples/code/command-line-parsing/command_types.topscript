@@ -1,0 +1,14 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core;;
+[@@@part "1"];;
+Command.Spec.empty ;;
+[%%expect ocaml {|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
+Command.Spec.(empty +> anon ("foo" %: int)) ;;
+[%%expect ocaml {|- : (int -> '_a, '_a) Command.Spec.t = <abstr>|}];;

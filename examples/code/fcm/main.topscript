@@ -1,0 +1,146 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+module type X_int = sig val x : int end;;
+[%%expect ocaml {|module type X_int = sig val x : int end|}];;
+[@@@part "1"];;
+module Three : X_int = struct let x = 3 end;;
+[%%expect ocaml {|module Three : X_int|}];;
+Three.x;;
+[%%expect ocaml {|- : int = 3|}];;
+[@@@part "2"];;
+let three = (module Three : X_int);;
+[%%expect ocaml {|val three : (module X_int) = <module>|}];;
+[@@@part "3"];;
+module Four = struct let x = 4 end;;
+[%%expect ocaml {|module Four : sig val x : int end|}];;
+let numbers = [ three; (module Four) ];;
+[%%expect ocaml {|val numbers : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "4"];;
+let numbers = [three; (module struct let x = 4 end)];;
+[%%expect ocaml {|val numbers : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "5"];;
+module New_three = (val three : X_int) ;;
+[%%expect ocaml {|module New_three : X_int|}];;
+New_three.x;;
+[%%expect ocaml {|- : int = 3|}];;
+[@@@part "6"];;
+module type Y_int = X_int;;
+[%%expect ocaml {|module type Y_int = X_int|}];;
+let five = (module struct let x = 5 end : Y_int);;
+[%%expect ocaml {|val five : (module Y_int) = <module>|}];;
+[three; five];;
+[%%expect ocaml {|- : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "7"];;
+[three; (module (val five))];;
+[%%expect ocaml {|- : (module X_int) list = [<module>; <module>]|}];;
+[@@@part "8"];;
+let to_int m =
+  let module M = (val m : X_int) in
+  M.x
+;;
+[%%expect ocaml {|val to_int : (module X_int) -> int = <fun>|}];;
+let plus m1 m2 =
+  (module struct
+    let x = to_int m1 + to_int m2
+  end : X_int)
+;;
+[%%expect ocaml {|val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>|}];;
+[@@@part "9"];;
+let six = plus three three;;
+[%%expect ocaml {|val six : (module X_int) = <module>|}];;
+to_int (List.fold ~init:six ~f:plus [three;three]);;
+[%%expect ocaml {|- : int = 12|}];;
+[@@@part "10"];;
+let to_int (module M : X_int) = M.x ;;
+[%%expect ocaml {|val to_int : (module X_int) -> int = <fun>|}];;
+[@@@part "11"];;
+module type Bumpable = sig
+  type t
+  val bump : t -> t
+end;;
+[%%expect ocaml {|module type Bumpable = sig type t val bump : t -> t end|}];;
+[@@@part "12"];;
+module Int_bumper = struct
+  type t = int
+  let bump n = n + 1
+end;;
+[%%expect ocaml {|module Int_bumper : sig type t = int val bump : t -> t end|}];;
+module Float_bumper = struct
+  type t = float
+  let bump n = n +. 1.
+end;;
+[%%expect ocaml {|module Float_bumper : sig type t = float val bump : t -> t end|}];;
+[@@@part "13"];;
+let int_bumper = (module Int_bumper : Bumpable);;
+[%%expect ocaml {|val int_bumper : (module Bumpable) = <module>|}];;
+[@@@part "14"];;
+let (module Bumpable) = int_bumper in Bumpable.bump 3;;
+[%%expect{|
+Characters 52-53:
+Error: This expression has type int but an expression was expected of type
+         Bumpable.t
+|}];;
+[@@@part "15"];;
+let int_bumper = (module Int_bumper : Bumpable with type t = int);;
+[%%expect ocaml {|val int_bumper : (module Bumpable with type t = int) = <module>|}];;
+let float_bumper = (module Float_bumper : Bumpable with type t = float);;
+[%%expect ocaml {|val float_bumper : (module Bumpable with type t = float) = <module>|}];;
+[@@@part "16"];;
+let (module Bumpable) = int_bumper in Bumpable.bump 3;;
+[%%expect ocaml {|- : int = 4|}];;
+let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;
+[%%expect ocaml {|- : float = 4.5|}];;
+[@@@part "17"];;
+let bump_list
+      (type a)
+      (module B : Bumpable with type t = a)
+      (l: a list)
+  =
+  List.map ~f:B.bump l
+;;
+[%%expect ocaml {|
+val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
+  <fun>
+|}];;
+[@@@part "18"];;
+bump_list int_bumper [1;2;3];;
+[%%expect ocaml {|- : int list = [2; 3; 4]|}];;
+bump_list float_bumper [1.5;2.5;3.5];;
+[%%expect ocaml {|- : float list = [2.5; 3.5; 4.5]|}];;
+[@@@part "19"];;
+let wrap_in_list (type a) (x:a) = [x];;
+[%%expect ocaml {|val wrap_in_list : 'a -> 'a list = <fun>|}];;
+[@@@part "20"];;
+let double_int (type a) (x:a) = x + x;;
+[%%expect{|
+Characters 32-33:
+Error: This expression has type a but an expression was expected of type int
+|}];;
+[@@@part "21"];;
+module type Comparable = sig
+  type t
+  val compare : t -> t -> int
+end ;;
+[%%expect ocaml {|module type Comparable = sig type t val compare : t -> t -> int end|}];;
+let create_comparable (type a) compare =
+  (module struct
+    type t = a
+    let compare = compare
+  end : Comparable with type t = a)
+;;
+[%%expect ocaml {|
+val create_comparable :
+  ('a -> 'a -> int) -> (module Comparable with type t = 'a) = <fun>
+|}];;
+create_comparable Int.compare;;
+[%%expect ocaml {|- : (module Comparable with type t = int) = <module>|}];;
+create_comparable Float.compare;;
+[%%expect ocaml {|- : (module Comparable with type t = float) = <module>|}];;

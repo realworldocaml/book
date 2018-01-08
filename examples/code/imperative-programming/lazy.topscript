@@ -1,0 +1,51 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
+[%%expect ocaml {|val v : float lazy_t = <lazy>|}];;
+Lazy.force v;;
+[%%expect{|performing lazy computation|};
+ocaml {|- : float = 4.|}];;
+Lazy.force v;;
+[%%expect ocaml {|- : float = 4.|}];;
+[@@@part "2"];;
+type 'a lazy_state =
+  | Delayed of (unit -> 'a)
+  | Value of 'a
+  | Exn of exn
+;;
+[%%expect ocaml {|type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn|}];;
+[@@@part "3"];;
+let create_lazy f = ref (Delayed f);;
+[%%expect ocaml {|val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>|}];;
+let v = create_lazy
+          (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
+[%%expect ocaml {|val v : float lazy_state ref = {contents = Delayed <fun>}|}];;
+[@@@part "4"];;
+let force v =
+  match !v with
+  | Value x -> x
+  | Exn e -> raise e
+  | Delayed f ->
+    try
+      let x = f () in
+      v := Value x;
+      x
+    with exn ->
+      v := Exn exn;
+      raise exn
+;;
+[%%expect ocaml {|val force : 'a lazy_state ref -> 'a = <fun>|}];;
+[@@@part "5"];;
+force v;;
+[%%expect{|performing lazy computation|};
+ocaml {|- : float = 4.|}];;
+force v;;
+[%%expect ocaml {|- : float = 4.|}];;

@@ -1,0 +1,11 @@
+.*.swp
+_build
+.merlin
+*.cmi
+*.cmo
+*.cmx
+*.cma
+*.a
+*.o
+*.cmi
+

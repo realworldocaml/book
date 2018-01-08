@@ -1,0 +1,226 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+#warnings "-40";;
+open Core_kernel;;
+module Time_ns = Core_kernel.Time_ns;;
+[%%expect ocaml {|module Time_ns = Core_kernel.Time_ns|}];;
+[@@@part "1"];;
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      important: bool;
+      message: string;
+    }
+end
+;;
+[%%expect ocaml {|
+module Log_entry :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      important : bool;
+      message : string;
+    }
+  end
+|}];;
+[@@@part "1.5"];;
+module Heartbeat = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      status_message: string;
+    }
+end;;
+[%%expect ocaml {|
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
+|}];;
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+      credentials: string;
+    }
+end;;
+[%%expect ocaml {|
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
+|}];;
+[@@@part "2"];;
+type client_message = | Logon of Logon.t
+                      | Heartbeat of Heartbeat.t
+                      | Log_entry of Log_entry.t
+;;
+[%%expect ocaml {|
+type client_message =
+    Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+|}];;
+[@@@part "3"];;
+let messages_for_user user messages =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) message ->
+        match message with
+        | Logon m ->
+          if m.user = user then
+            (message::messages, Set.add user_sessions m.session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ ->
+          let session_id = match message with
+            | Logon     m -> m.session_id
+            | Heartbeat m -> m.session_id
+            | Log_entry m -> m.session_id
+          in
+          if Set.mem user_sessions session_id then
+            (message::messages,user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+;;
+[%%expect ocaml {|
+val messages_for_user : string -> client_message list -> client_message list =
+  <fun>
+|}];;
+[@@@part "4"];;
+module Log_entry = struct
+  type t = { important: bool;
+             message: string;
+           }
+end;;
+[%%expect ocaml {|module Log_entry : sig type t = { important : bool; message : string; } end|}];;
+module Heartbeat = struct
+  type t = { status_message: string; }
+end;;
+[%%expect ocaml {|module Heartbeat : sig type t = { status_message : string; } end|}];;
+module Logon = struct
+  type t = { user: string;
+             credentials: string;
+           }
+end ;;
+[%%expect ocaml {|module Logon : sig type t = { user : string; credentials : string; } end|}];;
+[@@@part "5"];;
+type details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+;;
+[%%expect ocaml {|
+type details =
+    Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+|}];;
+[@@@part "6"];;
+module Common = struct
+  type t = { session_id: string;
+             time: Time_ns.t;
+           }
+end ;;
+[%%expect ocaml {|module Common : sig type t = { session_id : string; time : Time_ns.t; } end|}];;
+[@@@part "7"];;
+let messages_for_user user (messages : (Common.t * details) list) =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
+        match details with
+        | Logon m ->
+          if m.user = user then
+            (message::messages, Set.add user_sessions common.session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ ->
+          if Set.mem user_sessions common.session_id then
+            (message::messages, user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+;;
+[%%expect ocaml {|
+val messages_for_user :
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
+|}];;
+[@@@part "7.9"];;
+type server_state;;
+[%%expect ocaml {|type server_state|}];;
+let handle_log_entry (_:server_state) ((_:Common.t),_) = ();;
+[%%expect ocaml {|val handle_log_entry : server_state -> Common.t * 'a -> unit = <fun>|}];;
+let handle_logon _ (_,_) = ();;
+[%%expect ocaml {|val handle_logon : 'a -> 'b * 'c -> unit = <fun>|}];;
+let handle_heartbeat _ (_,_) = ();;
+[%%expect ocaml {|val handle_heartbeat : 'a -> 'b * 'c -> unit = <fun>|}];;
+[@@@part "8"];;
+let handle_message server_state (common,details) =
+  match details with
+  | Log_entry m -> handle_log_entry server_state (common,m)
+  | Logon     m -> handle_logon     server_state (common,m)
+  | Heartbeat m -> handle_heartbeat server_state (common,m)
+;;
+[%%expect ocaml {|val handle_message : server_state -> Common.t * details -> unit = <fun>|}];;
+[@@@part "9"];;
+type details =
+  | Logon     of { user: string; credentials: string; }
+  | Heartbeat of { status_message: string; }
+  | Log_entry of { important: bool; message: string; }
+;;
+[%%expect ocaml {|
+type details =
+    Logon of { user : string; credentials : string; }
+  | Heartbeat of { status_message : string; }
+  | Log_entry of { important : bool; message : string; }
+|}];;
+[@@@part "10"];;
+let messages_for_user user (messages : (Common.t * details) list) =
+  let (user_messages,_) =
+    List.fold messages ~init:([],String.Set.empty)
+      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
+        match details with
+        | Logon m ->
+          if m.user = user then
+            (message::messages, Set.add user_sessions common.session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ ->
+          if Set.mem user_sessions common.session_id then
+            (message::messages, user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+;;
+[%%expect ocaml {|
+val messages_for_user :
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
+|}];;
+[@@@part "11"];;
+let get_logon_contents = function
+  | Logon m -> Some m
+  | _ -> None
+;;
+[%%expect{|
+Characters 54-55:
+Error: This form is not allowed as the type of the inlined record could escape.
+|}];;

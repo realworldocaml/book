@@ -1,0 +1,31 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+let c = Gc.get () ;;
+[%%expect ocaml {|
+val c : Gc.control =
+  {Core_kernel.Gc.Control.minor_heap_size = 262144;
+   major_heap_increment = 15; space_overhead = 80; verbose = 0;
+   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
+   window_size = 1}
+|}];;
+Gc.tune ~minor_heap_size:(262144 * 2) () ;;
+[%%expect ocaml {|- : unit = ()|}];;
+[@@@part "1"];;
+Gc.tune ~major_heap_increment:(1000448 * 4) () ;;
+[%%expect ocaml {|- : unit = ()|}];;
+[@@@part "2"];;
+Gc.major_slice 0 ;;
+[%%expect ocaml {|- : int = 0|}];;
+Gc.full_major () ;;
+[%%expect ocaml {|- : unit = ()|}];;
+[@@@part "3"];;
+Gc.tune ~max_overhead:0 () ;;
+[%%expect ocaml {|- : unit = ()|}];;

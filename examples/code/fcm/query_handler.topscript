@@ -1,0 +1,340 @@
+#use "topfind";;
+[%%expect ocaml {|- : unit = ()|};
+{|
+Findlib has been successfully loaded. Additional directives:
+  #require "package";;      to load a package
+  #list;;                   to list the available packages
+  #camlp4o;;                to load camlp4 (standard syntax)
+  #camlp4r;;                to load camlp4 (revised syntax)
+  #predicates "p,q,...";;   to set these predicates
+  Topfind.reset();;         to force that packages will be reloaded
+  #thread;;                 to enable threads
+
+|};
+ocaml {|- : unit = ()|}];;
+#thread;;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/ocaml/threads: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ocaml/threads/threads.cma: loaded
+|}];;
+#camlp4o;;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/ocaml/dynlink.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ocaml/camlp4: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ocaml/camlp4/camlp4o.cma: loaded
+|}];;
+#require "core";;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/base/caml: added to search path
+/Users/yminsky/.opam/4.04.2/lib/base/caml/caml.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/base/shadow_stdlib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/base/shadow_stdlib/shadow_stdlib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/sexplib/0: added to search path
+/Users/yminsky/.opam/4.04.2/lib/base: added to search path
+/Users/yminsky/.opam/4.04.2/lib/base/base.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/fieldslib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/fieldslib/fieldslib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_compare/runtime-lib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_compare/runtime-lib/ppx_compare_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/sexplib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/variantslib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/variantslib/variantslib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/bin_prot/shape: added to search path
+/Users/yminsky/.opam/4.04.2/lib/bin_prot/shape/bin_shape_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/bin_prot: added to search path
+/Users/yminsky/.opam/4.04.2/lib/bin_prot/bin_prot.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_hash/runtime-lib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_hash/runtime-lib/ppx_hash_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_inline_test/config: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_inline_test/config/inline_test_config.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_inline_test/runtime-lib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_inline_test/runtime-lib/ppx_inline_test_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/core_kernel/base_for_tests: added to search path
+/Users/yminsky/.opam/4.04.2/lib/core_kernel/base_for_tests/base_for_tests.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/jane-street-headers: added to search path
+/Users/yminsky/.opam/4.04.2/lib/jane-street-headers/jane_street_headers.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ocaml/nums.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/num-top: added to search path
+/Users/yminsky/.opam/4.04.2/lib/num-top/num_top.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/num: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_assert/runtime-lib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_assert/runtime-lib/ppx_assert_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_bench/runtime-lib: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_bench/runtime-lib/ppx_bench_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_expect/common: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_expect/common/expect_test_common.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_expect/config: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_expect/config/expect_test_config.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/ppx_expect/collector: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_expect/collector/expect_test_collector.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/stdio: added to search path
+/Users/yminsky/.opam/4.04.2/lib/stdio/stdio.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/typerep: added to search path
+/Users/yminsky/.opam/4.04.2/lib/typerep/typerep_lib.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/core_kernel: added to search path
+/Users/yminsky/.opam/4.04.2/lib/core_kernel/core_kernel.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/sexplib/unix: added to search path
+/Users/yminsky/.opam/4.04.2/lib/sexplib/unix/sexplib_unix.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/spawn: added to search path
+/Users/yminsky/.opam/4.04.2/lib/spawn/spawn.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/core: added to search path
+/Users/yminsky/.opam/4.04.2/lib/core/core.cma: loaded
+|}];;
+#require "ppx_jane";;
+[%%expect{|
+/Users/yminsky/.opam/4.04.2/lib/ppx_jane: added to search path
+/Users/yminsky/.opam/4.04.2/lib/ppx_jane/./ppx.exe --as-ppx: activated
+|}];;
+#install_printer Core.Sexp.pp_hum;;
+#install_printer Core.Error.pp;;
+open Core_kernel;;
+[@@@part "0.5"];;
+module type Query_handler = sig
+
+  (** Configuration for a query handler.  Note that this can be
+      converted to and from an s-expression *)
+  type config [@@deriving sexp]
+
+  (** The name of the query-handling service *)
+  val name : string
+
+  (** The state of the query handler *)
+  type t
+
+  (** Creates a new query handler from a config *)
+  val create : config -> t
+
+  (** Evaluate a given query, where both input and output are
+      s-expressions *)
+  val eval : t -> Sexp.t -> Sexp.t Or_error.t
+end;;
+[%%expect ocaml {|
+module type Query_handler =
+  sig
+    type config
+    val config_of_sexp : Sexp.t -> config
+    val sexp_of_config : config -> Sexp.t
+    val name : string
+    type t
+    val create : config -> t
+    val eval : t -> Sexp.t -> Sexp.t Or_error.t
+  end
+|}];;
+[@@@part "1"];;
+module type M = sig type t [@@deriving sexp] end;;
+[%%expect ocaml {|
+module type M =
+  sig type t val t_of_sexp : Sexp.t -> t val sexp_of_t : t -> Sexp.t end
+|}];;
+[@@@part "2"];;
+type u = { a: int; b: float } [@@deriving sexp];;
+[%%expect ocaml {|
+type u = { a : int; b : float; }
+val u_of_sexp : Sexp.t -> u = <fun>
+val sexp_of_u : u -> Sexp.t = <fun>
+|}];;
+sexp_of_u {a=3;b=7.};;
+[%%expect ocaml {|- : Sexp.t = ((a 3) (b 7))|}];;
+u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
+[%%expect ocaml {|- : u = {a = 43; b = 3.4}|}];;
+[@@@part "3"];;
+module Unique = struct
+  type config = int [@@deriving sexp]
+  type t = { mutable next_id: int }
+
+  let name = "unique"
+  let create start_at = { next_id = start_at }
+
+  let eval t sexp =
+    match Or_error.try_with (fun () -> unit_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok () ->
+      let response = Ok (Int.sexp_of_t t.next_id) in
+      t.next_id <- t.next_id + 1;
+      response
+end;;
+[%%expect ocaml {|
+module Unique :
+  sig
+    type config = int
+    val config_of_sexp : Sexp.t -> config
+    val sexp_of_config : config -> Sexp.t
+    type t = { mutable next_id : config; }
+    val name : string
+    val create : config -> t
+    val eval : t -> Sexp.t -> (Sexp.t, Error.t) result
+  end
+|}];;
+[@@@part "4"];;
+let unique = Unique.create 0;;
+[%%expect ocaml {|val unique : Unique.t = {Unique.next_id = 0}|}];;
+Unique.eval unique Sexp.unit;;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok 0|}];;
+Unique.eval unique Sexp.unit;;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok 1|}];;
+[@@@part "5"];;
+module List_dir = struct
+  type config = string [@@deriving sexp]
+  type t = { cwd: string }
+
+  (** [is_abs p] Returns true if [p] is an absolute path  *)
+  let is_abs p =
+    String.length p > 0 && p.[0] = '/'
+
+  let name = "ls"
+  let create cwd = { cwd }
+
+  let eval t sexp =
+    match Or_error.try_with (fun () -> string_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok dir ->
+      let dir =
+        if is_abs dir then dir
+        else Filename.concat t.cwd dir
+      in
+      Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+end;;
+[%%expect ocaml {|
+module List_dir :
+  sig
+    type config = string
+    val config_of_sexp : Sexp.t -> config
+    val sexp_of_config : config -> Sexp.t
+    type t = { cwd : config; }
+    val is_abs : config -> bool
+    val name : config
+    val create : config -> t
+    val eval : t -> Sexp.t -> (Sexp.t, Error.t) result
+  end
+|}];;
+[@@@part "6"];;
+let list_dir = List_dir.create "/var";;
+[%%expect ocaml {|val list_dir : List_dir.t = {List_dir.cwd = "/var"}|}];;
+List_dir.eval list_dir (sexp_of_string ".");;
+[%%expect ocaml {|
+- : (Sexp.t, Error.t) result =
+Ok
+ (agentx at audit backups db empty folders jabberd lib log ma mail msgs
+  netboot networkd root rpc run rwho spool tmp vm yp)
+|}];;
+List_dir.eval list_dir (sexp_of_string "yp");;
+[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (binding)|}];;
+[@@@part "7"];;
+module type Query_handler_instance = sig
+  module Query_handler : Query_handler
+  val this : Query_handler.t
+end;;
+[%%expect ocaml {|
+module type Query_handler_instance =
+  sig module Query_handler : Query_handler val this : Query_handler.t end
+|}];;
+[@@@part "8"];;
+let unique_instance =
+  (module struct
+    module Query_handler = Unique
+    let this = Unique.create 0
+  end : Query_handler_instance);;
+[%%expect ocaml {|val unique_instance : (module Query_handler_instance) = <module>|}];;
+[@@@part "9"];;
+let build_instance
+      (type a)
+      (module Q : Query_handler with type config = a)
+      config
+  =
+  (module struct
+    module Query_handler = Q
+    let this = Q.create config
+  end : Query_handler_instance)
+;;
+[%%expect ocaml {|
+val build_instance :
+  (module Query_handler with type config = 'a) ->
+  'a -> (module Query_handler_instance) = <fun>
+|}];;
+[@@@part "10"];;
+let unique_instance = build_instance (module Unique) 0;;
+[%%expect ocaml {|val unique_instance : (module Query_handler_instance) = <module>|}];;
+let list_dir_instance = build_instance (module List_dir)  "/var";;
+[%%expect ocaml {|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
+[@@@part "11"];;
+let build_dispatch_table handlers =
+  let table = String.Table.create () in
+  List.iter handlers
+    ~f:(fun ((module I : Query_handler_instance) as instance) ->
+      Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
+  table
+;;
+[%%expect ocaml {|
+val build_dispatch_table :
+  (module Query_handler_instance) list ->
+  (module Query_handler_instance) String.Table.t = <fun>
+|}];;
+[@@@part "12"];;
+let dispatch dispatch_table name_and_query =
+  match name_and_query with
+  | Sexp.List [Sexp.Atom name; query] ->
+    begin match Hashtbl.find dispatch_table name with
+    | None ->
+      Or_error.error "Could not find matching handler"
+        name String.sexp_of_t
+    | Some (module I : Query_handler_instance) ->
+      I.Query_handler.eval I.this query
+    end
+  | _ ->
+    Or_error.error_string "malformed query"
+;;
+[%%expect ocaml {|
+val dispatch :
+  (string, (module Query_handler_instance)) Hashtbl.t ->
+  Sexp.t -> Sexp.t Or_error.t = <fun>
+|}];;
+[@@@part "13"];;
+let rec cli dispatch_table =
+  printf ">>> %!";
+  let result =
+    match In_channel.input_line stdin with
+    | None -> `Stop
+    | Some line ->
+      match Or_error.try_with (fun () -> Sexp.of_string line) with
+      | Error e -> `Continue (Error.to_string_hum e)
+      | Ok (Sexp.Atom "quit") -> `Stop
+      | Ok query ->
+        begin match dispatch dispatch_table query with
+        | Error e -> `Continue (Error.to_string_hum e)
+        | Ok s    -> `Continue (Sexp.to_string_hum s)
+        end;
+  in
+  match result with
+  | `Stop -> ()
+  | `Continue msg ->
+    printf "%s\n%!" msg;
+    cli dispatch_table
+;;
+[%%expect{|
+Characters 95-100:
+Warning 3: deprecated: Core_kernel.stdin
+[since 2016-04] Use [In_channel.stdin]
+|};
+ocaml {|val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>|}];;
+[@@@part "14"];;
+type query_handler_instance = { name : string
+                              ; eval : Sexp.t -> Sexp.t Or_error.t
+                              };;
+[%%expect ocaml {|
+type query_handler_instance = {
+  name : string;
+  eval : Sexp.t -> Sexp.t Or_error.t;
+}
+|}];;
+type query_handler = Sexp.t -> query_handler_instance
+;;
+[%%expect ocaml {|type query_handler = Sexp.t -> query_handler_instance|}];;
+[@@@part "15"];;
+let unique_handler config_sexp =
+  let config = Unique.config_of_sexp config_sexp in
+  let unique = Unique.create config in
+  { name = Unique.name
+  ; eval = (fun config -> Unique.eval unique config)
+  }
+;;
+[%%expect ocaml {|val unique_handler : Sexp.t -> query_handler_instance = <fun>|}];;

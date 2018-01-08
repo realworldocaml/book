@@ -1,0 +1,6 @@
+(executable
+ ((name freq)
+  (libraries (core_kernel))
+  ))
+
+(jbuild_version 1)

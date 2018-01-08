@@ -1,0 +1,314 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core;;
+[@@@part "17"];;
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      important: bool;
+      message: string;
+    }
+end
+module Heartbeat = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      status_message: string;
+    }
+end
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+      credentials: string;
+    }
+end
+;;
+[%%expect ocaml {|
+module Log_entry :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      important : bool;
+      message : string;
+    }
+  end
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
+|}];;
+[@@@part "18"];;
+let create_log_entry ~session_id ~important message =
+  { Log_entry.time = Time_ns.now (); 
+    Log_entry.session_id; 
+    Log_entry.important; 
+    Log_entry.message
+  }
+;;
+[%%expect ocaml {|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "19"];;
+let create_log_entry ~session_id ~important message =
+  { Log_entry.
+    time = Time_ns.now (); session_id; important; message }
+;;
+[%%expect ocaml {|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "19.1"];;
+let create_log_entry ~session_id ~important message : Log_entry.t =
+  { time = Time_ns.now (); session_id; important; message }
+;;
+[%%expect{|
+Characters 70-127:
+Warning 40: this record of type Log_entry.t contains fields that are 
+not visible in the current scope: time session_id important message.
+They will not be selected if the type becomes unknown.
+|};
+ocaml {|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "19.2"];;
+#warnings "-40";;
+let create_log_entry ~session_id ~important message : Log_entry.t =
+  { time = Time_ns.now (); session_id; important; message }
+;;
+[%%expect ocaml {|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+|}];;
+[@@@part "20"];;
+let message_to_string { Log_entry.important; message; _ } =
+  if important then String.uppercase message else message
+;;
+[%%expect ocaml {|val message_to_string : Log_entry.t -> string = <fun>|}];;
+[@@@part "21"];;
+let is_important t = t.Log_entry.important;;
+[%%expect ocaml {|val is_important : Log_entry.t -> bool = <fun>|}];;
+[@@@part "21.1"];;
+let create_log_entry ~session_id ~important message : Log_entry.t =
+  { time = Time_ns.now (); session_id; important; message }
+let message_to_string ({ important; message; _ } : Log_entry.t) =
+  if important then String.uppercase message else message
+let is_important (t:Log_entry.t) = t.important ;;
+[%%expect ocaml {|
+val create_log_entry :
+  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+val message_to_string : Log_entry.t -> string = <fun>
+val is_important : Log_entry.t -> bool = <fun>
+|}];;
+[@@@part "22"];;
+type client_info =
+  { addr: Unix.Inet_addr.t;
+    port: int;
+    user: string;
+    credentials: string;
+    last_heartbeat_time: Time_ns.t;
+  };;
+[%%expect ocaml {|
+type client_info = {
+  addr : Unix.inet_addr;
+  port : int;
+  user : string;
+  credentials : string;
+  last_heartbeat_time : Time_ns.t;
+}
+|}];;
+let register_heartbeat t hb =
+  { addr = t.addr;
+    port = t.port;
+    user = t.user;
+    credentials = t.credentials;
+    last_heartbeat_time = hb.Heartbeat.time;
+  };;
+[%%expect ocaml {|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
+[@@@part "23"];;
+let register_heartbeat t hb =
+  { t with last_heartbeat_time = hb.Heartbeat.time };;
+[%%expect ocaml {|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
+[@@@part "24"];;
+type client_info =
+  { addr: Unix.Inet_addr.t;
+    port: int;
+    user: string;
+    credentials: string;
+    last_heartbeat_time: Time_ns.t;
+    last_heartbeat_status: string;
+  };;
+[%%expect ocaml {|
+type client_info = {
+  addr : Unix.inet_addr;
+  port : int;
+  user : string;
+  credentials : string;
+  last_heartbeat_time : Time_ns.t;
+  last_heartbeat_status : string;
+}
+|}];;
+[@@@part "25"];;
+let register_heartbeat t hb =
+  { t with last_heartbeat_time   = hb.Heartbeat.time;
+           last_heartbeat_status = hb.Heartbeat.status_message;
+  };;
+[%%expect ocaml {|val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>|}];;
+[@@@part "26"];;
+type client_info =
+  { addr: Unix.Inet_addr.t;
+    port: int;
+    user: string;
+    credentials: string;
+    mutable last_heartbeat_time: Time_ns.t;
+    mutable last_heartbeat_status: string;
+  };;
+[%%expect ocaml {|
+type client_info = {
+  addr : Unix.inet_addr;
+  port : int;
+  user : string;
+  credentials : string;
+  mutable last_heartbeat_time : Time_ns.t;
+  mutable last_heartbeat_status : string;
+}
+|}];;
+[@@@part "27"];;
+let register_heartbeat t hb =
+  t.last_heartbeat_time   <- hb.Heartbeat.time;
+  t.last_heartbeat_status <- hb.Heartbeat.status_message
+;;
+[%%expect ocaml {|val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>|}];;
+[@@@part "28"];;
+let get_users logons =
+  List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
+[%%expect ocaml {|val get_users : Logon.t list -> string list = <fun>|}];;
+[@@@part "29"];;
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+     credentials: string;
+    }
+  [@@deriving fields]
+end;;
+[%%expect ocaml {|
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+    val credentials : t -> string
+    val user : t -> string
+    val time : t -> Time_ns.t
+    val session_id : t -> string
+    module Fields :
+      sig
+        val names : string list
+        val credentials :
+          ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+        val user :
+          ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+        val time :
+          ([< `Read | `Set_and_create ], t, Time_ns.t) Field.t_with_perm
+...
+      end
+  end
+|}];;
+[@@@part "30"];;
+let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
+[%%expect ocaml {|val get_users : Logon.t list -> string list = <fun>|}];;
+[@@@part "31"];;
+Field.get Logon.Fields.user;;
+[%%expect ocaml {|- : Logon.t -> string = <fun>|}];;
+[@@@part "32"];;
+Field.get;;
+[%%expect ocaml {|- : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>|}];;
+[@@@part "33"];;
+let show_field field to_string record =
+  let name = Field.name field in
+  let field_string = to_string (Field.get field record) in
+  name ^ ": " ^ field_string
+;;
+[%%expect ocaml {|
+val show_field :
+  ('a, 'b, 'c) Field.t_with_perm -> ('c -> string) -> 'b -> string = <fun>
+|}];;
+[@@@part "34"];;
+let logon = { Logon.
+              session_id = "26685";
+              time = Time_ns.of_string "2017-07-21 10:11:45 EST";
+              user = "yminsky";
+              credentials = "Xy2d9W"; }
+;;
+[%%expect ocaml {|
+val logon : Logon.t =
+  {Logon.session_id = "26685"; time = 2017-07-21 11:11:45.000000-04:00;
+   user = "yminsky"; credentials = "Xy2d9W"}
+|}];;
+show_field Logon.Fields.user Fn.id logon;;
+[%%expect ocaml {|- : string = "user: yminsky"|}];;
+show_field Logon.Fields.time Time_ns.to_string logon;;
+[%%expect ocaml {|...|}];;
+[@@@part "35"];;
+Logon.Fields.iter;;
+[%%expect ocaml {|
+- : session_id:(([< `Read | `Set_and_create ], Logon.t, string)
+                Field.t_with_perm -> unit) ->
+    time:(([< `Read | `Set_and_create ], Logon.t, Time_ns.t)
+          Field.t_with_perm -> unit) ->
+    user:(([< `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm ->
+          unit) ->
+    credentials:(([< `Read | `Set_and_create ], Logon.t, string)
+                 Field.t_with_perm -> unit) ->
+    unit
+= <fun>
+|}];;
+[@@@part "36"];;
+let print_logon logon =
+  let print to_string field =
+    printf "%s\n" (show_field field to_string logon)
+  in
+  Logon.Fields.iter
+    ~session_id:(print Fn.id)
+    ~time:(print Time_ns.to_string)
+    ~user:(print Fn.id)
+    ~credentials:(print Fn.id)
+;;
+[%%expect ocaml {|val print_logon : Logon.t -> unit = <fun>|}];;
+print_logon logon;;
+[%%expect{|
+session_id: 26685
+...
+user: yminsky
+credentials: Xy2d9W
+|};
+ocaml {|- : unit = ()|}];;

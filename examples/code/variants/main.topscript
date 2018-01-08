@@ -1,0 +1,244 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Core_kernel;;
+type basic_color =
+  | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
+[%%expect ocaml {|
+type basic_color =
+    Black
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+  | White
+|}];;
+Cyan ;;
+[%%expect ocaml {|- : basic_color = Cyan|}];;
+[Blue; Magenta; Red] ;;
+[%%expect ocaml {|- : basic_color list = [Blue; Magenta; Red]|}];;
+[@@@part "1"];;
+let basic_color_to_int = function
+  | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
+  | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
+[%%expect ocaml {|val basic_color_to_int : basic_color -> int = <fun>|}];;
+List.map ~f:basic_color_to_int [Blue;Red];;
+[%%expect ocaml {|- : int list = [4; 1]|}];;
+[@@@part "2"];;
+let color_by_number number text =
+  sprintf "\027[38;5;%dm%s\027[0m" number text;;
+[%%expect ocaml {|val color_by_number : int -> string -> string = <fun>|}];;
+let blue = color_by_number (basic_color_to_int Blue) "Blue";;
+[%%expect ocaml {|val blue : string = "\027[38;5;4mBlue\027[0m"|}];;
+printf "Hello %s World!\n" blue;;
+[%%expect{|Hello [38;5;4mBlue[0m World!|};
+ocaml {|- : unit = ()|}];;
+[@@@part "3"];;
+type weight = Regular | Bold;;
+[%%expect ocaml {|type weight = Regular | Bold|}];;
+type color =
+  | Basic of basic_color * weight (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color cube *)
+  | Gray  of int                   (* 24 grayscale levels *)
+;;
+[%%expect ocaml {|
+type color =
+    Basic of basic_color * weight
+  | RGB of int * int * int
+  | Gray of int
+|}];;
+[RGB (250,70,70); Basic (Green, Regular)];;
+[%%expect ocaml {|- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]|}];;
+[@@@part "4"];;
+let color_to_int = function
+  | Basic (basic_color,weight) ->
+    let base = match weight with Bold -> 8 | Regular -> 0 in
+    base + basic_color_to_int basic_color
+  | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+  | Gray i -> 232 + i ;;
+[%%expect ocaml {|val color_to_int : color -> int = <fun>|}];;
+[@@@part "5"];;
+let color_print color s =
+  printf "%s\n" (color_by_number (color_to_int color) s);;
+[%%expect ocaml {|val color_print : color -> string -> unit = <fun>|}];;
+color_print (Basic (Red,Bold)) "A bold red!";;
+[%%expect{|[38;5;9mA bold red![0m|};
+ocaml {|- : unit = ()|}];;
+color_print (Gray 4) "A muted gray...";;
+[%%expect{|[38;5;236mA muted gray...[0m|};
+ocaml {|- : unit = ()|}];;
+[@@@part "6"];;
+let three = `Int 3;;
+[%%expect ocaml {|val three : [> `Int of int ] = `Int 3|}];;
+let four = `Float 4.;;
+[%%expect ocaml {|val four : [> `Float of float ] = `Float 4.|}];;
+let nan = `Not_a_number;;
+[%%expect ocaml {|val nan : [> `Not_a_number ] = `Not_a_number|}];;
+[three; four; nan];;
+[%%expect ocaml {|
+- : [> `Float of float | `Int of int | `Not_a_number ] list =
+[`Int 3; `Float 4.; `Not_a_number]
+|}];;
+[@@@part "7"];;
+let five = `Int "five";;
+[%%expect ocaml {|val five : [> `Int of string ] = `Int "five"|}];;
+[three; four; five];;
+[%%expect{|
+Characters 14-18:
+Error: This expression has type [> `Int of string ]
+       but an expression was expected of type
+         [> `Float of float | `Int of int ]
+       Types for tag `Int are incompatible
+|}];;
+[@@@part "8"];;
+let is_positive = function
+  | `Int   x -> x > 0
+  | `Float x -> x > 0.
+;;
+[%%expect ocaml {|val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>|}];;
+[@@@part "9"];;
+let exact = List.filter ~f:is_positive [three;four];;
+[%%expect ocaml {|val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]|}];;
+[@@@part "10"];;
+let is_positive = function
+  | `Int   x -> Ok (x > 0)
+  | `Float x -> Ok (x > 0.)
+  | `Not_a_number -> Error "not a number";;
+[%%expect ocaml {|
+val is_positive :
+  [< `Float of float | `Int of int | `Not_a_number ] -> (bool, string) result =
+  <fun>
+|}];;
+List.filter [three; four] ~f:(fun x ->
+  match is_positive x with Error _ -> false | Ok b -> b);;
+[%%expect ocaml {|
+- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
+[`Int 3; `Float 4.]
+|}];;
+[@@@part "11"];;
+type extended_color =
+  | Basic of basic_color * weight  (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color space *)
+  | Gray  of int                   (* 24 grayscale levels *)
+  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
+;;
+[%%expect ocaml {|
+type extended_color =
+    Basic of basic_color * weight
+  | RGB of int * int * int
+  | Gray of int
+  | RGBA of int * int * int * int
+|}];;
+[@@@part "12"];;
+let extended_color_to_int = function
+  | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+  | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
+;;
+[%%expect{|
+Characters 150-155:
+Error: This expression has type extended_color
+       but an expression was expected of type color
+|}];;
+[@@@part "13"];;
+let basic_color_to_int = function
+  | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
+  | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
+;;
+[%%expect ocaml {|
+val basic_color_to_int :
+  [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
+  int = <fun>
+|}];;
+let color_to_int = function
+  | `Basic (basic_color,weight) ->
+    let base = match weight with `Bold -> 8 | `Regular -> 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
+  | `Gray i -> 232 + i
+;;
+[%%expect ocaml {|
+val color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [< `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int ] ->
+  int = <fun>
+|}];;
+[@@@part "14"];;
+let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+;;
+[%%expect ocaml {|
+val extended_color_to_int :
+  [< `Basic of
+       [< `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [< `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int
+   | `RGBA of int * int * int * int ] ->
+  int = <fun>
+|}];;
+[@@@part "15"];;
+let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
+  | color -> color_to_int color
+;;
+[%%expect{|
+Characters 121-126:
+Error: This expression has type [> `RGBA of int * int * int * int ]
+       but an expression was expected of type
+         [< `Basic of
+              [< `Black
+               | `Blue
+               | `Cyan
+               | `Green
+               | `Magenta
+               | `Red
+               | `White
+               | `Yellow ] *
+              [< `Bold | `Regular ]
+          | `Gray of int
+          | `RGB of int * int * int ]
+       The second variant type does not allow tag(s) `RGBA
+|}];;
+[@@@part "16"];;
+let is_positive_permissive = function
+  | `Int   x -> Ok (x > 0)
+  | `Float x -> Ok (x > 0.)
+  | _ -> Error "Unknown number type"
+;;
+[%%expect ocaml {|
+val is_positive_permissive :
+  [> `Float of float | `Int of int ] -> (bool, string) result = <fun>
+|}];;
+is_positive_permissive (`Int 0);;
+[%%expect ocaml {|- : (bool, string) result = Ok false|}];;
+is_positive_permissive (`Ratio (3,4));;
+[%%expect ocaml {|- : (bool, string) result = Error "Unknown number type"|}];;
+[@@@part "17"];;
+is_positive_permissive (`Floot 3.5);;
+[%%expect ocaml {|- : (bool, string) result = Error "Unknown number type"|}];;

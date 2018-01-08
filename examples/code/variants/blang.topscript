@@ -1,0 +1,130 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type 'a expr =
+  | Base  of 'a
+  | Const of bool
+  | And   of 'a expr list
+  | Or    of 'a expr list
+  | Not   of 'a expr
+;;
+[%%expect ocaml {|
+type 'a expr =
+    Base of 'a
+  | Const of bool
+  | And of 'a expr list
+  | Or of 'a expr list
+  | Not of 'a expr
+|}];;
+[@@@part "1"];;
+type mail_field = To | From | CC | Date | Subject;;
+[%%expect ocaml {|type mail_field = To | From | CC | Date | Subject|}];;
+type mail_predicate = { field: mail_field;
+                        contains: string }
+;;
+[%%expect ocaml {|type mail_predicate = { field : mail_field; contains : string; }|}];;
+[@@@part "2"];;
+let test field contains = Base { field; contains };;
+[%%expect ocaml {|val test : mail_field -> string -> mail_predicate expr = <fun>|}];;
+And [ Or [ test To "doligez"; test CC "doligez" ];
+      test Subject "runtime";
+    ]
+;;
+[%%expect ocaml {|
+- : mail_predicate expr =
+And
+ [Or
+   [Base {field = To; contains = "doligez"};
+    Base {field = CC; contains = "doligez"}];
+  Base {field = Subject; contains = "runtime"}]
+|}];;
+[@@@part "3"];;
+let rec eval expr base_eval =
+  (* a shortcut, so we don't need to repeatedly pass [base_eval]
+     explicitly to [eval] *)
+  let eval' expr = eval expr base_eval in
+  match expr with
+  | Base  base  -> base_eval base
+  | Const bool  -> bool
+  | And   exprs -> List.for_all exprs ~f:eval'
+  | Or    exprs -> List.exists  exprs ~f:eval'
+  | Not   expr  -> not (eval' expr)
+;;
+[%%expect ocaml {|val eval : 'a expr -> ('a -> bool) -> bool = <fun>|}];;
+[@@@part "4"];;
+let and_ l =
+  if List.mem l (Const false) then Const false
+  else
+    match List.filter l ~f:((<>) (Const true)) with
+    | [] -> Const true
+    | [ x ] -> x
+    | l -> And l
+;;
+[%%expect{|
+Characters 18-42:
+Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
+       but an expression was expected of type bool
+|}];;
+let or_ l =
+  if List.mem l (Const true) then Const true
+  else
+    match List.filter l ~f:((<>) (Const false)) with
+    | [] -> Const false
+    | [x] -> x
+    | l -> Or l
+;;
+[%%expect{|
+Characters 17-40:
+Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
+       but an expression was expected of type bool
+|}];;
+let not_ = function
+  | Const b -> Const (not b)
+  | e -> Not e
+;;
+[%%expect ocaml {|val not_ : 'a expr -> 'a expr = <fun>|}];;
+[@@@part "5"];;
+let rec simplify = function
+  | Base _ | Const _ as x -> x
+  | And l -> and_ (List.map ~f:simplify l)
+  | Or l  -> or_  (List.map ~f:simplify l)
+  | Not e -> not_ (simplify e)
+;;
+[%%expect{|
+Characters 72-76:
+Error: Unbound value and_
+|}];;
+[@@@part "6"];;
+simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                     Base "it's raining"]));;
+[%%expect{|
+Characters 0-8:
+Error: Unbound value simplify
+|}];;
+[@@@part "7"];;
+simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                     Not (Not (Base "it's raining"))]));;
+[%%expect{|
+Characters 0-8:
+Error: Unbound value simplify
+|}];;
+[@@@part "8"];;
+let not_ = function
+  | Const b -> Const (not b)
+  | (Base _ | And _ | Or _ | Not _) as e -> Not e
+;;
+[%%expect ocaml {|val not_ : 'a expr -> 'a expr = <fun>|}];;
+[@@@part "9"];;
+let not_ = function
+  | Const b -> Const (not b)
+  | Not e -> e
+  | (Base _ | And _ | Or _ ) as e -> Not e
+;;
+[%%expect ocaml {|val not_ : 'a expr -> 'a expr = <fun>|}];;

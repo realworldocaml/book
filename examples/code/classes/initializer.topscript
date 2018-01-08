@@ -1,0 +1,22 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+class obj x = 
+  let () = printf "Creating obj %d\n" x in
+  object 
+    val field = printf "Initializing field\n"; x
+  end ;;
+[%%expect ocaml {|class obj : int -> object val field : int end|}];;
+let o = new obj 3 ;;
+[%%expect{|
+Creating obj 3
+Initializing field
+|};
+ocaml {|val o : obj = <obj>|}];;

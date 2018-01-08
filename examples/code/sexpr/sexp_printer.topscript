@@ -1,0 +1,14 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;
+[%%expect ocaml {|- : string = "(1 2)"|}];;
+Sexp.of_string ("(1 2 (3 4))") ;;
+[%%expect ocaml {|- : Sexp.t = (1 2 (3 4))|}];;

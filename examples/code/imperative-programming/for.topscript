@@ -1,0 +1,49 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+for i = 0 to 3 do printf "i = %d\n" i done;;
+[%%expect{|
+i = 0
+i = 1
+i = 2
+i = 3
+|};
+ocaml {|- : unit = ()|}];;
+[@@@part "2"];;
+for i = 3 downto 0 do printf "i = %d\n" i done;;
+[%%expect{|
+i = 3
+i = 2
+i = 1
+i = 0
+|};
+ocaml {|- : unit = ()|}];;
+[@@@part "3"];;
+let rev_inplace ar =
+  let i = ref 0 in
+  let j = ref (Array.length ar - 1) in
+  (* terminate when the upper and lower indices meet *)
+  while !i < !j do
+    (* swap the two elements *)
+    let tmp = ar.(!i) in
+    ar.(!i) <- ar.(!j);
+    ar.(!j) <- tmp;
+    (* bump the indices *)
+    incr i;
+    decr j
+  done
+;;
+[%%expect ocaml {|val rev_inplace : 'a array -> unit = <fun>|}];;
+let nums = [|1;2;3;4;5|];;
+[%%expect ocaml {|val nums : int array = [|1; 2; 3; 4; 5|]|}];;
+rev_inplace nums;;
+[%%expect ocaml {|- : unit = ()|}];;
+nums;;
+[%%expect ocaml {|- : int array = [|5; 4; 3; 2; 1|]|}];;

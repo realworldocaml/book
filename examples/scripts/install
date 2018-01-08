@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Designed for the Travis CI build environment. See .travis.yml
+
+export OPAMYES=1
+export OPAMJOBS=2
+
+if [ -d $HOME/.opam ]; then
+  # update the build cache
+  opam update -u
+  opam config exec -- ocaml --version
+else
+  opam init -a --switch=4.04.2
+  opam depext -i async core_bench core_extended ctypes ctypes-foreign ppx_deriving
+fi

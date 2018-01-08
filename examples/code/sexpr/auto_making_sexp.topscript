@@ -1,0 +1,27 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "0.5"];;
+type t = { foo: int; bar: float } [@@deriving sexp] ;;
+[%%expect ocaml {|
+type t = { foo : int; bar : float; }
+val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
+|}];;
+t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
+[%%expect ocaml {|- : t = {foo = 3; bar = 35.}|}];;
+[@@@part "1"];;
+exception Bad_message of string list ;;
+[%%expect ocaml {|exception Bad_message of string list|}];;
+Exn.to_string (Bad_message ["1";"2";"3"]) ;;
+[%%expect ocaml {|- : string = "(\"Bad_message(_)\")"|}];;
+exception Good_message of string list [@@deriving sexp];;
+[%%expect ocaml {|exception Good_message of string list|}];;
+Exn.to_string (Good_message ["1";"2";"3"]) ;;
+[%%expect ocaml {|- : string = "(//toplevel//.Good_message (1 2 3))"|}];;

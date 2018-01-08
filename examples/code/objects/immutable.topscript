@@ -1,0 +1,39 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "1"];;
+let imm_stack init = object
+  val v = init
+
+  method pop =
+    match v with
+    | hd :: tl -> Some (hd, {< v = tl >})
+    | [] -> None 
+
+  method push hd = 
+    {< v = hd :: v >}
+end ;;
+[%%expect ocaml {|
+val imm_stack :
+  'a list -> (< pop : ('a * 'b) option; push : 'a -> 'b > as 'b) = <fun>
+|}];;
+[@@@part "2"];;
+let s = imm_stack [3; 2; 1] ;;
+[%%expect ocaml {|val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>|}];;
+let t = s#push 4 ;;
+[%%expect ocaml {|val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>|}];;
+s#pop ;;
+[%%expect ocaml {|
+- : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
+Some (3, <obj>)
+|}];;
+t#pop ;;
+[%%expect ocaml {|
+- : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
+Some (4, <obj>)
+|}];;

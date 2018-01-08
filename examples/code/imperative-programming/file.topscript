@@ -1,0 +1,39 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#camlp4o;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+open Core_kernel;;
+[@@@part "1"];;
+let create_number_file filename numbers =
+  let outc = Out_channel.create filename in
+  List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
+  Out_channel.close outc
+;;
+[%%expect ocaml {|val create_number_file : string -> int list -> unit = <fun>|}];;
+let sum_file filename =
+  let file = In_channel.create filename in
+  let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
+  let sum = List.fold ~init:0 ~f:(+) numbers in
+  In_channel.close file;
+  sum
+;;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
+create_number_file "numbers.txt" [1;2;3;4;5];;
+[%%expect ocaml {|- : unit = ()|}];;
+sum_file "numbers.txt";;
+[%%expect ocaml {|- : int = 15|}];;
+[@@@part "2"];;
+sum_file "/etc/hosts";;
+[%%expect{|Exception: (Failure "Int.of_string: \"##\"").|}];;
+[@@@part "3"];;
+for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
+[%%expect ocaml {|- : unit = ()|}];;
+sum_file "numbers.txt";;
+[%%expect.nondeterministic{|
+File "file.topscript", line 1:
+Error: I/O error: /var/folders/z3/7h_5sgf933952482gktqg_gh0000gn/T/camlppxc637c7: Too many open files
+|}];;

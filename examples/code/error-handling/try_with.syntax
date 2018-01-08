@@ -1,0 +1,4 @@
+try <expr> with
+| <pat1> -> <expr1>
+| <pat2> -> <expr2>
+...

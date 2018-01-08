@@ -1,0 +1,6 @@
+(jbuild_version 1)
+
+(executables
+ ((names (sum))
+  (libraries (core_kernel))
+  ))
