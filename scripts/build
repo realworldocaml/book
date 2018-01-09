@@ -1,8 +1,11 @@
 #!/bin/sh
 # Designed for the Travis CI build environment. See .travis.yml
 
+set -x
 cd $TRAVIS_BUILD_DIR
+echo Build started at `date`
 docker build -t rwo .
+echo Build completed at `date`
 docker run --name temp-container rwo /bin/true
 docker cp temp-container:/home/opam/src/site $TRAVIS_BUILD_DIR/site
 find $TRAVIS_BUILD_DIR/site
