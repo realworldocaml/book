@@ -5,8 +5,8 @@ maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/realworldocaml/book"
 license: "ISC"
 authors: ["Yaron Minsky" "Anil Madhavapeddy" "Jason Hickey"]
-dev-repo: "https://github.com/RealWorldOCaml/scripts.git"
-bug-reports: "https://github.com/RealWorldOCaml/scripts/issues"
+dev-repo: "https://github.com/realworldocaml/book.git"
+bug-reports: "https://github.com/realworldocaml/book/issues"
 
 build: [ "jbuilder" "build" ]
 
@@ -21,8 +21,20 @@ depends: [
   "ocaml-topexpect"
   "cohttp-async"
   "ocamlnet"
+  # Required for code blocks within book.
+  "core_bench"
+  "mtime"
+  "yojson"
+  "astring"
+  "cryptokit"
+  "ocp-index"
+  "atd"
+  "atdgen"
+  "ctypes"
+  "ctypes-foreign"
+  "textwrap"
+  "uri"
 ]
-
 depexts: [
  [["ubuntu"] ["tzdata"]]
  [["debian"] ["tzdata"]]
