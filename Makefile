@@ -63,6 +63,7 @@ endif
 ROOT = ./
 
 site/%.html: book/%.html
+	mkdir -p site
 ifdef PYGMENTIZE
 	$(APP) build chapter -pygmentize -code examples -o site/ -repo-root $(ROOT) $<
 else
