@@ -16,6 +16,4 @@ bin: [
 ]
 doc: [
   "_build/install/default/doc/ocaml-topexpect/README.md"
-  "_build/install/default/doc/ocaml-topexpect/LICENSE.md"
-  "_build/install/default/doc/ocaml-topexpect/CHANGES.md"
 ]
