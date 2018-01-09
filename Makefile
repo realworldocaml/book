@@ -62,6 +62,10 @@ endif
 
 ROOT = ./
 
+code:
+	jbuilder build
+	env RWO_BUILD=$(PWD)/_build/install/default/bin/rwo-build TOPEXPECT_BIN=$(PWD)/_build/install/default/bin/ocaml-topexpect make -C examples
+
 site/%.html: book/%.html
 	mkdir -p site
 ifdef PYGMENTIZE
