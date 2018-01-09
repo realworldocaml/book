@@ -1,0 +1,21 @@
+lib: [
+  "_build/install/default/lib/ocaml-topexpect/META" {"META"}
+  "_build/install/default/lib/ocaml-topexpect/opam" {"opam"}
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cmi"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cmx"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cmt"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cmti"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.mli"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cma"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cmxa"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.a"
+  "_build/install/default/lib/ocaml-topexpect/ocaml_topexpect.cmxs"
+]
+bin: [
+  "_build/install/default/bin/ocaml-topexpect" {"ocaml-topexpect"}
+]
+doc: [
+  "_build/install/default/doc/ocaml-topexpect/README.md"
+  "_build/install/default/doc/ocaml-topexpect/LICENSE.md"
+  "_build/install/default/doc/ocaml-topexpect/CHANGES.md"
+]
