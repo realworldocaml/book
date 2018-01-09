@@ -104,5 +104,6 @@ clean:
 	rm -f .depend
 	rm -rf site
 	rm -rf _build
+	make -C examples clean
 
 -include .depend
