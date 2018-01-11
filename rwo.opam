@@ -18,7 +18,6 @@ depends: [
   "jbuilder" {build & >="1.0+beta9"}
   "toplevel_expect_test"
   "patdiff"
-  "ocaml-topexpect"
   "cohttp-async"
   "ocamlnet"
   # Required for code blocks within book.
