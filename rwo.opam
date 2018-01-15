@@ -14,6 +14,7 @@ depends: [
   "core" {>="v0.10.0"}
   "async" {>="v0.10.0"}
   "ppx_sexp_conv" {build & >="v0.9.0"}
+  "ppx_deriving"
   "cohttp" {>="0.99.0"}
   "jbuilder" {build & >="1.0+beta9"}
   "toplevel_expect_test"
