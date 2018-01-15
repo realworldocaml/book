@@ -9,5 +9,6 @@ COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src
 WORKDIR /home/opam/src
 RUN opam pin add -n rwo .
+RUN opam depext -y rwo
 RUN opam install --deps-only rwo -j2
 RUN opam config exec -- make PYGMENTIZE=1 -j2
