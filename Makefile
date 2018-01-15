@@ -37,8 +37,8 @@ HTML_FILES := $(HTML_CHAPTER_FILES) index.html faqs.html toc.html install.html
 # Compute chapters dependencies
 
 .depend: $(foreach file,$(HTML_CHAPTER_FILES),book/$(file))
-	$(APP_DEPS) deps site -repo-root ./ > $@
 	jbuilder build
+	$(APP_DEPS) deps site -repo-root ./ > $@
 	mkdir -p site
 
 ################################################################################
@@ -60,11 +60,16 @@ endif
 ################################################################################
 # HTML Book
 
+RWO_BUILD := $(PWD)/_build/install/default/bin/rwo-build
+TOPEXPECT_BIN := $(PWD)/_build/install/default/bin/ocaml-topexpect
+export RWO_BUILD
+export TOPEXPECT_BIN
+
 ROOT = ./
 
 code:
 	jbuilder build
-	env RWO_BUILD=$(PWD)/_build/install/default/bin/rwo-build TOPEXPECT_BIN=$(PWD)/_build/install/default/bin/ocaml-topexpect make -C examples
+	make -C examples
 
 site/%.html: book/%.html
 	mkdir -p site
