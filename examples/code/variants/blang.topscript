@@ -60,31 +60,24 @@ let rec eval expr base_eval =
 [%%expect ocaml {|val eval : 'a expr -> ('a -> bool) -> bool = <fun>|}];;
 [@@@part "4"];;
 let and_ l =
-  if List.mem l (Const false) then Const false
+  if List.exists l ~f:(function Const false -> true | _ -> false) 
+  then Const false
   else
-    match List.filter l ~f:((<>) (Const true)) with
+    match List.filter l ~f:(function Const true -> false | _ -> true) with
     | [] -> Const true
     | [ x ] -> x
     | l -> And l
 ;;
-[%%expect{|
-Characters 18-42:
-Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
-       but an expression was expected of type bool
-|}];;
+[%%expect ocaml {|val and_ : 'a expr list -> 'a expr = <fun>|}];;
 let or_ l =
-  if List.mem l (Const true) then Const true
+  if List.exists l ~f:(function Const true -> true | _ -> false) then Const true
   else
-    match List.filter l ~f:((<>) (Const false)) with
+    match List.filter l ~f:(function Const false -> false | _ -> true) with
     | [] -> Const false
     | [x] -> x
     | l -> Or l
 ;;
-[%%expect{|
-Characters 17-40:
-Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
-       but an expression was expected of type bool
-|}];;
+[%%expect ocaml {|val or_ : 'a expr list -> 'a expr = <fun>|}];;
 let not_ = function
   | Const b -> Const (not b)
   | e -> Not e
@@ -97,24 +90,15 @@ let rec simplify = function
   | Or l  -> or_  (List.map ~f:simplify l)
   | Not e -> not_ (simplify e)
 ;;
-[%%expect{|
-Characters 72-76:
-Error: Unbound value and_
-|}];;
+[%%expect ocaml {|val simplify : 'a expr -> 'a expr = <fun>|}];;
 [@@@part "6"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Base "it's raining"]));;
-[%%expect{|
-Characters 0-8:
-Error: Unbound value simplify
-|}];;
+[%%expect ocaml {|- : string expr = Not (Base "it's raining")|}];;
 [@@@part "7"];;
 simplify (Not (And [ Or [Base "it's snowing"; Const true];
                      Not (Not (Base "it's raining"))]));;
-[%%expect{|
-Characters 0-8:
-Error: Unbound value simplify
-|}];;
+[%%expect ocaml {|- : string expr = Not (Not (Not (Base "it's raining")))|}];;
 [@@@part "8"];;
 let not_ = function
   | Const b -> Const (not b)
