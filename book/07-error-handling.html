@@ -663,15 +663,15 @@
               backtraces</idx><idx>backtraces</idx>:<idx>exceptions/stack
               backtraces for</idx><idx>error handling/exception
               backtracing</idx></p>
-          <link rel="import" href="code/error-handling/blow_up.ml"/>
+          <link rel="import" href="code/error-handling/blow_up/blow_up.ml"/>
 
           <p>
 	    If we build and run this program, we'll get a stack
             backtrace that will provide some information about where
             the error occurred and the stack of function calls that
             were in place at the time of the error:</p>
-          <link rel="import" href="code/error-handling/jbuild"/>
-          <link rel="import" href="code/error-handling/build_blow_up.errsh"/>
+          <link rel="import" href="code/error-handling/blow_up/jbuild"/>
+          <link rel="import" href="code/error-handling/blow_up/build_blow_up.errsh"/>
 
           <p>
 	    You can also capture a backtrace within your program by
@@ -695,8 +695,8 @@
             you can turn backtraces off by setting the
             <code>OCAMLRUNPARAM</code> environment variable to be
             empty:</p>
-          <link rel="import" href="code/error-handling/jbuild"/>
-          <link rel="import" href="code/error-handling/build_blow_up_notrace.errsh"/>
+          <link rel="import" href="code/error-handling/blow_up/jbuild"/>
+          <link rel="import" href="code/error-handling/blow_up/build_blow_up_notrace.errsh"/>
 
           <p>
 	    The resulting error message is considerably less
@@ -711,7 +711,7 @@
             faster still if you disable backtraces. Here's a simple
             benchmark that shows the effect, using the
             <code>core_bench</code> package:</p>
-          <link rel="import" href="code/error-handling/exn_cost.ml"/>
+          <link rel="import" href="code/error-handling/exn_cost/exn_cost.ml"/>
 
           <p>
 	    We're testing three cases here: a simple computation
@@ -723,15 +723,15 @@
           <p>
 	    If we run this with stacktraces on, the benchmark
             results look like this:</p>
-          <link rel="import" href="code/error-handling/jbuild"/>
-          <link rel="import" href="code/error-handling/run_exn_cost.sh"/>
+          <link rel="import" href="code/error-handling/exn_cost/jbuild"/>
+          <link rel="import" href="code/error-handling/exn_cost/run_exn_cost.sh"/>
 
           <p>
 	    Here, we see that we lose something like 30 cycles to
             adding an exception handler, and 60 more to actually
             throwing and catching an exception. If we turn backtraces
             off, then the results look like this:</p>
-          <link rel="import" href="code/error-handling/run_exn_cost_notrace.sh"/>
+          <link rel="import" href="code/error-handling/exn_cost/run_exn_cost_notrace.sh"/>
 
           <p>
 	    Here, the handler costs about the same, but the
