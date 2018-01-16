@@ -296,9 +296,9 @@ Pipe.transfer;;
 <fun>
 |}];;
 [@@@part "27"];;
-Command.async;;
+Command.async_spec;;
 [%%expect ocaml {|
-- : ('a, unit Deferred.t) Async_extra.Command.basic_command
+- : ('a, unit Deferred.t) Async.Command.basic_spec_command
     Command.with_options
 = <fun>
 |}];;
