@@ -1098,7 +1098,7 @@
       <em class="filename">sum.ml</em>. Note that we don't
       terminate expressions with <code>;;</code> here, since it's
       not required outside the toplevel:</p>
-      <link rel="import" href="code/guided-tour/sum.ml"/>
+      <link rel="import" href="code/guided-tour/sum/sum.ml"/>
 
       <p>This is our first use of OCaml's input and output
       routines. The function <code>read_and_accumulate</code> is a
@@ -1127,7 +1127,7 @@
         using <span class="command"><em>jbuilder</em></span>, a build
         system that's designed for use with OCaml projects. First, we
         need to write a <em>jbuild</em> file to specify the build.</p>
-        <link rel="import" href="code/guided-tour/jbuild"/>
+        <link rel="import" href="code/guided-tour/sum/jbuild"/>
 
 	<p>All we need to specify is the fact that we're building an
 	executable rather than a library, the name of the executable,
@@ -1136,7 +1136,7 @@
 	<p>We can now invoke jbuilder to build the executable.
 	The <code>--dev</code> flag is recommended to get better error
 	messages during the build.</p>
-        <link rel="import" href="code/guided-tour/build_sum.sh"/>
+        <link rel="import" href="code/guided-tour/sum/build_sum.sh"/>
 
         <p>The <code>.exe</code> suffix indicates that we're building
         a native-code executable, which we'll discuss more
@@ -1147,7 +1147,7 @@
         to <code>sum.native</code> by typing in a sequence of numbers,
         one per line, hitting <strong><code>Ctrl-D</code></strong>
         when we're done:</p> <link rel="import"
-        href="code/guided-tour/sum.rawsh"/>
+        href="code/guided-tour/sum/sum.rawsh"/>
 
         <p>More work is needed to make a really usable command-line
         program, including a proper command-line parsing interface and
