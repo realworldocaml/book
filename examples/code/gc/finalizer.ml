@@ -27,6 +27,6 @@ let main () =
   return ()
 
 let () =
-  Command.async ~summary:"Testing finalizers"
+  Command.async_spec ~summary:"Testing finalizers"
     Command.Spec.empty main
   |> Command.run
