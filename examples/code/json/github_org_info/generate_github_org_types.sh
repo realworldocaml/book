@@ -1,2 +1,2 @@
-atdgen -t github_org.atd
-cat github_org_t.mli
+jbuilder build github_org_t.mli
+cat _build/defaut/github_org_t.mli
