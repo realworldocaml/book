@@ -140,7 +140,7 @@
 
 (rule
  ((targets (example_load.topscript.stamp))
-  (deps    (example_load.topscript))
+  (deps    (example_load.topscript example.scm example_broken.scm comment_heavy.scm))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
