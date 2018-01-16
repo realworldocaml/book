@@ -8,3 +8,4 @@ site
 *.install
 *.byte
 *.orig
+a.out
