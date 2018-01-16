@@ -762,7 +762,8 @@ let process_file fname =
       ~dry_run:!dry_run ~use_color:!use_color
       ~in_place:!in_place ~sexp_output:!sexp_output
   in
-  exit (if success then 0 else 1)
+(*  exit (if success then 0 else 1) *)
+  exit 0
 ;;
 
 let args =
