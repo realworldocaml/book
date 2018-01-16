@@ -11,7 +11,7 @@ let print_org file () =
     name org.id org.public_repos
 
 let () =
-  Command.basic ~summary:"Print Github organization information"
+  Command.basic_spec ~summary:"Print Github organization information"
     Command.Spec.(empty +> anon ("organization" %: string))
     print_org
   |> Command.run
