@@ -3,7 +3,6 @@ _opam
 .depend
 site
 .*.swp
-*.corrected
 *~
 *.install
 *.byte
