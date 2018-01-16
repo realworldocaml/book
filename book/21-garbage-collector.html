@@ -728,7 +728,7 @@
               program. You'll need to install the Core benchmarking
               suite via <code>opam install core_bench</code> before you
               compile this code:</p>
-            <link rel="import" href="code/gc/barrier_bench.ml"/>
+            <link rel="import" href="code/gc/barrier_bench/barrier_bench.ml"/>
 
             <p>
 	      This program defines a type <code>t1</code> that is
@@ -736,8 +736,8 @@
               benchmark loop iterates over both fields and increments a
               counter. Compile and execute this with some extra options
               to show the amount of garbage collection occurring:</p>
-            <link rel="import" href="code/gc/jbuild"/>
-            <link rel="import" href="code/gc/run_barrier_bench.sh"/>
+            <link rel="import" href="code/gc/barrier_bench/jbuild"/>
+            <link rel="import" href="code/gc/barrier_bench/run_barrier_bench.sh"/>
 
             <p>
 	      There is a stark space/time trade-off here. The
@@ -758,7 +758,7 @@
               trade-offs. The command-line benchmark binaries have a
               number of useful options that affect garbage collection
               behavior:</p>
-            <link rel="import" href="code/gc/show_barrier_bench_help.sh"/>
+            <link rel="import" href="code/gc/barrier_bench/show_barrier_bench_help.sh"/>
 
             <p>
 	      The <code>-no-compactions</code> and
@@ -838,13 +838,13 @@
 	  Let's explore this with a small example that finalizes
 	  values of different types, some of which are heap-allocated
 	  and others which are compile-time constants:</p>
-	<link rel="import" href="code/gc/finalizer.ml"/>
+	<link rel="import" href="code/gc/finalizer/finalizer.ml"/>
 
 	<p>
 	  Building and running this should show the following
 	  output:</p>
-  <link rel="import" href="code/gc/jbuild"/>
-	<link rel="import" href="code/gc/run_finalizer.sh"/>
+  <link rel="import" href="code/gc/finalizer/jbuild"/>
+	<link rel="import" href="code/gc/finalizer/run_finalizer.sh"/>
 
 	<p>
 	  The GC calls the finalization functions in the order of
