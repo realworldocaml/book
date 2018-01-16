@@ -15,8 +15,8 @@
 (rule
  ((targets (camlp4_toplevel.topscript.stamp))
   (deps    (camlp4_toplevel.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (camlp4_toplevel.topscript.corrected as camlp4_toplevel.topscript))
   ))))

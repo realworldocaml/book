@@ -15,8 +15,8 @@
 (rule
  ((targets (main.topscript.stamp))
   (deps    (main.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (main.topscript.corrected as main.topscript))
   ))))
@@ -33,8 +33,8 @@
 (rule
  ((targets (local_let.topscript.stamp))
   (deps    (local_let.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (local_let.topscript.corrected as local_let.topscript))
   ))))

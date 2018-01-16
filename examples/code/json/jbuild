@@ -15,8 +15,8 @@
 (rule
  ((targets (install.topscript.stamp))
   (deps    (install.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (install.topscript.corrected as install.topscript))
   ))))
@@ -33,8 +33,8 @@
 (rule
  ((targets (parse_book.topscript.stamp))
   (deps    (parse_book.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (parse_book.topscript.corrected as parse_book.topscript))
   ))))
@@ -51,8 +51,8 @@
 (rule
  ((targets (build_json.topscript.stamp))
   (deps    (build_json.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (build_json.topscript.corrected as build_json.topscript))
   ))))

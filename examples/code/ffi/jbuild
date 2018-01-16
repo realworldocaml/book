@@ -15,8 +15,8 @@
 (rule
  ((targets (qsort.topscript.stamp))
   (deps    (qsort.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (qsort.topscript.corrected as qsort.topscript))
   ))))
@@ -33,8 +33,8 @@
 (rule
  ((targets (posix.topscript.stamp))
   (deps    (posix.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (posix.topscript.corrected as posix.topscript))
   ))))

@@ -15,8 +15,8 @@
 (rule
  ((targets (polymorphism.topscript.stamp))
   (deps    (polymorphism.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (polymorphism.topscript.corrected as polymorphism.topscript))
   ))))
@@ -33,8 +33,8 @@
 (rule
  ((targets (stack.topscript.stamp))
   (deps    (stack.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (stack.topscript.corrected as stack.topscript))
   ))))
@@ -51,8 +51,8 @@
 (rule
  ((targets (subtyping.topscript.stamp))
   (deps    (subtyping.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (subtyping.topscript.corrected as subtyping.topscript))
   ))))
@@ -69,8 +69,8 @@
 (rule
  ((targets (immutable.topscript.stamp))
   (deps    (immutable.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (immutable.topscript.corrected as immutable.topscript))
   ))))
@@ -87,8 +87,8 @@
 (rule
  ((targets (row_polymorphism.topscript.stamp))
   (deps    (row_polymorphism.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (row_polymorphism.topscript.corrected as row_polymorphism.topscript))
   ))))

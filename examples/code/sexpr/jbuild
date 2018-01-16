@@ -15,8 +15,8 @@
 (rule
  ((targets (inline_sexp.topscript.stamp))
   (deps    (inline_sexp.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (inline_sexp.topscript.corrected as inline_sexp.topscript))
   ))))
@@ -33,8 +33,8 @@
 (rule
  ((targets (sexp_default.topscript.stamp))
   (deps    (sexp_default.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (sexp_default.topscript.corrected as sexp_default.topscript))
   ))))
@@ -51,8 +51,8 @@
 (rule
  ((targets (to_from_sexp.topscript.stamp))
   (deps    (to_from_sexp.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (to_from_sexp.topscript.corrected as to_from_sexp.topscript))
   ))))
@@ -69,8 +69,8 @@
 (rule
  ((targets (sexp_option.topscript.stamp))
   (deps    (sexp_option.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (sexp_option.topscript.corrected as sexp_option.topscript))
   ))))
@@ -87,8 +87,8 @@
 (rule
  ((targets (sexp_opaque.topscript.stamp))
   (deps    (sexp_opaque.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (sexp_opaque.topscript.corrected as sexp_opaque.topscript))
   ))))
@@ -105,8 +105,8 @@
 (rule
  ((targets (print_sexp.topscript.stamp))
   (deps    (print_sexp.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (print_sexp.topscript.corrected as print_sexp.topscript))
   ))))
@@ -123,8 +123,8 @@
 (rule
  ((targets (manually_making_sexp.topscript.stamp))
   (deps    (manually_making_sexp.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (manually_making_sexp.topscript.corrected as manually_making_sexp.topscript))
   ))))
@@ -141,8 +141,8 @@
 (rule
  ((targets (example_load.topscript.stamp))
   (deps    (example_load.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (example_load.topscript.corrected as example_load.topscript))
   ))))
@@ -159,8 +159,8 @@
 (rule
  ((targets (auto_making_sexp.topscript.stamp))
   (deps    (auto_making_sexp.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (auto_making_sexp.topscript.corrected as auto_making_sexp.topscript))
   ))))
@@ -177,8 +177,8 @@
 (rule
  ((targets (sexp_list.topscript.stamp))
   (deps    (sexp_list.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (sexp_list.topscript.corrected as sexp_list.topscript))
   ))))
@@ -195,8 +195,8 @@
 (rule
  ((targets (sexp_printer.topscript.stamp))
   (deps    (sexp_printer.topscript))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (promote-if (sexp_printer.topscript.corrected as sexp_printer.topscript))
   ))))

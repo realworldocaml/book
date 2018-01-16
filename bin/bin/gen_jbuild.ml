@@ -40,8 +40,8 @@ let process_topscripts dir =
 (rule
  ((targets (%s.stamp))
   (deps    (%s))
-  (action  (progn 
-    (run ocaml-topexpect -short-paths -verbose ${<})
+  (action  (progn
+    (setenv OCAMLRUNPARAM \"\" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} \"\")
     (promote-if (%s.corrected as %s))
   ))))" f f f f f f f f in
