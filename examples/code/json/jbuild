@@ -32,7 +32,7 @@
 
 (rule
  ((targets (parse_book.topscript.stamp))
-  (deps    (parse_book.topscript))
+  (deps    (parse_book.topscript book.json))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
