@@ -28,6 +28,6 @@ let sort_stdin () =
   |> List.iter ~f:(fun a -> printf "%d\n" a)
 
 let () =
-  Command.basic ~summary:"Sort integers on standard input"
+  Command.basic_spec ~summary:"Sort integers on standard input"
     Command.Spec.empty sort_stdin
   |> Command.run

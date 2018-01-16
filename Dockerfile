@@ -12,3 +12,4 @@ RUN opam pin add -n rwo .
 RUN opam depext -uy rwo
 RUN opam install --deps-only rwo -j2
 RUN opam config exec -- make PYGMENTIZE=1 -j2
+RUN rm -rf /home/opam/.opam

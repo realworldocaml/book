@@ -59,7 +59,7 @@ let search_and_print words =
 
 [@@@part "5"];;
 let () =
-  Command.async
+  Command.async_spec
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
       empty

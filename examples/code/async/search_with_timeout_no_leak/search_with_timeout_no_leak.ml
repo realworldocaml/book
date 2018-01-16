@@ -78,7 +78,7 @@ let search_and_print ~servers ~timeout words =
   List.iter results ~f:print_result
 
 let () =
-  Command.async
+  Command.async_spec
     ~summary:"Retrieve definitions from duckduckgo search engine"
     Command.Spec.(
       let string_list = Arg_type.create (String.split ~on:',') in
