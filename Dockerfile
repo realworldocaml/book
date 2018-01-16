@@ -8,6 +8,7 @@ RUN opam depext -j2 -i cohttp-lwt-unix async core_extended textwrap ctypes-forei
 COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src
 WORKDIR /home/opam/src
+RUN opam pin add jbuilder --dev
 RUN opam pin add -n rwo .
 RUN opam depext -uy rwo
 RUN opam install --deps-only rwo -j2
