@@ -47,7 +47,7 @@ let area_of_ring inner_radius outer_radius =
 ;;
 [%%expect ocaml {|val area_of_ring : float -> float -> float = <fun>|}];;
 area_of_ring 1. 3.;;
-[%%expect ocaml {|- : float = 25.1327412287|}];;
+[%%expect ocaml {|- : float = 25.132741228718345|}];;
 [@@@part "6"];;
 let area_of_ring inner_radius outer_radius =
   let pi = Float.pi in
@@ -213,7 +213,7 @@ let (|>) x f = f x ;;
 let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
 [%%expect ocaml {|val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"|}];;
 String.split ~on:':' path
-|> List.dedup ~compare:String.compare
+|> List.dedup_and_sort ~compare:String.compare
 |> List.iter ~f:print_endline
 ;;
 [%%expect{|
@@ -225,7 +225,7 @@ String.split ~on:':' path
 ocaml {|- : unit = ()|}];;
 [@@@part "33"];;
 let split_path = String.split ~on:':' path in
-let deduped_path = List.dedup ~compare:String.compare split_path in
+let deduped_path = List.dedup_and_sort ~compare:String.compare split_path in
 List.iter ~f:print_endline deduped_path
 ;;
 [%%expect{|
@@ -250,11 +250,11 @@ let (^>) x f = f x;;
 [%%expect ocaml {|val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
 Sys.getenv "PATH"
 ^> String.split ~on:':' path
-^> List.dedup ~compare:String.compare
+^> List.dedup_and_sort ~compare:String.compare
 ^> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 88-114:
+Characters 97-123:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
@@ -301,7 +301,7 @@ ratio ~num ~denom;;
 [%%expect ocaml {|- : float = 0.75|}];;
 [@@@part "43"];;
 String.split ~on:':' path
-|> List.dedup ~compare:String.compare
+|> List.dedup_and_sort ~compare:String.compare
 |> List.iter ~f:print_endline
 ;;
 [%%expect{|

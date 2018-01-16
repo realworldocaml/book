@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executable
+  ((name finalizer)
+   (modules finalizer)
+   (libraries (core async))
+  )
+)

@@ -1,7 +1,6 @@
 #silent true;;
 #use "topfind";;
 #thread;;
-#camlp4o;;
 #require "core";;
 #require "core.top";;
 #require "ppx_jane";;
@@ -100,12 +99,6 @@ let plus_one_if x =
 [%%expect ocaml {|val plus_one_if : int -> int = <fun>|}];;
 [@@@part "10"];;
 #require "core_bench";;
-[%%expect{|
-/Users/yminsky/.opam/4.04.2/lib/textutils: added to search path
-/Users/yminsky/.opam/4.04.2/lib/textutils/textutils.cma: loaded
-/Users/yminsky/.opam/4.04.2/lib/core_bench: added to search path
-/Users/yminsky/.opam/4.04.2/lib/core_bench/core_bench.cma: loaded
-|}];;
 open Core_bench;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
       ignore (plus_one_match 10))
@@ -244,7 +237,7 @@ let extensions filenames =
       | None  | Some ("",_) -> None
       | Some (_,ext) ->
         Some ext)
-  |> List.dedup
+  |> List.dedup_and_sort
 ;;
 [%%expect ocaml {|val extensions : string list -> string list = <fun>|}];;
 extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;

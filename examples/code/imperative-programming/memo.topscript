@@ -35,7 +35,6 @@ edit_distance "OCaml" "ocaml";;
 [%%expect ocaml {|- : int = 2|}];;
 [@@@part "3"];;
 #require "mtime.os.top";;
-[%%expect{|No such package: mtime.os.top|}];;
 let time f =
   let counter = Mtime.counter () in
   let x = f () in

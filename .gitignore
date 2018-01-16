@@ -2,10 +2,9 @@ _build
 _opam
 .depend
 site
-examples
 .*.swp
-*.corrected
 *~
 *.install
 *.byte
 *.orig
+a.out

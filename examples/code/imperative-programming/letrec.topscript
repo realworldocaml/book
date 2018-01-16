@@ -8,7 +8,6 @@
 #silent false;;
 open Core_kernel;;
 #require "mtime.os.top";;
-[%%expect{|No such package: mtime.os.top|}];;
 let time f =
   let counter = Mtime.counter () in
   let x = f () in

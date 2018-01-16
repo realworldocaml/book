@@ -110,7 +110,7 @@ module Int_interval = Make_interval(Int) ;;
 module Int_interval :
   sig
     type t =
-      Make_interval(Core_kernel__Core_int).t =
+      Make_interval(Core_kernel__Int).t =
         Interval of int * int
       | Empty
     val create : int -> int -> t
@@ -124,7 +124,7 @@ module String_interval = Make_interval(String) ;;
 module String_interval :
   sig
     type t =
-      Make_interval(Core_kernel__Core_string).t =
+      Make_interval(Core_kernel__String).t =
         Interval of string * string
       | Empty
     val create : string -> string -> t
@@ -239,8 +239,8 @@ module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Core_int).t
-    type endpoint = Make_interval(Core_kernel__Core_int).endpoint
+    type t = Make_interval(Core_kernel__Int).t
+    type endpoint = Make_interval(Core_kernel__Int).endpoint
     val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
@@ -323,7 +323,7 @@ module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Core_int).t
+    type t = Make_interval(Core_kernel__Int).t
     type endpoint = int
     val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
@@ -403,7 +403,7 @@ module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Core_int).t
+    type t = Make_interval(Core_kernel__Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -585,7 +585,7 @@ module Int_interval = Make_interval(Int) ;;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Core_int).t
+    type t = Make_interval(Core_kernel__Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
