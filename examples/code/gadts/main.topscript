@@ -51,14 +51,10 @@ Array [|1;2;3|];;
 Array [|1.0;2.0;3.0|];;
 [%%expect ocaml {|- : float gadt_compact_array = Array [|1.; 2.; 3.|]|}];;
 
-# part 2.2
+[@@@part "2.2"];;
+Bytes "foo";;
 
-  Bytes "foo";;
-
-[%%expect{|
-Characters 8-11:
-Error: Syntax error
-|}];;
+[%%expect ocaml {|- : 'a gadt_compact_array = Bytes "foo"|}];;
 [@@@part "3"];;
 type 'a t = | Array : 'a array -> 'a t
             | Bytes : bytes -> char t
