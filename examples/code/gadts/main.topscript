@@ -3,82 +3,85 @@
 #camlp4o;;
 #require "core";;
 #require "ppx_jane";;
-open Core_kernel;;
-
-[%%expect];;
+open Base;;
 [@@@part "1"];;
-
 type 'a compact_array = 
   | Array of 'a array
   | Bytes of bytes
 ;;
 
-[%%expect];;
+[%%expect ocaml {|type 'a compact_array = Array of 'a sexp_array | Bytes of string|}];;
 [@@@part "1.1"];;
-
 let of_bytes x = Bytes x
 let of_array x = Array x
 
 let length = function
   | Array a -> Array.length a
-  | Bytes s -> Bytes.length s
+  | Bytes b -> Bytes.length b
 
 let get t i =
   match t with
   | Array a -> a.(i)
-  | Bytes s -> s.[i]
+  | Bytes b -> Bytes.get b i
 
 let set t i v =
   match t with
   | Array a -> a.(i) <- v
-  | Bytes s -> s.[i] <- v
+  | Bytes b -> Bytes.set b i v
 
-[%%expect];;
+[%%expect ocaml {| |}]
 [@@@part "2"];;
-
+[%%expect{|
+Characters 306-312:
+Error: Uninterpreted extension 'expect'.
+|}];;
 type 'a gadt_compact_array =
-  | Array : 'a array -> 'a t
-  | Bytes : bytes -> 'a t
+  | Array : 'a array -> 'a gadt_compact_array
+  | Bytes : bytes -> 'a gadt_compact_array
 ;;
 
-[%%expect];;
+[%%expect ocaml {|
+type 'a gadt_compact_array =
+    Array : 'a sexp_array -> 'a gadt_compact_array
+  | Bytes : string -> 'a gadt_compact_array
+|}];;
 [@@@part "2.1"];;
-
 Array [|1;2;3|];;
+[%%expect ocaml {|- : int gadt_compact_array = Array [|1; 2; 3|]|}];;
 Array [|1.0;2.0;3.0|];;
+[%%expect ocaml {|- : float gadt_compact_array = Array [|1.; 2.; 3.|]|}];;
 
 # part 2.2
 
   Bytes "foo";;
 
-[%%expect];;
+[%%expect{|
+Characters 8-11:
+Error: Syntax error
+|}];;
 [@@@part "3"];;
-
 type 'a t = | Array : 'a array -> 'a t
             | Bytes : bytes -> char t
 ;;
 
-[%%expect];;
+[%%expect ocaml {|type 'a t = Array : 'a sexp_array -> 'a t | Bytes : string -> char t|}];;
 [@@@part "3.1"];;
-
 let length t = 
   match t with
   | Bytes b -> Bytes.length b
   | Array a -> Array.length a
 ;;
 
-[%%expect];;
+[%%expect ocaml {|val length : char t -> int = <fun>|}];;
 [@@@part "3.2"];;
-
 let length (type el) (t:el t) = 
   match t with
   | Bytes b -> Bytes.length b
   | Array a -> Array.length a
 ;;
 
-[%%expect];;
+[%%expect ocaml {|val length : 'a t -> int = <fun>|}];;
 [@@@part "3.3"];;
-
 module Compact_array = struct
 
   type 'a t = | Array : 'a array -> 'a t
@@ -104,9 +107,18 @@ module Compact_array = struct
 
 end;;
 
-[%%expect];;
+[%%expect ocaml {|
+module Compact_array :
+  sig
+    type 'a t = Array : 'a sexp_array -> 'a t | Bytes : string -> char t
+    val of_bytes : string -> char t
+    val of_array : 'a sexp_array -> 'a t
+    val length : 'a t -> int
+    val get : 'a t -> int -> 'a
+    val set : 'a t -> int -> 'a -> unit
+  end
+|}];;
 [@@@part "10"];;
-
 type value =
   | Int of int
   | Bool of bool
@@ -118,31 +130,40 @@ type expr =
   | Plus  of expr * expr
 ;;
 
-[%%expect];;
+[%%expect ocaml {|
+type value = Int of int | Bool of bool
+type expr =
+    Value of value
+  | If of expr * expr * expr
+  | Gt of expr * expr
+  | Plus of expr * expr
+|}];;
 [@@@part "11"];;
-
 let max_expr x y =
   let i x = Value (Int x) in
   let x = i x in
   let y = i y in
   If (Gt (x,y), x, y)
 ;;
+[%%expect ocaml {|val max_expr : int -> int -> expr = <fun>|}];;
 max_expr 3 4;;
 
-[%%expect];;
+[%%expect ocaml {|
+- : expr =
+If (Gt (Value (Int 3), Value (Int 4)), Value (Int 3), Value (Int 4))
+|}];;
 [@@@part "12"];;
-
 let ill_typed x y =
   let i x = Value (Int x) in
   let x = i x in
   let y = i y in
   Plus (Gt (x,y), y)
 ;;
+[%%expect ocaml {|val ill_typed : int -> int -> expr = <fun>|}];;
 ill_typed 3 4;;
 
-[%%expect];;
+[%%expect ocaml {|- : expr = Plus (Gt (Value (Int 3), Value (Int 4)), Value (Int 4))|}];;
 [@@@part "13"];;
-
 let rec eval expr =
   let eval_int expr =
     match eval expr with
@@ -161,39 +182,47 @@ let rec eval expr =
   | Plus (x,y) -> Int (eval_int x + eval_int y)
 ;;
 
-[%%expect];;
+[%%expect ocaml {|val eval : expr -> value = <fun>|}];;
 [@@@part "14"];;
-
 eval (max_expr  3 4);;
+[%%expect ocaml {|- : value = Int 4|}];;
 eval (ill_typed 3 4);;
 
-[%%expect];;
+[%%expect{|Exception: Failure "expected int, found bool".|}];;
 [@@@part "15"];;
-
 type _ value =
   | Int  : int  -> int value
   | Bool : bool -> bool value
 ;;
+[%%expect ocaml {|type _ value = Int : int -> int value | Bool : bool -> bool value|}];;
 type _ expr =
   | Value : 'a value                      -> 'a expr
   | If    : bool expr * 'a expr * 'a expr -> 'a expr
   | Gt    : 'a expr * 'a expr             -> bool expr
   | Plus  : int expr * int expr           -> int expr
 ;;
-[%%expect];;
+[%%expect ocaml {|
+type _ expr =
+    Value : 'a value -> 'a expr
+  | If : bool expr * 'a expr * 'a expr -> 'a expr
+  | Gt : 'a expr * 'a expr -> bool expr
+  | Plus : int expr * int expr -> int expr
+|}];;
 [@@@part "16"];;
-
 let max_expr x y =
   let i x = Value (Int x) in
   let x = i x in
   let y = i y in
   If (Gt (x,y), x, y)
 ;;
+[%%expect ocaml {|val max_expr : int -> int -> int expr = <fun>|}];;
 max_expr 3 4;;
 
-[%%expect];;
+[%%expect ocaml {|
+- : int expr =
+If (Gt (Value (Int 3), Value (Int 4)), Value (Int 3), Value (Int 4))
+|}];;
 [@@@part "17"];;
-
 let ill_typed x y =
   let i x = Value (Int x) in
   let x = i x in
@@ -201,9 +230,13 @@ let ill_typed x y =
   Plus (Gt (x,y), y)
 ;;
 
-[%%expect];;
+[%%expect{|
+Characters 91-99:
+Error: This expression has type bool expr
+       but an expression was expected of type int expr
+       Type bool is not compatible with type int 
+|}];;
 [@@@part "18"];;
-
 let rec eval = function
   | Value (Int x)  -> x
   | Value (Bool x) -> x
@@ -212,9 +245,13 @@ let rec eval = function
   | Plus  (x,y)    -> eval x + eval y
 ;;
 
-[%%expect];;
+[%%expect{|
+Characters 58-66:
+Error: This pattern matches values of type bool value
+       but a pattern was expected which matches values of type int value
+       Type bool is not compatible with type int 
+|}];;
 [@@@part "19"];;
-
 let rec eval : type a . a expr -> a = function
   | Value (Int x)  -> x
   | Value (Bool x) -> x
@@ -222,3 +259,8 @@ let rec eval : type a . a expr -> a = function
   | Gt    (x,y)    -> eval x > eval y
   | Plus  (x,y)    -> eval x + eval y
 ;;
+[%%expect{|
+Characters 173-179:
+Error: This expression has type $Gt_'a but an expression was expected of type
+         int
+|}];;
