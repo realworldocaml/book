@@ -256,11 +256,7 @@ let rec eval : type a . a expr -> a = function
   | Value (Int x)  -> x
   | Value (Bool x) -> x
   | If    (c,t,e)  -> if eval c then eval t else eval e
-  | Gt    (x,y)    -> eval x > eval y
+  | Gt    (x,y)    -> Polymorphic_compare.(>) (eval x) (eval y)
   | Plus  (x,y)    -> eval x + eval y
 ;;
-[%%expect{|
-Characters 173-179:
-Error: This expression has type $Gt_'a but an expression was expected of type
-         int
-|}];;
+[%%expect ocaml {|val eval : 'a expr -> 'a = <fun>|}];;
