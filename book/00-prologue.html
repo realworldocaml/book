@@ -182,67 +182,79 @@
       </section>
 
       <section id="the-core-standard-library" data-type="sect2">
-        <h2>The <code>Core</code> Standard Library</h2>
+        <h2>The <code>Base</code> Standard Library</h2>
 
         <p>A language on its own isn't enough. You also need a rich
-        set of libraries to base your applications on. A common
-        source of frustration for those learning OCaml is that the
-        standard library that ships with the compiler is limited,
-        covering only a small subset of the functionality you would
-        expect from a general-purpose standard library. That's
-        because the standard library isn't a general-purpose tool;
-        it was developed for use in bootstrapping the compiler and
-        is purposefully kept small and simple.<idx>Core standard
-        library/development of</idx><idx>OCaml/Core standard
-        library</idx></p>
+          set of libraries to build your applications on. A common
+          source of frustration for those learning OCaml is that the
+          standard library that ships with the compiler is limited,
+          covering only a subset of the functionality you would expect
+          from a general-purpose standard library. That's because the
+          standard library isn't really a general-purpose tool; its
+          fundamental role is in bootstrapping the compiler, and has
+          been purposefully kept small and simple.</p>
 
         <p>Happily, in the world of open source software, nothing
-        stops alternative libraries from being written to
-        supplement the compiler-supplied standard library, and this
-        is exactly what <code>Core</code> is.</p>
+          stops alternative libraries from being written to supplement
+          the compiler-supplied standard library, and this is exactly
+          what <code>Base</code> is.
+
+	  <idx>Base standard library</idx>
+	</p>
 
         <p>Jane Street, a company that has been using OCaml for
-        more than a decade, developed <code>Core</code> for its own
-        internal use, but designed it from the start with an eye
-        toward being a general-purpose standard library. Like the
-        OCaml language itself, <code>Core</code> is engineered with
-        correctness, reliability, and performance in mind.</p>
+          more than 15 years, developed the code in <code>Base</code>
+          for its own internal use, but from the start designed it
+          with an eye toward being a general-purpose standard
+          library. Like the OCaml language itself, <code>Base</code>
+          is engineered with correctness, reliability, and performance
+          in mind.  It's also designed to be easy to install and
+          highly portable, available on every platform OCaml is,
+          including UNIX, Mac, Windows, and JavaScript.
+	</p>
 
-        <p><code>Core</code> is distributed with syntax extensions
-        that provide useful new functionality to OCaml, and there
-        are additional libraries such as the <code>Async</code>
-        network communications library that extend the reach of
-        <code>Core</code> into building complex distributed
-        systems. All of these libraries are distributed under a
-        liberal Apache 2 license to permit free use in hobby,
-        academic, and commercial settings.</p>
+	<p>
+	  <code>Base</code> is distributed with a set of syntax
+	  extensions that provide useful new functionality to OCaml,
+	  and there are additional libraries that are designed to work
+	  well with it, including <code>Core</code>, an extension
+	  to <code>Base</code> that includes more significantly more
+	  functionality, including UNIX-specific calls,
+	  and <code>Async</code>, a library for doing concurrent
+	  programming such as GUIs or networked applications. All of
+	  these libraries are distributed under a
+          liberal Apache 2 license to permit free use in hobby,
+          academic, and commercial settings.
+	</p>
       </section>
 
       <section id="the-ocaml-platform" data-type="sect2">
         <h2>The OCaml Platform</h2>
 
-        <p><code>Core</code> is a comprehensive and effective
-        standard library, but there's much more OCaml software out
-        there. A large community of programmers has been using
-        OCaml since its first release in 1996, and has generated
-        many useful libraries and tools. We'll introduce some of
-        these libraries in the course of the examples presented in
-        the book.<idx>OCaml/third-party libraries for</idx></p>
+        <p><code>Base</code> is a comprehensive and effective standard
+        library, but there's much more OCaml software out there. A
+        large community of programmers has been using OCaml since its
+        first release in 1996, and has generated many useful libraries
+        and tools. We'll introduce some of these libraries in the
+        course of the examples presented in the
+        book.<idx>OCaml/third-party libraries for</idx></p>
 
         <p>The installation and management of these third-party
         libraries is made much easier via a package management tool
         known as <a href="http://opam.ocaml.org/">OPAM</a>. We'll
-        explain more about OPAM as the book unfolds, but it forms
-        the basis of the Platform, which is a set of tools and
-        libraries that, along with the OCaml compiler, lets you
-        build real-world applications quickly and effectively.</p>
+        explain more about OPAM as the book unfolds, but it forms the
+        basis of the Platform, which is a set of tools and libraries
+        that, along with the OCaml compiler, lets you build real-world
+        applications quickly and effectively.</p>
 
-        <p>We'll also use OPAM for installing the <span class="command"><em>utop</em></span> command-line interface. This
-        is a modern interactive tool that supports command history,
-        macro expansion, module completion, and other niceties that
-        make it much more pleasant to work with the language. We'll
-        be using <span class="command"><em>utop</em></span>
-        throughout the book to let you step through the examples
+        <p>We'll also use OPAM for installing
+        the <span class="command"><em>utop</em></span> command-line
+        interface. This is a modern interactive tool that supports
+        command history, macro expansion, module completion, and other
+        niceties that make it much more pleasant to work with the
+        language. We'll be
+        using <span class="command"><em>utop</em></span> throughout
+        the book to let you step through the examples
         interactively.</p>
       </section>
     </section>
