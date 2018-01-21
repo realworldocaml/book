@@ -113,7 +113,7 @@ let process_chapters book_dir output_dir =
     | "faqs.html" -> frontpage_chapter "faqs"
     | "toc.html" -> frontpage_chapter "toc"
     | "index.html" -> frontpage_chapter "index"
-    | file -> print_endline file; ""
+    | file -> eprintf "Warning: orphan html file %s in repo\n" file; ""
   ) |>
   String.concat "\n" |> fun s ->
   find_static_files () ^ s |>
@@ -172,7 +172,6 @@ let process_examples dir =
   Filename.concat dir "jbuild.inc" |> fun jbuild ->
   files_with ~exts:book_extensions dir |>
   List.map (fun f ->
-    printf "handling %s/%s\n%!" dir f;
     match f with 
     | "jbuild" -> jbuild_rule f 
     | f when Filename.extension f = ".topscript" -> topscript_rule f

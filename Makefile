@@ -7,7 +7,7 @@ code:
 	jbuilder build @code
 
 dep:
-	jbuilder build @jbuilder
+	jbuilder exec -- rwo-jbuild
 
 clean:
 	jbuilder clean
