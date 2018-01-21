@@ -728,7 +728,8 @@ let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color ~in_pla
   in
   if sexp_output then (
     document_of_phrases file_contents success phrases
-    |> Document.sexp_of_t
+    |> Document.rwo 
+    |> Document.sexp_of_rwo
     |> Sexplib.Sexp.output stdout_backup
   );
   success
