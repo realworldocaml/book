@@ -49,6 +49,9 @@ let book_extensions =
     ".topscript"; ".sh"; ".errsh"; ".rawsh"; "jbuild";
     ".json"; ".atd"; ".rawsh"; ".c"; ".h"; ".cmd"; ".S" ]
 
+let static_extensions =
+  [ ".js"; ".jpg"; ".css"; ".png" ]
+
 (** Process the book chapters *)
 
 (** Find the dependencies within an HTML file *)
@@ -82,13 +85,39 @@ let starts_with_digit b =
   try Scanf.sscanf b "%d-" (fun _ -> ()); true
   with _ -> false
 
+let frontpage_chapter name =
+  sprintf {|
+  (alias ((name site) (deps (%s.html))))
+  (rule
+    ((targets (%s.html))
+    (deps (../book/%s.html ../bin/bin/app.exe))
+    (action (run rwo-build build %s -o . -repo-root ..)))) |} name name name name
+
+let find_static_files () =
+  find_dirs_containing ~exts:static_extensions "static" |>
+  List.map (fun d -> files_with ~exts:static_extensions d |> List.map (Filename.concat d)) |>
+  List.flatten |>
+  List.map (fun f ->
+    String.split_on_char '/' f |>
+    List.tl |>
+    String.concat "/") |>
+  String.concat "\n" |>
+  sprintf "(alias ((name site) (deps (%s))))"
+
 let process_chapters book_dir output_dir =
   files_with ~exts:[".html"] book_dir |>
-  List.filter (starts_with_digit) |>
   List.sort String.compare |>
-  List.map (jbuild_for_chapter book_dir) |>
-  String.concat "\n" |>
-  emit_sexp (Filename.concat output_dir "jbuild")
+  List.map (function
+    | file when starts_with_digit file -> jbuild_for_chapter book_dir file
+    | "install.html" -> frontpage_chapter "install"
+    | "faqs.html" -> frontpage_chapter "faqs"
+    | "toc.html" -> frontpage_chapter "toc"
+    | "index.html" -> frontpage_chapter "index"
+    | file -> print_endline file; ""
+  ) |>
+  String.concat "\n" |> fun s ->
+  find_static_files () ^ s |>
+  emit_sexp (Filename.concat output_dir "jbuild.inc")
 
 (** Handle examples *)
 
@@ -103,13 +132,11 @@ let topscript_rule f =
   sprintf {|
 (alias ((name code) (deps (%s.stamp))))
 (alias ((name sexp) (deps (%s.sexp))))
-
 (rule
  ((targets (%s.sexp))
   (deps    (%s))
   (action  (with-stdout-to ${@}
     (run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
-
 (rule
  ((targets (%s.stamp))
   (deps    (%s%s))
@@ -123,12 +150,9 @@ let topscript_rule f =
 let rwo_eval_rule f =
   sprintf {|
 (alias ((name sexp) (deps (%s.sexp))))
-
 (rule
-  ((targets (%s.sexp))
-  (deps (%s))
-  (action (with-stdout-to ${@}
-  (run rwo-build eval ${<}))))) |} f f f
+  ((targets (%s.sexp)) (deps (%s))
+  (action (with-stdout-to ${@} (run rwo-build eval ${<}))))) |} f f f
 
 let jbuild_rule f =
   (* TODO filter out the include here *)
@@ -139,7 +163,6 @@ let sh_rule f =
    * https://github.com/ocaml/dune/issues/431 is answered *)
   sprintf {|
 (alias ((name sexp) (deps (%s.sexp))))
-
 (rule
   ((targets (%s.sexp))
   (deps (%s))
@@ -164,5 +187,4 @@ let process_examples dir =
 let _ =
   find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions "examples" |>
   List.iter process_examples;
-  process_chapters "book" "site"
-
+  process_chapters "book" "static";
