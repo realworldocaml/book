@@ -1,9 +1,9 @@
 (jbuild_version 1)
 
 (executables
- ((names (app rwo_deps gen_jbuild))
+ ((names (app gen_jbuild))
+  (public_names (rwo-build rwo-jbuild))
   (package rwo)
-  (public_names (rwo-build rwo-deps rwo-jbuild))
   (libraries (rwo lambdasoup sexp_pretty))
   (flags (:standard -short-paths))
   ))
