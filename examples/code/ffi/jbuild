@@ -17,9 +17,8 @@
   (deps    (qsort.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (qsort.topscript.corrected as qsort.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (posix.topscript.stamp))))
 (alias ((name sexp) (deps (posix.topscript.sexp))))
@@ -35,6 +34,5 @@
   (deps    (posix.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (posix.topscript.corrected as posix.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

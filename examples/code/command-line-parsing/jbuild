@@ -17,9 +17,8 @@
   (deps    (basic.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (basic.topscript.corrected as basic.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (step.topscript.stamp))))
 (alias ((name sexp) (deps (step.topscript.sexp))))
@@ -35,9 +34,8 @@
   (deps    (step.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (step.topscript.corrected as step.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (command_types.topscript.stamp))))
 (alias ((name sexp) (deps (command_types.topscript.sexp))))
@@ -53,9 +51,8 @@
   (deps    (command_types.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (command_types.topscript.corrected as command_types.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (group.topscript.stamp))))
 (alias ((name sexp) (deps (group.topscript.sexp))))
@@ -71,6 +68,5 @@
   (deps    (group.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (group.topscript.corrected as group.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

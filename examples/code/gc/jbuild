@@ -17,6 +17,5 @@
   (deps    (tune.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (tune.topscript.corrected as tune.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

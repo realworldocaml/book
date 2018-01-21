@@ -17,9 +17,8 @@
   (deps    (install.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (install.topscript.corrected as install.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (parse_book.topscript.stamp))))
 (alias ((name sexp) (deps (parse_book.topscript.sexp))))
@@ -35,9 +34,8 @@
   (deps    (parse_book.topscript book.json))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (parse_book.topscript.corrected as parse_book.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (build_json.topscript.stamp))))
 (alias ((name sexp) (deps (build_json.topscript.sexp))))
@@ -53,6 +51,5 @@
   (deps    (build_json.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (build_json.topscript.corrected as build_json.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

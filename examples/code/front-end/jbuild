@@ -17,6 +17,5 @@
   (deps    (camlp4_toplevel.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (camlp4_toplevel.topscript.corrected as camlp4_toplevel.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

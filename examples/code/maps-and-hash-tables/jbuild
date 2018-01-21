@@ -17,9 +17,8 @@
   (deps    (core_phys_equal.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (core_phys_equal.topscript.corrected as core_phys_equal.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (main.topscript.stamp))))
 (alias ((name sexp) (deps (main.topscript.sexp))))
@@ -35,6 +34,5 @@
   (deps    (main.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (main.topscript.corrected as main.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

@@ -17,9 +17,8 @@
   (deps    (main.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (main.topscript.corrected as main.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))
 
 (alias ((name code) (deps (main2.topscript.stamp))))
 (alias ((name sexp) (deps (main2.topscript.sexp))))
@@ -35,6 +34,5 @@
   (deps    (main2.topscript))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (promote-if (main2.topscript.corrected as main2.topscript))
-  ))))
+    (write-file ${@} "")))
+  ))

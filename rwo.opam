@@ -41,5 +41,5 @@ depexts: [
  [["alpine"] ["tzdata"]]
 ]
 available: [
-  ocaml-version >= "4.05.0"
+  ocaml-version >= "4.06.0"
 ]
