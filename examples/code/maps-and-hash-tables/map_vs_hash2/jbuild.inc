@@ -1,0 +1,26 @@
+(jbuild_version 1)
+
+(alias ((name sexp) (deps (jbuild.sexp))))
+
+(rule (
+  (targets (jbuild.sexp))
+  (deps    (jbuild))
+  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+
+(alias ((name sexp) (deps (run_map_vs_hash2.sh.sexp))))
+
+(rule (
+  (targets (run_map_vs_hash2.sh.sexp))
+  (deps    (run_map_vs_hash2.sh))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+
+(alias ((name sexp) (deps (map_vs_hash2.ml.sexp))))
+
+(rule (
+  (targets (map_vs_hash2.ml.sexp))
+  (deps    (map_vs_hash2.ml))
+  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+

@@ -1,4 +1,5 @@
 (jbuild_version 1)
+(include jbuild.inc)
 
 (executable
   ((name read_foo_better_errors)
