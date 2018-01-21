@@ -93,7 +93,8 @@ let parse_phrase (contents, lexbuf) =
     | exception exn ->
       let exn = match Location.error_of_exn exn with
         | None -> raise exn
-        | Some error -> Location.Error (shift_location_error startpos error)
+        | Some `Already_displayed -> raise exn
+        | Some (`Ok error) -> Location.Error (shift_location_error startpos error)
       in
       if lexbuf.Lexing.lex_last_action <> semisemi_action then begin
         let rec aux () = match Lexer.token lexbuf with
@@ -616,7 +617,7 @@ let find_delim s =
       then Bytes.unsafe_to_string b
       else exhaust (next b)
     in
-    exhaust ""
+    exhaust (Bytes.of_string "")
 
 let output_phrases oc contents =
   let rec aux = function
@@ -839,7 +840,7 @@ module Options = Main_args.Make_bytetop_options (struct
     let _drawlambda = set dump_rawlambda
     let _dlambda = set dump_lambda
     let _dflambda = set dump_flambda
-    let _dtimings = set print_timings
+    (* let _dtimings = set print_timings *)
     let _dinstr = set dump_instr
 
     let anonymous s = process_file s
