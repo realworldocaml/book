@@ -34,13 +34,9 @@
 
 (rule (
   (targets (00-prologue.html))
-  (deps (
-    ../book/00-prologue.html ../bin/bin/app.exe ../topexpect/src/main.exe))
+  (deps (../book/00-prologue.html ../bin/bin/app.exe))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (01-guided-tour.html))))
 
@@ -49,7 +45,6 @@
   (deps (
     ../book/01-guided-tour.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/guided-tour/local_let.topscript.sexp
     ../examples/code/guided-tour/main.topscript.sexp
     ../examples/code/guided-tour/recursion.ml.sexp
@@ -58,10 +53,7 @@
     ../examples/code/guided-tour/sum/sum.ml.sexp
     ../examples/code/guided-tour/sum/sum.rawsh.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (02-variables-and-functions.html))))
 
@@ -70,7 +62,6 @@
   (deps (
     ../book/02-variables-and-functions.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/variables-and-functions/abs_diff.mli.sexp
     ../examples/code/variables-and-functions/htable_sig1.ml.sexp
     ../examples/code/variables-and-functions/htable_sig2.ml.sexp
@@ -82,10 +73,7 @@
     ../examples/code/variables-and-functions/substring_sig1.ml.sexp
     ../examples/code/variables-and-functions/substring_sig2.ml.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (03-lists-and-patterns.html))))
 
@@ -94,13 +82,9 @@
   (deps (
     ../book/03-lists-and-patterns.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/lists-and-patterns/main.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (04-files-modules-and-programs.html))))
 
@@ -109,7 +93,6 @@
   (deps (
     ../book/04-files-modules-and-programs.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/files-modules-and-programs/abstract_username.ml.sexp
     ../examples/code/files-modules-and-programs/common.ml.sexp
     ../examples/code/files-modules-and-programs/ext_list.ml.sexp
@@ -151,10 +134,7 @@
     ../examples/code/files-modules-and-programs/session_info/session_info.ml.sexp
     ../examples/code/files-modules-and-programs/val.syntax.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (05-records.html))))
 
@@ -163,17 +143,13 @@
   (deps (
     ../book/05-records.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/records/functional_update.syntax.sexp
     ../examples/code/records/main.topscript.sexp
     ../examples/code/records/main2.topscript.sexp
     ../examples/code/records/record.syntax.sexp
     ../examples/code/records/warn_help.sh.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (06-variants.html))))
 
@@ -182,7 +158,6 @@
   (deps (
     ../book/06-variants.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/variants-termcol-annotated/build.errsh.sexp
     ../examples/code/variants-termcol-annotated/jbuild.sexp
     ../examples/code/variants-termcol-annotated/terminal_color.ml.sexp
@@ -195,10 +170,7 @@
     ../examples/code/variants/main.topscript.sexp
     ../examples/code/variants/variant.syntax.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (07-error-handling.html))))
 
@@ -207,7 +179,6 @@
   (deps (
     ../book/07-error-handling.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/error-handling/blow_up/blow_up.ml.sexp
     ../examples/code/error-handling/blow_up/build_blow_up.errsh.sexp
     ../examples/code/error-handling/blow_up/build_blow_up_notrace.errsh.sexp
@@ -221,10 +192,7 @@
     ../examples/code/error-handling/sexpr.scm.sexp
     ../examples/code/error-handling/try_with.syntax.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (08-imperative-programming.html))))
 
@@ -233,7 +201,6 @@
   (deps (
     ../book/08-imperative-programming.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/imperative-programming/array-get.syntax.sexp
     ../examples/code/imperative-programming/array-set.syntax.sexp
     ../examples/code/imperative-programming/bigarray.syntax.sexp
@@ -265,10 +232,7 @@
     ../examples/code/imperative-programming/value_restriction.topscript.sexp
     ../examples/code/imperative-programming/weak.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (09-functors.html))))
 
@@ -277,7 +241,6 @@
   (deps (
     ../book/09-functors.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/functors/compare_example.ml.sexp
     ../examples/code/functors/destructive_sub.syntax.sexp
     ../examples/code/functors/extended_fqueue.ml.sexp
@@ -290,10 +253,7 @@
     ../examples/code/functors/sexpable.ml.sexp
     ../examples/code/functors/sharing_constraint.syntax.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (10-first-class-modules.html))))
 
@@ -302,7 +262,6 @@
   (deps (
     ../book/10-first-class-modules.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/fcm/loader_cli1.rawsh.sexp
     ../examples/code/fcm/loader_cli2.rawsh.sexp
     ../examples/code/fcm/loader_cli3.rawsh.sexp
@@ -319,10 +278,7 @@
     ../examples/code/fcm/query_handler_loader/query_handler_loader.ml.sexp
     ../examples/code/fcm/unpack.syntax.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (11-objects.html))))
 
@@ -331,7 +287,6 @@
   (deps (
     ../book/11-objects.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/objects/IsBarbell.java.sexp
     ../examples/code/objects/Shape.java.sexp
     ../examples/code/objects/immutable.topscript.sexp
@@ -343,10 +298,7 @@
     ../examples/code/objects/subtyping.ml.sexp
     ../examples/code/objects/subtyping.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (12-classes.html))))
 
@@ -355,7 +307,6 @@
   (deps (
     ../book/12-classes.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/classes-async/multiple_inheritance.ml.sexp
     ../examples/code/classes-async/multiple_inheritance_wrong.ml.sexp
     ../examples/code/classes-async/shapes/build_shapes.sh.sexp
@@ -374,10 +325,7 @@
     ../examples/code/classes/iter.topscript.sexp
     ../examples/code/classes/stack.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (13-maps-and-hashtables.html))))
 
@@ -386,7 +334,6 @@
   (deps (
     ../book/13-maps-and-hashtables.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/files-modules-and-programs/freq-fast/counter.ml.sexp
     ../examples/code/files-modules-and-programs/freq-fast/counter.mli.sexp
     ../examples/code/maps-and-hash-tables/comparable.ml.sexp
@@ -400,10 +347,7 @@
     ../examples/code/maps-and-hash-tables/map_vs_hash2/run_map_vs_hash2.sh.sexp
     ../examples/code/maps-and-hash-tables/phys_equal.rawscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (14-command-line-parsing.html))))
 
@@ -412,7 +356,6 @@
   (deps (
     ../book/14-command-line-parsing.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/command-line-parsing/basic.topscript.sexp
     ../examples/code/command-line-parsing/basic_md5/basic_md5.ml.sexp
     ../examples/code/command-line-parsing/basic_md5/build_basic_md5.sh.sexp
@@ -456,10 +399,7 @@
     ../examples/code/command-line-parsing/run_basic_md5_with_custom_arg.errsh.sexp
     ../examples/code/command-line-parsing/step.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (15-json.html))))
 
@@ -468,7 +408,6 @@
   (deps (
     ../book/15-json.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/json/book.json.sexp
     ../examples/code/json/build_github_atd.sh.sexp
     ../examples/code/json/build_json.topscript.sexp
@@ -495,10 +434,7 @@
     ../examples/code/json/yojson_basic_simple.mli.sexp
     ../examples/code/json/yojson_safe.mli.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (16-parsing-with-ocamllex-and-menhir.html))))
 
@@ -507,7 +443,6 @@
   (deps (
     ../book/16-parsing-with-ocamllex-and-menhir.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/parsing-test/build_test.sh.sexp
     ../examples/code/parsing-test/run_broken_test.errsh.sexp
     ../examples/code/parsing-test/test.ml.sexp
@@ -527,10 +462,7 @@
     ../examples/code/parsing/short_parser.mly.sexp
     ../examples/code/parsing/tokens.ml.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (17-data-serialization.html))))
 
@@ -539,7 +471,6 @@
   (deps (
     ../book/17-data-serialization.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/sexpr/auto_making_sexp.topscript.sexp
     ../examples/code/sexpr/basic.scm.sexp
     ../examples/code/sexpr/comment_heavy.scm.sexp
@@ -574,10 +505,7 @@
     ../examples/code/sexpr/test_interval_nosexp/jbuild.sexp
     ../examples/code/sexpr/to_from_sexp.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (18-concurrent-programming.html))))
 
@@ -586,7 +514,6 @@
   (deps (
     ../book/18-concurrent-programming.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/async/better_echo.ml.sexp
     ../examples/code/async/echo/echo.ml.sexp
     ../examples/code/async/echo/jbuild.sexp
@@ -610,10 +537,7 @@
     ../examples/code/async/search_with_timeout_no_leak/search_with_timeout_no_leak.ml.sexp
     ../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (19-foreign-function-interface.html))))
 
@@ -622,7 +546,6 @@
   (deps (
     ../book/19-foreign-function-interface.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/ctypes/ctypes.mli.sexp
     ../examples/code/ctypes/ctypes_impl.ml.sexp
     ../examples/code/ffi/datetime/build_datetime.sh.sexp
@@ -651,10 +574,7 @@
     ../examples/code/ffi/return_frag.ml.sexp
     ../examples/code/ffi/timeval_headers.h.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (20-runtime-memory-layout.html))))
 
@@ -663,15 +583,11 @@
   (deps (
     ../book/20-runtime-memory-layout.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/memory-repr/custom_ops.c.sexp
     ../examples/code/memory-repr/reprs.topscript.sexp
     ../examples/code/memory-repr/simple_record.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (21-garbage-collector.html))))
 
@@ -680,7 +596,6 @@
   (deps (
     ../book/21-garbage-collector.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/gc/barrier_bench/barrier_bench.ml.sexp
     ../examples/code/gc/barrier_bench/jbuild.sexp
     ../examples/code/gc/barrier_bench/run_barrier_bench.sh.sexp
@@ -690,10 +605,7 @@
     ../examples/code/gc/finalizer/run_finalizer.sh.sexp
     ../examples/code/gc/tune.topscript.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (22-compiler-frontend.html))))
 
@@ -702,7 +614,6 @@
   (deps (
     ../book/22-compiler-frontend.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/front-end/alice.ml.sexp
     ../examples/code/front-end/alice.mli.sexp
     ../examples/code/front-end/alice_combined.ml.sexp
@@ -754,10 +665,7 @@
     ../examples/code/packing/show_files.sh.sexp
     ../examples/code/packing/test.ml.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (23-compiler-backend.html))))
 
@@ -766,7 +674,6 @@
   (deps (
     ../book/23-compiler-backend.html
     ../bin/bin/app.exe
-    ../topexpect/src/main.exe
     ../examples/code/back-end-embed/build_embed.sh.sexp
     ../examples/code/back-end-embed/build_embed_binary.rawsh.sexp
     ../examples/code/back-end-embed/build_embed_c.sh.sexp
@@ -806,10 +713,7 @@
     ../examples/code/back-end/perf_record.rawsh.sexp
     ../examples/code/back-end/perf_report.rawsh.sexp))
   (action (
-    setenv
-    TOPEXPECT_BIN
-    ${path:../topexpect/src/main.exe}
-    (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))))
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
 (alias ((name site) (deps (faqs.html))))
 

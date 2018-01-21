@@ -74,12 +74,9 @@ let jbuild_for_chapter base_dir file =
   (alias ((name site) (deps (%s))))
   (rule
   ((targets (%s))
-   (deps (../book/%s ../bin/bin/app.exe ../topexpect/src/main.exe
+   (deps (../book/%s ../bin/bin/app.exe 
 %s))
-   (action
-     (setenv TOPEXPECT_BIN ${path:../topexpect/src/main.exe}
-       (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})
-     )))) |} file file file deps
+   (action (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))) |} file file file deps
 
 let starts_with_digit b =
   try Scanf.sscanf b "%d-" (fun _ -> ()); true
