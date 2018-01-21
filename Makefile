@@ -1,7 +1,8 @@
 .PHONY: all clean
 
 all:
-	jbuilder build @site
+	@jbuilder build @site
+	@echo Site has been generated in _build/default/static/
 
 code:
 	jbuilder build @code
