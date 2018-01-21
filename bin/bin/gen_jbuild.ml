@@ -1,5 +1,6 @@
 (** Generate jbuild files for code examples within the tree *)
 open Printf
+open Sexplib.Conv
 
 (** Directory and file traversal functions *)
 
@@ -118,14 +119,7 @@ let process_chapters book_dir output_dir =
 
 (** Handle examples *)
 
-(** todo replace with an sexp file in the directory *)
-let topscript_extra_deps =
-  function
-  |"parse_book.topscript" -> " book.json"
-  |"example_load.topscript" -> " example.scm example_broken.scm comment_heavy.scm"
-  |_ -> ""
-
-let topscript_rule f =
+let topscript_rule ~dep f =
   sprintf {|
 (alias ((name code) (deps (%s.stamp))))
 (alias ((name sexp) (deps (%s.sexp))))
@@ -136,44 +130,54 @@ let topscript_rule f =
     (run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 (rule
  ((targets (%s.stamp))
-  (deps    (%s%s))
+  (deps    (%s %s))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? %s %s.corrected)
     ))
-  )) |} f f f f f f (topscript_extra_deps f) f f
+  )) |} f f f f f f dep f f
 
-let rwo_eval_rule f =
+let rwo_eval_rule ~dep f =
   sprintf {|
 (alias ((name sexp) (deps (%s.sexp))))
 (rule
   ((targets (%s.sexp)) (deps (%s))
   (action (with-stdout-to ${@} (run rwo-build eval ${<}))))) |} f f f
 
-let jbuild_rule f =
+let jbuild_rule ~dep f =
   (* TODO filter out the include here *)
-  rwo_eval_rule f
+  rwo_eval_rule ~dep f
 
-let sh_rule f =
+let sh_rule ~dep f =
   (* as a special case, touch a jbuild.inc file until
    * https://github.com/ocaml/dune/issues/431 is answered *)
   sprintf {|
 (alias ((name sexp) (deps (%s.sexp))))
 (rule
   ((targets (%s.sexp))
-  (deps (%s))
-  (action (progn (bash "touch jbuild.inc") (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f f
+  (deps (%s %s))
+  (action (progn (bash "touch jbuild.inc") (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f dep f
+
+type extra_deps = (string * string list) list [@@deriving sexp]
+
+let find_extra_deps dir =
+  let f = Filename.concat dir "jbuild.deps" in
+  if Sys.file_exists f then begin
+    Sexplib.Sexp.load_sexp_conv_exn f extra_deps_of_sexp
+  end else []
 
 let process_examples dir =
   Filename.concat dir "jbuild.inc" |> fun jbuild ->
+  find_extra_deps dir |> fun deps ->
   files_with ~exts:book_extensions dir |>
   List.map (fun f ->
+    let dep = List.assoc_opt f deps |> function None -> "" | Some v -> String.concat " " v in
     match f with 
-    | "jbuild" -> jbuild_rule f 
-    | f when Filename.extension f = ".topscript" -> topscript_rule f
-    | f when Filename.extension f = ".sh" -> sh_rule f
-    | f when List.mem (Filename.extension f) book_extensions -> rwo_eval_rule f
+    | "jbuild" -> jbuild_rule ~dep f 
+    | f when Filename.extension f = ".topscript" -> topscript_rule ~dep f
+    | f when Filename.extension f = ".sh" -> sh_rule ~dep f
+    | f when List.mem (Filename.extension f) book_extensions -> rwo_eval_rule ~dep f
     | _ -> printf "skipping %s/%s\n%!" dir f; ""
   ) |>
   List.filter ((<>) "") |>
