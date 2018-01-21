@@ -4,6 +4,7 @@
  ((names (app rwo_deps gen_jbuild))
   (package rwo)
   (public_names (rwo-build rwo-deps rwo-jbuild))
-  (libraries (rwo))
+  (preprocess (pps (ppx_sexp_conv)))
+  (libraries (rwo lambdasoup))
   (flags (:standard -short-paths))
   ))
