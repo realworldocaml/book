@@ -4,3 +4,7 @@
 set -ex
 
 docker pull ocaml/opam:ubuntu-16.04_ocaml-4.06.0
+cd $TRAVIS_BUILD_DIR
+echo Build started at `date`
+docker build -t ocaml/rwo .
+echo Build completed at `date`
