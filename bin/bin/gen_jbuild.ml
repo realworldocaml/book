@@ -177,6 +177,7 @@ let process_examples dir =
     | "jbuild" -> jbuild_rule ~dep f 
     | f when Filename.extension f = ".topscript" -> topscript_rule ~dep f
     | f when Filename.extension f = ".sh" -> sh_rule ~dep f
+    | f when Filename.extension f = ".errsh" -> sh_rule ~dep f
     | f when List.mem (Filename.extension f) book_extensions -> rwo_eval_rule ~dep f
     | _ -> printf "skipping %s/%s\n%!" dir f; ""
   ) |>
