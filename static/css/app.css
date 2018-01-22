@@ -269,7 +269,7 @@ p {
   font-family: inherit;
   font-weight: 300;
   font-size: 1.2rem;
-  line-height: 1.8;
+  line-height: 1.5;
   margin-bottom: 1.25rem;
   text-rendering: optimizeLegibility; }
   p.lead {
@@ -729,143 +729,6 @@ a h1 {
     .left-column .to-chapter:hover {
       background: #e4d0ed; }
 
-pre .hll {
-  background-color: #ffffcc; }
-
-pre {
-  background: whitesmoke; }
-
-pre .c {
-  color: green; }
-
-/* Comment */
-pre .err {
-  border: 1px solid red; }
-
-/* Error */
-pre .k {
-  color: blue; }
-
-/* Keyword */
-pre .cm {
-  color: green; }
-
-/* Comment.Multiline */
-pre .cp {
-  color: blue; }
-
-/* Comment.Preproc */
-pre .c1 {
-  color: green; }
-
-/* Comment.Single */
-pre .cs {
-  color: green; }
-
-/* Comment.Special */
-pre .ge {
-  font-style: italic; }
-
-/* Generic.Emph */
-pre.ge {
-  font-style: italic; }
-
-/* Generic.Emph */
-pre .gh {
-  font-weight: bold; }
-
-/* Generic.Heading */
-pre .gp {
-  font-weight: bold; }
-
-/* Generic.Prompt */
-pre .gs {
-  font-weight: bold; }
-
-/* Generic.Strong */
-pre .gu {
-  font-weight: bold; }
-
-/* Generic.Subheading */
-pre .kc {
-  color: blue; }
-
-/* Keyword.Constant */
-pre .kd {
-  color: blue; }
-
-/* Keyword.Declaration */
-pre .kn {
-  color: blue; }
-
-/* Keyword.Namespace */
-pre .kp {
-  color: blue; }
-
-/* Keyword.Pseudo */
-pre .kr {
-  color: blue; }
-
-/* Keyword.Reserved */
-pre .kt {
-  color: #2b91af; }
-
-/* Keyword.Type */
-pre .s {
-  color: #a31515; }
-
-/* Literal.String */
-pre .nc {
-  color: #2b91af; }
-
-/* Name.Class */
-pre .ow {
-  color: blue; }
-
-/* Operator.Word */
-pre .sb {
-  color: #a31515; }
-
-/* Literal.String.Backtick */
-pre .sc {
-  color: #a31515; }
-
-/* Literal.String.Char */
-pre .sd {
-  color: #a31515; }
-
-/* Literal.String.Doc */
-pre .s2 {
-  color: #a31515; }
-
-/* Literal.String.Double */
-pre .se {
-  color: #a31515; }
-
-/* Literal.String.Escape */
-pre .sh {
-  color: #a31515; }
-
-/* Literal.String.Heredoc */
-pre .si {
-  color: #a31515; }
-
-/* Literal.String.Interpol */
-pre .sx {
-  color: #a31515; }
-
-/* Literal.String.Other */
-pre .sr {
-  color: #a31515; }
-
-/* Literal.String.Regex */
-pre .s1 {
-  color: #a31515; }
-
-/* Literal.String.Single */
-pre .ss {
-  color: #a31515; }
-
 /* Literal.String.Symbol */
 .splash .title h1, .title-bar .title h1 {
   font-family: "lexia", serif;
@@ -1250,7 +1113,7 @@ pre .ss {
           color: black; }
 
 section[data-type=chapter] h2, section[data-type=chapter] h3, section[data-type=chapter] h4, section[data-type=chapter] h5, section[data-type=chapter] h6 {
-  margin-top: 3.75rem; }
+  margin-top: 1.75rem; }
 section[data-type=chapter] > h1 {
   font-size: 3.8147rem;
   border-bottom: 2px solid #222222;
@@ -1303,18 +1166,10 @@ section[data-type=chapter] aside {
   section[data-type=chapter] aside pre, section[data-type=chapter] aside div.highlight {
     font-size: 0.875rem;
     background: transparent; }
-  section[data-type=chapter] aside div.highlight {
-    padding: 0 1.6875rem; }
 section[data-type=chapter] div.highlight {
-  background: whitesmoke;
-  position: relative;
-  display: block;
-  padding: 0.84375rem 1.6875rem;
-  border-radius: 3px;
-  margin-bottom: 1.25rem;
-  margin-left: 0;
-  white-space: pre-wrap;
-  overflow: scroll; }
+  font-size: 90%;
+  margin-bottom: 1em;
+}
 section[data-type=chapter] dl dt {
   margin: 0; }
 section[data-type=chapter] dl dd {
@@ -1354,8 +1209,8 @@ section[data-type=chapter] table {
     background: #fafafa; }
 @media only screen and (min-width: 40.063em) {
   section[data-type=chapter] section[data-type=sect1] {
-    margin-top: 3.375rem;
-    padding-top: 3.375rem; }
+    margin-top: 1.375rem;
+    padding-top: 1.375rem; }
   section[data-type=chapter] aside pre {
     margin-left: 0;
     margin-right: 0; }
