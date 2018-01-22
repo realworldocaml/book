@@ -25,6 +25,7 @@
 (rule (
   (targets (variant.syntax.sexp))
   (deps    (variant.syntax))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
@@ -32,6 +33,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (logger.topscript.stamp))))

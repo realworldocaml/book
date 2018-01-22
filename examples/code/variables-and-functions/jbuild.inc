@@ -5,6 +5,7 @@
 (rule (
   (targets (htable_sig2.ml.sexp))
   (deps    (htable_sig2.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (substring_sig1.ml.sexp))))
@@ -12,6 +13,7 @@
 (rule (
   (targets (substring_sig1.ml.sexp))
   (deps    (substring_sig1.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
@@ -19,6 +21,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (numerical_deriv_alt_sig.ml.sexp))))
@@ -26,6 +29,7 @@
 (rule (
   (targets (numerical_deriv_alt_sig.ml.sexp))
   (deps    (numerical_deriv_alt_sig.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (abs_diff.ml.sexp))))
@@ -33,6 +37,7 @@
 (rule (
   (targets (abs_diff.ml.sexp))
   (deps    (abs_diff.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (let.syntax.sexp))))
@@ -40,6 +45,7 @@
 (rule (
   (targets (let.syntax.sexp))
   (deps    (let.syntax))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (let_in.syntax.sexp))))
@@ -47,6 +53,7 @@
 (rule (
   (targets (let_in.syntax.sexp))
   (deps    (let_in.syntax))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (operators.syntax.sexp))))
@@ -54,6 +61,7 @@
 (rule (
   (targets (operators.syntax.sexp))
   (deps    (operators.syntax))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (numerical_derv_alt_sig.ml.sexp))))
@@ -61,6 +69,7 @@
 (rule (
   (targets (numerical_derv_alt_sig.ml.sexp))
   (deps    (numerical_derv_alt_sig.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (main.topscript.stamp))))
@@ -88,6 +97,7 @@
 (rule (
   (targets (substring_sig2.ml.sexp))
   (deps    (substring_sig2.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (abs_diff.mli.sexp))))
@@ -95,6 +105,7 @@
 (rule (
   (targets (abs_diff.mli.sexp))
   (deps    (abs_diff.mli))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (htable_sig1.ml.sexp))))
@@ -102,6 +113,7 @@
 (rule (
   (targets (htable_sig1.ml.sexp))
   (deps    (htable_sig1.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (numerical_deriv_alt_sig.mli.sexp))))
@@ -109,5 +121,6 @@
 (rule (
   (targets (numerical_deriv_alt_sig.mli.sexp))
   (deps    (numerical_deriv_alt_sig.mli))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

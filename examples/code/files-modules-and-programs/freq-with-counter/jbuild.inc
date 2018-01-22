@@ -5,6 +5,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (counter.ml.sexp))))
@@ -12,6 +13,7 @@
 (rule (
   (targets (counter.ml.sexp))
   (deps    (counter.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (build.sh.sexp))))
@@ -19,6 +21,7 @@
 (rule (
   (targets (build.sh.sexp))
   (deps    (build.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -29,6 +32,7 @@
 (rule (
   (targets (freq.ml.sexp))
   (deps    (freq.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (infer_mli.sh.sexp))))
@@ -36,6 +40,7 @@
 (rule (
   (targets (infer_mli.sh.sexp))
   (deps    (infer_mli.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")

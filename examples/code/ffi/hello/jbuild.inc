@@ -5,6 +5,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (build_hello.sh.sexp))))
@@ -12,6 +13,7 @@
 (rule (
   (targets (build_hello.sh.sexp))
   (deps    (build_hello.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -22,5 +24,6 @@
 (rule (
   (targets (hello.ml.sexp))
   (deps    (hello.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

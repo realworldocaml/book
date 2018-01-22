@@ -5,6 +5,7 @@
 (rule (
   (targets (int_interval_manual_sexp.mli.sexp))
   (deps    (int_interval_manual_sexp.mli))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (inline_sexp.topscript.stamp))))
@@ -32,6 +33,7 @@
 (rule (
   (targets (sexp.mli.sexp))
   (deps    (sexp.mli))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (sexp_default.topscript.stamp))))
@@ -59,6 +61,7 @@
 (rule (
   (targets (int_interval_nosexp.mli.sexp))
   (deps    (int_interval_nosexp.mli))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (basic.scm.sexp))))
@@ -66,6 +69,7 @@
 (rule (
   (targets (basic.scm.sexp))
   (deps    (basic.scm))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (to_from_sexp.topscript.stamp))))
@@ -93,6 +97,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (example.scm.sexp))))
@@ -100,6 +105,7 @@
 (rule (
   (targets (example.scm.sexp))
   (deps    (example.scm))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (comment_heavy.scm.sexp))))
@@ -107,6 +113,7 @@
 (rule (
   (targets (comment_heavy.scm.sexp))
   (deps    (comment_heavy.scm))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (sexp_option.topscript.stamp))))
@@ -154,6 +161,7 @@
 (rule (
   (targets (sexp.ml.sexp))
   (deps    (sexp.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (print_sexp.topscript.stamp))))
@@ -203,6 +211,7 @@
 (rule (
   (targets (list_top_packages.sh.sexp))
   (deps    (list_top_packages.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -234,6 +243,7 @@
 (rule (
   (targets (sexp_override.ml.sexp))
   (deps    (sexp_override.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (int_interval_manual_sexp.ml.sexp))))
@@ -241,6 +251,7 @@
 (rule (
   (targets (int_interval_manual_sexp.ml.sexp))
   (deps    (int_interval_manual_sexp.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (auto_making_sexp.topscript.stamp))))
@@ -268,6 +279,7 @@
 (rule (
   (targets (int_interval_nosexp.ml.sexp))
   (deps    (int_interval_nosexp.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (sexp_list.topscript.stamp))))
@@ -315,5 +327,6 @@
 (rule (
   (targets (example_broken.scm.sexp))
   (deps    (example_broken.scm))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

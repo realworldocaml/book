@@ -5,6 +5,7 @@
 (rule (
   (targets (record.syntax.sexp))
   (deps    (record.syntax))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
@@ -12,6 +13,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (warn_help.sh.sexp))))
@@ -19,6 +21,7 @@
 (rule (
   (targets (warn_help.sh.sexp))
   (deps    (warn_help.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -49,6 +52,7 @@
 (rule (
   (targets (functional_update.syntax.sexp))
   (deps    (functional_update.syntax))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (main2.topscript.stamp))))

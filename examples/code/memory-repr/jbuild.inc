@@ -5,6 +5,7 @@
 (rule (
   (targets (custom_ops.c.sexp))
   (deps    (custom_ops.c))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (simple_record.topscript.stamp))))
@@ -32,6 +33,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (reprs.topscript.stamp))))

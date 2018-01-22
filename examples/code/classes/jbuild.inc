@@ -25,6 +25,7 @@
 (rule (
   (targets (doc.ml.sexp))
   (deps    (doc.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (binary.topscript.stamp))))
@@ -92,6 +93,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (class_types_stack.ml.sexp))))
@@ -99,6 +101,7 @@
 (rule (
   (targets (class_types_stack.ml.sexp))
   (deps    (class_types_stack.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (stack.topscript.stamp))))
@@ -126,6 +129,7 @@
 (rule (
   (targets (Iterator.java.sexp))
   (deps    (Iterator.java))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (citerator.cpp.sexp))))
@@ -133,6 +137,7 @@
 (rule (
   (targets (citerator.cpp.sexp))
   (deps    (citerator.cpp))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (binary_larger.ml.sexp))))
@@ -140,6 +145,7 @@
 (rule (
   (targets (binary_larger.ml.sexp))
   (deps    (binary_larger.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (binary_module.ml.sexp))))
@@ -147,5 +153,6 @@
 (rule (
   (targets (binary_module.ml.sexp))
   (deps    (binary_module.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

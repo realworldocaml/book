@@ -25,6 +25,7 @@
 (rule (
   (targets (subtyping.ml.sexp))
   (deps    (subtyping.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
@@ -32,6 +33,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (is_barbell.ml.sexp))))
@@ -39,6 +41,7 @@
 (rule (
   (targets (is_barbell.ml.sexp))
   (deps    (is_barbell.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (stack.topscript.stamp))))
@@ -66,6 +69,7 @@
 (rule (
   (targets (narrowing.ml.sexp))
   (deps    (narrowing.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (subtyping.topscript.stamp))))
@@ -113,6 +117,7 @@
 (rule (
   (targets (IsBarbell.java.sexp))
   (deps    (IsBarbell.java))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (row_polymorphism.topscript.stamp))))
@@ -140,5 +145,6 @@
 (rule (
   (targets (Shape.java.sexp))
   (deps    (Shape.java))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

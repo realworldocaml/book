@@ -5,6 +5,7 @@
 (rule (
   (targets (B.ml.sexp))
   (deps    (B.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
@@ -12,6 +13,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (test.ml.sexp))))
@@ -19,6 +21,7 @@
 (rule (
   (targets (test.ml.sexp))
   (deps    (test.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (build_test.sh.sexp))))
@@ -26,6 +29,7 @@
 (rule (
   (targets (build_test.sh.sexp))
   (deps    (build_test.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -36,6 +40,7 @@
 (rule (
   (targets (show_files.sh.sexp))
   (deps    (show_files.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -46,5 +51,6 @@
 (rule (
   (targets (A.ml.sexp))
   (deps    (A.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

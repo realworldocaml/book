@@ -5,6 +5,7 @@
 (rule (
   (targets (build_session_info.errsh.sexp))
   (deps    (build_session_info.errsh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -15,6 +16,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (session_info.ml.sexp))))
@@ -22,5 +24,6 @@
 (rule (
   (targets (session_info.ml.sexp))
   (deps    (session_info.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

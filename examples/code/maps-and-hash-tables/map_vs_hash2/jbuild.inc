@@ -5,6 +5,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (run_map_vs_hash2.sh.sexp))))
@@ -12,6 +13,7 @@
 (rule (
   (targets (run_map_vs_hash2.sh.sexp))
   (deps    (run_map_vs_hash2.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -22,5 +24,6 @@
 (rule (
   (targets (map_vs_hash2.ml.sexp))
   (deps    (map_vs_hash2.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
