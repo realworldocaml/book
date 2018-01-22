@@ -1,7 +1,7 @@
 #!/bin/sh
 # Designed for the Travis CI build environment. See .travis.yml
 
-set -x
+set -ex
 cd $TRAVIS_BUILD_DIR
 echo Build started at `date`
 docker build -t ocaml/rwo .

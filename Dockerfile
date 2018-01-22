@@ -1,16 +1,16 @@
-FROM ocaml/opam:ubuntu-17.04_ocaml-4.05.0
-RUN sudo apt-get -y install python-pygments 
+FROM ocaml/opam:ubuntu-17.04_ocaml-4.06.0
 RUN git -C /home/opam/opam-repository pull origin master && opam update
 RUN opam repo set-url default https://opam.ocaml.org/
 ENV OPAMYES=1
-ENV OPAMJOBS=4
-RUN opam depext -j2 -i cohttp-lwt-unix async core_extended textwrap ctypes-foreign toplevel_expect_test sexp_pretty lambdasoup
+ENV OPAMJOBS=3
+RUN opam depext -ui cohttp-lwt-unix async core_extended textwrap ctypes-foreign toplevel_expect_test sexp_pretty lambdasoup
+RUN sudo apt-get -y install python-pygments 
 COPY . /home/opam/src
 RUN sudo chown -R opam /home/opam/src
 WORKDIR /home/opam/src
 RUN opam pin add jbuilder --dev
 RUN opam pin add -n rwo .
 RUN opam depext -uy rwo
-RUN opam install --deps-only rwo -j2
-RUN opam config exec -- make PYGMENTIZE=1 -j2
+RUN opam install --deps-only rwo
+RUN opam config exec -- make 
 RUN rm -rf /home/opam/.opam
