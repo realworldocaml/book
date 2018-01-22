@@ -52,7 +52,7 @@
 
 (rule (
   (targets (build_embed.sh.sexp))
-  (deps    (build_embed.sh))
+  (deps (build_embed.sh embed_me1.ml embed_me2.ml))
   (fallback)
   (action (
     progn
@@ -63,7 +63,7 @@
 
 (rule (
   (targets (build_embed_c.sh.sexp))
-  (deps    (build_embed_c.sh))
+  (deps (build_embed_c.sh embed_me1.ml embed_me2.ml))
   (fallback)
   (action (
     progn
