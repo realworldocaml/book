@@ -6,7 +6,7 @@ let add_days base span () =
   |> print_endline
 
 let add =
-  Command.basic
+  Command.basic_spec
     ~summary:"Add [days] to the [base] date and print day"
     Command.Spec.(
       step

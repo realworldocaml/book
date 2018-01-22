@@ -4,7 +4,11 @@
 
 (rule (
   (targets (build_and_run_cal_add_interactive.sh.sexp))
-  (deps    (build_and_run_cal_add_interactive.sh))
+  (deps (
+    build_and_run_cal_add_interactive.sh
+    cal_add_interactive.ml
+    jbuild
+    jbuild.inc))
   (fallback)
   (action (
     progn
