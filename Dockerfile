@@ -1,4 +1,4 @@
-FROM ocaml/opam:ubuntu-17.04_ocaml-4.06.0
+FROM ocaml/opam:ubuntu-16.04_ocaml-4.06.0
 RUN git -C /home/opam/opam-repository pull origin master && opam update
 RUN opam repo set-url default https://opam.ocaml.org/
 ENV OPAMYES=1
