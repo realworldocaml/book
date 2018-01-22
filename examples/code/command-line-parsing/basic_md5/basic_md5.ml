@@ -14,7 +14,7 @@ let spec =
   +> anon ("filename" %: string)
 [@@@part "2"];;
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     spec

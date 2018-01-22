@@ -11,7 +11,7 @@
 
 (rule (
   (targets (build_qsort.sh.sexp))
-  (deps (input.txt build_qsort.sh))
+  (deps (build_qsort.sh input.txt))
   (action (
     progn
     (bash "touch jbuild.inc")
