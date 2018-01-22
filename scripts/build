@@ -2,8 +2,12 @@
 # Designed for the Travis CI build environment. See .travis.yml
 
 set -ex
+cd $TRAVIS_BUILD_DIR
+echo Build started at `date`
+docker build -t ocaml/rwo .
+echo Build completed at `date`
 #echo Using Hub build due to a Travis build hanging
 #docker pull ocaml/rwo
-mkdir -p $TRAVIS_BUILD_DIR/site
-docker run --name temp-container -v $TRAVIS_BUILD_DIR/site:/out ocaml/rwo sh -c "opam config exec -- make && sudo cp -r /home/opam/src/_build/default/site/* /out"
+docker run --name temp-container ocaml/rwo /bin/true
+docker cp temp-container:/home/opam/src/_build/default/site $TRAVIS_BUILD_DIR/site
 find $TRAVIS_BUILD_DIR/site
