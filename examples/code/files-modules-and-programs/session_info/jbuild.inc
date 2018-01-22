@@ -4,7 +4,7 @@
 
 (rule (
   (targets (build_session_info.errsh.sexp))
-  (deps    (build_session_info.errsh))
+  (deps (build_session_info.errsh session_info.ml jbuild jbuild.inc))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

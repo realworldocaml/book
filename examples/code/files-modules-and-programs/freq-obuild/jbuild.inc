@@ -12,7 +12,7 @@
 
 (rule (
   (targets (build.sh.sexp))
-  (deps    (build.sh))
+  (deps (build.sh jbuild.inc jbuild freq.ml))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
@@ -28,7 +28,7 @@
 
 (rule (
   (targets (test.sh.sexp))
-  (deps    (test.sh))
+  (deps (test.sh build.sh.sexp))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
