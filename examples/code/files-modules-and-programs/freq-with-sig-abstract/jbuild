@@ -1,6 +1,6 @@
+(jbuild_version 1)
+(include jbuild.inc)
 (executable
  ((name freq)
   (libraries (core_kernel))
   ))
-
-(jbuild_version 1)

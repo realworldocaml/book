@@ -1,7 +1,7 @@
 (jbuild_version 1)
+(include jbuild.inc)
 
 (executable
   ((name session_info)
    (libraries (core_kernel))
-  )
-)
+  ))

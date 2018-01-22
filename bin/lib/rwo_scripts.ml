@@ -256,8 +256,16 @@ let eval_script lang ~run_nondeterministic ~filename =
       Reader.file_contents filename >>| fun x ->
       let regexp = Str.regexp "ppx_sexp_conv -no-check" in
       let removed_check = Str.replace_first regexp "ppx_sexp_conv" x in
-      Ok (`Other removed_check)
-    )
+      let regexp = Str.regexp_string "(jbuild_version 1)" in
+      let removed_check = Str.replace_first regexp "" removed_check in
+      let regexp = Str.regexp_string "(include jbuild.inc)" in
+      let removed_check = Str.replace_first regexp "" removed_check in
+      match Sexplib.Sexp.of_string (sprintf "(%s)" removed_check) with
+      | Sexplib.Sexp.Atom _ -> assert false
+      | Sexplib.Sexp.List l ->
+         let r = String.concat ~sep:"\n" (List.map ~f:Sexp_pretty.sexp_to_string l) in
+         Ok (`Other r)
+      )
   | _ -> (
       Reader.file_contents filename >>| fun x ->
       Ok (`Other x)

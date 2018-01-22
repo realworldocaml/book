@@ -117,7 +117,7 @@ let build : Command.t = Command.group
   ~summary:"build commands"
   [
     "chapter", build_chapter;
-    "frontpage", build_frontpage;
+    "index", build_frontpage;
     "toc", build_toc_page;
     "faqs", build_faqs_page;
     "install", build_install_page;

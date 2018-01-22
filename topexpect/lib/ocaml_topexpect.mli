@@ -26,8 +26,10 @@ end
 
 module Document : sig
   type t [@@deriving sexp]
+  type rwo [@@deriving sexp]
   val v : parts:Part.t list -> matched:bool -> t
 
+  val rwo : t -> rwo
   val parts : t -> Part.t list
   val matched : t -> bool
 end

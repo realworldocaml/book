@@ -1,0 +1,2 @@
+jbuilder build basic_md5_as_filename.exe
+./_build/default/basic_md5_as_filename.exe nonexistent
