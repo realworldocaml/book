@@ -11,7 +11,7 @@
 
 (rule (
   (targets (run_read_json.sh.sexp))
-  (deps    (run_read_json.sh))
+  (deps (book.json run_read_json.sh))
   (action (
     progn
     (bash "touch jbuild.inc")
