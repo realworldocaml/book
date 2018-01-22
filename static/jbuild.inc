@@ -363,10 +363,12 @@
     ../examples/code/command-line-parsing/basic_md5/get_basic_md5_version.sh.sexp
     ../examples/code/command-line-parsing/basic_md5/jbuild.sexp
     ../examples/code/command-line-parsing/basic_md5/run_basic_md5.sh.sexp
-    ../examples/code/command-line-parsing/basic_md5_as_filename.ml.sexp
+    ../examples/code/command-line-parsing/basic_md5_as_filename/basic_md5_as_filename.ml.sexp
+    ../examples/code/command-line-parsing/basic_md5_as_filename/run_basic_md5_as_filename.errsh.sexp
     ../examples/code/command-line-parsing/basic_md5_sequence.ml.sexp
     ../examples/code/command-line-parsing/basic_md5_succinct.ml.sexp
-    ../examples/code/command-line-parsing/basic_md5_with_custom_arg.ml.sexp
+    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/basic_md5_with_custom_arg.ml.sexp
+    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run_basic_md5_with_custom_arg.errsh.sexp
     ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml.sexp
     ../examples/code/command-line-parsing/basic_md5_with_flags/build_basic_md5_with_flags.sh.sexp
     ../examples/code/command-line-parsing/basic_md5_with_flags/jbuild.sexp
@@ -395,8 +397,6 @@
     ../examples/code/command-line-parsing/command_types.topscript.sexp
     ../examples/code/command-line-parsing/group.topscript.sexp
     ../examples/code/command-line-parsing/opam.rawsh.sexp
-    ../examples/code/command-line-parsing/run_basic_md5_as_filename.errsh.sexp
-    ../examples/code/command-line-parsing/run_basic_md5_with_custom_arg.errsh.sexp
     ../examples/code/command-line-parsing/step.topscript.sexp))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
