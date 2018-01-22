@@ -20,7 +20,7 @@
 
 (rule (
   (targets (build_basic_md5.sh.sexp))
-  (deps (build_basic_md5.sh basic_md5.ml))
+  (deps (build_basic_md5.sh basic_md5.ml jbuild jbuild.inc))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

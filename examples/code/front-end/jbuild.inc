@@ -244,7 +244,7 @@
 
 (rule (
   (targets (indent_follow_on_function_fixed.sh.sexp))
-  (deps    (indent_follow_on_function_fixed.sh))
+  (deps (indent_follow_on_function_fixed.sh follow_on_function_fixed.ml))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
