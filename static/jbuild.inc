@@ -4,6 +4,7 @@
   (name site)
   (deps (
     css/app.css
+    css/prism.css
     images/jason.jpg
     images/plain-bg.jpg
     images/anil.jpg
@@ -22,6 +23,7 @@
     images/memory-repr/float_array_layout.png
     images/memory-repr/tuple_layout.png
     js/_functions.js
+    js/prism.js
     js/jquery.min.js
     js/modernizr.js
     js/app.js
