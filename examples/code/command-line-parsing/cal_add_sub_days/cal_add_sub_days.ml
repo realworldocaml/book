@@ -1,7 +1,7 @@
 open Core
 
 let add =
-  Command.basic ~summary:"Add [days] to the [base] date"
+  Command.basic_spec ~summary:"Add [days] to the [base] date"
     Command.Spec.(
       empty
       +> anon ("base" %: date)
@@ -14,7 +14,7 @@ let add =
     )
 
 let diff =
-  Command.basic ~summary:"Show days between [date1] and [date2]"
+  Command.basic_spec ~summary:"Show days between [date1] and [date2]"
     Command.Spec.(
       empty
       +> anon ("date1" %: date)

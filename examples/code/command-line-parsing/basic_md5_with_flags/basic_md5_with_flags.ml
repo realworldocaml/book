@@ -16,7 +16,7 @@ let checksum_from_file filename =
   |> print_endline
 
 let command =
-  Command.basic
+  Command.basic_spec
     ~summary:"Generate an MD5 hash of the input data"
     Command.Spec.(
       empty

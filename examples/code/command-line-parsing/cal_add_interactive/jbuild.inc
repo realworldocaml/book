@@ -5,6 +5,7 @@
 (rule (
   (targets (build_and_run_cal_add_interactive.sh.sexp))
   (deps    (build_and_run_cal_add_interactive.sh))
+  (fallback)
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -15,6 +16,7 @@
 (rule (
   (targets (jbuild.sexp))
   (deps    (jbuild))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name sexp) (deps (cal_add_interactive.ml.sexp))))
@@ -22,5 +24,6 @@
 (rule (
   (targets (cal_add_interactive.ml.sexp))
   (deps    (cal_add_interactive.ml))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
