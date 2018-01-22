@@ -54,10 +54,7 @@
   (targets (infer_typedef.sh.sexp))
   (deps    (infer_typedef.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (build_type_conv_with_camlp4.rawsh.sexp))))
 
@@ -73,10 +70,7 @@
   (targets (build_principal_corebuild.sh.sexp))
   (deps    (build_principal_corebuild.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (comparelib_test.ml.sexp))))
 
@@ -108,10 +102,7 @@
   (targets (build_broken_poly_with_annot.errsh.sexp))
   (deps    (build_broken_poly_with_annot.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (indent_follow_on_function.sh.sexp))))
 
@@ -119,10 +110,7 @@
   (targets (indent_follow_on_function.sh.sexp))
   (deps    (indent_follow_on_function.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (fixed_module.ml.sexp))))
 
@@ -138,10 +126,7 @@
   (targets (typedtree_typedef.sh.sexp))
   (deps    (typedtree_typedef.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (broken_poly.ml.sexp))))
 
@@ -157,10 +142,7 @@
   (targets (process_comparelib_interface.sh.sexp))
   (deps    (process_comparelib_interface.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (conflicting_interface.ml.sexp))))
 
@@ -184,10 +166,7 @@
   (targets (build_type_conv_without_camlp4.errsh.sexp))
   (deps    (build_type_conv_without_camlp4.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (comparelib_test.mli.sexp))))
 
@@ -203,10 +182,7 @@
   (targets (build_principal.sh.sexp))
   (deps    (build_principal.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (let_unit.syntax.sexp))))
 
@@ -246,10 +222,7 @@
   (targets (conflicting_interfaces.errsh.sexp))
   (deps    (conflicting_interfaces.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (build_broken_module.errsh.sexp))))
 
@@ -257,10 +230,7 @@
   (targets (build_broken_module.errsh.sexp))
   (deps    (build_broken_module.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (principal.ml.sexp))))
 
@@ -276,10 +246,7 @@
   (targets (indent_follow_on_function_fixed.sh.sexp))
   (deps    (indent_follow_on_function_fixed.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (camlp4_dump.cmd.sexp))))
 
@@ -295,10 +262,7 @@
   (targets (parsetree_typedef.sh.sexp))
   (deps    (parsetree_typedef.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (typedef_objinfo.sh.sexp))))
 
@@ -306,10 +270,7 @@
   (targets (typedef_objinfo.sh.sexp))
   (deps    (typedef_objinfo.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (typedef.ml.sexp))))
 
@@ -325,10 +286,7 @@
   (targets (build_non_principal.sh.sexp))
   (deps    (build_non_principal.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (short_paths_2.rawsh.sexp))))
 
@@ -412,10 +370,7 @@
   (targets (build_follow_on_function.errsh.sexp))
   (deps    (build_follow_on_function.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (broken_module.ml.sexp))))
 
@@ -431,10 +386,7 @@
   (targets (build_broken_poly.errsh.sexp))
   (deps    (build_broken_poly.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (process_comparelib_test.sh.sexp))))
 
@@ -442,8 +394,5 @@
   (targets (process_comparelib_test.sh.sexp))
   (deps    (process_comparelib_test.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

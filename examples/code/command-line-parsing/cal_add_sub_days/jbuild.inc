@@ -14,10 +14,7 @@
   (targets (build_cal_add_sub_days.sh.sexp))
   (deps (build_cal_add_sub_days.sh cal_add_sub_days.ml jbuild jbuild.inc))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (run_cal_add_sub_days.sh.sexp))))
 
@@ -25,10 +22,7 @@
   (targets (run_cal_add_sub_days.sh.sexp))
   (deps (run_cal_add_sub_days.sh build_cal_add_sub_days.sh.sexp))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (cal_add_sub_days.ml.sexp))))
 

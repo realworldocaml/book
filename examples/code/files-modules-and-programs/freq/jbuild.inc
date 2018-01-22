@@ -6,10 +6,7 @@
   (targets (simple_build.sh.sexp))
   (deps    (simple_build.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
 
@@ -25,10 +22,7 @@
   (targets (simple_build_fail.errsh.sexp))
   (deps    (simple_build_fail.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (freq.ml.sexp))))
 

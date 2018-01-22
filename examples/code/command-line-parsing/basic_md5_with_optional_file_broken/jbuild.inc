@@ -25,8 +25,5 @@
     build_basic_md5_with_optional_file_broken.errsh
     basic_md5_with_optional_file_broken.ml))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

@@ -38,8 +38,5 @@
   (targets (build_test_interval.sh.sexp))
   (deps    (build_test_interval.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

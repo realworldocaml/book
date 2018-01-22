@@ -6,10 +6,7 @@
   (targets (run_map_vs_hash.sh.sexp))
   (deps    (run_map_vs_hash.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
 

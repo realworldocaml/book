@@ -7,10 +7,7 @@
   (deps (
     build_basic_md5_with_flags.sh basic_md5_with_flags.ml jbuild jbuild.inc))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (basic_md5_with_flags.ml.sexp))))
 
@@ -38,10 +35,7 @@
     jbuild
     jbuild.inc))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (md5_completion.sh.sexp))))
 
@@ -50,8 +44,5 @@
   (deps (
     md5_completion.sh build_basic_md5_with_flags.sh.sexp jbuild jbuild.inc))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

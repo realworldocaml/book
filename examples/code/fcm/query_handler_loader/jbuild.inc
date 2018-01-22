@@ -38,8 +38,5 @@
   (targets (build_query_handler_loader.sh.sexp))
   (deps    (build_query_handler_loader.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

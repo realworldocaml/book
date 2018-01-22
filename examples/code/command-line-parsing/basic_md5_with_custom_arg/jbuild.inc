@@ -18,10 +18,7 @@
     jbuild.inc
     basic_md5_with_custom_arg.ml))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (basic_md5_with_custom_arg.ml.sexp))))
 

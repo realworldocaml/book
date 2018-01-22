@@ -22,8 +22,5 @@
   (targets (run_alternate_list.sh.sexp))
   (deps    (run_alternate_list.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

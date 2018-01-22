@@ -54,10 +54,7 @@
   (targets (build_embed.sh.sexp))
   (deps (build_embed.sh embed_me1.ml embed_me2.ml))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (build_embed_c.sh.sexp))))
 
@@ -65,10 +62,7 @@
   (targets (build_embed_c.sh.sexp))
   (deps (build_embed_c.sh embed_me1.ml embed_me2.ml))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (run_debug_hello.sh.sexp))))
 
@@ -76,10 +70,7 @@
   (targets (run_debug_hello.sh.sexp))
   (deps    (run_debug_hello.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (hello.ml.sexp))))
 

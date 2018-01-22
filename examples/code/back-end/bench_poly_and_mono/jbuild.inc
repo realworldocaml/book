@@ -14,10 +14,7 @@
   (targets (run_bench_poly_and_mono.sh.sexp))
   (deps    (run_bench_poly_and_mono.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (bench_poly_and_mono.ml.sexp))))
 

@@ -6,10 +6,7 @@
   (targets (show_barrier_bench_help.sh.sexp))
   (deps    (show_barrier_bench_help.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (barrier_bench.ml.sexp))))
 
@@ -33,8 +30,5 @@
   (targets (run_barrier_bench.sh.sexp))
   (deps    (run_barrier_bench.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

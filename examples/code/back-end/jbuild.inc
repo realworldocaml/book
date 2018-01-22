@@ -78,10 +78,7 @@
   (targets (instr_for_pattern_monomorphic_small.sh.sexp))
   (deps    (instr_for_pattern_monomorphic_small.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (compare_poly.ml.sexp))))
 
@@ -97,10 +94,7 @@
   (targets (asm_from_compare_mono.sh.sexp))
   (deps    (asm_from_compare_mono.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (lambda_for_pattern_monomorphic_large.sh.sexp))))
 
@@ -108,10 +102,7 @@
   (targets (lambda_for_pattern_monomorphic_large.sh.sexp))
   (deps (lambda_for_pattern_monomorphic_large.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (compare_poly_asm.S.sexp))))
 
@@ -127,10 +118,7 @@
   (targets (lambda_for_pattern_monomorphic_small.sh.sexp))
   (deps (lambda_for_pattern_monomorphic_small.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (perf_record.rawsh.sexp))))
 
@@ -146,10 +134,7 @@
   (targets (lambda_for_pattern_polymorphic.sh.sexp))
   (deps    (lambda_for_pattern_polymorphic.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (pattern_monomorphic_small.ml.sexp))))
 

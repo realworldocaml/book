@@ -14,10 +14,7 @@
   (targets (run_basic_md5.sh.sexp))
   (deps (run_basic_md5.sh build_basic_md5.sh.sexp))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (build_basic_md5.sh.sexp))))
 
@@ -25,10 +22,7 @@
   (targets (build_basic_md5.sh.sexp))
   (deps (build_basic_md5.sh basic_md5.ml))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
 
@@ -44,10 +38,7 @@
   (targets (get_basic_md5_help.errsh.sexp))
   (deps (get_basic_md5_help.errsh build_basic_md5.sh.sexp))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (get_basic_md5_version.sh.sexp))))
 
@@ -55,8 +46,5 @@
   (targets (get_basic_md5_version.sh.sexp))
   (deps (get_basic_md5_version.sh build_basic_md5.sh.sexp))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

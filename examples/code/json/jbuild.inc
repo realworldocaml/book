@@ -178,10 +178,7 @@
   (targets (build_github_atd.sh.sexp))
   (deps    (build_github_atd.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (github_j.mli.sexp))))
 

@@ -6,10 +6,7 @@
   (targets (build_test_interval_nosexp.errsh.sexp))
   (deps    (build_test_interval_nosexp.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (int_interval.ml.sexp))))
 

@@ -30,8 +30,5 @@
   (targets (build_read_foo_better_errors.errsh.sexp))
   (deps    (build_read_foo_better_errors.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

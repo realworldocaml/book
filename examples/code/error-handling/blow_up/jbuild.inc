@@ -6,10 +6,7 @@
   (targets (build_blow_up.errsh.sexp))
   (deps    (build_blow_up.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (blow_up.ml.sexp))))
 
@@ -33,8 +30,5 @@
   (targets (build_blow_up_notrace.errsh.sexp))
   (deps    (build_blow_up_notrace.errsh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

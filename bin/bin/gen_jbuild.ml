@@ -151,15 +151,14 @@ let jbuild_rule ~dep f =
   rwo_eval_rule ~dep f
 
 let sh_rule ~dep f =
-  (* as a special case, touch a jbuild.inc file until
-   * https://github.com/ocaml/dune/issues/431 is answered *)
+  (* see https://github.com/ocaml/dune/issues/431 is answered *)
   sprintf {|
 (alias ((name sexp) (deps (%s.sexp))))
 (rule
   ((targets (%s.sexp))
   (deps (%s %s))
   (fallback)
-  (action (progn (bash "touch jbuild.inc") (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f f dep
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f f dep
 
 type extra_deps = (string * string list) list [@@deriving sexp]
 

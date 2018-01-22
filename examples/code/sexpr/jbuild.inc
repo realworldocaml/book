@@ -212,10 +212,7 @@
   (targets (list_top_packages.sh.sexp))
   (deps    (list_top_packages.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name code) (deps (example_load.topscript.stamp))))
 

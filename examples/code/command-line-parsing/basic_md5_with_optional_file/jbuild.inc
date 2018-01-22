@@ -19,10 +19,7 @@
     jbuild.inc
     basic_md5_with_optional_file.ml))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
 
@@ -38,10 +35,7 @@
   (targets (run_basic_and_default_md5.sh.sexp))
   (deps (run_basic_and_default_md5.sh build_basic_and_default_md5.sh.sexp))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (basic_md5_with_optional_file.ml.sexp))))
 

@@ -30,10 +30,7 @@
   (targets (build_test.sh.sexp))
   (deps    (build_test.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (show_files.sh.sexp))))
 
@@ -41,10 +38,7 @@
   (targets (show_files.sh.sexp))
   (deps    (show_files.sh))
   (fallback)
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (A.ml.sexp))))
 
