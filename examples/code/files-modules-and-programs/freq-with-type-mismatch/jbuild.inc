@@ -28,7 +28,7 @@
 
 (rule (
   (targets (build.errsh.sexp))
-  (deps    (build.errsh))
+  (deps (build.errsh counter.ml counter.mli freq.ml jbuild jbuild.inc))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
