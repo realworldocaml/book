@@ -142,8 +142,8 @@ let rwo_eval_rule ~dep f =
   sprintf {|
 (alias ((name sexp) (deps (%s.sexp))))
 (rule
-  ((targets (%s.sexp)) (deps (%s))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<}))))) |} f f f
+  ((targets (%s.sexp)) (deps (%s %s))
+  (action (with-stdout-to ${@} (run rwo-build eval ${<}))))) |} f f f dep
 
 let jbuild_rule ~dep f =
   (* TODO filter out the include here *)
@@ -157,7 +157,7 @@ let sh_rule ~dep f =
 (rule
   ((targets (%s.sexp))
   (deps (%s %s))
-  (action (progn (bash "touch jbuild.inc") (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f dep f
+  (action (progn (bash "touch jbuild.inc") (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f f dep
 
 type extra_deps = (string * string list) list [@@deriving sexp]
 
