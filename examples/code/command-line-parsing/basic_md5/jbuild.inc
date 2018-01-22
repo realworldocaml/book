@@ -39,7 +39,10 @@
 (rule (
   (targets (get_basic_md5_help.errsh.sexp))
   (deps (get_basic_md5_help.errsh build_basic_md5.sh.sexp))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (get_basic_md5_version.sh.sexp))))
 

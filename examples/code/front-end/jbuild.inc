@@ -95,7 +95,10 @@
 (rule (
   (targets (build_broken_poly_with_annot.errsh.sexp))
   (deps    (build_broken_poly_with_annot.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (indent_follow_on_function.sh.sexp))))
 
@@ -160,7 +163,10 @@
 (rule (
   (targets (build_type_conv_without_camlp4.errsh.sexp))
   (deps    (build_type_conv_without_camlp4.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (comparelib_test.mli.sexp))))
 
@@ -212,14 +218,20 @@
 (rule (
   (targets (conflicting_interfaces.errsh.sexp))
   (deps    (conflicting_interfaces.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (build_broken_module.errsh.sexp))))
 
 (rule (
   (targets (build_broken_module.errsh.sexp))
   (deps    (build_broken_module.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (principal.ml.sexp))))
 
@@ -356,7 +368,10 @@
 (rule (
   (targets (build_follow_on_function.errsh.sexp))
   (deps    (build_follow_on_function.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (broken_module.ml.sexp))))
 
@@ -370,7 +385,10 @@
 (rule (
   (targets (build_broken_poly.errsh.sexp))
   (deps    (build_broken_poly.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (process_comparelib_test.sh.sexp))))
 

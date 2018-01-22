@@ -20,5 +20,8 @@
 (rule (
   (targets (build_basic_md5_with_optional_file_broken.errsh.sexp))
   (deps (build_basic_md5_with_optional_file_broken.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

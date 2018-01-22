@@ -25,7 +25,7 @@
 
 (rule (
   (targets (run_parse_book.sh.sexp))
-  (deps    (run_parse_book.sh))
+  (deps (run_parse_book.sh book.json parse_book.ml))
   (action (
     progn
     (bash "touch jbuild.inc")

@@ -5,7 +5,10 @@
 (rule (
   (targets (build_test_interval_nosexp.errsh.sexp))
   (deps    (build_test_interval_nosexp.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (int_interval.ml.sexp))))
 

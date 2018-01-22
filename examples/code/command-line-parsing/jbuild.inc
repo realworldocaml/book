@@ -12,7 +12,10 @@
 (rule (
   (targets (run_basic_md5_as_filename.errsh.sexp))
   (deps    (run_basic_md5_as_filename.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name code) (deps (basic.topscript.stamp))))
 
@@ -127,7 +130,10 @@
 (rule (
   (targets (run_basic_md5_with_custom_arg.errsh.sexp))
   (deps    (run_basic_md5_with_custom_arg.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (cal_add_labels.ml.sexp))))
 

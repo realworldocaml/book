@@ -5,7 +5,10 @@
 (rule (
   (targets (build_blow_up.errsh.sexp))
   (deps    (build_blow_up.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (blow_up.ml.sexp))))
 
@@ -26,5 +29,8 @@
 (rule (
   (targets (build_blow_up_notrace.errsh.sexp))
   (deps    (build_blow_up_notrace.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

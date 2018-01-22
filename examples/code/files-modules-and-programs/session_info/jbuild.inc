@@ -5,7 +5,10 @@
 (rule (
   (targets (build_session_info.errsh.sexp))
   (deps    (build_session_info.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (jbuild.sexp))))
 

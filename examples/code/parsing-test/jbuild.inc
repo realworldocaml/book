@@ -33,7 +33,10 @@
 (rule (
   (targets (run_broken_test.errsh.sexp))
   (deps    (run_broken_test.errsh))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
+  (action (
+    progn
+    (bash "touch jbuild.inc")
+    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (parser.mly.sexp))))
 
