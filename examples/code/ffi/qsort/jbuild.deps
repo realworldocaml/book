@@ -1,1 +1,1 @@
-((build_qsort.sh (input.txt)))
+((build_qsort.sh (input.txt jbuild jbuild.inc qsort.ml)))
