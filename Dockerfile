@@ -13,4 +13,3 @@ RUN opam pin add -n rwo .
 RUN opam depext -uy rwo
 RUN opam install --deps-only rwo
 RUN opam config exec -- make 
-RUN rm -rf /home/opam/.opam
