@@ -143,6 +143,7 @@ let rwo_eval_rule ~dep f =
 (alias ((name sexp) (deps (%s.sexp))))
 (rule
   ((targets (%s.sexp)) (deps (%s %s))
+  (fallback)
   (action (with-stdout-to ${@} (run rwo-build eval ${<}))))) |} f f f dep
 
 let jbuild_rule ~dep f =
@@ -157,6 +158,7 @@ let sh_rule ~dep f =
 (rule
   ((targets (%s.sexp))
   (deps (%s %s))
+  (fallback)
   (action (progn (bash "touch jbuild.inc") (with-stdout-to ${@} (run rwo-build eval ${<})))))) |} f f f dep
 
 type extra_deps = (string * string list) list [@@deriving sexp]
