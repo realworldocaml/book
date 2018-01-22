@@ -14,7 +14,7 @@ let run ~uppercase ~port =
   Deferred.never ()
 
 let () =
-  Command.async
+  Command.async_spec
     ~summary:"Start an echo server"
     Command.Spec.(
       empty
