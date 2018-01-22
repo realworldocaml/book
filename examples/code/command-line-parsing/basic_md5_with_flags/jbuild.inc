@@ -4,7 +4,7 @@
 
 (rule (
   (targets (build_basic_md5_with_flags.sh.sexp))
-  (deps    (build_basic_md5_with_flags.sh))
+  (deps (build_basic_md5_with_flags.sh basic_md5_with_flags.ml))
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -28,7 +28,7 @@
 
 (rule (
   (targets (run_basic_md5_flags_help.sh.sexp))
-  (deps    (run_basic_md5_flags_help.sh))
+  (deps (run_basic_md5_flags_help.sh build_basic_md5_with_flags.sh.sexp))
   (action (
     progn
     (bash "touch jbuild.inc")
@@ -38,7 +38,7 @@
 
 (rule (
   (targets (md5_completion.sh.sexp))
-  (deps    (md5_completion.sh))
+  (deps (md5_completion.sh build_basic_md5_with_flags.sh.sexp))
   (action (
     progn
     (bash "touch jbuild.inc")

@@ -7,16 +7,6 @@
   (deps    (cal_add_days.ml))
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
-(alias ((name sexp) (deps (run_basic_md5_as_filename.errsh.sexp))))
-
-(rule (
-  (targets (run_basic_md5_as_filename.errsh.sexp))
-  (deps    (run_basic_md5_as_filename.errsh))
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
-
 (alias ((name code) (deps (basic.topscript.stamp))))
 
 (alias ((name sexp) (deps (basic.topscript.sexp))))
@@ -98,13 +88,6 @@
   (deps    (cal_append.ml))
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
-(alias ((name sexp) (deps (basic_md5_as_filename.ml.sexp))))
-
-(rule (
-  (targets (basic_md5_as_filename.ml.sexp))
-  (deps    (basic_md5_as_filename.ml))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (group.topscript.stamp))))
 
 (alias ((name sexp) (deps (group.topscript.sexp))))
@@ -124,16 +107,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}            "")
     (diff?      group.topscript group.topscript.corrected)))))
-
-(alias ((name sexp) (deps (run_basic_md5_with_custom_arg.errsh.sexp))))
-
-(rule (
-  (targets (run_basic_md5_with_custom_arg.errsh.sexp))
-  (deps    (run_basic_md5_with_custom_arg.errsh))
-  (action (
-    progn
-    (bash "touch jbuild.inc")
-    (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
 (alias ((name sexp) (deps (cal_add_labels.ml.sexp))))
 
@@ -161,12 +134,5 @@
 (rule (
   (targets (basic_md5_sequence.ml.sexp))
   (deps    (basic_md5_sequence.ml))
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (basic_md5_with_custom_arg.ml.sexp))))
-
-(rule (
-  (targets (basic_md5_with_custom_arg.ml.sexp))
-  (deps    (basic_md5_with_custom_arg.ml))
   (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
