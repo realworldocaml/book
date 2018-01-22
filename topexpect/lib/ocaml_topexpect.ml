@@ -36,7 +36,13 @@ module Document = struct
     { parts : Part.t list; matched : bool; }
     [@@deriving sexp]
 
+  type rwo = [
+    `OCaml_toplevel of t
+  ] [@@deriving sexp]
+
   let v ~parts ~matched = {parts; matched}
+
+  let rwo t = `OCaml_toplevel t
   let parts {parts;_} = parts
   let matched {matched;_} = matched
 end

@@ -1,0 +1,3 @@
+(
+ (run_echo.sh (jbuild jbuild.inc echo.ml))
+)

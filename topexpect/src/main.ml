@@ -93,7 +93,8 @@ let parse_phrase (contents, lexbuf) =
     | exception exn ->
       let exn = match Location.error_of_exn exn with
         | None -> raise exn
-        | Some error -> Location.Error (shift_location_error startpos error)
+        | Some `Already_displayed -> raise exn
+        | Some (`Ok error) -> Location.Error (shift_location_error startpos error)
       in
       if lexbuf.Lexing.lex_last_action <> semisemi_action then begin
         let rec aux () = match Lexer.token lexbuf with
@@ -616,7 +617,7 @@ let find_delim s =
       then Bytes.unsafe_to_string b
       else exhaust (next b)
     in
-    exhaust ""
+    exhaust (Bytes.of_string "")
 
 let output_phrases oc contents =
   let rec aux = function
@@ -727,7 +728,8 @@ let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color ~in_pla
   in
   if sexp_output then (
     document_of_phrases file_contents success phrases
-    |> Document.sexp_of_t
+    |> Document.rwo 
+    |> Document.sexp_of_rwo
     |> Sexplib.Sexp.output stdout_backup
   );
   success
@@ -756,13 +758,12 @@ let process_file fname =
   Compmisc.init_path true;
   Toploop.toplevel_env := Compmisc.initial_env ();
   Sys.interactive := false;
-  let success =
+  let _success =
     process_expect_file ~fname
       ~run_nondeterministic:!run_nondeterministic
       ~dry_run:!dry_run ~use_color:!use_color
       ~in_place:!in_place ~sexp_output:!sexp_output
   in
-(*  exit (if success then 0 else 1) *)
   exit 0
 ;;
 
@@ -839,7 +840,7 @@ module Options = Main_args.Make_bytetop_options (struct
     let _drawlambda = set dump_rawlambda
     let _dlambda = set dump_lambda
     let _dflambda = set dump_flambda
-    let _dtimings = set print_timings
+    (* let _dtimings = set print_timings *)
     let _dinstr = set dump_instr
 
     let anonymous s = process_file s

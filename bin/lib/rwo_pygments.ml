@@ -34,14 +34,14 @@ let of_lang (x:Lang.t) = match (x :> string) with
     error "we are not supporting this language for pygmentize" x Lang.sexp_of_t
 
 let lang_to_string = function
-  | `OCaml -> "book/pygmentize/ocaml-custom.py:OcamlLexer"
+  | `OCaml -> "ocaml"
   | `Bash -> "bash"
   | `C -> "c"
   | `Gas -> "gas"
   | `Java -> "java"
   | `Json -> "json"
   | `Scheme -> "scheme"
-  | `Sexp -> "lisp"
+  | `Sexp -> "scheme"
 
 let really_pygmentize ~add_attrs lang contents =
   let arg = match lang with
@@ -90,5 +90,5 @@ let pygmentize ?(add_attrs=[]) ?(pygmentize=true) lang contents =
     really_pygmentize ~add_attrs lang contents )
   else
     (Html.encode contents
-    |> (fun x -> Html.pre ~a:add_attrs [`Data x])
+    |> (fun x -> Html.pre ~a:add_attrs [Html.code ~a:["class","language-" ^ (lang_to_string lang)] [`Data x]])
     |> return)

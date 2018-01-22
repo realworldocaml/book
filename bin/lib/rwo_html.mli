@@ -81,6 +81,7 @@ val div : ?a:attributes -> t -> item
 val span : ?a:attributes -> t -> item
 val p : ?a:attributes -> t -> item
 val pre : ?a:attributes -> t -> item
+val code : ?a:attributes -> t -> item
 val article : ?a:attributes -> t -> item
 val body : ?a:attributes -> t -> item
 val html : ?a:attributes -> t -> item
