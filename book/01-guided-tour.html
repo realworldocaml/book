@@ -36,8 +36,9 @@
 	summary.
 
 	<ul>
-	  <li><em><code>Base</code></em> is the most minimal of the three.  It's
-	  designed to be portable, lightweight, and stable.
+	  <li><em><code>Base</code></em> is the most minimal of the
+	    three.  It's designed to be portable, lightweight, and
+	    stable.
 	  </li>
 
 	  <li><em><code>Core_kernel<code></em>
@@ -194,10 +195,22 @@
       take multiple arguments. (Note that the following example
       will not work if you haven't opened
       <code>Base</code> as was suggested
-      earlier.)<idx>multi-argument
-      functions</idx><idx>functions/with multiple
-      arguments</idx></p>
+      earlier.)
+
+      <idx>multi-argument functions</idx>
+      <idx>functions/with multiple arguments</idx>
+      </p>
+
       <link rel="import" href="code/guided-tour/main.topscript" part="6"/>
+
+      <p>
+	Note that if you find operators like <code>/.</code> awkward
+	to use, you can take advantage of OCaml's <em>local open</em> syntax
+	to make the floating point operations available using the
+	traditional operators.
+      </p>
+
+      <link rel="import" href="code/guided-tour/main.topscript" part="6.1"/>
 
       <p>The preceding example also happens to be our first use of
       modules. Here, <code>Float.of_int</code> refers to the
@@ -271,7 +284,8 @@
 
 	    <p><code>if test second then second else 0</code> </p>
 
-	    <p>we can infer that <code>second</code> has type <code>int</code>.</p>
+	    <p>we can infer that <code>second</code> has
+	    type <code>int</code>.</p>
           </li>
 
           <li>

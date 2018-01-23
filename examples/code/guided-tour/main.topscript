@@ -65,6 +65,16 @@ let ratio x y =
 [%%expect ocaml {|val ratio : int -> int -> float = <fun>|}];;
 ratio 4 7;;
 [%%expect ocaml {|- : float = 0.5714285714285714|}];;
+
+[@@@part "6.1"];;
+let ratio x y =
+  let open Float.O in
+  of_int x / of_int y
+;;
+[%%expect ocaml {|val ratio : int -> int -> float = <fun>|}];;
+
+
+
 [@@@part "7"];;
 let sum_if_true test first second =
   (if test first then first else 0)
