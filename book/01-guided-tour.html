@@ -16,9 +16,9 @@
     of the language. This should provide a sense of what OCaml can
     do, without getting too deep into any one topic.</p>
 
-    <p>Throughout the book we're going to
-    use <code>Core_kernel</code>, a more full-featured and capable
-    replacement for OCaml's standard library. We'll also
+    <p>Throughout the book we're going to use <code>Base</code>, a
+    more full-featured and capable replacement for OCaml's standard
+    library. We'll also
     use <span class="command"><em>utop</em></span>, a shell that lets
     you type in expressions and evaluate them interactively.
       <span class="command"><em>utop</em></span> is an
@@ -29,24 +29,38 @@
     toplevel should mostly work fine.</p>
 
     <div data-type="note">
-      <h1><code>Core</code>, <code>Core_kernel</code> and
-      portability</h1>
+      <h1><code>Base</code>, <code>Core</code> and <code>Core_kernel</code></h1>
 
-      <p><code>Core_kernel</code> is actually part of a more
-      expansive library called <code>Core</code>. We use
-      <code>Core_kernel</code> here because it is portable to every
-      platform that OCaml runs on, unlike <code>Core</code>, which
-      only works on Unix-like platforms, including Linux and MacOS.
-      If you want your code to run on Windows or Javascript, you
-      need to stick to <code>Core_kernel</code>.</p>
+      <p><code>Base</code> is one of a family of three standard library
+      replacements, each with different use-cases. Here's a quick
+	summary.
 
-      <p>You should check out <code>Core</code> if you'll be running
-      only on Unix. <code>Core</code> includes a lot of useful
-      functionality, including an excellent command line parsing
-      library and modules that provide access to low-level operating
-      systems facilities from mutexes to sockets. We'll discuss some
-      of the additional functionality provided by <code>Core</code>
-      later in the book.</p>
+	<ul>
+	  <li><em><code>Base</code></em> is the most minimal of the three.  It's
+	  designed to be portable, lightweight, and stable.
+	  </li>
+
+	  <li><em><code>Core_kernel<code></em>
+	    extends <code>Base</code> with many new data structures
+	    and capabilities. It's still portable, but has many more
+	    dependencies and takes longer to build, and also increases
+	    the size of your resulting executbale by more. Also, it
+	    contains some APIs that change faster than those
+	    in <code>Base</code>
+	  </li>
+
+	  <li><em><code>Core</code></em> is the most full-featured,
+	    extending <code>Core_kernel</code> with support for a variety of
+	    UNIX APIs, but only works on UNIX-like OSs, including Linux
+	    and Mac OS.
+	    </li>
+	</ul>
+
+	We use <code>Base</code> in this section, but you should check
+	out <code>Core</code> and <code>Core_kernel</code>, depending
+	on your requirements.  We'll discuss some of the additional
+	functionality provided by <code>Core</code>
+	and <code>Core_kernel</code> later in the book.</p>
     </div>
 
     <p>Before getting started, make sure you have a working OCaml
@@ -56,7 +70,7 @@
     <section id="ocaml-as-a-calculator" data-type="sect1">
       <h1>OCaml as a Calculator</h1>
 
-      <p>Our first step is to open <code>Core_kernel</code>:
+      <p>Our first step is to open <code>Base</code>:
 
 	<idx>OCaml/numerical calculations in</idx>
 	<idx>numerical calculations</idx>
@@ -65,9 +79,9 @@
 
       <link rel="import" href="code/guided-tour/main.topscript" part="0.5"/>
 
-      <p>By opening <code>Core_kernel</code>, we make the
+      <p>By opening <code>Base</code>, we make the
       definitions it contains available without having to reference
-      <code>Core_kernel</code> explicitly. This is required for
+      <code>Base</code> explicitly. This is required for
       many of the examples in the tour and in the remainder of the
       book.</p>
 
@@ -179,7 +193,7 @@
       returns an <code>int</code>. We can also write functions that
       take multiple arguments. (Note that the following example
       will not work if you haven't opened
-      <code>Core_kernel</code> as was suggested
+      <code>Base</code> as was suggested
       earlier.)<idx>multi-argument
       functions</idx><idx>functions/with multiple
       arguments</idx></p>
@@ -474,7 +488,7 @@
         <section id="the-list-module" data-type="sect3">
           <h3>The List module</h3>
 
-          <p><code>Core_kernel</code> comes with a
+          <p><code>Base</code> comes with a
           <code>List</code> module that has a rich collection of
           functions for working with lists. We can access values
           from within a module by using dot notation. For example,
