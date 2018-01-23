@@ -184,20 +184,21 @@
       <section id="the-core-standard-library" data-type="sect2">
         <h2>The <code>Base</code> Standard Library</h2>
 
-        <p>A language on its own isn't enough. You also need a rich
-          set of libraries to build your applications on. A common
-          source of frustration for those learning OCaml is that the
-          standard library that ships with the compiler is limited,
-          covering only a subset of the functionality you would expect
-          from a general-purpose standard library. That's because the
-          standard library isn't really a general-purpose tool; its
-          fundamental role is in bootstrapping the compiler, and has
-          been purposefully kept small and simple.</p>
+        <p>However good it is, a language on its own isn't enough. You
+          also need a set of libraries to build your applications
+          on. A common source of frustration for those learning OCaml
+          is that the standard library that ships with the compiler is
+          limited, covering only a subset of the functionality you
+          would expect from a general-purpose standard library. That's
+          because the standard library isn't really a general-purpose
+          tool; its fundamental role is in bootstrapping the compiler,
+          and has been purposefully kept small and simple.</p>
 
         <p>Happily, in the world of open source software, nothing
           stops alternative libraries from being written to supplement
-          the compiler-supplied standard library, and this is exactly
-          what <code>Base</code> is.
+          the compiler-supplied standard library.  <code>Base</code>
+          is an example of such a library, and it's the standard
+          library we'll use through most of this book.
 
 	  <idx>Base standard library</idx>
 	</p>
@@ -218,12 +219,13 @@
 	  extensions that provide useful new functionality to OCaml,
 	  and there are additional libraries that are designed to work
 	  well with it, including <code>Core</code>, an extension
-	  to <code>Base</code> that includes more significantly more
-	  functionality, including UNIX-specific calls,
-	  and <code>Async</code>, a library for doing concurrent
-	  programming such as GUIs or networked applications. All of
-	  these libraries are distributed under a
-          liberal Apache 2 license to permit free use in hobby,
+	  to <code>Base</code> that includes support for UNIX-specific
+	  APIs and a wealth of new data structures and tools;
+	  and <code>Async</code>, a library for concurrent programming
+	  of the kind that often comes up when building user
+	  interfaces or networked applications.  All of these
+	  libraries are distributed under a liberal Apache 2 license
+	  to permit free use in hobby,
           academic, and commercial settings.
 	</p>
       </section>
