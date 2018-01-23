@@ -101,13 +101,16 @@ pre[class*="language-"] {
 	color: #690;
 }
 
-.token.operator,
 .token.entity,
 .token.url,
 .language-css .token.string,
 .style .token.string {
 	color: #a67f59;
 	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.operator {
+  color: #a67f59;
 }
 
 .token.atrule,
