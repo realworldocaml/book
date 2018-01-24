@@ -31,30 +31,41 @@
     <div data-type="note">
       <h1><code>Base</code>, <code>Core</code> and <code>Core_kernel</code></h1>
 
-      <p><code>Base</code> is one of a family of three standard library
-      replacements, each with different use-cases. Here's a quick
-	summary.
+      <p>
+	<code>Base</code> is one of a family of three standard library
+	replacements, each with different use-cases, each building on
+	the last. Here's a quick summary.
 
 	<ul>
-	  <li><em><code>Base</code></em> is the most minimal of the
-	    three.  It's designed to be portable, lightweight, and
-	    stable.
+	  <li>
+	    <em><code>Base</code></em> is designed to provide the
+	    fundamentals needed from a standard library. It has a
+	    variety of basic efficient data structures like
+	    hash-tables, sets and sequences. It also defines the basic
+	    idioms for error handling and serialization, and contains
+	    well organized APIs for every basic data type from
+	    integers to lazy values. This is comes along with a
+	    minimum of external dependencies, so <code>Base</code>
+	    just takes seconds to build and install. It's also
+	    portable, running on every platform that OCaml does,
+	    including Windows and JavaScript.
 	  </li>
 
-	  <li><em><code>Core_kernel<code></em>
-	    extends <code>Base</code> with many new data structures
-	    and capabilities. It's still portable, but has many more
-	    dependencies and takes longer to build, and also increases
-	    the size of your resulting executbale by more. Also, it
-	    contains some APIs that change faster than those
-	    in <code>Base</code>
+	  <li>
+	    <em><code>Core_kernel<code></em> extends <code>Base</code>
+	    with many new data structures, like heaps, and other
+	    capabilities, like types to represent times and
+	    time-zones, and support for efficient binary serializers.
+	    It's still portable, but has many more dependencies,
+	    takes longer to build, and will add more to the size of
+	    your executables.
 	  </li>
 
-	  <li><em><code>Core</code></em> is the most full-featured,
-	    extending <code>Core_kernel</code> with support for a variety of
-	    UNIX APIs, but only works on UNIX-like OSs, including Linux
-	    and Mac OS.
-	    </li>
+	  <li>
+	    <em><code>Core</code></em> is the most full-featured,
+	    extending <code>Core_kernel</code> with support for a
+	    variety of UNIX APIs, but only works on UNIX-like OSs,
+	    including Linux and macOS. </li>
 	</ul>
 
 	We use <code>Base</code> in this section, but you should check
@@ -189,7 +200,7 @@
       <code>int -&gt; int</code> is a function type, in this case
       indicating a function that takes an <code>int</code> and
       returns an <code>int</code>. We can also write functions that
-      take multiple arguments. (Reminder: Don't forget to open <code>Base</code>,
+      take multiple arguments. (Reminder: Don't forget <code>open Base</code>,
       or these examples won't work!)
 
       <idx>multi-argument functions</idx>
@@ -210,14 +221,17 @@
       </p>
 
       <p>
-	Modules can also be opened, as we opened <code>Base</code>
-	earlier. We can use that to make this code a little easier to
-	read, both avoiding the repetition of <code>Float</code>
-	above, and avoiding use of the slightly
-	awkward <code>/.</code> operator.  In the following example,
-	we open the <code>Float.O</code> module, which has a bunch of
-	useful operators and functions that are designed to be used in
-	this kind of context.
+	Modules can also be opened to make their contents available
+	without explicitly qualifying by the module name.  We did that
+	once already, when we opened <code>Base</code> earlier.  We
+	can use that to make this code a little easier to read, both
+	avoiding the repetition of <code>Float</code> above, and
+	avoiding use of the slightly awkward <code>/.</code> operator.
+	In the following example, we open the <code>Float.O</code>
+	module, which has a bunch of useful operators and functions
+	that are designed to be used in this kind of context. Note
+	that this causes the standard int-only arithmetic operators to
+	be shadowed locally.
       </p>
 
       <link rel="import" href="code/guided-tour/main.topscript" part="6.1"/>
