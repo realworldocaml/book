@@ -1,0 +1,16 @@
+syntax: glob
+_build
+_opam
+.depend
+site
+.*.swp
+*~
+*.install
+*.byte
+*.orig
+a.out
+.merlin
+*.cmi
+*.cmo
+*.o
+*.cmx
