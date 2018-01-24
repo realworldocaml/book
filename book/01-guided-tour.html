@@ -16,9 +16,9 @@
     of the language. This should provide a sense of what OCaml can
     do, without getting too deep into any one topic.</p>
 
-    <p>Throughout the book we're going to
-    use <code>Core_kernel</code>, a more full-featured and capable
-    replacement for OCaml's standard library. We'll also
+    <p>Throughout the book we're going to use <code>Base</code>, a
+    more full-featured and capable replacement for OCaml's standard
+    library. We'll also
     use <span class="command"><em>utop</em></span>, a shell that lets
     you type in expressions and evaluate them interactively.
       <span class="command"><em>utop</em></span> is an
@@ -29,24 +29,50 @@
     toplevel should mostly work fine.</p>
 
     <div data-type="note">
-      <h1><code>Core</code>, <code>Core_kernel</code> and
-      portability</h1>
+      <h1><code>Base</code>, <code>Core</code> and <code>Core_kernel</code></h1>
 
-      <p><code>Core_kernel</code> is actually part of a more
-      expansive library called <code>Core</code>. We use
-      <code>Core_kernel</code> here because it is portable to every
-      platform that OCaml runs on, unlike <code>Core</code>, which
-      only works on Unix-like platforms, including Linux and MacOS.
-      If you want your code to run on Windows or Javascript, you
-      need to stick to <code>Core_kernel</code>.</p>
+      <p>
+	<code>Base</code> is one of a family of three standard library
+	replacements, each with different use-cases, each building on
+	the last. Here's a quick summary.
 
-      <p>You should check out <code>Core</code> if you'll be running
-      only on Unix. <code>Core</code> includes a lot of useful
-      functionality, including an excellent command line parsing
-      library and modules that provide access to low-level operating
-      systems facilities from mutexes to sockets. We'll discuss some
-      of the additional functionality provided by <code>Core</code>
-      later in the book.</p>
+	<ul>
+	  <li>
+	    <em><code>Base</code></em> is designed to provide the
+	    fundamentals needed from a standard library. It has a
+	    variety of basic efficient data structures like
+	    hash-tables, sets and sequences. It also defines the basic
+	    idioms for error handling and serialization, and contains
+	    well organized APIs for every basic data type from
+	    integers to lazy values. This is comes along with a
+	    minimum of external dependencies, so <code>Base</code>
+	    just takes seconds to build and install. It's also
+	    portable, running on every platform that OCaml does,
+	    including Windows and JavaScript.
+	  </li>
+
+	  <li>
+	    <em><code>Core_kernel<code></em> extends <code>Base</code>
+	    with many new data structures, like heaps, and other
+	    capabilities, like types to represent times and
+	    time-zones, and support for efficient binary serializers.
+	    It's still portable, but has many more dependencies,
+	    takes longer to build, and will add more to the size of
+	    your executables.
+	  </li>
+
+	  <li>
+	    <em><code>Core</code></em> is the most full-featured,
+	    extending <code>Core_kernel</code> with support for a
+	    variety of UNIX APIs, but only works on UNIX-like OSs,
+	    including Linux and macOS. </li>
+	</ul>
+
+	We use <code>Base</code> in this section, but you should check
+	out <code>Core</code> and <code>Core_kernel</code>, depending
+	on your requirements.  We'll discuss some of the additional
+	functionality provided by <code>Core</code>
+	and <code>Core_kernel</code> later in the book.</p>
     </div>
 
     <p>Before getting started, make sure you have a working OCaml
@@ -56,7 +82,7 @@
     <section id="ocaml-as-a-calculator" data-type="sect1">
       <h1>OCaml as a Calculator</h1>
 
-      <p>Our first step is to open <code>Core_kernel</code>:
+      <p>Our first step is to open <code>Base</code>:
 
 	<idx>OCaml/numerical calculations in</idx>
 	<idx>numerical calculations</idx>
@@ -65,9 +91,9 @@
 
       <link rel="import" href="code/guided-tour/main.topscript" part="0.5"/>
 
-      <p>By opening <code>Core_kernel</code>, we make the
+      <p>By opening <code>Base</code>, we make the
       definitions it contains available without having to reference
-      <code>Core_kernel</code> explicitly. This is required for
+      <code>Base</code> explicitly. This is required for
       many of the examples in the tour and in the remainder of the
       book.</p>
 
@@ -144,9 +170,6 @@
       these are legal:</p>
       <link rel="import" href="code/guided-tour/main.topscript" part="3"/>
 
-      <p>Note that by default, <span class="command"><em>utop</em></span> doesn't bother to print out
-      variables starting with an underscore.</p>
-
       <p>The following examples, however, are not legal:</p>
       <link rel="import" href="code/guided-tour/main.topscript" part="4"/>
 
@@ -177,22 +200,50 @@
       <code>int -&gt; int</code> is a function type, in this case
       indicating a function that takes an <code>int</code> and
       returns an <code>int</code>. We can also write functions that
-      take multiple arguments. (Note that the following example
-      will not work if you haven't opened
-      <code>Core_kernel</code> as was suggested
-      earlier.)<idx>multi-argument
-      functions</idx><idx>functions/with multiple
-      arguments</idx></p>
+      take multiple arguments. (Reminder: Don't forget <code>open Base</code>,
+      or these examples won't work!)
+
+      <idx>multi-argument functions</idx>
+      <idx>functions/with multiple arguments</idx>
+      </p>
+
       <link rel="import" href="code/guided-tour/main.topscript" part="6"/>
 
-      <p>The preceding example also happens to be our first use of
-      modules. Here, <code>Float.of_int</code> refers to the
-      <code>of_int</code> function contained in the
-      <code>Float</code> module. This is different from what you
-      might expect from an object-oriented language, where
-      dot-notation is typically used for accessing a method of an
-      object. Note that module names always start with a capital
-      letter.</p>
+      <p>
+	The preceding example also happens to be our first use of
+	modules. Here, <code>Float.of_int</code> refers to
+	the <code>of_int</code> function contained in
+	the <code>Float</code> module. This is different from what you
+	might expect from an object-oriented language, where
+	dot-notation is typically used for accessing a method of an
+	object. Note that module names always start with a capital
+	letter.
+      </p>
+
+      <p>
+	Modules can also be opened to make their contents available
+	without explicitly qualifying by the module name.  We did that
+	once already, when we opened <code>Base</code> earlier.  We
+	can use that to make this code a little easier to read, both
+	avoiding the repetition of <code>Float</code> above, and
+	avoiding use of the slightly awkward <code>/.</code> operator.
+	In the following example, we open the <code>Float.O</code>
+	module, which has a bunch of useful operators and functions
+	that are designed to be used in this kind of context. Note
+	that this causes the standard int-only arithmetic operators to
+	be shadowed locally.
+      </p>
+
+      <link rel="import" href="code/guided-tour/main.topscript" part="6.1"/>
+
+      <p>
+	Note that we used a slightly different syntax for opening the
+	module, since we were only opening it in the local scope
+	inside the definition of <code>ratio</code>.  There's also a
+	more concise syntax for local opens, as you can see here.
+      </p>
+
+      <link rel="import" href="code/guided-tour/main.topscript" part="6.2"/>
 
       <p>The notation for the type-signature of a multiargument
       function may be a little surprising at first, but we'll
@@ -223,7 +274,7 @@
       <code>=</code> in two different ways: once as part of the
       <code>let</code> binding that separates the thing being
       defined from its definition; and once as an equality test,
-      when comparing <code>x mod 2</code> to <code>0</code>. These
+      when comparing <code>x % 2</code> to <code>0</code>. These
       are very different operations despite the fact that they
       share some syntax.</p>
 
@@ -257,7 +308,8 @@
 
 	    <p><code>if test second then second else 0</code> </p>
 
-	    <p>we can infer that <code>second</code> has type <code>int</code>.</p>
+	    <p>we can infer that <code>second</code> has
+	    type <code>int</code>.</p>
           </li>
 
           <li>
@@ -284,15 +336,16 @@
         variables, which determines the overall type of
         <code>sum_if_true</code>.</p>
 
-        <p>Over time, you'll build a rough intuition for how the
-        OCaml inference engine works, which makes it easier to
-        reason through your programs. You can make it easier to
-        understand the types of a given expression by adding
-        explicit type annotations. These annotations don't change
-        the behavior of an OCaml program, but they can serve as
-        useful documentation, as well as catch unintended type
-        changes. They can also be helpful in figuring out why a
-        given piece of code fails to compile.</p>
+        <p>
+	  Over time, you'll build a rough intuition for how the OCaml
+          inference engine works, which makes it easier to reason
+          through your programs. You can also make it easier to
+          understand the types of a given expression by adding
+          explicit type annotations. These annotations don't change
+          the behavior of an OCaml program, but they can serve as
+          useful documentation, as well as catch unintended type
+          changes. They can also be helpful in figuring out why a
+          given piece of code fails to compile.</p>
 
         <p>Here's an annotated version of
         <code>sum_if_true</code>:</p>
@@ -415,8 +468,12 @@
         particularly simple data structure, the tuple. A tuple is
         an ordered collection of values that can each be of a
         different type. You can create a tuple by joining values
-        together with a comma:<idx>tuples</idx><idx>data
-        structures/tuples</idx></p>
+        together with a comma.
+
+	<idx>tuples</idx>
+	<idx>data structures/tuples</idx>
+	</p>
+
         <link rel="import" href="code/guided-tour/main.topscript" part="16"/>
 
         <p>(For the mathematically inclined, <code>*</code>
@@ -450,7 +507,7 @@
         fuss:</p>
         <link rel="import" href="code/guided-tour/main.topscript" part="19"/>
 
-        <p>The <code>**</code> operator used above is for raising a
+        <p>The <code>**.</code> operator used above is for raising a
         floating-point number to a power.</p>
 
         <p>This is just a first taste of pattern matching. Pattern
@@ -474,7 +531,7 @@
         <section id="the-list-module" data-type="sect3">
           <h3>The List module</h3>
 
-          <p><code>Core_kernel</code> comes with a
+          <p><code>Base</code> comes with a
           <code>List</code> module that has a rich collection of
           functions for working with lists. We can access values
           from within a module by using dot notation. For example,
@@ -604,11 +661,11 @@
           <p>A <code>match</code> statement is a kind of juiced-up
           version of the <code>switch</code> statement found in C and
           Java. It essentially lets you list a sequence of patterns,
-          separated by pipe characters. Note that the one before the
-          first case is optional. The compiler then dispatches to the
-          code following the first matching pattern. As we've already
-          seen, the pattern can mint new variables that correspond to
-          parts of the value being matched.</p>
+          separated by pipe characters. (The one before the first case
+          is optional.) The compiler then dispatches to the code
+          following the first matching pattern. As we've already seen,
+          the pattern can mint new variables that correspond to parts
+          of the value being matched.</p>
 
           <p>Here's a new version of
           <code>my_favorite_language</code> that uses
@@ -694,9 +751,11 @@
           involved a lot of recursive functions. In practice, this
           isn't usually necessary. Most of the time, you'll find
           yourself happy to use the iteration functions found in
-          the <code>List</code> module. But it's good to know how
-          to use recursion when you need to do something
-          new.<a data-type="indexterm" data-startref="DSlists">&nbsp;</a></p>
+          the <code>List</code> module. But it's good to know how to
+          use recursion for when you need to iterate in a new way.
+
+	    <a data-type="indexterm" data-startref="DSlists">&nbsp;</a>
+	  </p>
         </section>
       </section>
 
@@ -853,6 +912,7 @@
       <p>Here's how we might write a function for testing whether a
       point is in the interior of some element of a list of
       <code>scene_element</code>s:</p>
+
       <link rel="import" href="code/guided-tour/main.topscript" part="48"/>
 
       <p>You might at this point notice that the use
@@ -876,7 +936,30 @@
       are any elements of the list in question for which the provided
       function evaluates to <code>true</code>. In this case, we're
       using <code>List.exists</code> to check if there is a scene
-      element within which our point resides.</p>
+	element within which our point resides.</p>
+
+      <div data-type="note">
+	<h1><code>Base</code> and polymorphic comparison</h1>
+
+	<p>
+	  One other thing to notice was the fact that we opened
+	  <code>Float.O</code> in the definition of
+	  <code>is_inside_scene_element</code>. That allowed us to use the
+	  simple, un-dotted infix operators, but more importantly it
+	  brought the float comparison operators into scope.  When
+	  using <code>Base</code>, the default comparison operators
+	  work only on integers, and you need to explicitly choose
+	  other comparison operators when you want them. OCaml also
+	  offers a special set of <em>polymorphic
+	    comparison operators</em> that can work on almost any type,
+	  but those are considered to be problematic, and so are hidden
+	  by default by <code>Base</code>. We'll learn more about
+	  polymorphic compare in
+	  <a href="03-lists-and-patterns.html#terser-and-faster-patterns"
+	     data-type="xref">Terser and Faster Patterns</a>	  
+	</p>
+      </div>
+	
     </section>
 
     <section id="imperative-programming" data-type="sect1">
@@ -1094,20 +1177,25 @@
       numbers read in from the standard
       input.<idx>programming/simple standalone example</idx></p>
 
-      <p>Here's the code, which you can save in a file called
-      <em class="filename">sum.ml</em>. Note that we don't
-      terminate expressions with <code>;;</code> here, since it's
-      not required outside the toplevel:</p>
+      <p>
+	Here's the code, which you can save in a file
+	called <em class="filename">sum.ml</em>. Note that we don't
+	terminate expressions with <code>;;</code> here, since it's
+	not required outside the toplevel.</p>
+
       <link rel="import" href="code/guided-tour/sum/sum.ml"/>
 
-      <p>This is our first use of OCaml's input and output
-      routines. The function <code>read_and_accumulate</code> is a
-      recursive function that uses
-      <code>In_channel.input_line</code> to read in lines one by
-      one from the standard input, invoking itself at each
-      iteration with its updated accumulated sum. Note that
-      <code>input_line</code> returns an optional value, with
-      <code>None</code> indicating the end of the input stream.</p>
+      <p>
+	This is our first use of OCaml's input and output routines,
+	and we needed to open another library, <code>Stdio</code>, to
+	get access to them. The
+	function <code>read_and_accumulate</code> is a recursive
+	function that uses <code>In_channel.input_line</code> to read
+	in lines one by one from the standard input, invoking itself
+	at each iteration with its updated accumulated sum. Note
+	that <code>input_line</code> returns an optional value,
+	with <code>None</code> indicating the end of the input
+	stream.</p>
 
       <p>After <code>read_and_accumulate</code> returns, the total
       needs to be printed. This is done using the <code>printf</code>

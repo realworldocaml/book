@@ -1,4 +1,5 @@
-open Core_kernel
+open Base
+open Stdio
 
 let rec read_and_accumulate accum =
   let line = In_channel.input_line In_channel.stdin in
