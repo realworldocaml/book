@@ -10,11 +10,6 @@ step (fun m (base:Date.t) days ->
   | Some days -> m base days
   | None ->
     print_endline "enter days: ";
-    m base (read_int ())) ;;
-[%%expect{|
-Characters 139-147:
-Warning 3: deprecated: Core.read_int
-[since 2016-04] Use
-[Out_channel.(flush stdout); Int.of_string In_channel.(input_line_exn stdin)]
-|};
-ocaml {|- : (Date.t -> int -> '_a, Date.t -> int option -> '_a) t = <abstr>|}];;
+    let i = Int.of_string In_channel.(input_line_exn stdin) in
+    m base i) ;;
+[%%expect ocaml {|- : (Date.t -> int -> '_weak1, Date.t -> int option -> '_weak1) t = <abstr>|}];;
