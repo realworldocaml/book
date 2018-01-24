@@ -3,5 +3,5 @@
 
 (executables
  ((names (sum))
-  (libraries (core_kernel))
+  (libraries (base stdio))
   ))

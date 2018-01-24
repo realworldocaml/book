@@ -17,8 +17,8 @@ open Base;;
 [%%expect ocaml {|- : float = 9.5|}];;
 30_000_000 / 300_000;;
 [%%expect ocaml {|- : int = 100|}];;
-Float.sqrt 9.;;
-[%%expect ocaml {|- : float = 3.|}];;
+3 * 5 > 14;;
+[%%expect ocaml {|- : bool = true|}];;
 [@@@part "2"];;
 let x = 3 + 4;;
 [%%expect ocaml {|val x : int = 7|}];;
@@ -31,10 +31,6 @@ let x_plus_y = x + y;;
 [%%expect ocaml {|val x_plus_y : int = 21|}];;
 let x' = x + 1;;
 [%%expect ocaml {|val x' : int = 8|}];;
-let _x' = x' + x';;
-[%%expect ocaml {|val _x' : int = 16|}];;
-_x';;
-[%%expect ocaml {|- : int = 16|}];;
 [@@@part "4"];;
 let Seven = 3 + 4;;
 [%%expect{|
@@ -73,7 +69,11 @@ let ratio x y =
 ;;
 [%%expect ocaml {|val ratio : int -> int -> float = <fun>|}];;
 
-
+[@@@part "6.2"];;
+let ratio x y =
+  Float.O.(of_int x / of_int y)
+;;
+[%%expect ocaml {|val ratio : int -> int -> float = <fun>|}];;
 
 [@@@part "7"];;
 let sum_if_true test first second =

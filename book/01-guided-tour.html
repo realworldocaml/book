@@ -159,9 +159,6 @@
       these are legal:</p>
       <link rel="import" href="code/guided-tour/main.topscript" part="3"/>
 
-      <p>Note that by default, <span class="command"><em>utop</em></span> doesn't bother to print out
-      variables starting with an underscore.</p>
-
       <p>The following examples, however, are not legal:</p>
       <link rel="import" href="code/guided-tour/main.topscript" part="4"/>
 
@@ -192,10 +189,8 @@
       <code>int -&gt; int</code> is a function type, in this case
       indicating a function that takes an <code>int</code> and
       returns an <code>int</code>. We can also write functions that
-      take multiple arguments. (Note that the following example
-      will not work if you haven't opened
-      <code>Base</code> as was suggested
-      earlier.)
+      take multiple arguments. (Reminder: Don't forget to open <code>Base</code>,
+      or these examples won't work!)
 
       <idx>multi-argument functions</idx>
       <idx>functions/with multiple arguments</idx>
@@ -204,22 +199,37 @@
       <link rel="import" href="code/guided-tour/main.topscript" part="6"/>
 
       <p>
-	Note that if you find operators like <code>/.</code> awkward
-	to use, you can take advantage of OCaml's <em>local open</em> syntax
-	to make the floating point operations available using the
-	traditional operators.
+	The preceding example also happens to be our first use of
+	modules. Here, <code>Float.of_int</code> refers to
+	the <code>of_int</code> function contained in
+	the <code>Float</code> module. This is different from what you
+	might expect from an object-oriented language, where
+	dot-notation is typically used for accessing a method of an
+	object. Note that module names always start with a capital
+	letter.
+      </p>
+
+      <p>
+	Modules can also be opened, as we opened <code>Base</code>
+	earlier. We can use that to make this code a little easier to
+	read, both avoiding the repetition of <code>Float</code>
+	above, and avoiding use of the slightly
+	awkward <code>/.</code> operator.  In the following example,
+	we open the <code>Float.O</code> module, which has a bunch of
+	useful operators and functions that are designed to be used in
+	this kind of context.
       </p>
 
       <link rel="import" href="code/guided-tour/main.topscript" part="6.1"/>
 
-      <p>The preceding example also happens to be our first use of
-      modules. Here, <code>Float.of_int</code> refers to the
-      <code>of_int</code> function contained in the
-      <code>Float</code> module. This is different from what you
-      might expect from an object-oriented language, where
-      dot-notation is typically used for accessing a method of an
-      object. Note that module names always start with a capital
-      letter.</p>
+      <p>
+	Note that we used a slightly different syntax for opening the
+	module, since we were only opening it in the local scope
+	inside the definition of <code>ratio</code>.  There's also a
+	more concise syntax for local opens, as you can see here.
+      </p>
+
+      <link rel="import" href="code/guided-tour/main.topscript" part="6.2"/>
 
       <p>The notation for the type-signature of a multiargument
       function may be a little surprising at first, but we'll
@@ -250,7 +260,7 @@
       <code>=</code> in two different ways: once as part of the
       <code>let</code> binding that separates the thing being
       defined from its definition; and once as an equality test,
-      when comparing <code>x mod 2</code> to <code>0</code>. These
+      when comparing <code>x % 2</code> to <code>0</code>. These
       are very different operations despite the fact that they
       share some syntax.</p>
 
@@ -312,15 +322,16 @@
         variables, which determines the overall type of
         <code>sum_if_true</code>.</p>
 
-        <p>Over time, you'll build a rough intuition for how the
-        OCaml inference engine works, which makes it easier to
-        reason through your programs. You can make it easier to
-        understand the types of a given expression by adding
-        explicit type annotations. These annotations don't change
-        the behavior of an OCaml program, but they can serve as
-        useful documentation, as well as catch unintended type
-        changes. They can also be helpful in figuring out why a
-        given piece of code fails to compile.</p>
+        <p>
+	  Over time, you'll build a rough intuition for how the OCaml
+          inference engine works, which makes it easier to reason
+          through your programs. You can also make it easier to
+          understand the types of a given expression by adding
+          explicit type annotations. These annotations don't change
+          the behavior of an OCaml program, but they can serve as
+          useful documentation, as well as catch unintended type
+          changes. They can also be helpful in figuring out why a
+          given piece of code fails to compile.</p>
 
         <p>Here's an annotated version of
         <code>sum_if_true</code>:</p>
@@ -443,8 +454,12 @@
         particularly simple data structure, the tuple. A tuple is
         an ordered collection of values that can each be of a
         different type. You can create a tuple by joining values
-        together with a comma:<idx>tuples</idx><idx>data
-        structures/tuples</idx></p>
+        together with a comma.
+
+	<idx>tuples</idx>
+	<idx>data structures/tuples</idx>
+	</p>
+
         <link rel="import" href="code/guided-tour/main.topscript" part="16"/>
 
         <p>(For the mathematically inclined, <code>*</code>
@@ -478,7 +493,7 @@
         fuss:</p>
         <link rel="import" href="code/guided-tour/main.topscript" part="19"/>
 
-        <p>The <code>**</code> operator used above is for raising a
+        <p>The <code>**.</code> operator used above is for raising a
         floating-point number to a power.</p>
 
         <p>This is just a first taste of pattern matching. Pattern
@@ -632,11 +647,11 @@
           <p>A <code>match</code> statement is a kind of juiced-up
           version of the <code>switch</code> statement found in C and
           Java. It essentially lets you list a sequence of patterns,
-          separated by pipe characters. Note that the one before the
-          first case is optional. The compiler then dispatches to the
-          code following the first matching pattern. As we've already
-          seen, the pattern can mint new variables that correspond to
-          parts of the value being matched.</p>
+          separated by pipe characters. (The one before the first case
+          is optional.) The compiler then dispatches to the code
+          following the first matching pattern. As we've already seen,
+          the pattern can mint new variables that correspond to parts
+          of the value being matched.</p>
 
           <p>Here's a new version of
           <code>my_favorite_language</code> that uses
@@ -722,9 +737,11 @@
           involved a lot of recursive functions. In practice, this
           isn't usually necessary. Most of the time, you'll find
           yourself happy to use the iteration functions found in
-          the <code>List</code> module. But it's good to know how
-          to use recursion when you need to do something
-          new.<a data-type="indexterm" data-startref="DSlists">&nbsp;</a></p>
+          the <code>List</code> module. But it's good to know how to
+          use recursion for when you need to iterate in a new way.
+
+	    <a data-type="indexterm" data-startref="DSlists">&nbsp;</a>
+	  </p>
         </section>
       </section>
 
@@ -881,6 +898,7 @@
       <p>Here's how we might write a function for testing whether a
       point is in the interior of some element of a list of
       <code>scene_element</code>s:</p>
+
       <link rel="import" href="code/guided-tour/main.topscript" part="48"/>
 
       <p>You might at this point notice that the use
@@ -904,7 +922,30 @@
       are any elements of the list in question for which the provided
       function evaluates to <code>true</code>. In this case, we're
       using <code>List.exists</code> to check if there is a scene
-      element within which our point resides.</p>
+	element within which our point resides.</p>
+
+      <div data-type="note">
+	<h1><code>Base</code> and polymorphic comparison</h1>
+
+	<p>
+	  One other thing to notice was the fact that we opened
+	  <code>Float.O</code> in the definition of
+	  <code>is_inside_scene_element</code>. That allowed us to use the
+	  simple, un-dotted infix operators, but more importantly it
+	  brought the float comparison operators into scope.  When
+	  using <code>Base</code>, the default comparison operators
+	  work only on integers, and you need to explicitly choose
+	  other comparison operators when you want them. OCaml also
+	  offers a special set of <em>polymorphic
+	    comparison operators</em> that can work on almost any type,
+	  but those are considered to be problematic, and so are hidden
+	  by default by <code>Base</code>. We'll learn more about
+	  polymorphic compare in
+	  <a href="03-lists-and-patterns.html#terser-and-faster-patterns"
+	     data-type="xref">Terser and Faster Patterns</a>	  
+	</p>
+      </div>
+	
     </section>
 
     <section id="imperative-programming" data-type="sect1">
@@ -1122,20 +1163,25 @@
       numbers read in from the standard
       input.<idx>programming/simple standalone example</idx></p>
 
-      <p>Here's the code, which you can save in a file called
-      <em class="filename">sum.ml</em>. Note that we don't
-      terminate expressions with <code>;;</code> here, since it's
-      not required outside the toplevel:</p>
+      <p>
+	Here's the code, which you can save in a file
+	called <em class="filename">sum.ml</em>. Note that we don't
+	terminate expressions with <code>;;</code> here, since it's
+	not required outside the toplevel.</p>
+
       <link rel="import" href="code/guided-tour/sum/sum.ml"/>
 
-      <p>This is our first use of OCaml's input and output
-      routines. The function <code>read_and_accumulate</code> is a
-      recursive function that uses
-      <code>In_channel.input_line</code> to read in lines one by
-      one from the standard input, invoking itself at each
-      iteration with its updated accumulated sum. Note that
-      <code>input_line</code> returns an optional value, with
-      <code>None</code> indicating the end of the input stream.</p>
+      <p>
+	This is our first use of OCaml's input and output routines,
+	and we needed to open another library, <code>Stdio</code>, to
+	get access to them. The
+	function <code>read_and_accumulate</code> is a recursive
+	function that uses <code>In_channel.input_line</code> to read
+	in lines one by one from the standard input, invoking itself
+	at each iteration with its updated accumulated sum. Note
+	that <code>input_line</code> returns an optional value,
+	with <code>None</code> indicating the end of the input
+	stream.</p>
 
       <p>After <code>read_and_accumulate</code> returns, the total
       needs to be printed. This is done using the <code>printf</code>
