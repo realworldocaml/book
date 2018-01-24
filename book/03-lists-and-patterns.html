@@ -143,14 +143,15 @@
       check if the first two elements are equal to each
       other.<idx>data structures/pattern matching and</idx></p>
 
-      <p>You can think of patterns as a specialized sublanguage
-      that can express a limited (though still quite rich) set of
-      conditions. The fact that the pattern language is limited
-      turns out to be a very good thing, making it possible to
-      build better support for patterns in the compiler. In
-      particular, both the efficiency of <code>match</code>
-      statements and the ability of the compiler to detect errors
-      in matches depend on the constrained nature of patterns.</p>
+      <p>
+	You can think of patterns as a specialized sublanguage that
+	can express a limited (though still quite rich) set of
+	conditions. The fact that the pattern language is limited
+	turns out to be a good thing, making it possible to build
+	better support for patterns in the compiler. In particular,
+	both the efficiency of <code>match</code> statements and the
+	ability of the compiler to detect errors in matches depend on
+	the constrained nature of patterns.</p>
 
       <section id="performance" data-type="sect2">
         <h2>Performance</h2>
@@ -247,7 +248,7 @@
       <h1>Using the List Module Effectively</h1>
 
       <p>We've so far written a fair amount of list-munging code
-      using pattern matching and recursive functions. But in real
+      using pattern matching and recursive functions. In real
       life, you're usually better off using the <code>List</code>
       module, which is full of reusable functions that abstract out
       common patterns for computing with lists.<idx>tables,
@@ -255,12 +256,11 @@
       tables with</idx><idx id="Llistmod">lists/List
       module</idx></p>
 
-      <p>Let's work through a concrete example to see this in
-      action. We'll write a function <code>render_table</code>
-      that, given a list of column headers and a list of rows,
-      prints them out in a well-formatted text table, as
-      follows:</p>
-      <link rel="import" href="code/lists-and-patterns/main.topscript" part="69"/>
+      <p>Let's work through a concrete example. We'll write a
+      function <code>render_table</code> that, given a list of column
+      headers and a list of rows, prints them out in a well-formatted
+      text table, as follows:</p> <link rel="import"
+      href="code/lists-and-patterns/main.topscript" part="69"/>
 
       <p>The first step is to write a function to compute the
       maximum width of each column of data. We can do this by

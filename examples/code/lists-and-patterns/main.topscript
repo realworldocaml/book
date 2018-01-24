@@ -237,7 +237,7 @@ let extensions filenames =
       | None  | Some ("",_) -> None
       | Some (_,ext) ->
         Some ext)
-  |> List.dedup_and_sort
+  |> List.dedup_and_sort ~compare:String.compare
 ;;
 [%%expect ocaml {|val extensions : string list -> string list = <fun>|}];;
 extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
@@ -424,8 +424,7 @@ let rec count_some list =
 let count_some l = List.count ~f:Option.is_some l;;
 [%%expect ocaml {|val count_some : 'a option list -> int = <fun>|}];;
 [@@@part "69"];;
-open Stdio;;
-printf "%s\n"
+Stdio.print_endline
   (render_table
      ["language";"architect";"first release"]
      [ ["Lisp" ;"John McCarthy" ;"1958"] ;
