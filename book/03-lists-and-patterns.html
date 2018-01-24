@@ -107,7 +107,7 @@
       <p>The key observation is that the appearance of
       <code>to_drop</code> in the second case doesn't imply a check
       that the first element is equal to the value
-      <code>to_drop</code> passed in as an argument to
+      <code>to_drop</code> that was passed in as an argument to
       <code>drop_value</code>. Instead, it just causes a new
       variable <code>to_drop</code> to be bound to whatever happens
       to be in the first element of the list, shadowing the earlier
@@ -121,11 +121,14 @@
       <code>if</code> statement:</p>
       <link rel="import" href="code/lists-and-patterns/main.topscript" part="7"/>
 
-      <p>Note that if we wanted to drop a particular literal value
-      (rather than a value that was passed in), we could do this
-      using something like our original implementation of
-      <code>drop_value</code>:</p>
+      <p>
+	If we wanted to drop a particular literal value, rather than a
+	value that was passed in, we could do this using something
+	like our original implementation
+	of <code>drop_value</code>:</p>
+
       <link rel="import" href="code/lists-and-patterns/main.topscript" part="8"/>
+
     </section>
 
     <section id="limitations-and-blessings-of-pattern-matching" data-type="sect1">
