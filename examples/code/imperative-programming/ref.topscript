@@ -1,7 +1,6 @@
 #silent true;;
 #use "topfind";;
 #thread;;
-#camlp4o;;
 #require "core";;
 #require "core.top";;
 #require "ppx_jane";;

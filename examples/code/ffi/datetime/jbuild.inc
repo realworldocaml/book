@@ -20,7 +20,7 @@
 
 (rule (
   (targets (build_datetime.sh.sexp))
-  (deps    (build_datetime.sh))
+  (deps (build_datetime.sh datetime.ml jbuild jbuild.inc))
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 

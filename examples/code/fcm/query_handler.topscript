@@ -1,6 +1,5 @@
 #use "topfind";;
 #thread;;
-#camlp4o;;
 #require "core";;
 #require "ppx_jane";;
 #install_printer Core.Sexp.pp_hum;;
