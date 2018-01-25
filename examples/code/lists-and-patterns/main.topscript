@@ -265,10 +265,12 @@ List.append [1;2;3] [4;5;6];;
 List.concat [[1;2];[3;4;5];[6];[]];;
 [%%expect ocaml {|- : int list = [1; 2; 3; 4; 5; 6]|}];;
 [@@@part "35"];;
-module Sys = Core.Sys;;
-[%%expect ocaml {|module Sys = Core.Sys|}];;
+module Sys = Core.Sys
 module Filename = Core.Filename;;
-[%%expect ocaml {|module Filename = Core.Filename|}];;
+[%%expect ocaml {|
+module Sys = Core.Sys
+module Filename = Core.Filename
+|}];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
   then [s]
