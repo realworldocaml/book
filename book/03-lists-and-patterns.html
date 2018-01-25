@@ -466,45 +466,60 @@
           example:<idx>elements/partitioning with
           List.partition_tf</idx><idx>lists/partitioning elements
           in</idx><idx>List module/List.partition_tf</idx></p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="31"/>
+
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="31"/>
         </section>
 
         <section id="combining-lists" data-type="sect3">
           <h3>Combining lists</h3>
 
-          <p>Another very common operation on lists is
-          concatenation. The list module actually comes with a few
-          different ways of doing this. First, there's
-          <code>List.append</code>, for concatenating a pair of
-          lists:<idx>lists/combining</idx><idx>List
-          module/List.append</idx></p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="32"/>
+          <p>
+	    Another very common operation on lists is
+            concatenation. The list module actually comes with a few
+            different ways of doing this.
+            There's <code>List.append</code>, for concatenating a pair
+            of lists.
 
-          <p>There's also <code>@</code>, an operator equivalent of
-          <code>List.append</code>:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="33"/>
+	    <idx>lists/combining</idx>
+	    <idx>List module/List.append</idx></p> 
 
-          <p>In addition, there is <code>List.concat</code>, for
-          concatenating a list of lists:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="34"/>
+	  <link rel="import" 
+		href="code/lists-and-patterns/main.topscript" part="32"/>
+
+          <p>
+	    There's also <code>@</code>, an operator equivalent
+            of <code>List.append</code>.</p>
+
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="33"/>
+
+          <p>
+	    In addition, there is <code>List.concat</code>, for
+            concatenating a list of lists:</p>
+
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="34"/>
 
           <p>Here's an example of using <code>List.concat</code> along
             with <code>List.map</code> to compute a recursive listing of
             a directory tree. </p> 
-	  <link rel="import" href="code/lists-and-patterns/main.topscript" part="35"/>
+	  <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="35"/>
 
-          <p>Note that this example uses some functions from
-            the <code>Sys</code> module from <code>Core</code> for
-            accessing the filesystem.  It also uses <code>^/</code>,
-	    an infix operator for adding a new element to a string
-	    representing a file path, which is an alias
-	    of <code>Filename.concat</code>.</p>
+          <p>
+	    Note that this example uses some functions from
+            the <code>Sys</code> and <code>Filename</code> modules
+            from <code>Core</code> for accessing the filesystem and
+            dealing with filenames.</p>
 
-          <p>The preceding combination of <code>List.map</code> and
+          <p>
+	    The preceding combination of <code>List.map</code> and
             <code>List.concat</code> is common enough that there is a
             function <code>List.concat_map</code> that combines these
             into one, more efficient operation:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="36"/>
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="36"/>
         </section>
       </section>
     </section>
