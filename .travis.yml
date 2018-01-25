@@ -1,16 +1,34 @@
 language: c
 sudo: false
-services:
-  - docker
+dist: trusty
 branches:
   except:
   - gh-pages
+cache:
+  directories:
+  - $HOME/.opam
+addons:
+  apt:
+    sources:
+    - avsm
+    packages:
+    - opam
+    - aspcud
+    - debianutils
+    - libffi-dev
+    - libgmp-dev
+    - libpcre3-dev
+    - m4
+    - perl
+    - pkg-config
+    - tzdata
+    - zlib1g-dev
 install: scripts/install
 script: scripts/build
 deploy:
   provider: pages
   skip_cleanup: true
-  local_dir: $TRAVIS_BUILD_DIR/site
+  local_dir: $TRAVIS_BUILD_DIR/_build/default/static
   github_token: $GITHUB_TOKEN
   on:
     branch: master
