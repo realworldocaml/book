@@ -352,31 +352,6 @@ let rec destutter = function
   | hd :: tl -> hd :: destutter tl
 ;;
 [%%expect ocaml {|val destutter : int list -> int list = <fun>|}];;
-[@@@part "45"];;
-3 = 4;;
-[%%expect ocaml {|- : bool = false|}];;
-[3;4;5] = [3;4;5];;
-[%%expect{|
-Characters 0-7:
-Error: This expression has type 'a list
-       but an expression was expected of type int
-|}];;
-[Some 3; None] = [None; Some 3];;
-[%%expect{|
-Characters 0-14:
-Error: This expression has type 'a list
-       but an expression was expected of type int
-|}];;
-[@@@part "46"];;
-(=);;
-[%%expect ocaml {|- : int -> int -> bool = <fun>|}];;
-[@@@part "47"];;
-(fun x -> x + 1) = (fun x -> x + 1);;
-[%%expect{|
-Characters 0-16:
-Error: This expression should not be a function, the expected type is
-int
-|}];;
 [@@@part "48"];;
 let rec count_some list =
   match list with

@@ -84,7 +84,8 @@
   (deps (
     ../book/03-lists-and-patterns.html
     ../bin/bin/app.exe
-    ../examples/code/lists-and-patterns/main.topscript.sexp))
+    ../examples/code/lists-and-patterns/main.topscript.sexp
+    ../examples/code/lists-and-patterns/poly.topscript.sexp))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
