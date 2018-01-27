@@ -402,7 +402,7 @@
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml"/>
 
-      With this implementation, the build now succeeds!
+      <p>With this implementation, the build now succeeds!</p>
 
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/build.sh"/>
@@ -415,13 +415,18 @@
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
-      <p>Note that in the preceding example we use
-      <code>String.Map</code> in some places and simply
-      <code>Map</code> in others. This has to do with the fact that
-      for some operations, like creating a <code>Map.t</code>, you
-      need access to type-specialized information, and for others,
-      like looking something up in <code>Map.t</code>, you don't.
-      This is covered in more detail in <a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>.</p>
+      <p>
+	There's some unfamiliar syntax in the above example, in
+	particular, writing <code>Map.M(String).t</code> to refer to
+	the type of a map with string keys, and <code>Map.empty
+	(module String)</code> to generate an empty map.  Here, we're
+	making use of some more advanced features of the language
+	(specifically, <em>functors</em> and <em>first-class
+	modules</em>, which we'll get to in later chapters).  The use
+	of these features for the Map data-structure in particular is
+	covered in
+	<a href="13-maps-and-hashtables.html#maps-and-hash-tables"
+	      data-type="xref">Maps And Hash Tables</a>.</p>
     </section>
 
     <section id="concrete-types-in-signatures" data-type="sect1">
