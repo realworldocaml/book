@@ -1,1 +1,1 @@
-ocamlfind ocamlc -linkpkg -thread -package core_kernel freq.ml -o freq.byte
+ocamlfind ocamlc -linkpkg -package base -package stdio freq.ml -o freq.byte

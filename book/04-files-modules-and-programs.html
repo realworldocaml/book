@@ -27,7 +27,7 @@
       <h1>Single-File Programs</h1>
 
       <p>We'll start with an example: a utility that reads lines
-      from <code>stdin</code> and computes a frequency count of the
+      from <code>stdin</code>, computes a frequency count of the
       lines, and prints out the ten most frequent lines. We'll start
       with a simple implementation, which we'll save as the
       file <em>freq.ml</em>.
@@ -55,24 +55,33 @@
       original list, but instead allocates a new list with the
       requisite key/value pair added.</p>
 
-      <p>Now we can write <code>freq.ml</code>:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq/freq.ml"/>
+      <p>Now we can write <code>freq.ml</code>.</p>
 
-      <p>The function <code>build_counts</code> reads in lines from
-      <code>stdin</code>, constructing from those lines an
-      association list with the frequencies of each line. It does
-      this by invoking <code>In_channel.fold_lines</code> (similar
-      to the function <code>List.fold</code> described in <a href="03-lists-and-patterns.html#lists-and-patterns" data-type="xref">Lists And Patterns</a>), which reads through the lines
-      one by one, calling the provided <code>fold</code> function
-      for each line to update the accumulator. That accumulator is
-      initialized to the empty list.</p>
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq/freq.ml"/>
 
-      <p>With <code>build_counts</code> defined, we then call the
-      function to build the association list, sort that list by
-      frequency in descending order, grab the first 10 elements off
-      the list, and then iterate over those 10 elements and print
-      them to the screen. These operations are tied together using
-      the <code>|&gt;</code> operator described in <a href="02-variables-and-functions.html#variables-and-functions" data-type="xref">Variables And Functions</a>.
+      <p>
+	The function <code>build_counts</code> reads in lines
+	from <code>stdin</code>, constructing from those lines an
+	association list with the frequencies of each line. It does
+	this by invoking <code>In_channel.fold_lines</code> (similar
+	to the function <code>List.fold</code> described in
+	<a href="03-lists-and-patterns.html#lists-and-patterns"
+	   data-type="xref">Lists And Patterns</a>), which reads
+	through the lines one by one, calling the
+	provided <code>fold</code> function for each line to update
+	the accumulator. That accumulator is initialized to the empty
+	list.</p>
+
+      <p>
+	With <code>build_counts</code> defined, we then call the
+	function to build the association list, sort that list by
+	frequency in descending order, grab the first 10 elements off
+	the list, and then iterate over those 10 elements and print
+	them to the screen. These operations are tied together using
+	the <code>|&gt;</code> operator described
+	in <a href="02-variables-and-functions.html#prefix-and-infix-operators"
+	      data-type="xref">Variables And Functions</a>.
 
 	<idx>let ( ) declaration</idx>
 	<idx>main function</idx></p>
@@ -80,7 +89,7 @@
       <div class="allow_break" data-type="note">
         <h1>Where Is <code>main</code>?</h1>
 
-        <p>Unlike programs in C, Java or C#, programs in OCaml do not
+        <p>Unlike programs in C, Java or C#, programs in OCaml don't
         have a unique <code>main</code> function. When an OCaml
         program is evaluated, all the statements in the implementation
         files are evaluated in the order in which they were linked
@@ -106,26 +115,27 @@
       this:</p>
       <link rel="import" href="code/files-modules-and-programs/freq/simple_build_fail.errsh"/>
 
-      <p>But as you can see, it fails because it can't find
-      <code>Core_kernel</code>. We need a somewhat more complex
-      invocation to get <code>Core_kernel</code> linked in:
+      <p>But as you can see, it fails because it can't
+      find <code>Base</code> and <code>Stdio</code>. We need a
+      somewhat more complex invocation to get them linked in:
 
       <idx>OCaml toolchain/ocamlc</idx>
       <idx>OCaml toolchain/ocamlfind</idx>
-      <idx>Core standard library/finding with ocamlfind</idx></p>
+      <idx>Base standard library/finding with ocamlfind</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq/simple_build.sh"/>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/freq/simple_build.sh"/>
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>, a
       tool which itself invokes other parts of the OCaml toolchain (in
       this case, <span class="command"><em>ocamlc</em></span>) with
       the appropriate flags to link in particular libraries and
-      packages. Here, <code>-package core</code> is
+      packages. Here, <code>-package base</code> is
       asking <span class="command"><em>ocamlfind</em></span> to link
-      in the Core library; <code>-linkpkg</code> asks ocamlfind to
-      link in the packages as is necessary for building an executable,
-      while <code>-thread</code> turns on threading support, which is
-      required for Core.
+      in the <code>Base</code> library; <code>-linkpkg</code> asks
+      ocamlfind to link in the packages as is necessary for building
+      an executable, while <code>-thread</code> turns on threading
+      support, which is required for Base.
 
       <idx>threads/turning on with -thread</idx>
       <idx data-primary-sortas="linkpkg">-linkpkg</idx></p>
@@ -205,7 +215,7 @@
         supported by the native-code compiler. We'll cover both
         compilers in more detail
         in <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
-        data-type="xref">The Compiler Backend Byte Code And Native
+        data-type="xref">The Compiler Backend: Byte Code And Native
         Code</a>.</p>
       </div>
     </section>
