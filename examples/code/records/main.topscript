@@ -6,9 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
-module Time_ns = Core_kernel.Time_ns;;
-[%%expect ocaml {|module Time_ns = Core_kernel.Time_ns|}];;
+open Core;;
 type service_info =
   { service_name : string;
     port         : int;
@@ -18,15 +16,9 @@ type service_info =
 [%%expect ocaml {|type service_info = { service_name : string; port : int; protocol : string; }|}];;
 [@@@part "1"];;
 #require "re.posix";;
-[%%expect{|
-/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
-/Users/yminsky/.opam/4.04.2/lib/re: added to search path
-/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
-/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
-|}];;
 let service_info_of_string line =
   let matches = 
-    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    Re.exec (Re_posix.compile_pat " *([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
   in
   { service_name = Re.get matches 1;
     port = Int.of_string (Re.get matches 2);
@@ -60,12 +52,7 @@ parse_lines service_info_of_string
     tcpmux            1/tcp     # TCP Port Service Multiplexer
   |}
 ;;
-[%%expect ocaml {|
-- : service_info with_line_num list =
-[{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
- {item = {service_name = "tcpmux"; port = 1; protocol = "udp"}; line_num = 2};
- {item = {service_name = "tcpmux"; port = 1; protocol = "tcp"}; line_num = 3}]
-|}];;
+[%%expect{|Exception: Not_found.|}];;
 [@@@part "4.2"];;
 parse_lines Int.of_string "1\n10\n100\n1000";;
 [%%expect ocaml {|
@@ -76,28 +63,45 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 
 [@@@part "4.3"];;
 let s = "A string!";;
+[%%expect ocaml {|val s : string = "A string!"|}];;
 
 [@@@part "4.4"];;
 let s = {|A string!|};;
+[%%expect ocaml {|val s : string = "A string!"|}];;
 
 [@@@part "4.5"];;
 let s = "\"A quoted string!\"";;
+[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
 let () = print_endline s;;
+[%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.6"];;
 let s = "\"A quoted string!\"";;
+[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
 let () = print_endline s;;
+[%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.7"];;
 let s = print_endline {|
 It's possible to put something
 here that spans multiple lines|};;
+[%%expect{|
+It's possible to put something
+here that spans multiple lines
+|};
+ocaml {|val s : unit = ()|}];;
 
 [@@@part "4.8"];;
 let s = print_endline {x|
 OCaml has multiple kinds of quotations,
 including ", and {| and |}
 |x};;
+[%%expect{escape|
+OCaml has multiple kinds of quotations,
+including ", and {| and |}
+
+|escape};
+ocaml {|val s : unit = ()|}];;
 
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
