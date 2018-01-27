@@ -595,30 +595,33 @@
         <li>
           <p>Opening modules at the toplevel of a module should be
           done quite sparingly, and generally only with modules
-          that have been specifically designed to be opened, like
-          <code>Base</code> or
-          <code>Option.Monad_infix</code>.</p>
+            that have been specifically designed to be opened, like
+            <code>Base</code> or
+            <code>Option.Monad_infix</code>.</p>
         </li>
 
         <li>
           <p>If you do need to do an open, it's better to do a
-          <em>local open</em>. There are two syntaxes for local
-          opens. For example, you can write:</p>
-        </li>
-      </ul>
+            <em>local open</em>. There are two syntaxes for local
+            opens. For example, you can write:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="1"/>
+	  <link rel="import" 
+		href="code/files-modules-and-programs/main.topscript" 
+		part="1"/>
 
-      <p>Here, <code>of_int</code> and the infix operators are the
-      ones from the <code>Int64</code> module.</p>
+	  <p>Here, <code>of_int</code> and the infix operators are the
+	    ones from the <code>Int64</code> module.</p>
 
-      <p>There's another, even more lightweight syntax for local
-      <code>open</code>s, which is particularly useful for small
-      expressions:</p>
+	  <p>There's another, even more lightweight syntax for local
+	    <code>open</code>s, which is particularly useful for small
+	    expressions:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="2"/>
+	  <link rel="import" 
+		href="code/files-modules-and-programs/main.topscript" 
+		part="2"/>
 
-      <ul>
+	</li>
+
         <li>
           <p>An alternative to local <code>open</code>s that makes
           your code terser without giving up on explicitness is to
@@ -629,12 +632,14 @@
         <li style="list-style: none; display: inline">
 
           <link rel="import" 
-		href="code/files-modules-and-programs/freq-median/use_median_1.ml" part="1"/>
+		href="code/files-modules-and-programs/freq-median/use_median_1.ml" 
+		part="1"/>
 
           <p>you could write:</p>
 
           <link rel="import" 
-		href="code/files-modules-and-programs/freq-median/use_median_2.ml" part="1"/>
+		href="code/files-modules-and-programs/freq-median/use_median_2.ml" 
+		part="1"/>
 
           <p>Because the module name <code>C</code> only exists for
           a short scope, it's easy to read and remember what
@@ -648,12 +653,12 @@
     <section id="including-modules" data-type="sect1">
       <h1>Including Modules</h1>
 
-      <p>While opening a module affects the environment used to
-      search for identifiers, <em>including</em> a module is a way
-      of actually adding new identifiers to a module proper.
-      Consider the following simple module for representing a range
-      of integer
-      values:
+      <p>
+	While opening a module affects the environment used to search
+	for identifiers, <em>including</em> a module is a way of
+	adding new identifiers to a module proper.  Consider the
+	following simple module for representing a range of integer
+	values:
 
 	<idx>modules/including</idx>
 	<idx>identifiers/adding to modules</idx></p>
@@ -674,11 +679,12 @@
 
       <link rel="import" href="code/files-modules-and-programs/main.topscript" part="5"/>
 
-      <p>To consider a more realistic example, imagine you wanted
-      to build an extended version of the <code>List</code> module,
-      where you've added some functionality not present in the
-      module as distributed in <code>Base</code>.
-      <code>include</code> allows us to do just that:</p>
+      <p>
+	To consider a more realistic example, imagine you wanted to
+	build an extended version of the <code>List</code> module,
+	where you've added some functionality not present in the
+	module as distributed in <code>Base</code>. That's a job
+	for <code>include</code>.</p>
 
       <link rel="import" href="code/files-modules-and-programs/ext_list.ml"/>
 
