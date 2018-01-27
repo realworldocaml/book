@@ -503,21 +503,30 @@
       you do need to convert, you can do so using explicit
       conversions to and from the string type.</p>
 
-      <p>Here's how you might create such an abstract type, within
-      a submodule:
+      <p>
+	Here's how you might create such an abstract type, within a
+	submodule:
 
 	<idx>abstract types</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/abstract_username.ml"/>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/abstract_username.ml"/>
 
-      <p>Note that the <code>to_string</code> and
-      <code>of_string</code> functions above are implemented simply
-      as the identity function, which means they have no runtime
-      effect. They are there purely as part of the discipline that
-      they enforce on the code through the type system.</p>
+      <p>
+	Note that the <code>to_string</code>
+	and <code>of_string</code> functions above are implemented
+	simply as the identity function, which means they have no
+	runtime effect. They are there purely as part of the
+	discipline that they enforce on the code through the type
+	system. We also chose to put in an equality function, so you
+	can check if two usernames match. In a real application, we
+	might want more functionality, like the ability to hash and
+	compare usernames, but we've kept this example purposefully
+	simple.
+      </p>
 
-      <p>The basic structure of a module declaration like this
-      is:</p>
+      <p>
+	The basic structure of a module declaration like this is:</p>
 
       <link rel="import" href="code/files-modules-and-programs/module.syntax"/>
 
@@ -559,9 +568,9 @@
       <idx>modules/opening</idx></p>
 
       <p>We've encountered <code>open</code> already, specifically
-      where we've written <code>open Core_kernel</code> to get
+      where we've written <code>open Base</code> to get
       access to the standard definitions in the
-      <code>Core_kernel</code> library. In general, opening a
+      <code>Base</code> library. In general, opening a
       module adds the contents of that module to the environment
       that the compiler looks at to find the definition of various
       identifiers. Here's an example:</p>
@@ -570,7 +579,7 @@
 
       <p><code>open</code> is essential when you want to modify
       your environment for a standard library like
-      <code>Core_kernel</code>, but it's generally good style to
+      <code>Base</code>, but it's generally good style to
       keep the opening of modules to a minimum. Opening a module is
       basically a trade-off between terseness and explicitness—the
       more modules you open, the fewer module qualifications you
@@ -587,7 +596,7 @@
           <p>Opening modules at the toplevel of a module should be
           done quite sparingly, and generally only with modules
           that have been specifically designed to be opened, like
-          <code>Core_kernel</code> or
+          <code>Base</code> or
           <code>Option.Monad_infix</code>.</p>
         </li>
 
@@ -668,7 +677,7 @@
       <p>To consider a more realistic example, imagine you wanted
       to build an extended version of the <code>List</code> module,
       where you've added some functionality not present in the
-      module as distributed in <code>Core_kernel</code>.
+      module as distributed in <code>Base</code>.
       <code>include</code> allows us to do just that:</p>
 
       <link rel="import" href="code/files-modules-and-programs/ext_list.ml"/>
@@ -701,7 +710,7 @@
       <link rel="import" href="code/files-modules-and-programs/common.ml"/>
 
       <p>And if we then put <code>open Common</code> after
-      <code>open Core_kernel</code> at the top of each file in
+      <code>open Base</code> at the top of each file in
       our project, then references to <code>List</code> will
       automatically go to <code>Ext_list</code> instead.</p>
     </section>
@@ -943,8 +952,9 @@
         Part of achieving that is standardizing aspects of those
         interfaces.</p>
 
-        <p><code>Core</code> and <code>Core_kernel</code> are
-        libraries that work hard to create uniform interfaces. Here
+        <p><code>Base</code>, <code>Core</code> and other libraries
+        from the same family have been designed with a uniform set of
+        standards in mind around the design of module interfaces. Here
         are some of the guidelines that they use.</p>
 
         <ul>
@@ -972,7 +982,7 @@
           </li>
         </ul>
 
-        <p>There are also standards in Core about what the type
+        <p>There are also standards in Base about what the type
         signature for specific functions should be. For example,
         the signature for <code>map</code> is always essentially
         the same, no matter what the underlying type it is applied
@@ -981,9 +991,9 @@
         which allow for different modules to share components of
         their interface. This approach is described in <a href="09-functors.html#using-multiple-interfaces" data-type="xref">Using Multiple Interfaces</a>.</p>
 
-        <p>Core's standards may or may not fit your projects, but
-        you can improve the usability of your codebase by finding
-        some consistent set of standards to apply.</p>
+        <p>Base's standards may or may not fit your projects, but you
+        can improve the usability of your codebase by finding some
+        consistent set of standards to apply.</p>
       </section>
 
       <section data-type="sect2">
