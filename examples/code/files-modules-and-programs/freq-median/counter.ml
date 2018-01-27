@@ -1,7 +1,7 @@
-open Core_kernel
-type t = int String.Map.t
+open Base
+type t = int Map.M(String).t
 
-let empty = String.Map.empty
+let empty = Map.empty (module String)
 
 let to_list t = Map.to_alist t
 
@@ -11,7 +11,7 @@ let touch t s =
     | None -> 0
     | Some x -> x
   in
-  Map.add t ~key:s ~data:(count + 1)
+  Map.set t ~key:s ~data:(count + 1)
 
 [@@@part "1"]
 type median = | Median of string
@@ -25,6 +25,7 @@ let median t =
   let len = List.length sorted_strings in
   if len = 0 then failwith "median: empty frequency count";
   let nth n = fst (List.nth_exn sorted_strings n) in
-  if len mod 2 = 1
+  if len % 2 = 1
   then Median (nth (len/2))
-  else Before_and_after (nth (len/2 - 1), nth (len/2));;
+  else Before_and_after (nth (len/2 - 1), nth (len/2))
+

@@ -1,4 +1,4 @@
-open Core_kernel
+open Base
 
 (** A collection of string frequency counts *)
 type t

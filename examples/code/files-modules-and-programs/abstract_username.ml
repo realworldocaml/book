@@ -1,4 +1,4 @@
-open Core
+open Base
 
 module Username : sig
   type t

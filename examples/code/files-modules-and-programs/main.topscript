@@ -3,7 +3,7 @@
 #require "core";;
 #require "ppx_jane";;
 [@@@part "0.5"];;
-open Core_kernel;;
+open Base;;
 module M = struct let foo = 3 end;;
 [%%expect ocaml {|module M : sig val foo : int end|}];;
 foo;;

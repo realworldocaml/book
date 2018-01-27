@@ -1,4 +1,5 @@
-open! Core_kernel
+open! Base
+open Stdio
 
 [@@@part "1"]
 let print_median m =

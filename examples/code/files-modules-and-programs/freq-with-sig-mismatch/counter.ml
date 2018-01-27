@@ -1,4 +1,4 @@
-open Core_kernel
+open Base
 
 type t = (string * int) list
 
