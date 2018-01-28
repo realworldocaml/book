@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
+open Base;;
 let x = 3;;
 [%%expect ocaml {|val x : int = 3|}];;
 let y = 4;;
@@ -149,7 +149,7 @@ let rec find_first_repeat list =
   | x :: y :: tl ->
     if x = y then Some x else find_first_repeat (y::tl)
 ;;
-[%%expect ocaml {|val find_first_repeat : 'a list -> 'a option = <fun>|}];;
+[%%expect ocaml {|val find_first_repeat : int list -> int option = <fun>|}];;
 [@@@part "23"];;
 let rec is_even x =
   if x = 0 then true else is_odd (x - 1)
@@ -180,14 +180,14 @@ let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 (3,2) +! (-2,4);;
 [%%expect ocaml {|- : int * int = (1, 6)|}];;
 [@@@part "27"];;
-let (***) x y = (x ** y) ** y;;
+let (***) x y = (x **. y) **. y;;
 [%%expect{|
 Characters 17-18:
 Error: This expression has type int but an expression was expected of type
          float
 |}];;
 [@@@part "28"];;
-let ( *** ) x y = (x ** y) ** y;;
+let ( *** ) x y = (x **. y) **. y;;
 [%%expect ocaml {|val ( *** ) : float -> float -> float = <fun>|}];;
 [@@@part "29"];;
 Int.max 3 (-4);;
@@ -209,6 +209,7 @@ Error: This expression has type int -> int
 let (|>) x f = f x ;;
 [%%expect ocaml {|val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
 [@@@part "32"];;
+open Stdio;;
 let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
 [%%expect ocaml {|val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"|}];;
 String.split ~on:':' path
@@ -247,13 +248,13 @@ List.iter ~f:print_endline;;
 [@@@part "36"];;
 let (^>) x f = f x;;
 [%%expect ocaml {|val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
-Sys.getenv "PATH"
+Core.Sys.getenv "PATH"
 ^> String.split ~on:':' path
 ^> List.dedup_and_sort ~compare:String.compare
 ^> List.iter ~f:print_endline
 ;;
 [%%expect{|
-Characters 97-123:
+Characters 102-128:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
@@ -286,7 +287,7 @@ some_or_default 3 (Some 5);;
 List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
 [%%expect ocaml {|- : int list = [3; 100; 4]|}];;
 [@@@part "40"];;
-let ratio ~num ~denom = float num /. float denom;;
+let ratio ~num ~denom = Float.of_int num /. Float.of_int denom;;
 [%%expect ocaml {|val ratio : num:int -> denom:int -> float = <fun>|}];;
 [@@@part "41"];;
 ratio ~num:3 ~denom:10;;
