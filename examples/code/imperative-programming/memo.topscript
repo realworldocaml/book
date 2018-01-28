@@ -5,7 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 [@@@part "1"];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
@@ -21,7 +21,7 @@ let rec edit_distance s t =
     let s' = String.drop_suffix s 1 in
     let t' = String.drop_suffix t 1 in
     let cost_to_drop_both =
-      if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      if Char.(=) s.[len_s - 1] t.[len_t - 1] then 0 else 1
     in
     List.reduce_exn ~f:Int.min
       [ edit_distance s' t  + 1
@@ -33,30 +33,22 @@ let rec edit_distance s t =
 edit_distance "OCaml" "ocaml";;
 [%%expect ocaml {|- : int = 2|}];;
 [@@@part "3"];;
-#require "mtime.os.top";;
 let time f =
-  let counter = Mtime.counter () in
+  let open Core in
+  let start = Time.now () in
   let x = f () in
-  let elapsed = Mtime.count counter in
-  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  let stop = Time.now () in
+  printf "Time: %F ms\n" (Time.diff stop start |> Time.Span.to_ms);
   x 
 ;;
-[%%expect{|
-Characters 29-42:
-Error: Unbound module Mtime
-Hint: Did you mean Time?
-|}];;
+[%%expect ocaml {|val time : (unit -> 'a) -> 'a = <fun>|}];;
 [@@@part "4"];;
 time (fun () -> edit_distance "OCaml" "ocaml");;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 1.10292434692 ms|};
+ocaml {|- : int = 2|}];;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 3282.86218643 ms|};
+ocaml {|- : int = 2|}];;
 [@@@part "5"];;
 let memo_rec f_norec x =
   let fref = ref (fun _ -> assert false) in
@@ -73,7 +65,7 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
     let s' = String.drop_suffix s 1 in
     let t' = String.drop_suffix t 1 in
     let cost_to_drop_both =
-      if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      if Char.(=) s.[len_s - 1] t.[len_t - 1] then 0 else 1
     in
     List.reduce_exn ~f:Int.min
       [ edit_distance (s',t ) + 1
@@ -83,7 +75,5 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
 [%%expect ocaml {|val edit_distance : string * string -> int = <fun>|}];;
 [@@@part "7"];;
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 0.348091125488 ms|};
+ocaml {|- : int = 2|}];;
