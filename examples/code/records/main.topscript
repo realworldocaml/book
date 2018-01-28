@@ -18,7 +18,7 @@ type service_info =
 #require "re.posix";;
 let service_info_of_string line =
   let matches = 
-    Re.exec (Re_posix.compile_pat " *([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
   in
   { service_name = Re.get matches 1;
     port = Int.of_string (Re.get matches 2);
