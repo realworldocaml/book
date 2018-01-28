@@ -5,7 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 #require "mtime.os.top";;
 let time f =
   let counter = Mtime.counter () in
