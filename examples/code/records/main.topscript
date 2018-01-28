@@ -47,12 +47,16 @@ let parse_lines parse file_contents =
 [%%expect ocaml {|val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>|}];;
 [@@@part "4.1"];;
 parse_lines service_info_of_string
-  {|rtmp              1/ddp     # Routing Table Maintenance Protocol
-    tcpmux            1/udp     # TCP Port Service Multiplexer
-    tcpmux            1/tcp     # TCP Port Service Multiplexer
-  |}
+  "rtmp              1/ddp     # Routing Table Maintenance Protocol
+   tcpmux            1/udp     # TCP Port Service Multiplexer
+   tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
-[%%expect{|Exception: Not_found.|}];;
+[%%expect ocaml {|
+- : service_info with_line_num list =
+[{item = {service_name = "rtmp"; port = 1; protocol = "ddp"}; line_num = 1};
+ {item = {service_name = "tcpmux"; port = 1; protocol = "udp"}; line_num = 2};
+ {item = {service_name = "tcpmux"; port = 1; protocol = "tcp"}; line_num = 3}]
+|}];;
 [@@@part "4.2"];;
 parse_lines Int.of_string "1\n10\n100\n1000";;
 [%%expect ocaml {|
