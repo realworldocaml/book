@@ -154,10 +154,9 @@ let eval : Command.t =
 let main = 
   Command.group
     ~summary:"Real World OCaml authoring and publication tools"
-    [
-      "build", build;
-      "validate", validate;
-      "eval", eval
+    [ "build", build
+    ; "validate", validate
+    ; "eval", eval
     ]
 
 let () =
