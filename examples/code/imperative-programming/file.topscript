@@ -5,11 +5,12 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
+open Stdio;;
 [@@@part "1"];;
 let create_number_file filename numbers =
   let outc = Out_channel.create filename in
-  List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
+  List.iter numbers ~f:(fun x -> Out_channel.fprintf outc "%d\n" x);
   Out_channel.close outc
 ;;
 [%%expect ocaml {|val create_number_file : string -> int list -> unit = <fun>|}];;
