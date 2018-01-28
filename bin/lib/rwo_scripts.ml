@@ -146,8 +146,8 @@ let phrases_to_html ?(pygmentize=false) phrases =
   in
 
   let phrase_to_html (x : Expect.Chunk.t) : Html.t Deferred.t =
-    (in_phrase x >>| Option.some) >>= fun in_phrase ->
-    out_phrase x >>| fun out_phrase ->
+    let%bind in_phrase = (in_phrase x >>| Option.some) in
+    let%map out_phrase = out_phrase x in
     List.filter_map ~f:Fn.id [in_phrase; messages x; stdout x] @ out_phrase
   in
 
@@ -156,16 +156,17 @@ let phrases_to_html ?(pygmentize=false) phrases =
 
 
 let script_part_to_html ?(pygmentize=false) (x : script_part) =
-  (
+  let singleton x = [x] in
+  let%map l =
     match x with
     | `OCaml_toplevel phrases -> phrases_to_html ~pygmentize phrases
     | `OCaml x
     | `OCaml_rawtoplevel x ->
       let content = x.Expect.Raw_script.content in
-      (Pygments.pygmentize ~pygmentize `OCaml content >>| fun x -> [x])
+      Pygments.pygmentize ~pygmentize `OCaml content >>| singleton
     | `Other x ->
-      (Pygments.pygmentize ~pygmentize:false `OCaml x >>| fun x -> [x])
-  ) >>| fun l ->
+      Pygments.pygmentize ~pygmentize:false `OCaml x >>| singleton
+  in
   Html.div ~a:["class","highlight"] l
 
 
@@ -184,25 +185,24 @@ let exn_of_filename filename content =
 (* Main Operations                                                            *)
 (******************************************************************************)
 let eval_script lang ~run_nondeterministic ~filename =
+  let open Deferred.Or_error.Let_syntax in
   match (lang : Lang.t :> string) with
   | "ml" | "mli" | "mly" | "mll" -> (
       (* Hack: Oloop.Script.of_file intended only for ml files but
          happens to work for mli, mll, and mly files. *)
-      Expect.Raw_script.of_file ~filename
-      >>|? fun script -> `OCaml script
+      let%map script = Expect.Raw_script.of_file ~filename in
+      `OCaml script
     )
   | "rawtopscript" -> (
-      Expect.Raw_script.of_file ~filename
-      >>|? fun script -> `OCaml_rawtoplevel script
+      let%map script = Expect.Raw_script.of_file ~filename in
+      `OCaml_rawtoplevel script
     )
-  | "topscript" -> (
+  | "topscript" -> 
       (*if String.is_suffix filename ~suffix:"async/main.topscript" then (
         Expect.Raw_script.of_file ~filename
         >>|? fun script -> `OCaml_rawtoplevel script
       ) else*)
-      (
-        Expect.Document.of_file ~run_nondeterministic ~filename
-        >>=? fun doc ->
+        let%bind doc = Expect.Document.of_file ~run_nondeterministic ~filename in
         let corrected_built_filename =
           Filename.realpath filename ^ ".corrected"
         in
@@ -220,21 +220,21 @@ let eval_script lang ~run_nondeterministic ~filename =
         in
         if not doc.Expect.Document.matched then
           Log.Global.error "%s didn't match expect test" filename;
-        Deferred.ok begin
-          Sys.file_exists corrected_built_filename >>= function
+        let%map () = Deferred.ok begin
+          let open Deferred.Let_syntax in
+          match%bind Sys.file_exists corrected_built_filename with
           | `Yes ->
-            Sys.rename corrected_built_filename corrected_filename;
+            Sys.rename corrected_built_filename corrected_filename
           | `Unknown -> return ()
           | `No ->
-            Sys.file_exists corrected_filename >>= function
+            match%bind Sys.file_exists corrected_filename with
             | `Yes -> Sys.remove corrected_filename
             | _ -> return ()
         end
-        >>|? fun () -> `OCaml_toplevel doc
-      )
-    )
+        in
+        `OCaml_toplevel doc
   | "sh" -> (
-      Bash_script.eval_file filename >>|? fun x ->
+      let%map x = Bash_script.eval_file filename in
       if not (List.for_all x.Bash_script.Evaluated.commands
                 ~f:(fun x -> x.Bash_script.Evaluated.exit_code = 0))
       then
@@ -245,7 +245,7 @@ let eval_script lang ~run_nondeterministic ~filename =
       `Other (Bash_script.Evaluated.to_string x)
     )
   | "errsh" -> (
-      Bash_script.eval_file filename >>|? fun x ->
+      let%map x = Bash_script.eval_file filename in
       if not (List.exists x.Bash_script.Evaluated.commands
                 ~f:(fun x -> x.Bash_script.Evaluated.exit_code <> 0))
       then
@@ -256,27 +256,27 @@ let eval_script lang ~run_nondeterministic ~filename =
       `Other (Bash_script.Evaluated.to_string x)
     )
   | "sexp" when Filename.basename filename = "jbuild" ->
-    (
-      Reader.file_contents filename >>| fun x ->
-      let regexp = Str.regexp "ppx_sexp_conv -no-check" in
-      let removed_check = Str.replace_first regexp "ppx_sexp_conv" x in
-      let regexp = Str.regexp_string "(jbuild_version 1)" in
-      let removed_check = Str.replace_first regexp "" removed_check in
-      let regexp = Str.regexp_string "(include jbuild.inc)" in
-      let removed_check = Str.replace_first regexp "" removed_check in
-      match Sexplib.Sexp.of_string (sprintf "(%s)" removed_check) with
-      | Sexplib.Sexp.Atom _ -> assert false
-      | Sexplib.Sexp.List l ->
-         let r = 
-           String.concat ~sep:"\n" 
-             (List.map ~f:Sexp_pretty.sexp_to_string l) 
-         in
-         Ok (`Other r)
-      )
-  | _ -> (
-      Reader.file_contents filename >>| fun x ->
-      Ok (`Other x)
-    )
+    let open Deferred.Let_syntax in
+    let%map x = Reader.file_contents filename in
+    let regexp = Str.regexp "ppx_sexp_conv -no-check" in
+    let removed_check = Str.replace_first regexp "ppx_sexp_conv" x in
+    let regexp = Str.regexp_string "(jbuild_version 1)" in
+    let removed_check = Str.replace_first regexp "" removed_check in
+    let regexp = Str.regexp_string "(include jbuild.inc)" in
+    let removed_check = Str.replace_first regexp "" removed_check in
+    begin match Sexplib.Sexp.of_string (sprintf "(%s)" removed_check) with
+    | Atom _ -> assert false
+    | List l ->
+      let r = 
+        String.concat ~sep:"\n" (List.map ~f:Sexp_pretty.sexp_to_string l) 
+      in
+      Ok (`Other r)
+    end
+  | _ ->
+    let open Deferred.Let_syntax in
+    let%map x = Reader.file_contents filename in
+    Ok (`Other x)
+
 
 let eval_script_to_sexp lang ~run_nondeterministic ~filename =
   let open Deferred.Or_error.Monad_infix in
@@ -290,11 +290,13 @@ let add_script t lang ~run_nondeterministic ~filename =
     return (error "script already exists" file sexp_of_string)
   else begin
     let cache_filename = filename ^ ".sexp" in
-    begin Sys.file_exists cache_filename >>= function
-    |`Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
-    |_ -> eval_script lang ~run_nondeterministic ~filename 
-    end >>|? fun script ->
-    Map.set t ~key:file ~data:script
+    let%map script =
+      match%bind Sys.file_exists cache_filename with
+      | `Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
+      | _ -> eval_script lang ~run_nondeterministic ~filename 
+    in
+    Result.map script ~f:(fun script ->
+      Map.set t ~key:file ~data:script)
   end
 
 let of_html ?(code_dir="examples") ~run_nondeterministic ~filename:_  html =
