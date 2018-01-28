@@ -2,7 +2,7 @@
 
 [@@@part "1"];;
 (* file: dictionary.ml *)
-open Core_kernel
+open Base
 
 type ('a, 'b) t = { mutable length: int;
                     buckets: ('a * 'b) list array;
@@ -12,7 +12,7 @@ type ('a, 'b) t = { mutable length: int;
 [@@@part "2"];;
 let num_buckets = 17
 
-let hash_bucket key = (Hashtbl.hash key) mod num_buckets
+let hash_bucket key = (Hashtbl.hash key) % num_buckets
 
 let create () =
   { length = 0;
