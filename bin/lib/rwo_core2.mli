@@ -1,6 +1,6 @@
 (** Core extensions. After `open Core`, can do `open Rwo_core2`
     to extend some modules in Core. *)
-open Core_kernel.Std
+open Base
 
 module Result : sig
   include module type of Result
