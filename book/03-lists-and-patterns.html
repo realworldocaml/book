@@ -107,7 +107,7 @@
       <p>The key observation is that the appearance of
       <code>to_drop</code> in the second case doesn't imply a check
       that the first element is equal to the value
-      <code>to_drop</code> passed in as an argument to
+      <code>to_drop</code> that was passed in as an argument to
       <code>drop_value</code>. Instead, it just causes a new
       variable <code>to_drop</code> to be bound to whatever happens
       to be in the first element of the list, shadowing the earlier
@@ -121,11 +121,14 @@
       <code>if</code> statement:</p>
       <link rel="import" href="code/lists-and-patterns/main.topscript" part="7"/>
 
-      <p>Note that if we wanted to drop a particular literal value
-      (rather than a value that was passed in), we could do this
-      using something like our original implementation of
-      <code>drop_value</code>:</p>
+      <p>
+	If we wanted to drop a particular literal value, rather than a
+	value that was passed in, we could do this using something
+	like our original implementation
+	of <code>drop_value</code>:</p>
+
       <link rel="import" href="code/lists-and-patterns/main.topscript" part="8"/>
+
     </section>
 
     <section id="limitations-and-blessings-of-pattern-matching" data-type="sect1">
@@ -140,14 +143,15 @@
       check if the first two elements are equal to each
       other.<idx>data structures/pattern matching and</idx></p>
 
-      <p>You can think of patterns as a specialized sublanguage
-      that can express a limited (though still quite rich) set of
-      conditions. The fact that the pattern language is limited
-      turns out to be a very good thing, making it possible to
-      build better support for patterns in the compiler. In
-      particular, both the efficiency of <code>match</code>
-      statements and the ability of the compiler to detect errors
-      in matches depend on the constrained nature of patterns.</p>
+      <p>
+	You can think of patterns as a specialized sublanguage that
+	can express a limited (though still quite rich) set of
+	conditions. The fact that the pattern language is limited
+	turns out to be a good thing, making it possible to build
+	better support for patterns in the compiler. In particular,
+	both the efficiency of <code>match</code> statements and the
+	ability of the compiler to detect errors in matches depend on
+	the constrained nature of patterns.</p>
 
       <section id="performance" data-type="sect2">
         <h2>Performance</h2>
@@ -244,7 +248,7 @@
       <h1>Using the List Module Effectively</h1>
 
       <p>We've so far written a fair amount of list-munging code
-      using pattern matching and recursive functions. But in real
+      using pattern matching and recursive functions. In real
       life, you're usually better off using the <code>List</code>
       module, which is full of reusable functions that abstract out
       common patterns for computing with lists.<idx>tables,
@@ -252,12 +256,11 @@
       tables with</idx><idx id="Llistmod">lists/List
       module</idx></p>
 
-      <p>Let's work through a concrete example to see this in
-      action. We'll write a function <code>render_table</code>
-      that, given a list of column headers and a list of rows,
-      prints them out in a well-formatted text table, as
-      follows:</p>
-      <link rel="import" href="code/lists-and-patterns/main.topscript" part="69"/>
+      <p>Let's work through a concrete example. We'll write a
+      function <code>render_table</code> that, given a list of column
+      headers and a list of rows, prints them out in a well-formatted
+      text table, as follows:</p> <link rel="import"
+      href="code/lists-and-patterns/main.topscript" part="69"/>
 
       <p>The first step is to write a function to compute the
       maximum width of each column of data. We can do this by
@@ -463,45 +466,60 @@
           example:<idx>elements/partitioning with
           List.partition_tf</idx><idx>lists/partitioning elements
           in</idx><idx>List module/List.partition_tf</idx></p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="31"/>
+
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="31"/>
         </section>
 
         <section id="combining-lists" data-type="sect3">
           <h3>Combining lists</h3>
 
-          <p>Another very common operation on lists is
-          concatenation. The list module actually comes with a few
-          different ways of doing this. First, there's
-          <code>List.append</code>, for concatenating a pair of
-          lists:<idx>lists/combining</idx><idx>List
-          module/List.append</idx></p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="32"/>
+          <p>
+	    Another very common operation on lists is
+            concatenation. The <code>List</code> module actually comes
+            with a few different ways of doing this.
+            There's <code>List.append</code>, for concatenating a pair
+            of lists.
 
-          <p>There's also <code>@</code>, an operator equivalent of
-          <code>List.append</code>:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="33"/>
+	    <idx>lists/combining</idx>
+	    <idx>List module/List.append</idx></p> 
 
-          <p>In addition, there is <code>List.concat</code>, for
-          concatenating a list of lists:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="34"/>
+	  <link rel="import" 
+		href="code/lists-and-patterns/main.topscript" part="32"/>
+
+          <p>
+	    There's also <code>@</code>, an operator equivalent
+            of <code>List.append</code>.</p>
+
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="33"/>
+
+          <p>
+	    In addition, there is <code>List.concat</code>, for
+            concatenating a list of lists:</p>
+
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="34"/>
 
           <p>Here's an example of using <code>List.concat</code> along
             with <code>List.map</code> to compute a recursive listing of
             a directory tree. </p> 
-	  <link rel="import" href="code/lists-and-patterns/main.topscript" part="35"/>
+	  <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="35"/>
 
-          <p>Note that this example uses some functions from
-            the <code>Sys</code> module from <code>Core</code> for
-            accessing the filesystem.  It also uses <code>^/</code>,
-	    an infix operator for adding a new element to a string
-	    representing a file path, which is an alias
-	    of <code>Filename.concat</code>.</p>
+          <p>
+	    Note that this example uses some functions from
+            the <code>Sys</code> and <code>Filename</code> modules
+            from <code>Core</code> for accessing the filesystem and
+            dealing with filenames.</p>
 
-          <p>The preceding combination of <code>List.map</code> and
+          <p>
+	    The preceding combination of <code>List.map</code> and
             <code>List.concat</code> is common enough that there is a
             function <code>List.concat_map</code> that combines these
             into one, more efficient operation:</p>
-          <link rel="import" href="code/lists-and-patterns/main.topscript" part="36"/>
+          <link rel="import" href="code/lists-and-patterns/main.topscript" 
+		part="36"/>
         </section>
       </section>
     </section>
@@ -619,8 +637,10 @@
       keyword</idx></p>
       <link rel="import" href="code/lists-and-patterns/main.topscript" part="42"/>
 
-      <p>We can further collapse this by combining the first two
-      cases into one, using an Or pattern:</p>
+      <p>
+	We can further collapse this by combining the first two cases
+	into one, using an <em>or pattern</em>:</p>
+
       <link rel="import" href="code/lists-and-patterns/main.topscript" part="43"/>
 
       <p>We can make the code slightly terser now by using a
@@ -634,64 +654,116 @@
       <aside data-type="sidebar">
         <h5>Polymorphic Compare</h5>
 
-        <p>In the preceding <code>destutter</code> example, we made
-        use of the fact that OCaml lets us test equality between
-        values of any type, using the <code>=</code> operator.
-        Thus, we can write:</p>
-        <link rel="import" href="code/lists-and-patterns/main.topscript" part="45"/>
+        <p>
+	  You might have noticed that <code>destutter</code> is
+          specialized to lists of integers. That's
+          because <code>Base</code>'s default equality operator is
+          specialized to integers, as you can see if you try to apply
+          it to values of a different type.</p>
 
-        <p>Indeed, if we look at the type of the equality operator,
-        we'll see that it is polymorphic:</p>
-        <link rel="import" href="code/lists-and-patterns/main.topscript" part="46"/>
+        <link rel="import" href="code/lists-and-patterns/poly.topscript" 
+	      part="1"/>
 
-        <p>OCaml comes with a whole family of polymorphic
-        comparison operators, including the standard infix
-        comparators, <code>&lt;</code>, <code>&gt;=</code>, etc.,
-        as well as the function <code>compare</code> that returns
-        <code>-1</code>, <code>0</code>, or <code>1</code> to flag
-        whether the first operand is smaller than, equal to, or
-        greater than the second, respectively.</p>
+	<p>
+	  OCaml also has a collection of polymorphic equality and
+	  comparison operators, which we can make available by opening
+	  the module <code>Base.Poly</code>.</p>
+	
+        <link rel="import" href="code/lists-and-patterns/poly.topscript" 
+	      part="2"/>
 
-        <p>You might wonder how you could build functions like
-        these yourself if OCaml didn't come with them built in. It
-        turns out that you <em>can't</em> build these functions on
-        your own. OCaml's polymorphic comparison functions are
-        built into the runtime to a low level. These comparisons
-        are polymorphic on the basis of ignoring almost everything
-        about the types of the values that are being compared,
-        paying attention only to the structure of the values as
-        they're laid out in memory.</p>
+        <p>
+	  Indeed, if we look at the type of the equality operator,
+          we'll see that it is polymorphic.</p>
 
-        <p>Polymorphic compare does have some limitations. For
-        example, it will fail at runtime if it encounters a
-        function value:</p>
-        <link rel="import" href="code/lists-and-patterns/main.topscript" part="47"/>
+        <link rel="import" href="code/lists-and-patterns/poly.topscript" 
+	      part="3"/>
 
-        <p>Similarly, it will fail on values that come from outside
-        the OCaml heap, like values from C bindings. But it will
-        work in a reasonable way for other kinds of values.</p>
+	<p> 
+	  If we rewrite our destutter example
+	  with <code>Base.Poly</code> open, we'll see that it gets a
+	  polymorphic type, and can now be used on inputs of different
+	  types.</p>
 
-        <p>For simple atomic types, polymorphic compare has the
-        semantics you would expect: for floating-point numbers and
-        integers, polymorphic compare corresponds to the expected
-        numerical comparison functions. For strings, it's a
-        lexicographic comparison.</p>
+        <link rel="import" href="code/lists-and-patterns/poly.topscript" 
+	      part="4"/>
 
-        <p>Sometimes, however, the type-ignoring nature of
-        polymorphic compare is a problem, particularly when you
-        have your own notion of equality and ordering that you want
-        to impose. We'll discuss this issue more, as well as some
-        of the other downsides of polymorphic compare, in <a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>.</p>
+        <p>
+	  OCaml comes with a whole family of polymorphic comparison
+          operators, including the standard infix
+          comparators, <code>&lt;</code>, <code>&gt;=</code>, etc., as
+          well as the function <code>compare</code> that
+          returns <code>-1</code>, <code>0</code>, or <code>1</code>
+          to flag whether the first operand is smaller than, equal to,
+          or greater than the second, respectively.</p>
+
+        <p>
+	  You might wonder how you could build functions like these
+          yourself if OCaml didn't come with them built in. It turns
+          out that you <em>can't</em> build these functions on your
+          own. OCaml's polymorphic comparison functions are built into
+          the runtime to a low level. These comparisons are
+          polymorphic on the basis of ignoring almost everything about
+          the types of the values that are being compared, paying
+          attention only to the structure of the values as they're
+          laid out in memory. (You can learn more about this structure
+	  in <a href="20-runtime-memory-layout.html"
+	  data-type="xref">Memory Representation of Values</a>.)
+	</p>
+
+        <p>
+	  Polymorphic compare does have some limitations. For example,
+          it will fail at runtime if it encounters a function
+          value.</p>
+
+        <link rel="import" href="code/lists-and-patterns/poly.topscript" 
+	      part="5"/>
+
+        <p>
+	  Similarly, it will fail on values that come from outside the
+          OCaml heap, like values from C bindings. But it will work in
+          a reasonable way for most other kinds of values.</p>
+
+        <p>
+	  For simple atomic types, polymorphic compare has the
+          semantics you would expect: for floating-point numbers and
+          integers, polymorphic compare corresponds to the expected
+          numerical comparison functions. For strings, it's a
+          lexicographic comparison.</p>
+
+        <p>
+	  That said, experienced OCaml developers typically avoid
+	  polymorphic comparison. That's surprising, given how
+	  obviously useful is, but there's a good reason.  While it's
+	  very convenient, in some cases, the type oblivious nature of
+	  polymorphic compare means that it does something that
+	  doesn't make sense for the particular type of values you're
+	  dealing with. This can lead to surprising and hard to
+	  resolve bugs in your code.  It's for this reason
+	  that <code>Base</code> discourages the use of polymorphic
+	  compare by hiding it by default.</p>
+
+	<p>
+	  We'll discuss this issue more
+          in <a href="13-maps-and-hashtables.html#maps-and-hash-tables"
+		data-type="xref">Maps And Hash Tables</a>. But in any
+	  case, you can restore the default behavior
+	  of <code>Base</code> by opening the module again.
+	</p>
+
+        <link rel="import" href="code/lists-and-patterns/poly.topscript" 
+	      part="6"/>
+
       </aside>
 
-      <p>Note that <code>when</code> clauses have some downsides.
-      As we noted earlier, the static checks associated with
-      pattern matches rely on the fact that patterns are restricted
-      in what they can express. Once we add the ability to add an
-      arbitrary condition to a pattern, something will be lost. In
-      particular, the ability of the compiler to determine if a
-      match is exhaustive, or if some case is redundant, is
-      compromised.</p>
+      <p>
+	Note that <code>when</code> clauses have some downsides.  As
+	we noted earlier, the static checks associated with pattern
+	matches rely on the fact that patterns are restricted in what
+	they can express. Once we add the ability to add an arbitrary
+	condition to a pattern, something is lost. In particular, the
+	ability of the compiler to determine if a match is exhaustive,
+	or if some case is redundant, is compromised.</p>
 
       <p>Consider the following function, which takes a list of
       optional values, and returns the number of those values that

@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
+open Base;;
 List.find;;
 [%%expect ocaml {|- : 'a list -> f:('a -> bool) -> 'a option = <fun>|}];;
 [@@@part "1"];;
@@ -34,7 +34,7 @@ let find_mismatches table1 table2 =
   )
 ;;
 [%%expect ocaml {|
-val find_mismatches : ('a, 'b) Hashtbl.t -> ('a, 'b) Hashtbl.t -> 'a list =
+val find_mismatches : ('a, int) Hashtbl.t -> ('a, int) Hashtbl.t -> 'a list =
   <fun>
 |}];;
 [@@@part "4"];;
@@ -45,7 +45,7 @@ Error.of_string "something went wrong";;
 [%%expect ocaml {|- : Error.t = something went wrong|}];;
 [@@@part "6"];;
 Error.of_thunk (fun () ->
-  sprintf "something went wrong: %f" 32.3343);;
+  Printf.sprintf "something went wrong: %f" 32.3343);;
 [%%expect ocaml {|- : Error.t = something went wrong: 32.334300|}];;
 [@@@part "7"];;
 Error.create "Unexpected character" 'z' Char.sexp_of_t;;
@@ -128,7 +128,7 @@ val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
 List.map ~f:(fun x -> 100 / x) [1;3;0;4];;
 [%%expect{|Exception: Division_by_zero.|}];;
 [@@@part "17"];;
-List.map ~f:(fun x -> printf "%d\n%!" x; 100 / x) [1;3;0;4];;
+List.map ~f:(fun x -> Stdio.printf "%d\n%!" x; 100 / x) [1;3;0;4];;
 [%%expect{|
 Exception: Division_by_zero.
 1
@@ -150,7 +150,7 @@ List.filter exceptions  ~f:(function
 [@@@part "20"];;
 let rec find_exn alist key = match alist with
   | [] -> raise (Key_not_found key)
-  | (key',data) :: tl -> if key = key' then data else find_exn tl key
+  | (key',data) :: tl -> if String.(=) key key' then data else find_exn tl key
 ;;
 [%%expect ocaml {|val find_exn : (string * 'a) list -> string -> 'a = <fun>|}];;
 let alist = [("a",1); ("b",2)];;
@@ -220,6 +220,7 @@ let merge_lists xs ys ~f =
 merge_lists [1;2;3] [-1] ~f:(+);;
 [%%expect{|Exception: "Assert_failure //toplevel//:7:11".|}];;
 [@@@part "28"];;
+open Stdio;;
 let parse_line line =
   String.split_on_chars ~on:[','] line
   |> List.map ~f:Float.of_string
@@ -235,8 +236,8 @@ let load filename =
 [@@@part "29"];;
 let load filename =
   let inc = In_channel.create filename in
-  protect ~f:(fun () ->
-    In_channel.input_lines inc |> List.map ~f:parse_line)
+  Exn.protect
+    ~f:(fun () -> In_channel.input_lines inc |> List.map ~f:parse_line)
     ~finally:(fun () -> In_channel.close inc)
 ;;
 [%%expect ocaml {|val load : string -> float list list = <fun>|}];;
@@ -309,7 +310,7 @@ let find alist key =
   Or_error.try_with (fun () -> find_exn alist key) ;;
 [%%expect ocaml {|val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>|}];;
 find ["a",1; "b",2] "c";;
-[%%expect ocaml {|- : int Or_error.t = Core_kernel__.Result.Error ("Key_not_found(\"c\")")|}];;
+[%%expect ocaml {|- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")|}];;
 [@@@part "37"];;
 Or_error.ok_exn (find ["a",1; "b",2] "b");;
 [%%expect ocaml {|- : int = 2|}];;

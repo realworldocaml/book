@@ -6,9 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
-module Time_ns = Core_kernel.Time_ns;;
-[%%expect ocaml {|module Time_ns = Core_kernel.Time_ns|}];;
+open Core;;
 type service_info =
   { service_name : string;
     port         : int;
@@ -18,12 +16,6 @@ type service_info =
 [%%expect ocaml {|type service_info = { service_name : string; port : int; protocol : string; }|}];;
 [@@@part "1"];;
 #require "re.posix";;
-[%%expect{|
-/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
-/Users/yminsky/.opam/4.04.2/lib/re: added to search path
-/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
-/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
-|}];;
 let service_info_of_string line =
   let matches = 
     Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
@@ -55,10 +47,9 @@ let parse_lines parse file_contents =
 [%%expect ocaml {|val parse_lines : (string -> 'a) -> string -> 'a with_line_num list = <fun>|}];;
 [@@@part "4.1"];;
 parse_lines service_info_of_string
-  {|rtmp              1/ddp     # Routing Table Maintenance Protocol
-    tcpmux            1/udp     # TCP Port Service Multiplexer
-    tcpmux            1/tcp     # TCP Port Service Multiplexer
-  |}
+  "rtmp              1/ddp     # Routing Table Maintenance Protocol
+   tcpmux            1/udp     # TCP Port Service Multiplexer
+   tcpmux            1/tcp     # TCP Port Service Multiplexer"
 ;;
 [%%expect ocaml {|
 - : service_info with_line_num list =
@@ -73,31 +64,6 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 [{item = 1; line_num = 1}; {item = 10; line_num = 2};
  {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
 |}];;
-
-[@@@part "4.3"];;
-let s = "A string!";;
-
-[@@@part "4.4"];;
-let s = {|A string!|};;
-
-[@@@part "4.5"];;
-let s = "\"A quoted string!\"";;
-let () = print_endline s;;
-
-[@@@part "4.6"];;
-let s = "\"A quoted string!\"";;
-let () = print_endline s;;
-
-[@@@part "4.7"];;
-let s = print_endline {|
-It's possible to put something
-here that spans multiple lines|};;
-
-[@@@part "4.8"];;
-let s = print_endline {x|
-OCaml has multiple kinds of quotations,
-including ", and {| and |}
-|x};;
 
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =

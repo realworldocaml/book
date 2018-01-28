@@ -139,7 +139,7 @@
             XML? Or something else entirely?</p>
 
           <p>
-	    Core's answer to this question is the
+	    Base's answer to this question is the
             <code>Error.t</code> type, which tries to forge a good
             compromise between efficiency, convenience, and control
             over the presentation of errors.</p>
@@ -181,9 +181,11 @@
 
           <p>
 	    S-expressions are supported by the Sexplib package that
-            is distributed with Core and is the most common
-            serialization format used in Core. Indeed, most types in
-            Core come with built-in s-expression converters.
+            is distributed with Base and is the most common
+            serialization format used in Base. Indeed, most types in
+            Base come with built-in s-expression converters.
+
+
             <idx>Sexplib package/sexp converter</idx></p>
           <link rel="import" href="code/error-handling/main.topscript" part="7"/>
 
@@ -218,7 +220,7 @@
 	    The type <code>'a Or_error.t</code> is just a shorthand
             for <code>('a,Error.t) Result.t</code>, and it is, after
             <code>option</code>, the most common way of returning
-            errors in Core.</p>
+            errors in Base.</p>
 	</section>
 
 	<section id="bind-and-other-error-handling-idioms" data-type="sect2">
@@ -375,7 +377,7 @@
 	  Note that we named the function <code>find_exn</code> to
 	  warn the user that the function routinely throws exceptions,
 	  a convention that is used heavily in
-	  Core.<idx>functions/exception warnings for</idx><idx>find_exn
+	  Base.<idx>functions/exception warnings for</idx><idx>find_exn
 	    function</idx></p>
 
 	<p>
@@ -446,19 +448,21 @@
           <h2>Helper Functions for Throwing Exceptions</h2>
 
           <p>
-	    OCaml and Core provide a number of helper functions to
-            simplify the task of throwing exceptions. The simplest one
+	    Base provides a number of helper functions to simplify the
+            task of throwing exceptions. The simplest one
             is <code>failwith</code>, which could be defined as
-            follows:<idx>exceptions/helper functions
-              for</idx><idx>error handling/exception helper
-              functions</idx></p>
+            follows:
+
+	    <idx>exceptions/helper functions for</idx>
+	    <idx>error handling/exception helper functions</idx></p>
+
           <link rel="import" href="code/error-handling/main.topscript" part="25"/>
 
           <p>
 	    There are several other useful functions for raising
             exceptions, which can be found in the API documentation for
             the <code>Common</code> and <code>Exn</code> modules in
-            Core.</p>
+            Base.</p>
 
           <p>
 	    Another important way of throwing an exception is the
@@ -538,12 +542,15 @@
             in an awkward state. Consider the following function for
             loading a file full of numerical data.  This code parses
             data that matches a simple comma-separated file format,
-            where each field is a floating point number.
+            where each field is a floating point number. In this
+            example we open <code>Stdio</code>, to get access to
+            routines for reading from files.
 
 	    <idx>exceptions/exception clean up</idx>
 	    <idx>error handling/exception clean up</idx></p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="28"/>
+          <link rel="import" href="code/error-handling/main.topscript" 
+		part="28"/>
 
           <p>
 	    One problem with this code is that the parsing function
@@ -553,7 +560,7 @@
             be closed, leading to a file-descriptor leak.</p>
 
           <p>
-	    We can fix this using Core_kernel's <code>protect</code>
+	    We can fix this using Base's <code>Exn.protect</code>
             function, which takes two arguments: a
             thunk <code>f</code>, which is the main body of the
             computation to be run; and a thunk <code>finally</code>,

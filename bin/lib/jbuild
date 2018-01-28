@@ -2,7 +2,7 @@
  ((name        rwo)
   (public_name rwo)
   (libraries   (core async netclient cohttp sexp_pretty))
-  (preprocess (pps (ppx_sexp_conv)))
+  (preprocess (pps (ppx_jane)))
 ))
 
 (rule

@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
+open Base;;
 [1;2;3];;
 [%%expect ocaml {|- : int list = [1; 2; 3]|}];;
 [@@@part "1"];;
@@ -62,7 +62,7 @@ let rec drop_value l to_drop =
     let new_tl = drop_value tl to_drop in
     if hd = to_drop then new_tl else hd :: new_tl
 ;;
-[%%expect ocaml {|val drop_value : 'a list -> 'a -> 'a list = <fun>|}];;
+[%%expect ocaml {|val drop_value : int list -> int -> int list = <fun>|}];;
 drop_value [1;2;3] 2;;
 [%%expect ocaml {|- : int list = [1; 3]|}];;
 [@@@part "8"];;
@@ -228,7 +228,7 @@ List.reduce ~f:(+) [1;2;3;4;5];;
 List.reduce ~f:(+) [];;
 [%%expect ocaml {|- : int option = None|}];;
 [@@@part "29"];;
-List.filter ~f:(fun x -> x mod 2 = 0) [1;2;3;4;5];;
+List.filter ~f:(fun x -> x % 2 = 0) [1;2;3;4;5];;
 [%%expect ocaml {|- : int list = [2; 4]|}];;
 [@@@part "30"];;
 let extensions filenames =
@@ -237,7 +237,7 @@ let extensions filenames =
       | None  | Some ("",_) -> None
       | Some (_,ext) ->
         Some ext)
-  |> List.dedup_and_sort
+  |> List.dedup_and_sort ~compare:String.compare
 ;;
 [%%expect ocaml {|val extensions : string list -> string list = <fun>|}];;
 extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
@@ -266,6 +266,11 @@ List.concat [[1;2];[3;4;5];[6];[]];;
 [%%expect ocaml {|- : int list = [1; 2; 3; 4; 5; 6]|}];;
 [@@@part "35"];;
 module Sys = Core.Sys
+module Filename = Core.Filename;;
+[%%expect ocaml {|
+module Sys = Core.Sys
+module Filename = Core.Filename
+|}];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
   then [s]
@@ -274,10 +279,7 @@ let rec ls_rec s =
     |> List.map ~f:(fun sub -> ls_rec (Filename.concat s sub))
     |> List.concat
 ;;
-[%%expect ocaml {|
-module Sys = Core.Sys
-val ls_rec : string -> string list = <fun>
-|}];;
+[%%expect ocaml {|val ls_rec : string -> string list = <fun>|}];;
 [@@@part "36"];;
 let rec ls_rec s =
   if Sys.is_file_exn ~follow_symlinks:true s
@@ -325,7 +327,7 @@ let rec destutter list =
     if hd = hd' then destutter (hd' :: tl)
     else hd :: destutter (hd' :: tl)
 ;;
-[%%expect ocaml {|val destutter : 'a list -> 'a list = <fun>|}];;
+[%%expect ocaml {|val destutter : int list -> int list = <fun>|}];;
 [@@@part "42"];;
 let rec destutter = function
   | [] as l -> l
@@ -334,7 +336,7 @@ let rec destutter = function
     if hd = hd' then destutter tl
     else hd :: destutter tl
 ;;
-[%%expect ocaml {|val destutter : 'a list -> 'a list = <fun>|}];;
+[%%expect ocaml {|val destutter : int list -> int list = <fun>|}];;
 [@@@part "43"];;
 let rec destutter = function
   | [] | [_] as l -> l
@@ -342,27 +344,14 @@ let rec destutter = function
     if hd = hd' then destutter tl
     else hd :: destutter tl
 ;;
-[%%expect ocaml {|val destutter : 'a list -> 'a list = <fun>|}];;
+[%%expect ocaml {|val destutter : int list -> int list = <fun>|}];;
 [@@@part "44"];;
 let rec destutter = function
   | [] | [_] as l -> l
   | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
   | hd :: tl -> hd :: destutter tl
 ;;
-[%%expect ocaml {|val destutter : 'a list -> 'a list = <fun>|}];;
-[@@@part "45"];;
-3 = 4;;
-[%%expect ocaml {|- : bool = false|}];;
-[3;4;5] = [3;4;5];;
-[%%expect ocaml {|- : bool = true|}];;
-[Some 3; None] = [None; Some 3];;
-[%%expect ocaml {|- : bool = false|}];;
-[@@@part "46"];;
-(=);;
-[%%expect ocaml {|- : 'a -> 'a -> bool = <fun>|}];;
-[@@@part "47"];;
-(fun x -> x + 1) = (fun x -> x + 1);;
-[%%expect{|Exception: (Invalid_argument "compare: functional value").|}];;
+[%%expect ocaml {|val destutter : int list -> int list = <fun>|}];;
 [@@@part "48"];;
 let rec count_some list =
   match list with
@@ -410,7 +399,7 @@ let rec count_some list =
 let count_some l = List.count ~f:Option.is_some l;;
 [%%expect ocaml {|val count_some : 'a option list -> int = <fun>|}];;
 [@@@part "69"];;
-printf "%s\n"
+Stdio.print_endline
   (render_table
      ["language";"architect";"first release"]
      [ ["Lisp" ;"John McCarthy" ;"1958"] ;

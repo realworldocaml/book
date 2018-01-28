@@ -1,4 +1,4 @@
-open Core_kernel.Std
+open Base
 
 module Result = struct
   include Result
