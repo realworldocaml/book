@@ -5,7 +5,8 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
+open Stdio;;
 [@@@part "1"];;
 for i = 0 to 3 do printf "i = %d\n" i done;;
 [%%expect{|
@@ -35,8 +36,8 @@ let rev_inplace ar =
     ar.(!i) <- ar.(!j);
     ar.(!j) <- tmp;
     (* bump the indices *)
-    incr i;
-    decr j
+    Int.incr i;
+    Int.decr j
   done
 ;;
 [%%expect ocaml {|val rev_inplace : 'a array -> unit = <fun>|}];;
