@@ -134,11 +134,13 @@ let phrases_to_html ?(pygmentize=false) phrases =
     if Expect.Chunk.evaluated x then (
       let highlight = function
         | Expect.Chunk.OCaml, str ->
-          Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize `OCaml str
+          Pygments.pygmentize ~add_attrs:["class","ge"]
+            ~pygmentize `OCaml str
         | Expect.Chunk.Raw, str ->
-          Pygments.pygmentize ~add_attrs:["class","ge"] ~pygmentize:false `OCaml str
+          Pygments.pygmentize ~add_attrs:["class","ge"]
+            ~pygmentize:false `OCaml str
       in
-      Deferred.all (List.map ~f:highlight (Expect.Chunk.responses x))
+      Deferred.List.map ~f:highlight (Expect.Chunk.responses x)
     ) else
       Deferred.return []
   in
@@ -171,8 +173,10 @@ let exn_of_filename filename content =
   let (_filename, extension) = Filename.split_extension filename in
   match extension with
   | Some ext -> (match ext with
-    | "ml" | "mli" | "mly" | "mll" -> `OCaml Rwo_expect.Raw_script.{ name = ""; content }
-    | "rawtopscript" -> `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
+    | "ml" | "mli" | "mly" | "mll" -> 
+      `OCaml Rwo_expect.Raw_script.{ name = ""; content }
+    | "rawtopscript" -> 
+      `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
     | _ -> `Other content)
   | None -> `Other content
 
@@ -263,7 +267,10 @@ let eval_script lang ~run_nondeterministic ~filename =
       match Sexplib.Sexp.of_string (sprintf "(%s)" removed_check) with
       | Sexplib.Sexp.Atom _ -> assert false
       | Sexplib.Sexp.List l ->
-         let r = String.concat ~sep:"\n" (List.map ~f:Sexp_pretty.sexp_to_string l) in
+         let r = 
+           String.concat ~sep:"\n" 
+             (List.map ~f:Sexp_pretty.sexp_to_string l) 
+         in
          Ok (`Other r)
       )
   | _ -> (
@@ -293,7 +300,8 @@ let add_script t lang ~run_nondeterministic ~filename =
 let of_html ?(code_dir="examples") ~run_nondeterministic ~filename:_  html =
   let imports =
     Import.find_all html
-    |> List.dedup_and_sort ~compare:(fun i j -> compare i.Import.href j.Import.href)
+    |> List.dedup_and_sort ~compare:(fun i j -> 
+      compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
       add_script accum (Import.lang_of i |> ok_exn)
