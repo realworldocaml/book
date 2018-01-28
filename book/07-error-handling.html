@@ -538,12 +538,15 @@
             in an awkward state. Consider the following function for
             loading a file full of numerical data.  This code parses
             data that matches a simple comma-separated file format,
-            where each field is a floating point number.
+            where each field is a floating point number. In this
+            example we open <code>Stdio</code>, to get access to
+            routines for reading from files.
 
 	    <idx>exceptions/exception clean up</idx>
 	    <idx>error handling/exception clean up</idx></p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="28"/>
+          <link rel="import" href="code/error-handling/main.topscript" 
+		part="28"/>
 
           <p>
 	    One problem with this code is that the parsing function
