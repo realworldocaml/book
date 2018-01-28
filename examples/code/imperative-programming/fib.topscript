@@ -5,20 +5,16 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
-#require "mtime.os.top";;
+open Base;;
 let time f =
-  let counter = Mtime.counter () in
+  let open Core in
+  let start = Time.now () in
   let x = f () in
-  let elapsed = Mtime.count counter in
-  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  let stop = Time.now () in
+  printf "Time: %F ms\n" (Time.diff stop start |> Time.Span.to_ms);
   x 
 ;;
-[%%expect{|
-Characters 29-42:
-Error: Unbound module Mtime
-Hint: Did you mean Time?
-|}];;
+[%%expect ocaml {|val time : (unit -> 'a) -> 'a = <fun>|}];;
 let memoize f =
   let table = Hashtbl.Poly.create () in
   (fun x ->
@@ -36,28 +32,20 @@ let rec fib i =
 [%%expect ocaml {|val fib : int -> int = <fun>|}];;
 [@@@part "2"];;
 time (fun () -> fib 20);;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 1.12414360046 ms|};
+ocaml {|- : int = 10946|}];;
 time (fun () -> fib 40);;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 18263.7000084 ms|};
+ocaml {|- : int = 165580141|}];;
 [@@@part "3"];;
 let fib = memoize fib;;
 [%%expect ocaml {|val fib : int -> int = <fun>|}];;
 time (fun () -> fib 40);;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 18122.092247 ms|};
+ocaml {|- : int = 165580141|}];;
 time (fun () -> fib 40);;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 0.00596046447754 ms|};
+ocaml {|- : int = 165580141|}];;
 [@@@part "4"];;
 let fib_norec fib i =
   if i <= 1 then i
@@ -90,10 +78,8 @@ let memo_rec f_norec x =
 let fib = memo_rec fib_norec;;
 [%%expect ocaml {|val fib : int -> int = <fun>|}];;
 time (fun () -> fib 40);;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 0.0388622283936 ms|};
+ocaml {|- : int = 102334155|}];;
 [@@@part "9"];;
 let fib = memo_rec (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
