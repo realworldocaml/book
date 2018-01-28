@@ -65,48 +65,6 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
  {item = 100; line_num = 3}; {item = 1000; line_num = 4}]
 |}];;
 
-[@@@part "4.3"];;
-let s = "A string!";;
-[%%expect ocaml {|val s : string = "A string!"|}];;
-
-[@@@part "4.4"];;
-let s = {|A string!|};;
-[%%expect ocaml {|val s : string = "A string!"|}];;
-
-[@@@part "4.5"];;
-let s = "\"A quoted string!\"";;
-[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
-let () = print_endline s;;
-[%%expect{|"A quoted string!"|}];;
-
-[@@@part "4.6"];;
-let s = "\"A quoted string!\"";;
-[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
-let () = print_endline s;;
-[%%expect{|"A quoted string!"|}];;
-
-[@@@part "4.7"];;
-let s = print_endline {|
-It's possible to put something
-here that spans multiple lines|};;
-[%%expect{|
-It's possible to put something
-here that spans multiple lines
-|};
-ocaml {|val s : unit = ()|}];;
-
-[@@@part "4.8"];;
-let s = print_endline {x|
-OCaml has multiple kinds of quotations,
-including ", and {| and |}
-|x};;
-[%%expect{escape|
-OCaml has multiple kinds of quotations,
-including ", and {| and |}
-
-|escape};
-ocaml {|val s : unit = ()|}];;
-
 [@@@part "5"];;
 let service_info_to_string { service_name = name; port = port; protocol = prot  } =
   sprintf "%s %i/%s" name port prot
