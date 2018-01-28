@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 #warnings "-40";;
-open Core_kernel;;
+open Base;;
 module Time_ns = Core_kernel.Time_ns;;
 [%%expect ocaml {|module Time_ns = Core_kernel.Time_ns|}];;
 [@@@part "1"];;

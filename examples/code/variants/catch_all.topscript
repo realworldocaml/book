@@ -5,7 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White;;
 [%%expect ocaml {|
