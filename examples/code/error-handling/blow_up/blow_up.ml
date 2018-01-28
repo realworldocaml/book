@@ -1,4 +1,4 @@
-open Core
+open Base
 exception Empty_list
 
 let list_max = function

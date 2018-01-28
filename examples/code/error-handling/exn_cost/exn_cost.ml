@@ -1,4 +1,4 @@
-open Core
+open Base
 open Core_bench
 
 let simple_computation () =
