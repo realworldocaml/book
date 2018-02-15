@@ -2,7 +2,7 @@
 
 [@@@part "1"];;
 (* file: dlist.ml *)
-open Core_kernel
+open Base
 
 type 'a element =
   { value : 'a;

@@ -5,9 +5,11 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
+open Stdio;;
 [@@@part "1"];;
-printf "%i is an integer, %F is a float, \"%s\" is a string\n"
+printf
+  "%i is an integer, %F is a float, \"%s\" is a string\n"
   3 4.5 "five";;
 [%%expect{|3 is an integer, 4.5 is a float, "five" is a string|};
 ocaml {|- : unit = ()|}];;
@@ -33,7 +35,7 @@ open CamlinternalFormatBasics;;
 let fmt : ('a, 'b, 'c) format =
   "%i is an integer\n";;
 [%%expect ocaml {|
-val fmt : (int -> 'c, 'b, 'c) Core_kernel.format =
+val fmt : (int -> 'c, 'b, 'c) format =
   Format
    (Int (Int_i, No_padding, No_precision,
      String_literal (" is an integer\n", End_of_format)),

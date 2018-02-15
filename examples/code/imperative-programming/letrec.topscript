@@ -5,20 +5,16 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
-#require "mtime.os.top";;
+open Base;;
 let time f =
-  let counter = Mtime.counter () in
+  let open Core in
+  let start = Time.now () in
   let x = f () in
-  let elapsed = Mtime.count counter in
-  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  let stop = Time.now () in
+  printf "Time: %F ms\n" (Time.diff stop start |> Time.Span.to_ms);
   x 
 ;;
-[%%expect{|
-Characters 29-42:
-Error: Unbound module Mtime
-Hint: Did you mean Time?
-|}];;
+[%%expect ocaml {|val time : (unit -> 'a) -> 'a = <fun>|}];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
   (fun x ->
@@ -51,7 +47,5 @@ let lazy_memo_rec f_norec x =
 ;;
 [%%expect ocaml {|val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
 time (fun () -> lazy_memo_rec fib_norec 40);;
-[%%expect{|
-Characters 0-4:
-Error: Unbound value time
-|}];;
+[%%expect{|Time: 0.0441074371338 ms|};
+ocaml {|- : int = 102334155|}];;
