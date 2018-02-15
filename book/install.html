@@ -562,7 +562,7 @@ syntax enable
 " Vim needs to be built with Python scripting support, and must be
 " able to find Merlin's executable on PATH.
 if executable('ocamlmerlin') &amp;&amp; has('python')
-  let s:ocamlmerlin = substitute(system('opam config var share'), '\n$', '', '''') . "/ocamlmerlin"
+  let s:ocamlmerlin = substitute(system('opam config var share'), '\n$', '', '''') . "/merlin"
   execute "set rtp+=".s:ocamlmerlin."/vim"
   execute "set rtp+=".s:ocamlmerlin."/vimbufsync"
 endif
@@ -659,7 +659,7 @@ $ opam install ocp-indent
   <code>autocmd</code> to your Vim configuration:</p>
   <pre><code class="language-none">
 " Your vimrc
-autocmd FileType ocaml source substitute(system('opam config var share'), '\n$', '', '''') . "/typerex/ocp-indent/ocp-indent.vim"
+autocmd FileType ocaml execute "set rtp+=" . substitute(system('opam config var share'), '\n$', '', '''') . "/ocp-indent/vim/indent/ocaml.vim"
 </code></pre>
 </body>
 </html>
