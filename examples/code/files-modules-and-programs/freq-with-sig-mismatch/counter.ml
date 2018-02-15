@@ -1,4 +1,4 @@
-open Core_kernel
+open Base
 
 type t = (string * int) list
 
@@ -12,4 +12,4 @@ let touch t s =
     | None -> 0
     | Some x -> x
   in
-  Map.add t ~key:s ~data:(count + 1)
+  Map.set t ~key:s ~data:(count + 1)

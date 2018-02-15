@@ -3,5 +3,5 @@
 
 (executable
  ((name freq)
-  (libraries (core_kernel))
+  (libraries (base stdio))
   ))

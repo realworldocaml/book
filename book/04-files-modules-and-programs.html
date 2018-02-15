@@ -27,7 +27,7 @@
       <h1>Single-File Programs</h1>
 
       <p>We'll start with an example: a utility that reads lines
-      from <code>stdin</code> and computes a frequency count of the
+      from <code>stdin</code>, computes a frequency count of the
       lines, and prints out the ten most frequent lines. We'll start
       with a simple implementation, which we'll save as the
       file <em>freq.ml</em>.
@@ -55,24 +55,33 @@
       original list, but instead allocates a new list with the
       requisite key/value pair added.</p>
 
-      <p>Now we can write <code>freq.ml</code>:</p>
-      <link rel="import" href="code/files-modules-and-programs/freq/freq.ml"/>
+      <p>Now we can write <code>freq.ml</code>.</p>
 
-      <p>The function <code>build_counts</code> reads in lines from
-      <code>stdin</code>, constructing from those lines an
-      association list with the frequencies of each line. It does
-      this by invoking <code>In_channel.fold_lines</code> (similar
-      to the function <code>List.fold</code> described in <a href="03-lists-and-patterns.html#lists-and-patterns" data-type="xref">Lists And Patterns</a>), which reads through the lines
-      one by one, calling the provided <code>fold</code> function
-      for each line to update the accumulator. That accumulator is
-      initialized to the empty list.</p>
+      <link rel="import"
+	    href="code/files-modules-and-programs/freq/freq.ml"/>
 
-      <p>With <code>build_counts</code> defined, we then call the
-      function to build the association list, sort that list by
-      frequency in descending order, grab the first 10 elements off
-      the list, and then iterate over those 10 elements and print
-      them to the screen. These operations are tied together using
-      the <code>|&gt;</code> operator described in <a href="02-variables-and-functions.html#variables-and-functions" data-type="xref">Variables And Functions</a>.
+      <p>
+	The function <code>build_counts</code> reads in lines
+	from <code>stdin</code>, constructing from those lines an
+	association list with the frequencies of each line. It does
+	this by invoking <code>In_channel.fold_lines</code> (similar
+	to the function <code>List.fold</code> described in
+	<a href="03-lists-and-patterns.html#lists-and-patterns"
+	   data-type="xref">Lists And Patterns</a>), which reads
+	through the lines one by one, calling the
+	provided <code>fold</code> function for each line to update
+	the accumulator. That accumulator is initialized to the empty
+	list.</p>
+
+      <p>
+	With <code>build_counts</code> defined, we then call the
+	function to build the association list, sort that list by
+	frequency in descending order, grab the first 10 elements off
+	the list, and then iterate over those 10 elements and print
+	them to the screen. These operations are tied together using
+	the <code>|&gt;</code> operator described
+	in <a href="02-variables-and-functions.html#prefix-and-infix-operators"
+	      data-type="xref">Variables And Functions</a>.
 
 	<idx>let ( ) declaration</idx>
 	<idx>main function</idx></p>
@@ -80,7 +89,7 @@
       <div class="allow_break" data-type="note">
         <h1>Where Is <code>main</code>?</h1>
 
-        <p>Unlike programs in C, Java or C#, programs in OCaml do not
+        <p>Unlike programs in C, Java or C#, programs in OCaml don't
         have a unique <code>main</code> function. When an OCaml
         program is evaluated, all the statements in the implementation
         files are evaluated in the order in which they were linked
@@ -101,31 +110,32 @@
         effect.</p>
       </div>
 
-      <p>If we weren't using <code>Core_kernel</code> or any other
+      <p>If we weren't using <code>Base</code> or any other
       external libraries, we could build the executable like
       this:</p>
       <link rel="import" href="code/files-modules-and-programs/freq/simple_build_fail.errsh"/>
 
-      <p>But as you can see, it fails because it can't find
-      <code>Core_kernel</code>. We need a somewhat more complex
-      invocation to get <code>Core_kernel</code> linked in:
+      <p>But as you can see, it fails because it can't
+      find <code>Base</code> and <code>Stdio</code>. We need a
+      somewhat more complex invocation to get them linked in:
 
       <idx>OCaml toolchain/ocamlc</idx>
       <idx>OCaml toolchain/ocamlfind</idx>
-      <idx>Core standard library/finding with ocamlfind</idx></p>
+      <idx>Base standard library/finding with ocamlfind</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/freq/simple_build.sh"/>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/freq/simple_build.sh"/>
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>, a
       tool which itself invokes other parts of the OCaml toolchain (in
       this case, <span class="command"><em>ocamlc</em></span>) with
       the appropriate flags to link in particular libraries and
-      packages. Here, <code>-package core</code> is
+      packages. Here, <code>-package base</code> is
       asking <span class="command"><em>ocamlfind</em></span> to link
-      in the Core library; <code>-linkpkg</code> asks ocamlfind to
-      link in the packages as is necessary for building an executable,
-      while <code>-thread</code> turns on threading support, which is
-      required for Core.
+      in the <code>Base</code> library; <code>-linkpkg</code> asks
+      ocamlfind to link in the packages as is necessary for building
+      an executable, while <code>-thread</code> turns on threading
+      support, which is required for Base.
 
       <idx>threads/turning on with -thread</idx>
       <idx data-primary-sortas="linkpkg">-linkpkg</idx></p>
@@ -205,7 +215,7 @@
         supported by the native-code compiler. We'll cover both
         compilers in more detail
         in <a href="23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code"
-        data-type="xref">The Compiler Backend Byte Code And Native
+        data-type="xref">The Compiler Backend: Byte Code And Native
         Code</a>.</p>
       </div>
     </section>
@@ -392,7 +402,7 @@
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml"/>
 
-      With this implementation, the build now succeeds!
+      <p>With this implementation, the build now succeeds!</p>
 
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-with-sig-abstract-fixed/build.sh"/>
@@ -405,13 +415,18 @@
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
-      <p>Note that in the preceding example we use
-      <code>String.Map</code> in some places and simply
-      <code>Map</code> in others. This has to do with the fact that
-      for some operations, like creating a <code>Map.t</code>, you
-      need access to type-specialized information, and for others,
-      like looking something up in <code>Map.t</code>, you don't.
-      This is covered in more detail in <a href="13-maps-and-hashtables.html#maps-and-hash-tables" data-type="xref">Maps And Hash Tables</a>.</p>
+      <p>
+	There's some unfamiliar syntax in the above example, in
+	particular, writing <code>Map.M(String).t</code> to refer to
+	the type of a map with string keys, and <code>Map.empty
+	(module String)</code> to generate an empty map.  Here, we're
+	making use of some more advanced features of the language
+	(specifically, <em>functors</em> and <em>first-class
+	modules</em>, which we'll get to in later chapters).  The use
+	of these features for the Map data-structure in particular is
+	covered in
+	<a href="13-maps-and-hashtables.html#maps-and-hash-tables"
+	      data-type="xref">Maps And Hash Tables</a>.</p>
     </section>
 
     <section id="concrete-types-in-signatures" data-type="sect1">
@@ -488,21 +503,30 @@
       you do need to convert, you can do so using explicit
       conversions to and from the string type.</p>
 
-      <p>Here's how you might create such an abstract type, within
-      a submodule:
+      <p>
+	Here's how you might create such an abstract type, within a
+	submodule:
 
 	<idx>abstract types</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/abstract_username.ml"/>
+      <link rel="import" 
+	    href="code/files-modules-and-programs/abstract_username.ml"/>
 
-      <p>Note that the <code>to_string</code> and
-      <code>of_string</code> functions above are implemented simply
-      as the identity function, which means they have no runtime
-      effect. They are there purely as part of the discipline that
-      they enforce on the code through the type system.</p>
+      <p>
+	Note that the <code>to_string</code>
+	and <code>of_string</code> functions above are implemented
+	simply as the identity function, which means they have no
+	runtime effect. They are there purely as part of the
+	discipline that they enforce on the code through the type
+	system. We also chose to put in an equality function, so you
+	can check if two usernames match. In a real application, we
+	might want more functionality, like the ability to hash and
+	compare usernames, but we've kept this example purposefully
+	simple.
+      </p>
 
-      <p>The basic structure of a module declaration like this
-      is:</p>
+      <p>
+	The basic structure of a module declaration like this is:</p>
 
       <link rel="import" href="code/files-modules-and-programs/module.syntax"/>
 
@@ -544,9 +568,9 @@
       <idx>modules/opening</idx></p>
 
       <p>We've encountered <code>open</code> already, specifically
-      where we've written <code>open Core_kernel</code> to get
+      where we've written <code>open Base</code> to get
       access to the standard definitions in the
-      <code>Core_kernel</code> library. In general, opening a
+      <code>Base</code> library. In general, opening a
       module adds the contents of that module to the environment
       that the compiler looks at to find the definition of various
       identifiers. Here's an example:</p>
@@ -555,7 +579,7 @@
 
       <p><code>open</code> is essential when you want to modify
       your environment for a standard library like
-      <code>Core_kernel</code>, but it's generally good style to
+      <code>Base</code>, but it's generally good style to
       keep the opening of modules to a minimum. Opening a module is
       basically a trade-off between terseness and explicitness—the
       more modules you open, the fewer module qualifications you
@@ -571,30 +595,33 @@
         <li>
           <p>Opening modules at the toplevel of a module should be
           done quite sparingly, and generally only with modules
-          that have been specifically designed to be opened, like
-          <code>Core_kernel</code> or
-          <code>Option.Monad_infix</code>.</p>
+            that have been specifically designed to be opened, like
+            <code>Base</code> or
+            <code>Option.Monad_infix</code>.</p>
         </li>
 
         <li>
           <p>If you do need to do an open, it's better to do a
-          <em>local open</em>. There are two syntaxes for local
-          opens. For example, you can write:</p>
-        </li>
-      </ul>
+            <em>local open</em>. There are two syntaxes for local
+            opens. For example, you can write:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="1"/>
+	  <link rel="import" 
+		href="code/files-modules-and-programs/main.topscript" 
+		part="1"/>
 
-      <p>Here, <code>of_int</code> and the infix operators are the
-      ones from the <code>Int64</code> module.</p>
+	  <p>Here, <code>of_int</code> and the infix operators are the
+	    ones from the <code>Int64</code> module.</p>
 
-      <p>There's another, even more lightweight syntax for local
-      <code>open</code>s, which is particularly useful for small
-      expressions:</p>
+	  <p>There's another, even more lightweight syntax for local
+	    <code>open</code>s, which is particularly useful for small
+	    expressions:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="2"/>
+	  <link rel="import" 
+		href="code/files-modules-and-programs/main.topscript" 
+		part="2"/>
 
-      <ul>
+	</li>
+
         <li>
           <p>An alternative to local <code>open</code>s that makes
           your code terser without giving up on explicitness is to
@@ -605,12 +632,14 @@
         <li style="list-style: none; display: inline">
 
           <link rel="import" 
-		href="code/files-modules-and-programs/freq-median/use_median_1.ml" part="1"/>
+		href="code/files-modules-and-programs/freq-median/use_median_1.ml" 
+		part="1"/>
 
           <p>you could write:</p>
 
           <link rel="import" 
-		href="code/files-modules-and-programs/freq-median/use_median_2.ml" part="1"/>
+		href="code/files-modules-and-programs/freq-median/use_median_2.ml" 
+		part="1"/>
 
           <p>Because the module name <code>C</code> only exists for
           a short scope, it's easy to read and remember what
@@ -624,12 +653,12 @@
     <section id="including-modules" data-type="sect1">
       <h1>Including Modules</h1>
 
-      <p>While opening a module affects the environment used to
-      search for identifiers, <em>including</em> a module is a way
-      of actually adding new identifiers to a module proper.
-      Consider the following simple module for representing a range
-      of integer
-      values:
+      <p>
+	While opening a module affects the environment used to search
+	for identifiers, <em>including</em> a module is a way of
+	adding new identifiers to a module proper.  Consider the
+	following simple module for representing a range of integer
+	values:
 
 	<idx>modules/including</idx>
 	<idx>identifiers/adding to modules</idx></p>
@@ -650,11 +679,12 @@
 
       <link rel="import" href="code/files-modules-and-programs/main.topscript" part="5"/>
 
-      <p>To consider a more realistic example, imagine you wanted
-      to build an extended version of the <code>List</code> module,
-      where you've added some functionality not present in the
-      module as distributed in <code>Core_kernel</code>.
-      <code>include</code> allows us to do just that:</p>
+      <p>
+	To consider a more realistic example, imagine you wanted to
+	build an extended version of the <code>List</code> module,
+	where you've added some functionality not present in the
+	module as distributed in <code>Base</code>. That's a job
+	for <code>include</code>.</p>
 
       <link rel="import" href="code/files-modules-and-programs/ext_list.ml"/>
 
@@ -686,7 +716,7 @@
       <link rel="import" href="code/files-modules-and-programs/common.ml"/>
 
       <p>And if we then put <code>open Common</code> after
-      <code>open Core_kernel</code> at the top of each file in
+      <code>open Base</code> at the top of each file in
       our project, then references to <code>List</code> will
       automatically go to <code>Ext_list</code> instead.</p>
     </section>
@@ -928,8 +958,9 @@
         Part of achieving that is standardizing aspects of those
         interfaces.</p>
 
-        <p><code>Core</code> and <code>Core_kernel</code> are
-        libraries that work hard to create uniform interfaces. Here
+        <p><code>Base</code>, <code>Core</code> and other libraries
+        from the same family have been designed with a uniform set of
+        standards in mind around the design of module interfaces. Here
         are some of the guidelines that they use.</p>
 
         <ul>
@@ -957,7 +988,7 @@
           </li>
         </ul>
 
-        <p>There are also standards in Core about what the type
+        <p>There are also standards in Base about what the type
         signature for specific functions should be. For example,
         the signature for <code>map</code> is always essentially
         the same, no matter what the underlying type it is applied
@@ -966,9 +997,9 @@
         which allow for different modules to share components of
         their interface. This approach is described in <a href="09-functors.html#using-multiple-interfaces" data-type="xref">Using Multiple Interfaces</a>.</p>
 
-        <p>Core's standards may or may not fit your projects, but
-        you can improve the usability of your codebase by finding
-        some consistent set of standards to apply.</p>
+        <p>Base's standards may or may not fit your projects, but you
+        can improve the usability of your codebase by finding some
+        consistent set of standards to apply.</p>
       </section>
 
       <section data-type="sect2">
