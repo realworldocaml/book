@@ -14,9 +14,9 @@ module Params = struct
   let production =
     let default = false in
     let doc = sprintf
-                " Set to true to generate file for publication. Default \
-                 is %b, which generates dev version of file."
-                default
+        " Set to true to generate file for publication. Default \
+         is %b, which generates dev version of file."
+        default
     in
     flag "-production" (optional_with_default default bool) ~doc
 
@@ -61,16 +61,16 @@ open Command.Let_syntax
 let build_chapter : Command.t =
   Command.async ~summary:"build chapter"
     [%map_open
-       let run_nondeterministic = Params.run_nondeterministic
-       and pygmentize = Params.pygmentize
-       and repo_root = Params.repo_root
-       and code_dir = Params.code_dir
-       and out_dir = Params.out_dir
-       and file = Params.file
-       in
-       fun () ->
-         Book.make ~code_dir ~run_nondeterministic ~pygmentize
-           ~repo_root ~out_dir (`Chapter file) ]
+      let run_nondeterministic = Params.run_nondeterministic
+      and pygmentize = Params.pygmentize
+      and repo_root = Params.repo_root
+      and code_dir = Params.code_dir
+      and out_dir = Params.out_dir
+      and file = Params.file
+      in
+      fun () ->
+        Book.make ~code_dir ~run_nondeterministic ~pygmentize
+          ~repo_root ~out_dir (`Chapter file) ]
 
 let build_frontpage : Command.t =
   Command.async ~summary:"build frontpage"
@@ -126,8 +126,8 @@ let validate : Command.t =
         let diff = Set.diff code_files imported_files |> Set.to_list in
         if List.length diff <> 0 then
           Log.Global.error
-	    "following files are not used:%s"
-	    (List.map diff ~f:(fun x -> "\n  "^x) |> String.concat ~sep:"")
+            "following files are not used:%s"
+            (List.map diff ~f:(fun x -> "\n  "^x) |> String.concat ~sep:"")
     ]
 
 (******************************************************************************)
