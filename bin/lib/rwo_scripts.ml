@@ -36,28 +36,6 @@ let is_rawpart ~name p = name = p.Expect.Raw_script.name
 
 let is_part ~name p = name = p.Expect.Part.name
 
-(*let find (t:t) ?part:(name="") ~filename =
-  match String.Map.find t filename with
-  | None -> None
-  | Some (`OCaml parts) -> (
-      match List.find ~f:(is_rawpart ~name) parts with
-      | None -> None
-      | Some x -> Some (`OCaml x)
-    )
-  | Some (`OCaml_toplevel doc) -> (
-      match List.find ~f:(is_part ~name) (Expect.Document.parts doc) with
-      | None -> None
-      | Some x -> Some (`OCaml_toplevel x.Expect.Part.chunks)
-    )
-  | Some (`OCaml_rawtoplevel parts) -> (
-      match List.find ~f:(is_rawpart ~name) parts with
-      | None -> None
-      | Some x -> Some (`OCaml_rawtoplevel x)
-    )
-  | Some (`Other _ as x) ->
-    if name = "" then Some x else None
-*)
-
 let find_exn t ?part:(name="") ~filename =
   let no_file_err() =
     ok_exn (error "no data for file" filename sexp_of_string)
