@@ -1,14 +1,14 @@
 .PHONY: all clean dep code publish
 
 all:
-	@jbuilder build @site
+	@jbuilder build @site --dev
 	@echo Site has been generated in _build/default/static/
 
 code:
-	jbuilder build @code
+	jbuilder build @code --dev
 
 dep:
-	jbuilder exec -- rwo-jbuild
+	jbuilder exec --dev -- rwo-jbuild
 
 clean:
 	jbuilder clean
