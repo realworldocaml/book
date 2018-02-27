@@ -31,9 +31,9 @@ module Params = struct
 
   let code_dir =
     let default = "examples" in
-    let doc = 
-      sprintf "DIR Directory with code examples. Default: \"%s\"" 
-        default 
+    let doc =
+      sprintf "DIR Directory with code examples. Default: \"%s\""
+        default
     in
     flag "-code" (optional_with_default default file) ~doc
 
@@ -58,7 +58,7 @@ end
 (******************************************************************************)
 open Command.Let_syntax
 
-let build_chapter : Command.t = 
+let build_chapter : Command.t =
   Command.async ~summary:"build chapter"
     [%map_open
        let run_nondeterministic = Params.run_nondeterministic
@@ -72,35 +72,35 @@ let build_chapter : Command.t =
          Book.make ~code_dir ~run_nondeterministic ~pygmentize
            ~repo_root ~out_dir (`Chapter file) ]
 
-let build_frontpage : Command.t = 
+let build_frontpage : Command.t =
   Command.async ~summary:"build frontpage"
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
       in fun () -> Book.make ~repo_root ~out_dir `Frontpage ]
 
-let build_toc_page : Command.t = 
+let build_toc_page : Command.t =
   Command.async ~summary:"build TOC page"
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
       in fun () -> Book.make ~repo_root ~out_dir `Toc_page ]
 
-let build_faqs_page : Command.t = 
+let build_faqs_page : Command.t =
   Command.async ~summary:"build FAQs page"
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
       in fun () -> Book.make ~repo_root ~out_dir `FAQs ]
 
-let build_install_page : Command.t = 
+let build_install_page : Command.t =
   Command.async ~summary:"build install page"
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
       in fun () -> Book.make ~repo_root ~out_dir `Install ]
 
-let build : Command.t = 
+let build : Command.t =
   Command.group ~summary:"build commands"
     [ "chapter", build_chapter
     ; "index", build_frontpage
@@ -113,7 +113,7 @@ let build : Command.t =
 (******************************************************************************)
 (* `validate` command                                                         *)
 (******************************************************************************)
-let validate : Command.t = 
+let validate : Command.t =
   Command.async ~summary:"validate various things"
     [%map_open
       let repo_root = Params.repo_root in
@@ -134,8 +134,8 @@ let validate : Command.t =
 (* `eval` command                                                             *)
 (******************************************************************************)
 
-let eval : Command.t = 
-  Command.async 
+let eval : Command.t =
+  Command.async
     ~summary:"Evaluate a file into a sexp, to serve as a cache."
     [%map_open
       let filename = Params.file in
@@ -143,7 +143,7 @@ let eval : Command.t =
         let open Deferred.Let_syntax in
         let lang = Rwo.Lang.of_filename filename |> Or_error.ok_exn in
         let run_nondeterministic = false in
-        let%map sexp = 
+        let%map sexp =
           Rwo.Scripts.eval_script_to_sexp lang ~run_nondeterministic ~filename
         in
         print_endline (Sexp.to_string_hum (Or_error.ok_exn sexp))]
@@ -151,7 +151,7 @@ let eval : Command.t =
 (******************************************************************************)
 (* `main` command                                                             *)
 (******************************************************************************)
-let main = 
+let main =
   Command.group
     ~summary:"Real World OCaml authoring and publication tools"
     [ "build", build
@@ -160,7 +160,7 @@ let main =
     ]
 
 let () =
-  let build_info = 
+  let build_info =
     match About.git_commit with
     | None -> "unknown"
     | Some x -> x
