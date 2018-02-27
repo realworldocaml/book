@@ -25,7 +25,6 @@ type src = [
 (** Make an HTML page from the given [src] and save it to [out_dir]. *)
 val make
   : ?pygmentize:bool
-  -> ?run_nondeterministic:bool
   -> ?repo_root:string
   -> ?code_dir:string
   -> out_dir:string

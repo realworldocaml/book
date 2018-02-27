@@ -162,9 +162,10 @@ let exn_of_filename filename content =
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
-let eval_script lang ~run_nondeterministic ~filename =
+let eval_script lang ~filename =
   let open Deferred.Or_error.Let_syntax in
   match (lang : Lang.t :> string) with
+  | "topscript" -> assert false (* handled directly by ocaml-topexepct *)
   | "ml" | "mli" | "mly" | "mll" -> (
       (* Hack: Oloop.Script.of_file intended only for ml files but
          happens to work for mli, mll, and mly files. *)
@@ -175,42 +176,6 @@ let eval_script lang ~run_nondeterministic ~filename =
       let%map script = Expect.Raw_script.of_file ~filename in
       `OCaml_rawtoplevel script
     )
-  | "topscript" ->
-      (*if String.is_suffix filename ~suffix:"async/main.topscript" then (
-        Expect.Raw_script.of_file ~filename
-        >>|? fun script -> `OCaml_rawtoplevel script
-      ) else*)
-        let%bind doc = Expect.Document.of_file ~run_nondeterministic ~filename in
-        let corrected_built_filename =
-          Filename.realpath filename ^ ".corrected"
-        in
-        let corrected_filename =
-          corrected_built_filename
-          |> Filename.parts
-          |> (fun parts ->
-               let rec fn acc = function
-                 |[] -> List.rev acc
-                 |"_build"::_::tl -> fn acc tl
-                 |hd::tl -> fn (hd::acc) tl in
-               fn [] parts
-             )
-          |> Filename.of_parts
-        in
-        if not doc.Expect.Document.matched then
-          Log.Global.error "%s didn't match expect test" filename;
-        let%map () = Deferred.ok begin
-          let open Deferred.Let_syntax in
-          match%bind Sys.file_exists corrected_built_filename with
-          | `Yes ->
-            Sys.rename corrected_built_filename corrected_filename
-          | `Unknown -> return ()
-          | `No ->
-            match%bind Sys.file_exists corrected_filename with
-            | `Yes -> Sys.remove corrected_filename
-            | _ -> return ()
-        end
-        in
-        `OCaml_toplevel doc
   | "sh" -> (
       let%map x = Bash_script.eval_file filename in
       if not (List.for_all x.Bash_script.Evaluated.commands
@@ -256,12 +221,12 @@ let eval_script lang ~run_nondeterministic ~filename =
     Ok (`Other x)
 
 
-let eval_script_to_sexp lang ~run_nondeterministic ~filename =
+let eval_script_to_sexp lang ~filename =
   let open Deferred.Or_error.Monad_infix in
-  eval_script lang ~run_nondeterministic ~filename >>|
+  eval_script lang ~filename >>|
   sexp_of_script
 
-let add_script t lang ~run_nondeterministic ~filename =
+let add_script t ~filename =
   let dir,file = filename in
   let filename = Filename.concat dir file in
   if file_is_mem t file then
@@ -271,19 +236,18 @@ let add_script t lang ~run_nondeterministic ~filename =
     let%map script =
       match%bind Sys.file_exists cache_filename with
       | `Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
-      | _ -> eval_script lang ~run_nondeterministic ~filename
+      | _    -> return (error "missing dependency" cache_filename sexp_of_string)
     in
     Result.map script ~f:(fun script ->
       Map.set t ~key:file ~data:script)
   end
 
-let of_html ?(code_dir="examples") ~run_nondeterministic ~filename:_  html =
+let of_html ?(code_dir="examples") ~filename:_  html =
   let imports =
     Import.find_all html
     |> List.dedup_and_sort ~compare:(fun i j ->
       compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
-      add_script accum (Import.lang_of i |> ok_exn)
-        ~run_nondeterministic ~filename:(code_dir,i.Import.href)
+      add_script accum ~filename:(code_dir,i.Import.href)
     )

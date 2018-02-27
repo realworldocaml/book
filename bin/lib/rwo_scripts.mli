@@ -24,19 +24,16 @@ type t = script String.Map.t (** key is filename *)
 
 val eval_script
   :  Rwo_lang.t
-  -> run_nondeterministic:bool
   -> filename:string -> script Or_error.t Deferred.t
 (** Return the [script] representation of a parsed file *)
 
 val eval_script_to_sexp
   : Rwo_lang.t
-  -> run_nondeterministic:bool
   -> filename:string -> Sexp.t Or_error.t Deferred.t
 (** Return the sexp representation of a parsed file *)
 
 val of_html
   :  ?code_dir:string
-  -> run_nondeterministic:bool
   -> filename:string
   -> Rwo_html.t
   -> t Or_error.t Deferred.t
