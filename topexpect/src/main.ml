@@ -5,7 +5,6 @@ module Linked = struct
   include (Condition : sig end)
 end
 
-open Lexing
 open Parsetree
 open Sexplib.Conv
 open Ocaml_topexpect
@@ -28,155 +27,6 @@ let disable_outputs = lazy (
   Unix.close fd_out;
 )
 
-(** {1 Phrase parsing} *)
-
-type phrase = {
-  startpos : position;
-  endpos   : position;
-  parsed   : (toplevel_phrase, exn) result;
-}
-
-let toplevel_fname = "//toplevel//"
-
-let shift_toplevel_position start pos = {
-  pos_fname = toplevel_fname;
-  pos_lnum = pos.pos_lnum - start.pos_lnum + 1;
-  pos_bol  = pos.pos_bol  - start.pos_cnum - 1;
-  pos_cnum = pos.pos_cnum - start.pos_cnum - 1;
-}
-
-let shift_toplevel_location start loc =
-  let open Location in
-  {loc with loc_start = shift_toplevel_position start loc.loc_start;
-            loc_end = shift_toplevel_position start loc.loc_end}
-
-let shift_location_error start =
-  let open Location in
-  let rec aux (error : Location.error) =
-    {error with sub = List.map aux error.sub;
-                loc = shift_toplevel_location start error.loc}
-  in
-  aux
-
-let position_mapper start =
-  let open Ast_mapper in
-  let location mapper loc =
-    shift_toplevel_location start (default_mapper.location mapper loc)
-  in
-  {default_mapper with location}
-
-let initial_pos = {
-  pos_fname = toplevel_fname;
-  pos_lnum  = 1;
-  pos_bol   = 0;
-  pos_cnum  = 0;
-}
-
-let semisemi_action =
-  let lexbuf = Lexing.from_string ";;" in
-  match Lexer.token lexbuf with
-  | Parser.SEMISEMI ->
-    lexbuf.Lexing.lex_last_action
-  | _ -> assert false
-
-let init_parser ~fname contents =
-  let lexbuf = Lexing.from_string contents in
-  lexbuf.lex_curr_p <- {initial_pos with pos_fname = fname};
-  Location.input_name := fname;
-  (contents, lexbuf)
-
-let parse_phrase (_contents, lexbuf) =
-  let startpos = lexbuf.Lexing.lex_curr_p in
-  let parsed = match Parse.toplevel_phrase lexbuf with
-    | phrase -> Ok phrase
-    | exception exn ->
-      let exn = match Location.error_of_exn exn with
-        | None -> raise exn
-        | Some `Already_displayed -> raise exn
-        | Some (`Ok error) -> Location.Error (shift_location_error startpos error)
-      in
-      if lexbuf.Lexing.lex_last_action <> semisemi_action then begin
-        let rec aux () = match Lexer.token lexbuf with
-          | Parser.SEMISEMI | Parser.EOF -> ()
-          | _ -> aux ()
-        in
-        aux ();
-      end;
-      Error exn
-  in
-  let endpos = lexbuf.Lexing.lex_curr_p in
-  { startpos; endpos; parsed }
-
-(** *)
-
-type 'a phrase_role =
-  | Phrase_code of 'a
-  | Phrase_expect of { location: Location.t; responses: Chunk.response list; nondeterministic: bool }
-  | Phrase_part of { location: Location.t; name: string }
-
-exception Cannot_parse_payload of Location.t
-
-let string_of_location {Location.loc_start = {pos_fname; pos_lnum; pos_bol; pos_cnum};_} =
-  Printf.sprintf "%s, line %d, col %d" pos_fname pos_lnum (pos_cnum - pos_bol)
-
-let payload_constants loc = function
-  | PStr [{pstr_desc = Pstr_eval (expr, _); _}] ->
-    let one {pexp_loc; pexp_desc; _} = match pexp_desc with
-      | Pexp_apply ({pexp_desc = Pexp_ident ident; _},
-                    [Asttypes.Nolabel, {pexp_desc = Pexp_constant const; _}]) ->
-        (pexp_loc, Some ident, const)
-      | Pexp_constant const -> (pexp_loc, None, const)
-      | _ -> raise (Cannot_parse_payload pexp_loc)
-    in
-    let rec consts = function
-      | {pexp_desc=Pexp_sequence(e, rest); _} -> one e :: consts rest
-      | e -> [one e]
-    in
-    consts expr
-  | PStr [] -> []
-  | _ -> raise (Cannot_parse_payload loc)
-
-let payload_strings loc = function
-  | PStr [] -> []
-  | x ->
-    let aux = function
-      | _, Some {Location.txt = Longident.Lident "ocaml"; _},
-        Pconst_string (str, _) -> (Chunk.OCaml, str)
-      | _, None, Pconst_string (str, _) -> (Chunk.Raw, str)
-      | loc, _, _ -> raise (Cannot_parse_payload loc)
-    in
-    List.map aux (payload_constants loc x)
-
-let constant_payload const = PStr [Ast_helper.(Str.eval (Exp.constant const))]
-let string_payload x = constant_payload (Pconst_string (x, None))
-
-let attr_is x name = x.Asttypes.txt = name
-
-let phrase_role phrase = match phrase.parsed with
-  | Ok (Ptop_def [{pstr_desc = Pstr_extension((attr, payload), _attrs); pstr_loc}])
-    when List.exists (attr_is attr) ["expect"; "expect.nondeterministic"] ->
-    begin match payload_strings pstr_loc payload with
-      | responses ->
-        let nondeterministic = attr_is attr "expect.nondeterministic" in
-        Phrase_expect { location = pstr_loc; responses; nondeterministic }
-      | exception (Cannot_parse_payload loc) ->
-        prerr_endline (string_of_location loc ^ ": cannot parse [%%expect] payload");
-        Phrase_code ()
-   end
-  | Ok (Ptop_def [{pstr_desc = Pstr_attribute (name, payload); pstr_loc}])
-    when name.Asttypes.txt = "part" ->
-    begin match payload_strings pstr_loc payload with
-      | [Chunk.Raw, part] -> Phrase_part { location = pstr_loc; name = part }
-      | _ ->
-        prerr_endline (string_of_location pstr_loc ^ ": cannot parse [@@@part] payload");
-        Phrase_code ()
-      | exception (Cannot_parse_payload loc) ->
-        prerr_endline
-          (string_of_location loc ^ ": cannot parse [@@@part] payload");
-        Phrase_code ()
-    end
-  | _ -> Phrase_code ()
-
 let verbose = ref false
 let () = Hashtbl.add Toploop.directive_table "verbose"
     (Toploop.Directive_bool (fun x -> verbose := x))
@@ -184,15 +34,6 @@ let silent = ref false
 let () = Hashtbl.add Toploop.directive_table "silent"
     (Toploop.Directive_bool (fun x -> silent := x))
 let verbose_findlib = ref false
-
-let is_findlib_directive =
-  let findlib_directive = function
-    | "require" | "use" | "camlp4o" | "camlp4r" | "thread" -> true
-    | _ -> false
-  in
-  function
-  | { parsed = Ok (Ptop_dir (dir, _)); _ } -> findlib_directive dir
-  | _ -> false
 
 module Async_autorun = struct
   (* Inspired by Utop auto run rewriter *)
@@ -214,7 +55,7 @@ module Async_autorun = struct
     match Env.find_type path env with
     | { Types.type_manifest = Some ty; _ } -> begin
         match Ctype.expand_head env ty with
-        | { Types.desc = Types.Tconstr (path, _, _);_ } -> path
+        | { Types.desc = Types.Tconstr (path, _, _); _ } -> path
         | _ -> path
       end
     | _ -> path
@@ -267,11 +108,11 @@ module Async_autorun = struct
     | phrase -> phrase
 end
 
-let toplevel_exec_phrase ppf = function
-  | { parsed = Error exn; _} -> raise exn
-  | { parsed = Ok phrase; startpos; _} ->
+let toplevel_exec_phrase ppf p = match Phrase.result p with
+  | Error exn -> raise exn
+  | Ok phrase ->
     Warnings.reset_fatal ();
-    let mapper = position_mapper {startpos with pos_fname = toplevel_fname} in
+    let mapper = Lexbuf.position_mapper (Phrase.start p) in
     let phrase = match phrase with
       | Ptop_def str -> Ptop_def (mapper.Ast_mapper.structure mapper str)
       | Ptop_dir _ as x -> x
@@ -351,21 +192,8 @@ let cleanup_lines lines =
   in
   join lines
 
-let dry_exec phrases =
-  let rec aux acc = function
-    | [] -> List.rev acc
-    | (phrase, Phrase_code ()) :: rest ->
-      begin match rest with
-        | (_, Phrase_expect { responses; _ }) :: _ ->
-          aux ((phrase, Phrase_code responses) :: acc) rest
-        | _ -> aux ((phrase, Phrase_code []) :: acc) rest
-      end
-    | (_, (Phrase_part _ | Phrase_expect _) as phrase) :: rest ->
-      aux (phrase :: acc) rest
-  in
-  aux [] phrases
-
-let eval_phrases ~run_nondeterministic ~fname ~dry_run fcontents =
+let eval_phrases ~run_nondeterministic ~dry_run lexbuf =
+  let open Phrase in
   (* 4.03: Warnings.reset_fatal (); *)
   let buf = Buffer.create 1024 in
   let ppf = Format.formatter_of_buffer buf in
@@ -395,41 +223,37 @@ let eval_phrases ~run_nondeterministic ~fname ~dry_run fcontents =
     end;
     Format.pp_print_flush ppf ();
     capture Chunk.Raw;
-    if !silent || (not !verbose_findlib && is_findlib_directive phrase) then
-      Phrase_code []
+    if !silent || (not !verbose_findlib && Phrase.is_findlib_directive phrase)
+    then
+      Code []
     else
-      Phrase_code (cleanup_lines (List.rev !lines))
+      Code (cleanup_lines (List.rev !lines))
   in
-  let parser = init_parser ~fname fcontents in
-  if dry_run then  (
-    let rec aux phrases = match parse_phrase parser with
-      | exception End_of_file ->  List.rev phrases
-      | phrase -> aux ((phrase, phrase_role phrase) :: phrases)
-    in
-    dry_exec (aux [])
-  ) else (
+  if dry_run then Phrase.read_all lexbuf
+  else (
     redirect ~f:(fun ~capture ->
         capture_compiler_stuff ppf ~f:(fun () ->
             let rec process_phrase chunks phrase =
-              match phrase_role phrase with
-              | Phrase_expect x ->
-                next_phrase ((phrase, Phrase_expect {x with responses = cleanup_lines x.responses}) :: chunks)
-              | Phrase_part _ as x ->
+              match Phrase.kind phrase with
+              | Expect x ->
+                let e = Expect {x with responses = cleanup_lines x.responses} in
+                next_phrase ((phrase, e) :: chunks)
+              | Part _ as x ->
                 next_phrase ((phrase, x) :: chunks)
-              | Phrase_code () ->
-                match parse_phrase parser with
-                | exception End_of_file ->
+              | Code () ->
+                match Phrase.read lexbuf with
+                | None ->
                   List.rev ((phrase, exec_code ~capture phrase) :: chunks)
-                | phrase' ->
-                  let role = match phrase_role phrase' with
-                    | Phrase_expect { nondeterministic = true; responses; _ }
-                      when not run_nondeterministic -> Phrase_code responses
+                | Some phrase' ->
+                  let role = match Phrase.kind phrase' with
+                    | Expect { nondeterministic = true; responses; _ }
+                      when not run_nondeterministic -> Code responses
                     | _ -> exec_code ~capture phrase
                   in
                   process_phrase ((phrase, role) :: chunks) phrase'
-            and next_phrase chunks = match parse_phrase parser with
-              | exception End_of_file -> List.rev chunks
-              | phrase -> process_phrase chunks phrase
+            and next_phrase chunks = match Phrase.read lexbuf with
+              | None -> List.rev chunks
+              | Some phrase -> process_phrase chunks phrase
             in
             next_phrase []
           )
@@ -437,279 +261,10 @@ let eval_phrases ~run_nondeterministic ~fname ~dry_run fcontents =
   )
 ;;
 
-let is_whitespace = function
-  | ' ' | '\n' -> true
-  | _ -> false
-
-let is_all_whitespace str =
-  try
-    for i = 0 to String.length str - 1 do
-      if not (is_whitespace str.[i]) then raise Exit
-    done;
-    true
-  with Exit -> false
-
-let is_ellision_line str =
-  let i = ref 0 in
-  let j = String.length str in
-  while !i < j && is_whitespace str.[!i] do incr i done;
-  !i <= j - 3 && str.[!i] = '.' && str.[!i+1] = '.' && str.[!i+2] = '.' && (
-    i := !i + 3;
-    while !i < j && is_whitespace str.[!i] do incr i done;
-    !i = j
-  )
-
-let string_subequal subject str i =
-  let len = String.length subject in
-  String.length str >= len + i &&
-  try
-    for j = 0 to len - 1 do
-      if subject.[j] <> str.[i+j] then
-        raise Exit;
-    done;
-    true
-  with Exit ->
-    false
-
-let match_outcome_chunk (k1,outcome) (k2,expected) =
-  k1 = k2 &&
-  let rec split_chunks acc str i0 i =
-    match String.index_from str i '\n' with
-    | exception Not_found ->
-      let acc =
-        if is_ellision_line (String.sub str i (String.length str - i))
-        then "" :: String.sub str i0 i :: acc
-        else String.sub str i0 (String.length str - i0) :: acc
-      in
-      List.rev acc
-    | j ->
-      if is_ellision_line (String.sub str i (j - i)) then
-        split_chunks (String.sub str i0 (i - i0) :: acc) str (j + 1) (j + 1)
-      else
-        split_chunks acc str i0 (j + 1)
-  in
-  match split_chunks [] expected 0 0 with
-  | [] -> assert false
-  | x :: xs ->
-    string_subequal x outcome 0 &&
-    let rec match_chunks i = function
-      | [] -> i = String.length outcome
-      | [x] ->
-        let i' = String.length outcome - String.length x in
-        i' >= i && string_subequal x outcome i'
-      | x :: xs ->
-        let bound = String.length outcome - String.length x in
-        let i = ref i in
-        while !i <= bound && not (string_subequal x outcome !i)
-        do incr i done;
-        if !i > bound then false
-        else match_chunks (!i + String.length x) xs
-    in
-    match_chunks (String.length x) xs
-
-let match_outcome xs ys =
-  List.length xs = List.length ys &&
-  List.for_all2 match_outcome_chunk xs ys
-
-(* Check if output matches expectations and keep ellisions when possible *)
-let validate_phrases run_nondeterministic =
-  let rec aux success acc = function
-    | [] -> (success, List.rev acc)
-    | (_, Phrase_part _ as entry) :: rest ->
-      aux success (entry :: acc) rest
-    | (p0, Phrase_code outcome) :: (p1, Phrase_expect outcome') :: rest ->
-      let success' =
-        if outcome'.nondeterministic && not run_nondeterministic then
-          true
-        else
-          match_outcome outcome outcome'.responses
-      in
-      let acc =
-        if success' then
-          (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome'.responses) :: acc
-        else
-          (p1, Phrase_expect outcome') :: (p0, Phrase_code outcome) :: acc
-      in
-      aux (success && success') acc rest
-    | (_, Phrase_code outcome as x) :: rest ->
-      let success =
-        success && List.for_all (fun (_,s) -> is_all_whitespace s) outcome
-      in
-      aux success (x :: acc) rest
-    | (_, Phrase_expect _ as x) :: rest ->
-      aux false (x :: acc) rest
-  in
-  fun phrases -> aux true [] phrases
-
-
-(* Skip spaces as well as ';;' *)
-let skip_whitespace contents ?(stop=String.length contents) start =
-  let rec loop start =
-    if start >= stop then start else
-      match contents.[start] with
-      | ' ' | '\t' | '\n' -> loop (start + 1)
-      | ';' when start + 1 < stop && contents.[start+1] = ';' ->
-        loop (start + 2)
-      | _ -> start
-  in
-  loop start
-
-let phrase_contents contents ?start ?stop phrase =
-  let stop = match stop with
-    | None -> phrase.endpos.pos_cnum
-    | Some stop -> stop
-  in
-  let start = match start with
-    | None -> phrase.startpos.pos_cnum
-    | Some start -> start
-  in
-  let start = skip_whitespace contents ~stop start in
-  String.sub contents start (stop - start)
-
-let phrase_whitespace contents phrase rest =
-  let start = phrase.endpos.pos_cnum in
-  let stop = match rest with
-    | [] -> String.length contents
-    | (phrase', _) :: _ ->
-      skip_whitespace contents phrase'.startpos.pos_cnum
-  in
-  String.sub contents start (stop - start)
-
-let find_delim s =
-  let len = String.length s in
-  let delims = ref [] in
-  let beginning = ref (-1) in
-  for i = 0 to len - 1 do
-    match s.[i] with
-    | '{' -> beginning := i
-    | '|' when !beginning = -1 || s.[!beginning] <> '{' -> beginning := i
-    | ('|' | '}' as c) when !beginning <> -1 && (c = '|' || s.[!beginning] = '|') ->
-      let delim = String.sub s (!beginning + 1) (i - !beginning - 1) in
-      begin match !delims with
-        | delim' :: _ when delim' = delim -> ()
-        | delims' -> delims := delim :: delims'
-      end;
-      beginning := -1
-    | 'a'..'z' | '_' -> ()
-    | _ -> beginning := -1
-  done;
-  let delims = !delims in
-  let candidates = [""; "escape"; "x"; "y"; "z"] in
-  match List.find (fun delim -> not (List.mem delim delims)) candidates with
-  | candidate -> candidate
-  | exception Not_found ->
-    (* Generate a string that is not in the list of delimiters *)
-    let next b =
-      try
-        for i = Bytes.length b - 1 downto 0 do
-          match Bytes.get b i with
-          | 'z' -> Bytes.set b i 'a'
-          | c ->
-            Bytes.set b i (Char.chr (Char.code c + 1));
-            raise Exit
-        done;
-        Bytes.cat b (Bytes.unsafe_of_string "a")
-      with Exit -> b
-    in
-    let rec exhaust b =
-      if not (List.mem (Bytes.unsafe_to_string b) delims)
-      then Bytes.unsafe_to_string b
-      else exhaust (next b)
-    in
-    exhaust (Bytes.of_string "")
-
-let output_phrases oc contents =
-  let rec aux = function
-    | [] -> ()
-    | (phrase, Phrase_part {name; location}) :: rest ->
-      Printf.fprintf oc "%s[@@@part %S];;\n"
-        (phrase_contents contents phrase ~stop:location.loc_start.pos_cnum) name;
-      aux rest
-    | (phrase, Phrase_code expect_code) :: rest ->
-      let phrase_post, expect_pre, expect_post, nondeterministic, rest =
-        match rest with
-        | (phrase_expect, Phrase_expect x) :: rest' ->
-          (phrase_whitespace contents phrase rest,
-           phrase_contents contents phrase_expect ~stop:x.location.loc_start.pos_cnum,
-           phrase_whitespace contents phrase_expect rest',
-           x.nondeterministic,
-           rest')
-        | _ ->
-          ("\n", "", phrase_whitespace contents phrase rest, false, rest)
-      in
-      let phrase_code = phrase_contents contents phrase in
-      if List.for_all (fun (_,s) -> is_all_whitespace s) expect_code &&
-         not nondeterministic then
-        Printf.fprintf oc "%s%s%s" phrase_code expect_pre expect_post
-      else (
-        let string_of_kind = function
-          | Chunk.Raw -> ""
-          | Chunk.OCaml -> "ocaml "
-        in
-        let output_expect oc = function
-          | [] -> ()
-          | [(kind, str)] when not (String.contains str '\n') ->
-            let k = string_of_kind kind in
-            let delim = find_delim str in
-            Printf.fprintf oc "%s%s{%s|%s|%s}" (if k <> "" then " " else "") k delim str delim
-          | xs ->
-            let rec aux first = function
-              | [] -> ()
-              | (k,s) :: xs ->
-                let k = string_of_kind k in
-                let pre = if first then (if k <> "" then " " else "") else "\n" in
-                let post = if xs = [] then "" else ";" in
-                let delim = find_delim s in
-                if not (String.contains s '\n') then
-                  Printf.fprintf oc "%s%s{%s|%s|%s}%s" pre k delim s delim post
-                else
-                  Printf.fprintf oc "%s%s{%s|\n%s\n|%s}%s" pre k delim s delim post;
-                aux false xs
-            in
-            aux true xs
-        in
-        Printf.fprintf oc "%s%s%s[%%%%expect%s%a];;%s"
-          phrase_code phrase_post
-          expect_pre
-          (if nondeterministic then ".nondeterministic" else "")
-          output_expect expect_code expect_post;
-      );
-      aux rest
-    | (phrase, Phrase_expect {location; _}) :: rest ->
-      Printf.fprintf oc "%s" (phrase_contents contents phrase ~stop:location.loc_start.pos_cnum);
-      aux rest
-  in aux
-
-let document_of_phrases contents matched phrases =
-  let rec parts_of_phrase part acc = function
-    | (_, Phrase_part { name; _ }) :: rest ->
-      Part.v ~name:part ~chunks:(List.rev acc) ::
-      parts_of_phrase name [] rest
-    | (_, Phrase_expect _) :: rest ->
-      parts_of_phrase part acc rest
-    | (phrase, Phrase_code toplevel_responses) :: rest ->
-      let ocaml_code = phrase_contents contents phrase in
-      let chunk = Chunk.v ~ocaml_code ~toplevel_responses in
-      parts_of_phrase part (chunk :: acc) rest
-    | [] ->
-      if part <> "" || acc <> [] then
-        [Part.v ~name:part ~chunks:(List.rev acc)]
-      else
-        []
-  in
-  let parts = parts_of_phrase "" [] phrases in
-  Document.v ~matched ~parts
-
-let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color:_ ~in_place ~sexp_output =
-  let file_contents =
-    let ic = open_in fname in
-    let len = in_channel_length ic in
-    let result = really_input_string ic len in
-    close_in_noerr ic;
-    result
-  in
-  let phrases = eval_phrases ~run_nondeterministic ~fname ~dry_run file_contents in
-  let success, phrases = validate_phrases run_nondeterministic phrases in
+let process_expect_file ~run_nondeterministic ~fname ~dry_run ~in_place ~sexp_output =
+  let lexbuf = Lexbuf.of_file fname in
+  let phrases = eval_phrases ~run_nondeterministic ~dry_run lexbuf in
+  let success, phrases = Phrase.validate ~run_nondeterministic phrases in
   let oname = if in_place then fname else fname ^ ".corrected" in
   if success && not in_place && Sys.file_exists oname then
     Sys.remove oname;
@@ -718,7 +273,7 @@ let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color:_ ~in_p
     else (
       (* Otherwise, generate corrected file and keep toplevel output. *)
       let oc = open_out_bin (oname ^ ".tmp") in
-      output_phrases oc file_contents phrases;
+      Phrase.output oc lexbuf phrases;
       flush oc;
       close_out oc;
       Sys.rename (oname ^ ".tmp") oname;
@@ -726,9 +281,8 @@ let process_expect_file ~run_nondeterministic ~fname ~dry_run ~use_color:_ ~in_p
     )
   in
   if sexp_output then (
-    document_of_phrases file_contents success phrases
-    |> Document.rwo
-    |> Document.sexp_of_rwo
+    Phrase.document ~matched:success lexbuf phrases
+    |> Document.sexp_of_t
     |> Sexplib.Sexp.output stdout_backup
   );
   success
@@ -742,7 +296,6 @@ let override_sys_argv args =
   Arg.current := 0;
 ;;
 
-let use_color   = ref true
 let in_place    = ref false
 let sexp_output = ref false
 let dry_run     = ref false
@@ -757,13 +310,13 @@ let process_file fname =
   Compmisc.init_path true;
   Toploop.toplevel_env := Compmisc.initial_env ();
   Sys.interactive := false;
-  let _success =
+  let success =
     process_expect_file ~fname
       ~run_nondeterministic:!run_nondeterministic
-      ~dry_run:!dry_run ~use_color:!use_color
+      ~dry_run:!dry_run
       ~in_place:!in_place ~sexp_output:!sexp_output
   in
-  exit 0
+  exit (if success then 0 else 1)
 ;;
 
 let args =
@@ -839,7 +392,7 @@ module Options = Main_args.Make_bytetop_options (struct
     let _drawlambda = set dump_rawlambda
     let _dlambda = set dump_lambda
     let _dflambda = set dump_flambda
-    (* let _dtimings = set print_timings *)
+    let _dtimings () = profile_columns := [ `Time ]
     let _dinstr = set dump_instr
 
     let anonymous s = process_file s
