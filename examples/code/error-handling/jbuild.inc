@@ -1,45 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (result.ml.sexp))))
-
-(rule (
-  (targets (result.ml.sexp))
-  (deps    (result.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (sexpr.scm.sexp))))
-
-(rule (
-  (targets (sexpr.scm.sexp))
-  (deps    (sexpr.scm))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (try_with.syntax.sexp))))
-
-(rule (
-  (targets (try_with.syntax.sexp))
-  (deps    (try_with.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (result.mli.sexp))))
-
-(rule (
-  (targets (result.mli.sexp))
-  (deps    (result.mli))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (main.topscript.stamp))))
 
 (alias ((name sexp) (deps (main.topscript.sexp))))

@@ -60,14 +60,6 @@
     (write-file ${@}           "")
     (diff?      weak.topscript weak.topscript.corrected)))))
 
-(alias ((name sexp) (deps (time_converter2.rawsh.sexp))))
-
-(rule (
-  (targets (time_converter2.rawsh.sexp))
-  (deps    (time_converter2.rawsh))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (file2.topscript.stamp))))
 
 (alias ((name sexp) (deps (file2.topscript.sexp))))
@@ -107,30 +99,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}           "")
     (diff?      lazy.topscript lazy.topscript.corrected)))))
-
-(alias ((name sexp) (deps (dictionary.mli.sexp))))
-
-(rule (
-  (targets (dictionary.mli.sexp))
-  (deps    (dictionary.mli))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (remember_type.ml.sexp))))
-
-(rule (
-  (targets (remember_type.ml.sexp))
-  (deps    (remember_type.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (file.topscript.stamp))))
 
@@ -172,30 +140,6 @@
     (write-file ${@}          "")
     (diff?      ref.topscript ref.topscript.corrected)))))
 
-(alias ((name sexp) (deps (dictionary.ml.sexp))))
-
-(rule (
-  (targets (dictionary.ml.sexp))
-  (deps    (dictionary.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (let-unit.syntax.sexp))))
-
-(rule (
-  (targets (let-unit.syntax.sexp))
-  (deps    (let-unit.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (let_rec.ml.sexp))))
-
-(rule (
-  (targets (let_rec.ml.sexp))
-  (deps    (let_rec.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (printf.topscript.stamp))))
 
 (alias ((name sexp) (deps (printf.topscript.sexp))))
@@ -216,14 +160,6 @@
     (write-file ${@} "")
     (diff? printf.topscript printf.topscript.corrected)))))
 
-(alias ((name sexp) (deps (dlist.mli.sexp))))
-
-(rule (
-  (targets (dlist.mli.sexp))
-  (deps    (dlist.mli))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (letrec.topscript.stamp))))
 
 (alias ((name sexp) (deps (letrec.topscript.sexp))))
@@ -243,22 +179,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? letrec.topscript letrec.topscript.corrected)))))
-
-(alias ((name sexp) (deps (bigarray.syntax.sexp))))
-
-(rule (
-  (targets (bigarray.syntax.sexp))
-  (deps    (bigarray.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (semicolon.syntax.sexp))))
-
-(rule (
-  (targets (semicolon.syntax.sexp))
-  (deps    (semicolon.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (order.topscript.stamp))))
 
@@ -300,14 +220,6 @@
     (write-file ${@}          "")
     (diff?      for.topscript for.topscript.corrected)))))
 
-(alias ((name sexp) (deps (dictionary2.ml.sexp))))
-
-(rule (
-  (targets (dictionary2.ml.sexp))
-  (deps    (dictionary2.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (fib.topscript.stamp))))
 
 (alias ((name sexp) (deps (fib.topscript.sexp))))
@@ -327,46 +239,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}          "")
     (diff?      fib.topscript fib.topscript.corrected)))))
-
-(alias ((name sexp) (deps (string.syntax.sexp))))
-
-(rule (
-  (targets (string.syntax.sexp))
-  (deps    (string.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (dlist.ml.sexp))))
-
-(rule (
-  (targets (dlist.ml.sexp))
-  (deps    (dlist.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (array-set.syntax.sexp))))
-
-(rule (
-  (targets (array-set.syntax.sexp))
-  (deps    (array-set.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (time_converter2.ml.sexp))))
-
-(rule (
-  (targets (time_converter2.ml.sexp))
-  (deps    (time_converter2.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (array-get.syntax.sexp))))
-
-(rule (
-  (targets (array-get.syntax.sexp))
-  (deps    (array-get.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (memo.topscript.stamp))))
 

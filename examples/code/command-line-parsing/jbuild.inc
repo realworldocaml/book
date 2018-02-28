@@ -1,13 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (cal_add_days.ml.sexp))))
-
-(rule (
-  (targets (cal_add_days.ml.sexp))
-  (deps    (cal_add_days.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (basic.topscript.stamp))))
 
 (alias ((name sexp) (deps (basic.topscript.sexp))))
@@ -27,22 +19,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}            "")
     (diff?      basic.topscript basic.topscript.corrected)))))
-
-(alias ((name sexp) (deps (opam.rawsh.sexp))))
-
-(rule (
-  (targets (opam.rawsh.sexp))
-  (deps    (opam.rawsh))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (step.topscript.stamp))))
 
@@ -84,14 +60,6 @@
     (write-file ${@} "")
     (diff? command_types.topscript command_types.topscript.corrected)))))
 
-(alias ((name sexp) (deps (cal_append.ml.sexp))))
-
-(rule (
-  (targets (cal_append.ml.sexp))
-  (deps    (cal_append.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (group.topscript.stamp))))
 
 (alias ((name sexp) (deps (group.topscript.sexp))))
@@ -111,36 +79,4 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}            "")
     (diff?      group.topscript group.topscript.corrected)))))
-
-(alias ((name sexp) (deps (cal_add_labels.ml.sexp))))
-
-(rule (
-  (targets (cal_add_labels.ml.sexp))
-  (deps    (cal_add_labels.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (cal_completion.rawsh.sexp))))
-
-(rule (
-  (targets (cal_completion.rawsh.sexp))
-  (deps    (cal_completion.rawsh))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (basic_md5_succinct.ml.sexp))))
-
-(rule (
-  (targets (basic_md5_succinct.ml.sexp))
-  (deps    (basic_md5_succinct.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (basic_md5_sequence.ml.sexp))))
-
-(rule (
-  (targets (basic_md5_sequence.ml.sexp))
-  (deps    (basic_md5_sequence.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

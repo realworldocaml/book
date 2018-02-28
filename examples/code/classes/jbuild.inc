@@ -20,14 +20,6 @@
     (write-file ${@}           "")
     (diff?      iter.topscript iter.topscript.corrected)))))
 
-(alias ((name sexp) (deps (doc.ml.sexp))))
-
-(rule (
-  (targets (doc.ml.sexp))
-  (deps    (doc.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (binary.topscript.stamp))))
 
 (alias ((name sexp) (deps (binary.topscript.sexp))))
@@ -88,22 +80,6 @@
     (write-file ${@} "")
     (diff? initializer.topscript initializer.topscript.corrected)))))
 
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (class_types_stack.ml.sexp))))
-
-(rule (
-  (targets (class_types_stack.ml.sexp))
-  (deps    (class_types_stack.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (stack.topscript.stamp))))
 
 (alias ((name sexp) (deps (stack.topscript.sexp))))
@@ -123,36 +99,4 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}            "")
     (diff?      stack.topscript stack.topscript.corrected)))))
-
-(alias ((name sexp) (deps (Iterator.java.sexp))))
-
-(rule (
-  (targets (Iterator.java.sexp))
-  (deps    (Iterator.java))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (citerator.cpp.sexp))))
-
-(rule (
-  (targets (citerator.cpp.sexp))
-  (deps    (citerator.cpp))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (binary_larger.ml.sexp))))
-
-(rule (
-  (targets (binary_larger.ml.sexp))
-  (deps    (binary_larger.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (binary_module.ml.sexp))))
-
-(rule (
-  (targets (binary_module.ml.sexp))
-  (deps    (binary_module.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

@@ -1,13 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (int_interval_manual_sexp.mli.sexp))))
-
-(rule (
-  (targets (int_interval_manual_sexp.mli.sexp))
-  (deps    (int_interval_manual_sexp.mli))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (inline_sexp.topscript.stamp))))
 
 (alias ((name sexp) (deps (inline_sexp.topscript.sexp))))
@@ -27,14 +19,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? inline_sexp.topscript inline_sexp.topscript.corrected)))))
-
-(alias ((name sexp) (deps (sexp.mli.sexp))))
-
-(rule (
-  (targets (sexp.mli.sexp))
-  (deps    (sexp.mli))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (sexp_default.topscript.stamp))))
 
@@ -56,22 +40,6 @@
     (write-file ${@} "")
     (diff? sexp_default.topscript sexp_default.topscript.corrected)))))
 
-(alias ((name sexp) (deps (int_interval_nosexp.mli.sexp))))
-
-(rule (
-  (targets (int_interval_nosexp.mli.sexp))
-  (deps    (int_interval_nosexp.mli))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (basic.scm.sexp))))
-
-(rule (
-  (targets (basic.scm.sexp))
-  (deps    (basic.scm))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (to_from_sexp.topscript.stamp))))
 
 (alias ((name sexp) (deps (to_from_sexp.topscript.sexp))))
@@ -91,30 +59,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? to_from_sexp.topscript to_from_sexp.topscript.corrected)))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (example.scm.sexp))))
-
-(rule (
-  (targets (example.scm.sexp))
-  (deps    (example.scm))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (comment_heavy.scm.sexp))))
-
-(rule (
-  (targets (comment_heavy.scm.sexp))
-  (deps    (comment_heavy.scm))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (sexp_option.topscript.stamp))))
 
@@ -155,14 +99,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? sexp_opaque.topscript sexp_opaque.topscript.corrected)))))
-
-(alias ((name sexp) (deps (sexp.ml.sexp))))
-
-(rule (
-  (targets (sexp.ml.sexp))
-  (deps    (sexp.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (print_sexp.topscript.stamp))))
 
@@ -235,22 +171,6 @@
     (write-file ${@} "")
     (diff? example_load.topscript example_load.topscript.corrected)))))
 
-(alias ((name sexp) (deps (sexp_override.ml.sexp))))
-
-(rule (
-  (targets (sexp_override.ml.sexp))
-  (deps    (sexp_override.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (int_interval_manual_sexp.ml.sexp))))
-
-(rule (
-  (targets (int_interval_manual_sexp.ml.sexp))
-  (deps    (int_interval_manual_sexp.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (auto_making_sexp.topscript.stamp))))
 
 (alias ((name sexp) (deps (auto_making_sexp.topscript.sexp))))
@@ -270,14 +190,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? auto_making_sexp.topscript auto_making_sexp.topscript.corrected)))))
-
-(alias ((name sexp) (deps (int_interval_nosexp.ml.sexp))))
-
-(rule (
-  (targets (int_interval_nosexp.ml.sexp))
-  (deps    (int_interval_nosexp.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (sexp_list.topscript.stamp))))
 
@@ -318,12 +230,4 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? sexp_printer.topscript sexp_printer.topscript.corrected)))))
-
-(alias ((name sexp) (deps (example_broken.scm.sexp))))
-
-(rule (
-  (targets (example_broken.scm.sexp))
-  (deps    (example_broken.scm))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

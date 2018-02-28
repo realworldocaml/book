@@ -8,22 +8,6 @@
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
-(alias ((name sexp) (deps (barrier_bench.ml.sexp))))
-
-(rule (
-  (targets (barrier_bench.ml.sexp))
-  (deps    (barrier_bench.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name sexp) (deps (run_barrier_bench.sh.sexp))))
 
 (rule (
