@@ -128,22 +128,20 @@ let process_chapters book_dir output_dir =
 
 let topscript_rule ~dep f =
   sprintf {|
-(alias ((name code) (deps (%s.stamp))))
 (alias ((name sexp) (deps (%s.sexp))))
 (rule
  ((targets (%s.sexp))
   (deps    (%s))
   (action  (with-stdout-to ${@}
     (run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
-(rule
- ((targets (%s.stamp))
+
+(alias
+ ((name    code)
   (deps    (%s %s))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? %s %s.corrected)
-    ))
-  )) |} f f f f f f dep f f
+    (diff? ${<} ${<}.corrected)))))|}
+    f f f f dep
 
 let sh_rule ~dep f =
   (* see https://github.com/ocaml/dune/issues/431 is answered *)
