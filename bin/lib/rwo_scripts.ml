@@ -226,7 +226,7 @@ let eval_script_to_sexp lang ~filename =
   eval_script lang ~filename >>|
   sexp_of_script
 
-let add_script t ~filename =
+let add_script t lang ~filename =
   let dir,file = filename in
   let filename = Filename.concat dir file in
   if file_is_mem t file then
@@ -236,7 +236,7 @@ let add_script t ~filename =
     let%map script =
       match%bind Sys.file_exists cache_filename with
       | `Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
-      | _    -> return (error "missing dependency" cache_filename sexp_of_string)
+      | _    -> eval_script lang ~filename
     in
     Result.map script ~f:(fun script ->
       Map.set t ~key:file ~data:script)
@@ -249,5 +249,6 @@ let of_html ?(code_dir="examples") ~filename:_  html =
       compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
-      add_script accum ~filename:(code_dir,i.Import.href)
+      let lang = Import.lang_of i |> ok_exn in
+      add_script accum lang ~filename:(code_dir,i.Import.href)
     )
