@@ -1,11 +1,11 @@
 (library
  ((name        rwo)
   (public_name rwo)
-  (libraries   (core async netclient cohttp sexp_pretty))
+  (libraries   (core async netclient cohttp sexp_pretty ocaml-topexpect))
   (preprocess (pps (ppx_jane)))
 ))
 
 (rule
  ((targets (rwo_about.ml))
   (action  (with-stdout-to ${@}
-             (echo "let git_commit = Some \"${version:rwo}\"")))))	
+             (echo "let git_commit = Some \"${version:rwo}\"")))))

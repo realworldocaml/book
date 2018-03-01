@@ -34,7 +34,7 @@ let empty = String.Map.empty
 
 let is_rawpart ~name p = name = p.Expect.Raw_script.name
 
-let is_part ~name p = name = p.Expect.Part.name
+let is_part ~name p = name = Expect.Part.name p
 
 let find_exn t ?part:(name="") ~filename =
   let no_file_err() =
@@ -54,7 +54,7 @@ let find_exn t ?part:(name="") ~filename =
   | Some (`OCaml_toplevel doc) -> (
       match List.find ~f:(is_part ~name) (Expect.Document.parts doc) with
       | None -> no_part_err()
-      | Some x -> `OCaml_toplevel x.Expect.Part.chunks
+      | Some x -> `OCaml_toplevel (Expect.Part.chunks x)
     )
   | Some (`OCaml_rawtoplevel parts) -> (
       match List.find ~f:(is_rawpart ~name) parts with
@@ -165,7 +165,9 @@ let exn_of_filename filename content =
 let eval_script lang ~filename =
   let open Deferred.Or_error.Let_syntax in
   match (lang : Lang.t :> string) with
-  | "topscript" -> assert false (* handled directly by ocaml-topexepct *)
+  | "topscript" ->
+    let%map script = Expect.Document.of_file ~filename in
+    `OCaml_toplevel script
   | "ml" | "mli" | "mly" | "mll" -> (
       (* Hack: Oloop.Script.of_file intended only for ml files but
          happens to work for mli, mll, and mly files. *)
