@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(executable
+ ((name        main)
+  (public_name cram)
+  (modules     (main))
+  (libraries   (fmt cram unix))))
+
+(executable ((name convert) (modules convert)))
