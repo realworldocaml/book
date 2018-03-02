@@ -64,7 +64,7 @@ let sexp_deps_of_chapter file =
   fold (fun a n -> R.attribute "href" n :: a) [] |>
   List.sort_uniq String.compare
 
-let needs_sexp_file = [ ".topscript"; ".sh"; ".errsh" ]
+let needs_sexp_file = [ ".sh"; ".errsh" ]
 
 let jbuild_for_chapter base_dir file =
   let examples_dir = "../examples" in
@@ -128,20 +128,13 @@ let process_chapters book_dir output_dir =
 
 let topscript_rule ~dep f =
   sprintf {|
-(alias ((name sexp) (deps (%s.sexp))))
-(rule
- ((targets (%s.sexp))
-  (deps    (%s))
-  (action  (with-stdout-to ${@}
-    (run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
-
 (alias
  ((name    code)
   (deps    (%s %s))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))|}
-    f f f f dep
+    f dep
 
 let sh_rule ~dep f =
   (* see https://github.com/ocaml/dune/issues/431 is answered *)
