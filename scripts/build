@@ -2,9 +2,14 @@
 # Designed for the Travis CI build environment. See .travis.yml
 
 set -ex
+
+# poor man's caching; download the existing layers for ocaml/rwo
+# this will avoid having to download and install the dependencies
+docker pull ocaml/rwo:latest
+
 cd $TRAVIS_BUILD_DIR
 echo Build started at `date`
-docker build -t ocaml/rwo .
+docker build --cache-from ocaml/rwo:latest -t ocaml/rwo .
 echo Build completed at `date`
 #echo Using Hub build due to a Travis build hanging
 #docker pull ocaml/rwo
