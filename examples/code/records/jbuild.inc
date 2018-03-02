@@ -1,21 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (record.syntax.sexp))))
-
-(rule (
-  (targets (record.syntax.sexp))
-  (deps    (record.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name sexp) (deps (warn_help.sh.sexp))))
 
 (rule (
@@ -43,14 +27,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}           "")
     (diff?      main.topscript main.topscript.corrected)))))
-
-(alias ((name sexp) (deps (functional_update.syntax.sexp))))
-
-(rule (
-  (targets (functional_update.syntax.sexp))
-  (deps    (functional_update.syntax))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (main2.topscript.stamp))))
 

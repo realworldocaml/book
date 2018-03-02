@@ -20,30 +20,6 @@
     (write-file ${@} "")
     (diff? polymorphism.topscript polymorphism.topscript.corrected)))))
 
-(alias ((name sexp) (deps (subtyping.ml.sexp))))
-
-(rule (
-  (targets (subtyping.ml.sexp))
-  (deps    (subtyping.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (is_barbell.ml.sexp))))
-
-(rule (
-  (targets (is_barbell.ml.sexp))
-  (deps    (is_barbell.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (stack.topscript.stamp))))
 
 (alias ((name sexp) (deps (stack.topscript.sexp))))
@@ -63,14 +39,6 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}            "")
     (diff?      stack.topscript stack.topscript.corrected)))))
-
-(alias ((name sexp) (deps (narrowing.ml.sexp))))
-
-(rule (
-  (targets (narrowing.ml.sexp))
-  (deps    (narrowing.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 
 (alias ((name code) (deps (subtyping.topscript.stamp))))
 
@@ -112,14 +80,6 @@
     (write-file ${@} "")
     (diff? immutable.topscript immutable.topscript.corrected)))))
 
-(alias ((name sexp) (deps (IsBarbell.java.sexp))))
-
-(rule (
-  (targets (IsBarbell.java.sexp))
-  (deps    (IsBarbell.java))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (row_polymorphism.topscript.stamp))))
 
 (alias ((name sexp) (deps (row_polymorphism.topscript.sexp))))
@@ -139,12 +99,4 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@} "")
     (diff? row_polymorphism.topscript row_polymorphism.topscript.corrected)))))
-
-(alias ((name sexp) (deps (Shape.java.sexp))))
-
-(rule (
-  (targets (Shape.java.sexp))
-  (deps    (Shape.java))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

@@ -20,11 +20,3 @@
     (write-file ${@}           "")
     (diff?      tune.topscript tune.topscript.corrected)))))
 
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-

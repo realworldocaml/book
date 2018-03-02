@@ -20,14 +20,6 @@
     (write-file ${@}            "")
     (diff?      qsort.topscript qsort.topscript.corrected)))))
 
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (posix.topscript.stamp))))
 
 (alias ((name sexp) (deps (posix.topscript.sexp))))
@@ -47,60 +39,4 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (write-file ${@}            "")
     (diff?      posix.topscript posix.topscript.corrected)))))
-
-(alias ((name sexp) (deps (return_c_uncurried.c.sexp))))
-
-(rule (
-  (targets (return_c_uncurried.c.sexp))
-  (deps    (return_c_uncurried.c))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (return_c_frag.c.sexp))))
-
-(rule (
-  (targets (return_c_frag.c.sexp))
-  (deps    (return_c_frag.c))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (timeval_headers.h.sexp))))
-
-(rule (
-  (targets (timeval_headers.h.sexp))
-  (deps    (timeval_headers.h))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (posix_headers.h.sexp))))
-
-(rule (
-  (targets (posix_headers.h.sexp))
-  (deps    (posix_headers.h))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (install.rawsh.sexp))))
-
-(rule (
-  (targets (install.rawsh.sexp))
-  (deps    (install.rawsh))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (return_frag.ml.sexp))))
-
-(rule (
-  (targets (return_frag.ml.sexp))
-  (deps    (return_frag.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (return_c_frag.h.sexp))))
-
-(rule (
-  (targets (return_c_frag.h.sexp))
-  (deps    (return_c_frag.h))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
 

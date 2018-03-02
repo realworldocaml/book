@@ -64,11 +64,18 @@ let sexp_deps_of_chapter file =
   fold (fun a n -> R.attribute "href" n :: a) [] |>
   List.sort_uniq String.compare
 
+let needs_sexp_file = [ ".topscript"; ".sh"; ".errsh" ]
+
 let jbuild_for_chapter base_dir file =
   let examples_dir = "../examples" in
   let deps =
     sexp_deps_of_chapter (Filename.concat base_dir file) |>
-    List.map (sprintf "%s/%s.sexp" examples_dir) |>
+    List.map (fun f ->
+        if List.mem (Filename.extension f) needs_sexp_file then
+          sprintf "%s/%s.sexp" examples_dir f
+        else
+          sprintf "%s/%s" examples_dir f
+      ) |>
     List.map (fun s -> "     " ^ s) |>
     String.concat "\n" in
   sprintf {|
@@ -138,18 +145,6 @@ let topscript_rule ~dep f =
     ))
   )) |} f f f f f f dep f f
 
-let rwo_eval_rule ~dep f =
-  sprintf {|
-(alias ((name sexp) (deps (%s.sexp))))
-(rule
-  ((targets (%s.sexp)) (deps (%s %s))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<}))))) |} f f f dep
-
-let jbuild_rule ~dep f =
-  (* TODO filter out the include here *)
-  rwo_eval_rule ~dep f
-
 let sh_rule ~dep f =
   (* see https://github.com/ocaml/dune/issues/431 is answered *)
   sprintf {|
@@ -175,11 +170,9 @@ let process_examples dir =
   List.map (fun f ->
     let dep = List.assoc_opt f deps |> function None -> "" | Some v -> String.concat " " v in
     match f with
-    | "jbuild" -> jbuild_rule ~dep f
     | f when Filename.extension f = ".topscript" -> topscript_rule ~dep f
     | f when Filename.extension f = ".sh" -> sh_rule ~dep f
     | f when Filename.extension f = ".errsh" -> sh_rule ~dep f
-    | f when List.mem (Filename.extension f) book_extensions -> rwo_eval_rule ~dep f
     | _ -> printf "skipping %s/%s\n%!" dir f; ""
   ) |>
   List.filter ((<>) "") |>

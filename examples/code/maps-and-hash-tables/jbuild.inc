@@ -1,29 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (comparable.ml.sexp))))
-
-(rule (
-  (targets (comparable.ml.sexp))
-  (deps    (comparable.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (phys_equal.rawscript.sexp))))
-
-(rule (
-  (targets (phys_equal.rawscript.sexp))
-  (deps    (phys_equal.rawscript))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (core_phys_equal.topscript.stamp))))
 
 (alias ((name sexp) (deps (core_phys_equal.topscript.sexp))))

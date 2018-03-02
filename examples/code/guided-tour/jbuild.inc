@@ -1,21 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (jbuild.sexp))))
-
-(rule (
-  (targets (jbuild.sexp))
-  (deps    (jbuild))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
-(alias ((name sexp) (deps (recursion.ml.sexp))))
-
-(rule (
-  (targets (recursion.ml.sexp))
-  (deps    (recursion.ml))
-  (fallback)
-  (action (with-stdout-to ${@} (run rwo-build eval ${<})))))
-
 (alias ((name code) (deps (main.topscript.stamp))))
 
 (alias ((name sexp) (deps (main.topscript.sexp))))
