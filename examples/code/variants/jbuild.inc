@@ -1,7 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name code) (deps (blang.topscript.stamp))))
-
 (alias ((name sexp) (deps (blang.topscript.sexp))))
 
 (rule (
@@ -11,16 +9,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (blang.topscript.stamp))
-  (deps    (blang.topscript))
+(alias (
+  (name code)
+  (deps (blang.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@}            "")
-    (diff?      blang.topscript blang.topscript.corrected)))))
-
-(alias ((name code) (deps (logger.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (logger.topscript.sexp))))
 
@@ -31,16 +26,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (logger.topscript.stamp))
-  (deps    (logger.topscript))
+(alias (
+  (name code)
+  (deps (logger.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? logger.topscript logger.topscript.corrected)))))
-
-(alias ((name code) (deps (main.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (main.topscript.sexp))))
 
@@ -51,16 +43,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (main.topscript.stamp))
-  (deps    (main.topscript))
+(alias (
+  (name code)
+  (deps (main.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@}           "")
-    (diff?      main.topscript main.topscript.corrected)))))
-
-(alias ((name code) (deps (catch_all.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (catch_all.topscript.sexp))))
 
@@ -71,12 +60,11 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (catch_all.topscript.stamp))
-  (deps    (catch_all.topscript))
+(alias (
+  (name code)
+  (deps (catch_all.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? catch_all.topscript catch_all.topscript.corrected)))))
+    (diff? ${<} ${<}.corrected)))))
 

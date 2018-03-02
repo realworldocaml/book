@@ -1,7 +1,5 @@
 (jbuild_version 1)
 
-(alias ((name code) (deps (iter.topscript.stamp))))
-
 (alias ((name sexp) (deps (iter.topscript.sexp))))
 
 (rule (
@@ -11,16 +9,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (iter.topscript.stamp))
-  (deps    (iter.topscript))
+(alias (
+  (name code)
+  (deps (iter.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@}           "")
-    (diff?      iter.topscript iter.topscript.corrected)))))
-
-(alias ((name code) (deps (binary.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (binary.topscript.sexp))))
 
@@ -31,16 +26,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (binary.topscript.stamp))
-  (deps    (binary.topscript))
+(alias (
+  (name code)
+  (deps (binary.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? binary.topscript binary.topscript.corrected)))))
-
-(alias ((name code) (deps (istack.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (istack.topscript.sexp))))
 
@@ -51,16 +43,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (istack.topscript.stamp))
-  (deps    (istack.topscript))
+(alias (
+  (name code)
+  (deps (istack.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? istack.topscript istack.topscript.corrected)))))
-
-(alias ((name code) (deps (initializer.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (initializer.topscript.sexp))))
 
@@ -71,16 +60,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (initializer.topscript.stamp))
-  (deps    (initializer.topscript))
+(alias (
+  (name code)
+  (deps (initializer.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? initializer.topscript initializer.topscript.corrected)))))
-
-(alias ((name code) (deps (stack.topscript.stamp))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (stack.topscript.sexp))))
 
@@ -91,12 +77,11 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (stack.topscript.stamp))
-  (deps    (stack.topscript))
+(alias (
+  (name code)
+  (deps (stack.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@}            "")
-    (diff?      stack.topscript stack.topscript.corrected)))))
+    (diff? ${<} ${<}.corrected)))))
 
