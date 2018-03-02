@@ -61,15 +61,14 @@ open Command.Let_syntax
 let build_chapter : Command.t =
   Command.async ~summary:"build chapter"
     [%map_open
-      let run_nondeterministic = Params.run_nondeterministic
-      and pygmentize = Params.pygmentize
+      let pygmentize = Params.pygmentize
       and repo_root = Params.repo_root
       and code_dir = Params.code_dir
       and out_dir = Params.out_dir
       and file = Params.file
       in
       fun () ->
-        Book.make ~code_dir ~run_nondeterministic ~pygmentize
+        Book.make ~code_dir ~pygmentize
           ~repo_root ~out_dir (`Chapter file) ]
 
 let build_frontpage : Command.t =
@@ -142,10 +141,7 @@ let eval : Command.t =
       fun () ->
         let open Deferred.Let_syntax in
         let lang = Rwo.Lang.of_filename filename |> Or_error.ok_exn in
-        let run_nondeterministic = false in
-        let%map sexp =
-          Rwo.Scripts.eval_script_to_sexp lang ~run_nondeterministic ~filename
-        in
+        let%map sexp = Rwo.Scripts.eval_script_to_sexp lang ~filename in
         print_endline (Sexp.to_string_hum (Or_error.ok_exn sexp))]
 
 (******************************************************************************)
