@@ -36,28 +36,6 @@ let is_rawpart ~name p = name = p.Expect.Raw_script.name
 
 let is_part ~name p = name = p.Expect.Part.name
 
-(*let find (t:t) ?part:(name="") ~filename =
-  match String.Map.find t filename with
-  | None -> None
-  | Some (`OCaml parts) -> (
-      match List.find ~f:(is_rawpart ~name) parts with
-      | None -> None
-      | Some x -> Some (`OCaml x)
-    )
-  | Some (`OCaml_toplevel doc) -> (
-      match List.find ~f:(is_part ~name) (Expect.Document.parts doc) with
-      | None -> None
-      | Some x -> Some (`OCaml_toplevel x.Expect.Part.chunks)
-    )
-  | Some (`OCaml_rawtoplevel parts) -> (
-      match List.find ~f:(is_rawpart ~name) parts with
-      | None -> None
-      | Some x -> Some (`OCaml_rawtoplevel x)
-    )
-  | Some (`Other _ as x) ->
-    if name = "" then Some x else None
-*)
-
 let find_exn t ?part:(name="") ~filename =
   let no_file_err() =
     ok_exn (error "no data for file" filename sexp_of_string)
@@ -174,9 +152,9 @@ let exn_of_filename filename content =
   let (_filename, extension) = Filename.split_extension filename in
   match extension with
   | Some ext -> (match ext with
-    | "ml" | "mli" | "mly" | "mll" -> 
+    | "ml" | "mli" | "mly" | "mll" ->
       `OCaml Rwo_expect.Raw_script.{ name = ""; content }
-    | "rawtopscript" -> 
+    | "rawtopscript" ->
       `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
     | _ -> `Other content)
   | None -> `Other content
@@ -197,7 +175,7 @@ let eval_script lang ~run_nondeterministic ~filename =
       let%map script = Expect.Raw_script.of_file ~filename in
       `OCaml_rawtoplevel script
     )
-  | "topscript" -> 
+  | "topscript" ->
       (*if String.is_suffix filename ~suffix:"async/main.topscript" then (
         Expect.Raw_script.of_file ~filename
         >>|? fun script -> `OCaml_rawtoplevel script
@@ -267,8 +245,8 @@ let eval_script lang ~run_nondeterministic ~filename =
     begin match Sexplib.Sexp.of_string (sprintf "(%s)" removed_check) with
     | Atom _ -> assert false
     | List l ->
-      let r = 
-        String.concat ~sep:"\n" (List.map ~f:Sexp_pretty.sexp_to_string l) 
+      let r =
+        String.concat ~sep:"\n" (List.map ~f:Sexp_pretty.sexp_to_string l)
       in
       Ok (`Other r)
     end
@@ -293,7 +271,7 @@ let add_script t lang ~run_nondeterministic ~filename =
     let%map script =
       match%bind Sys.file_exists cache_filename with
       | `Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
-      | _ -> eval_script lang ~run_nondeterministic ~filename 
+      | _ -> eval_script lang ~run_nondeterministic ~filename
     in
     Result.map script ~f:(fun script ->
       Map.set t ~key:file ~data:script)
@@ -302,7 +280,7 @@ let add_script t lang ~run_nondeterministic ~filename =
 let of_html ?(code_dir="examples") ~run_nondeterministic ~filename:_  html =
   let imports =
     Import.find_all html
-    |> List.dedup_and_sort ~compare:(fun i j -> 
+    |> List.dedup_and_sort ~compare:(fun i j ->
       compare i.Import.href j.Import.href)
   in
   Deferred.Or_error.List.fold imports ~init:empty ~f:(fun accum i ->
