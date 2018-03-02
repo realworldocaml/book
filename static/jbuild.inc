@@ -47,8 +47,8 @@
   (deps (
     ../book/01-guided-tour.html
     ../bin/bin/app.exe
-    ../examples/code/guided-tour/local_let.topscript.sexp
-    ../examples/code/guided-tour/main.topscript.sexp
+    ../examples/code/guided-tour/local_let.topscript
+    ../examples/code/guided-tour/main.topscript
     ../examples/code/guided-tour/recursion.ml
     ../examples/code/guided-tour/sum/build_sum.sh.sexp
     ../examples/code/guided-tour/sum/jbuild
@@ -69,7 +69,7 @@
     ../examples/code/variables-and-functions/htable_sig2.ml
     ../examples/code/variables-and-functions/let.syntax
     ../examples/code/variables-and-functions/let_in.syntax
-    ../examples/code/variables-and-functions/main.topscript.sexp
+    ../examples/code/variables-and-functions/main.topscript
     ../examples/code/variables-and-functions/numerical_deriv_alt_sig.mli
     ../examples/code/variables-and-functions/operators.syntax
     ../examples/code/variables-and-functions/substring_sig1.ml
@@ -84,8 +84,8 @@
   (deps (
     ../book/03-lists-and-patterns.html
     ../bin/bin/app.exe
-    ../examples/code/lists-and-patterns/main.topscript.sexp
-    ../examples/code/lists-and-patterns/poly.topscript.sexp))
+    ../examples/code/lists-and-patterns/main.topscript
+    ../examples/code/lists-and-patterns/poly.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -130,8 +130,8 @@
     ../examples/code/files-modules-and-programs/freq/freq.ml
     ../examples/code/files-modules-and-programs/freq/simple_build.sh.sexp
     ../examples/code/files-modules-and-programs/freq/simple_build_fail.errsh.sexp
-    ../examples/code/files-modules-and-programs/intro.topscript.sexp
-    ../examples/code/files-modules-and-programs/main.topscript.sexp
+    ../examples/code/files-modules-and-programs/intro.topscript
+    ../examples/code/files-modules-and-programs/main.topscript
     ../examples/code/files-modules-and-programs/module.syntax
     ../examples/code/files-modules-and-programs/session_info/build_session_info.errsh.sexp
     ../examples/code/files-modules-and-programs/session_info/session_info.ml
@@ -147,8 +147,8 @@
     ../book/05-records.html
     ../bin/bin/app.exe
     ../examples/code/records/functional_update.syntax
-    ../examples/code/records/main.topscript.sexp
-    ../examples/code/records/main2.topscript.sexp
+    ../examples/code/records/main.topscript
+    ../examples/code/records/main2.topscript
     ../examples/code/records/record.syntax
     ../examples/code/records/warn_help.sh.sexp))
   (action (
@@ -167,10 +167,10 @@
     ../examples/code/variants-termcol-fixed/terminal_color.ml
     ../examples/code/variants-termcol/terminal_color.ml
     ../examples/code/variants-termcol/terminal_color.mli
-    ../examples/code/variants/blang.topscript.sexp
-    ../examples/code/variants/catch_all.topscript.sexp
-    ../examples/code/variants/logger.topscript.sexp
-    ../examples/code/variants/main.topscript.sexp
+    ../examples/code/variants/blang.topscript
+    ../examples/code/variants/catch_all.topscript
+    ../examples/code/variants/logger.topscript
+    ../examples/code/variants/main.topscript
     ../examples/code/variants/variant.syntax))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
@@ -190,7 +190,7 @@
     ../examples/code/error-handling/exn_cost/jbuild
     ../examples/code/error-handling/exn_cost/run_exn_cost.sh.sexp
     ../examples/code/error-handling/exn_cost/run_exn_cost_notrace.sh.sexp
-    ../examples/code/error-handling/main.topscript.sexp
+    ../examples/code/error-handling/main.topscript
     ../examples/code/error-handling/result.mli
     ../examples/code/error-handling/sexpr.scm
     ../examples/code/error-handling/try_with.syntax))
@@ -212,19 +212,19 @@
     ../examples/code/imperative-programming/dictionary2.ml
     ../examples/code/imperative-programming/dlist.ml
     ../examples/code/imperative-programming/dlist.mli
-    ../examples/code/imperative-programming/examples.topscript.sexp
-    ../examples/code/imperative-programming/fib.topscript.sexp
-    ../examples/code/imperative-programming/file.topscript.sexp
-    ../examples/code/imperative-programming/file2.topscript.sexp
-    ../examples/code/imperative-programming/for.topscript.sexp
-    ../examples/code/imperative-programming/lazy.topscript.sexp
+    ../examples/code/imperative-programming/examples.topscript
+    ../examples/code/imperative-programming/fib.topscript
+    ../examples/code/imperative-programming/file.topscript
+    ../examples/code/imperative-programming/file2.topscript
+    ../examples/code/imperative-programming/for.topscript
+    ../examples/code/imperative-programming/lazy.topscript
     ../examples/code/imperative-programming/let-unit.syntax
     ../examples/code/imperative-programming/let_rec.ml
-    ../examples/code/imperative-programming/letrec.topscript.sexp
-    ../examples/code/imperative-programming/memo.topscript.sexp
-    ../examples/code/imperative-programming/order.topscript.sexp
-    ../examples/code/imperative-programming/printf.topscript.sexp
-    ../examples/code/imperative-programming/ref.topscript.sexp
+    ../examples/code/imperative-programming/letrec.topscript
+    ../examples/code/imperative-programming/memo.topscript
+    ../examples/code/imperative-programming/order.topscript
+    ../examples/code/imperative-programming/printf.topscript
+    ../examples/code/imperative-programming/ref.topscript
     ../examples/code/imperative-programming/remember_type.ml
     ../examples/code/imperative-programming/semicolon.syntax
     ../examples/code/imperative-programming/string.syntax
@@ -232,8 +232,8 @@
     ../examples/code/imperative-programming/time_converter/time_converter.rawsh
     ../examples/code/imperative-programming/time_converter2.ml
     ../examples/code/imperative-programming/time_converter2.rawsh
-    ../examples/code/imperative-programming/value_restriction.topscript.sexp
-    ../examples/code/imperative-programming/weak.topscript.sexp))
+    ../examples/code/imperative-programming/value_restriction.topscript
+    ../examples/code/imperative-programming/weak.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -251,7 +251,7 @@
     ../examples/code/functors/foldable.ml
     ../examples/code/functors/fqueue.ml
     ../examples/code/functors/fqueue.mli
-    ../examples/code/functors/main.topscript.sexp
+    ../examples/code/functors/main.topscript
     ../examples/code/functors/multi_sharing_constraint.syntax
     ../examples/code/functors/sexpable.ml
     ../examples/code/functors/sharing_constraint.syntax))
@@ -269,11 +269,11 @@
     ../examples/code/fcm/loader_cli2.rawsh
     ../examples/code/fcm/loader_cli3.rawsh
     ../examples/code/fcm/loader_cli4.rawsh
-    ../examples/code/fcm/main.topscript.sexp
+    ../examples/code/fcm/main.topscript
     ../examples/code/fcm/pack.syntax
     ../examples/code/fcm/query-syntax.scm
     ../examples/code/fcm/query_example.rawscript
-    ../examples/code/fcm/query_handler.topscript.sexp
+    ../examples/code/fcm/query_handler.topscript
     ../examples/code/fcm/query_handler_loader/build_query_handler_loader.sh.sexp
     ../examples/code/fcm/query_handler_loader/jbuild
     ../examples/code/fcm/query_handler_loader/query_handler.ml
@@ -292,14 +292,14 @@
     ../bin/bin/app.exe
     ../examples/code/objects/IsBarbell.java
     ../examples/code/objects/Shape.java
-    ../examples/code/objects/immutable.topscript.sexp
+    ../examples/code/objects/immutable.topscript
     ../examples/code/objects/is_barbell.ml
     ../examples/code/objects/narrowing.ml
-    ../examples/code/objects/polymorphism.topscript.sexp
-    ../examples/code/objects/row_polymorphism.topscript.sexp
-    ../examples/code/objects/stack.topscript.sexp
+    ../examples/code/objects/polymorphism.topscript
+    ../examples/code/objects/row_polymorphism.topscript
+    ../examples/code/objects/stack.topscript
     ../examples/code/objects/subtyping.ml
-    ../examples/code/objects/subtyping.topscript.sexp))
+    ../examples/code/objects/subtyping.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -317,16 +317,16 @@
     ../examples/code/classes-async/shapes/shapes.ml
     ../examples/code/classes-async/verbose_shapes.ml
     ../examples/code/classes/Iterator.java
-    ../examples/code/classes/binary.topscript.sexp
+    ../examples/code/classes/binary.topscript
     ../examples/code/classes/binary_larger.ml
     ../examples/code/classes/binary_module.ml
     ../examples/code/classes/citerator.cpp
     ../examples/code/classes/class_types_stack.ml
     ../examples/code/classes/doc.ml
-    ../examples/code/classes/initializer.topscript.sexp
-    ../examples/code/classes/istack.topscript.sexp
-    ../examples/code/classes/iter.topscript.sexp
-    ../examples/code/classes/stack.topscript.sexp))
+    ../examples/code/classes/initializer.topscript
+    ../examples/code/classes/istack.topscript
+    ../examples/code/classes/iter.topscript
+    ../examples/code/classes/stack.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -340,8 +340,8 @@
     ../examples/code/files-modules-and-programs/freq-fast/counter.ml
     ../examples/code/files-modules-and-programs/freq-fast/counter.mli
     ../examples/code/maps-and-hash-tables/comparable.ml
-    ../examples/code/maps-and-hash-tables/core_phys_equal.topscript.sexp
-    ../examples/code/maps-and-hash-tables/main.topscript.sexp
+    ../examples/code/maps-and-hash-tables/core_phys_equal.topscript
+    ../examples/code/maps-and-hash-tables/main.topscript
     ../examples/code/maps-and-hash-tables/map_vs_hash/jbuild
     ../examples/code/maps-and-hash-tables/map_vs_hash/map_vs_hash.ml
     ../examples/code/maps-and-hash-tables/map_vs_hash/run_map_vs_hash.sh.sexp
@@ -359,7 +359,7 @@
   (deps (
     ../book/14-command-line-parsing.html
     ../bin/bin/app.exe
-    ../examples/code/command-line-parsing/basic.topscript.sexp
+    ../examples/code/command-line-parsing/basic.topscript
     ../examples/code/command-line-parsing/basic_md5/basic_md5.ml
     ../examples/code/command-line-parsing/basic_md5/build_basic_md5.sh.sexp
     ../examples/code/command-line-parsing/basic_md5/get_basic_md5_help.errsh.sexp
@@ -397,10 +397,10 @@
     ../examples/code/command-line-parsing/cal_append_broken/build_cal_append_broken.errsh.sexp
     ../examples/code/command-line-parsing/cal_append_broken/jbuild
     ../examples/code/command-line-parsing/cal_completion.rawsh
-    ../examples/code/command-line-parsing/command_types.topscript.sexp
-    ../examples/code/command-line-parsing/group.topscript.sexp
+    ../examples/code/command-line-parsing/command_types.topscript
+    ../examples/code/command-line-parsing/group.topscript
     ../examples/code/command-line-parsing/opam.rawsh
-    ../examples/code/command-line-parsing/step.topscript.sexp))
+    ../examples/code/command-line-parsing/step.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -413,7 +413,7 @@
     ../bin/bin/app.exe
     ../examples/code/json/book.json
     ../examples/code/json/build_github_atd.sh.sexp
-    ../examples/code/json/build_json.topscript.sexp
+    ../examples/code/json/build_json.topscript
     ../examples/code/json/github.atd
     ../examples/code/json/github_j_excerpt.mli
     ../examples/code/json/github_org_info/build_github_org.sh.sexp
@@ -423,10 +423,10 @@
     ../examples/code/json/github_org_info/github_org_info.ml
     ../examples/code/json/github_org_info/jbuild
     ../examples/code/json/github_org_info/run_github_org.sh.sexp
-    ../examples/code/json/install.topscript.sexp
+    ../examples/code/json/install.topscript
     ../examples/code/json/install_atdgen.rawsh
     ../examples/code/json/list_excerpt.mli
-    ../examples/code/json/parse_book.topscript.sexp
+    ../examples/code/json/parse_book.topscript
     ../examples/code/json/parse_book/jbuild
     ../examples/code/json/parse_book/parse_book.ml
     ../examples/code/json/parse_book/run_parse_book.sh.sexp
@@ -474,17 +474,17 @@
   (deps (
     ../book/17-data-serialization.html
     ../bin/bin/app.exe
-    ../examples/code/sexpr/auto_making_sexp.topscript.sexp
+    ../examples/code/sexpr/auto_making_sexp.topscript
     ../examples/code/sexpr/basic.scm
     ../examples/code/sexpr/comment_heavy.scm
     ../examples/code/sexpr/example.scm
-    ../examples/code/sexpr/example_load.topscript.sexp
-    ../examples/code/sexpr/inline_sexp.topscript.sexp
+    ../examples/code/sexpr/example_load.topscript
+    ../examples/code/sexpr/inline_sexp.topscript
     ../examples/code/sexpr/int_interval_manual_sexp.mli
     ../examples/code/sexpr/int_interval_nosexp.mli
     ../examples/code/sexpr/list_top_packages.sh.sexp
-    ../examples/code/sexpr/manually_making_sexp.topscript.sexp
-    ../examples/code/sexpr/print_sexp.topscript.sexp
+    ../examples/code/sexpr/manually_making_sexp.topscript
+    ../examples/code/sexpr/print_sexp.topscript
     ../examples/code/sexpr/read_foo/build_read_foo.errsh.sexp
     ../examples/code/sexpr/read_foo/foo_broken_example.scm
     ../examples/code/sexpr/read_foo/jbuild
@@ -493,12 +493,12 @@
     ../examples/code/sexpr/read_foo_better_errors/jbuild
     ../examples/code/sexpr/read_foo_better_errors/read_foo_better_errors.ml
     ../examples/code/sexpr/sexp.mli
-    ../examples/code/sexpr/sexp_default.topscript.sexp
-    ../examples/code/sexpr/sexp_list.topscript.sexp
-    ../examples/code/sexpr/sexp_opaque.topscript.sexp
-    ../examples/code/sexpr/sexp_option.topscript.sexp
+    ../examples/code/sexpr/sexp_default.topscript
+    ../examples/code/sexpr/sexp_list.topscript
+    ../examples/code/sexpr/sexp_opaque.topscript
+    ../examples/code/sexpr/sexp_option.topscript
     ../examples/code/sexpr/sexp_override.ml
-    ../examples/code/sexpr/sexp_printer.topscript.sexp
+    ../examples/code/sexpr/sexp_printer.topscript
     ../examples/code/sexpr/test_interval/build_test_interval.sh.sexp
     ../examples/code/sexpr/test_interval/int_interval.ml
     ../examples/code/sexpr/test_interval/int_interval.mli
@@ -506,7 +506,7 @@
     ../examples/code/sexpr/test_interval/test_interval.ml
     ../examples/code/sexpr/test_interval_nosexp/build_test_interval_nosexp.errsh.sexp
     ../examples/code/sexpr/test_interval_nosexp/jbuild
-    ../examples/code/sexpr/to_from_sexp.topscript.sexp))
+    ../examples/code/sexpr/to_from_sexp.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -521,7 +521,7 @@
     ../examples/code/async/echo/echo.ml
     ../examples/code/async/echo/jbuild
     ../examples/code/async/echo/run_echo.sh.sexp
-    ../examples/code/async/main.topscript.sexp
+    ../examples/code/async/main.topscript
     ../examples/code/async/pipe_write_break.rawscript
     ../examples/code/async/run_native_code_log_delays.rawsh
     ../examples/code/async/search/jbuild
@@ -562,9 +562,9 @@
     ../examples/code/ffi/ncurses/ncurses.h
     ../examples/code/ffi/ncurses/ncurses.ml
     ../examples/code/ffi/ncurses/ncurses.mli
-    ../examples/code/ffi/posix.topscript.sexp
+    ../examples/code/ffi/posix.topscript
     ../examples/code/ffi/posix_headers.h
-    ../examples/code/ffi/qsort.topscript.sexp
+    ../examples/code/ffi/qsort.topscript
     ../examples/code/ffi/qsort/build_qsort.sh.sexp
     ../examples/code/ffi/qsort/jbuild
     ../examples/code/ffi/qsort/qsort.h
@@ -587,8 +587,8 @@
     ../book/20-runtime-memory-layout.html
     ../bin/bin/app.exe
     ../examples/code/memory-repr/custom_ops.c
-    ../examples/code/memory-repr/reprs.topscript.sexp
-    ../examples/code/memory-repr/simple_record.topscript.sexp))
+    ../examples/code/memory-repr/reprs.topscript
+    ../examples/code/memory-repr/simple_record.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -606,7 +606,7 @@
     ../examples/code/gc/finalizer/finalizer.ml
     ../examples/code/gc/finalizer/jbuild
     ../examples/code/gc/finalizer/run_finalizer.sh.sexp
-    ../examples/code/gc/tune.topscript.sexp))
+    ../examples/code/gc/tune.topscript))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -634,7 +634,7 @@
     ../examples/code/front-end/build_type_conv_with_camlp4.rawsh
     ../examples/code/front-end/build_type_conv_without_camlp4.errsh.sexp
     ../examples/code/front-end/camlp4_dump.cmd
-    ../examples/code/front-end/camlp4_toplevel.topscript.sexp
+    ../examples/code/front-end/camlp4_toplevel.topscript
     ../examples/code/front-end/comparelib_test.ml
     ../examples/code/front-end/comparelib_test.mli
     ../examples/code/front-end/conflicting_interface.ml

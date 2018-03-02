@@ -112,15 +112,6 @@
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
-(alias ((name sexp) (deps (camlp4_toplevel.topscript.sexp))))
-
-(rule (
-  (targets (camlp4_toplevel.topscript.sexp))
-  (deps    (camlp4_toplevel.topscript))
-  (action (
-    with-stdout-to ${@} (
-      run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
-
 (alias (
   (name code)
   (deps (camlp4_toplevel.topscript))
