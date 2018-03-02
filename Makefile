@@ -1,4 +1,4 @@
-.PHONY: all clean dep code publish
+.PHONY: all clean dep code publish promote
 
 all:
 	@jbuilder build @site --dev
@@ -9,6 +9,9 @@ code:
 
 dep:
 	jbuilder exec --dev -- rwo-jbuild
+
+promote:
+	jbuilder promote
 
 clean:
 	jbuilder clean
