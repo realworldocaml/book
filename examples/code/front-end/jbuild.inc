@@ -112,8 +112,6 @@
   (fallback)
   (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
 
-(alias ((name code) (deps (camlp4_toplevel.topscript.stamp))))
-
 (alias ((name sexp) (deps (camlp4_toplevel.topscript.sexp))))
 
 (rule (
@@ -123,14 +121,13 @@
     with-stdout-to ${@} (
       run ocaml-topexpect -dry-run -sexp -short-paths -verbose ${<})))))
 
-(rule (
-  (targets (camlp4_toplevel.topscript.stamp))
-  (deps    (camlp4_toplevel.topscript))
+(alias (
+  (name code)
+  (deps (camlp4_toplevel.topscript))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (write-file ${@} "")
-    (diff? camlp4_toplevel.topscript camlp4_toplevel.topscript.corrected)))))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias ((name sexp) (deps (build_follow_on_function.errsh.sexp))))
 
