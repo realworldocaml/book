@@ -1,4 +1,4 @@
 (
  (build_cal_add_sub_days.sh (cal_add_sub_days.ml jbuild jbuild.inc))
- (run_cal_add_sub_days.sh (build_cal_add_sub_days.sh.sexp))
+ (run_cal_add_sub_days.sh (build_cal_add_sub_days.sh))
 )

@@ -1,6 +1,6 @@
 (
- (run_basic_md5.sh (build_basic_md5.sh.sexp))
- (get_basic_md5_version.sh (build_basic_md5.sh.sexp))
- (get_basic_md5_help.errsh (build_basic_md5.sh.sexp))
+ (run_basic_md5.sh (build_basic_md5.sh))
+ (get_basic_md5_version.sh (build_basic_md5.sh))
+ (get_basic_md5_help.errsh (build_basic_md5.sh))
  (build_basic_md5.sh (basic_md5.ml jbuild jbuild.inc))
 )

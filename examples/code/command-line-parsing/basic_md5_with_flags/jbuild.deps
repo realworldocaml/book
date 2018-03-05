@@ -1,5 +1,5 @@
 (
   (build_basic_md5_with_flags.sh (basic_md5_with_flags.ml jbuild jbuild.inc))
-  (run_basic_md5_flags_help.sh (build_basic_md5_with_flags.sh.sexp jbuild jbuild.inc))
-  (md5_completion.sh (build_basic_md5_with_flags.sh.sexp jbuild jbuild.inc))
+  (run_basic_md5_flags_help.sh (build_basic_md5_with_flags.sh jbuild jbuild.inc))
+  (md5_completion.sh (build_basic_md5_with_flags.sh jbuild jbuild.inc))
 )

@@ -2,5 +2,5 @@
  (build_github_org.sh (github_org_info.ml jbuild jbuild.inc))
  (generate_github_org_json.sh (github_org_j.mli jbuild jbuild.inc))
  (generate_github_org_types.sh (github_org_t.mli jbuild jbuild.inc))
- (run_github_org.sh (build_github_org.sh.sexp jbuild jbuild.inc))
+ (run_github_org.sh (build_github_org.sh jbuild jbuild.inc))
 )
