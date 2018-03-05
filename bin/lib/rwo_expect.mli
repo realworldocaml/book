@@ -12,35 +12,10 @@ module Raw_script : sig
   val of_file : filename:string -> t Deferred.Or_error.t
 end
 
-module Chunk : sig
-  type kind = OCaml | Raw
-    [@@deriving sexp]
-
-  type response = (kind * string)
-    [@@deriving sexp]
-
-  type t =
-    { ocaml_code : string; toplevel_responses : response list; }
-    [@@deriving sexp]
-
-  val code      : t -> string
-  val warnings  : t -> string
-  val responses : t -> response list
-  val stdout    : t -> string
-  val evaluated : t -> bool
-end
-
-module Part : sig
-  type t =
-    { name : string; chunks : Chunk.t list; }
-    [@@deriving sexp]
-end
+module Chunk = Ocaml_topexpect.Chunk
+module Part = Ocaml_topexpect.Part
 
 module Document : sig
-  type t =
-    { parts : Part.t list; matched : bool; }
-    [@@deriving sexp]
-
-  val parts : t -> Part.t list
-  val of_file : run_nondeterministic:bool -> filename:string -> t Deferred.Or_error.t
+  include (module type of Ocaml_topexpect.Document)
+  val of_file: filename:string -> t Deferred.Or_error.t
 end
