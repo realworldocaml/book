@@ -198,7 +198,7 @@ let eval_script lang ~filename =
       ;
       `Other (Bash_script.Evaluated.to_string x)
     )
-  | "sexp" when Filename.basename filename = "jbuild" ->
+  | "jbuild" ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
     let regexp = Str.regexp "ppx_sexp_conv -no-check" in
@@ -207,14 +207,7 @@ let eval_script lang ~filename =
     let removed_check = Str.replace_first regexp "" removed_check in
     let regexp = Str.regexp_string "(include jbuild.inc)" in
     let removed_check = Str.replace_first regexp "" removed_check in
-    begin match Sexplib.Sexp.of_string (sprintf "(%s)" removed_check) with
-    | Atom _ -> assert false
-    | List l ->
-      let r =
-        String.concat ~sep:"\n" (List.map ~f:Sexp_pretty.sexp_to_string l)
-      in
-      Ok (`Other r)
-    end
+    Ok (`Other removed_check)
   | _ ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
