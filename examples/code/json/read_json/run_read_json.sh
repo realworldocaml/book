@@ -1,1 +1,1 @@
-jbuilder exec -- ./read_json.exe
+  $ jbuilder exec -- ./read_json.exe

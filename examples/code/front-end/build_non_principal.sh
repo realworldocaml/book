@@ -1,1 +1,1 @@
-ocamlc -i -principal non_principal.ml
+  $ ocamlc -i -principal non_principal.ml

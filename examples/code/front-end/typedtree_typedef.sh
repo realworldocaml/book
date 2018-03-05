@@ -1,1 +1,1 @@
-ocamlc -dtypedtree typedef.ml 2>&1
+  $ ocamlc -dtypedtree typedef.ml 2>&1

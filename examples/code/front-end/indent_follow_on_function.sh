@@ -1,1 +1,1 @@
-ocp-indent follow_on_function.ml
+  $ ocp-indent follow_on_function.ml

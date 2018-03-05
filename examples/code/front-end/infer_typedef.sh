@@ -1,1 +1,1 @@
-ocamlc -i typedef.ml
+  $ ocamlc -i typedef.ml

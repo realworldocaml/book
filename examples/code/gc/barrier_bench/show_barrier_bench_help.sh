@@ -1,1 +1,1 @@
-./_build/default/barrier_bench.exe -help
+  $ ./_build/default/barrier_bench.exe -help

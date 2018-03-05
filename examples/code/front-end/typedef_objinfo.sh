@@ -1,2 +1,2 @@
-ocamlc -c typedef.ml
-ocamlobjinfo typedef.cmi
+  $ ocamlc -c typedef.ml
+  $ ocamlobjinfo typedef.cmi

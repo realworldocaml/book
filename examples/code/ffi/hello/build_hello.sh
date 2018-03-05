@@ -1,1 +1,1 @@
-jbuilder build hello.exe
+  $ jbuilder build hello.exe

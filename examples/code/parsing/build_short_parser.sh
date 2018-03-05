@@ -1,1 +1,1 @@
-jbuilder build short_parser.mli
+  $ jbuilder build short_parser.mli

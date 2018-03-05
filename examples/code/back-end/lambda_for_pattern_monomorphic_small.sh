@@ -1,1 +1,1 @@
-ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
+  $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1

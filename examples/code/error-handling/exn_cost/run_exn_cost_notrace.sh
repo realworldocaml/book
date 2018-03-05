@@ -1,1 +1,1 @@
-OCAMLRUNPARAM= ./_build/default/exn_cost.exe -ascii cycles -quota 1
+  $ OCAMLRUNPARAM= ./_build/default/exn_cost.exe -ascii cycles -quota 1
