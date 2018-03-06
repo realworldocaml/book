@@ -1,1 +1,4 @@
   $ ocamlfind ocamlc -c type_conv_example.ml
+  [1mFile "[1mtype_conv_example.ml", line 1, characters 5-16[0m[0m:
+  [1;31mError[0m: Unbound module Sexplib
+  [2]

@@ -1,1 +1,14 @@
   $ ocamlc -c conflicting_interface.mli conflicting_interface.ml
+  [1mFile "[1mconflicting_interface.ml", line 1[0m[0m:
+  [1;31mError[0m: The implementation conflicting_interface.ml
+         does not match the interface conflicting_interface.cmi:
+         Type declarations do not match:
+           type t = Foo
+         is not included in
+           type t = Bar
+         File "[1mconflicting_interface.mli", line 1, characters 0-12[0m:
+           Expected declaration
+         File "[1mconflicting_interface.ml", line 1, characters 0-12[0m:
+           Actual declaration
+         Fields number 1 have different names, Foo and Bar.
+  [2]

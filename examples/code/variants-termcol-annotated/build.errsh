@@ -1,1 +1,4 @@
   $ jbuilder build terminal_color.exe
+      ocamlopt .terminal_color.eobjs/terminal_color.{cmx,o}
+  [1mFile "[1mterminal_color.ml", line 31, characters 25-32[0m[0m:
+  [1;35mWarning[0m 12: this sub-pattern is unused.

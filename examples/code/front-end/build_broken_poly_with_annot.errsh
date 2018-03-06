@@ -1,1 +1,6 @@
   $ ocamlc -i broken_poly_with_annot.ml
+  [1mFile "[1mbroken_poly_with_annot.ml", line 22, characters 14-21[0m[0m:
+  [1;31mError[0m: This expression has type [> `Nu of int ]
+         but an expression was expected of type t
+         The second variant type does not allow tag(s) `Nu
+  [2]
