@@ -52,3 +52,31 @@ module Document = struct
     Ocaml_topexpect.Phrase.document lexbuf ~matched:true phrases
 
 end
+
+module Cram = struct
+
+  type item = [
+    | `Output  of string
+    | `Command of string
+    | `Comment of string
+    | `Part    of string
+  ] [@@deriving sexp]
+
+  type t = item list [@@deriving sexp]
+
+  let contents = Cram.to_string
+  let part = Cram.part
+
+  let of_file ~filename =
+    Monitor.try_with_or_error (fun () -> Reader.file_contents filename)
+    >>|? fun contents ->
+    let lexbuf = Lexing.from_string contents in
+    lexbuf.lex_curr_p <-
+      { pos_fname = filename
+      ; pos_cnum  = 0
+      ; pos_lnum  = 1
+      ; pos_bol   = 0
+      };
+    Cram.parse_lexbuf lexbuf
+
+end
