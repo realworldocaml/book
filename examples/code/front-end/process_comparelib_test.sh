@@ -14,6 +14,6 @@
             | 0 -> compare a__001_.bar b__002_.bar
             | n -> n) : t -> t -> int)
   let _ = compare
-  [1mFile "[1mcomparelib_test.ml", line 1[0m[0m:
-  [1;31mError[0m: Could not find the .cmi file for interface comparelib_test.mli.
+  File "comparelib_test.ml", line 1:
+  Error: Could not find the .cmi file for interface comparelib_test.mli.
   [2]
