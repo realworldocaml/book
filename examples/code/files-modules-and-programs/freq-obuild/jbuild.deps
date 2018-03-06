@@ -1,4 +1,0 @@
-(
- (build.sh (jbuild.inc jbuild freq.ml))
- (test.sh (build.sh))
-)

@@ -1,1 +1,0 @@
-  $ jbuilder build freq.bc
