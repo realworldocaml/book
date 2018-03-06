@@ -130,21 +130,6 @@ let validate : Command.t =
     ]
 
 (******************************************************************************)
-(* `eval` command                                                             *)
-(******************************************************************************)
-
-let eval : Command.t =
-  Command.async
-    ~summary:"Evaluate a file into a sexp, to serve as a cache."
-    [%map_open
-      let filename = Params.file in
-      fun () ->
-        let open Deferred.Let_syntax in
-        let lang = Rwo.Lang.of_filename filename |> Or_error.ok_exn in
-        let%map sexp = Rwo.Scripts.eval_script_to_sexp lang ~filename in
-        print_endline (Sexp.to_string_hum (Or_error.ok_exn sexp))]
-
-(******************************************************************************)
 (* `main` command                                                             *)
 (******************************************************************************)
 let main =
@@ -152,7 +137,6 @@ let main =
     ~summary:"Real World OCaml authoring and publication tools"
     [ "build", build
     ; "validate", validate
-    ; "eval", eval
     ]
 
 let () =

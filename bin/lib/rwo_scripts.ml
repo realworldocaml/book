@@ -1,6 +1,5 @@
 open Core
 open Async
-module Bash_script = Rwo_bash_script
 module Html = Rwo_html
 module Import = Rwo_import
 module Lang = Rwo_lang
@@ -208,26 +207,14 @@ let script lang ~filename =
     let%map x = Reader.file_contents filename in
     Ok (`Other x)
 
-
-let eval_script_to_sexp lang ~filename =
-  let open Deferred.Or_error.Monad_infix in
-  eval_script lang ~filename >>|
-  sexp_of_script
-
 let add_script t lang ~filename =
   let dir,file = filename in
   let filename = Filename.concat dir file in
   if file_is_mem t file then
     return (error "script already exists" file sexp_of_string)
   else begin
-    let cache_filename = filename ^ ".sexp" in
-    let%map script =
-      match%bind Sys.file_exists cache_filename with
-      | `Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
-      | _    -> eval_script lang ~filename
-    in
-    Result.map script ~f:(fun script ->
-      Map.set t ~key:file ~data:script)
+    let%map script = script lang ~filename in
+    Result.map script ~f:(fun script -> Map.set t ~key:file ~data:script)
   end
 
 let of_html ?(code_dir="examples") ~filename:_  html =
