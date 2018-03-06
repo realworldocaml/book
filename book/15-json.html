@@ -884,7 +884,7 @@
 	    Let's build the OCaml type declaration first by calling
             <code>atdgen -t</code> on the specification file:</p>
 
-          <link rel="import" href="code/json/github_org_info/generate_github_org_types.sh"/>
+          <link rel="import" href="code/json/github_org_info/github_org.sh" part="generate json"/>
 
           <p>
 	    The OCaml type has an obvious mapping to the ATD spec,
@@ -893,7 +893,7 @@
             generate this serialization code for us in a new file
             called <code>github_org_j.ml</code>:</p>
 
-          <link rel="import" href="code/json/github_org_info/generate_github_org_json.sh"/>
+          <link rel="import" href="code/json/github_org_info/github_org.sh" part="generate json"/>
 
           <p>
 	    The <code>Github_org_j</code> serializer interface
@@ -925,7 +925,7 @@
 	    The following is a short shell script that generates all
             of the OCaml code and also builds the final executable:</p>
           <link rel="import" href="code/json/github_org_info/jbuild"/>
-          <link rel="import" href="code/json/github_org_info/build_github_org.sh"/>
+          <link rel="import" href="code/json/github_org_info/github_org.sh" part="build"/>
 
           <p>
 	    You can now run the command-line tool with a single
@@ -933,7 +933,7 @@
             will dynamically fetch the JSON from the web, parse it, and
             render the summary to your console:</p>
 
-          <link rel="import" href="code/json/github_org_info/run_github_org.sh"/>
+          <link rel="import" href="code/json/github_org_info/github_org.sh" part="run"/>
 
           <p>
 	    The JSON returned from the <code>janestreet</code> query

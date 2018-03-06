@@ -1,1 +1,17 @@
-ocamlc -c broken_poly.ml
+  $ ocamlc -c broken_poly.ml
+  [1mFile "[1mbroken_poly.ml", line 9, characters 10-154[0m[0m:
+  [1;31mError[0m: This expression has type
+           [> `Add of
+                ([< `Add of 'a * 'a
+                  | `Mul of 'a * 'a
+                  | `Num of int
+                  | `Sub of 'a * 'a
+                  > `Num ]
+                 as 'a) *
+                [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ] ] ]
+         but an expression was expected of type
+           [< `Add of 'a * 'a | `Mul of 'a * 'a | `Num of int | `Sub of 'a * 'a
+            > `Num ]
+           as 'a
+         The second variant type does not allow tag(s) `Nu
+  [2]

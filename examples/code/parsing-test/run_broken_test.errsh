@@ -1,2 +1,10 @@
-cat test2.json
-./_build/default/test.exe test2.json
+  $ cat test2.json
+  { "name": "Chicago",
+    "zips": [12345,
+  }
+  { "name": "New York",
+    "zips": [10004]
+  }
+  $ ./_build/default/test.exe test2.json
+  sh: ./_build/default/test.exe: No such file or directory
+  [127]

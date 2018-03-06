@@ -1,1 +1,4 @@
-ocamlc -c follow_on_function.ml
+  $ ocamlc -c follow_on_function.ml
+  [1mFile "[1mfollow_on_function.ml", line 11, characters 0-3[0m[0m:
+  [1;31mError[0m: Syntax error
+  [2]

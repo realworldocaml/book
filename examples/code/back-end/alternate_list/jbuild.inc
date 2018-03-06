@@ -1,10 +1,10 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (run_alternate_list.sh.sexp))))
-
-(rule (
-  (targets (run_alternate_list.sh.sexp))
-  (deps    (run_alternate_list.sh))
-  (fallback)
-  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+(alias (
+  (name cram)
+  (deps (run_alternate_list.sh (files_recursively_in .)))
+  (action (
+    progn
+    (run   cram ${<})
+    (diff? ${<} ${<}.corrected)))))
 

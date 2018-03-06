@@ -56,13 +56,13 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
-(alias ((name sexp) (deps (list_top_packages.sh.sexp))))
-
-(rule (
-  (targets (list_top_packages.sh.sexp))
-  (deps    (list_top_packages.sh))
-  (fallback)
-  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+(alias (
+  (name cram)
+  (deps (list_top_packages.sh (files_recursively_in .)))
+  (action (
+    progn
+    (run   cram ${<})
+    (diff? ${<} ${<}.corrected)))))
 
 (alias (
   (name code)

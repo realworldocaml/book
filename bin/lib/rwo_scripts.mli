@@ -9,6 +9,7 @@ type script = [
   | `OCaml of Rwo_expect.Raw_script.t
   | `OCaml_toplevel of Rwo_expect.Document.t
   | `OCaml_rawtoplevel of Rwo_expect.Raw_script.t
+  | `Shell of Rwo_expect.Cram.t
   | `Other of string
 ]
 
@@ -17,20 +18,11 @@ type script_part = [
   | `OCaml of Rwo_expect.Raw_script.part
   | `OCaml_toplevel of Rwo_expect.Chunk.t list
   | `OCaml_rawtoplevel of Rwo_expect.Raw_script.part
+  | `Shell of Rwo_expect.Cram.t
   | `Other of string
 ]
 
 type t = script String.Map.t (** key is filename *)
-
-val eval_script
-  :  Rwo_lang.t
-  -> filename:string -> script Or_error.t Deferred.t
-(** Return the [script] representation of a parsed file *)
-
-val eval_script_to_sexp
-  : Rwo_lang.t
-  -> filename:string -> Sexp.t Or_error.t Deferred.t
-(** Return the sexp representation of a parsed file *)
 
 val of_html
   :  ?code_dir:string

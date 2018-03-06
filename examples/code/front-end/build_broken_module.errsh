@@ -1,1 +1,4 @@
-ocamlc -c broken_module.ml
+  $ ocamlc -c broken_module.ml
+  [1mFile "[1mbroken_module.ml", line 2, characters 2-8[0m[0m:
+  [1;31mError[0m: Syntax error
+  [2]

@@ -1,6 +1,5 @@
 open Core
 open Async
-module Bash_script = Rwo_bash_script
 module Html = Rwo_html
 module Import = Rwo_import
 module Lang = Rwo_lang
@@ -14,6 +13,7 @@ type script = [
   | `OCaml of Expect.Raw_script.t
   | `OCaml_toplevel of Expect.Document.t
   | `OCaml_rawtoplevel of Expect.Raw_script.t
+  | `Shell of Expect.Cram.t
   | `Other of string
 ] [@@deriving sexp]
 
@@ -21,6 +21,7 @@ type script_part = [
   | `OCaml of Expect.Raw_script.part
   | `OCaml_toplevel of Expect.Chunk.t list
   | `OCaml_rawtoplevel of Expect.Raw_script.part
+  | `Shell of Expect.Cram.t
   | `Other of string
 ] [@@deriving sexp]
 
@@ -60,6 +61,12 @@ let find_exn t ?part:(name="") ~filename =
       match List.find ~f:(is_rawpart ~name) parts with
       | None -> no_part_err()
       | Some x -> `OCaml_rawtoplevel x
+    )
+  | Some (`Shell parts) -> (
+      if name = "" then `Shell parts
+      else match Expect.Cram.part name parts with
+        | None   -> no_part_err ()
+        | Some x -> `Shell x
     )
   | Some (`Other _ as x) ->
     if name = "" then x else no_part_err()
@@ -142,6 +149,9 @@ let script_part_to_html ?(pygmentize=false) (x : script_part) =
     | `OCaml_rawtoplevel x ->
       let content = x.Expect.Raw_script.content in
       Pygments.pygmentize ~pygmentize `OCaml content >>| singleton
+    | `Shell x ->
+      let content = Expect.Cram.contents x in
+      Pygments.pygmentize ~pygmentize:false `Bash content >>| singleton
     | `Other x ->
       Pygments.pygmentize ~pygmentize:false `OCaml x >>| singleton
   in
@@ -162,7 +172,7 @@ let exn_of_filename filename content =
 (******************************************************************************)
 (* Main Operations                                                            *)
 (******************************************************************************)
-let eval_script lang ~filename =
+let script lang ~filename =
   let open Deferred.Or_error.Let_syntax in
   match (lang : Lang.t :> string) with
   | "topscript" ->
@@ -178,27 +188,9 @@ let eval_script lang ~filename =
       let%map script = Expect.Raw_script.of_file ~filename in
       `OCaml_rawtoplevel script
     )
-  | "sh" -> (
-      let%map x = Bash_script.eval_file filename in
-      if not (List.for_all x.Bash_script.Evaluated.commands
-                ~f:(fun x -> x.Bash_script.Evaluated.exit_code = 0))
-      then
-        Log.Global.error
-          "all commands in %s expected to exit with 0 but got non-zero"
-          filename
-      ;
-      `Other (Bash_script.Evaluated.to_string x)
-    )
-  | "errsh" -> (
-      let%map x = Bash_script.eval_file filename in
-      if not (List.exists x.Bash_script.Evaluated.commands
-                ~f:(fun x -> x.Bash_script.Evaluated.exit_code <> 0))
-      then
-        Log.Global.error
-          "all commands in %s exited with 0 but expected at least one non-zero"
-          filename
-      ;
-      `Other (Bash_script.Evaluated.to_string x)
+  | "sh" | "errsh" -> (
+      let %map script = Expect.Cram.of_file ~filename in
+      `Shell script
     )
   | "jbuild" ->
     let open Deferred.Let_syntax in
@@ -215,26 +207,14 @@ let eval_script lang ~filename =
     let%map x = Reader.file_contents filename in
     Ok (`Other x)
 
-
-let eval_script_to_sexp lang ~filename =
-  let open Deferred.Or_error.Monad_infix in
-  eval_script lang ~filename >>|
-  sexp_of_script
-
 let add_script t lang ~filename =
   let dir,file = filename in
   let filename = Filename.concat dir file in
   if file_is_mem t file then
     return (error "script already exists" file sexp_of_string)
   else begin
-    let cache_filename = filename ^ ".sexp" in
-    let%map script =
-      match%bind Sys.file_exists cache_filename with
-      | `Yes -> Async_unix.Reader.load_sexp cache_filename script_of_sexp
-      | _    -> eval_script lang ~filename
-    in
-    Result.map script ~f:(fun script ->
-      Map.set t ~key:file ~data:script)
+    let%map script = script lang ~filename in
+    Result.map script ~f:(fun script -> Map.set t ~key:file ~data:script)
   end
 
 let of_html ?(code_dir="examples") ~filename:_  html =

@@ -1,1 +1,0 @@
-((build_short_parser.sh (short_parser.mly jbuild jbuild.inc json.ml lexer.mll prog.ml prog.mli))) 

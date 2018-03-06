@@ -1,3 +1,0 @@
-((build_basic_and_default_md5.sh (basic_md5_with_default_file.ml jbuild jbuild.inc basic_md5_with_optional_file.ml))
- (run_basic_and_default_md5.sh (build_basic_and_default_md5.sh.sexp))
-)

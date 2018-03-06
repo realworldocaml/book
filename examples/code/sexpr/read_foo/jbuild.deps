@@ -1,1 +1,0 @@
-((build_read_foo.errsh (foo_broken_example.scm jbuild jbuild.inc read_foo.ml)))

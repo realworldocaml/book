@@ -1,1 +1,4 @@
-ocamlc freq.ml -o freq.byte
+  $ ocamlc freq.ml -o freq.byte
+  [1mFile "[1mfreq.ml", line 1, characters 5-9[0m[0m:
+  [1;31mError[0m: Unbound module Base
+  [2]

@@ -1,2 +1,8 @@
-jbuilder build search_with_configurable_server.exe
-./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+  $ jbuilder build search_with_configurable_server.exe
+  $ ./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+  (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
+   ("Raised by primitive operation at file \"src/unix_syscalls.ml\", line 937, characters 17-76"
+    "Called from file \"src/deferred1.ml\", line 20, characters 40-45"
+    "Called from file \"src/job_queue.ml\", line 159, characters 6-47"
+    "Caught by monitor Tcp.close_sock_on_error"))
+  [1]
