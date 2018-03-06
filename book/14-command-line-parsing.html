@@ -226,13 +226,13 @@
             before building this example. Once that's completed, run
             the following to compile the binary:</p>
           <link rel="import" href="code/command-line-parsing/basic_md5/jbuild"/>
-          <link rel="import" href="code/command-line-parsing/basic_md5/build_basic_md5.sh"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="build"/>
 
           <p>
 	    You can now query the version information for the binary
             you just compiled:</p>
 
-          <link rel="import" href="code/command-line-parsing/basic_md5/get_basic_md5_version.sh"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="get version"/>
 
           <p>
 	    The versions that you see in the output were defined via
@@ -242,7 +242,7 @@
             system (e.g., by running <code>hg id</code> to generate a
             build revision number, in the case of Mercurial):</p>
 
-          <link rel="import" href="code/command-line-parsing/basic_md5/get_basic_md5_help.errsh"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="get help"/>
 
           <p>
 	    When we invoke this binary without any arguments, it
@@ -256,7 +256,7 @@
             then <code>do_hash</code> is called with the argument and
             the MD5 output is displayed to the standard output:</p>
 
-          <link rel="import" href="code/command-line-parsing/basic_md5/run_basic_md5.sh"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="run"/>
 
           <p>
 	    And that's all it took to build our little MD5 utility!
@@ -460,8 +460,8 @@
             that they have the same behavior:</p>
 
           <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/jbuild"/>
-          <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/build_basic_and_default_md5.sh"/>
-          <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/run_basic_and_default_md5.sh"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/basic_and_default_md5.sh" part="build"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/basic_and_default_md5.sh" part="run"/>
         </section>
 
 	<section id="sequences-of-arguments" data-type="sect2">
@@ -511,7 +511,7 @@
 
 	TODO: build_basic_md5_with_flags.sh
   <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/jbuild"/>
-	<link rel="import" href="code/command-line-parsing/basic_md5_with_flags/build_basic_md5_with_flags.sh"/>
+	<link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh" part="build"/>
 	<link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml"/>
 
 	<p>
@@ -524,7 +524,7 @@
 	  <code>doc</code> text with a blank space. The help text for
 	  the preceding code looks like this:</p>
 
-	<link rel="import" href="code/command-line-parsing/basic_md5_with_flags/run_basic_md5_flags_help.sh"/>
+	<link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh" part="run"/>
 
 	<p>
 	  The <code>-s</code> flag in our specification requires a
@@ -670,13 +670,13 @@
 	  the help output, which now reflects the subcommands we just
 	  added.</p>
   <link rel="import" href="code/command-line-parsing/cal_add_sub_days/jbuild"/>
-	<link rel="import" href="code/command-line-parsing/cal_add_sub_days/build_cal_add_sub_days.sh"/>
+	<link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.sh" part="build"/>
 
 	<p>
 	  We can invoke the two commands we just defined to verify
 	  that they work and see the date parsing in action:</p>
 
-	<link rel="import" href="code/command-line-parsing/cal_add_sub_days/run_cal_add_sub_days.sh"/>
+	<link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.sh" part="run"/>
       </section>
 
       <section id="advanced-control-over-parsing" data-type="sect1">
@@ -1047,7 +1047,7 @@
             earlier, assuming that the binary is called <span class="command"><em>basic_md5_with_flags</em></span> in the
             current directory:</p>
 
-          <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/md5_completion.sh"/>
+          <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh" part="completion"/>
 
           <p>
 	    Recall that we used the <code>Arg_type.file</code> to
