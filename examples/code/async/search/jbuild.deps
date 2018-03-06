@@ -1,3 +1,0 @@
-(
- (run_search.sh (search.ml jbuild jbuild.inc))
-)

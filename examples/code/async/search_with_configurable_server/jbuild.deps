@@ -1,3 +1,0 @@
-(
- (run_search_with_configurable_server.errsh (search_with_configurable_server.ml jbuild jbuild.inc))
-)

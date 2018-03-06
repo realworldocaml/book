@@ -1,4 +1,0 @@
-(
- (run_basic_md5_with_custom_arg.errsh (basic_md5_with_custom_arg.ml jbuild jbuild.inc))
- (run_basic_md5_as_filename.errsh (basic_md5_as_filename.ml jbuild jbuild.inc))
-)
