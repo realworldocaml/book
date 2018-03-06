@@ -1,1 +1,1 @@
-jbuilder build cal_append_broken.exe
+  $ jbuilder build cal_append_broken.exe

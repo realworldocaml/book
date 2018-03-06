@@ -1,1 +1,1 @@
-jbuilder build freq.bc
+  $ jbuilder build freq.bc

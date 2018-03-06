@@ -1,1 +1,1 @@
-ocamlc -c broken_module.ml
+  $ ocamlc -c broken_module.ml

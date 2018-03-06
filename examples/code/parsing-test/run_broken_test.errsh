@@ -1,2 +1,2 @@
-cat test2.json
-./_build/default/test.exe test2.json
+  $ cat test2.json
+  $ ./_build/default/test.exe test2.json
