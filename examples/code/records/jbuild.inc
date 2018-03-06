@@ -1,12 +1,12 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (warn_help.sh.sexp))))
-
-(rule (
-  (targets (warn_help.sh.sexp))
-  (deps    (warn_help.sh))
-  (fallback)
-  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+(alias (
+  (name cram)
+  (deps (warn_help.sh (files_recursively_in .)))
+  (action (
+    progn
+    (run   cram ${<})
+    (diff? ${<} ${<}.corrected)))))
 
 (alias (
   (name code)

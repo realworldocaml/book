@@ -1,14 +1,10 @@
 (jbuild_version 1)
 
-(alias ((name sexp) (deps (run_search_with_timeout_no_leak.sh.sexp))))
-
-(rule (
-  (targets (run_search_with_timeout_no_leak.sh.sexp))
-  (deps (
-    run_search_with_timeout_no_leak.sh
-    search_with_timeout_no_leak.ml
-    jbuild
-    jbuild.inc))
-  (fallback)
-  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+(alias (
+  (name cram)
+  (deps (run_search_with_timeout_no_leak.sh (files_recursively_in .)))
+  (action (
+    progn
+    (run   cram ${<})
+    (diff? ${<} ${<}.corrected)))))
 

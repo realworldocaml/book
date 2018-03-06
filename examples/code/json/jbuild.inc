@@ -24,11 +24,11 @@
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
-(alias ((name sexp) (deps (build_github_atd.sh.sexp))))
-
-(rule (
-  (targets (build_github_atd.sh.sexp))
-  (deps    (build_github_atd.sh))
-  (fallback)
-  (action (setenv TERM dumb (with-stdout-to ${@} (run rwo-build eval ${<}))))))
+(alias (
+  (name cram)
+  (deps (build_github_atd.sh (files_recursively_in .)))
+  (action (
+    progn
+    (run   cram ${<})
+    (diff? ${<} ${<}.corrected)))))
 
