@@ -6,6 +6,27 @@ let read_lines file =
     close_in ic;
     List.rev !r
 
+(* From jbuilder's stdlib *)
+let ansi_color_strip str =
+  let len = String.length str in
+  let buf = Buffer.create len in
+  let rec loop i =
+    if i = len then
+      Buffer.contents buf
+    else
+      match str.[i] with
+      | '\027' -> skip (i + 1)
+      | c      -> Buffer.add_char buf c; loop (i + 1)
+  and skip i =
+    if i = len then
+      Buffer.contents buf
+    else
+      match str.[i] with
+      | 'm' -> loop (i + 1)
+      | _   -> skip (i + 1)
+  in
+  loop 0
+
 let () =
   let expect_test = ref None in
   let usage =
@@ -43,7 +64,7 @@ let () =
               | _ -> 255
             in
             List.iter (fun line ->
-                Fmt.pf ppf "  %s\n" line
+                Fmt.pf ppf "  %s\n" (ansi_color_strip line)
               ) (read_lines temp_file);
             if n <> 0 then Printf.bprintf buf "  [%d]\n" n
         ) items;
