@@ -44,10 +44,10 @@ let time f =
 [%%expect ocaml {|val time : (unit -> 'a) -> 'a = <fun>|}];;
 [@@@part "4"];;
 time (fun () -> edit_distance "OCaml" "ocaml");;
-[%%expect{|Time: 1.10292434692 ms|};
+[%%expect.nondeterministic {|Time: 1.10292434692 ms|};
 ocaml {|- : int = 2|}];;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
-[%%expect{|Time: 3282.86218643 ms|};
+[%%expect.nondeterministic {|Time: 3282.86218643 ms|};
 ocaml {|- : int = 2|}];;
 [@@@part "5"];;
 let memo_rec f_norec x =
@@ -75,5 +75,5 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
 [%%expect ocaml {|val edit_distance : string * string -> int = <fun>|}];;
 [@@@part "7"];;
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
-[%%expect{|Time: 0.348091125488 ms|};
+[%%expect.nondeterministic {|Time: 0.348091125488 ms|};
 ocaml {|- : int = 2|}];;

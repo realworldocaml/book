@@ -262,7 +262,7 @@ let logon = { Logon.
               user = "yminsky";
               credentials = "Xy2d9W"; }
 ;;
-[%%expect ocaml {|
+[%%expect.nondeterministic ocaml {|
 val logon : Logon.t =
   {Logon.session_id = "26685"; time = 2017-07-21 11:11:45.000000-04:00;
    user = "yminsky"; credentials = "Xy2d9W"}

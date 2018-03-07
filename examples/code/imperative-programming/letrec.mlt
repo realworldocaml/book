@@ -47,5 +47,5 @@ let lazy_memo_rec f_norec x =
 ;;
 [%%expect ocaml {|val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>|}];;
 time (fun () -> lazy_memo_rec fib_norec 40);;
-[%%expect{|Time: 0.0441074371338 ms|};
+[%%expect.nondeterministic {|Time: 0.0441074371338 ms|};
 ocaml {|- : int = 102334155|}];;
