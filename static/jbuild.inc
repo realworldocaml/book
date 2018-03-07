@@ -667,7 +667,6 @@
     ../bin/bin/app.exe
     ../examples/code/back-end-embed/build_embed.sh
     ../examples/code/back-end-embed/build_embed_binary.rawsh
-    ../examples/code/back-end-embed/build_embed_c.sh
     ../examples/code/back-end-embed/build_embed_native.rawsh
     ../examples/code/back-end-embed/embed_me1.ml
     ../examples/code/back-end-embed/embed_me2.ml

@@ -409,7 +409,7 @@
 
         <p>Now compile the OCaml files into a standalone object
         file:</p>
-        <link rel="import" href="code/back-end-embed/build_embed.sh"/>
+        <link rel="import" href="code/back-end-embed/build_embed.sh" part="o"/>
 
         <p>After this point, you no longer need the OCaml compiler,
         as <code>embed_out.o</code> has all of the OCaml code
@@ -424,7 +424,7 @@
         result by specifying a <code>.c</code> output file
         extension instead of the <code>.o</code> we used
         earlier:</p>
-        <link rel="import" href="code/back-end-embed/build_embed_c.sh"/>
+        <link rel="import" href="code/back-end-embed/build_embed.sh" part="c"/>
 
         <p>Embedding OCaml code like this lets you write OCaml that
         interfaces with any environment that works with a C
