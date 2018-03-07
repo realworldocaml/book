@@ -8,7 +8,7 @@ let rec copy_blocks buffer r w =
   >>= function
   | `Eof -> return ()
   | `Ok bytes_read ->
-    Writer.write w buffer ~len:bytes_read;
+    Writer.write w (Bytes.to_string buffer) ~len:bytes_read;
     Writer.flushed w
     >>= fun () ->
     copy_blocks buffer r w
@@ -23,7 +23,7 @@ let run () =
       ~on_handler_error:`Raise
       (Tcp.Where_to_listen.of_port 8765)
       (fun _addr r w ->
-         let buffer = String.create (16 * 1024) in
+         let buffer = Bytes.create (16 * 1024) in
          copy_blocks buffer r w)
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
