@@ -336,7 +336,7 @@
       <p>We can now create a binding to <code>time</code> directly
       from the toplevel.</p>
 
-      <link rel="import" part="0.5" href="code/ffi/posix.topscript"/>
+      <link rel="import" part="0.5" href="code/ffi/posix.mlt"/>
 
       <p>The <code>foreign</code> function is the main link between
       OCaml and C. It takes two arguments: the name of the C
@@ -349,12 +349,12 @@
       toplevel. The argument is actually optional, so we'll just
       pass a null pointer that has been coerced into becoming a
       null pointer to <code>time_t</code>:</p>
-      <link rel="import" href="code/ffi/posix.topscript" part="1"/>
+      <link rel="import" href="code/ffi/posix.mlt" part="1"/>
 
       <p>Since we're going to call <code>time</code> a few times,
       let's create a wrapper function that passes the null pointer
       through:</p>
-      <link rel="import" href="code/ffi/posix.topscript" part="2"/>
+      <link rel="import" href="code/ffi/posix.mlt" part="2"/>
 
       <p>Since <code>time_t</code> is an abstract type, we can't
       actually do anything useful with it directly. We need to bind
@@ -362,7 +362,7 @@
       values from <code>time</code>. We'll move on to
       <code>difftime</code>; the second C function in our prototype
       list:</p>
-      <link rel="import" href="code/ffi/posix.topscript" part="3"/>
+      <link rel="import" href="code/ffi/posix.mlt" part="3"/>
 
       <p>The binding to <code>difftime</code> above is sufficient
       to compare two <code>time_t</code> values.</p>
@@ -375,24 +375,24 @@
         theme from earlier, we'll bind to the <code>ctime</code>
         function, which converts a <code>time_t</code> value to a
         human-readable string:<idx>memory/allocation for pointers</idx><idx>pointers/allocating typed memory for</idx></p>
-        <link rel="import" href="code/ffi/posix.topscript" part="4"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="4"/>
 
         <p>The binding is continued in the toplevel to add to our
         growing collection. However, we can't just pass the result
         of <code>time</code> to <code>ctime</code>:</p>
-        <link rel="import" href="code/ffi/posix.topscript" part="5"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="5"/>
 
         <p>This is because <code>ctime</code> needs a pointer to
         the <code>time_t</code> rather than passing it by value. We
         thus need to allocate some memory for the
         <code>time_t</code> and obtain its memory address:</p>
-        <link rel="import" href="code/ffi/posix.topscript" part="6"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="6"/>
 
         <p>The <code>allocate</code> function takes the type of the
         memory to be allocated and the initial value and it returns
         a suitably typed pointer. We can now call
         <code>ctime</code> passing the pointer as an argument:</p>
-        <link rel="import" href="code/ffi/posix.topscript" part="7"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="7"/>
       </section>
 
       <section id="using-views-to-map-complex-values" data-type="sect2">
@@ -482,7 +482,7 @@
         <p>Using Ctypes, we can describe this type as follows in
         our toplevel, continuing on from the previous
         definitions:</p>
-        <link rel="import" href="code/ffi/posix.topscript" part="8"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="8"/>
 
         <p>The first command defines a new OCaml type
         <code>timeval</code> that we'll use to instantiate the
@@ -507,7 +507,7 @@
         doesn't have any fields, so we need to add those next:
         <idx>fields/adding to structures</idx>
         <idx>structs and unions/field addition</idx></p>
-        <link rel="import" href="code/ffi/posix.topscript" part="9"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="9"/>
 
         <p>The <code>field</code> function appends a field to the
         structure, as shown with <code>tv_sec</code> and
@@ -529,7 +529,7 @@
         <p>Since <code>gettimeofday</code> needs a <code>struct
         timezone</code> pointer for its second argument, we also
         need to define a second structure type: <idx>structs and unions/incomplete structure definitions</idx></p>
-        <link rel="import" href="code/ffi/posix.topscript" part="10"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="10"/>
 
         <p>We don't ever need to create <code>struct
         timezone</code> values, so we can leave this struct as
@@ -540,7 +540,7 @@
 
         <p>We're finally ready to bind to <code>gettimeofday</code>
         now:</p>
-        <link rel="import" href="code/ffi/posix.topscript" part="11"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="11"/>
 
         <p>There's one other new feature here: the
         <code>returning_checking_errno</code> function behaves like
@@ -556,7 +556,7 @@
         create a structure value, retrieve the address of a
         structure value, and retrieve the value of a field from a
         structure:</p>
-        <link rel="import" href="code/ffi/posix.topscript" part="12"/>
+        <link rel="import" href="code/ffi/posix.mlt" part="12"/>
 
         <p>You need to be a little careful not to get all the open
         modules mixed up here. Both <code>Pervasives</code> and
@@ -750,7 +750,7 @@
       <code>typedef</code> and end up with working OCaml bindings
       to <code>qsort</code>:</p>
 
-      <link rel="import" part="1" href="code/ffi/qsort.topscript"/>
+      <link rel="import" part="1" href="code/ffi/qsort.mlt"/>
 
       <p>We only use <code>compare_t</code> once (in the
       <code>qsort</code> definition), so you can choose to inline

@@ -112,7 +112,7 @@
 
 	  <idx id="blck">blocks (of memory)</idx></p>
 
-	<link rel="import" part="1" href="code/memory-repr/simple_record.topscript"/> 
+	<link rel="import" part="1" href="code/memory-repr/simple_record.mlt"/> 
 
 	<p>
 	  The type declaration <code>t</code> doesn't take up any
@@ -444,7 +444,7 @@
 	  exposes the internal representation of values to OCaml
 	  code:</p>
 
-	<link rel="import" part="0.5" href="code/memory-repr/reprs.topscript"/> 
+	<link rel="import" part="0.5" href="code/memory-repr/reprs.mlt"/> 
 
 	<p>
 	  The <code>Obj.repr</code> function retrieves the runtime
@@ -465,7 +465,7 @@
             
 	    <idx>floating-point values</idx></p>
 
-          <link rel="import" href="code/memory-repr/reprs.topscript" part="1"/> 
+          <link rel="import" href="code/memory-repr/reprs.mlt" part="1"/> 
 
           <p>
 	    Since each floating-point value is boxed in a separate
@@ -486,7 +486,7 @@
 	    First, let's check that float arrays do in fact have a
             different tag number from normal floating-point values:</p>
 
-          <link rel="import" href="code/memory-repr/reprs.topscript" part="2"/> 
+          <link rel="import" href="code/memory-repr/reprs.mlt" part="2"/> 
 
           <p>
 	    This tells us that float arrays have a tag value of 254.
@@ -496,7 +496,7 @@
             <code>Obj.double_field</code> to retrieve a float from
             within the block:</p>
 
-          <link rel="import" href="code/memory-repr/reprs.topscript" part="3"/> 
+          <link rel="import" href="code/memory-repr/reprs.mlt" part="3"/> 
 
           <p>
 	    The first thing we tested was that a float array has the
@@ -525,7 +525,7 @@
 	  <idx>lists/memory representation of</idx>
 	  <idx>runtime memory representation/variants and lists</idx></p>
 
-	<link rel="import" href="code/memory-repr/reprs.topscript" part="4"/> 
+	<link rel="import" href="code/memory-repr/reprs.mlt" part="4"/> 
 
 	<p>
 	  <code>Obj.magic</code> unsafely forces a type cast between
@@ -541,7 +541,7 @@
 	  variants with parameters). The parameters are stored as words
 	  in the block:</p>
 
-	<link rel="import" href="code/memory-repr/reprs.topscript" part="5"/> 
+	<link rel="import" href="code/memory-repr/reprs.mlt" part="5"/> 
 
 	<p>
 	  In the preceding example, the <code>Apple</code> and
@@ -620,7 +620,7 @@
 	  compiler, but the <code>type_conv</code> library from Core
 	  provides an alternative implementation:</p>
 
-	<link rel="import" href="code/memory-repr/reprs.topscript" part="6"/> 
+	<link rel="import" href="code/memory-repr/reprs.mlt" part="6"/> 
 
 	<p>
 	  The hash function is designed to give the same results on

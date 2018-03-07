@@ -49,7 +49,7 @@
       <idx>lists/adding new bindings in</idx>
       <idx>lists/finding key associations in</idx></p>
 
-      <link rel="import" part="1" href="code/files-modules-and-programs/intro.topscript"/>
+      <link rel="import" part="1" href="code/files-modules-and-programs/intro.mlt"/>
 
       <p>Note that <code>List.Assoc.add</code> doesn't modify the
       original list, but instead allocates a new list with the
@@ -575,7 +575,7 @@
       that the compiler looks at to find the definition of various
       identifiers. Here's an example:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="0.5"/>
+      <link rel="import" href="code/files-modules-and-programs/main.mlt" part="0.5"/>
 
       <p><code>open</code> is essential when you want to modify
       your environment for a standard library like
@@ -606,7 +606,7 @@
             opens. For example, you can write:</p>
 
 	  <link rel="import" 
-		href="code/files-modules-and-programs/main.topscript" 
+		href="code/files-modules-and-programs/main.mlt" 
 		part="1"/>
 
 	  <p>Here, <code>of_int</code> and the infix operators are the
@@ -617,7 +617,7 @@
 	    expressions:</p>
 
 	  <link rel="import" 
-		href="code/files-modules-and-programs/main.topscript" 
+		href="code/files-modules-and-programs/main.mlt" 
 		part="2"/>
 
 	</li>
@@ -663,13 +663,13 @@
 	<idx>modules/including</idx>
 	<idx>identifiers/adding to modules</idx></p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="3"/>
+      <link rel="import" href="code/files-modules-and-programs/main.mlt" part="3"/>
 
       <p>We can use the <code>include</code> directive to create a
       new, extended version of the <code>Interval</code>
       module:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="4"/>
+      <link rel="import" href="code/files-modules-and-programs/main.mlt" part="4"/>
 
       <p>The difference between <code>include</code> and
       <code>open</code> is that we've done more than change how
@@ -677,7 +677,7 @@
       module. If we'd used <code>open</code>, we'd have gotten a
       quite different result:</p>
 
-      <link rel="import" href="code/files-modules-and-programs/main.topscript" part="5"/>
+      <link rel="import" href="code/files-modules-and-programs/main.mlt" part="5"/>
 
       <p>
 	To consider a more realistic example, imagine you wanted to

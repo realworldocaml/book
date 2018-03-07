@@ -54,7 +54,7 @@
       of</idx><idx>bindings/scope of</idx><idx>scope</idx></p>
 
       <p>Here's a simple example.</p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="0.5"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="0.5"/>
 
       <p><code>let</code> can also be used to create a variable
       binding whose scope is limited to a particular expression,
@@ -66,13 +66,13 @@
       with <em><code>variable</code></em> bound to whatever value was
       produced by the evaluation of <em><code>expr1</code></em>.
       Here's how it looks in practice.</p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="1"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="1"/>
 
       <p>Note that the scope of <code>language_list</code> is just
       the expression <code>String.concat ~sep:"-"
       language_list</code> and is not available at the toplevel, as
       we can see if we try to access it now.</p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="2"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="2"/>
 
       <p>A <code>let</code> binding in an inner scope can
       <em>shadow</em>, or hide, the definition from an outer scope.
@@ -80,7 +80,7 @@
       <code>dashed_languages</code> example as
       follows. <idx>variables/shadowing
       of</idx><idx>shadowing</idx></p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="3"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="3"/>
 
       <p>This time, in the inner scope we called the list of
       strings <code>languages</code> instead of
@@ -89,21 +89,21 @@
       of <code>dashed_languages</code> is complete, the inner scope
       has closed and the original definition of languages
       is still available.</p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="4"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="4"/>
 
       <p>One common idiom is to use a series of nested
       <code>let</code>/<code>in</code> expressions to build up the
       components of a larger computation. Thus, we might
       write. <idx>let syntax/nested bindings</idx><idx>nested let
       binding</idx></p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="5"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="5"/>
 
       <p>It's important not to confuse a sequence of
       <code>let</code> bindings with the modification of a mutable
       variable. For example, consider how <code>area_of_ring</code>
       would work if we had instead written this purposefully
       confusing bit of code:</p>
-      <link rel="import" href="code/variables-and-functions/main.topscript" part="6"/>
+      <link rel="import" href="code/variables-and-functions/main.mlt" part="6"/>
 
       <p>Here, we redefined <code>pi</code> to be zero after the
       definition of <code>area_of_circle</code>. You might think that
@@ -159,7 +159,7 @@
         let</idx><idx>let syntax/pattern
         matching</idx><idx>variables/pattern matching in</idx></p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="7"/>
+        href="code/variables-and-functions/main.mlt" part="7"/>
 
         <p>Here, <code>(ints,strings)</code> is a pattern, and
         the <code>let</code> binding assigns values to both of the
@@ -180,20 +180,20 @@
         following code that implements a function for upper casing
         the first element of a comma-separated
         list.<idx>irrefutable patterns</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="8"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="8"/>
 
         <p>This case can't really come up in practice,
         because <code>String.split</code> always returns a list with
         at least one element, even when given the empty string.
         <link rel="import"
-        href="code/variables-and-functions/main.topscript"
+        href="code/variables-and-functions/main.mlt"
         part="8.1"/>
 
 	But the compiler doesn't know this, and so it emits the
         warning. It's generally better to use a <code>match</code>
         statement to handle such cases explicitly.</p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="9"/>
+        href="code/variables-and-functions/main.mlt" part="9"/>
 
         <p>Note that this is our first use of <code>assert</code>,
         which is useful for marking cases that should be
@@ -223,24 +223,24 @@
         the <code>fun</code> keyword, as shown here. <idx>fun
         keyword/anonymous functions</idx><idx>anonymous
         functions</idx><idx>functions/anonymous functions</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="10"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="10"/>
 
         <p>Anonymous functions operate in much the same way as
         named functions. For example, we can apply an anonymous
         function to an argument. </p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="11"/> 
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="11"/> 
 
         <p>Or pass it to another function. Passing functions to
         iteration functions like <code>List.map</code> is probably
         the most common use case for anonymous functions.</p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="12"/> 
+        href="code/variables-and-functions/main.mlt" part="12"/> 
 
         <p>You can even stuff a function into a data structure, like a
         list.</p>
 
         <link rel="import" 
-	      href="code/variables-and-functions/main.topscript"
+	      href="code/variables-and-functions/main.mlt"
 	      part="13" />
 
         <p>
@@ -262,13 +262,13 @@
         storing them in data structures. We even name functions in
         the same way that we name other values, by using a
         <code>let</code> binding.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="14"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="14"/>
 
         <p>Defining named functions is so common that there is some
         syntactic sugar for it. Thus, the following definition of
         <code>plusone</code> is equivalent to the previous
         definition.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="15"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="15"/>
 
         <p>This is the most common and convenient way to declare a
         function, but syntactic niceties aside, the two styles of
@@ -283,7 +283,7 @@
           value passed by the caller. Indeed, the following two
           expressions are nearly equivalent. <idx>let
           syntax/functions and</idx></p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="16"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="16"/>
 
           <p>This connection is important, and will come up more
           when programming in a monadic style, as we'll see in
@@ -300,14 +300,14 @@
         functions</idx><idx>multi-argument
         functions</idx><idx>functions/multi-argument
         functions</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="17"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="17"/>
 
         <p>You may find the type signature of <code>abs_diff</code>
         with all of its arrows a little hard to parse. To
         understand what's going on, let's rewrite
         <code>abs_diff</code> in an equivalent form, using the
         <code>fun</code> keyword.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="18"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="18"/>
 
         <p>This rewrite makes it explicit that
         <code>abs_diff</code> is actually a function of one
@@ -344,7 +344,7 @@
           the distance of a given number from <code>3</code>.</p>
 	
         <link rel="import" 
-	      href="code/variables-and-functions/main.topscript"
+	      href="code/variables-and-functions/main.mlt"
 	      part="19" /> 
 
         <p>The practice of applying some of the arguments of a curried
@@ -356,7 +356,7 @@
         of <code>abs_diff</code> is equivalent to the previous
         one.<idx>fun keyword/currying syntax</idx></p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="20"/>
+        href="code/variables-and-functions/main.mlt" part="20"/>
 
         <p>You might worry that curried functions are terribly
         expensive, but this is not the case. In OCaml, there is no
@@ -368,7 +368,7 @@
         function in OCaml. It's also possible to use the different
         parts of a tuple as different arguments. So, we could
         write.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="21"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="21"/>
 
         <p>OCaml handles this calling convention efficiently as
         well. In particular it does not generally have to allocate
@@ -401,7 +401,7 @@
         <code>rec</code> keyword, as shown in this function for
         finding the first sequentially repeated element in a
         list.<idx>rec keyword</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="22"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="22"/>
 
         <p>
 	  The pattern <code>[] | [_]</code> is itself a disjunction of
@@ -419,7 +419,7 @@
           the <code>and</code> keyword. Here's a (gratuitously
           inefficient) example.</p>
 
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="23" />
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="23" />
 
         <p>
 	  OCaml distinguishes between nonrecursive definitions
@@ -454,7 +454,7 @@
         operators</idx><idx>infix operators</idx><idx>prefix
         operators</idx><idx id="FNCprf">functions/prefix and infix
         operators</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="24"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="24"/>
 
         <p>You might not have thought of the second example as an
         ordinary function, but it very much is. Infix operators
@@ -462,7 +462,7 @@
         other functions. In fact, if we put parentheses around an
         infix operator, you can use it as an ordinary prefix
         function.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="25"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="25"/>
 
         <p>In the second expression, we've partially applied
         <code>(+)</code> to create a function that increments its
@@ -483,18 +483,18 @@
         <p>We can define (or redefine) the meaning of an operator.
         Here's an example of a simple vector-addition operator on
         <code>int</code> pairs.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="26"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="26"/>
 
         <p>Note that you have to be careful when dealing with
         operators containing <code>*</code>. Consider the following
         example.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="27"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="27"/>
 
         <p>What's going on is that <code>(***)</code> isn't
         interpreted as an operator at all; it's read as a comment!
         To get this to work properly, we need to put spaces around
         any operator that begins or ends with <code>*</code>.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="28"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="28"/>
 
         <p>The syntactic role of an operator is typically
         determined by its first character or two, though there are
@@ -638,18 +638,18 @@
         operators</idx><idx>operators/subtraction
         operators</idx><idx>subtraction
         operators</idx><idx>negation operators</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="29"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="29"/>
 
         <p>Here, OCaml is interpreting the second expression as
         equivalent to.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="30"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="30"/>
 
         <p>which obviously doesn't make sense.</p>
 
         <p>Here's an example of a very useful operator from the
         standard library whose behavior depends critically on the
         precedence rules described previously.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="31"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="31"/>
 
         <p>It's not quite obvious at first what the purpose of this
         operator is: it just takes a value and a function and
@@ -664,12 +664,12 @@
         removal</idx><idx>duplicates,
         removing</idx><idx>List.dedup</idx><idx>operators/sequencing
         operators</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="32"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="32"/>
 
         <p>We can do this without <code>|&gt;</code> by naming the
         intermediate values, but the result is a bit more verbose.</p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="33"/>
+        href="code/variables-and-functions/main.mlt" part="33"/>
 
         <p>An important part of what's happening here is partial
         application. For example, <code>List.iter</code> takes two
@@ -678,11 +678,11 @@
         call <code>List.iter</code> with all its
         arguments.  <idx>partial application</idx></p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="34"/>
+        href="code/variables-and-functions/main.mlt" part="34"/>
 
         <p>Or, we can pass it just the function argument, leaving
         us with a function for printing out a list of strings.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="35"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="35"/>
 
         <p>It is this later form that we're using in the preceding
         <code>|&gt;</code> pipeline.</p>
@@ -691,7 +691,7 @@
         because it is left-associative. Let's see what happens if
         we try using a right-associative operator, like
         (^&gt;).</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="36"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="36"/>
 
         <p>The type error is a little bewildering at first glance.
         What's going on is that, because <code>^&gt;</code> is
@@ -716,17 +716,17 @@
         an example.<idx>functions/defining</idx><idx>function
         keyword</idx><idx>functions/declaring with function
         keyword</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="37"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="37"/>
 
         <p>This is equivalent to combining an ordinary function
         definition with a <code>match</code>.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="38"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="38"/>
 
         <p>We can also combine the different styles of function
         declaration together, as in the following example, where we
         declare a two-argument (curried) function with a pattern
         match on the second argument.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="39"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="39"/>
 
         <p>Also, note the use of partial application to generate
         the function passed to <code>List.map</code>. In other
@@ -750,12 +750,12 @@
         arguments</idx><idx>arguments/labeled
         arguments</idx><idx>functions/labeled arguments</idx></p>
         <link rel="import"
-        href="code/variables-and-functions/main.topscript" part="40"/>
+        href="code/variables-and-functions/main.mlt" part="40"/>
 
         <p>We can then provide a labeled argument using a similar
         convention. As you can see, the arguments can be provided
         in any order.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="41"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="41"/>
 
         <p>OCaml also supports <em>label punning</em>, meaning that
         you get to drop the text after the <code>:</code> if the
@@ -764,7 +764,7 @@
         when defining <code>ratio</code>. The following shows how
         punning can be used when invoking a
         function.<idx>punning</idx><idx>label punning</idx></p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="42"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="42"/>
 
         <p>Labeled arguments are useful in a few different
         cases:</p>
@@ -830,7 +830,7 @@
             <code>List.iter</code> by giving it just the function,
             as in the following example from earlier in the
             chapter.</p>
-            <link rel="import" href="code/variables-and-functions/main.topscript" part="43"/>
+            <link rel="import" href="code/variables-and-functions/main.mlt" part="43"/>
 
             <p>This requires that we put the function argument
             first. In other cases, you want to put the function
@@ -852,7 +852,7 @@
           example.<idx>higher-order functions, and
           labels</idx><idx>functions/higher-order and
           labels</idx></p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="44"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="44"/>
 
           <p>Here, the definition of <code>apply_to_tuple</code>
           sets up the expectation that its first argument is a
@@ -861,19 +861,19 @@
           have defined <code>apply_to_tuple</code> differently to
           change the order in which the labeled arguments were
           listed.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="45"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="45"/>
 
           <p>It turns out this order matters. In particular, if we
           define a function that has a different order</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="46"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="46"/>
 
           <p>we'll find that it can't be passed in to
           <code>apply_to_tuple_2</code>.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="47"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="47"/>
 
           <p>But, it works smoothly with the original
           <code>apply_to_tuple</code>.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="48"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="48"/>
 
           <p>As a result, when passing labeled functions as
           arguments, you need to take care to be consistent in your
@@ -896,7 +896,7 @@
         with an optional separator. This function uses the
         <code>^</code> operator for pairwise string
         concatenation.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="49"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="49"/>
 
         <p>Here, <code>?</code> is used in the definition of the
         function to mark <code>sep</code> as optional. And while
@@ -911,7 +911,7 @@
         a common enough pattern that there's an explicit syntax for
         providing a default value, which allows us to write
         <code>concat</code> more concisely.</p>
-        <link rel="import" href="code/variables-and-functions/main.topscript" part="50"/>
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="50"/>
 
         <p>Optional arguments are very useful, but they're also
         easy to abuse. The key advantage of optional arguments is
@@ -952,12 +952,12 @@
           <code>sep</code> argument to
           <code>concat</code>.<idx>optional arguments/explicit
           passing of</idx></p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="51"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="51"/>
 
           <p>And the following two lines are equivalent ways of
           calling <code>concat</code> without specifying
           <code>sep</code>.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="52"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="52"/>
 
           <p>One use case for this is when you want to define a
           wrapper function that mimics the optional arguments of
@@ -967,7 +967,7 @@
           <code>concat</code> except that it converts the first
           string that it's passed to uppercase. We could write the
           function as follows.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="53"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="53"/>
 
           <p>In the way we've written it, we've been forced to
           separately make the decision as to what the default
@@ -979,7 +979,7 @@
           <p>Instead, we can have <code>uppercase_concat</code>
           simply pass through the optional argument to
           <code>concat</code> using the <code>?</code> syntax.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="54"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="54"/>
 
           <p>Now, if someone calls <code>uppercase_concat</code>
           without an argument, an explicit <code>None</code> will
@@ -1008,7 +1008,7 @@
           inference</idx><idx>labeled
           arguments</idx><idx>arguments/inference
           of</idx><idx>optional arguments/inference of</idx></p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="55"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="55"/>
 
           <p>In principle, it's not obvious how the order of the
           arguments to <code>f</code> should be chosen. Since
@@ -1034,7 +1034,7 @@
           of <code>numeric_deriv</code> where different invocations
           of <code>f</code> list the arguments in different
           orders.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="56"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="56"/>
 
           <p>As suggested by the error message, we can get OCaml to
           accept the fact that <code>f</code> is used with
@@ -1042,7 +1042,7 @@
           information. Thus, the following code compiles without
           error, due to the type annotation on
           <code>f</code>.<idx>type annotations</idx></p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="57"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="57"/>
         </section>
 
         <section id="optional-arguments-and-partial-application" data-type="sect3">
@@ -1051,17 +1051,17 @@
           <p>Optional arguments can be tricky to think about in the
           presence of partial application. We can of course
           partially apply the optional argument itself.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="58"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="58"/>
 
           <p>But what happens if we partially apply just the first
           argument?</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="59"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="59"/>
 
           <p>The optional argument <code>?sep</code> has now
           disappeared, or been <em>erased</em>. Indeed, if we try
           to pass in that optional argument now, it will be
           rejected.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="60"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="60"/>
 
           <p>So when does OCaml decide to erase an optional
           argument?</p>
@@ -1073,29 +1073,29 @@
           <code>prepend_pound</code>. But if we had instead defined
           <code>concat</code> with the optional argument in the
           second position.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="61"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="61"/>
 
           <p>then application of the first argument would not cause
           the optional argument to be erased.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="62"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="62"/>
 
           <p>However, if all arguments to a function are presented
           at once, then erasure of optional arguments isn't applied
           until all of the arguments are passed in. This preserves
           our ability to pass in optional arguments anywhere on the
           argument list. Thus, we can write.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="63"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="63"/>
 
           <p>An optional argument that doesn't have any following
           positional arguments can't be erased at all, which leads
           to a compiler warning.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="64"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="64"/>
 
           <p>And indeed, when we provide the two positional
           arguments, the <code>sep</code> argument is not erased,
           instead returning a function that expects the
           <code>sep</code> argument to be provided.</p>
-          <link rel="import" href="code/variables-and-functions/main.topscript" part="65"/>
+          <link rel="import" href="code/variables-and-functions/main.mlt" part="65"/>
 
           <p>As you can see, OCaml's support for labeled and
           optional arguments is not without its complexities. But

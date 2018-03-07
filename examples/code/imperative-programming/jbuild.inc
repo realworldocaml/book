@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (examples.topscript))
+  (deps (for.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (value_restriction.topscript))
+  (deps (order.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -18,7 +18,7 @@
 
 (alias (
   (name code)
-  (deps (weak.topscript))
+  (deps (file.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (file2.topscript))
+  (deps (file2.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -34,7 +34,7 @@
 
 (alias (
   (name code)
-  (deps (lazy.topscript))
+  (deps (letrec.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -42,7 +42,7 @@
 
 (alias (
   (name code)
-  (deps (file.topscript))
+  (deps (fib.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -50,7 +50,7 @@
 
 (alias (
   (name code)
-  (deps (ref.topscript))
+  (deps (examples.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -58,7 +58,7 @@
 
 (alias (
   (name code)
-  (deps (printf.topscript))
+  (deps (weak.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -66,7 +66,7 @@
 
 (alias (
   (name code)
-  (deps (letrec.topscript))
+  (deps (memo.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -74,7 +74,7 @@
 
 (alias (
   (name code)
-  (deps (order.topscript))
+  (deps (printf.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -82,7 +82,7 @@
 
 (alias (
   (name code)
-  (deps (for.topscript))
+  (deps (value_restriction.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -90,7 +90,7 @@
 
 (alias (
   (name code)
-  (deps (fib.topscript))
+  (deps (ref.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -98,7 +98,7 @@
 
 (alias (
   (name code)
-  (deps (memo.topscript))
+  (deps (lazy.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

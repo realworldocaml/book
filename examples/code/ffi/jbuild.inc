@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (qsort.topscript))
+  (deps (posix.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (posix.topscript))
+  (deps (qsort.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

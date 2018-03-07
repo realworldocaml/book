@@ -41,7 +41,7 @@ Toc
 
 Useful & reusable tools, not specific to this book.
 
-Scripts 
+Scripts
 :   Collection of scripts.
 
 Import
@@ -111,7 +111,7 @@ Lang
     - "mly": OCaml file, which will be parsed by Oloop.
     - "mlpack"
 
-    - "topscript": OCaml toplevel commands that will be auto-evaluated
+    - "mlt": OCaml toplevel commands that will be auto-evaluated
       via Oloop.
 
     - "rawscript": OCaml toplevel script, which should not be
@@ -149,4 +149,3 @@ Lang
     - "S" or "s": GNU assembly code.
     - "scm"
     - "txt"
-

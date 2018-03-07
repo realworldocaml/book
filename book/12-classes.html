@@ -30,7 +30,7 @@
 
 	  <idx>classes/basic syntax for</idx></p>
 
-	<link rel="import" href="code/classes/istack.topscript" part="1"/>
+	<link rel="import" href="code/classes/istack.mlt" part="1"/>
 
 	<p>
 	  The <code>class istack : object ... end</code> result shows
@@ -53,7 +53,7 @@
 	  To produce an object, classes are instantiated with the
 	  keyword <code>new</code>:</p>
 
-	<link rel="import" href="code/classes/istack.topscript" part="2"/>
+	<link rel="import" href="code/classes/istack.mlt" part="2"/>
 
 	<p>
 	  You may have noticed that the object <code>s</code> has
@@ -65,7 +65,7 @@
 	  an object type <code>istack</code> with the same methods as
 	  the class. This type definition is equivalent to:</p>
 
-	<link rel="import" href="code/classes/istack.topscript" part="3"/>
+	<link rel="import" href="code/classes/istack.mlt" part="3"/>
 
 	<p>
 	  Note that this type represents any object with these
@@ -94,7 +94,7 @@
 	  parameter <code>init</code> for the initial contents of the
 	  stack:</p>
 
-	<link rel="import" href="code/classes/stack.topscript" part="0.5"/>
+	<link rel="import" href="code/classes/stack.mlt" part="0.5"/>
 
 	<p>
 	  Note that the type parameter <code>['a]</code> in the
@@ -109,7 +109,7 @@
 	  polymorphic": <code>init</code> could have some type <code>'b
 	    list</code>:</p>
 
-	<link rel="import" href="code/classes/stack.topscript" part="1"/>
+	<link rel="import" href="code/classes/stack.mlt" part="1"/>
 
 	<p>
 	  In general, we need to provide enough constraints so that
@@ -166,13 +166,13 @@
 	  First, we'll define an object type <code>iterator</code>
 	  that specifies the methods in an iterator:</p>
 
-	<link rel="import" href="code/classes/iter.topscript" part="0.5"/>
+	<link rel="import" href="code/classes/iter.mlt" part="0.5"/>
 
 	<p>
 	  Next, we'll define an actual iterator for lists. We can
 	  use this to iterate over the contents of our stack:</p>
 
-	<link rel="import" href="code/classes/iter.topscript" part="1"/>
+	<link rel="import" href="code/classes/iter.mlt" part="1"/>
 
 	<p>
 	  Finally, we add a method <code>iterator</code> to the
@@ -180,13 +180,13 @@
 	  construct a <code>list_iterator</code> that refers to the
 	  current contents of the stack:</p>
 
-	<link rel="import" href="code/classes/iter.topscript" part="2"/>
+	<link rel="import" href="code/classes/iter.mlt" part="2"/>
 
 	<p>
 	  Now we can build a new stack, push some values to it, and
 	  iterate over them:</p>
 
-	<link rel="import" href="code/classes/iter.topscript" part="3"/>
+	<link rel="import" href="code/classes/iter.mlt" part="3"/>
 
 	<section id="functional-iterators" data-type="sect2">
           <h2>Functional Iterators</h2>
@@ -200,7 +200,7 @@
 
 	    <idx>functional iterators</idx></p>
 
-          <link rel="import" href="code/classes/iter.topscript" part="4"/>
+          <link rel="import" href="code/classes/iter.mlt" part="4"/>
 
           <p>
 	    What about functional operations like <code>map</code>
@@ -216,7 +216,7 @@
             method type like this, we must use a type quantifier, as
             shown in the following example:</p>
 
-          <link rel="import" href="code/classes/iter.topscript" part="5"/>
+          <link rel="import" href="code/classes/iter.mlt" part="5"/>
 
           <p>
 	    The type quantifier <code>'b.</code> can be read as "for
@@ -240,14 +240,14 @@
 	  <idx>inheritance</idx>
 	  <idx>classes/inheritance in</idx></p>
 
-	<link rel="import" href="code/classes/stack.topscript" part="2"/>
+	<link rel="import" href="code/classes/stack.mlt" part="2"/>
 
 	<p>
 	  A class can override methods from classes it inherits. For
 	  example, this class creates stacks of integers that double
 	  the integers before they are pushed onto the stack:</p>
 
-	<link rel="import" href="code/classes/stack.topscript" part="3"/>
+	<link rel="import" href="code/classes/stack.mlt" part="3"/>
 
 	<p>
 	  The preceding <code>as super</code> statement creates a
@@ -436,7 +436,7 @@
 	  <idx>classes/binary methods for</idx>
 	  <idx>binary methods</idx></p>
 
-	<link rel="import" href="code/classes/binary.topscript" part="0.5"/>
+	<link rel="import" href="code/classes/binary.mlt" part="0.5"/>
 
 	<p>
 	  Note how we can use the type annotation <code>(self:
@@ -446,7 +446,7 @@
 	  We can now test different object instances for equality by
 	  using the <code>equals</code> binary method:</p>
 
-	<link rel="import" href="code/classes/binary.topscript" part="1"/>
+	<link rel="import" href="code/classes/binary.mlt" part="1"/>
 
 	<p>
 	  This works, but there is a problem lurking here. The
@@ -455,7 +455,7 @@
 	  we can't define a common base class <code>shape</code> that
 	  also includes an equality method:</p>
 
-	<link rel="import" href="code/classes/binary.topscript" part="2"/>
+	<link rel="import" href="code/classes/binary.mlt" part="2"/>
 
 	<p>
 	  The problem is that a <code>square</code> expects to be
@@ -477,7 +477,7 @@
 	  However, the built-in polymorphic equality has very poor
 	  behavior when applied to objects:</p>
 
-	<link rel="import" href="code/classes/binary.topscript" part="3"/>
+	<link rel="import" href="code/classes/binary.mlt" part="3"/>
 
 	<p>
 	  The problem here is that two objects are considered equal
@@ -496,7 +496,7 @@
 
 	  <idx>representation types</idx></p>
 
-	<link rel="import" href="code/classes/binary.topscript" part="4"/>
+	<link rel="import" href="code/classes/binary.mlt" part="4"/>
 
 	<p>
 	  The binary method <code>equals</code> is now implemented
@@ -636,7 +636,7 @@
 	  <idx>initializers</idx>
 	  <idx>classes/initializers for</idx></p>
 
-	<link rel="import" href="code/classes/initializer.topscript" part="1"/>
+	<link rel="import" href="code/classes/initializer.mlt" part="1"/>
 
 	<p>
 	  However, these expressions are executed before the object

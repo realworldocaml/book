@@ -50,11 +50,11 @@
 	In that light, consider the following signature of a module
 	with a single integer variable:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="0.5"/>
+      <link rel="import" href="code/fcm/main.mlt" part="0.5"/>
 
       <p>We can also create a module that matches this signature:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="1"/>
+      <link rel="import" href="code/fcm/main.mlt" part="1"/>
 
       <p>
 	A first-class module is created by packaging up a module with
@@ -68,18 +68,18 @@
       <p>We can convert <code>Three</code> into a first-class module
       as follows:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="2"/>
+      <link rel="import" href="code/fcm/main.mlt" part="2"/>
 
       <p>The module type doesn't need to be part of the
       construction of a first-class module if it can be inferred.
       Thus, we can write:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="3"/>
+      <link rel="import" href="code/fcm/main.mlt" part="3"/>
 
       <p>We can also create a first-class module from an anonymous
       module:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="4"/>
+      <link rel="import" href="code/fcm/main.mlt" part="4"/>
 
       <p>In order to access the contents of a first-class module,
       you need to unpack it into an ordinary module. This can be
@@ -89,7 +89,7 @@
 
       <p>Here's an example:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="5"/>
+      <link rel="import" href="code/fcm/main.mlt" part="5"/>
 
       <p>
 	We can also write ordinary functions which consume and create
@@ -98,14 +98,14 @@
 	X_int)</code> into an <code>int</code>; and <code>plus</code>,
 	which returns the sum of two <code>(module X_int)</code>:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="8"/>
+      <link rel="import" href="code/fcm/main.mlt" part="8"/>
 
       <p>With these functions in hand, we can now work with values of
       type <code>(module X_int)</code> in a more natural style, taking
       advantage of the concision and simplicity of the
       core <span class="keep-together">language</span>:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="9"/>
+      <link rel="import" href="code/fcm/main.mlt" part="9"/>
 
       <p>
 	There are some useful syntactic shortcuts when dealing
@@ -114,7 +114,7 @@
 	Thus, we can rewrite the <code>to_int</code> function as
 	follows:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="10"/>
+      <link rel="import" href="code/fcm/main.mlt" part="10"/>
 
       <p>First-class modules can contain types and functions in
       addition to simple values like <code>int</code>. Here's an
@@ -122,27 +122,27 @@
       <code>bump</code> operation that takes a value of the type
       and produces a new one:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="11"/>
+      <link rel="import" href="code/fcm/main.mlt" part="11"/>
 
       <p>We can create multiple instances of this module with
       different underlying types:</p>
-      <link rel="import" href="code/fcm/main.topscript" part="12"/>
+      <link rel="import" href="code/fcm/main.mlt" part="12"/>
 
       <p>And we can convert these to first-class modules:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="13"/>
+      <link rel="import" href="code/fcm/main.mlt" part="13"/>
 
       <p>But you can't do much with <code>int_bumper</code>, since
       <code>int_bumper</code> is fully abstract, so that we can no
       longer recover the fact that the type in question is
       <code>int</code>.</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="14"/>
+      <link rel="import" href="code/fcm/main.mlt" part="14"/>
 
       <p>To make <code>int_bumper</code> usable, we need to expose
       the type, which we can do as follows:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="15"/>
+      <link rel="import" href="code/fcm/main.mlt" part="15"/>
 
       <p>
 	The sharing constraints we've added above make the resulting
@@ -151,7 +151,7 @@
 	type <code>t</code>. As a result, we can now use these
 	first-class modules on values of the matching type:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="16"/>
+      <link rel="import" href="code/fcm/main.mlt" part="16"/>
 
       <p>
 	We can also write functions that use such first-class
@@ -163,7 +163,7 @@
 	<idx>polymorphism/in first-class modules</idx>
 	<idx>first-class modules/polymorphism in</idx></p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="17"/>
+      <link rel="import" href="code/fcm/main.mlt" part="17"/>
 
       <p>
 	Here, we used a feature of OCaml that hasn't come up
@@ -187,7 +187,7 @@
 	list element and the type <code>Bumpable.t</code>. We can see
 	this function in action:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="18"/>
+      <link rel="import" href="code/fcm/main.mlt" part="18"/>
 
       <p>
 	Polymorphic first-class modules are important because they
@@ -205,7 +205,7 @@
 
 	  <idx>polymorphism/in locally abstract types</idx></p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="19"/>
+      <link rel="import" href="code/fcm/main.mlt" part="19"/>
 
       <p>
 	This compiles successfully because the type <code>a</code> is
@@ -217,13 +217,13 @@
 	  as equivalent to some concrete type, say, <code>int</code>, then
 	  the compiler will complain:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="20"/>
+      <link rel="import" href="code/fcm/main.mlt" part="20"/>
 
       <p>One common use of locally abstract types is to create a
       new type that can be used in constructing a module. Here's an
       example of doing this to create a new first-class module:</p>
 
-      <link rel="import" href="code/fcm/main.topscript" part="21"/>
+      <link rel="import" href="code/fcm/main.mlt" part="21"/>
 
 	<p>
 	  Here, what we effectively do is capture a polymorphic type
@@ -250,7 +250,7 @@
 	<idx>query-handlers/and first-class modules</idx>
 	<idx id="FCMquery">first-class modules/query-handling framework</idx></p>
 
-      <link rel="import" href="code/fcm/query_handler.topscript" part="0.5"/>
+      <link rel="import" href="code/fcm/query_handler.mlt" part="0.5"/>
 
       <p>
 	Here, we used s-expressions as the format for queries and
@@ -270,13 +270,13 @@
 	it replaces it with declarations of s-expression converters,
 	for example:<idx>sexp declaration</idx></p>
 
-      <link rel="import" href="code/fcm/query_handler.topscript" part="1"/>
+      <link rel="import" href="code/fcm/query_handler.mlt" part="1"/>
 
       <p>
 	In a module, <code>[@@deriving sexp]</code> adds the
 	implementation of those functions. Thus, we can write:</p>
 
-      <link rel="import" href="code/fcm/query_handler.topscript" part="2"/>
+      <link rel="import" href="code/fcm/query_handler.mlt" part="2"/>
 
       <p>
 	This is all described in more detail
@@ -297,25 +297,25 @@
 
 	  <idx>query-handlers/implementation of</idx></p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="3"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="3"/>
 
         <p>
 	  We can use this module to create an instance of the
           <code>Unique</code> query handler and interact with it
           directly:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="4"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="4"/>
 
         <p>Here's another example: a query handler that does
         directory listings. Here, the config is the default
         directory that relative paths are interpreted within:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="5"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="5"/>
 
         <p>Again, we can create an instance of this query handler
         and interact with it directly:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="6"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="6"/>
       </section>
 
       <section id="dispatching-to-multiple-query-handlers" data-type="sect2">
@@ -330,7 +330,7 @@
         combines a <code>Query_handler</code> module with an
         instantiated query handler:<idx>query-handlers/dispatching to multiple</idx></p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="7"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="7"/>
 
         <p>With this signature, we can create a first-class module
         that encompasses both an instance of the query and the
@@ -338,19 +338,19 @@
 
         <p>We can create an instance as follows:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="8"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="8"/>
 
         <p>Constructing instances in this way is a little verbose,
         but we can write a function that eliminates most of this
         boilerplate. Note that we are again making use of a locally
         abstract type:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="9"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="9"/>
 
         <p>Using <code>build_instance</code>, constructing a new
         instance becomes a one-liner:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="10"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="10"/>
 
         <p>We can now write code that lets you dispatch queries to
         one of a list of query handler instances. We assume that
@@ -367,12 +367,12 @@
         list of query handler instances and constructs a dispatch
         table from it:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="11"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="11"/>
 
         <p>Now, we need a function that dispatches to a handler
         using a dispatch table:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="12"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="12"/>
 
         <p>This function interacts with an instance by unpacking it
         into a module <code>I</code> and then using the query
@@ -392,7 +392,7 @@
         <p>Now let's turn this into a complete, running example by
         adding a command-line interface:</p>
 
-        <link rel="import" href="code/fcm/query_handler.topscript" part="13"/>
+        <link rel="import" href="code/fcm/query_handler.mlt" part="13"/>
 
         <p>We can most effectively run this command-line interface
         from a standalone program, which we can do by putting the
@@ -538,14 +538,14 @@
       handler example without first-class modules using the
       following types:<idx>first-class modules/alternatives to</idx></p>
 
-      <link rel="import" href="code/fcm/query_handler.topscript" part="14"/>
+      <link rel="import" href="code/fcm/query_handler.mlt" part="14"/>
 
       <p>The idea here is that we hide the true types of the
       objects in question behind the functions stored in the
       closure. Thus, we could put the <code>Unique</code> query
       handler into this framework as follows:</p>
 
-      <link rel="import" href="code/fcm/query_handler.topscript" part="15"/>
+      <link rel="import" href="code/fcm/query_handler.mlt" part="15"/>
 
       <p>For an example on this scale, the preceding approach is
       completely reasonable, and first-class modules are not really

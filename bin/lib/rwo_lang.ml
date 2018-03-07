@@ -28,7 +28,7 @@ let of_string x = match x with
   | "scm"
   | "sh"
   | "syntax"
-  | "topscript"
+  | "mlt"
   | "sexp"
   | "txt" -> Ok x
   | _ -> error "invalid extension" x sexp_of_string

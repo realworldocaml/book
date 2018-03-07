@@ -43,13 +43,13 @@
 	  the <code>find</code> function in the <code>List</code>
 	  module:</p>
 
-	<link rel="import" href="code/error-handling/main.topscript" part="0.5"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="0.5"/>
 
 	<p>
 	  The option in the return type indicates that the function
 	  may not succeed in finding a suitable element:</p>
 
-	<link rel="import" href="code/error-handling/main.topscript" part="1"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="1"/>
 
 	<p>
 	  Including errors in the return values of your functions
@@ -65,7 +65,7 @@
 	  <code>List.last</code>, which return <code>None</code> when
 	  they encounter an empty list, are used to extract the largest
 	  and smallest element of the list:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="2"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="2"/>
 
 	<p>
 	  The <code>match</code> statement is used to handle the
@@ -81,7 +81,7 @@
 	  arguments and searches for keys that have different data in
 	  one table than in the other. As such, the failure to find a
 	  key in one table isn't a failure of any sort:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="3"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="3"/>
 
 	<p>
 	  The use of options to encode errors underlines the fact
@@ -115,7 +115,7 @@
             options, the constructors <code>Ok</code>
             and <code>Error</code> are available at the toplevel. As
             such, we can write:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="4"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="4"/>
 
           <p>
 	    without first opening the <code>Result</code>
@@ -158,13 +158,13 @@
             you need it, which means a lot of the time you never have
             to construct it at all. You can of course construct an
             error directly from a string:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="5"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="5"/>
 
           <p>
 	    But you can also construct an <code>Error.t</code> from
             a <em>thunk</em>, i.e., a function that takes a single
             argument of type <code>unit</code>:<idx>thunks</idx></p>
-          <link rel="import" href="code/error-handling/main.topscript" part="6"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="6"/>
 
           <p>
 	    In this case, we can benefit from the laziness of
@@ -187,7 +187,7 @@
 
 
             <idx>Sexplib package/sexp converter</idx></p>
-          <link rel="import" href="code/error-handling/main.topscript" part="7"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="7"/>
 
           <p>
 	    Note that the character isn't actually serialized into an
@@ -199,11 +199,11 @@
             more detail in <a href="17-data-serialization.html#data-serialization-with-s-expressions" data-type="xref">Data Serialization With S Expressions</a>,
             but Sexplib comes with a language extension that can
             autogenerate sexp converters for newly generated types:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="8"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="8"/>
 
           <p>
 	    We can use this same idiom for generating an error:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="9"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="9"/>
 
           <p>
 	    <code>Error</code> also supports operations for
@@ -214,7 +214,7 @@
             fulfill these
             roles:<idx>Error.of_list</idx><idx>Error.tag</idx><idx>errors/transformation
               of</idx></p>
-          <link rel="import" href="code/error-handling/main.topscript" part="10"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="10"/>
 
           <p>
 	    The type <code>'a Or_error.t</code> is just a shorthand
@@ -236,7 +236,7 @@
             function and an infix operator <code>&gt;&gt;=</code>.
             Here's the definition of <code>bind</code> for options:
             <idx>bind function</idx></p>
-          <link rel="import" href="code/error-handling/main.topscript" part="11"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="11"/>
 
           <p>
 	    As you can see, <code>bind None f</code> returns
@@ -247,7 +247,7 @@
             produce an error terminates the computation. Here's a
             rewrite of <code>compute_bounds</code> to use a nested
             series of <code>bind</code>s:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="12"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="12"/>
 
           <p>
 	    The preceding code is a little bit hard to swallow,
@@ -258,7 +258,7 @@
             module is called <code>Monad_infix</code> because the
             <code>bind</code> operator is part of a subinterface called
             <code>Monad</code>, which we'll see again in <a href="18-concurrent-programming.html#concurrent-programming-with-async" data-type="xref">Concurrent Programming With Async</a>.</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="13"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="13"/>
 
           <p>
 	    This use of <code>bind</code> isn't really materially
@@ -277,7 +277,7 @@
 	      for monadic binds, called <code>Let_syntax</code>.
 	      Here's what the above example looks like using this
 	      extension. </p>
-	    <link rel="import" href="code/error-handling/main.topscript" part="13.1"/>
+	    <link rel="import" href="code/error-handling/main.mlt" part="13.1"/>
 
 	    <p>To understand what's going on here, you need to know
 	    that <code>let%bind x = some_expr in
@@ -301,7 +301,7 @@
             if either of its arguments are <code>None</code>. Using
             <code>Option.both</code>, we can make
             <code>compute_bounds</code> even shorter:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="14"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="14"/>
 
           <p>
 	    These error-handling functions are valuable because they
@@ -329,30 +329,30 @@
 	<p>
 	  You can trigger an exception by, for example, dividing an
 	  integer by zero:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="15"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="15"/>
 
 	<p>
 	  And an exception can terminate a computation even if it
 	  happens nested somewhere deep within it:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="16"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="16"/>
 
 	<p>
 	  If we put a <code>printf</code> in the middle of the
 	  computation, we can see that <code>List.map</code> is
 	  interrupted partway through its execution, never getting to
 	  the end of the list:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="17"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="17"/>
 
 	<p>
 	  In addition to built-in exceptions like
 	  <code>Divide_by_zero</code>, OCaml lets you define your
 	  own:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="18"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="18"/>
 
 	<p>
 	  Exceptions are ordinary values and can be manipulated just
 	  like other OCaml values:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="19"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="19"/>
 
 	<p>
 	  Exceptions are all of the same type, <code>exn</code>. The
@@ -371,7 +371,7 @@
 	<p>
 	  The following function uses the <code>Key_not_found</code>
 	  exception we defined above to signal an error:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="20"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="20"/>
 
 	<p>
 	  Note that we named the function <code>find_exn</code> to
@@ -384,7 +384,7 @@
 	  In the preceding example, <code>raise</code> throws the
 	  exception, thus terminating the computation. The type of
 	  raise is a bit surprising when you first see it:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="21"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="21"/>
 
 	<p>
 	  The return type of <code>'a</code> makes it look like
@@ -396,7 +396,7 @@
 	  <code>raise</code> that terminate by throwing exceptions.
 	  Here's another example of a function that doesn't return a
 	  value:</p>
-	<link rel="import" href="code/error-handling/main.topscript" part="22"/>
+	<link rel="import" href="code/error-handling/main.mlt" part="22"/>
 
 	<p>
 	  <code>forever</code> doesn't return a value for a
@@ -417,14 +417,14 @@
 	    OCaml can't always generate a useful textual representation
             of an exception. For example:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="23"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="23"/>
 
           <p>
 	    But if we declare the exception (and the types it depends
 	    on) using <code>[@@deriving sexp]</code>, we'll get something with
 	    more information:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="24"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="24"/>
 
           <p>
 	    The period in front of <code>Crossed_bounds</code> is there
@@ -456,7 +456,7 @@
 	    <idx>exceptions/helper functions for</idx>
 	    <idx>error handling/exception helper functions</idx></p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="25"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="25"/>
 
           <p>
 	    There are several other useful functions for raising
@@ -471,7 +471,7 @@
             question indicates a bug. Consider the following piece of
             code for zipping together two lists:<idx>assert
               directive</idx></p>
-          <link rel="import" href="code/error-handling/main.topscript" part="26"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="26"/>
 
           <p>
 	    Here we use <code>assert false</code>, which means that
@@ -485,7 +485,7 @@
             lists are of the same length before we call
             <code>loop</code>. If we change the code so that we drop
             this test, then we can trigger the <code>assert</code>:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="27"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="27"/>
 
           <p>
 	    This shows what's special about <code>assert</code>: it
@@ -549,7 +549,7 @@
 	    <idx>exceptions/exception clean up</idx>
 	    <idx>error handling/exception clean up</idx></p>
 
-          <link rel="import" href="code/error-handling/main.topscript" 
+          <link rel="import" href="code/error-handling/main.mlt" 
 		part="28"/>
 
           <p>
@@ -571,7 +571,7 @@
             rather than being a built-in primitive. Here's how it
             could be used to fix our <code>load</code> function:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="29"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="29"/>
 
           <p>
 	    This is a common enough problem
@@ -579,7 +579,7 @@
             called <code>with_file</code> that automates this
             pattern:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="30"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="30"/>
 
           <p>
 	    <code>In_channel.with_file</code> is built on top
@@ -602,7 +602,7 @@
 	    <idx>exceptions/catching specific</idx>
 	    <idx>error handling/exception detection</idx></p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="31"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="31"/>
 
           <p>
 	    As you can see from the type, <code>lookup_weight</code>
@@ -621,7 +621,7 @@
             <code>Not_found</code>, then that's not what will
             happen:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="32"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="32"/>
 
           <p>
 	    This kind of problem is hard to detect in advance because
@@ -632,7 +632,7 @@
             scope of the exception handler, so that when it fires it's
             very clear what part of the code failed:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="33"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="33"/>
 
 	  <p>
 
@@ -643,7 +643,7 @@
 	    caught by match statements directly, which lets you write
 	    this more concisely as follows.</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="33.1"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="33.1"/>
 
 	  <p>
 
@@ -656,7 +656,7 @@
 	    do by using the exception-free
             function, <code>List.Assoc.find</code>, instead:</p>
 
-          <link rel="import" href="code/error-handling/main.topscript" part="34"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="34"/>
 	</section>
 
 	<section id="backtraces" data-type="sect2">
@@ -763,17 +763,17 @@
               types</idx><idx>error-aware return types</idx><idx>error
               handling/combining exceptions and error-aware
               types</idx></p>
-          <link rel="import" href="code/error-handling/main.topscript" part="35"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="35"/>
 
           <p>
 	    And <code>Result</code> and <code>Or_error</code> have
             similar <code>try_with</code> functions. So, we could
             write:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="36"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="36"/>
 
           <p>
 	    And then we can reraise that exception:</p>
-          <link rel="import" href="code/error-handling/main.topscript" part="37"/>
+          <link rel="import" href="code/error-handling/main.mlt" part="37"/>
 	</section>
       </section>
 

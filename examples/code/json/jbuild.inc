@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (install.topscript))
+  (deps (build_json.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,15 +10,7 @@
 
 (alias (
   (name code)
-  (deps (parse_book.topscript book.json))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name code)
-  (deps (build_json.topscript))
+  (deps (install.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -30,5 +22,13 @@
   (action (
     progn
     (run   cram ${<})
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name code)
+  (deps (parse_book.mlt))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 

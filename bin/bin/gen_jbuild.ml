@@ -45,9 +45,9 @@ let emit_sexp file s =
       close_out fout
 
 let book_extensions =
-  [ ".ml"; ".mli"; ".mly"; ".mll"; ".rawtopscript";
+  [ ".ml"; ".mli"; ".mly"; ".mll";
     ".syntax"; ".scm"; ".rawscript"; ".java"; ".cpp";
-    ".topscript"; ".sh"; ".errsh"; ".rawsh"; "jbuild";
+    ".mlt"; ".sh"; ".errsh"; ".rawsh"; "jbuild";
     ".json"; ".atd"; ".rawsh"; ".c"; ".h"; ".cmd"; ".S" ]
 
 let static_extensions =
@@ -119,7 +119,7 @@ let process_chapters book_dir output_dir =
 
 (** Handle examples *)
 
-let topscript_rule ~dep f =
+let mlt_rule ~dep f =
   sprintf {|
 (alias
  ((name    code)
@@ -155,7 +155,7 @@ let process_examples dir =
   List.map (fun f ->
     let dep = List.assoc_opt f deps |> function None -> "" | Some v -> String.concat " " v in
     match f with
-    | f when Filename.extension f = ".topscript" -> topscript_rule ~dep f
+    | f when Filename.extension f = ".mlt" -> mlt_rule ~dep f
     | f when Filename.extension f = ".sh" -> sh_rule ~dep f
     | f when Filename.extension f = ".errsh" -> sh_rule ~dep f
     | _ -> printf "skipping %s/%s\n%!" dir f; ""

@@ -129,7 +129,7 @@
             <span class="command"><em>utop</em></span> toplevel by:</p>
 	</div>
 
-	<link rel="import" part="1" href="code/json/install.topscript"/>
+	<link rel="import" part="1" href="code/json/install.mlt"/>
       </section>
 
       <section id="parsing-json-with-yojson" data-type="sect1">
@@ -379,7 +379,7 @@
 	  Let's start with selecting a single <code>title</code>
 	  field from the record:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="1"/>
+	<link rel="import" href="code/json/parse_book.mlt" part="1"/>
 
 	<p>
 	  The <code>member</code> function accepts a JSON object and
@@ -393,7 +393,7 @@
 	  convenient way to chain these
 	  operations <span class="keep-together">together</span>:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="2"/>
+	<link rel="import" href="code/json/parse_book.mlt" part="2"/>
 
 	<p>
 	  The <code>tags</code> field is similar to
@@ -407,7 +407,7 @@
 	  cannot be converted to a <code>string</code> will be skipped
 	  from the output of <code>filter_string</code>:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="3"/>
+	<link rel="import" href="code/json/parse_book.mlt" part="3"/>
 
 	<p>
 	  The <code>is_online</code> and <code>is_translated</code>
@@ -418,7 +418,7 @@
 	  <code>is_online</code> is present and
 	  <code>is_translated</code> will be <code>None</code>:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="4"/>
+	<link rel="import" href="code/json/parse_book.mlt" part="4"/>
 
 	<p>
 	  The final use of JSON combinators is to extract all the
@@ -429,7 +429,7 @@
 	  variable name. It can also be written more succinctly using
 	  the pipe-forward operator:</p>
 
-	<link rel="import" href="code/json/parse_book.topscript" part="5"/>
+	<link rel="import" href="code/json/parse_book.mlt" part="5"/>
 
 	<p>
 	  This style of programming, which omits variable names and
@@ -474,7 +474,7 @@
 	  use the pretty-printing functions in the
 	  <code>Yojson.Basic</code> module to display JSON output:</p>
 
-	<link rel="import" href="code/json/build_json.topscript" part="1"/>
+	<link rel="import" href="code/json/build_json.mlt" part="1"/>
 
 	<p>
 	  In the preceding example, we've constructed a simple JSON
@@ -493,7 +493,7 @@
 	  records that you haven't used yet (e.g. <code>Int</code> or
 	  <code>Null</code>):</p>
 
-	<link rel="import" href="code/json/build_json.topscript" part="2"/>
+	<link rel="import" href="code/json/build_json.mlt" part="2"/>
 
 	<p>
 	  The <code>pretty_to_string</code> function has a more
@@ -504,7 +504,7 @@
 	  structure of the <code>json</code> type to ensure that
 	  they're compatible:</p>
 
-	<link rel="import" href="code/json/build_json.topscript" part="3"/>
+	<link rel="import" href="code/json/build_json.mlt" part="3"/>
 
 	<p>
 	  In this case, there are no problems. Our
@@ -531,7 +531,7 @@
             mistakenly include a single value instead of a list of
             keys:</p>
 
-          <link rel="import" href="code/json/build_json.topscript" part="4"/>
+          <link rel="import" href="code/json/build_json.mlt" part="4"/>
 
           <p>
 	    The type error is more verbose than it needs to be,
@@ -540,7 +540,7 @@
             to a shorter form by adding explicit type annotations as a
             hint about your intentions:</p>
 
-          <link rel="import" href="code/json/build_json.topscript" part="5"/>
+          <link rel="import" href="code/json/build_json.mlt" part="5"/>
 
           <p>
 	    We've annotated <code>person</code> as being of type

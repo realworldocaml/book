@@ -47,7 +47,7 @@ module Params = struct
 
   let run_nondeterministic =
     flag "-run-nondeterministic" no_arg
-      ~doc:" In topscripts, run code marked [%%expect.nondeterministic ...]. \
+      ~doc:" In .mlt files, run code marked [%%expect.nondeterministic ...]. \
             By default, they are skipped."
 
 end

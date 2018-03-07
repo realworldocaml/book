@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (query_handler.topscript))
+  (deps (query_handler.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (main.topscript))
+  (deps (main.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

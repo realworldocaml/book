@@ -43,7 +43,7 @@
       the different cases. Note that variant tags must be
       capitalized.</p>
 
-    <link rel="import" href="code/variants/main.topscript" part="0.5"/>
+    <link rel="import" href="code/variants/main.mlt" part="0.5"/>
 
     <p>
       The following function uses pattern matching to convert
@@ -51,13 +51,13 @@
       exhaustiveness checking on pattern matches means that the
       compiler will warn us if we miss a color:</p>
 
-    <link rel="import" href="code/variants/main.topscript" part="1"/>
+    <link rel="import" href="code/variants/main.mlt" part="1"/>
 
     <p>
       Using the preceding function, we can generate escape codes to
       change the color of a given string displayed in a terminal:</p>
 
-    <link rel="import" href="code/variants/main.topscript" part="2"/>
+    <link rel="import" href="code/variants/main.mlt" part="2"/>
 
     <p>
       On most terminals, that word "Blue" will be rendered in
@@ -90,7 +90,7 @@
       variants can have multiple arguments, which are separated
       by <code>*</code>s:</p>
 
-    <link rel="import" href="code/variants/main.topscript" part="3"/>
+    <link rel="import" href="code/variants/main.mlt" part="3"/>
 
     <p>
       Once again, we'll use pattern matching to convert a color to a
@@ -98,11 +98,11 @@
       does more than separate out the different cases; it also allows
       us to extract the data associated with each tag:</p>
 
-    <link rel="import" href="code/variants/main.topscript" part="4"/>
+    <link rel="import" href="code/variants/main.mlt" part="4"/>
 
     <p>Now, we can print text using the full set of available
     colors:</p>
-    <link rel="import" href="code/variants/main.topscript" part="5"/>
+    <link rel="import" href="code/variants/main.mlt" part="5"/>
 
     <section id="catch-all-cases-and-refactoring" data-type="sect1">
       <h1>Catch-All Cases and Refactoring</h1>
@@ -122,7 +122,7 @@
       <p>Consider what would happen if we were to change the
       definition of <code>color</code> to the following:</p>
 
-      <link rel="import" href="code/variants/catch_all.topscript" part="1"/>
+      <link rel="import" href="code/variants/catch_all.mlt" part="1"/>
 
       <p>We've essentially broken out the <code>Basic</code> case
       into two cases, <code>Basic</code> and <code>Bold</code>, and
@@ -132,19 +132,19 @@
       that same code again, the compiler will notice the
       discrepancy:</p>
 
-      <link rel="import" href="code/variants/catch_all.topscript" part="2"/>
+      <link rel="import" href="code/variants/catch_all.mlt" part="2"/>
 
       <p>Here, the compiler is complaining that the <code>Basic</code>
       tag is used with the wrong number of arguments. If we fix that,
       however, the compiler will flag a second problem, which is that
       we haven't handled the new <code>Bold</code> tag:</p>
 
-      <link rel="import" href="code/variants/catch_all.topscript" part="3"/>
+      <link rel="import" href="code/variants/catch_all.mlt" part="3"/>
 
       <p>Fixing this now leads us to the correct
       implementation:</p>
 
-      <link rel="import" href="code/variants/catch_all.topscript" part="4"/>
+      <link rel="import" href="code/variants/catch_all.mlt" part="4"/>
 
       <p>As we've seen, the type errors identified the things that
       needed to be fixed to complete the refactoring of the code.
@@ -164,12 +164,12 @@
 
       <idx>exhaustion checks</idx></p>
 
-      <link rel="import" href="code/variants/catch_all.topscript" part="5"/>
+      <link rel="import" href="code/variants/catch_all.mlt" part="5"/>
 
       <p>If we then applied the same fix we did above, we would have
       ended up with this.</p>
 
-      <link rel="import" href="code/variants/catch_all.topscript" part="6"/>
+      <link rel="import" href="code/variants/catch_all.mlt" part="6"/>
 
       <p>
 	Because of the catch-all case, we'll no longer be warned about
@@ -202,7 +202,7 @@
       <a href="05-records.html#records" data-type="xref">Records</a>. We'll start by reminding ourselves of the
       definition of <code>Log_entry.t</code>:</p>
 
-      <link rel="import" href="code/variants/logger.topscript" part="1"/>
+      <link rel="import" href="code/variants/logger.mlt" part="1"/>
 
       <p>This record type combines multiple pieces of data into one
       value. In particular, a single <code>Log_entry.t</code> has a
@@ -212,7 +212,7 @@
       types as conjunctions. Variants, on the other hand, are
       disjunctions, letting you represent multiple possibilities,
       as in the following example:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="2"/>
+      <link rel="import" href="code/variants/logger.mlt" part="2"/>
 
       <p>A <code>client_message</code> is a <code>Logon</code>
       <em>or</em> a <code>Heartbeat</code> <em>or</em> a
@@ -245,7 +245,7 @@
       </ul>
 
       <p>Here's the concrete code:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="3"/>
+      <link rel="import" href="code/variants/logger.mlt" part="3"/>
 
       <p>Note that we take advantage of the fact that the type of the
       record <code>m</code> is known in the above code, so we don't
@@ -266,15 +266,15 @@
       different messages. The first step is to cut down the
       definitions of each per-message record to contain just the
       information unique to that record:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="4"/>
+      <link rel="import" href="code/variants/logger.mlt" part="4"/>
 
       <p>We can then define a variant type that combines these
       types:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="5"/>
+      <link rel="import" href="code/variants/logger.mlt" part="5"/>
 
       <p>Separately, we need a record that contains the fields that
       are common across all messages:</p>
-      <link rel="import" href="code/variants/logger.topscript" part="6"/>
+      <link rel="import" href="code/variants/logger.mlt" part="6"/>
 
       <p>A full message can then be represented as a pair of
       a <code>Common.t</code> and a <code>details</code>. Using this,
@@ -283,7 +283,7 @@
       fields correctly. Otherwise, we'd need to qualify them
       explicitly.</p>
 
-      <link rel="import" href="code/variants/logger.topscript"
+      <link rel="import" href="code/variants/logger.mlt"
 	    part="7"/>
 
       <p>As you can see, the code for extracting the session ID has
@@ -298,7 +298,7 @@
       message.  Thus, if we had functions for handling individual
       message types, we could write a dispatch function as
       follows:</p> <link rel="import"
-      href="code/variants/logger.topscript" part="8"/>
+      href="code/variants/logger.mlt" part="8"/>
 
       <p>
 	And it's explicit at the type level that
@@ -316,14 +316,14 @@
 	  separately from the variant, then OCaml allows us to embed
 	  the records directly into the variant.</p>
 
-	<link rel="import" href="code/variants/logger.topscript"
+	<link rel="import" href="code/variants/logger.mlt"
 	      part="9"/>
 
 	<p>Even though the type is different, we can
 	  write <code>messages_for_user</code> in essentially the same
 	  way we did before.</p>
 
-	<link rel="import" href="code/variants/logger.topscript"
+	<link rel="import" href="code/variants/logger.mlt"
 	      part="10"/>
 
 	<p>Variants with inline records are both more concise and more
@@ -337,7 +337,7 @@
 	  object. And, as you can see below, OCaml will reject code
 	  that tries to do so.</p>
 
-	<link rel="import" href="code/variants/logger.topscript"
+	<link rel="import" href="code/variants/logger.mlt"
 	      part="11"/>
 
 
@@ -362,7 +362,7 @@
       variant <code>expr</code>, with one tag for each kind of
       expression we want to support:</p>
 
-      <link rel="import" href="code/variants/blang.topscript" part="0.5"/>
+      <link rel="import" href="code/variants/blang.mlt" part="0.5"/>
 
       <p>Note that the definition of the type <code>expr</code> is
       recursive, meaning that a <code>expr</code> may contain other
@@ -384,17 +384,17 @@
       writing a filter language for an email processor, your base
       predicates might specify the tests you would run against an
       email, as in the following example:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="1"/>
+      <link rel="import" href="code/variants/blang.mlt" part="1"/>
 
       <p>Using the preceding code, we can construct a simple
       expression with <code>mail_predicate</code> as its base
       predicate:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="2"/>
+      <link rel="import" href="code/variants/blang.mlt" part="2"/>
 
       <p>Being able to construct such expressions isn't enough; we
       also need to be able to evaluate them. Here's a function for
       doing just that:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="3"/>
+      <link rel="import" href="code/variants/blang.mlt" part="3"/>
 
       <p>The structure of the code is pretty straightforward—we're
       just pattern matching over the structure of the data, doing
@@ -406,15 +406,15 @@
       <p>Another useful operation on expressions is simplification.
       The following is a set of simplifying construction functions
       that mirror the tags of an <code>expr</code>:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="4"/>
+      <link rel="import" href="code/variants/blang.mlt" part="4"/>
 
       <p>We can now write a simplification routine that is based on
       the preceding functions.</p>
-      <link rel="import" href="code/variants/blang.topscript" part="5"/>
+      <link rel="import" href="code/variants/blang.mlt" part="5"/>
 
       <p>We can apply this to a Boolean expression and see how good
       a job it does at simplifying it:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="6"/>
+      <link rel="import" href="code/variants/blang.mlt" part="6"/>
 
       <p>Here, it correctly converted the <code>Or</code> branch to
       <code>Const true</code> and then eliminated the
@@ -424,7 +424,7 @@
       <p>There are some simplifications it misses, however. In
       particular, see what happens if we add a double negation
       in:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="7"/>
+      <link rel="import" href="code/variants/blang.mlt" part="7"/>
 
       <p>It fails to remove the double negation, and it's easy to
       see why. The <code>not_</code> function has a catch-all case,
@@ -433,11 +433,11 @@
       cases are generally a bad idea, and if we make the code more
       explicit, we see that the missing of the double negation is
       more obvious:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="8"/>
+      <link rel="import" href="code/variants/blang.mlt" part="8"/>
 
       <p>We can of course fix this by simply adding an explicit
       case for double negation:</p>
-      <link rel="import" href="code/variants/blang.topscript" part="9"/>
+      <link rel="import" href="code/variants/blang.mlt" part="9"/>
 
       <p>The example of a Boolean expression language is more than
       a toy. There's a module very much in this spirit in
@@ -470,7 +470,7 @@
       ordinary variants by the leading backtick. And unlike
       ordinary variants, polymorphic variants can be used without
       an explicit type declaration:</p>
-      <link rel="import" href="code/variants/main.topscript" part="6"/>
+      <link rel="import" href="code/variants/main.mlt" part="6"/>
 
       <p>
 	As you can see, polymorphic variant types are inferred
@@ -485,7 +485,7 @@
       <p>The type system will complain if it sees incompatible uses
       of the same tag:</p>
 
-      <link rel="import" href="code/variants/main.topscript" part="7"/>
+      <link rel="import" href="code/variants/main.mlt" part="7"/>
 
       <p>The <code>&gt;</code> at the beginning of the variant
       types above is critical because it marks the types as being
@@ -501,7 +501,7 @@
       <code>&lt;</code>, to indicate "these tags or less," as in
       the following example:</p>
 
-      <link rel="import" href="code/variants/main.topscript" part="8"/>
+      <link rel="import" href="code/variants/main.mlt" part="8"/>
 
       <p>The <code>&lt;</code> is there
       because <code>is_positive</code> has no way of dealing with
@@ -514,7 +514,7 @@
       bound, we end up with an <em>exact</em> polymorphic variant
       type, which has neither marker. For example:</p>
 
-      <link rel="import" href="code/variants/main.topscript" part="9"/>
+      <link rel="import" href="code/variants/main.mlt" part="9"/>
 
       <p>Perhaps surprisingly, we can also create polymorphic variant
       types that have different upper and lower bounds.  Note
@@ -523,7 +523,7 @@
       from <code>Base</code>: <idx>polymorphic variant
       types/upper/lower bounds of</idx></p>
 
-      <link rel="import" href="code/variants/main.topscript" part="10"/>
+      <link rel="import" href="code/variants/main.mlt" part="10"/>
 
       <p>Here, the inferred type states that the tags can be no more
       than <code>`Float</code>, <code>`Int</code>,
@@ -543,7 +543,7 @@
         variant:<idx>polymorphic variant types/vs.  ordinary
         variants</idx></p>
 
-        <link rel="import" href="code/variants/main.topscript" part="11"/>
+        <link rel="import" href="code/variants/main.mlt" part="11"/>
 
         <p>We want to write a
         function <code>extended_color_to_int</code>, that works
@@ -552,7 +552,7 @@
         an alpha channel. One might try to write such a function as
         follows.</p>
 
-        <link rel="import" href="code/variants/main.topscript" part="12"/>
+        <link rel="import" href="code/variants/main.mlt" part="12"/>
 
         <p>The code looks reasonable enough, but it leads to a type
         error because <code>extended_color</code> and
@@ -568,7 +568,7 @@
         and <code>color_to_int</code> using polymorphic variants. The
         translation here is pretty straightforward:</p>
 
-        <link rel="import" href="code/variants/main.topscript" part="13"/>
+        <link rel="import" href="code/variants/main.mlt" part="13"/>
 
         <p>Now we can try writing
         <code>extended_color_to_int</code>. The key issue with this
@@ -580,7 +580,7 @@
         <code>color</code> includes only the tags
         <code>`Basic</code>, <code>`RGB</code>, and
         <code>`Gray</code>, and not <code>`RGBA</code>:</p>
-        <link rel="import" href="code/variants/main.topscript" part="14"/>
+        <link rel="import" href="code/variants/main.mlt" part="14"/>
 
         <p>
 	  The preceding code is more delicately balanced than one
@@ -588,7 +588,7 @@
           instead of an explicit enumeration of the cases, the type is
           no longer narrowed, and so compilation fails:</p>
 
-        <link rel="import" href="code/variants/main.topscript" part="15"/>
+        <link rel="import" href="code/variants/main.mlt" part="15"/>
 
         <div class="allow_break" data-type="note">
           <h1>Polymorphic Variants and Catch-all Cases</h1>
@@ -602,7 +602,7 @@
           a lower bound:<idx>pattern matching/catch-all
           cases</idx><idx>catch-all cases</idx><idx>polymorphic
           variant types/and catch-all cases</idx></p>
-          <link rel="import" href="code/variants/main.topscript" part="16"/>
+          <link rel="import" href="code/variants/main.mlt" part="16"/>
 
           <p>Catch-all cases are error-prone even with ordinary
           variants, but they are especially so with polymorphic
@@ -612,7 +612,7 @@
           that uses <code>is_positive_permissive</code> passes in
           <code>Float</code> misspelled as <code>Floot</code>, the
           erroneous code will compile without complaint:</p>
-          <link rel="import" href="code/variants/main.topscript" part="17"/>
+          <link rel="import" href="code/variants/main.mlt" part="17"/>
 
           <p>With ordinary variants, such a typo would have been
           caught as an unknown tag. As a general matter, one should

@@ -7,7 +7,7 @@ type part = string
 
 type script = [
   | `OCaml of Rwo_expect.Raw_script.t
-  | `OCaml_toplevel of Rwo_expect.Document.t
+  | `OCaml_toplevel of Rwo_expect.Mlt.t
   | `OCaml_rawtoplevel of Rwo_expect.Raw_script.t
   | `Shell of Rwo_expect.Cram.t
   | `Other of string

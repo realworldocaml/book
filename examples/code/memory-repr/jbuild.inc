@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (simple_record.topscript))
+  (deps (reprs.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (reprs.topscript))
+  (deps (simple_record.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

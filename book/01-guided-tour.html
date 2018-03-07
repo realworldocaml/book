@@ -89,7 +89,7 @@
 	<idx>Core standard library/opening</idx> 
       </p>
 
-      <link rel="import" href="code/guided-tour/main.topscript" part="0.5"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="0.5"/>
 
       <p>By opening <code>Base</code>, we make the
       definitions it contains available without having to reference
@@ -98,7 +98,7 @@
       book.</p>
 
       <p>Now let's try a few simple numerical calculations:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="1"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="1"/>
 
       <p>By and large, this is pretty similar to what you'd find in
       any programming language, but a few things jump right out at
@@ -156,7 +156,7 @@
       <p>We can also create a variable to name the value of a given
       expression, using the <code>let</code> keyword. This is known
       as a <em>let binding</em>:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="2"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="2"/>
 
       <p>After a new variable is created, the toplevel tells us the
       name of the variable (<code>x</code> or <code>y</code>), in
@@ -168,10 +168,10 @@
       except for <code>_</code> and <code>'</code>, and variables
       must start with a lowercase letter or an underscore. Thus,
       these are legal:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="3"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="3"/>
 
       <p>The following examples, however, are not legal:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="4"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="4"/>
 
       <p>This highlights that variables can't be capitalized, can't
       begin with numbers, and can't contain dashes.</p>
@@ -183,7 +183,7 @@
       <p>The <code>let</code> syntax can also be used to define a
       function:<idx>let syntax/function definition
       with</idx><idx>functions/defining</idx></p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="5"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="5"/>
 
       <p>Functions in OCaml are values like any other, which is why
       we use the <code>let</code> keyword to bind a function to a
@@ -207,7 +207,7 @@
       <idx>functions/with multiple arguments</idx>
       </p>
 
-      <link rel="import" href="code/guided-tour/main.topscript" part="6"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="6"/>
 
       <p>
 	The preceding example also happens to be our first use of
@@ -234,7 +234,7 @@
 	be shadowed locally.
       </p>
 
-      <link rel="import" href="code/guided-tour/main.topscript" part="6.1"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="6.1"/>
 
       <p>
 	Note that we used a slightly different syntax for opening the
@@ -243,7 +243,7 @@
 	more concise syntax for local opens, as you can see here.
       </p>
 
-      <link rel="import" href="code/guided-tour/main.topscript" part="6.2"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="6.2"/>
 
       <p>The notation for the type-signature of a multiargument
       function may be a little surprising at first, but we'll
@@ -261,14 +261,14 @@
       arguments: a test function and two integer arguments. The
       function returns the sum of the integers that pass the
       test:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="7"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="7"/>
 
       <p>If we look at the inferred type signature in detail, we
       see that the first argument is a function that takes an
       integer and returns a boolean, and that the remaining two
       arguments are integers. Here's an example of this function in
       action:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="8"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="8"/>
 
       <p>Note that in the definition of <code>even</code>, we used
       <code>=</code> in two different ways: once as part of the
@@ -349,7 +349,7 @@
 
         <p>Here's an annotated version of
         <code>sum_if_true</code>:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="9"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="9"/>
 
         <p>In the above, we've marked every argument to the
         function with its type, with the final annotation
@@ -364,7 +364,7 @@
         <p>Sometimes, there isn't enough information to fully
         determine the concrete type of a given value. Consider this
         function..<idx>type inference/generic types</idx></p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="10"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="10"/>
 
         <p><code>first_if_true</code> takes as its arguments a
         function <code>test</code>, and two values, <code>x</code>
@@ -397,10 +397,10 @@
 
         <p>Because the type of <code>first_if_true</code> is generic,
         we can write this:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="11"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="11"/>
 
         <p>As well as this:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="12"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="12"/>
 
         <p>Both <code>long_string</code> and
         <code>big_number</code> are functions, and each is passed
@@ -409,7 +409,7 @@
         integers in the second). But we can't mix and match two
         different concrete types for <code>'a</code> in the same
         use of <code>first_if_true</code>:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="13"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="13"/>
 
         <p>In this example, <code>big_number</code> requires that
         <code>'a</code> be instantiated as <code>int</code>,
@@ -435,14 +435,14 @@
           difference between runtime and compile-time errors, but
           that difference is still there. Generally, type errors
           like this one:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="14"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="14"/>
 
           <p>are compile-time errors (because <code>+</code>
           requires that both its arguments be of type
           <code>int</code>), whereas errors that can't be caught by
           the type system, like division by zero, lead to runtime
           exceptions:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="15"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="15"/>
 
           <p>The distinction here is that type errors will stop you
           whether or not the offending code is ever actually
@@ -474,7 +474,7 @@
 	<idx>data structures/tuples</idx>
 	</p>
 
-        <link rel="import" href="code/guided-tour/main.topscript" part="16"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="16"/>
 
         <p>(For the mathematically inclined, <code>*</code>
           is used in the type <code>t * s</code> because that type
@@ -486,14 +486,14 @@
 
         <p>You can extract the components of a tuple using OCaml's
         pattern-matching syntax, as shown below:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="17"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="17"/>
 
         <p>Here, the <code>(x,y)</code> on the left-hand side of
         the <code>let</code> binding is the pattern. This pattern lets
         us mint the new variables <code>x</code> and <code>y</code>,
         each bound to different components of the value being
         matched. These can now be used in subsequent expressions:</p>
-        <link rel="import" href="code/guided-tour/main.topscript"
+        <link rel="import" href="code/guided-tour/main.mlt"
         part="18"/>
 
         <p>Note that the same syntax is used both for constructing
@@ -505,7 +505,7 @@
         pair of <code>float</code>s. The pattern-matching syntax
         lets us get at the values we need with a minimum of
         fuss:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="19"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="19"/>
 
         <p>The <code>**.</code> operator used above is for raising a
         floating-point number to a power.</p>
@@ -522,11 +522,11 @@
         potentially of different types, lists let you hold any
         number of items of the same type. Consider the following
         example:<idx id="DSlists">data structures/lists</idx></p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="20"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="20"/>
 
         <p>Note that you can't mix elements of different types in
         the same list, unlike tuples:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="21"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="21"/>
 
         <section id="the-list-module" data-type="sect3">
           <h3>The List module</h3>
@@ -536,12 +536,12 @@
           functions for working with lists. We can access values
           from within a module by using dot notation. For example,
           this is how we compute the length of a list:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="22"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="22"/>
 
           <p>Here's something a little more complicated. We can
           compute the list of the lengths of each language as
           follows:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="23"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="23"/>
 
           <p><code>List.map</code> takes two arguments: a list and
           a function for transforming the elements of that list. It
@@ -556,7 +556,7 @@
           without changing its behavior, as you can see
           here:<idx>arguments/labeled arguments</idx><idx>labeled
           arguments</idx></p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="24"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="24"/>
 
           <p>We'll learn more about labeled arguments and why
           they're important in <a href="02-variables-and-functions.html#variables-and-functions" data-type="xref">Variables And Functions</a>.</p>
@@ -569,13 +569,13 @@
           use the list constructor <code>::</code> for adding elements
           to the front of a list:<idx>operators/: :
           operator</idx><idx>lists/operator : :</idx></p>
-          <link rel="import" href="code/guided-tour/main.topscript"
+          <link rel="import" href="code/guided-tour/main.mlt"
           part="25"/>
 
           <p>Here, we're creating a new and extended list, not
           changing the list we started with, as you can see
           below:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="26"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="26"/>
 
           <div data-type="note">
             <h1>Semicolons Versus Commas</h1>
@@ -587,7 +587,7 @@
             that your code compiles but doesn't do quite what you
             might expect:<idx>commas vs.
             semicolons</idx><idx>semicolons vs. commas</idx></p>
-            <link rel="import" href="code/guided-tour/main.topscript" part="27"/>
+            <link rel="import" href="code/guided-tour/main.mlt" part="27"/>
 
             <p>In particular, rather than a list of three strings,
             what we have is a singleton list containing a
@@ -596,7 +596,7 @@
             <p>This example uncovers the fact that commas create a
             tuple, even if there are no surrounding parens. So, we
             can write:</p>
-            <link rel="import" href="code/guided-tour/main.topscript" part="28"/>
+            <link rel="import" href="code/guided-tour/main.mlt" part="28"/>
 
             <p>to allocate a tuple of integers. This is generally
             considered poor style and should be avoided.</p>
@@ -607,14 +607,14 @@
           declarations are all equivalent. Note that
           <code>[]</code> is used to represent the empty list and
           that <code>::</code> is right-associative:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="29"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="29"/>
 
           <p>The <code>::</code> constructor can only be used for
           adding one element to the front of the list, with the
           list terminating at <code>[]</code>, the empty list.
           There's also a list concatenation operator,
           <code>@</code>, which can concatenate two lists:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="30"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="30"/>
 
           <p>It's important to remember that, unlike
           <code>::</code>, this is not a constant-time operation.
@@ -630,7 +630,7 @@
           constructors, <code>[]</code> and <code>::</code>. Here's
           a simple example:<idx>pattern matching/in
           lists</idx><idx>lists/pattern matching</idx></p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="31"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="31"/>
 
           <p>By pattern matching using <code>::</code>, we've
           isolated and named the first element of the list
@@ -650,7 +650,7 @@
           particular, <code>[]</code>, the empty list. If we try to
           run <code>my_favorite_language</code>, we'll see that it
           works on nonempty lists and fails on empty ones:</p>
-          <link rel="import" href="code/guided-tour/main.topscript"
+          <link rel="import" href="code/guided-tour/main.mlt"
           part="32"/>
 
           <p>You can avoid these warnings, and more importantly
@@ -671,7 +671,7 @@
           <code>my_favorite_language</code> that uses
           <code>match</code> and doesn't trigger a compiler
           warning:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="33"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="33"/>
 
           <p>The preceding code also includes our first comment.
           OCaml comments are bounded by <code>(*</code> and
@@ -707,7 +707,7 @@
           between the base cases and the inductive cases is often
           done using pattern matching. Here's a simple example of a
           function that sums the elements of a list:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="34"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="34"/>
 
           <p>Following the common OCaml idiom, we use
           <code>hd</code> to refer to the head of the list and
@@ -729,14 +729,14 @@
           <p>We can introduce more complicated list patterns as
           well. Here's a function for removing sequential
           duplicates:</p>
-          <link rel="import" href="code/guided-tour/main.topscript" part="35"/>
+          <link rel="import" href="code/guided-tour/main.mlt" part="35"/>
 
           <p>Again, the first arm of the match is the base case, and
           the second is the inductive case. Unfortunately, this code
           has a problem, as indicated by the warning message. In
           particular, it doesn't handle one-element lists. We can fix
           this warning by adding another case to the match:</p>
-          <link rel="import" href="code/guided-tour/main.topscript"
+          <link rel="import" href="code/guided-tour/main.mlt"
           part="36"/>
 
           <p>Note that this code used another variant of the list
@@ -767,7 +767,7 @@
         might or might not be present. For
         example:<idx>options</idx><idx>data
         structures/options</idx></p> <link rel="import"
-        href="code/guided-tour/main.topscript" part="37"/>
+        href="code/guided-tour/main.mlt" part="37"/>
 
         <p>The function <code>divide</code> either returns
         <code>None</code> if the divisor is zero, or
@@ -789,7 +789,7 @@
         <code>String.rsplit2</code> has return type <code>(string *
         string) option</code>, returning <code>None</code> when no
         character was found to split on.</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="38"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="38"/>
 
         <p>Note that we used the <code>^</code> operator for
         concatenating strings. The concatenation operator is
@@ -808,19 +808,19 @@
           which the new variable can be used. Thus, we could
           write:<idx>let syntax/nested let binding</idx></p>
 
-          <link rel="import" href="code/guided-tour/local_let.topscript" part="0.5"/>
+          <link rel="import" href="code/guided-tour/local_let.mlt" part="0.5"/>
 
           <p>Note that the scope of the <code>let</code> binding is
           terminated by the double-semicolon, so the value of
           <code>x</code> is no longer available:</p>
 
-          <link rel="import" href="code/guided-tour/local_let.topscript" part="1"/>
+          <link rel="import" href="code/guided-tour/local_let.mlt" part="1"/>
 
           <p>We can also have multiple <code>let</code> statements
           in a row, each one adding a new variable binding to what
           came before:</p>
 
-          <link rel="import" href="code/guided-tour/local_let.topscript" part="2"/>
+          <link rel="import" href="code/guided-tour/local_let.mlt" part="2"/>
 
           <p>This kind of nested <code>let</code> binding is a
           common way of building up a complex expression, with each
@@ -858,18 +858,18 @@
       also allows us to define new data types. Here's a toy example
       of a data type representing a point in two-dimensional
       space:<idx>datatypes/defining new</idx></p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="41"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="41"/>
 
       <p><code>point2d</code> is a <em>record</em> type, which you
       can think of as a tuple where the individual fields are
       named, rather than being defined positionally. Record types
       are easy enough to construct:<idx>records/record
       types</idx><idx>datatypes/record types</idx></p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="42"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="42"/>
 
       <p>And we can get access to the contents of these types using
       pattern matching:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="43"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="43"/>
 
       <p>The pattern match here binds the variable
       <code>x_pos</code> to the value contained in the
@@ -882,17 +882,17 @@
       we don't have to write them both down. Using this, our
       magnitude function can be rewritten as
       follows:<idx>fields/field punning</idx></p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="44"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="44"/>
 
       <p>Alternatively, we can use dot notation for accessing
       record fields:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="45"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="45"/>
 
       <p>And we can of course include our newly defined types as
       components in larger types. Here, for example, are some types
       for modeling different geometric objects that contain values
       of type <code>point2d</code>:</p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="46"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="46"/>
 
       <p>Now, imagine that you want to combine multiple objects of
       these types together as a description of a multi-object scene.
@@ -901,7 +901,7 @@
       <em>variant</em> type:<idx>datatypes/variant
       types</idx><idx>variant types/combining multiple object types
       with</idx></p>
-      <link rel="import" href="code/guided-tour/main.topscript" part="47"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="47"/>
 
       <p>The <code>|</code> character separates the different cases
       of the variant (the first <code>|</code> is optional), and
@@ -913,7 +913,7 @@
       point is in the interior of some element of a list of
       <code>scene_element</code>s:</p>
 
-      <link rel="import" href="code/guided-tour/main.topscript" part="48"/>
+      <link rel="import" href="code/guided-tour/main.mlt" part="48"/>
 
       <p>You might at this point notice that the use
       of <code>match</code> here is reminiscent of how we
@@ -998,7 +998,7 @@
         Here's an example:<idx>data
         structures/arrays</idx><idx>arrays/imperative programming
         and</idx><idx>imperative programming/arrays</idx></p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="49"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="49"/>
 
         <p>The <code>.(i)</code> syntax is used to refer to an
         element of an array, and the <code>&lt;-</code> syntax is
@@ -1029,7 +1029,7 @@
         storing a running statistical summary of a collection of
         numbers.<idx>imperative programming/mutable record
         fields</idx><idx>mutable record fields</idx><idx>data
-        structures/mutable record fields</idx></p> <link rel="import" href="code/guided-tour/main.topscript" part="50"/>
+        structures/mutable record fields</idx></p> <link rel="import" href="code/guided-tour/main.mlt" part="50"/>
 
         <p>The fields in <code>running_sum</code> are designed to
         be easy to extend incrementally, and sufficient to compute
@@ -1040,7 +1040,7 @@
         <em>utop</em> to process the input, not to separate two
         declarations:</p>
 
-        <link rel="import" href="code/guided-tour/main.topscript" part="51"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="51"/>
 
         <p>We use the function <code>float</code> above, which is a
         convenient equivalent of <code>Float.of_int</code> provided
@@ -1048,7 +1048,7 @@
 
         <p>We also need functions to create and update
         <code>running_sum</code>s:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="52"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="52"/>
 
         <p><code>create</code> returns a <code>running_sum</code>
         corresponding to the empty set, and <code>update rsum
@@ -1065,7 +1065,7 @@
         <code>update</code> in action. Note that this code uses
         <code>List.iter</code>, which calls the function
         <code>~f</code> on each element of the provided list:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="53"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="53"/>
 
         <p>It's worth noting that the preceding algorithm is
         numerically naive and has poor precision in the presence of
@@ -1085,17 +1085,17 @@
         single mutable field called
         <code>contents</code>:<idx>records/record
         types</idx><idx>imperative programming/ref type</idx></p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="54"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="54"/>
 
         <p>There are a handful of useful functions and operators
         defined for <code>ref</code>s to make them more convenient
         to work with:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="55"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="55"/>
 
         <p>There's nothing magical with these operators either. You
         can completely reimplement the <code>ref</code> type and
         all of these operators in just a few lines of code:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="56"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="56"/>
 
         <p>The <code>'a</code> before the <code>ref</code>
         indicates that the <code>ref</code> type is polymorphic, in
@@ -1112,7 +1112,7 @@
         of a list imperatively by calling <code>List.iter</code> to
         call a simple function on every element of a list, using a
         <code>ref</code> to accumulate the results:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="57"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="57"/>
 
         <p>This isn't the most idiomatic way to sum up a list, but
         it shows how you can use a <code>ref</code> in place of a
@@ -1132,7 +1132,7 @@
         random:<idx>Random module</idx><idx>while
         loops</idx><idx>for loops</idx><idx>imperative
         programming/for and while loops</idx></p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="58"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="58"/>
 
         <p>From a syntactic perspective, you should note the
         keywords that distinguish a <code>for</code> loop:
@@ -1140,14 +1140,14 @@
         <code>done</code>.</p>
 
         <p>Here's an example run of this code:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="59"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="59"/>
 
         <p>OCaml also supports <code>while</code> loops, as shown
         in the following function for finding the position of the
         first negative entry in an array. Note that
         <code>while</code> (like <code>for</code>) is also a
         keyword:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="60"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="60"/>
 
         <p>As a side note, the preceding code takes advantage of
         the fact that <code>&amp;&amp;</code>, OCaml's And
@@ -1160,7 +1160,7 @@
         out-of-bounds error. Indeed, we can trigger that
         out-of-bounds error by rewriting the function to avoid the
         short-circuiting:</p>
-        <link rel="import" href="code/guided-tour/main.topscript" part="61"/>
+        <link rel="import" href="code/guided-tour/main.mlt" part="61"/>
 
         <p>The or operator, <code>||</code>, short-circuits in a
         similar way to <code>&amp;&amp;</code>.</p>

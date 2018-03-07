@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (inline_sexp.topscript))
+  (deps (sexp_option.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_default.topscript))
+  (deps (manually_making_sexp.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -18,7 +18,7 @@
 
 (alias (
   (name code)
-  (deps (to_from_sexp.topscript))
+  (deps (inline_sexp.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_option.topscript))
+  (deps (sexp_default.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -34,7 +34,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_opaque.topscript))
+  (deps (sexp_printer.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -42,7 +42,7 @@
 
 (alias (
   (name code)
-  (deps (print_sexp.topscript))
+  (deps (auto_making_sexp.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -50,7 +50,15 @@
 
 (alias (
   (name code)
-  (deps (manually_making_sexp.topscript))
+  (deps (example_load.mlt))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name code)
+  (deps (to_from_sexp.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -66,8 +74,7 @@
 
 (alias (
   (name code)
-  (deps (
-    example_load.topscript example.scm example_broken.scm comment_heavy.scm))
+  (deps (print_sexp.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -75,7 +82,7 @@
 
 (alias (
   (name code)
-  (deps (auto_making_sexp.topscript))
+  (deps (sexp_list.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -83,15 +90,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_list.topscript))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name code)
-  (deps (sexp_printer.topscript))
+  (deps (sexp_opaque.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
