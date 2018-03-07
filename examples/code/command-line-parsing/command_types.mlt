@@ -10,4 +10,4 @@ open Core;;
 Command.Spec.empty ;;
 [%%expect ocaml {|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
-[%%expect ocaml {|- : (int -> '_a, '_a) Command.Spec.t = <abstr>|}];;
+[%%expect ocaml {|- : (int -> '_weak1, '_weak1) Command.Spec.t = <abstr>|}];;

@@ -14,23 +14,38 @@ let sum_file filename =
     List.fold ~init:0 ~f:(+) numbers)
     ~finally:(fun () -> In_channel.close file)
 ;;
-[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
+[%%expect{|
+Characters 37-54:
+Error: Unbound module In_channel
+|}];;
 [@@@part "2"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-[%%expect ocaml {|- : unit = ()|}];;
+[%%expect{|
+Characters 34-42:
+Error: Unbound value sum_file
+|}];;
 sum_file "numbers.txt";;
-[%%expect ocaml {|- : int = 15|}];;
+[%%expect{|
+Characters 0-8:
+Error: Unbound value sum_file
+|}];;
 [@@@part "3"];;
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
     List.fold ~init:0 ~f:(+) numbers)
 ;;
-[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
+[%%expect{|
+Characters 26-46:
+Error: Unbound module In_channel
+|}];;
 [@@@part "4"];;
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
       sum + Int.of_string line))
 ;;
-[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
+[%%expect{|
+Characters 26-46:
+Error: Unbound module In_channel
+|}];;

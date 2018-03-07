@@ -64,7 +64,7 @@ class ['a] stack :
 |}];;
 [@@@part "3"];;
 let s = new stack [] ;;
-[%%expect ocaml {|val s : '_a stack = <obj>|}];;
+[%%expect ocaml {|val s : '_weak1 stack = <obj>|}];;
 s#push 5 ;;
 [%%expect ocaml {|- : unit = ()|}];;
 s#push 4 ;;

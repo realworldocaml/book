@@ -13,7 +13,7 @@ let remember =
      | Some y -> y
      | None -> cache := Some x; x)
 ;;
-[%%expect ocaml {|val remember : '_a -> '_a = <fun>|}];;
+[%%expect ocaml {|val remember : '_weak1 -> '_weak1 = <fun>|}];;
 [@@@part "2"];;
 let identity x = x;;
 [%%expect ocaml {|val identity : 'a -> 'a = <fun>|}];;

@@ -138,15 +138,15 @@ let count_lines filename =
 [@@@part "15"];;
 let ivar = Ivar.create ();;
 [%%expect ocaml {|
-val ivar : '_a Ivar.t =
+val ivar : '_weak1 Ivar.t =
   {Async_kernel__.Types.Ivar.cell = Async_kernel__Types.Cell.Empty}
 |}];;
 
 let def = Ivar.read ivar;;
-[%%expect ocaml {|val def : '_a Deferred.t = <abstr>|}];;
+[%%expect ocaml {|val def : '_weak2 Deferred.t = <abstr>|}];;
 
 Deferred.peek def;;
-[%%expect ocaml {|- : '_a option = None|}];;
+[%%expect ocaml {|- : '_weak3 option = None|}];;
 
 Ivar.fill ivar "Hello";;
 [%%expect ocaml {|- : unit = ()|}];;
@@ -264,14 +264,14 @@ let (r,w) = Pipe.create ();;
 
 
 [%%expect ocaml {|
-val r : '_a Pipe.Reader.t = <abstr>
-val w : '_a Pipe.Writer.t = <abstr>
+val r : '_weak4 Pipe.Reader.t = <abstr>
+val w : '_weak4 Pipe.Writer.t = <abstr>
 |}];;
 [@@@part "25"];;
 let (r,w) = Pipe.create ();;
 [%%expect ocaml {|
-val r : '_a Pipe.Reader.t = <abstr>
-val w : '_a Pipe.Writer.t = <abstr>
+val r : '_weak5 Pipe.Reader.t = <abstr>
+val w : '_weak5 Pipe.Writer.t = <abstr>
 |}];;
 
 

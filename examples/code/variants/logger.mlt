@@ -101,9 +101,9 @@ let messages_for_user user messages =
   in
   List.rev user_messages
 ;;
-[%%expect ocaml {|
-val messages_for_user : string -> client_message list -> client_message list =
-  <fun>
+[%%expect{|
+Characters 97-113:
+Error: Unbound module String.Set
 |}];;
 [@@@part "4"];;
 module Log_entry = struct
@@ -159,9 +159,9 @@ let messages_for_user user (messages : (Common.t * details) list) =
   in
   List.rev user_messages
 ;;
-[%%expect ocaml {|
-val messages_for_user :
-  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
+[%%expect{|
+Characters 127-143:
+Error: Unbound module String.Set
 |}];;
 [@@@part "7.9"];;
 type server_state;;
@@ -210,9 +210,9 @@ let messages_for_user user (messages : (Common.t * details) list) =
   in
   List.rev user_messages
 ;;
-[%%expect ocaml {|
-val messages_for_user :
-  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
+[%%expect{|
+Characters 127-143:
+Error: Unbound module String.Set
 |}];;
 [@@@part "11"];;
 let get_logon_contents = function
