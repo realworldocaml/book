@@ -262,15 +262,23 @@ let logon = { Logon.
               user = "yminsky";
               credentials = "Xy2d9W"; }
 ;;
-[%%expect ocaml {|
+[%%expect.nondeterministic ocaml {|
 val logon : Logon.t =
   {Logon.session_id = "26685"; time = 2017-07-21 11:11:45.000000-04:00;
    user = "yminsky"; credentials = "Xy2d9W"}
 |}];;
 show_field Logon.Fields.user Fn.id logon;;
-[%%expect ocaml {|- : string = "user: yminsky"|}];;
+[%%expect{|
+Characters 35-40:
+Error: Unbound value logon
+Hint: Did you mean log, log10, log1p, log, log10 or log1p?
+|}];;
 show_field Logon.Fields.time Time_ns.to_string logon;;
-[%%expect ocaml {|...|}];;
+[%%expect{|
+Characters 47-52:
+Error: Unbound value logon
+Hint: Did you mean log, log10, log1p, log, log10 or log1p?
+|}];;
 [@@@part "35"];;
 Logon.Fields.iter;;
 [%%expect ocaml {|
@@ -299,9 +307,7 @@ let print_logon logon =
 [%%expect ocaml {|val print_logon : Logon.t -> unit = <fun>|}];;
 print_logon logon;;
 [%%expect{|
-session_id: 26685
-...
-user: yminsky
-credentials: Xy2d9W
-|};
-ocaml {|- : unit = ()|}];;
+Characters 12-17:
+Error: Unbound value logon
+Hint: Did you mean log, log10, log1p, log, log10 or log1p?
+|}];;

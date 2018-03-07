@@ -85,4 +85,4 @@ let gettimeofday' () =
   Pervasives.(float secs +. float usecs /. 1000000.0) ;;
 [%%expect ocaml {|val gettimeofday' : unit -> float = <fun>|}];;
 gettimeofday' () ;;
-[%%expect ocaml {|- : float = 1516746708.884176|}];;
+[%%expect.nondeterministic ocaml {|- : float = 1516746708.884176|}];;

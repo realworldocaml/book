@@ -17,7 +17,6 @@ let time f =
 [%%expect{|
 Characters 29-42:
 Error: Unbound module Mtime
-Hint: Did you mean Time?
 |}];;
 let memoize f =
   let memo_table = Hashtbl.Poly.create () in
@@ -32,10 +31,10 @@ let identity x = x;;
 [%%expect ocaml {|- : 'a -> 'a list = <fun>|}];;
 [@@@part "2"];;
 memoize (fun x -> [x;x]);;
-[%%expect ocaml {|- : '_a -> '_a list = <fun>|}];;
+[%%expect ocaml {|- : '_weak1 -> '_weak1 list = <fun>|}];;
 [@@@part "3"];;
 identity (fun x -> [x;x]);;
-[%%expect ocaml {|- : '_a -> '_a list = <fun>|}];;
+[%%expect ocaml {|- : '_weak2 -> '_weak2 list = <fun>|}];;
 [@@@part "4"];;
 let f () = ref None;;
 [%%expect ocaml {|val f : unit -> 'a option ref = <fun>|}];;
@@ -46,13 +45,13 @@ List.init 10 ~f:Int.to_string;;
 [%%expect ocaml {|- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]|}];;
 [@@@part "6"];;
 let list_init_10 = List.init 10;;
-[%%expect ocaml {|val list_init_10 : f:(int -> '_a) -> '_a list = <fun>|}];;
+[%%expect ocaml {|val list_init_10 : f:(int -> '_weak3) -> '_weak3 list = <fun>|}];;
 [@@@part "7"];;
 let list_init_10 ~f = List.init 10 ~f;;
 [%%expect ocaml {|val list_init_10 : f:(int -> 'a) -> 'a list = <fun>|}];;
 [@@@part "8"];;
 identity (fun x -> [x;x]);;
-[%%expect ocaml {|- : '_a -> '_a list = <fun>|}];;
+[%%expect ocaml {|- : '_weak4 -> '_weak4 list = <fun>|}];;
 [@@@part "9"];;
 identity [];;
 [%%expect ocaml {|- : 'a list = []|}];;
@@ -60,7 +59,7 @@ identity [];;
 [||];;
 [%%expect ocaml {|- : 'a array = [||]|}];;
 identity [||];;
-[%%expect ocaml {|- : '_a array = [||]|}];;
+[%%expect ocaml {|- : '_weak5 array = [||]|}];;
 [@@@part "11"];;
 module Concat_list : sig
   type 'a t
@@ -100,7 +99,7 @@ module Concat_list :
 Concat_list.empty;;
 [%%expect ocaml {|- : 'a Concat_list.t = <abstr>|}];;
 identity Concat_list.empty;;
-[%%expect ocaml {|- : '_a Concat_list.t = <abstr>|}];;
+[%%expect ocaml {|- : '_weak6 Concat_list.t = <abstr>|}];;
 [@@@part "13"];;
 module Concat_list : sig
   type +'a t
