@@ -183,7 +183,6 @@
     ../bin/bin/app.exe
     ../examples/code/error-handling/blow_up/blow_up.ml
     ../examples/code/error-handling/blow_up/build_blow_up.errsh
-    ../examples/code/error-handling/blow_up/build_blow_up_notrace.errsh
     ../examples/code/error-handling/blow_up/jbuild
     ../examples/code/error-handling/exn_cost/exn_cost.ml
     ../examples/code/error-handling/exn_cost/jbuild

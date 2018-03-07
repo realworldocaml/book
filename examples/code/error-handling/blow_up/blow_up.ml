@@ -1,4 +1,5 @@
 open Base
+open Stdio
 exception Empty_list
 
 let list_max = function
