@@ -327,7 +327,7 @@ let extract_code_from_1e_exn chapter =
     let part = match part with
       | None | Some "" -> ""
       | Some part -> (match (lang :> string) with
-        | "topscript" -> sprintf "\n[@@@part %S]\n" part
+        | "mlt" -> sprintf "\n[@@@part %S]\n" part
         | "ml" -> sprintf "\n\n[@@@part %S]\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
@@ -338,7 +338,7 @@ let extract_code_from_1e_exn chapter =
 
     let f = function
       | `Output x | `Prompt x -> (match (lang :> string) with
-        | "topscript" -> ""
+        | "mlt" -> ""
         | _ -> x
       )
       | `Input x | `Data x -> x

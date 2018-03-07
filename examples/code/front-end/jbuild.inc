@@ -65,6 +65,14 @@
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
+  (name code)
+  (deps (camlp4_toplevel.mlt))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
   (name cram)
   (deps (conflicting_interfaces.errsh (files_recursively_in .)))
   (action (
@@ -110,14 +118,6 @@
   (action (
     progn
     (run   cram ${<})
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name code)
-  (deps (camlp4_toplevel.topscript))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (

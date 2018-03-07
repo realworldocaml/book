@@ -10,7 +10,7 @@
     - "mly": OCaml file, which will be parsed by Oloop.
     - "mlpack"
 
-    - "topscript": OCaml toplevel commands that will be auto-evaluated
+    - "mlt": OCaml toplevel commands that will be auto-evaluated
       via Oloop.
 
     - "rawscript": OCaml toplevel script, which should not be

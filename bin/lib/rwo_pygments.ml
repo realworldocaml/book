@@ -26,8 +26,8 @@ let of_lang (x:Lang.t) = match (x :> string) with
   | "json"         -> Ok `Json
   | "ml"
   | "mli"
-  | "topscript"
-  | "rawtopscript" -> Ok `OCaml
+  | "mlt"
+  | "rawscript"    -> Ok `OCaml
   | "scm"          -> Ok `Scheme
   | "sexp"         -> Ok `Sexp
   | _ ->

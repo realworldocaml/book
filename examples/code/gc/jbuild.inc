@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (tune.topscript))
+  (deps (tune.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

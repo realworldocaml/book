@@ -11,7 +11,7 @@ type part = string
 
 type script = [
   | `OCaml of Expect.Raw_script.t
-  | `OCaml_toplevel of Expect.Document.t
+  | `OCaml_toplevel of Expect.Mlt.t
   | `OCaml_rawtoplevel of Expect.Raw_script.t
   | `Shell of Expect.Cram.t
   | `Other of string
@@ -53,7 +53,7 @@ let find_exn t ?part:(name="") ~filename =
       | Some x -> `OCaml x
     )
   | Some (`OCaml_toplevel doc) -> (
-      match List.find ~f:(is_part ~name) (Expect.Document.parts doc) with
+      match List.find ~f:(is_part ~name) (Expect.Mlt.parts doc) with
       | None -> no_part_err()
       | Some x -> `OCaml_toplevel (Expect.Part.chunks x)
     )
@@ -164,7 +164,7 @@ let exn_of_filename filename content =
   | Some ext -> (match ext with
     | "ml" | "mli" | "mly" | "mll" ->
       `OCaml Rwo_expect.Raw_script.{ name = ""; content }
-    | "rawtopscript" ->
+    | "rawscript" ->
       `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
     | _ -> `Other content)
   | None -> `Other content
@@ -175,8 +175,8 @@ let exn_of_filename filename content =
 let script lang ~filename =
   let open Deferred.Or_error.Let_syntax in
   match (lang : Lang.t :> string) with
-  | "topscript" ->
-    let%map script = Expect.Document.of_file ~filename in
+  | "mlt" ->
+    let%map script = Expect.Mlt.of_file ~filename in
     `OCaml_toplevel script
   | "ml" | "mli" | "mly" | "mll" -> (
       (* Hack: Oloop.Script.of_file intended only for ml files but
@@ -184,7 +184,7 @@ let script lang ~filename =
       let%map script = Expect.Raw_script.of_file ~filename in
       `OCaml script
     )
-  | "rawtopscript" -> (
+  | "rawscript" -> (
       let%map script = Expect.Raw_script.of_file ~filename in
       `OCaml_rawtoplevel script
     )

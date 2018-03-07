@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (iter.topscript))
+  (deps (iter.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (binary.topscript))
+  (deps (istack.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -18,7 +18,7 @@
 
 (alias (
   (name code)
-  (deps (istack.topscript))
+  (deps (stack.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (initializer.topscript))
+  (deps (binary.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -34,7 +34,7 @@
 
 (alias (
   (name code)
-  (deps (stack.topscript))
+  (deps (initializer.mlt))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

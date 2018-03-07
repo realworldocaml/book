@@ -40,7 +40,7 @@ end
 module Chunk = Ocaml_topexpect.Chunk
 module Part = Ocaml_topexpect.Part
 
-module Document = struct
+module Mlt = struct
 
   include Ocaml_topexpect.Document
 

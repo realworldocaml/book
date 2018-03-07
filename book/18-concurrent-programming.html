@@ -78,7 +78,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  Recall how I/O is typically done in Core. Here's a simple
 	  example:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="1"/>
+	<link rel="import" href="code/async/main.mlt" part="1"/>
 
 	<p>
 	  From the type of <code>In_channel.read_all</code>, you can
@@ -98,7 +98,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  equivalent of <code>In_channel.read_all</code>.
 	  <idx>Deferred.t</idx></p>
 
-	<link rel="import" href="code/async/main.topscript" part="3"/>
+	<link rel="import" href="code/async/main.mlt" part="3"/>
 
 	<p>
 	  We first load the Async package in the toplevel
@@ -114,7 +114,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  deferred will initially be empty, as you can see by
 	  calling <code>Deferred.peek</code>.  <idx>Deferred.peek</idx></p>
 
-	<link rel="import" href="code/async/main.topscript" part="4"/>
+	<link rel="import" href="code/async/main.mlt" part="4"/>
 
 	<p>
 	  The value in <code>contents</code> isn't yet determined
@@ -130,7 +130,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  running and block until the deferred is determined. Thus, we
 	  can write:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="5"/>
+	<link rel="import" href="code/async/main.mlt" part="5"/>
 
 
 	<p>
@@ -143,7 +143,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  If we peek again, we'll see that the value
 	  of <code>contents</code> has been filled in.</p>
 
-	<link rel="import" href="code/async/main.topscript" part="6"/>
+	<link rel="import" href="code/async/main.mlt" part="6"/>
 
 	<p>
 	  In order to do real work with deferreds, we need a way of
@@ -151,7 +151,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  using <code>Deferred.bind</code>. Here's the type-signature
 	  of <code>bind</code>.</p>
 
-	<link rel="import" href="code/async/main.topscript" part="7"/>
+	<link rel="import" href="code/async/main.mlt" part="7"/>
 
 	<p>
 	  <code>bind</code> is effectively a way of sequencing
@@ -165,7 +165,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  that replaces a file with an uppercase version of its
 	  contents. </p>
 
-	<link rel="import" href="code/async/main.topscript" part="8"/>
+	<link rel="import" href="code/async/main.mlt" part="8"/>
 
 	<p>Again, <code>bind</code> is acting as a
 	  sequencing operator, causing the file to be saved via the
@@ -179,7 +179,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  it: <code>&gt;&gt;=</code>. Using this operator, we can
 	  rewrite <code>uppercase_file</code> as follows:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="9"/>
+	<link rel="import" href="code/async/main.mlt" part="9"/>
 
 	<p>
 	  In the preceding code, we've dropped the parentheses around
@@ -195,7 +195,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <code>bind</code>. In this case, we'll write a function that
 	  counts the number of lines in a file:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="10"/>
+	<link rel="import" href="code/async/main.mlt" part="10"/>
 
 	<p>
 	  This looks reasonable enough, but as you can see, the
@@ -210,14 +210,14 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <idx>return function</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="11"/>
+	<link rel="import" href="code/async/main.mlt" part="11"/>
 
 	<p>
 	  Using <code>return</code>, we can
 	  make <code>count_lines</code> compile:</p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="12"/>
+	<link rel="import" href="code/async/main.mlt" part="12"/>
 
 	<p>
 	  Together, <code>bind</code> and <code>return</code> form a
@@ -235,14 +235,14 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  shortcut for it called <code>Deferred.map</code>, which has
 	  the following signature:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="13"/>
+	<link rel="import" href="code/async/main.mlt" part="13"/>
 
 	<p>
 	  and comes with its own infix equivalent,
 	  <code>&gt;&gt;|</code>. Using it, we can rewrite
 	  <code>count_lines</code> again a bit more succinctly:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="14"/>
+	<link rel="import" href="code/async/main.mlt" part="14"/>
 
 	<p>
 	  Note that <code>count_lines</code> returns a deferred, but
@@ -261,11 +261,11 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    Here's what the <code>bind</code>-using version
 	    of <code>count_lines</code> looks like with that
 	    syntax.</p>
-          <link rel="import" href="code/async/main.topscript" part="12.1"/>
+          <link rel="import" href="code/async/main.mlt" part="12.1"/>
 
 	  <p>And here's the <code>map</code>-based version
 	    of <code>count_lines</code>.</p>
-          <link rel="import" href="code/async/main.topscript" part="14.1"/>
+          <link rel="import" href="code/async/main.mlt" part="14.1"/>
 
 	  <p>The difference here is just syntactic, with these
 	    examples compiling down to the same thing as the
@@ -318,7 +318,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             using <code>Ivar.fill</code>. These operations are
             illustrated below:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="15"/>
+          <link rel="import" href="code/async/main.mlt" part="15"/>
 
           <p>
 	    Ivars are something of a low-level feature; operators
@@ -335,7 +335,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             actions are executed in the same order they were scheduled
             in.  Here's a signature that captures this idea:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="16"/>
+          <link rel="import" href="code/async/main.mlt" part="16"/>
 
           <p>
 	    An action is handed to <code>schedule</code> in the form
@@ -350,7 +350,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    <idx>thunks</idx></p>
 
 
-          <link rel="import" href="code/async/main.topscript" part="17"/>
+          <link rel="import" href="code/async/main.mlt" part="17"/>
 
           <p>
 	    Like <code>bind</code> and <code>return</code>,
@@ -368,7 +368,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             a time span and returns a deferred which becomes determined
             after that time span elapses:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="18"/>
+          <link rel="import" href="code/async/main.mlt" part="18"/>
 
           <p>
 	    This code isn't particularly long, but it is subtle. In
@@ -408,7 +408,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    <p>
 	      That sounds like a lot, but we can implement this
 	      relatively concisely.</p>
-            <link rel="import" href="code/async/main.topscript"
+            <link rel="import" href="code/async/main.mlt"
 		  part="18.1"/>
 
 	    <p> Async's real implementation has more optimizations and
@@ -562,14 +562,14 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    <idx>functions/non-returning</idx></p>
 
 
-          <link rel="import" href="code/async/main.topscript" part="19"/>
+          <link rel="import" href="code/async/main.mlt" part="19"/>
 
           <p>
 	    This can be surprising when you call a function like
             this expecting it to return <code>unit</code>. The
             type-checker won't necessarily complain in such a case:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="20"/>
+          <link rel="import" href="code/async/main.mlt" part="20"/>
 
           <p>
 	    With a name like <code>loop_forever</code>, the meaning
@@ -580,7 +580,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             <code>never_returns</code>. Let's do the same trick with
             <code>loop_forever</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="21"/>
+          <link rel="import" href="code/async/main.mlt" part="21"/>
 
           <p>
 	    The type <code>never_returns</code> is uninhabited, so a
@@ -591,13 +591,13 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             <code>do_stuff</code> function, we'll get a helpful type
             error:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="22"/>
+          <link rel="import" href="code/async/main.mlt" part="22"/>
 
           <p>
 	    We can resolve the error by calling the function
             <code>never_returns</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="23"/>
+          <link rel="import" href="code/async/main.mlt" part="23"/>
 
           <p>
 	    Thus, we got the compilation to go through by explicitly
@@ -664,7 +664,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
           <p>
 	    Pipes are created in connected read/write pairs:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="24"/>
+          <link rel="import" href="code/async/main.mlt" part="24"/>
 
           <p>
 	    <code>r</code> and <code>w</code> are really just read
@@ -685,7 +685,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    The deferred returned by write completes on its own once
             the value written into the pipe has been read out:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="25"/>
+          <link rel="import" href="code/async/main.mlt" part="25"/>
 
           <p>
 	    In the function <code>run</code>, we're taking advantage
@@ -695,7 +695,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             data from a reader-pipe and moves it to a writer-pipe.
             Here's the type of <code>Pipe.transfer</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="26"/>
+          <link rel="import" href="code/async/main.mlt" part="26"/>
 
           <p>
 	    The two pipes being connected are generated by the
@@ -722,7 +722,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             module with an extended version that contains the
             <code>async</code> call:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="27"/>
+          <link rel="import" href="code/async/main.mlt" part="27"/>
 
           <p>
 	    This differs from the ordinary
@@ -869,7 +869,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             look at the type for <code>Cohttp_async.Client.get</code>,
             which we can do in <span class="command"><em>utop</em></span>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="28"/>
+          <link rel="import" href="code/async/main.mlt" part="28"/>
 
           <p>
 	    The <code>get</code> call takes as a required argument a
@@ -919,7 +919,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             <code>Deferred.all</code> to wait for all the results.
             Here's the type of <code>Deferred.all</code>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="29"/>
+          <link rel="import" href="code/async/main.mlt" part="29"/>
 
           <p>
 	    Note that the list returned by <code>Deferred.all</code>
@@ -943,7 +943,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             every deferred on the input list is determined. We can see
             the type of this function in <span class="command"><em>utop</em></span>:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="30"/>
+          <link rel="import" href="code/async/main.mlt" part="30"/>
 
           <p>
 	    Finally, we create a command-line interface using
@@ -985,7 +985,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  or returns <code>unit</code>, alternating between the two
 	  behaviors on subsequent calls:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="31"/>
+	<link rel="import" href="code/async/main.mlt" part="31"/>
 
 	<p>
 	  In <span class="command"><em>utop</em></span>, the
@@ -1000,7 +1000,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <code>try/with</code> statement, but as you can see that
 	  doesn't quite do the trick:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="32"/>
+	<link rel="import" href="code/async/main.mlt" part="32"/>
 
 	<p>
 	  This didn't work because <code>try/with</code> only
@@ -1016,7 +1016,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <idx>exceptions/asynchronous errors</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="33"/>
+	<link rel="import" href="code/async/main.mlt" part="33"/>
 
 	<p>
 	  <code>try_with f</code> takes as its argument a
@@ -1060,7 +1060,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             <code>within'</code>, which takes a thunk that returns a
             deferred. Here's an example:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="34"/>
+          <link rel="import" href="code/async/main.mlt" part="34"/>
 
           <p>
 	    In addition to the ordinary stack-trace, the exception
@@ -1083,7 +1083,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             a very simple example of a function that captures and
             ignores errors in the processes it spawns.</p>
 
-          <link rel="import" href="code/async/main.topscript" part="35"/>
+          <link rel="import" href="code/async/main.mlt" part="35"/>
 
 	  <p>
 	    The deferred returned by this function is never
@@ -1101,7 +1101,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	    determined.
 	  </p>
 
-          <link rel="import" href="code/async/main.topscript" part="35.5"/>
+          <link rel="import" href="code/async/main.mlt" part="35.5"/>
 
           <p>
 	    As you can see, the message "an error happened" is printed
@@ -1115,7 +1115,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             current monitor, which is the parent of the newly created
             monitor.</p>
 
-          <link rel="import" href="code/async/main.topscript" part="36"/>
+          <link rel="import" href="code/async/main.mlt" part="36"/>
 
           <p>
 	    Note that we use <code>Monitor.extract_exn</code> to grab
@@ -1132,14 +1132,14 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
             be passed to the parent monitor and delivered as
             usual:</p>
 
-          <link rel="import" href="code/async/main.topscript" part="37"/>
+          <link rel="import" href="code/async/main.mlt" part="37"/>
 
           <p>
 	    If instead we use <code>Ignore_me</code>, the exception
             will be ignored, and the computation will finish when the
             timeout expires.</p>
 
-          <link rel="import" href="code/async/main.topscript" part="38"/>
+          <link rel="import" href="code/async/main.mlt" part="38"/>
 
           <p>
 	    In practice, you should rarely use monitors directly,
@@ -1262,7 +1262,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <idx>Async library/timeouts and cancellations</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="39"/>
+	<link rel="import" href="code/async/main.mlt" part="39"/>
 
 	<p>
 	  Sometimes, however, we want to wait only for the first of
@@ -1272,7 +1272,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  returns a single deferred that will become determined once
 	  any of the values on the list is determined.</p>
 
-	<link rel="import" href="code/async/main.topscript" part="40"/>
+	<link rel="import" href="code/async/main.mlt" part="40"/>
 
 	<p>
 	  Let's use this to add timeouts to our DuckDuckGo searches.
@@ -1334,7 +1334,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  if and only if that deferred is chosen. Here's the type
 	  signature of <code>choice</code> and <code>choose</code>:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="41"/>
+	<link rel="import" href="code/async/main.mlt" part="41"/>
 
 	<p>
 	  Note that there's no guarantee that the winning deferred
@@ -1430,7 +1430,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  <idx>In_thread module</idx></p>
 
 
-	<link rel="import" href="code/async/main.topscript" part="42"/>
+	<link rel="import" href="code/async/main.mlt" part="42"/>
 
 	<p>
 	  to cause <code>List.range 1 10</code> to be run on one of
@@ -1448,20 +1448,20 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  becomes determined, at which point it prints out one last
 	  timestamp:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="43"/>
+	<link rel="import" href="code/async/main.mlt" part="43"/>
 
 	<p>
 	  If we feed this function a simple timeout deferred, it
 	  works as you might expect, waking up roughly every 100
 	  milliseconds:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="44"/>
+	<link rel="import" href="code/async/main.mlt" part="44"/>
 
 	<p>
 	  Now see what happens if, instead of waiting on a clock
 	  event, we wait for a busy loop to finish running:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="45"/>
+	<link rel="import" href="code/async/main.mlt" part="45"/>
 
 	<p>
 	  As you can see, instead of waking up 10 times a second,
@@ -1473,7 +1473,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  to offload this to a different system thread, the behavior
 	  will be different:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="46"/>
+	<link rel="import" href="code/async/main.mlt" part="46"/>
 
 	<p>
 	  Now <code>log_delays</code> does get a chance to run, but
@@ -1493,7 +1493,7 @@ sh<html xmlns="http://www.w3.org/1999/xhtml">
 	  behavior, so if we run a nonallocating loop in bytecode, our
 	  timer process will get to run:</p>
 
-	<link rel="import" href="code/async/main.topscript" part="47"/>
+	<link rel="import" href="code/async/main.mlt" part="47"/>
 
 	<p>
 	  But if we compile this to a native-code executable, then

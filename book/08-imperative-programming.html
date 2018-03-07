@@ -173,7 +173,7 @@
 	<code>List.find_map</code>, which you can see the type of by
 	typing it into the toplevel:</p>
 
-      <link rel="import" href="code/imperative-programming/examples.topscript" part="1"/>
+      <link rel="import" href="code/imperative-programming/examples.mlt" part="1"/>
 
       <p>
 	<code>List.find_map</code> iterates over the elements of
@@ -406,7 +406,7 @@
 
           <p>The definition for the <code>ref</code> type is as
           follows:</p>
-          <link rel="import" href="code/imperative-programming/ref.topscript" part="1"/>
+          <link rel="import" href="code/imperative-programming/ref.mlt" part="1"/>
 
           <p>The standard library defines the following operators
           for working with <code>ref</code>s.</p>
@@ -433,11 +433,11 @@
           </dl>
 
           <p>You can see these in action:</p>
-          <link rel="import" href="code/imperative-programming/ref.topscript" part="3"/>
+          <link rel="import" href="code/imperative-programming/ref.mlt" part="3"/>
 
           <p>The preceding are just ordinary OCaml functions, which
           could be defined as follows:</p>
-          <link rel="import" href="code/imperative-programming/ref.topscript" part="2"/>
+          <link rel="import" href="code/imperative-programming/ref.mlt" part="2"/>
         </section>
       </section>
 
@@ -485,12 +485,12 @@
       <code>Dictionary</code> is built using it. Here's a simple
       example of <code>for</code>:</p>
 
-      <link rel="import" href="code/imperative-programming/for.topscript" part="1"/>
+      <link rel="import" href="code/imperative-programming/for.mlt" part="1"/>
 
       <p>As you can see, the upper and lower bounds are inclusive.
       We can also use <code>downto</code> to iterate in the other
       direction:</p>
-      <link rel="import" href="code/imperative-programming/for.topscript" part="2"/>
+      <link rel="import" href="code/imperative-programming/for.mlt" part="2"/>
 
       <p>Note that the loop variable of a <code>for</code> loop,
       <code>i</code> in this case, is immutable in the scope of the
@@ -502,7 +502,7 @@
       condition, and then, if it evaluates to true, evaluates the
       body and starts the loop again. Here's a simple example of a
       function for reversing an array in place:</p>
-      <link rel="import" href="code/imperative-programming/for.topscript" part="3"/>
+      <link rel="import" href="code/imperative-programming/for.mlt" part="3"/>
 
       <p>In the preceding example, we used <code>incr</code> and
       <code>decr</code>, which are built-in functions for
@@ -574,7 +574,7 @@
         <p>There is an exception to this, though: you can construct
         fixed-size cyclic data structures using <code>let
         rec</code>:</p>
-        <link rel="import" href="code/imperative-programming/examples.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/examples.mlt" part="2"/>
 
         <p>This approach is quite limited, however. General-purpose
         cyclic data structures require mutation.</p>
@@ -711,7 +711,7 @@
 	type <code>s Lazy.t</code>. The evaluation of that expression is
 	delayed until forced with <code>Lazy.force</code>:</p>
 
-      <link rel="import" href="code/imperative-programming/lazy.topscript" part="1"/>
+      <link rel="import" href="code/imperative-programming/lazy.mlt" part="1"/>
 
       <p>You can see from the <code>print</code> statement that the
       actual computation was performed only once, and only
@@ -721,7 +721,7 @@
       the implementation of our own lazy type. We'll start by
       declaring types to represent a lazy value:</p>
 
-      <link rel="import" href="code/imperative-programming/lazy.topscript" part="2"/>
+      <link rel="import" href="code/imperative-programming/lazy.mlt" part="2"/>
 
       <p>A <code>lazy_state</code> represents the possible states of a
       lazy value. A lazy value is <code>Delayed</code> before it has
@@ -744,17 +744,17 @@
 	<idx>thunks</idx>
       </p>
 
-      <link rel="import" href="code/imperative-programming/lazy.topscript" part="3"/>
+      <link rel="import" href="code/imperative-programming/lazy.mlt" part="3"/>
 
       <p>Now we just need a way to force a lazy value. The
       following function does just that:</p>
 
-      <link rel="import" href="code/imperative-programming/lazy.topscript" part="4"/>
+      <link rel="import" href="code/imperative-programming/lazy.mlt" part="4"/>
 
       <p>Which we can use in the same way we used
 	<code>Lazy.force</code>:</p>
 
-      <link rel="import" href="code/imperative-programming/lazy.topscript" part="5"/>
+      <link rel="import" href="code/imperative-programming/lazy.mlt" part="5"/>
 
       <p>
 	The main user-visible difference between our
@@ -783,7 +783,7 @@
           that function. Here we'll use Core's <code>Hashtbl</code>
           module, rather than our toy <code>Dictionary</code>:</p>
 
-        <link rel="import" href="code/imperative-programming/memo.topscript" part="1"/>
+        <link rel="import" href="code/imperative-programming/memo.mlt" part="1"/>
 
         <p>
 	  The preceding code is a bit tricky. <code>memoize</code>
@@ -833,7 +833,7 @@
 
 	  <idx>memoization/example of</idx></p>
 
-        <link rel="import" href="code/imperative-programming/memo.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/memo.mlt" part="2"/>
 
         <p>The thing to note is that if you call <code>edit_distance
         "OCaml" "ocaml"</code>, then that will in turn dispatch the
@@ -858,11 +858,11 @@
           slow for large strings. We can see this by writing a small
           timing function, using the <code>Mtime</code> package.</p>
 
-        <link rel="import" href="code/imperative-programming/memo.topscript" part="3"/>
+        <link rel="import" href="code/imperative-programming/memo.mlt" part="3"/>
 
         <p>And now we can use this to try out some examples:</p>
 
-        <link rel="import" href="code/imperative-programming/memo.topscript" part="4"/>
+        <link rel="import" href="code/imperative-programming/memo.mlt" part="4"/>
 
         <p>Just those few extra characters made it thousands of
           times slower!</p>
@@ -892,7 +892,7 @@
           recursive definition of Fibonacci is as follows:
 	</p>
 
-	<link rel="import" href="code/imperative-programming/fib.topscript" part="1"/>
+	<link rel="import" href="code/imperative-programming/fib.mlt" part="1"/>
 
         <p>
 	  This is, however, exponentially slow, for the same reason
@@ -900,7 +900,7 @@
           many redundant calls to <code>fib</code>. It shows up quite
           dramatically in the performance:</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="2"/>
 
         <p>
 	  As you can see, <code>fib 40</code> takes thousands of
@@ -914,7 +914,7 @@
           after the fact and expect the first call to
           <code>fib</code> to be improved.</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="3"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="3"/>
 
         <p>
 	  In order to make <code>fib</code> fast, our first step will
@@ -923,20 +923,20 @@
           argument a function (called <code>fib</code>) that will be
           called in lieu of the usual recursive call.</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="4"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="4"/>
 
         <p>
 	  We can now turn this back into an ordinary Fibonacci
           function by tying the recursive knot:</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="5"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="5"/>
 
         <p>
 	  We can even write a polymorphic function that we'll call
           <code>make_rec</code> that can tie the recursive knot for
           any function of this form:</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="6"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="6"/>
 
         <p>
 	  This is a pretty strange piece of code, and it may take
@@ -956,7 +956,7 @@
           ties the recursive knot. We'll call that
           function <code>memo_rec</code>:</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="7"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="7"/>
 
         <p>
 	  Note that <code>memo_rec</code> has the same signature
@@ -971,7 +971,7 @@
 	  Using <code>memo_rec</code>, we can now build an
           efficient version of <code>fib</code>:</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="8"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="8"/>
 
         <p>
 	  And as you can see, the exponential time complexity is now
@@ -995,7 +995,7 @@
           declaration that makes this look like it's little more than
           a special form of <code>let rec</code>:</p>
 
-        <link rel="import" href="code/imperative-programming/fib.topscript" part="9"/>
+        <link rel="import" href="code/imperative-programming/fib.mlt" part="9"/>
 
         <p>
 	  Memoization is overkill for implementing Fibonacci, and
@@ -1016,7 +1016,7 @@
           the <code>memo_rec</code> call, we can get a memoized
           version of <code>edit_distance</code>:</p>
 
-        <link rel="import" href="code/imperative-programming/memo.topscript" part="6"/>
+        <link rel="import" href="code/imperative-programming/memo.mlt" part="6"/>
 
         <p>
 	  This new version of <code>edit_distance</code> is much more
@@ -1024,7 +1024,7 @@
           is many thousands of times faster than it was without
           memoization:</p>
 
-        <link rel="import" href="code/imperative-programming/memo.topscript" part="7"/>
+        <link rel="import" href="code/imperative-programming/memo.mlt" part="7"/>
 
         <div class="allow_break" data-type="note">
           <h1>Limitations of let rec</h1>
@@ -1037,7 +1037,7 @@
 
 	    <idx>let rec</idx></p>
 
-          <link rel="import" href="code/imperative-programming/letrec.topscript" part="1"/>
+          <link rel="import" href="code/imperative-programming/letrec.mlt" part="1"/>
 
           <p>
 	    OCaml rejects the definition because OCaml, as a
@@ -1073,7 +1073,7 @@
             something like our definition of <code>x</code> work if
             we use OCaml's laziness:</p>
 
-          <link rel="import" href="code/imperative-programming/letrec.topscript" part="2"/>
+          <link rel="import" href="code/imperative-programming/letrec.mlt" part="2"/>
 
           <p>
 	    Of course, actually trying to compute this will fail.
@@ -1081,7 +1081,7 @@
             value tries to force itself as part of its own
             evaluation.</p>
 
-          <link rel="import" href="code/imperative-programming/letrec.topscript" part="3"/>
+          <link rel="import" href="code/imperative-programming/letrec.mlt" part="3"/>
 
           <p>
 	    But we can also create useful recursive definitions
@@ -1089,7 +1089,7 @@
             to make our definition of <code>memo_rec</code> work
             without explicit mutation:</p>
 
-          <link rel="import" href="code/imperative-programming/letrec.topscript" part="5"/>
+          <link rel="import" href="code/imperative-programming/letrec.mlt" part="5"/>
 
           <p>
 	    Laziness is more constrained than explicit mutation,
@@ -1260,13 +1260,13 @@
 	<idx>printf function</idx>
 	<idx>I/O (input/output) operations/formatted output</idx></p>
 
-        <link rel="import" href="code/imperative-programming/printf.topscript" part="1"/>
+        <link rel="import" href="code/imperative-programming/printf.mlt" part="1"/>
 
         <p>Unlike C's <code>printf</code>, the <code>printf</code>
         in OCaml is type-safe. In particular, if we provide an
         argument whose type doesn't match what's presented in the
         format string, we'll get a type error:</p>
-        <link rel="import" href="code/imperative-programming/printf.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/printf.mlt" part="2"/>
 
         <aside data-type="sidebar">
           <h5>Understanding Format Strings</h5>
@@ -1286,7 +1286,7 @@
           string to <code>printf</code>, the compiler will
           complain:</p>
 
-          <link rel="import" href="code/imperative-programming/printf.topscript" part="3"/>
+          <link rel="import" href="code/imperative-programming/printf.mlt" part="3"/>
 
           <p>
 	    If OCaml infers that a given string literal is a format
@@ -1299,13 +1299,13 @@
             representation of the format string that's printed out
             won't fill the whole page.)</p>
 
-          <link rel="import" href="code/imperative-programming/printf.topscript" part="4"/>
+          <link rel="import" href="code/imperative-programming/printf.mlt" part="4"/>
 
           <p>
 	    And accordingly, we can pass it to
             <code>printf</code>:</p>
 
-          <link rel="import" href="code/imperative-programming/printf.topscript" part="5"/>
+          <link rel="import" href="code/imperative-programming/printf.mlt" part="5"/>
 
           <p>
 	    If this looks different from everything else you've seen
@@ -1393,7 +1393,7 @@
 	<idx>files/file I/O</idx>
 	<idx>I/O (input/output) operations/file I/O</idx></p>
 
-        <link rel="import" href="code/imperative-programming/file.topscript" part="1"/>
+        <link rel="import" href="code/imperative-programming/file.mlt" part="1"/>
 
         <p>For both of these functions, we followed the same basic
         sequence: we first create the channel, then use the
@@ -1406,12 +1406,12 @@
         an exception in the middle of its work, it won't actually
         close the file. If we try to read a file that doesn't
         actually contain numbers, we'll see such an error:</p>
-        <link rel="import" href="code/imperative-programming/file.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/file.mlt" part="2"/>
 
         <p>And if we do this over and over in a loop, we'll
         eventually run out of file descriptors:</p>
 
-        <link rel="import" href="code/imperative-programming/file.topscript" part="3"/>
+        <link rel="import" href="code/imperative-programming/file.mlt" part="3"/>
 
         <p>And now, you'll need to restart your toplevel if you
         want to open any more files!</p>
@@ -1419,11 +1419,11 @@
         <p>To avoid this, we need to make sure that our code cleans
         up after itself. We can do this using the
         <code>protect</code> function described in <a href="07-error-handling.html#error-handling" data-type="xref">Error Handling</a>, as follows:</p>
-        <link rel="import" href="code/imperative-programming/file2.topscript" part="1"/>
+        <link rel="import" href="code/imperative-programming/file2.mlt" part="1"/>
 
         <p>And now, the file descriptor leak is gone:</p>
 
-        <link rel="import" href="code/imperative-programming/file2.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/file2.mlt" part="2"/>
 
         <p>
 	  This is really an example of a more general issue with
@@ -1442,7 +1442,7 @@
           rewrite <code>sum_file</code> using this function, as shown
           here:</p>
 
-        <link rel="import" href="code/imperative-programming/file2.topscript" part="3"/>
+        <link rel="import" href="code/imperative-programming/file2.mlt" part="3"/>
 
         <p>Another misfeature of our implementation of
         <code>sum_file</code> is that we read the entire file into
@@ -1450,7 +1450,7 @@
         efficient to process a line at a time. You can use the
         <code>In_channel.fold_lines</code> function to do just
         that:</p>
-        <link rel="import" href="code/imperative-programming/file2.topscript" part="4"/>
+        <link rel="import" href="code/imperative-programming/file2.mlt" part="4"/>
 
         <p>This is just a taste of the functionality of
         <code>In_channel</code> and <code>Out_channel</code>. To
@@ -1486,7 +1486,7 @@
 	have a negative <code>sin</code>. The following snippet of
 	code would answer that question:</p>
 
-      <link rel="import" href="code/imperative-programming/order.topscript" part="1"/>
+      <link rel="import" href="code/imperative-programming/order.mlt" part="1"/>
 
       <p>
 	In some sense, we don't really need to compute the <code>sin
@@ -1499,12 +1499,12 @@
 	keyword, we can write the original computation so
 	that <code>sin 128.</code> won't ever be computed:</p>
 
-      <link rel="import" href="code/imperative-programming/order.topscript" part="2"/>
+      <link rel="import" href="code/imperative-programming/order.mlt" part="2"/>
 
       <p>We can confirm that fact by a few well-placed
       <code>printf</code>s:</p>
 
-      <link rel="import" href="code/imperative-programming/order.topscript" part="3"/>
+      <link rel="import" href="code/imperative-programming/order.mlt" part="3"/>
 
       <p>
 	OCaml is strict by default for a good reason: lazy evaluation
@@ -1527,7 +1527,7 @@
 
       <p>Consider the following example:</p>
 
-      <link rel="import" href="code/imperative-programming/order.topscript" part="4"/>
+      <link rel="import" href="code/imperative-programming/order.mlt" part="4"/>
 
       <p>
 	Here, you can see that the subexpression that came last was
@@ -1550,7 +1550,7 @@
 	</idx>
       </p>
 
-      <link rel="import" href="code/imperative-programming/weak.topscript" part="1"/>
+      <link rel="import" href="code/imperative-programming/weak.mlt" part="1"/>
 
       <p><code>remember</code> simply caches the first value that's
       passed to it, returning that value on every call. That's
@@ -1573,7 +1573,7 @@
       identity function, as an example, gets a polymorphic type in
       this way:</p>
 
-      <link rel="import" href="code/imperative-programming/weak.topscript" part="2"/>
+      <link rel="import" href="code/imperative-programming/weak.mlt" part="2"/>
 
       <p>
 	As you can see, the polymorphic type of <code>identity</code>
@@ -1601,7 +1601,7 @@
       concrete type as soon as it gets a clue as to what concrete
       type it is to be used as:</p>
 
-      <link rel="import" href="code/imperative-programming/weak.topscript" part="3"/>
+      <link rel="import" href="code/imperative-programming/weak.mlt" part="3"/>
 
       <p>Note that the type of <code>remember</code> was settled by
       the definition of <code>remember_three</code>, even though
@@ -1658,14 +1658,14 @@
         <p>Thus, the following expression is a simple value, and as
         a result, the types of values contained within it are
         allowed to be polymorphic:</p>
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="1"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="1"/>
 
         <p>But, if we write down an expression that isn't a simple
         value by the preceding definition, we'll get different
         results. For example, consider what happens if we try to
         memoize the function defined previously.</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="2"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="2"/>
 
         <p>
 	  The memoized version of the function does in fact need to be
@@ -1675,7 +1675,7 @@
           determination even if the function in question did no such
           thing. Consider this example:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="3"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="3"/>
 
         <p>It would be safe to infer a fully polymorphic variable
         here, but because OCaml's type system doesn't distinguish
@@ -1688,7 +1688,7 @@
         same function. Thus, a function that produces a fresh
         reference every time it's called can have a fully
         polymorphic type:</p>
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="4"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="4"/>
 
         <p>But a function that has a mutable cache that persists
         across calls, like <code>memoize</code>, can only be weakly
@@ -1713,13 +1713,13 @@
         <p>Consider the <code>List.init</code> function, which is
         used for creating lists where each element is created by
         calling a function on the index of that element:</p>
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="5"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="5"/>
 
         <p>Imagine we wanted to create a specialized version of
         <code>List.init</code> that always created lists of length
         10. We could do that using partial application, as
         follows:</p>
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="6"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="6"/>
 
         <p>As you can see, we now infer a weakly polymorphic type
         for the resulting function. That's because there's nothing
@@ -1729,7 +1729,7 @@
         <code>list_init_10</code>. We can eliminate this
         possibility, and at the same time get the compiler to infer
         a polymorphic type, by avoiding partial application:</p>
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="7"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="7"/>
 
         <p>This transformation is referred to as <em>eta
         expansion</em> and is often useful to resolve problems that
@@ -1756,18 +1756,18 @@
         simple value and thus can turn a polymorphic value into a
         weakly polymorphic one:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="8"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="8"/>
 
         <p>But that's not always the case. When the type of the
         returned value is immutable, then OCaml can typically infer
         a fully polymorphic type:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="9"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="9"/>
 
         <p>On the other hand, if the returned type is mutable, then
         the result will be weakly polymorphic:</p>
 
-	<link rel="import" href="code/imperative-programming/value_restriction.topscript" part="10"/>
+	<link rel="import" href="code/imperative-programming/value_restriction.mlt" part="10"/>
 
         <p>
 	  A more important example of this comes up when defining
@@ -1775,7 +1775,7 @@
           structure for an immutable list type that supports
           constant-time concatenation:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="11"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="11"/>
 
         <p>The details of the implementation don't matter so much, but
         it's important to note that a <code>Concat_list.t</code> is
@@ -1783,7 +1783,7 @@
         the value restriction, OCaml treats it as if it were
         mutable:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="12"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="12"/>
 
         <p>
 	  The issue here is that the signature, by virtue of being
@@ -1809,13 +1809,13 @@
           polymorphic types for expressions of this type that are not
           simple values:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="13"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="13"/>
 
         <p>Now, we can apply the identity function to
         <code>Concat_list.empty</code> without without losing any
         polymorphism:</p>
 
-        <link rel="import" href="code/imperative-programming/value_restriction.topscript" part="14"/>
+        <link rel="import" href="code/imperative-programming/value_restriction.mlt" part="14"/>
       </section>
     </section>
 

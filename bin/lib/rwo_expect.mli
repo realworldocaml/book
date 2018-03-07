@@ -15,7 +15,7 @@ end
 module Chunk = Ocaml_topexpect.Chunk
 module Part = Ocaml_topexpect.Part
 
-module Document : sig
+module Mlt : sig
   include (module type of Ocaml_topexpect.Document)
   val of_file: filename:string -> t Deferred.Or_error.t
 end

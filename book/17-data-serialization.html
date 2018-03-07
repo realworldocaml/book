@@ -89,7 +89,7 @@
 	  Let's rewrite our example s-expression in terms of this
 	  type:</p>
 
-	<link rel="import" href="code/sexpr/print_sexp.topscript" part="1"/>
+	<link rel="import" href="code/sexpr/print_sexp.mlt" part="1"/>
 
 	<p>
 	  This prints out nicely because Core registers a pretty
@@ -99,7 +99,7 @@
 
 	  <idx>pretty printers</idx></p>
 
-	<link rel="import" href="code/sexpr/sexp_printer.topscript" part="1"/>
+	<link rel="import" href="code/sexpr/sexp_printer.mlt" part="1"/>
 
 	<p>
 	  In addition to providing the <code>Sexp</code> module,
@@ -108,14 +108,14 @@
 	  functions defined in the respective modules for integers,
 	  strings, and exceptions:</p>
 
-	<link rel="import" href="code/sexpr/to_from_sexp.topscript" part="0.5"/>
+	<link rel="import" href="code/sexpr/to_from_sexp.mlt" part="0.5"/>
 
 	<p>
 	  It's also possible to convert more complex types such as
 	  lists or arrays that are polymorphic across the types that
 	  they can contain:</p>
 
-	<link rel="import" href="code/sexpr/to_from_sexp.topscript" part="1"/>
+	<link rel="import" href="code/sexpr/to_from_sexp.mlt" part="1"/>
 
 	<p>
 	  Notice that <code>List.sexp_of_t</code> is polymorphic and
@@ -133,7 +133,7 @@
 	  presented with an s-expression that doesn't match the
 	  structure of the OCaml type in question.</p>
 
-	<link rel="import" href="code/sexpr/to_from_sexp.topscript" part="2"/>
+	<link rel="import" href="code/sexpr/to_from_sexp.mlt" part="2"/>
 
 	<div data-type="note">
           <h1>More on Top-Level Printing</h1>
@@ -174,7 +174,7 @@
 
 	    <idx>s-expressions/generating from OCaml types</idx></p>
 
-          <link rel="import" href="code/sexpr/manually_making_sexp.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/manually_making_sexp.mlt" part="1"/>
 
           <p>
 	    This is somewhat tiresome to write, and it gets more so
@@ -195,7 +195,7 @@
 	    <idx>Sexplib package/syntax extension in</idx>
 	    <idx>syntax extension/in Sexplib package</idx></p>
 
-          <link rel="import" href="code/sexpr/auto_making_sexp.topscript" part="0.5"/>
+          <link rel="import" href="code/sexpr/auto_making_sexp.mlt" part="0.5"/>
 
           <p>
 	    The syntax extension can be used outside of type
@@ -206,14 +206,14 @@
             exception, which will improve the ability of Core to
             generate a useful string representation:</p>
 
-          <link rel="import" href="code/sexpr/auto_making_sexp.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/auto_making_sexp.mlt" part="1"/>
 
           <p>
 	    You don't always have to declare a named type to create
             an s-expression converter. The following syntax lets you
             create one inline, as part of a larger expression:</p>
 
-          <link rel="import" href="code/sexpr/inline_sexp.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/inline_sexp.mlt" part="1"/>
 
           <p>
 	    The declaration <code>[%sexp_of: int * string]</code>
@@ -296,7 +296,7 @@
 	  can be loaded using Sexplib. As you can see, the commented
 	  data is not part of the resulting s-expression:</p>
 
-	<link rel="import" href="code/sexpr/example_load.topscript" part="0.5"/>
+	<link rel="import" href="code/sexpr/example_load.mlt" part="0.5"/>
 
 	<p>
 	  All in, the s-expression format supports three comment
@@ -335,7 +335,7 @@
 	  Again, loading the file as an s-expression drops the
 	  comments:</p>
 
-	<link rel="import" href="code/sexpr/example_load.topscript" part="1"/>
+	<link rel="import" href="code/sexpr/example_load.mlt" part="1"/>
 
 	<p>
 	  If we introduce an error into our s-expression, by, say,
@@ -343,7 +343,7 @@
 	  <code>example.scm</code>, without open-paren in front of
 	  <code>bar</code>, we'll get a parse error:</p>
 
-	<link rel="import" href="code/sexpr/example_load.topscript" part="2"/>
+	<link rel="import" href="code/sexpr/example_load.mlt" part="2"/>
 
 	<p>
 	  In the preceding example, we use
@@ -551,28 +551,28 @@
             define a type without a sexp converter and then try to use
             another type with a sexp converter, we'll error out:</p>
 
-          <link rel="import" href="code/sexpr/sexp_opaque.topscript" part="0.5"/>
+          <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="0.5"/>
 
           <p>
 	    But with <code>sexp_opaque</code>, we can embed our
             opaque <code>no_converter</code> type within the other data
             structure without an error.</p>
 
-          <link rel="import" href="code/sexpr/sexp_opaque.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="1"/>
 
           <p>
 	    And if we now convert a value of this type to an
             s-expression, we'll see the contents of field
             <code>a</code> marked as opaque:</p>
 
-          <link rel="import" href="code/sexpr/sexp_opaque.topscript" part="2"/>
+          <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="2"/>
 
           <p>
 	    Note that the <code>t_of_sexp</code> function for an
             opaque type is generated, but will fail at runtime if it is
             used:</p>
 
-          <link rel="import" href="code/sexpr/sexp_opaque.topscript" part="3"/>
+          <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="3"/>
 
           <p>
 	    This is there to allow for s-expression converters to be
@@ -583,7 +583,7 @@
             the <code>t_of_sexp</code> function would still succeed
             when the list is empty:</p>
 
-          <link rel="import" href="code/sexpr/sexp_opaque.topscript" part="4"/>
+          <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="4"/>
 
           <p>
 	    If you really only want to generate one direction of
@@ -591,7 +591,7 @@
             <code>[@@deriving sexp_of]</code> or <code>[@@deriving of_sexp]</code>
             instead of <code>[@@deriving sexp]</code>:</p>
 
-          <link rel="import" href="code/sexpr/sexp_opaque.topscript" part="5"/>
+          <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="5"/>
 	</section>
 
 	<section id="sexp_list" data-type="sect2">
@@ -604,7 +604,7 @@
 
 	    <idx>Sexplib package/sexp_list</idx></p>
 
-          <link rel="import" href="code/sexpr/sexp_list.topscript" part="0.5"/>
+          <link rel="import" href="code/sexpr/sexp_list.mlt" part="0.5"/>
 
           <p>
 	    You might prefer to make the syntax a bit less
@@ -613,7 +613,7 @@
             type declaration with <code>string sexp_list</code> to give
             us this alternate syntax:</p>
 
-          <link rel="import" href="code/sexpr/sexp_list.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/sexp_list.mlt" part="1"/>
 	</section>
 
 	<section id="sexp_option" data-type="sect2">
@@ -630,7 +630,7 @@
 
 	    <idx>Sexplib package/sexp_option</idx></p>
 
-          <link rel="import" href="code/sexpr/sexp_option.topscript" part="0.5"/>
+          <link rel="import" href="code/sexpr/sexp_option.mlt" part="0.5"/>
 
           <p>
 	    But what if we want a field to be optional, i.e., we
@@ -638,7 +638,7 @@
             that case, we can mark it with
             <code>sexp_option</code>:</p>
 
-          <link rel="import" href="code/sexpr/sexp_option.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/sexp_option.mlt" part="1"/>
 	</section>
 
 	<section id="specifying-defaults" data-type="sect2">
@@ -658,7 +658,7 @@
 	    Consider the following type, which represents the
             configuration of a very simple web server:</p>
 
-          <link rel="import" href="code/sexpr/sexp_default.topscript" part="0.5"/>
+          <link rel="import" href="code/sexpr/sexp_default.mlt" part="0.5"/>
 
           <p>
 	    One could imagine making some of these parameters
@@ -666,28 +666,28 @@
             server to bind to port 80, and to listen as localhost. We
             can do this as follows:</p>
 
-          <link rel="import" href="code/sexpr/sexp_default.topscript" part="1"/>
+          <link rel="import" href="code/sexpr/sexp_default.mlt" part="1"/>
 
           <p>
 	    Now, if we try to convert an s-expression that specifies
             only the <code>web_root</code>, we'll see that the other
             values are filled in with the desired defaults:</p>
 
-          <link rel="import" href="code/sexpr/sexp_default.topscript" part="2"/>
+          <link rel="import" href="code/sexpr/sexp_default.mlt" part="2"/>
 
           <p>
 	    If we convert the configuration back out to an
             s-expression, you'll notice that all of the fields are
             present, even though they're not strictly necessary:</p>
 
-          <link rel="import" href="code/sexpr/sexp_default.topscript" part="3"/>
+          <link rel="import" href="code/sexpr/sexp_default.mlt" part="3"/>
 
           <p>
 	    We could make the generated s-expression also drop
             exported values, by using the
             <code>sexp_drop_default</code> directive:</p>
 
-          <link rel="import" href="code/sexpr/sexp_default.topscript" part="4"/>
+          <link rel="import" href="code/sexpr/sexp_default.mlt" part="4"/>
 
           <p>
 	    As you can see, the fields that are at their default
@@ -695,7 +695,7 @@
             other hand, if we convert a config with other values, then
             those values will be included in the s-expression:</p>
 
-          <link rel="import" href="code/sexpr/sexp_default.topscript" part="5"/>
+          <link rel="import" href="code/sexpr/sexp_default.mlt" part="5"/>
 
           <p>
 	    This can be very useful in designing config file formats
