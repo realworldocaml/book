@@ -6,46 +6,32 @@
 #require "ppx_jane";;
 #silent false;;
 open Base;;
+open Stdio;;
 [@@@part "1"];;
 let sum_file filename =
   let file = In_channel.create filename in
-  protect ~f:(fun () ->
+  Exn.protect ~f:(fun () ->
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
     List.fold ~init:0 ~f:(+) numbers)
     ~finally:(fun () -> In_channel.close file)
 ;;
-[%%expect{|
-Characters 37-54:
-Error: Unbound module In_channel
-|}];;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
 [@@@part "2"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-[%%expect{|
-Characters 34-42:
-Error: Unbound value sum_file
-|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 sum_file "numbers.txt";;
-[%%expect{|
-Characters 0-8:
-Error: Unbound value sum_file
-|}];;
+[%%expect ocaml {|- : int = 15|}];;
 [@@@part "3"];;
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
     List.fold ~init:0 ~f:(+) numbers)
 ;;
-[%%expect{|
-Characters 26-46:
-Error: Unbound module In_channel
-|}];;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
 [@@@part "4"];;
 let sum_file filename =
   In_channel.with_file filename ~f:(fun file ->
     In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
       sum + Int.of_string line))
 ;;
-[%%expect{|
-Characters 26-46:
-Error: Unbound module In_channel
-|}];;
+[%%expect ocaml {|val sum_file : string -> int = <fun>|}];;
