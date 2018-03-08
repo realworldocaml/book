@@ -7,6 +7,7 @@
 #silent false;;
 [@@@part "0.5"];;
 open Base;;
+open Stdio;;
 type basic_color =
   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
 [%%expect ocaml {|
@@ -33,21 +34,13 @@ List.map ~f:basic_color_to_int [Blue;Red];;
 [%%expect ocaml {|- : int list = [4; 1]|}];;
 [@@@part "2"];;
 let color_by_number number text =
-  sprintf "\027[38;5;%dm%s\027[0m" number text;;
-[%%expect{|
-Characters 36-43:
-Error: Unbound value sprintf
-|}];;
+  Printf.sprintf "\027[38;5;%dm%s\027[0m" number text;;
+[%%expect ocaml {|val color_by_number : int -> string -> string = <fun>|}];;
 let blue = color_by_number (basic_color_to_int Blue) "Blue";;
-[%%expect{|
-Characters 11-26:
-Error: Unbound value color_by_number
-|}];;
+[%%expect ocaml {|val blue : string = "\027[38;5;4mBlue\027[0m"|}];;
 printf "Hello %s World!\n" blue;;
-[%%expect{|
-Characters 0-6:
-Error: Unbound value printf
-|}];;
+[%%expect{|Hello [38;5;4mBlue[0m World!|};
+ocaml {|- : unit = ()|}];;
 [@@@part "3"];;
 type weight = Regular | Bold;;
 [%%expect ocaml {|type weight = Regular | Bold|}];;
@@ -75,22 +68,13 @@ let color_to_int = function
 [@@@part "5"];;
 let color_print color s =
   printf "%s\n" (color_by_number (color_to_int color) s);;
-[%%expect{|
-Characters 28-34:
-Error: Unbound value printf
-|}];;
+[%%expect ocaml {|val color_print : color -> string -> unit = <fun>|}];;
 color_print (Basic (Red,Bold)) "A bold red!";;
-[%%expect{|
-Characters 0-11:
-Error: Unbound value color_print
-Hint: Did you mean color_to_int?
-|}];;
+[%%expect{|[38;5;9mA bold red![0m|};
+ocaml {|- : unit = ()|}];;
 color_print (Gray 4) "A muted gray...";;
-[%%expect{|
-Characters 0-11:
-Error: Unbound value color_print
-Hint: Did you mean color_to_int?
-|}];;
+[%%expect{|[38;5;236mA muted gray...[0m|};
+ocaml {|- : unit = ()|}];;
 [@@@part "6"];;
 let three = `Int 3;;
 [%%expect ocaml {|val three : [> `Int of int ] = `Int 3|}];;

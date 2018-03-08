@@ -81,11 +81,11 @@ type client_message =
 [@@@part "3"];;
 let messages_for_user user messages =
   let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
+    List.fold messages ~init:([], Set.empty (module String))
       ~f:(fun ((messages,user_sessions) as acc) message ->
         match message with
         | Logon m ->
-          if m.user = user then
+          if String.(m.user = user) then
             (message::messages, Set.add user_sessions m.session_id)
           else acc
         | Heartbeat _ | Log_entry _ ->
@@ -101,9 +101,9 @@ let messages_for_user user messages =
   in
   List.rev user_messages
 ;;
-[%%expect{|
-Characters 97-113:
-Error: Unbound module String.Set
+[%%expect ocaml {|
+val messages_for_user : string -> client_message list -> client_message list =
+  <fun>
 |}];;
 [@@@part "4"];;
 module Log_entry = struct
