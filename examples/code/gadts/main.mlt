@@ -4,12 +4,12 @@
 #require "ppx_jane";;
 open Base;;
 [@@@part "1"];;
-type 'a compact_array = 
+type 'a compact_array =
   | Array of 'a array
   | Bytes of bytes
 ;;
 
-[%%expect ocaml {|type 'a compact_array = Array of 'a sexp_array | Bytes of string|}];;
+[%%expect ocaml {|type 'a compact_array = Array of 'a array | Bytes of bytes|}];;
 [@@@part "1.1"];;
 let of_bytes x = Bytes x
 let of_array x = Array x
@@ -41,8 +41,8 @@ type 'a gadt_compact_array =
 
 [%%expect ocaml {|
 type 'a gadt_compact_array =
-    Array : 'a sexp_array -> 'a gadt_compact_array
-  | Bytes : string -> 'a gadt_compact_array
+    Array : 'a array -> 'a gadt_compact_array
+  | Bytes : bytes -> 'a gadt_compact_array
 |}];;
 [@@@part "2.1"];;
 Array [|1;2;3|];;
@@ -51,17 +51,17 @@ Array [|1.0;2.0;3.0|];;
 [%%expect ocaml {|- : float gadt_compact_array = Array [|1.; 2.; 3.|]|}];;
 
 [@@@part "2.2"];;
-Bytes "foo";;
+Bytes (Bytes.of_string "foo");;
 
-[%%expect ocaml {|- : 'a gadt_compact_array = Bytes "foo"|}];;
+[%%expect ocaml {|- : '_weak1 gadt_compact_array = Bytes (Bytes.of_string "foo")|}];;
 [@@@part "3"];;
 type 'a t = | Array : 'a array -> 'a t
             | Bytes : bytes -> char t
 ;;
 
-[%%expect ocaml {|type 'a t = Array : 'a sexp_array -> 'a t | Bytes : string -> char t|}];;
+[%%expect ocaml {|type 'a t = Array : 'a array -> 'a t | Bytes : bytes -> char t|}];;
 [@@@part "3.1"];;
-let length t = 
+let length t =
   match t with
   | Bytes b -> Bytes.length b
   | Array a -> Array.length a
@@ -69,7 +69,7 @@ let length t =
 
 [%%expect ocaml {|val length : char t -> int = <fun>|}];;
 [@@@part "3.2"];;
-let length (type el) (t:el t) = 
+let length (type el) (t:el t) =
   match t with
   | Bytes b -> Bytes.length b
   | Array a -> Array.length a
@@ -105,9 +105,9 @@ end;;
 [%%expect ocaml {|
 module Compact_array :
   sig
-    type 'a t = Array : 'a sexp_array -> 'a t | Bytes : string -> char t
-    val of_bytes : string -> char t
-    val of_array : 'a sexp_array -> 'a t
+    type 'a t = Array : 'a array -> 'a t | Bytes : bytes -> char t
+    val of_bytes : bytes -> char t
+    val of_array : 'a array -> 'a t
     val length : 'a t -> int
     val get : 'a t -> int -> 'a
     val set : 'a t -> int -> 'a -> unit
@@ -118,7 +118,7 @@ type value =
   | Int of int
   | Bool of bool
 
-type expr = 
+type expr =
   | Value of value
   | If    of expr * expr * expr
   | Gt    of expr * expr
