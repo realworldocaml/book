@@ -50,7 +50,7 @@
 
 (alias (
   (name code)
-  (deps (example_load.mlt))
+  (deps (example_load.mlt example.scm example_broken.scm comment_heavy.scm))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

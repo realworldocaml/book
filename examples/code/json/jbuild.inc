@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (parse_book.mlt))
+  (deps (parse_book.mlt book.json))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
