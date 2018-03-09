@@ -10,7 +10,7 @@ script: scripts/build
 deploy:
   provider: pages
   skip_cleanup: true
-  local_dir: $TRAVIS_BUILD_DIR/site
+  local_dir: site
   github_token: $GITHUB_TOKEN
   on:
     branch: master
