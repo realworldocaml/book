@@ -67,7 +67,7 @@
 	  count of the specified string by 1; and <code>to_list</code>
 	  returns the list of nonzero frequencies.</p>
 
-	<p>Here's the implementation:</p>
+	<p>Here's the implementation.</p>
 
 	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
@@ -88,22 +88,26 @@
 	  comparison function from the <code>String</code>
 	  module. We'll talk about why the comparator witness is
 	  important later in the chapter.</p>
-
 	<p>
 	  The call to <code>Map.empty</code> is also worth explaining,
 	  in that, unusually, it takes a first-class module as an
 	  argument.  The point of the first class module is to provide
 	  the comparison function that is required for building the
-	  map. We don't need the module again for functions
-	  like <code>Map.find</code> or <code>Map.add</code>, because
-	  the map itself a reference to the comparison function it
-	  uses.</p>
+	  map, along with an s-expression converter for generating
+	  useful error messages (we'll talk more about s-expressions
+	  in <a href="17-data-serialization.html"
+	  data-type="xref">Data Serialization with
+	  S-Expressions</a>). We don't need to provide the module
+	  again for functions like <code>Map.find</code>
+	  or <code>Map.add</code>, because the map itself contains a reference
+	  to the comparison function it uses.</p>
 
 
 	<p>
 	  Not every module can be used for creating maps, but the
-	  standard ones in Base are. In the next chapter, we'll show
-	  how to set up a new module in this way. </p>
+	  standard ones in Base are. In the next section, we'll show
+	  how you can set up a module your own so it can be used in
+	  this way. </p>
 
 	<section id="modules-and-comparators" data-type="sect2">
           <h2>Modules and Comparators</h2>
@@ -128,70 +132,125 @@
           <link rel="import" part="mc.2"
 		href="code/maps-and-hash-tables/main.mlt" />
 
-          <p>
-	    The comparator is only required for operations that create
-            maps from scratch. Operations that update an existing map
-            simply inherit the comparator of the map they start with,
-            as we say above with the use of <code>Map.find</code>.</p>
+	  <p>
+	    The type <code>Map.comparator</code> is actually an alias
+	    for a first-class module type, representing any module
+	    that matches the signature <code>Comparator.S</code>,
+	    shown below.</p>
+
+          <link rel="import" part="mc.2.1"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    Such a module needs to contain the type of the key itself,
+	    as well as the <code>comparator_witness</code> type, which
+	    serves as a type-level identifier of the comparison
+	    function in question, and finally, the concrete comparator
+	    itself, a value that contains the necessary comparison
+	    function.</p>
+
+	  <p>
+	    Modules from Base like <code>Int</code>
+	    and <code>String</code> already satisfy this
+	    interface. But what if you want to satisfy this interface
+	    with a new module? Consider, for example, the following
+	    type representing a book, for which we've written a
+	    comparison function and an s-expression serializer.</p>
+
+          <link rel="import" part="mc.2.2"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    This module has the basic functionality we need, but
+	    doesn't satisfy the <code>Comparator.S</code> interface,
+	    so we can't use it for creating a map, as you can see.</p>
+
+          <link rel="import" part="mc.2.3"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    In order to satisfy the interface, we need to use
+	    the <code>Comparator.Make</code> functor to extend the
+	    module. Here, we use a common idiom where we create a
+	    submodule, called <code>T</code> containing the basic
+	    functionality for the type in question, and then include
+	    both that module and one or more functors applied to the
+	    module to construct the desired result.</p>
+
+          <link rel="import" part="mc.2.4"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    With this module in hand, we can now build a set or a map
+	    using the type <code>Book.t</code>.</p>
+
+          <link rel="import" part="mc.2.5"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  </section>
+	  <section id="why-comparator-witnesses" data-type="sect2">
+          <h2>Why do we need comparator witnesses?</h2>
 
           <p>
-	    Including the comparator in the type is important because
-            operations that work on multiple maps at the same time
-            often require that the maps share their comparison
-            function.  Consider, for
-            example, <code>Map.symmetric_diff</code>, which computes
-            the difference between two maps.</p>
+	    The comparator witness looks a little surprising at first,
+	    and it may not be obvious why it's there in the first
+	    place. The purpose of the comparison witness is to
+	    identify the comparison function being used at the type
+	    level, which is important because some of the operations
+	    on maps, in particular those that combine multiple maps,
+	    depend for their correctness on the fact that the
+	    different maps are using the same comparison function.</p>
+
+
+	  <p>
+	    Consider, for example, <code>Map.symmetric_diff</code>,
+	    which computes the difference between two maps.</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.3"/>
 
           <p>
 	    The type of <code>Map.symmetric_diff</code>, which
             follows, requires that the two maps it compares have the
-            same comparator type. Each comparator has a distinct
-            abstract type, so the type of a comparator identifies the
-            comparator uniquely.</p>
+            same comparator type, and therefore the same comparison
+            function.</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.4"/>
 
           <p>
-	    This constraint is important because the algorithm
-            that <code>Map.symmetric_diff</code> uses depends on the
-            fact that both maps have the same comparator; running it
-            on maps sorted in different ways would lead to garbled
-            results.</p>
-
-          <p>
-	    We can create a new comparator using
-            the <code>Comparator.Make</code> functor, which takes as
-            its input a module containing the type of the object to be
-            compared, sexp converter functions, and a comparison
-            function. The sexp converters are included in the
-            comparator to make it possible for users of the comparator
-            to generate better error messages. Here's an example:
-
-	    <idx>Sexplib package/sexp converter</idx></p>
+	    Without this constraint, we could
+	    run <code>Map.symmetric_diff</code> on maps that are
+	    sorted in different orders, which could lead to garbled
+            results. We can show how this works in practice by
+            creating two maps with the same key and data types, but
+            different comparison functions.  In the following, we do
+            this by minting a new module <code>Reverse</code>, which
+            represents strings sorted in the reverse of the usual
+            lexicographic order.
+	  </p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.5"/>
 
           <p>
-	    As you can see in the following code,
-            both <code>Reverse</code> and <code>String</code> can be
+	    As you can see in the following, both <code>Reverse</code>
+	    and <code>String</code> can be
             used to create maps with a key type
             of <code>string</code>:</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.6"/>
 
           <p>
-	    <code>Map.min_elt</code> returns the key and value for
-            the smallest key in the map, which lets us see that these
-            two maps do indeed use different comparison functions:</p>
+	    <code>Map.min_elt</code> returns the key and value for the
+            smallest key in the map, which confirms that these two
+            maps do indeed use different comparison functions.</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.7"/>
 
           <p>
-	    Accordingly, if we try to use
-            <code>Map.symmetric_diff</code> on these two maps, we'll
-            get a compile-time error:</p>
+	    As such, running <code>Map.symmetric_diff</code> on these
+	    maps doesn't make any sense. Happily, the type system will
+            give us a compile-time error if we try, instead of
+            throwing an error at run time, or worse, silently
+            returning the wrong result.</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.8"/>
 	</section>
@@ -201,30 +260,29 @@
 
           <p>
 	    We don't need to generate specialized comparators for
-            every type we want to build a map on. We can instead use a
-            comparator based on OCaml's built-in polymorphic comparison
-            function, which was discussed in <a href="03-lists-and-patterns.html#lists-and-patterns" data-type="xref">Lists And Patterns</a>. This comparator is found in
-            the <code>Comparator.Poly</code> module, allowing us to
-            write:
+            every type we want to build a map on. We can instead build
+            a map based on OCaml's built-in polymorphic comparison
+            function, which was discussed
+            in <a href="03-lists-and-patterns.html#lists-and-patterns"
+            data-type="xref">Lists And Patterns</a>. Base currently
+            doesn't have a convenient function for minting maps based
+            on polymorphic compare, but Core_kernel does, as we can
+            see below.
 
 	    <idx>maps/polymorphic comparison in</idx>
-	    <idx>Comparator.Poly module</idx>
-	    <idx>polymorphic comparisons</idx></p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="14"/>
-
-          <p>
-	    Or, equivalently:</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="15"/>
+	    <idx>polymorphic comparisons</idx>
+	  </p>
+          <link rel="import" part="pc.1"
+		href="code/maps-and-hash-tables/main.mlt" />
 
           <p>
-	    Note that maps based on the polymorphic comparator are
-            not equivalent to those based on the type-specific
-            comparators from the point of view of the type system.
-            Thus, the compiler rejects the following:</p>
+	    Note that maps based on the polymorphic comparator have
+	    different comparator witnesses than those based on the
+	    type-specific comparison function.  Thus, the compiler
+	    rejects the following:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="16"/>
+          <link rel="import" part="pc.2"
+		href="code/maps-and-hash-tables/main.mlt"/>
 
           <p>
 	    This is rejected for good reason: there's no guarantee
@@ -254,10 +312,10 @@
               function that works for most OCaml values and largely
               behaves as you would expect. For example,
               on <code>int</code>s and <code>float</code>s, it acts as
-              you would expect a numeric comparison function to
-              act. For simple containers like strings and lists and
-              arrays, it operates as a lexicographic comparison. And
-              except for values from outside of the OCaml heap and
+              you would expect a numeric comparison function to act,
+              and for simple containers like strings and lists and
+              arrays, it operates as a lexicographic comparison.
+              Except for values from outside of the OCaml heap and
               functions, it works on almost every OCaml type.</p>
 
             <p>
