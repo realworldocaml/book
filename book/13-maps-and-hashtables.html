@@ -53,9 +53,10 @@
 
 	<p>
 	  Let's consider an example of how one might use a map in
-	  practice. In <a href="04-files-modules-and-programs.html#files-modules-and-programs" data-type="xref">Files Modules And Programs</a>, we showed a
-	  module <code>Counter</code> for keeping frequency counts on a
-	  set of strings. Here's the interface:</p>
+	  practice. In <a href="04-files-modules-and-programs.html#files-modules-and-programs"
+	  data-type="xref">Files Modules And Programs</a>, we showed a
+	  module <code>Counter</code> for keeping frequency counts on
+	  a set of strings. Here's the interface:</p>
 
 	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.mli"/>
 
@@ -71,53 +72,61 @@
 	<link rel="import" href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
 	<p>
-	  Note that in some places the preceding code refers to
-	  <code>String.Map.t</code>, and in others <code>Map.t</code>.
-	  This has to do with the fact that maps are implemented as
-	  ordered binary trees, and as such, need a way of comparing
-	  keys.</p>
+	  Take a look at the definition of the type <code>t</code>
+	  above.  You'll see that the <code>Map.t</code> has three
+	  type parameter. The first two are what you might expect; one
+	  for the type of the key, and one for type of the data. The
+	  third type parameter, the <em>comparator witness</em>,
+	  requires some explaining. </p>
+
+	<p> 
+	  The comparator witness is used to indicate which comparison
+	  function was used to construct the map, rather than saying
+	  anything about concrete data stored in the map.  The
+	  type <code>String.comparator_witness</code> in particular
+	  indicates that this map was built with the default
+	  comparison function from the <code>String</code>
+	  module. We'll talk about why the comparator witness is
+	  important later in the chapter.</p>
 
 	<p>
-	  To deal with this, a map, once created, stores the
-	  necessary comparison function within the data structure.
-	  Thus, operations like <code>Map.find</code> or
-	  <code>Map.add</code> that access the contents of a map or
-	  create a new map from an existing one, do so by using the
-	  comparison function embedded within the map.</p>
+	  The call to <code>Map.empty</code> is also worth explaining,
+	  in that, unusually, it takes a first-class module as an
+	  argument.  The point of the first class module is to provide
+	  the comparison function that is required for building the
+	  map. We don't need the module again for functions
+	  like <code>Map.find</code> or <code>Map.add</code>, because
+	  the map itself a reference to the comparison function it
+	  uses.</p>
+
 
 	<p>
-	  But in order to get a map in the first place, you need to
-	  get your hands on the comparison function somehow. For this
-	  reason, modules like <code>String</code> contain a
-	  <code>Map</code> submodule that has values like
-	  <code>String.Map.empty</code> and
-	  <code>String.Map.of_alist</code> that are specialized to
-	  strings, and thus have access to a string comparison
-	  function. Such a <code>Map</code> submodule is included in
-	  every module that satisfies the <code>Comparable.S</code>
-	  interface from Core.</p>
+	  Not every module can be used for creating maps, but the
+	  standard ones in Base are. In the next chapter, we'll show
+	  how to set up a new module in this way. </p>
 
-	<section id="creating-maps-with-comparators" data-type="sect2">
-          <h2>Creating Maps with Comparators</h2>
+	<section id="modules-and-comparators" data-type="sect2">
+          <h2>Modules and Comparators</h2>
 
           <p>
-	    The specialized <code>Map</code> submodule is
-            convenient, but it's not the only way of creating a
-            <code>Map.t</code>. The information required to compare
-            values of a given type is wrapped up in a value called a
-            <em>comparator</em> that can be used to create maps using
-            the <code>Map</code> module directly:
+	    It's easy enough to create a map whose key type is
+	    represented by a module in Base.  Here, we'll create a map
+	    from digits to their English names, based
+	    on <code>digit_alist</code>, which was defined earlier in
+	    the chapter. </p>
 
-	    <idx>comparators, creating maps with</idx>
-	    <idx>Map module/Map.of_alist_exn</idx>
-	    <idx>maps/creating with comparators</idx></p>
+          <link rel="import" part="mc.1" 
+		href="code/maps-and-hash-tables/main.mlt" />
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="3"/>
+	  <p> 
+	    The function <code>Map.of_alist_exn</code> constructs a
+	    map from a provided association list, throwing an
+	    exception if a key is used more than once.  Let's take a
+	    look at the type signature
+	    of <code>Map.of_alist_exn</code>.</p>
 
-          <p>
-	    The preceding code uses <code>Map.of_alist_exn</code>,
-            which creates a map from an association list, throwing an
-            exception if there are duplicate keys in the list.</p>
+          <link rel="import" part="mc.2" 
+		href="code/maps-and-hash-tables/main.mlt" />
 
           <p>
 	    The comparator is only required for operations that
@@ -125,7 +134,6 @@
             existing map simply inherit the comparator of the map they
             start with:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="4"/>
 
           <p>
 	    The type <code>Map.t</code> has three type parameters: one
@@ -175,9 +183,9 @@
 
           <p>
 	    As you can see in the following code,
-            both <code>Reverse.comparator_witness</code>
-            and <code>String.comparator_witness</code> can be used to
-            create maps with a key type of <code>string</code>:</p>
+            both <code>Reverse</code> and <code>String</code> can be
+            used to create maps with a key type
+            of <code>string</code>:</p>
 
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="8"/>
 

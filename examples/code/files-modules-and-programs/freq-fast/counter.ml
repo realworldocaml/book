@@ -1,6 +1,6 @@
 open Base
 
-type t = int Map.M(String).t
+type t = (string,int,String.comparator_witness) Map.t
 
 let empty = Map.empty (module String)
 
