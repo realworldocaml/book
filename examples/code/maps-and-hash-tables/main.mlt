@@ -42,7 +42,9 @@ Map.of_alist_exn;;
 - : ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t =
 <fun>
 |}];;
-[@@@part "5"];;
+
+
+[@@@part "mc.3"];;
 let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0];;
 [%%expect ocaml {|val left : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
 let right = Map.of_alist_exn (module String) ["foo",0; "snoo",0];;
@@ -53,7 +55,7 @@ Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 [("bar", `Left 3); ("foo", `Unequal (1, 0))]
 |}];;
 
-[@@@part "6"];;
+[@@@part "mc.4"];;
 Map.symmetric_diff;;
 [%%expect ocaml {|
 - : ('k, 'v, 'cmp) Map.t ->
@@ -63,7 +65,7 @@ Map.symmetric_diff;;
 = <fun>
 |}];;
 
-[@@@part "7"];;
+[@@@part "mc.5"];;
 module Reverse = struct
   module T = struct
     type t = string
@@ -93,7 +95,7 @@ module Reverse :
   end
 |}];;
 
-[@@@part "8"];;
+[@@@part "mc.6"];;
 let alist = ["foo", 0; "snoo", 3];;
 [%%expect ocaml {|val alist : (string * int) list = [("foo", 0); ("snoo", 3)]|}];;
 let ord_map = Map.of_alist_exn (module String) alist;;
@@ -101,13 +103,13 @@ let ord_map = Map.of_alist_exn (module String) alist;;
 let rev_map = Map.of_alist_exn (module Reverse) alist;;
 [%%expect ocaml {|val rev_map : (string, int, Reverse.comparator_witness) Map.t = <abstr>|}];;
 
-[@@@part "9"];;
+[@@@part "mc.7"];;
 Map.min_elt ord_map;;
 [%%expect ocaml {|- : (string * int) option = Some ("foo", 0)|}];;
 Map.min_elt rev_map;;
 [%%expect ocaml {|- : (string * int) option = Some ("snoo", 3)|}];;
 
-[@@@part "10"];;
+[@@@part "mc.8"];;
 Map.symmetric_diff ord_map rev_map;;
 [%%expect{|
 Characters 27-34:

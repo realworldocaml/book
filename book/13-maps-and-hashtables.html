@@ -79,7 +79,7 @@
 	  third type parameter, the <em>comparator witness</em>,
 	  requires some explaining. </p>
 
-	<p> 
+	<p>
 	  The comparator witness is used to indicate which comparison
 	  function was used to construct the map, rather than saying
 	  anything about concrete data stored in the map.  The
@@ -115,42 +115,34 @@
 	    on <code>digit_alist</code>, which was defined earlier in
 	    the chapter. </p>
 
-          <link rel="import" part="mc.1" 
+          <link rel="import" part="mc.1"
 		href="code/maps-and-hash-tables/main.mlt" />
 
-	  <p> 
+	  <p>
 	    The function <code>Map.of_alist_exn</code> constructs a
 	    map from a provided association list, throwing an
 	    exception if a key is used more than once.  Let's take a
 	    look at the type signature
 	    of <code>Map.of_alist_exn</code>.</p>
 
-          <link rel="import" part="mc.2" 
+          <link rel="import" part="mc.2"
 		href="code/maps-and-hash-tables/main.mlt" />
 
           <p>
-	    The comparator is only required for operations that
-            create maps from scratch. Operations that update an
-            existing map simply inherit the comparator of the map they
-            start with:</p>
-
-
-          <p>
-	    The type <code>Map.t</code> has three type parameters: one
-            for the key, one for the value, and one to identify the
-            comparator. Indeed, the type <code>'a Int.Map.t</code> is
-            just a type alias
-            for <code>(int,'a,Int.comparator_witness)
-            Map.t</code>.</p>
+	    The comparator is only required for operations that create
+            maps from scratch. Operations that update an existing map
+            simply inherit the comparator of the map they start with,
+            as we say above with the use of <code>Map.find</code>.</p>
 
           <p>
 	    Including the comparator in the type is important because
-            operations that work on multiple maps at the same time often
-            require that the maps share their comparison function.
-            Consider, for example, <code>Map.symmetric_diff</code>,
-            which computes the difference between two maps.</p>
+            operations that work on multiple maps at the same time
+            often require that the maps share their comparison
+            function.  Consider, for
+            example, <code>Map.symmetric_diff</code>, which computes
+            the difference between two maps.</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="5"/>
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.3"/>
 
           <p>
 	    The type of <code>Map.symmetric_diff</code>, which
@@ -159,27 +151,27 @@
             abstract type, so the type of a comparator identifies the
             comparator uniquely.</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="6"/>
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.4"/>
 
           <p>
 	    This constraint is important because the algorithm
-            that <code>Map.symmetric_diff</code> uses depends for its
-            correctness on the fact that both maps have the same
-            comparator.</p>
+            that <code>Map.symmetric_diff</code> uses depends on the
+            fact that both maps have the same comparator; running it
+            on maps sorted in different ways would lead to garbled
+            results.</p>
 
           <p>
-	    We can create a new comparator using the
-            <code>Comparator.Make</code> functor, which takes as its
-            input a module containing the type of the object to be
+	    We can create a new comparator using
+            the <code>Comparator.Make</code> functor, which takes as
+            its input a module containing the type of the object to be
             compared, sexp converter functions, and a comparison
             function. The sexp converters are included in the
             comparator to make it possible for users of the comparator
-            to generate better error messages. Here's an
-            example:
+            to generate better error messages. Here's an example:
 
 	    <idx>Sexplib package/sexp converter</idx></p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="7"/>
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.5"/>
 
           <p>
 	    As you can see in the following code,
@@ -187,65 +179,21 @@
             used to create maps with a key type
             of <code>string</code>:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="8"/>
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.6"/>
 
           <p>
 	    <code>Map.min_elt</code> returns the key and value for
             the smallest key in the map, which lets us see that these
             two maps do indeed use different comparison functions:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="9"/>
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.7"/>
 
           <p>
 	    Accordingly, if we try to use
             <code>Map.symmetric_diff</code> on these two maps, we'll
             get a compile-time error:</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="10"/>
-	</section>
-
-	<section id="trees" data-type="sect2">
-          <h2>Trees</h2>
-
-          <p>
-	    As we've discussed, maps carry within them the comparator
-            that they were created with. Sometimes, for space
-            efficiency reasons, you want a version of the map data
-            structure that doesn't include the comparator. You can get
-            such a representation with <code>Map.to_tree</code>, which
-            returns just the tree underlying the map, without the
-            comparator:
-
-	    <idx>Map module/Map.to_tree</idx>
-	    <idx>maps/tree structure</idx></p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="11"/>
-
-          <p>
-	    Even though a <code>Map.Tree.t</code> doesn't physically
-            include a comparator, it does include the comparator in its
-            type. This is what is known as a <em>phantom type</em>,
-            because it reflects something about the logic of the value
-            in question, even though it doesn't correspond to any
-            values directly represented in the underlying physical
-            structure of the value.</p>
-
-          <p>
-	    Since the comparator isn't included in the tree, we need
-            to provide the comparator explicitly when we, say, search
-            for a key, as shown below:</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="12"/>
-
-          <p>
-	    The algorithm of <code>Map.Tree.find</code> depends on
-            the fact that it's using the same comparator when looking
-            up a value as you were when you stored it. That's the
-            invariant that the phantom type is there to enforce. As you
-            can see in the following example, using the wrong
-            comparator will lead to a type error:</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="13"/>
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.8"/>
 	</section>
 
 	<section id="the-polymorphic-comparator" data-type="sect2">
@@ -527,6 +475,51 @@
             <link rel="import" href="code/maps-and-hash-tables/phys_equal.rawscript"/>
           </aside>
 	</section>
+
+	<section id="trees" data-type="sect2">
+          <h2>Trees</h2>
+
+          <p>
+	    As we've discussed, maps carry within them the comparator
+            that they were created with. Sometimes, for space
+            efficiency reasons, you want a version of the map data
+            structure that doesn't include the comparator. You can get
+            such a representation with <code>Map.to_tree</code>, which
+            returns just the tree underlying the map, without the
+            comparator:
+
+	    <idx>Map module/Map.to_tree</idx>
+	    <idx>maps/tree structure</idx></p>
+
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="11"/>
+
+          <p>
+	    Even though a <code>Map.Tree.t</code> doesn't physically
+            include a comparator, it does include the comparator in its
+            type. This is what is known as a <em>phantom type</em>,
+            because it reflects something about the logic of the value
+            in question, even though it doesn't correspond to any
+            values directly represented in the underlying physical
+            structure of the value.</p>
+
+          <p>
+	    Since the comparator isn't included in the tree, we need
+            to provide the comparator explicitly when we, say, search
+            for a key, as shown below:</p>
+
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="12"/>
+
+          <p>
+	    The algorithm of <code>Map.Tree.find</code> depends on
+            the fact that it's using the same comparator when looking
+            up a value as you were when you stored it. That's the
+            invariant that the phantom type is there to enforce. As you
+            can see in the following example, using the wrong
+            comparator will lead to a type error:</p>
+
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="13"/>
+	</section>
+
       </section>
 
       <section id="hash-tables" data-type="sect1">
