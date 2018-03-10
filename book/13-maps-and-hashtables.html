@@ -105,17 +105,39 @@
 
 	<p>
 	  Not every module can be used for creating maps, but the
-	  standard ones in Base are. In the next section, we'll show
+	  standard ones in <code>Base</code> are. Later in the chapter, we'll show
 	  how you can set up a module your own so it can be used in
 	  this way. </p>
+
+	<section id="sets" data-type="sect2">
+          <h2>Sets</h2>
+
+          <p>
+	    In addition to maps, <code>Base</code> also provides a set
+	    data type that's designed along similar lines. In some
+	    sense, sets are little more than maps where you ignore the
+	    data.  But while you could encode sets in terms of maps,
+	    it's more natural, and more efficient, to
+	    use <code>Base</code>'s specialized set type. Here's a
+	    simple example.  <idx>set types</idx></p>
+
+          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="17"/>
+
+          <p>
+	    In addition to the operators you would expect to have
+            for maps, sets support the traditional set operations,
+            including union, intersection, and set difference. And, as
+            with maps, we can create sets based on type-specific
+            comparators or on the polymorphic comparator.</p>
+	</section>
 
 	<section id="modules-and-comparators" data-type="sect2">
           <h2>Modules and Comparators</h2>
 
           <p>
-	    It's easy enough to create a map whose key type is
-	    represented by a module in Base.  Here, we'll create a map
-	    from digits to their English names, based
+	    It's easy enough to create a map or set based on a type
+	    represented by a module in <code>Base</code>.  Here, we'll
+	    create a map from digits to their English names, based
 	    on <code>digit_alist</code>, which was defined earlier in
 	    the chapter. </p>
 
@@ -150,7 +172,7 @@
 	    function.</p>
 
 	  <p>
-	    Modules from Base like <code>Int</code>
+	    Modules from <code>Base</code> like <code>Int</code>
 	    and <code>String</code> already satisfy this
 	    interface. But what if you want to satisfy this interface
 	    with a new module? Consider, for example, the following
@@ -174,15 +196,15 @@
 	    module. Here, we use a common idiom where we create a
 	    submodule, called <code>T</code> containing the basic
 	    functionality for the type in question, and then include
-	    both that module and one or more functors applied to the
-	    module to construct the desired result.</p>
+	    both that module and the result of applying a functor to
+	    that module.</p>
 
           <link rel="import" part="mc.2.4"
 		href="code/maps-and-hash-tables/main.mlt" />
 
 	  <p>
-	    With this module in hand, we can now build a set or a map
-	    using the type <code>Book.t</code>.</p>
+	    With this module in hand, we can now build a set using the
+	    type <code>Book.t</code>.</p>
 
           <link rel="import" part="mc.2.5"
 		href="code/maps-and-hash-tables/main.mlt" />
@@ -194,13 +216,12 @@
           <p>
 	    The comparator witness looks a little surprising at first,
 	    and it may not be obvious why it's there in the first
-	    place. The purpose of the comparison witness is to
-	    identify the comparison function being used at the type
-	    level, which is important because some of the operations
-	    on maps, in particular those that combine multiple maps,
-	    depend for their correctness on the fact that the
-	    different maps are using the same comparison function.</p>
-
+	    place. The purpose of the witness is to identify the
+	    comparison function being used. This is important because
+	    some of the operations on maps and sets, in particular
+	    those that combine multiple maps or sets together, depend
+	    for their correctness on the fact that the different maps
+	    are using the same comparison function.</p>
 
 	  <p>
 	    Consider, for example, <code>Map.symmetric_diff</code>,
@@ -264,9 +285,9 @@
             a map based on OCaml's built-in polymorphic comparison
             function, which was discussed
             in <a href="03-lists-and-patterns.html#lists-and-patterns"
-            data-type="xref">Lists And Patterns</a>. Base currently
+            data-type="xref">Lists And Patterns</a>. <code>Base</code> currently
             doesn't have a convenient function for minting maps based
-            on polymorphic compare, but Core_kernel does, as we can
+            on polymorphic compare, but <code>Core_kernel</code> does, as we can
             see below.
 
 	    <idx>maps/polymorphic comparison in</idx>
@@ -320,17 +341,17 @@
 
             <p>
 	      But sometimes, a structural comparison is not what you
-              want. Sets are a great example of this. Consider the
-              following two sets:</p>
+              want. Maps are actually a fine example of this. Consider
+              the following two maps.</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="18"/>
+            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="ppc.1"/>
 
             <p>
 	      Logically, these two sets should be equal, and that's
-              the result that you get if you call
-              <code>Set.equal</code> on them:</p>
+              the result that you get if you
+              call <code>Map.equal</code> on them:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="19"/>
+            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="ppc.2"/>
 
             <p>
 	      But because the elements were added in different
@@ -339,20 +360,26 @@
               will conclude that they're different.</p>
 
             <p>
-	      Let's see what happens if we use polymorphic compare
-              to test for equality by way of the <code>=</code>
-              operator. Comparing the maps directly will fail at
-              runtime because the comparators stored within the sets
-              contain function values:</p>
+	      Let's see what happens if we use polymorphic compare to
+              test for equality. <code>Base</code> hides polymorphic comparison by
+              defaults, but it is available by opening
+              the <code>Poly</code> module, at which
+              point <code>=</code> is bound to polymorphic equality.
+              Comparing the maps directly will fail at runtime because
+              the comparators stored within the sets contain function
+              values:</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="20"/>
+            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="ppc.3"/>
 
             <p>
-	      We can, however, use the function
-              <code>Set.to_tree</code> to expose the underlying tree
-              without the attached comparator:</p>
+	      We can, however, use the
+              function <code>Map.Using_comparator.to_tree</code> to
+              expose the underlying binary tree without the attached
+              comparator. This same issue comes up with other data
+              types, including sets, which we'll discuss later in the
+              chapter.</p>
 
-            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="21"/>
+            <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="ppc.4"/>
 
             <p>
 	      This can cause real and quite subtle bugs. If, for
@@ -366,107 +393,37 @@
           </aside>
 	</section>
 
-	<section id="sets" data-type="sect2">
-          <h2>Sets</h2>
+	<section id="using-deriving" data-type="sect2">
+          <h2>Using <code>[@@deriving]</code></h2>
 
-          <p>
-	    Sometimes, instead of keeping track of a set of key/value
-            pairs, you just want to keep track of a set of keys. You
-            could representing a set of values by a map whose data
-            type is <code>unit</code>. But a more idiomatic (and
-            efficient) solution is to use Core's set type, which is
-            similar in design and spirit to the map type, while having
-            an API better tuned to working with sets and a lower
-            memory footprint. Here's a simple example:
-	    <idx>set types</idx></p>
+	  <p>
+	    Using maps and sets on a new type requires satisfying
+	    the <code>Comparator.S</code> interface, which in turn
+	    requires s-expression converters and comparison functions
+	    for the type in question. Writing such functions by hand
+	    is annoying and error prone, but there's a better
+	    way. <code>Base</code> comes along with a set of syntax
+	    extensions that automate these tasks away.</p>
 
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="17"/>
+	  <p>
+	    Let's return to an example from earlier in the chapter,
+	    where we created a type <code>Book.t</code> and set it up
+	    for use in creating maps and sets.</p>
 
-          <p>
-	    In addition to the operators you would expect to have
-            for maps, sets support the traditional set operations,
-            including union, intersection, and set difference. And, as
-            with maps, we can create sets based on type-specific
-            comparators or on the polymorphic comparator.</p>
-	</section>
+          <link rel="import" part="mc.2.4"
+		href="code/maps-and-hash-tables/main.mlt" />
 
-	<section id="satisfying-the-comparable.s-interface" data-type="sect2">
-          <h2>Satisfying the Comparable.S Interface</h2>
+	  <p>
+	    Much of the code here is devoted to creating a comparison
+	    function and s-expression converter for the
+	    type <code>Book.t</code>. But if we have the ppx_sexp_conv
+	    and ppx_compare syntax extensions enabled (both of which
+	    come with the omnibus ppx_jane package), then we can
+	    request that default implementations of these functions be
+	    created, as follows.</p>
 
-          <p>
-	    Core's <code>Comparable.S</code> interface includes a
-            lot of useful functionality, including support for working
-            with maps and sets. In particular,
-            <code>Comparable.S</code> requires the presence of the
-            <code>Map</code> and <code>Set</code> submodules, as well
-            as a comparator.
-
-	    <idx>interfaces/Comparable.S</idx>
-	    <idx>Comparable module/Comparable.Make</idx>
-	    <idx>Comparable module/Comparable.S</idx>
-	    <idx>maps/comparable.S interface</idx></p>
-
-          <p>
-	    <code>Comparable.S</code> is satisfied by most of the
-            types in Core, but the question arises of how to satisfy
-            the comparable interface for a new type that you design.
-            Certainly implementing all of the required functionality
-            from scratch would be an absurd amount of work.</p>
-
-          <p>
-	    The module <code>Comparable</code> contains a number of
-            functors to help you automate this task. The simplest one
-            of these is <code>Comparable.Make</code>, which takes as an
-            input any module that satisfies the following
-            interface:</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/comparable.ml"/>
-
-          <p>
-	    In other words, it expects a type with a comparison
-            function, as well as functions for converting to and
-            from <em>s-expressions</em>. S-expressions are a
-            serialization format used commonly in Core and are
-            required here to enable better error messages. We'll
-            discuss s-expressions more
-            in <a href="17-data-serialization.html#data-serialization-with-s-expressions"
-            data-type="xref">Data Serialization With S
-            Expressions</a>, but in the meantime, we'll use
-            the <code>[@@deriving sexp]</code> annotation that comes
-            from the <code>ppx_sexp_conv</code> syntax extension.
-            This declaration kicks off the automatic generation of
-            s-expression conversion functions for the marked type.</p>
-
-          <p>
-	    The following example shows how this all fits together,
-            following the same basic pattern for using functors described
-            in <a href="09-functors.html#extending-modules" data-type="xref">Extending Modules</a>:</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="22"/>
-
-          <p>
-	    We don't include the full response from the toplevel
-            because it is quite lengthy, but <code>Foo_and_bar</code>
-            does satisfy <code>Comparable.S</code>.</p>
-
-          <p>
-	    In the preceding code we wrote the comparison function by
-            hand, but this isn't strictly necessary. Core ships with a
-            syntax extension which will create a comparison function
-            from a type definition if you write <code>[@@deriving
-            compare]</code> after the type defintion.  We can rewrite
-            the previous example to use this extension</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="23"/>
-
-          <p>
-	    The comparison function we get from <code>[@@deriving
-	    compare]</code> will call out to the comparison functions
-	    for its component types. As a result, the <code>foo</code>
-	    field will be compared
-	    using <code>Int.Set.compare</code>. This is different, and
-            saner than the structural comparison done by polymorphic
-            compare.</p>
+          <link rel="import" part="ud.1"
+		href="code/maps-and-hash-tables/main.mlt" />
 
           <p>
 	    If you want your comparison function that orders things in
@@ -475,16 +432,6 @@
             suitable for creating maps and sets with,
             then <code>[@@deriving compare]</code> is a good
             choice.</p>
-
-          <p>
-	    You can also satisfy the <code>Comparable.S</code>
-            interface using polymorphic compare:</p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="24"/>
-
-          <p>
-	    That said, for reasons we discussed earlier, polymorphic
-            compare should be used sparingly.</p>
 
           <aside data-type="sidebar">
             <h5>=, ==, and phys_equal</h5>

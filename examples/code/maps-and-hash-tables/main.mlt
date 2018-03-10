@@ -260,21 +260,14 @@ Error: This expression has type (int, string, Int.comparator_witness) Map.t
 |}];;
 
 [@@@part "17"];;
-let dedup ~comparator l =
-  List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
-  |> Set.to_list
-;;
-[%%expect{|
-Characters 58-68:
-Error: The function applied to this argument has type
-         ('a, 'b) Set.comparator -> ('a, 'b) Set.t
-This argument cannot be applied with label ~comparator
-|}];;
-dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
-[%%expect{|
-Characters 0-5:
-Error: Unbound value dedup
-|}];;
+Set.of_list (module Int) [1;2;3] |> Set.to_list;;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
+Set.union
+  (Set.of_list (module Int) [1;2;3;2])
+  (Set.of_list (module Int) [3;5;1])
+|> Set.to_list;;
+[%%expect ocaml {|- : int list = [1; 2; 3; 5]|}];;
+
 
 [@@@part "ppc.1"];;
 let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
@@ -294,6 +287,42 @@ Poly.(m1 = m2);;
 Poly.((Map.Using_comparator.to_tree m1) =
       (Map.Using_comparator.to_tree m2));;
 [%%expect ocaml {|- : bool = false|}];;
+
+[@@@part "ud.1"];;
+module Book = struct
+  module T = struct
+    type t = { title: string; isbn: string }
+    [@@deriving compare, sexp_of]
+  end
+  include T
+  include Comparator.Make(T)
+end;;
+[%%expect ocaml {|
+module Book :
+  sig
+    module T :
+      sig
+        type t = { title : string; isbn : string; }
+        val compare : t -> t -> int
+        val sexp_of_t : t -> Sexp.t
+      end
+    type t = T.t = { title : string; isbn : string; }
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
+    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
+  end
+|}];;
+
+
+
+
+
+
+
+
+
+
 
 [@@@part "22"];;
 module Foo_and_bar : sig

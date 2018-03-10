@@ -7,12 +7,13 @@
 #silent false;;
 
 [@@@part "1"];;
-open Core_kernel;;
+open Base;;
 1 == 2 ;;
 [%%expect{|
 Characters 2-4:
-Warning 3: deprecated: Core_kernel.==
-[since 2014-10] Use [phys_equal]
+Warning 3: deprecated: Base.==
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Use [phys_equal] instead.
 |};
 ocaml {|- : bool = false|}];;
 phys_equal 1 2 ;;
