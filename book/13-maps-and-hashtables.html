@@ -489,9 +489,10 @@
             that they were created with. Sometimes, for space
             efficiency reasons, you want a version of the map data
             structure that doesn't include the comparator. You can get
-            such a representation with <code>Map.to_tree</code>, which
+            such a representation
+            with <code>Map.Using_comparator.to_tree</code>, which
             returns just the tree underlying the map, without the
-            comparator:
+            comparator.
 
 	    <idx>Map module/Map.to_tree</idx>
 	    <idx>maps/tree structure</idx></p>
@@ -499,7 +500,7 @@
           <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="11"/>
 
           <p>
-	    Even though a <code>Map.Tree.t</code> doesn't physically
+	    Even though the tree doesn't physically
             include a comparator, it does include the comparator in its
             type. This is what is known as a <em>phantom type</em>,
             because it reflects something about the logic of the value
@@ -532,11 +533,13 @@
 
 	<p>
 	  Hash tables are the imperative cousin of maps. We walked
-	  over a basic hash table implementation in <a href="08-imperative-programming.html#imperative-programming-1" data-type="xref">Imperative Programming 1</a>, so in this
-	  section we'll mostly discuss the pragmatics of Core's
-	  <code>Hashtbl</code> module. We'll cover this material more
-	  briefly than we did with maps because many of the concepts
-	  are shared.
+	  over a basic hash table implementation
+	  in <a href="08-imperative-programming.html#imperative-programming-1"
+	  data-type="xref">Imperative Programming 1</a>, so in this
+	  section we'll mostly discuss the pragmatics of
+	  Core's <code>Hashtbl</code> module. We'll cover this
+	  material more briefly than we did with maps because many of
+	  the concepts are shared.
 
 	  <idx>hash tables/basics of</idx></p>
 
@@ -563,25 +566,25 @@
           <p>
 	    The statement that hash tables provide constant-time
             access hides some complexities. First of all, any hash
-            table implementation, OCaml's included, needs to resize the
-            table when it gets too full. A resize requires allocating a
-            new backing array for the hash table and copying over all
-            entries, and so it is quite an expensive operation. That
-            means adding a new element to the table is only
-            <em>amortized</em> constant, which is to say, it's constant
-            on average over a long sequence of operations, but some of
-            the individual operations can be quite expensive.</p>
+            table implementation, OCaml's included, needs to resize
+            the table when it gets too full. A resize requires
+            allocating a new backing array for the hash table and
+            copying over all entries, and so it is quite an expensive
+            operation. That means adding a new element to the table is
+            only <em>amortized</em> constant, which is to say, it's
+            constant on average over a long sequence of operations,
+            but some of the individual operations can cost more.</p>
 
           <p>
-	    Another hidden cost of hash tables has to do with the
-            hash function you use. If you end up with a pathologically
-            bad hash function that hashes all of your data to the same
+	    Another hidden cost of hash tables has to do with the hash
+            function you use. If you end up with a pathologically bad
+            hash function that hashes all of your data to the same
             number, then all of your insertions will hash to the same
             underlying bucket, meaning you no longer get constant-time
-            access at all. Core's hash table implementation uses binary
-            trees for the hash-buckets, so this case only leads to
-            logarithmic time, rather than linear for a traditional hash
-            table.</p>
+            access at all. <code>Base</code>'s hash table
+            implementation uses binary trees for the hash-buckets, so
+            this case only leads to logarithmic time, rather than
+            linear for a traditional implementation.</p>
 
           <p>
 	    The logarithmic behavior of Core's hash tables in the
@@ -599,52 +602,64 @@
 	</div>
 
 	<p>
-	  When creating a hash table, we need to provide a value of
-	  type <em>hashable</em>, which includes among other things the
-	  function for hashing the key type. This is analogous to the
-	  comparator used for creating maps:</p>
+	  We create a hashtable in a way that's similar to how we
+	  create maps, by providing a first-class module from which
+	  the required operations for building a hashtable can be
+	  obtained.</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.mlt" part="25"/>
-
-	<p>
-	  The <code>hashable</code> value is included as part of the
-	  <code>Hashable.S</code> interface, which is satisfied by most
-	  types in Core. The <code>Hashable.S</code> interface also
-	  includes a <code>Table</code> submodule which provides more
-	  convenient creation functions:</p>
-
-	<link rel="import" href="code/maps-and-hash-tables/main.mlt" part="26"/>
+	<link rel="import" part="ht.1"
+	      href="code/maps-and-hash-tables/main.mlt"/>
 
 	<p>
-	  There is also a polymorphic <code>hashable</code> value,
-	  corresponding to the polymorphic hash function provided by
-	  the OCaml runtime, for cases where you don't have a hash
-	  function for your specific type:</p>
+	  As with maps, most modules in Base are ready to be used for
+	  this purpose, but if you want to create a hash table from
+	  one of your own types, you need to do some work to prepare
+	  it. In order for a module to be suitable for passing
+	  to <code>Hashtbl.create</code>, it has to match the
+	  following interface.</p>
 
-	<link rel="import" href="code/maps-and-hash-tables/main.mlt" part="27"/>
-
-	<p>
-	  Or, equivalently:</p>
-
-	<link rel="import" href="code/maps-and-hash-tables/main.mlt" part="28"/>
+	<link rel="import" part="ht.2"
+	      href="code/maps-and-hash-tables/main.mlt"/>
 
 	<p>
-	  Note that, unlike the comparators used with maps and sets,
-	  hashables don't show up in the type of a
-	  <code>Hashtbl.t</code>. That's because hash tables don't have
-	  operations that operate on multiple hash tables that depend
-	  on those tables having the same hash function, in the way
-	  that <code>Map.symmetric_diff</code> and
-	  <code>Set.union</code> depend on their arguments using the
-	  same comparison function.
+	  Note that there's no equivalent to the comparator witness
+	  that came up for maps and sets. That's because the
+	  requirement for multiple objects to share a comparison
+	  function or a hash function mostly just doesn't come up for
+	  hash tables. That makes building a module suitable for use
+	  with a hash table simpler.</p>
 
-	  <idx>polymorphism/in hash functions</idx></p>
+	<link rel="import" part="ht.3"
+	      href="code/maps-and-hash-tables/main.mlt"/>
+
+	<p>
+	  You can also create a hashtable based on OCaml's
+	  polymorphic hash and comparison functions.</p>
+
+	<link rel="import" part="ht.4"
+	      href="code/maps-and-hash-tables/main.mlt" />
+
+	<p>
+	  This is highly convenient, but polymorphic comparison can
+	  behave in surprising ways, so it's generally best to avoid
+	  this for code where correctness matters.</p>
 
 	<div data-type="warning">
           <h1>Collisions with the Polymorphic Hash Function</h1>
 
+	  <p>
+	    The polymorphic hash function, like polymorphic compare,
+	    has problems that derive from the fact that it doesn't pay
+	    any attention to the type, just blindly walking down the
+	    structure of a data type and computing a hash from what it
+	    sees. That means that for data structures like maps and
+	    sets where equivalent instances can have different
+	    structures, it will do the wrong thing.</p>
+
           <p>
-	    OCaml's polymorphic hash function works by walking over
+	    But there's another problem with polymorphic hash, which
+	    is that it is prone to creating hash collisions.  OCaml's
+	    polymorphic hash function works by walking over
             the data structure it’s given using a breadth-first
             traversal that is bounded in the number of nodes it’s
             willing to traverse. By default, that bound is set at 10
@@ -654,55 +669,35 @@
 
           <p>
 	    The bound on the traversal means that the hash function
-            may ignore part of the data structure, and this can lead to
-            pathological <span class="keep-together">cases</span> where
-            every value you store has the same hash value. We'll
-            demonstrate this below, using the function
-            <code>List.range</code> to allocate lists of integers of
-            different length:</p>
+            may ignore part of the data structure, and this can lead
+            to pathological <span class="keep-together">cases</span>
+            where every value you store has the same hash value. We'll
+            demonstrate this below, using the
+            function <code>List.range</code> to allocate lists of
+            integers of different length:</p>
+
+	  <link rel="import" part="ph.1"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    As you can see, the hash function stops after the first 10
+	    elements. The same can happen with any large data structure,
+	    including records and arrays. When building hash functions
+	    over large custom data structures, it is generally a good
+	    idea to write one's own hash function, or to use the ones
+	    provided by <code>[@@deriving]</code>, which don't have
+	    this problem, as you can see below.</p>
+
+	  <link rel="import" part="ph.2"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    Note that rather than declaring a type and
+	    using <code>[@@deriving hash]</code> to invoke ppx_hash,
+	    we use <code>[%%hash]</code>, a shorthand for creating a
+	    hash function inline in an expression.</p>
+
 	</div>
-
-	<link rel="import" href="code/maps-and-hash-tables/main.mlt" part="29"/>
-
-	<p>
-	  As you can see, the hash function stops after the first 10
-	  elements. The same can happen with any large data structure,
-	  including records and arrays. When building hash functions
-	  over large custom data structures, it is generally a good
-	  idea to write one's own hash function.</p>
-
-	<section id="satisfying-the-hashable.s-interface" data-type="sect2">
-          <h2>Satisfying the Hashable.S Interface</h2>
-
-          <p>
-	    Most types in Core satisfy the <code>Hashable.S</code>
-            interface, but as with the <code>Comparable.S</code>
-            interface, the question remains of how one should satisfy
-            this interface when writing a new module. Again, the
-            answer is to use a functor to build the necessary
-            functionality; in this case, <code>Hashable.Make</code>,
-            using <code>[@@deriving hash]</code> to produce the hash
-            function.
-
-	    <idx>Hashable.Make</idx>
-	    <idx>interfaces/Hashable.S</idx>
-	    <idx>Hashable.S interface</idx>
-	    <idx>hash tables/satisfying Hashable.S interface</idx></p>
-
-          <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="30"/>
-
-          <p>
-	    Note that in order to satisfy hashable, a key needs to
-            provide a comparison function, for equality checking, and
-            s-expression conversion, for generating useful errors.</p>
-
-          <p>
-	    There is currently no analogue of
-            <code>comparelib</code> for autogeneration of hash
-            functions, so you do need to either write the hash function
-            by hand, or use the built-in polymorphic hash function,
-            <code>Hashtbl.hash</code>.</p>
-	</section>
       </section>
 
       <section id="choosing-between-maps-and-hash-tables" data-type="sect1">

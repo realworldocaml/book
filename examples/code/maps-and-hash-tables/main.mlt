@@ -45,7 +45,7 @@ Map.of_alist_exn;;
 
 [@@@part "mc.2.1"];;
 #typeof "Comparator.S";;
-[%%expect.nondeterministic{|
+[%%expect.nondeterministic ocaml {|
 module type Base.Comparator.S =
   sig
     type t
@@ -315,179 +315,70 @@ module Book :
 |}];;
 
 
-
-
-
-
-
-
-
-
-
-[@@@part "22"];;
-module Foo_and_bar : sig
-  type t = { foo: Set.M(Int).t; bar: string }
-  include Comparable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: Set.M(Int).t; bar: string } [@@deriving sexp]
-    let compare t1 t2 =
-      let c = Set.compare_direct t1.foo t2.foo in
-      if c <> 0 then c else String.compare t1.bar t2.bar
-  end
-  include T
-  include Comparable.Make(T)
-end;;
-[%%expect ocaml {|
-module Foo_and_bar :
-  sig
-    type t = { foo : Base.Set.M(Base.Int).t; bar : string; }
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-    val validate_lbound : min:t Core_kernel._maybe_bound -> t Validate.check
-    val validate_ubound : max:t Core_kernel._maybe_bound -> t Validate.check
-    val validate_bound :
-      min:t Core_kernel._maybe_bound ->
-      max:t Core_kernel._maybe_bound -> t Validate.check
-  end
-|}];;
-
-[@@@part "23"];;
-module Foo_and_bar : sig
-  type t = { foo: Set.M(Int).t; bar: string }
-  include Comparable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: Set.M(Int).t; bar: string } [@@deriving sexp, compare]
-  end
-  include T
-  include Comparable.Make(T)
-end;;
-[%%expect ocaml {|
-module Foo_and_bar :
-  sig
-    type t = { foo : Base.Set.M(Base.Int).t; bar : string; }
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-    val min : t -> t -> t
-    val max : t -> t -> t
-    val ascending : t -> t -> int
-    val descending : t -> t -> int
-    val between : t -> low:t -> high:t -> bool
-    val clamp_exn : t -> min:t -> max:t -> t
-    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
-    type comparator_witness
-    val comparator : (t, comparator_witness) Comparator.t
-    val validate_lbound : min:t Core_kernel._maybe_bound -> t Validate.check
-    val validate_ubound : max:t Core_kernel._maybe_bound -> t Validate.check
-    val validate_bound :
-      min:t Core_kernel._maybe_bound ->
-      max:t Core_kernel._maybe_bound -> t Validate.check
-  end
-|}];;
-
-[@@@part "24"];;
-module Foo_and_bar : sig
-  type t = { foo: int; bar: string }
-  include Comparable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: int; bar: string } [@@deriving sexp]
-  end
-  include T
-  include Comparable.Poly(T)
-end;;
-[%%expect ocaml {|
-module Foo_and_bar :
-  sig
-    type t = { foo : int; bar : string; }
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-...
-  end
-|}];;
-
-[@@@part "25"];;
-let table = Hashtbl.create ~hashable:String.hashable ();;
-[%%expect{|
-Characters 37-52:
-Error: The function applied to this argument has type
-         ?growth_allowed:bool -> ?size:int -> unit -> ('a, 'b) Hashtbl.t
-This argument cannot be applied with label ~hashable
-|}];;
-Hashtbl.set table ~key:"three" ~data:3;;
-[%%expect{|
-Characters 12-17:
-Error: Unbound value table
-|}];;
-Hashtbl.find table "three";;
-[%%expect{|
-Characters 13-18:
-Error: Unbound value table
-|}];;
-
-[@@@part "26"];;
+[@@@part "ht.1"];;
 let table = Hashtbl.create (module String) ();;
 [%%expect ocaml {|val table : (string, '_weak1) Hashtbl.t = <abstr>|}];;
+Hashtbl.set table ~key:"three" ~data:3;;
+[%%expect ocaml {|- : unit = ()|}];;
+Hashtbl.find table "three";;
+[%%expect ocaml {|- : int option = Some 3|}];;
 
-[@@@part "27"];;
-let table = Hashtbl.Poly.create ();;
-[%%expect ocaml {|val table : ('_weak2, '_weak3) Hashtbl.t = <abstr>|}];;
 
-[@@@part "28"];;
-let table = Hashtbl.Poly.create ();;
-[%%expect ocaml {|val table : ('_weak4, '_weak5) Hashtbl.t = <abstr>|}];;
-
-[@@@part "29"];;
-Caml.Hashtbl.hash (List.range 0 9);;
-[%%expect ocaml {|- : int = 209331808|}];;
-Caml.Hashtbl.hash (List.range 0 10);;
-[%%expect ocaml {|- : int = 182325193|}];;
-Caml.Hashtbl.hash (List.range 0 11);;
-[%%expect ocaml {|- : int = 182325193|}];;
-Caml.Hashtbl.hash (List.range 0 100);;
-[%%expect ocaml {|- : int = 182325193|}];;
-
-[@@@part "30"];;
-module Foo_and_bar : sig
-  type t = { foo: int; bar: string }
-  include Hashable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: int; bar: string } [@@deriving sexp, compare, hash]
+[@@@part "ht.2"];;
+#typeof "Hashtbl_intf.Key";;
+[%%expect.nondeterministic ocaml {|
+module type Base.Hashtbl_intf.Key =
+  sig
+    type t
+    val compare : t -> t -> Base.int
+    val sexp_of_t : t -> Base.Sexp.t
+    val hash : t -> Base.int
   end
-  include T
-  include Hashable.Make(T)
-end;;
-[%%expect{|
-Characters 233-246:
-Error: Unbound module Hashable
-Hint: Did you mean Hashtbl or Hashtbl?
 |}];;
+
+[@@@part "ht.3"];;
+module Book = struct
+  type t = { title: string; isbn: string }
+  [@@deriving compare, sexp_of, hash]
+end;;
+[%%expect ocaml {|
+module Book :
+  sig
+    type t = { title : string; isbn : string; }
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
+    val hash_fold_t : Hash.state -> t -> Hash.state
+    val hash : t -> int
+  end
+|}];;
+let table = Hashtbl.create (module Book) ();;
+[%%expect ocaml {|val table : (Book.t, '_weak2) Hashtbl.t = <abstr>|}];;
+
+[@@@part "ht.4"];;
+let table = Hashtbl.Poly.create ();;
+[%%expect ocaml {|val table : ('_weak3, '_weak4) Hashtbl.t = <abstr>|}];;
+Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
+[%%expect ocaml {|- : unit = ()|}];;
+Hashtbl.find table ("foo",3,[1;2;3]);;
+[%%expect ocaml {|- : string option = Some "random data!"|}];;
+
+
+[@@@part "ph.1"];;
+Hashtbl.Poly.hashable.hash (List.range 0 9);;
+[%%expect ocaml {|- : int = 209331808|}];;
+Hashtbl.Poly.hashable.hash (List.range 0 10);;
+[%%expect ocaml {|- : int = 182325193|}];;
+Hashtbl.Poly.hashable.hash (List.range 0 11);;
+[%%expect ocaml {|- : int = 182325193|}];;
+Hashtbl.Poly.hashable.hash (List.range 0 100);;
+[%%expect ocaml {|- : int = 182325193|}];;
+
+[@@@part "ph.2"];;
+[%hash: int list] (List.range 0 9);;
+[%%expect ocaml {|- : int = 999007935|}];;
+[%hash: int list] (List.range 0 10);;
+[%%expect ocaml {|- : int = 195154657|}];;
+[%hash: int list] (List.range 0 11);;
+[%%expect ocaml {|- : int = 527899773|}];;
+[%hash: int list] (List.range 0 100);;
+[%%expect ocaml {|- : int = 594983280|}];;
