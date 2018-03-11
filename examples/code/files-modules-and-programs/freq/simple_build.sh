@@ -1,1 +1,1 @@
-  $ ocamlfind ocamlc -linkpkg -package base -package stdio freq.ml -o freq.byte
+  $ ocamlfind ocamlc -linkpkg -package base -package stdio freq.ml -o freq.byte -no-alias-deps
