@@ -10,4 +10,4 @@
   Called from file "read_foo.ml", line 3, characters 0-73
   Called from file "read_foo.ml", line 11, characters 4-60
   Called from file "src/exn.ml", line 108, characters 6-10
-  [1]
+@@ exit 1

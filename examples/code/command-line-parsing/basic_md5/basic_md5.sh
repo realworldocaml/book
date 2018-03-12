@@ -9,7 +9,7 @@
   $ ./_build/default/basic_md5.exe
   Error parsing command line.  Run with -help for usage information.
   missing anonymous argument: FILENAME
-  [1]
+@@ exit 1
 ### get version
   $ ./_build/default/basic_md5.exe -version
   1.0

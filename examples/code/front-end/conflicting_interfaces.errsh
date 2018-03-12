@@ -11,4 +11,4 @@
          File "conflicting_interface.ml", line 1, characters 0-12:
            Actual declaration
          Fields number 1 have different names, Foo and Bar.
-  [2]
+@@ exit 2

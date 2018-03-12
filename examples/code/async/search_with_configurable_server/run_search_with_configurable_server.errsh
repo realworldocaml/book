@@ -5,4 +5,4 @@
     "Called from file \"src/deferred1.ml\", line 20, characters 40-45"
     "Called from file \"src/job_queue.ml\", line 159, characters 6-47"
     "Caught by monitor Tcp.close_sock_on_error"))
-  [1]
+@@ exit 1

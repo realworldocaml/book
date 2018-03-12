@@ -3,4 +3,4 @@
   Error: This expression has type [> `Nu of int ]
          but an expression was expected of type t
          The second variant type does not allow tag(s) `Nu
-  [2]
+@@ exit 2

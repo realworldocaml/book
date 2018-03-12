@@ -3,4 +3,4 @@
   Error: Library "async_graphics" not found.
   
   Hint: try: jbuilder external-lib-deps --missing shapes.exe
-  [1]
+@@ exit 1

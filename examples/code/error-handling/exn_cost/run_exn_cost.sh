@@ -33,7 +33,7 @@
   refer to the stdlib, use Caml.Exit instead
   File "exn_cost.ml", line 35, characters 5-16:
   Error: Unbound module Command
-  [1]
+@@ exit 1
   $ ./_build/default/exn_cost.exe -ascii cycles -quota 1
   sh: ./_build/default/exn_cost.exe: No such file or directory
-  [127]
+@@ exit 127

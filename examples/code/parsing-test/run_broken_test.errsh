@@ -7,4 +7,4 @@
   }
   $ ./_build/default/test.exe test2.json
   sh: ./_build/default/test.exe: No such file or directory
-  [127]
+@@ exit 127
