@@ -7,10 +7,6 @@ branches:
   - gh-pages
 install: scripts/install
 script: scripts/build
-env:
-  - GIT_TRACE=2
-  - GIT_TRACE_PACKET=2
-  - GIT_TRACE_SETUP=2
 deploy:
   edge:
     branch: v1.8.47 # See travis-ci/travis-ci#9312
