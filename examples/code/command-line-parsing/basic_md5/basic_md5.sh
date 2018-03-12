@@ -3,6 +3,7 @@
       ocamlopt basic_md5.exe
   ld: warning: directory not found for option '-L/opt/local/lib'
 ### run
+%% --non-deterministic
   $ ./_build/default/basic_md5.exe ./_build/default/basic_md5.exe
   755e1de2f36cfffd870269161df6a3f2
 ### get help

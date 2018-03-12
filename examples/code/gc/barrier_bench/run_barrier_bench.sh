@@ -1,4 +1,5 @@
   $ jbuilder build barrier_bench.exe
+%% --non-deterministic [skip]
   $ ./_build/default/barrier_bench.exe -ascii alloc -quota 1
   Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
                                                                        
