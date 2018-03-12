@@ -7,6 +7,10 @@ branches:
   - gh-pages
 install: scripts/install
 script: scripts/build
+env:
+  - GIT_TRACE=2
+  - GIT_TRACE_PACKET=2
+  - GIT_TRACE_SETUP=2
 deploy:
   provider: pages
   skip_cleanup: true
