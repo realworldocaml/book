@@ -482,6 +482,54 @@
           </aside>
 	</section>
 
+	<section id="applying-deriving-to-maps-and-sets" data-type="sect2">
+	  <h2>Applying <code>[@@deriving]</code> to maps and sets</h2>
+
+	  <p>
+	    In the previous section, we showed how to
+	    use <code>[@@deriving]</code> annotations to help prepare
+	    types so that they can be used to build up maps and
+	    sets. But what if we want to put
+	    a <code>[@@deriving]</code> annotation on a map or set
+	    type itself?</p>
+
+          <link rel="import" part="adm.1"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    This fails because there is no
+	    existing <code>Map.t_of_sexp</code>. This isn't just a
+	    simple omission; there's really no reasonable way to
+	    define a useful <code>Map.t_of_sexp</code>, because the
+	    comparator witness isn't a thing that can be parsed out of
+	    the s-expression. </p>
+
+	  <p>
+	    There is, however, another way of writing the type of a
+	    map that does work with the
+	    various <code>[@@deriving]</code> extensions, which you
+	    can see below.</p>
+
+	  <link rel="import" part="adm.2"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    Here, we use a functor, <code>Map.M</code>, to define the
+	    type we need. While this looks different than the ordinary
+	    type signature, the meaning of the type is the same, as
+	    evidenced here.</p>
+
+	  <link rel="import" part="adm.3"
+		href="code/maps-and-hash-tables/main.mlt" />
+
+	  <p>
+	    This same type works well with other derivers, like those
+	    for comparison and hash functions. Since this way of
+	    writing the type is also shorter, it's what you should use
+	    most of the time.</p>
+
+	</section>
+
 	<section id="trees" data-type="sect2">
           <h2>Trees</h2>
 
