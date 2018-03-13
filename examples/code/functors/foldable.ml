@@ -1,4 +1,4 @@
-open Core
+open Base
 
 module type S = sig
   type 'a t
