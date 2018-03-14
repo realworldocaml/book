@@ -67,7 +67,7 @@ var discourseDiv = div({
             "For other things like typo's we encourage you to make "
           ),
           a({
-            href:"https://github.com/realworldocaml/Real-World-OCaml",
+            href:"https://github.com/realworldocaml/book/issues",
             children: [
               text("an issue on GitHub")
             ]
