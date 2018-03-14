@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
+open Base;;
 module type X_int = sig val x : int end;;
 [%%expect ocaml {|module type X_int = sig val x : int end|}];;
 [@@@part "1"];;

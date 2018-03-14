@@ -4,7 +4,7 @@
 #require "ppx_jane";;
 #install_printer Core.Sexp.pp_hum;;
 #install_printer Core.Error.pp;;
-open Core_kernel;;
+open Base;;
 [@@@part "0.5"];;
 module type Query_handler = sig
 
@@ -52,7 +52,7 @@ val sexp_of_u : u -> Sexp.t = <fun>
 |}];;
 sexp_of_u {a=3;b=7.};;
 [%%expect ocaml {|- : Sexp.t = ((a 3) (b 7))|}];;
-u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
+u_of_sexp (Core_kernel.Sexp.of_string "((a 43) (b 3.4))");;
 [%%expect ocaml {|- : u = {a = 43; b = 3.4}|}];;
 [@@@part "3"];;
 module Unique = struct
@@ -85,9 +85,9 @@ module Unique :
 [@@@part "4"];;
 let unique = Unique.create 0;;
 [%%expect ocaml {|val unique : Unique.t = {Unique.next_id = 0}|}];;
-Unique.eval unique Sexp.unit;;
+Unique.eval unique (Sexp.List []);;
 [%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok 0|}];;
-Unique.eval unique Sexp.unit;;
+Unique.eval unique (Sexp.List []);;
 [%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok 1|}];;
 [@@@part "5"];;
 module List_dir = struct
@@ -96,7 +96,7 @@ module List_dir = struct
 
   (** [is_abs p] Returns true if [p] is an absolute path  *)
   let is_abs p =
-    String.length p > 0 && p.[0] = '/'
+    String.length p > 0 && Char.(=) p.[0] '/'
 
   let name = "ls"
   let create cwd = { cwd }
@@ -107,9 +107,9 @@ module List_dir = struct
     | Ok dir ->
       let dir =
         if is_abs dir then dir
-        else Filename.concat t.cwd dir
+        else Core.Filename.concat t.cwd dir
       in
-      Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+      Ok (Array.sexp_of_t String.sexp_of_t (Core.Sys.readdir dir))
 end;;
 [%%expect ocaml {|
 module List_dir :
@@ -135,7 +135,7 @@ Ok
   at log folders netboot run rpc tmp backups agentx rwho)
 |}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (binding)|}];;
+[%%expect.nondeterministic ocaml {|- : (Sexp.t, Error.t) result = Ok (binding)|}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler
@@ -175,7 +175,7 @@ let list_dir_instance = build_instance (module List_dir)  "/var";;
 [%%expect ocaml {|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
 [@@@part "11"];;
 let build_dispatch_table handlers =
-  let table = String.Table.create () in
+  let table = Hashtbl.create (module String) () in
   List.iter handlers
     ~f:(fun ((module I : Query_handler_instance) as instance) ->
       Hashtbl.set table ~key:I.Query_handler.name ~data:instance);
@@ -184,7 +184,7 @@ let build_dispatch_table handlers =
 [%%expect ocaml {|
 val build_dispatch_table :
   (module Query_handler_instance) list ->
-  (module Query_handler_instance) String.Table.t = <fun>
+  (string, (module Query_handler_instance)) Hashtbl.t = <fun>
 |}];;
 [@@@part "12"];;
 let dispatch dispatch_table name_and_query =
@@ -206,13 +206,16 @@ val dispatch :
   Sexp.t -> Sexp.t Or_error.t = <fun>
 |}];;
 [@@@part "13"];;
+open Stdio;;
 let rec cli dispatch_table =
   printf ">>> %!";
   let result =
-    match In_channel.input_line stdin with
+    match In_channel.input_line In_channel.stdin with
     | None -> `Stop
     | Some line ->
-      match Or_error.try_with (fun () -> Sexp.of_string line) with
+      match Or_error.try_with (fun () ->
+        Core_kernel.Sexp.of_string line)
+      with
       | Error e -> `Continue (Error.to_string_hum e)
       | Ok (Sexp.Atom "quit") -> `Stop
       | Ok query ->
@@ -227,12 +230,7 @@ let rec cli dispatch_table =
     printf "%s\n%!" msg;
     cli dispatch_table
 ;;
-[%%expect{|
-Characters 95-100:
-Warning 3: deprecated: Core_kernel.stdin
-[since 2016-04] Use [In_channel.stdin]
-|};
-ocaml {|val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>|}];;
+[%%expect ocaml {|val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>|}];;
 [@@@part "14"];;
 type query_handler_instance = { name : string
                               ; eval : Sexp.t -> Sexp.t Or_error.t
