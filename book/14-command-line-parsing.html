@@ -30,9 +30,9 @@
       </ul>
 
       <p>
-	It's tedious and error-prone to code all of this manually
-	for every program you write. Core provides the Command library,
-	which simplifies all of this by letting you declare all your
+	It's tedious and error-prone to code all of this manually for
+	every program you write. Core provides the Command library,
+	which simplifies all of this by letting you declare your
 	command-line options in one place and by deriving all of the
 	above functionality from these declarations.
 
@@ -65,9 +65,8 @@
 
 	<li>
           <p>
-	    Demonstrate how <em>functional combinators</em> can be
-            used to declare complex command-line interfaces in a
-            type-safe and elegant way
+	    Demonstrate how to declare complex command-line interfaces
+	    in a type-safe and elegant way
 
 	    <idx>combinators/functional combinators</idx></p>
 	</li>
@@ -91,13 +90,14 @@
 	<link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.ml"/>
 
 	<p>
-	  The <code>do_hash</code> function accepts a
-	  <code>filename</code> parameter and prints the human-readable
-	  MD5 string to the console standard output. The first step
-	  toward turning this function into a command-line program is
-	  to declare all the possible command-line arguments in a
-	  <em>specification</em>. <code>Command.Spec</code> defines
-	  combinators that can be chained together to define optional
+	  The <code>do_hash</code> function accepts
+	  a <code>filename</code> parameter and prints the
+	  human-readable MD5 string to the console standard
+	  output. The first step toward turning this function into a
+	  command-line program is to declare all the possible
+	  command-line arguments in a <em>specification</em>. The
+	  module <code>Command.Param</code> provides a set of
+	  combinators that can be combined together to define optional
 	  flags and positional arguments, what types they should map
 	  to, and whether to take special actions (such as pausing for
 	  interactive input) if certain inputs are encountered.</p>
@@ -108,15 +108,16 @@
           <p>
 	    Let's build the specification for a single argument that
             is passed directly on the command line. This is known as
-            an <em>anonymous</em> argument:
+            an <em>anonymous</em> argument.
 
 	    <idx>arguments/anonymous arguments</idx>
 	    <idx>anonymous arguments</idx></p>
 
-          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.ml" part="1"/>
+          <link rel="import" part="1"
+		href="code/command-line-parsing/basic_md5/basic_md5.ml" />
 
           <p>
-	    The <code>Command.Spec</code> module defines the tools
+	    The <code>Command.Param</code> module defines the tools
             you'll need to build up a command-line specification. We
             start with the <code>empty</code> value and add parameters
             to that using the <code>+&gt;</code> combinator. (Both of
