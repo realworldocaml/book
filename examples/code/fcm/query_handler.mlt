@@ -135,7 +135,7 @@ Ok
   at log folders netboot run rpc tmp backups agentx rwho)
 |}];;
 List_dir.eval list_dir (sexp_of_string "yp");;
-[%%expect ocaml {|- : (Sexp.t, Error.t) result = Ok (binding)|}];;
+[%%expect.nondeterministic ocaml {|- : (Sexp.t, Error.t) result = Ok (binding)|}];;
 [@@@part "7"];;
 module type Query_handler_instance = sig
   module Query_handler : Query_handler

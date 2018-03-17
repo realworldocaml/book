@@ -7,7 +7,7 @@
 #silent false;;
 
 [@@@part "1"];;
-open Core_kernel;;
+open Base;;
 let digit_alist =
   [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
   ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
@@ -30,42 +30,127 @@ List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch";;
  (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
 |}];;
 
-[@@@part "3"];;
-let digit_map = Map.of_alist_exn digit_alist ~comparator:Int.comparator;;
-[%%expect{|
-Characters 57-71:
-Error: The function applied to this argument has type
-         ('a * 'b) list -> ('a, 'b, 'c) Map.t
-This argument cannot be applied with label ~comparator
-|}];;
+[@@@part "mc.1"];;
+let digit_map = Map.of_alist_exn (module Int) digit_alist;;
+[%%expect ocaml {|val digit_map : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
 Map.find digit_map 3;;
-[%%expect{|
-Characters 9-18:
-Error: Unbound value digit_map
+[%%expect ocaml {|- : string option = Some "three"|}];;
+
+[@@@part "mc.2"];;
+Map.of_alist_exn;;
+[%%expect ocaml {|
+- : ('a, 'cmp) Map.comparator -> ('a * 'b) list -> ('a, 'b, 'cmp) Map.t =
+<fun>
 |}];;
 
-[@@@part "4"];;
-let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
-[%%expect{|
-Characters 16-23:
-Warning 3: deprecated: Core_kernel.Map.add
-[since 2017-11] Use [set] instead
-Characters 24-33:
-Error: Unbound value digit_map
+[@@@part "mc.2.1"];;
+#typeof "Comparator.S";;
+[%%expect.nondeterministic ocaml {|
+module type Base.Comparator.S =
+  sig
+    type t
+    type comparator_witness
+    val comparator : (t, comparator_witness) Base.Comparator.t
+  end
 |}];;
 
-[@@@part "5"];;
-let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
-[%%expect ocaml {|val left : int String.Map.t = <abstr>|}];;
-let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
-[%%expect ocaml {|val right : int String.Map.t = <abstr>|}];;
+[@@@part "mc.2.2"];;
+module Book = struct
+
+  type t = { title: string; isbn: string }
+
+  let compare t1 t2 =
+    let cmp_title = String.compare t1.title t2.title in
+    if cmp_title <> 0 then cmp_title
+    else String.compare t1.isbn t2.isbn
+
+  let sexp_of_t t : Sexp.t =
+    List [ Atom t.title; Atom t.isbn ]
+end;;
+[%%expect ocaml {|
+module Book :
+  sig
+    type t = { title : string; isbn : string; }
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
+  end
+|}];;
+
+[@@@part "mc.2.3"];;
+Map.empty (module Book);;
+[%%expect{|
+Characters 18-22:
+Error: Signature mismatch:
+       ...
+       The value `comparator' is required but not provided
+       File "src/comparator.mli", line 21, characters 2-53:
+         Expected declaration
+       The type `comparator_witness' is required but not provided
+       File "src/comparator.mli", line 20, characters 2-25:
+         Expected declaration
+|}];;
+
+[@@@part "mc.2.4"];;
+module Book = struct
+  module T = struct
+
+    type t = { title: string; isbn: string }
+
+    let compare t1 t2 =
+      let cmp_title = String.compare t1.title t2.title in
+      if cmp_title <> 0 then cmp_title
+      else String.compare t1.isbn t2.isbn
+
+    let sexp_of_t t : Sexp.t =
+      List [ Atom t.title; Atom t.isbn ]
+
+  end
+  include T
+  include Comparator.Make(T)
+end;;
+[%%expect ocaml {|
+module Book :
+  sig
+    module T :
+      sig
+        type t = { title : string; isbn : string; }
+        val compare : t -> t -> int
+        val sexp_of_t : t -> Sexp.t
+      end
+    type t = T.t = { title : string; isbn : string; }
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
+    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
+  end
+|}];;
+
+[@@@part "mc.2.5"];;
+let some_programming_books =
+  Set.of_list (module Book)
+    [ { title = "Real World OCaml"
+      ; isbn = "978-1449323912" }
+    ; { title = "Structure and Interpretation of Computer Programs"
+      ; isbn = "978-0262510875" }
+    ; { title = "The C Programming Language"
+      ; isbn = "978-0131101630" } ];;
+[%%expect ocaml {|
+val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
+  <abstr>
+|}];;
+
+[@@@part "mc.3"];;
+let left = Map.of_alist_exn (module String) ["foo",1; "bar",3; "snoo",0];;
+[%%expect ocaml {|val left : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
+let right = Map.of_alist_exn (module String) ["foo",0; "snoo",0];;
+[%%expect ocaml {|val right : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
 Map.symmetric_diff ~data_equal:Int.equal left right |> Sequence.to_list;;
 [%%expect ocaml {|
 - : (string, int) Map.Symmetric_diff_element.t list =
 [("bar", `Left 3); ("foo", `Unequal (1, 0))]
 |}];;
 
-[@@@part "6"];;
+[@@@part "mc.4"];;
 Map.symmetric_diff;;
 [%%expect ocaml {|
 - : ('k, 'v, 'cmp) Map.t ->
@@ -75,101 +160,99 @@ Map.symmetric_diff;;
 = <fun>
 |}];;
 
-[@@@part "7"];;
-module Reverse = Comparator.Make(struct
+[@@@part "mc.5"];;
+module Reverse = struct
+  module T = struct
     type t = string
     let sexp_of_t = String.sexp_of_t
     let t_of_sexp = String.t_of_sexp
     let compare x y = String.compare y x
-  end);;
+  end
+  include T
+  include Comparator.Make(T)
+end;;
 [%%expect ocaml {|
 module Reverse :
   sig
-    type comparator_witness
-    val comparator : (string, comparator_witness) Comparator.t
+    module T :
+      sig
+        type t = string
+        val sexp_of_t : t -> Sexp.t
+        val t_of_sexp : Sexp.t -> t
+        val compare : t -> t -> int
+      end
+    type t = string
+    val sexp_of_t : t -> Sexp.t
+    val t_of_sexp : Sexp.t -> t
+    val compare : t -> t -> int
+    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
   end
 |}];;
 
-[@@@part "8"];;
+[@@@part "mc.6"];;
 let alist = ["foo", 0; "snoo", 3];;
 [%%expect ocaml {|val alist : (string * int) list = [("foo", 0); ("snoo", 3)]|}];;
-let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
-[%%expect{|
-Characters 43-60:
-Error: The function applied to this argument has type
-         ('a * 'b) list -> ('a, 'b, 'c) Map.t
-This argument cannot be applied with label ~comparator
-|}];;
-let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
-[%%expect{|
-Characters 43-61:
-Error: The function applied to this argument has type
-         ('a * 'b) list -> ('a, 'b, 'c) Map.t
-This argument cannot be applied with label ~comparator
-|}];;
+let ord_map = Map.of_alist_exn (module String) alist;;
+[%%expect ocaml {|val ord_map : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
+let rev_map = Map.of_alist_exn (module Reverse) alist;;
+[%%expect ocaml {|val rev_map : (string, int, Reverse.comparator_witness) Map.t = <abstr>|}];;
 
-[@@@part "9"];;
+[@@@part "mc.7"];;
 Map.min_elt ord_map;;
-[%%expect{|
-Characters 12-19:
-Error: Unbound value ord_map
-|}];;
+[%%expect ocaml {|- : (string * int) option = Some ("foo", 0)|}];;
 Map.min_elt rev_map;;
-[%%expect{|
-Characters 12-19:
-Error: Unbound value rev_map
-|}];;
+[%%expect ocaml {|- : (string * int) option = Some ("snoo", 3)|}];;
 
-[@@@part "10"];;
+[@@@part "mc.8"];;
 Map.symmetric_diff ord_map rev_map;;
 [%%expect{|
-Characters 19-26:
-Error: Unbound value ord_map
+Characters 27-34:
+Error: This expression has type
+         (string, int, Reverse.comparator_witness) Map.t
+       but an expression was expected of type
+         (string, int, String.comparator_witness) Map.t
+       Type Reverse.comparator_witness is not compatible with type
+         String.comparator_witness 
 |}];;
 
 [@@@part "11"];;
-let ord_tree = Map.to_tree ord_map;;
-[%%expect{|
-Characters 27-34:
-Error: Unbound value ord_map
+let ord_tree = Map.Using_comparator.to_tree ord_map;;
+[%%expect ocaml {|
+val ord_tree :
+  (string, int, String.comparator_witness) Map.Using_comparator.Tree.t =
+  <abstr>
 |}];;
 
 [@@@part "12"];;
-Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
-[%%expect{|
-Characters 44-52:
-Error: Unbound value ord_tree
-|}];;
+Map.Using_comparator.Tree.find ~comparator:String.comparator ord_tree "snoo";;
+[%%expect ocaml {|- : int option = Some 3|}];;
 
 [@@@part "13"];;
-Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
+Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
 [%%expect{|
-Characters 45-53:
-Error: Unbound value ord_tree
+Characters 62-70:
+Error: This expression has type
+         (string, int, String.comparator_witness) Map.Using_comparator.Tree.t
+       but an expression was expected of type
+         (string, int, Reverse.comparator_witness)
+         Map.Using_comparator.Tree.t
+       Type String.comparator_witness is not compatible with type
+         Reverse.comparator_witness 
 |}];;
 
-[@@@part "14"];;
-Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
-[%%expect{|
-Characters 29-55:
-Error: The function applied to this argument has type
-         ('a * 'b) list -> ('a, 'b, 'c) Map.t
-This argument cannot be applied with label ~comparator
-|}];;
+[@@@part "pc.1"];;
+Core_kernel.Map.Poly.of_alist_exn digit_alist;;
+[%%expect ocaml {|- : (int, string) Core_kernel.Map.Poly.t = <abstr>|}];;
 
-[@@@part "15"];;
-Map.Poly.of_alist_exn digit_alist;;
-[%%expect ocaml {|- : (int, string) Map.Poly.t = <abstr>|}];;
-
-[@@@part "16"];;
+[@@@part "pc.2"];;
 Map.symmetric_diff
-  (Map.Poly.singleton 3 "three")
-  (Int.Map.singleton  3 "four" )
+  (Core_kernel.Map.Poly.singleton 3 "three")
+  (Map.singleton (module Int) 3 "four" )
 ;;
 [%%expect{|
-Characters 54-84:
-Error: This expression has type
-         string Int.Map.t = (int, string, Int.comparator_witness) Map.t
+Characters 66-104:
+Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
@@ -177,472 +260,125 @@ Error: This expression has type
 |}];;
 
 [@@@part "17"];;
-let dedup ~comparator l =
-  List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
-  |> Set.to_list
-;;
-[%%expect{|
-Characters 58-68:
-Error: The function applied to this argument has type
-         ('a, 'b) Set.comparator -> ('a, 'b) Set.t
-This argument cannot be applied with label ~comparator
-|}];;
-dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
-[%%expect{|
-Characters 0-5:
-Error: Unbound value dedup
-|}];;
+Set.of_list (module Int) [1;2;3] |> Set.to_list;;
+[%%expect ocaml {|- : int list = [1; 2; 3]|}];;
+Set.union
+  (Set.of_list (module Int) [1;2;3;2])
+  (Set.of_list (module Int) [3;5;1])
+|> Set.to_list;;
+[%%expect ocaml {|- : int list = [1; 2; 3; 5]|}];;
 
-[@@@part "18"];;
-let s1 = Int.Set.of_list [1;2];;
-[%%expect ocaml {|val s1 : Int.Set.t = <abstr>|}];;
-let s2 = Int.Set.of_list [2;1];;
-[%%expect ocaml {|val s2 : Int.Set.t = <abstr>|}];;
 
-[@@@part "19"];;
-Set.equal s1 s2;;
+[@@@part "ppc.1"];;
+let m1 = Map.of_alist_exn (module Int) [1, "one";2, "two"];;
+[%%expect ocaml {|val m1 : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
+let m2 = Map.of_alist_exn (module Int) [2, "two";1, "one"];;
+[%%expect ocaml {|val m2 : (int, string, Int.comparator_witness) Map.t = <abstr>|}];;
+
+[@@@part "ppc.2"];;
+Map.equal String.equal m1 m2;;
 [%%expect ocaml {|- : bool = true|}];;
 
-[@@@part "20"];;
-s1 = s2;;
+[@@@part "ppc.3"];;
+Poly.(m1 = m2);;
 [%%expect{|Exception: (Invalid_argument "compare: functional value").|}];;
 
-[@@@part "21"];;
-Set.to_tree s1 = Set.to_tree s2;;
+[@@@part "ppc.4"];;
+Poly.((Map.Using_comparator.to_tree m1) =
+      (Map.Using_comparator.to_tree m2));;
 [%%expect ocaml {|- : bool = false|}];;
 
-[@@@part "22"];;
-module Foo_and_bar : sig
-  type t = { foo: Int.Set.t; bar: string }
-  include Comparable.S with type t := t
-end = struct
+[@@@part "ud.1"];;
+module Book = struct
   module T = struct
-    type t = { foo: Int.Set.t; bar: string } [@@deriving sexp]
-    let compare t1 t2 =
-      let c = Int.Set.compare t1.foo t2.foo in
-      if c <> 0 then c else String.compare t1.bar t2.bar
+    type t = { title: string; isbn: string }
+    [@@deriving compare, sexp_of]
   end
   include T
-  include Comparable.Make(T)
+  include Comparator.Make(T)
 end;;
 [%%expect ocaml {|
-module Foo_and_bar :
+module Book :
   sig
-    type t = { foo : Int.Set.t; bar : string; }
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
+    module T :
+      sig
+        type t = { title : string; isbn : string; }
+        val compare : t -> t -> int
+        val sexp_of_t : t -> Sexp.t
+      end
+    type t = T.t = { title : string; isbn : string; }
     val compare : t -> t -> int
-...
-    module Replace_polymorphic_compare :
-      sig
-        val ( >= ) : t -> t -> bool
-        val ( <= ) : t -> t -> bool
-        val ( = ) : t -> t -> bool
-        val ( > ) : t -> t -> bool
-...
-      end
-    module Map :
-      sig
-...
-      end
-    module Set :
-      sig
-...
-      end
+    val sexp_of_t : t -> Sexp.t
+    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
   end
 |}];;
 
-[@@@part "23"];;
-module Foo_and_bar : sig
-  type t = { foo: Int.Set.t; bar: string }
-  include Comparable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: Int.Set.t; bar: string } [@@deriving sexp, compare]
-  end
-  include T
-  include Comparable.Make(T)
-end;;
-[%%expect ocaml {|
-module Foo_and_bar :
-  sig
-    type t = { foo : Int.Set.t; bar : string; }
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-...
-  end
-|}];;
 
-[@@@part "24"];;
-module Foo_and_bar : sig
-  type t = { foo: int; bar: string }
-  include Comparable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: int; bar: string } [@@deriving sexp]
-  end
-  include T
-  include Comparable.Poly(T)
-end;;
-[%%expect ocaml {|
-module Foo_and_bar :
-  sig
-    type t = { foo : int; bar : string; }
-    val ( >= ) : t -> t -> bool
-    val ( <= ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( > ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-    val ( <> ) : t -> t -> bool
-    val equal : t -> t -> bool
-    val compare : t -> t -> int
-...
-  end
-|}];;
-
-[@@@part "25"];;
-let table = Hashtbl.create ~hashable:String.hashable ();;
-[%%expect{|
-Characters 37-52:
-Error: The function applied to this argument has type
-         ?growth_allowed:bool -> ?size:int -> unit -> ('a, 'b) Hashtbl.t
-This argument cannot be applied with label ~hashable
-|}];;
+[@@@part "ht.1"];;
+let table = Hashtbl.create (module String) ();;
+[%%expect ocaml {|val table : (string, '_weak1) Hashtbl.t = <abstr>|}];;
 Hashtbl.set table ~key:"three" ~data:3;;
-[%%expect{|
-Characters 12-17:
-Error: Unbound value table
-|}];;
+[%%expect ocaml {|- : unit = ()|}];;
 Hashtbl.find table "three";;
-[%%expect{|
-Characters 13-18:
-Error: Unbound value table
-|}];;
+[%%expect ocaml {|- : int option = Some 3|}];;
 
-[@@@part "26"];;
-let table = String.Table.create ();;
-[%%expect ocaml {|val table : '_weak1 String.Table.t = <abstr>|}];;
 
-[@@@part "27"];;
-let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
-[%%expect{|
-Characters 37-58:
-Error: The function applied to this argument has type
-         ?growth_allowed:bool -> ?size:int -> unit -> ('a, 'b) Hashtbl.t
-This argument cannot be applied with label ~hashable
-|}];;
-
-[@@@part "28"];;
-let table = Hashtbl.Poly.create ();;
-[%%expect ocaml {|val table : ('_weak2, '_weak3) Hashtbl.t = <abstr>|}];;
-
-[@@@part "29"];;
-Caml.Hashtbl.hash (List.range 0 9);;
-[%%expect ocaml {|- : int = 209331808|}];;
-Caml.Hashtbl.hash (List.range 0 10);;
-[%%expect ocaml {|- : int = 182325193|}];;
-Caml.Hashtbl.hash (List.range 0 11);;
-[%%expect ocaml {|- : int = 182325193|}];;
-Caml.Hashtbl.hash (List.range 0 100);;
-[%%expect ocaml {|- : int = 182325193|}];;
-
-[@@@part "30"];;
-module Foo_and_bar : sig
-  type t = { foo: int; bar: string }
-  include Hashable.S with type t := t
-end = struct
-  module T = struct
-    type t = { foo: int; bar: string } [@@deriving sexp, compare, hash]
+[@@@part "ht.2"];;
+#typeof "Hashtbl_intf.Key";;
+[%%expect.nondeterministic ocaml {|
+module type Base.Hashtbl_intf.Key =
+  sig
+    type t
+    val compare : t -> t -> Base.int
+    val sexp_of_t : t -> Base.Sexp.t
+    val hash : t -> Base.int
   end
-  include T
-  include Hashable.Make(T)
+|}];;
+
+[@@@part "ht.3"];;
+module Book = struct
+  type t = { title: string; isbn: string }
+  [@@deriving compare, sexp_of, hash]
 end;;
 [%%expect ocaml {|
-module Foo_and_bar :
+module Book :
   sig
-    type t = { foo : int; bar : string; }
+    type t = { title : string; isbn : string; }
     val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
     val hash_fold_t : Hash.state -> t -> Hash.state
     val hash : t -> int
-    val hashable : t Hashtbl_intf.Hashable.t
-    module Table :
-      sig
-        type key = t
-        type ('a, 'b) hashtbl = ('a, 'b) Hashtbl.t
-        type 'b t = (key, 'b) hashtbl
-        val sexp_of_t : ('b -> Sexp.t) -> 'b t -> Sexp.t
-        type ('a, 'b) t_ = 'b t
-        type 'a key_ = key
-        val hashable : key Hashtbl_intf.Hashable.t
-        val invariant :
-          'a Base__Invariant_intf.t -> 'a t Base__Invariant_intf.t
-        val create :
-          (key, 'b, unit -> 'b t)
-          Hashtbl_intf.create_options_without_hashable
-        val of_alist :
-          (key, 'b,
-           (key * 'b) list -> [ `Duplicate_key of key | `Ok of 'b t ])
-          Hashtbl_intf.create_options_without_hashable
-        val of_alist_report_all_dups :
-          (key, 'b,
-           (key * 'b) list -> [ `Duplicate_keys of key list | `Ok of 'b t ])
-          Hashtbl_intf.create_options_without_hashable
-        val of_alist_or_error :
-          (key, 'b, (key * 'b) list -> 'b t Base__.Or_error.t)
-          Hashtbl_intf.create_options_without_hashable
-        val of_alist_exn :
-          (key, 'b, (key * 'b) list -> 'b t)
-          Hashtbl_intf.create_options_without_hashable
-        val of_alist_multi :
-          (key, 'b list, (key * 'b) list -> 'b list t)
-          Hashtbl_intf.create_options_without_hashable
-        val create_mapped :
-          (key, 'b,
-           get_key:('r -> key) ->
-           get_data:('r -> 'b) ->
-           'r list -> [ `Duplicate_keys of key list | `Ok of 'b t ])
-          Hashtbl_intf.create_options_without_hashable
-        val create_with_key :
-          (key, 'r,
-           get_key:('r -> key) ->
-           'r list -> [ `Duplicate_keys of key list | `Ok of 'r t ])
-          Hashtbl_intf.create_options_without_hashable
-        val create_with_key_or_error :
-          (key, 'r, get_key:('r -> key) -> 'r list -> 'r t Base__.Or_error.t)
-          Hashtbl_intf.create_options_without_hashable
-        val create_with_key_exn :
-          (key, 'r, get_key:('r -> key) -> 'r list -> 'r t)
-          Hashtbl_intf.create_options_without_hashable
-        val group :
-          (key, 'b,
-           get_key:('r -> key) ->
-           get_data:('r -> 'b) -> combine:('b -> 'b -> 'b) -> 'r list -> 'b t)
-          Hashtbl_intf.create_options_without_hashable
-        val sexp_of_key : 'a t -> key -> Sexp.t
-        val clear : 'a t -> unit
-        val copy : 'b t -> 'b t
-        val fold :
-          'b t -> init:'c -> f:(key:key -> data:'b -> 'c -> 'c) -> 'c
-        val iter_keys : 'a t -> f:(key -> unit) -> unit
-        val iter : 'b t -> f:('b -> unit) -> unit
-        val iteri : 'b t -> f:(key:key -> data:'b -> unit) -> unit
-        val existsi : 'b t -> f:(key:key -> data:'b -> bool) -> bool
-        val exists : 'b t -> f:('b -> bool) -> bool
-        val for_alli : 'b t -> f:(key:key -> data:'b -> bool) -> bool
-        val for_all : 'b t -> f:('b -> bool) -> bool
-        val counti : 'b t -> f:(key:key -> data:'b -> bool) -> int
-        val count : 'b t -> f:('b -> bool) -> int
-        val length : 'a t -> int
-        val is_empty : 'a t -> bool
-        val mem : 'a t -> key -> bool
-        val remove : 'a t -> key -> unit
-        val set : 'b t -> key:key -> data:'b -> unit
-        val add : 'b t -> key:key -> data:'b -> [ `Duplicate | `Ok ]
-        val add_exn : 'b t -> key:key -> data:'b -> unit
-        val change : 'b t -> key -> f:('b option -> 'b option) -> unit
-        val update : 'b t -> key -> f:('b option -> 'b) -> unit
-        val map : 'b t -> f:('b -> 'c) -> 'c t
-        val mapi : 'b t -> f:(key:key -> data:'b -> 'c) -> 'c t
-        val filter_map : 'b t -> f:('b -> 'c option) -> 'c t
-        val filter_mapi : 'b t -> f:(key:key -> data:'b -> 'c option) -> 'c t
-        val filter_keys : 'b t -> f:(key -> bool) -> 'b t
-        val filter : 'b t -> f:('b -> bool) -> 'b t
-        val filteri : 'b t -> f:(key:key -> data:'b -> bool) -> 'b t
-        val partition_map :
-          'b t -> f:('b -> [ `Fst of 'c | `Snd of 'd ]) -> 'c t * 'd t
-        val partition_mapi :
-          'b t ->
-          f:(key:key -> data:'b -> [ `Fst of 'c | `Snd of 'd ]) ->
-          'c t * 'd t
-        val partition_tf : 'b t -> f:('b -> bool) -> 'b t * 'b t
-        val partitioni_tf :
-          'b t -> f:(key:key -> data:'b -> bool) -> 'b t * 'b t
-        val find_or_add : 'b t -> key -> default:(unit -> 'b) -> 'b
-        val find : 'b t -> key -> 'b option
-        val find_exn : 'b t -> key -> 'b
-        val find_and_call :
-          'b t ->
-          key -> if_found:('b -> 'c) -> if_not_found:(key -> 'c) -> 'c
-        val find_and_remove : 'b t -> key -> 'b option
-        val merge :
-          'a t ->
-          'b t ->
-          f:(key:key ->
-             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -> 'c option) ->
-          'c t
-        type 'a merge_into_action = Remove | Set_to of 'a
-        val merge_into :
-          src:'a t ->
-          dst:'b t ->
-          f:(key:key -> 'a -> 'b option -> 'b merge_into_action) -> unit
-        val keys : 'a t -> key list
-        val data : 'b t -> 'b list
-        val filter_keys_inplace : 'a t -> f:(key -> bool) -> unit
-        val filter_inplace : 'b t -> f:('b -> bool) -> unit
-        val filteri_inplace : 'b t -> f:(key:key -> data:'b -> bool) -> unit
-        val map_inplace : 'b t -> f:('b -> 'b) -> unit
-        val mapi_inplace : 'b t -> f:(key:key -> data:'b -> 'b) -> unit
-        val filter_map_inplace : 'b t -> f:('b -> 'b option) -> unit
-        val filter_mapi_inplace :
-          'b t -> f:(key:key -> data:'b -> 'b option) -> unit
-        val equal : 'b t -> 'b t -> ('b -> 'b -> bool) -> bool
-        val similar : 'b1 t -> 'b2 t -> ('b1 -> 'b2 -> bool) -> bool
-        val to_alist : 'b t -> (key * 'b) list
-        val validate :
-          name:(key -> string) -> 'b Validate.check -> 'b t Validate.check
-        val incr : ?by:int -> ?remove_if_zero:bool -> int t -> key -> unit
-        val decr : ?by:int -> ?remove_if_zero:bool -> int t -> key -> unit
-        val add_multi : 'b list t -> key:key -> data:'b -> unit
-        val remove_multi : 'a list t -> key -> unit
-        val find_multi : 'b list t -> key -> 'b list
-        module Provide_of_sexp :
-          functor (Key : sig val t_of_sexp : Sexp.t -> key end) ->
-            sig
-              val t_of_sexp :
-                (Sexp.t -> 'v_x__001_) -> Sexp.t -> 'v_x__001_ t
-            end
-        module Provide_bin_io :
-          functor
-            (Key : sig
-                     val bin_t : key Bin_prot.Type_class.t0
-                     val bin_read_t : key Bin_prot.Read.reader
-                     val __bin_read_t__ : (int -> key) Bin_prot.Read.reader
-                     val bin_reader_t : key Bin_prot.Type_class.reader0
-                     val bin_size_t : key Bin_prot.Size.sizer
-                     val bin_write_t : key Bin_prot.Write.writer
-                     val bin_writer_t : key Bin_prot.Type_class.writer0
-                     val bin_shape_t : Bin_prot.Shape.t
-                   end) ->
-            sig
-              val bin_t :
-                'a Bin_prot.Type_class.t0 -> 'a t Bin_prot.Type_class.t0
-              val bin_read_t :
-                'a Bin_prot.Read.reader -> 'a t Bin_prot.Read.reader
-              val __bin_read_t__ :
-                'a Bin_prot.Read.reader -> (int -> 'a t) Bin_prot.Read.reader
-              val bin_reader_t :
-                'a Bin_prot.Type_class.reader0 ->
-                'a t Bin_prot.Type_class.reader0
-              val bin_size_t :
-                'a Bin_prot.Size.sizer -> 'a t Bin_prot.Size.sizer
-              val bin_write_t :
-                'a Bin_prot.Write.writer -> 'a t Bin_prot.Write.writer
-              val bin_writer_t :
-                'a Bin_prot.Type_class.writer0 ->
-                'a t Bin_prot.Type_class.writer0
-              val bin_shape_t : Bin_prot.Shape.t -> Bin_prot.Shape.t
-            end
-        val t_of_sexp : (Sexp.t -> 'v_x__002_) -> Sexp.t -> 'v_x__002_ t
-      end
-    module Hash_set :
-      sig
-        type elt = t
-        type t = elt Hash_set.t
-        val sexp_of_t : t -> Sexp.t
-        type 'a t_ = t
-        type 'a elt_ = elt
-        val create :
-          ('a, unit -> t)
-          Core_kernel__.Hash_set_intf.create_options_without_hashable
-        val of_list :
-          ('a, elt list -> t)
-          Core_kernel__.Hash_set_intf.create_options_without_hashable
-        module Provide_of_sexp :
-          functor (X : sig val t_of_sexp : Sexp.t -> elt end) ->
-            sig val t_of_sexp : Sexp.t -> t end
-        module Provide_bin_io :
-          functor
-            (X : sig
-                   val bin_t : elt Bin_prot.Type_class.t0
-                   val bin_read_t : elt Bin_prot.Read.reader
-                   val __bin_read_t__ : (int -> elt) Bin_prot.Read.reader
-                   val bin_reader_t : elt Bin_prot.Type_class.reader0
-                   val bin_size_t : elt Bin_prot.Size.sizer
-                   val bin_write_t : elt Bin_prot.Write.writer
-                   val bin_writer_t : elt Bin_prot.Type_class.writer0
-                   val bin_shape_t : Bin_prot.Shape.t
-                 end) ->
-            sig
-              val bin_t : t Bin_prot.Type_class.t0
-              val bin_read_t : t Bin_prot.Read.reader
-              val __bin_read_t__ : (int -> t) Bin_prot.Read.reader
-              val bin_reader_t : t Bin_prot.Type_class.reader0
-              val bin_size_t : t Bin_prot.Size.sizer
-              val bin_write_t : t Bin_prot.Write.writer
-              val bin_writer_t : t Bin_prot.Type_class.writer0
-              val bin_shape_t : Bin_prot.Shape.t
-            end
-        val t_of_sexp : Sexp.t -> t
-      end
-    module Hash_queue :
-      sig
-        module Key :
-          sig
-            type t = Hash_set.elt
-            val compare : t -> t -> int
-            val sexp_of_t : t -> Sexp.t
-            val hash : t -> int
-          end
-        type 'a t
-        val sexp_of_t : ('a -> Sexp.t) -> 'a t -> Sexp.t
-        val length : 'a t -> int
-        val is_empty : 'a t -> bool
-        val iter : 'a t -> f:('a -> unit) -> unit
-        val fold :
-          'a t -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
-        val fold_result :
-          'a t ->
-          init:'accum ->
-          f:('accum -> 'a -> ('accum, 'e) result) -> ('accum, 'e) result
-        val fold_until :
-          'a t ->
-          init:'accum ->
-          f:('accum -> 'a -> ('accum, 'stop) Base.Continue_or_stop.t) ->
-          ('accum, 'stop) Base.Finished_or_stopped_early.t
-        val exists : 'a t -> f:('a -> bool) -> bool
-        val for_all : 'a t -> f:('a -> bool) -> bool
-        val count : 'a t -> f:('a -> bool) -> int
-        val sum :
-          (module Base__.Commutative_group.S with type t = 'sum) ->
-          'a t -> f:('a -> 'sum) -> 'sum
-        val find : 'a t -> f:('a -> bool) -> 'a option
-        val find_map : 'a t -> f:('a -> 'b option) -> 'b option
-        val to_list : 'a t -> 'a list
-        val to_array : 'a t -> 'a array
-        val min_elt : 'a t -> cmp:('a -> 'a -> int) -> 'a option
-        val max_elt : 'a t -> cmp:('a -> 'a -> int) -> 'a option
-        val invariant : 'a t -> unit
-        val create : ?growth_allowed:bool -> ?size:int -> unit -> 'a t
-        val clear : 'a t -> unit
-        val mem : 'a t -> Key.t -> bool
-        val lookup : 'a t -> Key.t -> 'a option
-        val lookup_exn : 'a t -> Key.t -> 'a
-        val enqueue : 'a t -> Key.t -> 'a -> [ `Key_already_present | `Ok ]
-        val enqueue_exn : 'a t -> Key.t -> 'a -> unit
-        val lookup_and_move_to_back : 'a t -> Key.t -> 'a option
-        val lookup_and_move_to_back_exn : 'a t -> Key.t -> 'a
-        val first : 'a t -> 'a option
-        val first_with_key : 'a t -> (Key.t * 'a) option
-        val keys : 'a t -> Key.t list
-        val dequeue : 'a t -> 'a option
-        val dequeue_exn : 'a t -> 'a
-        val dequeue_with_key : 'a t -> (Key.t * 'a) option
-        val dequeue_with_key_exn : 'a t -> Key.t * 'a
-        val dequeue_all : 'a t -> f:('a -> unit) -> unit
-        val remove : 'a t -> Key.t -> [ `No_such_key | `Ok ]
-        val remove_exn : 'a t -> Key.t -> unit
-        val replace : 'a t -> Key.t -> 'a -> [ `No_such_key | `Ok ]
-        val replace_exn : 'a t -> Key.t -> 'a -> unit
-        val iteri : 'a t -> f:(key:Key.t -> data:'a -> unit) -> unit
-        val foldi :
-          'a t -> init:'b -> f:('b -> key:Key.t -> data:'a -> 'b) -> 'b
-      end
   end
 |}];;
+let table = Hashtbl.create (module Book) ();;
+[%%expect ocaml {|val table : (Book.t, '_weak2) Hashtbl.t = <abstr>|}];;
+
+[@@@part "ht.4"];;
+let table = Hashtbl.Poly.create ();;
+[%%expect ocaml {|val table : ('_weak3, '_weak4) Hashtbl.t = <abstr>|}];;
+Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!";;
+[%%expect ocaml {|- : unit = ()|}];;
+Hashtbl.find table ("foo",3,[1;2;3]);;
+[%%expect ocaml {|- : string option = Some "random data!"|}];;
+
+
+[@@@part "ph.1"];;
+Hashtbl.Poly.hashable.hash (List.range 0 9);;
+[%%expect ocaml {|- : int = 209331808|}];;
+Hashtbl.Poly.hashable.hash (List.range 0 10);;
+[%%expect ocaml {|- : int = 182325193|}];;
+Hashtbl.Poly.hashable.hash (List.range 0 11);;
+[%%expect ocaml {|- : int = 182325193|}];;
+Hashtbl.Poly.hashable.hash (List.range 0 100);;
+[%%expect ocaml {|- : int = 182325193|}];;
+
+[@@@part "ph.2"];;
+[%hash: int list] (List.range 0 9);;
+[%%expect ocaml {|- : int = 999007935|}];;
+[%hash: int list] (List.range 0 10);;
+[%%expect ocaml {|- : int = 195154657|}];;
+[%hash: int list] (List.range 0 11);;
+[%%expect ocaml {|- : int = 527899773|}];;
+[%hash: int list] (List.range 0 100);;
+[%%expect ocaml {|- : int = 594983280|}];;
