@@ -128,7 +128,7 @@ module List_dir :
 let list_dir = List_dir.create "/var";;
 [%%expect ocaml {|val list_dir : List_dir.t = {List_dir.cwd = "/var"}|}];;
 List_dir.eval list_dir (sexp_of_string ".");;
-[%%expect ocaml {|
+[%%expect.nondeterministic ocaml {|
 - : (Sexp.t, Error.t) result =
 Ok
  (yp networkd install empty ma mail spool jabberd vm msgs audit root lib db
@@ -210,7 +210,7 @@ open Stdio;;
 let rec cli dispatch_table =
   printf ">>> %!";
   let result =
-    match In_channel.input_line In_channel.stdin with
+    match In_channel.(input_line stdin) with
     | None -> `Stop
     | Some line ->
       match Or_error.try_with (fun () ->
