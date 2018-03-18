@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Core_kernel;;
+open Base;;
 module type X_int = sig val x : int end;;
 [%%expect ocaml {|module type X_int = sig val x : int end|}];;
 [@@@part "1"];;
@@ -108,10 +108,7 @@ module Int_interval = Make_interval(Int) ;;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t =
-      Make_interval(Core_kernel__Int).t =
-        Interval of int * int
-      | Empty
+    type t = Make_interval(Base__Int).t = Interval of int * int | Empty
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -123,7 +120,7 @@ module String_interval = Make_interval(String) ;;
 module String_interval :
   sig
     type t =
-      Make_interval(Core_kernel__String).t =
+      Make_interval(Base__String).t =
         Interval of string * string
       | Empty
     val create : string -> string -> t
@@ -238,8 +235,8 @@ module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Int).t
-    type endpoint = Make_interval(Core_kernel__Int).endpoint
+    type t = Make_interval(Base__Int).t
+    type endpoint = Make_interval(Base__Int).endpoint
     val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
@@ -322,7 +319,7 @@ module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Int).t
+    type t = Make_interval(Base__Int).t
     type endpoint = int
     val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
@@ -402,7 +399,7 @@ module Int_interval = Make_interval(Int);;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Int).t
+    type t = Make_interval(Base__Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -430,7 +427,7 @@ val sexp_of_some_type : some_type -> Sexp.t = <fun>
 |}];;
 sexp_of_some_type (33, ["one"; "two"]);;
 [%%expect ocaml {|- : Sexp.t = (33 (one two))|}];;
-Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
+Core_kernel.Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
 [%%expect ocaml {|- : some_type = (44, ["five"; "six"])|}];;
 [@@@part "25"];;
 module Make_interval(Endpoint : Comparable)
@@ -477,7 +474,7 @@ Error: Unbound value Endpoint.t_of_sexp
 [@@@part "26"];;
 module type Interval_intf_with_sexp = sig
   include Interval_intf
-  include Sexpable with type t := t
+  include Core_kernel.Sexpable with type t := t
 end;;
 [%%expect ocaml {|
 module type Interval_intf_with_sexp =
@@ -496,7 +493,7 @@ module type Interval_intf_with_sexp =
 module type Interval_intf_with_sexp = sig
   type t
   include Interval_intf with type t := t
-  include Sexpable      with type t := t
+  include Core_kernel.Sexpable      with type t := t
 end;;
 [%%expect ocaml {|
 module type Interval_intf_with_sexp =
@@ -515,7 +512,7 @@ module type Interval_intf_with_sexp =
 module Make_interval(Endpoint : sig
     type t
     include Comparable with type t := t
-    include Sexpable   with type t := t
+    include Core_kernel.Sexpable with type t := t
   end)
   : (Interval_intf_with_sexp with type endpoint := Endpoint.t)
 = struct
@@ -584,7 +581,7 @@ module Int_interval = Make_interval(Int) ;;
 [%%expect ocaml {|
 module Int_interval :
   sig
-    type t = Make_interval(Core_kernel__Int).t
+    type t = Make_interval(Base__Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
