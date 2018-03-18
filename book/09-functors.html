@@ -197,14 +197,14 @@
       the functor input as an anonymous module:</p>
       <link rel="import" href="code/functors/main.mlt" part="7"/>
 
-      <p>If the input interface for your functor is aligned with
-      the standards of the libraries you use, then you don't need
-      to construct a custom module to feed to the functor. In this
-      case, we can directly use the <code>Int</code> or
-      <code>String</code> modules provided by Core_kernel:</p>
-      <link rel="import" href="code/functors/main.mlt" part="8"/>
+      <p>If the input interface for your functor is aligned with the
+      standards of the libraries you use, then you don't need to
+      construct a custom module to feed to the functor. In this case,
+      we can directly use the <code>Int</code> or <code>String</code>
+      modules provided by <code>Base</code>:</p> <link rel="import"
+      href="code/functors/main.mlt" part="8"/>
 
-      <p>This works because many modules in Core_kernel,
+      <p>This works because many modules in </code>Base</code>,
       including <code>Int</code> and <code>String</code>, satisfy an
       extended version of the <code>Comparable</code> signature
       described previously. Such standardized signatures are good
@@ -383,11 +383,11 @@
           is the ability to <em>serialize</em>, i.e., to be able to read
           and write intervals as a stream of bytes. In this case, we'll
           do this by converting to and from s-expressions, which were
-          mentioned already in 
+          mentioned already in
 	  <a href="07-error-handling.html#error-handling" data-type="xref">Error Handling</a>. To recall, an
 	  s-expression is essentially a parenthesized expression whose
           atoms are strings, and it is a serialization format that is
-          used commonly in Core_kernel. Here's an example:
+          used commonly in <code>Base</code>. Here's an example:
 
 	  <idx>s-expressions/example of</idx>
 	  <idx>interval computation/multiple interfaces and</idx></p>
@@ -395,7 +395,7 @@
         <link rel="import" href="code/functors/main.mlt" part="23"/>
 
         <p>
-	  Core_kernel comes with a syntax extension
+	  <code>Base</code> comes with a syntax extension
 	  called <code>ppx_sexp_conv</code> which will generate
 	  s-expression conversion functions for any type annotated
 	  with <code>[@@deriving sexp]</code>. Thus, we can write:
@@ -420,7 +420,7 @@
         doesn't say anything about s-expressions.</p>
 
         <p>
-	  Happily, Core_kernel comes with a built-in interface for
+	  Happily, <code>Base</code> comes with a built-in interface for
           just this purpose called <code>Sexpable</code>, which is
           defined as follows:</p>
 
@@ -535,7 +535,7 @@
       <link rel="import" href="code/functors/extended_fqueue.ml"/>
 
       <p>
-	Core_kernel comes with a number of functors for extending modules
+	<code>Base</code> comes with a number of functors for extending modules
 	that follow this same basic pattern,
 	including:
 
@@ -581,7 +581,7 @@
       <p>
 	These functors come in handy when you want to add the same
 	kind of functionality that is commonly available in
-	Core_kernel to your own types.</p>
+	<code>Base</code> to your own types.</p>
 
       <p>
 	We've really only covered some of the possible uses of
