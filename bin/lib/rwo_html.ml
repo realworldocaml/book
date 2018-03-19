@@ -1,8 +1,7 @@
 open Core
 open Async
 
-type attributes = (string * string) list
-  [@@deriving sexp]
+type attributes = (string * string) list [@@deriving sexp]
 
 type element = {
   name : string;
@@ -15,55 +14,51 @@ and item = [
 | `Data of string
 ] [@@deriving sexp]
 
-type t = item list
-  [@@deriving sexp]
+type t = item list [@@deriving sexp]
 
-let rec item_of_nethtml (doc:Nethtml.document) : item =
-  match doc with
-  | Nethtml.Element(name,attrs,childs) ->
-    `Element {name; attrs; childs = List.map childs ~f:item_of_nethtml}
-  | Nethtml.Data x ->
-    `Data x
+let rec item_of_element: type a. a Soup.node -> item = fun n ->
+  match Soup.element n with
+  | None   -> `Data (String.concat ~sep:"" Soup.(texts n))
+  | Some n ->
+    let name = Soup.name n in
+    let attrs =
+      Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] n
+      |> List.rev
+    in
+    let childs = Soup.(children n |> to_list) in
+    let childs = List.map childs ~f:item_of_element in
+    `Element {name; attrs; childs}
 
-let rec item_to_nethtml (item:item) : Nethtml.document =
+
+let rec item_to_soup (item:item) =
   match item with
+  | `Data x    -> `Data x
   | `Element x ->
-    Nethtml.Element(x.name, x.attrs, List.map x.childs ~f:item_to_nethtml)
-  | `Data x ->
-    Nethtml.Data x
+    let data, childs =
+      List.fold_left (List.rev x.childs) ~init:([], []) ~f:(fun (ds, es) e ->
+          match item_to_soup e with
+          | `Data d    -> d::ds, es
+          | `Element e -> ds, e :: es
+        ) in
+    let inner_text = String.concat ~sep:"" data in
+    let e = Soup.create_element ~inner_text ~attributes:x.attrs x.name in
+    List.iter ~f:(Soup.append_child e) childs;
+    `Element e
 
 let of_string s =
-  Netchannels.with_in_obj_channel
-    (new Netchannels.input_string s)
-    (Nethtml.parse ~dtd:[])
-  |> List.map ~f:item_of_nethtml
+  let soup = Soup.parse s in
+  let elements = Soup.(children soup |> to_list) in
+  List.map ~f:item_of_element elements
 
-let of_file file =
-  Reader.file_contents file >>| of_string
-
-let item_of_string_helper ?filename s = match of_string s with
-  | x::[] -> Ok x
-  | l -> (
-    let msg = "expected single HTML item but got" in
-    let n = List.length l in
-    match filename with
-    | None -> error msg n sexp_of_int
-    | Some filename -> error msg (filename,n) [%sexp_of: string * int]
-  )
-
-let item_of_string s = item_of_string_helper s
-
-let item_of_file filename =
-  Reader.file_contents filename
-  >>| item_of_string_helper ~filename
+let of_file file = Reader.file_contents file >>| of_string
 
 let to_string t =
-  let docs = List.map t ~f:item_to_nethtml in
-  let buf = Buffer.create 2048 in
-  Netchannels.with_out_obj_channel (new Netchannels.output_buffer buf)
-    (Fn.flip Nethtml.write docs)
-  ;
-  Buffer.contents buf
+  let root = Soup.create_soup () in
+  List.iter ~f:(fun e -> match item_to_soup e with
+      | `Data x    -> Soup.append_root root (Soup.create_text x)
+      | `Element e -> Soup.append_root root e
+    ) t;
+  Soup.pretty_print root
 
 let is_elem_node item name' = match item with
   | `Data _ -> false
@@ -158,13 +153,17 @@ let fold t ~init ~f =
   in
   List.fold t ~init ~f:loop
 
-let get_body_childs ~filename t =
-  match get_all_nodes "body" t with
-  | [] -> failwithf "%s: <body> not found" filename ()
-  | _::_::_ -> failwithf "%s: multiple <body> tags found" filename ()
+let get_childs ~filename tag t =
+  match get_all_nodes tag t with
+  | [] -> failwithf "%s: <%s> not found" filename tag ()
+  | _::_::_ -> failwithf "%s: multiple <%s> tags found" filename tag ()
   | (`Data _)::[] -> assert false
-  | (`Element {name="body";childs;_})::[] -> childs
+  | (`Element {name;childs;_})::[] when name=tag-> childs
   | (`Element _)::[] -> assert false
+
+let get_body_childs ~filename t =
+  let html = get_childs ~filename "html" t in
+  get_childs ~filename "body" html
 
 let replace_id_node_with t ~id ~with_ =
   let rec loop = function

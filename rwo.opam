@@ -21,7 +21,6 @@ depends: [
   "patdiff"
   "cohttp-async"
   "lambdasoup"
-  "ocamlnet"
   "sexp_pretty"
   # Required for code blocks within book.
   "core_bench"
