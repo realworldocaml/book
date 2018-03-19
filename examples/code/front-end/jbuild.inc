@@ -66,7 +66,7 @@
 
 (alias (
   (name code)
-  (deps (camlp4_toplevel.mlt))
+  (deps (camlp4_toplevel.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

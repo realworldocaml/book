@@ -119,47 +119,36 @@ let process_chapters book_dir output_dir =
 
 (** Handle examples *)
 
-let mlt_rule ~dep f =
+let mlt_rule f =
   sprintf {|
 (alias
  ((name    code)
-  (deps    (%s %s))
+  (deps    (%s (files_recursively_in .)))
   (action  (progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))|}
-    f dep
+    f
 
-let sh_rule ~dep f =
+let sh_rule f =
   sprintf {|
 (alias
  ((name     cram)
-  (deps     (%s %s (files_recursively_in .)))
+  (deps     (%s (files_recursively_in .)))
   (action
     (progn
      (run cram ${<})
      (diff? ${<} ${<}.corrected)))))|}
-    f dep
-
-type extra_deps = (string * string list) list [@@deriving sexp]
-
-let find_extra_deps dir =
-  let f = Filename.concat dir "jbuild.deps" in
-  if Sys.file_exists f then begin
-    Sexplib.Sexp.load_sexp_conv_exn f extra_deps_of_sexp
-  end else []
+    f
 
 let process_examples dir =
   Filename.concat dir "jbuild.inc" |> fun jbuild ->
-  find_extra_deps dir |> fun deps ->
   files_with ~exts:book_extensions dir |>
-  List.map (fun f ->
-    let dep = List.assoc_opt f deps |> function None -> "" | Some v -> String.concat " " v in
-    match f with
-    | f when Filename.extension f = ".mlt" -> mlt_rule ~dep f
-    | f when Filename.extension f = ".sh" -> sh_rule ~dep f
-    | f when Filename.extension f = ".errsh" -> sh_rule ~dep f
-    | _ -> printf "skipping %s/%s\n%!" dir f; ""
-  ) |>
+  List.map (function
+      | f when Filename.extension f = ".mlt"   -> mlt_rule f
+      | f when Filename.extension f = ".sh"    -> sh_rule f
+      | f when Filename.extension f = ".errsh" -> sh_rule f
+      | f -> printf "skipping %s/%s\n%!" dir f; ""
+    ) |>
   List.filter ((<>) "") |>
   String.concat "\n" |>
   emit_sexp jbuild

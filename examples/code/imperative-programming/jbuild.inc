@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (for.mlt))
+  (deps (for.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (order.mlt))
+  (deps (order.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -18,7 +18,7 @@
 
 (alias (
   (name code)
-  (deps (file.mlt))
+  (deps (file.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (file2.mlt))
+  (deps (file2.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -34,7 +34,7 @@
 
 (alias (
   (name code)
-  (deps (letrec.mlt))
+  (deps (letrec.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -42,7 +42,7 @@
 
 (alias (
   (name code)
-  (deps (fib.mlt))
+  (deps (fib.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -50,7 +50,7 @@
 
 (alias (
   (name code)
-  (deps (examples.mlt))
+  (deps (examples.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -58,7 +58,7 @@
 
 (alias (
   (name code)
-  (deps (weak.mlt))
+  (deps (weak.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -66,7 +66,7 @@
 
 (alias (
   (name code)
-  (deps (memo.mlt))
+  (deps (memo.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -74,7 +74,7 @@
 
 (alias (
   (name code)
-  (deps (printf.mlt))
+  (deps (printf.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -82,7 +82,7 @@
 
 (alias (
   (name code)
-  (deps (value_restriction.mlt))
+  (deps (value_restriction.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -90,7 +90,7 @@
 
 (alias (
   (name code)
-  (deps (ref.mlt))
+  (deps (ref.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -98,7 +98,7 @@
 
 (alias (
   (name code)
-  (deps (lazy.mlt))
+  (deps (lazy.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

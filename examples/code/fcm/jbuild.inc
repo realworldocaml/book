@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (query_handler.mlt))
+  (deps (query_handler.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (main.mlt))
+  (deps (main.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

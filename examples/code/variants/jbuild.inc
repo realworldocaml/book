@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (logger.mlt))
+  (deps (logger.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (main.mlt))
+  (deps (main.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -18,7 +18,7 @@
 
 (alias (
   (name code)
-  (deps (catch_all.mlt))
+  (deps (catch_all.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (blang.mlt))
+  (deps (blang.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

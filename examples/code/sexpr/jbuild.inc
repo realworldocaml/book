@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_option.mlt))
+  (deps (sexp_option.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (manually_making_sexp.mlt))
+  (deps (manually_making_sexp.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -18,7 +18,7 @@
 
 (alias (
   (name code)
-  (deps (inline_sexp.mlt))
+  (deps (inline_sexp.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_default.mlt))
+  (deps (sexp_default.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -34,7 +34,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_printer.mlt))
+  (deps (sexp_printer.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -42,7 +42,7 @@
 
 (alias (
   (name code)
-  (deps (auto_making_sexp.mlt))
+  (deps (auto_making_sexp.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -50,7 +50,7 @@
 
 (alias (
   (name code)
-  (deps (example_load.mlt example.scm example_broken.scm comment_heavy.scm))
+  (deps (example_load.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -58,7 +58,7 @@
 
 (alias (
   (name code)
-  (deps (to_from_sexp.mlt))
+  (deps (to_from_sexp.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -74,7 +74,7 @@
 
 (alias (
   (name code)
-  (deps (print_sexp.mlt))
+  (deps (print_sexp.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -82,7 +82,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_list.mlt))
+  (deps (sexp_list.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -90,7 +90,7 @@
 
 (alias (
   (name code)
-  (deps (sexp_opaque.mlt))
+  (deps (sexp_opaque.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

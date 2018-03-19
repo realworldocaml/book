@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (build_json.mlt))
+  (deps (build_json.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name code)
-  (deps (install.mlt))
+  (deps (install.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -26,7 +26,7 @@
 
 (alias (
   (name code)
-  (deps (parse_book.mlt book.json))
+  (deps (parse_book.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))

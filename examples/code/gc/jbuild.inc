@@ -2,7 +2,7 @@
 
 (alias (
   (name code)
-  (deps (tune.mlt))
+  (deps (tune.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
