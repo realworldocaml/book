@@ -1,14 +1,14 @@
-.PHONY: all clean dep code publish promote cram
+.PHONY: all clean dep publish promote test test-all
 
 all:
 	@jbuilder build @site --dev
 	@echo Site has been generated in _build/default/static/
 
-code:
-	jbuilder build @code --dev
+test:
+	jbuilder runtest --dev
 
-cram:
-	jbuilder build @cram --dev
+test-all:
+	jbuilder build @runtest-all --dev
 
 dep:
 	jbuilder exec --dev -- rwo-jbuild
