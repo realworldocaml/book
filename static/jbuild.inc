@@ -588,9 +588,8 @@
     ../book/21-garbage-collector.html
     ../bin/bin/app.exe
     ../examples/code/gc/barrier_bench/barrier_bench.ml
+    ../examples/code/gc/barrier_bench/barrier_bench.sh
     ../examples/code/gc/barrier_bench/jbuild
-    ../examples/code/gc/barrier_bench/run_barrier_bench.sh
-    ../examples/code/gc/barrier_bench/show_barrier_bench_help.sh
     ../examples/code/gc/finalizer/finalizer.ml
     ../examples/code/gc/finalizer/jbuild
     ../examples/code/gc/finalizer/run_finalizer.sh

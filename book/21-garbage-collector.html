@@ -737,7 +737,7 @@
               counter. Compile and execute this with some extra options
               to show the amount of garbage collection occurring:</p>
             <link rel="import" href="code/gc/barrier_bench/jbuild"/>
-            <link rel="import" href="code/gc/barrier_bench/run_barrier_bench.sh"/>
+            <link rel="import" href="code/gc/barrier_bench/barrier_bench.sh" part="run"/>
 
             <p>
 	      There is a stark space/time trade-off here. The
@@ -758,7 +758,7 @@
               trade-offs. The command-line benchmark binaries have a
               number of useful options that affect garbage collection
               behavior:</p>
-            <link rel="import" href="code/gc/barrier_bench/show_barrier_bench_help.sh"/>
+            <link rel="import" href="code/gc/barrier_bench/barrier_bench.sh" "part="help"/>
 
             <p>
 	      The <code>-no-compactions</code> and
