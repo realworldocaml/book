@@ -120,25 +120,36 @@ let process_chapters book_dir output_dir =
 (** Handle examples *)
 
 let mlt_rule f =
-  sprintf {|
+  let alias name cmd =
+    sprintf {|
 (alias
- ((name    code)
+ ((name    %s)
   (deps    (%s (files_recursively_in .)))
   (action  (progn
-    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
+    (setenv OCAMLRUNPARAM "" (run %s ${<}))
     (diff? ${<} ${<}.corrected)))))|}
-    f
+      name f cmd
+  in
+  sprintf "%s\n\n%s\n"
+    (alias "runtest"     "ocaml-topexpect -short-paths -verbose")
+    (alias "runtest-all" "ocaml-topexpect -non-deterministic -short-paths -verbose")
 
 let sh_rule f =
-  sprintf {|
+  let alias name cmd =
+    sprintf {|
 (alias
- ((name     cram)
+ ((name     %s)
   (deps     (%s (files_recursively_in .)))
   (action
     (progn
-     (run cram ${<})
+     (run %s ${<})
      (diff? ${<} ${<}.corrected)))))|}
-    f
+      name f cmd
+  in
+  sprintf "%s\n\n%s\n"
+    (alias "runtest"     "cram")
+    (alias "runtest-all" "cram --non-deterministic")
+
 
 let process_examples dir =
   Filename.concat dir "jbuild.inc" |> fun jbuild ->
