@@ -6,7 +6,8 @@
   </head>
 
   <body>
-    <section xmlns="http://www.w3.org/1999/xhtml" id="command-line-parsing" data-type="chapter">
+    <section xmlns="http://www.w3.org/1999/xhtml"
+	     id="command-line-parsing" data-type="chapter">
       <h1>Command-Line Parsing</h1>
 
       <p>
@@ -51,25 +52,19 @@
 	In this chapter, we'll:</p>
 
       <ul>
-	<li>
-          <p>
+	<li> <p>
 	    Learn how to use Command to construct basic and grouped
-            command-line interfaces</p>
-	</li>
+            command-line interfaces</p> </li>
 
-	<li>
-          <p>
+	<li> <p>
 	    We will build simple equivalents to the cryptographic
-            <code>md5</code> and <code>shasum</code> utilities</p>
-	</li>
+            <code>md5</code> and <code>shasum</code> utilities</p> </li>
 
-	<li>
-          <p>
+	<li> <p>
 	    Demonstrate how to declare complex command-line interfaces
 	    in a type-safe and elegant way
 
-	    <idx>combinators/functional combinators</idx></p>
-	</li>
+	    <idx>combinators/functional combinators</idx></p> </li>
       </ul>
 
       <section id="basic-command-line-parsing" data-type="sect1">
@@ -77,7 +72,7 @@
 
 	<p>
 	  Let's start by working through a clone of the
-	  <em>md5sum</em> command that is present on most Linux
+	  <code>md5sum</code> command that is present on most Linux
 	  installations (the equivalent command on Mac OS X is simply
 	  <code>md5</code>). The following function defined below reads
 	  in the contents of a file, applies the MD5 one-way
@@ -94,46 +89,44 @@
 	  a <code>filename</code> parameter and prints the
 	  human-readable MD5 string to the console standard
 	  output. The first step toward turning this function into a
-	  command-line program is to declare all the possible
-	  command-line arguments in a <em>specification</em>. The
-	  module <code>Command.Param</code> provides a set of
-	  combinators that can be combined together to define optional
-	  flags and positional arguments, what types they should map
-	  to, and whether to take special actions (such as pausing for
-	  interactive input) if certain inputs are encountered.</p>
+	  command-line program is to create a parser for the command
+	  line arguments.  The module <code>Command.Param</code>
+	  provides a set of combinators that can be combined together
+	  to define a parameter parser for optional flags and
+	  positional arguments, including documentation, the types
+	  they should map to, and whether to take special actions such
+	  as pausing for interactive input if certain inputs are
+	  encountered.</p>
 
 	<section id="anonymous-arguments" data-type="sect2">
           <h2>Anonymous Arguments</h2>
 
           <p>
-	    Let's build the specification for a single argument that
-            is passed directly on the command line. This is known as
-            an <em>anonymous</em> argument.
-
-	    <idx>arguments/anonymous arguments</idx>
-	    <idx>anonymous arguments</idx></p>
+	    Let's build a parser for a command line UI with a
+	    single <em>anonymous</em> argument, i.e., an argument that
+	    is passed in without a flag.</p>
 
           <link rel="import" part="1"
 		href="code/command-line-parsing/basic_md5/basic_md5.ml" />
 
           <p>
-	    The <code>Command.Param</code> module defines the tools
-            you'll need to build up a command-line specification. We
-            start with the <code>empty</code> value and add parameters
-            to that using the <code>+&gt;</code> combinator. (Both of
-            these values come from <code>Command.Spec</code>.)</p>
+	    The values <code>anon</code>, <code>file</code>
+	    and <code>%:</code> all come from
+	    the <code>Command.Param</code> module, and they're used to
+	    define a parameter parser which accepts a single anonymous
+	    argument called <code>"filename"</code>. </p>
 
-          <p>
-	    In this case, we defined a single anonymous argument
-            called <code>filename</code>, which takes a value of type
-            <code>string</code>. Anonymous parameters are created using
-            the <code>%:</code> operator, which binds a textual name
-            (used in the help text to identify the parameter) to an
-            OCaml conversion function that parses the command-line
-            string fragments into a higher-level OCaml data type. In
-            the preceding example, this is just
-            <code>Command.Spec.string</code>, but we'll see more
-            complex conversion options later in the chapter.</p>
+	  <p>
+	    Anonymous parameters are declared using <code>anon</code>
+	    created using the <code>%:</code> operator, which binds a
+	    textual name (used in the help text to identify the
+	    parameter) to an OCaml conversion function that parses the
+	    command-line string fragments into a higher-level OCaml
+	    data type. In the preceding example, this conversion
+	    function is specified
+	    by <code>Command.Param.file</code>. We'll see how to parse
+	    parameters for types not directly supported
+	    by <code>Command</code> later in the chapter.</p>
 	</section>
 
 	<section id="defining-basic-commands" data-type="sect2">
@@ -176,8 +169,7 @@
           </dl>
 
           <p>
-	    The specification and the callback function follow as
-            nonlabeled arguments.</p>
+	    The final argument is the parameter parser.</p>
 
           <p>
 	    The callback function is where all the work happens
@@ -191,23 +183,6 @@
 	    <idx>arguments/unit argument to callbacks</idx>
 	    <idx>unit argument</idx>
 	    <idx>callback function</idx></p>
-
-          <div data-type="note">
-            <h1>The Extra unit Argument to Callbacks</h1>
-
-            <p>
-	      The preceding callback needs an extra
-              <code>unit</code> argument after <code>filename</code>.
-              This is to ensure that specifications can work even when
-              they are empty (i.e. the <code>Command.Spec.empty</code>
-              value).</p>
-
-            <p>
-	      Every OCaml function needs at least one argument, so
-              the final <code>unit</code> guarantees that it will not
-              be evaluated immediately as a value if there are no other
-              arguments.</p>
-          </div>
 	</section>
 
 	<section id="running-basic-commands" data-type="sect2">

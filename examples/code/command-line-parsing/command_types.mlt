@@ -7,7 +7,7 @@
 #silent false;;
 open Core;;
 [@@@part "1"];;
-Command.Spec.empty ;;
-[%%expect ocaml {|- : ('m, 'm) Command.Spec.t = <abstr>|}];;
+Command.Param.anon;;
+[%%expect ocaml {|- : 'a Command.Spec.anons -> 'a Command.Spec.param = <fun>|}];;
 Command.Spec.(empty +> anon ("foo" %: int)) ;;
 [%%expect ocaml {|- : (int -> '_weak1, '_weak1) Command.Spec.t = <abstr>|}];;
