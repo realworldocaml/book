@@ -1,0 +1,4 @@
+(executable
+  ((name main)
+   (public_name html2md)
+   (libraries (fmt lambdasoup))))
