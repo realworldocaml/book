@@ -17,8 +17,8 @@ type service_info =
 [@@@part "1"];;
 #require "re.posix";;
 let service_info_of_string line =
-  let matches = 
-    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  let matches =
+    Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
   in
   { service_name = Re.get matches 1;
     port = Int.of_string (Re.get matches 2);
@@ -122,8 +122,8 @@ let service_info_of_string line =
     | Some (ordinary,comment) -> (ordinary, Some comment)
   in
   (* now, use a regular expression to break up the service definition *)
-  let matches = 
-    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+  let matches =
+    Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
   in
   let service_name = Re.get matches 1 in
   let port = Int.of_string (Re.get matches 2) in

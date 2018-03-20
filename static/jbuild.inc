@@ -337,7 +337,6 @@
     ../bin/bin/app.exe
     ../examples/code/files-modules-and-programs/freq-fast/counter.ml
     ../examples/code/files-modules-and-programs/freq-fast/counter.mli
-    ../examples/code/maps-and-hash-tables/comparable.ml
     ../examples/code/maps-and-hash-tables/core_phys_equal.mlt
     ../examples/code/maps-and-hash-tables/main.mlt
     ../examples/code/maps-and-hash-tables/map_vs_hash/jbuild
