@@ -315,6 +315,33 @@ module Book :
 |}];;
 
 
+[@@@part "adm.1"];;
+type string_int_map =
+  (string,int,String.comparator_witness) Map.t
+[@@deriving sexp];;
+
+[%%expect{|
+Characters 63-68:
+Error: Unbound value Map.t_of_sexp
+Hint: Did you mean m__t_of_sexp?
+|}];;
+
+[@@@part "adm.2"];;
+type string_int_map =
+  int Map.M(String).t
+[@@deriving sexp];;
+[%%expect ocaml {|
+type string_int_map = int Base.Map.M(Base.String).t
+val string_int_map_of_sexp : Sexp.t -> string_int_map = <fun>
+val sexp_of_string_int_map : string_int_map -> Sexp.t = <fun>
+|}];;
+
+[@@@part "adm.3"];;
+let m = Map.singleton (module String) "one" 1;;
+[%%expect ocaml {|val m : (string, int, String.comparator_witness) Map.t = <abstr>|}];;
+(m : int Map.M(String).t);;
+[%%expect ocaml {|- : int Base.Map.M(Base.String).t = <abstr>|}];;
+
 [@@@part "ht.1"];;
 let table = Hashtbl.create (module String) ();;
 [%%expect ocaml {|val table : (string, '_weak1) Hashtbl.t = <abstr>|}];;
