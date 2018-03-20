@@ -5,4 +5,4 @@
   b88d621596b7e61337e832f7841066a9
   $ ./_build/default/basic_md5_with_custom_arg.exe /dev/null
   '/dev/null' is not a regular file.
-  [1]
+@@ exit 1

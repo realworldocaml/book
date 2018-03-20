@@ -1,4 +1,4 @@
   $ ocamlc freq.ml -o freq.byte
   File "freq.ml", line 1, characters 5-9:
   Error: Unbound module Base
-  [2]
+@@ exit 2

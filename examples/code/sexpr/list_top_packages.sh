@@ -1,3 +1,4 @@
+%% --non-deterministic
   $ ocamlfind list | grep top
   astring.top         (version: 0.8.3)
   cohttp.top          (version: n/a)

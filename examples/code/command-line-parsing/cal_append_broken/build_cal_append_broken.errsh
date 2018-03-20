@@ -11,4 +11,4 @@
            (bool -> unit -> unit -> unit, unit -> unit) Core.Command.Spec.t =
              (bool -> unit -> unit -> unit, unit -> unit) Core__Command.Spec.t
          Type unit -> unit is not compatible with type unit 
-  [1]
+@@ exit 1

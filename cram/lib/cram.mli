@@ -2,23 +2,41 @@
     format. *)
 
 (** The type for line items. *)
-type item = [
+type line = [
   | `Output  of string
   | `Command of string
   | `Comment of string
   | `Part    of string
+  | `Non_det of [`Output | `Command]
 ]
 
-val pp_item: item Fmt.t
+val pp_line: ?hide:bool -> line Fmt.t
+(** [pp_line] is the pretty-printer for lines. If [hide] is true,
+    commands starting by [@@] are not displayed. By default, [hide] is
+    not set (all the lines are printed). *)
 
-type t = item list
+(** The type for tests. *)
+type test = {
+  part: string option;
+  non_deterministic: [`Command | `Output | `False];
+  command: string;
+  output: string list;
+  lines: line list;
+}
+
+(** The type for test items *)
+type item =
+  | Test of test
+  | Line of line
+
+type t = item list [@@deriving sexp]
 (** The type for cram files. *)
 
-val pp: t Fmt.t
-val to_string: t -> string
+val pp: ?hide:bool -> t Fmt.t
+val to_string: ?hide:bool -> t -> string
 
 val parse_file: string -> t
-val parse_lexbuf: Lexing.lexbuf -> item list
+val parse_lexbuf: Lexing.lexbuf -> t
 
 val run: string -> f:(string -> t -> string) -> unit
 (** [run n f] runs the expect callback [f] over the file named
@@ -29,3 +47,6 @@ val run: string -> f:(string -> t -> string) -> unit
 
 val part: string -> t -> t option
 (** [part i t] is the i-th part in [t]. *)
+
+val pp_exit_code: int Fmt.t
+(** Display exit code. *)

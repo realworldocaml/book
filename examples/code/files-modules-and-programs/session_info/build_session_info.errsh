@@ -4,4 +4,4 @@
   File "session_info.ml", line 27, characters 15-22:
   Error: This expression has type Username.t
          but an expression was expected of type Hostname.t
-  [1]
+@@ exit 1
