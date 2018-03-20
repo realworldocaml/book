@@ -78,10 +78,16 @@ let () =
               List.iter (Cram.pp_line ppf) t.Cram.lines
             | _ ->
               let n = run_test temp_file t in
+              let lines = read_lines temp_file in
+              let output =
+                let output = List.map (fun x -> `Output x) lines in
+                if Cram.equal_output output t.output then t.output else output
+              in
               Fmt.pf ppf "  $ %s\n" t.Cram.command;
-              List.iter (fun line ->
-                  Fmt.pf ppf "  %s\n" (ansi_color_strip line)
-                ) (read_lines temp_file);
+              List.iter (function
+                  | `Ellipsis    -> Fmt.pf ppf "  ...\n"
+                  | `Output line -> Fmt.pf ppf "  %s\n" (ansi_color_strip line)
+                ) output;
               Cram.pp_exit_code ppf n
         ) items;
       Buffer.contents buf)

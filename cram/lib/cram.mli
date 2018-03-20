@@ -1,9 +1,12 @@
 (** Library to handle {{:https://bitheap.org/cram/}cram tests}
     format. *)
 
-(** The type for line items. *)
+(** The type for output lines. *)
+type output = [`Output of string | `Ellipsis]
+
+(** The type for all lines. *)
 type line = [
-  | `Output  of string
+  output
   | `Command of string
   | `Comment of string
   | `Part    of string
@@ -20,7 +23,7 @@ type test = {
   part: string option;
   non_deterministic: [`Command | `Output | `False];
   command: string;
-  output: string list;
+  output: output list;
   lines: line list;
 }
 
@@ -50,3 +53,7 @@ val part: string -> t -> t option
 
 val pp_exit_code: int Fmt.t
 (** Display exit code. *)
+
+val equal_output: output list -> output list -> bool
+(** [equal x y] compares [x] and [y]; {Ellipsis} are used as
+    wildcards for zero, one or multiple matching lines. *)
