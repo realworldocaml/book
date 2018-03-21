@@ -142,7 +142,7 @@
 
       <p>With that in place, we can
 	invoke <span class="command"><em>jbuilder</em></span> as
-	follows.
+	follows.</p>
 
       <link rel="import" href="code/files-modules-and-programs/freq-obuild/freq.sh" part="build"/>
 
@@ -260,7 +260,7 @@
 	<idx>modules/naming of</idx></p>
 
       <p>We can now rewrite <code>freq.ml</code> to
-      use <code>Counter</code>.
+      use <code>Counter</code>.</p>
 
       <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml"/>
 
@@ -847,7 +847,7 @@
       </section>
     </section>
 
-    <section data-type="sect1">
+    <section id="designing-with-modules" data-type="sect1">
       <h1>Designing with Modules</h1>
 
       <p>The module system is a key part of how an OCaml program is
@@ -855,7 +855,7 @@
       advice on how to think about designing that structure
       effectively.</p>
 
-      <section data-type="sect2">
+      <section id="expose-concrete-types-rarely" data-type="sect2">
         <h2>Expose Concrete Types Rarely</h2>
 
         <p>When designing an <code>mli</code>, one choice that you
@@ -898,7 +898,7 @@
         the data type itself.</p>
       </section>
 
-      <section data-type="sect2">
+      <section id="design-for-the-call-site" data-type="sect2">
         <h2>Design for the Call Site</h2>
 
         <p>When writing an interface, you should think not just
@@ -939,7 +939,7 @@
         important the more often a name is used.</p>
       </section>
 
-      <section data-type="sect2">
+      <section id="create-uniform-intefaces" data-type="sect2">
         <h2>Create Uniform Interfaces</h2>
 
         <p>Designing the interface of a module is a task that
@@ -992,7 +992,7 @@
         consistent set of standards to apply.</p>
       </section>
 
-      <section data-type="sect2">
+      <section id="interfaces-before-implementations" data-type="sect2">
         <h2>Interfaces before implementations</h2>
 
         <p>OCaml's concise and flexible type language enables a

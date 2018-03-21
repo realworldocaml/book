@@ -174,12 +174,13 @@
 
         <p>This case can't really come up in practice,
         because <code>String.split</code> always returns a list with
-        at least one element, even when given the empty string.
+        at least one element, even when given the empty string.</p>
+
         <link rel="import"
         href="code/variables-and-functions/main.mlt"
         part="8.1"/>
 
-	But the compiler doesn't know this, and so it emits the
+        <p>But the compiler doesn't know this, and so it emits the
         warning. It's generally better to use a <code>match</code>
         statement to handle such cases explicitly.</p>
         <link rel="import"
