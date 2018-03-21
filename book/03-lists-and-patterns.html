@@ -467,7 +467,7 @@
           List.partition_tf</idx><idx>lists/partitioning elements
           in</idx><idx>List module/List.partition_tf</idx></p>
 
-          <link rel="import" href="code/lists-and-patterns/main.mlt" 
+          <link rel="import" href="code/lists-and-patterns/main.mlt"
 		part="31"/>
         </section>
 
@@ -482,29 +482,29 @@
             of lists.
 
 	    <idx>lists/combining</idx>
-	    <idx>List module/List.append</idx></p> 
+	    <idx>List module/List.append</idx></p>
 
-	  <link rel="import" 
+	  <link rel="import"
 		href="code/lists-and-patterns/main.mlt" part="32"/>
 
           <p>
 	    There's also <code>@</code>, an operator equivalent
             of <code>List.append</code>.</p>
 
-          <link rel="import" href="code/lists-and-patterns/main.mlt" 
+          <link rel="import" href="code/lists-and-patterns/main.mlt"
 		part="33"/>
 
           <p>
 	    In addition, there is <code>List.concat</code>, for
             concatenating a list of lists:</p>
 
-          <link rel="import" href="code/lists-and-patterns/main.mlt" 
+          <link rel="import" href="code/lists-and-patterns/main.mlt"
 		part="34"/>
 
           <p>Here's an example of using <code>List.concat</code> along
             with <code>List.map</code> to compute a recursive listing of
-            a directory tree. </p> 
-	  <link rel="import" href="code/lists-and-patterns/main.mlt" 
+            a directory tree. </p>
+	  <link rel="import" href="code/lists-and-patterns/main.mlt"
 		part="35"/>
 
           <p>
@@ -518,7 +518,7 @@
             <code>List.concat</code> is common enough that there is a
             function <code>List.concat_map</code> that combines these
             into one, more efficient operation:</p>
-          <link rel="import" href="code/lists-and-patterns/main.mlt" 
+          <link rel="import" href="code/lists-and-patterns/main.mlt"
 		part="36"/>
         </section>
       </section>
@@ -661,31 +661,31 @@
           specialized to integers, as you can see if you try to apply
           it to values of a different type.</p>
 
-        <link rel="import" href="code/lists-and-patterns/poly.mlt" 
+        <link rel="import" href="code/lists-and-patterns/poly.mlt"
 	      part="1"/>
 
 	<p>
 	  OCaml also has a collection of polymorphic equality and
 	  comparison operators, which we can make available by opening
 	  the module <code>Base.Poly</code>.</p>
-	
-        <link rel="import" href="code/lists-and-patterns/poly.mlt" 
+
+        <link rel="import" href="code/lists-and-patterns/poly.mlt"
 	      part="2"/>
 
         <p>
 	  Indeed, if we look at the type of the equality operator,
           we'll see that it is polymorphic.</p>
 
-        <link rel="import" href="code/lists-and-patterns/poly.mlt" 
+        <link rel="import" href="code/lists-and-patterns/poly.mlt"
 	      part="3"/>
 
-	<p> 
+	<p>
 	  If we rewrite our destutter example
 	  with <code>Base.Poly</code> open, we'll see that it gets a
 	  polymorphic type, and can now be used on inputs of different
 	  types.</p>
 
-        <link rel="import" href="code/lists-and-patterns/poly.mlt" 
+        <link rel="import" href="code/lists-and-patterns/poly.mlt"
 	      part="4"/>
 
         <p>
@@ -716,7 +716,7 @@
           it will fail at runtime if it encounters a function
           value.</p>
 
-        <link rel="import" href="code/lists-and-patterns/poly.mlt" 
+        <link rel="import" href="code/lists-and-patterns/poly.mlt"
 	      part="5"/>
 
         <p>
@@ -751,7 +751,7 @@
 	  of <code>Base</code> by opening the module again.
 	</p>
 
-        <link rel="import" href="code/lists-and-patterns/poly.mlt" 
+        <link rel="import" href="code/lists-and-patterns/poly.mlt"
 	      part="6"/>
 
       </aside>
