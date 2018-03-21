@@ -25,8 +25,8 @@ type item = [
 and phrase = item list
 
 and table = {
-  id     : string;
-  caption: phrase;
+  id     : string option;
+  caption: phrase option;
   headers: phrase list;
   body   : phrase list list;
 }
@@ -42,6 +42,7 @@ type block = [
   | `Blocks of block list
   | `Table of table
   | `Sidebar of item list * block list
+  | `Warning of warning
   | `Figure of string
   | `Safari of block list
 ]
@@ -52,6 +53,12 @@ and section = {
   level    : int;
   title    : item list;
   body     : block list;
+}
+
+and warning = {
+  allow_break: bool;
+  w_title    : item list;
+  w_body     : block list;
 }
 
 let dump ppf n = Fmt.of_to_string Soup.to_string ppf n
@@ -79,15 +86,22 @@ let pp_item ppf (i:item) = match i with
 let pp_items ppf is = Fmt.(list ~sep:(unit " ") pp_item) ppf is
 
 let pp_table ppf t =
-  let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
-  let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
-  Fmt.(list ~sep:(unit " | ") pp_items) ppf t.headers;
-  Fmt.(list ~sep:(unit "-|-") string) ppf
-    (List.map (fun s -> String.make (len s) '-') t.headers);
-  Fmt.(list ~sep:(unit "\n")
-         Fmt.(list ~sep:(unit " | ") pp_items)
-      ) ppf t.body;
-  Fmt.pf ppf "\nTable: %a" pp_items t.caption
+  let aux ppf () =
+    let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
+    let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
+    Fmt.(list ~sep:(unit " | ") pp_items) ppf t.headers;
+    Fmt.(list ~sep:(unit "-|-") string) ppf
+      (List.map (fun s -> String.make (len s) '-') t.headers);
+    Fmt.(list ~sep:(unit "\n")
+           Fmt.(list ~sep:(unit " | ") pp_items)
+        ) ppf t.body;
+    match t.caption with
+    | None   -> ()
+    | Some c -> Fmt.pf ppf "\nTable: %a" pp_items c
+  in
+  match t.id with
+  | None    -> Fmt.pf ppf "%a\n" aux ()
+  | Some id -> Fmt.pf ppf "::: {#%s}\n%a\n:::\n\n" id aux ()
 
 let pp_figure ppf t =
   Fmt.pf ppf
@@ -116,6 +130,12 @@ let rec pp_block ppf (t:block) = match t with
     Fmt.pf ppf "%a %a {#%s data-type=%S}\n\n%a\n"
       pp_level s.level pp_items s.title s.id s.data_type pp_blocks s.body
   | `Safari bs    -> Fmt.pf ppf "::: .safarienabled\n%a\n:::\n\n" pp_blocks bs
+  | `Warning w    ->
+    let pp_break ppf () =
+      if w.allow_break then Fmt.string ppf ".allow_break " else ()
+    in
+    Fmt.pf ppf "::: %adata-type=warning\n## %a\n\n%a\n:::\n\n"
+      pp_break () pp_items w.w_title pp_blocks w.w_body
 
 and pp_blocks ppf bs = Fmt.(list ~sep:(unit "\n") pp_block) ppf bs
 
@@ -154,6 +174,11 @@ and dump_block ppf (t:block) = match t with
   | `Table t      -> pp_table ppf t
   | `Sidebar s    -> pp_sidebar ppf s
   | `Safari s     -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_blocks s
+  | `Warning w    -> Fmt.pf ppf "@[<2>Warning@ %a@]" dump_warning w
+
+and dump_warning ppf t =
+  Fmt.pf ppf "@[<2>{allow_break=%b; title=%a; body=%a}@]"
+    t.allow_break pp_items t.w_title pp_blocks t.w_body
 
 and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 
@@ -294,7 +319,10 @@ module Parse = struct
     aux [] l
 
   let table id childs =
-    let caption = find "caption" (flatten_map items) childs in
+    let caption =
+      try Some (find "caption" (flatten_map items) childs)
+      with Error _ -> None
+    in
     let td = find_all "td" (flatten_map items) in
     let th = find_all "th" (flatten_map items) in
     let headers = find "thead" (find "tr" th) childs in
@@ -340,22 +368,27 @@ module Parse = struct
           Some (`Note (1+level, title, body))
         else if Soup.attribute "class" e = Some "safarienabled" then
           Some (`Safari (filter_map (maybe_block ~head:false) (children e)))
+        else if Soup.attribute "data-type" e = Some "warning" then
+          let allow_break = Soup.classes e = ["allow_break"] in
+          let level, w_title, w_body = header e in
+          if level <> 1 then err "wrong header level for warning section";
+          let w = { allow_break; w_title; w_body } in
+          Some (`Warning w)
         else
-          err "unsuported div"
+          err "unsuported div: %a" dump e
       | "ol" -> Some (`Enum (filter_map li (children e)))
       | "ul" -> Some (`List (filter_map li (children e)))
       | "dl" -> Some (`Descr (pair_map dt dd (children e)))
       | "table" ->
-        (match Soup.id e with
-         | None    -> err "table without id"
-         | Some id -> Some (`Table (table id (children e))))
+        let id = Soup.id e in
+        Some (`Table (table id (children e)))
       | "aside" ->
         if Soup.attribute "data-type" e = Some "sidebar" then
           let level, title, body = header e in
           if level <> 5 then err "wrong header level in sidebar (%d)" level;
           Some (`Sidebar (title, body))
         else
-          err "invalid aside"
+          err "invalid aside %a" dump e
       | "figure" ->
         if Soup.attribute "style" e = Some "float: 0" then
           let img e = match Soup.element e with
