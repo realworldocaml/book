@@ -43,6 +43,7 @@ type block = [
   | `Table of table
   | `Sidebar of item list * block list
   | `Figure of string
+  | `Safari of block list
 ]
 
 and section = {
@@ -114,6 +115,7 @@ let rec pp_block ppf (t:block) = match t with
   | `Section s    ->
     Fmt.pf ppf "%a %a {#%s data-type=%S}\n\n%a\n"
       pp_level s.level pp_items s.title s.id s.data_type pp_blocks s.body
+  | `Safari bs    -> Fmt.pf ppf "::: .safarienabled\n%a\n:::\n\n" pp_blocks bs
 
 and pp_blocks ppf bs = Fmt.(list ~sep:(unit "\n") pp_block) ppf bs
 
@@ -151,6 +153,7 @@ and dump_block ppf (t:block) = match t with
   | `Section s    -> Fmt.pf ppf "@[<2>Section@ (%a)@]\n" dump_level s
   | `Table t      -> pp_table ppf t
   | `Sidebar s    -> pp_sidebar ppf s
+  | `Safari s     -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_blocks s
 
 and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 
@@ -298,7 +301,7 @@ module Parse = struct
     let body = find "tbody" (find_all "tr" td) childs in
     { id; caption; headers; body }
 
-  let rec maybe_block ?(head=true) n =
+  let rec maybe_block ?(head=true) n: block option =
     match Soup.element n with
     | None   -> None
     | Some e ->
@@ -335,6 +338,8 @@ module Parse = struct
         if Soup.attribute "data-type" e = Some "note" then
           let level, title, body = header e in
           Some (`Note (1+level, title, body))
+        else if Soup.attribute "class" e = Some "safarienabled" then
+          Some (`Safari (filter_map (maybe_block ~head:false) (children e)))
         else
           err "unsuported div"
       | "ol" -> Some (`Enum (filter_map li (children e)))
@@ -364,9 +369,9 @@ module Parse = struct
            |  _  -> err "figure")
         else
           err "invalid figure"
-      | s -> err "TODO block: %s" s
+      | s -> err "TODO block: %s %a" s dump e
 
-  and block ?head e = match maybe_block ?head e with
+  and block ?head e: block = match maybe_block ?head e with
     | None   -> err "expecting a block, got %a" dump e
     | Some b -> b
 
