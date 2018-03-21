@@ -22,14 +22,24 @@ type item = [
   | `Idx    of string
 ]
 
+and phrase = item list
+
+and table = {
+  id     : string;
+  caption: phrase;
+  headers: phrase list;
+  body   : phrase list list;
+}
+
 type block = [
   | `Link of string * string * string option
   | `Para of item list
-  | `Note of item list * block list
+  | `Note of int * item list * block list
   | `List of block list
   | `Enum of block list
   | `Section of section
   | `Blocks of block list
+  | `Table of table
 ]
 
 and section = {
@@ -64,17 +74,30 @@ let pp_item ppf (i:item) = match i with
 
 let pp_items ppf is = Fmt.(list ~sep:(unit " ") pp_item) ppf is
 
+let pp_table ppf t =
+  let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
+  let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
+  Fmt.(list ~sep:(unit " | ") pp_items) ppf t.headers;
+  Fmt.(list ~sep:(unit "-|-") string) ppf
+    (List.map (fun s -> String.make (len s) '-') t.headers);
+  Fmt.(list ~sep:(unit "\n")
+         Fmt.(list ~sep:(unit " | ") pp_items)
+      ) ppf t.body;
+  Fmt.pf ppf "\nTable: %a" pp_items t.caption
+
 let rec pp_block ppf (t:block) = match t with
   | `Blocks l     -> pp_blocks ppf l
   | `Link l       -> pp_link ppf l
   | `Para is      -> Fmt.pf ppf "%a\n" pp_items is
+  | `Table t      -> pp_table ppf t
   | `List bs      ->
     (* FIXME: handle depth *)
     List.iter (Fmt.pf ppf "- %a" pp_block) bs
   | `Enum bs      ->
     List.iteri (fun i -> Fmt.pf ppf "%d. %a" i pp_block) bs
-  | `Note (t, bs) ->
-    Fmt.pf ppf "::: data-type=note\n# %a\n%a\n:::\n" pp_items t pp_blocks bs
+  | `Note (l, t, bs) ->
+    Fmt.pf ppf "::: data-type=note\n%a %a\n\n%a\n:::\n"
+      pp_level l pp_items t pp_blocks bs
   | `Section s    ->
     Fmt.pf ppf "%a %a {#%s data-type=%S}\n\n%a\n"
       pp_level s.level pp_items s.title s.id s.data_type pp_blocks s.body
@@ -97,8 +120,10 @@ and dump_block ppf (t:block) = match t with
   | `Para is      -> Fmt.pf ppf "@[<2>Para@ (%a)@]\n" dump_items is
   | `List bs      -> Fmt.pf ppf "@[<2>List@ (%a)@]\n" dump_blocks bs
   | `Enum bs      -> Fmt.pf ppf "@[<2>Enum@ (%a)@]\n" dump_blocks bs
-  | `Note (t, bs) -> Fmt.pf ppf "@[<2>Note@ (%a@, %a@)]\n" dump_items t pp_blocks bs
+  | `Note (l,t,b) -> Fmt.pf ppf "@[<2>Note@ (%d,@ %a@, %a@)]\n"
+                       l dump_items t pp_blocks b
   | `Section s    -> Fmt.pf ppf "@[<2>Section@ (%a)@]\n" dump_level s
+  | `Table t      -> pp_table ppf t
 
 and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 
@@ -112,7 +137,6 @@ let int_of_level = function
   | "h4" -> 4
   | "h5" -> 5
   | "h6" -> 6
-  | "h7" -> 7
   | s    -> Fmt.invalid_arg "invalid level: %s" s
 
 let filter_map f e =
@@ -182,18 +206,50 @@ module Parse = struct
         (match Soup.attribute "class" e with
          | Some "command"       ->
            (match items (one_child e) with
-            | [`Em x] -> [`Code x]
+            | [`Em x] ->
+              (* <span class="command"><em>foo</em></span> == <code>foo</code> *)
+              [`Code x]
             | _ -> failwith "class=\"command\"")
          (* XXX: not sure what it is used for *)
          | Some "keep-together" -> flatten_map items (children e)
          | _ -> err "TODO item: span %a" Fmt.(of_to_string Soup.to_string) e)
       | s -> err "TODO item: %s (%a)" s dump e
 
-  let rec parse_para acc = function
+  let rec para acc = function
     | []   -> List.rev acc
-    | h::t -> parse_para (items h @ acc) t
+    | h::t -> para (items h @ acc) t
 
-  let rec maybe_block n =
+  let find name f l =
+    let rec aux = function
+      | []   -> err "cannot find %s in %a" name Fmt.(Dump.list dump) l
+    | h::t ->
+      match Soup.element h with
+      | None   -> aux t
+      | Some e -> if Soup.name e = name then f (children e) else aux t
+    in
+    aux l
+
+  let find_all name f l =
+    let rec aux acc =function
+    | []   -> List.rev acc
+    | h::t ->
+      match Soup.element h with
+      | None   -> aux acc t
+      | Some e ->
+        if Soup.name e <> name then aux acc t
+        else aux (f (children e) :: acc) t
+    in
+    aux [] l
+
+  let table id childs =
+    let caption = find "caption" (flatten_map items) childs in
+    let td = find_all "td" (flatten_map items) in
+    let th = find_all "th" (flatten_map items) in
+    let headers = find "thead" (find "tr" th) childs in
+    let body = find "tbody" (find_all "tr" td) childs in
+    { id; caption; headers; body }
+
+  let rec maybe_block ?(head=true) n =
     match Soup.element n with
     | None   -> None
     | Some e ->
@@ -203,11 +259,12 @@ module Parse = struct
         let id = List.assoc "id" attrs in
         let data_type = List.assoc "data-type" attrs in
         let level, h, children = find_header_node (children e) in
+        let level = if head then level else level + 1 in
         let title = flatten_map items h in
-        let body = filter_map maybe_block children in
+        let body = filter_map (maybe_block ~head:false) children in
         Some (`Section { id; data_type; level; title; body })
       | "p" ->
-        let p = parse_para [] (children e) in
+        let p = para [] (children e) in
         Some (`Para p)
       | "link" ->
         let rel, href, part =
@@ -223,51 +280,29 @@ module Parse = struct
         Some (`Link (rel, href, part))
       | "div" ->
         if Soup.attribute "data-type" e = Some "note" then
-          let _, h, children = find_header_node (children e) in
+          let level, h, children = find_header_node (children e) in
           let title = flatten_map items h in
-          let body = filter_map maybe_block children in
-          Some (`Note (title, body))
+          let body = filter_map (maybe_block ~head:false) children in
+          Some (`Note (1+level, title, body))
         else
           failwith "unsuported div"
       | "ol" -> Some (`Enum (filter_map li (children e)))
       | "ul" -> Some (`List (filter_map li (children e)))
+      | "table" ->
+        (match Soup.id e with
+         | None    -> err "table without id"
+         | Some id -> Some (`Table (table id (children e))))
       | s -> err "TODO block: %s %a" s dump e
 
-  and block e = match maybe_block e with
+  and block ?head e = match maybe_block ?head e with
     | None   -> err "expecting a block, got %a" dump e
     | Some b -> b
-
-  and guess_param = function
-    | []   -> None
-    | h::t ->
-      let e =
-        try `Items (items h)
-        with Error a ->
-          (try `Blocks [block h]
-           with Error b -> err "%s\n%s" a b)
-      in
-      match e, guess_param t with
-      | _         , None              -> Some e
-      | `Blocks e , Some (`Blocks t)  -> Some (`Blocks (e @ t))
-      | `Items  e , Some (`Items t)   -> Some (`Items (e @ t))
-      | `Items [] , Some (`Blocks t)  -> Some (`Blocks t)
-      | `Items  e , Some (`Blocks []) -> Some (`Items e)
-      | `Blocks [], Some (`Items t)   -> Some (`Items t)
-      | `Blocks e , Some (`Items [])  -> Some (`Blocks e)
-      | `Items  e , Some (`Blocks t)  ->
-        err "cannot guess: items=%a blocks=%a" dump_items e dump_blocks t
-      | `Blocks e , Some (`Items t)   ->
-        err "cannot guess: blocks=%a items=%a" dump_blocks e dump_items t
 
   and li e =
     match Soup.element e with
     | None   -> None
     | Some e -> match Soup.name e with
-      | "li" ->
-        (match guess_param (children e) with
-         | None  -> None
-         | Some (`Blocks b) -> Some (`Blocks b)
-         | Some (`Items b)  -> Some (`Para b))
+      | "li" -> Some (`Blocks (filter_map (maybe_block ~head:false) (children e)))
       | s    -> err "was expecting <li>, got <%s>" s
 
 end
