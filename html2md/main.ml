@@ -40,6 +40,8 @@ type block = [
   | `Section of section
   | `Blocks of block list
   | `Table of table
+  | `Sidebar of item list * block list
+  | `Figure of string
 ]
 
 and section = {
@@ -85,11 +87,20 @@ let pp_table ppf t =
       ) ppf t.body;
   Fmt.pf ppf "\nTable: %a" pp_items t.caption
 
+let pp_figure ppf t =
+  Fmt.pf ppf
+    "<figure style=\"float: 0\">\n\
+     \  <img src=%S/>\n\
+     </figure>\n"
+    t
+
 let rec pp_block ppf (t:block) = match t with
   | `Blocks l     -> pp_blocks ppf l
   | `Link l       -> pp_link ppf l
   | `Para is      -> Fmt.pf ppf "%a\n" pp_items is
   | `Table t      -> pp_table ppf t
+  | `Sidebar s    -> pp_sidebar ppf s
+  | `Figure f     -> pp_figure ppf f
   | `List bs      ->
     (* FIXME: handle depth *)
     List.iter (Fmt.pf ppf "- %a" pp_block) bs
@@ -104,6 +115,10 @@ let rec pp_block ppf (t:block) = match t with
 
 and pp_blocks ppf bs = Fmt.(list ~sep:(unit "\n") pp_block) ppf bs
 
+and pp_sidebar ppf (title, body) =
+  Fmt.pf ppf "<aside data-type=\"sidebar\">\n\n%a %a\n\n%a\n\n</aside>"
+    pp_level 5 pp_items title pp_blocks body
+
 let rec dump_item ppf (i:item) = match i with
   | `Em e     -> Fmt.pf ppf "Em %S" e
   | `Strong s -> Fmt.pf ppf "Strong %S" s
@@ -117,6 +132,7 @@ and dump_items ppf t = Fmt.Dump.list dump_item ppf t
 and dump_block ppf (t:block) = match t with
   | `Blocks l     -> pp_blocks ppf l
   | `Link l       -> pp_link ppf l
+  | `Figure f     -> Fmt.pf ppf "@[<2>Figure %S@]\n" f
   | `Para is      -> Fmt.pf ppf "@[<2>Para@ (%a)@]\n" dump_items is
   | `List bs      -> Fmt.pf ppf "@[<2>List@ (%a)@]\n" dump_blocks bs
   | `Enum bs      -> Fmt.pf ppf "@[<2>Enum@ (%a)@]\n" dump_blocks bs
@@ -124,11 +140,13 @@ and dump_block ppf (t:block) = match t with
                        l dump_items t pp_blocks b
   | `Section s    -> Fmt.pf ppf "@[<2>Section@ (%a)@]\n" dump_level s
   | `Table t      -> pp_table ppf t
+  | `Sidebar s    -> pp_sidebar ppf s
 
 and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 
 and dump_level ppf t =
   Fmt.pf ppf "@[{name: %s; level: %a}@]" t.id dump_items t.title
+
 
 let int_of_level = function
   | "h1" -> 1
@@ -258,10 +276,8 @@ module Parse = struct
         let attrs = Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] e in
         let id = List.assoc "id" attrs in
         let data_type = List.assoc "data-type" attrs in
-        let level, h, children = find_header_node (children e) in
+        let level, title, body = header e in
         let level = if head then level else level + 1 in
-        let title = flatten_map items h in
-        let body = filter_map (maybe_block ~head:false) children in
         Some (`Section { id; data_type; level; title; body })
       | "p" ->
         let p = para [] (children e) in
@@ -280,9 +296,7 @@ module Parse = struct
         Some (`Link (rel, href, part))
       | "div" ->
         if Soup.attribute "data-type" e = Some "note" then
-          let level, h, children = find_header_node (children e) in
-          let title = flatten_map items h in
-          let body = filter_map (maybe_block ~head:false) children in
+          let level, title, body = header e in
           Some (`Note (1+level, title, body))
         else
           failwith "unsuported div"
@@ -292,11 +306,37 @@ module Parse = struct
         (match Soup.id e with
          | None    -> err "table without id"
          | Some id -> Some (`Table (table id (children e))))
-      | s -> err "TODO block: %s %a" s dump e
+      | "aside" ->
+        if Soup.attribute "data-type" e = Some "sidebar" then
+          let level, title, body = header e in
+          if level <> 5 then err "wrong header level in sidebar (%d)" level;
+          Some (`Sidebar (title, body))
+        else
+          err "invalid aside"
+      | "figure" ->
+        if Soup.attribute "style" e = Some "float: 0" then
+          let img e = match Soup.element e with
+            | None   -> None
+            | Some e -> match Soup.name e with
+              | "img" -> Soup.attribute "src" e
+              | s     -> err "figure: %s" s
+          in
+          (match filter_map img (children e) with
+           | [x] -> Some (`Figure x)
+           |  _  -> err "figure")
+        else
+          err "invalid figure"
+      | s -> err "TODO block: %s" s
 
   and block ?head e = match maybe_block ?head e with
     | None   -> err "expecting a block, got %a" dump e
     | Some b -> b
+
+  and header e =
+    let level, h, children = find_header_node (children e) in
+    let title = flatten_map items h in
+    let body = filter_map (maybe_block ~head:false) children in
+    level, title, body
 
   and li e =
     match Soup.element e with
