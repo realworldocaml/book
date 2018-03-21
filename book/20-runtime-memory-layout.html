@@ -13,7 +13,7 @@
 	need to ensure that your code is interfacing correctly with
 	OCaml runtime's memory management.
 
-	<idx>runtime memory representation/importance of</idx> 
+	<idx>runtime memory representation/importance of</idx>
 	<idx id="VALmemory">values/memory representation of</idx></p>
 
       <p>
@@ -25,7 +25,7 @@
 	output based on the runtime memory layout, and debuggers
 	execute binaries without any knowledge of the static OCaml
 	types. To use these tools effectively, you'll need to do some
-	translation between the OCaml and C worlds. 
+	translation between the OCaml and C worlds.
 
 	<idx>interfaces/with OCaml binaries</idx></p>
 
@@ -54,7 +54,7 @@
 	  result in a type error.
 
 	  <idx>type checking</idx>
-	  <idx>AST (abstract syntax-tree)</idx>	 
+	  <idx>AST (abstract syntax-tree)</idx>
 	  <idx>compilation process/phases of</idx></p>
 
 	<p>
@@ -86,9 +86,9 @@
 	This chapter covers the precise mapping from OCaml types to
 	runtime values and walks you through them via the toplevel.
 	We'll cover how these values are managed by the runtime later
-	on in 
+	on in
 	<a href="21-garbage-collector.html#understanding-the-garbage-collector" data-type="xref">Understanding The Garbage Collector</a>.
-	
+
 	<idx id="MAPocaml">mapping/of OCaml types to runtime values</idx></p>
 
       <section id="ocaml-blocks-and-values" data-type="sect1">
@@ -103,7 +103,7 @@
 
 	  <idx id="blck">blocks (of memory)</idx></p>
 
-	<link rel="import" part="1" href="code/memory-repr/simple_record.mlt"/> 
+	<link rel="import" part="1" href="code/memory-repr/simple_record.mlt"/>
 
 	<p>
 	  The type declaration <code>t</code> doesn't take up any
@@ -124,8 +124,8 @@
 	  integer and pointer values, since it scans pointers to find
 	  further values but doesn't follow integers that don't point
 	  to anything meaningful beyond their immediate value.
-	  
-	  <idx>pointers/values for</idx> 
+
+	  <idx>pointers/values for</idx>
 	  <idx>integers</idx>
 	  <idx>values/integer vs. pointer</idx></p>
 
@@ -139,7 +139,7 @@
             order to make it easier for the garbage collector (GC) to
             do its job, but at the expense of an extra level of
             indirection to access the data within the boxed value.
-            
+
 	    <idx>garbage collection/and boxed values</idx>
 	    <idx>boxing (of values)</idx>
 	    <idx>values/boxing of</idx></p>
@@ -183,7 +183,7 @@
             marked as being managed by the OCaml runtime, it is assumed
             to point to an OCaml value. If it points outside the OCaml
             runtime area, it is treated as an opaque C pointer to some
-            other system resource. 
+            other system resource.
 
 	    <idx>word-aligned pointers</idx>
 	    <idx>pointers/word-aligned</idx></p>
@@ -200,7 +200,7 @@
               result in a CPU exception that terminated the program.
               Thus, all pointers were historically rounded off to the
               architecture word size (usually 32 or 64 bits).
-              
+
 	      <idx>unaligned memory access</idx></p>
 
             <p>
@@ -239,7 +239,7 @@
 	  variable-length data that is either opaque bytes or an array
 	  of <em>fields</em>. The header has a multipurpose tag byte
 	  that defines whether to interpret the subsequent data as
-	  opaque bytes or OCaml fields. 
+	  opaque bytes or OCaml fields.
 
 	  <idx>runtime memory representation/blocks and values</idx></p>
 
@@ -392,7 +392,7 @@
             are stored as constant integers. Boolean values have a
             value of <code>1</code> and <code>0</code> for
             <code>true</code> and <code>false</code>, respectively.
-            
+
 	    <idx>integers</idx>
 	    <idx>unboxed integers</idx></p>
 
@@ -435,7 +435,7 @@
 	  exposes the internal representation of values to OCaml
 	  code:</p>
 
-	<link rel="import" part="0.5" href="code/memory-repr/reprs.mlt"/> 
+	<link rel="import" part="0.5" href="code/memory-repr/reprs.mlt"/>
 
 	<p>
 	  The <code>Obj.repr</code> function retrieves the runtime
@@ -453,10 +453,10 @@
             contains the number. This block has the
             <code>Double_tag</code> set, which signals to the collector
             that the floating-point value is not to be scanned:
-            
+
 	    <idx>floating-point values</idx></p>
 
-          <link rel="import" href="code/memory-repr/reprs.mlt" part="1"/> 
+          <link rel="import" href="code/memory-repr/reprs.mlt" part="1"/>
 
           <p>
 	    Since each floating-point value is boxed in a separate
@@ -477,7 +477,7 @@
 	    First, let's check that float arrays do in fact have a
             different tag number from normal floating-point values:</p>
 
-          <link rel="import" href="code/memory-repr/reprs.mlt" part="2"/> 
+          <link rel="import" href="code/memory-repr/reprs.mlt" part="2"/>
 
           <p>
 	    This tells us that float arrays have a tag value of 254.
@@ -487,7 +487,7 @@
             <code>Obj.double_field</code> to retrieve a float from
             within the block:</p>
 
-          <link rel="import" href="code/memory-repr/reprs.mlt" part="3"/> 
+          <link rel="import" href="code/memory-repr/reprs.mlt" part="3"/>
 
           <p>
 	    The first thing we tested was that a float array has the
@@ -516,7 +516,7 @@
 	  <idx>lists/memory representation of</idx>
 	  <idx>runtime memory representation/variants and lists</idx></p>
 
-	<link rel="import" href="code/memory-repr/reprs.mlt" part="4"/> 
+	<link rel="import" href="code/memory-repr/reprs.mlt" part="4"/>
 
 	<p>
 	  <code>Obj.magic</code> unsafely forces a type cast between
@@ -532,7 +532,7 @@
 	  variants with parameters). The parameters are stored as words
 	  in the block:</p>
 
-	<link rel="import" href="code/memory-repr/reprs.mlt" part="5"/> 
+	<link rel="import" href="code/memory-repr/reprs.mlt" part="5"/>
 
 	<p>
 	  In the preceding example, the <code>Apple</code> and
@@ -611,7 +611,7 @@
 	  compiler, but the <code>type_conv</code> library from Core
 	  provides an alternative implementation:</p>
 
-	<link rel="import" href="code/memory-repr/reprs.mlt" part="6"/> 
+	<link rel="import" href="code/memory-repr/reprs.mlt" part="6"/>
 
 	<p>
 	  The hash function is designed to give the same results on
@@ -663,9 +663,9 @@
 	  <code>No_scan_tag</code>, indicating that the contents of the
 	  block are opaque to the collector. The block contents are the
 	  contents of the string, with padding bytes to align the block
-	  on a word boundary. 
+	  on a word boundary.
 
-	  <idx>strings/memory representation of</idx> 
+	  <idx>strings/memory representation of</idx>
 	  <idx>runtime memory representation/string values</idx></p>
 
 	<figure style="float: 0">
@@ -677,7 +677,7 @@
 	  the modulo of the string length and word size to ensure the
 	  result is word-aligned. A 64-bit machine extends the
 	  potential padding up to 7 bytes instead of 3
-	  (see <a href="20-runtime-memory-layout.html#chapter_20_table" data-type="xref">Chapter_20_table</a>).</p> 
+	  (see <a href="20-runtime-memory-layout.html#chapter_20_table" data-type="xref">Chapter_20_table</a>).</p>
 
 	<table id="chapter_20_table">
           <caption>
@@ -761,7 +761,7 @@
 	  (255) is higher than <code>No_scan_tag</code> and so isn't
 	  scanned by the GC.
 
-	  <idx>custom heap blocks</idx> 
+	  <idx>custom heap blocks</idx>
 	  <idx>runtime memory representation/custom heap blocks</idx></p>
 
 	<p>
@@ -770,7 +770,7 @@
 	  custom block cannot have pointers to OCaml blocks and is
 	  opaque to the GC:</p>
 
-	<link rel="import" href="code/memory-repr/custom_ops.c"/> 
+	<link rel="import" href="code/memory-repr/custom_ops.c"/>
 
 	<p>
 	  The custom operations specify how the runtime should perform
