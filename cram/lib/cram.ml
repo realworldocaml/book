@@ -8,7 +8,7 @@ type test = {
   part: string option;
   non_deterministic: nd;
   command: string;
-  output: string list;
+  output: [`Output of string | `Ellipsis] list;
   lines: line list;
 } [@@deriving sexp]
 
@@ -21,9 +21,10 @@ type t = item list [@@deriving sexp]
 
 let fold l =
   let rec output ls acc k = function
-    | `Comment _ as l :: t         -> output (l::ls) acc k t
-    | `Output s as l  :: t         -> output (l::ls) (s :: acc) k t
-    | l                            -> k (List.rev ls) (List.rev acc) l
+    | `Comment _ as l :: t -> output (l::ls) acc k t
+    | `Ellipsis as l  :: t -> output (l:: t) (`Ellipsis :: acc) k t
+    | `Output s as l  :: t -> output (l::ls) (`Output s :: acc) k t
+    | l                    -> k (List.rev ls) (List.rev acc) l
   and command lines part k = function
     | []                   -> k (List.map (fun l -> Line l) lines)
     | `Comment _ as l :: t -> command lines part (fun ls -> k (Line l :: ls)) t
@@ -31,7 +32,7 @@ let fold l =
     | `Command s as l :: t -> create (l :: lines) `False part s k t
     | (`Non_det nd as d) :: (`Command s as l) :: t ->
       create (l :: d :: lines) (nd :> nd) part s k t
-    | `Non_det _ :: _ | `Output _ :: _       -> failwith "malformed input"
+    | (`Non_det _ | `Output _ | `Ellipsis) :: _ -> failwith "malformed input"
   and create ls non_deterministic part s k t =
     output ls [] (fun lines output rest ->
         let c = { lines; part; non_deterministic; command = s; output } in
@@ -66,6 +67,7 @@ let pp_line ?(hide=false) ppf = function
   | `Output s         -> Fmt.pf ppf "  %s\n" s
   | `Part s           -> Fmt.pf ppf "### %s\n" s
   | `Command s        -> Fmt.pf ppf "  $ %s\n" s
+  | `Ellipsis         -> Fmt.pf ppf "  ...\n"
   | `Non_det `Output  -> Fmt.string ppf "%% --non-deterministic\n"
   | `Non_det `Command -> Fmt.string ppf "%% --non-deterministic [skip]\n"
   | `Comment s        ->
@@ -81,3 +83,16 @@ let to_string ?hide t =
   Fmt.to_to_string (pp ?hide) t
 
 let pp_exit_code ppf n = if n <> 0 then Fmt.pf ppf "%s exit %d\n" "@@" n
+
+type output = [`Output of string | `Ellipsis]
+
+let equal_output a b =
+  let rec aux x y = match x, y with
+    | [], []  | [`Ellipsis], _   | _, [`Ellipsis]  -> true
+    | (`Ellipsis::a as x), (_::b as y) | (_::b as y), (`Ellipsis::a as x) ->
+      aux x b || (* n+ matches: skip y's head *)
+      aux a y    (* 0  match  : skip x's head *)
+    | a::b, h::t -> a = h && aux b t
+    | _ -> false
+  in
+  aux a b
