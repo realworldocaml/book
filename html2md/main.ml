@@ -194,7 +194,7 @@ let pair_map l r x =
 let children x = Soup.(to_list @@ children x)
 
 let rec find_header_node = function
-  | []   -> failwith "no header node"
+  | []   -> err "no header node"
   | h::t ->
     match Soup.element h with
     | None   -> find_header_node t
@@ -203,7 +203,7 @@ let rec find_header_node = function
       i, children e, t
 
 let one_child e = match children e with
-  | []  -> failwith "no child"
+  | []  -> err "no child"
   | [e] -> e
   | _   -> err "too many children: %a" dump e
 
@@ -251,7 +251,7 @@ module Parse = struct
             | [`Em x] ->
               (* <span class="command"><em>foo</em></span> == <code>foo</code> *)
               [`Code x]
-            | _ -> failwith "class=\"command\"")
+            | _ -> err "class=\"command\"")
          (* XXX: not sure what it is used for *)
          | Some "keep-together" -> flatten_map items (children e)
          | _ -> err "TODO item: span %a" Fmt.(of_to_string Soup.to_string) e)
@@ -336,7 +336,7 @@ module Parse = struct
           let level, title, body = header e in
           Some (`Note (1+level, title, body))
         else
-          failwith "unsuported div"
+          err "unsuported div"
       | "ol" -> Some (`Enum (filter_map li (children e)))
       | "ul" -> Some (`List (filter_map li (children e)))
       | "dl" -> Some (`Descr (pair_map dt dd (children e)))
@@ -386,8 +386,12 @@ module Parse = struct
 
 end
 
-let blocks =
-  i |> Soup.children |> Soup.to_list |> filter_map Parse.maybe_block
-
 let () =
-  List.iter (Fmt.pr "%a\n" pp_block) blocks
+  try
+    let blocks =
+      i |> Soup.children |> Soup.to_list |> filter_map Parse.maybe_block
+    in
+    List.iter (Fmt.pr "%a\n" pp_block) blocks
+  with Error e ->
+    Fmt.epr "%s: %s\n%!" input e;
+    exit 1
