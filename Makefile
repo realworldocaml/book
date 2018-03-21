@@ -1,4 +1,4 @@
-.PHONY: all clean dep publish promote test test-all
+.PHONY: all clean dep publish promote test test-all docker
 
 all:
 	@jbuilder build @site --dev
@@ -18,6 +18,9 @@ promote:
 
 clean:
 	jbuilder clean
+
+docker:
+	docker build -t ocaml/rwo .
 
 publish:
 	rm -rf .gh-pages
