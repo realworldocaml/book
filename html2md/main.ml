@@ -37,6 +37,7 @@ type block = [
   | `Note of int * item list * block list
   | `List of block list
   | `Enum of block list
+  | `Descr of (phrase * block) list
   | `Section of section
   | `Blocks of block list
   | `Table of table
@@ -101,6 +102,7 @@ let rec pp_block ppf (t:block) = match t with
   | `Table t      -> pp_table ppf t
   | `Sidebar s    -> pp_sidebar ppf s
   | `Figure f     -> pp_figure ppf f
+  | `Descr d      -> pp_descr ppf d
   | `List bs      ->
     (* FIXME: handle depth *)
     List.iter (Fmt.pf ppf "- %a" pp_block) bs
@@ -114,6 +116,12 @@ let rec pp_block ppf (t:block) = match t with
       pp_level s.level pp_items s.title s.id s.data_type pp_blocks s.body
 
 and pp_blocks ppf bs = Fmt.(list ~sep:(unit "\n") pp_block) ppf bs
+
+and pp_descr ppf t =
+  Fmt.pf ppf "%a\n" Fmt.(list ~sep:(unit "\n") pp_list) t
+
+and pp_list ppf (title, body) =
+  Fmt.pf ppf "%a\n: %a" pp_items title pp_block body
 
 and pp_sidebar ppf (title, body) =
   Fmt.pf ppf "<aside data-type=\"sidebar\">\n\n%a %a\n\n%a\n\n</aside>"
@@ -135,6 +143,8 @@ and dump_block ppf (t:block) = match t with
   | `Figure f     -> Fmt.pf ppf "@[<2>Figure %S@]\n" f
   | `Para is      -> Fmt.pf ppf "@[<2>Para@ (%a)@]\n" dump_items is
   | `List bs      -> Fmt.pf ppf "@[<2>List@ (%a)@]\n" dump_blocks bs
+  | `Descr d      -> Fmt.pf ppf "@[<2>Descr@ (%a)@]\n"
+                       Fmt.Dump.(list (pair pp_items pp_block)) d
   | `Enum bs      -> Fmt.pf ppf "@[<2>Enum@ (%a)@]\n" dump_blocks bs
   | `Note (l,t,b) -> Fmt.pf ppf "@[<2>Note@ (%d,@ %a@, %a@)]\n"
                        l dump_items t pp_blocks b
@@ -166,6 +176,20 @@ let filter_map f e =
 let flatten_map f l =
   List.fold_left (fun acc x -> List.rev_append (f x) acc) [] l
   |> List.rev
+
+let pair_map l r x =
+  let rec left acc = function
+    | []   -> List.rev acc
+    | h::t -> match l h with
+      | None   -> left acc t
+      | Some l -> right l acc t
+  and right l acc = function
+    | []   -> err "list is even"
+    | h::t -> match r h with
+      | None   -> right l acc t
+      | Some r -> left ((l, r) :: acc) t
+  in
+  left [] x
 
 let children x = Soup.(to_list @@ children x)
 
@@ -240,12 +264,19 @@ module Parse = struct
   let find name f l =
     let rec aux = function
       | []   -> err "cannot find %s in %a" name Fmt.(Dump.list dump) l
-    | h::t ->
-      match Soup.element h with
-      | None   -> aux t
-      | Some e -> if Soup.name e = name then f (children e) else aux t
+      | h::t ->
+        match Soup.element h with
+        | None   -> aux t
+        | Some e -> if Soup.name e = name then f (children e) else aux t
     in
     aux l
+
+  let expect name f e =
+    match Soup.element e with
+    | None   -> None
+    | Some e ->
+      if Soup.name e = name then Some (f (children e))
+      else err "expecting %s, got %s" name (Soup.name e)
 
   let find_all name f l =
     let rec aux acc =function
@@ -308,6 +339,7 @@ module Parse = struct
           failwith "unsuported div"
       | "ol" -> Some (`Enum (filter_map li (children e)))
       | "ul" -> Some (`List (filter_map li (children e)))
+      | "dl" -> Some (`Descr (pair_map dt dd (children e)))
       | "table" ->
         (match Soup.id e with
          | None    -> err "table without id"
@@ -338,18 +370,19 @@ module Parse = struct
     | None   -> err "expecting a block, got %a" dump e
     | Some b -> b
 
+  and blocks e = `Blocks (filter_map (maybe_block ~head:false) e)
+
   and header e =
     let level, h, children = find_header_node (children e) in
     let title = flatten_map items h in
     let body = filter_map (maybe_block ~head:false) children in
     level, title, body
 
-  and li e =
-    match Soup.element e with
-    | None   -> None
-    | Some e -> match Soup.name e with
-      | "li" -> Some (`Blocks (filter_map (maybe_block ~head:false) (children e)))
-      | s    -> err "was expecting <li>, got <%s>" s
+  and li e = expect "li" blocks e
+
+  and dt e = expect "dt" (flatten_map items) e
+
+  and dd e = expect "dd" blocks e
 
 end
 
