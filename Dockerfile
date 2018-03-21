@@ -7,7 +7,7 @@ WORKDIR /home/opam/src
 
 # pre-install dependencies
 RUN opam depext -iy core async ppx_sexp_conv ppx_deriving cohttp jbuilder \
-    toplevel_expect_test patdiff cohttp-async lambdasoup ocamlnet sexp_pretty \
+    toplevel_expect_test patdiff cohttp-async lambdasoup sexp_pretty \
     core_bench mtime yojson astring cryptokit ocp-index atd atdgen ctypes \
     ctypes-foreign textwrap uri
 
