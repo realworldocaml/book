@@ -274,8 +274,14 @@ module Parse = struct
       match Soup.name e with
       | "section" ->
         let attrs = Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] e in
-        let id = List.assoc "id" attrs in
-        let data_type = List.assoc "data-type" attrs in
+        let id =
+          try List.assoc "id" attrs
+          with Not_found -> err "id not found in %a" dump e
+        in
+        let data_type =
+          try List.assoc "data-type" attrs
+          with Not_found -> err "data-type not found in %a" dump e
+        in
         let level, title, body = header e in
         let level = if head then level else level + 1 in
         Some (`Section { id; data_type; level; title; body })
