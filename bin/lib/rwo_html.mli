@@ -59,8 +59,6 @@ val filter_whitespace : item list -> item list
 
 val fold : item list -> init:'a -> f:('a -> item -> 'a) -> 'a
 
-val get_body_childs : filename:string -> t -> item list
-
 (** [replace_id_node_with t id with_] searches [t] for a node with
     given [id], and replaces that node entirely with [with_] items. *)
 val replace_id_node_with : t -> id:string -> with_:(item list) -> t

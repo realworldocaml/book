@@ -181,7 +181,7 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
   let column3 = [Html.div ~a:["class","index-toc"] (part_items part3)] in
   Html.of_file file >>| fun html ->
   let content =
-    Html.get_body_childs ~filename:file html
+    html
     |> Html.replace_id_node_with ~id:"part1" ~with_:column1
     |> Html.replace_id_node_with ~id:"part2" ~with_:column2
     |> Html.replace_id_node_with ~id:"part3" ~with_:column3
@@ -238,7 +238,6 @@ let make_chapter_page ?code_dir ?pygmentize repo_root chapters chapter_file
   in
 
   Html.of_file chapter_file >>= fun html ->
-  let html = Html.get_body_childs ~filename:chapter_file html in
   Scripts.of_html ?code_dir ~filename:chapter_file html >>|
   ok_exn >>= fun scripts ->
   loop scripts html >>| fun content ->
@@ -259,11 +258,8 @@ let make_simple_page file =
   Html.of_file file >>= fun content ->
   let content = Html.[
     div ~a:["class","left-column"] [];
-    article ~a:["class","main-body"] (
-      get_body_childs ~filename:file content;
-    )
-  ]
-  in
+    article ~a:["class","main-body"] content;
+  ] in
   return (main_template ~title_bar:title_bar ~content ())
 
 

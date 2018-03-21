@@ -74,7 +74,7 @@ let get_title file (t:Html.t) : string =
     | (`Element {Html.name="h1"; attrs=_; childs})::_ -> items_to_string childs
     | _ -> assert false
 
-let get_sections file html =
+let get_sections file (html: Html.t) =
 
   (* Convert arbitrary HTML to a section title, under the reasonable
       assumption that we don't put overly complex HTML within section
@@ -94,9 +94,8 @@ let get_sections file html =
     |> String.map ~f:(function ' ' -> '-' | c -> c)
   in
 
-  let get_sections_helper data_type (item:Html.item)
-      : (section * Html.item) list
-      =
+  let sections_of_items data_type items =
+
     let title_elem = match data_type with
       | "chapter" -> "h1"
       | "sect1" -> "h1"
@@ -109,44 +108,39 @@ let get_sections file html =
     let rec loop accum = function
       | [] -> accum
       | (`Element{Html.name="section";attrs;childs} as item)::rest -> (
-        if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type",data_type)
-        then (
-          match Html.filter_whitespace childs with
-          | `Element{Html.name; attrs=_; childs}::_ -> (
-            if name = title_elem then
-              let title = html_to_title childs in
-              let id = match List.Assoc.find ~equal:String.equal attrs "id" with
-                | Some x -> x
-                | None -> title_to_id title
-              in
-              loop (({title;id},item)::accum) rest
-            else
+          if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type",data_type)
+          then (
+            match Html.filter_whitespace childs with
+            | `Element{Html.name; attrs=_; childs}::_ -> (
+                if name = title_elem then
+                  let title = html_to_title childs in
+                  let id = match List.Assoc.find ~equal:String.equal attrs "id" with
+                    | Some x -> x
+                    | None -> title_to_id title
+                  in
+                  loop (({title;id},item)::accum) rest
+                else
+                  failwithf "%s: <section data-type=\"%s\"> must have <%s> as \
+                             first child" file data_type title_elem ()
+              )
+            | _ ->
               failwithf "%s: <section data-type=\"%s\"> must have <%s> as \
                          first child" file data_type title_elem ()
           )
-          | _ ->
-            failwithf "%s: <section data-type=\"%s\"> must have <%s> as \
-                       first child" file data_type title_elem ()
+          else
+            failwithf "%s: expected <section> with data-type=\"%s"
+              file data_type ()
         )
-        else
-          failwithf "%s: expected <section> with data-type=\"%s"
-            file data_type ()
-      )
-      | _::rest ->
-        loop accum rest
+      | _ :: rest -> loop accum rest
     in
-    match item with
+    List.rev (loop [] items)
+  in
+  let sections_of_childs data_type = function
     | `Data _ -> assert false (* only applied to [Element]s *)
-    | `Element{childs;_} -> (loop [] childs |> List.rev)
+    | `Element {Html.childs;_} -> sections_of_items data_type childs
   in
 
-  let body = match Html.get_all_nodes "body" html with
-    | item::[] -> item
-    | [] -> failwithf "%s: <body> element not found" file ()
-    | _::_::_ -> failwithf "%s: multiple <body> elements found" file ()
-  in
-
-  let chapter_section = match get_sections_helper "chapter" body with
+  let chapter_section = match sections_of_items "chapter" html with
     | (_,item)::[] -> item
     | [] ->
       failwithf "%s: <section data-type=\"chapter\"> element not found"
@@ -156,21 +150,15 @@ let get_sections file html =
         file ()
   in
 
-  get_sections_helper "sect1" chapter_section
+  sections_of_childs "sect1" chapter_section
   |> List.map ~f:(fun (sect,item) ->
-    sect,
-    (
-      get_sections_helper "sect2" item
+      sect,
+      sections_of_childs "sect2" item
       |> List.map ~f:(fun (sect,item) ->
-        sect,
-        (
-          get_sections_helper "sect3" item
+          sect,
+          sections_of_childs "sect3" item
           |> List.map ~f:fst
-        )
-      )
-    )
-  )
-;;
+        ))
 
 let flatten_sections sections =
   List.fold sections ~init:[] ~f:(fun accum (section,childs) ->

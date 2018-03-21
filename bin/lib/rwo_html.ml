@@ -153,18 +153,6 @@ let fold t ~init ~f =
   in
   List.fold t ~init ~f:loop
 
-let get_childs ~filename tag t =
-  match get_all_nodes tag t with
-  | [] -> failwithf "%s: <%s> not found" filename tag ()
-  | _::_::_ -> failwithf "%s: multiple <%s> tags found" filename tag ()
-  | (`Data _)::[] -> assert false
-  | (`Element {name;childs;_})::[] when name=tag-> childs
-  | (`Element _)::[] -> assert false
-
-let get_body_childs ~filename t =
-  let html = get_childs ~filename "html" t in
-  get_childs ~filename "body" html
-
 let replace_id_node_with t ~id ~with_ =
   let rec loop = function
     | [] -> []
