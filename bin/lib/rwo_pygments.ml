@@ -89,6 +89,6 @@ let pygmentize ?(add_attrs=[]) ?(pygmentize=true) lang contents =
   if pygmentize then (
     really_pygmentize ~add_attrs lang contents )
   else
-    (Html.encode contents
+    (contents
     |> (fun x -> Html.pre ~a:add_attrs [Html.code ~a:["class","language-" ^ (lang_to_string lang)] [`Data x]])
     |> return)

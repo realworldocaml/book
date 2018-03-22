@@ -1,10 +1,12 @@
 open Core
 open Rwo_html
 
+let nbsp = `Data (List.hd_exn (Soup.(texts (parse "&nbsp;"))))
+
 let indexterm_to_idx docs =
   let rec loop item = match item with
     | `Data _ -> item
-    | `Element {name="a"; attrs; childs=[`Data "&nbsp;"]} -> (
+    | `Element {name="a"; attrs; childs=[x]} when x = nbsp -> (
       if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type", "indexterm")
       then (
         match
@@ -45,7 +47,7 @@ let idx_to_indexterm t =
         `Element {
           name = "a";
           attrs = ["data-type","indexterm"; "data-primary",x]@attrs;
-          childs = [`Data "&nbsp;"];
+          childs = [nbsp];
         }
       | x::y ->
         `Element {
@@ -55,7 +57,7 @@ let idx_to_indexterm t =
             "data-primary", x;
             "data-secondary", String.concat ~sep:"/" y;
           ]@attrs;
-          childs = [`Data "&nbsp;"];
+          childs = [nbsp];
         }
       | _ ->
         failwithf
