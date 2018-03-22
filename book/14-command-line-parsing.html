@@ -99,7 +99,7 @@
 	  encountered.</p>
 
 	<section id="anonymous-arguments" data-type="sect2">
-          <h2>Anonymous Arguments</h2>
+          <h2>Defining an anonymous argument</h2>
 
           <p>
 	    Let's build a parser for a command line UI with a
@@ -109,90 +109,97 @@
           <link rel="import" part="1"
 		href="code/command-line-parsing/basic_md5/basic_md5.ml" />
 
-          <p>
-	    The values <code>anon</code>, <code>file</code>
-	    and <code>%:</code> all come from
-	    the <code>Command.Param</code> module, and they're used to
-	    define a parameter parser which accepts a single anonymous
-	    argument called <code>"filename"</code>. </p>
-
 	  <p>
-	    Anonymous parameters are declared using <code>anon</code>
-	    created using the <code>%:</code> operator, which binds a
-	    textual name (used in the help text to identify the
-	    parameter) to an OCaml conversion function that parses the
-	    command-line string fragments into a higher-level OCaml
-	    data type. In the preceding example, this conversion
-	    function is specified
-	    by <code>Command.Param.file</code>. We'll see how to parse
-	    parameters for types not directly supported
-	    by <code>Command</code> later in the chapter.</p>
+	    Here, <code>anon</code> is used to signal the parsing of
+	    an anonymous argument, and the expression <code>("filename"
+	    %: file)</code> indicates the textual name of the argument
+	    and specification that describes the kind of value that is
+	    expected. The textual name is used for generating help
+	    text, and the specification is used both to nail down the
+	    OCaml type of the returned value (<code>string</code>, in
+	    this case) and to guide features like auto-completion and
+	    input validation. The
+	    values <code>anon</code>, <code>file</code>
+	    and <code>%:</code> all come from
+	    the <code>Command.Param</code> module.</p>
+
 	</section>
 
 	<section id="defining-basic-commands" data-type="sect2">
-          <h2>Defining Basic Commands</h2>
+          <h2>Defining basic commands</h2>
 
           <p>
 	    Once we've defined a specification, we need to put it to
             work on real input. The simplest way is to directly create
-            a command-line interface via the <code>Command.basic</code>
-            module:
+            a command-line interface with <code>Command.basic</code>.
 
-	    <idx>Command.basic module</idx></p>
+	    <idx>Command.basic</idx></p>
 
           <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.ml" part="2"/>
 
           <p>
-	    <code>Command.basic</code> defines a complete
-            command-line interface that takes the following extra
-            arguments, in addition to the ones defined in the
-            specification:</p>
-
-          <dl>
-            <dt><code>summary</code></dt>
-
-            <dd>
-              <p>
-		A required one-line description to go at the top of
-		the command help screen.</p>
-            </dd>
-
-            <dt><code>readme</code></dt>
-
-            <dd>
-              <p>
-		For longer help text when the command is called with
-		<code>-help</code>. The <code>readme</code> argument is
-		a function that is only evaluated when the help text is
-		actually needed.</p>
-            </dd>
-          </dl>
+	    The <code>summary</code> argument is a one-line
+	    description which goes at the top of the help screen,
+	    while the (optional) <code>readme</code> argument is for
+	    providing a more detailed description that will be
+	    provided on demand.</p>
 
           <p>
-	    The final argument is the parameter parser.</p>
+	    The final argument is the most interesting one, which is
+	    the parameter parser. This will be easier to understand if
+	    we first learn a bit more about the type signatures of the
+	    various components we've been using. Let's do that by
+	    recreating some of this code in the toplevel.</p>
 
-          <p>
-	    The callback function is where all the work happens
-            after the command-line parsing is complete. This function
-            is applied with the arguments containing the parsed
-            command-line values, and it takes over as the main thread
-            of the application. The callback's arguments are passed in
-            the same order as they were bound in the specification
-            (using the <code>+&gt;</code> operator).
+	  <link rel="import" part="1"
+		href="code/command-line-parsing/command_types.mlt"/>
 
-	    <idx>arguments/unit argument to callbacks</idx>
-	    <idx>unit argument</idx>
-	    <idx>callback function</idx></p>
+	  <p>
+	    The type parameter of <code>filename_param</code> is there
+	    to indicate the type of the value returned by the parser;
+	    in this case, <code>string</code>. </p>
+
+	  <p>
+	    But <code>Command.basic</code> requires a parameter parser
+	    that returns a value of type <code>unit -> unit</code>. We
+	    can see that by using <code>#show</code> to explore the
+	    types.</p>
+
+	  <link rel="import" part="2"
+		href="code/command-line-parsing/command_types.mlt"/>
+
+	  <p>
+	    It makes sense that <code>Command.basic</code> wants a
+	    parser that returns a function; after all, in the end, it
+	    needs a function it can run that constitutes the execution
+	    of the program. But how do we get such a parser, given the
+	    parser we have returns just a filename? </p>
+
+	  <p>
+	    The answer is to use a <code>map</code> function to
+	    change the value returned by the parser.
+	  </p>
+
+	  <link rel="import" part="3"
+		href="code/command-line-parsing/command_types.mlt"/>
+
+	  <p>
+	    And that's exactly what we did in our invocation
+	    of <code>Command.basic</code> earlier. And, as required,
+	    the value that we return is itself a function of
+	    type <code>unit -> unit</code>.</p>
+
 	</section>
 
 	<section id="running-basic-commands" data-type="sect2">
-          <h2>Running Basic Commands</h2>
+          <h2>Running commands</h2>
 
           <p>
 	    Once we've defined the basic command, running it is just
             one function call away:</p>
 
-          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.ml" part="3"/>
+          <link rel="import" part="3"
+		href="code/command-line-parsing/basic_md5/basic_md5.ml" />
 
           <p>
 	    <code>Command.run</code> takes a couple of optional
@@ -200,9 +207,12 @@
             binary you are running in production. You'll need to
             install Cryptokit via <code>opam install cryptokit</code>
             before building this example. Once that's completed, run
-            the following to compile the binary:</p>
-          <link rel="import" href="code/command-line-parsing/basic_md5/jbuild"/>
-          <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="build"/>
+            the following to compile the binary.</p>
+
+          <link rel="import"
+		href="code/command-line-parsing/basic_md5/jbuild"/>
+          <link rel="import" part="build"
+		href="code/command-line-parsing/basic_md5/basic_md5.sh" />
 
           <p>
 	    You can now query the version information for the binary
