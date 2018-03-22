@@ -102,14 +102,14 @@ let phrases_to_html ?(pygmentize=false) phrases =
      )
      |> function
      | "" -> None
-     | x -> Some Html.(pre [`Data (x |> Html.encode)])
+     | x -> Some Html.(pre [`Data x])
   in
 
   let stdout x : Html.item option =
     if Expect.Chunk.evaluated x then
       match Expect.Chunk.stdout x with
       | "" -> None
-      | x -> Some Html.(pre [`Data (Html.encode x)])
+      | x -> Some Html.(pre [`Data x])
     else None
   in
 
