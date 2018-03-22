@@ -7,5 +7,4 @@ module Scripts = Rwo_scripts
 
 module Import = Rwo_import
 module Index = Rwo_index
-module Ppre = Rwo_ppre
 module Toc = Rwo_toc
