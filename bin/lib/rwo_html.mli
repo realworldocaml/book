@@ -2,8 +2,7 @@
 open Core
 open Async
 
-type attributes = (string * string) list
-  [@@deriving sexp]
+type attributes = (string * string) list [@@deriving sexp]
 
 type element = {
   name : string;
@@ -16,11 +15,7 @@ and item = [
 | `Data of string
 ] [@@deriving sexp]
 
-type t = item list
-  [@@deriving sexp]
-
-val item_of_string : string -> item Or_error.t
-val item_of_file : string -> item Or_error.t Deferred.t
+type t = item list [@@deriving sexp]
 
 val of_string : string -> t
 val of_file : string -> t Deferred.t
@@ -56,15 +51,13 @@ val is_nested : string -> t -> bool
 val print_elements_only
   :  ?exclude_elements:string list
   -> ?keep_attrs:string list
-  -> t
+  -> item list
   -> unit
 
 (** Filter out pure whitespace Data nodes. *)
-val filter_whitespace : t -> t
+val filter_whitespace : item list -> item list
 
-val fold : t -> init:'a -> f:('a -> item -> 'a) -> 'a
-
-val get_body_childs : filename:string -> t -> item list
+val fold : item list -> init:'a -> f:('a -> item -> 'a) -> 'a
 
 (** [replace_id_node_with t id with_] searches [t] for a node with
     given [id], and replaces that node entirely with [with_] items. *)
@@ -77,50 +70,50 @@ val encode : string -> string
 (******************************************************************************)
 (** {2 Constructors} *)
 (******************************************************************************)
-val div : ?a:attributes -> t -> item
-val span : ?a:attributes -> t -> item
-val p : ?a:attributes -> t -> item
-val pre : ?a:attributes -> t -> item
-val code : ?a:attributes -> t -> item
-val article : ?a:attributes -> t -> item
-val body : ?a:attributes -> t -> item
-val html : ?a:attributes -> t -> item
+val div : ?a:attributes -> item list -> item
+val span : ?a:attributes -> item list -> item
+val p : ?a:attributes -> item list -> item
+val pre : ?a:attributes -> item list -> item
+val code : ?a:attributes -> item list -> item
+val article : ?a:attributes -> item list -> item
+val body : ?a:attributes -> item list -> item
+val html : ?a:attributes -> item list -> item
 
-val a : ?a:attributes -> t -> item
-val i : ?a:attributes -> t -> item
+val a : ?a:attributes -> item list -> item
+val i : ?a:attributes -> item list -> item
 val br : item
 
-val ul : ?a:attributes -> t -> item
-val li : ?a:attributes -> t -> item
+val ul : ?a:attributes -> item list -> item
+val li : ?a:attributes -> item list -> item
 
-val h1 : ?a:attributes -> t -> item
-val h2 : ?a:attributes -> t -> item
-val h3 : ?a:attributes -> t -> item
-val h4 : ?a:attributes -> t -> item
-val h5 : ?a:attributes -> t -> item
-val h6 : ?a:attributes -> t -> item
+val h1 : ?a:attributes -> item list -> item
+val h2 : ?a:attributes -> item list -> item
+val h3 : ?a:attributes -> item list -> item
+val h4 : ?a:attributes -> item list -> item
+val h5 : ?a:attributes -> item list -> item
+val h6 : ?a:attributes -> item list -> item
 
-val small : ?a:attributes -> t -> item
-val sup : ?a:attributes -> t -> item
+val small : ?a:attributes -> item list -> item
+val sup : ?a:attributes -> item list -> item
 
-val table : ?a:attributes -> t -> item
-val thead : ?a:attributes -> t -> item
-val th : ?a:attributes -> t -> item
-val tbody : ?a:attributes -> t -> item
-val tr : ?a:attributes -> t -> item
-val td : ?a:attributes -> t -> item
+val table : ?a:attributes -> item list -> item
+val thead : ?a:attributes -> item list -> item
+val th : ?a:attributes -> item list -> item
+val tbody : ?a:attributes -> item list -> item
+val tr : ?a:attributes -> item list -> item
+val td : ?a:attributes -> item list -> item
 
-val dl : ?a:attributes -> t -> item
-val dd : ?a:attributes -> t -> item
+val dl : ?a:attributes -> item list -> item
+val dd : ?a:attributes -> item list -> item
 
-val head : ?a:attributes -> t -> item
-val meta : ?a:attributes -> t -> item
-val title : ?a:attributes -> t -> item
-val script : ?a:attributes -> t -> item
-val link : ?a:attributes -> t -> item
+val head : ?a:attributes -> item list -> item
+val meta : ?a:attributes -> item list -> item
+val title : ?a:attributes -> item list -> item
+val script : ?a:attributes -> item list -> item
+val link : ?a:attributes -> item list -> item
 
-val nav : ?a:attributes -> t -> item
-val footer : ?a:attributes -> t -> item
+val nav : ?a:attributes -> item list -> item
+val footer : ?a:attributes -> item list -> item
 
 
 (******************************************************************************)

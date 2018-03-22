@@ -1,106 +1,223 @@
 (jbuild_version 1)
 
 (alias (
-  (name code)
-  (deps (for.mlt))
+  (name runtest)
+  (deps (for.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (order.mlt))
+  (name runtest-all)
+  (deps (for.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (order.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (file.mlt))
+  (name runtest-all)
+  (deps (order.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (file.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (file2.mlt))
+  (name runtest-all)
+  (deps (file.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (file2.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (letrec.mlt))
+  (name runtest-all)
+  (deps (file2.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (letrec.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (fib.mlt))
+  (name runtest-all)
+  (deps (letrec.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (fib.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (examples.mlt))
+  (name runtest-all)
+  (deps (fib.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (examples.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (weak.mlt))
+  (name runtest-all)
+  (deps (examples.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (weak.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (memo.mlt))
+  (name runtest-all)
+  (deps (weak.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (memo.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (printf.mlt))
+  (name runtest-all)
+  (deps (memo.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (printf.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (value_restriction.mlt))
+  (name runtest-all)
+  (deps (printf.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (value_restriction.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (ref.mlt))
+  (name runtest-all)
+  (deps (value_restriction.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (ref.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name code)
-  (deps (lazy.mlt))
+  (name runtest-all)
+  (deps (ref.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (lazy.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest-all)
+  (deps (lazy.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 

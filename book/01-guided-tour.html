@@ -1,14 +1,4 @@
-
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39"/>
-
-  <title></title>
-</head>
-
-<body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id="a-guided-tour" data-type="chapter">
+  <section id="a-guided-tour" data-type="chapter">
     <h1>A Guided Tour</h1>
 
     <p>This chapter gives an overview of OCaml by walking through a
@@ -34,11 +24,11 @@
       <p>
 	<code>Base</code> is one of a family of three standard library
 	replacements, each with different use-cases, each building on
-	the last. Here's a quick summary.
+	the last. Here's a quick summary.</p>
 
 	<ul>
 	  <li>
-	    <em><code>Base</code></em> is designed to provide the
+	    <p><em><code>Base</code></em> is designed to provide the
 	    fundamentals needed from a standard library. It has a
 	    variety of basic efficient data structures like
 	    hash-tables, sets and sequences. It also defines the basic
@@ -48,27 +38,27 @@
 	    minimum of external dependencies, so <code>Base</code>
 	    just takes seconds to build and install. It's also
 	    portable, running on every platform that OCaml does,
-	    including Windows and JavaScript.
+	    including Windows and JavaScript.</p>
 	  </li>
 
 	  <li>
-	    <em><code>Core_kernel<code></em> extends <code>Base</code>
+	    <p><em><code>Core_kernel</code></em> extends <code>Base</code>
 	    with many new data structures, like heaps, and other
 	    capabilities, like types to represent times and
 	    time-zones, and support for efficient binary serializers.
 	    It's still portable, but has many more dependencies,
 	    takes longer to build, and will add more to the size of
-	    your executables.
+	    your executables.</p>
 	  </li>
 
 	  <li>
-	    <em><code>Core</code></em> is the most full-featured,
+	    <p><em><code>Core</code></em> is the most full-featured,
 	    extending <code>Core_kernel</code> with support for a
 	    variety of UNIX APIs, but only works on UNIX-like OSs,
-	    including Linux and macOS. </li>
+	    including Linux and macOS.</p> </li>
 	</ul>
 
-	We use <code>Base</code> in this section, but you should check
+	<p>We use <code>Base</code> in this section, but you should check
 	out <code>Core</code> and <code>Core_kernel</code>, depending
 	on your requirements.  We'll discuss some of the additional
 	functionality provided by <code>Core</code>
@@ -86,7 +76,7 @@
 
 	<idx>OCaml/numerical calculations in</idx>
 	<idx>numerical calculations</idx>
-	<idx>Core standard library/opening</idx> 
+	<idx>Core standard library/opening</idx>
       </p>
 
       <link rel="import" href="code/guided-tour/main.mlt" part="0.5"/>
@@ -304,7 +294,7 @@
 
 	    <p> requires that <code>first</code> must be the same type
             as <code>0</code>, and so <code>first</code> must be of
-            type <code>int</code>. Similarly, from</p> 
+            type <code>int</code>. Similarly, from</p>
 
 	    <p><code>if test second then second else 0</code> </p>
 
@@ -956,10 +946,10 @@
 	  by default by <code>Base</code>. We'll learn more about
 	  polymorphic compare in
 	  <a href="03-lists-and-patterns.html#terser-and-faster-patterns"
-	     data-type="xref">Terser and Faster Patterns</a>	  
+	     data-type="xref">Terser and Faster Patterns</a>
 	</p>
       </div>
-	
+
     </section>
 
     <section id="imperative-programming" data-type="sect1">
@@ -1220,7 +1210,7 @@
 	<p>All we need to specify is the fact that we're building an
 	executable rather than a library, the name of the executable,
 	and the name of the libraries we depend on.</p>
-	
+
 	<p>We can now invoke jbuilder to build the executable.
 	The <code>--dev</code> flag is recommended to get better error
 	messages during the build.</p>
@@ -1255,5 +1245,3 @@
       as a result.</p>
     </section>
   </section>
-</body>
-</html>

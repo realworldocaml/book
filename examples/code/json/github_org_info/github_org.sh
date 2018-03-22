@@ -1,8 +1,10 @@
 ### build
   $ jbuilder build github_org_info.exe
 ### run
+%% --non-deterministic
   $ jbuilder exec -- ./github_org_info.exe mirage
   MirageOS (131943) with 125 public repos
+%% --non-deterministic
   $ jbuilder exec -- ./github_org_info.exe janestreet
   ??? (3384712) with 145 public repos
 ### generate json

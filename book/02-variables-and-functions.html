@@ -1,14 +1,4 @@
-
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39"/>
-
-  <title></title>
-</head>
-
-<body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id="variables-and-functions" data-type="chapter">
+  <section id="variables-and-functions" data-type="chapter">
     <h1>Variables and Functions</h1>
 
     <p>Variables and functions are fundamental ideas that show up
@@ -184,12 +174,13 @@
 
         <p>This case can't really come up in practice,
         because <code>String.split</code> always returns a list with
-        at least one element, even when given the empty string.
+        at least one element, even when given the empty string.</p>
+
         <link rel="import"
         href="code/variables-and-functions/main.mlt"
         part="8.1"/>
 
-	But the compiler doesn't know this, and so it emits the
+        <p>But the compiler doesn't know this, and so it emits the
         warning. It's generally better to use a <code>match</code>
         statement to handle such cases explicitly.</p>
         <link rel="import"
@@ -228,18 +219,18 @@
         <p>Anonymous functions operate in much the same way as
         named functions. For example, we can apply an anonymous
         function to an argument. </p>
-        <link rel="import" href="code/variables-and-functions/main.mlt" part="11"/> 
+        <link rel="import" href="code/variables-and-functions/main.mlt" part="11"/>
 
         <p>Or pass it to another function. Passing functions to
         iteration functions like <code>List.map</code> is probably
         the most common use case for anonymous functions.</p>
         <link rel="import"
-        href="code/variables-and-functions/main.mlt" part="12"/> 
+        href="code/variables-and-functions/main.mlt" part="12"/>
 
         <p>You can even stuff a function into a data structure, like a
         list.</p>
 
-        <link rel="import" 
+        <link rel="import"
 	      href="code/variables-and-functions/main.mlt"
 	      part="13" />
 
@@ -342,10 +333,10 @@
           some of the arguments. Here's an example where we create a
           specialized version of <code>abs_diff</code> that measures
           the distance of a given number from <code>3</code>.</p>
-	
-        <link rel="import" 
+
+        <link rel="import"
 	      href="code/variables-and-functions/main.mlt"
-	      part="19" /> 
+	      part="19" />
 
         <p>The practice of applying some of the arguments of a curried
         function to get a new function is called <em>partial
@@ -428,7 +419,7 @@
           the type-inference algorithm needs to know when a set of
           function definitions are mutually recursive, and these have
           to be marked explicitly by the programmer.
-	  
+
 	  <idx>let syntax/nonrecursive vs. recursive functions</idx></p>
 
         <p>
@@ -1108,5 +1099,3 @@
       </section>
     </section>
   </section>
-</body>
-</html>

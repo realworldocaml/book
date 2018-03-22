@@ -1,4 +1,4 @@
   $ ocamlc -c broken_module.ml
   File "broken_module.ml", line 2, characters 2-8:
   Error: Syntax error
-  [2]
+@@ exit 2

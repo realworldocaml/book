@@ -1,14 +1,4 @@
-
-
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta name="generator" content="HTML Tidy for HTML5 (experimental) for Mac OS X https://github.com/w3c/tidy-html5/tree/c63cc39"/>
-
-  <title></title>
-</head>
-
-<body>
-  <section xmlns="http://www.w3.org/1999/xhtml" id="files-modules-and-programs" data-type="chapter">
+  <section id="files-modules-and-programs" data-type="chapter">
     <h1>Files, Modules, and Programs</h1>
 
     <p>We've so far experienced OCaml largely through the toplevel.
@@ -123,7 +113,7 @@
       <idx>OCaml toolchain/ocamlfind</idx>
       <idx>Base standard library/finding with ocamlfind</idx></p>
 
-      <link rel="import" 
+      <link rel="import"
 	    href="code/files-modules-and-programs/freq/simple_build.sh"/>
 
       <p>This uses <span class="command"><em>ocamlfind</em></span>, a
@@ -152,7 +142,7 @@
 
       <p>With that in place, we can
 	invoke <span class="command"><em>jbuilder</em></span> as
-	follows.
+	follows.</p>
 
       <link rel="import" href="code/files-modules-and-programs/freq-obuild/freq.sh" part="build"/>
 
@@ -256,7 +246,7 @@
       contains the logic for maintaining the association list used to
       represent the frequency counts. The key function,
       called <code>touch</code>, bumps the frequency count of a given
-      line by one.</p> 
+      line by one.</p>
 
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-with-counter/counter.ml"/>
@@ -270,7 +260,7 @@
 	<idx>modules/naming of</idx></p>
 
       <p>We can now rewrite <code>freq.ml</code> to
-      use <code>Counter</code>. 
+      use <code>Counter</code>.</p>
 
       <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml"/>
 
@@ -322,7 +312,7 @@
       <link rel="import" href="code/files-modules-and-programs/val.syntax"/>
 
       <p>Using this syntax, we can write the signature
-      of <code>counter.ml</code> as follows. </p> 
+      of <code>counter.ml</code> as follows. </p>
 
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-with-sig/counter.mli"/>
@@ -410,8 +400,8 @@
       <p>Now we can turn to optimizing the implementation
       of <code>Counter</code>. Here's an alternate and far more
       efficient implementation, based on the <code>Map</code> data
-      structure in <code>Core_kernel</code>.</p> 
-      
+      structure in <code>Core_kernel</code>.</p>
+
       <link rel="import"
 	    href="code/files-modules-and-programs/freq-fast/counter.ml"/>
 
@@ -450,7 +440,7 @@
       represent the fact that there are two possible return
       values. Here's a possible implementation:</p>
 
-      <link rel="import" 
+      <link rel="import"
 	    href="code/files-modules-and-programs/freq-median/counter.ml" part="1"/>
 
       <p>In the above, we use <code>failwith</code> to throw an
@@ -468,7 +458,7 @@
       clash here. Adding the following two lines
       to <code>counter.mli</code> does the trick.</p>
 
-      <link rel="import" 
+      <link rel="import"
 	    href="code/files-modules-and-programs/freq-median/counter.mli" part="1"/>
 
       <p>The decision of whether a given type should be abstract or
@@ -509,7 +499,7 @@
 
 	<idx>abstract types</idx></p>
 
-      <link rel="import" 
+      <link rel="import"
 	    href="code/files-modules-and-programs/abstract_username.ml"/>
 
       <p>
@@ -543,7 +533,7 @@
       be comparing the usernames in both cases. Because of how we
       defined our types, however, the compiler will flag this bug
       for us.</p>
-      <link rel="import" 
+      <link rel="import"
 	    href="code/files-modules-and-programs/session_info/build_session_info.errsh"/>
 
       <p>This is a trivial example, but confusing different kinds
@@ -605,8 +595,8 @@
             <em>local open</em>. There are two syntaxes for local
             opens. For example, you can write:</p>
 
-	  <link rel="import" 
-		href="code/files-modules-and-programs/main.mlt" 
+	  <link rel="import"
+		href="code/files-modules-and-programs/main.mlt"
 		part="1"/>
 
 	  <p>Here, <code>of_int</code> and the infix operators are the
@@ -616,8 +606,8 @@
 	    <code>open</code>s, which is particularly useful for small
 	    expressions:</p>
 
-	  <link rel="import" 
-		href="code/files-modules-and-programs/main.mlt" 
+	  <link rel="import"
+		href="code/files-modules-and-programs/main.mlt"
 		part="2"/>
 
 	</li>
@@ -631,14 +621,14 @@
 
         <li style="list-style: none; display: inline">
 
-          <link rel="import" 
-		href="code/files-modules-and-programs/freq-median/use_median_1.ml" 
+          <link rel="import"
+		href="code/files-modules-and-programs/freq-median/use_median_1.ml"
 		part="1"/>
 
           <p>you could write:</p>
 
-          <link rel="import" 
-		href="code/files-modules-and-programs/freq-median/use_median_2.ml" 
+          <link rel="import"
+		href="code/files-modules-and-programs/freq-median/use_median_2.ml"
 		part="1"/>
 
           <p>Because the module name <code>C</code> only exists for
@@ -765,13 +755,13 @@
 	<idx>errors/missing module definitions</idx>
 	<idx>modules/missing definitions in</idx></p>
 
-        <link rel="import" 
+        <link rel="import"
 	      href="code/files-modules-and-programs/freq-with-missing-def/counter.mli" part="1"/>
 
         <p>Now if we try to compile without actually adding the
         implementation, we'll get this error.</p>
 
-        <link rel="import" 
+        <link rel="import"
 	      href="code/files-modules-and-programs/freq-with-missing-def/build.errsh"/>
 
         <p>A missing type definition will lead to a similar
@@ -792,12 +782,12 @@
 	<idx>errors/module type definition mismatches</idx>
 	<idx>modules/type definition mismatches</idx></p>
 
-        <link rel="import" 
+        <link rel="import"
 	      href="code/files-modules-and-programs/freq-with-type-mismatch/counter.mli"
 	      part="1"/>
 
         <p>will lead to a compilation error.</p>
-        <link rel="import" 
+        <link rel="import"
 	      href="code/files-modules-and-programs/freq-with-type-mismatch/build.errsh"/>
 
         <p>Order is similarly important to other type declarations,
@@ -849,7 +839,7 @@
 
         <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/counter.ml" part="1"/>
 
-        <p>In this case, 
+        <p>In this case,
 	  <span class="command"><em>jbuilder</em></span> will
         notice the error and complain explicitly about the cycle:</p>
         <link rel="import"
@@ -857,7 +847,7 @@
       </section>
     </section>
 
-    <section data-type="sect1">
+    <section id="designing-with-modules" data-type="sect1">
       <h1>Designing with Modules</h1>
 
       <p>The module system is a key part of how an OCaml program is
@@ -865,7 +855,7 @@
       advice on how to think about designing that structure
       effectively.</p>
 
-      <section data-type="sect2">
+      <section id="expose-concrete-types-rarely" data-type="sect2">
         <h2>Expose Concrete Types Rarely</h2>
 
         <p>When designing an <code>mli</code>, one choice that you
@@ -908,7 +898,7 @@
         the data type itself.</p>
       </section>
 
-      <section data-type="sect2">
+      <section id="design-for-the-call-site" data-type="sect2">
         <h2>Design for the Call Site</h2>
 
         <p>When writing an interface, you should think not just
@@ -949,7 +939,7 @@
         important the more often a name is used.</p>
       </section>
 
-      <section data-type="sect2">
+      <section id="create-uniform-intefaces" data-type="sect2">
         <h2>Create Uniform Interfaces</h2>
 
         <p>Designing the interface of a module is a task that
@@ -1002,7 +992,7 @@
         consistent set of standards to apply.</p>
       </section>
 
-      <section data-type="sect2">
+      <section id="interfaces-before-implementations" data-type="sect2">
         <h2>Interfaces before implementations</h2>
 
         <p>OCaml's concise and flexible type language enables a
@@ -1028,5 +1018,3 @@
       </section>
     </section>
   </section>
-</body>
-</html>

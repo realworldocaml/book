@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
 (alias (
-  (name cram)
+  (name runtest)
   (deps (build_blow_up.errsh (files_recursively_in .)))
   (action (
     progn
@@ -9,10 +9,8 @@
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
-  (name cram)
-  (deps (build_blow_up_notrace.errsh (files_recursively_in .)))
+  (name runtest-all)
+  (deps (build_blow_up.errsh (files_recursively_in .)))
   (action (
-    progn
-    (run   cram ${<})
-    (diff? ${<} ${<}.corrected)))))
+    progn (run cram --non-deterministic ${<}) (diff? ${<} ${<}.corrected)))))
 

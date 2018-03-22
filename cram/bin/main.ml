@@ -27,6 +27,17 @@ let ansi_color_strip str =
   in
   loop 0
 
+let run_test temp_file t =
+  let fd = Unix.openfile temp_file [O_WRONLY; O_TRUNC] 0 in
+  let pid =
+    Unix.create_process
+      "sh" [|"sh"; "-c"; t.Cram.command|] Unix.stdin fd fd
+  in
+  Unix.close fd;
+  match snd (Unix.waitpid [] pid) with
+  | WEXITED n -> n
+  | _ -> 255
+
 let () =
   let expect_test = ref None in
   let usage =
@@ -37,7 +48,12 @@ let () =
     | None -> expect_test := Some s
     | Some _ -> raise (Arg.Bad "test must only be given once")
   in
-  Arg.parse [ ] anon usage;
+  let non_deterministic = ref false in
+  Arg.parse [
+    "--non-deterministic",
+    Arg.Set non_deterministic,
+    "Run non-deterministic tests"
+  ] anon usage;
   let expect_test =
     match !expect_test with
     | None -> raise (Arg.Bad "expect test file must be passed")
@@ -49,23 +65,29 @@ let () =
       let buf = Buffer.create (String.length file_contents + 1024) in
       let ppf = Format.formatter_of_buffer buf in
       List.iter (function
-          | `Output _ -> ()
-          | `Part _ | `Comment _ as i -> Cram.pp_item ppf i
-          | `Command s ->
-            Fmt.pf ppf "  $ %s\n" s;
-            let fd = Unix.openfile temp_file [O_WRONLY; O_TRUNC] 0 in
-            let pid =
-              Unix.create_process "sh" [|"sh"; "-c"; s|] Unix.stdin fd fd
-            in
-            Unix.close fd;
-            let n =
-              match snd (Unix.waitpid [] pid) with
-              | WEXITED n -> n
-              | _ -> 255
-            in
-            List.iter (fun line ->
-                Fmt.pf ppf "  %s\n" (ansi_color_strip line)
-              ) (read_lines temp_file);
-            if n <> 0 then Printf.bprintf buf "  [%d]\n" n
+          | Cram.Line l -> Cram.pp_line ppf l
+          | Cram.Test t ->
+            match !non_deterministic, t.Cram.non_deterministic with
+            | false, `Command ->
+              (* the command is non-deterministic so skip everything *)
+              List.iter (Cram.pp_line ppf) t.Cram.lines
+            | false, `Output ->
+              (* the command's output is non-deterministic; run it but
+                 keep the old output. *)
+              let _ = run_test temp_file t in
+              List.iter (Cram.pp_line ppf) t.Cram.lines
+            | _ ->
+              let n = run_test temp_file t in
+              let lines = read_lines temp_file in
+              let output =
+                let output = List.map (fun x -> `Output x) lines in
+                if Cram.equal_output output t.output then t.output else output
+              in
+              Fmt.pf ppf "  $ %s\n" t.Cram.command;
+              List.iter (function
+                  | `Ellipsis    -> Fmt.pf ppf "  ...\n"
+                  | `Output line -> Fmt.pf ppf "  %s\n" (ansi_color_strip line)
+                ) output;
+              Cram.pp_exit_code ppf n
         ) items;
       Buffer.contents buf)

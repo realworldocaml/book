@@ -1,12 +1,4 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta name="generator" content="HTML Tidy for HTML5 for Mac OS X version 4.9.20"/>
-
-    <title></title>
-  </head>
-
-  <body>
-    <section xmlns="http://www.w3.org/1999/xhtml" id="understanding-the-garbage-collector" data-type="chapter">
+    <section id="understanding-the-garbage-collector" data-type="chapter">
       <h1>Understanding the Garbage Collector</h1>
 
       <p>
@@ -737,7 +729,7 @@
               counter. Compile and execute this with some extra options
               to show the amount of garbage collection occurring:</p>
             <link rel="import" href="code/gc/barrier_bench/jbuild"/>
-            <link rel="import" href="code/gc/barrier_bench/run_barrier_bench.sh"/>
+            <link rel="import" href="code/gc/barrier_bench/barrier_bench.sh" part="run"/>
 
             <p>
 	      There is a stark space/time trade-off here. The
@@ -758,7 +750,7 @@
               trade-offs. The command-line benchmark binaries have a
               number of useful options that affect garbage collection
               behavior:</p>
-            <link rel="import" href="code/gc/barrier_bench/show_barrier_bench_help.sh"/>
+            <link rel="import" href="code/gc/barrier_bench/barrier_bench.sh" part="help"/>
 
             <p>
 	      The <code>-no-compactions</code> and
@@ -875,5 +867,3 @@
 	  with it.</p>
       </section>
     </section>
-  </body>
-</html>

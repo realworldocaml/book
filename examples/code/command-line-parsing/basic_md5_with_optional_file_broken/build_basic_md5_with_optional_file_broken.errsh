@@ -5,4 +5,4 @@
   Error: This expression has type string -> unit -> unit
          but an expression was expected of type string option -> unit -> unit
          Type string is not compatible with type string option 
-  [1]
+@@ exit 1

@@ -1,7 +1,7 @@
 (library
  ((name        rwo)
   (public_name rwo)
-  (libraries   (core async netclient cohttp sexp_pretty ocaml-topexpect cram))
+  (libraries   (core async lambdasoup str cohttp sexp_pretty ocaml-topexpect cram))
   (preprocess (pps (ppx_jane)))
 ))
 

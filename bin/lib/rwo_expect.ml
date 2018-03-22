@@ -55,16 +55,8 @@ end
 
 module Cram = struct
 
-  type item = [
-    | `Output  of string
-    | `Command of string
-    | `Comment of string
-    | `Part    of string
-  ] [@@deriving sexp]
-
-  type t = item list [@@deriving sexp]
-
-  let contents = Cram.to_string
+  type t = Cram.t [@@deriving sexp]
+  let contents = Cram.to_string ~hide:true
   let part = Cram.part
 
   let of_file ~filename =
