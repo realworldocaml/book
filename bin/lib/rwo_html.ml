@@ -29,21 +29,18 @@ let rec item_of_element: type a. a Soup.node -> item = fun n ->
     let childs = List.map childs ~f:item_of_element in
     `Element {name; attrs; childs}
 
-
 let rec item_to_soup (item:item) =
-  match item with
-  | `Data x    -> `Data x
-  | `Element x ->
-    let data, childs =
-      List.fold_left (List.rev x.childs) ~init:([], []) ~f:(fun (ds, es) e ->
-          match item_to_soup e with
-          | `Data d    -> d::ds, es
-          | `Element e -> ds, e :: es
-        ) in
-    let inner_text = String.concat ~sep:"" data in
-    let e = Soup.create_element ~inner_text ~attributes:x.attrs x.name in
-    List.iter ~f:(Soup.append_child e) childs;
-    `Element e
+  let node = Soup.create_soup () in
+  let () = match item with
+    | `Data x    -> Soup.append_root node Soup.(create_text x)
+    | `Element x ->
+      let e = Soup.create_element ~attributes:x.attrs x.name in
+      List.iter ~f:(fun child ->
+          Soup.append_child e (item_to_soup child)
+        ) x.childs;
+      Soup.append_root node e
+  in
+  node
 
 let of_string s =
   let soup = Soup.parse s in
@@ -54,10 +51,7 @@ let of_file file = Reader.file_contents file >>| of_string
 
 let to_string t =
   let root = Soup.create_soup () in
-  List.iter ~f:(fun e -> match item_to_soup e with
-      | `Data x    -> Soup.append_root root (Soup.create_text x)
-      | `Element e -> Soup.append_root root e
-    ) t;
+  List.iter ~f:(fun e -> Soup.append_root root (item_to_soup e)) t;
   Soup.pretty_print root
 
 let is_elem_node item name' = match item with
