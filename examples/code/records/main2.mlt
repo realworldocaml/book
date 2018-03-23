@@ -198,7 +198,8 @@ let register_heartbeat t hb =
 [%%expect ocaml {|val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>|}];;
 [@@@part "28"];;
 let get_users logons =
-  List.dedup_and_sort (List.map logons ~f:(fun x -> x.Logon.user));;
+  List.dedup_and_sort ~compare:String.compare
+    (List.map logons ~f:(fun x -> x.Logon.user));;
 [%%expect ocaml {|val get_users : Logon.t list -> string list = <fun>|}];;
 [@@@part "29"];;
 module Logon = struct
@@ -237,7 +238,9 @@ module Logon :
   end
 |}];;
 [@@@part "30"];;
-let get_users logons = List.dedup_and_sort (List.map logons ~f:Logon.user);;
+let get_users logons =
+  List.dedup_and_sort ~compare:String.compare
+    (List.map logons ~f:Logon.user);;
 [%%expect ocaml {|val get_users : Logon.t list -> string list = <fun>|}];;
 [@@@part "31"];;
 Field.get Logon.Fields.user;;
@@ -298,7 +301,7 @@ let print_logon logon =
 ;;
 [%%expect ocaml {|val print_logon : Logon.t -> unit = <fun>|}];;
 print_logon logon;;
-[%%expect.nondeterministic {|
+[%%expect.nondeterministic{|
 session_id: 26685
 time: 2017-07-21 17:11:45.000000+02:00
 user: yminsky

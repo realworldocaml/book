@@ -11,7 +11,7 @@ let map_iter ~num_keys ~iterations =
   loop iterations (Map.empty (module Int))
 
 let table_iter ~num_keys ~iterations =
-  let table = Hashtbl.create (module Int) ~size:num_keys () in
+  let table = Hashtbl.create (module Int) ~size:num_keys in
   let rec loop i =
     if i <= 0 then ()
     else (

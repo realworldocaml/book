@@ -175,7 +175,7 @@ let list_dir_instance = build_instance (module List_dir)  "/var";;
 [%%expect ocaml {|val list_dir_instance : (module Query_handler_instance) = <module>|}];;
 [@@@part "11"];;
 let build_dispatch_table handlers =
-  let table = Hashtbl.create (module String) () in
+  let table = Hashtbl.create (module String) in
   List.iter handlers
     ~f:(fun ((module I : Query_handler_instance) as instance) ->
       Hashtbl.set table ~key:I.Query_handler.name ~data:instance);

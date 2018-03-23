@@ -1,5 +1,7 @@
-open Base
+open Core
 open Core_bench
+
+exception Exit
 
 let simple_computation () =
   List.range 0 10
