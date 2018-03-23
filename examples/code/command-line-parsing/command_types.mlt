@@ -20,5 +20,5 @@ type nonrec 'result basic_command =
     (unit -> 'result) Command.Spec.param -> Command.t
 |}];;
 [@@@part "3"];;
-Command.Param.map;;
-[%%expect ocaml {|- : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param = <fun>|}];;
+#show Command.Param.map;;
+[%%expect{|val map : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param|}];;

@@ -1,6 +1,4 @@
   $ jbuilder build basic_md5_as_filename.exe
-      ocamlopt basic_md5_as_filename.exe
-  ld: warning: directory not found for option '-L/opt/local/lib'
   $ ./_build/default/basic_md5_as_filename.exe nonexistent
   Uncaught exception:
     

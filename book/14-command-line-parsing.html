@@ -160,6 +160,11 @@
 	    href="code/command-line-parsing/command_types.mlt"/>
 
       <p>
+	Note that the <code>'result</code> parameter of the type alias
+	<code>basic_command</code> is instantiated
+	as <code>unit</code> for the type of <code>Command.basic</code>.</p>
+
+      <p>
 	It makes sense that <code>Command.basic</code> wants a
 	parser that returns a function; after all, in the end, it
 	needs a function it can run that constitutes the execution
@@ -168,7 +173,9 @@
 
       <p>
 	The answer is to use a <code>map</code> function to
-	change the value returned by the parser.
+	change the value returned by the parser. As you can see below,
+	the type of <code>Command.Param.map</code> is very similar to
+	the code of <code>List.map</code>.
       </p>
 
       <link rel="import" part="3"
@@ -176,9 +183,9 @@
 
       <p>
 	And that's exactly what we did in our invocation
-	of <code>Command.basic</code> earlier. And, as required,
-	the value that we return is itself a function of
-	type <code>unit -> unit</code>.</p>
+	of <code>Command.basic</code> earlier, converting the
+	<code>filename_param</code>, which returns a string
+	representing the file name, into a parser that returns... </p>
 
     </section>
 
