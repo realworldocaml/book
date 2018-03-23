@@ -2,13 +2,19 @@ exception Error of string
 
 let err fmt = Fmt.kstrf (fun str -> raise (Error str)) fmt
 
+type idx = {
+  id    : string option;
+  sortas: string option;
+  v     : string;
+}
+
 type item = [
   | `Text   of string
   | `Strong of item list
   | `Em     of string
   | `Code   of string
   | `A      of string * item list
-  | `Idx    of string option * string
+  | `Idx    of idx
   | `Keep_together of string
   | `Index_term of string
   | `Xref of string * item list
@@ -30,10 +36,17 @@ and table = {
   body   : phrase list list;
 }
 
+type link = {
+  rel : string;
+  href: string;
+  part: string option;
+}
+
 type block = [
-  | `Link of string * string * string option
+  | `Empty
+  | `Link of link
   | `Para of item list
-  | `Note of unit part
+  | `Note of bool part
   | `List of block list
   | `Enum of block list
   | `Descr of (phrase * block) list
@@ -84,7 +97,7 @@ let pp_level ppf l =
   let s = String.make l '#' in
   Fmt.string ppf s
 
-let pp_link ppf (rel, href, part) =
+let pp_link ppf {rel; href; part} =
   let pp_part ppf s = Fmt.pf ppf "part=\"%a\" " pp_words s in
   Fmt.pf ppf "<link rel=\"%a\" href=\"%a\" %a/>"
     pp_words rel pp_words href Fmt.(option pp_part) part
@@ -92,11 +105,19 @@ let pp_link ppf (rel, href, part) =
 let pp_index_term ppf s =
   Fmt.pf ppf "<a data-type=\"indexterm\" data-startref=\"%s\">&nbsp;</a>" s
 
+let pp_idx ppf {id; sortas; v} = match id, sortas with
+  | None  , None   -> Fmt.pf ppf "<idx>%a</idx>" pp_words v
+  | Some i, None   -> Fmt.pf ppf "<idx id=\"%s\">%a</idx>" i pp_words v
+  | None  , Some s ->
+    Fmt.pf ppf "<idx data-primary-sortas=\"%s\">%a</idx>" s pp_words v
+  | Some i, Some s ->
+    Fmt.pf ppf "<idx id=\"%s\" data-primary-sortas=\"%s\">%a</idx>"
+      i s pp_words v
+
 let rec pp_item ppf (i:item) = match i with
   | `Em e     -> Fmt.pf ppf "*%a*" pp_words e
   | `Strong s -> Fmt.pf ppf "**%a**" pp_items s
-  | `Idx (None  , x) -> Fmt.pf ppf "<idx>%a</idx>" pp_words x
-  | `Idx (Some y, x) -> Fmt.pf ppf "<idx id=\"%s\">%a</idx>" y pp_words x
+  | `Idx i    -> pp_idx ppf i
   | `Code c   -> Fmt.pf ppf "`%a`" pp_words c
   | `A href   -> pp_href ppf href
   | `Xref x   -> pp_xref ppf x
@@ -146,6 +167,7 @@ let pp_figure ppf t =
     t
 
 let rec pp_block ppf (t:block) = match t with
+  | `Empty        -> ()
   | `Blocks l     -> pp_blocks ppf l
   | `Link l       -> pp_link ppf l
   | `Para is      -> pp_para ppf is
@@ -161,12 +183,13 @@ let rec pp_block ppf (t:block) = match t with
   | `Warning w    -> pp_warning ppf w
   | `Simple_list l -> pp_simple_list ppf l
 
+and pp_break ppf b = if b then Fmt.string ppf ".allow_break " else ()
+
 and pp_note ppf n =
-  Fmt.pf ppf "@[::: {data-type=note}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
-    pp_level n.level pp_items n.title pp_blocks n.body
+  Fmt.pf ppf "@[::: {%adata-type=note}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
+    pp_break n.v pp_level n.level pp_items n.title pp_blocks n.body
 
 and pp_warning ppf w =
-  let pp_break ppf b = if b then Fmt.string ppf ".allow_break " else () in
   Fmt.pf ppf "@[::: {%adata-type=warning}@]@.@[%a %a@]@.@.@[%a@]@.:::@."
     pp_break w.v pp_level w.level pp_items w.title pp_blocks w.body
 
@@ -193,10 +216,16 @@ and pp_sidebar ppf (title, body) =
   Fmt.pf ppf "<aside data-type=\"sidebar\">@,@,%a %a@,@,%a@,@,</aside>"
     pp_level 5 pp_items title pp_blocks body
 
+let dump_idx ppf {id; sortas; v} =
+  Fmt.pf ppf "@[{id=%a;@ sortas=%a;@ v=%S}@]"
+    Fmt.(Dump.option string) id
+    Fmt.(Dump.option string) sortas
+    v
+
 let rec dump_item ppf (i:item) = match i with
   | `Em e     -> Fmt.pf ppf "Em %S" e
   | `Strong s -> Fmt.pf ppf "Strong %a" dump_items s
-  | `Idx s    -> Fmt.pf ppf "Idx %a" Fmt.(Dump.pair Dump.(option string) string) s
+  | `Idx s    -> Fmt.pf ppf "Idx %a" dump_idx s
   | `Code c   -> Fmt.pf ppf "Code %S" c
   | `A (h, l) -> Fmt.pf ppf "A (%S, %a)" h dump_items l
   | `Text s   -> Fmt.pf ppf "Text %S" s
@@ -213,14 +242,15 @@ let rec dump_item ppf (i:item) = match i with
 and dump_items ppf t = Fmt.Dump.list dump_item ppf t
 
 and dump_block ppf (t:block) = match t with
+  | `Empty     -> Fmt.string ppf "Empty"
   | `Blocks l  -> Fmt.pf ppf "@[<2>Block %a@]" dump_blocks l
-  | `Link l    -> pp_link ppf l
+  | `Link l    -> Fmt.pf ppf "@[<2>Link %a@]" dump_link l
   | `Figure f  -> Fmt.pf ppf "@[<2>Figure %S@]" f
   | `Para is   -> Fmt.pf ppf "@[<2>Para@ (%a)@]" dump_items is
   | `List bs   -> Fmt.pf ppf "@[<2>List@ (%a)@]" dump_blocks bs
   | `Descr d   -> Fmt.pf ppf "@[<2>Descr@ (%a)@]" dump_descr d
   | `Enum bs   -> Fmt.pf ppf "@[<2>Enum@ (%a)@]" dump_blocks bs
-  | `Note n    -> Fmt.pf ppf "@[<2>Note@ %a]" (dump_part dump_unit) n
+  | `Note n    -> Fmt.pf ppf "@[<2>Note@ %a]" (dump_part Fmt.bool) n
   | `Section s -> Fmt.pf ppf "@[<2>Section@ (%a)@]" (dump_part dump_section) s
   | `Table t   -> dump_table ppf t
   | `Sidebar s -> pp_sidebar ppf s
@@ -232,10 +262,12 @@ and dump_part: type a. a Fmt.t -> a part Fmt.t = fun dump_v ppf t ->
   Fmt.pf ppf "@[<2>{level=%d; title=%a; body=%a; %a}@]"
     t.level pp_items t.title dump_blocks t.body dump_v t.v
 
-and dump_descr ppf d = Fmt.Dump.(list (pair dump_items pp_block)) ppf d
-and dump_unit ppf () = Fmt.string ppf ""
-and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
+and dump_link ppf {rel; href; part} =
+  Fmt.pf ppf "@[<h-2>{rel=@[%a@];@ href=@[%a@];@ part=@[<h>%a@]}@]"
+    pp_words rel pp_words href Fmt.(Dump.option pp_words) part
 
+and dump_descr ppf d = Fmt.Dump.(list (pair dump_items pp_block)) ppf d
+and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 and dump_section ppf s =
   Fmt.pf ppf "@[id:@ %S;@ data_type:@ %S@]" s.id s.data_type
 
@@ -282,16 +314,18 @@ let pair_map l r x =
 let children x = Soup.(to_list @@ children x)
 
 let rec find_first_node = function
-  | []   -> err "no header node"
+  | []   -> None
   | h::t ->
     match Soup.element h with
     | None   -> find_first_node t
-    | Some e -> e, h, t
+    | Some e -> Some (e, h, t)
 
 let find_header_node e =
-  let e, s, t = find_first_node (children e) in
-  let i = int_of_level e (Soup.name e) in
-  i, children s, t
+  match find_first_node (children e) with
+  | None           -> err "no header node"
+  | Some (e, h, t) ->
+    let i = int_of_level e (Soup.name e) in
+    i, children h, t
 
 let one_child e = match children e with
   | []  -> err "no child"
@@ -303,7 +337,7 @@ module Parse = struct
   let text s = `Text s
   let strong s = `Strong s
   let em s = `Em s
-  let idx x s = `Idx (x, s)
+  let idx ?id ?sortas v = `Idx {id; sortas; v}
   let code s = `Code s
   let keep_together s = `Keep_together s
   let hyperlink s = `Hyperlink s
@@ -330,10 +364,10 @@ module Parse = struct
     let attrs = Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] e in
     List.sort compare attrs
 
-  let link e: block =
+  let link e =
     match attrs e with
-    | ["href", href; "rel", rel] -> `Link (rel, href, None)
-    | ["href", href; "part", part; "rel", rel] -> `Link (rel, href, Some part)
+    | ["href", href; "rel", rel] -> {rel; href; part=None}
+    | ["href", href; "part", p; "rel", rel] -> {rel; href; part=Some p}
     | _ -> err "invalid link: %a" dump e
 
   let no_attrs e =
@@ -362,8 +396,11 @@ module Parse = struct
       | "code"   -> no_attrs h; txt code
       | "a"      -> [a e]
       | "idx"    -> (match attrs e with
-          | ["id", id] -> txt (idx (Some id))
-          | []        -> txt (idx None)
+          | ["id", id]                 -> txt (fun x -> idx ~id x)
+          | ["data-primary-sortas", s] -> txt (fun x -> idx ~sortas:s x)
+          | ["data-primary-sortas", s; "id", id] ->
+            txt (fun x -> idx ~id ~sortas:s x)
+          | []        -> txt (fun x -> idx x)
           | _         -> err "invalid idx: %a" dump e)
       | "span"   ->
         (match Soup.attribute "class" e with
@@ -404,7 +441,9 @@ module Parse = struct
       | []   -> List.rev acc
       | h::t -> aux (items h @ acc) t
     in
-    `Para (normalize (aux [] t))
+    match normalize (aux [] t) with
+    | [] -> `Empty
+    | is -> `Para is
 
   let find name f l =
     let rec aux = function
@@ -468,19 +507,30 @@ module Parse = struct
          | _ -> err "invalid section: %a" dump e)
       | "p" ->
         no_attrs e;
+        (* <p><link ... .></p> is added by pandoc. <link> should not
+           appear inside <p> so sometimes lambdasoup creates an empty
+           <p>. *)
         (match children e with
-         | [e] when name e = Some "link" -> Some (link Soup.(require (element e)))
-         | childs -> Some (para childs))
-      | "link" -> Some (link e)
+         | []     -> None
+         | childs ->
+           match find_first_node childs with
+           | None          -> Some (para childs)
+           | Some (h, _, t) ->
+             match Soup.name h, t with
+             | "link", [] -> Some (`Link (link h))
+             | _          -> Some (para childs))
+      | "link" -> Some (`Link (link e))
       | "div" ->
         (match attrs e with
+         | [("class", "allow_break"); ("data-type", "note")]
          | ["data-type", "note"] ->
+           let v = Soup.classes e = ["allow_break"] in
            let level, title, body = header ~depth e in
            let level = if level < depth+1 then depth+level else level in
-           Some (`Note {level; title; body; v=()})
+           Some (`Note {level; title; body; v})
          | ["class", "safarienabled"] ->
-           Some (`Safari (filter_map (maybe_block ~depth) (children e)))
-         | ["data-type", "warning"] ->
+           Some (`Safari [blocks ~depth (children e)])
+         | ["data-type", "warning"]   ->
            let allow_break = Soup.classes e = ["allow_break"] in
            let level, title, body = header ~depth e in
            if level <> 1 then err "wrong header level for warning section";
@@ -488,13 +538,13 @@ module Parse = struct
            Some (`Warning w)
          | ("data-type", "table") :: ([] | ["id", _]) -> (* added by pp_table *)
            let id = Soup.id e in
-           (match filter_map (maybe_block ~depth) (children e) with
-            | [`Table t] -> Some (`Table { t with id })
-            | x -> err "unsuported table div: %a" dump_blocks x)
+           (match blocks ~depth (children e) with
+            | `Table t -> Some (`Table { t with id })
+            | x -> err "unsuported table div: %a" dump_block x)
          | ["class", "simplelist"] -> (* added by pp_simple_list *)
-           (match filter_map (maybe_block ~depth) (children e) with
-            | [`List l] -> Some (`Simple_list l)
-            | x -> err "unsupported simplelist div: %a" dump_blocks x)
+           (match blocks ~depth (children e) with
+            | `List l -> Some (`Simple_list l)
+            | x -> err "unsupported simplelist div: %a" dump_block x)
          | _ -> err "unsuported div: %a" dump e)
       | "ol" ->
         (match attrs e with
@@ -517,23 +567,25 @@ module Parse = struct
       | "aside" ->
         (match attrs e with
          | ["data-type", "sidebar"] ->
-           let hd, n', _ = find_first_node (children e) in
            let make e =
              let level, title, body = header ~depth e in
              if level <> 5 then err "wrong header level in sidebar (%d)" level;
              Some (`Sidebar (title, body))
            in
-           (match Soup.name hd with
-            | "section" (* section is added by pandoc *) ->
-              (match attrs hd with
-               | [ ("class", l); ("id", id); ] ->
-                 if String.length l >= 5 && String.sub l 0 5 = "level" then
-                   let s = section ~depth ~data_type:"foo" ~id hd in
-                   Some (`Sidebar (s.title, s.body))
-                 else
-                   err "invalid section/aside: %a" dump e
-               | _ -> err "invalid aside (1) %a" dump e)
-            | _ -> make e)
+           (match find_first_node (children e) with
+            | None             -> err "wrong sidebar: %a" dump e
+            | Some (hd, n', _) ->
+              (match Soup.name hd with
+               | "section" (* section is added by pandoc *) ->
+                 (match attrs hd with
+                  | [ ("class", l); ("id", id); ] ->
+                    if String.length l >= 5 && String.sub l 0 5 = "level" then
+                      let s = section ~depth ~data_type:"foo" ~id hd in
+                      Some (`Sidebar (s.title, s.body))
+                    else
+                      err "invalid section/aside: %a" dump e
+                  | _ -> err "invalid aside (1) %a" dump e)
+               | _ -> make e))
          | _ -> err "invalid aside (2) %a" dump e)
       | "figure" ->
         (match attrs e with
@@ -555,10 +607,10 @@ module Parse = struct
     | Some b -> b
 
   and blocks ~depth e =
-    let blocks = filter_map (maybe_block ~depth) e in
-    let blocks = List.filter (function `Para p -> p <> [] | _ -> true) blocks in
-    match blocks with
-    | []  -> `Para []
+    let bs = filter_map (maybe_block ~depth) e in
+    let bs = List.filter ((<>) `Empty) bs in
+    match bs with
+    | []  -> `Empty
     | [b] -> b
     | bs  -> `Blocks bs
 
@@ -575,7 +627,7 @@ module Parse = struct
 
   and li e =
     expect "li" (fun e ->
-        try `Para (normalize_items e)
+        try para e
         with Error _ -> blocks ~depth:0 e
       ) e
 
@@ -666,6 +718,15 @@ module Check = struct
     in
     v name Fmt.Dump.(option f.pp) aux
 
+  let idx =
+    let aux (a:idx) (b:idx) =
+      check (option "id" (string "id")) a.id b.id;
+      check (option "sortas" (string "sortas")) a.sortas b.sortas;
+      check (string "idx") a.v b.v;
+      true
+    in
+    v "idx" dump_idx aux
+
   let rec item () =
     let href name = pair "a" (string "href") (list "txt" (item ())) in
     let rec aux (a:item) (b:item) = match a, b with
@@ -673,8 +734,7 @@ module Check = struct
       | `Keep_together a, `Keep_together b ->
         check (string "keep-together") a b; true
       | `Strong a, `Strong b -> check (list "strong" (item ())) a b; true
-      | `Idx a, `Idx b ->
-        check (pair "idx" (option "id" (string "id")) (string "idx")) a b; true
+      | `Idx a, `Idx b -> check idx a b; true
       | `Code a, `Code b -> check (string "code") a b; true
       | `A a, `A b -> check (href "a") a b; true
       | `Text a, `Text b -> check (string "text") a b; true
@@ -697,13 +757,14 @@ module Check = struct
 
   let rec block () =
     let aux (a:block) (b:block) = match a, b with
+      | `Empty, `Empty         -> true
       | `Figure a, `Figure b   -> check (string "figure") a b; true
       | `Descr a, `Descr b     ->
         check (list "descr" (pair "descr" phrase (block ()))) a b; true
       | `List a, `List b       -> check (list "list" (block ())) a b; true
       | `Table a, `Table b     -> check table a b; true
       | `Section a, `Section b -> check (part "section" section) a b; true
-      | `Note a, `Note b       -> check (part "note" unit) a b; true
+      | `Note a, `Note b       -> check (part "note" bool) a b; true
       | `Safari a, `Safari b   -> check (list "safari" (block ())) a b; true
       | `Sidebar a, `Sidebar b ->
         check (pair "sidebar" phrase (blocks ())) a b;
@@ -717,13 +778,13 @@ module Check = struct
         check (list "simplelist" (block ())) a b; true
       | (`Figure _ | `Descr _ | `List _ | `Table _ | `Section _ | `Note _
         | `Safari _ | `Sidebar _ | `Blocks _ | `Enum _ | `Para _ | `Link _
-        | `Warning _ | `Simple_list _), _ -> false
+        | `Warning _ | `Simple_list _ | `Empty), _ -> false
     in
     v "block" dump_block aux
 
-  and unit = v "unit" dump_unit (=)
   and link = v "link" pp_link (=)
   and blocks () = list "blocks" (block ())
+
   and bool = v "allow_break" Fmt.bool (=)
 
   and section =
@@ -782,7 +843,7 @@ let () =
     close_out oc;
     let _ =
       Fmt.kstrf Sys.command
-        "pandoc --section-divs -f markdown-smart %s -o %s"
+        "pandoc --section-divs -f markdown-smart -t html5 %s -o %s"
         output html_output
     in
     check input html_output
