@@ -1,7 +1,5 @@
 ### build
   $ jbuilder build basic_md5.exe
-      ocamlopt basic_md5.exe
-  ld: warning: directory not found for option '-L/opt/local/lib'
 ### run
 %% --non-deterministic
   $ ./_build/default/basic_md5.exe ./_build/default/basic_md5.exe

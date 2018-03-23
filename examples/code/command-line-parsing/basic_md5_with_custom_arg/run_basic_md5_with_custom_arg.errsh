@@ -1,8 +1,6 @@
   $ jbuilder build basic_md5_with_custom_arg.exe
-      ocamlopt basic_md5_with_custom_arg.exe
-  ld: warning: directory not found for option '-L/opt/local/lib'
   $ ./_build/default/basic_md5_with_custom_arg.exe /etc/passwd
-  b88d621596b7e61337e832f7841066a9
+  27bf1f2dbadd4cae84f1da4dfe8b5cb3
   $ ./_build/default/basic_md5_with_custom_arg.exe /dev/null
   '/dev/null' is not a regular file.
 @@ exit 1
