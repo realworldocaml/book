@@ -49,14 +49,14 @@ type block = [
   | `Note of bool part
   | `List of block list
   | `Enum of block list
-  | `Descr of (phrase * block) list
+  | `Descr of (phrase * phrase) list
   | `Section of section part
   | `Blocks of block list
   | `Table of table
-  | `Sidebar of item list * block list
+  | `Sidebar of item list * block
   | `Warning of bool part
   | `Figure of string
-  | `Safari of block list
+  | `Safari of block
   (* only in 00-prologue *)
   | `Simple_list of block list
 ]
@@ -64,7 +64,7 @@ type block = [
 and 'a part = {
   level: int;
   title: item list;
-  body : block list;
+  body : block;
   v    : 'a;
 }
 
@@ -179,7 +179,7 @@ let rec pp_block ppf (t:block) = match t with
   | `Enum bs      -> pp_enum ppf bs
   | `Note n       -> pp_note ppf n
   | `Section s    -> pp_section ppf s
-  | `Safari bs    -> Fmt.pf ppf "::: safarienabled@,%a@,:::" pp_blocks bs
+  | `Safari bs    -> Fmt.pf ppf "::: safarienabled@,%a@,:::" pp_block bs
   | `Warning w    -> pp_warning ppf w
   | `Simple_list l -> pp_simple_list ppf l
 
@@ -187,15 +187,15 @@ and pp_break ppf b = if b then Fmt.string ppf ".allow_break " else ()
 
 and pp_note ppf n =
   Fmt.pf ppf "@[::: {%adata-type=note}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
-    pp_break n.v pp_level n.level pp_items n.title pp_blocks n.body
+    pp_break n.v pp_level n.level pp_items n.title pp_block n.body
 
 and pp_warning ppf w =
   Fmt.pf ppf "@[::: {%adata-type=warning}@]@.@[%a %a@]@.@.@[%a@]@.:::@."
-    pp_break w.v pp_level w.level pp_items w.title pp_blocks w.body
+    pp_break w.v pp_level w.level pp_items w.title pp_block w.body
 
 and pp_section ppf s =
   Fmt.pf ppf "@[%a %a {#%s data-type=%S}@]@.@.%a@."
-    pp_level s.level pp_items s.title s.v.id s.v.data_type pp_blocks s.body
+    pp_level s.level pp_items s.title s.v.id s.v.data_type pp_block s.body
 
 and pp_para ppf p = Fmt.pf ppf "%a" (list_h pp_item) p
 and pp_enum ppf s = listi_v pp_enum_descr ppf s
@@ -210,11 +210,11 @@ and pp_simple_list ppf t = Fmt.pf ppf "::: {.simplelist}@,%a@,:::@," pp_list t
 
 and pp_descr ppf t = list_v pp_descr_elt ppf t
 and pp_descr_elt ppf (title, body) =
-  Fmt.pf ppf "@[%a@,@[<2>: %a@]]" pp_items title pp_block body
+  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: %a@]@]" pp_items title pp_items body
 
 and pp_sidebar ppf (title, body) =
   Fmt.pf ppf "<aside data-type=\"sidebar\">@,@,%a %a@,@,%a@,@,</aside>"
-    pp_level 5 pp_items title pp_blocks body
+    pp_level 5 pp_items title pp_block body
 
 let dump_idx ppf {id; sortas; v} =
   Fmt.pf ppf "@[{id=%a;@ sortas=%a;@ v=%S}@]"
@@ -254,19 +254,19 @@ and dump_block ppf (t:block) = match t with
   | `Section s -> Fmt.pf ppf "@[<2>Section@ (%a)@]" (dump_part dump_section) s
   | `Table t   -> dump_table ppf t
   | `Sidebar s -> pp_sidebar ppf s
-  | `Safari s  -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_blocks s
+  | `Safari s  -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_block s
   | `Warning w -> Fmt.pf ppf "@[<2>Warning@ %a@]" (dump_part Fmt.bool) w
   | `Simple_list s -> Fmt.pf ppf "@[<2>Simple_list (%a)@]" dump_blocks s
 
 and dump_part: type a. a Fmt.t -> a part Fmt.t = fun dump_v ppf t ->
   Fmt.pf ppf "@[<2>{level=%d; title=%a; body=%a; %a}@]"
-    t.level pp_items t.title dump_blocks t.body dump_v t.v
+    t.level pp_items t.title dump_block t.body dump_v t.v
 
 and dump_link ppf {rel; href; part} =
   Fmt.pf ppf "@[<h-2>{rel=@[%a@];@ href=@[%a@];@ part=@[<h>%a@]}@]"
     pp_words rel pp_words href Fmt.(Dump.option pp_words) part
 
-and dump_descr ppf d = Fmt.Dump.(list (pair dump_items pp_block)) ppf d
+and dump_descr ppf d = Fmt.Dump.(list (pair dump_items dump_items)) ppf d
 and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 and dump_section ppf s =
   Fmt.pf ppf "@[id:@ %S;@ data_type:@ %S@]" s.id s.data_type
@@ -529,7 +529,7 @@ module Parse = struct
            let level = if level < depth+1 then depth+level else level in
            Some (`Note {level; title; body; v})
          | ["class", "safarienabled"] ->
-           Some (`Safari [blocks ~depth (children e)])
+           Some (`Safari (blocks ~depth (children e)))
          | ["data-type", "warning"]   ->
            let allow_break = Soup.classes e = ["allow_break"] in
            let level, title, body = header ~depth e in
@@ -617,7 +617,7 @@ module Parse = struct
   and header ~depth e =
     let level, h, children = find_header_node e in
     let title = normalize_items h in
-    let body = filter_map (maybe_block ~depth:(depth + 1)) children in
+    let body = blocks ~depth:(depth + 1) children in
     level, title, body
 
   and section ~depth ~data_type ~id e =
@@ -633,7 +633,7 @@ module Parse = struct
 
   and dt e = expect "dt" (normalize_items) e
 
-  and dd e = expect "dd" (blocks ~depth:0) e
+  and dd e = expect "dd" (normalize_items) e
 
 end
 
@@ -755,35 +755,35 @@ module Check = struct
   let item = item ()
   let phrase = list "phrase" item
 
-  let rec block () =
+  let rec block name: block t =
     let aux (a:block) (b:block) = match a, b with
       | `Empty, `Empty         -> true
       | `Figure a, `Figure b   -> check (string "figure") a b; true
       | `Descr a, `Descr b     ->
-        check (list "descr" (pair "descr" phrase (block ()))) a b; true
-      | `List a, `List b       -> check (list "list" (block ())) a b; true
+        check (list "descr" (pair "descr" phrase phrase)) a b; true
+      | `List a, `List b       -> check (list "list" (block "list")) a b; true
       | `Table a, `Table b     -> check table a b; true
       | `Section a, `Section b -> check (part "section" section) a b; true
       | `Note a, `Note b       -> check (part "note" bool) a b; true
-      | `Safari a, `Safari b   -> check (list "safari" (block ())) a b; true
+      | `Safari a, `Safari b   -> check (block "safari") a b; true
       | `Sidebar a, `Sidebar b ->
-        check (pair "sidebar" phrase (blocks ())) a b;
+        check (pair "sidebar" phrase (block "sidebar")) a b;
         true
       | `Blocks a, `Blocks b   -> check (blocks ()) a b; true
-      | `Enum a, `Enum b       -> check (list "enum" (block ())) a b; true
+      | `Enum a, `Enum b       -> check (list "enum" (block "enum")) a b; true
       | `Para a, `Para b       -> check (list "para" item) a b; true
       | `Link a, `Link b       -> check link a b; true
       | `Warning a, `Warning b -> check (part "warning" bool) a b; true
       | `Simple_list a, `Simple_list b ->
-        check (list "simplelist" (block ())) a b; true
+        check (list "simplelist" (block "simplelist")) a b; true
       | (`Figure _ | `Descr _ | `List _ | `Table _ | `Section _ | `Note _
         | `Safari _ | `Sidebar _ | `Blocks _ | `Enum _ | `Para _ | `Link _
         | `Warning _ | `Simple_list _ | `Empty), _ -> false
     in
-    v "block" dump_block aux
+    v name dump_block aux
 
   and link = v "link" pp_link (=)
-  and blocks () = list "blocks" (block ())
+  and blocks (): block list t = list "blocks" (block "blocks")
 
   and bool = v "allow_break" Fmt.bool (=)
 
@@ -800,7 +800,7 @@ module Check = struct
       check phrase a.title b.title;
       let title = Fmt.to_to_string pp_items a.title in
       check (int ("level of " ^ title)) a.level b.level;
-      check (list ("body of " ^ title) (block ())) a.body b.body;
+      check (block name) a.body b.body;
       check ty a.v b.v;
       true
     in
@@ -821,7 +821,9 @@ module Check = struct
 end
 
 let check a b =
+  (*  Fmt.pr "Parsing %s\n%!" a; *)
   let a = of_file a in
+  (*  Fmt.pr "Parsing %s\n%!" b; *)
   let b = of_file b in
   Check.(check blocks) a b
 
