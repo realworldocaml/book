@@ -28,7 +28,7 @@ sum_file "numbers.txt";;
 [%%expect ocaml {|- : int = 15|}];;
 [@@@part "2"];;
 sum_file "/etc/hosts";;
-[%%expect{|Exception: (Failure "Int.of_string: \"##\"").|}];;
+[%%expect.nondeterministic{|Exception: (Failure "Int.of_string: \"##\"").|}];;
 [@@@part "3"];;
 for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
 [%%expect ocaml {|- : unit = ()|}];;
