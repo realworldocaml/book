@@ -246,14 +246,14 @@ and dump_table ppf (t:table) =
     Fmt.(Dump.list dump_items) t.headers
     Fmt.(Dump.list (Dump.list dump_items)) t.body
 
-let int_of_level = function
+let int_of_level e = function
   | "h1" -> 1
   | "h2" -> 2
   | "h3" -> 3
   | "h4" -> 4
   | "h5" -> 5
   | "h6" -> 6
-  | s    -> Fmt.invalid_arg "invalid level: %s" s
+  | _    -> Fmt.invalid_arg "invalid level: %a" dump e
 
 let filter_map f e =
   List.fold_left (fun acc e -> match f e with
@@ -281,14 +281,17 @@ let pair_map l r x =
 
 let children x = Soup.(to_list @@ children x)
 
-let rec find_header_node = function
+let rec find_first_node = function
   | []   -> err "no header node"
   | h::t ->
     match Soup.element h with
-    | None   -> find_header_node t
-    | Some e ->
-      let i = int_of_level (Soup.name e) in
-      i, children e, t
+    | None   -> find_first_node t
+    | Some e -> e, h, t
+
+let find_header_node e =
+  let e, s, t = find_first_node (children e) in
+  let i = int_of_level e (Soup.name e) in
+  i, children s, t
 
 let one_child e = match children e with
   | []  -> err "no child"
@@ -454,18 +457,14 @@ module Parse = struct
     | Some e ->
       match Soup.name e with
       | "section" ->
-        let make data_type id =
-          let level, title, body = header ~depth e in
-          let level = if level < depth+1 then depth+level else level in
-          Some (`Section { v = {id; data_type}; level; title; body })
-        in
         (match attrs e with
          | [ ("class", l); ("data-type", data_type); ("id", id); ] ->
            if String.length l >= 5 && String.sub l 0 5 = "level" then
-             (* added by pandoc *)
-             make data_type id
+             (* 'class' is added by pandoc *)
+             Some (`Section (section ~depth ~data_type ~id e))
            else err "invalid section: %a" dump e
-         | [ ("data-type", data_type); ("id", id) ] -> make data_type id
+         | [ ("data-type", data_type); ("id", id) ] ->
+           Some (`Section (section ~depth ~data_type ~id e))
          | _ -> err "invalid section: %a" dump e)
       | "p" ->
         no_attrs e;
@@ -516,25 +515,39 @@ module Parse = struct
            Some (`Table (table id (children e)))
          | _ -> err "invalid table: %a" dump e)
       | "aside" ->
-        if Soup.attribute "data-type" e = Some "sidebar" then
-          let level, title, body = header ~depth e in
-          if level <> 5 then err "wrong header level in sidebar (%d)" level;
-          Some (`Sidebar (title, body))
-        else
-          err "invalid aside %a" dump e
+        (match attrs e with
+         | ["data-type", "sidebar"] ->
+           let hd, n', _ = find_first_node (children e) in
+           let make e =
+             let level, title, body = header ~depth e in
+             if level <> 5 then err "wrong header level in sidebar (%d)" level;
+             Some (`Sidebar (title, body))
+           in
+           (match Soup.name hd with
+            | "section" (* section is added by pandoc *) ->
+              (match attrs hd with
+               | [ ("class", l); ("id", id); ] ->
+                 if String.length l >= 5 && String.sub l 0 5 = "level" then
+                   let s = section ~depth ~data_type:"foo" ~id hd in
+                   Some (`Sidebar (s.title, s.body))
+                 else
+                   err "invalid section/aside: %a" dump e
+               | _ -> err "invalid aside (1) %a" dump e)
+            | _ -> make e)
+         | _ -> err "invalid aside (2) %a" dump e)
       | "figure" ->
-        if Soup.attribute "style" e = Some "float: 0" then
-          let img e = match Soup.element e with
-            | None   -> None
-            | Some e -> match Soup.name e with
-              | "img" -> Soup.attribute "src" e
-              | s     -> err "figure: %s" s
-          in
-          (match filter_map img (children e) with
-           | [x] -> Some (`Figure x)
-           |  _  -> err "figure")
-        else
-          err "invalid figure"
+        (match attrs e with
+         | ["style", "float: 0"] ->
+           let img e = match Soup.element e with
+             | None   -> None
+             | Some e -> match Soup.name e with
+               | "img" -> Soup.attribute "src" e
+               | s     -> err "figure: %s" s
+           in
+           (match filter_map img (children e) with
+            | [x] -> Some (`Figure x)
+            |  _  -> err "figure")
+         | _ -> err "invalid figure")
       | s -> err "TODO block: %s %a" s dump e
 
   and block ~depth e: block = match maybe_block ~depth e with
@@ -550,10 +563,15 @@ module Parse = struct
     | bs  -> `Blocks bs
 
   and header ~depth e =
-    let level, h, children = find_header_node (children e) in
+    let level, h, children = find_header_node e in
     let title = normalize_items h in
     let body = filter_map (maybe_block ~depth:(depth + 1)) children in
     level, title, body
+
+  and section ~depth ~data_type ~id e =
+    let level, title, body = header ~depth e in
+    let level = if level < depth+1 then depth+level else level in
+    { v = {id; data_type}; level; title; body }
 
   and li e =
     expect "li" (fun e ->
