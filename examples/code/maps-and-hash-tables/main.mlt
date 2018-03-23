@@ -343,7 +343,7 @@ let m = Map.singleton (module String) "one" 1;;
 [%%expect ocaml {|- : int Base.Map.M(Base.String).t = <abstr>|}];;
 
 [@@@part "ht.1"];;
-let table = Hashtbl.create (module String) ();;
+let table = Hashtbl.create (module String);;
 [%%expect ocaml {|val table : (string, '_weak1) Hashtbl.t = <abstr>|}];;
 Hashtbl.set table ~key:"three" ~data:3;;
 [%%expect ocaml {|- : unit = ()|}];;
@@ -378,7 +378,7 @@ module Book :
     val hash : t -> int
   end
 |}];;
-let table = Hashtbl.create (module Book) ();;
+let table = Hashtbl.create (module Book);;
 [%%expect ocaml {|val table : (Book.t, '_weak2) Hashtbl.t = <abstr>|}];;
 
 [@@@part "ht.4"];;
