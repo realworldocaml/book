@@ -19,8 +19,8 @@ Exn.handle_uncaught ~exit:false (fun () ->
 Uncaught exception:
   
   (Sexplib.Sexp.Parse_error
-   ((location parse) (err_msg "unexpected character: ')'") (text_line 4)
-    (text_char 29) (global_offset 78) (buf_pos 78)))
+   ((err_msg "unexpected character: ')'") (text_line 4) (text_char 30)
+    (global_offset 78) (buf_pos 78)))
 
 |};
 ocaml {|- : unit = ()|}];;
