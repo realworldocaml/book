@@ -168,7 +168,7 @@ and pp_section ppf s =
 
 and pp_para ppf p = Fmt.pf ppf "%a" (list_h pp_item) p
 and pp_enum ppf s = listi_v pp_enum_descr ppf s
-and pp_enum_descr ppf (i, s) = Fmt.pf ppf "@[<2>%d. %a@]" i pp_block s
+and pp_enum_descr ppf (i, s) = Fmt.pf ppf "@[<2>%d. %a@]" (i+1) pp_block s
 
 and pp_blocks ppf bs = Fmt.pf ppf "@[<2>%a@]" (list_v pp_block) bs
 
