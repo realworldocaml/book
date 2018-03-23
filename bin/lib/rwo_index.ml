@@ -17,10 +17,9 @@ let indexterm_to_idx docs =
         | Ok () ->
           let data = sprintf "%s%s"
             (List.Assoc.find_exn ~equal:String.equal attrs "data-primary")
-            (
-              try ("/" ^ List.Assoc.find_exn ~equal:String.equal attrs "data-secondary")
-              with Not_found -> ""
-            )
+            (match List.Assoc.find ~equal:String.equal attrs "data-secondary" with
+             | None -> ""
+             | Some s -> "/" ^ s)
           in
           let attrs = List.filter attrs ~f:(fun (x,_) ->
             match x with
