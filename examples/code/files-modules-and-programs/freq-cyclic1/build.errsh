@@ -1,3 +1,4 @@
+%% --non-deterministic
   $ jbuilder build freq.bc
         ocamlc .freq.eobjs/counter.{cmi,cmo,cmt} (exit 2)
   (cd _build/default && /Users/thomas/git/rwo/book/_opam/bin/ocamlc.opt -w -40 -g -bin-annot -I /Users/thomas/git/rwo/book/_opam/lib/base -I /Users/thomas/git/rwo/book/_opam/lib/base/caml -I /Users/thomas/git/rwo/book/_opam/lib/base/shadow_stdlib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib/0 -I /Users/thomas/git/rwo/book/_opam/lib/stdio -no-alias-deps -I .freq.eobjs -o .freq.eobjs/counter.cmo -c -impl counter.ml)

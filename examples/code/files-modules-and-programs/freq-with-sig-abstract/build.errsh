@@ -1,6 +1,9 @@
   $ jbuilder build freq.bc
         ocamlc .freq.eobjs/freq.{cmi,cmo,cmt} (exit 2)
-  (cd _build/default && /Users/thomas/git/rwo/book/_opam/bin/ocamlc.opt -w -40 -g -bin-annot -I /Users/thomas/git/rwo/book/_opam/lib/base -I /Users/thomas/git/rwo/book/_opam/lib/base/caml -I /Users/thomas/git/rwo/book/_opam/lib/base/shadow_stdlib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib/0 -I /Users/thomas/git/rwo/book/_opam/lib/stdio -no-alias-deps -I .freq.eobjs -o .freq.eobjs/freq.cmo -c -impl freq.ml)
-  File "freq.ml", line 1, characters 5-16:
-  Error: Unbound module Core_kernel
+  (cd _build/default && /home/yminsky/.opam/fresh-4.06.1/bin/ocamlc.opt -w -40 -g -bin-annot -I .freq.eobjs -I /home/yminsky/.opam/fresh-4.06.1/lib/base -I /home/yminsky/.opam/fresh-4.06.1/lib/base/caml -I /home/yminsky/.opam/fresh-4.06.1/lib/base/shadow_stdlib -I /home/yminsky/.opam/fresh-4.06.1/lib/sexplib0 -I /home/yminsky/.opam/fresh-4.06.1/lib/stdio -no-alias-deps -o .freq.eobjs/freq.cmo -c -impl freq.ml)
+  File "freq.ml", line 5, characters 53-66:
+  Error: This expression has type Counter.t -> Base.string -> Counter.t
+         but an expression was expected of type
+           'a list -> Base.string -> 'a list
+         Type Counter.t is not compatible with type 'a list 
 @@ exit 1
