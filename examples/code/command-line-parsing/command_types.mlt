@@ -7,7 +7,7 @@
 #silent false;;
 open Core;;
 [@@@part "1"];;
-let filename_param = Command.Param.(anon ("filename" %: file));;
+let filename_param = Command.Param.(anon ("filename" %: string));;
 [%%expect ocaml {|val filename_param : string Command.Spec.param = <abstr>|}];;
 [@@@part "2"];;
 #show Command.basic;;

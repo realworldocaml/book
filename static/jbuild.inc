@@ -5,31 +5,31 @@
   (deps (
     css/app.css
     css/prism.css
-    images/jason.jpg
-    images/plain-bg.jpg
-    images/anil.jpg
-    images/yaron.jpg
     images/cover.png
+    images/plain-bg.jpg
+    images/yaron.jpg
     images/book-cover.jpg
     images/bg.jpg
+    images/anil.jpg
+    images/jason.jpg
     images/front-end/pipeline.png
     images/gc/minor_heap.png
     images/imperative-programming/edit_distance2.png
     images/imperative-programming/edit_distance.png
     images/lists-and-patterns/lists_layout.png
+    images/memory-repr/tuple_layout.png
     images/memory-repr/string_block.png
     images/memory-repr/string_size_calc.png
     images/memory-repr/block.png
     images/memory-repr/float_array_layout.png
-    images/memory-repr/tuple_layout.png
-    js/_functions.js
-    js/prism.js
     js/jquery.min.js
-    js/modernizr.js
-    js/app.js
+    js/prism.js
     js/discourse.js
-    js/min/modernizr-min.js
+    js/modernizr.js
+    js/_functions.js
+    js/app.js
     js/min/app-min.js
+    js/min/modernizr-min.js
     theme/pdf/pdf.css))))
 
 (alias ((name site) (deps (00-prologue.html))))
@@ -363,7 +363,7 @@
     ../examples/code/command-line-parsing/basic_md5_as_filename/basic_md5_as_filename.ml
     ../examples/code/command-line-parsing/basic_md5_as_filename/run_basic_md5_as_filename.errsh
     ../examples/code/command-line-parsing/basic_md5_sequence.ml
-    ../examples/code/command-line-parsing/basic_md5_succinct.ml
+    ../examples/code/command-line-parsing/basic_md5_succinct/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/basic_md5_with_custom_arg.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run_basic_md5_with_custom_arg.errsh
     ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml

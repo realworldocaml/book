@@ -10,7 +10,7 @@ let do_hash file =
 [@@@part "1"];;
 let filename_param =
   let open Command.Param in
-  anon ("filename" %: file)
+  anon ("filename" %: string)
 [@@@part "2"];;
 let command =
   Command.basic

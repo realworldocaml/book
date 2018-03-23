@@ -103,14 +103,13 @@
       <p>
 	Here, <code>anon</code> is used to signal the parsing of
 	an anonymous argument, and the expression <code>("filename"
-	  %: file)</code> indicates the textual name of the argument
+	  %: string)</code> indicates the textual name of the argument
 	and specification that describes the kind of value that is
-	expected. The textual name is used for generating help
-	text, and the specification is used both to nail down the
-	OCaml type of the returned value (<code>string</code>, in
-	this case) and to guide features like auto-completion and
-	input validation. The
-	values <code>anon</code>, <code>file</code>
+	expected. The textual name is used for generating help text,
+	and the specification is used both to nail down the OCaml type
+	of the returned value (<code>string</code>, in this case) and
+	to guide features like input validation. The
+	values <code>anon</code>, <code>string</code>
 	and <code>%:</code> all come from
 	the <code>Command.Param</code> module.</p>
 
@@ -183,9 +182,11 @@
 
       <p>
 	And that's exactly what we did in our invocation
-	of <code>Command.basic</code> earlier, converting the
-	<code>filename_param</code>, which returns a string
-	representing the file name, into a parser that returns... </p>
+	of <code>Command.basic</code> earlier, converting
+	the <code>filename_param</code>, which returns a string
+	representing the file name, into a parser that returns a
+	function of type <code>unit -> unit</code>, which holds the
+	code that will be run when the command executes.</p>
 
     </section>
 
@@ -225,23 +226,25 @@
         leave these blank in your own programs or get your build
         system to generate them directly from your version control
         system (e.g., by running <code>hg id</code> to generate a
-        build revision number, in the case of Mercurial):</p>
-
-      <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="get help"/>
+        build revision number, in the case of Mercurial).</p>
 
       <p>
-	When we invoke this binary without any arguments, it
-        helpfully displays all of the command-line options
-        available, along with a message to the standard error that
-        informs you that a required argument <code>filename</code>
-        is missing.</p>
+	When we invoke our binary with <code>-help</code> as an
+	argument, it helpfully displays all of the command-line
+	options available, along with a message to the standard error
+	that informs you that a required
+	argument <code>filename</code> is missing.</p>
+
+      <link rel="import" part="get help"
+	    href="code/command-line-parsing/basic_md5/basic_md5.sh" />
 
       <p>
 	If you do supply the <code>filename</code> argument,
         then <code>do_hash</code> is called with the argument and
         the MD5 output is displayed to the standard output:</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.sh" part="run"/>
+      <link rel="import" part="run"
+	    href="code/command-line-parsing/basic_md5/basic_md5.sh"/>
 
       <p>
 	And that's all it took to build our little MD5 utility!
@@ -249,8 +252,8 @@
         through, made slightly more succinct by removing
         intermediate variables:</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_succinct.ml"/>
-
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_succinct/md5.ml"/>
       <p>
 	Now that we have the basics in place, the rest of the
         chapter will examine some of the more advanced features of
