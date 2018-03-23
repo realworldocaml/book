@@ -367,7 +367,7 @@ open Core
  ;; Change the path below to be wherever you've put your tuareg installation.
  (expand-file-name "~/lib/elisp/tuareg"))
 (require 'tuareg)
-(setq auto-mode-alist 
+(setq auto-mode-alist
       (append '(("\\.ml[ily]?$" . tuareg-mode))
           auto-mode-alist))
 
@@ -430,7 +430,7 @@ open Core
 (setq auto-mode-alist
       (append '(("\\.ml[ily]?$" . tuareg-mode)
                 ("\\.topml$" . tuareg-mode))
-              auto-mode-alist)) 
+              auto-mode-alist))
 (autoload 'utop-setup-ocaml-buffer "utop" "Toplevel for OCaml" t)
 (add-hook 'tuareg-mode-hook 'utop-setup-ocaml-buffer)
 (add-hook 'tuareg-mode-hook 'merlin-mode)
