@@ -8,15 +8,17 @@ type item = [
   | `Em     of string
   | `Code   of string
   | `A      of string * item list
-  | `Idx    of string
+  | `Idx    of string option * string
   | `Keep_together of string
   | `Index_term of string
   | `Xref of string * item list
-  (* only in the prologue ... *)
+  | `Filename of string
+  (* only in 00-prologue *)
   | `Uri of string * item list
   | `A_hide of string * item list
   | `A_hide_i of string * item list
   | `Email of string
+  | `Hyperlink of string
 ]
 
 and phrase = item list
@@ -42,6 +44,8 @@ type block = [
   | `Warning of bool part
   | `Figure of string
   | `Safari of block list
+  (* only in 00-prologue *)
+  | `Simple_list of block list
 ]
 
 and 'a part = {
@@ -91,7 +95,8 @@ let pp_index_term ppf s =
 let rec pp_item ppf (i:item) = match i with
   | `Em e     -> Fmt.pf ppf "*%a*" pp_words e
   | `Strong s -> Fmt.pf ppf "**%a**" pp_items s
-  | `Idx s    -> Fmt.pf ppf "<idx>%a</idx>" pp_words s
+  | `Idx (None  , x) -> Fmt.pf ppf "<idx>%a</idx>" pp_words x
+  | `Idx (Some y, x) -> Fmt.pf ppf "<idx id=\"%s\">%a</idx>" y pp_words x
   | `Code c   -> Fmt.pf ppf "`%a`" pp_words c
   | `A href   -> pp_href ppf href
   | `Xref x   -> pp_xref ppf x
@@ -99,9 +104,11 @@ let rec pp_item ppf (i:item) = match i with
   | `Email s  -> Fmt.pf ppf "@[[_%s_](mailto:%s){.email}@]" s s
   | `Keep_together s -> Fmt.pf ppf "<span class=\"keep-together\">%s</span>" s
   | `Index_term s    -> pp_index_term ppf s
+  | `Filename f      -> Fmt.pf ppf "<em class=\"filename\">%a</em>" pp_words f
   | `A_hide (h, t)   -> Fmt.pf ppf "@[[%a](%s){.orm:hideurl}@]" pp_items t h
   | `A_hide_i (h, t) -> Fmt.pf ppf "@[[%a](%s){.orm:hideurl:ital}@]" pp_items t h
   | `Uri (h, t)      -> Fmt.pf ppf  "@[[%a](%s)@]" pp_items t h
+  | `Hyperlink s     -> Fmt.pf ppf "<em class=\"hyperlink\">%a</em>" pp_words s
 
 and pp_items ppf l = list_h pp_item ppf l
 
@@ -152,6 +159,7 @@ let rec pp_block ppf (t:block) = match t with
   | `Section s    -> pp_section ppf s
   | `Safari bs    -> Fmt.pf ppf "::: safarienabled@,%a@,:::" pp_blocks bs
   | `Warning w    -> pp_warning ppf w
+  | `Simple_list l -> pp_simple_list ppf l
 
 and pp_note ppf n =
   Fmt.pf ppf "@[::: {data-type=note}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
@@ -175,6 +183,8 @@ and pp_blocks ppf bs = Fmt.pf ppf "@[<2>%a@]" (list_v pp_block) bs
 and pp_list ppf t = list_v pp_list_elt ppf t
 and pp_list_elt ppf t = Fmt.pf ppf "@[<2>- %a@]" pp_block t
 
+and pp_simple_list ppf t = Fmt.pf ppf "::: {.simplelist}@,%a@,:::@," pp_list t
+
 and pp_descr ppf t = list_v pp_descr_elt ppf t
 and pp_descr_elt ppf (title, body) =
   Fmt.pf ppf "@[%a@,@[<2>: %a@]]" pp_items title pp_block body
@@ -186,17 +196,19 @@ and pp_sidebar ppf (title, body) =
 let rec dump_item ppf (i:item) = match i with
   | `Em e     -> Fmt.pf ppf "Em %S" e
   | `Strong s -> Fmt.pf ppf "Strong %a" dump_items s
-  | `Idx s    -> Fmt.pf ppf "Idx %S" s
+  | `Idx s    -> Fmt.pf ppf "Idx %a" Fmt.(Dump.pair Dump.(option string) string) s
   | `Code c   -> Fmt.pf ppf "Code %S" c
   | `A (h, l) -> Fmt.pf ppf "A (%S, %a)" h dump_items l
   | `Text s   -> Fmt.pf ppf "Text %S" s
   | `Email s  -> Fmt.pf ppf "Email %S" s
+  | `Filename f      -> Fmt.pf ppf "Filename %S" f
   | `Keep_together s -> Fmt.pf ppf "Keep_together %S" s
   | `Index_term s    -> Fmt.pf ppf "Index_term %S" s
   | `Xref (h,l)      -> Fmt.pf ppf "Xref (%S, %a)" h dump_items l
   | `A_hide (h,l)    -> Fmt.pf ppf "A_hide (%S, %a)" h dump_items l
   | `A_hide_i (h,l)  -> Fmt.pf ppf "A_hide_i (%S, %a)" h dump_items l
   | `Uri (h,l)       -> Fmt.pf ppf "Uri (%S, %a)" h dump_items l
+  | `Hyperlink s     -> Fmt.pf ppf "Hyperlink %S" s
 
 and dump_items ppf t = Fmt.Dump.list dump_item ppf t
 
@@ -214,6 +226,7 @@ and dump_block ppf (t:block) = match t with
   | `Sidebar s -> pp_sidebar ppf s
   | `Safari s  -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_blocks s
   | `Warning w -> Fmt.pf ppf "@[<2>Warning@ %a@]" (dump_part Fmt.bool) w
+  | `Simple_list s -> Fmt.pf ppf "@[<2>Simple_list (%a)@]" dump_blocks s
 
 and dump_part: type a. a Fmt.t -> a part Fmt.t = fun dump_v ppf t ->
   Fmt.pf ppf "@[<2>{level=%d; title=%a; body=%a; %a}@]"
@@ -287,9 +300,11 @@ module Parse = struct
   let text s = `Text s
   let strong s = `Strong s
   let em s = `Em s
-  let idx s = `Idx s
+  let idx x s = `Idx (x, s)
   let code s = `Code s
   let keep_together s = `Keep_together s
+  let hyperlink s = `Hyperlink s
+  let filename s = `Filename s
 
   let normalize t =
     let text txt = `Text (String.concat "" (List.rev txt)) in
@@ -307,18 +322,25 @@ module Parse = struct
     in
     aux [] [] t
 
-  let link e =
-    let rel, href, part =
-      match
-        Soup.attribute "rel" e,
-        Soup.attribute "href" e,
-        Soup.attribute "part" e
-      with
-      | Some rel, Some href, part -> rel, href, part
-      | None, _, _ -> err "missing rel in link: %a" dump e
-      | _, None, _ -> err "missing hrel in link: %a" dump e
-    in
-    `Link (rel, href, part)
+  let attrs e =
+    let compare (a, _) (b, _) = String.compare a b in
+    let attrs = Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] e in
+    List.sort compare attrs
+
+  let link e: block =
+    match attrs e with
+    | ["href", href; "rel", rel] -> `Link (rel, href, None)
+    | ["href", href; "part", part; "rel", rel] -> `Link (rel, href, Some part)
+    | _ -> err "invalid link: %a" dump e
+
+  let no_attrs e =
+    match Soup.element e with
+    | None   -> ()
+    | Some e ->
+      let attrs = attrs e in
+      if attrs <> [] then
+        err "item has attributes: %a"
+          Fmt.(Dump.list Dump.(pair string string)) attrs
 
   let rec items h: item list =
     let txt f =
@@ -327,14 +349,19 @@ module Parse = struct
       |> function "" -> [] | s -> [f s]
     in
     match Soup.element h with
-    | None   -> txt text
+    | None   -> no_attrs h; txt text
     | Some e ->
       match Soup.name e with
-      | "strong" -> [`Strong (normalize_items (children e))]
-      | "em"     -> txt em
-      | "code"   -> txt code
+      | "strong" -> no_attrs h; [`Strong (normalize_items (children e))]
+      | "em" when attrs e = ["class", "hyperlink"] -> txt hyperlink
+      | "em" when attrs e = ["class", "filename"]  -> txt filename
+      | "em"     -> no_attrs h; txt em
+      | "code"   -> no_attrs h; txt code
       | "a"      -> [a e]
-      | "idx"    -> txt idx
+      | "idx"    -> (match attrs e with
+          | ["id", id] -> txt (idx (Some id))
+          | []        -> txt (idx None)
+          | _         -> err "invalid idx: %a" dump e)
       | "span"   ->
         (match Soup.attribute "class" e with
          | Some "command"       ->
@@ -345,15 +372,13 @@ module Parse = struct
             | _ -> err "class=\"command\"")
          (* XXX: not sure what it is used for *)
          | Some "keep-together" -> txt keep_together
-         | _ -> err "TODO item: span %a" Fmt.(of_to_string Soup.to_string) e)
+         | _ -> err "TODO item: span %a" dump e)
       | s -> err "TODO item: %s (%a)" s dump e
 
   and normalize_items h = normalize (flatten_map items h)
 
   and a e =
-    let compare (a, _) (b, _) = String.compare a b in
-    let attrs = Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] e in
-    let attrs = List.sort compare attrs in
+    let attrs = attrs e in
     let x = normalize_items (children e) in
     let email s =
       if String.length s < 7 then err "invalid email: %s" s
@@ -369,7 +394,7 @@ module Parse = struct
     | [("class", "orm:hideurl:ital"); ("href", h)] -> `A_hide_i (h, x)
     | [("data-type", "xref"); ("href", h)] -> `Xref (h, x)
     | [("data-startref", s); ("data-type", "indexterm")] -> `Index_term s
-    | _ -> err "invalid a: %S" (Soup.to_string e)
+    | _ -> err "invalid a: %a" dump e
 
   let para t =
     let rec aux acc = function
@@ -429,50 +454,67 @@ module Parse = struct
     | Some e ->
       match Soup.name e with
       | "section" ->
-        let attrs = Soup.fold_attributes (fun acc k v -> (k, v) :: acc) [] e in
-        let id =
-          try List.assoc "id" attrs
-          with Not_found -> err "id not found in %a" dump e
+        let make data_type id =
+          let level, title, body = header ~depth e in
+          let level = if level < depth+1 then depth+level else level in
+          Some (`Section { v = {id; data_type}; level; title; body })
         in
-        let data_type =
-          try List.assoc "data-type" attrs
-          with Not_found -> err "data-type not found in %a" dump e
-        in
-        let level, title, body = header ~depth e in
-        let level = if level < depth+1 then depth+level else level in
-        Some (`Section { v = {id; data_type}; level; title; body })
+        (match attrs e with
+         | [ ("class", l); ("data-type", data_type); ("id", id); ] ->
+           if String.length l >= 5 && String.sub l 0 5 = "level" then
+             (* added by pandoc *)
+             make data_type id
+           else err "invalid section: %a" dump e
+         | [ ("data-type", data_type); ("id", id) ] -> make data_type id
+         | _ -> err "invalid section: %a" dump e)
       | "p" ->
+        no_attrs e;
         (match children e with
          | [e] when name e = Some "link" -> Some (link Soup.(require (element e)))
          | childs -> Some (para childs))
       | "link" -> Some (link e)
       | "div" ->
-        if Soup.attribute "data-type" e = Some "note" then
-          let level, title, body = header ~depth e in
-          let level = if level < depth+1 then depth+level else level in
-          Some (`Note {level; title; body; v=()})
-        else if Soup.attribute "class" e = Some "safarienabled" then
-          Some (`Safari (filter_map (maybe_block ~depth) (children e)))
-        else if Soup.attribute "data-type" e = Some "warning" then
-          let allow_break = Soup.classes e = ["allow_break"] in
-          let level, title, body = header ~depth e in
-          if level <> 1 then err "wrong header level for warning section";
-          let w = { level=1; v=allow_break; title; body } in
-          Some (`Warning w)
-        else if Soup.attribute "data-type" e = Some "table" then (
-          let id = Soup.id e in
-          (* added by pp_table *)
-          match filter_map (maybe_block ~depth) (children e) with
-          | [`Table t] -> Some (`Table { t with id })
-          | x -> err "unsuported table div: %a" dump_blocks x
-        ) else
-          err "unsuported div: %a" dump e
-      | "ol" -> Some (`Enum (filter_map li (children e)))
-      | "ul" -> Some (`List (filter_map li (children e)))
-      | "dl" -> Some (`Descr (pair_map dt dd (children e)))
+        (match attrs e with
+         | ["data-type", "note"] ->
+           let level, title, body = header ~depth e in
+           let level = if level < depth+1 then depth+level else level in
+           Some (`Note {level; title; body; v=()})
+         | ["class", "safarienabled"] ->
+           Some (`Safari (filter_map (maybe_block ~depth) (children e)))
+         | ["data-type", "warning"] ->
+           let allow_break = Soup.classes e = ["allow_break"] in
+           let level, title, body = header ~depth e in
+           if level <> 1 then err "wrong header level for warning section";
+           let w = { level=1; v=allow_break; title; body } in
+           Some (`Warning w)
+         | ("data-type", "table") :: ([] | ["id", _]) -> (* added by pp_table *)
+           let id = Soup.id e in
+           (match filter_map (maybe_block ~depth) (children e) with
+            | [`Table t] -> Some (`Table { t with id })
+            | x -> err "unsuported table div: %a" dump_blocks x)
+         | ["class", "simplelist"] -> (* added by pp_simple_list *)
+           (match filter_map (maybe_block ~depth) (children e) with
+            | [`List l] -> Some (`Simple_list l)
+            | x -> err "unsupported simplelist div: %a" dump_blocks x)
+         | _ -> err "unsuported div: %a" dump e)
+      | "ol" ->
+        (match attrs e with
+         | ["type", _]  (* added by pandoc *)
+         | [] ->Some (`Enum (filter_map li (children e)))
+         | _ -> err "invalid ol: %a" dump e)
+      | "ul" ->
+        (match attrs e with
+         | ["class", "simplelist"] ->
+           Some (`Simple_list (filter_map li (children e)))
+         | [] -> Some (`List (filter_map li (children e)))
+         | _  -> err "invalid ul: %a" dump e)
+      | "dl" -> no_attrs e; Some (`Descr (pair_map dt dd (children e)))
       | "table" ->
-        let id = Soup.id e in
-        Some (`Table (table id (children e)))
+        (match attrs e with
+         | ["id", _] | [] ->
+           let id = Soup.id e in
+           Some (`Table (table id (children e)))
+         | _ -> err "invalid table: %a" dump e)
       | "aside" ->
         if Soup.attribute "data-type" e = Some "sidebar" then
           let level, title, body = header ~depth e in
@@ -613,7 +655,8 @@ module Check = struct
       | `Keep_together a, `Keep_together b ->
         check (string "keep-together") a b; true
       | `Strong a, `Strong b -> check (list "strong" (item ())) a b; true
-      | `Idx a, `Idx b -> check (string "idx") a b; true
+      | `Idx a, `Idx b ->
+        check (pair "idx" (option "id" (string "id")) (string "idx")) a b; true
       | `Code a, `Code b -> check (string "code") a b; true
       | `A a, `A b -> check (href "a") a b; true
       | `Text a, `Text b -> check (string "text") a b; true
@@ -623,9 +666,11 @@ module Check = struct
       | `A_hide a, `A_hide b -> check (href "a:hide") a b; true
       | `A_hide_i a, `A_hide_i b -> check (href "a:hide:ital") a b; true
       | `Index_term a, `Index_term b -> check (string "indexterm") a b; true
+      | `Hyperlink a, `Hyperlink b -> check (string "hyperlink") a b; true
+      | `Filename a, `Filename b -> check (string "filename") a b; true
       | (`Em _ | `Keep_together _ | `Strong _ | `Idx _ | `Code _ | `Index_term _
-        | `A _ | `Text _ | `Email _ | `Xref _ | `Uri _ | `A_hide _
-        | `A_hide_i _), _ -> false
+        | `A _ | `Text _ | `Email _ | `Xref _ | `Uri _ | `A_hide _ | `Hyperlink _
+        | `A_hide_i _ | `Filename _), _ -> false
     in
     v "item" dump_item aux
 
@@ -650,7 +695,11 @@ module Check = struct
       | `Para a, `Para b       -> check (list "para" item) a b; true
       | `Link a, `Link b       -> check link a b; true
       | `Warning a, `Warning b -> check (part "warning" bool) a b; true
-      | _ -> false
+      | `Simple_list a, `Simple_list b ->
+        check (list "simplelist" (block ())) a b; true
+      | (`Figure _ | `Descr _ | `List _ | `Table _ | `Section _ | `Note _
+        | `Safari _ | `Sidebar _ | `Blocks _ | `Enum _ | `Para _ | `Link _
+        | `Warning _ | `Simple_list _), _ -> false
     in
     v "block" dump_block aux
 
