@@ -52,7 +52,7 @@ let of_file file = Reader.file_contents file >>| of_string
 let to_string t =
   let root = Soup.create_soup () in
   List.iter ~f:(fun e -> Soup.append_root root (item_to_soup e)) t;
-  Soup.pretty_print root
+  Soup.to_string root
 
 let is_elem_node item name' = match item with
   | `Data _ -> false
