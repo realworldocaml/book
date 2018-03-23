@@ -581,13 +581,14 @@
           <h2>Catching Specific Exceptions</h2>
 
           <p>
-	    OCaml's exception-handling system allows you to tune
-            your error-recovery logic to the particular error that was
-            thrown. For example, <code>List.find_exn</code> throws
-            <code>Not_found</code> when the element in question can't
-            be found. Let's look at an example of how you could take
-            advantage of this. In particular, consider the following
-            function:
+	    OCaml's exception-handling system allows you to tune your
+            error-recovery logic to the particular error that was
+            thrown. For example, <code>find_exn</code>, which we
+            defined earlier in the chapter,
+            throws <code>Key_not_found</code> when the element in
+            question can't be found. Let's look at an example of how
+            you could take advantage of this. In particular, consider
+            the following function:
 
 	    <idx>exceptions/catching specific</idx>
 	    <idx>error handling/exception detection</idx></p>
@@ -643,8 +644,8 @@
           <p>
 
 	    Best of all is to avoid exceptions entirely, which we could
-	    do by using the exception-free
-            function, <code>List.Assoc.find</code>, instead:</p>
+	    do by using the exception-free function from
+            Base, <code>List.Assoc.find</code>, instead:</p>
 
           <link rel="import" href="code/error-handling/main.mlt" part="34"/>
 	</section>
