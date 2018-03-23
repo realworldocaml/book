@@ -115,18 +115,21 @@ let pp_table ppf t =
     let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
     let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
     Fmt.(list ~sep:(unit " | ") pp_items) ppf t.headers;
+    Fmt.pf ppf "@,";
     Fmt.(list ~sep:(unit "-|-") string) ppf
       (List.map (fun s -> String.make (len s) '-') t.headers);
+    Fmt.pf ppf "@,";
     Fmt.(list ~sep:(unit "@,")
            Fmt.(list ~sep:(unit " | ") pp_items)
         ) ppf t.body;
+    Fmt.pf ppf "@,";
     match t.caption with
     | None   -> ()
     | Some c -> Fmt.pf ppf "@,Table: %a" pp_items c
   in
   match t.id with
   | None    -> Fmt.pf ppf "%a@," aux ()
-  | Some id -> Fmt.pf ppf "::: {#%s}@,%a@,:::@,@," id aux ()
+  | Some id -> Fmt.pf ppf "::: {#%s data-type=table}@,%a@,:::@,@," id aux ()
 
 let pp_figure ppf t =
   Fmt.pf ppf
@@ -207,7 +210,7 @@ and dump_block ppf (t:block) = match t with
   | `Enum bs   -> Fmt.pf ppf "@[<2>Enum@ (%a)@]" dump_blocks bs
   | `Note n    -> Fmt.pf ppf "@[<2>Note@ %a]" (dump_part dump_unit) n
   | `Section s -> Fmt.pf ppf "@[<2>Section@ (%a)@]" (dump_part dump_section) s
-  | `Table t   -> pp_table ppf t
+  | `Table t   -> dump_table ppf t
   | `Sidebar s -> pp_sidebar ppf s
   | `Safari s  -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_blocks s
   | `Warning w -> Fmt.pf ppf "@[<2>Warning@ %a@]" (dump_part Fmt.bool) w
@@ -222,6 +225,13 @@ and dump_blocks ppf t = Fmt.Dump.list dump_block ppf t
 
 and dump_section ppf s =
   Fmt.pf ppf "@[id:@ %S;@ data_type:@ %S@]" s.id s.data_type
+
+and dump_table ppf (t:table) =
+  Fmt.pf ppf "@[<2>{id: %a; caption: %a; headers: %a; body: %a}@]"
+    Fmt.(Dump.option string) t.id
+    Fmt.(Dump.option dump_items) t.caption
+    Fmt.(Dump.list dump_items) t.headers
+    Fmt.(Dump.list (Dump.list dump_items)) t.body
 
 let int_of_level = function
   | "h1" -> 1
@@ -449,7 +459,13 @@ module Parse = struct
           if level <> 1 then err "wrong header level for warning section";
           let w = { level=1; v=allow_break; title; body } in
           Some (`Warning w)
-        else
+        else if Soup.attribute "data-type" e = Some "table" then (
+          let id = Soup.id e in
+          (* added by pp_table *)
+          match filter_map (maybe_block ~depth) (children e) with
+          | [`Table t] -> Some (`Table { t with id })
+          | x -> err "unsuported table div: %a" dump_blocks x
+        ) else
           err "unsuported div: %a" dump e
       | "ol" -> Some (`Enum (filter_map li (children e)))
       | "ul" -> Some (`List (filter_map li (children e)))
@@ -640,7 +656,6 @@ module Check = struct
 
   and unit = v "unit" dump_unit (=)
   and link = v "link" pp_link (=)
-  and table = v "table" pp_table (=)
   and blocks () = list "blocks" (block ())
   and bool = v "allow_break" Fmt.bool (=)
 
@@ -662,6 +677,16 @@ module Check = struct
       true
     in
     v name (dump_part ty.pp) aux
+
+  and table =
+    let aux (a:table) (b:table) =
+      check (option "id" (string "id")) a.id b.id;
+      check (option "caption" (list "caption" item)) a.caption b.caption;
+      check (list "headers" (list "headers" item)) a.headers b.headers;
+      check (list "body" (list "body" (list "body" item))) a.body b.body;
+      true
+    in
+    v "table" dump_table aux
 
   let blocks = blocks ()
 
