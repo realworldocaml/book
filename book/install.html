@@ -1,7 +1,3 @@
-<html>
-<head></head>
-
-<body>
   <h1>Installation Instructions</h1>
 
   <p>These instructions are aimed at readers of Real World OCaml,
@@ -99,11 +95,9 @@ $ sudo yaourt -S opam
   <pre><code class="language-bash">
 $ sudo pacman -S base-devel
 $ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
-$ tar -xvf opam.tar.gz <span class=
-"pl-k">&amp;&amp;</span> <span class="pl-s3">cd</span> opam
+$ tar -xvf opam.tar.gz &amp;&amp; cd opam
 $ makepkg
-$ sudo pacman -U opam-<span class=
-"pl-k">&lt;</span>version<span class="pl-k">&gt;</span>.pkg.tar.xz
+$ sudo pacman -U opam-&lt;version&gt;.pkg.tar.xz
 </code></pre>
 
   <h2>Building from source</h2>
@@ -369,7 +363,7 @@ open Core
  ;; Change the path below to be wherever you've put your tuareg installation.
  (expand-file-name "~/lib/elisp/tuareg"))
 (require 'tuareg)
-(setq auto-mode-alist 
+(setq auto-mode-alist
       (append '(("\\.ml[ily]?$" . tuareg-mode))
           auto-mode-alist))
 
@@ -432,7 +426,7 @@ open Core
 (setq auto-mode-alist
       (append '(("\\.ml[ily]?$" . tuareg-mode)
                 ("\\.topml$" . tuareg-mode))
-              auto-mode-alist)) 
+              auto-mode-alist))
 (autoload 'utop-setup-ocaml-buffer "utop" "Toplevel for OCaml" t)
 (add-hook 'tuareg-mode-hook 'utop-setup-ocaml-buffer)
 (add-hook 'tuareg-mode-hook 'merlin-mode)
@@ -661,5 +655,3 @@ $ opam install ocp-indent
 " Your vimrc
 autocmd FileType ocaml execute "set rtp+=" . substitute(system('opam config var share'), '\n$', '', '''') . "/ocp-indent/vim/indent/ocaml.vim"
 </code></pre>
-</body>
-</html>
