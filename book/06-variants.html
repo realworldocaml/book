@@ -678,7 +678,7 @@
           <dt>Complexity</dt>
 
           <dd>
-            <p>As we've seen, the typing rules for polymorphic
+            As we've seen, the typing rules for polymorphic
             variants are a lot more complicated than they are for
             regular variants. This means that heavy use of
             polymorphic variants can leave you scratching your head
@@ -686,26 +686,26 @@
             didn't compile. It can also lead to absurdly long and
             hard to decode error messages. Indeed, concision at the
             value level is often balanced out by more verbosity at
-            the type level.</p>
+            the type level.
           </dd>
 
           <dt>Error-finding</dt>
 
           <dd>
-            <p>Polymorphic variants are type-safe, but the typing
+            Polymorphic variants are type-safe, but the typing
             discipline that they impose is, by dint of its
             flexibility, less likely to catch bugs in your
-            program.</p>
+            program.
           </dd>
 
           <dt>Efficiency</dt>
 
           <dd>
-            <p>This isn't a huge effect, but polymorphic variants
+            This isn't a huge effect, but polymorphic variants
             are somewhat heavier than regular variants, and OCaml
             can't generate code for matching on polymorphic
             variants that is quite as efficient as what it
-            generated for regular variants.</p>
+            generated for regular variants.
           </dd>
         </dl>
 

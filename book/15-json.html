@@ -592,28 +592,25 @@
           <dt>The <code>lit</code> suffix</dt>
 
           <dd>
-            <p>
 	      Denotes that the value is stored as a JSON string. For
               example, a <code>Floatlit</code> will be stored as
-              <code>"1.234"</code> instead of <code>1.234</code>.</p>
+              <code>"1.234"</code> instead of <code>1.234</code>.
           </dd>
 
           <dt>The <code>Tuple</code> type</dt>
 
           <dd>
-            <p>
 	      Stored as <code>("abc", 123)</code> instead of a
-              list.</p>
+              list.
           </dd>
 
           <dt>The <code>Variant</code> type</dt>
 
           <dd>
-            <p>
 	      Encodes OCaml variants more explicitly, as
               <code>&lt;"Foo"&gt;</code> or
               <code>&lt;"Bar":123&gt;</code> for a variant with
-              parameters.</p>
+              parameters.
           </dd>
 	</dl>
 
@@ -806,29 +803,26 @@
             <dt><code>-j-std</code></dt>
 
             <dd>
-              <p>
 		Converts tuples and variants into standard JSON and
 		refuse to print NaN and infinities. You should specify
 		this if you intend to interoperate with services that
-		aren't using ATD.</p>
+		aren't using ATD.
             </dd>
 
             <dt><code>-j-custom-fields FUNCTION</code></dt>
 
             <dd>
-              <p>
 		Calls a custom function for every unknown field
 		encountered, instead of raising a parsing
-		exception.</p>
+		exception.
             </dd>
 
             <dt><code>-j-defaults</code></dt>
 
             <dd>
-              <p>
 		Always explicitly outputs a JSON value if possible.
 		This requires the default value for that field to be
-		defined in the ATD specification.</p>
+		defined in the ATD specification.
             </dd>
           </dl>
 
