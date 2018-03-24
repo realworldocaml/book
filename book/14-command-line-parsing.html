@@ -73,7 +73,7 @@
       <idx>MD5 one-way cryptographic hash function</idx>
       <idx>command-line parsing/basic approach to</idx></p>
 
-    <link rel="import" href="code/command-line-parsing/basic_md5/md5.ml"/>
+    <link rel="import" href="code/command-line-parsing/md5/md5.ml"/>
 
     <p>
       The <code>do_hash</code> function accepts
@@ -98,7 +98,7 @@
 	is passed in without a flag.</p>
 
       <link rel="import" part="1"
-	    href="code/command-line-parsing/basic_md5/md5.ml" />
+	    href="code/command-line-parsing/md5/md5.ml" />
 
       <p>
 	Here, <code>anon</code> is used to signal the parsing of
@@ -125,7 +125,7 @@
 
 	<idx>Command.basic</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5/md5.ml" part="2"/>
+      <link rel="import" href="code/command-line-parsing/md5/md5.ml" part="2"/>
 
       <p>
 	The <code>summary</code> argument is a one-line
@@ -197,7 +197,7 @@
         one function call away.</p>
 
       <link rel="import" part="3"
-	    href="code/command-line-parsing/basic_md5/md5.ml" />
+	    href="code/command-line-parsing/md5/md5.ml" />
 
       <p>
 	<code>Command.run</code> takes a couple of optional
@@ -208,16 +208,16 @@
         the following to compile the binary.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5/jbuild"/>
+	    href="code/command-line-parsing/md5/jbuild"/>
       <link rel="import" part="build"
-	    href="code/command-line-parsing/basic_md5/md5.sh" />
+	    href="code/command-line-parsing/md5/md5.sh" />
 
       <p>
 	You can now query the version information for the binary
         you just compiled:</p>
 
       <link rel="import" part="get version"
-	    href="code/command-line-parsing/basic_md5/md5.sh" />
+	    href="code/command-line-parsing/md5/md5.sh" />
 
       <p>
 	The versions that you see in the output were defined via
@@ -232,7 +232,7 @@
 	auto-generated help.</p>
 
       <link rel="import" part="get help"
-	    href="code/command-line-parsing/basic_md5/md5.sh" />
+	    href="code/command-line-parsing/md5/md5.sh" />
 
       <p>
 	If you supply the <code>filename</code> argument,
@@ -240,7 +240,7 @@
         the MD5 output is displayed to the standard output.</p>
 
       <link rel="import" part="run"
-	    href="code/command-line-parsing/basic_md5/md5.sh"/>
+	    href="code/command-line-parsing/md5/md5.sh"/>
 
       <p>
 	And that's all it took to build our little MD5 utility!
@@ -249,7 +249,7 @@
         intermediate variables.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_succinct/md5.ml"/>
+	    href="code/command-line-parsing/md5_succinct/md5.ml"/>
     </section>
 
     <section id="multiple-arguments" data-type="sect2">
@@ -275,14 +275,14 @@
 	of the hash to print out, and the second is the filename.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_multiarg/md5.ml" />
+	    href="code/command-line-parsing/md5_multiarg/md5.ml" />
 
       <p>
 	Building and running this command, we can see that it now
 	indeed expects two arguments.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_multiarg/md5.sh" />
+	    href="code/command-line-parsing/md5_multiarg/md5.sh" />
 
       <p>
 	This works well enough for two parameters, but if you want
@@ -292,7 +292,7 @@
 	data-type="xref">Error Handling</a>.</p>
 
       <link rel="import" part="1"
-	    href="code/command-line-parsing/basic_md5_let_syntax/md5.ml" />
+	    href="code/command-line-parsing/md5_let_syntax/md5.ml" />
 
       <p>
 	Here, we take advantage of let-syntax's support for parallel
@@ -310,7 +310,7 @@
 	syntax, demonstrated below.</p>
 
       <link rel="import" part="1"
-	    href="code/command-line-parsing/basic_md5_let_syntax2/md5.ml"
+	    href="code/command-line-parsing/md5_let_syntax2/md5.ml"
 	    />
 
       <p>
@@ -404,7 +404,7 @@
       valid filename, and not just any string.</p>
 
       <link rel="import" part="1"
-	    href="code/command-line-parsing/basic_md5_as_filename/md5.ml" />
+	    href="code/command-line-parsing/md5_as_filename/md5.ml" />
 
     <p>
       This doesn't change the validation of the provided value, but it
@@ -424,7 +424,7 @@
 	<idx>arguments/defining custom types</idx></p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_custom_arg/md5.ml"/>
+	    href="code/command-line-parsing/md5_with_custom_arg/md5.ml"/>
 
       <p>
 	The <code>regular_file</code> function transforms a
@@ -435,7 +435,7 @@
         as <code>/dev/null</code>:</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_custom_arg/run.errsh"/>
+	    href="code/command-line-parsing/md5_with_custom_arg/run.errsh"/>
     </section>
 
     <section id="optional-and-default-arguments" data-type="sect2">
@@ -453,11 +453,11 @@
 	<idx>optional arguments/and default arguments</idx>
 	<idx>arguments/optional arguments</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/md5.ml" part="1"/>
+      <link rel="import" href="code/command-line-parsing/md5_with_optional_file_broken/md5.ml" part="1"/>
 
       <p>
 	But building this results in a compile-time error.</p>
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/build.errsh"/>
+      <link rel="import" href="code/command-line-parsing/md5_with_optional_file_broken/build.errsh"/>
 
       <p>
 	This is because changing the argument type has also changed
@@ -468,7 +468,7 @@
         and read from standard input if no file is specified.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_optional_file/md5.ml"/>
+	    href="code/command-line-parsing/md5_with_optional_file/md5.ml"/>
 
       <p>
 	The <code>filename</code> parameter to
@@ -479,7 +479,7 @@
         is similar to our previous examples.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_optional_file/md5.sh" />
+	    href="code/command-line-parsing/md5_with_optional_file/md5.sh" />
 
       <p>
 	Another possible way to handle this would be to supply a dash
@@ -494,14 +494,14 @@
         <code>maybe_with_default</code>:</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_default_file/md5.ml"/>
+	    href="code/command-line-parsing/md5_with_default_file/md5.ml"/>
 
       <p>
 	Building and running this confirms that it has the same
 	behavior as before.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_default_file/md5.sh" />
+	    href="code/command-line-parsing/md5_with_default_file/md5.sh" />
     </section>
 
     <section id="sequences-of-arguments" data-type="sect2">
@@ -516,7 +516,7 @@
 	<idx>arguments/sequences of</idx></p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_sequence/md5.ml"/>
+	    href="code/command-line-parsing/md5_sequence/md5.ml"/>
 
       <p>
 	The callback function is a little more complex now, to handle
@@ -528,7 +528,7 @@
         through <code>do_hash</code> sequentially.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_sequence/md5.sh" />
+	    href="code/command-line-parsing/md5_sequence/md5.sh" />
 
     </section>
   </section>
