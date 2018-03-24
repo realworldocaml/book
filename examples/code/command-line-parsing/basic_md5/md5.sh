@@ -1,6 +1,6 @@
 ### build
   $ jbuilder build md5.exe
-  Done: 3/5 (jobs: 1)                   Done: 72/75 (jobs: 1)                     Done: 73/75 (jobs: 1)                     Done: 74/75 (jobs: 1)                     
+  Done: 3/7 (jobs: 1)                   Done: 4/7 (jobs: 1)                   Done: 5/7 (jobs: 1)                   Done: 74/77 (jobs: 1)                     Done: 75/77 (jobs: 1)                     Done: 76/77 (jobs: 1)                     
 ### run
 %% --non-deterministic
   $ ./_build/default/md5.exe ./_build/default/md5.exe

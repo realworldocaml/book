@@ -367,8 +367,8 @@
     ../examples/code/command-line-parsing/basic_md5_multiarg/md5.sh
     ../examples/code/command-line-parsing/basic_md5_sequence.ml
     ../examples/code/command-line-parsing/basic_md5_succinct/md5.ml
-    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/basic_md5_with_custom_arg.ml
-    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run_basic_md5_with_custom_arg.errsh
+    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run.errsh
     ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml
     ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh
     ../examples/code/command-line-parsing/basic_md5_with_flags/jbuild

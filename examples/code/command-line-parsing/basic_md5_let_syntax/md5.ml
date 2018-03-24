@@ -20,7 +20,7 @@ let command =
        hash_length = anon ("hash_length" %: int)
      and filename  = anon ("filename" %: string)
      in
-     do_hash hash_length filename)
+     fun () -> do_hash hash_length filename)
 
 [@@@part "2"];;
 let () =

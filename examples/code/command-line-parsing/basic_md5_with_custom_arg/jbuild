@@ -2,6 +2,7 @@
 (include jbuild.inc)
 
 (executables
- ((names (basic_md5_with_custom_arg))
+ ((names (md5))
   (libraries (core cryptokit))
+  (preprocess (pps (ppx_jane)))
 ))

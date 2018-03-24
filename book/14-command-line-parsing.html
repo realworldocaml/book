@@ -332,8 +332,8 @@
     <h1>Argument Types</h1>
 
     <p>
-      You aren't just limited to parsing command lines as strings, of
-      course. <code>Command.Param</code> defines several other
+      You aren't just limited to parsing command lines of strings and
+      ints. <code>Command.Param</code> defines several other
       conversion functions (shown
       in <a href="14-command-line-parsing.html#table14_1"
       data-type="xref">Table14_1</a>) that validate and parse input
@@ -421,11 +421,12 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
         predefined ones aren't sufficient. For instance, let's make
         a <code>regular_file</code> argument type that ensures that
         the input file isn't a character device or some other odd
-        UNIX file type that can't be fully read:
+        UNIX file type that can't be fully read.
 
 	<idx>arguments/defining custom types</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_custom_arg/basic_md5_with_custom_arg.ml"/>
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_with_custom_arg/md5.ml"/>
 
       <p>
 	The <code>regular_file</code> function transforms a
@@ -435,7 +436,7 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
         new error messages if you try to open a special device such
         as <code>/dev/null</code>:</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_custom_arg/run_basic_md5_with_custom_arg.errsh"/>
+      <link rel="import" href="code/command-line-parsing/basic_md5_with_custom_arg/run.errsh"/>
     </section>
 
     <section id="optional-and-default-arguments" data-type="sect2">

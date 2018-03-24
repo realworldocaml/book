@@ -13,9 +13,9 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Param.(
-      map (anon ("filename" %: file)) ~f:(fun file ->
-          (fun () -> do_hash file)))
+    Command.Let_syntax.(
+      let%map_open file = anon ("filename" %: file) in
+      fun () -> do_hash file)
 
 [@@@part "2"];;
 
