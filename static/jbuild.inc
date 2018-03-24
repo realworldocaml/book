@@ -381,8 +381,8 @@
     ../examples/code/command-line-parsing/cal_add_interactive/build_and_run_cal_add_interactive.sh
     ../examples/code/command-line-parsing/cal_add_interactive/cal_add_interactive.ml
     ../examples/code/command-line-parsing/cal_add_labels.ml
-    ../examples/code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.ml
-    ../examples/code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.sh
+    ../examples/code/command-line-parsing/cal_add_sub_days/cal.ml
+    ../examples/code/command-line-parsing/cal_add_sub_days/cal.sh
     ../examples/code/command-line-parsing/cal_add_sub_days/jbuild
     ../examples/code/command-line-parsing/cal_append.ml
     ../examples/code/command-line-parsing/cal_append_broken/build_cal_append_broken.errsh

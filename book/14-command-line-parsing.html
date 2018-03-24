@@ -714,21 +714,26 @@
       using <code>Command.group</code>.</p>
 
     <link rel="import"
-	  href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.ml"/>
+	  href="code/command-line-parsing/cal_add_sub_days/cal.ml"/>
 
     <p>
       And that's all you really need to add subcommand support!
       Let's build the example first in the usual way and inspect
       the help output, which now reflects the subcommands we just
       added.</p>
-    <link rel="import" href="code/command-line-parsing/cal_add_sub_days/jbuild"/>
-    <link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.sh" part="build"/>
+    <link rel="import"
+	  href="code/command-line-parsing/cal_add_sub_days/jbuild"/>
+    <link rel="import"
+	  href="code/command-line-parsing/cal_add_sub_days/cal.sh"
+	  part="build"/>
 
     <p>
       We can invoke the two commands we just defined to verify
       that they work and see the date parsing in action:</p>
 
-    <link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.sh" part="run"/>
+    <link rel="import"
+	  href="code/command-line-parsing/cal_add_sub_days/cal.sh"
+	  part="run"/>
   </section>
 
   <section id="advanced-control-over-parsing" data-type="sect1">
