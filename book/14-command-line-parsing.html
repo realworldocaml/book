@@ -411,7 +411,7 @@
       does enable interactive command-line completion. We'll explain
       how to enable that later in the chapter.</p>
 
-j    <section id="defining-custom-argument-types" data-type="sect2">
+    <section id="defining-custom-argument-types" data-type="sect2">
       <h2>Defining Custom Argument Types</h2>
 
       <p>
@@ -434,7 +434,8 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
         new error messages if you try to open a special device such
         as <code>/dev/null</code>:</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_custom_arg/run.errsh"/>
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_with_custom_arg/run.errsh"/>
     </section>
 
     <section id="optional-and-default-arguments" data-type="sect2">
@@ -507,24 +508,28 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
       <h2>Sequences of Arguments</h2>
 
       <p>
-	One last transformation that's useful is to obtain lists
-        of anonymous arguments rather than a single one. As an
-        example, let's modify our MD5 code to take a collection of
-        files to process on the command line:
+	Another common way of parsing anonymous arguments is as a
+	variable length list.  As an example, let's modify our MD5
+	code to take a collection of files to process on the command
+	line.
 
 	<idx>arguments/sequences of</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_sequence.ml"/>
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_sequence/md5.ml"/>
 
       <p>
-	The callback function is a little more complex now, to
-        handle the extra options. The <code>files</code> are now a
-        <code>string list</code>, and an empty list reverts to
-        using standard input, just as our previous
-        <code>maybe</code> and <code>maybe_with_default</code>
-        examples did. If the list of files isn't empty, then it
-        opens up each file and runs them through
-        <code>do_hash</code> sequentially.</p>
+	The callback function is a little more complex now, to handle
+        the extra options. The <code>files</code> are now
+        a <code>string list</code>, and an empty list reverts to using
+        standard input, just as our previous <code>maybe</code>
+        and <code>maybe_with_default</code> examples did. If the list
+        of files isn't empty, then it opens up each file and runs them
+        through <code>do_hash</code> sequentially.</p>
+
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_sequence/md5.sh" />
+
     </section>
   </section>
 

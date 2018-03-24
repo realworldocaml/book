@@ -365,7 +365,8 @@
     ../examples/code/command-line-parsing/basic_md5_let_syntax2/md5.ml
     ../examples/code/command-line-parsing/basic_md5_multiarg/md5.ml
     ../examples/code/command-line-parsing/basic_md5_multiarg/md5.sh
-    ../examples/code/command-line-parsing/basic_md5_sequence.ml
+    ../examples/code/command-line-parsing/basic_md5_sequence/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_sequence/md5.sh
     ../examples/code/command-line-parsing/basic_md5_succinct/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run.errsh
