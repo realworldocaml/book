@@ -372,9 +372,6 @@
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run.errsh
     ../examples/code/command-line-parsing/basic_md5_with_default_file/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_default_file/md5.sh
-    ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml
-    ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh
-    ../examples/code/command-line-parsing/basic_md5_with_flags/jbuild
     ../examples/code/command-line-parsing/basic_md5_with_optional_file/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_optional_file/md5.sh
     ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/build.errsh
@@ -392,6 +389,8 @@
     ../examples/code/command-line-parsing/cal_completion.rawsh
     ../examples/code/command-line-parsing/command_types.mlt
     ../examples/code/command-line-parsing/group.mlt
+    ../examples/code/command-line-parsing/md5_with_flags/md5.ml
+    ../examples/code/command-line-parsing/md5_with_flags/md5.sh
     ../examples/code/command-line-parsing/opam.rawsh
     ../examples/code/command-line-parsing/step.mlt))
   (action (

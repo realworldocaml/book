@@ -537,26 +537,24 @@
     <h1>Adding Labeled Flags to the Command Line</h1>
 
     <p>
-      You aren't just limited to anonymous arguments on the
-      command line. A <em>flag</em> is a named field that can be
-      followed by an optional argument. These flags can appear in
-      any order on the command line, or multiple times, depending
-      on how they're declared in the specification.
+      You aren't limited to anonymous arguments on the command
+      line. A <em>flag</em> is a named field that can be followed by
+      an optional argument. These flags can appear in any order on the
+      command line, or multiple times, depending on how they're
+      declared in the specification.
 
       <idx>flags</idx>
       <idx>command-line parsing/labeled flags and</idx></p>
 
     <p>
-      Let's add two arguments to our <code>md5</code> command
-      that mimics the Mac OS X version. A <code>-s</code> flag
-      specifies the string to be hashed directly on the command
-      line and <code>-t</code> runs a self-test. The complete
-      example follows:</p>
+      Let's add two arguments to our <code>md5</code> command that
+      mimics the Mac OS X version. A <code>-s</code> flag specifies
+      the string to be hashed directly on the command line
+      and <code>-t</code> runs a self-test. The complete example
+      follows.</p>
 
-    TODO: build_basic_md5_with_flags.sh
-    <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/jbuild"/>
-    <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh" part="build"/>
-    <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml"/>
+    <link rel="import"
+	  href="code/command-line-parsing/md5_with_flags/md5.ml"/>
 
     <p>
       The specification now uses the <code>flag</code> function
@@ -568,14 +566,18 @@
       <code>doc</code> text with a blank space. The help text for
       the preceding code looks like this:</p>
 
-    <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh" part="run"/>
+    <link rel="import"
+	  href="code/command-line-parsing/md5_with_flags/md5.sh"
+	  part="run"/>
 
     <p>
-      The <code>-s</code> flag in our specification requires a
-      <code>string</code> argument and isn't optional. The Command
-      parser outputs an error message if the flag isn't supplied,
-      as with the anonymous arguments in earlier examples. <a href="14-command-line-parsing.html#table14-2" data-type="xref">Table14 2</a> contains a list of some of the functions
-      that you can wrap flags in to control how they are
+      The <code>-s</code> flag in our specification requires
+      a <code>string</code> argument and isn't optional. The Command
+      parser outputs an error message if the flag isn't supplied, as
+      with the anonymous arguments in earlier
+      examples. <a href="14-command-line-parsing.html#table14-2"
+      data-type="xref">Table14 2</a> contains a list of some of the
+      functions that you can wrap flags in to control how they are
       parsed.
 
       <idx>flag functions</idx></p>
@@ -1087,11 +1089,14 @@
         variable set to any value.</p>
 
       <p>
-	For example, let's try it on our MD5 example from
-        earlier, assuming that the binary is called <span class="command"><em>basic_md5_with_flags</em></span> in the
+	For example, let's try it on our MD5 example from earlier,
+        assuming that the binary is
+        called <span class="command"><em>md5</em></span> in the
         current directory:</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh" part="completion"/>
+      <link rel="import"
+	    href="code/command-line-parsing/md5_with_flags/md5.sh"
+	    part="completion"/>
 
       <p>
 	Recall that we used the <code>Arg_type.file</code> to
