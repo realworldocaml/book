@@ -467,7 +467,7 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
         and read from standard input if no file is specified.</p>
 
       <link rel="import"
-	    href="code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_optional_file.ml"/>
+	    href="code/command-line-parsing/basic_md5_with_optional_file/md5.ml"/>
 
       <p>
 	The <code>filename</code> parameter to
@@ -477,28 +477,30 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
         standard input or a file, and then the rest of the command
         is similar to our previous examples.</p>
 
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_with_optional_file/md5.sh" />
+
       <p>
-	Another possible way to handle this would be to supply a
-        dash as the default filename if one isn't specified. The
-        <code>maybe_with_default</code> function can do just this,
-        with the benefit of not having to change the callback
-        parameter type (which may be a problem in more complex
-        applications).</p>
+	Another possible way to handle this would be to supply a dash
+        as the default filename if one isn't
+        specified. The <code>maybe_with_default</code> function can do
+        just this, with the benefit of not having to change the
+        callback parameter type.</p>
 
       <p>
 	The following example behaves exactly the same as the
         previous example, but replaces <code>maybe</code> with
         <code>maybe_with_default</code>:</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_default_file.ml"/>
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_with_default_file/md5.ml"/>
 
       <p>
-	Building and running both against a system file confirms
-        that they have the same behavior:</p>
+	Building and running this confirms that it has the same
+	behavior as before.</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/jbuild"/>
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/basic_and_default_md5.sh" part="build"/>
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/basic_and_default_md5.sh" part="run"/>
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_with_default_file/md5.sh" />
     </section>
 
     <section id="sequences-of-arguments" data-type="sect2">

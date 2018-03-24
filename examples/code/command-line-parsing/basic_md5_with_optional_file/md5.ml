@@ -6,7 +6,7 @@ let get_inchan = function
   | Some filename ->
     In_channel.create ~binary:true filename
 
-let do_hash filename () =
+let do_hash filename =
   let open Cryptokit in
   get_inchan filename
   |> hash_channel (Hash.md5 ())
@@ -14,11 +14,12 @@ let do_hash filename () =
   |> print_endline
 
 let command =
-  Command.basic_spec
+  Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Spec.(empty +> anon (maybe ("filename" %: file)))
-    do_hash
+    Command.Let_syntax.(
+      let%map_open filename = anon (maybe ("filename" %: file)) in
+      fun () -> do_hash filename)
 
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command

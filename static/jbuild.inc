@@ -369,15 +369,14 @@
     ../examples/code/command-line-parsing/basic_md5_succinct/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run.errsh
+    ../examples/code/command-line-parsing/basic_md5_with_default_file/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_with_default_file/md5.sh
     ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml
     ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh
     ../examples/code/command-line-parsing/basic_md5_with_flags/jbuild
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/basic_and_default_md5.sh
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_default_file.ml
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_optional_file.ml
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/jbuild
+    ../examples/code/command-line-parsing/basic_md5_with_optional_file/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_with_optional_file/md5.sh
     ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/build.errsh
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/jbuild
     ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/md5.ml
     ../examples/code/command-line-parsing/cal_add_days.ml
     ../examples/code/command-line-parsing/cal_add_interactive/build_and_run_cal_add_interactive.sh
