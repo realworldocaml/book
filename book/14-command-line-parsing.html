@@ -73,7 +73,7 @@
       <idx>MD5 one-way cryptographic hash function</idx>
       <idx>command-line parsing/basic approach to</idx></p>
 
-    <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.ml"/>
+    <link rel="import" href="code/command-line-parsing/basic_md5/md5.ml"/>
 
     <p>
       The <code>do_hash</code> function accepts
@@ -98,7 +98,7 @@
 	is passed in without a flag.</p>
 
       <link rel="import" part="1"
-	    href="code/command-line-parsing/basic_md5/basic_md5.ml" />
+	    href="code/command-line-parsing/basic_md5/md5.ml" />
 
       <p>
 	Here, <code>anon</code> is used to signal the parsing of
@@ -125,7 +125,7 @@
 
 	<idx>Command.basic</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5/basic_md5.ml" part="2"/>
+      <link rel="import" href="code/command-line-parsing/basic_md5/md5.ml" part="2"/>
 
       <p>
 	The <code>summary</code> argument is a one-line
@@ -198,7 +198,7 @@
         one function call away.</p>
 
       <link rel="import" part="3"
-	    href="code/command-line-parsing/basic_md5/basic_md5.ml" />
+	    href="code/command-line-parsing/basic_md5/md5.ml" />
 
       <p>
 	<code>Command.run</code> takes a couple of optional
@@ -211,14 +211,14 @@
       <link rel="import"
 	    href="code/command-line-parsing/basic_md5/jbuild"/>
       <link rel="import" part="build"
-	    href="code/command-line-parsing/basic_md5/basic_md5.sh" />
+	    href="code/command-line-parsing/basic_md5/md5.sh" />
 
       <p>
 	You can now query the version information for the binary
         you just compiled:</p>
 
       <link rel="import" part="get version"
-	    href="code/command-line-parsing/basic_md5/basic_md5.sh" />
+	    href="code/command-line-parsing/basic_md5/md5.sh" />
 
       <p>
 	The versions that you see in the output were defined via
@@ -236,7 +236,7 @@
 	argument <code>filename</code> is missing.</p>
 
       <link rel="import" part="get help"
-	    href="code/command-line-parsing/basic_md5/basic_md5.sh" />
+	    href="code/command-line-parsing/basic_md5/md5.sh" />
 
       <p>
 	If you do supply the <code>filename</code> argument,
@@ -244,13 +244,13 @@
         the MD5 output is displayed to the standard output:</p>
 
       <link rel="import" part="run"
-	    href="code/command-line-parsing/basic_md5/basic_md5.sh"/>
+	    href="code/command-line-parsing/basic_md5/md5.sh"/>
 
       <p>
 	And that's all it took to build our little MD5 utility!
         Here's a complete version of the example we just walked
         through, made slightly more succinct by removing
-        intermediate variables:</p>
+        intermediate variables.</p>
 
       <link rel="import"
 	    href="code/command-line-parsing/basic_md5_succinct/md5.ml"/>
@@ -259,31 +259,98 @@
         chapter will examine some of the more advanced features of
         Command.</p>
     </section>
+
+    <section id="multiple-arguments" data-type="sect2">
+      <h2>Multi-argument commands</h2>
+
+      <p>
+	All of the examples thus far have involved single argument
+	commands. We can create parsers that take multiple arguments
+	by binding together simpler parsers, using the
+	function <code>Command.Param.both</code>. Here is its
+	type.</p>
+
+      <link rel="import" part="4"
+	    href="code/command-line-parsing/command_types.mlt"/>
+
+      <p>
+	<code>both</code> allows us to take two parameter parsers and
+	combine them into a single parser that returns the two
+	arguments as a pair. In the following, we rewrite
+	our <code>md5</code> program so it takes two anonymous
+	arguments: the first is an integer saying how many characters
+	of the hash to print out, and the second is the filename.</p>
+
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_multiarg/md5.ml" />
+
+      <p>
+	Building and running this command, we can see that it now
+	indeed expects two arguments.</p>
+
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_multiarg/md5.sh" />
+
+      <p>
+	This works well enough for two parameters, but if you want
+	longer parameter lists, this approach gets old fast. A better
+	way is to use let-syntax, which was discussed
+	in <a href="07-error-handling.html#bind-and-other-error-handling-idioms"
+	data-type="xref">Error Handling</a>.</p>
+
+      <link rel="import" part="1"
+	    href="code/command-line-parsing/basic_md5_let_syntax/md5.ml" />
+
+      <p>
+	Here, we take advantage of let-syntax's support for parallel
+	let bindings, using <code>and</code> to join the definitions
+	together. This syntax translates down to the same pattern
+	based on <code>both</code> that we showed above, but it's
+	easier to read and use, and scales better to more
+	arguments. <p>
+
+      <p>
+	The need to open both modules is a little awkward, and
+	the <code>Param</code> module in particular you really only
+	need on the right-hand-side of the equals-sign. This is
+	achieved automatically by using the <code>let%map_open</code>
+	syntax, demonstrated below.</p>
+
+      <link rel="import" part="1"
+	    href="code/command-line-parsing/basic_md5_let_syntax2/md5.ml"
+	    />
+
+      <p>
+	Let-syntax is the most common way of writing parsers
+	for <code>Command</code>, and we'll use that idiom for the
+	remainder of the chapter. </p>
+
+      </section>
   </section>
 
   <section id="argument-types" data-type="sect1">
     <h1>Argument Types</h1>
 
     <p>
-      You aren't just limited to parsing command lines as
-      strings, of course. <code>Command.Spec</code> defines several
-      other conversion functions (shown in <a href="14-command-line-parsing.html#table14_1" data-type="xref">Table14_1</a>) that validate and parse input into
-      various types.
+      You aren't just limited to parsing command lines as strings, of
+      course. <code>Command.Param</code> defines several other
+      conversion functions (shown
+      in <a href="14-command-line-parsing.html#table14_1"
+      data-type="xref">Table14_1</a>) that validate and parse input
+      into various types.
 
       <idx>arguments/argument types</idx>
       <idx>command-line parsing/argument types</idx></p>
 
     <table id="table14_1">
       <caption>
-        Conversion functions defined by <code>Command.spec</code>
+        Conversion functions defined in <code>Command.Param</code>
       </caption>
 
       <thead>
         <tr>
           <th>Argument type</th>
-
           <th>OCaml type</th>
-
           <th>Example</th>
         </tr>
       </thead>
@@ -291,78 +358,62 @@
       <tbody>
         <tr>
           <td><code>string</code></td>
-
           <td><code>string</code></td>
-
           <td><code>foo</code></td>
         </tr>
 
         <tr>
           <td><code>int</code></td>
-
           <td><code>int</code></td>
-
           <td><code>123</code></td>
         </tr>
 
         <tr>
           <td><code>float</code></td>
-
           <td><code>float</code></td>
-
           <td><code>123.01</code></td>
         </tr>
 
         <tr>
           <td><code>bool</code></td>
-
           <td><code>bool</code></td>
-
           <td><code>true</code></td>
         </tr>
 
         <tr>
           <td><code>date</code></td>
-
           <td><code>Date.t</code></td>
-
           <td><code>2013-12-25</code></td>
         </tr>
 
         <tr>
           <td><code>time_span</code></td>
-
           <td><code>Span.t</code></td>
-
           <td><code>5s</code></td>
         </tr>
 
         <tr>
           <td><code>file</code></td>
-
           <td><code>string</code></td>
-
           <td><code>/etc/passwd</code></td>
         </tr>
       </tbody>
     </table>
 
     <p>
-      We can tighten up the specification of the command to
-      <code>file</code> to reflect that the argument must be a
-      valid filename, and not just any string:</p>
+      We can tighten up the specification of the command
+      to <code>file</code> to reflect that the argument must be a
+      valid filename, and not just any string.</p>
 
-    <link rel="import" href="code/command-line-parsing/basic_md5_as_filename/basic_md5_as_filename.ml" part="1"/>
+      <link rel="import" part="1"
+	    href="code/command-line-parsing/basic_md5_as_filename/md5.ml" />
 
     <p>
-      Running this with a nonexistent filename will now output
-      an error if the file doesn't exist. As a bonus, it also
-      enables interactive command-line completion to work on the
-      filename argument (explained later in the chapter):</p>
+      This doesn't change the validation of the provided value, but it
+      does enable interactive command-line completion. We'll explain
+      how to enable that later in the chapter.</p>
 
-    <link rel="import" href="code/command-line-parsing/basic_md5_as_filename/run_basic_md5_as_filename.errsh"/>
-
-    <section id="defining-custom-argument-types" data-type="sect2">
+j    <section id="defining-custom-argument-types" data-type="sect2">
       <h2>Defining Custom Argument Types</h2>
 
       <p>

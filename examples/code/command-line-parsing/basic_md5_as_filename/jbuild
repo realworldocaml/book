@@ -2,6 +2,6 @@
 (include jbuild.inc)
 
 (executables
- ((names (basic_md5_as_filename))
+ ((names (md5))
   (libraries (core cryptokit))
 ))

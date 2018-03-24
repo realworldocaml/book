@@ -22,3 +22,10 @@ type nonrec 'result basic_command =
 [@@@part "3"];;
 #show Command.Param.map;;
 [%%expect{|val map : 'a Command.Spec.param -> f:('a -> 'b) -> 'b Command.Spec.param|}];;
+[@@@part "4"];;
+#show Command.Param.both;;
+[%%expect{|
+val both :
+  'a Command.Spec.param ->
+  'b Command.Spec.param -> ('a * 'b) Command.Spec.param
+|}];;

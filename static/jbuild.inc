@@ -357,11 +357,14 @@
     ../book/14-command-line-parsing.html
     ../bin/bin/app.exe
     ../examples/code/command-line-parsing/basic.mlt
-    ../examples/code/command-line-parsing/basic_md5/basic_md5.ml
-    ../examples/code/command-line-parsing/basic_md5/basic_md5.sh
     ../examples/code/command-line-parsing/basic_md5/jbuild
-    ../examples/code/command-line-parsing/basic_md5_as_filename/basic_md5_as_filename.ml
-    ../examples/code/command-line-parsing/basic_md5_as_filename/run_basic_md5_as_filename.errsh
+    ../examples/code/command-line-parsing/basic_md5/md5.ml
+    ../examples/code/command-line-parsing/basic_md5/md5.sh
+    ../examples/code/command-line-parsing/basic_md5_as_filename/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_let_syntax/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_let_syntax2/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_multiarg/md5.ml
+    ../examples/code/command-line-parsing/basic_md5_multiarg/md5.sh
     ../examples/code/command-line-parsing/basic_md5_sequence.ml
     ../examples/code/command-line-parsing/basic_md5_succinct/md5.ml
     ../examples/code/command-line-parsing/basic_md5_with_custom_arg/basic_md5_with_custom_arg.ml

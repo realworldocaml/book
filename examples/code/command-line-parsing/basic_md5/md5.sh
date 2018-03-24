@@ -1,15 +1,15 @@
 ### build
-  $ jbuilder build basic_md5.exe
+  $ jbuilder build md5.exe
   Done: 3/5 (jobs: 1)                   Done: 72/75 (jobs: 1)                     Done: 73/75 (jobs: 1)                     Done: 74/75 (jobs: 1)                     
 ### run
 %% --non-deterministic
-  $ ./_build/default/basic_md5.exe ./_build/default/basic_md5.exe
+  $ ./_build/default/md5.exe ./_build/default/md5.exe
   755e1de2f36cfffd870269161df6a3f2
 ### get help
-  $ ./_build/default/basic_md5.exe -help
+  $ ./_build/default/md5.exe -help
   Generate an MD5 hash of the input data
   
-    basic_md5.exe FILENAME
+    md5.exe FILENAME
   
   More detailed information
   
@@ -21,7 +21,7 @@
                    (alias: -?)
   
 ### get version
-  $ ./_build/default/basic_md5.exe -version
+  $ ./_build/default/md5.exe -version
   1.0
-  $ ./_build/default/basic_md5.exe -build-info
+  $ ./_build/default/md5.exe -build-info
   RWO
