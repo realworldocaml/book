@@ -142,7 +142,7 @@
 	recreating some of this code in the toplevel.</p>
 
       <link rel="import" part="1"
-	    href="code/command-line-parsing/command_types.mlt"/>
+	    href="code/command-line-parsing/main.mlt"/>
 
       <p>
 	The type parameter of <code>filename_param</code> is there
@@ -156,7 +156,7 @@
 	types.</p>
 
       <link rel="import" part="2"
-	    href="code/command-line-parsing/command_types.mlt"/>
+	    href="code/command-line-parsing/main.mlt"/>
 
       <p>
 	Note that the <code>'result</code> parameter of the type alias
@@ -178,7 +178,7 @@
       </p>
 
       <link rel="import" part="3"
-	    href="code/command-line-parsing/command_types.mlt"/>
+	    href="code/command-line-parsing/main.mlt"/>
 
       <p>
 	In our program, we used <code>map</code> to convert
@@ -264,7 +264,7 @@
 	type.</p>
 
       <link rel="import" part="4"
-	    href="code/command-line-parsing/command_types.mlt"/>
+	    href="code/command-line-parsing/main.mlt"/>
 
       <p>
 	<code>both</code> allows us to take two parameter parsers and
@@ -533,8 +533,8 @@
     </section>
   </section>
 
-  <section id="adding-labeled-flags-to-the-command-line" data-type="sect1">
-    <h1>Adding Labeled Flags to the Command Line</h1>
+  <section id="adding-labeled-flags" data-type="sect1">
+    <h1>Adding Labeled Flags</h1>
 
     <p>
       You aren't limited to anonymous arguments on the command
@@ -675,21 +675,20 @@
 
     <p>
       This usually only becomes a concern when your application
-      organically grows features. Luckily, it's simple to extend
-      your application to do this in Command: just swap the
-      <code>Command.basic</code> for <code>Command.group</code>,
-      which takes an association list of specifications and handles
-      the subcommand parsing and help output for you:
+      organically grows features. Luckily, it's simple to extend your
+      application to do this in Command: just
+      use <code>Command.group</code>, which lets you merge a
+      collection of <code>Command.t</code>'s into one.
 
       <idx>Command.group</idx></p>
 
-    <link rel="import" href="code/command-line-parsing/group.mlt" part="1"/>
+    <link rel="import" href="code/command-line-parsing/main.mlt" part="g.1"/>
 
     <p>
-      The <code>group</code> signature accepts a list of basic
-      <code>Command.t</code> values and their corresponding names.
-      When executed, it looks for the appropriate subcommand from
-      the name list, and dispatches it to the right command
+      The <code>group</code> signature accepts a list of
+      basic <code>Command.t</code> values and their corresponding
+      names.  When executed, it looks for the appropriate subcommand
+      from the name list, and dispatches it to the right command
       handler.</p>
 
     <p>
@@ -698,17 +697,24 @@
       define a command that adds days to an input date and prints
       the resulting date:</p>
 
-    <link rel="import" href="code/command-line-parsing/cal_add_days.ml"/>
+    <link rel="import"
+	  href="code/command-line-parsing/cal_add_days/cal.ml"/>
 
     <p>
       Everything in this command should be familiar to you by
-      now. Once you've tested it and made sure it works, we can
-      define another new command that takes the difference of two
-      dates. However, instead of creating a new binary, we group
-      both operations as subcommands using
-      <code>Command.group</code>:</p>
+      now, and it works as you might expect.</p>
 
-    <link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.ml"/>
+    <link rel="import"
+	  href="code/command-line-parsing/cal_add_days/cal.sh"/>
+
+    <p>
+      Now, let's also add the ability to take the difference between
+      two dates, but, instead of creating a new binary, we'll group
+      both operations as subcommands
+      using <code>Command.group</code>.</p>
+
+    <link rel="import"
+	  href="code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.ml"/>
 
     <p>
       And that's all you really need to add subcommand support!
@@ -806,7 +812,9 @@
         that returns a value of type <code>'r</code>. Let's look at
         some examples of specs, and their types:</p>
 
-      <link rel="import" href="code/command-line-parsing/command_types.mlt" part="1"/>
+      <link rel="import"
+	    href="code/command-line-parsing/main.mlt"
+	    part="1"/>
 
       <p>
 	The empty specification is simple, as it doesn't add any
@@ -901,7 +909,8 @@
 
 	<idx>interactive input/prompts for</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/cal_add_days.ml"/>
+      <link rel="import"
+	    href="code/command-line-parsing/cal_add_days/cal.ml"/>
 
       <p>
 	This program requires you to specify both the

@@ -376,7 +376,8 @@
     ../examples/code/command-line-parsing/basic_md5_with_optional_file/md5.sh
     ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/build.errsh
     ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/md5.ml
-    ../examples/code/command-line-parsing/cal_add_days.ml
+    ../examples/code/command-line-parsing/cal_add_days/cal.ml
+    ../examples/code/command-line-parsing/cal_add_days/cal.sh
     ../examples/code/command-line-parsing/cal_add_interactive/build_and_run_cal_add_interactive.sh
     ../examples/code/command-line-parsing/cal_add_interactive/cal_add_interactive.ml
     ../examples/code/command-line-parsing/cal_add_labels.ml
@@ -387,8 +388,7 @@
     ../examples/code/command-line-parsing/cal_append_broken/build_cal_append_broken.errsh
     ../examples/code/command-line-parsing/cal_append_broken/jbuild
     ../examples/code/command-line-parsing/cal_completion.rawsh
-    ../examples/code/command-line-parsing/command_types.mlt
-    ../examples/code/command-line-parsing/group.mlt
+    ../examples/code/command-line-parsing/main.mlt
     ../examples/code/command-line-parsing/md5_with_flags/md5.ml
     ../examples/code/command-line-parsing/md5_with_flags/md5.sh
     ../examples/code/command-line-parsing/opam.rawsh

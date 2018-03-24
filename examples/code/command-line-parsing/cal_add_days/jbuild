@@ -1,0 +1,8 @@
+(jbuild_version 1)
+(include jbuild.inc)
+
+(executable
+  ((name cal)
+   (libraries (core))
+   (preprocess (pps (ppx_jane)))
+  ))
