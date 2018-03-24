@@ -18,8 +18,8 @@ Error: Unbound value no_converter_of_sexp
 type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp] ;;
 [%%expect ocaml {|
 type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
+val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t = <fun>
+val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t = <fun>
 |}];;
 [@@@part "2"];;
 sexp_of_t { a = (3,4); b = "foo" } ;;

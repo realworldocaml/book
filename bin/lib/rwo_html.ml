@@ -228,7 +228,7 @@ let check_attrs ?(required=[]) ?(allowed=`Any) attrs_list =
   let attrs_list = List.map attrs_list ~f:fst in
   let attrs = String.Set.of_list attrs_list in
   let required = String.Set.of_list required in
-  match List.find_a_dup attrs_list with
+  match List.find_a_dup ~compare:String.compare attrs_list with
   | Some x ->
     error "attribute repeated" x sexp_of_string
   | None ->

@@ -1,4 +1,5 @@
   $ jbuilder build search_with_configurable_server.exe
+%% --non-deterministic
   $ ./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
   (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
    ("Raised by primitive operation at file \"src/unix_syscalls.ml\", line 937, characters 17-76"

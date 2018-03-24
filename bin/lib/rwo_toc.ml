@@ -199,7 +199,7 @@ let get_chapters ?(repo_root=".") () : chapter list Deferred.t =
       sections = get_sections in_file html;
     }
   ) >>|
-  List.sort ~cmp:(fun a b -> Int.compare a.number b.number)
+  List.sort ~compare:(fun a b -> Int.compare a.number b.number)
 
 let get_next_chapter chapters curr_chapter : chapter option =
   List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)
@@ -230,7 +230,7 @@ let imported_files ?(repo_root=".") () =
       List.map l ~f:(fun x -> repo_root/"book"/x.Import.href)
     ) >>| fun ll ->
   List.concat ll |> fun l ->
-  List.dedup_and_sort l
+  List.dedup_and_sort ~compare:String.compare l
 
 let code_files ?(repo_root=".") () =
   Util.find_files (repo_root/"examples"/"code") >>|

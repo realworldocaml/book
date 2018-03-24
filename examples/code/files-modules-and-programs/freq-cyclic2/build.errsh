@@ -1,6 +1,6 @@
   $ jbuilder build freq.bc
   Dependency cycle between modules in _build/default:
-     Freq
+     -> Freq
   -> Counter
   -> Freq
 @@ exit 1

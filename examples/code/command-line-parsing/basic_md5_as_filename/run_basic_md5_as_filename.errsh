@@ -1,13 +1,11 @@
   $ jbuilder build basic_md5_as_filename.exe
-      ocamlopt basic_md5_as_filename.exe
-  ld: warning: directory not found for option '-L/opt/local/lib'
   $ ./_build/default/basic_md5_as_filename.exe nonexistent
   Uncaught exception:
     
     (Sys_error "nonexistent: No such file or directory")
   
   Raised by primitive operation at file "pervasives.ml", line 389, characters 28-54
-  Called from file "src/in_channel.ml", line 20, characters 45-66
+  Called from file "src/in_channel.ml", line 22, characters 45-66
   Called from file "src/command.ml", line 2734, characters 6-97
-  Called from file "src/exn.ml", line 108, characters 6-10
+  Called from file "src/exn.ml", line 113, characters 6-10
 @@ exit 1

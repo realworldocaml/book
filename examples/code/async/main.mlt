@@ -415,7 +415,7 @@ let swallow_error () =
 [%%expect ocaml {|val swallow_error : unit -> 'a Conduit_async.io = <fun>|}];;
 
 [@@@part "35.5"];;
-Deferred.any [ after (Time.Span.of_sec 0.5) 
+Deferred.any [ after (Time.Span.of_sec 0.5)
              ; swallow_error () ]
 ;;
 [%%expect{|an error happened|};
@@ -440,10 +440,15 @@ let swallow_some_errors exn_to_raise =
 [%%expect ocaml {|val swallow_some_errors : exn -> 'a Conduit_async.io = <fun>|}];;
 
 [@@@part "37"];;
+exception Another_exception;;
+[%%expect ocaml {|exception Another_exception|}];;
 Deferred.any [ after (Time.Span.of_sec 0.5)
-             ; swallow_some_errors Not_found ]
+             ; swallow_some_errors Another_exception ]
 ;;
-[%%expect{|Exception: (monitor.ml.Error Not_found ("Caught by monitor (id 61)")).|}];;
+[%%expect{|
+Exception:
+(monitor.ml.Error (Another_exception) ("Caught by monitor (id 61)")).
+|}];;
 [@@@part "38"];;
 Deferred.any [ after (Time.Span.of_sec 0.5)
              ; swallow_some_errors Ignore_me ]
