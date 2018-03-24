@@ -5,6 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
+open Base;;
 [@@@part "1"];;
 let imm_stack init = object
   val v = init
@@ -12,9 +13,9 @@ let imm_stack init = object
   method pop =
     match v with
     | hd :: tl -> Some (hd, {< v = tl >})
-    | [] -> None 
+    | [] -> None
 
-  method push hd = 
+  method push hd =
     {< v = hd :: v >}
 end ;;
 [%%expect ocaml {|
