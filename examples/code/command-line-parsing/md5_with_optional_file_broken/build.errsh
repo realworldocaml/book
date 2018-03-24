@@ -4,5 +4,5 @@
   File "md5.ml", line 18, characters 24-32:
   Error: This expression has type string option
          but an expression was expected of type Base.string = string
-  Done: 74/77 (jobs: 1)                     
+  Done: 74/77 (jobs: 1)
 @@ exit 1
