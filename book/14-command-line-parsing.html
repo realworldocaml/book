@@ -181,12 +181,11 @@
 	    href="code/command-line-parsing/command_types.mlt"/>
 
       <p>
-	And that's exactly what we did in our invocation
-	of <code>Command.basic</code> earlier, converting
-	the <code>filename_param</code>, which returns a string
+	In our program, we used <code>map</code> to convert
+	the <code>filename_param</code> parser, which returns a string
 	representing the file name, into a parser that returns a
-	function of type <code>unit -> unit</code>, which holds the
-	code that will be run when the command executes.</p>
+	function of type <code>unit -> unit</code> containing the body
+	of the command.</p>
 
     </section>
 
@@ -229,19 +228,16 @@
         build revision number, in the case of Mercurial).</p>
 
       <p>
-	When we invoke our binary with <code>-help</code> as an
-	argument, it helpfully displays all of the command-line
-	options available, along with a message to the standard error
-	that informs you that a required
-	argument <code>filename</code> is missing.</p>
+	We can invoke our binary with <code>-help</code> to see the
+	auto-generated help.</p>
 
       <link rel="import" part="get help"
 	    href="code/command-line-parsing/basic_md5/md5.sh" />
 
       <p>
-	If you do supply the <code>filename</code> argument,
+	If you supply the <code>filename</code> argument,
         then <code>do_hash</code> is called with the argument and
-        the MD5 output is displayed to the standard output:</p>
+        the MD5 output is displayed to the standard output.</p>
 
       <link rel="import" part="run"
 	    href="code/command-line-parsing/basic_md5/md5.sh"/>
@@ -254,19 +250,16 @@
 
       <link rel="import"
 	    href="code/command-line-parsing/basic_md5_succinct/md5.ml"/>
-      <p>
-	Now that we have the basics in place, the rest of the
-        chapter will examine some of the more advanced features of
-        Command.</p>
     </section>
 
     <section id="multiple-arguments" data-type="sect2">
       <h2>Multi-argument commands</h2>
 
       <p>
-	All of the examples thus far have involved single argument
-	commands. We can create parsers that take multiple arguments
-	by binding together simpler parsers, using the
+	All the examples thus far have involved a single argument, but
+	we can of course create multi-argument commands as well. We
+	can make a parser for multiple arguments by binding together
+	simpler parsers, using the
 	function <code>Command.Param.both</code>. Here is its
 	type.</p>
 
@@ -322,8 +315,13 @@
 
       <p>
 	Let-syntax is the most common way of writing parsers
-	for <code>Command</code>, and we'll use that idiom for the
-	remainder of the chapter. </p>
+	for <code>Command</code>, and we'll use that idiom from here
+	on. </p>
+
+      <p>
+	Now that we have the basics in place, the rest of the
+        chapter will examine some of the more advanced features of
+        Command.</p>
 
       </section>
   </section>
@@ -445,32 +443,31 @@ j    <section id="defining-custom-argument-types" data-type="sect2">
       <p>
 	A more realistic MD5 binary could also read from the
         standard input if a <code>filename</code> isn't
-        specified:
+        specified. To do this, we need to declare the filename
+        argument as optional, which we can do with
+        the <code>maybe</code> operator.
 
 	<idx>arguments/default arguments</idx>
 	<idx>default arguments</idx>
 	<idx>optional arguments/and default arguments</idx>
 	<idx>arguments/optional arguments</idx></p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/basic_md5_with_optional_file_broken.ml" part="1"/>
+      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/md5.ml" part="1"/>
 
       <p>
-	This just wraps the <code>filename</code> argument
-        declaration in the <code>maybe</code> function to mark it
-        as an optional argument. However, building this results in
-        a compile-time error:</p>
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/jbuild"/>
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/build_basic_md5_with_optional_file_broken.errsh"/>
+	But building this results in a compile-time error.</p>
+      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file_broken/build.errsh"/>
 
       <p>
-	This is because changing the argument type has also
-        changed the type of the callback function. It now wants a
-        <code>string option</code> instead of a
-        <code>string</code>, since the value has become optional.
-        We can adapt our example to use the new information and
-        read from standard input if no file is specified:</p>
+	This is because changing the argument type has also changed
+        the type of the value that is returned by the parser. It now
+        produces a <code>string option</code> instead of
+        a <code>string</code>, reflecting the optionality of the
+        argument.  We can adapt our example to use the new information
+        and read from standard input if no file is specified.</p>
 
-      <link rel="import" href="code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_optional_file.ml"/>
+      <link rel="import"
+	    href="code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_optional_file.ml"/>
 
       <p>
 	The <code>filename</code> parameter to

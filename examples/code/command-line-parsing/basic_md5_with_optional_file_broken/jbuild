@@ -2,7 +2,8 @@
 (include jbuild.inc)
 
 (executable
-  ((name basic_md5_with_optional_file_broken)
+  ((name md5)
    (libraries (core cryptokit))
+   (preprocess (pps (ppx_jane)))
   )
 )

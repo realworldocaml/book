@@ -2,7 +2,7 @@
 
 (alias (
   (name runtest)
-  (deps (build.errsh (files_recursively_in .)))
+  (deps (basic_and_default_md5.sh (files_recursively_in .)))
   (action (
     progn
     (run   cram ${<})
@@ -10,7 +10,7 @@
 
 (alias (
   (name runtest-all)
-  (deps (build.errsh (files_recursively_in .)))
+  (deps (basic_and_default_md5.sh (files_recursively_in .)))
   (action (
     progn (run cram --non-deterministic ${<}) (diff? ${<} ${<}.corrected)))))
 

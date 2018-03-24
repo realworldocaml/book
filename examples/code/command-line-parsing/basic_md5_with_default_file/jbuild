@@ -1,0 +1,8 @@
+(jbuild_version 1)
+(include jbuild.inc)
+
+(executables
+  ((names (basic_md5_with_optional_file
+           basic_md5_with_default_file))
+   (libraries (core cryptokit))
+  ))
