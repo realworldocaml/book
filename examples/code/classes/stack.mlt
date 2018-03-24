@@ -5,7 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 [@@@part "0.5"];;
 class ['a] stack init = object
   val mutable v : 'a list = init
@@ -33,18 +33,18 @@ class ['a] stack :
 class ['a] stack init = object
   val mutable v = init
 
-  method pop = 
+  method pop =
     match v with
-    | hd :: tl -> 
+    | hd :: tl ->
       v <- tl;
       Some hd
     | [] -> None
 
-  method push hd = 
+  method push hd =
     v <- hd :: v
 end ;;
 [%%expect{|
-Characters 0-194:
+Characters 0-191:
 Error: Some type variables are unbound in this type:
          class ['a] stack :
            'b list ->
@@ -60,7 +60,7 @@ class sstack init = object
   inherit [string] stack init
 
   method print =
-    List.iter ~f:print_string v
+    List.iter ~f:Stdio.print_endline v
 end ;;
 [%%expect ocaml {|
 class sstack :

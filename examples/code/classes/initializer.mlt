@@ -5,12 +5,12 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 [@@@part "1"];;
-class obj x = 
-  let () = printf "Creating obj %d\n" x in
-  object 
-    val field = printf "Initializing field\n"; x
+class obj x =
+  let () = Stdio.printf "Creating obj %d\n" x in
+  object
+    val field = Stdio.printf "Initializing field\n"; x
   end ;;
 [%%expect ocaml {|class obj : int -> object val field : int end|}];;
 let o = new obj 3 ;;
