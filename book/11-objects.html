@@ -36,49 +36,49 @@
         <dt>Abstraction</dt>
 
         <dd>
-          <p>The details of the implementation are hidden in the
+          The details of the implementation are hidden in the
           object, and the external interface is just the set of
-          publicly accessible methods.</p>
+          publicly accessible methods.
         </dd>
 
         <dt>Dynamic lookup</dt>
 
         <dd>
-          <p>When a message is sent to an object, the method to be
+          When a message is sent to an object, the method to be
           executed is determined by the implementation of the
           object, not by some static property of the program. In
           other words, different objects may react to the same
-          message in different ways.</p>
+          message in different ways.
         </dd>
 
         <dt>Subtyping</dt>
 
         <dd>
-          <p>If an object <code>a</code> has all the functionality
+          If an object <code>a</code> has all the functionality
           of an object <code>b</code>, then we may use
           <code>a</code> in any context where <code>b</code> is
-          expected.</p>
+          expected.
         </dd>
 
         <dt>Inheritance</dt>
 
         <dd>
-          <p>The definition of one kind of object can be reused to
+          The definition of one kind of object can be reused to
           produce a new kind of object. This new definition can
           override some behavior, but also share code with its
-          parent.</p>
+          parent.
         </dd>
 
         <dt>Open recursion</dt>
 
         <dd>
-          <p>An object's methods can invoke another method in the
+          An object's methods can invoke another method in the
           same object using a special variable (often called
           <code>self</code> or <code>this</code>). When objects are
           created from classes, these calls use dynamic lookup,
           allowing a method defined in one class to invoke methods
           defined in another class that inherits from the
-          first.</p>
+          first.
         </dd>
       </dl>
 
