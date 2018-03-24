@@ -150,19 +150,17 @@
             <dt><code>summary</code></dt>
 
             <dd>
-              <p>
 		A required one-line description to go at the top of
-		the command help screen.</p>
+		the command help screen.
             </dd>
 
             <dt><code>readme</code></dt>
 
             <dd>
-              <p>
 		For longer help text when the command is called with
 		<code>-help</code>. The <code>readme</code> argument is
 		a function that is only evaluated when the help text is
-		actually needed.</p>
+		actually needed.
             </dd>
           </dl>
 
@@ -1109,21 +1107,21 @@
           <dt>The <code>Arg</code> module</dt>
 
           <dd>
-            <p>
 	      The <code>Arg</code> module is from the OCaml standard
               library, which is used by the compiler itself to handle
               its command-line interface. Command is generally more
               featureful than Arg (mainly via support for subcommands,
               the <code>step</code> combinator to transform inputs, and
               help generation), but there's absolutely nothing wrong
-              with using Arg either.</p>
+              with using Arg either.
 
-            <p>
+              <br/>
+
 	      You can use the
               <code>Command.Spec.flags_of_args_exn</code> function to
               convert Arg specifications into ones compatible with
               Command. This is quite often used to help port older
-              non-Core code into the Core standard library world.</p>
+              non-Core code into the Core standard library world.
           </dd>
 
           <dt>
@@ -1131,12 +1129,11 @@
           </dt>
 
           <dd>
-            <p>
 	      <code>ocaml-getopt</code> provides the general
               command-line syntax of GNU <code>getopt</code> and
               <code>getopt_long</code>. The GNU conventions are widely
               used in the open source world, and this library lets your
-              OCaml programs obey the same rules.</p>
+              OCaml programs obey the same rules.
           </dd>
 
           <dt>
@@ -1144,14 +1141,13 @@
           </dt>
 
           <dd>
-            <p>
 	      Cmdliner is a mix between the Command and Getopt
               libraries. It allows for the declarative definition of
               command-line interfaces but exposes a more
               <code>getopt</code>-like interface. It also automates the
               generation of UNIX man pages as part of the
               specification. Cmdliner is the parser used by OPAM to
-              manage its command line.</p>
+              manage its command line.
           </dd>
 	</dl>
       </section>
