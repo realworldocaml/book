@@ -5,18 +5,18 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 let stack init = object
   val mutable v = init
 
   method pop =
     match v with
-    | hd :: tl -> 
+    | hd :: tl ->
       v <- tl;
       Some hd
     | [] -> None
 
-  method push hd = 
+  method push hd =
     v <- hd :: v
 end ;;
 [%%expect ocaml {|val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>|}];;
@@ -32,7 +32,7 @@ end ;;
 type circle = < area : float; radius : int > ;;
 [%%expect ocaml {|type circle = < area : float; radius : int >|}];;
 let circle r = object
-  method area = 3.14 *. (Float.of_int r) ** 2.0
+  method area = 3.14 *. Float.of_int r **. 2.0
   method radius = r
 end ;;
 [%%expect ocaml {|val circle : int -> < area : float; radius : int > = <fun>|}];;
@@ -93,15 +93,15 @@ Error: Type square array is not a subtype of shape array
        The second object type has no method width
 |}];;
 [@@@part "7"];;
-let shape_to_string: shape -> string = 
-  fun s -> sprintf "Shape(%F)" s#area ;;
+let shape_to_string: shape -> string =
+  fun s -> Printf.sprintf "Shape(%F)" s#area ;;
 [%%expect ocaml {|val shape_to_string : shape -> string = <fun>|}];;
-let square_to_string: square -> string = 
+let square_to_string: square -> string =
   (shape_to_string :> square -> string) ;;
 [%%expect ocaml {|val square_to_string : square -> string = <fun>|}];;
 [@@@part "8"];;
 module Either = struct
-  type ('a, 'b) t = 
+  type ('a, 'b) t =
     | Left of 'a
     | Right of 'b
   let left x = Left x
@@ -118,7 +118,7 @@ module Either :
 (Either.left (square 40) :> (shape, shape) Either.t) ;;
 [%%expect ocaml {|- : (shape, shape) Either.t = Either.Left <obj>|}];;
 [@@@part "9"];;
-module AbstractEither : sig 
+module AbstractEither : sig
   type ('a, 'b) t
   val left: 'a -> ('a, 'b) t
   val right: 'b -> ('a, 'b) t
@@ -143,7 +143,7 @@ Error: This expression cannot be coerced to type
        The second object type has no method width
 |}];;
 [@@@part "10"];;
-module VarEither : sig 
+module VarEither : sig
   type (+'a, +'b) t
   val left: 'a -> ('a, 'b) t
   val right: 'b -> ('a, 'b) t
@@ -160,7 +160,7 @@ module VarEither :
 [%%expect ocaml {|- : (shape, shape) VarEither.t = <abstr>|}];;
 [@@@part "11"];;
 let total_area (shape_stacks: shape stack list) =
-  let stack_area acc st = 
+  let stack_area acc st =
     let rec loop acc =
       match st#pop with
       | Some s -> loop (acc +. s#area)
@@ -184,7 +184,7 @@ Error: Type square stack = < pop : square option; push : square -> unit >
 type 'a readonly_stack = < pop : 'a option > ;;
 [%%expect ocaml {|type 'a readonly_stack = < pop : 'a option >|}];;
 let total_area (shape_stacks: shape readonly_stack list) =
-  let stack_area acc st = 
+  let stack_area acc st =
     let rec loop acc =
       match st#pop with
       | Some s -> loop (acc +. s#area)
@@ -194,6 +194,6 @@ let total_area (shape_stacks: shape readonly_stack list) =
   in
   List.fold ~init:0.0 ~f:stack_area shape_stacks ;;
 [%%expect ocaml {|val total_area : shape readonly_stack list -> float = <fun>|}];;
-total_area [(square_stack :> shape readonly_stack); (circle_stack :> 
+total_area [(square_stack :> shape readonly_stack); (circle_stack :>
                                                        shape readonly_stack)] ;;
 [%%expect ocaml {|- : float = 7280.|}];;

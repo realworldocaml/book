@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "1"];;
-open Core_kernel;;
+open Base;;
 class istack = object
   val mutable v = [0; 2]
 

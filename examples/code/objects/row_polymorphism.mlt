@@ -5,7 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 type shape = < area : float > ;;
 [%%expect ocaml {|type shape = < area : float >|}];;
 type square = < area : float; width : int > ;;
@@ -18,23 +18,23 @@ end ;;
 type circle = < area : float; radius : int > ;;
 [%%expect ocaml {|type circle = < area : float; radius : int >|}];;
 let circle r = object
-  method area = 3.14 *. (Float.of_int r) ** 2.0
+  method area = 3.14 *. Float.of_int r **. 2.0
   method radius = r
 end ;;
 [%%expect ocaml {|val circle : int -> < area : float; radius : int > = <fun>|}];;
 [@@@part "1"];;
 let remove_large l =
-  List.filter ~f:(fun s -> s#area <= 100.) l ;;
+  List.filter ~f:(fun s -> Float.(s#area <= 100.)) l ;;
 [%%expect ocaml {|val remove_large : (< area : float; .. > as 'a) list -> 'a list = <fun>|}];;
 [@@@part "2"];;
-let squares : < area : float; width : int > list = 
+let squares : < area : float; width : int > list =
   [square 5; square 15; square 10] ;;
 [%%expect ocaml {|val squares : < area : float; width : int > list = [<obj>; <obj>; <obj>]|}];;
 remove_large squares ;;
 [%%expect ocaml {|- : < area : float; width : int > list = [<obj>; <obj>]|}];;
 [@@@part "3"];;
-let remove_large (l: < area : float > list) = 
-  List.filter ~f:(fun s -> s#area <= 100.) l ;;
+let remove_large (l: < area : float > list) =
+  List.filter ~f:(fun s -> Float.(s#area <= 100.)) l ;;
 [%%expect ocaml {|val remove_large : < area : float > list -> < area : float > list = <fun>|}];;
 remove_large (squares :> < area : float > list ) ;;
 [%%expect ocaml {|- : < area : float > list = [<obj>; <obj>]|}];;
@@ -48,7 +48,10 @@ Error: This expression has type < area : float; radius : int >
 |}];;
 [@@@part "5"];;
 let shape_ref: < area: float; ..> ref = ref (square 40) ;;
-[%%expect ocaml {|val shape_ref : < area : float; width : int > ref = {contents = <obj>}|}];;
+[%%expect ocaml {|
+val shape_ref : < area : float; width : int > ref =
+  {Base.Ref.contents = <obj>}
+|}];;
 shape_ref := circle 20 ;;
 [%%expect{|
 Characters 13-22:
@@ -60,6 +63,6 @@ Error: This expression has type < area : float; radius : int >
 let hlist: shape list = [(square 10 :> shape); (circle 30 :> shape)] ;;
 [%%expect ocaml {|val hlist : shape list = [<obj>; <obj>]|}];;
 let shape_ref: shape ref = ref (square 40 :> shape) ;;
-[%%expect ocaml {|val shape_ref : shape ref = {contents = <obj>}|}];;
+[%%expect ocaml {|val shape_ref : shape ref = {Base.Ref.contents = <obj>}|}];;
 shape_ref := (circle 20 :> shape) ;;
 [%%expect ocaml {|- : unit = ()|}];;

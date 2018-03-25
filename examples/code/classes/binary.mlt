@@ -5,9 +5,9 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 [@@@part "0.5"];;
-class square w = object(self : 'self) 
+class square w = object(self : 'self)
   method width = w
   method area = Float.of_int (self#width * self#width)
   method equals (other : 'self) = other#width = self#width
@@ -23,7 +23,7 @@ class square :
 |}];;
 class circle r = object(self : 'self)
   method radius = r
-  method area = 3.14 *. (Float.of_int self#radius) ** 2.0
+  method area = 3.14 *. (Float.of_int self#radius) **. 2.0
   method equals (other : 'self) = other#radius = self#radius
 end ;;
 [%%expect ocaml {|
@@ -53,7 +53,9 @@ Error: Type square = < area : float; equals : square -> bool; width : int >
          square = < area : float; equals : square -> bool; width : int > 
 |}];;
 [@@@part "3"];;
-(object method area = 5 end) = (object method area = 5 end) ;;
+Poly.(=)
+  (object method area = 5 end)
+  (object method area = 5 end) ;;
 [%%expect ocaml {|- : bool = false|}];;
 [@@@part "4"];;
 type shape_repr =
@@ -63,11 +65,11 @@ type shape_repr =
 type shape =
   < repr : shape_repr; equals : shape -> bool; area : float > ;;
 [%%expect ocaml {|type shape = < area : float; equals : shape -> bool; repr : shape_repr >|}];;
-class square w = object(self) 
+class square w = object(self)
   method width = w
   method area = Float.of_int (self#width * self#width)
   method repr = Square self#width
-  method equals (other : shape) = other#repr = self#repr
+  method equals (other : shape) = Poly.(=) other#repr self#repr
 end ;;
 [%%expect ocaml {|
 class square :
