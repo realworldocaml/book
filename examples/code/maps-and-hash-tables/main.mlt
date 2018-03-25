@@ -242,16 +242,16 @@ Error: This expression has type
 |}];;
 
 [@@@part "pc.1"];;
-Core_kernel.Map.Poly.of_alist_exn digit_alist;;
-[%%expect ocaml {|- : (int, string) Core_kernel.Map.Poly.t = <abstr>|}];;
+Map.Poly.of_alist_exn digit_alist;;
+[%%expect ocaml {|- : (int, string) Map.Poly.t = <abstr>|}];;
 
 [@@@part "pc.2"];;
 Map.symmetric_diff
-  (Core_kernel.Map.Poly.singleton 3 "three")
+  (Map.Poly.singleton 3 "three")
   (Map.singleton (module Int) 3 "four" )
 ;;
 [%%expect{|
-Characters 66-104:
+Characters 54-92:
 Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
