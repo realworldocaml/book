@@ -5,7 +5,7 @@
 #require "core.top";;
 #require "ppx_jane";;
 #silent false;;
-open Core_kernel;;
+open Base;;
 [@@@part "0.5"];;
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 [%%expect ocaml {|type 'a iterator = < get : 'a; has_value : bool; next : unit >|}];;
@@ -13,7 +13,7 @@ type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 class ['a] list_iterator init = object
   val mutable current : 'a list = init
 
-  method has_value = current <> []
+  method has_value = Poly.(current <> [])
 
   method get =
     match current with
@@ -95,8 +95,8 @@ class ['a] stack init = object
   method push hd =
     v <- hd :: v
 
-  method iter f = 
-    List.iter ~f v 
+  method iter f =
+    List.iter ~f v
 end ;;
 [%%expect ocaml {|
 class ['a] stack :
@@ -123,7 +123,7 @@ class ['a] stack init = object
     v <- hd :: v
 
   method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
-    (fun f init -> List.fold ~f ~init v) 
+    (fun f init -> List.fold ~f ~init v)
 end ;;
 [%%expect ocaml {|
 class ['a] stack :
