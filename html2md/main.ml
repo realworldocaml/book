@@ -858,7 +858,7 @@ let () =
     close_out oc;
     let _ =
       Fmt.kstrf Sys.command
-        "pandoc --section-divs -f markdown-smart -t html5 %s -o %s"
+        "pandoc --section-divs -f markdown-smart-auto_identifiers -t html5 %s -o %s"
         output html_output
     in
     check input html_output
