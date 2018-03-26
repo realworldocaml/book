@@ -223,8 +223,10 @@ and pp_descr_elt ppf (title, body) =
   Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: %a@]@]" pp_items title pp_items body
 
 and pp_sidebar ppf (title, body) =
-  Fmt.pf ppf "<aside data-type=\"sidebar\">@,@,%a %a@,@,%a@,@,</aside>"
-    pp_level 5 pp_items title pp_block body
+  (* FIXME: pandoc has a bug here when using ### headers and
+     --section-div: it doesn't close the section at the right place *)
+  Fmt.pf ppf "<aside data-type=\"sidebar\">@,<h5>%a</h5>@,@,%a@,@,</aside>"
+    pp_items title pp_block body
 
 let dump_idx ppf {id; sortas; v} =
   Fmt.pf ppf "@[{id=%a;@ sortas=%a;@ v=%S}@]"
