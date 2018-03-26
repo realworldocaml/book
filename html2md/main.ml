@@ -3,9 +3,10 @@ exception Error of string
 let err fmt = Fmt.kstrf (fun str -> raise (Error str)) fmt
 
 type idx = {
-  id    : string option;
-  sortas: string option;
-  v     : string;
+  id     : string option;
+  sortas : string option;
+  seealso: string option;
+  v      : string;
 }
 
 type item = [
@@ -346,7 +347,7 @@ module Parse = struct
   let text s = `Text s
   let strong s = `Strong s
   let em s = `Em s
-  let idx ?id ?sortas v = `Idx {id; sortas; v}
+  let idx ?id ?sortas ?seealso v = `Idx {id; sortas; v; seealso}
   let code s = `Code s
   let keep_together s = `Keep_together s
   let hyperlink s = `Hyperlink s
@@ -406,6 +407,7 @@ module Parse = struct
       | "a"      -> [a e]
       | "idx"    -> (match attrs e with
           | ["id", id]                 -> txt (fun x -> idx ~id x)
+          | ["data-seealso", s]        -> txt (fun x -> idx ~seealso:s x)
           | ["data-primary-sortas", s] -> txt (fun x -> idx ~sortas:s x)
           | ["data-primary-sortas", s; "id", id] ->
             txt (fun x -> idx ~id ~sortas:s x)
