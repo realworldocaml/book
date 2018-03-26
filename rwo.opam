@@ -11,8 +11,8 @@ bug-reports: "https://github.com/realworldocaml/book/issues"
 build: [ "jbuilder" "build" ]
 
 depends: [
-  "core" {>="v0.10.0"}
-  "async" {>="v0.10.0"}
+  "core" {>="v0.11.0"}
+  "async" {>="v0.11.0"}
   "ppx_sexp_conv" {build & >="v0.9.0"}
   "ppx_deriving"
   "cohttp" {>="0.99.0"}
