@@ -101,6 +101,27 @@ let pp_words ppf s =
       last := c
     ) s
 
+let pp_html_words ppf s =
+  let is_white = function ' ' | '\t' .. '\r'  -> true | _ -> false in
+  let is_start = (=)'<' and is_end = (=) '>' in
+  let last = ref 'x' in
+  let needs_escaping = ref false in
+  String.iter (fun c ->
+      if is_white c && is_white !last then ()
+      else if is_white c then (
+        needs_escaping := false; (* <foo > is parser properly by pandoc *)
+        Format.pp_print_space ppf ()
+      ) else (
+        if is_start c then needs_escaping := true;
+        if is_end c && !needs_escaping then (
+          needs_escaping := false;
+          Format.pp_print_char ppf '\\';
+        );
+        Format.pp_print_char ppf c;
+      );
+      last := c
+    ) s
+
 let list_v pp = Fmt.vbox Fmt.(list ~sep:(unit "@,@,") pp)
 let list_h pp = Fmt.box Fmt.(list ~sep:(unit "") pp)
 
@@ -145,7 +166,7 @@ let rec pp_item ppf (i:item) = match i with
   | `Code c   -> Fmt.pf ppf "@[`%a`@]" pp_code c
   | `A href   -> pp_href ppf href
   | `Xref x   -> pp_xref ppf x
-  | `Text s   -> pp_words ppf s
+  | `Text s   -> pp_html_words ppf s
   | `Email s  -> Fmt.pf ppf "@[[_%s_](mailto:%s){.email}@]" s s
   | `Keep_together s -> Fmt.pf ppf "<span class=\"keep-together\">%s</span>" s
   | `Index_term s    -> pp_index_term ppf s
