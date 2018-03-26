@@ -110,7 +110,7 @@ let pp_level ppf l =
   Fmt.string ppf s
 
 let pp_link ppf {rel; href; part} =
-  let pp_part ppf s = Fmt.pf ppf "part=\"%a\" " pp_words s in
+  let pp_part ppf s = Fmt.pf ppf "part=@[\"%a\"@] " pp_words s in
   Fmt.pf ppf "<link rel=\"%a\" href=\"%a\" %a/>"
     pp_words rel pp_words href Fmt.(option pp_part) part
 
