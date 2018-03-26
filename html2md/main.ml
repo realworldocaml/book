@@ -23,7 +23,7 @@ type 'a xref = {
 type item = [
   | `Text   of string
   | `Strong of item list
-  | `Em     of string
+  | `Em     of item list
   | `Code   of string
   | `A      of item list a
   | `Idx    of idx
@@ -136,7 +136,7 @@ let pp_code ppf s =
   else pp_words ppf s
 
 let rec pp_item ppf (i:item) = match i with
-  | `Em e     -> Fmt.pf ppf "*%a*" pp_words e
+  | `Em e     -> Fmt.pf ppf "*%a*" pp_items e
   | `Strong s -> Fmt.pf ppf "**%a**" pp_items s
   | `Idx i    -> pp_idx ppf i
   | `Code c   -> Fmt.pf ppf "`%a`" pp_code c
@@ -262,7 +262,7 @@ let dump_idx ppf {id; sortas; v} =
     v
 
 let rec dump_item ppf (i:item) = match i with
-  | `Em e     -> Fmt.pf ppf "Em %S" e
+  | `Em e     -> Fmt.pf ppf "Em %a" dump_items e
   | `Strong s -> Fmt.pf ppf "Strong %a" dump_items s
   | `Idx s    -> Fmt.pf ppf "Idx %a" dump_idx s
   | `Code c   -> Fmt.pf ppf "Code %S" c
@@ -437,7 +437,7 @@ module Parse = struct
       | "strong" -> no_attrs h; [`Strong (normalize_items (children e))]
       | "em" when attrs e = ["class", "hyperlink"] -> txt hyperlink
       | "em" when attrs e = ["class", "filename"]  -> txt filename
-      | "em"     -> no_attrs h; txt em
+      | "em"     -> no_attrs h; [`Em (normalize_items (children e))]
       | "code"   -> no_attrs h; txt code
       | "a"      -> [a e]
       | "idx"    -> (match attrs e with
@@ -452,7 +452,7 @@ module Parse = struct
         (match Soup.attribute "class" e with
          | Some "command"       ->
            (match items (one_child e) with
-            | [`Em x] ->
+            | [`Em [`Text x]] ->
               (* <span class="command"><em>foo</em></span> == <code>foo</code> *)
               [`Code x]
             | _ -> err "class=\"command\"")
@@ -780,12 +780,12 @@ module Check = struct
     in
     v "idx" dump_idx aux
 
-  let rec item () =
+  let rec item name =
     let rec aux (a:item) (b:item) = match a, b with
-      | `Em a, `Em b -> check (string "em") a b; true
+      | `Em a, `Em b -> check (items "name") a b; true
       | `Keep_together a, `Keep_together b ->
         check (string "keep-together") a b; true
-      | `Strong a, `Strong b -> check (list "strong" (item ())) a b; true
+      | `Strong a, `Strong b -> check (items "strong") a b; true
       | `Idx a, `Idx b -> check idx a b; true
       | `Code a, `Code b -> check (string "code") a b; true
       | `A a, `A b -> check (href "a") a b; true
@@ -807,7 +807,7 @@ module Check = struct
   and href name =
     let aux (x: item list a) (y: item list a) =
       check (string "href") x.href y.href;
-      check (list "items" (item ())) x.v y.v;
+      check (list name (item name)) x.v y.v;
       true
     in
     v name (dump_a dump_items) aux
@@ -816,12 +816,14 @@ module Check = struct
     let aux (x: item list xref) (y: item list xref) =
       check (string "href") x.href y.href;
       check (option "style" (string "style")) x.style y.style;
-      check (list "items" (item ())) x.v y.v;
+      check (list name (item name)) x.v y.v;
       true
     in
     v name (dump_xref dump_items) aux
 
-  let item = item ()
+  and items name = list name (item name)
+
+  let item = item "item"
   let phrase = list "phrase" item
 
   let rec block name: block t =
