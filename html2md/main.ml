@@ -136,10 +136,10 @@ let pp_code ppf s =
   else pp_words ppf s
 
 let rec pp_item ppf (i:item) = match i with
-  | `Em e     -> Fmt.pf ppf "*%a*" pp_items e
-  | `Strong s -> Fmt.pf ppf "**%a**" pp_items s
+  | `Em e     -> Fmt.pf ppf "@[*%a*@]" pp_items e
+  | `Strong s -> Fmt.pf ppf "@[**%a**@]" pp_items s
   | `Idx i    -> pp_idx ppf i
-  | `Code c   -> Fmt.pf ppf "`%a`" pp_code c
+  | `Code c   -> Fmt.pf ppf "@[`%a`@]" pp_code c
   | `A href   -> pp_href ppf href
   | `Xref x   -> pp_xref ppf x
   | `Text s   -> pp_words ppf s
@@ -247,7 +247,7 @@ and pp_simple_list ppf t = Fmt.pf ppf "::: {.simplelist}@,%a@,:::@," pp_list t
 
 and pp_descr ppf t = list_v pp_descr_elt ppf t
 and pp_descr_elt ppf (title, body) =
-  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: %a@]@]" pp_items title pp_items body
+  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: @[%a@]@]@]" pp_items title pp_items body
 
 and pp_sidebar ppf (title, body) =
   (* FIXME: pandoc has a bug here when using ### headers and
@@ -526,7 +526,7 @@ module Parse = struct
 
   let table id childs =
     let caption =
-      try Some (find "caption" (flatten_map items) childs)
+      try Some (normalize (find "caption" (flatten_map items) childs))
       with Error _ -> None
     in
     let td = find_all "td" (flatten_map items) in
