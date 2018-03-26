@@ -22,6 +22,7 @@ depends: [
   "cohttp-async"
   "lambdasoup"
   "sexp_pretty"
+  "re"
   # Required for code blocks within book.
   "core_bench"
   "mtime"
