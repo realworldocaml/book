@@ -15,15 +15,14 @@ depends: [
   "async" {>="v0.11.0"}
   "ppx_sexp_conv" {build & >="v0.9.0"}
   "ppx_deriving"
-  "cohttp" {>="0.99.0"}
   "jbuilder" {build & >="1.0+beta9"}
   "toplevel_expect_test"
   "patdiff"
-  "cohttp-async"
   "lambdasoup"
   "sexp_pretty"
-  "re"
+  "re" "fmt"
   # Required for code blocks within book.
+  "cohttp-async"
   "core_bench"
   "mtime"
   "yojson"
