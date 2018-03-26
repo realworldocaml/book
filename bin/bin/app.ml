@@ -40,11 +40,6 @@ module Params = struct
   let file =
     anon ("file" %: file)
 
-  let pygmentize =
-    flag "-pygmentize" no_arg
-      ~doc:" Syntax highlight code with pygmentize. \
-            By default, this is not done."
-
   let run_nondeterministic =
     flag "-run-nondeterministic" no_arg
       ~doc:" In .mlt files, run code marked [%%expect.nondeterministic ...]. \
@@ -61,14 +56,13 @@ open Command.Let_syntax
 let build_chapter : Command.t =
   Command.async ~summary:"build chapter"
     [%map_open
-      let pygmentize = Params.pygmentize
-      and repo_root = Params.repo_root
+      let repo_root = Params.repo_root
       and code_dir = Params.code_dir
       and out_dir = Params.out_dir
       and file = Params.file
       in
       fun () ->
-        Book.make ~code_dir ~pygmentize
+        Book.make ~code_dir
           ~repo_root ~out_dir (`Chapter file) ]
 
 let build_frontpage : Command.t =
