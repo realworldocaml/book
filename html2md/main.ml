@@ -269,7 +269,7 @@ and dump_block ppf (t:block) = match t with
   | `Simple_list s -> Fmt.pf ppf "@[<2>Simple_list (%a)@]" dump_blocks s
 
 and dump_part: type a. a Fmt.t -> a part Fmt.t = fun dump_v ppf t ->
-  Fmt.pf ppf "@[<2>{level=%d; title=%a; body=%a; %a}@]"
+  Fmt.pf ppf "@[<2>{level=%d;@ title=%a;@ body=%a;@ %a}@]"
     t.level pp_items t.title dump_block t.body dump_v t.v
 
 and dump_link ppf {rel; href; part} =
@@ -699,10 +699,12 @@ module Check = struct
     let mk x y =
       let rec aux a b = match a, b with
         | [], [] -> true
-        | [], x | x, [] ->
+        | [], r | r, [] ->
           let pp = Fmt.(Dump.list t.pp) in
-          err "%s: list are of different size. Common: @[%a@] Remaining: @[%a@]"
-            name pp x pp x
+          err "%s: list are of different size (%d and %d). \
+               Common:@,@[%a@]@.@.Remaining:@,@[%a@]"
+            name (List.length x) (List.length y)
+            pp x pp r
         | a::b, c::d ->
           check t a c;
           aux b d
