@@ -114,11 +114,20 @@ let pp_idx ppf {id; sortas; v} = match id, sortas with
     Fmt.pf ppf "<idx id=\"%s\" data-primary-sortas=\"%s\">%a</idx>"
       i s pp_words v
 
+let pp_code ppf s =
+  let string_mem c =
+    let r = ref false in
+    String.iter (fun k -> if k=c then r := true) s;
+    !r
+  in
+  if string_mem '`' then Fmt.pf ppf "` %a`" pp_words s
+  else pp_words ppf s
+
 let rec pp_item ppf (i:item) = match i with
   | `Em e     -> Fmt.pf ppf "*%a*" pp_words e
   | `Strong s -> Fmt.pf ppf "**%a**" pp_items s
   | `Idx i    -> pp_idx ppf i
-  | `Code c   -> Fmt.pf ppf "`%a`" pp_words c
+  | `Code c   -> Fmt.pf ppf "`%a`" pp_code c
   | `A href   -> pp_href ppf href
   | `Xref x   -> pp_xref ppf x
   | `Text s   -> pp_words ppf s
