@@ -216,7 +216,7 @@ and pp_note ppf n =
     pp_break n.v pp_level n.level pp_items n.title pp_block n.body
 
 and pp_warning ppf w =
-  Fmt.pf ppf "@[::: {%adata-type=warning}@]@.@[%a %a@]@.@.@[%a@]@.:::@."
+  Fmt.pf ppf "@[::: {%adata-type=warning}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
     pp_break w.v pp_level w.level pp_items w.title pp_block w.body
 
 and pp_section ppf s =
@@ -569,7 +569,8 @@ module Parse = struct
            Some (`Note {level; title; body; v})
          | ["class", "safarienabled"] ->
            Some (`Safari (blocks ~depth (children e)))
-         | ["data-type", "warning"]   ->
+         | ["data-type", "warning"]
+         | [("class", "allow_break"); ("data-type", "warning")] ->
            let allow_break = Soup.classes e = ["allow_break"] in
            let level, title, body = header ~depth e in
            if level <> 1 then err "wrong header level for warning section";
