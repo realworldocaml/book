@@ -1,5 +1,5 @@
-/* PrismJS 1.10.0
-http://prismjs.com/download.html?themes=prism&languages=markup+css+clike+javascript+bash+json+ocaml+scheme&plugins=toolbar+command-line+normalize-whitespace+show-language+copy-to-clipboard */
+/* PrismJS 1.13.0
+http://prismjs.com/download.html?#themes=prism&languages=markup+css+clike+javascript+bash+json+ocaml+scheme&plugins=toolbar+command-line+normalize-whitespace+show-language+copy-to-clipboard */
 /**
  * prism.js default theme for JavaScript, CSS and HTML
  * Based on dabblet (http://dabblet.com)
@@ -17,7 +17,7 @@ pre[class*="language-"] {
 	word-spacing: normal;
 	word-break: normal;
 	word-wrap: normal;
-        line-height: 1.4;
+	line-height: 1.5;
 
 	-moz-tab-size: 4;
 	-o-tab-size: 4;
@@ -50,8 +50,8 @@ code[class*="language-"]::selection, code[class*="language-"] ::selection {
 
 /* Code blocks */
 pre[class*="language-"] {
-	padding: 0.35em;
-	/*avsm margin: .5em 0; */
+	padding: 1em;
+	margin: .5em 0;
 	overflow: auto;
 }
 
@@ -101,6 +101,7 @@ pre[class*="language-"] {
 	color: #690;
 }
 
+.token.operator,
 .token.entity,
 .token.url,
 .language-css .token.string,
@@ -109,17 +110,14 @@ pre[class*="language-"] {
 	background: hsla(0, 0%, 100%, .5);
 }
 
-.token.operator {
-  color: #a67f59;
-}
-
 .token.atrule,
 .token.attr-value,
 .token.keyword {
 	color: #07a;
 }
 
-.token.function {
+.token.function,
+.token.class-name {
 	color: #DD4A68;
 }
 
@@ -141,11 +139,11 @@ pre[class*="language-"] {
 	cursor: help;
 }
 
-pre.code-toolbar {
+div.code-toolbar {
 	position: relative;
 }
 
-pre.code-toolbar > .toolbar {
+div.code-toolbar > .toolbar {
 	position: absolute;
 	top: .3em;
 	right: .2em;
@@ -153,19 +151,19 @@ pre.code-toolbar > .toolbar {
 	opacity: 0;
 }
 
-pre.code-toolbar:hover > .toolbar {
+div.code-toolbar:hover > .toolbar {
 	opacity: 1;
 }
 
-pre.code-toolbar > .toolbar .toolbar-item {
+div.code-toolbar > .toolbar .toolbar-item {
 	display: inline-block;
 }
 
-pre.code-toolbar > .toolbar a {
+div.code-toolbar > .toolbar a {
 	cursor: pointer;
 }
 
-pre.code-toolbar > .toolbar button {
+div.code-toolbar > .toolbar button {
 	background: none;
 	border: 0;
 	color: inherit;
@@ -178,9 +176,9 @@ pre.code-toolbar > .toolbar button {
 	-ms-user-select: none;
 }
 
-pre.code-toolbar > .toolbar a,
-pre.code-toolbar > .toolbar button,
-pre.code-toolbar > .toolbar span {
+div.code-toolbar > .toolbar a,
+div.code-toolbar > .toolbar button,
+div.code-toolbar > .toolbar span {
 	color: #bbb;
 	font-size: .8em;
 	padding: 0 .5em;
@@ -190,12 +188,12 @@ pre.code-toolbar > .toolbar span {
 	border-radius: .5em;
 }
 
-pre.code-toolbar > .toolbar a:hover,
-pre.code-toolbar > .toolbar a:focus,
-pre.code-toolbar > .toolbar button:hover,
-pre.code-toolbar > .toolbar button:focus,
-pre.code-toolbar > .toolbar span:hover,
-pre.code-toolbar > .toolbar span:focus {
+div.code-toolbar > .toolbar a:hover,
+div.code-toolbar > .toolbar a:focus,
+div.code-toolbar > .toolbar button:hover,
+div.code-toolbar > .toolbar button:focus,
+div.code-toolbar > .toolbar span:hover,
+div.code-toolbar > .toolbar span:focus {
 	color: inherit;
 	text-decoration: none;
 }
@@ -233,5 +231,4 @@ pre.code-toolbar > .toolbar span:focus {
 .command-line-prompt > span[data-prompt]:before {
 	content: attr(data-prompt);
 }
-
 
