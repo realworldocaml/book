@@ -9,21 +9,32 @@ type idx = {
   v      : string;
 }
 
+type 'a a = {
+  href: string;
+  v   : 'a;
+}
+
+type 'a xref = {
+  href : string;
+  style: string option;
+  v    : 'a;
+}
+
 type item = [
   | `Text   of string
   | `Strong of item list
   | `Em     of string
   | `Code   of string
-  | `A      of string * item list
+  | `A      of item list a
   | `Idx    of idx
   | `Keep_together of string
   | `Index_term of string
-  | `Xref of string * item list
+  | `Xref of item list xref
   | `Filename of string
   (* only in 00-prologue *)
-  | `Uri of string * item list
-  | `A_hide of string * item list
-  | `A_hide_i of string * item list
+  | `Uri of item list a
+  | `A_hide of item list a
+  | `A_hide_i of item list a
   | `Email of string
   | `Hyperlink of string
 ]
@@ -135,18 +146,23 @@ let rec pp_item ppf (i:item) = match i with
   | `Email s  -> Fmt.pf ppf "@[[_%s_](mailto:%s){.email}@]" s s
   | `Keep_together s -> Fmt.pf ppf "<span class=\"keep-together\">%s</span>" s
   | `Index_term s    -> pp_index_term ppf s
-  | `Filename f      -> Fmt.pf ppf "<em class=\"filename\">%a</em>" pp_words f
-  | `A_hide (h, t)   -> Fmt.pf ppf "@[[%a](%s){.orm:hideurl}@]" pp_items t h
-  | `A_hide_i (h, t) -> Fmt.pf ppf "@[[%a](%s){.orm:hideurl:ital}@]" pp_items t h
-  | `Uri (h, t)      -> Fmt.pf ppf  "@[[%a](%s)@]" pp_items t h
-  | `Hyperlink s     -> Fmt.pf ppf "<em class=\"hyperlink\">%a</em>" pp_words s
+  | `Filename f  -> Fmt.pf ppf "<em class=\"filename\">%a</em>" pp_words f
+  | `A_hide a    -> Fmt.pf ppf "@[[%a](%s){.orm:hideurl}@]" pp_items a.v a.href
+  | `A_hide_i a  -> Fmt.pf ppf "@[[%a](%s){.orm:hideurl:ital}@]" pp_items a.v a.href
+  | `Uri a       -> Fmt.pf ppf  "@[[%a](%s)@]" pp_items a.v a.href
+  | `Hyperlink s -> Fmt.pf ppf "<em class=\"hyperlink\">%a</em>" pp_words s
 
 and pp_items ppf l = list_h pp_item ppf l
 
-and pp_href ppf (h, t) = Fmt.pf ppf "@[[%a](%a)@]" pp_items t pp_words h
+and pp_href ppf a = Fmt.pf ppf "@[[%a](%a)@]" pp_items a.v pp_words a.href
 
-and pp_xref ppf (h, t) =
-  Fmt.pf ppf "@[[%a](%a){data-type=xref}@]" pp_items t pp_words h
+and pp_xref ppf a =
+  let pp_style ppf = function
+    | None   -> ()
+    | Some s -> Fmt.pf ppf " data-xrefstyle=\"%a\"" pp_words s
+  in
+  Fmt.pf ppf "@[[%a](%a){data-type=xref%a}@]"
+    pp_items a.v pp_words a.href pp_style a.style
 
 let pp_table ppf t =
   let aux ppf () =
@@ -239,17 +255,23 @@ let rec dump_item ppf (i:item) = match i with
   | `Strong s -> Fmt.pf ppf "Strong %a" dump_items s
   | `Idx s    -> Fmt.pf ppf "Idx %a" dump_idx s
   | `Code c   -> Fmt.pf ppf "Code %S" c
-  | `A (h, l) -> Fmt.pf ppf "A (%S, %a)" h dump_items l
+  | `A a      -> Fmt.pf ppf "A %a" (dump_a dump_items) a
   | `Text s   -> Fmt.pf ppf "Text %S" s
   | `Email s  -> Fmt.pf ppf "Email %S" s
   | `Filename f      -> Fmt.pf ppf "Filename %S" f
   | `Keep_together s -> Fmt.pf ppf "Keep_together %S" s
   | `Index_term s    -> Fmt.pf ppf "Index_term %S" s
-  | `Xref (h,l)      -> Fmt.pf ppf "Xref (%S, %a)" h dump_items l
-  | `A_hide (h,l)    -> Fmt.pf ppf "A_hide (%S, %a)" h dump_items l
-  | `A_hide_i (h,l)  -> Fmt.pf ppf "A_hide_i (%S, %a)" h dump_items l
-  | `Uri (h,l)       -> Fmt.pf ppf "Uri (%S, %a)" h dump_items l
+  | `Xref a          -> Fmt.pf ppf "Xref %a" (dump_xref dump_items) a
+  | `A_hide a        -> Fmt.pf ppf "A_hide %a" (dump_a dump_items) a
+  | `A_hide_i a      -> Fmt.pf ppf "A_hide_i %a" (dump_a dump_items) a
+  | `Uri a           -> Fmt.pf ppf "Uri %a" (dump_a dump_items) a
   | `Hyperlink s     -> Fmt.pf ppf "Hyperlink %S" s
+
+and dump_a pp ppf t = Fmt.pf ppf "@[<2>{href=%S;@ %a}@]" t.href pp t.v
+
+and dump_xref pp ppf t =
+  Fmt.pf ppf "@[<2>{href=%S;@ style=%a;@ %a}@]"
+    t.href Fmt.(Dump.option string) t.style pp t.v
 
 and dump_items ppf t = Fmt.Dump.list dump_item ppf t
 
@@ -439,13 +461,17 @@ module Parse = struct
         | "mailto:", s -> s
         | _ -> err "invalid email: %s" s
     in
+    let a href v = { href; v } in
+    let xref href style v = { href; style; v } in
     match attrs with
-    | [("href", h)] -> `A (h, x)
+    | [("href", h)] -> `A (a h x)
     | [("class", "email"); ("href", s)] -> `Email (email s)
-    | [("class", "uri"); ("href", h)] -> `Uri (h, x)
-    | [("class", "orm:hideurl"); ("href", h)] -> `A_hide (h, x)
-    | [("class", "orm:hideurl:ital"); ("href", h)] -> `A_hide_i (h, x)
-    | [("data-type", "xref"); ("href", h)] -> `Xref (h, x)
+    | [("class", "uri"); ("href", h)] -> `Uri (a h x)
+    | [("class", "orm:hideurl"); ("href", h)] -> `A_hide (a h x)
+    | [("class", "orm:hideurl:ital"); ("href", h)] -> `A_hide_i (a h x)
+    | [("data-type", "xref"); ("href", h)] -> `Xref (xref h None x)
+    | [("data-type", "xref"); ("data-xrefstyle", s); ("href", h)] ->
+      `Xref (xref h (Some s) x)
     | [("data-startref", s); ("data-type", "indexterm")] -> `Index_term s
     | _ -> err "invalid a: %a" dump e
 
@@ -743,7 +769,6 @@ module Check = struct
     v "idx" dump_idx aux
 
   let rec item () =
-    let href name = pair "a" (string "href") (list "txt" (item ())) in
     let rec aux (a:item) (b:item) = match a, b with
       | `Em a, `Em b -> check (string "em") a b; true
       | `Keep_together a, `Keep_together b ->
@@ -754,7 +779,7 @@ module Check = struct
       | `A a, `A b -> check (href "a") a b; true
       | `Text a, `Text b -> check (string "text") a b; true
       | `Email a, `Email b -> check (string "email") a b; true
-      | `Xref a, `Xref b -> check (href "xref") a b; true
+      | `Xref a, `Xref b -> check (xref "xref") a b; true
       | `Uri a, `Uri b -> check (href "uri") a b; true
       | `A_hide a, `A_hide b -> check (href "a:hide") a b; true
       | `A_hide_i a, `A_hide_i b -> check (href "a:hide:ital") a b; true
@@ -766,6 +791,23 @@ module Check = struct
         | `A_hide_i _ | `Filename _), _ -> false
     in
     v "item" dump_item aux
+
+  and href name =
+    let aux (x: item list a) (y: item list a) =
+      check (string "href") x.href y.href;
+      check (list "items" (item ())) x.v y.v;
+      true
+    in
+    v name (dump_a dump_items) aux
+
+  and xref name =
+    let aux (x: item list xref) (y: item list xref) =
+      check (string "href") x.href y.href;
+      check (option "style" (string "style")) x.style y.style;
+      check (list "items" (item ())) x.v y.v;
+      true
+    in
+    v name (dump_xref dump_items) aux
 
   let item = item ()
   let phrase = list "phrase" item
