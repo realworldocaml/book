@@ -57,23 +57,23 @@
   from the App Store first.</p>
 
   <p>You can then install OPAM using brew.</p>
-  <pre><code class="language-bash">
-$ brew install opam
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+brew install opam
 </code></pre>
 
   <p>Another popular package manager on Mac OS X is <a href=
   "http://macports.org">MacPorts</a>, which also has an OPAM
   package.</p>
-  <pre><code class="language-bash">
-$ sudo port install opam
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+sudo port install opam
 </code></pre>
 
   <h2>Ubuntu Linux</h2>
 
   <p>14.04 and higher comes with recent versions of OCaml  and opam. No PPA
   needed.</p>
-  <pre><code class="language-bash">
-$ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-native-compilers opam
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-native-compilers opam
 </code></pre>
 
   <h2>Debian Linux</h2>
@@ -87,17 +87,17 @@ $ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml
 
   <p>OPAM is available from the AUR (Arch User Repository). You can
   install OPAM using <code>yaourt</code>:</p>
-  <pre><code class="language-bash">
-$ sudo yaourt -S opam
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+sudo yaourt -S opam
 </code></pre>
 
   <p>Or directly using <code>pacman</code>.</p>
-  <pre><code class="language-bash">
-$ sudo pacman -S base-devel
-$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
-$ tar -xvf opam.tar.gz &amp;&amp; cd opam
-$ makepkg
-$ sudo pacman -U opam-&lt;version&gt;.pkg.tar.xz
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+sudo pacman -S base-devel
+wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
+tar -xvf opam.tar.gz &amp;&amp; cd opam
+makepkg
+sudo pacman -U opam-&lt;version&gt;.pkg.tar.xz
 </code></pre>
 
   <h2>Building from source</h2>
@@ -113,13 +113,13 @@ $ sudo pacman -U opam-&lt;version&gt;.pkg.tar.xz
 
   <p>The following is enough to get OCaml installed on most
   platforms.</p>
-  <pre><code class="language-bash">
-$ curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
-$ tar -zxvf 4.01.tar.gz
-$ cd ocaml-4.01
-$ ./configure
-$ make world world.opt
-$ sudo make install
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
+tar -zxvf 4.01.tar.gz
+cd ocaml-4.01
+./configure
+make world world.opt
+sudo make install
 </code></pre>
 
   <p>If you have problems with any of the above, read the
@@ -131,8 +131,8 @@ $ sudo make install
   privileges. You can also install it in your home directory by
   passing the <code>prefix</code> option to the configuration
   script:</p>
-  <pre><code class="language-bash">
-$ ./configure -prefix $HOME/my-ocaml
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+./configure -prefix $HOME/my-ocaml
 </code></pre>
 
   <p>Once the installation is completed into this custom location,
@@ -164,8 +164,8 @@ $ ./configure -prefix $HOME/my-ocaml
   will ask you a few interactive questions at the end. It's safe to
   answer yes to these unless you want to manually control the
   configuration steps yourself as an advanced user.</p>
-  <pre><code class="language-bash">
-$ opam init
+  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-22"><code class="language-bash">
+opam init
 &lt;...&gt;
 =-=-=-= Configuring OPAM =-=-=-=
 Do you want to update your configuration to use OPAM ? [Y/n] y
@@ -204,8 +204,8 @@ Gloabal configuration:
   itself to your shell profile, you can still configure it
   on-the-fly in your current shell with just one command.</p>
 
-  <pre><code class="language-bash">
-$ eval `opam config env`
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+eval `opam config env`
   </code></pre>
 
   <p>This evaluates the results of running <code>opam config
@@ -226,15 +226,15 @@ $ eval `opam config env`
   set up for you. You can verify this worked by seeing if the
   <code>OCAML_TOPLEVEL_PATH</code> environment variable is set. You
   can do this in <code>bash</code> as follows.</p>
-  <pre><code class="language-bash">
-$ printenv OCAML_TOPLEVEL_PATH
+  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2"><code class="language-bash">
+printenv OCAML_TOPLEVEL_PATH
 /Users/myusername/.opam/4.06.0/lib/toplevel
 </code></pre>
 
   <p>The next step is to make sure we have the right compiler
   version installed.</p>
-  <pre><code class="language-bash">
-$ opam switch
+  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-5"><code class="language-bash">
+opam switch
 system  C system                      System compiler (4.00.1)
 --     -- 4.04.2                      Official 4.04.2 release
 --     -- 4.05.0                      Official 4.05.0 release
@@ -244,9 +244,9 @@ system  C system                      System compiler (4.00.1)
   <p>If, as in this case, your system compiler is older than
   <code>4.06.0</code>, you should install a more up to date version
   of the compiler, as shown below.</p>
-  <pre><code class="language-bash">
-$ opam switch 4.06.0
-$ eval `opam config env`
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+opam switch 4.06.0
+eval `opam config env`
 </code></pre>
 
   <p>The <code>switch</code> itself will take around ten or fifteen
@@ -264,8 +264,8 @@ $ eval `opam config env`
   book are based on, and <code>utop</code>, which is the
   interactive toplevel that you can use for working through the
   examples.</p>
-  <pre><code class="language-bash">
-$ opam install core utop
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+opam install core utop
 </code></pre>
 
   <p>This will take about five or ten minutes to build, and will
@@ -273,10 +273,8 @@ $ opam install core utop
   dependencies. But there are other libraries that will be useful
   as you go through the book that you might as well install
   now.</p>
-  <pre><code class="language-bash">
-$ opam install \
-   async yojson core_extended core_bench \
-   cohttp async_graphics cryptokit menhir
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+opam install async yojson core_extended core_bench cohttp async_graphics cryptokit menhir
 </code></pre>
 
   <p>If some of the above don't work, don't worry too much. Most of
@@ -308,7 +306,7 @@ $ opam install \
   that you have Core installed, you should update your
   <code>ocamlinit</code> to load Core every time you start
   <code>utop</code>, by adding the following lines.</p>
-  <pre><code class="language-bash">
+  <pre ><code class="language-ocaml">
 #use "topfind";;
 #thread;;
 #require "core.top";;
@@ -410,7 +408,7 @@ open Core
   packages.</p>
 
   <p>Add to <code>.emacs.d/init.el</code></p>
-  <pre><code class="language-bash">
+  <pre><code class="language-scheme">
 (require 'package)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
@@ -422,7 +420,7 @@ open Core
 
   <p>Then add the rest of the configuration to
   <code>.emacs.d/init.el</code></p>
-  <pre><code class="language-bash">
+  <pre><code class="language-scheme">
 (add-hook 'tuareg-mode-hook 'tuareg-imenu-set-imenu)
 (setq auto-mode-alist
       (append '(("\\.ml[ily]?$" . tuareg-mode)
@@ -482,8 +480,8 @@ open Core
   </ul>
 
   <p>You can install merlin with OPAM:</p>
-  <pre><code class="language-bash">
-$ opam install merlin
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+opam install merlin
 </code></pre>
 
   <p>Then you will need to add configuration for your editor. The
@@ -612,7 +610,7 @@ endif
   is built on top of <code>ocamlbuild</code>), then the following
   is a good starting point.</p>
   <pre>
-<code>S .
+<code class="language-none">S .
 B _build
 PKG core
 PKG async
@@ -635,15 +633,15 @@ EXT nonrec
   get consistent indentation across tools.</p>
 
   <p>You can install it with <code>opam</code>:</p>
-  <pre><code class="language-bash">
-$ opam install ocp-indent
+  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
+opam install ocp-indent
 </code></pre>
 
   <h4>Emacs</h4>
 
   <p>After installing through OPAM, simply load the file as follows
   to override tuareg-mode's indentation:</p>
-  <pre><code class="language-bash">
+  <pre><code class="language-scheme">
 (setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
 (load-file (concat opam-share "/typerex/ocp-indent/ocp-indent.el"))
 </code></pre>
