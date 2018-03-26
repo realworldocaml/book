@@ -168,13 +168,24 @@ let pp_table ppf t =
   let aux ppf () =
     let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
     let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
-    Fmt.(list ~sep:(unit " | ") pp_items) ppf t.headers;
+    let pp_line ppf items =
+      let x = Fmt.to_to_string pp_items items in
+      (* cf. pipe_tables: The cells of pipe tables cannot contain
+         block elements like paragraphs and lists, and cannot span
+         multiple lines. *)
+      let x = String.mapi (fun i -> function
+          | '\n' -> ' '
+          | c    -> c
+        ) x in
+      Fmt.string ppf x
+    in
+    Fmt.(list ~sep:(unit " | ") pp_line) ppf t.headers;
     Fmt.pf ppf "@,";
     Fmt.(list ~sep:(unit "-|-") string) ppf
-      (List.map (fun s -> String.make (len s) '-') t.headers);
+      (List.map (fun s -> String.make (len s - 1) '-') t.headers);
     Fmt.pf ppf "@,";
     Fmt.(list ~sep:(unit "@,")
-           Fmt.(list ~sep:(unit " | ") pp_items)
+           Fmt.(list ~sep:(unit " | ") pp_line)
         ) ppf t.body;
     Fmt.pf ppf "@,";
     match t.caption with
