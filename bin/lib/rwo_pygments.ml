@@ -44,8 +44,15 @@ let lang_to_string = function
   | `Sexp -> "scheme"
 
 let pygmentize ?(add_attrs=[]) lang contents =
+  let pre_attrs = match lang with
+    | `Bash ->
+      ("class", "command-line") ::
+      ("data-user", "rwo") ::
+      ("data-host", "lama") ::
+      ("data-filter-output", ">") :: add_attrs
+    | _     -> add_attrs
+  in
   contents
-  |> (fun x -> Html.pre ~a:add_attrs [
-      Html.code ~a:["class","language-" ^ (lang_to_string lang)]
-        [`Data x]])
+  |> (fun x -> Html.pre ~a:pre_attrs [
+      Html.code ~a:["class","language-" ^ (lang_to_string lang)] [`Data x]])
   |> return

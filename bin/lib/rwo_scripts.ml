@@ -148,7 +148,7 @@ let script_part_to_html (x : script_part) =
       let content = x.Expect.Raw_script.content in
       Pygments.pygmentize `OCaml content >>| singleton
     | `Shell x ->
-      let content = Expect.Cram.contents x in
+      let content = Expect.Cram.to_html x in
       Pygments.pygmentize `Bash content >>| singleton
     | `Other x ->
       Pygments.pygmentize `OCaml x >>| singleton

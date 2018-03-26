@@ -22,7 +22,7 @@ end
 
 module Cram: sig
   type t [@@deriving sexp]
-  val contents: t -> string
+  val to_html: t -> string
   val part: string -> t -> t option
   val of_file: filename:string -> t Deferred.Or_error.t
 end
