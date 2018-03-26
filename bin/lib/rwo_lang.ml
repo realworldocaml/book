@@ -34,7 +34,7 @@ let of_string x = match x with
   | _ -> error "invalid extension" x sexp_of_string
 
 let of_filename filename =
-  if Filename.basename filename = "jbuild" then Ok "sexp"
+  if Filename.basename filename = "jbuild" then Ok "jbuild"
   else match Filename.split_extension filename with
   | _, Some ext -> of_string ext
   | _, None ->

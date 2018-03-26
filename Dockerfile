@@ -5,11 +5,16 @@ ENV OPAMYES=1
 ENV OPAMJOBS=3
 WORKDIR /home/opam/src
 
+# update opam
+RUN opam update
+
 # pre-install dependencies
-RUN opam depext -iy core async ppx_sexp_conv ppx_deriving cohttp jbuilder \
-    toplevel_expect_test patdiff cohttp-async lambdasoup sexp_pretty \
-    core_bench mtime yojson astring cryptokit ocp-index atd atdgen ctypes \
-    ctypes-foreign textwrap uri
+RUN opam depext -iy core async ppx_sexp_conv ppx_deriving jbuilder \
+    toplevel_expect_test patdiff lambdasoup sexp_pretty fmt re
+    # Required for code blocks
+    # core_bench mtime yojson astring cryptokit ocp-index atd atdgen ctypes \
+    # ctypes-foreign textwrap uri
+    # cohttp-async
 
 # compile the project
 COPY . /home/opam/src/
