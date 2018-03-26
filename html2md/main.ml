@@ -59,6 +59,7 @@ type block = [
   | `Link of link
   | `Para of item list
   | `Note of bool part
+  | `Warning of bool part
   | `List of block list
   | `Enum of block list
   | `Descr of (phrase * phrase) list
@@ -66,11 +67,13 @@ type block = [
   | `Blocks of block list
   | `Table of table
   | `Sidebar of item list * block
-  | `Warning of bool part
   | `Figure of string
   | `Safari of block
   (* only in 00-prologue *)
   | `Simple_list of block list
+  (* only in chapter 22 and 23 *)
+  | `Tip of bool part
+  | `Caution of bool part
 ]
 
 and 'a part = {
@@ -164,28 +167,29 @@ and pp_xref ppf a =
   Fmt.pf ppf "@[[%a](%a){data-type=xref%a}@]"
     pp_items a.v pp_words a.href pp_style a.style
 
+let pp_one_line ppf items =
+  let x = Fmt.to_to_string pp_items items in
+  (* cf. pipe_tables: The cells of pipe tables cannot contain block
+     elements like paragraphs and lists, and cannot span multiple
+     lines. Also cf multi-line headers which are not supported in
+     markdown. *)
+  let x = String.mapi (fun i -> function
+      | '\n' -> ' '
+      | c    -> c
+        ) x in
+  Fmt.string ppf x
+
 let pp_table ppf t =
   let aux ppf () =
     let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
     let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
-    let pp_line ppf items =
-      let x = Fmt.to_to_string pp_items items in
-      (* cf. pipe_tables: The cells of pipe tables cannot contain
-         block elements like paragraphs and lists, and cannot span
-         multiple lines. *)
-      let x = String.mapi (fun i -> function
-          | '\n' -> ' '
-          | c    -> c
-        ) x in
-      Fmt.string ppf x
-    in
-    Fmt.(list ~sep:(unit " | ") pp_line) ppf t.headers;
+    Fmt.(list ~sep:(unit " | ") pp_one_line) ppf t.headers;
     Fmt.pf ppf "@,";
     Fmt.(list ~sep:(unit "-|-") string) ppf
       (List.map (fun s -> String.make (len s - 1) '-') t.headers);
     Fmt.pf ppf "@,";
     Fmt.(list ~sep:(unit "@,")
-           Fmt.(list ~sep:(unit " | ") pp_line)
+           Fmt.(list ~sep:(unit " | ") pp_one_line)
         ) ppf t.body;
     Fmt.pf ppf "@,";
     match t.caption with
@@ -218,21 +222,24 @@ let rec pp_block ppf (t:block) = match t with
   | `Section s    -> pp_section ppf s
   | `Safari bs    -> Fmt.pf ppf "::: safarienabled@,%a@,:::" pp_block bs
   | `Warning w    -> pp_warning ppf w
+  | `Caution c    -> pp_caution ppf c
+  | `Tip t        -> pp_tip ppf t
   | `Simple_list l -> pp_simple_list ppf l
 
 and pp_break ppf b = if b then Fmt.string ppf ".allow_break " else ()
 
-and pp_note ppf n =
-  Fmt.pf ppf "@[::: {%adata-type=note}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
-    pp_break n.v pp_level n.level pp_items n.title pp_block n.body
+and pp_part name ppf n =
+  Fmt.pf ppf "@[::: {%adata-type=%s}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
+    pp_break n.v name pp_level n.level pp_items n.title pp_block n.body
 
-and pp_warning ppf w =
-  Fmt.pf ppf "@[::: {%adata-type=warning}@]@,@[%a %a@]@,@,@[%a@]@,:::@,"
-    pp_break w.v pp_level w.level pp_items w.title pp_block w.body
+and pp_note ppf n = pp_part "note" ppf n
+and pp_warning ppf w = pp_part "warning" ppf w
+and pp_tip ppf t = pp_part "tip" ppf t
+and pp_caution ppf c = pp_part "caution" ppf c
 
 and pp_section ppf s =
   Fmt.pf ppf "@[%a %a {#%s data-type=%S}@]@.@.%a@."
-    pp_level s.level pp_items s.title s.v.id s.v.data_type pp_block s.body
+    pp_level s.level pp_one_line s.title s.v.id s.v.data_type pp_block s.body
 
 and pp_para ppf p = Fmt.pf ppf "%a" (list_h pp_item) p
 and pp_enum ppf s = listi_v pp_enum_descr ppf s
@@ -301,6 +308,8 @@ and dump_block ppf (t:block) = match t with
   | `Sidebar s -> pp_sidebar ppf s
   | `Safari s  -> Fmt.pf ppf "@[<2>Safari@ (%a)@]" dump_block s
   | `Warning w -> Fmt.pf ppf "@[<2>Warning@ %a@]" (dump_part Fmt.bool) w
+  | `Tip t     -> Fmt.pf ppf "@[<2>Tip@ %a@]" (dump_part Fmt.bool) t
+  | `Caution c     -> Fmt.pf ppf "@[<2>Caution@ %a@]" (dump_part Fmt.bool) c
   | `Simple_list s -> Fmt.pf ppf "@[<2>Simple_list (%a)@]" dump_blocks s
 
 and dump_part: type a. a Fmt.t -> a part Fmt.t = fun dump_v ppf t ->
@@ -572,26 +581,26 @@ module Parse = struct
       | "link" -> Some (`Link (link e))
       | "div" ->
         (match attrs e with
-         | [("class", "allow_break"); ("data-type", "note")]
-         | ["data-type", "note"] ->
-           let v = Soup.classes e = ["allow_break"] in
-           let level, title, body = header ~depth e in
-           let level = if level < depth+1 then depth+level else level in
-           Some (`Note {level; title; body; v})
-         | ["class", "safarienabled"] ->
-           Some (`Safari (blocks ~depth (children e)))
-         | ["data-type", "warning"]
-         | [("class", "allow_break"); ("data-type", "warning")] ->
-           let allow_break = Soup.classes e = ["allow_break"] in
-           let level, title, body = header ~depth e in
-           if level <> 1 then err "wrong header level for warning section";
-           let w = { level=1; v=allow_break; title; body } in
-           Some (`Warning w)
          | ("data-type", "table") :: ([] | ["id", _]) -> (* added by pp_table *)
            let id = Soup.id e in
            (match blocks ~depth (children e) with
             | `Table t -> Some (`Table { t with id })
             | x -> err "unsuported table div: %a" dump_block x)
+         | [("class", "allow_break"); ("data-type", x)]
+         | ["data-type", x] ->
+           let f p = match x with
+             | "note"    -> Some (`Note p)
+             | "warning" -> Some (`Warning p)
+             | "tip"     -> Some (`Tip p)
+             | "caution" -> Some (`Caution p)
+             | x -> err "invalid part: %s" x
+           in
+           let v = Soup.classes e = ["allow_break"] in
+           let level, title, body = header ~depth e in
+           let level = if level < depth+1 then depth+level else level in
+           f {level; title; body; v}
+         | ["class", "safarienabled"] ->
+           Some (`Safari (blocks ~depth (children e)))
          | ["class", "simplelist"] -> (* added by pp_simple_list *)
            (match blocks ~depth (children e) with
             | `List l -> Some (`Simple_list l)
@@ -845,11 +854,13 @@ module Check = struct
       | `Para a, `Para b       -> check (list "para" item) a b; true
       | `Link a, `Link b       -> check link a b; true
       | `Warning a, `Warning b -> check (part "warning" bool) a b; true
+      | `Caution a, `Caution b -> check (part "caution" bool) a b; true
+      | `Tip a, `Tip b         -> check (part "tip" bool) a b; true
       | `Simple_list a, `Simple_list b ->
         check (list "simplelist" (block "simplelist")) a b; true
       | (`Figure _ | `Descr _ | `List _ | `Table _ | `Section _ | `Note _
         | `Safari _ | `Sidebar _ | `Blocks _ | `Enum _ | `Para _ | `Link _
-        | `Warning _ | `Simple_list _ | `Empty), _ -> false
+        | `Warning _ | `Simple_list _ | `Empty | `Tip _ | `Caution _), _ -> false
     in
     v name dump_block aux
 
