@@ -197,7 +197,7 @@ let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   in
   main_template ~title_bar:title_bar ~content ()
 
-let make_chapter_page ?code_dir ?pygmentize repo_root chapters chapter_file
+let make_chapter_page ?code_dir repo_root chapters chapter_file
   : Html.t Deferred.t
   =
 
@@ -212,13 +212,12 @@ let make_chapter_page ?code_dir ?pygmentize repo_root chapters chapter_file
   let import_node_to_html scripts (i:Import.t) : Html.item Deferred.t =
     (
       match i.Import.alt with
-      | None ->
-	 return (Scripts.find_exn scripts ~filename:i.href ?part:i.part)
+      | None -> return (Scripts.find_exn scripts ~filename:i.href ?part:i.part)
       | Some alt ->
-	 Reader.file_contents (repo_root/"book"/alt) >>| fun x ->
-      Scripts.exn_of_filename alt x
+        Reader.file_contents (repo_root/"book"/alt) >>| fun x ->
+        Scripts.exn_of_filename alt x
     ) >>=
-    Scripts.script_part_to_html ?pygmentize
+    Scripts.script_part_to_html
   in
   let rec loop scripts html : Html.t Deferred.t =
     (Deferred.List.map html ~f:(fun item ->
@@ -274,7 +273,7 @@ type src = [
 | `Install
 ]
 
-let make ?pygmentize ?(repo_root=".") ?(code_dir="examples") ~out_dir = function
+let make ?(repo_root=".") ?(code_dir="examples") ~out_dir = function
   | `Frontpage -> (
     let base = "index.html" in
     let out_file = out_dir/base in
@@ -296,7 +295,7 @@ let make ?pygmentize ?(repo_root=".") ?(code_dir="examples") ~out_dir = function
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
     Toc.get_chapters ~repo_root () >>= fun chapters ->
-    make_chapter_page ~code_dir ?pygmentize
+    make_chapter_page ~code_dir
       repo_root chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents

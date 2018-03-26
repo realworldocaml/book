@@ -37,16 +37,10 @@ val of_html
 (******************************************************************************)
 
 (** Returns a list of <pre> elements. *)
-val phrases_to_html
-  :  ?pygmentize:bool
-  -> Rwo_expect.Chunk.t list
-  -> Rwo_html.t Deferred.t
+val phrases_to_html: Rwo_expect.Chunk.t list -> Rwo_html.t Deferred.t
 
 (** Returns a single <div class="highlight"> element. *)
-val script_part_to_html
-  :  ?pygmentize:bool
-  -> script_part
-  -> Rwo_html.item Deferred.t
+val script_part_to_html: script_part -> Rwo_html.item Deferred.t
 
 
 (******************************************************************************)

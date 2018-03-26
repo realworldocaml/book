@@ -30,7 +30,6 @@ val of_lang : Rwo_lang.t -> lang Or_error.t
 *)
 val pygmentize
   :  ?add_attrs:Rwo_html.attributes
-  -> ?pygmentize:bool
   -> lang
   -> string
   -> Rwo_html.item Deferred.t

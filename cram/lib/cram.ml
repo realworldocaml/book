@@ -101,3 +101,24 @@ let equal_output a b =
     | _ -> false
   in
   aux a b
+
+module Html = struct
+
+  let pp_line ppf line =
+    match line with
+    | `Output s  -> Fmt.pf ppf ">%s\n" s
+    | `Part _    -> assert false
+    | `Command s -> Fmt.pf ppf "%s\n" s
+    | `Ellipsis  -> Fmt.pf ppf "  ...\n"
+    | `Non_det _
+    | `Comment _ -> ()
+
+
+  let pp ppf t =
+    List.iter (function
+        | Line l -> pp_line ppf l
+        | Test t -> List.iter (pp_line ppf) t.lines
+      ) t
+end
+
+let to_html t = Fmt.to_to_string Html.pp t

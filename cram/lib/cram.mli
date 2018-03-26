@@ -57,3 +57,5 @@ val pp_exit_code: int Fmt.t
 val equal_output: output list -> output list -> bool
 (** [equal x y] compares [x] and [y]; {Ellipsis} are used as
     wildcards for zero, one or multiple matching lines. *)
+
+val to_html: t -> string
