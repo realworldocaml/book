@@ -56,7 +56,7 @@ end
 module Cram = struct
 
   type t = Cram.t [@@deriving sexp]
-  let contents = Cram.to_string ~hide:true
+  let to_html x = Cram.to_html x
   let part = Cram.part
 
   let of_file ~filename =

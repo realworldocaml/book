@@ -61,17 +61,22 @@ let part n t =
   | [] -> None
   | l  -> Some l
 
-let is_hidden s = String.length s >= 2 && String.sub s 0 2 = "@@"
+let is_meta s =String.length s >= 2 && String.sub s 0 2 = "@@"
 
-let pp_line ?(hide=false) ppf = function
+let pp_line ?(hide=false) ppf line =
+  let pp_meta ppf fmt =
+    Fmt.kstrf (fun str ->
+        if not (hide || is_meta str) then Fmt.string ppf str
+      ) fmt
+  in
+  match line with
   | `Output s         -> Fmt.pf ppf "  %s\n" s
   | `Part s           -> Fmt.pf ppf "### %s\n" s
   | `Command s        -> Fmt.pf ppf "  $ %s\n" s
   | `Ellipsis         -> Fmt.pf ppf "  ...\n"
-  | `Non_det `Output  -> Fmt.string ppf "%% --non-deterministic\n"
-  | `Non_det `Command -> Fmt.string ppf "%% --non-deterministic [skip]\n"
-  | `Comment s        ->
-    if hide && is_hidden s then Fmt.string ppf "" else Fmt.pf ppf "%s\n" s
+  | `Non_det `Output  -> pp_meta ppf "%% --non-deterministic\n"
+  | `Non_det `Command -> pp_meta ppf "%% --non-deterministic [skip]\n"
+  | `Comment s        -> pp_meta ppf "%s\n" s
 
 let pp ?hide ppf t =
   List.iter (function
@@ -96,3 +101,24 @@ let equal_output a b =
     | _ -> false
   in
   aux a b
+
+module Html = struct
+
+  let pp_line ppf line =
+    match line with
+    | `Output s  -> Fmt.pf ppf ">%s\n" s
+    | `Part _    -> assert false
+    | `Command s -> Fmt.pf ppf "%s\n" s
+    | `Ellipsis  -> Fmt.pf ppf "  ...\n"
+    | `Non_det _
+    | `Comment _ -> ()
+
+
+  let pp ppf t =
+    List.iter (function
+        | Line l -> pp_line ppf l
+        | Test t -> List.iter (pp_line ppf) t.lines
+      ) t
+end
+
+let to_html t = Fmt.to_to_string Html.pp t

@@ -77,7 +77,7 @@ let file_is_mem = Map.mem
 (******************************************************************************)
 (* Printers                                                                   *)
 (******************************************************************************)
-let phrases_to_html ?(pygmentize=false) phrases =
+let phrases_to_html phrases =
 
   let in_phrase (x : Expect.Chunk.t) : Html.item Deferred.t =
     match String.split (Expect.Chunk.code x) ~on:'\n' with
@@ -85,7 +85,7 @@ let phrases_to_html ?(pygmentize=false) phrases =
     | x::xs ->
       let x = sprintf "# %s" x in
       let phrase = String.concat ~sep:"\n  " (x::xs) in
-      Pygments.pygmentize ~pygmentize `OCaml phrase
+      Pygments.pygmentize `OCaml phrase
   in
 
   let string_of_responses responses =
@@ -119,11 +119,9 @@ let phrases_to_html ?(pygmentize=false) phrases =
     if Expect.Chunk.evaluated x then (
       let highlight = function
         | Expect.Chunk.OCaml, str ->
-          Pygments.pygmentize ~add_attrs:["class","ge"]
-            ~pygmentize `OCaml str
+          Pygments.pygmentize ~add_attrs:["class","ge"] `OCaml str
         | Expect.Chunk.Raw, str ->
-          Pygments.pygmentize ~add_attrs:["class","ge"]
-            ~pygmentize:false `OCaml str
+          Pygments.pygmentize ~add_attrs:["class","ge"] `OCaml str
       in
       Deferred.List.map ~f:highlight (Expect.Chunk.responses x)
     ) else
@@ -140,20 +138,20 @@ let phrases_to_html ?(pygmentize=false) phrases =
   >>| List.concat
 
 
-let script_part_to_html ?(pygmentize=false) (x : script_part) =
+let script_part_to_html (x : script_part) =
   let singleton x = [x] in
   let%map l =
     match x with
-    | `OCaml_toplevel phrases -> phrases_to_html ~pygmentize phrases
+    | `OCaml_toplevel phrases -> phrases_to_html phrases
     | `OCaml x
     | `OCaml_rawtoplevel x ->
       let content = x.Expect.Raw_script.content in
-      Pygments.pygmentize ~pygmentize `OCaml content >>| singleton
+      Pygments.pygmentize `OCaml content >>| singleton
     | `Shell x ->
-      let content = Expect.Cram.contents x in
-      Pygments.pygmentize ~pygmentize:false `Bash content >>| singleton
+      let content = Expect.Cram.to_html x in
+      Pygments.pygmentize `Bash content >>| singleton
     | `Other x ->
-      Pygments.pygmentize ~pygmentize:false `OCaml x >>| singleton
+      Pygments.pygmentize `OCaml x >>| singleton
   in
   Html.div ~a:["class","highlight"] l
 
@@ -195,13 +193,17 @@ let script lang ~filename =
   | "jbuild" ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
-    let regexp = Str.regexp "ppx_sexp_conv -no-check" in
-    let removed_check = Str.replace_first regexp "ppx_sexp_conv" x in
-    let regexp = Str.regexp_string "(jbuild_version 1)" in
-    let removed_check = Str.replace_first regexp "" removed_check in
-    let regexp = Str.regexp_string "(include jbuild.inc)" in
-    let removed_check = Str.replace_first regexp "" removed_check in
-    Ok (`Other removed_check)
+    let changes = [
+        "ppx_sexp_conv -no-check", "ppx_sexp_conv";
+        "(jbuild_version 1)"     , "";
+        "(include jbuild.inc)"   , "";
+      ] in
+    let y =
+      let re = Re.alt (List.map ~f:(fun (s, _) -> Re.str s) changes) in
+      let f m = Caml.List.assoc (Re.Group.get m 0) changes in
+      Re.replace (Re.compile re) ~f x
+    in
+    Ok (`Other y)
   | _ ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
