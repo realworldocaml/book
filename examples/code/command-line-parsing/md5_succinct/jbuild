@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executable
+  ((name md5)
+   (libraries (core cryptokit))
+  )
+)

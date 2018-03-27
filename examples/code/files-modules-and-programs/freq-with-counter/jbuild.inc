@@ -2,7 +2,7 @@
 
 (alias (
   (name runtest)
-  (deps (build.sh (files_recursively_in .)))
+  (deps (infer_mli.sh (files_recursively_in .)))
   (action (
     progn
     (run   cram ${<})
@@ -10,13 +10,13 @@
 
 (alias (
   (name runtest-all)
-  (deps (build.sh (files_recursively_in .)))
+  (deps (infer_mli.sh (files_recursively_in .)))
   (action (
     progn (run cram --non-deterministic ${<}) (diff? ${<} ${<}.corrected)))))
 
 (alias (
   (name runtest)
-  (deps (infer_mli.sh (files_recursively_in .)))
+  (deps (build.sh (files_recursively_in .)))
   (action (
     progn
     (run   cram ${<})
@@ -24,7 +24,7 @@
 
 (alias (
   (name runtest-all)
-  (deps (infer_mli.sh (files_recursively_in .)))
+  (deps (build.sh (files_recursively_in .)))
   (action (
     progn (run cram --non-deterministic ${<}) (diff? ${<} ${<}.corrected)))))
 

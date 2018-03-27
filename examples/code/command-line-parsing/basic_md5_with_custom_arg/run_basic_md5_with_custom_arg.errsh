@@ -1,6 +1,0 @@
-  $ jbuilder build basic_md5_with_custom_arg.exe
-  $ ./_build/default/basic_md5_with_custom_arg.exe /etc/passwd
-  27bf1f2dbadd4cae84f1da4dfe8b5cb3
-  $ ./_build/default/basic_md5_with_custom_arg.exe /dev/null
-  '/dev/null' is not a regular file.
-@@ exit 1

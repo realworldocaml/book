@@ -5,31 +5,31 @@
   (deps (
     css/app.css
     css/prism.css
-    images/jason.jpg
-    images/plain-bg.jpg
-    images/anil.jpg
-    images/yaron.jpg
     images/cover.png
+    images/plain-bg.jpg
+    images/yaron.jpg
     images/book-cover.jpg
     images/bg.jpg
+    images/anil.jpg
+    images/jason.jpg
     images/front-end/pipeline.png
     images/gc/minor_heap.png
     images/imperative-programming/edit_distance2.png
     images/imperative-programming/edit_distance.png
     images/lists-and-patterns/lists_layout.png
+    images/memory-repr/tuple_layout.png
     images/memory-repr/string_block.png
     images/memory-repr/string_size_calc.png
     images/memory-repr/block.png
     images/memory-repr/float_array_layout.png
-    images/memory-repr/tuple_layout.png
-    js/_functions.js
-    js/prism.js
     js/jquery.min.js
-    js/modernizr.js
-    js/app.js
+    js/prism.js
     js/discourse.js
-    js/min/modernizr-min.js
+    js/modernizr.js
+    js/_functions.js
+    js/app.js
     js/min/app-min.js
+    js/min/modernizr-min.js
     theme/pdf/pdf.css))))
 
 (alias ((name site) (deps (00-prologue.html))))
@@ -356,41 +356,38 @@
   (deps (
     ../book/14-command-line-parsing.html
     ../bin/bin/app.exe
-    ../examples/code/command-line-parsing/basic.mlt
-    ../examples/code/command-line-parsing/basic_md5/basic_md5.ml
-    ../examples/code/command-line-parsing/basic_md5/basic_md5.sh
-    ../examples/code/command-line-parsing/basic_md5/jbuild
-    ../examples/code/command-line-parsing/basic_md5_as_filename/basic_md5_as_filename.ml
-    ../examples/code/command-line-parsing/basic_md5_as_filename/run_basic_md5_as_filename.errsh
-    ../examples/code/command-line-parsing/basic_md5_sequence.ml
-    ../examples/code/command-line-parsing/basic_md5_succinct.ml
-    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/basic_md5_with_custom_arg.ml
-    ../examples/code/command-line-parsing/basic_md5_with_custom_arg/run_basic_md5_with_custom_arg.errsh
-    ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.ml
-    ../examples/code/command-line-parsing/basic_md5_with_flags/basic_md5_with_flags.sh
-    ../examples/code/command-line-parsing/basic_md5_with_flags/jbuild
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/basic_and_default_md5.sh
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_default_file.ml
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/basic_md5_with_optional_file.ml
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file/jbuild
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/basic_md5_with_optional_file_broken.ml
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/build_basic_md5_with_optional_file_broken.errsh
-    ../examples/code/command-line-parsing/basic_md5_with_optional_file_broken/jbuild
-    ../examples/code/command-line-parsing/cal_add_days.ml
-    ../examples/code/command-line-parsing/cal_add_interactive/build_and_run_cal_add_interactive.sh
-    ../examples/code/command-line-parsing/cal_add_interactive/cal_add_interactive.ml
-    ../examples/code/command-line-parsing/cal_add_labels.ml
-    ../examples/code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.ml
-    ../examples/code/command-line-parsing/cal_add_sub_days/cal_add_sub_days.sh
+    ../examples/code/command-line-parsing/cal_add_days/cal.ml
+    ../examples/code/command-line-parsing/cal_add_days/cal.sh
+    ../examples/code/command-line-parsing/cal_add_interactive/cal.ml
+    ../examples/code/command-line-parsing/cal_add_interactive2/cal.ml
+    ../examples/code/command-line-parsing/cal_add_interactive2/cal.sh
+    ../examples/code/command-line-parsing/cal_add_sub_days/cal.ml
+    ../examples/code/command-line-parsing/cal_add_sub_days/cal.sh
     ../examples/code/command-line-parsing/cal_add_sub_days/jbuild
-    ../examples/code/command-line-parsing/cal_append.ml
-    ../examples/code/command-line-parsing/cal_append_broken/build_cal_append_broken.errsh
-    ../examples/code/command-line-parsing/cal_append_broken/jbuild
     ../examples/code/command-line-parsing/cal_completion.rawsh
-    ../examples/code/command-line-parsing/command_types.mlt
-    ../examples/code/command-line-parsing/group.mlt
-    ../examples/code/command-line-parsing/opam.rawsh
-    ../examples/code/command-line-parsing/step.mlt))
+    ../examples/code/command-line-parsing/main.mlt
+    ../examples/code/command-line-parsing/md5/jbuild
+    ../examples/code/command-line-parsing/md5/md5.ml
+    ../examples/code/command-line-parsing/md5/md5.sh
+    ../examples/code/command-line-parsing/md5_as_filename/md5.ml
+    ../examples/code/command-line-parsing/md5_let_syntax/md5.ml
+    ../examples/code/command-line-parsing/md5_let_syntax2/md5.ml
+    ../examples/code/command-line-parsing/md5_multiarg/md5.ml
+    ../examples/code/command-line-parsing/md5_multiarg/md5.sh
+    ../examples/code/command-line-parsing/md5_sequence/md5.ml
+    ../examples/code/command-line-parsing/md5_sequence/md5.sh
+    ../examples/code/command-line-parsing/md5_succinct/md5.ml
+    ../examples/code/command-line-parsing/md5_with_custom_arg/md5.ml
+    ../examples/code/command-line-parsing/md5_with_custom_arg/run.errsh
+    ../examples/code/command-line-parsing/md5_with_default_file/md5.ml
+    ../examples/code/command-line-parsing/md5_with_default_file/md5.sh
+    ../examples/code/command-line-parsing/md5_with_flags/md5.ml
+    ../examples/code/command-line-parsing/md5_with_flags/md5.sh
+    ../examples/code/command-line-parsing/md5_with_optional_file/md5.ml
+    ../examples/code/command-line-parsing/md5_with_optional_file/md5.sh
+    ../examples/code/command-line-parsing/md5_with_optional_file_broken/build.errsh
+    ../examples/code/command-line-parsing/md5_with_optional_file_broken/md5.ml
+    ../examples/code/command-line-parsing/opam.rawsh))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 

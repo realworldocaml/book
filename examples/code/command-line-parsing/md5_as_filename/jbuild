@@ -1,0 +1,8 @@
+(jbuild_version 1)
+(include jbuild.inc)
+
+(executables
+ ((names (md5))
+  (libraries (core cryptokit))
+  (preprocess (pps (ppx_jane)))
+))

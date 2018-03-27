@@ -1,7 +1,0 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
-(executables
- ((names (basic_md5_with_custom_arg))
-  (libraries (core cryptokit))
-))
