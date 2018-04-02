@@ -216,7 +216,7 @@ let make_chapter_page ?code_dir repo_root chapters chapter_file
       | Some alt ->
         Reader.file_contents (repo_root/"book"/alt) >>| fun x ->
         Scripts.exn_of_filename alt x
-    ) >>=
+    ) >>|
     Scripts.script_part_to_html
   in
   let rec loop scripts html : Html.t Deferred.t =

@@ -77,83 +77,74 @@ let file_is_mem = Map.mem
 (******************************************************************************)
 (* Printers                                                                   *)
 (******************************************************************************)
+
+let escape s =
+  (* workaround a bug in prism.js command-line plugin... *)
+  Re.replace Re.(compile @@ str "<") ~f:(fun _ -> "&#60;") s
+
 let phrases_to_html phrases =
 
-  let in_phrase (x : Expect.Chunk.t) : Html.item Deferred.t =
-    match String.split (Expect.Chunk.code x) ~on:'\n' with
-    | [] -> assert false
-    | x::xs ->
-      let x = sprintf "# %s" x in
-      let phrase = String.concat ~sep:"\n  " (x::xs) in
-      Pygments.pygmentize `OCaml phrase
-  in
+  let in_phrase x = Expect.Chunk.code x in
 
   let string_of_responses responses =
     String.concat ~sep:"\n" (List.map ~f:snd responses)
   in
 
-  (* get warnings or errors *)
-  let messages x : Html.item option =
-     (
-       if Expect.Chunk.evaluated x then
-         Expect.Chunk.warnings x
-       else
-         string_of_responses (Expect.Chunk.responses x)
-     )
-     |> function
-     | "" -> None
-     | x -> Some Html.(pre [`Data x])
+  let prefix s =
+    let s = String.strip (escape s) in
+    let s = String.split_lines s in
+    ">" ^ String.concat ~sep:"\n>" s
   in
 
-  let stdout x : Html.item option =
+  (* get warnings or errors *)
+  let messages x =
+    ( if Expect.Chunk.evaluated x then Expect.Chunk.warnings x
+      else string_of_responses (Expect.Chunk.responses x))
+    |> function
+    | "" -> None
+    | x  -> Some (prefix x)
+  in
+
+  let stdout x =
     if Expect.Chunk.evaluated x then
       match Expect.Chunk.stdout x with
       | "" -> None
-      | x -> Some Html.(pre [`Data x])
+      | x  -> Some (prefix x)
     else None
   in
 
-  let out_phrase (x : Expect.Chunk.t)
-    : Html.item list Deferred.t
-    =
+  let out_phrase x =
     if Expect.Chunk.evaluated x then (
       let highlight = function
-        | Expect.Chunk.OCaml, str ->
-          Pygments.pygmentize ~add_attrs:["class","ge"] `OCaml str
-        | Expect.Chunk.Raw, str ->
-          Pygments.pygmentize ~add_attrs:["class","ge"] `OCaml str
+        | Expect.Chunk.OCaml, str
+        | Expect.Chunk.Raw  , str -> prefix str
       in
-      Deferred.List.map ~f:highlight (Expect.Chunk.responses x)
+      List.map ~f:highlight (Expect.Chunk.responses x)
     ) else
-      Deferred.return []
+      []
   in
 
-  let phrase_to_html (x : Expect.Chunk.t) : Html.t Deferred.t =
-    let%bind in_phrase = (in_phrase x >>| Option.some) in
-    let%map out_phrase = out_phrase x in
+  let phrase_to_html x =
+    let in_phrase = in_phrase x |> Option.some in
+    let out_phrase = out_phrase x in
     List.filter_map ~f:Fn.id [in_phrase; messages x; stdout x] @ out_phrase
+    |> String.concat ~sep:"\n"
   in
 
-  Deferred.List.map phrases ~f:phrase_to_html
-  >>| List.concat
+  let phrases = List.map phrases ~f:phrase_to_html in
+  Pygments.pygmentize ~interactive:true `OCaml (String.concat ~sep:"\n" phrases)
 
 
 let script_part_to_html (x : script_part) =
-  let singleton x = [x] in
-  let%map l =
+  let l =
     match x with
     | `OCaml_toplevel phrases -> phrases_to_html phrases
-    | `OCaml x
-    | `OCaml_rawtoplevel x ->
-      let content = x.Expect.Raw_script.content in
-      Pygments.pygmentize `OCaml content >>| singleton
-    | `Shell x ->
-      let content = Expect.Cram.to_html x in
-      Pygments.pygmentize `Bash content >>| singleton
-    | `Other x ->
-      Pygments.pygmentize `OCaml x >>| singleton
+    | `OCaml_rawtoplevel x
+    | `OCaml x -> Pygments.pygmentize `OCaml x.Expect.Raw_script.content
+    | `Shell x -> Pygments.pygmentize `Bash (Expect.Cram.to_html x)
+    | `Other x -> Pygments.pygmentize `OCaml x
   in
-  Html.div ~a:["class","highlight"] l
+  Html.div ~a:["class","highlight"] [l]
 
 
 let exn_of_filename filename content =
