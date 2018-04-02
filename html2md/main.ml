@@ -90,9 +90,36 @@ and section = {
 
 let dump ppf n = Fmt.of_to_string Soup.to_string ppf n
 
+let is_white = function ' ' | '\t' .. '\r'  -> true | _ -> false
+
+let trim_left s =
+  let i = ref 0 in
+  let len = String.length s in
+  while !i < len && is_white s.[!i] do incr i done;
+  if !i = 0 then s else String.sub s !i (len - !i)
+
+let trim_right s =
+  let len = String.length s in
+  let i = ref len in
+  while !i > 0 && is_white s.[!i-1] do decr i done;
+  if !i = len then s else String.sub s 0 !i
+
+let map_text f (x:item) = match x with
+  | `Text s -> `Text (f s)
+  | _ -> x
+
+let trim_items = function
+  | []  -> []
+  | [i] -> [map_text String.trim i]
+  | h::(_::_ as t) ->
+    let t, last = match List.rev t with
+      | []   -> assert false
+      | h::t -> List.rev t, h
+    in
+    map_text trim_left h :: t @ [map_text trim_right last]
+
 (* Like [Fmt.words] but without triming *)
 let pp_words ppf s =
-  let is_white = function ' ' | '\t' .. '\r'  -> true | _ -> false in
   let last = ref 'x' in
   String.iter (fun c ->
       if is_white c && is_white !last then ()
@@ -129,12 +156,24 @@ let listi_v pp ppf l =
   let l = List.mapi (fun i x -> i, x) l in
   list_v pp ppf l
 
+let pp_one_line pp ppf items =
+  let x = Fmt.to_to_string pp items in
+  (* cf. pipe_tables: The cells of pipe tables cannot contain block
+     elements like paragraphs and lists, and cannot span multiple
+     lines. Also cf multi-line headers which are not supported in
+     markdown. *)
+  let x = String.mapi (fun i -> function
+      | '\n' -> ' '
+      | c    -> c
+        ) x in
+  Fmt.string ppf x
+
 let pp_level ppf l =
   let s = String.make l '#' in
   Fmt.string ppf s
 
 let pp_link ppf {rel; href; part} =
-  let pp_part ppf s = Fmt.pf ppf "part=@[\"%a\"@] " pp_words s in
+  let pp_part ppf s = Fmt.pf ppf "part=@[\"%a\"@] " (pp_one_line pp_words) s in
   Fmt.pf ppf "<link rel=\"%a\" href=\"%a\" %a/>"
     pp_words rel pp_words href Fmt.(option pp_part) part
 
@@ -142,13 +181,11 @@ let pp_index_term ppf s =
   Fmt.pf ppf "<a data-type=\"indexterm\" data-startref=\"%s\">&nbsp;</a>" s
 
 let pp_idx ppf {id; sortas; v} = match id, sortas with
-  | None  , None   -> Fmt.pf ppf "<idx>%a</idx>" pp_words v
-  | Some i, None   -> Fmt.pf ppf "<idx id=\"%s\">%a</idx>" i pp_words v
-  | None  , Some s ->
-    Fmt.pf ppf "<idx data-primary-sortas=\"%s\">%a</idx>" s pp_words v
+  | None  , None   -> Fmt.pf ppf "[%a]{.idx}" pp_words v
+  | Some i, None   -> Fmt.pf ppf "[%a]{.idx #%s}" pp_words v i
+  | None  , Some s -> Fmt.pf ppf "[%a]{.idx data-primary-sortas=%s}" pp_words v s
   | Some i, Some s ->
-    Fmt.pf ppf "<idx id=\"%s\" data-primary-sortas=\"%s\">%a</idx>"
-      i s pp_words v
+    Fmt.pf ppf "[%a]{.idx #%s data-primary-sortas=%s}" pp_words v i s
 
 let pp_code ppf s =
   let string_mem c =
@@ -188,21 +225,10 @@ and pp_xref ppf a =
   Fmt.pf ppf "@[[%a](%a){data-type=xref%a}@]"
     pp_items a.v pp_words a.href pp_style a.style
 
-let pp_one_line ppf items =
-  let x = Fmt.to_to_string pp_items items in
-  (* cf. pipe_tables: The cells of pipe tables cannot contain block
-     elements like paragraphs and lists, and cannot span multiple
-     lines. Also cf multi-line headers which are not supported in
-     markdown. *)
-  let x = String.mapi (fun i -> function
-      | '\n' -> ' '
-      | c    -> c
-        ) x in
-  Fmt.string ppf x
-
 let pp_table ppf t =
   let aux ppf () =
     let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
+    let pp_one_line = pp_one_line pp_items in
     let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
     Fmt.(list ~sep:(unit " | ") pp_one_line) ppf t.headers;
     Fmt.pf ppf "@,";
@@ -259,10 +285,11 @@ and pp_tip ppf t = pp_part "tip" ppf t
 and pp_caution ppf c = pp_part "caution" ppf c
 
 and pp_section ppf s =
-  Fmt.pf ppf "@[%a %a {#%s data-type=%S}@]@.@.%a@."
-    pp_level s.level pp_one_line s.title s.v.id s.v.data_type pp_block s.body
+  Fmt.pf ppf "@[%a %a {#%s data-type=%s}@]@.@.%a@."
+    pp_level s.level (pp_one_line pp_items)
+    s.title s.v.id s.v.data_type pp_block s.body
 
-and pp_para ppf p = Fmt.pf ppf "%a" (list_h pp_item) p
+and pp_para ppf p = list_h pp_item ppf (trim_items p)
 and pp_enum ppf s = listi_v pp_enum_descr ppf s
 and pp_enum_descr ppf (i, s) = Fmt.pf ppf "@[<2>%d. %a@]" (i+1) pp_block s
 
@@ -275,7 +302,8 @@ and pp_simple_list ppf t = Fmt.pf ppf "::: {.simplelist}@,%a@,:::@," pp_list t
 
 and pp_descr ppf t = list_v pp_descr_elt ppf t
 and pp_descr_elt ppf (title, body) =
-  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: @[%a@]@]@]" pp_items title pp_items body
+  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: @[%a@]@]@]"
+    pp_items title pp_items (trim_items body)
 
 and pp_sidebar ppf (title, body) =
   (* FIXME: pandoc has a bug here when using ### headers and
@@ -454,12 +482,24 @@ module Parse = struct
         err "item has attributes: %a"
           Fmt.(Dump.list Dump.(pair string string)) attrs
 
+  let txt h f =
+    Soup.texts h
+    |> String.concat ""
+    |> function "" -> [] | s -> [f s]
+
+  let idx h e =
+    let attrs = List.filter (fun (x, _) -> x <> "class") (attrs e) in
+    match attrs with
+    | ["id", id]                 -> txt h (fun x -> idx ~id x)
+    | ["data-seealso", s]        -> txt h (fun x -> idx ~seealso:s x)
+    | ["data-primary-sortas", s] -> txt h (fun x -> idx ~sortas:s x)
+    | ["data-primary-sortas", s; "id", id] ->
+      txt h (fun x -> idx ~id ~sortas:s x)
+    | []        -> txt h (fun x -> idx x)
+    | _         -> err "invalid idx: %a" dump e
+
   let rec items h: item list =
-    let txt f =
-      Soup.texts h
-      |> String.concat ""
-      |> function "" -> [] | s -> [f s]
-    in
+    let txt = txt h and idx = idx h in
     match Soup.element h with
     | None   -> no_attrs h; txt text
     | Some e ->
@@ -470,14 +510,7 @@ module Parse = struct
       | "em"     -> no_attrs h; [`Em (normalize_items (children e))]
       | "code"   -> no_attrs h; txt code
       | "a"      -> [a e]
-      | "idx"    -> (match attrs e with
-          | ["id", id]                 -> txt (fun x -> idx ~id x)
-          | ["data-seealso", s]        -> txt (fun x -> idx ~seealso:s x)
-          | ["data-primary-sortas", s] -> txt (fun x -> idx ~sortas:s x)
-          | ["data-primary-sortas", s; "id", id] ->
-            txt (fun x -> idx ~id ~sortas:s x)
-          | []        -> txt (fun x -> idx x)
-          | _         -> err "invalid idx: %a" dump e)
+      | "idx"    -> idx e
       | "span"   ->
         (match Soup.attribute "class" e with
          | Some "command"       ->
@@ -488,6 +521,7 @@ module Parse = struct
             | _ -> err "class=\"command\"")
          (* XXX: not sure what it is used for *)
          | Some "keep-together" -> txt keep_together
+         | Some "idx" -> idx e
          | _ -> err "TODO item: span %a" dump e)
       | s -> err "TODO item: %s (%a)" s dump e
 
@@ -618,7 +652,7 @@ module Parse = struct
            in
            let v = Soup.classes e = ["allow_break"] in
            let level, title, body = header ~depth e in
-           let level = if level < depth+1 then depth+level else level in
+           let level = if level < depth then depth else level in
            f {level; title; body; v}
          | ["class", "safarienabled"] ->
            Some (`Safari (blocks ~depth (children e)))
@@ -703,13 +737,13 @@ module Parse = struct
 
   and section ~depth ~data_type ~id e =
     let level, title, body = header ~depth e in
-    let level = if level < depth+1 then depth+level else level in
+    let level = if level < depth then depth else level in
     { v = {id; data_type}; level; title; body }
 
   and li e =
     expect "li" (fun e ->
         try para e
-        with Error _ -> blocks ~depth:0 e
+        with Error _ -> blocks ~depth:1 e
       ) e
 
   and dt e = expect "dt" (normalize_items) e
@@ -723,7 +757,7 @@ let of_string str =
   |> Soup.parse
   |> Soup.children
   |> Soup.to_list
-  |> filter_map Parse.(maybe_block ~depth:0)
+  |> filter_map Parse.(maybe_block ~depth:1)
 
 let of_file file =
   file
@@ -885,7 +919,7 @@ module Check = struct
     in
     v name dump_block aux
 
-  and link = v "link" pp_link (=)
+  and link = v "link" dump_link (=)
   and blocks (): block list t = list "blocks" (block "blocks")
 
   and bool = v "allow_break" Fmt.bool (=)
@@ -930,15 +964,9 @@ let check a b =
   let b = of_file b in
   Check.(check blocks) a b
 
-let () =
-  let input =
-    if Array.length Sys.argv = 2 then Sys.argv.(1)
-    else (
-      Fmt.epr "usage: html2md <file>";
-      exit 1
-    ) in
+let run input =
   let output = (Filename.remove_extension input) ^ ".md" in
-  let html_output = (Filename.remove_extension input) ^ "-new.html" in
+  Fmt.pr "Generating %s\n%!" output;
   try
     let oc = open_out output in
     let ppf = Format.formatter_of_out_channel oc in
@@ -946,6 +974,7 @@ let () =
     List.iter (Fmt.pf ppf "%a\n" pp_block) blocks;
     Fmt.pf ppf "%!";
     close_out oc;
+    let html_output = (Filename.remove_extension input) ^ ".2.html" in
     let _ =
       Fmt.kstrf Sys.command
         "pandoc --section-divs -f markdown-smart-auto_identifiers -t html5 %s -o %s"
@@ -955,3 +984,33 @@ let () =
   with Error e ->
     Fmt.epr "%s: %s\n%!" input e;
     exit 1
+
+let starts_with_digit b =
+  try Scanf.sscanf b "%d-" (fun _ -> ()); true
+  with _ -> false
+
+let () =
+  let input =
+    if Array.length Sys.argv = 2 then Sys.argv.(1)
+    else (
+      Fmt.epr "usage: html2md <file>";
+      exit 1
+    ) in
+  match input with
+  | "--all" | "-a" ->
+    let dir = Unix.opendir "book" in
+    let files = ref [] in
+    let (/) = Filename.concat in
+    let rec loop () =
+      try
+        let file = Unix.readdir dir in
+        if Filename.extension file = ".html"
+        && Filename.(extension (remove_extension file)) = ""
+        && starts_with_digit file then
+          files := ("book" / file) :: !files;
+        loop ()
+      with End_of_file ->
+        List.sort String.compare !files
+    in
+    List.iter run (loop ())
+  | _ -> run input
