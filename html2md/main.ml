@@ -650,7 +650,7 @@ module Parse = struct
            in
            let v = Soup.classes e = ["allow_break"] in
            let level, title, body = header ~depth e in
-           let level = if level < depth+1 then depth+level else level in
+           let level = if level < depth then depth else level in
            f {level; title; body; v}
          | ["class", "safarienabled"] ->
            Some (`Safari (blocks ~depth (children e)))
@@ -735,13 +735,13 @@ module Parse = struct
 
   and section ~depth ~data_type ~id e =
     let level, title, body = header ~depth e in
-    let level = if level < depth+1 then depth+level else level in
+    let level = if level < depth then depth else level in
     { v = {id; data_type}; level; title; body }
 
   and li e =
     expect "li" (fun e ->
         try para e
-        with Error _ -> blocks ~depth:0 e
+        with Error _ -> blocks ~depth:1 e
       ) e
 
   and dt e = expect "dt" (normalize_items) e
@@ -755,7 +755,7 @@ let of_string str =
   |> Soup.parse
   |> Soup.children
   |> Soup.to_list
-  |> filter_map Parse.(maybe_block ~depth:0)
+  |> filter_map Parse.(maybe_block ~depth:1)
 
 let of_file file =
   file
