@@ -70,7 +70,9 @@ let jbuild_for_chapter base_dir file =
     sexp_deps_of_chapter (Filename.concat base_dir file) |>
     List.map (fun f -> sprintf "%s/%s" examples_dir f) |>
     List.map (fun s -> "     " ^ s) |>
-    String.concat "\n" in
+    String.concat "\n"
+  in
+  let file = (Filename.remove_extension file) ^ ".html" in
   sprintf {|
   (alias ((name site) (deps (%s))))
   (rule
@@ -103,7 +105,7 @@ let find_static_files () =
   sprintf "(alias ((name site) (deps (%s))))"
 
 let process_chapters book_dir output_dir =
-  files_with ~exts:[".html"] book_dir |>
+  files_with ~exts:[".html";".md"] book_dir |>
   List.sort String.compare |>
   List.map (function
     | file when starts_with_digit file -> jbuild_for_chapter book_dir file
@@ -164,7 +166,28 @@ let process_examples dir =
   String.concat "\n" |>
   emit_sexp jbuild
 
+let process_md book_dir =
+  files_with ~exts:[".md"] book_dir |>
+  List.sort String.compare |>
+  List.map (fun file ->
+      if not (starts_with_digit file) then ""
+      else
+        let html = (Filename.remove_extension file) ^ ".html" in
+        sprintf {|
+(rule
+ ((targets (%s))
+  (deps    (%s))
+  (action  (run
+    pandoc --section-divs -f markdown-smart-auto_identifiers -t html5
+    ${<} -o ${@}))))|}
+          html file
+    ) |>
+  List.filter ((<>) "") |>
+  String.concat "\n" |>
+  emit_sexp (Filename.concat book_dir "jbuild")
+
 let _ =
+  process_md "book";
   find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions "examples" |>
   List.iter process_examples;
   process_chapters "book" "static";
