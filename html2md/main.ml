@@ -156,12 +156,24 @@ let listi_v pp ppf l =
   let l = List.mapi (fun i x -> i, x) l in
   list_v pp ppf l
 
+let pp_one_line pp ppf items =
+  let x = Fmt.to_to_string pp items in
+  (* cf. pipe_tables: The cells of pipe tables cannot contain block
+     elements like paragraphs and lists, and cannot span multiple
+     lines. Also cf multi-line headers which are not supported in
+     markdown. *)
+  let x = String.mapi (fun i -> function
+      | '\n' -> ' '
+      | c    -> c
+        ) x in
+  Fmt.string ppf x
+
 let pp_level ppf l =
   let s = String.make l '#' in
   Fmt.string ppf s
 
 let pp_link ppf {rel; href; part} =
-  let pp_part ppf s = Fmt.pf ppf "part=@[\"%a\"@] " pp_words s in
+  let pp_part ppf s = Fmt.pf ppf "part=@[\"%a\"@] " (pp_one_line pp_words) s in
   Fmt.pf ppf "<link rel=\"%a\" href=\"%a\" %a/>"
     pp_words rel pp_words href Fmt.(option pp_part) part
 
@@ -213,21 +225,10 @@ and pp_xref ppf a =
   Fmt.pf ppf "@[[%a](%a){data-type=xref%a}@]"
     pp_items a.v pp_words a.href pp_style a.style
 
-let pp_one_line ppf items =
-  let x = Fmt.to_to_string pp_items items in
-  (* cf. pipe_tables: The cells of pipe tables cannot contain block
-     elements like paragraphs and lists, and cannot span multiple
-     lines. Also cf multi-line headers which are not supported in
-     markdown. *)
-  let x = String.mapi (fun i -> function
-      | '\n' -> ' '
-      | c    -> c
-        ) x in
-  Fmt.string ppf x
-
 let pp_table ppf t =
   let aux ppf () =
     let item_lengh e = String.length (Fmt.to_to_string pp_item e) in
+    let pp_one_line = pp_one_line pp_items in
     let len t = List.fold_left (fun acc x -> 1 + item_lengh x + acc) 0 t in
     Fmt.(list ~sep:(unit " | ") pp_one_line) ppf t.headers;
     Fmt.pf ppf "@,";
@@ -285,7 +286,8 @@ and pp_caution ppf c = pp_part "caution" ppf c
 
 and pp_section ppf s =
   Fmt.pf ppf "@[%a %a {#%s data-type=%S}@]@.@.%a@."
-    pp_level s.level pp_one_line s.title s.v.id s.v.data_type pp_block s.body
+    pp_level s.level (pp_one_line pp_items)
+    s.title s.v.id s.v.data_type pp_block s.body
 
 and pp_para ppf p = list_h pp_item ppf (trim_items p)
 and pp_enum ppf s = listi_v pp_enum_descr ppf s
@@ -917,7 +919,7 @@ module Check = struct
     in
     v name dump_block aux
 
-  and link = v "link" pp_link (=)
+  and link = v "link" dump_link (=)
   and blocks (): block list t = list "blocks" (block "blocks")
 
   and bool = v "allow_break" Fmt.bool (=)
