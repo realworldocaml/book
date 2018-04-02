@@ -285,7 +285,7 @@ and pp_tip ppf t = pp_part "tip" ppf t
 and pp_caution ppf c = pp_part "caution" ppf c
 
 and pp_section ppf s =
-  Fmt.pf ppf "@[%a %a {#%s data-type=%S}@]@.@.%a@."
+  Fmt.pf ppf "@[%a %a {#%s data-type=%s}@]@.@.%a@."
     pp_level s.level (pp_one_line pp_items)
     s.title s.v.id s.v.data_type pp_block s.body
 
