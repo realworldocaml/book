@@ -90,9 +90,36 @@ and section = {
 
 let dump ppf n = Fmt.of_to_string Soup.to_string ppf n
 
+let is_white = function ' ' | '\t' .. '\r'  -> true | _ -> false
+
+let trim_left s =
+  let i = ref 0 in
+  let len = String.length s in
+  while !i < len && is_white s.[!i] do incr i done;
+  if !i = 0 then s else String.sub s !i (len - !i)
+
+let trim_right s =
+  let len = String.length s in
+  let i = ref len in
+  while !i > 0 && is_white s.[!i-1] do decr i done;
+  if !i = len then s else String.sub s 0 !i
+
+let map_text f (x:item) = match x with
+  | `Text s -> `Text (f s)
+  | _ -> x
+
+let trim_items = function
+  | []  -> []
+  | [i] -> [map_text String.trim i]
+  | h::(_::_ as t) ->
+    let t, last = match List.rev t with
+      | []   -> assert false
+      | h::t -> List.rev t, h
+    in
+    map_text trim_left h :: t @ [map_text trim_right last]
+
 (* Like [Fmt.words] but without triming *)
 let pp_words ppf s =
-  let is_white = function ' ' | '\t' .. '\r'  -> true | _ -> false in
   let last = ref 'x' in
   String.iter (fun c ->
       if is_white c && is_white !last then ()
@@ -262,7 +289,7 @@ and pp_section ppf s =
   Fmt.pf ppf "@[%a %a {#%s data-type=%S}@]@.@.%a@."
     pp_level s.level pp_one_line s.title s.v.id s.v.data_type pp_block s.body
 
-and pp_para ppf p = Fmt.pf ppf "%a" (list_h pp_item) p
+and pp_para ppf p = list_h pp_item ppf (trim_items p)
 and pp_enum ppf s = listi_v pp_enum_descr ppf s
 and pp_enum_descr ppf (i, s) = Fmt.pf ppf "@[<2>%d. %a@]" (i+1) pp_block s
 
@@ -275,7 +302,8 @@ and pp_simple_list ppf t = Fmt.pf ppf "::: {.simplelist}@,%a@,:::@," pp_list t
 
 and pp_descr ppf t = list_v pp_descr_elt ppf t
 and pp_descr_elt ppf (title, body) =
-  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: @[%a@]@]@]" pp_items title pp_items body
+  Fmt.pf ppf "@[<v>@[<h>%a@]@,@[<h-2>: @[%a@]@]@]"
+    pp_items title pp_items (trim_items body)
 
 and pp_sidebar ppf (title, body) =
   (* FIXME: pandoc has a bug here when using ### headers and
