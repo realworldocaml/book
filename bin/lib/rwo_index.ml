@@ -27,7 +27,8 @@ let indexterm_to_idx docs =
             | _ -> true
           )
           in
-          `Element {name="idx"; attrs; childs=[`Data data]}
+          let attrs = ("class", "idx") :: attrs in
+          `Element {name="span"; attrs; childs=[`Data data]}
       )
       else
         item (* no point in recursing to single Data child *)
@@ -40,8 +41,10 @@ let indexterm_to_idx docs =
 let idx_to_indexterm t =
   let rec loop item = match item with
     | `Data _ -> item
-    | `Element {name="idx"; attrs; childs=[`Data data]} -> (
-      match String.split data ~on:'/' with
+    | `Element {name="span"; attrs; childs=[`Data data]}
+      when List.Assoc.find ~equal:(=) attrs "class" = Some "idx"->
+      let attrs = List.filter attrs ~f:(fun (x, _) -> x <> "class") in
+      (match String.split data ~on:'/' with
       | x::[] ->
         `Element {
           name = "a";
@@ -63,8 +66,6 @@ let idx_to_indexterm t =
           "<idx> node's child must be slash separated string but got %s"
           data ()
     )
-    | `Element {name="idx"; _} ->
-      failwith "<idx> node should have single Data child"
     | `Element {name; attrs; childs} ->
       `Element {name; attrs; childs = List.map childs ~f:loop}
   in

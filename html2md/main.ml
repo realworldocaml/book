@@ -169,13 +169,11 @@ let pp_index_term ppf s =
   Fmt.pf ppf "<a data-type=\"indexterm\" data-startref=\"%s\">&nbsp;</a>" s
 
 let pp_idx ppf {id; sortas; v} = match id, sortas with
-  | None  , None   -> Fmt.pf ppf "<idx>%a</idx>" pp_words v
-  | Some i, None   -> Fmt.pf ppf "<idx id=\"%s\">%a</idx>" i pp_words v
-  | None  , Some s ->
-    Fmt.pf ppf "<idx data-primary-sortas=\"%s\">%a</idx>" s pp_words v
+  | None  , None   -> Fmt.pf ppf "[%a]{.idx}" pp_words v
+  | Some i, None   -> Fmt.pf ppf "[%a]{.idx #%s}" pp_words v i
+  | None  , Some s -> Fmt.pf ppf "[%a]{.idx data-primary-sortas=%s}" pp_words v s
   | Some i, Some s ->
-    Fmt.pf ppf "<idx id=\"%s\" data-primary-sortas=\"%s\">%a</idx>"
-      i s pp_words v
+    Fmt.pf ppf "[%a]{.idx #%s data-primary-sortas=%s}" pp_words v i s
 
 let pp_code ppf s =
   let string_mem c =
@@ -482,12 +480,24 @@ module Parse = struct
         err "item has attributes: %a"
           Fmt.(Dump.list Dump.(pair string string)) attrs
 
+  let txt h f =
+    Soup.texts h
+    |> String.concat ""
+    |> function "" -> [] | s -> [f s]
+
+  let idx h e =
+    let attrs = List.filter (fun (x, _) -> x <> "class") (attrs e) in
+    match attrs with
+    | ["id", id]                 -> txt h (fun x -> idx ~id x)
+    | ["data-seealso", s]        -> txt h (fun x -> idx ~seealso:s x)
+    | ["data-primary-sortas", s] -> txt h (fun x -> idx ~sortas:s x)
+    | ["data-primary-sortas", s; "id", id] ->
+      txt h (fun x -> idx ~id ~sortas:s x)
+    | []        -> txt h (fun x -> idx x)
+    | _         -> err "invalid idx: %a" dump e
+
   let rec items h: item list =
-    let txt f =
-      Soup.texts h
-      |> String.concat ""
-      |> function "" -> [] | s -> [f s]
-    in
+    let txt = txt h and idx = idx h in
     match Soup.element h with
     | None   -> no_attrs h; txt text
     | Some e ->
@@ -498,14 +508,7 @@ module Parse = struct
       | "em"     -> no_attrs h; [`Em (normalize_items (children e))]
       | "code"   -> no_attrs h; txt code
       | "a"      -> [a e]
-      | "idx"    -> (match attrs e with
-          | ["id", id]                 -> txt (fun x -> idx ~id x)
-          | ["data-seealso", s]        -> txt (fun x -> idx ~seealso:s x)
-          | ["data-primary-sortas", s] -> txt (fun x -> idx ~sortas:s x)
-          | ["data-primary-sortas", s; "id", id] ->
-            txt (fun x -> idx ~id ~sortas:s x)
-          | []        -> txt (fun x -> idx x)
-          | _         -> err "invalid idx: %a" dump e)
+      | "idx"    -> idx e
       | "span"   ->
         (match Soup.attribute "class" e with
          | Some "command"       ->
@@ -516,6 +519,7 @@ module Parse = struct
             | _ -> err "class=\"command\"")
          (* XXX: not sure what it is used for *)
          | Some "keep-together" -> txt keep_together
+         | Some "idx" -> idx e
          | _ -> err "TODO item: span %a" dump e)
       | s -> err "TODO item: %s (%a)" s dump e
 
@@ -966,7 +970,7 @@ let () =
       exit 1
     ) in
   let output = (Filename.remove_extension input) ^ ".md" in
-  let html_output = (Filename.remove_extension input) ^ "-new.html" in
+  let html_output = input in
   try
     let oc = open_out output in
     let ppf = Format.formatter_of_out_channel oc in
