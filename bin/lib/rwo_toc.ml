@@ -170,7 +170,9 @@ let flatten_sections sections =
   )
 
 let is_chapter_file file : bool =
-  Filename.basename file
+  let base, ext = Filename.split_extension file in
+  ext = Some "html" &&
+  base
   |> String.split ~on:'-'
   |> List.hd_exn
   |> fun x ->
