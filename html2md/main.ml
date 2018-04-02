@@ -962,15 +962,9 @@ let check a b =
   let b = of_file b in
   Check.(check blocks) a b
 
-let () =
-  let input =
-    if Array.length Sys.argv = 2 then Sys.argv.(1)
-    else (
-      Fmt.epr "usage: html2md <file>";
-      exit 1
-    ) in
+let run input =
   let output = (Filename.remove_extension input) ^ ".md" in
-  let html_output = input in
+  Fmt.pr "Generating %s\n%!" output;
   try
     let oc = open_out output in
     let ppf = Format.formatter_of_out_channel oc in
@@ -978,6 +972,7 @@ let () =
     List.iter (Fmt.pf ppf "%a\n" pp_block) blocks;
     Fmt.pf ppf "%!";
     close_out oc;
+    let html_output = (Filename.remove_extension input) ^ ".2.html" in
     let _ =
       Fmt.kstrf Sys.command
         "pandoc --section-divs -f markdown-smart-auto_identifiers -t html5 %s -o %s"
@@ -987,3 +982,33 @@ let () =
   with Error e ->
     Fmt.epr "%s: %s\n%!" input e;
     exit 1
+
+let starts_with_digit b =
+  try Scanf.sscanf b "%d-" (fun _ -> ()); true
+  with _ -> false
+
+let () =
+  let input =
+    if Array.length Sys.argv = 2 then Sys.argv.(1)
+    else (
+      Fmt.epr "usage: html2md <file>";
+      exit 1
+    ) in
+  match input with
+  | "--all" | "-a" ->
+    let dir = Unix.opendir "book" in
+    let files = ref [] in
+    let (/) = Filename.concat in
+    let rec loop () =
+      try
+        let file = Unix.readdir dir in
+        if Filename.extension file = ".html"
+        && Filename.(extension (remove_extension file)) = ""
+        && starts_with_digit file then
+          files := ("book" / file) :: !files;
+        loop ()
+      with End_of_file ->
+        List.sort String.compare !files
+    in
+    List.iter run (loop ())
+  | _ -> run input
