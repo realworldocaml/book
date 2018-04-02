@@ -5,31 +5,31 @@
   (deps (
     css/app.css
     css/prism.css
-    images/cover.png
+    images/jason.jpg
     images/plain-bg.jpg
+    images/anil.jpg
     images/yaron.jpg
+    images/cover.png
     images/book-cover.jpg
     images/bg.jpg
-    images/anil.jpg
-    images/jason.jpg
     images/front-end/pipeline.png
     images/gc/minor_heap.png
     images/imperative-programming/edit_distance2.png
     images/imperative-programming/edit_distance.png
     images/lists-and-patterns/lists_layout.png
-    images/memory-repr/tuple_layout.png
     images/memory-repr/string_block.png
     images/memory-repr/string_size_calc.png
     images/memory-repr/block.png
     images/memory-repr/float_array_layout.png
-    js/jquery.min.js
-    js/prism.js
-    js/discourse.js
-    js/modernizr.js
+    images/memory-repr/tuple_layout.png
     js/_functions.js
+    js/prism.js
+    js/jquery.min.js
+    js/modernizr.js
     js/app.js
-    js/min/app-min.js
+    js/discourse.js
     js/min/modernizr-min.js
+    js/min/app-min.js
     theme/pdf/pdf.css))))
 
 (alias ((name site) (deps (00-prologue.html))))
