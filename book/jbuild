@@ -1,0 +1,362 @@
+(jbuild_version 1)
+
+(rule (
+  (targets (00-prologue.html))
+  (deps    (00-prologue.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (01-guided-tour.html))
+  (deps    (01-guided-tour.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (02-variables-and-functions.html))
+  (deps    (02-variables-and-functions.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (03-lists-and-patterns.html))
+  (deps    (03-lists-and-patterns.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (04-files-modules-and-programs.html))
+  (deps    (04-files-modules-and-programs.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (05-records.html))
+  (deps    (05-records.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (06-variants.html))
+  (deps    (06-variants.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (07-error-handling.html))
+  (deps    (07-error-handling.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (08-imperative-programming.html))
+  (deps    (08-imperative-programming.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (09-functors.html))
+  (deps    (09-functors.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (10-first-class-modules.html))
+  (deps    (10-first-class-modules.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (11-objects.html))
+  (deps    (11-objects.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (12-classes.html))
+  (deps    (12-classes.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (13-maps-and-hashtables.html))
+  (deps    (13-maps-and-hashtables.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (14-command-line-parsing.html))
+  (deps    (14-command-line-parsing.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (15-json.html))
+  (deps    (15-json.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (16-parsing-with-ocamllex-and-menhir.html))
+  (deps    (16-parsing-with-ocamllex-and-menhir.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (17-data-serialization.html))
+  (deps    (17-data-serialization.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (18-concurrent-programming.html))
+  (deps    (18-concurrent-programming.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (19-foreign-function-interface.html))
+  (deps    (19-foreign-function-interface.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (20-runtime-memory-layout.html))
+  (deps    (20-runtime-memory-layout.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (21-garbage-collector.html))
+  (deps    (21-garbage-collector.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (22-compiler-frontend.html))
+  (deps    (22-compiler-frontend.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
+  (targets (23-compiler-backend.html))
+  (deps    (23-compiler-backend.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+

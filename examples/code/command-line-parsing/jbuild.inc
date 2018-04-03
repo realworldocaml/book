@@ -2,17 +2,20 @@
 
 (alias (
   (name runtest)
-  (deps (z.sh (files_recursively_in .)))
+  (deps (main.mlt (files_recursively_in .)))
   (action (
     progn
-    (run   cram ${<})
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
     (diff? ${<} ${<}.corrected)))))
 
 (alias (
   (name runtest-all)
-  (deps (z.sh (files_recursively_in .)))
+  (deps (main.mlt (files_recursively_in .)))
   (action (
-    progn (run cram --non-deterministic ${<}) (diff? ${<} ${<}.corrected)))))
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
 
 (alias (
   (name runtest)
@@ -42,23 +45,6 @@
 (alias (
   (name runtest-all)
   (deps (basic.mlt (files_recursively_in .)))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (
-      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name runtest)
-  (deps (main.mlt (files_recursively_in .)))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name runtest-all)
-  (deps (main.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (

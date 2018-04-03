@@ -98,9 +98,9 @@ let get_sections file (html: Html.t) =
 
     let title_elem = match data_type with
       | "chapter" -> "h1"
-      | "sect1" -> "h1"
-      | "sect2" -> "h2"
-      | "sect3" -> "h3"
+      | "sect1" -> "h2"
+      | "sect2" -> "h3"
+      | "sect3" -> "h4"
       | _ ->
         failwithf "%s: unsupported section data-type = %s"
           file data_type ()
@@ -170,7 +170,9 @@ let flatten_sections sections =
   )
 
 let is_chapter_file file : bool =
-  Filename.basename file
+  let base, ext = Filename.split_extension file in
+  ext = Some "html" &&
+  base
   |> String.split ~on:'-'
   |> List.hd_exn
   |> fun x ->

@@ -54,7 +54,7 @@ $(document).ready(function(){
 	if ($('section[data-type=chapter]').length > 0)
 	{
 		$('section[data-type=chapter]').scrollNav({
-			sections:		'section>h1',
+			sections:		'section>h2',
 			subSections:	'section',
 			sectionElem:	'div',
 			insertTarget:	$('.left-column').get(0),
