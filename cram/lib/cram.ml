@@ -66,7 +66,7 @@ let is_meta s =String.length s >= 2 && String.sub s 0 2 = "@@"
 let pp_line ?(hide=false) ppf line =
   let pp_meta ppf fmt =
     Fmt.kstrf (fun str ->
-        if not (hide || is_meta str) then Fmt.string ppf str
+        if not (hide && is_meta str) then Fmt.string ppf str
       ) fmt
   in
   match line with
@@ -74,8 +74,8 @@ let pp_line ?(hide=false) ppf line =
   | `Part s           -> Fmt.pf ppf "### %s\n" s
   | `Command s        -> Fmt.pf ppf "  $ %s\n" s
   | `Ellipsis         -> Fmt.pf ppf "  ...\n"
-  | `Non_det `Output  -> pp_meta ppf "%% --non-deterministic\n"
-  | `Non_det `Command -> pp_meta ppf "%% --non-deterministic [skip]\n"
+  | `Non_det `Output  -> pp_meta ppf "%%%% --non-deterministic\n"
+  | `Non_det `Command -> pp_meta ppf "%%%% --non-deterministic [skip]\n"
   | `Comment s        -> pp_meta ppf "%s\n" s
 
 let pp ?hide ppf t =
