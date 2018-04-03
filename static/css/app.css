@@ -295,14 +295,11 @@
      color: #6f6f6f;
      line-height: 0;
 }
- h1 {
+ h1, h2 {
      font-size: 1.48926rem;
 }
- h2 {
-     font-size: 1.19141rem;
-}
  h3 {
-     font-size: 0.7625rem;
+     font-size: 1.19141rem;
 }
  h4 {
      font-size: 1.0505rem;
@@ -469,14 +466,11 @@
      h1, h2, h3, h4, h5, h6 {
          line-height: 1;
     }
-     h1 {
+     h1, h2 {
          font-size: 3.05176rem;
     }
-     h2 {
-         font-size: 2.44141rem;
-    }
      h3 {
-         font-size: 1.5625rem;
+         font-size: 2.44141rem;
     }
      h4 {
          font-size: 1.5625rem;
@@ -529,11 +523,11 @@
      @page {
          margin: 0.5cm;
     }
-     p, h2, h3 {
+     p, h3 {
          orphans: 3;
          widows: 3;
     }
-     h2, h3 {
+     h3 {
          page-break-after: avoid;
     }
      .hide-on-print {
@@ -562,17 +556,17 @@
      font-feature-settings: "kern" 1;
      font-kerning: normal;
 }
- h1 small {
+ h1 small, h2 small {
      display: block;
      text-transform: uppercase;
      line-height: 1.4;
 }
- h3 {
+ h4 {
      text-transform: uppercase;
      font-weight: bold;
      color: #777777;
 }
- h4, h5, h6 {
+ h5, h6 {
      text-transform: uppercase;
      font-weight: bold;
 }
@@ -591,7 +585,7 @@
      text-transform: none !important;
      font-size: 95%;
 }
- a h1 {
+ a h1, a h2 {
      color: #8e44ad;
 }
  .wrap {
@@ -1231,7 +1225,10 @@
  .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item.active .scroll-nav__sub-link {
      color: black;
 }
- section[data-type=chapter] h2, section[data-type=chapter] h3, section[data-type=chapter] h4, section[data-type=chapter] h5, section[data-type=chapter] h6 {
+ section[data-type=chapter] h3,
+ section[data-type=chapter] h4,
+ section[data-type=chapter] h5,
+ section[data-type=chapter] h6 {
      margin-top: 1.75rem;
 }
  section[data-type=chapter] > h1 {
@@ -1240,7 +1237,8 @@
      padding-bottom: 1rem;
 }
  @media only screen and (max-width: 40em) {
-     section[data-type=chapter] > h1 {
+     section[data-type=chapter] > h1,
+     section[data-type=chapter] > h2 {
          font-size: 1.86157rem;
     }
 }
@@ -1259,7 +1257,7 @@
      padding-top: 2.53125rem;
      border-top: 1px solid #dddddd;
 }
- section[data-type=chapter] h1 + section[data-type=sect1] {
+ section[data-type=chapter] h2 + section[data-type=sect1] {
      margin-top: 1.6875rem;
      padding-top: 0;
      border-top: 0;
@@ -1271,7 +1269,8 @@
      margin-bottom: 1.6875rem;
      padding: 1.6875rem;
 }
- section[data-type=chapter] div[data-type=note] h1 {
+ section[data-type=chapter] div[data-type=note] h1,
+ section[data-type=chapter] div[data-type=note] h2 {
      font-size: 1.5625rem;
 }
  section[data-type=chapter] div[data-type=note] p {
