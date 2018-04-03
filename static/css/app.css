@@ -659,9 +659,9 @@
      .wrap .main-body {
          padding-left: 1.6875rem;
          padding-right: 1.6875rem;
-         width: 51.66667%;
+         width: 65%;
          float: left;
-         margin-left: 29.16667% !important;
+         margin-left: 30% !important;
          padding-bottom: 6.75rem;
     }
 }
