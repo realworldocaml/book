@@ -14,6 +14,3 @@
             | 0 -> compare a__001_.bar b__002_.bar
             | n -> n) : t -> t -> int)
   let _ = compare
-  File "comparelib_test.ml", line 1:
-  Error: Could not find the .cmi file for interface comparelib_test.mli.
-@@ exit 2

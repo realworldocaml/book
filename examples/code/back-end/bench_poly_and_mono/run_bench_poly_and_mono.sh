@@ -1,5 +1,5 @@
   $ jbuilder build bench_poly_and_mono.exe
-%% --non-deterministic [skip]
+% --non-deterministic [skip]
   $ ./_build/default/bench_poly_and_mono.exe -ascii -quota 1
   Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
                                                        
