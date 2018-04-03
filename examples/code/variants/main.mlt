@@ -234,28 +234,18 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
 |}];;
 [@@@part "16"];;
 let is_positive_permissive = function
-  | `Int   x -> Ok (x > 0)
-  | `Float x -> Ok (x > 0.)
+  | `Int   x -> Ok Int.(x > 0)
+  | `Float x -> Ok Float.(x > 0.)
   | _ -> Error "Unknown number type"
 ;;
-[%%expect{|
-Characters 89-91:
-Error: This expression has type float but an expression was expected of type
-         int
+[%%expect ocaml {|
+val is_positive_permissive :
+  [> `Float of float | `Int of int ] -> (bool, string) result = <fun>
 |}];;
 is_positive_permissive (`Int 0);;
-[%%expect{|
-Characters 0-22:
-Error: Unbound value is_positive_permissive
-|}];;
+[%%expect ocaml {|- : (bool, string) result = Ok false|}];;
 is_positive_permissive (`Ratio (3,4));;
-[%%expect{|
-Characters 0-22:
-Error: Unbound value is_positive_permissive
-|}];;
+[%%expect ocaml {|- : (bool, string) result = Error "Unknown number type"|}];;
 [@@@part "17"];;
 is_positive_permissive (`Floot 3.5);;
-[%%expect{|
-Characters 0-22:
-Error: Unbound value is_positive_permissive
-|}];;
+[%%expect ocaml {|- : (bool, string) result = Error "Unknown number type"|}];;
