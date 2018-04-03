@@ -1,4 +1,5 @@
   $ jbuilder build cal.exe
+  Done: 3/7 (jobs: 1)                   Done: 4/7 (jobs: 1)                   Done: 5/7 (jobs: 1)                   Done: 70/73 (jobs: 1)                     Done: 71/73 (jobs: 1)                     Done: 72/73 (jobs: 1)                     
   $ ./_build/default/cal.exe -help
   Add [days] to the [base] date and print day
   

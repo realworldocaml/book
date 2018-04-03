@@ -1,5 +1,5 @@
   $ jbuilder build exn_cost.exe
-% --non-deterministic [skip]
+%% --non-deterministic [skip]
   $ ./_build/default/exn_cost.exe -ascii cycles -quota 1
   Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 

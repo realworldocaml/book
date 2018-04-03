@@ -1,7 +1,7 @@
 ### build
   $ jbuilder build freq.bc
 ### test
-% --non-deterministic [skip]
+%% --non-deterministic [skip]
   $ strings `which ocamlopt` | ./_build/default/freq.bc
    92: <hov2>
    76: list.ml
