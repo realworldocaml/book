@@ -169,30 +169,19 @@ let flatten_sections sections =
     )
   )
 
-let is_chapter_file file : bool =
-  let base, ext = Filename.split_extension file in
-  ext = Some "html" &&
-  base
-  |> String.split ~on:'-'
-  |> List.hd_exn
-  |> fun x ->
-    try ignore (Int.of_string x); true
-    with _ -> false
+let toc dir =
+  let file = dir / "toc.txt" in
+  Reader.file_lines file >>| fun lines ->
+  List.map ~f:String.strip lines |>
+  List.filter ~f:((<>)"") |>
+  List.map ~f:(fun f -> f ^ ".html")
 
 let get_chapters ?(repo_root=".") () : chapter list Deferred.t =
   let book_dir = repo_root/"book" in
-  let number basename =
-    String.split basename ~on:'-'
-    |> List.hd_exn
-    |> Int.of_string
-  in
-  Sys.readdir book_dir >>= fun a ->
-  return (Array.to_list a) >>= fun l ->
-  return (List.filter l ~f:is_chapter_file) >>=
-  Deferred.List.map ~f:(fun basename ->
+  toc book_dir >>=
+  Deferred.List.mapi ~f:(fun number basename ->
     let in_file = book_dir/basename in
     Html.of_file in_file >>| fun html ->
-    let number = number basename in
     {
       number;
       filename = basename;
@@ -200,8 +189,7 @@ let get_chapters ?(repo_root=".") () : chapter list Deferred.t =
       part_info = part_info_of_chapter number;
       sections = get_sections in_file html;
     }
-  ) >>|
-  List.sort ~compare:(fun a b -> Int.compare a.number b.number)
+  )
 
 let get_next_chapter chapters curr_chapter : chapter option =
   List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)

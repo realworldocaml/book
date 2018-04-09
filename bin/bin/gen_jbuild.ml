@@ -2,6 +2,17 @@
 open Printf
 open Sexplib.Conv
 
+let read_lines file =
+  let ic = open_in_bin file in
+  let rec aux acc =
+    match input_line ic with
+    | l -> aux (l::acc)
+    | exception End_of_file -> List.rev acc
+  in
+  let r = aux [] in
+  close_in ic;
+  r
+
 (** Directory and file traversal functions *)
 
 (** [find_dirs_containing ~exts base] will return all the sub-directories
@@ -56,7 +67,7 @@ let static_extensions =
 (** Process the book chapters *)
 
 (** Find the dependencies within an HTML file *)
-let sexp_deps_of_chapter file =
+let deps_of_chapter file =
   let open Soup in
   read_file file |>
   parse |> fun s ->
@@ -67,7 +78,7 @@ let sexp_deps_of_chapter file =
 let jbuild_for_chapter base_dir file =
   let examples_dir = "../examples" in
   let deps =
-    sexp_deps_of_chapter (Filename.concat base_dir file) |>
+    deps_of_chapter (Filename.concat base_dir file) |>
     List.map (fun f -> sprintf "%s/%s" examples_dir f) |>
     List.map (fun s -> "     " ^ s) |>
     String.concat "\n"
@@ -77,13 +88,14 @@ let jbuild_for_chapter base_dir file =
   (alias ((name site) (deps (%s))))
   (rule
   ((targets (%s))
-   (deps (../book/%s ../bin/bin/app.exe
-%s))
+   (deps (../book/%s ../bin/bin/app.exe ../book/toc.txt %s))
    (action (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))) |} file file file deps
 
-let starts_with_digit b =
-  try Scanf.sscanf b "%d-" (fun _ -> ()); true
-  with _ -> false
+let read_toc base_dir =
+  let file = Filename.concat base_dir "toc.txt" in
+  List.map String.trim (read_lines  file)
+
+let is_chapter toc f = List.mem (Filename.remove_extension f) toc
 
 let frontpage_chapter name =
   sprintf {|
@@ -104,11 +116,11 @@ let find_static_files () =
   String.concat "\n" |>
   sprintf "(alias ((name site) (deps (%s))))"
 
-let process_chapters book_dir output_dir =
+let process_chapters ~toc book_dir output_dir =
   files_with ~exts:[".html";".md"] book_dir |>
   List.sort String.compare |>
   List.map (function
-    | file when starts_with_digit file -> jbuild_for_chapter book_dir file
+    | file when is_chapter toc file -> jbuild_for_chapter book_dir file
     | "install.html" -> frontpage_chapter "install"
     | "faqs.html" -> frontpage_chapter "faqs"
     | "toc.html" -> frontpage_chapter "toc"
@@ -166,11 +178,11 @@ let process_examples dir =
   String.concat "\n" |>
   emit_sexp jbuild
 
-let process_md book_dir =
+let process_md ~toc book_dir =
   files_with ~exts:[".md"] book_dir |>
   List.sort String.compare |>
   List.map (fun file ->
-      if not (starts_with_digit file) then ""
+      if not (is_chapter toc file) then ""
       else
         let html = (Filename.remove_extension file) ^ ".html" in
         sprintf {|
@@ -187,7 +199,8 @@ let process_md book_dir =
   emit_sexp (Filename.concat book_dir "jbuild")
 
 let _ =
-  process_md "book";
+  let toc = read_toc "book" in
+  process_md ~toc "book";
   find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions "examples" |>
   List.iter process_examples;
-  process_chapters "book" "static";
+  process_chapters ~toc "book" "static";
