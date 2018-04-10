@@ -2,17 +2,6 @@
 open Printf
 open Sexplib.Conv
 
-let read_lines file =
-  let ic = open_in_bin file in
-  let rec aux acc =
-    match input_line ic with
-    | l -> aux (l::acc)
-    | exception End_of_file -> List.rev acc
-  in
-  let r = aux [] in
-  close_in ic;
-  r
-
 (** Directory and file traversal functions *)
 
 (** [find_dirs_containing ~exts base] will return all the sub-directories
@@ -75,6 +64,8 @@ let deps_of_chapter file =
   fold (fun a n -> R.attribute "href" n :: a) [] |>
   List.sort_uniq String.compare
 
+let toc_file = "toc.scm"
+
 let jbuild_for_chapter base_dir file =
   let examples_dir = "../examples" in
   let deps =
@@ -88,22 +79,38 @@ let jbuild_for_chapter base_dir file =
   (alias ((name site) (deps (%s))))
   (rule
   ((targets (%s))
-   (deps (../book/%s ../bin/bin/app.exe ../book/toc.txt %s))
-   (action (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))) |} file file file deps
+   (deps (../book/%s ../bin/bin/app.exe ../book/%s %s))
+   (action (run rwo-build build chapter -o . -code ../examples -repo-root .. ${<})))) |} file file file toc_file deps
+
+type part = {
+  title   : string;
+  chapters: string list;
+} [@@deriving sexp]
+
+type toc = [ `part of part | `chapter of string] list [@@deriving sexp]
 
 let read_toc base_dir =
-  let file = Filename.concat base_dir "toc.txt" in
-  List.map String.trim (read_lines  file)
+  let f = Filename.concat base_dir toc_file in
+  let s = Sexplib.Sexp.load_sexps f in
+  toc_of_sexp (Sexplib.Sexp.List s)
 
-let is_chapter toc f = List.mem (Filename.remove_extension f) toc
+let is_chapter (toc:toc) f =
+  let mem = function
+    | `chapter c -> String.equal c f
+    | `part p    -> List.mem f p.chapters
+  in
+  List.exists mem toc
 
-let frontpage_chapter name =
+let frontpage_chapter ?(deps=[]) name =
   sprintf {|
   (alias ((name site) (deps (%s.html))))
   (rule
     ((targets (%s.html))
-    (deps (../book/%s.html ../bin/bin/app.exe))
-    (action (run rwo-build build %s -o . -repo-root ..)))) |} name name name name
+    (deps (../book/%s.html ../bin/bin/app.exe %s))
+    (action (run rwo-build build %s -o . -repo-root ..)))) |}
+    name name name
+    (String.concat " " deps)
+    name
 
 let find_static_files () =
   find_dirs_containing ~exts:static_extensions "static" |>
@@ -123,7 +130,7 @@ let process_chapters ~toc book_dir output_dir =
     | file when is_chapter toc file -> jbuild_for_chapter book_dir file
     | "install.html" -> frontpage_chapter "install"
     | "faqs.html" -> frontpage_chapter "faqs"
-    | "toc.html" -> frontpage_chapter "toc"
+    | "toc.html" -> frontpage_chapter ~deps:["../book/"^toc_file] "toc"
     | "index.html" -> frontpage_chapter "index"
     | file -> eprintf "Warning: orphan html file %s in repo\n" file; ""
   ) |>
