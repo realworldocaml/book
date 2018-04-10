@@ -2,7 +2,7 @@
 
 (alias (
   (name runtest)
-  (deps (build_json.mlt (files_recursively_in .)))
+  (deps (parse_book.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,24 +10,7 @@
 
 (alias (
   (name runtest-all)
-  (deps (build_json.mlt (files_recursively_in .)))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (
-      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name runtest)
-  (deps (install.mlt (files_recursively_in .)))
-  (action (
-    progn
-    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
-    (diff? ${<} ${<}.corrected)))))
-
-(alias (
-  (name runtest-all)
-  (deps (install.mlt (files_recursively_in .)))
+  (deps (parse_book.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (
@@ -50,7 +33,7 @@
 
 (alias (
   (name runtest)
-  (deps (parse_book.mlt (files_recursively_in .)))
+  (deps (install.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -58,7 +41,24 @@
 
 (alias (
   (name runtest-all)
-  (deps (parse_book.mlt (files_recursively_in .)))
+  (deps (install.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (
+      run ocaml-topexpect -non-deterministic -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest)
+  (deps (build_json.mlt (files_recursively_in .)))
+  (action (
+    progn
+    (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
+    (diff? ${<} ${<}.corrected)))))
+
+(alias (
+  (name runtest-all)
+  (deps (build_json.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (

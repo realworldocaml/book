@@ -2,7 +2,7 @@
 
 (alias (
   (name runtest)
-  (deps (query_handler.mlt (files_recursively_in .)))
+  (deps (main.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -10,7 +10,7 @@
 
 (alias (
   (name runtest-all)
-  (deps (query_handler.mlt (files_recursively_in .)))
+  (deps (main.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (
@@ -19,7 +19,7 @@
 
 (alias (
   (name runtest)
-  (deps (main.mlt (files_recursively_in .)))
+  (deps (query_handler.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (run ocaml-topexpect -short-paths -verbose ${<}))
@@ -27,7 +27,7 @@
 
 (alias (
   (name runtest-all)
-  (deps (main.mlt (files_recursively_in .)))
+  (deps (query_handler.mlt (files_recursively_in .)))
   (action (
     progn
     (setenv OCAMLRUNPARAM "" (
