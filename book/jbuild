@@ -1,8 +1,8 @@
 (jbuild_version 1)
 
 (rule (
-  (targets (00-prologue.html))
-  (deps    (00-prologue.md))
+  (targets (classes.html))
+  (deps    (classes.md))
   (action (
     run
     pandoc
@@ -16,8 +16,8 @@
     ${@}))))
 
 (rule (
-  (targets (01-guided-tour.html))
-  (deps    (01-guided-tour.md))
+  (targets (command-line-parsing.html))
+  (deps    (command-line-parsing.md))
   (action (
     run
     pandoc
@@ -31,8 +31,8 @@
     ${@}))))
 
 (rule (
-  (targets (02-variables-and-functions.html))
-  (deps    (02-variables-and-functions.md))
+  (targets (compiler-backend.html))
+  (deps    (compiler-backend.md))
   (action (
     run
     pandoc
@@ -46,8 +46,8 @@
     ${@}))))
 
 (rule (
-  (targets (03-lists-and-patterns.html))
-  (deps    (03-lists-and-patterns.md))
+  (targets (compiler-frontend.html))
+  (deps    (compiler-frontend.md))
   (action (
     run
     pandoc
@@ -61,8 +61,8 @@
     ${@}))))
 
 (rule (
-  (targets (04-files-modules-and-programs.html))
-  (deps    (04-files-modules-and-programs.md))
+  (targets (concurrent-programming.html))
+  (deps    (concurrent-programming.md))
   (action (
     run
     pandoc
@@ -76,8 +76,8 @@
     ${@}))))
 
 (rule (
-  (targets (05-records.html))
-  (deps    (05-records.md))
+  (targets (data-serialization.html))
+  (deps    (data-serialization.md))
   (action (
     run
     pandoc
@@ -91,8 +91,8 @@
     ${@}))))
 
 (rule (
-  (targets (06-variants.html))
-  (deps    (06-variants.md))
+  (targets (error-handling.html))
+  (deps    (error-handling.md))
   (action (
     run
     pandoc
@@ -106,8 +106,8 @@
     ${@}))))
 
 (rule (
-  (targets (07-error-handling.html))
-  (deps    (07-error-handling.md))
+  (targets (files-modules-and-programs.html))
+  (deps    (files-modules-and-programs.md))
   (action (
     run
     pandoc
@@ -121,8 +121,8 @@
     ${@}))))
 
 (rule (
-  (targets (08-imperative-programming.html))
-  (deps    (08-imperative-programming.md))
+  (targets (first-class-modules.html))
+  (deps    (first-class-modules.md))
   (action (
     run
     pandoc
@@ -136,8 +136,8 @@
     ${@}))))
 
 (rule (
-  (targets (09-functors.html))
-  (deps    (09-functors.md))
+  (targets (foreign-function-interface.html))
+  (deps    (foreign-function-interface.md))
   (action (
     run
     pandoc
@@ -151,8 +151,8 @@
     ${@}))))
 
 (rule (
-  (targets (10-first-class-modules.html))
-  (deps    (10-first-class-modules.md))
+  (targets (functors.html))
+  (deps    (functors.md))
   (action (
     run
     pandoc
@@ -166,8 +166,8 @@
     ${@}))))
 
 (rule (
-  (targets (11-objects.html))
-  (deps    (11-objects.md))
+  (targets (garbage-collector.html))
+  (deps    (garbage-collector.md))
   (action (
     run
     pandoc
@@ -181,8 +181,8 @@
     ${@}))))
 
 (rule (
-  (targets (12-classes.html))
-  (deps    (12-classes.md))
+  (targets (guided-tour.html))
+  (deps    (guided-tour.md))
   (action (
     run
     pandoc
@@ -196,8 +196,8 @@
     ${@}))))
 
 (rule (
-  (targets (13-maps-and-hashtables.html))
-  (deps    (13-maps-and-hashtables.md))
+  (targets (imperative-programming.html))
+  (deps    (imperative-programming.md))
   (action (
     run
     pandoc
@@ -211,8 +211,8 @@
     ${@}))))
 
 (rule (
-  (targets (14-command-line-parsing.html))
-  (deps    (14-command-line-parsing.md))
+  (targets (json.html))
+  (deps    (json.md))
   (action (
     run
     pandoc
@@ -226,8 +226,8 @@
     ${@}))))
 
 (rule (
-  (targets (15-json.html))
-  (deps    (15-json.md))
+  (targets (lists-and-patterns.html))
+  (deps    (lists-and-patterns.md))
   (action (
     run
     pandoc
@@ -241,8 +241,8 @@
     ${@}))))
 
 (rule (
-  (targets (16-parsing-with-ocamllex-and-menhir.html))
-  (deps    (16-parsing-with-ocamllex-and-menhir.md))
+  (targets (maps-and-hashtables.html))
+  (deps    (maps-and-hashtables.md))
   (action (
     run
     pandoc
@@ -256,8 +256,8 @@
     ${@}))))
 
 (rule (
-  (targets (17-data-serialization.html))
-  (deps    (17-data-serialization.md))
+  (targets (objects.html))
+  (deps    (objects.md))
   (action (
     run
     pandoc
@@ -271,8 +271,8 @@
     ${@}))))
 
 (rule (
-  (targets (18-concurrent-programming.html))
-  (deps    (18-concurrent-programming.md))
+  (targets (parsing-with-ocamllex-and-menhir.html))
+  (deps    (parsing-with-ocamllex-and-menhir.md))
   (action (
     run
     pandoc
@@ -286,8 +286,8 @@
     ${@}))))
 
 (rule (
-  (targets (19-foreign-function-interface.html))
-  (deps    (19-foreign-function-interface.md))
+  (targets (prologue.html))
+  (deps    (prologue.md))
   (action (
     run
     pandoc
@@ -301,8 +301,8 @@
     ${@}))))
 
 (rule (
-  (targets (20-runtime-memory-layout.html))
-  (deps    (20-runtime-memory-layout.md))
+  (targets (records.html))
+  (deps    (records.md))
   (action (
     run
     pandoc
@@ -316,8 +316,8 @@
     ${@}))))
 
 (rule (
-  (targets (21-garbage-collector.html))
-  (deps    (21-garbage-collector.md))
+  (targets (runtime-memory-layout.html))
+  (deps    (runtime-memory-layout.md))
   (action (
     run
     pandoc
@@ -331,8 +331,8 @@
     ${@}))))
 
 (rule (
-  (targets (22-compiler-frontend.html))
-  (deps    (22-compiler-frontend.md))
+  (targets (variables-and-functions.html))
+  (deps    (variables-and-functions.md))
   (action (
     run
     pandoc
@@ -346,8 +346,8 @@
     ${@}))))
 
 (rule (
-  (targets (23-compiler-backend.html))
-  (deps    (23-compiler-backend.md))
+  (targets (variants.html))
+  (deps    (variants.md))
   (action (
     run
     pandoc
