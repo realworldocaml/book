@@ -36,7 +36,7 @@
 
 (rule (
   (targets (00-prologue.html))
-  (deps (../book/00-prologue.html ../bin/bin/app.exe ../book/toc.txt))
+  (deps (../book/00-prologue.html ../bin/bin/app.exe ../book/toc.scm))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
@@ -47,7 +47,7 @@
   (deps (
     ../book/01-guided-tour.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/guided-tour/local_let.mlt
     ../examples/code/guided-tour/main.mlt
     ../examples/code/guided-tour/recursion.ml
@@ -65,7 +65,7 @@
   (deps (
     ../book/02-variables-and-functions.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/variables-and-functions/abs_diff.mli
     ../examples/code/variables-and-functions/htable_sig1.ml
     ../examples/code/variables-and-functions/htable_sig2.ml
@@ -86,7 +86,7 @@
   (deps (
     ../book/03-lists-and-patterns.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/lists-and-patterns/main.mlt
     ../examples/code/lists-and-patterns/poly.mlt))
   (action (
@@ -99,7 +99,7 @@
   (deps (
     ../book/04-files-modules-and-programs.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/files-modules-and-programs/abstract_username.ml
     ../examples/code/files-modules-and-programs/common.ml
     ../examples/code/files-modules-and-programs/ext_list.ml
@@ -149,7 +149,7 @@
   (deps (
     ../book/05-records.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/records/functional_update.syntax
     ../examples/code/records/main.mlt
     ../examples/code/records/main2.mlt
@@ -165,7 +165,7 @@
   (deps (
     ../book/06-variants.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/variants-termcol-annotated/build.errsh
     ../examples/code/variants-termcol-annotated/jbuild
     ../examples/code/variants-termcol-annotated/terminal_color.ml
@@ -187,7 +187,7 @@
   (deps (
     ../book/07-error-handling.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/error-handling/blow_up/blow_up.ml
     ../examples/code/error-handling/blow_up/build_blow_up.errsh
     ../examples/code/error-handling/blow_up/jbuild
@@ -209,7 +209,7 @@
   (deps (
     ../book/08-imperative-programming.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/imperative-programming/array-get.syntax
     ../examples/code/imperative-programming/array-set.syntax
     ../examples/code/imperative-programming/bigarray.syntax
@@ -250,7 +250,7 @@
   (deps (
     ../book/09-functors.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/functors/compare_example.ml
     ../examples/code/functors/destructive_sub.syntax
     ../examples/code/functors/extended_fqueue.ml
@@ -272,7 +272,7 @@
   (deps (
     ../book/10-first-class-modules.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/fcm/loader_cli1.rawsh
     ../examples/code/fcm/loader_cli2.rawsh
     ../examples/code/fcm/loader_cli3.rawsh
@@ -298,7 +298,7 @@
   (deps (
     ../book/11-objects.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/objects/IsBarbell.java
     ../examples/code/objects/Shape.java
     ../examples/code/objects/immutable.mlt
@@ -319,7 +319,7 @@
   (deps (
     ../book/12-classes.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/classes-async/multiple_inheritance.ml
     ../examples/code/classes-async/multiple_inheritance_wrong.ml
     ../examples/code/classes-async/shapes/build_shapes.sh
@@ -347,7 +347,7 @@
   (deps (
     ../book/13-maps-and-hashtables.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/files-modules-and-programs/freq-fast/counter.ml
     ../examples/code/files-modules-and-programs/freq-fast/counter.mli
     ../examples/code/maps-and-hash-tables/core_phys_equal.mlt
@@ -369,7 +369,7 @@
   (deps (
     ../book/14-command-line-parsing.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/command-line-parsing/cal_add_days/cal.ml
     ../examples/code/command-line-parsing/cal_add_days/cal.sh
     ../examples/code/command-line-parsing/cal_add_interactive/cal.ml
@@ -412,7 +412,7 @@
   (deps (
     ../book/15-json.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/json/book.json
     ../examples/code/json/build_github_atd.sh
     ../examples/code/json/build_json.mlt
@@ -445,7 +445,7 @@
   (deps (
     ../book/16-parsing-with-ocamllex-and-menhir.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/parsing-test/build_test.sh
     ../examples/code/parsing-test/run_broken_test.errsh
     ../examples/code/parsing-test/test.ml
@@ -474,7 +474,7 @@
   (deps (
     ../book/17-data-serialization.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/sexpr/auto_making_sexp.mlt
     ../examples/code/sexpr/basic.scm
     ../examples/code/sexpr/comment_heavy.scm
@@ -518,7 +518,7 @@
   (deps (
     ../book/18-concurrent-programming.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/async/better_echo.ml
     ../examples/code/async/echo/echo.ml
     ../examples/code/async/echo/jbuild
@@ -551,7 +551,7 @@
   (deps (
     ../book/19-foreign-function-interface.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/ctypes/ctypes.mli
     ../examples/code/ctypes/ctypes_impl.ml
     ../examples/code/ffi/datetime/build_datetime.sh
@@ -589,7 +589,7 @@
   (deps (
     ../book/20-runtime-memory-layout.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/memory-repr/custom_ops.c
     ../examples/code/memory-repr/reprs.mlt
     ../examples/code/memory-repr/simple_record.mlt))
@@ -603,7 +603,7 @@
   (deps (
     ../book/21-garbage-collector.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/gc/barrier_bench/barrier_bench.ml
     ../examples/code/gc/barrier_bench/barrier_bench.sh
     ../examples/code/gc/barrier_bench/jbuild
@@ -621,7 +621,7 @@
   (deps (
     ../book/22-compiler-frontend.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/front-end/alice.ml
     ../examples/code/front-end/alice.mli
     ../examples/code/front-end/alice_combined.ml
@@ -682,7 +682,7 @@
   (deps (
     ../book/23-compiler-backend.html
     ../bin/bin/app.exe
-    ../book/toc.txt
+    ../book/toc.scm
     ../examples/code/back-end-embed/build_embed.sh
     ../examples/code/back-end-embed/build_embed_binary.rawsh
     ../examples/code/back-end-embed/build_embed_native.rawsh
@@ -748,6 +748,6 @@
 
 (rule (
   (targets (toc.html))
-  (deps (../book/toc.html ../bin/bin/app.exe))
+  (deps (../book/toc.html ../bin/bin/app.exe ../book/toc.scm))
   (action (run rwo-build build toc -o . -repo-root ..))))
 

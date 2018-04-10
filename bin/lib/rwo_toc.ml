@@ -32,33 +32,6 @@ type part = {
 
 type t = part list
 
-(** Return part info for the given chapter number, if the chapter is
-    in a part. *)
-let part_info_of_chapter chapter_num : part_info option =
-  let parts = [
-    (
-      {number=1; title="Language Concepts"},
-      [1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12]
-    );
-    (
-      {number=2; title="Tools and Techniques"},
-      [13; 14; 15; 16; 17; 18]
-    );
-    (
-      {number=3; title="The Runtime System"},
-      [19; 20; 21; 22; 23 ]
-    );
-  ]
-  in
-  List.fold parts ~init:None ~f:(fun accum (info,chapters) ->
-    match accum with
-    | Some _ as x -> x
-    | None ->
-      if List.mem ~equal:Int.equal chapters chapter_num
-      then Some info
-      else None
-  )
-
 let get_title file (t:Html.t) : string =
   let rec item_to_string = function
     | `Data x -> x
@@ -169,27 +142,59 @@ let flatten_sections sections =
     )
   )
 
-let toc dir =
-  let file = dir / "toc.txt" in
-  Reader.file_lines file >>| fun lines ->
-  List.map ~f:String.strip lines |>
-  List.filter ~f:((<>)"") |>
-  List.map ~f:(fun f -> f ^ ".html")
+module Toc = struct
+  type part = {
+    title   : string;
+    chapters: string list;
+  } [@@deriving sexp]
 
-let get_chapters ?(repo_root=".") () : chapter list Deferred.t =
-  let book_dir = repo_root/"book" in
-  toc book_dir >>=
-  Deferred.List.mapi ~f:(fun number basename ->
-    let in_file = book_dir/basename in
-    Html.of_file in_file >>| fun html ->
-    {
-      number;
-      filename = basename;
-      title = get_title (book_dir/basename) html;
-      part_info = part_info_of_chapter number;
-      sections = get_sections in_file html;
-    }
-  )
+  type t = [ `part of part | `chapter of string] list [@@deriving sexp]
+
+  let html_file f =
+    try (Filename.chop_extension f) ^ ".html"
+    with Invalid_argument _ -> f
+
+  let html =
+    let aux = function
+      | `chapter f -> `chapter (html_file f)
+      | `part p    -> `part {p with chapters = List.map ~f:html_file p.chapters}
+    in
+    List.map ~f:aux
+
+  let read dir =
+    let f = dir / "toc.scm" in
+    Reader.file_contents f >>| fun contents ->
+    let s = Sexplib.Sexp.scan_sexps (Lexing.from_string contents) in
+    html (t_of_sexp (Sexplib.Sexp.List s))
+
+end
+
+let of_toc book_dir toc =
+  let chapter part_info number basename =
+    let file = book_dir/basename in
+    Html.of_file file >>| fun html ->
+    let title = get_title file html in
+    let sections = get_sections file html in
+    { number; filename = basename; part_info; sections; title }
+  in
+  let part ~parts ~chapters title files =
+    let part_info = Some { title; number = parts } in
+    Deferred.List.mapi ~f:(fun i f -> chapter part_info (i+chapters) f) files
+    >>| fun chapters ->
+    { info = part_info; chapters }
+  in
+  let rec aux ~parts ~chapters acc = function
+    | [] -> return (List.rev acc)
+    | `chapter c :: t ->
+      chapter None chapters c >>= fun c ->
+      let p = { info = None; chapters = [c] } in
+      aux ~parts ~chapters:(chapters+1) (p :: acc) t
+    | `part (p:Toc.part) :: t ->
+      part ~parts ~chapters p.title p.Toc.chapters >>= fun p ->
+      let chapters = chapters + List.length p.chapters in
+      aux ~parts:(parts+1) ~chapters (p :: acc) t
+  in
+  aux ~parts:1 ~chapters:0 [] toc
 
 let get_next_chapter chapters curr_chapter : chapter option =
   List.find chapters ~f:(fun x -> curr_chapter.number = x.number - 1)
@@ -198,19 +203,30 @@ let of_chapters (chapters : chapter list) : part list =
   List.fold_right chapters ~init:[] ~f:(fun x accum ->
     match accum with
     | [] -> (* not building a part yet *)
-      [{info = part_info_of_chapter x.number; chapters = [x]}]
+      [{info = x.part_info; chapters = [x]}]
     | p::rest ->
       let prev_part = p.info in
-      let curr_part = (part_info_of_chapter x.number) in
+      let curr_part = x.part_info in
       if prev_part = curr_part then
         {p with chapters = x::p.chapters}::rest
       else
-        {info = curr_part; chapters = [x]}::p::rest
-  )
+          {info = curr_part; chapters = [x]}::p::rest
+    )
 
-let get ?repo_root () =
-  get_chapters ?repo_root () >>|
-  of_chapters
+let get ?(repo_root=".") () =
+  let book_dir = repo_root/"book" in
+  Toc.read book_dir >>= fun toc ->
+  of_toc book_dir toc
+
+let flatten_chapters t =
+  let rec aux acc = function
+    | [] -> List.rev acc
+    | { chapters; _ } :: t -> aux (List.rev_append chapters acc) t
+  in
+  aux [] t
+
+let get_chapters ?repo_root () =
+  get ?repo_root () >>| flatten_chapters
 
 let imported_files ?(repo_root=".") () =
   get_chapters ~repo_root () >>= fun chapters ->
