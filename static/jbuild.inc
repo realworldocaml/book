@@ -701,6 +701,14 @@
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
+(alias ((name site) (deps (testing.html))))
+
+(rule (
+  (targets (testing.html))
+  (deps (../book/testing.html ../bin/bin/app.exe ../book/toc.scm))
+  (action (
+    run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
+
 (alias ((name site) (deps (toc.html))))
 
 (rule (
