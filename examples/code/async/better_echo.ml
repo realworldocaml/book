@@ -5,7 +5,7 @@ let run ~uppercase ~port =
   let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
-      (Tcp.on_port port)
+      (Tcp.Where_to_listen.of_port port)
       (fun _addr r w ->
         Pipe.transfer (Reader.pipe r) (Writer.pipe w)
            ~f:(if uppercase then String.uppercase else Fn.id))
