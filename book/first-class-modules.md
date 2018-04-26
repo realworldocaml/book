@@ -209,7 +209,7 @@ Thus, we can write:
 <link rel="import" href="code/fcm/query_handler.mlt" part="2" />
 
 This is all described in more detail in
-[Data Serialization With S Expressions](17-data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
+[Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
 
 ### Implementing a Query Handler {#implementing-a-query-handler data-type=sect2}
 
@@ -368,7 +368,7 @@ The `eval` function itself is fairly straightforward, dispatching to the
 appropriate functions to respond to each type of query. Note that we write
 `<:sexp_of<string list>>` to autogenerate a function for converting a list of
 strings to an s-expression, as described in
-[Data Serialization With S Expressions](17-data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
+[Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
 
 This function ends the definition of the `Loader` module:
 

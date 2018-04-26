@@ -41,6 +41,7 @@ val get_chapters : ?repo_root:string -> unit -> chapter list Deferred.t
 
 val get_next_chapter : chapter list -> chapter -> chapter option
 
+val find: filename:string -> t -> chapter option
 
 (** [get_sections filename html] returns the section structure within
     the chapter of the given file, to depth 3. The [filename] is only

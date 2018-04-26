@@ -165,7 +165,7 @@ There's also a more concise syntax for local opens, as you can see here.
 The notation for the type-signature of a multiargument function may be a
 little surprising at first, but we'll explain where it comes from when we get
 to function currying in
-[Multi Argument Functions](02-variables-and-functions.html#multi-argument-functions){data-type=xref}.
+[Multi Argument Functions](variables-and-functions.html#multi-argument-functions){data-type=xref}.
 For the moment, think of the arrows as separating different arguments of the
 function, with the type after the final arrow being the return value. Thus,
 `int -> int -> float` describes a function that takes two `int` arguments and
@@ -406,7 +406,7 @@ here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 <link rel="import" href="code/guided-tour/main.mlt" part="24" />
 
 We'll learn more about labeled arguments and why they're important in
-[Variables And Functions](02-variables-and-functions.html#variables-and-functions){data-type=xref}.
+[Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
 #### Constructing lists with :: {#constructing-lists-with data-type=sect3}
 
@@ -637,7 +637,7 @@ In OCaml, however, missing values are explicit. A value of type
 `string * string` always contains two well-defined values of type `string`.
 If you want to allow, say, the first of those to be absent, then you need to
 change the type to `string option * string`. As we'll see in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref}, this
+[Error Handling](error-handling.html#error-handling){data-type=xref}, this
 explicitness allows the compiler to provide a great deal of help in making
 sure you're correctly handling the possibility of missing data.
 
@@ -728,7 +728,7 @@ comparison operators when you want them. OCaml also offers a special set of
 *polymorphic comparison operators* that can work on almost any type, but
 those are considered to be problematic, and so are hidden by default by
 `Base`. We'll learn more about polymorphic compare in
-[Terser and Faster Patterns](03-lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}
+[Terser and Faster Patterns](lists-and-patterns.html#terser-and-faster-patterns){data-type=xref}
 :::
 
 
@@ -945,7 +945,7 @@ recommended to get better error messages during the build.
 
 The `.exe` suffix indicates that we're building a native-code executable,
 which we'll discuss more in
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 Once the build completes, we can use the resulting program like any
 command-line utility. We can feed input to `sum.native` by typing in a
 sequence of numbers, one per line, hitting **`Ctrl-D`** when we're done:
@@ -955,7 +955,7 @@ sequence of numbers, one per line, hitting **`Ctrl-D`** when we're done:
 More work is needed to make a really usable command-line program, including a
 proper command-line parsing interface and better error handling, all of which
 is covered in
-[Command Line Parsing](14-command-line-parsing.html#command-line-parsing){data-type=xref}.
+[Command Line Parsing](command-line-parsing.html#command-line-parsing){data-type=xref}.
 
 
 ## Where to Go from Here {#where-to-go-from-here data-type=sect1}
