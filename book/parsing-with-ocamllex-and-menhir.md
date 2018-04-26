@@ -25,7 +25,7 @@ including `ocamllex`, which replaces `lex`, and `ocamlyacc` and `menhir`,
 which replace `yacc`. We'll explore these tools in the course of walking
 through the implementation of a parser for the JSON serialization format that
 we discussed in
-[Handling Json Data](15-json.html#handling-json-data){data-type=xref}.
+[Handling Json Data](json.html#handling-json-data){data-type=xref}.
 
 Parsing is a broad and often intricate topic, and our purpose here is not to
 teach all of the theoretical issues, but to provide a pragmatic introduction
@@ -94,7 +94,7 @@ This kind of representation is easier to work with than the original text,
 since it gets rid of some unimportant syntactic details and adds useful
 structure. But it's still a good deal more low-level than the simple AST we
 used for representing JSON data in
-[Handling Json Data](15-json.html#handling-json-data){data-type=xref}:
+[Handling Json Data](json.html#handling-json-data){data-type=xref}:
 
 <link rel="import" href="code/parsing/json.ml" />
 
@@ -459,7 +459,7 @@ to terminate with a nonzero exit code:
 That wraps up our parsing tutorial. As an aside, notice that the JSON
 polymorphic variant type that we defined in this chapter is actually
 structurally compatible with the Yojson representation explained in
-[Handling Json Data](15-json.html#handling-json-data){data-type=xref}. That
+[Handling Json Data](json.html#handling-json-data){data-type=xref}. That
 means that you can take this parser and use it with the helper functions in
 Yojson to build more sophisticated applications.
 

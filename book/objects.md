@@ -4,7 +4,7 @@ We've already seen several tools that OCaml provides for organizing programs,
 particularly modules. In addition, OCaml also supports object-oriented
 programming. There are objects, classes, and their associated types. In this
 chapter, we'll introduce you to OCaml objects and subtyping. In the next
-chapter, [Classes](12-classes.html#classes){data-type=xref}, we'll introduce
+chapter, [Classes](classes.html#classes){data-type=xref}, we'll introduce
 you to classes and inheritance. [objects/in object-oriented
 programming]{.idx}[object-oriented programming
 (OOP)]{.idx}[programming/object-oriented programming (OOP)]{.idx}
@@ -222,7 +222,7 @@ library]{.idx}[libraries/Cryptokit]{.idx}[libraries/Camlimages]{.idx}[external
 libraries/Camlimages]{.idx}[external libraries/Cryptokit]{.idx}
 
 We'll introduce you to classes, and examples using open recursion, in
-[Classes](12-classes.html#classes){data-type=xref}.
+[Classes](classes.html#classes){data-type=xref}.
 
 ## Subtyping {#subtyping data-type=sect1}
 

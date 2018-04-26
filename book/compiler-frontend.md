@@ -32,14 +32,14 @@ In this chapter, we'll cover the following topics:
 
 The details of the compilation process into executable code can be found
 next, in
-[The Compiler Backend Byte Code And Native Code](23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
+[The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 
 ## An Overview of the Toolchain {#an-overview-of-the-toolchain data-type=sect1}
 
 The OCaml tools accept textual source code as input, using the filename
 extensions `.ml` and `.mli` for modules and signatures, respectively. We
 explained the basics of the build process in
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
 so we'll assume you've built a few OCaml programs already by this
 point.[OCaml toolchain/overview of]{.idx}
 
@@ -150,7 +150,7 @@ When a source file is passed to the OCaml compiler, its first task is to
 parse the text into a more structured abstract syntax tree (AST). The parsing
 logic is implemented in OCaml itself using the techniques described earlier
 in
-[Parsing With Ocamllex And Menhir](16-parsing-with-ocamllex-and-menhir.html#parsing-with-ocamllex-and-menhir){data-type=xref}.
+[Parsing With Ocamllex And Menhir](parsing-with-ocamllex-and-menhir.html#parsing-with-ocamllex-and-menhir){data-type=xref}.
 The lexer and parser rules can be found in the `parsing` directory in the
 source distribution.[AST (abstract syntax-tree)]{.idx}[source code/parsing
 of]{.idx #SCpras}[parsing/of source code]{.idx #PARSsource}[compilation
@@ -390,7 +390,7 @@ can now run `utop` and load the syntax extensions in. We'll use the
 
 OCaml provides a built-in polymorphic comparison operator that inspects the
 runtime representation of two values to see if they're equal. As we noted in
-[Maps And Hash Tables](13-maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
+[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
 the polymorphic comparison is less efficient than defining explicit
 comparison functions between values. However, it quickly becomes tedious to
 manually define comparison functions for complex type definitions.
@@ -441,7 +441,7 @@ Note that although the generated code uses `Pervasives.compare`, it is also
 annotated with a `string` type. This lets the compiler use a specialized
 string comparison function and not actually call the runtime polymorphic
 comparison function. This has implications for correctness, too: recall from
-[Maps And Hash Tables](13-maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
+[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
 that `comparelib` provides reliable comparison functions that work for values
 that are logically the same but that have differing internal representations
 (e.g., `Int.Set.t`).[wildcards]{.idx}[bindings/wildcards in let
@@ -822,11 +822,11 @@ this case, just recompile with a clean source tree.
 The OCaml module system enables smaller components to be reused effectively
 in large projects while still retaining all the benefits of static type
 safety. We covered the basics of using modules earlier in
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 The module language that operates over these signatures also extends to
 functors and first-class modules, described in
-[Functors](09-functors.html#functors){data-type=xref} and
-[First Class Modules](10-first-class-modules.html#first-class-modules){data-type=xref},
+[Functors](functors.html#functors){data-type=xref} and
+[First Class Modules](first-class-modules.html#first-class-modules){data-type=xref},
 respectively. [modules/separate compilation in]{.idx}
 
 This section discusses how the compiler implements them in more detail.
@@ -1057,7 +1057,7 @@ follows:[autocompletion]{.idx}[ocp-index]{.idx}
 <link rel="import" href="code/front-end/install_ocp_index.rawsh" />
 
 Let's refer back to our Ncurses binding example from the beginning of
-[Foreign Function Interface](19-foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
 This module defined bindings for the Ncurses library. First, compile the
 interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
 files, and then run `ocp-index` in completion mode:
@@ -1108,7 +1108,7 @@ You'll rarely need to look at this raw output from the compiler unless you're
 building IDE tools such as `ocp-index`, or are hacking on extensions to the
 core compiler itself. However, it's useful to know that this intermediate
 form exists before we delve further into the code generation process next, in
-[The Compiler Backend Byte Code And Native Code](23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
+[The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 
 There are several new integrated tools emerging that combine these typed AST
 files with common editors such as Emacs or Vim. The best of these is

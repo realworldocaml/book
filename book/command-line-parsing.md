@@ -181,7 +181,7 @@ arguments.
 This works well enough for two parameters, but if you want longer parameter
 lists, this approach gets old fast. A better way is to use let-syntax, which
 was discussed in
-[Error Handling](07-error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
+[Error Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 
 <link rel="import" href="code/command-line-parsing/md5_let_syntax/md5.ml" part=
 "1" />
@@ -210,7 +210,7 @@ some of the more advanced features of Command.
 
 You aren't just limited to parsing command lines of strings and ints.
 `Command.Param` defines several other conversion functions (shown in
-[Table14_1](14-command-line-parsing.html#table14_1){data-type=xref}) that
+[Table14_1](command-line-parsing.html#table14_1){data-type=xref}) that
 validate and parse input into various types. [arguments/argument
 types]{.idx}[command-line parsing/argument types]{.idx}
 
@@ -344,7 +344,7 @@ code looks like this:
 The `-s` flag in our specification requires a `string` argument and isn't
 optional. The Command parser outputs an error message if the flag isn't
 supplied, as with the anonymous arguments in earlier examples.
-[Table14 2](14-command-line-parsing.html#table14-2){data-type=xref} contains
+[Table14 2](command-line-parsing.html#table14-2){data-type=xref} contains
 a list of some of the functions that you can wrap flags in to control how
 they are parsed. [flag functions]{.idx}
 

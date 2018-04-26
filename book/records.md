@@ -3,7 +3,7 @@
 One of OCaml's best features is its concise and expressive system for
 declaring new data types. *Records* are a key element of that system. We
 discussed records briefly in
-[A Guided Tour](01-guided-tour.html#a-guided-tour){data-type=xref}, but this
+[A Guided Tour](guided-tour.html#a-guided-tour){data-type=xref}, but this
 chapter will go into more depth, covering more of the technical details, as
 well as providing advice on how to use records effectively in your software
 designs.
@@ -293,7 +293,7 @@ module qualifications.
 This feature of the language, known by the somewhat imposing name of
 *type-directed constructor disambiguation*, applies to variant constructors
 as well as record fields, as we'll see in
-[Variants](06-variants.html#variants){data-type=xref}.
+[Variants](variants.html#variants){data-type=xref}.
 
 For functions defined within the module where a given record is defined, the
 module qualification goes away entirely.
@@ -364,7 +364,7 @@ specified when the record is created.
 OCaml's policy of immutable-by-default is a good one, but imperative
 programming is an important part of programming in OCaml. We go into more
 depth about how (and when) to use OCaml's imperative features in
-[Imperative Programming](01-guided-tour.html#imperative-programming){data-type=xref}.
+[Imperative Programming](guided-tour.html#imperative-programming){data-type=xref}.
 
 ## First-Class Fields {#first-class-fields data-type=sect1}
 
