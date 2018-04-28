@@ -303,9 +303,9 @@ Command.async_spec;;
 |}];;
 
 [@@@part "28"];;
-#require true;;
+#silent true;;
 #require "cohttp.async";;
-#require false;;
+#silent false;;
 Cohttp_async.Client.get;;
 
 [%%expect ocaml {|
