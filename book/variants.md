@@ -70,6 +70,55 @@ Now, we can print text using the full set of available colors:
 
 <link rel="import" href="code/variants/main.mlt" part="5" />
 
+::: {.allow_break data-type=note}
+#### Variants, tuples and parens
+
+Variants with multiple arguments look an awful lot like tuples.
+Consider the following example of a value of the type `color` we
+defined earlier.
+
+<link rel="import" href="code/variants/main.mlt" part="5.1" />
+
+It really looks like we've created a 3-tuple and wrapped it with the
+`RGB` constructor. But that's not what's really going on, as you can
+see if create a tuple first and then place it inside the `RGB`
+constructor.
+
+<link rel="import" href="code/variants/main.mlt" part="5.2" />
+
+We can also create variants that explicitly contain tuples, like this
+one.
+
+<link rel="import" href="code/variants/main.mlt" part="5.3" />
+
+The syntatic difference is unfortunately quite subtle, coming down to
+the extra set of parens around the arguments. But having defined it
+this way, we can now take the tuple in and out freely.
+
+<link rel="import" href="code/variants/main.mlt" part="5.4" />
+
+If, on the other hand, we define a variant without the parens, then we
+get the same behavior we got with the `RGB` constructor.
+
+<link rel="import" href="code/variants/main.mlt" part="5.5" />
+
+Note that, while we can't just grab the tuple as a whole from this
+type, we can achieve more or less the same ends by explicitly
+deconstructing and reconstructing the data we need.
+
+<link rel="import" href="code/variants/main.mlt" part="5.6" />
+
+The differences between a multi-argument variant and a variant
+containing a tuple are mostly about performance. A multi-argument
+variant is a single allocated block in memory, while a variant
+containing a tuple requires an extra heap-allocated block for the
+tuple. You can learn more about OCaml's memory representation in
+[Memory Representation of
+Values](00-memory-representation-of-values.html){data-type=xref}.
+
+
+:::
+
 ## Catch-All Cases and Refactoring {#catch-all-cases-and-refactoring data-type=sect1}
 
 OCaml's type system can act as a refactoring tool, warning you of places
@@ -300,7 +349,7 @@ just need to write the `base_eval` function, which is capable of evaluating a
 base predicate.
 
 Another useful operation on expressions is simplification. The following is a
-set of simplifying construction functions that mirror the tags of an 
+set of simplifying construction functions that mirror the tags of an
 `expr`:
 
 <link rel="import" href="code/variants/blang.mlt" part="4" />
@@ -324,7 +373,7 @@ happens if we add a double negation in:
 
 <link rel="import" href="code/variants/blang.mlt" part="7" />
 
-It fails to remove the double negation, and it's easy to see why. The 
+It fails to remove the double negation, and it's easy to see why. The
 `not_` function has a catch-all case, so it ignores everything but the one
 case it explicitly considers, that of the negation of a constant. Catch-all
 cases are generally a bad idea, and if we make the code more explicit, we see
@@ -376,7 +425,7 @@ The `>` at the beginning of the variant types above is critical because it
 marks the types as being open to combination with other variant types. We can
 read the type `` [> `Int of string | `Float of float]`` as describing a
 variant whose tags include `` `Int of string`` and `` `Float of float``, but
-may include more tags as well. In other words, you can roughly translate 
+may include more tags as well. In other words, you can roughly translate
 `>` to mean: "these tags or more."
 
 OCaml will in some cases infer a variant type with `<`, to indicate "these
@@ -494,7 +543,7 @@ this library as follows:
 In the preceding code, we did something funny to the definition of
 `extended_color_to_int` that underlines some of the downsides of polymorphic
 variants. In particular, we added some special-case handling for the color
-gray, rather than using `color_to_int`. Unfortunately, we misspelled 
+gray, rather than using `color_to_int`. Unfortunately, we misspelled
 `Gray` as `Grey`. This is exactly the kind of error that the compiler would
 catch with ordinary variants, but with polymorphic variants, this compiles
 without issue. All that happened was that the compiler inferred a wider type
@@ -575,6 +624,3 @@ support for subtyping. As we'll discuss further when we cover objects in
 [Objects](11-objects.html#objects){data-type=xref}, subtyping brings in a lot
 of complexity, and most of the time, that's complexity you want to
 avoid.<a data-type="indexterm" data-startref="VARTYPpoly">&nbsp;</a><a data-type="indexterm" data-startref="DTvar">&nbsp;</a>
-
-
-
