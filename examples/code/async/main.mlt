@@ -17,7 +17,9 @@ In_channel.read_all "test.txt";;
 
 [%%expect ocaml {|- : string = "This is only a test."|}];;
 [@@@part "3"];;
+#silent true;;
 #require "async";;
+#silent false;;
 open Async;;
 Reader.file_contents;;
 
@@ -299,12 +301,11 @@ Command.async_spec;;
     Command.with_options
 = <fun>
 |}];;
-[@@@part "27.5"];;
-Deferred.all;;
-[%%expect ocaml {|- : 'a Deferred.t list -> 'a list Deferred.t = <fun>|}];;
 
 [@@@part "28"];;
+#require true;;
 #require "cohttp.async";;
+#require false;;
 Cohttp_async.Client.get;;
 
 [%%expect ocaml {|
