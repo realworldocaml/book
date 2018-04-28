@@ -114,7 +114,7 @@ variant is a single allocated block in memory, while a variant
 containing a tuple requires an extra heap-allocated block for the
 tuple. You can learn more about OCaml's memory representation in
 [Memory Representation of
-Values](00-memory-representation-of-values.html){data-type=xref}.
+Values](runtime-memory-layout.html){data-type=xref}.
 
 
 :::
