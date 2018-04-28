@@ -201,8 +201,9 @@ let make_chapter_page ?code_dir repo_root chapters chapter_file
   : Html.t Deferred.t
   =
 
-  let chapter = List.find_exn chapters ~f:(fun x ->
-    x.Toc.filename = Filename.basename chapter_file)
+  let toc = Toc.of_chapters chapters in
+  let chapter = Option.value_exn
+      (Toc.find ~filename:(Filename.basename chapter_file) toc)
   in
 
   let next_chapter_footer =
@@ -224,7 +225,7 @@ let make_chapter_page ?code_dir repo_root chapters chapter_file
       if Import.is_import_html item then
         import_node_to_html scripts (ok_exn (Import.of_html item))
       else if References.is_reference item then
-        return (References.add_reference chapter_file item)
+        return (References.add_reference toc chapter_file item)
       else match item with
       | `Data _ -> return item
       | `Element {Html.name; attrs; childs} -> (

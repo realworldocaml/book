@@ -284,7 +284,7 @@ Another feature that we might want for our interval module is the ability to
 *serialize*, i.e., to be able to read and write intervals as a stream of
 bytes. In this case, we'll do this by converting to and from s-expressions,
 which were mentioned already in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref}. To
+[Error Handling](error-handling.html#error-handling){data-type=xref}. To
 recall, an s-expression is essentially a parenthesized expression whose atoms
 are strings, and it is a serialization format that is used commonly in
 `Base`. Here's an example: [s-expressions/example of]{.idx}[interval
@@ -299,7 +299,7 @@ generate s-expression conversion functions for any type annotated with
 <link rel="import" href="code/functors/main.mlt" part="24" />
 
 We'll discuss s-expressions and Sexplib in more detail in
-[Data Serialization With S Expressions](17-data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
+[Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
 but for now, let's see what happens if we attach the `[@@deriving sexp]`
 declaration to the definition of `t` within the functor:
 
@@ -360,7 +360,7 @@ Here's a reasonable `mli` for such a module:
 
 The preceding `Fqueue.fold` function requires some explanation. It follows
 the same pattern as the `List.fold` function we described in
-[Using The List Module Effectively](03-lists-and-patterns.html#using-the-list-module-effectively){data-type=xref}.
+[Using The List Module Effectively](lists-and-patterns.html#using-the-list-module-effectively){data-type=xref}.
 Essentially, `Fqueue.fold q ~init ~f` walks over the elements of `q` from
 front to back, starting with an accumulator of `init` and using `f` to update
 the accumulator value as it walks over the queue, returning the final value
@@ -425,9 +425,9 @@ module/Comparable.Make]{.idx}[Container.Make]{.idx}
 
 `Monad.Make`
 : For so-called monadic libraries, like those discussed in Chapters
-  [Error Handling](07-error-handling.html#error-handling){data-type=xref data-xrefstyle="select:
+  [Error Handling](error-handling.html#error-handling){data-type=xref data-xrefstyle="select:
   labelnumber"} and
-  [Concurrent Programming With Async](18-concurrent-programming.html#concurrent-programming-with-async){data-type=xref data-xrefstyle="select:
+  [Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref data-xrefstyle="select:
   labelnumber"}. Here, the functor is used to provide a collection of
   standard helper functions based on the `bind` and `return` operators.
 

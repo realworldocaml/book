@@ -34,7 +34,7 @@ a mutable mapping from keys to values. This is really for illustration
 purposes; both Core and the standard library provide imperative dictionaries,
 and for most real-world tasks, you should use one of those implementations.
 There's more advice on using Core's implementation in particular in
-[Maps And Hash Tables](13-maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
+[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
 [dictionaries, imperative]{.idx #DICTimper}[Core standard library/imperative
 dictionaries in]{.idx}[imperative programming/imperative
 dictionaries]{.idx #IPimpdict}
@@ -236,7 +236,7 @@ where you'll find useful functions for working with strings.
 A `Bigarray.t` is a handle to a block of memory stored outside of the OCaml
 heap. These are mostly useful for interacting with C or Fortran libraries,
 and are discussed in
-[Memory Representation Of Values](20-runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
+[Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
 Bigarrays too have their own getting and setting syntax: [bigarrays]{.idx}
 
 <link rel="import" href="code/imperative-programming/bigarray.syntax" />
@@ -248,7 +248,7 @@ As we've seen, records are immutable by default, but individual record fields
 can be declared as mutable. These mutable fields can be set using the 
 `<-` operator, i.e., `record.field <- expr`. [fields/mutability of]{.idx}
 
-As we'll see in [Objects](11-objects.html#objects){data-type=xref}, fields of
+As we'll see in [Objects](objects.html#objects){data-type=xref}, fields of
 an object can similarly be declared as mutable, and can then be modified in
 much the same way as record fields. [primitive mutable data/record/object
 fields and ref cells]{.idx}
@@ -297,7 +297,7 @@ exported by system calls or other external libraries. Many of these come
 built in, like access to the `write` system call or to the `clock`, while
 others come from user libraries, like LAPACK bindings. OCaml's FFI is
 discussed in more detail in
-[Foreign Function Interface](19-foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
 [libraries/interfacing with external]{.idx}[external libraries/interfacing
 with]{.idx}[LAPACK bindings]{.idx}[foreign function interface
 (FFI)/imperative operations and]{.idx}[primitive mutable data/foreign
@@ -784,7 +784,7 @@ OCaml's buffered I/O library that can be used through the `In_channel` and
 `Out_channel` modules in Core. Other I/O primitives are also available
 through the `Unix` module in Core as well as `Async`, the asynchronous I/O
 library that is covered in
-[Concurrent Programming With Async](18-concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
 Most of the functionality in Core's `In_channel` and `Out_channel` (and in
 Core's `Unix` module) derives from the standard library, but we'll use Core's
 interfaces here.
@@ -980,7 +980,7 @@ files!
 
 To avoid this, we need to make sure that our code cleans up after itself. We
 can do this using the `protect` function described in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref}, as
+[Error Handling](error-handling.html#error-handling){data-type=xref}, as
 follows:
 
 <link rel="import" href="code/imperative-programming/file2.mlt" part=
@@ -1273,7 +1273,7 @@ can resolve this in one of two ways: either by making the type concrete
 (i.e., exposing the implementation in the `mli`), which is often not
 desirable; or by marking the type variable in question as *covariant*. We'll
 learn more about covariance and contravariance in
-[Objects](11-objects.html#objects){data-type=xref}, but for now, you can
+[Objects](objects.html#objects){data-type=xref}, but for now, you can
 think of it as an annotation that can be put in the interface of a pure data
 structure. [datatypes/covariant]{.idx}
 

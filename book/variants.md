@@ -191,7 +191,7 @@ data types]{.idx}[variant types/and records]{.idx #VARTYPrec}
 Algebraic data types gain much of their power from the ability to construct
 layered combinations of sums and products. Let's see what we can achieve with
 this by revisiting the logging server types that were described in
-[Records](05-records.html#records){data-type=xref}. We'll start by reminding
+[Records](records.html#records){data-type=xref}. We'll start by reminding
 ourselves of the definition of `Log_entry.t`:
 
 <link rel="import" href="code/variants/logger.mlt" part="1" />
@@ -529,7 +529,7 @@ polymorphic variants.
 Let's consider how we might turn our code into a proper library with an
 implementation in an `ml` file and an interface in a separate `mli`, as we
 saw in
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 Let's start with the `mli`:
 
 <link rel="import" href="code/variants-termcol/terminal_color.mli" />
@@ -621,6 +621,6 @@ Variants are most problematic exactly where you take full advantage of their
 power; in particular, when you take advantage of the ability of polymorphic
 variant types to overlap in the tags they support. This ties into OCaml's
 support for subtyping. As we'll discuss further when we cover objects in
-[Objects](11-objects.html#objects){data-type=xref}, subtyping brings in a lot
+[Objects](objects.html#objects){data-type=xref}, subtyping brings in a lot
 of complexity, and most of the time, that's complexity you want to
 avoid.<a data-type="indexterm" data-startref="VARTYPpoly">&nbsp;</a><a data-type="indexterm" data-startref="DTvar">&nbsp;</a>

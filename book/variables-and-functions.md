@@ -24,7 +24,7 @@ syntax/top-level bindings]{.idx}
 <link rel="import" href="code/variables-and-functions/let.syntax" />
 
 As we'll see when we get to the module system in
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
 this same syntax is used for `let` bindings at the top level of a module.
 
 Every variable binding has a *scope*, which is the portion of the code that
@@ -99,7 +99,7 @@ telling us that there is an unused variable.
 
 In OCaml, `let` bindings are immutable. There are many kinds of mutable
 values in OCaml, which we'll discuss in
-[Imperative Programming](08-imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 but there are no mutable variables.
 
 ::: {data-type=note}
@@ -138,7 +138,7 @@ Here, `(ints,strings)` is a pattern, and the `let` binding assigns values to
 both of the identifiers that show up in that pattern. A pattern is
 essentially a description of the shape of a data structure, where some
 components are names to be bound to values. As we saw in
-[Tuples Lists Options And Pattern Matching](01-guided-tour.html#tuples-lists-options-and-pattern-matching){data-type=xref},
+[Tuples Lists Options And Pattern Matching](guided-tour.html#tuples-lists-options-and-pattern-matching){data-type=xref},
 OCaml has patterns for a variety of different data types.
 
 Using a pattern in a `let` binding makes the most sense for a pattern that is
@@ -165,7 +165,7 @@ generally better to use a `match` statement to handle such cases explicitly.
 
 Note that this is our first use of `assert`, which is useful for marking
 cases that should be impossible. We'll discuss `assert` in more detail in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref}.
+[Error Handling](error-handling.html#error-handling){data-type=xref}.
 
 
 ## Functions {#functions data-type=sect1}
@@ -246,7 +246,7 @@ equivalent. [let syntax/functions and]{.idx}
 
 This connection is important, and will come up more when programming in a
 monadic style, as we'll see in
-[Concurrent Programming With Async](18-concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
 :::
 
 
@@ -330,7 +330,7 @@ A function is *recursive* if it refers to itself in its definition. Recursion
 is important in any programming language, but is particularly important in
 functional languages, because it is the way that you build looping
 constructs. (As will be discussed in more detail in
-[Imperative Programming 1](08-imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
 OCaml also supports imperative looping constructs like `for` and `while`, but
 these are only useful when using OCaml's imperative features.)[recursive
 functions/definition of]{.idx}[functions/recursive functions]{.idx}
@@ -420,7 +420,7 @@ any operator that begins or ends with `*`.
 
 The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.
-[Table2_1](02-variables-and-functions.html#table2_1){data-type=xref} breaks
+[Table2_1](variables-and-functions.html#table2_1){data-type=xref} breaks
 the different operators and other syntactic forms into groups from highest to
 lowest precedence, explaining how each behaves syntactically. We write 
 `!`... to indicate the class of operators beginning with `!`.
@@ -722,7 +722,7 @@ This means that rarely used functions should not have optional arguments. A
 good rule of thumb is to avoid optional arguments for functions internal to a
 module, *i.e.*, functions that are not included in the module's interface, or
 `mli` file. We'll learn more about `mli`s in
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 
 #### Explicit passing of an optional argument {#explicit-passing-of-an-optional-argument data-type=sect3}
 

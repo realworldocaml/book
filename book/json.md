@@ -132,7 +132,7 @@ The `from_file` function accepts an input filename and takes care of opening
 and closing it for you. It's far more common to use `from_string` to
 construct JSON values though, since these strings come in via a network
 connection (we'll see more of this in
-[Concurrent Programming With Async](18-concurrent-programming.html#concurrent-programming-with-async){data-type=xref})
+[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref})
 or a database. Finally, the example checks that the two input mechanisms
 actually resulted in the same OCaml data structure.
 
@@ -185,7 +185,7 @@ changing a mutable record field or printing to the standard output.
 </aside>
 
 `Yojson` provides several combinators in the `Yojson.Basic.Util` module, some
-of which are listed in [Table15_1](15-json.html#table15_1){data-type=xref}.
+of which are listed in [Table15_1](json.html#table15_1){data-type=xref}.
 [combinators/in Yojson library]{.idx}[Yojson library/combinators in]{.idx}
 
 ::: {#table15_1 data-type=table}
@@ -203,7 +203,7 @@ Table:  Yojson combinators
 
 We'll go through each of these uses one by one now. The following examples
 also use the `|>` pipe-forward operator that we explained in
-[Variables And Functions](02-variables-and-functions.html#variables-and-functions){data-type=xref}.
+[Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 This lets us chain together multiple JSON selection functions and feed the
 output from one into the next one, without having to create separate 
 `let` bindings for each one. [filter_string function]{.idx}[to_init
@@ -334,7 +334,7 @@ tracking down such issues much easier.
 
 We'll discuss more techniques like this that help you interpret type errors
 more easily in
-[The Compiler Frontend Parsing And Type Checking](22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
+[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
 
 </aside>
 
@@ -591,7 +591,7 @@ which has lots of quirks typical in real-world web APIs.
 Our example shells out to `curl` on the command line to obtain the JSON,
 which is rather inefficient. We'll explain how to integrate the HTTP fetch
 directly into your OCaml application in
-[Concurrent Programming With Async](18-concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
 
 
 

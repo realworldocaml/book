@@ -516,7 +516,7 @@ types defined previously can be allocated as blocks via the `Array` module:
 The array functions are similar to those in the standard library `Array`
 module except that they operate on arrays stored using the flat C
 representation rather than the OCaml representation described in
-[Memory Representation Of Values](20-runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
+[Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
 
 As with standard OCaml arrays, the conversion between arrays and lists
 requires copying the values, which can be expensive for large data
@@ -535,7 +535,7 @@ controlling]{.idx}
 Ctypes defines a number of operators that let you manipulate pointers and
 arrays just as you would in C. The Ctypes equivalents do have the benefit of
 being more strongly typed, of course (see
-[Table19sub1](19-foreign-function-interface.html#Table19sub1){data-type=xref}).
+[Table19sub1](foreign-function-interface.html#Table19sub1){data-type=xref}).
 
 ::: {#Table19sub1 data-type=table}
 Operator | Purpose
@@ -680,9 +680,9 @@ This chapter hasn't really needed you to understand the innards of OCaml at
 all. Ctypes does its best to make function bindings easy, but the rest of
 this part will also fill you in about interactions with OCaml memory layout
 in
-[Memory Representation Of Values](20-runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
+[Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
 and automatic memory management in
-[Understanding The Garbage Collector](21-garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
+[Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
 
 Ctypes gives OCaml programs access to the C representation of values,
 shielding you from the details of the OCaml value representation, and
