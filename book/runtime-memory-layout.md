@@ -1,7 +1,7 @@
 # Memory Representation of Values {#memory-representation-of-values data-type=chapter}
 
 The FFI interface we described in
-[Foreign Function Interface](19-foreign-function-interface.html#foreign-function-interface){data-type=xref}
+[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}
 hides the precise details of how values are exchanged across C libraries and
 the OCaml runtime. There is a simple reason for this: using this interface
 directly is a delicate operation that requires understanding a few different
@@ -51,16 +51,16 @@ patching]{.idx data-primary-sortas=Just}[dynamic type
 checking]{.idx}[compile-time static checking]{.idx}
 
 We'll explain this compilation pipeline in more detail in
-[The Compiler Frontend Parsing And Type Checking](22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}
+[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}
 and
-[The Compiler Backend Byte Code And Native Code](23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
+[The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 :::
 
 
 This chapter covers the precise mapping from OCaml types to runtime values
 and walks you through them via the toplevel. We'll cover how these values are
 managed by the runtime later on in
-[Understanding The Garbage Collector](21-garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
+[Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
 [mapping/of OCaml types to runtime values]{.idx #MAPocaml}
 
 ## OCaml Blocks and Values {#ocaml-blocks-and-values data-type=sect1}
@@ -181,7 +181,7 @@ MB on that architecture. If you need bigger strings, either switch to a
 
 The 2-bit `color` field is used by the GC to keep track of its state during
 mark-and-sweep collection. We'll come back to this field in
-[Understanding The Garbage Collector](21-garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
+[Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
 This tag isn't exposed to OCaml source code in any case.
 
 A block's tag byte is multipurpose, and indicates whether the data array
@@ -193,7 +193,7 @@ type, which we describe in more detail later in this chapter.
 The exact representation of values inside a block depends on their static
 OCaml type. All OCaml types are distilled down into `values`, and summarized
 in
-[Table20 1_ocaml](20-runtime-memory-layout.html#table20-1_ocaml){data-type=xref}.<a data-type="indexterm" data-startref="blck">&nbsp;</a>
+[Table20 1_ocaml](runtime-memory-layout.html#table20-1_ocaml){data-type=xref}.<a data-type="indexterm" data-startref="blck">&nbsp;</a>
 
 ::: {#table20-1_ocaml data-type=table}
 OCaml value | Representation
@@ -421,7 +421,7 @@ of]{.idx}[runtime memory representation/string values]{.idx}
 On a 32-bit machine, the padding is calculated based on the modulo of the
 string length and word size to ensure the result is word-aligned. A 64-bit
 machine extends the potential padding up to 7 bytes instead of 3 (see
-[Chapter_20_table](20-runtime-memory-layout.html#chapter_20_table){data-type=xref}).
+[Chapter_20_table](runtime-memory-layout.html#chapter_20_table){data-type=xref}).
 
 ::: {#chapter_20_table data-type=table}
 String length mod 4 | Padding
@@ -476,7 +476,7 @@ comparison, hashing and binary marshaling. They also optionally contain a
 *finalizer* that the runtime calls just before the block is
 garbage-collected. This finalizer has nothing to do with ordinary OCaml
 finalizers (as created by `Gc.finalize` and explained in
-[Understanding The Garbage Collector](21-garbage-collector.html#understanding-the-garbage-collector){data-type=xref}).
+[Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}).
 They are instead used to call C cleanup functions such as `free`.
 [finalizers/for C cleanup functions]{.idx}
 

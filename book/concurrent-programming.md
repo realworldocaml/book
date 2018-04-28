@@ -141,7 +141,7 @@ Using `return`, we can make `count_lines` compile:
 Together, `bind` and `return` form a design pattern in functional programming
 known as a *monad*. You'll run across this signature in many applications
 beyond just threads. Indeed, we already ran across monads in
-[Bind And Other Error Handling Idioms](07-error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
+[Bind And Other Error Handling Idioms](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 [monads]{.idx}
 
 Calling `bind` and `return` together is a fairly common pattern, and as such
@@ -163,7 +163,7 @@ instead.
 ### Using `Let_syntax` with Async
 
 As was discussed in
-[Error Handling](07-error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
+[Error Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
 there is a special syntax designed for working with monads, called
 `Let_syntax`. Here's what the `bind`-using version of `count_lines` looks
 like with that syntax.
@@ -439,7 +439,7 @@ Pipes are created in connected read/write pairs:
 
 `r` and `w` are really just read and write handles to the same underlying
 object. Note that `r` and `w` have weakly polymorphic types, as discussed in
-[Imperative Programming](01-guided-tour.html#imperative-programming){data-type=xref},
+[Imperative Programming](guided-tour.html#imperative-programming){data-type=xref},
 and so can only contain values of a single, yet-to-be-determined type.
 
 If we just try and write to the writer, we'll see that we block indefinitely
@@ -473,7 +473,7 @@ the shutdown happens transparently.
 
 The command-line parsing for this program is based on the Command library
 that we introduced in
-[Command Line Parsing](14-command-line-parsing.html#command-line-parsing){data-type=xref}.
+[Command Line Parsing](command-line-parsing.html#command-line-parsing){data-type=xref}.
 Opening `Async`, shadows the `Command` module with an extended version that
 contains the `async` call:
 
@@ -510,7 +510,7 @@ library/DuckDuckGo searching example]{.idx #ALduckduck}
 
 `yojson`
 : A JSON parsing library that was described in
-  [Handling Json Data](15-json.html#handling-json-data){data-type=xref}.
+  [Handling Json Data](json.html#handling-json-data){data-type=xref}.
 
 `cohttp`
 : A library for creating HTTP clients and servers. We need Async support,
@@ -543,7 +543,7 @@ The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
 [RFC4627](http://www.ietf.org/rfc/rfc4627.txt). We'll parse the JSON data
 using the Yojson library, which was introduced in
-[Handling Json Data](15-json.html#handling-json-data){data-type=xref}.
+[Handling Json Data](json.html#handling-json-data){data-type=xref}.
 [Yojson library/parsing JSON with]{.idx}[DuckDuckGo search engine/parsing
 JSON strings in]{.idx}[RFC4627]{.idx}
 
@@ -640,7 +640,7 @@ from a flaky server to a network outage to exhausting of local resources can
 lead to a runtime error. When programming in OCaml, some of these errors will
 show up explicitly in a function's return type, and some of them will show up
 as exceptions. We covered exception handling in OCaml in
-[Exceptions](07-error-handling.html#exceptions){data-type=xref}, but as we'll
+[Exceptions](error-handling.html#exceptions){data-type=xref}, but as we'll
 see, exception handling in a concurrent program presents some new challenges.
 [exceptions/in concurrent programming]{.idx}[concurrent
 programming]{.idx}[Async library/exception handling in]{.idx #ALexcept}
@@ -826,7 +826,7 @@ Note that in this code, we're relying on the fact that
 particular by closing its file descriptors. If you need to implement such
 functionality directly, you may want to use the `Monitor.protect` call, which
 is analogous to the `protect` call described in
-[Cleaning Up In The Presence Of Exceptions](07-error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.<a data-type="indexterm" data-startref="ALexcept">&nbsp;</a>
+[Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.<a data-type="indexterm" data-startref="ALexcept">&nbsp;</a>
 
 
 ## Timeouts, Cancellation, and Choices {#timeouts-cancellation-and-choices data-type=sect1}
@@ -946,7 +946,7 @@ that have their own event loop or for another reason need their own threads.
 In that case, it's sometimes useful to run some OCaml code on the foreign
 thread as part of the communication to your main program. OCaml's foreign
 function interface is discussed in more detail in
-[Foreign Function Interface](19-foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+[Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
 
 Another occasional use for system threads is to better interoperate with
 compute-intensive OCaml code. In Async, if you have a long-running

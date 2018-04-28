@@ -41,7 +41,7 @@ The function `build_counts` reads in lines from `stdin`, constructing from
 those lines an association list with the frequencies of each line. It does
 this by invoking `In_channel.fold_lines` (similar to the function `List.fold`
 described in
-[Lists And Patterns](03-lists-and-patterns.html#lists-and-patterns){data-type=xref}),
+[Lists And Patterns](lists-and-patterns.html#lists-and-patterns){data-type=xref}),
 which reads through the lines one by one, calling the provided `fold`
 function for each line to update the accumulator. That accumulator is
 initialized to the empty list.
@@ -51,7 +51,7 @@ association list, sort that list by frequency in descending order, grab the
 first 10 elements off the list, and then iterate over those 10 elements and
 print them to the screen. These operations are tied together using the 
 `|>` operator described in
-[Variables And Functions](02-variables-and-functions.html#prefix-and-infix-operators){data-type=xref}.
+[Variables And Functions](variables-and-functions.html#prefix-and-infix-operators){data-type=xref}.
 [let ( ) declaration]{.idx}[main function]{.idx}
 
 ::: {.allow_break data-type=note}
@@ -145,7 +145,7 @@ native-code compiler, but it sometimes makes sense to use bytecode for
 development builds. And, of course, bytecode makes sense when targeting a
 platform not supported by the native-code compiler. We'll cover both
 compilers in more detail in
-[The Compiler Backend: Byte Code And Native Code](23-compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
+[The Compiler Backend: Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 :::
 
 
@@ -241,7 +241,7 @@ place where you specify your module's interface, and as such is a natural
 place to put documentation. We started our comments with a double asterisk to
 cause them to be picked up by the `odoc` tool when generating API
 documentation. We'll discuss `odoc` more in
-[The Compiler Frontend Parsing And Type Checking](22-compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
+[The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`:
 
@@ -275,7 +275,7 @@ There's some unfamiliar syntax in the above example, in particular, writing
 of some more advanced features of the language (specifically, *functors* and
 *first-class modules*, which we'll get to in later chapters). The use of
 these features for the Map data-structure in particular is covered in
-[Maps And Hash Tables](13-maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
+[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
 
 ## Concrete Types in Signatures {#concrete-types-in-signatures data-type=sect1}
 
@@ -297,7 +297,7 @@ implementation:
 
 In the above, we use `failwith` to throw an exception for the case of the
 empty list. We'll discuss exceptions more in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref}. Note
+[Error Handling](error-handling.html#error-handling){data-type=xref}. Note
 also that the function `fst` simply returns the first element of any
 two-tuple.
 
@@ -550,7 +550,7 @@ definitions that all refer to one another. If you want to create such
 definitions, you typically have to mark them specially. For example, when
 defining a set of mutually recursive values (like the definition of `is_even`
 and `is_odd` in
-[Recursive Functions](02-variables-and-functions.html#recursive-functions){data-type=xref}),
+[Recursive Functions](variables-and-functions.html#recursive-functions){data-type=xref}),
 you need to define them using `let rec` rather than ordinary `let`.
 [dependencies, cyclic]{.idx}[cyclic dependencies]{.idx}[errors/cyclic
 dependencies]{.idx}[modules/cyclic dependencies]{.idx}
@@ -636,7 +636,7 @@ from that perspective, you simplify the lives of your users.
 
 There are many ways of improving readability at the call site. One example is
 labeled arguments (discussed in
-[Labeled Arguments](02-variables-and-functions.html#labeled-arguments){data-type=xref}),
+[Labeled Arguments](variables-and-functions.html#labeled-arguments){data-type=xref}),
 which act as documentation that is available at the call site.
 
 You can also improve readability simply by choosing good names for your
@@ -675,7 +675,7 @@ interfaces. Here are some of the guidelines that they use.
 - Functions that routinely throw an exception should end in `_exn`.
   Otherwise, errors should be signaled by returning an `option` or an
   `Or_error.t` (both of which are discussed in
-  [Error Handling](07-error-handling.html#error-handling){data-type=xref} ).
+  [Error Handling](error-handling.html#error-handling){data-type=xref} ).
 
 There are also standards in Base about what the type signature for specific
 functions should be. For example, the signature for `map` is always
@@ -683,7 +683,7 @@ essentially the same, no matter what the underlying type it is applied to.
 This kind of function-by-function API uniformity is achieved through the use
 of *signature includes*, which allow for different modules to share
 components of their interface. This approach is described in
-[Using Multiple Interfaces](09-functors.html#using-multiple-interfaces){data-type=xref}.
+[Using Multiple Interfaces](functors.html#using-multiple-interfaces){data-type=xref}.
 
 Base's standards may or may not fit your projects, but you can improve the
 usability of your codebase by finding some consistent set of standards to

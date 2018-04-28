@@ -2,7 +2,7 @@
 
 This chapter will focus on two common elements of programming in OCaml: lists
 and pattern matching. Both of these were discussed in
-[A Guided Tour](01-guided-tour.html#a-guided-tour){data-type=xref}, but we'll
+[A Guided Tour](guided-tour.html#a-guided-tour){data-type=xref}, but we'll
 go into more depth here, presenting the two topics together and using one to
 help illustrate the other.
 
@@ -184,7 +184,7 @@ a case, along with an example of an unmatched pattern:
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="13" />
 
 Even for simple examples like this, exhaustiveness checks are pretty useful.
-But as we'll see in [Variants](06-variants.html#variants){data-type=xref},
+But as we'll see in [Variants](variants.html#variants){data-type=xref},
 they become yet more valuable as you get to more complicated examples,
 especially those involving user-defined types. In addition to catching
 outright errors, they act as a sort of refactoring tool, guiding you to the
@@ -353,7 +353,7 @@ List.filter]{.idx}[List module/List.filter]{.idx}
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="29" />
 
 Note that the `mod` used above is an infix operator, as described in
-[Variables And Functions](02-variables-and-functions.html#variables-and-functions){data-type=xref}.
+[Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
 Sometimes, you want to both transform and filter as part of the same
 computation. In that case, `List.filter_map` is what you need. The function
@@ -492,7 +492,7 @@ right approach.
 
 Now that we know more about how lists and patterns work, let's consider how
 we can improve on an example from
-[Recursive List Functions](01-guided-tour.html#recursive-list-functions){data-type=xref}:
+[Recursive List Functions](guided-tour.html#recursive-list-functions){data-type=xref}:
 the function `destutter`, which removes sequential duplicates from a list.
 Here's the implementation that was described earlier:[destutter
 function]{.idx}[pattern matching/terser and faster
@@ -563,7 +563,7 @@ into the runtime to a low level. These comparisons are polymorphic on the
 basis of ignoring almost everything about the types of the values that are
 being compared, paying attention only to the structure of the values as
 they're laid out in memory. (You can learn more about this structure in
-[Memory Representation of Values](20-runtime-memory-layout.html){data-type=xref}.)
+[Memory Representation of Values](runtime-memory-layout.html){data-type=xref}.)
 
 Polymorphic compare does have some limitations. For example, it will fail at
 runtime if it encounters a function value.
@@ -588,7 +588,7 @@ surprising and hard to resolve bugs in your code. It's for this reason that
 `Base` discourages the use of polymorphic compare by hiding it by default.
 
 We'll discuss this issue more in
-[Maps And Hash Tables](13-maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
+[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
 But in any case, you can restore the default behavior of `Base` by opening
 the module again.
 

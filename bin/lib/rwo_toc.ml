@@ -246,3 +246,13 @@ let code_files ?(repo_root=".") () =
       | "./book/code/imperative-programming/numbers.txt" -> false
       | _ -> true
     )
+
+let find ~filename (t:t) =
+  let rec aux = function
+    | []   -> None
+    | h::t ->
+      match List.find h.chapters ~f:(fun c -> c.filename = filename) with
+      | Some _ as x -> x
+      | None -> aux t
+  in
+  aux t

@@ -1472,3 +1472,24 @@
          float: none;
     }
 }
+
+ body:after{
+     z-index:1000;
+     content: "beta";
+     position: fixed;
+     width: 130px;
+     height: 40px;
+     background: #EE8E4A;
+     top: 10px;
+     left: -35px;
+     text-align: center;
+     font-size: 15px;
+     font-family: sans-serif;
+     text-transform: uppercase;
+     font-weight: bold;
+     color: #fff;
+     line-height: 27px;
+     -ms-transform:rotate(-45deg);
+     -webkit-transform:rotate(-45deg);
+     transform:rotate(-45deg);
+ }

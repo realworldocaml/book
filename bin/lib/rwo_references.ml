@@ -12,17 +12,25 @@ let is_reference = function
   )
   | `Element _ -> false
 
-let create_reference_prefix url = (
-  let chapter = string_of_int(int_of_string (String.slice url 0 2)) in
-  `Data ("Chapter " ^ chapter ^ ", "))
+let create_reference_prefix toc url =
+  let filename =
+    (* remove anchors *)
+    match String.rsplit2 ~on:'#' url with
+    | None        -> url
+    | Some (f, _) -> f
+  in
+  match Rwo_toc.find ~filename toc with
+  | None   -> failwithf "invalid cross-reference: %s" url ()
+  | Some c -> `Data ("Chapter " ^ string_of_int c.number  ^ ", ")
 
-let add_reference chapter_file = function
+let add_reference toc chapter_file = function
   | `Element {Html.name; attrs; childs} as orginal_element -> (
     let (_, prefix) = Filename.split chapter_file in
     let url = List.Assoc.find_exn ~equal:String.equal attrs "href" in
     if String.is_prefix url ~prefix then
       orginal_element
     else
-    `Element {Html.name; attrs; childs = ([create_reference_prefix url] @ childs)}
+      let childs = create_reference_prefix toc url :: childs in
+      `Element {Html.name; attrs; childs}
   )
   | _ -> assert false

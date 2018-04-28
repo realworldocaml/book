@@ -353,17 +353,17 @@ We would especially like to thank the following individuals for improving
 *Real World OCaml*:
 
 - Leo White contributed greatly to the content and examples in
-  [Objects](11-objects.html#objects){data-type=xref} and
-  [Classes](12-classes.html#classes){data-type=xref}.
+  [Objects](objects.html#objects){data-type=xref} and
+  [Classes](classes.html#classes){data-type=xref}.
 
 - Jeremy Yallop authored and documented the Ctypes library described in
-  [Foreign Function Interface](19-foreign-function-interface.html#foreign-function-interface){data-type=xref}.
+  [Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}.
 
 - Stephen Weeks is responsible for much of the modular architecture behind
   Core, and his extensive notes formed the basis of
-  [Memory Representation Of Values](20-runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
+  [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}
   and
-  [Understanding The Garbage Collector](21-garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
+  [Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
 
 - Jérémie Dimino, the author of `utop`, the interactive command-line
   interface that is used throughout this book. We're particularly grateful

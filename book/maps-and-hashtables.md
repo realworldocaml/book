@@ -28,7 +28,7 @@ tables/basics of]{.idx}[maps/basics of]{.idx}
 ## Maps {#maps data-type=sect1}
 
 Let's consider an example of how one might use a map in practice. In
-[Files Modules And Programs](04-files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
+[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
 we showed a module `Counter` for keeping frequency counts on a set of
 strings. Here's the interface:
 
@@ -60,7 +60,7 @@ takes a first-class module as an argument. The point of the first class
 module is to provide the comparison function that is required for building
 the map, along with an s-expression converter for generating useful error
 messages (we'll talk more about s-expressions in
-[Data Serialization with S-Expressions](17-data-serialization.html){data-type=xref}).
+[Data Serialization with S-Expressions](data-serialization.html){data-type=xref}).
 We don't need to provide the module again for functions like `Map.find` or
 `Map.add`, because the map itself contains a reference to the comparison
 function it uses.
@@ -186,7 +186,7 @@ result.
 We don't need to generate specialized comparators for every type we want to
 build a map on. We can instead build a map based on OCaml's built-in
 polymorphic comparison function, which was discussed in
-[Lists And Patterns](03-lists-and-patterns.html#lists-and-patterns){data-type=xref}.
+[Lists And Patterns](lists-and-patterns.html#lists-and-patterns){data-type=xref}.
 `Base` currently doesn't have a convenient function for minting maps based on
 polymorphic compare, but `Core_kernel` does, as we can see below.
 [maps/polymorphic comparison in]{.idx}[polymorphic comparisons]{.idx}
@@ -382,7 +382,7 @@ following example, using the wrong comparator will lead to a type error:
 
 Hash tables are the imperative cousin of maps. We walked over a basic hash
 table implementation in
-[Imperative Programming 1](08-imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
 so in this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
 module. We'll cover this material more briefly than we did with maps because
 many of the concepts are shared. [hash tables/basics of]{.idx}

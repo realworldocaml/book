@@ -14,9 +14,9 @@ An example s-expression might look like this.
 S-expressions play a major role in Core, effectively acting as the default
 serialization format. Indeed, we've encountered s-expressions multiple times
 already, including in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref},
-[Functors](09-functors.html#functors){data-type=xref}, and
-[First Class Modules](10-first-class-modules.html#first-class-modules){data-type=xref}.
+[Error Handling](error-handling.html#error-handling){data-type=xref},
+[Functors](functors.html#functors){data-type=xref}, and
+[First Class Modules](first-class-modules.html#first-class-modules){data-type=xref}.
 
 This chapter will go into s-expressions in more depth. In particular, we'll
 discuss:
@@ -125,7 +125,7 @@ in]{.idx}[syntax extension/in Sexplib package]{.idx}
 
 The syntax extension can be used outside of type declarations as well. As
 discussed in
-[Error Handling](07-error-handling.html#error-handling){data-type=xref},
+[Error Handling](error-handling.html#error-handling){data-type=xref},
 `with sexp` can be attached to the declaration of an exception, which will
 improve the ability of Core to generate a useful string representation:
 
@@ -164,9 +164,9 @@ PPX]{.idx}
 
 `ppx_sexp_conv` is part of a family of syntax extensions, including
 `ppx_compare`, described in
-[Maps And Hash Tables](13-maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
+[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
 and `ppx_fields`, described in
-[Records](05-records.html#records){data-type=xref}, that generate code based
+[Records](records.html#records){data-type=xref}, that generate code based
 on type declarations. [Type_conv library]{.idx}[Sexplib package/Type_conv
 library and]{.idx}
 :::
@@ -226,7 +226,7 @@ The most important functionality provided by Sexplib is the autogeneration of
 converters for new types. We've seen a bit of how this works already, but
 let's walk through a complete example. Here's the source for a simple library
 for representing integer intervals, very similar to the one described in
-[Functors](09-functors.html#functors){data-type=xref}:
+[Functors](functors.html#functors){data-type=xref}:
 [s-expressions/preserving invariants in]{.idx}
 
 <link rel="import" href="code/sexpr/test_interval/int_interval.ml" />

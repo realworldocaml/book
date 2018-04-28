@@ -131,7 +131,7 @@ the error is printed out.
 
 We're not restricted to doing this kind of error reporting with built-in
 types. This will be discussed in more detail in
-[Data Serialization With S Expressions](17-data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
+[Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
 but Sexplib comes with a language extension that can autogenerate sexp
 converters for newly generated types:
 
@@ -177,7 +177,7 @@ using the infix operator form of `bind`, which we get access to by locally
 opening `Option.Monad_infix`. The module is called `Monad_infix` because the
 `bind` operator is part of a subinterface called `Monad`, which we'll see
 again in
-[Concurrent Programming With Async](18-concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
 
 <link rel="import" href="code/error-handling/main.mlt" part="13" />
 
@@ -257,7 +257,7 @@ values:
 
 Exceptions are all of the same type, `exn`. The `exn` type is something of a
 special case in the OCaml type system. It is similar to the variant types we
-encountered in [Variants](06-variants.html#variants){data-type=xref}, except
+encountered in [Variants](variants.html#variants){data-type=xref}, except
 that it is *open*, meaning that it's not fully defined in any one place. In
 particular, new tags (specifically, new exceptions) can be added to it by
 different parts of the program. This is in contrast to ordinary variants,
@@ -317,7 +317,7 @@ rather than in a module.
 
 This is all part of the support for s-expressions provided by the Sexplib
 library and syntax extension, which is described in more detail in
-[Data Serialization With S-Expressions](17-data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
+[Data Serialization With S-Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
 :::
 
 
