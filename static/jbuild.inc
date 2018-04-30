@@ -709,7 +709,6 @@
     ../book/testing.html
     ../bin/bin/app.exe
     ../book/toc.scm
-    ../examples/code/files-modules-and-programs/freq-obuild/jbuild
     ../examples/code/testing/inline_tests/jbuild))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
