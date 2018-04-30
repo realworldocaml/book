@@ -2,7 +2,7 @@
 
 (alias (
   (name runtest)
-  (deps (run.sh (files_recursively_in .)))
+  (deps (run.errsh (files_recursively_in .)))
   (action (
     progn
     (run   cram ${<})
@@ -10,7 +10,7 @@
 
 (alias (
   (name runtest-all)
-  (deps (run.sh (files_recursively_in .)))
+  (deps (run.errsh (files_recursively_in .)))
   (action (
     progn (run cram --non-deterministic ${<}) (diff? ${<} ${<}.corrected)))))
 
