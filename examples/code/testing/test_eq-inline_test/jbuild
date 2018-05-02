@@ -2,7 +2,7 @@
 (include jbuild.inc)
 
 (library
- ((name foo)
+ ((name foo2)
   (libraries (base stdio))
   (preprocess (pps (ppx_jane)))
   (inline_tests)

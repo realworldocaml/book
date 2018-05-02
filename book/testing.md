@@ -43,12 +43,64 @@ Here are some properties that are important for tests to have.
 Frameworks can't solve all of your testing problems, but they can help
 you with all of the issues described above.
 
-## Testing with inline tests {data-type=sect1}
+## Inline tests {data-type=sect1}
 
-We're going to show you how to build tests using `ppx_inline_test`
-framework. This framework lets you mark tests in your file with an
-annotation which are then registered with the build system. To do
-that, we need to make sure we enable the appropriate syntax
-extensions, and
+We're going to show you how to build tests using the `ppx_inline_test`
+framework. This framework lets you add tests to any module in your
+library by using a specially annotated let binding. To do that, we
+need to enable the appropriate syntax extensions, as well as mark that
+the files in this library contain inline tests. We do the first by
+adding `ppx_jane` to the set of preprocessors, and the second by
+adding an `inline_tests` declaration to the library stanza, as shown
+below.
 
-<link rel="import" href="code/testing/inline_tests/jbuild" />
+<link rel="import" href="code/testing/simple_inline_test/jbuild" />
+
+We use `ppx_jane` in this example because it pulls in a collection of
+useful syntax extensions with a single declartion, but it is also
+possible to pull in just the specific preprocessors you want to use.
+
+Any module in this library can contain a test, so in the following
+we'll create a file called `test.ml` which contains only a single test.
+
+<link rel="import" href="code/testing/simple_inline_test/test.ml" />
+>
+The test passes if the expression on the right-hand side of the
+equals-sign evaluates to true.  These tests are not automatically run
+with the instantiation of the module, but are instead registered for
+running via the test runner, which can be invoked via jbuilder.
+
+<link rel="import" href="code/testing/simple_inline_test/run.sh" />
+
+Since the test was correct, it passes, generating no output. If we
+modify the test to have an error, as below,
+
+<link rel="import" href="code/testing/broken_inline_test/test.ml" />
+
+then we will see an error when we run the test.
+
+<link rel="import" href="code/testing/broken_inline_test/run.sh" />
+
+### More readable errors with `test_eq` {data-type=sect2}
+
+One problem with the test output above is that it doesn't print out
+the data associated with the failed test. That's not really a problem
+in this case, since the data in question is pretty clear. But in more
+realistic tests, it's often to see the concrete data that failed.
+
+We often do this by running a test that fails by throwing an
+exception, rather than just returning false. That exception can then
+contain more useful debugging information. To do this, we need to
+change our top-level test to use `let%test_unit` instead of
+`let%test`, so that the test allows a unit-returning body. We're also
+going to use the `[%test_eq]` syntax, which, given a type, generates
+code to test for equality and throw a meaningful exception if the
+arguments are unequal.
+
+Here's what our new test looks like.
+
+<link rel="import" href="code/testing/test_eq-inline_test/test.ml" />
+
+And here's what it looks like when we run a test.
+
+<link rel="import" href="code/testing/test_eq-inline_test/run.sh" />
