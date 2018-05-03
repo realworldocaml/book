@@ -29,6 +29,7 @@ publish:
 	git -C .gh-pages reset
 	git -C .gh-pages clean -dxf
 	cp -r _build/default/static/* .gh-pages/
+	echo dev.realworldocaml.org > .gh-pages/CNAME
 	git -C .gh-pages add .
 	git -C .gh-pages commit -m "Update Pages"
 	git -C .gh-pages push origin gh-pages -f
