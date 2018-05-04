@@ -144,11 +144,11 @@ end ;;
 [@@@part "7"];;
 let messages_for_user user (messages : (Common.t * details) list) =
   let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
+    List.fold messages ~init:([],Set.empty (module String))
       ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
         match details with
         | Logon m ->
-          if m.user = user then
+          if String.(=) m.user user then
             (message::messages, Set.add user_sessions common.session_id)
           else acc
         | Heartbeat _ | Log_entry _ ->
@@ -159,9 +159,9 @@ let messages_for_user user (messages : (Common.t * details) list) =
   in
   List.rev user_messages
 ;;
-[%%expect{|
-Characters 127-143:
-Error: Unbound module String.Set
+[%%expect ocaml {|
+val messages_for_user :
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 |}];;
 [@@@part "7.9"];;
 type server_state;;
@@ -195,11 +195,11 @@ type details =
 [@@@part "10"];;
 let messages_for_user user (messages : (Common.t * details) list) =
   let (user_messages,_) =
-    List.fold messages ~init:([],String.Set.empty)
+    List.fold messages ~init:([],Set.empty (module String))
       ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
         match details with
         | Logon m ->
-          if m.user = user then
+          if String.(=) m.user user then
             (message::messages, Set.add user_sessions common.session_id)
           else acc
         | Heartbeat _ | Log_entry _ ->
@@ -210,9 +210,9 @@ let messages_for_user user (messages : (Common.t * details) list) =
   in
   List.rev user_messages
 ;;
-[%%expect{|
-Characters 127-143:
-Error: Unbound module String.Set
+[%%expect ocaml {|
+val messages_for_user :
+  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 |}];;
 [@@@part "11"];;
 let get_logon_contents = function
