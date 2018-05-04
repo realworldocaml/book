@@ -57,6 +57,7 @@ type color =
 |}];;
 [RGB (250,70,70); Basic (Green, Regular)];;
 [%%expect ocaml {|- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]|}];;
+
 [@@@part "4"];;
 let color_to_int = function
   | Basic (basic_color,weight) ->
@@ -75,6 +76,54 @@ ocaml {|- : unit = ()|}];;
 color_print (Gray 4) "A muted gray...";;
 [%%expect{|[38;5;236mA muted gray...[0m|};
 ocaml {|- : unit = ()|}];;
+
+[@@@part "5.1"];;
+RGB (200,0,200);;
+[%%expect ocaml {|- : color = RGB (200, 0, 200)|}];;
+
+[@@@part "5.2"];;
+let purple = (200,0,200);;
+[%%expect ocaml {|val purple : int * int * int = (200, 0, 200)|}];;
+RGB purple;;
+[%%expect{|
+Characters 0-10:
+Error: The constructor RGB expects 3 argument(s),
+       but is applied here to 1 argument(s)
+|}];;
+
+[@@@part "5.3"];;
+type tupled = Tupled of (int * int);;
+[%%expect ocaml {|type tupled = Tupled of (int * int)|}];;
+
+[@@@part "5.4"];;
+let of_tuple x = Tupled x;;
+[%%expect ocaml {|val of_tuple : int * int -> tupled = <fun>|}];;
+let to_tuple (Tupled x) = x;;
+[%%expect ocaml {|val to_tuple : tupled -> int * int = <fun>|}];;
+
+[@@@part "5.5"];;
+type untupled = Untupled of int * int;;
+[%%expect ocaml {|type untupled = Untupled of int * int|}];;
+let of_tuple x = Untupled x;;
+[%%expect{|
+Characters 17-27:
+Error: The constructor Untupled expects 2 argument(s),
+       but is applied here to 1 argument(s)
+|}];;
+let to_tuple (Untupled x) = x;;
+[%%expect{|
+Characters 13-25:
+Error: The constructor Untupled expects 2 argument(s),
+       but is applied here to 1 argument(s)
+|}];;
+
+[@@@part "5.6"];;
+let of_tuple (x,y) = Untupled (x,y);;
+[%%expect ocaml {|val of_tuple : int * int -> untupled = <fun>|}];;
+let to_tuple (Untupled (x,y)) = (x,y);;
+[%%expect ocaml {|val to_tuple : untupled -> int * int = <fun>|}];;
+
+
 [@@@part "6"];;
 let three = `Int 3;;
 [%%expect ocaml {|val three : [> `Int of int ] = `Int 3|}];;
