@@ -85,8 +85,11 @@ running via the test runner, which can be invoked via jbuilder.
 
 <link rel="import" href="code/testing/simple_inline_test/run.sh" />
 
-Since the test was correct, it passes, generating no output. If we
-modify the test to have an error, as below,
+Since the test was correct, it passes, generating no output.  Note
+that Jbuilder will run tests declared in different files in parallel,
+which is important for making your test suite run quickly.
+
+If we modify the test to have an error, as below,
 
 <link rel="import" href="code/testing/broken_inline_test/test.ml" />
 
@@ -172,5 +175,8 @@ The tests we've discussed so far have themselves been extraordinarily
 simple.
 
 ## Expect Tests {data-type=sect1}
+
+
+
 
 ## Coverage Testing {data-type=sect1}
