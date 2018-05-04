@@ -91,7 +91,7 @@ one.
 
 <link rel="import" href="code/variants/main.mlt" part="5.3" />
 
-The syntatic difference is unfortunately quite subtle, coming down to
+The syntactic difference is unfortunately quite subtle, coming down to
 the extra set of parens around the arguments. But having defined it
 this way, we can now take the tuple in and out freely.
 
