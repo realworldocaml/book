@@ -1,30 +1,28 @@
 # Testing {#testing data-type=chapter}
 
-Testing is a fundamental part of building reliable software, but that
-doesn't prevent people from routinely under-investing in testing. The
-reasons are clear enough. Testing can be tedious, and in the early
-stages of a project, it's often not obvious how important testing is
-going to become down the line. Since testing is harder to do if it
-hasn't been designed in from the start, it's all too easy to get stuck
-with system that's both under-tested and difficult to add tests to.
+Testing is fundamental to building reliable software, but you wouldn't
+know it from watching how software engineers spend their time.
+Testing can be tedious, and in the early stages of a project, it's
+often not obvious how important testing is going to become down the
+line. This leads people to test less than they should, and more
+critically, to design systems without taking testability into account,
+which makes such omissions harder to fix down the line.
 
 In some ways, OCaml's type-system makes this worse, by enhancing the
 illusion that you can get by without testing.  After all, many trivial
 bugs are caught cheaply by OCaml's type system, no testing
 required. But make no mistake, type system or no type system, testing
-is essential.
+is essential as your systems evolve and grow more complex.
 
-A good way of motivating yourself to write tests is to make it easy
-and fun. Testing tools can reduce the tedium of writing tests and
-simplify the process of maintaining them.  With better infrastructure
-in place, you'll find yourself writing way more tests, and your
-creations will be more reliable as a result.
+One way to improve the situtation is to fix the tedium problem. With
+the right tools, writnig tests can be made lightweight and fun.  With
+better infrastructure in place, you'll find yourself writing more
+tests, and your creations will be more reliable as a result.
 
-The goal of this chapter is to teach you about some of the available
-infrastructure for testing in OCaml. But before that, we'll discuss
-what makes for good tests, and what kind of test automation is
-important to have. Then we'll turn back to what tools are available
-specifically for OCaml.
+The goal of this chapter is to teach you about some of the testing
+infrastructure available in the OCaml ecosystem. But first, we'll
+discuss more generally what you should be optimizing for in your tests
+and in your testing infrastructure.
 
 ## What makes for good tests? {#what-makes-for-good-tests data-type=sect1}
 
@@ -39,16 +37,17 @@ Here are some properties that are important for tests to have.
 - **Fast**, so they don't slow down your development process.
 - **Readable**, so that someone can go back later and understand what
   the test is for.
-- **Deterministic**. Test failures that might just be noise are hard
-  to take seriously. You want your test failures to be believable
-  indications of a problem, which requires determinism.
+- **Deterministic**. It's hard to take test failures seriously if
+  there's a decent chance that the failure might be random.  You want
+  your test failures to be believable indications of a problem, which
+  requires determinism.
 - **Fail understandably**. Tests whose failures are localized and easy
   to comprehend make it easier to find and fix the problem flagged by
   the failing test.
 
-No testing framework can ensure that your tests satisfy all of these
-properties. But the test framework you choose can help or hinder on
-all of these fronts.
+No testing framework can ensure that your tests satisfy these
+properties. But the testing tools you choose can help or hinder on all
+of these fronts.
 
 As we go through the rest of this chapter, we'll try to show how the
 various testing tools available for OCaml can help you on each of
@@ -56,19 +55,18 @@ these fronts.
 
 ## Inline tests {data-type=sect1}
 
-The first step towards building good tests is making them easy to set
-up and and run.  The *inline test* framework helps here, by letting
-you add tests to any module in your library with a specially annotated
-let binding.
+The first step towards a good testing environment is making it easy to
+set up and and run a test.  To that end, we'll show you how to write
+tests with `ppx_inline_test`, which lets you add tests to any module
+in your library with a specially annotated let binding.
 
 To use inline tests, we need to enable the `ppx_inline_test`
-preprocessor, as well as mark that the files in this library contain
-inline tests. On the preprocessor front, we'll add `ppx_jane` to the
-set of preprocessors, which bundles together `ppx_inline_test` with a
-collection of other preprocessors that are useful for testing and for
-other purposes.  And we'll tell jbuilder to expect tests in this
-library by adding the `inline_tests` declaration to the library
-stanza, as shown below.
+preprocessor, as well as tell Dune that the files in this library
+contain inline tests.  We'll add `ppx_jane` to the set of
+preprocessors, which bundles together `ppx_inline_test` with a
+collection of other useful preprocessors.  And we'll tell Dune to
+expect tests in this library by adding the `inline_tests` declaration
+to the library stanza. Here's the resulting `jbuild` file.
 
 <link rel="import" href="code/testing/simple_inline_test/jbuild" />
 
@@ -81,19 +79,18 @@ a single test.
 The test passes if the expression on the right-hand side of the
 equals-sign evaluates to true.  These tests are not automatically run
 with the instantiation of the module, but are instead registered for
-running via the test runner, which can be invoked via jbuilder.
+running via the test runner, which can be invoked via Dune.  Note that
+the test runner will execute tests declared in different files in
+parallel.
 
 <link rel="import" href="code/testing/simple_inline_test/run.sh" />
 
-Since the test was correct, it passes, generating no output.  Note
-that Jbuilder will run tests declared in different files in parallel,
-which is important for making your test suite run quickly.
-
-If we modify the test to have an error, as below,
+No output is generated because the test passed successfully.
+But if we break the test,
 
 <link rel="import" href="code/testing/broken_inline_test/test.ml" />
 
-then we will see an error when we run the test.
+then we'll see an error when we run it.
 
 <link rel="import" href="code/testing/broken_inline_test/run.sh" />
 
@@ -168,6 +165,32 @@ legitimate reasons to want to put some test directly in your
 production library, e.g., there's something that's really awkward to
 expose in a way that makes it possible to test. But these examples are
 few and far between.
+
+::: {.allow_break data-type=note}
+#### Why can't inline tests go in executables?
+
+We've only talked about putting tests into libraries. What about
+executables? After all, you want to test the logic of your
+command-line tools as well. It turns out you can't do this directly,
+since Dune doesn't support the `inline_tests` declaration in
+executable files.
+
+There's a good reason for this, which is that the `ppx_inline_test`
+test runner needs to instantiate the modules that contain the
+tests. If those modules have toplevel side-effects, that's a recipe
+for disaster. You don't want your test-framework running lots of
+copies of your executables in parallel without your say-so.
+
+So, how do we test code that's part of an executable? The solution is
+to break up your program in to two pieces: a directory containing a
+library that contains all of the logic of your program, and is
+suitable for testing (either with embedded inline tests, or from a
+purpose-built testing library); and a directory for the executable
+that links in the library, and is just responsible for launching the
+code contained in the companion library.
+
+:::
+
 
 ## Quickcheck {data-type=sect1}
 
