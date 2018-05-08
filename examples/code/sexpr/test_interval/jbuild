@@ -1,9 +1,7 @@
-(jbuild_version 1)
-(include jbuild.inc)
 
 (executable
   ((name test_interval)
-   (libraries (core ppx_sexp_conv))
-   (preprocess (pps (ppx_sexp_conv -no-check)))
+   (libraries (core sexplib))
+   (preprocess (pps (ppx_sexp_conv)))
   )
 )

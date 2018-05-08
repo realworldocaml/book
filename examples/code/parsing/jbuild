@@ -1,5 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
 
 (rule
  ((targets (short_parser.mli short_parser.ml))

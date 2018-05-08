@@ -1,5 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
 
 (rule
  ((targets (github_org_j.ml github_org_j.mli))

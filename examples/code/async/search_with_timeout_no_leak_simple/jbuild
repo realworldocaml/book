@@ -1,5 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
 
 (executable
   ((name search_with_timeout_no_leak_simple)
