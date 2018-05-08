@@ -140,48 +140,64 @@ let process_chapters ~toc book_dir output_dir =
 
 (** Handle examples *)
 
-let mlt_rule f =
+let mlt_rule ~dir base =
   let alias name cmd =
     sprintf {|
 (alias
  ((name    %s)
-  (deps    (%s (files_recursively_in .)))
-  (action  (progn
-    (setenv OCAMLRUNPARAM "" (run %s ${<}))
-    (diff? ${<} ${<}.corrected)))))|}
-      name f cmd
+  (deps    ((files_recursively_in %s)))
+  (action
+   (chdir %s
+    (progn
+     (setenv OCAMLRUNPARAM "" (run %s %s))
+     (diff? %s %s.corrected))))))|}
+      name dir dir cmd base base base
   in
   sprintf "%s\n\n%s\n"
     (alias "runtest"     "ocaml-topexpect -short-paths -verbose")
     (alias "runtest-all" "ocaml-topexpect -non-deterministic -short-paths -verbose")
 
-let sh_rule f =
+let sh_rule ~dir base =
   let alias name cmd =
     sprintf {|
 (alias
  ((name     %s)
-  (deps     (%s (files_recursively_in .)))
+  (deps     ((files_recursively_in %s)))
   (action
+   (chdir %s
     (progn
-     (run %s ${<})
-     (diff? ${<} ${<}.corrected)))))|}
-      name f cmd
+     (run %s %s)
+     (diff? %s %s.corrected))))))|}
+      name dir dir cmd base base base
   in
   sprintf "%s\n\n%s\n"
     (alias "runtest"     "cram")
     (alias "runtest-all" "cram --non-deterministic")
 
-
-let process_examples dir =
-  Filename.concat dir "jbuild.inc" |> fun jbuild ->
+let process_example ~root dir =
+  let rdir =
+    if root = dir then "."
+    else
+      let rlen = String.length root + 1 in
+      String.sub dir rlen (String.length dir - rlen)
+  in
   files_with ~exts:book_extensions dir |>
   List.map (function
-      | f when Filename.extension f = ".mlt"   -> mlt_rule f
-      | f when Filename.extension f = ".sh"    -> sh_rule f
-      | f when Filename.extension f = ".errsh" -> sh_rule f
+      | f when Filename.extension f = ".mlt"   -> mlt_rule ~dir:rdir f
+      | f when Filename.extension f = ".sh"    -> sh_rule ~dir:rdir f
+      | f when Filename.extension f = ".errsh" -> sh_rule ~dir:rdir f
       | f -> printf "skipping %s/%s\n%!" dir f; ""
     ) |>
-  List.filter ((<>) "") |>
+  List.filter ((<>) "")
+
+let process_examples dir =
+  let dirs =
+    find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions dir
+  in
+  Filename.concat dir "jbuild" |> fun jbuild ->
+  List.map (process_example ~root:dir) dirs |>
+  List.flatten |>
+  List.sort_uniq String.compare |>
   String.concat "\n" |>
   emit_sexp jbuild
 
@@ -208,6 +224,5 @@ let process_md ~toc book_dir =
 let _ =
   let toc = read_toc "book" in
   process_md ~toc "book";
-  find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions "examples" |>
-  List.iter process_examples;
+  process_examples "examples";
   process_chapters ~toc "book" "static";
