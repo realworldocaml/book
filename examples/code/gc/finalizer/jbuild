@@ -1,4 +1,3 @@
-
 (executable
   ((name finalizer)
    (modules finalizer)

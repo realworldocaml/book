@@ -1,16 +1,13 @@
-
 (rule
  ((targets (github_org_j.ml github_org_j.mli))
   (deps    (github_org.atd))
   (fallback)
   (action  (run atdgen -j ${<}))))
-
 (rule
  ((targets (github_org_t.ml github_org_t.mli))
   (deps    (github_org.atd))
   (fallback)
   (action  (run atdgen -t ${<}))))
-
 (executable
   ((name github_org_info)
    (libraries (core yojson atdgen core_extended))

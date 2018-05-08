@@ -1,4 +1,3 @@
-
 (executables
  ((names (sum))
   (libraries (base stdio))

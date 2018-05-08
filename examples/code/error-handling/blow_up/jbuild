@@ -1,4 +1,3 @@
-
 (executable
   ((name blow_up)
    (modules blow_up)

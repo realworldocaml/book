@@ -1,4 +1,3 @@
-
 (executable
   ((name read_foo_better_errors)
    (libraries (core sexplib))

@@ -1,4 +1,3 @@
-
 (executable
   ((name query_handler_loader)
   (libraries (core core_kernel ppx_sexp_conv))

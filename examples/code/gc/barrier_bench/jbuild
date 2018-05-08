@@ -1,4 +1,3 @@
-
 (executable
   ((name barrier_bench)
    (modules barrier_bench)

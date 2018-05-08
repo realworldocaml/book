@@ -1,4 +1,3 @@
-
 (executables
  ((names (md5))
   (libraries (core cryptokit))

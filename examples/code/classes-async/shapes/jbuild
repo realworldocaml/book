@@ -1,4 +1,3 @@
-
 (executable
   ((name shapes)
    (modules shapes)

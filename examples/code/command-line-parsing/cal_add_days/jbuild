@@ -1,4 +1,3 @@
-
 (executable
   ((name cal)
    (libraries (core))
