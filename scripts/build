@@ -15,4 +15,5 @@ echo Build completed at `date`
 #docker pull ocaml/rwo
 docker run --name temp-container ocaml/rwo /bin/true
 docker cp temp-container:/home/opam/src/_build/default/static $TRAVIS_BUILD_DIR/site
+echo dev.realworldocaml.org > $TRAVIS_BUILD_DIR/site/CNAME
 find $TRAVIS_BUILD_DIR/site
