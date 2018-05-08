@@ -81,7 +81,7 @@ defined earlier.
 
 It really looks like we've created a 3-tuple and wrapped it with the
 `RGB` constructor. But that's not what's really going on, as you can
-see if create a tuple first and then place it inside the `RGB`
+see if we create a tuple first and then place it inside the `RGB`
 constructor.
 
 <link rel="import" href="code/variants/main.mlt" part="5.2" />
