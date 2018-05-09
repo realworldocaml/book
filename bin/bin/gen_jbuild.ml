@@ -140,35 +140,47 @@ let process_chapters ~toc book_dir output_dir =
 
 (** Handle examples *)
 
+(* build a valid jbuilder alias name *)
+let to_alias s = String.map (function
+    | '/' -> '-'
+    | c   -> c
+  ) s
+
 let mlt_rule ~dir base =
+  let alias = to_alias (Filename.concat dir base) in
   let alias name cmd =
     sprintf {|
 (alias
- ((name    %s)
+ ((name    %s-%s)
   (deps    ((files_recursively_in %s)))
   (action
    (chdir %s
     (progn
      (setenv OCAMLRUNPARAM "" (run %s %s))
-     (diff? %s %s.corrected))))))|}
-      name dir dir cmd base base base
+     (diff? %s %s.corrected))))))
+
+(alias ((name %s) (deps ((alias %s-%s)))))
+|} name alias dir dir cmd base base base name name alias
   in
   sprintf "%s\n\n%s\n"
     (alias "runtest"     "ocaml-topexpect -short-paths -verbose")
     (alias "runtest-all" "ocaml-topexpect -non-deterministic -short-paths -verbose")
 
 let sh_rule ~dir base =
+  let alias = to_alias (Filename.concat dir base) in
   let alias name cmd =
     sprintf {|
 (alias
- ((name     %s)
+ ((name     %s-%s)
   (deps     ((files_recursively_in %s)))
   (action
    (chdir %s
     (progn
      (run %s %s)
-     (diff? %s %s.corrected))))))|}
-      name dir dir cmd base base base
+     (diff? %s %s.corrected))))))
+
+(alias ((name %s) (deps ((alias %s-%s)))))
+|} name alias dir dir cmd base base base name name alias
   in
   sprintf "%s\n\n%s\n"
     (alias "runtest"     "cram")
