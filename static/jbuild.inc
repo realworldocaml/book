@@ -5,29 +5,29 @@
   (deps (
     css/app.css
     css/prism.css
+    images/anil.jpg
+    images/bg.jpg
+    images/book-cover.jpg
     images/cover.png
+    images/jason.jpg
     images/plain-bg.jpg
     images/yaron.jpg
-    images/book-cover.jpg
-    images/bg.jpg
-    images/anil.jpg
-    images/jason.jpg
     images/front-end/pipeline.png
     images/gc/minor_heap.png
-    images/imperative-programming/edit_distance2.png
     images/imperative-programming/edit_distance.png
+    images/imperative-programming/edit_distance2.png
     images/lists-and-patterns/lists_layout.png
-    images/memory-repr/tuple_layout.png
-    images/memory-repr/string_block.png
-    images/memory-repr/string_size_calc.png
     images/memory-repr/block.png
     images/memory-repr/float_array_layout.png
-    js/jquery.min.js
-    js/prism.js
-    js/discourse.js
-    js/modernizr.js
+    images/memory-repr/string_block.png
+    images/memory-repr/string_size_calc.png
+    images/memory-repr/tuple_layout.png
     js/_functions.js
     js/app.js
+    js/discourse.js
+    js/jquery.min.js
+    js/modernizr.js
+    js/prism.js
     js/min/app-min.js
     js/min/modernizr-min.js
     theme/pdf/pdf.css))))
