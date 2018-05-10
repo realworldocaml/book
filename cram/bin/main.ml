@@ -90,4 +90,5 @@ let () =
                 ) output;
               Cram.pp_exit_code ppf n
         ) items;
+      Format.pp_print_flush ppf ();
       Buffer.contents buf)
