@@ -2679,6 +2679,138 @@
     runtest-all-code-sexpr-test_interval_nosexp-build_test_interval_nosexp.errsh)))))
 
 (alias (
+  (name runtest-code-testing-broken_inline_test-run.sh)
+  (deps ((files_recursively_in code/testing/broken_inline_test)))
+  (action (
+    chdir code/testing/broken_inline_test (
+      progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-broken_inline_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-broken_inline_test-run.sh)
+  (deps ((files_recursively_in code/testing/broken_inline_test)))
+  (action (
+    chdir code/testing/broken_inline_test (
+      progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-broken_inline_test-run.sh)))))
+
+(alias (
+  (name runtest-code-testing-manual_property_test-run.sh)
+  (deps ((files_recursively_in code/testing/manual_property_test)))
+  (action (
+    chdir code/testing/manual_property_test (
+      progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-manual_property_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-manual_property_test-run.sh)
+  (deps ((files_recursively_in code/testing/manual_property_test)))
+  (action (
+    chdir code/testing/manual_property_test (
+      progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-manual_property_test-run.sh)))))
+
+(alias (
+  (name runtest-code-testing-quickcheck_property_test-run.sh)
+  (deps ((files_recursively_in code/testing/quickcheck_property_test)))
+  (action (
+    chdir
+    code/testing/quickcheck_property_test
+    (progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-quickcheck_property_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-quickcheck_property_test-run.sh)
+  (deps ((files_recursively_in code/testing/quickcheck_property_test)))
+  (action (
+    chdir
+    code/testing/quickcheck_property_test
+    (progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-quickcheck_property_test-run.sh)))))
+
+(alias (
+  (name runtest-code-testing-simple_inline_test-run.sh)
+  (deps ((files_recursively_in code/testing/simple_inline_test)))
+  (action (
+    chdir code/testing/simple_inline_test (
+      progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-simple_inline_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-simple_inline_test-run.sh)
+  (deps ((files_recursively_in code/testing/simple_inline_test)))
+  (action (
+    chdir code/testing/simple_inline_test (
+      progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-simple_inline_test-run.sh)))))
+
+(alias (
+  (name runtest-code-testing-test_eq-inline_test-run.sh)
+  (deps ((files_recursively_in code/testing/test_eq-inline_test)))
+  (action (
+    chdir code/testing/test_eq-inline_test (
+      progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-test_eq-inline_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-test_eq-inline_test-run.sh)
+  (deps ((files_recursively_in code/testing/test_eq-inline_test)))
+  (action (
+    chdir code/testing/test_eq-inline_test (
+      progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-test_eq-inline_test-run.sh)))))
+
+(alias (
   (name runtest-code-variants-termcol-annotated-build.errsh)
   (deps ((files_recursively_in code/variants-termcol-annotated)))
   (action (
