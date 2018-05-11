@@ -1,12 +1,7 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (ocamllex (lexer))
-
 (menhir (
   (modules (parser))
 ))
-
 (executable (
   (name test)
   (libraries (core))

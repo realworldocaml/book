@@ -1,0 +1,4662 @@
+(jbuild_version 1)
+
+(alias (
+  (name runtest-code-async-echo-run_echo.sh)
+  (deps ((files_recursively_in code/async/echo)))
+  (action (
+    chdir code/async/echo (
+      progn
+      (run   cram        run_echo.sh)
+      (diff? run_echo.sh run_echo.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-async-echo-run_echo.sh)))))
+
+(alias (
+  (name runtest-all-code-async-echo-run_echo.sh)
+  (deps ((files_recursively_in code/async/echo)))
+  (action (
+    chdir code/async/echo (
+      progn
+      (run cram --non-deterministic run_echo.sh)
+      (diff? run_echo.sh run_echo.sh.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-async-echo-run_echo.sh)))))
+
+(alias (
+  (name runtest-code-async-search-run_search.sh)
+  (deps ((files_recursively_in code/async/search)))
+  (action (
+    chdir code/async/search (
+      progn
+      (run   cram          run_search.sh)
+      (diff? run_search.sh run_search.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-async-search-run_search.sh)))))
+
+(alias (
+  (name runtest-all-code-async-search-run_search.sh)
+  (deps ((files_recursively_in code/async/search)))
+  (action (
+    chdir code/async/search (
+      progn
+      (run cram --non-deterministic run_search.sh)
+      (diff? run_search.sh run_search.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-async-search-run_search.sh)))))
+
+(alias (
+  (name
+   runtest-code-async-search_with_configurable_server-run_search_with_configurable_server.errsh)
+  (deps ((files_recursively_in code/async/search_with_configurable_server)))
+  (action (
+    chdir
+    code/async/search_with_configurable_server
+    (progn
+      (run cram run_search_with_configurable_server.errsh)
+      (diff?
+       run_search_with_configurable_server.errsh
+       run_search_with_configurable_server.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-async-search_with_configurable_server-run_search_with_configurable_server.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-async-search_with_configurable_server-run_search_with_configurable_server.errsh)
+  (deps ((files_recursively_in code/async/search_with_configurable_server)))
+  (action (
+    chdir
+    code/async/search_with_configurable_server
+    (progn
+      (run cram --non-deterministic run_search_with_configurable_server.errsh)
+      (diff?
+       run_search_with_configurable_server.errsh
+       run_search_with_configurable_server.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-async-search_with_configurable_server-run_search_with_configurable_server.errsh)))))
+
+(alias (
+  (name
+   runtest-code-async-search_with_error_handling-run_search_with_error_handling.sh)
+  (deps ((files_recursively_in code/async/search_with_error_handling)))
+  (action (
+    chdir
+    code/async/search_with_error_handling
+    (progn
+      (run cram run_search_with_error_handling.sh)
+      (diff?
+       run_search_with_error_handling.sh
+       run_search_with_error_handling.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-async-search_with_error_handling-run_search_with_error_handling.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-async-search_with_error_handling-run_search_with_error_handling.sh)
+  (deps ((files_recursively_in code/async/search_with_error_handling)))
+  (action (
+    chdir
+    code/async/search_with_error_handling
+    (progn
+      (run cram --non-deterministic run_search_with_error_handling.sh)
+      (diff?
+       run_search_with_error_handling.sh
+       run_search_with_error_handling.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-async-search_with_error_handling-run_search_with_error_handling.sh)))))
+
+(alias (
+  (name
+   runtest-code-async-search_with_timeout_no_leak-run_search_with_timeout_no_leak.sh)
+  (deps ((files_recursively_in code/async/search_with_timeout_no_leak)))
+  (action (
+    chdir
+    code/async/search_with_timeout_no_leak
+    (progn
+      (run cram run_search_with_timeout_no_leak.sh)
+      (diff?
+       run_search_with_timeout_no_leak.sh
+       run_search_with_timeout_no_leak.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-async-search_with_timeout_no_leak-run_search_with_timeout_no_leak.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-async-search_with_timeout_no_leak-run_search_with_timeout_no_leak.sh)
+  (deps ((files_recursively_in code/async/search_with_timeout_no_leak)))
+  (action (
+    chdir
+    code/async/search_with_timeout_no_leak
+    (progn
+      (run cram --non-deterministic run_search_with_timeout_no_leak.sh)
+      (diff?
+       run_search_with_timeout_no_leak.sh
+       run_search_with_timeout_no_leak.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-async-search_with_timeout_no_leak-run_search_with_timeout_no_leak.sh)))))
+
+(alias (
+  (name
+   runtest-code-async-search_with_timeout_no_leak_simple-run_search_with_timeout_no_leak_simple.sh)
+  (deps ((files_recursively_in code/async/search_with_timeout_no_leak_simple)))
+  (action (
+    chdir
+    code/async/search_with_timeout_no_leak_simple
+    (progn
+      (run cram run_search_with_timeout_no_leak_simple.sh)
+      (diff?
+       run_search_with_timeout_no_leak_simple.sh
+       run_search_with_timeout_no_leak_simple.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-async-search_with_timeout_no_leak_simple-run_search_with_timeout_no_leak_simple.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-async-search_with_timeout_no_leak_simple-run_search_with_timeout_no_leak_simple.sh)
+  (deps ((files_recursively_in code/async/search_with_timeout_no_leak_simple)))
+  (action (
+    chdir
+    code/async/search_with_timeout_no_leak_simple
+    (progn
+      (run cram --non-deterministic run_search_with_timeout_no_leak_simple.sh)
+      (diff?
+       run_search_with_timeout_no_leak_simple.sh
+       run_search_with_timeout_no_leak_simple.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-async-search_with_timeout_no_leak_simple-run_search_with_timeout_no_leak_simple.sh)))))
+
+(alias (
+  (name runtest-code-back-end-alternate_list-run_alternate_list.sh)
+  (deps ((files_recursively_in code/back-end/alternate_list)))
+  (action (
+    chdir code/back-end/alternate_list (
+      progn
+      (run cram run_alternate_list.sh)
+      (diff? run_alternate_list.sh run_alternate_list.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-alternate_list-run_alternate_list.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-alternate_list-run_alternate_list.sh)
+  (deps ((files_recursively_in code/back-end/alternate_list)))
+  (action (
+    chdir code/back-end/alternate_list (
+      progn
+      (run cram --non-deterministic run_alternate_list.sh)
+      (diff? run_alternate_list.sh run_alternate_list.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-back-end-alternate_list-run_alternate_list.sh)))))
+
+(alias (
+  (name runtest-code-back-end-asm_from_compare_mono.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram asm_from_compare_mono.sh)
+      (diff? asm_from_compare_mono.sh asm_from_compare_mono.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-asm_from_compare_mono.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-asm_from_compare_mono.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram --non-deterministic asm_from_compare_mono.sh)
+      (diff? asm_from_compare_mono.sh asm_from_compare_mono.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-back-end-asm_from_compare_mono.sh)))))
+
+(alias (
+  (name runtest-code-back-end-bench_patterns-run_bench_patterns.sh)
+  (deps ((files_recursively_in code/back-end/bench_patterns)))
+  (action (
+    chdir code/back-end/bench_patterns (
+      progn
+      (run cram run_bench_patterns.sh)
+      (diff? run_bench_patterns.sh run_bench_patterns.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-bench_patterns-run_bench_patterns.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-bench_patterns-run_bench_patterns.sh)
+  (deps ((files_recursively_in code/back-end/bench_patterns)))
+  (action (
+    chdir code/back-end/bench_patterns (
+      progn
+      (run cram --non-deterministic run_bench_patterns.sh)
+      (diff? run_bench_patterns.sh run_bench_patterns.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-back-end-bench_patterns-run_bench_patterns.sh)))))
+
+(alias (
+  (name runtest-code-back-end-bench_poly_and_mono-run_bench_poly_and_mono.sh)
+  (deps ((files_recursively_in code/back-end/bench_poly_and_mono)))
+  (action (
+    chdir code/back-end/bench_poly_and_mono (
+      progn
+      (run cram run_bench_poly_and_mono.sh)
+      (diff? run_bench_poly_and_mono.sh run_bench_poly_and_mono.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-back-end-bench_poly_and_mono-run_bench_poly_and_mono.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-back-end-bench_poly_and_mono-run_bench_poly_and_mono.sh)
+  (deps ((files_recursively_in code/back-end/bench_poly_and_mono)))
+  (action (
+    chdir code/back-end/bench_poly_and_mono (
+      progn
+      (run cram --non-deterministic run_bench_poly_and_mono.sh)
+      (diff? run_bench_poly_and_mono.sh run_bench_poly_and_mono.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-back-end-bench_poly_and_mono-run_bench_poly_and_mono.sh)))))
+
+(alias (
+  (name runtest-code-back-end-embed-build_embed.sh)
+  (deps ((files_recursively_in code/back-end-embed)))
+  (action (
+    chdir code/back-end-embed (
+      progn
+      (run   cram           build_embed.sh)
+      (diff? build_embed.sh build_embed.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-back-end-embed-build_embed.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-embed-build_embed.sh)
+  (deps ((files_recursively_in code/back-end-embed)))
+  (action (
+    chdir code/back-end-embed (
+      progn
+      (run cram --non-deterministic build_embed.sh)
+      (diff? build_embed.sh build_embed.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-back-end-embed-build_embed.sh)))))
+
+(alias (
+  (name runtest-code-back-end-embed-run_debug_hello.sh)
+  (deps ((files_recursively_in code/back-end-embed)))
+  (action (
+    chdir code/back-end-embed (
+      progn
+      (run cram run_debug_hello.sh)
+      (diff? run_debug_hello.sh run_debug_hello.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-embed-run_debug_hello.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-embed-run_debug_hello.sh)
+  (deps ((files_recursively_in code/back-end-embed)))
+  (action (
+    chdir code/back-end-embed (
+      progn
+      (run cram --non-deterministic run_debug_hello.sh)
+      (diff? run_debug_hello.sh run_debug_hello.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-back-end-embed-run_debug_hello.sh)))))
+
+(alias (
+  (name runtest-code-back-end-instr_for_pattern_monomorphic_small.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram instr_for_pattern_monomorphic_small.sh)
+      (diff?
+       instr_for_pattern_monomorphic_small.sh
+       instr_for_pattern_monomorphic_small.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-instr_for_pattern_monomorphic_small.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-instr_for_pattern_monomorphic_small.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram --non-deterministic instr_for_pattern_monomorphic_small.sh)
+      (diff?
+       instr_for_pattern_monomorphic_small.sh
+       instr_for_pattern_monomorphic_small.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-back-end-instr_for_pattern_monomorphic_small.sh)))))
+
+(alias (
+  (name runtest-code-back-end-lambda_for_pattern_monomorphic_large.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram lambda_for_pattern_monomorphic_large.sh)
+      (diff?
+       lambda_for_pattern_monomorphic_large.sh
+       lambda_for_pattern_monomorphic_large.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-lambda_for_pattern_monomorphic_large.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-lambda_for_pattern_monomorphic_large.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram --non-deterministic lambda_for_pattern_monomorphic_large.sh)
+      (diff?
+       lambda_for_pattern_monomorphic_large.sh
+       lambda_for_pattern_monomorphic_large.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-back-end-lambda_for_pattern_monomorphic_large.sh)))))
+
+(alias (
+  (name runtest-code-back-end-lambda_for_pattern_monomorphic_small.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram lambda_for_pattern_monomorphic_small.sh)
+      (diff?
+       lambda_for_pattern_monomorphic_small.sh
+       lambda_for_pattern_monomorphic_small.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-lambda_for_pattern_monomorphic_small.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-lambda_for_pattern_monomorphic_small.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram --non-deterministic lambda_for_pattern_monomorphic_small.sh)
+      (diff?
+       lambda_for_pattern_monomorphic_small.sh
+       lambda_for_pattern_monomorphic_small.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-back-end-lambda_for_pattern_monomorphic_small.sh)))))
+
+(alias (
+  (name runtest-code-back-end-lambda_for_pattern_polymorphic.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram lambda_for_pattern_polymorphic.sh)
+      (diff?
+       lambda_for_pattern_polymorphic.sh
+       lambda_for_pattern_polymorphic.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-back-end-lambda_for_pattern_polymorphic.sh)))))
+
+(alias (
+  (name runtest-all-code-back-end-lambda_for_pattern_polymorphic.sh)
+  (deps ((files_recursively_in code/back-end)))
+  (action (
+    chdir code/back-end (
+      progn
+      (run cram --non-deterministic lambda_for_pattern_polymorphic.sh)
+      (diff?
+       lambda_for_pattern_polymorphic.sh
+       lambda_for_pattern_polymorphic.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-back-end-lambda_for_pattern_polymorphic.sh)))))
+
+(alias (
+  (name runtest-code-classes-async-shapes-build_shapes.sh)
+  (deps ((files_recursively_in code/classes-async/shapes)))
+  (action (
+    chdir code/classes-async/shapes (
+      progn
+      (run   cram            build_shapes.sh)
+      (diff? build_shapes.sh build_shapes.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-classes-async-shapes-build_shapes.sh)))))
+
+(alias (
+  (name runtest-all-code-classes-async-shapes-build_shapes.sh)
+  (deps ((files_recursively_in code/classes-async/shapes)))
+  (action (
+    chdir code/classes-async/shapes (
+      progn
+      (run cram --non-deterministic build_shapes.sh)
+      (diff? build_shapes.sh build_shapes.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-classes-async-shapes-build_shapes.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-cal_add_days-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_days)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_days
+    (progn
+      (run   cram   cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-cal_add_days-cal.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-cal_add_days-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_days)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_days
+    (progn
+      (run cram --non-deterministic cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-cal_add_days-cal.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-cal_add_interactive-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_interactive)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_interactive
+    (progn
+      (run   cram   cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-cal_add_interactive-cal.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-cal_add_interactive-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_interactive)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_interactive
+    (progn
+      (run cram --non-deterministic cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-command-line-parsing-cal_add_interactive-cal.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-cal_add_interactive2-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_interactive2)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_interactive2
+    (progn
+      (run   cram   cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-cal_add_interactive2-cal.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-cal_add_interactive2-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_interactive2)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_interactive2
+    (progn
+      (run cram --non-deterministic cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-command-line-parsing-cal_add_interactive2-cal.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-cal_add_sub_days-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_sub_days)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_sub_days
+    (progn
+      (run   cram   cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-cal_add_sub_days-cal.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-cal_add_sub_days-cal.sh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_add_sub_days)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_add_sub_days
+    (progn
+      (run cram --non-deterministic cal.sh)
+      (diff? cal.sh cal.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-cal_add_sub_days-cal.sh)))))
+
+(alias (
+  (name
+   runtest-code-command-line-parsing-cal_append_broken-build_cal_append_broken.errsh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_append_broken)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_append_broken
+    (progn
+      (run cram build_cal_append_broken.errsh)
+      (diff?
+       build_cal_append_broken.errsh
+       build_cal_append_broken.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-command-line-parsing-cal_append_broken-build_cal_append_broken.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-command-line-parsing-cal_append_broken-build_cal_append_broken.errsh)
+  (deps ((files_recursively_in code/command-line-parsing/cal_append_broken)))
+  (action (
+    chdir
+    code/command-line-parsing/cal_append_broken
+    (progn
+      (run cram --non-deterministic build_cal_append_broken.errsh)
+      (diff?
+       build_cal_append_broken.errsh
+       build_cal_append_broken.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-command-line-parsing-cal_append_broken-build_cal_append_broken.errsh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5)))
+  (action (
+    chdir code/command-line-parsing/md5 (
+      progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5)))
+  (action (
+    chdir code/command-line-parsing/md5 (
+      progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-md5-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_as_filename-run.errsh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_as_filename)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_as_filename
+    (progn
+      (run   cram      run.errsh)
+      (diff? run.errsh run.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5_as_filename-run.errsh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_as_filename-run.errsh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_as_filename)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_as_filename
+    (progn
+      (run cram --non-deterministic run.errsh)
+      (diff? run.errsh run.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-command-line-parsing-md5_as_filename-run.errsh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_let_syntax-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_let_syntax)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_let_syntax
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5_let_syntax-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_let_syntax-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_let_syntax)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_let_syntax
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-md5_let_syntax-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_let_syntax2-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_let_syntax2)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_let_syntax2
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5_let_syntax2-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_let_syntax2-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_let_syntax2)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_let_syntax2
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-md5_let_syntax2-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_multiarg-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_multiarg)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_multiarg
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5_multiarg-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_multiarg-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_multiarg)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_multiarg
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-md5_multiarg-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_sequence-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_sequence)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_sequence
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5_sequence-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_sequence-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_sequence)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_sequence
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-md5_sequence-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_with_custom_arg-run.errsh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_with_custom_arg)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_custom_arg
+    (progn
+      (run   cram      run.errsh)
+      (diff? run.errsh run.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-command-line-parsing-md5_with_custom_arg-run.errsh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_with_custom_arg-run.errsh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_with_custom_arg)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_custom_arg
+    (progn
+      (run cram --non-deterministic run.errsh)
+      (diff? run.errsh run.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-command-line-parsing-md5_with_custom_arg-run.errsh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_with_default_file-md5.sh)
+  (deps ((
+    files_recursively_in code/command-line-parsing/md5_with_default_file)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_default_file
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-command-line-parsing-md5_with_default_file-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_with_default_file-md5.sh)
+  (deps ((
+    files_recursively_in code/command-line-parsing/md5_with_default_file)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_default_file
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-command-line-parsing-md5_with_default_file-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_with_flags-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_with_flags)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_flags
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-command-line-parsing-md5_with_flags-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_with_flags-md5.sh)
+  (deps ((files_recursively_in code/command-line-parsing/md5_with_flags)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_flags
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-md5_with_flags-md5.sh)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-md5_with_optional_file-md5.sh)
+  (deps ((
+    files_recursively_in code/command-line-parsing/md5_with_optional_file)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_optional_file
+    (progn
+      (run   cram   md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-command-line-parsing-md5_with_optional_file-md5.sh)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-md5_with_optional_file-md5.sh)
+  (deps ((
+    files_recursively_in code/command-line-parsing/md5_with_optional_file)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_optional_file
+    (progn
+      (run cram --non-deterministic md5.sh)
+      (diff? md5.sh md5.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-command-line-parsing-md5_with_optional_file-md5.sh)))))
+
+(alias (
+  (name
+   runtest-code-command-line-parsing-md5_with_optional_file_broken-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/command-line-parsing/md5_with_optional_file_broken)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_optional_file_broken
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-command-line-parsing-md5_with_optional_file_broken-build.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-command-line-parsing-md5_with_optional_file_broken-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/command-line-parsing/md5_with_optional_file_broken)))
+  (action (
+    chdir
+    code/command-line-parsing/md5_with_optional_file_broken
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-command-line-parsing-md5_with_optional_file_broken-build.errsh)))))
+
+(alias (
+  (name runtest-code-error-handling-blow_up-build_blow_up.errsh)
+  (deps ((files_recursively_in code/error-handling/blow_up)))
+  (action (
+    chdir code/error-handling/blow_up (
+      progn
+      (run cram build_blow_up.errsh)
+      (diff? build_blow_up.errsh build_blow_up.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-error-handling-blow_up-build_blow_up.errsh)))))
+
+(alias (
+  (name runtest-all-code-error-handling-blow_up-build_blow_up.errsh)
+  (deps ((files_recursively_in code/error-handling/blow_up)))
+  (action (
+    chdir code/error-handling/blow_up (
+      progn
+      (run cram --non-deterministic build_blow_up.errsh)
+      (diff? build_blow_up.errsh build_blow_up.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-error-handling-blow_up-build_blow_up.errsh)))))
+
+(alias (
+  (name runtest-code-error-handling-exn_cost-run_exn_cost.sh)
+  (deps ((files_recursively_in code/error-handling/exn_cost)))
+  (action (
+    chdir code/error-handling/exn_cost (
+      progn
+      (run   cram            run_exn_cost.sh)
+      (diff? run_exn_cost.sh run_exn_cost.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-error-handling-exn_cost-run_exn_cost.sh)))))
+
+(alias (
+  (name runtest-all-code-error-handling-exn_cost-run_exn_cost.sh)
+  (deps ((files_recursively_in code/error-handling/exn_cost)))
+  (action (
+    chdir code/error-handling/exn_cost (
+      progn
+      (run cram --non-deterministic run_exn_cost.sh)
+      (diff? run_exn_cost.sh run_exn_cost.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-error-handling-exn_cost-run_exn_cost.sh)))))
+
+(alias (
+  (name runtest-code-error-handling-exn_cost-run_exn_cost_notrace.sh)
+  (deps ((files_recursively_in code/error-handling/exn_cost)))
+  (action (
+    chdir code/error-handling/exn_cost (
+      progn
+      (run cram run_exn_cost_notrace.sh)
+      (diff? run_exn_cost_notrace.sh run_exn_cost_notrace.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-error-handling-exn_cost-run_exn_cost_notrace.sh)))))
+
+(alias (
+  (name runtest-all-code-error-handling-exn_cost-run_exn_cost_notrace.sh)
+  (deps ((files_recursively_in code/error-handling/exn_cost)))
+  (action (
+    chdir code/error-handling/exn_cost (
+      progn
+      (run cram --non-deterministic run_exn_cost_notrace.sh)
+      (diff? run_exn_cost_notrace.sh run_exn_cost_notrace.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-error-handling-exn_cost-run_exn_cost_notrace.sh)))))
+
+(alias (
+  (name runtest-code-fcm-query_handler_loader-build_query_handler_loader.sh)
+  (deps ((files_recursively_in code/fcm/query_handler_loader)))
+  (action (
+    chdir code/fcm/query_handler_loader (
+      progn
+      (run cram build_query_handler_loader.sh)
+      (diff?
+       build_query_handler_loader.sh
+       build_query_handler_loader.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-fcm-query_handler_loader-build_query_handler_loader.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-fcm-query_handler_loader-build_query_handler_loader.sh)
+  (deps ((files_recursively_in code/fcm/query_handler_loader)))
+  (action (
+    chdir code/fcm/query_handler_loader (
+      progn
+      (run cram --non-deterministic build_query_handler_loader.sh)
+      (diff?
+       build_query_handler_loader.sh
+       build_query_handler_loader.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-fcm-query_handler_loader-build_query_handler_loader.sh)))))
+
+(alias (
+  (name runtest-code-ffi-datetime-build_datetime.sh)
+  (deps ((files_recursively_in code/ffi/datetime)))
+  (action (
+    chdir code/ffi/datetime (
+      progn
+      (run   cram              build_datetime.sh)
+      (diff? build_datetime.sh build_datetime.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-ffi-datetime-build_datetime.sh)))))
+
+(alias (
+  (name runtest-all-code-ffi-datetime-build_datetime.sh)
+  (deps ((files_recursively_in code/ffi/datetime)))
+  (action (
+    chdir code/ffi/datetime (
+      progn
+      (run cram --non-deterministic build_datetime.sh)
+      (diff? build_datetime.sh build_datetime.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-ffi-datetime-build_datetime.sh)))))
+
+(alias (
+  (name runtest-code-ffi-hello-build_hello.sh)
+  (deps ((files_recursively_in code/ffi/hello)))
+  (action (
+    chdir code/ffi/hello (
+      progn
+      (run   cram           build_hello.sh)
+      (diff? build_hello.sh build_hello.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-ffi-hello-build_hello.sh)))))
+
+(alias (
+  (name runtest-all-code-ffi-hello-build_hello.sh)
+  (deps ((files_recursively_in code/ffi/hello)))
+  (action (
+    chdir code/ffi/hello (
+      progn
+      (run cram --non-deterministic build_hello.sh)
+      (diff? build_hello.sh build_hello.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-ffi-hello-build_hello.sh)))))
+
+(alias (
+  (name runtest-code-ffi-ncurses-infer_ncurses.sh)
+  (deps ((files_recursively_in code/ffi/ncurses)))
+  (action (
+    chdir code/ffi/ncurses (
+      progn
+      (run   cram             infer_ncurses.sh)
+      (diff? infer_ncurses.sh infer_ncurses.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-ffi-ncurses-infer_ncurses.sh)))))
+
+(alias (
+  (name runtest-all-code-ffi-ncurses-infer_ncurses.sh)
+  (deps ((files_recursively_in code/ffi/ncurses)))
+  (action (
+    chdir code/ffi/ncurses (
+      progn
+      (run cram --non-deterministic infer_ncurses.sh)
+      (diff? infer_ncurses.sh infer_ncurses.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-ffi-ncurses-infer_ncurses.sh)))))
+
+(alias (
+  (name runtest-code-ffi-qsort-build_qsort.sh)
+  (deps ((files_recursively_in code/ffi/qsort)))
+  (action (
+    chdir code/ffi/qsort (
+      progn
+      (run   cram           build_qsort.sh)
+      (diff? build_qsort.sh build_qsort.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-ffi-qsort-build_qsort.sh)))))
+
+(alias (
+  (name runtest-all-code-ffi-qsort-build_qsort.sh)
+  (deps ((files_recursively_in code/ffi/qsort)))
+  (action (
+    chdir code/ffi/qsort (
+      progn
+      (run cram --non-deterministic build_qsort.sh)
+      (diff? build_qsort.sh build_qsort.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-ffi-qsort-build_qsort.sh)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-freq-cyclic1-build.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq-cyclic1)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-cyclic1
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-files-modules-and-programs-freq-cyclic1-build.errsh)))))
+
+(alias (
+  (name runtest-all-code-files-modules-and-programs-freq-cyclic1-build.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq-cyclic1)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-cyclic1
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-cyclic1-build.errsh)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-freq-cyclic2-build.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq-cyclic2)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-cyclic2
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-files-modules-and-programs-freq-cyclic2-build.errsh)))))
+
+(alias (
+  (name runtest-all-code-files-modules-and-programs-freq-cyclic2-build.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq-cyclic2)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-cyclic2
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-cyclic2-build.errsh)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-freq-obuild-freq.sh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq-obuild)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-obuild
+    (progn
+      (run   cram    freq.sh)
+      (diff? freq.sh freq.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-files-modules-and-programs-freq-obuild-freq.sh)))))
+
+(alias (
+  (name runtest-all-code-files-modules-and-programs-freq-obuild-freq.sh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq-obuild)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-obuild
+    (progn
+      (run cram --non-deterministic freq.sh)
+      (diff? freq.sh freq.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-files-modules-and-programs-freq-obuild-freq.sh)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-freq-simple_build.sh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq
+    (progn
+      (run   cram            simple_build.sh)
+      (diff? simple_build.sh simple_build.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-files-modules-and-programs-freq-simple_build.sh)))))
+
+(alias (
+  (name runtest-all-code-files-modules-and-programs-freq-simple_build.sh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq
+    (progn
+      (run cram --non-deterministic simple_build.sh)
+      (diff? simple_build.sh simple_build.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-files-modules-and-programs-freq-simple_build.sh)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-freq-simple_build_fail.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq
+    (progn
+      (run cram simple_build_fail.errsh)
+      (diff? simple_build_fail.errsh simple_build_fail.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-simple_build_fail.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-simple_build_fail.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/freq)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq
+    (progn
+      (run cram --non-deterministic simple_build_fail.errsh)
+      (diff? simple_build_fail.errsh simple_build_fail.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-simple_build_fail.errsh)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-freq-with-counter-build.sh)
+  (deps ((
+    files_recursively_in code/files-modules-and-programs/freq-with-counter)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-counter
+    (progn
+      (run   cram     build.sh)
+      (diff? build.sh build.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-files-modules-and-programs-freq-with-counter-build.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-counter-build.sh)
+  (deps ((
+    files_recursively_in code/files-modules-and-programs/freq-with-counter)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-counter
+    (progn
+      (run cram --non-deterministic build.sh)
+      (diff? build.sh build.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-counter-build.sh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-freq-with-counter-infer_mli.sh)
+  (deps ((
+    files_recursively_in code/files-modules-and-programs/freq-with-counter)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-counter
+    (progn
+      (run   cram         infer_mli.sh)
+      (diff? infer_mli.sh infer_mli.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-with-counter-infer_mli.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-counter-infer_mli.sh)
+  (deps ((
+    files_recursively_in code/files-modules-and-programs/freq-with-counter)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-counter
+    (progn
+      (run cram --non-deterministic infer_mli.sh)
+      (diff? infer_mli.sh infer_mli.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-counter-infer_mli.sh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-freq-with-missing-def-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-missing-def)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-missing-def
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-with-missing-def-build.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-missing-def-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-missing-def)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-missing-def
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-missing-def-build.errsh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-freq-with-sig-abstract-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-sig-abstract)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-sig-abstract
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-with-sig-abstract-build.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-sig-abstract-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-sig-abstract)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-sig-abstract
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-sig-abstract-build.errsh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-freq-with-sig-abstract-fixed-build.sh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-sig-abstract-fixed)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-sig-abstract-fixed
+    (progn
+      (run   cram     build.sh)
+      (diff? build.sh build.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-with-sig-abstract-fixed-build.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-sig-abstract-fixed-build.sh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-sig-abstract-fixed)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-sig-abstract-fixed
+    (progn
+      (run cram --non-deterministic build.sh)
+      (diff? build.sh build.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-sig-abstract-fixed-build.sh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-freq-with-sig-mismatch-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-sig-mismatch)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-sig-mismatch
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-with-sig-mismatch-build.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-sig-mismatch-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-sig-mismatch)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-sig-mismatch
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-sig-mismatch-build.errsh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-freq-with-type-mismatch-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-type-mismatch)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-type-mismatch
+    (progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-freq-with-type-mismatch-build.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-freq-with-type-mismatch-build.errsh)
+  (deps ((
+    files_recursively_in
+    code/files-modules-and-programs/freq-with-type-mismatch)))
+  (action (
+    chdir
+    code/files-modules-and-programs/freq-with-type-mismatch
+    (progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-freq-with-type-mismatch-build.errsh)))))
+
+(alias (
+  (name
+   runtest-code-files-modules-and-programs-session_info-build_session_info.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/session_info)))
+  (action (
+    chdir
+    code/files-modules-and-programs/session_info
+    (progn
+      (run cram build_session_info.errsh)
+      (diff? build_session_info.errsh build_session_info.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-files-modules-and-programs-session_info-build_session_info.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-files-modules-and-programs-session_info-build_session_info.errsh)
+  (deps ((files_recursively_in code/files-modules-and-programs/session_info)))
+  (action (
+    chdir
+    code/files-modules-and-programs/session_info
+    (progn
+      (run cram --non-deterministic build_session_info.errsh)
+      (diff? build_session_info.errsh build_session_info.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-files-modules-and-programs-session_info-build_session_info.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-build_broken_module.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_broken_module.errsh)
+      (diff? build_broken_module.errsh build_broken_module.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_broken_module.errsh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_broken_module.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_broken_module.errsh)
+      (diff? build_broken_module.errsh build_broken_module.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_broken_module.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-build_broken_poly.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_broken_poly.errsh)
+      (diff? build_broken_poly.errsh build_broken_poly.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_broken_poly.errsh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_broken_poly.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_broken_poly.errsh)
+      (diff? build_broken_poly.errsh build_broken_poly.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_broken_poly.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-build_broken_poly_with_annot.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_broken_poly_with_annot.errsh)
+      (diff?
+       build_broken_poly_with_annot.errsh
+       build_broken_poly_with_annot.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_broken_poly_with_annot.errsh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_broken_poly_with_annot.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_broken_poly_with_annot.errsh)
+      (diff?
+       build_broken_poly_with_annot.errsh
+       build_broken_poly_with_annot.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_broken_poly_with_annot.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-build_follow_on_function.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_follow_on_function.errsh)
+      (diff?
+       build_follow_on_function.errsh
+       build_follow_on_function.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_follow_on_function.errsh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_follow_on_function.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_follow_on_function.errsh)
+      (diff?
+       build_follow_on_function.errsh
+       build_follow_on_function.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_follow_on_function.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-build_non_principal.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_non_principal.sh)
+      (diff? build_non_principal.sh build_non_principal.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_non_principal.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_non_principal.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_non_principal.sh)
+      (diff? build_non_principal.sh build_non_principal.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_non_principal.sh)))))
+
+(alias (
+  (name runtest-code-front-end-build_principal.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_principal.sh)
+      (diff? build_principal.sh build_principal.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-front-end-build_principal.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_principal.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_principal.sh)
+      (diff? build_principal.sh build_principal.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_principal.sh)))))
+
+(alias (
+  (name runtest-code-front-end-build_principal_corebuild.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_principal_corebuild.sh)
+      (diff?
+       build_principal_corebuild.sh
+       build_principal_corebuild.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_principal_corebuild.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_principal_corebuild.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_principal_corebuild.sh)
+      (diff?
+       build_principal_corebuild.sh
+       build_principal_corebuild.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-build_principal_corebuild.sh)))))
+
+(alias (
+  (name runtest-code-front-end-build_type_conv_without_camlp4.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram build_type_conv_without_camlp4.errsh)
+      (diff?
+       build_type_conv_without_camlp4.errsh
+       build_type_conv_without_camlp4.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-build_type_conv_without_camlp4.errsh)))))
+
+(alias (
+  (name runtest-all-code-front-end-build_type_conv_without_camlp4.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic build_type_conv_without_camlp4.errsh)
+      (diff?
+       build_type_conv_without_camlp4.errsh
+       build_type_conv_without_camlp4.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias runtest-all-code-front-end-build_type_conv_without_camlp4.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-conflicting_interfaces.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram conflicting_interfaces.errsh)
+      (diff?
+       conflicting_interfaces.errsh
+       conflicting_interfaces.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-conflicting_interfaces.errsh)))))
+
+(alias (
+  (name runtest-all-code-front-end-conflicting_interfaces.errsh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic conflicting_interfaces.errsh)
+      (diff?
+       conflicting_interfaces.errsh
+       conflicting_interfaces.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-conflicting_interfaces.errsh)))))
+
+(alias (
+  (name runtest-code-front-end-indent_follow_on_function.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram indent_follow_on_function.sh)
+      (diff?
+       indent_follow_on_function.sh
+       indent_follow_on_function.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-indent_follow_on_function.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-indent_follow_on_function.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic indent_follow_on_function.sh)
+      (diff?
+       indent_follow_on_function.sh
+       indent_follow_on_function.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-indent_follow_on_function.sh)))))
+
+(alias (
+  (name runtest-code-front-end-indent_follow_on_function_fixed.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram indent_follow_on_function_fixed.sh)
+      (diff?
+       indent_follow_on_function_fixed.sh
+       indent_follow_on_function_fixed.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-indent_follow_on_function_fixed.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-indent_follow_on_function_fixed.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic indent_follow_on_function_fixed.sh)
+      (diff?
+       indent_follow_on_function_fixed.sh
+       indent_follow_on_function_fixed.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-indent_follow_on_function_fixed.sh)))))
+
+(alias (
+  (name runtest-code-front-end-infer_typedef.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run   cram             infer_typedef.sh)
+      (diff? infer_typedef.sh infer_typedef.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-front-end-infer_typedef.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-infer_typedef.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic infer_typedef.sh)
+      (diff? infer_typedef.sh infer_typedef.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-infer_typedef.sh)))))
+
+(alias (
+  (name runtest-code-front-end-parsetree_typedef.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram parsetree_typedef.sh)
+      (diff? parsetree_typedef.sh parsetree_typedef.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-front-end-parsetree_typedef.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-parsetree_typedef.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic parsetree_typedef.sh)
+      (diff? parsetree_typedef.sh parsetree_typedef.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-parsetree_typedef.sh)))))
+
+(alias (
+  (name runtest-code-front-end-process_comparelib_interface.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram process_comparelib_interface.sh)
+      (diff?
+       process_comparelib_interface.sh
+       process_comparelib_interface.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-process_comparelib_interface.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-process_comparelib_interface.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic process_comparelib_interface.sh)
+      (diff?
+       process_comparelib_interface.sh
+       process_comparelib_interface.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-process_comparelib_interface.sh)))))
+
+(alias (
+  (name runtest-code-front-end-process_comparelib_test.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram process_comparelib_test.sh)
+      (diff? process_comparelib_test.sh process_comparelib_test.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-front-end-process_comparelib_test.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-process_comparelib_test.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic process_comparelib_test.sh)
+      (diff? process_comparelib_test.sh process_comparelib_test.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-process_comparelib_test.sh)))))
+
+(alias (
+  (name runtest-code-front-end-typedef_objinfo.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram typedef_objinfo.sh)
+      (diff? typedef_objinfo.sh typedef_objinfo.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-front-end-typedef_objinfo.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-typedef_objinfo.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic typedef_objinfo.sh)
+      (diff? typedef_objinfo.sh typedef_objinfo.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-typedef_objinfo.sh)))))
+
+(alias (
+  (name runtest-code-front-end-typedtree_typedef.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram typedtree_typedef.sh)
+      (diff? typedtree_typedef.sh typedtree_typedef.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-front-end-typedtree_typedef.sh)))))
+
+(alias (
+  (name runtest-all-code-front-end-typedtree_typedef.sh)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (run cram --non-deterministic typedtree_typedef.sh)
+      (diff? typedtree_typedef.sh typedtree_typedef.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-typedtree_typedef.sh)))))
+
+(alias (
+  (name runtest-code-gc-barrier_bench-barrier_bench.sh)
+  (deps ((files_recursively_in code/gc/barrier_bench)))
+  (action (
+    chdir code/gc/barrier_bench (
+      progn
+      (run   cram             barrier_bench.sh)
+      (diff? barrier_bench.sh barrier_bench.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-gc-barrier_bench-barrier_bench.sh)))))
+
+(alias (
+  (name runtest-all-code-gc-barrier_bench-barrier_bench.sh)
+  (deps ((files_recursively_in code/gc/barrier_bench)))
+  (action (
+    chdir code/gc/barrier_bench (
+      progn
+      (run cram --non-deterministic barrier_bench.sh)
+      (diff? barrier_bench.sh barrier_bench.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-gc-barrier_bench-barrier_bench.sh)))))
+
+(alias (
+  (name runtest-code-gc-finalizer-run_finalizer.sh)
+  (deps ((files_recursively_in code/gc/finalizer)))
+  (action (
+    chdir code/gc/finalizer (
+      progn
+      (run   cram             run_finalizer.sh)
+      (diff? run_finalizer.sh run_finalizer.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-gc-finalizer-run_finalizer.sh)))))
+
+(alias (
+  (name runtest-all-code-gc-finalizer-run_finalizer.sh)
+  (deps ((files_recursively_in code/gc/finalizer)))
+  (action (
+    chdir code/gc/finalizer (
+      progn
+      (run cram --non-deterministic run_finalizer.sh)
+      (diff? run_finalizer.sh run_finalizer.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-gc-finalizer-run_finalizer.sh)))))
+
+(alias (
+  (name runtest-code-guided-tour-sum-build_sum.sh)
+  (deps ((files_recursively_in code/guided-tour/sum)))
+  (action (
+    chdir code/guided-tour/sum (
+      progn
+      (run   cram         build_sum.sh)
+      (diff? build_sum.sh build_sum.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-guided-tour-sum-build_sum.sh)))))
+
+(alias (
+  (name runtest-all-code-guided-tour-sum-build_sum.sh)
+  (deps ((files_recursively_in code/guided-tour/sum)))
+  (action (
+    chdir code/guided-tour/sum (
+      progn
+      (run cram --non-deterministic build_sum.sh)
+      (diff? build_sum.sh build_sum.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-guided-tour-sum-build_sum.sh)))))
+
+(alias (
+  (name runtest-code-json-build_github_atd.sh)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (run cram build_github_atd.sh)
+      (diff? build_github_atd.sh build_github_atd.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-json-build_github_atd.sh)))))
+
+(alias (
+  (name runtest-all-code-json-build_github_atd.sh)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (run cram --non-deterministic build_github_atd.sh)
+      (diff? build_github_atd.sh build_github_atd.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-json-build_github_atd.sh)))))
+
+(alias (
+  (name runtest-code-json-github_org_info-github_org.sh)
+  (deps ((files_recursively_in code/json/github_org_info)))
+  (action (
+    chdir code/json/github_org_info (
+      progn
+      (run   cram          github_org.sh)
+      (diff? github_org.sh github_org.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-json-github_org_info-github_org.sh)))))
+
+(alias (
+  (name runtest-all-code-json-github_org_info-github_org.sh)
+  (deps ((files_recursively_in code/json/github_org_info)))
+  (action (
+    chdir code/json/github_org_info (
+      progn
+      (run cram --non-deterministic github_org.sh)
+      (diff? github_org.sh github_org.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-json-github_org_info-github_org.sh)))))
+
+(alias (
+  (name runtest-code-json-parse_book-run_parse_book.sh)
+  (deps ((files_recursively_in code/json/parse_book)))
+  (action (
+    chdir code/json/parse_book (
+      progn
+      (run   cram              run_parse_book.sh)
+      (diff? run_parse_book.sh run_parse_book.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-json-parse_book-run_parse_book.sh)))))
+
+(alias (
+  (name runtest-all-code-json-parse_book-run_parse_book.sh)
+  (deps ((files_recursively_in code/json/parse_book)))
+  (action (
+    chdir code/json/parse_book (
+      progn
+      (run cram --non-deterministic run_parse_book.sh)
+      (diff? run_parse_book.sh run_parse_book.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-json-parse_book-run_parse_book.sh)))))
+
+(alias (
+  (name runtest-code-json-read_json-run_read_json.sh)
+  (deps ((files_recursively_in code/json/read_json)))
+  (action (
+    chdir code/json/read_json (
+      progn
+      (run   cram             run_read_json.sh)
+      (diff? run_read_json.sh run_read_json.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-json-read_json-run_read_json.sh)))))
+
+(alias (
+  (name runtest-all-code-json-read_json-run_read_json.sh)
+  (deps ((files_recursively_in code/json/read_json)))
+  (action (
+    chdir code/json/read_json (
+      progn
+      (run cram --non-deterministic run_read_json.sh)
+      (diff? run_read_json.sh run_read_json.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-json-read_json-run_read_json.sh)))))
+
+(alias (
+  (name runtest-code-maps-and-hash-tables-map_vs_hash-run_map_vs_hash.sh)
+  (deps ((files_recursively_in code/maps-and-hash-tables/map_vs_hash)))
+  (action (
+    chdir
+    code/maps-and-hash-tables/map_vs_hash
+    (progn
+      (run cram run_map_vs_hash.sh)
+      (diff? run_map_vs_hash.sh run_map_vs_hash.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-maps-and-hash-tables-map_vs_hash-run_map_vs_hash.sh)))))
+
+(alias (
+  (name runtest-all-code-maps-and-hash-tables-map_vs_hash-run_map_vs_hash.sh)
+  (deps ((files_recursively_in code/maps-and-hash-tables/map_vs_hash)))
+  (action (
+    chdir
+    code/maps-and-hash-tables/map_vs_hash
+    (progn
+      (run cram --non-deterministic run_map_vs_hash.sh)
+      (diff? run_map_vs_hash.sh run_map_vs_hash.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-maps-and-hash-tables-map_vs_hash-run_map_vs_hash.sh)))))
+
+(alias (
+  (name runtest-code-maps-and-hash-tables-map_vs_hash2-run_map_vs_hash2.sh)
+  (deps ((files_recursively_in code/maps-and-hash-tables/map_vs_hash2)))
+  (action (
+    chdir
+    code/maps-and-hash-tables/map_vs_hash2
+    (progn
+      (run cram run_map_vs_hash2.sh)
+      (diff? run_map_vs_hash2.sh run_map_vs_hash2.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias runtest-code-maps-and-hash-tables-map_vs_hash2-run_map_vs_hash2.sh)))))
+
+(alias (
+  (name
+   runtest-all-code-maps-and-hash-tables-map_vs_hash2-run_map_vs_hash2.sh)
+  (deps ((files_recursively_in code/maps-and-hash-tables/map_vs_hash2)))
+  (action (
+    chdir
+    code/maps-and-hash-tables/map_vs_hash2
+    (progn
+      (run cram --non-deterministic run_map_vs_hash2.sh)
+      (diff? run_map_vs_hash2.sh run_map_vs_hash2.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-maps-and-hash-tables-map_vs_hash2-run_map_vs_hash2.sh)))))
+
+(alias (
+  (name runtest-code-ocp-index-index_ncurses.sh)
+  (deps ((files_recursively_in code/ocp-index)))
+  (action (
+    chdir code/ocp-index (
+      progn
+      (run   cram             index_ncurses.sh)
+      (diff? index_ncurses.sh index_ncurses.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-ocp-index-index_ncurses.sh)))))
+
+(alias (
+  (name runtest-all-code-ocp-index-index_ncurses.sh)
+  (deps ((files_recursively_in code/ocp-index)))
+  (action (
+    chdir code/ocp-index (
+      progn
+      (run cram --non-deterministic index_ncurses.sh)
+      (diff? index_ncurses.sh index_ncurses.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-ocp-index-index_ncurses.sh)))))
+
+(alias (
+  (name runtest-code-packing-build_test.sh)
+  (deps ((files_recursively_in code/packing)))
+  (action (
+    chdir code/packing (
+      progn
+      (run   cram          build_test.sh)
+      (diff? build_test.sh build_test.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-packing-build_test.sh)))))
+
+(alias (
+  (name runtest-all-code-packing-build_test.sh)
+  (deps ((files_recursively_in code/packing)))
+  (action (
+    chdir code/packing (
+      progn
+      (run cram --non-deterministic build_test.sh)
+      (diff? build_test.sh build_test.sh.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-packing-build_test.sh)))))
+
+(alias (
+  (name runtest-code-packing-show_files.sh)
+  (deps ((files_recursively_in code/packing)))
+  (action (
+    chdir code/packing (
+      progn
+      (run   cram          show_files.sh)
+      (diff? show_files.sh show_files.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-packing-show_files.sh)))))
+
+(alias (
+  (name runtest-all-code-packing-show_files.sh)
+  (deps ((files_recursively_in code/packing)))
+  (action (
+    chdir code/packing (
+      progn
+      (run cram --non-deterministic show_files.sh)
+      (diff? show_files.sh show_files.sh.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-packing-show_files.sh)))))
+
+(alias (
+  (name runtest-code-parsing-build_short_parser.sh)
+  (deps ((files_recursively_in code/parsing)))
+  (action (
+    chdir code/parsing (
+      progn
+      (run cram build_short_parser.sh)
+      (diff? build_short_parser.sh build_short_parser.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-parsing-build_short_parser.sh)))))
+
+(alias (
+  (name runtest-all-code-parsing-build_short_parser.sh)
+  (deps ((files_recursively_in code/parsing)))
+  (action (
+    chdir code/parsing (
+      progn
+      (run cram --non-deterministic build_short_parser.sh)
+      (diff? build_short_parser.sh build_short_parser.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-parsing-build_short_parser.sh)))))
+
+(alias (
+  (name runtest-code-parsing-test-build_test.sh)
+  (deps ((files_recursively_in code/parsing-test)))
+  (action (
+    chdir code/parsing-test (
+      progn
+      (run   cram          build_test.sh)
+      (diff? build_test.sh build_test.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-parsing-test-build_test.sh)))))
+
+(alias (
+  (name runtest-all-code-parsing-test-build_test.sh)
+  (deps ((files_recursively_in code/parsing-test)))
+  (action (
+    chdir code/parsing-test (
+      progn
+      (run cram --non-deterministic build_test.sh)
+      (diff? build_test.sh build_test.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-parsing-test-build_test.sh)))))
+
+(alias (
+  (name runtest-code-parsing-test-run_broken_test.errsh)
+  (deps ((files_recursively_in code/parsing-test)))
+  (action (
+    chdir code/parsing-test (
+      progn
+      (run cram run_broken_test.errsh)
+      (diff? run_broken_test.errsh run_broken_test.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-parsing-test-run_broken_test.errsh)))))
+
+(alias (
+  (name runtest-all-code-parsing-test-run_broken_test.errsh)
+  (deps ((files_recursively_in code/parsing-test)))
+  (action (
+    chdir code/parsing-test (
+      progn
+      (run cram --non-deterministic run_broken_test.errsh)
+      (diff? run_broken_test.errsh run_broken_test.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-parsing-test-run_broken_test.errsh)))))
+
+(alias (
+  (name runtest-code-records-warn_help.sh)
+  (deps ((files_recursively_in code/records)))
+  (action (
+    chdir code/records (
+      progn
+      (run   cram         warn_help.sh)
+      (diff? warn_help.sh warn_help.sh.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-records-warn_help.sh)))))
+
+(alias (
+  (name runtest-all-code-records-warn_help.sh)
+  (deps ((files_recursively_in code/records)))
+  (action (
+    chdir code/records (
+      progn
+      (run cram --non-deterministic warn_help.sh)
+      (diff? warn_help.sh warn_help.sh.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-records-warn_help.sh)))))
+
+(alias (
+  (name runtest-code-sexpr-list_top_packages.sh)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (run cram list_top_packages.sh)
+      (diff? list_top_packages.sh list_top_packages.sh.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-sexpr-list_top_packages.sh)))))
+
+(alias (
+  (name runtest-all-code-sexpr-list_top_packages.sh)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (run cram --non-deterministic list_top_packages.sh)
+      (diff? list_top_packages.sh list_top_packages.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-sexpr-list_top_packages.sh)))))
+
+(alias (
+  (name runtest-code-sexpr-read_foo-build_read_foo.errsh)
+  (deps ((files_recursively_in code/sexpr/read_foo)))
+  (action (
+    chdir code/sexpr/read_foo (
+      progn
+      (run cram build_read_foo.errsh)
+      (diff? build_read_foo.errsh build_read_foo.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-sexpr-read_foo-build_read_foo.errsh)))))
+
+(alias (
+  (name runtest-all-code-sexpr-read_foo-build_read_foo.errsh)
+  (deps ((files_recursively_in code/sexpr/read_foo)))
+  (action (
+    chdir code/sexpr/read_foo (
+      progn
+      (run cram --non-deterministic build_read_foo.errsh)
+      (diff? build_read_foo.errsh build_read_foo.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-sexpr-read_foo-build_read_foo.errsh)))))
+
+(alias (
+  (name
+   runtest-code-sexpr-read_foo_better_errors-build_read_foo_better_errors.errsh)
+  (deps ((files_recursively_in code/sexpr/read_foo_better_errors)))
+  (action (
+    chdir code/sexpr/read_foo_better_errors (
+      progn
+      (run cram build_read_foo_better_errors.errsh)
+      (diff?
+       build_read_foo_better_errors.errsh
+       build_read_foo_better_errors.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-sexpr-read_foo_better_errors-build_read_foo_better_errors.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-sexpr-read_foo_better_errors-build_read_foo_better_errors.errsh)
+  (deps ((files_recursively_in code/sexpr/read_foo_better_errors)))
+  (action (
+    chdir code/sexpr/read_foo_better_errors (
+      progn
+      (run cram --non-deterministic build_read_foo_better_errors.errsh)
+      (diff?
+       build_read_foo_better_errors.errsh
+       build_read_foo_better_errors.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-sexpr-read_foo_better_errors-build_read_foo_better_errors.errsh)))))
+
+(alias (
+  (name runtest-code-sexpr-test_interval-build_test_interval.sh)
+  (deps ((files_recursively_in code/sexpr/test_interval)))
+  (action (
+    chdir code/sexpr/test_interval (
+      progn
+      (run cram build_test_interval.sh)
+      (diff? build_test_interval.sh build_test_interval.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-sexpr-test_interval-build_test_interval.sh)))))
+
+(alias (
+  (name runtest-all-code-sexpr-test_interval-build_test_interval.sh)
+  (deps ((files_recursively_in code/sexpr/test_interval)))
+  (action (
+    chdir code/sexpr/test_interval (
+      progn
+      (run cram --non-deterministic build_test_interval.sh)
+      (diff? build_test_interval.sh build_test_interval.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-sexpr-test_interval-build_test_interval.sh)))))
+
+(alias (
+  (name
+   runtest-code-sexpr-test_interval_nosexp-build_test_interval_nosexp.errsh)
+  (deps ((files_recursively_in code/sexpr/test_interval_nosexp)))
+  (action (
+    chdir code/sexpr/test_interval_nosexp (
+      progn
+      (run cram build_test_interval_nosexp.errsh)
+      (diff?
+       build_test_interval_nosexp.errsh
+       build_test_interval_nosexp.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((
+    alias
+    runtest-code-sexpr-test_interval_nosexp-build_test_interval_nosexp.errsh)))))
+
+(alias (
+  (name
+   runtest-all-code-sexpr-test_interval_nosexp-build_test_interval_nosexp.errsh)
+  (deps ((files_recursively_in code/sexpr/test_interval_nosexp)))
+  (action (
+    chdir code/sexpr/test_interval_nosexp (
+      progn
+      (run cram --non-deterministic build_test_interval_nosexp.errsh)
+      (diff?
+       build_test_interval_nosexp.errsh
+       build_test_interval_nosexp.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((
+    alias
+    runtest-all-code-sexpr-test_interval_nosexp-build_test_interval_nosexp.errsh)))))
+
+(alias (
+  (name runtest-code-variants-termcol-annotated-build.errsh)
+  (deps ((files_recursively_in code/variants-termcol-annotated)))
+  (action (
+    chdir code/variants-termcol-annotated (
+      progn
+      (run   cram        build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-variants-termcol-annotated-build.errsh)))))
+
+(alias (
+  (name runtest-all-code-variants-termcol-annotated-build.errsh)
+  (deps ((files_recursively_in code/variants-termcol-annotated)))
+  (action (
+    chdir code/variants-termcol-annotated (
+      progn
+      (run cram --non-deterministic build.errsh)
+      (diff? build.errsh build.errsh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-variants-termcol-annotated-build.errsh)))))
+
+(alias (
+  (name runtest-code-async-main.mlt)
+  (deps ((files_recursively_in code/async)))
+  (action (
+    chdir code/async (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-async-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-async-main.mlt)
+  (deps ((files_recursively_in code/async)))
+  (action (
+    chdir code/async (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-async-main.mlt)))))
+
+(alias (
+  (name runtest-code-classes-binary.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose binary.mlt))
+      (diff? binary.mlt binary.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-classes-binary.mlt)))))
+
+(alias (
+  (name runtest-all-code-classes-binary.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        binary.mlt))
+      (diff? binary.mlt binary.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-classes-binary.mlt)))))
+
+(alias (
+  (name runtest-code-classes-initializer.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose initializer.mlt))
+      (diff? initializer.mlt initializer.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-classes-initializer.mlt)))))
+
+(alias (
+  (name runtest-all-code-classes-initializer.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        initializer.mlt))
+      (diff? initializer.mlt initializer.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-classes-initializer.mlt)))))
+
+(alias (
+  (name runtest-code-classes-istack.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose istack.mlt))
+      (diff? istack.mlt istack.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-classes-istack.mlt)))))
+
+(alias (
+  (name runtest-all-code-classes-istack.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        istack.mlt))
+      (diff? istack.mlt istack.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-classes-istack.mlt)))))
+
+(alias (
+  (name runtest-code-classes-iter.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose iter.mlt))
+      (diff? iter.mlt iter.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-classes-iter.mlt)))))
+
+(alias (
+  (name runtest-all-code-classes-iter.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose iter.mlt))
+      (diff? iter.mlt iter.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-classes-iter.mlt)))))
+
+(alias (
+  (name runtest-code-classes-stack.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose stack.mlt))
+      (diff? stack.mlt stack.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-classes-stack.mlt)))))
+
+(alias (
+  (name runtest-all-code-classes-stack.mlt)
+  (deps ((files_recursively_in code/classes)))
+  (action (
+    chdir code/classes (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        stack.mlt))
+      (diff? stack.mlt stack.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-classes-stack.mlt)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-basic.mlt)
+  (deps ((files_recursively_in code/command-line-parsing)))
+  (action (
+    chdir code/command-line-parsing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose basic.mlt))
+      (diff? basic.mlt basic.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-command-line-parsing-basic.mlt)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-basic.mlt)
+  (deps ((files_recursively_in code/command-line-parsing)))
+  (action (
+    chdir code/command-line-parsing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        basic.mlt))
+      (diff? basic.mlt basic.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-basic.mlt)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-main.mlt)
+  (deps ((files_recursively_in code/command-line-parsing)))
+  (action (
+    chdir code/command-line-parsing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-command-line-parsing-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-main.mlt)
+  (deps ((files_recursively_in code/command-line-parsing)))
+  (action (
+    chdir code/command-line-parsing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-main.mlt)))))
+
+(alias (
+  (name runtest-code-command-line-parsing-step.mlt)
+  (deps ((files_recursively_in code/command-line-parsing)))
+  (action (
+    chdir code/command-line-parsing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose step.mlt))
+      (diff? step.mlt step.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-command-line-parsing-step.mlt)))))
+
+(alias (
+  (name runtest-all-code-command-line-parsing-step.mlt)
+  (deps ((files_recursively_in code/command-line-parsing)))
+  (action (
+    chdir code/command-line-parsing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose step.mlt))
+      (diff? step.mlt step.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-command-line-parsing-step.mlt)))))
+
+(alias (
+  (name runtest-code-error-handling-main.mlt)
+  (deps ((files_recursively_in code/error-handling)))
+  (action (
+    chdir code/error-handling (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-error-handling-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-error-handling-main.mlt)
+  (deps ((files_recursively_in code/error-handling)))
+  (action (
+    chdir code/error-handling (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-error-handling-main.mlt)))))
+
+(alias (
+  (name runtest-code-fcm-main.mlt)
+  (deps ((files_recursively_in code/fcm)))
+  (action (
+    chdir code/fcm (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-fcm-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-fcm-main.mlt)
+  (deps ((files_recursively_in code/fcm)))
+  (action (
+    chdir code/fcm (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-fcm-main.mlt)))))
+
+(alias (
+  (name runtest-code-fcm-query_handler.mlt)
+  (deps ((files_recursively_in code/fcm)))
+  (action (
+    chdir code/fcm (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose query_handler.mlt))
+      (diff? query_handler.mlt query_handler.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-fcm-query_handler.mlt)))))
+
+(alias (
+  (name runtest-all-code-fcm-query_handler.mlt)
+  (deps ((files_recursively_in code/fcm)))
+  (action (
+    chdir code/fcm (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        query_handler.mlt))
+      (diff? query_handler.mlt query_handler.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-fcm-query_handler.mlt)))))
+
+(alias (
+  (name runtest-code-ffi-posix.mlt)
+  (deps ((files_recursively_in code/ffi)))
+  (action (
+    chdir code/ffi (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose posix.mlt))
+      (diff? posix.mlt posix.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-ffi-posix.mlt)))))
+
+(alias (
+  (name runtest-all-code-ffi-posix.mlt)
+  (deps ((files_recursively_in code/ffi)))
+  (action (
+    chdir code/ffi (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        posix.mlt))
+      (diff? posix.mlt posix.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-ffi-posix.mlt)))))
+
+(alias (
+  (name runtest-code-ffi-qsort.mlt)
+  (deps ((files_recursively_in code/ffi)))
+  (action (
+    chdir code/ffi (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose qsort.mlt))
+      (diff? qsort.mlt qsort.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-ffi-qsort.mlt)))))
+
+(alias (
+  (name runtest-all-code-ffi-qsort.mlt)
+  (deps ((files_recursively_in code/ffi)))
+  (action (
+    chdir code/ffi (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        qsort.mlt))
+      (diff? qsort.mlt qsort.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-ffi-qsort.mlt)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-intro.mlt)
+  (deps ((files_recursively_in code/files-modules-and-programs)))
+  (action (
+    chdir code/files-modules-and-programs (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose intro.mlt))
+      (diff? intro.mlt intro.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-files-modules-and-programs-intro.mlt)))))
+
+(alias (
+  (name runtest-all-code-files-modules-and-programs-intro.mlt)
+  (deps ((files_recursively_in code/files-modules-and-programs)))
+  (action (
+    chdir code/files-modules-and-programs (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        intro.mlt))
+      (diff? intro.mlt intro.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-files-modules-and-programs-intro.mlt)))))
+
+(alias (
+  (name runtest-code-files-modules-and-programs-main.mlt)
+  (deps ((files_recursively_in code/files-modules-and-programs)))
+  (action (
+    chdir code/files-modules-and-programs (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-files-modules-and-programs-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-files-modules-and-programs-main.mlt)
+  (deps ((files_recursively_in code/files-modules-and-programs)))
+  (action (
+    chdir code/files-modules-and-programs (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-files-modules-and-programs-main.mlt)))))
+
+(alias (
+  (name runtest-code-front-end-camlp4_toplevel.mlt)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose camlp4_toplevel.mlt))
+      (diff? camlp4_toplevel.mlt camlp4_toplevel.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-front-end-camlp4_toplevel.mlt)))))
+
+(alias (
+  (name runtest-all-code-front-end-camlp4_toplevel.mlt)
+  (deps ((files_recursively_in code/front-end)))
+  (action (
+    chdir code/front-end (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        camlp4_toplevel.mlt))
+      (diff? camlp4_toplevel.mlt camlp4_toplevel.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-front-end-camlp4_toplevel.mlt)))))
+
+(alias (
+  (name runtest-code-functors-main.mlt)
+  (deps ((files_recursively_in code/functors)))
+  (action (
+    chdir code/functors (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-functors-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-functors-main.mlt)
+  (deps ((files_recursively_in code/functors)))
+  (action (
+    chdir code/functors (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-functors-main.mlt)))))
+
+(alias (
+  (name runtest-code-gadts-main.mlt)
+  (deps ((files_recursively_in code/gadts)))
+  (action (
+    chdir code/gadts (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-gadts-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-gadts-main.mlt)
+  (deps ((files_recursively_in code/gadts)))
+  (action (
+    chdir code/gadts (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-gadts-main.mlt)))))
+
+(alias (
+  (name runtest-code-gc-tune.mlt)
+  (deps ((files_recursively_in code/gc)))
+  (action (
+    chdir code/gc (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose tune.mlt))
+      (diff? tune.mlt tune.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-gc-tune.mlt)))))
+
+(alias (
+  (name runtest-all-code-gc-tune.mlt)
+  (deps ((files_recursively_in code/gc)))
+  (action (
+    chdir code/gc (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose tune.mlt))
+      (diff? tune.mlt tune.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-gc-tune.mlt)))))
+
+(alias (
+  (name runtest-code-guided-tour-local_let.mlt)
+  (deps ((files_recursively_in code/guided-tour)))
+  (action (
+    chdir code/guided-tour (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose local_let.mlt))
+      (diff? local_let.mlt local_let.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-guided-tour-local_let.mlt)))))
+
+(alias (
+  (name runtest-all-code-guided-tour-local_let.mlt)
+  (deps ((files_recursively_in code/guided-tour)))
+  (action (
+    chdir code/guided-tour (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        local_let.mlt))
+      (diff? local_let.mlt local_let.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-guided-tour-local_let.mlt)))))
+
+(alias (
+  (name runtest-code-guided-tour-main.mlt)
+  (deps ((files_recursively_in code/guided-tour)))
+  (action (
+    chdir code/guided-tour (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-guided-tour-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-guided-tour-main.mlt)
+  (deps ((files_recursively_in code/guided-tour)))
+  (action (
+    chdir code/guided-tour (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-guided-tour-main.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-examples.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose examples.mlt))
+      (diff? examples.mlt examples.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-examples.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-examples.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        examples.mlt))
+      (diff? examples.mlt examples.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-examples.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-fib.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose fib.mlt))
+      (diff? fib.mlt fib.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-imperative-programming-fib.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-fib.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose fib.mlt))
+      (diff? fib.mlt fib.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-fib.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-file.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose file.mlt))
+      (diff? file.mlt file.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-file.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-file.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose file.mlt))
+      (diff? file.mlt file.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-file.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-file2.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose file2.mlt))
+      (diff? file2.mlt file2.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-file2.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-file2.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        file2.mlt))
+      (diff? file2.mlt file2.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-file2.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-for.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose for.mlt))
+      (diff? for.mlt for.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-imperative-programming-for.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-for.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose for.mlt))
+      (diff? for.mlt for.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-for.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-lazy.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose lazy.mlt))
+      (diff? lazy.mlt lazy.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-lazy.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-lazy.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose lazy.mlt))
+      (diff? lazy.mlt lazy.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-lazy.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-letrec.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose letrec.mlt))
+      (diff? letrec.mlt letrec.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-letrec.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-letrec.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        letrec.mlt))
+      (diff? letrec.mlt letrec.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-letrec.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-memo.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose memo.mlt))
+      (diff? memo.mlt memo.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-memo.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-memo.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose memo.mlt))
+      (diff? memo.mlt memo.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-memo.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-order.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose order.mlt))
+      (diff? order.mlt order.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-order.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-order.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        order.mlt))
+      (diff? order.mlt order.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-order.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-printf.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose printf.mlt))
+      (diff? printf.mlt printf.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-printf.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-printf.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        printf.mlt))
+      (diff? printf.mlt printf.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-printf.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-ref.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose ref.mlt))
+      (diff? ref.mlt ref.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-imperative-programming-ref.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-ref.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose ref.mlt))
+      (diff? ref.mlt ref.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-ref.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-value_restriction.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose value_restriction.mlt))
+      (diff? value_restriction.mlt value_restriction.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-value_restriction.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-value_restriction.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        value_restriction.mlt))
+      (diff? value_restriction.mlt value_restriction.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-value_restriction.mlt)))))
+
+(alias (
+  (name runtest-code-imperative-programming-weak.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose weak.mlt))
+      (diff? weak.mlt weak.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-imperative-programming-weak.mlt)))))
+
+(alias (
+  (name runtest-all-code-imperative-programming-weak.mlt)
+  (deps ((files_recursively_in code/imperative-programming)))
+  (action (
+    chdir code/imperative-programming (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose weak.mlt))
+      (diff? weak.mlt weak.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-imperative-programming-weak.mlt)))))
+
+(alias (
+  (name runtest-code-json-build_json.mlt)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose build_json.mlt))
+      (diff? build_json.mlt build_json.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-json-build_json.mlt)))))
+
+(alias (
+  (name runtest-all-code-json-build_json.mlt)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        build_json.mlt))
+      (diff? build_json.mlt build_json.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-json-build_json.mlt)))))
+
+(alias (
+  (name runtest-code-json-install.mlt)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose install.mlt))
+      (diff? install.mlt install.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-json-install.mlt)))))
+
+(alias (
+  (name runtest-all-code-json-install.mlt)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        install.mlt))
+      (diff? install.mlt install.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-json-install.mlt)))))
+
+(alias (
+  (name runtest-code-json-parse_book.mlt)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose parse_book.mlt))
+      (diff? parse_book.mlt parse_book.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-json-parse_book.mlt)))))
+
+(alias (
+  (name runtest-all-code-json-parse_book.mlt)
+  (deps ((files_recursively_in code/json)))
+  (action (
+    chdir code/json (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        parse_book.mlt))
+      (diff? parse_book.mlt parse_book.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-json-parse_book.mlt)))))
+
+(alias (
+  (name runtest-code-lists-and-patterns-main.mlt)
+  (deps ((files_recursively_in code/lists-and-patterns)))
+  (action (
+    chdir code/lists-and-patterns (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-lists-and-patterns-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-lists-and-patterns-main.mlt)
+  (deps ((files_recursively_in code/lists-and-patterns)))
+  (action (
+    chdir code/lists-and-patterns (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-lists-and-patterns-main.mlt)))))
+
+(alias (
+  (name runtest-code-lists-and-patterns-poly.mlt)
+  (deps ((files_recursively_in code/lists-and-patterns)))
+  (action (
+    chdir code/lists-and-patterns (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose poly.mlt))
+      (diff? poly.mlt poly.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-lists-and-patterns-poly.mlt)))))
+
+(alias (
+  (name runtest-all-code-lists-and-patterns-poly.mlt)
+  (deps ((files_recursively_in code/lists-and-patterns)))
+  (action (
+    chdir code/lists-and-patterns (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose poly.mlt))
+      (diff? poly.mlt poly.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-lists-and-patterns-poly.mlt)))))
+
+(alias (
+  (name runtest-code-maps-and-hash-tables-core_phys_equal.mlt)
+  (deps ((files_recursively_in code/maps-and-hash-tables)))
+  (action (
+    chdir code/maps-and-hash-tables (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose core_phys_equal.mlt))
+      (diff? core_phys_equal.mlt core_phys_equal.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-maps-and-hash-tables-core_phys_equal.mlt)))))
+
+(alias (
+  (name runtest-all-code-maps-and-hash-tables-core_phys_equal.mlt)
+  (deps ((files_recursively_in code/maps-and-hash-tables)))
+  (action (
+    chdir code/maps-and-hash-tables (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        core_phys_equal.mlt))
+      (diff? core_phys_equal.mlt core_phys_equal.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-maps-and-hash-tables-core_phys_equal.mlt)))))
+
+(alias (
+  (name runtest-code-maps-and-hash-tables-main.mlt)
+  (deps ((files_recursively_in code/maps-and-hash-tables)))
+  (action (
+    chdir code/maps-and-hash-tables (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-maps-and-hash-tables-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-maps-and-hash-tables-main.mlt)
+  (deps ((files_recursively_in code/maps-and-hash-tables)))
+  (action (
+    chdir code/maps-and-hash-tables (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-maps-and-hash-tables-main.mlt)))))
+
+(alias (
+  (name runtest-code-memory-repr-reprs.mlt)
+  (deps ((files_recursively_in code/memory-repr)))
+  (action (
+    chdir code/memory-repr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose reprs.mlt))
+      (diff? reprs.mlt reprs.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-memory-repr-reprs.mlt)))))
+
+(alias (
+  (name runtest-all-code-memory-repr-reprs.mlt)
+  (deps ((files_recursively_in code/memory-repr)))
+  (action (
+    chdir code/memory-repr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        reprs.mlt))
+      (diff? reprs.mlt reprs.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-memory-repr-reprs.mlt)))))
+
+(alias (
+  (name runtest-code-memory-repr-simple_record.mlt)
+  (deps ((files_recursively_in code/memory-repr)))
+  (action (
+    chdir code/memory-repr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose simple_record.mlt))
+      (diff? simple_record.mlt simple_record.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-memory-repr-simple_record.mlt)))))
+
+(alias (
+  (name runtest-all-code-memory-repr-simple_record.mlt)
+  (deps ((files_recursively_in code/memory-repr)))
+  (action (
+    chdir code/memory-repr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        simple_record.mlt))
+      (diff? simple_record.mlt simple_record.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-memory-repr-simple_record.mlt)))))
+
+(alias (
+  (name runtest-code-objects-immutable.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose immutable.mlt))
+      (diff? immutable.mlt immutable.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-objects-immutable.mlt)))))
+
+(alias (
+  (name runtest-all-code-objects-immutable.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        immutable.mlt))
+      (diff? immutable.mlt immutable.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-objects-immutable.mlt)))))
+
+(alias (
+  (name runtest-code-objects-polymorphism.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose polymorphism.mlt))
+      (diff? polymorphism.mlt polymorphism.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-objects-polymorphism.mlt)))))
+
+(alias (
+  (name runtest-all-code-objects-polymorphism.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        polymorphism.mlt))
+      (diff? polymorphism.mlt polymorphism.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-objects-polymorphism.mlt)))))
+
+(alias (
+  (name runtest-code-objects-row_polymorphism.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose row_polymorphism.mlt))
+      (diff? row_polymorphism.mlt row_polymorphism.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-objects-row_polymorphism.mlt)))))
+
+(alias (
+  (name runtest-all-code-objects-row_polymorphism.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        row_polymorphism.mlt))
+      (diff? row_polymorphism.mlt row_polymorphism.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-objects-row_polymorphism.mlt)))))
+
+(alias (
+  (name runtest-code-objects-stack.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose stack.mlt))
+      (diff? stack.mlt stack.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-objects-stack.mlt)))))
+
+(alias (
+  (name runtest-all-code-objects-stack.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        stack.mlt))
+      (diff? stack.mlt stack.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-objects-stack.mlt)))))
+
+(alias (
+  (name runtest-code-objects-subtyping.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose subtyping.mlt))
+      (diff? subtyping.mlt subtyping.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-objects-subtyping.mlt)))))
+
+(alias (
+  (name runtest-all-code-objects-subtyping.mlt)
+  (deps ((files_recursively_in code/objects)))
+  (action (
+    chdir code/objects (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        subtyping.mlt))
+      (diff? subtyping.mlt subtyping.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-objects-subtyping.mlt)))))
+
+(alias (
+  (name runtest-code-records-main.mlt)
+  (deps ((files_recursively_in code/records)))
+  (action (
+    chdir code/records (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-records-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-records-main.mlt)
+  (deps ((files_recursively_in code/records)))
+  (action (
+    chdir code/records (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-records-main.mlt)))))
+
+(alias (
+  (name runtest-code-records-main2.mlt)
+  (deps ((files_recursively_in code/records)))
+  (action (
+    chdir code/records (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main2.mlt))
+      (diff? main2.mlt main2.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-records-main2.mlt)))))
+
+(alias (
+  (name runtest-all-code-records-main2.mlt)
+  (deps ((files_recursively_in code/records)))
+  (action (
+    chdir code/records (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        main2.mlt))
+      (diff? main2.mlt main2.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-records-main2.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-auto_making_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose auto_making_sexp.mlt))
+      (diff? auto_making_sexp.mlt auto_making_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-sexpr-auto_making_sexp.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-auto_making_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        auto_making_sexp.mlt))
+      (diff? auto_making_sexp.mlt auto_making_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-sexpr-auto_making_sexp.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-example_load.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose example_load.mlt))
+      (diff? example_load.mlt example_load.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-example_load.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-example_load.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        example_load.mlt))
+      (diff? example_load.mlt example_load.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-example_load.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-inline_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose inline_sexp.mlt))
+      (diff? inline_sexp.mlt inline_sexp.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-inline_sexp.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-inline_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        inline_sexp.mlt))
+      (diff? inline_sexp.mlt inline_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-inline_sexp.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-manually_making_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose manually_making_sexp.mlt))
+      (diff? manually_making_sexp.mlt manually_making_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest) (deps ((alias runtest-code-sexpr-manually_making_sexp.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-manually_making_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        manually_making_sexp.mlt))
+      (diff? manually_making_sexp.mlt manually_making_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-sexpr-manually_making_sexp.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-print_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose print_sexp.mlt))
+      (diff? print_sexp.mlt print_sexp.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-print_sexp.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-print_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        print_sexp.mlt))
+      (diff? print_sexp.mlt print_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-print_sexp.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-sexp_default.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose sexp_default.mlt))
+      (diff? sexp_default.mlt sexp_default.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-sexp_default.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-sexp_default.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        sexp_default.mlt))
+      (diff? sexp_default.mlt sexp_default.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-sexp_default.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-sexp_list.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose sexp_list.mlt))
+      (diff? sexp_list.mlt sexp_list.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-sexp_list.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-sexp_list.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        sexp_list.mlt))
+      (diff? sexp_list.mlt sexp_list.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-sexp_list.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-sexp_opaque.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose sexp_opaque.mlt))
+      (diff? sexp_opaque.mlt sexp_opaque.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-sexp_opaque.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-sexp_opaque.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        sexp_opaque.mlt))
+      (diff? sexp_opaque.mlt sexp_opaque.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-sexp_opaque.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-sexp_option.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose sexp_option.mlt))
+      (diff? sexp_option.mlt sexp_option.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-sexp_option.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-sexp_option.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        sexp_option.mlt))
+      (diff? sexp_option.mlt sexp_option.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-sexp_option.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-sexp_printer.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose sexp_printer.mlt))
+      (diff? sexp_printer.mlt sexp_printer.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-sexp_printer.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-sexp_printer.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        sexp_printer.mlt))
+      (diff? sexp_printer.mlt sexp_printer.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-sexp_printer.mlt)))))
+
+(alias (
+  (name runtest-code-sexpr-to_from_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose to_from_sexp.mlt))
+      (diff? to_from_sexp.mlt to_from_sexp.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-sexpr-to_from_sexp.mlt)))))
+
+(alias (
+  (name runtest-all-code-sexpr-to_from_sexp.mlt)
+  (deps ((files_recursively_in code/sexpr)))
+  (action (
+    chdir code/sexpr (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        to_from_sexp.mlt))
+      (diff? to_from_sexp.mlt to_from_sexp.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-sexpr-to_from_sexp.mlt)))))
+
+(alias (
+  (name runtest-code-variables-and-functions-main.mlt)
+  (deps ((files_recursively_in code/variables-and-functions)))
+  (action (
+    chdir code/variables-and-functions (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-variables-and-functions-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-variables-and-functions-main.mlt)
+  (deps ((files_recursively_in code/variables-and-functions)))
+  (action (
+    chdir code/variables-and-functions (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-variables-and-functions-main.mlt)))))
+
+(alias (
+  (name runtest-code-variants-blang.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose blang.mlt))
+      (diff? blang.mlt blang.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-variants-blang.mlt)))))
+
+(alias (
+  (name runtest-all-code-variants-blang.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        blang.mlt))
+      (diff? blang.mlt blang.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-variants-blang.mlt)))))
+
+(alias (
+  (name runtest-code-variants-catch_all.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose catch_all.mlt))
+      (diff? catch_all.mlt catch_all.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-variants-catch_all.mlt)))))
+
+(alias (
+  (name runtest-all-code-variants-catch_all.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        catch_all.mlt))
+      (diff? catch_all.mlt catch_all.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-variants-catch_all.mlt)))))
+
+(alias (
+  (name runtest-code-variants-logger.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose logger.mlt))
+      (diff? logger.mlt logger.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-variants-logger.mlt)))))
+
+(alias (
+  (name runtest-all-code-variants-logger.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run
+        ocaml-topexpect
+        -non-deterministic
+        -short-paths
+        -verbose
+        logger.mlt))
+      (diff? logger.mlt logger.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-variants-logger.mlt)))))
+
+(alias (
+  (name runtest-code-variants-main.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-variants-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-variants-main.mlt)
+  (deps ((files_recursively_in code/variants)))
+  (action (
+    chdir code/variants (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias (
+  (name runtest-all) (deps ((alias runtest-all-code-variants-main.mlt)))))
+

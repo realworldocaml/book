@@ -123,7 +123,7 @@ definition with]{.idx}[functions/defining]{.idx}
 
 <link rel="import" href="code/guided-tour/main.mlt" part="5" />
 
-Functions in OCaml are values like any other, which is why we use the 
+Functions in OCaml are values like any other, which is why we use the
 `let` keyword to bind a function to a variable name, just as we use `let` to
 bind a simple value like an integer to a variable name. When using `let` to
 define a function, the first identifier after the `let` is the function name,
@@ -187,7 +187,7 @@ in action:
 
 Note that in the definition of `even`, we used `=` in two different ways:
 once as part of the `let` binding that separates the thing being defined from
-its definition; and once as an equality test, when comparing `x % 2` to 
+its definition; and once as an equality test, when comparing `x % 2` to
 `0`. These are very different operations despite the fact that they share
 some syntax.
 
@@ -206,14 +206,14 @@ As an example, let's walk through the process of inferring the type of
 
 1. OCaml requires that both branches of an `if` statement have the same type,
    so the expression
-   
+
    `if test first then first else 0`
-   
+
    requires that `first` must be the same type as `0`, and so `first` must be
    of type `int`. Similarly, from
-   
+
    `if test second then second else 0`
-   
+
    we can infer that `second` has type `int`.
 
 2. `test` is passed `first` as an argument. Since `first` has type `int`, the
@@ -252,7 +252,7 @@ types]{.idx}
 
 <link rel="import" href="code/guided-tour/main.mlt" part="10" />
 
-`first_if_true` takes as its arguments a function `test`, and two values, 
+`first_if_true` takes as its arguments a function `test`, and two values,
 `x` and `y`, where `x` is to be returned if `test x` evaluates to `true`, and
 `y` otherwise. So what's the type of the `x` argument to `first_if_true`?
 There are no obvious clues such as arithmetic operators or literals to narrow
@@ -558,7 +558,7 @@ fix this warning by adding another case to the match:
 Note that this code used another variant of the list pattern, `[hd]`, to
 match a list with a single element. We can do this to match a list with any
 fixed number of elements; for example, `[x;y;z]` will match any list with
-exactly three elements and will bind those elements to the variables 
+exactly three elements and will bind those elements to the variables
 `x`, `y`, and `z`.
 
 In the last few examples, our list processing code involved a lot of
@@ -577,7 +577,7 @@ example:[options]{.idx}[data structures/options]{.idx}
 
 <link rel="import" href="code/guided-tour/main.mlt" part="37" />
 
-The function `divide` either returns `None` if the divisor is zero, or 
+The function `divide` either returns `None` if the divisor is zero, or
 `Some` of the result of the division otherwise. `Some` and `None` are
 constructors that let you build optional values, just as `::` and `[]` let
 you build lists. You can think of an option as a specialized list that can
@@ -690,8 +690,8 @@ types/combining multiple object types with]{.idx}
 
 <link rel="import" href="code/guided-tour/main.mlt" part="47" />
 
-The `|` character separates the different cases of the variant (the first 
-`|` is optional), and each case has a capitalized tag, like `Circle`, 
+The `|` character separates the different cases of the variant (the first
+`|` is optional), and each case has a capitalized tag, like `Circle`,
 `Rect` or `Segment`, to distinguish that case from the others.
 
 Here's how we might write a function for testing whether a point is in the
@@ -761,7 +761,7 @@ programming/arrays]{.idx}
 
 <link rel="import" href="code/guided-tour/main.mlt" part="49" />
 
-The `.(i)` syntax is used to refer to an element of an array, and the 
+The `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element <span class="keep-together">.(2) is</span>
 the third element.
@@ -794,9 +794,6 @@ required only to tell *utop* to process the input, not to separate two
 declarations:
 
 <link rel="import" href="code/guided-tour/main.mlt" part="51" />
-
-We use the function `float` above, which is a convenient equivalent of
-`Float.of_int` provided by the `Pervasives` library.
 
 We also need functions to create and update `running_sum`s:
 
@@ -964,5 +961,3 @@ That's it for the guided tour! There are plenty of features left and lots of
 details to explain, but we hope that you now have a sense of what to expect
 from OCaml, and that you'll be more comfortable reading the rest of the book
 as a result.
-
-

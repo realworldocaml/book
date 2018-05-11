@@ -1,6 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable (
   (name test_interval_nosexp)
   (libraries (core))

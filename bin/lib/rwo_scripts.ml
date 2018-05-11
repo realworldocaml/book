@@ -184,17 +184,7 @@ let script lang ~filename =
   | "jbuild" ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
-    let changes = [
-        "ppx_sexp_conv -no-check", "ppx_sexp_conv";
-        "(jbuild_version 1)"     , "";
-        "(include jbuild.inc)"   , "";
-      ] in
-    let y =
-      let re = Re.alt (List.map ~f:(fun (s, _) -> Re.str s) changes) in
-      let f m = Caml.List.assoc (Re.Group.get m 0) changes in
-      Re.replace (Re.compile re) ~f x
-    in
-    Ok (`Other y)
+    Ok (`Other x)
   | _ ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
