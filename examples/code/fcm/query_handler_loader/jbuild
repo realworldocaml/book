@@ -1,8 +1,5 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable
   ((name query_handler_loader)
   (libraries (core core_kernel ppx_sexp_conv))
-  (preprocess (pps (ppx_sexp_conv -no-check)))
+  (preprocess (pps (ppx_sexp_conv)))
 ))

@@ -1,6 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable
   ((name read_json)
    (libraries (core yojson))

@@ -1,9 +1,6 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable
   ((name read_foo_better_errors)
-   (libraries (core ppx_sexp_conv))
-   (preprocess (pps (ppx_sexp_conv -no-check)))
+   (libraries (core sexplib))
+   (preprocess (pps (ppx_sexp_conv)))
   )
 )

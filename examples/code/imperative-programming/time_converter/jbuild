@@ -1,6 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable
   ((name time_converter)
    (modules time_converter)

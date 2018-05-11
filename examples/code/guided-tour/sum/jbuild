@@ -1,6 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executables
  ((names (sum))
   (libraries (base stdio))

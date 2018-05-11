@@ -1,6 +1,3 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable
   ((name search_with_configurable_server)
    (libraries (cohttp.async yojson textwrap))

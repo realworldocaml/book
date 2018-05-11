@@ -1,8 +1,4 @@
-(jbuild_version 1)
-(include jbuild.inc)
-
 (executable
  ((name freq)
   (libraries (base stdio))
   ))
-
