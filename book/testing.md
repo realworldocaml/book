@@ -11,11 +11,11 @@ which makes such omissions harder to fix down the line.
 In some ways, OCaml's type-system makes this worse, by enhancing the
 illusion that you can get by without testing.  After all, many trivial
 bugs are caught cheaply by OCaml's type system, no testing
-required. But make no mistake, type system or no type system, testing
-is essential as your systems evolve and grow more complex.
+required. But make no mistake, with or without types, testing is
+essential for developing and evolving complex software systems.
 
-One way to improve the situtation is to fix the tedium problem. With
-the right tools, writnig tests can be made lightweight and fun.  With
+One way to improve the situation is to fix the tedium problem. With
+the right tools, writing tests can be made lightweight and fun.  With
 better infrastructure in place, you'll find yourself writing more
 tests, and your creations will be more reliable as a result.
 
@@ -26,7 +26,8 @@ and in your testing infrastructure.
 
 ## What makes for good tests? {#what-makes-for-good-tests data-type=sect1}
 
-Here are some properties that are important for tests to have.
+Here are some of the properties that characterize well written tests
+in a good testing environment.
 
 - **Easy to write**. The less overhead there is to adding a test, the
   more people will do it.
@@ -41,7 +42,7 @@ Here are some properties that are important for tests to have.
   there's a decent chance that the failure might be random.  You want
   your test failures to be believable indications of a problem, which
   requires determinism.
-- **Fail understandably**. Tests whose failures are localized and easy
+- **Understandable in their failures**. Tests whose failures are localized and easy
   to comprehend make it easier to find and fix the problem flagged by
   the failing test.
 
@@ -60,13 +61,13 @@ set up and and run a test.  To that end, we'll show you how to write
 tests with `ppx_inline_test`, which lets you add tests to any module
 in your library with a specially annotated let binding.
 
-To use inline tests, we need to enable the `ppx_inline_test`
+To use inline tests, we need to enable `ppx_inline_test` as a
 preprocessor, as well as tell Dune that the files in this library
-contain inline tests.  We'll add `ppx_jane` to the set of
-preprocessors, which bundles together `ppx_inline_test` with a
-collection of other useful preprocessors.  And we'll tell Dune to
-expect tests in this library by adding the `inline_tests` declaration
-to the library stanza. Here's the resulting `jbuild` file.
+contain inline tests.  To achieve the first goal, we'll add `ppx_jane`
+to the set of preprocessors, which bundles together `ppx_inline_test`
+with a collection of other useful preprocessors.  The second goal is
+achieved by adding the `inline_tests` declaration to the library
+stanza. Here's the resulting `jbuild` file.
 
 <link rel="import" href="code/testing/simple_inline_test/jbuild" />
 
@@ -79,9 +80,9 @@ a single test.
 The test passes if the expression on the right-hand side of the
 equals-sign evaluates to true.  These tests are not automatically run
 with the instantiation of the module, but are instead registered for
-running via the test runner, which can be invoked via Dune.  Note that
-the test runner will execute tests declared in different files in
-parallel.
+running via the test runner, which can be invoked via Dune.  While it
+doesn't affect this example, it's worth noting that the test runner
+will execute tests declared in different files in parallel.
 
 <link rel="import" href="code/testing/simple_inline_test/run.sh" />
 
@@ -135,8 +136,8 @@ writing your application code. But the approach has several downsides.
 
 - **Bloat**. When your tests are written as a part of your library, it
   means that every user of your library has to link in that testing
-  code in their production application. The code won't get executed in
-  production, of course, but it still adds to the size of the
+  code in their production application. Even though that code won't
+  get executed in production, it still adds to the size of the
   executable.
 
 - **Dependencies**. Adding testing code to your library doesn't just
@@ -146,10 +147,10 @@ writing your application code. But the approach has several downsides.
   application, and can also require you to link libraries into your
   application that you'd rather not rely on in production.
 
-- **Testing against unexposed APIs**. Writing tests on the inside of your
-  libraries has the virtue of letting you write tests against any of
-  the code you've written, not just what has been exposed in the
-  API. But this is a two-edged sword, most of the time, it's a good
+- **Testing against unexposed APIs**. Writing tests on the inside of
+  your libraries has the virtue of letting you write tests against any
+  of the code you've written, not just what has been exposed in the
+  API. But this is a two-edged sword.  Most of the time, it's a good
   mental discipline to express your testing in terms of the public
   API, rather than in terms of the implementation. This encourages you
   to think about and test the invariants exposed to users.
@@ -191,11 +192,46 @@ code contained in the companion library.
 
 :::
 
+## Property testing with Quickcheck {data-type=sect1}
 
-## Quickcheck {data-type=sect1}
+The tests we've discussed so far have been pretty simple, amounting to
+little more than writing down individual examples and checking that
+their behavior is as expected.  We often want to write tests that do
+more than that. One useful form of testing that lets you step beyond
+stating simple examples is called *property testing*.
 
-The tests we've discussed so far have themselves been extraordinarily
-simple.
+The basic idea is simple enough. A property test first requires that
+you write down a function that takes an example input, and verifies
+that a given predicate is satisfied on that input.  You also need to
+provide a way of genreating random examples, and the full test then
+checks whether the predicate holds over those randomly generated
+examples.
+
+We can write a property test using only the tools we've learned so
+far.  Here's an example.
+
+<link rel="import" href="code/testing/manual_property_test/test.ml" />
+
+And if we run this test, we'll see it succeeds, as you might expect.
+
+<link rel="import" href="code/testing/manual_property_test/run.sh" />
+
+One thing that was implicit in the example we gave above was the
+choice of probability distribution. When we pick examples at random,
+we're always making a choice as to the probability with which each
+possible example is selected, and not all choices are equally
+good.  Moreover, the choice we used here, which is the uniform
+distribution, is problematic, since it picks interesting corner cases,
+like zero, with the same probability as everything else.
+
+That's where Quickcheck comes in. Quickcheck is a library to help
+automate the construction of probability distributions that are good
+for running tests. Let's try rewriting the example we provided above
+with Quickcheck.
+
+<link rel="import" href="code/testing/quickcheck_property_test/test.ml" />
+
+<link rel="import" href="code/testing/quickcheck_property_test/run.sh" />
 
 ## Expect Tests {data-type=sect1}
 

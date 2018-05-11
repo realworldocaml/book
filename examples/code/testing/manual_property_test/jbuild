@@ -1,0 +1,9 @@
+(jbuild_version 1)
+(include jbuild.inc)
+
+(library
+ ((name bar1)
+  (libraries (base stdio))
+  (preprocess (pps (ppx_jane)))
+  (inline_tests)
+))
