@@ -197,32 +197,32 @@ code contained in the companion library.
 The tests we've discussed so far have been pretty simple, amounting to
 little more than writing down individual examples and checking that
 their behavior is as expected.  We often want to write tests that do
-more than that. One useful form of testing that lets you step beyond
-stating simple examples is called *property testing*.
+more than that, and one useful form of testing that lets you step
+beyond example-based testing is called *property testing*.
 
-The basic idea is simple enough. A property test first requires that
-you write down a function that takes an example input, and verifies
-that a given predicate is satisfied on that input.  You also need to
-provide a way of genreating random examples, and the full test then
-checks whether the predicate holds over those randomly generated
-examples.
+The basic idea is simple enough. A property test requires two things:
+a function that takes an example input and checks that a given
+property holds on that example; as well as a way of generating random
+examples. The test then checks whether the predicate holds over many
+randomly generated examples.
 
 We can write a property test using only the tools we've learned so
 far.  Here's an example.
 
 <link rel="import" href="code/testing/manual_property_test/test.ml" />
 
-And if we run this test, we'll see it succeeds, as you might expect.
+Running this test will show that it passes.
 
 <link rel="import" href="code/testing/manual_property_test/run.sh" />
 
-One thing that was implicit in the example we gave above was the
-choice of probability distribution. When we pick examples at random,
-we're always making a choice as to the probability with which each
-possible example is selected, and not all choices are equally
-good.  Moreover, the choice we used here, which is the uniform
-distribution, is problematic, since it picks interesting corner cases,
-like zero, with the same probability as everything else.
+One thing that was implicit in the example we gave above is the
+probability distribution that was used for selecting
+examples. Whenever you pick things at random, you're always making a
+choice as to the probability with which each possible example is
+selected, and not all choices are equally good.  Moreover, the choice
+we used here, which is the uniform distribution, is problematic, since
+it picks interesting corner cases, like zero, with the same
+probability as everything else.
 
 That's where Quickcheck comes in. Quickcheck is a library to help
 automate the construction of probability distributions that are good
