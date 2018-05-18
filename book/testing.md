@@ -211,7 +211,7 @@ far.  Here's an example.
 
 <link rel="import" href="code/testing/manual_property_test/test.ml" />
 
-Running this test will show that it passes.
+As you can see below, this test passes.
 
 <link rel="import" href="code/testing/manual_property_test/run.sh" />
 
@@ -219,19 +219,41 @@ One thing that was implicit in the example we gave above is the
 probability distribution that was used for selecting
 examples. Whenever you pick things at random, you're always making a
 choice as to the probability with which each possible example is
-selected, and not all choices are equally good.  Moreover, the choice
-we used here, which is the uniform distribution, is problematic, since
-it picks interesting corner cases, like zero, with the same
-probability as everything else.
+selected. But not all probability distributions are equally good for
+testing.  In fact, the choice we made above, which was to pick
+integers uniformly and at random, is problematic, since it picks
+interesting special, like zero or one, with the same probability as
+everything else.
 
 That's where Quickcheck comes in. Quickcheck is a library to help
-automate the construction of probability distributions that are good
-for running tests. Let's try rewriting the example we provided above
-with Quickcheck.
+automate the construction of testing distributions. Let's try
+rewriting the example we provided above with Quickcheck.
 
 <link rel="import" href="code/testing/quickcheck_property_test/test.ml" />
 
+Note that we didn't explictly state how many examples should be
+tested. Quickcheck has a built in default which can be overridden by
+way of an optional argument.
+
+In any case, running the test uncovers the fact that the property
+we've been testing doesn't actually hold on all outputs, and
+Quickcheck has found a counterexample.
+
 <link rel="import" href="code/testing/quickcheck_property_test/run.sh" />
+
+The example that triggers the exception is `-4611686018427387904`,
+which can also be referred to as `Int.min_value`, and is the smallest
+value of type `Int.t`. Note that the largest value
+
+<link rel="import" part="min-int1" href="code/testing/main.mlt" />
+
+  `Int.min_value`, which is the
+smallest value of type `int`. This is a side effect of how integers
+are encoded at the machine level, which means that there's exactly one
+extra negative `int` without a corresponding positive
+`int`. Quickcheck found
+
+
 
 ## Expect Tests {data-type=sect1}
 

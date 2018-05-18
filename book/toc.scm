@@ -20,7 +20,6 @@
  ((title "Tools and Techniques")
   (chapters
    (maps-and-hashtables.md
-    testing.md
     command-line-parsing.md
     json.md
     parsing-with-ocamllex-and-menhir.md

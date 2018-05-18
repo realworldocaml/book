@@ -4650,6 +4650,30 @@
   (name runtest-all) (deps ((alias runtest-all-code-sexpr-to_from_sexp.mlt)))))
 
 (alias (
+  (name runtest-code-testing-main.mlt)
+  (deps ((files_recursively_in code/testing)))
+  (action (
+    chdir code/testing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest) (deps ((alias runtest-code-testing-main.mlt)))))
+
+(alias (
+  (name runtest-all-code-testing-main.mlt)
+  (deps ((files_recursively_in code/testing)))
+  (action (
+    chdir code/testing (
+      progn
+      (setenv OCAMLRUNPARAM "" (
+        run ocaml-topexpect -non-deterministic -short-paths -verbose main.mlt))
+      (diff? main.mlt main.mlt.corrected))))))
+
+(alias ((name runtest-all) (deps ((alias runtest-all-code-testing-main.mlt)))))
+
+(alias (
   (name runtest-code-variables-and-functions-main.mlt)
   (deps ((files_recursively_in code/variables-and-functions)))
   (action (

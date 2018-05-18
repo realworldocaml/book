@@ -711,6 +711,7 @@
     ../book/toc.scm
     ../examples/code/testing/broken_inline_test/run.sh
     ../examples/code/testing/broken_inline_test/test.ml
+    ../examples/code/testing/main.mlt
     ../examples/code/testing/manual_property_test/run.sh
     ../examples/code/testing/manual_property_test/test.ml
     ../examples/code/testing/quickcheck_property_test/run.sh
