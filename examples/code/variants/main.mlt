@@ -150,34 +150,27 @@ Error: This expression has type [> `Int of string ]
 [@@@part "8"];;
 let is_positive = function
   | `Int   x -> x > 0
-  | `Float x -> x > 0.
+  | `Float x -> Float.(x > 0.)
 ;;
-[%%expect{|
-Characters 69-71:
-Error: This expression has type float but an expression was expected of type
-         int
-|}];;
+[%%expect ocaml {|val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>|}];;
 [@@@part "9"];;
 let exact = List.filter ~f:is_positive [three;four];;
-[%%expect{|
-Characters 27-38:
-Error: Unbound value is_positive
-|}];;
+[%%expect ocaml {|val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]|}];;
 [@@@part "10"];;
 let is_positive = function
   | `Int   x -> Ok (x > 0)
-  | `Float x -> Ok (x > 0.)
+  | `Float x -> Ok Float.(x > 0.)
   | `Not_a_number -> Error "not a number";;
-[%%expect{|
-Characters 78-80:
-Error: This expression has type float but an expression was expected of type
-         int
+[%%expect ocaml {|
+val is_positive :
+  [< `Float of float | `Int of int | `Not_a_number ] -> (bool, string) result =
+  <fun>
 |}];;
 List.filter [three; four] ~f:(fun x ->
   match is_positive x with Error _ -> false | Ok b -> b);;
-[%%expect{|
-Characters 47-58:
-Error: Unbound value is_positive
+[%%expect ocaml {|
+- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
+[`Int 3; `Float 4.]
 |}];;
 [@@@part "11"];;
 type extended_color =
