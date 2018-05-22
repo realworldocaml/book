@@ -601,11 +601,10 @@ is automatically opened in every OCaml program.
 ::: {data-type=note}
 #### Nesting lets with let and in
 
-`log_entry` was our first use of `let` to define a new variable within the
-body of a function. A `let` paired with an `in` can be used to introduce a
-new binding within any local scope, including a function body. The `in` marks
-the beginning of the scope within which the new variable can be used. Thus,
-we could write:[let syntax/nested let binding]{.idx}
+A `let` paired with an `in` can be used to introduce a new binding within any
+local scope, including a function body. The `in` marks the beginning of the
+scope within which the new variable can be used. Thus, we could write:
+[let syntax/nested let binding]{.idx}
 
 <link rel="import" href="code/guided-tour/local_let.mlt" part="0.5" />
 
