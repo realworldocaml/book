@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(executables
+ ((names (app rwo_deps))
+  (public_names (rwo-build rwo-deps))
+  (libraries (rwo))
+  (preprocess (pps (ppx_let)))
+  (flags (:standard -short-paths))
+  ))

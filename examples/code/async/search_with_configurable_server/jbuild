@@ -3,5 +3,6 @@
 (executable
   ((name search_with_configurable_server)
    (libraries (cohttp.async yojson textwrap))
+   (preprocess (pps (ppx_let)))
   )
 )

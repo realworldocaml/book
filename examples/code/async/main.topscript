@@ -5,6 +5,7 @@
 #require "core";;
 #require "core.top";;
 #require "ppx_jane";;
+#warnings "-3";;
 #silent false;;
 [@@@part "1"];;
 open Core;;
@@ -297,11 +298,7 @@ Pipe.transfer;;
 |}];;
 [@@@part "27"];;
 Command.async;;
-[%%expect ocaml {|
-- : ('a, unit Deferred.t) Async_extra.Command.basic_command
-    Command.with_options
-= <fun>
-|}];;
+[%%expect ocaml {|- : unit Deferred.t Async.Command.basic_command Command.with_options = <fun>|}];;
 [@@@part "28"];;
 #silent true;;
 #require "cohttp.async";;

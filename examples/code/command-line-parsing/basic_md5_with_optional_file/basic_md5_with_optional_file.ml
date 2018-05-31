@@ -14,11 +14,14 @@ let do_hash filename () =
   |> print_endline
 
 let command =
+  let open Command.Let_syntax in
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Spec.(empty +> anon (maybe ("filename" %: file)))
-    do_hash
+    [%map_open
+      let filename = anon (maybe ("filename" %: file)) in
+      do_hash filename
+    ]
 
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command

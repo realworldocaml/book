@@ -12,6 +12,6 @@ let build_counts () =
 
 let () =
   build_counts ()
-  |> List.sort ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+  |> List.sort ~compare:(fun (_,x) (_,y) -> Int.descending x y)
   |> (fun l -> List.take l 10)
   |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)

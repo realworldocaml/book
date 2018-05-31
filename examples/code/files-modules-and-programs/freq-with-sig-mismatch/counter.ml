@@ -1,15 +1,15 @@
 open Core_kernel
 
-type t = (string * int) list
+type t = int String.Map.t
 
-let empty = []
+let empty = String.Map.empty
 
-let to_list x = x
+let to_list t = String.Map.to_alist t
 
-let touch t s =
+let touch (t:t) (s:string) : t =
   let count =
     match Map.find t s with
     | None -> 0
     | Some x -> x
   in
-  Map.add t ~key:s ~data:(count + 1)
+  Map.set t ~key:s ~data:(count + 1)

@@ -5,6 +5,7 @@
 #require "core";;
 #require "core.top";;
 #require "ppx_jane";;
+#warnings "-3";;
 #silent false;;
 [@@@part "0.5"];;
 open Core_kernel;;
@@ -16,14 +17,14 @@ List.find [1;2;3] ~f:(fun x -> x >= 2) ;;
 List.find [1;2;3] ~f:(fun x -> x >= 10) ;;
 [%%expect ocaml {|- : int option = None|}];;
 [@@@part "2"];;
-let compute_bounds ~cmp list =
-  let sorted = List.sort ~cmp list in
+let compute_bounds ~compare list =
+  let sorted = List.sort ~compare list in
   match List.hd sorted, List.last sorted with
   | None,_ | _, None -> None
   | Some x, Some y -> Some (x,y)
 ;;
 [%%expect ocaml {|
-val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
 [@@@part "3"];;
@@ -79,47 +80,47 @@ let bind option f =
 ;;
 [%%expect ocaml {|val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>|}];;
 [@@@part "12"];;
-let compute_bounds ~cmp list =
-  let sorted = List.sort ~cmp list in
+let compute_bounds ~compare list =
+  let sorted = List.sort ~compare list in
   Option.bind (List.hd sorted) (fun first ->
     Option.bind (List.last sorted) (fun last ->
       Some (first,last)))
 ;;
 [%%expect ocaml {|
-val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
 [@@@part "13"];;
-let compute_bounds ~cmp list =
+let compute_bounds ~compare list =
   let open Option.Monad_infix in
-  let sorted = List.sort ~cmp list in
+  let sorted = List.sort ~compare list in
   List.hd sorted   >>= fun first ->
   List.last sorted >>= fun last  ->
   Some (first,last)
 ;;
 [%%expect ocaml {|
-val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
 [@@@part "13.1"];;
-let compute_bounds ~cmp list =
+let compute_bounds ~compare list =
   let open Option.Let_syntax in
-  let sorted = List.sort ~cmp list in
+  let sorted = List.sort ~compare list in
   let%bind first = List.hd sorted in
   let%bind last  = List.last sorted in
   Some (first,last)
 ;;
 [%%expect ocaml {|
-val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
 [@@@part "14"];;
-let compute_bounds ~cmp list =
-  let sorted = List.sort ~cmp list in
+let compute_bounds ~compare list =
+  let sorted = List.sort ~compare list in
   Option.both (List.hd sorted) (List.last sorted)
 ;;
 [%%expect ocaml {|
-val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
+val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 |}];;
 [@@@part "15"];;
@@ -250,14 +251,14 @@ let load filename =
 [@@@part "31"];;
 let lookup_weight ~compute_weight alist key =
   try
-    let data = List.Assoc.find_exn alist key in
+    let data = List.Assoc.find_exn ~equal:(=) alist key in
     compute_weight data
   with
     Not_found -> 0. ;;
 [%%expect ocaml {|
 val lookup_weight :
-  compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
+  compute_weight:('a -> float) -> ('b, 'a) Base__List.Assoc.t -> 'b -> float =
+  <fun>
 |}];;
 [@@@part "32"];;
 lookup_weight ~compute_weight:(fun _ -> raise Not_found)
@@ -266,36 +267,35 @@ lookup_weight ~compute_weight:(fun _ -> raise Not_found)
 [@@@part "33"];;
 let lookup_weight ~compute_weight alist key =
   match
-    try Some (List.Assoc.find_exn alist key)
+    try Some (List.Assoc.find_exn ~equal:(=) alist key)
     with _ -> None
   with
   | None -> 0.
   | Some data -> compute_weight data ;;
 [%%expect ocaml {|
 val lookup_weight :
-  compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
+  compute_weight:('a -> float) -> ('b, 'a) Base__List.Assoc.t -> 'b -> float =
+  <fun>
 |}];;
 [@@@part "33.1"];;
 let lookup_weight ~compute_weight alist key =
-  match List.Assoc.find_exn alist key with
+  match List.Assoc.find_exn ~equal:(=) alist key with
   | exception _ -> 0.
   | data -> compute_weight data ;;
 [%%expect ocaml {|
 val lookup_weight :
-  compute_weight:((equal:('a -> 'a -> bool) -> 'b) -> float) ->
-  ('a, 'b) Base__List.Assoc.t -> 'a -> float = <fun>
+  compute_weight:('a -> float) -> ('b, 'a) Base__List.Assoc.t -> 'b -> float =
+  <fun>
 |}];;
 [@@@part "34"];;
 let lookup_weight ~compute_weight alist key =
-  match List.Assoc.find alist key with
+  match List.Assoc.find ~equal:(=) alist key with
   | None -> 0.
   | Some data -> compute_weight data ;;
-[%%expect{|
-Characters 89-93:
-Error: This pattern matches values of type 'a option
-       but a pattern was expected which matches values of type
-         equal:('b -> 'b -> bool) -> 'c option
+[%%expect ocaml {|
+val lookup_weight :
+  compute_weight:('a -> float) -> ('b, 'a) Base__List.Assoc.t -> 'b -> float =
+  <fun>
 |}];;
 [@@@part "35"];;
 let find alist key =

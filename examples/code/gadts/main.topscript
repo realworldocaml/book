@@ -37,8 +37,8 @@ let set t i v =
 [@@@part "2"];;
 
 type 'a gadt_compact_array =
-  | Array : 'a array -> 'a t
-  | Bytes : bytes -> 'a t
+  | Array : 'a array -> 'a gadt_compact_array
+  | Bytes : Bytes.t -> 'a gadt_compact_array
 ;;
 
 [%%expect];;
@@ -49,13 +49,13 @@ Array [|1.0;2.0;3.0|];;
 
 # part 2.2
 
-  Bytes "foo";;
+  Bytes (Bytes.of_string "foo");;
 
 [%%expect];;
 [@@@part "3"];;
 
 type 'a t = | Array : 'a array -> 'a t
-            | Bytes : bytes -> char t
+            | Bytes : Bytes.t -> char t
 ;;
 
 [%%expect];;
@@ -82,7 +82,7 @@ let length (type el) (t:el t) =
 module Compact_array = struct
 
   type 'a t = | Array : 'a array -> 'a t
-              | Bytes : bytes -> char t
+              | Bytes : Bytes.t -> char t
 
   let of_bytes x = Bytes x
   let of_array x = Array x

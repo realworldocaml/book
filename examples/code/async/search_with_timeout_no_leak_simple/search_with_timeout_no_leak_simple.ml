@@ -73,15 +73,17 @@ let search_and_print ~servers ~timeout words =
 let () =
   Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Spec.(
-      let string_list = Arg_type.create (String.split ~on:',') in
-      empty
-      +> anon (sequence ("word" %: string))
-      +> flag "-servers"
-           (optional_with_default ["api.duckduckgo.com"] string_list)
-           ~doc:" Specify server to connect to"
-      +> flag "-timeout" (optional_with_default (sec 5.) time_span)
-           ~doc:" Abandon queries that take longer than this time"
+    (
+      let open Command.Let_syntax in
+      let string_list = Command.Arg_type.create (String.split ~on:',') in
+      [%map_open
+        let words = anon (sequence ("word" %: string))
+        and servers = flag "-servers"
+            (optional_with_default ["api.duckduckgo.com"] string_list)
+            ~doc:" Specify server to connect to"
+        and timeout = flag "-timeout" (optional_with_default (sec 5.) time_span)
+            ~doc:" Abandon queries that take longer than this time" in
+        (fun () -> search_and_print ~servers ~timeout words)
+      ]
     )
-    (fun words servers timeout () -> search_and_print ~servers ~timeout words)
   |> Command.run

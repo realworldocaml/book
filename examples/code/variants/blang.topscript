@@ -60,7 +60,7 @@ let rec eval expr base_eval =
 [%%expect ocaml {|val eval : 'a expr -> ('a -> bool) -> bool = <fun>|}];;
 [@@@part "4"];;
 let and_ l =
-  if List.mem l (Const false) then Const false
+  if List.mem ~equal:(=) l (Const false) then Const false
   else
     match List.filter l ~f:((<>) (Const true)) with
     | [] -> Const true
@@ -73,7 +73,7 @@ Error: This expression has type equal:('a expr -> 'a expr -> bool) -> bool
        but an expression was expected of type bool
 |}];;
 let or_ l =
-  if List.mem l (Const true) then Const true
+  if List.mem  ~equal:(=)l (Const true) then Const true
   else
     match List.filter l ~f:((<>) (Const false)) with
     | [] -> Const false

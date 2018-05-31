@@ -3,5 +3,6 @@
 (executable
   ((name basic_md5_with_flags)
    (libraries (core cryptokit))
+   (preprocess (pps (ppx_let)))
   )
 )

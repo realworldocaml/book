@@ -68,13 +68,15 @@ let print_result (word,definition) =
 let () =
   Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Spec.(
-      let string_list = Arg_type.create (String.split ~on:',') in
-      empty
-      +> anon (sequence ("word" %: string))
-      +> flag "-servers"
-           (optional_with_default ["api.duckduckgo.com"] string_list)
-           ~doc:" Specify server to connect to"
+    (
+      let open Command.Let_syntax in
+      let string_list = Command.Arg_type.create (String.split ~on:',') in
+      [%map_open
+        let words = anon (sequence ("word" %: string))
+        and servers =  flag "-servers"
+            (optional_with_default ["api.duckduckgo.com"] string_list)
+            ~doc:" Specify server to connect to" in
+        (fun () -> search_and_print ~servers words)
+      ]
     )
-    (fun words servers () -> search_and_print ~servers words)
   |> Command.run

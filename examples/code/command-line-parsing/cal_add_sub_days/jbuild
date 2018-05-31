@@ -3,5 +3,6 @@
 (executable
   ((name cal_add_sub_days)
    (libraries (core))
+   (preprocess (pps (ppx_let)))
   )
 )

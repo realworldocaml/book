@@ -13,7 +13,7 @@ type t = { foo: bool }
 let main () =
   let alloced_float = Unix.gettimeofday () in
   let alloced_bool = alloced_float > 0.0 in
-  let alloced_string = String.create 4 in
+  let alloced_string = Bytes.create 4 in
   attach_finalizer "immediate int" 1;
   attach_finalizer "immediate float" 1.0;
   attach_finalizer "immediate variant" (`Foo "hello");
@@ -28,5 +28,5 @@ let main () =
 
 let () =
   Command.async ~summary:"Testing finalizers"
-    Command.Spec.empty main
+    (Command.Let_syntax.return main)
   |> Command.run

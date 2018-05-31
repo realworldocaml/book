@@ -36,8 +36,6 @@ ocaml {|- : unit = ()|}];;
 /Users/yminsky/.opam/4.04.2/lib/fieldslib/fieldslib.cma: loaded
 /Users/yminsky/.opam/4.04.2/lib/ppx_compare/runtime-lib: added to search path
 /Users/yminsky/.opam/4.04.2/lib/ppx_compare/runtime-lib/ppx_compare_lib.cma: loaded
-/Users/yminsky/.opam/4.04.2/lib/result: added to search path
-/Users/yminsky/.opam/4.04.2/lib/ppx_deriving: added to search path
 /Users/yminsky/.opam/4.04.2/lib/sexplib: added to search path
 /Users/yminsky/.opam/4.04.2/lib/variantslib: added to search path
 /Users/yminsky/.opam/4.04.2/lib/variantslib/variantslib.cma: loaded

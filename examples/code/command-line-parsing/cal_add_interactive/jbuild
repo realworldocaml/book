@@ -3,5 +3,6 @@
 (executable
   ((name cal_add_interactive)
    (libraries (core))
+   (preprocess (pps (ppx_let)))
   )
 )

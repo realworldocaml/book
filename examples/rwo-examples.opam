@@ -18,7 +18,6 @@ depends: [
   "yojson"
   "astring"
   "cryptokit"
-  "async_graphics"
   "ocp-index"
   "atd"
   "atdgen"
@@ -26,6 +25,10 @@ depends: [
   "ctypes-foreign"
   "textwrap"
   "uri"
+]
+
+pin-depends: [
+    ["async_graphics" "https://github.com/christophe-riolo/async_graphics.git"
 ]
 
 depexts: [

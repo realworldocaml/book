@@ -9,4 +9,5 @@
 (executable (
   (name test)
   (libraries (core))
+  (preprocess (pps (ppx_let)))
 ))

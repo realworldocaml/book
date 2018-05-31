@@ -82,8 +82,8 @@ type timezone ;;
 let timezone : timezone structure typ = structure "timezone" ;;
 [%%expect ocaml {|val timezone : timezone structure typ = struct timezone|}];;
 [@@@part "11"];;
-let gettimeofday = foreign "gettimeofday"
-                     (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
+let gettimeofday = foreign "gettimeofday" ~check_errno:true
+                     (ptr timeval @-> ptr timezone @-> returning int) ;;
 [%%expect{|
 Characters 97-121:
 Error: Unbound value returning_checking_errno
