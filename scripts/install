@@ -3,4 +3,4 @@
 
 set -ex
 
-docker pull ocaml/opam:ubuntu-16.04_ocaml-4.02.3
+docker pull ocaml/opam2:ubuntu-16.04-ocaml-4.02.3
