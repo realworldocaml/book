@@ -3,5 +3,6 @@
 (executable
   ((name datetime)
    (libraries (core ctypes.foreign))
+   (preprocess (pps (ppx_let)))
   )
 )

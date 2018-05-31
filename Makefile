@@ -64,9 +64,9 @@ ROOT = ./
 
 site/%.html: book/%.html
 ifdef PYGMENTIZE
-	$(APP) build chapter -pygmentize -code examples -o site/ -repo-root $(ROOT) $<
+	$(APP) build  chapter -pygmentize -code examples -o site/ -chapter $$(echo $< | sed -r "s/.*([0-9]{2}).*/\1/") -repo-root $(ROOT) $<
 else
-	$(APP) build chapter -o site/ -code examples -repo-root $(ROOT) $<
+	$(APP) build  chapter -o site/ -code examples  -chapter $$(echo $< | sed -r "s/.*([0-9]{2}).*/\1/") -repo-root $(ROOT) $<
 endif
 
 site/index.html:

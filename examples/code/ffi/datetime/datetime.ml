@@ -35,8 +35,10 @@ let ascii_time () =
   printf "%s%!" (ctime t_ptr)
 
 let () =
-  let open Command in
-  basic ~summary:"Display the current time in various formats"
-    Spec.(empty +> flag "-a" no_arg ~doc:" Human-readable output format")
-    (fun human -> if human then ascii_time else float_time)
+  let open Command.Let_syntax in
+  Command.basic ~summary:"Display the current time in various formats"
+    [%map_open
+      let human = flag "-a" no_arg ~doc:" Human-readable output format" in
+      (if human then ascii_time else float_time)
+    ]
   |> Command.run

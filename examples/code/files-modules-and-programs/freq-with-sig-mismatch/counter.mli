@@ -8,7 +8,7 @@ val empty : t
 
 [@@@part "1"]
 (** Bump the frequency count for the given string. *)
-val touch : t -> string -> t
+val touch : string -> t -> t
 
 [@@@part "2"]
 (** Converts the set of frequency counts to an association list.  A string shows

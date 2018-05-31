@@ -23,7 +23,8 @@ Findlib has been successfully loaded. Additional directives:
 ocaml {|- : unit = ()|}];;
 #camlp4o ;;
 [@@@part "1"];;
-#require "comparelib.syntax" ;;
+#require "ppx_compare";;
+open Core;;
 [%%expect{|No such package: comparelib.syntax|}];;
 type t = { foo: string; bar : t } ;;
 [%%expect ocaml {|type t = { foo : string; bar : t; }|}];;

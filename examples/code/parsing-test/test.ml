@@ -32,7 +32,10 @@ let loop filename () =
   In_channel.close inx
 
 let () =
+  let open Command.Let_syntax in
   Command.basic ~summary:"Parse and display JSON"
-    Command.Spec.(empty +> anon ("filename" %: file))
-    loop
+    [%map_open
+      let filename =  anon ("filename" %: file) in
+      loop filename
+    ]
   |> Command.run

@@ -16,22 +16,22 @@ let checksum_from_file filename =
   |> print_endline
 
 let command =
+  let open Command.Let_syntax in
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
-    Command.Spec.(
-      empty
-      +> flag "-s" (optional string) ~doc:"string Checksum the given string"
-      +> flag "-t" no_arg ~doc:" run a built-in time trial"
-      +> anon (maybe_with_default "-" ("filename" %: file))
-    )
-    (fun use_string trial filename () ->
-       match trial with
-       | true -> printf "Running time trial\n"
-       | false -> begin
-           match use_string with
-           | Some buf -> checksum_from_string buf
-           | None -> checksum_from_file filename
-         end
-    )
+    [%map_open
+      let use_string = flag "-s" (optional string) ~doc:"string Checksum the given string"
+      and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
+      and filename = anon (maybe_with_default "-" ("filename" %: file)) in
+      (fun () ->
+         match trial with
+         | true -> printf "Running time trial\n"
+         | false -> begin
+             match use_string with
+             | Some buf -> checksum_from_string buf
+             | None -> checksum_from_file filename
+           end
+      )
+    ]
 
 let () = Command.run command

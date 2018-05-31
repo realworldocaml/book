@@ -14,5 +14,6 @@
   ((name github_org_info)
    (libraries (core yojson atdgen core_extended))
    (modules (github_org_info github_org_t github_org_j))
+   (preprocess (pps (ppx_let)))
   )
 )

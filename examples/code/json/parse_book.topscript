@@ -10,7 +10,7 @@ open Core_kernel;;
 #require "yojson";;
 [%%expect{|
 /Users/yminsky/.opam/4.04.2/lib/easy-format: added to search path
-/Users/yminsky/.opam/4.04.2/lib/easy-format/easy_format.cma: loaded
+/Users/yminsky/.opam/4.04.2/lib/easy-format/easy_format.cmo: loaded
 /Users/yminsky/.opam/4.04.2/lib/biniou: added to search path
 /Users/yminsky/.opam/4.04.2/lib/biniou/biniou.cma: loaded
 /Users/yminsky/.opam/4.04.2/lib/yojson: added to search path

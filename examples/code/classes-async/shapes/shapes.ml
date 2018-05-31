@@ -158,7 +158,7 @@ class virtual linear x' y' = object
     updates <- update :: updates
 end
 
-let pi = (atan 1.0) *. 4.0
+let pi = (Float.atan 1.0) *. 4.0
 
 class virtual harmonic offset x' y' = object
   val virtual mutable updates: (int -> unit) list
@@ -167,7 +167,7 @@ class virtual harmonic offset x' y' = object
 
   initializer
     let update step =
-      let m = sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
+      let m = Float.sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
       let x' = Float.to_int (m *. Float.of_int x') in
       let y' = Float.to_int (m *. Float.of_int y') in
       x <- x + x';

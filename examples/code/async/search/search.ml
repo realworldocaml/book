@@ -59,11 +59,11 @@ let search_and_print words =
 
 [@@@part "5"];;
 let () =
+  let open Command.Let_syntax in
   Command.async
     ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Spec.(
-      empty
-      +> anon (sequence ("word" %: string))
-    )
-    (fun words () -> search_and_print words)
+    [%map_open
+      let words =  anon (sequence ("word" %: string)) in
+      (fun () -> search_and_print words)
+    ]
   |> Command.run

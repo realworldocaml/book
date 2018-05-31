@@ -99,7 +99,9 @@ let plus_one_if x =
 ;;
 [%%expect ocaml {|val plus_one_if : int -> int = <fun>|}];;
 [@@@part "10"];;
+#silent true;;
 #require "core_bench";;
+#silent false;;
 [%%expect{|
 /Users/yminsky/.opam/4.04.2/lib/textutils: added to search path
 /Users/yminsky/.opam/4.04.2/lib/textutils/textutils.cma: loaded
@@ -244,7 +246,7 @@ let extensions filenames =
       | None  | Some ("",_) -> None
       | Some (_,ext) ->
         Some ext)
-  |> List.dedup
+  |> List.dedup_and_sort
 ;;
 [%%expect ocaml {|val extensions : string list -> string list = <fun>|}];;
 extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;

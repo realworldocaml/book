@@ -21,7 +21,7 @@ let run () =
   let host_and_port =
     Tcp.Server.create
       ~on_handler_error:`Raise
-      (Tcp.on_port 8765)
+      (Tcp.Where_to_listen.of_port 8765)
       (fun _addr r w ->
          let buffer = String.create (16 * 1024) in
          copy_blocks buffer r w)

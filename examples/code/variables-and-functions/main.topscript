@@ -181,7 +181,7 @@ let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 (3,2) +! (-2,4);;
 [%%expect ocaml {|- : int * int = (1, 6)|}];;
 [@@@part "27"];;
-let (***) x y = (x ** y) ** y;;
+let (***) base exponent = (base ** exponent) ** exponent;;
 [%%expect{|
 Characters 17-18:
 Error: This expression has type int but an expression was expected of type
@@ -213,7 +213,7 @@ let (|>) x f = f x ;;
 let path = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin";;
 [%%expect ocaml {|val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin:/usr/bin"|}];;
 String.split ~on:':' path
-|> List.dedup ~compare:String.compare
+|> List.dedup_and_sort ~compare:String.compare
 |> List.iter ~f:print_endline
 ;;
 [%%expect{|
@@ -225,7 +225,7 @@ String.split ~on:':' path
 ocaml {|- : unit = ()|}];;
 [@@@part "33"];;
 let split_path = String.split ~on:':' path in
-let deduped_path = List.dedup ~compare:String.compare split_path in
+let deduped_path = List.dedup_and_sort ~compare:String.compare split_path in
 List.iter ~f:print_endline deduped_path
 ;;
 [%%expect{|
@@ -250,7 +250,7 @@ let (^>) x f = f x;;
 [%%expect ocaml {|val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>|}];;
 Sys.getenv "PATH"
 ^> String.split ~on:':' path
-^> List.dedup ~compare:String.compare
+^> List.dedup_and_sort ~compare:String.compare
 ^> List.iter ~f:print_endline
 ;;
 [%%expect{|
@@ -301,7 +301,7 @@ ratio ~num ~denom;;
 [%%expect ocaml {|- : float = 0.75|}];;
 [@@@part "43"];;
 String.split ~on:':' path
-|> List.dedup ~compare:String.compare
+|> List.dedup_and_sort ~compare:String.compare
 |> List.iter ~f:print_endline
 ;;
 [%%expect{|

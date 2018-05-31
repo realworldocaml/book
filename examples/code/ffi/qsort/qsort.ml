@@ -29,5 +29,5 @@ let sort_stdin () =
 
 let () =
   Command.basic ~summary:"Sort integers on standard input"
-    Command.Spec.empty sort_stdin
+    (Command.Let_syntax.return sort_stdin)
   |> Command.run

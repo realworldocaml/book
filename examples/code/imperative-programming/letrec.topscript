@@ -7,13 +7,13 @@
 #require "ppx_jane";;
 #silent false;;
 open Core_kernel;;
-#require "mtime.os.top";;
+#require "mtime.clock.os";;
 [%%expect{|No such package: mtime.os.top|}];;
 let time f =
-  let counter = Mtime.counter () in
+  let counter = Mtime_clock.counter () in
   let x = f () in
-  let elapsed = Mtime.count counter in
-  printf "Time: %F ms\n" (Mtime.to_ms elapsed);
+  let elapsed = Mtime_clock.count counter in
+  printf "Time: %F ms\n" (Mtime.Span.to_ms elapsed);
   x 
 ;;
 [%%expect{|

@@ -1,2 +1,2 @@
-./basic_md5_with_custom_arg.native /etc/passwd
-./basic_md5_with_custom_arg.native /dev/null
+_build/default/basic_md5_with_custom_arg.exe /etc/passwd
+_build/default/basic_md5_with_custom_arg.exe /dev/null

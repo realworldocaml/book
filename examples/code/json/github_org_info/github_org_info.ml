@@ -11,7 +11,10 @@ let print_org file () =
     name org.id org.public_repos
 
 let () =
+  let open Command.Let_syntax in
   Command.basic ~summary:"Print Github organization information"
-    Command.Spec.(empty +> anon ("organization" %: string))
-    print_org
+    [%map_open
+      let org = anon ("organization" %: string) in
+      print_org org
+    ]
   |> Command.run

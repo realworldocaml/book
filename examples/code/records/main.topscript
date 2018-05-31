@@ -18,16 +18,12 @@ type service_info =
 ;;
 [%%expect ocaml {|type service_info = { service_name : string; port : int; protocol : string; }|}];;
 [@@@part "1"];;
+#silent true;;
 #require "re.posix";;
-[%%expect{|
-/Users/yminsky/.opam/4.04.2/lib/bytes: added to search path
-/Users/yminsky/.opam/4.04.2/lib/re: added to search path
-/Users/yminsky/.opam/4.04.2/lib/re/re.cma: loaded
-/Users/yminsky/.opam/4.04.2/lib/re/re_posix.cma: loaded
-|}];;
+#silent false;;
 let service_info_of_string line =
   let matches = 
-    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
   in
   { service_name = Re.get matches 1;
     port = Int.of_string (Re.get matches 2);
@@ -58,7 +54,7 @@ let parse_lines parse file_contents =
 parse_lines service_info_of_string
   {|rtmp              1/ddp     # Routing Table Maintenance Protocol
     tcpmux            1/udp     # TCP Port Service Multiplexer
-    tcpmux            1/tcp     # TCP Port Service Multiplexer|}
+    tcpmux            1/tcp     # TCP Port Service Multiplexer |}
 ;;
 [%%expect ocaml {|
 - : service_info with_line_num list =
@@ -75,46 +71,45 @@ parse_lines Int.of_string "1\n10\n100\n1000";;
 |}];;
 
 [@@@part "4.3"];;
-print_endline "A string!";;
-[%%expect{|A string!|};
-ocaml {|- : unit = ()|}];;
+let s = "A string!";;
+[%%expect ocaml {|val s : string = "A string!"|}];;
 
 [@@@part "4.4"];;
-print_endline {|A string!|};;
-[%%expect{|A string!|};
-ocaml {|- : unit = ()|}];;
+let s = {|A string!|};;
+[%%expect ocaml {|val s : string = "A string!"|}];;
 
 [@@@part "4.5"];;
-print_endline "\"A quoted string!\"";;
-[%%expect{|"A quoted string!"|};
-ocaml {|- : unit = ()|}];;
+let s = "\"A quoted string!\"";;
+[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
+let () = print_endline s;;
+[%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.6"];;
-print_endline {|"A quoted string"|};;
-[%%expect{|"A quoted string"|};
-ocaml {|- : unit = ()|}];;
+let s = "\"A quoted string!\"";;
+[%%expect ocaml {|val s : string = "\"A quoted string!\""|}];;
+let () = print_endline s;;
+[%%expect{|"A quoted string!"|}];;
 
 [@@@part "4.7"];;
-print_endline "A string with a \n and a \t!";;
+let s = print_endline {|
+It's possible to put something
+here that spans multiple lines|};;
 [%%expect{|
-A string with a 
- and a 	!
+It's possible to put something
+here that spans multiple lines
 |};
-ocaml {|- : unit = ()|}];;
-print_endline {|A string with a \n and a \t!|};;
-[%%expect{|A string with a \n and a \t!|};
-ocaml {|- : unit = ()|}];;
-
+ocaml {|val s : unit = ()|}];;
 
 [@@@part "4.8"];;
-let s = print_string {x|
+let s = print_endline {x|
 OCaml has multiple kinds of quotations,
-including ", {|, and |}
+including ", and {| and |}
 |x};;
-[%%expect{escape|
+[%%expect{|
 OCaml has multiple kinds of quotations,
-including ", {|, and |}
-|escape};
+including ", and {| and |}
+
+|};
 ocaml {|val s : unit = ()|}];;
 
 [@@@part "5"];;
@@ -175,7 +170,7 @@ let service_info_of_string line =
   in
   (* now, use a regular expression to break up the service definition *)
   let matches = 
-    Re.exec (Re_posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+    Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
   in
   let service_name = Re.get matches 1 in
   let port = Int.of_string (Re.get matches 2) in

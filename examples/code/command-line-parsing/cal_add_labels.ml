@@ -6,13 +6,13 @@ let add_days ~base_date ~num_days () =
   |> print_endline
 
 let add =
+  let open Command.Let_syntax in
   Command.basic
     ~summary:"Add [days] to the [base] date and print day"
-    Command.Spec.( 
-      step (fun m base days -> m ~base_date:base ~num_days:days)
-      +> anon ("base" %: date)
-      +> anon ("days" %: int)
-    )
-    add_days
+    [%map_open
+      let base_date = anon ("base" %: date) 
+      and num_days = anon ("days" %: int) in
+      add_days ~base_date ~num_days
+    ]
 
 let () = Command.run add
