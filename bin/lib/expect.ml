@@ -58,6 +58,7 @@ module Cram = struct
   type t = Cram.t [@@deriving sexp]
   let to_html x = Cram.to_html x
   let part = Cram.part
+  let is_empty t = t = []
 
   let of_file ~filename =
     Monitor.try_with_or_error (fun () -> Reader.file_contents filename)

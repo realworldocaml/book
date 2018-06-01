@@ -136,7 +136,9 @@ let script_part_to_html (x : script_part) =
     | `OCaml_toplevel phrases -> phrases_to_html phrases
     | `OCaml_rawtoplevel x
     | `OCaml x -> Pygments.pygmentize `OCaml x.Expect.Raw_script.content
-    | `Shell x -> Pygments.pygmentize ~interactive:true `Bash (Expect.Cram.to_html x)
+    | `Shell x ->
+      if Expect.Cram.is_empty x then `Data ""
+      else Pygments.pygmentize ~interactive:true `Bash (Expect.Cram.to_html x)
     | `Other x -> Pygments.pygmentize `OCaml x
   in
   Html.div ~a:["class","highlight"] [l]
@@ -174,6 +176,8 @@ let script lang ~filename =
     )
   | "sh" | "errsh" -> (
       let %map script = Expect.Cram.of_file ~filename in
+      if Expect.Cram.is_empty script then
+        printf "warning: %s is empty\n%!" filename;
       `Shell script
     )
   | "jbuild" ->
