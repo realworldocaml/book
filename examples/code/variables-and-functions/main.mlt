@@ -180,14 +180,14 @@ let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 (3,2) +! (-2,4);;
 [%%expect ocaml {|- : int * int = (1, 6)|}];;
 [@@@part "27"];;
-let (***) x y = (x **. y) **. y;;
+let (***) base exponent = (base **. exponent) **. exponent;;
 [%%expect{|
 Characters 17-18:
 Error: This expression has type int but an expression was expected of type
          float
 |}];;
 [@@@part "28"];;
-let ( *** ) x y = (x **. y) **. y;;
+let ( *** ) base exponent = (base **. exponent) **. exponent;;
 [%%expect ocaml {|val ( *** ) : float -> float -> float = <fun>|}];;
 [@@@part "29"];;
 Int.max 3 (-4);;
