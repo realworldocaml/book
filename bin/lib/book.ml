@@ -1,11 +1,6 @@
 open Core
 open Async
-module Html = Rwo_html
-module Import = Rwo_import
-module References = Rwo_references
-module Index = Rwo_index
-module Scripts = Rwo_scripts
-module Toc = Rwo_toc
+
 let (/) = Filename.concat
 
 (******************************************************************************)

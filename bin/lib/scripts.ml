@@ -1,10 +1,5 @@
 open Core
 open Async
-module Html = Rwo_html
-module Import = Rwo_import
-module Lang = Rwo_lang
-module Pygments = Rwo_pygments
-module Expect = Rwo_expect
 
 type part = string
   [@@deriving sexp]
@@ -152,9 +147,9 @@ let exn_of_filename filename content =
   match extension with
   | Some ext -> (match ext with
     | "ml" | "mli" | "mly" | "mll" ->
-      `OCaml Rwo_expect.Raw_script.{ name = ""; content }
+      `OCaml Expect.Raw_script.{ name = ""; content }
     | "rawscript" ->
-      `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
+      `OCaml_rawtoplevel Expect.Raw_script.{ name = ""; content }
     | _ -> `Other content)
   | None -> `Other content
 

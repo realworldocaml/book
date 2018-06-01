@@ -1,6 +1,4 @@
 open Core
-module Lang = Rwo_lang
-module Html = Rwo_html
 
 module T = struct
 
@@ -11,7 +9,7 @@ module T = struct
     href : string;
     part : part option;
     alt : string option;
-    childs : Rwo_html.item list;
+    childs : Html.item list;
   } [@@deriving sexp]
 
   (* Ignore [childs]. *)
