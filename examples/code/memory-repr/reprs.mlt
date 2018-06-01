@@ -52,10 +52,7 @@ Obj.tag (Obj.repr (Pear "xyz")) ;;
 (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;
 [%%expect ocaml {|- : string = "xyz"|}];;
 [@@@part "6"];;
-Pa_type_conv.hash_variant "Foo" ;;
-[%%expect{|
-Characters 0-25:
-Error: Unbound module Pa_type_conv
-|}];;
+Typerep_lib__Typerep_obj.hash_variant "Foo" ;;
+[%%expect ocaml {|- : int = 3505894|}];;
 (Obj.magic (Obj.repr `Foo) : int) ;;
 [%%expect ocaml {|- : int = 3505894|}];;

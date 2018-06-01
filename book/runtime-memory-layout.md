@@ -371,7 +371,7 @@ A polymorphic variant without any parameters is stored as an unboxed integer
 and so only takes up one word of memory, just like a normal variant. This
 integer value is determined by applying a hash function to the *name* of the
 variant. The hash function isn't exposed directly by the compiler, but the
-`type_conv` library from Core provides an alternative implementation:
+`typerep` library from Core provides an alternative implementation:
 
 <link rel="import" href="code/memory-repr/reprs.mlt" part="6" />
 
