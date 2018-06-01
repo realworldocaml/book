@@ -1,16 +1,17 @@
-opam-version: "1.2"
+opam-version: "2.0"
 name: "rwo"
 version: "dev"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/realworldocaml/book"
 license: "ISC"
 authors: ["Yaron Minsky" "Anil Madhavapeddy" "Jason Hickey"]
-dev-repo: "https://github.com/realworldocaml/book.git"
+dev-repo: "git://github.com/realworldocaml/book.git"
 bug-reports: "https://github.com/realworldocaml/book/issues"
 
 build: [ "jbuilder" "build" ]
 
 depends: [
+  "ocaml" {>= "4.06.0"}
   "core" {>="v0.11.0"}
   "async" {>="v0.11.0"}
   "ppx_sexp_conv" {build & >="v0.9.0"}
@@ -32,15 +33,16 @@ depends: [
   "atd"
   "atdgen"
   "ctypes"
+  "async_graphics"
   "ctypes-foreign"
   "textwrap"
   "uri"
+]
+pin-depends: [
+ ["async_graphic.dev" "git://github.com/drewsdunne/async_graphics.git"]
 ]
 depexts: [
  [["ubuntu"] ["tzdata"]]
  [["debian"] ["tzdata"]]
  [["alpine"] ["tzdata"]]
-]
-available: [
-  ocaml-version >= "4.06.0"
 ]
