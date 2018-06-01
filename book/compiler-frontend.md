@@ -504,7 +504,7 @@ clashes]{.idx}[macros]{.idx}[conditional
 compilation]{.idx}[whitespace-sensitive indentation]{.idx}[syntax
 extension/potential overuse of]{.idx}
 
-::: {.allow_break data-type=caution}
+::: {.allow_break data-type=warning}
 #### Don't Overdo the Syntax Extensions
 
 Syntax extensions are a powerful extension mechanism that can completely

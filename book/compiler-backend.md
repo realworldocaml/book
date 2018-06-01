@@ -525,7 +525,7 @@ source code to let-bind the anonymous function to a variable name.
 Let's see name mangling in action with some interactive debugging using GNU
 `gdb`. [GNU debugger]{.idx}
 
-::: {data-type=caution}
+::: {data-type=warning}
 ##### Beware gdb on Mac OS X
 
 The examples here assume that you are running `gdb` on either Linux or
