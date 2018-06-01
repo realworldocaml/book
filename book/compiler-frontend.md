@@ -890,7 +890,7 @@ files]{.idx}[OCaml toolchain/ocamlogjinfo]{.idx}
 <aside data-type="sidebar">
 <h5>Inspecting Compilation Units with ocamlobjinfo</h5>
 
-For separate compilation to be sound, we need to ensure that all the 
+For separate compilation to be sound, we need to ensure that all the
 `cmi` files used to type-check a module are the same across compilation runs.
 If they vary, this raises the possibility of two modules checking different
 type signatures for a common module with the same name. This in turn lets the
@@ -963,7 +963,7 @@ create a new module to link against `X` to complete the example:
 
 You can now compile this test module and see that its inferred interface is
 the result of using the packed contents of `X`. We further verify this by
-examining the imported interfaces in `Test` and confirming that neither 
+examining the imported interfaces in `Test` and confirming that neither
 `A` nor `B` are mentioned in there and that only the packed `X` module is
 used:
 
@@ -992,7 +992,7 @@ installed (and hence not exposing the intermediate compiled modules).
 ### Shorter Module Paths in Type Errors {#shorter-module-paths-in-type-errors data-type=sect2}
 
 Core uses the OCaml module system quite extensively to provide a complete
-replacement standard library. It collects these modules into a single 
+replacement standard library. It collects these modules into a single
 `Std` module, which provides a single module that needs to be opened to
 import the replacement modules and functions. [errors/reducing verbosity
 in]{.idx}
@@ -1100,7 +1100,7 @@ displayed in a more developer-readable form via the `-dtypedtree` option:
 <link rel="import" href="code/front-end/typedtree_typedef.sh" />
 
 The typed AST is more explicit than the untyped syntax tree. For instance,
-the type declaration has been given a unique name (`t/1008`), as has the 
+the type declaration has been given a unique name (`t/1008`), as has the
 `v` value (`v/1011`).
 <a data-type="indexterm" data-startref="typesyntree">&nbsp;</a><a data-type="indexterm" data-startref="CPtypsyn">&nbsp;</a>
 
@@ -1116,6 +1116,3 @@ files with common editors such as Emacs or Vim. The best of these is
 autocompletion, displays inferred types and can build and display errors
 directly from within your editor. There are instructions available on its
 homepage for configuring Merlin with your favorite editor.
-
-
-
