@@ -38,7 +38,7 @@
 
   <p>Let's get started.</p>
 
-  <h1>Getting OPAM</h1>
+  <h2>Getting OPAM</h2>
 
   <p>The easiest way to install OPAM is through your OS's package
   manager. In most cases, installing OPAM will also trigger the
@@ -48,7 +48,7 @@
 
   <p>Here are platform-specific instructions.</p>
 
-  <h2>Mac OS X</h2>
+  <h3>Mac OS X</h3>
 
   <p>If you don't already have a package manager set up, try
   installing homebrew. You can find information on installing
@@ -68,7 +68,7 @@ brew install opam
 sudo port install opam
 </code></pre>
 
-  <h2>Ubuntu Linux</h2>
+  <h3>Ubuntu Linux</h3>
 
   <p>14.04 and higher comes with recent versions of OCaml  and opam. No PPA
   needed.</p>
@@ -76,14 +76,14 @@ sudo port install opam
 sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-native-compilers opam
 </code></pre>
 
-  <h2>Debian Linux</h2>
+  <h3>Debian Linux</h3>
 
   <p>Debian's OCaml packages aren't yet at 4.06.0, and so you will
   need to compile it from sources. If you are using the
   Debian 9 <code>stable</code> stream, then OPAM 1.2.2 will
   be available.</p>
 
-  <h2>Arch Linux</h2>
+  <h3>Arch Linux</h3>
 
   <p>OPAM is available from the AUR (Arch User Repository). You can
   install OPAM using <code>yaourt</code>:</p>
@@ -100,7 +100,7 @@ makepkg
 sudo pacman -U opam-&lt;version&gt;.pkg.tar.xz
 </code></pre>
 
-  <h2>Building from source</h2>
+  <h3>Building from source</h3>
 
   <p>On platforms not listed above, you'll need to install OPAM
   from source, and to do that you'll need OCaml installed first.
@@ -125,7 +125,7 @@ sudo make install
   <p>If you have problems with any of the above, read the
   <code>INSTALL</code> file in the tar file.</p>
 
-  <h3>Installing OCaml locally</h3>
+  <h4>Installing OCaml locally</h4>
 
   <p>The installation step described above requires administrator
   privileges. You can also install it in your home directory by
@@ -142,7 +142,7 @@ sudo make install
   have special reasons, so try to install binary packages before
   trying a source installation.</p>
 
-  <h3>Installing OPAM</h3>
+  <h4>Installing OPAM</h4>
 
   <p>If the binary packages aren't available for your system,
   you'll need to install the latest OPAM release from source. You
@@ -150,7 +150,7 @@ sudo make install
   "http://opam.ocaml.org/doc/Quick_Install.html">quick install
   guide</a>.</p>
 
-  <h1>Configuring OPAM</h1>
+  <h2>Configuring OPAM</h2>
 
   <p>The entire OPAM package database is held in the
   <code>.opam</code> directory in your home directory, including
@@ -290,7 +290,7 @@ opam install async yojson core_extended core_bench cohttp async_graphics cryptok
   this set up as part of your shell init scripts, as described
   earlier.</p>
 
-  <h1>Setting up and using <code>utop</code></h1>
+  <h2>Setting up and using <code>utop</code></h2>
 
   <p>When you first run <code>utop</code>, you'll find yourself at
   an interactive prompt with a bar at the bottom of the screen. The
@@ -335,9 +335,9 @@ open Core
   remember to open it before running any of the interactive
   examples in the book.</p>
 
-  <h1>Editors</h1>
+  <h2>Editors</h2>
 
-  <h2>Emacs</h2>
+  <h3>Emacs</h3>
 
   <p>These instructions have been tested on emacs 24.2 and should
   work for that version and newer. There are some reports of
@@ -401,7 +401,7 @@ open Core
   "https://github.com/diml/utop#integration-with-emacs">utop
   homepage</a>.</p>
 
-  <h3>Using Emacs24 packages</h3>
+  <h4>Using Emacs24 packages</h4>
 
   <p>As an alternative to the setup above, here is a simplified
   OCaml setup using <a href="http://melpa.milkbox.net/#/">MELPA</a>
@@ -433,14 +433,14 @@ open Core
 (setq merlin-error-after-save nil)
 </code></pre>
 
-  <h2>Vim</h2>
+  <h3>Vim</h3>
 
   <p>Vim users can use the built-in style, and <a href=
   "http://github.com/avsm/ocaml-annot">ocaml-annot</a> may also be
   useful. For a more richly-featured setup, see the section on
   Merlin below.</p>
 
-  <h2>Eclipse</h2>
+  <h3>Eclipse</h3>
 
   <p>Eclipse is a popular IDE usually used for Java development.
   The <a href="http://ocamldt.free.fr">OCaml Development Tools
@@ -449,13 +449,13 @@ open Core
   completion. Installation instructions can be found <a href=
   "http://ocamldt.free.fr/spip.php?article5">here</a></p>
 
-  <h2>Other editors</h2>
+  <h3>Other editors</h3>
 
   <p>There are lots of other editors, and many of them come with
   built-in OCaml modes. These includes TextMate and Sublime Text
   for the Mac, and countless others.</p>
 
-  <h2>Cross-editor tools</h2>
+  <h3>Cross-editor tools</h3>
 
   <p>There are a number of tools that are compatible with multiple
   editors that can help you work more effectively with OCaml. Two
@@ -464,7 +464,7 @@ open Core
   optional. You might want to get started with the book before
   getting back to setting these up.</p>
 
-  <h3>Merlin</h3>
+  <h4>Merlin</h4>
 
   <p>Merlin provides a number of advanced IDE-like features,
   including:</p>
@@ -488,7 +488,7 @@ opam install merlin
   following examples assume Merlin has been installed through OPAM
   as above.</p>
 
-  <h4>Emacs</h4>
+  <h5>Emacs</h5>
 
   <p>A summary follows -- for more complete information, see
   <a href=
@@ -540,7 +540,7 @@ opam install merlin
     confused</li>
   </ul>
 
-  <h4>Vim</h4>
+  <h5>Vim</h5>
 
   <p>A summary follows -- for more complete information, see
   <a href=
@@ -600,7 +600,7 @@ endif
   such as Syntastic and neocomplcache -- see <code>:help
   merlin.txt</code> for pointers.</p>
 
-  <h4>Tell Merlin about your project layout</h4>
+  <h5>Tell Merlin about your project layout</h5>
 
   <p>Regardless of which editor you use, you need to tell Merlin a
   bit about the build environment you're working with in order for
@@ -621,9 +621,9 @@ EXT nonrec
   <p>See the Merlin README for complete details of the file
   format.</p>
 
-  <h3><a id="user-content-ocp-indent" class="anchor" href=
+  <h4><a id="user-content-ocp-indent" class="anchor" href=
   "#ocp-indent" aria-hidden="true" name=
-  "user-content-ocp-indent"></a>ocp-indent</h3>
+  "user-content-ocp-indent"></a>ocp-indent</h4>
 
   <p><code>ocp-indent</code> is a source-code indenter which
   includes a command-line tool, library and integration with emacs
@@ -637,7 +637,7 @@ EXT nonrec
 opam install ocp-indent
 </code></pre>
 
-  <h4>Emacs</h4>
+  <h5>Emacs</h5>
 
   <p>After installing through OPAM, simply load the file as follows
   to override tuareg-mode's indentation:</p>
@@ -646,7 +646,7 @@ opam install ocp-indent
 (load-file (concat opam-share "/typerex/ocp-indent/ocp-indent.el"))
 </code></pre>
 
-  <h4>Vim</h4>
+  <h5>Vim</h5>
 
   <p>After installing through OPAM, simply add this
   <code>autocmd</code> to your Vim configuration:</p>
