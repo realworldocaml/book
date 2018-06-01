@@ -46,7 +46,7 @@ val find: filename:string -> t -> chapter option
 (** [get_sections filename html] returns the section structure within
     the chapter of the given file, to depth 3. The [filename] is only
     for error messages. *)
-val get_sections : string -> Html.t -> sections
+val get_sections : filename:string -> Html.t -> sections
 
 (** Useful for debugging. *)
 val flatten_sections : sections -> section list
