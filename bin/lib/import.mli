@@ -18,21 +18,21 @@ type t = {
   href : string;
   part : part option;
   alt : string option;
-  childs : Rwo_html.item list;
+  childs : Html.item list;
 } [@@deriving sexp]
 
-val of_html : Rwo_html.item -> t Or_error.t
+val of_html : Html.item -> t Or_error.t
 
-val to_html : t -> Rwo_html.item
+val to_html : t -> Html.item
 
-val lang_of : t -> Rwo_lang.t Or_error.t
+val lang_of : t -> Lang.t Or_error.t
 
 (** Return true if given HTML [item] should be parseable as an import node
     and nothing else. A true result doesn't guarantee that
     [parse_import item] will succceed, only that it should because it
     can't be anything else. *)
-val is_import_html : Rwo_html.item -> bool
+val is_import_html : Html.item -> bool
 
-val find_all : Rwo_html.t -> t list
+val find_all : Html.t -> t list
 
 include Comparable.S with type t := t

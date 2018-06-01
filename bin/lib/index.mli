@@ -11,5 +11,5 @@
 *)
 open! Core
 
-val indexterm_to_idx : Rwo_html.t -> Rwo_html.t
-val idx_to_indexterm : Rwo_html.t -> Rwo_html.t
+val indexterm_to_idx : Html.t -> Html.t
+val idx_to_indexterm : Html.t -> Html.t

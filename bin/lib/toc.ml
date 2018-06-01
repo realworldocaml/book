@@ -1,8 +1,6 @@
 open Core
 open Async
-module Html = Rwo_html
-module Import = Rwo_import
-module Util = Rwo_util
+
 let (/) = Filename.concat
 
 type part_info = {
@@ -81,7 +79,7 @@ let get_sections file (html: Html.t) =
     let rec loop accum = function
       | [] -> accum
       | (`Element{Html.name="section";attrs;childs} as item)::rest -> (
-          if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type",data_type)
+          if List.mem ~equal:Util.string_pair_equal attrs ("data-type",data_type)
           then (
             match Html.filter_whitespace childs with
             | `Element{Html.name; attrs=_; childs}::_ -> (
