@@ -1262,26 +1262,46 @@
      padding-top: 0;
      border-top: 0;
 }
+
+ /* Notes & Warnings */
  section[data-type=chapter] div[data-type=note] {
      background: #fdedd4;
      border: 1px solid #f39c12;
+ }
+ section[data-type=chapter] div[data-type=warning] {
+     background: #F2D7D5;
+     border: 1px solid #F1948A;
+ }
+
+ section[data-type=chapter] div[data-type=note],
+ section[data-type=chapter] div[data-type=warning] {
      border-radius: 3px;
      margin-bottom: 1.6875rem;
      padding: 1.6875rem;
 }
  section[data-type=chapter] div[data-type=note] h1,
- section[data-type=chapter] div[data-type=note] h2 {
+ section[data-type=chapter] div[data-type=note] h2,
+ section[data-type=chapter] div[data-type=warning] h1,
+ section[data-type=chapter] div[data-type=warning] h2 {
      font-size: 1.5625rem;
 }
- section[data-type=chapter] div[data-type=note] p {
+ section[data-type=chapter] div[data-type=note] p,
+ section[data-type=chapter] div[data-type=warning] p {
+     font-size: 0.875rem;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+     font-weight: normal;
 }
- section[data-type=chapter] div[data-type=note] pre, section[data-type=chapter] div[data-type=note] div.highlight {
+ section[data-type=chapter] div[data-type=note] pre,
+ section[data-type=chapter] div[data-type=note] div.highlight,
+ section[data-type=chapter] div[data-type=warning] pre,
+ section[data-type=chapter] div[data-type=warning] div.highlight {
      background: transparent;
 }
- section[data-type=chapter] div[data-type=note] div.highlight {
+ section[data-type=chapter] div[data-type=note] div.highlight,
+ section[data-type=chapter] div[data-type=warning] div.highlight {
      padding: 0 1.6875rem;
 }
+
  section[data-type=chapter] aside {
      margin-left: -1.6875rem;
      margin-right: -1.6875rem;
