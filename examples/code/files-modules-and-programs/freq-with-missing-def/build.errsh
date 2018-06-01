@@ -1,4 +1,9 @@
-  $ dune build counter.bc
-  Don't know how to build counter.bc
-  Hint: did you mean counter.ml?
+  $ dune build freq.bc
+        ocamlc .freq.eobjs/counter.{cmo,cmt} (exit 2)
+  (cd _build/default && /home/christophe/.opam/rwo/bin/ocamlc.opt -w -40 -g -bin-annot -I .freq.eobjs -I /home/christophe/.opam/rwo/lib/base -I /home/christophe/.opam/rwo/lib/base/caml -I /home/christophe/.opam/rwo/lib/base/shadow_stdlib -I /home/christophe/.opam/rwo/lib/sexplib0 -I /home/christophe/.opam/rwo/lib/stdio -no-alias-deps -o .freq.eobjs/counter.cmo -c -impl counter.ml)
+  File "counter.ml", line 1:
+  Error: The implementation counter.ml
+         does not match the interface .freq.eobjs/counter.cmi:
+         The value `count' is required but not provided
+         File "counter.mli", line 18, characters 0-30: Expected declaration
 @@ exit 1
