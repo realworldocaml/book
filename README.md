@@ -70,6 +70,10 @@ To generate the HTML pages:
 make
 ```
 
+The HTML pages are created in `_build/default/static/`.
+Open `_build/default/static/index.html` to start browsing the
+freshly built version of the book.
+
 ### Testing the code examples
 
 It is possible to automatically test that
