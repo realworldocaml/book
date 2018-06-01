@@ -1,4 +1,4 @@
-# Variables and Functions {#variables-and-functions data-type=chapter}
+# Variables and Functions {#variables-and-functions}
 
 Variables and functions are fundamental ideas that show up in virtually all
 programming languages. OCaml has a different take on these concepts than most
@@ -12,7 +12,7 @@ especially toward the end of the chapter. The concepts here are important,
 but if they don't connect for you on your first read, you should return to
 this chapter after you've gotten a better sense of the rest of the language.
 
-## Variables {#variables data-type=sect1}
+## Variables {#variables}
 
 At its simplest, a variable is an identifier whose meaning is bound to a
 particular value. In OCaml these bindings are often introduced using the
@@ -168,7 +168,7 @@ cases that should be impossible. We'll discuss `assert` in more detail in
 [Error Handling](error-handling.html#error-handling){data-type=xref}.
 
 
-## Functions {#functions data-type=sect1}
+## Functions {#functions}
 
 Given that OCaml is a functional language, it's no surprise that functions
 are important and pervasive. Indeed, functions have come up in almost every

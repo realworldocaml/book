@@ -1,4 +1,4 @@
-# The Compiler Backend: Bytecode and Native code {#the-compiler-backend-byte-code-and-native-code data-type=chapter}
+# The Compiler Backend: Bytecode and Native code {#the-compiler-backend-byte-code-and-native-code}
 
 Once OCaml has passed the type checking stage, it can stop emitting syntax
 and type errors and begin the process of compiling the well-formed modules
@@ -13,7 +13,7 @@ In this chapter, we'll cover the following topics:
 - The native code `ocamlopt` code generator, and debugging and profiling
   native code
 
-## The Untyped Lambda Form {#the-untyped-lambda-form data-type=sect1}
+## The Untyped Lambda Form {#the-untyped-lambda-form}
 
 The first code generation phase eliminates all the static type information
 into a simpler intermediate *lambda form*. The lambda form discards
@@ -152,7 +152,7 @@ from this stage than to wade through the native assembly code from compiled
 executables.<a data-type="indexterm" data-startref="CPuntype">&nbsp;</a>
 
 
-## Generating Portable Bytecode {#generating-portable-bytecode data-type=sect1}
+## Generating Portable Bytecode {#generating-portable-bytecode}
 
 After the lambda form has been generated, we are very close to having
 executable code. The OCaml toolchain branches into two separate compilers at
@@ -342,7 +342,7 @@ section of the OCaml manual.
 <a data-type="indexterm" data-startref="CPportbyte">&nbsp;</a>
 
 
-## Compiling Fast Native Code {#compiling-fast-native-code data-type=sect1}
+## Compiling Fast Native Code {#compiling-fast-native-code}
 
 The native code compiler is ultimately the tool that most production OCaml
 code goes through. It compiles the lambda form into fast native code
@@ -732,7 +732,7 @@ very latest version, which you should be using via the `4.01.0` OPAM switch.
 <a data-type="indexterm" data-startref="CPfast">&nbsp;</a>
 
 
-## Summarizing the File Extensions {#summarizing-the-file-extensions data-type=sect1}
+## Summarizing the File Extensions {#summarizing-the-file-extensions}
 
 We've seen how the compiler uses intermediate files to store various stages
 of the compilation toolchain. Here's a cheat sheet of all them in one place.

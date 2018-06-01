@@ -1,4 +1,4 @@
-# Understanding the Garbage Collector {#understanding-the-garbage-collector data-type=chapter}
+# Understanding the Garbage Collector {#understanding-the-garbage-collector}
 
 We've described the runtime format of individual OCaml variables earlier, in
 [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
@@ -16,7 +16,7 @@ values in response to allocation requests by the OCaml program.
 [values/allocation requests and]{.idx}[heaps/heap
 blocks]{.idx}[heaps/definition of]{.idx}
 
-## Mark and Sweep Garbage Collection {#mark-and-sweep-garbage-collection data-type=sect1}
+## Mark and Sweep Garbage Collection {#mark-and-sweep-garbage-collection}
 
 When there isn't enough memory available to satisfy an allocation request
 from the pool of allocated heap blocks, the runtime system invokes the
@@ -38,7 +38,7 @@ retained, and unreachable blocks can be reused by the application. The
 algorithm used by OCaml to perform this heap traversal is commonly known as
 *mark and sweep* garbage collection, and we'll explain it further now.
 
-## Generational Garbage Collection {#generational-garbage-collection data-type=sect1}
+## Generational Garbage Collection {#generational-garbage-collection}
 
 The usual OCaml programming style involves allocating many small variables
 that are used for a short period of time and then never accessed again. OCaml
@@ -83,7 +83,7 @@ the
 
 </aside>
 
-## The Fast Minor Heap {#the-fast-minor-heap data-type=sect1}
+## The Fast Minor Heap {#the-fast-minor-heap}
 
 The minor heap is where most of your short-lived values are held. It consists
 of one contiguous chunk of virtual memory containing a sequence of OCaml
@@ -156,7 +156,7 @@ standard OCaml installation quite significantly, and you'll want to reduce
 this if running in very memory-constrained environments.
 
 
-## The Long-Lived Major Heap {#the-long-lived-major-heap data-type=sect1}
+## The Long-Lived Major Heap {#the-long-lived-major-heap}
 
 The major heap is where the bulk of the longer-lived and larger values in
 your program are stored. It consists of any number of noncontiguous chunks of
@@ -478,7 +478,7 @@ to re-create the behavior in a performance unit test.
 
 
 
-## Attaching Finalizer Functions to Values {#attaching-finalizer-functions-to-values data-type=sect1}
+## Attaching Finalizer Functions to Values {#attaching-finalizer-functions-to-values}
 
 OCaml's automatic memory management guarantees that a value will eventually
 be freed when it's no longer in use, either via the GC sweeping it or the

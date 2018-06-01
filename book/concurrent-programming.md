@@ -1,4 +1,4 @@
-# Concurrent Programming with Async {#concurrent-programming-with-async data-type=chapter}
+# Concurrent Programming with Async {#concurrent-programming-with-async}
 
 The logic of building programs that interact with the outside world is often
 dominated by waiting; waiting for the click of a mouse, or for data to be
@@ -41,7 +41,7 @@ synchronization woes of preemptive threads without the confusing inversion of
 control that usually comes with event-driven systems. [Async library/benefits
 of]{.idx}
 
-## Async Basics {#async-basics data-type=sect1}
+## Async Basics {#async-basics}
 
 Recall how I/O is typically done in Core. Here's a simple example:
 
@@ -282,7 +282,7 @@ primitives.
 
 
 
-## Example: An Echo Server {#examples-an-echo-server data-type=sect1}
+## Example: An Echo Server {#examples-an-echo-server}
 
 Now that we have the basics of Async under our belt, let's look at a small
 standalone Async program. In particular, we'll write an echo server, 
@@ -486,7 +486,7 @@ explicit call to
 `Scheduler.go`.<a data-type="indexterm" data-startref="echo">&nbsp;</a><a data-type="indexterm" data-startref="ALecho">&nbsp;</a>
 
 
-## Example: Searching Definitions with DuckDuckGo {#example-searching-definitions-with-duckduckgo data-type=sect1}
+## Example: Searching Definitions with DuckDuckGo {#example-searching-definitions-with-duckduckgo}
 
 DuckDuckGo is a search engine with a freely available search interface. In
 this section, we'll use Async to write a small command-line utility for
@@ -633,7 +633,7 @@ searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 <link rel="import" href="code/async/search/run_search.sh" />
 
 
-## Exception Handling {#exception-handling data-type=sect1}
+## Exception Handling {#exception-handling}
 
 When programming with external resources, errors are everywhere: everything
 from a flaky server to a network outage to exhausting of local resources can
@@ -829,7 +829,7 @@ is analogous to the `protect` call described in
 [Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.<a data-type="indexterm" data-startref="ALexcept">&nbsp;</a>
 
 
-## Timeouts, Cancellation, and Choices {#timeouts-cancellation-and-choices data-type=sect1}
+## Timeouts, Cancellation, and Choices {#timeouts-cancellation-and-choices}
 
 In a concurrent program, one often needs to combine results from multiple,
 distinct concurrent subcomputations going on in the same program. We already
@@ -916,7 +916,7 @@ succeeds and the other fails reporting a timeout:
 
 <link rel="import" href="code/async/search_with_timeout_no_leak/run_search_with_timeout_no_leak.sh" />
 
-## Working with System Threads {#working-with-system-threads data-type=sect1}
+## Working with System Threads {#working-with-system-threads}
 
 Although we haven't worked with them yet, OCaml does have built-in support
 for true system threads, i.e., kernel-level threads whose interleaving is

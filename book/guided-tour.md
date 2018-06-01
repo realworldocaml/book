@@ -1,4 +1,4 @@
-# A Guided Tour {#a-guided-tour data-type=chapter}
+# A Guided Tour {#a-guided-tour}
 
 This chapter gives an overview of OCaml by walking through a series of small
 examples that cover most of the major features of the language. This should
@@ -48,7 +48,7 @@ book.
 Before getting started, make sure you have a working OCaml installation so
 you can try out the examples as you read through the chapter.
 
-## OCaml as a Calculator {#ocaml-as-a-calculator data-type=sect1}
+## OCaml as a Calculator {#ocaml-as-a-calculator}
 
 Our first step is to open `Base`: [OCaml/numerical calculations
 in]{.idx}[numerical calculations]{.idx}[Core standard library/opening]{.idx}
@@ -116,7 +116,7 @@ The following examples, however, are not legal:
 This highlights that variables can't be capitalized, can't begin with
 numbers, and can't contain dashes.
 
-## Functions and Type Inference {#functions-and-type-inference data-type=sect1}
+## Functions and Type Inference {#functions-and-type-inference}
 
 The `let` syntax can also be used to define a function:[let syntax/function
 definition with]{.idx}[functions/defining]{.idx}
@@ -321,7 +321,7 @@ when it's called with an input that triggers the exception.
 
 
 
-## Tuples, Lists, Options, and Pattern Matching {#tuples-lists-options-and-pattern-matching data-type=sect1}
+## Tuples, Lists, Options, and Pattern Matching {#tuples-lists-options-and-pattern-matching}
 
 ### Tuples {#tuples}
 
@@ -642,7 +642,7 @@ explicitness allows the compiler to provide a great deal of help in making
 sure you're correctly handling the possibility of missing data.
 
 
-## Records and Variants {#records-and-variants data-type=sect1}
+## Records and Variants {#records-and-variants}
 
 So far, we've only looked at data structures that were predefined in the
 language, like lists and tuples. But OCaml also allows us to define new data
@@ -732,7 +732,7 @@ those are considered to be problematic, and so are hidden by default by
 :::
 
 
-## Imperative Programming {#imperative-programming data-type=sect1}
+## Imperative Programming {#imperative-programming}
 
 The code we've written so far has been almost entirely *pure* or
 *functional*, which roughly speaking means that the code in question doesn't
@@ -894,7 +894,7 @@ error by rewriting the function to avoid the short-circuiting:
 The or operator, `||`, short-circuits in a similar way to `&&`.
 
 
-## A Complete Program {#a-complete-program data-type=sect1}
+## A Complete Program {#a-complete-program}
 
 So far, we've played with the basic features of the language via `utop`. Now
 we'll show how to create a simple standalone program. In particular, we'll
@@ -955,7 +955,7 @@ is covered in
 [Command Line Parsing](command-line-parsing.html#command-line-parsing){data-type=xref}.
 
 
-## Where to Go from Here {#where-to-go-from-here data-type=sect1}
+## Where to Go from Here {#where-to-go-from-here}
 
 That's it for the guided tour! There are plenty of features left and lots of
 details to explain, but we hope that you now have a sense of what to expect

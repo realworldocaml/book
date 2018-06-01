@@ -1,4 +1,4 @@
-# Functors {#functors data-type=chapter}
+# Functors {#functors}
 
 Up until now, we've seen OCaml's modules play an important but limited role.
 In particular, we've seen them as a mechanism for organizing code into units
@@ -35,7 +35,7 @@ Instead, this chapter will try to provide examples that illuminate the
 language features and design patterns that you need to master in order to use
 functors effectively.
 
-## A Trivial Example {#a-trivial-example data-type=sect1}
+## A Trivial Example {#a-trivial-example}
 
 Let's create a functor that takes a module containing a single integer
 variable `x` and returns a new module with `x` incremented by one. This is
@@ -87,7 +87,7 @@ whether an object satisfies a given interface. As in an object-oriented
 context, the extra information that doesn't match the signature you're
 looking for (in this case, the variable `y`) is simply ignored.
 
-## A Bigger Example: Computing with Intervals {#a-bigger-example-computing-with-intervals data-type=sect1}
+## A Bigger Example: Computing with Intervals {#a-bigger-example-computing-with-intervals}
 
 Let's consider a more realistic example of how to use functors: a library for
 computing with intervals. Intervals are a common computational object, and
@@ -344,7 +344,7 @@ And now, we can use that sexp converter in the ordinary way:
 <link rel="import" href="code/functors/main.mlt" part="29" />
 
 
-## Extending Modules {#extending-modules data-type=sect1}
+## Extending Modules {#extending-modules}
 
 Another common use of functors is to generate type-specific functionality for
 a given module in a standardized way. Let's see how this works in the context

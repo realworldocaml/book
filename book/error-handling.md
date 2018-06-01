@@ -1,4 +1,4 @@
-# Error Handling {#error-handling data-type=chapter}
+# Error Handling {#error-handling}
 
 Nobody likes dealing with errors. It's tedious, it's easy to get wrong, and
 it's usually just not as fun as thinking about how your program is going to
@@ -16,7 +16,7 @@ OCaml: error-aware return types and exceptions. [error-aware return
 types]{.idx #erraware}[error handling/error-aware return
 types]{.idx #EHeraware}
 
-## Error-Aware Return Types {#error-aware-return-types data-type=sect1}
+## Error-Aware Return Types {#error-aware-return-types}
 
 The best way in OCaml to signal an error is to include that error in your
 return value. Consider the type of the `find` function in the `List` module:
@@ -221,7 +221,7 @@ this kind can be found in the `Result` and `Or_error`
 modules.<a data-type="indexterm" data-startref="erraware">&nbsp;</a><a data-type="indexterm" data-startref="EHeraware">&nbsp;</a>
 
 
-## Exceptions {#exceptions data-type=sect1}
+## Exceptions {#exceptions}
 
 Exceptions in OCaml are not that different from exceptions in many other
 languages, like Java, C#, and Python. Exceptions are a way to terminate a
@@ -557,7 +557,7 @@ And then we can reraise that exception:
 <link rel="import" href="code/error-handling/main.mlt" part="37" />
 
 
-## Choosing an Error-Handling Strategy {#choosing-an-error-handling-strategy data-type=sect1}
+## Choosing an Error-Handling Strategy {#choosing-an-error-handling-strategy}
 
 Given that OCaml supports both exceptions and error-aware return types, how
 do you choose between them? The key is to think about the trade-off between

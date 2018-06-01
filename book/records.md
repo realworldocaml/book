@@ -1,4 +1,4 @@
-# Records {#records data-type=chapter}
+# Records {#records}
 
 One of OCaml's best features is its concise and expressive system for
 declaring new data types. *Records* are a key element of that system. We
@@ -74,7 +74,7 @@ line.
 
 <link rel="import" href="code/records/main.mlt" part="4.2" />
 
-## Patterns and Exhaustiveness {#patterns-and-exhaustiveness data-type=sect1}
+## Patterns and Exhaustiveness {#patterns-and-exhaustiveness}
 
 Another way of getting information out of a record is by using a pattern
 match, as shown in the following function.[pattern matching/and
@@ -157,7 +157,7 @@ to compile on newer compiler releases.
 :::
 
 
-## Field Punning {#field-punning data-type=sect1}
+## Field Punning {#field-punning}
 
 When the name of a variable coincides with the name of a record field, OCaml
 provides some handy syntactic shortcuts. For example, the pattern in the
@@ -189,7 +189,7 @@ same names throughout your codebase. This is generally good practice, since
 it encourages consistent naming, which makes it easier to navigate the
 source.
 
-## Reusing Field Names {#reusing-field-names data-type=sect1}
+## Reusing Field Names {#reusing-field-names}
 
 Defining records with the same field names can be problematic. As a simple
 example, let's consider a collection of types representing the protocol of a
@@ -299,7 +299,7 @@ For functions defined within the module where a given record is defined, the
 module qualification goes away entirely.
 <a data-type="indexterm" data-startref="RECreusfn">&nbsp;</a><a data-type="indexterm" data-startref="FNreus">&nbsp;</a>
 
-## Functional Updates {#functional-updates data-type=sect1}
+## Functional Updates {#functional-updates}
 
 Fairly often, you will find yourself wanting to create a new record that
 differs from an existing record in only a subset of the fields. For example,
@@ -343,7 +343,7 @@ would be to update the code as follows:
 
 <link rel="import" href="code/records/main2.mlt" part="25" />
 
-## Mutable Fields {#mutable-fields data-type=sect1}
+## Mutable Fields {#mutable-fields}
 
 Like most OCaml values, records are immutable by default. You can, however,
 declare individual record fields as mutable. In the following code, we've
@@ -366,7 +366,7 @@ programming is an important part of programming in OCaml. We go into more
 depth about how (and when) to use OCaml's imperative features in
 [Imperative Programming](guided-tour.html#imperative-programming){data-type=xref}.
 
-## First-Class Fields {#first-class-fields data-type=sect1}
+## First-Class Fields {#first-class-fields}
 
 Consider the following function for extracting the usernames from a list of
 `Logon` messages:[fields/first-class fields]{.idx #Ffc}[first-class

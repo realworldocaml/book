@@ -1,4 +1,4 @@
-# Handling JSON Data {#handling-json-data data-type=chapter}
+# Handling JSON Data {#handling-json-data}
 
 Data serialization, i.e., converting data to and from a sequence of bytes
 that's suitable for writing to disk or sending across the network, is an
@@ -23,7 +23,7 @@ the book by using:
 - External tools to generate boilerplate OCaml modules and signatures from
   external specification files
 
-## JSON Basics {#json-basics data-type=sect1}
+## JSON Basics {#json-basics}
 
 JSON is a lightweight data-interchange format often used in web services and
 browsers. It's described in [RFC4627](http://www.ietf.org/rfc/rfc4627.txt)
@@ -74,7 +74,7 @@ you can open it in the `utop` toplevel by:
 
 <link rel="import" href="code/json/install.mlt" part="1" />
 
-## Parsing JSON with Yojson {#parsing-json-with-yojson data-type=sect1}
+## Parsing JSON with Yojson {#parsing-json-with-yojson}
 
 The JSON specification has very few data types, and the `Yojson.Basic.json`
 type that follows is sufficient to express any valid JSON structure: [JSON
@@ -136,7 +136,7 @@ connection (we'll see more of this in
 or a database. Finally, the example checks that the two input mechanisms
 actually resulted in the same OCaml data structure.
 
-## Selecting Values from JSON Structures {#selecting-values-from-json-structures data-type=sect1}
+## Selecting Values from JSON Structures {#selecting-values-from-json-structures}
 
 Now that we've figured out how to parse the example JSON into an OCaml value,
 let's manipulate it from OCaml code and extract specific fields:
@@ -265,7 +265,7 @@ at runtime (for example, mixing up lists and objects) will be caught
 statically via a type error.
 <a data-type="indexterm" data-startref="JSONselval">&nbsp;</a><a data-type="indexterm" data-startref="VALjson">&nbsp;</a>
 
-## Constructing JSON Values {#constructing-json-values data-type=sect1}
+## Constructing JSON Values {#constructing-json-values}
 
 Building and printing JSON values is pretty straightforward given the
 `Yojson.Basic.json` type. You can just construct values of type `json` and
@@ -338,7 +338,7 @@ more easily in
 
 </aside>
 
-## Using Nonstandard JSON Extensions {#using-non-standard-json-extensions data-type=sect1}
+## Using Nonstandard JSON Extensions {#using-non-standard-json-extensions}
 
 The standard JSON types are *really* basic, and OCaml types are far more
 expressive. Yojson supports an extended JSON format for those times when
@@ -380,7 +380,7 @@ function as follows:
 
 <link rel="import" href="code/json/yojson_safe.mli" part="1" />
 
-## Automatically Mapping JSON to OCaml Types {#automatically-mapping-json-to-ocaml-types data-type=sect1}
+## Automatically Mapping JSON to OCaml Types {#automatically-mapping-json-to-ocaml-types}
 
 The combinators described previously make it easy to write functions that
 extract fields from JSON records, but the process is still pretty manual.

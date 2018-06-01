@@ -1,4 +1,4 @@
-# The Compiler Frontend: Parsing and <span class="keep-together">Type Checking</span> {#the-compiler-frontend-parsing-and-type-checking data-type=chapter}
+# The Compiler Frontend: Parsing and <span class="keep-together">Type Checking</span> {#the-compiler-frontend-parsing-and-type-checking}
 
 Compiling source code into executable programs is a fairly complex libraries,
 linkers, and assemblers. It's important to understand how these fit together
@@ -34,7 +34,7 @@ The details of the compilation process into executable code can be found
 next, in
 [The Compiler Backend Byte Code And Native Code](compiler-backend.html#the-compiler-backend-byte-code-and-native-code){data-type=xref}.
 
-## An Overview of the Toolchain {#an-overview-of-the-toolchain data-type=sect1}
+## An Overview of the Toolchain {#an-overview-of-the-toolchain}
 
 The OCaml tools accept textual source code as input, using the filename
 extensions `.ml` and `.mli` for modules and signatures, respectively. We
@@ -144,7 +144,7 @@ A number of tools and scripts are also built alongside the core compiler:
 We'll go through each of the compilation stages now and explain how they will
 be useful to you during day-to-day OCaml development.
 
-## Parsing Source Code {#parsing-source-code data-type=sect1}
+## Parsing Source Code {#parsing-source-code}
 
 When a source file is passed to the OCaml compiler, its first task is to
 parse the text into a more structured abstract syntax tree (AST). The parsing
@@ -288,7 +288,7 @@ detailed output:
 
 
 
-## Preprocessing Source Code {#preprocessing-source-code data-type=sect1}
+## Preprocessing Source Code {#preprocessing-source-code}
 
 One powerful feature in OCaml is a facility to extend the standard-language
 grammar without having to modify the compiler. You can roughly think of it as
@@ -550,7 +550,7 @@ are:<a data-type="indexterm" data-startref="SEcamlp">&nbsp;</a><a data-type="ind
   source code
 
 
-## Static Type Checking {#static-type-checking data-type=sect1}
+## Static Type Checking {#static-type-checking}
 
 After obtaining a valid abstract syntax tree, the compiler has to verify that
 the code obeys the rules of the OCaml type system. Code that is syntactically
@@ -1031,7 +1031,7 @@ compiler if you need
 it.<a data-type="indexterm" data-startref="CPstatictype">&nbsp;</a>
 
 
-## The Typed Syntax Tree {#the-typed-syntax-tree data-type=sect1}
+## The Typed Syntax Tree {#the-typed-syntax-tree}
 
 When the type checking process has successfully completed, it is combined
 with the AST to form a *typed abstract syntax tree*. This contains precise

@@ -1,4 +1,4 @@
-# Imperative Programming {#imperative-programming-1 data-type=chapter}
+# Imperative Programming {#imperative-programming-1}
 
 Most of the code shown so far in this book, and indeed, most OCaml code in
 general, is *pure*. Pure code works without mutating the program's internal
@@ -27,7 +27,7 @@ in a pure style, but also providing great support for imperative programming.
 This chapter will walk you through OCaml's imperative features, and help you
 use them to their fullest.
 
-## Example: Imperative Dictionaries {#example-imperative-dictionaries data-type=sect1}
+## Example: Imperative Dictionaries {#example-imperative-dictionaries}
 
 We'll start with the implementation of a simple imperative dictionary, i.e.,
 a mutable mapping from keys to values. This is really for illustration
@@ -174,7 +174,7 @@ such operations will be interrupted with an exception, leaving the data
 structure in an inconsistent state.
 <a data-type="indexterm" data-startref="DICTimper">&nbsp;</a><a data-type="indexterm" data-startref="IPimpdict">&nbsp;</a>
 
-## Primitive Mutable Data {#primitive-mutable-data data-type=sect1}
+## Primitive Mutable Data {#primitive-mutable-data}
 
 Now that we've looked at a complete example, let's take a more systematic
 look at imperative programming in OCaml. We encountered two different forms
@@ -304,7 +304,7 @@ with]{.idx}[LAPACK bindings]{.idx}[foreign function interface
 functions]{.idx}
 
 
-## for and while Loops {#for-and-while-loops-1 data-type=sect1}
+## for and while Loops {#for-and-while-loops-1}
 
 OCaml provides support for traditional imperative looping constructs, in
 particular, `for` and `while` loops. Neither of these constructs is strictly
@@ -339,7 +339,7 @@ In the preceding example, we used `incr` and `decr`, which are built-in
 functions for incrementing and decrementing an `int ref` by one,
 respectively.
 
-## Example: Doubly Linked Lists {#example-doubly-linked-lists data-type=sect1}
+## Example: Doubly Linked Lists {#example-doubly-linked-lists}
 
 Another common imperative data structure is the doubly linked list. Doubly
 linked lists can be traversed in both directions, and elements can be added
@@ -473,7 +473,7 @@ OCaml, as well as some of the
 pitfalls.<a data-type="indexterm" data-startref="IPdoublink">&nbsp;</a>
 
 
-## Laziness and Other Benign Effects {#laziness-and-other-benign-effects data-type=sect1}
+## Laziness and Other Benign Effects {#laziness-and-other-benign-effects}
 
 There are many instances where you basically want to program in a pure style,
 but you want to make limited use of side effects to improve the performance
@@ -767,7 +767,7 @@ lead to code whose behavior is easier to think about.
 
 
 
-## Input and Output {#input-and-output data-type=sect1}
+## Input and Output {#input-and-output}
 
 Imperative programming is about more than modifying in-memory data
 structures. Any function that doesn't boil down to a deterministic
@@ -1018,7 +1018,7 @@ To get a fuller understanding, you should review the API documentation for
 those modules.<a data-type="indexterm" data-startref="IPinpout">&nbsp;</a>
 
 
-## Order of Evaluation {#order-of-evaluation data-type=sect1}
+## Order of Evaluation {#order-of-evaluation}
 
 The order in which expressions are evaluated is an important part of the
 definition of a programming language, and it is particularly important when
@@ -1077,7 +1077,7 @@ evaluated first! This is generally the case for many different kinds of
 expressions. If you want to make sure of the evaluation order of different
 subexpressions, you should express them as a series of `let` bindings.
 
-## Side Effects and Weak Polymorphism {#side-effects-and-weak-polymorphism data-type=sect1}
+## Side Effects and Weak Polymorphism {#side-effects-and-weak-polymorphism}
 
 Consider the following simple, imperative function: [polymorphism/weak
 polymorphism]{.idx}[weak polymorphism]{.idx}[side effects]{.idx}[ imperative
@@ -1293,7 +1293,7 @@ without losing any polymorphism:
 "14" />
 
 
-## Summary {#summary data-type=sect1}
+## Summary {#summary}
 
 This chapter has covered quite a lot of ground, including: [imperative
 programming/overview of]{.idx}

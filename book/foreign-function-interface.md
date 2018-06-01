@@ -1,4 +1,4 @@
-# Foreign Function Interface {#foreign-function-interface data-type=chapter}
+# Foreign Function Interface {#foreign-function-interface}
 
 OCaml has several options available to interact with non-OCaml code. The
 compiler can link with external system libraries via C code and also can
@@ -47,7 +47,7 @@ You'll also need the Ncurses library for the first example. This comes
 preinstalled on many operating systems such as Mac OS X, and Debian Linux
 provides it as the `libncurses5-dev` package.
 
-## Example: A Terminal Interface {#example-a-terminal-interface data-type=sect1}
+## Example: A Terminal Interface {#example-a-terminal-interface}
 
 Ncurses is a library to help build terminal-independent text interfaces in a
 reasonably efficient way. It's used in console mail clients like Mutt and
@@ -163,7 +163,7 @@ We'll go over some of these features in more detail for the remainder of the
 chapter by using some POSIX date functions as running
 examples.<a data-type="indexterm" data-startref="FFItermint">&nbsp;</a>
 
-## Basic Scalar C Types {#basic-scalar-c-types data-type=sect1}
+## Basic Scalar C Types {#basic-scalar-c-types}
 
 First, let's look at how to define basic scalar C types. Every C type is
 represented by an OCaml equivalent via the single type definition:[scalar C
@@ -214,7 +214,7 @@ some of them need a bit more explanation:
   `float complex` and `double complex` types both map onto the OCaml
   double-precision `Complex.t` type.
 
-## Pointers and Arrays {#pointers-and-arrays data-type=sect1}
+## Pointers and Arrays {#pointers-and-arrays}
 
 Pointers are at the heart of C, so they are necessarily part of Ctypes, which
 provides support for pointer arithmetic, pointer conversions, reading and
@@ -353,7 +353,7 @@ use the Ctypes `Bigarray` support to pass memory by reference instead.
 
 
 
-## Structs and Unions {#structs-and-unions data-type=sect1}
+## Structs and Unions {#structs-and-unions}
 
 The C constructs `struct` and `union` make it possible to build new types
 from existing types. Ctypes contains counterparts that work
@@ -556,7 +556,7 @@ documentation), such as pointer differencing and comparison.
 </aside>
 
 
-## Passing Functions to C {#passing-functions-to-c data-type=sect1}
+## Passing Functions to C {#passing-functions-to-c}
 
 It's also straightforward to pass OCaml function values to C. The C standard
 library function `qsort` sorts arrays of elements using a comparison function
@@ -662,7 +662,7 @@ garbage-collected.
 </aside>
 
 
-## Learning More About C Bindings {#learning-more-about-c-bindings data-type=sect1}
+## Learning More About C Bindings {#learning-more-about-c-bindings}
 
 The Ctypes [distribution](http://github.com/ocamllabs/ocaml-ctypes) contains
 a number of larger-scale examples, including: [foreign function interface

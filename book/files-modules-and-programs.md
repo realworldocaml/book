@@ -1,4 +1,4 @@
-# Files, Modules, and Programs {#files-modules-and-programs data-type=chapter}
+# Files, Modules, and Programs {#files-modules-and-programs}
 
 We've so far experienced OCaml largely through the toplevel. As you move from
 exercises to real-world programs, you'll need to leave the toplevel behind
@@ -10,7 +10,7 @@ In this chapter, we'll show you how to build an OCaml program from a
 collection of files, as well as the basics of working with modules and module
 signatures.
 
-## Single-File Programs {#single-file-programs data-type=sect1}
+## Single-File Programs {#single-file-programs}
 
 We'll start with an example: a utility that reads lines from `stdin`,
 computes a frequency count of the lines, and prints out the ten most frequent
@@ -149,7 +149,7 @@ compilers in more detail in
 :::
 
 
-## Multifile Programs and Modules {#multi-file-programs-and-modules data-type=sect1}
+## Multifile Programs and Modules {#multi-file-programs-and-modules}
 
 Source files in OCaml are tied into the module system, with each file
 compiling down into a module whose name is derived from the name of the file.
@@ -193,7 +193,7 @@ dependencies and realize that `counter.ml` needs to be compiled.
 
 <link rel="import" href="code/files-modules-and-programs/freq-with-counter/build.sh" />
 
-## Signatures and Abstract Types {#signatures-and-abstract-types data-type=sect1}
+## Signatures and Abstract Types {#signatures-and-abstract-types}
 
 While we've pushed some of the logic to the `Counter` module, the code in
 `freq.ml` can still depend on the details of the implementation of `Counter`.
@@ -277,7 +277,7 @@ of some more advanced features of the language (specifically, *functors* and
 these features for the Map data-structure in particular is covered in
 [Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
 
-## Concrete Types in Signatures {#concrete-types-in-signatures data-type=sect1}
+## Concrete Types in Signatures {#concrete-types-in-signatures}
 
 In our frequency-count example, the module `Counter` had an abstract type
 `Counter.t` for representing a collection of frequency counts. Sometimes,
@@ -317,7 +317,7 @@ enforced by the type itself; concrete types let you expose more detail and
 structure to client code in a lightweight way. The right choice depends very
 much on the context.
 
-## Nested Modules {#nested-modules data-type=sect1}
+## Nested Modules {#nested-modules}
 
 Up until now, we've only considered modules that correspond to files, like
 `counter.ml`. But modules (and module signatures) can be nested inside other
@@ -368,7 +368,7 @@ This is a trivial example, but confusing different kinds of identifiers is a
 very real source of bugs, and the approach of minting abstract types for
 different classes of identifiers is an effective way of avoiding such issues.
 
-## Opening Modules {#opening-modules data-type=sect1}
+## Opening Modules {#opening-modules}
 
 Most of the time, you refer to values and types within a module by using the
 module name as an explicit qualifier. For example, you write `List.map` to
@@ -430,7 +430,7 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
   read and remember what `C` stands for. Rebinding modules to very short
   names at the top level of your module is usually a mistake.
 
-## Including Modules {#including-modules data-type=sect1}
+## Including Modules {#including-modules}
 
 While opening a module affects the environment used to search for
 identifiers, *including* a module is a way of adding new identifiers to a
@@ -485,7 +485,7 @@ And if we then put `open Common` after `open Base` at the top of each file in
 our project, then references to `List` will automatically go to `Ext_list`
 instead.
 
-## Common Errors with Modules {#common-errors-with-modules data-type=sect1}
+## Common Errors with Modules {#common-errors-with-modules}
 
 When OCaml compiles a program with an `ml` and an `mli`, it will complain if
 it detects a mismatch between the two. Here are some of the common errors
@@ -584,7 +584,7 @@ the cycle:
 <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.errsh" />
 
 
-## Designing with Modules {#designing-with-modules data-type=sect1}
+## Designing with Modules {#designing-with-modules}
 
 The module system is a key part of how an OCaml program is structured. As
 such, we'll close this chapter with some advice on how to think about

@@ -1,4 +1,4 @@
-# Classes {#classes data-type=chapter}
+# Classes {#classes}
 
 Programming with objects directly is great for encapsulation, but one of the
 main goals of object-oriented programming is code reuse through inheritance.
@@ -7,7 +7,7 @@ programming, a class is a "recipe" for creating objects. The recipe can be
 changed by adding new methods and fields, or it can be changed by modifying
 existing methods. [programming/object-oriented programming (OOP)]{.idx}
 
-## OCaml Classes {#ocaml-classes data-type=sect1}
+## OCaml Classes {#ocaml-classes}
 
 In OCaml, class definitions must be defined as toplevel statements in a
 module. The syntax for a class definition uses the keyword `class`:
@@ -41,7 +41,7 @@ Note that this type represents any object with these methods: objects created
 using the `istack` class will have this type, but objects with this type may
 not have been created by the `istack` class.
 
-## Class Parameters and Polymorphism {#class-parameters-and-polymorphism data-type=sect1}
+## Class Parameters and Polymorphism {#class-parameters-and-polymorphism}
 
 A class definition serves as the *constructor* for the class. In general, a
 class definition may have parameters that must be provided as arguments when
@@ -72,7 +72,7 @@ to add. You can add type constraints in all three places, but the extra text
 may not help clarity. A convenient middle ground is to annotate the fields
 and/or class parameters, and add constraints to methods only if necessary.
 
-## Object Types as Interfaces {#object-types-as-interfaces data-type=sect1}
+## Object Types as Interfaces {#object-types-as-interfaces}
 
 We may wish to traverse the elements on our stack. One common style for doing
 this in object-oriented languages is to define a class for an `iterator`
@@ -145,7 +145,7 @@ can only be used *directly after* the method name, which means that method
 parameters must be expressed using a `fun` or `function` expression.
 
 
-## Inheritance {#inheritance data-type=sect1}
+## Inheritance {#inheritance}
 
 Inheritance uses an existing class to define a new one. For example, the
 following class definition inherits from our `stack` class for strings and
@@ -164,7 +164,7 @@ The preceding `as super` statement creates a special object called `super`
 which can be used to call superclass methods. Note that `super` is not a real
 object and can only be used to call methods.
 
-## Class Types {#class-types data-type=sect1}
+## Class Types {#class-types}
 
 To allow code in a different file or module to inherit from a class, we must
 expose it and give it a class type. What is the class type? [classes/class
@@ -200,7 +200,7 @@ In this signature, we've chosen to make everything visible. The class type
 for `stack` specifies the types of the field `v`, as well as the types of
 each of the methods.
 
-## Open Recursion {#open-recursion data-type=sect1}
+## Open Recursion {#open-recursion}
 
 Open recursion allows an object's methods to invoke other methods on the same
 object. These calls are looked up dynamically, allowing a method in one class
@@ -242,7 +242,7 @@ Note how the `super` special object is used in `text_item` to call the
 `[int] folder` class's `text_item` method to fold over the children of the
 `text_item` node.
 
-## Private Methods {#private-methods data-type=sect1}
+## Private Methods {#private-methods}
 
 Methods can be declared *private*, which means that they may be called by
 subclasses, but they are not visible otherwise (similar to a *protected*
@@ -275,7 +275,7 @@ invoked in subclasses of `counter_with_sig`:
 
 <link rel="import" href="code/classes/doc.ml" part="5" />
 
-## Binary Methods {#binary-methods data-type=sect1}
+## Binary Methods {#binary-methods}
 
 A *binary method* is a method that takes an object of `self` type. One common
 example is defining a method for equality: [methods/binary
@@ -345,7 +345,7 @@ compares shapes by their sizes:
 In this case, there is no one-to-one correspondence between the objects and
 their sizes, and we can still easily define new kinds of shape.
 
-## Virtual Classes and Methods {#virtual-classes-and-methods data-type=sect1}
+## Virtual Classes and Methods {#virtual-classes-and-methods}
 
 A *virtual* class is a class where some methods or fields are declared but
 not implemented. This should not be confused with the word `virtual` as it is
@@ -407,7 +407,7 @@ functor application is implemented through inheritance, when virtual methods
 are given concrete implementations.
 
 
-## Initializers {#initializers data-type=sect1}
+## Initializers {#initializers}
 
 You can execute expressions during the instantiation of a class by placing
 them before the object expression or in the initial value of a field:
@@ -428,7 +428,7 @@ events:
 
 <link rel="import" href="code/classes-async/shapes/shapes.ml" part="3" />
 
-## Multiple Inheritance {#multiple-inheritance data-type=sect1}
+## Multiple Inheritance {#multiple-inheritance}
 
 When a class inherits from more than one superclass, it is using
 *multiple inheritance*. Multiple inheritance extends the variety of ways that

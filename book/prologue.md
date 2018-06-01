@@ -1,6 +1,6 @@
-# Prologue {#prologue data-type=chapter}
+# Prologue {#prologue}
 
-## Why OCaml? {#why-ocaml data-type=sect1}
+## Why OCaml? {#why-ocaml}
 
 Programming languages matter. They affect the reliability, security, and
 efficiency of the code you write, as well as how easy it is to read,
@@ -173,7 +173,7 @@ with the language. We'll be using `utop` throughout the book to let you step
 through the examples interactively.
 
 
-## About This Book {#about-this-book data-type=sect1}
+## About This Book {#about-this-book}
 
 *Real World OCaml* is aimed at programmers who have some experience with
 conventional programming languages, but not specifically with statically
@@ -269,7 +269,7 @@ permission given above, feel free to contact us at
 [_permissions@oreilly.com_](mailto:permissions@oreilly.com){.email}.
 
 
-## Safari® Books Online {#safari-books-online data-type=sect1}
+## Safari® Books Online {#safari-books-online}
 
 ::: safarienabled
 Safari Books Online
@@ -300,7 +300,7 @@ Bartlett, Course Technology, and dozens
 information about Safari Books Online, please visit us
 [online](http://www.safaribooksonline.com/){.orm:hideurl}.
 
-## How to Contact Us {#how-to-contact-us data-type=sect1}
+## How to Contact Us {#how-to-contact-us}
 
 Please address comments and questions concerning this book to the publisher:
 
@@ -347,7 +347,7 @@ Follow us on Twitter:
 Watch us on YouTube:
 [<em class="hyperlink">http://www.youtube.com/oreillymedia</em>](http://www.youtube.com/oreillymedia)
 
-## Contributors {#contributors data-type=sect1}
+## Contributors {#contributors}
 
 We would especially like to thank the following individuals for improving
 *Real World OCaml*:

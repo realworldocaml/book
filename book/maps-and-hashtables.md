@@ -1,4 +1,4 @@
-# Maps and Hash Tables {#maps-and-hash-tables data-type=chapter}
+# Maps and Hash Tables {#maps-and-hash-tables}
 
 Lots of programming problems require dealing with data organized as key/value
 pairs. Maybe the simplest way of representing such data in OCaml is an
@@ -25,7 +25,7 @@ have constant time complexity. We'll describe both of these data structures
 in detail and provide some advice as to how to choose between them. [hash
 tables/basics of]{.idx}[maps/basics of]{.idx}
 
-## Maps {#maps data-type=sect1}
+## Maps {#maps}
 
 Let's consider an example of how one might use a map in practice. In
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
@@ -378,7 +378,7 @@ following example, using the wrong comparator will lead to a type error:
 <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="13" />
 
 
-## Hash Tables {#hash-tables data-type=sect1}
+## Hash Tables {#hash-tables}
 
 Hash tables are the imperative cousin of maps. We walked over a basic hash
 table implementation in
@@ -499,7 +499,7 @@ inline in an expression.
 :::
 
 
-## Choosing Between Maps and Hash Tables {#choosing-between-maps-and-hash-tables data-type=sect1}
+## Choosing Between Maps and Hash Tables {#choosing-between-maps-and-hash-tables}
 
 Maps and hash tables overlap enough in functionality that it's not always
 clear when to choose one or the other. Maps, by virtue of being immutable,

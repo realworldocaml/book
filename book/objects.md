@@ -1,4 +1,4 @@
-# Objects {#objects data-type=chapter}
+# Objects {#objects}
 
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules. In addition, OCaml also supports object-oriented
@@ -55,7 +55,7 @@ Ruby, Python, or JavaScript.
 
 </aside>
 
-## OCaml Objects {#ocaml-objects data-type=sect1}
+## OCaml Objects {#ocaml-objects}
 
 If you already know about object-oriented programming in a language like Java
 or <span class="keep-together">C++,</span> the OCaml object system may come
@@ -101,7 +101,7 @@ the polymorphic type `'a`. When `stack` is invoked on a concrete value
 `[3; 2; 1]`, we get the same object type as before, with type `int` for the
 values on the stack.
 
-## Object Polymorphism {#object-polymorphism data-type=sect1}
+## Object Polymorphism {#object-polymorphism}
 
 Like polymorphic variants, methods can be used without an explicit type
 declaration: [polymorphism/in objects]{.idx}[objects/polymorphism of]{.idx}
@@ -154,7 +154,7 @@ An object of type `< pop : int option; .. >` can be any object with a method
 
 <link rel="import" href="code/objects/stack.mlt" part="4" />
 
-## Immutable Objects {#immutable-objects data-type=sect1}
+## Immutable Objects {#immutable-objects}
 
 Many people consider object-oriented programming to be intrinsically
 imperative, where an object is like a state machine. Sending a message to an
@@ -179,7 +179,7 @@ be used only within a method body, and only the values of fields may be
 updated. Method implementations are fixed at the time the object is created;
 they cannot be changed <span class="keep-together">dynamically</span>.
 
-## When to Use Objects {#when-to-use-objects data-type=sect1}
+## When to Use Objects {#when-to-use-objects}
 
 You might wonder when to use objects in OCaml, which has a multitude of
 alternative mechanisms to express the similar concepts. First-class modules
@@ -224,7 +224,7 @@ libraries/Camlimages]{.idx}[external libraries/Cryptokit]{.idx}
 We'll introduce you to classes, and examples using open recursion, in
 [Classes](classes.html#classes){data-type=xref}.
 
-## Subtyping {#subtyping data-type=sect1}
+## Subtyping {#subtyping}
 
 Subtyping is a central concept in object-oriented programming. It governs
 when an object with one type *A* can be used in an expression that expects an

@@ -1,4 +1,4 @@
-# Parsing with OCamllex and Menhir {#parsing-with-ocamllex-and-menhir data-type=chapter}
+# Parsing with OCamllex and Menhir {#parsing-with-ocamllex-and-menhir}
 
 Many programming tasks start with the interpretion of some form of structured
 textual data. *Parsing* is the process of converting such data into data
@@ -51,7 +51,7 @@ running `opam install menhir`.
 :::
 
 
-## Lexing and Parsing {#lexing-and-parsing data-type=sect1}
+## Lexing and Parsing {#lexing-and-parsing}
 
 Parsing is traditionally broken down into two parts: *lexical analysis*,
 which is a kind of simplified parsing phase that converts a stream of
@@ -106,7 +106,7 @@ shown below for our earlier JSON example:
 
 <link rel="import" href="code/parsing/parsed_example.ml" />
 
-## Defining a Parser {#defining-a-parser data-type=sect1}
+## Defining a Parser {#defining-a-parser}
 
 A parser-specification file has suffix `.mly` and contains two sections that
 are broken up by separator lines consisting of the characters `%%` on a line
@@ -246,7 +246,7 @@ generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&n
 <link rel="import" href="code/parsing/build_short_parser.sh" />
 
 
-## Defining a Lexer {#defining-a-lexer data-type=sect1}
+## Defining a Lexer {#defining-a-lexer}
 
 Now we can define a lexer, using `ocamllex`, to convert our input text into a
 stream of tokens. The specification of the lexer is placed in a file with an
@@ -409,7 +409,7 @@ names.<a data-type="indexterm" data-startref="PARlex">&nbsp;</a>
 
 
 
-## Bringing It All Together {#bringing-it-all-together data-type=sect1}
+## Bringing It All Together {#bringing-it-all-together}
 
 For the final part, we need to compose the lexer and parser. As we saw in the
 type definition in `parser.mli`, the parsing function expects a lexer of type

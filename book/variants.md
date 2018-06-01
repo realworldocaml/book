@@ -1,4 +1,4 @@
-# Variants {#variants data-type=chapter}
+# Variants {#variants}
 
 Variant types are one of the most useful features of OCaml and also one of
 the most unusual. They let you represent data that may take on multiple
@@ -119,7 +119,7 @@ Values](runtime-memory-layout.html){data-type=xref}.
 
 :::
 
-## Catch-All Cases and Refactoring {#catch-all-cases-and-refactoring data-type=sect1}
+## Catch-All Cases and Refactoring {#catch-all-cases-and-refactoring}
 
 OCaml's type system can act as a refactoring tool, warning you of places
 where your code needs to be updated to match an interface change. This is
@@ -174,7 +174,7 @@ Because of the catch-all case, we'll no longer be warned about missing the
 `Bold` case. This highlights the value of avoiding catch-all cases, since
 they effectively suppress exhaustiveness checking.
 
-## Combining Records and Variants {#combining-records-and-variants data-type=sect1}
+## Combining Records and Variants {#combining-records-and-variants}
 
 The term *algebraic data types* is often used to describe a collection of
 types that includes variants, records, and tuples. Algebraic data types act
@@ -300,7 +300,7 @@ will reject code that tries to do so.
 <link rel="import" href="code/variants/logger.mlt" part="11" />
 
 
-## Variants and Recursive Data Structures {#variants-and-recursive-data-structures data-type=sect1}
+## Variants and Recursive Data Structures {#variants-and-recursive-data-structures}
 
 Another common application of variants is to represent tree-like recursive
 data structures. We'll show how this can be done by walking through the
@@ -397,7 +397,7 @@ More generally, using variants to build recursive data structures is a common
 technique, and shows up everywhere from designing little languages to
 building complex data structures.
 
-## Polymorphic Variants {#polymorphic-variants data-type=sect1}
+## Polymorphic Variants {#polymorphic-variants}
 
 In addition to the ordinary variants we've seen so far, OCaml also supports
 so-called *polymorphic variants*. As we'll see, polymorphic variants are more

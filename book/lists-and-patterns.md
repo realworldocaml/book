@@ -1,4 +1,4 @@
-# Lists and Patterns {#lists-and-patterns data-type=chapter}
+# Lists and Patterns {#lists-and-patterns}
 
 This chapter will focus on two common elements of programming in OCaml: lists
 and pattern matching. Both of these were discussed in
@@ -6,7 +6,7 @@ and pattern matching. Both of these were discussed in
 go into more depth here, presenting the two topics together and using one to
 help illustrate the other.
 
-## List Basics {#list-basics data-type=sect1}
+## List Basics {#list-basics}
 
 An OCaml list is an immutable, finite sequence of elements of the same type.
 As we've seen, OCaml lists can be generated using a bracket-and-semicolon
@@ -45,7 +45,7 @@ change any of the existing ones, as you can see:[lists/extension of]{.idx}
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="3" />
 
-## Using Patterns to Extract Data from a List {#using-patterns-to-extract-data-from-a-list data-type=sect1}
+## Using Patterns to Extract Data from a List {#using-patterns-to-extract-data-from-a-list}
 
 We can read data out of a list using a `match` statement. Here's a simple
 example of a recursive function that computes the sum of all elements of a
@@ -101,7 +101,7 @@ of `drop_value`:
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="8" />
 
-## Limitations (and Blessings) of Pattern Matching {#limitations-and-blessings-of-pattern-matching data-type=sect1}
+## Limitations (and Blessings) of Pattern Matching {#limitations-and-blessings-of-pattern-matching}
 
 The preceding example highlights an important fact about patterns, which is
 that they can't be used to express arbitrary conditions. Patterns can
@@ -192,7 +192,7 @@ locations where you need to adapt your code to deal with changing
 types.<a data-type="indexterm" data-startref="PATMAT">&nbsp;</a>
 
 
-## Using the List Module Effectively {#using-the-list-module-effectively data-type=sect1}
+## Using the List Module Effectively {#using-the-list-module-effectively}
 
 We've so far written a fair amount of list-munging code using pattern
 matching and recursive functions. In real life, you're usually better off
@@ -419,7 +419,7 @@ efficient operation:
 
 
 
-## Tail Recursion {#tail-recursion data-type=sect1}
+## Tail Recursion {#tail-recursion}
 
 The only way to compute the length of an OCaml list is to walk the list from
 beginning to end. As a result, computing the length of a list takes time
@@ -488,7 +488,7 @@ But when dealing with situations where the depth of the sequence of nested
 calls is on the order of the size of your data, tail recursion is usually the
 right approach.
 
-## Terser and Faster Patterns {#terser-and-faster-patterns data-type=sect1}
+## Terser and Faster Patterns {#terser-and-faster-patterns}
 
 Now that we know more about how lists and patterns work, let's consider how
 we can improve on an example from

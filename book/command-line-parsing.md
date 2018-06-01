@@ -1,4 +1,4 @@
-# Command-Line Parsing {#command-line-parsing data-type=chapter}
+# Command-Line Parsing {#command-line-parsing}
 
 Many of the OCaml programs that you'll write will end up as binaries that
 need to be run from a command prompt. Any nontrivial command line should
@@ -35,7 +35,7 @@ In this chapter, we'll:
 - Demonstrate how to declare complex command-line interfaces in a type-safe
   and elegant way [combinators/functional combinators]{.idx}
 
-## Basic Command-Line Parsing {#basic-command-line-parsing data-type=sect1}
+## Basic Command-Line Parsing {#basic-command-line-parsing}
 
 Let's start by working through a clone of the `md5sum` command that is
 present on most Linux installations (the equivalent command on Mac OS X is
@@ -206,7 +206,7 @@ Now that we have the basics in place, the rest of the chapter will examine
 some of the more advanced features of Command.
 
 
-## Argument Types {#argument-types data-type=sect1}
+## Argument Types {#argument-types}
 
 You aren't just limited to parsing command lines of strings and ints.
 `Command.Param` defines several other conversion functions (shown in
@@ -317,7 +317,7 @@ and runs them through `do_hash` sequentially.
 <link rel="import" href="code/command-line-parsing/md5_sequence/md5.sh" />
 
 
-## Adding Labeled Flags {#adding-labeled-flags data-type=sect1}
+## Adding Labeled Flags {#adding-labeled-flags}
 
 You aren't limited to anonymous arguments on the command line. A *flag* is a
 named field that can be followed by an optional argument. These flags can
@@ -367,7 +367,7 @@ anonymous arguments do. This lets you change the specification and ensure
 that all the callback functions are updated appropriately, without runtime
 errors.
 
-## Grouping Subcommands Together {#grouping-sub-commands-together data-type=sect1}
+## Grouping Subcommands Together {#grouping-sub-commands-together}
 
 You can get pretty far by using flags and anonymous arguments to assemble
 complex, command-line interfaces. After a while, though, too many options can
@@ -431,7 +431,7 @@ see the date parsing in action:
 <link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal.sh" part=
 "run" />
 
-## Prompting for Interactive Input {#prompting-for-interactive-input data-type=sect1}
+## Prompting for Interactive Input {#prompting-for-interactive-input}
 
 Sometimes, if a value isn't provided on the command line, you want to prompt
 for it instead. Let's return to the calendar tool we built before.
@@ -464,7 +464,7 @@ second argument.
 
 <link rel="import" href="code/command-line-parsing/cal_add_interactive2/cal.sh" />
 
-## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash data-type=sect1}
+## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash}
 
 Modern UNIX shells usually have a tab-completion feature to interactively
 help you figure out how to build a command line. These work by pressing the
@@ -553,7 +553,7 @@ scripts and follow their lead, as the details are very OS-specific.
 
 
 
-## Alternative Command-Line Parsers {#alternative-command-line-parsers data-type=sect1}
+## Alternative Command-Line Parsers {#alternative-command-line-parsers}
 
 This rounds up our tour of the Command library. This isn't the only way to
 parse command-line arguments of course; there are several alternatives

@@ -1,4 +1,4 @@
-# Memory Representation of Values {#memory-representation-of-values data-type=chapter}
+# Memory Representation of Values {#memory-representation-of-values}
 
 The FFI interface we described in
 [Foreign Function Interface](foreign-function-interface.html#foreign-function-interface){data-type=xref}
@@ -63,7 +63,7 @@ managed by the runtime later on in
 [Understanding The Garbage Collector](garbage-collector.html#understanding-the-garbage-collector){data-type=xref}.
 [mapping/of OCaml types to runtime values]{.idx #MAPocaml}
 
-## OCaml Blocks and Values {#ocaml-blocks-and-values data-type=sect1}
+## OCaml Blocks and Values {#ocaml-blocks-and-values}
 
 A running OCaml program uses blocks of memory (i.e., contiguous sequences of
 words in RAM) to represent values such as tuples, records, closures, or
@@ -154,7 +154,7 @@ instructions, and multiplication is only a few more.
 
 
 
-## Blocks and Values {#blocks-and-values data-type=sect1}
+## Blocks and Values {#blocks-and-values}
 
 An OCaml *block* is the basic unit of allocation on the heap. A block
 consists of a one-word header (either 32 or 64 bits depending on the CPU
@@ -232,7 +232,7 @@ lot of spare registers to further improve the efficiency of using unboxed
 integers.
 
 
-## Tuples, Records, and Arrays {#tuples-records-and-arrays data-type=sect1}
+## Tuples, Records, and Arrays {#tuples-records-and-arrays}
 
 <figure style="float: 0">
   <img src="images/memory-repr/tuple_layout.png"/>
@@ -301,7 +301,7 @@ Only records and arrays can have the float array optimization, and for
 records, every single field must be a float.
 
 
-## Variants and Lists {#variants-and-lists data-type=sect1}
+## Variants and Lists {#variants-and-lists}
 
 Basic variant types with no extra parameters for any of their branches are
 simply stored as an OCaml integer, starting with `0` for the first option and
@@ -359,7 +359,7 @@ variants without parameters is the size of the native integer (either 31 or
 63 bits). This limit arises because of the size of the tag byte, and that
 some of the high-numbered tags are reserved.
 
-## Polymorphic Variants {#polymorphic-variants-1 data-type=sect1}
+## Polymorphic Variants {#polymorphic-variants-1}
 
 Polymorphic variants are more flexible than normal variants when writing code
 but are slightly less efficient at runtime. This is because there isn't as
@@ -404,7 +404,7 @@ predictable. The OCaml compiler never switches memory representation due to
 optimization passes. This lets you predict the precise runtime layout by
 referring to these guidelines and your source code.
 
-## String Values {#string-values data-type=sect1}
+## String Values {#string-values}
 
 Strings are standard OCaml blocks with the header size defining the size of
 the string in machine words. The `String_tag` (252) is higher than the
@@ -456,7 +456,7 @@ library functions can operate on arbitrary data, but `strlen` or `strcpy`
 both require a `NULL`-terminated buffer, and neither has a mechanism for
 encoding a `NULL` value within its contents.
 
-## Custom Heap Blocks {#custom-heap-blocks data-type=sect1}
+## Custom Heap Blocks {#custom-heap-blocks}
 
 OCaml supports *custom* heap blocks via a `Custom_tag` that lets the runtime
 perform user-defined operations over OCaml values. A custom block lives in
