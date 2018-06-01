@@ -1248,15 +1248,7 @@ h6 {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: normal;
 }
-
- section div[data-type=note] pre,
- section div[data-type=note] div.highlight,
- section div[data-type=warning] pre,
- section div[data-type=warning] div.highlight {
-     background: transparent;
-}
- section div.highlight,
- section div.highlight {
+ section div[data-type=note] div.highlight {
      padding: 0 1.6875rem;
 }
 
@@ -1273,10 +1265,6 @@ h6 {
  section aside p {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: normal;
-}
- section aside pre, section[data-type=chapter] aside div.highlight {
-     font-size: 80%;
-     background: transparent;
 }
  section div.highlight {
      font-size: 80%;
