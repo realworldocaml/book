@@ -1225,80 +1225,81 @@
  .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item.active .scroll-nav__sub-link {
      color: black;
 }
- section[data-type=chapter] h3,
- section[data-type=chapter] h4,
- section[data-type=chapter] h5,
- section[data-type=chapter] h6 {
+ section h3,
+ section h4,
+ section h5,
+ section h6 {
      margin-top: 1.75rem;
 }
- section[data-type=chapter] > h1 {
+ section > h1 {
      font-size: 3.8147rem;
      border-bottom: 2px solid #222222;
      padding-bottom: 1rem;
 }
  @media only screen and (max-width: 40em) {
-     section[data-type=chapter] > h1,
-     section[data-type=chapter] > h2 {
+     section > h1,
+     section > h2 {
          font-size: 1.86157rem;
     }
 }
- section[data-type=chapter] a:hover {
+ section a:hover {
      text-shadow: 0 2px white, -2px 2px white, 2px 2px white;
      border-bottom: 1px dotted #7a3a95;
 }
- section[data-type=chapter] p strong, section[data-type=chapter] p b {
+ section p strong, section p b {
      text-transform: lowercase;
      font-variant: small-caps;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: bold;
 }
- section[data-type=chapter] section[data-type=sect1] {
+ section section {
      margin-top: 2.53125rem;
      padding-top: 2.53125rem;
      border-top: 1px solid #dddddd;
 }
- section[data-type=chapter] h2 + section[data-type=sect1] {
+ section h2 + section {
      margin-top: 1.6875rem;
      padding-top: 0;
      border-top: 0;
 }
 
  /* Notes & Warnings */
- section[data-type=chapter] div[data-type=note] {
+ section div[data-type=note] {
      background: #fdedd4;
      border: 1px solid #f39c12;
  }
- section[data-type=chapter] div[data-type=warning] {
+ section div[data-type=warning] {
      background: #F2D7D5;
      border: 1px solid #F1948A;
  }
 
- section[data-type=chapter] div[data-type=note],
- section[data-type=chapter] div[data-type=warning] {
+ section div[data-type=note],
+ section div[data-type=warning] {
      border-radius: 3px;
      margin-bottom: 1.6875rem;
      padding: 1.6875rem;
 }
- section[data-type=chapter] div[data-type=note] h1,
- section[data-type=chapter] div[data-type=note] h2,
- section[data-type=chapter] div[data-type=warning] h1,
- section[data-type=chapter] div[data-type=warning] h2 {
+ section div[data-type=note] h1,
+ section div[data-type=note] h2,
+ section div[data-type=warning] h1,
+ section div[data-type=warning] h2 {
      font-size: 1.5625rem;
-}
- section[data-type=chapter] div[data-type=note] p,
- section[data-type=chapter] div[data-type=warning] p {
+ }
+ section div[data-type=note] p,
+ section div[data-type=warning] p {
      font-size: 0.875rem;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: normal;
 }
- section[data-type=chapter] div[data-type=note] pre,
- section[data-type=chapter] div[data-type=note] div.highlight,
- section[data-type=chapter] div[data-type=warning] pre,
- section[data-type=chapter] div[data-type=warning] div.highlight {
+
+ section div[data-type=note] pre,
+ section div[data-type=note] div.highlight,
+ section div[data-type=warning] pre,
+ section div[data-type=warning] div.highlight {
      background: transparent;
 }
- section[data-type=chapter] div[data-type=note] div.highlight,
- section[data-type=chapter] div[data-type=warning] div.highlight {
+ section div.highlight,
+ section div.highlight {
      padding: 0 1.6875rem;
 }
 
@@ -1309,80 +1310,80 @@
      background: #fafafa;
      padding: 1.6875rem;
 }
- section[data-type=chapter] aside h5:first-child {
+ section aside h5:first-child {
      margin-top: 0;
 }
- section[data-type=chapter] aside p {
+ section aside p {
      font-size: 0.875rem;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: normal;
 }
- section[data-type=chapter] aside pre, section[data-type=chapter] aside div.highlight {
+ section aside pre, section aside div.highlight {
      font-size: 0.875rem;
      background: transparent;
 }
- section[data-type=chapter] div.highlight {
+ section div.highlight {
      font-size: 90%;
      margin-bottom: 1em;
 }
- section[data-type=chapter] dl dt {
+ section dl dt {
      margin: 0;
 }
- section[data-type=chapter] dl dd {
+ section dl dd {
      position: relative;
      padding-left: 1.6875rem;
 }
- section[data-type=chapter] dl dd:before {
+ section dl dd:before {
      content: '↪';
      position: absolute;
      left: 0.5rem;
      top: 0;
 }
- section[data-type=chapter] ul {
+ section ul {
      list-style: circle;
      margin-left: 1.6875rem;
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] ol {
+ section ol {
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] ol li {
+ section ol li {
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] table {
+ section table {
      margin-left: -0.875rem;
      width: 100%;
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] table caption {
+ section table caption {
      padding: 0.5rem 0;
      border-bottom: 1px solid #dddddd;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: 300;
      text-transform: uppercase;
 }
- section[data-type=chapter] table th, section[data-type=chapter] table td {
+ section table th, section table td {
      padding: 0.5rem 0.875rem;
 }
- section[data-type=chapter] table th {
+ section table th {
      text-align: left;
      border-bottom: 1px solid #dddddd;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-size: 1.3rem;
 }
- section[data-type=chapter] table tr:nth-child(even) td {
+ section table tr:nth-child(even) td {
      background: #fafafa;
 }
  @media only screen and (min-width: 40.063em) {
-     section[data-type=chapter] section[data-type=sect1] {
+     section section[data-type=sect1] {
          margin-top: 1.375rem;
          padding-top: 1.375rem;
     }
-     section[data-type=chapter] aside pre {
+     section aside pre {
          margin-left: 0;
          margin-right: 0;
     }
-     section[data-type=chapter] dl dd {
+     section dl dd {
          padding-left: 2.53125rem;
     }
 }

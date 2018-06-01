@@ -51,9 +51,9 @@ function checkScroll() {
 }
 
 $(document).ready(function(){
-	if ($('section[data-type=chapter]').length > 0)
+	if ($('section').length > 0)
 	{
-		$('section[data-type=chapter]').scrollNav({
+		$('section').scrollNav({
 			sections:		'section>h2',
 			subSections:	'section',
 			sectionElem:	'div',
