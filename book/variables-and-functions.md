@@ -123,7 +123,7 @@ without mutation.
 :::
 
 
-### Pattern Matching and let {#pattern-matching-and-let data-type=sect2}
+### Pattern Matching and let {#pattern-matching-and-let}
 
 Another useful feature of `let` bindings is that they support the use of
 *patterns* on the left-hand side. Consider the following code, which uses
@@ -177,7 +177,7 @@ the details of how OCaml's functions work. As you'll see, functions in OCaml
 differ in a variety of ways from what you'll find in most mainstream
 languages.
 
-### Anonymous Functions {#anonymous-functions data-type=sect2}
+### Anonymous Functions {#anonymous-functions}
 
 We'll start by looking at the most basic style of function declaration in
 OCaml: the *anonymous function*. An anonymous function is a function that is
@@ -250,7 +250,7 @@ monadic style, as we'll see in
 :::
 
 
-### Multiargument functions {#multi-argument-functions data-type=sect2}
+### Multiargument functions {#multi-argument-functions}
 
 OCaml of course also supports multiargument functions, such as:[fun
 keyword/multi-argument functions]{.idx}[multi-argument
@@ -324,7 +324,7 @@ There are small trade-offs between these two approaches, but most of the
 time, one should stick to currying, since it's the default style in the OCaml
 world.
 
-### Recursive Functions {#recursive-functions data-type=sect2}
+### Recursive Functions {#recursive-functions}
 
 A function is *recursive* if it refers to itself in its definition. Recursion
 is important in any programming language, but is particularly important in
@@ -369,7 +369,7 @@ build upon previous definitions.
 In addition, having a nonrecursive form makes it easier to create a new
 definition that extends and supersedes an existing one by shadowing it.
 
-### Prefix and Infix Operators {#prefix-and-infix-operators data-type=sect2}
+### Prefix and Infix Operators {#prefix-and-infix-operators}
 
 So far, we've seen examples of functions used in both prefix and infix
 style.[operators/prefix and infix operators]{.idx}[infix
@@ -527,7 +527,7 @@ The type error aside, this example highlights the importance of choosing the
 operator you use with care, particularly with respect to
 associativity.<a data-type="indexterm" data-startref="FNCprf">&nbsp;</a>
 
-### Declaring Functions with `function` {#declaring-functions-with-function data-type=sect2}
+### Declaring Functions with `function` {#declaring-functions-with-function}
 
 Another way to define a function is using the `function` keyword. Instead of
 having syntactic support for declaring multiargument (curried) functions,
@@ -555,7 +555,7 @@ Also, note the use of partial application to generate the function passed to
 `List.map`. In other words, `some_or_default 100` is a function that was
 created by feeding just the first argument to `some_or_default`.
 
-### Labeled Arguments {#labeled-arguments data-type=sect2}
+### Labeled Arguments {#labeled-arguments}
 
 Up until now, the functions we've defined have specified their arguments
 positionally, *i.e.*, by the order in which the arguments are passed to the
@@ -639,7 +639,7 @@ Labeled arguments are useful in a few different cases:
   In particular, a multiline function passed as an argument to another
   function is easiest to read when it is the final argument to that function.
 
-#### Higher-order functions and labels {#higher-order-functions-and-labels data-type=sect3}
+#### Higher-order functions and labels {#higher-order-functions-and-labels}
 
 One surprising gotcha with labeled arguments is that while order doesn't
 matter when calling a function with labeled arguments, it does matter in a
@@ -678,7 +678,7 @@ As a result, when passing labeled functions as arguments, you need to take
 care to be consistent in your ordering of labeled arguments.
 
 
-### Optional Arguments {#optional-arguments data-type=sect2}
+### Optional Arguments {#optional-arguments}
 
 An optional argument is like a labeled argument that the caller can choose
 whether or not to provide. Optional arguments are passed in using the same
@@ -724,7 +724,7 @@ module, *i.e.*, functions that are not included in the module's interface, or
 `mli` file. We'll learn more about `mli`s in
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 
-#### Explicit passing of an optional argument {#explicit-passing-of-an-optional-argument data-type=sect3}
+#### Explicit passing of an optional argument {#explicit-passing-of-an-optional-argument}
 
 Under the covers, a function with an optional argument receives `None` when
 the caller doesn't provide the argument, and `Some` when it does. But the
@@ -768,7 +768,7 @@ Now, if someone calls `uppercase_concat` without an argument, an explicit
 `None` will be passed to `concat`, leaving `concat` to decide what the
 default behavior should be.
 
-#### Inference of labeled and optional arguments {#inference-of-labeled-and-optional-arguments data-type=sect3}
+#### Inference of labeled and optional arguments {#inference-of-labeled-and-optional-arguments}
 
 One subtle aspect of labeled and optional arguments is how they are inferred
 by the type system. Consider the following example for computing numerical
@@ -816,7 +816,7 @@ annotation on `f`.[type annotations]{.idx}
 <link rel="import" href="code/variables-and-functions/main.mlt" part=
 "57" />
 
-#### Optional arguments and partial application {#optional-arguments-and-partial-application data-type=sect3}
+#### Optional arguments and partial application {#optional-arguments-and-partial-application}
 
 Optional arguments can be tricky to think about in the presence of partial
 application. We can of course partially apply the optional argument itself.

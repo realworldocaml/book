@@ -58,7 +58,7 @@ your program, and thus is not something that a general-purpose library can
 know in advance. One of the advantages of error-aware return types is that
 they work well in both situations.
 
-### Encoding Errors with Result {#encoding-errors-with-result data-type=sect2}
+### Encoding Errors with Result {#encoding-errors-with-result}
 
 Options aren't always a sufficiently expressive way to report errors.
 Specifically, when you encode an error as `None`, there's nowhere to say
@@ -78,7 +78,7 @@ write:
 
 without first opening the `Result` module.
 
-### Error and Or_error {#error-and-or_error data-type=sect2}
+### Error and Or_error {#error-and-or_error}
 
 `Result.t` gives you complete freedom to choose the type of value you use to
 represent errors, but it's often useful to standardize on an error type.
@@ -152,7 +152,7 @@ roles:[Error.of_list]{.idx}[Error.tag]{.idx}[errors/transformation of]{.idx}
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t) Result.t`, and
 it is, after `option`, the most common way of returning errors in Base.
 
-### `bind` and Other Error Handling Idioms {#bind-and-other-error-handling-idioms data-type=sect2}
+### `bind` and Other Error Handling Idioms {#bind-and-other-error-handling-idioms}
 
 As you write more error handling code in OCaml, you'll discover that certain
 patterns start to emerge. A number of these common patterns have been
@@ -321,7 +321,7 @@ library and syntax extension, which is described in more detail in
 :::
 
 
-### Helper Functions for Throwing Exceptions {#helper-functions-for-throwing-exceptions data-type=sect2}
+### Helper Functions for Throwing Exceptions {#helper-functions-for-throwing-exceptions}
 
 Base provides a number of helper functions to simplify the task of throwing
 exceptions. The simplest one is `failwith`, which could be defined as
@@ -353,7 +353,7 @@ the `assert`:
 This shows what's special about `assert`: it captures the line number and
 character offset of the source location from which the assertion was made.
 
-### Exception Handlers {#exception-handlers data-type=sect2}
+### Exception Handlers {#exception-handlers}
 
 So far, we've only seen exceptions fully terminate the execution of a
 computation. But often, we want a program to be able to respond to and
@@ -380,7 +380,7 @@ Otherwise, the original exception continues up the stack of function calls,
 to be handled by the next outer exception handler. If the exception is never
 caught, it terminates the program.
 
-### Cleaning Up in the Presence of Exceptions {#cleaning-up-in-the-presence-of-exceptions data-type=sect2}
+### Cleaning Up in the Presence of Exceptions {#cleaning-up-in-the-presence-of-exceptions}
 
 One headache with exceptions is that they can terminate your execution at
 unexpected places, leaving your program in an awkward state. Consider the
@@ -415,7 +415,7 @@ This is a common enough problem that `In_channel` has a function called
 `In_channel.with_file` is built on top of `protect` so that it can clean up
 after itself in the presence of exceptions.
 
-### Catching Specific Exceptions {#catching-specific-exceptions data-type=sect2}
+### Catching Specific Exceptions {#catching-specific-exceptions}
 
 OCaml's exception-handling system allows you to tune your error-recovery
 logic to the particular error that was thrown. For example, `find_exn`, which
@@ -463,7 +463,7 @@ exception-free function from Base, `List.Assoc.find`, instead:
 
 <link rel="import" href="code/error-handling/main.mlt" part="34" />
 
-### Backtraces {#backtraces data-type=sect2}
+### Backtraces {#backtraces}
 
 A big part of the value of exceptions is that they provide useful debugging
 information in the form of a stack backtrace. Consider the following simple
@@ -535,7 +535,7 @@ Here, the handler costs about the same, but the exception itself costs only
 you're using exceptions routinely as part of your flow control, which is in
 most cases a stylistic mistake anyway.
 
-### From Exceptions to Error-Aware Types and Back Again {#from-exceptions-to-error-aware-types-and-back-again data-type=sect2}
+### From Exceptions to Error-Aware Types and Back Again {#from-exceptions-to-error-aware-types-and-back-again}
 
 Both exceptions and error-aware types are necessary parts of programming in
 OCaml. As such, you often need to move between these two worlds. Happily,

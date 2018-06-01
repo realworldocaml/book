@@ -74,7 +74,7 @@ portable.
 All of this makes OCaml a great choice for programmers who want to step up to
 a better programming language, and at the same time get practical work done.
 
-### A Brief History {#a-brief-history data-type=sect2}
+### A Brief History {#a-brief-history}
 
 OCaml was written in 1996 by Xavier Leroy, Jérôme Vouillon, Damien Doligez,
 and Didier Rémy at INRIA in France. It was inspired by a long line of
@@ -118,7 +118,7 @@ the flexibility of the language. There is also fast native code support for
 x86_64, ARM, PowerPC, and Sparc, making OCaml a good choice for systems where
 resource usage, predictability, and performance all matter.
 
-### The `Base` Standard Library {#the-core-standard-library data-type=sect2}
+### The `Base` Standard Library {#the-core-standard-library}
 
 However good it is, a language on its own isn't enough. You also need a set
 of libraries to build your applications on. A common source of frustration
@@ -151,7 +151,7 @@ comes up when building user interfaces or networked applications. All of
 these libraries are distributed under a liberal Apache 2 license to permit
 free use in hobby, academic, and commercial settings.
 
-### The OCaml Platform {#the-ocaml-platform data-type=sect2}
+### The OCaml Platform {#the-ocaml-platform}
 
 `Base` is a comprehensive and effective standard library, but there's much
 more OCaml software out there. A large community of programmers has been
@@ -196,7 +196,7 @@ exist, but there are other online resources for learning how that works.
 *Real World OCaml* focuses on the techniques the authors have used in their
 personal experience to construct scalable, robust software systems.
 
-### What to Expect {#what-to-expect data-type=sect2}
+### What to Expect {#what-to-expect}
 
 *Real World OCaml* is split into three parts:
 
@@ -226,7 +226,7 @@ personal experience to construct scalable, robust software systems.
   also where we talk about profiling and debugging techniques using tools
   such as GNU `gdb`.
 
-### Installation Instructions {#installation-instructions data-type=sect2}
+### Installation Instructions {#installation-instructions}
 
 *Real World OCaml* uses some tools that we've developed while writing this
 book. Some of these resulted in improvements to the OCaml compiler, which
@@ -251,7 +251,7 @@ documentation or the OCaml manual and man pages. You can find documentation
 for all of the libraries and tools referenced in the book
 [online](https://realworldocaml.org/doc).
 
-### Code Examples {#code-examples data-type=sect2}
+### Code Examples {#code-examples}
 
 All of the code examples in this book are available freely online under a
 public-domain-like license. You are most welcome to copy and use any of the

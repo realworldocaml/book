@@ -101,7 +101,7 @@ The `core.top` package (which you should have loaded by default in your
 `.ocamlinit` file) loads in printers for the Core extensions already, so you
 don't need to do anything special to use the s-expression printer.
 
-### Generating S-Expressions from OCaml Types {#generating-s-expressions-from-ocaml-types data-type=sect2}
+### Generating S-Expressions from OCaml Types {#generating-s-expressions-from-ocaml-types}
 
 But what if you want a function to convert a brand new type to an
 s-expression? You can of course write it yourself manually. Here's an
@@ -350,7 +350,7 @@ are added via the Sexplib syntax extension. However, since Sexplib is used
 throughout Core and is part of the standard bundle activated by `corebuild`,
 you can use these in your own Core code without any special effort.
 
-### sexp_opaque {#sexp_opaque data-type=sect2}
+### sexp_opaque {#sexp_opaque}
 
 The most commonly used directive is `sexp_opaque`, whose purpose is to mark a
 given component of a type as being unconvertible. Anything marked with
@@ -393,7 +393,7 @@ this by annotating the type with `[@@deriving sexp_of]` or
 
 <link rel="import" href="code/sexpr/sexp_opaque.mlt" part="5" />
 
-### sexp_list {#sexp_list data-type=sect2}
+### sexp_list {#sexp_list}
 
 Sometimes, sexp converters have more parentheses than one would ideally like.
 Consider, for example, the following variant type: [Sexplib
@@ -407,7 +407,7 @@ declaration with `string sexp_list` to give us this alternate syntax:
 
 <link rel="import" href="code/sexpr/sexp_list.mlt" part="1" />
 
-### sexp_option {#sexp_option data-type=sect2}
+### sexp_option {#sexp_option}
 
 Another common directive is `sexp_option`, which is used to make a record
 field optional in the s-expression. Normally, optional values are represented
@@ -423,7 +423,7 @@ omitted from the record entirely? In that case, we can mark it with
 
 <link rel="import" href="code/sexpr/sexp_option.mlt" part="1" />
 
-### Specifying Defaults {#specifying-defaults data-type=sect2}
+### Specifying Defaults {#specifying-defaults}
 
 The `sexp_option` declaration is really just an example of specifying a
 default behavior for dealing with an unspecified field. In particular,

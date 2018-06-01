@@ -234,7 +234,7 @@ of *B*. More concretely, subtyping restricts when the coercion operator
 subtype of `t`. [subtyping/basics of]{.idx}[objects/subtyping
 and]{.idx #OBsub}
 
-### Width Subtyping {#width-subtyping data-type=sect2}
+### Width Subtyping {#width-subtyping}
 
 To explore this, let's define some simple object types for geometric shapes.
 The generic type `shape` has a method to compute the area, and `square` and
@@ -254,7 +254,7 @@ means that an object type *A* is a subtype of *B*, if *A* has all of the
 methods of *B*, and possibly more. A `square` is a subtype of `shape` because
 it implements all of the methods of `shape` (the `area` method).
 
-### Depth Subtyping {#depth-subtyping data-type=sect2}
+### Depth Subtyping {#depth-subtyping}
 
 We can also use *depth* subtyping with objects. Depth subtyping allows us
 coerce an object if its individual methods could safely be coerced. So an
@@ -282,7 +282,7 @@ polymorphic variant type. A polymorphic variant type *A* is a subtype of
 :::
 
 
-### Variance {#variance data-type=sect2}
+### Variance {#variance}
 
 What about types built from object types? If a `square` is a `shape`, we
 expect a `square list` to be a `shape list`. OCaml does indeed allow such
@@ -374,7 +374,7 @@ typing. The situation in OCaml is much better: it works, it is statically
 checked, and the annotations are pretty
 simple.<a data-type="indexterm" data-startref="var">&nbsp;</a><a data-type="indexterm" data-startref="SUBvar">&nbsp;</a>
 
-### Narrowing {#narrowing data-type=sect2}
+### Narrowing {#narrowing}
 
 Narrowing, also called *down casting*, is the ability to coerce an object to
 one of its subtypes. For example, if we have a list of shapes `shape list`,
@@ -432,7 +432,7 @@ This pattern works, but it has drawbacks. In particular, the recursive type
 definition should make it clear that this pattern is essentially equivalent
 to using variants, and that objects do not provide much value here.
 
-### Subtyping Versus Row Polymorphism {#subtyping-vs.-row-polymorphism data-type=sect2}
+### Subtyping Versus Row Polymorphism {#subtyping-vs.-row-polymorphism}
 
 There is considerable overlap between subtyping and row polymorphism. Both
 mechanisms allow you to write functions that can be applied to objects of

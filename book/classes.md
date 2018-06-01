@@ -120,7 +120,7 @@ Now we can build a new stack, push some values to it, and iterate over them:
 
 <link rel="import" href="code/classes/iter.mlt" part="3" />
 
-### Functional Iterators {#functional-iterators data-type=sect2}
+### Functional Iterators {#functional-iterators}
 
 In practice, most OCaml programmers avoid iterator objects in favor of
 functional-style techniques. For example, the alternative `stack` class that
@@ -372,7 +372,7 @@ on the `Async_graphics` display:
 
 <link rel="import" href="code/classes-async/shapes/shapes.ml" />
 
-### Create Some Simple Shapes {#create-some-simple-shapes data-type=sect2}
+### Create Some Simple Shapes {#create-some-simple-shapes}
 
 Now let's add classes for making squares and circles. We include an
 `on_click` method for adding event handlers to the shapes: [geometric
@@ -438,7 +438,7 @@ inheritance hierarchy is a graph rather than a tree, so it should be used
 with care. [multiple inheritance/name resolution
 in]{.idx}[inheritance]{.idx}[classes/multiple inheritance in]{.idx}
 
-### How Names Are Resolved {#how-names-are-resolved data-type=sect2}
+### How Names Are Resolved {#how-names-are-resolved}
 
 The main trickiness of multiple inheritance is due to naming—what happens
 when a method or field with some name is defined in more than one class?
@@ -471,7 +471,7 @@ field. Note that the methods and fields added by an inheritance are those
 listed in its class type, so private methods that are hidden by the type will
 not be included.
 
-### Mixins {#mixins data-type=sect2}
+### Mixins {#mixins}
 
 When should you use multiple inheritance? If you ask multiple people, you're
 likely to get multiple (perhaps heated) answers. Some will argue that
@@ -523,7 +523,7 @@ produce a variety of different animations: [linear mixins]{.idx}
 
 <link rel="import" href="code/classes-async/shapes/shapes.ml" part="9" />
 
-### Displaying the Animated Shapes {#displaying-the-animated-shapes data-type=sect2}
+### Displaying the Animated Shapes {#displaying-the-animated-shapes}
 
 We finish our shapes module by creating a `main` function to draw some shapes
 on the graphical display and running that function using the Async scheduler:

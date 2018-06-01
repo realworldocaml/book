@@ -87,7 +87,7 @@ scans pointers to find further values but doesn't follow integers that don't
 point to anything meaningful beyond their immediate value. [pointers/values
 for]{.idx}[integers]{.idx}[values/integer vs. pointer]{.idx}
 
-### Distinguishing Integers and Pointers at Runtime {#distinguishing-integer-and-pointers-at-runtime data-type=sect2}
+### Distinguishing Integers and Pointers at Runtime {#distinguishing-integer-and-pointers-at-runtime}
 
 Wrapping primitives types (such as integers) inside another data structure
 that records extra metadata about the value is known as *boxing*. Values are
@@ -215,7 +215,7 @@ Table:  OCaml values
 
 
 
-### Integers, Characters, and Other Basic Types {#integers-characters-and-other-basic-types data-type=sect2}
+### Integers, Characters, and Other Basic Types {#integers-characters-and-other-basic-types}
 
 Many basic types are efficiently stored as unboxed integers at runtime. The
 native `int` type is the most obvious, although it drops a single bit of
@@ -258,7 +258,7 @@ The `Obj.repr` function retrieves the runtime representation of any OCaml
 value. `Obj.is_block` checks the bottom bit to determine if the value is a
 block header or an unboxed integer.
 
-### Floating-Point Numbers and Arrays {#floating-point-numbers-and-arrays data-type=sect2}
+### Floating-Point Numbers and Arrays {#floating-point-numbers-and-arrays}
 
 Floating-point numbers in OCaml are always stored as full, double-precision
 values. Individual floating-point values are stored as a block with a single
@@ -480,7 +480,7 @@ finalizers (as created by `Gc.finalize` and explained in
 They are instead used to call C cleanup functions such as `free`.
 [finalizers/for C cleanup functions]{.idx}
 
-### Managing External Memory with Bigarray {#managing-external-memory-with-bigarray data-type=sect2}
+### Managing External Memory with Bigarray {#managing-external-memory-with-bigarray}
 
 A common use of custom blocks is to manage external system memory directly
 from within OCaml. The Bigarray interface was originally intended to exchange

@@ -129,7 +129,7 @@ and `STRING` carries a `string` value. The remaining tokens, such as
 `TRUE`, `FALSE`, or the punctuation, aren't associated with any value, and so
 we can omit the `<`*`type`*`>` specification.
 
-### Describing the Grammar {#describing-the-grammar data-type=sect2}
+### Describing the Grammar {#describing-the-grammar}
 
 The next thing we need to do is to specify the grammar of a JSON expression.
 `menhir`, like many parser generators, expresses grammars as
@@ -194,7 +194,7 @@ transform the object in question to. Note that we still have two nonterminals
 whose definitions we depend on here but have not yet defined: `object_fields`
 and `array_values`. We'll look at how these are parsed next.
 
-### Parsing Sequences {#parsing-sequences data-type=sect2}
+### Parsing Sequences {#parsing-sequences}
 
 The rule for `object_fields` follows, and is really just a thin wrapper that
 reverses the list returned by the following rule for `rev_object_fields`.
@@ -254,7 +254,7 @@ stream of tokens. The specification of the lexer is placed in a file with an
 toolchain/ocamllex]{.idx}[mll files]{.idx}[files/mll
 files]{.idx}[parsing/lexer definition]{.idx #PARlex}
 
-### OCaml Prelude {#ocaml-prelude data-type=sect2}
+### OCaml Prelude {#ocaml-prelude}
 
 Let's walk through the definition of a lexer section by section. The first
 section is an optional chunk of OCaml code that is bounded by a pair of curly
@@ -272,7 +272,7 @@ that holds the state of the lexer, including the current location within the
 source file. The `next_line` function simply accesses the `lex_curr_p` field
 that holds the current location and updates its line number.
 
-### Regular Expressions {#regular-expressions data-type=sect2}
+### Regular Expressions {#regular-expressions}
 
 The next section of the lexing file is a collection of named regular
 expressions. These look syntactically like ordinary OCaml `let` bindings, but
@@ -305,7 +305,7 @@ The `newline` introduces the `|` operator, which lets one of several
 alternative regular expressions match (in this case, the various
 carriage-return combinations of CR, LF, or CRLF).
 
-### Lexing Rules {#lexing-rules data-type=sect2}
+### Lexing Rules {#lexing-rules}
 
 The lexing rules are essentially functions that consume the data, producing
 OCaml expressions that evaluate to tokens. These OCaml expressions can be
@@ -355,7 +355,7 @@ pattern:
   input were `true: 167`, then both `"true"` and `id` match the first four
   characters; `"true"` is first, so the return value is `TRUE`.
 
-### Recursive Rules {#recursive-rules data-type=sect2}
+### Recursive Rules {#recursive-rules}
 
 Unlike many other lexer generators, `ocamllex` allows the definition of
 multiple lexers in the same file, and the definitions can be recursive. In

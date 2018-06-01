@@ -276,7 +276,7 @@ And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
 <a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a><a data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a>
 
-### Embedded records {#embedded-records data-type=sect2}
+### Embedded records {#embedded-records}
 
 If we don't need to be able to pass the record types separately from the
 variant, then OCaml allows us to embed the records directly into the variant.
@@ -455,7 +455,7 @@ Here, the inferred type states that the tags can be no more than `` `Float``,
 `` `Int``. As you can already start to see, polymorphic variants can lead to
 fairly complex inferred types.
 
-### Example: Terminal Colors Redux {#example-terminal-colors-redux data-type=sect2}
+### Example: Terminal Colors Redux {#example-terminal-colors-redux}
 
 To see how to use polymorphic variants in practice, we'll return to terminal
 colors. Imagine that we have a new terminal type that adds yet more colors,
@@ -574,7 +574,7 @@ This is useful when you want to narrow down to a type whose definition is
 long, and you don't want the verbosity of writing the tags down explicitly in
 the match.
 
-### When to Use Polymorphic Variants {#when-to-use-polymorphic-variants data-type=sect2}
+### When to Use Polymorphic Variants {#when-to-use-polymorphic-variants}
 
 At first glance, polymorphic variants look like a strict improvement over
 ordinary variants. You can do everything that ordinary variants can do, plus

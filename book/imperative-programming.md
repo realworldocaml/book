@@ -185,13 +185,13 @@ structures/primitive mutable data]{.idx}[mutable data]{.idx}[primitive
 mutable data/array-like data]{.idx}[imperative programming/primitive mutable
 data]{.idx}
 
-### Array-Like Data {#array-like-data data-type=sect2}
+### Array-Like Data {#array-like-data}
 
 OCaml supports a number of array-like data structures; i.e., mutable
 integer-indexed containers that provide constant-time access to their
 elements. We'll discuss several of them in this section.
 
-#### Ordinary arrays {#ordinary-arrays data-type=sect3}
+#### Ordinary arrays {#ordinary-arrays}
 
 The `array` type is used for general-purpose polymorphic arrays. The 
 `Array` module has a variety of utility functions for interacting with
@@ -215,7 +215,7 @@ structures) will lead to an exception being thrown.
 Array literals are written using `[|` and `|]` as delimiters. Thus,
 `[| 1; 2; 3 |]` is a literal integer array.
 
-#### Strings {#strings data-type=sect3}
+#### Strings {#strings}
 
 Strings are essentially byte arrays which are often used for textual data.
 The main advantage of using a `string` in place of a `Char.t array` (a
@@ -231,7 +231,7 @@ Strings also come with their own syntax for getting and setting values:
 And string literals are bounded by quotes. There's also a module `String`
 where you'll find useful functions for working with strings.
 
-#### Bigarrays {#bigarrays data-type=sect3}
+#### Bigarrays {#bigarrays}
 
 A `Bigarray.t` is a handle to a block of memory stored outside of the OCaml
 heap. These are mostly useful for interacting with C or Fortran libraries,
@@ -242,7 +242,7 @@ Bigarrays too have their own getting and setting syntax: [bigarrays]{.idx}
 <link rel="import" href="code/imperative-programming/bigarray.syntax" />
 
 
-### Mutable Record and Object Fields and Ref Cells {#mutable-record-and-object-fields-and-ref-cells data-type=sect2}
+### Mutable Record and Object Fields and Ref Cells {#mutable-record-and-object-fields-and-ref-cells}
 
 As we've seen, records are immutable by default, but individual record fields
 can be declared as mutable. These mutable fields can be set using the 
@@ -253,7 +253,7 @@ an object can similarly be declared as mutable, and can then be modified in
 much the same way as record fields. [primitive mutable data/record/object
 fields and ref cells]{.idx}
 
-#### Ref cells {#ref-cells data-type=sect3}
+#### Ref cells {#ref-cells}
 
 Variables in OCaml are never mutable—they can refer to mutable data, but
 what the variable points to can't be changed. Sometimes, though, you want to
@@ -288,7 +288,7 @@ follows:
 <link rel="import" href="code/imperative-programming/ref.mlt" part="2" />
 
 
-### Foreign Functions {#foreign-functions data-type=sect2}
+### Foreign Functions {#foreign-functions}
 
 Another source of imperative operations in OCaml is resources that come from
 interfacing with external libraries through OCaml's foreign function
@@ -398,7 +398,7 @@ structures require mutation.
 :::
 
 
-### Modifying the List {#modifying-the-list data-type=sect2}
+### Modifying the List {#modifying-the-list}
 
 Now, we'll start considering operations that mutate the list, starting with
 `insert_first`, which inserts an element at the front of the list:
@@ -446,7 +446,7 @@ to put great care into your error handling. [imperative programming/drawbacks
 of]{.idx}[Doubly-linked module]{.idx}[error handling/and imperative data
 structures]{.idx}
 
-### Iteration Functions {#iteration-functions data-type=sect2}
+### Iteration Functions {#iteration-functions}
 
 When defining containers like lists, dictionaries, and trees, you'll
 typically want to define a set of iteration functions like `iter`, `map`, and
@@ -529,7 +529,7 @@ the built-in version is syntax. Rather than writing
 `create_lazy (fun () -> sqrt 16.)`, we can (with the built-in `lazy`) just
 write `lazy (sqrt 16.)`.
 
-### Memoization and Dynamic Programming {#memoization-and-dynamic-programming data-type=sect2}
+### Memoization and Dynamic Programming {#memoization-and-dynamic-programming}
 
 Another benign effect is *memoization*. A memoized function remembers the
 result of previous invocations of the function so that they can be returned
@@ -789,7 +789,7 @@ Most of the functionality in Core's `In_channel` and `Out_channel` (and in
 Core's `Unix` module) derives from the standard library, but we'll use Core's
 interfaces here.
 
-### Terminal I/O {#terminal-io data-type=sect2}
+### Terminal I/O {#terminal-io}
 
 OCaml's buffered I/O library is organized around two types: `in_channel`, for
 channels you read from, and `out_channel`, for channels you write to. The
@@ -852,7 +852,7 @@ flush is not technically required, since the program ends after that
 instruction, at which point all remaining output will be flushed anyway, but
 the explicit flush is nonetheless good practice.
 
-### Formatted Output with printf {#formatted-output-with-printf data-type=sect2}
+### Formatted Output with printf {#formatted-output-with-printf}
 
 Generating output with functions like `Out_channel.output_string` is simple
 and easy to understand, but can be a bit verbose. OCaml also supports
@@ -950,7 +950,7 @@ function]{.idx}
 All of this, and a good deal more, is described in the API documentation for
 the `Printf` module in the OCaml Manual.
 
-### File I/O {#file-io data-type=sect2}
+### File I/O {#file-io}
 
 Another common use of `in_channel`s and `out_channel`s is for working with
 files. Here are a couple of functions—one that creates a file full of
@@ -1125,7 +1125,7 @@ as it gets a clue as to what concrete type it is to be used as:
 Note that the type of `remember` was settled by the definition of
 `remember_three`, even though `remember_three` was never called!
 
-### The Value Restriction {#the-value-restriction data-type=sect2}
+### The Value Restriction {#the-value-restriction}
 
 So, when does the compiler infer weakly polymorphic types? As we've seen, we
 need weakly polymorphic types when a value of unknown type is stored in a
@@ -1186,7 +1186,7 @@ every time it's called can have a fully polymorphic type:
 But a function that has a mutable cache that persists across calls, like
 `memoize`, can only be weakly polymorphic.
 
-### Partial Application and the Value Restriction {#partial-application-and-the-value-restriction data-type=sect2}
+### Partial Application and the Value Restriction {#partial-application-and-the-value-restriction}
 
 Most of the time, when the value restriction kicks in, it's for a good
 reason, i.e., it's because the value in question can actually only safely be
@@ -1222,7 +1222,7 @@ avoiding partial application:
 This transformation is referred to as *eta expansion* and is often useful to
 resolve problems that arise from the value restriction.
 
-### Relaxing the Value Restriction {#relaxing-the-value-restriction data-type=sect2}
+### Relaxing the Value Restriction {#relaxing-the-value-restriction}
 
 OCaml is actually a little better at inferring polymorphic types than was
 suggested previously. The value restriction as we described it is basically a

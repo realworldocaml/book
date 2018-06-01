@@ -191,7 +191,7 @@ programming, `Let_syntax` can make your code easier to read.
 :::
 
 
-### Ivars and Upon {#ivars-and-upon data-type=sect2}
+### Ivars and Upon {#ivars-and-upon}
 
 Deferreds are usually built using combinations of `bind`, `map` and `return`,
 but sometimes you want to construct a deferred where you can programmatically
@@ -404,7 +404,7 @@ source that the call to `loop_forever` never returns.
 
 </aside>
 
-### Improving the Echo Server {#improving-the-echo-server data-type=sect2}
+### Improving the Echo Server {#improving-the-echo-server}
 
 Let's try to go a little bit farther with our echo server by walking through
 a few improvements. In particular, we will:
@@ -518,7 +518,7 @@ library/DuckDuckGo searching example]{.idx #ALduckduck}
 
 Now let's dive into the implementation.
 
-### URI Handling {#uri-handling data-type=sect2}
+### URI Handling {#uri-handling}
 
 HTTP URLs, which identify endpoints across the Web, are actually part of a
 more general family known as Uniform Resource Identifiers (URIs). The full
@@ -537,7 +537,7 @@ A `Uri.t` is constructed from the `Uri.of_string` function, and a query
 parameter `q` is added with the desired search query. The library takes care
 of encoding the URI correctly when outputting it in the network protocol.
 
-### Parsing JSON Strings {#parsing-json-strings data-type=sect2}
+### Parsing JSON Strings {#parsing-json-strings}
 
 The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
@@ -555,7 +555,7 @@ first one for which a nonempty value is defined:
 
 <link rel="import" href="code/async/search/search.ml" part="1" />
 
-### Executing an HTTP Client Query {#executing-an-http-client-query data-type=sect2}
+### Executing an HTTP Client Query {#executing-an-http-client-query}
 
 Now let's look at the code for dispatching the search queries over HTTP,
 using the Cohttp library: [query-handlers/executing an HTTP client
@@ -679,7 +679,7 @@ a deferred that becomes determined either as `Ok` of whatever `f` returned,
 or `Error exn` if `f` threw an exception before its return value became
 determined.
 
-### Monitors {#monitors data-type=sect2}
+### Monitors {#monitors}
 
 `try_with` is a great way of handling exceptions in Async, but it's not the
 whole story. All of Async's exception-handling mechanisms, `try_with`
@@ -764,7 +764,7 @@ individual request, in either case responding to an exception by closing the
 connection. It is for building this kind of custom error handling that
 monitors can be helpful.
 
-### Example: Handling Exceptions with DuckDuckGo {#example-handling-exceptions-with-duckduckgo data-type=sect2}
+### Example: Handling Exceptions with DuckDuckGo {#example-handling-exceptions-with-duckduckgo}
 
 Let's now go back and improve the exception handling of our DuckDuckGo
 client. In particular, we'll change it so that any query that fails is
@@ -1018,7 +1018,7 @@ The takeaway from these examples is that predicting thread interleavings is a
 subtle business. Staying within the bounds of Async has its limitations, but
 it leads to more predictable behavior.
 
-### Thread-Safety and Locking {#thread-safety-and-locking data-type=sect2}
+### Thread-Safety and Locking {#thread-safety-and-locking}
 
 Once you start working with system threads, you'll need to be careful about
 mutable data structures. Most mutable OCaml data structures do not have

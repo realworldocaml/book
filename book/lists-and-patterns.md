@@ -117,7 +117,7 @@ to build better support for patterns in the compiler. In particular, both the
 efficiency of `match` statements and the ability of the compiler to detect
 errors in matches depend on the constrained nature of patterns.
 
-### Performance {#performance data-type=sect2}
+### Performance {#performance}
 
 Naively, you might think that it would be necessary to check each case in a
 `match` in sequence to figure out which one fires. If the cases of a match
@@ -165,7 +165,7 @@ list element.
 This is a more general phenomena: pattern matching is very efficient, and
 pattern matching code is usually a win over what you might write by hand.
 
-### Detecting Errors {#detecting-errors data-type=sect2}
+### Detecting Errors {#detecting-errors}
 
 The error-detecting capabilities of `match` statements are if anything more
 important than their performance. We've already seen one example of OCaml's
@@ -314,14 +314,14 @@ table:
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="26" />
 
-### More Useful List Functions {#more-useful-list-functions data-type=sect2}
+### More Useful List Functions {#more-useful-list-functions}
 
 The previous example we worked through touched on only three of the functions
 in `List`. We won't cover the entire interface (for that you should look at
 the [online docs](http://realworldocaml.org/doc)), but a few more functions
 are useful enough to mention here.
 
-#### Combining list elements with List.reduce {#combining-list-elements-with-list.reduce data-type=sect3}
+#### Combining list elements with List.reduce {#combining-list-elements-with-list.reduce}
 
 `List.fold`, which we described earlier, is a very general and powerful
 function. Sometimes, however, you want something simpler and easier to use.
@@ -343,7 +343,7 @@ Now we can see `reduce` in action:
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="28" />
 
-#### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map data-type=sect3}
+#### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map}
 
 Very often when processing lists, you wants to restrict your attention to a
 subset of the values on your list. The `List.filter` function is one way of
@@ -373,7 +373,7 @@ have multiple subpatterns within a larger pattern. In this case,
 `None | Some ("",_)` is an Or pattern. As we'll see later, Or patterns can be
 nested anywhere within larger patterns.
 
-#### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf data-type=sect3}
+#### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf}
 
 Another useful operation that's closely related to filtering is partitioning.
 The function `List.partition_tf` takes a list and a function for computing a
@@ -386,7 +386,7 @@ module/List.partition_tf]{.idx}
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="31" />
 
-#### Combining lists {#combining-lists data-type=sect3}
+#### Combining lists {#combining-lists}
 
 Another very common operation on lists is concatenation. The `List` module
 actually comes with a few different ways of doing this. There's

@@ -412,7 +412,7 @@ The command-line tool will be installed within your
 [this Real World OCaml page](http://realworldocaml.org/install) if this isn't
 working.
 
-### ATD Basics {#atd-basics data-type=sect2}
+### ATD Basics {#atd-basics}
 
 The idea behind ATD is to specify the format of the JSON in a separate file
 and then run a compiler (`atdgen`) that outputs OCaml code to construct and
@@ -434,7 +434,7 @@ definitions. Every JSON record is assigned a type name (e.g., `app` in the
 preceding example). You can also define variants that are similar to OCaml's
 variant types (e.g., `scope` in the example).
 
-### ATD Annotations {#atd-annotations data-type=sect2}
+### ATD Annotations {#atd-annotations}
 
 ATD does deviate from OCaml syntax due to its support for annotations within
 the specification. The annotations can customize the code that is generated
@@ -451,7 +451,7 @@ is `user`, but that the variable name of the parsed variant in OCaml should
 be `User`. These annotations are often useful to map JSON values to reserved
 keywords in OCaml (e.g., `type`).
 
-### Compiling ATD Specifications to OCaml {#compiling-atd-specifications-to-ocaml data-type=sect2}
+### Compiling ATD Specifications to OCaml {#compiling-atd-specifications-to-ocaml}
 
 The ATD specification we defined can be compiled to OCaml code using the
 `atdgen` command-line tool. Let's run the compiler twice to generate some
@@ -511,7 +511,7 @@ process. [Piqi](http://piqi.org) supports conversions between XML, JSON, and
 the Google protobuf format; and [Thrift](http://thrift.apache.org) supports
 many other programming languages and includes OCaml bindings.
 
-### Example: Querying GitHub Organization Information {#example-querying-github-organization-information data-type=sect2}
+### Example: Querying GitHub Organization Information {#example-querying-github-organization-information}
 
 Let's finish up with an example of some live JSON parsing from GitHub and
 build a tool to query organization information via their API. Start by

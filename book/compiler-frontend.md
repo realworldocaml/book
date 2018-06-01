@@ -156,7 +156,7 @@ source distribution.[AST (abstract syntax-tree)]{.idx}[source code/parsing
 of]{.idx #SCpras}[parsing/of source code]{.idx #PARSsource}[compilation
 process/parsing source code]{.idx #CPpars}
 
-### Syntax Errors {#syntax-errors data-type=sect2}
+### Syntax Errors {#syntax-errors}
 
 The OCaml parser's goal is to output a well-formed AST data structure to the
 next phase of compilation, and so it any source code that doesn't match basic
@@ -184,7 +184,7 @@ that couldn't be parsed. In the broken example, the `module` keyword isn't a
 valid token at that point in parsing, so the error location information is
 correct.
 
-### Automatically Indenting Source Code {#automatically-indenting-source-code data-type=sect2}
+### Automatically Indenting Source Code {#automatically-indenting-source-code}
 
 Sadly, syntax errors do get more inaccurate sometimes, depending on the
 nature of your mistake. Try to spot the deliberate error in the following
@@ -227,7 +227,7 @@ how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
 
-### Generating Documentation from Interfaces {#generating-documentation-from-interfaces data-type=sect2}
+### Generating Documentation from Interfaces {#generating-documentation-from-interfaces}
 
 Whitespace and source code comments are removed during parsing and aren't
 significant in determining the semantics of the program. However, other tools
@@ -372,7 +372,7 @@ toplevel to explore the extension's behavior or run Camlp4 manually yourself
 to see the transformation in action. We'll show you how to do both of these
 now.
 
-### Using Camlp4 Interactively {#using-camlp4-interactively data-type=sect2}
+### Using Camlp4 Interactively {#using-camlp4-interactively}
 
 The `utop` toplevel can run the phrases that you type through `camlp4`
 automatically. You should have at least these lines in your `~/.ocamlinit`
@@ -406,7 +406,7 @@ is intercepted by `comparelib` and transformed into the original type
 definition with two new functions also
 <span class="keep-together">included</span>.
 
-### Running Camlp4 from the Command Line {#running-camlp4-from-the-command-line data-type=sect2}
+### Running Camlp4 from the Command Line {#running-camlp4-from-the-command-line}
 
 The toplevel is a quick way to examine the signatures generated from the
 extensions, but how can we see what these new functions actually do? We can't
@@ -482,7 +482,7 @@ underscore:
 Although you don't use `_z` in your code, this will never generate an unused
 variable warning.
 
-### Preprocessing Module Signatures {#preprocessing-module-signatures data-type=sect2}
+### Preprocessing Module Signatures {#preprocessing-module-signatures}
 
 Another useful feature of `type_conv` is that it can generate module
 signatures, too. Copy the earlier type definition into a
@@ -529,7 +529,7 @@ acts as a single point for extending the grammar via the `with` keyword.
 :::
 
 
-### Further Reading on Camlp4 {#further-reading-on-camlp4 data-type=sect2}
+### Further Reading on Camlp4 {#further-reading-on-camlp4}
 
 We've deliberately only shown you how to use Camlp4 extensions here, and not
 how to build your own. The full details of building new extensions are fairly
@@ -590,7 +590,7 @@ Subtyping in OCaml objects is always an explicit operation (via the `:>`
 operator). This means that it doesn't complicate the core type inference
 engine and can be tested as a separate concern.
 
-### Displaying Inferred Types from the Compiler {#displaying-inferred-types-from-the-compiler data-type=sect2}
+### Displaying Inferred Types from the Compiler {#displaying-inferred-types-from-the-compiler}
 
 We've already seen how you can explore type inference directly from the
 toplevel. It's also possible to generate type signatures for an entire file
@@ -656,7 +656,7 @@ the implementation to native code.
 :::
 
 
-### Type Inference {#type-inference-1 data-type=sect2}
+### Type Inference {#type-inference-1}
 
 Type inference is the process of determining the appropriate types for
 expressions based on their use. It's a feature that's partially present in
@@ -677,7 +677,7 @@ type inference, but by and large, most programs you write will never
 *require* annotations (although they sometimes help the compiler produce
 better error messages).
 
-#### Adding type annotations to find errors {#adding-type-annotations-to-find-errors data-type=sect3}
+#### Adding type annotations to find errors {#adding-type-annotations-to-find-errors}
 
 It's often said that the hardest part of writing OCaml code is getting past
 the type checker—but once the code does compile, it works correctly the
@@ -741,7 +741,7 @@ Once you fix the problem, you can remove the manual annotations if you prefer
 more succinct code. You can also leave the annotations there, of course, to
 help with future refactoring and debugging.
 
-#### Enforcing principal typing {#enforcing-principal-typing data-type=sect3}
+#### Enforcing principal typing {#enforcing-principal-typing}
 
 The compiler also has a stricter *principal type checking* mode that is
 activated via the <span class="keep-together">-principal</span> flag. This
@@ -817,7 +817,7 @@ it can result in the type checker failing unexpectedly very occasionally. In
 this case, just recompile with a clean source tree.
 
 
-### Modules and Separate Compilation {#modules-and-separate-compilation data-type=sect2}
+### Modules and Separate Compilation {#modules-and-separate-compilation}
 
 The OCaml module system enables smaller components to be reused effectively
 in large projects while still retaining all the benefits of static type
@@ -836,7 +836,7 @@ single source file when changing just one or two files, and the module system
 minimizes such recompilation while still encouraging code reuse. [compilation
 units]{.idx}
 
-#### The mapping between files and modules {#the-mapping-between-files-and-modules data-type=sect3}
+#### The mapping between files and modules {#the-mapping-between-files-and-modules}
 
 Individual compilation units provide a convenient way to break up a big
 module hierarchy into a collection of files. The relationship between files
@@ -856,7 +856,7 @@ directly in another module that references `Alice`:
 
 <link rel="import" href="code/front-end/alice_combined.ml" />
 
-#### Defining a module search path {#defining-a-module-search-path data-type=sect3}
+#### Defining a module search path {#defining-a-module-search-path}
 
 In the preceding example, `Alice` also has a reference to another module
 `Bob`. For the overall type of `Alice` to be valid, the compiler also needs
@@ -927,7 +927,7 @@ scratch.
 </aside>
 
 
-### Packing Modules Together {#packing-modules-together data-type=sect2}
+### Packing Modules Together {#packing-modules-together}
 
 The module-to-file mapping described so far rigidly enforces a 1:1 mapping
 between a top-level module and a file. It's often convenient to split larger
@@ -989,7 +989,7 @@ installed (and hence not exposing the intermediate compiled modules).
 :::
 
 
-### Shorter Module Paths in Type Errors {#shorter-module-paths-in-type-errors data-type=sect2}
+### Shorter Module Paths in Type Errors {#shorter-module-paths-in-type-errors}
 
 Core uses the OCaml module system quite extensively to provide a complete
 replacement standard library. It collects these modules into a single
@@ -1048,7 +1048,7 @@ This is activated by passing the `-bin-annot` flag to the compiler.
 The `cmt` files are particularly useful for IDE tools to match up OCaml
 source code at a specific location to the inferred or external types.
 
-### Using ocp-index for Autocompletion {#using-ocp-index-for-auto-completion data-type=sect2}
+### Using ocp-index for Autocompletion {#using-ocp-index-for-auto-completion}
 
 One such command-line tool to display autocompletion information in your
 editor is `ocp-index`. Install it via OPAM as
@@ -1070,7 +1070,7 @@ autocompletion is invaluable on larger codebases. See the
 [*ocp-index*](https://github.com/ocamlpro/ocp-index) home page for more
 information on how to integrate it with your favorite editor.
 
-### Examining the Typed Syntax Tree Directly {#examining-the-typed-syntax-tree-directly data-type=sect2}
+### Examining the Typed Syntax Tree Directly {#examining-the-typed-syntax-tree-directly}
 
 The compiler has a couple of advanced flags that can dump the raw output of
 the internal AST representation. You can't depend on these flags to give the

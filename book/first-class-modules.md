@@ -211,7 +211,7 @@ Thus, we can write:
 This is all described in more detail in
 [Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
 
-### Implementing a Query Handler {#implementing-a-query-handler data-type=sect2}
+### Implementing a Query Handler {#implementing-a-query-handler}
 
 Let's look at some examples of query handlers that satisfy the
 `Query_handler` interface. The first example is a handler that produces
@@ -238,7 +238,7 @@ directly:
 
 <link rel="import" href="code/fcm/query_handler.mlt" part="6" />
 
-### Dispatching to Multiple Query Handlers {#dispatching-to-multiple-query-handlers data-type=sect2}
+### Dispatching to Multiple Query Handlers {#dispatching-to-multiple-query-handlers}
 
 Now, what if we want to dispatch queries to any of an arbitrary collection of
 handlers? Ideally, we'd just like to pass in the handlers as a simple data
@@ -311,7 +311,7 @@ Here's an example of a session with this program:
 
 <link rel="import" href="code/fcm/query_example.rawscript" />
 
-### Loading and Unloading Query Handlers {#loading-and-unloading-query-handlers data-type=sect2}
+### Loading and Unloading Query Handlers {#loading-and-unloading-query-handlers}
 
 One of the advantages of first-class modules is that they afford a great deal
 of dynamism and flexibility. For example, it's a fairly simple matter to

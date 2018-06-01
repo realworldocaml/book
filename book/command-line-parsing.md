@@ -55,7 +55,7 @@ for optional flags and positional arguments, including documentation, the
 types they should map to, and whether to take special actions such as pausing
 for interactive input if certain inputs are encountered.
 
-### Defining an anonymous argument {#anonymous-arguments data-type=sect2}
+### Defining an anonymous argument {#anonymous-arguments}
 
 Let's build a parser for a command line UI with a single *anonymous*
 argument, i.e., an argument that is passed in without a flag.
@@ -70,7 +70,7 @@ used both to nail down the OCaml type of the returned value (`string`, in
 this case) and to guide features like input validation. The values `anon`,
 `string` and `%:` all come from the `Command.Param` module.
 
-### Defining basic commands {#defining-basic-commands data-type=sect2}
+### Defining basic commands {#defining-basic-commands}
 
 Once we've defined a specification, we need to put it to work on real input.
 The simplest way is to directly create a command-line interface with
@@ -115,7 +115,7 @@ In our program, we used `map` to convert the `filename_param` parser, which
 returns a string representing the file name, into a parser that returns a
 function of type `unit -> unit` containing the body of the command.
 
-### Running commands {#running-basic-commands data-type=sect2}
+### Running commands {#running-basic-commands}
 
 Once we've defined the basic command, running it is just one function call
 away.
@@ -156,7 +156,7 @@ removing intermediate variables.
 
 <link rel="import" href="code/command-line-parsing/md5_succinct/md5.ml" />
 
-### Multi-argument commands {#multiple-arguments data-type=sect2}
+### Multi-argument commands {#multiple-arguments}
 
 All the examples thus far have involved a single argument, but we can of
 course create multi-argument commands as well. We can make a parser for
@@ -240,7 +240,7 @@ This doesn't change the validation of the provided value, but it does enable
 interactive command-line completion. We'll explain how to enable that later
 in the chapter.
 
-### Defining Custom Argument Types {#defining-custom-argument-types data-type=sect2}
+### Defining Custom Argument Types {#defining-custom-argument-types}
 
 We can also define our own argument types if the predefined ones aren't
 sufficient. For instance, let's make a `regular_file` argument type that
@@ -256,7 +256,7 @@ try to open a special device such as `/dev/null`:
 
 <link rel="import" href="code/command-line-parsing/md5_with_custom_arg/run.errsh" />
 
-### Optional and Default Arguments {#optional-and-default-arguments data-type=sect2}
+### Optional and Default Arguments {#optional-and-default-arguments}
 
 A more realistic MD5 binary could also read from the standard input if a
 `filename` isn't specified. To do this, we need to declare the filename
@@ -300,7 +300,7 @@ Building and running this confirms that it has the same behavior as before.
 
 <link rel="import" href="code/command-line-parsing/md5_with_default_file/md5.sh" />
 
-### Sequences of Arguments {#sequences-of-arguments data-type=sect2}
+### Sequences of Arguments {#sequences-of-arguments}
 
 Another common way of parsing anonymous arguments is as a variable length
 list. As an example, let's modify our MD5 code to take a collection of files
@@ -506,7 +506,7 @@ often in <em class="filename">/etc/bash_completion.d</em>, and in Homebrew on
 Mac OS X, it would be
 <em class="filename">/usr/local/etc/bash_completion.d</em> by default.
 
-### Generating Completion Fragments from Command {#generating-completion-fragments-from-command data-type=sect2}
+### Generating Completion Fragments from Command {#generating-completion-fragments-from-command}
 
 The Command library has a declarative description of all the possible valid
 options, and it can use this information to generate a shell script that
@@ -524,7 +524,7 @@ Recall that we used the `Arg_type.file` to specify the argument type. This
 also supplies the completion logic so that you can just press Tab to complete
 files in your current directory.
 
-### Installing the Completion Fragment {#installing-the-completion-fragment data-type=sect2}
+### Installing the Completion Fragment {#installing-the-completion-fragment}
 
 You don't need to worry about what the preceding output script actually does
 (unless you have an unhealthy fascination with shell scripting internals,
