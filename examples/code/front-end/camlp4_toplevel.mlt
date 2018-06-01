@@ -9,11 +9,12 @@
 #use "topfind" ;;
 #camlp4o ;;
 [@@@part "1"];;
-#require "comparelib.syntax" ;;
+open Core_kernel;;
+#require "ppx_compare" ;;
 type t = { foo: string; bar : t } ;;
 [%%expect ocaml {|type t = { foo : string; bar : t; }|}];;
 type t = { foo: string; bar: t } [@@deriving compare] ;;
-[%%expect{|
-Characters 16-22:
-Error: Unbound value compare_string
+[%%expect ocaml {|
+type t = { foo : string; bar : t; }
+val compare : t -> t -> int = <fun>
 |}];;

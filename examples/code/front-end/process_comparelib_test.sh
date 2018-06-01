@@ -1,4 +1,9 @@
-  $ ocamlfind ocamlc -package ppx_compare -package core_kernel -dsource -linkpkg comparelib_test.ml
+  $ ocamlfind ocamlc -package ppx_compare -package core_kernel -dsource -linkpkg comparelib_test.mli comparelib_test.ml
+  open Core_kernel
+  type t = {
+    foo: string ;
+    bar: t }[@@deriving compare]
+  include sig [@@@ocaml.warning "-32"] val compare : t -> t -> int end
   open Core_kernel
   type t = {
     foo: string ;
@@ -14,6 +19,3 @@
             | 0 -> compare a__001_.bar b__002_.bar
             | n -> n) : t -> t -> int)
   let _ = compare
-  File "comparelib_test.ml", line 1:
-  Error: Could not find the .cmi file for interface comparelib_test.mli.
-@@ exit 2
