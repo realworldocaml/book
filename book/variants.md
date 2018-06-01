@@ -1,4 +1,4 @@
-# Variants {#variants data-type=chapter}
+# Variants {#variants}
 
 Variant types are one of the most useful features of OCaml and also one of
 the most unusual. They let you represent data that may take on multiple
@@ -119,7 +119,7 @@ Values](runtime-memory-layout.html){data-type=xref}.
 
 :::
 
-## Catch-All Cases and Refactoring {#catch-all-cases-and-refactoring data-type=sect1}
+## Catch-All Cases and Refactoring {#catch-all-cases-and-refactoring}
 
 OCaml's type system can act as a refactoring tool, warning you of places
 where your code needs to be updated to match an interface change. This is
@@ -174,7 +174,7 @@ Because of the catch-all case, we'll no longer be warned about missing the
 `Bold` case. This highlights the value of avoiding catch-all cases, since
 they effectively suppress exhaustiveness checking.
 
-## Combining Records and Variants {#combining-records-and-variants data-type=sect1}
+## Combining Records and Variants {#combining-records-and-variants}
 
 The term *algebraic data types* is often used to describe a collection of
 types that includes variants, records, and tuples. Algebraic data types act
@@ -276,7 +276,7 @@ And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
 <a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a><a data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a>
 
-### Embedded records {#embedded-records data-type=sect2}
+### Embedded records {#embedded-records}
 
 If we don't need to be able to pass the record types separately from the
 variant, then OCaml allows us to embed the records directly into the variant.
@@ -300,7 +300,7 @@ will reject code that tries to do so.
 <link rel="import" href="code/variants/logger.mlt" part="11" />
 
 
-## Variants and Recursive Data Structures {#variants-and-recursive-data-structures data-type=sect1}
+## Variants and Recursive Data Structures {#variants-and-recursive-data-structures}
 
 Another common application of variants is to represent tree-like recursive
 data structures. We'll show how this can be done by walking through the
@@ -397,7 +397,7 @@ More generally, using variants to build recursive data structures is a common
 technique, and shows up everywhere from designing little languages to
 building complex data structures.
 
-## Polymorphic Variants {#polymorphic-variants data-type=sect1}
+## Polymorphic Variants {#polymorphic-variants}
 
 In addition to the ordinary variants we've seen so far, OCaml also supports
 so-called *polymorphic variants*. As we'll see, polymorphic variants are more
@@ -455,7 +455,7 @@ Here, the inferred type states that the tags can be no more than `` `Float``,
 `` `Int``. As you can already start to see, polymorphic variants can lead to
 fairly complex inferred types.
 
-### Example: Terminal Colors Redux {#example-terminal-colors-redux data-type=sect2}
+### Example: Terminal Colors Redux {#example-terminal-colors-redux}
 
 To see how to use polymorphic variants in practice, we'll return to terminal
 colors. Imagine that we have a new terminal type that adds yet more colors,
@@ -574,7 +574,7 @@ This is useful when you want to narrow down to a type whose definition is
 long, and you don't want the verbosity of writing the tags down explicitly in
 the match.
 
-### When to Use Polymorphic Variants {#when-to-use-polymorphic-variants data-type=sect2}
+### When to Use Polymorphic Variants {#when-to-use-polymorphic-variants}
 
 At first glance, polymorphic variants look like a strict improvement over
 ordinary variants. You can do everything that ordinary variants can do, plus

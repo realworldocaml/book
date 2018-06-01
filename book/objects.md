@@ -1,4 +1,4 @@
-# Objects {#objects data-type=chapter}
+# Objects {#objects}
 
 We've already seen several tools that OCaml provides for organizing programs,
 particularly modules. In addition, OCaml also supports object-oriented
@@ -55,7 +55,7 @@ Ruby, Python, or JavaScript.
 
 </aside>
 
-## OCaml Objects {#ocaml-objects data-type=sect1}
+## OCaml Objects {#ocaml-objects}
 
 If you already know about object-oriented programming in a language like Java
 or <span class="keep-together">C++,</span> the OCaml object system may come
@@ -101,7 +101,7 @@ the polymorphic type `'a`. When `stack` is invoked on a concrete value
 `[3; 2; 1]`, we get the same object type as before, with type `int` for the
 values on the stack.
 
-## Object Polymorphism {#object-polymorphism data-type=sect1}
+## Object Polymorphism {#object-polymorphism}
 
 Like polymorphic variants, methods can be used without an explicit type
 declaration: [polymorphism/in objects]{.idx}[objects/polymorphism of]{.idx}
@@ -154,7 +154,7 @@ An object of type `< pop : int option; .. >` can be any object with a method
 
 <link rel="import" href="code/objects/stack.mlt" part="4" />
 
-## Immutable Objects {#immutable-objects data-type=sect1}
+## Immutable Objects {#immutable-objects}
 
 Many people consider object-oriented programming to be intrinsically
 imperative, where an object is like a state machine. Sending a message to an
@@ -179,7 +179,7 @@ be used only within a method body, and only the values of fields may be
 updated. Method implementations are fixed at the time the object is created;
 they cannot be changed <span class="keep-together">dynamically</span>.
 
-## When to Use Objects {#when-to-use-objects data-type=sect1}
+## When to Use Objects {#when-to-use-objects}
 
 You might wonder when to use objects in OCaml, which has a multitude of
 alternative mechanisms to express the similar concepts. First-class modules
@@ -224,7 +224,7 @@ libraries/Camlimages]{.idx}[external libraries/Cryptokit]{.idx}
 We'll introduce you to classes, and examples using open recursion, in
 [Classes](classes.html#classes){data-type=xref}.
 
-## Subtyping {#subtyping data-type=sect1}
+## Subtyping {#subtyping}
 
 Subtyping is a central concept in object-oriented programming. It governs
 when an object with one type *A* can be used in an expression that expects an
@@ -234,7 +234,7 @@ of *B*. More concretely, subtyping restricts when the coercion operator
 subtype of `t`. [subtyping/basics of]{.idx}[objects/subtyping
 and]{.idx #OBsub}
 
-### Width Subtyping {#width-subtyping data-type=sect2}
+### Width Subtyping {#width-subtyping}
 
 To explore this, let's define some simple object types for geometric shapes.
 The generic type `shape` has a method to compute the area, and `square` and
@@ -254,7 +254,7 @@ means that an object type *A* is a subtype of *B*, if *A* has all of the
 methods of *B*, and possibly more. A `square` is a subtype of `shape` because
 it implements all of the methods of `shape` (the `area` method).
 
-### Depth Subtyping {#depth-subtyping data-type=sect2}
+### Depth Subtyping {#depth-subtyping}
 
 We can also use *depth* subtyping with objects. Depth subtyping allows us
 coerce an object if its individual methods could safely be coerced. So an
@@ -282,7 +282,7 @@ polymorphic variant type. A polymorphic variant type *A* is a subtype of
 :::
 
 
-### Variance {#variance data-type=sect2}
+### Variance {#variance}
 
 What about types built from object types? If a `square` is a `shape`, we
 expect a `square list` to be a `shape list`. OCaml does indeed allow such
@@ -374,7 +374,7 @@ typing. The situation in OCaml is much better: it works, it is statically
 checked, and the annotations are pretty
 simple.<a data-type="indexterm" data-startref="var">&nbsp;</a><a data-type="indexterm" data-startref="SUBvar">&nbsp;</a>
 
-### Narrowing {#narrowing data-type=sect2}
+### Narrowing {#narrowing}
 
 Narrowing, also called *down casting*, is the ability to coerce an object to
 one of its subtypes. For example, if we have a list of shapes `shape list`,
@@ -432,7 +432,7 @@ This pattern works, but it has drawbacks. In particular, the recursive type
 definition should make it clear that this pattern is essentially equivalent
 to using variants, and that objects do not provide much value here.
 
-### Subtyping Versus Row Polymorphism {#subtyping-vs.-row-polymorphism data-type=sect2}
+### Subtyping Versus Row Polymorphism {#subtyping-vs.-row-polymorphism}
 
 There is considerable overlap between subtyping and row polymorphism. Both
 mechanisms allow you to write functions that can be applied to objects of

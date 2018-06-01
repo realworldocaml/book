@@ -1,4 +1,4 @@
-# A Guided Tour {#a-guided-tour data-type=chapter}
+# A Guided Tour {#a-guided-tour}
 
 This chapter gives an overview of OCaml by walking through a series of small
 examples that cover most of the major features of the language. This should
@@ -48,7 +48,7 @@ book.
 Before getting started, make sure you have a working OCaml installation so
 you can try out the examples as you read through the chapter.
 
-## OCaml as a Calculator {#ocaml-as-a-calculator data-type=sect1}
+## OCaml as a Calculator {#ocaml-as-a-calculator}
 
 Our first step is to open `Base`: [OCaml/numerical calculations
 in]{.idx}[numerical calculations]{.idx}[Core standard library/opening]{.idx}
@@ -116,7 +116,7 @@ The following examples, however, are not legal:
 This highlights that variables can't be capitalized, can't begin with
 numbers, and can't contain dashes.
 
-## Functions and Type Inference {#functions-and-type-inference data-type=sect1}
+## Functions and Type Inference {#functions-and-type-inference}
 
 The `let` syntax can also be used to define a function:[let syntax/function
 definition with]{.idx}[functions/defining]{.idx}
@@ -191,7 +191,7 @@ its definition; and once as an equality test, when comparing `x % 2` to
 `0`. These are very different operations despite the fact that they share
 some syntax.
 
-### Type Inference {#type-inference data-type=sect2}
+### Type Inference {#type-inference}
 
 As the types we encounter get more complicated, you might ask yourself how
 OCaml is able to figure them out, given that we didn't write down any
@@ -244,7 +244,7 @@ In the above, we've marked every argument to the function with its type, with
 the final annotation indicating the type of the return value. Such type
 annotations can be placed on any expression in an OCaml program:
 
-### Inferring Generic Types {#inferring-generic-types data-type=sect2}
+### Inferring Generic Types {#inferring-generic-types}
 
 Sometimes, there isn't enough information to fully determine the concrete
 type of a given value. Consider this function..[type inference/generic
@@ -321,9 +321,9 @@ when it's called with an input that triggers the exception.
 
 
 
-## Tuples, Lists, Options, and Pattern Matching {#tuples-lists-options-and-pattern-matching data-type=sect1}
+## Tuples, Lists, Options, and Pattern Matching {#tuples-lists-options-and-pattern-matching}
 
-### Tuples {#tuples data-type=sect2}
+### Tuples {#tuples}
 
 So far we've encountered a handful of basic types like `int`, `float`, and
 `string`, as well as function types like `string -> int`. But we haven't yet
@@ -367,7 +367,7 @@ power.
 This is just a first taste of pattern matching. Pattern matching is a
 pervasive tool in OCaml, and as you'll see, it has surprising power.
 
-### Lists {#lists data-type=sect2}
+### Lists {#lists}
 
 Where tuples let you combine a fixed number of items, potentially of
 different types, lists let you hold any number of items of the same type.
@@ -380,7 +380,7 @@ tuples:
 
 <link rel="import" href="code/guided-tour/main.mlt" part="21" />
 
-#### The List module {#the-list-module data-type=sect3}
+#### The List module {#the-list-module}
 
 `Base` comes with a `List` module that has a rich collection of functions for
 working with lists. We can access values from within a module by using dot
@@ -408,7 +408,7 @@ here:[arguments/labeled arguments]{.idx}[labeled arguments]{.idx}
 We'll learn more about labeled arguments and why they're important in
 [Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 
-#### Constructing lists with :: {#constructing-lists-with data-type=sect3}
+#### Constructing lists with :: {#constructing-lists-with}
 
 In addition to constructing lists using brackets, we can use the list
 constructor `::` for adding elements to the front of a list:[operators/: :
@@ -461,7 +461,7 @@ It's important to remember that, unlike `::`, this is not a constant-time
 operation. Concatenating two lists takes time proportional to the length of
 the first list.
 
-#### List patterns using match {#list-patterns-using-match data-type=sect3}
+#### List patterns using match {#list-patterns-using-match}
 
 The elements of a list can be accessed through pattern matching. List
 patterns are based on the two list constructors, `[]` and `::`. Here's a
@@ -513,7 +513,7 @@ written down with one or more `::`'s. The second pattern, `[]`, matches only
 the empty list. These cases are exhaustive, since every list is either empty
 or has at least one element, a fact that is verified by the compiler.
 
-#### Recursive list functions {#recursive-list-functions data-type=sect3}
+#### Recursive list functions {#recursive-list-functions}
 
 Recursive functions, or functions that call themselves, are an important part
 of working in OCaml or really any functional language. The typical approach
@@ -569,7 +569,7 @@ to iterate in a new way.
 <a data-type="indexterm" data-startref="DSlists">&nbsp;</a>
 
 
-### Options {#options data-type=sect2}
+### Options {#options}
 
 Another common data structure in OCaml is the *option*. An option is used to
 express that a value might or might not be present. For
@@ -642,7 +642,7 @@ explicitness allows the compiler to provide a great deal of help in making
 sure you're correctly handling the possibility of missing data.
 
 
-## Records and Variants {#records-and-variants data-type=sect1}
+## Records and Variants {#records-and-variants}
 
 So far, we've only looked at data structures that were predefined in the
 language, like lists and tuples. But OCaml also allows us to define new data
@@ -732,7 +732,7 @@ those are considered to be problematic, and so are hidden by default by
 :::
 
 
-## Imperative Programming {#imperative-programming data-type=sect1}
+## Imperative Programming {#imperative-programming}
 
 The code we've written so far has been almost entirely *pure* or
 *functional*, which roughly speaking means that the code in question doesn't
@@ -749,7 +749,7 @@ structures being immutable. But OCaml also has excellent support for
 imperative programming, including mutable data structures like arrays and
 hash tables, and control-flow constructs like `for` and `while` loops.
 
-### Arrays {#arrays data-type=sect2}
+### Arrays {#arrays}
 
 Perhaps the simplest mutable data structure in OCaml is the array. Arrays in
 OCaml are very similar to arrays in other languages like C: indexing starts
@@ -775,7 +775,7 @@ returning a value. It's also used as the argument to functions that don't
 require an input value. This is similar to the role that `void` plays in
 languages like C and Java.
 
-### Mutable Record Fields {#mutable-record-fields data-type=sect2}
+### Mutable Record Fields {#mutable-record-fields}
 
 The array is an important mutable data structure, but it's not the only one.
 Records, which are immutable by default, can have some of their fields
@@ -820,7 +820,7 @@ Wikipedia
 for more details, paying particular attention to the weighted incremental and
 parallel algorithms.
 
-### Refs {#refs data-type=sect2}
+### Refs {#refs}
 
 We can create a single mutable value by using a `ref`. The `ref` type comes
 predefined in the standard library, but there's nothing really special about
@@ -857,7 +857,7 @@ element of a list, using a `ref` to accumulate the results:
 This isn't the most idiomatic way to sum up a list, but it shows how you can
 use a `ref` in place of a mutable variable.
 
-### For and While Loops {#for-and-while-loops data-type=sect2}
+### For and While Loops {#for-and-while-loops}
 
 OCaml also supports traditional imperative control-flow constructs like
 `for and while` loops. Here, for example, is some code for permuting an array
@@ -894,7 +894,7 @@ error by rewriting the function to avoid the short-circuiting:
 The or operator, `||`, short-circuits in a similar way to `&&`.
 
 
-## A Complete Program {#a-complete-program data-type=sect1}
+## A Complete Program {#a-complete-program}
 
 So far, we've played with the basic features of the language via `utop`. Now
 we'll show how to create a simple standalone program. In particular, we'll
@@ -923,7 +923,7 @@ the remaining arguments that are <span class="keep-together">required</span>.
 In this case, there is a single formatting directive, `%F`, so `printf`
 expects one additional argument of type `float`.
 
-### Compiling and Running {#compiling-and-running data-type=sect2}
+### Compiling and Running {#compiling-and-running}
 
 We'll compile our program using `jbuilder`, a build system that's designed
 for use with OCaml projects. First, we need to write a *jbuild* file to
@@ -955,7 +955,7 @@ is covered in
 [Command Line Parsing](command-line-parsing.html#command-line-parsing){data-type=xref}.
 
 
-## Where to Go from Here {#where-to-go-from-here data-type=sect1}
+## Where to Go from Here {#where-to-go-from-here}
 
 That's it for the guided tour! There are plenty of features left and lots of
 details to explain, but we hope that you now have a sense of what to expect

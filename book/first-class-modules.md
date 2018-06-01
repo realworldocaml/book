@@ -1,4 +1,4 @@
-# First-Class Modules {#first-class-modules data-type=chapter}
+# First-Class Modules {#first-class-modules}
 
 You can think of OCaml as being broken up into two parts: a core language
 that is concerned with values and types, and a module language that is
@@ -20,7 +20,7 @@ language is quite powerful, increasing the range of what you can express and
 making it easier to build flexible and modular
 <span class="keep-together">systems</span>.
 
-## Working with First-Class Modules {#working-with-first-class-modules data-type=sect1}
+## Working with First-Class Modules {#working-with-first-class-modules}
 
 We'll start out by covering the basic mechanics of first-class modules by
 working through some toy examples. We'll get to more realistic examples in
@@ -178,7 +178,7 @@ the same approach to construct a local module to be fed to a functor.
 :::
 
 
-## Example: A Query-Handling Framework {#example-a-query-handling-framework data-type=sect1}
+## Example: A Query-Handling Framework {#example-a-query-handling-framework}
 
 Now let's look at first-class modules in the context of a more complete and
 realistic example. In particular, consider the following signature for a
@@ -211,7 +211,7 @@ Thus, we can write:
 This is all described in more detail in
 [Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}.
 
-### Implementing a Query Handler {#implementing-a-query-handler data-type=sect2}
+### Implementing a Query Handler {#implementing-a-query-handler}
 
 Let's look at some examples of query handlers that satisfy the
 `Query_handler` interface. The first example is a handler that produces
@@ -238,7 +238,7 @@ directly:
 
 <link rel="import" href="code/fcm/query_handler.mlt" part="6" />
 
-### Dispatching to Multiple Query Handlers {#dispatching-to-multiple-query-handlers data-type=sect2}
+### Dispatching to Multiple Query Handlers {#dispatching-to-multiple-query-handlers}
 
 Now, what if we want to dispatch queries to any of an arbitrary collection of
 handlers? Ideally, we'd just like to pass in the handlers as a simple data
@@ -311,7 +311,7 @@ Here's an example of a session with this program:
 
 <link rel="import" href="code/fcm/query_example.rawscript" />
 
-### Loading and Unloading Query Handlers {#loading-and-unloading-query-handlers data-type=sect2}
+### Loading and Unloading Query Handlers {#loading-and-unloading-query-handlers}
 
 One of the advantages of first-class modules is that they afford a great deal
 of dynamism and flexibility. For example, it's a fairly simple matter to
@@ -419,7 +419,7 @@ takes care of much of the workflow around setting up dynamic linking.
 <a data-type="indexterm" data-startref="FCMquery">&nbsp;</a>
 
 
-## Living Without First-Class Modules {#living-without-first-class-modules data-type=sect1}
+## Living Without First-Class Modules {#living-without-first-class-modules}
 
 It's worth noting that most designs that can be done with first-class modules
 can be simulated without them, with some level of awkwardness. For example,

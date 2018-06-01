@@ -1,4 +1,4 @@
-# Lists and Patterns {#lists-and-patterns data-type=chapter}
+# Lists and Patterns {#lists-and-patterns}
 
 This chapter will focus on two common elements of programming in OCaml: lists
 and pattern matching. Both of these were discussed in
@@ -6,7 +6,7 @@ and pattern matching. Both of these were discussed in
 go into more depth here, presenting the two topics together and using one to
 help illustrate the other.
 
-## List Basics {#list-basics data-type=sect1}
+## List Basics {#list-basics}
 
 An OCaml list is an immutable, finite sequence of elements of the same type.
 As we've seen, OCaml lists can be generated using a bracket-and-semicolon
@@ -45,7 +45,7 @@ change any of the existing ones, as you can see:[lists/extension of]{.idx}
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="3" />
 
-## Using Patterns to Extract Data from a List {#using-patterns-to-extract-data-from-a-list data-type=sect1}
+## Using Patterns to Extract Data from a List {#using-patterns-to-extract-data-from-a-list}
 
 We can read data out of a list using a `match` statement. Here's a simple
 example of a recursive function that computes the sum of all elements of a
@@ -101,7 +101,7 @@ of `drop_value`:
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="8" />
 
-## Limitations (and Blessings) of Pattern Matching {#limitations-and-blessings-of-pattern-matching data-type=sect1}
+## Limitations (and Blessings) of Pattern Matching {#limitations-and-blessings-of-pattern-matching}
 
 The preceding example highlights an important fact about patterns, which is
 that they can't be used to express arbitrary conditions. Patterns can
@@ -117,7 +117,7 @@ to build better support for patterns in the compiler. In particular, both the
 efficiency of `match` statements and the ability of the compiler to detect
 errors in matches depend on the constrained nature of patterns.
 
-### Performance {#performance data-type=sect2}
+### Performance {#performance}
 
 Naively, you might think that it would be necessary to check each case in a
 `match` in sequence to figure out which one fires. If the cases of a match
@@ -165,7 +165,7 @@ list element.
 This is a more general phenomena: pattern matching is very efficient, and
 pattern matching code is usually a win over what you might write by hand.
 
-### Detecting Errors {#detecting-errors data-type=sect2}
+### Detecting Errors {#detecting-errors}
 
 The error-detecting capabilities of `match` statements are if anything more
 important than their performance. We've already seen one example of OCaml's
@@ -192,7 +192,7 @@ locations where you need to adapt your code to deal with changing
 types.<a data-type="indexterm" data-startref="PATMAT">&nbsp;</a>
 
 
-## Using the List Module Effectively {#using-the-list-module-effectively data-type=sect1}
+## Using the List Module Effectively {#using-the-list-module-effectively}
 
 We've so far written a fair amount of list-munging code using pattern
 matching and recursive functions. In real life, you're usually better off
@@ -314,14 +314,14 @@ table:
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="26" />
 
-### More Useful List Functions {#more-useful-list-functions data-type=sect2}
+### More Useful List Functions {#more-useful-list-functions}
 
 The previous example we worked through touched on only three of the functions
 in `List`. We won't cover the entire interface (for that you should look at
 the [online docs](http://realworldocaml.org/doc)), but a few more functions
 are useful enough to mention here.
 
-#### Combining list elements with List.reduce {#combining-list-elements-with-list.reduce data-type=sect3}
+#### Combining list elements with List.reduce {#combining-list-elements-with-list.reduce}
 
 `List.fold`, which we described earlier, is a very general and powerful
 function. Sometimes, however, you want something simpler and easier to use.
@@ -343,7 +343,7 @@ Now we can see `reduce` in action:
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="28" />
 
-#### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map data-type=sect3}
+#### Filtering with List.filter and List.filter_map {#filtering-with-list.filter-and-list.filter_map}
 
 Very often when processing lists, you wants to restrict your attention to a
 subset of the values on your list. The `List.filter` function is one way of
@@ -373,7 +373,7 @@ have multiple subpatterns within a larger pattern. In this case,
 `None | Some ("",_)` is an Or pattern. As we'll see later, Or patterns can be
 nested anywhere within larger patterns.
 
-#### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf data-type=sect3}
+#### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf}
 
 Another useful operation that's closely related to filtering is partitioning.
 The function `List.partition_tf` takes a list and a function for computing a
@@ -386,7 +386,7 @@ module/List.partition_tf]{.idx}
 
 <link rel="import" href="code/lists-and-patterns/main.mlt" part="31" />
 
-#### Combining lists {#combining-lists data-type=sect3}
+#### Combining lists {#combining-lists}
 
 Another very common operation on lists is concatenation. The `List` module
 actually comes with a few different ways of doing this. There's
@@ -419,7 +419,7 @@ efficient operation:
 
 
 
-## Tail Recursion {#tail-recursion data-type=sect1}
+## Tail Recursion {#tail-recursion}
 
 The only way to compute the length of an OCaml list is to walk the list from
 beginning to end. As a result, computing the length of a list takes time
@@ -488,7 +488,7 @@ But when dealing with situations where the depth of the sequence of nested
 calls is on the order of the size of your data, tail recursion is usually the
 right approach.
 
-## Terser and Faster Patterns {#terser-and-faster-patterns data-type=sect1}
+## Terser and Faster Patterns {#terser-and-faster-patterns}
 
 Now that we know more about how lists and patterns work, let's consider how
 we can improve on an example from

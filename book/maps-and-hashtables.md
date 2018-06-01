@@ -1,4 +1,4 @@
-# Maps and Hash Tables {#maps-and-hash-tables data-type=chapter}
+# Maps and Hash Tables {#maps-and-hash-tables}
 
 Lots of programming problems require dealing with data organized as key/value
 pairs. Maybe the simplest way of representing such data in OCaml is an
@@ -25,7 +25,7 @@ have constant time complexity. We'll describe both of these data structures
 in detail and provide some advice as to how to choose between them. [hash
 tables/basics of]{.idx}[maps/basics of]{.idx}
 
-## Maps {#maps data-type=sect1}
+## Maps {#maps}
 
 Let's consider an example of how one might use a map in practice. In
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref},
@@ -69,7 +69,7 @@ Not every module can be used for creating maps, but the standard ones in
 `Base` are. Later in the chapter, we'll show how you can set up a module your
 own so it can be used in this way.
 
-### Sets {#sets data-type=sect2}
+### Sets {#sets}
 
 In addition to maps, `Base` also provides a set data type that's designed
 along similar lines. In some sense, sets are little more than maps where you
@@ -84,7 +84,7 @@ the traditional set operations, including union, intersection, and set
 difference. And, as with maps, we can create sets based on type-specific
 comparators or on the polymorphic comparator.
 
-### Modules and Comparators {#modules-and-comparators data-type=sect2}
+### Modules and Comparators {#modules-and-comparators}
 
 It's easy enough to create a map or set based on a type represented by a
 module in `Base`. Here, we'll create a map from digits to their English
@@ -134,7 +134,7 @@ With this module in hand, we can now build a set using the type `Book.t`.
 
 <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.2.5" />
 
-### Why do we need comparator witnesses? {#why-comparator-witnesses data-type=sect2}
+### Why do we need comparator witnesses? {#why-comparator-witnesses}
 
 The comparator witness looks a little surprising at first, and it may not be
 obvious why it's there in the first place. The purpose of the witness is to
@@ -181,7 +181,7 @@ result.
 
 <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="mc.8" />
 
-### The Polymorphic Comparator {#the-polymorphic-comparator data-type=sect2}
+### The Polymorphic Comparator {#the-polymorphic-comparator}
 
 We don't need to generate specialized comparators for every type we want to
 build a map on. We can instead build a map based on OCaml's built-in
@@ -261,7 +261,7 @@ once the order changes, the behavior will change.
 
 </aside>
 
-### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving data-type=sect2}
+### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving}
 
 Using maps and sets on a new type requires satisfying the `Comparator.S`
 interface, which in turn requires s-expression converters and comparison
@@ -320,7 +320,7 @@ with recursive values and structural equality for yourself:
 
 </aside>
 
-### Applying `[@@deriving]` to maps and sets {#applying-deriving-to-maps-and-sets data-type=sect2}
+### Applying `[@@deriving]` to maps and sets {#applying-deriving-to-maps-and-sets}
 
 In the previous section, we showed how to use `[@@deriving]` annotations to
 set up a type so it could be used to create a map or set type. But what if we
@@ -348,7 +348,7 @@ This same type works well with other derivers, like those for comparison and
 hash functions. Since this way of writing the type is also shorter, it's what
 you should use most of the time.
 
-### Trees {#trees data-type=sect2}
+### Trees {#trees}
 
 As we've discussed, maps carry within them the comparator that they were
 created with. Sometimes, for space efficiency reasons, you want a version of
@@ -378,7 +378,7 @@ following example, using the wrong comparator will lead to a type error:
 <link rel="import" href="code/maps-and-hash-tables/main.mlt" part="13" />
 
 
-## Hash Tables {#hash-tables data-type=sect1}
+## Hash Tables {#hash-tables}
 
 Hash tables are the imperative cousin of maps. We walked over a basic hash
 table implementation in
@@ -499,7 +499,7 @@ inline in an expression.
 :::
 
 
-## Choosing Between Maps and Hash Tables {#choosing-between-maps-and-hash-tables data-type=sect1}
+## Choosing Between Maps and Hash Tables {#choosing-between-maps-and-hash-tables}
 
 Maps and hash tables overlap enough in functionality that it's not always
 clear when to choose one or the other. Maps, by virtue of being immutable,

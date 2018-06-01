@@ -1,4 +1,4 @@
-# The Compiler Backend: Bytecode and Native code {#the-compiler-backend-byte-code-and-native-code data-type=chapter}
+# The Compiler Backend: Bytecode and Native code {#the-compiler-backend-byte-code-and-native-code}
 
 Once OCaml has passed the type checking stage, it can stop emitting syntax
 and type errors and begin the process of compiling the well-formed modules
@@ -13,7 +13,7 @@ In this chapter, we'll cover the following topics:
 - The native code `ocamlopt` code generator, and debugging and profiling
   native code
 
-## The Untyped Lambda Form {#the-untyped-lambda-form data-type=sect1}
+## The Untyped Lambda Form {#the-untyped-lambda-form}
 
 The first code generation phase eliminates all the static type information
 into a simpler intermediate *lambda form*. The lambda form discards
@@ -29,7 +29,7 @@ maps the source code to the runtime memory model described in
 This stage also performs some optimizations, most notably converting
 pattern-match statements into more optimized but low-level statements.
 
-### Pattern Matching Optimization {#pattern-matching-optimization data-type=sect2}
+### Pattern Matching Optimization {#pattern-matching-optimization}
 
 The compiler dumps the lambda form in an s-expression syntax if you add the
 <span class="keep-together">-dlambda</span> directive to the command line.
@@ -121,7 +121,7 @@ such a lightweight language construct to use in OCaml code.
 :::
 
 
-### Benchmarking Pattern Matching {#benchmarking-pattern-matching data-type=sect2}
+### Benchmarking Pattern Matching {#benchmarking-pattern-matching}
 
 Let's benchmark these three pattern-matching techniques to quantify their
 runtime costs more accurately. The `Core_bench` module runs the tests
@@ -152,7 +152,7 @@ from this stage than to wade through the native assembly code from compiled
 executables.<a data-type="indexterm" data-startref="CPuntype">&nbsp;</a>
 
 
-## Generating Portable Bytecode {#generating-portable-bytecode data-type=sect1}
+## Generating Portable Bytecode {#generating-portable-bytecode}
 
 After the lambda form has been generated, we are very close to having
 executable code. The OCaml toolchain branches into two separate compilers at
@@ -224,7 +224,7 @@ any budding language hacker.
 :::
 
 
-### Compiling and Linking Bytecode {#compiling-and-linking-bytecode data-type=sect2}
+### Compiling and Linking Bytecode {#compiling-and-linking-bytecode}
 
 The `ocamlc` command compiles individual `ml` files into bytecode files that
 have a `cmo` extension. The compiled bytecode files are matched with the
@@ -250,7 +250,7 @@ presented on the command line defines the order in which compilation units
 are initialized at runtime. Remember that OCaml has no single `main` function
 like C, so this link order is more important than in C programs.
 
-### Executing Bytecode {#executing-bytecode data-type=sect2}
+### Executing Bytecode {#executing-bytecode}
 
 The bytecode runtime comprises three parts: the bytecode interpreter, GC, and
 a set of C functions that implement the primitive operations. The bytecode
@@ -287,7 +287,7 @@ available for compiling bytecode (notably with shared libraries or building
 custom runtimes). Full details can be found in the
 [ OCaml](http://caml.inria.fr/pub/docs/manual-ocaml/manual022.html).
 
-### Embedding OCaml Bytecode in C {#embedding-ocaml-bytecode-in-c data-type=sect2}
+### Embedding OCaml Bytecode in C {#embedding-ocaml-bytecode-in-c}
 
 A consequence of using the bytecode compiler is that the final link phase
 must be performed by `ocamlc`. However, you might sometimes want to embed
@@ -342,7 +342,7 @@ section of the OCaml manual.
 <a data-type="indexterm" data-startref="CPportbyte">&nbsp;</a>
 
 
-## Compiling Fast Native Code {#compiling-fast-native-code data-type=sect1}
+## Compiling Fast Native Code {#compiling-fast-native-code}
 
 The native code compiler is ultimately the tool that most production OCaml
 code goes through. It compiles the lambda form into fast native code
@@ -377,7 +377,7 @@ search path so that they are available for cross-module inlining. If you
 don't do this, the compilation will still succeed, but you will have missed
 out on an important optimization and have slower binaries.
 
-### Inspecting Assembly Output {#inspecting-assembly-output data-type=sect2}
+### Inspecting Assembly Output {#inspecting-assembly-output}
 
 The native code compiler generates assembly language that is then passed to
 the system assembler for compiling into object files. You can get `ocamlopt`
@@ -393,7 +393,7 @@ you a more accurate picture of what executes on the CPU. Don't forget that
 you can use the lambda code from earlier to get a slightly higher-level
 picture of the code if you get lost in the more verbose assembly.
 
-#### The impact of polymorphic comparison {#the-impact-of-polymorphic-comparison data-type=sect3}
+#### The impact of polymorphic comparison {#the-impact-of-polymorphic-comparison}
 
 We warned you in
 [Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
@@ -452,7 +452,7 @@ minor heap pointer can also be changed by the C code that's being called
 returning from the `caml_greaterthan` call. Finally, the return value of the
 comparison is popped from the stack and returned.
 
-#### Benchmarking polymorphic comparison {#benchmarking-polymorphic-comparison data-type=sect3}
+#### Benchmarking polymorphic comparison {#benchmarking-polymorphic-comparison}
 
 You don't have to fully understand the intricacies of assembly language to
 see that this polymorphic comparison is much heavier than the simple
@@ -475,7 +475,7 @@ iterations in a tight inner loop, it's worth manually peering at the produced
 assembly code to see if you can hand-optimize it.
 
 
-### Debugging Native Code Binaries {#debugging-native-code-binaries data-type=sect2}
+### Debugging Native Code Binaries {#debugging-native-code-binaries}
 
 The native code compiler builds executables that can be debugged using
 conventional system debuggers such as GNU `gdb`. You need to compile your
@@ -488,7 +488,7 @@ library is compiled in debug mode. These include the CFI stubs you will have
 noticed in the profiling output earlier (`.cfi_start_proc` and
 `.cfi_end_proc` to delimit an OCaml function call, for example).
 
-#### Understanding name mangling {#understanding-name-mangling data-type=sect3}
+#### Understanding name mangling {#understanding-name-mangling}
 
 So how do you refer to OCaml functions in an interactive debugger like
 `gdb`? The first thing you need to know is how OCaml function names compile
@@ -520,7 +520,7 @@ Anonymous functions are hard to predict without inspecting intermediate
 compiler output. If you need to debug them, it's usually easier to modify the
 source code to let-bind the anonymous function to a variable name.
 
-#### Interactive breakpoints with the GNU debugger {#interactive-breakpoints-with-the-gnu-debugger data-type=sect3}
+#### Interactive breakpoints with the GNU debugger {#interactive-breakpoints-with-the-gnu-debugger}
 
 Let's see name mangling in action with some interactive debugging using GNU
 `gdb`. [GNU debugger]{.idx}
@@ -597,7 +597,7 @@ calls to C libraries or even callbacks into OCaml from the C layer if you're
 in an environment which embeds the OCaml runtime as a library.
 
 
-### Profiling Native Code {#profiling-native-code data-type=sect2}
+### Profiling Native Code {#profiling-native-code}
 
 The recording and analysis of where your application spends its execution
 time is known as *performance profiling*. OCaml native code binaries can be
@@ -618,7 +618,7 @@ Note that many other tools that operate on native binaries, such as Valgrind,
 will work just fine with OCaml as long as the program is linked with the
 `-g` flag to embed debugging symbols.
 
-#### Gprof {#gprof data-type=sect3}
+#### Gprof {#gprof}
 
 `gprof` produces an execution profile of an OCaml program by recording a call
 graph of which functions call one another, and recording the time these calls
@@ -630,7 +630,7 @@ generates extra code that records profile information to a file called
 `gmon.out` when the program is executed. This profile information can then be
 examined using `gprof`.
 
-#### Perf {#perf data-type=sect3}
+#### Perf {#perf}
 
 Perf is a more modern alternative to `gprof` that doesn't require you to
 instrument the binary. Instead, it uses hardware counters and debug
@@ -685,7 +685,7 @@ more about this on the OCamlPro
 </aside>
 
 
-### Embedding Native Code in C {#embedding-native-code-in-c data-type=sect2}
+### Embedding Native Code in C {#embedding-native-code-in-c}
 
 The native code compiler normally links a complete executable, but can also
 output a standalone native object file just as the bytecode compiler can.
@@ -732,7 +732,7 @@ very latest version, which you should be using via the `4.01.0` OPAM switch.
 <a data-type="indexterm" data-startref="CPfast">&nbsp;</a>
 
 
-## Summarizing the File Extensions {#summarizing-the-file-extensions data-type=sect1}
+## Summarizing the File Extensions {#summarizing-the-file-extensions}
 
 We've seen how the compiler uses intermediate files to store various stages
 of the compilation toolchain. Here's a cheat sheet of all them in one place.
