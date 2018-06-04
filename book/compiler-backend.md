@@ -708,7 +708,7 @@ significant in modern GNU toolchains (especially as used in Ubuntu 11.10 and
 later) that resolve symbols from left to right in a single
 pass.[debugging/activating debug runtime]{.idx}
 
-::: {data-type=tip}
+::: {data-type=note}
 #### Activating the Debug Runtime
 
 Despite your best efforts, it is easy to introduce a bug into some

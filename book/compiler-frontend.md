@@ -267,7 +267,7 @@ for]{.idx}[Bibtex]{.idx}[OCaml toolchain/ocamldoc-generators]{.idx}[Argot
 HTML generator]{.idx}[HTML
 generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
 
-::: {data-type=tip}
+::: {data-type=note}
 #### Using Custom ocamldoc Generators
 
 The default HTML output stylesheets from `ocamldoc` are pretty spartan and
