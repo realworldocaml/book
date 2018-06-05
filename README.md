@@ -41,7 +41,7 @@ There are three main repositories for the book:
   uses the scripts and examples repositories to compile the HTML
   site online.
 
-All of the code and examples are built using OCaml 4.06.2.
+All of the code and examples are built using OCaml 4.06.1.
 
 ## Building
 
