@@ -1,0 +1,18 @@
+#silent true;;
+#use "topfind";;
+#thread;;
+#require "core";;
+#require "core.top";;
+#require "ppx_jane";;
+#silent false;;
+[@@@part "0.5"];;
+open Base;;
+[@@@part "min-int1"];;
+Int.min_value;;
+[%%expect ocaml {|- : int = -4611686018427387904|}];;
+[@@@part "min-int2"];;
+Int.max_value;;
+[%%expect ocaml {|- : int = 4611686018427387903|}];;
+[@@@part "min-int3"];;
+Int.neg Int.min_value;;
+[%%expect ocaml {|- : int = -4611686018427387904|}];;
