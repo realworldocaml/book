@@ -152,7 +152,7 @@ let replace_id_node_with t ~id ~with_ =
     | [] -> []
     | (`Data _ as x)::rest -> x::(loop rest)
     | (`Element {name;attrs;childs;_})::rest ->
-      if List.mem ~equal:Rwo_util.string_pair_equal attrs ("id",id) then
+      if List.mem ~equal:Util.string_pair_equal attrs ("id",id) then
         with_@(loop rest)
       else
         (`Element {name; attrs; childs = loop childs})::(loop rest)

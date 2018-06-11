@@ -14,7 +14,7 @@ type lang = [
   | `Sexp
 ]
 
-val of_lang : Rwo_lang.t -> lang Or_error.t
+val of_lang : Lang.t -> lang Or_error.t
 
 (** Run given string through pygmentize. Return a single <pre>
     element.
@@ -29,7 +29,7 @@ val of_lang : Rwo_lang.t -> lang Or_error.t
 *)
 val pygmentize
   :  ?interactive:bool
-  -> ?add_attrs:Rwo_html.attributes
+  -> ?add_attrs:Html.attributes
   -> lang
   -> string
-  -> Rwo_html.item
+  -> Html.item

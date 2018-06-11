@@ -1,10 +1,5 @@
 open Core
 open Async
-module Html = Rwo_html
-module Import = Rwo_import
-module Lang = Rwo_lang
-module Pygments = Rwo_pygments
-module Expect = Rwo_expect
 
 type part = string
   [@@deriving sexp]
@@ -141,7 +136,9 @@ let script_part_to_html (x : script_part) =
     | `OCaml_toplevel phrases -> phrases_to_html phrases
     | `OCaml_rawtoplevel x
     | `OCaml x -> Pygments.pygmentize `OCaml x.Expect.Raw_script.content
-    | `Shell x -> Pygments.pygmentize ~interactive:true `Bash (Expect.Cram.to_html x)
+    | `Shell x ->
+      if Expect.Cram.is_empty x then `Data ""
+      else Pygments.pygmentize ~interactive:true `Bash (Expect.Cram.to_html x)
     | `Other x -> Pygments.pygmentize `OCaml x
   in
   Html.div ~a:["class","highlight"] [l]
@@ -152,9 +149,9 @@ let exn_of_filename filename content =
   match extension with
   | Some ext -> (match ext with
     | "ml" | "mli" | "mly" | "mll" ->
-      `OCaml Rwo_expect.Raw_script.{ name = ""; content }
+      `OCaml Expect.Raw_script.{ name = ""; content }
     | "rawscript" ->
-      `OCaml_rawtoplevel Rwo_expect.Raw_script.{ name = ""; content }
+      `OCaml_rawtoplevel Expect.Raw_script.{ name = ""; content }
     | _ -> `Other content)
   | None -> `Other content
 
@@ -179,6 +176,8 @@ let script lang ~filename =
     )
   | "sh" | "errsh" -> (
       let %map script = Expect.Cram.of_file ~filename in
+      if Expect.Cram.is_empty script then
+        printf "warning: %s is empty\n%!" filename;
       `Shell script
     )
   | "jbuild" ->

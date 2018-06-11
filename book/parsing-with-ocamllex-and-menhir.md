@@ -1,4 +1,4 @@
-# Parsing with OCamllex and Menhir {#parsing-with-ocamllex-and-menhir data-type=chapter}
+# Parsing with OCamllex and Menhir {#parsing-with-ocamllex-and-menhir}
 
 Many programming tasks start with the interpretion of some form of structured
 textual data. *Parsing* is the process of converting such data into data
@@ -51,7 +51,7 @@ running `opam install menhir`.
 :::
 
 
-## Lexing and Parsing {#lexing-and-parsing data-type=sect1}
+## Lexing and Parsing {#lexing-and-parsing}
 
 Parsing is traditionally broken down into two parts: *lexical analysis*,
 which is a kind of simplified parsing phase that converts a stream of
@@ -106,7 +106,7 @@ shown below for our earlier JSON example:
 
 <link rel="import" href="code/parsing/parsed_example.ml" />
 
-## Defining a Parser {#defining-a-parser data-type=sect1}
+## Defining a Parser {#defining-a-parser}
 
 A parser-specification file has suffix `.mly` and contains two sections that
 are broken up by separator lines consisting of the characters `%%` on a line
@@ -129,7 +129,7 @@ and `STRING` carries a `string` value. The remaining tokens, such as
 `TRUE`, `FALSE`, or the punctuation, aren't associated with any value, and so
 we can omit the `<`*`type`*`>` specification.
 
-### Describing the Grammar {#describing-the-grammar data-type=sect2}
+### Describing the Grammar {#describing-the-grammar}
 
 The next thing we need to do is to specify the grammar of a JSON expression.
 `menhir`, like many parser generators, expresses grammars as
@@ -194,7 +194,7 @@ transform the object in question to. Note that we still have two nonterminals
 whose definitions we depend on here but have not yet defined: `object_fields`
 and `array_values`. We'll look at how these are parsed next.
 
-### Parsing Sequences {#parsing-sequences data-type=sect2}
+### Parsing Sequences {#parsing-sequences}
 
 The rule for `object_fields` follows, and is really just a thin wrapper that
 reverses the list returned by the following rule for `rev_object_fields`.
@@ -246,7 +246,7 @@ generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&n
 <link rel="import" href="code/parsing/build_short_parser.sh" />
 
 
-## Defining a Lexer {#defining-a-lexer data-type=sect1}
+## Defining a Lexer {#defining-a-lexer}
 
 Now we can define a lexer, using `ocamllex`, to convert our input text into a
 stream of tokens. The specification of the lexer is placed in a file with an
@@ -254,7 +254,7 @@ stream of tokens. The specification of the lexer is placed in a file with an
 toolchain/ocamllex]{.idx}[mll files]{.idx}[files/mll
 files]{.idx}[parsing/lexer definition]{.idx #PARlex}
 
-### OCaml Prelude {#ocaml-prelude data-type=sect2}
+### OCaml Prelude {#ocaml-prelude}
 
 Let's walk through the definition of a lexer section by section. The first
 section is an optional chunk of OCaml code that is bounded by a pair of curly
@@ -272,7 +272,7 @@ that holds the state of the lexer, including the current location within the
 source file. The `next_line` function simply accesses the `lex_curr_p` field
 that holds the current location and updates its line number.
 
-### Regular Expressions {#regular-expressions data-type=sect2}
+### Regular Expressions {#regular-expressions}
 
 The next section of the lexing file is a collection of named regular
 expressions. These look syntactically like ordinary OCaml `let` bindings, but
@@ -305,7 +305,7 @@ The `newline` introduces the `|` operator, which lets one of several
 alternative regular expressions match (in this case, the various
 carriage-return combinations of CR, LF, or CRLF).
 
-### Lexing Rules {#lexing-rules data-type=sect2}
+### Lexing Rules {#lexing-rules}
 
 The lexing rules are essentially functions that consume the data, producing
 OCaml expressions that evaluate to tokens. These OCaml expressions can be
@@ -355,7 +355,7 @@ pattern:
   input were `true: 167`, then both `"true"` and `id` match the first four
   characters; `"true"` is first, so the return value is `TRUE`.
 
-### Recursive Rules {#recursive-rules data-type=sect2}
+### Recursive Rules {#recursive-rules}
 
 Unlike many other lexer generators, `ocamllex` allows the definition of
 multiple lexers in the same file, and the definitions can be recursive. In
@@ -409,7 +409,7 @@ names.<a data-type="indexterm" data-startref="PARlex">&nbsp;</a>
 
 
 
-## Bringing It All Together {#bringing-it-all-together data-type=sect1}
+## Bringing It All Together {#bringing-it-all-together}
 
 For the final part, we need to compose the lexer and parser. As we saw in the
 type definition in `parser.mli`, the parsing function expects a lexer of type

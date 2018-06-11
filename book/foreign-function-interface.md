@@ -1,4 +1,4 @@
-# Foreign Function Interface {#foreign-function-interface data-type=chapter}
+# Foreign Function Interface {#foreign-function-interface}
 
 OCaml has several options available to interact with non-OCaml code. The
 compiler can link with external system libraries via C code and also can
@@ -47,7 +47,7 @@ You'll also need the Ncurses library for the first example. This comes
 preinstalled on many operating systems such as Mac OS X, and Debian Linux
 provides it as the `libncurses5-dev` package.
 
-## Example: A Terminal Interface {#example-a-terminal-interface data-type=sect1}
+## Example: A Terminal Interface {#example-a-terminal-interface}
 
 Ncurses is a library to help build terminal-independent text interfaces in a
 reasonably efficient way. It's used in console mail clients like Mutt and
@@ -163,7 +163,7 @@ We'll go over some of these features in more detail for the remainder of the
 chapter by using some POSIX date functions as running
 examples.<a data-type="indexterm" data-startref="FFItermint">&nbsp;</a>
 
-## Basic Scalar C Types {#basic-scalar-c-types data-type=sect1}
+## Basic Scalar C Types {#basic-scalar-c-types}
 
 First, let's look at how to define basic scalar C types. Every C type is
 represented by an OCaml equivalent via the single type definition:[scalar C
@@ -214,7 +214,7 @@ some of them need a bit more explanation:
   `float complex` and `double complex` types both map onto the OCaml
   double-precision `Complex.t` type.
 
-## Pointers and Arrays {#pointers-and-arrays data-type=sect1}
+## Pointers and Arrays {#pointers-and-arrays}
 
 Pointers are at the heart of C, so they are necessarily part of Ctypes, which
 provides support for pointer arithmetic, pointer conversions, reading and
@@ -271,7 +271,7 @@ in our prototype list:
 
 The binding to `difftime` above is sufficient to compare two `time_t` values.
 
-### Allocating Typed Memory for Pointers {#allocating-typed-memory-for-pointers data-type=sect2}
+### Allocating Typed Memory for Pointers {#allocating-typed-memory-for-pointers}
 
 Let's look at a slightly less trivial example where we pass a nonnull pointer
 to a function. Continuing with the theme from earlier, we'll bind to the
@@ -298,7 +298,7 @@ initial value and it returns a suitably typed pointer. We can now call
 
 <link rel="import" href="code/ffi/posix.mlt" part="7" />
 
-### Using Views to Map Complex Values {#using-views-to-map-complex-values data-type=sect2}
+### Using Views to Map Complex Values {#using-views-to-map-complex-values}
 
 While scalar types typically have a 1:1 representation, other C types require
 extra work to convert them into OCaml. Views create new C type descriptions
@@ -353,14 +353,14 @@ use the Ctypes `Bigarray` support to pass memory by reference instead.
 
 
 
-## Structs and Unions {#structs-and-unions data-type=sect1}
+## Structs and Unions {#structs-and-unions}
 
 The C constructs `struct` and `union` make it possible to build new types
 from existing types. Ctypes contains counterparts that work
 similarly.[unions]{.idx}[structs and unions/structure
 definition]{.idx}[foreign function interface (FFI)/structs and unions]{.idx}
 
-### Defining a Structure {#defining-a-structure data-type=sect2}
+### Defining a Structure {#defining-a-structure}
 
 Let's improve the timer function that we wrote earlier. The POSIX function
 `gettimeofday` retrieves the time with microsecond resolution. The signature
@@ -383,7 +383,7 @@ The second command calls `structure` to create a fresh structure type. At
 this point, the structure type is incomplete: we can add fields but cannot
 yet use it in `foreign` calls or use it to create values.
 
-### Adding Fields to Structures {#adding-fields-to-structures data-type=sect2}
+### Adding Fields to Structures {#adding-fields-to-structures}
 
 The `timeval` structure definition still doesn't have any fields, so we need
 to add those next: [fields/adding to structures]{.idx}[structs and
@@ -401,7 +401,7 @@ Every field addition mutates the structure variable and records a new size
 added). Once we `seal` the structure, we will be able to create values using
 it, but adding fields to a sealed structure is an error.
 
-### Incomplete Structure Definitions {#incomplete-structure-definitions data-type=sect2}
+### Incomplete Structure Definitions {#incomplete-structure-definitions}
 
 Since `gettimeofday` needs a `struct timezone` pointer for its second
 argument, we also need to define a second structure type: [structs and
@@ -437,7 +437,7 @@ here. Both `Pervasives` and `Ctypes` define different `float` functions. The
 As seen previously though, you just need to locally open `Pervasives` again
 to bring the usual `float` function back in scope.
 
-#### Recap: A time-printing command {#recap-a-time-printing-command data-type=sect3}
+#### Recap: A time-printing command {#recap-a-time-printing-command}
 
 We built up a lot of bindings in the previous section, so let's recap them
 with a complete example that ties it together with a command-line frontend:
@@ -505,7 +505,7 @@ function definitions.
 </aside>
 
 
-### Defining Arrays {#defining-arrays data-type=sect2}
+### Defining Arrays {#defining-arrays}
 
 Arrays in C are contiguous blocks of the same type of value. Any of the basic
 types defined previously can be allocated as blocks via the `Array` module:
@@ -556,7 +556,7 @@ documentation), such as pointer differencing and comparison.
 </aside>
 
 
-## Passing Functions to C {#passing-functions-to-c data-type=sect1}
+## Passing Functions to C {#passing-functions-to-c}
 
 It's also straightforward to pass OCaml function values to C. The C standard
 library function `qsort` sorts arrays of elements using a comparison function
@@ -590,7 +590,7 @@ Arrays created using Ctypes have a richer runtime structure than C arrays, so
 we don't need to pass size information around. Furthermore, we can use OCaml
 polymorphism in place of the unsafe `void ptr` type.
 
-### Example: A Command-Line Quicksort {#example-a-command-line-quicksort data-type=sect2}
+### Example: A Command-Line Quicksort {#example-a-command-line-quicksort}
 
 The following is a command-line tool that uses the `qsort` binding to sort
 all of the integers supplied on the standard input: [qsort binding]{.idx}
@@ -662,7 +662,7 @@ garbage-collected.
 </aside>
 
 
-## Learning More About C Bindings {#learning-more-about-c-bindings data-type=sect1}
+## Learning More About C Bindings {#learning-more-about-c-bindings}
 
 The Ctypes [distribution](http://github.com/ocamllabs/ocaml-ctypes) contains
 a number of larger-scale examples, including: [foreign function interface
@@ -712,7 +712,7 @@ You can find more information about the C interface in several places:
   The SWIG manual has examples of converting library specifications into
   OCaml bindings.
 
-### Struct Memory Layout {#struct-memory-layout data-type=sect2}
+### Struct Memory Layout {#struct-memory-layout}
 
 The C language gives implementations a certain amount of freedom in choosing
 how to lay out structs in memory. There may be padding between members and at

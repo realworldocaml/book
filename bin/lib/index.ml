@@ -1,5 +1,5 @@
 open Core
-open Rwo_html
+open Html
 
 let nbsp = `Data (List.hd_exn (Soup.(texts (parse "&nbsp;"))))
 
@@ -7,7 +7,7 @@ let indexterm_to_idx docs =
   let rec loop item = match item with
     | `Data _ -> item
     | `Element {name="a"; attrs; childs=[x]} when x = nbsp -> (
-      if List.mem ~equal:Rwo_util.string_pair_equal attrs ("data-type", "indexterm")
+      if List.mem ~equal:Util.string_pair_equal attrs ("data-type", "indexterm")
       then (
         match
           check_attrs attrs ~required:["data-type"; "data-primary"]

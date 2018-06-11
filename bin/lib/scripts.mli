@@ -6,19 +6,19 @@ type part = string
   [@@deriving sexp]
 
 type script = [
-  | `OCaml of Rwo_expect.Raw_script.t
-  | `OCaml_toplevel of Rwo_expect.Mlt.t
-  | `OCaml_rawtoplevel of Rwo_expect.Raw_script.t
-  | `Shell of Rwo_expect.Cram.t
+  | `OCaml of Expect.Raw_script.t
+  | `OCaml_toplevel of Expect.Mlt.t
+  | `OCaml_rawtoplevel of Expect.Raw_script.t
+  | `Shell of Expect.Cram.t
   | `Other of string
 ]
 
 (** One part of a script. *)
 type script_part = [
-  | `OCaml of Rwo_expect.Raw_script.part
-  | `OCaml_toplevel of Rwo_expect.Chunk.t list
-  | `OCaml_rawtoplevel of Rwo_expect.Raw_script.part
-  | `Shell of Rwo_expect.Cram.t
+  | `OCaml of Expect.Raw_script.part
+  | `OCaml_toplevel of Expect.Chunk.t list
+  | `OCaml_rawtoplevel of Expect.Raw_script.part
+  | `Shell of Expect.Cram.t
   | `Other of string
 ]
 
@@ -27,7 +27,7 @@ type t = script String.Map.t (** key is filename *)
 val of_html
   :  ?code_dir:string
   -> filename:string
-  -> Rwo_html.t
+  -> Html.t
   -> t Or_error.t Deferred.t
 (** Return all scripts found in given HTML. [code_dir] defaults to [examples]. *)
 
@@ -37,7 +37,7 @@ val of_html
 (******************************************************************************)
 
 (** Returns a single <div class="highlight"> element. *)
-val script_part_to_html: script_part -> Rwo_html.item
+val script_part_to_html: script_part -> Html.item
 
 
 (******************************************************************************)

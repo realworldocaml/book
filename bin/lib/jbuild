@@ -6,6 +6,6 @@
 ))
 
 (rule
- ((targets (rwo_about.ml))
+ ((targets (about.ml))
   (action  (with-stdout-to ${@}
              (echo "let git_commit = Some \"${version:rwo}\"")))))

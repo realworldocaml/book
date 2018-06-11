@@ -1,4 +1,4 @@
-# Files, Modules, and Programs {#files-modules-and-programs data-type=chapter}
+# Files, Modules, and Programs {#files-modules-and-programs}
 
 We've so far experienced OCaml largely through the toplevel. As you move from
 exercises to real-world programs, you'll need to leave the toplevel behind
@@ -10,7 +10,7 @@ In this chapter, we'll show you how to build an OCaml program from a
 collection of files, as well as the basics of working with modules and module
 signatures.
 
-## Single-File Programs {#single-file-programs data-type=sect1}
+## Single-File Programs {#single-file-programs}
 
 We'll start with an example: a utility that reads lines from `stdin`,
 computes a frequency count of the lines, and prints out the ten most frequent
@@ -149,7 +149,7 @@ compilers in more detail in
 :::
 
 
-## Multifile Programs and Modules {#multi-file-programs-and-modules data-type=sect1}
+## Multifile Programs and Modules {#multi-file-programs-and-modules}
 
 Source files in OCaml are tied into the module system, with each file
 compiling down into a module whose name is derived from the name of the file.
@@ -193,7 +193,7 @@ dependencies and realize that `counter.ml` needs to be compiled.
 
 <link rel="import" href="code/files-modules-and-programs/freq-with-counter/build.sh" />
 
-## Signatures and Abstract Types {#signatures-and-abstract-types data-type=sect1}
+## Signatures and Abstract Types {#signatures-and-abstract-types}
 
 While we've pushed some of the logic to the `Counter` module, the code in
 `freq.ml` can still depend on the details of the implementation of `Counter`.
@@ -277,7 +277,7 @@ of some more advanced features of the language (specifically, *functors* and
 these features for the Map data-structure in particular is covered in
 [Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
 
-## Concrete Types in Signatures {#concrete-types-in-signatures data-type=sect1}
+## Concrete Types in Signatures {#concrete-types-in-signatures}
 
 In our frequency-count example, the module `Counter` had an abstract type
 `Counter.t` for representing a collection of frequency counts. Sometimes,
@@ -317,7 +317,7 @@ enforced by the type itself; concrete types let you expose more detail and
 structure to client code in a lightweight way. The right choice depends very
 much on the context.
 
-## Nested Modules {#nested-modules data-type=sect1}
+## Nested Modules {#nested-modules}
 
 Up until now, we've only considered modules that correspond to files, like
 `counter.ml`. But modules (and module signatures) can be nested inside other
@@ -368,7 +368,7 @@ This is a trivial example, but confusing different kinds of identifiers is a
 very real source of bugs, and the approach of minting abstract types for
 different classes of identifiers is an effective way of avoiding such issues.
 
-## Opening Modules {#opening-modules data-type=sect1}
+## Opening Modules {#opening-modules}
 
 Most of the time, you refer to values and types within a module by using the
 module name as an explicit qualifier. For example, you write `List.map` to
@@ -430,7 +430,7 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
   read and remember what `C` stands for. Rebinding modules to very short
   names at the top level of your module is usually a mistake.
 
-## Including Modules {#including-modules data-type=sect1}
+## Including Modules {#including-modules}
 
 While opening a module affects the environment used to search for
 identifiers, *including* a module is a way of adding new identifiers to a
@@ -485,13 +485,13 @@ And if we then put `open Common` after `open Base` at the top of each file in
 our project, then references to `List` will automatically go to `Ext_list`
 instead.
 
-## Common Errors with Modules {#common-errors-with-modules data-type=sect1}
+## Common Errors with Modules {#common-errors-with-modules}
 
 When OCaml compiles a program with an `ml` and an `mli`, it will complain if
 it detects a mismatch between the two. Here are some of the common errors
 you'll run into.
 
-### Type Mismatches {#type-mismatches data-type=sect2}
+### Type Mismatches {#type-mismatches}
 
 The simplest kind of error is where the type specified in the signature does
 not match the type in the implementation of the module. As an example, if we
@@ -506,7 +506,7 @@ and we try to compile, we'll get the following error.
 
 <link rel="import" href="code/files-modules-and-programs/freq-with-sig-mismatch/build.errsh" />
 
-### Missing Definitions {#missing-definitions data-type=sect2}
+### Missing Definitions {#missing-definitions}
 
 We might decide that we want a new function in `Counter` for pulling out the
 frequency count of a given string. We can update the `mli` by adding the
@@ -523,7 +523,7 @@ get this error.
 
 A missing type definition will lead to a similar error.
 
-### Type Definition Mismatches {#type-definition-mismatches data-type=sect2}
+### Type Definition Mismatches {#type-definition-mismatches}
 
 Type definitions that show up in an `mli` need to match up with corresponding
 definitions in the `ml`. Consider again the example of the type `median`. The
@@ -543,7 +543,7 @@ Order is similarly important to other type declarations, including the order
 in which record fields are declared and the order of arguments (including
 labeled and optional arguments) to a function.
 
-### Cyclic Dependencies {#cyclic-dependencies data-type=sect2}
+### Cyclic Dependencies {#cyclic-dependencies}
 
 In most cases, OCaml doesn't allow cyclic dependencies, i.e., a collection of
 definitions that all refer to one another. If you want to create such
@@ -584,13 +584,13 @@ the cycle:
 <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.errsh" />
 
 
-## Designing with Modules {#designing-with-modules data-type=sect1}
+## Designing with Modules {#designing-with-modules}
 
 The module system is a key part of how an OCaml program is structured. As
 such, we'll close this chapter with some advice on how to think about
 designing that structure effectively.
 
-### Expose Concrete Types Rarely {#expose-concrete-types-rarely data-type=sect2}
+### Expose Concrete Types Rarely {#expose-concrete-types-rarely}
 
 When designing an `mli`, one choice that you need to make is whether to
 expose the concrete definition of your types or leave them abstract. Most of
@@ -622,7 +622,7 @@ implementation of your types when there's significant value in the ability to
 pattern match, and when the invariants that you care about are already
 enforced by the data type itself.
 
-### Design for the Call Site {#design-for-the-call-site data-type=sect2}
+### Design for the Call Site {#design-for-the-call-site}
 
 When writing an interface, you should think not just about how easy it is to
 understand the interface for someone who reads your carefully documented
@@ -653,7 +653,7 @@ more rarely used names should be longer and more explicit, since the cost of
 concision and the benefit of explicitness become more important the more
 often a name is used.
 
-### Create Uniform Interfaces {#create-uniform-intefaces data-type=sect2}
+### Create Uniform Interfaces {#create-uniform-intefaces}
 
 Designing the interface of a module is a task that should not be thought of
 in isolation. The interfaces that appear in your codebase should play
@@ -689,7 +689,7 @@ Base's standards may or may not fit your projects, but you can improve the
 usability of your codebase by finding some consistent set of standards to
 apply.
 
-### Interfaces before implementations {#interfaces-before-implementations data-type=sect2}
+### Interfaces before implementations {#interfaces-before-implementations}
 
 OCaml's concise and flexible type language enables a type-oriented approach
 to software design. Such an approach involves thinking through and writing

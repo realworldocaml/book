@@ -1,4 +1,4 @@
-# Concurrent Programming with Async {#concurrent-programming-with-async data-type=chapter}
+# Concurrent Programming with Async {#concurrent-programming-with-async}
 
 The logic of building programs that interact with the outside world is often
 dominated by waiting; waiting for the click of a mouse, or for data to be
@@ -41,7 +41,7 @@ synchronization woes of preemptive threads without the confusing inversion of
 control that usually comes with event-driven systems. [Async library/benefits
 of]{.idx}
 
-## Async Basics {#async-basics data-type=sect1}
+## Async Basics {#async-basics}
 
 Recall how I/O is typically done in Core. Here's a simple example:
 
@@ -191,7 +191,7 @@ programming, `Let_syntax` can make your code easier to read.
 :::
 
 
-### Ivars and Upon {#ivars-and-upon data-type=sect2}
+### Ivars and Upon {#ivars-and-upon}
 
 Deferreds are usually built using combinations of `bind`, `map` and `return`,
 but sometimes you want to construct a deferred where you can programmatically
@@ -282,7 +282,7 @@ primitives.
 
 
 
-## Example: An Echo Server {#examples-an-echo-server data-type=sect1}
+## Example: An Echo Server {#examples-an-echo-server}
 
 Now that we have the basics of Async under our belt, let's look at a small
 standalone Async program. In particular, we'll write an echo server, 
@@ -404,7 +404,7 @@ source that the call to `loop_forever` never returns.
 
 </aside>
 
-### Improving the Echo Server {#improving-the-echo-server data-type=sect2}
+### Improving the Echo Server {#improving-the-echo-server}
 
 Let's try to go a little bit farther with our echo server by walking through
 a few improvements. In particular, we will:
@@ -486,7 +486,7 @@ explicit call to
 `Scheduler.go`.<a data-type="indexterm" data-startref="echo">&nbsp;</a><a data-type="indexterm" data-startref="ALecho">&nbsp;</a>
 
 
-## Example: Searching Definitions with DuckDuckGo {#example-searching-definitions-with-duckduckgo data-type=sect1}
+## Example: Searching Definitions with DuckDuckGo {#example-searching-definitions-with-duckduckgo}
 
 DuckDuckGo is a search engine with a freely available search interface. In
 this section, we'll use Async to write a small command-line utility for
@@ -518,7 +518,7 @@ library/DuckDuckGo searching example]{.idx #ALduckduck}
 
 Now let's dive into the implementation.
 
-### URI Handling {#uri-handling data-type=sect2}
+### URI Handling {#uri-handling}
 
 HTTP URLs, which identify endpoints across the Web, are actually part of a
 more general family known as Uniform Resource Identifiers (URIs). The full
@@ -537,7 +537,7 @@ A `Uri.t` is constructed from the `Uri.of_string` function, and a query
 parameter `q` is added with the desired search query. The library takes care
 of encoding the URI correctly when outputting it in the network protocol.
 
-### Parsing JSON Strings {#parsing-json-strings data-type=sect2}
+### Parsing JSON Strings {#parsing-json-strings}
 
 The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
@@ -555,7 +555,7 @@ first one for which a nonempty value is defined:
 
 <link rel="import" href="code/async/search/search.ml" part="1" />
 
-### Executing an HTTP Client Query {#executing-an-http-client-query data-type=sect2}
+### Executing an HTTP Client Query {#executing-an-http-client-query}
 
 Now let's look at the code for dispatching the search queries over HTTP,
 using the Cohttp library: [query-handlers/executing an HTTP client
@@ -633,7 +633,7 @@ searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 <link rel="import" href="code/async/search/run_search.sh" />
 
 
-## Exception Handling {#exception-handling data-type=sect1}
+## Exception Handling {#exception-handling}
 
 When programming with external resources, errors are everywhere: everything
 from a flaky server to a network outage to exhausting of local resources can
@@ -679,7 +679,7 @@ a deferred that becomes determined either as `Ok` of whatever `f` returned,
 or `Error exn` if `f` threw an exception before its return value became
 determined.
 
-### Monitors {#monitors data-type=sect2}
+### Monitors {#monitors}
 
 `try_with` is a great way of handling exceptions in Async, but it's not the
 whole story. All of Async's exception-handling mechanisms, `try_with`
@@ -764,7 +764,7 @@ individual request, in either case responding to an exception by closing the
 connection. It is for building this kind of custom error handling that
 monitors can be helpful.
 
-### Example: Handling Exceptions with DuckDuckGo {#example-handling-exceptions-with-duckduckgo data-type=sect2}
+### Example: Handling Exceptions with DuckDuckGo {#example-handling-exceptions-with-duckduckgo}
 
 Let's now go back and improve the exception handling of our DuckDuckGo
 client. In particular, we'll change it so that any query that fails is
@@ -829,7 +829,7 @@ is analogous to the `protect` call described in
 [Cleaning Up In The Presence Of Exceptions](error-handling.html#cleaning-up-in-the-presence-of-exceptions){data-type=xref}.<a data-type="indexterm" data-startref="ALexcept">&nbsp;</a>
 
 
-## Timeouts, Cancellation, and Choices {#timeouts-cancellation-and-choices data-type=sect1}
+## Timeouts, Cancellation, and Choices {#timeouts-cancellation-and-choices}
 
 In a concurrent program, one often needs to combine results from multiple,
 distinct concurrent subcomputations going on in the same program. We already
@@ -916,7 +916,7 @@ succeeds and the other fails reporting a timeout:
 
 <link rel="import" href="code/async/search_with_timeout_no_leak/run_search_with_timeout_no_leak.sh" />
 
-## Working with System Threads {#working-with-system-threads data-type=sect1}
+## Working with System Threads {#working-with-system-threads}
 
 Although we haven't worked with them yet, OCaml does have built-in support
 for true system threads, i.e., kernel-level threads whose interleaving is
@@ -1018,7 +1018,7 @@ The takeaway from these examples is that predicting thread interleavings is a
 subtle business. Staying within the bounds of Async has its limitations, but
 it leads to more predictable behavior.
 
-### Thread-Safety and Locking {#thread-safety-and-locking data-type=sect2}
+### Thread-Safety and Locking {#thread-safety-and-locking}
 
 Once you start working with system threads, you'll need to be careful about
 mutable data structures. Most mutable OCaml data structures do not have

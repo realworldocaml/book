@@ -1,4 +1,4 @@
-# Functors {#functors data-type=chapter}
+# Functors {#functors}
 
 Up until now, we've seen OCaml's modules play an important but limited role.
 In particular, we've seen them as a mechanism for organizing code into units
@@ -35,7 +35,7 @@ Instead, this chapter will try to provide examples that illuminate the
 language features and design patterns that you need to master in order to use
 functors effectively.
 
-## A Trivial Example {#a-trivial-example data-type=sect1}
+## A Trivial Example {#a-trivial-example}
 
 Let's create a functor that takes a module containing a single integer
 variable `x` and returns a new module with `x` incremented by one. This is
@@ -87,7 +87,7 @@ whether an object satisfies a given interface. As in an object-oriented
 context, the extra information that doesn't match the signature you're
 looking for (in this case, the variable `y`) is simply ignored.
 
-## A Bigger Example: Computing with Intervals {#a-bigger-example-computing-with-intervals data-type=sect1}
+## A Bigger Example: Computing with Intervals {#a-bigger-example-computing-with-intervals}
 
 Let's consider a more realistic example of how to use functors: a library for
 computing with intervals. Intervals are a common computational object, and
@@ -173,7 +173,7 @@ This is important, because confusing the two kinds of intervals would be a
 semantic error, and it's an easy one to make. The ability of functors to mint
 new types is a useful trick that comes up a lot.
 
-### Making the Functor Abstract {#making-the-functor-abstract data-type=sect2}
+### Making the Functor Abstract {#making-the-functor-abstract}
 
 There's a problem with `Make_interval`. The code we wrote depends on the
 invariant that the upper bound of an interval is greater than its lower
@@ -196,7 +196,7 @@ implementation of the module to match `Interval_intf`:
 
 <link rel="import" href="code/functors/main.mlt" part="15" />
 
-### Sharing Constraints {#sharing-constraints data-type=sect2}
+### Sharing Constraints {#sharing-constraints}
 
 The resulting module is abstract, but it's unfortunately too abstract. In
 particular, we haven't exposed the type `endpoint`, which means that we can't
@@ -241,7 +241,7 @@ things that require that `endpoint` be exposed, like constructing intervals:
 
 <link rel="import" href="code/functors/main.mlt" part="19" />
 
-### Destructive Substitution {#destructive-substitution data-type=sect2}
+### Destructive Substitution {#destructive-substitution}
 
 Sharing constraints basically do the job, but they have some downsides. In
 particular, we've now been stuck with the useless type declaration of
@@ -278,7 +278,7 @@ It's worth noting that the name is somewhat misleading, in that there's
 nothing destructive about destructive substitution; it's really just a way of
 creating a new signature by transforming an existing one.
 
-### Using Multiple Interfaces {#using-multiple-interfaces data-type=sect2}
+### Using Multiple Interfaces {#using-multiple-interfaces}
 
 Another feature that we might want for our interval module is the ability to
 *serialize*, i.e., to be able to read and write intervals as a stream of
@@ -344,7 +344,7 @@ And now, we can use that sexp converter in the ordinary way:
 <link rel="import" href="code/functors/main.mlt" part="29" />
 
 
-## Extending Modules {#extending-modules data-type=sect1}
+## Extending Modules {#extending-modules}
 
 Another common use of functors is to generate type-specific functionality for
 a given module in a standardized way. Let's see how this works in the context

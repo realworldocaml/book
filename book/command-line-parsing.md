@@ -1,4 +1,4 @@
-# Command-Line Parsing {#command-line-parsing data-type=chapter}
+# Command-Line Parsing {#command-line-parsing}
 
 Many of the OCaml programs that you'll write will end up as binaries that
 need to be run from a command prompt. Any nontrivial command line should
@@ -35,7 +35,7 @@ In this chapter, we'll:
 - Demonstrate how to declare complex command-line interfaces in a type-safe
   and elegant way [combinators/functional combinators]{.idx}
 
-## Basic Command-Line Parsing {#basic-command-line-parsing data-type=sect1}
+## Basic Command-Line Parsing {#basic-command-line-parsing}
 
 Let's start by working through a clone of the `md5sum` command that is
 present on most Linux installations (the equivalent command on Mac OS X is
@@ -55,7 +55,7 @@ for optional flags and positional arguments, including documentation, the
 types they should map to, and whether to take special actions such as pausing
 for interactive input if certain inputs are encountered.
 
-### Defining an anonymous argument {#anonymous-arguments data-type=sect2}
+### Defining an anonymous argument {#anonymous-arguments}
 
 Let's build a parser for a command line UI with a single *anonymous*
 argument, i.e., an argument that is passed in without a flag.
@@ -70,7 +70,7 @@ used both to nail down the OCaml type of the returned value (`string`, in
 this case) and to guide features like input validation. The values `anon`,
 `string` and `%:` all come from the `Command.Param` module.
 
-### Defining basic commands {#defining-basic-commands data-type=sect2}
+### Defining basic commands {#defining-basic-commands}
 
 Once we've defined a specification, we need to put it to work on real input.
 The simplest way is to directly create a command-line interface with
@@ -115,7 +115,7 @@ In our program, we used `map` to convert the `filename_param` parser, which
 returns a string representing the file name, into a parser that returns a
 function of type `unit -> unit` containing the body of the command.
 
-### Running commands {#running-basic-commands data-type=sect2}
+### Running commands {#running-basic-commands}
 
 Once we've defined the basic command, running it is just one function call
 away.
@@ -156,7 +156,7 @@ removing intermediate variables.
 
 <link rel="import" href="code/command-line-parsing/md5_succinct/md5.ml" />
 
-### Multi-argument commands {#multiple-arguments data-type=sect2}
+### Multi-argument commands {#multiple-arguments}
 
 All the examples thus far have involved a single argument, but we can of
 course create multi-argument commands as well. We can make a parser for
@@ -206,7 +206,7 @@ Now that we have the basics in place, the rest of the chapter will examine
 some of the more advanced features of Command.
 
 
-## Argument Types {#argument-types data-type=sect1}
+## Argument Types {#argument-types}
 
 You aren't just limited to parsing command lines of strings and ints.
 `Command.Param` defines several other conversion functions (shown in
@@ -240,7 +240,7 @@ This doesn't change the validation of the provided value, but it does enable
 interactive command-line completion. We'll explain how to enable that later
 in the chapter.
 
-### Defining Custom Argument Types {#defining-custom-argument-types data-type=sect2}
+### Defining Custom Argument Types {#defining-custom-argument-types}
 
 We can also define our own argument types if the predefined ones aren't
 sufficient. For instance, let's make a `regular_file` argument type that
@@ -256,7 +256,7 @@ try to open a special device such as `/dev/null`:
 
 <link rel="import" href="code/command-line-parsing/md5_with_custom_arg/run.errsh" />
 
-### Optional and Default Arguments {#optional-and-default-arguments data-type=sect2}
+### Optional and Default Arguments {#optional-and-default-arguments}
 
 A more realistic MD5 binary could also read from the standard input if a
 `filename` isn't specified. To do this, we need to declare the filename
@@ -300,7 +300,7 @@ Building and running this confirms that it has the same behavior as before.
 
 <link rel="import" href="code/command-line-parsing/md5_with_default_file/md5.sh" />
 
-### Sequences of Arguments {#sequences-of-arguments data-type=sect2}
+### Sequences of Arguments {#sequences-of-arguments}
 
 Another common way of parsing anonymous arguments is as a variable length
 list. As an example, let's modify our MD5 code to take a collection of files
@@ -317,7 +317,7 @@ and runs them through `do_hash` sequentially.
 <link rel="import" href="code/command-line-parsing/md5_sequence/md5.sh" />
 
 
-## Adding Labeled Flags {#adding-labeled-flags data-type=sect1}
+## Adding Labeled Flags {#adding-labeled-flags}
 
 You aren't limited to anonymous arguments on the command line. A *flag* is a
 named field that can be followed by an optional argument. These flags can
@@ -367,7 +367,7 @@ anonymous arguments do. This lets you change the specification and ensure
 that all the callback functions are updated appropriately, without runtime
 errors.
 
-## Grouping Subcommands Together {#grouping-sub-commands-together data-type=sect1}
+## Grouping Subcommands Together {#grouping-sub-commands-together}
 
 You can get pretty far by using flags and anonymous arguments to assemble
 complex, command-line interfaces. After a while, though, too many options can
@@ -431,7 +431,7 @@ see the date parsing in action:
 <link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal.sh" part=
 "run" />
 
-## Prompting for Interactive Input {#prompting-for-interactive-input data-type=sect1}
+## Prompting for Interactive Input {#prompting-for-interactive-input}
 
 Sometimes, if a value isn't provided on the command line, you want to prompt
 for it instead. Let's return to the calendar tool we built before.
@@ -464,7 +464,7 @@ second argument.
 
 <link rel="import" href="code/command-line-parsing/cal_add_interactive2/cal.sh" />
 
-## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash data-type=sect1}
+## Command-Line Autocompletion with bash {#command-line-auto-completion-with-bash}
 
 Modern UNIX shells usually have a tab-completion feature to interactively
 help you figure out how to build a command line. These work by pressing the
@@ -506,7 +506,7 @@ often in <em class="filename">/etc/bash_completion.d</em>, and in Homebrew on
 Mac OS X, it would be
 <em class="filename">/usr/local/etc/bash_completion.d</em> by default.
 
-### Generating Completion Fragments from Command {#generating-completion-fragments-from-command data-type=sect2}
+### Generating Completion Fragments from Command {#generating-completion-fragments-from-command}
 
 The Command library has a declarative description of all the possible valid
 options, and it can use this information to generate a shell script that
@@ -524,7 +524,7 @@ Recall that we used the `Arg_type.file` to specify the argument type. This
 also supplies the completion logic so that you can just press Tab to complete
 files in your current directory.
 
-### Installing the Completion Fragment {#installing-the-completion-fragment data-type=sect2}
+### Installing the Completion Fragment {#installing-the-completion-fragment}
 
 You don't need to worry about what the preceding output script actually does
 (unless you have an unhealthy fascination with shell scripting internals,
@@ -553,7 +553,7 @@ scripts and follow their lead, as the details are very OS-specific.
 
 
 
-## Alternative Command-Line Parsers {#alternative-command-line-parsers data-type=sect1}
+## Alternative Command-Line Parsers {#alternative-command-line-parsers}
 
 This rounds up our tour of the Command library. This isn't the only way to
 parse command-line arguments of course; there are several alternatives

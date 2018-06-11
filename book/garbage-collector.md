@@ -1,4 +1,4 @@
-# Understanding the Garbage Collector {#understanding-the-garbage-collector data-type=chapter}
+# Understanding the Garbage Collector {#understanding-the-garbage-collector}
 
 We've described the runtime format of individual OCaml variables earlier, in
 [Memory Representation Of Values](runtime-memory-layout.html#memory-representation-of-values){data-type=xref}.
@@ -16,7 +16,7 @@ values in response to allocation requests by the OCaml program.
 [values/allocation requests and]{.idx}[heaps/heap
 blocks]{.idx}[heaps/definition of]{.idx}
 
-## Mark and Sweep Garbage Collection {#mark-and-sweep-garbage-collection data-type=sect1}
+## Mark and Sweep Garbage Collection {#mark-and-sweep-garbage-collection}
 
 When there isn't enough memory available to satisfy an allocation request
 from the pool of allocated heap blocks, the runtime system invokes the
@@ -38,7 +38,7 @@ retained, and unreachable blocks can be reused by the application. The
 algorithm used by OCaml to perform this heap traversal is commonly known as
 *mark and sweep* garbage collection, and we'll explain it further now.
 
-## Generational Garbage Collection {#generational-garbage-collection data-type=sect1}
+## Generational Garbage Collection {#generational-garbage-collection}
 
 The usual OCaml programming style involves allocating many small variables
 that are used for a short period of time and then never accessed again. OCaml
@@ -83,7 +83,7 @@ the
 
 </aside>
 
-## The Fast Minor Heap {#the-fast-minor-heap data-type=sect1}
+## The Fast Minor Heap {#the-fast-minor-heap}
 
 The minor heap is where most of your short-lived values are held. It consists
 of one contiguous chunk of virtual memory containing a sequence of OCaml
@@ -100,7 +100,7 @@ collection *stops the world* (that it, halts the application) while it runs,
 which is why it's so important that it complete quickly to let the
 application resume running with minimal interruption.
 
-### Allocating on the Minor Heap {#allocating-on-the-minor-heap data-type=sect2}
+### Allocating on the Minor Heap {#allocating-on-the-minor-heap}
 
 The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly. [minor heaps/allocating
@@ -156,7 +156,7 @@ standard OCaml installation quite significantly, and you'll want to reduce
 this if running in very memory-constrained environments.
 
 
-## The Long-Lived Major Heap {#the-long-lived-major-heap data-type=sect1}
+## The Long-Lived Major Heap {#the-long-lived-major-heap}
 
 The major heap is where the bulk of the longer-lived and larger values in
 your program are stored. It consists of any number of noncontiguous chunks of
@@ -191,7 +191,7 @@ of time, and also precede each slice with a fast minor collection. Only the
 compaction phase touches all the memory in one go, and is a relatively rare
 operation.
 
-### Allocating on the Major Heap {#allocating-on-the-major-heap data-type=sect2}
+### Allocating on the Major Heap {#allocating-on-the-major-heap}
 
 The major heap consists of a singly linked list of contiguous memory chunks
 sorted in increasing order of virtual address. Each chunk is a single memory
@@ -247,7 +247,7 @@ collection. The one exception to this is for values larger than 256 words
 major heap, since an allocation on the minor heap would likely trigger an
 immediate collection and copy it to the major heap anyway.
 
-### Memory Allocation Strategies {#memory-allocation-strategies data-type=sect2}
+### Memory Allocation Strategies {#memory-allocation-strategies}
 
 The major heap does its best to manage memory allocation as efficiently as
 possible and relies on heap compaction to ensure that memory stays contiguous
@@ -261,7 +261,7 @@ in the major heap. The default free list search is called
 *next-fit allocation*, with an alternative *first-fit* algorithm also
 available. [first-fit allocation]{.idx}[next-fit allocation]{.idx}
 
-#### Next-fit allocation {#next-fit-allocation data-type=sect3}
+#### Next-fit allocation {#next-fit-allocation}
 
 Next-fit allocation keeps a pointer to the block in the free list that was
 most recently used to satisfy a request. When a new request comes in, the
@@ -273,7 +273,7 @@ allocation mechanism, since the same heap chunk can be reused across
 allocation requests until it runs out. This in turn means that there is good
 memory locality to use CPU caches better.
 
-#### First-fit allocation {#first-fit-allocation data-type=sect3}
+#### First-fit allocation {#first-fit-allocation}
 
 If your program allocates values of many varied sizes, you may sometimes find
 that your free list becomes fragmented. In this situation, the GC is forced
@@ -303,7 +303,7 @@ The same behavior can be controlled at runtime by setting `a=0` or `a=1` in
 
 
 
-### Marking and Scanning the Heap {#marking-and-scanning-the-heap data-type=sect2}
+### Marking and Scanning the Heap {#marking-and-scanning-the-heap}
 
 The marking process can take a long time to run over the complete major heap
 and has to pause the main application while it's active. It therefore runs
@@ -377,7 +377,7 @@ system that isn't overly memory-constrained. Set this even higher if you have
 lots of memory, or lower to cause the GC to work harder and collect blocks
 faster at the expense of using more CPU time.
 
-### Heap Compaction {#heap-compaction data-type=sect2}
+### Heap Compaction {#heap-compaction}
 
 After a certain number of major GC cycles have completed, the heap may begin
 to be fragmented due to values being deallocated out of order from how they
@@ -407,7 +407,7 @@ allocation patterns that are causing a higher-than-usual rate of compactions:
 
 <link rel="import" href="code/gc/tune.mlt" part="3" />
 
-### Intergenerational Pointers {#inter-generational-pointers data-type=sect2}
+### Intergenerational Pointers {#inter-generational-pointers}
 
 One complexity of generational collection arises from the fact that minor
 heap sweeps are much more frequent than major heap collections. In order to
@@ -424,7 +424,7 @@ a write barrier to update this so-called *remembered set* whenever a
 major-heap block is modified to point at a minor-heap block. [write
 barriers]{.idx}[remembered sets]{.idx}
 
-#### The mutable write barrier {#the-mutable-write-barrier data-type=sect3}
+#### The mutable write barrier {#the-mutable-write-barrier}
 
 The write barrier can have profound implications for the structure of your
 code. It's one of the reasons using immutable data structures and allocating
@@ -478,7 +478,7 @@ to re-create the behavior in a performance unit test.
 
 
 
-## Attaching Finalizer Functions to Values {#attaching-finalizer-functions-to-values data-type=sect1}
+## Attaching Finalizer Functions to Values {#attaching-finalizer-functions-to-values}
 
 OCaml's automatic memory management guarantees that a value will eventually
 be freed when it's no longer in use, either via the GC sweeping it or the

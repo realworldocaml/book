@@ -265,19 +265,49 @@
  p {
      font-family: inherit;
      font-weight: 300;
-     font-size: 1.2rem;
-     line-height: 1.5;
+     font-size: 1rem;
+     line-height: 1.4;
      margin-bottom: 1.25rem;
      text-rendering: optimizeLegibility;
+     max-width: 750px;
 }
  p.lead {
-     font-size: 1.41875rem;
+     font-size: 1.5rem;
      line-height: 1.6;
 }
  p aside {
-     font-size: 0.875rem;
      line-height: 1.35;
      font-style: italic;
+ }
+
+ h1 {
+    font-size:32px;
+    font-size:2rem;     /* 32px */
+    line-height:1.5;    /* 48px */
+}
+h2 {
+    font-size:1.5em;    /* 24px */
+    line-height:1;      /* 24px */
+}
+h3 {
+    font-size:20px;
+    font-size:1.25rem;  /* 20px */
+    line-height:1.2;    /* 24px */
+}
+h4 {
+    font-size:18px;
+    font-size:1.125rem; /* 18px */
+    line-height:1.333;  /* 24px */
+}
+h5 {
+    font-size:16px;
+    font-size:1rem;     /* 16px */
+    line-height:1.5;    /* 24px */
+}
+h6 {
+    font-size:16px;
+    font-size:1rem;     /* 16px */
+    line-height:1.5;    /* 24px */
 }
 /* Default header styles */
  h1, h2, h3, h4, h5, h6 {
@@ -294,21 +324,6 @@
      font-size: 40%;
      color: #6f6f6f;
      line-height: 0;
-}
- h1, h2 {
-     font-size: 1.48926rem;
-}
- h3 {
-     font-size: 1.19141rem;
-}
- h4 {
-     font-size: 1.0505rem;
-}
- h5 {
-     font-size: 1.1rem;
-}
- h6 {
-     font-size: 0.875rem;
 }
  .subheader {
      line-height: 1.4;
@@ -345,12 +360,15 @@
      border-width: 0;
      border-style: solid;
      border-color: #adadad;
+     border-radius: 3px;
      padding: 0;
+     line-height: 1.2;
+     vertical-align: baseline;
+     text-transform: none !important;
 }
 /* Lists */
  ul, ol, dl {
-     font-size: 1.2rem;
-     line-height: 1.8;
+     line-height: 1.5;
      margin-bottom: 1.25rem;
      list-style-position: inside;
      font-family: inherit;
@@ -408,7 +426,7 @@
 /* Abbreviations */
  abbr, acronym {
      text-transform: uppercase;
-     font-size: 90%;
+     font-size: 80%;
      color: #444444;
      border-bottom: 1px dotted #dddddd;
      cursor: help;
@@ -424,7 +442,7 @@
 }
  blockquote cite {
      display: block;
-     font-size: 0.8125rem;
+     font-size: 80%;
      color: #555555;
 }
  blockquote cite:before {
@@ -450,7 +468,7 @@
 }
  .vcard .fn {
      font-weight: bold;
-     font-size: 0.9375rem;
+     font-size: 80%;
 }
  .vevent .summary {
      font-weight: bold;
@@ -465,21 +483,6 @@
  @media only screen and (min-width: 40.063em) {
      h1, h2, h3, h4, h5, h6 {
          line-height: 1;
-    }
-     h1, h2 {
-         font-size: 3.05176rem;
-    }
-     h3 {
-         font-size: 2.44141rem;
-    }
-     h4 {
-         font-size: 1.5625rem;
-    }
-     h5 {
-         font-size: 1.25rem;
-    }
-     h6 {
-         font-size: 1rem;
     }
 }
 /* * Print styles. * * Inlined to avoid required HTTP connection: www.phpied.com/delay-loading-your-print-css/ * Credit to Paul Irish and HTML5 Boilerplate (html5boilerplate.com) */
@@ -575,15 +578,8 @@
 }
  @media only screen and (max-width: 40em) {
      p, pre, ul, ol, dl {
-         font-size: 0.875rem;
+         font-size: 80%;
     }
-}
- code {
-     border-radius: 3px;
-     line-height: 1.2;
-     vertical-align: baseline;
-     text-transform: none !important;
-     font-size: 95%;
 }
  a h1, a h2 {
      color: #8e44ad;
@@ -702,6 +698,7 @@
      .title-bar {
          background: url("../images/book-cover.jpg") no-repeat, #424b50 url("../images/bg.jpg") repeat;
          background-size: auto 100%, auto;
+         padding-left: 20%;
     }
      .title-bar .title {
          padding-left: 1.6875rem;
@@ -778,7 +775,7 @@
      font-weight: normal;
      color: white;
      text-transform: uppercase;
-     font-size: 0.875rem;
+     font-size: 80%;
      display: inline-block;
      margin-right: 0.5rem;
      margin-bottom: 0.5rem;
@@ -840,9 +837,6 @@
      float: none;
      padding-bottom: 1.6875rem;
 }
- .splash .title h1 {
-     font-size: 1.86157rem;
-}
  @media only screen and (min-width: 40.063em) {
      .splash {
          display: table;
@@ -872,11 +866,6 @@
          background: transparent;
     }
 }
- @media only screen and (min-width: 64.063em) {
-     .splash .title h1 {
-         font-size: 3.8147rem;
-    }
-}
  .toc {
      list-style: none;
      margin: 0;
@@ -903,12 +892,6 @@
 }
  .toc > li a h2 {
      margin: 0;
-     font-size: 1.5625rem;
-}
- @media only screen and (max-width: 40em) {
-     .toc > li a h2 {
-         font-size: 1.36719rem;
-    }
 }
  .toc > li a h2 small {
      display: block;
@@ -931,7 +914,6 @@
      font-style: normal;
      content: '+';
      font-color: #6f6f6f;
-     font-size: 1.4rem;
      text-align: center;
      line-height: 1.8rem;
      cursor: pointer;
@@ -963,7 +945,6 @@
      font-weight: 300;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-style: italic;
-     font-size: 1rem;
      color: #9c9c9c;
 }
  .toc .children li a:hover h5 {
@@ -983,11 +964,9 @@
      color: #6f6f6f;
 }
  .toc-full h2 {
-     font-size: 1.5625rem;
      margin: 0;
 }
  .toc-full h5 {
-     font-size: 1rem;
      text-transform: none;
      font-weight: 300;
      font-style: italic;
@@ -1011,14 +990,13 @@
  .toc-full .children .children a {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      color: #6f6f6f;
-     font-size: 1rem;
      line-height: 1;
 }
  .toc-full .children .children a:hover {
      color: #8e44ad;
 }
  .toc-full .children .children .children a {
-     font-size: 0.75rem;
+     font-size: 80%;
      text-transform: uppercase;
 }
  .toc-full a {
@@ -1053,14 +1031,12 @@
      padding: 0.3rem 0;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      color: #444444;
-     font-size: 1rem;
      line-height: 1;
 }
  .index-toc ul li a:hover {
      color: #8e44ad;
 }
  .index-toc h4 {
-     font-size: 1rem;
      color: #6f6f6f;
      margin: 0 0 0.625rem;
 }
@@ -1083,11 +1059,10 @@
      padding-left: 1.6875rem;
 }
  .author .author-meta h4 {
-     font-size: 1.2rem;
      margin: 0 0 0.625rem;
 }
  .author .author-meta p {
-     font-size: 0.875rem;
+     font-size: 80%;
 }
  .author .author-meta p a {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
@@ -1098,12 +1073,6 @@
          padding-right: 1.6875rem;
          width: 33.33333%;
          float: left;
-    }
-     .author .author-meta h4 {
-         font-size: 1.2rem;
-    }
-     .author .author-meta p {
-         font-size: 1rem;
     }
 }
  .extras {
@@ -1152,16 +1121,17 @@
  .question {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: 300;
-     font-size: 1.5625rem;
+     font-size: 1.5rem;
      line-height: 1.25;
 }
  .question:nth-child(n+2) {
      border-top: 1px solid #dddddd;
-     padding-top: 3.375rem;
-     margin-top: 3.375rem;
+     padding-top: 1em;
+     margin-top: 0;
 }
  .scroll-nav {
      margin-bottom: 3.375rem;
+     margin-left: 10%;
 }
  .scroll-nav .scroll-nav__wrapper {
      width: 100%;
@@ -1211,12 +1181,13 @@
 }
  .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item .scroll-nav__sub-link {
      display: block;
-     font-size: 0.875em;
+     font-size: 80%;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
-     padding: 0.4375rem 1rem;
+     padding-left: 1em;
+     padding-top: 0.5em;
+     padding-bottom: 0.5em;
      line-height: 1.2;
      color: dimgray;
-     font-style: italic;
      transition: color 0.2s;
 }
  .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item .scroll-nav__sub-link:hover {
@@ -1225,144 +1196,137 @@
  .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item.active .scroll-nav__sub-link {
      color: black;
 }
- section[data-type=chapter] h3,
- section[data-type=chapter] h4,
- section[data-type=chapter] h5,
- section[data-type=chapter] h6 {
+ section h3,
+ section h4,
+ section h5,
+ section h6 {
      margin-top: 1.75rem;
 }
- section[data-type=chapter] > h1 {
-     font-size: 3.8147rem;
+ section > h1 {
      border-bottom: 2px solid #222222;
-     padding-bottom: 1rem;
+     padding-bottom: 0.3em;
 }
- @media only screen and (max-width: 40em) {
-     section[data-type=chapter] > h1,
-     section[data-type=chapter] > h2 {
-         font-size: 1.86157rem;
-    }
-}
- section[data-type=chapter] a:hover {
+ section a:hover {
      text-shadow: 0 2px white, -2px 2px white, 2px 2px white;
      border-bottom: 1px dotted #7a3a95;
 }
- section[data-type=chapter] p strong, section[data-type=chapter] p b {
+ section p strong, section p b {
      text-transform: lowercase;
      font-variant: small-caps;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: bold;
 }
- section[data-type=chapter] section[data-type=sect1] {
+ section section {
      margin-top: 2.53125rem;
-     padding-top: 2.53125rem;
-     border-top: 1px solid #dddddd;
+     padding-top: 0;
+     border-top: 0;
 }
- section[data-type=chapter] h2 + section[data-type=sect1] {
+ section h2 + section {
      margin-top: 1.6875rem;
      padding-top: 0;
      border-top: 0;
 }
- section[data-type=chapter] div[data-type=note] {
+
+ /* Notes & Warnings */
+ section div[data-type=note] {
      background: #fdedd4;
      border: 1px solid #f39c12;
+ }
+ section div[data-type=warning] {
+     background: #F2D7D5;
+     border: 1px solid #F1948A;
+ }
+
+ section div[data-type=note],
+ section div[data-type=warning] {
      border-radius: 3px;
      margin-bottom: 1.6875rem;
      padding: 1.6875rem;
+     padding-top: 0;
 }
- section[data-type=chapter] div[data-type=note] h1,
- section[data-type=chapter] div[data-type=note] h2 {
-     font-size: 1.5625rem;
-}
- section[data-type=chapter] div[data-type=note] p {
+ section div[data-type=note] p {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+     font-weight: normal;
 }
- section[data-type=chapter] div[data-type=note] pre, section[data-type=chapter] div[data-type=note] div.highlight {
-     background: transparent;
-}
- section[data-type=chapter] div[data-type=note] div.highlight {
+ section div[data-type=note] div.highlight {
      padding: 0 1.6875rem;
 }
- section[data-type=chapter] aside {
+
+ section aside {
      margin-left: -1.6875rem;
      margin-right: -1.6875rem;
      margin-bottom: 1.6875rem;
      background: #fafafa;
      padding: 1.6875rem;
 }
- section[data-type=chapter] aside h5:first-child {
+ section aside h5:first-child {
      margin-top: 0;
 }
- section[data-type=chapter] aside p {
-     font-size: 0.875rem;
+ section aside p {
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: normal;
 }
- section[data-type=chapter] aside pre, section[data-type=chapter] aside div.highlight {
-     font-size: 0.875rem;
-     background: transparent;
-}
- section[data-type=chapter] div.highlight {
-     font-size: 90%;
+ section div.highlight {
+     font-size: 80%;
      margin-bottom: 1em;
 }
- section[data-type=chapter] dl dt {
+ section dl dt {
      margin: 0;
 }
- section[data-type=chapter] dl dd {
+ section dl dd {
      position: relative;
      padding-left: 1.6875rem;
 }
- section[data-type=chapter] dl dd:before {
+ section dl dd:before {
      content: '↪';
      position: absolute;
      left: 0.5rem;
      top: 0;
 }
- section[data-type=chapter] ul {
+ section ul {
      list-style: circle;
      margin-left: 1.6875rem;
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] ol {
+ section ol {
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] ol li {
+ section ol li {
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] table {
+ section table {
      margin-left: -0.875rem;
      width: 100%;
      margin-bottom: 1.25rem;
 }
- section[data-type=chapter] table caption {
+ section table caption {
      padding: 0.5rem 0;
      border-bottom: 1px solid #dddddd;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      font-weight: 300;
      text-transform: uppercase;
 }
- section[data-type=chapter] table th, section[data-type=chapter] table td {
+ section table th, section table td {
      padding: 0.5rem 0.875rem;
 }
- section[data-type=chapter] table th {
+ section table th {
      text-align: left;
      border-bottom: 1px solid #dddddd;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
-     font-size: 1.3rem;
 }
- section[data-type=chapter] table tr:nth-child(even) td {
+ section table tr:nth-child(even) td {
      background: #fafafa;
 }
  @media only screen and (min-width: 40.063em) {
-     section[data-type=chapter] section[data-type=sect1] {
+     section section[data-type=sect1] {
          margin-top: 1.375rem;
-         padding-top: 1.375rem;
+         padding-top: 0;
     }
-     section[data-type=chapter] aside pre {
+     section aside pre {
          margin-left: 0;
          margin-right: 0;
     }
-     section[data-type=chapter] dl dd {
+     section dl dd {
          padding-left: 2.53125rem;
     }
 }
@@ -1418,7 +1382,7 @@
      max-width: 573.75rem;
      background: #ecf0f1;
      padding: 1.6875rem 0;
-     font-size: 0.875rem;
+     font-size: 80%;
 }
  footer:before, footer:after {
      content: " ";
@@ -1438,7 +1402,6 @@
      list-style: none;
      padding: 0;
      margin: 0;
-     font-size: 0.875rem;
 }
  footer ul li {
      display: inline-block;
@@ -1454,7 +1417,7 @@
      border-bottom: 1px dotted #7a3a95;
 }
  footer p {
-     font-size: 0.875rem;
+     font-size: 80%;
      margin-top: 0.5rem;
      color: #6f6f6f;
 }

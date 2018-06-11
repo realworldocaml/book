@@ -1,7 +1,5 @@
 open Core
 
-module Html = Rwo_html
-
 let is_reference = function
   | `Data _ -> false
   | `Element {Html.name="a"; attrs; _} -> (
@@ -19,7 +17,7 @@ let create_reference_prefix toc url =
     | None        -> url
     | Some (f, _) -> f
   in
-  match Rwo_toc.find ~filename toc with
+  match Toc.find ~filename toc with
   | None   -> failwithf "invalid cross-reference: %s" url ()
   | Some c -> `Data ("Chapter " ^ string_of_int c.number  ^ ", ")
 

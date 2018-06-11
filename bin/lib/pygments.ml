@@ -1,6 +1,4 @@
 open Core
-module Html = Rwo_html
-module Lang = Rwo_lang
 
 type lang = [
   | `OCaml

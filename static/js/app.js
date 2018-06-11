@@ -15,7 +15,7 @@ function checkScroll() {
 				{
 					$sn.addClass('true-fixed').removeClass('top bottom');
 				}
-				
+
 				if ($sn.scrollTop() > wS - $snSide.offset().top && !wD)
 				{
 					snScroll = wS - $snSide.offset().top;
@@ -25,12 +25,12 @@ function checkScroll() {
 					snScroll = wS - $snSide.offset().top - $snSide.outerHeight() + snInHeight;
 				}
 				$sn.scrollTop(snScroll);
-				
+
 			}
 			else
 			{
 				$sn.removeClass('true-fixed');
-				
+
 				if ($snSide.offset().top + $snSide.outerHeight() > wS + wh)
 				{
 					$sn.addClass('top').removeClass('bottom');
@@ -42,7 +42,7 @@ function checkScroll() {
 					$sn.css('min-height', wh);
 					snScroll = snInHeight - $(window).height();
 				}
-				
+
 			}
 		}
 		isScrolled = false;
@@ -51,9 +51,9 @@ function checkScroll() {
 }
 
 $(document).ready(function(){
-	if ($('section[data-type=chapter]').length > 0)
+	if ($('section').length > 0)
 	{
-		$('section[data-type=chapter]').scrollNav({
+		$('section').scrollNav({
 			sections:		'section>h2',
 			subSections:	'section',
 			sectionElem:	'div',
@@ -65,9 +65,9 @@ $(document).ready(function(){
 			showTopLink:	false
 		});
 	}
-	
+
 	if ($('.toc').length > 0)
-	{		
+	{
 		$('.toc .children').slideUp(0).before($('<i>+</i>'));
 		$('.toc i').on('click', function(e){
 			e.preventDefault();
@@ -89,7 +89,7 @@ $(document).ready(function(){
 			}
 		});
 	}
-	
+
 	if ($('.toc-full').length > 0)
 	{
 		$('.main-body').scrollNav({
@@ -104,12 +104,12 @@ $(document).ready(function(){
 			showTopLink:	false
 		});
 	}
-	
+
 	if ($sn)
 	{
 		snTop = $sn.offset().top;
 		snInHeight = $sn.outerHeight();
-		
+
 		isScrolled = true;
 		checkScroll();
 	}
