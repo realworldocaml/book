@@ -1,10 +1,10 @@
 # Testing {#testing data-type=chapter}
 
 Testing is fundamental to building reliable software, but you wouldn't
-know it from watching how software engineers spend their time.
-Testing can be tedious, and in the early stages of a project, it's
-often not obvious how important testing is going to become down the
-line. This leads people to test less than they should, and more
+necessarily know it from watching how software engineers spend their
+time.  Testing can be tedious, and in the early stages of a project,
+it's often not obvious how important testing is going to become down
+the line. This leads people to test less than they should, and more
 critically, to design systems without taking testability into account,
 which makes such omissions harder to fix down the line.
 
@@ -15,12 +15,12 @@ required. But make no mistake, with or without types, testing is
 essential for developing and evolving complex software systems.
 
 One way to improve the situation is to fix the tedium problem. With
-the right tools, writing tests can be made lightweight and fun.  With
-better infrastructure in place, you'll find yourself writing more
-tests, and your creations will be more reliable as a result.
+the right tools, writing tests is lightweight and fun.  With such
+tools in place, you'll find yourself writing more tests, and your
+creations will be more reliable as a result.
 
 The goal of this chapter is to teach you about some of the testing
-infrastructure available in the OCaml ecosystem. But first, we'll
+infrastructure available in the OCaml ecosystem. But first, let's
 discuss more generally what you should be optimizing for in your tests
 and in your testing infrastructure.
 
@@ -31,8 +31,8 @@ in a good testing environment.
 
 - **Easy to write**. The less overhead there is to adding a test, the
   more people will do it.
-- **Easy to run**. Ideally, they should be run automatically, every time
-  you push changes.
+- **Easy to run**. Ideally, they should be run automatically, every
+  time you make changes.
 - **Easy to update**. Tests that are hard to adjust in the face of code
   changes can become their own form of technical debt.
 - **Fast**, so they don't slow down your development process.
@@ -42,9 +42,9 @@ in a good testing environment.
   there's a decent chance that the failure might be random.  You want
   your test failures to be believable indications of a problem, which
   requires determinism.
-- **Understandable in their failures**. Tests whose failures are localized and easy
-  to comprehend make it easier to find and fix the problem flagged by
-  the failing test.
+- **Comprehensible**. Tests whose failures are localized and easy to
+  comprehend make it easier to find and fix the problem flagged by the
+  failing test.
 
 No testing framework can ensure that your tests satisfy these
 properties. But the testing tools you choose can help or hinder on all
@@ -99,8 +99,8 @@ then we'll see an error when we run it.
 
 One problem with the test output we just saw is that it doesn't show
 the data associated with the failed test.  We can fix this by having
-the test signal success or failure by throwing an exception, and
-putting extra diagnostic information in that exception.
+the test signal failure by throwing an exception. That exception is
+then a place where we can put diagnostic information.
 
 To do this, we need to change our test declaration to use
 `let%test_unit` instead of `let%test`, so that the test allows a
@@ -156,8 +156,8 @@ writing your application code. But the approach has several downsides.
   to think about and test the invariants exposed to users.
 
 - **Readability**. Including all of your tests directly in your
-  applicatoin code can make that code itself harder to read. This can
-  lead to people writing too few tests in an effort to keep your
+  application code can make that code itself harder to read. This can
+  lead to people writing too few tests in an effort to keep their
   application code uncluttered.
 
 For all of these reasons, our recommendation is to put your tests in
@@ -188,7 +188,7 @@ library that contains all of the logic of your program, and is
 suitable for testing (either with embedded inline tests, or from a
 purpose-built testing library); and a directory for the executable
 that links in the library, and is just responsible for launching the
-code contained in the companion library.
+program.
 
 :::
 
@@ -198,11 +198,11 @@ The tests we've discussed so far have been pretty simple, amounting to
 little more than writing down individual examples and checking that
 their behavior is as expected.  We often want to write tests that do
 more than that, and one useful form of testing that lets you step
-beyond example-based testing is called *property testing*.
+beyond testing concrete examples is called *property testing*.
 
 The basic idea is simple enough. A property test requires two things:
 a function that takes an example input and checks that a given
-property holds on that example; as well as a way of generating random
+property holds on that example; and a way of generating random
 examples. The test then checks whether the predicate holds over many
 randomly generated examples.
 
@@ -243,21 +243,21 @@ Quickcheck has found a counterexample.
 
 The example that triggers the exception is `-4611686018427387904`,
 which can also be referred to as `Int.min_value`, and is the smallest
-value of type `Int.t`. Note that the largest value
+value of type `Int.t`. Note that the largest int, `Int.max_value`, is
+smaller in absolute value than `Int.max_value`.
 
-<link rel="import" part="min-int1" href="code/testing/main.mlt" />
+<link rel="import" href="code/testing/main.mlt" part="min-int1" />
 
-  `Int.min_value`, which is the
-smallest value of type `int`. This is a side effect of how integers
-are encoded at the machine level, which means that there's exactly one
-extra negative `int` without a corresponding positive
-`int`. Quickcheck found
+It turns out that the standard behavior for negation is that the
+negation of the minimum value of an int is equal to itself, as you can
+see here:
 
+<link rel="import" href="code/testing/main.mlt" part="min-int2" />
+
+Quickcheck found this example for us because it's careful about the
+distributions it uses, and in particular is careful about making sure
+to keep track of and explore special cases like `min_value` and
+`max_value`.
 
 
 ## Expect Tests {data-type=sect1}
-
-
-
-
-## Coverage Testing {data-type=sect1}

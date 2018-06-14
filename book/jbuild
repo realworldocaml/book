@@ -331,6 +331,21 @@
     ${@}))))
 
 (rule (
+  (targets (testing.html))
+  (deps    (testing.md))
+  (action (
+    run
+    pandoc
+    --section-divs
+    -f
+    markdown-smart-auto_identifiers
+    -t
+    html5
+    ${<}
+    -o
+    ${@}))))
+
+(rule (
   (targets (variables-and-functions.html))
   (deps    (variables-and-functions.md))
   (action (
