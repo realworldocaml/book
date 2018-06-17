@@ -2679,6 +2679,32 @@
     runtest-all-code-sexpr-test_interval_nosexp-build_test_interval_nosexp.errsh)))))
 
 (alias (
+  (name runtest-code-testing-bigger_quickcheck_test-run.sh)
+  (deps ((files_recursively_in code/testing/bigger_quickcheck_test)))
+  (action (
+    chdir code/testing/bigger_quickcheck_test (
+      progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-bigger_quickcheck_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-bigger_quickcheck_test-run.sh)
+  (deps ((files_recursively_in code/testing/bigger_quickcheck_test)))
+  (action (
+    chdir code/testing/bigger_quickcheck_test (
+      progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-bigger_quickcheck_test-run.sh)))))
+
+(alias (
   (name runtest-code-testing-broken_inline_test-run.sh)
   (deps ((files_recursively_in code/testing/broken_inline_test)))
   (action (

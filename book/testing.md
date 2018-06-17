@@ -259,5 +259,43 @@ distributions it uses, and in particular is careful about making sure
 to keep track of and explore special cases like `min_value` and
 `max_value`.
 
+### Building more complex values
+
+Tests don't subsist on simple atomic types alone. Often, you'll want
+to build distributions over more complex types. Here's a simple
+example, where we want to test the behavior of `List.rev_append`,
+which requires us to create lists of randomly generated values.
+
+<link rel="import" href="code/testing/bigger_quickcheck_test/test.ml"/>
+
+Here, we made use of `Quickcheck.Generator.both`, which is useful for
+creating a generator for pairs from two generators for the constituent
+types.
+
+<link rel="import" href="code/testing/main.mlt" part="monadic-gen1" />
+
+Quickcheck has support for other container types, like lists and maps,
+and Quickcheck's generator also form a monad, meaning that they
+support operators like `bind` and `map`. These operators were
+introduced in [Error
+Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
+In combination with`Let_syntax`, this gives us a convenient way to
+specify generators for custom types. Imagine we wanted to generate
+examples of the following variant type.
+
+<link rel="import" href="code/testing/main.mlt" part="monadic-gen2" />
+
+Here's one way of writing such a generator.
+
+<link rel="import" href="code/testing/main.mlt" part="monadic-gen3" />
+
+Throughout the above function we're making choices about the
+probability distribution. For example, the use of the `union` operator
+means that circles, rectangles and polygons will be equally likely. We
+could have used `weighted_union` to pick a different distribution.
+
+The full API for building generators is beyond the scope of this
+chapter, but it's worth digging in to the API docs if you want more
+control over the distribution of your test examples.
 
 ## Expect Tests {data-type=sect1}

@@ -6,7 +6,7 @@
 #require "ppx_jane";;
 #silent false;;
 [@@@part "0.5"];;
-open Base;;
+open Core_kernel;;
 [@@@part "min-int1"];;
 Int.min_value;;
 [%%expect ocaml {|- : int = -4611686018427387904|}];;
@@ -15,3 +15,44 @@ Int.max_value;;
 [@@@part "min-int2"];;
 Int.neg Int.min_value;;
 [%%expect ocaml {|- : int = -4611686018427387904|}];;
+
+[@@@part "monadic-gen1"];;
+#show Quickcheck.Generator.both;;
+[%%expect{|
+val both :
+  'a Quickcheck.Generator.t ->
+  'b Quickcheck.Generator.t -> ('a * 'b) Quickcheck.Generator.t
+|}];;
+[@@@part "monadic-gen2"];;
+type shape = | Circle of { radius: float }
+             | Rect of { height: float; width: float }
+             | Poly of (float * float) list;;
+[%%expect ocaml {|
+type shape =
+    Circle of { radius : float; }
+  | Rect of { height : float; width : float; }
+  | Poly of (float * float) list
+|}];;
+[@@@part "monadic-gen3"];;
+let gen_shape =
+  let open Quickcheck.Generator.Let_syntax in
+  let module G = Quickcheck.Generator in
+  let circle =
+    let%map radius = Float.gen_positive in
+    Circle { radius }
+  in
+  let rect =
+    let%map height = Float.gen_positive
+    and width = Float.gen_positive
+    in
+    Rect { height; width }
+  in
+  let poly =
+    let%map points = List.gen (G.both Float.gen_positive Float.gen_positive) in
+    Poly points
+  in
+  G.union [circle; rect; poly]
+;;
+
+
+[%%expect ocaml {|val gen_shape : shape Quickcheck.Generator.t = <abstr>|}];;
