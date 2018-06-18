@@ -1,0 +1,141 @@
+diff --git a/md2mdx/dune b/md2mdx/dune
+index 79e7d92f..d9470769 100644
+--- a/md2mdx/dune
++++ b/md2mdx/dune
+@@ -1,3 +1,3 @@
+ (executable
+-  ((name main)
+-   (libraries (fmt xmlm ocaml-topexpect astring cram unix))))
++  (name      main)
++  (libraries fmt xmlm ocaml-topexpect astring cram unix))
+diff --git a/md2mdx/main.ml b/md2mdx/main.ml
+index b1d0f4bc..e0c1808b 100644
+--- a/md2mdx/main.ml
++++ b/md2mdx/main.ml
+@@ -4,7 +4,7 @@ let (/) = Filename.concat
+ 
+ let err fmt = Fmt.kstrf (fun str -> raise (Error str)) fmt
+ 
+-type script = [
++type block = [
+   | `OCaml of Expect.Raw_script.t
+   | `OCaml_toplevel of Expect.Mlt.t
+   | `OCaml_rawtoplevel of Expect.Raw_script.t
+@@ -12,7 +12,7 @@ type script = [
+   | `Other of string
+ ]
+ 
+-type script_part = [
++type block_part = [
+   | `OCaml of Expect.Raw_script.part
+   | `OCaml_toplevel of Expect.Chunk.t list
+   | `OCaml_rawtoplevel of Expect.Raw_script.part
+@@ -21,8 +21,9 @@ type script_part = [
+ ]
+ 
+ type link = {
+-  href: string;
+-  part: script_part;
++  href : string;
++  block: block_part;
++  part : string option;
+ }
+ 
+ type item =
+@@ -30,11 +31,11 @@ type item =
+   | Link  of link
+ 
+ type t = {
+-  items  : item list;
+-  scripts: script list;
++  items : item list;
++  blocks: block list;
+ }
+ 
+-let read_script filename: script =
++let read_block filename: block =
+   match Filename.extension filename with
+   | ".mlt" ->
+     let script = Expect.Mlt.of_file ~filename in
+@@ -56,7 +57,7 @@ let read_script filename: script =
+   | _ -> `Other (File.read filename)
+ 
+ type cache = {
+-  files: (string, script) Hashtbl.t;
++  files: (string, block) Hashtbl.t;
+ }
+ 
+ let empty () = { files = Hashtbl.create 17 }
+@@ -64,14 +65,14 @@ let empty () = { files = Hashtbl.create 17 }
+ let read t filename =
+   try Hashtbl.find t.files filename
+   with Not_found ->
+-    let s = read_script filename in
++    let s = read_block filename in
+     Hashtbl.add t.files filename s;
+     s
+ 
+ let is_rawpart ~name p = name = p.Expect.Raw_script.name
+ let is_part ~name p = name = Expect.Part.name p
+ 
+-let read_part t ?part:(name="") filename: script_part =
++let read_part t ?part:(name="") filename: block_part =
+   let err_no_part () =
+     Fmt.failwith "no data for requested part of file %s:%s" filename name
+   in
+@@ -97,20 +98,13 @@ let read_part t ?part:(name="") filename: script_part =
+         | None   -> err_no_part ()
+         | Some x -> `Shell x
+     )
+-  | `Other s as x -> if name = "" then x else err_no_part ()
++  | `Other _ as x -> if name = "" then x else err_no_part ()
+ 
+ let link t ?part href =
+-  let part = read_part t ?part ("examples" / href) in
+-  { href; part; }
++  let block = read_part t ?part ("examples" / href) in
++  { href; block; part }
+ 
+-let dump_part ppf = function
+-  | `OCaml p -> Expect.Raw_script.dump_part ppf p
+-  | `OCaml_toplevel e -> Fmt.Dump.list Expect.Chunk.dump ppf e
+-  | `OCaml_rawtoplevel p -> Expect.Raw_script.dump_part ppf p
+-  | `Shell s -> Expect.Cram.dump ppf s
+-  | `Other s -> Fmt.string ppf s
+-
+-let pp_part ppf = function
++let pp_part ?part ppf = function
+   | `OCaml c ->
+     Fmt.pf ppf "```ocaml\n%s\n```\n" (String.trim c.Expect.Raw_script.content)
+   | `OCaml_toplevel c ->
+@@ -122,20 +116,14 @@ let pp_part ppf = function
+     Fmt.pf ppf "```sh dir=%s\n%a```\n" dir Expect.Cram.pp s
+   | `Other s -> Fmt.pf ppf "```\n%s\n```\n" s
+ 
+-let dump_item ppf = function
+-  | Lines t -> Fmt.pf ppf "Line@ (@[<2>%a@])" Fmt.(Dump.list string) t
+-  | Link l ->
+-    Fmt.pf ppf "{@[<2>@ href: %S;@ part: %a@]}" l.href dump_part l.part
+-
+ let pp_lines ppf l =
+   let str = Fmt.to_to_string Fmt.(list ~sep:(unit "\n") string) l in
+   Fmt.string ppf (String.trim str)
+ 
+ let pp_item ppf = function
+   | Lines t -> Fmt.pf ppf "%a\n" pp_lines t
+-  | Link t  -> pp_part ppf t.part
++  | Link t  -> pp_part ppf ~part:t.part t.block
+ 
+-let dump ppf t = Fmt.Dump.list pp_item ppf t.items
+ let pp ppf t = Fmt.pf ppf "%a\n" Fmt.(list ~sep:(unit "\n") pp_item) t.items
+ 
+ module Html = struct
+@@ -147,7 +135,7 @@ module Html = struct
+     let data d = D d in
+     let i = Xmlm.make_input (`String (0, s)) in
+     try  let _, d = Xmlm.input_doc_tree ~el ~data i in d
+-    with Xmlm.Error (_, e) -> D s
++    with Xmlm.Error (_, _) -> D s
+ 
+   let rec dump ppf = function
+     | E (t, tr) -> Fmt.pf ppf "@[E (%a,@ %a)@]" Xmlm.pp_tag t Fmt.(Dump.list dump) tr
