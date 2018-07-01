@@ -709,6 +709,7 @@
     ../book/testing.html
     ../bin/bin/app.exe
     ../book/toc.scm
+    ../examples/code/testing/bigger_quickcheck_test/test.ml
     ../examples/code/testing/broken_inline_test/run.sh
     ../examples/code/testing/broken_inline_test/test.ml
     ../examples/code/testing/main.mlt
@@ -720,7 +721,9 @@
     ../examples/code/testing/simple_inline_test/run.sh
     ../examples/code/testing/simple_inline_test/test.ml
     ../examples/code/testing/test_eq-inline_test/run.sh
-    ../examples/code/testing/test_eq-inline_test/test.ml))
+    ../examples/code/testing/test_eq-inline_test/test.ml
+    ../examples/code/testing/trivial_expect_test/run.sh
+    ../examples/code/testing/trivial_expect_test/test.ml))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 

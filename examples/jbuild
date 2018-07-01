@@ -2757,6 +2757,34 @@
   (deps ((alias runtest-all-code-testing-manual_property_test-run.sh)))))
 
 (alias (
+  (name runtest-code-testing-monadic_quickcheck_test-run.sh)
+  (deps ((files_recursively_in code/testing/monadic_quickcheck_test)))
+  (action (
+    chdir
+    code/testing/monadic_quickcheck_test
+    (progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-monadic_quickcheck_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-monadic_quickcheck_test-run.sh)
+  (deps ((files_recursively_in code/testing/monadic_quickcheck_test)))
+  (action (
+    chdir
+    code/testing/monadic_quickcheck_test
+    (progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-monadic_quickcheck_test-run.sh)))))
+
+(alias (
   (name runtest-code-testing-quickcheck_property_test-run.sh)
   (deps ((files_recursively_in code/testing/quickcheck_property_test)))
   (action (
@@ -2835,6 +2863,60 @@
 (alias (
   (name runtest-all)
   (deps ((alias runtest-all-code-testing-test_eq-inline_test-run.sh)))))
+
+(alias (
+  (name runtest-code-testing-trivial_expect_test-run.sh)
+  (deps ((files_recursively_in code/testing/trivial_expect_test)))
+  (action (
+    chdir code/testing/trivial_expect_test (
+      progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-trivial_expect_test-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-trivial_expect_test-run.sh)
+  (deps ((files_recursively_in code/testing/trivial_expect_test)))
+  (action (
+    chdir code/testing/trivial_expect_test (
+      progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-trivial_expect_test-run.sh)))))
+
+(alias (
+  (name runtest-code-testing-trivial_expect_test_fixed-run.sh)
+  (deps ((files_recursively_in code/testing/trivial_expect_test_fixed)))
+  (action (
+    chdir
+    code/testing/trivial_expect_test_fixed
+    (progn
+      (run   cram   run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest)
+  (deps ((alias runtest-code-testing-trivial_expect_test_fixed-run.sh)))))
+
+(alias (
+  (name runtest-all-code-testing-trivial_expect_test_fixed-run.sh)
+  (deps ((files_recursively_in code/testing/trivial_expect_test_fixed)))
+  (action (
+    chdir
+    code/testing/trivial_expect_test_fixed
+    (progn
+      (run cram --non-deterministic run.sh)
+      (diff? run.sh run.sh.corrected))))))
+
+(alias (
+  (name runtest-all)
+  (deps ((alias runtest-all-code-testing-trivial_expect_test_fixed-run.sh)))))
 
 (alias (
   (name runtest-code-variants-termcol-annotated-build.errsh)

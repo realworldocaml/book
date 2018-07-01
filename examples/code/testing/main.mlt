@@ -48,7 +48,9 @@ let gen_shape =
     Rect { height; width }
   in
   let poly =
-    let%map points = List.gen (G.both Float.gen_positive Float.gen_positive) in
+    let%map points =
+      List.gen (G.both Float.gen_positive Float.gen_positive)
+    in
     Poly points
   in
   G.union [circle; rect; poly]
