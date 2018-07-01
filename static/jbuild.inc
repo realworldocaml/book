@@ -723,7 +723,9 @@
     ../examples/code/testing/test_eq-inline_test/run.sh
     ../examples/code/testing/test_eq-inline_test/test.ml
     ../examples/code/testing/trivial_expect_test/run.sh
-    ../examples/code/testing/trivial_expect_test/test.ml))
+    ../examples/code/testing/trivial_expect_test/test.ml
+    ../examples/code/testing/trivial_expect_test_fixed/run.sh
+    ../examples/code/testing/trivial_expect_test_fixed/test.ml))
   (action (
     run rwo-build build chapter -o . -code ../examples -repo-root .. ${<}))))
 
