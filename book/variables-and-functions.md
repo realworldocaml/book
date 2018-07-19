@@ -519,7 +519,7 @@ see what happens if we try using a right-associative operator, like (^>).
 
 The type error is a little bewildering at first glance. What's going on is
 that, because `^>` is right associative, the operator is trying to feed the
-value `List.dedup ~compare:String.compare` to the function
+value `List.dedup_and_sort ~compare:String.compare` to the function
 `List.iter ~f:print_endline`. But `List.iter ~f:print_endline` expects a list
 of strings as its input, not a function.
 
