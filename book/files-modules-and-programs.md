@@ -462,7 +462,7 @@ present in the module as distributed in `Base`. That's a job for `include`.
 
 Now, how do we write an interface for this new module? It turns out that
 `include` works on signatures as well, so we can pull essentially the same
-trick to write our `mli`. The only issues is that we need to get our hands on
+trick to write our `mli`. The only issue is that we need to get our hands on
 the signature for the `List` module. This can be done using `module type of`,
 which computes a signature from a module:
 
