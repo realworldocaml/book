@@ -944,7 +944,7 @@ The `.exe` suffix indicates that we're building a native-code executable,
 which we'll discuss more in
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 Once the build completes, we can use the resulting program like any
-command-line utility. We can feed input to `sum.native` by typing in a
+command-line utility. We can feed input to `sum.exe` by typing in a
 sequence of numbers, one per line, hitting **`Ctrl-D`** when we're done:
 
 <link rel="import" href="code/guided-tour/sum/sum.rawsh" />
