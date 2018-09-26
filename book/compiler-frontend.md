@@ -222,7 +222,7 @@ to verify that the syntax is correct:
 
 <link rel="import" href="code/front-end/indent_follow_on_function_fixed.sh" />
 
-The `ocp-indent`[home page](https://github.com/OCamlPro/ocp-indent) documents
+The `ocp-indent` [home page](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
