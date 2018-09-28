@@ -28,7 +28,7 @@ let memoize f =
 [%%expect ocaml {|val memoize : ('a -> 'b) -> 'a -> 'b = <fun>|}];;
 [@@@part "1"];;
 let rec fib i =
-  if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+  if i <= 1 then i else fib (i - 1) + fib (i - 2);;
 [%%expect ocaml {|val fib : int -> int = <fun>|}];;
 [@@@part "2"];;
 time (fun () -> fib 20);;
