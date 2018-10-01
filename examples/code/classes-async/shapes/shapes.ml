@@ -17,7 +17,7 @@ class virtual shape x y = object(self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun ev ->  
+      (fun ev ->
          if self#contains ev.mouse_x ev.mouse_y then
            f ev.mouse_x ev.mouse_y)
 
@@ -38,10 +38,10 @@ class square w x y = object
 
   method draw = fill_rect x y width width
 
-  method private contains x' y' = 
+  method private contains x' y' =
     x <= x' && x' <= x + width &&
-    y <= y' && y' <= y + width 
-end 
+    y <= y' && y' <= y + width
+end
 
 class circle r x y = object
   inherit shape x y
@@ -70,18 +70,18 @@ end
 
 [@@@part "4"];;
 class virtual draggable = object(self)
-  method virtual on_mousedown: 
-    ?start:unit Deferred.t -> 
-    ?stop:unit Deferred.t -> 
+  method virtual on_mousedown:
+    ?start:unit Deferred.t ->
+    ?stop:unit Deferred.t ->
     (int -> int -> unit) -> unit
-  val virtual mutable x: int  
-  val virtual mutable y: int  
+  val virtual mutable x: int
+  val virtual mutable y: int
 
   val mutable dragging = false
   method dragging = dragging
 
-  initializer 
-    self#on_mousedown 
+  initializer
+    self#on_mousedown
       (fun mouse_x mouse_y ->
          let offset_x = x - mouse_x in
          let offset_y = y - mouse_y in
@@ -102,15 +102,15 @@ end
 [@@@part "5"];;
 class small_square = object
   inherit square 20 40 40
-  inherit draggable 
+  inherit draggable
 end
 
 
 [@@@part "6"];;
 class virtual animated span = object(self)
-  method virtual on_click: 
-    ?start:unit Deferred.t -> 
-    ?stop:unit Deferred.t -> 
+  method virtual on_click:
+    ?start:unit Deferred.t ->
+    ?stop:unit Deferred.t ->
     (int -> int -> unit) -> unit
   val mutable updates: (int -> unit) list = []
   val mutable step = 0
@@ -123,7 +123,7 @@ class virtual animated span = object(self)
     running <- true;
     let stop =
       Clock.after span
-      >>| fun () -> running <- false 
+      >>| fun () -> running <- false
     in
     Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0))
       (fun () ->
@@ -158,7 +158,7 @@ class virtual linear x' y' = object
     updates <- update :: updates
 end
 
-let pi = (atan 1.0) *. 4.0
+let pi = (Float.atan 1.0) *. 4.0
 
 class virtual harmonic offset x' y' = object
   val virtual mutable updates: (int -> unit) list
@@ -167,7 +167,7 @@ class virtual harmonic offset x' y' = object
 
   initializer
     let update step =
-      let m = sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
+      let m = Float.sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
       let x' = Float.to_int (m *. Float.of_int x') in
       let y' = Float.to_int (m *. Float.of_int y') in
       x <- x + x';
@@ -196,9 +196,9 @@ end
 
 [@@@part "10"];;
 let main () =
-  let shapes = [ 
-     (my_circle :> drawable); 
-     (new my_square 50 350 :> drawable); 
+  let shapes = [
+     (my_circle :> drawable);
+     (new my_square 50 350 :> drawable);
      (new my_square 50 200 :> drawable);
      (new growing_circle 20 70 70 :> drawable);
   ] in
@@ -206,7 +206,7 @@ let main () =
     clear_graph ();
     List.iter ~f:(fun s -> s#draw) shapes;
     synchronize ()
-  in 
+  in
     open_graph "";
     auto_synchronize false;
     Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint

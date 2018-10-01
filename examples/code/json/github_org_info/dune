@@ -13,4 +13,5 @@
 (executable
   (name      github_org_info)
   (libraries core yojson atdgen core_extended)
+  (flags     :standard -w -32)
   (modules   github_org_info github_org_t github_org_j))

@@ -1,8 +1,7 @@
-(ocamllex (lexer))
-(menhir (
-  (modules (parser))
-))
-(executable (
-  (name test)
-  (libraries (core))
-))
+(ocamllex lexer)
+
+(menhir (modules parser))
+
+(executable
+  (name      test)
+  (libraries core))

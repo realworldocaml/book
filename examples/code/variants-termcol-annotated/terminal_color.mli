@@ -1,5 +1,3 @@
-open Core
-
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
   | `Magenta | `Red  | `White | `Yellow ]

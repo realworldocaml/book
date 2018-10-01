@@ -1,4 +1,6 @@
   $ dune build terminal_color.exe
-      ocamlopt .terminal_color.eobjs/terminal_color.{cmx,o}
-  File "terminal_color.ml", line 31, characters 25-32:
-  Warning 12: this sub-pattern is unused.
+      ocamlopt .terminal_color.eobjs/terminal_color.{cmx,o} (exit 2)
+  ...
+  File "terminal_color.ml", line 29, characters 25-32:
+  Error (warning 12): this sub-pattern is unused.
+@@ exit 1
