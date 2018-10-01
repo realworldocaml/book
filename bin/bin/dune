@@ -1,0 +1,7 @@
+(executables
+ (package      rwo)
+ (names        app       dep)
+ (public_names rwo-build rwo-dep)
+ (preprocess   (pps ppx_jane))
+ (libraries    rwo lambdasoup sexp_pretty)
+ (flags        :standard -short-paths))

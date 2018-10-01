@@ -122,9 +122,9 @@ assuming the JSON record is stored in a file called *book.json*:
 
 <link rel="import" href="code/json/read_json/read_json.ml" />
 
-You can build this by running `jbuilder`:
+You can build this by running `dune`:
 
-<link rel="import" href="code/json/read_json/jbuild" />
+<link rel="import" href="code/json/read_json/dune" />
 
 <link rel="import" href="code/json/read_json/run_read_json.sh" />
 
@@ -147,7 +147,7 @@ values from]{.idx #JSONselval}
 
 Now build and run this in the same way as the previous example:
 
-<link rel="import" href="code/json/parse_book/jbuild" />
+<link rel="import" href="code/json/parse_book/dune" />
 
 <link rel="import" href="code/json/parse_book/run_parse_book.sh" />
 
@@ -196,7 +196,7 @@ to_string | `json -> string` | Convert a JSON value into an OCaml `string`. Rais
 to_int | `json -> int` | Convert a JSON value into an OCaml `int`. Raises an exception if this is impossible.
 filter_string | `json list -> string list` | Filter valid strings from a list of JSON fields, and return them as an OCaml list of strings.
 
-Table:  Yojson combinators 
+Table:  Yojson combinators
 :::
 
 
@@ -205,7 +205,7 @@ We'll go through each of these uses one by one now. The following examples
 also use the `|>` pipe-forward operator that we explained in
 [Variables And Functions](variables-and-functions.html#variables-and-functions){data-type=xref}.
 This lets us chain together multiple JSON selection functions and feed the
-output from one into the next one, without having to create separate 
+output from one into the next one, without having to create separate
 `let` bindings for each one. [filter_string function]{.idx}[to_init
 function]{.idx}[functions/to_init function]{.idx}[to_string
 function]{.idx}[functions/to_string function]{.idx}[functions/member
@@ -562,7 +562,7 @@ before running the example. You might also need to
 The following is a short shell script that generates all of the OCaml code
 and also builds the final executable:
 
-<link rel="import" href="code/json/github_org_info/jbuild" />
+<link rel="import" href="code/json/github_org_info/dune" />
 
 <link rel="import" href="code/json/github_org_info/github_org.sh" part=
 "build" />
@@ -592,6 +592,3 @@ Our example shells out to `curl` on the command line to obtain the JSON,
 which is rather inefficient. We'll explain how to integrate the HTTP fetch
 directly into your OCaml application in
 [Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
-
-
-

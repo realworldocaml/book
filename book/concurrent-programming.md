@@ -285,7 +285,7 @@ primitives.
 ## Example: An Echo Server {#examples-an-echo-server}
 
 Now that we have the basics of Async under our belt, let's look at a small
-standalone Async program. In particular, we'll write an echo server, 
+standalone Async program. In particular, we'll write an echo server,
 *i.e.*, a program that accepts connections from clients and spits back
 whatever is sent to it.[echo servers]{.idx #echo}[Async library/echo server
 example]{.idx #ALecho}
@@ -361,7 +361,7 @@ concurrent clients without further modification.
 Now that we have the echo server, we can connect to the echo server using the
 netcat tool, which is invoked as `nc`:
 
-<link rel="import" href="code/async/echo/jbuild" />
+<link rel="import" href="code/async/echo/dune" />
 
 <link rel="import" href="code/async/echo/run_echo.sh" />
 
@@ -628,7 +628,7 @@ Finally, we create a command-line interface using `Command.async`:
 And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
-<link rel="import" href="code/async/search/jbuild" />
+<link rel="import" href="code/async/search/dune" />
 
 <link rel="import" href="code/async/search/run_search.sh" />
 
@@ -788,7 +788,7 @@ list of servers. Now, let's see what happens if we rebuild the application
 and run it giving it a list of servers, some of which won't respond to the
 query:
 
-<link rel="import" href="code/async/search_with_configurable_server/jbuild" />
+<link rel="import" href="code/async/search_with_configurable_server/dune" />
 
 <link rel="import" href="code/async/search_with_configurable_server/run_search_with_configurable_server.errsh" />
 
@@ -815,7 +815,7 @@ the new type:
 Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
-<link rel="import" href="code/async/search_with_error_handling/jbuild" />
+<link rel="import" href="code/async/search_with_error_handling/dune" />
 
 <link rel="import" href="code/async/search_with_error_handling/run_search_with_error_handling.sh" />
 
@@ -912,7 +912,7 @@ Here's the code:
 Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
-<link rel="import" href="code/async/search_with_timeout_no_leak/jbuild" />
+<link rel="import" href="code/async/search_with_timeout_no_leak/dune" />
 
 <link rel="import" href="code/async/search_with_timeout_no_leak/run_search_with_timeout_no_leak.sh" />
 
@@ -1053,6 +1053,3 @@ the `Thread_safe` module in Async, and thereby run Async computations safely.
 This is a very flexible way of connecting threads to the Async world, but
 it's a complex use case that is beyond the scope of this chapter.
 <a data-type="indexterm" data-startref="systhrd">&nbsp;</a><a data-type="indexterm" data-startref="ALsysthr">&nbsp;</a>
-
-
-

@@ -180,7 +180,7 @@ let script lang ~filename =
         printf "warning: %s is empty\n%!" filename;
       `Shell script
     )
-  | "jbuild" ->
+  | "dune" ->
     let open Deferred.Let_syntax in
     let%map x = Reader.file_contents filename in
     Ok (`Other x)

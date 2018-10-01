@@ -40,7 +40,7 @@ to extract the largest and smallest element of the list:
 
 <link rel="import" href="code/error-handling/main.mlt" part="2" />
 
-The `match` statement is used to handle the error cases, propagating a 
+The `match` statement is used to handle the error cases, propagating a
 `None` in `hd` or `last` into the return value of `compute_bounds`.
 
 On the other hand, in the `find_mismatches` that follows, errors encountered
@@ -344,7 +344,7 @@ Here we use `assert false`, which means that the `assert` is guaranteed to
 trigger. In general, one can put an arbitrary condition in the assertion.
 
 In this case, the `assert` can never be triggered because we have a check
-that makes sure that the lists are of the same length before we call 
+that makes sure that the lists are of the same length before we call
 `loop`. If we change the code so that we drop this test, then we can trigger
 the `assert`:
 
@@ -477,7 +477,7 @@ If we build and run this program, we'll get a stack backtrace that will
 provide some information about where the error occurred and the stack of
 function calls that were in place at the time of the error:
 
-<link rel="import" href="code/error-handling/blow_up/jbuild" />
+<link rel="import" href="code/error-handling/blow_up/dune" />
 
 <link rel="import" href="code/error-handling/blow_up/build_blow_up.errsh" part=
 "trace" />
@@ -496,7 +496,7 @@ linking in Core, you will have backtraces enabled by default.
 Even using Core and compiling with debugging symbols, you can turn backtraces
 off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 
-<link rel="import" href="code/error-handling/blow_up/jbuild" />
+<link rel="import" href="code/error-handling/blow_up/dune" />
 
 <link rel="import" href="code/error-handling/blow_up/build_blow_up.errsh" part=
 "no_trace" />
@@ -520,7 +520,7 @@ flow back to the caller.
 
 If we run this with stacktraces on, the benchmark results look like this:
 
-<link rel="import" href="code/error-handling/exn_cost/jbuild" />
+<link rel="import" href="code/error-handling/exn_cost/dune" />
 
 <link rel="import" href="code/error-handling/exn_cost/run_exn_cost.sh" />
 
@@ -590,5 +590,3 @@ explicit than having none of them marked.
 In short, for errors that are a foreseeable and ordinary part of the
 execution of your production code and that are not omnipresent, error-aware
 return types are typically the right solution.
-
-

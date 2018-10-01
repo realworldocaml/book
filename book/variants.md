@@ -558,7 +558,7 @@ the `mli`), then the compiler has enough information to warn us:
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
 
-<link rel="import" href="code/variants-termcol-annotated/jbuild" />
+<link rel="import" href="code/variants-termcol-annotated/dune" />
 
 <link rel="import" href="code/variants-termcol-annotated/build.errsh" />
 

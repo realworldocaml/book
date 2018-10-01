@@ -925,18 +925,17 @@ expects one additional argument of type `float`.
 
 ### Compiling and Running {#compiling-and-running}
 
-We'll compile our program using `jbuilder`, a build system that's designed
-for use with OCaml projects. First, we need to write a *jbuild* file to
+We'll compile our program using `dune`, a build system that's designed
+for use with OCaml projects. First, we need to write a *dune* file to
 specify the build.
 
-<link rel="import" href="code/guided-tour/sum/jbuild" />
+<link rel="import" href="code/guided-tour/sum/dune" />
 
 All we need to specify is the fact that we're building an executable rather
 than a library, the name of the executable, and the name of the libraries we
 depend on.
 
-We can now invoke jbuilder to build the executable. The `--dev` flag is
-recommended to get better error messages during the build.
+We can now invoke dune to build the executable.
 
 <link rel="import" href="code/guided-tour/sum/build_sum.sh" />
 

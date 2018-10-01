@@ -19,7 +19,7 @@ parser, in the form of *parser generators*. A parser generator creates a
 parser from a specification of the data format that you want to parse, and
 uses that to generate a parser. [parsing/parser generators]{.idx}
 
-Parser generators have a long history, including tools like `lex` and 
+Parser generators have a long history, including tools like `lex` and
 `yacc` that date back to the early 1970s. OCaml has its own alternatives,
 including `ocamllex`, which replaces `lex`, and `ocamlyacc` and `menhir`,
 which replace `yacc`. We'll explore these tools in the course of walking
@@ -125,7 +125,7 @@ strings, identifiers, and punctuation: [tokens, declaration of]{.idx}
 
 The `<`*`type`*`>` specifications mean that a token carries a value. The
 `INT` token carries an integer value with it, `FLOAT` has a `float` value,
-and `STRING` carries a `string` value. The remaining tokens, such as 
+and `STRING` carries a `string` value. The remaining tokens, such as
 `TRUE`, `FALSE`, or the punctuation, aren't associated with any value, and so
 we can omit the `<`*`type`*`>` specification.
 
@@ -147,7 +147,7 @@ symbols]{.idx}[non-terminal symbols]{.idx}[context-free
 grammars]{.idx}[Menhir parser generator/context-free grammars in]{.idx}
 
 We'll start describing the JSON grammar by declaring the start symbol to be
-the non-terminal symbol `prog`, and by declaring that when parsed, a 
+the non-terminal symbol `prog`, and by declaring that when parsed, a
 `prog` value should be converted into an OCaml value of type
 `Json.value option`. We then end the declaration section of the parser with a
 `%%`:
@@ -241,7 +241,7 @@ handle files with the `.mly` suffix: [-use-menhir
 flag]{.idx data-primary-sortas=use}[Menhir parser
 generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&nbsp;</a>
 
-<link rel="import" href="code/parsing/jbuild" />
+<link rel="import" href="code/parsing/dune" />
 
 <link rel="import" href="code/parsing/build_short_parser.sh" />
 
@@ -462,5 +462,3 @@ structurally compatible with the Yojson representation explained in
 [Handling Json Data](json.html#handling-json-data){data-type=xref}. That
 means that you can take this parser and use it with the helper functions in
 Yojson to build more sophisticated applications.
-
-

@@ -1,0 +1,9 @@
+(library
+ (name        rwo)
+ (public_name rwo)
+ (libraries   core async lambdasoup re sexp_pretty ocaml-topexpect cram)
+ (preprocess  (pps ppx_jane)))
+
+(rule
+  (with-stdout-to about.ml
+    (echo "let git_commit = Some \"${version:rwo}\"")))

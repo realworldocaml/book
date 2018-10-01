@@ -1,23 +1,23 @@
 .PHONY: all clean dep publish promote test test-all docker
 
 all:
-	@jbuilder build @site --dev
+	@dune build @site
 	@echo Site has been generated in _build/default/static/
 
 test:
-	jbuilder runtest --dev
+	dune runtest
 
 test-all:
-	jbuilder build @runtest-all --dev
+	dune build @runtest-all
 
 dep:
-	jbuilder exec --dev -- rwo-jbuild
+	dune exec -- rwo-dep
 
 promote:
-	jbuilder promote
+	dune promote
 
 clean:
-	jbuilder clean
+	dune clean
 
 docker:
 	docker build -t ocaml/rwo .

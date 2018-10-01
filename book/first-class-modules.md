@@ -284,7 +284,7 @@ Now, we need a function that dispatches to a handler using a dispatch table:
 
 <link rel="import" href="code/fcm/query_handler.mlt" part="12" />
 
-This function interacts with an instance by unpacking it into a module 
+This function interacts with an instance by unpacking it into a module
 `I` and then using the query handler instance (`I.this`) in concert with the
 associated module (`I.Query_handler`).[I.Query_handler module]{.idx}
 
@@ -385,7 +385,7 @@ command-line interface, passing it the active table:
 
 Now build this into a command-line interface to experiment with it:
 
-<link rel="import" href="code/fcm/query_handler_loader/jbuild" />
+<link rel="import" href="code/fcm/query_handler_loader/dune" />
 
 <link rel="import" href="code/fcm/query_handler_loader/build_query_handler_loader.sh" />
 
@@ -440,5 +440,3 @@ functionality you need to hide away behind a set of closures, and the more
 complicated the relationships between the different types in question, the
 more awkward this approach becomes, and the better it is to use first-class
 modules. <a data-type="indexterm" data-startref="MODfirst">&nbsp;</a>
-
-
