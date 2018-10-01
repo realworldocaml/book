@@ -1,7 +1,4 @@
   $ dune build test.exe
-        menhir parser.{ml,mli}
-  Warning: you are using the standard library and/or the %inline keyword. We
-  recommend switching on --infer in order to avoid obscure type error messages.
   $ ./_build/default/test.exe test1.json
   true
   false

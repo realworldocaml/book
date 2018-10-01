@@ -3,6 +3,7 @@
   $ ./_build/default/blow_up.bc
   3
   Fatal error: exception Blow_up.Empty_list
+  Raised at file "blow_up.ml", line 6, characters 16-26
   Called from file "blow_up.ml", line 11, characters 16-29
 @@ exit 2
 ### no_trace
