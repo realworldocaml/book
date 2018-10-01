@@ -715,8 +715,10 @@
     ../examples/code/testing/main.mlt
     ../examples/code/testing/manual_property_test/run.sh
     ../examples/code/testing/manual_property_test/test.ml
+    ../examples/code/testing/multi_expect_test/test.ml
     ../examples/code/testing/quickcheck_property_test/run.sh
     ../examples/code/testing/quickcheck_property_test/test.ml
+    ../examples/code/testing/simple_expect_test/test.ml
     ../examples/code/testing/simple_inline_test/jbuild
     ../examples/code/testing/simple_inline_test/run.sh
     ../examples/code/testing/simple_inline_test/test.ml

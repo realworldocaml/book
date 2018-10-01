@@ -1,1 +1,1 @@
-  $ jbuilder runtest --dev --auto-promote
+  $ jbuilder runtest --dev

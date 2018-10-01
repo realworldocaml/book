@@ -125,25 +125,28 @@ error.
 ### Where should tests go? {data-type=sect2}
 
 The inline test framework lets you put tests into any `.ml` file
-that's part of a library. But just because you *can* do something
-doesn't mean you *should*. Where in practice should your tests go?
+that's part of a library. But just because you can do something
+doesn't mean you should.
 
-One obvious approach is to put the tests directly in the library
-you're developing. That way, you can put a test for a given function
-directly after the defintion of that function. This is a appealing at
-first glance, since it encourages you to think about testing as you're
-writing your application code. But the approach has several downsides.
+Putting tests directly in the library you're building certainly has
+some benefits. For one thing, it lets you put a test for a given
+function directly after the defintion of that function. This approach
+also lets you test aspects of your code that aren't exposed by its
+external interface.
 
-- **Bloat**. When your tests are written as a part of your library, it
+While this sounds appealing at first glance, putting tests the
+approach has several downsides.
+
+- **Test bloat**. When your tests are written as a part of your library, it
   means that every user of your library has to link in that testing
   code in their production application. Even though that code won't
   get executed in production, it still adds to the size of the
   executable.
 
-- **Dependencies**. Adding testing code to your library doesn't just
-  add the generated code for the specific tests you write; it can also
-  require you to add dependencies on libraries and modules that you
-  only really need for testing. This can further bloat your
+- **Excess dependencies**. Adding testing code to your library doesn't
+  just add the generated code for the specific tests you write; it can
+  also require you to add dependencies on libraries and modules that
+  you only really need for testing. This can further bloat your
   application, and can also require you to link libraries into your
   application that you'd rather not rely on in production.
 
@@ -309,14 +312,14 @@ what you want. Sometimes, instead of writing down properties, you want
 to express your tests in terms of simple, concrete scenarios. *Expect
 tests* are a great way of doing just that.
 
-### Mechanics
+### Basic mechanics
 
-The basic idea of an expect test is simple: an expect test involves a
-single source file that specifies both the code you're going to
-execute, and the expected output of that code. Upon running an expect
-test, any discrpeancy between the expected output and what was
-actually generated is reported, and we can *promote* that output to be
-the actual source of the test if it looks right ot us.
+An expect test involves a single source file that specifies both the
+code to be executed and the expected output. Upon running an expect
+test, any discrepancy between the expected output and what was
+actually generated is reported, and, if the new output looks correct,
+we can *promote* it to be the expected output by adjusting the source
+accordingly.
 
 Here's a simple example of a test written in this style.  Note that
 the test generates output, but that output isn't captured in the
@@ -339,3 +342,35 @@ to look like this.
 Now, if we run the test again, we'll see that it passes.
 
 <link rel="import" href="code/testing/trivial_expect_test_fixed/run.sh" />
+
+We only have one expect block in this example, but the system supports
+having multiple expect blocks, as you can see below.
+
+<link rel="import" href="code/testing/multi_expect_test/test.ml" />
+
+### What are expect tests good for?
+
+It's not obvious why one would want to use expect tests in the first
+place. Why should this:
+
+<link rel="import" href="code/testing/simple_expect_test/test.ml" />
+
+be preferable to this?
+
+<link rel="import" href="code/testing/simple_inline_test/test.ml" />
+
+Indeed, for examples like this, expect tests don't present a material
+advantage. Simple example-based tests like the one above are a great
+solution when it's easy and convenient to write out specific examples
+in full. And property tests are your best bet when you have a clear
+set of predicates that you want to test.
+
+Where expect tests shine is where you want to capture some aspect of
+the behavior of your system that's hard to capture in either
+predicates or hand-written examples. Instead, expect tests give you a
+way to visualize the behavior of your code, and then to be notified
+whenever that visualization changes.
+
+This is more useful than it might seem at first. One common use-case
+of expect tests is simply to capture the behavior of a complex bit of
+code that you don't necessarily have a small specification of.
