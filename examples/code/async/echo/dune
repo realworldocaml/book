@@ -1,4 +1,3 @@
 (executable
-  ((name echo)
-   (libraries (core async)))
-  )
+  (name      echo)
+  (libraries core async))

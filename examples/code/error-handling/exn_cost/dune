@@ -1,6 +1,4 @@
 (executable
-  ((name exn_cost)
-   (modules exn_cost)
-   (libraries (core core_bench))
-  )
-)
+  (name      exn_cost)
+  (modules   exn_cost)
+  (libraries core core_bench))

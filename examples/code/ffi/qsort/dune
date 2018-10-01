@@ -1,5 +1,3 @@
 (executable
-  ((name qsort)
-   (libraries (core ctypes.foreign))
-  )
-)
+  (name      qsort)
+  (libraries core ctypes.foreign))

@@ -1,5 +1,3 @@
 (executable
-  ((name terminal_color)
-   (libraries (core))
-  )
-)
+  (name      terminal_color)
+  (libraries core))

@@ -1,5 +1,4 @@
 (executable
-  ((name time_converter)
-   (modules time_converter)
-   (libraries (core))
-  ))
+  (name      time_converter)
+  (modules   time_converter)
+  (libraries core))
