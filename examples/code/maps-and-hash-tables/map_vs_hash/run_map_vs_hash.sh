@@ -1,4 +1,4 @@
-  $ jbuilder build map_vs_hash.exe
+  $ dune build map_vs_hash.exe
   Done: 3/5 (jobs: 1)                   Done: 74/77 (jobs: 1)                     Done: 75/77 (jobs: 1)                     Done: 76/77 (jobs: 1)                     
 %% --non-deterministic [skip]
   $ ./_build/default/map_vs_hash.exe -ascii -quota 1 -clear-columns time speedup

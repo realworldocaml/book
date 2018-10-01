@@ -1,4 +1,4 @@
-  $ jbuilder build echo.exe
+  $ dune build echo.exe
   $ ./_build/default/echo.exe &
   $ sleep 1
   $ echo "This is an echo server" | nc 127.0.0.1 8765

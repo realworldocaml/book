@@ -1,4 +1,4 @@
-  $ jbuilder build freq.bc
+  $ dune build freq.bc
   Dependency cycle between modules in _build/default:
      -> Freq
   -> Counter

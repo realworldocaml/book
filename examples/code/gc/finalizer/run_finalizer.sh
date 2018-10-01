@@ -1,4 +1,4 @@
-  $ jbuilder build finalizer.exe
+  $ dune build finalizer.exe
         ocamlc .finalizer.eobjs/finalizer.{cmi,cmo,cmt}
   File "finalizer.ml", line 16, characters 23-36:
   Warning 3: deprecated: Core.String.create

@@ -1,4 +1,4 @@
-  $ jbuilder build datetime.exe
+  $ dune build datetime.exe
 %% --non-deterministic
   $ ./_build/default/datetime.exe
   1520339271.364367

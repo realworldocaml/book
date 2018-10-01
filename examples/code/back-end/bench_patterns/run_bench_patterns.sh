@@ -1,4 +1,4 @@
-  $ jbuilder build bench_patterns.exe
+  $ dune build bench_patterns.exe
 %% --non-deterministic [skip]
   $ ./_build/default/bench_patterns.exe -ascii -quota 0.25
   Estimated testing time 750ms (3 benchmarks x 250ms). Change using -quota SECS.
