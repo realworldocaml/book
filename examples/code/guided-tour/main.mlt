@@ -439,7 +439,7 @@ val ar : int array =
 permute ar;;
 [%%expect ocaml {|- : unit = ()|}];;
 ar;;
-[%%expect ocaml {|
+[%%expect.nondeterministic ocaml {|
 - : int array =
 [|5; 4; 13; 17; 16; 19; 1; 6; 10; 14; 15; 7; 18; 2; 9; 11; 12; 0; 3; 8|]
 |}];;

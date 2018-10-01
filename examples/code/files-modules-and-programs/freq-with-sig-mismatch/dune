@@ -1,0 +1,3 @@
+(executable
+  (name      freq)
+  (libraries base stdio))

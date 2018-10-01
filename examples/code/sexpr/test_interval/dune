@@ -1,0 +1,4 @@
+(executable
+  (name       test_interval)
+  (libraries  core sexplib)
+  (preprocess (pps ppx_sexp_conv)))

@@ -1,5 +1,0 @@
-(executable
-  ((name alternate_list)
-   (libraries (core))
-  )
-)

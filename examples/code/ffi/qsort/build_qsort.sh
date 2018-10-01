@@ -1,4 +1,4 @@
-  $ jbuilder build qsort.exe
+  $ dune build qsort.exe
   $ cat input.txt
   2
   4

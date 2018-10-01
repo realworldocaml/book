@@ -1,4 +1,0 @@
-(executable (
-  (name test_interval_nosexp)
-  (libraries (core))
-))

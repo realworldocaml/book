@@ -1,5 +1,5 @@
 ### build
-  $ jbuilder build freq.bc
+  $ dune build freq.bc
 ### test
 %% --non-deterministic [skip]
   $ strings `which ocamlopt` | ./_build/default/freq.bc

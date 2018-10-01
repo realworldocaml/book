@@ -1,6 +1,6 @@
-  $ jbuilder build freq.bc
-  Dependency cycle between modules in _build/default:
-     -> Freq
-  -> Counter
-  -> Freq
+  $ dune build freq.bc
+  Dependency cycle between the following files:
+      _build/default/.freq.eobjs/counter.ml.all-deps
+  --> _build/default/.freq.eobjs/freq.ml.all-deps
+  --> _build/default/.freq.eobjs/counter.ml.all-deps
 @@ exit 1

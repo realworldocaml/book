@@ -147,7 +147,7 @@ together:
 The `hello` executable is compiled by linking with the `ctypes.foreign`
 OCamlfind package:
 
-<link rel="import" href="code/ffi/hello/jbuild" />
+<link rel="import" href="code/ffi/hello/dune" />
 
 <link rel="import" href="code/ffi/hello/build_hello.sh" />
 
@@ -391,7 +391,7 @@ unions/field addition]{.idx}
 
 <link rel="import" href="code/ffi/posix.mlt" part="9" />
 
-The `field` function appends a field to the structure, as shown with 
+The `field` function appends a field to the structure, as shown with
 `tv_sec` and `tv_usec`. Structure fields are typed accessors that are
 associated with a particular structure, and they correspond to the labels in
 C.
@@ -447,7 +447,7 @@ with a complete example that ties it together with a command-line frontend:
 
 This can be compiled and run in the usual way: [returning function]{.idx}
 
-<link rel="import" href="code/ffi/datetime/jbuild" />
+<link rel="import" href="code/ffi/datetime/dune" />
 
 <link rel="import" href="code/ffi/datetime/build_datetime.sh" />
 
@@ -493,7 +493,7 @@ A C function that's written in curried style looks very different:
 <link rel="import" href="code/ffi/return_c_uncurried.c" />
 
 The OCaml type of `uncurried_C` when bound by Ctypes is `int -> int -> int`:
-a two-argument function. The OCaml type of `curried_C` when bound by 
+a two-argument function. The OCaml type of `curried_C` when bound by
 `ctypes` is `int -> (int -> int)`: a one-argument function that returns a
 one-argument function.
 
@@ -545,7 +545,7 @@ Operator | Purpose
 `p +@ n` | If `p` points to an array element, then compute the address of the `n`th next element.
 `p -@ n` | If `p` points to an array element, then compute the address of the `n`th previous element.
 
-Table:  Operators for manipulating pointers and arrays 
+Table:  Operators for manipulating pointers and arrays
 :::
 
 
@@ -573,7 +573,7 @@ more palatable:
 <link rel="import" href="code/ffi/qsort/qsort_typedef.h" />
 
 This also happens to be a close mapping to the corresponding Ctypes
-definition. Since type descriptions are regular values, we can just use 
+definition. Since type descriptions are regular values, we can just use
 `let` in place of `typedef` and end up with working OCaml bindings to
 `qsort`:
 
@@ -600,7 +600,7 @@ all of the integers supplied on the standard input: [qsort binding]{.idx}
 Compile it in the usual way with *dune* and test it against some input data,
 and also build the inferred interface so we can examine it more closely:
 
-<link rel="import" href="code/ffi/qsort/jbuild" />
+<link rel="import" href="code/ffi/qsort/dune" />
 
 <link rel="import" href="code/ffi/qsort/build_qsort.sh" />
 
@@ -748,6 +748,3 @@ The details of using Cstubs are available in the online
 [documentation](https://ocamllabs.github.io/ocaml-ctypes), along with
 instructions on integration with `autoconf` platform portability
 instructions.<a data-type="indexterm" data-startref="INTERffi">&nbsp;</a>
-
-
-

@@ -1,4 +1,4 @@
-  $ jbuilder build search.exe
+  $ dune build search.exe
   $ ./_build/default/search.exe "Concurrent Programming" "OCaml"
   Concurrent Programming
   ----------------------

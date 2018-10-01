@@ -118,7 +118,7 @@ delimit the start and end of the heap region (`caml_young_start` and
 aligned against the next nearest word boundary from `base` to make it easier
 to store OCaml values.
 
-In a fresh minor heap, the `limit` equals the `start`, and the current 
+In a fresh minor heap, the `limit` equals the `start`, and the current
 `ptr` will equal the `end`. `ptr` decreases as blocks are allocated until it
 reaches `limit`, at which point a minor garbage collection is triggered.
 
@@ -320,7 +320,7 @@ White (during sweeping) | Unreachable and can be freed
 Gray | Reachable, but its fields have not been scanned
 Black | Reachable, and its fields have been scanned
 
-Table:  Tag color statuses 
+Table:  Tag color statuses
 
 
 The color tags in the value headers store most of the state of the marking
@@ -449,7 +449,7 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring:
 
-<link rel="import" href="code/gc/barrier_bench/jbuild" />
+<link rel="import" href="code/gc/barrier_bench/dune" />
 
 <link rel="import" href="code/gc/barrier_bench/barrier_bench.sh" part=
 "run" />
@@ -530,7 +530,7 @@ constants:
 
 Building and running this should show the following output:
 
-<link rel="import" href="code/gc/finalizer/jbuild" />
+<link rel="import" href="code/gc/finalizer/dune" />
 
 <link rel="import" href="code/gc/finalizer/run_finalizer.sh" />
 
@@ -542,7 +542,7 @@ which are run when the value becomes unreachable. You can have many
 finalizers all pointing to the same heap block if you wish.
 
 After a garbage collection determines that a heap block `b` is unreachable,
-it removes from the set of finalizers all the functions associated with 
+it removes from the set of finalizers all the functions associated with
 `b`, and serially applies each of those functions to `b`. Thus, every
 finalizer function attached to `b` will run at most once. However, program
 termination will not cause all the finalizers to be run before the runtime
@@ -552,5 +552,3 @@ The finalizer can use all features of OCaml, including assignments that make
 the value reachable again and thus prevent it from being garbage-collected.
 It can also loop forever, which will cause other finalizers to be interleaved
 with it.
-
-

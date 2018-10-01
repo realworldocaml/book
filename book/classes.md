@@ -286,7 +286,7 @@ methods]{.idx}[classes/binary methods for]{.idx}[binary methods]{.idx}
 Note how we can use the type annotation `(self: 'self)` to obtain the type of
 the current object.
 
-We can now test different object instances for equality by using the 
+We can now test different object instances for equality by using the
 `equals` binary method:
 
 <link rel="import" href="code/classes/binary.mlt" part="1" />
@@ -485,7 +485,7 @@ In any case, if you're programming with objects, there's one general pattern
 for multiple inheritance that is both useful and reasonably simple: the
 *mixin* pattern. Generically, a *mixin* is just a virtual class that
 implements a feature based on another one. If you have a class that
-implements methods *A*, and you have a mixin *M* that provides methods 
+implements methods *A*, and you have a mixin *M* that provides methods
 *B* from *A*, then you can inherit from *M*—"mixing" it in—to get
 features *B*.
 
@@ -539,7 +539,7 @@ graphical display and ask Async to run `repaint` at regular intervals.
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies:
 
-<link rel="import" href="code/classes-async/shapes/jbuild" />
+<link rel="import" href="code/classes-async/shapes/dune" />
 
 <link rel="import" href="code/classes-async/shapes/build_shapes.sh" />
 
@@ -565,6 +565,3 @@ graphics]{.idx}[external libraries/for graphics]{.idx}
 [js_of_ocaml](http://ocsigen.org/js_of_ocaml/api/Js)
 : Compiles OCaml code to JavaScript and has bindings to WebGL. This is the
   emerging standard for 3D rendering in web browsers.
-
-
-

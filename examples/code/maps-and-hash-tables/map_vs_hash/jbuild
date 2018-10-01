@@ -1,4 +1,0 @@
-(executable
-  ((name map_vs_hash)
-   (libraries (base core_bench))
-  ))

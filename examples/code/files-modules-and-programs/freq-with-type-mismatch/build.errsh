@@ -1,17 +1,13 @@
-  $ jbuilder build freq.bc
+  $ dune build freq.bc
         ocamlc .freq.eobjs/counter.{cmo,cmt} (exit 2)
-  (cd _build/default && /home/yminsky/.opam/fresh-4.06.1/bin/ocamlc.opt -w -40 -g -bin-annot -I .freq.eobjs -I /home/yminsky/.opam/fresh-4.06.1/lib/base -I /home/yminsky/.opam/fresh-4.06.1/lib/base/caml -I /home/yminsky/.opam/fresh-4.06.1/lib/base/shadow_stdlib -I /home/yminsky/.opam/fresh-4.06.1/lib/sexplib0 -I /home/yminsky/.opam/fresh-4.06.1/lib/stdio -no-alias-deps -o .freq.eobjs/counter.cmo -c -impl counter.ml)
+  ...
   File "counter.ml", line 1:
   Error: The implementation counter.ml
          does not match the interface .freq.eobjs/counter.cmi:
          Type declarations do not match:
-           type median =
-               Median of Base.string
-             | Before_and_after of Base.string * Base.string
+           type median = Median of string | Before_and_after of string * string
          is not included in
-           type median =
-               Before_and_after of Base.string * Base.string
-             | Median of Base.string
+           type median = Before_and_after of string * string | Median of string
          File "counter.mli", line 20, characters 0-84: Expected declaration
          File "counter.ml", line 18, characters 0-84: Actual declaration
          Fields number 1 have different names, Median and Before_and_after.

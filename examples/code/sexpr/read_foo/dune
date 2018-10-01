@@ -1,0 +1,4 @@
+(executable
+  (name       read_foo)
+  (libraries  core sexplib)
+  (preprocess (pps ppx_sexp_conv)))

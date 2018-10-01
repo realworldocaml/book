@@ -49,7 +49,7 @@ initialized to the empty list.
 With `build_counts` defined, we then call the function to build the
 association list, sort that list by frequency in descending order, grab the
 first 10 elements off the list, and then iterate over those 10 elements and
-print them to the screen. These operations are tied together using the 
+print them to the screen. These operations are tied together using the
 `|>` operator described in
 [Variables And Functions](variables-and-functions.html#prefix-and-infix-operators){data-type=xref}.
 [let ( ) declaration]{.idx}[main function]{.idx}
@@ -95,12 +95,12 @@ with -thread]{.idx}[-linkpkg]{.idx data-primary-sortas=linkpkg}
 
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for this task
-is `jbuilder`. To invoke `jbuilder`, you need to have a `jbuild` file that
-specifies the details of the build. [jbuilder]{.idx}
+is `dune`. To invoke `dune`, you need to have a `dune` file that
+specifies the details of the build. [dune]{.idx}
 
-<link rel="import" href="code/files-modules-and-programs/freq-obuild/jbuild" />
+<link rel="import" href="code/files-modules-and-programs/freq-obuild/dune" />
 
-With that in place, we can invoke `jbuilder` as follows.
+With that in place, we can invoke `dune` as follows.
 
 <link rel="import" href="code/files-modules-and-programs/freq-obuild/freq.sh" part=
 "build" />
@@ -109,7 +109,7 @@ We can run the resulting executable, `freq.bc`, from the command line. The
 following invocation extracts strings from the `ocamlopt` binary, reporting
 the most frequently occurring ones. Note that the specific results will vary
 from platform to platform, since the binary itself will differ between
-platforms. [OCaml toolchain/jbuilder]{.idx}[native-code compiler/vs. bytecode
+platforms. [OCaml toolchain/dune]{.idx}[native-code compiler/vs. bytecode
 compiler]{.idx}[bytecode compiler/vs. native-code compiler]{.idx}[OCaml
 toolchain/ocamlopt]{.idx}[OCaml toolchain/ocamlc]{.idx}[code
 compilers/bytecode vs. native
@@ -125,7 +125,7 @@ OCaml ships with two compilers: the `ocamlc` bytecode compiler and the
 `ocamlopt` native-code compiler. Programs compiled with `ocamlc` are
 interpreted by a virtual machine, while programs compiled with `ocamlopt` are
 compiled to native machine code to be run on a specific operating system and
-processor architecture. With `jbuilder`, targets ending with `.bc` are built
+processor architecture. With `dune`, targets ending with `.bc` are built
 as bytecode executables, and those ending with `.exe` are built as native
 code.
 
@@ -153,7 +153,7 @@ compilers in more detail in
 
 Source files in OCaml are tied into the module system, with each file
 compiling down into a module whose name is derived from the name of the file.
-We've encountered modules before, such as when we used functions like 
+We've encountered modules before, such as when we used functions like
 `find` and `add` from the `List.Assoc` module. At its simplest, you can think
 of a module as a collection of definitions that are stored within a
 namespace. [modules/basics of]{.idx}[files/multi-file
@@ -188,7 +188,7 @@ We can now rewrite `freq.ml` to use `Counter`.
 
 <link rel="import" href="code/files-modules-and-programs/freq-with-counter/freq.ml" />
 
-The resulting code can still be built with `jbuilder`, which will discover
+The resulting code can still be built with `dune`, which will discover
 dependencies and realize that `counter.ml` needs to be compiled.
 
 <link rel="import" href="code/files-modules-and-programs/freq-with-counter/build.sh" />
@@ -212,7 +212,7 @@ defined by a file `filename.ml` can be constrained by a signature placed in a
 file called `filename.mli`. [interfaces/synonyms for]{.idx}
 
 For `counter.mli`, we'll start by writing down an interface that describes
-what's currently available in `counter.ml`, without hiding anything. 
+what's currently available in `counter.ml`, without hiding anything.
 `val` declarations are used to specify values in a signature. The syntax of a
 `val` declaration is as follows:
 
@@ -222,7 +222,7 @@ Using this syntax, we can write the signature of `counter.ml` as follows.
 
 <link rel="import" href="code/files-modules-and-programs/freq-with-sig/counter.mli" />
 
-Note that `jbuilder` will detect the presence of the `mli` file automatically
+Note that `dune` will detect the presence of the `mli` file automatically
 and include it in the build.
 
 To hide the fact that frequency counts are represented as association lists,
@@ -401,16 +401,16 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
 
 - If you do need to do an open, it's better to do a *local open*. There are
   two syntaxes for local opens. For example, you can write:
-  
+
   <link rel="import" href="code/files-modules-and-programs/main.mlt" part=
   "1" />
-  
+
   Here, `of_int` and the infix operators are the ones from the `Int64`
   module.
-  
+
   There's another, even more lightweight syntax for local `open`s, which is
   particularly useful for small expressions:
-  
+
   <link rel="import" href="code/files-modules-and-programs/main.mlt" part=
   "2" />
 
@@ -420,12 +420,12 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
 
 - <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_1.ml" part=
   "1" />
-  
+
   you could write:
-  
+
   <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_2.ml" part=
   "1" />
-  
+
   Because the module name `C` only exists for a short scope, it's easy to
   read and remember what `C` stands for. Rebinding modules to very short
   names at the top level of your module is usually a mistake.
@@ -578,7 +578,7 @@ between files. We could create such a situation by adding a reference to
 <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/counter.ml" part=
 "1" />
 
-In this case, `jbuilder` will notice the error and complain explicitly about
+In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
 <link rel="import" href="code/files-modules-and-programs/freq-cyclic2/build.errsh" />
@@ -707,6 +707,3 @@ by working on the implementation. But types and signatures provide a
 lightweight tool for constructing a skeleton of your design in a way that
 helps clarify your goals and intent, before you spend a lot of time and
 effort fleshing it out.
-
-
-

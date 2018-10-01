@@ -290,7 +290,7 @@ need is a total order suitable for creating maps and sets with, then
 <aside data-type="sidebar">
 <h5>=, ==, and phys_equal</h5>
 
-If you come from a C/C++ background, you'll probably reflexively use 
+If you come from a C/C++ background, you'll probably reflexively use
 `==` to test two values for equality. In OCaml, the `==` operator tests for
 *physical* equality, while the `=` operator tests for *structural* equality.
 
@@ -526,7 +526,7 @@ structures:
 The results show the hash table version to be around four times faster than
 the map version:
 
-<link rel="import" href="code/maps-and-hash-tables/map_vs_hash/jbuild" />
+<link rel="import" href="code/maps-and-hash-tables/map_vs_hash/dune" />
 
 <link rel="import" href="code/maps-and-hash-tables/map_vs_hash/run_map_vs_hash.sh" />
 
@@ -555,7 +555,7 @@ take snapshots of the table:
 Unsurprisingly, maps perform far better than hash tables on this benchmark,
 in this case by more than a factor of 10:
 
-<link rel="import" href="code/maps-and-hash-tables/map_vs_hash2/jbuild" />
+<link rel="import" href="code/maps-and-hash-tables/map_vs_hash2/dune" />
 
 <link rel="import" href="code/maps-and-hash-tables/map_vs_hash2/run_map_vs_hash2.sh" />
 
@@ -568,5 +568,3 @@ structure or the other will depend on the details of the application.
 [phys_equal function]{.idx}[equal equal (= =) operator]{.idx}[equal (=)
 operator]{.idx}[structural equality]{.idx}[physical equality]{.idx}[equality,
 tests of]{.idx}
-
-

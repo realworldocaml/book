@@ -127,7 +127,7 @@ identify which version of the binary you are running in production. You'll
 need to install Cryptokit via `opam install cryptokit` before building this
 example. Once that's completed, run the following to compile the binary.
 
-<link rel="import" href="code/command-line-parsing/md5/jbuild" />
+<link rel="import" href="code/command-line-parsing/md5/dune" />
 
 <link rel="import" href="code/command-line-parsing/md5/md5.sh" part="build" />
 
@@ -357,7 +357,7 @@ Flag function | OCaml type
 `listed` *arg* | *arg* `list`, flag may appear multiple times
 `no_arg` | `bool` that is true if flag is present
 
-Table:  Flag functions 
+Table:  Flag functions
 :::
 
 
@@ -420,7 +420,7 @@ And that's all you really need to add subcommand support! Let's build the
 example first in the usual way and inspect the help output, which now
 reflects the subcommands we just added.
 
-<link rel="import" href="code/command-line-parsing/cal_add_sub_days/jbuild" />
+<link rel="import" href="code/command-line-parsing/cal_add_sub_days/dune" />
 
 <link rel="import" href="code/command-line-parsing/cal_add_sub_days/cal.sh" part=
 "build" />
@@ -583,5 +583,3 @@ The `Arg` module
   `getopt`-like interface. It also automates the generation of UNIX man pages
   as part of the specification. Cmdliner is the parser used by OPAM to manage
   its command line.
-
-

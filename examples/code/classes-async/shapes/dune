@@ -1,0 +1,4 @@
+(executable
+  (name      shapes)
+  (modules   shapes)
+  (libraries async_graphics))

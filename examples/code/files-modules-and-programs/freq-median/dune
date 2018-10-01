@@ -1,0 +1,3 @@
+(executables
+  (names     freq use_median_1 use_median_2)
+  (libraries base stdio))

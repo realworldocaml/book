@@ -310,7 +310,7 @@ Cohttp_async.Client.get;;
 
 [%%expect ocaml {|
 - : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async_ssl.Ssl_config.config ->
+    ?ssl_config:Conduit_async__V1.Conduit_async.Ssl.config ->
     ?headers:Cohttp__Header.t ->
     Uri.t -> (Cohttp__Response.t * Cohttp_async__Body.t) Deferred.t
 = <fun>

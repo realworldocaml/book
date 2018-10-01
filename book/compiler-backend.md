@@ -135,7 +135,7 @@ benchmarking]{.idx}
 Building and executing this example will run for around 30 seconds by
 default, and you'll see the results summarized in a neat table:
 
-<link rel="import" href="code/back-end/bench_patterns/jbuild" />
+<link rel="import" href="code/back-end/bench_patterns/dune" />
 
 <link rel="import" href="code/back-end/bench_patterns/run_bench_patterns.sh" />
 
@@ -463,7 +463,7 @@ again by writing a quick `Core_bench` test with both functions:
 
 Running this shows quite a significant runtime difference between the two:
 
-<link rel="import" href="code/back-end/bench_poly_and_mono/jbuild" />
+<link rel="import" href="code/back-end/bench_poly_and_mono/dune" />
 
 <link rel="import" href="code/back-end/bench_poly_and_mono/run_bench_poly_and_mono.sh" />
 
@@ -555,7 +555,7 @@ single-step through the execution:
 Compile and run this with debugging symbols. You should see the following
 output:
 
-<link rel="import" href="code/back-end/alternate_list/jbuild" />
+<link rel="import" href="code/back-end/alternate_list/dune" />
 
 <link rel="import" href="code/back-end/alternate_list/run_alternate_list.sh" />
 
