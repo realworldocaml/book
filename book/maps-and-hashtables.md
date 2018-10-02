@@ -418,12 +418,12 @@ underlying bucket, meaning you no longer get constant-time access at all.
 this case only leads to logarithmic time, rather than linear for a
 traditional implementation.
 
-The logarithmic behavior of Core's hash tables in the presence of hash
+The logarithmic behavior of Base's hash tables in the presence of hash
 collisions also helps protect against some denial-of-service attacks. One
 well-known type of attack is to send queries to a service with carefully
 chosen keys to cause many collisions. This, in combination with the linear
 behavior of most hashtables, can cause the service to become unresponsive due
-to high CPU load. Core's hash tables would be much less susceptible to such
+to high CPU load. Base's hash tables would be much less susceptible to such
 an attack because the amount of degradation would be far less. [security
 issues/denial-of-service attacks]{.idx}[denial-of-service attacks,
 avoiding]{.idx}
