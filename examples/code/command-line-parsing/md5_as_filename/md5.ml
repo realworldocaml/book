@@ -1,10 +1,11 @@
 open Core
 
-let do_hash file =
-  In_channel.with_file file ~f:(fun ic ->
+let do_hash hash_length filename =
+  In_channel.with_file filename ~f:(fun ic ->
     let open Cryptokit in
     hash_channel (Hash.md5 ()) ic
     |> transform_string (Hexa.encode ())
+    |> (fun s -> String.prefix s hash_length)
     |> print_endline
   )
 
@@ -14,8 +15,11 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open file = anon ("filename" %: file) in
-      fun () -> do_hash file)
+      let%map_open
+        hash_length = anon ("hash_length" %: int)
+      and filename  = anon ("filename" %: file)
+      in
+      fun () -> do_hash hash_length filename)
 
 [@@@part "2"];;
 
