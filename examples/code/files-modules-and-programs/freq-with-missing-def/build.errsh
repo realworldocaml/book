@@ -1,6 +1,6 @@
   $ dune build freq.bc
         ocamlc .freq.eobjs/counter.{cmo,cmt} (exit 2)
-  (cd _build/default && /home/christophe/.opam/rwo/bin/ocamlc.opt -w -40 -g -bin-annot -I .freq.eobjs -I /home/christophe/.opam/rwo/lib/base -I /home/christophe/.opam/rwo/lib/base/caml -I /home/christophe/.opam/rwo/lib/base/shadow_stdlib -I /home/christophe/.opam/rwo/lib/sexplib0 -I /home/christophe/.opam/rwo/lib/stdio -no-alias-deps -o .freq.eobjs/counter.cmo -c -impl counter.ml)
+  (cd _build/default && /home/christophe/.opam/rwo/bin/ocamlc.opt -w @a-4-29-40-41-42-44-45-48-58-59-60-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I .freq.eobjs -I /home/christophe/.opam/rwo/lib/base -I /home/christophe/.opam/rwo/lib/base/caml -I /home/christophe/.opam/rwo/lib/base/shadow_stdlib -I /home/christophe/.opam/rwo/lib/sexplib0 -I /home/christophe/.opam/rwo/lib/stdio -intf-suffix .ml -no-alias-deps -opaque -o .freq.eobjs/counter.cmo -c -impl counter.ml)
   File "counter.ml", line 1:
   Error: The implementation counter.ml
          does not match the interface .freq.eobjs/counter.cmi:

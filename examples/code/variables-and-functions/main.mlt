@@ -182,9 +182,8 @@ let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
 [@@@part "27"];;
 let (***) base exponent = (base **. exponent) **. exponent;;
 [%%expect{|
-Characters 17-18:
-Error: This expression has type int but an expression was expected of type
-         float
+Characters 27-31:
+Error: Unbound value base
 |}];;
 [@@@part "28"];;
 let ( *** ) base exponent = (base **. exponent) **. exponent;;
