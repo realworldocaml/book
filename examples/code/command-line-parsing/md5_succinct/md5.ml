@@ -12,7 +12,7 @@ let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    Command.Param.(
+    (Command.Param.(
      map (anon ("filename" %: string))
        ~f:(fun filename -> (fun () -> do_hash filename))))
 
