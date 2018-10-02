@@ -5,6 +5,7 @@
   { "name": "New York",
     "zips": [10004]
   }
+  $ dune build test.exe
   $ ./_build/default/test.exe test2.json
   sh: ./_build/default/test.exe: No such file or directory
 @@ exit 127
