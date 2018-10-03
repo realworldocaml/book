@@ -75,6 +75,7 @@ let dune_for_chapter base_dir file =
 (rule
   (targets %s)
   (deps    (:x ../book/%s)
+           (alias ../book/html)
            ../bin/bin/app.exe
            ../book/%s%s)
   (action  (run rwo-build build chapter -o . -code ../examples -repo-root .. %%{x})))|}
@@ -103,7 +104,7 @@ let frontpage_chapter ?(deps=[]) name =
   sprintf {|(alias (name site) (deps %s.html))
   (rule
     (targets %s.html)
-    (deps    ../book/%s.html ../bin/bin/app.exe %s)
+    (deps    (alias ../book/html) ../book/%s.html ../bin/bin/app.exe %s)
     (action  (run rwo-build build %s -o . -repo-root ..)))|}
     name name name
     (String.concat " " deps)
@@ -136,7 +137,7 @@ let process_chapters ~toc book_dir output_dir =
     ) |>
   List.filter ((<>)"") |>
   String.concat "\n\n" |> fun s ->
-  find_static_files () ^ s |>
+  find_static_files () ^ s  ^ "\n" |>
   emit_file (Filename.concat output_dir "dune")
 
 (** Handle examples *)
@@ -217,23 +218,34 @@ let process_examples dir =
   fun x ->  emit_file dune ("(ignored_subdirs (code))\n\n" ^ x)
 
 let process_md ~toc book_dir =
+  let html_alias =
+    let file f = (Filename.chop_extension f) ^ ".html" in
+    let part acc = function
+      | `part p    -> List.rev_append (List.rev_map file p.chapters) acc
+      | `chapter f -> file f :: acc
+    in
+    let toc = List.fold_left part [] toc in
+    let toc = List.sort String.compare toc in
+    let toc = String.concat "\n         " toc in
+    sprintf "(alias\n  (name html)\n  (deps %s))" toc
+  in
   files_with ~exts:[".md"] book_dir |>
   List.sort String.compare |>
   List.map (fun file ->
       if not (is_chapter toc file) then ""
       else
         let html = (Filename.remove_extension file) ^ ".html" in
-        sprintf {|
-(rule
+        sprintf {|(rule
  (targets %s)
  (deps    %s)
  (action  (run
-    pandoc --section-divs -f markdown-smart-auto_identifiers -t html5
-    %%{deps} -o %%{targets})))|}
+    mdx output %%{deps} -o %%{targets})))|}
           html file
     ) |>
   List.filter ((<>) "") |>
-  String.concat "\n" |>
+  (fun x -> html_alias :: x) |>
+  String.concat "\n\n" |>
+  (fun x -> x ^ "\n") |>
   emit_file (Filename.concat book_dir "dune")
 
 let _ =

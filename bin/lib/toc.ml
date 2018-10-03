@@ -139,7 +139,7 @@ end
 
 let of_toc book_dir toc =
   let chapter part_info number basename =
-    let file = book_dir/basename in
+    let file = book_dir/basename ^ ".html" in
     Html.of_file file >>| fun html ->
     let title = get_title file html in
     let sections = get_sections ~filename:file html in
