@@ -531,7 +531,7 @@ Let's build the OCaml type declaration first by calling `atdgen -t` on the
 specification file:
 
 <link rel="import" href="code/json/github_org_info/github_org.sh" part=
-"generate json" />
+"generate types" />
 
 The OCaml type has an obvious mapping to the ATD spec, but we still need the
 logic to convert JSON buffers to and from this type. Calling `atdgen -j` will
