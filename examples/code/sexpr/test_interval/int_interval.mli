@@ -1,5 +1,9 @@
-type t [@@deriving sexp]
+module Int_interval : sig
 
-val is_empty : t -> bool
-val create : int -> int -> t
-val contains : t -> int -> bool
+  type t [@@deriving sexp]
+
+  val is_empty : t -> bool
+  val create : int -> int -> t
+  val contains : t -> int -> bool
+
+end
