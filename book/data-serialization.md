@@ -222,23 +222,26 @@ exceptions.
 
 ## Preserving Invariants {#preserving-invariants}
 
-The most important functionality provided by Sexplib is the autogeneration of
-converters for new types. We've seen a bit of how this works already, but
-let's walk through a complete example. Here's the source for a simple library
-for representing integer intervals, very similar to the one described in
-[Functors](functors.html#functors){data-type=xref}:
+The most important functionality provided by Sexplib is the
+autogeneration of converters for new types. We've seen a bit of how
+this works already, but let's walk through a complete example. Here's
+the contents of a file `int_interval.ml`, which is a simple library
+for representing integer intervals, similar to the one described in
+[Functors](functors.html#functors){data-type=xref}.
 [s-expressions/preserving invariants in]{.idx}
 
 <link rel="import" href="code/sexpr/test_interval/int_interval.ml" />
 
-We can now use this module as follows:
+Because of the filename, the resulting module will be available under
+the name `Int_interval`. We can use this module as follows.
 
 <link rel="import" href="code/sexpr/test_interval/test_interval.ml" />
 
-But we're still missing something: we haven't created an `mli` signature for
-`Int_interval` yet. Note that we need to explicitly export the s-expression
-converters that were created within the `ml` file. For example, here's an
-interface that doesn't export the s-expression functions:
+But we're still missing something: we haven't created an `mli` to
+express the signature of `Int_interval` yet.  In doing so, we'll need
+to explicitly export the s-expression converters that were created
+within the `ml` file. For example, here's an interface that doesn't
+export the s-expression functions:
 
 <link rel="import" href="code/sexpr/int_interval_nosexp.mli" />
 
