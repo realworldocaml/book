@@ -85,13 +85,12 @@ library/finding with ocamlfind]{.idx}
 
 <link rel="import" href="code/files-modules-and-programs/freq/simple_build.sh" />
 
-This uses `ocamlfind`, a tool which itself invokes other parts of the OCaml
-toolchain (in this case, `ocamlc`) with the appropriate flags to link in
-particular libraries and packages. Here, `-package base` is asking
-`ocamlfind` to link in the `Base` library; `-linkpkg` asks ocamlfind to link
-in the packages as is necessary for building an executable, while `-thread`
-turns on threading support, which is required for Base. [threads/turning on
-with -thread]{.idx}[-linkpkg]{.idx data-primary-sortas=linkpkg}
+This uses `ocamlfind`, a tool which itself invokes other parts of the
+OCaml toolchain (in this case, `ocamlc`) with the appropriate flags to
+link in particular libraries and packages. Here, `-package base` is
+asking `ocamlfind` to link in the `Base` library; `-linkpkg` asks
+ocamlfind to link in the packages as is necessary for building an
+executable. [-linkpkg]{.idx data-primary-sortas=linkpkg}
 
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build. One good tool for this task
