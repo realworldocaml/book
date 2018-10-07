@@ -574,9 +574,9 @@ value containing a `Cohttp.Response.t` (which we ignore) and a pipe reader to
 which the body of the request will be written.
 
 In this case, the HTTP body probably isn't very large, so we call
-`Pipe.to_list` to collect the strings from the pipe as a single deferred list
-of strings. We then join those strings using `String.concat` and pass the
-result through our parsing function.
+`Cohttp_async.Body.to_string` to collect the data from the connection
+as a single deferred string, rather than consuming the data in a
+streaming fashion using a pipe.
 
 Running a single search isn't that interesting from a concurrency
 perspective, so let's write code for dispatching multiple searches in
