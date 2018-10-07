@@ -17,9 +17,7 @@ In_channel.read_all "test.txt";;
 
 [%%expect ocaml {|- : string = "This is only a test."|}];;
 [@@@part "3"];;
-#silent true;;
 #require "async";;
-#silent false;;
 open Async;;
 Reader.file_contents;;
 
@@ -303,9 +301,7 @@ Command.async_spec;;
 |}];;
 
 [@@@part "28"];;
-#silent true;;
 #require "cohttp.async";;
-#silent false;;
 Cohttp_async.Client.get;;
 
 [%%expect ocaml {|
