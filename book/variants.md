@@ -424,7 +424,7 @@ The type system will complain if it sees incompatible uses of the same tag:
 The `>` at the beginning of the variant types above is critical because it
 marks the types as being open to combination with other variant types. We can
 read the type `` [> `Float of float | `Int of int]`` as describing a
-variant whose tags include `` ``Float of float`` and `` `Int of int``, but
+variant whose tags include `` `Float of float`` and `` `Int of int``, but
 may include more tags as well. In other words, you can roughly translate
 `>` to mean: "these tags or more."
 
