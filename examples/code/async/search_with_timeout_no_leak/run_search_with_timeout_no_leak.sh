@@ -4,14 +4,7 @@
   concurrent programming
   ----------------------
 
-  "Concurrent computing is a form of computing in which several
-  computations are executed during overlapping time
-  periods—concurrently—instead of sequentially. This is a property
-  of a system—this may be an individual program, a computer, or a
-  network—and there is a separate execution point or \"thread of
-  control\" for each computation. A concurrent system is one where a
-  computation can advance without waiting for all other computations to
-  complete."
+  DuckDuckGo query failed: Timed out
 
   ocaml
   -----
