@@ -197,7 +197,7 @@ atomic values are strings, e.g.,
 responses]{.idx}
 
 In addition, we use the `ppx_sexp_conv` syntax extension which interprets the
-`[@@deriving_sexp]` annotation. When `ppx_sexp_conv` sees `[@@deriving sexp]`
+`[@@deriving sexp]` annotation. When `ppx_sexp_conv` sees `[@@deriving sexp]`
 attached to a signature, it replaces it with declarations of s-expression
 converters, for example:[sexp declaration]{.idx}
 
