@@ -1000,7 +1000,7 @@ h6 {
      text-transform: uppercase;
 }
  .toc-full a {
-     display: block;
+     display: table-cell;
 }
  .toc-full a:hover {
      color: #8e44ad;
@@ -1147,7 +1147,7 @@ h6 {
      border-bottom: 1px solid #dddddd;
 }
  .scroll-nav .scroll-nav__wrapper .scroll-nav__list .scroll-nav__item .scroll-nav__link {
-     display: block;
+     display: table-cell;
      padding: 0.875rem 1rem;
      line-height: 1.2;
      color: dimgray;
@@ -1180,7 +1180,7 @@ h6 {
      display: block;
 }
  .scroll-nav .scroll-nav__wrapper .scroll-nav__sub-list .scroll-nav__sub-item .scroll-nav__sub-link {
-     display: block;
+     display: table-cell;
      font-size: 80%;
      font-family: "proxima-nova", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
      padding-left: 1em;
