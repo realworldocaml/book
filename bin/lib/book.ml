@@ -192,7 +192,7 @@ let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
   in
   main_template ~title_bar:title_bar ~content ()
 
-let make_chapter_page ?code_dir repo_root chapters chapter_file
+let make_chapter_page chapters chapter_file
   : Html.t Deferred.t
   =
 
@@ -205,26 +205,14 @@ let make_chapter_page ?code_dir repo_root chapters chapter_file
     next_chapter_footer (Toc.get_next_chapter chapters chapter)
   in
 
-  let import_node_to_html scripts (i:Import.t) : Html.item Deferred.t =
-    (
-      match i.Import.alt with
-      | None -> return (Scripts.find_exn scripts ~filename:i.href ?part:i.part)
-      | Some alt ->
-        Reader.file_contents (repo_root/"book"/alt) >>| fun x ->
-        Scripts.exn_of_filename alt x
-    ) >>|
-    Scripts.script_part_to_html
-  in
-  let rec loop scripts html : Html.t Deferred.t =
+  let rec loop html : Html.t Deferred.t =
     (Deferred.List.map html ~f:(fun item ->
-      if Import.is_import_html item then
-        import_node_to_html scripts (ok_exn (Import.of_html item))
-      else if References.is_reference item then
+      if References.is_reference item then
         return (References.add_reference toc chapter_file item)
       else match item with
       | `Data _ -> return item
       | `Element {Html.name; attrs; childs} -> (
-        Deferred.List.map childs ~f:(fun x -> loop scripts [x])
+        Deferred.List.map childs ~f:(fun x -> loop [x])
         >>| List.concat
         >>| fun childs -> `Element {Html.name; attrs; childs}
       )
@@ -233,9 +221,7 @@ let make_chapter_page ?code_dir repo_root chapters chapter_file
   in
 
   Html.of_file chapter_file >>= fun html ->
-  Scripts.of_html ?code_dir ~filename:chapter_file html >>|
-  ok_exn >>= fun scripts ->
-  loop scripts html >>| fun content ->
+  loop html >>| fun content ->
   let content = Html.[
     div ~a:["class","left-column"] [
       a ~a:["href","toc.html"; "class","to-chapter"] [
@@ -269,7 +255,7 @@ type src = [
 | `Install
 ]
 
-let make ?(repo_root=".") ?(code_dir="examples") ~out_dir = function
+let make ?(repo_root=".") ~out_dir = function
   | `Frontpage -> (
     let base = "index.html" in
     let out_file = out_dir/base in
@@ -291,8 +277,7 @@ let make ?(repo_root=".") ?(code_dir="examples") ~out_dir = function
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
     Toc.get_chapters ~repo_root () >>= fun chapters ->
-    make_chapter_page ~code_dir
-      repo_root chapters in_file >>= fun html ->
+    make_chapter_page chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )

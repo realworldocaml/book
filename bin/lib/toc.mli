@@ -51,8 +51,5 @@ val get_sections : filename:string -> Html.t -> sections
 (** Useful for debugging. *)
 val flatten_sections : sections -> section list
 
-(** Return list of all files referenced in all import nodes. *)
-val imported_files : ?repo_root:string -> unit -> string list Deferred.t
-
 (** Return list of all files within the book/code directory. *)
 val code_files : ?repo_root:string -> unit -> string list Deferred.t

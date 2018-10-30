@@ -190,33 +190,6 @@ let sh_rule ~dir base =
     (alias "runtest"     "cram")
     (alias "runtest-all" "cram --non-deterministic")
 
-let process_example ~root dir =
-  let rdir =
-    if root = dir then "."
-    else
-      let rlen = String.length root + 1 in
-      String.sub dir rlen (String.length dir - rlen)
-  in
-  files_with ~exts:book_extensions dir |>
-  List.map (function
-      | f when Filename.extension f = ".mlt"   -> mlt_rule ~dir:rdir f
-      | f when Filename.extension f = ".sh"    -> sh_rule ~dir:rdir f
-      | f when Filename.extension f = ".errsh" -> sh_rule ~dir:rdir f
-      | f -> printf "skipping %s/%s\n%!" dir f; ""
-    ) |>
-  List.filter ((<>) "")
-
-let process_examples dir =
-  let dirs =
-    find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions dir
-  in
-  Filename.concat dir "dune" |> fun dune ->
-  List.map (process_example ~root:dir) dirs |>
-  List.flatten |>
-  List.sort_uniq String.compare |>
-  String.concat "\n" |>
-  fun x ->  emit_file dune ("(ignored_subdirs (code))\n\n" ^ x)
-
 let process_md ~toc book_dir =
   let html_alias =
     let file f = (Filename.chop_extension f) ^ ".html" in
@@ -251,5 +224,4 @@ let process_md ~toc book_dir =
 let _ =
   let toc = read_toc "book" in
   process_md ~toc "book";
-  process_examples "examples";
   process_chapters ~toc "book" "static";
