@@ -401,8 +401,7 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
 - If you do need to do an open, it's better to do a *local open*. There are
   two syntaxes for local opens. For example, you can write:
 
-  <link rel="import" href="code/files-modules-and-programs/main.mlt" part=
-  "1" />
+  <link rel="import" href="code/files-modules-and-programs/main.mlt" part="1" />
 
   Here, `of_int` and the infix operators are the ones from the `Int64`
   module.
@@ -410,20 +409,17 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
   There's another, even more lightweight syntax for local `open`s, which is
   particularly useful for small expressions:
 
-  <link rel="import" href="code/files-modules-and-programs/main.mlt" part=
-  "2" />
+  <link rel="import" href="code/files-modules-and-programs/main.mlt" part="2" />
 
 - An alternative to local `open`s that makes your code terser without giving
   up on explicitness is to locally rebind the name of a module. So, when
   using the `Counter.median` type, instead of writing:
 
-- <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_1.ml" part=
-  "1" />
+  <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_1.ml" part="1" />
 
   you could write:
 
-  <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_2.ml" part=
-  "1" />
+  <link rel="import" href="code/files-modules-and-programs/freq-median/use_median_2.ml" part="1" />
 
   Because the module name `C` only exists for a short scope, it's easy to
   read and remember what `C` stands for. Rebinding modules to very short

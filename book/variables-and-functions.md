@@ -630,10 +630,9 @@ Labeled arguments are useful in a few different cases:
   and a list of elements to call that function on. A common pattern is to
   partially apply `List.iter` by giving it just the function, as in the
   following example from earlier in the chapter.
-  
-  <link rel="import" href="code/variables-and-functions/main.mlt" part=
-  "43" />
-  
+
+  <link rel="import" href="code/variables-and-functions/main.mlt" part="43" />
+
   This requires that we put the function argument first. In other cases, you
   want to put the function argument second. One common reason is readability.
   In particular, a multiline function passed as an argument to another
