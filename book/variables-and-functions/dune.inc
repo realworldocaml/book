@@ -1,0 +1,20 @@
+(alias
+ (name   runtest)
+ (deps   (:x README.md)
+         (:y5 ../../examples/code/variables-and-functions/abs_diff.mli)
+         (:y4 ../../examples/code/variables-and-functions/htable_sig1.ml)
+         (:y3 ../../examples/code/variables-and-functions/htable_sig2.ml)
+         (:y2 ../../examples/code/variables-and-functions/numerical_deriv_alt_sig.mli)
+         (:y1 ../../examples/code/variables-and-functions/substring_sig1.ml)
+         (:y0 ../../examples/code/variables-and-functions/substring_sig2.ml)
+         prelude.ml
+         (package mdx))
+ (action (progn
+           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (diff? %{x} %{x}.corrected)
+           (diff? %{y5} %{y5}.corrected)
+           (diff? %{y4} %{y4}.corrected)
+           (diff? %{y3} %{y3}.corrected)
+           (diff? %{y2} %{y2}.corrected)
+           (diff? %{y1} %{y1}.corrected)
+           (diff? %{y0} %{y0}.corrected))))
