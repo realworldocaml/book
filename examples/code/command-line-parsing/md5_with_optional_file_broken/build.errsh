@@ -1,6 +1,0 @@
-  $ dune build md5.exe
-  ...
-  File "md5.ml", line 18, characters 24-32:
-  Error: This expression has type string option
-         but an expression was expected of type string
-@@ exit 1

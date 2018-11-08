@@ -1,4 +1,0 @@
-type <variant> =
-  | <Tag> [ of <type> [* <type>]... ]
-  | <Tag> [ of <type> [* <type>]... ]
-  | ...
