@@ -186,9 +186,13 @@ block
 code offset
 : Values that are relative to the starting code address
 
-The interpreter virtual machine only has seven registers in total: the
-program counter, stack pointer, accumulator, exception and argument pointers,
-and environment and global data. You can display the bytecode instructions in
+The interpreter virtual machine only has seven registers in total: 
+- program counter, 
+- stack, exception and argument pointers,
+- accumulator,
+- environment and global data.
+
+You can display the bytecode instructions in
 textual form via `-dinstr`. Try this on one of our earlier pattern-matching
 examples:
 
