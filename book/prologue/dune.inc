@@ -1,9 +1,7 @@
 (alias
  (name   runtest)
- (deps   (:x README.md)
-         ../prelude.ml
-         (package mdx))
+ (deps   (:x README.md))
  (action (progn
-           (run mdx test --prelude=../prelude.ml --direction=infer-timestamp %{x})
+           (run mdx test --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
 )))
