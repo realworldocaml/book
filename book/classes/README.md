@@ -131,7 +131,7 @@ be "too polymorphic": `init` could have some type `'b list`:
     method push hd =
       v <- hd :: v
   end
-Characters 0-191:
+Characters 0-215:
 Error: Some type variables are unbound in this type:
          class ['a] stack :
            'b list ->
@@ -420,10 +420,10 @@ use explicit modules for illustration, but the process is similar when we
 want to define a `.mli` file). In keeping with the usual style for modules,
 we define a type `'a t` to represent the type of our stacks:
 
-```ocaml file=../../examples/code/classes/class_types_stack.ml
+```ocaml skip
 module Stack = struct
   class ['a] stack init = object
-    ...    
+    ...
   end
 
   type 'a t = 'a stack
@@ -436,7 +436,7 @@ We have multiple choices in defining the module type, depending on how much
 of the implementation we want to expose. At one extreme, a maximally abstract
 signature would completely hide the class definitions:
 
-```ocaml file=../../examples/code/classes/class_types_stack.ml,part=1
+```ocaml skip
 module AbstractStack : sig
    type 'a t = < pop: 'a option; push: 'a -> unit >
 
@@ -455,9 +455,9 @@ simple. A class type specifies the type of each of the visible parts of the
 class, including both fields and methods. Just as with module types, you
 don't have to give a type for everything; anything you omit will be hidden:
 
-```ocaml file=../../examples/code/classes/class_types_stack.ml,part=2
+```ocaml skip
 module VisibleStack : sig
-  
+
   type 'a t = < pop: 'a option; push: 'a -> unit >
 
   class ['a] stack : object
@@ -491,7 +491,7 @@ For example, consider writing recursive functions over a simple document
 format. This format is represented as a tree with three different types of
 node:
 
-```ocaml file=../../examples/code/classes/doc.ml
+```ocaml env=doc
 type doc =
   | Heading of string
   | Paragraph of text_item list
@@ -503,7 +503,7 @@ and text_item =
   | Enumerate of int list_item list
   | Quote of doc
 
-and 'a list_item = 
+and 'a list_item =
   { tag: 'a;
     text: text_item list }
 ```
@@ -516,7 +516,7 @@ avoid repetitive boilerplate?
 The simplest way is to use classes and open recursion. For example, the
 following class defines objects that fold over the document data:
 
-```ocaml file=../../examples/code/classes/doc.ml,part=1
+```ocaml env=doc
 open Core
 
 class ['a] folder = object(self)
@@ -525,7 +525,7 @@ class ['a] folder = object(self)
   | Paragraph text -> List.fold ~f:self#text_item ~init:acc text
   | Definition list -> List.fold ~f:self#list_item ~init:acc list
 
-  method list_item: 'b. 'a -> 'b list_item -> 'a = 
+  method list_item: 'b. 'a -> 'b list_item -> 'a =
     fun acc {tag; text} ->
       List.fold ~f:self#text_item ~init:acc text
 
@@ -544,7 +544,7 @@ By inheriting from this class, we can create functions that fold over the
 document data. For example, the `count_doc` function counts the number of
 bold tags in the document that are not within a list:
 
-```ocaml file=../../examples/code/classes/doc.ml,part=2
+```ocaml env=doc
 class counter = object
   inherit [int] folder as super
 
@@ -576,7 +576,7 @@ handling each of the different cases in `doc` and `text_item`. However, we
 may not want to force subclasses of `folder` to expose these methods, as they
 probably shouldn't be called directly:
 
-```ocaml file=../../examples/code/classes/doc.ml,part=3
+```ocaml env=doc
 class ['a] folder2 = object(self)
   method doc acc = function
   | Heading str -> self#heading acc str
@@ -600,9 +600,9 @@ class ['a] folder2 = object(self)
     List.fold ~f:self#list_item ~init:acc list
 
   method private raw acc str = acc
-  method private bold acc text = 
+  method private bold acc text =
     List.fold ~f:self#text_item ~init:acc text
-  method private enumerate acc list = 
+  method private enumerate acc list =
     List.fold ~f:self#list_item ~init:acc list
   method private quote acc doc = self#doc acc doc
 end
@@ -621,13 +621,13 @@ of the object type. This means, for example, that the object `f` has no
 method `bold`. However, the private methods are available to subclasses: we
 can use them to simplify our `counter` class:
 
-```ocaml file=../../examples/code/classes/doc.ml,part=4
+```ocaml env=doc
 class counter_with_private_method = object
   inherit [int] folder2 as super
 
   method list_item acc li = acc
 
-  method private bold acc txt = 
+  method private bold acc txt =
     let acc = super#bold acc txt in
     acc + 1
 end
@@ -640,7 +640,7 @@ class type that omits the method. In the following code, the private methods
 are explicitly omitted from the class type of `counter_with_sig` and can't be
 invoked in subclasses of `counter_with_sig`:
 
-```ocaml file=../../examples/code/classes/doc.ml,part=5
+```ocaml env=doc
 class counter_with_sig : object
   method doc : int -> doc -> int
   method list_item : int -> 'b list_item -> int
@@ -650,7 +650,7 @@ end = object
 
   method list_item acc li = acc
 
-  method private bold acc txt = 
+  method private bold acc txt =
     let acc = super#bold acc txt in
     acc + 1
 end
@@ -775,7 +775,7 @@ The binary method `equals` is now implemented in terms of the concrete type
 `shape_repr`. When using this pattern, you will not be able to hide the
 `repr` method, but you can hide the type definition using the module system:
 
-```ocaml file=../../examples/code/classes/binary_module.ml
+```ocaml skip
 module Shapes : sig
   type shape_repr
   type shape =
@@ -789,9 +789,9 @@ module Shapes : sig
       method equals : shape -> bool
     end
 end = struct
-  type shape_repr = 
-  | Square of int 
-  | Circle of int 
+  type shape_repr =
+  | Square of int
+  | Circle of int
   ...
 end
 ```
@@ -807,11 +807,11 @@ access to all the information of the other object. Many other binary methods
 need only partial information about the object. For instance, a method that
 compares shapes by their sizes:
 
-```ocaml file=../../examples/code/classes/binary_larger.ml
-class square w = object(self) 
+```ocaml skip
+class square w = object(self)
   method width = w
   method area = Float.of_int (self#width * self#width)
-  method larger other = self#area > other#area
+  method larger other = Float.(self#area > other#area)
 end
 ```
 
@@ -1309,4 +1309,3 @@ graphics]{.idx}[external libraries/for graphics]{.idx}
 [js_of_ocaml](http://ocsigen.org/js_of_ocaml/api/Js)
 : Compiles OCaml code to JavaScript and has bindings to WebGL. This is the
   emerging standard for 3D rendering in web browsers.
-

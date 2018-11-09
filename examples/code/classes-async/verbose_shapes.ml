@@ -1,6 +1,5 @@
+;; [@@@part "1"] ;;
 
-
-[@@@part "1"];;
 class square w x y = object(self)
   val mutable x: int = x
   method x = x
@@ -24,8 +23,10 @@ class square w x y = object(self)
            f ev.mouse_x ev.mouse_y)
 end
 
+;;
 
-[@@@part "2"];;
+;; [@@@part "2"] ;;
+
 class circle r x y = object(self)
   val mutable x: int = x
   method x = x
