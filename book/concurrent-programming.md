@@ -308,8 +308,8 @@ condition, the loop is ended. The deferred returned by a call to
 [end-of-file condition]{.idx}
 
 One important aspect of how this is written is that it uses *pushback*, which
-is to say that if the writer can't make progress writing, the reader will
-stop reading. If you don't implement pushback in your servers, then a stopped
+is to say that if the reader can't make progress reading, the writer will
+stop writing. If you don't implement pushback in your servers, then a stopped
 client can cause your program to leak memory, since you'll need to allocate
 space for the data that's been read in but not yet written out.
 [pushback]{.idx}
