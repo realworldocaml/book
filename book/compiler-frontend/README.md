@@ -312,7 +312,7 @@ Here's a sample of some source code that's been annotated with `ocamldoc`
 comments:
 
 ```ocaml file=../../examples/code/front-end/doc.ml
-(** example.ml: The first special comment of the file is the comment 
+(** example.ml: The first special comment of the file is the comment
     associated with the whole module. *)
 
 (** Comment for exception My_exception. *)
@@ -434,6 +434,7 @@ definition:
 $ ocamlfind ocamlc -c type_conv_example.ml
 File "type_conv_example.ml", line 1, characters 5-16:
 Error: Unbound module Sexplib
+Hint: Did you mean Stdlib?
 [2]
 ```
 
@@ -513,8 +514,8 @@ Let's see how `comparelib` solves this problem by running it in `utop`:
 # type t = { foo: string; bar : t }
 type t = { foo : string; bar : t; }
 # type t = { foo: string; bar: t } [@@deriving compare]
-Characters 16-22:
-Error: Unbound value compare_string
+type t = { foo : string; bar : t; }
+val compare : t -> t -> int = <fun>
 ```
 
 The first definition of `t` is a standard OCaml phrase and results in the
@@ -577,9 +578,6 @@ let rec compare =
           | 0 -> compare a__001_.bar b__002_.bar
           | n -> n) : t -> t -> int)
 let _ = compare
-File "comparelib_test.ml", line 1:
-Error: Could not find the .cmi file for interface comparelib_test.mli.
-[2]
 ```
 
 The output contains the original type definition accompanied by some
@@ -1217,7 +1215,7 @@ corruption and crashes.
 OCaml guards against this by recording a MD5 checksum in every `cmi`. Let's
 examine our earlier `typedef.ml` more closely:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,non-deterministic
 $ ocamlc -c typedef.ml
 $ ocamlobjinfo typedef.cmi
 File typedef.cmi
@@ -1312,7 +1310,7 @@ examining the imported interfaces in `Test` and confirming that neither
 `A` nor `B` are mentioned in there and that only the packed `X` module is
 used:
 
-```sh dir=../../examples/code/packing
+```sh dir=../../examples/code/packing,non-deterministic
 $ corebuild test.inferred.mli test.cmi
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules test.ml > test.ml.depends
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules A.ml > A.ml.depends
@@ -1437,7 +1435,7 @@ One such command-line tool to display autocompletion information in your
 editor is `ocp-index`. Install it via OPAM as
 follows:[autocompletion]{.idx}[ocp-index]{.idx}
 
-```
+```sh skip
 $ opam install ocp-index
 $ ocp-index
 ```
@@ -1448,15 +1446,15 @@ This module defined bindings for the Ncurses library. First, compile the
 interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
 files, and then run `ocp-index` in completion mode:
 
-```sh dir=../../examples/code/ocp-index
-$ (cd ../ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
+```sh dir=../../examples/code,source-tree=../../examples/code/ffi
+$ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
 ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
-$ ocp-index complete -I ../ffi Ncur
+$ ocp-index complete -I ffi Ncur
 Ncurses module
-$ ocp-index complete -I ../ffi Ncurses.a
+$ ocp-index complete -I ffi Ncurses.a
 Ncurses.addstr val string -> unit
-$ ocp-index complete -I ../ffi Ncurses.
+$ ocp-index complete -I ffi Ncurses.
 Ncurses.window val window Ctypes.typ
 Ncurses.initscr val unit -> window
 Ncurses.endwin val unit -> unit
@@ -1603,4 +1601,3 @@ files with common editors such as Emacs or Vim. The best of these is
 autocompletion, displays inferred types and can build and display errors
 directly from within your editor. There are instructions available on its
 homepage for configuring Merlin with your favorite editor.
-
