@@ -3,6 +3,7 @@
 
 (alias
  (name   runtest)
+ (deps   README.md)
  (action (diff dune.inc dune.gen)))
 
 (include dune.inc)
