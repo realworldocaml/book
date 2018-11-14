@@ -85,7 +85,7 @@ and exceptions:
 
 ```ocaml env=to_from_sexp
 # Int.sexp_of_t 3
-- : Sexplib0.Sexp.t = 3
+- : Sexp.t = 3
 # String.sexp_of_t "hello"
 - : Sexp.t = hello
 # Exn.sexp_of_t (Invalid_argument "foo")
@@ -197,8 +197,8 @@ in]{.idx}[syntax extension/in Sexplib package]{.idx}
 ```ocaml env=auto_making_sexp
 # type t = { foo: int; bar: float } [@@deriving sexp]
 type t = { foo : int; bar : float; }
-val t_of_sexp : Sexplib0.Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexplib0.Sexp.t = <fun>
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 # t_of_sexp (Sexp.of_string "((bar 35) (foo 3))")
 - : t = {foo = 3; bar = 35.}
 ```
@@ -292,7 +292,7 @@ of]{.idx}
 can be loaded using Sexplib. As you can see, the commented data is not part
 of the resulting s-expression:
 
-```ocaml env=example_load
+```ocaml env=example_load,dir=../../examples/code/sexpr
 # Sexp.load_sexp "example.scm"
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 ```
@@ -326,7 +326,7 @@ The following example shows all of these in action:
 
 Again, loading the file as an s-expression drops the comments:
 
-```ocaml env=example_load
+```ocaml env=example_load,dir=../../examples/code/sexpr
 # Sexp.load_sexp "comment_heavy.scm"
 - : Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
@@ -335,7 +335,7 @@ If we introduce an error into our s-expression, by, say, creating a file
 `broken_example.scm` which is `example.scm`, without open-paren in front of
 `bar`, we'll get a parse error:
 
-```ocaml env=example_load
+```ocaml env=example_load,dir=../../examples/code/sexpr
 # Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm"))
 Uncaught exception:
@@ -552,10 +552,10 @@ with s-expressions]{.idx}[s-expressions/deserializing a type from]{.idx}
 ```ocaml file=../../examples/code/sexpr/read_foo/read_foo.ml
 open Core
 
-type t = { 
+type t = {
   a: string;
   b: int;
-  c: float option 
+  c: float option
 } [@@deriving sexp]
 
 let run () =
@@ -615,10 +615,10 @@ message greatly:
 ```ocaml file=../../examples/code/sexpr/read_foo_better_errors/read_foo_better_errors.ml
 open Core
 
-type t = { 
+type t = {
   a: string;
   b: int;
-  c: float option 
+  c: float option
 } [@@deriving sexp]
 
 let run () =
@@ -694,8 +694,8 @@ the other data structure without an error.
 ```ocaml env=sexp_opaque
 # type t = { a: no_converter sexp_opaque; b: string } [@@deriving sexp]
 type t = { a : no_converter; b : string; }
-val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t = <fun>
-val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t = <fun>
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 ```
 
 And if we now convert a value of this type to an s-expression, we'll see the
@@ -755,10 +755,8 @@ package/sexp_list]{.idx}
     | Specific of string list
   | All [@@deriving sexp]
 type compatible_versions = Specific of string list | All
-val compatible_versions_of_sexp : Sexplib0.Sexp.t -> compatible_versions =
-  <fun>
-val sexp_of_compatible_versions : compatible_versions -> Sexplib0.Sexp.t =
-  <fun>
+val compatible_versions_of_sexp : Sexp.t -> compatible_versions = <fun>
+val sexp_of_compatible_versions : compatible_versions -> Sexp.t = <fun>
 # sexp_of_compatible_versions
   (Specific ["3.12.0"; "3.12.1"; "3.13.0"])
 - : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
@@ -791,8 +789,8 @@ package/sexp_option]{.idx}
 ```ocaml env=sexp_option
 # type t = { a: int option; b: string } [@@deriving sexp]
 type t = { a : int option; b : string; }
-val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t = <fun>
-val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t = <fun>
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 # sexp_of_t { a = None; b = "hello" }
 - : Sexp.t = ((a ()) (b hello))
 # sexp_of_t { a = Some 3; b = "hello" }
@@ -832,10 +830,8 @@ simple web server:
     addr: string;
   } [@@deriving sexp]
 type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp :
-  Ppx_sexp_conv_lib.Sexp.t -> http_server_config = <fun>
-val sexp_of_http_server_config :
-  http_server_config -> Ppx_sexp_conv_lib.Sexp.t = <fun>
+val http_server_config_of_sexp : Sexp.t -> http_server_config = <fun>
+val sexp_of_http_server_config : http_server_config -> Sexp.t = <fun>
 ```
 
 One could imagine making some of these parameters optional; in particular, by
@@ -911,4 +907,3 @@ you make that field optional, then you should still be able to parse older
 version of your config.
 <a data-type="indexterm" data-startref="SERFORMsexp">&nbsp;</a>[files/config
 files]{.idx}[config file formats]{.idx}
-
