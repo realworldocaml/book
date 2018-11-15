@@ -1,8 +1,14 @@
 (rule (with-stdout-to dune.gen
-  (run mdx rule --direction=to-ml README.md --prelude ../prelude.ml)))
+  (run mdx rule --direction=to-ml README.md
+                --prelude=prelude.ml
+                --prelude=memo:memo.ml
+                --prelude=fib:fib.ml
+                --prelude=letrec:letrec.ml
+                --prelude=value_restriction:letrec.ml)))
 
 (alias
  (name   runtest)
+ (deps   README.md)
  (action (diff dune.inc dune.gen)))
 
 (include dune.inc)

@@ -266,7 +266,7 @@ elements. We'll discuss several of them in this section.
 
 #### Ordinary arrays
 
-The `array` type is used for general-purpose polymorphic arrays. The 
+The `array` type is used for general-purpose polymorphic arrays. The
 `Array` module has a variety of utility functions for interacting with
 arrays, including a number of mutating operations. These include `Array.set`,
 for setting an individual element, and `Array.blit`, for efficiently copying
@@ -327,7 +327,7 @@ Bigarrays too have their own getting and setting syntax: [bigarrays]{.idx}
 ### Mutable Record and Object Fields and Ref Cells
 
 As we've seen, records are immutable by default, but individual record fields
-can be declared as mutable. These mutable fields can be set using the 
+can be declared as mutable. These mutable fields can be set using the
 `<-` operator, i.e., `record.field <- expr`. [fields/mutability of]{.idx}
 
 As we'll see in [Objects](objects.html#objects){data-type=xref}, fields of
@@ -367,7 +367,7 @@ You can see these in action:
 
 ```ocaml env=ref
 # let x = ref 1
-val x : int ref = {contents = 1}
+val x : int Caml.ref = {Base.Ref.contents = 1}
 # !x
 - : int = 1
 # x := !x + 1
@@ -759,8 +759,8 @@ computation of an expression: [thunks]{.idx}
 ```ocaml env=lazy
 # let create_lazy f = ref (Delayed f)
 val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
-# let v = 
-    create_lazy (fun () -> 
+# let v =
+    create_lazy (fun () ->
   print_endline "performing lazy computation"; Float.sqrt 16.)
 val v : float lazy_state ref = {Base.Ref.contents = Delayed <fun>}
 ```
@@ -895,13 +895,13 @@ see this by writing a small timing function, using the `Mtime` package.
     let x = f () in
     let stop = Time.now () in
     printf "Time: %F ms\n" (Time.diff stop start |> Time.Span.to_ms);
-    x 
+    x
 val time : (unit -> 'a) -> 'a = <fun>
 ```
 
 And now we can use this to try out some examples:
 
-```ocaml env=memo
+```ocaml env=memo,non-deterministic=command
 # time (fun () -> edit_distance "OCaml" "ocaml")
 Time: 1.10292434692 ms
 - : int = 2
@@ -937,7 +937,7 @@ This is, however, exponentially slow, for the same reason that
 `edit_distance` was slow: we end up making many redundant calls to `fib`. It
 shows up quite dramatically in the performance:
 
-```ocaml env=fib
+```ocaml env=fib,non-deterministic=command
 # time (fun () -> fib 20)
 Time: 1.12414360046 ms
 - : int = 10946
@@ -954,7 +954,7 @@ need to insert the memoization before the recursive calls within `fib`. We
 can't just define `fib` in the ordinary way and memoize it after the fact and
 expect the first call to `fib` to be improved.
 
-```ocaml env=fib
+```ocaml env=fib,non-deterministic=command
 # let fib = memoize fib
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
@@ -1029,7 +1029,7 @@ using a `let rec`, which for reasons we'll describe later wouldn't work here.
 
 Using `memo_rec`, we can now build an efficient version of `fib`:
 
-```ocaml env=fib
+```ocaml env=fib,non-deterministic=command
 # let fib = memo_rec fib_norec
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
@@ -1091,7 +1091,7 @@ This new version of `edit_distance` is much more efficient than the one we
 started with; the following call is many thousands of times faster than it
 was without memoization:
 
-```ocaml env=memo
+```ocaml env=memo,non-deterministic=command
 # time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"))
 Time: 0.348091125488 ms
 - : int = 2
@@ -1108,7 +1108,7 @@ just that: [let rec]{.idx}
 # let memo_rec f_norec =
     let rec f = memoize (fun x -> f_norec f x) in
     f
-Characters 37-67:
+Characters 39-69:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
@@ -1154,7 +1154,7 @@ But we can also create useful recursive definitions with `lazy`. In
 particular, we can use laziness to make our definition of `memo_rec` work
 without explicit mutation:
 
-```ocaml env=letrec
+```ocaml env=letrec,non-deterministic=command
 # let lazy_memo_rec f_norec x =
     let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
     (force f) x
@@ -1282,7 +1282,7 @@ the explicit flush is nonetheless good practice.
 
 Generating output with functions like `Out_channel.output_string` is simple
 and easy to understand, but can be a bit verbose. OCaml also supports
-formatted output using the `printf` function, which is modeled after 
+formatted output using the `printf` function, which is modeled after
 `printf` in the C standard library. `printf` takes a *format string* that
 describes what to print and how to format it, as well as arguments to be
 printed, as determined by the formatting directives embedded in the format
@@ -1384,7 +1384,7 @@ let () =
     printf "The time in %s is %s.\n%!" (Time.Zone.to_string zone) time_string
 ```
 
-In the preceding example, we've used only two formatting directives: 
+In the preceding example, we've used only two formatting directives:
 `%s`, for including a string, and `%!` which causes `printf` to flush the
 channel.
 
@@ -1457,12 +1457,11 @@ Exception: (Failure "Int.of_string: \"##\"").
 And if we do this over and over in a loop, we'll eventually run out of file
 descriptors:
 
-```ocaml env=file
+```ocaml skip
 # for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done
 - : unit = ()
 # sum_file "numbers.txt"
-File "file.topscript", line 1:
-Error: I/O error: /var/folders/z3/7h_5sgf933952482gktqg_gh0000gn/T/camlppxc637c7: Too many open files
+Error: I/O error: ...: Too many open files
 ```
 
 And now, you'll need to restart your toplevel if you want to open any more
@@ -1725,7 +1724,7 @@ happens if we try to memoize the function defined previously.
 
 ```ocaml env=value_restriction
 # memoize (fun x -> [x;x])
-- : '_weak1 -> '_weak1 list = <fun>
+- : '_weak2 -> '_weak2 list = <fun>
 ```
 
 The memoized version of the function does in fact need to be restricted to a
@@ -1736,7 +1735,7 @@ Consider this example:
 
 ```ocaml env=value_restriction
 # identity (fun x -> [x;x])
-- : '_weak2 -> '_weak2 list = <fun>
+- : '_weak3 -> '_weak3 list = <fun>
 ```
 
 It would be safe to infer a fully polymorphic variable here, but because
@@ -1782,7 +1781,7 @@ follows:
 
 ```ocaml env=value_restriction
 # let list_init_10 = List.init 10
-val list_init_10 : f:(int -> '_weak3) -> '_weak3 list = <fun>
+val list_init_10 : f:(int -> '_weak4) -> '_weak4 list = <fun>
 ```
 
 As you can see, we now infer a weakly polymorphic type for the resulting
@@ -1817,7 +1816,7 @@ value into a weakly polymorphic one:
 
 ```ocaml env=value_restriction
 # identity (fun x -> [x;x])
-- : '_weak4 -> '_weak4 list = <fun>
+- : '_weak5 -> '_weak5 list = <fun>
 ```
 
 But that's not always the case. When the type of the returned value is
@@ -1835,7 +1834,7 @@ weakly polymorphic:
 # [||]
 - : 'a array = [||]
 # identity [||]
-- : '_weak5 array = [||]
+- : '_weak6 array = [||]
 ```
 
 A more important example of this comes up when defining abstract data types.
@@ -1886,7 +1885,7 @@ mutable:
 # Concat_list.empty
 - : 'a Concat_list.t = <abstr>
 # identity Concat_list.empty
-- : '_weak6 Concat_list.t = <abstr>
+- : '_weak7 Concat_list.t = <abstr>
 ```
 
 The issue here is that the signature, by virtue of being abstract, has
@@ -1974,4 +1973,3 @@ fundamental part of building any serious application, and that if you want to
 be an effective OCaml programmer, you need to understand OCaml's approach to
 imperative
 programming.<a data-type="indexterm" data-startref="PROGimper">&nbsp;</a>
-
