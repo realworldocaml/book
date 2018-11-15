@@ -465,7 +465,7 @@ module List_dir :
 Again, we can create an instance of this query handler and interact with it
 directly:
 
-```ocaml env=query_handler
+```ocaml env=query_handler,non-deterministic
 # let list_dir = List_dir.create "/var"
 val list_dir : List_dir.t = {List_dir.cwd = "/var"}
 # List_dir.eval list_dir (sexp_of_string ".")
@@ -560,7 +560,7 @@ instances and constructs a dispatch table from it:
     table
 val build_dispatch_table :
   (module Query_handler_instance) list ->
-  (string, (module Query_handler_instance)) Hashtbl.t = <fun>
+  (string, (module Query_handler_instance)) Core_kernel.Hashtbl.t = <fun>
 ```
 
 Now, we need a function that dispatches to a handler using a dispatch table:
@@ -579,7 +579,7 @@ Now, we need a function that dispatches to a handler using a dispatch table:
     | _ ->
       Or_error.error_string "malformed query"
 val dispatch :
-  (string, (module Query_handler_instance)) Hashtbl.t ->
+  (string, (module Query_handler_instance)) Core_kernel.Hashtbl.t ->
   Sexp.t -> Sexp.t Or_error.t = <fun>
 ```
 
@@ -621,7 +621,9 @@ interface:
     | `Continue msg ->
       printf "%s\n%!" msg;
       cli dispatch_table
-val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>
+val cli :
+  (string, (module Query_handler_instance)) Core_kernel.Hashtbl.t -> unit =
+  <fun>
 ```
 
 We can most effectively run this command-line interface from a standalone
@@ -635,8 +637,8 @@ let () =
 
 Here's an example of a session with this program:
 
-```ocaml
-$ ./query_handler.byte 
+```sh skip
+$ dune exec ./query_handler.exe
 >>> (unique ())
 0
 >>> (unique ())
@@ -897,4 +899,3 @@ functionality you need to hide away behind a set of closures, and the more
 complicated the relationships between the different types in question, the
 more awkward this approach becomes, and the better it is to use first-class
 modules. <a data-type="indexterm" data-startref="MODfirst">&nbsp;</a>
-
