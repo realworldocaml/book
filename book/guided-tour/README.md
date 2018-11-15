@@ -184,7 +184,7 @@ functions]{.idx}[functions/with multiple arguments]{.idx}
     Float.of_int x /. Float.of_int y
 val ratio : int -> int -> float = <fun>
 # ratio 4 7
-- : float = 0.5714285714285714
+- : float = 0.571428571428571397
 ```
 
 The preceding example also happens to be our first use of modules. Here,
@@ -419,7 +419,7 @@ val is_a_multiple : int -> int -> bool = <fun>
 - : bool = true
 # is_a_multiple 8 0
 Exception:
-(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive").
+Invalid_argument "8 % 0 in core_int.ml: modulus should be positive".
 ```
 
 The distinction here is that type errors will stop you whether or not the
@@ -635,7 +635,7 @@ matching]{.idx}
 ```ocaml env=main
 # let my_favorite_language (my_favorite :: the_rest) =
     my_favorite
-Characters 25-66:
+Characters 25-68:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -660,7 +660,7 @@ on empty ones:
 # my_favorite_language ["English";"Spanish";"French"]
 - : string = "English"
 # my_favorite_language []
-Exception: "Match_failure //toplevel//:2:25".
+Exception: Match_failure ("//toplevel//", 1, 26).
 ```
 
 You can avoid these warnings, and more importantly make sure that your code
@@ -757,7 +757,7 @@ for removing sequential duplicates:
     | first :: second :: tl ->
       if first = second then remove_sequential_duplicates (second :: tl)
       else first :: remove_sequential_duplicates (second :: tl)
-Characters 46-236:
+Characters 48-246:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -1159,9 +1159,9 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x)
 - : unit = ()
 # mean rsum
-- : float = 1.3333333333333333
+- : float = 1.33333333333333326
 # stdev rsum
-- : float = 3.944053188733077
+- : float = 3.94405318873307698
 ```
 
 It's worth noting that the preceding algorithm is numerically naive and has
@@ -1317,7 +1317,7 @@ error by rewriting the function to avoid the short-circuiting:
     if !pos = Array.length array then None else Some !pos
 val find_first_negative_entry : int array -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|]
-Exception: (Invalid_argument "index out of bounds").
+Exception: Invalid_argument "index out of bounds".
 ```
 
 The or operator, `||`, short-circuits in a similar way to `&&`.

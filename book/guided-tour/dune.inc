@@ -3,8 +3,8 @@
  (deps   (:x README.md)
          (:y1 ../../examples/code/guided-tour/recursion.ml)
          (:y0 ../../examples/code/guided-tour/sum/sum.ml)
-         prelude.ml
-         (package mdx))
+         (source_tree ../../examples/code/guided-tour/sum)
+         prelude.ml)
  (action (progn
            (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
