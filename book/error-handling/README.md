@@ -73,8 +73,9 @@ to find a key in one table isn't a failure of any sort:
       | Some data' when data' <> data -> key :: mismatches
       | _ -> mismatches
     )
-val find_mismatches : ('a, int) Hashtbl.t -> ('a, int) Hashtbl.t -> 'a list =
-  <fun>
+val find_mismatches :
+  ('a, int) Core_kernel.Hashtbl.t ->
+  ('a, int) Core_kernel.Hashtbl.t -> 'a list = <fun>
 ```
 
 The use of options to encode errors underlines the fact that it's not clear
@@ -537,7 +538,7 @@ the `assert`:
     loop xs ys
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
 # merge_lists [1;2;3] [-1] ~f:(+)
-Exception: "Assert_failure //toplevel//:7:11".
+Exception: "Assert_failure //toplevel//:6:14".
 ```
 
 This shows what's special about `assert`: it captures the line number and
@@ -720,7 +721,7 @@ exception-free function from Base, `List.Assoc.find`, instead:
   | Some data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) ->
-  (string, 'a) Base__List.Assoc.t -> string -> float = <fun>
+  (string, 'a) Base.List.Assoc.t -> string -> float = <fun>
 ```
 
 ### Backtraces
@@ -925,9 +926,9 @@ write:
 ```ocaml env=main
 # let find alist key =
   Or_error.try_with (fun () -> find_exn alist key)
-val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
+val find : (string * 'a) list -> string -> 'a Base.Or_error.t = <fun>
 # find ["a",1; "b",2] "c"
-- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
+- : int Base.Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 ```
 
 And then we can reraise that exception:
