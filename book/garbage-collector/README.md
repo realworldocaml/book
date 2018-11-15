@@ -150,7 +150,7 @@ the `Gc.set` function:
 ```ocaml env=tune
 # open Core_kernel
 # let c = Gc.get ()
-val c : Gc.control =
+val c : Core_kernel.Gc.control =
   {Core_kernel.Gc.Control.minor_heap_size = 262144;
    major_heap_increment = 15; space_overhead = 80; verbose = 0;
    max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
@@ -485,7 +485,7 @@ let rec test_immutable t2 =
 let () =
   let iters = 1000000 in
   let tests = [
-    Bench.Test.create ~name:"mutable" 
+    Bench.Test.create ~name:"mutable"
       (fun () -> test_mutable { iters1=iters; count1=0.0 });
     Bench.Test.create ~name:"immutable"
       (fun () -> test_immutable { iters2=iters; count2=0.0 })
@@ -533,6 +533,7 @@ command-line benchmark binaries have a number of useful options that affect
 garbage collection behavior:
 
 ```sh dir=../../examples/code/gc/barrier_bench
+$ dune build barrier_bench.exe
 $ ./_build/default/barrier_bench.exe -help
 Benchmark for mutable, immutable
 
@@ -548,7 +549,6 @@ Columns that can be specified are:
 	samples    - Number of samples collected for profiling.
 
 ...
-
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
@@ -682,4 +682,3 @@ The finalizer can use all features of OCaml, including assignments that make
 the value reachable again and thus prevent it from being garbage-collected.
 It can also loop forever, which will cause other finalizers to be interleaved
 with it.
-
