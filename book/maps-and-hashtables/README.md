@@ -25,7 +25,7 @@ We can use functions from the `List.Assoc` module to manipulate this data:
 # List.Assoc.find ~equal:Int.equal digit_alist 22
 - : string option = None
 # List.Assoc.add ~equal:Int.equal digit_alist 0 "zilch"
-- : (int, string) Base__List.Assoc.t =
+- : (int, string) Base.List.Assoc.t =
 [(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
  (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
 ```
@@ -169,12 +169,12 @@ representing any module that matches the signature `Comparator.S`, shown
 below.
 
 ```ocaml env=main
-# #typeof "Comparator.S"
-module type Base.Comparator.S =
+# #show Base.Comparator.S
+module type S =
   sig
     type t
     type comparator_witness
-    val comparator : (t, comparator_witness) Base.Comparator.t
+    val comparator : (t, comparator_witness) Comparator.t
   end
 ```
 
@@ -261,7 +261,7 @@ module Book :
     type t = T.t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    type comparator_witness = Base.Comparator.Make(T).comparator_witness
     val comparator : (t, comparator_witness) Comparator.t
   end
 ```
@@ -347,7 +347,7 @@ module Reverse :
     val sexp_of_t : t -> Sexp.t
     val t_of_sexp : Sexp.t -> t
     val compare : t -> t -> int
-    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    type comparator_witness = Base.Comparator.Make(T).comparator_witness
     val comparator : (t, comparator_witness) Comparator.t
   end
 ```
@@ -414,7 +414,7 @@ the compiler rejects the following:
 # Map.symmetric_diff
     (Map.Poly.singleton 3 "three")
     (Map.singleton (module Int) 3 "four" )
-Characters 54-92:
+Characters 58-96:
 Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
@@ -539,7 +539,7 @@ module Book :
     type t = T.t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    type comparator_witness = Base.Comparator.Make(T).comparator_witness
     val comparator : (t, comparator_witness) Comparator.t
   end
 ```
@@ -570,7 +570,7 @@ module Book :
     type t = T.t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    type comparator_witness = Base__Comparator.Make(T).comparator_witness
+    type comparator_witness = Base.Comparator.Make(T).comparator_witness
     val comparator : (t, comparator_witness) Comparator.t
   end
 ```
@@ -618,7 +618,7 @@ Use [phys_equal] instead.
 If you feel like hanging your OCaml interpreter, you can verify what happens
 with recursive values and structural equality for yourself:
 
-```ocaml
+```ocaml skip
 # type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
 type t1 = { foo1 : int; bar1 : t2; }
 and t2 = { foo2 : int; bar2 : t1; }
@@ -644,7 +644,7 @@ want to put a `[@@deriving]` annotation on a map or set type itself?
 # type string_int_map =
     (string,int,String.comparator_witness) Map.t
   [@@deriving sexp]
-Characters 63-68:
+Characters 65-70:
 Error: Unbound value Map.t_of_sexp
 Hint: Did you mean m__t_of_sexp?
 ```
@@ -786,7 +786,7 @@ building a hashtable can be obtained.
 
 ```ocaml env=main
 # let table = Hashtbl.create (module String)
-val table : (string, '_weak1) Hashtbl.t = <abstr>
+val table : (string, '_weak1) Core_kernel.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:"three" ~data:3
 - : unit = ()
 # Hashtbl.find table "three"
@@ -799,13 +799,14 @@ some work to prepare it. In order for a module to be suitable for passing to
 `Hashtbl.create`, it has to match the following interface.
 
 ```ocaml env=main
-# #typeof "Hashtbl_intf.Key"
-module type Base.Hashtbl_intf.Key =
+# #show Core.Hashtbl_intf.Key
+module type Key =
   sig
     type t
-    val compare : t -> t -> Base.int
-    val sexp_of_t : t -> Base.Sexp.t
-    val hash : t -> Base.int
+    val t_of_sexp : Sexp.t -> t
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Sexp.t
+    val hash : t -> int
   end
 ```
 
@@ -829,7 +830,7 @@ module Book :
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book)
-val table : (Book.t, '_weak2) Hashtbl.t = <abstr>
+val table : (Book.t, '_weak2) Core_kernel.Hashtbl.t = <abstr>
 ```
 
 You can also create a hashtable based on OCaml's polymorphic hash and
@@ -837,7 +838,7 @@ comparison functions.
 
 ```ocaml env=main
 # let table = Hashtbl.Poly.create ()
-val table : ('_weak3, '_weak4) Hashtbl.t = <abstr>
+val table : ('_weak3, '_weak4) Core_kernel.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!"
 - : unit = ()
 # Hashtbl.find table ("foo",3,[1;2;3])
@@ -979,12 +980,12 @@ the map version:
 $ dune build map_vs_hash.exe
 $ ./_build/default/map_vs_hash.exe -ascii -quota 1 -clear-columns time speedup
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
-                              
-  Name    Time/Run   Speedup  
- ------- ---------- --------- 
-  table    13.34ms      1.00  
-  map      44.54ms      3.34  
-                              
+
+  Name    Time/Run   Speedup
+ ------- ---------- ---------
+  table    13.34ms      1.00
+  map      44.54ms      3.34
+
 ```
 
 We can make the speedup smaller or larger depending on the details of the
@@ -1063,12 +1064,12 @@ in this case by more than a factor of 10:
 $ dune build map_vs_hash2.exe
 $ ./_build/default/map_vs_hash2.exe -ascii -clear-columns time speedup
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
-                                
-  Name      Time/Run   Speedup  
- ------- ------------ --------- 
-  table   4_453.95us     25.80  
-  map       172.61us      1.00  
-                                
+
+  Name      Time/Run   Speedup
+ ------- ------------ ---------
+  table   4_453.95us     25.80
+  map       172.61us      1.00
+
 ```
 
 These numbers can be made more extreme by increasing the size of the tables
@@ -1080,4 +1081,3 @@ structure or the other will depend on the details of the application.
 [phys_equal function]{.idx}[equal equal (= =) operator]{.idx}[equal (=)
 operator]{.idx}[structural equality]{.idx}[physical equality]{.idx}[equality,
 tests of]{.idx}
-
