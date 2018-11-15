@@ -76,7 +76,7 @@ zip codes:
   "title": "Cities",
   "cities": [
     { "name": "Chicago",  "zips": [60601] },
-    { "name": "New York", "zips": [10004] } 
+    { "name": "New York", "zips": [10004] }
   ]
 }
 ```
@@ -193,7 +193,7 @@ syntax `%token <`*`type`*`>`*`uid`*, where the *`<type>`* is optional and
 *`uid`* is a capitalized identifier. For JSON, we need tokens for numbers,
 strings, identifiers, and punctuation: [tokens, declaration of]{.idx}
 
-```ocaml file=../../examples/code/parsing/parser.mly
+```ocaml skip
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -239,7 +239,7 @@ the non-terminal symbol `prog`, and by declaring that when parsed, a
 `Json.value option`. We then end the declaration section of the parser with a
 `%%`:
 
-```ocaml file=../../examples/code/parsing/parser.mly,part=1
+```ocaml skip
 %start <Json.value option> prog
 %%
 ```
@@ -249,7 +249,7 @@ productions are organized into *rules*, where each rule lists all the
 possible productions for a given nonterminal symbols. Here, for example, is
 the rule for `prog`:
 
-```ocaml file=../../examples/code/parsing/parser.mly,part=2
+```ocaml skip
 prog:
   | EOF       { None }
   | v = value { Some v }
@@ -273,7 +273,7 @@ within the curly braces for that production.
 
 Now let's consider a more complex example, the rule for the `value` symbol:
 
-```ocaml file=../../examples/code/parsing/parser.mly,part=3
+```ocaml skip
 value:
   | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
     { `Assoc obj }
@@ -317,7 +317,7 @@ side, because what we're matching on in this case is an empty sequence of
 tokens. The comment `(* empty *)` is used to make this clear:
 [rev_object_fields]{.idx}[object_fields]{.idx}
 
-```ocaml file=../../examples/code/parsing/parser.mly,part=4
+```ocaml skip
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
@@ -334,7 +334,7 @@ right-recursive rule accepts the same input, but during parsing, it requires
 linear stack space to read object field definitions: [Menhir parser
 generator/left-recursive definitions]{.idx}
 
-```ocaml file=../../examples/code/parsing/right_rec_rule.mly,part=4
+```ocaml skip
 (* Inefficient right-recursive rule *)
 object_fields:
   | (* empty *) { [] }
@@ -347,7 +347,7 @@ construct the returned value in left-to-right order. This is even less
 efficient, since the complexity of building the list incrementally in this
 way is quadratic in the length of the list:
 
-```ocaml file=../../examples/code/parsing/quadratic_rule.mly,part=4
+```ocaml skip
 (* Quadratic left-recursive rule *)
 object_fields:
   | (* empty *) { [] }
@@ -368,7 +368,7 @@ A version of the JSON grammar using these more succinct Menhir rules follows.
 Notice the use of `separated_list` to parse both JSON objects and lists with
 one rule:
 
-```ocaml file=../../examples/code/parsing/short_parser.mly,part=1
+```ocaml skip
 prog:
   | v = value { Some v }
   | EOF       { None   } ;
@@ -425,7 +425,7 @@ Let's walk through the definition of a lexer section by section. The first
 section is an optional chunk of OCaml code that is bounded by a pair of curly
 braces: [lexers/optional OCaml code for]{.idx}
 
-```ocaml file=../../examples/code/parsing/lexer.mll
+```ocaml skip
 {
 open Lexing
 open Parser
@@ -459,7 +459,7 @@ really this is a specialized syntax for declaring regular expressions. Here's
 an example: [regular expressions]{.idx}[lexers/regular expressions
 collection]{.idx}
 
-```ocaml file=../../examples/code/parsing/lexer.mll,part=1
+```ocaml skip
 let int = '-'? ['0'-'9'] ['0'-'9']*
 ```
 
@@ -476,7 +476,7 @@ points and exponents. We make the expression easier to read by building up a
 sequence of named regular expressions, rather than creating one big and
 impenetrable expression:
 
-```ocaml file=../../examples/code/parsing/lexer.mll,part=2
+```ocaml skip
 let digit = ['0'-'9']
 let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
@@ -485,7 +485,7 @@ let float = digit* frac? exp?
 
 Finally, we define whitespace, newlines, and identifiers:
 
-```ocaml file=../../examples/code/parsing/lexer.mll,part=3
+```ocaml skip
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
@@ -503,7 +503,7 @@ quite complicated, using side effects and invoking other rules as part of the
 body of the rule. Let's look at the `read` rule for parsing a JSON
 expression: [lexers/rules for]{.idx}
 
-```ocaml file=../../examples/code/parsing/lexer.mll,part=4
+```ocaml skip
 rule read =
   parse
   | white    { read lexbuf }
@@ -537,7 +537,7 @@ skips the input whitespace and returns the following token. The action
 advance the line number for the lexer using the utility function that we
 defined at the top of the file. Let's skip to the third action:
 
-```ocaml file=../../examples/code/parsing/lexer_int_fragment.mll
+```ocaml skip
 | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
 ```
 
@@ -573,7 +573,7 @@ multiple lexers in the same file, and the definitions can be recursive. In
 this case, we use recursion to match string literals using the following rule
 definition: [recursion/in lexers]{.idx}[lexers/recursive rules]{.idx}
 
-```ocaml file=../../examples/code/parsing/lexer.mll,part=5
+```ocaml skip
 and read_string buf =
   parse
   | '"'       { STRING (Buffer.contents buf) }
@@ -729,8 +729,7 @@ Now build and run the example using this file, and you can see the full
 parser in action:
 
 ```sh dir=../../examples/code/parsing-test
-$ dune build test.exe
-$ ./_build/default/test.exe test1.json
+$ dune exec ./test.exe test1.json
 true
 false
 null
@@ -754,9 +753,9 @@ $ cat test2.json
 { "name": "New York",
   "zips": [10004]
 }
-$ ./_build/default/test.exe test2.json
-sh: ./_build/default/test.exe: No such file or directory
-[127]
+$ dune exec ./test.exe test2.json
+test2.json:3:2: syntax error
+[255]
 ```
 
 That wraps up our parsing tutorial. As an aside, notice that the JSON
@@ -765,4 +764,3 @@ structurally compatible with the Yojson representation explained in
 [Handling Json Data](json.html#handling-json-data){data-type=xref}. That
 means that you can take this parser and use it with the helper functions in
 Yojson to build more sophisticated applications.
-
