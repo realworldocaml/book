@@ -93,7 +93,7 @@ This code follows the convention of using `hd` to represent the first element
 The `match` statement in `sum` is really doing two things: first, it's acting
 as a case-analysis tool, breaking down the possibilities into a
 pattern-indexed list of cases. Second, it lets you name substructures within
-the data structure being matched. In this case, the variables `hd` and 
+the data structure being matched. In this case, the variables `hd` and
 `tl` are bound by the pattern that defines the second case of the match
 statement. Variables that are bound in this way can be used in the expression
 to the right of the arrow for the pattern in question.
@@ -110,7 +110,7 @@ immediately warn you that something is wrong:
     | [] -> []
     | to_drop :: tl -> drop_value tl to_drop
     | hd :: tl -> hd :: drop_value tl to_drop
-Characters 106-114:
+Characters 114-122:
 Warning 11: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
@@ -225,7 +225,7 @@ the number of cases increases. Here, we'll benchmark these functions using
 the `core_bench` library, which can be installed by running
 `opam install core_bench` from the command line.
 
-```ocaml env=main
+```ocaml env=main,non-deterministic=command
 # #require "core_bench"
 # open Core_bench
 # [ Bench.Test.create ~name:"plus_one_match" (fun () ->
@@ -258,7 +258,7 @@ val sum_if : int list -> int = <fun>
 
 Again, we can benchmark these to see the difference:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic=command
 # let numbers = List.range 0 1000 in
   [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
   ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
@@ -304,7 +304,7 @@ a case, along with an example of an unmatched pattern:
     match l with
     | [] -> []
     | 0  :: tl -> drop_zero tl
-Characters 24-78:
+Characters 26-84:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 1::_
@@ -333,7 +333,7 @@ Let's work through a concrete example. We'll write a function `render_table`
 that, given a list of column headers and a list of rows, prints them out in a
 well-formatted text table, as follows:
 
-```ocaml env=main
+```ocaml skip
 # Stdio.print_endline
     (render_table
        ["language";"architect";"first release"]
@@ -437,7 +437,7 @@ generate the line that separates the header from the rest of the text table.
 We'll do this in part by mapping `String.make` over the lengths of the
 columns to generate a string of dashes of the appropriate length. We'll then
 join these sequences of dashes together using `String.concat`, which
-concatenates a list of strings with an optional separator string, and 
+concatenates a list of strings with an optional separator string, and
 `^`, which is a pairwise string concatenation function, to add the delimiters
 on the outside:
 
@@ -838,7 +838,7 @@ an *or pattern*:
 val destutter : int list -> int list = <fun>
 ```
 
-We can make the code slightly terser now by using a `when` clause. A 
+We can make the code slightly terser now by using a `when` clause. A
 `when` clause allows us to add an extra precondition to a pattern in the form
 of an arbitrary OCaml expression. In this case, we can use it to include the
 check on whether the first two elements are equal:
@@ -969,7 +969,7 @@ exhaustive:
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
-Characters 28-161:
+Characters 30-169:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_
@@ -1032,6 +1032,3 @@ probably just use the `List.count` function from `Core_kernel`:
 # let count_some l = List.count ~f:Option.is_some l
 val count_some : 'a option list -> int = <fun>
 ```
-
-
-
