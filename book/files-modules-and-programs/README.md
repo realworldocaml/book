@@ -34,10 +34,10 @@ val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
 # List.Assoc.find ~equal:String.equal assoc "two"
 - : int option = Some 2
 # List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *)
-- : (string, int) Base__List.Assoc.t =
+- : (string, int) Base.List.Assoc.t =
 [("four", 4); ("one", 1); ("two", 2); ("three", 3)]
 # List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *)
-- : (string, int) Base__List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
+- : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
 ```
 
 Note that `List.Assoc.add` doesn't modify the original list, but instead
