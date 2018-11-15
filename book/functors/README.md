@@ -241,7 +241,7 @@ modules provided by `Base`:
 # module Int_interval = Make_interval(Int)
 module Int_interval :
   sig
-    type t = Make_interval(Base__Int).t = Interval of int * int | Empty
+    type t = Make_interval(Base.Int).t = Interval of int * int | Empty
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -251,7 +251,7 @@ module Int_interval :
 module String_interval :
   sig
     type t =
-      Make_interval(Base__String).t =
+      Make_interval(Base.String).t =
         Interval of string * string
       | Empty
     val create : string -> string -> t
@@ -421,8 +421,8 @@ even construct an interval anymore: [sharing constraint]{.idx}
 # module Int_interval = Make_interval(Int)
 module Int_interval :
   sig
-    type t = Make_interval(Base__Int).t
-    type endpoint = Make_interval(Base__Int).endpoint
+    type t = Make_interval(Base.Int).t
+    type endpoint = Make_interval(Base.Int).endpoint
     val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
     val contains : t -> endpoint -> bool
@@ -538,7 +538,7 @@ things that require that `endpoint` be exposed, like constructing intervals:
 # module Int_interval = Make_interval(Int)
 module Int_interval :
   sig
-    type t = Make_interval(Base__Int).t
+    type t = Make_interval(Base.Int).t
     type endpoint = int
     val create : endpoint -> endpoint -> t
     val is_empty : t -> bool
@@ -644,7 +644,7 @@ constructors and thereby violating the invariants of the module:
 # module Int_interval = Make_interval(Int)
 module Int_interval :
   sig
-    type t = Make_interval(Base__Int).t
+    type t = Make_interval(Base.Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
@@ -741,7 +741,7 @@ declaration to the definition of `t` within the functor:
         create (max l1 l2) (min h1 h2)
 
   end
-Characters 132-142:
+Characters 138-148:
 Error: Unbound value Endpoint.t_of_sexp
 ```
 
@@ -890,7 +890,7 @@ And now, we can use that sexp converter in the ordinary way:
 # module Int_interval = Make_interval(Int)
 module Int_interval :
   sig
-    type t = Make_interval(Base__Int).t
+    type t = Make_interval(Base.Int).t
     val create : int -> int -> t
     val is_empty : t -> bool
     val contains : t -> int -> bool
