@@ -1,0 +1,11 @@
+{
+  "title": "Real World OCaml",
+  "tags" : [ "functional programming", "ocaml", "algorithms" ],
+  "pages": 450,
+  "authors": [
+    { "name": "Jason Hickey", "affiliation": "Google" },
+    { "name": "Anil Madhavapeddy", "affiliation": "Cambridge"},
+    { "name": "Yaron Minsky", "affiliation": "Jane Street"}
+  ],
+  "is_online": true
+}

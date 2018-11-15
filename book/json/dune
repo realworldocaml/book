@@ -1,8 +1,11 @@
 (rule (with-stdout-to dune.gen
-  (run mdx rule --direction=to-ml README.md --prelude ../prelude.ml)))
+  (run mdx rule --direction=to-ml README.md
+                --root ../../examples/code/json
+                --prelude=prelude.ml)))
 
 (alias
  (name   runtest)
+ (deps   README.md)
  (action (diff dune.inc dune.gen)))
 
 (include dune.inc)

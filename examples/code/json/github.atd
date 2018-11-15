@@ -1,0 +1,28 @@
+type scope = [
+    User <json name="user">
+  | Public_repo <json name="public_repo">
+  | Repo <json name="repo">
+  | Repo_status <json name="repo_status">
+  | Delete_repo <json name="delete_repo">
+  | Gist <json name="gist">
+]
+
+type app = {
+  name: string;
+  url: string;
+}  <ocaml field_prefix="app_">
+
+type authorization_request = {
+  scopes: scope list;
+  note: string;
+} <ocaml field_prefix="auth_req_">
+
+type authorization_response = {
+  scopes: scope list;
+  token: string;
+  app: app;
+  url: string;
+  id: int;
+  ?note: string option;
+  ?note_url: string option;
+}
