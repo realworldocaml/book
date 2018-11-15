@@ -135,7 +135,7 @@ The remainder of the Ncurses binding simply expands on these definitions:
 
 ```ocaml file=../../examples/code/ffi/ncurses/ncurses.ml,part=2
 let newwin =
-  foreign "newwin" 
+  foreign "newwin"
     (int @-> int @-> int @-> int @-> returning window)
 
 let endwin =
@@ -216,7 +216,7 @@ passed to an Ncurses library call.
 Now compile a "hello world" terminal drawing program to tie this all
 together:
 
-```ocaml file=../../examples/code/ffi/hello/hello.ml
+```ocaml file=../../examples/code/ffi/hello/hello.ml,non-deterministic
 open Ncurses
 
 let () =
@@ -416,7 +416,7 @@ it directly. We need to bind a second function to do anything useful with the
 return values from `time`. We'll move on to `difftime`; the second C function
 in our prototype list:
 
-```ocaml env=posix
+```ocaml env=posix,non-deterministic
 # let difftime =
   foreign "difftime" (time_t @-> time_t @-> returning double)
 val difftime : time_t -> time_t -> float = <fun>
@@ -425,7 +425,7 @@ val difftime : time_t -> time_t -> float = <fun>
   Unix.sleep 2;
   let t2 = time' () in
   difftime t2 t1
- ... 
+- : float = 2.
 ```
 
 The binding to `difftime` above is sufficient to compare two `time_t` values.
@@ -506,9 +506,9 @@ Given these functions, the definition of the `Ctypes.string` value that uses
 views is quite simple:
 
 ```ocaml file=../../examples/code/ctypes/ctypes_impl.ml
-let string = 
+let string =
   view (char ptr)
-    ~read:string_of_char_ptr 
+    ~read:string_of_char_ptr
     ~write:char_ptr_of_string
 ```
 
@@ -649,13 +649,13 @@ functions `make`, `addr`, and `getf` create a structure value, retrieve the
 address of a structure value, and retrieve the value of a field from a
 structure:
 
-```ocaml env=posix
+```ocaml env=posix,non-deterministic
 # let gettimeofday' () =
     let tv = make timeval in
     ignore(gettimeofday (addr tv) (from_voidp timezone null));
     let secs = Signed.Long.(to_int (getf tv tv_sec)) in
     let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1000000.0)
+    Caml.Pervasives.(float secs +. float usecs /. 1000000.0)
 val gettimeofday' : unit -> float = <fun>
 # gettimeofday' ()
 - : float = 1516746708.884176
@@ -1162,4 +1162,3 @@ The details of using Cstubs are available in the online
 [documentation](https://ocamllabs.github.io/ocaml-ctypes), along with
 instructions on integration with `autoconf` platform portability
 instructions.<a data-type="indexterm" data-startref="INTERffi">&nbsp;</a>
-
