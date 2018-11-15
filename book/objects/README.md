@@ -91,7 +91,7 @@ val s : < pop : int option; push : int -> unit > = <obj>
 ```
 
 The object has an integer list value `v`, a method `pop` that returns the
-head of `v`, and a method `push` that adds an integer to the head of 
+head of `v`, and a method `push` that adds an integer to the head of
 `v`.
 
 The object type is enclosed in angle brackets `< ... >`, containing just the
@@ -168,7 +168,7 @@ method:
 # let toggle sq b : unit =
     if b then sq#resize `Fullscreen
   else minimize sq
-Characters 75-77:
+Characters 77-79:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
        Types for method resize are incompatible
@@ -176,7 +176,7 @@ Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
 
 The `..` in the inferred object types are ellipses, standing for other
 unspecified methods that the object may have. The type
-`< width : float; .. >` specifies an object that must have at least a 
+`< width : float; .. >` specifies an object that must have at least a
 `width` method, and possibly some others as well. Such object types are said
 to be *open*. [open object types]{.idx}
 
@@ -228,7 +228,7 @@ An object of type `< pop : int option; .. >` can be any object with a method
 `pop : int option`; it doesn't matter how it is implemented. When the method
 `#pop` is invoked, the actual method that is run is determined by the object:
 
-```ocaml env=stack
+```ocaml env=stack,non-deterministic
 # let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop
 val print_pop : < pop : int option; .. > -> unit = <fun>
 # print_pop (stack [5;4;3;2;1])
@@ -430,7 +430,7 @@ val items : item list = [<obj>; <obj>]
 #### Polymorphic Variant Subtyping
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
-polymorphic variant type. A polymorphic variant type *A* is a subtype of 
+polymorphic variant type. A polymorphic variant type *A* is a subtype of
 *B*, if the tags of *A* are a subset of the tags of *B*:
 
 ```ocaml env=subtyping
@@ -829,4 +829,3 @@ val shape_ref : shape ref = {Base.Ref.contents = <obj>}
 
 This chapter contains significant contributions from Leo White.
 :::
-
