@@ -48,7 +48,22 @@ let static_extensions =
 
 (** Process the book chapters *)
 
+type part = {
+  title   : string;
+  chapters: string list;
+} [@@deriving sexp]
+
+type toc = [ `part of part | `chapter of string] list [@@deriving sexp]
+
 let toc_file = "toc.scm"
+
+let toc_files toc =
+  let part acc = function
+    | `part p    -> List.rev_append p.chapters acc
+    | `chapter f -> f :: acc
+  in
+  let toc = List.fold_left part [] toc in
+  List.sort String.compare toc
 
 let dune_for_chapter file =
   let file = (Filename.remove_extension file) ^ ".html" in
@@ -62,13 +77,6 @@ let dune_for_chapter file =
            ../book/%s)
   (action  (run rwo-build build chapter -o . -repo-root .. %%{x})))|}
     file file file toc_file
-
-type part = {
-  title   : string;
-  chapters: string list;
-} [@@deriving sexp]
-
-type toc = [ `part of part | `chapter of string] list [@@deriving sexp]
 
 let read_toc base_dir =
   let f = base_dir / toc_file in
@@ -107,28 +115,26 @@ let find_static_files () =
   (deps %s))|}
 
 let process_chapters ~toc book_dir output_dir =
-  files_with ~exts:[".html";".md"] book_dir |>
-  List.sort String.compare |>
-  List.map (function
-    | file when is_chapter toc file -> dune_for_chapter file
-    | "install.html" -> frontpage_chapter "install"
-    | "faqs.html" -> frontpage_chapter "faqs"
-    | "toc.html" -> frontpage_chapter ~deps:["../book/"^toc_file] "toc"
-    | "index.html" -> frontpage_chapter "index"
-    | file -> eprintf "Warning: orphan html file %s in repo\n" file; ""
-    ) |>
-  List.filter ((<>)"") |>
+  let html =
+    files_with ~exts:[".html"] book_dir |>
+    List.sort String.compare |>
+    List.map (function
+        | "install.html" -> frontpage_chapter "install"
+        | "faqs.html" -> frontpage_chapter "faqs"
+        | "toc.html" -> frontpage_chapter ~deps:["../book/"^toc_file] "toc"
+        | "index.html" -> frontpage_chapter "index"
+        | file -> eprintf "Warning: orphan html file %s in repo\n" file; ""
+      ) |>
+    List.filter ((<>)"")
+  in
+  let chapters = List.map dune_for_chapter (toc_files toc) in
+  html @ chapters |>
   String.concat "\n\n" |> fun s ->
   find_static_files () ^ s  ^ "\n" |>
   emit_file (output_dir / "dune")
 
 let process_md ~toc book_dir =
-  let part acc = function
-    | `part p    -> List.rev_append p.chapters acc
-    | `chapter f -> f :: acc
-  in
-  let toc = List.fold_left part [] toc in
-  let toc = List.sort String.compare toc in
+  let toc = toc_files toc in
   let html_alias =
     let file f = f ^ ".html" in
     let toc = List.map file toc in
@@ -149,23 +155,7 @@ let process_md ~toc book_dir =
     (fun x -> x ^ "\n") |>
     emit_file (book_dir / "dune")
   in
-  let chapter_dune chapter =
-    let file = {|(rule (with-stdout-to dune.gen
-  (run mdx rule README.md --prelude ../prelude.ml)))
-
-(alias
- (name   runtest)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
-|}
-    in
-    let dir = book_dir / chapter in
-    if not (Sys.file_exists dir) then Unix.mkdir dir 0o755;
-    emit_file (book_dir / chapter / "dune") file
-  in
-  main_dune ();
-  List.iter chapter_dune toc
+  main_dune ()
 
 let _ =
   let toc = read_toc "book" in

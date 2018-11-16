@@ -78,7 +78,7 @@ let toc chapters : Html.item list =
   List.map parts ~f:(fun {info;chapters} ->
     let ul = ul ~a:["class","toc-full"] (List.map chapters ~f:(fun chapter ->
       li [
-        a ~a:["href",chapter.filename] [
+        a ~a:["href", chapter.name ^ ".html"] [
           h2 [`Data (
             if chapter.number = 0
             then sprintf "%s" chapter.title
@@ -87,17 +87,17 @@ let toc chapters : Html.item list =
         ];
         ul ~a:["class","children"] (
           List.map chapter.sections ~f:(fun (sect1,sect2s) ->
-            let href = sprintf "%s#%s" chapter.filename sect1.id in
+            let href = sprintf "%s.html#%s" chapter.name sect1.id in
             li [
               a ~a:["href",href] [h5 [`Data sect1.title]];
               ul ~a:["class","children"] (
                 List.map sect2s ~f:(fun (sect2,sect3s) ->
-                  let href = sprintf "%s#%s" chapter.filename sect2.id in
+                  let href = sprintf "%s.html#%s" chapter.name sect2.id in
                   li [
                     a ~a:["href",href] [`Data sect2.title];
                     ul ~a:["class","children"] (
                       List.map sect3s ~f:(fun sect3 ->
-                        let href = sprintf "%s#%s" chapter.filename sect3.id in
+                        let href = sprintf "%s.html#%s" chapter.name sect3.id in
                         li [a ~a:["href",href] [`Data sect3.title]]
                       ) );
                   ]
@@ -124,7 +124,7 @@ let next_chapter_footer next_chapter : Html.item option =
   match next_chapter with
   | None -> None
   | Some x -> Some (
-    a ~a:["class","next-chapter"; "href", x.filename] [
+    a ~a:["class","next-chapter"; "href", x.name ^ ".html"] [
       div ~a:["class","content"] [
         h1 [
           small [`Data (sprintf "Next: Chapter %02d" x.number)];
@@ -160,7 +160,7 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
   let part_items {Toc.info; chapters} = List.filter_map ~f:Fn.id [
     Option.map info ~f:(fun x -> Html.h4 [`Data x.Toc.title]);
     Some (Html.ul (List.map chapters ~f:(fun x ->
-      Html.li [Html.a ~a:["href",x.Toc.filename] [`Data x.title]])))
+      Html.li [Html.a ~a:["href", x.Toc.name ^ ".html"] [`Data x.title]])))
   ]
   in
   let file = repo_root/"book"/"index.html" in
@@ -195,10 +195,13 @@ let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
 let make_chapter_page chapters chapter_file
   : Html.t Deferred.t
   =
-
   let toc = Toc.of_chapters chapters in
-  let chapter = Option.value_exn
-      (Toc.find ~filename:(Filename.basename chapter_file) toc)
+  let chapter =
+    let name = Filename.basename chapter_file in
+    let name =
+      try Filename.chop_extension name with Invalid_argument _ -> name
+    in
+    Option.value_exn (Toc.find ~name toc)
   in
 
   let next_chapter_footer =
