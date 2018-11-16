@@ -125,7 +125,7 @@ would work if we had instead written this purposefully confusing bit of code:
     let area_of_circle r = pi *. r *. r in
     let pi = 0. in
     area_of_circle outer_radius -. area_of_circle inner_radius
-Characters 115-117:
+Characters 121-123:
 Warning 26: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
 ```
@@ -198,7 +198,7 @@ patterns]{.idx}
 # let upcase_first_entry line =
     let (first :: rest) = String.split ~on:',' line in
     String.concat ~sep:"," (String.uppercase first :: rest)
-Characters 36-51:
+Characters 34-144:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -700,7 +700,7 @@ val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
   ^> String.split ~on:':' path
   ^> List.dedup_and_sort ~compare:String.compare
   ^> List.iter ~f:print_endline
-Characters 102-128:
+Characters 108-134:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
@@ -1105,7 +1105,7 @@ invocations of `f` list the arguments in different orders.
     let dx = (f ~y ~x:x' -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
     (dx,dy)
-Characters 122-123:
+Characters 130-131:
 Error: This function is applied to arguments
 in an order different from other calls.
 This is only allowed when the real type is known.

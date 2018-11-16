@@ -7,8 +7,7 @@
          (:y2 ../../examples/code/variables-and-functions/numerical_deriv_alt_sig.mli)
          (:y1 ../../examples/code/variables-and-functions/substring_sig1.ml)
          (:y0 ../../examples/code/variables-and-functions/substring_sig2.ml)
-         prelude.ml
-         (package mdx))
+         prelude.ml)
  (action (progn
            (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
