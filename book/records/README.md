@@ -222,7 +222,7 @@ The OCaml compiler is packed full of useful warnings that can be enabled and
 disabled separately. These are documented in the compiler itself, so we could
 have found out about warning 9 as follows:
 
-```sh dir=../../examples/code/records
+```sh
 $ ocaml -warn-help | egrep '\b9\b'
   9 Missing fields in a record pattern.
   R Alias for warning 9.
@@ -311,8 +311,8 @@ This is considerably more concise than what you would get without punning:
         ~service_name:service_name ~port:port
         ~protocol:protocol ~comment:comment =
     { service_name = service_name;
-      port = port; 
-      protocol = protocol; 
+      port = port;
+      protocol = protocol;
       comment = comment;
     }
 val create_service_info :
@@ -814,7 +814,7 @@ module/Field.name]{.idx}[fieldslib]{.idx}
 : Does a functional update of a field
 
 `Field.setter`
-: Returns `None` if the field is not mutable or `Some f` if it is, where 
+: Returns `None` if the field is not mutable or `Some f` if it is, where
   `f` is a function for mutating that field
 
 A `Field.t` has two type parameters: the first for the type of the record,
@@ -941,4 +941,3 @@ building record-validation functions to scaffolding the definition of a web
 form from a record type. Such applications can benefit from the guarantee
 that all fields of the record type in question have been
 considered.<a data-type="indexterm" data-startref="Ffc">&nbsp;</a><a data-type="indexterm" data-startref="firstclass">&nbsp;</a><a data-type="indexterm" data-startref="RECfirstclass">&nbsp;</a>
-
