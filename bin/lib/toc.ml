@@ -17,7 +17,7 @@ type sections = (section * (section * section list) list) list
 
 type chapter = {
   number : int;
-  filename : string;
+  name : string;
   title : string;
   part_info : part_info option;
   sections : sections;
@@ -139,11 +139,11 @@ end
 
 let of_toc book_dir toc =
   let chapter part_info number basename =
-    let file = book_dir/basename ^ ".html" in
+    let file = book_dir / basename ^ ".html" in
     Html.of_file file >>| fun html ->
     let title = get_title file html in
     let sections = get_sections ~filename:file html in
-    { number; filename = basename; part_info; sections; title }
+    { number; name = basename; part_info; sections; title }
   in
   let part ~parts ~chapters title files =
     let part_info = Some { title; number = parts } in
@@ -205,11 +205,11 @@ let code_files ?(repo_root=".") () =
       | _ -> true
     )
 
-let find ~filename (t:t) =
+let find ~name (t:t) =
   let rec aux = function
     | []   -> None
     | h::t ->
-      match List.find h.chapters ~f:(fun c -> c.filename = filename) with
+      match List.find h.chapters ~f:(fun c -> c.name = name) with
       | Some _ as x -> x
       | None -> aux t
   in

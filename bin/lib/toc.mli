@@ -19,7 +19,7 @@ type sections = (section * (section * section list) list) list
 
 type chapter = {
   number : int;
-  filename : string; (** basename *)
+  name : string; (** basename with .html *)
   title : string;
   part_info : part_info option;
   sections : sections;
@@ -41,7 +41,7 @@ val get_chapters : ?repo_root:string -> unit -> chapter list Deferred.t
 
 val get_next_chapter : chapter list -> chapter -> chapter option
 
-val find: filename:string -> t -> chapter option
+val find: name:string -> t -> chapter option
 
 (** [get_sections filename html] returns the section structure within
     the chapter of the given file, to depth 3. The [filename] is only
