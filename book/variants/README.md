@@ -71,7 +71,7 @@ val color_by_number : int -> string -> string = <fun>
 # let blue = color_by_number (basic_color_to_int Blue) "Blue"
 val blue : string = "\027[38;5;4mBlue\027[0m"
 # printf "Hello %s World!\n" blue
-Hello [38;5;4mBlue[0m World!
+Hello Blue World!
 - : unit = ()
 ```
 
@@ -133,10 +133,10 @@ Now, we can print text using the full set of available colors:
   printf "%s\n" (color_by_number (color_to_int color) s)
 val color_print : color -> string -> unit = <fun>
 # color_print (Basic (Red,Bold)) "A bold red!"
-[38;5;9mA bold red![0m
+A bold red!
 - : unit = ()
 # color_print (Gray 4) "A muted gray..."
-[38;5;236mA muted gray...[0m
+A muted gray...
 - : unit = ()
 ```
 
@@ -261,7 +261,7 @@ discrepancy:
       base + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i
-Characters 38-58:
+Characters 40-60:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 ```
@@ -275,7 +275,7 @@ problem, which is that we haven't handled the new `Bold` tag:
     | Basic basic_color -> basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | Gray i -> 232 + i
-Characters 19-148:
+Characters 19-152:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 Bold _
@@ -311,7 +311,7 @@ We might have written the function as follows: [exhaustion checks]{.idx}
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
   | _ -> basic_color_to_int White
-Characters 48-68:
+Characters 50-70:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
 ```
@@ -529,7 +529,7 @@ for handling individual message types, we could write a dispatch function as
 follows:
 
 ```ocaml env=logger
-# let handle_message server_state (common,details) =
+# let handle_message server_state ((common:Common.t), details) =
     match details with
     | Log_entry m -> handle_log_entry server_state (common,m)
     | Logon     m -> handle_logon     server_state (common,m)
@@ -594,7 +594,7 @@ will reject code that tries to do so.
 # let get_logon_contents = function
     | Logon m -> Some m
     | _ -> None
-Characters 54-55:
+Characters 56-57:
 Error: This form is not allowed as the type of the inlined record could escape.
 ```
 
@@ -695,7 +695,7 @@ set of simplifying construction functions that mirror the tags of an
 
 ```ocaml env=blang
 # let and_ l =
-    if List.exists l ~f:(function Const false -> true | _ -> false) 
+    if List.exists l ~f:(function Const false -> true | _ -> false)
     then Const false
     else
       match List.filter l ~f:(function Const true -> false | _ -> true) with
@@ -913,7 +913,7 @@ function as follows.
 # let extended_color_to_int = function
     | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
-Characters 150-155:
+Characters 154-159:
 Error: This expression has type extended_color
        but an expression was expected of type color
 ```
@@ -993,7 +993,7 @@ the cases, the type is no longer narrowed, and so compilation fails:
 # let extended_color_to_int = function
     | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
     | color -> color_to_int color
-Characters 121-126:
+Characters 125-130:
 Error: This expression has type [> `RGBA of int * int * int * int ]
        but an expression was expected of type
          [< `Basic of
@@ -1108,7 +1108,7 @@ let color_to_int = function
     base + basic_color_to_int basic_color
   | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | `Gray i -> 232 + i
- 
+
 let extended_color_to_int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Grey x -> 2000 + x
@@ -1147,7 +1147,6 @@ In particular, the compiler will complain that the `` `Grey`` case is unused:
 
 ```sh dir=../../examples/code/variants-termcol-annotated
 $ dune build terminal_color.exe
-    ocamlopt .terminal_color.eobjs/terminal_color.{cmx,o} (exit 2)
 ...
 File "terminal_color.ml", line 29, characters 25-32:
 Error (warning 12): this sub-pattern is unused.
@@ -1219,4 +1218,3 @@ support for subtyping. As we'll discuss further when we cover objects in
 [Objects](objects.html#objects){data-type=xref}, subtyping brings in a lot
 of complexity, and most of the time, that's complexity you want to
 avoid.<a data-type="indexterm" data-startref="VARTYPpoly">&nbsp;</a><a data-type="indexterm" data-startref="DTvar">&nbsp;</a>
-
