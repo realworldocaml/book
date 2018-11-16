@@ -171,7 +171,7 @@ a function that counts the number of lines in a file:
     Reader.file_contents filename
     >>= fun text ->
     List.length (String.split text ~on:'\n')
-Characters 79-119:
+Characters 85-125:
 Error: This expression has type int but an expression was expected of type
          'a Deferred.t
 ```
@@ -598,9 +598,10 @@ function, we'll get a helpful type error:
     let x = 3 in
     if n > 0 then loop_forever ();
     x + n
-Characters 48-63:
-Error: This expression has type never_returns = (unit, int) Base.Type_equal.t
+Characters 52-67:
+Error: This expression has type never_returns = (unit, int) Type_equal.t
        but an expression was expected of type unit
+       because it is in the result of a conditional with no else branch
 ```
 
 We can resolve the error by calling the function `never_returns`:
@@ -693,7 +694,7 @@ and so can only contain values of a single, yet-to-be-determined type.
 If we just try and write to the writer, we'll see that we block indefinitely
 in `utop`. You can break out of the wait by hitting **`Control-C`**:
 
-```ocaml
+```ocaml skip
 # Pipe.write w "Hello World!";;
 Interrupted.
 ```
@@ -873,9 +874,9 @@ To better understand what's going on, it's useful to look at the type for
 # #require "cohttp.async"
 # Cohttp_async.Client.get
 - : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async__V1.Conduit_async.Ssl.config ->
-    ?headers:Cohttp__Header.t ->
-    Uri.t -> (Cohttp__Response.t * Cohttp_async__Body.t) Deferred.t
+    ?ssl_config:Conduit_async.V1.Conduit_async.Ssl.config ->
+    ?headers:Cohttp.Header.t ->
+    Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
 = <fun>
 ```
 
@@ -1201,7 +1202,7 @@ If we pass in an exception other than `Ignore_me`, like, say, the built-in
 exception `Not_found`, then the exception will be passed to the parent
 monitor and delivered as usual:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic=command
 # exception Another_exception
 exception Another_exception
 # Deferred.any [ after (Time.Span.of_sec 0.5)
@@ -1621,22 +1622,22 @@ val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
 If we feed this function a simple timeout deferred, it works as you might
 expect, waking up roughly every 100 milliseconds:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # log_delays (fun () -> after (sec 0.5))
-0.038147ms, 101.254ms, 201.826ms, 305.019ms, 410.269ms, 501.83ms, 
+0.038147ms, 101.254ms, 201.826ms, 305.019ms, 410.269ms, 501.83ms,
 - : unit = ()
 ```
 
 Now see what happens if, instead of waiting on a clock event, we wait for a
 busy loop to finish running:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # let busy_loop () =
     let x = ref None in
     for i = 1 to 100_000_000 do x := Some i done
 val busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> return (busy_loop ()))
-2.12909s, 
+2.12909s,
 - : unit = ()
 ```
 
@@ -1646,9 +1647,9 @@ blocked out entirely while `busy_loop` churns away.
 If, on the other hand, we use `In_thread.run` to offload this to a different
 system thread, the behavior will be different:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # log_delays (fun () -> In_thread.run busy_loop)
-0.0460148ms, 312.767ms, 415.486ms, 521.813ms, 631.633ms, 792.659ms, 896.126ms, 1.00168s, 1.10679s, 1.21284s, 1.31803s, 1.42162s, 1.52478s, 1.63463s, 1.7379s, 1.84361s, 1.95302s, 2.13509s, 
+0.0460148ms, 312.767ms, 415.486ms, 521.813ms, 631.633ms, 792.659ms, 896.126ms, 1.00168s, 1.10679s, 1.21284s, 1.31803s, 1.42162s, 1.52478s, 1.63463s, 1.7379s, 1.84361s, 1.95302s, 2.13509s,
 - : unit = ()
 ```
 
@@ -1665,12 +1666,12 @@ there's a piece of code that doesn't allocate at all, then it will never
 allow another OCaml thread to run. Bytecode doesn't have this behavior, so if
 we run a nonallocating loop in bytecode, our timer process will get to run:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # let noalloc_busy_loop () =
     for i = 0 to 100_000_000 do () done
 val noalloc_busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> In_thread.run noalloc_busy_loop)
-0.0400543ms, 130.686ms, 239.836ms, 340.546ms, 443.258ms, 605.56ms, 710.801ms, 870.451ms, 980.326ms, 1.03697s, 
+0.0400543ms, 130.686ms, 239.836ms, 340.546ms, 443.258ms, 605.56ms, 710.801ms, 870.451ms, 980.326ms, 1.03697s,
 - : unit = ()
 ```
 
@@ -1723,4 +1724,3 @@ the `Thread_safe` module in Async, and thereby run Async computations safely.
 This is a very flexible way of connecting threads to the Async world, but
 it's a complex use case that is beyond the scope of this chapter.
 <a data-type="indexterm" data-startref="systhrd">&nbsp;</a><a data-type="indexterm" data-startref="ALsysthr">&nbsp;</a>
-
