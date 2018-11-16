@@ -87,6 +87,7 @@ let () =
               List.iter (function
                   | `Ellipsis    -> Fmt.pf ppf "  ...\n"
                   | `Output line -> Fmt.pf ppf "  %s\n" (ansi_color_strip line)
+                  | `Exit_code _ -> ()
                 ) output;
               Cram.pp_exit_code ppf n
         ) items;

@@ -1,8 +1,0 @@
-#use "topfind";;
-#thread;;
-#require "core";;
-#require "ppx_jane";;
-open Core;;
-[@@@part "1"];;
-Command.basic;;
-[%%expect ocaml {|- : unit Command.basic_command = <fun>|}];;

@@ -1,6 +1,0 @@
-  $ dune build test_interval_nosexp.exe
-        ocamlc .test_interval_nosexp.eobjs/test_interval_nosexp.{cmi,cmo,cmt} (exit 2)
-  ...
-  File "test_interval_nosexp.ml", line 13, characters 20-42:
-  Error: Unbound value Int_interval.sexp_of_t
-@@ exit 1

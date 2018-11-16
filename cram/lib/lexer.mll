@@ -16,6 +16,7 @@
 
 let eol = '\n' | eof
 let ws = ' ' | '\t'
+let digit = ['0' - '9']+
 
 rule file = parse
  | eof { [] }
@@ -23,6 +24,7 @@ rule file = parse
  | "%% --non-deterministic [skip]" ws* eol { `Non_det `Command :: file lexbuf }
  | "%%" ([^'\n']* as str) eol              { err lexbuf "invalid pre-condition: %s" str }
  | "### " ([^'\n']* as str) eol { `Part str    :: file lexbuf }
+ | "@@ exit " (digit+ as n) eol { `Exit_code (int_of_string n) :: file lexbuf }
  | "  " ws* "..." ws* eol       { `Ellipsis    :: file lexbuf }
  | "  $ " ([^'\n']* as str) eol { `Command str :: file lexbuf }
  | "  " ([^'\n']* as str) eol   { `Output  str :: file lexbuf }

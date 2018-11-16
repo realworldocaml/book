@@ -1,7 +1,0 @@
-  $ dune build md5.exe
-%% --non-deterministic
-  $ ./_build/default/md5.exe /etc/services
-  6501e9c7bf20b1dc56f015e341f79833
-  $ ./_build/default/md5.exe /dev/null
-  '/dev/null' is not a regular file.
-@@ exit 1

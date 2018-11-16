@@ -15,6 +15,9 @@ RUN opam depext -iy core async ppx_sexp_conv ppx_deriving jbuilder \
     # ctypes-foreign textwrap uri
     # cohttp-async
 
+# until a new release of mdx
+RUN opam pin add -y mdx --dev
+
 #install pandoc
 WORKDIR /tmp
 RUN curl -OL https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-1-amd64.deb && sudo dpkg -i pandoc-2.1.3-1-amd64.deb

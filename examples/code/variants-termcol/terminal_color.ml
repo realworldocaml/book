@@ -23,7 +23,7 @@ let color_to_int = function
     base + basic_color_to_int basic_color
   | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
   | `Gray i -> 232 + i
- 
+
 let extended_color_to_int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Grey x -> 2000 + x

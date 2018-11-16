@@ -2,6 +2,8 @@
 open Printf
 open Sexplib.Conv
 
+let (/) = Filename.concat
+
 (** Directory and file traversal functions *)
 
 (** [find_dirs_containing ~exts base] will return all the sub-directories
@@ -46,39 +48,20 @@ let static_extensions =
 
 (** Process the book chapters *)
 
-(** Find the dependencies within an HTML file *)
-let deps_of_chapter file =
-  let open Soup in
-  read_file file |>
-  parse |> fun s ->
-  s $$ "link[rel][href]" |>
-  fold (fun a n -> R.attribute "href" n :: a) [] |>
-  List.sort_uniq String.compare
-
 let toc_file = "toc.scm"
 
-let dune_for_chapter base_dir file =
-  let examples_dir = "../examples" in
-  let pad = "\n           " in
-  let deps =
-    deps_of_chapter (Filename.concat base_dir file) |>
-    List.map (fun f -> sprintf "%s/%s" examples_dir f) |>
-    List.map (fun s -> s) |>
-    String.concat pad
-    |> function
-    | "" -> ""
-    | s  -> pad ^ s
-  in
+let dune_for_chapter file =
   let file = (Filename.remove_extension file) ^ ".html" in
   sprintf {|(alias (name site) (deps %s))
 
 (rule
   (targets %s)
   (deps    (:x ../book/%s)
+           (alias ../book/html)
            ../bin/bin/app.exe
-           ../book/%s%s)
-  (action  (run rwo-build build chapter -o . -code ../examples -repo-root .. %%{x})))|}
-    file file file toc_file deps
+           ../book/%s)
+  (action  (run rwo-build build chapter -o . -repo-root .. %%{x})))|}
+    file file file toc_file
 
 type part = {
   title   : string;
@@ -88,7 +71,7 @@ type part = {
 type toc = [ `part of part | `chapter of string] list [@@deriving sexp]
 
 let read_toc base_dir =
-  let f = Filename.concat base_dir toc_file in
+  let f = base_dir / toc_file in
   let s = Sexplib.Sexp.load_sexps f in
   toc_of_sexp (Sexplib.Sexp.List s)
 
@@ -103,7 +86,7 @@ let frontpage_chapter ?(deps=[]) name =
   sprintf {|(alias (name site) (deps %s.html))
   (rule
     (targets %s.html)
-    (deps    ../book/%s.html ../bin/bin/app.exe %s)
+    (deps    (alias ../book/html) ../book/%s.html ../bin/bin/app.exe %s)
     (action  (run rwo-build build %s -o . -repo-root ..)))|}
     name name name
     (String.concat " " deps)
@@ -127,7 +110,7 @@ let process_chapters ~toc book_dir output_dir =
   files_with ~exts:[".html";".md"] book_dir |>
   List.sort String.compare |>
   List.map (function
-    | file when is_chapter toc file -> dune_for_chapter book_dir file
+    | file when is_chapter toc file -> dune_for_chapter file
     | "install.html" -> frontpage_chapter "install"
     | "faqs.html" -> frontpage_chapter "faqs"
     | "toc.html" -> frontpage_chapter ~deps:["../book/"^toc_file] "toc"
@@ -136,108 +119,55 @@ let process_chapters ~toc book_dir output_dir =
     ) |>
   List.filter ((<>)"") |>
   String.concat "\n\n" |> fun s ->
-  find_static_files () ^ s |>
-  emit_file (Filename.concat output_dir "dune")
-
-(** Handle examples *)
-
-(* build a valid dune alias name *)
-let to_alias s = String.map (function
-    | '/' -> '-'
-    | c   -> c
-  ) s
-
-let mlt_rule ~dir base =
-  let alias = to_alias (Filename.concat dir base) in
-  let alias name cmd =
-    sprintf {|(alias
- (name    %s-%s)
- (deps   (source_tree %s))
- (action
-   (chdir %s
-    (progn
-     (setenv OCAMLRUNPARAM "" (run %s %s))
-     (diff? %s %s.corrected)))))
-
-(alias
-  (name %s)
-  (deps (alias %s-%s)))|}
-      name alias dir dir cmd base base base name name alias
-  in
-  sprintf "%s\n\n%s\n"
-    (alias "runtest"     "ocaml-topexpect -short-paths -verbose")
-    (alias "runtest-all" "ocaml-topexpect -non-deterministic -short-paths -verbose")
-
-let sh_rule ~dir base =
-  let alias = to_alias (Filename.concat dir base) in
-  let alias name cmd =
-    sprintf {|(alias
- (name     %s-%s)
- (deps     (source_tree %s))
- (action
-   (chdir %s
-    (progn
-     (run %s %s)
-     (diff? %s %s.corrected)))))
-
-(alias
-  (name %s)
-  (deps (alias %s-%s)))|}
-      name alias dir dir cmd base base base name name alias
-  in
-  sprintf "%s\n\n%s\n"
-    (alias "runtest"     "cram")
-    (alias "runtest-all" "cram --non-deterministic")
-
-let process_example ~root dir =
-  let rdir =
-    if root = dir then "."
-    else
-      let rlen = String.length root + 1 in
-      String.sub dir rlen (String.length dir - rlen)
-  in
-  files_with ~exts:book_extensions dir |>
-  List.map (function
-      | f when Filename.extension f = ".mlt"   -> mlt_rule ~dir:rdir f
-      | f when Filename.extension f = ".sh"    -> sh_rule ~dir:rdir f
-      | f when Filename.extension f = ".errsh" -> sh_rule ~dir:rdir f
-      | f -> printf "skipping %s/%s\n%!" dir f; ""
-    ) |>
-  List.filter ((<>) "")
-
-let process_examples dir =
-  let dirs =
-    find_dirs_containing ~ignore_dirs:["_build"] ~exts:book_extensions dir
-  in
-  Filename.concat dir "dune" |> fun dune ->
-  List.map (process_example ~root:dir) dirs |>
-  List.flatten |>
-  List.sort_uniq String.compare |>
-  String.concat "\n" |>
-  fun x ->  emit_file dune ("(ignored_subdirs (code))\n\n" ^ x)
+  find_static_files () ^ s  ^ "\n" |>
+  emit_file (output_dir / "dune")
 
 let process_md ~toc book_dir =
-  files_with ~exts:[".md"] book_dir |>
-  List.sort String.compare |>
-  List.map (fun file ->
-      if not (is_chapter toc file) then ""
-      else
-        let html = (Filename.remove_extension file) ^ ".html" in
-        sprintf {|
-(rule
- (targets %s)
- (deps    %s)
- (action  (run
-    pandoc --section-divs -f markdown-smart-auto_identifiers -t html5
-    %%{deps} -o %%{targets})))|}
-          html file
-    ) |>
-  List.filter ((<>) "") |>
-  String.concat "\n" |>
-  emit_file (Filename.concat book_dir "dune")
+  let part acc = function
+    | `part p    -> List.rev_append p.chapters acc
+    | `chapter f -> f :: acc
+  in
+  let toc = List.fold_left part [] toc in
+  let toc = List.sort String.compare toc in
+  let html_alias =
+    let file f = f ^ ".html" in
+    let toc = List.map file toc in
+    let toc = String.concat "\n        " toc in
+    sprintf "(alias\n  (name html)\n  (deps %s))" toc
+  in
+  let main_dune () =
+    List.map (fun chapter ->
+        let html = chapter ^ ".html" in
+        sprintf {|(rule
+  (targets %s)
+  (deps    %s)
+  (action  (run mdx output %%{deps} -o %%{targets})))|}
+          html (chapter / "README.md")
+      ) toc |>
+    (fun x -> html_alias :: x) |>
+    String.concat "\n\n" |>
+    (fun x -> x ^ "\n") |>
+    emit_file (book_dir / "dune")
+  in
+  let chapter_dune chapter =
+    let file = {|(rule (with-stdout-to dune.gen
+  (run mdx rule README.md --prelude ../prelude.ml)))
+
+(alias
+ (name   runtest)
+ (action (diff dune.inc dune.gen)))
+
+(include dune.inc)
+|}
+    in
+    let dir = book_dir / chapter in
+    if not (Sys.file_exists dir) then Unix.mkdir dir 0o755;
+    emit_file (book_dir / chapter / "dune") file
+  in
+  main_dune ();
+  List.iter chapter_dune toc
 
 let _ =
   let toc = read_toc "book" in
   process_md ~toc "book";
-  process_examples "examples";
   process_chapters ~toc "book" "static";

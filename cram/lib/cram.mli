@@ -2,7 +2,7 @@
     format. *)
 
 (** The type for output lines. *)
-type output = [`Output of string | `Ellipsis]
+type output = [`Output of string | `Ellipsis | `Exit_code of int]
 
 (** The type for all lines. *)
 type line = [
@@ -10,6 +10,7 @@ type line = [
   | `Command of string
   | `Comment of string
   | `Part    of string
+  | `Exit_code of int
   | `Non_det of [`Output | `Command]
 ]
 
@@ -24,6 +25,7 @@ type test = {
   non_deterministic: [`Command | `Output | `False];
   command: string;
   output: output list;
+  exit_code: int;
   lines: line list;
 }
 

@@ -139,7 +139,7 @@ end
 
 let of_toc book_dir toc =
   let chapter part_info number basename =
-    let file = book_dir/basename in
+    let file = book_dir/basename ^ ".html" in
     Html.of_file file >>| fun html ->
     let title = get_title file html in
     let sections = get_sections ~filename:file html in
@@ -195,16 +195,6 @@ let flatten_chapters t =
 
 let get_chapters ?repo_root () =
   get ?repo_root () >>| flatten_chapters
-
-let imported_files ?(repo_root=".") () =
-  get_chapters ~repo_root () >>= fun chapters ->
-  Deferred.List.map chapters ~f:(fun chapter ->
-      Html.of_file ("book"/chapter.filename) >>| fun html ->
-      Import.find_all html |> fun l ->
-      List.map l ~f:(fun x -> repo_root/"book"/x.Import.href)
-    ) >>| fun ll ->
-  List.concat ll |> fun l ->
-  List.dedup_and_sort ~compare:String.compare l
 
 let code_files ?(repo_root=".") () =
   Util.find_files (repo_root/"examples"/"code") >>|

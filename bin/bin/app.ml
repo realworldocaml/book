@@ -29,14 +29,6 @@ module Params = struct
     let doc = sprintf "DIR Output directory. Default: \"%s\"" default in
     flag "-o" (optional_with_default default file) ~doc
 
-  let code_dir =
-    let default = "examples" in
-    let doc =
-      sprintf "DIR Directory with code examples. Default: \"%s\""
-        default
-    in
-    flag "-code" (optional_with_default default file) ~doc
-
   let file =
     anon ("file" %: file)
 
@@ -57,13 +49,11 @@ let build_chapter : Command.t =
   Command.async ~summary:"build chapter"
     [%map_open
       let repo_root = Params.repo_root
-      and code_dir = Params.code_dir
       and out_dir = Params.out_dir
       and file = Params.file
       in
       fun () ->
-        Book.make ~code_dir
-          ~repo_root ~out_dir (`Chapter file) ]
+        Book.make ~repo_root ~out_dir (`Chapter file) ]
 
 let build_frontpage : Command.t =
   Command.async ~summary:"build frontpage"
@@ -104,33 +94,12 @@ let build : Command.t =
 
 
 (******************************************************************************)
-(* `validate` command                                                         *)
-(******************************************************************************)
-let validate : Command.t =
-  Command.async ~summary:"validate various things"
-    [%map_open
-      let repo_root = Params.repo_root in
-      fun () ->
-        let open Deferred.Let_syntax in
-        let%bind imported_files = Toc.imported_files ~repo_root () in
-        let%map code_files = Toc.code_files ~repo_root () in
-        let imported_files = String.Set.of_list imported_files in
-        let code_files = String.Set.of_list code_files in
-        let diff = Set.diff code_files imported_files |> Set.to_list in
-        if List.length diff <> 0 then
-          Log.Global.error
-            "following files are not used:%s"
-            (List.map diff ~f:(fun x -> "\n  "^x) |> String.concat ~sep:"")
-    ]
-
-(******************************************************************************)
 (* `main` command                                                             *)
 (******************************************************************************)
 let main =
   Command.group
     ~summary:"Real World OCaml authoring and publication tools"
     [ "build", build
-    ; "validate", validate
     ]
 
 let () =
