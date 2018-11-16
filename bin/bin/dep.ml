@@ -149,23 +149,7 @@ let process_md ~toc book_dir =
     (fun x -> x ^ "\n") |>
     emit_file (book_dir / "dune")
   in
-  let chapter_dune chapter =
-    let file = {|(rule (with-stdout-to dune.gen
-  (run mdx rule README.md --prelude ../prelude.ml)))
-
-(alias
- (name   runtest)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
-|}
-    in
-    let dir = book_dir / chapter in
-    if not (Sys.file_exists dir) then Unix.mkdir dir 0o755;
-    emit_file (book_dir / chapter / "dune") file
-  in
-  main_dune ();
-  List.iter chapter_dune toc
+  main_dune ()
 
 let _ =
   let toc = read_toc "book" in
