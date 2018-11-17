@@ -73,8 +73,9 @@ to find a key in one table isn't a failure of any sort:
       | Some data' when data' <> data -> key :: mismatches
       | _ -> mismatches
     )
-val find_mismatches : ('a, int) Hashtbl.t -> ('a, int) Hashtbl.t -> 'a list =
-  <fun>
+val find_mismatches :
+  ('a, int) Core_kernel.Hashtbl.t ->
+  ('a, int) Core_kernel.Hashtbl.t -> 'a list = <fun>
 ```
 
 The use of options to encode errors underlines the fact that it's not clear

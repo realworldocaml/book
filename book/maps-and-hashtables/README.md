@@ -388,7 +388,7 @@ Error: This expression has type
        but an expression was expected of type
          (string, int, String.comparator_witness) Map.t
        Type Reverse.comparator_witness is not compatible with type
-         String.comparator_witness
+         String.comparator_witness 
 ```
 
 ### The Polymorphic Comparator
@@ -419,7 +419,7 @@ Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness
+         Comparator.Poly.comparator_witness 
 ```
 
 This is rejected for good reason: there's no guarantee that the comparator
@@ -725,7 +725,7 @@ Error: This expression has type
          (string, int, Reverse.comparator_witness)
          Map.Using_comparator.Tree.t
        Type String.comparator_witness is not compatible with type
-         Reverse.comparator_witness
+         Reverse.comparator_witness 
 ```
 
 ## Hash Tables
@@ -786,7 +786,7 @@ building a hashtable can be obtained.
 
 ```ocaml env=main
 # let table = Hashtbl.create (module String)
-val table : (string, '_weak1) Hashtbl.t = <abstr>
+val table : (string, '_weak1) Core_kernel.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:"three" ~data:3
 - : unit = ()
 # Hashtbl.find table "three"
@@ -830,7 +830,7 @@ module Book :
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book)
-val table : (Book.t, '_weak2) Hashtbl.t = <abstr>
+val table : (Book.t, '_weak2) Core_kernel.Hashtbl.t = <abstr>
 ```
 
 You can also create a hashtable based on OCaml's polymorphic hash and
@@ -838,7 +838,7 @@ comparison functions.
 
 ```ocaml env=main
 # let table = Hashtbl.Poly.create ()
-val table : ('_weak3, '_weak4) Hashtbl.t = <abstr>
+val table : ('_weak3, '_weak4) Core_kernel.Hashtbl.t = <abstr>
 # Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!"
 - : unit = ()
 # Hashtbl.find table ("foo",3,[1;2;3])
