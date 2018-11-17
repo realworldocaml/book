@@ -198,7 +198,7 @@ patterns]{.idx}
 # let upcase_first_entry line =
     let (first :: rest) = String.split ~on:',' line in
     String.concat ~sep:"," (String.uppercase first :: rest)
-Characters 34-144:
+Characters 38-53:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []

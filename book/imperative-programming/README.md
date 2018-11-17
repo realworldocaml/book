@@ -1451,7 +1451,9 @@ file that doesn't actually contain numbers, we'll see such an error:
 
 ```ocaml env=file
 # sum_file "/etc/hosts"
-Exception: (Failure "Int.of_string: \"##\"").
+Exception:
+(Failure
+ "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"").
 ```
 
 And if we do this over and over in a loop, we'll eventually run out of file

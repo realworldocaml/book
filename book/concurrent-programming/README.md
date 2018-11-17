@@ -220,7 +220,7 @@ following signature:
 and comes with its own infix equivalent, `>>|`. Using it, we can rewrite
 `count_lines` again a bit more succinctly:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # let count_lines filename =
     Reader.file_contents filename
     >>| fun text ->
