@@ -76,7 +76,7 @@ checking]{.idx}[unit tests]{.idx}
 ### Installing the Yojson Library
 
 There are several JSON libraries available for OCaml. For this chapter, we've
-picked the [Yojson](http://mjambon.com/yojson.html) library by Martin Jambon.
+picked the [Yojson](https://github.com/mjambon/yojson) library by Martin Jambon.
 It's easiest to install via OPAM by running `opam install yojson`. See
 [this Real World OCaml page](http://realworldocaml.org/install) for
 installation instructions if you haven't already got OPAM. Once installed,
