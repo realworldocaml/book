@@ -421,13 +421,13 @@ memory representation/polymorphic variants]{.idx}
 A polymorphic variant without any parameters is stored as an unboxed integer
 and so only takes up one word of memory, just like a normal variant. This
 integer value is determined by applying a hash function to the *name* of the
-variant. The hash function isn't exposed directly by the compiler, but the
-`type_conv` library from Core provides an alternative implementation:
+variant. The hash function is exposed via the `compiler-libs` package that
+reveals some of the internals of the OCaml compiler:
 
 ```ocaml env=reprs
-# Pa_type_conv.hash_variant "Foo"
-Characters 0-25:
-Error: Unbound module Pa_type_conv
+# #require "compiler-libs"
+# Btype.hash_variant "Foo"
+- : int = 3505894
 # (Obj.magic (Obj.repr `Foo) : int)
 - : int = 3505894
 ```
