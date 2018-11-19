@@ -864,7 +864,7 @@ field can be grabbed.
 
 Here's an example of `show_field` in action:
 
-```ocaml env=main2
+```ocaml env=main2,non-deterministic
 # let logon = { Logon.
                 session_id = "26685";
                 time = Time_ns.of_string "2017-07-21 10:11:45 EST";
@@ -911,7 +911,7 @@ can be looked up using the combination of the record and the `Field.t`.
 Now, let's use `Logon.Fields.iter` and `show_field` to print out all the
 fields of a `Logon` record:
 
-```ocaml env=main2
+```ocaml env=main2,non-deterministic
 # let print_logon logon =
     let print to_string field =
       printf "%s\n" (show_field field to_string logon)

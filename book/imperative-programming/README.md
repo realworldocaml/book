@@ -1421,7 +1421,7 @@ files. Here are a couple of functions—one that creates a file full of
 numbers, and the other that reads in such a file and returns the sum of those
 numbers: [files/file I/O]{.idx}[I/O (input/output) operations/file I/O]{.idx}
 
-```ocaml env=file
+```ocaml env=file,non-deterministic
 # let create_number_file filename numbers =
     let outc = Out_channel.create filename in
     List.iter numbers ~f:(fun x -> Out_channel.fprintf outc "%d\n" x);
@@ -1451,7 +1451,9 @@ file that doesn't actually contain numbers, we'll see such an error:
 
 ```ocaml env=file
 # sum_file "/etc/hosts"
-Exception: (Failure "Int.of_string: \"##\"").
+Exception:
+(Failure
+ "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"").
 ```
 
 And if we do this over and over in a loop, we'll eventually run out of file

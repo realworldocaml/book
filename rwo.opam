@@ -33,6 +33,7 @@ depends: [
   "ctypes-foreign"
   "textwrap"
   "uri"
+  "async_graphics"
 ]
 build: ["jbuilder" "build"]
 depexts: [

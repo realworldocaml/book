@@ -973,4 +973,3 @@ explicit than having none of them marked.
 In short, for errors that are a foreseeable and ordinary part of the
 execution of your production code and that are not omnipresent, error-aware
 return types are typically the right solution.
-

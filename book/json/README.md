@@ -824,7 +824,7 @@ specification file:
 $ dune build github_org_t.mli
 $ cat _build/default/github_org_t.mli
 (* Auto-generated from "github_org.atd" *)
-
+              [@@@ocaml.warning "-27-32-35-39"]
 
 type org = {
   login: string;
@@ -846,7 +846,7 @@ generate this serialization code for us in a new file called
 $ dune build github_org_j.mli
 $ cat _build/default/github_org_j.mli
 (* Auto-generated from "github_org.atd" *)
-
+[@@@ocaml.warning "-27-32-35-39"]
 
 type org = Github_org_t.org = {
   login: string;
