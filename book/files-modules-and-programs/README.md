@@ -232,7 +232,7 @@ one.
 open Base
 
 let touch counts line =
-  let count = 
+  let count =
     match List.Assoc.find ~equal:String.equal counts line with
     | None -> 0
     | Some x -> x
@@ -351,7 +351,7 @@ let empty = []
 let to_list x = x
 
 let touch counts line =
-  let count = 
+  let count =
     match List.Assoc.find ~equal:String.equal counts line with
     | None -> 0
     | Some x -> x
@@ -369,7 +369,7 @@ File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
-       Type Counter.t is not compatible with type 'a list 
+       Type Counter.t is not compatible with type 'a list
 [1]
 ```
 
@@ -421,13 +421,13 @@ let touch t s =
   Map.set t ~key:s ~data:(count + 1)
 ```
 
-There's some unfamiliar syntax in the above example, in particular, writing
-`Map.M(String).t` to refer to the type of a map with string keys, and
-`Map.empty (module String)` to generate an empty map. Here, we're making use
-of some more advanced features of the language (specifically, *functors* and
-*first-class modules*, which we'll get to in later chapters). The use of
-these features for the Map data-structure in particular is covered in
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
+There's some unfamiliar syntax in the above example, in particular the
+use of `Map.empty (module String)` to generate an empty map. Here,
+we're making use of a more advanced feature of the language
+(specifically, *first-class modules*, which we'll get to in later
+chapters). The use of these features for the Map data-structure in
+particular is covered in [Maps And Hash
+Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
 
 ## Concrete Types in Signatures
 
@@ -449,7 +449,7 @@ type median = | Median of string
               | Before_and_after of string * string
 
 let median t =
-  let sorted_strings = 
+  let sorted_strings =
     List.sort (Map.to_alist t)
       ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
   in
@@ -1079,4 +1079,3 @@ by working on the implementation. But types and signatures provide a
 lightweight tool for constructing a skeleton of your design in a way that
 helps clarify your goals and intent, before you spend a lot of time and
 effort fleshing it out.
-
