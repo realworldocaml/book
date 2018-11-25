@@ -30,7 +30,7 @@ As we'll see when we get to the module system in
 this same syntax is used for `let` bindings at the top level of a module.
 
 Every variable binding has a *scope*, which is the portion of the code that
-can refer to that binding. When using `utop`, the scope of a top-level 
+can refer to that binding. When using `utop`, the scope of a top-level
 `let` binding is everything that follows it in the session. When it shows up
 in a module, the scope is the remainder of that module.[variables/scope
 of]{.idx}[bindings/scope of]{.idx}[scope]{.idx}
@@ -156,7 +156,7 @@ of]{.idx}
 The answer to this is that variables in OCaml (and generally in functional
 languages) are really more like variables in an equation than a variable in
 an imperative language. If you think about the mathematical identity
-`x(y + z) = xy + xz`, there's no notion of mutating the variables `x`, 
+`x(y + z) = xy + xz`, there's no notion of mutating the variables `x`,
 `y`, and `z`. They vary in the sense that you can instantiate this equation
 with different numbers for those variables, and it still holds.
 
@@ -541,7 +541,7 @@ val ( +! ) : int * int -> int * int -> int * int = <fun>
 - : int * int = (1, 6)
 ```
 
-Note that you have to be careful when dealing with operators containing 
+Note that you have to be careful when dealing with operators containing
 `*`. Consider the following example.
 
 ```ocaml env=main
@@ -564,7 +564,7 @@ The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.
 [Table2_1](variables-and-functions.html#table2_1){data-type=xref} breaks
 the different operators and other syntactic forms into groups from highest to
-lowest precedence, explaining how each behaves syntactically. We write 
+lowest precedence, explaining how each behaves syntactically. We write
 `!`... to indicate the class of operators beginning with `!`.
 
 ::: {#table2_1 data-type=table}
@@ -587,7 +587,7 @@ function application, constructor, `assert`, `lazy` | Left associative
 `if` | -
 `;` | Right associative
 
-Table:  Precedence and associativity 
+Table:  Precedence and associativity
 :::
 
 
@@ -630,15 +630,17 @@ behavior depends critically on the precedence rules described previously.
 val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 ```
 
-It's not quite obvious at first what the purpose of this operator is: it just
-takes a value and a function and applies the function to the value. Despite
-that bland-sounding description, it has the useful role of a sequencing
-operator, similar in spirit to using the pipe character in the UNIX shell.
-Consider, for example, the following code for printing out the unique
-elements of your `PATH`. Note that `List.dedup` that follows removes
-duplicates from a list by sorting the list using the provided comparison
+It's not quite obvious at first what the purpose of this operator is:
+it just takes a value and a function and applies the function to the
+value. Despite that bland-sounding description, it has the useful role
+of a sequencing operator, similar in spirit to using the pipe
+character in the UNIX shell.  Consider, for example, the following
+code for printing out the unique elements of your `PATH`. Note that
+`List.dedup_and_sort` that follows removes duplicates from a list by
+sorting the list using the provided comparison
 function.[lists/duplicate removal]{.idx}[duplicates,
-removing]{.idx}[List.dedup]{.idx}[operators/sequencing operators]{.idx}
+removing]{.idx}[List.dedup_and_sort]{.idx}[operators/sequencing
+operators]{.idx}
 
 ```ocaml env=main
 # open Stdio
@@ -705,7 +707,7 @@ Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
        Type string list is not compatible with type
-         string list -> string list 
+         string list -> string list
 ```
 
 The type error is a little bewildering at first glance. What's going on is
@@ -953,7 +955,7 @@ val concat : ?sep:string -> string -> string -> string = <fun>
 ```
 
 Here, `?` is used in the definition of the function to mark `sep` as
-optional. And while the caller can pass a value of type `string` for 
+optional. And while the caller can pass a value of type `string` for
 `sep`, internally to the function, `sep` is seen as a `string option`, with
 `None` appearing when `sep` is not provided by the caller.
 
@@ -1221,4 +1223,3 @@ usefulness of these features. Labels and optional arguments are very
 effective tools for making your APIs both more convenient and safer, and it's
 worth the effort of learning how to use them
 effectively.<a data-type="indexterm" data-startref="ARGopt">&nbsp;</a><a data-type="indexterm" data-startref="FNCopt">&nbsp;</a>
-
