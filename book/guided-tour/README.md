@@ -827,7 +827,7 @@ to split on.
 # let downcase_extension filename =
     match String.rsplit2 filename ~on:'.' with
     | None -> filename
-    | Some (base,ext) -> 
+    | Some (base,ext) ->
       base ^ "." ^ String.lowercase ext
 val downcase_extension : string -> string = <fun>
 # List.map ~f:downcase_extension
@@ -1383,6 +1383,7 @@ depend on.
 We can now invoke dune to build the executable.
 
 ```sh dir=../../examples/code/guided-tour/sum
+$ dune build sum.exe
 ```
 
 The `.exe` suffix indicates that we're building a native-code executable,
@@ -1413,4 +1414,3 @@ That's it for the guided tour! There are plenty of features left and lots of
 details to explain, but we hope that you now have a sense of what to expect
 from OCaml, and that you'll be more comfortable reading the rest of the book
 as a result.
-
