@@ -422,6 +422,9 @@ compiler warning.
   [@@@warning "-10"]
   let b = Sys.argv; ()
   end
+Characters 54-62:
+Warning 10: this expression should have type unit.
+module Abc : sig val a : unit val b : unit end
 ```
 
 The number in our example is taken from the
@@ -438,12 +441,19 @@ a module implementation can be annotated to indicate that it should not be used 
     let earth = true
     let pluto = true
   end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."]
+module Planets : sig val earth : bool val pluto : bool end
 # module Planets2016 = struct
     let earth = true
     let pluto = false
   end
+module Planets2016 : sig val earth : bool val pluto : bool end
 # let is_pluto_a_planet = Planets.pluto
+Characters 24-37:
+Warning 3: deprecated: module Planets
+Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
+val is_pluto_a_planet : bool = true
 # let is_pluto_a_planet = Planets2016.pluto
+val is_pluto_a_planet : bool = false
 ```
 
 In this case, the `@@deprecated` annotation is only attached to the `Planets` module,
@@ -457,10 +467,16 @@ not be pattern matched upon with a constant literal.
 # type program_result =
   | Error of string [@warn_on_literal_pattern]
   | Exit_code of int
+type program_result = Error of string | Exit_code of int
 # let exit_with = function
   | Error "It blew up" -> 1
   | Exit_code code -> code
   | Error _ -> 100
+Characters 35-47:
+Warning 52: Code should not depend on the actual values of
+this constructor's arguments. They are only for information
+and may change in future versions. (See manual section 9.5)
+val exit_with : program_result -> int = <fun>
 ```
 
 ### Remaining camlp4 stuff (deprecated)
