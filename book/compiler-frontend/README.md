@@ -379,45 +379,50 @@ detailed output:
 :::
 
 
-
 ## Preprocessing Source Code
 
-One powerful feature in OCaml is a facility to extend the standard-language
-grammar without having to modify the compiler. You can roughly think of it as
-a type-safe version of the `cpp` preprocessor used in C/C++ to control
-conditional compilation directives.[grammars/extension of standard
-language]{.idx}[source code/preprocessing of]{.idx #SCpreproc}[compilation
-process/preprocessing source code]{.idx #CPpreproc}
+One powerful feature in OCaml is a facility to extend the standard language via
+_extension points_.  These represent placeholders in the OCaml syntax tree and are
+ignored by the standard compiler tooling, beyond being delimited and stored in
+the abstract syntax tree alongside the normal parsed source code. They are
+intended to be expanded by external tools that select extension nodes that can
+interpret them.  The external tools can choose to generate further OCaml code
+by transforming the input syntax tree, thus forming the basis of an extensible
+preprocessor for the language.
 
-The OCaml distribution includes a system called Camlp4 for writing extensible
-parsers. This provides some OCaml libraries that are used to define grammars,
-as well as dynamically loadable syntax extensions of such grammars. Camlp4
-modules register new language keywords and later transform these keywords (or
-indeed, any portion of the input program) into conventional OCaml code that
-can be understood by the rest of the compiler.[syntax extension/in
-Camlp4]{.idx #SEcamlp}[programming/dynamic programming]{.idx}[dynamic
-programming]{.idx}[Bin_prot library]{.idx}[Sexplib package/sexp
-converter]{.idx}[fieldslib]{.idx}[parsing/extensible
-parsers]{.idx}[extensible parsers]{.idx}[Camlp4 syntax extension
-mechanism]{.idx #camlp}
+There are two primary forms of extension points in OCaml: _attributes_ and
+_extension nodes_.  Let's first run through some examples of what they look
+like, and then see how to use them in your own code.
 
-We've already seen several Core libraries that use Camlp4:
+### Extension Attributes
 
-`Fieldslib`
-: Generates first-class values that represent fields of a record
+Attributes supply additional information that is attached to a node in the OCaml
+syntax tree, and subsequently interpreted and expanded by external tools. 
 
-`Sexplib`
-: To convert types to textual s-expressions
+The basic form of an attribute is the `[@ ... ]` syntax.  The number of `@` symbols
+defines which part of the syntax tree the attribute is bound to:
 
-`Bin_prot`
-: For efficient binary conversion and parsing
+- a single `[@` binds to expressions and individual type definitions.
+- a double `[@@` binds to blocks of code, such as type declarations or class fields.
+- a triple `[@@@` appears as a standalone node, and are not tied to any specific source code node.
 
-These libraries all extend the language in quite a minimal way by adding a
-`with` keyword to type declarations to signify that extra code should be
-generated from that declaration. For example, here's a trivial use of Sexplib
-and Fieldslib:
+The OCaml compiler has some useful builtin attributes that we can use to
+illustrate their use without requiring any external tools.
 
-```ocaml file=../../examples/code/front-end/type_conv_example.ml
+```ocaml
+module Fruit = struct
+  let fn ~a ~b = a + b
+
+  let partial_fn = fn ~a:1
+
+  [@@warning "+6"]
+  let partial_fn = fn ~a:1
+end
+```
+
+#### Common Attributes
+
+```
 open Sexplib.Std
 
 type t = {
@@ -514,6 +519,7 @@ Let's see how `comparelib` solves this problem by running it in `utop`:
 # type t = { foo: string; bar : t }
 type t = { foo : string; bar : t; }
 # type t = { foo: string; bar: t } [@@deriving compare]
+q
 type t = { foo : string; bar : t; }
 val compare : t -> t -> int = <fun>
 ```
@@ -578,6 +584,9 @@ let rec compare =
           | 0 -> compare a__001_.bar b__002_.bar
           | n -> n) : t -> t -> int)
 let _ = compare
+File "comparelib_test.ml", line 1:
+Error: Could not find the .cmi file for interface comparelib_test.mli.
+[2]
 ```
 
 The output contains the original type definition accompanied by some
