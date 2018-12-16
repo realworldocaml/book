@@ -403,24 +403,67 @@ The basic form of an attribute is the `[@ ... ]` syntax.  The number of `@` symb
 defines which part of the syntax tree the attribute is bound to:
 
 - a single `[@` binds to expressions and individual type definitions.
-- a double `[@@` binds to blocks of code, such as type declarations or class fields.
-- a triple `[@@@` appears as a standalone node, and are not tied to any specific source code node.
+- a double `[@@` binds to blocks of code, such as module definitions, type declarations or class fields.
+- a triple `[@@@` appears as a standalone entry in a module implementation or
+ signature, and are not tied to any specific source code node.
 
 The OCaml compiler has some useful builtin attributes that we can use to
-illustrate their use without requiring any external tools.
+illustrate their use without requiring any external tools.  Let's first look
+at the use of the standalone attribute `@@@warning` to toggle an OCaml
+compiler warning.
 
-```ocaml
-module Fruit = struct
-  let fn ~a ~b = a + b
 
-  let partial_fn = fn ~a:1
+```ocaml env=main
+# module Abc = struct
 
-  [@@warning "+6"]
-  let partial_fn = fn ~a:1
-end
+  [@@@warning "+10"]
+  let a = Sys.argv; ()
+
+  [@@@warning "-10"]
+  let b = Sys.argv; ()
+  end
 ```
 
-#### Common Attributes
+The number in our example is taken from the
+[compiler manual page](https://caml.inria.fr/pub/docs/manual-ocaml/native.html);
+in this case warning 10 emits a message if the expression in a sequence
+doesn't have type `unit`.  The `@@@warning` nodes in the module implementation
+cause the compiler to change its behaviour within the scope of that structure only.
+
+A deprecation warning can also be more narrowly attached to a block of code.  For example,
+a module implementation can be annotated to indicate that it should not be used in new code:
+
+```ocaml env=main
+# module Planets = struct
+    let earth = true
+    let pluto = true
+  end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."]
+# module Planets2016 = struct
+    let earth = true
+    let pluto = false
+  end
+# let is_pluto_a_planet = Planets.pluto
+# let is_pluto_a_planet = Planets2016.pluto
+```
+
+In this case, the `@@deprecated` annotation is only attached to the `Planets` module,
+and the human-readable argument string can redirect developers to the newer code.
+
+A warning can also be attached to an individual expression.  In the next example, the
+`warn_on_literal_pattern` indicates that the argument to the type constructor should
+not be pattern matched upon with a constant literal.
+
+```ocaml env=main
+# type program_result =
+  | Error of string [@warn_on_literal_pattern]
+  | Exit_code of int
+# let exit_with = function
+  | Error "It blew up" -> 1
+  | Exit_code code -> code
+  | Error _ -> 100
+```
+
+### Remaining camlp4 stuff (deprecated)
 
 ```
 open Sexplib.Std
@@ -519,7 +562,6 @@ Let's see how `comparelib` solves this problem by running it in `utop`:
 # type t = { foo: string; bar : t }
 type t = { foo : string; bar : t; }
 # type t = { foo: string; bar: t } [@@deriving compare]
-q
 type t = { foo : string; bar : t; }
 val compare : t -> t -> int = <fun>
 ```
