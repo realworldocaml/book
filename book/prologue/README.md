@@ -234,7 +234,7 @@ means that you will need to ensure that you have an up-to-date development
 environment (using the 4.05.0 version of the compiler). The installation
 process is largely automated through the OPAM package manager. Instructions
 on how to it set up and what packages to install can be found at
-[this Real World OCaml page](http://realworldocaml.org/install).[installation
+[this Real World OCaml page](http://dev.realworldocaml.org/install.html).[installation
 instructions]{.idx}[OCaml/installation instructions]{.idx}
 
 `Core` requires a UNIX based operating system, and so only works on systems
@@ -249,7 +249,7 @@ the language and about libraries tools and techniques that will help you be a
 more effective OCaml programmer. But it's no replacement for API
 documentation or the OCaml manual and man pages. You can find documentation
 for all of the libraries and tools referenced in the book
-[online](https://realworldocaml.org/doc).
+[online](https://ocaml.janestreet.com/ocaml-core/).
 
 ### Code Examples
 
