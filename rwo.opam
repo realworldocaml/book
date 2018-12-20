@@ -14,7 +14,6 @@ depends: [
   "ppx_sexp_conv" {build & >= "v0.9.0"}
   "ppx_deriving"
   "dune" {build & >= "1.6.0"}
-  "toplevel_expect_test"
   "patdiff"
   "lambdasoup"
   "sexp_pretty"
