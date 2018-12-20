@@ -1,9 +1,0 @@
-(jbuild_version 1)
-
-(library
- ((name        cram)
-  (public_name cram)
-  (libraries  (fmt sexplib))
-  (preprocess (pps (ppx_jane)))))
-
-(ocamllex (lexer))
