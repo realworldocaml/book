@@ -13,7 +13,7 @@ depends: [
   "async" {>= "v0.11.0"}
   "ppx_sexp_conv" {build & >= "v0.9.0"}
   "ppx_deriving"
-  "jbuilder" {build & >= "1.0+beta9"}
+  "dune" {build & >= "1.6.0"}
   "toplevel_expect_test"
   "patdiff"
   "lambdasoup"
@@ -33,9 +33,10 @@ depends: [
   "ctypes-foreign"
   "textwrap"
   "uri"
+  "mdx"
   "async_graphics"
 ]
-build: ["jbuilder" "build"]
+build: ["dune" "build"]
 depexts: [
   ["tzdata"] {os-distribution = "ubuntu"}
   ["tzdata"] {os-distribution = "debian"}
