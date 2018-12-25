@@ -1,9 +1,9 @@
 # The Compiler Frontend: Parsing and <span class="keep-together">Type Checking</span>
 
-Compiling source code into executable programs is a fairly complex libraries,
-linkers, and assemblers. It's important to understand how these fit together
-to help with your day-to-day workflow of developing, debugging, and deploying
-applications.[compilation process/toolchain for]{.idx}
+Compiling source code into executable programs involves a fairly complex set of
+libraries, linkers, and assemblers. It's important to understand how these fit
+together to help with your day-to-day workflow of developing, debugging, and
+deploying applications.[compilation process/toolchain for]{.idx}
 
 OCaml has a strong emphasis on static type safety and rejects source code
 that doesn't meet its requirements as early as possible. The compiler does
@@ -93,21 +93,17 @@ of:
 : Configuration directives to tailor OCaml for your operating system and
   architecture.
 
-`bytecomp/` and `byterun/`
-: Bytecode compiler and runtime, including the garbage collector (GC).
+`bytecomp/`
+: Bytecode compiler that converts OCaml into an interpreted executable format.
 
-`asmcomp/` and `asmrun/`
-: Native-code compiler and runtime. The native runtime symlinks many modules
-  from the `byterun` directory to share code, most notably the GC.
+`asmcomp/`
+: Native-code compiler that converts OCaml into high performance native code executables.
 
 `parsing/`
 : The OCaml lexer, parser, and libraries for manipulating them.
 
 `typing/`
 : The static type checking implementation and type definitions.
-
-`camlp4/`
-: The source code macro preprocessor.
 
 `driver/`
 : Command-line interfaces for the compiler tools.
