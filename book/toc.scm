@@ -13,6 +13,7 @@
     imperative-programming
     functors
     first-class-modules
+    gadts
     objects
     classes))))
 
