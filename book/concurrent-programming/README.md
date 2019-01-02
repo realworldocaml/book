@@ -134,7 +134,7 @@ uppercase version of its contents.
 # let uppercase_file filename =
     Deferred.bind (Reader.file_contents filename)
       (fun text ->
-         Writer.save filename ~contents:(String.uppercase_ascii text))
+         Writer.save filename ~contents:(String.uppercase text))
 val uppercase_file : string -> unit Deferred.t = <fun>
 # uppercase_file "test.txt"
 - : unit = ()
@@ -154,7 +154,7 @@ includes an infix operator for it: `>>=`. Using this operator, we can rewrite
 # let uppercase_file filename =
     Reader.file_contents filename
     >>= fun text ->
-    Writer.save filename ~contents:(String.uppercase_ascii text)
+    Writer.save filename ~contents:(String.uppercase text)
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
@@ -646,7 +646,7 @@ let run ~uppercase ~port =
       (Tcp.Where_to_listen.of_port port)
       (fun _addr r w ->
         Pipe.transfer (Reader.pipe r) (Writer.pipe w)
-           ~f:(if uppercase then String.uppercase_ascii else Fn.id))
+           ~f:(if uppercase then String.uppercase else Fn.id))
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
   Deferred.never ()
