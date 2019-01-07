@@ -267,7 +267,7 @@ uniform and more readable.
 
 `Let_syntax` works for any monad, and you decide which monad is in use by
 opening the appropriate `Let_syntax` module. Opening `Async` also implicitly
-opens `Deferred.Let_syntax`, but in some contexts you may may want to do that
+opens `Deferred.Let_syntax`, but in some contexts you may want to do that
 explicitly.
 
 To keep things simple, we'll use the infix notation for map and bind for the
