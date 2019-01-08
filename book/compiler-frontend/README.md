@@ -26,7 +26,7 @@ In this chapter, we'll cover the following topics:
 
 - The compilation pipeline and what each stage represents
 
-- Source preprocessing via Camlp4 and the intermediate forms
+- Source preprocessing via ppx and the intermediate forms
 
 - The type-checking process, including module resolution
 
@@ -76,15 +76,10 @@ through this chapter. The source code is available from multiple places:
 
 - Stable releases as <em class="filename">zip</em> and
   <em class="filename">tar</em> archives from the
-  [OCaml download site](http://caml.inria.fr/download.en.html)
+  [OCaml download site](http://ocaml.org/docs/install.html)
 
-- A Subversion anonymous mirror of the main development sources available on
-  the [development resources](http://caml.inria.fr/ocaml/anonsvn.en.html)
-  page online
-
-- A Git mirror of the Subversion repository with all the history and
-  development branches included, browsable online at
-  [GitHub](https://github.com/ocaml/ocaml)
+- A Git repository with all the history and development branches included,
+  browsable online at [GitHub](https://github.com/ocaml/ocaml)
 
 The source tree is split up into subdirectories. The core compiler consists
 of:
@@ -284,7 +279,7 @@ let () =
   ()
 ```
 
-The `ocp-indent` [home page](https://github.com/OCamlPro/ocp-indent) documents
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
