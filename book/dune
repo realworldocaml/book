@@ -11,7 +11,6 @@
         first-class-modules.html
         foreign-function-interface.html
         functors.html
-        gadts.html
         garbage-collector.html
         guided-tour.html
         imperative-programming.html
@@ -79,11 +78,6 @@
 (rule
   (targets functors.html)
   (deps    functors/README.md)
-  (action  (run mdx output %{deps} -o %{targets})))
-
-(rule
-  (targets gadts.html)
-  (deps    gadts/README.md)
   (action  (run mdx output %{deps} -o %{targets})))
 
 (rule
