@@ -241,6 +241,16 @@
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
+(alias (name site) (deps ppx.html))
+
+(rule
+  (targets ppx.html)
+  (deps    (:x ../book/ppx.html)
+           (alias ../book/html)
+           ../bin/bin/app.exe
+           ../book/toc.scm)
+  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
+
 (alias (name site) (deps prologue.html))
 
 (rule
