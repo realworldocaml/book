@@ -27,10 +27,11 @@
     concurrent-programming))))
 
 (part
- ((title "The Runtime System")
+ ((title "The Compiler and Runtime System")
   (chapters
    (foreign-function-interface
     runtime-memory-layout
     garbage-collector
     compiler-frontend
+    ppx
     compiler-backend))))
