@@ -105,9 +105,38 @@ and may change in future versions. (See manual section 9.5)
 val exit_with : program_result -> int = <fun>
 ```
 
-## Understanding ppx extensions 
+#### Commonly used extension attributes
 
 We have already used extension points in [Data Serialization With S
 Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref}
-to generate boilerplate code for handling s-expressions.  We will now look into
-how this works under the hood with the OCaml compiler toolchain.
+to generate boilerplate code for handling s-expressions.
+
+TODO
+
+### Extension Nodes
+
+While extension points are useful for annotating existing source
+code, we also need a mechanism to store generic placeholders
+within the OCaml AST for code generation.  OCaml provides this
+facility via the *extension node* syntax.
+
+The general syntax for an extension node is `[%id expr]`, where
+`id` is an identifier for a particular extension node rewriter
+and `expr` is the payload for the rewriter to parse.
+
+## Using ppx extensions
+
+### ppx in the compiler
+
+
+## Building your first ppx extension
+
+### The AST Mapper and hello world
+
+- replace `[%calc 1+2]` with a constant integer
+
+### ppxlib
+
+Why use ppxlib over direct use of AST-mapper
+
+
