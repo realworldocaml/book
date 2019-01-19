@@ -1,0 +1,146 @@
+(alias
+  (name html)
+  (deps classes.html
+        command-line-parsing.html
+        compiler-backend.html
+        compiler-frontend.html
+        concurrent-programming.html
+        data-serialization.html
+        error-handling.html
+        files-modules-and-programs.html
+        first-class-modules.html
+        foreign-function-interface.html
+        functors.html
+        garbage-collector.html
+        guided-tour.html
+        imperative-programming.html
+        json.html
+        lists-and-patterns.html
+        maps-and-hashtables.html
+        objects.html
+        parsing-with-ocamllex-and-menhir.html
+        prologue.html
+        records.html
+        runtime-memory-layout.html
+        variables-and-functions.html
+        variants.html))
+
+(rule
+  (targets classes.html)
+  (deps    classes/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets command-line-parsing.html)
+  (deps    command-line-parsing/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets compiler-backend.html)
+  (deps    compiler-backend/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets compiler-frontend.html)
+  (deps    compiler-frontend/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets concurrent-programming.html)
+  (deps    concurrent-programming/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets data-serialization.html)
+  (deps    data-serialization/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets error-handling.html)
+  (deps    error-handling/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets files-modules-and-programs.html)
+  (deps    files-modules-and-programs/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets first-class-modules.html)
+  (deps    first-class-modules/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets foreign-function-interface.html)
+  (deps    foreign-function-interface/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets functors.html)
+  (deps    functors/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets garbage-collector.html)
+  (deps    garbage-collector/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets guided-tour.html)
+  (deps    guided-tour/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets imperative-programming.html)
+  (deps    imperative-programming/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets json.html)
+  (deps    json/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets lists-and-patterns.html)
+  (deps    lists-and-patterns/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets maps-and-hashtables.html)
+  (deps    maps-and-hashtables/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets objects.html)
+  (deps    objects/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets parsing-with-ocamllex-and-menhir.html)
+  (deps    parsing-with-ocamllex-and-menhir/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets prologue.html)
+  (deps    prologue/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets records.html)
+  (deps    records/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets runtime-memory-layout.html)
+  (deps    runtime-memory-layout/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets variables-and-functions.html)
+  (deps    variables-and-functions/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets variants.html)
+  (deps    variants/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))

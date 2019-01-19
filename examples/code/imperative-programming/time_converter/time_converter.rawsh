@@ -1,3 +1,0 @@
-$ jbuilder build time_converter.bc
-$ ./_build/default/time_converter.bc
-Pick a timezone:

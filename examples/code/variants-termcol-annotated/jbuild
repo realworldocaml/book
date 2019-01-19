@@ -1,5 +1,0 @@
-(executable
-  ((name terminal_color)
-   (libraries (core))
-  )
-)

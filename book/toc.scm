@@ -1,37 +1,36 @@
-(chapter prologue.md)
+(chapter prologue)
 
 (part
  ((title "Language Concepts")
   (chapters
-   (guided-tour.md
-    variables-and-functions.md
-    lists-and-patterns.md
-    files-modules-and-programs.md
-    records.md
-    variants.md
-    error-handling.md
-    imperative-programming.md
-    functors.md
-    first-class-modules.md
-    objects.md
-    classes.md))))
+   (guided-tour
+    variables-and-functions
+    lists-and-patterns
+    files-modules-and-programs
+    records
+    variants
+    error-handling
+    imperative-programming
+    functors
+    first-class-modules
+    objects
+    classes))))
 
 (part
  ((title "Tools and Techniques")
   (chapters
-   (testing.md
-    maps-and-hashtables.md
-    command-line-parsing.md
-    json.md
-    parsing-with-ocamllex-and-menhir.md
-    data-serialization.md
-    concurrent-programming.md))))
+   (maps-and-hashtables
+    command-line-parsing
+    json
+    parsing-with-ocamllex-and-menhir
+    data-serialization
+    concurrent-programming))))
 
 (part
  ((title "The Runtime System")
   (chapters
-   (foreign-function-interface.md
-    runtime-memory-layout.md
-    garbage-collector.md
-    compiler-frontend.md
-    compiler-backend.md))))
+   (foreign-function-interface
+    runtime-memory-layout
+    garbage-collector
+    compiler-frontend
+    compiler-backend))))

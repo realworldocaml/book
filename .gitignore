@@ -1,6 +1,7 @@
 _build
 _opam
 .depend
+.merlin
 site
 .*.swp
 *~

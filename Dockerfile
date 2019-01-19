@@ -1,15 +1,14 @@
-FROM ocaml/opam:ubuntu-16.04_ocaml-4.06.0
+FROM ocaml/opam2:ubuntu-18.04
 RUN sudo apt-get update && sudo apt-get -y install python-pygments tzdata
-RUN opam repo set-url default https://opam.ocaml.org/
 ENV OPAMYES=1
-ENV OPAMJOBS=3
 WORKDIR /home/opam/src
 
 # update opam
-RUN opam update
+RUN opam switch 4.06
+RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 
 # pre-install dependencies
-RUN opam depext -iy core async ppx_sexp_conv ppx_deriving jbuilder \
+RUN opam depext -iy core async ppx_sexp_conv dune \
     toplevel_expect_test patdiff lambdasoup sexp_pretty fmt re
     # Required for code blocks
     # core_bench mtime yojson astring cryptokit ocp-index atd atdgen ctypes \
@@ -24,4 +23,4 @@ WORKDIR /home/opam/src
 # compile the project
 COPY . /home/opam/src/
 RUN sudo chown -R opam /home/opam/src
-RUN opam config exec -- make
+RUN opam exec -- make

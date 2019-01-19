@@ -35,13 +35,13 @@ There are three main repositories for the book:
   code fragments which are evaluated and inserted into this book.
   They can be checked out separately for easy building by readers.
   The code fragments are evaluted by the `rwo` tool by using the
-  [ocaml-topexpect](https://github.com/let-def/topexpect) toplevel
-  parser.  The working branch is currently the `v2` branch.
+  [mdx](https://github.com/realworldocaml/mdx) mardkown
+  parser.  The working branch is currently the `master` branch.
 - <https://github.com/realworldocaml/book> is this repository, whic
   uses the scripts and examples repositories to compile the HTML
   site online.
 
-All of the code and examples are built using OCaml 4.06.2.
+All of the code and examples are built using OCaml 4.07.1.
 
 ## Building
 

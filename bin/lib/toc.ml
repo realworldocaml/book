@@ -17,7 +17,7 @@ type sections = (section * (section * section list) list) list
 
 type chapter = {
   number : int;
-  filename : string;
+  name : string;
   title : string;
   part_info : part_info option;
   sections : sections;
@@ -139,11 +139,11 @@ end
 
 let of_toc book_dir toc =
   let chapter part_info number basename =
-    let file = book_dir/basename in
+    let file = book_dir / basename ^ ".html" in
     Html.of_file file >>| fun html ->
     let title = get_title file html in
     let sections = get_sections ~filename:file html in
-    { number; filename = basename; part_info; sections; title }
+    { number; name = basename; part_info; sections; title }
   in
   let part ~parts ~chapters title files =
     let part_info = Some { title; number = parts } in
@@ -196,16 +196,6 @@ let flatten_chapters t =
 let get_chapters ?repo_root () =
   get ?repo_root () >>| flatten_chapters
 
-let imported_files ?(repo_root=".") () =
-  get_chapters ~repo_root () >>= fun chapters ->
-  Deferred.List.map chapters ~f:(fun chapter ->
-      Html.of_file ("book"/chapter.filename) >>| fun html ->
-      Import.find_all html |> fun l ->
-      List.map l ~f:(fun x -> repo_root/"book"/x.Import.href)
-    ) >>| fun ll ->
-  List.concat ll |> fun l ->
-  List.dedup_and_sort ~compare:String.compare l
-
 let code_files ?(repo_root=".") () =
   Util.find_files (repo_root/"examples"/"code") >>|
   List.filter ~f:(function
@@ -215,11 +205,11 @@ let code_files ?(repo_root=".") () =
       | _ -> true
     )
 
-let find ~filename (t:t) =
+let find ~name (t:t) =
   let rec aux = function
     | []   -> None
     | h::t ->
-      match List.find h.chapters ~f:(fun c -> c.filename = filename) with
+      match List.find h.chapters ~f:(fun c -> c.name = name) with
       | Some _ as x -> x
       | None -> aux t
   in

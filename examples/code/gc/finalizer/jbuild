@@ -1,6 +1,0 @@
-(executable
-  ((name finalizer)
-   (modules finalizer)
-   (libraries (core async))
-  )
-)

@@ -8,8 +8,6 @@ branches:
 install: scripts/install
 script: scripts/build
 deploy:
-  edge:
-    branch: v1.8.47 # See travis-ci/travis-ci#9312
   provider: pages
   skip_cleanup: true
   local_dir: site

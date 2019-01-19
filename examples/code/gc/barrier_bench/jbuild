@@ -1,6 +1,0 @@
-(executable
-  ((name barrier_bench)
-   (modules barrier_bench)
-   (libraries (core core_bench))
-  )
-)

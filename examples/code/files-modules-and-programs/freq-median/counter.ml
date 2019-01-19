@@ -20,7 +20,7 @@ type median = | Median of string
 let median t =
   let sorted_strings = 
     List.sort (Map.to_alist t)
-      ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
+      ~compare:(fun (_,x) (_,y) -> Int.descending x y)
   in
   let len = List.length sorted_strings in
   if len = 0 then failwith "median: empty frequency count";

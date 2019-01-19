@@ -17,8 +17,12 @@ let create_reference_prefix toc url =
     | None        -> url
     | Some (f, _) -> f
   in
-  match Toc.find ~filename toc with
-  | None   -> failwithf "invalid cross-reference: %s" url ()
+  let name =
+    try Filename.chop_extension filename
+    with Invalid_argument _ -> filename
+  in
+  match Toc.find ~name toc with
+  | None   -> failwithf "invalid cross-reference: %s (%s)" url name ()
   | Some c -> `Data ("Chapter " ^ string_of_int c.number  ^ ", ")
 
 let add_reference toc chapter_file = function

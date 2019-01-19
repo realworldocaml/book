@@ -1,4 +1,0 @@
-  $ jbuilder build counter.bc
-  Don't know how to build counter.bc
-  Hint: did you mean counter.o or counter.ml?
-@@ exit 1

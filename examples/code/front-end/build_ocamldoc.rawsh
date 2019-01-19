@@ -1,4 +1,0 @@
-$ mkdir -p html man/man3
-$ ocamldoc -html -d html doc.ml
-$ ocamldoc -man -d man/man3 doc.ml
-$ man -M man Doc

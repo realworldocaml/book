@@ -14,7 +14,7 @@ let command =
     ~readme:(fun () -> "More detailed information")
     Command.Param.(
      map (anon ("filename" %: string))
-       ~f:(fun filename -> (fun () -> do_hash filename))))
+       ~f:(fun filename -> (fun () -> do_hash filename)))
 
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command

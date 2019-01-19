@@ -1,0 +1,3 @@
+(executable
+  (name      session_info)
+  (libraries core_kernel))

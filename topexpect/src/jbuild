@@ -1,9 +1,0 @@
-(jbuild_version 1)
-
-(executable
- ((name main)
-  (public_name ocaml-topexpect)
-  (modes (byte))  ;; no native code toplevel libs yet
-  (link_flags (-linkall))
-  (libraries (unix compiler-libs.toplevel ppx_sexp_conv findlib.top threads ocaml-topexpect))
-  (preprocess (pps (ppx_sexp_conv)))))
