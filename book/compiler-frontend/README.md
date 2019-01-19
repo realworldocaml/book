@@ -418,14 +418,15 @@ Warning 10: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
 ```
 
-The number in our example is taken from the
-[compiler manual page](https://caml.inria.fr/pub/docs/manual-ocaml/native.html);
-in this case warning 10 emits a message if the expression in a sequence
+The warning number in our example is taken from the
+[compiler manual page](https://caml.inria.fr/pub/docs/manual-ocaml/native.html).
+In this case, warning 10 emits a message if the expression in a sequence
 doesn't have type `unit`.  The `@@@warning` nodes in the module implementation
 cause the compiler to change its behaviour within the scope of that structure only.
 
-A deprecation warning can also be more narrowly attached to a block of code.  For example,
-a module implementation can be annotated to indicate that it should not be used in new code:
+An annotation can also be more narrowly attached to a block of code.  For example,
+a module implementation can be annotated with `@@deprecated` to indicate that it
+should not be used in new code:
 
 ```ocaml env=main
 # module Planets = struct
@@ -450,9 +451,10 @@ val is_pluto_a_planet : bool = false
 In this case, the `@@deprecated` annotation is only attached to the `Planets` module,
 and the human-readable argument string can redirect developers to the newer code.
 
-A warning can also be attached to an individual expression.  In the next example, the
-`warn_on_literal_pattern` indicates that the argument to the type constructor should
-not be pattern matched upon with a constant literal.
+Finally, an attribute can also be attached to an individual expression.  In the
+next example, the `@warn_on_literal_pattern` attribute indicates that the
+argument to the type constructor should not be pattern matched upon with a
+constant literal.
 
 ```ocaml env=main
 # type program_result =
