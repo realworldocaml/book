@@ -9,7 +9,7 @@ RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 
 # pre-install dependencies
 RUN opam depext -iy core async ppx_sexp_conv dune \
-    toplevel_expect_test patdiff lambdasoup sexp_pretty fmt re
+    toplevel_expect_test patdiff lambdasoup sexp_pretty fmt re mdx
     # Required for code blocks
     # core_bench mtime yojson astring cryptokit ocp-index atd atdgen ctypes \
     # ctypes-foreign textwrap uri
