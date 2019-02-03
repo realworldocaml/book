@@ -259,7 +259,7 @@ snippets as you see fit in your own code, without any attribution or other
 restrictions on their use.[OCaml/code examples for]{.idx}
 
 The code repository is available online at
-[<em class="hyperlink">https://github.com/realworldocaml/examples</em>](https://github.com/realworldocaml/examples).
+[<em class="hyperlink">https://github.com/realworldocaml/book/tree/master/examples</em>](https://github.com/realworldocaml/book/tree/master/examples).
 Every code snippet in the book has a clickable header that tells you the
 filename in that repository to find the source code, shell script, or
 ancillary data file that the snippet was sourced from.
