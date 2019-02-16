@@ -85,19 +85,10 @@ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-n
 
   <h3>Arch Linux</h3>
 
-  <p>OPAM is available from the AUR (Arch User Repository). You can
-  install OPAM using <code>yaourt</code>:</p>
+  <p>OPAM is available from the <code>community</code> repository. You can
+  install OPAM using <code>pacman</code>:</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-sudo yaourt -S opam
-</code></pre>
-
-  <p>Or directly using <code>pacman</code>.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-sudo pacman -S base-devel
-wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
-tar -xvf opam.tar.gz &amp;&amp; cd opam
-makepkg
-sudo pacman -U opam-&lt;version&gt;.pkg.tar.xz
+sudo pacman -S opam
 </code></pre>
 
   <h3>Building from source</h3>
