@@ -317,7 +317,7 @@ val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 
 In the above, we've marked every argument to the function with its type, with
 the final annotation indicating the type of the return value. Such type
-annotations can be placed on any expression in an OCaml program:
+annotations can be placed on any expression in an OCaml program.
 
 ### Inferring Generic Types
 
@@ -827,8 +827,9 @@ to split on.
 # let downcase_extension filename =
     match String.rsplit2 filename ~on:'.' with
     | None -> filename
-    | Some (base,ext) ->
-      base ^ "." ^ String.lowercase ext
+    | Some (base, ext) ->
+      let lc_ext = String.lowercase ext in
+      base ^ "." ^ lc_ext
 val downcase_extension : string -> string = <fun>
 # List.map ~f:downcase_extension
     [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
@@ -842,7 +843,7 @@ is automatically opened in every OCaml program.
 ::: {data-type=note}
 #### Nesting lets with let and in
 
-`log_entry` was our first use of `let` to define a new variable within the
+`lc_ext` was our first use of `let` to define a new variable within the
 body of a function. A `let` paired with an `in` can be used to introduce a
 new binding within any local scope, including a function body. The `in` marks
 the beginning of the scope within which the new variable can be used. Thus,
@@ -1242,7 +1243,7 @@ use a `ref` in place of a mutable variable.
 ### For and While Loops
 
 OCaml also supports traditional imperative control-flow constructs like
-`for and while` loops. Here, for example, is some code for permuting an array
+`for` and `while` loops. Here, for example, is some code for permuting an array
 that uses a `for` loop. We use the `Random` module as our source of
 randomness. `Random` starts with a default seed, but you can call
 `Random.self_init` to choose a new seed at random:[Random module]{.idx}[while
