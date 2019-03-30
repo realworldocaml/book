@@ -776,7 +776,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 ```
 
 The example of a Boolean expression language is more than a toy. There's a
-module very much in this spirit in `Base` called `Blang` (short for "Boolean
+module very much in this spirit in `Core_kernel` called `Blang` (short for "Boolean
 language"), and it gets a lot of practical use in a variety of applications.
 The simplification algorithm in particular is useful when you want to use it
 to specialize the evaluation of expressions for which the evaluation of some
