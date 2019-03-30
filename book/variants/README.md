@@ -371,7 +371,7 @@ module Log_entry :
 ```
 
 This record type combines multiple pieces of data into one value. In
-particular, a single `Log_entry.t` has a `session_id`*and* a `time`*and* an
+particular, a single `Log_entry.t` has a `session_id` *and* a `time` *and* an
 `important` flag *and* a `message`. More generally, you can think of record
 types as conjunctions. Variants, on the other hand, are disjunctions, letting
 you represent multiple possibilities, as in the following example:
@@ -386,7 +386,7 @@ type client_message =
   | Log_entry of Log_entry.t
 ```
 
-A `client_message` is a `Logon`*or* a `Heartbeat`*or* a `Log_entry`. If we
+A `client_message` is a `Logon` *or* a `Heartbeat` *or* a `Log_entry`. If we
 want to write code that processes messages generically, rather than code
 specialized to a fixed message type, we need something like `client_message`
 to act as one overarching type for the different possible messages. We can
@@ -776,7 +776,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 ```
 
 The example of a Boolean expression language is more than a toy. There's a
-module very much in this spirit in `Base` called `Blang` (short for "Boolean
+module very much in this spirit in `Core_kernel` called `Blang` (short for "Boolean
 language"), and it gets a lot of practical use in a variety of applications.
 The simplification algorithm in particular is useful when you want to use it
 to specialize the evaluation of expressions for which the evaluation of some
