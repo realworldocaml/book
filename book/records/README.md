@@ -229,7 +229,7 @@ $ ocaml -warn-help | egrep '\b9\b'
 ```
 
 You can think of OCaml's warnings as a powerful set of optional static
-analysis tools. They're enormously helpful in catching all sorts of bugs, and
+analysis tools. They're enormously helpful in catching all sorts of bugs,
 and you should enable them in your build environment. You don't typically
 enable all warnings, but the defaults that ship with the compiler are pretty
 good.
