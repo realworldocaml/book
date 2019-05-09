@@ -9,7 +9,7 @@ module Params = struct
   let repo_root =
     let default = "./" in
     let doc = sprintf "dir Root of repository. Default: \"%s\"." default in
-    flag "-repo-root" (optional_with_default default file) ~doc
+    flag "-repo-root" (optional_with_default default string) ~doc
 
   let production =
     let default = false in
@@ -27,10 +27,10 @@ module Params = struct
   let out_dir =
     let default = "_build" in
     let doc = sprintf "DIR Output directory. Default: \"%s\"" default in
-    flag "-o" (optional_with_default default file) ~doc
+    flag "-o" (optional_with_default default string) ~doc
 
   let file =
-    anon ("file" %: file)
+    anon ("file" %: string)
 
   let run_nondeterministic =
     flag "-run-nondeterministic" no_arg
