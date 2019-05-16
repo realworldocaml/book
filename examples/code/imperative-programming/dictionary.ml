@@ -21,10 +21,9 @@ let create () =
 
 let length t = t.length
 
-let find t key =
+let find t key ~equal =
   List.find_map t.buckets.(hash_bucket key)
-    ~f:(fun (key',data) -> if key' = key then Some data else None)
-
+    ~f:(fun (key', data) -> if (equal key' key) then Some data else None)
 
 [@@@part "3"];;
 let iter t ~f =
@@ -34,15 +33,15 @@ let iter t ~f =
 
 
 [@@@part "4"];;
-let bucket_has_key t i key =
-  List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key)
+let bucket_has_key t i key ~equal =
+  List.exists t.buckets.(i) ~f:(fun (key',_) -> equal key' key)
 
-let add t ~key ~data =
+let add t ~key ~data ~equal =
   let i = hash_bucket key in
-  let replace = bucket_has_key t i key in
+  let replace = bucket_has_key t i key ~equal:equal in
   let filtered_bucket =
     if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (equal key' key))
     else
       t.buckets.(i)
   in
@@ -51,9 +50,9 @@ let add t ~key ~data =
 
 let remove t key =
   let i = hash_bucket key in
-  if bucket_has_key t i key then (
+  if bucket_has_key t i key ~equal then (
     let filtered_bucket =
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (equal key' key))
     in
     t.buckets.(i) <- filtered_bucket;
     t.length <- t.length - 1
