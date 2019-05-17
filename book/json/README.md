@@ -11,7 +11,7 @@ formats/JSON]{.idx #SERjson}[data serialization/with JSON]{.idx #DATjson}
 
 We'll start by using the popular and simple JSON data format and then look at
 other serialization formats later in the book. This chapter introduces you to
-a couple of new techniques that glue together the basic ideas from Part I off
+a couple of new techniques that glue together the basic ideas from Part I of
 the book by using:
 
 - *Polymorphic variants* to write more extensible libraries and protocols
