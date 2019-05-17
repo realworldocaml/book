@@ -781,7 +781,7 @@ flag]{.idx data-primary-sortas=j-std}[flags]{.idx}
 : Always explicitly outputs a JSON value if possible. This requires the
   default value for that field to be defined in the ATD specification.
 
-The full [ATD specification](http://mjambon.com/atdgen/atdgen-manual.html) is
+The full [ATD specification](https://atd.readthedocs.io/en/latest/) is
 quite sophisticated and documented online. The ATD compiler can also target
 formats other than JSON and outputs code for other languages (such as Java)
 if you need more interoperability.
