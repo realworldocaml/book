@@ -31865,7 +31865,7 @@ let () =
 
           <para>Using the frame pointer changes the OCaml calling convention,
           but OPAM takes care of recompiling all your libraries with the new
-          interface. You can read more about this on the OCamlPro <ulink url="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</ulink>.</para>
+          interface. You can read more about this on the OCamlPro <ulink url="https://www.ocamlpro.com/2012/08/08/profiling-ocaml-amd64-code-under-linux/">blog</ulink>.</para>
         </sidebar>
       </sect3>
     </sect2>
