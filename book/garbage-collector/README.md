@@ -79,7 +79,7 @@ You can also control the behavior of OCaml programs by setting the
 lets you set GC parameters without recompiling, for example to benchmark the
 effects of different settings. The format of `OCAMLRUNPARAM` is documented in
 the
-[ OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html).
+[ OCaml manual](https://caml.inria.fr/pub/docs/manual-ocaml/runtime.html).
 
 </aside>
 
