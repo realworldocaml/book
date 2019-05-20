@@ -42,7 +42,7 @@ Once that's done, Ctypes is available via OPAM as usual:
 
 ```
 $ brew install libffi     # for MacOS X users
-$ opam install ctypes
+$ opam install ctypes-foreign
 $ utop
 # require "ctypes.foreign" ;;
 ```
