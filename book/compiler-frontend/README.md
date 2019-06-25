@@ -1,9 +1,9 @@
 # The Compiler Frontend: Parsing and <span class="keep-together">Type Checking</span>
 
-Compiling source code into executable programs is a fairly complex libraries,
-linkers, and assemblers. It's important to understand how these fit together
-to help with your day-to-day workflow of developing, debugging, and deploying
-applications.[compilation process/toolchain for]{.idx}
+Compiling source code into executable programs involves a fairly complex set of
+libraries, linkers, and assemblers. It's important to understand how these fit
+together to help with your day-to-day workflow of developing, debugging, and
+deploying applications.[compilation process/toolchain for]{.idx}
 
 OCaml has a strong emphasis on static type safety and rejects source code
 that doesn't meet its requirements as early as possible. The compiler does
@@ -25,8 +25,6 @@ toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlopt]{.idx}
 In this chapter, we'll cover the following topics:
 
 - The compilation pipeline and what each stage represents
-
-- Source preprocessing via Camlp4 and the intermediate forms
 
 - The type-checking process, including module resolution
 
@@ -76,15 +74,10 @@ through this chapter. The source code is available from multiple places:
 
 - Stable releases as <em class="filename">zip</em> and
   <em class="filename">tar</em> archives from the
-  [OCaml download site](http://caml.inria.fr/download.en.html)
+  [OCaml download site](http://ocaml.org/docs/install.html)
 
-- A Subversion anonymous mirror of the main development sources available on
-  the [development resources](http://caml.inria.fr/ocaml/anonsvn.en.html)
-  page online
-
-- A Git mirror of the Subversion repository with all the history and
-  development branches included, browsable online at
-  [GitHub](https://github.com/ocaml/ocaml)
+- A Git repository with all the history and development branches included,
+  browsable online at [GitHub](https://github.com/ocaml/ocaml)
 
 The source tree is split up into subdirectories. The core compiler consists
 of:
@@ -93,21 +86,17 @@ of:
 : Configuration directives to tailor OCaml for your operating system and
   architecture.
 
-`bytecomp/` and `byterun/`
-: Bytecode compiler and runtime, including the garbage collector (GC).
+`bytecomp/`
+: Bytecode compiler that converts OCaml into an interpreted executable format.
 
-`asmcomp/` and `asmrun/`
-: Native-code compiler and runtime. The native runtime symlinks many modules
-  from the `byterun` directory to share code, most notably the GC.
+`asmcomp/`
+: Native-code compiler that converts OCaml into high performance native code executables.
 
 `parsing/`
 : The OCaml lexer, parser, and libraries for manipulating them.
 
 `typing/`
 : The static type checking implementation and type definitions.
-
-`camlp4/`
-: The source code macro preprocessor.
 
 `driver/`
 : Command-line interfaces for the compiler tools.
@@ -288,7 +277,7 @@ let () =
   ()
 ```
 
-The `ocp-indent` [home page](https://github.com/OCamlPro/ocp-indent) documents
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favorite editor. All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
@@ -377,351 +366,6 @@ detailed output:
 - JSON output is available via a custom
   [generator](https://github.com/xen-org/ocamldoc-json) in Xen.
 :::
-
-
-
-## Preprocessing Source Code
-
-One powerful feature in OCaml is a facility to extend the standard-language
-grammar without having to modify the compiler. You can roughly think of it as
-a type-safe version of the `cpp` preprocessor used in C/C++ to control
-conditional compilation directives.[grammars/extension of standard
-language]{.idx}[source code/preprocessing of]{.idx #SCpreproc}[compilation
-process/preprocessing source code]{.idx #CPpreproc}
-
-The OCaml distribution includes a system called Camlp4 for writing extensible
-parsers. This provides some OCaml libraries that are used to define grammars,
-as well as dynamically loadable syntax extensions of such grammars. Camlp4
-modules register new language keywords and later transform these keywords (or
-indeed, any portion of the input program) into conventional OCaml code that
-can be understood by the rest of the compiler.[syntax extension/in
-Camlp4]{.idx #SEcamlp}[programming/dynamic programming]{.idx}[dynamic
-programming]{.idx}[Bin_prot library]{.idx}[Sexplib package/sexp
-converter]{.idx}[fieldslib]{.idx}[parsing/extensible
-parsers]{.idx}[extensible parsers]{.idx}[Camlp4 syntax extension
-mechanism]{.idx #camlp}
-
-We've already seen several Core libraries that use Camlp4:
-
-`Fieldslib`
-: Generates first-class values that represent fields of a record
-
-`Sexplib`
-: To convert types to textual s-expressions
-
-`Bin_prot`
-: For efficient binary conversion and parsing
-
-These libraries all extend the language in quite a minimal way by adding a
-`with` keyword to type declarations to signify that extra code should be
-generated from that declaration. For example, here's a trivial use of Sexplib
-and Fieldslib:
-
-```ocaml file=../../examples/code/front-end/type_conv_example.ml
-open Sexplib.Std
-
-type t = {
-  foo: int;
-  bar: string
-} [@@deriving sexp, fields]
-```
-
-Compiling this code will normally give you a syntax error if you do so
-without Camlp4, since the `with` keyword isn't normally allowed after a type
-definition:
-
-```sh dir=../../examples/code/front-end
-$ ocamlfind ocamlc -c type_conv_example.ml
-File "type_conv_example.ml", line 1, characters 5-16:
-Error: Unbound module Sexplib
-Hint: Did you mean Stdlib?
-[2]
-```
-
-Now add in the syntax extension packages for Fieldslib and Sexplib, and
-everything will compile again:
-
-```
-$ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
-    -package fieldslib.syntax type_conv_example.ml
-```
-
-We've specified a couple of additional flags here. The `-syntax` flag directs
-`ocamlfind` to add the `-pp` flag to the compiler command line. This flag
-instructs the compiler to run the preprocessor during its parsing phase.
-
-The `-package` flag imports other OCaml libraries. The `.syntax` suffix in
-the package name is a convention that indicates these libraries are
-preprocessors that should be run during parsing. The syntax extension modules
-are dynamically loaded into the `camlp4o` command, which rewrites the input
-source code into conventional OCaml code that has no trace of the new
-keywords. The compiler then compiles this transformed code with no knowledge
-of the preprocessor's actions.
-
-Both Fieldslib and Sexplib need this new `with` keyword, but they both can't
-register the same extension. Instead, a library called Type_conv provides the
-common extension framework for them to use. Type_conv registers the `with`
-grammar extension to Camlp4, and the OCamlfind packaging ensures that it's
-loaded before Fieldslib or Sexplib.
-
-The two extensions generate boilerplate OCaml code based on the type
-definition at compilation time. This avoids the performance hit of doing the
-code generation dynamically and also doesn't require a just-in-time (JIT)
-runtime that can be a source of unpredictable dynamic behavior. Instead, all
-the extra code is simply generated at compilation time via Camlp4, and type
-information can be discarded from the runtime image. ["Just-in-Time" dynamic
-patching]{.idx data-primary-sortas=Just}
-
-The syntax extensions accept an input AST and output a modified one. If
-you're not familiar with the Camlp4 module in question, how do you figure out
-what changes it's made to your code? The obvious way is to read the
-documentation that accompanies the extension. Another approach is to use the
-toplevel to explore the extension's behavior or run Camlp4 manually yourself
-to see the transformation in action. We'll show you how to do both of these
-now.
-
-### Using Camlp4 Interactively
-
-The `utop` toplevel can run the phrases that you type through `camlp4`
-automatically. You should have at least these lines in your `~/.ocamlinit`
-file in your home directory (see
-[this Real World OCaml page](http://realworldocaml.org/install) for more
-information):
-
-```ocaml env=camlp4_toplevel
-# #use "topfind"
-# #camlp4o
-```
-
-The first directive loads the `ocamlfind` top-level interface that lets you
-require `ocamlfind` packages (including all their dependent packages). The
-second directive instructs the toplevel to filter all phrases via Camlp4. You
-can now run `utop` and load the syntax extensions in. We'll use the
-`comparelib` syntax extension for our experiments.
-
-OCaml provides a built-in polymorphic comparison operator that inspects the
-runtime representation of two values to see if they're equal. As we noted in
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref},
-the polymorphic comparison is less efficient than defining explicit
-comparison functions between values. However, it quickly becomes tedious to
-manually define comparison functions for complex type definitions.
-[interactive input/with camlp4]{.idx}[polymorphic comparisons]{.idx}
-
-Let's see how `comparelib` solves this problem by running it in `utop`:
-
-```ocaml env=camlp4_toplevel
-# #require "comparelib.syntax"
-# type t = { foo: string; bar : t }
-type t = { foo : string; bar : t; }
-# type t = { foo: string; bar: t } [@@deriving compare]
-type t = { foo : string; bar : t; }
-val compare : t -> t -> int = <fun>
-```
-
-The first definition of `t` is a standard OCaml phrase and results in the
-expected output. The second one includes the `with compare` directive. This
-is intercepted by `comparelib` and transformed into the original type
-definition with two new functions also
-<span class="keep-together">included</span>.
-
-### Running Camlp4 from the Command Line
-
-The toplevel is a quick way to examine the signatures generated from the
-extensions, but how can we see what these new functions actually do? We can't
-do this from `utop` directly, since it embeds the Camlp4 invocation as an
-automated part of its operation.[command-line parsing/with Camlp4]{.idx}
-
-Let's turn to the command line to obtain the result of the `comparelib`
-transformation instead. Create a file that contains the type declaration from
-earlier:
-
-```ocaml file=../../examples/code/front-end/comparelib_test.ml
-open Core_kernel
-
-type t = {
-  foo: string;
-  bar: t
-} [@@deriving compare]
-```
-
-We need to run the Camlp4 binary with the library paths to Comparelib and
-Type_conv. Let's use a small shell script to wrap this invocation:
-
-```
-#!/bin/sh
-
-OCAMLFIND="ocamlfind query -predicates syntax,preprocessor -r"
-INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
-ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
-camlp4o -printer o $INCLUDE $ARCHIVES $1
-```
-
-The script uses the `ocamlfind` package manager to list the include and
-library paths needed by `comparelib`. It then invokes the `camlp4o`
-preprocessor with these paths and outputs the resulting AST to the standard
-output:
-
-```sh dir=../../examples/code/front-end
-$ ocamlfind ocamlc -package ppx_compare -package core_kernel -dsource -linkpkg comparelib_test.ml
-open Core_kernel
-type t = {
-  foo: string ;
-  bar: t }[@@deriving compare]
-let _ = fun (_ : t) -> ()
-let rec compare =
-  (fun a__001_ ->
-     fun b__002_ ->
-       if Ppx_compare_lib.phys_equal a__001_ b__002_
-       then 0
-       else
-         (match compare_string a__001_.foo b__002_.foo with
-          | 0 -> compare a__001_.bar b__002_.bar
-          | n -> n) : t -> t -> int)
-let _ = compare
-```
-
-The output contains the original type definition accompanied by some
-automatically generated code that implements an explicit comparison function
-for each field in the record. If you're using the extension in your compiler
-command line, this generated code is then compiled as if you had typed it in
-yourself.
-
-Note that although the generated code uses `Pervasives.compare`, it is also
-annotated with a `string` type. This lets the compiler use a specialized
-string comparison function and not actually call the runtime polymorphic
-comparison function. This has implications for correctness, too: recall from
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}
-that `comparelib` provides reliable comparison functions that work for values
-that are logically the same but that have differing internal representations
-(e.g., `Int.Set.t`).[wildcards]{.idx}[bindings/wildcards in let
-bindings]{.idx}[let syntax/wildcards in bindings]{.idx}
-
-::: {.allow_break data-type=note}
-#### A Style Note: Wildcards in let Bindings
-
-You may have noticed the `let _ = fun` construct in the autogenerated code
-above. The underscore in a `let` binding is just the same as a wildcard
-underscore in a pattern match, and tells the compiler to accept any return
-value and discard it immediately.
-
-This is fine for mechanically generated code from Type_conv but should be
-avoided in code that you write by hand. If it's a unit-returning expression,
-then write a `unit` binding explicitly instead. This will cause a type error
-if the expression changes type in the future (e.g., due to code refactoring):
-:::
-
-```
-let () = <expr>
-```
-
-If the expression has a different type, then write it explicitly:
-
-```ocaml file=../../examples/code/front-end/let_notunit.ml
-let (_:some_type) = <expr>
-let () = ignore (<expr> : some_type)
-)(* if the expression returns a unit Deferred.t *)
-let () = don't_wait_for (<expr>
-```
-
-The last one is used to ignore Async expressions that should run in the
-background rather than blocking in the current thread.
-
-One other important reason for using wildcard matches is to bind a variable
-name to something that you want to use in future code but don't want to use
-right away. This would normally generate an "unused value" compiler warning.
-These warnings are suppressed for any variable name that's prepended with an
-underscore:
-
-```ocaml file=../../examples/code/front-end/unused_var.ml
-let fn x y =
-  let _z = x + y in
-  ()
-```
-
-Although you don't use `_z` in your code, this will never generate an unused
-variable warning.
-
-### Preprocessing Module Signatures
-
-Another useful feature of `type_conv` is that it can generate module
-signatures, too. Copy the earlier type definition into a
-`comparelib_test.mli` that's got exactly the same
-<span class="keep-together">content</span>:[signatures/preprocessing module
-signatures]{.idx}[modules/preprocessing signatures of]{.idx}
-
-```ocaml file=../../examples/code/front-end/comparelib_test.mli
-open Core_kernel
-
-type t = {
-  foo: string;
-  bar: t
-} [@@deriving compare]
-```
-
-If you rerun the Camlp4 dumper script now, you'll see that different code is
-produced for signature files:
-
-```sh dir=../../examples/code/front-end
-$ ocamlfind ocamlc -package ppx_compare -package core_kernel -dsource -linkpkg comparelib_test.mli
-open Core_kernel
-type t = {
-  foo: string ;
-  bar: t }[@@deriving compare]
-include sig [@@@ocaml.warning "-32"] val compare : t -> t -> int end
-```
-
-The external signature generated by `comparelib` is much simpler than the
-actual code. Running Camlp4 directly on the original source code lets you see
-these all these transformations precisely. [grammars/avoiding grammar
-clashes]{.idx}[macros]{.idx}[conditional
-compilation]{.idx}[whitespace-sensitive indentation]{.idx}[syntax
-extension/potential overuse of]{.idx}
-
-::: {.allow_break data-type=warning}
-#### Don't Overdo the Syntax Extensions
-
-Syntax extensions are a powerful extension mechanism that can completely
-alter your source code's layout and style. Core includes a very conservative
-set of extensions that take care to minimize the syntax changes. There are a
-number of third-party libraries that are much more ambitious—some introduce
-whitespace-sensitive indentation, while others build entirely new embedded
-languages using OCaml as a host language, and yet others introduce
-conditional compilation for macros or optional logging.
-
-While it's tempting to compress all your boilerplate code into Camlp4
-extensions, it can make your source code much harder for other people to
-quickly read and understand. Core mainly focuses on type-driven code
-generation using the `type_conv` extension and doesn't fundamentally change
-the OCaml syntax.
-
-Another thing to consider before deploying your own syntax extension is
-compatibility with other extensions. Two separate extensions can create a
-grammar clash that leads to odd syntax errors and hard-to-reproduce bugs.
-That's why most of Core's syntax extensions go through `type_conv`, which
-acts as a single point for extending the grammar via the `with` keyword.
-:::
-
-
-### Further Reading on Camlp4
-
-We've deliberately only shown you how to use Camlp4 extensions here, and not
-how to build your own. The full details of building new extensions are fairly
-daunting and could be the subject of an entirely new book.[syntax
-extension/building new]{.idx}[extensions]{.idx}
-
-The best resources to get started
-are:<a data-type="indexterm" data-startref="SEcamlp">&nbsp;</a><a data-type="indexterm" data-startref="camlp">&nbsp;</a><a data-type="indexterm" data-startref="SCpreproc">&nbsp;</a><a data-type="indexterm" data-startref="CPpreproc">&nbsp;</a>
-
-- A series of
-  [ blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html)
-  by Jake Donham describe the internals of Camlp4 and its syntax extension
-  mechanism
-
-- The online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4)
-
-- Using OPAM to install existing Camlp4 extensions and inspecting their
-  source code
-
 
 ## Static Type Checking
 
@@ -1451,21 +1095,8 @@ $ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
 ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
 $ ocp-index complete -I ffi Ncur
-Ncurses module
 $ ocp-index complete -I ffi Ncurses.a
-Ncurses.addstr val string -> unit
 $ ocp-index complete -I ffi Ncurses.
-Ncurses.window val window Ctypes.typ
-Ncurses.initscr val unit -> window
-Ncurses.endwin val unit -> unit
-Ncurses.refresh val unit -> unit
-Ncurses.wrefresh val window -> unit
-Ncurses.newwin val int -> int -> int -> int -> window
-Ncurses.mvwaddch val window -> int -> int -> char -> unit
-Ncurses.addstr val string -> unit
-Ncurses.mvwaddstr val window -> int -> int -> string -> unit
-Ncurses.box val window -> char -> char -> unit
-Ncurses.cbreak val unit -> int
 ```
 
 You need to pass `ocp-index` a set of directories to search for `cmt` files
