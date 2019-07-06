@@ -450,7 +450,7 @@ to *`type'`* whose definition is outside of it. One can also apply multiple
 sharing constraints to the same signature:
 
 ```
-<Module_type> with type <type1> = <type1'> and <type2> = <type2'>
+<Module_type> with type <type1> = <type1'> and type <type2> = <type2'>
 ```
 
 We can use a sharing constraint to create a specialized version of
