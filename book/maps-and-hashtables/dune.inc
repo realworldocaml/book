@@ -9,7 +9,7 @@
          (source_tree ../../examples/code/maps-and-hash-tables/map_vs_hash2)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
@@ -26,7 +26,7 @@
          (source_tree ../../examples/code/maps-and-hash-tables/map_vs_hash2)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)

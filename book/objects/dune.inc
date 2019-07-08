@@ -7,7 +7,7 @@
          prelude.ml
          subtyping.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --prelude=subtyping.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --prelude=subtyping.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
@@ -21,7 +21,7 @@
          prelude.ml
          subtyping.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --prelude=subtyping.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --prelude=subtyping.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)

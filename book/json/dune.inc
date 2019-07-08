@@ -12,7 +12,7 @@
          (source_tree ../../examples/code/json)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --root=../../examples/code/json %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --root=../../examples/code/json %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
@@ -36,7 +36,7 @@
          (source_tree ../../examples/code/json)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic --root=../../examples/code/json %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic --root=../../examples/code/json %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)

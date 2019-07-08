@@ -3,7 +3,7 @@
  (deps   (:x README.md)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
 )))
 (alias
@@ -11,6 +11,6 @@
  (deps   (:x README.md)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
 )))

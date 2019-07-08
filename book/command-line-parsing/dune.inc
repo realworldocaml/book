@@ -30,7 +30,7 @@
          (source_tree ../../examples/code/command-line-parsing/md5_with_optional_file_broken)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y15} %{y15}.corrected)
            (diff? %{y14} %{y14}.corrected)
@@ -80,7 +80,7 @@
          (source_tree ../../examples/code/command-line-parsing/md5_with_optional_file_broken)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y15} %{y15}.corrected)
            (diff? %{y14} %{y14}.corrected)

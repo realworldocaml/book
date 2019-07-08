@@ -8,7 +8,7 @@
          (source_tree ../../examples/code/classes-async/shapes)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)

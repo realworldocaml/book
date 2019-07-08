@@ -36,7 +36,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/session_info)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y21} %{y21}.corrected)
            (diff? %{y20} %{y20}.corrected)
@@ -98,7 +98,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/session_info)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y21} %{y21}.corrected)
            (diff? %{y20} %{y20}.corrected)
