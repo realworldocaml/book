@@ -15,7 +15,7 @@
          memo.ml
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
@@ -43,7 +43,7 @@
          memo.ml
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)

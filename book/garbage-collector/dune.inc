@@ -7,7 +7,7 @@
          (source_tree ../../examples/code/gc/finalizer)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y1} %{y1}.corrected)
            (diff? %{y0} %{y0}.corrected))))
@@ -20,7 +20,7 @@
          (source_tree ../../examples/code/gc/finalizer)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y1} %{y1}.corrected)
            (diff? %{y0} %{y0}.corrected))))

@@ -32,7 +32,7 @@ depends: [
   "ctypes-foreign"
   "textwrap"
   "uri"
-  "mdx" {>= "1.2.0"}
+  "mdx" {= "1.4.0"}
   "async_graphics"
 ]
 build: ["dune" "build"]

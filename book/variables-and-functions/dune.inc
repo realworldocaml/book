@@ -9,7 +9,7 @@
          (:y0 ../../examples/code/variables-and-functions/substring_sig2.ml)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y5} %{y5}.corrected)
            (diff? %{y4} %{y4}.corrected)

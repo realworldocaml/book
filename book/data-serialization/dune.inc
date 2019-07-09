@@ -17,7 +17,7 @@
          (source_tree ../../examples/code/sexpr/test_interval_nosexp)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
@@ -47,7 +47,7 @@
          (source_tree ../../examples/code/sexpr/test_interval_nosexp)
          prelude.ml)
  (action (progn
-           (run mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
