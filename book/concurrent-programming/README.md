@@ -540,7 +540,7 @@ netcat tool, which is invoked as `nc`:
 
 
 
-```sh dir=../../examples/code/async/echo
+```sh skip,dir=../../examples/code/async/echo
 $ dune build echo.exe
 $ ./_build/default/echo.exe &
 $ sleep 1
