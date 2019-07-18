@@ -354,7 +354,7 @@ example, the `int` type hint retrieves the runtime integer value. The
 `Obj.is_block` confirms that the value isn't a more complex block, but just
 an OCaml `int`.
 
-Variants that have parameters arguments are a little more complex. They are
+Variants that have parameters are a little more complex. They are
 stored as blocks, with the value *tags* ascending from 0 (counting from
 leftmost variants with parameters). The parameters are stored as words in the
 block:
