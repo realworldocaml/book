@@ -571,7 +571,7 @@ type session_info = { user: Username.t;
                     }
 
 let sessions_have_same_user s1 s2 =
-  Hostname.(=) s1.user s2.host
+  Username.(=) s1.user s2.host
 ```
 
 The preceding code has a bug: it compares the username in one session to the
