@@ -37,7 +37,7 @@ There are three main repositories for the book:
   The code fragments are evaluted by the `rwo` tool by using the
   [mdx](https://github.com/realworldocaml/mdx) mardkown
   parser.  The working branch is currently the `master` branch.
-- <https://github.com/realworldocaml/book> is this repository, whic
+- <https://github.com/realworldocaml/book> is this repository, which
   uses the scripts and examples repositories to compile the HTML
   site online.
 
