@@ -13,7 +13,7 @@ depends: [
   "async" {>= "v0.11.0"}
   "ppx_sexp_conv" {>= "v0.9.0"}
   "ppx_jane"
-  "dune" {build & >= "1.6.0"}
+  "dune" {>= "1.11.0"}
   "patdiff"
   "lambdasoup"
   "sexp_pretty"
