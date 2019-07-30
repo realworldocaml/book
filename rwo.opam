@@ -21,14 +21,14 @@ depends: [
   "fmt"
   "cohttp-async"
   "core_bench"
-  "mtime"
+  "mtime" {< "1.2.0"}
   "yojson"
   "astring"
   "cryptokit"
   "ocp-index"
   "atd"
   "atdgen"
-  "ctypes"
+  "ctypes" {< "0.15.0"}
   "ctypes-foreign"
   "textwrap"
   "uri"
