@@ -1,0 +1,28 @@
+opam-version: "2.0"
+name: "async_graphics"
+version: "0.6.0+dev"
+synopsis: "Async wrapper for the OCaml Graphics library"
+maintainer: "Leo White <leo@lpw25.net>"
+authors: ["Leo White <leo@lpw25.net>"]
+homepage: "https://github.com/lpw25/async_graphics"
+bug-reports: "https://github.com/lpw25/async_graphics/issues"
+dev-repo: "git://github.com/lpw25/async_graphics"
+license: "LGPL-2.0 with OCaml linking exception"
+tags: [
+  "async"
+  "graphics"
+]
+depends: [
+  "graphics"
+  "async" {>= "v0.9"}
+  "async_unix" {>= "v0.12"}
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+description: """
+`async_graphics` is a wrapper for the `graphics` library that
+provides `async` based event handling"""

@@ -1,0 +1,20 @@
+[
+  {
+    "label": "flower",
+    "value": {
+      "petals": [12, 45, 83.5555],
+      "water": "a340bcf02e"
+    }
+  },
+  {
+    "label": "flower",
+    "value": {
+      "petals": "undefined",
+      "fold": null,
+      "water": 0
+    }
+  },
+  { "labels": ["fork", "scissors"],
+    "value": [ 8, 8 ]
+  }
+]

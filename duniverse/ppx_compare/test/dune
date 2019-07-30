@@ -1,0 +1,9 @@
+(library (name comparelib_test)
+ (preprocess (pps ppxlib ppx_compare ppx_inline_test)))
+
+(alias (name DEFAULT) (deps test.ml.pp))
+
+(alias (name runtest) (deps comparelib_test__Check_optims.o)
+ (action
+  (bash
+   "objdump -t comparelib_test__Check_optims.o | { ! grep -Eq 'caml_(compare|equal)'; }")))

@@ -1,0 +1,4 @@
+(test
+ (name test_value_printing)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_value_printing_stubs test_value_printing_bindings tests_common))

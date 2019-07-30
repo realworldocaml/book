@@ -1,0 +1,213 @@
+                              The Biniou format
+                              -----------------
+
+Contents:
+
+1. Grammar
+2. Tags
+3. Fixed-length types
+4. Vints
+5. Field and variant name hashing
+6. Numeric variants
+
+
+
+1. Grammar
+
+
+  TAGVAL ::= TAG VAL    // A biniou value with its matching tag
+
+  VAL ::= ATOM
+        | ARRAY
+        | TUPLE
+        | RECORD
+        | NUM_VARIANT
+        | VARIANT
+        | TABLE
+        | SHARED
+
+  ATOM ::= unit     // 0, using one byte
+         | bool     // 0 for false, 1 for true, using one byte
+         | int8     // 1 arbitrary byte
+         | int16    // 2 arbitrary bytes
+         | int32    // 4 arbitrary bytes
+         | int64    // 8 arbitrary bytes
+         | float32  // IEEE-754 binary32
+         | float64  // IEEE-754 binary64
+         | uvint    // unsigned variable-length int
+         | svint    // signed variable-length int
+         | STRING   // sequence of any number of bytes prefixed by its length
+
+  STRING ::= LENGTH byte*
+  ARRAY ::= LENGTH (TAG VAL* )?
+  NUM_VARIANT ::= NUM_VARIANT_TAG TAGVAL?
+  VARIANT ::= VARIANT_TAG TAGVAL?
+  TUPLE ::= LENGTH TAGVAL*
+  RECORD ::= LENGTH (FIELD_TAG TAGVAL)*
+  TABLE ::= LENGTH (LENGTH (FIELD_TAG TAG)* (VAL* )* )? // list of records
+
+  SHARED ::= OFFSET TAGVAL?  // Value given iff the offset is 0.
+                             // Otherwise, the offset indicates the
+                             // relative position to the left of a SHARED
+                             // to which we are redirected.
+
+  TAG ::= int8               // identifies a type of node
+  LENGTH ::= uvint
+  OFFSET ::= uvint
+  NUM_VARIANT_TAG ::= int8   // 0-127 if no argument, 128-255 if has argument
+  VARIANT_TAG ::= int32      // first bit indicates argument, then 31-bit hash
+  FIELD_TAG ::= int32        // 31-bit hash (first bit always 1)
+
+
+
+2. Tags
+
+
+Tags indicate the shallow structure of any biniou value.
+
+The biniou format is such that the tag of any value is known
+from the input data.  This allows decoding biniou data as a tree
+where each node represents a biniou value, without requiring external
+type information.
+
+The tag values for the various kinds of biniou values are:
+
+    Type of value     Tag
+    ---------------------------
+    bool              0
+    int8              1
+    int16             2
+    int32             3
+    int64             4
+    float32           11
+    float64           12
+    uvint             16
+    svint             17
+    string            18
+    ARRAY             19
+    TUPLE             20
+    RECORD            21
+    NUM_VARIANT       22
+    VARIANT           23
+    unit              24
+    TABLE             25
+    SHARED            26
+
+
+
+3. Fixed-length types
+
+
+Atomic values of type unit, bool, int8, int16, int32, int64, float32 and
+float64 represent arbitrary sequences of 1, 2, 4 or 8 bytes.
+
+In order to make the visualization of data easier,
+the default interpretation of these values shall be used:
+
+    Length
+    in bytes   Type of value   Default interpretation
+    ---------------------------------------------------------------------
+    1          unit            0 represents the unit value
+    1          bool            0 represents false, 1 represents true
+    1          int8            unsigned 8-bit int
+    2          int16           big endian unsigned 16-bit int
+    4          int32           big endian unsigned 32-bit int
+    8          int64           big endian unsigned 64-bit int
+    4          float32         big endian IEEE-754 binary32 (float)
+    8          float64         big endian IEEE-754 binary64 (double)
+
+
+
+4. Vints
+
+
+Vints are a variable-length, byte-aligned representation of
+positive integers.
+
+A vint is represented by a sequence of bytes from least significant
+to most significant.  In all the bytes except the last one, the
+high bit is set to 1 and indicates that more bytes follow.
+The high bit of the last byte is set to 0.
+The remaining 7 bits in each byte represent data.
+
+Here is the representation of some sample values:
+
+           0xxxxxxx
+  0        00000000
+  1        00000001
+  2        00000010
+  127      01111111
+
+           1xxxxxxx 0xxxxxxx
+  128      10000000 00000001
+  129      10000001 00000001
+  255      11111111 00000001
+  256      11111111 00000010
+  16383    11111111 01111111
+
+           1xxxxxxx 1xxxxxxx 0xxxxxxx
+  16384    10000000 10000000 00000001
+  16385    10000001 10000000 00000001
+
+
+Positive integers can be represented by standard vints.
+We call this representation unsigned vint or uvint.
+
+Arbitrary integers can also be represented using vints, after mapping
+to positive integers.  We call this representation signed vint or svint.
+Positive numbers and 0 are mapped to even numbers and negative numbers
+are mapped to odd positive numbers.  Here is the mapping for
+small numbers:
+
+    vint              unsigned	            signed
+    representation    interpretation	    interpretation
+		      (uvint)               (svint)	
+    0xxxxxx0
+    00000000          0	             	    0
+    00000010          2	             	    1
+    00000100          4	                    2
+    00000110          6	                    3
+
+    0xxxxxx1					
+    00000001          1	                    -1
+    00000011          3	                    -2
+    00000101          5                     -3
+
+
+
+5. Field and variant name hashing
+
+
+Record field names and variant names are represented by a
+31-bit tag which must be a hash of the name.  The following
+hash function must be used:
+
+  hash(s):
+    h <- 0
+    for i = 0 to length(s) - 1 do
+      h <- 223 * h + s[i]
+    done
+    h <- h mod 2^31
+    return h
+
+For example, hash("Hello") is 0x37eea2f2.
+
+A full field tag or variant tag is made of 32 bits.
+The first bit is 0 for variants without an argument, and 1 for
+variants with an argument or record fields.
+The remaining 31 bits are the hash of field or variant name described above.
+
+
+
+6. Numeric variants
+
+
+Numeric variants are a more compact alternative to variants using
+32-bit hash-based tags since the tag of numeric variants
+takes only one byte.
+
+The most common use of numeric variants is for an option type.
+A value of type option is either None or Some value,
+e.g. None, Some 123 or Some 0.
+This allows to represent undefined values without
+reserving a special value called null or undefined.

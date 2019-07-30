@@ -1,0 +1,7 @@
+(library
+ (name lwt)
+ (public_name lwt)
+ (synopsis "Monadic promises and concurrent I/O")
+ (wrapped false)
+ (libraries bytes result seq)
+ (flags (:standard -w +A-29)))

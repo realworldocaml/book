@@ -1,0 +1,48 @@
+language: c
+
+env:
+  - COMPILER=4.02.3
+  - COMPILER=4.03.0
+  - COMPILER=4.04.2
+  - COMPILER=4.05.0 COVERALLS=yes PERFORMANCE=yes
+  - COMPILER=4.06.1
+  - COMPILER=4.07.1
+  - COMPILER=4.08.0
+  - COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+
+matrix:
+  allow_failures:
+    - env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+
+before_script:
+  - wget https://github.com/ocaml/opam/releases/download/2.0.4/opam-2.0.4-x86_64-linux
+  - sudo mv opam-2.0.4-x86_64-linux /usr/local/bin/opam
+  - sudo chmod a+x /usr/local/bin/opam
+  - opam init -y --bare --disable-sandboxing --disable-shell-hook
+  - "opam switch create . $COMPILER $REPOSITORIES --no-install"
+  - eval `opam env`
+  - opam --version
+  - ocaml -version
+
+script:
+  - opam lint
+  - opam install -y ounit lwt js_of_ocaml
+  - opam pin add -y --no-action markup .
+  - opam install -y --deps-only markup
+  - "[ -z $COVERALLS ] || opam install -y ocveralls"
+  - make test
+  - make coverage
+  - "[ -z $COVERALLS ] || ocveralls --prefix _build/default _build/default/test/bisect*.out _build/default/test/*/bisect*.out --send"
+  - make js-test
+  - make dependency-test
+  - "[ -z $PERFORMANCE ] || opam install -y xmlm ocamlnet"
+  - "[ -z $PERFORMANCE ] || make performance-test"
+  - "[ -z $DOCS ] || opam install -y lambdasoup"
+  - "[ -z $DOCS ] || make clean docs"
+
+notifications:
+  email:
+    recipients:
+      - antonbachin@yahoo.com
+    on_success: always
+    on_failure: always

@@ -1,0 +1,11 @@
+(jbuild_version 1)
+
+;; we don't include jsonpp here b/c it requires json-wheel
+(executables
+ ((names (simple_example lambda_example))
+  (modules (:standard \ jsonpp))
+  (libraries (easy-format))))
+
+(alias
+ ((name DEFAULT)
+  (deps (simple_example.exe lambda_example.exe))))

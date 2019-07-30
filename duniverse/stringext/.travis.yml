@@ -1,0 +1,17 @@
+language: c
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex ./.travis-docker.sh
+env:
+  global:
+  - PACKAGE="stringext"
+  - PINS="stringext:."
+  matrix:
+  - DISTRO="debian-stable" OCAML_VERSION="4.07"
+  - DISTRO="alpine" OCAML_VERSION="4.06"
+  - DISTRO="fedora" OCAML_VERSION="4.05"
+  - DISTRO="ubuntu-lts" OCAML_VERSION="4.04"
+  - DISTRO="opensuse" OCAML_VERSION="4.03"
+  - DISTRO="ubuntu" OCAML_VERSION="4.02"

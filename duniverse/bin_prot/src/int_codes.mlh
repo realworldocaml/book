@@ -1,0 +1,6 @@
+(** Int_codes: integer codes used by the binary protocol *)
+
+#define CODE_NEG_INT8 '\xff'
+#define CODE_INT16 '\xfe'
+#define CODE_INT32 '\xfd'
+#define CODE_INT64 '\xfc'

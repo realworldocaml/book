@@ -1,0 +1,4 @@
+(executable
+ (name driver)
+ (modules driver)
+ (libraries ctypes test_enums_struct_stubs tests_common))

@@ -1,0 +1,10 @@
+(library
+  (name domain_name)
+  (public_name domain-name)
+  (modules domain_name)
+  (libraries fmt astring))
+
+(test
+  (name tests)
+  (modules tests)
+  (libraries alcotest domain-name))

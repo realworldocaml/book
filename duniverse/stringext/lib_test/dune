@@ -1,0 +1,17 @@
+(executables
+ (names test_stringext test_stringext_qcheck)
+ (libraries stringext oUnit qcheck))
+
+(alias
+ (name runtest)
+ (deps
+  (:< test_stringext.exe))
+ (action
+  (run %{<})))
+
+(alias
+ (name runtest)
+ (deps
+  (:< test_stringext_qcheck.exe))
+ (action
+  (run %{<})))

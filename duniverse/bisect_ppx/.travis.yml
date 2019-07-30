@@ -1,0 +1,32 @@
+sudo: required
+
+language: generic
+
+matrix:
+  include:
+    - os: linux
+      env: OCAML_VERSION=4.02
+    - os: linux
+      env: OCAML_VERSION=4.03
+    - os: linux
+      env: OCAML_VERSION=4.04
+    # Awaiting restoration of self-instrumentation.
+    # - os: linux
+    #   env: OCAML_VERSION=4.04 COVERALLS=yes
+    - os: linux
+      env: OCAML_VERSION=4.05
+    - os: linux
+      env: OCAML_VERSION=4.06
+    - os: linux
+      env: OCAML_VERSION=4.07
+    - os: osx
+      env: OCAML_VERSION=4.07
+
+  fast_finish: true
+
+script: bash -e ./src/util/travis_ci_test.sh
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always

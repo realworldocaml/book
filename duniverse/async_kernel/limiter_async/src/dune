@@ -1,0 +1,3 @@
+(library (name limiter_async) (public_name async_kernel.limiter_async)
+ (libraries async_kernel core_kernel core_kernel.limiter)
+ (preprocess (pps ppx_jane)))

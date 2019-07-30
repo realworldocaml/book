@@ -1,0 +1,16 @@
+# -*- sh -*-
+# Script for working with development versions of atdgen's dependencies.
+# All git repositories (atd, atdgen, etc.) must exist in the same directory.
+
+# Usage (from within atdgen/): . util/recompile-deps
+
+# This script is meant to be sourced from the atdgen directory.
+# It sets the OCAMLPATH variable such that the development versions
+# of atdgen's dependencies are found first when compiling.
+
+atdgen_dir=$(pwd)
+parent=$atdgen_dir/..
+export OCAMLPATH=$parent
+for x in cppo easy-format atd biniou yojson atdgen; do
+  (cd parent/$x; make clean; make)
+done

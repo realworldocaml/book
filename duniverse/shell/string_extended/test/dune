@@ -1,0 +1,3 @@
+(library (name string_extended_test)
+ (libraries core quickcheck_deprecated string_extended)
+ (preprocess (pps ppx_jane)))

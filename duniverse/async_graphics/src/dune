@@ -1,0 +1,4 @@
+(library
+ (name async_graphics)
+ (public_name async_graphics)
+ (libraries graphics async async_unix.thread_safe_pipe))

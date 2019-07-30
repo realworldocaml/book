@@ -1,0 +1,16 @@
+opam-version: "2.0"
+maintainer: "Sergei Lebedev <superbobry@gmail.com>"
+authors: "Sergei Lebedev <superbobry@gmail.com>"
+license: "MIT"
+homepage: "https://github.com/superbobry/ocaml-textwrap"
+bug-reports: "https://github.com/superbobry/ocaml-textwrap/issues"
+depends: ["ocaml" "dune"]
+dev-repo: "git+https://github.com/superbobry/ocaml-textwrap.git"
+synopsis: "Text wrapping and filling for OCaml"
+description: """
+An almost complete port of Python's textwrap library to OCaml.
+"""
+build: [
+ ["dune" "subst"] {pinned}
+ ["dune" "build" "-p" name "-j" jobs]
+]

@@ -1,0 +1,11 @@
+(library
+ (name test_enums_stubs)
+ (wrapped false)
+ (libraries ctypes.stubs test_enums_struct_stubs))
+
+(rule
+ (targets generated_struct_bindings.ml)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{exe:../struct-stub-generator.exe}))))

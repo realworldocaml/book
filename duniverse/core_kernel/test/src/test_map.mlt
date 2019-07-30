@@ -1,0 +1,32 @@
+open Core_kernel
+
+let _ = Map.add
+
+[%%expect {|
+|}]
+
+let _ = String.Map.add
+
+[%%expect {|
+|}]
+
+module F (M : Map.S) = struct
+  let _ = M.add
+end
+
+[%%expect {|
+|}]
+
+module F (M : Core_kernel.Map.S_binable) = struct
+  let _ = M.add
+end
+
+[%%expect {|
+|}]
+
+module F (M : Core_kernel.Map.S_plain) = struct
+  let _ = M.add
+end
+
+[%%expect {|
+|}]

@@ -1,0 +1,4 @@
+(library (name caml) (public_name base.caml) (preprocess no_preprocessing))
+
+(rule (targets caml.ml) (deps (:first_dep ../gen/gen.exe))
+ (action (run %{first_dep} -ocaml-where %{ocaml_where} -o %{targets})))

@@ -1,0 +1,11 @@
+(library
+ (name spawn)
+ (public_name spawn)
+ (c_names spawn_stubs)
+ ;; We don't use the thread library directly, however we use pthread
+ ;; functions in the stubs, so declare a dependency on thread.
+ ;;
+ ;; If that was a problem, we could add -lpthread to
+ ;; c_library_flags. However, this would require testing that it is
+ ;; supported.
+ (libraries unix threads))

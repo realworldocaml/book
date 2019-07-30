@@ -1,0 +1,14 @@
+{
+  "title": "Example",
+  "tiemout": 20,
+  "credentials": [
+    {
+      "name": "joeuser",
+      "key": "db7c0877bdef3016"
+    },
+    {
+      "name": "tester",
+      "key": "09871ff387ac2b10"
+    }
+  ]
+}

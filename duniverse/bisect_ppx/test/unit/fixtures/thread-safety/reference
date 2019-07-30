@@ -1,0 +1,13 @@
+file "source.ml"
+  point at offset     11:      1
+  point at offset     26:      2
+  point at offset     44: 2000000
+  point at offset     58:      1
+  point at offset     70:      1
+  point at offset     86:      1
+  point at offset    106:      1
+  point at offset    121:      1
+  point at offset    153:      1
+  point at offset    168:      1
+  point at offset    201:      1
+  point at offset    225:      1

@@ -1,0 +1,40 @@
+(ocamllex read)
+
+(rule
+ (targets yojson.ml)
+ (deps
+   (:out yojson.cppo.ml)
+   monomorphic.ml
+   read.ml
+   write.ml
+   safe.ml
+   pretty.ml
+   write2.ml
+   common.ml
+   util.ml
+   type.ml)
+  (action (run cppo %{out} -o %{targets})))
+
+(rule
+ (targets yojson.mli)
+ (deps
+   (:out yojson.cppo.mli)
+   monomorphic.mli
+   write.mli
+   read.mli
+   safe.mli
+   pretty.mli
+   write2.mli
+   common.mli
+   util.mli
+   type.ml)
+ (action (run cppo %{out} -o %{targets})))
+
+(library
+ (name yojson)
+ (public_name yojson)
+ (modules yojson yojson_biniou)
+ (wrapped false)
+ (synopsis "JSON parsing and printing (successor of json-wheel)")
+ (flags (-safe-string))
+ (libraries easy-format biniou))

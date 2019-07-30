@@ -1,0 +1,4 @@
+(library
+ (name stringext)
+ (public_name stringext)
+ (wrapped false))

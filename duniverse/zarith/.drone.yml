@@ -1,0 +1,16 @@
+kind: pipeline
+name: arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+- name: build
+  image: ocaml/opam2
+  commands:
+  - sudo chown -R opam .
+  - git -C /home/opam/opam-repository pull origin && opam update
+  - opam pin add -n .
+  - opam --yes depext -y zarith
+  - opam install -t -y zarith

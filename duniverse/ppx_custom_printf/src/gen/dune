@@ -1,0 +1,3 @@
+(executables (names gen)
+ (libraries str compiler-libs.common compiler-libs.toplevel)
+ (preprocess no_preprocessing))

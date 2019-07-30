@@ -1,0 +1,15 @@
+#!/bin/bash
+
+output="$("$@" 2>&1)"
+code=$?
+if [ $code -eq 0 ]; then
+    echo "The compilation should have failed but did not"
+    if [ "$output" ]; then
+        echo >&2 "$output"
+    fi
+    exit 1
+else
+    if [ "$SHOW" ]; then
+        echo "$output"
+    fi
+fi

@@ -1,0 +1,12 @@
+(library
+ (name mtime)
+ (public_name mtime)
+ (modules mtime)
+ (wrapped false))
+
+(library
+ (name mtime_top)
+ (public_name mtime.top)
+ (libraries compiler-libs.toplevel mtime)
+ (modules mtime_top)
+ (wrapped false))

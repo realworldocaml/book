@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(library
+ ((name biniou)
+  (public_name biniou)
+  (synopsis "Extensible binary serialization format")
+  (wrapped false)
+  (flags (-safe-string))
+  (libraries (easy-format))))

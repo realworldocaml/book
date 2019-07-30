@@ -1,0 +1,5 @@
+(library
+ (name ppxlib_ppx)
+ (kind ppx_rewriter)
+ (flags (:standard -safe-string))
+ (libraries ppxlib))

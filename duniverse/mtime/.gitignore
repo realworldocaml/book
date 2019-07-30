@@ -1,0 +1,10 @@
+_build
+tmp
+CLOCK.org
+*~
+\.\#*
+\#*#
+*.native
+*.byte
+*.install
+test_jsoo.*

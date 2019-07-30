@@ -1,0 +1,4 @@
+(test
+ (name test_cstdlib)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_cstdlib_stubs test_cstdlib_bindings tests_common))

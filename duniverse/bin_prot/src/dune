@@ -1,0 +1,10 @@
+(library (name bin_prot)
+ (libraries bigarray bin_shape_lib base.md5 base base.caml)
+ (public_name bin_prot) (c_names blit_stubs)
+ (preprocessor_deps int_codes.mlh)
+ (preprocess
+  (per_module
+   ((action (system "%{cpp} -x assembler-with-cpp -undef %{input-file}"))
+    size write read type_class)
+   ((pps ppx_sexp_conv -type-conv-keep-w32=both) common md5)))
+ (js_of_ocaml (javascript_files runtime.js)))

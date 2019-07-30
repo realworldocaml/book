@@ -1,0 +1,3 @@
+(executables
+ (names date)
+ (libraries ctypes-foreign.threaded))

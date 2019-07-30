@@ -1,0 +1,35 @@
+(* -*- tuareg -*- *)
+
+open Jbuild_plugin
+
+type t = { major: int; minor: int; patch: int option; extra: string option }
+let v ?patch ?extra major minor = { major; minor; patch; extra }
+
+let major { major; _ } = major
+let minor { minor; _ } = minor
+let patch { patch; _ } = patch
+let extra { extra; _ } = extra
+
+let parse s =
+  try Scanf.sscanf s "%d.%d.%d+%s" (fun major minor patch extra -> v ~patch ~extra major minor)
+  with End_of_file | Scanf.Scan_failure _ -> begin
+      try Scanf.sscanf s "%d.%d+%s" (fun major minor extra -> v ~extra major minor)
+      with End_of_file | Scanf.Scan_failure _ -> begin
+          try Scanf.sscanf s "%d.%d.%d" (fun major minor patch -> v ~patch major minor)
+          with End_of_file | Scanf.Scan_failure _ -> begin
+              Scanf.sscanf s "%d.%d" (fun major minor -> v major minor)
+            end
+        end
+end
+
+let ocaml_version = V1.ocaml_version |> parse
+
+let has_bigarray_in_stdlib = major ocaml_version >= 4 && minor ocaml_version >= 7
+let base_dune = "(library (name bigarray_compat) (public_name bigarray-compat) (modules bigarray_compat) (wrapped false)"
+
+let dune_file_stdlib = base_dune^") (rule (targets bigarray_compat.ml) (action (copy bigarray_stdlib.ml bigarray_compat.ml)))"
+let dune_file_pre407 = base_dune^"(libraries bigarray)) (rule (targets bigarray_compat.ml) (action (copy bigarray_pre407.ml bigarray_compat.ml)))"
+
+let _ = match has_bigarray_in_stdlib with
+    | true -> V1.send dune_file_stdlib
+    | false -> V1.send dune_file_pre407

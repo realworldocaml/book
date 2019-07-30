@@ -1,0 +1,18 @@
+(executables
+ (names report)
+ (public_names bisect-ppx-report)
+ (package bisect_ppx)
+ (libraries bisect_ppx.runtime unix))
+
+(rule
+ (targets assets.ml)
+ (deps coverage.template.css coverage.js)
+ (action
+  (with-stdout-to %{targets}
+   (progn
+    (echo "let css = {css|")
+    (cat coverage.template.css)
+    (echo "|css}")
+    (echo "let js = {js|")
+    (cat coverage.js)
+    (echo "|js}")))))

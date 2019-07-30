@@ -1,0 +1,2 @@
+(library (name rope) (public_name core_kernel.rope) (libraries core_kernel)
+ (preprocess (pps ppx_jane)))

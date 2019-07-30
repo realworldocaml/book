@@ -1,0 +1,5 @@
+(tests
+  (names run_tests)
+  (libraries num)
+  (flags -w +a-33)
+)

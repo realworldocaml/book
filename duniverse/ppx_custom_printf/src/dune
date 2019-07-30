@@ -1,0 +1,8 @@
+(library (name ppx_custom_printf) (public_name ppx_custom_printf)
+ (kind ppx_rewriter)
+ (libraries compiler-libs.common base ppxlib ppx_sexp_conv.expander
+  ppxlib.metaquot_lifters)
+ (preprocess (pps ppxlib.metaquot ppxlib.traverse)))
+
+(rule (targets format_lifter.ml) (deps (:first_dep gen/gen.bc))
+ (action (run %{first_dep} -o format_lifter.ml)))

@@ -1,0 +1,5 @@
+* Jane Street header files
+
+The repository contains the C header files shared between the various
+Jane Street packages.
+

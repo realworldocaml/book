@@ -1,0 +1,4 @@
+(library
+ (name test_returning_errno_lwt_jobs_stubs)
+ (wrapped false)
+ (libraries ctypes))

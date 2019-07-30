@@ -1,0 +1,5 @@
+true : package(bytes), bin_annot, safe_string
+
+<src> : include
+<src/astring_top*> : package(compiler-libs.toplevel)
+<test> : include

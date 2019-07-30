@@ -1,0 +1,6 @@
+(library (name ppx_hash_test) (libraries core_kernel)
+ (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT)
+ (deps inline_records.ml.pp override_example.ml.pp hash_test.ml.pp
+  record_field_control.ml.pp))

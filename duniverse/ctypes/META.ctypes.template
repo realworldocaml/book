@@ -1,0 +1,10 @@
+# DUNE_GEN
+package "foreign" {
+  description = "Deprecated. Use ctypes-foreign directly"
+  requires(-mt) = "ctypes-foreign.unthreaded"
+  requires(mt) = "ctypes-foreign.threaded"
+  package "base" {
+    description = "Deprecated. Use ctypes-foreign.base directly"
+    requires = "ctypes-foreign.base"
+  }
+}

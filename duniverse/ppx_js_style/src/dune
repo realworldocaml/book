@@ -1,0 +1,6 @@
+(library (name ppx_js_style) (public_name ppx_js_style) (kind ppx_rewriter)
+ (libraries compiler-libs.common base ppxlib octavius)
+ (preprocess (pps ppxlib.metaquot)))
+
+(rule (targets dated_deprecation.ml) (deps)
+ (action (write-file %{targets} "let enabled = ref false")) (mode fallback))

@@ -1,0 +1,10 @@
+(library
+  (name        conduit)
+  (public_name conduit)
+  (wrapped     false)
+  (preprocess  (pps ppx_sexp_conv))
+  (modules     conduit conduit_trie resolver)
+  (libraries   sexplib ipaddr ipaddr-sexp uri astring))
+
+(documentation
+ (package conduit))

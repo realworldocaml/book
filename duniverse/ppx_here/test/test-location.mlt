@@ -1,0 +1,9 @@
+(* -*- tuareg -*- *)
+#verbose true;;
+
+[%here]
+[%%expect{|
+- : Lexing.position =
+{Lexing.pos_fname = "ppx/ppx_here/test/test-location.mlt"; pos_lnum = 4;
+ pos_bol = 38; pos_cnum = 38}
+|}]

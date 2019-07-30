@@ -1,0 +1,14 @@
+module M : sig
+  val x : unit [@@deprecated "[since 2016-07]"]
+end = struct
+  let x = ()
+end
+
+let _ = M.x
+
+[%%expect
+  {|
+Line _, characters 8-11:
+Error (Warning 3): deprecated: M.x
+[since 2016-07]
+|}]

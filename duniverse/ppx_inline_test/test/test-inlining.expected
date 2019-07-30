@@ -1,0 +1,27 @@
+Partitions diff:
+2a3
+> file_without_test_module
+4a6
+> random_state
+
+File "performance_test.ml", line 1, characters 0-70: alloc-test-ok (XXX sec)
+File "performance_test.ml", line 5, characters 0-73: alloc-test-fail (XXX sec)
+File "performance_test.ml", line 10, characters 4-60: <<true>> (XXX sec)
+File "performance_test.ml", line 15, characters 4-24: ok (XXX sec)
+File "performance_test.ml", line 16, characters 4-27: fail (XXX sec)
+
+======================================================================
+TEST_MODULE at file "failures.ml", line 10, characters 2-72: name3 threw Exit.
+  in TEST_MODULE at file "failures.ml", line 6, characters 0-186: name2
+
+TEST_MODULE at file "failures.ml", line 14, characters 0-60 threw Exit.
+
+File "performance_test.ml", line 5, characters 0-73: alloc-test-fail is false.
+
+File "performance_test.ml", line 16, characters 4-27: fail is false.
+  in TEST_MODULE at file "performance_test.ml", line 13, characters 0-152: alloc-test-module
+
+TEST_MODULE at file "performance_test.ml", line 19, characters 0-248: early-cutoff-module threw "Assert_failure performance_test.ml:23:13".
+
+FAILED 2 / 5 tests, 3 TEST_MODULES
+code: 2

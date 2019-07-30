@@ -1,0 +1,5 @@
+(alias (name runtest) (deps (:first_dep test_low_level_process.exe))
+ (action (bash ./%{first_dep})))
+
+(executables (names test_low_level_process)
+ (libraries low_level_process oUnit) (preprocess (pps ppx_jane)))

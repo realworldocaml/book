@@ -1,0 +1,44 @@
+{1:accepted_syntax Accepted syntax}
+
+Octavious should be fully compatible with 
+{{:http://caml.inria.fr/pub/docs/manual-ocaml/ocamldoc.html#sec339}the syntax
+accepted by ocamldocs}.
+
+However, some additions were made which are described below.
+
+{2:include_tags New \@tags}
+
+To control the rendering of includes (which are "expanded" by odoc) the
+following tags have been added
+- [@inline]: will make the [include ...] line disappear from the interface and
+the content of the module (type) being included will be inserted in its place.
+- [@open]: the [include ...] line will be shown expanded initially
+- [@close]: the [include ...] line will be shown folded initially
+
+{2:references_syntax New syntax for references}
+
+ocamldoc's syntax for references doesn't (as far as we can see) allow to
+disambiguate the reference on the last line in the following:
+
+{[
+module M : sig
+  module type S : sig
+    type t
+  end
+
+  module S : sig
+    type t
+  end
+end
+
+(** Some reference to {!M.S.t} *)
+]}
+
+Indeed the syntax ocamldoc provides only allows to disambiguate the last part of
+the reference, but not intermediate ones.
+So here one cannot say: "I want S to be a module type".
+
+We have extended the syntax for references to be able to disambiguate
+intermediate parts of the path.
+In the previous example the fully disambiguated reference could look like this:
+[{!module-M.module-type-S.type-t}].

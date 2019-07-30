@@ -1,0 +1,19 @@
+--- test.output
++++ test-partitions.output
+@@ -1,3 +1,5 @@
++Test for partition config:
++Test for partition failures:
+ File "failures.ml", line 4, characters 0-18: <<false>> is false.
+ 
+ File "failures.ml", line 5, characters 0-29: name1 threw Exit.
+@@ -16,5 +18,9 @@
+ 
+ TEST_MODULE at file "failures.ml", line 14, characters 0-60 threw Exit.
+ 
+-FAILED 5 / 26 tests, 2 TEST_MODULES
++FAILED 5 / 5 tests, 2 TEST_MODULES
+ code: 2
++Test for partition file_without_test_module:
++Test for partition order:
++Test for partition performance_test:
++Test for partition random_state:

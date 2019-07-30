@@ -1,0 +1,3 @@
+(library (name weak_hashtbl) (public_name core_kernel.weak_hashtbl)
+ (libraries core_kernel thread_safe_queue weak_pointer)
+ (preprocess (pps ppx_jane)))

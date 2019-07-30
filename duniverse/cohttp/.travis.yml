@@ -1,0 +1,47 @@
+language: c
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex ./.travis-docker.sh
+env:
+  global:
+  - EXTRA_REMOTES="https://github.com/mirage/mirage-dev.git"
+  - PINS="cohttp-top:. cohttp-async:. cohttp-lwt-unix:. cohttp-lwt-jsoo:. cohttp-lwt:. cohttp-mirage:. cohttp:."
+  matrix:
+  - PACKAGE="cohttp" DISTRO="ubuntu-18.04" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-async" DISTRO="ubuntu-18.04" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="ubuntu-18.04" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="ubuntu-18.04" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-lwt" DISTRO="ubuntu-18.04" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-mirage" DISTRO="ubuntu-18.04" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-async" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-lwt" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-mirage" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-async" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-lwt" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-mirage" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-async" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-lwt" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+matrix:
+  allow_failures:
+  - env: PACKAGE="cohttp-async" DISTRO="alpine" OCAML_VERSION="4.06"
+  - env: PACKAGE="cohttp-async" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - env: PACKAGE="cohttp-lwt-unix" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/6ee5059c7420709f4ad1
+    on_success: change
+    on_failure: always
+    on_start: false

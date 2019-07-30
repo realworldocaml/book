@@ -1,0 +1,3 @@
+(library (name thread_pool_cpu_affinity)
+ (public_name core_kernel.thread_pool_cpu_affinity) (libraries core_kernel)
+ (preprocess (pps ppx_jane -annotated-ignores -check-doc-comments)))

@@ -1,0 +1,3 @@
+(executables (names array_queue hashtbl_bench immediate_bench)
+ (libraries core core_bench pooled_hashtbl ppx_hash.runtime-lib re2)
+ (preprocess (pps ppx_jane)))
