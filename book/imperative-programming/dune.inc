@@ -1,7 +1,14 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y8 ../../examples/code/imperative-programming/dictionary.ml)
          (:y7 ../../examples/code/imperative-programming/dictionary.mli)
          (:y6 ../../examples/code/imperative-programming/dictionary2.ml)
@@ -16,7 +23,7 @@
          memo.ml
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml %{x}))
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
@@ -30,7 +37,10 @@
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y8 ../../examples/code/imperative-programming/dictionary.ml)
          (:y7 ../../examples/code/imperative-programming/dictionary.mli)
          (:y6 ../../examples/code/imperative-programming/dictionary2.ml)
@@ -45,7 +55,7 @@
          memo.ml
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml --non-deterministic %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)

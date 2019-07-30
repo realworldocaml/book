@@ -1,7 +1,14 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y14 ../../examples/code/front-end/alice.ml)
          (:y13 ../../examples/code/front-end/alice.mli)
          (:y12 ../../examples/code/front-end/alice_combined.ml)
@@ -23,7 +30,7 @@
          (source_tree ../../examples/code/packing)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y14} %{y14}.corrected)
            (diff? %{y13} %{y13}.corrected)
            (diff? %{y12} %{y12}.corrected)
@@ -43,7 +50,10 @@
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y14 ../../examples/code/front-end/alice.ml)
          (:y13 ../../examples/code/front-end/alice.mli)
          (:y12 ../../examples/code/front-end/alice_combined.ml)
@@ -65,7 +75,7 @@
          (source_tree ../../examples/code/packing)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y14} %{y14}.corrected)
            (diff? %{y13} %{y13}.corrected)
            (diff? %{y12} %{y12}.corrected)

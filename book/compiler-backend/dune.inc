@@ -1,7 +1,14 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y9 ../../examples/code/back-end-embed/embed_me1.ml)
          (:y8 ../../examples/code/back-end-embed/embed_me2.ml)
          (:y7 ../../examples/code/back-end/alternate_list/alternate_list.ml)
@@ -19,7 +26,7 @@
          (source_tree ../../examples/code/back-end/bench_poly_and_mono)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y9} %{y9}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
@@ -34,7 +41,10 @@
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y9 ../../examples/code/back-end-embed/embed_me1.ml)
          (:y8 ../../examples/code/back-end-embed/embed_me2.ml)
          (:y7 ../../examples/code/back-end/alternate_list/alternate_list.ml)
@@ -52,7 +62,7 @@
          (source_tree ../../examples/code/back-end/bench_poly_and_mono)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y9} %{y9}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)

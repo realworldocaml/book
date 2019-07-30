@@ -1,7 +1,16 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package async)
+         (package cohttp)
+         (package core)
+         (package ppx_jane)
          (:y8 ../../examples/code/async/better_echo.ml)
          (:y7 ../../examples/code/async/echo/echo.ml)
          (:y6 ../../examples/code/async/search/search.ml)
@@ -18,7 +27,7 @@
          (source_tree ../../examples/code/async/search_with_timeout_no_leak)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
@@ -32,7 +41,12 @@
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package async)
+         (package cohttp)
+         (package core)
+         (package ppx_jane)
          (:y8 ../../examples/code/async/better_echo.ml)
          (:y7 ../../examples/code/async/echo/echo.ml)
          (:y6 ../../examples/code/async/search/search.ml)
@@ -49,7 +63,7 @@
          (source_tree ../../examples/code/async/search_with_timeout_no_leak)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)

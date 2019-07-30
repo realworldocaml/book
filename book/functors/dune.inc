@@ -1,7 +1,14 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y6 ../../examples/code/functors/compare_example.ml)
          (:y5 ../../examples/code/functors/extended_fqueue.ml)
          (:y4 ../../examples/code/functors/extended_fqueue.mli)
@@ -11,7 +18,7 @@
          (:y0 ../../examples/code/functors/sexpable.ml)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)
            (diff? %{y4} %{y4}.corrected)

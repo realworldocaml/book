@@ -1,5 +1,5 @@
 (rule (with-stdout-to dune.gen
-  (run ocaml-mdx rule --direction=to-ml README.md
+  (run ocaml-mdx rule --duniverse-mode --direction=to-ml README.md
                 --prelude=prelude.ml
                 --prelude=memo:memo.ml
                 --prelude=fib:fib.ml

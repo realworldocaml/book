@@ -1,7 +1,15 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
+         (package yojson)
          (:y7 ../../examples/code/json/github_j_excerpt.mli)
          (:y6 ../../examples/code/json/github_org_info/github_org_info.ml)
          (:y5 ../../examples/code/json/list_excerpt.mli)
@@ -13,7 +21,7 @@
          (source_tree ../../examples/code/json)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --root=../../examples/code/json %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --root=../../examples/code/json %{x}))
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)
@@ -26,7 +34,11 @@
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
          (package mdx)
+         (package core)
+         (package ppx_jane)
+         (package yojson)
          (:y7 ../../examples/code/json/github_j_excerpt.mli)
          (:y6 ../../examples/code/json/github_org_info/github_org_info.ml)
          (:y5 ../../examples/code/json/list_excerpt.mli)
@@ -38,7 +50,7 @@
          (source_tree ../../examples/code/json)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic --root=../../examples/code/json %{x})
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic --root=../../examples/code/json %{x}))
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)
