@@ -1,6 +1,7 @@
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (package mdx)
          (:y9 ../../examples/code/back-end-embed/embed_me1.ml)
          (:y8 ../../examples/code/back-end-embed/embed_me2.ml)
          (:y7 ../../examples/code/back-end/alternate_list/alternate_list.ml)
@@ -19,7 +20,6 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y9} %{y9}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
@@ -29,10 +29,12 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (package mdx)
          (:y9 ../../examples/code/back-end-embed/embed_me1.ml)
          (:y8 ../../examples/code/back-end-embed/embed_me2.ml)
          (:y7 ../../examples/code/back-end/alternate_list/alternate_list.ml)
@@ -51,7 +53,6 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y9} %{y9}.corrected)
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
@@ -61,4 +62,5 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))

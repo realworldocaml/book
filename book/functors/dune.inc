@@ -1,6 +1,7 @@
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (package mdx)
          (:y6 ../../examples/code/functors/compare_example.ml)
          (:y5 ../../examples/code/functors/extended_fqueue.ml)
          (:y4 ../../examples/code/functors/extended_fqueue.mli)
@@ -11,11 +12,11 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)
            (diff? %{y4} %{y4}.corrected)
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))

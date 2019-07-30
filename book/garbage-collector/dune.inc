@@ -1,6 +1,7 @@
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (package mdx)
          (:y1 ../../examples/code/gc/barrier_bench/barrier_bench.ml)
          (:y0 ../../examples/code/gc/finalizer/finalizer.ml)
          (source_tree ../../examples/code/gc/barrier_bench)
@@ -8,12 +9,13 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (package mdx)
          (:y1 ../../examples/code/gc/barrier_bench/barrier_bench.ml)
          (:y0 ../../examples/code/gc/finalizer/finalizer.ml)
          (source_tree ../../examples/code/gc/barrier_bench)
@@ -21,6 +23,6 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))

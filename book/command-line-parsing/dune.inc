@@ -1,6 +1,7 @@
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (package mdx)
          (:y15 ../../examples/code/command-line-parsing/cal_add_days/cal.ml)
          (:y14 ../../examples/code/command-line-parsing/cal_add_interactive/cal.ml)
          (:y13 ../../examples/code/command-line-parsing/cal_add_interactive2/cal.ml)
@@ -31,7 +32,6 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y15} %{y15}.corrected)
            (diff? %{y14} %{y14}.corrected)
            (diff? %{y13} %{y13}.corrected)
@@ -47,10 +47,12 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (package mdx)
          (:y15 ../../examples/code/command-line-parsing/cal_add_days/cal.ml)
          (:y14 ../../examples/code/command-line-parsing/cal_add_interactive/cal.ml)
          (:y13 ../../examples/code/command-line-parsing/cal_add_interactive2/cal.ml)
@@ -81,7 +83,6 @@
          prelude.ml)
  (action (progn
            (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
-           (diff? %{x} %{x}.corrected)
            (diff? %{y15} %{y15}.corrected)
            (diff? %{y14} %{y14}.corrected)
            (diff? %{y13} %{y13}.corrected)
@@ -97,4 +98,5 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))
