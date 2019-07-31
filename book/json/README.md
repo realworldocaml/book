@@ -91,7 +91,7 @@ you can open it in the `utop` toplevel by:
 
 ## Parsing JSON with Yojson
 
-The JSON specification has very few data types, and the `Yojson.Basic.json`
+The JSON specification has very few data types, and the `Yojson.Basic.t`
 type that follows is sufficient to express any valid JSON structure: [JSON
 data/parsing with Yojson]{.idx}[Yojson library/parsing JSON with]{.idx}
 
@@ -371,7 +371,7 @@ our example JSON, only `is_online` is present and `is_translated` will be
 
 ```ocaml env=parse_book
 # let authors = json |> member "authors" |> to_list
-val authors : Yojson.Basic.json list =
+val authors : Yojson.Basic.t list =
   [`Assoc
      [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];
    `Assoc
@@ -413,9 +413,9 @@ statically via a type error.
 ## Constructing JSON Values
 
 Building and printing JSON values is pretty straightforward given the
-`Yojson.Basic.json` type. You can just construct values of type `json` and
+`Yojson.Basic.t` type. You can just construct values of type `t` and
 call the `to_string` function on them. Let's remind ourselves of the
-`Yojson.Basic.json` type again: [values/in JSON data]{.idx}[JSON
+`Yojson.Basic.t` type again: [values/in JSON data]{.idx}[JSON
 data/constructing values]{.idx}
 
 ```ocaml file=yojson_basic.mli
@@ -453,11 +453,11 @@ you haven't used yet (e.g. `Int` or `Null`):
 
 ```ocaml env=build_json
 # Yojson.Basic.pretty_to_string
-- : ?std:bool -> Yojson.Basic.json -> string = <fun>
+- : ?std:bool -> Yojson.Basic.t -> string = <fun>
 ```
 
 The `pretty_to_string` function has a more explicit signature that requires
-an argument of type `Yojson.Basic.json`. When `person` is applied to
+an argument of type `Yojson.Basic.t`. When `person` is applied to
 `pretty_to_string`, the inferred type of `person` is statically checked
 against the structure of the `json` type to ensure that they're compatible:
 
@@ -492,7 +492,7 @@ val person : [> `Assoc of string * [> `String of string ] ] =
 Characters 30-36:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
-       but an expression was expected of type Yojson.Basic.json
+       but an expression was expected of type Yojson.Basic.t
        Types for tag `Assoc are incompatible
 ```
 
@@ -502,15 +502,14 @@ this error to a shorter form by adding explicit type annotations as a hint
 about your intentions:
 
 ```ocaml env=build_json
-# let (person : Yojson.Basic.json) =
+# let (person : Yojson.Basic.t) =
   `Assoc ("name", `String "Anil")
-Characters 44-68:
+Characters 41-65:
 Error: This expression has type 'a * 'b
-       but an expression was expected of type
-         (string * Yojson.Basic.json) list
+       but an expression was expected of type (string * Yojson.Basic.t) list
 ```
 
-We've annotated `person` as being of type `Yojson.Basic.json`, and as a
+We've annotated `person` as being of type `Yojson.Basic.t`, and as a
 result, the compiler spots that the argument to the `Assoc` variant has the
 incorrect type. This illustrates the strengths and weaknesses of polymorphic
 variants: they're lightweight and flexible, but the error messages can be
@@ -579,7 +578,7 @@ You can convert a `Safe.json` to a `Basic.json` type by using the `to_basic`
 function as follows:
 
 ```ocaml file=yojson_safe.mli,part=1
-val to_basic : json -> Yojson.Basic.json
+val to_basic : json -> Yojson.Basic.t
 (** Tuples are converted to JSON arrays, Variants are converted to
     JSON strings or arrays of a string (constructor) and a json value
     (argument). Long integers are converted to JSON strings.

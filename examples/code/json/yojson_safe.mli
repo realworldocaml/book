@@ -13,9 +13,9 @@ type json = [
   | `Variant of string * json option
 ]
 
+[@@@part "1"] ;;
 
-[@@@part "1"]
-val to_basic : json -> Yojson.Basic.json
+val to_basic : json -> Yojson.Basic.t
 (** Tuples are converted to JSON arrays, Variants are converted to
     JSON strings or arrays of a string (constructor) and a json value
     (argument). Long integers are converted to JSON strings.
