@@ -9,31 +9,7 @@ bug-reports: "https://github.com/realworldocaml/book/issues"
 synopsis: "Real World OCaml book sources"
 depends: [
   "ocaml" {>= "4.06.0"}
-  "core" {>= "v0.11.0"}
-  "async" {>= "v0.11.0"}
-  "ppx_sexp_conv" {>= "v0.9.0"}
-  "ppx_jane"
   "dune" {>= "1.11.0"}
-  "patdiff"
-  "lambdasoup"
-  "sexp_pretty"
-  "re"
-  "fmt"
-  "cohttp-async"
-  "core_bench"
-  "mtime" {< "1.2.0"}
-  "yojson"
-  "astring"
-  "cryptokit"
-  "ocp-index"
-  "atd"
-  "atdgen"
-  "ctypes" {< "0.15.0"}
-  "ctypes-foreign"
-  "textwrap"
-  "uri"
-  "mdx" {= "1.4.0"}
-  "async_graphics"
 ]
 build: ["dune" "build"]
 depexts: [
