@@ -174,13 +174,13 @@ example. Once that's completed, run the following to compile the binary.
 
 
 
-```sh dir=../../examples/code/command-line-parsing/md5
+```sh dir=../../examples/code/command-line-parsing/md5,skip
 $ dune build md5.exe
 ```
 
 You can now query the version information for the binary you just compiled:
 
-```sh dir=../../examples/code/command-line-parsing/md5
+```sh dir=../../examples/code/command-line-parsing/md5,skip
 $ ./_build/default/md5.exe -version
 1.0
 $ ./_build/default/md5.exe -build-info
@@ -195,7 +195,7 @@ case of Mercurial).
 
 We can invoke our binary with `-help` to see the auto-generated help.
 
-```sh dir=../../examples/code/command-line-parsing/md5
+```sh dir=../../examples/code/command-line-parsing/md5,skip
 $ ./_build/default/md5.exe -help
 Generate an MD5 hash of the input data
 
@@ -215,7 +215,7 @@ More detailed information
 If you supply the `filename` argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
-```sh dir=../../examples/code/command-line-parsing/md5,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5,non-deterministic=output,skip
 $ ./_build/default/md5.exe ./_build/default/md5.exe
 755e1de2f36cfffd870269161df6a3f2
 ```
@@ -241,7 +241,7 @@ let command =
     ~readme:(fun () -> "More detailed information")
     Command.Param.(
      map (anon ("filename" %: string))
-       ~f:(fun filename -> (fun () -> do_hash filename))))
+       ~f:(fun filename -> (fun () -> do_hash filename)))
 
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command
@@ -297,7 +297,7 @@ let () =
 Building and running this command, we can see that it now indeed expects two
 arguments.
 
-```sh dir=../../examples/code/command-line-parsing/md5_multiarg,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5_multiarg,non-deterministic=output,skip
 $ dune build md5.exe
 $ ./_build/default/md5.exe 5 ./_build/default/md5.exe
 9b78e
@@ -437,7 +437,7 @@ same string but first checks that the file exists and is a regular file type.
 When you build and run this code, you will see the new error messages if you
 try to open a special device such as `/dev/null`:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_custom_arg,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5_with_custom_arg,non-deterministic=output,skip
 $ dune build md5.exe
 $ ./_build/default/md5.exe /etc/services
 6501e9c7bf20b1dc56f015e341f79833
@@ -466,7 +466,7 @@ let command =
 
 But building this results in a compile-time error.
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file_broken
+```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file_broken,skip
 $ dune build md5.exe
 ...
 File "md5.ml", line 18, characters 24-32:
@@ -514,7 +514,7 @@ resolved into an input channel via `get_inchan` to determine whether to open
 the standard input or a file, and then the rest of the command is similar to
 our previous examples.
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file,non-deterministic=output,skip
 $ dune build md5.exe
 $ cat /etc/services | ./_build/default/md5.exe
 27bf1f2dbadd4cae84f1da4dfe8b5cb3
@@ -556,7 +556,7 @@ let () =
 
 Building and running this confirms that it has the same behavior as before.
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_default_file,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5_with_default_file,non-deterministic=output,skip
 $ dune build md5.exe
 $ cat /etc/services | ./_build/default/md5.exe
 27bf1f2dbadd4cae84f1da4dfe8b5cb3
@@ -600,7 +600,7 @@ using standard input, just as our previous `maybe` and `maybe_with_default`
 examples did. If the list of files isn't empty, then it opens up each file
 and runs them through `do_hash` sequentially.
 
-```sh dir=../../examples/code/command-line-parsing/md5_sequence,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5_sequence,non-deterministic=output,skip
 $ dune build md5.exe
 $ ./_build/default/md5.exe /etc/services ./_build/default/md5.exe
 MD5 (/etc/services) = 6501e9c7bf20b1dc56f015e341f79833
@@ -663,9 +663,9 @@ the full help text. Notice that the `-t` flag has no argument, and so we
 prepend its `doc` text with a blank space. The help text for the preceding
 code looks like this:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_flags
+```sh dir=../../examples/code/command-line-parsing/md5_with_flags,skip
 $ dune build md5.exe
-$ ./_build/default/md5.exe -help
+$ dune exec -- md5.exe -help
 Generate an MD5 hash of the input data
 
   md5.exe [FILENAME]
@@ -1032,7 +1032,7 @@ variable set to any value.
 For example, let's try it on our MD5 example from earlier, assuming that the
 binary is called `md5` in the current directory:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_flags,non-deterministic=output
+```sh dir=../../examples/code/command-line-parsing/md5_with_flags,non-deterministic=output,skip
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./_build/default/md5.exe
 function _jsautocom_23483 {
   export COMP_CWORD
