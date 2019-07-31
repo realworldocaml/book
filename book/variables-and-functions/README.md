@@ -707,7 +707,7 @@ Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
        Type string list is not compatible with type
-         string list -> string list
+         string list -> string list 
 ```
 
 The type error is a little bewildering at first glance. What's going on is
