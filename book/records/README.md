@@ -46,7 +46,7 @@ just think of them as a simple pattern language you can use for parsing a
 string.
 
 ```ocaml env=main
-# #require "re.posix"
+# #require "re,re.posix"
 # let service_info_of_string line =
     let matches =
       Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
