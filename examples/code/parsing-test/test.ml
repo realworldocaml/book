@@ -16,7 +16,8 @@ let parse_with_error lexbuf =
     fprintf stderr "%a: syntax error\n" print_position lexbuf;
     exit (-1)
 
-[@@@part "1"]
+[@@@part "1"] ;;
+
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
@@ -33,6 +34,6 @@ let loop filename () =
 
 let () =
   Command.basic_spec ~summary:"Parse and display JSON"
-    Command.Spec.(empty +> anon ("filename" %: file))
+    Command.Spec.(empty +> anon ("filename" %: string))
     loop
   |> Command.run
