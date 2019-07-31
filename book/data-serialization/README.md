@@ -120,8 +120,7 @@ that doesn't match the structure of the OCaml type in question.
 - : int list = [1; 2; 3]
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)")
 Exception:
-(Sexplib.Conv.Of_sexp_error (Failure "int_of_sexp: (Failure int_of_string)")
- three).
+(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three)).
 ```
 
 ::: {data-type=note}
@@ -436,8 +435,6 @@ Building this will give us the following error:
 
 ```sh dir=../../examples/code/sexpr/test_interval_nosexp
 $ dune build test_interval_nosexp.exe
-      ocamlc .test_interval_nosexp.eobjs/test_interval_nosexp.{cmi,cmo,cmt} (exit 2)
-...
 File "test_interval_nosexp.ml", line 13, characters 20-42:
 Error: Unbound value Int_interval.sexp_of_t
 [1]
@@ -584,14 +581,14 @@ $ dune build read_foo.exe
 $ ./_build/default/read_foo.exe foo_example_broken.scm
 Uncaught exception:
   
-  (Sexplib.Conv.Of_sexp_error
-   (Failure "int_of_sexp: (Failure int_of_string)") not-an-integer)
+  (Of_sexp_error "int_of_sexp: (Failure int_of_string)"
+   (invalid_sexp not-an-integer))
 
-Raised at file "sexp_conv.ml", line 195, characters 30-72
+Raised at file "duniverse/sexplib0/sexp_conv.ml", line 194, characters 30-72
 Called from file "read_foo.ml", line 5, characters 2-3
-Called from file "read_foo.ml", line 3, characters 0-73
+Called from file "read_foo.ml", line 3, characters 0-71
 Called from file "read_foo.ml", line 11, characters 4-60
-Called from file "src/exn.ml", line 113, characters 6-10
+Called from file "duniverse/base/src/exn.ml", line 107, characters 6-10
 [1]
 ```
 
@@ -636,14 +633,12 @@ $ dune build read_foo_better_errors.exe
 $ ./_build/default/read_foo_better_errors.exe foo_example_broken.scm
 Uncaught exception:
   
-  (Sexplib.Conv.Of_sexp_error
-   (Sexplib.Sexp.Annotated.Conv_exn foo_broken_example.scm:2:4
-    (Failure "int_of_sexp: (Failure int_of_string)"))
-   not-an-integer)
+  (Of_sexp_error foo_broken_example.scm:2:4
+   "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
 
-Raised at file "src/pre_sexp.ml", line 715, characters 4-56
+Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 742, characters 4-56
 Called from file "read_foo_better_errors.ml", line 10, characters 10-68
-Called from file "src/exn.ml", line 113, characters 6-10
+Called from file "duniverse/base/src/exn.ml", line 107, characters 6-10
 [1]
 ```
 
@@ -712,8 +707,8 @@ fail at runtime if it is used:
 ```ocaml env=sexp_opaque
 # t_of_sexp (Sexp.of_string "((a whatever) (b foo))")
 Exception:
-(Sexplib.Conv.Of_sexp_error
- (Failure "opaque_of_sexp: cannot convert opaque values") whatever).
+(Of_sexp_error "opaque_of_sexp: cannot convert opaque values"
+ (invalid_sexp whatever)).
 ```
 
 This is there to allow for s-expression converters to be created for types

@@ -1,9 +1,9 @@
 open Core
 
-type t = { 
+type t = {
   a: string;
   b: int;
-  c: float option 
+  c: float option
 } [@@deriving sexp]
 
 let run () =
