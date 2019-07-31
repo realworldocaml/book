@@ -782,7 +782,7 @@ you might expect.
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_days
 $ dune build cal.exe
-$ ./_build/default/cal.exe -help
+$ dune exec -- ./cal.exe -help
 Add [days] to the [base] date and print day
 
   cal.exe BASE DAYS
@@ -794,7 +794,7 @@ Add [days] to the [base] date and print day
   [-help]        print this help text and exit
                  (alias: -?)
 
-$ ./_build/default/cal.exe 2012-12-25 40
+$ dune exec -- ./cal.exe 2012-12-25 40
 2013-02-03
 ```
 
@@ -852,7 +852,7 @@ reflects the subcommands we just added.
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_sub_days
 $ dune build cal.exe
-$ ./_build/default/cal.exe -help
+$ dune exec -- ./cal.exe -help
 Manipulate dates
 
   cal.exe SUBCOMMAND
@@ -870,9 +870,9 @@ We can invoke the two commands we just defined to verify that they work and
 see the date parsing in action:
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_sub_days
-$ ./_build/default/cal.exe add 2012-12-25 40
+$ dune exec ./cal.exe add 2012-12-25 40
 2013-02-03
-$ ./_build/default/cal.exe diff 2012-12-25 2012-11-01
+$ dune exec ./cal.exe diff 2012-12-25 2012-11-01
 54 days
 ```
 
@@ -975,7 +975,7 @@ second argument.
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_interactive2
 $ dune build cal.exe
-$ echo 35 | ./_build/default/cal.exe 2013-12-01
+$ echo 35 | dune exec -- ./cal.exe 2013-12-01
 enter days: 2014-01-05
 ```
 
