@@ -94,6 +94,9 @@ val set_variables: t -> (string * string) list
 val unset_variables: t -> string list
 (** [unset_variable t] is the list of environment variable to unset *)
 
+val required_packages: t -> string list
+(** [required_packages t] is the names of the required packages *)
+
 val required_libraries: t -> (Library.Set.t, string) Result.result
 (** [required_packages t] is the names of the required packages *)
 

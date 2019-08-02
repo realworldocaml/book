@@ -6,6 +6,6 @@ $ ls
 ```
 
 ```sh toto,dir=xxx
->> "toto" is not a valid label or prefix. Valid labels are "dir", "source-tree", "file", "part", "env", "skip", "non-deterministic" and "version" and valid prefixes are "set-" and "unset-".
+>> "toto" is not a valid label or prefix. Valid labels are "dir", "source-tree", "file", "part", "env", "skip", "non-deterministic", "version" and "require-package" and valid prefixes are "set-" and "unset-".
 $ xxx
 ```

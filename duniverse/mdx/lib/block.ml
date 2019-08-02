@@ -149,6 +149,7 @@ let labels = [
   `Label "skip"             , [`None];
   `Label "non-deterministic", [`None; `Some "command"; `Some "output"];
   `Label "version"          , [`Any];
+  `Label "require-package"  , [`Any];
   `Prefix "set-"            , [`Any];
   `Prefix "unset-"          , [`None];
 ]
@@ -287,6 +288,15 @@ let unset_variables t =
     | _ -> Fmt.failwith "invalid env variable operator (no operator allowed)"
   in
   List.map f (get_prefixed_labels t "unset-")
+
+let required_packages t =
+  let f = function
+    | `Eq, "" ->
+      Fmt.failwith "invalid `require-package` label value: requires a value"
+    | `Eq, pkg -> pkg
+    | _ -> Fmt.failwith "invalid `env` label value"
+  in
+  List.map f (get_labels t "require-package")
 
 let require_re =
   let open Re in

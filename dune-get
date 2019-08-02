@@ -363,7 +363,7 @@
       (provided_packages (((name rresult) (version (0.6.0+dune))))))
      ((dir mdx) (upstream https://github.com/Julow/mdx.git)
       (ref
-       ((t duniverse_mode) (commit 74538860c46c59051f7d148f3519935b2b0b50f2)))
+       ((t duniverse_mode) (commit 9a109655cb0609ebfaa704479848718caf0148b5)))
       (provided_packages (((name mdx) (version (1.4.0))))))
      ((dir splittable_random)
       (upstream https://github.com/janestreet/splittable_random.git)

@@ -40,7 +40,7 @@ let findlib_conf_gen_rule =
      ^^ " (action %s))\n")
     target action
 
-let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~requires ~duniverse_mode options =
+let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_mode options =
   let ml_files = String.Set.elements ml_files in
   let ml_files = List.map (prepend_root root) ml_files in
   let dirs = match root with
@@ -55,7 +55,7 @@ let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~requires ~duniverse_
     let f (cpt, acc) _ = cpt + 1, ("y" ^ string_of_int cpt) :: acc in
     List.fold_left f (0, []) ml_files |> snd
   in
-  let requires = String.Set.elements requires in
+  let packages = String.Set.elements packages in
   let pp_package_deps fmt name =
     Fmt.pf fmt "\         (package %s)" name
   in
@@ -75,9 +75,8 @@ let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~requires ~duniverse_
   in
   let root = match root with None -> "" | Some r -> Fmt.strf "--root=%s " r in
   let deps =
-    let require_deps = if duniverse_mode then requires else [] in
     let x =
-      List.map (Fmt.to_to_string pp_package_deps) require_deps @
+      List.map (Fmt.to_to_string pp_package_deps) packages @
       List.map (Fmt.to_to_string pp_ml_deps) (List.combine var_names ml_files) @
       List.map (Fmt.to_to_string pp_dir_deps) dirs @
       prelude
@@ -171,7 +170,11 @@ let run () md_file section direction prelude prelude_str root duniverse_mode =
   let on_item acc = function
     | Mdx.Section _ | Text _ -> Ok acc
     | Block b when active b ->
-      let files, dirs, nd, requires = acc in
+      let files, dirs, nd, packages = acc in
+      let packages =
+        Mdx.Block.required_packages b
+        |> List.fold_left (fun s e -> String.Set.add e s) packages
+      in
       let nd = nd || match Mdx.Block.mode b with
         | `Non_det _ -> true
         | _          -> false
@@ -183,9 +186,12 @@ let run () md_file section direction prelude prelude_str root duniverse_mode =
         |> String.Set.union source_trees
       in
       let files = add_opt (Mdx.Block.file b) files in
-      Mdx.Block.required_libraries b >>| fun libs ->
-      let requires = Mdx.Library.Set.union requires libs in
-      files, dirs, nd, requires
+      if duniverse_mode then
+        Mdx.Block.required_libraries b >>| fun libs ->
+        let packages = String.Set.union packages (requires_to_packages libs) in
+        files, dirs, nd, packages
+      else
+        Ok (files, dirs, nd, packages)
     | Block _ -> Ok acc
   in
   let on_file file_contents items =
@@ -194,24 +200,24 @@ let run () md_file section direction prelude prelude_str root duniverse_mode =
       requires_from_prelude prelude >>= fun prelude_requires ->
       requires_from_prelude_str prelude_str >>= fun prelude_str_requires ->
       let requires = Mdx.Library.Set.union prelude_requires prelude_str_requires in
-      Mdx.Util.Result.List.fold ~f:on_item ~init:(empty, empty, false, requires) items
+      let packages = requires_to_packages requires in
+      Mdx.Util.Result.List.fold ~f:on_item ~init:(empty, empty, false, packages) items
     in
     match req_res with
     | Error s ->
       Printf.eprintf "Fatal error while parsing block: %s" s;
       exit 1
-    | Ok (ml_files, dirs, nd, requires) ->
+    | Ok (ml_files, dirs, nd, packages) ->
       let options =
         List.map (Fmt.to_to_string pp_prelude) prelude @
         List.map (Fmt.to_to_string pp_prelude_str) prelude_str @
         [Fmt.to_to_string pp_direction direction]
       in
-      let requires = requires_to_packages requires in
       if duniverse_mode then
         ( Fmt.pr "%s" findlib_conf_gen_rule;
           Fmt.pr "\n"
         );
-      print_rule ~md_file ~prelude ~nd ~ml_files ~dirs ~root ~requires
+      print_rule ~md_file ~prelude ~nd ~ml_files ~dirs ~root ~packages
         ~duniverse_mode options;
       file_contents
   in
