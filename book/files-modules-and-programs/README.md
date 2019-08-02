@@ -265,6 +265,7 @@ The resulting code can still be built with `dune`, which will discover
 dependencies and realize that `counter.ml` needs to be compiled.
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-counter
+$ dune build freq.bc
 ```
 
 ## Signatures and Abstract Types
@@ -397,6 +398,7 @@ let () =
 With this implementation, the build now succeeds!
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-abstract-fixed
+$ dune build freq.bc
 ```
 
 Now we can turn to optimizing the implementation of `Counter`. Here's an
