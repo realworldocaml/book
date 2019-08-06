@@ -706,7 +706,7 @@ The `atdgen` command will generate some new files in your current directory.
 `github_t.ml` and `github_t.mli` will contain an OCaml module with types
 defined that correspond to the ATD file:
 
-```sh
+```sh require-package=atdgen
 $ atdgen -t github.atd
 $ atdgen -j github.atd
 $ ocamlfind ocamlc -package atd -i github_t.mli
