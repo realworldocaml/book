@@ -7,13 +7,9 @@ WORKDIR /home/opam/src
 RUN opam switch 4.07
 RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 
-# pre-install dependencies
-RUN opam depext -y core async ppx_sexp_conv dune \
-    toplevel_expect_test patdiff lambdasoup sexp_pretty fmt re mdx
-    # Required for code blocks
-    # core_bench mtime yojson astring cryptokit ocp-index atd atdgen ctypes \
-    # ctypes-foreign textwrap uri
-    # cohttp-async
+# install non-OCaml dependencies
+COPY Makefile /home/opam/src/.
+RUN make depext
 RUN opam install dune=1.11.0
 
 #install pandoc

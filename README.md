@@ -49,6 +49,12 @@ Here are the commands to build the website:
 
 ### Installing Dependencies
 
+You can install system dependencies by running:
+
+```
+make depext
+```
+
 All OCaml dependencies are vendored in the `duniverse/` directory except
 for the `dune` build system itself. It's preferable to use an empty opam switch
 with only `dune` installed to avoid conflicts between the opam and local
