@@ -364,13 +364,11 @@ If we now try to compile `freq.ml`, we'll get the following error:
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-abstract
 $ dune build freq.bc
-      ocamlc .freq.eobjs/freq.{cmi,cmo,cmt} (exit 2)
-...
 File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
-       Type Counter.t is not compatible with type 'a list
+       Type Counter.t is not compatible with type 'a list 
 [1]
 ```
 
@@ -853,7 +851,7 @@ get this error.
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-missing-def
 $ dune build counter.bc
-Don't know how to build counter.bc
+Error: Don't know how to build counter.bc
 Hint: did you mean counter.ml?
 [1]
 ```
@@ -883,16 +881,14 @@ will lead to a compilation error.
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-type-mismatch
 $ dune build freq.bc
-      ocamlc .freq.eobjs/counter.{cmo,cmt} (exit 2)
-...
 File "counter.ml", line 1:
 Error: The implementation counter.ml
-       does not match the interface .freq.eobjs/counter.cmi:
+       does not match the interface .freq.eobjs/byte/counter.cmi:
        Type declarations do not match:
          type median = Median of string | Before_and_after of string * string
        is not included in
          type median = Before_and_after of string * string | Median of string
-       File "counter.mli", line 20, characters 0-84: Expected declaration
+       File "counter.mli", line 21, characters 0-84: Expected declaration
        File "counter.ml", line 18, characters 0-84: Actual declaration
        Fields number 1 have different names, Median and Before_and_after.
 [1]
@@ -951,10 +947,10 @@ the cycle:
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2
 $ dune build freq.bc
-Dependency cycle between the following files:
-    _build/default/.freq.eobjs/counter.ml.all-deps
---> _build/default/.freq.eobjs/freq.ml.all-deps
---> _build/default/.freq.eobjs/counter.ml.all-deps
+Error: Dependency cycle between the following files:
+   _build/default/.freq.eobjs/counter.ml.all-deps
+-> _build/default/.freq.eobjs/freq.ml.all-deps
+-> _build/default/.freq.eobjs/counter.ml.all-deps
 [1]
 ```
 
