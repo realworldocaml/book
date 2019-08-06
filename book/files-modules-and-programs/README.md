@@ -117,7 +117,7 @@ need a somewhat more complex invocation to get them linked in: [OCaml
 toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlfind]{.idx}[Base standard
 library/finding with ocamlfind]{.idx}
 
-```sh dir=../../examples/code/files-modules-and-programs/freq
+```sh dir=../../examples/code/files-modules-and-programs/freq,skip
 $ ocamlfind ocamlc -linkpkg -package base -package stdio freq.ml -o freq.byte
 ```
 
