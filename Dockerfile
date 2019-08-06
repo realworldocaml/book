@@ -21,3 +21,4 @@ WORKDIR /home/opam/src
 COPY . /home/opam/src/
 RUN sudo chown -R opam /home/opam/src
 RUN opam exec -- make
+RUN opam exec -- make test
