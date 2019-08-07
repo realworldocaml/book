@@ -51,9 +51,9 @@ string.
     let matches =
       Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
     in
-    { service_name = Re.get matches 1;
-      port = Int.of_string (Re.get matches 2);
-      protocol = Re.get matches 3;
+    { service_name = Re.Group.get matches 1;
+      port = Int.of_string (Re.Group.get matches 2);
+      protocol = Re.Group.get matches 3;
     }
 val service_info_of_string : string -> service_info = <fun>
 ```
@@ -282,9 +282,9 @@ updated version of `service_info_of_string`.[records/construction of]{.idx}
     let matches =
       Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
     in
-    let service_name = Re.get matches 1 in
-    let port = Int.of_string (Re.get matches 2) in
-    let protocol = Re.get matches 3 in
+    let service_name = Re.Group.get matches 1 in
+    let port = Int.of_string (Re.Group.get matches 2) in
+    let protocol = Re.Group.get matches 3 in
     { service_name; port; protocol; comment }
 val service_info_of_string : string -> service_info = <fun>
 ```
