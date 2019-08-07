@@ -2,10 +2,10 @@
   (target dune.gen)
   (action
    (with-stdout-to %{target}
-    (run ocaml-mdx rule --duniverse-mode README.md --direction=to-ml
-                          --prelude=prelude.ml
-                          --prelude=catch_all:catch_all.ml
-                          --prelude=logger:logger.ml))))
+    (run ocaml-mdx rule --duniverse-mode --direction=to-ml %{dep:README.md}
+      --prelude=%{dep:prelude.ml}
+      --prelude=catch_all:%{dep:catch_all.ml}
+      --prelude=logger:%{dep:logger.ml}))))
 
 (alias
  (name   runtest)
