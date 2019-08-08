@@ -465,7 +465,7 @@ module List_dir :
 Again, we can create an instance of this query handler and interact with it
 directly:
 
-```ocaml env=query_handler,non-deterministic
+```ocaml env=query_handler,non-deterministic=command
 # let list_dir = List_dir.create "/var"
 val list_dir : List_dir.t = {List_dir.cwd = "/var"}
 # List_dir.eval list_dir (sexp_of_string ".")
