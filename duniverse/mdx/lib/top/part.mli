@@ -30,4 +30,5 @@ val find: file -> part:string option -> string list option
 
 val replace: file -> part:string option -> lines:string list -> file
 (** [replace ~file ~part ~lines] returns the lines of the file [file] where
-    the lines of part [part] have been replaced by [lines]. *)
+    the lines of part [part] have been replaced by [lines].
+    If [part] does not occur in the file, a new part is added at the end. *)

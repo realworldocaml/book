@@ -413,13 +413,18 @@ let labels_of_string s =
 
 let compare_versions v1 v2 =
   match (v1, v2) with
-  | (Some _, Some _, Some _), (None, _, _) -> 0
-  | (Some x, Some _, Some _), (Some x', None, _) -> x - x'
-  | (Some x, Some y, Some _), (Some x', Some y', None) ->
+  | (Some _, Some _, _), (None, _, _) -> 0
+  | (Some x, Some _, _), (Some x', None, _) -> x - x'
+  | (Some x, Some y, _), (Some x', Some y', None) ->
     if x = x' then y - y' else x - x'
   | (Some x, Some y, Some z), (Some x', Some y', Some z') ->
     if x = x' then
       if y = y' then z - z'
+      else y - y'
+    else x - x'
+  | (Some x, Some y, None), (Some x', Some y', Some z') ->
+    if x = x' then
+      if y = y' then - z'
       else y - y'
     else x - x'
   | _ -> Fmt.failwith "incomplete OCaml version"

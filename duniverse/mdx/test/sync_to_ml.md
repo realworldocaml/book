@@ -36,6 +36,15 @@ let () =
   ()
 ```
 
+```ocaml file=sync_to_ml.mli,part=1
+module A =
+struct
+```
+
+```ocaml file=sync_to_ml.mli,part=2
+  type t = Some of int | Many
+```
+
 ```ocaml file=sync_to_ml.mli,part=3
-type t = Some of int | Many
+end
 ```
