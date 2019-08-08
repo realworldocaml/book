@@ -329,8 +329,8 @@ modules/query-handling framework]{.idx #FCMquery}
 module type Query_handler =
   sig
     type config
-    val config_of_sexp : Sexp.t -> config
     val sexp_of_config : config -> Sexp.t
+    val config_of_sexp : Sexp.t -> config
     val name : string
     type t
     val create : config -> t
