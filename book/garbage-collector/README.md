@@ -507,7 +507,7 @@ garbage collection occurring:
 
 
 
-```sh dir=../../examples/code/gc/barrier_bench,non-deterministic=command
+```sh dir=../../examples/code/gc/barrier_bench,non-deterministic=command,require-package=core_bench
 $ dune build barrier_bench.exe
 $ ./_build/default/barrier_bench.exe -ascii alloc -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
@@ -534,7 +534,7 @@ garbage collection behavior:
 
 ```sh dir=../../examples/code/gc/barrier_bench
 $ dune build barrier_bench.exe
-$ ./_build/default/barrier_bench.exe -help
+$ dune exec -- ./barrier_bench.exe -help
 Benchmark for mutable, immutable
 
   barrier_bench.exe [COLUMN ...]
@@ -653,9 +653,9 @@ Building and running this should show the following output:
 
 
 
-```sh dir=../../examples/code/gc/finalizer
+```sh dir=../../examples/code/gc/finalizer,require-package=async
 $ dune build finalizer.exe
-$ ./_build/default/finalizer.exe
+$ dune exec -- ./finalizer.exe
        immediate int: FAIL
      immediate float: FAIL
       allocated bool: FAIL
