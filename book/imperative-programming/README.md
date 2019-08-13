@@ -1449,7 +1449,7 @@ One problem with the preceding code is that if it throws an exception in the
 middle of its work, it won't actually close the file. If we try to read a
 file that doesn't actually contain numbers, we'll see such an error:
 
-```ocaml env=file
+```ocaml env=file,non-deterministic=command
 # sum_file "/etc/hosts"
 Exception:
 (Failure

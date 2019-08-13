@@ -1,6 +1,5 @@
+[@@@part "1"] ;;
 
-
-[@@@part "1"];;
 (* file: dlist.ml *)
 open Base
 
@@ -12,8 +11,8 @@ type 'a element =
 
 type 'a t = 'a element option ref
 
+[@@@part "2"] ;;
 
-[@@@part "2"];;
 let create () = ref None
 let is_empty t = !t = None
 
@@ -23,8 +22,8 @@ let first t = !t
 let next elt = elt.next
 let prev elt = elt.prev
 
+[@@@part "3"] ;;
 
-[@@@part "3"];;
 let insert_first t value =
   let new_elt = { prev = None; next = !t; value } in
   begin match !t with
@@ -34,8 +33,8 @@ let insert_first t value =
   t := Some new_elt;
   new_elt
 
+[@@@part "4"] ;;
 
-[@@@part "4"];;
 let insert_after elt value =
   let new_elt = { value; prev = Some elt; next = elt.next } in
   begin match elt.next with
@@ -45,8 +44,8 @@ let insert_after elt value =
   elt.next <- Some new_elt;
   new_elt
 
+[@@@part "5"] ;;
 
-[@@@part "5"];;
 let remove t elt =
   let { prev; next; _ } = elt in
   begin match prev with
@@ -60,8 +59,8 @@ let remove t elt =
   elt.prev <- None;
   elt.next <- None
 
+[@@@part "6"] ;;
 
-[@@@part "6"];;
 let iter t ~f =
   let rec loop = function
     | None -> ()
