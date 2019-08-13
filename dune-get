@@ -78,6 +78,10 @@
      ((dir re) (upstream https://github.com/ocaml/ocaml-re.git)
       (ref ((t 1.9.0) (commit 42c7f8899c9b1a4e011053487a97cf7eab312d5f)))
       (provided_packages (((name re) (version (1.9.0))))))
+     ((dir seq) (upstream https://github.com/dune-universe/seq.git)
+      (ref
+       ((t duniverse-0.1) (commit 8feae7e02820f656c6c2ebe5a126b20d3eecb76e)))
+      (provided_packages (((name seq) (version (0.1+dune))))))
      ((dir result) (upstream https://github.com/janestreet/result.git)
       (ref ((t 1.4) (commit 5f7f1a4423ca3b9db4b4048d561f31fd6bfd9ab0)))
       (provided_packages (((name result) (version (1.4))))))
