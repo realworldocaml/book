@@ -1,4 +1,4 @@
-;; [@@@part "1"] ;;
+[@@@part "1"] ;;
 
 class square_outline w x y = object
   inherit square w x y

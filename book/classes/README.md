@@ -1283,7 +1283,7 @@ which will pull in all the other dependencies:
 
 
 
-```sh dir=../../examples/code/classes-async/shapes
+```sh dir=../../examples/code/classes-async/shapes,skip
 $ dune build shapes.exe
 ```
 
