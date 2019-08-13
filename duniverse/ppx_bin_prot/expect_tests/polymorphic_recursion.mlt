@@ -1,0 +1,25 @@
+open Bin_prot.Std
+
+#verbose true;;
+
+module Simple = struct
+  type 'a t = C of 'a list t * string t [@@deriving bin_io]
+end
+
+[%%expect{|
+module Simple :
+  sig
+    type 'a t = C of 'a list t * string t
+    val bin_shape_t : Bin_prot.Shape.t -> Bin_prot.Shape.t
+    val bin_size_t : 'a Bin_prot.Size.sizer -> 'a t Bin_prot.Size.sizer
+    val bin_write_t : 'a Bin_prot.Write.writer -> 'a t Bin_prot.Write.writer
+    val bin_writer_t :
+      'a Bin_prot.Type_class.writer0 -> 'a t Bin_prot.Type_class.writer0
+    val __bin_read_t__ :
+      'a Bin_prot.Read.reader -> (int -> 'a t) Bin_prot.Read.reader
+    val bin_read_t : 'a Bin_prot.Read.reader -> 'a t Bin_prot.Read.reader
+    val bin_reader_t :
+      'a Bin_prot.Type_class.reader0 -> 'a t Bin_prot.Type_class.reader0
+    val bin_t : 'a Bin_prot.Type_class.t0 -> 'a t Bin_prot.Type_class.t0
+  end
+|}]

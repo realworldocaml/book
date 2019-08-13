@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+ ((name atdgen_runtime)
+  (public_name atdgen-runtime)
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (libraries (biniou yojson))))

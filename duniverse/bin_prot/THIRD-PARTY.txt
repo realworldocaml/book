@@ -1,0 +1,5 @@
+The repository contains 3rd-party code in the following locations and
+under the following licenses:
+
+- src: based on Tywith, by Martin Sandin.  License can be found in
+  LICENSE-Tywith.txt

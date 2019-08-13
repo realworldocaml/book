@@ -1,4 +1,4 @@
-.PHONY: all clean dep publish promote test test-all docker
+.PHONY: all clean dep publish promote test test-all docker depext
 
 all:
 	@dune build @site
@@ -34,3 +34,7 @@ publish:
 	git -C .gh-pages commit -m "Update Pages"
 	git -C .gh-pages push origin gh-pages -f
 	rm -rf .gh-pages
+
+depext:
+	opam depext -y core async ppx_sexp_conv dune toplevel_expect_test patdiff \
+		lambdasoup sexp_pretty fmt re mdx

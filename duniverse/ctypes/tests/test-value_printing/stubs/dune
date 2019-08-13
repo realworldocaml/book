@@ -1,0 +1,4 @@
+(library
+ (name test_value_printing_stubs)
+ (wrapped false)
+ (libraries ctypes))

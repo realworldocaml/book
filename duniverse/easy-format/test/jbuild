@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(executable
+ ((name test_easy_format)
+  (libraries (easy-format))))
+
+(alias
+ ((name runtest)
+  (deps (test_easy_format.exe))
+  (action (run ${<}))))

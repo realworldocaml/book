@@ -1,0 +1,2 @@
+(library (name sexp_pretty_test) (libraries core_kernel sexp_pretty)
+ (preprocess (pps ppx_jane)))

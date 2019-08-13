@@ -1,0 +1,4 @@
+(library (name ppx_jane) (public_name ppx_jane) (kind ppx_rewriter)
+ (libraries ppx_jane_kernel ppx_expect base_quickcheck.ppx_quickcheck
+  ppx_stable)
+ (preprocess no_preprocessing))

@@ -1,0 +1,4 @@
+(library
+ (name test_unions_stubs)
+ (wrapped false)
+ (libraries ctypes ctypes-foreign.threaded))

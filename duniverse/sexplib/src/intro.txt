@@ -1,0 +1,326 @@
+@indexes
+
+{2 Modules}
+
+@all_modules
+
+{2 What is Sexplib?}
+This library contains functionality for parsing and pretty-printing
+S-expressions.  In addition to that it contains a preprocessing module for
+Camlp4, which can be used to automatically generate code from type definitions
+for efficiently converting OCaml-values to S-expressions and vice versa.
+In combination with the parsing and pretty-printing functionality this frees
+users from having to write their own I/O-routines for datastructures they
+define.  Possible errors during automatic conversions from S-expressions
+to OCaml-values are reported in human-readable ways with exact location
+information.  Another module in this library allows you to extract and
+replace sub-expressions in S-expressions.
+
+{2 How can you use it?}
+
+Make sure you have installed the [type_conv] package on your system,
+too.  It should be obtainable at the same site as [sexplib].
+
+The API (.mli-files) in the [sexplib] library directory is
+fully documented.  Module [Sexp] contains all I/O-functions for
+S-expressions, module [Conv] helper functions for converting
+OCaml-values of standard types to S-expressions.  Module [Path]
+supports sub-expression extraction and substitution.
+
+Module [pa_sexp_conv.ml] contains the extensions for the
+Camlp4-preprocessor.  It adds the new construct [with sexp]
+(and [with sexp_of] and [with of_sexp], which are implied by
+the first).  When using this construct right after a type definition,
+function definitions will be generated automatically, which perform
+S-expression conversions.
+
+E.g. given the following type definition:
+
+@color{[type t = A | B
+with sexp]}
+
+The above will generate the functions [sexp_of_t] and
+[t_of_sexp].  The preprocessor also supports automatic addition
+of conversion functions to signatures.  Just add [with sexp] to
+the type in a signature, and the appropriate function signatures will
+be generated.
+
+See the file [lib_test/conv_test.ml] for example usage.  It also
+demonstrates how to extract and substitute sub-expressions.
+
+
+{2 Syntax Specification of S-expressions}
+
+{9 Lexical conventions of S-expression}
+
+Whitespace, which consists of space, newline, carriage return, horizontal
+tab and form feed, is ignored unless within an OCaml-string, where it
+is treated according to OCaml-conventions.  The semicolon introduces
+comments.  Comments are ignored, and range up to the next newline
+character.  The left parenthesis opens a new list, the right parenthesis
+closes it again.  Lists can be empty.  The double quote denotes the
+beginning and end of a string following the lexical conventions of OCaml
+(see OCaml-manual for details).  All characters other than double quotes,
+left- and right parentheses, and whitespace are considered part of a
+contiguous string.
+
+{9 Grammar of S-expressions}
+
+S-expressions are either strings (= atoms) or lists. The lists can
+recursively contain further S-expressions or be empty, and must be
+balanced, i.e. parentheses must match.
+
+{9 Examples}
+
+{[this_is_an_atom_123'&^%!  ; this is a comment
+"another atom in an OCaml-string \"string in a string\" \123"
+
+; empty list follows below
+()
+
+; a more complex example
+(
+  (
+    list in a list  ; comment within a list
+    (list in a list in a list)
+    42 is the answer to all questions
+  )
+)]}
+
+{9 Conversion of basic OCaml-values}
+
+Basic OCaml-values like the unit-value, integers (in all representations),
+floats, strings, and booleans are represented in S-exp syntax in the
+same way as in OCaml.  Strings may also appear without quotes if this
+does not clash with the lexical conventions for S-expressions.
+
+{9 Conversion of OCaml-tuples}
+
+OCaml-tuples are simple lists of values in the same order as in the tuple.
+E.g.:
+
+{[(3.14, "foo", "bar bla", 27) <===> (3.14 foo "bar bla" 27)]}
+
+{9 Conversion of OCaml-records}
+
+OCaml-records are represented as lists of pairs in S-expression syntax.
+Each pair consists of the name of the record field (first element),
+and its value (second element).  E.g.:
+
+@color{[{
+  foo = 3;
+  bar = "some string";
+}]}
+
+[<===>]
+
+{[(
+  (foo 3)
+  (bar "some string")
+)]}
+
+Type specifications of records allow the use of a special type
+[sexp_option] which indicates that a record field should be optional.
+E.g.:
+
+@color{[type t =
+{
+  x : int option;
+  y : int sexp_option;
+}]}
+
+The type [sexp_option] is equivalent to ordinary options, but is
+treated specially by the code generator.  The above would lead to the
+following equivalences of values and S-expressions:
+
+@color{[{
+  x = Some 1;
+  y = Some 2;
+}]}
+
+[<===>]
+
+{[(
+  (x (some 1))
+  (y 2)
+)]}
+
+And:
+
+@color{[{
+  x = None;
+  y = None;
+}]}
+
+[<===>]
+
+{[(
+  (x none)
+)]}
+
+Note how [sexp_option] allows you to leave away record fields
+that should default to [None].  It is also unnecessary (and
+actually wrong) now to write down such a value as an option, i.e.
+the [some]-tag must be dropped if the field should be defined.
+
+The types [sexp_list], [sexp_array], and [sexp_bool] can be
+used in ways similar to the type [sexp_option].  They assume the empty
+list, empty array, and false value respectively as default values.
+
+{9 Conversion of sum types}
+
+Constant constructors in sum types are represented as strings.
+Constructors with arguments are represented as lists, the first element
+being the constructor name, the rest being its arguments.  Constructors
+may also be started in lowercase in S-expressions, but will always be
+converted to uppercase when converting from OCaml-values.
+
+For example:
+
+@color{[type t = A | B of int * float * t with sexp ]}
+
+{[B (42, 3.14, B (-1, 2.72, A)) <===> (B 42 3.14 (B -1 2.72 A))]}
+
+The above example also demonstrates recursion in datastructures.
+
+{9 Conversion of variant types}
+
+The conversion of polymorphic variants is almost the same as with
+sum types.  The notable difference is that variant constructors must
+always start with an either lower- or uppercase character, matching
+the way it was specified in the type definition.  This is because OCaml
+also distinguishes between upper- and lowercase variant constructors.
+Note that type specifications containing unions of variant types are
+also supported by the S-expression converter.
+
+{9 Conversion of OCaml-lists and arrays}
+
+OCaml-lists and arrays are straightforwardly represented as S-expression
+lists.
+
+{9 Conversion of option types}
+
+The option type is converted like ordinary polymorphic sum types, i.e.:
+
+{[None        <===>  none
+Some value  <===>  (some value)]}
+
+There is a deprecated version of the syntax in which values of option
+type are represented as lists in S-expressions:
+
+{[None        <===>  ()
+Some value  <===>  (value)]}
+
+Reading of the old-style S-expression syntax for option values is only
+supported if the reference [Conv.read_old_option_format] is set to
+[true] (currently the default, which may change soon).  A conversion
+exception is raised otherwise.  The old format will be written only if
+[Conv.write_old_option_format] is true (also currently the default).
+Reading of the new format is always supported.
+
+{9 Conversion of polymorphic values}
+
+There is nothing special about polymorphic values as long as there are
+conversion functions for the type parameters.  E.g.:
+
+@color{[type 'a t = A | B of 'a with sexp
+type foo = int t with sexp]}
+
+In the above case the conversion functions will behave as if [foo]
+had been defined as a monomorphic version of [t] with ['a]
+replaced by [int] on the right hand side.
+
+If a datastructure is indeed polymorphic, and you want to convert it,
+you will have to supply the conversion functions for the type parameters
+at runtime.  E.g. in the above example, if you wanted to convert a value
+of type ['a t], you would have to write something like this:
+
+@color{[sexp_of_t sexp_of_a v]}
+
+where [sexp_of_a], which may also be named differently in
+this particular case, is a function that converts values of type ['a]
+to an S-expression.  Types with more than one parameter require passing
+conversion functions for those parameters in the order of their appearance
+on the left hand side of the type definition.
+
+{9 Conversion of abstract datatypes}
+
+Of course, if you want to convert an abstract datatype to an S-expression,
+you will have to roll your own conversion function, which should produce
+values of type [Sexp.t] directly.  If, however, you want to make
+use of your abstract type within definitions of other types, make sure
+that you call your conversion function appropriately: it should be in the
+same scope as the typename, and must be named [sexp_of_{typename}].
+
+{9 Conversion of hashtables}
+
+Hashtables, which are abstract values in OCaml, are represented as
+association lists, i.e. lists of key-value pairs, e.g.:
+
+@color{[((foo 42) (bar 3))]}
+
+Reading in the above S-expression as hashtable mapping strings to
+integers ([(string, int) Hashtbl.t]) will map ["foo"] to 42
+and ["bar"] to 3.
+
+Note that the order of elements in the list may matter, because
+duplicates are kept: bindings will be inserted into the hashtable in
+order of appearence.  Therefore, the last binding of a key will be the
+``visible'' one, the others are ``hidden''.  See the OCaml-documentation
+on hashtables for details.
+
+Note, too, that polymorphic equality may not hold between conversions.
+You will have to use a function implementing logical equality for that
+purpose.
+
+{9 Conversion of opaque values}
+
+Opaque values are ones for which we do not want to perform conversions.
+This may be, because we do not have S-expression converters for them,
+or because we do not want to apply them in a particular type context,
+e.g. if the resulting S-expression should be printed out but without
+superfluous information.  To prevent the preprocessor from generating
+calls to converters, simply apply the qualifier [sexp_opaque]
+as if it were a type constructor, e.g.:
+
+@color{[type foo = int * stuff sexp_opaque with sexp]}
+
+Thus, there is no need to specify converters for type [stuff],
+and if there are any, they will not be used in this particular context.
+Needless to say, it is not possible to convert such an S-expression back
+to the original value.  Here is an example conversion:
+
+{[(42, some_stuff) ===>  (42, <opaque>)]}
+
+{9 Conversion of exceptions}
+
+S-expression converters for exceptions can be automatically registered
+using the [with sexp] macro, e.g.:
+
+@color{[module M = struct
+  exception Foo of int with sexp
+end]}
+
+Such exceptions will be translated in a similar way as sum types, but
+their constructor will be prefixed with the fully qualified module path
+(here: [M.Foo]) so as to be able to discriminate between them
+without problems.
+
+The user can then easily convert an exception matching the above
+one to an S-expression using [Sexplib.Conv.sexp_of_exn].
+User-defined conversion functions can be registered, too, by calling
+[Sexplib.Conv.add_exn_converter].  This should make it very
+convenient for users to catch arbitrary exceptions escaping their program
+and pretty-printing them, including all arguments, as S-expressions.
+The library already contains mappings for all known exceptions that can
+escape functions in the OCaml standard library.
+
+{2 I/O and type conversions}
+
+There are multiple ways of performing I/O with S-expressions.  If exact
+error locations are required when type conversions fail, S-expressions need
+to be parsed with location annotations.  In most cases users may want to use
+functions like e.g. [load_sexp_conv] or [load_sexp_conv_exn], which
+load S-expressions from files and convert them.  Only when conversions fail,
+the file will be reparsed with annotations, which is slower, and type errors
+will be reported accurately with file, line number, column, and file position.

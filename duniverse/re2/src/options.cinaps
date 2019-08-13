@@ -1,0 +1,43 @@
+(* -*- mode:tuareg -*- *)
+
+include StdLabels
+include Printf
+
+module Type = struct
+  type t =
+    { ocaml_type : string
+    ; value_of_c : string
+    ; value_to_c : string
+    }
+
+  let bool = { ocaml_type = "bool"; value_of_c = "Val_bool"; value_to_c = "Bool_val" }
+
+  let int = { ocaml_type = "int"; value_of_c = "Val_int"; value_to_c = "Int_val" }
+
+  let encoding =
+    { ocaml_type = "Encoding.C_repr.t"
+    ; value_of_c = "Val_int"
+    ; value_to_c = "static_cast<RE2::Options::Encoding>Int_val"}
+end
+
+type t =
+  { name : string
+  ; type_ : Type.t
+  }
+
+let all =
+  [ { name = "case_sensitive"; type_ = Type.bool }
+  ; { name = "dot_nl"; type_ = Type.bool }
+  ; { name = "encoding"; type_ = Type.encoding }
+  ; { name = "literal"; type_ = Type.bool }
+  ; { name = "log_errors"; type_ = Type.bool }
+  ; { name = "longest_match"; type_ = Type.bool }
+  ; { name = "max_mem"; type_ = Type.int }
+  ; { name = "never_capture"; type_ = Type.bool }
+  ; { name = "never_nl"; type_ = Type.bool }
+  ; { name = "one_line"; type_ = Type.bool }
+  ; { name = "perl_classes"; type_ = Type.bool }
+  ; { name = "posix_syntax"; type_ = Type.bool }
+  ; { name = "word_boundary"; type_ = Type.bool }
+  ]
+;;

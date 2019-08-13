@@ -1,0 +1,17 @@
+(executable
+ (name dep_core)
+ (modules dep_core)
+ (libraries markup)
+ (flags (:standard -w +A-48)))
+
+(executable
+ (name dep_lwt)
+ (modules dep_lwt)
+ (libraries markup-lwt)
+ (flags (:standard -w +A-48)))
+
+(executable
+ (name dep_lwt_unix)
+ (modules dep_lwt_unix)
+ (libraries markup-lwt.unix)
+ (flags (:standard -w +A-48)))

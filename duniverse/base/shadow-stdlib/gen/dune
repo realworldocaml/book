@@ -1,0 +1,4 @@
+(executables (names gen) (libraries str compiler-libs.common caml)
+ (link_flags -linkall) (preprocess no_preprocessing))
+
+(ocamllex mapper)

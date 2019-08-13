@@ -1,0 +1,7 @@
+(library (name expect_test_matcher) (public_name ppx_expect.matcher)
+ (libraries base stdio re expect_test_common expect_test_config)
+ (preprocess
+  (pps ppx_assert ppx_compare ppx_custom_printf ppx_inline_test ppx_sexp_conv
+   ppx_variants_conv)))
+
+(ocamllex lexer)

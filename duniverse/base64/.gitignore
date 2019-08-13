@@ -1,0 +1,10 @@
+_build
+_tests
+tmp
+*~
+\.\#*
+\#*#
+*.install
+*.native
+*.byte
+.merlin

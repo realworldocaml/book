@@ -1,6 +1,14 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
+         (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y21 ../../examples/code/files-modules-and-programs/abstract_username.ml)
          (:y20 ../../examples/code/files-modules-and-programs/common.ml)
          (:y19 ../../examples/code/files-modules-and-programs/ext_list.ml)
@@ -36,8 +44,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/session_info)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y21} %{y21}.corrected)
            (diff? %{y20} %{y20}.corrected)
            (diff? %{y19} %{y19}.corrected)
@@ -59,10 +66,15 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
+         (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y21 ../../examples/code/files-modules-and-programs/abstract_username.ml)
          (:y20 ../../examples/code/files-modules-and-programs/common.ml)
          (:y19 ../../examples/code/files-modules-and-programs/ext_list.ml)
@@ -98,8 +110,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/session_info)
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x})
-           (diff? %{x} %{x}.corrected)
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y21} %{y21}.corrected)
            (diff? %{y20} %{y20}.corrected)
            (diff? %{y19} %{y19}.corrected)
@@ -121,4 +132,5 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))

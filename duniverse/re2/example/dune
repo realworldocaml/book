@@ -1,0 +1,2 @@
+(executables (names grep2) (libraries core_kernel re2)
+ (preprocess no_preprocessing))

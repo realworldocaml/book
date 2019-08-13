@@ -1,0 +1,5 @@
+(library
+ (name test_functions)
+ (install_c_headers test_functions)
+ (c_names test_functions)
+ (libraries ctypes))

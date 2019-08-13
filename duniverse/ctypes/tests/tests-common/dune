@@ -1,0 +1,3 @@
+(library
+ (name tests_common)
+ (libraries ctypes ctypes.stubs ctypes-foreign.threaded))

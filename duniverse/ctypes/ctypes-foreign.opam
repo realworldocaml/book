@@ -1,0 +1,51 @@
+opam-version: "2.0"
+version: "dev"
+maintainer: "yallop@gmail.com"
+authors: "yallop@gmail.com"
+tags: ["org:ocamllabs" "org:mirage"]
+homepage: "https://github.com/ocamllabs/ocaml-ctypes"
+bug-reports: "http://github.com/ocamllabs/ocaml-ctypes/issues"
+post-messages: "This package requires libffi on your system" {failure}
+synopsis: "Dynamic access to foreign C libraries using Ctypes"
+description: """
+ctypes is a library for binding to C libraries using pure OCaml. The primary
+aim is to make writing C extensions as straightforward as possible.
+The core of ctypes is a set of combinators for describing the structure of C
+types -- numeric types, arrays, pointers, structs, unions and functions. You
+can use these combinators to describe the types of the functions that you want
+to call, then bind directly to those functions -- all without writing or
+generating any C!
+
+To install the optional `ctypes.foreign` interface (which uses `libffi` to
+provide dynamic access to foreign libraries), you will need to also install
+the `ctypes-foreign` package.
+
+    opam install ctypes-foreign
+
+This will make the `ctypes-foreign` ocamlfind subpackage available.
+"""
+depexts: [
+  ["libffi-dev"] {os-distribution = "debian"}
+  ["libffi-dev"] {os-distribution = "ubuntu"}
+  ["libffi"] {os = "macos" & os-distribution = "homebrew"}
+  ["libffi-devel"] {os-distribution = "centos"}
+  ["libffi-devel"] {os-distribution = "oraclelinux"}
+  ["libffi-devel"] {os-distribution = "fedora"}
+  ["libffi-dev"] {os-distribution = "alpine"}
+  ["libffi-devel"] {os-distribution = "opensuse"}
+]
+dev-repo: "git+http://github.com/ocamllabs/ocaml-ctypes.git"
+depends: [
+  "ocaml" {>= "4.02.3"}
+  "ctypes" {="version"}
+  "conf-pkg-config" {build}
+  "lwt" {with-test & < "4.0.0"}
+  "ounit" {with-test}
+  "conf-ncurses" {with-test}
+]
+build: [
+  ["dune" "subst"]
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+

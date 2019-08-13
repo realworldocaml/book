@@ -1,6 +1,14 @@
+(rule
+ (target findlib.conf)
+ (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+
 (alias
  (name   runtest)
  (deps   (:x README.md)
+         (:conf findlib.conf)
+         (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y8 ../../examples/code/imperative-programming/dictionary.ml)
          (:y7 ../../examples/code/imperative-programming/dictionary.mli)
          (:y6 ../../examples/code/imperative-programming/dictionary2.ml)
@@ -15,8 +23,7 @@
          memo.ml
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml %{x}))
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
@@ -25,10 +32,15 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))
 (alias
  (name   runtest-all)
  (deps   (:x README.md)
+         (:conf findlib.conf)
+         (package mdx)
+         (package core)
+         (package ppx_jane)
          (:y8 ../../examples/code/imperative-programming/dictionary.ml)
          (:y7 ../../examples/code/imperative-programming/dictionary.mli)
          (:y6 ../../examples/code/imperative-programming/dictionary2.ml)
@@ -43,8 +55,7 @@
          memo.ml
          prelude.ml)
  (action (progn
-           (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml --non-deterministic %{x})
-           (diff? %{x} %{x}.corrected)
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --prelude=memo:memo.ml --prelude=fib:fib.ml --prelude=letrec:letrec.ml --prelude=value_restriction:letrec.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y8} %{y8}.corrected)
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
@@ -53,4 +64,5 @@
            (diff? %{y3} %{y3}.corrected)
            (diff? %{y2} %{y2}.corrected)
            (diff? %{y1} %{y1}.corrected)
-           (diff? %{y0} %{y0}.corrected))))
+           (diff? %{y0} %{y0}.corrected)
+           (diff? %{x} %{x}.corrected))))

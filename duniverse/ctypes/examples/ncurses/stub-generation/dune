@@ -1,0 +1,3 @@
+(executable
+ (name ncurses_stub_cmd)
+ (libraries ncurses_bindings ncurses_generated))

@@ -1,0 +1,10 @@
+(executable
+ (name configure)
+ (modules configure)
+ (libraries unix)
+ (flags (:standard)))
+
+(executable
+ (name discover)
+ (modules discover)
+ (flags (:standard -w +A-29)))

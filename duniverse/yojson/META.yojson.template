@@ -1,0 +1,6 @@
+# JBUILDER_GEN
+
+package "biniou" (
+  description = "Deprecated. The yojson package already includes this"
+  requires = "yojson"
+)

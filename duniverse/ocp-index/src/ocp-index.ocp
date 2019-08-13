@@ -1,0 +1,47 @@
+comp += [ "-g" "-w" "+1..39-4-9-37-40" ]
+
+if ocaml_version >= "4.02" then {
+   comp += [ "-safe-string" ]
+}
+
+begin library "ocp-index-lib"
+  sort = false
+  files = [ "trie.ml"
+              "indexTypes.ml" (pp = "ocp-pp")
+              "indexMisc.ml" (pp = "ocp-pp")
+              "indexOut.mli"
+              "indexOut.ml" (pp = "ocp-pp")
+              "indexPredefined.mli"
+              "indexPredefined.ml" (pp = "ocp-pp")
+              "indexBuild.mli"
+              "indexBuild.ml" (pp = "ocp-pp")
+              "libIndex.ml" (pp = "ocp-pp")
+              "indexScope.ml" ]
+  requires = [ "compiler-libs" "compiler-libs.common"
+               "ocp-indent.lexer" "ocp-indent.utils" ]
+end
+
+begin program "ocp-index"
+  sort = false
+        files = [
+        "indexOptions.mli"
+        "indexOptions.ml" (pp = "ocp-pp")
+          "indexMain.ml" ]
+  requires = [ "ocp-index-lib" "unix" "cmdliner" ]
+end
+
+begin program "ocp-grep"
+  sort = false
+  files = [ "grepMain.ml" (pp = "ocp-pp") ]
+  requires = [ "unix" "cmdliner" "ocp-index-lib" "re" "re.posix" ]
+end
+
+begin program "ocp-browser"
+  sort = false
+        files = [
+        "indexOptions.mli"
+        "indexOptions.ml" (pp = "ocp-pp")
+          "browserMain.ml" (pp = "ocp-pp")
+                ]
+  requires = [ "ocp-index-lib" "unix" "cmdliner" "lambda-term" ]
+end

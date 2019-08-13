@@ -1,0 +1,30 @@
+Ellipsis lines are preserved if possible even when the output changes
+
+```sh
+$ for i in `seq 1 21`; do echo $i; done
+1
+2
+...
+10
+...
+19
+20
+21
+```
+
+```sh
+$ for i in `seq 1 19`; do echo $i; done
+1
+2
+...
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+```

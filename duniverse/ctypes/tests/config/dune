@@ -1,0 +1,17 @@
+(executable
+ (name test_config)
+ (libraries dune.configurator))
+
+(rule
+ (targets test-cflags)
+ (deps test_config.exe %{lib:ctypes:cstubs_internals.h}
+   %{lib:ctypes:ctypes_complex_compatibility.h}
+   %{lib:ctypes:ctypes_complex_stubs.h}
+   %{lib:ctypes:ctypes_cstubs_internals.h}
+   %{lib:ctypes:ctypes_ldouble_stubs.h}
+   %{lib:ctypes:ctypes_managed_buffer_stubs.h}
+   %{lib:ctypes:ctypes_primitives.h} %{lib:ctypes:ctypes_raw_pointer.h}
+   %{lib:ctypes:ctypes_type_info_stubs.h})
+ (action
+  (run %{exe:test_config.exe} -integers-dir %{lib:integers:ocaml_integers.h}
+    -ctypes-dir %{lib:ctypes:ctypes_cstubs_internals.h})))

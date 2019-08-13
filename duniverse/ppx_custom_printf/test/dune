@@ -1,0 +1,4 @@
+(library (name custom_printf_sample) (libraries ppx_sexp_conv.runtime-lib)
+ (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT) (deps test.ml.pp))

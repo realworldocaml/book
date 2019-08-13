@@ -1,0 +1,82 @@
+
+                   Installation instructions for atdgen
+                   ====================================
+
+
+Godi makes the installation process straightforward. Simply install the
+godi-atdgen package using `godi_console'. Dependencies will be selected
+and installed automatically.
+
+
+Requirements
+------------
+
+- Objective Caml (>= 3.11 is fine, earlier versions are probably fine too)
+
+- GNU make
+
+- Findlib (`ocamlfind' command):
+    http://www.camlcity.org/archive/programming/findlib.html
+
+- menhir (installation of atd):
+    http://pauillac.inria.fr/~fpottier/menhir/
+
+- easy-format (required for biniou, yojson and atd):
+    http://martin.jambon.free.fr/easy-format.html
+
+- cppo (installation of yojson only):
+    http://martin.jambon.free.fr/cppo.html
+
+- biniou (>= 1.0.0):
+    http://martin.jambon.free.fr/biniou.html
+
+- yojson (>= 1.0.0):
+    http://martin.jambon.free.fr/yojson.html
+
+- atd (>= 1.0.0):
+    http://oss.wink.com/atd/
+
+
+Manual installation
+-------------------
+
+make           # or `make all' for the bytecode-only version
+
+make install   # or `make BINDIR=/foo/bin install' for installing executables
+               # in a place other than the guessed default.
+
+
+Manual uninstallation
+---------------------
+
+make uninstall
+
+
+
+Getting started
+---------------
+
+First take a look at the example in the `example' subdirectory.
+
+Commands installed by the different packages:
+
+- atdgen: produces OCaml code from ATD type definitions
+- atdcat: pretty-prints ATD type definitions
+- bdump: displays biniou data in human-readable form
+- ydump: pretty-prints JSON data
+
+Sources of documentation:
+
+- command-line interface help: `atdgen -help'
+- type definition syntax: atd manual
+- options available for each language (ocaml, biniou, json, doc): atdgen manual
+- generic biniou tree: biniou documentation, module Bi_io
+- generic JSON tree: yojson documentation, module Yojson.Safe
+- biniou input buffers: biniou documentation, module Bi_inbuf
+- output buffers: biniou documentation, module Bi_outbuf
+
+
+Contact
+-------
+Bugs and feedback should be sent to Martin Jambon <martinj@mylife.com>
+or <martin@mjambon.com>.

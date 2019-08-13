@@ -1,0 +1,146 @@
+* Parsexp - S-expression parser
+
+=Parsexp= contains functionality for parsing s-expressions, which are
+defined in the [[https://github.com/janestreet/base][Base]] library as follows:
+
+#+begin_src ocaml
+module Sexp : sig
+  type t = Atom of string | List of t list
+end
+#+end_src
+
+=Parsexp= is platform independent and as such doesn't provide IO
+operations. The companion library [[https://github.com/janestreet/parsexp_io][Parsexp_io]] provides facilities for
+loading s-expressions from files.
+
+** Syntax of s-expression
+
+*** Lexical conventions of s-expression
+
+Whitespace, which consists of space, newline, horizontal tab, and form
+feed, is ignored unless within an OCaml-string, where it is treated
+according to OCaml-conventions.  The left parenthesis opens a new
+list, the right one closes it.  Lists can be empty.
+
+The double quote denotes the beginning and end of a string using
+similar lexing conventions to the ones of OCaml (see the
+[[http://caml.inria.fr/pub/docs/manual-ocaml/][OCaml-manual]] for details). Differences are:
+
+- octal escape sequences (=\o123=) are not supported by parsexp
+- backslash that's not a part of any escape sequence is kept as it is instead of 
+  resulting in parse error
+- a backslash followed by a space does not form an escape sequence, so it's 
+  interpreted as is, while it is interpreted as just a space by OCaml
+
+All characters other than double quotes, left- and right parentheses,
+whitespace, carriage return, and comment-introducing characters or
+sequences (see next paragraph) are considered part of a contiguous
+string.
+
+*** Comments
+
+There are three kinds of comments:
+
+- _line comments_ are introduced with =;=, and end at the newline.
+- _sexp comments_ are introduced with =#;=, and end at the end of the
+  following s-expression
+- _block comments_ are introduced with =#|= and end with =|#=.  These
+  can be nested, and double-quotes within them must be balanced and be
+  lexically correct OCaml strings.
+
+*** Grammar of s-expressions
+
+s-expressions are either strings (= atoms) or lists.  The lists can
+recursively contain further s-expressions or be empty, and must be
+balanced, /i.e./ parentheses must match.
+
+*** Examples
+
+#+begin_src scheme
+  this_is_an_atom_123'&^%!  ; this is a comment
+  "another atom in an OCaml-string \"string in a string\" \123"
+
+  ; empty list follows below
+  ()
+
+  ; a more complex example
+  (
+    (
+      list in a list  ; comment within a list
+      (list in a list in a list)
+      42 is the answer to all questions
+      #; (this S-expression
+           (has been commented out)
+         )
+      #| Block comments #| can be "nested" |# |#
+    )
+  )
+#+end_src
+
+** API
+
+=Parsexp= offers a few different parsers. Each of them comes in 3
+variants:
+
+1. =single=, for parsing a source expected to contain a single
+   s-expression. Zero or more than 1 s-expressions is considered an
+   error and reported as such.
+2. =many=, for parsing a source expected to contain multiple
+   s-expressions, returned as a list
+3. =eager=, for reporting s-expressions to the user as soon as they
+   are found in the input source
+
+Parsers all implement the same API. For each parsers, =Parsexp= offers
+a low-level API, where one feeds characters one-by-one to the parser,
+as well as a convenience functions to parse a whole string.
+
+*** Low-level API
+
+With the low-level API, ones must create a parser state and feed it
+characters one by one. This allows =Parsexp= to be used with any kind
+of input as well as to be =Lwt= or =Async= friendly.
+
+Essentially, if you want to parse from a different input source, you
+have to write the fetch-character-feed-to-parser loop yourself.
+
+*** Parsers
+
+=Parsexp= offers the following parsers:
+
+- _normal parsers_ returning values of type =Sexp.t=
+- _with positions_ returning s-expressions as well as a set of
+  positions (see next section)
+- _just positions_ returning only a set of positions
+- _CST_ return a concrete syntax tree, including all comment and
+  locations
+
+In addition, it provides convenience functions for parsing strings and
+converting the result with a =Sexp.t -> 'a= function, reporting errors
+with accurate locations.
+
+Each parsing/conversion functions comes in two variants: one raising
+exception in case of error and one returning a =Result.t= value. In
+general you should use the latter since parsing is an operation that
+can always fail.
+
+*** Positions sets and error reporting
+
+To deal with error locations when converting S-expressions to OCaml
+values, =Parsexp= introduces the notion of compact positions sets.
+
+A positions set represents positions in the input source of all
+s-expressions. It has a small memory footprint and is relatively cheap
+to construct. Using a positions set and the corresponding
+s-expression, one can reconstruct the location of any sub
+s-expressions in the input source.
+
+Depending on the input source, one can either:
+
+- parse a first time without recording positions and parse a second
+  time only producing positions in case of error
+- parse only once producing both the s-expressions and the positions
+  sets
+
+The first method has the advantage that it is faster where there are
+no errors, however it is not suitable for sources that can't guarantee
+repeatable reads such as files.

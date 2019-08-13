@@ -49,11 +49,20 @@ Here are the commands to build the website:
 
 ### Installing Dependencies
 
-To install the dependencies needed for the book and the code examples:
+You can install system dependencies by running:
 
 ```
-opam pin add rwo . -n
-opam install rwo --deps-only
+make depext
+```
+
+All OCaml dependencies are vendored in the `duniverse/` directory except
+for the `dune` build system itself. It's preferable to use an empty opam switch
+with only `dune` installed to avoid conflicts between the opam and local
+libraries. To set up your RWO development environment you can run:
+
+```
+opam switch create rwo 4.07.1
+opam install dune=1.11.0
 ```
 
 ### Generating the HTML

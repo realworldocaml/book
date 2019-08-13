@@ -1,0 +1,20 @@
+true : bin_annot, safe_string
+
+# Ideally we should not have this and use_mtime
+# would give us the right link order, see
+# https://github.com/ocaml/ocamlbuild/issues/122
+<src> : include
+
+<src/mtime_top*> : package(compiler-libs.toplevel)
+
+<src-os/mtime_clock.{cma,cmxa}> : record_mtime_clock_os_stubs
+<src-os/mtime_clock.cmxs> : link_mtime_clock_os_stubs
+
+# use_mtime is missing, see above
+<test-os/*> : use_mtime_clock_os
+<test-os/test.byte> : custom
+
+<{src,test}-jsoo/*> : package(js_of_ocaml)
+
+# use_mtime is missing, see above
+<test-jsoo/*> : use_mtime_clock_jsoo

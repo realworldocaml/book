@@ -1,0 +1,4 @@
+(library
+ (name test_arrays_stubs)
+ (wrapped false)
+ (libraries ctypes))

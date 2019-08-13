@@ -1,0 +1,29 @@
+opam-version: "2.0"
+maintainer: "Hannes Mehnert <hannes@mehnert.org>"
+authors: "Hannes Mehnert <hannes@mehnert.org>"
+license: "ISC"
+homepage: "https://github.com/hannesm/domain-name"
+doc: "https://hannesm.github.io/domain-name/doc"
+bug-reports: "https://github.com/hannesm/domain-name/issues"
+depends: [
+  "ocaml" {>= "4.04.2"}
+  "dune" {build}
+  "fmt"
+  "astring"
+  "alcotest" {with-test}
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/hannesm/domain-name.git"
+synopsis: "RFC 1035 Internet domain names"
+description: """
+A domain name is a sequence of labels separated by dots, such as `foo.example`.
+Each label may contain any bytes. The length of each label may not exceed 63
+charactes.  The total length of a domain name is limited to 253 (byte
+representation is 255), but other protocols (such as SMTP) may apply even
+smaller limits.  A domain name label is case preserving, comparison is done in a
+case insensitive manner.
+"""

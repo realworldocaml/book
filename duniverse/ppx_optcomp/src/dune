@@ -1,0 +1,3 @@
+(library (name ppx_optcomp) (public_name ppx_optcomp)
+ (libraries compiler-libs.common base ppxlib stdio) (kind ppx_deriver)
+ (preprocess no_preprocessing))

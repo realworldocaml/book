@@ -1,0 +1,50 @@
+(library
+ (name ppxlib)
+ (public_name ppxlib)
+ (libraries
+  ocaml-compiler-libs.common
+  compiler-libs.common
+  ocaml-compiler-libs.shadow
+  ocaml-migrate-parsetree
+  ppxlib_ast
+  base
+  stdio
+  ppxlib_print_diff
+  ppx_derivers
+  ppxlib_traverse_builtins)
+ (flags (:standard -open Ocaml_shadow -safe-string))
+ (ppx.driver
+  (main       Ppxlib.Driver.standalone)
+  (replaces   ocaml-migrate-parsetree)
+  (flags      (-corrected-suffix %{corrected-suffix} -diff-cmd - -dump-ast))
+  (lint_flags (-corrected-suffix %{corrected-suffix} -diff-cmd - -null    ))))
+
+(alias
+ (name DEFAULT)
+ (deps cinaps_helpers (:ml (glob_files *.ml)) (:mli (glob_files *.mli)))
+ (action (run %{bin:cinaps} %{ml} %{mli})))
+
+(rule
+ (targets ast_pattern_generated.ml)
+ (deps    gen/gen_ast_pattern.exe)
+ (action  (run ./gen/gen_ast_pattern.exe %{lib:ppxlib.ast:ast.ml})))
+
+(rule
+ (targets ast_builder_generated.ml)
+ (deps gen/gen_ast_builder.exe)
+ (action  (run ./gen/gen_ast_builder.exe %{lib:ppxlib.ast:ast.ml})))
+
+(alias
+ (name cinaps)
+ (deps cinaps_helpers (:ml (glob_files *.ml)) (:mli (glob_files *.mli)))
+ (action (progn
+          (run %{bin:cinaps} -no-color -diff-cmd - %{ml} %{mli})
+          (diff? code_matcher.ml code_matcher.ml.cinaps-corrected)
+          (diff? driver.ml driver.ml.cinaps-corrected))))
+
+;; This is to make the code compatible with different versions of
+;; OCaml
+(rule
+ (targets compiler_specifics.ml)
+ (deps    gen-compiler_specifics)
+ (action  (run %{ocaml} %{deps} %{ocaml_version} %{targets})))

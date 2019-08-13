@@ -1,0 +1,4 @@
+(library
+ (name test_passing_ocaml_values_stubs)
+ (wrapped false)
+ (libraries ctypes))

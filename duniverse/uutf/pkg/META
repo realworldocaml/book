@@ -1,0 +1,7 @@
+version = "%%VERSION_NUM%%"
+description = "Non-blocking streaming Unicode codec for OCaml"
+requires = "bytes uchar"
+archive(byte) = "uutf.cma"
+archive(native) = "uutf.cmxa"
+plugin(byte) = "uutf.cma"
+plugin(native) = "uutf.cmxs"
