@@ -1,7 +1,7 @@
 open Base
 
 let touch counts line =
-  let count = 
+  let count =
     match List.Assoc.find ~equal:String.equal counts line with
     | None -> 0
     | Some x -> x

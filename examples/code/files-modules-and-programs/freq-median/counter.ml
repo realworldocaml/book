@@ -13,12 +13,13 @@ let touch t s =
   in
   Map.set t ~key:s ~data:(count + 1)
 
-[@@@part "1"]
+[@@@part "1"] ;;
+
 type median = | Median of string
               | Before_and_after of string * string
 
 let median t =
-  let sorted_strings = 
+  let sorted_strings =
     List.sort (Map.to_alist t)
       ~compare:(fun (_,x) (_,y) -> Int.descending x y)
   in
@@ -28,4 +29,3 @@ let median t =
   if len % 2 = 1
   then Median (nth (len/2))
   else Before_and_after (nth (len/2 - 1), nth (len/2))
-
