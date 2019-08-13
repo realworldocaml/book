@@ -235,7 +235,7 @@ characters]{.idx}
 Let's run our erroneous file through `ocp-indent` and see how it processes
 it:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,skip
 $ ocp-indent follow_on_function.ml
 let concat_and_print x y =
   let v = x ^ y in
@@ -258,7 +258,7 @@ first `concat_and_print` definition, and the errant semicolon is now much
 easier to spot. We just need to remove that semicolon and rerun `ocp-indent`
 to verify that the syntax is correct:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,skip
 $ ocp-indent follow_on_function_fixed.ml
 (*TODO: Check contents*)
 let concat_and_print x y =
@@ -735,7 +735,7 @@ The `ocamlbuild` equivalent is to add the tag `principal` to your build. The
 *corebuild* wrapper script actually adds this by default, but it does no harm
 to explicitly repeat it:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,skip
 $ corebuild -no-hygiene -tag principal principal.cmi non_principal.cmi
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules principal.ml > principal.ml.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o principal.cmo principal.ml
@@ -1090,7 +1090,7 @@ This module defined bindings for the Ncurses library. First, compile the
 interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
 files, and then run `ocp-index` in completion mode:
 
-```sh dir=../../examples/code,source-tree=../../examples/code/ffi
+```sh dir=../../examples/code,source-tree=../../examples/code/ffi,skip
 $ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
 ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
