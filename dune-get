@@ -276,8 +276,10 @@
       (ref ((t v0.12.0) (commit 50c0835df2cc13ad461ce06eb76248f8d3142d17)))
       (provided_packages (((name core_bench) (version (v0.12.0))))))
      ((dir ctypes) (upstream https://github.com/avsm/ocaml-ctypes.git)
-      (ref ((t dune-port) (commit cff50b601c2e1d210582f65eda629f01aad391ba)))
-      (provided_packages (((name ctypes) (version (0.14.0+dune))))))
+      (ref ((t dune-port) (commit a2030b55473871b033288b43fed0ef830213e39d)))
+      (provided_packages
+       (((name ctypes) (version (0.15.1+dune)))
+        ((name ctypes) (version (0.15.1+dune))))))
      ((dir uri) (upstream https://github.com/mirage/ocaml-uri.git)
       (ref ((t v3.0.0) (commit a2d304ad78958931f1a159f7bfeeac69a708972b)))
       (provided_packages
