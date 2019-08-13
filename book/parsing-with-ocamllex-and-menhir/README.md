@@ -705,7 +705,7 @@ let loop filename () =
 
 let () =
   Command.basic_spec ~summary:"Parse and display JSON"
-    Command.Spec.(empty +> anon ("filename" %: file))
+    Command.Spec.(empty +> anon ("filename" %: string))
     loop
   |> Command.run
 ```
