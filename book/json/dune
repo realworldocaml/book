@@ -1,7 +1,10 @@
-(rule (with-stdout-to dune.gen
-  (run ocaml-mdx rule --duniverse-mode --direction=to-ml README.md
+(rule
+  (target dune.gen)
+  (action
+   (with-stdout-to %{target}
+    (run ocaml-mdx rule --duniverse-mode --direction=to-ml %{dep:README.md}
                 --root ../../examples/code/json
-                --prelude=prelude.ml)))
+                --prelude=%{dep:prelude.ml}))))
 
 (alias
  (name   runtest)
