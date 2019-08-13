@@ -42,9 +42,9 @@ Once that's done, Ctypes is available via OPAM as usual:
 
 ```
 $ brew install libffi     # for MacOS X users
-$ opam install ctypes
+$ opam install ctypes ctypes-foreign
 $ utop
-# require "ctypes.foreign" ;;
+# require "ctypes-foreign" ;;
 ```
 
 You'll also need the Ncurses library for the first example. This comes
@@ -181,7 +181,7 @@ signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
 ```sh dir=../../examples/code/ffi/ncurses
-$ corebuild -pkg ctypes.foreign ncurses.inferred.mli
+$ corebuild -pkg ctypes-foreign ncurses.inferred.mli
 $ cp _build/ncurses.inferred.mli .
 ```
 
@@ -233,13 +233,13 @@ let () =
   endwin ()
 ```
 
-The `hello` executable is compiled by linking with the `ctypes.foreign`
+The `hello` executable is compiled by linking with the `ctypes-foreign`
 OCamlfind package:
 
 ```scheme
 (executable
   (name      hello)
-  (libraries ctypes.foreign)
+  (libraries ctypes-foreign)
   (flags     :standard -cclib -lncurses))
 ```
 
@@ -380,7 +380,7 @@ The first step is to open some of the Ctypes modules:
 We can now create a binding to `time` directly from the toplevel.
 
 ```ocaml env=posix
-# #require "ctypes.foreign"
+# #require "ctypes-foreign"
 # #require "ctypes.top"
 # open Ctypes
 # open PosixTypes
@@ -723,7 +723,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```scheme
 (executable
   (name      datetime)
-  (libraries core ctypes.foreign))
+  (libraries core ctypes-foreign))
 ```
 
 
@@ -984,7 +984,7 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme
 (executable
   (name      qsort)
-  (libraries core ctypes.foreign))
+  (libraries core ctypes-foreign))
 ```
 
 
@@ -1001,9 +1001,9 @@ $ ./_build/default/qsort.exe < input.txt
 2
 3
 4
-$ corebuild -pkg ctypes.foreign qsort.inferred.mli
-ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
-ocamlfind ocamlc -i -thread -short-paths -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
+$ corebuild -pkg ctypes-foreign qsort.inferred.mli
+ocamlfind ocamldep -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
+ocamlfind ocamlc -i -thread -short-paths -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
 $ cp _build/qsort.inferred.mli qsort.mli
 ```
 
