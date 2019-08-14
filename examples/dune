@@ -1,1 +1,1 @@
-(ignored_subdirs (code))
+(data_only_dirs code)
