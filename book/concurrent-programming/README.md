@@ -785,7 +785,7 @@ library/DuckDuckGo searching example]{.idx #ALduckduck}
 
 `cohttp`
 : A library for creating HTTP clients and servers. We need Async support,
-  which comes with the `cohttp.async` package.
+  which comes with the `cohttp-async` package.
 
 Now let's dive into the implementation.
 
@@ -871,10 +871,10 @@ To better understand what's going on, it's useful to look at the type for
 `Cohttp_async.Client.get`, which we can do in `utop`:
 
 ```ocaml env=main
-# #require "cohttp.async"
+# #require "cohttp-async"
 # Cohttp_async.Client.get
 - : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async.V1.Conduit_async.Ssl.config ->
+    ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
     ?headers:Cohttp.Header.t ->
     Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
 = <fun>
