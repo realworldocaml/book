@@ -11,6 +11,8 @@ RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 COPY Makefile /home/opam/src/.
 RUN make depext
 RUN opam install dune=1.11.1
+# until ported to duniverse, need menhir in PATH
+RUN opam install menhir
 
 #install pandoc
 WORKDIR /tmp
