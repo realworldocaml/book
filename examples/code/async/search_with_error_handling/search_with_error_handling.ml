@@ -2,31 +2,6 @@ open Core
 open Async
 
 [@@@part "1"];;
-(* Generate a DuckDuckGo search URI from a query string *)
-let query_uri ~server query =
-  let base_uri =
-    Uri.of_string (String.concat ["http://";server;"/?format=json"])
-  in
-  Uri.add_query_param base_uri ("q", [query])
-
-[@@@part "2"];;
-(* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
-let get_definition_from_json json =
-  match Yojson.Safe.from_string json with
-  | `Assoc kv_list ->
-    let find key =
-      begin match List.Assoc.find ~equal:String.equal kv_list key with
-      | None | Some (`String "") -> None
-      | Some s -> Some (Yojson.Safe.to_string s)
-      end
-    in
-    begin match find "Abstract" with
-    | Some _ as x -> x
-    | None -> find "Definition"
-    end
-  | _ -> None
-
-[@@@part "1"];;
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
