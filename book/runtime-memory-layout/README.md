@@ -425,7 +425,7 @@ variant. The hash function is exposed via the `compiler-libs` package that
 reveals some of the internals of the OCaml compiler:
 
 ```ocaml env=reprs
-# #require "ocaml-compiler-libs"
+# #require "ocaml-compiler-libs.common"
 # Btype.hash_variant "Foo"
 - : int = 3505894
 # (Obj.magic (Obj.repr `Foo) : int)

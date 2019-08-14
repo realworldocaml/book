@@ -7,7 +7,7 @@
  (deps   (:x README.md)
          (:conf findlib.conf)
          (package mdx)
-         (package compiler-libs)
+         (package ocaml-compiler-libs)
          prelude.ml)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
