@@ -469,8 +469,7 @@ val create : int -> int -> t
 val contains : t -> int -> bool
 ```
 
-At this point, `test_interval.ml` will compile again, and if we run it, we'll
-get the following output:
+At this point, `test_interval.ml` will compile again using this `dune` file:
 
 ```scheme
 (executable
@@ -479,11 +478,11 @@ get the following output:
   (preprocess (pps ppx_sexp_conv)))
 ```
 
-
+And if we run it, we'll get the following output:
 
 ```sh dir=../../examples/code/sexpr/test_interval
 $ dune build test_interval.exe
-$ ./_build/default/test_interval.exe
+$ dune exec ./test_interval.exe
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
 ```
 
@@ -578,7 +577,7 @@ you'll get the following error:
 
 ```sh dir=../../examples/code/sexpr/read_foo
 $ dune build read_foo.exe
-$ ./_build/default/read_foo.exe foo_example_broken.scm
+$ dune exec -- ./read_foo.exe foo_example_broken.scm
 Uncaught exception:
   
   (Of_sexp_error "int_of_sexp: (Failure int_of_string)"
@@ -630,7 +629,7 @@ If we run it again, we'll see a much more specific error:
 
 ```sh dir=../../examples/code/sexpr/read_foo_better_errors
 $ dune build read_foo_better_errors.exe
-$ ./_build/default/read_foo_better_errors.exe foo_example_broken.scm
+$ dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
 Uncaught exception:
   
   (Of_sexp_error foo_broken_example.scm:2:4
