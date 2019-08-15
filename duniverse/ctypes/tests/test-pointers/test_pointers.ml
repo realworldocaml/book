@@ -62,7 +62,7 @@ struct
       (allocate (ptr (ptr int)) (allocate (ptr int) (allocate int 4))) in
 
     assert_equal ~msg:"Passing pointers to pointers"
-      Pervasives.(1 + 2 + 3 + 4)
+      Stdlib.(1 + 2 + 3 + 4)
       (accept_pointers_to_pointers p pp ppp pppp)
 
 

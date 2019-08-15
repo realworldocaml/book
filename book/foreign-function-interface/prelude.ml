@@ -1,5 +1,7 @@
 #require "core,core.top,ppx_jane";;
-#require "ctypes.top,ctypes.foreign" ;;
+#require "ctypes";;
+#require "ctypes.top";;
+#require "ctypes-foreign";;
 
 open Base
 open Ctypes

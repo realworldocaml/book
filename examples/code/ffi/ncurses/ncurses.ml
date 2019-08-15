@@ -3,17 +3,17 @@ open Ctypes
 type window = unit ptr
 let window : window typ = ptr void
 
+[@@@part "1"] ;;
 
-[@@@part "1"];;
 open Foreign
 
 let initscr =
   foreign "initscr" (void @-> returning window)
 
+[@@@part "2"] ;;
 
-[@@@part "2"];;
 let newwin =
-  foreign "newwin" 
+  foreign "newwin"
     (int @-> int @-> int @-> int @-> returning window)
 
 let endwin =

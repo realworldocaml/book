@@ -32,10 +32,10 @@ depends: [
    "integers" { >= "0.3.0" }
    "ocamlfind" {build}
    "conf-pkg-config" {build}
-   "lwt" {test & >= "3.2.0"}
-   "ctypes-foreign" {test}
-   "ounit" {test}
-   "conf-ncurses" {test}
+   "lwt" {with-test & >= "3.2.0"}
+   "ctypes-foreign" {with-test}
+   "ounit" {with-test}
+   "conf-ncurses" {with-test}
 ]
 depopts: [
   "ocveralls" {with-test}

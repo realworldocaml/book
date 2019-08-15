@@ -38,7 +38,7 @@ let test_pointer_coercions _ =
         ~f:(fun (T t1) ->
           ListLabels.iter types
             ~f:(fun (T t2) ->
-              let _ = coerce (ptr t1) (ptr t2) in ()))
+              let _fn = coerce (ptr t1) (ptr t2) in ()))
 
     (* Check that pointer coercions are value-preserving. *)
     let v = 10

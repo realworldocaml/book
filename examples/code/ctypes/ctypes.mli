@@ -1,7 +1,7 @@
 type 'a typ
 
+[@@@part "1"] ;;
 
-[@@@part "1"]
 val void      : unit typ
 val char      : char typ
 val schar     : int typ
@@ -33,24 +33,24 @@ val double    : float typ
 val complex32 : Complex.t typ
 val complex64 : Complex.t typ
 
+[@@@part "2"] ;;
 
-[@@@part "2"]
 val view :
   read:('a -> 'b) ->
   write:('b -> 'a) ->
   'a typ -> 'b typ
 
+[@@@part "3"] ;;
 
-[@@@part "3"]
 val string_of_char_ptr : char ptr -> string
 val char_ptr_of_string : string -> char ptr
 
+[@@@part "4"] ;;
 
-[@@@part "4"]
-val string    : string typ
+val string    : string.typ
 
+[@@@part "5"] ;;
 
-[@@@part "5"]
 module Array : sig
   type 'a t = 'a array
 

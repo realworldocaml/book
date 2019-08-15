@@ -37,11 +37,12 @@ depexts: [
 dev-repo: "git+http://github.com/ocamllabs/ocaml-ctypes.git"
 depends: [
   "ocaml" {>= "4.02.3"}
-  "ctypes" {="version"}
+  "ctypes" {=version}
   "conf-pkg-config" {build}
   "lwt" {with-test & < "4.0.0"}
   "ounit" {with-test}
   "conf-ncurses" {with-test}
+  "stdlib-shims" {with-test}
 ]
 build: [
   ["dune" "subst"]
