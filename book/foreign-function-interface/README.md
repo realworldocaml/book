@@ -380,7 +380,7 @@ The first step is to open some of the Ctypes modules:
 We can now create a binding to `time` directly from the toplevel.
 
 ```ocaml env=posix
-# #require "ctypes-foreign"
+# #require "ctypes-foreign.threaded"
 # #require "ctypes.top"
 # open Ctypes
 # open PosixTypes
