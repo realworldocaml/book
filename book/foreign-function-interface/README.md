@@ -239,7 +239,7 @@ OCamlfind package:
 ```scheme
 (executable
   (name      hello)
-  (libraries ctypes-foreign)
+  (libraries ctypes-foreign.threaded)
   (flags     :standard -cclib -lncurses))
 ```
 
@@ -731,7 +731,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```scheme
 (executable
   (name      datetime)
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
@@ -995,7 +995,7 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme
 (executable
   (name      qsort)
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
