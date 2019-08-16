@@ -180,7 +180,7 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
-```sh dir=../../examples/code/ffi/ncurses
+```sh dir=../../examples/code/ffi/ncurses,skip
 $ corebuild -pkg ctypes-foreign ncurses.inferred.mli
 $ cp _build/ncurses.inferred.mli .
 ```
@@ -1000,7 +1000,7 @@ and also build the inferred interface so we can examine it more closely:
 
 
 
-```sh dir=../../examples/code/ffi/qsort
+```sh dir=../../examples/code/ffi/qsort,skip
 $ dune build qsort.exe
 $ cat input.txt
 2
