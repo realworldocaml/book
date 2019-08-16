@@ -37,4 +37,4 @@ publish:
 
 depext:
 	opam depext -y core async ppx_sexp_conv dune toplevel_expect_test patdiff \
-		lambdasoup sexp_pretty fmt re mdx ctypes-foreign
+		lambdasoup sexp_pretty fmt re mdx ctypes-foreign conf-ncurses
