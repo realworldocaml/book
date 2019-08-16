@@ -32,7 +32,7 @@ let prepend_root r b = match r with
 let findlib_conf_gen_rule =
   let target = "findlib.conf" in
   let action =
-    {|(write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")|}
+    {|(write-file %{target} "")|}
   in
   Printf.sprintf
     ("(rule\n"
@@ -40,7 +40,18 @@ let findlib_conf_gen_rule =
      ^^ " (action %s))\n")
     target action
 
-let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_mode options =
+let pp_locks_field fmt dirs_and_files =
+  match dirs_and_files with
+  | [] -> ()
+  | [lock] ->
+    Fmt.pf fmt " (locks %s)\n" lock
+  | l ->
+    let sep = Fmt.(const string "\n   ") in
+    Fmt.(list ~sep string) fmt (" (locks"::l);
+    Fmt.pf fmt ")\n"
+
+let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_mode ~locks
+    options =
   let ml_files = String.Set.elements ml_files in
   let ml_files = List.map (prepend_root root) ml_files in
   let dirs = match root with
@@ -103,7 +114,7 @@ let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_
 (alias\n\
 \ (name   %s)\n\
 \ (deps   (:x %s)%s\n\
-\         (package mdx)%s)\n\
+\         (package mdx)%s)\n%a\
 \ (action (progn\n\
 \           %s\n%a\n\
 \           (diff? %%{x} %%{x}.corrected))))\n"
@@ -111,6 +122,7 @@ let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_
       md_file
       conf_dep
       deps
+      pp_locks_field locks
       (run_action arg)
       (Fmt.list ~sep:Fmt.cut pp_ml_diff) var_names
   in
@@ -156,7 +168,7 @@ let requires_to_packages library_set =
     library_set
     String.Set.empty
 
-let run () md_file section direction prelude prelude_str root duniverse_mode =
+let run () md_file section direction prelude prelude_str root duniverse_mode locks =
   let open Rresult.R.Infix in
   let section = match section with
     | None   -> None
@@ -218,7 +230,7 @@ let run () md_file section direction prelude prelude_str root duniverse_mode =
           Fmt.pr "\n"
         );
       print_rule ~md_file ~prelude ~nd ~ml_files ~dirs ~root ~packages
-        ~duniverse_mode options;
+        ~duniverse_mode ~locks options;
       file_contents
   in
   Mdx.run md_file ~f:on_file;
@@ -233,9 +245,14 @@ let duniverse_mode =
   in
   Arg.(value & flag & info ["duniverse-mode"] ~doc)
 
+let locks =
+  let docv = "LOCK[,LOCKS]" in
+  let doc = "Explicitly specify a list of locks to add to the generated dune rule" in
+  Arg.(value & opt (list ~sep:',' string) [] & info ["locks"] ~doc ~docv)
+
 let cmd =
   let doc = "Produce dune rules to synchronize markdown and OCaml files." in
   Term.(pure run
         $ Cli.setup $ Cli.file $ Cli.section $ Cli.direction
-        $ Cli.prelude $ Cli.prelude_str $ Cli.root $ duniverse_mode),
+        $ Cli.prelude $ Cli.prelude_str $ Cli.root $ duniverse_mode $ locks),
   Term.info "rule" ~doc
