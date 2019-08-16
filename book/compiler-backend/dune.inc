@@ -25,6 +25,7 @@
          (source_tree ../../examples/code/back-end/bench_patterns)
          (source_tree ../../examples/code/back-end/bench_poly_and_mono)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y9} %{y9}.corrected)
@@ -61,6 +62,7 @@
          (source_tree ../../examples/code/back-end/bench_patterns)
          (source_tree ../../examples/code/back-end/bench_poly_and_mono)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y9} %{y9}.corrected)

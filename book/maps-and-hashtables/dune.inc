@@ -16,6 +16,7 @@
          (source_tree ../../examples/code/maps-and-hash-tables/map_vs_hash)
          (source_tree ../../examples/code/maps-and-hash-tables/map_vs_hash2)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y3} %{y3}.corrected)
@@ -37,6 +38,7 @@
          (source_tree ../../examples/code/maps-and-hash-tables/map_vs_hash)
          (source_tree ../../examples/code/maps-and-hash-tables/map_vs_hash2)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y3} %{y3}.corrected)

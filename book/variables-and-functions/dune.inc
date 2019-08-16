@@ -16,6 +16,7 @@
          (:y1 ../../examples/code/variables-and-functions/substring_sig1.ml)
          (:y0 ../../examples/code/variables-and-functions/substring_sig2.ml)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y5} %{y5}.corrected)

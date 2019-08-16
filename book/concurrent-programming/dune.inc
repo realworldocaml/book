@@ -28,6 +28,7 @@
          (source_tree ../../examples/code/async/search_with_error_handling)
          (source_tree ../../examples/code/async/search_with_timeout_no_leak)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y8} %{y8}.corrected)
@@ -66,6 +67,7 @@
          (source_tree ../../examples/code/async/search_with_error_handling)
          (source_tree ../../examples/code/async/search_with_timeout_no_leak)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y8} %{y8}.corrected)

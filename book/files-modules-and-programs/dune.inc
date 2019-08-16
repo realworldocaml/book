@@ -43,6 +43,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/freq-with-type-mismatch)
          (source_tree ../../examples/code/files-modules-and-programs/session_info)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y21} %{y21}.corrected)
@@ -109,6 +110,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/freq-with-type-mismatch)
          (source_tree ../../examples/code/files-modules-and-programs/session_info)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y21} %{y21}.corrected)

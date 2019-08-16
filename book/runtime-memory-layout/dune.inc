@@ -9,6 +9,7 @@
          (package mdx)
          (package ocaml-compiler-libs)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
 

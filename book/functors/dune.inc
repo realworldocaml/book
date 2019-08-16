@@ -17,6 +17,7 @@
          (:y1 ../../examples/code/functors/fqueue.mli)
          (:y0 ../../examples/code/functors/sexpable.ml)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y6} %{y6}.corrected)

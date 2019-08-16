@@ -14,6 +14,7 @@
          (:y0 ../../examples/code/objects/subtyping.ml)
          prelude.ml
          subtyping.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --prelude=subtyping.ml --direction=to-ml %{x}))
            (diff? %{y2} %{y2}.corrected)
@@ -32,6 +33,7 @@
          (:y0 ../../examples/code/objects/subtyping.ml)
          prelude.ml
          subtyping.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --prelude=subtyping.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y2} %{y2}.corrected)

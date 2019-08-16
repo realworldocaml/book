@@ -29,6 +29,7 @@
          (source_tree ../../examples/code/front-end)
          (source_tree ../../examples/code/packing)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y14} %{y14}.corrected)
@@ -74,6 +75,7 @@
          (source_tree ../../examples/code/front-end)
          (source_tree ../../examples/code/packing)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y14} %{y14}.corrected)

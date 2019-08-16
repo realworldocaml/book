@@ -24,6 +24,7 @@
          (source_tree ../../examples/code/sexpr/test_interval)
          (source_tree ../../examples/code/sexpr/test_interval_nosexp)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y8} %{y8}.corrected)
@@ -58,6 +59,7 @@
          (source_tree ../../examples/code/sexpr/test_interval)
          (source_tree ../../examples/code/sexpr/test_interval_nosexp)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y8} %{y8}.corrected)
