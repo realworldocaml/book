@@ -180,7 +180,7 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
-```sh dir=../../examples/code/ffi/ncurses
+```sh dir=../../examples/code/ffi/ncurses,skip
 $ corebuild -pkg ctypes-foreign ncurses.inferred.mli
 $ cp _build/ncurses.inferred.mli .
 ```
@@ -239,7 +239,7 @@ OCamlfind package:
 ```scheme
 (executable
   (name      hello)
-  (libraries ctypes-foreign)
+  (libraries ctypes-foreign.threaded)
   (flags     :standard -cclib -lncurses))
 ```
 
@@ -731,7 +731,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```scheme
 (executable
   (name      datetime)
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
@@ -995,12 +995,12 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme
 (executable
   (name      qsort)
-  (libraries core ctypes-foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
 
-```sh dir=../../examples/code/ffi/qsort
+```sh dir=../../examples/code/ffi/qsort,skip
 $ dune build qsort.exe
 $ cat input.txt
 2

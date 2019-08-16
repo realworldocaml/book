@@ -276,7 +276,7 @@
       (ref ((t v0.12.0) (commit 50c0835df2cc13ad461ce06eb76248f8d3142d17)))
       (provided_packages (((name core_bench) (version (v0.12.0))))))
      ((dir ctypes) (upstream https://github.com/avsm/ocaml-ctypes.git)
-      (ref ((t dune-port) (commit a2030b55473871b033288b43fed0ef830213e39d)))
+      (ref ((t dune-port) (commit 81bd4c5feaac62e02c71dc26395cf815315989bf)))
       (provided_packages
        (((name ctypes) (version (0.15.1+dune)))
         ((name ctypes) (version (0.15.1+dune))))))
