@@ -945,7 +945,7 @@ let _build_counts = Freq.build_counts
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2
+```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2,non-deterministic
 $ dune build freq.bc
 Error: Dependency cycle between the following files:
    _build/default/.freq.eobjs/counter.impl.all-deps
