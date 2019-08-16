@@ -1,6 +1,6 @@
 (rule
  (target findlib.conf)
- (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+ (action (write-file %{target} "")))
 
 (alias
  (name   runtest)
@@ -9,6 +9,7 @@
          (package mdx)
          (package ocaml-compiler-libs)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
 

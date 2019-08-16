@@ -1,6 +1,6 @@
 (rule
  (target findlib.conf)
- (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+ (action (write-file %{target} "")))
 
 (alias
  (name   runtest)
@@ -20,6 +20,7 @@
          (:y0 ../../examples/code/json/yojson_safe.mli)
          (source_tree ../../examples/code/json)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --root=../../examples/code/json %{x}))
            (diff? %{y7} %{y7}.corrected)
@@ -49,6 +50,7 @@
          (:y0 ../../examples/code/json/yojson_safe.mli)
          (source_tree ../../examples/code/json)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic --root=../../examples/code/json %{x}))
            (diff? %{y7} %{y7}.corrected)

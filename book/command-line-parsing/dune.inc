@@ -1,6 +1,6 @@
 (rule
  (target findlib.conf)
- (action (write-file %{target} "path=\"%{project_root}/_build/install/%{context_name}/lib\"")))
+ (action (write-file %{target} "")))
 
 (alias
  (name   runtest)
@@ -37,6 +37,7 @@
          (source_tree ../../examples/code/command-line-parsing/md5_with_optional_file)
          (source_tree ../../examples/code/command-line-parsing/md5_with_optional_file_broken)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
            (diff? %{y15} %{y15}.corrected)
@@ -91,6 +92,7 @@
          (source_tree ../../examples/code/command-line-parsing/md5_with_optional_file)
          (source_tree ../../examples/code/command-line-parsing/md5_with_optional_file_broken)
          prelude.ml)
+ (locks ../../global-lock)
  (action (progn
            (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
            (diff? %{y15} %{y15}.corrected)
