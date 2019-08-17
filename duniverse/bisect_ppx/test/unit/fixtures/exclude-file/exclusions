@@ -1,0 +1,11 @@
+file "missing.ml" [
+  name "g";
+];
+
+file "source.ml" [
+  name "f1";
+  regexp "f.*";
+];
+
+file "excluded.ml"
+file regexp "excluded_by_.*"

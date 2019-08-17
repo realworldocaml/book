@@ -1,4 +1,5 @@
-#require "base,ppx_jane";;
+#require "base";;
+#require "ppx_jane";;
 
 open Base
 

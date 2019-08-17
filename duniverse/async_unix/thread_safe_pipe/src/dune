@@ -1,0 +1,3 @@
+(library (name thread_safe_pipe) (public_name async_unix.thread_safe_pipe)
+ (libraries async_unix)
+ (preprocess (pps ppx_jane -annotated-ignores -check-doc-comments)))

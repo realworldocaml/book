@@ -1,0 +1,9 @@
+* OCAML-COMPILER-LIBS
+
+This package simply repackage the OCaml compiler libraries so they
+don't expose everything at toplevel. For instance =Ast_helper= is now
+=Ocaml_common.Ast_helper=.
+
+The special library =ocaml_shadow= add a deprecation warning on all
+modules from the compiler libraries, to force the user to use the
+prefixed names.

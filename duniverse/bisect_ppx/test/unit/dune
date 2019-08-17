@@ -1,0 +1,7 @@
+(executable
+ (name test_main)
+ (libraries bisect_ppx.runtime compiler-libs.common oUnit))
+
+(alias
+ (name tester)
+ (deps test_main.exe (source_tree fixtures)))

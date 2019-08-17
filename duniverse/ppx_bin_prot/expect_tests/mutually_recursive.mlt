@@ -1,0 +1,81 @@
+open Bin_prot.Std
+
+#verbose true;;
+
+module Test = struct
+ type ('a, 'm) branch =
+    { branch_on : 'm
+    ; value : float
+    ; if_lt : ('a, 'm) t'
+    ; if_geq : ('a, 'm) t'
+    }
+  and ('a, 'm) t' =
+    [ `leaf   of 'a
+    | `branch of ('a, 'm) branch
+    ]
+  [@@deriving bin_io]
+end
+
+[%%expect{|
+module Test :
+  sig
+    type ('a, 'm) branch = {
+      branch_on : 'm;
+      value : float;
+      if_lt : ('a, 'm) t';
+      if_geq : ('a, 'm) t';
+    }
+    and ('a, 'm) t' = [ `branch of ('a, 'm) branch | `leaf of 'a ]
+    val bin_shape_branch :
+      Bin_prot.Shape.t -> Bin_prot.Shape.t -> Bin_prot.Shape.t
+    val bin_shape_t' :
+      Bin_prot.Shape.t -> Bin_prot.Shape.t -> Bin_prot.Shape.t
+    val bin_size_branch :
+      'a Bin_prot.Size.sizer ->
+      'm Bin_prot.Size.sizer -> ('a, 'm) branch Bin_prot.Size.sizer
+    val bin_size_t' :
+      'a Bin_prot.Size.sizer ->
+      'm Bin_prot.Size.sizer -> ('a, 'm) t' Bin_prot.Size.sizer
+    val bin_write_branch :
+      'a Bin_prot.Write.writer ->
+      'm Bin_prot.Write.writer -> ('a, 'm) branch Bin_prot.Write.writer
+    val bin_write_t' :
+      'a Bin_prot.Write.writer ->
+      'm Bin_prot.Write.writer -> ('a, 'm) t' Bin_prot.Write.writer
+    val bin_writer_branch :
+      'a Bin_prot.Type_class.writer0 ->
+      'b Bin_prot.Type_class.writer0 ->
+      ('a, 'b) branch Bin_prot.Type_class.writer0
+    val bin_writer_t' :
+      'a Bin_prot.Type_class.writer0 ->
+      'b Bin_prot.Type_class.writer0 ->
+      ('a, 'b) t' Bin_prot.Type_class.writer0
+    val __bin_read_branch__ :
+      'a Bin_prot.Read.reader ->
+      'm Bin_prot.Read.reader ->
+      (int -> ('a, 'm) branch) Bin_prot.Read.reader
+    val __bin_read_t'__ :
+      'a Bin_prot.Read.reader ->
+      'm Bin_prot.Read.reader -> (int -> ('a, 'm) t') Bin_prot.Read.reader
+    val bin_read_branch :
+      'a Bin_prot.Read.reader ->
+      'm Bin_prot.Read.reader -> ('a, 'm) branch Bin_prot.Read.reader
+    val bin_read_t' :
+      'a Bin_prot.Read.reader ->
+      'm Bin_prot.Read.reader -> ('a, 'm) t' Bin_prot.Read.reader
+    val bin_reader_branch :
+      'a Bin_prot.Type_class.reader0 ->
+      'b Bin_prot.Type_class.reader0 ->
+      ('a, 'b) branch Bin_prot.Type_class.reader0
+    val bin_reader_t' :
+      'a Bin_prot.Type_class.reader0 ->
+      'b Bin_prot.Type_class.reader0 ->
+      ('a, 'b) t' Bin_prot.Type_class.reader0
+    val bin_branch :
+      'a Bin_prot.Type_class.t0 ->
+      'b Bin_prot.Type_class.t0 -> ('a, 'b) branch Bin_prot.Type_class.t0
+    val bin_t' :
+      'a Bin_prot.Type_class.t0 ->
+      'b Bin_prot.Type_class.t0 -> ('a, 'b) t' Bin_prot.Type_class.t0
+  end
+|}]

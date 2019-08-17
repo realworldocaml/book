@@ -1,7 +1,10 @@
-(rule (with-stdout-to dune.gen
-  (run ocaml-mdx rule --direction=to-ml README.md
-                --prelude=prelude.ml
-                --prelude=subtyping.ml)))
+(rule
+  (target dune.gen)
+  (action
+   (with-stdout-to %{target}
+    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-ml %{dep:README.md}
+                --prelude=%{dep:prelude.ml}
+                --prelude=%{dep:subtyping.ml}))))
 
 (alias
  (name   runtest)

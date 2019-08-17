@@ -23,7 +23,7 @@ let rec test_immutable t2 =
 let () =
   let iters = 1000000 in
   let tests = [
-    Bench.Test.create ~name:"mutable" 
+    Bench.Test.create ~name:"mutable"
       (fun () -> test_mutable { iters1=iters; count1=0.0 });
     Bench.Test.create ~name:"immutable"
       (fun () -> test_immutable { iters2=iters; count2=0.0 })

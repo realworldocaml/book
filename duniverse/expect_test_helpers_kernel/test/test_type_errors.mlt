@@ -1,0 +1,32 @@
+open! Base
+
+open! Expect_test_helpers_kernel
+
+module Empty = struct end
+
+let () = print_and_check_stable_type [%here] ()
+
+[%%expect
+  {|
+Line _, characters 45-47:
+Error: This expression has type unit but an expression was expected of type
+         (module Core_kernel.Stable_without_comparator with type t = 'a)
+|}]
+
+let () = print_and_check_stable_int63able_type [%here] ()
+
+[%%expect
+  {|
+Line _, characters 55-57:
+Error: This expression has type unit but an expression was expected of type
+         (module Core_kernel.Stable_int63able with type t = 'a)
+|}]
+
+let () = print_and_check_container_sexps [%here] ()
+
+[%%expect
+  {|
+Line _, characters 49-51:
+Error: This expression has type unit but an expression was expected of type
+         (module Expect_test_helpers_kernel.With_containers with type t = 'a)
+|}]

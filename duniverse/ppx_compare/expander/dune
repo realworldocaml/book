@@ -1,0 +1,3 @@
+(library (name ppx_compare_expander) (public_name ppx_compare.expander)
+ (libraries base ppxlib) (ppx_runtime_libraries ppx_compare.runtime-lib)
+ (preprocess (pps ppxlib.metaquot)))

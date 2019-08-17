@@ -1,0 +1,4 @@
+(library (name weak_hashtbl_async)
+ (public_name async_kernel.weak_hashtbl_async)
+ (libraries async_kernel core_kernel.weak_hashtbl)
+ (preprocess (pps ppx_jane)))

@@ -1,0 +1,9 @@
+(executable
+  (name      test_async_integration)
+  (libraries cohttp_async_test async_unix base core async_kernel oUnit
+             cohttp-async))
+
+(alias
+  (name    runtest)
+  (package cohttp-async)
+  (action  (run ./test_async_integration.exe)))

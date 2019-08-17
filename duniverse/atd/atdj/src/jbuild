@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executable
+ ((name atdj_main)
+  (public_name atdj)
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (package atdj)
+  (libraries (str atd))))

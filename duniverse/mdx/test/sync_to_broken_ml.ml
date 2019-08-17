@@ -1,0 +1,3 @@
+let () =
+  module MyString = String;
+  ()

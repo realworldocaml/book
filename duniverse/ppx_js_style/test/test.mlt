@@ -1,0 +1,8 @@
+module type S = sig
+  val x : int [@deprecated "[since 2018-01] ..."]
+end
+
+[%%expect{|
+Line _, characters 16-48:
+Error: Jane Street style: Invalid deprecated attribute, it will be ignored by the compiler
+|}];;

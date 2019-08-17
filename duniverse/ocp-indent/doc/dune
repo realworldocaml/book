@@ -1,0 +1,10 @@
+(rule
+ (targets ocp-indent.1)
+ (action
+  (with-stdout-to %{targets}
+   (run %{bin:ocp-indent} --help=groff)))
+)
+(install
+ (section man)
+ (files ocp-indent.1)
+)

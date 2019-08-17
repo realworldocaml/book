@@ -1,0 +1,27 @@
+Releases of biniou
+==================
+
+!!! = some incompatibilities
+opt = optimizations
++ui = additions in the user interface
+-ui = restrictions in the user interface
+bug = bug or security fix
+doc = major changes in the documentation
+pkg = changes in the structure of the package or in the installation procedure
+
+2012-03-19 1.0.2: [+ui] support for flushing output to abstract OO channels
+
+2012-01-03 1.0.1: [+ui] new experimental array streaming utility
+                  [+ui] compiling with -g, allowing stack trace recording
+                  [doc] fixed description of the format for string encoding
+
+2010-12-04 1.0.0: [+ui] added system of references for sharing values
+                  [!!!] new variant `Shared
+                  [!!!] new fields in input and output buffers
+                  [+ui] bdump: option -h to specify alternate dictionary
+                  [pkg] standalone reference for the biniou format
+
+2010-09-13 0.9.1: [bug] fixed Bi_inbuf.from_channel
+                  [pkg] added INSTALL file
+
+2010-08-04 0.9.0: first release

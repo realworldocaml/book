@@ -1,0 +1,112 @@
+
+open! Core
+
+(* The generated expectation should follow user formatting when present, otherwise it
+   should follow a sensible default *)
+
+
+(* Single line actual.. *)
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {| hello |}]
+
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {| hello |}]
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {| hello |}]
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {|  hello
+           |}]
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {|  hello
+           |}]
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {|
+  hello |}]
+
+let%expect_test _ =
+  print_string "hello";
+  [%expect {|
+       hello
+  |}]
+
+
+(* Multi line actual... *)
+
+let%expect_test _ =
+  print_string "one1\ntwo";
+  [%expect {|
+    one1
+    two |}]
+
+let%expect_test _ =
+  print_string "one2\ntwo";
+  [%expect {|
+    one2
+    two
+  |}]
+
+let%expect_test _ =
+  print_string "one3\ntwo";
+  [%expect {|
+    one3
+    two
+           |}]
+
+let%expect_test _ =
+  print_string "one4\ntwo";
+  [%expect {|
+    one4
+    two
+           |}]
+
+let%expect_test _ =
+  print_string "one5\ntwo";
+  [%expect {|
+  one5
+  two |}]
+
+let%expect_test _ =
+  print_string "one6\ntwo";
+  [%expect {|
+       one6
+       two
+  |}]
+
+let%expect_test _ =
+  print_string "one8\ntwo";
+  [%expect {|
+  one8
+  two |}]
+
+let%expect_test _ =
+  print_string "one9\ntwo";
+  [%expect {|
+       one9
+       two
+  |}]
+
+let%expect_test _ =
+  print_string "one10\ntwo";
+  [%expect {|
+       one10
+       two
+  |}]
+
+let%expect_test _ =
+  print_string "one11\ntwo";
+  [%expect {|
+       one11
+       two
+  |}]

@@ -1,0 +1,3 @@
+(library (name inline_benchmarks_public)
+ (public_name core_bench.inline_benchmarks) (libraries core core_bench re)
+ (preprocess (pps ppx_jane)))

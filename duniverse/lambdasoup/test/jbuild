@@ -1,0 +1,15 @@
+(jbuild_version 1)
+
+(executable
+ ((name test)
+  (flags (:standard -w +A))
+  (libraries (lambdasoup oUnit))))
+
+(alias
+ ((name build-test)
+  (deps (test.exe (files_recursively_in pages)))))
+
+(alias
+ ((name runtest)
+  (deps (test.exe (files_recursively_in pages)))
+  (action (run ${<}))))

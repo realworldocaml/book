@@ -1,0 +1,46 @@
+(* -*- tuareg -*- *)
+
+let v ~launchd ~ssl ~tls () =
+  let launchd, launchd_d =
+    if launchd then "conduit_lwt_launchd_real", "launchd.lwt "
+    else "conduit_lwt_launchd_dummy", ""
+  in
+  let ssl, ssl_d =
+    if ssl then "conduit_lwt_unix_ssl_real", "lwt_ssl "
+    else "conduit_lwt_unix_ssl_dummy", ""
+  in
+  let tls, tls_d =
+    if tls then "conduit_lwt_tls_real", "tls.lwt "
+    else "conduit_lwt_tls_dummy", ""
+  in
+  Printf.sprintf {|
+(rule (copy %s.ml conduit_lwt_launchd.ml))
+(rule (copy %s.ml conduit_lwt_unix_ssl.ml))
+(rule (copy %s.ml conduit_lwt_tls.ml))
+(rule (copy %s.mli conduit_lwt_unix_ssl.mli))
+(rule (copy %s.mli conduit_lwt_tls.mli))
+
+(library
+  (name        conduit_lwt_unix)
+  (public_name conduit-lwt-unix)
+  (preprocess  (pps ppx_sexp_conv))
+  (wrapped     false)
+  (modules     resolver_lwt_unix conduit_lwt_unix conduit_lwt_server
+               conduit_lwt_tls conduit_lwt_unix_ssl conduit_lwt_launchd)
+  (libraries   conduit-lwt lwt.unix uri.services ipaddr-sexp ipaddr.unix logs %s%s%s))
+|} launchd ssl tls ssl tls launchd_d ssl_d tls_d
+
+let main () =
+  let is_installed s = Printf.kprintf Sys.command "ocamlfind query %s" s = 0 in
+  let launchd = is_installed "launchd.lwt" in
+  let ssl = is_installed "lwt_ssl" in
+  let tls = Sys.unix && is_installed "tls.lwt" in
+  Printf.printf
+    "Configuration\n\
+    \  launchd: %b\n\
+    \  ssl    : %b\n\
+    \  tls    : %b\n%!"
+    launchd ssl tls;
+  v ~launchd ~ssl ~tls ()
+
+let () = Jbuild_plugin.V1.send @@ main ()

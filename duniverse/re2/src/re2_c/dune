@@ -1,0 +1,26 @@
+(library (name re2_c) (public_name re2.c) (preprocess no_preprocessing)
+ (c_library_flags :standard -lstdc++ -lpthread)
+ (self_build_stubs_archive (re2_c)))
+
+(rule (targets libre2_c_stubs.a dllre2_c_stubs.so)
+ (deps (source_tree libre2))
+ (action
+  (bash
+    "\
+   \nARFLAGS=rsc\
+   \nCXXFLAGS=\"-Wall -O3 -g -pthread\"\
+   \nif [ FreeBSD = `uname -s` ]; then\
+   \n       CXX=clang++\
+   \n       CXXFLAGS=\"$CXXFLAGS -I /usr/local/lib/re2\"\
+   \nelse\
+   \n       CXX=g++\
+   \nfi\
+   \nif ! %{arch_sixtyfour}; then\
+   \n  CXX=\"$CXX -m32\"\
+   \nfi\
+   \n%{make} -s -C libre2 clean\
+   \n%{make} -s -C libre2 ARFLAGS=\"$ARFLAGS\" CXX=\"$CXX\" CXXFLAGS=\"$CXXFLAGS\" obj/libre2.a obj/so/libre2.so\
+   \ncp libre2/obj/libre2.a libre2_c_stubs.a\
+   \ncp libre2/obj/so/libre2.so dllre2_c_stubs.so\
+   \n%{make} -s -C libre2 clean\
+   \n")))

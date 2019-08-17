@@ -1,0 +1,271 @@
+/* Syntax elements. */
+
+.keyword {
+    font-weight: bold;
+}
+
+.superscript {
+    font-size: 4;
+}
+
+.subscript {
+    font-size: 4;
+}
+
+.string {
+    color: gray;
+}
+
+.comment {
+    color: #0090E4;
+    font-style: oblique;
+}
+
+.constructor {
+    color: #114CA5;
+}
+
+/* Formatting. */
+
+.warning {
+    margin-right: 1ex;
+    font-weight: bold;
+}
+
+.info {
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.param_info {
+    margin-top: 4px;
+    margin-left: 3em;
+    margin-right: 3em;
+}
+
+.info pre, pre.codepre {
+    background-color: #f4f4f4;
+    padding: 0.75em 1em;
+}
+
+.info .code {
+    background-color: #eee;
+    padding: 0 3px;
+}
+
+.info pre .code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.typetable {
+    border-style: hidden;
+}
+
+.paramstable {
+    border-style: hidden;
+    padding: 5pt;
+}
+
+td.typefieldcomment {
+    font-size: smaller;
+}
+
+div.sig_block {
+    margin-left: 2em;
+}
+
+table {
+    font: inherit;
+    border-spacing: 0;
+}
+
+td {
+    padding: 0;
+}
+
+td.module {
+    font-family: monospace;
+}
+
+/* General. */
+
+body {
+    font-size: 14px;
+    font-family: "Helvetica Neue", Helvetica, sans-serif;
+    line-height: 1.5;
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
+    margin: 0;
+    margin-left: 20em;
+    max-width: 50em;
+    background-color: #fefefe;
+}
+
+.toc {
+    position: fixed;
+    top: 3em;
+    left: 1em;
+}
+
+.toc p {
+    display: none;
+}
+
+.top-links {
+    float: right;
+    margin-top: 1.5em;
+    margin-right: 3em;
+}
+
+.top-links a {
+    margin-right: 1em;
+}
+
+p {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+ul {
+    margin-bottom: 1.5em;
+}
+
+p + ul {
+    margin-top: -1.5em;
+}
+
+.asynchronous pre + pre {
+    margin-top: 1.5em;
+}
+
+@media (max-width:980px) {
+    body {
+        margin-left: 1em;
+    }
+
+    .toc {
+        position: static;
+    }
+
+    .toc p {
+        display: block;
+        margin-top: 3em;
+        font-weight: bold;
+    }
+
+    .toc .hide-narrow {
+        display: none;
+    }
+
+    .toc .links br:nth-of-type(1), .toc .links br:nth-of-type(2) {
+        display: none;
+    }
+
+    .toc .links {
+        columns: 15em 2;
+        -webkit-columns: 15em 2;
+        -moz-columns: 15em 2;
+    }
+}
+
+.footer {
+    margin-top: 9em;
+    opacity: 0.3;
+}
+
+/* Sections. */
+
+h2 {
+    font-size: 150%;
+    margin-top: 3em;
+    margin-bottom: 1em;
+    line-height: 1;
+}
+
+h3 {
+    font-size: 100%;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+body > pre:first-of-type {
+    margin-top: 1.5em;
+}
+
+.info {
+    margin-bottom: 1.5em;
+}
+
+.info.top {
+    margin-bottom: 6em;
+}
+
+table .info {
+    margin-bottom: 0;
+}
+
+.multiline-member {
+    margin-top: 1.5em;
+}
+
+.end-of-section-text {
+    margin-bottom: 3em;
+}
+
+/* Links. */
+
+a {
+    color: #416DFF;
+    text-decoration: none;
+}
+
+a:hover {
+    background-color: #ddd;
+    text-decoration: underline;
+}
+
+a .code {
+    color: #416DFF;
+}
+
+a.github {
+    font-weight: bold;
+}
+
+h2:target,
+a:target {
+    background-color: yellow;
+}
+
+h2[id] > a,
+a[id] {
+    color: inherit;
+    outline: none;
+}
+
+h2[id] > a:hover,
+a[id]:hover {
+    background-color: yellow;
+    text-decoration: none;
+}
+
+/* Code. */
+
+pre {
+    margin: 0;
+    overflow: auto;
+}
+
+pre.codepre br {
+    display: none;
+}
+
+/* Abuse of CSS for semantic structure. */
+
+body.index .top ul,
+body.index .top pre:first-of-type,
+body.index .top pre:nth-of-type(2) + p,
+body.index .top table + p {
+    margin-bottom: 3em;
+}

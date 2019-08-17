@@ -1,0 +1,3 @@
+(executables (names test) (preprocess (pps ppx_here ppx_fail)))
+
+(alias (name DEFAULT) (deps test.ml.pp))

@@ -42,9 +42,9 @@ Once that's done, Ctypes is available via OPAM as usual:
 
 ```
 $ brew install libffi     # for MacOS X users
-$ opam install ctypes
+$ opam install ctypes ctypes-foreign
 $ utop
-# require "ctypes.foreign" ;;
+# require "ctypes-foreign" ;;
 ```
 
 You'll also need the Ncurses library for the first example. This comes
@@ -180,8 +180,8 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
-```sh dir=../../examples/code/ffi/ncurses
-$ corebuild -pkg ctypes.foreign ncurses.inferred.mli
+```sh dir=../../examples/code/ffi/ncurses,skip
+$ corebuild -pkg ctypes-foreign ncurses.inferred.mli
 $ cp _build/ncurses.inferred.mli .
 ```
 
@@ -233,13 +233,13 @@ let () =
   endwin ()
 ```
 
-The `hello` executable is compiled by linking with the `ctypes.foreign`
+The `hello` executable is compiled by linking with the `ctypes-foreign`
 OCamlfind package:
 
 ```scheme
 (executable
   (name      hello)
-  (libraries ctypes.foreign)
+  (libraries ctypes-foreign.threaded)
   (flags     :standard -cclib -lncurses))
 ```
 
@@ -380,7 +380,7 @@ The first step is to open some of the Ctypes modules:
 We can now create a binding to `time` directly from the toplevel.
 
 ```ocaml env=posix
-# #require "ctypes.foreign"
+# #require "ctypes-foreign.threaded"
 # #require "ctypes.top"
 # open Ctypes
 # open PosixTypes
@@ -570,7 +570,10 @@ continuing on from the previous definitions:
 # type timeval
 type timeval
 # let timeval : timeval structure typ = structure "timeval"
-val timeval : timeval structure typ = struct timeval
+val timeval : timeval structure typ =
+  Ctypes_static.Struct
+   {Ctypes_static.tag = "timeval";
+    spec = Ctypes_static.Incomplete {Ctypes_static.isize = 0}; fields = []}
 ```
 
 The first command defines a new OCaml type `timeval` that we'll use to
@@ -592,10 +595,12 @@ unions/field addition]{.idx}
 ```ocaml env=posix
 # let tv_sec  = field timeval "tv_sec" long
 val tv_sec : (Signed.long, timeval structure) field =
-  {Ctypes_static.ftype = long; foffset = 0; fname = "tv_sec"}
+  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
+   foffset = 0; fname = "tv_sec"}
 # let tv_usec = field timeval "tv_usec" long
 val tv_usec : (Signed.long, timeval structure) field =
-  {Ctypes_static.ftype = long; foffset = 8; fname = "tv_usec"}
+  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
+   foffset = 8; fname = "tv_usec"}
 # seal timeval
 - : unit = ()
 ```
@@ -620,7 +625,10 @@ unions/incomplete structure definitions]{.idx}
 # type timezone
 type timezone
 # let timezone : timezone structure typ = structure "timezone"
-val timezone : timezone structure typ = struct timezone
+val timezone : timezone structure typ =
+  Ctypes_static.Struct
+   {Ctypes_static.tag = "timezone";
+    spec = Ctypes_static.Incomplete {Ctypes_static.isize = 0}; fields = []}
 ```
 
 We don't ever need to create `struct timezone` values, so we can leave this
@@ -723,7 +731,7 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```scheme
 (executable
   (name      datetime)
-  (libraries core ctypes.foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
@@ -915,7 +923,10 @@ definition. Since type descriptions are regular values, we can just use
 # open Foreign
 # let compare_t = ptr void @-> ptr void @-> returning int
 val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
-  int(void*, void*)
+  Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
+   Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
+    Ctypes_static.Returns
+     (Ctypes_static.Primitive Ctypes_primitive_types.Int)))
 # let qsort = foreign "qsort"
                 (ptr void @-> size_t @-> size_t @->
   funptr compare_t @-> returning void)
@@ -984,12 +995,12 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme
 (executable
   (name      qsort)
-  (libraries core ctypes.foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
 
-```sh dir=../../examples/code/ffi/qsort
+```sh dir=../../examples/code/ffi/qsort,skip
 $ dune build qsort.exe
 $ cat input.txt
 2
@@ -1001,9 +1012,9 @@ $ ./_build/default/qsort.exe < input.txt
 2
 3
 4
-$ corebuild -pkg ctypes.foreign qsort.inferred.mli
-ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
-ocamlfind ocamlc -i -thread -short-paths -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
+$ corebuild -pkg ctypes-foreign qsort.inferred.mli
+ocamlfind ocamldep -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
+ocamlfind ocamlc -i -thread -short-paths -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
 $ cp _build/qsort.inferred.mli qsort.mli
 ```
 

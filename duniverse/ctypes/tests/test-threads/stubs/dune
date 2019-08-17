@@ -1,0 +1,4 @@
+(library
+ (name test_threads_stubs)
+ (wrapped false)
+ (libraries ctypes))

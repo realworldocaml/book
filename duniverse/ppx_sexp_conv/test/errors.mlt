@@ -1,0 +1,58 @@
+type t =
+  { a : int [@sexp_drop_default] [@sexp.omit_nil] }
+[@@deriving sexp_of]
+[%%expect{|
+Line _, characters 4-5:
+Error: The following elements are mutually exclusive: sexp.sexp_drop_default sexp.omit_nil
+|}]
+
+type t =
+  { a : int sexp_list [@sexp.omit_nil] }
+[@@deriving sexp_of]
+[%%expect{|
+Line _, characters 4-5:
+Error: The following elements are mutually exclusive: sexp.omit_nil sexp_list
+|}]
+
+type t =
+  { a : int [@default 0] [@sexp.omit_nil] }
+[@@deriving of_sexp]
+[%%expect{|
+Line _, characters 4-5:
+Error: The following elements are mutually exclusive: sexp.default sexp.omit_nil
+|}]
+
+
+type t = int [@@deriving sexp][@@sexp.allow_extra_fields]
+[%%expect {|
+Line _, characters 0-57:
+Error: ppx_sexp_conv: [@@allow_extra_fields] is only allowed on records.
+|}]
+
+
+type 'a t = 'a option = None | Some of 'a
+[@@deriving sexp][@@sexp.allow_extra_fields]
+[%%expect {|
+Line _, characters 0-86:
+Error: ppx_sexp_conv: [@@allow_extra_fields] is only allowed on records.
+|}]
+
+
+
+type 'a t = Some of {a : int}
+[@@deriving sexp] [@@sexp.allow_extra_fields]
+[%%expect {|
+Line _, characters 0-75:
+Error: ppx_sexp_conv: [@@allow_extra_fields] only works on records. For inline records, do: type t = A of { a : int } [@allow_extra_fields] | B [@@deriving sexp]
+|}]
+
+
+type 'a t =
+  | Some of {a : int}
+  | None [@sexp.allow_extra_fields]
+[@@deriving sexp]
+[%%expect {|
+Line _, characters 0-87:
+Error: ppx_sexp_conv: [@allow_extra_fields] is only allowed on inline records.
+|}]
+

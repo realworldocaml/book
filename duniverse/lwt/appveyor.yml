@@ -1,0 +1,48 @@
+version: "{build}"
+
+shallow_clone: true
+
+environment:
+  matrix:
+    - {SYSTEM: mingw, ARCH: x86_64, COMPILER: 4.03}
+    # Temporarily disabled. AppVeyor stopped hosting build artifacts
+    # indefinitely. We would have to upload the Cygwin packages to S3 or
+    # elsewhere. The most important build is MinGW anyway, because that is our
+    # only CI build testing Win32. See
+    #   https://ci.appveyor.com/project/aantron/lwt/branch/master/job/voa9bfgcllcbyjbn
+    # - {SYSTEM: cygwin, ARCH: x86, COMPILER: 4.04}
+    # Temporary workaround; see commit message.
+    # - {SYSTEM: cygwin, ARCH: x86, COMPILER: 4.04, LIBEV: yes}
+
+  global:
+    LWT_FORCE_LIBEV_BY_DEFAULT: yes
+    # Uncomment to debug build with RDP. Alternatively, create the file
+    # appveyor-debug in the repository root. The latter option avoids
+    # invalidating the AppVeyor dependency cache.
+    # LWT_APPVEYOR_DEBUG: yes
+
+install:
+  - 'IF EXIST C:\projects\lwt\appveyor-debug (SET LWT_APPVEYOR_DEBUG=yes)'
+
+  - 'IF "%ARCH%"=="x86" (SET CYGSH=C:\Cygwin\bin\bash -lc) ELSE (SET CYGSH=C:\Cygwin64\bin\bash -lc)'
+  - 'IF "%ARCH%"=="x86" (SET CYGSETUP=C:\Cygwin\setup-x86) ELSE (SET CYGSETUP=C:\Cygwin64\setup-x86_64)'
+
+  - 'IF "%LWT_APPVEYOR_DEBUG%"=="yes" (%CYGSETUP% -q -P nano)'
+  # Workaround for aantron/binaries#1.
+  - '%CYGSETUP% -q -P patch'
+
+  - 'IF "%LIBEV%"=="yes" (%CYGSETUP% -q -P libev-devel)'
+
+  - ps: '(new-object net.webclient).DownloadString("https://aantron.github.io/binaries/$env:SYSTEM/$env:ARCH/ocaml/$env:COMPILER/install.ps1") | PowerShell -Command -'
+  - ps: '(new-object net.webclient).DownloadString("https://aantron.github.io/binaries/$env:SYSTEM/$env:ARCH/opam/1.2/install.ps1") | PowerShell -Command -'
+
+  - '%CYGSH% "cd /cygdrive/c/projects/lwt ; src/util/appveyor-install.sh"'
+
+build_script:
+  - '%CYGSH% "cd /cygdrive/c/projects/lwt ; src/util/appveyor-build.sh"'
+
+cache:
+  - '..\opam-cache-%SYSTEM%-%COMPILER%-%LIBEV%.tar -> lwt*.opam, appveyor.yml, src\util\appveyor*.sh'
+
+on_finish:
+  - ps: 'if ($env:LWT_APPVEYOR_DEBUG -eq "yes") { $blockRdp = $true; iex ((new-object net.webclient).DownloadString("https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1")) }'

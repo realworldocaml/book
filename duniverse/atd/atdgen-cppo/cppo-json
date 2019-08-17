@@ -1,0 +1,56 @@
+#! /bin/sh
+
+usage () {
+    echo "\
+Usage: cppo-json [cppo arguments]
+
+cppo-json processes an OCaml file written with embedded type definitions
+directives and replaces them by OCaml type definitions and JSON
+serialization/deserialization code.
+
+Sample input:
+
+  \$ cat example.ml
+  #ext json
+  type mytype = string list
+  #endext
+  let data = [ \"Hello\"; \"world\" ]
+  let () = print_endline (J.string_of_mytype data)
+
+How to view the OCaml code produced by cppo-json:
+
+  \$ cppo-json < example.ml | less
+
+How to compile an OCaml program:
+
+  \$ ocamlfind opt -o example \\
+      -pp cppo-json \\
+      -package atdgen -linkpkg \\
+      example.ml
+
+cppo-json ships with atdgen-cppo and is shorthand for the following command:
+
+  cppo -x \"json:atdgen-cppo t j v\"
+
+where 't' stands for 'type definitions', 'j' stands for 'JSON', and
+'v' stands for \"validators\".
+
+See also:
+  atdgen-cppo --help
+  cppo --help
+" >&2
+}
+
+case "$1" in
+    --help|-help) usage; exit 0 ;;
+    *)
+esac
+
+cppo -x "json:atdgen-cppo t j v" "$@"
+
+case $? in
+    0) ;;
+    *)
+        echo "cppo-json failed" >&2
+        exit 2
+esac

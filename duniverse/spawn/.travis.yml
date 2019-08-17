@@ -1,0 +1,15 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docker.sh
+script: bash -ex .travis-docker.sh
+services:
+- docker
+env:
+  global:
+  - PINS="spawn:."
+  - DISTRO="debian-stable"
+  matrix:
+  - PACKAGE="spawn" OCAML_VERSION="4.02.3"
+  - PACKAGE="spawn" OCAML_VERSION="4.03.0"
+  - PACKAGE="spawn" OCAML_VERSION="4.04.2"
+  - PACKAGE="spawn" OCAML_VERSION="4.05.0"
+  - PACKAGE="spawn" OCAML_VERSION="4.06.0"

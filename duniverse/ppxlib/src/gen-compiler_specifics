@@ -1,0 +1,17 @@
+(* -*- tuareg -*- *)
+
+open Printf
+
+let () =
+  let ver = Scanf.sscanf Sys.argv.(1) "%u.%u" (fun a b -> a, b) in
+  let oc = open_out_bin Sys.argv.(2) in
+  let pr fmt = fprintf oc (fmt ^^ "\n") in
+  pr "module O = Ocaml_common";
+  if ver < (4, 08) then (
+    pr "let get_load_path () = !Ocaml_common.Config.load_path";
+    pr "let read_clflags_from_env () = ()"
+  ) else (
+    pr "let get_load_path () = Ocaml_common.Load_path.get_paths ()";
+    pr "let read_clflags_from_env () = Ocaml_common.Compmisc.read_clflags_from_env ()"
+  );
+  close_out oc

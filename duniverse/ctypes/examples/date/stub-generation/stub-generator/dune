@@ -1,0 +1,16 @@
+(executable
+ (name date_stub_generator)
+ (modules date_stub_generator)
+ (libraries date_stubs ctypes.stubs ctypes))
+
+(rule
+ (targets date_stubs.c date_generated.ml)
+ (deps date_stub_generator.exe)
+ (action
+  (run %{deps})))
+
+(library
+ (name date_generated)
+ (modules date_generated)
+ (c_names date_stubs)
+ (libraries ctypes.stubs))

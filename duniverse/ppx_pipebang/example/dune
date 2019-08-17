@@ -1,0 +1,3 @@
+(library (name ppx_pipebang_sample) (preprocess (pps ppx_pipebang)))
+
+(alias (name DEFAULT) (deps test.ml.pp))

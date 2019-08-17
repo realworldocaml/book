@@ -1,0 +1,4 @@
+(executables (names main) (libraries ppx_base ppxlib) (link_flags -linkall)
+ (preprocess no_preprocessing))
+
+(install (section bin) (files (main.exe as ppx-base)))

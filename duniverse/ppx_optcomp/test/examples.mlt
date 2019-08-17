@@ -1,0 +1,364 @@
+module Test_simple_if = struct
+
+  open Core
+
+  [%% if true ]
+  let x = "OK"
+  [%% else ]
+  let x = "BAD"
+  [%% endif]
+
+  let _ = printf "%s" x
+end
+[%%expect{| OK |}]
+
+module Test_comments = struct
+
+  open Core
+
+  [%% if (* comment *) true ]
+  let x = "OK"
+  [%% else ]
+  let x = "BAD"
+  (* comment
+  *)
+  [%% endif]
+
+  let _ = printf "%s" x
+
+end
+[%%expect{| OK |}]
+module Test_nested_if = struct
+  open Core
+
+  [%% define ABC true ]
+  [%% define xyz false ]
+  [%% if ABC ]
+    let x = "OK1"
+  [%% else ]
+    [%% if xyz ]
+      let x = "BAD1"
+    [%% endif]
+    let x = "BAD2"
+  [%% endif]
+  let y = "OK2"
+
+  let _ = printf "%s %s" x y
+end
+[%%expect{| OK1 OK2 |}]
+
+
+module Test_defined = struct
+  open Core
+
+  [%% define FOO ]
+  [%% undef BAR ]
+
+  [%% if (defined FOO) ]
+  let x = "OK1"
+  [%% else ]
+  let x = "BAD1"
+  [%% endif ]
+
+  [%% if (defined BAR) ]
+  let y = "BAD2"
+  [%% else ]
+  let y = "OK2"
+  [%% endif ]
+
+  let _ = printf "%s %s" x y
+end
+[%%expect{| OK1 OK2 |}]
+
+module Test_error_simple = struct
+  [%% warning "Ooops."]
+  [%% error "Big ooooooops."]
+end
+[%%expect{|
+Line _, characters 6-11:
+Error: Big ooooooops.
+File "examples.mlt", line 74, characters 6-13::
+Warning Ooops.
+|}]
+
+module Test_optional_variant = struct
+  open Core
+
+  [%%define FOO]
+  [%%undef BAR]
+  [%%define BAZ 3]
+
+  type t =
+    | OK_1
+    | OK_2 [@if defined FOO]
+    | OK_3 [@if not (defined BAR)]
+    | BAD_4 [@if BAZ < 0]
+    | OK_5
+
+  let _ : t*t*t*t = OK_1, OK_2, OK_3, OK_5
+  let _ : t = BAD_4
+
+end
+[%%expect{|
+Line _, characters 14-19:
+Error: This variant expression is expected to have type t
+       The constructor BAD_4 does not belong to type t
+|}]
+
+module Test_import_order = struct
+  [%% define A true]
+  [%% define B A]
+  [%% import "test_imported/order/cd.ml"]
+  [%% define E D]
+end
+[%%expect{||}]
+
+module Test_nested_error = struct
+  [%% import "test_imported/error/a.ml" ]
+end
+[%%expect{|
+Line _, characters 4-9:
+Error: nested error
+|}]
+
+module Test_import_config = struct
+  open Core
+
+  [%% import "test_imported/config.h"]
+  [%% import "test_imported/config.h"] (* try importing twice *)
+
+  [%% if (defined FOO) ]
+  let x = "OK"
+  [%% else]
+  let x = "BAD"
+  [%% endif]
+
+  let _ = printf "%s" x
+end
+[%%expect{| OK |}]
+
+module Test_order = struct
+  open Core
+
+  let _ = printf "%s" "a"
+  let _ = printf "%s" "b"
+
+  [%% if true ]
+   let _ = printf "%s" "c"
+   let _ = printf "%s" "d"
+   [%% define ABC]
+   let _ = printf "%s" "e"
+   let _ = printf "%s" "f"
+  [%% endif ]
+
+  [%% if false ]
+  [%% else ]
+   let _ = printf "%s" "g"
+   let _ = printf "%s" "h"
+   [%% define ABC]
+   let _ = printf "%s" "i"
+   let _ = printf "%s" "j"
+  [%% endif ]
+
+  [%% if false ]
+  [%% elif true ]
+   let _ = printf "%s" "k"
+   let _ = printf "%s" "l"
+   [%% define ABC]
+   let _ = printf "%s" "m"
+   let _ = printf "%s" "n"
+  [%% endif ]
+
+  let _ = printf "%s" "o"
+  let _ = printf "%s" "p"
+  [%% define ABC]
+  let _ = printf "%s" "q"
+  let _ = printf "%s" "r"
+end
+[%%expect{| abcdefghijklmnopqr |}]
+
+module Test_show = struct
+  open Core
+
+  [%% if (show (3+3*3)) > 0]
+   let _ = printf "%s" "OK";
+  [%% endif ]
+
+  [%% define x "OK"]
+  module A = struct
+    [%% define y (show x)]
+  end
+  [%% define x "BAD"]
+end
+[%%expect{|
+File "examples.mlt", line 183, characters 9-23::
+SHOW 12
+File "examples.mlt", line 189, characters 17-25::
+SHOW "OK"
+OK
+|}]
+
+module Test_optional_match = struct
+  open Core
+
+  [%%define FOO]
+  [%%undef BAR]
+
+  type t =
+  | OK1 of string
+  | OK2 of string * int [@if defined FOO]
+  | BAD of int [@if defined BAR]
+
+  let _ = match ((OK2 ("OK", 2)): t) with
+  | OK1 s -> printf "%s" s
+  | OK2 (y,z) [@if defined FOO] -> printf "%s %i\n" y z
+  | BAD _ [@if defined BAR] -> printf "This will cause error if not dropped %s" undefined_ident
+
+  let f = function
+   | OK1 _ -> "OK"
+   | OK2 _ -> "OK"
+   | BAD _ [@if defined BAR] -> "BAD"
+
+  let _ = printf "%s" (f (OK1 "abc"))
+end
+[%%expect{|
+OK 2
+OK
+|}]
+
+[%%define FOO]
+
+module Test_signature : sig
+  [%% if defined FOO]
+   type t
+  [%%else]
+   type s
+  [%%endif]
+type u
+end = struct
+  [%% if defined FOO]
+   type t
+  [%%else]
+   type s
+  [%%endif]
+  type u
+end
+[%%expect{||}]
+
+module Test_drop_attr = struct
+  [%%if false]
+  external abc : unit -> int = "abc" [@@noalloc]
+  [%%endif]
+
+  type s
+end
+[%%expect{||}]
+
+module Test_qualified_name = struct
+  [%% optcomp.define FOO 3 ]
+
+  type t = A | B [@optcomp.if FOO = 3]
+end
+[%%expect{||}]
+
+module Test_optcomp_first = struct
+  type t = A | B [@if false]
+  [@@deriving sexp]
+end
+[%%expect{||}]
+
+module Test_ifndef_quirk = struct
+  [%%ifndef FOO_NOT_USED_BEFORE]
+  [%%define FOO_NOT_USED_BEFORE]
+  [%%endif]
+end
+[%%expect{||}]
+
+module Test_scoping = struct
+  open Core
+  [%%define x "OK"]
+  module B = struct
+    module A = struct
+      [%%define x "BAD1"]
+      [%%ifdef x]
+        let _ = printf "%s" "OK2"
+      [%%endif]
+    end
+    [%%define y (show x)]
+  end
+  [%%define x "BAD2"]
+end
+
+[%%expect{|
+File "examples.mlt", line 287, characters 16-24::
+SHOW "OK"
+OK2
+|}]
+
+module Test_scoping2 = struct
+  [%%define x "<top>"]
+
+  module A = struct
+    [%%define x "A"]
+
+    [%%define y (show ("in A", x))]
+  end
+
+  module B = struct
+    [%%define y (show ("in B", x))]
+  end
+
+  [%%define y (show ("at toplevel", x))]
+end
+
+[%%expect{|
+File "examples.mlt", line 304, characters 16-34::
+SHOW ("in A", "A")
+File "examples.mlt", line 308, characters 16-34::
+SHOW ("in B", "<top>")
+File "examples.mlt", line 311, characters 14-39::
+SHOW ("at toplevel", "<top>")
+|}]
+
+module Test_scoping3 = struct
+
+  module A = struct
+    [%%define x "A"]
+
+    [%%define y (show ("in A", x))]
+  end
+
+  let () = ()
+
+  [%%define x "top"]
+
+  let () = ()
+
+  [%%define y (show ("between", x))]
+
+  let () = ()
+
+  module B = struct
+    [%%define y (show ("in B", x))]
+  end
+
+end
+
+[%%expect{|
+File "examples.mlt", line 328, characters 16-34::
+SHOW ("in A", "A")
+File "examples.mlt", line 337, characters 14-35::
+SHOW ("between", "top")
+File "examples.mlt", line 342, characters 16-34::
+SHOW ("in B", "top")
+|}]
+
+(* Test env is preserved in toplevel *)
+[%%define x "test_toplevel"]
+[%%define y x]
+[%%define y (show y)]
+
+[%%expect{|
+File "examples.mlt", line 359, characters 12-20::
+SHOW "test_toplevel"
+|}]

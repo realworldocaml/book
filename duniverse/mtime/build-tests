@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Work around https://github.com/ocaml/ocamlbuild/issues/122
+
+set -e
+
+OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
+                          -no-links -use-ocamlfind" }
+
+$OCAMLBUILD -I src -I src-jsoo \
+  test-jsoo/test_jsoo.js test-jsoo/test_jsoo.html
+
+$OCAMLBUILD -I src -I src-os \
+    test-os/min_os.byte test-os/min_os.native \
+    test-os/test.byte test-os/test.native

@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(ocamllex (lexer doc_lexer))
+(menhir ((modules (parser))))
+
+(library
+ ((name atd)
+  (public_name atd)
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (libraries (easy-format unix str))))

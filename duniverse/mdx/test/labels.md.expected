@@ -1,0 +1,11 @@
+Testing labels:
+
+```sh dir=foo,non-deterministic=bar
+>> bar is not a valid value for label "non-deterministic". Valid values are <none>, "command" and "output".
+$ ls
+```
+
+```sh toto,dir=xxx
+>> "toto" is not a valid label or prefix. Valid labels are "dir", "source-tree", "file", "part", "env", "skip", "non-deterministic", "version" and "require-package" and valid prefixes are "set-" and "unset-".
+$ xxx
+```

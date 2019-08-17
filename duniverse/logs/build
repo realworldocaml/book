@@ -1,0 +1,44 @@
+#!/bin/sh
+# This script is only used for developement. It is removed by the
+# distribution process.
+
+set -e
+
+OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
+                          -use-ocamlfind" }
+
+action ()
+{
+    case $1 in
+        default) action lib;;
+        lib) $OCAMLBUILD logs.cma logs.cmxa \
+                         logs_fmt.cma logs_fmt.cmxa \
+                         logs_browser.cma logs_browser.cmxa \
+                         logs_cli.cma logs_cli.cmxa \
+                         logs_top.cma logs_top.cmxa ;;
+        test-browser)
+            action lib
+            action test/tests.otarget
+            js_of_ocaml _build/test/test_browser.byte -o \
+                        _build/test/test_browser.js
+            shift;
+            if [ "$1" = "-r" ]; then
+                topkg browse \
+                "http://`hostname`/logs/test/test_browser.html"
+            fi
+            ;;
+
+        test)
+            action lib
+            $OCAMLBUILD test/tests.otarget
+            ;;
+        doc)     shift; topkg doc --dev $* ;;
+        api-doc) shift; topkg doc $* ;;
+        clean)   $OCAMLBUILD -clean ;;
+        *)       $OCAMLBUILD $* ;;
+    esac
+}
+
+if [ $# -eq 0 ];
+then action default ;
+else action $*; fi

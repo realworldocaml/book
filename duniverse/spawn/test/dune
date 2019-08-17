@@ -1,0 +1,5 @@
+(library
+ (name spawn_test)
+ (libraries unix spawn)
+ (inline_tests (deps exe/hello.exe))
+ (preprocess (pps ppx_expect)))

@@ -1,0 +1,200 @@
+
+Design for [ppx_hash] syntax extension:
+
+(1) [@@deriving hash]
+
+From: type t = ... [@@deriving hash]
+
+Generate a folding-style function.
+    [hash_fold_t] : [Hash.state -> t -> Hash.state]
+
+And generate a direct-style function.
+    [hash] : [t -> Hash.hash_value]  (named [hash_<T>] when <T> != "t")
+
+where [Hash] is [Ppx_hash_lib.Std.Hash].
+
+The folding-style function [hash_fold_<T>] function is compositional, following the
+structure of the type; allowing user overrides at every level. This is in contrast to
+ocaml's builtin polymorphic hashing [Hashtbl.hash] which ignores user overrides.
+
+The direct-style function is a wrapper around the folding-style function, and is not used
+in a compositional way.
+
+[hash_fold_t state x] is supposed to disturb the [state] by mixing in all the
+information present in [x]. It should not discard [state].
+
+To have collision resistance, it should expand to different sequences of
+built-in mixing functions for different values of [x]. No such sequence is
+allowed to be a prefix of another.
+
+We also support the inline syntax extensions [%hash_fold: TYPE] and [%hash: TYPE]
+
+(2) [Hash.state], [Hash.hash_value], [Hash.seed]
+
+The [ppx_hash] extension is not tied to any specific hash-function, with the generated
+code making no assumptions over the detail of these types.
+
+These types are defined by the specific hash-function selected as [Ppx_hash_lib.Std.Hash]
+We have conservatively selected to use the builtin hash-function defined internally in
+ocaml - which we refer to as "internalhash" - (but used in a compositional way).
+
+This hash-function has: [type seed = int] [type hash_value = int]
+[Hash.state] is abstract, but is an immediate value, so avoiding allocation issues.
+
+(3) User interface:
+
+Normally hashing is performed with the generated direct-style hash function:
+    hash x
+
+Alternatively, the generated folding-style function can be run with [Hash.run]:
+(In addition, this allows a non-default seed to be passed.)
+    Hash.run ?seed hash_fold_t x
+
+Or we can use the syntax extensions:
+
+    [%hash: T] x
+    Hash.run ?seed [%hash_fold: T] x
+
+(4) Code generation:
+
+The generated code follows the structure of the type.
+
+For leaf types, (in these examples [a], [b] and [c]), the generated function expects the
+corresponding hash_fold function ([hash_fold_a], [hash_fold_b] and [hash_fold_c]) to be in
+scope, accompanying the types in scope.
+
+Tuples:
+
+    type t1 = a * b * c [@@deriving hash]
+
+    let hash_fold_t1 : Hash.t -> t1 -> Hash.t =
+      fun hsv  ->
+        fun arg  ->
+          let (e0,e1,e2) = arg in
+          hash_fold_c (hash_fold_b (hash_fold_a hsv e0) e1) e2
+
+Records:
+
+    type t2 = {a: a; b: b; c: c;} [@@deriving hash]
+
+    let hash_fold_t2 : Hash.t -> t2 -> Hash.t =
+      fun hsv  ->
+        fun arg  ->
+          hash_fold_c (hash_fold_b (hash_fold_a hsv arg.a) arg.b) arg.c
+
+
+For variants, we also take account of (the position of) the variant tag:
+
+    type t3 = Foo | Bar of a | Qaz of b * c [@@deriving hash]
+
+    let hash_fold_t3 : Hash.t -> t3 -> Hash.t =
+      fun hsv  ->
+        fun arg  ->
+          match arg with
+          | Foo  -> Hash.fold_int hsv 0
+          | Bar a0 -> hash_fold_a (Hash.fold_int hsv 1) a0
+          | Qaz (a0,a1) -> hash_fold_c (hash_fold_b (Hash.fold_int hsv 2) a0) a1
+
+
+For polymorphic-variants, we use the ocaml hash value of the polymorphic-variant tag,
+returned by [Btype.hash_variant]:
+
+    type t4 = [ `Foo of a  | `Bar ] [@@deriving hash]
+
+    let hash_fold_t4 : Hash.t -> t4 -> Hash.t =
+      fun hsv  ->
+        fun arg  ->
+          match arg with
+          | `Foo _v -> hash_fold_a (Hash.fold_int hsv 3505894) _v
+          | `Bar -> Hash.fold_int hsv 3303859
+
+
+For parametrised types we generate a hash function parametrised over the hash function
+for the element type (nothing new here).
+
+    type 'a t5 = ('a * 'a) list [@@deriving hash]
+
+    let hash_fold_t5 : 'a . (Hash.t -> 'a -> Hash.t) -> Hash.t -> 'a t5 -> Hash.t =
+      fun _hash_fold_a  ->
+        fun hsv  ->
+          fun arg  ->
+            hash_fold_list
+              (fun hsv  ->
+                 fun arg  ->
+                   let (e0,e1) = arg in _hash_fold_a (_hash_fold_a hsv e0) e1)
+              hsv arg
+
+
+(5) Special support for record fields:
+
+Record fields can be annotated with [@hash.ignore] so that they are not
+incorporated into the computed hash value. In the case of mutable fields, there
+must be such an annotation.
+
+    type t = {
+      mutable s : string; [@hash.ignore]
+      i : int;
+    } [@@deriving hash]
+
+    let hash_fold_t : Hash.t -> t -> Hash.t =
+      fun hsv  -> fun arg  -> hash_fold_int hsv arg.i
+
+
+(6) Support for builtins:
+
+We do nothing special for built-in types such as [int] or [float], or build-in type
+constructors such as [list] and [option]. We just expect the corresponding [hash_fold_<T>]
+functions to be in scope.
+
+This is the same approach as taken by sexp-conv, but different from ppx_compare, which
+does treat built-in types & constructors specially, leading to buggy behaviour when those
+names are redefined.
+
+A runtime library defines the hash functions for the built-in types & constructors, and is
+put in scope by [open Core] as is done for built-in sexp converters.
+
+  type 'a folder = Hash.t -> 'a -> Hash.t
+
+  val hash_fold_nativeint    : nativeint     folder
+  val hash_fold_int64        : int64         folder
+  val hash_fold_int32        : int32         folder
+  val hash_fold_char         : char          folder
+  val hash_fold_int          : int           folder
+  val hash_fold_bool         : bool          folder
+  val hash_fold_string       : string        folder
+  val hash_fold_float        : float         folder
+  val hash_fold_unit         : unit          folder
+
+  val hash_fold_option       : 'a folder -> 'a option  folder
+  val hash_fold_list         : 'a folder -> 'a list    folder
+  val hash_fold_lazy_t       : 'a folder -> 'a lazy_t  folder
+
+
+(7) Array/Ref:
+
+Hash support for [array] and [ref] is not provided directly, because of the danger
+when hashing mutable values: the computed hash changes when the value mutates.
+
+Instead we provide [.._frozen] type aliases, with the corresponding [hash_fold_<T>] function.
+
+  type 'a ref_frozen = 'a ref
+  type 'a array_frozen = 'a array
+
+  val hash_fold_ref_frozen : 'a folder -> 'a ref folder
+  val hash_fold_array_frozen : 'a folder -> 'a array folder
+
+These are not safe if the ref/array value hashed is mutated.
+
+
+(8) [lazy_t]:
+
+We avoid the bug in ocaml's internal function on [lazy_t] values, by defining:
+
+  let hash_fold_lazy_t hash_fold_elem s x =
+    hash_fold_elem s (Lazy.force x)
+
+(9) GADTs:
+
+GADTs are not explicitly supported. Some examples will be fine, but examples with
+existential types wont work and will generate ill-typed code. We make no attempt to
+distinguish the cases.

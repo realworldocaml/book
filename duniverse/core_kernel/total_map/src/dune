@@ -1,0 +1,2 @@
+(library (name total_map) (public_name core_kernel.total_map)
+ (libraries core_kernel) (preprocess (pps ppx_jane)))

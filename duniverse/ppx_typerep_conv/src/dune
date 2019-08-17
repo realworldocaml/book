@@ -1,0 +1,3 @@
+(library (name ppx_typerep_conv) (public_name ppx_typerep_conv)
+ (kind ppx_deriver) (ppx_runtime_libraries typerep) (libraries base ppxlib)
+ (preprocess (pps ppxlib.metaquot)))

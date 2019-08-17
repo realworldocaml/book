@@ -1,0 +1,16 @@
+type text = string <ocaml valid="Resume_util.validate_some_text">
+
+type date = {
+  year : int;
+  month : int;
+  day : int;
+} <ocaml valid="Resume_util.validate_date">
+
+type job = {
+  company : text;
+  title : text;
+  start_date : date;
+  ?end_date : date option;
+} <ocaml valid="Resume_util.validate_job">
+
+type work_experience = job list

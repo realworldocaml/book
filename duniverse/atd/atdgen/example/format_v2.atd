@@ -1,0 +1,11 @@
+(* Newer version of an imagined data format. Compare to `format_v1.atd'. *)
+
+type t = {
+  a : int option;
+  (* removed field b, making newer data unreadable with older software since
+     b was not optional. *)
+  ?c : int option;
+  ~d : float;
+  ~e : string list; (* added optional field e, allowing newer software
+                       to read older data. *)
+}

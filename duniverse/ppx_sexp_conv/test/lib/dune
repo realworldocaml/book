@@ -1,0 +1,2 @@
+(library (name sexplib_test) (libraries ppx_sexp_conv_lib)
+ (preprocess (pps ppxlib ppx_sexp_conv ppx_here ppx_inline_test)))

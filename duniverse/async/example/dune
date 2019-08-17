@@ -1,0 +1,6 @@
+(executables
+ (names bin_prot_test bind_loop cat countdown dns finalizer hello
+  jobs_speed_test load_file log_test max_num_open_file_descrs monitors
+  priority server sexp_with_text signals sigpipe socket speed_test
+  thread_pool_not_stuck timeouts write_forever)
+ (libraries async core) (preprocess (pps ppx_jane)))

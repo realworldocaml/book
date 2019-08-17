@@ -1,0 +1,14 @@
+(library
+  (name num)
+  (public_name num)
+  (wrapped false)
+  (c_names nat_stubs bng bng_generic)
+  (c_flags (:include config/cflags))
+  (flags -w +a-4-9-41-42-44-45-48 -warn-error A -bin-annot -g -safe-string -strict-sequence -strict-formats )
+)
+
+
+(rule
+  (targets bng_generic.c)
+  (deps bng_digit.c bng_amd64.c bng_arm64.c bng_ia32.c bng_ppc.c bng_sparc.c)
+  (action (run touch bng_generic.c)))

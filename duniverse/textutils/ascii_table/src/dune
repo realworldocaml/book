@@ -1,0 +1,2 @@
+(library (name ascii_table) (public_name textutils.ascii_table)
+ (libraries console core) (preprocess (pps ppx_jane)))

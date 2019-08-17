@@ -1,0 +1,5 @@
+(test
+ (name test_callback_lifetime)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_callback_lifetimes_stubs test_callback_lifetimes_bindings
+   tests_common))
