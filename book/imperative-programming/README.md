@@ -1246,7 +1246,7 @@ let () =
     Out_channel.flush stdout
 ```
 
-We can build this program using `jbuilder` and run it. You'll see that it
+We can build this program using `dune` and run it. You'll see that it
 prompts you for input, as follows:
 
 ```
