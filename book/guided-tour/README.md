@@ -23,7 +23,7 @@ different use-cases, each building on the last. Here's a quick summary.
   library. It has a variety of basic efficient data structures like
   hash-tables, sets and sequences. It also defines the basic idioms for error
   handling and serialization, and contains well organized APIs for every
-  basic data type from integers to lazy values. This is comes along with a
+  basic data type from integers to lazy values. This comes along with a
   minimum of external dependencies, so `Base` just takes seconds to build and
   install. It's also portable, running on every platform that OCaml does,
   including Windows and JavaScript.
