@@ -13,4 +13,3 @@
   version_util_fallback_stubs heap_block_stubs)
  (preprocess (pps ppx_jane -check-doc-comments)) (preprocessor_deps config.h)
  (js_of_ocaml (javascript_files strftime.js runtime.js)))
-

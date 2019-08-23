@@ -81,8 +81,8 @@ let () =
       value, its callbacks are called.
     - Separate {b resolvers} of type ['a ]{!Lwt.u} are used to write values into
       promises, through {!Lwt.wakeup_later}.
-    - Promises and resolvers are created in pairs using {!Lwt.task}. Lwt I/O
-      functions call {!Lwt.task} internally, but return only the promise.
+    - Promises and resolvers are created in pairs using {!Lwt.wait}. Lwt I/O
+      functions call {!Lwt.wait} internally, but return only the promise.
     - {!Lwt_main.run} is used to wait on one “top-level” promise. When that
       promise gets a value, the program terminates.
 
@@ -238,7 +238,7 @@ let () =
     {{: http://man7.org/linux/man-pages/man7/epoll.7.html} [epoll(7)]},
     {{: https://www.freebsd.org/cgi/man.cgi?query=kqueue&sektion=2}
     [kqueue(2)]}, or whatever asynchronous I/O API your system provides. On
-    browsers, the work of {!Lwt_main.run} is done by the surrouding JavaScript
+    browsers, the work of {!Lwt_main.run} is done by the surrounding JavaScript
     engine, so you don't call {!Lwt_main.run} from inside your program. But the
     execution model is still the same, and the description below applies!
 
@@ -323,7 +323,7 @@ let () =
       ways: {e fulfilled} with a value, or {e rejected} with an exception. There
       is nothing conceptually special about rejection – it's just that you can
       ask for callbacks to run only on fulfillment, only on rejection, etc.
-    - {{: #2_Cancelation} Cancelation}. This is a special case of rejection,
+    - {{: #2_Cancelation} Cancellation}. This is a special case of rejection,
       specifically with exception {!Lwt.Canceled}. It has extra helpers in the
       Lwt API.
     - {{: #2_Concurrency} Concurrency helpers}. All of these could be
@@ -385,7 +385,7 @@ type +'a t
 
     Promise variables of this type, ['a Lwt.t], are actually {b read-only} in
     Lwt. Separate {e resolvers} of type ['a ]{!Lwt.u} are used to write to them.
-    Promises and their resolvers are created together by calling {!Lwt.task}.
+    Promises and their resolvers are created together by calling {!Lwt.wait}.
     There is one exception to this: most promises can be {e canceled} by calling
     {!Lwt.cancel}, without going through a resolver. *)
 
@@ -396,7 +396,7 @@ type -'a u
     be passed to {!Lwt.wakeup_later}, {!Lwt.wakeup_later_exn}, or
     {!Lwt.wakeup_later_result} to resolve that promise. *)
 
-val task : unit -> ('a t * 'a u)
+val wait : unit -> ('a t * 'a u)
 (** Creates a new pending {{: #TYPEt} promise}, paired with its {{: #TYPEu}
     resolver}.
 
@@ -404,7 +404,7 @@ val task : unit -> ('a t * 'a u)
     libraries, call it internally, and return only the promise. You then chain
     the promises together using {!Lwt.bind}.
 
-    However, it is important to understand [Lwt.task] as the fundamental promise
+    However, it is important to understand [Lwt.wait] as the fundamental promise
     “constructor.” All other functions that evaluate to a promise can be, or
     are, eventually implemented in terms of it. *)
 
@@ -420,7 +420,14 @@ val wakeup_later : 'a u -> 'a -> unit
     If the promise is not pending, [Lwt.wakeup_later] raises
     {{: https://caml.inria.fr/pub/docs/manual-ocaml/libref/Pervasives.html#VALinvalid_arg}
     [Pervasives.Invalid_argument]}, unless the promise is {{: #VALcancel}
-    canceled}. If the promise is canceled, [Lwt.wakeup_later] has no effect. *)
+    canceled}. If the promise is canceled, [Lwt.wakeup_later] has no effect.
+
+    If your program has multiple threads, it is important to make sure that
+    [Lwt.wakeup_later] (and any similar function) is only called from the main
+    thread. [Lwt.wakeup_later] can trigger callbacks attached to promises
+    by the program, and these assume they are running in the main thread. If you
+    need to communicate from a worker thread to the main thread running Lwt, see
+    {!Lwt_preemptive} or {!Lwt_unix.send_notification}. *)
 
 val wakeup_later_exn : _ u -> exn -> unit
 (** [Lwt.wakeup_later_exn r exn] is like {!Lwt.wakeup_later}, except, if the
@@ -1017,15 +1024,34 @@ val nchoose_split : ('a t) list -> ('a list * ('a t) list) t
 
 
 
-(** {2 Cancelation} *)
+(** {2 Cancellation}
+
+    Note: cancelation has proved difficult to understand, explain, and maintain,
+    so use of these functions is discouraged in new code. See
+    {{:https://github.com/ocsigen/lwt/issues/283#issuecomment-518014539}
+    ocsigen/lwt#283}. *)
 
 exception Canceled
 (** Canceled promises are those rejected with this exception, [Lwt.Canceled].
     See {!Lwt.cancel}. *)
 
+val task : unit -> ('a t * 'a u)
+(** [Lwt.task] is the same as {!Lwt.wait}, except the resulting promise [p] is
+    {{: #VALcancel} cancelable}.
+
+    This is significant, because it means promises created by [Lwt.task] can be
+    resolved (specifically, rejected) by canceling them directly, in addition to
+    being resolved through their paired resolvers.
+
+    In contrast, promises returned by {!Lwt.wait} can only be resolved through
+    their resolvers. *)
+
 val cancel : _ t -> unit
 (** [Lwt.cancel p] attempts to {e cancel} the pending promise [p], without
     needing access to its resolver.
+
+    It is recommended to avoid [Lwt.cancel], and handle cancelation by tracking
+    the needed extra state explicitly within your library or application.
 
     A {b canceled} promise is one that has been rejected with exception
     {!Lwt.Canceled}.
@@ -1043,7 +1069,7 @@ val cancel : _ t -> unit
     propagated “forwards” by {!Lwt.bind}, {!Lwt.join}, etc., as described in the
     documentation of those functions.
 
-    {b Cancelation} is a separate phase, triggered only by {!Lwt.cancel}, that
+    {b Cancellation} is a separate phase, triggered only by {!Lwt.cancel}, that
     searches {e backwards}, strating from [p], for promises to reject with
     {!Lwt.Canceled}. Once those promises are found, they are canceled, and then
     ordinary, forwards rejection propagation takes over.
@@ -1103,7 +1129,7 @@ let () =
       rejection.
     - Suppose [p] was returned by {!Lwt.join}, {!Lwt.pick}, or similar function,
       which was applied to the promise list [ps]. {!Lwt.cancel} then recursively
-      tries to cancel each promise in [ps]. If one of those cancelations
+      tries to cancel each promise in [ps]. If one of those cancellations
       succeeds, [p] {e may} be canceled later by the normal propagation of
       rejection. *)
 
@@ -1115,7 +1141,7 @@ val on_cancel : _ t -> (unit -> unit) -> unit
     callbacks that are triggered by rejection, such as those added by
     {!Lwt.catch}.
 
-    Note that this does not interact directly with the {e cancelation}
+    Note that this does not interact directly with the {e cancellation}
     mechanism, the backwards search described in {!Lwt.cancel}. For example,
     manually rejecting a promise with {!Lwt.Canceled} is sufficient to trigger
     [f].
@@ -1125,26 +1151,16 @@ val on_cancel : _ t -> (unit -> unit) -> unit
 
 val protected : 'a t -> 'a t
 (** [Lwt.protected p] creates a {{: #VALcancel} cancelable} promise [p'] with
-    the same state as [p]. However, cancelation, the backwards search described
+    the same state as [p]. However, cancellation, the backwards search described
     in {!Lwt.cancel}, stops at [p'], and does not continue to [p]. *)
 
 val no_cancel : 'a t -> 'a t
 (** [Lwt.no_cancel p] creates a non-{{: #VALcancel}cancelable} promise [p'],
-    with the same state as [p]. Cancelation, the backwards search described in
+    with the same state as [p]. Cancellation, the backwards search described in
     {!Lwt.cancel}, stops at [p'], and does not continue to [p].
 
     Note that [p'] can still be canceled if [p] is canceled. [Lwt.no_cancel]
-    only prevents cancelation of [p] and [p'] through [p']. *)
-
-val wait : unit -> ('a t * 'a u)
-(** [Lwt.wait] is the same as {!Lwt.task}, except the resulting promise [p] is
-    {e not} {{: #VALcancel} cancelable}.
-
-    This is significant, because it means [p] created by [Lwt.wait] can {e only}
-    be resolved through its paired resolver.
-
-    In contrast, promises returned by {!Lwt.task} can additionally be resolved
-    by canceling them directly with {!Lwt.cancel}. *)
+    only prevents cancellation of [p] and [p'] through [p']. *)
 
 
 
@@ -1315,7 +1331,7 @@ let () =
       explicit {!Lwt.choose} syntax, so using this operator is not
       recommended.
 
-      Futhermore, most users actually need {!Lwt.pick} instead of
+      Furthermore, most users actually need {!Lwt.pick} instead of
       {!Lwt.choose}. *)
 
   val (=<<) : ('a -> 'b t) -> 'a t -> 'b t

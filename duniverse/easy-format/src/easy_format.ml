@@ -1,23 +1,12 @@
 open Format
 
-(** Shadow map and split with tailrecursive variants. *)
-module List = struct
-  include List
-  (** Tail recursive of map *)
-  let map f l = List.rev_map f l |> List.rev
-
-  (** Tail recursive version of split *)
-  let rev_split l =
-    let rec inner xs ys = function
-      | (x, y) :: xys ->
-          inner (x::xs) (y::ys) xys
-      | [] -> (xs, ys)
-    in
-    inner [] [] l
-
-  let split l = rev_split (List.rev l)
-
-end
+let rev_split l =
+  let rec inner xs ys = function
+    | (x, y) :: xys ->
+       inner (x::xs) (y::ys) xys
+    | [] -> (xs, ys)
+  in
+  inner [] [] l
 
 type wrap = [
   | `Wrap_atoms
@@ -127,7 +116,7 @@ let propagate_from_leaf_to_root
         let acc = init_acc x in
         map_node x acc
     | List (param, children) ->
-        let new_children, accs = List.rev_split (List.rev_map aux children) in
+        let new_children, accs = rev_split (List.rev_map aux children) in
         let acc = List.fold_left merge_acc (init_acc x) accs in
         map_node (List (param, new_children)) acc
     | Label ((x1, param), x2) ->
@@ -149,8 +138,8 @@ let propagate_from_leaf_to_root
 let propagate_forced_breaks x =
   (* acc = whether to force breaks in wrappable lists or labels *)
   let init_acc = function
-    | List ((_, _, _, { wrap_body = `Force_breaks_rec }), _)
-    | Label ((_, { label_break = `Always_rec }), _) -> true
+    | List ((_, _, _, { wrap_body = `Force_breaks_rec; _ }), _)
+    | Label ((_, { label_break = `Always_rec; _ }), _) -> true
     | Atom _
     | Label _
     | Custom _
@@ -161,12 +150,12 @@ let propagate_forced_breaks x =
   in
   let map_node x force_breaks =
     match x with
-    | List ((_, _, _, { wrap_body = `Force_breaks_rec }), _) -> x, true
-    | List ((_, _, _, { wrap_body = `Force_breaks }), _) -> x, force_breaks
+    | List ((_, _, _, { wrap_body = `Force_breaks_rec; _ }), _) -> x, true
+    | List ((_, _, _, { wrap_body = `Force_breaks; _ }), _) -> x, force_breaks
 
     | List ((op, sep, cl, ({ wrap_body = (`Wrap_atoms
                                          | `Never_wrap
-                                         | `Always_wrap) } as p)),
+                                         | `Always_wrap); _ } as p)),
             children) ->
         if force_breaks then
           let p = { p with wrap_body = `Force_breaks } in
@@ -174,19 +163,19 @@ let propagate_forced_breaks x =
         else
           x, false
 
-    | Label ((a, ({ label_break = `Auto } as lp)), b) ->
+    | Label ((a, ({ label_break = `Auto; _ } as lp)), b) ->
         if force_breaks then
           let lp = { lp with label_break = `Always } in
           Label ((a, lp), b), true
         else
           x, false
 
-    | List ((_, _, _, { wrap_body = `No_breaks }), _)
-    | Label ((_, { label_break = (`Always | `Always_rec | `Never) }), _)
+    | List ((_, _, _, { wrap_body = `No_breaks; _ }), _)
+    | Label ((_, { label_break = (`Always | `Always_rec | `Never); _ }), _)
     | Atom _
     | Custom _ -> x, force_breaks
   in
-  let new_x, forced_breaks =
+  let new_x, _forced_breaks =
     propagate_from_leaf_to_root
       ~init_acc
       ~merge_acc
@@ -288,7 +277,7 @@ struct
 
   let pp_open_xbox fmt p indent =
     match p.wrap_body with
-	`Always_wrap
+        `Always_wrap
       | `Never_wrap
       | `Wrap_atoms -> pp_open_hvbox fmt indent
       | `Force_breaks
@@ -310,8 +299,8 @@ struct
       ((fun fmt -> pp_open_hovbox fmt 0),
        (fun fmt -> pp_close_box fmt ()))
     else
-      ((fun fmt -> ()),
-       (fun fmt -> ()))
+      ((fun _ -> ()),
+       (fun _ -> ()))
 
 
   let pp_open_nonaligned_box fmt p indent l =
@@ -401,7 +390,7 @@ struct
           pp_print_string fmt " "
 
   (* Either horizontal or vertical list *)
-  and fprint_list fmt label ((op, sep, cl, p) as param) = function
+  and fprint_list fmt label ((op, _sep, cl, p) as param) = function
       [] ->
         fprint_opt_label fmt label;
         tag_string fmt p.opening_style op;

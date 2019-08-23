@@ -33,7 +33,7 @@ type t = string list StringMap.t
 
 let user_agent = Printf.sprintf "ocaml-cohttp/%s" Conf.version
 
-let compare = StringMap.compare Pervasives.compare
+let compare = StringMap.compare Stdlib.compare
 
 let headers_with_list_values = Array.map LString.of_string [|
   "accept";"accept-charset";"accept-encoding";"accept-language";

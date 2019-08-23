@@ -1,3 +1,7 @@
+**This project is unmaintained. Pull requests won't be reviewed.
+  If you would like to contribute, please request a transfer to
+  [ocaml-community](https://github.com/ocaml-community/meta).**
+  
 Biniou
 ======
 

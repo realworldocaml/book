@@ -5,9 +5,9 @@ environment:
   CYG_ROOT: "C:\\cygwin"
   CYG_BASH: "%CYG_ROOT%\\bin\\bash -lc"
   TESTS: "false"
-  PINS: "conduit:. mirage-conduit:. conduit-async:. conduit-lwt:. conduit-lwt-unix:."
+  PINS: "conduit:. conduit-mirage:. conduit-async:. conduit-lwt:. conduit-lwt-unix:."
   PACKAGE: "conduit"
-  DEPOPTS: "mirage-conduit conduit-async conduit-lwt conduit-lwt-unix"
+  DEPOPTS: "conduit-mirage conduit-async conduit-lwt conduit-lwt-unix"
 
 install:
   - appveyor DownloadFile https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/appveyor-opam.sh

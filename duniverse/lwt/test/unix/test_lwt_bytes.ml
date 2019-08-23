@@ -685,7 +685,7 @@ let suite = suite "lwt_bytes" [
       let offset = 0 in
       let io_vectors = [Lwt_bytes.io_vector ~buffer ~offset ~length:6] in
       let server_logic socket =
-        Lwt_bytes.recv_msg ~socket ~io_vectors
+        (Lwt_bytes.recv_msg [@ocaml.warning "-3"]) ~socket ~io_vectors
       in
       let client_logic socket sockaddr =
         let message = Lwt_bytes.of_string "abcdefghij" in
@@ -702,14 +702,14 @@ let suite = suite "lwt_bytes" [
       let offset = 0 in
       let server_logic socket =
         let io_vectors = [Lwt_bytes.io_vector ~buffer ~offset ~length:6] in
-        Lwt_bytes.recv_msg ~socket ~io_vectors
+        (Lwt_bytes.recv_msg [@ocaml.warning "-3"]) ~socket ~io_vectors
       in
       let client_logic socket sockaddr =
         Lwt_unix.connect socket sockaddr
         >>= fun () ->
         let message = Lwt_bytes.of_string "abcdefghij" in
         let io_vectors = [Lwt_bytes.io_vector ~buffer:message ~offset ~length:9] in
-        Lwt_bytes.send_msg ~socket ~io_vectors ~fds:[]
+        (Lwt_bytes.send_msg [@ocaml.warning "-3"]) ~socket ~io_vectors ~fds:[]
       in
       udp_server_client_exchange server_logic client_logic
       >>= fun () ->

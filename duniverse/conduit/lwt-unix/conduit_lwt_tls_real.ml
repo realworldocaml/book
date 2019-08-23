@@ -19,14 +19,19 @@ open Lwt.Infix
 
 let _ = Nocrypto_entropy_lwt.initialize ()
 
+module X509 = struct
+  let private_of_pems ~cert ~priv_key =
+    X509_lwt.private_of_pems ~cert ~priv_key
+end
+
 module Client = struct
-  let connect ?src host sa =
+  let connect ?src ?certificates host sa =
     Conduit_lwt_server.with_socket sa (fun fd ->
         (match src with
          | None -> Lwt.return_unit
          | Some src_sa -> Lwt_unix.bind fd src_sa) >>= fun () ->
         X509_lwt.authenticator `No_authentication_I'M_STUPID >>= fun authenticator ->
-        let config = Tls.Config.client ~authenticator () in
+        let config = Tls.Config.client ~authenticator ?certificates () in
         Lwt_unix.connect fd sa >>= fun () ->
         Tls_lwt.Unix.client_of_fd config ~host fd >|= fun t ->
         let ic, oc = Tls_lwt.of_t t in
@@ -39,14 +44,14 @@ module Server = struct
   let init' ?backlog ?stop ?timeout tls sa callback =
     sa
     |> Conduit_lwt_server.listen ?backlog
-    >>= Conduit_lwt_server.init ?stop (fun (fd, _) ->
+    >>= Conduit_lwt_server.init ?stop (fun (fd, addr) ->
         Lwt.try_bind
           (fun () -> Tls_lwt.Unix.server_of_fd tls fd)
           (fun t ->
              let (ic, oc) = Tls_lwt.of_t t in
              Lwt.return (fd, ic, oc))
           (fun exn -> Lwt_unix.close fd >>= fun () -> Lwt.fail exn)
-        >>= Conduit_lwt_server.process_accept ?timeout callback)
+        >>= Conduit_lwt_server.process_accept ?timeout (callback addr))
 
   let init ?backlog ~certfile ~keyfile ?stop ?timeout sa callback =
     X509_lwt.private_of_pems ~cert:certfile ~priv_key:keyfile

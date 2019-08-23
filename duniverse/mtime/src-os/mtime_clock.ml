@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2017 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -25,7 +25,7 @@ let counter = elapsed_ns
 let count c = Mtime.Span.of_uint64_ns (Int64.sub (elapsed_ns ()) c)
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Daniel C. Bünzli
+   Copyright (c) 2017 The mtime programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

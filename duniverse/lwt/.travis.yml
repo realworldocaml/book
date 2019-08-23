@@ -2,6 +2,10 @@ language: c
 
 matrix:
   include:
+    - os: osx
+      env: COMPILER=4.08.1 LIBEV=no
+    - os: linux
+      env: COMPILER=4.08.1 COVERAGE=yes
     - os: linux
       env: COMPILER=4.02.3 LIBEV=no
     - os: linux
@@ -17,16 +21,12 @@ matrix:
     - os: linux
       env: COMPILER=ocaml-variants.4.07.1+flambda
     - os: linux
-      env: COMPILER=ocaml-variants.4.08.0+beta2 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
-    - os: osx
-      env: COMPILER=4.07.1
-    - os: osx
-      env: COMPILER=4.07.1 LIBEV=no
-
-  fast_finish: true
+      env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
 
   allow_failures:
-    - env: COMPILER=ocaml-variants.4.08.0+beta2 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+    - env: COMPILER=ocaml-variants.4.09.0+beta1 REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+
+  fast_finish: true
 
 env:
   global:
@@ -38,6 +38,7 @@ script: bash -e src/util/travis.sh
 cache:
   directories:
     - $HOME/.opam
+    - ./_opam
 
 notifications:
   email:

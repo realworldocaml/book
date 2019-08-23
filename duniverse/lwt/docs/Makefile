@@ -8,10 +8,10 @@ PKGS=\
 	-package react
 
 INCS=\
-	-I ${BLD}/core/.lwt.objs \
-	-I ${BLD}/ppx/.ppx_lwt.objs \
-	-I ${BLD}/react/.lwt_react.objs \
-	-I ${BLD}/unix/.lwt_unix.objs
+	-I ${BLD}/core/.lwt.objs/byte \
+	-I ${BLD}/ppx/.ppx_lwt.objs/byte \
+	-I ${BLD}/react/.lwt_react.objs/byte \
+	-I ${BLD}/unix/.lwt_unix.objs/byte
 
 MLIS=\
 	$(wildcard ${SRC}/core/*.mli) \

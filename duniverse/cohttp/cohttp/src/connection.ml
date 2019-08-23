@@ -26,4 +26,4 @@ let create () =
   incr count;
   !count
 
-let compare (a:t) (b:t) = Pervasives.compare a b
+let compare (a:t) (b:t) = Stdlib.compare a b

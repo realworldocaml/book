@@ -35,8 +35,6 @@ extern int socket_domain_table[];
 extern int socket_type_table[];
 extern void get_sockaddr(value mladdr, union sock_addr_union *addr /*out*/,
                          socklen_t *addr_len /*out*/);
-void store_iovs(struct iovec *iovs, value iovs_val);
-void bytes_store_iovs(struct iovec *iovs, value iovs_val);
 value wrapper_recv_msg(int fd, int n_iovs, struct iovec *iovs);
 value wrapper_send_msg(int fd, int n_iovs, struct iovec *iovs,
                        value val_n_fds, value val_fds);

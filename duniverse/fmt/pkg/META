@@ -1,0 +1,40 @@
+description = "OCaml Format pretty-printer combinators"
+version = "%%VERSION_NUM%%"
+requires = "seq stdlib-shims"
+archive(byte) = "fmt.cma"
+archive(native) = "fmt.cmxa"
+plugin(byte) = "fmt.cma"
+plugin(native) = "fmt.cmxs"
+
+package "tty" (
+  description = "Fmt TTY setup"
+  version = "%%VERSION_NUM%%"
+  requires = "unix fmt"
+  archive(byte) = "fmt_tty.cma"
+  archive(native) = "fmt_tty.cmxa"
+  plugin(byte) = "fmt_tty.cma"
+  plugin(native) = "fmt_tty.cmxs"
+  exists_if = "fmt_tty.cma"
+)
+
+package "cli" (
+  description = "Cmdliner support for Fmt"
+  version = "%%VERSION_NUM%%"
+  requires = "cmdliner fmt"
+  archive(byte) = "fmt_cli.cma"
+  archive(native) = "fmt_cli.cmxa"
+  plugin(byte) = "fmt_cli.cma"
+  plugin(native) = "fmt_cli.cmxs"
+  exists_if = "fmt_cli.cma"
+)
+
+package "top" (
+  description = "Fmt toplevel support"
+  version = "%%VERSION_NUM%%"
+  requires = "fmt fmt.tty"
+  archive(byte) = "fmt_top.cma"
+  archive(native) = "fmt_top.cmxa"
+  plugin(byte) = "fmt_top.cma"
+  plugin(native) = "fmt_top.cmxs"
+  exists_if = "fmt_top.cma"
+)

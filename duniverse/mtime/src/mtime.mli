@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -93,7 +93,7 @@ module Span : sig
   (** [to_ms span] is [span] in milliseconds (1e-3s). *)
 
   val to_s : span -> float
-  (** [to_s span] is [span] is seconds. *)
+  (** [to_s span] is [span] in seconds. *)
 
   val to_min : span -> float
   (** [to_min span] is [span] in SI-accepted minutes (60s). *)
@@ -249,7 +249,7 @@ val s_to_year : float
     in one second. *)
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The mtime programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

@@ -1,3 +1,13 @@
+
+
+Support for thread safe logging, thanks to Jules Aguillon for the
+work.
+
+* Add `Logs.set_reporter_mutex` for installing mutual exclusion
+  primitives to access the reporter.
+* Add `Logs_threaded.enable` to install mutual exclusion
+  primitives for OCaml threads.
+
 v0.6.3 2019-04-19 La Forclaz (VS)
 ---------------------------------
 

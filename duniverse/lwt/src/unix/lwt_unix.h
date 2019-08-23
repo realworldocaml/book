@@ -34,7 +34,7 @@
 void *lwt_unix_malloc(size_t size);
 void *lwt_unix_realloc(void *ptr, size_t size);
 
-/* Same as [strdup] and abort hte program if there is not memory
+/* Same as [strdup] and abort the program if there is not memory
    left. */
 char *lwt_unix_strdup(char *string);
 

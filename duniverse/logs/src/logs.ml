@@ -178,6 +178,10 @@ type ('a, 'b) msgf =
   (?header:string -> ?tags:Tag.set ->
    ('a, Format.formatter, unit, 'b) format4 -> 'a) -> 'b
 
+type reporter_mutex = { lock : unit -> unit; unlock : unit -> unit }
+let _reporter_mutex = ref { lock = (fun () -> ()); unlock = (fun () -> ()) }
+let set_reporter_mutex ~lock ~unlock = _reporter_mutex := { lock; unlock }
+
 type reporter =
   { report :
       'a 'b. src -> level -> over:(unit -> unit) -> (unit -> 'b) ->
@@ -187,7 +191,10 @@ let nop_reporter = { report = fun _ _ ~over k _ -> over (); k () }
 let _reporter = ref nop_reporter
 let set_reporter r = _reporter := r
 let reporter () = !_reporter
-let report src level ~over k msgf  = !_reporter.report src level ~over k msgf
+let report src level ~over k msgf =
+  let over () = over (); !_reporter_mutex.unlock () in
+  !_reporter_mutex.lock ();
+  !_reporter.report src level ~over k msgf
 
 let pp_header ppf (l, h) = match h with
 | None -> if l = App then () else Format.fprintf ppf "[%a]" pp_level l
@@ -234,7 +241,8 @@ type 'a log = ('a, unit) msgf -> unit
 
 let over () = ()
 let kmsg : type a b. (unit -> b) -> ?src:src -> level -> (a, b) msgf -> b =
-fun k ?(src = default) level msgf -> match Src.level src with
+fun k ?(src = default) level msgf ->
+match Src.level src with
 | None -> k ()
 | Some level' when level > level' ->
     (if level = Error then incr _err_count else

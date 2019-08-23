@@ -1,3 +1,9 @@
+v1.1.2 2019-08-12
+-----------------
+
+* Actually port to dune by converting the `generator/` directory from
+  jbuild to dune (@avsm).
+
 v1.1.1 2018-12-21
 -----------------
 

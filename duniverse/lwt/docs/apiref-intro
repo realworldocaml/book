@@ -47,7 +47,7 @@ This package depends on the {e core} library and the {e unix} package.
 
 {2 Reactive programming helpers}
 
-The {e lwt.react} package provides helpers for functionnal reactive
+The {e lwt.react} package provides helpers for functional reactive
 programming with Lwt. It is based on the {e react} package. The
 {!Lwt_react} module is a replacement for the [React] module. It
 contains:

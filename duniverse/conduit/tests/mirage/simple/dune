@@ -1,4 +1,4 @@
 (test
   (name      test)
-  (libraries mirage-conduit)
-  (package   mirage-conduit))
+  (libraries conduit-mirage)
+  (package   conduit-mirage))

@@ -18,9 +18,8 @@
     for example: {{: https://www.lri.fr/~filliatr/software.en.html#heap} Heaps}
     by Jean-Cristophe Filliatre,
     {{: http://cedeela.fr/~simon/software/containers/CCHeap.html} containers},
-    or
     {{: http://ocaml-batteries-team.github.io/batteries-included/hdoc2/BatHeap.html}
-    Batteries}. *)
+    Batteries}, or {{:https://github.com/pqwy/psq} psq}. *)
 
 [@@@ocaml.deprecated
 " This module is an implementation detail of Lwt. See

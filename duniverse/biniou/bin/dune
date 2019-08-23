@@ -1,0 +1,6 @@
+(executable
+ (name bdump)
+ (public_name bdump)
+ (package biniou)
+ (flags -safe-string)
+ (libraries biniou))

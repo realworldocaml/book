@@ -48,7 +48,7 @@ let test_exception list_combinator =
   let number_of_callback_calls = ref 0 in
 
   let callback _ =
-    Pervasives.incr number_of_callback_calls;
+    incr number_of_callback_calls;
     match !number_of_callback_calls with
     | 2 -> raise Exception
     | _ -> Lwt.return ()

@@ -18,6 +18,8 @@
 module Client = struct
   let default_ctx = `Ssl_not_available
 
+  let create_ctx ?certfile:_ ?keyfile:_ ?password:_ () = default_ctx
+
   let connect ?(ctx=default_ctx) ?src:_ ?hostname:_ _sa =
     ignore ctx;
     Lwt.fail_with "Ssl not available"

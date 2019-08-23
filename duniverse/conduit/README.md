@@ -20,7 +20,7 @@ The opam packages available are:
 - `conduit-lwt`: the portable Lwt implementation
 - `conduit-lwt-unix`: the Lwt/Unix implementation
 - `conduit-async` the Jane Street Async implementation
-- `mirage-conduit`: the MirageOS compatible implementation
+- `conduit-mirage`: the MirageOS compatible implementation
 
 ### Debugging
 

@@ -60,7 +60,14 @@ let respond_file ?headers ~fname () =
         respond_not_found ()
       | exn -> Lwt.fail exn)
 
-let create ?timeout ?backlog ?stop ?on_exn ?(ctx=Net.default_ctx)
+let log_on_exn =
+  function
+  | Unix.Unix_error (error, func, arg) ->
+     Logs.warn (fun m -> m "Client connection error %s: %s(%S)"
+       (Unix.error_message error) func arg)
+  | exn -> Logs.err (fun m -> m "Unhandled exception: %a" Fmt.exn exn)
+
+let create ?timeout ?backlog ?stop ?(on_exn=log_on_exn) ?(ctx=Net.default_ctx)
     ?(mode=`TCP (`Port 8080)) spec =
-  Conduit_lwt_unix.serve ?backlog ?timeout ?stop ?on_exn ~ctx:ctx.Net.ctx
+  Conduit_lwt_unix.serve ?backlog ?timeout ?stop ~on_exn ~ctx:ctx.Net.ctx
     ~mode (callback spec)

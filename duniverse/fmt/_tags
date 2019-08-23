@@ -1,0 +1,7 @@
+true : bin_annot, safe_string, package(seq), package(stdlib-shims)
+<_b0> : -traverse
+<src> : include
+<src/fmt_tty*> : package(unix)
+<src/fmt_cli*> : package(cmdliner)
+<src/fmt_top*> : package(compiler-libs.toplevel)
+<test> : include

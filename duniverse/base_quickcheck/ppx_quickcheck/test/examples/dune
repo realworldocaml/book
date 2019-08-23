@@ -6,9 +6,11 @@
   ppx_quickcheck_test_examples_mli_pp.output))
 
 (rule (targets ppx_quickcheck_test_examples_ml_pp.output)
+ (mode fallback)
  (deps (:first_dep ppx_quickcheck_test_examples.ml.pp))
  (action (bash "cp %{first_dep} %{targets}")))
 
 (rule (targets ppx_quickcheck_test_examples_mli_pp.output)
+ (mode fallback)
  (deps (:first_dep ppx_quickcheck_test_examples.mli.pp))
  (action (bash "cp %{first_dep} %{targets}")))

@@ -10,7 +10,7 @@
  (public_name cohttp)
  (synopsis "Co-operative Client/Server HTTP library.")
  (preprocess (pps ppx_fields_conv ppx_sexp_conv))
- (libraries re stringext uri uri-sexp fieldslib sexplib0 bytes base64))
+ (libraries re stringext uri uri-sexp fieldslib sexplib0 bytes base64 stdlib-shims))
 
 (ocamllex  accept_lexer)
 (ocamlyacc accept_parser)

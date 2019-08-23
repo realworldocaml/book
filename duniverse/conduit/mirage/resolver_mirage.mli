@@ -26,40 +26,17 @@ val static : (string, (port:int -> Conduit.endp)) Hashtbl.t -> Resolver_lwt.t
     maps [localhost] to [127.0.0.1], and fails on all other hostnames. *)
 val localhost : Resolver_lwt.t
 
-(** Module allowing to build a {!Resolver_lwt} than can perform DNS lookups. *)
-module type S = sig
-  module DNS : Dns_resolver_mirage.S
-
-  (** Default resolver to use, which is [8.8.8.8] (Google DNS). *)
-  val default_ns : Ipaddr.V4.t
-
-  val vchan_resolver : tld:string -> Resolver_lwt.rewrite_fn
-
-  (** [dns_stub_resolver ?ns ?dns_port dns] will return a resolver that uses
-      the stub resolver [ns] on port [ns_port] to resolve URIs via
-      the [dns] network interface. *)
-  val dns_stub_resolver:
-    ?ns:Ipaddr.V4.t -> ?ns_port:int -> DNS.t -> Resolver_lwt.rewrite_fn
-
-  (** [register ?ns ?ns_port ?stack res] TODO *)
-  val register:
-    ?ns:Ipaddr.V4.t -> ?ns_port:int -> ?stack:DNS.stack ->
-    Resolver_lwt.t -> unit
-
-  (** [init ?ns ?ns_port ?stack ()] TODO *)
-  val init:
-    ?ns:Ipaddr.V4.t -> ?ns_port:int -> ?stack:DNS.stack -> unit -> Resolver_lwt.t
-end
-
-(** Given a DNS resolver {{:https://github.com/mirage/ocaml-dns}implementation},
-    provide a {!Resolver_lwt} that can perform DNS lookups to return
-    endpoints. *)
-module Make(DNS:Dns_resolver_mirage.S) : S with module DNS = DNS
-
 (** Provides a DNS-enabled {!Resolver_lwt} given a network stack.
     See {!Make}.
 *)
-module Make_with_stack (T: Mirage_time_lwt.S) (S: Mirage_stack_lwt.V4) : sig
+module Make_with_stack (R: Mirage_random.C) (T: Mirage_time_lwt.S) (S: Mirage_stack_lwt.V4) : sig
   include Resolver_lwt.S with type t = Resolver_lwt.t
-  module R : S with type DNS.stack = S.t
+
+  module R : sig
+    val register : ?ns:Ipaddr.V4.t -> ?ns_port:int -> ?stack:S.t -> Resolver_lwt.t -> unit
+
+    (** [init ?ns ?ns_port ?stack ()] TODO *)
+    val init:
+      ?ns:Ipaddr.V4.t -> ?ns_port:int -> ?stack:S.t -> unit -> t
+  end
 end

@@ -1,3 +1,37 @@
+===== 4.3.0 (2019-08-20) =====
+
+====== Planned to break in 5.0.0 ======
+
+  For general discussion of breakage in Lwt 5.0.0, see #584. See #293 about how
+  Lwt announces and does breaking changes.*
+
+  * The signature of Lwt.async will change from (unit -> 'a Lwt.t) -> unit to
+    (unit -> unit Lwt.t) -> unit (#603, prompted @cfcs).
+  * Lwt_unix.send_msg and Lwt_unix.recv_msg will be changed to take
+    Lwt_unix.IO_vectors.t instead of Lwt_unix.io_vectors (#702, prompted
+    Marcello Seri).
+  * Nesting calls to Lwt_main.run will be forbidden, and will raise an
+    Failure. Most programs don't do this (#609, prompted François-René Rideau).
+  * configure.ml will be removed in favor of an improved discover.ml This
+    affects only users who are configuring Lwt as part of a manual installation
+    (i.e., not users of opam or esy). See discover.ml for usage (#700).
+  * Lwt_unix.async_method will have no effect. In practice, it already does
+    nothing, and has almost no users (#572).
+
+====== Additions ======
+
+  * Lwt_process: allow setting working directory for new processes (#694, Thomas
+    Leonard).
+  * PPX: use OCaml 4.08 ASTs to support latest features (#697).
+  * Lwt_io.NumberIO: use compiler intrinsics for better performance (#178,
+    requested Mauricio Fernandez).
+
+====== Bugs fixed ======
+
+  * Race condition in Lwt_react.S.limit (4e592eb).
+  * Use fallback rule during configuration (#693, Hongchang Wu).
+  * Fix typos (#688, #692, @Fourchaux).
+
 ===== 4.2.1 (2019-04-02) =====
 
 ====== Bug fixed ======
@@ -416,7 +450,7 @@ See #453 for details and instructions about planned breakage in Lwt 4.0.0.
   * Improve wildcard detection in the ppx (#198)
   * Fix Lwt_stream: bounded_push#close wake the reader (#201)
   * Fix infinite loop with Lwt_stream.choose (#214)
-  * Fix lazyness failure with Lwt_io.common#close (#207)
+  * Fix laziness failure with Lwt_io.common#close (#207)
 
 ===== 2.5.1 (2015-12-07) =====
 
@@ -632,7 +666,7 @@ See #453 for details and instructions about planned breakage in Lwt 4.0.0.
   * {{{Lwt_unix}}} now use libev instead of select
   * Add thread local storage support to {{{Lwt}}}
   * Add backtrace support to {{{Lwt}}}. Now {{{Lwt}}} exceptions can
-    be recored by using the syntax extension with the {{{-lwt-debug}}}
+    be recorded by using the syntax extension with the {{{-lwt-debug}}}
     command line switch.
   * Allow blocking system calls to be executed in parallels
   * Change the type of many functions of {{{Lwt_unix}}}, which now
@@ -682,7 +716,7 @@ See #453 for details and instructions about planned breakage in Lwt 4.0.0.
   * Allow to use {{{select}}} on arbitrary high file descriptors
   * More commands and features in {{{Lwt_read_line}}}:
     ** Handle "undo" command
-    ** New controlable read-lines instances
+    ** New controllable read-lines instances
     ** More edition commands
     ** Completion as you type
     ** Backward search

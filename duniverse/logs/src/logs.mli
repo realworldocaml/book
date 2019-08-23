@@ -346,6 +346,12 @@ val reporter : unit -> reporter
 val set_reporter : reporter -> unit
 (** [set_reporter r] sets the current reporter to [r]. *)
 
+val set_reporter_mutex : lock:(unit -> unit) -> unlock:(unit -> unit) -> unit
+(** [set_reporter_mutex ~lock ~unlock] sets the mutex primitives used
+    to access the reporter. [lock] is called before invoking the
+    reporter and [unlock] after it returns. Initially both [lock] and
+    [unlock] are [fun () -> ()]. *)
+
 (**/**)
 val report : src -> level -> over:(unit -> unit) -> (unit -> 'b) ->
   ('a, 'b) msgf -> 'b
@@ -427,6 +433,12 @@ let main () =
     install code before these initialization bits are being executed
     otherwise you will miss these messages.
 
+    In multi-threaded programs you likely want to ensure mutual
+    exclusion on reporter access. This can be done by invoking
+    {!Logs.set_reporter_mutex} with suitable mutual exclusion
+    primitives. If you use OCaml {!Thread}s simply calling
+    {!Logs_threaded.enable} with handle that for you.
+
     If you need to use multiple reporters in your program see this
     {{!ex2}sample code}.
 
@@ -437,7 +449,7 @@ let main () =
     If you are writing a library you should neither install reporters, nor
     set the reporting level of sources, nor log on the {!default} source or
     at the [App] level; follow the {{!usage}the usage conventions}. A
-    library should simply log on an another existing source or define
+    library should simply log on another existing source or define
     its own source like in the example below:
 {[
 let src = Logs.Src.create "mylib.network" ~doc:"logs mylib's network events"

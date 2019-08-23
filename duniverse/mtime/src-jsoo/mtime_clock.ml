@@ -1,8 +1,10 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2017 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
+
+open Js_of_ocaml
 
 let us_to_ns = 1000L (* microsecond to nanosecond uint64 multiplier *)
 
@@ -14,11 +16,21 @@ let performance_now_ms_unavailable () =
 let performance_now_ms =
   let has_perf = Js.Unsafe.get Dom_html.window "performance" in
   match Js.Optdef.to_option has_perf with
-  | None -> performance_now_ms_unavailable
+  | None ->
+      let typeof_require = Js.typeof (Js.Unsafe.pure_js_expr "require") in
+      if Js.to_string typeof_require = "function" then
+        let require = Js.Unsafe.pure_js_expr "require" in
+        let args = [| Js.Unsafe.inject (Js.string "perf_hooks") |] in
+        let perf_hooks = Js.Unsafe.fun_call require args in
+        let performance = Js.Unsafe.get perf_hooks "performance" in
+        fun () -> Js.Unsafe.meth_call performance "now" [||]
+      else
+        performance_now_ms_unavailable
   | Some p ->
-      match Js.Unsafe.get p "now" with
-      | None -> performance_now_ms_unavailable
-      | Some n -> fun () -> Js.Unsafe.meth_call p "now" [||]
+      if Js.Optdef.test (Js.Unsafe.get p "now") then
+        fun () -> Js.Unsafe.meth_call p "now" [||]
+      else
+        performance_now_ms_unavailable
 
 (* Conversion of DOMHighResTimeStamp to uint64 nanosecond timestamps.
 
@@ -71,7 +83,7 @@ let count c =
   Mtime.Span.of_uint64_ns (Int64.(mul (of_float  @@ now_us () -. c)) us_to_ns)
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Daniel C. Bünzli
+   Copyright (c) 2017 The mtime programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

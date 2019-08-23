@@ -18,3 +18,5 @@ true : bin_annot, safe_string
 
 # use_mtime is missing, see above
 <test-jsoo/*> : use_mtime_clock_jsoo
+
+<_b0> : -traverse

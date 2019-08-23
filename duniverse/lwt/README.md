@@ -1,6 +1,6 @@
-# Lwt &nbsp;&nbsp; [![version 4.2.1][version]][releases] [![Gitter chat][gitter-img]][gitter] [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor]
+# Lwt &nbsp;&nbsp; [![version 4.3.0][version]][releases] [![Gitter chat][gitter-img]][gitter] [![Travis status][travis-img]][travis] [![AppVeyor status][appveyor-img]][appveyor]
 
-[version]:      https://img.shields.io/badge/version-4.2.1-blue.svg
+[version]:      https://img.shields.io/badge/version-4.3.0-blue.svg
 [releases]:     https://github.com/ocsigen/lwt/releases
 [gitter-img]:   https://img.shields.io/badge/chat-on_gitter-lightgrey.svg
 [travis]:       https://travis-ci.org/ocsigen/lwt/branches

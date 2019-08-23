@@ -3,18 +3,8 @@ version: "{build}"
 shallow_clone: true
 
 environment:
-  matrix:
-    - {SYSTEM: mingw, ARCH: x86_64, COMPILER: 4.03}
-    # Temporarily disabled. AppVeyor stopped hosting build artifacts
-    # indefinitely. We would have to upload the Cygwin packages to S3 or
-    # elsewhere. The most important build is MinGW anyway, because that is our
-    # only CI build testing Win32. See
-    #   https://ci.appveyor.com/project/aantron/lwt/branch/master/job/voa9bfgcllcbyjbn
-    # - {SYSTEM: cygwin, ARCH: x86, COMPILER: 4.04}
-    # Temporary workaround; see commit message.
-    # - {SYSTEM: cygwin, ARCH: x86, COMPILER: 4.04, LIBEV: yes}
-
   global:
+    ARCH: x86_64
     LWT_FORCE_LIBEV_BY_DEFAULT: yes
     # Uncomment to debug build with RDP. Alternatively, create the file
     # appveyor-debug in the repository root. The latter option avoids
@@ -28,13 +18,14 @@ install:
   - 'IF "%ARCH%"=="x86" (SET CYGSETUP=C:\Cygwin\setup-x86) ELSE (SET CYGSETUP=C:\Cygwin64\setup-x86_64)'
 
   - 'IF "%LWT_APPVEYOR_DEBUG%"=="yes" (%CYGSETUP% -q -P nano)'
-  # Workaround for aantron/binaries#1.
-  - '%CYGSETUP% -q -P patch'
+  - '%CYGSETUP% -q -P rsync -P patch -P diffutils -P make -P unzip -P m4'
 
   - 'IF "%LIBEV%"=="yes" (%CYGSETUP% -q -P libev-devel)'
 
-  - ps: '(new-object net.webclient).DownloadString("https://aantron.github.io/binaries/$env:SYSTEM/$env:ARCH/ocaml/$env:COMPILER/install.ps1") | PowerShell -Command -'
-  - ps: '(new-object net.webclient).DownloadString("https://aantron.github.io/binaries/$env:SYSTEM/$env:ARCH/opam/1.2/install.ps1") | PowerShell -Command -'
+  - '%CYGSH% "wget https://github.com/fdopen/opam-repository-mingw/releases/download/0.0.0.2/opam64.tar.xz"'
+  - '%CYGSH% "tar -xf opam64.tar.xz"'
+  - '%CYGSH% "bash opam64/install.sh"'
+  - '%CYGSH% "opam init default https://github.com/fdopen/opam-repository-mingw.git#opam2 -c ocaml-variants.4.07.1+mingw64c --disable-sandboxing --yes --auto-setup"'
 
   - '%CYGSH% "cd /cygdrive/c/projects/lwt ; src/util/appveyor-install.sh"'
 

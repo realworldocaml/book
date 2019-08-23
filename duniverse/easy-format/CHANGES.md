@@ -1,4 +1,12 @@
-2012-02-03: Release 1.0.1
+1.3.2 (2019-08-02)
+------------------
+
+- Port from jbuilder to dune. (#24)
+
+- Port to opam 2.0 and make dune a non build dependency (#25)
+
+1.0.1 (2012-02-03)
+------------------
 
 - Nothing new other than the way of building the tar.gz package.
 
@@ -21,5 +29,7 @@ New features:
   (HTML, terminal, ...) without interfering with the computation of
   line breaks and spacing.
 
+0.9.0 (2008-07-09)
+------------------
 
-2008-07-09: First release 0.9.0
+- Initial release

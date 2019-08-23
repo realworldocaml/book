@@ -31,7 +31,7 @@ let make_net_req uri meth' body () =
   show_headers (Cohttp.Response.headers res);
   body
   |> Body.to_pipe
-  |> Pipe.iter ~f:(fun b -> Caml.Pervasives.print_string b; return ())
+  |> Pipe.iter ~f:(fun b -> Stdlib.print_string b; return ())
 
 let _ =
   (* enable logging to stdout *)
