@@ -4,13 +4,13 @@ ENV OPAMYES=1
 WORKDIR /home/opam/src
 
 # update opam
-RUN opam switch 4.07
+RUN opam switch 4.08
 RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 
 # install non-OCaml dependencies
 COPY Makefile /home/opam/src/.
 RUN make depext
-RUN opam install dune=1.11.1
+RUN opam install dune=1.11.3
 
 #install pandoc
 WORKDIR /tmp

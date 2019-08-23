@@ -41,7 +41,7 @@ compiler warning.
   [@@@warning "-10"]
   let b = Sys.argv; ()
   end
-Characters 54-62:
+Line 4, characters 11-19:
 Warning 10: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
 ```
@@ -76,8 +76,8 @@ deprecated, the compiler will issue a warning.
 
 ```ocaml env=main
 # let is_pluto_a_planet = Planets.pluto
-Characters 24-37:
-Warning 3: deprecated: module Planets
+Line 1, characters 25-38:
+Alert deprecated: module Planets
 Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
 val is_pluto_a_planet : bool = true
 # let is_pluto_a_planet = Planets2016.pluto
@@ -98,7 +98,7 @@ type program_result = Error of string | Exit_code of int
   | Error "It blew up" -> 1
   | Exit_code code -> code
   | Error _ -> 100
-Characters 35-47:
+Line 2, characters 11-23:
 Warning 52: Code should not depend on the actual values of
 this constructor's arguments. They are only for information
 and may change in future versions. (See manual section 9.5)
