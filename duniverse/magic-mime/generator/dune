@@ -1,0 +1,3 @@
+(executables
+ (names generate_mime_types)
+ (libraries str))

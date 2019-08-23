@@ -96,7 +96,7 @@ and 'mode _channel = {
   abort_wakener : int Lwt.u;
 
   mutable auto_flushing : bool;
-  (* Wether the auto-flusher is currently running or not *)
+  (* Whether the auto-flusher is currently running or not *)
 
   main : 'mode channel;
   (* The main wrapper *)
@@ -493,7 +493,7 @@ let flush_all () =
     wrappers
 
 let () =
-  (* Flush all opened ouput channels on exit: *)
+  (* Flush all opened output channels on exit: *)
   Lwt_main.at_exit flush_all
 
 let no_seek _pos _cmd =
@@ -658,66 +658,6 @@ let resize_buffer : type m. m channel -> int -> unit Lwt.t = fun wrapper len ->
         Lwt.return_unit
     in
     primitive f wrapper
-
-(* +-----------------------------------------------------------------+
-   | Byte-order                                                      |
-   +-----------------------------------------------------------------+ *)
-
-module ByteOrder =
-struct
-  module type S = sig
-    val pos16_0 : int
-    val pos16_1 : int
-    val pos32_0 : int
-    val pos32_1 : int
-    val pos32_2 : int
-    val pos32_3 : int
-    val pos64_0 : int
-    val pos64_1 : int
-    val pos64_2 : int
-    val pos64_3 : int
-    val pos64_4 : int
-    val pos64_5 : int
-    val pos64_6 : int
-    val pos64_7 : int
-  end
-
-  module LE =
-  struct
-    let pos16_0 = 0
-    let pos16_1 = 1
-    let pos32_0 = 0
-    let pos32_1 = 1
-    let pos32_2 = 2
-    let pos32_3 = 3
-    let pos64_0 = 0
-    let pos64_1 = 1
-    let pos64_2 = 2
-    let pos64_3 = 3
-    let pos64_4 = 4
-    let pos64_5 = 5
-    let pos64_6 = 6
-    let pos64_7 = 7
-  end
-
-  module BE =
-  struct
-    let pos16_0 = 1
-    let pos16_1 = 0
-    let pos32_0 = 3
-    let pos32_1 = 2
-    let pos32_2 = 1
-    let pos32_3 = 0
-    let pos64_0 = 7
-    let pos64_1 = 6
-    let pos64_2 = 5
-    let pos64_3 = 4
-    let pos64_4 = 3
-    let pos64_5 = 2
-    let pos64_6 = 1
-    let pos64_7 = 0
-  end
-end
 
 module Primitives =
 struct
@@ -1045,79 +985,31 @@ struct
       Lwt.return x
     end
 
-  module MakeNumberIO(ByteOrder : ByteOrder.S) =
+  module MakeNumberIO (Endian : EndianBigstring.EndianBigstringSig) =
   struct
-    open ByteOrder
-
     (* +-------------------------------------------------------------+
        | Reading numbers                                             |
        +-------------------------------------------------------------+ *)
 
-    let get buffer ptr = Char.code (Lwt_bytes.unsafe_get buffer ptr)
-
     let read_int ic =
       read_block_unsafe ic 4
         (fun buffer ptr ->
-           let v0 = get buffer (ptr + pos32_0)
-           and v1 = get buffer (ptr + pos32_1)
-           and v2 = get buffer (ptr + pos32_2)
-           and v3 = get buffer (ptr + pos32_3) in
-           let n3 = if v3 >= 128 then v3 - 256 else v3 in
-           let v = v0 + (v1 lsl 8) + (v2 lsl 16) + (n3 lsl 24) in
-           Lwt.return v)
+          Lwt.return (Int32.to_int (Endian.get_int32 buffer ptr)))
 
     let read_int16 ic =
       read_block_unsafe ic 2
         (fun buffer ptr ->
-           let v0 = get buffer (ptr + pos16_0)
-           and v1 = get buffer (ptr + pos16_1) in
-           let v = v0 lor (v1 lsl 8) in
-           if v1 land 0x80 = 0 then
-             Lwt.return v
-           else
-             Lwt.return (v - (1 lsl 16)))
+          Lwt.return (Endian.get_int16 buffer ptr))
 
     let read_int32 ic =
       read_block_unsafe ic 4
         (fun buffer ptr ->
-           let v0 = get buffer (ptr + pos32_0)
-           and v1 = get buffer (ptr + pos32_1)
-           and v2 = get buffer (ptr + pos32_2)
-           and v3 = get buffer (ptr + pos32_3) in
-           Lwt.return (Int32.logor
-                         (Int32.logor
-                            (Int32.of_int v0)
-                            (Int32.shift_left (Int32.of_int v1) 8))
-                         (Int32.logor
-                            (Int32.shift_left (Int32.of_int v2) 16)
-                            (Int32.shift_left (Int32.of_int v3) 24))))
+          Lwt.return (Endian.get_int32 buffer ptr))
 
     let read_int64 ic =
       read_block_unsafe ic 8
         (fun buffer ptr ->
-           let v0 = get buffer (ptr + pos64_0)
-           and v1 = get buffer (ptr + pos64_1)
-           and v2 = get buffer (ptr + pos64_2)
-           and v3 = get buffer (ptr + pos64_3)
-           and v4 = get buffer (ptr + pos64_4)
-           and v5 = get buffer (ptr + pos64_5)
-           and v6 = get buffer (ptr + pos64_6)
-           and v7 = get buffer (ptr + pos64_7) in
-           Lwt.return (Int64.logor
-                         (Int64.logor
-                            (Int64.logor
-                               (Int64.of_int v0)
-                               (Int64.shift_left (Int64.of_int v1) 8))
-                            (Int64.logor
-                               (Int64.shift_left (Int64.of_int v2) 16)
-                               (Int64.shift_left (Int64.of_int v3) 24)))
-                         (Int64.logor
-                            (Int64.logor
-                               (Int64.shift_left (Int64.of_int v4) 32)
-                               (Int64.shift_left (Int64.of_int v5) 40))
-                            (Int64.logor
-                               (Int64.shift_left (Int64.of_int v6) 48)
-                               (Int64.shift_left (Int64.of_int v7) 56)))))
+          Lwt.return (Endian.get_int64 buffer ptr))
 
     let read_float32 ic =
       read_int32 ic >>= fun x -> Lwt.return (Int32.float_of_bits x)
@@ -1128,45 +1020,29 @@ struct
        | Writing numbers                                             |
        +-------------------------------------------------------------+ *)
 
-    let set buffer ptr x = Lwt_bytes.unsafe_set buffer ptr (Char.unsafe_chr x)
-
     let write_int oc v =
       write_block_unsafe oc 4
         (fun buffer ptr ->
-           set buffer (ptr + pos32_0) v;
-           set buffer (ptr + pos32_1) (v lsr 8);
-           set buffer (ptr + pos32_2) (v lsr 16);
-           set buffer (ptr + pos32_3) (v asr 24);
-           Lwt.return_unit)
+          Endian.set_int32 buffer ptr (Int32.of_int v);
+          Lwt.return_unit)
 
     let write_int16 oc v =
       write_block_unsafe oc 2
         (fun buffer ptr ->
-           set buffer (ptr + pos16_0) v;
-           set buffer (ptr + pos16_1) (v lsr 8);
-           Lwt.return_unit)
+          Endian.set_int16 buffer ptr v;
+          Lwt.return_unit)
 
     let write_int32 oc v =
       write_block_unsafe oc 4
         (fun buffer ptr ->
-           set buffer (ptr + pos32_0) (Int32.to_int v);
-           set buffer (ptr + pos32_1) (Int32.to_int (Int32.shift_right v 8));
-           set buffer (ptr + pos32_2) (Int32.to_int (Int32.shift_right v 16));
-           set buffer (ptr + pos32_3) (Int32.to_int (Int32.shift_right v 24));
-           Lwt.return_unit)
+          Endian.set_int32 buffer ptr v;
+          Lwt.return_unit)
 
     let write_int64 oc v =
       write_block_unsafe oc 8
         (fun buffer ptr ->
-           set buffer (ptr + pos64_0) (Int64.to_int v);
-           set buffer (ptr + pos64_1) (Int64.to_int (Int64.shift_right v 8));
-           set buffer (ptr + pos64_2) (Int64.to_int (Int64.shift_right v 16));
-           set buffer (ptr + pos64_3) (Int64.to_int (Int64.shift_right v 24));
-           set buffer (ptr + pos64_4) (Int64.to_int (Int64.shift_right v 32));
-           set buffer (ptr + pos64_5) (Int64.to_int (Int64.shift_right v 40));
-           set buffer (ptr + pos64_6) (Int64.to_int (Int64.shift_right v 48));
-           set buffer (ptr + pos64_7) (Int64.to_int (Int64.shift_right v 56));
-           Lwt.return_unit)
+          Endian.set_int64 buffer ptr v;
+          Lwt.return_unit)
 
     let write_float32 oc v = write_int32 oc (Int32.bits_of_float v)
     let write_float64 oc v = write_int64 oc (Int64.bits_of_float v)
@@ -1332,9 +1208,9 @@ module type NumberIO = sig
   val write_float64 : output_channel -> float -> unit Lwt.t
 end
 
-module MakeNumberIO(ByteOrder : ByteOrder.S) =
+module MakeNumberIO (Endian : EndianBigstring.EndianBigstringSig) =
 struct
-  module Primitives = Primitives.MakeNumberIO(ByteOrder)
+  module Primitives = Primitives.MakeNumberIO (Endian)
 
   let read_int ic = primitive Primitives.read_int ic
   let read_int16 ic = primitive Primitives.read_int16 ic
@@ -1353,8 +1229,8 @@ struct
     primitive (fun oc -> Primitives.write_float64 oc x) oc
 end
 
-module LE = MakeNumberIO(ByteOrder.LE)
-module BE = MakeNumberIO(ByteOrder.BE)
+module LE = MakeNumberIO (EndianBigstring.LittleEndian_unsafe)
+module BE = MakeNumberIO (EndianBigstring.BigEndian_unsafe)
 
 type byte_order = Lwt_sys.byte_order = Little_endian | Big_endian
 let system_byte_order = Lwt_sys.byte_order

@@ -151,7 +151,7 @@ static value result_getcwd(struct job_getcwd *job)
     /* This macro is defined in `lwt_unix.h`. The arguments are used as follows:
 
        - The first argument is the name of the job variable.
-       - If the check in the second argument *succeds*, the C call, and job,
+       - If the check in the second argument *succeeds*, the C call, and job,
          failed (confusing!). Note that this check must *not* be based solely on
          `job->error_code`; see comment in `worker_getcwd` above.
        - The last argument is the name of the C call, used in a

@@ -15,34 +15,24 @@ test: build
 # Install dependencies needed during development.
 .PHONY : dev-deps
 dev-deps :
-	opam install --yes --unset-root \
-	  bisect_ppx \
-	  cppo \
-	  dune \
-	  mmap \
-	  ocaml-migrate-parsetree \
-	  ocamlfind \
-	  ppx_tools_versioned \
-	  react \
-	  result \
-	  seq \
+	opam install . --deps-only --yes
 
 # Use Dune+odoc to generate static html documentation.
-# Currenty requires ocaml 4.03.0 to install odoc.
+# Currently requires ocaml 4.03.0 to install odoc.
 .PHONY: doc
 doc:
 	dune build @doc
 
 # Build HTML documentation with ocamldoc
 .PHONY: doc-api-html
-doc-api-html: build-all
+doc-api-html: build
 	$(MAKE) -C docs api/html/index.html
 
 # Build wiki documentation with wikidoc
 # requires ocaml 4.03.0 and pinning the repo
 # https://github.com/ocsigen/wikidoc
 .PHONY: doc-api-wiki
-doc-api-wiki: build-all
+doc-api-wiki: build
 	$(MAKE) -C docs api/wiki/index.wiki
 
 # Packaging tests. These are run with Lwt installed by OPAM, typically during
@@ -100,7 +90,7 @@ coverage: clean
 	BISECT_ENABLE=yes $(MAKE) build
 	BISECT_ENABLE=yes dune runtest -j 1 --no-buffer
 	bisect-ppx-report \
-	    -I _build/default/ -html _coverage/ \
-	    -text - -summary-only \
+	    -I _build/default/ --html _coverage/ \
+	    --text - --summary-only \
 	    $(BISECT_FILES_PATTERN)
 	@echo See _coverage/index.html

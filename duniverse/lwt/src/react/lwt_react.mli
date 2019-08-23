@@ -29,7 +29,22 @@ module E : sig
         collected. *)
 
   val next : 'a event -> 'a Lwt.t
-    (** [next e] returns the next occurrence of [e] *)
+  (** [next e] returns the next occurrence of [e].
+
+      Avoid trying to create an "asynchronous loop" by calling [next e] again in
+      a callback attached to the promise returned by [next e]:
+
+      - The callback is called within the React update step, so calling [next e]
+        within it will return a promise that is fulfilled with the same value as
+        the current occurrence.
+      - If you instead arrange for the React update step to end (for example, by
+        calling [Lwt.pause ()] within the callback), multiple React update steps
+        may occur before the callback calls [next e] again, so some occurrences
+        can be effectively "lost."
+
+      To robustly asynchronously process occurrences of [e] in a loop, use
+      [to_stream e], and repeatedly call {!Lwt_stream.next} on the resulting
+      stream. *)
 
   val limit : (unit -> unit Lwt.t) -> 'a event -> 'a event
     (** [limit f e] limits the rate of [e] with [f].

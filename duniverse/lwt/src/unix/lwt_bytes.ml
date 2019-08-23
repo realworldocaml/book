@@ -157,32 +157,20 @@ let io_vector ~buffer ~offset ~length = ({
   iov_length = length;
 } : io_vector)
 
-let check_io_vectors func_name iovs =
-  List.iter
-    (fun (iov : io_vector) ->
-       if iov.iov_offset < 0
-       || iov.iov_length < 0
-       || iov.iov_offset > length iov.iov_buffer - iov.iov_length then
-         Printf.ksprintf invalid_arg "Lwt_bytes.%s" func_name)
-    iovs
-
-external stub_recv_msg : Unix.file_descr -> int -> io_vector list -> int * Unix.file_descr list = "lwt_unix_bytes_recv_msg"
+let convert_io_vectors old_io_vectors =
+  let io_vectors = IO_vectors.create () in
+  old_io_vectors
+  |> List.iter (fun ({iov_buffer; iov_offset; iov_length} : io_vector) ->
+    IO_vectors.append_bigarray io_vectors iov_buffer iov_offset iov_length);
+  io_vectors
 
 let recv_msg ~socket ~io_vectors =
-  check_io_vectors "recv_msg" io_vectors;
-  let n_iovs = List.length io_vectors in
-  wrap_syscall Read socket
-    (fun () ->
-       stub_recv_msg (unix_file_descr socket) n_iovs io_vectors)
-
-external stub_send_msg : Unix.file_descr -> int -> io_vector list -> int -> Unix.file_descr list -> int = "lwt_unix_bytes_send_msg"
+  Lwt_unix.Versioned.recv_msg_2
+    ~socket ~io_vectors:(convert_io_vectors io_vectors)
 
 let send_msg ~socket ~io_vectors ~fds =
-  check_io_vectors "send_msg" io_vectors;
-  let n_iovs = List.length io_vectors and n_fds = List.length fds in
-  wrap_syscall Write socket
-    (fun () ->
-       stub_send_msg (unix_file_descr socket) n_iovs io_vectors n_fds fds)
+  Lwt_unix.Versioned.send_msg_2
+    ~socket ~io_vectors:(convert_io_vectors io_vectors) ~fds
 
 external stub_recvfrom : Unix.file_descr -> t -> int -> int -> Unix.msg_flag list -> int * Unix.sockaddr = "lwt_unix_bytes_recvfrom"
 

@@ -19,11 +19,11 @@ Please see <https://mirage.io> for a self-hosted explanation
 and instructions on how to use this library."""
 depends: [
   "ocaml" {>= "4.05.0"}
-  "dune" {build & >= "1.1.0"}
+  "dune" {>= "1.1.0"}
   "mirage-flow-lwt" {>= "1.2.0"}
   "mirage-channel-lwt" {>= "3.0.0"}
   "conduit" {>= "0.99"}
-  "mirage-conduit" {>= "3.0.0"}
+  "conduit-mirage"
   "mirage-kv-lwt" {>= "2.0.0"}
   "lwt" {>= "2.4.3"}
   "cohttp"

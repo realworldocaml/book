@@ -1,5 +1,4 @@
 (library
- (name lwt)
  (public_name lwt)
  (synopsis "Monadic promises and concurrent I/O")
  (wrapped false)

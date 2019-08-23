@@ -28,14 +28,22 @@ let chans_of_fd sock =
   ((Lwt_ssl.get_fd sock), ic, oc)
 
 module Client = struct
-  (* SSL TCP connection *)
-  let default_ctx = Ssl.create_context Ssl.SSLv23 Ssl.Client_context
-  let () =
-    Ssl.disable_protocols default_ctx [Ssl.SSLv23];
+  let create_ctx ?certfile ?keyfile ?password () =
+    let ctx = Ssl.create_context Ssl.SSLv23 Ssl.Client_context in
+    Ssl.disable_protocols ctx [Ssl.SSLv23];
     (* Use default CA certificates *)
-    ignore (Ssl.set_default_verify_paths default_ctx);
+    ignore (Ssl.set_default_verify_paths ctx);
     (* Enable peer verification *)
-    Ssl.set_verify default_ctx [Ssl.Verify_peer] None
+    Ssl.set_verify ctx [Ssl.Verify_peer] None;
+    (match certfile, keyfile with
+     | Some certfile, Some keyfile -> Ssl.use_certificate ctx certfile keyfile
+     | None, _ | _, None -> ());
+    (match password with
+     | Some password -> Ssl.set_password_callback ctx password
+     | None -> ());
+    ctx
+
+  let default_ctx = create_ctx ()
 
   let connect ?(ctx=default_ctx) ?src ?hostname sa =
     Conduit_lwt_server.with_socket sa (fun fd ->
@@ -77,11 +85,11 @@ module Server = struct
       ?timeout sa cb =
     sa
     |> listen ~ctx ?backlog ?password ~certfile ~keyfile
-    >>= Conduit_lwt_server.init ?stop (fun (fd, _) ->
+    >>= Conduit_lwt_server.init ?stop (fun (fd, addr) ->
         Lwt.try_bind (fun () -> Lwt_ssl.ssl_accept fd ctx)
           (fun sock -> Lwt.return (chans_of_fd sock))
           (fun exn -> Lwt_unix.close fd >>= fun () -> Lwt.fail exn)
-        >>= Conduit_lwt_server.process_accept ?timeout cb)
+        >>= Conduit_lwt_server.process_accept ?timeout (cb addr))
 
 end
 

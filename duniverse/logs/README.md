@@ -44,7 +44,7 @@ The documentation can be consulted [online][doc] or via `odig doc logs`.
 
 ## Sample programs
 
-If you installed Logs with `opam` sample programs are located in the directory
+If you installed Logs with `opam` sample programs are located in
 the directory `opam config var logs:doc`.
 
 

@@ -942,7 +942,7 @@ static struct stack_frame *become_worker = NULL;
    without being scheduled. */
 #define CALL_SUCCEEDED 1
 
-/* Value returned to the old main thread whan a blocking call
+/* Value returned to the old main thread when a blocking call
    terminates but has been scheduled. */
 #define CALL_SCHEDULED 2
 

@@ -1464,28 +1464,42 @@ let io_vector ~buffer ~offset ~length = {
   iov_length = length;
 }
 
-let check_io_vectors func_name iovs =
-  List.iter (fun iov ->
-    if iov.iov_offset < 0
-    || iov.iov_length < 0
-    || iov.iov_offset > String.length iov.iov_buffer - iov.iov_length then
-      invalid_arg func_name) iovs
+let convert_io_vectors old_io_vectors =
+  let io_vectors = IO_vectors.create () in
+  old_io_vectors |> List.iter (fun {iov_buffer; iov_offset; iov_length} ->
+    IO_vectors.append_bytes
+      io_vectors (Bytes.unsafe_of_string iov_buffer) iov_offset iov_length);
+  io_vectors
 
-external stub_recv_msg : Unix.file_descr -> int -> io_vector list -> int * Unix.file_descr list = "lwt_unix_recv_msg"
+external stub_recv_msg :
+  Unix.file_descr -> int -> IO_vectors.io_vector list ->
+    int * Unix.file_descr list =
+  "lwt_unix_recv_msg"
+
+let recv_msg_new ~socket ~io_vectors =
+  let count = check_io_vectors "Lwt_unix.recv_msg" io_vectors in
+  wrap_syscall Read socket (fun () ->
+    stub_recv_msg socket.fd count io_vectors.IO_vectors.prefix)
 
 let recv_msg ~socket ~io_vectors =
-  check_io_vectors "Lwt_unix.recv_msg" io_vectors;
-  let n_iovs = List.length io_vectors in
-  wrap_syscall Read socket (fun () -> stub_recv_msg socket.fd n_iovs io_vectors)
+  recv_msg_new ~socket ~io_vectors:(convert_io_vectors io_vectors)
 
-external stub_send_msg : Unix.file_descr -> int -> io_vector list -> int -> Unix.file_descr list -> int = "lwt_unix_send_msg"
+external stub_send_msg :
+  Unix.file_descr ->
+  int -> IO_vectors.io_vector list ->
+  int -> Unix.file_descr list ->
+    int =
+  "lwt_unix_send_msg"
+
+let send_msg_new ~socket ~io_vectors ~fds =
+  let vector_count = check_io_vectors "Lwt_unix.send_msg" io_vectors in
+  let fd_count = List.length fds in
+  wrap_syscall Write socket (fun () ->
+    stub_send_msg
+      socket.fd vector_count io_vectors.IO_vectors.prefix fd_count fds)
 
 let send_msg ~socket ~io_vectors ~fds =
-  check_io_vectors "Lwt_unix.send_msg" io_vectors;
-  let n_iovs = List.length io_vectors and n_fds = List.length fds in
-  wrap_syscall Write socket
-    (fun () ->
-       stub_send_msg socket.fd n_iovs io_vectors n_fds fds)
+  send_msg_new ~socket ~io_vectors:(convert_io_vectors io_vectors) ~fds
 
 type inet_addr = Unix.inet_addr
 
@@ -1558,7 +1572,7 @@ let accept_n ch n =
 
 let connect ch addr =
   if Sys.win32 then
-    (* [in_progress] tell wether connection has started but not
+    (* [in_progress] tell whether connection has started but not
        terminated: *)
     let in_progress = ref false in
     wrap_syscall Write ch begin fun () ->
@@ -1583,13 +1597,13 @@ let connect ch addr =
           raise Retry
     end
   else
-    (* [in_progress] tell wether connection has started but not
+    (* [in_progress] tell whether connection has started but not
        terminated: *)
     let in_progress = ref false in
     wrap_syscall Write ch begin fun () ->
       if !in_progress then
         (* If the connection is in progress, [getsockopt_error] tells
-           wether it succceed: *)
+           whether it succceed: *)
         match Unix.getsockopt_error ch.fd with
         | None ->
           (* The socket is connected *)
@@ -2374,4 +2388,8 @@ struct
     Unix.bind ch.fd addr
 
   let bind_2 = bind
+
+  let recv_msg_2 = recv_msg_new
+
+  let send_msg_2 = send_msg_new
 end

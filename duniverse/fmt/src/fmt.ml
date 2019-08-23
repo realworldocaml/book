@@ -449,12 +449,11 @@ let prefix0x = [
   0xffff    , fmt "%04x";
   0xfffff   , fmt "%05x";
   0xffffff  , fmt "%06x";
-  0xfffffff , fmt "%07x";
-  0xffffffff, fmt "%08x"; ]
+  0xfffffff , fmt "%07x"; ]
 
 let padded0x ~max = match List.find_opt (fun (x, _) -> max <= x) prefix0x with
 | Some (_, pp) -> pp
-| None -> fmt "%x"
+| None -> fmt "%08x"
 
 let ascii ?(w = 0) ?(subst = const char '.') () ppf (n, _ as v) =
   let pp_char ppf (_, c) =

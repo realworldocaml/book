@@ -17,7 +17,6 @@ and its libraries are distributed under the ISC license.
 [jsoo]: http://ocsigen.org/js_of_ocaml/
 
 Home page: http://erratique.ch/software/mtime  
-Contact: Daniel Bünzli `<daniel.buenzl i@erratique.ch>`
 
 ## Installation
 

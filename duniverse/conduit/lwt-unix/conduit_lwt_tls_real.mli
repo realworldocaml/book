@@ -21,6 +21,7 @@ module Client : sig
 
   val connect :
     ?src:Lwt_unix.sockaddr ->
+    ?certificates:Tls.Config.own_cert ->
     string ->
     Lwt_unix.sockaddr ->
     (Lwt_unix.file_descr * Lwt_io.input_channel * Lwt_io.output_channel) Lwt.t
@@ -35,7 +36,8 @@ module Server : sig
     -> ?stop:(unit Lwt.t)
     -> ?timeout:int
     -> Lwt_unix.sockaddr
-    -> (Lwt_unix.file_descr
+    -> ( Lwt_unix.sockaddr
+        -> Lwt_unix.file_descr
         -> Lwt_io.input_channel
         -> Lwt_io.output_channel
         -> unit Lwt.t)
@@ -47,7 +49,8 @@ module Server : sig
     -> ?timeout:int
     -> Tls.Config.server
     -> Lwt_unix.sockaddr
-    -> (Lwt_unix.file_descr
+    -> (Lwt_unix.sockaddr
+        -> Lwt_unix.file_descr
         -> Lwt_io.input_channel
         -> Lwt_io.output_channel
         -> unit Lwt.t)

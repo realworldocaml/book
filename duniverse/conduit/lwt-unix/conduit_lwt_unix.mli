@@ -80,7 +80,7 @@ type tcp_config = [
   | `Socket of Lwt_unix.file_descr sexp_opaque
 ] [@@deriving sexp]
 
-(** Set of supported listening mechanisms that are supported by this module. 
+(** Set of supported listening mechanisms that are supported by this module.
    - [`TLS server_tls_config]: Use OCaml-TLS or OpenSSL (depending on CONDUIT_TLS) to connect
      to the given [host], [ip], [port] tuple via TCP.
    - [`TLS_native _]: Force use of native OCaml TLS stack to connect.
@@ -139,13 +139,17 @@ type flow = private
 [@@deriving sexp_of]
 
 (** Type describing where to locate a PEM key in the filesystem *)
-type tls_server_key = [
+type tls_own_key = [
  | `None
  | `TLS of
     [ `Crt_file_path of string ] *
     [ `Key_file_path of string ] *
     [ `Password of bool -> string | `No_password ]
 ] [@@deriving sexp]
+
+(**/**)
+type tls_server_key = tls_own_key [@@deriving sexp]
+(**/**)
 
 (** State handler for an active conduit *)
 type ctx [@@deriving sexp_of]
@@ -156,17 +160,21 @@ type ctx [@@deriving sexp_of]
     no TLS certificate associated with the Conduit *)
 val default_ctx : ctx
 
-(** [init ?src ?tls_server_key ()] will initialize a Unix conduit
+(** [init ?src ?tls_own_key ()] will initialize a Unix conduit
     that binds to the [src] interface if specified.  If TLS server
     connections are used, then [tls_server_key] must contain a
     valid certificate to be used to advertise a TLS connection *)
-val init : ?src:string -> ?tls_server_key:tls_server_key -> unit -> ctx io
+val init :
+  ?src:string ->
+  ?tls_own_key:tls_own_key ->
+  ?tls_server_key:tls_own_key (* Deprecated, use tls_own_key. *) ->
+  unit -> ctx io
 
 (** [connect ~ctx client] establishes an outgoing connection
     via the [ctx] context to the endpoint described by [client] *)
 val connect : ctx:ctx -> client -> (flow * ic * oc) io
 
-(** [serve ?backlog ?timeout ?stop ?on_exn ~ctx ~mode fn]
+(** [serve ?backlog ?timeout ?stop ~on_exn ~ctx ~mode fn]
     establishes a listening connection of type [mode], using the [ctx]
     context.  The [stop] thread will terminate the server if it ever
     becomes determined.  Every connection will be served in a new
@@ -174,10 +182,10 @@ val connect : ctx:ctx -> client -> (flow * ic * oc) io
     [fn] callback is passed the {!flow} representing the client
     connection and the associated input {!ic} and output {!oc}
     channels. If the callback raises an exception, it is passed to
-    [on_exn] (by default, to !Lwt.async_exception_hook). *)
+    [on_exn]. *)
 val serve :
   ?backlog:int -> ?timeout:int -> ?stop:(unit io) ->
-  ?on_exn:(exn -> unit) -> ctx:ctx -> mode:server ->
+  on_exn:(exn -> unit) -> ctx:ctx -> mode:server ->
   (flow -> ic -> oc -> unit io) -> unit io
 
 (** [set_max_active nconn] sets the maximum number of active connections

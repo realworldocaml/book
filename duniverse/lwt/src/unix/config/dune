@@ -1,10 +1,8 @@
 (executable
  (name configure)
- (modules configure)
- (libraries unix)
- (flags (:standard)))
+ (modules configure))
 
 (executable
  (name discover)
  (modules discover)
- (flags (:standard -w +A-29)))
+ (libraries dune.configurator))

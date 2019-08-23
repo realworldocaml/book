@@ -1,3 +1,10 @@
+
+* Add MTIME_OS environment variable for specifying the
+  OS at build time.
+* Add support for node.js. Thanks to Fabian (@copy)
+  for the patch.
+* Support for js_of_ocaml 3.4.0.
+
 v1.1.0 2017-06-24 London
 ------------------------
 

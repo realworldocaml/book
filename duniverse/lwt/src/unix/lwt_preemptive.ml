@@ -88,7 +88,7 @@ type thread = {
   (* The worker thread. *)
 
   mutable reuse : bool;
-  (* Whether the thread must be readded to the pool when the work is
+  (* Whether the thread must be re-added to the pool when the work is
      done. *)
 }
 

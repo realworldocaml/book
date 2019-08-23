@@ -502,7 +502,7 @@ val open_connection :
       connection to the given address and returns two channels for using
       it. If [fd] is not specified, a fresh one will be used.
 
-      The connection is completly closed when you close both
+      The connection is completely closed when you close both
       channels.
 
       @raise Unix.Unix_error on error.

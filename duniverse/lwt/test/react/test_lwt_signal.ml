@@ -26,6 +26,29 @@ let suite = suite "lwt_signal" [
          Lwt_condition.signal cond ();
          return (!l = [4; 3; 2; 1]));
 
+  test "limit race condition" begin fun () ->
+    let change_count = ref 0 in
+
+    let underlying_signal, set = React.S.create 0 in
+
+    underlying_signal
+    |> Lwt_react.S.limit (fun () ->
+      let p = Lwt_unix.sleep 1. in
+      Lwt.async (fun () ->
+        Lwt_unix.sleep 0.1 >|= fun () ->
+        Lwt.on_success p (fun () ->
+        set 2));
+      p)
+    |> React.S.changes
+    |> React.E.map (fun _ -> incr change_count)
+    |> ignore;
+
+    set 1;
+
+    Lwt_unix.sleep 2. >|= fun () ->
+    !change_count = 1
+  end;
+
   test "with_finaliser lifetime" begin fun () ->
     let s, set = React.S.create 0 in
     let finalizer_ran = ref false in

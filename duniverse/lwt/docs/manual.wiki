@@ -402,6 +402,21 @@ val p3 : '_a Lwt.t = <abstr>
   sure to compile it with {{{-g}}}. Most modern build systems add {{{-g}}} by
   default.
 
+=== {{{let*}}} syntax ===
+
+  To use Lwt with the {{{let*}}} syntax introduced in OCaml 4.08, you can define:
+
+<<code language="ocaml" |let (let*) = Lwt.bind
+let (and*) = Lwt.both
+>>
+
+  Then, you can write
+
+<<code language="ocaml" |let* () = Lwt_io.printl "Hello," in
+let* () = Lwt_io.printl "world!" in
+Lwt.return ()
+>>
+
 === Other modules of the core library ===
 
   The core library contains several modules that only depend on

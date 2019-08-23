@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2017 The mtime programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -16,6 +16,10 @@
 
     Consult important information about {{!err}error handling}
     and {{!platform_support}platform support}.
+
+    Concrete implementation of this interfaces are provided by the
+    [mtime.clock.os] and [mtime.clock.jsoo] packages against which you
+    should compile depending on your target.
 
     {e %%VERSION%% — {{:%%PKG_HOMEPAGE%% }homepage}} *)
 
@@ -73,7 +77,7 @@ val period_ns : unit -> int64 option
 
     The functions {!elapsed}, {!now}, {!counter}, {!elapsed_ns} and
     {!now_ns} raise [Sys_error] whenever they can't determine the
-    current time or that it doesn't fit in [Mtime]'s range. Ususally
+    current time or that it doesn't fit in [Mtime]'s range. Usually
     this exception should only be catched at the toplevel of your
     program to log it and abort the program. It indicates a serious
     error condition in the system.
@@ -99,12 +103,16 @@ val period_ns : unit -> int64 option
        which returns a
        {{:http://www.w3.org/TR/hr-time/#sec-DOMHighResTimeStamp}double
        floating point value} in milliseconds with
-       resolution up to the microsecond.}}
+       resolution up to the microsecond.}
+    {- JavaScript running on Node.js uses the built-in
+       {{:https://nodejs.org/api/perf_hooks.html#perf_hooks_performance_now}[perf_hooks]}
+       module, which provides an interface compatible to the [performance]
+       module in browsers.}}
 *)
 
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2017 Daniel C. Bünzli
+   Copyright (c) 2017 The mtime programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

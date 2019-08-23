@@ -17,7 +17,9 @@ depopts: [
   "js_of_ocaml"
   "fmt"
   "cmdliner"
-  "lwt" ]
+  "lwt"
+  "base-threads"
+]
 conflicts: [
   "js_of_ocaml" { < "3.3.0" } ]
 
@@ -27,4 +29,6 @@ build: [[
           "--with-js_of_ocaml" "%{js_of_ocaml:installed}%"
           "--with-fmt" "%{fmt:installed}%"
           "--with-cmdliner" "%{cmdliner:installed}%"
-          "--with-lwt" "%{lwt:installed}%" ]]
+          "--with-lwt" "%{lwt:installed}%"
+          "--with-base-threads" "%{base-threads:installed}%"
+]]

@@ -327,19 +327,18 @@ let rec server (e:Conduit.endp): server Lwt.t = match e with
   | `TLS (x, y) -> server y >>= fun s -> tls_server x s
   | `Unknown s -> err_unknown s
 
-module Context (T: Mirage_time_lwt.S) (S: Mirage_stack_lwt.V4) = struct
+module Context (R: Mirage_random.C) (T: Mirage_time_lwt.S) (S: Mirage_stack_lwt.V4) = struct
 
   type t = Resolver_lwt.t * conduit
 
-  module DNS = Dns_resolver_mirage.Make(T)(S)
-  module RES = Resolver_mirage.Make(DNS)
+  module RES = Resolver_mirage.Make_with_stack(R)(T)(S)
 
   let conduit = empty
   let stackv4 = stackv4 (module S: Mirage_stack_lwt.V4 with type t = S.t)
 
   let create ?(tls=false) stack =
     let res = Resolver_lwt.init () in
-    RES.register ~stack res;
+    RES.R.register ~stack res;
     with_tcp conduit stackv4 stack >>= fun conduit ->
     if tls then
       with_tls conduit >|= fun conduit ->

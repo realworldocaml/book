@@ -32,8 +32,8 @@ static HANDLE get_handle(value opt) {
 #define string_option(opt) (Is_block(opt) ? String_val(Field(opt, 0)) : NULL)
 
 CAMLprim value lwt_process_create_process(value prog, value cmdline, value env,
-                                          value fds) {
-  CAMLparam4(prog, cmdline, env, fds);
+                                          value cwd, value fds) {
+  CAMLparam5(prog, cmdline, env, cwd, fds);
   CAMLlocal1(result);
 
   STARTUPINFO si;
@@ -48,7 +48,7 @@ CAMLprim value lwt_process_create_process(value prog, value cmdline, value env,
   si.hStdError = get_handle(Field(fds, 2));
 
   if (!CreateProcess(string_option(prog), String_val(cmdline), NULL, NULL, TRUE,
-                     0, string_option(env), NULL, &si, &pi)) {
+                     0, string_option(env), string_option(cwd), &si, &pi)) {
     win32_maperr(GetLastError());
     uerror("CreateProcess", Nothing);
   }

@@ -49,6 +49,17 @@ package "lwt" (
   exists_if = "logs_lwt.cma"
 )
 
+package "threaded" (
+  description = "Thread safe logging"
+  version = "%%VERSION_NUM%%"
+  requires = "logs threads"
+  archive(byte) = "logs_threaded.cma"
+  archive(native) = "logs_threaded.cmxa"
+  plugin(byte) = "logs_threaded.cma"
+  plugin(native) = "logs_threaded.cmxs"
+  exists_if = "logs_threaded.cma"
+)
+
 package "top" (
   description = "Logs toplevel support"
   version = "%%VERSION_NUM%%"

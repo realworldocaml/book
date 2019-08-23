@@ -11,7 +11,6 @@ CACHE=$DIRECTORY/../opam-cache-$SYSTEM-$COMPILER-$LIBEV.tar
 
 if [ ! -f $CACHE ]
 then
-    opam init -y --auto-setup
     eval `opam config env`
 
     # Pin Lwt and install its dependencies.

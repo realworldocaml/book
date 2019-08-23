@@ -1,3 +1,7 @@
+**This project is unmaintained. Pull requests won't be reviewed.
+  If you would like to contribute, please request a transfer to
+  [ocaml-community](https://github.com/ocaml-community/meta).**
+
 Easy-format: indentation made easy
 ==================================
 
@@ -11,7 +15,7 @@ The documentation is at https://mjambon.github.io/mjambon2016/easy-format.html
 Installation
 ------------
 
-Installation requires ocamlfind.
+Installation requires dune (formerly known as jbuilder) and ocamlfind.
 
 ```
 $ make

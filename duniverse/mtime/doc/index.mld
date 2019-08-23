@@ -1,0 +1,11 @@
+{0 Mtime {%html: <span class="version">%%VERSION%%</span>%}}
+
+Mtime has platform independent support for monotonic wall-clock time
+in pure OCaml.
+
+{1:api API}
+
+{!modules:
+Mtime
+Mtime_clock
+}

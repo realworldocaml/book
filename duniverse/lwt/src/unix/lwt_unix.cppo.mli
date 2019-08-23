@@ -45,70 +45,6 @@ val handle_unix_error : ('a -> 'b Lwt.t) -> 'a -> 'b Lwt.t
   (** Same as [Unix.handle_unix_error] but catches lwt-level
       exceptions *)
 
-(** {2 Configuration} *)
-
-(** For system calls that cannot be made asynchronously, Lwt uses one
-    of the following method: *)
-type async_method =
-  | Async_none
-      (** System calls are made synchronously, and may block the
-          entire program. *)
-  | Async_detach
-      (** System calls are made in another system thread, thus without
-          blocking other Lwt threads. The drawback is that it may
-          degrade performance in some cases.
-
-          This is the default. *)
-  | Async_switch
-      (** System calls are made in the main thread, and if one blocks
-          the execution continue in another system thread. This method
-          is the most efficient, also you will get better performance
-          if you force all threads to run on the same cpu. On linux
-          this can be done by using the command [taskset].
-
-          Note that this method is still experimental. *)
-
-val default_async_method : unit -> async_method
-  (** Returns the default async method.
-
-      This can be initialized using the environment variable
-      ["LWT_ASYNC_METHOD"] with possible values ["none"],
-      ["detach"] and ["switch"]. *)
-
-val set_default_async_method : async_method -> unit
-  (** Sets the default async method. *)
-
-val async_method : unit -> async_method
-  (** [async_method ()] returns the async method used in the current
-      thread. *)
-
-val async_method_key : async_method Lwt.key
-  (** The key for storing the local async method. *)
-
-val with_async_none : (unit -> 'a) -> 'a
-  (** [with_async_none f] is a shorthand for:
-
-      {[
-        Lwt.with_value async_method_key (Some Async_none) f
-      ]}
-  *)
-
-val with_async_detach : (unit -> 'a) -> 'a
-  (** [with_async_detach f] is a shorthand for:
-
-      {[
-        Lwt.with_value async_method_key (Some Async_detach) f
-      ]}
-  *)
-
-val with_async_switch : (unit -> 'a) -> 'a
-  (** [with_async_switch f] is a shorthand for:
-
-      {[
-        Lwt.with_value async_method_key (Some Async_switch) f
-      ]}
-  *)
-
 (** {2 Sleeping} *)
 
 val sleep : float -> unit Lwt.t
@@ -120,8 +56,13 @@ val yield : unit -> unit Lwt.t
       as soon as possible and terminates. *)
 
 val auto_yield : float -> (unit -> unit Lwt.t)
-  (** [auto_yield timeout] returns a function [f] that will yield
-      every [timeout] seconds. *)
+  (** [auto_yield timeout] returns a function [f], and [f ()] has the following
+      behavior:
+
+      - If it has been more than [timeout] seconds since the last time [f ()]
+        behaved like {!Lwt_unix.yield}, [f ()] calls {!Lwt_unix.yield}.
+      - Otherwise, if it has been less than [timeout] seconds, [f ()] behaves
+        like {!Lwt.return_unit}, i.e. it does not yield. *)
 
 exception Timeout
   (** Exception raised by timeout operations *)
@@ -867,7 +808,7 @@ val signal_count : unit -> int
 val reinstall_signal_handler : int -> unit
   (** [reinstall_signal_handler signum] if any signal handler is
       registered for this signal with {!on_signal}, it reinstall the
-      signal handler (with [Sys.set_signal]). This is usefull in case
+      signal handler (with [Sys.set_signal]). This is useful in case
       another part of the program install another signal handler. *)
 
 (** {2 Sockets} *)
@@ -987,6 +928,9 @@ val io_vector : buffer : string -> offset : int -> length : int -> io_vector
   (** Creates an io-vector *)
 
 val recv_msg : socket : file_descr -> io_vectors : io_vector list -> (int * Unix.file_descr list) Lwt.t
+  [@@ocaml.deprecated
+" Will be replaced by Lwt_unix.Versioned.recv_msg_2 in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/594"]
 (** [recv_msg ~socket ~io_vectors] receives data into a list of
     io-vectors, plus any file-descriptors that may accompany the
     messages. It returns a tuple whose first field is the number of
@@ -995,9 +939,15 @@ val recv_msg : socket : file_descr -> io_vectors : io_vector list -> (int * Unix
     provided [io_vectors] list. Data is written directly into the
     [iov_buffer] buffers.
 
-    Not implemented on Windows. *)
+    Not implemented on Windows.
+
+    @deprecated Will be replaced by {!Lwt_unix.Versioned.recv_msg_2} in Lwt
+                5.0.0. *)
 
 val send_msg : socket : file_descr -> io_vectors : io_vector list -> fds : Unix.file_descr list -> int Lwt.t
+  [@@ocaml.deprecated
+" Will be replaced by Lwt_unix.Versioned.send_msg_2 in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/594"]
 (** [send_msg ~socket ~io_vectors ~fds] sends data from a list of
     io-vectors, accompanied with a list of file-descriptors. It
     returns the number of bytes sent. If fd-passing is not possible on
@@ -1005,7 +955,10 @@ val send_msg : socket : file_descr -> io_vectors : io_vector list -> fds : Unix.
     [Lwt_sys.Not_available "fd_passing"]. Data is written directly from
     the [iov_buffer] buffers.
 
-    Not implemented on Windows. *)
+    Not implemented on Windows.
+
+    @deprecated Will be replaced by {!Lwt_unix.Versioned.send_msg_2} in Lwt
+                5.0.0. *)
 
 type credentials = {
   cred_pid : int;
@@ -1266,6 +1219,106 @@ type flow_action =
 val tcflow : file_descr -> flow_action -> unit Lwt.t
   (** Wrapper for [Unix.tcflow] *)
 
+
+
+(** {2 Configuration (deprecated)} *)
+
+(** For system calls that cannot be made asynchronously, Lwt uses one
+    of the following method: *)
+type async_method =
+  | Async_none
+      (** System calls are made synchronously, and may block the
+          entire program. *)
+  | Async_detach
+      (** System calls are made in another system thread, thus without
+          blocking other Lwt threads. The drawback is that it may
+          degrade performance in some cases.
+
+          This is the default. *)
+  | Async_switch
+      (** System calls are made in the main thread, and if one blocks
+          the execution continue in another system thread. This method
+          is the most efficient, also you will get better performance
+          if you force all threads to run on the same cpu. On linux
+          this can be done by using the command [taskset].
+
+          Note that this method is still experimental. *)
+
+val default_async_method : unit -> async_method
+  [@@ocaml.deprecated
+" Will always return Async_detach in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** Returns the default async method.
+
+    This can be initialized using the environment variable
+    ["LWT_ASYNC_METHOD"] with possible values ["none"],
+    ["detach"] and ["switch"].
+
+    @deprecated Will always return [Async_detach] in Lwt 5.0.0. *)
+
+val set_default_async_method : async_method -> unit
+  [@@ocaml.deprecated
+" Will be a no-op in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** Sets the default async method.
+
+    @deprecated Will be a no-op in Lwt 5.0.0. *)
+
+val async_method : unit -> async_method
+  [@@ocaml.deprecated
+" Will always return Async_detach in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** [async_method ()] returns the async method used in the current
+    thread.
+
+    @deprecated Will always return [Async_detach] in Lwt 5.0.0. *)
+
+val async_method_key : async_method Lwt.key
+  [@@ocaml.deprecated
+" Will be ignored in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** The key for storing the local async method.
+
+    @deprecated Will be ignored in Lwt 5.0.0. *)
+
+val with_async_none : (unit -> 'a) -> 'a
+  [@@ocaml.deprecated
+" Will have no effect in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** [with_async_none f] is a shorthand for:
+
+    {[
+      Lwt.with_value async_method_key (Some Async_none) f
+    ]}
+
+    @deprecated Will have no effect in Lwt 5.0.0. *)
+
+val with_async_detach : (unit -> 'a) -> 'a
+  [@@ocaml.deprecated
+" Will have no effect in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** [with_async_detach f] is a shorthand for:
+
+    {[
+      Lwt.with_value async_method_key (Some Async_detach) f
+    ]}
+
+    @deprecated Will have no effect in Lwt 5.0.0. *)
+
+val with_async_switch : (unit -> 'a) -> 'a
+  [@@ocaml.deprecated
+" Will have no effect in Lwt >= 5.0.0. See
+   https://github.com/ocsigen/lwt/issues/572"]
+(** [with_async_switch f] is a shorthand for:
+
+    {[
+      Lwt.with_value async_method_key (Some Async_switch) f
+    ]}
+
+    @deprecated Will have no effect in Lwt 5.0.0. *)
+
+
+
 (** {2 Low-level interaction} *)
 
 exception Retry
@@ -1316,7 +1369,10 @@ val run_job : ?async_method : async_method -> 'a job -> 'a Lwt.t
   (** [run_job ?async_method job] starts [job] and wait for its
       termination.
 
-      The async method is choosen follow:
+      The [~async_method] argument will be ignored in Lwt 5.0.0, and this
+      function will always act as if [~async_method:Async_detach] is passed.
+
+      The async method is chosen follow:
       - if the optional parameter [async_method] is specified, it is
         used,
       - otherwise if the local key {!async_method_key} is set in the
@@ -1445,6 +1501,26 @@ sig
 
       @deprecated Use {!Lwt_unix.bind}.
       @since 2.7.0 *)
+
+  val recv_msg_2 :
+    socket:file_descr -> io_vectors:IO_vectors.t ->
+      (int * Unix.file_descr list) Lwt.t
+  (** Upcoming version of {!Lwt_unix.recv_msg} that uses the new module
+      {!Lwt_unix.IO_vectors} rather than an argument of type
+      {!Lwt_unix.io_vector}. In Lwt 5.0.0, {!Lwt_unix.recv_msg} will become an
+      alias for this function.
+
+      @since 4.3.0 *)
+
+  val send_msg_2 :
+    socket:file_descr -> io_vectors:IO_vectors.t -> fds:Unix.file_descr list ->
+      int Lwt.t
+  (** Upcoming version of {!Lwt_unix.send_msg} that uses the new module
+      {!Lwt_unix.IO_vectors} rather than an argument of type
+      {!Lwt_unix.io_vector}. In Lwt 5.0.0, {!Lwt_unix.send_msg} will become an
+      alias for this function.
+
+      @since 4.3.0 *)
 end
 
 (**/**)

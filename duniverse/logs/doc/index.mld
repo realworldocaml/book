@@ -1,0 +1,21 @@
+{0 Logs {%html: <span class="version">%%VERSION%%</span>%}}
+
+Logs provides a logging infrastructure.
+
+Logging is performed on sources whose reporting level can be set
+independently. Log message report is decoupled from logging and is
+handled by a reporter. A few optional log reporters are distributed
+with the package and the API easily allows to implement your own.
+
+See the {{!Logs.basics}basics}.
+
+{1:api API}
+
+{!modules:
+Logs
+Logs_browser
+Logs_cli
+Logs_fmt
+Logs_lwt
+Logs_threaded
+}

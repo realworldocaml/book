@@ -96,13 +96,13 @@
    "aspects," which are *not* necessary to understand the main mechanism
    promises, but they are still there:
 
-   - promise cancelation
+   - promise cancellation
    - sequence-associated storage
 
-   If you are not interested in cancelation or storage, you can ignore these two
-   complications, and still get a pretty good understanding of the code. To
-   help, all identifiers related to cancelation contain the string "cancel," and
-   all identifiers related to storage contain "storage."
+   If you are not interested in cancellation or storage, you can ignore these
+   two complications, and still get a pretty good understanding of the code. To
+   help, all identifiers related to cancellation contain the string "cancel,"
+   and all identifiers related to storage contain "storage."
 
 
    1. Promises
@@ -145,13 +145,13 @@
 
        For example, [Lwt.bind]. These promises only are only resolved when the
        preceding sequence of promises resolves. The user cannot resolve these
-       promises directly (but see the section on cancelation below).
+       promises directly (but see the section on cancellation below).
 
      - Concurrent composition
 
        For example, [Lwt.join] or [Lwt.choose]. These promises are only resolved
        when all or one of a set of "preceding" promises resolve. The user cannot
-       resolve these promises directly (but see the section on cancelation
+       resolve these promises directly (but see the section on cancellation
        below).
 
 
@@ -183,8 +183,8 @@
    - all cancel callbacks of a promise are called before any regular callback
      is called.
 
-   Cancelation is a special case of resolution, in particular, a special case of
-   rejection, but see the section on cancelation later below.
+   Cancellation is a special case of resolution, in particular, a special case
+   of rejection, but see the section on cancellation later below.
 
 
    4. Resolution loop
@@ -207,23 +207,23 @@
    callback to resolve another initial promise. All the explicit dependencies
    are created by Lwt's own sequential and concurrent composition functions
    (so, [Lwt.bind], [Lwt.join], etc). Whether dependencies are explicit or not
-   is relevant only to cancelation.
+   is relevant only to cancellation.
 
 
-   5. Cancelation
+   5. Cancellation
 
    As described above, ordinary promise resolution proceeds from an initial
    promise, forward along callbacks through the dependency graph. Since it
    starts from an initial promise, it can only be triggered using a resolver.
 
-   Cancelation is a sort of dual to ordinary resolution. Instead of starting at
-   an initial promise/resolver, cancelation starts at *any* promise. It then
+   Cancellation is a sort of dual to ordinary resolution. Instead of starting at
+   an initial promise/resolver, cancellation starts at *any* promise. It then
    goes *backwards* through the explicit dependency graph, looking for
    cancelable initial promises to cancel -- those that were created by
-   [Lwt.task]. After finding them, cancelation resolves them normally with
+   [Lwt.task]. After finding them, cancellation resolves them normally with
    [Rejected Lwt.Canceled], causing an ordinary promise resolution process.
 
-   To summarize, cancelation is a way to trigger an *ordinary* resolution of
+   To summarize, cancellation is a way to trigger an *ordinary* resolution of
    promises created with [Lwt.task], by first searching for them in the promise
    dependency graph (which is assembled by [Lwt.bind], [Lwt.join], etc).
 
@@ -244,7 +244,7 @@
    susceptible to being canceled by [Lwt.cancel], but the user can manually
    cancel initial promises created by both [Lwt.task] and [Lwt.wait].
 
-   Due to [Lwt.cancel], promise cancelation, and therefore resolution, can be
+   Due to [Lwt.cancel], promise cancellation, and therefore resolution, can be
    initiated by the user without access to a resolver. This is important for
    reasoning about state changes in the implementation of Lwt, and is referenced
    in some implementation detail comments.
@@ -254,7 +254,7 @@
 
    The Lwt core deliberately doesn't do I/O. The resolution loop stops running
    once no promises can be resolved immediately. It has to be restarted later
-   by some surrouding I/O loop. This I/O loop typically keeps track of pending
+   by some surrounding I/O loop. This I/O loop typically keeps track of pending
    promises that represent blocked or in-progress I/O; other pending promises
    that indirectly depend on I/O are not explicitly tracked. They are retained
    in memory by references captured inside callbacks.
@@ -493,7 +493,7 @@ struct
        memory representation.
 
      - As per the Overview, there are regular callbacks and cancel callbacks.
-       Cancel callbacks are called only on cancelation, and, then, before any
+       Cancel callbacks are called only on cancellation, and, then, before any
        regular callbacks are called.
 
        Despite the different types for the two kinds of callbacks, they are
@@ -698,7 +698,7 @@ struct
      They do not return a corresponding resolver. That means that only the
      function itself (typically, a callback registered by it) can resolve [p].
      The only thing the user can do directly is try to cancel [p], but, since
-     [p] is not an initial promise, the cancelation attempt simply propagates
+     [p] is not an initial promise, the cancellation attempt simply propagates
      past [p] to [p]'s predecessors. If that eventually results in canceling
      [p], it will be through the normal mechanisms of the function (e.g.
      [Lwt.bind]'s callback).
@@ -1435,8 +1435,8 @@ struct
        through the promise dependency graph.
 
        The callbacks of these initial promises are then run, in a separate
-       phase. These callbacks propagate cancelation forwards to any dependent
-       promises. See "Cancelation" in the Overview. *)
+       phase. These callbacks propagate cancellation forwards to any dependent
+       promises. See "Cancellation" in the Overview. *)
     let propagate_cancel : (_, _, _) promise -> packed_callbacks list =
         fun p ->
       let rec cancel_and_collect_callbacks :
@@ -1763,9 +1763,9 @@ struct
      becomes resolved probably are:
 
      - Promises have more behaviors than resolution. One would have to add a
-       cancelation handler to [~outer_promise] to propagate the cancelation back
-       to [~user_provided_promise], for example. It may be easier to just think
-       of them as the same promise.
+       cancellation handler to [~outer_promise] to propagate the cancellation
+       back to [~user_provided_promise], for example. It may be easier to just
+       think of them as the same promise.
      - If using callbacks, resolving [~user_provided_promise] would not
        immediately resolve [~outer_promise]. Another callback added to
        [~user_provided_promise] might see [~user_provided_promise] resolved,
@@ -1849,11 +1849,11 @@ struct
       (* The result promise is a fresh pending promise.
 
          Initially, trying to cancel this fresh pending promise [p''] will
-         propagate the cancelation attempt to [p] (backwards through the promise
-         dependency graph). If/when [p] is fulfilled, Lwt will call the user's
-         callback [f] below, which will provide a new promise [p'], and [p']
-         will become a proxy of [p'']. At that point, trying to cancel [p'']
-         will be equivalent to trying to cancel [p'], so the behavior will
+         propagate the cancellation attempt to [p] (backwards through the
+         promise dependency graph). If/when [p] is fulfilled, Lwt will call the
+         user's callback [f] below, which will provide a new promise [p'], and
+         [p'] will become a proxy of [p'']. At that point, trying to cancel
+         [p''] will be equivalent to trying to cancel [p'], so the behavior will
          depend on how the user obtained [p']. *)
 
       let saved_storage = !current_storage in

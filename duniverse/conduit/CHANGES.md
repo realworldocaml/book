@@ -1,4 +1,24 @@
-## v1.5.0 (2019-07-15)
+## v2.0.1 (2019-08-19)
+
+* lwt-unix: fix compilation with `lwt_ssl` and fix tests to correctly exercise this
+  part of the codepath (#304 @avsm).
+
+## v2.0.0 (2019-08-17)
+
+* lwt-unix: obtain client IP correctly when using TLS connections (#277 @victorgomes)
+* lwt-unix: replace the dune/ocaml file with a `(select)` build form.
+  This avoids invoking `ocamlfind` from the build, and fits in with the
+  rest of dune builds much more naturally (@avsm).
+* lwt-unix: force callers to give a custom callback `on_exn` in case of exceptions
+  to avoid random crashes (#261 @kit-ty-kate)
+* mirage: use `dns-client>=4.0.0` which is the `udns` implementation (#290 @hannesm)
+* mirage: rename `mirage-conduit` to `conduit-mirage` to fit the naming structure
+  of this library suite more.  All new users of Mirage should use `conduit-mirage`,
+  and migrating should involve simply swapping the name in your `dune` and `opam`
+  files (#302 @hannesm @avsm)
+* async: expose `verify_mode` correctly in `Conduit_async` (#298 @brendanlong)
+
+## v1.5.0
 
 * lwt-unix: Do not close file descriptors more than once, which led to a lot of
   log spam due to EBADF (#294 @hcarty @avsm)

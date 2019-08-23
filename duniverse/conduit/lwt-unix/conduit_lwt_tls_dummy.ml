@@ -1,5 +1,10 @@
+module X509 = struct
+  let private_of_pems ~cert:_ ~priv_key:_ =
+    Lwt.fail_with "Tls not available"
+end
+
 module Client = struct
-  let connect ?src:_ _host _sa =
+  let connect ?src:_ ?certificates:_ _host _sa =
     Lwt.fail_with "Tls not available"
 end
 

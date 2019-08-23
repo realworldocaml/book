@@ -176,7 +176,7 @@ let make_heterogenous_list (container_wrap, wrap) =
 
 let print_margin fmt () =
   let margin = Format.pp_get_margin fmt () in
-  for i = 1 to margin do
+  for _ = 1 to margin do
     print_char '+'
   done;
   print_newline ()
