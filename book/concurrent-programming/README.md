@@ -986,7 +986,7 @@ searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
 
 
-```sh dir=../../examples/code/async/search,require-package=textwrap,require-package=yojson
+```sh dir=../../examples/code/async/search
 $ dune build search.exe
 $ ./_build/default/search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
