@@ -706,7 +706,7 @@ val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
   ^> String.split ~on:':'
   ^> List.dedup_and_sort ~compare:String.compare
   ^> List.iter ~f:print_endline
-Characters 108-134:
+Characters 127-153:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
