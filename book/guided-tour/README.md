@@ -794,6 +794,46 @@ to iterate in a new way.
 <a data-type="indexterm" data-startref="DSlists">&nbsp;</a>
 
 
+::: {data-type=note}
+#### Nesting lets with let and in
+
+`new_tl` in the above examples was our first use of `let` to define a
+new variable within the body of a function. A `let` paired with an
+`in` can be used to introduce a new binding within any local scope,
+including a function body. The `in` marks the beginning of the scope
+within which the new variable can be used. Thus, we could write:[let
+syntax/nested let binding]{.idx}
+
+```ocaml env=local_let
+# let x = 7 in
+  x + x
+- : int = 14
+```
+
+Note that the scope of the `let` binding is terminated by the
+double-semicolon, so the value of `x` is no longer available:
+
+```ocaml env=local_let
+# x
+Characters 0-1:
+Error: Unbound value x
+```
+
+We can also have multiple `let` statements in a row, each one adding a new
+variable binding to what came before:
+
+```ocaml env=local_let
+# let x = 7 in
+  let y = x * x in
+  x + y
+- : int = 56
+```
+
+This kind of nested `let` binding is a common way of building up a complex
+expression, with each `let` naming some component, before combining them in
+one final expression.
+:::
+
 ### Options
 
 Another common data structure in OCaml is the *option*. An option is used to
@@ -836,46 +876,6 @@ val downcase_extension : string -> string = <fun>
 Note that we used the `^` operator for concatenating strings. The
 concatenation operator is provided as part of the `Pervasives` module, which
 is automatically opened in every OCaml program.
-
-::: {data-type=note}
-#### Nesting lets with let and in
-
-`log_entry` was our first use of `let` to define a new variable within the
-body of a function. A `let` paired with an `in` can be used to introduce a
-new binding within any local scope, including a function body. The `in` marks
-the beginning of the scope within which the new variable can be used. Thus,
-we could write:[let syntax/nested let binding]{.idx}
-
-```ocaml env=local_let
-# let x = 7 in
-  x + x
-- : int = 14
-```
-
-Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `x` is no longer available:
-
-```ocaml env=local_let
-# x
-Characters 0-1:
-Error: Unbound value x
-```
-
-We can also have multiple `let` statements in a row, each one adding a new
-variable binding to what came before:
-
-```ocaml env=local_let
-# let x = 7 in
-  let y = x * x in
-  x + y
-- : int = 56
-```
-
-This kind of nested `let` binding is a common way of building up a complex
-expression, with each `let` naming some component, before combining them in
-one final expression.
-:::
-
 
 Options are important because they are the standard way in OCaml to encode a
 value that might not be there; there's no such thing as a
