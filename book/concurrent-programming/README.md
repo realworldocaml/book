@@ -1208,7 +1208,7 @@ exception Another_exception
 # Deferred.any [ after (Time.Span.of_sec 0.5)
                ; swallow_some_errors Another_exception ]
 Exception:
-(monitor.ml.Error (Another_exception) ("Caught by monitor (id 61)")).
+(monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)")).
 ```
 
 If instead we use `Ignore_me`, the exception will be ignored, and the
@@ -1272,9 +1272,9 @@ query:
 $ dune build search_with_configurable_server.exe
 $ ./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
- ("Raised by primitive operation at file \"src/unix_syscalls.ml\", line 937, characters 17-76"
-  "Called from file \"src/deferred1.ml\", line 20, characters 40-45"
-  "Called from file \"src/job_queue.ml\", line 159, characters 6-47"
+ ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
+  "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
+  "Called from file \"duniverse/async_kernel/src/job_queue.ml\", line 170, characters 6-47"
   "Caught by monitor Tcp.close_sock_on_error"))
 [1]
 ```
@@ -1348,6 +1348,7 @@ the programming language Caml, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
 in 1996. A member of the ML language family, OCaml extends the core
 Caml language with object-oriented programming constructs."
+
 ```
 
 Now, only the query that went to `localhost` failed.
@@ -1537,6 +1538,7 @@ the programming language Caml, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
 in 1996. A member of the ML language family, OCaml extends the core
 Caml language with object-oriented programming constructs."
+
 ```
 
 ## Working with System Threads
@@ -1612,6 +1614,7 @@ prints out one last timestamp:
     let d = thunk () in
     Clock.every (sec 0.1) ~stop:d print_time;
     d >>= fun () ->
+    printf "\nFinished at: ";
     print_time ();
     printf "\n";
     Writer.flushed (force Writer.stdout);
@@ -1624,7 +1627,8 @@ expect, waking up roughly every 100 milliseconds:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> after (sec 0.5))
-0.038147ms, 101.254ms, 201.826ms, 305.019ms, 410.269ms, 501.83ms,
+37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
+Finished at: 500.67615509033203ms,
 - : unit = ()
 ```
 
@@ -1637,7 +1641,7 @@ busy loop to finish running:
     for i = 1 to 100_000_000 do x := Some i done
 val busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> return (busy_loop ()))
-2.12909s,
+Finished at: 874.99594688415527ms,
 - : unit = ()
 ```
 
@@ -1649,15 +1653,16 @@ system thread, the behavior will be different:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> In_thread.run busy_loop)
-0.0460148ms, 312.767ms, 415.486ms, 521.813ms, 631.633ms, 792.659ms, 896.126ms, 1.00168s, 1.10679s, 1.21284s, 1.31803s, 1.42162s, 1.52478s, 1.63463s, 1.7379s, 1.84361s, 1.95302s, 2.13509s,
+31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
+Finished at: 840.72136878967285ms,
 - : unit = ()
 ```
 
-Now `log_delays` does get a chance to run, but not nearly as often as every
-100 milliseconds. The reason is that now that we're using system threads, we
-are at the mercy of the operating system to decide when each thread gets
-scheduled. The behavior of threads is very much dependent on the operating
-system and how it is configured.
+Now `log_delays` does get a chance to run, but it's no longer at clean
+100 millisecond intervals. The reason is that now that we're using
+system threads, we are at the mercy of the operating system to decide
+when each thread gets scheduled.  The behavior of threads is very much
+dependent on the operating system and how it is configured.
 
 Another tricky aspect of dealing with OCaml threads has to do with
 allocation. When compiling to native code, OCaml's threads only get a chance
@@ -1671,7 +1676,8 @@ we run a nonallocating loop in bytecode, our timer process will get to run:
     for i = 0 to 100_000_000 do () done
 val noalloc_busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> In_thread.run noalloc_busy_loop)
-0.0400543ms, 130.686ms, 239.836ms, 340.546ms, 443.258ms, 605.56ms, 710.801ms, 870.451ms, 980.326ms, 1.03697s,
+32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
+Finished at: 418.69187355041504ms,
 - : unit = ()
 ```
 
