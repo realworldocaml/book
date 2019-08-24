@@ -1684,7 +1684,7 @@ Finished at: 418.69187355041504ms,
 But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
-```
+```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
 $ dune build native_code_log_delays.exe
 $ ./_build/default/native_code_log_delays.exe
 15.5686s,
