@@ -753,9 +753,9 @@ for removing sequential duplicates:
     match list with
     | [] -> []
     | first :: second :: tl ->
-      if first = second then remove_sequential_duplicates (second :: tl)
-      else first :: remove_sequential_duplicates (second :: tl)
-Characters 48-246:
+      let new_tl = remove_sequential_duplicates (second :: tl) in
+      if first = second then new_tl else first :: new_tl
+Characters 48-232:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -773,8 +773,8 @@ fix this warning by adding another case to the match:
     | [] -> []
     | [hd] -> [hd]
     | hd1 :: hd2 :: tl ->
-      if hd1 = hd2 then remove_sequential_duplicates (hd2 :: tl)
-      else hd1 :: remove_sequential_duplicates (hd2 :: tl)
+      let new_tl = remove_sequential_duplicates (hd2 :: tl) in
+      if hd1 = hd2 then new_tl else hd1 :: new_tl
 val remove_sequential_duplicates : int list -> int list = <fun>
 # remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1]
 - : int list = [1; 2; 3; 4; 1]
