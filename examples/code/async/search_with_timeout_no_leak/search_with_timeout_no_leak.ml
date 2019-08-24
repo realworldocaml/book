@@ -87,7 +87,7 @@ let () =
       +> flag "-servers"
            (optional_with_default ["api.duckduckgo.com"] string_list)
            ~doc:" Specify server to connect to"
-      +> flag "-timeout" (optional_with_default (sec 5.) time_span)
+      +> flag "-timeout" (optional_with_default (sec 5.) Time.Span.arg_type)
            ~doc:" Abandon queries that take longer than this time"
     )
     (fun words servers timeout () -> search_and_print ~servers ~timeout words)
