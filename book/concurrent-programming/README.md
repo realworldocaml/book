@@ -1684,11 +1684,11 @@ Finished at: 418.69187355041504ms,
 But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
-```
+```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
 $ dune build native_code_log_delays.exe
 $ ./_build/default/native_code_log_delays.exe
-15.5686s,
-$
+197.41058349609375us, 
+Finished at: 1.2127914428710938s, 
 ```
 
 The takeaway from these examples is that predicting thread interleavings is a
