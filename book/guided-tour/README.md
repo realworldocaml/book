@@ -28,9 +28,7 @@ different use-cases, each building on the last. Here's a quick summary.
   install. It's also portable, running on every platform that OCaml does,
   including Windows and JavaScript.
 
-- *`Core_kernel`* extends `Base` with many new data structures, like heaps,
-  and other capabilities, like types to represent times and time-zones, and
-  support for efficient binary serializers. It's still portable, but has many
+- *`Core_kernel`* extends `Base` with many new data structures, like heaps, types to represent times and time-zones, support for efficient binary serializers, and other capabilities. It's still portable, but has many
   more dependencies, takes longer to build, and will add more to the size of
   your executables.
 
