@@ -694,12 +694,16 @@ It is this later form that we're using in the preceding `|>` pipeline.
 
 But `|>` only works in the intended way because it is left-associative. Let's
 see what happens if we try using a right-associative operator, like (^>).
+Note that `Core.Sys.getenv` returns `Some` of your `PATH`,
+thus it should be applied to `Base.Option.value_exn`
+(or `Base.Option.value`, if you have a default `PATH` for `~default` argument)
+to step forward.
 
 ```ocaml env=main
 # let (^>) x f = f x
 val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
-# Core.Sys.getenv "PATH"
-  ^> String.split ~on:':' path
+# Base.Option.value_exn (Core.Sys.getenv "PATH")
+  ^> String.split ~on:':'
   ^> List.dedup_and_sort ~compare:String.compare
   ^> List.iter ~f:print_endline
 Characters 108-134:
