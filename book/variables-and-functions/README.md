@@ -702,11 +702,11 @@ to step forward.
 ```ocaml env=main
 # let (^>) x f = f x
 val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
-# Base.Option.value_exn (Core.Sys.getenv "PATH")
+# Option.value_exn (Core.Sys.getenv "PATH")
   ^> String.split ~on:':'
   ^> List.dedup_and_sort ~compare:String.compare
   ^> List.iter ~f:print_endline
-Characters 127-153:
+Characters 122-148:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
