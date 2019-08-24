@@ -692,17 +692,17 @@ printing out a list of strings.
 
 It is this later form that we're using in the preceding `|>` pipeline.
 
-But `|>` only works in the intended way because it is left-associative. Let's
-see what happens if we try using a right-associative operator, like (^>).
+But `|>` only works in the intended way because it is
+left-associative. Let's see what happens if we try using a
+right-associative operator, like (^>).
 
 ```ocaml env=main
 # let (^>) x f = f x
 val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
-# Core.Sys.getenv "PATH"
-  ^> String.split ~on:':' path
+# String.split ~on:':' path
   ^> List.dedup_and_sort ~compare:String.compare
   ^> List.iter ~f:print_endline
-Characters 108-134:
+Characters 80-106:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
