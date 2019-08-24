@@ -1614,6 +1614,7 @@ prints out one last timestamp:
     let d = thunk () in
     Clock.every (sec 0.1) ~stop:d print_time;
     d >>= fun () ->
+    printf "\nFinished at: ";
     print_time ();
     printf "\n";
     Writer.flushed (force Writer.stdout);
@@ -1626,7 +1627,8 @@ expect, waking up roughly every 100 milliseconds:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> after (sec 0.5))
-37.431716918945312us, 100.64697265625ms, 202.18563079833984ms, 303.71594429016113ms, 404.47735786437988ms, 500.6721019744873ms,
+37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
+Finished at: 500.67615509033203ms,
 - : unit = ()
 ```
 
@@ -1639,7 +1641,7 @@ busy loop to finish running:
     for i = 1 to 100_000_000 do x := Some i done
 val busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> return (busy_loop ()))
-845.11899948120117ms,
+Finished at: 874.99594688415527ms,
 - : unit = ()
 ```
 
@@ -1651,7 +1653,8 @@ system thread, the behavior will be different:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> In_thread.run busy_loop)
-28.6102294921875us, 113.0821704864502ms, 263.42582702636719ms, 413.7876033782959ms, 513.85593414306641ms, 664.26730155944824ms, 814.46146965026855ms, 838.40727806091309ms,
+31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
+Finished at: 840.72136878967285ms,
 - : unit = ()
 ```
 
@@ -1673,7 +1676,8 @@ we run a nonallocating loop in bytecode, our timer process will get to run:
     for i = 0 to 100_000_000 do () done
 val noalloc_busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> In_thread.run noalloc_busy_loop)
-33.37860107421875us, 130.76257705688477ms, 230.90696334838867ms, 331.096887588501ms, 417.41490364074707ms,
+32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
+Finished at: 418.69187355041504ms,
 - : unit = ()
 ```
 
