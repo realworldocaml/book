@@ -532,7 +532,7 @@ concurrent clients without further modification.
 Now that we have the echo server, we can connect to the echo server using the
 netcat tool, which is invoked as `nc`:
 
-```scheme
+```scheme file=../../examples/code/async/echo/dune
 (executable
   (name      echo)
   (libraries core async))
@@ -540,7 +540,7 @@ netcat tool, which is invoked as `nc`:
 
 
 
-```sh skip,dir=../../examples/code/async/echo
+```sh dir=../../examples/code/async/echo
 $ dune build echo.exe
 $ ./_build/default/echo.exe &
 $ sleep 1
@@ -978,7 +978,7 @@ let () =
 And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
-```scheme
+```scheme file=../../examples/code/async/search/dune
 (executable
   (name      search)
   (libraries core async cohttp.async yojson textwrap))
@@ -1260,7 +1260,7 @@ list of servers. Now, let's see what happens if we rebuild the application
 and run it giving it a list of servers, some of which won't respond to the
 query:
 
-```scheme
+```scheme file=../../examples/code/async/search_with_configurable_server/dune
 (executable
   (name      search_with_configurable_server)
   (libraries cohttp.async yojson textwrap))
@@ -1324,7 +1324,7 @@ let print_result (word,definition) =
 Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
-```scheme
+```scheme file=../../examples/code/async/search_with_error_handling/dune
 (executable
   (name      search_with_error_handling)
   (libraries cohttp.async yojson textwrap))
@@ -1507,7 +1507,7 @@ let get_definition_with_timeout ~server ~timeout word =
 Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
-```scheme
+```scheme file=../../examples/code/async/search_with_timeout_no_leak/dune
 (executable
   (name      search_with_timeout_no_leak)
   (libraries cohttp.async yojson textwrap))
