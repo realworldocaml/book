@@ -1277,7 +1277,7 @@ successfully on its own. We can handle the failures of individual connections
 separately by using the `try_with` function within each call to
 `get_definition`, as follows:
 
-```ocaml file=../../examples/code/async/search_with_error_handling/search_with_error_handling.ml,part=1
+```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
@@ -1299,7 +1299,7 @@ first element is the word being searched for, and the second element is the
 Now we just need to change the code for `print_result` so that it can handle
 the new type:
 
-```ocaml file=../../examples/code/async/search_with_error_handling/search_with_error_handling.ml,part=2
+```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -1316,17 +1316,9 @@ let print_result (word,definition) =
 Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
-```scheme
-(executable
-  (name      search_with_error_handling)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_error_handling,non-deterministic=output
-$ dune build search_with_error_handling.exe
-$ ./_build/default/search_with_error_handling.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune build search.exe
+$ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
 
