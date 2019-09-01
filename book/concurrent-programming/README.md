@@ -1245,7 +1245,7 @@ that occur when one of those servers is misspecified.
 First we'll need to change `query_uri` to take an argument specifying the
 server to connect to:
 
-```ocaml file=../../examples/code/async/search_with_configurable_server/search_with_configurable_server.ml,part=1
+```ocaml file=../../examples/code/async/search_with_configurable_server/search.ml,part=1
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
@@ -1260,17 +1260,9 @@ list of servers. Now, let's see what happens if we rebuild the application
 and run it giving it a list of servers, some of which won't respond to the
 query:
 
-```scheme
-(executable
-  (name      search_with_configurable_server)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_configurable_server,non-deterministic=output
-$ dune build search_with_configurable_server.exe
-$ ./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune build search.exe
+$ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
  ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
   "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
