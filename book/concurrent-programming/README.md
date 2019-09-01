@@ -1245,7 +1245,7 @@ that occur when one of those servers is misspecified.
 First we'll need to change `query_uri` to take an argument specifying the
 server to connect to:
 
-```ocaml file=../../examples/code/async/search_with_configurable_server/search_with_configurable_server.ml,part=1
+```ocaml file=../../examples/code/async/search_with_configurable_server/search.ml,part=1
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
@@ -1260,17 +1260,9 @@ list of servers. Now, let's see what happens if we rebuild the application
 and run it giving it a list of servers, some of which won't respond to the
 query:
 
-```scheme
-(executable
-  (name      search_with_configurable_server)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_configurable_server,non-deterministic=output
-$ dune build search_with_configurable_server.exe
-$ ./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune build search.exe
+$ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
  ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
   "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
@@ -1285,7 +1277,7 @@ successfully on its own. We can handle the failures of individual connections
 separately by using the `try_with` function within each call to
 `get_definition`, as follows:
 
-```ocaml file=../../examples/code/async/search_with_error_handling/search_with_error_handling.ml,part=1
+```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
@@ -1307,7 +1299,7 @@ first element is the word being searched for, and the second element is the
 Now we just need to change the code for `print_result` so that it can handle
 the new type:
 
-```ocaml file=../../examples/code/async/search_with_error_handling/search_with_error_handling.ml,part=2
+```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -1324,17 +1316,9 @@ let print_result (word,definition) =
 Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
-```scheme
-(executable
-  (name      search_with_error_handling)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_error_handling,non-deterministic=output
-$ dune build search_with_error_handling.exe
-$ ./_build/default/search_with_error_handling.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune build search.exe
+$ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
 
@@ -1429,7 +1413,7 @@ The following code shows how you can change `get_definition` and
 `get_definition_with_timeout` to cancel the `get` call if the timeout
 expires:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml,part=1
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
   try_with (fun () ->
@@ -1447,7 +1431,7 @@ Next, we'll modify `get_definition_with_timeout` to create a deferred to pass
 in to `get_definition`, which will become determined when our timeout
 expires:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml,part=2
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->
@@ -1486,7 +1470,7 @@ In the following example, we use `choose` to ensure that the `interrupt`
 deferred becomes determined if and only if the timeout deferred is chosen.
 Here's the code:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak/search_with_timeout_no_leak.ml,part=2
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
@@ -1507,17 +1491,9 @@ let get_definition_with_timeout ~server ~timeout word =
 Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
-```scheme
-(executable
-  (name      search_with_timeout_no_leak)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_timeout_no_leak,non-deterministic=output
-$ dune build search_with_timeout_no_leak.exe
-$ ./_build/default/search_with_timeout_no_leak.exe "concurrent programming" ocaml -timeout 0.2s
+$ dune build search.exe
+$ ./_build/default/search.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
 
@@ -1533,11 +1509,7 @@ complete."
 ocaml
 -----
 
-"OCaml, originally named Objective Caml, is the main implementation of
-the programming language Caml, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
-in 1996. A member of the ML language family, OCaml extends the core
-Caml language with object-oriented programming constructs."
+DuckDuckGo query failed: Timed out
 
 ```
 
@@ -1687,8 +1659,8 @@ busy loop will block anything else from running:
 ```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
 $ dune build native_code_log_delays.exe
 $ ./_build/default/native_code_log_delays.exe
-197.41058349609375us, 
-Finished at: 1.2127914428710938s, 
+197.41058349609375us,
+Finished at: 1.2127914428710938s,
 ```
 
 The takeaway from these examples is that predicting thread interleavings is a
