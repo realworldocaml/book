@@ -1507,17 +1507,9 @@ let get_definition_with_timeout ~server ~timeout word =
 Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
-```scheme
-(executable
-  (name      search_with_timeout_no_leak)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_timeout_no_leak,non-deterministic=output
 $ dune build search_with_timeout_no_leak.exe
-$ ./_build/default/search_with_timeout_no_leak.exe "concurrent programming" ocaml -timeout 0.2s
+$ ./_build/default/search_with_timeout_no_leak.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
 
@@ -1533,11 +1525,7 @@ complete."
 ocaml
 -----
 
-"OCaml, originally named Objective Caml, is the main implementation of
-the programming language Caml, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
-in 1996. A member of the ML language family, OCaml extends the core
-Caml language with object-oriented programming constructs."
+DuckDuckGo query failed: Timed out
 
 ```
 
