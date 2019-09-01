@@ -530,20 +530,11 @@ thinking about multiple clients, this server is able to handle many
 concurrent clients without further modification.
 
 Now that we have the echo server, we can connect to the echo server using the
-netcat tool, which is invoked as `nc`:
-
-```scheme
-(executable
-  (name      echo)
-  (libraries core async))
-```
-
-
+netcat tool, which is invoked as `nc`.  Note that we use `dune exec`
+to both build and run the executable.
 
 ```sh skip,dir=../../examples/code/async/echo
-$ dune build echo.exe
-$ ./_build/default/echo.exe &
-$ sleep 1
+$ dune exec ./echo.exe &
 $ echo "This is an echo server" | nc 127.0.0.1 8765
 This is an echo server
 $ echo "It repeats whatever I write" | nc 127.0.0.1 8765
@@ -978,17 +969,8 @@ let () =
 And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
-```scheme
-(executable
-  (name      search)
-  (libraries core async cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search,require-package=textwrap,require-package=yojson
-$ dune build search.exe
-$ ./_build/default/search.exe "Concurrent Programming" "OCaml"
+$ dune exec ./search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
 ----------------------
 
@@ -1258,11 +1240,10 @@ In addition, we'll make the necessary changes to get the list of servers on
 the command-line, and to distribute the search queries round-robin across the
 list of servers. Now, let's see what happens if we rebuild the application
 and run it giving it a list of servers, some of which won't respond to the
-query:
+query.
 
 ```sh dir=../../examples/code/async/search_with_configurable_server,non-deterministic=output
-$ dune build search.exe
-$ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune exec ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
  ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
   "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
@@ -1270,6 +1251,9 @@ $ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent 
   "Caught by monitor Tcp.close_sock_on_error"))
 [1]
 ```
+
+Note that in the above, we needed the double-dash to make it clear
+that the flags were arguments to `search.exe`, not to `dune`.
 
 As you can see, we got a "Connection refused" failure, which ends the entire
 program, even though one of the two queries would have gone through
@@ -1317,8 +1301,7 @@ Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
 ```sh dir=../../examples/code/async/search_with_error_handling,non-deterministic=output
-$ dune build search.exe
-$ ./_build/default/search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune exec ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
 
@@ -1492,8 +1475,7 @@ Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
 ```sh dir=../../examples/code/async/search_with_timeout_no_leak,non-deterministic=output
-$ dune build search.exe
-$ ./_build/default/search.exe "concurrent programming" ocaml -timeout 0.1s
+$ dune exec ./search.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
 
@@ -1657,8 +1639,7 @@ But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
 ```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
-$ dune build native_code_log_delays.exe
-$ ./_build/default/native_code_log_delays.exe
+$ dune exec native_code_log_delays.exe
 197.41058349609375us,
 Finished at: 1.2127914428710938s,
 ```
