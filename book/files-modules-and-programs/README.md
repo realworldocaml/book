@@ -145,29 +145,43 @@ With that in place, we can invoke `dune` as follows.
 $ dune build freq.bc
 ```
 
-We can run the resulting executable, `freq.bc`, from the command line. The
-following invocation extracts strings from the `ocamlopt` binary, reporting
-the most frequently occurring ones. Note that the specific results will vary
-from platform to platform, since the binary itself will differ between
-platforms. [OCaml toolchain/dune]{.idx}[native-code compiler/vs. bytecode
-compiler]{.idx}[bytecode compiler/vs. native-code compiler]{.idx}[OCaml
-toolchain/ocamlopt]{.idx}[OCaml toolchain/ocamlc]{.idx}[code
-compilers/bytecode vs. native
-code]{.idx}<a data-type="indexterm" data-startref="FILEsnglprog">&nbsp;</a><a data-type="indexterm" data-startref="Psingfil">&nbsp;</a>
+We can run the resulting executable, `freq.bc`, from the command line.
+Executables built with `dune` will be left in the `_build/default`
+directory, from which they can be invoked.  The specific invocation
+below will count the words that come up in the file `freq.ml`
+itself. [OCaml toolchain/dune]{.idx}
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-obuild,non-deterministic=command
-$ strings `which ocamlopt` | ./_build/default/freq.bc
- 92: <hov2>
- 76: list.ml
- 54: bytecomp/matching.ml
- 53: p` <
- 47: typing/env.ml
- 46: <hov>
- 43: string.ml
- 42: typing/parmatch.ml
- 41: typing/ctype.ml
- 40: utils/misc.ml
+```sh dir=../../examples/code/files-modules-and-programs/freq-obuild
+$ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
+  5: line
+  5: List
+  5: counts
+  4: count
+  4: fun
+  4: x
+  4: equal
+  3: let
+  2: f
+  2: l
 ```
+
+Conveniently, `dune` allows us to combine the building and running an
+executable into a single operation, which we can do using `dune exec`.
+
+```sh dir=../../examples/code/files-modules-and-programs/freq-obuild
+$ grep -o '[[:alpha:]]*' freq.ml | dune exec ./freq.bc
+  5: line
+  5: List
+  5: counts
+  4: count
+  4: fun
+  4: x
+  4: equal
+  3: let
+  2: f
+  2: l
+```
+
 
 ::: {data-type=note}
 ### Bytecode Versus Native Code
