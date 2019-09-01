@@ -1486,7 +1486,7 @@ In the following example, we use `choose` to ensure that the `interrupt`
 deferred becomes determined if and only if the timeout deferred is chosen.
 Here's the code:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak/search_with_timeout_no_leak.ml,part=2
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
@@ -1508,8 +1508,8 @@ Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
 ```sh dir=../../examples/code/async/search_with_timeout_no_leak,non-deterministic=output
-$ dune build search_with_timeout_no_leak.exe
-$ ./_build/default/search_with_timeout_no_leak.exe "concurrent programming" ocaml -timeout 0.1s
+$ dune build search.exe
+$ ./_build/default/search.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
 
@@ -1675,8 +1675,8 @@ busy loop will block anything else from running:
 ```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
 $ dune build native_code_log_delays.exe
 $ ./_build/default/native_code_log_delays.exe
-197.41058349609375us, 
-Finished at: 1.2127914428710938s, 
+197.41058349609375us,
+Finished at: 1.2127914428710938s,
 ```
 
 The takeaway from these examples is that predicting thread interleavings is a
