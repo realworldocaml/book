@@ -34,7 +34,7 @@
          (source_tree ../../examples/code/files-modules-and-programs/freq)
          (source_tree ../../examples/code/files-modules-and-programs/freq-cyclic1)
          (source_tree ../../examples/code/files-modules-and-programs/freq-cyclic2)
-         (source_tree ../../examples/code/files-modules-and-programs/freq-obuild)
+         (source_tree ../../examples/code/files-modules-and-programs/freq-dune)
          (source_tree ../../examples/code/files-modules-and-programs/freq-with-counter)
          (source_tree ../../examples/code/files-modules-and-programs/freq-with-missing-def)
          (source_tree ../../examples/code/files-modules-and-programs/freq-with-sig-abstract)

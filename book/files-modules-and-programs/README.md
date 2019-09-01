@@ -141,7 +141,7 @@ specifies the details of the build. [dune]{.idx}
 
 With that in place, we can invoke `dune` as follows.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-obuild
+```sh dir=../../examples/code/files-modules-and-programs/freq-dune
 $ dune build freq.bc
 ```
 
@@ -151,7 +151,7 @@ directory, from which they can be invoked.  The specific invocation
 below will count the words that come up in the file `freq.ml`
 itself. [OCaml toolchain/dune]{.idx}
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-obuild
+```sh dir=../../examples/code/files-modules-and-programs/freq-dune
 $ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
   5: line
   5: List
@@ -168,7 +168,7 @@ $ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
 Conveniently, `dune` allows us to combine the building and running an
 executable into a single operation, which we can do using `dune exec`.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-obuild
+```sh dir=../../examples/code/files-modules-and-programs/freq-dune
 $ grep -o '[[:alpha:]]*' freq.ml | dune exec ./freq.bc
   5: line
   5: List
