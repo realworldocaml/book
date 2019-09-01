@@ -1,13 +1,14 @@
 # Concurrent Programming with Async
 
-The logic of building programs that interact with the outside world is often
-dominated by waiting; waiting for the click of a mouse, or for data to be
-fetched from disk, or for space to be available on an outgoing network
-buffer. Even mildly sophisticated interactive applications are typically
-*concurrent*, needing to wait for multiple different events at the same time,
-responding immediately to whatever event happens first. [interactive
-input/concurrent programming for]{.idx}[concurrent
-programming]{.idx}[programming/concurrent programming with Async]{.idx}
+The logic of building programs that interact with the outside world is
+often dominated by waiting; waiting for the click of a mouse, or for
+data to be fetched from disk, or for space to be available on an
+outgoing network buffer. Even mildly sophisticated interactive
+applications are typically *concurrent*, needing to wait for multiple
+different events at the same time, responding immediately to whatever
+happens first. [interactive input/concurrent programming
+for]{.idx}[concurrent programming]{.idx}[programming/concurrent
+programming with Async]{.idx}
 
 One approach to concurrency is to use preemptive system threads, which is the
 dominant approach in languages like Java or C#. In this model, each task that
@@ -158,10 +159,10 @@ includes an infix operator for it: `>>=`. Using this operator, we can rewrite
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
-In the preceding code, we've dropped the parentheses around the function on
-the righthand side of the bind, and we didn't add a level of indentation for
-the contents of that function. This is standard practice for using the infix
-`bind`operator. [bind function]{.idx}
+In the preceding code, we've dropped the parentheses around the
+function on the righthand side of the bind, and we didn't add a level
+of indentation for the contents of that function. This is standard
+practice for using the infix `bind` operator. [bind function]{.idx}
 
 Now let's look at another potential use of `bind`. In this case, we'll write
 a function that counts the number of lines in a file:
@@ -176,12 +177,12 @@ Error: This expression has type int but an expression was expected of type
          'a Deferred.t
 ```
 
-This looks reasonable enough, but as you can see, the compiler is unhappy.
-The issue here is that `bind` expects a function that returns a deferred, but
-we've provided it a function that returns the nondeferred result directly. To
-make these signatures match, we need a function for taking an ordinary value
-and wrapping it in a deferred. This function is a standard part of Async and
-is called `return`: [return function]{.idx}
+This looks reasonable enough, but as you can see, the compiler is
+unhappy.  The issue here is that `bind` expects a function that
+returns a `Deferred.t`, but we've provided it a function that returns
+the result directly.  What we need is `return`, a function provided by
+Async that takes an ordinary value and wraps it up in a deferred.
+[return function]{.idx}
 
 ```ocaml env=main
 # return
@@ -272,7 +273,7 @@ explicitly.
 
 To keep things simple, we'll use the infix notation for map and bind for the
 remainder of the chapter. But once you get comfortable with Async and monadic
-programming, `Let_syntax` can make your code easier to read.
+programming, we recommend using `Let_syntax`.
 :::
 
 
@@ -372,13 +373,14 @@ which becomes determined after that time span elapses:
 module Delayer : Delayer_intf
 ```
 
-This code isn't particularly long, but it is subtle. In particular, note how
-the queue of thunks is used to ensure that the enqueued actions are run in
-order, even if the thunks scheduled by `upon` are run out of order. This kind
-of subtlety is typical of code that involves ivars and `upon`, and because of
-this, you should stick to the simpler map/bind/return style of working with
-deferreds when you
-can.<a data-type="indexterm" data-startref="ALbas">&nbsp;</a>
+This code isn't particularly long, but it is subtle. In particular,
+note how the queue of thunks is used to ensure that the enqueued
+actions are run in the order they were scheduled, even if the thunks
+scheduled by `upon` are run out of order. This kind of subtlety is
+typical of code that involves ivars and `upon`, and because of this,
+you should stick to the simpler map/bind/return style of working with
+deferreds when you can.<a data-type="indexterm"
+data-startref="ALbas">&nbsp;</a>
 
 ::: {data-type=note}
 #### Understanding `bind` in terms of ivars and `upon`
@@ -460,22 +462,41 @@ condition, the loop is ended. The deferred returned by a call to
 `copy_blocks` becomes determined only once the end-of-file condition is hit.
 [end-of-file condition]{.idx}
 
-One important aspect of how this is written is that it uses *pushback*, which
-is to say that if the reader can't make progress reading, the writer will
-stop writing. If you don't implement pushback in your servers, then a stopped
-client can cause your program to leak memory, since you'll need to allocate
-space for the data that's been read in but not yet written out.
-[pushback]{.idx}
+One important aspect of how `copy_blocks` is written is that it provides
+*pushback*, which is to say that if the process can't make progress
+writing, it will stop reading. If you don't implement pushback in your
+servers, then anything that prevents you from writing (e.g., a client
+that is unable to keep up) will cause your program to allocate
+unbounded amounts of memory, as it keeps track of all the data it
+intends to write but hasn't been able to yet.
 
-You might also be concerned that the chain of deferreds that is built up as
-you go through the loop would lead to a memory leak. After all, this code
-constructs an ever-growing chain of binds, each of which creates a deferred.
-In this case, however, all of the deferreds should become determined
-precisely when the final deferred in the chain is determined, in this case,
-when the `Eof` condition is hit. Because of this, we could safely replace all
-of these deferreds with a single deferred. Async has logic to do just this,
-and so there's no memory leak after all. This is essentially a form of
-tail-call optimization, lifted to the Async monad. [tail calls]{.idx}
+::: {data-type=note}
+### Tail-calls and chains of deferreds
+
+There's another memory problem you might be concerned about, which is
+the allocation of deferreds.  If you think about the execution of
+`copy_blocks`, you'll see it's creating a chain of deferreds, two per
+time through the loop.  The length of this chain is unbounded, and so,
+naively, you'd think this would take up an unbounded amount of memory
+as the echo process continues.
+
+Happily, it turns out that this is a special case that Async knows how
+to optimize.  In particular, the whole chain of deferreds should
+become determined precisely when the final deferred in the chain is
+determined, in this case, when the `Eof` condition is hit.  Because of
+this, we could safely replace all of these deferreds with a single
+deferred.  Async does just this, and so there's no memory leak after
+all.
+
+This is essentially a form of tail-call optimization, lifted to the
+Async monad.  Indeed, you can tell that the bind in question doesn't
+lead to a memory leak in more or less the same way you can tell that
+the tail recursion optimization should apply, which is that the bind
+that creates the deferred is in tail-position.  In other words,
+nothing is done to that deferred once it's created; it's simply
+returned as is.  [tail calls]{.idx}
+
+:::
 
 `copy_blocks` provides the logic for handling a client connection, but we
 still need to set up a server to receive such connections and dispatch to
@@ -498,18 +519,19 @@ let run () =
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 ```
 
-The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which is a
-handle to the server that lets you shut the server down. We don't use that
-functionality here, so we explicitly ignore `server` to suppress the
-unused-variables error. We put in a type annotation around the ignored value
-to make the nature of the value we're ignoring
-<span class="keep-together">explicit</span>.
+The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which
+is a handle to the server that lets you shut the server down. We don't
+use that functionality here, so we explicitly ignore `server` to
+suppress the unused-variables error. We put in a type annotation
+around the ignored value to make the nature of the value we're
+ignoring explicit.
 
-The most important argument to `Tcp.Server.create` is the final one, which is
-the client connection handler. Notably, the preceding code does nothing
-explicit to close down the client connections when the communication is done.
-That's because the server will automatically shut down the connection once
-the deferred returned by the handler becomes determined.
+The most important argument to `Tcp.Server.create` is the final one,
+which is the client connection handler. Notably, the preceding code
+does nothing explicit to close down the client connections when the
+communication is done.  That's because the server will automatically
+shut down the connection once the deferred returned by the handler
+becomes determined.
 
 Finally, we need to initiate the server and start the Async scheduler:
 
@@ -525,9 +547,10 @@ scheduler. It can be a bewildering mistake, because without the scheduler,
 your program won't do anything at all; even calls to `printf` won't reach the
 terminal.
 
-It's worth noting that even though we didn't spend much explicit effort on
-thinking about multiple clients, this server is able to handle many
-concurrent clients without further modification.
+It's worth noting that even though we didn't spend much explicit
+effort on thinking about multiple clients, this server is able to
+handle many clients concurrently connecting and reading and writing
+data.
 
 Now that we have the echo server, we can connect to the echo server using the
 netcat tool, which is invoked as `nc`.  Note that we use `dune exec`
@@ -539,11 +562,11 @@ $ echo "This is an echo server" | nc 127.0.0.1 8765
 This is an echo server
 $ echo "It repeats whatever I write" | nc 127.0.0.1 8765
 It repeats whatever I write
-$ killall -9 echo.exe
+$ killall echo.exe
 ```
 
-<aside data-type="sidebar">
-<h5>Functions that Never Return</h5>
+::: {data-type=note}
+##### Functions that Never Return
 
 You might wonder what's going on with the call to `never_returns`.
 `never_returns` is an idiom that comes from Core that is used to mark
@@ -610,7 +633,7 @@ val do_stuff : int -> int = <fun>
 Thus, we got the compilation to go through by explicitly marking in the
 source that the call to `loop_forever` never returns.
 
-</aside>
+:::
 
 ### Improving the Echo Server
 
