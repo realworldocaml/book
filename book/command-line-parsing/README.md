@@ -177,9 +177,9 @@ exec`, which you can use to query the version information for the
 binary you just compiled.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
-$ dune exec -- md5.exe -version
+$ dune exec -- ./md5.exe -version
 1.0
-$ dune exec -- md5.exe -build-info
+$ dune exec -- ./md5.exe -build-info
 RWO
 ```
 
@@ -192,7 +192,7 @@ case of Mercurial).
 We can invoke our binary with `-help` to see the auto-generated help.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
-$ dune exec -- md5.exe -help
+$ dune exec -- ./md5.exe -help
 Generate an MD5 hash of the input data
 
   md5.exe FILENAME
@@ -213,7 +213,7 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
 $ ./_build/default/md5.exe md5.ml
-755e1de2f36cfffd870269161df6a3f2
+12bd09922dafc27038e092df39de646d
 ```
 
 And that's all it took to build our little MD5 utility! Here's a complete
@@ -296,7 +296,7 @@ arguments.
 ```sh dir=../../examples/code/command-line-parsing/md5_multiarg
 $ dune build md5.exe
 $ ./_build/default/md5.exe 5 md5.ml
-9b78e
+a8416
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -436,7 +436,7 @@ try to open a special device such as `/dev/null`:
 ```sh dir=../../examples/code/command-line-parsing/md5_with_custom_arg
 $ dune build md5.exe
 $ ./_build/default/md5.exe md5.ml
-6501e9c7bf20b1dc56f015e341f79833
+d3d6bcc22e120b0f0930c0d096c9cb93
 $ ./_build/default/md5.exe /dev/null
 '/dev/null' is not a regular file.
 [1]
@@ -498,8 +498,8 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open files =
-        anon (sequence ("filename" %: Filename.arg_type))
+      let%map_open filename =
+        anon (maybe ("filename" %: Filename.arg_type))
       in
       fun () -> do_hash filename)
 
@@ -513,8 +513,8 @@ the standard input or a file, and then the rest of the command is similar to
 our previous examples.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file
-$ cat md5.ml | dune exec -- md5.exe
-27bf1f2dbadd4cae84f1da4dfe8b5cb3
+$ cat md5.ml | dune exec -- ./md5.exe
+6a970b4718a7fa2c340fcb428ea6d541
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -557,7 +557,7 @@ Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-27bf1f2dbadd4cae84f1da4dfe8b5cb3
+a3e48fe50b7361508c830fe8a2768564
 ```
 
 ### Sequences of Arguments
@@ -665,7 +665,7 @@ prepend its `doc` text with a blank space. The help text for the preceding
 code looks like this:
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_flags
-$ dune exec -- md5.exe -help
+$ dune exec -- ./md5.exe -help
 Generate an MD5 hash of the input data
 
   md5.exe [FILENAME]
@@ -1029,18 +1029,18 @@ variable set to any value.
 For example, let's try it on our MD5 example from earlier, assuming that the
 binary is called `md5` in the current directory:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_flags
+```sh dir=../../examples/code/command-line-parsing/md5_with_flags,non-deterministic=output
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 dune exec -- ./md5.exe
-function _jsautocom_23483 {
+function _jsautocom_16984 {
   export COMP_CWORD
-  COMP_WORDS[0]=./_build/default/md5.exe
+  COMP_WORDS[0]=./md5.exe
   if type readarray > /dev/null
   then readarray -t COMPREPLY < <("${COMP_WORDS[@]}")
   else IFS="
 " read -d " " -A COMPREPLY < <("${COMP_WORDS[@]}")
   fi
 }
-complete -F _jsautocom_23483 ./_build/default/md5.exe
+complete -F _jsautocom_16984 ./md5.exe
 ```
 
 Recall that we used the `Arg_type.file` to specify the argument type. This
