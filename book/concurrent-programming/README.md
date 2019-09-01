@@ -1413,7 +1413,7 @@ The following code shows how you can change `get_definition` and
 `get_definition_with_timeout` to cancel the `get` call if the timeout
 expires:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml,part=1
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
   try_with (fun () ->
@@ -1431,7 +1431,7 @@ Next, we'll modify `get_definition_with_timeout` to create a deferred to pass
 in to `get_definition`, which will become determined when our timeout
 expires:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml,part=2
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->
