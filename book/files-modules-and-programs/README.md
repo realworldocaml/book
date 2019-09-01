@@ -141,33 +141,47 @@ specifies the details of the build. [dune]{.idx}
 
 With that in place, we can invoke `dune` as follows.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-obuild
+```sh dir=../../examples/code/files-modules-and-programs/freq-dune
 $ dune build freq.bc
 ```
 
-We can run the resulting executable, `freq.bc`, from the command line. The
-following invocation extracts strings from the `ocamlopt` binary, reporting
-the most frequently occurring ones. Note that the specific results will vary
-from platform to platform, since the binary itself will differ between
-platforms. [OCaml toolchain/dune]{.idx}[native-code compiler/vs. bytecode
-compiler]{.idx}[bytecode compiler/vs. native-code compiler]{.idx}[OCaml
-toolchain/ocamlopt]{.idx}[OCaml toolchain/ocamlc]{.idx}[code
-compilers/bytecode vs. native
-code]{.idx}<a data-type="indexterm" data-startref="FILEsnglprog">&nbsp;</a><a data-type="indexterm" data-startref="Psingfil">&nbsp;</a>
+We can run the resulting executable, `freq.bc`, from the command line.
+Executables built with `dune` will be left in the `_build/default`
+directory, from which they can be invoked.  The specific invocation
+below will count the words that come up in the file `freq.ml`
+itself. [OCaml toolchain/dune]{.idx}
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-obuild,non-deterministic=command
-$ strings `which ocamlopt` | ./_build/default/freq.bc
- 92: <hov2>
- 76: list.ml
- 54: bytecomp/matching.ml
- 53: p` <
- 47: typing/env.ml
- 46: <hov>
- 43: string.ml
- 42: typing/parmatch.ml
- 41: typing/ctype.ml
- 40: utils/misc.ml
+```sh dir=../../examples/code/files-modules-and-programs/freq-dune
+$ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
+  5: line
+  5: List
+  5: counts
+  4: count
+  4: fun
+  4: x
+  4: equal
+  3: let
+  2: f
+  2: l
 ```
+
+Conveniently, `dune` allows us to combine the building and running an
+executable into a single operation, which we can do using `dune exec`.
+
+```sh dir=../../examples/code/files-modules-and-programs/freq-dune
+$ grep -o '[[:alpha:]]*' freq.ml | dune exec ./freq.bc
+  5: line
+  5: List
+  5: counts
+  4: count
+  4: fun
+  4: x
+  4: equal
+  3: let
+  2: f
+  2: l
+```
+
 
 ::: {data-type=note}
 ### Bytecode Versus Native Code
@@ -579,11 +593,9 @@ host in the other session, when it should be comparing the usernames in both
 cases. Because of how we defined our types, however, the compiler will flag
 this bug for us.
 
-```sh dir=../../examples/code/files-modules-and-programs/session_info,non-deterministic=output
+```sh dir=../../examples/code/files-modules-and-programs/session_info
 $ dune build session_info.exe
-      ocamlc .session_info.eobjs/session_info.{cmi,cmo,cmt} (exit 2)
-(cd _build/default && /Users/thomas/git/rwo/book/_opam/bin/ocamlc.opt -w -40 -g -bin-annot -I /Users/thomas/git/rwo/book/_opam/lib/base -I /Users/thomas/git/rwo/book/_opam/lib/base/caml -I /Users/thomas/git/rwo/book/_opam/lib/base/md5 -I /Users/thomas/git/rwo/book/_opam/lib/base/shadow_stdlib -I /Users/thomas/git/rwo/book/_opam/lib/bin_prot -I /Users/thomas/git/rwo/book/_opam/lib/bin_prot/shape -I /Users/thomas/git/rwo/book/_opam/lib/core_kernel -I /Users/thomas/git/rwo/book/_opam/lib/core_kernel/base_for_tests -I /Users/thomas/git/rwo/book/_opam/lib/fieldslib -I /Users/thomas/git/rwo/book/_opam/lib/jane-street-headers -I /Users/thomas/git/rwo/book/_opam/lib/ppx_assert/runtime-lib -I /Users/thomas/git/rwo/book/_opam/lib/ppx_bench/runtime-lib -I /Users/thomas/git/rwo/book/_opam/lib/ppx_compare/runtime-lib -I /Users/thomas/git/rwo/book/_opam/lib/ppx_expect/collector -I /Users/thomas/git/rwo/book/_opam/lib/ppx_expect/common -I /Users/thomas/git/rwo/book/_opam/lib/ppx_expect/config -I /Users/thomas/git/rwo/book/_opam/lib/ppx_hash/runtime-lib -I /Users/thomas/git/rwo/book/_opam/lib/ppx_inline_test/config -I /Users/thomas/git/rwo/book/_opam/lib/ppx_inline_test/runtime-lib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib/0 -I /Users/thomas/git/rwo/book/_opam/lib/stdio -I /Users/thomas/git/rwo/book/_opam/lib/typerep -I /Users/thomas/git/rwo/book/_opam/lib/variantslib -no-alias-deps -I .session_info.eobjs -o .session_info.eobjs/session_info.cmo -c -impl session_info.ml)
-File "session_info.ml", line 27, characters 15-22:
+File "session_info.ml", line 27, characters 23-30:
 Error: This expression has type Hostname.t
        but an expression was expected of type Username.t
 [1]
@@ -817,20 +829,17 @@ val touch : t -> string -> t
 
 and we try to compile, we'll get the following error.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch,non-deterministic=output
+```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch
 $ dune build freq.bc
-      ocamlc .freq.eobjs/counter.{cmo,cmt} (exit 2)
-(cd _build/default && /Users/thomas/git/rwo/book/_opam/bin/ocamlc.opt -w -40 -g -bin-annot -I /Users/thomas/git/rwo/book/_opam/lib/base -I /Users/thomas/git/rwo/book/_opam/lib/base/caml -I /Users/thomas/git/rwo/book/_opam/lib/base/shadow_stdlib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib/0 -I /Users/thomas/git/rwo/book/_opam/lib/stdio -no-alias-deps -I .freq.eobjs -o .freq.eobjs/counter.cmo -c -impl counter.ml)
 File "counter.ml", line 1:
 Error: The implementation counter.ml
-       does not match the interface .freq.eobjs/counter.cmi:
+       does not match the interface .freq.eobjs/byte/counter.cmi:
        Values do not match:
          val touch :
-           ('a, Base__Int.t, 'b) Base.Map.t ->
-           'a -> ('a, Base__Int.t, 'b) Base.Map.t
+           ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
        is not included in
          val touch : t -> Base.string -> t
-       File "counter.mli", line 11, characters 0-28: Expected declaration
+       File "counter.mli", line 16, characters 0-28: Expected declaration
        File "counter.ml", line 9, characters 4-9: Actual declaration
 [1]
 ```
@@ -925,10 +934,8 @@ let singleton l = Counter.touch Counter.empty
 
 we'll see this error when we try to build:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic1,non-deterministic=output
+```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic1
 $ dune build freq.bc
-      ocamlc .freq.eobjs/counter.{cmi,cmo,cmt} (exit 2)
-(cd _build/default && /Users/thomas/git/rwo/book/_opam/bin/ocamlc.opt -w -40 -g -bin-annot -I /Users/thomas/git/rwo/book/_opam/lib/base -I /Users/thomas/git/rwo/book/_opam/lib/base/caml -I /Users/thomas/git/rwo/book/_opam/lib/base/shadow_stdlib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib -I /Users/thomas/git/rwo/book/_opam/lib/sexplib/0 -I /Users/thomas/git/rwo/book/_opam/lib/stdio -no-alias-deps -I .freq.eobjs -o .freq.eobjs/counter.cmo -c -impl counter.ml)
 File "counter.ml", line 18, characters 18-31:
 Error: Unbound module Counter
 [1]
@@ -945,7 +952,7 @@ let _build_counts = Freq.build_counts
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2,non-deterministic
+```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2
 $ dune build freq.bc
 Error: Dependency cycle between the following files:
    _build/default/.freq.eobjs/counter.impl.all-deps
