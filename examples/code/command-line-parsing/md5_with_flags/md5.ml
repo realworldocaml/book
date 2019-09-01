@@ -23,7 +23,8 @@ let command =
         use_string = flag "-s" (optional string)
           ~doc:"string Checksum the given string"
       and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
-      and filename = anon (maybe_with_default "-" ("filename" %: file))
+      and filename =
+        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
       in
       fun () ->
         if trial then printf "Running time trial\n"
