@@ -1,16 +1,15 @@
 open Core
 
-let get_inchan = function
+let get_contents = function
   | None | Some "-" ->
-    In_channel.stdin
+    In_channel.(input_all stdin)
   | Some filename ->
-    In_channel.create ~binary:true filename
+    In_channel.(read_all filename)
 
 let do_hash filename =
-  let open Cryptokit in
-  get_inchan filename
-  |> hash_channel (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
+  get_contents filename
+  |> Md5.digest_string
+  |> Md5.to_hex
   |> print_endline
 
 let command =
