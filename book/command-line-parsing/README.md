@@ -168,9 +168,8 @@ You'll need the following `dune` file:
   (preprocess (pps ppx_jane)))
 ```
 
-At which point you can build and execute the program using `dune
-exec`, which you can use to query the version information for the
-binary you just compiled.
+At which point we can build and execute the program using `dune
+exec`. Let's use this to query version information from the binary.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
 $ dune exec -- ./md5.exe -version
@@ -208,7 +207,7 @@ If you supply the `filename` argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
-$ ./_build/default/md5.exe md5.ml
+$ dune exec -- md5.exe md5.ml
 fdac6d086494068b8c22ddf38d19c51d
 ```
 
@@ -662,7 +661,7 @@ Generate an MD5 hash of the input data
   [-help]        print this help text and exit
                  (alias: -?)
 
-$ ./_build/default/md5.exe -s "ocaml rocks"
+$ dune exec -- md5.exe -s "ocaml rocks"
 5a118fe92ac3b6c7854c595ecf6419cb
 ```
 
