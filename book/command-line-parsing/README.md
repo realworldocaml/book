@@ -38,7 +38,7 @@ In this chapter, we'll:
 ## Basic Command-Line Parsing
 
 Let's start by working through a clone of the `md5sum` command that is
-present on most Linux installations (the equivalent command on Mac OS X is
+present on most Linux installations (the equivalent command on macOS is
 simply `md5`). The following function defined below reads in the contents of
 a file, applies the MD5 one-way cryptographic hash function to the data, and
 outputs an ASCII hex representation of the result: [MD5 one-way cryptographic
@@ -48,12 +48,9 @@ hash function]{.idx}[command-line parsing/basic approach to]{.idx}
 open Core
 
 let do_hash file =
-  In_channel.with_file file ~f:(fun ic ->
-    let open Cryptokit in
-    hash_channel (Hash.md5 ()) ic
-    |> transform_string (Hexa.encode ())
-    |> print_endline
-  )
+  Md5.digest_file_blocking file
+  |> Md5.to_hex
+  |> print_endline
 ```
 
 The `do_hash` function accepts a `filename` parameter and prints the
@@ -161,42 +158,36 @@ let () =
 ```
 
 `Command.run` takes a couple of optional arguments that are useful to
-identify which version of the binary you are running in production. You'll
-need to install Cryptokit via `opam install cryptokit` before building this
-example. Once that's completed, run the following to compile the binary.
+identify which version of the binary you are running in production.
+You'll need the following `dune` file:
 
 ```scheme
 (executable
   (name       md5)
-  (libraries  core cryptokit)
+  (libraries  core)
   (preprocess (pps ppx_jane)))
 ```
 
+At which point we can build and execute the program using `dune
+exec`. Let's use this to query version information from the binary.
 
-
-```sh dir=../../examples/code/command-line-parsing/md5,skip
-$ dune build md5.exe
-```
-
-You can now query the version information for the binary you just compiled:
-
-```sh dir=../../examples/code/command-line-parsing/md5,skip
-$ ./_build/default/md5.exe -version
+```sh dir=../../examples/code/command-line-parsing/md5
+$ dune exec -- ./md5.exe -version
 1.0
-$ ./_build/default/md5.exe -build-info
+$ dune exec -- ./md5.exe -build-info
 RWO
 ```
 
 The versions that you see in the output were defined via the optional
 arguments to `Command.run`. You can leave these blank in your own programs or
 get your build system to generate them directly from your version control
-system (e.g., by running `hg id` to generate a build revision number, in the
-case of Mercurial).
+system.  Dune provides a [`dune-build-info` library](https://dune.readthedocs.io/en/stable/executables.html#embedding-build-information-into-executables) that automates this
+process for most common workflows.
 
 We can invoke our binary with `-help` to see the auto-generated help.
 
-```sh dir=../../examples/code/command-line-parsing/md5,skip
-$ ./_build/default/md5.exe -help
+```sh dir=../../examples/code/command-line-parsing/md5
+$ dune exec -- ./md5.exe -help
 Generate an MD5 hash of the input data
 
   md5.exe FILENAME
@@ -215,9 +206,9 @@ More detailed information
 If you supply the `filename` argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
-```sh dir=../../examples/code/command-line-parsing/md5,non-deterministic=output,skip
-$ ./_build/default/md5.exe ./_build/default/md5.exe
-755e1de2f36cfffd870269161df6a3f2
+```sh dir=../../examples/code/command-line-parsing/md5
+$ dune exec -- ./md5.exe md5.ml
+fdac6d086494068b8c22ddf38d19c51d
 ```
 
 And that's all it took to build our little MD5 utility! Here's a complete
@@ -228,12 +219,9 @@ removing intermediate variables.
 open Core
 
 let do_hash file =
-  In_channel.with_file file ~f:(fun ic ->
-    let open Cryptokit in
-    hash_channel (Hash.md5 ()) ic
-    |> transform_string (Hexa.encode ())
-    |> print_endline
-  )
+  Md5.digest_file_blocking file
+  |> Md5.to_hex
+  |> print_endline
 
 let command =
   Command.basic
@@ -271,13 +259,10 @@ is the filename.
 open Core
 
 let do_hash hash_length filename =
-  In_channel.with_file filename ~f:(fun ic ->
-    let open Cryptokit in
-    hash_channel (Hash.md5 ()) ic
-    |> transform_string (Hexa.encode ())
-    |> (fun s -> String.prefix s hash_length)
-    |> print_endline
-  )
+  Md5.digest_file_blocking filename
+  |> Md5.to_hex
+  |> (fun s -> String.prefix s hash_length)
+  |> print_endline
 
 let command =
   Command.basic
@@ -297,10 +282,9 @@ let () =
 Building and running this command, we can see that it now indeed expects two
 arguments.
 
-```sh dir=../../examples/code/command-line-parsing/md5_multiarg,non-deterministic=output,skip
-$ dune build md5.exe
-$ ./_build/default/md5.exe 5 ./_build/default/md5.exe
-9b78e
+```sh dir=../../examples/code/command-line-parsing/md5_multiarg
+$ dune exec -- ./md5.exe 5 md5.ml
+c45ae
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -376,8 +360,8 @@ Table:  Conversion functions defined in `Command.Param`
 
 
 
-We can tighten up the specification of the command to `file` to reflect that
-the argument must be a valid filename, and not just any string.
+We can tighten up the specification of the command to `Filename.arg_type` to
+reflect that the argument must be a valid filename, and not just any string.
 
 ```ocaml file=../../examples/code/command-line-parsing/md5_as_filename/md5.ml,part=1
 let command =
@@ -385,7 +369,7 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open file = anon ("filename" %: file) in
+      let%map_open file = anon ("filename" %: Filename.arg_type) in
       fun () -> do_hash file)
 ```
 
@@ -404,12 +388,9 @@ file type that can't be fully read. [arguments/defining custom types]{.idx}
 open Core
 
 let do_hash file =
-  In_channel.with_file file ~f:(fun ic ->
-    let open Cryptokit in
-    hash_channel (Hash.md5 ()) ic
-    |> transform_string (Hexa.encode ())
-    |> print_endline
-  )
+  Md5.digest_file_blocking file
+  |> Md5.to_hex
+  |> print_endline
 
 let regular_file =
   Command.Arg_type.create
@@ -437,18 +418,17 @@ same string but first checks that the file exists and is a regular file type.
 When you build and run this code, you will see the new error messages if you
 try to open a special device such as `/dev/null`:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_custom_arg,non-deterministic=output,skip
-$ dune build md5.exe
-$ ./_build/default/md5.exe /etc/services
-6501e9c7bf20b1dc56f015e341f79833
-$ ./_build/default/md5.exe /dev/null
+```sh dir=../../examples/code/command-line-parsing/md5_with_custom_arg
+$ dune exec -- ./md5.exe md5.ml
+dcf52e01189f63155410b17f252cf676
+$ dune exec -- ./md5.exe /dev/null
 '/dev/null' is not a regular file.
 [1]
 ```
 
 ### Optional and Default Arguments
 
-A more realistic MD5 binary could also read from the standard input if a
+A more realistic `md5` binary could also read from the standard input if a
 `filename` isn't specified. To do this, we need to declare the filename
 argument as optional, which we can do with the `maybe` operator.
 [arguments/default arguments]{.idx}[default arguments]{.idx}[optional
@@ -466,10 +446,10 @@ let command =
 
 But building this results in a compile-time error.
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file_broken,skip
+```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file_broken
 $ dune build md5.exe
 ...
-File "md5.ml", line 18, characters 24-32:
+File "md5.ml", line 15, characters 24-32:
 Error: This expression has type string option
        but an expression was expected of type string
 [1]
@@ -484,17 +464,16 @@ no file is specified.
 ```ocaml file=../../examples/code/command-line-parsing/md5_with_optional_file/md5.ml
 open Core
 
-let get_inchan = function
+let get_contents = function
   | None | Some "-" ->
-    In_channel.stdin
+    In_channel.input_all In_channel.stdin
   | Some filename ->
-    In_channel.create ~binary:true filename
+    In_channel.read_all filename
 
 let do_hash filename =
-  let open Cryptokit in
-  get_inchan filename
-  |> hash_channel (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
+  get_contents filename
+  |> Md5.digest_string
+  |> Md5.to_hex
   |> print_endline
 
 let command =
@@ -502,7 +481,9 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open filename = anon (maybe ("filename" %: file)) in
+      let%map_open filename =
+        anon (maybe ("filename" %: Filename.arg_type))
+      in
       fun () -> do_hash filename)
 
 let () =
@@ -510,14 +491,13 @@ let () =
 ```
 
 The `filename` parameter to `do_hash` is now a `string option` type. This is
-resolved into an input channel via `get_inchan` to determine whether to open
+resolved into a string via `get_contents` to determine whether to rad
 the standard input or a file, and then the rest of the command is similar to
 our previous examples.
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file,non-deterministic=output,skip
-$ dune build md5.exe
-$ cat /etc/services | ./_build/default/md5.exe
-27bf1f2dbadd4cae84f1da4dfe8b5cb3
+```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file
+$ cat md5.ml | dune exec -- ./md5.exe
+e533f209e966f6c6c60f909f651fc24d
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -531,15 +511,14 @@ replaces `maybe` with `maybe_with_default`:
 ```ocaml file=../../examples/code/command-line-parsing/md5_with_default_file/md5.ml
 open Core
 
-let get_inchan = function
-  | "-"      -> In_channel.stdin
-  | filename -> In_channel.create ~binary:true filename
+let get_contents = function
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
 
 let do_hash filename =
-  let open Cryptokit in
-  get_inchan filename
-  |> hash_channel (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
+  get_contents filename
+  |> Md5.digest_string
+  |> Md5.to_hex
   |> print_endline
 
 let command =
@@ -547,7 +526,9 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open filename = anon (maybe_with_default "-" ("filename" %: file)) in
+      let%map_open filename =
+        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+      in
       fun () -> do_hash filename)
 
 let () =
@@ -556,10 +537,9 @@ let () =
 
 Building and running this confirms that it has the same behavior as before.
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_default_file,non-deterministic=output,skip
-$ dune build md5.exe
-$ cat /etc/services | ./_build/default/md5.exe
-27bf1f2dbadd4cae84f1da4dfe8b5cb3
+```sh dir=../../examples/code/command-line-parsing/md5_with_default_file
+$ cat md5.ml | dune exec -- ./md5.exe
+560f6fd99e100c7df0ef18161e9e8626
 ```
 
 ### Sequences of Arguments
@@ -571,10 +551,14 @@ to process on the command line. [arguments/sequences of]{.idx}
 ```ocaml file=../../examples/code/command-line-parsing/md5_sequence/md5.ml
 open Core
 
-let do_hash filename ic =
-  let open Cryptokit in
-  hash_channel (Hash.md5 ()) ic
-  |> transform_string (Hexa.encode ())
+let get_contents = function
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
+
+let do_hash filename =
+  get_contents filename
+  |> Md5.digest_string
+  |> Md5.to_hex
   |> fun md5 -> printf "MD5 (%s) = %s\n" filename md5
 
 let command =
@@ -582,13 +566,13 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open files = anon (sequence ("filename" %: file)) in
+      let%map_open files =
+        anon (sequence ("filename" %: Filename.arg_type))
+      in
       fun () ->
         match files with
-        | [] -> do_hash "-" In_channel.stdin
-        | _ ->
-          List.iter files ~f:(fun file ->
-              In_channel.with_file ~f:(do_hash file) file))
+        | [] -> do_hash "-"
+        | _  -> List.iter files ~f:do_hash)
 
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command
@@ -600,9 +584,8 @@ using standard input, just as our previous `maybe` and `maybe_with_default`
 examples did. If the list of files isn't empty, then it opens up each file
 and runs them through `do_hash` sequentially.
 
-```sh dir=../../examples/code/command-line-parsing/md5_sequence,non-deterministic=output,skip
-$ dune build md5.exe
-$ ./_build/default/md5.exe /etc/services ./_build/default/md5.exe
+```sh dir=../../examples/code/command-line-parsing/md5_sequence,non-deterministic=output
+$ dune exec -- ./md5.exe /etc/services ./_build/default/md5.exe
 MD5 (/etc/services) = 6501e9c7bf20b1dc56f015e341f79833
 MD5 (./_build/default/md5.exe) = 6602408aa98478ba5617494f7460d3d9
 ```
@@ -621,20 +604,19 @@ command line and `-t` runs a self-test. The complete example follows.
 
 ```ocaml file=../../examples/code/command-line-parsing/md5_with_flags/md5.ml
 open Core
-open Cryptokit
 
 let checksum_from_string buf =
-  hash_string (Hash.md5 ()) buf
-  |> transform_string (Hexa.encode ())
+  Md5.digest_string buf
+  |> Md5.to_hex
   |> print_endline
 
 let checksum_from_file filename =
-  let ic = match filename with
-    | "-" -> In_channel.stdin
-    | _   -> In_channel.create ~binary:true filename
+  let contents = match filename with
+    | "-"      -> In_channel.input_all In_channel.stdin
+    | filename -> In_channel.read_all filename
   in
-  hash_channel (Hash.md5 ()) ic
-  |> transform_string (Hexa.encode ())
+  Md5.digest_string contents
+  |> Md5.to_hex
   |> print_endline
 
 let command =
@@ -645,7 +627,8 @@ let command =
         use_string = flag "-s" (optional string)
           ~doc:"string Checksum the given string"
       and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
-      and filename = anon (maybe_with_default "-" ("filename" %: file))
+      and filename =
+        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
       in
       fun () ->
         if trial then printf "Running time trial\n"
@@ -663,9 +646,8 @@ the full help text. Notice that the `-t` flag has no argument, and so we
 prepend its `doc` text with a blank space. The help text for the preceding
 code looks like this:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_flags,skip
-$ dune build md5.exe
-$ dune exec -- md5.exe -help
+```sh dir=../../examples/code/command-line-parsing/md5_with_flags
+$ dune exec -- ./md5.exe -help
 Generate an MD5 hash of the input data
 
   md5.exe [FILENAME]
@@ -679,7 +661,7 @@ Generate an MD5 hash of the input data
   [-help]        print this help text and exit
                  (alias: -?)
 
-$ ./_build/default/md5.exe -s "ocaml rocks"
+$ dune exec -- ./md5.exe -s "ocaml rocks"
 5a118fe92ac3b6c7854c595ecf6419cb
 ```
 
@@ -719,15 +701,15 @@ hierarchy to the command-line interface. [subcommands, grouping
 of]{.idx}[OPAM package manager]{.idx}[command-line parsing/subcommand
 grouping]{.idx}
 
-You'll have run across this style already when using the OPAM package manager
-(or, in the non-OCaml world, the Git or Mercurial commands). OPAM exposes
+You'll have run across this style already when using the opam package manager
+(or, in the non-OCaml world, the Git or Mercurial commands). opam exposes
 commands in this form:
 
 ```
 $ opam config env
 $ opam remote list -k git
 $ opam install --help
-$ opam install cryptokit --verbose
+$ opam install core --verbose
 ```
 
 The `config`, `remote`, and `install` keywords form a logical grouping of
@@ -781,7 +763,6 @@ Everything in this command should be familiar to you by now, and it works as
 you might expect.
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_days
-$ dune build cal.exe
 $ dune exec -- ./cal.exe -help
 Add [days] to the [base] date and print day
 
@@ -851,7 +832,6 @@ reflects the subcommands we just added.
 
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_sub_days
-$ dune build cal.exe
 $ dune exec -- ./cal.exe -help
 Manipulate dates
 
@@ -870,9 +850,9 @@ We can invoke the two commands we just defined to verify that they work and
 see the date parsing in action:
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_sub_days
-$ dune exec ./cal.exe add 2012-12-25 40
+$ dune exec -- ./cal.exe add 2012-12-25 40
 2013-02-03
-$ dune exec ./cal.exe diff 2012-12-25 2012-11-01
+$ dune exec -- ./cal.exe diff 2012-12-25 2012-11-01
 54 days
 ```
 
@@ -916,7 +896,7 @@ let add_days base days =
 
 let prompt_for_string name of_string =
   printf "enter %s: %!" name;
-  match In_channel.(input_line stdin) with
+  match In_channel.input_line In_channel.stdin with
   | None -> failwith "no value entered. aborting."
   | Some line -> of_string line
 
@@ -974,7 +954,6 @@ We can see the prompting behavior if we run the program without providing the
 second argument.
 
 ```sh dir=../../examples/code/command-line-parsing/cal_add_interactive2
-$ dune build cal.exe
 $ echo 35 | dune exec -- ./cal.exe 2013-12-01
 enter days: 2014-01-05
 ```
@@ -1032,18 +1011,18 @@ variable set to any value.
 For example, let's try it on our MD5 example from earlier, assuming that the
 binary is called `md5` in the current directory:
 
-```sh dir=../../examples/code/command-line-parsing/md5_with_flags,non-deterministic=output,skip
-$ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./_build/default/md5.exe
-function _jsautocom_23483 {
+```sh dir=../../examples/code/command-line-parsing/md5_with_flags,non-deterministic=output
+$ env COMMAND_OUTPUT_INSTALLATION_BASH=1 dune exec -- ./md5.exe
+function _jsautocom_16984 {
   export COMP_CWORD
-  COMP_WORDS[0]=./_build/default/md5.exe
+  COMP_WORDS[0]=./md5.exe
   if type readarray > /dev/null
   then readarray -t COMPREPLY < <("${COMP_WORDS[@]}")
   else IFS="
 " read -d " " -A COMPREPLY < <("${COMP_WORDS[@]}")
   fi
 }
-complete -F _jsautocom_23483 ./_build/default/md5.exe
+complete -F _jsautocom_16984 ./md5.exe
 ```
 
 Recall that we used the `Arg_type.file` to specify the argument type. This
@@ -1114,4 +1093,3 @@ The `Arg` module
   `getopt`-like interface. It also automates the generation of UNIX man pages
   as part of the specification. Cmdliner is the parser used by OPAM to manage
   its command line.
-

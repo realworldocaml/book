@@ -1,14 +1,13 @@
 open Core
 
-let get_inchan = function
-  | "-"      -> In_channel.stdin
-  | filename -> In_channel.create ~binary:true filename
+let get_contents = function
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
 
 let do_hash filename =
-  let open Cryptokit in
-  get_inchan filename
-  |> hash_channel (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
+  get_contents filename
+  |> Md5.digest_string
+  |> Md5.to_hex
   |> print_endline
 
 let command =
@@ -16,7 +15,9 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open filename = anon (maybe_with_default "-" ("filename" %: file)) in
+      let%map_open filename =
+        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+      in
       fun () -> do_hash filename)
 
 let () =

@@ -1,12 +1,10 @@
 open Core
 
 let do_hash file =
-  In_channel.with_file file ~f:(fun ic ->
-    let open Cryptokit in
-    hash_channel (Hash.md5 ()) ic
-    |> transform_string (Hexa.encode ())
-    |> print_endline
-  )
+  Md5.digest_file_blocking file
+  |> Md5.to_hex
+  |> print_endline
+
 [@@@part "1"];;
 let filename_param =
   let open Command.Param in

@@ -1,9 +1,13 @@
 open Core
 
-let do_hash filename ic =
-  let open Cryptokit in
-  hash_channel (Hash.md5 ()) ic
-  |> transform_string (Hexa.encode ())
+let get_contents = function
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
+
+let do_hash filename =
+  get_contents filename
+  |> Md5.digest_string
+  |> Md5.to_hex
   |> fun md5 -> printf "MD5 (%s) = %s\n" filename md5
 
 let command =
@@ -11,13 +15,13 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
-      let%map_open files = anon (sequence ("filename" %: file)) in
+      let%map_open files =
+        anon (sequence ("filename" %: Filename.arg_type))
+      in
       fun () ->
         match files with
-        | [] -> do_hash "-" In_channel.stdin
-        | _ ->
-          List.iter files ~f:(fun file ->
-              In_channel.with_file ~f:(do_hash file) file))
+        | [] -> do_hash "-"
+        | _  -> List.iter files ~f:do_hash)
 
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command

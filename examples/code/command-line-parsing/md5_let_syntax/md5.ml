@@ -1,13 +1,10 @@
 open Core
 
 let do_hash hash_length filename =
-  In_channel.with_file filename ~f:(fun ic ->
-    let open Cryptokit in
-    hash_channel (Hash.md5 ()) ic
-    |> transform_string (Hexa.encode ())
-    |> (fun s -> String.prefix s hash_length)
-    |> print_endline
-  )
+  Md5.digest_file_blocking filename
+  |> Md5.to_hex
+  |> (fun s -> String.prefix s hash_length)
+  |> print_endline
 
 [@@@part "1"];;
 let command =

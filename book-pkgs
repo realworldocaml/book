@@ -20,7 +20,6 @@ core_bench
 core_extended
 core_kernel
 cppo
-cryptokit
 domain-name
 easy-format
 expect_test_helpers
