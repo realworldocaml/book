@@ -7,7 +7,7 @@
      ((name bigarray-compat)) ((name bin_prot)) ((name biniou))
      ((name bisect_ppx)) ((name cmdliner)) ((name cohttp-async))
      ((name core)) ((name core_bench)) ((name core_extended))
-     ((name core_kernel)) ((name cppo)) ((name cryptokit))
+     ((name core_kernel)) ((name cppo))
      ((name domain-name)) ((name easy-format)) ((name expect_test_helpers))
      ((name fieldslib)) ((name fmt)) ((name integers))
      ((name jane-street-headers)) ((name jsonm)) ((name jst-config))
@@ -41,8 +41,7 @@
  (deps
   ((opamverse
     (((name ocp-pp) (version (1.99.19-beta)))
-     ((name graphics) (version (4.07.1)))
-     ((name cryptokit) (version (1.13)))))
+     ((name graphics) (version (4.07.1)))))
    (duniverse
     (((dir ipaddr) (upstream https://github.com/mirage/ocaml-ipaddr.git)
       (ref ((t v4.0.0) (commit fda97e5355239c68b70a838012a037d7f0df4aba)))

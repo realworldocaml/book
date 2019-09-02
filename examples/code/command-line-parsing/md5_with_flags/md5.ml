@@ -1,18 +1,17 @@
 open Core
-open Cryptokit
 
 let checksum_from_string buf =
-  hash_string (Hash.md5 ()) buf
-  |> transform_string (Hexa.encode ())
+  Md5.digest_string buf
+  |> Md5.to_hex
   |> print_endline
 
 let checksum_from_file filename =
-  let ic = match filename with
-    | "-" -> In_channel.stdin
-    | _   -> In_channel.create ~binary:true filename
+  let contents = match filename with
+    | "-"      -> In_channel.(input_all stdin)
+    | filename -> In_channel.(read_all filename)
   in
-  hash_channel (Hash.md5 ()) ic
-  |> transform_string (Hexa.encode ())
+  Md5.digest_string contents
+  |> Md5.to_hex
   |> print_endline
 
 let command =
