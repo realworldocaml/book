@@ -95,7 +95,7 @@ drop the number of variants to just two, then there's no need for the
 complexity of computing this table:
 
 ```ocaml file=../../examples/code/back-end/pattern_monomorphic_small.ml
-type t = | Alice | Bob 
+type t = | Alice | Bob
 
 let test v =
   match v with
@@ -249,13 +249,13 @@ default, and you'll see the results summarized in a neat table:
 $ dune build bench_patterns.exe
 $ ./_build/default/bench_patterns.exe -ascii -quota 0.25
 Estimated testing time 750ms (3 benchmarks x 250ms). Change using -quota SECS.
-                                                      
-  Name                         Time/Run   Percentage  
- ---------------------------- ---------- ------------ 
-  Polymorphic pattern           24.93ns       89.45%  
-  Monomorphic larger pattern    27.88ns      100.00%  
-  Monomorphic small pattern     10.84ns       38.90%  
-                                                      
+
+  Name                         Time/Run   Percentage
+ ---------------------------- ---------- ------------
+  Polymorphic pattern           24.93ns       89.45%
+  Monomorphic larger pattern    27.88ns      100.00%
+  Monomorphic small pattern     10.84ns       38.90%
+
 ```
 
 These results confirm the performance hypothesis that we obtained earlier by
@@ -305,8 +305,8 @@ block
 code offset
 : Values that are relative to the starting code address
 
-The interpreter virtual machine only has seven registers in total: 
-- program counter, 
+The interpreter virtual machine only has seven registers in total:
+- program counter,
 - stack, exception and argument pointers,
 - accumulator,
 - environment and global data.
@@ -475,7 +475,7 @@ Next, create a C file to be your main entry point:
 #include <caml/memory.h>
 #include <caml/callback.h>
 
-int 
+int
 main (int argc, char **argv)
 {
   printf("Before calling OCaml\n");
@@ -733,12 +733,12 @@ Running this shows quite a significant runtime difference between the two:
 $ dune build bench_poly_and_mono.exe
 $ ./_build/default/bench_poly_and_mono.exe -ascii -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
-                                                     
-  Name                        Time/Run   Percentage  
- ------------------------ ------------- ------------ 
-  Polymorphic comparison   18_402.43ns      100.00%  
-  Monomorphic comparison      734.22ns        3.99%  
-                                                     
+
+  Name                        Time/Run   Percentage
+ ------------------------ ------------- ------------
+  Polymorphic comparison   18_402.43ns      100.00%
+  Monomorphic comparison      734.22ns        3.99%
+
 ```
 
 We see that the polymorphic comparison is close to 20 times slower! These
@@ -881,7 +881,7 @@ The `gdb` prompt lets you enter debug directives. Let's set the program to
 break just before the first call to `take`:
 
 ```
-(gdb) break camlAlternate_list__take_69242 
+(gdb) break camlAlternate_list__take_69242
 Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
 ```
 
@@ -897,7 +897,7 @@ Once you've set the breakpoint, start the program executing:
 Starting program: /home/avsm/alternate_list.native
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
- 
+
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
 4         function
 ```
@@ -909,12 +909,12 @@ and check the stacktrace after a couple of recursions:
 ```
 (gdb) cont
 Continuing.
- 
+
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
 4         function
 (gdb) cont
 Continuing.
- 
+
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
 4         function
 (gdb) bt
@@ -927,7 +927,7 @@ Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
 #6  0x00000000008099a0 in ?? ()
 #7  0x0000000000000000 in ?? ()
 (gdb) clear camlAlternate_list__take_69242
-Deleted breakpoint 1 
+Deleted breakpoint 1
 (gdb) cont
 Continuing.
 1,3,5,7,9
@@ -994,22 +994,22 @@ in-place modification:
 ```
 $ perf record -g ./barrier_bench.native
 Estimated testing time 20s (change using -quota SECS).
- 
+
   Name        Time (ns)             Time 95ci   Percentage
   ----        ---------             ---------   ----------
   mutable     7_306_219   7_250_234-7_372_469        96.83
   immutable   7_545_126   7_537_837-7_551_193       100.00
- 
+
 [ perf record: Woken up 11 times to write data ]
 [ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
 perf record -g ./barrier.native
 Estimated testing time 20s (change using -quota SECS).
- 
+
   Name        Time (ns)             Time 95ci   Percentage
   ----        ---------             ---------   ----------
   mutable     7_306_219   7_250_234-7_372_469        96.83
   immutable   7_545_126   7_537_837-7_551_193       100.00
- 
+
 [ perf record: Woken up 11 times to write data ]
 [ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
 ```
@@ -1032,8 +1032,8 @@ Perf has a growing collection of other commands that let you archive these
 runs and compare them against each other. You can read more on the
 [home page](http://perf.wiki.kernel.org). [frame pointers]{.idx}
 
-<aside data-type="sidebar">
-<h5>Using the Frame Pointer to Get More Accurate Traces</h5>
+::: {data-type=note}
+##### Using the Frame Pointer to Get More Accurate Traces
 
 Although Perf doesn't require adding in explicit probes to the binary, it
 does need to understand how to unwind function calls so that the kernel can
@@ -1062,7 +1062,7 @@ care of recompiling all your libraries with the new interface. You can read
 more about this on the OCamlPro
 [ blog](http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html).
 
-</aside>
+:::
 
 
 ### Embedding Native Code in C
@@ -1116,7 +1116,7 @@ To use the debug library, just link your program with the
 $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 + clang -arch x86_64 -Wno-trigraphs -c -o 'hello.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlasm9b916c.s'
 + clang -arch x86_64 -Wno-trigraphs -c -o '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartupf69d9a.s'
-+ cc -O2 -fno-strict-aliasing -fwrapv -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -DCAML_NAME_SPACE   -Wl,-no_compact_unwind -o 'hello.native'   '-L/Users/thomas/git/rwo/book/_opam/lib/ocaml'  '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/std_exit.o' 'hello.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/stdlib.a' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/libasmrund.a' 
++ cc -O2 -fno-strict-aliasing -fwrapv -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -DCAML_NAME_SPACE   -Wl,-no_compact_unwind -o 'hello.native'   '-L/Users/thomas/git/rwo/book/_opam/lib/ocaml'  '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/std_exit.o' 'hello.o' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/stdlib.a' '/Users/thomas/git/rwo/book/_opam/lib/ocaml/libasmrund.a'
 $ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 256k words
@@ -1177,4 +1177,3 @@ Extension | Purpose
 
 Table:  Intermediate outputs produced by the native code OCaml toolchain
 :::
-

@@ -9,8 +9,8 @@ you to classes and inheritance. [objects/in object-oriented
 programming]{.idx}[object-oriented programming
 (OOP)]{.idx}[programming/object-oriented programming (OOP)]{.idx}
 
-<aside data-type="sidebar">
-<h5>What Is Object-Oriented Programming?</h5>
+::: {data-type=note}
+##### What Is Object-Oriented Programming?
 
 Object-oriented programming (often shortened to OOP) is a programming style
 that encapsulates computation and data within logical *objects*. Each object
@@ -53,7 +53,7 @@ Almost every notable modern programming language has been influenced by OOP,
 and you'll have run across these terms if you've ever used C++, Java, C#,
 Ruby, Python, or JavaScript.
 
-</aside>
+:::
 
 ## OCaml Objects
 
@@ -470,9 +470,9 @@ this and does not allow the coercion:
 val square_array : square array = [|<obj>; <obj>|]
 # let shape_array: shape array = (square_array :> shape array)
 Characters 31-60:
-Error: Type square array is not a subtype of shape array 
+Error: Type square array is not a subtype of shape array
        Type square = < area : float; width : int >
-       is not compatible with type shape = < area : float > 
+       is not compatible with type shape = < area : float >
        The second object type has no method width
 ```
 
@@ -498,8 +498,8 @@ We say that `'a -> string` is *contravariant* in `'a`. In general, function
 types are contravariant in their arguments and covariant in their results.
 [contravariance]{.idx}
 
-<aside data-type="sidebar">
-<h5>Variance Annotations</h5>
+::: {data-type=note}
+##### Variance Annotations
 
 OCaml works out the variance of a type using that type's definition:
 
@@ -543,7 +543,7 @@ Error: This expression cannot be coerced to type
        it has type (< area : float; width : int >, 'a) AbstractEither.t
        but is here used with type (shape, shape) AbstractEither.t
        Type < area : float; width : int > is not compatible with type
-         shape = < area : float > 
+         shape = < area : float >
        The second object type has no method width
 ```
 
@@ -566,7 +566,7 @@ module VarEither :
 - : (shape, shape) VarEither.t = <abstr>
 ```
 
-</aside>
+:::
 
 For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles:
@@ -603,9 +603,9 @@ However, when we try to apply this function to our objects, we get an error:
 Characters 12-41:
 Error: Type square stack = < pop : square option; push : square -> unit >
        is not a subtype of
-         shape stack = < pop : shape option; push : shape -> unit > 
+         shape stack = < pop : shape option; push : shape -> unit >
        Type shape = < area : float > is not a subtype of
-         square = < area : float; width : int > 
+         square = < area : float; width : int >
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of

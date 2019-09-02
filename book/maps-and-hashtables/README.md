@@ -388,7 +388,7 @@ Error: This expression has type
        but an expression was expected of type
          (string, int, String.comparator_witness) Map.t
        Type Reverse.comparator_witness is not compatible with type
-         String.comparator_witness 
+         String.comparator_witness
 ```
 
 ### The Polymorphic Comparator
@@ -419,15 +419,15 @@ Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness 
+         Comparator.Poly.comparator_witness
 ```
 
 This is rejected for good reason: there's no guarantee that the comparator
 associated with a given type will order things in the same way that
 polymorphic compare does.
 
-<aside data-type="sidebar">
-<h5>The Perils of Polymorphic Compare</h5>
+::: {data-type=warning}
+##### The Perils of Polymorphic Compare
 
 Polymorphic compare is highly convenient, but it has serious downsides as
 well and should be used with care. In particular, polymorphic compare has a
@@ -497,7 +497,7 @@ together. Even worse, it will work sometimes and fail others; since if the
 sets are built in a consistent order, then they will work as expected, but
 once the order changes, the behavior will change.
 
-</aside>
+:::
 
 ### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving}
 
@@ -580,8 +580,8 @@ you can always write your own comparison function by hand; but if all you
 need is a total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
-<aside data-type="sidebar">
-<h5>=, ==, and phys_equal</h5>
+::: {data-type=note}
+##### =, ==, and phys_equal
 
 If you come from a C/C++ background, you'll probably reflexively use
 `==` to test two values for equality. In OCaml, the `==` operator tests for
@@ -632,7 +632,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 <press ^Z and kill the process now>
 ```
 
-</aside>
+:::
 
 ### Applying `[@@deriving]` to maps and sets
 
@@ -725,7 +725,7 @@ Error: This expression has type
          (string, int, Reverse.comparator_witness)
          Core_kernel.Map_intf.Tree.t
        Type String.comparator_witness is not compatible with type
-         Reverse.comparator_witness 
+         Reverse.comparator_witness
 ```
 
 ## Hash Tables
