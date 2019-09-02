@@ -209,7 +209,7 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
 $ ./_build/default/md5.exe md5.ml
-12bd09922dafc27038e092df39de646d
+fdac6d086494068b8c22ddf38d19c51d
 ```
 
 And that's all it took to build our little MD5 utility! Here's a complete
@@ -285,7 +285,7 @@ arguments.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_multiarg
 $ dune exec -- ./md5.exe 5 md5.ml
-a8416
+c45ae
 ```
 
 This works well enough for two parameters, but if you want longer parameter
@@ -421,7 +421,7 @@ try to open a special device such as `/dev/null`:
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-d3d6bcc22e120b0f0930c0d096c9cb93
+dcf52e01189f63155410b17f252cf676
 $ dune exec -- ./md5.exe /dev/null
 '/dev/null' is not a regular file.
 [1]
@@ -498,7 +498,7 @@ our previous examples.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file
 $ cat md5.ml | dune exec -- ./md5.exe
-6a970b4718a7fa2c340fcb428ea6d541
+a2fb03a2f2551b7059e1251ac44a2829
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -540,7 +540,7 @@ Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-a3e48fe50b7361508c830fe8a2768564
+46c7f88b80cd86aaabdbd538e17ebd8d
 ```
 
 ### Sequences of Arguments
