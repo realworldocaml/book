@@ -1309,8 +1309,8 @@ Error: This expression has type float but an expression was expected of type
          int
 ```
 
-<aside data-type="sidebar">
-<h5>Understanding Format Strings</h5>
+::: {data-type=note}
+##### Understanding Format Strings
 
 The format strings used by `printf` turn out to be quite different from
 ordinary strings. This difference ties to the fact that OCaml format strings,
@@ -1366,7 +1366,7 @@ time, you don't need to know about this special handling of format
 strings—you can just use `printf` and not worry about the details. But it's
 useful to keep the broad outlines of the story in the back of your head.
 
-</aside>
+:::
 
 Now let's see how we can rewrite our time conversion program to be a little
 more concise using `printf`:

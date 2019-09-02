@@ -744,8 +744,8 @@ $ ./_build/default/datetime.exe -a
 Tue Mar  6 13:27:51 2018
 ```
 
-<aside data-type="sidebar">
-<h5>Why Do We Need to Use returning?</h5>
+::: {data-type=note}
+##### Why Do We Need to Use returning?
 
 The alert reader may be curious about why all these function definitions have
 to be terminated by `returning`:
@@ -822,7 +822,7 @@ types are the same but the C semantics are quite different, we need some kind
 of marker to distinguish the cases. This is the purpose of `returning` in
 function definitions.
 
-</aside>
+:::
 
 
 ### Defining Arrays
@@ -862,8 +862,8 @@ memory. They are also fully supported in Ctypes, but we won't go into more
 detail here. [operators/controlling pointers]{.idx}[pointers/operators
 controlling]{.idx}
 
-<aside data-type="sidebar">
-<h5>Pointer Operators for Dereferencing and Arithmetic</h5>
+::: {data-type=note}
+##### Pointer Operators for Dereferencing and Arithmetic
 
 Ctypes defines a number of operators that let you manipulate pointers and
 arrays just as you would in C. The Ctypes equivalents do have the benefit of
@@ -886,7 +886,7 @@ Table:  Operators for manipulating pointers and arrays
 There are also other useful nonoperator functions available (see the Ctypes
 documentation), such as pointer differencing and comparison.
 
-</aside>
+:::
 
 
 ## Passing Functions to C
@@ -1048,8 +1048,8 @@ scope since we opened `Ctypes` at the start of the file.[memory/and allocated
 Ctypes]{.idx}[Ctypes library/lifetime of allocated Ctypes]{.idx}[garbage
 collection/of allocated Ctypes]{.idx}
 
-<aside data-type="sidebar">
-<h5>Lifetime of Allocated Ctypes</h5>
+::: {data-type=note}
+##### Lifetime of Allocated Ctypes
 
 Values allocated via Ctypes (i.e., using `allocate`, `Array.make`, and so on)
 will not be garbage-collected as long as they are reachable from OCaml
@@ -1084,7 +1084,7 @@ function pointers in global variables or elsewhere, in which case you'll need
 to take care that the OCaml functions you pass to them aren't prematurely
 garbage-collected.
 
-</aside>
+:::
 
 
 ## Learning More About C Bindings
