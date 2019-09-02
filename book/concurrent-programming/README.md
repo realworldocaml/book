@@ -1390,15 +1390,18 @@ single deferred that will become determined once any of the values on the
 list is determined.
 
 ```ocaml env=main
-# Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
-  ; (after (sec 10.) >>| fun () -> "ten seconds") ]
+# Deferred.any
+  [ (after (sec 0.5) >>| fun () -> "half a second")
+  ; (after (sec 1.0) >>| fun () -> "one second")
+  ; (after (sec 4.0) >>| fun () -> "four seconds")
+  ]
 - : string = "half a second"
 ```
 
-Let's use this to add timeouts to our DuckDuckGo searches. The following code
-is a wrapper for `get_definition` that takes a timeout (in the form of a
-`Time.Span.t`) and returns either the definition, or, if that takes too long,
-an error:
+Let's use this to add timeouts to our DuckDuckGo searches. The
+following code is a wrapper for `get_definition` that takes a timeout
+(in the form of a `Time.Span.t`) and returns either the definition,
+or, if that takes too long, an error:
 
 ```ocaml file=../../examples/code/async/search_with_timeout.ml,part=1
 let get_definition_with_timeout ~server ~timeout word =
@@ -1458,9 +1461,9 @@ let get_definition_with_timeout ~server ~timeout word =
   (word,result')
 ```
 
-This will work and will cause the connection to shutdown cleanly when we time
-out; but our code no longer explicitly knows whether or not the timeout has
-kicked in. In particular, the error message on a timeout will now be
+This will cause the connection to shutdown cleanly when we time out;
+but our code no longer explicitly knows whether or not the timeout has
+kicked in.  In particular, the error message on a timeout will now be
 `"Unexpected failure"` rather than `"Timed out"`, which it was in our
 previous implementation.
 
