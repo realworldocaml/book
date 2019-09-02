@@ -554,10 +554,12 @@ data.
 
 Now that we have the echo server, we can connect to the echo server using the
 netcat tool, which is invoked as `nc`.  Note that we use `dune exec`
-to both build and run the executable.
+to both build and run the executable.  We use the double-dashes so
+that Dune's parsing of arguments doesn't interfere with argument
+parsing for the executed program.
 
 ```sh skip,dir=../../examples/code/async/echo
-$ dune exec ./echo.exe &
+$ dune exec -- ./echo.exe &
 $ echo "This is an echo server" | nc 127.0.0.1 8765
 This is an echo server
 $ echo "It repeats whatever I write" | nc 127.0.0.1 8765
@@ -896,12 +898,12 @@ To better understand what's going on, it's useful to look at the type for
 
 The `get` call takes as a required argument a URI and returns a deferred
 value containing a `Cohttp.Response.t` (which we ignore) and a pipe reader to
-which the body of the request will be written.
+which the body of the request will be streamed.
 
 In this case, the HTTP body probably isn't very large, so we call
 `Cohttp_async.Body.to_string` to collect the data from the connection
-as a single deferred string, rather than consuming the data in a
-streaming fashion using a pipe.
+as a single deferred string, rather than consuming the data
+incrementally.
 
 Running a single search isn't that interesting from a concurrency
 perspective, so let's write code for dispatching multiple searches in
@@ -950,11 +952,17 @@ to wait for all the results. Here's the type of `Deferred.all`:
 - : 'a Conduit_async.io list -> 'a list Conduit_async.io = <fun>
 ```
 
-Note that the list returned by `Deferred.all` reflects the order of the
-deferreds passed to it. As such, the definitions will be printed out in the
-same order that the search words are passed in, no matter what order the
-queries return in. We could rewrite this code to print out the results as
-they're received (and thus potentially out of order) as follows:
+(Somewhat confusingly, the type `Conduit_async.io` is just a type
+alias for `Deferred.t`, introduced by `Conduit_async`.)
+
+The list returned by `Deferred.all` reflects the order of the
+deferreds passed to it. As such, the definitions will be printed out
+in the same order that the search words are passed in, no matter what
+order the queries return in.  It also means that no printing occurs
+until all results arrive.
+
+We could rewrite this code to print out the results as they're
+received (and thus potentially out of order) as follows:
 
 ```ocaml file=../../examples/code/async/search_out_of_order.ml,part=1
 (* Run many searches in parallel, printing out the results as you go *)
@@ -993,7 +1001,7 @@ And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
 ```sh dir=../../examples/code/async/search,require-package=textwrap,require-package=yojson
-$ dune exec ./search.exe "Concurrent Programming" "OCaml"
+$ dune exec -- ./search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
 ----------------------
 
@@ -1019,22 +1027,22 @@ Caml language with object-oriented programming constructs."
 
 ## Exception Handling
 
-When programming with external resources, errors are everywhere: everything
-from a flaky server to a network outage to exhausting of local resources can
-lead to a runtime error. When programming in OCaml, some of these errors will
-show up explicitly in a function's return type, and some of them will show up
-as exceptions. We covered exception handling in OCaml in
-[Exceptions](error-handling.html#exceptions){data-type=xref}, but as we'll
-see, exception handling in a concurrent program presents some new challenges.
-[exceptions/in concurrent programming]{.idx}[concurrent
-programming]{.idx}[Async library/exception handling in]{.idx #ALexcept}
+When programming with external resources, errors are everywhere.
+Everything from a flaky server to a network outage to exhausting of
+local resources can lead to a runtime error. When programming in
+OCaml, some of these errors will show up explicitly in a function's
+return type, and some of them will show up as exceptions. We covered
+exception handling in OCaml in
+[Exceptions](error-handling.html#exceptions){data-type=xref}, but as
+we'll see, exception handling in a concurrent program presents some
+new challenges.  [exceptions/in concurrent
+programming]{.idx}[concurrent programming]{.idx}[Async
+library/exception handling in]{.idx #ALexcept}
 
-Let's get a better sense of how exceptions work in Async by creating an
-asynchronous computation that (sometimes) fails with an exception. The
-function
-`maybe_raise`<span class="keep-together">blocks
-	    for half a second,</span>
-and then either throws an exception or returns `unit`, alternating between
+Let's get a better sense of how exceptions work in Async by creating
+an asynchronous computation that (sometimes) fails with an
+exception. The function `maybe_raise` blocks for half a second, and
+then either throws an exception or returns `unit`, alternating between
 the two behaviors on subsequent calls:
 
 ```ocaml env=main
@@ -1099,14 +1107,16 @@ a deferred that becomes determined either as `Ok` of whatever `f` returned,
 or `Error exn` if `f` threw an exception before its return value became
 determined.
 
-### Monitors
+::: {data-type=note}
+##### Monitors
 
-`try_with` is a great way of handling exceptions in Async, but it's not the
-whole story. All of Async's exception-handling mechanisms, `try_with`
-included, are built on top of Async's system of *monitors*, which are
-inspired by the error-handling mechanism in Erlang of the same name. Monitors
-are fairly low-level and are only occasionally used directly, but it's
-nonetheless worth understanding how they work. [monitors]{.idx}
+`try_with` is a useful tool for handling exceptions in Async, but it's
+not the whole story. All of Async's exception-handling mechanisms,
+`try_with` included, are built on top of Async's system of *monitors*,
+which are inspired by the error-handling mechanism in Erlang of the
+same name. Monitors are fairly low-level and are only occasionally
+used directly, but it's nonetheless worth understanding how they
+work. [monitors]{.idx}
 
 In Async, a monitor is a context that determines what to do when there is an
 unhandled exception. Every Async job runs within the context of some monitor,
@@ -1235,6 +1245,8 @@ individual request, in either case responding to an exception by closing the
 connection. It is for building this kind of custom error handling that
 monitors can be helpful.
 
+:::
+
 ### Example: Handling Exceptions with DuckDuckGo
 
 Let's now go back and improve the exception handling of our DuckDuckGo
@@ -1261,12 +1273,14 @@ let query_uri ~server query =
 
 In addition, we'll make the necessary changes to get the list of servers on
 the command-line, and to distribute the search queries round-robin across the
-list of servers. Now, let's see what happens if we rebuild the application
-and run it giving it a list of servers, some of which won't respond to the
+list of servers.
+
+But first, let's see what happens if we rebuild the application and
+run it giving it a list of servers, some of which won't respond to the
 query.
 
 ```sh dir=../../examples/code/async/search_with_configurable_server,non-deterministic=output
-$ dune exec ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
+$ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
  ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
   "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
@@ -1275,14 +1289,11 @@ $ dune exec ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Pr
 [1]
 ```
 
-Note that in the above, we needed the double-dash to make it clear
-that the flags were arguments to `search.exe`, not to `dune`.
-
-As you can see, we got a "Connection refused" failure, which ends the entire
-program, even though one of the two queries would have gone through
-successfully on its own. We can handle the failures of individual connections
-separately by using the `try_with` function within each call to
-`get_definition`, as follows:
+As you can see, we got a "Connection refused" failure, which ends the
+entire program, even though one of the two queries would have gone
+through successfully on its own. We can handle the failures of
+individual connections separately by using the `try_with` function
+within each call to `get_definition`, as follows:
 
 ```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=1
 (* Execute the DuckDuckGo search *)
@@ -1324,7 +1335,7 @@ Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
 ```sh dir=../../examples/code/async/search_with_error_handling,non-deterministic=output
-$ dune exec ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune exec -- ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
 
@@ -1498,7 +1509,7 @@ Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
 ```sh dir=../../examples/code/async/search_with_timeout_no_leak,non-deterministic=output
-$ dune exec ./search.exe "concurrent programming" ocaml -timeout 0.1s
+$ dune exec -- ./search.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
 
@@ -1662,7 +1673,7 @@ But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
 ```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
-$ dune exec native_code_log_delays.exe
+$ dune exec -- native_code_log_delays.exe
 197.41058349609375us,
 Finished at: 1.2127914428710938s,
 ```
