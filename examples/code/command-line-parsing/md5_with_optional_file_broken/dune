@@ -1,4 +1,4 @@
 (executable
   (name      md5)
-  (libraries core cryptokit)
+  (libraries core)
   (preprocess (pps ppx_jane)))
