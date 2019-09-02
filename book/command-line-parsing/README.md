@@ -450,7 +450,7 @@ But building this results in a compile-time error.
 ```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file_broken
 $ dune build md5.exe
 ...
-File "md5.ml", line 18, characters 24-32:
+File "md5.ml", line 15, characters 24-32:
 Error: This expression has type string option
        but an expression was expected of type string
 [1]
