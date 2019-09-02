@@ -7,8 +7,8 @@ let checksum_from_string buf =
 
 let checksum_from_file filename =
   let contents = match filename with
-    | "-"      -> In_channel.(input_all stdin)
-    | filename -> In_channel.(read_all filename)
+    | "-"      -> In_channel.input_all In_channel.stdin
+    | filename -> In_channel.read_all filename
   in
   Md5.digest_string contents
   |> Md5.to_hex
