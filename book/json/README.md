@@ -265,8 +265,8 @@ This code introduces the `Yojson.Basic.Util` module, which contains
 strongly typed OCaml value. [combinators/functional
 combinators]{.idx}[functional combinators]{.idx}
 
-<aside data-type="sidebar">
-<h5>Functional Combinators</h5>
+::: {data-type=note}
+##### Functional Combinators
 
 Combinators are a design pattern that crops up quite often in functional
 programming. John Hughes defines them as "a function which builds program
@@ -296,7 +296,7 @@ imperative code. The input function is applied to every value, but no result
 is supplied. The function must instead apply some side effect such as
 changing a mutable record field or printing to the standard output.
 
-</aside>
+:::
 
 `Yojson` provides several combinators in the `Yojson.Basic.Util` module, some
 of which are listed in [Table15_1](json.html#table15_1){data-type=xref}.
@@ -477,8 +477,8 @@ reliability, as all the uses of polymorphic variants are still checked at
 compile time. [errors/type errors]{.idx}[type checking]{.idx}[polymorphic
 variant types/type checking and]{.idx}[type inference/benefits of]{.idx}
 
-<aside data-type="sidebar">
-<h5>Polymorphic Variants and Easier Type Checking</h5>
+::: {data-type=note}
+##### Polymorphic Variants and Easier Type Checking
 
 One difficulty you will encounter is that type errors involving polymorphic
 variants can be quite verbose. For example, suppose you build an `Assoc` and
@@ -520,7 +520,7 @@ We'll discuss more techniques like this that help you interpret type errors
 more easily in
 [The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
 
-</aside>
+:::
 
 ## Using Nonstandard JSON Extensions {#using-non-standard-json-extensions}
 
