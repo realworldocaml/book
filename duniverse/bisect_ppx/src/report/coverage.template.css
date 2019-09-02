@@ -1,0 +1,307 @@
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5em;
+}
+
+pre {
+    margin: 0;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 13px;
+    color: black;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:visited {
+    color: inherit;
+}
+
+#header {
+    color: #555;
+}
+
+h1 {
+    display: inline-block;
+    margin: 1.5em 1.5em 0.75em 1.5em;
+}
+
+.dirname {
+    color: #bbb;
+}
+
+h2 {
+    display: inline-block;
+    position: relative;
+    top: -1px;
+}
+
+#footer {
+    margin: 1.5em 0 1.5em 3em;
+    color: #aaa;
+    font-style: oblique;
+}
+
+#footer a {
+    color: #666;
+    border-bottom: 1px solid #ccc;
+}
+
+#footer a:visited {
+    color: #666;
+}
+
+#navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 1em;
+    height: 100%;
+    background-color: #eee;
+    border-right: 1px solid #ddd;
+    cursor: pointer;
+}
+
+#navbar span {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 5px;
+}
+
+#navbar .unvisited, #navbar .some-visited {
+    background-color: #d69e9e;
+}
+
+#report {
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    overflow: hidden;
+}
+
+#lines-layer {
+    position: absolute;
+    z-index: -100;
+    width: 100%;
+}
+
+#lines-layer span {
+    display: inline-block;
+    width: 100%;
+}
+
+a[id] {
+    display: block;
+    position: relative;
+    top: -5.5em;
+}
+
+#lines-layer .unvisited {
+    background-color: $(unvisited_color);
+}
+
+#lines-layer .visited {
+    background-color: $(visited_color);
+}
+
+#lines-layer .some-visited {
+    background-color: $(some_visited_color);
+}
+
+a[id]:target + span {
+    -webkit-animation: highlight-blank 0.5s;
+    -moz-animation: highlight-blank 0.5s;
+    -o-animation: highlight-blank 0.5s;
+    animation: highlight-blank 0.5s;
+}
+
+a[id]:target + .unvisited {
+    -webkit-animation: highlight-unvisited 0.5s;
+    -moz-animation: highlight-unvisited 0.5s;
+    -o-animation: highlight-unvisited 0.5s;
+    animation: highlight-unvisited 0.5s;
+}
+
+a[id]:target + .visited {
+    -webkit-animation: highlight-visited 0.5s;
+    -moz-animation: highlight-visited 0.5s;
+    -o-animation: highlight-visited 0.5s;
+    animation: highlight-visited 0.5s;
+}
+
+a[id]:target + .some-visited {
+    -webkit-animation: highlight-some-visited 0.5s;
+    -moz-animation: highlight-some-visited 0.5s;
+    -o-animation: highlight-some-visited 0.5s;
+    animation: highlight-some-visited 0.5s;
+}
+
+@-webkit-keyframes highlight-blank {
+    from { background-color: $(highlight_color); }
+    to { background-color: transparent; }
+}
+
+@-moz-keyframes highlight-blank {
+    from { background-color: $(highlight_color); }
+    to { background-color: transparent; }
+}
+
+@-o-keyframes highlight-blank {
+    from { background-color: $(highlight_color); }
+    to { background-color: transparent; }
+}
+
+@keyframes highlight-blank {
+    from { background-color: $(highlight_color); }
+    to { background-color: transparent; }
+}
+
+@-webkit-keyframes highlight-unvisited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(unvisited_color); }
+}
+
+@-moz-keyframes highlight-unvisited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(unvisited_color); }
+}
+
+@-o-keyframes highlight-unvisited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(unvisited_color); }
+}
+
+@keyframes highlight-unvisited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(unvisited_color); }
+}
+
+@-webkit-keyframes highlight-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(visited_color); }
+}
+
+@-moz-keyframes highlight-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(visited_color); }
+}
+
+@-o-keyframes highlight-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(visited_color); }
+}
+
+@keyframes highlight-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(visited_color); }
+}
+
+@-webkit-keyframes highlight-some-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(some_visited_color); }
+}
+
+@-moz-keyframes highlight-some-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(some_visited_color); }
+}
+
+@-o-keyframes highlight-some-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(some_visited_color); }
+}
+
+@keyframes highlight-some-visited {
+    from { background-color: $(highlight_color); }
+    to { background-color: $(some_visited_color); }
+}
+
+#line-numbers {
+    float: left;
+    border-right: 1px solid #eee;
+    margin-right: 1em;
+    color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.0125);
+    text-align: right;
+}
+
+#line-numbers a {
+    display: inline-block;
+    padding-left: 2.35em;
+    padding-right: 1em;
+    text-decoration: none;
+    color: inherit;
+}
+
+#line-numbers .unvisited {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+#line-numbers .visited {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+#code span {
+    cursor: default;
+}
+
+#code span[data-count] {
+    display: inline-block;
+    background-color: rgba(64, 192, 64, 0.2);
+}
+
+#code span[data-count="0"] {
+    display: inline-block;
+    background-color: rgba(255, 128, 128, 0.3);
+}
+
+#tool-tip {
+    display: none;
+    position: fixed;
+    padding: 0 0.25em;
+    background-color: black;
+    color: white;
+}
+
+#tool-tip.visible {
+    display: block;
+}
+
+#files {
+    padding: 1.5em 4em;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.meter {
+    display: inline-block;
+    position: relative;
+    top: 2px;
+    width: 5em;
+    height: 1em;
+    background-color: #f9c3c3;
+}
+
+.covered {
+    display: inline-block;
+    width: 50%;
+    height: 100%;
+    background-color: #9ed09f;
+    border-right: 1px solid white;
+}
+
+.percentage {
+    display: inline-block;
+    width: 4em;
+    font-size: 90%;
+}
+
+#files a {
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+    color: inherit;
+}

@@ -65,8 +65,8 @@ compiler generates specialized executable binaries suitable for
 high-performance applications.[compilation process/compiler source
 code]{.idx}[code compilers/bytecode vs. native code]{.idx}
 
-<aside data-type="sidebar">
-<h5>Obtaining the Compiler Source Code</h5>
+::: {data-type=note}
+##### Obtaining the Compiler Source Code
 
 Although it's not necessary to understand the examples, you may find it
 useful to have a copy of the OCaml source tree checked out while you read
@@ -128,7 +128,7 @@ A number of tools and scripts are also built alongside the core compiler:
 `testsuite/`
 : Regression tests for the core compiler.
 
-</aside>
+:::
 
 We'll go through each of the compilation stages now and explain how they will
 be useful to you during day-to-day OCaml development.
@@ -235,7 +235,7 @@ characters]{.idx}
 Let's run our erroneous file through `ocp-indent` and see how it processes
 it:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,skip
 $ ocp-indent follow_on_function.ml
 let concat_and_print x y =
   let v = x ^ y in
@@ -258,7 +258,7 @@ first `concat_and_print` definition, and the errant semicolon is now much
 easier to spot. We just need to remove that semicolon and rerun `ocp-indent`
 to verify that the syntax is correct:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,skip
 $ ocp-indent follow_on_function_fixed.ml
 (*TODO: Check contents*)
 let concat_and_print x y =
@@ -735,7 +735,7 @@ The `ocamlbuild` equivalent is to add the tag `principal` to your build. The
 *corebuild* wrapper script actually adds this by default, but it does no harm
 to explicitly repeat it:
 
-```sh dir=../../examples/code/front-end
+```sh dir=../../examples/code/front-end,skip
 $ corebuild -no-hygiene -tag principal principal.cmi non_principal.cmi
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules principal.ml > principal.ml.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o principal.cmo principal.ml
@@ -846,8 +846,8 @@ override the default path unless you have a good reason to (such as setting
 up a cross-compilation environment). [cmi files]{.idx}[files/cmi
 files]{.idx}[OCaml toolchain/ocamlogjinfo]{.idx}
 
-<aside data-type="sidebar">
-<h5>Inspecting Compilation Units with ocamlobjinfo</h5>
+::: {data-type=note}
+##### Inspecting Compilation Units with ocamlobjinfo
 
 For separate compilation to be sound, we need to ensure that all the
 `cmi` files used to type-check a module are the same across compilation runs.
@@ -898,7 +898,7 @@ should ensure that you never see the preceding error messages, but if you do
 run into it, just clean out your intermediate files and recompile from
 scratch.
 
-</aside>
+:::
 
 
 ### Packing Modules Together
@@ -1090,7 +1090,7 @@ This module defined bindings for the Ncurses library. First, compile the
 interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
 files, and then run `ocp-index` in completion mode:
 
-```sh dir=../../examples/code,source-tree=../../examples/code/ffi
+```sh dir=../../examples/code,source-tree=../../examples/code/ffi,skip
 $ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
 ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli

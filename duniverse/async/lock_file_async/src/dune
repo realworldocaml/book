@@ -1,0 +1,2 @@
+(library (name lock_file_async) (public_name async.lock_file_async)
+ (libraries async core core.lock_file_blocking) (preprocess (pps ppx_jane)))

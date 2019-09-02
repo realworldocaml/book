@@ -91,7 +91,7 @@ you can open it in the `utop` toplevel by:
 
 ## Parsing JSON with Yojson
 
-The JSON specification has very few data types, and the `Yojson.Basic.json`
+The JSON specification has very few data types, and the `Yojson.Basic.t`
 type that follows is sufficient to express any valid JSON structure: [JSON
 data/parsing with Yojson]{.idx}[Yojson library/parsing JSON with]{.idx}
 
@@ -265,8 +265,8 @@ This code introduces the `Yojson.Basic.Util` module, which contains
 strongly typed OCaml value. [combinators/functional
 combinators]{.idx}[functional combinators]{.idx}
 
-<aside data-type="sidebar">
-<h5>Functional Combinators</h5>
+::: {data-type=note}
+##### Functional Combinators
 
 Combinators are a design pattern that crops up quite often in functional
 programming. John Hughes defines them as "a function which builds program
@@ -296,7 +296,7 @@ imperative code. The input function is applied to every value, but no result
 is supplied. The function must instead apply some side effect such as
 changing a mutable record field or printing to the standard output.
 
-</aside>
+:::
 
 `Yojson` provides several combinators in the `Yojson.Basic.Util` module, some
 of which are listed in [Table15_1](json.html#table15_1){data-type=xref}.
@@ -371,7 +371,7 @@ our example JSON, only `is_online` is present and `is_translated` will be
 
 ```ocaml env=parse_book
 # let authors = json |> member "authors" |> to_list
-val authors : Yojson.Basic.json list =
+val authors : Yojson.Basic.t list =
   [`Assoc
      [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];
    `Assoc
@@ -413,9 +413,9 @@ statically via a type error.
 ## Constructing JSON Values
 
 Building and printing JSON values is pretty straightforward given the
-`Yojson.Basic.json` type. You can just construct values of type `json` and
+`Yojson.Basic.t` type. You can just construct values of type `t` and
 call the `to_string` function on them. Let's remind ourselves of the
-`Yojson.Basic.json` type again: [values/in JSON data]{.idx}[JSON
+`Yojson.Basic.t` type again: [values/in JSON data]{.idx}[JSON
 data/constructing values]{.idx}
 
 ```ocaml file=yojson_basic.mli
@@ -453,11 +453,11 @@ you haven't used yet (e.g. `Int` or `Null`):
 
 ```ocaml env=build_json
 # Yojson.Basic.pretty_to_string
-- : ?std:bool -> Yojson.Basic.json -> string = <fun>
+- : ?std:bool -> Yojson.Basic.t -> string = <fun>
 ```
 
 The `pretty_to_string` function has a more explicit signature that requires
-an argument of type `Yojson.Basic.json`. When `person` is applied to
+an argument of type `Yojson.Basic.t`. When `person` is applied to
 `pretty_to_string`, the inferred type of `person` is statically checked
 against the structure of the `json` type to ensure that they're compatible:
 
@@ -477,8 +477,8 @@ reliability, as all the uses of polymorphic variants are still checked at
 compile time. [errors/type errors]{.idx}[type checking]{.idx}[polymorphic
 variant types/type checking and]{.idx}[type inference/benefits of]{.idx}
 
-<aside data-type="sidebar">
-<h5>Polymorphic Variants and Easier Type Checking</h5>
+::: {data-type=note}
+##### Polymorphic Variants and Easier Type Checking
 
 One difficulty you will encounter is that type errors involving polymorphic
 variants can be quite verbose. For example, suppose you build an `Assoc` and
@@ -492,7 +492,7 @@ val person : [> `Assoc of string * [> `String of string ] ] =
 Characters 30-36:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
-       but an expression was expected of type Yojson.Basic.json
+       but an expression was expected of type Yojson.Basic.t
        Types for tag `Assoc are incompatible
 ```
 
@@ -502,15 +502,14 @@ this error to a shorter form by adding explicit type annotations as a hint
 about your intentions:
 
 ```ocaml env=build_json
-# let (person : Yojson.Basic.json) =
+# let (person : Yojson.Basic.t) =
   `Assoc ("name", `String "Anil")
-Characters 44-68:
+Characters 41-65:
 Error: This expression has type 'a * 'b
-       but an expression was expected of type
-         (string * Yojson.Basic.json) list
+       but an expression was expected of type (string * Yojson.Basic.t) list
 ```
 
-We've annotated `person` as being of type `Yojson.Basic.json`, and as a
+We've annotated `person` as being of type `Yojson.Basic.t`, and as a
 result, the compiler spots that the argument to the `Assoc` variant has the
 incorrect type. This illustrates the strengths and weaknesses of polymorphic
 variants: they're lightweight and flexible, but the error messages can be
@@ -521,7 +520,7 @@ We'll discuss more techniques like this that help you interpret type errors
 more easily in
 [The Compiler Frontend Parsing And Type Checking](compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking){data-type=xref}.
 
-</aside>
+:::
 
 ## Using Nonstandard JSON Extensions {#using-non-standard-json-extensions}
 
@@ -579,7 +578,7 @@ You can convert a `Safe.json` to a `Basic.json` type by using the `to_basic`
 function as follows:
 
 ```ocaml file=yojson_safe.mli,part=1
-val to_basic : json -> Yojson.Basic.json
+val to_basic : json -> Yojson.Basic.t
 (** Tuples are converted to JSON arrays, Variants are converted to
     JSON strings or arrays of a string (constructor) and a json value
     (argument). Long integers are converted to JSON strings.
@@ -707,7 +706,7 @@ The `atdgen` command will generate some new files in your current directory.
 `github_t.ml` and `github_t.mli` will contain an OCaml module with types
 defined that correspond to the ATD file:
 
-```sh
+```sh skip
 $ atdgen -t github.atd
 $ atdgen -j github.atd
 $ ocamlfind ocamlc -package atd -i github_t.mli
@@ -820,7 +819,7 @@ type org = {
 Let's build the OCaml type declaration first by calling `atdgen -t` on the
 specification file:
 
-```sh dir=github_org_info
+```sh dir=github_org_info,skip
 $ dune build github_org_t.mli
 $ cat _build/default/github_org_t.mli
 (* Auto-generated from "github_org.atd" *)
@@ -842,7 +841,7 @@ logic to convert JSON buffers to and from this type. Calling `atdgen -j` will
 generate this serialization code for us in a new file called
 `github_org_j.ml`:
 
-```sh dir=github_org_info
+```sh dir=github_org_info,skip
 $ dune build github_org_j.mli
 $ cat _build/default/github_org_j.mli
 (* Auto-generated from "github_org.atd" *)
@@ -941,7 +940,7 @@ and also builds the final executable:
 
 
 
-```sh dir=github_org_info
+```sh dir=github_org_info,skip
 $ dune build github_org_info.exe
 ```
 
@@ -949,7 +948,7 @@ You can now run the command-line tool with a single argument to specify the
 name of the organization, and it will dynamically fetch the JSON from the
 web, parse it, and render the summary to your console:
 
-```sh dir=github_org_info,non-deterministic=output
+```sh dir=github_org_info,non-deterministic=output,skip
 $ dune exec -- ./github_org_info.exe mirage
 MirageOS (131943) with 125 public repos
 $ dune exec -- ./github_org_info.exe janestreet

@@ -1,0 +1,4 @@
+(library (name bin_shape_gen_example) (libraries)
+ (preprocess (pps ppx_bin_prot)))
+
+(alias (name DEFAULT) (deps example.ml.pp))

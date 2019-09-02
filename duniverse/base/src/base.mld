@@ -1,0 +1,173 @@
+{1 Base}
+
+{b {{!Base} The full API is browsable here}}.
+
+Base is a standard library for OCaml. It provides a standard set of
+general-purpose modules that are well tested, performant, and fully
+portable across any environment that can run OCaml code.
+
+Unlike other standard library projects, Base is meant to be used as a
+wholesale replacement of the standard library distributed with the
+OCaml compiler. In particular, it makes different choices and doesn't
+re-export features that are not fully portable such as I/O, which are
+left to other libraries.
+
+Note that an API for OCaml's channel-based I/O can be found in the
+{{!module:Stdio}[Stdio]} library.
+
+{2 Relationship to Core_kernel and Core}
+
+Base is the smallest, most self-contained version of Jane Street's
+family of three standard library replacements. It is extended by
+[Core_kernel], which is in turn extended by [Core].
+
+In sum:
+
+- {b {!Base}}: Minimal stdlib replacement. Portable and lightweight and
+  intended to be highly stable.
+- {b {!Core_kernel}}: Extension of Base. More fully featured, with more
+  code and dependencies, and APIs that evolve more quickly. Portable,
+  and works on Javascript.
+- {b {!Core}}: Core_kernel extended with UNIX APIs.
+
+
+{2 Using the OCaml standard library with Base}
+
+Base is intended as a full stdlib replacement.  As a result, after an
+[open Base], all the modules, values, types, etc., coming from the OCaml
+standard library that one normally gets in the default environment are
+deprecated.
+
+In order to access these values, one must use the [Caml] library,
+which re-exports them all through the toplevel name
+{{!module:Caml}[Caml]}: [Caml.String], [Caml.print_string], ...
+
+The new modules and values made available by Base are documented
+{{!Base} here}.
+
+{2 Differences between Base and the OCaml standard library}
+
+Programmers who are used to the OCaml standard library should read
+through this section to understand major differences between the two
+libraries that one should be aware of when switching to Base.
+
+{3 Comparison operators}
+
+The comparison operators exposed by the OCaml standard library are
+polymorphic:
+
+{[
+val compare : 'a -> 'a -> int
+val ( <= ) : 'a -> 'a -> bool
+(* ... *)
+]}
+
+What they implement is structural comparison of the runtime
+representation of values. Since these are often error-prone,
+i.e., they don't correspond to what the user expects, they are not
+exposed directly by Base.
+
+To use polymorphic comparison with Base, one should use the
+{{!Base.Polymorphic_compare}[Polymorphic_compare]} module. The default
+comparison operators exposed by Base are the integer ones, just like
+the default arithmetic operators are the integer ones.
+
+The recommended way to compare arbitrary complex data structures is to
+use the specific [compare] functions. For instance:
+
+{[ List.compare String.compare x y ]}
+
+The [ppx_compare] rewriter offers an alternative way to write this:
+
+{[ [%compare: string list] x y ]}
+
+{2 Base and ppx code generators}
+
+Base uses a few ppx code generators to implement:
+
+- reliable and customizable comparison of OCaml values;
+- reliable and customizable hash of OCaml values; and
+- conversions between OCaml values and s-expression.
+
+However, it doesn't need these code generators to build. Instead, it
+uses ppx as a code verification tool during development. It works in a
+very similar fashion to {{: https://github.com/janestreet/ppx_expect}
+expect tests}.
+
+Whenever you see this in the code source:
+
+{[
+type t = ... [@@deriving_inline sexp_of]
+let sexp_of_t = ...
+[@@@end]
+]}
+
+the code between the [[@@deriving_inline]] and the [[@@@end]] is
+generated code. The generated code is currently quite big and hard to
+read, however we are working on making it look like human-written
+code.
+
+You can put the following elisp code in your [~/.emacs] file to hide
+these blocks:
+
+{v
+(defun deriving-inline-forward-sexp (&optional arg)
+  (search-forward-regexp "\\[@@@end\\]") nil nil arg)
+
+(defun setup-hide-deriving-inline ()
+  (inline)
+  (hs-minor-mode t)
+  (let ((hs-hide-comments-when-hiding-all nil))
+    (hs-hide-all)))
+
+(require 'hideshow)
+(add-to-list 'hs-special-modes-alist
+             '(tuareg-mode "\\[@@deriving_inline[^]]*\\]" "\\[@@@end\\]" nil
+                           deriving-inline-forward-sexp nil))
+(add-hook 'tuareg-mode-hook 'setup-hide-deriving-inline)
+v}
+
+Things are not yet set up in the git repository to make it convenient
+to change types and update the generated code, but they will be set up
+soon.
+
+{2 Base coding rules}
+
+There are a few coding rules across the code base that are enforced by
+lint tools.
+
+These rules are:
+
+{ul
+{- Opening the [Caml] module is not allowed. Inside Base, the OCaml
+  stdlib is shadowed and accessible through the [Caml] module. We
+  forbid opening [Caml] so that we know exactly where things come
+  from.}
+{- [Caml.Foo] modules cannot be aliased, one must use [Caml.Foo]
+  explicitly. This is to avoid having to remember a list of aliases
+  at the beginning of each file.}
+{- For some modules that are both in the OCaml stdlib and Base, such as
+  [String], we define a module [String0] for common functions that
+  cannot be defined directly in [Base.String] to avoid creating a
+  circular dependency.  Except for [String] itself, other modules
+  are not allowed to use [Caml.String] and must use either [String] or
+  [String0] instead.}
+{- Indentation is exactly the one of [ocp-indent].}
+{- A few other coding style rules enforced by
+  {{: https://github.com/janestreet/ppx_js_style} ppx_js_style}.}
+}
+
+
+The Base specific coding rules are checked by [ppx_base_lint], in the
+[lint] subfolder. The indentation rules are checked by a wrapper around
+[ocp-indent] and the coding style rules are checked by [ppx_js_style].
+
+These checks are currently not run by [jbuilder], but it will soon get
+a [-dev] flag to run them automatically.
+
+{2 Roadmap}
+
+Base is still under active development and there are several missing
+feature that are yet to be added. Consult the
+{{:https://github.com/janestreet/base/blob/master/ROADMAP.md}roadmap} to
+see what is happening.

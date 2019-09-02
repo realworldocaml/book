@@ -1,0 +1,23 @@
+(library
+ (name performance_common)
+ (modules performance_common)
+ (libraries unix)
+ (flags (:standard -w +A)))
+
+(executable
+ (name performance_markup)
+ (modules performance_markup)
+ (libraries markup performance_common unix)
+ (flags (:standard -w +A-48)))
+
+(executable
+ (name performance_nethtml)
+ (modules performance_nethtml)
+ (libraries threads netstring performance_common)
+ (flags (:standard -w +A-48)))
+
+(executable
+ (name performance_xmlm)
+ (modules performance_xmlm)
+ (libraries unix performance_common xmlm)
+ (flags (:standard -w +A)))

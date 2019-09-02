@@ -1,0 +1,2 @@
+(library (name expect_test_helpers_kernel_test)
+ (libraries expect_test_helpers_kernel) (preprocess (pps ppx_jane)))

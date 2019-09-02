@@ -851,8 +851,8 @@ check on whether the first two elements are equal:
 val destutter : int list -> int list = <fun>
 ```
 
-<aside data-type="sidebar">
-<h5>Polymorphic Compare</h5>
+::: {data-type=note}
+##### Polymorphic Compare
 
 You might have noticed that `destutter` is specialized to lists of integers.
 That's because `Base`'s default equality operator is specialized to integers,
@@ -949,7 +949,7 @@ the module again.
 # open Base
 ```
 
-</aside>
+:::
 
 Note that `when` clauses have some downsides. As we noted earlier, the static
 checks associated with pattern matches rely on the fact that patterns are

@@ -9,8 +9,8 @@ you to classes and inheritance. [objects/in object-oriented
 programming]{.idx}[object-oriented programming
 (OOP)]{.idx}[programming/object-oriented programming (OOP)]{.idx}
 
-<aside data-type="sidebar">
-<h5>What Is Object-Oriented Programming?</h5>
+::: {data-type=note}
+##### What Is Object-Oriented Programming?
 
 Object-oriented programming (often shortened to OOP) is a programming style
 that encapsulates computation and data within logical *objects*. Each object
@@ -53,7 +53,7 @@ Almost every notable modern programming language has been influenced by OOP,
 and you'll have run across these terms if you've ever used C++, Java, C#,
 Ruby, Python, or JavaScript.
 
-</aside>
+:::
 
 ## OCaml Objects
 
@@ -498,8 +498,8 @@ We say that `'a -> string` is *contravariant* in `'a`. In general, function
 types are contravariant in their arguments and covariant in their results.
 [contravariance]{.idx}
 
-<aside data-type="sidebar">
-<h5>Variance Annotations</h5>
+::: {data-type=note}
+##### Variance Annotations
 
 OCaml works out the variance of a type using that type's definition:
 
@@ -566,7 +566,7 @@ module VarEither :
 - : (shape, shape) VarEither.t = <abstr>
 ```
 
-</aside>
+:::
 
 For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles:

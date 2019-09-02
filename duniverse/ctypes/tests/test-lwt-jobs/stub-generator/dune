@@ -1,0 +1,4 @@
+(executable
+ (name driver)
+ (modules driver)
+ (libraries ctypes test_lwt_jobs_stubs tests_common))

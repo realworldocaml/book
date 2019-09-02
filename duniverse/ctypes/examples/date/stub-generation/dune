@@ -1,0 +1,3 @@
+(executable
+ (name date_cmd)
+ (libraries date_stubs date_generated))

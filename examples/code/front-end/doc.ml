@@ -1,4 +1,4 @@
-(** example.ml: The first special comment of the file is the comment 
+(** example.ml: The first special comment of the file is the comment
     associated with the whole module. *)
 
 (** Comment for exception My_exception. *)

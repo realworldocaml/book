@@ -1,0 +1,12 @@
+(install
+ (package ocp-index)
+ (section share_root)
+ (files
+  (ocp-index.el as emacs/site-lisp/ocp-index.el)))
+
+(install
+ (package ocp-index)
+ (section share)
+ (files
+  (ocp-index.vim as vim/autoload/ocpindex.vim)
+  (autoload.vim as vim/ftplugin/ocaml.vim)))

@@ -1,0 +1,5 @@
+(library (name ppx_hash_lib_bench)
+ (libraries core_kernel ppx_hash_lib ppx_hash_runtime_test)
+ (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT) (deps bench.ml.pp))

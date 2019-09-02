@@ -1,0 +1,10 @@
+(library
+ (name indexLib)
+ (public_name ocp-index.lib)
+ (preprocess
+  (action
+   (run ocp-pp %{input-file})))
+ (libraries compiler-libs compiler-libs.common ocp-indent.lexer
+   ocp-indent.utils)
+ (wrapped false)
+ (flags :standard -w -9))

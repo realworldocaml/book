@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: d9e288eb92d7dd1102a21c1e379fc03d)
+version = "0.2"
+description = "Text wrapping and filling for OCaml."
+requires = "str"
+archive(byte) = "textwrap.cma"
+archive(byte, plugin) = "textwrap.cma"
+archive(native) = "textwrap.cmxa"
+archive(native, plugin) = "textwrap.cmxs"
+exists_if = "textwrap.cma"
+# OASIS_STOP
+

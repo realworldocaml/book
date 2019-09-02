@@ -706,7 +706,7 @@ let loop filename () =
 
 let () =
   Command.basic_spec ~summary:"Parse and display JSON"
-    Command.Spec.(empty +> anon ("filename" %: file))
+    Command.Spec.(empty +> anon ("filename" %: string))
     loop
   |> Command.run
 ```
@@ -729,7 +729,7 @@ null
 Now build and run the example using this file, and you can see the full
 parser in action:
 
-```sh dir=../../examples/code/parsing-test
+```sh dir=../../examples/code/parsing-test,skip
 $ dune exec ./test.exe test1.json
 true
 false
@@ -746,7 +746,7 @@ null
 With our simple error handling scheme, errors are fatal and cause the program
 to terminate with a nonzero exit code:
 
-```sh dir=../../examples/code/parsing-test
+```sh dir=../../examples/code/parsing-test,skip
 $ cat test2.json
 { "name": "Chicago",
   "zips": [12345,

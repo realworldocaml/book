@@ -1,0 +1,4 @@
+(library (name ppx_hash_expander) (public_name ppx_hash.expander)
+ (ppx_runtime_libraries ppx_hash.runtime-lib)
+ (libraries ppx_compare.expander base ppxlib compiler-libs.common)
+ (preprocess (pps ppxlib.metaquot)))

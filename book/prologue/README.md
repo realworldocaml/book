@@ -205,7 +205,7 @@ personal experience to construct scalable, robust software systems.
   everything in the tour; it's meant to give you a taste of many different
   aspects of the language, but the ideas covered there will be explained in
   more depth in the chapters that follow.
-  
+
   After covering the core language, Part I then moves onto more advanced
   features like modules, functors, and objects, which may take some time to
   digest. Understanding these concepts is important, though. These ideas will
@@ -253,99 +253,15 @@ for all of the libraries and tools referenced in the book
 
 ### Code Examples
 
-All of the code examples in this book are available freely online under a
-public-domain-like license. You are most welcome to copy and use any of the
-snippets as you see fit in your own code, without any attribution or other
-restrictions on their use.[OCaml/code examples for]{.idx}
+All of the code examples in this book are available freely online
+under a public-domain-like license. You are most welcome to copy and
+use any of the snippets as you see fit in your own code, without any
+attribution or other restrictions on their use.[OCaml/code examples
+for]{.idx}
 
-The code repository is available online at
-[<em class="hyperlink">https://github.com/realworldocaml/examples</em>](https://github.com/realworldocaml/examples).
-Every code snippet in the book has a clickable header that tells you the
-filename in that repository to find the source code, shell script, or
-ancillary data file that the snippet was sourced from.
-
-If you feel your use of code examples falls outside fair use or the
-permission given above, feel free to contact us at
-[_permissions@oreilly.com_](mailto:permissions@oreilly.com){.email}.
-
-
-## Safari® Books Online
-
-::: safarienabled
-Safari Books Online
-([<em class="hyperlink">www.safaribooksonline.com</em>](http://my.safaribooksonline.com/?portal=oreilly){.orm:hideurl:ital})
-is an on-demand digital library that delivers expert
-[content](http://www.safaribooksonline.com/content){.orm:hideurl} in both
-book and video form from the world’s leading authors in technology and
-business. Technology professionals, software developers, web designers, and
-business and creative professionals use Safari Books Online as their primary
-resource for research, problem solving, learning, and certification training.
-:::
-
-Safari Books Online offers a range of
-[product mixes](http://www.safaribooksonline.com/subscriptions){.orm:hideurl}
-and pricing programs for
-[organizations](http://www.safaribooksonline.com/organizations-teams){.orm:hideurl},
-[government agencies](http://www.safaribooksonline.com/government){.orm:hideurl},
-and
-[individuals](http://www.safaribooksonline.com/individuals){.orm:hideurl}.
-Subscribers have access to thousands of books, training videos, and
-prepublication manuscripts in one fully searchable database from publishers
-like O’Reilly Media, Prentice Hall Professional, Addison-Wesley
-Professional, Microsoft Press, Sams, Que, Peachpit Press, Focal Press, Cisco
-Press, John Wiley & Sons, Syngress, Morgan Kaufmann, IBM Redbooks, Packt,
-Adobe Press, FT Press, Apress, Manning, New Riders, McGraw-Hill, Jones &
-Bartlett, Course Technology, and dozens
-[more](http://www.safaribooksonline.com/publishers){.orm:hideurl}. For more
-information about Safari Books Online, please visit us
-[online](http://www.safaribooksonline.com/){.orm:hideurl}.
-
-## How to Contact Us
-
-Please address comments and questions concerning this book to the publisher:
-
-::: {.simplelist}
-- O’Reilly Media, Inc.
-
-- 1005 Gravenstein Highway North
-
-- Sebastopol, CA 95472
-
-- 800-998-9938 (in the United States or Canada)
-
-- 707-829-0515 (international or local)
-
-- 707-829-0104 (fax)
-:::
-
-
-We have a web page for this book, where we list errata, examples, and any
-additional information. You can access this page at:
-
-::: {.simplelist}
-- [<em class="hyperlink">http://oreil.ly/realworldOCaml</em>](http://oreil.ly/realworldOCaml)
-:::
-
-
-To comment or ask technical questions about this book, send email to:
-
-::: {.simplelist}
-- [_bookquestions@oreilly.com_](mailto:bookquestions@oreilly.com){.email}
-:::
-
-
-For more information about our books, courses, conferences, and news, see our
-website at
-[<em class="hyperlink">http://www.oreilly.com</em>](http://www.oreilly.com).
-
-Find us on Facebook:
-[<em class="hyperlink">http://facebook.com/oreilly</em>](http://facebook.com/oreilly)
-
-Follow us on Twitter:
-[<em class="hyperlink">http://twitter.com/oreillymedia</em>](http://twitter.com/oreillymedia)
-
-Watch us on YouTube:
-[<em class="hyperlink">http://www.youtube.com/oreillymedia</em>](http://www.youtube.com/oreillymedia)
+The full text of the book, along with all of the example code is
+available online at [<em
+class="hyperlink">https://github.com/realworldocaml/book</em>](https://github.com/realworldocaml/book).
 
 ## Contributors
 
@@ -378,4 +294,3 @@ We would especially like to thank the following individuals for improving
 - The many people who collectively submitted over 2400 comments to online
   drafts of this book, through whose efforts countless errors were found and
   fixed.
-

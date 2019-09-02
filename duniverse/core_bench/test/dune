@@ -1,0 +1,2 @@
+(executables (names test_bench mv_regr) (libraries core core_bench)
+ (preprocess no_preprocessing))

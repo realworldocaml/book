@@ -1,0 +1,3 @@
+(library (name ppx_fields_conv) (public_name ppx_fields_conv)
+ (kind ppx_deriver) (ppx_runtime_libraries fieldslib) (libraries base ppxlib)
+ (preprocess (pps ppxlib.metaquot)))

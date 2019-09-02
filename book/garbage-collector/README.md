@@ -64,8 +64,8 @@ major and minor heaps to account for this generational difference. We'll
 explain how they differ in more detail next. [OCAMLRUNPARAM]{.idx}[Gc
 module]{.idx}
 
-<aside data-type="sidebar">
-<h5>The Gc Module and OCAMLRUNPARAM</h5>
+::: {data-type=note}
+##### The Gc Module and OCAMLRUNPARAM
 
 OCaml provides several mechanisms to query and alter the behavior of the
 runtime system. The `Gc` module provides this functionality from within OCaml
@@ -81,7 +81,7 @@ effects of different settings. The format of `OCAMLRUNPARAM` is documented in
 the
 [ OCaml manual](https://caml.inria.fr/pub/docs/manual-ocaml/runtime.html).
 
-</aside>
+:::
 
 ## The Fast Minor Heap
 
@@ -507,9 +507,9 @@ garbage collection occurring:
 
 
 
-```sh dir=../../examples/code/gc/barrier_bench,non-deterministic=command
+```sh dir=../../examples/code/gc/barrier_bench,non-deterministic=command,require-package=core_bench
 $ dune build barrier_bench.exe
-$ ./_build/default/barrier_bench.exe -ascii alloc -quota 1
+$ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
 
   Name        Time/Run   mWd/Run   mjWd/Run   Prom/Run   Percentage
@@ -534,7 +534,7 @@ garbage collection behavior:
 
 ```sh dir=../../examples/code/gc/barrier_bench
 $ dune build barrier_bench.exe
-$ ./_build/default/barrier_bench.exe -help
+$ dune exec -- ./barrier_bench.exe -help
 Benchmark for mutable, immutable
 
   barrier_bench.exe [COLUMN ...]
@@ -653,9 +653,9 @@ Building and running this should show the following output:
 
 
 
-```sh dir=../../examples/code/gc/finalizer
+```sh dir=../../examples/code/gc/finalizer,require-package=async
 $ dune build finalizer.exe
-$ ./_build/default/finalizer.exe
+$ dune exec -- ./finalizer.exe
        immediate int: FAIL
      immediate float: FAIL
       allocated bool: FAIL

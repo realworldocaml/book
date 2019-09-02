@@ -1,0 +1,17 @@
+description = "Result value combinators for OCaml"
+version = "%%VERSION_NUM%%"
+requires = "result"
+archive(byte) = "rresult.cma"
+archive(native) = "rresult.cmxa"
+plugin(byte) = "rresult.cma"
+plugin(native) = "rresult.cmxs"
+
+package "top" (
+  description = "Rresult toplevel support"
+  version = "%%VERSION_NUM%%"
+  requires = "rresult"
+  archive(byte) = "rresult_top.cma"
+  archive(native) = "rresult_top.cmxa"
+  plugin(byte) = "rresult_top.cma"
+  plugin(native) = "rresult_top.cmxs"
+)

@@ -1,13 +1,14 @@
 # Concurrent Programming with Async
 
-The logic of building programs that interact with the outside world is often
-dominated by waiting; waiting for the click of a mouse, or for data to be
-fetched from disk, or for space to be available on an outgoing network
-buffer. Even mildly sophisticated interactive applications are typically
-*concurrent*, needing to wait for multiple different events at the same time,
-responding immediately to whatever event happens first. [interactive
-input/concurrent programming for]{.idx}[concurrent
-programming]{.idx}[programming/concurrent programming with Async]{.idx}
+The logic of building programs that interact with the outside world is
+often dominated by waiting; waiting for the click of a mouse, or for
+data to be fetched from disk, or for space to be available on an
+outgoing network buffer. Even mildly sophisticated interactive
+applications are typically *concurrent*, needing to wait for multiple
+different events at the same time, responding immediately to whatever
+happens first. [interactive input/concurrent programming
+for]{.idx}[concurrent programming]{.idx}[programming/concurrent
+programming with Async]{.idx}
 
 One approach to concurrency is to use preemptive system threads, which is the
 dominant approach in languages like Java or C#. In this model, each task that
@@ -43,7 +44,7 @@ of]{.idx}
 
 ## Async Basics
 
-Recall how I/O is typically done in Core. Here's a simple example:
+Recall how I/O is typically done in Core. Here's a simple example.
 
 ```ocaml env=main
 # open Core
@@ -158,10 +159,10 @@ includes an infix operator for it: `>>=`. Using this operator, we can rewrite
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
-In the preceding code, we've dropped the parentheses around the function on
-the righthand side of the bind, and we didn't add a level of indentation for
-the contents of that function. This is standard practice for using the infix
-`bind`operator. [bind function]{.idx}
+In the preceding code, we've dropped the parentheses around the
+function on the righthand side of the bind, and we didn't add a level
+of indentation for the contents of that function. This is standard
+practice for using the infix `bind` operator. [bind function]{.idx}
 
 Now let's look at another potential use of `bind`. In this case, we'll write
 a function that counts the number of lines in a file:
@@ -176,12 +177,12 @@ Error: This expression has type int but an expression was expected of type
          'a Deferred.t
 ```
 
-This looks reasonable enough, but as you can see, the compiler is unhappy.
-The issue here is that `bind` expects a function that returns a deferred, but
-we've provided it a function that returns the nondeferred result directly. To
-make these signatures match, we need a function for taking an ordinary value
-and wrapping it in a deferred. This function is a standard part of Async and
-is called `return`: [return function]{.idx}
+This looks reasonable enough, but as you can see, the compiler is
+unhappy.  The issue here is that `bind` expects a function that
+returns a `Deferred.t`, but we've provided it a function that returns
+the result directly.  What we need is `return`, a function provided by
+Async that takes an ordinary value and wraps it up in a deferred.
+[return function]{.idx}
 
 ```ocaml env=main
 # return
@@ -272,7 +273,7 @@ explicitly.
 
 To keep things simple, we'll use the infix notation for map and bind for the
 remainder of the chapter. But once you get comfortable with Async and monadic
-programming, `Let_syntax` can make your code easier to read.
+programming, we recommend using `Let_syntax`.
 :::
 
 
@@ -372,13 +373,14 @@ which becomes determined after that time span elapses:
 module Delayer : Delayer_intf
 ```
 
-This code isn't particularly long, but it is subtle. In particular, note how
-the queue of thunks is used to ensure that the enqueued actions are run in
-order, even if the thunks scheduled by `upon` are run out of order. This kind
-of subtlety is typical of code that involves ivars and `upon`, and because of
-this, you should stick to the simpler map/bind/return style of working with
-deferreds when you
-can.<a data-type="indexterm" data-startref="ALbas">&nbsp;</a>
+This code isn't particularly long, but it is subtle. In particular,
+note how the queue of thunks is used to ensure that the enqueued
+actions are run in the order they were scheduled, even if the thunks
+scheduled by `upon` are run out of order. This kind of subtlety is
+typical of code that involves ivars and `upon`, and because of this,
+you should stick to the simpler map/bind/return style of working with
+deferreds when you can.<a data-type="indexterm"
+data-startref="ALbas">&nbsp;</a>
 
 ::: {data-type=note}
 #### Understanding `bind` in terms of ivars and `upon`
@@ -460,22 +462,41 @@ condition, the loop is ended. The deferred returned by a call to
 `copy_blocks` becomes determined only once the end-of-file condition is hit.
 [end-of-file condition]{.idx}
 
-One important aspect of how this is written is that it uses *pushback*, which
-is to say that if the reader can't make progress reading, the writer will
-stop writing. If you don't implement pushback in your servers, then a stopped
-client can cause your program to leak memory, since you'll need to allocate
-space for the data that's been read in but not yet written out.
-[pushback]{.idx}
+One important aspect of how `copy_blocks` is written is that it provides
+*pushback*, which is to say that if the process can't make progress
+writing, it will stop reading. If you don't implement pushback in your
+servers, then anything that prevents you from writing (e.g., a client
+that is unable to keep up) will cause your program to allocate
+unbounded amounts of memory, as it keeps track of all the data it
+intends to write but hasn't been able to yet.
 
-You might also be concerned that the chain of deferreds that is built up as
-you go through the loop would lead to a memory leak. After all, this code
-constructs an ever-growing chain of binds, each of which creates a deferred.
-In this case, however, all of the deferreds should become determined
-precisely when the final deferred in the chain is determined, in this case,
-when the `Eof` condition is hit. Because of this, we could safely replace all
-of these deferreds with a single deferred. Async has logic to do just this,
-and so there's no memory leak after all. This is essentially a form of
-tail-call optimization, lifted to the Async monad. [tail calls]{.idx}
+::: {data-type=note}
+### Tail-calls and chains of deferreds
+
+There's another memory problem you might be concerned about, which is
+the allocation of deferreds.  If you think about the execution of
+`copy_blocks`, you'll see it's creating a chain of deferreds, two per
+time through the loop.  The length of this chain is unbounded, and so,
+naively, you'd think this would take up an unbounded amount of memory
+as the echo process continues.
+
+Happily, it turns out that this is a special case that Async knows how
+to optimize.  In particular, the whole chain of deferreds should
+become determined precisely when the final deferred in the chain is
+determined, in this case, when the `Eof` condition is hit.  Because of
+this, we could safely replace all of these deferreds with a single
+deferred.  Async does just this, and so there's no memory leak after
+all.
+
+This is essentially a form of tail-call optimization, lifted to the
+Async monad.  Indeed, you can tell that the bind in question doesn't
+lead to a memory leak in more or less the same way you can tell that
+the tail recursion optimization should apply, which is that the bind
+that creates the deferred is in tail-position.  In other words,
+nothing is done to that deferred once it's created; it's simply
+returned as is.  [tail calls]{.idx}
+
+:::
 
 `copy_blocks` provides the logic for handling a client connection, but we
 still need to set up a server to receive such connections and dispatch to
@@ -498,18 +519,19 @@ let run () =
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
 ```
 
-The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which is a
-handle to the server that lets you shut the server down. We don't use that
-functionality here, so we explicitly ignore `server` to suppress the
-unused-variables error. We put in a type annotation around the ignored value
-to make the nature of the value we're ignoring
-<span class="keep-together">explicit</span>.
+The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which
+is a handle to the server that lets you shut the server down. We don't
+use that functionality here, so we explicitly ignore `server` to
+suppress the unused-variables error. We put in a type annotation
+around the ignored value to make the nature of the value we're
+ignoring explicit.
 
-The most important argument to `Tcp.Server.create` is the final one, which is
-the client connection handler. Notably, the preceding code does nothing
-explicit to close down the client connections when the communication is done.
-That's because the server will automatically shut down the connection once
-the deferred returned by the handler becomes determined.
+The most important argument to `Tcp.Server.create` is the final one,
+which is the client connection handler. Notably, the preceding code
+does nothing explicit to close down the client connections when the
+communication is done.  That's because the server will automatically
+shut down the connection once the deferred returned by the handler
+becomes determined.
 
 Finally, we need to initiate the server and start the Async scheduler:
 
@@ -525,34 +547,28 @@ scheduler. It can be a bewildering mistake, because without the scheduler,
 your program won't do anything at all; even calls to `printf` won't reach the
 terminal.
 
-It's worth noting that even though we didn't spend much explicit effort on
-thinking about multiple clients, this server is able to handle many
-concurrent clients without further modification.
+It's worth noting that even though we didn't spend much explicit
+effort on thinking about multiple clients, this server is able to
+handle many clients concurrently connecting and reading and writing
+data.
 
 Now that we have the echo server, we can connect to the echo server using the
-netcat tool, which is invoked as `nc`:
-
-```scheme
-(executable
-  (name      echo)
-  (libraries core async))
-```
-
-
+netcat tool, which is invoked as `nc`.  Note that we use `dune exec`
+to both build and run the executable.  We use the double-dashes so
+that Dune's parsing of arguments doesn't interfere with argument
+parsing for the executed program.
 
 ```sh skip,dir=../../examples/code/async/echo
-$ dune build echo.exe
-$ ./_build/default/echo.exe &
-$ sleep 1
+$ dune exec -- ./echo.exe &
 $ echo "This is an echo server" | nc 127.0.0.1 8765
 This is an echo server
 $ echo "It repeats whatever I write" | nc 127.0.0.1 8765
 It repeats whatever I write
-$ killall -9 echo.exe
+$ killall echo.exe
 ```
 
-<aside data-type="sidebar">
-<h5>Functions that Never Return</h5>
+::: {data-type=note}
+##### Functions that Never Return
 
 You might wonder what's going on with the call to `never_returns`.
 `never_returns` is an idiom that comes from Core that is used to mark
@@ -619,7 +635,7 @@ val do_stuff : int -> int = <fun>
 Thus, we got the compilation to go through by explicitly marking in the
 source that the call to `loop_forever` never returns.
 
-</aside>
+:::
 
 ### Improving the Echo Server
 
@@ -785,7 +801,7 @@ library/DuckDuckGo searching example]{.idx #ALduckduck}
 
 `cohttp`
 : A library for creating HTTP clients and servers. We need Async support,
-  which comes with the `cohttp.async` package.
+  which comes with the `cohttp-async` package.
 
 Now let's dive into the implementation.
 
@@ -871,10 +887,10 @@ To better understand what's going on, it's useful to look at the type for
 `Cohttp_async.Client.get`, which we can do in `utop`:
 
 ```ocaml env=main
-# #require "cohttp.async"
+# #require "cohttp-async"
 # Cohttp_async.Client.get
 - : ?interrupt:unit Deferred.t ->
-    ?ssl_config:Conduit_async.V1.Conduit_async.Ssl.config ->
+    ?ssl_config:Conduit_async.V2.Ssl.Config.t ->
     ?headers:Cohttp.Header.t ->
     Uri.t -> (Cohttp.Response.t * Cohttp_async.Body.t) Deferred.t
 = <fun>
@@ -882,12 +898,12 @@ To better understand what's going on, it's useful to look at the type for
 
 The `get` call takes as a required argument a URI and returns a deferred
 value containing a `Cohttp.Response.t` (which we ignore) and a pipe reader to
-which the body of the request will be written.
+which the body of the request will be streamed.
 
 In this case, the HTTP body probably isn't very large, so we call
 `Cohttp_async.Body.to_string` to collect the data from the connection
-as a single deferred string, rather than consuming the data in a
-streaming fashion using a pipe.
+as a single deferred string, rather than consuming the data
+incrementally.
 
 Running a single search isn't that interesting from a concurrency
 perspective, so let's write code for dispatching multiple searches in
@@ -936,11 +952,17 @@ to wait for all the results. Here's the type of `Deferred.all`:
 - : 'a Conduit_async.io list -> 'a list Conduit_async.io = <fun>
 ```
 
-Note that the list returned by `Deferred.all` reflects the order of the
-deferreds passed to it. As such, the definitions will be printed out in the
-same order that the search words are passed in, no matter what order the
-queries return in. We could rewrite this code to print out the results as
-they're received (and thus potentially out of order) as follows:
+(Somewhat confusingly, the type `Conduit_async.io` is just a type
+alias for `Deferred.t`, introduced by `Conduit_async`.)
+
+The list returned by `Deferred.all` reflects the order of the
+deferreds passed to it. As such, the definitions will be printed out
+in the same order that the search words are passed in, no matter what
+order the queries return in.  It also means that no printing occurs
+until all results arrive.
+
+We could rewrite this code to print out the results as they're
+received (and thus potentially out of order) as follows:
 
 ```ocaml file=../../examples/code/async/search_out_of_order.ml,part=1
 (* Run many searches in parallel, printing out the results as you go *)
@@ -978,17 +1000,8 @@ let () =
 And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
-```scheme
-(executable
-  (name      search)
-  (libraries core async cohttp.async yojson textwrap))
-```
-
-
-
-```sh dir=../../examples/code/async/search
-$ dune build search.exe
-$ ./_build/default/search.exe "Concurrent Programming" "OCaml"
+```sh dir=../../examples/code/async/search,require-package=textwrap,require-package=yojson
+$ dune exec -- ./search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
 ----------------------
 
@@ -1014,22 +1027,22 @@ Caml language with object-oriented programming constructs."
 
 ## Exception Handling
 
-When programming with external resources, errors are everywhere: everything
-from a flaky server to a network outage to exhausting of local resources can
-lead to a runtime error. When programming in OCaml, some of these errors will
-show up explicitly in a function's return type, and some of them will show up
-as exceptions. We covered exception handling in OCaml in
-[Exceptions](error-handling.html#exceptions){data-type=xref}, but as we'll
-see, exception handling in a concurrent program presents some new challenges.
-[exceptions/in concurrent programming]{.idx}[concurrent
-programming]{.idx}[Async library/exception handling in]{.idx #ALexcept}
+When programming with external resources, errors are everywhere.
+Everything from a flaky server to a network outage to exhausting of
+local resources can lead to a runtime error. When programming in
+OCaml, some of these errors will show up explicitly in a function's
+return type, and some of them will show up as exceptions. We covered
+exception handling in OCaml in
+[Exceptions](error-handling.html#exceptions){data-type=xref}, but as
+we'll see, exception handling in a concurrent program presents some
+new challenges.  [exceptions/in concurrent
+programming]{.idx}[concurrent programming]{.idx}[Async
+library/exception handling in]{.idx #ALexcept}
 
-Let's get a better sense of how exceptions work in Async by creating an
-asynchronous computation that (sometimes) fails with an exception. The
-function
-`maybe_raise`<span class="keep-together">blocks
-	    for half a second,</span>
-and then either throws an exception or returns `unit`, alternating between
+Let's get a better sense of how exceptions work in Async by creating
+an asynchronous computation that (sometimes) fails with an
+exception. The function `maybe_raise` blocks for half a second, and
+then either throws an exception or returns `unit`, alternating between
 the two behaviors on subsequent calls:
 
 ```ocaml env=main
@@ -1094,14 +1107,16 @@ a deferred that becomes determined either as `Ok` of whatever `f` returned,
 or `Error exn` if `f` threw an exception before its return value became
 determined.
 
-### Monitors
+::: {data-type=note}
+##### Monitors
 
-`try_with` is a great way of handling exceptions in Async, but it's not the
-whole story. All of Async's exception-handling mechanisms, `try_with`
-included, are built on top of Async's system of *monitors*, which are
-inspired by the error-handling mechanism in Erlang of the same name. Monitors
-are fairly low-level and are only occasionally used directly, but it's
-nonetheless worth understanding how they work. [monitors]{.idx}
+`try_with` is a useful tool for handling exceptions in Async, but it's
+not the whole story. All of Async's exception-handling mechanisms,
+`try_with` included, are built on top of Async's system of *monitors*,
+which are inspired by the error-handling mechanism in Erlang of the
+same name. Monitors are fairly low-level and are only occasionally
+used directly, but it's nonetheless worth understanding how they
+work. [monitors]{.idx}
 
 In Async, a monitor is a context that determines what to do when there is an
 unhandled exception. Every Async job runs within the context of some monitor,
@@ -1208,7 +1223,7 @@ exception Another_exception
 # Deferred.any [ after (Time.Span.of_sec 0.5)
                ; swallow_some_errors Another_exception ]
 Exception:
-(monitor.ml.Error (Another_exception) ("Caught by monitor (id 61)")).
+(monitor.ml.Error (Another_exception) ("Caught by monitor (id 69)")).
 ```
 
 If instead we use `Ignore_me`, the exception will be ignored, and the
@@ -1230,6 +1245,8 @@ individual request, in either case responding to an exception by closing the
 connection. It is for building this kind of custom error handling that
 monitors can be helpful.
 
+:::
+
 ### Example: Handling Exceptions with DuckDuckGo
 
 Let's now go back and improve the exception handling of our DuckDuckGo
@@ -1245,7 +1262,7 @@ that occur when one of those servers is misspecified.
 First we'll need to change `query_uri` to take an argument specifying the
 server to connect to:
 
-```ocaml file=../../examples/code/async/search_with_configurable_server/search_with_configurable_server.ml,part=1
+```ocaml file=../../examples/code/async/search_with_configurable_server/search.ml,part=1
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
@@ -1256,36 +1273,28 @@ let query_uri ~server query =
 
 In addition, we'll make the necessary changes to get the list of servers on
 the command-line, and to distribute the search queries round-robin across the
-list of servers. Now, let's see what happens if we rebuild the application
-and run it giving it a list of servers, some of which won't respond to the
-query:
+list of servers.
 
-```scheme
-(executable
-  (name      search_with_configurable_server)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
+Now, let's see what happens when we rebuild the application and run it
+two servers, one of which won't respond to the query.
 
 ```sh dir=../../examples/code/async/search_with_configurable_server,non-deterministic=output
-$ dune build search_with_configurable_server.exe
-$ ./_build/default/search_with_configurable_server.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
- ("Raised by primitive operation at file \"src/unix_syscalls.ml\", line 937, characters 17-76"
-  "Called from file \"src/deferred1.ml\", line 20, characters 40-45"
-  "Called from file \"src/job_queue.ml\", line 159, characters 6-47"
+ ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
+  "Called from file \"duniverse/async_kernel/src/deferred1.ml\", line 17, characters 40-45"
+  "Called from file \"duniverse/async_kernel/src/job_queue.ml\", line 170, characters 6-47"
   "Caught by monitor Tcp.close_sock_on_error"))
 [1]
 ```
 
-As you can see, we got a "Connection refused" failure, which ends the entire
-program, even though one of the two queries would have gone through
-successfully on its own. We can handle the failures of individual connections
-separately by using the `try_with` function within each call to
-`get_definition`, as follows:
+As you can see, we got a "Connection refused" failure, which ends the
+entire program, even though one of the two queries would have gone
+through successfully on its own. We can handle the failures of
+individual connections separately by using the `try_with` function
+within each call to `get_definition`, as follows:
 
-```ocaml file=../../examples/code/async/search_with_error_handling/search_with_error_handling.ml,part=1
+```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
@@ -1307,7 +1316,7 @@ first element is the word being searched for, and the second element is the
 Now we just need to change the code for `print_result` so that it can handle
 the new type:
 
-```ocaml file=../../examples/code/async/search_with_error_handling/search_with_error_handling.ml,part=2
+```ocaml file=../../examples/code/async/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -1324,17 +1333,8 @@ let print_result (word,definition) =
 Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
-```scheme
-(executable
-  (name      search_with_error_handling)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_error_handling,non-deterministic=output
-$ dune build search_with_error_handling.exe
-$ ./_build/default/search_with_error_handling.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
 
@@ -1348,6 +1348,7 @@ the programming language Caml, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
 in 1996. A member of the ML language family, OCaml extends the core
 Caml language with object-oriented programming constructs."
+
 ```
 
 Now, only the query that went to `localhost` failed.
@@ -1389,15 +1390,18 @@ single deferred that will become determined once any of the values on the
 list is determined.
 
 ```ocaml env=main
-# Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
-  ; (after (sec 10.) >>| fun () -> "ten seconds") ]
+# Deferred.any
+  [ (after (sec 0.5) >>| fun () -> "half a second")
+  ; (after (sec 1.0) >>| fun () -> "one second")
+  ; (after (sec 4.0) >>| fun () -> "four seconds")
+  ]
 - : string = "half a second"
 ```
 
-Let's use this to add timeouts to our DuckDuckGo searches. The following code
-is a wrapper for `get_definition` that takes a timeout (in the form of a
-`Time.Span.t`) and returns either the definition, or, if that takes too long,
-an error:
+Let's use this to add timeouts to our DuckDuckGo searches. The
+following code is a wrapper for `get_definition` that takes a timeout
+(in the form of a `Time.Span.t`) and returns either the definition,
+or, if that takes too long, an error:
 
 ```ocaml file=../../examples/code/async/search_with_timeout.ml,part=1
 let get_definition_with_timeout ~server ~timeout word =
@@ -1428,7 +1432,7 @@ The following code shows how you can change `get_definition` and
 `get_definition_with_timeout` to cancel the `get` call if the timeout
 expires:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml,part=1
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
   try_with (fun () ->
@@ -1446,7 +1450,7 @@ Next, we'll modify `get_definition_with_timeout` to create a deferred to pass
 in to `get_definition`, which will become determined when our timeout
 expires:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search_with_timeout_no_leak_simple.ml,part=2
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak_simple/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->
@@ -1457,9 +1461,9 @@ let get_definition_with_timeout ~server ~timeout word =
   (word,result')
 ```
 
-This will work and will cause the connection to shutdown cleanly when we time
-out; but our code no longer explicitly knows whether or not the timeout has
-kicked in. In particular, the error message on a timeout will now be
+This will cause the connection to shutdown cleanly when we time out;
+but our code no longer explicitly knows whether or not the timeout has
+kicked in.  In particular, the error message on a timeout will now be
 `"Unexpected failure"` rather than `"Timed out"`, which it was in our
 previous implementation.
 
@@ -1485,7 +1489,7 @@ In the following example, we use `choose` to ensure that the `interrupt`
 deferred becomes determined if and only if the timeout deferred is chosen.
 Here's the code:
 
-```ocaml file=../../examples/code/async/search_with_timeout_no_leak/search_with_timeout_no_leak.ml,part=2
+```ocaml file=../../examples/code/async/search_with_timeout_no_leak/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
@@ -1506,17 +1510,8 @@ let get_definition_with_timeout ~server ~timeout word =
 Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
-```scheme
-(executable
-  (name      search_with_timeout_no_leak)
-  (libraries cohttp.async yojson textwrap))
-```
-
-
-
 ```sh dir=../../examples/code/async/search_with_timeout_no_leak,non-deterministic=output
-$ dune build search_with_timeout_no_leak.exe
-$ ./_build/default/search_with_timeout_no_leak.exe "concurrent programming" ocaml -timeout 0.2s
+$ dune exec -- ./search.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
 
@@ -1532,11 +1527,8 @@ complete."
 ocaml
 -----
 
-"OCaml, originally named Objective Caml, is the main implementation of
-the programming language Caml, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy, Ascánder Suárez and others
-in 1996. A member of the ML language family, OCaml extends the core
-Caml language with object-oriented programming constructs."
+DuckDuckGo query failed: Timed out
+
 ```
 
 ## Working with System Threads
@@ -1612,6 +1604,7 @@ prints out one last timestamp:
     let d = thunk () in
     Clock.every (sec 0.1) ~stop:d print_time;
     d >>= fun () ->
+    printf "\nFinished at: ";
     print_time ();
     printf "\n";
     Writer.flushed (force Writer.stdout);
@@ -1624,7 +1617,8 @@ expect, waking up roughly every 100 milliseconds:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> after (sec 0.5))
-0.038147ms, 101.254ms, 201.826ms, 305.019ms, 410.269ms, 501.83ms,
+37.670135498046875us, 100.65722465515137ms, 201.19547843933105ms, 301.85389518737793ms, 402.58693695068359ms,
+Finished at: 500.67615509033203ms,
 - : unit = ()
 ```
 
@@ -1637,7 +1631,7 @@ busy loop to finish running:
     for i = 1 to 100_000_000 do x := Some i done
 val busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> return (busy_loop ()))
-2.12909s,
+Finished at: 874.99594688415527ms,
 - : unit = ()
 ```
 
@@ -1649,15 +1643,16 @@ system thread, the behavior will be different:
 
 ```ocaml env=main,non-deterministic
 # log_delays (fun () -> In_thread.run busy_loop)
-0.0460148ms, 312.767ms, 415.486ms, 521.813ms, 631.633ms, 792.659ms, 896.126ms, 1.00168s, 1.10679s, 1.21284s, 1.31803s, 1.42162s, 1.52478s, 1.63463s, 1.7379s, 1.84361s, 1.95302s, 2.13509s,
+31.709671020507812us, 107.50102996826172ms, 207.65542984008789ms, 307.95812606811523ms, 458.15873146057129ms, 608.44659805297852ms, 708.55593681335449ms, 808.81166458129883ms,
+Finished at: 840.72136878967285ms,
 - : unit = ()
 ```
 
-Now `log_delays` does get a chance to run, but not nearly as often as every
-100 milliseconds. The reason is that now that we're using system threads, we
-are at the mercy of the operating system to decide when each thread gets
-scheduled. The behavior of threads is very much dependent on the operating
-system and how it is configured.
+Now `log_delays` does get a chance to run, but it's no longer at clean
+100 millisecond intervals. The reason is that now that we're using
+system threads, we are at the mercy of the operating system to decide
+when each thread gets scheduled.  The behavior of threads is very much
+dependent on the operating system and how it is configured.
 
 Another tricky aspect of dealing with OCaml threads has to do with
 allocation. When compiling to native code, OCaml's threads only get a chance
@@ -1671,18 +1666,18 @@ we run a nonallocating loop in bytecode, our timer process will get to run:
     for i = 0 to 100_000_000 do () done
 val noalloc_busy_loop : unit -> unit = <fun>
 # log_delays (fun () -> In_thread.run noalloc_busy_loop)
-0.0400543ms, 130.686ms, 239.836ms, 340.546ms, 443.258ms, 605.56ms, 710.801ms, 870.451ms, 980.326ms, 1.03697s,
+32.186508178710938us, 116.56808853149414ms, 216.65477752685547ms, 316.83063507080078ms, 417.13213920593262ms,
+Finished at: 418.69187355041504ms,
 - : unit = ()
 ```
 
 But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
-```
-$ dune build native_code_log_delays.exe
-$ ./_build/default/native_code_log_delays.exe
-15.5686s,
-$
+```sh dir=../../examples/code/async/native_code_log_delays,non-deterministic=output
+$ dune exec -- native_code_log_delays.exe
+197.41058349609375us,
+Finished at: 1.2127914428710938s,
 ```
 
 The takeaway from these examples is that predicting thread interleavings is a

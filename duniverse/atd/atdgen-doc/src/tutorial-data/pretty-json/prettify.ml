@@ -1,0 +1,5 @@
+let json =
+"[1234,\"abcde\",{\"start_date\":{\"year\":1970,\"month\":1,\"day\":1}, 
+\"end_date\":{\"year\":1980,\"month\":1,\"day\":1}}]"
+
+let () = print_endline (Yojson.Safe.prettify json)

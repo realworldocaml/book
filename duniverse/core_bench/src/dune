@@ -1,0 +1,2 @@
+(library (name core_bench) (public_name core_bench)
+ (libraries textutils.ascii_table core) (preprocess (pps ppx_jane)))

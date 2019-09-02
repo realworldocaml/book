@@ -1,0 +1,5 @@
+text/x-makefile			Makefile makefile
+text/x-plain				META
+text/x-changelog		ChangeLog
+text/x-plain				Changes LICENSE README
+text/x-plain				_oasis _tags opam

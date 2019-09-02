@@ -1,0 +1,9 @@
+(executable
+ (name discover)
+ (modules discover)
+ (libraries dune.configurator))
+
+(executable
+ (name gen_libffi_abi)
+ (modules gen_libffi_abi)
+ (libraries dune.configurator))

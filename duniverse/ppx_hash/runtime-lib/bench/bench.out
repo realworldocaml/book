@@ -1,0 +1,112 @@
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌──────────────────────────────────────────┬──────────┬─────────┬────────────┐
+│ Name                                     │ Time/Run │ mWd/Run │ Percentage │
+├──────────────────────────────────────────┼──────────┼─────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash a   │   6.40ns │         │      0.86% │
+│ [bench.ml:Bench:.Internalhash] hash a    │   9.49ns │         │      1.27% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash a  │  11.28ns │         │      1.51% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash a │   6.73ns │         │      0.90% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash a │   8.03ns │   5.00w │      1.08% │
+│ [bench.ml:Bench:.Siphash(C)] hash a      │  20.15ns │         │      2.70% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash a  │ 745.78ns │ 120.00w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash a  │  26.38ns │         │      3.54% │
+└──────────────────────────────────────────┴──────────┴─────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌──────────────────────────────────────────┬────────────┬─────────┬────────────┐
+│ Name                                     │   Time/Run │ mWd/Run │ Percentage │
+├──────────────────────────────────────────┼────────────┼─────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash b   │     9.13ns │         │      0.61% │
+│ [bench.ml:Bench:.Internalhash] hash b    │    17.12ns │         │      1.14% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash b  │    18.04ns │         │      1.20% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash b │    17.72ns │         │      1.17% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash b │    30.80ns │  13.00w │      2.04% │
+│ [bench.ml:Bench:.Siphash(C)] hash b      │    29.43ns │         │      1.95% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash b  │ 1_508.09ns │ 243.00w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash b  │    53.27ns │         │      3.53% │
+└──────────────────────────────────────────┴────────────┴─────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌─────────────────────────────────────────────┬──────────┬─────────┬────────────┐
+│ Name                                        │ Time/Run │ mWd/Run │ Percentage │
+├─────────────────────────────────────────────┼──────────┼─────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash c__1   │   6.10ns │         │      0.84% │
+│ [bench.ml:Bench:.Internalhash] hash c__1    │   9.15ns │         │      1.25% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash c__1  │  10.99ns │         │      1.51% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash c__1 │   6.41ns │         │      0.88% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash c__1 │   7.83ns │   5.00w │      1.07% │
+│ [bench.ml:Bench:.Siphash(C)] hash c__1      │  20.02ns │         │      2.74% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash c__1  │ 729.84ns │ 120.00w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash c__1  │  26.61ns │         │      3.65% │
+└─────────────────────────────────────────────┴──────────┴─────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌─────────────────────────────────────────────┬────────────┬─────────┬────────────┐
+│ Name                                        │   Time/Run │ mWd/Run │ Percentage │
+├─────────────────────────────────────────────┼────────────┼─────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash c__2   │    17.78ns │         │      0.49% │
+│ [bench.ml:Bench:.Internalhash] hash c__2    │    37.97ns │         │      1.05% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash c__2  │    37.32ns │         │      1.03% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash c__2 │    29.38ns │         │      0.81% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash c__2 │    45.86ns │  28.00w │      1.27% │
+│ [bench.ml:Bench:.Siphash(C)] hash c__2      │    51.36ns │         │      1.42% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash c__2  │ 3_614.71ns │ 603.00w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash c__2  │   117.32ns │         │      3.25% │
+└─────────────────────────────────────────────┴────────────┴─────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌─────────────────────────────────────────────┬─────────────┬───────────┬────────────┐
+│ Name                                        │    Time/Run │   mWd/Run │ Percentage │
+├─────────────────────────────────────────────┼─────────────┼───────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash c_10   │    122.05ns │           │      0.45% │
+│ [bench.ml:Bench:.Internalhash] hash c_10    │    305.74ns │           │      1.14% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash c_10  │    269.31ns │           │      1.00% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash c_10 │    210.97ns │           │      0.78% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash c_10 │    378.80ns │   212.00w │      1.41% │
+│ [bench.ml:Bench:.Siphash(C)] hash c_10      │    317.78ns │           │      1.18% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash c_10  │ 26_887.89ns │ 4_467.00w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash c_10  │    870.10ns │           │      3.24% │
+└─────────────────────────────────────────────┴─────────────┴───────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌─────────────────────────────────────────────┬──────────┬─────────┬──────────┬──────────┬────────────┐
+│ Name                                        │ Time/Run │ mWd/Run │ mjWd/Run │ Prom/Run │ Percentage │
+├─────────────────────────────────────────────┼──────────┼─────────┼──────────┼──────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash c100   │   1.20us │         │          │          │      0.42% │
+│ [bench.ml:Bench:.Internalhash] hash c100    │   2.79us │         │          │          │      0.97% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash c100  │   2.59us │         │          │          │      0.90% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash c100 │   2.30us │         │          │          │      0.80% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash c100 │   3.85us │  2.28kw │          │          │      1.34% │
+│ [bench.ml:Bench:.Siphash(C)] hash c100      │   3.18us │         │          │          │      1.11% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash c100  │ 286.44us │ 47.94kw │    0.14w │    0.14w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash c100  │   9.17us │         │          │          │      3.20% │
+└─────────────────────────────────────────────┴──────────┴─────────┴──────────┴──────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌─────────────────────────────────────────────┬─────────────┬───────────┬────────────┐
+│ Name                                        │    Time/Run │   mWd/Run │ Percentage │
+├─────────────────────────────────────────────┼─────────────┼───────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash d_10   │     80.53ns │           │      0.47% │
+│ [bench.ml:Bench:.Internalhash] hash d_10    │    196.18ns │           │      1.14% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash d_10  │    290.85ns │           │      1.70% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash d_10 │    259.83ns │           │      1.51% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash d_10 │    348.62ns │   325.00w │      2.03% │
+│ [bench.ml:Bench:.Siphash(C)] hash d_10      │    344.75ns │           │      2.01% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash d_10  │ 17_157.77ns │ 2_883.00w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash d_10  │    825.77ns │           │      4.81% │
+└─────────────────────────────────────────────┴─────────────┴───────────┴────────────┘
+Warning: X_LIBRARY_INLINING is not set to true, benchmarks may be inaccurate.
+Estimated testing time 16s (8 benchmarks x 2s). Change using -quota SECS.
+┌─────────────────────────────────────────────┬──────────────┬─────────┬──────────┬──────────┬────────────┐
+│ Name                                        │     Time/Run │ mWd/Run │ mjWd/Run │ Prom/Run │ Percentage │
+├─────────────────────────────────────────────┼──────────────┼─────────┼──────────┼──────────┼────────────┤
+│ [bench.ml:Bench:.Traverse_only] hash d100   │     746.80ns │         │          │          │      0.13% │
+│ [bench.ml:Bench:.Internalhash] hash d100    │   3_930.53ns │         │          │          │      0.68% │
+│ [bench.ml:Bench:.Dumbhash(C,64)] hash d100  │   4_829.49ns │         │          │          │      0.83% │
+│ [bench.ml:Bench:.Dumbhash(ML,63)] hash d100 │   7_790.63ns │         │          │          │      1.34% │
+│ [bench.ml:Bench:.Dumbhash(ML,64)] hash d100 │  21_027.40ns │ 25.75kw │    0.13w │    0.13w │      3.63% │
+│ [bench.ml:Bench:.Siphash(C)] hash d100      │   6_596.03ns │         │          │          │      1.14% │
+│ [bench.ml:Bench:.Siphash(ML,64)] hash d100  │ 579_517.29ns │ 95.90kw │    0.16w │    0.16w │    100.00% │
+│ [bench.ml:Bench:.Siphash(ML,63)] hash d100  │  22_099.60ns │         │          │          │      3.81% │
+└─────────────────────────────────────────────┴──────────────┴─────────┴──────────┴──────────┴────────────┘

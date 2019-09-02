@@ -1,0 +1,8 @@
+(alias (name runtest) (deps dummy.ml.pp)
+ (action (bash "grep -q '\"ppx/ppx_here/test/dummy.mll\"' dummy.ml.pp")))
+
+(alias (name DEFAULT) (deps dummy.ml.pp))
+
+(executables (names dummy) (preprocess (pps ppx_here)))
+
+(ocamllex dummy)

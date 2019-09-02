@@ -1,0 +1,6 @@
+(library (name unix_extended) (public_name shell.unix_extended)
+ (libraries core re2 shell_internal spawn) (preprocessor_deps config.h)
+ (c_names fork_exec unix_extended_stubs) (preprocess (pps ppx_jane)))
+
+(rule (targets config.h) (deps)
+ (action (bash "cp %{lib:jst-config:config.h} %{targets}")))

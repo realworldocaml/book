@@ -1,0 +1,18 @@
+(library
+  (name        conduit_lwt_unix)
+  (public_name conduit-lwt-unix)
+  (preprocess  (pps ppx_sexp_conv))
+  (wrapped     false)
+  (modules     resolver_lwt_unix conduit_lwt_unix conduit_lwt_server
+               conduit_lwt_tls conduit_lwt_unix_ssl conduit_lwt_launchd)
+  (libraries   conduit-lwt lwt.unix uri.services ipaddr-sexp ipaddr.unix logs
+    (select conduit_lwt_launchd.ml from
+      (launchd.lwt -> conduit_lwt_launchd_real.ml)
+      (-> conduit_lwt_launchd_dummy.ml))
+    (select conduit_lwt_unix_ssl.ml from
+      (lwt_ssl -> conduit_lwt_unix_ssl_real.ml)
+      (-> conduit_lwt_unix_ssl_dummy.ml))
+    (select conduit_lwt_tls.ml from
+      (tls.lwt -> conduit_lwt_tls_real.ml)
+      (-> conduit_lwt_tls_dummy.ml))
+  ))

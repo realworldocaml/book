@@ -1,0 +1,19 @@
+true : bin_annot, safe_string
+<_b0> : -traverse
+<src> : include
+<src/logs_fmt*> : package(fmt)
+<src/logs_browser*> : package(js_of_ocaml)
+<src/logs_cli*> : package(cmdliner)
+<src/logs_lwt*> : package(lwt)
+<src/logs_top*> : package(compiler-libs.toplevel)
+<src/logs_threaded*> : thread, package(threads)
+<test> : include
+<test/tool*> : package(fmt), package(fmt.tty), package(fmt.cli), \
+               package(cmdliner)
+<test/test_fmt*> : package(fmt), package(fmt.tty)
+<test/test_browser*> : package(fmt), package(js_of_ocaml)
+<test/test_lwt*> : package(lwt), package(lwt.unix), package(fmt), \
+                   package(fmt.tty)
+<test/tags*> : package(mtime.clock.os)
+<test/test_multi*> : package(fmt), package(fmt.tty)
+<test/test_threaded*> : thread, package(threads), package(fmt)

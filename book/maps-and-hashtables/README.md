@@ -219,10 +219,10 @@ Characters 18-22:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "src/comparator.mli", line 20, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 20, characters 2-25:
          Expected declaration
 ```
 
@@ -426,8 +426,8 @@ This is rejected for good reason: there's no guarantee that the comparator
 associated with a given type will order things in the same way that
 polymorphic compare does.
 
-<aside data-type="sidebar">
-<h5>The Perils of Polymorphic Compare</h5>
+::: {data-type=warning}
+##### The Perils of Polymorphic Compare
 
 Polymorphic compare is highly convenient, but it has serious downsides as
 well and should be used with care. In particular, polymorphic compare has a
@@ -497,7 +497,7 @@ together. Even worse, it will work sometimes and fail others; since if the
 sets are built in a consistent order, then they will work as expected, but
 once the order changes, the behavior will change.
 
-</aside>
+:::
 
 ### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving}
 
@@ -580,8 +580,8 @@ you can always write your own comparison function by hand; but if all you
 need is a total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
-<aside data-type="sidebar">
-<h5>=, ==, and phys_equal</h5>
+::: {data-type=note}
+##### =, ==, and phys_equal
 
 If you come from a C/C++ background, you'll probably reflexively use
 `==` to test two values for equality. In OCaml, the `==` operator tests for
@@ -632,7 +632,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 <press ^Z and kill the process now>
 ```
 
-</aside>
+:::
 
 ### Applying `[@@deriving]` to maps and sets
 
@@ -693,7 +693,7 @@ module/Map.to_tree]{.idx}[maps/tree structure]{.idx}
 ```ocaml env=main
 # let ord_tree = Map.Using_comparator.to_tree ord_map
 val ord_tree :
-  (string, int, String.comparator_witness) Map.Using_comparator.Tree.t =
+  (string, int, String.comparator_witness) Core_kernel.Map_intf.Tree.t =
   <abstr>
 ```
 
@@ -720,10 +720,10 @@ following example, using the wrong comparator will lead to a type error:
 # Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo"
 Characters 62-70:
 Error: This expression has type
-         (string, int, String.comparator_witness) Map.Using_comparator.Tree.t
+         (string, int, String.comparator_witness) Core_kernel.Map_intf.Tree.t
        but an expression was expected of type
          (string, int, Reverse.comparator_witness)
-         Map.Using_comparator.Tree.t
+         Core_kernel.Map_intf.Tree.t
        Type String.comparator_witness is not compatible with type
          Reverse.comparator_witness 
 ```

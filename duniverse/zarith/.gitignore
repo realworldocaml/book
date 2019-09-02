@@ -1,0 +1,16 @@
+*.a
+*.cm?
+*.cmxa
+*.cmxs
+*.cmti
+*.exe
+*.o
+*.so
+Makefile
+depend
+z.ml
+z.mli
+z_features.h
+.merlin
+*.install
+_build

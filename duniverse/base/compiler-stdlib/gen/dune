@@ -1,0 +1,3 @@
+(executables (names gen)
+ (libraries compiler-libs.common compiler-libs.bytecomp)
+ (preprocess no_preprocessing))

@@ -1,0 +1,24 @@
+opam-version: "2.0"
+maintainer: "rudi.grinberg@gmail.com"
+authors: "Rudi Grinberg"
+license: "MIT"
+homepage: "https://github.com/rgrinberg/stringext"
+bug-reports: "https://github.com/rgrinberg/stringext/issues"
+depends: [
+  "ocaml" {>= "4.02.3"}
+  "dune" {build & >= "1.0"}
+  "ounit" {with-test}
+  "qtest" {with-test & >= "2.2"}
+  "base-bytes"
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/rgrinberg/stringext.git"
+synopsis: "Extra string functions for OCaml"
+description: """
+Extra string functions for OCaml. Mainly splitting. All functions are in the
+Stringext module.
+"""

@@ -1,0 +1,5 @@
+(alias (name runtest) (deps (:first_dep int_set_test.exe))
+ (action (bash ./%{first_dep})))
+
+(executables (names int_set_test) (libraries core int_set oUnit)
+ (preprocess (pps ppx_jane)))

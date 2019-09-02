@@ -1,0 +1,2 @@
+(library (name string_extended) (public_name shell.string_extended)
+ (libraries core_kernel) (preprocess (pps ppx_jane)))

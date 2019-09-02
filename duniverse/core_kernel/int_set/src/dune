@@ -1,0 +1,2 @@
+(library (name int_set) (public_name core_kernel.int_set)
+ (preprocess (pps ppx_jane -check-doc-comments)) (libraries core_kernel))

@@ -1,0 +1,47 @@
+(library
+ (name logs)
+ (public_name logs)
+ (libraries result)
+ (modules logs)
+ (flags :standard -w -27 -safe-string)
+ (wrapped false))
+
+(library
+ (name logs_fmt)
+ (public_name logs.fmt)
+ (libraries fmt logs)
+ (modules logs_fmt)
+ (flags :standard -w -27 -safe-string)
+ (wrapped false))
+
+(library
+ (name logs_cli)
+ (public_name logs.cli)
+ (libraries logs cmdliner)
+ (modules logs_cli)
+ (flags :standard -w -27 -safe-string)
+ (wrapped false))
+
+(library
+ (name logs_lwt)
+ (public_name logs.lwt)
+ (libraries lwt logs)
+ (modules logs_lwt)
+ (flags :standard -w -27 -safe-string)
+ (optional)
+ (wrapped false))
+
+(library
+ (name logs_threaded)
+ (public_name logs.threaded)
+ (libraries logs threads)
+ (modules logs_threaded)
+ (flags :standard -w -27 -safe-string)
+ (wrapped false))
+
+(library
+ (name logs_top)
+ (public_name logs.top)
+ (libraries compiler-libs.toplevel logs)
+ (modules logs_top)
+ (wrapped false))

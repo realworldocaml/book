@@ -1,0 +1,72 @@
+version = "0.14.0"
+description = "Combinators for binding to C libraries without writing any C."
+requires = "bigarray bytes integers"
+archive(byte) = "ctypes.cma"
+archive(byte, plugin) = "ctypes.cma"
+archive(byte, toploop) = "ctypes.cma ctypes-top.cma"
+archive(native) = "ctypes.cmxa"
+archive(native, plugin) = "ctypes.cmxs"
+exists_if = "ctypes.cma"
+
+package "top" (
+  version = "0.14.0"
+  description = "Toplevel printers for C types"
+  requires = "ctypes"
+  archive(byte) = "ctypes-top.cma"
+  archive(byte, plugin) = "ctypes-top.cma"
+  archive(native) = "ctypes-top.cmxa"
+  archive(native, plugin) = "ctypes-top.cmxs"
+  exists_if = "ctypes-top.cma"
+)
+
+package "stubs" (
+  version = "0.14.0"
+  description = "Stub generation from C types"
+  requires = "ctypes str"
+  archive(byte) = "cstubs.cma"
+  archive(byte, plugin) = "cstubs.cma"
+  archive(native) = "cstubs.cmxa"
+  archive(native, plugin) = "cstubs.cmxs"
+  xen_linkopts = "-lctypes_stubs_xen"
+  exists_if = "cstubs.cma"
+)
+
+package "foreign" (
+ version = "0.14.0"
+ description = "Dynamic linking of C functions"
+ requires(-mt) = "ctypes.foreign.unthreaded"
+ requires(mt) = "ctypes.foreign.threaded"
+
+ package "base" (
+  version = "0.14.0"
+  description = "Dynamic linking of C functions (base package)"
+  requires = "ctypes"
+  archive(byte) = "ctypes-foreign-base.cma"
+  archive(byte, plugin) = "ctypes-foreign-base.cma"
+  archive(native) = "ctypes-foreign-base.cmxa"
+  archive(native, plugin) = "ctypes-foreign-base.cmxs"
+  exists_if = "ctypes-foreign-base.cma"
+ )
+
+ package "threaded" (
+  version = "0.14.0"
+  description = "Dynamic linking of C functions (for use in threaded programs)"
+  requires = "threads ctypes ctypes.foreign.base"
+  archive(byte) = "ctypes-foreign-threaded.cma"
+  archive(byte, plugin) = "ctypes-foreign-threaded.cma"
+  archive(native) = "ctypes-foreign-threaded.cmxa"
+  archive(native, plugin) = "ctypes-foreign-threaded.cmxs"
+  exists_if = "ctypes-foreign-threaded.cma"
+ )
+
+ package "unthreaded" (
+  version = "0.14.0"
+  description = "Dynamic linking of C functions (for use in unthreaded programs)"
+  requires = "ctypes ctypes.foreign.base"
+  archive(byte) = "ctypes-foreign-unthreaded.cma"
+  archive(byte, plugin) = "ctypes-foreign-unthreaded.cma"
+  archive(native) = "ctypes-foreign-unthreaded.cmxa"
+  archive(native, plugin) = "ctypes-foreign-unthreaded.cmxs"
+  exists_if = "ctypes-foreign-unthreaded.cma"
+ )
+)

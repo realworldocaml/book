@@ -1,0 +1,2 @@
+(library (name uopt) (public_name core_kernel.uopt) (libraries core_kernel)
+ (preprocess (pps ppx_jane -check-doc-comments)))

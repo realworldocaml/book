@@ -1,0 +1,74 @@
+#! /bin/sh -e
+version=1.0.0
+
+self="$0"
+usage () {
+    echo "\
+Usage: $self [t] [b] [j] [v]
+
+atdgen-cppo makes it possible to use atdgen to derive code from ATD 
+type definitions embedded in OCaml source files rather than in
+separate .atd files. This is similar to how json-static is used,
+except that the preprocessor is not camlp4 but the simpler program cppo.
+
+Modes:
+  t  produce a module T containing OCaml type definitions translated from ATD
+  b  produce a module B containing OCaml code for biniou serialization
+  j  produce a module J containing OCaml code JSON serialization
+  v  produce a module V containing OCaml code for validation
+
+Typical usage:
+
+  \$ cat example.ml
+  #ext json
+  type mytype = string list
+  #endext
+  let data = [ \"Hello\"; \"world\" ]
+  let () = print_endline (J.string_of_mytype data)
+
+  \$ ocamlfind opt -o example \\
+    -pp 'cppo -x \"json:$self t j\"' \\
+    -package atdgen -linkpkg example.ml
+
+  \$ ./example
+  [\"Hello\",\"world\"]
+" >&2
+}
+
+case "$1" in
+    -h|-help|--help) usage; exit 0 ;;
+    *) ;;
+esac
+
+tmp=$(tempfile -p ml- -s -atdgen-cppo.ml)
+cat > $tmp
+
+fail () {
+    rm -f $tmp
+    exit 1
+}
+
+# CPPO_FIRST_LINE is off by one in cppo 0.9.1.
+# Should be fixed in cppo rather than here.
+gen () {
+    echo "module $1 = ("
+    atdgen \
+      -pos-fname "$CPPO_FILE" \
+      -pos-lnum $(( $CPPO_FIRST_LINE + 1 )) \
+      -$2 < $tmp || fail
+    echo ")"
+}
+
+while [ $# != 0 ]; do
+    case "$1" in
+        t) gen T t ;;
+        b) gen B b ;;
+        j) gen J j ;;
+        v) gen V v ;;
+        --help|-help) usage; exit 0 ;;
+        *) usage; exit 2
+    esac
+    shift
+done
+
+rm -f $tmp

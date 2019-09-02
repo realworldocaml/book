@@ -1,0 +1,26 @@
+opam-version: "2.0"
+version: "1.1.9"
+maintainer: "louis.gesbert@ocamlpro.com"
+synopsis: "Console browser for the documentation of installed OCaml libraries"
+description: """
+ocp-browser is a ncurses-like interface that allows to easily browse the
+interfaces and documentation of all installed OCaml modules.
+"""
+authors: [
+  "Louis Gesbert"
+  "Gabriel Radanne"
+]
+homepage: "http://www.typerex.org/ocp-index.html"
+bug-reports: "https://github.com/OCamlPro/ocp-index/issues"
+license: "LGPL-2.1 with OCaml linking exception"
+tags: [ "org:ocamlpro" "org:typerex" ]
+dev-repo: "git+https://github.com/OCamlPro/ocp-index.git"
+build: ["dune" "build" "-p" name "-j" jobs]
+depends: [
+  "ocaml" {>= "4.02.0"}
+  "ocp-pp" {build}
+  "dune" {build & >= "1.0"}
+  "ocp-index" {= version}
+  "cmdliner"
+  "lambda-term"
+]

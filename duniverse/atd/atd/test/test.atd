@@ -1,0 +1,99 @@
+(* -*- tuareg -*- *)
+
+<doc html="<p>This <b>is</b> a test.</p>"
+     text="This is a test.">
+
+type x <a b> = y <a c>
+type y <a b> = x <a c>  (* conflict or inheritance or anything: unspecified. *)
+
+
+type ('a, 'b, 'c) yyy
+  <json something="aaaaaaaa" blopblop>
+  <json something="aaaaaaaa" blopblop>
+  <json something="aaaaaaaa" blopblop> =
+    int
+
+type z =
+    [
+    | X
+    | Y of x
+    | Z <a><b> of z ]
+
+type ('a, 'b, 'c) tiptoptiptop <json phew> =
+    [ Foo <json foooooooooooooooooooooooooooooooooooooooooooooooo xyz="aaaa">
+    | Fioo <json foooooooooooooooooooooooooooooooooooooooooo xyz="aaaa"> of int
+    | Bar <json bar> of z
+    | Aaaaaaaaaaaaa ]
+      <doc text="\
+First paragraph.
+First paragraph continued.
+
+Second paragraph, with {{some code}}. And then some preformatted code:
+{{{
+1 2  3   4    5     6
+}}}
+">
+
+type kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk = int option
+
+type ('a, 'b, 'ccccccccccccccccccccc) r = {
+  x <opt>:int;
+  y:float<x x> option;
+  adfadfafa
+    <json something="aaaaaaaa" blopblop>
+    <json something="aaaaaaaa" blopblop>
+    <json something="aaaaaaaa" blopblop>:
+    (int list option,'ccccccccccccccccccccc,'ccccccccccccccccccccc)
+    tiptoptiptop;
+  llllllllllllllllllllllllll: kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk;
+  ?z : int option;
+  ~t : int;
+}
+
+type tuple = (z * z * tuple option * kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+              * z * z * tuple option * kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk)
+<a b>
+
+type tuple2 = (int * float)
+
+type singleton = (int)
+type zero_tuple = ()
+
+type 'a i1 =
+    [ inherit 'a j2
+    | I1 ]
+
+type 'a i2 =
+    [ inherit z
+    | I2 of 'a ]
+
+type i = int i1
+
+type 'b j2 = 'b i2
+
+type i3 = [ inherit i | I1 of float | Y ]
+
+
+type r1 = { x1 : int }
+type r2 = { inherit r1; x2 : int }
+
+type nullable_string = string nullable
+
+type pair =
+    (<ocaml default="1"> <foo bar> : int * <ocaml default="true"> : bool)
+
+type 'a abs = abstract
+type int_abs = int abs
+
+type 'a l = 'a list
+type 'a int_l = int l
+type int_list = int list <ocaml repr="list">
+type int_array = int list <ocaml repr="array">
+
+type 'a recur = { cyc : 'a recur option }
+
+type 'a ta = [ Ta of 'a ] <ta f2="xyz" f1>
+type int_ta = int ta <ta f1="false" f3="abc">
+type int_ta2 = int ta <ta f1="false" f3="abc"> <ocaml repr="classic">
+
+type timestamp = string wrap <ocaml module="Timestamp">

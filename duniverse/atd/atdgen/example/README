@@ -1,0 +1,19 @@
+
+                         Example using atdgen
+                         ====================
+
+
+This simple but standalone example illustrates the use of atdgen to
+manage a backward-compatible change of data format.
+
+The old data format is defined in `format_v1.atd'.  The newer data
+format is defined in `format_v2.atd'.  It is a record type from which
+one field was removed and another field was added.
+
+The program `upgrade_demo' demonstrates the use of atdgen in general
+and how to make a data format evolve without losing compatibility
+with legacy data files or services.
+
+1.  Atdgen must be installed properly
+2.  Run `make'
+3.  Inspect the files starting with example.sh

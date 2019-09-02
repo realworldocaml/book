@@ -1,0 +1,27 @@
+Release 1.2 (2019-06-21)
+
+- Issue #9: install all .cmx files.
+- Pull request #6: provide findlib-install target to install everything
+  using ocamlfind.
+- Issue #3: make sur the stublibs/ directory exists before installing DLLs
+  inside it.
+- Issue #4: wrong DLL file names for Win32 ports, causing errors at
+  installation time.
+
+Release 1.1 (2017-10-13):
+
+- Install .cmx files as well.
+- Fix permissions on installed files.
+- Make tests compatible with safe strings.
+
+Release 1.0 (2017-06-04):
+
+- Fix build rule for nums.cmxs.
+- Typo in LICENSE file.
+
+Initialization (2016-12-08):
+
+- Initial import of the sources and test suite from the core OCaml system,
+  version 4.04.
+- Restructure as independent project with standalone Makefiles.
+- Integrate findlib support, including printers for toplevel use.

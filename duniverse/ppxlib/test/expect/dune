@@ -1,0 +1,8 @@
+(executable
+ (name expect_test)
+ (modules expect_test)
+ (link_flags (-linkall))
+ (modes byte)
+ (libraries unix compiler-libs.toplevel ppxlib ppxlib.traverse))
+
+(ocamllex expect_test)

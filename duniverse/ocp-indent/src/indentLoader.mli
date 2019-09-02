@@ -1,0 +1,15 @@
+(**************************************************************************)
+(*                                                                        *)
+(*  All rights reserved.This file is distributed under the terms of the   *)
+(*  GNU Lesser General Public License version 2.1 with linking            *)
+(*  exception.                                                            *)
+(*                                                                        *)
+(*  TypeRex is distributed in the hope that it will be useful,            *)
+(*  but WITHOUT ANY WARRANTY; without even the implied warranty of        *)
+(*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *)
+(*  Lesser GNU General Public License for more details.                   *)
+(*                                                                        *)
+(**************************************************************************)
+
+(** Dynlink of modules and finlib packages *)
+val load : ?debug:bool -> [`Mod of string | `Pkg of string ] list -> unit

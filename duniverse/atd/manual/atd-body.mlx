@@ -1,0 +1,487 @@
+% -*- latex -*-
+
+##
+#use "topfind";;
+#require "caml2html";;
+#require "easy-format";;
+#directory "..";;
+#load "atd.cma";;
+#require "unix";;
+#use "../atd_version.ml";;
+#use "macros.ml";;
+##
+
+\section{Introduction}
+
+ATD stands for Adjustable Type Definitions.
+
+## atd () ##
+(* This is a sample ATD file *)
+
+type profile = {
+  id : string;
+  email : string;
+  ~email_validated : bool;
+  name : string;
+  ?real_name : string option;
+  ~about_me : string list;
+  ?gender : gender option;
+  ?date_of_birth : date option;
+}
+
+type gender = [ Female | Male ]
+
+type date = {
+  year : int;
+  month : int;
+  day : int;
+}
+## () ##
+
+ATD is a language for defining data types across multiple programming
+languages and multiple data formats.
+That's it.
+
+We provide an OCaml library that provides a parser and a collection of
+tools that make it easy to write data validators and code generators
+based on ATD definitions.
+
+Unlike the big ``frameworks'' that provide ``everything'' in one
+monolithic package, we split the problem of data exchange into logical
+modules and ATD is one of them.
+In particular, we acknowledge that the following pieces have
+little in common and should be defined and implemented separately:
+
+\begin{itemize}
+\item data type specifications
+\item transport protocols
+\item serialization formats
+\end{itemize}
+
+Ideally we want just one single language for defining data types and
+it should accomodate all programming languages and data formats. ATD
+can play this role, but its OCaml implementation makes it
+particularly easy to translate ATD specifications into other interface
+definition languages if needed.
+
+It is however much harder to imagine that a single transport protocol and
+a single serialization format would ever become the only ones used.
+A reader from the future might wonder why we are even considering
+defining a transport protocol and a serialization format together.
+This has been a widespread practice at least until the beginning of
+the 21st century (ONC RPC, ICE, Thrift, etc.). For mysterious reasons,
+people somehow became convinced that calls to remote services should
+be made to mimic internal function calls, pretending that nothing
+really bad could happen on the way between the caller and the remote
+service. Well, I don't let my 3-old daughter go to school by herself
+because the definition of the external world is precisely that it is
+unsafe.
+
+Data input is by definition unsafe. A program whose internal data is
+corrupted should abort but a failed attempt to read external data
+should not cause a program to abort. On the contrary, a program should
+be very resistent to all forms of data corruption and attacks and
+provide the best diagnosis possible when problems with external data
+occur.
+
+Because data exchange is critical and involves multiple partners, we
+depart from magic programming language-centric or company-centric
+approaches. We define ATD, a data type definition language
+designed for maximum expressivity, compatibility across languages and
+static type checking of programs using such data.
+
+
+\subsection{Scope}
+
+
+ATD offers a core syntax for type definitions, i.e. an idealized view
+of the structure of data. Types are mapped to each programming
+language or data format using language-specific conventions.
+Annotations can complete the type definitions in
+order to specify options for a particular language.
+Annotations are placed in angle brackets after the element they refer to:
+
+## atd () ##
+type profile = {
+  id : int <ocaml repr="int64">;
+    (*
+       An int here will map to an OCaml int64 instead of
+       OCaml's default int type.
+       Other languages than OCaml will use their default int type.
+    *)
+
+  age : int;
+    (* No annotation here, the default int type will be used. *)
+}
+## () ##
+
+ATD supports:
+\begin{itemize}
+\item the following atomic types: bool, int, float, string and unit;
+\item built-in list and option types;
+\item records aka structs with a syntax for optional fields with or
+  with default;
+\item tuples;
+\item sum types aka variant types, algebraic data types or tagged unions;
+\item parametrized types;
+\item inheritance for both records and sum types;
+\item abstract types;
+\item arbitrary annotations.
+\end{itemize}
+
+ATD by design does not support:
+\begin{itemize}
+\item function types, function signatures or method signatures;
+\item a syntax to represent values;
+\item a syntax for submodules.
+\end{itemize}
+
+
+\subsection{Language overview}
+
+ATD was strongly inspired by the type system of ML and OCaml. Such a
+type system allows static type checking and type inference, properties
+which contribute to the safety and conciseness of the language.
+
+Unlike mainstream languages like Java, C++, C\# or Python to name a
+few, languages such as Haskell or OCaml offer sum types,
+also known as algebraic data types or variant types. These allow to
+specify that an object is of one kind or another without ever
+performing dynamic casts.
+
+## atd () ##
+(* Example of a sum type in ATD. The vertical bar reads `or'. *)
+type shape = [
+    Square of float               (* argument: side length *)
+  | Rectangle of (float * float)  (* argument: width and height *)
+  | Circle of float               (* argument: radius *)
+  | Dot                           (* no argument *)
+]
+## () ##
+
+A notable example of sum types is the predefined option type.
+An object of an option type contains either one value of a given type
+or nothing. We could define our own {\tt int\_option} type as follows:
+
+## atd () ##
+type int_option = [ None | Some of int ]
+## () ##
+
+ATD supports parametrized types also known as generics in Java or
+templates in C++.  We could define our own generic option type as
+follows:
+
+## atd () ##
+type 'a opt = [ None | Some of 'a ]
+  (* 'a denotes a type parameter. *)
+
+type opt_int = int opt
+  (* equivalent to int_option defined in the previous example *)
+
+type opt_string = string opt
+  (* same with string instead of int *)
+## () ##
+
+In practice we shall use the predefined option type.
+The option type is fundamentally different from nullable objects since
+the latter don't allow values that would have type {\tt 'a option option}.
+
+ATD also support product types. They come in two forms: tuples and
+records:
+
+## atd () ##
+type tuple_example = (string * int)
+
+type record_example = {
+  name : string;
+  age : int;
+}
+## () ##
+
+Although tuples in theory are not more expressive than
+records, they are much more concise and languages that support them
+natively usually do not require type definitions.
+
+Finally, ATD supports multiple inheritance which is a simple mechanism
+for adding fields to records or variants to sum types:
+
+## atd () ##
+type builtin_color = [
+    Red | Green | Blue | Yellow
+  | Purple | Black | White
+]
+
+type rgb = (float * float * float)
+type cmyk = (float * float * float * float)
+
+(* Inheritance of variants *)
+type color = [
+    inherit builtin_color
+  | Rgb of rgb
+  | Cmyk of cmyk
+]
+## () ##
+
+## atd () ##
+type basic_profile = {
+  id : string;
+  name : string;
+}
+
+(* Inheritance of record fields *)
+type full_profile = {
+  inherit basic_profile;
+  date_of_birth : (int * int * int) option;
+  street_address1 : string option;
+  street_address2 : string option;
+  city : string option;
+  zip_code : string option;
+  state : string option;
+}
+## () ##
+
+
+\subsection{Editing and validating ATD files}
+
+The extension for ATD files is {\tt .atd}. Editing ATD files is best
+achieved using an OCaml-friendly editor since the ATD syntax is vastly
+compatible with OCaml and uses a subset of OCaml's keywords.
+
+Emacs users can use caml-mode or tuareg-mode to edit ATD files.
+Adding the following line to the {\tt \~{}/.emacs} file will
+automatically use tuareg-mode when opening a file with a {\tt .atd}
+extension:
+\begin{verbatim}
+(add-to-list 'auto-mode-alist '("\\.atd\\'" . tuareg-mode))
+\end{verbatim}
+
+The syntax of an ATD file can be checked with the program
+{\tt atdcat} provided with the OCaml library {\tt atd}.
+{\tt atdcat} pretty-prints its input data, optionally after some
+transformations such as monomorphization or inheritance.
+Here is the output of {\tt atdcat -help}:
+## shell "PATH=.. atdcat -help" ##
+
+
+\section{ATD language}
+
+\newcommand\str[1]{\textcolor{CstringColor}{\texttt{#1}}}
+\newcommand\lval[1]{\hypertarget{#1}{#1}}
+\newcommand\rval[1]{\hyperlink{#1}{#1}}
+\newcommand\com[1]{\textit{#1}}
+
+This is a precise description of the syntax of the ATD language, not a
+tutorial.
+
+\subsection{Notations}
+
+Lexical and grammatical rules are expressed using a BNF-like syntax.
+Graphical terminal symbols use \str{unquoted strings in typewriter font}.
+Non-graphical characters use their official uppercase ASCII name such
+as LF for the newline character or SPACE for the space character.
+Non-terminal symbols use the regular font and link to their
+definition.  Parentheses are used for grouping.
+
+The following postfix operators are used to specify repeats:
+
+\begin{tabular}{ll}
+x* & 0, 1 or more occurrences of x \\
+x? & 0 or 1 occurrence of x \\
+x+ & 1 or more occurrences of x \\
+\end{tabular}
+
+
+\subsection{Lexical rules}
+
+ATD does not enforce a particular character encoding other than ASCII
+compatibility.  Non-ASCII text and data found in annotations and
+in comments may contain arbitrary bytes in the non-ASCII range 128-255
+without escaping.  The UTF-8 encoding is however strongly recommended
+for all text.  The use of hexadecimal or decimal escape sequences is
+recommended for binary data.
+
+An ATD lexer splits its input into a stream of \rval{token}s,
+discarding white\rval{space} and \rval{comment}s.
+
+\begin{tabular}{rcll}
+\lval{token} & ::= & \rval{keyword}
+                   | \rval{lident}
+                   | \rval{uident}
+                   | \rval{tident}
+                   | \rval{string} & \\
+\lval{ignorable} & ::= & \rval{space} | \rval{comment}
+                       & \com{discarded} \\
+\lval{space} & ::= & SPACE | TAB | CR | LF & \\
+\lval{blank} & ::= & SPACE | TAB & \\
+\lval{comment} & ::= & \str{(*} (\rval{comment} | \rval{string} | byte)*
+                       \str{*)} & \\
+\lval{lident} & ::= & (\rval{lower} 
+                    | \str{\_} \rval{identchar}) \rval{identchar}*
+                    & \com{lowercase identifier} \\
+\lval{uident} & ::= & \rval{upper} \rval{identchar}*
+                    & \com{uppercase identifier} \\
+\lval{tident} & ::= & \str{'} \rval{lident} & \com{type parameter} \\
+\lval{lower} & ::= & \str{a}...\str{z} & \\
+\lval{upper} & ::= & \str{A}...\str{Z} & \\
+\lval{identchar} & ::= & \rval{upper} | \rval{lower} | \rval{digit}
+                       | \str{\_} | \str{'}& \\
+\lval{string} & ::= & \str{"} \rval{substring}* \str{"}
+                    & \com{string literal, used in annotations} \\
+\lval{substring} & ::= & \str{$\backslash\backslash$}
+                       & \com{single backslash} \\
+                 &  |  & \str{$\backslash$"}
+                       & \com{double quote} \\
+                 &  |  & \str{$\backslash$x} \rval{hex} \rval{hex}
+                       & \com{single byte in hexadecimal notation} \\
+                 &  |  & \str{$\backslash$}
+                           \rval{digit} \rval{digit} \rval{digit}
+                       & \com{single byte in decimal notation} \\
+                 &  |  & \str{$\backslash$n} & \com{LF} \\
+                 &  |  & \str{$\backslash$r} & \com{CR} \\
+                 &  |  & \str{$\backslash$t} & \com{TAB} \\
+                 &  |  & \str{$\backslash$b} & \com{BS} \\
+                 &  |  & \str{$\backslash$} CR? LF blank* & \com{discarded} \\
+                 &  |  & not-backslash
+                 & \com{any byte except \str{$\backslash$} or \str{"}} \\
+\lval{digit} & ::= & \str{0}...\str{9} & \\
+\lval{hex} & ::= & \str{0}...\str{9} | \str{a}...\str{f} |
+                   \str{A}...\str{F} & \\
+\lval{keyword} & ::= & \str{(} | \str{)} | \str{[}
+                       | \str{]} | \str{\{} | \str{\}}
+                       | \str{<} | \str{>} & \\
+               &     & | \str{;} | \str{,} | \str{:} | \str{*}
+                       | \str{|} | \str{=} | \str{?} | \str{\~{}} & \\
+               &     & | \str{type} | \str{of} | \str{inherit}
+                     & \com{all keywords} \\
+\end{tabular}
+
+
+\subsection{Grammar}
+
+
+\begin{tabular}{rcll}
+\lval{module} & ::= & \rval{annot}* \rval{typedef}* & \com{entry point} \\
+
+\lval{annot} & ::= & \str{<} \rval{lident} annot-field* \str{>}
+                   & \com{annotation} \\
+
+\lval{annot-field} & ::= & (\rval{lident} (\str{=} \rval{string})?) & \\
+
+\lval{typedef} & ::= & \str{type} \rval{params}? lident annot
+                       \str{=} \rval{expr}
+                     & \com{type definition} \\
+
+\lval{params} & ::= & \rval{tident} & one parameter \\
+              &  |  & \str{(} \rval{tident} (\str{,} \rval{tident})+ \str{)}
+                    & \com{two or more parameters} \\
+
+\lval{expr} & ::= & \rval{expr-body} \rval{annot}* & \com{type expression} \\
+            &  |  & \rval{tident} & \\
+
+\lval{expr-body} & ::= & \rval{args}? \rval{lident} & \\
+                 &  |  & \str{(}
+                           (\rval{cell} (\str{*} \rval{cell})*)?
+                         \str{)} & \com{tuple type} \\
+                 &  |  & \str{\{}
+                           ((\rval{field} (\str{;} \rval{field})*) \str{;}?)?
+                         \str{\}} & \com{record type} \\
+                 &  |  & \str{[}
+                           (\str{|}? \rval{variant} (\str{|} \rval{variant})*)?
+                         \str{]} & \com{sum type} \\
+\lval{args} & ::= & \rval{expr} & \com{one argument} \\
+            &  |  & \str{(} \rval{expr} (\str{,} \rval{expr})+ \str{)}
+                  & \com{two or more arguments} \\
+
+\lval{cell} & ::= & (\rval{annot}+ \str{:})? \rval{expr} & \\
+
+\lval{field} & ::= & (\str{?} | \str{\~{}})? \rval{lident}
+                     \str{=} \rval{expr} & \\
+             &  |  & \str{inherit} \rval{expr} & \\
+
+\lval{variant} & ::= & \rval{uident} \rval{annot}* \str{of} \rval{expr} & \\
+               &  |  & \rval{uident} \rval{annot}* & \\
+               &  |  & \str{inherit} \rval{expr} & \\
+\end{tabular}
+
+
+
+\subsection{Predefined type names}
+
+The following types are considered predefined and may not be
+redefined.
+
+\begin{tabular}{ll}
+Type name & Intended use \\
+\hline
+\tt unit & Type of just one value, useful with parametrized types \\
+\tt bool & Boolean \\
+\tt int & Integer \\
+\tt float & Floating-point number \\
+\tt string & Sequence of bytes or characters \\
+\tt 'a option & Zero or one element \\
+\tt 'a list & Collection or sequence of elements \\
+\tt 'a shared & Values for which sharing must be preserved \\
+\tt abstract & Type defined elsewhere \\
+\end{tabular}
+
+
+\subsection{Shared values}
+
+ATD supports a special type $x$ \texttt{shared} where $x$ can be 
+any monomorphic type expression.
+It allows notably to represent cyclic values and to enforce that cycles
+are preserved during transformations such as serialization.
+
+## atd () ##
+(* Example of a simple graph type *)
+type shared_node = node shared (* sharing point *)
+type graph = shared_node list
+type node = {
+  label : string;
+  neighbors : shared_node list;
+}
+## () ##
+
+Two shared values that are physically identical must remain physically
+identical after any translation from one data format to another.
+
+Each occurrence of a \texttt{shared} type expression in the ATD
+source definition defines its own sharing point.
+Therefore the following attempt at defining a graph type will not
+preserve cycles because two sharing points are defined:
+
+## atd () ##
+(* Incorrect definition of a graph type *)
+type node = {
+  label : string;
+  neighbors : node shared (* sharing point 1 *) list;
+}
+
+(* Second occurrence of "shared", won't preserve cycles! *)
+type graph = node shared (* sharing point 2 *) list
+## () ##
+
+There is actually a way of having multiple \texttt{shared}
+type expressions using the same sharing point
+but this feature is designed for code generators and
+should not be used in handwritten ATD definitions.
+The technique consists in providing an annotation of the form
+\texttt{<share id=$x$>} where $x$ is any string identifying the sharing
+point.
+The graph example can be rewritten correctly as:
+
+## atd () ##
+type node = {
+  label : string;
+  neighbors : node shared <share id="1"> list;
+}
+
+type graph = node shared <share id="1"> list
+## () ##
+
+
+
+\section{OCaml \texttt{atd} library}
+
+The documentation for the \texttt{atd} library is available in HTML
+form at \url{##= odoc_url ##}.

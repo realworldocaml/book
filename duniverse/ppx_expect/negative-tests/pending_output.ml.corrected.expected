@@ -1,0 +1,26 @@
+module Expect_test_config : Expect_test_config.S with type 'a IO.t = 'a = struct
+  include Expect_test_config
+
+  let flushed () = print_string "blah\n"; false
+end
+
+let%expect_test _ =
+  print_endline "foo";
+  [%expect {| foo
+           |}];
+  [%expect {|
+    blah
+    blah
+    blah
+    blah
+    blah
+    blah
+    blah
+    blah
+    blah
+    blah
+
+    STOPPED COLLECTING OUTPUT AFTER 10 FLUSHING ATTEMPS
+    THERE MUST BE A BACKGROUND JOB PRINTING TO STDOUT |}]
+;;
+

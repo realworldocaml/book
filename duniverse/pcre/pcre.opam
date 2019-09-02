@@ -1,0 +1,27 @@
+opam-version: "2.0"
+maintainer: "Markus Mottl <markus.mottl@gmail.com>"
+authors: [ "Markus Mottl <markus.mottl@gmail.com>" ]
+license: "LGPL-2.1+ with OCaml linking exception"
+homepage: "https://mmottl.github.io/pcre-ocaml"
+doc: "https://mmottl.github.io/pcre-ocaml/api"
+dev-repo: "git+https://github.com/mmottl/pcre-ocaml.git"
+bug-reports: "https://github.com/mmottl/pcre-ocaml/issues"
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+
+depends: [
+  "ocaml" {>= "4.04"}
+  "dune" {build & >= "1.4.0"}
+  "conf-libpcre" {build}
+  "base" {build}
+  "base-bytes"
+]
+
+synopsis: "Bindings to the Perl Compatibility Regular Expressions library"
+
+description: """
+pcre-ocaml offers library functions for string pattern matching and
+substitution, similar to the functionality offered by the Perl language."""

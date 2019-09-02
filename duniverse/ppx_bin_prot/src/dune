@@ -1,0 +1,4 @@
+(library (name ppx_bin_prot) (public_name ppx_bin_prot) (kind ppx_deriver)
+ (ppx_runtime_libraries bin_prot)
+ (libraries compiler-libs.common base ppxlib bin_shape_expand)
+ (preprocess (pps ppxlib.metaquot)))

@@ -1,0 +1,5 @@
+Uncaught exception:
+  
+  (just_raise.ml.E 42)
+
+Raised at file "just_raise.ml", line 5, characters 9-21

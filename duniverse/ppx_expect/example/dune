@@ -1,0 +1,7 @@
+(library (name expect_test_examples) (libraries core async)
+ (preprocess (pps ppx_jane)))
+
+(rule (targets tabs.ml) (deps tabs.ml.in)
+ (action (bash "cp %{deps} %{targets}")))
+
+(alias (name DEFAULT) (deps tests.ml.pp))

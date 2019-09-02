@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(executable
+ ((name performance)
+  (flags (:standard -w +A))
+  (libraries (lambdasoup unix))))
+
+(alias
+ ((name build-performance-test)
+  (deps (performance.exe (files_recursively_in ../pages)))))

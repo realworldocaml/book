@@ -1,0 +1,2 @@
+(library (name shell_internal) (public_name shell.shell_internal)
+ (libraries core) (preprocess (pps ppx_jane)))

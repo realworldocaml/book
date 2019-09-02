@@ -1,0 +1,3 @@
+# JBUILDER_GEN
+
+xen_linkopts = "-lbin_prot_xen_stubs"

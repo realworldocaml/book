@@ -1,0 +1,43 @@
+{1 Introduction}
+
+The {!Conduit} library abstracts the concerns of establishing connections to
+peers that may be running within the same host (e.g. in another virtual
+machine) or on a remote host via TCP.  It consists of:
+
+- The {!Conduit} module with basic type definitions for endpoints
+- OS-specific modules for {{!transport}establishing individual connections}
+- The {!Resolver} module for mapping URIs to endpoints
+- OS-specific {{!resolution}name resolvers} that use available
+  resolution mechanisms
+
+{2:transport Connection Establishment} 
+
+Connections are created by identifying remote nodes using an
+{{!Conduit.endp}endp} value.  To ensure portability, the
+{{!Conduit.endp}endpoints} are translated into concrete connections by separate
+modules that target [Lwt_unix], [Async] and [Mirage].  This lets those backends
+use the appropriate local technique for creating the connection (such as using
+OpenSSL on Unix, or a pure OCaml TLS+TCP implementation on Mirage, or some
+other combination).
+
+The modules dealing with connection establishment are:
+{!modules: Conduit_lwt_unix Conduit_async Conduit_mirage}
+
+{2:resolution Name Resolution}
+
+This deals with resolving URIs into a list of {{!Conduit.endp}endp}
+addresses that can
+then be connected to by the {{!transport}connection establishment} modules.
+
+All of the name resolvers conform to the {!Resolver.S} module type.
+The OS-specific implementations of this interface are: 
+{!modules: Resolver_lwt Resolver_lwt_unix Resolver_mirage}
+
+{2:resolution Mirage Connections}
+
+On Mirage, the networking stack is configured via the application
+of functors to satisfy various signatures.  Some of the available
+functors are:
+{!modules: Conduit_xenstore Conduit_localhost}
+
+{!indexlist}

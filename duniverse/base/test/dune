@@ -1,0 +1,4 @@
+(library (name base_test)
+ (libraries base core_kernel.base_for_tests caml sexplib num
+  expect_test_helpers_kernel stdio)
+ (preprocess (pps ppx_jane -dont-apply=pipebang)))

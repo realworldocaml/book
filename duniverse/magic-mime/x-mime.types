@@ -1,0 +1,49 @@
+# Additional extensions
+text/x-R			r R Rhistory Rout Rout.save Rout.fail
+text/x-autoconf		ac
+text/x-ada		adb ads
+text/x-asp		asp
+text/x-bibtex	bib
+text/x-c			c
+text/x-chdr		h hh hp hpp h++
+text/x-cpp		cpp c++ cxxcc C
+text/x-csharp		cs
+text/x-dsrc			d
+text/x-diff			diff path
+text/vnd.graphviz		dot gv
+text/x-dtd			dtd
+text/x-eiffel		e eif
+text/x-erlang		erl erh
+text/x-forth		frt fs
+text/x-fortran	f f90 f95 for
+text/x-fsharp		fs
+text/x-gap			g gd gi gap
+text/x-gtkrc		gtkrc
+text/x-literate-haskell		lhs
+text/x-haskell						hs
+text/x-idl				idl
+text/x-ini-file		ini
+text/x-tex				tex ltx sty cls dtx ins bbl
+text/x-libtool		la lai lo
+text/x-lua				lua
+text/x-makefile		make mak mk
+text/x-markdown		md mkd
+text/x-matlab			m
+text/x-modelica		mo mop
+text/x-nemerle		n
+text/x-netrexx		nrx
+text/x-objcsrc		m
+text/x-objective-j		j
+text/x-ocaml			ml mli mll mly
+text/x-ocl				ocl
+text/x-pascal			p pas
+text/x-perl				pl pm al perl t
+text/x-php				php php3 php4 phtml
+text/x-gettext-translation						po
+text/x-gettext-translation-template		pot
+text/x-prolog			prolog
+text/x-protobuf		proto
+text/x-python			py
+text/x-rpm-spec		spec
+text/x-ruby				rb rake
+text/x-scala			scala

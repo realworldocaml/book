@@ -1,0 +1,13 @@
+let f () =
+  let module M = struct
+    let () = print_string "bar"
+
+    [%%expect {| bar |}]
+  end in
+  ()
+;;
+
+print_string "foo";
+[%%expect {| foo |}]
+
+let () = f ()

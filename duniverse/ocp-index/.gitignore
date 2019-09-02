@@ -1,0 +1,13 @@
+_obuild
+_build
+ocp-build.root*
+aclocal.m4
+*.cache
+config.*
+*.install
+man
+ocp-index
+ocp-browser
+ocp-grep
+Makefile.config
+.merlin
