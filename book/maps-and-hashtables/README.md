@@ -388,7 +388,7 @@ Error: This expression has type
        but an expression was expected of type
          (string, int, String.comparator_witness) Map.t
        Type Reverse.comparator_witness is not compatible with type
-         String.comparator_witness
+         String.comparator_witness 
 ```
 
 ### The Polymorphic Comparator
@@ -419,7 +419,7 @@ Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness
+         Comparator.Poly.comparator_witness 
 ```
 
 This is rejected for good reason: there's no guarantee that the comparator
@@ -725,7 +725,7 @@ Error: This expression has type
          (string, int, Reverse.comparator_witness)
          Core_kernel.Map_intf.Tree.t
        Type String.comparator_witness is not compatible with type
-         Reverse.comparator_witness
+         Reverse.comparator_witness 
 ```
 
 ## Hash Tables
