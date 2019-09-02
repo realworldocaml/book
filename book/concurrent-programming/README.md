@@ -44,7 +44,7 @@ of]{.idx}
 
 ## Async Basics
 
-Recall how I/O is typically done in Core. Here's a simple example:
+Recall how I/O is typically done in Core. Here's a simple example.
 
 ```ocaml env=main
 # open Core
@@ -1275,9 +1275,8 @@ In addition, we'll make the necessary changes to get the list of servers on
 the command-line, and to distribute the search queries round-robin across the
 list of servers.
 
-But first, let's see what happens if we rebuild the application and
-run it giving it a list of servers, some of which won't respond to the
-query.
+Now, let's see what happens when we rebuild the application and run it
+two servers, one of which won't respond to the query.
 
 ```sh dir=../../examples/code/async/search_with_configurable_server,non-deterministic=output
 $ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
@@ -1335,7 +1334,7 @@ Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
 ```sh dir=../../examples/code/async/search_with_error_handling,non-deterministic=output
-$ dune exec -- ./search.exe -- -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+$ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
 
