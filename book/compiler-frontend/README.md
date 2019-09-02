@@ -65,8 +65,8 @@ compiler generates specialized executable binaries suitable for
 high-performance applications.[compilation process/compiler source
 code]{.idx}[code compilers/bytecode vs. native code]{.idx}
 
-<aside data-type="sidebar">
-<h5>Obtaining the Compiler Source Code</h5>
+::: {data-type=note}
+##### Obtaining the Compiler Source Code
 
 Although it's not necessary to understand the examples, you may find it
 useful to have a copy of the OCaml source tree checked out while you read
@@ -128,7 +128,7 @@ A number of tools and scripts are also built alongside the core compiler:
 `testsuite/`
 : Regression tests for the core compiler.
 
-</aside>
+:::
 
 We'll go through each of the compilation stages now and explain how they will
 be useful to you during day-to-day OCaml development.
@@ -846,8 +846,8 @@ override the default path unless you have a good reason to (such as setting
 up a cross-compilation environment). [cmi files]{.idx}[files/cmi
 files]{.idx}[OCaml toolchain/ocamlogjinfo]{.idx}
 
-<aside data-type="sidebar">
-<h5>Inspecting Compilation Units with ocamlobjinfo</h5>
+::: {data-type=note}
+##### Inspecting Compilation Units with ocamlobjinfo
 
 For separate compilation to be sound, we need to ensure that all the
 `cmi` files used to type-check a module are the same across compilation runs.
@@ -898,7 +898,7 @@ should ensure that you never see the preceding error messages, but if you do
 run into it, just clean out your intermediate files and recompile from
 scratch.
 
-</aside>
+:::
 
 
 ### Packing Modules Together

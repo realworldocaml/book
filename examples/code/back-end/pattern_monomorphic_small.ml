@@ -1,4 +1,4 @@
-type t = | Alice | Bob 
+type t = | Alice | Bob
 
 let test v =
   match v with

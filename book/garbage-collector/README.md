@@ -64,8 +64,8 @@ major and minor heaps to account for this generational difference. We'll
 explain how they differ in more detail next. [OCAMLRUNPARAM]{.idx}[Gc
 module]{.idx}
 
-<aside data-type="sidebar">
-<h5>The Gc Module and OCAMLRUNPARAM</h5>
+::: {data-type=note}
+##### The Gc Module and OCAMLRUNPARAM
 
 OCaml provides several mechanisms to query and alter the behavior of the
 runtime system. The `Gc` module provides this functionality from within OCaml
@@ -81,7 +81,7 @@ effects of different settings. The format of `OCAMLRUNPARAM` is documented in
 the
 [ OCaml manual](https://caml.inria.fr/pub/docs/manual-ocaml/runtime.html).
 
-</aside>
+:::
 
 ## The Fast Minor Heap
 
