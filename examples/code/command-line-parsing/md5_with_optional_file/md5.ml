@@ -2,9 +2,9 @@ open Core
 
 let get_contents = function
   | None | Some "-" ->
-    In_channel.(input_all stdin)
+    In_channel.input_all In_channel.stdin
   | Some filename ->
-    In_channel.(read_all filename)
+    In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename

@@ -207,7 +207,7 @@ If you supply the `filename` argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=../../examples/code/command-line-parsing/md5
-$ dune exec -- md5.exe md5.ml
+$ dune exec -- ./md5.exe md5.ml
 fdac6d086494068b8c22ddf38d19c51d
 ```
 
@@ -497,7 +497,7 @@ our previous examples.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_optional_file
 $ cat md5.ml | dune exec -- ./md5.exe
-a2fb03a2f2551b7059e1251ac44a2829
+e533f209e966f6c6c60f909f651fc24d
 ```
 
 Another possible way to handle this would be to supply a dash as the default
@@ -539,7 +539,7 @@ Building and running this confirms that it has the same behavior as before.
 
 ```sh dir=../../examples/code/command-line-parsing/md5_with_default_file
 $ cat md5.ml | dune exec -- ./md5.exe
-46c7f88b80cd86aaabdbd538e17ebd8d
+560f6fd99e100c7df0ef18161e9e8626
 ```
 
 ### Sequences of Arguments
@@ -661,7 +661,7 @@ Generate an MD5 hash of the input data
   [-help]        print this help text and exit
                  (alias: -?)
 
-$ dune exec -- md5.exe -s "ocaml rocks"
+$ dune exec -- ./md5.exe -s "ocaml rocks"
 5a118fe92ac3b6c7854c595ecf6419cb
 ```
 
