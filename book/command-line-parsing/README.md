@@ -467,9 +467,9 @@ open Core
 
 let get_contents = function
   | None | Some "-" ->
-    In_channel.(input_all stdin)
+    In_channel.input_all In_channel.stdin
   | Some filename ->
-    In_channel.(read_all filename)
+    In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename
@@ -513,8 +513,8 @@ replaces `maybe` with `maybe_with_default`:
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.(input_all stdin)
-  | filename -> In_channel.(read_all filename)
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename
@@ -553,8 +553,8 @@ to process on the command line. [arguments/sequences of]{.idx}
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.(input_all stdin)
-  | filename -> In_channel.(read_all filename)
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename
@@ -613,8 +613,8 @@ let checksum_from_string buf =
 
 let checksum_from_file filename =
   let contents = match filename with
-    | "-"      -> In_channel.(input_all stdin)
-    | filename -> In_channel.(read_all filename)
+    | "-"      -> In_channel.input_all In_channel.stdin
+    | filename -> In_channel.read_all filename
   in
   Md5.digest_string contents
   |> Md5.to_hex
@@ -897,7 +897,7 @@ let add_days base days =
 
 let prompt_for_string name of_string =
   printf "enter %s: %!" name;
-  match In_channel.(input_line stdin) with
+  match In_channel.input_line In_channel.stdin with
   | None -> failwith "no value entered. aborting."
   | Some line -> of_string line
 

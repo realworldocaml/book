@@ -1,8 +1,8 @@
 open Core
 
 let get_contents = function
-  | "-"      -> In_channel.(input_all stdin)
-  | filename -> In_channel.(read_all filename)
+  | "-"      -> In_channel.input_all In_channel.stdin
+  | filename -> In_channel.read_all filename
 
 let do_hash filename =
   get_contents filename

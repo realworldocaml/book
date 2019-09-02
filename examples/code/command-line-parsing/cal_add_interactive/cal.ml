@@ -7,7 +7,7 @@ let add_days base days =
 
 let prompt_for_string name of_string =
   printf "enter %s: %!" name;
-  match In_channel.(input_line stdin) with
+  match In_channel.input_line In_channel.stdin with
   | None -> failwith "no value entered. aborting."
   | Some line -> of_string line
 
