@@ -1,10 +1,10 @@
 open Base
 
-type t = (string * int) list
+type t = (string,int,String.comparator_witness) Map.t
 
-let empty = []
+let empty = Map.empty (module String)
 
-let to_list x = x
+let to_list t = Map.to_alist t
 
 let touch t s =
   let count =
