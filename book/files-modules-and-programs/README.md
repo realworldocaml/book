@@ -955,9 +955,9 @@ the cycle:
 ```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2
 $ dune build freq.bc
 Error: Dependency cycle between the following files:
-   _build/default/.freq.eobjs/counter.impl.all-deps
--> _build/default/.freq.eobjs/freq.impl.all-deps
+   _build/default/.freq.eobjs/freq.impl.all-deps
 -> _build/default/.freq.eobjs/counter.impl.all-deps
+-> _build/default/.freq.eobjs/freq.impl.all-deps
 [1]
 ```
 
