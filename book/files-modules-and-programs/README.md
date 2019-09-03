@@ -831,11 +831,6 @@ and we try to compile, we'll get the following error.
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch
 $ dune build freq.bc
-File "freq.ml", line 5, characters 64-77:
-Error: This expression has type string -> Counter.t -> Counter.t
-       but an expression was expected of type
-         Counter.t -> string -> Counter.t
-       Type string is not compatible with type Counter.t 
 File "counter.ml", line 1:
 Error: The implementation counter.ml
        does not match the interface .freq.eobjs/byte/counter.cmi:
