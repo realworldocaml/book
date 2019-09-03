@@ -13,6 +13,6 @@ val to_list : t -> (string * int) list
 [@@@part "1"] ;;
 
 (** Bump the frequency count for the given string. *)
-val touch : t -> string -> t
+val touch : string -> t -> t
 
 [@@@part "2"] ;;

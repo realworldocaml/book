@@ -382,7 +382,7 @@ File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
-       Type Counter.t is not compatible with type 'a list
+       Type Counter.t is not compatible with type 'a list 
 [1]
 ```
 
@@ -824,13 +824,18 @@ mismatches]{.idx}[modules/type mismatches in]{.idx}
 
 ```ocaml file=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli,part=1
 (** Bump the frequency count for the given string. *)
-val touch : t -> string -> t
+val touch : string -> t -> t
 ```
 
 and we try to compile, we'll get the following error.
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch
 $ dune build freq.bc
+File "freq.ml", line 5, characters 64-77:
+Error: This expression has type string -> Counter.t -> Counter.t
+       but an expression was expected of type
+         Counter.t -> string -> Counter.t
+       Type string is not compatible with type Counter.t 
 File "counter.ml", line 1:
 Error: The implementation counter.ml
        does not match the interface .freq.eobjs/byte/counter.cmi:
@@ -838,7 +843,7 @@ Error: The implementation counter.ml
          val touch :
            ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
        is not included in
-         val touch : t -> Base.string -> t
+         val touch : string -> t -> t
        File "counter.mli", line 16, characters 0-28: Expected declaration
        File "counter.ml", line 9, characters 4-9: Actual declaration
 [1]
