@@ -382,7 +382,7 @@ File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
-       Type Counter.t is not compatible with type 'a list 
+       Type Counter.t is not compatible with type 'a list
 [1]
 ```
 
@@ -952,7 +952,7 @@ let _build_counts = Freq.build_counts
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2
+```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2,non-deterministic=output
 $ dune build freq.bc
 Error: Dependency cycle between the following files:
    _build/default/.freq.eobjs/freq.impl.all-deps
