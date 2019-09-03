@@ -2,7 +2,8 @@ open Base
 open Stdio
 
 let build_counts () =
-  In_channel.fold_lines In_channel.stdin ~init:Counter.empty ~f:Counter.touch
+  In_channel.fold_lines In_channel.stdin ~init:Counter.empty
+    ~f:(fun counter s -> Counter.touch s counter)
 
 let () =
   build_counts ()

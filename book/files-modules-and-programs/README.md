@@ -831,11 +831,6 @@ and we try to compile, we'll get the following error.
 
 ```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch
 $ dune build freq.bc
-File "freq.ml", line 5, characters 64-77:
-Error: This expression has type string -> Counter.t -> Counter.t
-       but an expression was expected of type
-         Counter.t -> string -> Counter.t
-       Type string is not compatible with type Counter.t 
 File "counter.ml", line 1:
 Error: The implementation counter.ml
        does not match the interface .freq.eobjs/byte/counter.cmi:
@@ -957,12 +952,12 @@ let _build_counts = Freq.build_counts
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2
+```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2,non-deterministic=output
 $ dune build freq.bc
 Error: Dependency cycle between the following files:
-   _build/default/.freq.eobjs/counter.impl.all-deps
--> _build/default/.freq.eobjs/freq.impl.all-deps
+   _build/default/.freq.eobjs/freq.impl.all-deps
 -> _build/default/.freq.eobjs/counter.impl.all-deps
+-> _build/default/.freq.eobjs/freq.impl.all-deps
 [1]
 ```
 
