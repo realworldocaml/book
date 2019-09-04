@@ -459,7 +459,7 @@ Let's see this for ourselves with a simple test program. You'll need to
 install the Core benchmarking suite via `opam install core_bench` before you
 compile this code:
 
-```ocaml file=../../examples/code/gc/barrier_bench/barrier_bench.ml
+```ocaml file=examples/barrier_bench/barrier_bench.ml
 open Core
 open Core_bench
 
@@ -507,7 +507,7 @@ garbage collection occurring:
 
 
 
-```sh dir=../../examples/code/gc/barrier_bench,non-deterministic=command,require-package=core_bench
+```sh dir=examples/barrier_bench,non-deterministic=command,require-package=core_bench
 $ dune build barrier_bench.exe
 $ dune exec -- ./barrier_bench.exe -ascii alloc -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
@@ -532,7 +532,7 @@ scenarios using `Core_bench` and experiment with the trade-offs. The
 command-line benchmark binaries have a number of useful options that affect
 garbage collection behavior:
 
-```sh dir=../../examples/code/gc/barrier_bench
+```sh dir=examples/barrier_bench
 $ dune build barrier_bench.exe
 $ dune exec -- ./barrier_bench.exe -help
 Benchmark for mutable, immutable
@@ -607,7 +607,7 @@ Let's explore this with a small example that finalizes values of different
 types, some of which are heap-allocated and others which are compile-time
 constants:
 
-```ocaml file=../../examples/code/gc/finalizer/finalizer.ml
+```ocaml file=examples/finalizer/finalizer.ml
 open Core
 open Async
 
@@ -653,7 +653,7 @@ Building and running this should show the following output:
 
 
 
-```sh dir=../../examples/code/gc/finalizer,require-package=async
+```sh dir=examples/finalizer,require-package=async
 $ dune build finalizer.exe
 $ dune exec -- ./finalizer.exe
        immediate int: FAIL
