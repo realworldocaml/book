@@ -408,7 +408,7 @@ generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&n
 
 
 
-```sh dir=../../examples/code/parsing
+```sh dir=examples/parsing
 ```
 
 ## Defining a Lexer
@@ -728,7 +728,7 @@ null
 Now build and run the example using this file, and you can see the full
 parser in action:
 
-```sh dir=../../examples/code/parsing-test,skip
+```sh dir=examples/parsing-test,skip
 $ dune exec ./test.exe test1.json
 true
 false
@@ -745,7 +745,7 @@ null
 With our simple error handling scheme, errors are fatal and cause the program
 to terminate with a nonzero exit code:
 
-```sh dir=../../examples/code/parsing-test,skip
+```sh dir=examples/parsing-test,skip
 $ cat test2.json
 { "name": "Chicago",
   "zips": [12345,

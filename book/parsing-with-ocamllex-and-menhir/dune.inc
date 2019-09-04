@@ -15,8 +15,8 @@
          (:y2 examples/parsing/parsed_example.ml)
          (:y1 examples/parsing/prog.mli)
          (:y0 examples/parsing/tokens.ml)
-         (source_tree ../../examples/code/parsing)
-         (source_tree ../../examples/code/parsing-test)
+         (source_tree examples/parsing)
+         (source_tree examples/parsing-test)
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
