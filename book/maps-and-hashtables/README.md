@@ -928,7 +928,7 @@ the keys and updating the values they contain. Note that we use the
 `Map.change` and `Hashtbl.change` functions to update the respective data
 structures:
 
-```ocaml file=../../examples/code/maps-and-hash-tables/map_vs_hash/map_vs_hash.ml
+```ocaml file=examples/map_vs_hash/map_vs_hash.ml
 open Base
 open Core_bench
 
@@ -976,7 +976,7 @@ the map version:
 
 
 
-```sh dir=../../examples/code/maps-and-hash-tables/map_vs_hash,non-deterministic=command
+```sh dir=examples/map_vs_hash,non-deterministic=command
 $ dune build map_vs_hash.exe
 $ ./_build/default/map_vs_hash.exe -ascii -quota 1 -clear-columns time speedup
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
@@ -1008,7 +1008,7 @@ keeping these copies around. In the map case, this is done by using
 are done using `Hashtbl.change`, but we also need to call `Hashtbl.copy` to
 take snapshots of the table:
 
-```ocaml file=../../examples/code/maps-and-hash-tables/map_vs_hash2/map_vs_hash2.ml
+```ocaml file=examples/map_vs_hash2/map_vs_hash2.ml
 open Base
 open Core_bench
 
@@ -1060,7 +1060,7 @@ in this case by more than a factor of 10:
 
 
 
-```sh dir=../../examples/code/maps-and-hash-tables/map_vs_hash2,non-deterministic=command
+```sh dir=examples/map_vs_hash2,non-deterministic=command
 $ dune build map_vs_hash2.exe
 $ ./_build/default/map_vs_hash2.exe -ascii -clear-columns time speedup
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
