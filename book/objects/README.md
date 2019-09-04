@@ -357,7 +357,7 @@ The generic type `shape` has a method to compute the area, and `square` and
 `circle` are specific kinds of shapes: [geometric shapes]{.idx}[width
 subtyping]{.idx}[subtyping/width subtyping]{.idx}
 
-```ocaml file=../../examples/code/objects/subtyping.ml,part=1
+```ocaml file=examples/subtyping.ml,part=1
 type shape = < area : float >
 
 type square = < area : float; width : int >
@@ -571,7 +571,7 @@ module VarEither :
 For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles:
 
-```ocaml file=../../examples/code/objects/subtyping.ml,part=2
+```ocaml file=examples/subtyping.ml,part=2
 type 'a stack = < pop: 'a option; push: 'a -> unit >
 
 let square_stack: square stack = stack [square 30; square 10]
@@ -716,7 +716,7 @@ support this kind of pattern analysis. It is also not obvious that
 object-oriented programming is well-suited for this situation. Pattern
 matching seems like a better fit:
 
-```ocaml file=../../examples/code/objects/is_barbell.ml
+```ocaml file=examples/is_barbell.ml
 let is_barbell = function
 | [Circle r1; Line _; Circle r2] when r1 = r2 -> true
 | _ -> false
@@ -726,7 +726,7 @@ Regardless, there is a solution if you find yourself in this situation, which
 is to augment the classes with variants. You can define a method `variant`
 that injects the actual object into a variant type:
 
-```ocaml file=../../examples/code/objects/narrowing.ml,part=1
+```ocaml file=examples/narrowing.ml,part=1
 type shape = < variant : repr; area : float>
 and circle = < variant : repr; area : float; radius : int >
 and line = < variant : repr; area : float; length : int >
