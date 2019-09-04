@@ -9,9 +9,9 @@
          (package mdx)
          (package base)
          (package ppx_jane)
-         (:y1 ../../examples/code/guided-tour/recursion.ml)
-         (:y0 ../../examples/code/guided-tour/sum/sum.ml)
-         (source_tree ../../examples/code/guided-tour/sum)
+         (:y1 examples/recursion.ml)
+         (:y0 examples/sum/sum.ml)
+         (source_tree examples/sum)
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
