@@ -45,7 +45,7 @@ allocates a new list with the requisite key/value pair added.
 
 Now we can write `freq.ml`.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq/freq.ml
+```ocaml file=examples/freq/freq.ml
 open Base
 open Stdio
 
@@ -105,7 +105,7 @@ is common for functions that operate primarily by side effect.
 If we weren't using `Base` or any other external libraries, we could build
 the executable like this:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq
+```sh dir=examples/freq
 $ ocamlc freq.ml -o freq.byte
 File "freq.ml", line 1, characters 5-9:
 Error: Unbound module Base
@@ -117,7 +117,7 @@ need a somewhat more complex invocation to get them linked in: [OCaml
 toolchain/ocamlc]{.idx}[OCaml toolchain/ocamlfind]{.idx}[Base standard
 library/finding with ocamlfind]{.idx}
 
-```sh dir=../../examples/code/files-modules-and-programs/freq,skip
+```sh dir=examples/freq,skip
 $ ocamlfind ocamlc -linkpkg -package base -package stdio freq.ml -o freq.byte
 ```
 
@@ -141,7 +141,7 @@ specifies the details of the build. [dune]{.idx}
 
 With that in place, we can invoke `dune` as follows.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-dune
+```sh dir=examples/freq-dune
 $ dune build freq.bc
 ```
 
@@ -151,7 +151,7 @@ directory, from which they can be invoked.  The specific invocation
 below will count the words that come up in the file `freq.ml`
 itself. [OCaml toolchain/dune]{.idx}
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-dune
+```sh dir=examples/freq-dune
 $ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
   5: line
   5: List
@@ -168,7 +168,7 @@ $ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
 Conveniently, `dune` allows us to combine the building and running an
 executable into a single operation, which we can do using `dune exec`.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-dune
+```sh dir=examples/freq-dune
 $ grep -o '[[:alpha:]]*' freq.ml | dune exec ./freq.bc
   5: line
   5: List
@@ -242,7 +242,7 @@ maintaining the association list used to represent the frequency counts. The
 key function, called `touch`, bumps the frequency count of a given line by
 one.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-counter/counter.ml
+```ocaml file=examples/freq-with-counter/counter.ml
 open Base
 
 let touch counts line =
@@ -261,7 +261,7 @@ capitalized. [modules/naming of]{.idx}
 
 We can now rewrite `freq.ml` to use `Counter`.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-counter/freq.ml
+```ocaml file=examples/freq-with-counter/freq.ml
 open Base
 open Stdio
 
@@ -278,7 +278,7 @@ let () =
 The resulting code can still be built with `dune`, which will discover
 dependencies and realize that `counter.ml` needs to be compiled.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-counter
+```sh dir=examples/freq-with-counter
 $ dune build freq.bc
 ```
 
@@ -311,7 +311,7 @@ val <identifier> : <type>
 
 Using this syntax, we can write the signature of `counter.ml` as follows.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-sig/counter.mli
+```ocaml file=examples/freq-with-sig/counter.mli
 open Base
 
 (** Bump the frequency count for the given string. *)
@@ -326,7 +326,7 @@ we'll need to make the type of frequency counts *abstract*. A type is
 abstract if its name is exposed in the interface, but its definition is not.
 Here's an abstract interface for `Counter`:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-sig-abstract/counter.mli
+```ocaml file=examples/freq-with-sig-abstract/counter.mli
 open Base
 
 (** A collection of string frequency counts *)
@@ -356,7 +356,7 @@ documentation. We'll discuss `odoc` more in
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-sig-abstract/counter.ml
+```ocaml file=examples/freq-with-sig-abstract/counter.ml
 open Base
 
 type t = (string * int) list
@@ -376,7 +376,7 @@ let touch counts line =
 
 If we now try to compile `freq.ml`, we'll get the following error:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-abstract
+```sh dir=examples/freq-with-sig-abstract
 $ dune build freq.bc
 File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
@@ -392,7 +392,7 @@ to fix `build_counts` to use `Counter.empty` instead of `[]` and to use
 `Counter.to_list` to convert the completed counts to an association list. The
 resulting implementation is shown below.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-sig-abstract-fixed/freq.ml
+```ocaml file=examples/freq-with-sig-abstract-fixed/freq.ml
 open Base
 open Stdio
 
@@ -409,7 +409,7 @@ let () =
 
 With this implementation, the build now succeeds!
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-abstract-fixed
+```sh dir=examples/freq-with-sig-abstract-fixed
 $ dune build freq.bc
 ```
 
@@ -417,7 +417,7 @@ Now we can turn to optimizing the implementation of `Counter`. Here's an
 alternate and far more efficient implementation, based on the `Map` data
 structure in `Core_kernel`.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-fast/counter.ml
+```ocaml file=examples/freq-fast/counter.ml
 open Base
 
 type t = (string,int,String.comparator_witness) Map.t
@@ -458,7 +458,7 @@ before and after the median instead. We'll use a custom type to represent the
 fact that there are two possible return values. Here's a possible
 implementation:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-median/counter.ml,part=1
+```ocaml file=examples/freq-median/counter.ml,part=1
 type median = | Median of string
               | Before_and_after of string * string
 
@@ -487,7 +487,7 @@ which functions are an example) and types have distinct namespaces, so
 there's no name clash here. Adding the following two lines to `counter.mli`
 does the trick.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-median/counter.mli,part=1
+```ocaml file=examples/freq-median/counter.mli,part=1
 (** Represents the median computed from a set of strings.  In the case where
     there is an even number of choices, the one before and after the median is
     returned.  *)
@@ -523,7 +523,7 @@ from the string type.
 Here's how you might create such an abstract type, within a submodule:
 [abstract types]{.idx}
 
-```ocaml file=../../examples/code/files-modules-and-programs/abstract_username.ml
+```ocaml file=examples/abstract_username.ml
 open Base
 
 module Username : sig
@@ -558,7 +558,7 @@ own top-level `module type` declaration, making it possible to create
 multiple distinct types with the same underlying implementation in a
 lightweight way:
 
-```ocaml file=../../examples/code/files-modules-and-programs/session_info/session_info.ml
+```ocaml file=examples/session_info/session_info.ml
 open Base
 module Time = Core_kernel.Time
 
@@ -593,7 +593,7 @@ host in the other session, when it should be comparing the usernames in both
 cases. Because of how we defined our types, however, the compiler will flag
 this bug for us.
 
-```sh dir=../../examples/code/files-modules-and-programs/session_info
+```sh dir=examples/session_info
 $ dune build session_info.exe
 File "session_info.ml", line 27, characters 23-30:
 Error: This expression has type Hostname.t
@@ -671,7 +671,7 @@ val average : int64 -> int64 -> int64 = <fun>
   up on explicitness is to locally rebind the name of a module. So, when
   using the `Counter.median` type, instead of writing:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-median/use_median_1.ml,part=1
+```ocaml file=examples/freq-median/use_median_1.ml,part=1
 let print_median m =
   match m with
   | Counter.Median string -> printf "True median:\n   %s\n" string
@@ -681,7 +681,7 @@ let print_median m =
 
 you could write:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-median/use_median_2.ml,part=1
+```ocaml file=examples/freq-median/use_median_2.ml,part=1
 let print_median m =
   let module C = Counter in
   match m with
@@ -760,7 +760,7 @@ To consider a more realistic example, imagine you wanted to build an extended
 version of the `List` module, where you've added some functionality not
 present in the module as distributed in `Base`. That's a job for `include`.
 
-```ocaml file=../../examples/code/files-modules-and-programs/ext_list.ml
+```ocaml file=examples/ext_list.ml
 open Base
 
 (* The new function we're going to add *)
@@ -779,7 +779,7 @@ trick to write our `mli`. The only issue is that we need to get our hands on
 the signature for the `List` module. This can be done using `module type of`,
 which computes a signature from a module:
 
-```ocaml file=../../examples/code/files-modules-and-programs/ext_list.mli
+```ocaml file=examples/ext_list.mli
 open Base
 
 (* Include the interface of the list module from Core *)
@@ -800,7 +800,7 @@ We can now use `Ext_list` as a replacement for `List`. If we want to use
 `Ext_list` in preference to `List` in our project, we can create a file of
 common definitions:
 
-```ocaml file=../../examples/code/files-modules-and-programs/common.ml
+```ocaml file=examples/common.ml
 module List = Ext_list
 ```
 
@@ -822,14 +822,14 @@ replace the `val` declaration in `counter.mli` by swapping the types of the
 first two arguments: [errors/module type mismatches]{.idx}[type
 mismatches]{.idx}[modules/type mismatches in]{.idx}
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch/counter.mli,part=1
+```ocaml file=examples/freq-with-sig-mismatch/counter.mli,part=1
 (** Bump the frequency count for the given string. *)
 val touch : string -> t -> t
 ```
 
 and we try to compile, we'll get the following error.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-sig-mismatch
+```sh dir=examples/freq-with-sig-mismatch
 $ dune build freq.bc
 File "counter.ml", line 1:
 Error: The implementation counter.ml
@@ -851,14 +851,14 @@ frequency count of a given string. We can update the `mli` by adding the
 following line: [errors/missing module definitions]{.idx}[modules/missing
 definitions in]{.idx}
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-missing-def/counter.mli,part=1
+```ocaml file=examples/freq-with-missing-def/counter.mli,part=1
 val count : t -> string -> int
 ```
 
 Now if we try to compile without actually adding the implementation, we'll
 get this error.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-missing-def
+```sh dir=examples/freq-with-missing-def
 $ dune build counter.bc
 Error: Don't know how to build counter.bc
 Hint: did you mean counter.ml?
@@ -876,7 +876,7 @@ definition of `median` in the implementation listing those options in a
 different order: [type definition mismatches]{.idx}[errors/module type
 definition mismatches]{.idx}[modules/type definition mismatches]{.idx}
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-with-type-mismatch/counter.mli,part=1
+```ocaml file=examples/freq-with-type-mismatch/counter.mli,part=1
 (** Represents the median computed from a set of strings.  In the case where
     there is an even number of choices, the one before and after the median is
     returned.  *)
@@ -888,7 +888,7 @@ val median : t -> median
 
 will lead to a compilation error.
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-with-type-mismatch
+```sh dir=examples/freq-with-type-mismatch
 $ dune build freq.bc
 File "counter.ml", line 1:
 Error: The implementation counter.ml
@@ -928,13 +928,13 @@ The simplest example of a forbidden circular reference is a module referring
 to its own module name. So, if we tried to add a reference to `Counter` from
 within `counter.ml`.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-cyclic1/counter.ml,part=1
+```ocaml file=examples/freq-cyclic1/counter.ml,part=1
 let singleton l = Counter.touch Counter.empty
 ```
 
 we'll see this error when we try to build:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic1
+```sh dir=examples/freq-cyclic1
 $ dune build freq.bc
 File "counter.ml", line 18, characters 18-31:
 Error: Unbound module Counter
@@ -945,14 +945,14 @@ The problem manifests in a different way if we create cyclic references
 between files. We could create such a situation by adding a reference to
 `Freq` from `counter.ml`, e.g., by adding the following line.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-cyclic2/counter.ml,part=1
+```ocaml file=examples/freq-cyclic2/counter.ml,part=1
 let _build_counts = Freq.build_counts
 ```
 
 In this case, `dune` will notice the error and complain explicitly about
 the cycle:
 
-```sh dir=../../examples/code/files-modules-and-programs/freq-cyclic2,non-deterministic=output
+```sh dir=examples/freq-cyclic2,non-deterministic=output
 $ dune build freq.bc
 Error: Dependency cycle between the following files:
    _build/default/.freq.eobjs/freq.impl.all-deps
