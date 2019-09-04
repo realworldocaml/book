@@ -135,7 +135,7 @@ that can rewrite some values into more top-level-friendly equivalents. They
 are generally installed as `ocamlfind` packages ending in `top`:
 :::
 
-```sh dir=../../examples/code/sexpr,non-deterministic=output
+```sh dir=examples,non-deterministic=output
 $ ocamlfind list | grep top
 astring.top         (version: 0.8.3)
 cohttp.top          (version: n/a)
@@ -291,7 +291,7 @@ of]{.idx}
 can be loaded using Sexplib. As you can see, the commented data is not part
 of the resulting s-expression:
 
-```ocaml env=example_load,dir=../../examples/code/sexpr
+```ocaml env=example_load,dir=examples
 # Sexp.load_sexp "example.scm"
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 ```
@@ -325,7 +325,7 @@ The following example shows all of these in action:
 
 Again, loading the file as an s-expression drops the comments:
 
-```ocaml env=example_load,dir=../../examples/code/sexpr
+```ocaml env=example_load,dir=examples
 # Sexp.load_sexp "comment_heavy.scm"
 - : Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
@@ -334,7 +334,7 @@ If we introduce an error into our s-expression, by, say, creating a file
 `broken_example.scm` which is `example.scm`, without open-paren in front of
 `bar`, we'll get a parse error:
 
-```ocaml env=example_load,dir=../../examples/code/sexpr
+```ocaml env=example_load,dir=examples
 # Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm"))
 Uncaught exception:
