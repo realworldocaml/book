@@ -49,7 +49,7 @@ Let's consider an example of how one might use a map in practice. In
 we showed a module `Counter` for keeping frequency counts on a set of
 strings. Here's the interface:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-fast/counter.mli
+```ocaml file=../files-modules-and-programs/examples/freq-fast/counter.mli
 open Base
 
 (** A collection of string frequency counts *)
@@ -74,7 +74,7 @@ frequencies.
 
 Here's the implementation.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-fast/counter.ml
+```ocaml file=../files-modules-and-programs/examples/freq-fast/counter.ml
 open Base
 
 type t = (string,int,String.comparator_witness) Map.t
