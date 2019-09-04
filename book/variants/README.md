@@ -1145,7 +1145,7 @@ In particular, the compiler will complain that the `` `Grey`` case is unused:
 
 
 
-```sh dir=../../examples/code/variants-termcol-annotated
+```sh dir=examples/variants-termcol-annotated
 $ dune build terminal_color.exe
 ...
 File "terminal_color.ml", line 29, characters 25-32:

@@ -13,7 +13,7 @@
          (:y2 examples/variants-termcol-fixed/terminal_color.ml)
          (:y1 examples/variants-termcol/terminal_color.ml)
          (:y0 examples/variants-termcol/terminal_color.mli)
-         (source_tree ../../examples/code/variants-termcol-annotated)
+         (source_tree examples/variants-termcol-annotated)
          catch_all.ml
          logger.ml
          prelude.ml)
