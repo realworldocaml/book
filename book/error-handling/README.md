@@ -94,7 +94,7 @@ anything about the nature of the error.
 `Result.t` is meant to address this deficiency. The type is defined as
 follows:[Result.t option]{.idx}
 
-```ocaml file=../../examples/code/error-handling/result.mli
+```ocaml file=examples/result.mli
 module Result : sig
    type ('a,'b) t = | Ok of 'a
                     | Error of 'b
@@ -732,7 +732,7 @@ program:[debugging/stack backtraces]{.idx}[stack
 backtraces]{.idx}[backtraces]{.idx}:[exceptions/stack backtraces
 for]{.idx}[error handling/exception backtracing]{.idx}
 
-```ocaml file=../../examples/code/error-handling/blow_up/blow_up.ml
+```ocaml file=examples/blow_up/blow_up.ml
 open Base
 open Stdio
 exception Empty_list
@@ -759,7 +759,7 @@ function calls that were in place at the time of the error:
 
 
 
-```sh dir=../../examples/code/error-handling/blow_up
+```sh dir=examples/blow_up
 $ dune build blow_up.bc
 $ ./_build/default/blow_up.bc
 3
@@ -792,7 +792,7 @@ off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 
 
 
-```sh dir=../../examples/code/error-handling/blow_up
+```sh dir=examples/blow_up
 $ dune build blow_up.bc
 $ OCAMLRUNPARAM= ./_build/default/blow_up.bc
 3
@@ -810,7 +810,7 @@ exceptions are fairly fast, but they're even faster still if you disable
 backtraces. Here's a simple benchmark that shows the effect, using the
 `core_bench` package:
 
-```ocaml file=../../examples/code/error-handling/exn_cost/exn_cost.ml
+```ocaml file=examples/exn_cost/exn_cost.ml
 open Core
 open Core_bench
 
@@ -866,7 +866,7 @@ If we run this with stacktraces on, the benchmark results look like this:
 
 
 
-```sh dir=../../examples/code/error-handling/exn_cost,non-deterministic=command
+```sh dir=examples/exn_cost,non-deterministic=command
 $ dune build exn_cost.exe
 $ ./_build/default/exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
@@ -883,7 +883,7 @@ Here, we see that we lose something like 30 cycles to adding an exception
 handler, and 60 more to actually throwing and catching an exception. If we
 turn backtraces off, then the results look like this:
 
-```sh dir=../../examples/code/error-handling/exn_cost,non-deterministic=output
+```sh dir=examples/exn_cost,non-deterministic=output
 $ OCAMLRUNPARAM= ./_build/default/exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 |
