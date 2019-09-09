@@ -157,7 +157,7 @@ errors]{.idx}
 Here's an example syntax error that we obtain by performing a module
 assignment as a statement instead of as a `let` binding:
 
-```ocaml file=../../examples/code/front-end/broken_module.ml
+```ocaml file=examples/front-end/broken_module.ml
 let () =
   module MyString = String;
   ()
@@ -165,7 +165,7 @@ let () =
 
 The code results in a syntax error when compiled:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -c broken_module.ml
 File "broken_module.ml", line 2, characters 2-8:
 Error: Syntax error
@@ -175,7 +175,7 @@ Error: Syntax error
 The correct version of this source code creates the `MyString` module
 correctly via a local open, and compiles successfully:
 
-```ocaml file=../../examples/code/front-end/fixed_module.ml
+```ocaml file=examples/front-end/fixed_module.ml
 let () =
   let module MyString = String in
   ()
@@ -192,7 +192,7 @@ Sadly, syntax errors do get more inaccurate sometimes, depending on the
 nature of your mistake. Try to spot the deliberate error in the following
 function definitions: [source code/automatically indenting]{.idx}
 
-```ocaml file=../../examples/code/front-end/follow_on_function.ml
+```ocaml file=examples/front-end/follow_on_function.ml
 let concat_and_print x y =
   let v = x ^ y in
   print_endline v;
@@ -211,7 +211,7 @@ let () =
 
 When you compile this file, you'll get a syntax error again:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -c follow_on_function.ml
 File "follow_on_function.ml", line 11, characters 0-3:
 Error: Syntax error
@@ -235,7 +235,7 @@ characters]{.idx}
 Let's run our erroneous file through `ocp-indent` and see how it processes
 it:
 
-```sh dir=../../examples/code/front-end,skip
+```sh dir=examples/front-end,skip
 $ ocp-indent follow_on_function.ml
 let concat_and_print x y =
   let v = x ^ y in
@@ -258,7 +258,7 @@ first `concat_and_print` definition, and the errant semicolon is now much
 easier to spot. We just need to remove that semicolon and rerun `ocp-indent`
 to verify that the syntax is correct:
 
-```sh dir=../../examples/code/front-end,skip
+```sh dir=examples/front-end,skip
 $ ocp-indent follow_on_function_fixed.ml
 (*TODO: Check contents*)
 let concat_and_print x y =
@@ -300,7 +300,7 @@ manual pages, and even module dependency graphs that can be viewed using
 Here's a sample of some source code that's been annotated with `ocamldoc`
 comments:
 
-```ocaml file=../../examples/code/front-end/doc.ml
+```ocaml file=examples/front-end/doc.ml
 (** example.ml: The first special comment of the file is the comment
     associated with the whole module. *)
 
@@ -414,7 +414,7 @@ toplevel. It's also possible to generate type signatures for an entire file
 by asking the compiler to do the work for you. Create a file with a single
 type definition and value:
 
-```ocaml file=../../examples/code/front-end/typedef.ml
+```ocaml file=examples/front-end/typedef.ml
 type t = Foo | Bar
 let v = Foo
 ```
@@ -423,7 +423,7 @@ Now run the compiler with the `-i` flag to infer the type signature for that
 file. This runs the type checker but doesn't compile the code any further
 after displaying the interface to the standard output:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 ```
 
 The output is the default signature for the module that represents the input
@@ -440,19 +440,19 @@ The compiler makes sure that your `ml` and `mli` files have compatible
 signatures. The type checker throws an immediate error if this isn't the
 case:
 
-```ocaml file=../../examples/code/front-end/conflicting_interface.ml
+```ocaml file=examples/front-end/conflicting_interface.ml
 type t = Foo
 ```
 
 
 
-```ocaml file=../../examples/code/front-end/conflicting_interface.mli
+```ocaml file=examples/front-end/conflicting_interface.mli
 type t = Bar
 ```
 
 
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -c conflicting_interface.mli conflicting_interface.ml
 File "conflicting_interface.ml", line 1:
 Error: The implementation conflicting_interface.ml
@@ -552,7 +552,7 @@ variant types/type checking and]{.idx}[row polymorphism]{.idx}
 For instance, consider this broken example that expresses some simple
 algebraic operations over integers:
 
-```ocaml file=../../examples/code/front-end/broken_poly.ml
+```ocaml file=examples/front-end/broken_poly.ml
 let rec algebra =
   function
   | `Add (x,y) -> (algebra x) + (algebra y)
@@ -576,7 +576,7 @@ let _ =
 There's a single character typo in the code so that it uses `Nu` instead of
 `Num`. The resulting type error is impressive:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -c broken_poly.ml
 File "broken_poly.ml", line 9, characters 10-154:
 Error: This expression has type
@@ -609,7 +609,7 @@ don't match up, outputs the difference as best it can.
 Let's see what happens with an explicit type annotation to help the compiler
 out:
 
-```ocaml file=../../examples/code/front-end/broken_poly_with_annot.ml
+```ocaml file=examples/front-end/broken_poly_with_annot.ml
 type t = [
   | `Add of t * t
   | `Sub of t * t
@@ -641,7 +641,7 @@ This code contains exactly the same error as before, but we've added a closed
 type definition of the polymorphic variants, and a type annotation to the
 `algebra` definition. The compiler error we get is much more useful now:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -i broken_poly_with_annot.ml
 File "broken_poly_with_annot.ml", line 22, characters 14-21:
 Error: This expression has type [> `Nu of int ]
@@ -682,7 +682,7 @@ The principality check only affects a few language features:
 Here's an example of principality warnings when used with record
 disambiguation.
 
-```ocaml file=../../examples/code/front-end/non_principal.ml
+```ocaml file=examples/front-end/non_principal.ml
 type s = { foo: int; bar: unit }
 type t = { foo: int }
 
@@ -693,7 +693,7 @@ let f x =
 
 Inferring the signature with `-principal` will show you a new warning:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -i -principal non_principal.ml
 File "non_principal.ml", line 6, characters 4-7:
 Warning 18: this type-based field disambiguation is not principal.
@@ -711,7 +711,7 @@ removed from the definition of `f`, its argument would be of type `t` and not
 You can fix this either by permuting the order of the type declarations, or
 by adding an explicit type annotation:
 
-```ocaml file=../../examples/code/front-end/principal.ml
+```ocaml file=examples/front-end/principal.ml
 type s = { foo: int; bar: unit }
 type t = { foo: int }
 
@@ -724,7 +724,7 @@ There is now no ambiguity about the inferred types, since we've explicitly
 given the argument a type, and the order of inference of the subexpressions
 no longer matters.
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -i -principal principal.ml
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
@@ -735,7 +735,7 @@ The `ocamlbuild` equivalent is to add the tag `principal` to your build. The
 *corebuild* wrapper script actually adds this by default, but it does no harm
 to explicitly repeat it:
 
-```sh dir=../../examples/code/front-end,skip
+```sh dir=examples/front-end,skip
 $ corebuild -no-hygiene -tag principal principal.cmi non_principal.cmi
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules principal.ml > principal.ml.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o principal.cmo principal.ml
@@ -794,20 +794,20 @@ and modules can be explained directly in terms of the module system.
 
 Create a file called `alice.ml` with the following contents:
 
-```ocaml file=../../examples/code/front-end/alice.ml
+```ocaml file=examples/front-end/alice.ml
 let friends = [ Bob.name ]
 ```
 
 and a corresponding signature file:
 
-```ocaml file=../../examples/code/front-end/alice.mli
+```ocaml file=examples/front-end/alice.mli
 val friends : Bob.t list
 ```
 
 These two files are exactly analogous to including the following code
 directly in another module that references `Alice`:
 
-```ocaml file=../../examples/code/front-end/alice_combined.ml
+```ocaml file=examples/front-end/alice_combined.ml
 module Alice : sig
   val friends : Bob.t list
 end = struct
@@ -859,7 +859,7 @@ corruption and crashes.
 OCaml guards against this by recording a MD5 checksum in every `cmi`. Let's
 examine our earlier `typedef.ml` more closely:
 
-```sh dir=../../examples/code/front-end,non-deterministic
+```sh dir=examples/front-end,non-deterministic
 $ ocamlc -c typedef.ml
 $ ocamlobjinfo typedef.cmi
 File typedef.cmi
@@ -928,7 +928,7 @@ to be packed under module `X`. There are special rules in `ocamlbuild` that
 tell it how to map `%.mlpack` files to the packed `%.cmx` or `%.cmo`
 equivalent:
 
-```sh dir=../../examples/code/packing
+```sh dir=examples/packing
 $ cat A.ml
 let v = "hello"
 $ cat B.ml
@@ -943,7 +943,7 @@ B
 You can now run *corebuild* to build the `X.cmx` file directly, but let's
 create a new module to link against `X` to complete the example:
 
-```ocaml file=../../examples/code/packing/test.ml
+```ocaml file=examples/packing/test.ml
 let v = X.A.v
 let w = X.B.w
 ```
@@ -954,7 +954,7 @@ examining the imported interfaces in `Test` and confirming that neither
 `A` nor `B` are mentioned in there and that only the packed `X` module is
 used:
 
-```sh dir=../../examples/code/packing,non-deterministic
+```sh dir=examples/packing,non-deterministic
 $ corebuild test.inferred.mli test.cmi
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules test.ml > test.ml.depends
 ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules A.ml > A.ml.depends
@@ -1090,7 +1090,7 @@ This module defined bindings for the Ncurses library. First, compile the
 interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
 files, and then run `ocp-index` in completion mode:
 
-```sh dir=../../examples/code,source-tree=../../examples/code/ffi,skip
+```sh dir=examples,source-tree=examples/ffi,skip
 $ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
 ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
@@ -1114,7 +1114,7 @@ tool.[flags]{.idx}
 
 We'll use our toy `typedef.ml` again:
 
-```ocaml file=../../examples/code/front-end/typedef.ml
+```ocaml file=examples/front-end/typedef.ml
 type t = Foo | Bar
 let v = Foo
 ```
@@ -1122,7 +1122,7 @@ let v = Foo
 Let's first look at the untyped syntax tree that's generated from the parsing
 phase:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -dparsetree typedef.ml 2>&1
 [
   structure_item (typedef.ml[1,0+0]..[1,0+18])
@@ -1174,7 +1174,7 @@ hasn't been type checked yet, so the raw tokens are all included.
 The typed AST that is normally output as a compiled `cmt` file can be
 displayed in a more developer-readable form via the `-dtypedtree` option:
 
-```sh dir=../../examples/code/front-end
+```sh dir=examples/front-end
 $ ocamlc -dtypedtree typedef.ml 2>&1
 [
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])

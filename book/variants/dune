@@ -13,3 +13,5 @@
  (action (diff dune.inc dune.gen)))
 
 (include dune.inc)
+
+(data_only_dirs examples)

@@ -1,0 +1,3 @@
+(executable
+  (name      ncurses)
+  (libraries ctypes-foreign.threaded))

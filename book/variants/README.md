@@ -1058,7 +1058,7 @@ saw in
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 Let's start with the `mli`:
 
-```ocaml file=../../examples/code/variants-termcol/terminal_color.mli
+```ocaml file=examples/variants-termcol/terminal_color.mli
 open Core
 
 type basic_color =
@@ -1082,7 +1082,7 @@ Here, `extended_color` is defined as an explicit extension of `color`. Also,
 notice that we defined all of these types as exact variants. We can implement
 this library as follows:
 
-```ocaml file=../../examples/code/variants-termcol/terminal_color.ml
+```ocaml file=examples/variants-termcol/terminal_color.ml
 open Core
 
 type basic_color =
@@ -1128,7 +1128,7 @@ type that was listed in the `mli`.
 If we add an explicit type annotation to the code itself (rather than just in
 the `mli`), then the compiler has enough information to warn us:
 
-```ocaml file=../../examples/code/variants-termcol-annotated/terminal_color.ml,part=1
+```ocaml file=examples/variants-termcol-annotated/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Gray x -> 2000 + x
@@ -1145,7 +1145,7 @@ In particular, the compiler will complain that the `` `Grey`` case is unused:
 
 
 
-```sh dir=../../examples/code/variants-termcol-annotated
+```sh dir=examples/variants-termcol-annotated
 $ dune build terminal_color.exe
 ...
 File "terminal_color.ml", line 29, characters 25-32:
@@ -1158,7 +1158,7 @@ how we write the pattern match that narrows the type. In particular, we can
 explicitly use the type name as part of the pattern match, by prefixing it
 with a `#`:
 
-```ocaml file=../../examples/code/variants-termcol-fixed/terminal_color.ml,part=1
+```ocaml file=examples/variants-termcol-fixed/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | #color as color -> color_to_int color

@@ -9,11 +9,11 @@
          (package mdx)
          (package core)
          (package ppx_jane)
-         (:y3 ../../examples/code/variants-termcol-annotated/terminal_color.ml)
-         (:y2 ../../examples/code/variants-termcol-fixed/terminal_color.ml)
-         (:y1 ../../examples/code/variants-termcol/terminal_color.ml)
-         (:y0 ../../examples/code/variants-termcol/terminal_color.mli)
-         (source_tree ../../examples/code/variants-termcol-annotated)
+         (:y3 examples/variants-termcol-annotated/terminal_color.ml)
+         (:y2 examples/variants-termcol-fixed/terminal_color.ml)
+         (:y1 examples/variants-termcol/terminal_color.ml)
+         (:y0 examples/variants-termcol/terminal_color.mli)
+         (source_tree examples/variants-termcol-annotated)
          catch_all.ml
          logger.ml
          prelude.ml)

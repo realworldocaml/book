@@ -41,7 +41,7 @@ code/pattern matching optimization]{.idx}
 Let's start by creating a straightforward exhaustive pattern match using four
 normal variants:
 
-```ocaml file=../../examples/code/back-end/pattern_monomorphic_large.ml
+```ocaml file=examples/back-end/pattern_monomorphic_large.ml
 type t = | Alice | Bob | Charlie | David
 
 let test v =
@@ -54,7 +54,7 @@ let test v =
 
 The lambda output for this code looks like this:
 
-```sh dir=../../examples/code/back-end
+```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_large.ml 2>&1
 (setglobal Pattern_monomorphic_large!
   (let
@@ -94,7 +94,7 @@ The compiler computes a jump table in order to handle all four cases. If we
 drop the number of variants to just two, then there's no need for the
 complexity of computing this table:
 
-```ocaml file=../../examples/code/back-end/pattern_monomorphic_small.ml
+```ocaml file=examples/back-end/pattern_monomorphic_small.ml
 type t = | Alice | Bob
 
 let test v =
@@ -105,7 +105,7 @@ let test v =
 
 The lambda output for this code is now quite different:
 
-```sh dir=../../examples/code/back-end
+```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
 (setglobal Pattern_monomorphic_small!
   (let (test/1005 = (function v/1006 (if (!= v/1006 0) 101 100)))
@@ -117,7 +117,7 @@ table, since it statically determines that the range of possible variants is
 small enough. Finally, let's look at the same code, but with polymorphic
 variants instead of normal variants:
 
-```ocaml file=../../examples/code/back-end/pattern_polymorphic.ml
+```ocaml file=examples/back-end/pattern_polymorphic.ml
 let test v =
   match v with
   | `Alice   -> 100
@@ -130,7 +130,7 @@ let test v =
 The lambda form for this also shows up the runtime representation of
 polymorphic variants:
 
-```sh dir=../../examples/code/back-end
+```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
 (setglobal Pattern_polymorphic!
   (let
@@ -182,7 +182,7 @@ You'll need to `opam install core_bench` to get the library:[pattern
 matching/benchmarking of]{.idx}[lambda form code/pattern matching
 benchmarking]{.idx}
 
-```ocaml file=../../examples/code/back-end/bench_patterns/bench_patterns.ml
+```ocaml file=examples/back-end/bench_patterns/bench_patterns.ml
 open Core
 open Core_bench
 
@@ -245,7 +245,7 @@ default, and you'll see the results summarized in a neat table:
 
 
 
-```sh dir=../../examples/code/back-end/bench_patterns,non-deterministic=command
+```sh dir=examples/back-end/bench_patterns,non-deterministic=command
 $ dune build bench_patterns.exe
 $ ./_build/default/bench_patterns.exe -ascii -quota 0.25
 Estimated testing time 750ms (3 benchmarks x 250ms). Change using -quota SECS.
@@ -315,7 +315,7 @@ You can display the bytecode instructions in
 textual form via `-dinstr`. Try this on one of our earlier pattern-matching
 examples:
 
-```sh dir=../../examples/code/back-end
+```sh dir=examples/back-end
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
 	branch L2
 L1:	acc 0
@@ -456,13 +456,13 @@ fits together.
 
 Create two OCaml source files that contain a single print line:
 
-```ocaml file=../../examples/code/back-end-embed/embed_me1.ml
+```ocaml file=examples/back-end-embed/embed_me1.ml
 let () = print_endline "hello embedded world 1"
 ```
 
 
 
-```ocaml file=../../examples/code/back-end-embed/embed_me2.ml
+```ocaml file=examples/back-end-embed/embed_me2.ml
 let () = print_endline "hello embedded world 2"
 ```
 
@@ -488,7 +488,7 @@ main (int argc, char **argv)
 
 Now compile the OCaml files into a standalone object file:
 
-```sh dir=../../examples/code/back-end-embed
+```sh dir=examples/back-end-embed
 $ rm -f embed_out.c
 $ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
 ```
@@ -512,7 +512,7 @@ to the command line to help figure out the GCC command line if you get stuck.
 You can even obtain the C source code to the `-output-obj` result by
 specifying a `.c` output file extension instead of the `.o` we used earlier:
 
-```sh dir=../../examples/code/back-end-embed
+```sh dir=examples/back-end-embed
 $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
 ```
 
@@ -587,7 +587,7 @@ now.[polymorphic comparisons]{.idx}
 First let's create a comparison function where we've explicitly annotated the
 types, so the compiler knows that only integers are being compared:
 
-```ocaml file=../../examples/code/back-end/compare_mono.ml
+```ocaml file=examples/back-end/compare_mono.ml
 let cmp (a:int) (b:int) =
   if a > b then a else b
 ```
@@ -595,7 +595,7 @@ let cmp (a:int) (b:int) =
 Now compile this into assembly and read the resulting `compare_mono.S` file.
 This file extension may be lowercase on some platforms such as Linux:
 
-```sh dir=../../examples/code/back-end
+```sh dir=examples/back-end
 ```
 
 If you've never seen assembly language before, then the contents may be
@@ -629,7 +629,7 @@ requires both the arguments to be immediate integers to work. Now let's see
 what happens if our OCaml code omits the type annotations and is a
 polymorphic comparison instead:
 
-```ocaml file=../../examples/code/back-end/compare_poly.ml
+```ocaml file=examples/back-end/compare_poly.ml
 let cmp a b =
   if a > b then a else b
 ```
@@ -691,7 +691,7 @@ see that this polymorphic comparison is much heavier than the simple
 monomorphic integer comparison from earlier. Let's confirm this hypothesis
 again by writing a quick `Core_bench` test with both functions:
 
-```ocaml file=../../examples/code/back-end/bench_poly_and_mono/bench_poly_and_mono.ml
+```ocaml file=examples/back-end/bench_poly_and_mono/bench_poly_and_mono.ml
 open Core
 open Core_bench
 
@@ -729,7 +729,7 @@ Running this shows quite a significant runtime difference between the two:
 
 
 
-```sh dir=../../examples/code/back-end/bench_poly_and_mono,non-deterministic=command
+```sh dir=examples/back-end/bench_poly_and_mono,non-deterministic=command
 $ dune build bench_poly_and_mono.exe
 $ ./_build/default/bench_poly_and_mono.exe -ascii -quota 1
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
@@ -824,7 +824,7 @@ Let's write a mutually recursive function that selects alternating values
 from a list. This isn't tail-recursive, so our stack size will grow as we
 single-step through the execution:
 
-```ocaml file=../../examples/code/back-end/alternate_list/alternate_list.ml
+```ocaml file=examples/back-end/alternate_list/alternate_list.ml
 open Core
 
 let rec take =
@@ -854,7 +854,7 @@ output:
 
 
 
-```sh dir=../../examples/code/back-end/alternate_list
+```sh dir=examples/back-end/alternate_list
 $ dune build alternate_list.exe
 $ ./_build/default/alternate_list.exe -ascii -quota 1
 1,3,5,7,9
@@ -1112,7 +1112,7 @@ To use the debug library, just link your program with the
 `-runtime-variant d` flag:
 :::
 
-```sh dir=../../examples/code/back-end-embed,non-deterministic=output
+```sh dir=examples/back-end-embed,non-deterministic=output
 $ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
 + clang -arch x86_64 -Wno-trigraphs -c -o 'hello.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlasm9b916c.s'
 + clang -arch x86_64 -Wno-trigraphs -c -o '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartup8f1c0d.o' '/var/folders/9g/7vjfw6kn7k9bs721d_zjzn7h0000gn/T/camlstartupf69d9a.s'
