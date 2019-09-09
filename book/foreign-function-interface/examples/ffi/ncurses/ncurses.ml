@@ -1,3 +1,4 @@
+[@@@part "0"];;
 open Ctypes
 
 type window = unit ptr

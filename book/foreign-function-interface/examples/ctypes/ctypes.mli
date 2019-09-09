@@ -1,3 +1,4 @@
+[@@@part "0"];;
 type 'a typ
 
 [@@@part "1"] ;;

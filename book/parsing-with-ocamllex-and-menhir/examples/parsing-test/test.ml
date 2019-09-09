@@ -1,3 +1,4 @@
+[@@@part "0"] ;;
 open Core
 open Lexer
 open Lexing

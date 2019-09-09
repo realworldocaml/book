@@ -843,7 +843,7 @@ for now you can safely ignore the details. You just need to run
 We will give each shape a `draw` method that describes how to draw the shape
 on the `Async_graphics` display:
 
-```ocaml file=examples/shapes/shapes.ml
+```ocaml file=examples/shapes/shapes.ml,part=0
 open Core
 open Async
 open Async_graphics

@@ -39,7 +39,7 @@
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
-           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-md %{x}))
            (diff? %{y15} %{y15}.corrected)
            (diff? %{y14} %{y14}.corrected)
            (diff? %{y13} %{y13}.corrected)
@@ -94,7 +94,7 @@
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
-           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic %{x}))
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-md --non-deterministic %{x}))
            (diff? %{y15} %{y15}.corrected)
            (diff? %{y14} %{y14}.corrected)
            (diff? %{y13} %{y13}.corrected)
