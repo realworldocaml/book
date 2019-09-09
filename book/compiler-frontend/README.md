@@ -1090,7 +1090,7 @@ This module defined bindings for the Ncurses library. First, compile the
 interfaces with `-bin-annot` so that we can obtain the `cmt` and `cmti`
 files, and then run `ocp-index` in completion mode:
 
-```sh dir=../foreign-function-interface/examples,source-tree=../foreign-function-interface/examples/ffi,skip
+```sh dir=examples,source-tree=examples/ffi,skip
 $ (cd ffi/ncurses && corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi)
 ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules ncurses.mli > ncurses.mli.depends
 ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -thread -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -o ncurses.cmi ncurses.mli
