@@ -101,7 +101,7 @@ OCaml value.
 Let's begin by defining the basic values we need, starting with the `WINDOW`
 state pointer:
 
-```ocaml file=examples/ffi/ncurses/ncurses.ml
+```ocaml file=examples/ffi/ncurses/ncurses.ml,part=0
 open Ctypes
 
 type window = unit ptr
@@ -267,7 +267,7 @@ First, let's look at how to define basic scalar C types. Every C type is
 represented by an OCaml equivalent via the single type definition:[scalar C
 types]{.idx}[foreign function interface (FFI)/basic scalar C types]{.idx}
 
-```ocaml file=examples/ctypes/ctypes.mli
+```ocaml file=examples/ctypes/ctypes.mli,part=0
 type 'a typ
 ```
 
@@ -750,7 +750,7 @@ Tue Mar  6 13:27:51 2018
 The alert reader may be curious about why all these function definitions have
 to be terminated by `returning`:
 
-```ocaml file=examples/ffi/return_frag.ml
+```ocaml file=examples/ffi/return_frag.ml,part=0
 (* correct types *)
 val time: ptr time_t @-> returning time_t
 val difftime: time_t @-> time_t @-> returning double

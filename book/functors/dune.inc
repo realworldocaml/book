@@ -19,7 +19,7 @@
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
-           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml %{x}))
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-md %{x}))
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)
            (diff? %{y4} %{y4}.corrected)

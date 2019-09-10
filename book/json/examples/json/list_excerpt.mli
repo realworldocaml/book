@@ -1,3 +1,4 @@
+[@@@part "0"];;
 val map  : 'a list -> f:('a -> 'b)   -> 'b list
 val fold : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
 

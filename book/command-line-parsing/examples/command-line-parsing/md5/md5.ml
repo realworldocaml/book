@@ -1,3 +1,4 @@
+[@@@part "0"];;
 open Core
 
 let do_hash file =
