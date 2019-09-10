@@ -1,3 +1,4 @@
+[@@@part "0"];;
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool

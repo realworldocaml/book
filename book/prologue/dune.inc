@@ -9,6 +9,6 @@
          (package mdx))
  (locks ../../global-lock)
  (action (progn
-           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --direction=to-ml %{x}))
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --direction=to-md %{x}))
 
            (diff? %{x} %{x}.corrected))))
