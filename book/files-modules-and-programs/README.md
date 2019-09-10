@@ -382,7 +382,7 @@ File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
-       Type Counter.t is not compatible with type 'a list 
+       Type Counter.t is not compatible with type 'a list
 [1]
 ```
 
@@ -1016,13 +1016,14 @@ labeled arguments (discussed in
 [Labeled Arguments](variables-and-functions.html#labeled-arguments){data-type=xref}),
 which act as documentation that is available at the call site.
 
-You can also improve readability simply by choosing good names for your
-functions, variant tags and record fields. Good names aren't always long, to
-be clear. If you wanted to write an anonymous function for doubling a number:
-`(fun x -> x * 2)`, a short variable name like `x` is best. A good rule of
-thumb is that names that have a small scope should be short, whereas names
-that have a large scope, like the name of a function in an a module
-interface, should be longer and more explicit.
+You can also improve readability simply by choosing good names for
+your functions, variant tags and record fields. Good names aren't
+always long, to be clear. If you wanted to write an anonymous function
+for doubling a number: `(fun x -> x * 2)`, a short variable name like
+`x` is best. A good rule of thumb is that names that have a small
+scope should be short, whereas names that have a large scope, like the
+name of a function in a module interface, should be longer and more
+explicit.
 
 There is of course a tradeoff here, in that making your APIs more explicit
 tends to make them more verbose as well. Another useful rule of thumb is that
