@@ -750,18 +750,8 @@ If we build and run this program, we'll get a stack backtrace that will
 provide some information about where the error occurred and the stack of
 function calls that were in place at the time of the error:
 
-```scheme
-(executable
-  (name      blow_up)
-  (modules   blow_up)
-  (libraries core))
-```
-
-
-
 ```sh dir=examples/blow_up
-$ dune build blow_up.bc
-$ ./_build/default/blow_up.bc
+$ dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
 Raised at file "blow_up.ml", line 6, characters 16-26
@@ -777,24 +767,14 @@ did not cause your program to fail.[Exn module/Exn.backtrace]{.idx}
 This works well if you have backtraces enabled, but that isn't always the
 case. In fact, by default, OCaml has backtraces turned off, and even if you
 have them turned on at runtime, you can't get backtraces unless you have
-compiled with debugging symbols. Core reverses the default, so if you're
-linking in Core, you will have backtraces enabled by default.
+compiled with debugging symbols. Base reverses the default, so if you're
+linking in Base, you will have backtraces enabled by default.
 
-Even using Core and compiling with debugging symbols, you can turn backtraces
+Even using Base and compiling with debugging symbols, you can turn backtraces
 off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 
-```scheme
-(executable
-  (name      blow_up)
-  (modules   blow_up)
-  (libraries core))
-```
-
-
-
 ```sh dir=examples/blow_up
-$ dune build blow_up.bc
-$ OCAMLRUNPARAM= ./_build/default/blow_up.bc
+$ OCAMLRUNPARAM= dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
 [2]
@@ -857,18 +837,8 @@ flow back to the caller.
 
 If we run this with stacktraces on, the benchmark results look like this:
 
-```scheme
-(executable
-  (name      exn_cost)
-  (modules   exn_cost)
-  (libraries core core_bench))
-```
-
-
-
 ```sh dir=examples/exn_cost,non-deterministic=command
-$ dune build exn_cost.exe
-$ ./_build/default/exn_cost.exe -ascii cycles -quota 1
+$ dune exec -- ./exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 
   Name                           Time/Run   Cycls/Run   mWd/Run   Percentage
@@ -904,7 +874,7 @@ most cases a stylistic mistake anyway.
 
 Both exceptions and error-aware types are necessary parts of programming in
 OCaml. As such, you often need to move between these two worlds. Happily,
-Core comes with some useful helper functions to help you do just that. For
+Base comes with some useful helper functions to help you do just that. For
 example, given a piece of code that can throw an exception, you can capture
 that exception into an option as follows:[exceptions/and error-aware
 types]{.idx}[error-aware return types]{.idx}[error handling/combining
@@ -926,9 +896,9 @@ write:
 ```ocaml env=main
 # let find alist key =
   Or_error.try_with (fun () -> find_exn alist key)
-val find : (string * 'a) list -> string -> 'a Base.Or_error.t = <fun>
+val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
 # find ["a",1; "b",2] "c"
-- : int Base.Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
+- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 ```
 
 And then we can reraise that exception:
