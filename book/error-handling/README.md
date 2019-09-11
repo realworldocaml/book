@@ -926,9 +926,9 @@ write:
 ```ocaml env=main
 # let find alist key =
   Or_error.try_with (fun () -> find_exn alist key)
-val find : (string * 'a) list -> string -> 'a Base.Or_error.t = <fun>
+val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
 # find ["a",1; "b",2] "c"
-- : int Base.Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
+- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 ```
 
 And then we can reraise that exception:
