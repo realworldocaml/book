@@ -22,7 +22,7 @@
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
-           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --root=examples/json %{x}))
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-md --root=examples/json %{x}))
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)
@@ -52,7 +52,7 @@
          prelude.ml)
  (locks ../../global-lock)
  (action (progn
-           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-ml --non-deterministic --root=examples/json %{x}))
+           (setenv OCAMLFIND_CONF %{conf} (run ocaml-mdx test --prelude=prelude.ml --direction=to-md --non-deterministic --root=examples/json %{x}))
            (diff? %{y7} %{y7}.corrected)
            (diff? %{y6} %{y6}.corrected)
            (diff? %{y5} %{y5}.corrected)

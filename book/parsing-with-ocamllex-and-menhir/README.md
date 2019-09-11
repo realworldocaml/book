@@ -653,7 +653,7 @@ parsing errors. There are currently two errors: `Parser.Error` and
 `Lexer.SyntaxError`. A simple solution when encountering an error is to print
 the error and give up: [errors/"give up on first error" approach]{.idx}
 
-```ocaml file=examples/parsing-test/test.ml
+```ocaml file=examples/parsing-test/test.ml,part=0
 open Core
 open Lexer
 open Lexing

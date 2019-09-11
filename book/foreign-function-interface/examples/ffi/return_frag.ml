@@ -1,3 +1,4 @@
+[@@@part "0"];;
 (* correct types *)
 val time: ptr time_t @-> returning time_t
 val difftime: time_t @-> time_t @-> returning double

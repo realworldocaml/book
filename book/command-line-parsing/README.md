@@ -44,7 +44,7 @@ a file, applies the MD5 one-way cryptographic hash function to the data, and
 outputs an ASCII hex representation of the result: [MD5 one-way cryptographic
 hash function]{.idx}[command-line parsing/basic approach to]{.idx}
 
-```ocaml file=examples/command-line-parsing/md5/md5.ml
+```ocaml file=examples/command-line-parsing/md5/md5.ml,part=0
 open Core
 
 let do_hash file =
@@ -208,7 +208,7 @@ argument and the MD5 output is displayed to the standard output.
 
 ```sh dir=examples/command-line-parsing/md5
 $ dune exec -- ./md5.exe md5.ml
-fdac6d086494068b8c22ddf38d19c51d
+cd43f59095550dce382f8f3427aa3373
 ```
 
 And that's all it took to build our little MD5 utility! Here's a complete

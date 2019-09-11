@@ -436,7 +436,7 @@ a convenient abstraction for working with input and output channels: [Writer
 module]{.idx}[Reader module]{.idx}[I/O (input/output) operations/copying
 data]{.idx}
 
-```ocaml file=examples/echo/echo.ml
+```ocaml file=examples/echo/echo.ml,part=0
 open Core
 open Async
 
@@ -818,7 +818,7 @@ engine/URI handling in]{.idx}
 We'll need a function for generating the URIs that we're going to use to
 query the DuckDuckGo servers:
 
-```ocaml file=examples/search/search.ml
+```ocaml file=examples/search/search.ml,part=0
 open Core
 open Async
 
