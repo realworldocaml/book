@@ -767,10 +767,10 @@ did not cause your program to fail.[Exn module/Exn.backtrace]{.idx}
 This works well if you have backtraces enabled, but that isn't always the
 case. In fact, by default, OCaml has backtraces turned off, and even if you
 have them turned on at runtime, you can't get backtraces unless you have
-compiled with debugging symbols. Core reverses the default, so if you're
-linking in Core, you will have backtraces enabled by default.
+compiled with debugging symbols. Base reverses the default, so if you're
+linking in Base, you will have backtraces enabled by default.
 
-Even using Core and compiling with debugging symbols, you can turn backtraces
+Even using Base and compiling with debugging symbols, you can turn backtraces
 off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 
 ```sh dir=examples/blow_up
@@ -874,7 +874,7 @@ most cases a stylistic mistake anyway.
 
 Both exceptions and error-aware types are necessary parts of programming in
 OCaml. As such, you often need to move between these two worlds. Happily,
-Core comes with some useful helper functions to help you do just that. For
+Base comes with some useful helper functions to help you do just that. For
 example, given a piece of code that can throw an exception, you can capture
 that exception into an option as follows:[exceptions/and error-aware
 types]{.idx}[error-aware return types]{.idx}[error handling/combining
