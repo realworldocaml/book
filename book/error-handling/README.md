@@ -750,18 +750,8 @@ If we build and run this program, we'll get a stack backtrace that will
 provide some information about where the error occurred and the stack of
 function calls that were in place at the time of the error:
 
-```scheme
-(executable
-  (name      blow_up)
-  (modules   blow_up)
-  (libraries core))
-```
-
-
-
 ```sh dir=examples/blow_up
-$ dune build blow_up.bc
-$ ./_build/default/blow_up.bc
+$ dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
 Raised at file "blow_up.ml", line 6, characters 16-26
@@ -783,18 +773,8 @@ linking in Core, you will have backtraces enabled by default.
 Even using Core and compiling with debugging symbols, you can turn backtraces
 off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 
-```scheme
-(executable
-  (name      blow_up)
-  (modules   blow_up)
-  (libraries core))
-```
-
-
-
 ```sh dir=examples/blow_up
-$ dune build blow_up.bc
-$ OCAMLRUNPARAM= ./_build/default/blow_up.bc
+$ OCAMLRUNPARAM= dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
 [2]
@@ -857,18 +837,8 @@ flow back to the caller.
 
 If we run this with stacktraces on, the benchmark results look like this:
 
-```scheme
-(executable
-  (name      exn_cost)
-  (modules   exn_cost)
-  (libraries core core_bench))
-```
-
-
-
 ```sh dir=examples/exn_cost,non-deterministic=command
-$ dune build exn_cost.exe
-$ ./_build/default/exn_cost.exe -ascii cycles -quota 1
+$ dune exec -- ./exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 
   Name                           Time/Run   Cycls/Run   mWd/Run   Percentage
