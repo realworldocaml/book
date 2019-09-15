@@ -7,14 +7,14 @@
   <p>At the highest level, here's what you need to do:</p>
 
   <ul>
-    <li>Get <a href="https://opam.ocaml.org">OPAM</a> installed</li>
+    <li>Get <a href="https://opam.ocaml.org">opam</a> installed</li>
 
-    <li>Build OCaml 4.06.0 or later using OPAM or your OS package manager</li>
+    <li>Build OCaml 4.07.1 or later using opam or your OS package manager</li>
 
-    <li>With OPAM, install the key libraries that you need to work
+    <li>With opam, install the key libraries that you need to work
     through the examples in the book</li>
 
-    <li>Install <a href="https://github.com/diml/utop">Utop</a>, a
+    <li>Install <a href="https://github.com/ocaml-community/utop">Utop</a>, a
     modern interactive toplevel with command history, tab
     completion, and defaults that are tuned to work with the
     examples in Real World OCaml,</li>
@@ -22,7 +22,7 @@
     <li>Set up your editing environment.</li>
 
     <li>Optionally install <a href=
-    "https://github.com/the-lambda-church/merlin">merlin</a>, a
+    "https://github.com/ocaml/merlin">merlin</a>, a
     tool for providing IDE-like functionality like auto-completion,
     as well as <a href=
     "https://github.com/OCamlPro/ocp-indent">ocp-indent</a>, a
@@ -31,24 +31,24 @@
   </ul>
 
   <p>Note that Windows is not currently supported by the examples
-  in Real World OCaml or by OPAM, although it is being worked on.
+  in Real World OCaml or by opam, although it is being worked on.
   Until that's ready, we recommend using a virtual machine running
   Debian Linux on your local machine, or
 <a href="https://docker.com">Docker for Windows</a>.</p>
 
   <p>Let's get started.</p>
 
-  <h2>Getting OPAM</h2>
+  <h2>Getting opam</h2>
 
-  <p>The easiest way to install OPAM is through your OS's package
-  manager. In most cases, installing OPAM will also trigger the
+  <p>The easiest way to install opam is through your OS's package
+  manager. In most cases, installing opam will also trigger the
   installation of OCaml. The version installed isn't important,
-  since we can use OPAM itself to install other versions of the
+  since we can use opam itself to install other versions of the
   compiler.</p>
 
   <p>Here are platform-specific instructions.</p>
 
-  <h3>Mac OS X</h3>
+  <h3>macOS</h3>
 
   <p>If you don't already have a package manager set up, try
   installing homebrew. You can find information on installing
@@ -56,13 +56,13 @@
   the latest XCode (and Command Line Tools for XCode) installed
   from the App Store first.</p>
 
-  <p>You can then install OPAM using brew.</p>
+  <p>You can then install opam using brew.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
 brew install opam
 </code></pre>
 
-  <p>Another popular package manager on Mac OS X is <a href=
-  "http://macports.org">MacPorts</a>, which also has an OPAM
+  <p>Another popular package manager on macOS is <a href=
+  "http://macports.org">MacPorts</a>, which also has an opam
   package.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
 sudo port install opam
@@ -70,7 +70,7 @@ sudo port install opam
 
   <h3>Ubuntu Linux</h3>
 
-  <p>14.04 and higher comes with recent versions of OCaml  and opam. No PPA
+  <p>14.04 and higher comes with recent versions of OCaml and opam. No PPA
   needed.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
 sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-native-compilers opam
@@ -78,25 +78,25 @@ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-n
 
   <h3>Debian Linux</h3>
 
-  <p>Debian's OCaml packages aren't yet at 4.06.0, and so you will
+  <p>Debian's OCaml packages aren't yet at 4.07.1, and so you will
   need to compile it from sources. If you are using the
-  Debian 9 <code>stable</code> stream, then OPAM 1.2.2 will
+  Debian 9 <code>stable</code> stream, then opam 2.0 will
   be available.</p>
 
   <h3>Arch Linux</h3>
 
-  <p>OPAM is available from the <code>community</code> repository. You can
-  install OPAM using <code>pacman</code>:</p>
+  <p>opam is available from the <code>community</code> repository. You can
+  install opam using <code>pacman</code>:</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
 sudo pacman -S opam
 </code></pre>
 
   <h3>Building from source</h3>
 
-  <p>On platforms not listed above, you'll need to install OPAM
+  <p>On platforms not listed above, you'll need to install opam
   from source, and to do that you'll need OCaml installed first.
   Some platforms, including Fedora Linux, have OCaml packages that
-  you can install but not OPAM packages. You can build OPAM on
+  you can install but not opam packages. You can build opam on
   OCaml version 4.02.1 or later.</p>
 
   <p>To install OCaml from source, you'll first need a C compiler,
@@ -133,33 +133,33 @@ sudo make install
   have special reasons, so try to install binary packages before
   trying a source installation.</p>
 
-  <h4>Installing OPAM</h4>
+  <h4>Installing opam</h4>
 
   <p>If the binary packages aren't available for your system,
-  you'll need to install the latest OPAM release from source. You
+  you'll need to install the latest opam release from source. You
   can follow the online <a href=
   "http://opam.ocaml.org/doc/Quick_Install.html">quick install
   guide</a>.</p>
 
-  <h2>Configuring OPAM</h2>
+  <h2>Configuring opam</h2>
 
-  <p>The entire OPAM package database is held in the
+  <p>The entire opam package database is held in the
   <code>.opam</code> directory in your home directory, including
-  compiler installations. On Linux and Mac OS X, this will be the
+  compiler installations. On Linux and macOS, this will be the
   <code>~/.opam</code> directory, which means you don't need
   administrative privileges to configure it. If you run into
-  problems configuring OPAM, just delete the whole
+  problems configuring opam, just delete the whole
   <code>~/.opam</code> directory and start over.</p>
 
-  <p>Let's begin by initialising the OPAM package database. This
+  <p>Let's begin by initialising the opam package database. This
   will ask you a few interactive questions at the end. It's safe to
   answer yes to these unless you want to manually control the
   configuration steps yourself as an advanced user.</p>
   <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-22"><code class="language-bash">
 opam init
 &lt;...&gt;
-=-=-=-= Configuring OPAM =-=-=-=
-Do you want to update your configuration to use OPAM ? [Y/n] y
+=-=-=-= Configuring opam =-=-=-=
+Do you want to update your configuration to use opam ? [Y/n] y
 [1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
 [2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
 [3/4] Do you want to install the auto-complete scripts ? [Y/n] y
@@ -181,17 +181,17 @@ Gloabal configuration:
 
   <p>You only need to run this command once, and it will create the
   <code>~/.opam</code> directory and sync with the latest package
-  list from the online OPAM database.</p>
+  list from the online opam database.</p>
 
   <p>When the <code>init</code> command finishes, you'll see some
-  instructions about environment variables. OPAM never installs
+  instructions about environment variables. opam never installs
   files into your system directories (which would require
   administrator privileges). Instead, it puts them into your home
   directory by default, and can output a set of shell commands
   which configures your shell with the right <code>PATH</code>
   variables so that packages will just work.</p>
 
-  <p>If you choose not to follow the OPAM instructions to add
+  <p>If you choose not to follow the opam instructions to add
   itself to your shell profile, you can still configure it
   on-the-fly in your current shell with just one command.</p>
 
@@ -203,11 +203,11 @@ eval `opam config env`
   env</code> in your current shell and sets the variables so that
   subsequent commands will use them. This <em>only</em> works with
   your current shell and it can only be automated for future shells
-  by adding the line to your login scripts. On Mac OS X you should
+  by adding the line to your login scripts. On macOS you should
   typically use <code>~/.profile</code>, and <code>~/.bashrc</code>
   on most Linux setups.</p>
 
-  <p>OPAM isn't unusual in this approach; the SSH
+  <p>opam isn't unusual in this approach; the SSH
   <code>ssh-agent</code> also works similarly, so if you're having
   any problems just hunt around in your configuration scripts to
   see how that's being invoked.</p>
@@ -219,7 +219,7 @@ eval `opam config env`
   can do this in <code>bash</code> as follows.</p>
   <pre class="command-line" data-user="rwo" data-host="lama" data-output="2"><code class="language-bash">
 printenv OCAML_TOPLEVEL_PATH
-/Users/myusername/.opam/4.06.0/lib/toplevel
+/Users/myusername/.opam/4.07.1/lib/toplevel
 </code></pre>
 
   <p>The next step is to make sure we have the right compiler
@@ -229,15 +229,16 @@ opam switch
 system  C system                      System compiler (4.00.1)
 --     -- 4.04.2                      Official 4.04.2 release
 --     -- 4.05.0                      Official 4.05.0 release
---     -- 4.06.0                      Official 4.06.0 release
+--     -- 4.07.1                      Official 4.07.1 release
+--     -- 4.07.1                      Official 4.07.1 release
 </code></pre>
 
   <p>If, as in this case, your system compiler is older than
-  <code>4.06.0</code>, you should install a more up to date version
+  <code>4.07.1</code>, you should install a more up to date version
   of the compiler, as shown below.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam switch 4.06.0
-eval `opam config env`
+opam switch 4.07.1
+eval `opam env`
 </code></pre>
 
   <p>The <code>switch</code> itself will take around ten or fifteen
@@ -470,13 +471,13 @@ open Core
     that don't compile as you go.</li>
   </ul>
 
-  <p>You can install merlin with OPAM:</p>
+  <p>You can install merlin with opam:</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
 opam install merlin
 </code></pre>
 
   <p>Then you will need to add configuration for your editor. The
-  following examples assume Merlin has been installed through OPAM
+  following examples assume Merlin has been installed through opam
   as above.</p>
 
   <h5>Emacs</h5>
@@ -630,7 +631,7 @@ opam install ocp-indent
 
   <h5>Emacs</h5>
 
-  <p>After installing through OPAM, simply load the file as follows
+  <p>After installing through opam, simply load the file as follows
   to override tuareg-mode's indentation:</p>
   <pre><code class="language-scheme">
 (setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
@@ -639,7 +640,7 @@ opam install ocp-indent
 
   <h5>Vim</h5>
 
-  <p>After installing through OPAM, simply add this
+  <p>After installing through opam, simply add this
   <code>autocmd</code> to your Vim configuration:</p>
   <pre><code class="language-none">
 " Your vimrc
