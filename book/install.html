@@ -80,7 +80,7 @@ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-n
 
   <p>Debian's OCaml packages aren't yet at 4.07.1, and so you will
   need to compile it from sources. If you are using the
-  Debian 9 <code>stable</code> stream, then opam 2.0 will
+  Debian 10 <code>stable</code> stream, then opam 2.0 will
   be available.</p>
 
   <h3>Arch Linux</h3>
@@ -105,9 +105,9 @@ sudo pacman -S opam
   <p>The following is enough to get OCaml installed on most
   platforms.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
-tar -zxvf 4.01.tar.gz
-cd ocaml-4.01
+curl -OL https://github.com/ocaml/ocaml/archive/4.07.1.tar.gz
+tar -zxvf 4.07.1.tar.gz
+cd ocaml-4.07.1
 ./configure
 make world world.opt
 sudo make install
@@ -229,7 +229,7 @@ opam switch
 system  C system                      System compiler (4.00.1)
 --     -- 4.04.2                      Official 4.04.2 release
 --     -- 4.05.0                      Official 4.05.0 release
---     -- 4.07.1                      Official 4.07.1 release
+--     -- 4.06.0                      Official 4.06.0 release
 --     -- 4.07.1                      Official 4.07.1 release
 </code></pre>
 
