@@ -67,9 +67,9 @@ contain inline tests.  To achieve the first goal, we'll add `ppx_jane`
 to the set of preprocessors, which bundles together `ppx_inline_test`
 with a collection of other useful preprocessors.  The second goal is
 achieved by adding the `inline_tests` declaration to the library
-stanza. Here's the resulting `jbuild` file.
+stanza. Here's the resulting `dune` file.
 
-```scheme file=../../examples/code/testing/simple_inline_test/jbuild
+```scheme file=examples/simple_inline_test/dune
 (jbuild_version 1)
 
 (library
@@ -84,7 +84,7 @@ With this done, any module in this library can host a test. We'll
 demonstrate this by creating a file called `test.ml`, containing just
 a single test.
 
-```ocaml file=../../examples/code/testing/simple_inline_test/test.ml
+```ocaml file=examples/simple_inline_test/test.ml
 open! Core_kernel
 
 let%test "rev" =
@@ -98,14 +98,14 @@ running via the test runner, which can be invoked via Dune.  While it
 doesn't affect this example, it's worth noting that the test runner
 will execute tests declared in different files in parallel.
 
-```sh file=../../examples/code/testing/simple_inline_test/run.sh
-  $ jbuilder runtest --dev
+```sh dir=examples/simple_inline_test
+  $ dune runtest
 ```
 
 No output is generated because the test passed successfully.
 But if we break the test,
 
-```ocaml file=../../examples/code/testing/broken_inline_test/test.ml
+```ocaml file=examples/broken_inline_test/test.ml
 open! Base
 
 let%test "rev" =
@@ -114,8 +114,8 @@ let%test "rev" =
 
 then we'll see an error when we run it.
 
-```sh file=../../examples/code/testing/broken_inline_test/run.sh
-  $ jbuilder runtest --dev
+```sh dir=examples/broken_inline_test
+  $ dune runtest
            run alias runtest (exit 2)
   (cd _build/default && ./.foo.inline-tests/run.exe inline-test-runner foo -source-tree-root . -diff-cmd -)
   File "test.ml", line 3, characters 0-73: rev is false.
@@ -140,7 +140,7 @@ Here's what our new test looks like. You'll notice that it's a little
 more concise, mostly because this is a less verbose way to express the
 comparison function.
 
-```ocaml file=../../examples/code/testing/test_eq-inline_test/test.ml
+```ocaml file=examples/test_eq-inline_test/test.ml
 open! Base
 
 let%test_unit "rev" =
@@ -149,8 +149,8 @@ let%test_unit "rev" =
 
 Here's what it looks like when we run the test.
 
-```sh file=../../examples/code/testing/test_eq-inline_test/run.sh
-  $ jbuilder runtest --dev
+```sh dir=examples/test_equ-inline_test
+  $ dune runtest
            run alias runtest (exit 2)
   (cd _build/default && ./.foo.inline-tests/run.exe inline-test-runner foo -source-tree-root . -diff-cmd -)
   File "test.ml", line 3, characters 0-71: rev threw
@@ -258,7 +258,7 @@ randomly generated examples.
 We can write a property test using only the tools we've learned so
 far.  Here's an example.
 
-```ocaml file=../../examples/code/testing/manual_property_test/test.ml
+```ocaml file=examples/manual_property_test/test.ml
 open! Base
 
 let%test_unit "negation flips the sign" =
@@ -270,8 +270,8 @@ let%test_unit "negation flips the sign" =
 
 As you can see below, this test passes.
 
-```sh file=../../examples/code/testing/manual_property_test/run.sh
-  $ jbuilder runtest --dev
+```sh dir=examples/manual_property_test
+  $ dune runtest
 ```
 
 One thing that was implicit in the example we gave above is the
@@ -288,7 +288,7 @@ That's where Quickcheck comes in. Quickcheck is a library to help
 automate the construction of testing distributions. Let's try
 rewriting the example we provided above with Quickcheck.
 
-```ocaml file=../../examples/code/testing/quickcheck_property_test/test.ml
+```ocaml file=examples/quickcheck_property_test/test.ml
 open Core_kernel
 
 let%test_unit "negation flips the sign" =
@@ -305,8 +305,8 @@ In any case, running the test uncovers the fact that the property
 we've been testing doesn't actually hold on all outputs, and
 Quickcheck has found a counterexample.
 
-```sh file=../../examples/code/testing/quickcheck_property_test/run.sh
-  $ jbuilder runtest --dev
+```sh dir=examples/quickcheck_property_test
+  $ dune runtest
            run alias runtest (exit 2)
   (cd _build/default && ./.foo.inline-tests/run.exe inline-test-runner foo -source-tree-root . -diff-cmd -)
   File "test.ml", line 3, characters 0-185: negation flips the sign threw
@@ -364,7 +364,7 @@ simple example, where we want to test the behavior of
 `List.rev_append`, which requires us to create lists of randomly
 generated values.
 
-```ocaml file=../../examples/code/testing/bigger_quickcheck_test/test.ml
+```ocaml file=examples/bigger_quickcheck_test/test.ml
 open Core_kernel
 
 let%test_unit "List.rev_append is List.append of List.rev" =
@@ -463,7 +463,7 @@ Here's a simple example of a test written in this style.  Note that
 the test generates output, but that output isn't captured in the
 source, at least, not yet.
 
-```ocaml file=../../examples/code/testing/trivial_expect_test/test.ml
+```ocaml file=examples/trivial_expect_test/test.ml
 open! Base
 open! Stdio
 
@@ -475,7 +475,7 @@ If we run the test, we'll be presented with a diff between what we
 wrote, and a corrected version of the source file with an `[%expect]`
 clause that contains the output generated by the test.
 
-```sh file=../../examples/code/testing/trivial_expect_test/run.sh
+```sh dir=examples/trivial_expect_test
   $ jbuilder runtest --dev
        patdiff (internal) (exit 1)
   (cd _build/default && /home/yminsky/.opam/default/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
@@ -496,7 +496,7 @@ If we want to accept the corrected version of the file, we can run
 `jbuilder promote`, at which point, our source file will be adjusted
 to look like this.
 
-```ocaml file=../../examples/code/testing/trivial_expect_test_fixed/test.ml
+```ocaml file=examples/trivial_expect_test_fixed/test.ml
 open! Base
 open! Stdio
 
@@ -507,7 +507,7 @@ let%expect_test "trivial" =
 
 Now, if we run the test again, we'll see that it passes.
 
-```sh file=../../examples/code/testing/trivial_expect_test_fixed/run.sh
+```sh dir=examples/trivial_expect_test_fixed
   $ jbuilder runtest --dev
 ```
 
@@ -515,7 +515,7 @@ We only have one expect block in this example, but the system supports
 having multiple expect blocks, as you can see below.
 
 (Something about multi-expect-tests here?
-../../examples/code/testing/multi_expect_test/test.ml)
+examples/multi_expect_test/test.ml)
 
 
 ### What are expect tests good for?
@@ -523,7 +523,7 @@ having multiple expect blocks, as you can see below.
 It's not obvious why one would want to use expect tests in the first
 place. Why should this:
 
-```ocaml file=../../examples/code/testing/simple_expect_test/test.ml
+```ocaml file=examples/simple_expect_test/test.ml
 open! Base
 open! Stdio
 
@@ -534,7 +534,7 @@ let%expect_test "trivial" =
 
 be preferable to this?
 
-```ocaml file=../../examples/code/testing/simple_inline_test/test.ml
+```ocaml file=examples/simple_inline_test/test.ml
 open! Core_kernel
 
 let%test "rev" =

@@ -1,1 +1,0 @@
-  $ jbuilder runtest --dev
