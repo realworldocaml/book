@@ -85,10 +85,10 @@ demonstrate this by creating a file called `test.ml`, containing just
 a single test.
 
 ```ocaml file=examples/simple_inline_test/test.ml
-open! Core_kernel
+open! Base
 
 let%test "rev" =
-  List.equal ~equal:Int.equal (List.rev [3;2;1]) [1;2;3]
+  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
 ```
 
 The test passes if the expression on the right-hand side of the
@@ -109,18 +109,17 @@ But if we break the test,
 open! Base
 
 let%test "rev" =
-  List.equal ~equal:Int.equal (List.rev [3;2;1]) [3;2;1]
+  List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
 ```
 
 then we'll see an error when we run it.
 
 ```sh dir=examples/broken_inline_test
   $ dune runtest
-           run alias runtest (exit 2)
-  (cd _build/default && ./.foo.inline-tests/run.exe inline-test-runner foo -source-tree-root . -diff-cmd -)
-  File "test.ml", line 3, characters 0-73: rev is false.
+  File "test.ml", line 3, characters 0-66: rev is false.
+  
   FAILED 1 / 1 tests
-@@ exit 1
+  [1]
 ```
 
 ### More readable errors with `test_eq`
@@ -151,20 +150,18 @@ Here's what it looks like when we run the test.
 
 ```sh dir=examples/test_eq-inline_test
   $ dune runtest
-           run alias runtest (exit 2)
-  (cd _build/default && ./.foo.inline-tests/run.exe inline-test-runner foo -source-tree-root . -diff-cmd -)
   File "test.ml", line 3, characters 0-71: rev threw
-  (runtime-lib/runtime.ml.E "comparison failed"
+  (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
     ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-    Raised at file "src/import0.ml" (inlined), line 351, characters 22-32
-    Called from file "runtime-lib/runtime.ml", line 28, characters 28-53
-    Called from file "runtime-lib/runtime.ml", line 486, characters 15-19
-    Called from file "runtime-lib/runtime.ml", line 327, characters 8-12
-    Re-raised at file "runtime-lib/runtime.ml", line 330, characters 6-13
-    Called from file "runtime-lib/runtime.ml", line 343, characters 15-52
-    Called from file "runtime-lib/runtime.ml", line 430, characters 52-83
+    Raised at file "duniverse/ppx_assert/runtime-lib/runtime.ml", line 28, characters 28-53
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 501, characters 15-19
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 342, characters 8-12
+    Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
+  
   FAILED 1 / 1 tests
-@@ exit 1
+  [1]
 ```
 
 As you can see, the data that caused the comparison to fail is printed
@@ -284,7 +281,7 @@ integers uniformly and at random, is problematic, since it picks
 interesting special, like zero or one, with the same probability as
 everything else.
 
-That's where Quickcheck comes in. Quickcheck is a library to help
+That's where Quickcheck comes in.  Quickcheck is a library to help
 automate the construction of testing distributions. Let's try
 rewriting the example we provided above with Quickcheck.
 
@@ -293,7 +290,8 @@ open Core_kernel
 
 let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]
-    Int.gen ~f:(fun x ->
+    (Int.gen_incl Int.min_value Int.max_value)
+    ~f:(fun x ->
         [%test_eq: Sign.t] (Int.sign (Int.neg x)) (Sign.flip (Int.sign x)))
 ```
 
@@ -307,27 +305,23 @@ Quickcheck has found a counterexample.
 
 ```sh dir=examples/quickcheck_property_test
   $ dune runtest
-           run alias runtest (exit 2)
-  (cd _build/default && ./.foo.inline-tests/run.exe inline-test-runner foo -source-tree-root . -diff-cmd -)
-  File "test.ml", line 3, characters 0-185: negation flips the sign threw
-  ("random input" (value -4611686018427387904)
+  File "test.ml", line 3, characters 0-224: negation flips the sign threw
+  ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
     (error
-      ((runtime-lib/runtime.ml.E "comparison failed"
-         (Neg vs Pos (Loc test.ml:6:19)))
-         "Raised at file \"src/import0.ml\" (inlined), line 351, characters 22-32\
-        \nCalled from file \"runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from file \"src/or_error.ml\", line 66, characters 9-15\
+      ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
+         (Neg vs Pos (Loc test.ml:7:19)))
+         "Raised at file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
+        \nCalled from file \"duniverse/base/src/or_error.ml\", line 64, characters 9-15\
         \n"))).
-    Raised at file "src/import0.ml" (inlined), line 351, characters 22-32
-    Called from file "src/error.ml" (inlined), line 9, characters 14-30
-    Called from file "src/or_error.ml", line 74, characters 17-32
-    Called from file "runtime-lib/runtime.ml", line 486, characters 15-19
-    Called from file "runtime-lib/runtime.ml", line 327, characters 8-12
-    Re-raised at file "runtime-lib/runtime.ml", line 330, characters 6-13
-    Called from file "runtime-lib/runtime.ml", line 343, characters 15-52
-    Called from file "runtime-lib/runtime.ml", line 430, characters 52-83
+    Raised at file "duniverse/base/src/error.ml", line 9, characters 14-30
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 501, characters 15-19
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 342, characters 8-12
+    Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
+  
   FAILED 1 / 1 tests
-@@ exit 1
+  [1]
 ```
 
 The example that triggers the exception is `-4611686018427387904`,
@@ -381,10 +375,11 @@ creating a generator for pairs from two generators for the constituent
 types.
 
 ```ocaml env=main
-# #show Quickcheck.Generator.both
-val both :
-  'a Quickcheck.Generator.t ->
-  'b Quickcheck.Generator.t -> ('a * 'b) Quickcheck.Generator.t
+# open Core_kernel
+# Quickcheck.Generator.both
+- : 'a Base_quickcheck.Generator.t ->
+    'b Base_quickcheck.Generator.t -> ('a * 'b) Base_quickcheck.Generator.t
+= <fun>
 ```
 
 Quickcheck has support for other container types, like lists and maps,
@@ -411,26 +406,26 @@ Using `Let_syntax`, a generator for this would look as follows.
 
 ```ocaml env=main
 # let gen_shape =
-	let open Quickcheck.Generator.Let_syntax in
-	let module G = Quickcheck.Generator in
-	let circle =
-	  let%map radius = Float.gen_positive in
-	  Circle { radius }
-	in
-	let rect =
-	  let%map height = Float.gen_positive
-	  and width = Float.gen_positive
-	  in
-	  Rect { height; width }
-	in
-	let poly =
-	  let%map points =
-		List.gen (G.both Float.gen_positive Float.gen_positive)
-	  in
-	  Poly points
-	in
-	G.union [circle; rect; poly];;
-val gen_shape : shape Quickcheck.Generator.t = <abstr>
+    let open Quickcheck.Generator.Let_syntax in
+    let module G = Quickcheck.Generator in
+    let circle =
+      let%map radius = Float.gen_positive in
+      Circle { radius }
+    in
+    let rect =
+      let%map height = Float.gen_positive
+      and width = Float.gen_positive
+      in
+      Rect { height; width }
+    in
+    let poly =
+      let%map points =
+        List.gen_non_empty (G.both Float.gen_positive Float.gen_positive)
+      in
+      Poly points
+    in
+    G.union [circle; rect; poly]
+val gen_shape : shape Base_quickcheck.Generator.t = <abstr>
 ```
 
 It may not be obvious, but throughout this function we're making
@@ -489,7 +484,7 @@ clause that contains the output generated by the test.
   -|  print_endline "Hello World!"
   +|  print_endline "Hello World!";
   +|  [%expect {| Hello World! |}]
-@@ exit 1
+  [1]
 ```
 
 If we want to accept the corrected version of the file, we can run
@@ -527,18 +522,18 @@ place. Why should this:
 open! Base
 open! Stdio
 
-let%expect_test "trivial" =
-  print_endline "Hello World!";
-  [%expect {| Hello World! |}]
+let%expect_test _ =
+  print_s [%sexp (List.rev [3;2;1] : int list)];
+  [%expect {| (1 2 3) |}]
 ```
 
 be preferable to this?
 
 ```ocaml file=examples/simple_inline_test/test.ml
-open! Core_kernel
+open! Base
 
 let%test "rev" =
-  List.equal ~equal:Int.equal (List.rev [3;2;1]) [1;2;3]
+  List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
 ```
 
 Indeed, for examples like this, expect tests don't present a material
