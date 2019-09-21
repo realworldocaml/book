@@ -1,12 +1,11 @@
 # Testing
 
-Testing is fundamental to building reliable software, but you wouldn't
-necessarily know it from watching how software engineers spend their
-time.  Testing can be tedious, and in the early stages of a project,
-it's often not obvious how important testing is going to become down
-the line. This leads people to test less than they should, and more
-critically, to design systems without taking testability into account,
-which makes such omissions harder to fix down the line.
+Testing is fundamental to building reliable software, but as
+developers, we don't always act that way.  Testing can be frustrating
+and tedious, and it's all too easy to skimp on.  As a result,
+developers often test less than they should, and more critically, fail
+to take testability into account up-front, when designing their
+systems.
 
 In some ways, OCaml's type-system makes this worse, by enhancing the
 illusion that you can get by without testing.  After all, many trivial
@@ -36,30 +35,26 @@ in a good testing environment.
 - **Easy to update**. Tests that are hard to adjust in the face of code
   changes can become their own form of technical debt.
 - **Fast**, so they don't slow down your development process.
-- **Readable**, so that someone can go back later and understand what
-  the test is for.
 - **Deterministic**. It's hard to take test failures seriously if
-  there's a decent chance that the failure might be random.  You want
-  your test failures to be believable indications of a problem, which
-  requires determinism.
-- **Comprehensible**. Tests whose failures are localized and easy to
-  comprehend make it easier to find and fix the problem flagged by the
-  failing test.
+  there's a decent chance that the failure is a random glitch.  You
+  want your test failures to be believable indications of a problem,
+  which requires determinism.
+- **Understandable**. Good tests should be easy to read, and their
+  failures should be localized and specific, so it's easy to find and
+  fix the problem flagged by a failing test.
 
 No testing framework can ensure that your tests satisfy these
-properties. But the testing tools you choose can help or hinder on all
-of these fronts.
-
-As we go through the rest of this chapter, we'll try to show how the
-various testing tools available for OCaml can help you on each of
-these fronts.
+properties. But the tools you choose can help or hinder on all of
+these fronts.  As we go through the rest of this chapter, we'll try to
+show how you can use the various testing tools available for OCaml to
+help you reach these goals.
 
 ## Inline tests
 
 The first step towards a good testing environment is making it easy to
 set up and and run a test.  To that end, we'll show you how to write
 tests with `ppx_inline_test`, which lets you add tests to any module
-in your library with a specially annotated let binding.
+in your library with a specially annotated `let` binding.
 
 To use inline tests, we need to enable `ppx_inline_test` as a
 preprocessor, as well as tell Dune that the files in this library
@@ -70,14 +65,11 @@ achieved by adding the `inline_tests` declaration to the library
 stanza. Here's the resulting `dune` file.
 
 ```scheme file=examples/simple_inline_test/dune
-(jbuild_version 1)
-
 (library
- ((name foo)
-  (libraries (base stdio core_kernel))
-  (preprocess (pps (ppx_jane)))
-  (inline_tests)
-))
+ (name foo)
+ (libraries base stdio)
+ (preprocess (pps ppx_jane))
+ (inline_tests))
 ```
 
 With this done, any module in this library can host a test. We'll
