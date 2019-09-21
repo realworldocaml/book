@@ -182,18 +182,16 @@ external interface.
 While this sounds appealing at first glance, putting tests in
 libraries has several downsides.
 
-- **Test bloat**. When your tests are written as a part of your library, it
+- **Bloat**. When your tests are written as a part of your library, it
   means that every user of your library has to link in that testing
-  code in their production application. Even though that code won't
-  get executed in production, it still adds to the size of the
-  executable.
+  code in their production application. Even though that code won't be
+  run, it still adds to the size of the executable.
 
-- **Excess dependencies**. Adding testing code to your library doesn't
-  just add the generated code for the specific tests you write; it can
-  also require you to add dependencies on libraries and modules that
-  you only really need for testing. This can further bloat your
-  application, and can also require you to link libraries into your
-  application that you'd rather not rely on in production.
+- **Excess dependencies**. Testing code doesn't just add size to your
+  final executable; it can also require dependencies on libraries that
+  you only really need for testing.  This can further bloat your
+  application, and can reduce portability and cause you to link risky
+  code into your production application.
 
 - **Testing against unexposed APIs**. Writing tests on the inside of
   your libraries has the virtue of letting you write tests against any
