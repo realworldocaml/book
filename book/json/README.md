@@ -78,9 +78,8 @@ checking]{.idx}[unit tests]{.idx}
 There are several JSON libraries available for OCaml. For this chapter, we've
 picked the [Yojson](https://github.com/mjambon/yojson) library by Martin Jambon.
 It's easiest to install via OPAM by running `opam install yojson`. See
-[this Real World OCaml page](http://realworldocaml.org/install) for
-installation instructions if you haven't already got OPAM. Once installed,
-you can open it in the `utop` toplevel by:
+[the installation instructions](install.html) if you haven't already got opam.
+Once installed, you can open it in the `utop` toplevel by:
 :::
 
 ```ocaml env=install
@@ -617,13 +616,13 @@ command-line tool that generates code. It can all be installed via OPAM:
 ```
 $ opam install atdgen
 $ atdgen -version
-1.2.3
+2.0.0
 ```
 
 The command-line tool will be installed within your
 <em class="filename">~/.opam</em> directory and should already be on your
 `PATH` from running `opam config env`. See
-[this Real World OCaml page](http://realworldocaml.org/install) if this isn't
+[the installation instructions](install.html) if this isn't
 working.
 
 ### ATD Basics
