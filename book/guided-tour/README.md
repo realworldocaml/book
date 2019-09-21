@@ -386,12 +386,11 @@ whereas `"short"` and `"loooooong"` require that `'a` be instantiated as
 ::: {data-type=note}
 #### Type Errors Versus Exceptions
 
-There's a big difference in OCaml (and really in any compiled language)
-between errors that are caught at compile time and those that are caught at
-runtime. It's better to catch errors as early as possible in the development
-process, and compilation time is best of all.[runtime exceptions vs. type
-errors]{.idx}[errors/runtime vs. compile time]{.idx}[exceptions/vs. type
-errors]{.idx}[type errors vs. exceptions]{.idx}
+There's a big difference in OCaml between errors that are caught at compile
+time and those that are caught at runtime. It's better to catch errors as early
+as possible in the development process, and compilation time is best of
+all.[runtime exceptions vs. type errors]{.idx}[errors/runtime vs. compile
+time]{.idx}[exceptions/vs. type errors]{.idx}[type errors vs. exceptions]{.idx}
 
 Working in the toplevel somewhat obscures the difference between runtime and
 compile-time errors, but that difference is still there. Generally, type
