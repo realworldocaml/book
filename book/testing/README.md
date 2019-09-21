@@ -56,25 +56,28 @@ set up and and run a test.  To that end, we'll show you how to write
 tests with `ppx_inline_test`, which lets you add tests to any module
 in your library with a specially annotated `let` binding.
 
-To use inline tests, we need to enable `ppx_inline_test` as a
-preprocessor, as well as tell Dune that the files in this library
-contain inline tests.  To achieve the first goal, we'll add `ppx_jane`
-to the set of preprocessors, which bundles together `ppx_inline_test`
-with a collection of other useful preprocessors.  The second goal is
-achieved by adding the `inline_tests` declaration to the library
-stanza. Here's the resulting `dune` file.
+To use inline tests in a library, we need to do two things:
+
+- Tell Dune to expect inline tests to show up in the library, and
+- enable `ppx_inline_test` as a preprocessor.
+
+The first of these is achieved by adding an `(inline_tests)`
+declaration, and the second is achieved by adding `ppx_jane` to the
+set of preprocessors, which bundles together `ppx_inline_test` with a
+collection of other useful preprocessors.  Here's the resulting `dune`
+file.
 
 ```scheme file=examples/simple_inline_test/dune
 (library
  (name foo)
  (libraries base stdio)
- (preprocess (pps ppx_jane))
- (inline_tests))
+ (inline_tests)
+ (preprocess (pps ppx_jane)))
 ```
 
 With this done, any module in this library can host a test. We'll
-demonstrate this by creating a file called `test.ml`, containing just
-a single test.
+demonstrate this by creating a file called `test.ml`, containing one
+test.
 
 ```ocaml file=examples/simple_inline_test/test.ml
 open! Base
@@ -84,11 +87,9 @@ let%test "rev" =
 ```
 
 The test passes if the expression on the right-hand side of the
-equals-sign evaluates to true.  These tests are not automatically run
+equals-sign evaluates to true.  Inline tests are not automatically run
 with the instantiation of the module, but are instead registered for
-running via the test runner, which can be invoked via Dune.  While it
-doesn't affect this example, it's worth noting that the test runner
-will execute tests declared in different files in parallel.
+running via the test runner.
 
 ```sh dir=examples/simple_inline_test
   $ dune runtest
@@ -104,26 +105,32 @@ let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [3;2;1]
 ```
 
-then we'll see an error when we run it.
+we'll see an error when we run it.
 
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
 
+It doesn't come up in this case, but in general it's worth knowing
+that the test runner will execute tests declared in different files in
+parallel.
+
 ### More readable errors with `test_eq`
 
-One problem with the test output we just saw is that it doesn't show
-the data associated with the failed test.  We can fix this by having
-the test signal failure by throwing an exception. That exception is
-then a place where we can put diagnostic information.
+One annoyance with the test output we just saw is that it doesn't show
+the data associated with the failed test, thus making it harder to
+diagnose and fix the problem when it occurs.  We can fix this by
+having the test signal failure not just by returning false, but by
+throwing an exception on failure.  That failure can contain human
+readable details about what went wrong.
 
-To do this, we need to change our test declaration to use
-`let%test_unit` instead of `let%test`, so that the test allows a
-unit-returning body. We're also going to use the `[%test_eq]` syntax,
+To do this, we'll change our test declaration to use `let%test_unit`
+instead of `let%test`, so that the test no longer expects a body that
+returns a bool.  We're also going to use the `[%test_eq]` syntax,
 which, given a type, generates code to test for equality and throw a
 meaningful exception if the arguments are unequal.
 
@@ -151,7 +158,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -172,8 +179,8 @@ function directly after the defintion of that function. This approach
 also lets you test aspects of your code that aren't exposed by its
 external interface.
 
-While this sounds appealing at first glance, putting tests the
-approach has several downsides.
+While this sounds appealing at first glance, putting tests in
+libraries has several downsides.
 
 - **Test bloat**. When your tests are written as a part of your library, it
   means that every user of your library has to link in that testing
@@ -209,7 +216,7 @@ expose in a way that makes it possible to test. But these examples are
 few and far between.
 
 ::: {data-type=note}
-#### Why can't inline tests go in executables?
+##### Why can't inline tests go in executables?
 
 We've only talked about putting tests into libraries. What about
 executables? After all, you want to test the logic of your
@@ -230,6 +237,8 @@ suitable for testing (either with embedded inline tests, or from a
 purpose-built testing library); and a directory for the executable
 that links in the library, and is just responsible for launching the
 program.
+:::
+
 ## Property testing with Quickcheck
 
 The tests we've discussed so far have been pretty simple, amounting to
@@ -311,7 +320,7 @@ Quickcheck has found a counterexample.
     Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
