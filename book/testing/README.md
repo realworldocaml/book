@@ -312,7 +312,7 @@ Quickcheck has found a counterexample.
 
 ```sh dir=examples/quickcheck_property_test
   $ dune runtest
-  File "test.ml", line 3, characters 0-224: negation flips the sign threw
+  File "test.ml", line 3, characters 0-244: negation flips the sign threw
   ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
     (error
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
@@ -552,7 +552,8 @@ Indeed, for examples like this, expect tests don't present a material
 advantage. Simple example-based tests like the one above are a great
 solution when it's easy and convenient to write out specific examples
 in full. And property tests are your best bet when you have a clear
-set of predicates that you want to test.
+set of predicates that you want to test, and examples can be naturally
+generated at random.
 
 Where expect tests shine is where you want to capture some aspect of
 the behavior of your system that's hard to capture in either
@@ -564,3 +565,17 @@ This is more useful than it might seem at first. One common use-case
 of expect tests is simply to capture the behavior of a complex bit of
 code that you don't necessarily have a small specification of
 (UNFINISHED)
+
+## Ideas for extending this chapter
+
+- More realistic examples of expect tests.  This is tricky, because
+  natural examples are often kind of long.
+- Maybe a tic-tac-toe game?
+- How to use randomness in a non-random way?
+- Is it worth talking about the technique of capturing random
+  examples, and then printing out changes to those examples?
+- Talk about how to write things so they're more testable. Determinism
+  is a big deal here.  Should we show off the
+  state-machine-with-events style?
+- Talk about using Synchronous_time_source, for Async applications?
+- Give examples of ways of making expect tests with pretty output?
