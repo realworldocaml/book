@@ -1,8 +1,12 @@
 open Core_kernel
 
 let%test_unit "List.rev_append is List.append of List.rev" =
-  Quickcheck.test ~sexp_of:[%sexp_of: int list * int list]
-    (Quickcheck.Generator.both (List.gen Int.gen) (List.gen Int.gen))
+  let int_list_gen =
+    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
+  in
+  Quickcheck.test
+    ~sexp_of:[%sexp_of: int list * int list]
+    (Quickcheck.Generator.both int_list_gen int_list_gen)
     ~f:(fun (l1,l2) ->
         [%test_eq: int list]
           (List.rev_append l1 l2)

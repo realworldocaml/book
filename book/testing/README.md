@@ -260,7 +260,9 @@ open! Base
 let%test_unit "negation flips the sign" =
   for _ = 0 to 100_000 do
     let x = Random.int_incl Int.min_value Int.max_value in
-    [%test_eq: Sign.t] (Int.sign (Int.neg x)) (Sign.flip (Int.sign x))
+    [%test_eq: Sign.t]
+      (Int.sign (Int.neg x))
+      (Sign.flip (Int.sign x))
   done
 ```
 
@@ -277,12 +279,16 @@ choice as to the probability with which each possible example is
 selected. But not all probability distributions are equally good for
 testing.  In fact, the choice we made above, which was to pick
 integers uniformly and at random, is problematic, since it picks
-interesting special, like zero or one, with the same probability as
-everything else.
+interesting special cases, like zero and one, with the same
+probability as everything else.
 
 That's where Quickcheck comes in.  Quickcheck is a library to help
 automate the construction of testing distributions. Let's try
-rewriting the example we provided above with Quickcheck.
+rewriting the example we provided above with Quickcheck.  Note that we
+open `Core_kernel` here because `Core_kernel` integrates the
+quickcheck library with some convenient helpers.  There's also a
+standalone `Base_quickcheck` library that can be used without
+`Core_kernel`.
 
 ```ocaml file=examples/quickcheck_property_test/test.ml
 open Core_kernel
@@ -291,7 +297,9 @@ let%test_unit "negation flips the sign" =
   Quickcheck.test ~sexp_of:[%sexp_of: int]
     (Int.gen_incl Int.min_value Int.max_value)
     ~f:(fun x ->
-        [%test_eq: Sign.t] (Int.sign (Int.neg x)) (Sign.flip (Int.sign x)))
+        [%test_eq: Sign.t]
+          (Int.sign (Int.neg x))
+          (Sign.flip (Int.sign x)))
 ```
 
 Note that we didn't explictly state how many examples should be
@@ -345,15 +353,15 @@ see here:
 ```
 
 Quickcheck found this example for us because it's careful about the
-distributions it uses, and in particular is careful about making sure
-to keep track of and explore special cases like `min_value` and
-`max_value`.
+probability distributions it uses, and in particular is careful about
+making sure to keep track of and explore special cases like
+`min_value` and `max_value`.
 
 ### Building more complex values
 
-Tests don't subsist on simple atomic types alone, which is why you'll
-often want to build distributions over more complex types. Here's a
-simple example, where we want to test the behavior of
+Tests can't subsist on simple atomic types alone, which is why you'll
+often want to build probability distributions over more complex types.
+Here's a simple example, where we want to test the behavior of
 `List.rev_append`, which requires us to create lists of randomly
 generated values.
 
@@ -361,8 +369,12 @@ generated values.
 open Core_kernel
 
 let%test_unit "List.rev_append is List.append of List.rev" =
-  Quickcheck.test ~sexp_of:[%sexp_of: int list * int list]
-    (Quickcheck.Generator.both (List.gen Int.gen) (List.gen Int.gen))
+  let int_list_gen =
+    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
+  in
+  Quickcheck.test
+    ~sexp_of:[%sexp_of: int list * int list]
+    (Quickcheck.Generator.both int_list_gen int_list_gen)
     ~f:(fun (l1,l2) ->
         [%test_eq: int list]
           (List.rev_append l1 l2)
@@ -381,8 +393,7 @@ types.
 = <fun>
 ```
 
-Quickcheck has support for other container types, like lists and maps,
-and Quickcheck's generator also form a monad, meaning that it supports
+Quickcheck's generator also form a monad, meaning that it supports
 operators like `bind` and `map`, which we say in an error handling
 context in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
@@ -419,7 +430,8 @@ Using `Let_syntax`, a generator for this would look as follows.
     in
     let poly =
       let%map points =
-        List.gen_non_empty (G.both Float.gen_positive Float.gen_positive)
+        List.gen_non_empty
+          (G.both Float.gen_positive Float.gen_positive)
       in
       Poly points
     in
