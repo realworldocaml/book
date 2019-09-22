@@ -110,7 +110,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -158,7 +158,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -326,7 +326,7 @@ Quickcheck has found a counterexample.
     Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
