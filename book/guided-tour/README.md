@@ -315,7 +315,7 @@ val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 
 In the above, we've marked every argument to the function with its type, with
 the final annotation indicating the type of the return value. Such type
-annotations can be placed on any expression in an OCaml program:
+annotations can be placed on any expression in an OCaml program.
 
 ### Inferring Generic Types
 
