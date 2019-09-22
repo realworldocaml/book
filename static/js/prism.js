@@ -1370,7 +1370,7 @@ Prism.hooks.add('before-insert', function (env) {
 	var codeLines = env.highlightedCode.split('\n');
 	for (var i = 0, l = (commandLine.outputLines || []).length; i < l; i++) {
 		if (commandLine.outputLines.hasOwnProperty(i)) {
-			codeLines[i] = commandLine.outputLines[i];
+			codeLines[i] = commandLine.outputLines[i].replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 		}
 	}
 	env.highlightedCode = codeLines.join('\n');
@@ -1383,7 +1383,6 @@ Prism.hooks.add('complete', function (env) {
 		return;
 	}
 
-         console.log("XX");
 	var pre = env.element.parentNode;
 	if (clsReg.test(env.element.className)) { // Remove the class "command-line" from the <code>
 		env.element.className = env.element.className.replace(clsReg, ' ');
@@ -1401,12 +1400,10 @@ Prism.hooks.add('complete', function (env) {
 	var promptText = getAttribute('data-prompt', '');
 	if (promptText !== '') {
 		promptLines = promptLines.join('<span data-prompt="' + promptText + '"></span>');
-          console.log("XXX " + promptText);
 	} else {
 		var user = getAttribute('data-user', 'user');
 		var host = getAttribute('data-host', 'localhost');
 		promptLines = promptLines.join('<span data-user="' + user + '" data-host="' + host + '"></span>');
-          console.log("XX2 " + promptText);
 	}
 
 	// Create the wrapper element. -- cwells
