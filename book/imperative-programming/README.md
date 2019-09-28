@@ -668,11 +668,11 @@ typically want to define a set of iteration functions like `iter`, `map`, and
 
 `Dlist` has two such iterators: `iter`, the goal of which is to call a
 `unit`-producing function on every element of the list, in order; and
-`find_el`, which runs a provided test function on each values stored in the
-list, returning the first `element` that passes the test. Both `iter` and
-`find_el` are implemented using simple recursive loops that use `next` to
-walk from element to element and `value` to extract the element from a given
-node:
+`find_el`, which runs a provided test function on each value stored in
+the list, returning the first `element` that passes the test. Both
+`iter` and `find_el` are implemented using simple recursive loops that
+use `next` to walk from element to element and `value` to extract the
+element from a given node:
 
 ```ocaml file=examples/dlist.ml,part=6
 let iter t ~f =
