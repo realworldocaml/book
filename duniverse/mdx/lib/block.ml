@@ -243,10 +243,12 @@ let part t = match get_label t "part" with
   | Some (Some _) -> Fmt.failwith "invalid `part` label value"
 
 let version t = match get_label t "version" with
+  | None -> None
+  | Some None -> None
   | Some (Some (op, v)) ->
-    let x, y, z = Misc.parse_version v in
-    op, x, y, z
-  | _ -> `Eq, None, None, None
+    match Ocaml_version.of_string v with
+    | Ok v -> Some (op, v)
+    | Error (`Msg e) -> Fmt.failwith "invalid `version` label value: %s" e
 
 let source_trees t =
   let f = function
@@ -289,12 +291,12 @@ let unset_variables t =
   in
   List.map f (get_prefixed_labels t "unset-")
 
-let required_packages t =
+let explicit_required_packages t =
   let f = function
     | `Eq, "" ->
       Fmt.failwith "invalid `require-package` label value: requires a value"
     | `Eq, pkg -> pkg
-    | _ -> Fmt.failwith "invalid `env` label value"
+    | _ -> Fmt.failwith "invalid `require-package` label value"
   in
   List.map f (get_labels t "require-package")
 
@@ -318,7 +320,16 @@ let require_from_lines lines =
   Util.Result.List.map ~f:require_from_line lines >>| fun libs ->
   List.fold_left Library.Set.union Library.Set.empty libs
 
-let required_libraries t = require_from_lines t.contents
+let required_libraries = function
+  | { value = Toplevel _; contents; _} -> require_from_lines contents
+  | { value = (Raw | OCaml | Error _ | Cram _); _ } -> Ok Library.Set.empty
+
+let required_packages t =
+  let open Rresult.R.Infix in
+  let explicit = String.Set.of_list (explicit_required_packages t) in
+  required_libraries t >>| fun toplevel_required_libs ->
+  let toplevel_requires = Library.Set.to_package_set toplevel_required_libs in
+  String.Set.union explicit toplevel_requires
 
 let value t = t.value
 let section t = t.section
@@ -411,24 +422,6 @@ let labels_of_string s =
       split "="  s `Eq
     ) labels
 
-let compare_versions v1 v2 =
-  match (v1, v2) with
-  | (Some _, Some _, _), (None, _, _) -> 0
-  | (Some x, Some _, _), (Some x', None, _) -> x - x'
-  | (Some x, Some y, _), (Some x', Some y', None) ->
-    if x = x' then y - y' else x - x'
-  | (Some x, Some y, Some z), (Some x', Some y', Some z') ->
-    if x = x' then
-      if y = y' then z - z'
-      else y - y'
-    else x - x'
-  | (Some x, Some y, None), (Some x', Some y', Some z') ->
-    if x = x' then
-      if y = y' then - z'
-      else y - y'
-    else x - x'
-  | _ -> Fmt.failwith "incomplete OCaml version"
-
 let compare = function
   | `Eq -> ( = )
   | `Neq -> ( <> )
@@ -438,6 +431,9 @@ let compare = function
   | `Ge -> ( >= )
 
 let version_enabled t =
-  let curr_version = Misc.parse_version Sys.ocaml_version in
-  let op, x, y, z = version t in
-  (compare op) (compare_versions curr_version (x, y, z)) 0
+  match Ocaml_version.of_string Sys.ocaml_version with
+  | Ok curr_version -> (
+      match version t with
+      | Some (op, v) -> (compare op) (Ocaml_version.compare curr_version v) 0
+      | None -> true )
+  | Error (`Msg e) -> Fmt.failwith "invalid OCaml version: %s" e

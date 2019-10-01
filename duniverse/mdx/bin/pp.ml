@@ -17,7 +17,7 @@
 let src = Logs.Src.create "cram.pp"
 module Log = (val Logs.src_log src : Logs.LOG)
 
-let run () file section =
+let run (`Setup ()) (`File file) (`Section section) =
   let t = Mdx.parse_file Normal file in
   let t = match section with
     | None   -> t
@@ -34,16 +34,18 @@ let run () file section =
         | Mdx.Section _ | Text _ -> ()
         | Block b ->
           let b = Mdx.Block.eval b in
-          Log.debug (fun l -> l "pp: %a" Mdx.Block.dump b);
-          let pp_lines = Fmt.(list ~sep:(unit "\n") string) in
-          let contents = Mdx.Block.executable_contents b in
-          match b.value with
-          | Toplevel _ -> Fmt.pr "%a\n" pp_lines contents
-          | OCaml      ->
-            Fmt.pr "%a\n%a\n"
-              Mdx.Block.pp_line_directive (file, b.line)
-              pp_lines contents
-          | _          -> ()
+          if not (Mdx.Block.skip b) then (
+            Log.debug (fun l -> l "pp: %a" Mdx.Block.dump b);
+            let pp_lines = Fmt.(list ~sep:(unit "\n") string) in
+            let contents = Mdx.Block.executable_contents b in
+            match b.value with
+            | Toplevel _ -> Fmt.pr "%a\n" pp_lines contents
+            | OCaml      ->
+              Fmt.pr "%a\n%a\n"
+                Mdx.Block.pp_line_directive (file, b.line)
+                pp_lines contents
+            | _          -> ()
+          )
       ) t;
     0
 

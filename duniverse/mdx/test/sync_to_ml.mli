@@ -5,10 +5,10 @@ val f: unit -> unit
 module A =
 struct
 
-[@@@part "2"] ;;
+  [@@@part "2"] ;;
 
   type t = Some of int | Many
 
-[@@@part "3"] ;;
+  [@@@part "3"] ;;
 
 end

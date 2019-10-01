@@ -30,6 +30,10 @@ val x : int = 2
 - : unit = ()
 ```
 
+```ocaml file=sync_to_ml.ml,part=new-part-not-in-original
+let g = [ f ]
+```
+
 ```ocaml file=sync_to_broken_ml.ml
 let () =
   module MyString = String;

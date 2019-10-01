@@ -7,8 +7,14 @@
   (libraries findlib.internal unix))
 
 (library
-  (name findlib)
+  (name findlib_internal)
   (public_name findlib.internal)
+  (modules)
+  (libraries findlib))
+
+(library
+  (name findlib)
+  (public_name findlib)
   (modules findlib fl_args fl_lint fl_package_base fl_metascanner
     fl_metatoken fl_split fl_meta fl_topo findlib_config)
   (flags (:standard -w -6-27-32-33-50))
@@ -27,6 +33,7 @@
   (public_name findlib.dynload)
   (wrapped false)
   (libraries findlib.internal dynlink)
+  (special_builtin_support findlib_dynload)
   (modules fl_dynload))
 
 (rule
