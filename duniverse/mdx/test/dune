@@ -1,9 +1,42 @@
+(include dune.inc)
+
+; Generates rules
+
+(rule
+ (targets dune.inc.gen)
+ (deps    (package mdx))
+ (action
+  (with-stdout-to %{targets}
+   (progn
+    (run ocaml-mdx rule %{dep:pp.md})
+    (run ocaml-mdx rule %{dep:ellipsis.md})
+    (run ocaml-mdx rule %{dep:envs.md})
+    (run ocaml-mdx rule %{dep:empty_line.md})
+    (run ocaml-mdx rule %{dep:spaces.md})
+    (run ocaml-mdx rule %{dep:errors.md})
+    (run ocaml-mdx rule %{dep:heredoc.md})
+    (run ocaml-mdx rule %{dep:mlt.md})
+    (run ocaml-mdx rule %{dep:semisemi.md})
+    (run ocaml-mdx rule %{dep:exit.md})
+    (run ocaml-mdx rule %{dep:padding.md})
+    (run ocaml-mdx rule %{dep:multilines.md})
+    (run ocaml-mdx rule %{dep:lines.md})
+    (run ocaml-mdx rule %{dep:lwt.md})
+    (run ocaml-mdx rule %{dep:non-det.md})
+    (run ocaml-mdx rule %{dep:code.md})
+    (run ocaml-mdx rule %{dep:set_environment_variable.md})
+    (run ocaml-mdx rule %{dep:unset_environment_variable.md})
+    (run ocaml-mdx rule --prelude-str "#require \"lwt\"" --prelude-str "toto:let x = \"42\"" %{dep:prelude.md})
+    (run ocaml-mdx rule --prelude prelude.ml %{dep:prelude_file.md})
+    (run ocaml-mdx rule --direction=to-ml %{dep:dune_rules.md})
+    (run ocaml-mdx rule %{dep:require/require-package.md})
+    (run ocaml-mdx rule --syntax=cram %{dep:cram.t})
+    (run ocaml-mdx rule -s Testing %{dep:section.md})
+   ))))
+
 (alias
- (name   runtest)
- (deps   (:x section.md) (:y section.md.expected) (package mdx))
- (action (progn
-           (run ocaml-mdx test --force-output -s Testing %{x})
-           (diff? %{y} %{x}.corrected))))
+ (name runtest)
+ (action (diff dune.inc dune.inc.gen)))
 
 (alias
  (name   runtest)
@@ -28,24 +61,10 @@
 
 (alias
  (name   runtest)
- (deps   (:x ellipsis.md) (package mdx))
+ (deps   (:x trailing.md) (:y trailing.md.expected) (package mdx))
  (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x envs.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x empty_line.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
+           (run ocaml-mdx test --force-output %{x})
+           (diff? %{y} %{x}.corrected))))
 
 (alias
  (name   runtest)
@@ -61,96 +80,6 @@
            (run ocaml-mdx output %{x} -o output.html)
            (diff? %{y} output.html))))
 
-(alias
- (name   runtest)
- (deps   (:x spaces.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x cram.t) (package mdx))
- (action (progn
-           (run ocaml-mdx test --syntax=cram %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x errors.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x heredoc.md) section.md (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x mlt.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x semisemi.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x exit.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x padding.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x multilines.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x lines.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x lwt.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x non-det.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x code.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
 
 (alias
  (name   runtest)
@@ -167,40 +96,6 @@
  (action (progn
            (run ocaml-mdx test --force-output --root=.. %{x})
            (diff? %{y} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x set_environment_variable.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x unset_environment_variable.md) (package mdx))
- (action (progn
-           (run ocaml-mdx test %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x prelude.md) (package mdx))
- (action (progn
-           (run ocaml-mdx
-                  test
-                  --prelude-str "#require \"lwt\""
-                  --prelude-str "toto:let x = \"42\""
-                  %{x})
-           (diff? %{x} %{x}.corrected))))
-
-(alias
- (name   runtest)
- (deps   (:x prelude_file.md) prelude.ml (package mdx))
- (action (progn
-           (run ocaml-mdx test --prelude prelude.ml %{x})
-           (diff? %{x} %{x}.corrected))))
-
-
 (alias
  (name   runtest)
  (deps   (:x sync_to_md.md)
@@ -258,22 +153,20 @@
  (deps   (:x section.out) (:y section.out.expected))
  (action (diff? %{x} %{y})))
 
-(include dune_rules.inc)
+; Test failures
 
 (rule
- (targets dune_rules.inc.gen)
- (deps    (source_tree test-cases) (:x dune_rules.md) (package mdx))
- (action  (with-stdout-to %{targets} (run ocaml-mdx rule --direction=to-ml %{x}))))
+ (targets failures.outputs)
+ (deps    (package mdx) failures/empty.ml)
+ (action
+  (with-outputs-to %{targets}
+   (progn
+    (system "%{bin:ocaml-mdx} test --prelude=a --prelude-str=b %{dep:failures/empty.md} || echo")
+    (system "%{bin:ocaml-mdx} test --direction=to-md %{dep:failures/part_not_found.md} || echo")
+    (system "%{bin:ocaml-mdx} test --direction=to-md %{dep:failures/ml_file_not_found.md} || echo")
+    (system "%{bin:ocaml-mdx} test --direction=to-md %{dep:failures/in_toplevel.md} || echo")
+   ))))
 
 (alias
  (name runtest)
- (action (diff dune_rules.inc dune_rules.inc.gen)))
-
-(alias
- (name   runtest)
- (deps   (:x require/require-package.md)
-         (package mdx)
-         (package example_lib))
- (action (progn
-           (run ocaml-mdx test --direction=infer-timestamp %{x})
-           (diff? %{x} %{x}.corrected))))
+ (action (diff failures.expected failures.outputs)))

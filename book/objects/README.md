@@ -470,9 +470,9 @@ this and does not allow the coercion:
 val square_array : square array = [|<obj>; <obj>|]
 # let shape_array: shape array = (square_array :> shape array)
 Characters 31-60:
-Error: Type square array is not a subtype of shape array 
+Error: Type square array is not a subtype of shape array
        Type square = < area : float; width : int >
-       is not compatible with type shape = < area : float > 
+       is not compatible with type shape = < area : float >
        The second object type has no method width
 ```
 
@@ -543,7 +543,7 @@ Error: This expression cannot be coerced to type
        it has type (< area : float; width : int >, 'a) AbstractEither.t
        but is here used with type (shape, shape) AbstractEither.t
        Type < area : float; width : int > is not compatible with type
-         shape = < area : float > 
+         shape = < area : float >
        The second object type has no method width
 ```
 
@@ -603,9 +603,9 @@ However, when we try to apply this function to our objects, we get an error:
 Characters 12-41:
 Error: Type square stack = < pop : square option; push : square -> unit >
        is not a subtype of
-         shape stack = < pop : shape option; push : shape -> unit > 
+         shape stack = < pop : shape option; push : shape -> unit >
        Type shape = < area : float > is not a subtype of
-         square = < area : float; width : int > 
+         square = < area : float; width : int >
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of

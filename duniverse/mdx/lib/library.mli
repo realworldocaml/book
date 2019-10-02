@@ -11,4 +11,8 @@ val pp : t Fmt.t
 
 val from_string : string -> (t, string) Result.result
 
-module Set : Set.S with type elt = t
+module Set : sig
+  include Set.S with type elt = t
+
+  val to_package_set : t -> Astring.String.Set.t
+end

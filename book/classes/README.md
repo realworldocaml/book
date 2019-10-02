@@ -712,10 +712,10 @@ type shape = < area : float; equals : shape -> bool >
 # (new square 5 :> shape)
 Characters 0-23:
 Error: Type square = < area : float; equals : square -> bool; width : int >
-       is not a subtype of shape = < area : float; equals : shape -> bool > 
+       is not a subtype of shape = < area : float; equals : shape -> bool >
        Type shape = < area : float; equals : shape -> bool >
        is not a subtype of
-         square = < area : float; equals : square -> bool; width : int > 
+         square = < area : float; equals : square -> bool; width : int >
 ```
 
 The problem is that a `square` expects to be compared with a `square`, not an

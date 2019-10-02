@@ -84,7 +84,7 @@ let pp_block ppf (b:Mdx.Block.t) =
   Fmt.pf ppf "<div class=\"highlight\"><pre%a><code%a>%t</code></pre></div>"
     pp_attrs () pp_lang () pp_code
 
-let run () file output =
+let run (`Setup ()) (`File file) (`Output output) =
   let t = Mdx.parse_file Normal file in
   match t with
   | [] -> 1
@@ -118,7 +118,8 @@ open Cmdliner
 let output =
   let doc = "Write output to $(b,FILE) instead of stdout.  If $(b,FILE) is -, \
              output will go to stdout," in
-  Arg.(value & opt (some string) None & info ["o";"output"] ~doc ~docv:"FILE")
+  Term.(app (const (fun x -> `Output x)))
+    Arg.(value & opt (some string) None & info ["o";"output"] ~doc ~docv:"FILE")
 
 let cmd =
   let doc = "Pre-process markdown files to produce OCaml code." in

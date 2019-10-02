@@ -20,10 +20,12 @@ module Part = struct
 
   type t =
     { name: string;
+      sep_indent: string; (** Whitespaces before the [@@@part] separator *)
       body: string; }
 
-  let v ~name ~body = { name; body }
+  let v ~name ~sep_indent ~body = { name; sep_indent; body }
   let name {name;_} = name
+  let sep_indent {sep_indent;_} = sep_indent
   let body {body;_} = body
 
 end
@@ -33,6 +35,9 @@ let rec remove_empty_heads = function
   | "" :: tl -> remove_empty_heads tl
   | l -> l
 
+let trim_empty_rev l =
+  remove_empty_heads (List.rev (remove_empty_heads l))
+
 module Parse_parts =
 struct
 
@@ -40,29 +45,33 @@ struct
     let open Re in
     let ws = rep space in
     compile @@ whole_string @@ seq [
-      ws; str "[@@@"; ws; str "part"; ws;
+      group ws; str "[@@@"; ws; str "part"; ws;
       str "\""; group (rep1 any); str "\"";
       ws; str "]"; ws; opt (str ";;"); ws;
     ]
 
-  let make_part ~name ~lines =
-    let body = String.concat "\n" (List.rev (remove_empty_heads lines)) in
-    Part.v ~name ~body
+  let next_part ~name ~sep_indent = fun lines_rev ->
+    let body = String.concat "\n" (trim_empty_rev lines_rev) in
+    Part.v ~name ~sep_indent ~body
 
-  let rec parse_parts input name lines =
+  let next_part_of_groups groups =
+    let sep_indent = Re.Group.get groups 1 in
+    let name = Re.Group.get groups 2 in
+    next_part ~name ~sep_indent
+
+  let rec parse_parts input make_part lines =
     match input_line input with
-    | exception End_of_file -> [make_part ~name ~lines]
+    | exception End_of_file -> [make_part lines]
     | line ->
       match Re.exec_opt part_statement_re line with
-      | None -> parse_parts input name (line :: lines)
+      | None -> parse_parts input make_part (line :: lines)
       | Some groups ->
-        let part = make_part ~name ~lines in
-        let new_name = Re.Group.get groups 1 in
-        part :: parse_parts input new_name []
+        let next_part = next_part_of_groups groups in
+        make_part lines :: parse_parts input next_part []
 
   let of_file name =
     let input = open_in name in
-    parse_parts input "" []
+    parse_parts input (next_part ~name:"" ~sep_indent:"") []
 
 end
 
@@ -86,7 +95,7 @@ let rec replace_or_append part_name body = function
   | p :: tl ->
     p :: replace_or_append part_name body tl
   | [] ->
-    [{ name = part_name; body }]
+    [{ name = part_name; sep_indent = ""; body }]
 
 let replace file ~part ~lines =
   let part = match part with None -> "" | Some p -> p in
@@ -98,7 +107,9 @@ let contents file =
         let body =  Part.body p in
         match Part.name p with
         | "" -> body :: acc
-        | n  -> body :: ("\n[@@@part \"" ^ n ^ "\"] ;;\n") :: acc
+        | n  ->
+          let indent = Part.sep_indent p in
+          body :: ("\n" ^ indent ^ "[@@@part \"" ^ n ^ "\"] ;;\n") :: acc
       ) [] file
   in
   let lines = List.rev lines in

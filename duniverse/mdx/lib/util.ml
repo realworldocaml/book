@@ -6,7 +6,7 @@ module Result = struct
       let rec go acc = function
         | [] -> Ok acc
         | hd::tl ->
-          f acc hd >>= fun acc -> 
+          f acc hd >>= fun acc ->
           go acc tl
       in
       go init l
