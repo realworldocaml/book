@@ -382,7 +382,7 @@ File "freq.ml", line 5, characters 53-66:
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
-       Type Counter.t is not compatible with type 'a list 
+       Type Counter.t is not compatible with type 'a list
 [1]
 ```
 
