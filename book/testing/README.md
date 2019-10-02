@@ -110,7 +110,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -158,7 +158,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -326,7 +326,7 @@ Quickcheck has found a counterexample.
     Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 345, characters 6-13
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 358, characters 15-52
     Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 445, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -548,28 +548,34 @@ let%test "rev" =
   List.equal Int.equal (List.rev [3;2;1]) [1;2;3]
 ```
 
-Indeed, for examples like this, expect tests don't present a material
-advantage. Simple example-based tests like the one above are a great
-solution when it's easy and convenient to write out specific examples
-in full. And property tests are your best bet when you have a clear
-set of predicates that you want to test, and examples can be naturally
+Indeed, for examples like this, expect tests aren't really better.
+Simple example-based tests like the one above are a great solution
+when it's easy and convenient to write out specific examples in full.
+And property tests are your best bet when you have a clear set of
+predicates that you want to test, and examples can be naturally
 generated at random.
 
 Where expect tests shine is where you want to capture some aspect of
 the behavior of your system that's hard to capture in either
-predicates or hand-written examples. Instead, expect tests give you a
+predicates or hand-written examples.  Instead, expect tests give you a
 way to visualize the behavior of your code, and then to be notified
 whenever that visualization changes.
 
-This is more useful than it might seem at first. One common use-case
-of expect tests is simply to capture the behavior of a complex bit of
-code that you don't necessarily have a small specification of
+This is more useful than it might seem at first.  One common use-case
+of expect tests is simply to capture the behavior of code where you
+don't necessarily have a concise specification of how the code should
+behave, and you just want to generate some examples and look at the
+output to make sure it make sense to human eyes.
+
 (UNFINISHED)
 
 ## Ideas for extending this chapter
 
 - More realistic examples of expect tests.  This is tricky, because
   natural examples are often kind of long.
+- Show an example of HTML-scraping?
+- Use expect_test_helpers to do shell commands.
+-
 - Maybe a tic-tac-toe game?
 - How to use randomness in a non-random way?
 - Is it worth talking about the technique of capturing random
