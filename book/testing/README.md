@@ -573,6 +573,7 @@ output to make sure it make sense to human eyes.
 
 - More realistic examples of expect tests.  This is tricky, because
   natural examples are often kind of long.
+- Test the boolean simplifier, maybe the one in blang?
 - Show an example of HTML-scraping?
 - Use expect_test_helpers to do shell commands.
 -
