@@ -286,6 +286,62 @@ Note that most of the time one should use `Comparable.Make` instead of
 (most notably infix comparison functions) in addition to the
 comparator.
 
+Here's the result of using `Comparable` rather than `Comparator`.  As
+you can see, a lot of extra functions have been defined.
+
+```ocaml env=main
+# module Book = struct
+    module T = struct
+
+      type t = { title: string; isbn: string }
+
+      let compare t1 t2 =
+        let cmp_title = String.compare t1.title t2.title in
+        if cmp_title <> 0 then cmp_title
+        else String.compare t1.isbn t2.isbn
+
+      let sexp_of_t t : Sexp.t =
+        List [ Atom t.title; Atom t.isbn ]
+
+    end
+    include T
+    include Comparable.Make(T)
+  end
+module Book :
+  sig
+    module T :
+      sig
+        type t = { title : string; isbn : string; }
+        val compare : t -> t -> int
+        val sexp_of_t : t -> Sexp.t
+      end
+    type t = T.t = { title : string; isbn : string; }
+    val sexp_of_t : t -> Sexp.t
+    val ( >= ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( > ) : t -> t -> bool
+    val ( < ) : t -> t -> bool
+    val ( <> ) : t -> t -> bool
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+    val min : t -> t -> t
+    val max : t -> t -> t
+    val ascending : t -> t -> int
+    val descending : t -> t -> int
+    val between : t -> low:t -> high:t -> bool
+    val clamp_exn : t -> min:t -> max:t -> t
+    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
+    type comparator_witness = Base.Comparable.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
+    val validate_lbound : min:t Core_kernel._maybe_bound -> t Validate.check
+    val validate_ubound : max:t Core_kernel._maybe_bound -> t Validate.check
+    val validate_bound :
+      min:t Core_kernel._maybe_bound ->
+      max:t Core_kernel._maybe_bound -> t Validate.check
+  end
+```
+
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
 
 The comparator witness looks a little surprising at first, and it may not be
