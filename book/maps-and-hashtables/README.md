@@ -281,6 +281,11 @@ val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
   <abstr>
 ```
 
+Note that most of the time one should use `Comparable.Make` instead of
+`Comparator.Make`, since the former provides extra helper functions
+(most notably infix comparison functions) in addition to the
+comparator.
+
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
 
 The comparator witness looks a little surprising at first, and it may not be
