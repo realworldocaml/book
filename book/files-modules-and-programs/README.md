@@ -651,7 +651,7 @@ Here's some general advice on how to deal with `open`s: [local opens]{.idx}
 ```ocaml env=main
 # let average x y =
     let open Int64 in
-    x + y / of_int 2
+    (x + y) / of_int 2
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
@@ -663,7 +663,7 @@ Here, `of_int` and the infix operators are the ones from the `Int64`
 
 ```ocaml env=main
 # let average x y =
-    Int64.(x + y / of_int 2)
+    Int64.((x + y) / of_int 2)
 val average : int64 -> int64 -> int64 = <fun>
 ```
 
