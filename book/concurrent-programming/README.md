@@ -1000,7 +1000,7 @@ let () =
 And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
-```sh dir=examples/search,require-package=textwrap,require-package=yojson
+```sh dir=examples/search,require-package=textwrap,require-package=yojson,non-deterministic
 $ dune exec -- ./search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
 ----------------------
