@@ -207,9 +207,9 @@ that we are ignoring extra fields. This is done by adding an underscore to
 the pattern:
 
 ```ocaml env=main
-# let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+# let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
     sprintf "%s %i/%s" name port prot
-val host_info_to_string : service_info -> string = <fun>
+val service_info_to_string : service_info -> string = <fun>
 ```
 
 It's a good idea to enable the warning for incomplete record matches and to
