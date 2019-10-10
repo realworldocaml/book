@@ -651,7 +651,7 @@ detection]{.idx}
       let data = find_exn alist key in
       compute_weight data
     with
-  Key_not_found _ -> 0.
+    Key_not_found _ -> 0.
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -665,7 +665,7 @@ found, then a weight of `0.` should be returned.
 The use of exceptions in this code, however, presents some problems. In
 particular, what happens if `compute_weight` throws an exception? Ideally,
 `lookup_weight` should propagate that exception on, but if the exception
-happens to be `Not_found`, then that's not what will happen:
+happens to be `Key_not_found`, then that's not what will happen:
 
 ```ocaml env=main
 # lookup_weight ~compute_weight:(fun _ -> raise (Key_not_found "foo"))
@@ -687,7 +687,7 @@ clear what part of the code failed:
       with _ -> None
     with
     | None -> 0.
-  | Some data -> compute_weight data
+    | Some data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -702,7 +702,7 @@ statements directly, which lets you write this more concisely as follows.
 # let lookup_weight ~compute_weight alist key =
     match find_exn alist key with
     | exception _ -> 0.
-  | data -> compute_weight data
+    | data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -718,7 +718,7 @@ exception-free function from Base, `List.Assoc.find`, instead:
 # let lookup_weight ~compute_weight alist key =
     match List.Assoc.find ~equal:String.equal alist key with
     | None -> 0.
-  | Some data -> compute_weight data
+    | Some data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) ->
   (string, 'a) Base.List.Assoc.t -> string -> float = <fun>
