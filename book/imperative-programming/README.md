@@ -367,7 +367,7 @@ You can see these in action:
 
 ```ocaml env=ref
 # let x = ref 1
-val x : int ref = {Base.Ref.contents = 1}
+val x : int Caml.ref = {Base.Ref.contents = 1}
 # !x
 - : int = 1
 # x := !x + 1
