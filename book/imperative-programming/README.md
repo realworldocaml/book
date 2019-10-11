@@ -367,7 +367,7 @@ You can see these in action:
 
 ```ocaml env=ref
 # let x = ref 1
-val x : int Caml.ref = {Base.Ref.contents = 1}
+val x : int ref = {Base.Ref.contents = 1}
 # !x
 - : int = 1
 # x := !x + 1
@@ -1709,7 +1709,7 @@ introduce persistent mutable cells, including:
 - Function declarations, i.e., expressions that begin with `fun` or
   `function`, or the equivalent let binding, `let f x = ...`
 
-- `let` bindings of the form `let`*`var`*`=`*`expr1`*`in`*`expr2`*, where
+- `let` bindings of the form `let` *`var`* `=` *`expr1`* `in` *`expr2`*, where
   both *`expr1`* and *`expr2`* are simple values
 
 Thus, the following expression is a simple value, and as a result, the types
@@ -1942,7 +1942,7 @@ module Concat_list :
 ```
 
 Now, we can apply the identity function to `Concat_list.empty` without
-without losing any polymorphism:
+losing any polymorphism:
 
 ```ocaml env=value_restriction
 # identity Concat_list.empty
