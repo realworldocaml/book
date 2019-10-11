@@ -78,9 +78,8 @@ checking]{.idx}[unit tests]{.idx}
 There are several JSON libraries available for OCaml. For this chapter, we've
 picked the [Yojson](https://github.com/mjambon/yojson) library by Martin Jambon.
 It's easiest to install via OPAM by running `opam install yojson`. See
-[this Real World OCaml page](http://realworldocaml.org/install) for
-installation instructions if you haven't already got OPAM. Once installed,
-you can open it in the `utop` toplevel by:
+[the installation instructions](install.html) if you haven't already got opam.
+Once installed, you can open it in the `utop` toplevel by:
 :::
 
 ```ocaml env=install
@@ -95,7 +94,7 @@ The JSON specification has very few data types, and the `Yojson.Basic.t`
 type that follows is sufficient to express any valid JSON structure: [JSON
 data/parsing with Yojson]{.idx}[Yojson library/parsing JSON with]{.idx}
 
-```ocaml file=yojson_basic.mli
+```ocaml file=yojson_basic.mli,part=0
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -276,7 +275,7 @@ transformations over values.
 
 You've already run across several of these in the `List` module:
 
-```ocaml file=list_excerpt.mli
+```ocaml file=list_excerpt.mli,part=0
 val map  : 'a list -> f:('a -> 'b)   -> 'b list
 val fold : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
 ```
@@ -418,7 +417,7 @@ call the `to_string` function on them. Let's remind ourselves of the
 `Yojson.Basic.t` type again: [values/in JSON data]{.idx}[JSON
 data/constructing values]{.idx}
 
-```ocaml file=yojson_basic.mli
+```ocaml file=yojson_basic.mli,part=0
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -531,7 +530,7 @@ human-readable, local format. The `Yojson.Safe.json` type is a superset of
 the `Basic` polymorphic variant and looks like this: [Yojson library/extended
 JSON format support]{.idx}[JSON data/nonstandard extensions for]{.idx}
 
-```ocaml file=yojson_safe.mli
+```ocaml file=yojson_safe.mli,part=0
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -617,13 +616,13 @@ command-line tool that generates code. It can all be installed via OPAM:
 ```
 $ opam install atdgen
 $ atdgen -version
-1.2.3
+2.0.0
 ```
 
 The command-line tool will be installed within your
 <em class="filename">~/.opam</em> directory and should already be on your
 `PATH` from running `opam config env`. See
-[this Real World OCaml page](http://realworldocaml.org/install) if this isn't
+[the installation instructions](install.html) if this isn't
 working.
 
 ### ATD Basics

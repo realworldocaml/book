@@ -38,7 +38,7 @@ let x =
 ;;
 #12 "spaces.md"
   let x = 1
-  
+
   in x
 #18 "spaces.md"
   3

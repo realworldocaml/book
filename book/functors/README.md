@@ -149,7 +149,7 @@ element is larger than the second, and a negative number if the first element
 is smaller than the second. Thus, we could rewrite the standard comparison
 functions on top of `compare`.
 
-```ocaml file=../../examples/code/functors/compare_example.ml
+```ocaml file=examples/compare_example.ml
 compare x y < 0     (* x < y *)
 compare x y = 0     (* x = y *)
 compare x y > 0     (* x > y *)
@@ -754,7 +754,7 @@ anything about s-expressions.
 Happily, `Base` comes with a built-in interface for just this purpose called
 `Sexpable`, which is defined as follows:
 
-```ocaml file=../../examples/code/functors/sexpable.ml
+```ocaml file=examples/sexpable.ml
 module type Sexpable = sig
   type t
   val sexp_of_t : t -> Sexp.t
@@ -916,7 +916,7 @@ queue]{.idx}[functors/module extension with]{.idx}
 
 Here's a reasonable `mli` for such a module:
 
-```ocaml file=../../examples/code/functors/fqueue.mli
+```ocaml file=examples/fqueue.mli
 type 'a t
 
 val empty : 'a t
@@ -947,7 +947,7 @@ efficiently dequeue from the output list. If you attempt to dequeue when the
 output list is empty, the input list is reversed and becomes the new output
 list. Here's the implementation:
 
-```ocaml file=../../examples/code/functors/fqueue.ml
+```ocaml file=examples/fqueue.ml
 open Base
 
 type 'a t = 'a list * 'a list
@@ -990,7 +990,7 @@ contains a module signature `S` which defines the signature that is required
 to support folding; and a functor `Extend` that allows one to extend any
 module that matches `Foldable.S`:
 
-```ocaml file=../../examples/code/functors/foldable.ml
+```ocaml file=examples/foldable.ml
 open Base
 
 module type S = sig
@@ -1037,7 +1037,7 @@ end
 Now we can apply this to `Fqueue`. We can create an interface for an extended
 version of `Fqueue` as follows:
 
-```ocaml file=../../examples/code/functors/extended_fqueue.mli
+```ocaml file=examples/extended_fqueue.mli
 type 'a t
 include (module type of Fqueue) with type 'a t := 'a t
 include Foldable.Extension with type 'a t := 'a t
@@ -1046,7 +1046,7 @@ include Foldable.Extension with type 'a t := 'a t
 In order to apply the functor, we'll put the definition of `Fqueue` in a
 submodule called `T`, and then call `Foldable.Extend` on `T`:
 
-```ocaml file=../../examples/code/functors/extended_fqueue.ml
+```ocaml file=examples/extended_fqueue.ml
 include Fqueue
 include Foldable.Extend(Fqueue)
 ```

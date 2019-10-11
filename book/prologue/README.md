@@ -160,13 +160,13 @@ libraries and tools. We'll introduce some of these libraries in the course of
 the examples presented in the book.[OCaml/third-party libraries for]{.idx}
 
 The installation and management of these third-party libraries is made much
-easier via a package management tool known as [OPAM](http://opam.ocaml.org/).
-We'll explain more about OPAM as the book unfolds, but it forms the basis of
+easier via a package management tool known as [opam](http://opam.ocaml.org/).
+We'll explain more about opam as the book unfolds, but it forms the basis of
 the Platform, which is a set of tools and libraries that, along with the
 OCaml compiler, lets you build real-world applications quickly and
 effectively.
 
-We'll also use OPAM for installing the `utop` command-line interface. This is
+We'll also use opam for installing the `utop` command-line interface. This is
 a modern interactive tool that supports command history, macro expansion,
 module completion, and other niceties that make it much more pleasant to work
 with the language. We'll be using `utop` throughout the book to let you step
@@ -231,10 +231,10 @@ personal experience to construct scalable, robust software systems.
 *Real World OCaml* uses some tools that we've developed while writing this
 book. Some of these resulted in improvements to the OCaml compiler, which
 means that you will need to ensure that you have an up-to-date development
-environment (using the 4.05.0 version of the compiler). The installation
-process is largely automated through the OPAM package manager. Instructions
+environment (using the 4.07.1 version of the compiler). The installation
+process is largely automated through the opam package manager. Instructions
 on how to it set up and what packages to install can be found at
-[this Real World OCaml page](http://dev.realworldocaml.org/install.html).[installation
+[the installation page](install.html).[installation
 instructions]{.idx}[OCaml/installation instructions]{.idx}
 
 `Core` requires a UNIX based operating system, and so only works on systems

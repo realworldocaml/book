@@ -1,5 +1,5 @@
-/* PrismJS 1.13.0
-http://prismjs.com/download.html?#themes=prism&languages=markup+css+clike+javascript+bash+json+ocaml+scheme&plugins=toolbar+command-line+normalize-whitespace+show-language+copy-to-clipboard */
+/* PrismJS 1.17.1
+https://prismjs.com/download.html?#themes=prism&languages=markup+css+clike+javascript+bash+json+scheme+ocaml&plugins=toolbar+command-line+normalize-whitespace+show-language+copy-to-clipboard */
 /**
  * prism.js default theme for JavaScript, CSS and HTML
  * Based on dabblet (http://dabblet.com)
@@ -12,6 +12,7 @@ pre[class*="language-"] {
 	background: none;
 	text-shadow: 0 1px white;
 	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
 	text-align: left;
 	white-space: pre;
 	word-spacing: normal;
@@ -106,7 +107,7 @@ pre[class*="language-"] {
 .token.url,
 .language-css .token.string,
 .style .token.string {
-	color: #a67f59;
+	color: #9a6e3a;
 	background: hsla(0, 0%, 100%, .5);
 }
 
@@ -152,6 +153,12 @@ div.code-toolbar > .toolbar {
 }
 
 div.code-toolbar:hover > .toolbar {
+	opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
 	opacity: 1;
 }
 

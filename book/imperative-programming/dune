@@ -2,7 +2,7 @@
   (target dune.gen)
   (action
    (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-ml %{dep:README.md}
+    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}
                 --prelude=%{dep:prelude.ml}
                 --prelude=memo:%{dep:memo.ml}
                 --prelude=fib:%{dep:fib.ml}
@@ -15,3 +15,5 @@
  (action (diff dune.inc dune.gen)))
 
 (include dune.inc)
+
+(data_only_dirs examples)

@@ -72,19 +72,3 @@ let err lexbuf fmt =
   Fmt.kstrf (fun str ->
       Fmt.failwith "%a: %s" pp_position lexbuf str
     ) fmt
-
-let parse_version v =
-  let to_string = String.Sub.to_string in
-  let to_int x = try Some (int_of_string x) with _ -> None in
-  let is_dot c = c = '.' in
-  match String.find is_dot v with
-  | None -> to_int v, None, None
-  | Some i_dot_1 ->
-     let major = String.sub ~stop:i_dot_1 v |> to_string |> to_int in
-     let remain = String.sub ~start:(i_dot_1+1) v |> to_string in
-     match String.find is_dot remain with
-     | None -> major, to_int remain, None
-     | Some i_dot_2 ->
-        let minor = String.sub ~stop:i_dot_2 remain |> to_string |> to_int in
-        let remain = String.sub ~start:(i_dot_2+1) remain |> to_string in
-        major, minor, to_int remain

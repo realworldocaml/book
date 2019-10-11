@@ -94,11 +94,17 @@ val set_variables: t -> (string * string) list
 val unset_variables: t -> string list
 (** [unset_variable t] is the list of environment variable to unset *)
 
-val required_packages: t -> string list
-(** [required_packages t] is the names of the required packages *)
+val explicit_required_packages: t -> string list
+(** [explicit_required_packages t] returns the list of packages explicitly required by the user
+    through require-package labels in the block [t]. *)
 
 val required_libraries: t -> (Library.Set.t, string) Result.result
-(** [required_packages t] is the names of the required packages *)
+(** [required_libraries t] returns the set of libaries that are loaded through [#require]
+    statements in the block [t]. Always returns an empty set if [t] isn't a toplevel
+    block. *)
+
+val required_packages: t -> (Astring.String.Set.t, string) Result.result
+(** [required_packages t] returns all packages that the block [t] depends upon. *)
 
 val skip: t -> bool
 (** [skip t] is true iff [skip] is in the labels of [t]. *)
@@ -116,11 +122,6 @@ val executable_contents: t -> string list
 (** [executable_contents t] is either [t]'s contents if [t] is a raw
    or a cram block, or [t]'s commands if [t] is a toplevel fragments
    (e.g. the phrase result is discarded). *)
-
-val version:
-  t ->
-  [`Eq | `Neq | `Ge | `Gt | `Le | `Lt] * int option * int option * int option
-(** [version t] is [t]'s OCaml version. *)
 
 val version_enabled: t -> bool
 (** [version_supported t] if the current OCaml version complies with [t]'s

@@ -8,7 +8,7 @@ build: [
 ]
 depends: [
   "ocaml" {>= "4.02.3"}
-  "dune" {build}
+  "dune" {>= "1.10.0"}
 ]
 synopsis: "A library manager for OCaml"
 description: """

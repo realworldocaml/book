@@ -357,7 +357,7 @@ The generic type `shape` has a method to compute the area, and `square` and
 `circle` are specific kinds of shapes: [geometric shapes]{.idx}[width
 subtyping]{.idx}[subtyping/width subtyping]{.idx}
 
-```ocaml file=../../examples/code/objects/subtyping.ml,part=1
+```ocaml file=examples/subtyping.ml,part=1
 type shape = < area : float >
 
 type square = < area : float; width : int >
@@ -470,9 +470,9 @@ this and does not allow the coercion:
 val square_array : square array = [|<obj>; <obj>|]
 # let shape_array: shape array = (square_array :> shape array)
 Characters 31-60:
-Error: Type square array is not a subtype of shape array 
+Error: Type square array is not a subtype of shape array
        Type square = < area : float; width : int >
-       is not compatible with type shape = < area : float > 
+       is not compatible with type shape = < area : float >
        The second object type has no method width
 ```
 
@@ -543,7 +543,7 @@ Error: This expression cannot be coerced to type
        it has type (< area : float; width : int >, 'a) AbstractEither.t
        but is here used with type (shape, shape) AbstractEither.t
        Type < area : float; width : int > is not compatible with type
-         shape = < area : float > 
+         shape = < area : float >
        The second object type has no method width
 ```
 
@@ -571,7 +571,7 @@ module VarEither :
 For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles:
 
-```ocaml file=../../examples/code/objects/subtyping.ml,part=2
+```ocaml file=examples/subtyping.ml,part=2
 type 'a stack = < pop: 'a option; push: 'a -> unit >
 
 let square_stack: square stack = stack [square 30; square 10]
@@ -603,9 +603,9 @@ However, when we try to apply this function to our objects, we get an error:
 Characters 12-41:
 Error: Type square stack = < pop : square option; push : square -> unit >
        is not a subtype of
-         shape stack = < pop : shape option; push : shape -> unit > 
+         shape stack = < pop : shape option; push : shape -> unit >
        Type shape = < area : float > is not a subtype of
-         square = < area : float; width : int > 
+         square = < area : float; width : int >
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of
@@ -716,7 +716,7 @@ support this kind of pattern analysis. It is also not obvious that
 object-oriented programming is well-suited for this situation. Pattern
 matching seems like a better fit:
 
-```ocaml file=../../examples/code/objects/is_barbell.ml
+```ocaml file=examples/is_barbell.ml
 let is_barbell = function
 | [Circle r1; Line _; Circle r2] when r1 = r2 -> true
 | _ -> false
@@ -726,7 +726,7 @@ Regardless, there is a solution if you find yourself in this situation, which
 is to augment the classes with variants. You can define a method `variant`
 that injects the actual object into a variant type:
 
-```ocaml file=../../examples/code/objects/narrowing.ml,part=1
+```ocaml file=examples/narrowing.ml,part=1
 type shape = < variant : repr; area : float>
 and circle = < variant : repr; area : float; radius : int >
 and line = < variant : repr; area : float; length : int >

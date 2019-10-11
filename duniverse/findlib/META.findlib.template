@@ -1,5 +1,0 @@
-# DUNE_GEN
-description = "Package manager"
-requires = "findlib.internal"
-requires(toploop) += "findlib.top"
-requires(create_toploop) += "findlib.top"

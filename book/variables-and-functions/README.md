@@ -370,7 +370,7 @@ right-associative. The type signature of `abs_diff` can therefore be
 parenthesized as follows. [curried functions]{.idx}[functions/curried
 functions]{.idx}
 
-```ocaml file=../../examples/code/variables-and-functions/abs_diff.mli
+```ocaml file=examples/abs_diff.mli
 val abs_diff : int -> (int -> int)
 ```
 
@@ -707,7 +707,7 @@ Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
        Type string list is not compatible with type
-         string list -> string list 
+         string list -> string list
 ```
 
 The type error is a little bewildering at first glance. What's going on is
@@ -819,14 +819,14 @@ Labeled arguments are useful in a few different cases:
   Boolean flag, which indicates whether that array will ever shrink when
   elements are removed.
 
-```ocaml file=../../examples/code/variables-and-functions/htable_sig1.ml
+```ocaml file=examples/htable_sig1.ml
 val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
 ```
 
 The signature makes it hard to divine the meaning of those two arguments.
   but with labeled arguments, we can make the intent immediately clear.
 
-```ocaml file=../../examples/code/variables-and-functions/htable_sig2.ml
+```ocaml file=examples/htable_sig2.ml
 val create_hashtable :
   init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
 ```
@@ -840,7 +840,7 @@ Choosing label names well is especially important for Boolean values, since
   the same type. For example, consider this signature for a function that
   extracts a substring.
 
-```ocaml file=../../examples/code/variables-and-functions/substring_sig1.ml
+```ocaml file=examples/substring_sig1.ml
 val substring: string -> int -> int -> string
 ```
 
@@ -848,7 +848,7 @@ Here, the two `ints` are the starting position and length of the substring
   to extract, respectively, but you wouldn't know that from the type
   signature. We can make the signature more informative by adding labels.
 
-```ocaml file=../../examples/code/variables-and-functions/substring_sig2.ml
+```ocaml file=examples/substring_sig2.ml
 val substring: string -> pos:int -> len:int -> string
 ```
 
@@ -1084,7 +1084,7 @@ Even worse, it would be perfectly consistent for `f` to take an optional
 argument instead of a labeled one, which could lead to this type signature
 for `numeric_deriv`.
 
-```ocaml file=../../examples/code/variables-and-functions/numerical_deriv_alt_sig.mli
+```ocaml file=examples/numerical_deriv_alt_sig.mli
 val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float

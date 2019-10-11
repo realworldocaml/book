@@ -1,3 +1,0 @@
-(executable
-  (name      md5)
-  (libraries core cryptokit))

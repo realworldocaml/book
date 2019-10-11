@@ -33,7 +33,14 @@ let from_string s =
   | [base_name; sl] -> Ok {base_name; sub_lib = Some sl}
   | _ -> invalid ()
 
-module Set = Set.Make(struct
+module Set = struct
+  include Set.Make(struct
     type nonrec t = t
     let compare = compare
   end)
+
+  let to_package_set t =
+    to_seq t
+    |> Seq.map (fun t -> t.base_name)
+    |> Astring.String.Set.of_seq
+end

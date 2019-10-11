@@ -21,6 +21,16 @@ let x = 2
 
 ```sh
  $ for i in `seq 1 10`; do echo $i; done
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+ 10
 ```
 
 ### Not testing cram
@@ -39,4 +49,12 @@ let () = print_endline (string_of_int x)
 ```ocaml
    # print_endline "42";;
    42
+```
+
+## Skipped blocks
+
+This block should not be executed by the tests:
+
+```ocaml skip
+let () = assert false
 ```
