@@ -6,7 +6,12 @@ let (/) = Filename.concat
 (******************************************************************************)
 (* HTML fragments                                                             *)
 (******************************************************************************)
-let head_item : Html.item =
+let head_item ?(page_title=None) () : Html.item =
+  let site_title = "Real World OCaml" in
+  let t = match page_title with
+      | None -> site_title
+      | Some t' -> sprintf "%s - %s" t' site_title
+  in
   let open Html in
   head [
     meta ~a:["charset","utf-8"] [];
@@ -14,7 +19,7 @@ let head_item : Html.item =
       "name","viewport";
       "content","width=device-width, initial-scale=1.0"
     ] [];
-    title [`Data "Real World OCaml"];
+    title [`Data t];
     link ~a:["rel","stylesheet"; "href","css/app.css"] [];
     link ~a:["rel","stylesheet"; "href","css/prism.css"] [];
     script ~a:["src","js/min/modernizr-min.js"] [];
@@ -138,10 +143,11 @@ let next_chapter_footer next_chapter : Html.item option =
     front page and only chapter pages contain links to a next chapter,
     so these are additional arguments. *)
 let main_template ?(next_chapter_footer=None)
+    ?(page_title=None)
     ~title_bar ~content () : Html.t =
   let open Html in
   [html ~a:["class", "js flexbox fontface"; "lang", "en"; "style", ""] [
-    head [head_item];
+    head_item ~page_title ();
     body (List.filter_map ~f:Fn.id [
       Some title_bar;
       Some (div ~a:["class","wrap"] content);
@@ -235,7 +241,8 @@ let make_chapter_page chapters chapter_file
   ]
   in
   let content = Index.idx_to_indexterm content in
-  main_template ~title_bar:title_bar ~next_chapter_footer ~content ()
+  let page_title = Some chapter.title in
+  main_template ~title_bar:title_bar ~next_chapter_footer ~content ~page_title ()
 
 let make_simple_page file =
   Html.of_file file >>= fun content ->
