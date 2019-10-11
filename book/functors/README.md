@@ -177,12 +177,12 @@ primitives for interacting with intervals:
       if Endpoint.compare low high > 0 then Empty
       else Interval (low,high)
 
-    (** Returns true iff the interval is empty *)
+    (** Returns true if the interval is empty *)
     let is_empty = function
       | Empty -> true
       | Interval _ -> false
 
-    (** [contains t x] returns true iff [x] is contained in the
+    (** [contains t x] returns true if [x] is contained in the
         interval [t] *)
     let contains t x =
       match t with
