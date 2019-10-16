@@ -491,7 +491,7 @@ let () =
 ```
 
 The `filename` parameter to `do_hash` is now a `string option` type. This is
-resolved into a string via `get_contents` to determine whether to rad
+resolved into a string via `get_contents` to determine whether to read
 the standard input or a file, and then the rest of the command is similar to
 our previous examples.
 

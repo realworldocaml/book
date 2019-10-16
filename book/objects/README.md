@@ -620,7 +620,7 @@ cannot be a subtype of `< push: shape -> unit; pop: shape option >`.
 
 Still, the `total_area` function should be fine, in principle. It doesn't
 call `push`, so it isn't making that error. To make it work, we need to use a
-more precise type that indicates we are not going to be using the `set`
+more precise type that indicates we are not going to be using the `push`
 method. We define a type `readonly_stack` and confirm that we can coerce the
 list of `stack`s to it:
 
