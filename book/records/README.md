@@ -62,8 +62,7 @@ We can construct a concrete record by calling the function on a line from the
 file.
 
 ```ocaml env=main
-# let ssh = service_info_of_string
-  "ssh 22/udp # SSH Remote Login Protocol"
+# let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol"
 val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
 ```
 
