@@ -6,7 +6,7 @@ let (/) = Filename.concat
 (******************************************************************************)
 (* HTML fragments                                                             *)
 (******************************************************************************)
-let head_item chapter_title : Html.item =
+let head_item ?chapter_title () : Html.item =
   let site_title = "Real World OCaml" in
   let page_title = match chapter_title with
       | None -> site_title
@@ -143,11 +143,14 @@ let next_chapter_footer next_chapter : Html.item option =
     front page and only chapter pages contain links to a next chapter,
     so these are additional arguments. *)
 let main_template ?(next_chapter_footer=None)
-    ?page_title
+    ?chapter_title
     ~title_bar ~content () : Html.t =
+  let head_html = match chapter_title with
+    | None -> head_item ()
+    | Some str -> head_item ~chapter_title:str () in
   let open Html in
   [html ~a:["class", "js flexbox fontface"; "lang", "en"; "style", ""] [
-    head_item page_title;
+    head_html;
     body (List.filter_map ~f:Fn.id [
       Some title_bar;
       Some (div ~a:["class","wrap"] content);
@@ -241,8 +244,8 @@ let make_chapter_page chapters chapter_file
   ]
   in
   let content = Index.idx_to_indexterm content in
-  let page_title = chapter.title in
-  main_template ~title_bar:title_bar ~next_chapter_footer ~content ~page_title ()
+  let chapter_title = chapter.title in
+  main_template ~title_bar:title_bar ~next_chapter_footer ~content ~chapter_title ()
 
 let make_simple_page file =
   Html.of_file file >>= fun content ->
