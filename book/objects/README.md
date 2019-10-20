@@ -382,7 +382,8 @@ area.  [width subtyping]{.idx}[subtyping/width subtyping]{.idx}
 # type shape = < area : float >
 type shape = < area : float >
 ```
-We can also add a type `square` representing a specific kind of shape.
+Now let's add a type representing a specific kind of shape, as well as
+a function for creating objects of that type.
 
 ```ocaml
 # type square = < area : float; width : int >
@@ -395,18 +396,18 @@ type square = < area : float; width : int >
 val square : int -> < area : float; width : int > = <fun>
 ```
 
-A `square` has a method `area` just like a `shape`, and an additional method
-`width`. Still, we expect a `square` to be a `shape`, and it is. The coercion
-`:>` must be explicit:
+A `square` has a method `area` just like a `shape`, and an additional
+method `width`. Still, we expect a `square` to be a `shape`, and it
+is. Note, however, that the coercion `:>` must be explicit:
 
 ```ocaml env=subtyping
-# let shape w : shape = square w
-Characters 22-30:
+# (square 10 : shape)
+Characters 1-10:
 Error: This expression has type < area : float; width : int >
        but an expression was expected of type shape
        The second object type has no method width
-# let shape w : shape = (square w :> shape)
-val shape : int -> shape = <fun>
+# (square 10 :> shape)
+- : shape = <obj>
 ```
 
 This form of object subtyping is called *width* subtyping. Width
@@ -417,12 +418,13 @@ subtype of `shape` because it implements all of the methods of
 
 ### Depth Subtyping
 
-We can also use *depth* subtyping with objects. Depth subtyping allows us
-coerce an object if its individual methods could safely be coerced. So an
-object type `< m: t1 >` is a subtype of `< m: t2 >` if `t1` is a subtype of
-`t2`. [depth subtyping]{.idx}[subtyping/depth subtyping]{.idx}
+We can also use *depth* subtyping with objects. Depth subtyping allows
+us coerce an object if its individual methods could safely be
+coerced. So an object type `< m: t1 >` is a subtype of `< m: t2 >` if
+`t1` is a subtype of `t2`. [depth subtyping]{.idx}[subtyping/depth
+subtyping]{.idx}
 
-For example, we can create two objects with a `shape` method:
+First, let's add a new shape type, `circle`:
 
 ```ocaml env=subtyping
 # type circle = < area : float; radius : int >
@@ -433,12 +435,23 @@ type circle = < area : float; radius : int >
     method radius = r
   end
 val circle : int -> < area : float; radius : int > = <fun>
+```
 
+Using that, let's create a couple of objects that each have a `shape`
+method, one returning a shape of type `circle`:
+
+```ocaml env=subtyping
 # let coin = object
     method shape = circle 5
     method color = "silver"
   end
-val coin : < color : string; shape : < area : float; radius : int > > = <obj>
+val coin : < color : string; shape : < area : float; radius : int > >
+= <obj>
+```
+
+And the other returning a shape of type `square`:
+
+```ocaml env=subtyping
 # let map = object
     method shape = square 10
   end
@@ -479,9 +492,10 @@ val c : const = `Int 3
 
 ### Variance
 
-What about types built from object types? If a `square` is a `shape`, we
-expect a `square list` to be a `shape list`. OCaml does indeed allow such
-coercions:[variance]{.idx #var}[subtyping/variance and]{.idx #SUBvar}
+What about types built from object types? If a `square` is a `shape`,
+we expect a `square list` to be a `shape list`. OCaml does indeed
+allow such coercions:[variance]{.idx #var}[subtyping/variance
+and]{.idx #SUBvar}
 
 ```ocaml env=subtyping
 # let squares: square list = [ square 10; square 20 ]
@@ -490,10 +504,10 @@ val squares : square list = [<obj>; <obj>]
 val shapes : shape list = [<obj>; <obj>]
 ```
 
-Note that this relies on lists being immutable. It would not be safe to treat
-a `square array` as a `shape array` because it would allow you to store
-nonsquare shapes into what should be an array of squares. OCaml recognizes
-this and does not allow the coercion:
+Note that this relies on lists being immutable. It would not be safe
+to treat a `square array` as a `shape array` because it would allow
+you to store nonsquare shapes into what should be an array of
+squares. OCaml recognizes this and does not allow the coercion:
 
 ```ocaml env=subtyping
 # let square_array: square array = [| square 10; square 20 |]
@@ -509,11 +523,11 @@ Error: Type square array is not a subtype of shape array
 We say that `'a list` is *covariant* (in `'a`), while `'a array` is
 *invariant*. [invariance]{.idx}[covariance]{.idx}
 
-Subtyping function types requires a third class of variance. A function with
-type `square -> string` cannot be used with type `shape -> string` because it
-expects its argument to be a `square` and would not know what to do with a
-`circle`. However, a function with type `shape -> string`*can* safely be used
-with type `square -> string`:
+Subtyping function types requires a third class of variance. A
+function with type `square -> string` cannot be used with type `shape
+-> string` because it expects its argument to be a `square` and would
+not know what to do with a `circle`. However, a function with type
+`shape -> string`*can* safely be used with type `square -> string`:
 
 ```ocaml env=subtyping
 # let shape_to_string: shape -> string =
@@ -524,9 +538,9 @@ val shape_to_string : shape -> string = <fun>
 val square_to_string : square -> string = <fun>
 ```
 
-We say that `'a -> string` is *contravariant* in `'a`. In general, function
-types are contravariant in their arguments and covariant in their results.
-[contravariance]{.idx}
+We say that `'a -> string` is *contravariant* in `'a`. In general,
+function types are contravariant in their arguments and covariant in
+their results.  [contravariance]{.idx}
 
 ::: {data-type=note}
 ##### Variance Annotations
