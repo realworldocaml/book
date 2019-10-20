@@ -511,6 +511,9 @@ here.
 ```ocaml env=main2
 # let create_log_entry ~session_id ~important message : Log_entry.t =
     { time = Time_ns.now (); session_id; important; message }
+Warning 40: this record of type Log_entry.t contains fields that are
+not visible in the current scope: time session_id important message.
+They will not be selected if the type becomes unknown.
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
