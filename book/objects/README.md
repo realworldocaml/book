@@ -145,21 +145,21 @@ values on the stack.
 
 ## Object Polymorphism
 
-Like polymorphic variants, methods can be used without an explicit type
-declaration: [polymorphism/in objects]{.idx}[objects/polymorphism of]{.idx}
+Like polymorphic variants, methods can be used without an explicit
+type declaration: [polymorphism/in objects]{.idx}[objects/polymorphism
+of]{.idx}
 
 ```ocaml env=polymorphism
 # let area sq = sq#width * sq#width
 val area : < width : int; .. > -> int = <fun>
 # let minimize sq : unit = sq#resize 1
 val minimize : < resize : int -> unit; .. > -> unit = <fun>
-# let limit sq =
-  if (area sq) > 100 then minimize sq
+# let limit sq = if (area sq) > 100 then minimize sq
 val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>
 ```
 
-As you can see, object types are inferred automatically from the methods that
-are invoked on them.
+As you can see, object types are inferred automatically from the
+methods that are invoked on them.
 
 The type system will complain if it sees incompatible uses of the same
 method:
@@ -198,7 +198,7 @@ Error: This expression has type < name : string; width : int >
 ```
 
 ::: {data-type=note}
-### Elisions Are Polymorphic
+##### Elisions Are Polymorphic
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods." It may not be apparent from the syntax, but an elided object type
@@ -224,33 +224,51 @@ records what polymorphic variants are to ordinary variants.
 :::
 
 
-An object of type `< pop : int option; .. >` can be any object with a method
-`pop : int option`; it doesn't matter how it is implemented. When the method
-`#pop` is invoked, the actual method that is run is determined by the object:
+An object of type `< pop : int option; .. >` can be any object with a
+method `pop : int option`; it doesn't matter how it is
+implemented. When the method `#pop` is invoked, the actual method that
+is run is determined by the object.  Consider the following function.
 
-```ocaml env=stack,non-deterministic
+```ocaml env=stack
 # let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop
 val print_pop : < pop : int option; .. > -> unit = <fun>
+```
+
+We can run it on the stack type we defined above, which is based on
+linked lists.
+
+```ocaml env=stack
 # print_pop (stack [5;4;3;2;1])
 Popped: 5
 - : unit = ()
-# module Time_ns = Core_kernel.Time_ns
-  let t = object
-    method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
+```
+
+But we could also create a totally different implementation of stacks,
+using Base's array-based `Stack` module.
+
+```ocaml env=stack
+# let array_stack l = object
+    val stack = Stack.of_list l
+    method pop = Stack.pop stack
   end
-module Time_ns = Core_kernel.Time_ns
-val t : < pop : int option > = <obj>
-# print_pop t
-Popped: 1521907632234117787
+val array_stack : 'a list -> < pop : 'a option > = <fun>
+```
+
+And `print_pop` will work just as well on this kind of stack object,
+despite having a completely different implementation.
+
+```ocaml env=stack
+# print_pop (array_stack [5;4;3;2;1])
+Popped: 5
 - : unit = ()
 ```
 
 ## Immutable Objects
 
 Many people consider object-oriented programming to be intrinsically
-imperative, where an object is like a state machine. Sending a message to an
-object causes it to change state, possibly sending messages to other objects.
-[objects/immutabile]{.idx}
+imperative, where an object is like a state machine. Sending a message
+to an object causes it to change state, possibly sending messages to
+other objects.  [objects/immutable]{.idx}
 
 Indeed, in many programs this makes sense, but it is by no means required.
 Let's define a function that creates immutable stack objects:
@@ -352,27 +370,25 @@ and]{.idx #OBsub}
 
 ### Width Subtyping
 
-To explore this, let's define some simple object types for geometric shapes.
-The generic type `shape` has a method to compute the area, and `square` and
-`circle` are specific kinds of shapes: [geometric shapes]{.idx}[width
-subtyping]{.idx}[subtyping/width subtyping]{.idx}
+To explore this, let's define some simple object types for geometric
+shapes.  The generic type `shape` just has a method to compute the
+area.  [width subtyping]{.idx}[subtyping/width subtyping]{.idx}
 
-```ocaml file=examples/subtyping.ml,part=1
+```ocaml
+# type shape = < area : float >
 type shape = < area : float >
+```
+We can also add a type `square` representing a specific kind of shape.
 
+```ocaml
+# type square = < area : float; width : int >
 type square = < area : float; width : int >
 
-let square w = object
-  method area = Float.of_int (w * w)
-  method width = w
-end
-
-type circle = < area : float; radius : int >
-
-let circle r = object
-  method area = 3.14 *. (Float.of_int r) ** 2.0
-  method radius = r
-end
+# let square w = object
+    method area = Float.of_int (w * w)
+    method width = w
+  end
+val square : int -> < area : float; width : int > = <fun>
 ```
 
 A `square` has a method `area` just like a `shape`, and an additional method
@@ -389,10 +405,11 @@ Error: This expression has type < area : float; width : int >
 val shape : int -> shape = <fun>
 ```
 
-This form of object subtyping is called *width* subtyping. Width subtyping
-means that an object type *A* is a subtype of *B*, if *A* has all of the
-methods of *B*, and possibly more. A `square` is a subtype of `shape` because
-it implements all of the methods of `shape` (the `area` method).
+This form of object subtyping is called *width* subtyping. Width
+subtyping means that an object type *A* is a subtype of *B*, if *A*
+has all of the methods of *B*, and possibly more. A `square` is a
+subtype of `shape` because it implements all of the methods of
+`shape`, which in this case means the `area` method.
 
 ### Depth Subtyping
 
@@ -404,6 +421,15 @@ object type `< m: t1 >` is a subtype of `< m: t2 >` if `t1` is a subtype of
 For example, we can create two objects with a `shape` method:
 
 ```ocaml env=subtyping
+# type circle = < area : float; radius : int >
+type circle = < area : float; radius : int >
+
+# let circle r = object
+    method area = 3.14 *. (Float.of_int r) **. 2.0
+    method radius = r
+  end
+val circle : int -> < area : float; radius : int > = <fun>
+
 # let coin = object
     method shape = circle 5
     method color = "silver"
@@ -571,12 +597,15 @@ module VarEither :
 For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles:
 
-```ocaml file=examples/subtyping.ml,part=2
-type 'a stack = < pop: 'a option; push: 'a -> unit >
+```ocaml
+# type 'a stack = < pop: 'a option; push: 'a -> unit >
+type 'a stack = < pop : 'a option; push : 'a -> unit >
 
-let square_stack: square stack = stack [square 30; square 10]
+# let square_stack: square stack = stack [square 30; square 10]
+val square_stack : square stack = <obj>
 
-let circle_stack: circle stack = stack [circle 20; circle 40]
+# let circle_stack: circle stack = stack [circle 20; circle 40]
+val circle_stack : circle stack = <obj>
 ```
 
 If we wanted to write a function that took a list of such stacks and found
@@ -716,30 +745,40 @@ support this kind of pattern analysis. It is also not obvious that
 object-oriented programming is well-suited for this situation. Pattern
 matching seems like a better fit:
 
-```ocaml file=examples/is_barbell.ml
-let is_barbell = function
-| [Circle r1; Line _; Circle r2] when r1 = r2 -> true
-| _ -> false
+```ocaml
+# type shape = Circle of circle | Line of
+Characters 40-42:
+Error: Syntax error
+# let is_barbell = function
+  | [Circle r1; Line _; Circle r2] when r1 = r2 -> true
+  | _ -> false
+Characters 31-37:
+Error: Unbound constructor Circle
 ```
 
 Regardless, there is a solution if you find yourself in this situation, which
 is to augment the classes with variants. You can define a method `variant`
 that injects the actual object into a variant type:
 
-```ocaml file=examples/narrowing.ml,part=1
-type shape = < variant : repr; area : float>
-and circle = < variant : repr; area : float; radius : int >
-and line = < variant : repr; area : float; length : int >
-and repr =
- | Circle of circle
- | Line of line;;
+```ocaml
+# type shape = < variant : repr; area : float>
+  and circle = < variant : repr; area : float; radius : int >
+  and line = < variant : repr; area : float; length : int >
+  and repr =
+   | Circle of circle
+   | Line of line;;
+type shape = < area : float; variant : repr >
+and circle = < area : float; radius : int; variant : repr >
+and line = < area : float; length : int; variant : repr >
+and repr = Circle of circle | Line of line
 
-let is_barbell = function
-| [s1; s2; s3] ->
-   (match s1#variant, s2#variant, s3#variant with
-    | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -> true
-    | _ -> false)
-| _ -> false;;
+# let is_barbell = function
+  | [s1; s2; s3] ->
+     (match s1#variant, s2#variant, s3#variant with
+      | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -> true
+      | _ -> false)
+  | _ -> false;;
+val is_barbell : < variant : repr; .. > list -> bool = <fun>
 ```
 
 This pattern works, but it has drawbacks. In particular, the recursive type
