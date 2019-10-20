@@ -289,71 +289,75 @@ val imm_stack :
   'a list -> (< pop : ('a * 'b) option; push : 'a -> 'b > as 'b) = <fun>
 ```
 
-The key parts of this implementation are in the `pop` and `push` methods. The
-expression `{< ... >}` produces a copy of the current object, with the same
-type, and the specified fields updated. In other words, the `push hd` method
-produces a copy of the object, with `v` replaced by `hd :: v`. The original
-object is not modified:
+The key parts of this implementation are in the `pop` and `push`
+methods. The expression `{< ... >}` produces a copy of the current
+object, with the same type, and the specified fields updated. In other
+words, the `push hd` method produces a copy of the object, with `v`
+replaced by `hd :: v`. The original object is not modified:
 
 ```ocaml env=immutable
 # let s = imm_stack [3; 2; 1]
 val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-# let t = s#push 4
-val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
+# let r = s#push 4
+val r : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
 # s#pop
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
 Some (3, <obj>)
-# t#pop
+# r#pop
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
 Some (4, <obj>)
 ```
 
-There are some restrictions on the use of the expression `{< ... >}`. It can
-be used only within a method body, and only the values of fields may be
-updated. Method implementations are fixed at the time the object is created;
-they cannot be changed <span class="keep-together">dynamically</span>.
+There are some restrictions on the use of the expression `{<
+... >}`. It can be used only within a method body, and only the values
+of fields may be updated. Method implementations are fixed at the time
+the object is created; they cannot be changed <span
+class="keep-together">dynamically</span>.
 
 ## When to Use Objects
 
-You might wonder when to use objects in OCaml, which has a multitude of
-alternative mechanisms to express the similar concepts. First-class modules
-are more expressive (a module can include types, while classes and objects
-cannot). Modules, functors, and data types also offer a wide range of ways to
-express program structure. In fact, many seasoned OCaml programmers rarely
-use classes and objects, if at all. [first-class modules/vs.
-objects]{.idx}[objects/benefits and drawbacks of]{.idx}
+You might wonder when to use objects in OCaml, which has a multitude
+of alternative mechanisms to express the similar concepts. First-class
+modules are more expressive (a module can include types, while classes
+and objects cannot). Modules, functors, and data types also offer a
+wide range of ways to express program structure. In fact, many
+seasoned OCaml programmers rarely use classes and objects, if at
+all. [first-class modules/vs.  objects]{.idx}[objects/benefits and
+drawbacks of]{.idx}
 
 Objects have some advantages over records: they don't require type
-definitions, and their support for row polymorphism makes them more flexible.
-However, the heavy syntax and additional runtime cost means that objects are
-rarely used in place of records.
+definitions, and their support for row polymorphism makes them more
+flexible.  However, the heavy syntax and additional runtime cost means
+that objects are rarely used in place of records.
 
-The real benefits of objects come from the class system. Classes support
-inheritance and open recursion. Open recursion allows interdependent parts of
-an object to be defined separately. This works because calls between the
-methods of an object are determined when the object is instantiated, a form
-of *late* binding. This makes it possible (and necessary) for one method to
-refer to other methods in the object without knowing statically how they will
-be implemented. [late binding]{.idx}[recursion/open recursion]{.idx}[open
+The real benefits of objects come from the class system. Classes
+support inheritance and open recursion. Open recursion allows
+interdependent parts of an object to be defined separately. This works
+because calls between the methods of an object are determined when the
+object is instantiated, a form of *late* binding. This makes it
+possible (and necessary) for one method to refer to other methods in
+the object without knowing statically how they will be
+implemented. [late binding]{.idx}[recursion/open recursion]{.idx}[open
 recursion]{.idx}[classes/benefits of]{.idx}
 
-In contrast, modules use early binding. If you want to parameterize your
-module code so that some part of it can be implemented later, you would write
-a function or functor. This is more explicit, but often more verbose than
-overriding a method in a class.
+In contrast, modules use early binding. If you want to parameterize
+your module code so that some part of it can be implemented later, you
+would write a function or functor. This is more explicit, but often
+more verbose than overriding a method in a class.
 
-In general, a rule of thumb is: use classes and objects in situations where
-open recursion is a big win. Two good examples are Xavier Leroy's
-[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit), which
-provides a variety of cryptographic primitives that can be combined in
-building-block style; and the
-[Camlimages](http://cristal.inria.fr/camlimages/) library, which manipulates
-various graphical file formats. Camlimages also provides a module-based
-version of the same library, letting you choose between functional and
-object-oriented styles depending on your problem domain. [Camlimages
-library]{.idx}[Cryptokit
-library]{.idx}[libraries/Cryptokit]{.idx}[libraries/Camlimages]{.idx}[external
-libraries/Camlimages]{.idx}[external libraries/Cryptokit]{.idx}
+In general, a rule of thumb is: use classes and objects in situations
+where open recursion is a big win. Two good examples are Xavier
+Leroy's
+[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit),
+which provides a variety of cryptographic primitives that can be
+combined in building-block style; and the
+[Camlimages](http://cristal.inria.fr/camlimages/) library, which
+manipulates various graphical file formats. Camlimages also provides a
+module-based version of the same library, letting you choose between
+functional and object-oriented styles depending on your problem
+domain. [Camlimages library]{.idx} [Cryptokit library]{.idx}
+[libraries/Cryptokit]{.idx} [libraries/Camlimages]{.idx} [external
+libraries/Camlimages]{.idx} [external libraries/Cryptokit]{.idx}
 
 We'll introduce you to classes, and examples using open recursion, in
 [Classes](classes.html#classes){data-type=xref}.
