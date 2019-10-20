@@ -633,8 +633,9 @@ As you can see, this now allows the coercion once again.
 
 :::
 
-For a more concrete example of variance, let's create some stacks containing
-shapes by applying our `stack` function to some squares and some circles:
+For a more concrete example of variance, let's create some stacks
+containing shapes by applying our `stack` function to some squares and
+some circles:
 
 ```ocaml
 # type 'a stack = < pop: 'a option; push: 'a -> unit >
@@ -664,7 +665,8 @@ the total area of their shapes, we might try:
 val total_area : shape stack list -> float = <fun>
 ```
 
-However, when we try to apply this function to our objects, we get an error:
+However, when we try to apply this function to our objects, we get an
+error:
 
 ```ocaml env=subtyping
 # total_area [(square_stack :> shape stack); (circle_stack :> shape stack)]
@@ -677,10 +679,11 @@ Error: Type square stack = < pop : square option; push : square -> unit >
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of
-`shape stack`. The problem is with the `push` method. For `shape stack`, the
-`push` method takes an arbitrary `shape`. So if we could coerce a
-`square stack` to a `shape stack`, then it would be possible to push an
-arbitrary shape onto `square stack`, which would be an error.
+`shape stack`. The problem is with the `push` method. For `shape
+stack`, the `push` method takes an arbitrary `shape`. So if we could
+coerce a `square stack` to a `shape stack`, then it would be possible
+to push an arbitrary shape onto `square stack`, which would be an
+error.
 
 Another way of looking at this is that `< push: 'a -> unit; .. >` is
 contravariant in `'a`, so `< push: square -> unit; pop: square option >`
@@ -711,44 +714,48 @@ val total_area : shape readonly_stack list -> float = <fun>
 - : float = 7280.
 ```
 
-Aspects of this section may seem fairly complicated, but it should be pointed
-out that this typing *works*, and in the end, the type annotations are fairly
-minor. In most typed object-oriented languages, these coercions would simply
-not be possible. For example, in C++, a STL type `list<T>` is invariant in
-`T`, so it is simply not possible to use `list<square>` where `list<shape>`
-is expected (at least safely). The situation is similar in Java, although
-Java has an escape hatch that allows the program to fall back to dynamic
-typing. The situation in OCaml is much better: it works, it is statically
-checked, and the annotations are pretty
-simple.<a data-type="indexterm" data-startref="var">&nbsp;</a><a data-type="indexterm" data-startref="SUBvar">&nbsp;</a>
+Aspects of this section may seem fairly complicated, but it should be
+pointed out that this typing *works*, and in the end, the type
+annotations are fairly minor. In most typed object-oriented languages,
+these coercions would simply not be possible. For example, in C++, a
+STL type `list<T>` is invariant in `T`, so it is simply not possible
+to use `list<square>` where `list<shape>` is expected (at least
+safely). The situation is similar in Java, although Java has an escape
+hatch that allows the program to fall back to dynamic typing. The
+situation in OCaml is much better: it works, it is statically checked,
+and the annotations are pretty simple.<a data-type="indexterm"
+data-startref="var">&nbsp;</a><a data-type="indexterm"
+data-startref="SUBvar">&nbsp;</a>
 
 ### Narrowing
 
-Narrowing, also called *down casting*, is the ability to coerce an object to
-one of its subtypes. For example, if we have a list of shapes `shape list`,
-we might know (for some reason) what the actual type of each shape is.
-Perhaps we know that all objects in the list have type `square`. In this
-case, *narrowing* would allow the recasting of the object from type `shape`
-to type `square`. Many languages support narrowing through dynamic type
-checking. For example, in Java, a coercion `(Square) x` is allowed if the
-value `x` has type `Square` or one of its subtypes; otherwise the coercion
+Narrowing, also called *down casting*, is the ability to coerce an
+object to one of its subtypes. For example, if we have a list of
+shapes `shape list`, we might know (for some reason) what the actual
+type of each shape is.  Perhaps we know that all objects in the list
+have type `square`. In this case, *narrowing* would allow the
+recasting of the object from type `shape` to type `square`. Many
+languages support narrowing through dynamic type checking. For
+example, in Java, a coercion `(Square) x` is allowed if the value `x`
+has type `Square` or one of its subtypes; otherwise the coercion
 throws an exception. [dynamic type checking]{.idx}[down
 casting]{.idx}[narrowing]{.idx}[objects/narrowing and]{.idx}
 
 Narrowing is *not permitted* in OCaml. Period.
 
-Why? There are two reasonable explanations, one based on a design principle,
-and another technical (the technical reason is simple: it is hard to
-implement).
+Why? There are two reasonable explanations, one based on a design
+principle, and another technical (the technical reason is simple: it
+is hard to implement).
 
-The design argument is this: narrowing violates abstraction. In fact, with a
-structural typing system like in OCaml, narrowing would essentially provide
-the ability to enumerate the methods in an object. To check whether an object
-`obj` has some method `foo : int`, one would attempt a coercion
-`(obj :> < foo : int >)`.
+The design argument is this: narrowing violates abstraction. In fact,
+with a structural typing system like in OCaml, narrowing would
+essentially provide the ability to enumerate the methods in an
+object. To check whether an object `obj` has some method `foo : int`,
+one would attempt a coercion `(obj :> < foo : int >)`.
 
-More pragmatically, narrowing leads to poor object-oriented style. Consider
-the following Java code, which returns the name of a shape object:
+More pragmatically, narrowing leads to poor object-oriented
+style. Consider the following Java code, which returns the name of a
+shape object:
 
 ```java
 String GetShapeName(Shape s) {
