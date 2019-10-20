@@ -962,7 +962,7 @@ good idea to write one's own hash function, or to use the ones provided by
 ```
 
 Note that rather than declaring a type and using `[@@deriving hash]` to
-invoke ppx_hash, we use `[%%hash]`, a shorthand for creating a hash function
+invoke ppx_hash, we use `[%hash]`, a shorthand for creating a hash function
 inline in an expression.
 :::
 
