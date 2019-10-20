@@ -370,7 +370,7 @@ end
 type circle = < area : float; radius : int >
 
 let circle r = object
-  method area = 3.14 *. (Float.of_int r) ** 2.0
+  method area = 3.14 *. (Float.of_int r) **. 2.0
   method radius = r
 end
 ```
