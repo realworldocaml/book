@@ -792,30 +792,29 @@ object-oriented programming is well-suited for this situation. Pattern
 matching seems like a better fit:
 
 ```ocaml
-# type shape = Circle of circle | Line of
-Characters 40-42:
-Error: Syntax error
+# type shape = Circle of { radius : int } | Line of { length: int }
+type shape = Circle of { radius : int; } | Line of { length : int; }
 # let is_barbell = function
-  | [Circle r1; Line _; Circle r2] when r1 = r2 -> true
+  | [Circle {radius=r1}; Line _; Circle {radius=r2}] when r1 = r2 -> true
   | _ -> false
-Characters 31-37:
-Error: Unbound constructor Circle
+val is_barbell : shape list -> bool = <fun>
 ```
 
-Regardless, there is a solution if you find yourself in this situation, which
-is to augment the classes with variants. You can define a method `variant`
-that injects the actual object into a variant type:
+Regardless, there is a solution if you find yourself in this
+situation, which is to augment the classes with variants. You can
+define a method `variant` that injects the actual object into a
+variant type.
 
 ```ocaml
-# type shape = < variant : repr; area : float>
-  and circle = < variant : repr; area : float; radius : int >
-  and line = < variant : repr; area : float; length : int >
+# type shape = < variant : repr >
+  and circle = < variant : repr; radius : int >
+  and line = < variant : repr; length : int >
   and repr =
    | Circle of circle
    | Line of line;;
-type shape = < area : float; variant : repr >
-and circle = < area : float; radius : int; variant : repr >
-and line = < area : float; length : int; variant : repr >
+type shape = < variant : repr >
+and circle = < radius : int; variant : repr >
+and line = < length : int; variant : repr >
 and repr = Circle of circle | Line of line
 
 # let is_barbell = function
@@ -827,19 +826,21 @@ and repr = Circle of circle | Line of line
 val is_barbell : < variant : repr; .. > list -> bool = <fun>
 ```
 
-This pattern works, but it has drawbacks. In particular, the recursive type
-definition should make it clear that this pattern is essentially equivalent
-to using variants, and that objects do not provide much value here.
+This pattern works, but it has drawbacks. In particular, the recursive
+type definition should make it clear that this pattern is essentially
+equivalent to using variants, and that objects do not provide much
+value here.
 
 ### Subtyping Versus Row Polymorphism {#subtyping-vs.-row-polymorphism}
 
-There is considerable overlap between subtyping and row polymorphism. Both
-mechanisms allow you to write functions that can be applied to objects of
-different types. In these cases, row polymorphism is usually preferred over
-subtyping because it does not require explicit coercions, and it preserves
-more type information, allowing functions like the following:
-[polymorphism/row polymorphism]{.idx}[row polymorphism]{.idx}[subtyping/vs.
-row polymorphism]{.idx}
+There is considerable overlap between subtyping and row
+polymorphism. Both mechanisms allow you to write functions that can be
+applied to objects of different types. In these cases, row
+polymorphism is usually preferred over subtyping because it does not
+require explicit coercions, and it preserves more type information,
+allowing functions like the following: [polymorphism/row
+polymorphism]{.idx}[row polymorphism]{.idx}[subtyping/vs.  row
+polymorphism]{.idx}
 
 ```ocaml env=row_polymorphism
 # let remove_large l =
