@@ -447,8 +447,7 @@ method, one returning a shape of type `circle`:
     method shape = circle 5
     method color = "silver"
   end
-val coin : < color : string; shape : < area : float; radius : int > >
-= <obj>
+val coin : < color : string; shape : < area : float; radius : int > > = <obj>
 ```
 
 And the other returning a shape of type `square`:
@@ -533,10 +532,10 @@ not know what to do with a `circle`. However, a function with type
 
 ```ocaml env=subtyping
 # let shape_to_string: shape -> string =
-  fun s -> Printf.sprintf "Shape(%F)" s#area
+    fun s -> Printf.sprintf "Shape(%F)" s#area
 val shape_to_string : shape -> string = <fun>
 # let square_to_string: square -> string =
-  (shape_to_string :> square -> string)
+    (shape_to_string :> square -> string)
 val square_to_string : square -> string = <fun>
 ```
 
@@ -547,7 +546,8 @@ their results.  [contravariance]{.idx}
 ::: {data-type=note}
 ##### Variance Annotations
 
-OCaml works out the variance of a type using that type's definition:
+OCaml works out the variance of a type using that type's definition.
+Consider the following simple immutable `Either` type.
 
 ```ocaml env=subtyping
 # module Either = struct
@@ -563,53 +563,72 @@ module Either :
     val left : 'a -> ('a, 'b) t
     val right : 'a -> ('b, 'a) t
   end
-# (Either.left (square 40) :> (shape, shape) Either.t)
-- : (shape, shape) Either.t = Either.Left <obj>
 ```
 
-However, if the definition is hidden by a signature, then OCaml is
-forced to assume that the type is invariant:
+By looking at what coercions are allowed, we can see that the type
+parameters of the immutable `Either` type are covariant.
 
 ```ocaml env=subtyping
-# module AbstractEither : sig
+# let left_square = Either.left (square 40)
+val left_square : (< area : float; width : int >, 'a) Either.t =
+  Either.Left <obj>
+# (left_square :> (shape,_) Either.t)
+- : (shape, 'a) Either.t = Either.Left <obj>
+```
+
+The story is different, however, if the definition is hidden by a
+signature.
+
+```ocaml env=subtyping
+# module Abs_either : sig
     type ('a, 'b) t
     val left: 'a -> ('a, 'b) t
     val right: 'b -> ('a, 'b) t
   end = Either
-module AbstractEither :
+module Abs_either :
   sig
     type ('a, 'b) t
     val left : 'a -> ('a, 'b) t
     val right : 'b -> ('a, 'b) t
   end
-# (AbstractEither.left (square 40) :> (shape, shape) AbstractEither.t)
-Characters 1-32:
-Error: This expression cannot be coerced to type
-         (shape, shape) AbstractEither.t;
-       it has type (< area : float; width : int >, 'a) AbstractEither.t
-       but is here used with type (shape, shape) AbstractEither.t
+```
+
+In this case, OCaml is forced to assume that the type is invariant.
+
+```ocaml env=subtyping
+# (Abs_either.left (square 40) :> (shape, _) Abs_either.t)
+Characters 1-28:
+Error: This expression cannot be coerced to type (shape, 'a) Abs_either.t;
+       it has type (< area : float; width : int >, 'b) Abs_either.t
+       but is here used with type (shape, 'a) Abs_either.t
        Type < area : float; width : int > is not compatible with type
          shape = < area : float >
        The second object type has no method width
 ```
 
-We can fix this by adding *variance annotations* to the type's parameters in
-the signature: `+` for covariance or `-` for contravariance:
+We can fix this by adding *variance annotations* to the type's
+parameters in the signature: `+` for covariance or `-` for
+contravariance:
 
 ```ocaml env=subtyping
-# module VarEither : sig
+# module Var_either : sig
     type (+'a, +'b) t
     val left: 'a -> ('a, 'b) t
     val right: 'b -> ('a, 'b) t
   end = Either
-module VarEither :
+module Var_either :
   sig
     type (+'a, +'b) t
     val left : 'a -> ('a, 'b) t
     val right : 'b -> ('a, 'b) t
   end
-# (VarEither.left (square 40) :> (shape, shape) VarEither.t)
-- : (shape, shape) VarEither.t = <abstr>
+```
+
+As you can see, this now allows the coercion once again.
+
+```ocaml env=subtyping
+# (Var_either.left (square 40) :> (shape, _) Var_either.t)
+- : (shape, 'a) Var_either.t = <abstr>
 ```
 
 :::
