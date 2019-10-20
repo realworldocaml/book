@@ -12,13 +12,14 @@ programming]{.idx}[object-oriented programming
 ::: {data-type=note}
 ##### What Is Object-Oriented Programming?
 
-Object-oriented programming (often shortened to OOP) is a programming style
-that encapsulates computation and data within logical *objects*. Each object
-contains some data stored in *fields* and has *method* functions that can be
-invoked against the data within the object (also called "sending a message"
-to the object). The code definition behind an object is called a *class*, and
-objects are constructed from a class definition by calling a constructor with
-the data that the object will use to build itself.
+Object-oriented programming (often shortened to OOP) is a programming
+style that encapsulates computation and data within logical
+*objects*. Each object contains some data stored in *fields* and has
+*method* functions that can be invoked against the data within the
+object (also called "sending a message" to the object). The code
+definition behind an object is called a *class*, and objects are
+constructed from a class definition by calling a constructor with the
+data that the object will use to build itself.
 
 There are five fundamental properties that differentiate OOP from other
 styles:
@@ -29,48 +30,49 @@ Abstraction
 
 Dynamic lookup
 : When a message is sent to an object, the method to be executed is
-  determined by the implementation of the object, not by some static property
-  of the program. In other words, different objects may react to the same
-  message in different ways.
+  determined by the implementation of the object, not by some static
+  property of the program. In other words, different objects may react
+  to the same message in different ways.
 
 Subtyping
 : If an object `a` has all the functionality of an object `b`, then we may
   use `a` in any context where `b` is expected.
 
 Inheritance
-: The definition of one kind of object can be reused to produce a new kind of
-  object. This new definition can override some behavior, but also share code
-  with its parent.
+: The definition of one kind of object can be reused to produce a new
+  kind of object. This new definition can override some behavior, but
+  also share code with its parent.
 
 Open recursion
-: An object's methods can invoke another method in the same object using a
-  special variable (often called `self` or `this`). When objects are created
-  from classes, these calls use dynamic lookup, allowing a method defined in
-  one class to invoke methods defined in another class that inherits from the
-  first.
+: An object's methods can invoke another method in the same object
+  using a special variable (often called `self` or `this`). When
+  objects are created from classes, these calls use dynamic lookup,
+  allowing a method defined in one class to invoke methods defined in
+  another class that inherits from the first.
 
-Almost every notable modern programming language has been influenced by OOP,
-and you'll have run across these terms if you've ever used C++, Java, C#,
-Ruby, Python, or JavaScript.
+Almost every notable modern programming language has been influenced
+by OOP, and you'll have run across these terms if you've ever used
+C++, Java, C#, Ruby, Python, or JavaScript.
 
 :::
 
 ## OCaml Objects
 
-If you already know about object-oriented programming in a language like Java
-or <span class="keep-together">C++,</span> the OCaml object system may come
-as a surprise. Foremost is the complete separation of objects and their types
-from the class system. In a language like Java, a class name is also used as
-the type of objects created by instantiating it, and the relationships
-between these object types correspond to inheritance. For example, if we
-implement a class `Deque` in Java by inheriting from a class `Stack`, we
-would be allowed to pass a deque anywhere a stack is expected. [objects/in
+If you already know about object-oriented programming in a language
+like Java or <span class="keep-together">C++,</span> the OCaml object
+system may come as a surprise. Foremost is the complete separation of
+objects and their types from the class system. In a language like
+Java, a class name is also used as the type of objects created by
+instantiating it, and the relationships between these object types
+correspond to inheritance. For example, if we implement a class
+`Deque` in Java by inheriting from a class `Stack`, we would be
+allowed to pass a deque anywhere a stack is expected. [objects/in
 OCaml]{.idx}
 
 OCaml is entirely different. Classes are used to construct objects and
 support inheritance, but classes are not types. Instead, objects have
-*object types*, and if you want to use objects, you aren't required to use
-classes at all. Here's an example of a simple object:
+*object types*, and if you want to use objects, you aren't required to
+use classes at all. Here's an example of a simple object:
 
 ```ocaml env=stack
 # open Base
@@ -527,7 +529,7 @@ Subtyping function types requires a third class of variance. A
 function with type `square -> string` cannot be used with type `shape
 -> string` because it expects its argument to be a `square` and would
 not know what to do with a `circle`. However, a function with type
-`shape -> string`*can* safely be used with type `square -> string`:
+`shape -> string` can safely be used with type `square -> string`:
 
 ```ocaml env=subtyping
 # let shape_to_string: shape -> string =
@@ -565,8 +567,8 @@ module Either :
 - : (shape, shape) Either.t = Either.Left <obj>
 ```
 
-However, if the definition is hidden by a signature, then OCaml is forced to
-assume that the type is invariant:
+However, if the definition is hidden by a signature, then OCaml is
+forced to assume that the type is invariant:
 
 ```ocaml env=subtyping
 # module AbstractEither : sig
