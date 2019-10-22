@@ -338,7 +338,7 @@ If we introduce an error into our s-expression, by, say, creating a file
 # Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm"))
 Uncaught exception:
-  
+
   (Sexplib.Sexp.Parse_error
    ((err_msg "unexpected character: ')'") (text_line 4) (text_char 30)
     (global_offset 78) (buf_pos 78)))
@@ -579,7 +579,7 @@ you'll get the following error:
 $ dune build read_foo.exe
 $ dune exec -- ./read_foo.exe foo_example_broken.scm
 Uncaught exception:
-  
+
   (Of_sexp_error "int_of_sexp: (Failure int_of_string)"
    (invalid_sexp not-an-integer))
 
@@ -631,7 +631,7 @@ If we run it again, we'll see a much more specific error:
 $ dune build read_foo_better_errors.exe
 $ dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
 Uncaught exception:
-  
+
   (Of_sexp_error foo_broken_example.scm:2:4
    "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
 

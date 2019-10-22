@@ -4,8 +4,8 @@
 
 `mdx` allows to execute code blocks inside markdown files.
 There are (currently) two sub-commands, corresponding
-to two modes of operations: pre-processing (`mdx pp`)
-and tests (`mdx test`).
+to two modes of operations: pre-processing (`ocaml-mdx pp`)
+and tests (`ocaml-mdx test`).
 
 The pre-processor mode allows to mix documentation and code,
 and to practice "literate programming" using markdown and OCaml.
@@ -13,7 +13,7 @@ and to practice "literate programming" using markdown and OCaml.
 The test mode allows to ensure that shell scripts and OCaml fragments
 in the documentation always stays up-to-date.
 
-`mdx` is released as a single binary (called `mdx`) and
+`mdx` is released as a single binary (called `ocaml-mdx`) and
 can be installed using opam:
 
 ```sh
@@ -24,7 +24,7 @@ $ opam install mdx
 
 #### Shell Scripts
 
-`mdx` interprets shell scripts inside `sh` code blocks as cram-like tests. The
+`ocaml-mdx` interprets shell scripts inside `sh` code blocks as cram-like tests. The
 syntax is the following:
 
 - Lines beginning with a dollar sign and a space are
@@ -63,7 +63,7 @@ with a padding of 3:
        10
     ```
 
-`mdx` will also consider exit codes when the syntax `[<exit code>]`is used:
+`ocaml-mdx` will also consider exit codes when the syntax `[<exit code>]`is used:
 
     ```sh
     $ exit 1
@@ -75,7 +75,7 @@ of success).
 
 #### OCaml Code
 
-`mdx` interprets OCaml fragments. It understands _normal_ code fragments and
+`ocaml-mdx` interprets OCaml fragments. It understands _normal_ code fragments and
 _toplevel_ code fragments (starting with a `#` sign and optionally ending with
 `;;`). Arbitrary whitespace padding is supported, at long as it stays
 consistent within a code block.
@@ -97,7 +97,7 @@ Here is an examples of toplevel OCaml code:
 
 ### Pre-processing
 
-`mdx pp` allows to transform a markdown file into a valid
+`ocaml-mdx pp` allows to transform a markdown file into a valid
 OCaml file, which can be passed to OCaml using the `-pp`
 option.
 
@@ -111,7 +111,7 @@ For instance, given the following `file.md` document:
 Can be compiled and executed using:
 
 ```sh
-$ ocamlc -pp 'mdx pp' -impl file.md -o file.exe
+$ ocamlc -pp 'ocaml-mdx pp' -impl file.md -o file.exe
 $ ./file.exe
 42
 ```
@@ -122,7 +122,7 @@ This can be automated using `dune`:
 (rule
  ((targets (file.ml))
   (deps    (file.md))
-  (action  (with-stdout-to ${@} (run mdx pp ${<})))))
+  (action  (with-stdout-to ${@} (run ocaml-mdx pp ${<})))))
 
 (executable ((name file)))
 ```
@@ -131,7 +131,7 @@ This can be automated using `dune`:
 
 #### Cram Tests
 
-Cram tests can be executed and checked with `mdx test <file.md>`.
+Cram tests can be executed and checked with `ocaml-mdx test <file.md>`.
 
     ```sh
      $ for i in `seq 1 10`; do echo $i; done
@@ -145,7 +145,7 @@ If the output is not consistent with what is expected,
 
 #### OCaml
 
-To execute OCaml code and toplevel fragments, uses `mdx test <file.md>`.
+To execute OCaml code and toplevel fragments, uses `ocaml-mdx test <file.md>`.
 
     ```ocaml
     # print_endline "42"
@@ -165,7 +165,7 @@ dune's `diff?` stanza:
   (name runtest)
   (deps (:test file.md))
   (action (progn
-           (run mdx test %{test})
+           (run ocaml-mdx test %{test})
            (diff? %{test} %{test}.corrected))))
 ```
 
@@ -204,7 +204,7 @@ $ dune promote
 
 **Non-deterministic Outputs**
 
-`mdx test` supports non-deterministic outputs:
+`ocaml-mdx test` supports non-deterministic outputs:
 
     ```sh non-deterministic=output
     $ <command>
@@ -213,19 +213,19 @@ $ dune promote
 
 In that case, `ppx test <file>` will run the command but will not
 generate `<file>.corrected` if the new output differs from the one
-described in the file. Use `mdx test --non-deterministic <file>` to come
+described in the file. Use `ocaml-mdx test --non-deterministic <file>` to come
 back to the default behaviour.
 
 **Non-deterministic Commands**
 
-`mdx test` supports non-deterministic commands:
+`ocaml-mdx test` supports non-deterministic commands:
 
     ```ocaml non-deterministic=command
     # Random.int 10;;
     - : int = 5
     ```
 
-In that case, `mdx test <file>` will *not* run the command. Use `mdx test
+In that case, `ocaml-mdx test <file>` will *not* run the command. Use `ocaml-mdx test
 --non-deterministic <file>` to come back to the default behaviour.
 
 #### Named execution environments (since mdx 1.1.0)
@@ -315,18 +315,18 @@ Those variables are then available in the subsequent blocks
 
 It is possible to test or execute only a subset of the file using
 sections using the `--section` option (short name is `-s`). For
-instance `mdx pp -s foo` will only consider the section matching the
+instance `ocaml-mdx pp -s foo` will only consider the section matching the
 perl regular expression `foo`.
 
 ### Dune rules (since mdx 1.1.0)
 
-`mdx` can generate `dune` rules to synchronize .md files with .ml files.
+`ocaml-mdx` can generate `dune` rules to synchronize .md files with .ml files.
 
 Consider the test/dune_rules.md file that contains blocks referring to files
 dune_rules_1.ml and dune_rules_2.ml, running:
 
 ```
-$ mdx rule test/dune_rules.md
+$ ocaml-mdx rule test/dune_rules.md
 ```
 
 generates the following `dune` rules on the standard output:
@@ -338,7 +338,7 @@ generates the following `dune` rules on the standard output:
          (:y0 dune_rules_2.ml)
          (source_tree foo))
  (action (progn
-           (run mdx test --direction=infer-timestamp %{x})
+           (run ocaml-mdx test --direction=infer-timestamp %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y1} %{y1}.corrected)
            (diff? %{y0} %{y0}.corrected))))

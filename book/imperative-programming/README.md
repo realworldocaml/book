@@ -668,11 +668,11 @@ typically want to define a set of iteration functions like `iter`, `map`, and
 
 `Dlist` has two such iterators: `iter`, the goal of which is to call a
 `unit`-producing function on every element of the list, in order; and
-`find_el`, which runs a provided test function on each values stored in the
-list, returning the first `element` that passes the test. Both `iter` and
-`find_el` are implemented using simple recursive loops that use `next` to
-walk from element to element and `value` to extract the element from a given
-node:
+`find_el`, which runs a provided test function on each value stored in
+the list, returning the first `element` that passes the test. Both
+`iter` and `find_el` are implemented using simple recursive loops that
+use `next` to walk from element to element and `value` to extract the
+element from a given node:
 
 ```ocaml file=examples/dlist.ml,part=6
 let iter t ~f =
@@ -1709,7 +1709,7 @@ introduce persistent mutable cells, including:
 - Function declarations, i.e., expressions that begin with `fun` or
   `function`, or the equivalent let binding, `let f x = ...`
 
-- `let` bindings of the form `let`*`var`*`=`*`expr1`*`in`*`expr2`*, where
+- `let` bindings of the form `let` *`var`* `=` *`expr1`* `in` *`expr2`*, where
   both *`expr1`* and *`expr2`* are simple values
 
 Thus, the following expression is a simple value, and as a result, the types
@@ -1942,7 +1942,7 @@ module Concat_list :
 ```
 
 Now, we can apply the identity function to `Concat_list.empty` without
-without losing any polymorphism:
+losing any polymorphism:
 
 ```ocaml env=value_restriction
 # identity Concat_list.empty

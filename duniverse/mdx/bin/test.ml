@@ -21,7 +21,7 @@ let (/) x y = match x with
   | "." -> y
   | _   -> Filename.concat x y
 
-let run () _ _ _ _ _ _ _ _ _ _ =
+let run (`Setup ()) _ _ _ _ _ _ _ _ _ _ =
   let base = Filename.basename Sys.argv.(0) in
   let dir = Filename.dirname Sys.argv.(0) in
   let cmd = match base with

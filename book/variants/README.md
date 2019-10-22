@@ -1132,7 +1132,7 @@ the `mli`), then the compiler has enough information to warn us:
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Gray x -> 2000 + x
-  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+  | (`Basic _ | `RGB _ | `Grey _) as color -> color_to_int color
 ```
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
@@ -1149,7 +1149,9 @@ In particular, the compiler will complain that the `` `Grey`` case is unused:
 $ dune build terminal_color.exe
 ...
 File "terminal_color.ml", line 29, characters 25-32:
-Error (warning 12): this sub-pattern is unused.
+Error: This pattern matches values of type [? `Grey of 'a ]
+       but a pattern was expected which matches values of type extended_color
+       The second variant type does not allow tag(s) `Grey
 [1]
 ```
 

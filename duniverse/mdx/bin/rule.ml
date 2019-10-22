@@ -29,31 +29,25 @@ let prepend_root r b = match r with
   | None   -> b
   | Some r -> Filename.concat r b
 
-let findlib_conf_gen_rule =
-  let target = "findlib.conf" in
-  let action =
-    {|(write-file %{target} "")|}
-  in
-  Printf.sprintf
-    ("(rule\n"
-     ^^ " (target %s)\n"
-     ^^ " (action %s))\n")
-    target action
+let pp_dep fmt = function
+  | `Named (name, path) -> Fmt.pf fmt "(:%s %s)" name path
+  | `Source_tree path -> Fmt.pf fmt "(source_tree %s)" path
+  | `Package p -> Fmt.pf fmt "(package %s)" p
+  | `Path path -> Fmt.pf fmt "%s" path
+
+let pp_action fmt = function
+  | `Diff_corrected var -> Fmt.pf fmt "(diff? %%{%s} %%{%s}.corrected)" var var
+  | `Run args -> Fmt.pf fmt "(run @[<hov 2>%a@])" Fmt.(list ~sep:sp string) args
 
 let pp_locks_field fmt dirs_and_files =
   match dirs_and_files with
   | [] -> ()
-  | [lock] ->
-    Fmt.pf fmt " (locks %s)\n" lock
-  | l ->
-    let sep = Fmt.(const string "\n   ") in
-    Fmt.(list ~sep string) fmt (" (locks"::l);
-    Fmt.pf fmt ")\n"
+  | locks ->
+    Fmt.pf fmt " (locks @[%a@])\n" Fmt.(list ~sep:(unit "@\n") string) locks
 
-let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_mode ~locks
-    options =
-  let ml_files = String.Set.elements ml_files in
-  let ml_files = List.map (prepend_root root) ml_files in
+let pp_rules ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~locks
+    fmt options =
+  let ml_files = List.map (prepend_root root) (String.Set.elements ml_files) in
   let dirs = match root with
     | None      -> String.Set.elements dirs
     | Some root ->
@@ -62,80 +56,90 @@ let print_rule ~nd ~prelude ~md_file ~ml_files ~dirs ~root ~packages ~duniverse_
       let dirs = String.Set.add root dirs in
       String.Set.elements dirs
   in
+  let prelude_files =
+    let files = String.Set.of_list (List.map prelude_file prelude) in
+    String.Set.elements files
+  in
   let var_names =
     let f (cpt, acc) _ = cpt + 1, ("y" ^ string_of_int cpt) :: acc in
     List.fold_left f (0, []) ml_files |> snd
   in
-  let packages = String.Set.elements packages in
-  let pp_package_deps fmt name =
-    Fmt.pf fmt "\         (package %s)" name
-  in
-  let pp_ml_deps fmt (var_name, ml_file) =
-    Fmt.pf fmt "\         (:%s %s)" var_name ml_file
-  in
-  let pp_dir_deps fmt dir =
-    Fmt.pf fmt "\         (source_tree %s)" dir
-  in
-  let pp_ml_diff fmt var =
-    Fmt.pf fmt "\           (diff? %%{%s} %%{%s}.corrected)" var var
-  in
-  let prelude =
-    let files = String.Set.of_list (List.map prelude_file prelude) in
-    String.Set.elements files
-    |> List.map (fun f -> Fmt.strf "         %s" f)
-  in
-  let root = match root with None -> "" | Some r -> Fmt.strf "--root=%s " r in
+  let root = match root with None -> [] | Some r -> ["--root=" ^ r] in
   let deps =
-    let x =
-      List.map (Fmt.to_to_string pp_package_deps) packages @
-      List.map (Fmt.to_to_string pp_ml_deps) (List.combine var_names ml_files) @
-      List.map (Fmt.to_to_string pp_dir_deps) dirs @
-      prelude
+    let packages =
+      List.map (fun p -> `Package p) (String.Set.elements packages)
+    and ml_files =
+      List.map2 (fun name p -> `Named (name, p)) var_names ml_files
+    and dirs = List.map (fun p -> `Source_tree p) dirs
+    and prelude = List.map (fun p -> `Path p) prelude_files
     in
-    match x with
-    | [] -> ""
-    | s  -> String.concat ~sep:"\n" ("" :: s)
+    `Named ("x", md_file) ::
+    packages @
+    ml_files @
+    dirs @
+    prelude
   in
-  let run_action arg =
-    let run =
-      Fmt.strf "(run ocaml-mdx test %a %s%s%%{x})"
-        Fmt.(list ~sep:(unit " ") string) options
-        arg root
-    in
-    if duniverse_mode then
-      Fmt.strf "(setenv OCAMLFIND_CONF %%{conf} %s)" run
-    else
-      run
+  let actions arg =
+    `Run ("ocaml-mdx" :: "test" :: options @ arg @ root @ ["%{x}"]) ::
+    `Diff_corrected "x" ::
+    List.map (fun v -> `Diff_corrected v) var_names
   in
-  let conf_dep = if duniverse_mode then "\n         (:conf findlib.conf)" else "" in
-  let pp name arg =
-    Fmt.pr
+  let pp fmt name arg =
+    Fmt.pf fmt
       "\
-(alias\n\
-\ (name   %s)\n\
-\ (deps   (:x %s)%s\n\
-\         (package mdx)%s)\n%a\
-\ (action (progn\n\
-\           %s\n%a\n\
-\           (diff? %%{x} %%{x}.corrected))))\n"
+(alias@\n\
+\ (name   %s)@\n\
+\ (deps   @[<v>%a@])@\n%a\
+\ (action @[<hv 2>(progn@ %a)@]))@\n"
       name
-      md_file
-      conf_dep
-      deps
+      Fmt.(list ~sep:sp pp_dep) deps
       pp_locks_field locks
-      (run_action arg)
-      (Fmt.list ~sep:Fmt.cut pp_ml_diff) var_names
+      Fmt.(list ~sep:cut pp_action) (actions arg)
   in
-  pp "runtest" "";
-  if nd then pp "runtest-all" "--non-deterministic "
+  pp fmt "runtest" [];
+  if nd then
+    pp fmt "runtest-all" ["--non-deterministic"]
+
+let print_format_dune_rules pp_rules =
+  let open Unix in
+  let read_pipe, write_pipe = pipe () in
+  set_close_on_exec read_pipe;
+  set_close_on_exec write_pipe;
+  let dune_file_format =
+    create_process "dune" [|"dune"; "format-dune-file"|] read_pipe stdout stderr
+  in
+  close read_pipe;
+  let oc = out_channel_of_descr write_pipe in
+  let fmt = Format.formatter_of_out_channel oc in
+  pp_rules fmt ();
+  close_out oc;
+  match waitpid [] dune_file_format with
+  | _, WEXITED 0 -> ()
+  | _, WEXITED _ ->
+    let msg =
+      Format.asprintf
+        "Failed to format the following rules with 'dune format-dune-file':\n%a"
+        pp_rules ()
+    in
+    failwith msg
+  | _, (WSIGNALED _ | WSTOPPED _) ->
+    failwith "Child process 'dune format-dune-file' was interrupted"
+
+let options_of_syntax = function
+  | Some Mdx.Normal -> [ "--syntax=normal" ]
+  | Some Mdx.Cram -> [ "--syntax=cram" ]
+  | None -> []
+
+let options_of_section = function
+  | Some s -> [ Fmt.to_to_string (Fmt.fmt "--section %S") s ]
+  | None -> []
 
 let pp_direction fmt = function
-  | `Infer_timestamp -> Fmt.pf fmt "--direction=infer-timestamp"
   | `To_md -> Fmt.pf fmt "--direction=to-md"
   | `To_ml -> Fmt.pf fmt "--direction=to-ml"
 
 let pp_prelude fmt s = Fmt.pf fmt "--prelude=%s" s
-let pp_prelude_str fmt s = Fmt.pf fmt "--prelude-str=%S" s
+let pp_prelude_str fmt s = Fmt.pf fmt "--prelude-str %S" s
 
 let add_opt e s = match e with None -> s | Some e -> String.Set.add e s
 
@@ -145,6 +149,7 @@ let aggregate_requires ~require_from l =
     ~f:(fun acc x -> require_from x >>| Mdx.Library.Set.union acc)
     ~init:Mdx.Library.Set.empty
     l
+  >>| Mdx.Library.Set.to_package_set
 
 let requires_from_prelude_str prelude_str_list =
   let require_from prelude_str =
@@ -162,31 +167,25 @@ let requires_from_prelude prelude_list =
   in
   aggregate_requires ~require_from prelude_list
 
-let requires_to_packages library_set =
-  Mdx.Library.Set.fold
-    (fun {base_name; _} acc -> String.Set.add base_name acc)
-    library_set
-    String.Set.empty
-
-let run () md_file section direction prelude prelude_str root duniverse_mode locks =
+let run (`Setup ()) (`File md_file) (`Section section) (`Syntax syntax) (`Direction direction)
+    (`Prelude prelude) (`Prelude_str prelude_str) (`Root root)
+    (`Duniverse_mode duniverse_mode) (`Locks locks) =
   let open Rresult.R.Infix in
-  let section = match section with
-    | None   -> None
-    | Some p -> Some (Re.Perl.compile_pat p)
-  in
-  let active b = match section, Mdx.Block.section b with
-    | None   , _      -> true
-    | Some re, None   -> Re.execp re ""
-    | Some re, Some s -> Re.execp re (snd s)
+  let active =
+    let section = match section with
+      | None   -> None
+      | Some p -> Some (Re.Perl.compile_pat p)
+    in
+    fun b ->
+      match section, Mdx.Block.section b with
+      | None   , _      -> true
+      | Some re, None   -> Re.execp re ""
+      | Some re, Some s -> Re.execp re (snd s)
   in
   let on_item acc = function
     | Mdx.Section _ | Text _ -> Ok acc
     | Block b when active b ->
       let files, dirs, nd, packages = acc in
-      let packages =
-        Mdx.Block.required_packages b
-        |> List.fold_left (fun s e -> String.Set.add e s) packages
-      in
       let nd = nd || match Mdx.Block.mode b with
         | `Non_det _ -> true
         | _          -> false
@@ -198,21 +197,31 @@ let run () md_file section direction prelude prelude_str root duniverse_mode loc
         |> String.Set.union source_trees
       in
       let files = add_opt (Mdx.Block.file b) files in
-      if duniverse_mode then
-        Mdx.Block.required_libraries b >>| fun libs ->
-        let packages = String.Set.union packages (requires_to_packages libs) in
-        files, dirs, nd, packages
-      else
-        Ok (files, dirs, nd, packages)
+      let explicit_requires = String.Set.of_list (Mdx.Block.explicit_required_packages b) in
+      let requires_from_statement =
+        if duniverse_mode then
+          Mdx.Block.required_libraries b >>| Mdx.Library.Set.to_package_set
+        else
+          Ok String.Set.empty
+      in
+      requires_from_statement >>| fun requires_from_statement ->
+      let (++) = String.Set.union in
+      let packages = packages ++ explicit_requires ++ requires_from_statement in
+      files, dirs, nd, packages
     | Block _ -> Ok acc
   in
   let on_file file_contents items =
     let empty = String.Set.empty in
     let req_res =
-      requires_from_prelude prelude >>= fun prelude_requires ->
-      requires_from_prelude_str prelude_str >>= fun prelude_str_requires ->
-      let requires = Mdx.Library.Set.union prelude_requires prelude_str_requires in
-      let packages = requires_to_packages requires in
+      let packages =
+        if duniverse_mode then
+          requires_from_prelude prelude >>= fun prelude_requires ->
+          requires_from_prelude_str prelude_str >>= fun prelude_str_requires ->
+          Ok (String.Set.union prelude_requires prelude_str_requires)
+        else
+          Ok String.Set.empty
+      in
+      packages >>= fun packages ->
       Mdx.Util.Result.List.fold ~f:on_item ~init:(empty, empty, false, packages) items
     in
     match req_res with
@@ -220,17 +229,18 @@ let run () md_file section direction prelude prelude_str root duniverse_mode loc
       Printf.eprintf "Fatal error while parsing block: %s" s;
       exit 1
     | Ok (ml_files, dirs, nd, packages) ->
+      let packages = if duniverse_mode then String.Set.add "mdx" packages else packages in
       let options =
         List.map (Fmt.to_to_string pp_prelude) prelude @
         List.map (Fmt.to_to_string pp_prelude_str) prelude_str @
-        [Fmt.to_to_string pp_direction direction]
+        [Fmt.to_to_string pp_direction direction] @
+        options_of_syntax syntax @
+        options_of_section section
       in
-      if duniverse_mode then
-        ( Fmt.pr "%s" findlib_conf_gen_rule;
-          Fmt.pr "\n"
-        );
-      print_rule ~md_file ~prelude ~nd ~ml_files ~dirs ~root ~packages
-        ~duniverse_mode ~locks options;
+      let pp_rules fmt () =
+        pp_rules ~md_file ~prelude ~nd ~ml_files ~dirs ~root ~packages ~locks fmt options;
+      in
+      print_format_dune_rules pp_rules;
       file_contents
   in
   Mdx.run md_file ~f:on_file;
@@ -243,16 +253,18 @@ let duniverse_mode =
     "Run mdx in a duniverse-compatible mode. \
      Expect all toplevel dependencies to be available in your duniverse folder."
   in
-  Arg.(value & flag & info ["duniverse-mode"] ~doc)
+  Cli.named (fun x -> `Duniverse_mode x)
+    Arg.(value & flag & info ["duniverse-mode"] ~doc)
 
 let locks =
   let docv = "LOCK[,LOCKS]" in
   let doc = "Explicitly specify a list of locks to add to the generated dune rule" in
-  Arg.(value & opt (list ~sep:',' string) [] & info ["locks"] ~doc ~docv)
+  Cli.named (fun x -> `Locks x)
+    Arg.(value & opt (list ~sep:',' string) [] & info ["locks"] ~doc ~docv)
 
 let cmd =
   let doc = "Produce dune rules to synchronize markdown and OCaml files." in
   Term.(pure run
-        $ Cli.setup $ Cli.file $ Cli.section $ Cli.direction
+        $ Cli.setup $ Cli.file $ Cli.section $ Cli.syntax $ Cli.direction
         $ Cli.prelude $ Cli.prelude_str $ Cli.root $ duniverse_mode $ locks),
   Term.info "rule" ~doc

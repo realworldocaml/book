@@ -8,7 +8,7 @@ let predicates = ref ("toploop" :: Findlib.recorded_predicates());;
      Findlib, hence we maintain our own list
    *)
 
-let directories = ref [ Findlib.ocaml_stdlib() ];;
+let directories = ref [];;
 
 
 (* Note: Sys.interactive is always _true_ during toploop startup.
@@ -43,7 +43,7 @@ let revised_syntax () = syntax "camlp4r";;
 
 let add_dir d =
   let d = Fl_split.norm_dir d in
-  if not (List.mem d !directories) then begin
+  if not (d = Findlib.ocaml_stdlib()) && not (List.mem d !directories) then begin
     Topdirs.dir_directory d;
     directories := d :: !directories;
     !log (d ^ ": added to search path")

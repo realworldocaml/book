@@ -62,8 +62,7 @@ We can construct a concrete record by calling the function on a line from the
 file.
 
 ```ocaml env=main
-# let ssh = service_info_of_string
-  "ssh 22/udp # SSH Remote Login Protocol"
+# let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol"
 val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
 ```
 
@@ -207,9 +206,9 @@ that we are ignoring extra fields. This is done by adding an underscore to
 the pattern:
 
 ```ocaml env=main
-# let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+# let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
     sprintf "%s %i/%s" name port prot
-val host_info_to_string : service_info -> string = <fun>
+val service_info_to_string : service_info -> string = <fun>
 ```
 
 It's a good idea to enable the warning for incomplete record matches and to
