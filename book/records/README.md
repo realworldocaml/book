@@ -751,7 +751,7 @@ declaration. So, for example, we could have defined `Logon` as follows:
       { session_id: string;
         time: Time_ns.t;
         user: string;
-       credentials: string;
+        credentials: string;
       }
     [@@deriving fields]
   end
