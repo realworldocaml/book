@@ -94,7 +94,7 @@ anything about the nature of the error.
 `Result.t` is meant to address this deficiency. The type is defined as
 follows:[Result.t option]{.idx}
 
-```ocaml file=../../examples/code/error-handling/result.mli
+```ocaml file=examples/result.mli
 module Result : sig
    type ('a,'b) t = | Ok of 'a
                     | Error of 'b
@@ -651,7 +651,7 @@ detection]{.idx}
       let data = find_exn alist key in
       compute_weight data
     with
-  Key_not_found _ -> 0.
+    Key_not_found _ -> 0.
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -665,7 +665,7 @@ found, then a weight of `0.` should be returned.
 The use of exceptions in this code, however, presents some problems. In
 particular, what happens if `compute_weight` throws an exception? Ideally,
 `lookup_weight` should propagate that exception on, but if the exception
-happens to be `Not_found`, then that's not what will happen:
+happens to be `Key_not_found`, then that's not what will happen:
 
 ```ocaml env=main
 # lookup_weight ~compute_weight:(fun _ -> raise (Key_not_found "foo"))
@@ -687,7 +687,7 @@ clear what part of the code failed:
       with _ -> None
     with
     | None -> 0.
-  | Some data -> compute_weight data
+    | Some data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -702,7 +702,7 @@ statements directly, which lets you write this more concisely as follows.
 # let lookup_weight ~compute_weight alist key =
     match find_exn alist key with
     | exception _ -> 0.
-  | data -> compute_weight data
+    | data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) -> (string * 'a) list -> string -> float =
   <fun>
@@ -718,7 +718,7 @@ exception-free function from Base, `List.Assoc.find`, instead:
 # let lookup_weight ~compute_weight alist key =
     match List.Assoc.find ~equal:String.equal alist key with
     | None -> 0.
-  | Some data -> compute_weight data
+    | Some data -> compute_weight data
 val lookup_weight :
   compute_weight:('a -> float) ->
   (string, 'a) Base.List.Assoc.t -> string -> float = <fun>
@@ -732,7 +732,7 @@ program:[debugging/stack backtraces]{.idx}[stack
 backtraces]{.idx}[backtraces]{.idx}:[exceptions/stack backtraces
 for]{.idx}[error handling/exception backtracing]{.idx}
 
-```ocaml file=../../examples/code/error-handling/blow_up/blow_up.ml
+```ocaml file=examples/blow_up/blow_up.ml
 open Base
 open Stdio
 exception Empty_list
@@ -750,18 +750,8 @@ If we build and run this program, we'll get a stack backtrace that will
 provide some information about where the error occurred and the stack of
 function calls that were in place at the time of the error:
 
-```scheme
-(executable
-  (name      blow_up)
-  (modules   blow_up)
-  (libraries core))
-```
-
-
-
-```sh dir=../../examples/code/error-handling/blow_up
-$ dune build blow_up.bc
-$ ./_build/default/blow_up.bc
+```sh dir=examples/blow_up
+$ dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
 Raised at file "blow_up.ml", line 6, characters 16-26
@@ -777,24 +767,14 @@ did not cause your program to fail.[Exn module/Exn.backtrace]{.idx}
 This works well if you have backtraces enabled, but that isn't always the
 case. In fact, by default, OCaml has backtraces turned off, and even if you
 have them turned on at runtime, you can't get backtraces unless you have
-compiled with debugging symbols. Core reverses the default, so if you're
-linking in Core, you will have backtraces enabled by default.
+compiled with debugging symbols. Base reverses the default, so if you're
+linking in Base, you will have backtraces enabled by default.
 
-Even using Core and compiling with debugging symbols, you can turn backtraces
+Even using Base and compiling with debugging symbols, you can turn backtraces
 off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 
-```scheme
-(executable
-  (name      blow_up)
-  (modules   blow_up)
-  (libraries core))
-```
-
-
-
-```sh dir=../../examples/code/error-handling/blow_up
-$ dune build blow_up.bc
-$ OCAMLRUNPARAM= ./_build/default/blow_up.bc
+```sh dir=examples/blow_up
+$ OCAMLRUNPARAM= dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
 [2]
@@ -810,7 +790,7 @@ exceptions are fairly fast, but they're even faster still if you disable
 backtraces. Here's a simple benchmark that shows the effect, using the
 `core_bench` package:
 
-```ocaml file=../../examples/code/error-handling/exn_cost/exn_cost.ml
+```ocaml file=examples/exn_cost/exn_cost.ml
 open Core
 open Core_bench
 
@@ -857,18 +837,8 @@ flow back to the caller.
 
 If we run this with stacktraces on, the benchmark results look like this:
 
-```scheme
-(executable
-  (name      exn_cost)
-  (modules   exn_cost)
-  (libraries core core_bench))
-```
-
-
-
-```sh dir=../../examples/code/error-handling/exn_cost,non-deterministic=command
-$ dune build exn_cost.exe
-$ ./_build/default/exn_cost.exe -ascii cycles -quota 1
+```sh dir=examples/exn_cost,non-deterministic=command
+$ dune exec -- ./exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 
   Name                           Time/Run   Cycls/Run   mWd/Run   Percentage
@@ -883,7 +853,7 @@ Here, we see that we lose something like 30 cycles to adding an exception
 handler, and 60 more to actually throwing and catching an exception. If we
 turn backtraces off, then the results look like this:
 
-```sh dir=../../examples/code/error-handling/exn_cost,non-deterministic=output
+```sh dir=examples/exn_cost,non-deterministic=output
 $ OCAMLRUNPARAM= ./_build/default/exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 |
@@ -904,7 +874,7 @@ most cases a stylistic mistake anyway.
 
 Both exceptions and error-aware types are necessary parts of programming in
 OCaml. As such, you often need to move between these two worlds. Happily,
-Core comes with some useful helper functions to help you do just that. For
+Base comes with some useful helper functions to help you do just that. For
 example, given a piece of code that can throw an exception, you can capture
 that exception into an option as follows:[exceptions/and error-aware
 types]{.idx}[error-aware return types]{.idx}[error handling/combining
@@ -926,9 +896,9 @@ write:
 ```ocaml env=main
 # let find alist key =
   Or_error.try_with (fun () -> find_exn alist key)
-val find : (string * 'a) list -> string -> 'a Base.Or_error.t = <fun>
+val find : (string * 'a) list -> string -> 'a Or_error.t = <fun>
 # find ["a",1; "b",2] "c"
-- : int Base.Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
+- : int Or_error.t = Base__.Result.Error ("Key_not_found(\"c\")")
 ```
 
 And then we can reraise that exception:

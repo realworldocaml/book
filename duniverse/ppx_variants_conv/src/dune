@@ -1,0 +1,3 @@
+(library (name ppx_variants_conv) (public_name ppx_variants_conv)
+ (kind ppx_deriver) (ppx_runtime_libraries variantslib)
+ (libraries base ppxlib) (preprocess (pps ppxlib.metaquot)))

@@ -1,0 +1,7 @@
+true : bin_annot, safe_string, package(bytes), package(uchar)
+
+<src> : include
+
+<test> : include
+<test/utftrip.*> : package(unix), package(cmdliner)
+<test/examples.*> : package(unix)

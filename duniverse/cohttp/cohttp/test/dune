@@ -1,0 +1,29 @@
+(executable
+ (name      test_accept)
+ (modules   test_accept)
+ (libraries cohttp alcotest fmt))
+
+(alias
+  (name    runtest)
+  (package cohttp)
+  (action  (run ./test_accept.exe)))
+
+(executable
+ (name      test_header)
+ (modules   test_header)
+ (libraries cohttp alcotest fmt))
+
+(alias
+  (name    runtest)
+  (package cohttp)
+  (action  (run ./test_header.exe)))
+
+(executable
+ (name      test_request)
+ (modules   test_request)
+ (libraries cohttp alcotest fmt))
+
+(alias
+  (name    runtest)
+  (package cohttp)
+  (action  (run ./test_request.exe)))

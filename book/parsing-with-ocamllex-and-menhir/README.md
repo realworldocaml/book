@@ -86,7 +86,7 @@ logical units, like curly braces, square brackets, commas, colons,
 identifiers, numbers, and quoted strings. Thus, we could represent our JSON
 text as a sequence of tokens of the following type:
 
-```ocaml file=../../examples/code/parsing/manual_token_type.ml
+```ocaml file=examples/parsing/manual_token_type.ml
 type token =
   | NULL
   | TRUE
@@ -112,7 +112,7 @@ required for understanding its meaning.
 If we converted the preceding example into a list of these tokens, it would
 look something like this:
 
-```ocaml file=../../examples/code/parsing/tokens.ml
+```ocaml file=examples/parsing/tokens.ml
 [ LEFT_BRACE; ID("title"); COLON; STRING("Cities"); COMMA; ID("cities"); ...
 ```
 
@@ -122,7 +122,7 @@ structure. But it's still a good deal more low-level than the simple AST we
 used for representing JSON data in
 [Handling Json Data](json.html#handling-json-data){data-type=xref}:
 
-```ocaml file=../../examples/code/parsing/json.ml
+```ocaml file=examples/parsing/json.ml
 type value = [
   | `Assoc of (string * value) list
   | `Bool of bool
@@ -170,7 +170,7 @@ of value types, including numbers, strings, arrays, and objects. The parser
 we'll write will convert a token stream into a value of this AST type, as
 shown below for our earlier JSON example:
 
-```ocaml file=../../examples/code/parsing/parsed_example.ml
+```ocaml file=examples/parsing/parsed_example.ml
 `Assoc
   ["title", `String "Cities";
    "cities", `List
@@ -408,7 +408,7 @@ generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&n
 
 
 
-```sh dir=../../examples/code/parsing
+```sh dir=examples/parsing
 ```
 
 ## Defining a Lexer
@@ -644,7 +644,7 @@ type definition in `parser.mli`, the parsing function expects a lexer of type
 `Lexing.lexbuf -> token`, and a `lexbuf`: [parsing/lexer and parser
 composition]{.idx}
 
-```ocaml file=../../examples/code/parsing/prog.mli
+```ocaml file=examples/parsing/prog.mli
 val prog:(Lexing.lexbuf -> token) -> Lexing.lexbuf -> Json.value option
 ```
 
@@ -653,7 +653,7 @@ parsing errors. There are currently two errors: `Parser.Error` and
 `Lexer.SyntaxError`. A simple solution when encountering an error is to print
 the error and give up: [errors/"give up on first error" approach]{.idx}
 
-```ocaml file=../../examples/code/parsing-test/test.ml
+```ocaml file=examples/parsing-test/test.ml,part=0
 open Core
 open Lexer
 open Lexing
@@ -688,7 +688,7 @@ structure, where the `Lexing.from_channel` function is used to construct a
 file. We define a function `Json.output_value`, not shown here, to print a
 `Json.value`:
 
-```ocaml file=../../examples/code/parsing-test/test.ml,part=1
+```ocaml file=examples/parsing-test/test.ml,part=1
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value ->
@@ -705,7 +705,7 @@ let loop filename () =
 
 let () =
   Command.basic_spec ~summary:"Parse and display JSON"
-    Command.Spec.(empty +> anon ("filename" %: file))
+    Command.Spec.(empty +> anon ("filename" %: string))
     loop
   |> Command.run
 ```
@@ -728,7 +728,7 @@ null
 Now build and run the example using this file, and you can see the full
 parser in action:
 
-```sh dir=../../examples/code/parsing-test
+```sh dir=examples/parsing-test,skip
 $ dune exec ./test.exe test1.json
 true
 false
@@ -745,7 +745,7 @@ null
 With our simple error handling scheme, errors are fatal and cause the program
 to terminate with a nonzero exit code:
 
-```sh dir=../../examples/code/parsing-test
+```sh dir=examples/parsing-test,skip
 $ cat test2.json
 { "name": "Chicago",
   "zips": [12345,

@@ -9,16 +9,17 @@ you to classes and inheritance. [objects/in object-oriented
 programming]{.idx}[object-oriented programming
 (OOP)]{.idx}[programming/object-oriented programming (OOP)]{.idx}
 
-<aside data-type="sidebar">
-<h5>What Is Object-Oriented Programming?</h5>
+::: {data-type=note}
+##### What Is Object-Oriented Programming?
 
-Object-oriented programming (often shortened to OOP) is a programming style
-that encapsulates computation and data within logical *objects*. Each object
-contains some data stored in *fields* and has *method* functions that can be
-invoked against the data within the object (also called "sending a message"
-to the object). The code definition behind an object is called a *class*, and
-objects are constructed from a class definition by calling a constructor with
-the data that the object will use to build itself.
+Object-oriented programming (often shortened to OOP) is a programming
+style that encapsulates computation and data within logical
+*objects*. Each object contains some data stored in *fields* and has
+*method* functions that can be invoked against the data within the
+object (also called "sending a message" to the object). The code
+definition behind an object is called a *class*, and objects are
+constructed from a class definition by calling a constructor with the
+data that the object will use to build itself.
 
 There are five fundamental properties that differentiate OOP from other
 styles:
@@ -29,48 +30,49 @@ Abstraction
 
 Dynamic lookup
 : When a message is sent to an object, the method to be executed is
-  determined by the implementation of the object, not by some static property
-  of the program. In other words, different objects may react to the same
-  message in different ways.
+  determined by the implementation of the object, not by some static
+  property of the program. In other words, different objects may react
+  to the same message in different ways.
 
 Subtyping
 : If an object `a` has all the functionality of an object `b`, then we may
   use `a` in any context where `b` is expected.
 
 Inheritance
-: The definition of one kind of object can be reused to produce a new kind of
-  object. This new definition can override some behavior, but also share code
-  with its parent.
+: The definition of one kind of object can be reused to produce a new
+  kind of object. This new definition can override some behavior, but
+  also share code with its parent.
 
 Open recursion
-: An object's methods can invoke another method in the same object using a
-  special variable (often called `self` or `this`). When objects are created
-  from classes, these calls use dynamic lookup, allowing a method defined in
-  one class to invoke methods defined in another class that inherits from the
-  first.
+: An object's methods can invoke another method in the same object
+  using a special variable (often called `self` or `this`). When
+  objects are created from classes, these calls use dynamic lookup,
+  allowing a method defined in one class to invoke methods defined in
+  another class that inherits from the first.
 
-Almost every notable modern programming language has been influenced by OOP,
-and you'll have run across these terms if you've ever used C++, Java, C#,
-Ruby, Python, or JavaScript.
+Almost every notable modern programming language has been influenced
+by OOP, and you'll have run across these terms if you've ever used
+C++, Java, C#, Ruby, Python, or JavaScript.
 
-</aside>
+:::
 
 ## OCaml Objects
 
-If you already know about object-oriented programming in a language like Java
-or <span class="keep-together">C++,</span> the OCaml object system may come
-as a surprise. Foremost is the complete separation of objects and their types
-from the class system. In a language like Java, a class name is also used as
-the type of objects created by instantiating it, and the relationships
-between these object types correspond to inheritance. For example, if we
-implement a class `Deque` in Java by inheriting from a class `Stack`, we
-would be allowed to pass a deque anywhere a stack is expected. [objects/in
+If you already know about object-oriented programming in a language
+like Java or <span class="keep-together">C++,</span> the OCaml object
+system may come as a surprise. Foremost is the complete separation of
+objects and their types from the class system. In a language like
+Java, a class name is also used as the type of objects created by
+instantiating it, and the relationships between these object types
+correspond to inheritance. For example, if we implement a class
+`Deque` in Java by inheriting from a class `Stack`, we would be
+allowed to pass a deque anywhere a stack is expected. [objects/in
 OCaml]{.idx}
 
 OCaml is entirely different. Classes are used to construct objects and
 support inheritance, but classes are not types. Instead, objects have
-*object types*, and if you want to use objects, you aren't required to use
-classes at all. Here's an example of a simple object:
+*object types*, and if you want to use objects, you aren't required to
+use classes at all. Here's an example of a simple object:
 
 ```ocaml env=stack
 # open Base
@@ -145,21 +147,21 @@ values on the stack.
 
 ## Object Polymorphism
 
-Like polymorphic variants, methods can be used without an explicit type
-declaration: [polymorphism/in objects]{.idx}[objects/polymorphism of]{.idx}
+Like polymorphic variants, methods can be used without an explicit
+type declaration: [polymorphism/in objects]{.idx}[objects/polymorphism
+of]{.idx}
 
 ```ocaml env=polymorphism
 # let area sq = sq#width * sq#width
 val area : < width : int; .. > -> int = <fun>
 # let minimize sq : unit = sq#resize 1
 val minimize : < resize : int -> unit; .. > -> unit = <fun>
-# let limit sq =
-  if (area sq) > 100 then minimize sq
+# let limit sq = if (area sq) > 100 then minimize sq
 val limit : < resize : int -> unit; width : int; .. > -> unit = <fun>
 ```
 
-As you can see, object types are inferred automatically from the methods that
-are invoked on them.
+As you can see, object types are inferred automatically from the
+methods that are invoked on them.
 
 The type system will complain if it sees incompatible uses of the same
 method:
@@ -198,7 +200,7 @@ Error: This expression has type < name : string; width : int >
 ```
 
 ::: {data-type=note}
-### Elisions Are Polymorphic
+##### Elisions Are Polymorphic
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods." It may not be apparent from the syntax, but an elided object type
@@ -224,33 +226,51 @@ records what polymorphic variants are to ordinary variants.
 :::
 
 
-An object of type `< pop : int option; .. >` can be any object with a method
-`pop : int option`; it doesn't matter how it is implemented. When the method
-`#pop` is invoked, the actual method that is run is determined by the object:
+An object of type `< pop : int option; .. >` can be any object with a
+method `pop : int option`; it doesn't matter how it is
+implemented. When the method `#pop` is invoked, the actual method that
+is run is determined by the object.  Consider the following function.
 
-```ocaml env=stack,non-deterministic
+```ocaml env=stack
 # let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop
 val print_pop : < pop : int option; .. > -> unit = <fun>
+```
+
+We can run it on the stack type we defined above, which is based on
+linked lists.
+
+```ocaml env=stack
 # print_pop (stack [5;4;3;2;1])
 Popped: 5
 - : unit = ()
-# module Time_ns = Core_kernel.Time_ns
-  let t = object
-    method pop = Some (Time_ns.to_int_ns_since_epoch (Time_ns.now ()))
+```
+
+But we could also create a totally different implementation of stacks,
+using Base's array-based `Stack` module.
+
+```ocaml env=stack
+# let array_stack l = object
+    val stack = Stack.of_list l
+    method pop = Stack.pop stack
   end
-module Time_ns = Core_kernel.Time_ns
-val t : < pop : int option > = <obj>
-# print_pop t
-Popped: 1521907632234117787
+val array_stack : 'a list -> < pop : 'a option > = <fun>
+```
+
+And `print_pop` will work just as well on this kind of stack object,
+despite having a completely different implementation.
+
+```ocaml env=stack
+# print_pop (array_stack [5;4;3;2;1])
+Popped: 5
 - : unit = ()
 ```
 
 ## Immutable Objects
 
 Many people consider object-oriented programming to be intrinsically
-imperative, where an object is like a state machine. Sending a message to an
-object causes it to change state, possibly sending messages to other objects.
-[objects/immutabile]{.idx}
+imperative, where an object is like a state machine. Sending a message
+to an object causes it to change state, possibly sending messages to
+other objects.  [objects/immutable]{.idx}
 
 Indeed, in many programs this makes sense, but it is by no means required.
 Let's define a function that creates immutable stack objects:
@@ -271,71 +291,75 @@ val imm_stack :
   'a list -> (< pop : ('a * 'b) option; push : 'a -> 'b > as 'b) = <fun>
 ```
 
-The key parts of this implementation are in the `pop` and `push` methods. The
-expression `{< ... >}` produces a copy of the current object, with the same
-type, and the specified fields updated. In other words, the `push hd` method
-produces a copy of the object, with `v` replaced by `hd :: v`. The original
-object is not modified:
+The key parts of this implementation are in the `pop` and `push`
+methods. The expression `{< ... >}` produces a copy of the current
+object, with the same type, and the specified fields updated. In other
+words, the `push hd` method produces a copy of the object, with `v`
+replaced by `hd :: v`. The original object is not modified:
 
 ```ocaml env=immutable
 # let s = imm_stack [3; 2; 1]
 val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-# let t = s#push 4
-val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
+# let r = s#push 4
+val r : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
 # s#pop
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
 Some (3, <obj>)
-# t#pop
+# r#pop
 - : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
 Some (4, <obj>)
 ```
 
-There are some restrictions on the use of the expression `{< ... >}`. It can
-be used only within a method body, and only the values of fields may be
-updated. Method implementations are fixed at the time the object is created;
-they cannot be changed <span class="keep-together">dynamically</span>.
+There are some restrictions on the use of the expression `{<
+... >}`. It can be used only within a method body, and only the values
+of fields may be updated. Method implementations are fixed at the time
+the object is created; they cannot be changed <span
+class="keep-together">dynamically</span>.
 
 ## When to Use Objects
 
-You might wonder when to use objects in OCaml, which has a multitude of
-alternative mechanisms to express the similar concepts. First-class modules
-are more expressive (a module can include types, while classes and objects
-cannot). Modules, functors, and data types also offer a wide range of ways to
-express program structure. In fact, many seasoned OCaml programmers rarely
-use classes and objects, if at all. [first-class modules/vs.
-objects]{.idx}[objects/benefits and drawbacks of]{.idx}
+You might wonder when to use objects in OCaml, which has a multitude
+of alternative mechanisms to express the similar concepts. First-class
+modules are more expressive (a module can include types, while classes
+and objects cannot). Modules, functors, and data types also offer a
+wide range of ways to express program structure. In fact, many
+seasoned OCaml programmers rarely use classes and objects, if at
+all. [first-class modules/vs.  objects]{.idx}[objects/benefits and
+drawbacks of]{.idx}
 
 Objects have some advantages over records: they don't require type
-definitions, and their support for row polymorphism makes them more flexible.
-However, the heavy syntax and additional runtime cost means that objects are
-rarely used in place of records.
+definitions, and their support for row polymorphism makes them more
+flexible.  However, the heavy syntax and additional runtime cost means
+that objects are rarely used in place of records.
 
-The real benefits of objects come from the class system. Classes support
-inheritance and open recursion. Open recursion allows interdependent parts of
-an object to be defined separately. This works because calls between the
-methods of an object are determined when the object is instantiated, a form
-of *late* binding. This makes it possible (and necessary) for one method to
-refer to other methods in the object without knowing statically how they will
-be implemented. [late binding]{.idx}[recursion/open recursion]{.idx}[open
+The real benefits of objects come from the class system. Classes
+support inheritance and open recursion. Open recursion allows
+interdependent parts of an object to be defined separately. This works
+because calls between the methods of an object are determined when the
+object is instantiated, a form of *late* binding. This makes it
+possible (and necessary) for one method to refer to other methods in
+the object without knowing statically how they will be
+implemented. [late binding]{.idx}[recursion/open recursion]{.idx}[open
 recursion]{.idx}[classes/benefits of]{.idx}
 
-In contrast, modules use early binding. If you want to parameterize your
-module code so that some part of it can be implemented later, you would write
-a function or functor. This is more explicit, but often more verbose than
-overriding a method in a class.
+In contrast, modules use early binding. If you want to parameterize
+your module code so that some part of it can be implemented later, you
+would write a function or functor. This is more explicit, but often
+more verbose than overriding a method in a class.
 
-In general, a rule of thumb is: use classes and objects in situations where
-open recursion is a big win. Two good examples are Xavier Leroy's
-[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit), which
-provides a variety of cryptographic primitives that can be combined in
-building-block style; and the
-[Camlimages](http://cristal.inria.fr/camlimages/) library, which manipulates
-various graphical file formats. Camlimages also provides a module-based
-version of the same library, letting you choose between functional and
-object-oriented styles depending on your problem domain. [Camlimages
-library]{.idx}[Cryptokit
-library]{.idx}[libraries/Cryptokit]{.idx}[libraries/Camlimages]{.idx}[external
-libraries/Camlimages]{.idx}[external libraries/Cryptokit]{.idx}
+In general, a rule of thumb is: use classes and objects in situations
+where open recursion is a big win. Two good examples are Xavier
+Leroy's
+[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit),
+which provides a variety of cryptographic primitives that can be
+combined in building-block style; and the
+[Camlimages](http://cristal.inria.fr/camlimages/) library, which
+manipulates various graphical file formats. Camlimages also provides a
+module-based version of the same library, letting you choose between
+functional and object-oriented styles depending on your problem
+domain. [Camlimages library]{.idx} [Cryptokit library]{.idx}
+[libraries/Cryptokit]{.idx} [libraries/Camlimages]{.idx} [external
+libraries/Camlimages]{.idx} [external libraries/Cryptokit]{.idx}
 
 We'll introduce you to classes, and examples using open recursion, in
 [Classes](classes.html#classes){data-type=xref}.
@@ -352,56 +376,71 @@ and]{.idx #OBsub}
 
 ### Width Subtyping
 
-To explore this, let's define some simple object types for geometric shapes.
-The generic type `shape` has a method to compute the area, and `square` and
-`circle` are specific kinds of shapes: [geometric shapes]{.idx}[width
-subtyping]{.idx}[subtyping/width subtyping]{.idx}
+To explore this, let's define some simple object types for geometric
+shapes.  The generic type `shape` just has a method to compute the
+area.  [width subtyping]{.idx}[subtyping/width subtyping]{.idx}
 
-```ocaml file=../../examples/code/objects/subtyping.ml,part=1
+```ocaml
+# type shape = < area : float >
 type shape = < area : float >
+```
+Now let's add a type representing a specific kind of shape, as well as
+a function for creating objects of that type.
 
+```ocaml
+# type square = < area : float; width : int >
 type square = < area : float; width : int >
 
-let square w = object
-  method area = Float.of_int (w * w)
-  method width = w
-end
-
-type circle = < area : float; radius : int >
-
-let circle r = object
-  method area = 3.14 *. (Float.of_int r) ** 2.0
-  method radius = r
-end
+# let square w = object
+    method area = Float.of_int (w * w)
+    method width = w
+  end
+val square : int -> < area : float; width : int > = <fun>
 ```
 
-A `square` has a method `area` just like a `shape`, and an additional method
-`width`. Still, we expect a `square` to be a `shape`, and it is. The coercion
-`:>` must be explicit:
+A `square` has a method `area` just like a `shape`, and an additional
+method `width`. Still, we expect a `square` to be a `shape`, and it
+is. Note, however, that the coercion `:>` must be explicit:
 
 ```ocaml env=subtyping
-# let shape w : shape = square w
-Characters 22-30:
+# (square 10 : shape)
+Characters 1-10:
 Error: This expression has type < area : float; width : int >
        but an expression was expected of type shape
        The second object type has no method width
-# let shape w : shape = (square w :> shape)
-val shape : int -> shape = <fun>
+# (square 10 :> shape)
+- : shape = <obj>
 ```
 
-This form of object subtyping is called *width* subtyping. Width subtyping
-means that an object type *A* is a subtype of *B*, if *A* has all of the
-methods of *B*, and possibly more. A `square` is a subtype of `shape` because
-it implements all of the methods of `shape` (the `area` method).
+This form of object subtyping is called *width* subtyping. Width
+subtyping means that an object type *A* is a subtype of *B*, if *A*
+has all of the methods of *B*, and possibly more. A `square` is a
+subtype of `shape` because it implements all of the methods of
+`shape`, which in this case means the `area` method.
 
 ### Depth Subtyping
 
-We can also use *depth* subtyping with objects. Depth subtyping allows us
-coerce an object if its individual methods could safely be coerced. So an
-object type `< m: t1 >` is a subtype of `< m: t2 >` if `t1` is a subtype of
-`t2`. [depth subtyping]{.idx}[subtyping/depth subtyping]{.idx}
+We can also use *depth* subtyping with objects. Depth subtyping allows
+us coerce an object if its individual methods could safely be
+coerced. So an object type `< m: t1 >` is a subtype of `< m: t2 >` if
+`t1` is a subtype of `t2`. [depth subtyping]{.idx}[subtyping/depth
+subtyping]{.idx}
 
-For example, we can create two objects with a `shape` method:
+First, let's add a new shape type, `circle`:
+
+```ocaml env=subtyping
+# type circle = < area : float; radius : int >
+type circle = < area : float; radius : int >
+
+# let circle r = object
+    method area = 3.14 *. (Float.of_int r) **. 2.0
+    method radius = r
+  end
+val circle : int -> < area : float; radius : int > = <fun>
+```
+
+Using that, let's create a couple of objects that each have a `shape`
+method, one returning a shape of type `circle`:
 
 ```ocaml env=subtyping
 # let coin = object
@@ -409,6 +448,11 @@ For example, we can create two objects with a `shape` method:
     method color = "silver"
   end
 val coin : < color : string; shape : < area : float; radius : int > > = <obj>
+```
+
+And the other returning a shape of type `square`:
+
+```ocaml env=subtyping
 # let map = object
     method shape = square 10
   end
@@ -449,9 +493,10 @@ val c : const = `Int 3
 
 ### Variance
 
-What about types built from object types? If a `square` is a `shape`, we
-expect a `square list` to be a `shape list`. OCaml does indeed allow such
-coercions:[variance]{.idx #var}[subtyping/variance and]{.idx #SUBvar}
+What about types built from object types? If a `square` is a `shape`,
+we expect a `square list` to be a `shape list`. OCaml does indeed
+allow such coercions:[variance]{.idx #var}[subtyping/variance
+and]{.idx #SUBvar}
 
 ```ocaml env=subtyping
 # let squares: square list = [ square 10; square 20 ]
@@ -460,48 +505,49 @@ val squares : square list = [<obj>; <obj>]
 val shapes : shape list = [<obj>; <obj>]
 ```
 
-Note that this relies on lists being immutable. It would not be safe to treat
-a `square array` as a `shape array` because it would allow you to store
-nonsquare shapes into what should be an array of squares. OCaml recognizes
-this and does not allow the coercion:
+Note that this relies on lists being immutable. It would not be safe
+to treat a `square array` as a `shape array` because it would allow
+you to store nonsquare shapes into what should be an array of
+squares. OCaml recognizes this and does not allow the coercion:
 
 ```ocaml env=subtyping
 # let square_array: square array = [| square 10; square 20 |]
 val square_array : square array = [|<obj>; <obj>|]
 # let shape_array: shape array = (square_array :> shape array)
 Characters 31-60:
-Error: Type square array is not a subtype of shape array 
+Error: Type square array is not a subtype of shape array
        Type square = < area : float; width : int >
-       is not compatible with type shape = < area : float > 
+       is not compatible with type shape = < area : float >
        The second object type has no method width
 ```
 
 We say that `'a list` is *covariant* (in `'a`), while `'a array` is
 *invariant*. [invariance]{.idx}[covariance]{.idx}
 
-Subtyping function types requires a third class of variance. A function with
-type `square -> string` cannot be used with type `shape -> string` because it
-expects its argument to be a `square` and would not know what to do with a
-`circle`. However, a function with type `shape -> string`*can* safely be used
-with type `square -> string`:
+Subtyping function types requires a third class of variance. A
+function with type `square -> string` cannot be used with type `shape
+-> string` because it expects its argument to be a `square` and would
+not know what to do with a `circle`. However, a function with type
+`shape -> string` can safely be used with type `square -> string`:
 
 ```ocaml env=subtyping
 # let shape_to_string: shape -> string =
-  fun s -> Printf.sprintf "Shape(%F)" s#area
+    fun s -> Printf.sprintf "Shape(%F)" s#area
 val shape_to_string : shape -> string = <fun>
 # let square_to_string: square -> string =
-  (shape_to_string :> square -> string)
+    (shape_to_string :> square -> string)
 val square_to_string : square -> string = <fun>
 ```
 
-We say that `'a -> string` is *contravariant* in `'a`. In general, function
-types are contravariant in their arguments and covariant in their results.
-[contravariance]{.idx}
+We say that `'a -> string` is *contravariant* in `'a`. In general,
+function types are contravariant in their arguments and covariant in
+their results.  [contravariance]{.idx}
 
-<aside data-type="sidebar">
-<h5>Variance Annotations</h5>
+::: {data-type=note}
+##### Variance Annotations
 
-OCaml works out the variance of a type using that type's definition:
+OCaml works out the variance of a type using that type's definition.
+Consider the following simple immutable `Either` type.
 
 ```ocaml env=subtyping
 # module Either = struct
@@ -517,66 +563,89 @@ module Either :
     val left : 'a -> ('a, 'b) t
     val right : 'a -> ('b, 'a) t
   end
-# (Either.left (square 40) :> (shape, shape) Either.t)
-- : (shape, shape) Either.t = Either.Left <obj>
 ```
 
-However, if the definition is hidden by a signature, then OCaml is forced to
-assume that the type is invariant:
+By looking at what coercions are allowed, we can see that the type
+parameters of the immutable `Either` type are covariant.
 
 ```ocaml env=subtyping
-# module AbstractEither : sig
+# let left_square = Either.left (square 40)
+val left_square : (< area : float; width : int >, 'a) Either.t =
+  Either.Left <obj>
+# (left_square :> (shape,_) Either.t)
+- : (shape, 'a) Either.t = Either.Left <obj>
+```
+
+The story is different, however, if the definition is hidden by a
+signature.
+
+```ocaml env=subtyping
+# module Abs_either : sig
     type ('a, 'b) t
     val left: 'a -> ('a, 'b) t
     val right: 'b -> ('a, 'b) t
   end = Either
-module AbstractEither :
+module Abs_either :
   sig
     type ('a, 'b) t
     val left : 'a -> ('a, 'b) t
     val right : 'b -> ('a, 'b) t
   end
-# (AbstractEither.left (square 40) :> (shape, shape) AbstractEither.t)
-Characters 1-32:
-Error: This expression cannot be coerced to type
-         (shape, shape) AbstractEither.t;
-       it has type (< area : float; width : int >, 'a) AbstractEither.t
-       but is here used with type (shape, shape) AbstractEither.t
+```
+
+In this case, OCaml is forced to assume that the type is invariant.
+
+```ocaml env=subtyping
+# (Abs_either.left (square 40) :> (shape, _) Abs_either.t)
+Characters 1-28:
+Error: This expression cannot be coerced to type (shape, 'a) Abs_either.t;
+       it has type (< area : float; width : int >, 'b) Abs_either.t
+       but is here used with type (shape, 'a) Abs_either.t
        Type < area : float; width : int > is not compatible with type
-         shape = < area : float > 
+         shape = < area : float >
        The second object type has no method width
 ```
 
-We can fix this by adding *variance annotations* to the type's parameters in
-the signature: `+` for covariance or `-` for contravariance:
+We can fix this by adding *variance annotations* to the type's
+parameters in the signature: `+` for covariance or `-` for
+contravariance:
 
 ```ocaml env=subtyping
-# module VarEither : sig
+# module Var_either : sig
     type (+'a, +'b) t
     val left: 'a -> ('a, 'b) t
     val right: 'b -> ('a, 'b) t
   end = Either
-module VarEither :
+module Var_either :
   sig
     type (+'a, +'b) t
     val left : 'a -> ('a, 'b) t
     val right : 'b -> ('a, 'b) t
   end
-# (VarEither.left (square 40) :> (shape, shape) VarEither.t)
-- : (shape, shape) VarEither.t = <abstr>
 ```
 
-</aside>
+As you can see, this now allows the coercion once again.
 
-For a more concrete example of variance, let's create some stacks containing
-shapes by applying our `stack` function to some squares and some circles:
+```ocaml env=subtyping
+# (Var_either.left (square 40) :> (shape, _) Var_either.t)
+- : (shape, 'a) Var_either.t = <abstr>
+```
 
-```ocaml file=../../examples/code/objects/subtyping.ml,part=2
-type 'a stack = < pop: 'a option; push: 'a -> unit >
+:::
 
-let square_stack: square stack = stack [square 30; square 10]
+For a more concrete example of variance, let's create some stacks
+containing shapes by applying our `stack` function to some squares and
+some circles:
 
-let circle_stack: circle stack = stack [circle 20; circle 40]
+```ocaml
+# type 'a stack = < pop: 'a option; push: 'a -> unit >
+type 'a stack = < pop : 'a option; push : 'a -> unit >
+
+# let square_stack: square stack = stack [square 30; square 10]
+val square_stack : square stack = <obj>
+
+# let circle_stack: circle stack = stack [circle 20; circle 40]
+val circle_stack : circle stack = <obj>
 ```
 
 If we wanted to write a function that took a list of such stacks and found
@@ -596,23 +665,25 @@ the total area of their shapes, we might try:
 val total_area : shape stack list -> float = <fun>
 ```
 
-However, when we try to apply this function to our objects, we get an error:
+However, when we try to apply this function to our objects, we get an
+error:
 
 ```ocaml env=subtyping
 # total_area [(square_stack :> shape stack); (circle_stack :> shape stack)]
 Characters 12-41:
 Error: Type square stack = < pop : square option; push : square -> unit >
        is not a subtype of
-         shape stack = < pop : shape option; push : shape -> unit > 
+         shape stack = < pop : shape option; push : shape -> unit >
        Type shape = < area : float > is not a subtype of
-         square = < area : float; width : int > 
+         square = < area : float; width : int >
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of
-`shape stack`. The problem is with the `push` method. For `shape stack`, the
-`push` method takes an arbitrary `shape`. So if we could coerce a
-`square stack` to a `shape stack`, then it would be possible to push an
-arbitrary shape onto `square stack`, which would be an error.
+`shape stack`. The problem is with the `push` method. For `shape
+stack`, the `push` method takes an arbitrary `shape`. So if we could
+coerce a `square stack` to a `shape stack`, then it would be possible
+to push an arbitrary shape onto `square stack`, which would be an
+error.
 
 Another way of looking at this is that `< push: 'a -> unit; .. >` is
 contravariant in `'a`, so `< push: square -> unit; pop: square option >`
@@ -620,7 +691,7 @@ cannot be a subtype of `< push: shape -> unit; pop: shape option >`.
 
 Still, the `total_area` function should be fine, in principle. It doesn't
 call `push`, so it isn't making that error. To make it work, we need to use a
-more precise type that indicates we are not going to be using the `set`
+more precise type that indicates we are not going to be using the `push`
 method. We define a type `readonly_stack` and confirm that we can coerce the
 list of `stack`s to it:
 
@@ -643,44 +714,48 @@ val total_area : shape readonly_stack list -> float = <fun>
 - : float = 7280.
 ```
 
-Aspects of this section may seem fairly complicated, but it should be pointed
-out that this typing *works*, and in the end, the type annotations are fairly
-minor. In most typed object-oriented languages, these coercions would simply
-not be possible. For example, in C++, a STL type `list<T>` is invariant in
-`T`, so it is simply not possible to use `list<square>` where `list<shape>`
-is expected (at least safely). The situation is similar in Java, although
-Java has an escape hatch that allows the program to fall back to dynamic
-typing. The situation in OCaml is much better: it works, it is statically
-checked, and the annotations are pretty
-simple.<a data-type="indexterm" data-startref="var">&nbsp;</a><a data-type="indexterm" data-startref="SUBvar">&nbsp;</a>
+Aspects of this section may seem fairly complicated, but it should be
+pointed out that this typing *works*, and in the end, the type
+annotations are fairly minor. In most typed object-oriented languages,
+these coercions would simply not be possible. For example, in C++, a
+STL type `list<T>` is invariant in `T`, so it is simply not possible
+to use `list<square>` where `list<shape>` is expected (at least
+safely). The situation is similar in Java, although Java has an escape
+hatch that allows the program to fall back to dynamic typing. The
+situation in OCaml is much better: it works, it is statically checked,
+and the annotations are pretty simple.<a data-type="indexterm"
+data-startref="var">&nbsp;</a><a data-type="indexterm"
+data-startref="SUBvar">&nbsp;</a>
 
 ### Narrowing
 
-Narrowing, also called *down casting*, is the ability to coerce an object to
-one of its subtypes. For example, if we have a list of shapes `shape list`,
-we might know (for some reason) what the actual type of each shape is.
-Perhaps we know that all objects in the list have type `square`. In this
-case, *narrowing* would allow the recasting of the object from type `shape`
-to type `square`. Many languages support narrowing through dynamic type
-checking. For example, in Java, a coercion `(Square) x` is allowed if the
-value `x` has type `Square` or one of its subtypes; otherwise the coercion
+Narrowing, also called *down casting*, is the ability to coerce an
+object to one of its subtypes. For example, if we have a list of
+shapes `shape list`, we might know (for some reason) what the actual
+type of each shape is.  Perhaps we know that all objects in the list
+have type `square`. In this case, *narrowing* would allow the
+recasting of the object from type `shape` to type `square`. Many
+languages support narrowing through dynamic type checking. For
+example, in Java, a coercion `(Square) x` is allowed if the value `x`
+has type `Square` or one of its subtypes; otherwise the coercion
 throws an exception. [dynamic type checking]{.idx}[down
 casting]{.idx}[narrowing]{.idx}[objects/narrowing and]{.idx}
 
 Narrowing is *not permitted* in OCaml. Period.
 
-Why? There are two reasonable explanations, one based on a design principle,
-and another technical (the technical reason is simple: it is hard to
-implement).
+Why? There are two reasonable explanations, one based on a design
+principle, and another technical (the technical reason is simple: it
+is hard to implement).
 
-The design argument is this: narrowing violates abstraction. In fact, with a
-structural typing system like in OCaml, narrowing would essentially provide
-the ability to enumerate the methods in an object. To check whether an object
-`obj` has some method `foo : int`, one would attempt a coercion
-`(obj :> < foo : int >)`.
+The design argument is this: narrowing violates abstraction. In fact,
+with a structural typing system like in OCaml, narrowing would
+essentially provide the ability to enumerate the methods in an
+object. To check whether an object `obj` has some method `foo : int`,
+one would attempt a coercion `(obj :> < foo : int >)`.
 
-More pragmatically, narrowing leads to poor object-oriented style. Consider
-the following Java code, which returns the name of a shape object:
+More pragmatically, narrowing leads to poor object-oriented
+style. Consider the following Java code, which returns the name of a
+shape object:
 
 ```java
 String GetShapeName(Shape s) {
@@ -716,45 +791,56 @@ support this kind of pattern analysis. It is also not obvious that
 object-oriented programming is well-suited for this situation. Pattern
 matching seems like a better fit:
 
-```ocaml file=../../examples/code/objects/is_barbell.ml
-let is_barbell = function
-| [Circle r1; Line _; Circle r2] when r1 = r2 -> true
-| _ -> false
+```ocaml
+# type shape = Circle of { radius : int } | Line of { length: int }
+type shape = Circle of { radius : int; } | Line of { length : int; }
+# let is_barbell = function
+  | [Circle {radius=r1}; Line _; Circle {radius=r2}] when r1 = r2 -> true
+  | _ -> false
+val is_barbell : shape list -> bool = <fun>
 ```
 
-Regardless, there is a solution if you find yourself in this situation, which
-is to augment the classes with variants. You can define a method `variant`
-that injects the actual object into a variant type:
+Regardless, there is a solution if you find yourself in this
+situation, which is to augment the classes with variants. You can
+define a method `variant` that injects the actual object into a
+variant type.
 
-```ocaml file=../../examples/code/objects/narrowing.ml,part=1
-type shape = < variant : repr; area : float>
-and circle = < variant : repr; area : float; radius : int >
-and line = < variant : repr; area : float; length : int >
-and repr =
- | Circle of circle
- | Line of line;;
+```ocaml
+# type shape = < variant : repr >
+  and circle = < variant : repr; radius : int >
+  and line = < variant : repr; length : int >
+  and repr =
+   | Circle of circle
+   | Line of line;;
+type shape = < variant : repr >
+and circle = < radius : int; variant : repr >
+and line = < length : int; variant : repr >
+and repr = Circle of circle | Line of line
 
-let is_barbell = function
-| [s1; s2; s3] ->
-   (match s1#variant, s2#variant, s3#variant with
-    | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -> true
-    | _ -> false)
-| _ -> false;;
+# let is_barbell = function
+  | [s1; s2; s3] ->
+     (match s1#variant, s2#variant, s3#variant with
+      | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -> true
+      | _ -> false)
+  | _ -> false;;
+val is_barbell : < variant : repr; .. > list -> bool = <fun>
 ```
 
-This pattern works, but it has drawbacks. In particular, the recursive type
-definition should make it clear that this pattern is essentially equivalent
-to using variants, and that objects do not provide much value here.
+This pattern works, but it has drawbacks. In particular, the recursive
+type definition should make it clear that this pattern is essentially
+equivalent to using variants, and that objects do not provide much
+value here.
 
 ### Subtyping Versus Row Polymorphism {#subtyping-vs.-row-polymorphism}
 
-There is considerable overlap between subtyping and row polymorphism. Both
-mechanisms allow you to write functions that can be applied to objects of
-different types. In these cases, row polymorphism is usually preferred over
-subtyping because it does not require explicit coercions, and it preserves
-more type information, allowing functions like the following:
-[polymorphism/row polymorphism]{.idx}[row polymorphism]{.idx}[subtyping/vs.
-row polymorphism]{.idx}
+There is considerable overlap between subtyping and row
+polymorphism. Both mechanisms allow you to write functions that can be
+applied to objects of different types. In these cases, row
+polymorphism is usually preferred over subtyping because it does not
+require explicit coercions, and it preserves more type information,
+allowing functions like the following: [polymorphism/row
+polymorphism]{.idx}[row polymorphism]{.idx}[subtyping/vs.  row
+polymorphism]{.idx}
 
 ```ocaml env=row_polymorphism
 # let remove_large l =

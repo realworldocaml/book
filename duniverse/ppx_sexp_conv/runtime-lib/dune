@@ -1,0 +1,2 @@
+(library (name ppx_sexp_conv_lib) (public_name ppx_sexp_conv.runtime-lib)
+ (libraries sexplib0) (preprocess no_preprocessing))

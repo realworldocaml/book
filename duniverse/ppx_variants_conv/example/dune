@@ -1,0 +1,3 @@
+(executables (names test) (libraries) (preprocess (pps ppx_variants_conv)))
+
+(alias (name DEFAULT) (deps test.ml.pp test.mli.pp))

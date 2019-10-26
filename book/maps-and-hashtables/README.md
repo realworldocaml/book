@@ -49,7 +49,7 @@ Let's consider an example of how one might use a map in practice. In
 we showed a module `Counter` for keeping frequency counts on a set of
 strings. Here's the interface:
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-fast/counter.mli
+```ocaml file=examples/freq-fast/counter.mli
 open Base
 
 (** A collection of string frequency counts *)
@@ -74,7 +74,7 @@ frequencies.
 
 Here's the implementation.
 
-```ocaml file=../../examples/code/files-modules-and-programs/freq-fast/counter.ml
+```ocaml file=examples/freq-fast/counter.ml
 open Base
 
 type t = (string,int,String.comparator_witness) Map.t
@@ -219,10 +219,10 @@ Characters 18-22:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "src/comparator.mli", line 20, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 20, characters 2-25:
          Expected declaration
 ```
 
@@ -279,6 +279,67 @@ With this module in hand, we can now build a set using the type `Book.t`.
   ; isbn = "978-0131101630" } ]
 val some_programming_books : (Book.t, Book.comparator_witness) Set.t =
   <abstr>
+```
+
+Note that most of the time one should use `Comparable.Make` instead of
+`Comparator.Make`, since the former provides extra helper functions
+(most notably infix comparison functions) in addition to the
+comparator.
+
+Here's the result of using `Comparable` rather than `Comparator`.  As
+you can see, a lot of extra functions have been defined.
+
+```ocaml env=main
+# module Book = struct
+    module T = struct
+
+      type t = { title: string; isbn: string }
+
+      let compare t1 t2 =
+        let cmp_title = String.compare t1.title t2.title in
+        if cmp_title <> 0 then cmp_title
+        else String.compare t1.isbn t2.isbn
+
+      let sexp_of_t t : Sexp.t =
+        List [ Atom t.title; Atom t.isbn ]
+
+    end
+    include T
+    include Comparable.Make(T)
+  end
+module Book :
+  sig
+    module T :
+      sig
+        type t = { title : string; isbn : string; }
+        val compare : t -> t -> int
+        val sexp_of_t : t -> Sexp.t
+      end
+    type t = T.t = { title : string; isbn : string; }
+    val sexp_of_t : t -> Sexp.t
+    val ( >= ) : t -> t -> bool
+    val ( <= ) : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( > ) : t -> t -> bool
+    val ( < ) : t -> t -> bool
+    val ( <> ) : t -> t -> bool
+    val equal : t -> t -> bool
+    val compare : t -> t -> int
+    val min : t -> t -> t
+    val max : t -> t -> t
+    val ascending : t -> t -> int
+    val descending : t -> t -> int
+    val between : t -> low:t -> high:t -> bool
+    val clamp_exn : t -> min:t -> max:t -> t
+    val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
+    type comparator_witness = Base.Comparable.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
+    val validate_lbound : min:t Core_kernel._maybe_bound -> t Validate.check
+    val validate_ubound : max:t Core_kernel._maybe_bound -> t Validate.check
+    val validate_bound :
+      min:t Core_kernel._maybe_bound ->
+      max:t Core_kernel._maybe_bound -> t Validate.check
+  end
 ```
 
 ### Why do we need comparator witnesses? {#why-comparator-witnesses}
@@ -388,7 +449,7 @@ Error: This expression has type
        but an expression was expected of type
          (string, int, String.comparator_witness) Map.t
        Type Reverse.comparator_witness is not compatible with type
-         String.comparator_witness 
+         String.comparator_witness
 ```
 
 ### The Polymorphic Comparator
@@ -419,15 +480,15 @@ Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
        Type Int.comparator_witness is not compatible with type
-         Comparator.Poly.comparator_witness 
+         Comparator.Poly.comparator_witness
 ```
 
 This is rejected for good reason: there's no guarantee that the comparator
 associated with a given type will order things in the same way that
 polymorphic compare does.
 
-<aside data-type="sidebar">
-<h5>The Perils of Polymorphic Compare</h5>
+::: {data-type=warning}
+##### The Perils of Polymorphic Compare
 
 Polymorphic compare is highly convenient, but it has serious downsides as
 well and should be used with care. In particular, polymorphic compare has a
@@ -497,7 +558,7 @@ together. Even worse, it will work sometimes and fail others; since if the
 sets are built in a consistent order, then they will work as expected, but
 once the order changes, the behavior will change.
 
-</aside>
+:::
 
 ### Satisfying `Comparator.S` with `[@@deriving]` {#satsifying-comparator.s-with-deriving}
 
@@ -580,8 +641,8 @@ you can always write your own comparison function by hand; but if all you
 need is a total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
-<aside data-type="sidebar">
-<h5>=, ==, and phys_equal</h5>
+::: {data-type=note}
+##### =, ==, and phys_equal
 
 If you come from a C/C++ background, you'll probably reflexively use
 `==` to test two values for equality. In OCaml, the `==` operator tests for
@@ -632,7 +693,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 <press ^Z and kill the process now>
 ```
 
-</aside>
+:::
 
 ### Applying `[@@deriving]` to maps and sets
 
@@ -693,7 +754,7 @@ module/Map.to_tree]{.idx}[maps/tree structure]{.idx}
 ```ocaml env=main
 # let ord_tree = Map.Using_comparator.to_tree ord_map
 val ord_tree :
-  (string, int, String.comparator_witness) Map.Using_comparator.Tree.t =
+  (string, int, String.comparator_witness) Core_kernel.Map_intf.Tree.t =
   <abstr>
 ```
 
@@ -720,12 +781,12 @@ following example, using the wrong comparator will lead to a type error:
 # Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo"
 Characters 62-70:
 Error: This expression has type
-         (string, int, String.comparator_witness) Map.Using_comparator.Tree.t
+         (string, int, String.comparator_witness) Core_kernel.Map_intf.Tree.t
        but an expression was expected of type
          (string, int, Reverse.comparator_witness)
-         Map.Using_comparator.Tree.t
+         Core_kernel.Map_intf.Tree.t
        Type String.comparator_witness is not compatible with type
-         Reverse.comparator_witness 
+         Reverse.comparator_witness
 ```
 
 ## Hash Tables
@@ -901,7 +962,7 @@ good idea to write one's own hash function, or to use the ones provided by
 ```
 
 Note that rather than declaring a type and using `[@@deriving hash]` to
-invoke ppx_hash, we use `[%%hash]`, a shorthand for creating a hash function
+invoke ppx_hash, we use `[%hash]`, a shorthand for creating a hash function
 inline in an expression.
 :::
 
@@ -928,7 +989,7 @@ the keys and updating the values they contain. Note that we use the
 `Map.change` and `Hashtbl.change` functions to update the respective data
 structures:
 
-```ocaml file=../../examples/code/maps-and-hash-tables/map_vs_hash/map_vs_hash.ml
+```ocaml file=examples/map_vs_hash/map_vs_hash.ml
 open Base
 open Core_bench
 
@@ -976,7 +1037,7 @@ the map version:
 
 
 
-```sh dir=../../examples/code/maps-and-hash-tables/map_vs_hash,non-deterministic=command
+```sh dir=examples/map_vs_hash,non-deterministic=command
 $ dune build map_vs_hash.exe
 $ ./_build/default/map_vs_hash.exe -ascii -quota 1 -clear-columns time speedup
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
@@ -1008,7 +1069,7 @@ keeping these copies around. In the map case, this is done by using
 are done using `Hashtbl.change`, but we also need to call `Hashtbl.copy` to
 take snapshots of the table:
 
-```ocaml file=../../examples/code/maps-and-hash-tables/map_vs_hash2/map_vs_hash2.ml
+```ocaml file=examples/map_vs_hash2/map_vs_hash2.ml
 open Base
 open Core_bench
 
@@ -1060,7 +1121,7 @@ in this case by more than a factor of 10:
 
 
 
-```sh dir=../../examples/code/maps-and-hash-tables/map_vs_hash2,non-deterministic=command
+```sh dir=examples/map_vs_hash2,non-deterministic=command
 $ dune build map_vs_hash2.exe
 $ ./_build/default/map_vs_hash2.exe -ascii -clear-columns time speedup
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.

@@ -1,0 +1,49 @@
+Releases of yojson
+==================
+
+!!! = some incompatibilities
+opt = optimizations
++ui = additions in the user interface
+-ui = restrictions in the user interface
+bug = bug or security fix
+doc = major changes in the documentation
+pkg = changes in the structure of the package or in the installation procedure
+
+trunk:            [bug] fix off-by-2 error in column error start location
+
+2014-12-26 1.2.0: [+ui] new function Yojson.Safe.buffer_json for saving
+                        a raw JSON string while parsing in order to
+                        parse later
+
+2014-01-19 1.1.8: [pkg] cmxs is now generated for supported platforms
+
+2013-05-24 1.1.7: [bug] tolerate double quoted boolean "true" and
+                        "false" when a boolean is expected
+
+2013-05-16 1.1.6: [bug] fix a bug in float printing. now print number
+                        of significant figures rather than decimal
+                        places for write_float_prec and
+                        write_std_float_prec
+
+2013-03-19 1.1.5: [+ui] new function Yojson.sort to sort fields in
+                        objects, and corresponding cmdline option.
+
+2012-12-31 1.1.4: [bug] proper support for escaped code points above U+FFFF
+
+2012-03-19 1.1.3: [+ui] new function Yojson.to_output for writing to an OO
+                        channel; requires biniou >= 1.0.2
+
+2012-02-27 1.1.2: [+ui] various enhancements
+
+2012-02-07 1.1.1: [!!!] ydump now implies -s i.e. multiple whitespace-separated
+                        records are accepted.
+2012-01-26 1.1.0: [!!!] Yojson.Biniou becomes Yojson_biniou,
+                        package yojson.biniou
+2011-04-27 1.0.2: [+ui] improved error messages showing several lookahead bytes
+                  [+ui] factored out lexer_state and init_lexer definitions
+                  [+ui] added read_null_if_possible function (used by atdgen)
+2011-01-22 1.0.1: [bug] fixed serialization of negative ints using the
+                        write_int function (affects atdgen)
+2010-12-04 1.0.0: [!!!] now requires biniou version 1.0.0 or higher
+2010-09-13 0.8.1: [doc] added INSTALL file
+2010-08-04 0.8.0: first release

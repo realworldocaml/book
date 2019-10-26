@@ -1,0 +1,20 @@
+File "failures.ml", line 4, characters 0-18: <<false>> is false.
+
+File "failures.ml", line 5, characters 0-29: name1 threw Exit.
+
+File "failures.ml", line 7, characters 2-20: <<false>> is false.
+  in TEST_MODULE at file "failures.ml", line 6, characters 0-186: name2
+
+File "failures.ml", line 8, characters 2-20: <<false>> is false.
+  in TEST_MODULE at file "failures.ml", line 6, characters 0-186: name2
+
+File "failures.ml", line 9, characters 2-25: <<raise Exit>> threw Exit.
+  in TEST_MODULE at file "failures.ml", line 6, characters 0-186: name2
+
+TEST_MODULE at file "failures.ml", line 10, characters 2-72: name3 threw Exit.
+  in TEST_MODULE at file "failures.ml", line 6, characters 0-186: name2
+
+TEST_MODULE at file "failures.ml", line 14, characters 0-60 threw Exit.
+
+FAILED 5 / 26 tests, 2 TEST_MODULES
+code: 2

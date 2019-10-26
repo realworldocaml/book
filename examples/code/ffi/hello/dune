@@ -1,4 +1,0 @@
-(executable
-  (name      hello)
-  (libraries ctypes.foreign)
-  (flags     :standard -cclib -lncurses))

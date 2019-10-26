@@ -1,0 +1,4 @@
+(executable
+  (name      hello)
+  (libraries ctypes-foreign.threaded)
+  (flags     :standard -cclib -lncurses))

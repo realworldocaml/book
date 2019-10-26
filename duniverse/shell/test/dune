@@ -1,0 +1,2 @@
+(library (name shell_test) (libraries expect_test_helpers_kernel shell)
+ (preprocess (pps ppx_jane)))

@@ -1,0 +1,71 @@
+description = "Logging infrastructure for OCaml"
+version = "%%VERSION_NUM%%"
+archive(byte) = "logs.cma"
+archive(native) = "logs.cmxa"
+plugin(byte) = "logs.cma"
+plugin(native) = "logs.cmxs"
+
+package "fmt" (
+  description = "Format reporter for Logs"
+  version = "%%VERSION_NUM%%"
+  requires = "logs fmt"
+  archive(byte) = "logs_fmt.cma"
+  archive(native) = "logs_fmt.cmxa"
+  plugin(byte) = "logs_fmt.cma"
+  plugin(native) = "logs_fmt.cmxs"
+  exists_if = "logs_fmt.cma"
+)
+
+package "browser" (
+  description = "Browser console reporter for Logs"
+  version = "%%VERSION_NUM%%"
+  requires = "logs js_of_ocaml"
+  archive(byte) = "logs_browser.cma"
+  archive(native) = "logs_browser.cmxa"
+  plugin(byte) = "logs_browser.cma"
+  plugin(native) = "logs_browser.cmxs"
+  exists_if = "logs_browser.cma"
+)
+
+package "cli" (
+  description = "Cmdliner support for Logs"
+  version = "%%VERSION_NUM%%"
+  requires = "logs cmdliner"
+  archive(byte) = "logs_cli.cma"
+  archive(native) = "logs_cli.cmxa"
+  plugin(byte) = "logs_cli.cma"
+  plugin(native) = "logs_cli.cmxs"
+  exists_if = "logs_cli.cma"
+)
+
+package "lwt" (
+  description = "Lwt support for Logs"
+  version = "%%VERSION_NUM%%"
+  requires = "logs lwt"
+  archive(byte) = "logs_lwt.cma"
+  archive(native) = "logs_lwt.cmxa"
+  plugin(byte) = "logs_lwt.cma"
+  plugin(native) = "logs_lwt.cmxs"
+  exists_if = "logs_lwt.cma"
+)
+
+package "threaded" (
+  description = "Thread safe logging"
+  version = "%%VERSION_NUM%%"
+  requires = "logs threads"
+  archive(byte) = "logs_threaded.cma"
+  archive(native) = "logs_threaded.cmxa"
+  plugin(byte) = "logs_threaded.cma"
+  plugin(native) = "logs_threaded.cmxs"
+  exists_if = "logs_threaded.cma"
+)
+
+package "top" (
+  description = "Logs toplevel support"
+  version = "%%VERSION_NUM%%"
+  requires = "logs"
+  archive(byte) = "logs_top.cma"
+  archive(native) = "logs_top.cmxa"
+  plugin(byte) = "logs_top.cma"
+  plugin(native) = "logs_top.cmxs"
+)

@@ -1,0 +1,127 @@
+(*
+ * This file is distributed under the terms of the MIT License.
+ * See the file LICENSE for details.
+ *)
+
+type library
+
+type dlsym_ret =
+  | Dlsy_unknown
+  | Dlsy_nomem
+  | Dlsy_enoent
+  | Dlsy_error of string
+  | Dlsy_ok of nativeint
+external _dlsym_default: string -> dlsym_ret = "ctypes_win32_dlsym_rtld_default"
+external _dlsym: library -> string -> dlsym_ret = "ctypes_win32_dlsym"
+
+type dlopen_ret =
+  | Dlop_unknown
+  | Dlop_nomem
+  | Dlop_notloaded
+  | Dlop_error of string
+  | Dlop_ok of library
+external _dlopen: string option -> int -> dlopen_ret = "ctypes_win32_dlopen"
+
+type dlclose_ret =
+  | Dlcl_unknown
+  | Dlcl_nomem
+  | Dlcl_ok
+  | Dlcl_error of string
+external _dlclose: library -> dlclose_ret = "ctypes_win32_dlclose"
+
+exception DL_error of string
+
+type flag =
+  | RTLD_LAZY
+  | RTLD_NOW
+  | RTLD_GLOBAL
+  | RTLD_LOCAL
+  | RTLD_NODELETE
+  | RTLD_NOLOAD
+  | RTLD_DEEPBIND
+
+let unknown = "unknown_error"
+let nomem = "no memory"
+
+let nonl s =
+  let l = String.length s in
+  if l = 0 || s.[l-1] <> '\n' then
+    s
+  else
+    let nl = if l > 1 && s.[l-2] = '\r' then l - 2 else l - 1 in
+    String.sub s 0 nl
+
+let replace_slash s =
+  let l = String.length s in
+  let b = Bytes.create l in
+  (* according to msdn, slashes are not supported for LoadLibrary *)
+  for i = 0 to pred l do
+    match s.[i] with
+      | '/' -> Bytes.set b i '\\'
+      | x   -> Bytes.set b i x
+  done;
+  Bytes.unsafe_to_string b
+
+let dlopen_raise s msg =
+  let s =
+    match s with
+      | None -> "NULL"
+      | Some x -> x
+  in
+  let msg = Printf.sprintf "dlopen (%s): %s" s (nonl msg) in
+  raise (DL_error msg)
+
+let dlopen ?filename ~flags =
+  let filename =
+    match filename with
+      | None -> None
+      | (Some x) as sx ->
+        let s =
+          if String.contains x '/' then
+            replace_slash x
+          else
+            x
+        in
+        let ls = String.lowercase s in
+        let s' =
+          if Filename.check_suffix ls ".so" ||
+            Filename.check_suffix ls ".dylib"
+          then
+            Filename.chop_extension s ^ ".dll"
+          else
+            s
+        in
+        if s' == x then sx else Some s'
+  in
+  let iflags =
+    (if List.mem RTLD_NOLOAD flags then 1 else 0) +
+    (if List.mem RTLD_NODELETE flags then 2 else 0)
+  in
+  match _dlopen filename iflags with
+    | Dlop_ok x -> x
+    | Dlop_nomem -> dlopen_raise filename nomem
+    | Dlop_unknown -> dlopen_raise filename unknown
+    | Dlop_error s -> dlopen_raise filename s
+    | Dlop_notloaded -> raise (DL_error "library not loaded")
+
+let draise y x = raise (DL_error ( y ^ ": " ^ nonl x))
+
+let dlclose ~handle =
+  match _dlclose handle with
+    | Dlcl_ok -> ()
+    | Dlcl_unknown -> draise "dlclose" unknown
+    | Dlcl_nomem -> draise "dlclose" nomem
+    | Dlcl_error s -> draise "dlclose" s
+
+let dlsym ?handle ~symbol =
+  let r =
+    match handle with
+      | None -> _dlsym_default symbol
+      | Some x -> _dlsym x symbol
+  in
+  match r with
+    | Dlsy_ok v -> v
+    | Dlsy_unknown -> draise "dlsym" unknown
+    | Dlsy_nomem -> draise "dlsym" nomem
+    | Dlsy_enoent -> draise "dlsym" "no such symbol"
+    | Dlsy_error x -> draise "dlsym" x

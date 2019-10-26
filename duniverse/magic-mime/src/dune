@@ -1,0 +1,11 @@
+(library
+ (name        magic_mime_library)
+ (public_name magic-mime)
+ (wrapped     false))
+
+(rule
+ (targets mime_types.ml)
+ (deps    ../generator/generate_mime_types.exe ../mime.types ../x-mime.types ../files.types)
+ (action  (with-stdout-to %{targets}
+           (progn (run  ../generator/generate_mime_types.exe ../mime.types ../x-mime.types)
+                  (run ../generator/generate_mime_types.exe ../files.types --files)))))

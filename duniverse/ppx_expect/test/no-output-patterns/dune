@@ -1,0 +1,2 @@
+(library (name ppx_expect_test_no_output_patterns)
+ (preprocess (pps ppx_expect)))

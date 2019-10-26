@@ -1,0 +1,6 @@
+open Base
+
+let _ = Map.add
+
+[%%expect {|
+|}];;

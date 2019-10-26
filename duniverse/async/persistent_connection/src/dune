@@ -1,0 +1,4 @@
+(library (name persistent_connection)
+ (public_name async.persistent_connection)
+ (libraries async async_kernel.persistent_connection_kernel)
+ (preprocess (pps ppx_jane)))

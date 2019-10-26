@@ -1,0 +1,4 @@
+(executable
+ (name       md5)
+ (libraries  core)
+ (preprocess (pps ppx_jane)))

@@ -1,3 +1,0 @@
-(executable
-  (name      ncurses)
-  (libraries ctypes.foreign))

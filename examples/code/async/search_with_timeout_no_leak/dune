@@ -1,3 +1,0 @@
-(executable
-  (name      search_with_timeout_no_leak)
-  (libraries cohttp.async yojson textwrap))

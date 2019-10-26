@@ -1,0 +1,19 @@
+opam-version: "2.0"
+maintainer: "martin@mjambon.com"
+authors: ["Martin Jambon"]
+
+homepage: "https://github.com/mjambon/atd"
+bug-reports: "https://github.com/mjambon/atd/issues"
+dev-repo: "git://github.com/mjambon/atd.git"
+
+build: [
+  ["jbuilder" "subst" "-n" name] {pinned}
+  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["jbuilder" "runtest" "-p" name] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.02.3"}
+  "jbuilder" {build}
+  "atd" {>= "1.13.0"}
+]

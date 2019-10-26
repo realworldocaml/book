@@ -1,0 +1,2 @@
+(library (name binary_packing) (public_name core_kernel.binary_packing)
+ (preprocess (pps ppx_jane -check-doc-comments)) (libraries core_kernel))

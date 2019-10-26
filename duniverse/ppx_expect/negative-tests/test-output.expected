@@ -1,0 +1,8 @@
+File "export_test.ml", line 2, characters 2-24 threw
+(Failure
+   "Trying to run an expect test from the wrong file.\
+  \n- test declared at ppx/ppx_expect/negative-tests/export_test.ml:2\
+  \n- trying to run it from ppx/ppx_expect/negative-tests/import_test.ml\
+  \n").
+
+FAILED 1 / 41 tests

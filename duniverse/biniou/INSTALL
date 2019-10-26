@@ -1,0 +1,30 @@
+                   Installation instructions for biniou
+
+
+Requirements:
+
+- Objective Caml (>= 3.11 is fine, earlier versions are probably fine too)
+- GNU make
+- Findlib (`ocamlfind' command)
+- easy-format
+
+
+GODI makes the installation process straightforward,
+although other package managers can be equally convenient.
+
+
+Manual installation is done using:
+
+make           # or `make all' for the bytecode-only version
+
+make install   # or `make BINDIR=/foo/bin install' for installing executables
+               # in a place other than the guessed default.
+
+
+Uninstallation:
+
+make uninstall
+
+
+
+Bugs and feedback should be sent to Martin Jambon <martin@mjambon.com>.

@@ -1,0 +1,3 @@
+(library (name unpack_sequence) (public_name async.unpack_sequence)
+ (preprocess (pps ppx_jane -check-doc-comments))
+ (libraries async core_kernel.unpack_buffer))

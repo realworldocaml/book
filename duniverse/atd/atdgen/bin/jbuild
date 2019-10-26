@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executables
+ ((libraries (str atd atdgen_emit))
+  (names (ag_main))
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (public_names (atdgen))
+  (package atdgen)))

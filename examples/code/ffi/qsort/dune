@@ -1,3 +1,0 @@
-(executable
-  (name      qsort)
-  (libraries core ctypes.foreign))

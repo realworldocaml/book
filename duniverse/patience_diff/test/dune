@@ -1,0 +1,3 @@
+(library (name patience_diff_lib_test)
+ (libraries base expect_test_helpers_kernel patience_diff_lib)
+ (preprocess (pps ppx_jane)))

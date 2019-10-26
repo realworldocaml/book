@@ -1,0 +1,2 @@
+(library (name ppx_hash_lib) (public_name ppx_hash.runtime-lib)
+ (libraries base) (preprocess (pps ppx_compare ppx_sexp_conv)))

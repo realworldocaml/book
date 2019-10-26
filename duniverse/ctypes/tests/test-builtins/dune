@@ -1,0 +1,4 @@
+(test
+ (name test_builtins)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_builtins_stubs test_builtins_bindings tests_common))

@@ -1,0 +1,2 @@
+(library (name log_extended) (public_name async.log_extended)
+ (libraries async textutils.console core.syslog) (preprocess (pps ppx_jane)))

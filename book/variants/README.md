@@ -371,7 +371,7 @@ module Log_entry :
 ```
 
 This record type combines multiple pieces of data into one value. In
-particular, a single `Log_entry.t` has a `session_id`*and* a `time`*and* an
+particular, a single `Log_entry.t` has a `session_id` *and* a `time` *and* an
 `important` flag *and* a `message`. More generally, you can think of record
 types as conjunctions. Variants, on the other hand, are disjunctions, letting
 you represent multiple possibilities, as in the following example:
@@ -386,7 +386,7 @@ type client_message =
   | Log_entry of Log_entry.t
 ```
 
-A `client_message` is a `Logon`*or* a `Heartbeat`*or* a `Log_entry`. If we
+A `client_message` is a `Logon` *or* a `Heartbeat` *or* a `Log_entry`. If we
 want to write code that processes messages generically, rather than code
 specialized to a fixed message type, we need something like `client_message`
 to act as one overarching type for the different possible messages. We can
@@ -776,7 +776,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 ```
 
 The example of a Boolean expression language is more than a toy. There's a
-module very much in this spirit in `Base` called `Blang` (short for "Boolean
+module very much in this spirit in `Core_kernel` called `Blang` (short for "Boolean
 language"), and it gets a lot of practical use in a variety of applications.
 The simplification algorithm in particular is useful when you want to use it
 to specialize the evaluation of expressions for which the evaluation of some
@@ -1058,7 +1058,7 @@ saw in
 [Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 Let's start with the `mli`:
 
-```ocaml file=../../examples/code/variants-termcol/terminal_color.mli
+```ocaml file=examples/variants-termcol/terminal_color.mli
 open Core
 
 type basic_color =
@@ -1082,7 +1082,7 @@ Here, `extended_color` is defined as an explicit extension of `color`. Also,
 notice that we defined all of these types as exact variants. We can implement
 this library as follows:
 
-```ocaml file=../../examples/code/variants-termcol/terminal_color.ml
+```ocaml file=examples/variants-termcol/terminal_color.ml
 open Core
 
 type basic_color =
@@ -1128,11 +1128,11 @@ type that was listed in the `mli`.
 If we add an explicit type annotation to the code itself (rather than just in
 the `mli`), then the compiler has enough information to warn us:
 
-```ocaml file=../../examples/code/variants-termcol-annotated/terminal_color.ml,part=1
+```ocaml file=examples/variants-termcol-annotated/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Gray x -> 2000 + x
-  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+  | (`Basic _ | `RGB _ | `Grey _) as color -> color_to_int color
 ```
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
@@ -1145,11 +1145,13 @@ In particular, the compiler will complain that the `` `Grey`` case is unused:
 
 
 
-```sh dir=../../examples/code/variants-termcol-annotated
+```sh dir=examples/variants-termcol-annotated
 $ dune build terminal_color.exe
 ...
 File "terminal_color.ml", line 29, characters 25-32:
-Error (warning 12): this sub-pattern is unused.
+Error: This pattern matches values of type [? `Grey of 'a ]
+       but a pattern was expected which matches values of type extended_color
+       The second variant type does not allow tag(s) `Grey
 [1]
 ```
 
@@ -1158,7 +1160,7 @@ how we write the pattern match that narrows the type. In particular, we can
 explicitly use the type name as part of the pattern match, by prefixing it
 with a `#`:
 
-```ocaml file=../../examples/code/variants-termcol-fixed/terminal_color.ml,part=1
+```ocaml file=examples/variants-termcol-fixed/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | #color as color -> color_to_int color

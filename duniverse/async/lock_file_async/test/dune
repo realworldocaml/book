@@ -1,0 +1,3 @@
+(library (name test_lock_file_async)
+ (libraries async core expect_test_helpers lock_file_async)
+ (preprocess (pps ppx_jane)))

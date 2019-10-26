@@ -1,0 +1,4 @@
+(library (name test_bin_shape) (libraries core)
+ (preprocess (pps ppx_assert ppx_custom_printf ppx_bin_prot ppx_inline_test)))
+
+(alias (name DEFAULT) (deps test.ml.pp alias runtest))

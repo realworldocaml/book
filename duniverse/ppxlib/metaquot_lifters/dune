@@ -1,0 +1,5 @@
+(library
+ (name        ppxlib_metaquot_lifters)
+ (public_name ppxlib.metaquot_lifters)
+ (flags (:standard -safe-string))
+ (libraries   ppxlib ppxlib_traverse_builtins))

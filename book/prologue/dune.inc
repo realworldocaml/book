@@ -1,7 +1,10 @@
 (alias
- (name   runtest)
- (deps   (:x README.md))
- (action (progn
-           (run mdx test --direction=to-ml %{x})
-           (diff? %{x} %{x}.corrected)
-)))
+ (name runtest)
+ (deps
+  (:x README.md)
+  (package mdx))
+ (locks ../../global-lock)
+ (action
+  (progn
+   (run ocaml-mdx test --direction=to-md %{x})
+   (diff? %{x} %{x}.corrected))))

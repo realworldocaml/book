@@ -42,9 +42,9 @@ Once that's done, Ctypes is available via OPAM as usual:
 
 ```
 $ brew install libffi     # for MacOS X users
-$ opam install ctypes
+$ opam install ctypes ctypes-foreign
 $ utop
-# require "ctypes.foreign" ;;
+# require "ctypes-foreign" ;;
 ```
 
 You'll also need the Ncurses library for the first example. This comes
@@ -101,7 +101,7 @@ OCaml value.
 Let's begin by defining the basic values we need, starting with the `WINDOW`
 state pointer:
 
-```ocaml file=../../examples/code/ffi/ncurses/ncurses.ml
+```ocaml file=examples/ffi/ncurses/ncurses.ml,part=0
 open Ctypes
 
 type window = unit ptr
@@ -114,7 +114,7 @@ it's good enough for now. The second statement defines an OCaml value that
 represents the `WINDOW` C pointer. This value is used later in the Ctypes
 function definitions:
 
-```ocaml file=../../examples/code/ffi/ncurses/ncurses.ml,part=1
+```ocaml file=examples/ffi/ncurses/ncurses.ml,part=1
 open Foreign
 
 let initscr =
@@ -133,7 +133,7 @@ initialize the terminal. The `foreign` function accepts two parameters:
 
 The remainder of the Ncurses binding simply expands on these definitions:
 
-```ocaml file=../../examples/code/ffi/ncurses/ncurses.ml,part=2
+```ocaml file=examples/ffi/ncurses/ncurses.ml,part=2
 let newwin =
   foreign "newwin"
     (int @-> int @-> int @-> int @-> returning window)
@@ -180,8 +180,8 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
-```sh dir=../../examples/code/ffi/ncurses
-$ corebuild -pkg ctypes.foreign ncurses.inferred.mli
+```sh dir=examples/ffi/ncurses,skip
+$ corebuild -pkg ctypes-foreign ncurses.inferred.mli
 $ cp _build/ncurses.inferred.mli .
 ```
 
@@ -193,7 +193,7 @@ internals more abstract.
 
 Here's the customized interface that we can safely use from other libraries:
 
-```ocaml file=../../examples/code/ffi/ncurses/ncurses.mli
+```ocaml file=examples/ffi/ncurses/ncurses.mli
 type window
 val window : window Ctypes.typ
 val initscr : unit -> window
@@ -216,7 +216,7 @@ passed to an Ncurses library call.
 Now compile a "hello world" terminal drawing program to tie this all
 together:
 
-```ocaml file=../../examples/code/ffi/hello/hello.ml,non-deterministic
+```ocaml file=examples/ffi/hello/hello.ml,non-deterministic
 open Ncurses
 
 let () =
@@ -233,19 +233,19 @@ let () =
   endwin ()
 ```
 
-The `hello` executable is compiled by linking with the `ctypes.foreign`
+The `hello` executable is compiled by linking with the `ctypes-foreign`
 OCamlfind package:
 
 ```scheme
 (executable
   (name      hello)
-  (libraries ctypes.foreign)
+  (libraries ctypes-foreign.threaded)
   (flags     :standard -cclib -lncurses))
 ```
 
 
 
-```sh dir=../../examples/code/ffi/hello
+```sh dir=examples/ffi/hello
 $ dune build hello.exe
 ```
 
@@ -267,7 +267,7 @@ First, let's look at how to define basic scalar C types. Every C type is
 represented by an OCaml equivalent via the single type definition:[scalar C
 types]{.idx}[foreign function interface (FFI)/basic scalar C types]{.idx}
 
-```ocaml file=../../examples/code/ctypes/ctypes.mli
+```ocaml file=examples/ctypes/ctypes.mli,part=0
 type 'a typ
 ```
 
@@ -292,7 +292,7 @@ There are various other uses of `typ` values within Ctypes, such as:
 Here are the definitions for most of the standard C99 scalar types, including
 some platform-dependent ones: [C99 scalar types]{.idx}
 
-```ocaml file=../../examples/code/ctypes/ctypes.mli,part=1
+```ocaml file=examples/ctypes/ctypes.mli,part=1
 val void      : unit typ
 val char      : char typ
 val schar     : int typ
@@ -380,7 +380,7 @@ The first step is to open some of the Ctypes modules:
 We can now create a binding to `time` directly from the toplevel.
 
 ```ocaml env=posix
-# #require "ctypes.foreign"
+# #require "ctypes-foreign.threaded"
 # #require "ctypes.top"
 # open Ctypes
 # open PosixTypes
@@ -486,7 +486,7 @@ is written or read.
 
 Here is the type signature of the `Ctypes.view` function:
 
-```ocaml file=../../examples/code/ctypes/ctypes.mli,part=2
+```ocaml file=examples/ctypes/ctypes.mli,part=2
 val view :
   read:('a -> 'b) ->
   write:('b -> 'a) ->
@@ -497,7 +497,7 @@ Ctypes has some internal low-level conversion functions that map between an
 OCaml `string` and a C character buffer by copying the contents into the
 respective data structure. They have the following type signature:
 
-```ocaml file=../../examples/code/ctypes/ctypes.mli,part=3
+```ocaml file=examples/ctypes/ctypes.mli,part=3
 val string_of_char_ptr : char ptr -> string
 val char_ptr_of_string : string -> char ptr
 ```
@@ -505,7 +505,7 @@ val char_ptr_of_string : string -> char ptr
 Given these functions, the definition of the `Ctypes.string` value that uses
 views is quite simple:
 
-```ocaml file=../../examples/code/ctypes/ctypes_impl.ml
+```ocaml file=examples/ctypes/ctypes_impl.ml
 let string =
   view (char ptr)
     ~read:string_of_char_ptr
@@ -515,7 +515,7 @@ let string =
 The type of this `string` function is a normal `typ` with no external sign of
 the use of the view function:
 
-```ocaml file=../../examples/code/ctypes/ctypes.mli,part=4
+```ocaml file=examples/ctypes/ctypes.mli,part=4
 val string    : string.typ
 ```
 
@@ -570,7 +570,10 @@ continuing on from the previous definitions:
 # type timeval
 type timeval
 # let timeval : timeval structure typ = structure "timeval"
-val timeval : timeval structure typ = struct timeval
+val timeval : timeval structure typ =
+  Ctypes_static.Struct
+   {Ctypes_static.tag = "timeval";
+    spec = Ctypes_static.Incomplete {Ctypes_static.isize = 0}; fields = []}
 ```
 
 The first command defines a new OCaml type `timeval` that we'll use to
@@ -592,10 +595,12 @@ unions/field addition]{.idx}
 ```ocaml env=posix
 # let tv_sec  = field timeval "tv_sec" long
 val tv_sec : (Signed.long, timeval structure) field =
-  {Ctypes_static.ftype = long; foffset = 0; fname = "tv_sec"}
+  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
+   foffset = 0; fname = "tv_sec"}
 # let tv_usec = field timeval "tv_usec" long
 val tv_usec : (Signed.long, timeval structure) field =
-  {Ctypes_static.ftype = long; foffset = 8; fname = "tv_usec"}
+  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
+   foffset = 8; fname = "tv_usec"}
 # seal timeval
 - : unit = ()
 ```
@@ -620,7 +625,10 @@ unions/incomplete structure definitions]{.idx}
 # type timezone
 type timezone
 # let timezone : timezone structure typ = structure "timezone"
-val timezone : timezone structure typ = struct timezone
+val timezone : timezone structure typ =
+  Ctypes_static.Struct
+   {Ctypes_static.tag = "timezone";
+    spec = Ctypes_static.Incomplete {Ctypes_static.isize = 0}; fields = []}
 ```
 
 We don't ever need to create `struct timezone` values, so we can leave this
@@ -673,7 +681,7 @@ We built up a lot of bindings in the previous section, so let's recap them
 with a complete example that ties it together with a command-line frontend:
 [structs and unions/time-printing command]{.idx}
 
-```ocaml file=../../examples/code/ffi/datetime/datetime.ml
+```ocaml file=examples/ffi/datetime/datetime.ml
 open Core
 open Ctypes
 open PosixTypes
@@ -723,12 +731,12 @@ This can be compiled and run in the usual way: [returning function]{.idx}
 ```scheme
 (executable
   (name      datetime)
-  (libraries core ctypes.foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
 
-```sh dir=../../examples/code/ffi/datetime,non-deterministic=output
+```sh dir=examples/ffi/datetime,non-deterministic=output
 $ dune build datetime.exe
 $ ./_build/default/datetime.exe
 1520339271.364367
@@ -736,13 +744,13 @@ $ ./_build/default/datetime.exe -a
 Tue Mar  6 13:27:51 2018
 ```
 
-<aside data-type="sidebar">
-<h5>Why Do We Need to Use returning?</h5>
+::: {data-type=note}
+##### Why Do We Need to Use returning?
 
 The alert reader may be curious about why all these function definitions have
 to be terminated by `returning`:
 
-```ocaml file=../../examples/code/ffi/return_frag.ml
+```ocaml file=examples/ffi/return_frag.ml,part=0
 (* correct types *)
 val time: ptr time_t @-> returning time_t
 val difftime: time_t @-> time_t @-> returning double
@@ -751,7 +759,7 @@ val difftime: time_t @-> time_t @-> returning double
 The `returning` function may appear superfluous here. Why couldn't we simply
 give the types as follows?
 
-```ocaml file=../../examples/code/ffi/return_frag.ml,part=1
+```ocaml file=examples/ffi/return_frag.ml,part=1
 (* incorrect types *)
 val time: ptr time_t @-> time_t
 val difftime: time_t @-> time_t @-> double
@@ -765,13 +773,13 @@ pointer from a function, but not to return an actual function.
 Secondly, OCaml functions are typically defined in a curried style. The
 signature of a two-argument function is written as follows:
 
-```ocaml file=../../examples/code/ffi/return_frag.ml,part=2
+```ocaml file=examples/ffi/return_frag.ml,part=2
 val curried : int -> int -> int
 ```
 
 but this really means:
 
-```ocaml file=../../examples/code/ffi/return_frag.ml,part=3
+```ocaml file=examples/ffi/return_frag.ml,part=3
 val curried : int -> (int -> int)
 ```
 
@@ -814,7 +822,7 @@ types are the same but the C semantics are quite different, we need some kind
 of marker to distinguish the cases. This is the purpose of `returning` in
 function definitions.
 
-</aside>
+:::
 
 
 ### Defining Arrays
@@ -823,7 +831,7 @@ Arrays in C are contiguous blocks of the same type of value. Any of the basic
 types defined previously can be allocated as blocks via the `Array` module:
 [arrays/definition of]{.idx}[structs and unions/array definition]{.idx}
 
-```ocaml file=../../examples/code/ctypes/ctypes.mli,part=5
+```ocaml file=examples/ctypes/ctypes.mli,part=5
 module Array : sig
   type 'a t = 'a array
 
@@ -854,8 +862,8 @@ memory. They are also fully supported in Ctypes, but we won't go into more
 detail here. [operators/controlling pointers]{.idx}[pointers/operators
 controlling]{.idx}
 
-<aside data-type="sidebar">
-<h5>Pointer Operators for Dereferencing and Arithmetic</h5>
+::: {data-type=note}
+##### Pointer Operators for Dereferencing and Arithmetic
 
 Ctypes defines a number of operators that let you manipulate pointers and
 arrays just as you would in C. The Ctypes equivalents do have the benefit of
@@ -878,7 +886,7 @@ Table:  Operators for manipulating pointers and arrays
 There are also other useful nonoperator functions available (see the Ctypes
 documentation), such as pointer differencing and comparison.
 
-</aside>
+:::
 
 
 ## Passing Functions to C
@@ -915,7 +923,10 @@ definition. Since type descriptions are regular values, we can just use
 # open Foreign
 # let compare_t = ptr void @-> ptr void @-> returning int
 val compare_t : (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) fn =
-  int(void*, void*)
+  Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
+   Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
+    Ctypes_static.Returns
+     (Ctypes_static.Primitive Ctypes_primitive_types.Int)))
 # let qsort = foreign "qsort"
                 (ptr void @-> size_t @-> size_t @->
   funptr compare_t @-> returning void)
@@ -942,7 +953,7 @@ polymorphism in place of the unsafe `void ptr` type.
 The following is a command-line tool that uses the `qsort` binding to sort
 all of the integers supplied on the standard input: [qsort binding]{.idx}
 
-```ocaml file=../../examples/code/ffi/qsort/qsort.ml
+```ocaml file=examples/ffi/qsort/qsort.ml
 open Core
 open Ctypes
 open PosixTypes
@@ -984,12 +995,12 @@ and also build the inferred interface so we can examine it more closely:
 ```scheme
 (executable
   (name      qsort)
-  (libraries core ctypes.foreign))
+  (libraries core ctypes-foreign.threaded))
 ```
 
 
 
-```sh dir=../../examples/code/ffi/qsort
+```sh dir=examples/ffi/qsort,skip
 $ dune build qsort.exe
 $ cat input.txt
 2
@@ -1001,16 +1012,16 @@ $ ./_build/default/qsort.exe < input.txt
 2
 3
 4
-$ corebuild -pkg ctypes.foreign qsort.inferred.mli
-ocamlfind ocamldep -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
-ocamlfind ocamlc -i -thread -short-paths -package ctypes.foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
+$ corebuild -pkg ctypes-foreign qsort.inferred.mli
+ocamlfind ocamldep -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
+ocamlfind ocamlc -i -thread -short-paths -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
 $ cp _build/qsort.inferred.mli qsort.mli
 ```
 
 The inferred interface shows us the types of the raw `qsort` binding and also
 the `qsort'` wrapper function:
 
-```ocaml file=../../examples/code/ffi/qsort/qsort.mli
+```ocaml file=examples/ffi/qsort/qsort.mli
 val compare_t :
   (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) Ctypes_static.fn
 val qsort :
@@ -1037,8 +1048,8 @@ scope since we opened `Ctypes` at the start of the file.[memory/and allocated
 Ctypes]{.idx}[Ctypes library/lifetime of allocated Ctypes]{.idx}[garbage
 collection/of allocated Ctypes]{.idx}
 
-<aside data-type="sidebar">
-<h5>Lifetime of Allocated Ctypes</h5>
+::: {data-type=note}
+##### Lifetime of Allocated Ctypes
 
 Values allocated via Ctypes (i.e., using `allocate`, `Array.make`, and so on)
 will not be garbage-collected as long as they are reachable from OCaml
@@ -1073,7 +1084,7 @@ function pointers in global variables or elsewhere, in which case you'll need
 to take care that the OCaml functions you pass to them aren't prematurely
 garbage-collected.
 
-</aside>
+:::
 
 
 ## Learning More About C Bindings

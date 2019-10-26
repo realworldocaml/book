@@ -1,0 +1,11 @@
+{0 Fmt {%html: <span class="version">%%VERSION%%</span>%}}
+
+Fmt exposes combinators to devise {!Format} pretty-printing functions.
+
+{1:api API}
+
+{!modules:
+Fmt
+Fmt_tty
+Fmt_cli
+}

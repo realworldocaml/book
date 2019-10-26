@@ -1,0 +1,4 @@
+(alias (name runtest) (deps ppx_bin_prot_nopervasives.cmxa))
+
+(library (name ppx_bin_prot_nopervasives) (libraries core)
+ (flags :standard -nopervasives) (preprocess (pps ppx_jane)))

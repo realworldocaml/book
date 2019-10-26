@@ -1,0 +1,4 @@
+(library
+ (name test_closure_type_promotions_stubs)
+ (wrapped false)
+ (libraries ctypes ctypes-foreign.threaded))

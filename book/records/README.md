@@ -46,14 +46,14 @@ just think of them as a simple pattern language you can use for parsing a
 string.
 
 ```ocaml env=main
-# #require "re.posix"
+# #require "re"
 # let service_info_of_string line =
     let matches =
       Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
     in
-    { service_name = Re.get matches 1;
-      port = Int.of_string (Re.get matches 2);
-      protocol = Re.get matches 3;
+    { service_name = Re.Group.get matches 1;
+      port = Int.of_string (Re.Group.get matches 2);
+      protocol = Re.Group.get matches 3;
     }
 val service_info_of_string : string -> service_info = <fun>
 ```
@@ -62,8 +62,7 @@ We can construct a concrete record by calling the function on a line from the
 file.
 
 ```ocaml env=main
-# let ssh = service_info_of_string
-  "ssh 22/udp # SSH Remote Login Protocol"
+# let ssh = service_info_of_string "ssh 22/udp # SSH Remote Login Protocol"
 val ssh : service_info = {service_name = "ssh"; port = 22; protocol = "udp"}
 ```
 
@@ -207,9 +206,9 @@ that we are ignoring extra fields. This is done by adding an underscore to
 the pattern:
 
 ```ocaml env=main
-# let host_info_to_string { service_name = name; port = port; protocol = prot; _ } =
+# let service_info_to_string { service_name = name; port = port; protocol = prot; _ } =
     sprintf "%s %i/%s" name port prot
-val host_info_to_string : service_info -> string = <fun>
+val service_info_to_string : service_info -> string = <fun>
 ```
 
 It's a good idea to enable the warning for incomplete record matches and to
@@ -229,7 +228,7 @@ $ ocaml -warn-help | egrep '\b9\b'
 ```
 
 You can think of OCaml's warnings as a powerful set of optional static
-analysis tools. They're enormously helpful in catching all sorts of bugs, and
+analysis tools. They're enormously helpful in catching all sorts of bugs,
 and you should enable them in your build environment. You don't typically
 enable all warnings, but the defaults that ship with the compiler are pretty
 good.
@@ -237,16 +236,17 @@ good.
 The warnings used for building the examples in this book are specified with
 the following flag: `-w @A-4-33-40-41-42-43-34-44`.
 
-The syntax of `-w` can be found by running `ocaml -help`, but this particular
-invocation turns on all warnings as errors, disabling only the numbers listed
-explicitly after the `A`.
+The syntax of `-w` can be found by running `ocaml -help`, but this
+particular invocation turns on all warnings as errors, disabling only
+the numbers listed explicitly after the `A`.
 
-Treating warnings as errors (i.e., making OCaml fail to compile any code that
-triggers a warning) is good practice, since without it, warnings are too
-often ignored during development. When preparing a package for distribution,
-however, this is a bad idea, since the list of warnings may grow from one
-release of the compiler to another, and so this may lead your package to fail
-to compile on newer compiler releases.
+Treating warnings as errors (i.e., making OCaml fail to compile any
+code that triggers a warning) is good practice, since without it,
+warnings are too often ignored during development. When preparing a
+package for distribution, however, this is a bad idea, since the list
+of warnings may grow from one release of the compiler to another, and
+so this may lead your package to fail to compile on newer compiler
+releases.
 :::
 
 
@@ -282,9 +282,9 @@ updated version of `service_info_of_string`.[records/construction of]{.idx}
     let matches =
       Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
     in
-    let service_name = Re.get matches 1 in
-    let port = Int.of_string (Re.get matches 2) in
-    let protocol = Re.get matches 3 in
+    let service_name = Re.Group.get matches 1 in
+    let port = Int.of_string (Re.Group.get matches 2) in
+    let protocol = Re.Group.get matches 3 in
     { service_name; port; protocol; comment }
 val service_info_of_string : string -> service_info = <fun>
 ```
@@ -504,9 +504,9 @@ val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
 
-Earlier, we saw that you could help OCaml understand which record field was
-intended by adding a type annotation. Let's see what happens if we try that
-here.
+Earlier, we saw that you could help OCaml understand which record
+field was intended by adding a type annotation.  We can use that here
+to make the example even more concise.
 
 ```ocaml env=main2
 # let create_log_entry ~session_id ~important message : Log_entry.t =
@@ -515,20 +515,8 @@ val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
 ```
 
-This triggers warning 40, showing that a type annotation causes the selection
-of an identifier in a different module. If we disable warning 40, this
-definition goes through without issue.
-
-```ocaml env=main2
-# #warnings "-40"
-# let create_log_entry ~session_id ~important message : Log_entry.t =
-    { time = Time_ns.now (); session_id; important; message }
-val create_log_entry :
-  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
-```
-
-This is not restricted to constructing a record; we can use the same trick
-when pattern matching:
+This is not restricted to constructing a record; we can use the same
+approaches when pattern matching:
 
 ```ocaml env=main2
 # let message_to_string { Log_entry.important; message; _ } =
@@ -536,37 +524,38 @@ when pattern matching:
 val message_to_string : Log_entry.t -> string = <fun>
 ```
 
-When using dot notation for accessing record fields, we can qualify the field
-by the module as well.
+When using dot notation for accessing record fields, we can qualify
+the field by the module as well.
 
 ```ocaml env=main2
 # let is_important t = t.Log_entry.important
 val is_important : Log_entry.t -> bool = <fun>
 ```
 
-The syntax here is a little surprising when you first encounter it. The thing
-to keep in mind is that the dot is being used in two ways: the first dot is a
-record field access, with everything to the right of the dot being
-interpreted as a field name; the second dot is accessing the contents of a
-module, referring to the record field `important` from within the module
-`Log_entry`. The fact that `Log_entry` is capitalized and so can't be a field
-name is what disambiguates the two uses.
+The syntax here is a little surprising when you first encounter
+it. The thing to keep in mind is that the dot is being used in two
+ways: the first dot is a record field access, with everything to the
+right of the dot being interpreted as a field name; the second dot is
+accessing the contents of a module, referring to the record field
+`important` from within the module `Log_entry`. The fact that
+`Log_entry` is capitalized and so can't be a field name is what
+disambiguates the two uses.
 
 Qualifying a record field by the module it comes from can be awkward.
-Happily, OCaml doesn't require that the record field be qualified if it can
-otherwise infer the type of the record in question. In particular, we can
-rewrite the above declarations by adding type annotations and removing the
-module qualifications.
+Happily, OCaml doesn't require that the record field be qualified if
+it can otherwise infer the type of the record in question. In
+particular, we can rewrite the above declarations by adding type
+annotations and removing the module qualifications.
 
 ```ocaml env=main2
 # let create_log_entry ~session_id ~important message : Log_entry.t =
     { time = Time_ns.now (); session_id; important; message }
-  let message_to_string ({ important; message; _ } : Log_entry.t) =
-    if important then String.uppercase message else message
-  let is_important (t:Log_entry.t) = t.important
 val create_log_entry :
   session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+# let message_to_string ({ important; message; _ } : Log_entry.t) =
+    if important then String.uppercase message else message
 val message_to_string : Log_entry.t -> string = <fun>
+# let is_important (t:Log_entry.t) = t.important
 val is_important : Log_entry.t -> bool = <fun>
 ```
 
@@ -752,7 +741,7 @@ declaration. So, for example, we could have defined `Logon` as follows:
       { session_id: string;
         time: Time_ns.t;
         user: string;
-       credentials: string;
+        credentials: string;
       }
     [@@deriving fields]
   end

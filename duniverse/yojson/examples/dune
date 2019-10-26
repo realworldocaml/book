@@ -1,0 +1,8 @@
+(executable
+ (name filtering)
+ (flags (-safe-string))
+ (libraries yojson))
+
+(alias
+ (name examples)
+ (deps filtering.exe))

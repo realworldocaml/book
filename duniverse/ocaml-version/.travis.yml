@@ -1,0 +1,12 @@
+sudo: required
+services:
+  - docker
+language: c
+script: bash -ex ./.docker-run.sh
+env:
+  global:
+  - OCAML_VERSIONS="4.02 4.03 4.04 4.05 4.06 4.07"
+  matrix:
+  - DISTRO="debian-stable"
+  - DISTRO="alpine"
+  - DISTRO="ubuntu"

@@ -23,14 +23,12 @@ different use-cases, each building on the last. Here's a quick summary.
   library. It has a variety of basic efficient data structures like
   hash-tables, sets and sequences. It also defines the basic idioms for error
   handling and serialization, and contains well organized APIs for every
-  basic data type from integers to lazy values. This is comes along with a
+  basic data type from integers to lazy values. This comes along with a
   minimum of external dependencies, so `Base` just takes seconds to build and
   install. It's also portable, running on every platform that OCaml does,
   including Windows and JavaScript.
 
-- *`Core_kernel`* extends `Base` with many new data structures, like heaps,
-  and other capabilities, like types to represent times and time-zones, and
-  support for efficient binary serializers. It's still portable, but has many
+- *`Core_kernel`* extends `Base` with many new data structures, like heaps, types to represent times and time-zones, support for efficient binary serializers, and other capabilities. It's still portable, but has many
   more dependencies, takes longer to build, and will add more to the size of
   your executables.
 
@@ -317,7 +315,7 @@ val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
 
 In the above, we've marked every argument to the function with its type, with
 the final annotation indicating the type of the return value. Such type
-annotations can be placed on any expression in an OCaml program:
+annotations can be placed on any expression in an OCaml program.
 
 ### Inferring Generic Types
 
@@ -388,12 +386,11 @@ whereas `"short"` and `"loooooong"` require that `'a` be instantiated as
 ::: {data-type=note}
 #### Type Errors Versus Exceptions
 
-There's a big difference in OCaml (and really in any compiled language)
-between errors that are caught at compile time and those that are caught at
-runtime. It's better to catch errors as early as possible in the development
-process, and compilation time is best of all.[runtime exceptions vs. type
-errors]{.idx}[errors/runtime vs. compile time]{.idx}[exceptions/vs. type
-errors]{.idx}[type errors vs. exceptions]{.idx}
+There's a big difference in OCaml between errors that are caught at compile
+time and those that are caught at runtime. It's better to catch errors as early
+as possible in the development process, and compilation time is best of
+all.[runtime exceptions vs. type errors]{.idx}[errors/runtime vs. compile
+time]{.idx}[exceptions/vs. type errors]{.idx}[type errors vs. exceptions]{.idx}
 
 Working in the toplevel somewhat obscures the difference between runtime and
 compile-time errors, but that difference is still there. Generally, type
@@ -733,7 +730,7 @@ Logically, you can think of the evaluation of a simple recursive function
 like `sum` almost as if it were a mathematical equation whose meaning you
 were unfolding step by step:
 
-```ocaml file=../../examples/code/guided-tour/recursion.ml
+```ocaml file=examples/recursion.ml
 sum [1;2;3]
 = 1 + sum [2;3]
 = 1 + (2 + sum [3])
@@ -755,9 +752,9 @@ for removing sequential duplicates:
     match list with
     | [] -> []
     | first :: second :: tl ->
-      if first = second then remove_sequential_duplicates (second :: tl)
-      else first :: remove_sequential_duplicates (second :: tl)
-Characters 48-246:
+      let new_tl = remove_sequential_duplicates (second :: tl) in
+      if first = second then new_tl else first :: new_tl
+Characters 48-232:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -775,8 +772,8 @@ fix this warning by adding another case to the match:
     | [] -> []
     | [hd] -> [hd]
     | hd1 :: hd2 :: tl ->
-      if hd1 = hd2 then remove_sequential_duplicates (hd2 :: tl)
-      else hd1 :: remove_sequential_duplicates (hd2 :: tl)
+      let new_tl = remove_sequential_duplicates (hd2 :: tl) in
+      if hd1 = hd2 then new_tl else hd1 :: new_tl
 val remove_sequential_duplicates : int list -> int list = <fun>
 # remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1]
 - : int list = [1; 2; 3; 4; 1]
@@ -795,6 +792,46 @@ time, you'll find yourself happy to use the iteration functions found in the
 to iterate in a new way.
 <a data-type="indexterm" data-startref="DSlists">&nbsp;</a>
 
+
+::: {data-type=note}
+#### Nesting lets with let and in
+
+`new_tl` in the above examples was our first use of `let` to define a
+new variable within the body of a function. A `let` paired with an
+`in` can be used to introduce a new binding within any local scope,
+including a function body. The `in` marks the beginning of the scope
+within which the new variable can be used. Thus, we could write:[let
+syntax/nested let binding]{.idx}
+
+```ocaml env=local_let
+# let x = 7 in
+  x + x
+- : int = 14
+```
+
+Note that the scope of the `let` binding is terminated by the
+double-semicolon, so the value of `x` is no longer available:
+
+```ocaml env=local_let
+# x
+Characters 0-1:
+Error: Unbound value x
+```
+
+We can also have multiple `let` statements in a row, each one adding a new
+variable binding to what came before:
+
+```ocaml env=local_let
+# let x = 7 in
+  let y = x * x in
+  x + y
+- : int = 56
+```
+
+This kind of nested `let` binding is a common way of building up a complex
+expression, with each `let` naming some component, before combining them in
+one final expression.
+:::
 
 ### Options
 
@@ -838,46 +875,6 @@ val downcase_extension : string -> string = <fun>
 Note that we used the `^` operator for concatenating strings. The
 concatenation operator is provided as part of the `Pervasives` module, which
 is automatically opened in every OCaml program.
-
-::: {data-type=note}
-#### Nesting lets with let and in
-
-`log_entry` was our first use of `let` to define a new variable within the
-body of a function. A `let` paired with an `in` can be used to introduce a
-new binding within any local scope, including a function body. The `in` marks
-the beginning of the scope within which the new variable can be used. Thus,
-we could write:[let syntax/nested let binding]{.idx}
-
-```ocaml env=local_let
-# let x = 7 in
-  x + x
-- : int = 14
-```
-
-Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `x` is no longer available:
-
-```ocaml env=local_let
-# x
-Characters 0-1:
-Error: Unbound value x
-```
-
-We can also have multiple `let` statements in a row, each one adding a new
-variable binding to what came before:
-
-```ocaml env=local_let
-# let x = 7 in
-  let y = x * x in
-  x + y
-- : int = 56
-```
-
-This kind of nested `let` binding is a common way of building up a complex
-expression, with each `let` naming some component, before combining them in
-one final expression.
-:::
-
 
 Options are important because they are the standard way in OCaml to encode a
 value that might not be there; there's no such thing as a
@@ -1334,7 +1331,7 @@ Here's the code, which you can save in a file called
 <em class="filename">sum.ml</em>. Note that we don't terminate expressions
 with `;;` here, since it's not required outside the toplevel.
 
-```ocaml file=../../examples/code/guided-tour/sum/sum.ml
+```ocaml file=examples/sum/sum.ml
 open Base
 open Stdio
 
@@ -1382,7 +1379,7 @@ depend on.
 
 We can now invoke dune to build the executable.
 
-```sh dir=../../examples/code/guided-tour/sum
+```sh dir=examples/sum
 $ dune build sum.exe
 ```
 

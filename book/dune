@@ -19,6 +19,7 @@
         maps-and-hashtables.html
         objects.html
         parsing-with-ocamllex-and-menhir.html
+        ppx.html
         prologue.html
         records.html
         runtime-memory-layout.html
@@ -118,6 +119,11 @@
 (rule
   (targets parsing-with-ocamllex-and-menhir.html)
   (deps    parsing-with-ocamllex-and-menhir/README.md)
+  (action  (run mdx output %{deps} -o %{targets})))
+
+(rule
+  (targets ppx.html)
+  (deps    ppx/README.md)
   (action  (run mdx output %{deps} -o %{targets})))
 
 (rule

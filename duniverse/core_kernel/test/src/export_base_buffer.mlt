@@ -1,0 +1,44 @@
+open! Core_kernel
+
+module Buffer_is_from_base : module type of struct
+  include Base.Buffer
+end =
+  Buffer
+
+[%%expect]
+
+module Buffer_is_from_caml : module type of struct
+  include Caml.Buffer
+end =
+  Buffer
+
+[%%expect
+  {|
+Line _, characters 2-8:
+Error: Signature mismatch:
+       ...
+       The value `of_seq' is required but not provided
+       File "buffer.mli", line 177, characters 0-28: Expected declaration
+       The value `add_seq' is required but not provided
+       File "buffer.mli", line 173, characters 0-37: Expected declaration
+       The value `to_seqi' is required but not provided
+       File "buffer.mli", line 168, characters 0-37: Expected declaration
+       The value `to_seq' is required but not provided
+       File "buffer.mli", line 163, characters 0-28: Expected declaration
+       The value `truncate' is required but not provided
+       File "buffer.mli", line 155, characters 0-31: Expected declaration
+       The value `output_buffer' is required but not provided
+       File "buffer.mli", line 151, characters 0-44: Expected declaration
+       The value `add_channel' is required but not provided
+       File "buffer.mli", line 144, characters 0-48: Expected declaration
+       The value `add_substitute' is required but not provided
+       File "buffer.mli", line 124, characters 0-62: Expected declaration
+       The value `add_utf_16be_uchar' is required but not provided
+       File "buffer.mli", line 101, characters 0-45: Expected declaration
+       The value `add_utf_16le_uchar' is required but not provided
+       File "buffer.mli", line 94, characters 0-45: Expected declaration
+       The value `add_utf_8_uchar' is required but not provided
+       File "buffer.mli", line 88, characters 0-42: Expected declaration
+       The value `to_bytes' is required but not provided
+       File "buffer.mli", line 45, characters 0-25: Expected declaration
+|}]

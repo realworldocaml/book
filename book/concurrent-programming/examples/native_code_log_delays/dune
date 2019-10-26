@@ -1,0 +1,3 @@
+(executable
+ (name native_code_log_delays)
+ (libraries core async))

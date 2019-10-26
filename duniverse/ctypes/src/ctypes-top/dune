@@ -1,0 +1,6 @@
+;; see https://github.com/ocaml/dune/issues/688
+
+(library
+ (name ctypes_top)
+ (public_name ctypes.top)
+ (libraries ctypes compiler-libs))

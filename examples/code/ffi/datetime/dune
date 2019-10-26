@@ -1,3 +1,0 @@
-(executable
-  (name      datetime)
-  (libraries core ctypes.foreign))

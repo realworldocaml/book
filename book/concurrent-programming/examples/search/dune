@@ -1,0 +1,3 @@
+(executable
+  (name      search)
+  (libraries core async cohttp-async yojson textwrap))

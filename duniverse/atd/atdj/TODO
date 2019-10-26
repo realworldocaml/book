@@ -1,0 +1,13 @@
+Now:
+- update documentation for ArrayList and for variants
+
+Later:
+- produce an output tree using Atd.Indent rather fprintf
+  (for clarity and atdj performance)
+- variant implementation: avoid memory leak by clearing previous field
+- translate atd syntax tree first, then generate code instead of doing
+  everything in the same pass (for clarity and atdj performance)
+- merge into atdgen
+- support top-level lists
+- add support for lists of lists
+- add location information to exceptions (need own parser)

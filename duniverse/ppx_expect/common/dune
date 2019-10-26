@@ -1,0 +1,3 @@
+(library (name expect_test_common) (public_name ppx_expect.common)
+ (synopsis "Shared parts for ppx_expect") (libraries base)
+ (preprocess (pps ppx_compare ppx_sexp_conv)))

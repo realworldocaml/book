@@ -1,0 +1,41 @@
+(library
+  (name zarith)
+  (public_name zarith)
+  (modules z q big_int_Z)
+  (c_library_flags (:include config/ldflags.sxp))
+  (self_build_stubs_archive (zarith_c))
+  (wrapped false))
+
+(rule
+ (targets libzarith_c_stubs%{ext_lib} dllzarith_c_stubs%{ext_dll})
+ (deps   caml_z_arch.o caml_z.o)
+ (action (run ocamlmklib -o zarith_c_stubs %{deps})))
+
+(executable
+ (name z_pp)
+ (modules z_pp)
+ (libraries str))
+
+(rule
+  (targets z.ml z.mli z_features.h)
+  (deps (:script z_pp.exe) z_pp.ml z.mlp z.mlip META caml_z_arch.S)
+  (action (run %{script} -ov %{ocaml_version} %{read-lines:config/arch})))
+
+(rule
+  (targets caml_z_arch.S)
+  (deps caml_z_arm.S caml_z_i686.S caml_z_x86_64.S caml_z_x86_64_mingw64.S)
+  (action (copy caml_z_%{read-lines:config/arch}.S caml_z_arch.S)))
+
+(rule
+  (targets caml_z_none.S)
+  (action (run touch caml_z_none.S)))
+
+(rule
+  (targets caml_z_arch.o)
+  (deps (:s caml_z_arch.S) zarith.h)
+  (action (run %{cc} %{read-lines:config/asflags} -c %{s} -o %{targets})))
+
+(rule
+  (targets caml_z.o)
+  (deps (:c caml_z.c) zarith.h z_features.h)
+  (action (run %{cc} %{read-lines:config/cflags} -c %{c} -o %{targets})))

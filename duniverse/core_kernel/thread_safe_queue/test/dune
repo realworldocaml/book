@@ -1,0 +1,2 @@
+(library (name thread_safe_queue_test) (libraries core thread_safe_queue)
+ (preprocess (pps ppx_jane)))

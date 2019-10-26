@@ -1,0 +1,4 @@
+(library
+ (name test_enums_struct_stubs)
+ (wrapped false)
+ (libraries ctypes))

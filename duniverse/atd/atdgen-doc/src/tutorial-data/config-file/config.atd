@@ -1,0 +1,15 @@
+type config = {
+  title : string;
+  ?description : string option;
+  ~timeout <ocaml default="10"> : int;
+  ~credentials : param list
+    <ocaml valid="fun l ->
+                    l <> [] || failwith \"missing credentials\"">;
+}
+
+type param = {
+  name : string
+    <ocaml valid="fun s -> s <> \"\"">;
+  key : string
+    <ocaml valid="fun s -> String.length s = 16">;
+}

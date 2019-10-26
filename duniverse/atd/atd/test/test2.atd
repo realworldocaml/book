@@ -1,0 +1,52 @@
+type z = abstract list
+
+type 'a t = int
+type x = float t
+
+type 'a l = [ Nil | Cons of ('a * 'a l) ]
+
+type int_l = int l
+type float_l = float l
+type tup = (int l * float_l)
+
+type ('a, 'b) tbl = ('a * 'b) list list
+type 'a string_tbl = (string, 'a) tbl
+type string_bool_tbl = bool string_tbl
+
+type 'a b = 'a a
+type 'a a = 'a b
+type c = c a b a
+
+
+type 'id gen_profile = {
+  id : 'id;
+  name : string option;
+  age : int option
+}
+
+type basic_profile = int gen_profile
+
+type profile_enhancements = {
+  credit_card_number : string
+}
+
+type ('id, 'self) nested_profile = {
+  inherit 'id gen_profile;
+  sub_profiles : 'self list
+}
+
+type profile = {
+  inherit (int, profile) nested_profile;
+  inherit profile_enhancements
+}
+(* expands to:
+
+type profile = {
+  id: int;
+  name: string option;
+  age: int option;
+  sub_profiles: profile list;
+  credit_card_number: string
+}
+
+*)

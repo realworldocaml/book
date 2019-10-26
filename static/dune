@@ -21,7 +21,6 @@
         images/memory-repr/tuple_layout.png
         js/_functions.js
         js/app.js
-        js/discourse.js
         js/jquery.min.js
         js/modernizr.js
         js/prism.js
@@ -236,6 +235,16 @@
 (rule
   (targets parsing-with-ocamllex-and-menhir.html)
   (deps    (:x ../book/parsing-with-ocamllex-and-menhir.html)
+           (alias ../book/html)
+           ../bin/bin/app.exe
+           ../book/toc.scm)
+  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
+
+(alias (name site) (deps ppx.html))
+
+(rule
+  (targets ppx.html)
+  (deps    (:x ../book/ppx.html)
            (alias ../book/html)
            ../bin/bin/app.exe
            ../book/toc.scm)

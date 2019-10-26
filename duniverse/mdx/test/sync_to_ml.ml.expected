@@ -1,0 +1,27 @@
+x;;
+
+[@@@part "1"] ;;
+
+let filename_param =
+  let open Command.Param in
+  anon ("filename" %: string)
+
+[@@@part "toto"] ;;
+
+let x = 3;;
+let y = 4;;
+print_int x;;
+print_int y;;
+
+[@@@part "zzz"] ;;
+
+let f = "hello world!"
+
+[@@@part "42"] ;;
+
+let () =
+  f x print_int
+
+[@@@part "new-part-not-in-original"] ;;
+
+let g = [ f ]

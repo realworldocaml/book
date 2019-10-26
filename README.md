@@ -37,7 +37,7 @@ There are three main repositories for the book:
   The code fragments are evaluted by the `rwo` tool by using the
   [mdx](https://github.com/realworldocaml/mdx) mardkown
   parser.  The working branch is currently the `master` branch.
-- <https://github.com/realworldocaml/book> is this repository, whic
+- <https://github.com/realworldocaml/book> is this repository, which
   uses the scripts and examples repositories to compile the HTML
   site online.
 
@@ -49,11 +49,20 @@ Here are the commands to build the website:
 
 ### Installing Dependencies
 
-To install the dependencies needed for the book and the code examples:
+You can install system dependencies by running:
 
 ```
-opam pin add rwo . -n
-opam install rwo --deps-only
+make depext
+```
+
+All OCaml dependencies are vendored in the `duniverse/` directory except
+for the `dune` build system itself. It's preferable to use an empty opam switch
+with only `dune` installed to avoid conflicts between the opam and local
+libraries. To set up your RWO development environment you can run:
+
+```
+opam switch create rwo 4.07.1
+opam install dune=1.11.0
 ```
 
 ### Generating the HTML

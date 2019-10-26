@@ -1,0 +1,5 @@
+(library (name ppx_hash_runtime_test)
+ (libraries ppx_hash_lib siphash_lib core) (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT)
+ (deps tree.ml.pp floats.ml.pp allocation.ml.pp collisions.ml.pp))

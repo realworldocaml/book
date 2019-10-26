@@ -1,0 +1,2 @@
+(library (name siphash_lib) (c_names siphash) (libraries base)
+ (preprocess no_preprocessing))

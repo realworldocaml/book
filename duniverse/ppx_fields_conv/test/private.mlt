@@ -1,0 +1,90 @@
+(* Testing private in implementation: *)
+module T = struct
+  type t = { a : int }
+end
+type t = T.t = private { a : int } [@@deriving fields]
+
+let _ = Fields.map
+[%%expect{|
+Line _, characters 8-18:
+Error: Unbound value Fields.map
+|}]
+
+let _ = Fieldslib.Field.fset Fields.a
+[%%expect{|
+Line _, characters *: (glob)
+Error: * (glob)
+       * (glob)
+       * (glob)
+       The first variant type does not allow tag(s) `Set_and_create
+|}]
+
+let _ = Fieldslib.Field.setter Fields.a
+[%%expect{|
+Line _, characters *: (glob)
+Error: * (glob)
+       * (glob)
+       * (glob)
+       The first variant type does not allow tag(s) `Set_and_create
+|}]
+
+let _ = (Fields.a :> (_, _) Fieldslib.Field.t)
+[%%expect{|
+Line _, characters 9-17:
+Error: * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       The first variant type does not allow tag(s) `Set_and_create
+|}]
+
+(* Testing private in interfaces: *)
+module T : sig
+  type t = private { a : int } [@@deriving fields]
+end = struct
+  type t = { a : int } [@@deriving fields]
+end
+
+let _ = T.Fields.map
+[%%expect{|
+Line _, characters *: (glob)
+Error: Unbound value T.Fields.map
+|}]
+
+let _ = Fieldslib.Field.fset T.Fields.a
+[%%expect{|
+Line _, characters *: (glob)
+Error: * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       The first variant type does not allow tag(s) `Set_and_create
+|}]
+
+let _ = Fieldslib.Field.setter T.Fields.a
+[%%expect{|
+Line _, characters *: (glob)
+Error: * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       The first variant type does not allow tag(s) `Set_and_create
+|}]
+
+let _ = (T.Fields.a :> (_, _) Fieldslib.Field.t)
+[%%expect{|
+Line _, characters *: (glob)
+Error: * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       * (glob)
+       The first variant type does not allow tag(s) `Set_and_create
+|}]

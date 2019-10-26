@@ -1,0 +1,2 @@
+(executables (names bench_pooled_hashtbl)
+ (libraries core_kernel pooled_hashtbl) (preprocess (pps ppx_jane)))

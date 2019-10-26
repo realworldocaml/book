@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(executables
+ ((names (atdcat))
+  (public_names (atdcat))
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (libraries (atd))
+  (package atd)))

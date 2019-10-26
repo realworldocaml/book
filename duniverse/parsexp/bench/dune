@@ -1,0 +1,2 @@
+(library (name parsexp_bench) (libraries core_kernel parsexp sexplib)
+ (preprocess (pps ppx_jane)))
