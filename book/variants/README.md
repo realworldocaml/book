@@ -55,7 +55,7 @@ that the compiler will warn us if we miss a color:
 ```ocaml env=main
 # let basic_color_to_int = function
     | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
-  | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7
+    | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7
 val basic_color_to_int : basic_color -> int = <fun>
 # List.map ~f:basic_color_to_int [Blue;Red]
 - : int list = [4; 1]
@@ -101,8 +101,8 @@ separated by `*`s:
 type weight = Regular | Bold
 # type color =
     | Basic of basic_color * weight (* basic colors, regular and bold *)
-    | RGB   of int * int * int       (* 6x6x6 color cube *)
-    | Gray  of int                   (* 24 grayscale levels *)
+    | RGB   of int * int * int      (* 6x6x6 color cube *)
+    | Gray  of int                  (* 24 grayscale levels *)
 type color =
     Basic of basic_color * weight
   | RGB of int * int * int
@@ -122,7 +122,7 @@ each tag:
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | Gray i -> 232 + i
+    | Gray i -> 232 + i
 val color_to_int : color -> int = <fun>
 ```
 
@@ -260,7 +260,7 @@ discrepancy:
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | Gray i -> 232 + i
+    | Gray i -> 232 + i
 Characters 40-60:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
@@ -274,8 +274,8 @@ problem, which is that we haven't handled the new `Bold` tag:
 # let color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | Gray i -> 232 + i
-Characters 19-152:
+    | Gray i -> 232 + i
+Characters 19-154:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 Bold _
@@ -289,7 +289,7 @@ Fixing this now leads us to the correct implementation:
     | Basic basic_color -> basic_color_to_int basic_color
     | Bold  basic_color -> 8 + basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | Gray i -> 232 + i
+    | Gray i -> 232 + i
 val color_to_int : color -> int = <fun>
 ```
 
@@ -310,7 +310,7 @@ We might have written the function as follows: [exhaustion checks]{.idx}
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
-  | _ -> basic_color_to_int White
+    | _ -> basic_color_to_int White
 Characters 50-70:
 Error: This pattern matches values of type 'a * 'b
        but a pattern was expected which matches values of type basic_color
@@ -322,7 +322,7 @@ this.
 ```ocaml env=catch_all
 # let oldschool_color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
-  | _ -> basic_color_to_int White
+    | _ -> basic_color_to_int White
 val oldschool_color_to_int : color -> int = <fun>
 ```
 
@@ -868,7 +868,7 @@ types/upper/lower bounds of]{.idx}
 # let is_positive = function
     | `Int   x -> Ok (x > 0)
     | `Float x -> Ok Float.(x > 0.)
-  | `Not_a_number -> Error "not a number"
+    | `Not_a_number -> Error "not a number"
 val is_positive :
   [< `Float of float | `Int of int | `Not_a_number ] -> (bool, string) result =
   <fun>
