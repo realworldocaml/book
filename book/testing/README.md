@@ -1,11 +1,9 @@
 # Testing
 
-Testing is fundamental to building reliable software, but as
-developers, we don't always act that way.  Testing can be frustrating
-and tedious, and it's all too easy to skimp on.  As a result,
-developers often test less than they should, and more critically, fail
-to take testability into account up-front, when designing their
-systems.
+Testing is fundamental to building reliable software, but it's an
+aspect of software engineering that's all too often neglected.
+Testing can be frustrating and tedious, and since it doesn't directly
+affect the functionality of your code, it's all too easy to skimp on.
 
 In some ways, OCaml's type-system makes this worse, by enhancing the
 illusion that you can get by without testing.  After all, many trivial
@@ -14,9 +12,8 @@ required. But make no mistake, with or without types, testing is
 essential for developing and evolving complex software systems.
 
 One way to improve the situation is to fix the tedium problem. With
-the right tools, writing tests is lightweight and fun.  With such
-tools in place, you'll find yourself writing more tests, and your
-creations will be more reliable as a result.
+the right tools, writing tests can be lightweight and fun.
+And once writing tests is no longer painful
 
 The goal of this chapter is to teach you about some of the testing
 infrastructure available in the OCaml ecosystem. But first, let's
