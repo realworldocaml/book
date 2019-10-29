@@ -17,7 +17,6 @@ val int16_t   : int typ
 val int32_t   : int32 typ
 val int64_t   : int64 typ
 val uchar     : uchar typ
-val uchar     : uchar typ
 val uint8_t   : uint8 typ
 val uint16_t  : uint16 typ
 val uint32_t  : uint32 typ
