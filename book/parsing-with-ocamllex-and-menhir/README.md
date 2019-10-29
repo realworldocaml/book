@@ -616,7 +616,7 @@ handle the full spectrum of the world's writing systems. OCaml has several
 third-party solutions to handling Unicode, with varying degrees of
 flexibility and complexity:
 
-- [Camomile](http://camomile.sourceforge.net) supports the full spectrum of
+- [Camomile](https://github.com/yoriyuki/Camomile) supports the full spectrum of
   Unicode character types, conversion from around 200 encodings, and
   collation and locale-sensitive case mappings.
 
