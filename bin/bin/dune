@@ -1,7 +1,7 @@
 (executables
  (package      rwo)
- (names        app       dep)
- (public_names rwo-build rwo-dep)
+ (names        app       dep       output)
+ (public_names rwo-build rwo-dep rwo-output)
  (preprocess   (pps ppx_jane))
- (libraries    rwo lambdasoup sexp_pretty)
+ (libraries    rwo lambdasoup sexp_pretty mdx cmdliner fmt)
  (flags        :standard -short-paths))

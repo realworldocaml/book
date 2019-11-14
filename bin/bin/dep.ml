@@ -146,8 +146,8 @@ let process_md ~toc book_dir =
         let html = chapter ^ ".html" in
         sprintf {|(rule
   (targets %s)
-  (deps    %s)
-  (action  (run mdx output %%{deps} -o %%{targets})))|}
+  (deps    (:x %s) ../bin/bin/output.exe)
+  (action  (run rwo-output %%{x} -o %%{targets})))|}
           html (chapter / "README.md")
       ) toc |>
     (fun x -> html_alias :: x) |>
