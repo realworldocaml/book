@@ -4,57 +4,53 @@ let pp_section ppf (n, title) =
 
 let pp_list pp = Fmt.(list ~sep:(unit "") pp)
 
-let pp_text ~html ppf s =
-  if html
-  then
-    let add = function
-      | '"' -> Fmt.string ppf "&quot;"
-      | '&' -> Fmt.string ppf "&amp;"
-      | '<' -> Fmt.string ppf "&lt;"
-      | '>' -> Fmt.string ppf "&gt;"
-      | c   -> Fmt.char ppf c
-    in
-    String.iter add s
-  else
-    Fmt.string ppf s
+let pp_html ppf s =
+  let add = function
+    | '"' -> Fmt.string ppf "&quot;"
+    | '&' -> Fmt.string ppf "&amp;"
+    | '<' -> Fmt.string ppf "&lt;"
+    | '>' -> Fmt.string ppf "&gt;"
+    | c   -> Fmt.char ppf c
+  in
+  String.iter add s
 
-let pp_output ~html ppf = function
-  |`Output s -> Fmt.pf ppf ">%a\n" (pp_text ~html) s
+let pp_output ppf = function
+  |`Output s -> Fmt.pf ppf ">%a\n" pp_html s
   |`Ellipsis -> Fmt.pf ppf "...\n"
 
- let pp_line ~html ppf l = Fmt.pf ppf "%a\n" (pp_text ~html) l
- 
- let pp_toplevel ~html ppf (t:Mdx.Toplevel.t) =
+ let pp_line ppf l = Fmt.pf ppf "%a\n" pp_html l
+
+ let pp_toplevel ppf (t:Mdx.Toplevel.t) =
   let cmds = match t.command with [c] -> [c ^ ";;"] | l -> l @ [";;"] in
-  Fmt.pf ppf "%a%a" (pp_list (pp_line ~html)) cmds (pp_list (pp_output ~html)) t.output
+  Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_output) t.output
 
-let pp_contents ~html (t:Mdx.Block.t) ppf =
-  Fmt.(list ~sep:(unit "\n") (pp_text ~html)) ppf t.contents
+let pp_contents (t:Mdx.Block.t) ppf =
+  Fmt.(list ~sep:(unit "\n") pp_html) ppf t.contents
 
-let pp_cram ~html ppf (t:Mdx.Cram.t) =
+let pp_cram ppf (t:Mdx.Cram.t) =
   let pp_exit ppf = match t.exit_code with
     | 0 -> ()
     | i -> Fmt.pf ppf "[%d]" i
   in
   Fmt.pf ppf "%a%a%t"
-    (pp_list (pp_line ~html)) t.command
-    (pp_list (pp_output ~html)) t.output pp_exit
+    (pp_list pp_line) t.command
+    (pp_list pp_output) t.output pp_exit
 
 let pp_block_html ppf (b:Mdx.Block.t) =
   let lang, pp_code, attrs = match b.value with
-    | Toplevel t -> Some "ocaml", (fun ppf -> pp_list (pp_toplevel ~html:true) ppf t), [
+    | Toplevel t -> Some "ocaml", (fun ppf -> pp_list pp_toplevel ppf t), [
         ("class"             , "command-line");
         ("data-prompt"       , "#");
         ("data-filter-output", ">");
       ]
-    | OCaml  -> Some "ocaml", (pp_contents ~html:true) b, []
-    | Cram t -> Some "bash" , (fun ppf -> pp_list (pp_cram ~html:true) ppf t.tests), [
+    | OCaml  -> Some "ocaml", pp_contents b, []
+    | Cram t -> Some "bash" , (fun ppf -> pp_list pp_cram ppf t.tests), [
         ("class"             , "command-line");
         ("data-user"         , "fun");
         ("data-host"         , "lama");
         ("data-filter-output", ">");
       ]
-    | Raw     -> b.header, (pp_contents ~html:true) b, []
+    | Raw     -> b.header, pp_contents b, []
     | Error s -> Some "error", (fun ppf -> pp_list Fmt.string ppf s), []
   in
   let pp_attr ppf (k, v) = Fmt.pf ppf "%s=%S" k v in
@@ -70,13 +66,14 @@ let pp_block_html ppf (b:Mdx.Block.t) =
     pp_attrs () pp_lang () pp_code
 
 let pp_block_latex ppf (b:Mdx.Block.t) =
-  let lang, pp_code = match b.value with
-    | Toplevel t -> Some "ocaml", (fun ppf -> pp_list (pp_toplevel ~html:false) ppf t)
-    | OCaml  -> Some "ocaml", (pp_contents ~html:false) b
-    | Cram t -> Some "bash" , (fun ppf -> pp_list (pp_cram ~html:false) ppf t.tests)
-    | Raw     -> b.header, (pp_contents ~html:false) b
-    | Error s -> Some "error", (fun ppf -> pp_list Fmt.string ppf s)
+  let lang = match b.value with
+    | Toplevel _
+    | OCaml  -> Some "ocaml"
+    | Cram _ -> Some "bash"
+    | Raw     -> b.header
+    | Error _ -> Some "error"
   in
+  let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
   let lang = match lang with
     | None   -> "clike"
     | Some l -> l
