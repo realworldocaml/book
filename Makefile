@@ -3,6 +3,8 @@
 all:
 	@dune build @site
 	@echo Site has been generated in _build/default/static/
+	@dune build @pdf
+	@echo Pdf has been generated in _build/default/static/
 
 vendor:
 	duniverse init rwo `cat pkgs` --pin mdx,https://github.com/Julow/mdx.git,duniverse_mode
