@@ -28,125 +28,125 @@
 
 (rule
   (targets classes.html)
-  (deps    (:x classes/README.md) ../bin/bin/output.exe)
+  (deps    (:x classes/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets command-line-parsing.html)
-  (deps    (:x command-line-parsing/README.md) ../bin/bin/output.exe)
+  (deps    (:x command-line-parsing/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets compiler-backend.html)
-  (deps    (:x compiler-backend/README.md) ../bin/bin/output.exe)
+  (deps    (:x compiler-backend/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets compiler-frontend.html)
-  (deps    (:x compiler-frontend/README.md) ../bin/bin/output.exe)
+  (deps    (:x compiler-frontend/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets concurrent-programming.html)
-  (deps    (:x concurrent-programming/README.md) ../bin/bin/output.exe)
+  (deps    (:x concurrent-programming/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets data-serialization.html)
-  (deps    (:x data-serialization/README.md) ../bin/bin/output.exe)
+  (deps    (:x data-serialization/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets error-handling.html)
-  (deps    (:x error-handling/README.md) ../bin/bin/output.exe)
+  (deps    (:x error-handling/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets files-modules-and-programs.html)
-  (deps    (:x files-modules-and-programs/README.md) ../bin/bin/output.exe)
+  (deps    (:x files-modules-and-programs/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets first-class-modules.html)
-  (deps    (:x first-class-modules/README.md) ../bin/bin/output.exe)
+  (deps    (:x first-class-modules/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets foreign-function-interface.html)
-  (deps    (:x foreign-function-interface/README.md) ../bin/bin/output.exe)
+  (deps    (:x foreign-function-interface/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets functors.html)
-  (deps    (:x functors/README.md) ../bin/bin/output.exe)
+  (deps    (:x functors/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets garbage-collector.html)
-  (deps    (:x garbage-collector/README.md) ../bin/bin/output.exe)
+  (deps    (:x garbage-collector/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets guided-tour.html)
-  (deps    (:x guided-tour/README.md) ../bin/bin/output.exe)
+  (deps    (:x guided-tour/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets imperative-programming.html)
-  (deps    (:x imperative-programming/README.md) ../bin/bin/output.exe)
+  (deps    (:x imperative-programming/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets json.html)
-  (deps    (:x json/README.md) ../bin/bin/output.exe)
+  (deps    (:x json/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets lists-and-patterns.html)
-  (deps    (:x lists-and-patterns/README.md) ../bin/bin/output.exe)
+  (deps    (:x lists-and-patterns/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets maps-and-hashtables.html)
-  (deps    (:x maps-and-hashtables/README.md) ../bin/bin/output.exe)
+  (deps    (:x maps-and-hashtables/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets objects.html)
-  (deps    (:x objects/README.md) ../bin/bin/output.exe)
+  (deps    (:x objects/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets parsing-with-ocamllex-and-menhir.html)
-  (deps    (:x parsing-with-ocamllex-and-menhir/README.md) ../bin/bin/output.exe)
+  (deps    (:x parsing-with-ocamllex-and-menhir/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets ppx.html)
-  (deps    (:x ppx/README.md) ../bin/bin/output.exe)
+  (deps    (:x ppx/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets prologue.html)
-  (deps    (:x prologue/README.md) ../bin/bin/output.exe)
+  (deps    (:x prologue/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets records.html)
-  (deps    (:x records/README.md) ../bin/bin/output.exe)
+  (deps    (:x records/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets runtime-memory-layout.html)
-  (deps    (:x runtime-memory-layout/README.md) ../bin/bin/output.exe)
+  (deps    (:x runtime-memory-layout/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets variables-and-functions.html)
-  (deps    (:x variables-and-functions/README.md) ../bin/bin/output.exe)
+  (deps    (:x variables-and-functions/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
 
 (rule
   (targets variants.html)
-  (deps    (:x variants/README.md) ../bin/bin/output.exe)
+  (deps    (:x variants/README.md) %{bin:rwo-output})
   (action  (run rwo-output %{x} -o %{targets})))
