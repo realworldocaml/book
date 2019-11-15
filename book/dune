@@ -28,125 +28,125 @@
 
 (rule
   (targets classes.html)
-  (deps    (:x classes/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file classes/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets command-line-parsing.html)
-  (deps    (:x command-line-parsing/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file command-line-parsing/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets compiler-backend.html)
-  (deps    (:x compiler-backend/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file compiler-backend/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets compiler-frontend.html)
-  (deps    (:x compiler-frontend/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file compiler-frontend/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets concurrent-programming.html)
-  (deps    (:x concurrent-programming/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file concurrent-programming/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets data-serialization.html)
-  (deps    (:x data-serialization/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file data-serialization/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets error-handling.html)
-  (deps    (:x error-handling/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file error-handling/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets files-modules-and-programs.html)
-  (deps    (:x files-modules-and-programs/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file files-modules-and-programs/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets first-class-modules.html)
-  (deps    (:x first-class-modules/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file first-class-modules/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets foreign-function-interface.html)
-  (deps    (:x foreign-function-interface/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file foreign-function-interface/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets functors.html)
-  (deps    (:x functors/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file functors/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets garbage-collector.html)
-  (deps    (:x garbage-collector/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file garbage-collector/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets guided-tour.html)
-  (deps    (:x guided-tour/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file guided-tour/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets imperative-programming.html)
-  (deps    (:x imperative-programming/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file imperative-programming/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets json.html)
-  (deps    (:x json/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file json/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets lists-and-patterns.html)
-  (deps    (:x lists-and-patterns/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file lists-and-patterns/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets maps-and-hashtables.html)
-  (deps    (:x maps-and-hashtables/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file maps-and-hashtables/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets objects.html)
-  (deps    (:x objects/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file objects/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets parsing-with-ocamllex-and-menhir.html)
-  (deps    (:x parsing-with-ocamllex-and-menhir/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file parsing-with-ocamllex-and-menhir/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets ppx.html)
-  (deps    (:x ppx/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file ppx/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets prologue.html)
-  (deps    (:x prologue/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file prologue/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets records.html)
-  (deps    (:x records/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file records/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets runtime-memory-layout.html)
-  (deps    (:x runtime-memory-layout/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file runtime-memory-layout/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets variables-and-functions.html)
-  (deps    (:x variables-and-functions/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file variables-and-functions/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
 
 (rule
   (targets variants.html)
-  (deps    (:x variants/README.md) %{bin:rwo-output})
-  (action  (run rwo-output %{x} -o %{targets})))
+  (deps    (:md_file variants/README.md))
+  (action  (run rwo-convert_md %{md_file} -o %{targets})))
