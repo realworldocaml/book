@@ -705,7 +705,7 @@ The `atdgen` command will generate some new files in your current directory.
 `github_t.ml` and `github_t.mli` will contain an OCaml module with types
 defined that correspond to the ATD file:
 
-```sh skip
+```sh
 $ atdgen -t github.atd
 $ atdgen -j github.atd
 $ ocamlfind ocamlc -package atd -i github_t.mli
@@ -818,7 +818,7 @@ type org = {
 Let's build the OCaml type declaration first by calling `atdgen -t` on the
 specification file:
 
-```sh dir=github_org_info,skip
+```sh dir=github_org_info
 $ dune build github_org_t.mli
 $ cat _build/default/github_org_t.mli
 (* Auto-generated from "github_org.atd" *)
@@ -840,7 +840,7 @@ logic to convert JSON buffers to and from this type. Calling `atdgen -j` will
 generate this serialization code for us in a new file called
 `github_org_j.ml`:
 
-```sh dir=github_org_info,skip
+```sh dir=github_org_info
 $ dune build github_org_j.mli
 $ cat _build/default/github_org_j.mli
 (* Auto-generated from "github_org.atd" *)
