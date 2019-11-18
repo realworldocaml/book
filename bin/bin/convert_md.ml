@@ -136,7 +136,6 @@ let run (`File file) (`Output output) output_type =
     let tmp = Filename.temp_file "ocaml-mdx" "pandoc" in
     let oc = open_out tmp in
     let ppf = Format.formatter_of_out_channel oc in
-
     let f acc t =
       match t with
         | Mdx.Section s ->
