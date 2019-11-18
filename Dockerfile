@@ -17,6 +17,11 @@ WORKDIR /tmp
 RUN curl -OL https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-1-amd64.deb && sudo dpkg -i pandoc-2.1.3-1-amd64.deb
 WORKDIR /home/opam/src
 
+#install pdflatex
+WORKDIR /tmp
+RUN sudo apt-get update && sudo apt-get -y install texlive-full
+WORKDIR /home/opam/src
+
 # compile the project
 COPY . /home/opam/src/
 RUN sudo chown -R opam /home/opam/src
