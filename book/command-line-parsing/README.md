@@ -1019,7 +1019,7 @@ function _jsautocom_16984 {
   if type readarray > /dev/null
   then readarray -t COMPREPLY < <("${COMP_WORDS[@]}")
   else IFS="
-" read -d " " -A COMPREPLY < <("${COMP_WORDS[@]}")
+" read -d "\0" -A COMPREPLY < <("${COMP_WORDS[@]}")
   fi
 }
 complete -F _jsautocom_16984 ./md5.exe
