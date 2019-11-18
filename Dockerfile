@@ -10,17 +10,13 @@ RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 # install non-OCaml dependencies
 COPY Makefile /home/opam/src/.
 RUN make depext
-RUN opam install dune=1.11.3
+RUN opam install dune=1.11.4
 
 #install pandoc
-WORKDIR /tmp
-RUN curl -OL https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-1-amd64.deb && sudo dpkg -i pandoc-2.1.3-1-amd64.deb
-WORKDIR /home/opam/src
+RUN curl -OL https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-1-amd64.deb && sudo dpkg -i pandoc-2.1.3-1-amd64.deb && rm -f pandoc-2.1.3-1-amd64.deb
 
 #install pdflatex
-WORKDIR /tmp
 RUN sudo apt-get update && sudo apt-get -y install texlive-full
-WORKDIR /home/opam/src
 
 # compile the project
 COPY . /home/opam/src/
