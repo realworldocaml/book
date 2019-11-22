@@ -163,8 +163,9 @@ Here's what it looks like when we run the test.
 ```
 
 As you can see, the data that caused the comparison to fail is printed
-out, along with the stacktrace that identifies the location of the
-error.
+out, along with the stacktrace.  Note that in this case the stacktrace
+is mostly a distraction, which is a downside of this way of writing
+the test.
 
 ### Where should tests go?
 
