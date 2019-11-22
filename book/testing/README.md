@@ -1,36 +1,38 @@
 # Testing
 
-Testing is fundamental to building reliable software, but it's an
-aspect of software engineering that's all too often neglected.
-Testing can be frustrating and tedious, and since it doesn't directly
-affect the functionality of your code, it's all too easy to skimp on.
+Testing is not the most loved part of software engineering.  It's a
+lot of work and can feel tedious, and because it doesn't directly
+contribute to the functionality of your code, it can feel like an
+unproductive distraction.
 
-In some ways, OCaml's type-system makes this worse, by enhancing the
-illusion that you can get by without testing.  After all, many trivial
-bugs are caught cheaply by OCaml's type system, no testing
-required. But make no mistake, with or without types, testing is
-essential for developing and evolving complex software systems.
+But make no mistake, testing is a fundamental part of building
+reliable systems.  In some ways, OCaml's type-system can serve to
+confuse matter, since it's ability to squash many kinds of bugs at
+compile time can make it easier to think that testing isn't all that
+important.  But clever types notwithstanding, testing is essential for
+developing and evolving complex software systems.
 
-One way to improve the situation is to fix the tedium problem. With
-the right tools, writing tests can be lightweight and fun.
-And once writing tests is no longer painful
+The tedium of testing is a real problem, since it discourages people
+from writing as many tests as they should.  But with the right tools,
+writing tests can be lightweight and fun, and the better the testing
+tools, the more tests you'll find yourself writing.
 
 The goal of this chapter is to teach you about some of the testing
-infrastructure available in the OCaml ecosystem. But first, let's
+infrastructure available in the OCaml ecosystem.  But first, let's
 discuss more generally what you should be optimizing for in your tests
 and in your testing infrastructure.
 
 ## What makes for good tests?
 
-Here are some of the properties that characterize well written tests
+Here are some of the properties that characterize well-written tests
 in a good testing environment.
 
-- **Easy to write**. The less overhead there is to adding a test, the
-  more people will do it.
-- **Easy to run**. Ideally, they should be run automatically, every
-  time you make changes.
-- **Easy to update**. Tests that are hard to adjust in the face of code
-  changes can become their own form of technical debt.
+- **Easy to write and run**. Tests should require a minimum of
+  boilerplate to create and to hook into your build pipeline.
+  Ideally, you should set things up so that tests are run
+  automatically on every proposed change, before it's accepted.
+- **Easy to update**. Tests that are hard to adjust in the face of
+  code changes can become their own form of technical debt.
 - **Fast**, so they don't slow down your development process.
 - **Deterministic**. It's hard to take test failures seriously if
   there's a decent chance that the failure is a random glitch.  You
@@ -41,7 +43,7 @@ in a good testing environment.
   fix the problem flagged by a failing test.
 
 No testing framework can ensure that your tests satisfy these
-properties. But the tools you choose can help or hinder on all of
+properties.  But the tools you choose can help or hinder on all of
 these fronts.  As we go through the rest of this chapter, we'll try to
 show how you can use the various testing tools available for OCaml to
 help you reach these goals.
@@ -51,7 +53,7 @@ help you reach these goals.
 The first step towards a good testing environment is making it easy to
 set up and and run a test.  To that end, we'll show you how to write
 tests with `ppx_inline_test`, which lets you add tests to any module
-in your library with a specially annotated `let` binding.
+in a library with a specially annotated `let` binding.
 
 To use inline tests in a library, we need to do two things:
 
