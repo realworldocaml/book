@@ -62,9 +62,9 @@ To use inline tests in a library, we need to do two things:
 
 The first of these is achieved by adding an `(inline_tests)`
 declaration, and the second is achieved by adding `ppx_jane` to the
-set of preprocessors, which bundles together `ppx_inline_test` with a
-collection of other useful preprocessors.  Here's the resulting `dune`
-file.
+set of preprocessors.  (`ppx_jane` bundles together `ppx_inline_test`
+with a collection of other useful preprocessors.)  Here's the
+resulting `dune` file.
 
 ```scheme file=examples/simple_inline_test/dune
 (library
@@ -114,9 +114,8 @@ we'll see an error when we run it.
   [1]
 ```
 
-It doesn't come up in this case, but in general it's worth knowing
-that the test runner will execute tests declared in different files in
-parallel.
+It doesn't matter here, but it's worth noting that the test runner
+will execute tests declared in different files in parallel.
 
 ### More readable errors with `test_eq`
 
