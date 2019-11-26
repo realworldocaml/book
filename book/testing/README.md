@@ -1,26 +1,26 @@
 # Testing
 
-Testing is not the most loved part of software engineering.  It's a
-lot of work and can feel tedious, and because it doesn't directly
-contribute to the functionality of your code, it can feel like an
-unproductive distraction.
+Testing is not the best loved part of software engineering.  It can be
+hard and tedious, and it often feels like a distraction from the work
+of just adding functionality to your code.  In some ways, OCaml's
+type-system makes testing seem even less appealing, since the type
+system's ability to squash many kinds of bugs at compile time makes it
+easier to imagine that testing isn't all that important.
 
-But make no mistake, testing is a fundamental part of building
-reliable systems.  In some ways, OCaml's type-system can serve to
-confuse matter, since it's ability to squash many kinds of bugs at
-compile time can make it easier to think that testing isn't all that
-important.  But clever types notwithstanding, testing is essential for
-developing and evolving complex software systems.
+But make no mistake, clever types notwithstanding, testing is
+essential for developing and evolving complex software systems.  The
+goal of this chapter is to teach you more about how to write effective
+tests in OCaml, and in particular to teach you some of the best tools
+for doing so.
 
-The tedium of testing is a real problem, since it discourages people
-from writing as many tests as they should.  But with the right tools,
-writing tests can be lightweight and fun, and the better the testing
-tools, the more tests you'll find yourself writing.
+Tooling is especially important here because one of the things that
+prevents people from writing all the tests they should is the sheer
+tedium of it all.  But with the right tools in hand, writing tests can
+be lightweight and fun.  And when testing is fun, people do a lot more
+of it.
 
-The goal of this chapter is to teach you about some of the testing
-infrastructure available in the OCaml ecosystem.  But first, let's
-discuss more generally what you should be optimizing for in your tests
-and in your testing infrastructure.
+Before talking about the tools, let's discuss what we want out of our
+tests in the first place.
 
 ## What makes for good tests?
 
@@ -44,9 +44,9 @@ in a good testing environment.
 
 No testing framework can ensure that your tests satisfy these
 properties.  But the tools you choose can help or hinder on all of
-these fronts.  As we go through the rest of this chapter, we'll try to
-show how you can use the various testing tools available for OCaml to
-help you reach these goals.
+these fronts.  As we go through the rest of this chapter, you should
+be able to see how the testing tools available for OCaml can help
+advance these goals.
 
 ## Inline tests
 
@@ -175,9 +175,9 @@ doesn't mean you should.
 
 Putting tests directly in the library you're building certainly has
 some benefits. For one thing, it lets you put a test for a given
-function directly after the defintion of that function. This approach
-also lets you test aspects of your code that aren't exposed by its
-external interface.
+function directly after the definition of that function, which in some
+cases can be good for readability. This approach also lets you test
+aspects of your code that aren't exposed by its external interface.
 
 While this sounds appealing at first glance, putting tests in
 libraries has several downsides.
@@ -189,7 +189,7 @@ libraries has several downsides.
 
 - **Excess dependencies**. Testing code doesn't just add size to your
   final executable; it can also require dependencies on libraries that
-  you only really need for testing.  This can further bloat your
+  you don't need in production.  This can further bloat your
   application, and can reduce portability and cause you to link risky
   code into your production application.
 
@@ -222,11 +222,11 @@ command-line tools as well. It turns out you can't do this directly,
 since Dune doesn't support the `inline_tests` declaration in
 executable files.
 
-There's a good reason for this, which is that the `ppx_inline_test`
-test runner needs to instantiate the modules that contain the
-tests. If those modules have toplevel side-effects, that's a recipe
-for disaster. You don't want your test-framework running lots of
-copies of your executables in parallel without your say-so.
+There's a good reason for this: the `ppx_inline_test` test runner
+needs to instantiate the modules that contain the tests. If those
+modules have toplevel side-effects, that's a recipe for disaster. You
+don't want your test-framework running lots of copies of your
+executables in parallel without your say-so.
 
 So, how do we test code that's part of an executable? The solution is
 to break up your program in to two pieces: a directory containing a
@@ -235,6 +235,7 @@ suitable for testing (either with embedded inline tests, or from a
 purpose-built testing library); and a directory for the executable
 that links in the library, and is just responsible for launching the
 program.
+
 :::
 
 ## Property testing with Quickcheck
@@ -242,8 +243,8 @@ program.
 The tests we've discussed so far have been pretty simple, amounting to
 little more than writing down individual examples and checking that
 their behavior is as expected.  We often want to write tests that do
-more than that, and one useful form of testing that lets you step
-beyond testing concrete examples is called *property testing*.
+more than that. One good example of a more powerful style of tests is
+called *property testing*.
 
 The basic idea is simple enough. A property test requires two things:
 a function that takes an example input and checks that a given
