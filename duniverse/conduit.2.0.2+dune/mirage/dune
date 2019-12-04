@@ -1,0 +1,9 @@
+(library
+  (name        conduit_mirage)
+  (public_name conduit-mirage)
+  (preprocess  (pps ppx_sexp_conv))
+  (modules     conduit_mirage resolver_mirage conduit_xenstore)
+  (wrapped     false)
+  (libraries   conduit conduit-lwt mirage-stack mirage-clock mirage-random
+               mirage-flow mirage-flow-combinators dns-client.mirage ipaddr-sexp
+               vchan tls tls-mirage xenstore.client uri.services))

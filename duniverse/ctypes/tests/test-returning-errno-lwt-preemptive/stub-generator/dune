@@ -1,4 +1,0 @@
-(executable
- (name driver)
- (modules driver)
- (libraries ctypes test_returning_errno_lwt_preemptive_stubs tests_common))

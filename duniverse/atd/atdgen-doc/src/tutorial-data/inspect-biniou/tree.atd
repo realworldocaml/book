@@ -1,5 +1,0 @@
-(* This a binary tree. Just for the purpose of pretty-printing trees. *)
-type tree =
-    [ Empty
-    | Node of (tree * int * tree) ]
-

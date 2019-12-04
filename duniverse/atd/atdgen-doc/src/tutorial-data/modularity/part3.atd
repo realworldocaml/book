@@ -1,6 +1,0 @@
-type t2 <ocaml from="Part2"> = abstract
-
-type t3 = {
-  name : string;
-  ?data : t2 option;
-}

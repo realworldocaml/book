@@ -1,0 +1,34 @@
+opam-version: "2.0"
+maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
+authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
+homepage: "http://erratique.ch/software/uutf"
+doc: "http://erratique.ch/software/uutf/doc/Uutf"
+dev-repo: "git+https://github.com/dune-universe/uutf.git"
+bug-reports: "https://github.com/dbuenzli/uutf/issues"
+tags: [ "unicode" "text" "utf-8" "utf-16" "codec" "org:erratique" ]
+license: "ISC"
+depends: [
+  "dune"
+  "ocaml" {>= "4.01.0"}
+  "uchar"
+]
+depopts: ["cmdliner"]
+conflicts: ["cmdliner" { < "0.9.6"} ]
+synopsis: """Non-blocking streaming Unicode codec for OCaml"""
+description: """\
+
+Uutf is a non-blocking streaming codec to decode and encode the UTF-8,
+UTF-16, UTF-16LE and UTF-16BE encoding schemes. It can efficiently
+work character by character without blocking on IO. Decoders perform
+character position tracking and support newline normalization.
+
+Functions are also provided to fold over the characters of UTF encoded
+OCaml string values and to directly encode characters in OCaml
+Buffer.t values.
+
+Uutf has no dependency and is distributed under the ISC license.
+"""
+build: [[ "dune" "build" "-p" name ]]
+url {
+  src: "git://github.com/dune-universe/uutf.git#duniverse-v1.0.2"
+}

@@ -1,0 +1,7 @@
+(library
+  (name        cohttp_mirage)
+  (public_name cohttp-mirage)
+  (synopsis    "Mirage backend for cohttp")
+  (wrapped false)
+  (libraries   cohttp-lwt mirage-channel conduit-mirage sexplib
+               mirage-flow magic-mime astring))

@@ -1,0 +1,9 @@
+(coq.theory
+ (name basic)
+ (public_name base.basic)
+ (modules :standard)
+ (synopsis "Test Coq library"))
+
+(alias
+ (name default)
+ (action (echo "%{read:base.install}")))

@@ -1,3 +1,0 @@
-(test
- (name test_errno)
- (libraries oUnit ctypes ctypes-foreign.threaded))

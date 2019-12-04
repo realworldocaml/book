@@ -1,0 +1,10 @@
+(alias
+  (name message)
+  (deps .link_deps.eobjs/.byte_objs/link_deps.cmo)
+  (action (echo "link\n"))
+  )
+
+(executable
+  (name link_deps)
+  (link_deps (alias message))
+  )

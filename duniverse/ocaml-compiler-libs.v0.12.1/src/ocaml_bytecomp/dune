@@ -1,0 +1,14 @@
+(library
+ (name ocaml_bytecomp)
+ (public_name ocaml-compiler-libs.bytecomp)
+ (flags :standard -safe-string)
+ (libraries compiler-libs.bytecomp)
+ (preprocess no_preprocessing))
+
+(rule
+ (targets ocaml_bytecomp.ml)
+ (deps
+  (:first_dep ../gen/gen.exe))
+ (action
+  (run %{first_dep} -archive %{ocaml_where}/compiler-libs/ocamlbytecomp.cma -o
+    %{targets})))

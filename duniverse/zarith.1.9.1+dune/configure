@@ -1,0 +1,487 @@
+#! /bin/sh
+
+# configuration script
+
+# This file is part of the Zarith library 
+# http://forge.ocamlcore.org/projects/zarith .
+# It is distributed under LGPL 2 licensing, with static linking exception.
+# See the LICENSE file included in the distribution.
+#   
+# Copyright (c) 2010-2011 Antoine Miné, Abstraction project.
+# Abstraction is part of the LIENS (Laboratoire d'Informatique de l'ENS),
+# a joint laboratory by:
+# CNRS (Centre national de la recherche scientifique, France),
+# ENS (École normale supérieure, Paris, France),
+# INRIA Rocquencourt (Institut national de recherche en informatique, France).
+
+
+# options
+installdir='auto'
+ocamllibdir='auto'
+host='auto'
+gmp='auto'
+perf='no'
+
+ar='ar'
+ocaml='ocaml'
+ocamlc='ocamlc'
+ocamlopt='ocamlopt'
+ocamlmklib='ocamlmklib'
+ocamldep='ocamldep'
+ocamldoc='ocamldoc'
+ccinc="$CPPFLAGS"
+cclib="$LDFLAGS"
+asopt="$ASFLAGS"
+ccdef=''
+mlflags="$OCAMLFLAGS"
+mloptflags="$OCAMLOPTFLAGS"
+mlinc="$OCAMLINC"
+objsuffix="o"
+ocamlfind="auto"
+
+# sanitize
+LC_ALL=C
+export LC_ALL
+unset IFS
+
+
+# help
+help()
+{
+    cat <<EOF
+usage: configure [options]
+
+where options include:
+  -installdir dir      installation directory
+  -ocamllibdir dir     ocaml library directory
+  -host arch           host type, for platform-specific asm code
+  -noasm               disable platform-specific asm code
+  -gmp                 use GMP library (default if found)
+  -mpir                use MPIR library instead of GMP
+  -perf                enable performance statistics
+  -prefixnonocaml      add for non ocaml tool, e.g. -prefixnonocaml x86_64-w64-mingw32-
+
+Environment variables that affect configuration:
+  CC                   C compiler to use (default: try gcc, then cc)
+  CFLAGS               extra flags to pass to the C compiler
+  ASFLAGS              extra flags to pass to the assembler
+  CPPFLAGS             extra includes, e.g. -I/path/to/gmp/include
+  LDFLAGS              extra link flags, e.g. -L/path/to/gmp/lib
+  OCAMLFLAGS           extra flags to pass to the ocamlc Caml compiler
+  OCAMLOPTFLAGS        extra flags to pass to the ocamlopt Caml compiler
+  OCAMLINC             extra includes to pass to the Caml compilers
+EOF
+    exit
+}
+
+# parse arguments
+while : ; do
+    case "$1" in
+        "") 
+            break;;
+        -installdir|--installdir)
+            installdir="$2"
+            shift;;
+        -ocamllibdir|--ocamllibdir)
+            ocamllibdir="$2"
+            shift;;
+        -no-ocamlfind|--no-ocamlfind)
+            ocamlfind="no"
+            shift;;
+        -host|--host)
+            host="$2"
+            shift;;
+        -noasm|--no-asm)
+            host='none';;
+        -help|--help)
+            help;;
+        -gmp|--gmp)
+            gmp='gmp';;
+        -mpir|--mpir)
+            gmp='mpir';;
+        -perf|--perf)
+            perf='yes';;
+        -prefixnonocaml|--prefixnonocaml)
+            prefixnonocaml="$2"
+            shift;;
+        *)
+            echo "unknown option $1, try -help"
+            exit 2;;
+    esac
+    shift
+done
+
+if test "$perf" = "yes"; then ccdef="-DZ_PERF_COUNTER $ccdef"; fi
+
+echo_n()
+{
+    echo "$1" | tr -d '\012'
+}
+
+# checking binaries in $PATH
+
+searchbin()
+{
+    if test "x$1" = "x"; then return 0; fi
+    echo_n "binary $1: "
+    case "$1" in
+      /*|./*|../*)
+        if test -f "$1" -a -x "$1"
+        then echo "found"; return 1
+        else echo "not found"; return 0
+        fi;;
+    esac
+    IFS=':'
+    for i in $PATH
+    do
+        if test -z "$i"; then i='.'; fi
+        if test -f $i/$1 -a -x $i/$1; then echo "found in $i"; unset IFS; return 1; fi
+    done
+    echo "not found"
+    unset IFS
+    return 0
+}
+
+searchbinreq()
+{
+    searchbin $1
+    if test $? -eq 0; then echo "required program $1 not found"; exit 2; fi
+}
+
+
+# checking includes and libraries
+
+checkinc()
+{
+    echo_n "include $1: "
+    rm -f tmp.c tmp.o
+    echo "#include <$1>" > tmp.c
+    echo "int main() { return 1; }" >> tmp.c
+    r=1
+    $cc $ccopt $ccinc -c tmp.c -o tmp.o >/dev/null 2>/dev/null || r=0
+    if test ! -f tmp.o; then r=0; fi
+    rm -f tmp.c tmp.o
+    if test $r -eq 0; then echo "not found"; else echo "found"; fi
+    return $r
+}
+
+checklib()
+{
+    echo_n "library $1: "
+    rm -f tmp.c tmp.out
+    echo "int main() { return 1; }" >> tmp.c
+    r=1
+    $cc $ccopt $cclib tmp.c -l$1 -o tmp.out >/dev/null 2>/dev/null || r=0
+    if test ! -x tmp.out; then r=0; fi
+    rm -f tmp.c tmp.o tmp.out
+    if test $r -eq 0; then echo "not found"; else echo "found"; fi
+    return $r
+}
+
+checkcc()
+{
+    echo_n "checking compilation with $cc $ccopt: "
+    rm -f tmp.c tmp.out
+    echo "int main() { return 1; }" >> tmp.c
+    r=1
+    $cc $ccopt tmp.c -o tmp.out >/dev/null 2>/dev/null || r=0
+    if test ! -x tmp.out; then r=0; fi
+    rm -f tmp.c tmp.o tmp.out
+    if test $r -eq 0; then echo "not working"; else echo "working"; fi
+    return $r
+}
+
+checkcmxalib()
+{
+    echo_n "library $1: "
+    $ocamlopt $mloptflags $1 -o tmp.out >/dev/null 2>/dev/null || r=0
+    if test ! -x tmp.out; then r=0; fi
+    rm -f tmp.out
+    if test $r -eq 0; then echo "not found"; else echo "found"; fi
+    return $r    
+}
+
+
+# check required programs
+
+searchbinreq $ocaml
+searchbinreq $ocamlc
+searchbinreq $ocamldep
+searchbinreq $ocamlmklib
+searchbinreq $ocamldoc
+searchbin $ar
+if test $? -eq 0; then ar=$prefixnonocaml$ar; searchbinreq $ar; fi
+searchbinreq perl
+
+if test -n "$CC"; then
+  searchbinreq "$CC"
+  cc="$CC"
+  ccopt="$CFLAGS"
+elif ! searchbin 'gcc'; then
+  cc='gcc'
+  ccopt="-O3 -Wall -Wextra $CFLAGS"
+elif ! searchbin $prefixnonocaml'gcc'; then
+  cc=$prefixnonocaml'gcc'
+  ccopt="-O3 -Wall -Wextra $CFLAGS"
+elif ! searchbin 'cc'; then
+  cc='cc'
+  ccopt="-O3 -Wall -Wextra $CFLAGS"
+else
+  searchbinreq $prefixnonocaml'cc'
+  cc=$prefixnonocaml'cc'
+  ccopt="-O3 -Wall -Wextra $CFLAGS"
+fi
+
+# optional native-code generation
+
+hasocamlopt='no'
+
+searchbin $ocamlopt
+if test $? -eq 1; then hasocamlopt='yes'; fi
+
+
+# check C compiler
+
+checkcc
+if test $? -eq 0; then
+    # try again with (almost) no options
+    ccopt='-O'
+    checkcc
+    if test $? -eq 0; then echo "cannot compile and link program"; exit 2; fi
+fi
+
+
+# directories
+
+if test "$ocamllibdir" = "auto"
+then ocamllibdir=`ocamlc -where | sed 's/\r$//'`
+fi
+
+if test ! -f "$ocamllibdir/caml/mlvalues.h"
+then echo "cannot find OCaml libraries in $ocamllibdir"; exit 2; fi
+ccinc="-I$ocamllibdir $ccinc"
+checkinc "caml/mlvalues.h"
+if test $? -eq 0; then echo "cannot include caml/mlvalues.h"; exit 2; fi
+
+
+# optional dynamic linking
+
+hasdynlink='no'
+
+if test $hasocamlopt = yes
+then
+    checkcmxalib dynlink.cmxa
+    if test $? -eq 1; then hasdynlink='yes'; fi
+fi
+
+
+# installation method
+
+searchbin ocamlfind
+if test $? -eq 1 -a $ocamlfind != "no"; then 
+    instmeth='findlib'
+    if test "$installdir" = "auto"
+    then installdir=`ocamlfind printconf destdir`; fi
+else
+    searchbin install
+    if test $? -eq 1; then instmeth='install'
+    else echo "no installation method found"; exit 2; fi
+    if test "$installdir" = "auto"; then installdir="$ocamllibdir"; fi
+fi
+
+
+# detect OCaml's word-size
+
+echo "print_int (Sys.word_size);;" > tmp.ml
+wordsize=`ocaml tmp.ml`
+echo "OCaml's word size is $wordsize"
+rm -f tmp.ml
+
+
+# auto-detect host
+
+if test "x$host" = 'xauto'; then 
+    searchbin uname
+    if test $? -eq 0; then host='none'
+    else host=`. ./config.guess`
+    fi
+fi
+
+
+# set arch from host
+
+arch='none'
+case $host in
+    x86_64-*linux-gnu|x86_64-kfreebsd-gnu)
+        ccdef="-DZ_ELF -DZ_DOT_LABEL_PREFIX $ccdef"
+        if test $wordsize = 32; then
+            # 32-bit OCaml on a 64-bit host
+            arch='i686'
+            ccopt="-m32 $ccopt"
+            asopt="-m32 $asopt"
+        else
+            arch='x86_64'
+        fi
+        ;;
+    i486-*linux-gnu|i686-*linux-gnu|i486-kfreebsd-gnu)
+        ccdef="-DZ_ELF -DZ_DOT_LABEL_PREFIX $ccdef"
+        arch='i686';;
+    i686-*cygwin)
+        if test "x$wordsize" = "x64"; then
+            ccdef="-DZ_COFF $ccdef"
+            arch='x86_64_mingw64'
+        else
+            ccdef="-DZ_UNDERSCORE_PREFIX -DZ_COFF $ccdef"
+            arch='i686'
+        fi
+	;;
+    i386-*darwin* | x86_64-*darwin*)
+        ccdef="-DZ_UNDERSCORE_PREFIX -DZ_MACOS $ccdef"
+        if test "x$wordsize" = "x64"; then
+            ccopt="-arch x86_64 $ccopt"
+            asopt="-arch x86_64 $asopt"
+            arch='x86_64'
+            checkcc
+        else
+            ccopt="-arch i386 $ccopt"
+            asopt="-arch i386 $asopt"
+            arch='i686'
+            checkcc
+        fi
+        ;;
+    armv7*-gnueabi)
+        arch='arm'
+        ;;
+    none)
+        ;;
+    *) 
+        echo "unknown host $host";;
+esac
+
+if test "$arch" != 'none'; then
+    if test ! -f "caml_z_${arch}.S"; then arch='none'; fi
+fi
+
+
+# check GMP, MPIR
+
+if test "$gmp" = 'gmp' -o "$gmp" = 'auto'; then
+    checkinc gmp.h
+    if test $? -eq 1; then
+        checklib gmp
+        if test $? -eq 1; then 
+            gmp='OK'
+            cclib="$cclib -lgmp"
+            ccdef="-DHAS_GMP $ccdef"
+        fi
+    fi
+fi
+if test "$gmp" = 'mpir' -o "$gmp" = 'auto'; then
+    checkinc mpir.h
+    if test $? -eq 1; then
+        checklib mpir
+        if test $? -eq 1; then 
+            gmp='OK'
+            cclib="$cclib -lmpir"
+            ccdef="-DHAS_MPIR $ccdef"
+        fi
+    fi
+fi
+if test "$gmp" != 'OK'; then echo "cannot find GMP nor MPIR"; exit 2; fi
+
+
+# OCaml version
+
+ocamlver=`ocamlc -version`
+
+# Extended comparisons available since 3.12.1
+case "$ocamlver" in
+    [12].* | 3.0* | 3.10* | 3.11* | 3.12.0*)
+        ;;
+    *)
+        echo "OCaml extended comparison supported"
+        ccdef="-DZ_OCAML_COMPARE_EXT $ccdef"
+        ;;
+esac
+
+# New hash functions available since 4.00.0
+case "$ocamlver" in
+    [123].*)
+        ;;
+    *)
+        echo "OCaml new hash functions available"
+        ccdef="-DZ_OCAML_HASH $ccdef"
+        ;;
+esac
+
+# -bin-annot available since 4.00.0
+case "$ocamlver" in
+    [123].*)
+        hasbinannot='no';;
+    *)
+        echo "OCaml supports -bin-annot to produce documentation"
+        hasbinannot='yes';;
+esac
+
+# Changes to C API (the custom_operation struct) since 4.08.0
+case "$ocamlver" in
+    [123].* | 4.0[01234567].* )
+        echo "Using OCaml legacy C API custom operations"
+        ccdef="-DZ_OCAML_LEGACY_CUSTOM_OPERATIONS $ccdef"
+    ;;
+    *)
+    ;;
+esac
+
+# dump Makefile
+
+cat > Makefile <<EOF
+# generated by ./configure
+
+CC=$cc
+OCAMLC=$ocamlc
+OCAMLOPT=$ocamlopt
+OCAMLDEP=$ocamldep
+OCAMLMKLIB=$ocamlmklib
+OCAMLDOC=$ocamldoc
+OCAMLFLAGS=$mlflags
+OCAMLOPTFLAGS=$mloptflags
+OCAMLINC=$mlinc
+CFLAGS=$ccinc $ccdef $ccopt
+ASFLAGS=$ccdef $asopt
+LIBS=$cclib
+ARCH=$arch
+INSTALLDIR=$installdir
+AR=$ar
+INSTALL=install
+OCAMLFIND=ocamlfind
+INSTMETH=$instmeth
+OBJSUFFIX=$objsuffix
+HASOCAMLOPT=$hasocamlopt
+HASDYNLINK=$hasdynlink
+HASBINANNOT=$hasbinannot
+
+include project.mak
+EOF
+
+
+# dump summary
+
+cat <<EOF
+
+detected configuration:
+
+  native-code:          $hasocamlopt
+  dynamic linking:      $hasdynlink
+  asm path:             $arch
+  defines:              $ccdef
+  libraries:            $cclib
+  C options:            $ccopt
+  asm options           $asopt
+  installation path:    $installdir
+  installation method   $instmeth
+
+configuration successful!
+now type "make" to build
+then type "make install" or "sudo make install" to install
+EOF

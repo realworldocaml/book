@@ -1,0 +1,132 @@
+
+* Sexplib - S-Expressions for OCaml
+
+=sexplib= contains functionality for parsing and pretty-printing
+s-expressions.  S-expressions are defined by the following type:
+
+#+begin_src ocaml
+type sexp = Atom of string | List of sexp list
+#+end_src
+
+** Usage example
+
+In this example we build an s-expression that corresponds to =(This
+(is an) (s expression))=, serialize that into a string, and then parse
+the string back into an s-expression.
+
+#+begin_src ocaml
+open Sexplib
+
+let () =
+  (* Build an Sexp from: (This (is an) (s expression)) *)
+  let exp1 = Sexp.(List [
+    Atom "This";
+    List [Atom "is"; Atom "an"];
+    List [Atom "s"; Atom "expression"]
+  ]) in
+  (* Serialize an Sexp object into a string *)
+  print_endline (Sexp.to_string exp1);
+  (* Parse a string and produce a Sexp object  *)
+  let exp2 = Sexp.of_string "(This (is an) (s expression))" in
+  (* Ensure we parsed what we expected. *)
+  assert (Sexp.compare exp1 exp2 = 0)
+#+end_src
+
+
+** About
+
+This library is often used in conjunction with =ppx_sexp_conv=, a
+syntax extension which generates code from type definitions for
+efficiently converting OCaml-values to s-expressions and vice versa.
+
+Together, these two libraries make it easy to convert your OCaml
+values to and from a human-readable serializable form, without the
+tedium of having to write your own converters.
+
+The library also offers functionality for extracting and replacing
+sub-expressions in s-expressions.  Here, we'll only document =sexplib=
+proper.  If you want to know more about the way in which OCaml types
+are mapped on to s-expressions, you should look at the documentation
+for [[https://github.com/janestreet/ppx_sexp_conv][=ppx_sexp_conv=]].
+
+** Lexical conventions of s-expression
+
+Whitespace, which consists of the space, newline, horizontal tab, and
+form feed characters, is ignored unless within an OCaml-string, where
+it is treated according to OCaml-conventions.  The left parenthesis
+opens a new list, the right one closes it again.  Lists can be empty.
+
+The double quote denotes the beginning and end of a string following
+the lexical conventions of OCaml (see the [[http://caml.inria.fr/pub/docs/manual-ocaml/][OCaml-manual]] for
+details). All characters other than double quotes, left and right
+parentheses, whitespace, carriage return, and comment-introducing
+characters or sequences (see next paragraph) are considered part of a
+contiguous string.
+
+** Comments
+
+There are three kinds of comments:
+
+- /line comments/ are introduced with =;=, and end at the newline.
+- /sexp comments/ are introduced with =#;=, and end at the end of the
+  following s-expression.
+- /block comments/ are introduced with =#|= and end with =|#=.  These
+  can be nested, and double-quotes within them must be balanced and be
+  lexically correct OCaml strings.
+
+** Grammar of s-expressions
+
+S-expressions are either strings (= atoms) or lists.  The lists can
+recursively contain further s-expressions or be empty, and must be
+balanced, i.e., parentheses must match.
+
+** Examples
+
+#+begin_src scheme
+  this_is_an_atom_123'&^%!  ; this is a comment
+  "another atom in an OCaml-string \"string in a string\" \123"
+  
+  ; empty list follows below
+  ()
+  
+  ; a more complex example
+  (
+    (
+      list in a list  ; comment within a list
+      (list in a list in a list)
+      42 is the answer to all questions
+      #; (this S-expression
+           (has been commented out)
+         )
+      #| Block comments #| can be "nested" |# |#
+    )
+  )
+#+end_src
+
+** I/O and Type Conversions
+
+There are multiple ways to perform I/O with s-expressions.  If exact
+error locations are required when type conversions fail, s-expressions
+need to be parsed with location annotations.  The associated parser is
+slower, however, and needs more memory.
+
+In most cases users may therefore want to use functions like
+=load_sexp_conv= or =load_sexp_conv_exn=, which load s-expressions
+from files and convert them.  They initially read the file without
+location annotations for performance reasons.  Only if conversions
+fail will the file be reparsed with location annotations.  Type errors
+can then be reported accurately with file name, line number, column,
+and file position.
+
+** Custom converters
+
+In addition to the converters provided automatically by
+=ppx_sexp_conv=, it's possible to write one's own sexp-converter.  For
+such converters to be available by other automatically generated
+converters, it should follow the convention of being defined in the
+same scope as the type, and should be named =sexp_of_[type]= and
+=[type]_of_sexp=.
+
+You must report failures by raising the =Of_sexp_error=-exception so
+that then =sexplib='s tools for pinpointing the location of type
+errors within an s-expression file will work properly.
