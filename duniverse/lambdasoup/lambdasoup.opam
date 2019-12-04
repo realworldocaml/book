@@ -13,11 +13,11 @@ dev-repo: "https://github.com/aantron/lambda-soup.git"
 depends: [
   # As a consequence of depending on Jbuilder, Lambda Soup requires OCaml
   # 4.02.3.
-  "jbuilder" {build & >= "1.0+beta10"}
+  "dune" {build & >= "1.0"}
   "markup" {>= "0.7.1"}
   "ounit" {test}
 ]
 
 build: [
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "build" "-p" name "-j" jobs]
 ]
