@@ -1,0 +1,4 @@
+(library
+ (name test_lwt_preemptive_stubs)
+ (wrapped false)
+ (libraries ctypes))

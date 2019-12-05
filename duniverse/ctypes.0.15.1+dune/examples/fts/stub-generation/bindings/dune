@@ -1,0 +1,8 @@
+(library
+ (name fts_stubs)
+ (wrapped false)
+ (modules_without_implementation fts)
+ (libraries
+  ctypes
+  ;; TODO below only needed until https://github.com/ocaml/dune/issues/1724
+  ctypes-foreign.unthreaded))

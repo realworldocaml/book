@@ -1,0 +1,4 @@
+(library
+ (name test_coercionss_stubs)
+ (wrapped false)
+ (libraries ctypes))

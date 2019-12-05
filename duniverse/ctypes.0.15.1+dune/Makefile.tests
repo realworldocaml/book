@@ -1,0 +1,1359 @@
+# -*- Makefile -*-
+
+VPATH += tests
+
+CFLAGS += -I $(CURDIR)/src/ctypes -I $(CURDIR)/tests
+
+CC=$(shell ocamlc -config | sed -n '/native_c_compiler/{ s/[^:]*://; p;}')
+
+# tests-common subproject
+tests-common.dir = tests/tests-common
+tests-common.subproject_deps = ctypes cstubs \
+   ctypes-foreign-base ctypes-foreign-threaded
+tests-common.install = no
+tests-common.install_native_objects = yes
+
+tests-common: PROJECT=tests-common
+tests-common: $$(LIB_TARGETS)
+
+
+test-raw.dir = tests/test-raw
+test-raw.threads = yes
+test-raw.deps = bigarray oUnit str bytes integers
+test-raw.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-raw: PROJECT=test-raw
+test-raw: $$(BEST_TARGET)
+
+test-pointers-stubs.dir  = tests/test-pointers/stubs
+test-pointers-stubs.threads = yes
+test-pointers-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-pointers-stubs: PROJECT=test-pointers-stubs
+test-pointers-stubs: $$(LIB_TARGETS)
+
+test-pointers-stub-generator.dir = tests/test-pointers/stub-generator
+test-pointers-stub-generator.threads = yes
+test-pointers-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-pointers-stubs tests-common
+test-pointers-stub-generator.deps = str bigarray bytes integers
+test-pointers-stub-generator: PROJECT=test-pointers-stub-generator
+test-pointers-stub-generator: $$(BEST_TARGET)
+
+test-pointers.dir = tests/test-pointers
+test-pointers.threads = yes
+test-pointers.deps = str bigarray oUnit bytes integers
+test-pointers.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs tests-common test-pointers-stubs
+test-pointers.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-pointers: PROJECT=test-pointers
+test-pointers: $$(BEST_TARGET)
+
+test-pointers-generated= \
+  tests/test-pointers/generated_bindings.ml \
+  tests/test-pointers/generated_stubs.c
+
+test-pointers-generated: $(test-pointers-generated)
+
+tests/test-pointers/generated_stubs.c: $(BUILDDIR)/test-pointers-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-pointers/generated_bindings.ml: $(BUILDDIR)/test-pointers-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-integers-stubs.dir  = tests/test-integers/stubs
+test-integers-stubs.threads = yes
+test-integers-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-integers-stubs: PROJECT=test-integers-stubs
+test-integers-stubs: $$(LIB_TARGETS)
+
+test-integers-stub-generator.dir = tests/test-integers/stub-generator
+test-integers-stub-generator.threads = yes
+test-integers-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-integers-stubs tests-common
+test-integers-stub-generator.deps = str bigarray bytes integers
+test-integers-stub-generator: PROJECT=test-integers-stub-generator
+test-integers-stub-generator: $$(BEST_TARGET)
+
+test-integers.dir = tests/test-integers
+test-integers.threads = yes
+test-integers.deps = str bigarray oUnit bytes integers
+test-integers.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs tests-common test-integers-stubs
+test-integers.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-integers: PROJECT=test-integers
+test-integers: $$(BEST_TARGET)
+
+test-integers-generated= \
+  tests/test-integers/generated_bindings.ml \
+  tests/test-integers/generated_stubs.c
+
+test-integers-generated: $(test-integers-generated)
+
+tests/test-integers/generated_stubs.c: $(BUILDDIR)/test-integers-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-integers/generated_bindings.ml: $(BUILDDIR)/test-integers-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-variadic-stubs.dir  = tests/test-variadic/stubs
+test-variadic-stubs.threads = yes
+test-variadic-stubs.deps = integers
+test-variadic-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-variadic-stubs: PROJECT=test-variadic-stubs
+test-variadic-stubs: $$(LIB_TARGETS)
+
+test-variadic-stub-generator.dir = tests/test-variadic/stub-generator
+test-variadic-stub-generator.threads = yes
+test-variadic-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-variadic-stubs tests-common
+test-variadic-stub-generator.deps = str bigarray bytes integers
+test-variadic-stub-generator: PROJECT=test-variadic-stub-generator
+test-variadic-stub-generator: $$(BEST_TARGET)
+
+test-variadic.dir = tests/test-variadic
+test-variadic.threads = yes
+test-variadic.deps = str bigarray oUnit bytes integers
+test-variadic.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs tests-common test-variadic-stubs
+test-variadic.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-variadic: PROJECT=test-variadic
+test-variadic: $$(BEST_TARGET)
+
+test-variadic-generated= \
+  tests/test-variadic/generated_bindings.ml \
+  tests/test-variadic/generated_stubs.c
+
+test-variadic-generated: $(test-variadic-generated)
+
+tests/test-variadic/generated_stubs.c: $(BUILDDIR)/test-variadic-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-variadic/generated_bindings.ml: $(BUILDDIR)/test-variadic-stub-generator.$(BEST)
+	$< --ml-file $@
+
+
+test-builtins-stubs.dir  = tests/test-builtins/stubs
+test-builtins-stubs.threads = yes
+test-builtins-stubs.subproject_deps = ctypes tests-common
+test-builtins-stubs: PROJECT=test-builtins-stubs
+test-builtins-stubs: $$(LIB_TARGETS)
+
+test-builtins-stub-generator.dir = tests/test-builtins/stub-generator
+test-builtins-stub-generator.threads = yes
+test-builtins-stub-generator.subproject_deps = ctypes cstubs \
+  test-builtins-stubs ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-builtins-stub-generator.deps = str bigarray bytes integers
+test-builtins-stub-generator: PROJECT=test-builtins-stub-generator
+test-builtins-stub-generator: $$(BEST_TARGET)
+
+test-builtins.dir = tests/test-builtins
+test-builtins.threads = yes
+test-builtins.deps = str bigarray oUnit bytes integers
+test-builtins.subproject_deps = ctypes cstubs test-builtins-stubs \
+  ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-builtins.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-builtins: PROJECT=test-builtins
+test-builtins: $$(BEST_TARGET)
+
+test-builtins-generated= \
+  tests/test-builtins/generated_bindings.ml \
+  tests/test-builtins/generated_stubs.c
+
+test-builtins-generated: $(test-builtins-generated)
+
+tests/test-builtins/generated_stubs.c: $(BUILDDIR)/test-builtins-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-builtins/generated_bindings.ml: $(BUILDDIR)/test-builtins-stub-generator.$(BEST)
+	$< --ml-file $@
+
+
+test-macros-stubs.dir  = tests/test-macros/stubs
+test-macros-stubs.threads = yes
+test-macros-stubs.subproject_deps = ctypes tests-common
+test-macros-stubs: PROJECT=test-macros-stubs
+test-macros-stubs: $$(LIB_TARGETS)
+
+test-macros-stub-generator.dir = tests/test-macros/stub-generator
+test-macros-stub-generator.threads = yes
+test-macros-stub-generator.subproject_deps = ctypes cstubs \
+  test-macros-stubs ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-macros-stub-generator.deps = str bigarray bytes integers
+test-macros-stub-generator: PROJECT=test-macros-stub-generator
+test-macros-stub-generator: $$(BEST_TARGET)
+
+test-macros.dir = tests/test-macros
+test-macros.threads = yes
+test-macros.deps = str bigarray oUnit bytes integers
+test-macros.subproject_deps = ctypes cstubs test-macros-stubs \
+  ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-macros.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-macros: PROJECT=test-macros
+test-macros: $$(BEST_TARGET)
+
+test-macros-generated= \
+  tests/test-macros/generated_bindings.ml \
+  tests/test-macros/generated_stubs.c
+
+test-macros-generated: $(test-macros-generated)
+
+tests/test-macros/generated_stubs.c: $(BUILDDIR)/test-macros-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-macros/generated_bindings.ml: $(BUILDDIR)/test-macros-stub-generator.$(BEST)
+	$< --ml-file $@
+
+
+test-higher_order-stubs.dir  = tests/test-higher_order/stubs
+test-higher_order-stubs.threads = yes
+test-higher_order-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-higher_order-stubs: PROJECT=test-higher_order-stubs
+test-higher_order-stubs: $$(LIB_TARGETS)
+
+test-higher_order-stub-generator.dir = tests/test-higher_order/stub-generator
+test-higher_order-stub-generator.threads = yes
+test-higher_order-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-higher_order-stubs tests-common
+test-higher_order-stub-generator.deps = str bigarray bytes integers
+test-higher_order-stub-generator: PROJECT=test-higher_order-stub-generator
+test-higher_order-stub-generator: $$(BEST_TARGET)
+
+test-higher_order.dir = tests/test-higher_order
+test-higher_order.threads = yes
+test-higher_order.deps = str bigarray oUnit bytes integers
+test-higher_order.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-higher_order-stubs tests-common
+test-higher_order.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-higher_order: PROJECT=test-higher_order
+test-higher_order: $$(BEST_TARGET)
+
+test-higher_order-generated= \
+  tests/test-higher_order/generated_bindings.ml \
+  tests/test-higher_order/generated_stubs.c
+
+test-higher_order-generated: $(test-higher_order-generated)
+
+tests/test-higher_order/generated_stubs.c: $(BUILDDIR)/test-higher_order-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-higher_order/generated_bindings.ml: $(BUILDDIR)/test-higher_order-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-enums-struct-stubs.dir  = tests/test-enums/struct-stubs
+test-enums-struct-stubs.threads = yes
+test-enums-struct-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-enums-struct-stubs: PROJECT=test-enums-struct-stubs
+test-enums-struct-stubs: $$(LIB_TARGETS)
+
+test-enums-stubs.dir  = tests/test-enums/stubs
+test-enums-stubs.threads = yes
+test-enums-stubs.extra_mls = generated_struct_bindings.ml
+test-enums-stubs.subproject_deps = ctypes \
+   test-enums-struct-stubs \
+   test-enums-struct-stubs-generator \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-enums-stubs: PROJECT=test-enums-stubs
+test-enums-stubs: $$(LIB_TARGETS)
+
+test-enums-stub-generator.dir = tests/test-enums/stub-generator
+test-enums-stub-generator.threads = yes
+test-enums-stub-generator.subproject_deps = ctypes cstubs \
+     test-enums-struct-stubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-enums-stubs tests-common
+test-enums-stub-generator.deps = str bigarray bytes integers
+test-enums-stub-generator: PROJECT=test-enums-stub-generator
+test-enums-stub-generator: $$(BEST_TARGET)
+
+test-enums-struct-stub-generator.dir = tests/test-enums/struct-stub-generator
+test-enums-struct-stub-generator.threads = yes
+test-enums-struct-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-enums-struct-stubs tests-common
+test-enums-struct-stub-generator.deps = str bigarray bytes integers
+test-enums-struct-stub-generator: PROJECT=test-enums-struct-stub-generator
+test-enums-struct-stub-generator: $$(BEST_TARGET)
+
+test-enums.dir = tests/test-enums
+test-enums.threads = yes
+test-enums.deps = str bigarray oUnit bytes integers
+test-enums.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-enums-struct-stubs test-enums-stubs tests-common
+test-enums.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-enums: PROJECT=test-enums
+test-enums: $$(BEST_TARGET)
+
+test-enums-structs-generated= \
+  tests/test-enums/stubs/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-enums/generated_struct_stubs.c
+
+test-enums-structs-generated: $(test-enums-structs-generated)
+
+test-enums-generated= \
+  tests/test-enums/generated_bindings.ml \
+  tests/test-enums/generated_stubs.c \
+
+test-enums-generated: $(test-enums-generated)
+
+tests/test-enums/generated_stubs.c: $(BUILDDIR)/test-enums-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-enums/generated_bindings.ml: $(BUILDDIR)/test-enums-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-enums/stubs/generated_struct_bindings.ml: $(BUILDDIR)/test-enums-ml-struct-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-enums-ml-struct-stub-generator.$(BEST): $(BUILDDIR)/tests/test-enums/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-enums/generated_struct_stubs.c: $(BUILDDIR)/test-enums-struct-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-structs-stubs.dir  = tests/test-structs/stubs
+test-structs-stubs.threads = yes
+test-structs-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-structs-stubs: PROJECT=test-structs-stubs
+test-structs-stubs: $$(LIB_TARGETS)
+
+test-structs-stub-generator.dir = tests/test-structs/stub-generator
+test-structs-stub-generator.threads = yes
+test-structs-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-structs-stubs tests-common
+test-structs-stub-generator.deps = str bigarray bytes integers
+test-structs-stub-generator: PROJECT=test-structs-stub-generator
+test-structs-stub-generator: $$(BEST_TARGET)
+
+test-structs.dir = tests/test-structs
+test-structs.threads = yes
+test-structs.deps = str bigarray oUnit bytes integers
+test-structs.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-structs-stubs tests-common
+test-structs.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-structs: PROJECT=test-structs
+test-structs: $$(BEST_TARGET)
+
+test-structs-generated= \
+  tests/test-structs/generated_bindings.ml \
+  tests/test-structs/generated_stubs.c \
+  tests/test-structs/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-structs/generated_struct_stubs.c
+
+test-structs-generated: $(test-structs-generated)
+
+tests/test-structs/generated_stubs.c: $(BUILDDIR)/test-structs-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-structs/generated_bindings.ml: $(BUILDDIR)/test-structs-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-structs/generated_struct_bindings.ml: $(BUILDDIR)/test-structs-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-structs-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-structs/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-structs/generated_struct_stubs.c: $(BUILDDIR)/test-structs-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-constants-stubs.dir  = tests/test-constants/stubs
+test-constants-stubs.threads = yes
+test-constants-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-constants-stubs: PROJECT=test-constants-stubs
+test-constants-stubs: $$(LIB_TARGETS)
+
+test-constants-stub-generator.dir = tests/test-constants/stub-generator
+test-constants-stub-generator.threads = yes
+test-constants-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-constants-stubs tests-common
+test-constants-stub-generator.deps = str bigarray bytes integers
+test-constants-stub-generator: PROJECT=test-constants-stub-generator
+test-constants-stub-generator: $$(BEST_TARGET)
+
+test-constants.dir = tests/test-constants
+test-constants.threads = yes
+test-constants.deps = str bigarray oUnit bytes integers
+test-constants.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-constants-stubs tests-common
+test-constants.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-constants: PROJECT=test-constants
+test-constants: $$(BEST_TARGET)
+
+test-constants-generated= \
+  tests/test-constants/generated_bindings.ml \
+  tests/test-constants/generated_stubs.c \
+  tests/test-constants/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-constants/generated_struct_stubs.c
+
+test-constants-generated: $(test-constants-generated)
+
+tests/test-constants/generated_stubs.c: $(BUILDDIR)/test-constants-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-constants/generated_bindings.ml: $(BUILDDIR)/test-constants-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-constants/generated_struct_bindings.ml: $(BUILDDIR)/test-constants-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-constants-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-constants/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-constants/generated_struct_stubs.c: $(BUILDDIR)/test-constants-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+
+test-finalisers.dir = tests/test-finalisers
+test-finalisers.threads = yes
+test-finalisers.deps = str bigarray oUnit bytes integers
+test-finalisers.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-finalisers: PROJECT=test-finalisers
+test-finalisers: $$(BEST_TARGET)
+
+test-cstdlib-stubs.dir  = tests/test-cstdlib/stubs
+test-cstdlib-stubs.threads = yes
+test-cstdlib-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-cstdlib-stubs: PROJECT=test-cstdlib-stubs
+test-cstdlib-stubs: $$(LIB_TARGETS)
+
+test-cstdlib-stub-generator.dir = tests/test-cstdlib/stub-generator
+test-cstdlib-stub-generator.threads = yes
+test-cstdlib-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-cstdlib-stubs tests-common
+test-cstdlib-stub-generator.deps = str bigarray bytes integers
+test-cstdlib-stub-generator: PROJECT=test-cstdlib-stub-generator
+test-cstdlib-stub-generator: $$(BEST_TARGET)
+
+test-cstdlib.dir = tests/test-cstdlib
+test-cstdlib.threads = yes
+test-cstdlib.deps = str bigarray oUnit bytes integers
+test-cstdlib.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs test-cstdlib-stubs tests-common
+test-cstdlib.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-cstdlib: PROJECT=test-cstdlib
+test-cstdlib: $$(BEST_TARGET)
+
+test-cstdlib-generated= \
+  tests/test-cstdlib/generated_bindings.ml \
+  tests/test-cstdlib/generated_stubs.c
+
+test-cstdlib-generated: $(test-cstdlib-generated)
+
+tests/test-cstdlib/generated_stubs.c: $(BUILDDIR)/test-cstdlib-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-cstdlib/generated_bindings.ml: $(BUILDDIR)/test-cstdlib-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-sizeof.dir = tests/test-sizeof
+test-sizeof.threads = yes
+test-sizeof.deps = str bigarray oUnit bytes integers
+test-sizeof.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-sizeof: PROJECT=test-sizeof
+test-sizeof: $$(BEST_TARGET)
+
+test-foreign_values-stubs.dir  = tests/test-foreign_values/stubs
+test-foreign_values-stubs.threads = yes
+test-foreign_values-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-foreign_values-stubs: PROJECT=test-foreign_values-stubs
+test-foreign_values-stubs: $$(LIB_TARGETS)
+
+test-foreign_values-stub-generator.dir = tests/test-foreign_values/stub-generator
+test-foreign_values-stub-generator.threads = yes
+test-foreign_values-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-foreign_values-stubs tests-common
+test-foreign_values-stub-generator.deps = str bigarray bytes integers
+test-foreign_values-stub-generator: PROJECT=test-foreign_values-stub-generator
+test-foreign_values-stub-generator: $$(BEST_TARGET)
+
+test-foreign_values.dir = tests/test-foreign_values
+test-foreign_values.threads = yes
+test-foreign_values.deps = str bigarray oUnit bytes integers
+test-foreign_values.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs tests-common test-foreign_values-stubs
+test-foreign_values.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-foreign_values: PROJECT=test-foreign_values
+test-foreign_values: $$(BEST_TARGET)
+
+test-foreign_values-generated= \
+  tests/test-foreign_values/generated_bindings.ml \
+  tests/test-foreign_values/generated_stubs.c
+
+test-foreign_values-generated: $(test-foreign_values-generated)
+
+tests/test-foreign_values/generated_stubs.c: $(BUILDDIR)/test-foreign_values-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-foreign_values/generated_bindings.ml: $(BUILDDIR)/test-foreign_values-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-unions-stubs.dir  = tests/test-unions/stubs
+test-unions-stubs.threads = yes
+test-unions-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-unions-stubs: PROJECT=test-unions-stubs
+test-unions-stubs: $$(LIB_TARGETS)
+
+test-unions-stub-generator.dir = tests/test-unions/stub-generator
+test-unions-stub-generator.threads = yes
+test-unions-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-unions-stubs tests-common
+test-unions-stub-generator.deps = str bigarray bytes integers
+test-unions-stub-generator: PROJECT=test-unions-stub-generator
+test-unions-stub-generator: $$(BEST_TARGET)
+
+test-unions.dir = tests/test-unions
+test-unions.threads = yes
+test-unions.deps = str bigarray oUnit bytes integers
+test-unions.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs test-unions-stubs tests-common
+test-unions.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-unions: PROJECT=test-unions
+test-unions: $$(BEST_TARGET)
+
+test-unions-generated= \
+  tests/test-unions/generated_bindings.ml \
+  tests/test-unions/generated_stubs.c \
+  tests/test-unions/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-unions/generated_struct_stubs.c
+
+test-unions-generated: $(test-unions-generated)
+
+tests/test-unions/generated_stubs.c: $(BUILDDIR)/test-unions-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-unions/generated_bindings.ml: $(BUILDDIR)/test-unions-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-unions/generated_struct_bindings.ml: $(BUILDDIR)/test-unions-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-unions-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-unions/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-unions/generated_struct_stubs.c: $(BUILDDIR)/test-unions-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-custom_ops.dir = tests/test-custom_ops
+test-custom_ops.threads = yes
+test-custom_ops.deps = str bigarray oUnit bytes integers
+test-custom_ops.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-custom_ops: PROJECT=test-custom_ops
+test-custom_ops: $$(BEST_TARGET)
+
+test-arrays-stubs.dir  = tests/test-arrays/stubs
+test-arrays-stubs.threads = yes
+test-arrays-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-arrays-stubs: PROJECT=test-arrays-stubs
+test-arrays-stubs: $$(LIB_TARGETS)
+
+test-arrays-stub-generator.dir = tests/test-arrays/stub-generator
+test-arrays-stub-generator.threads = yes
+test-arrays-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-arrays-stubs tests-common
+test-arrays-stub-generator.deps = str bigarray bytes integers
+test-arrays-stub-generator: PROJECT=test-arrays-stub-generator
+test-arrays-stub-generator: $$(BEST_TARGET)
+
+test-arrays.dir = tests/test-arrays
+test-arrays.threads = yes
+test-arrays.deps = str bigarray oUnit bytes integers
+test-arrays.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-arrays-stubs tests-common
+test-arrays.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-arrays: PROJECT=test-arrays
+test-arrays: $$(BEST_TARGET)
+
+test-arrays-generated= \
+  tests/test-arrays/generated_bindings.ml \
+  tests/test-arrays/generated_stubs.c
+
+test-arrays-generated: $(test-arrays-generated)
+
+tests/test-arrays/generated_stubs.c: $(BUILDDIR)/test-arrays-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-arrays/generated_bindings.ml: $(BUILDDIR)/test-arrays-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-foreign-errno.dir = tests/test-foreign-errno
+test-foreign-errno.threads = yes
+test-foreign-errno.deps = str bigarray oUnit bytes integers
+test-foreign-errno.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-foreign-errno: PROJECT=test-foreign-errno
+test-foreign-errno: $$(BEST_TARGET)
+
+test-passable.dir = tests/test-passable
+test-passable.threads = yes
+test-passable.deps = str bigarray oUnit bytes integers
+test-passable.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded cstubs
+test-passable: PROJECT=test-passable
+test-passable: $$(BEST_TARGET)
+
+test-alignment.dir = tests/test-alignment
+test-alignment.threads = yes
+test-alignment.deps = str bigarray oUnit bytes integers
+test-alignment.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-alignment: PROJECT=test-alignment
+test-alignment: $$(BEST_TARGET)
+
+test-views-stubs.dir  = tests/test-views/stubs
+test-views-stubs.threads = yes
+test-views-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-views-stubs: PROJECT=test-views-stubs
+test-views-stubs: $$(LIB_TARGETS)
+
+test-views-stub-generator.dir = tests/test-views/stub-generator
+test-views-stub-generator.threads = yes
+test-views-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-views-stubs tests-common
+test-views-stub-generator.deps = str bigarray bytes integers
+test-views-stub-generator: PROJECT=test-views-stub-generator
+test-views-stub-generator: $$(BEST_TARGET)
+
+test-views.dir = tests/test-views
+test-views.threads = yes
+test-views.deps = str bigarray oUnit bytes integers
+test-views.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded cstubs test-views-stubs tests-common
+test-views.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-views: PROJECT=test-views
+test-views: $$(BEST_TARGET)
+
+test-views-generated= \
+  tests/test-views/generated_bindings.ml \
+  tests/test-views/generated_stubs.c
+
+test-views-generated: $(test-views-generated)
+
+tests/test-views/generated_stubs.c: $(BUILDDIR)/test-views-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-views/generated_bindings.ml: $(BUILDDIR)/test-views-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-oo_style-stubs.dir  = tests/test-oo_style/stubs
+test-oo_style-stubs.threads = yes
+test-oo_style-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-oo_style-stubs: PROJECT=test-oo_style-stubs
+test-oo_style-stubs: $$(LIB_TARGETS)
+
+test-oo_style-stub-generator.dir = tests/test-oo_style/stub-generator
+test-oo_style-stub-generator.threads = yes
+test-oo_style-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-oo_style-stubs tests-common
+test-oo_style-stub-generator.deps = str bigarray bytes integers
+test-oo_style-stub-generator: PROJECT=test-oo_style-stub-generator
+test-oo_style-stub-generator: $$(BEST_TARGET)
+
+test-oo_style.dir = tests/test-oo_style
+test-oo_style.threads = yes
+test-oo_style.deps = str bigarray oUnit bytes integers
+test-oo_style.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs test-oo_style-stubs tests-common
+test-oo_style.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-oo_style: PROJECT=test-oo_style
+test-oo_style: $$(BEST_TARGET)
+
+test-oo_style-generated= \
+  tests/test-oo_style/generated_bindings.ml \
+  tests/test-oo_style/generated_stubs.c
+
+test-oo_style-generated: $(test-oo_style-generated)
+
+tests/test-oo_style/generated_stubs.c: $(BUILDDIR)/test-oo_style-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-oo_style/generated_bindings.ml: $(BUILDDIR)/test-oo_style-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-marshal.dir = tests/test-marshal
+test-marshal.threads = yes
+test-marshal.deps = str bigarray oUnit bytes integers
+test-marshal.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common
+test-marshal.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-marshal: PROJECT=test-marshal
+test-marshal: $$(BEST_TARGET)
+
+test-type_printing.dir = tests/test-type_printing
+test-type_printing.threads = yes
+test-type_printing.deps = str bigarray oUnit bytes integers
+test-type_printing.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded \
+  cstubs test-type_printing-stubs tests-common
+test-type_printing.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-type_printing: PROJECT=test-type_printing
+test-type_printing: $$(BEST_TARGET)
+
+test-type_printing-stubs.dir  = tests/test-type_printing/stubs
+test-type_printing-stubs.threads = yes
+test-type_printing-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-type_printing-stubs: PROJECT=test-type_printing-stubs
+test-type_printing-stubs: $$(LIB_TARGETS)
+
+test-type_printing-stub-generator.dir = tests/test-type_printing/stub-generator
+test-type_printing-stub-generator.threads = yes
+test-type_printing-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-type_printing-stubs tests-common
+test-type_printing-stub-generator.deps = str bigarray bytes integers
+test-type_printing-stub-generator: PROJECT=test-type_printing-stub-generator
+test-type_printing-stub-generator: $$(BEST_TARGET)
+
+test-type_printing-generated= \
+  tests/test-type_printing/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-type_printing/generated_struct_stubs.c
+
+test-type_printing-generated: $(test-type_printing-generated)
+
+tests/test-type_printing/generated_struct_bindings.ml: $(BUILDDIR)/test-type_printing-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-type_printing-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-type_printing/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-type_printing/generated_struct_stubs.c: $(BUILDDIR)/test-type_printing-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-value_printing-stubs.dir  = tests/test-value_printing/stubs
+test-value_printing-stubs.threads = yes
+test-value_printing-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-value_printing-stubs: PROJECT=test-value_printing-stubs
+test-value_printing-stubs: $$(LIB_TARGETS)
+
+test-value_printing-stub-generator.dir = tests/test-value_printing/stub-generator
+test-value_printing-stub-generator.threads = yes
+test-value_printing-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-value_printing-stubs tests-common
+test-value_printing-stub-generator.deps = str bigarray bytes integers
+test-value_printing-stub-generator: PROJECT=test-value_printing-stub-generator
+test-value_printing-stub-generator: $$(BEST_TARGET)
+
+test-value_printing.dir = tests/test-value_printing
+test-value_printing.threads = yes
+test-value_printing.deps = str bigarray oUnit bytes integers
+test-value_printing.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-value_printing-stubs
+test-value_printing.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-value_printing: PROJECT=test-value_printing
+test-value_printing: $$(BEST_TARGET)
+
+test-value_printing-generated= \
+  tests/test-value_printing/generated_bindings.ml \
+  tests/test-value_printing/generated_stubs.c
+
+test-value_printing-generated: $(test-value_printing-generated)
+
+tests/test-value_printing/generated_stubs.c: $(BUILDDIR)/test-value_printing-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-value_printing/generated_bindings.ml: $(BUILDDIR)/test-value_printing-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-complex-stubs.dir  = tests/test-complex/stubs
+test-complex-stubs.threads = yes
+test-complex-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-complex-stubs: PROJECT=test-complex-stubs
+test-complex-stubs: $$(LIB_TARGETS)
+
+test-complex-stub-generator.dir = tests/test-complex/stub-generator
+test-complex-stub-generator.threads = yes
+test-complex-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-complex-stubs tests-common
+test-complex-stub-generator.deps = str bigarray bytes integers
+test-complex-stub-generator: PROJECT=test-complex-stub-generator
+test-complex-stub-generator: $$(BEST_TARGET)
+
+test-complex.dir = tests/test-complex
+test-complex.threads = yes
+test-complex.deps = str bigarray oUnit bytes integers
+test-complex.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs tests-common test-complex-stubs
+test-complex.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-complex: PROJECT=test-complex
+test-complex: $$(BEST_TARGET)
+
+test-complex-generated= \
+  tests/test-complex/generated_bindings.ml \
+  tests/test-complex/generated_stubs.c
+
+test-complex-generated: $(test-complex-generated)
+
+tests/test-complex/generated_stubs.c: $(BUILDDIR)/test-complex-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-complex/generated_bindings.ml: $(BUILDDIR)/test-complex-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-bools-stubs.dir  = tests/test-bools/stubs
+test-bools-stubs.threads = yes
+test-bools-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-bools-stubs: PROJECT=test-bools-stubs
+test-bools-stubs: $$(LIB_TARGETS)
+
+test-bools-stub-generator.dir = tests/test-bools/stub-generator
+test-bools-stub-generator.threads = yes
+test-bools-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-bools-stubs tests-common
+test-bools-stub-generator.deps = str bigarray bytes integers
+test-bools-stub-generator: PROJECT=test-bools-stub-generator
+test-bools-stub-generator: $$(BEST_TARGET)
+
+test-bools.dir = tests/test-bools
+test-bools.threads = yes
+test-bools.deps = str bigarray oUnit bytes integers
+test-bools.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs tests-common test-bools-stubs
+test-bools.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-bools: PROJECT=test-bools
+test-bools: $$(BEST_TARGET)
+
+test-bools-generated= \
+  tests/test-bools/generated_bindings.ml \
+  tests/test-bools/generated_stubs.c
+
+test-bools-generated: $(test-bools-generated)
+
+tests/test-bools/generated_stubs.c: $(BUILDDIR)/test-bools-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-bools/generated_bindings.ml: $(BUILDDIR)/test-bools-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-callback_lifetime-stubs.dir  = tests/test-callback_lifetime/stubs
+test-callback_lifetime-stubs.threads = yes
+test-callback_lifetime-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-callback_lifetime-stubs: PROJECT=test-callback_lifetime-stubs
+test-callback_lifetime-stubs: $$(LIB_TARGETS)
+
+test-callback_lifetime-stub-generator.dir = tests/test-callback_lifetime/stub-generator
+test-callback_lifetime-stub-generator.threads = yes
+test-callback_lifetime-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-callback_lifetime-stubs tests-common
+test-callback_lifetime-stub-generator.deps = str bigarray bytes integers
+test-callback_lifetime-stub-generator: PROJECT=test-callback_lifetime-stub-generator
+test-callback_lifetime-stub-generator: $$(BEST_TARGET)
+
+test-callback_lifetime.dir = tests/test-callback_lifetime
+test-callback_lifetime.threads = yes
+test-callback_lifetime.deps = str bigarray oUnit bytes integers
+test-callback_lifetime.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-callback_lifetime-stubs tests-common
+test-callback_lifetime.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-callback_lifetime: PROJECT=test-callback_lifetime
+test-callback_lifetime: $$(BEST_TARGET)
+
+test-callback_lifetime-generated= \
+  tests/test-callback_lifetime/generated_bindings.ml \
+  tests/test-callback_lifetime/generated_stubs.c
+
+test-callback_lifetime-generated: $(test-callback_lifetime-generated)
+
+tests/test-callback_lifetime/generated_stubs.c: $(BUILDDIR)/test-callback_lifetime-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-callback_lifetime/generated_bindings.ml: $(BUILDDIR)/test-callback_lifetime-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-lifetime-stubs.dir  = tests/test-lifetime/stubs
+test-lifetime-stubs.threads = yes
+test-lifetime-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-lifetime-stubs: PROJECT=test-lifetime-stubs
+test-lifetime-stubs: $$(LIB_TARGETS)
+
+test-lifetime-stub-generator.dir = tests/test-lifetime/stub-generator
+test-lifetime-stub-generator.threads = yes
+test-lifetime-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-lifetime-stubs tests-common
+test-lifetime-stub-generator.deps = str bigarray bytes integers
+test-lifetime-stub-generator: PROJECT=test-lifetime-stub-generator
+test-lifetime-stub-generator: $$(BEST_TARGET)
+
+test-lifetime.dir = tests/test-lifetime
+test-lifetime.threads = yes
+test-lifetime.deps = str bigarray oUnit bytes integers
+test-lifetime.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-lifetime-stubs tests-common
+test-lifetime.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-lifetime: PROJECT=test-lifetime
+test-lifetime: $$(BEST_TARGET)
+
+test-lifetime-generated= \
+  tests/test-lifetime/generated_bindings.ml \
+  tests/test-lifetime/generated_stubs.c
+
+test-lifetime-generated: $(test-lifetime-generated)
+
+tests/test-lifetime/generated_stubs.c: $(BUILDDIR)/test-lifetime-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-lifetime/generated_bindings.ml: $(BUILDDIR)/test-lifetime-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-stubs.dir = tests/test-stubs
+test-stubs.threads = yes
+test-stubs.deps = str bigarray oUnit bytes integers
+test-stubs.subproject_deps = ctypes ctypes-foreign-base ctypes-foreign-threaded
+test-stubs: PROJECT=test-stubs
+test-stubs: $$(BEST_TARGET)
+
+test-bigarrays-stubs.dir  = tests/test-bigarrays/stubs
+test-bigarrays-stubs.threads = yes
+test-bigarrays-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-bigarrays-stubs: PROJECT=test-bigarrays-stubs
+test-bigarrays-stubs: $$(LIB_TARGETS)
+
+test-bigarrays-stub-generator.dir = tests/test-bigarrays/stub-generator
+test-bigarrays-stub-generator.threads = yes
+test-bigarrays-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-bigarrays-stubs tests-common
+test-bigarrays-stub-generator.deps = str bigarray bytes integers
+test-bigarrays-stub-generator: PROJECT=test-bigarrays-stub-generator
+test-bigarrays-stub-generator: $$(BEST_TARGET)
+
+test-bigarrays.dir = tests/test-bigarrays
+test-bigarrays.threads = yes
+test-bigarrays.deps = str bigarray oUnit bytes integers
+test-bigarrays.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-bigarrays-stubs
+test-bigarrays.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-bigarrays: PROJECT=test-bigarrays
+test-bigarrays: $$(BEST_TARGET)
+
+test-bigarrays-generated= \
+  tests/test-bigarrays/generated_bindings.ml \
+  tests/test-bigarrays/generated_stubs.c
+
+test-bigarrays-generated: $(test-bigarrays-generated)
+
+tests/test-bigarrays/generated_stubs.c: $(BUILDDIR)/test-bigarrays-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-bigarrays/generated_bindings.ml: $(BUILDDIR)/test-bigarrays-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-coercions-stubs.dir  = tests/test-coercions/stubs
+test-coercions-stubs.threads = yes
+test-coercions-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-coercions-stubs: PROJECT=test-coercions-stubs
+test-coercions-stubs: $$(LIB_TARGETS)
+
+test-coercions-stub-generator.dir = tests/test-coercions/stub-generator
+test-coercions-stub-generator.threads = yes
+test-coercions-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-coercions-stubs tests-common
+test-coercions-stub-generator.deps = str bigarray bytes integers
+test-coercions-stub-generator: PROJECT=test-coercions-stub-generator
+test-coercions-stub-generator: $$(BEST_TARGET)
+
+test-coercions.dir = tests/test-coercions
+test-coercions.threads = yes
+test-coercions.deps = str bigarray oUnit bytes integers
+test-coercions.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-coercions-stubs
+test-coercions.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-coercions: PROJECT=test-coercions
+test-coercions: $$(BEST_TARGET)
+
+test-coercions-generated= \
+  tests/test-coercions/generated_bindings.ml \
+  tests/test-coercions/generated_stubs.c
+
+test-coercions-generated: $(test-coercions-generated)
+
+tests/test-coercions/generated_stubs.c: $(BUILDDIR)/test-coercions-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-coercions/generated_bindings.ml: $(BUILDDIR)/test-coercions-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-roots.dir = tests/test-roots
+test-roots.threads = yes
+test-roots.deps = str bigarray oUnit bytes integers
+test-roots.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common
+test-roots.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-roots: PROJECT=test-roots
+test-roots: $$(BEST_TARGET)
+
+test-passing-ocaml-values-stubs.dir  = tests/test-passing-ocaml-values/stubs
+test-passing-ocaml-values-stubs.threads = yes
+test-passing-ocaml-values-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-passing-ocaml-values-stubs: PROJECT=test-passing-ocaml-values-stubs
+test-passing-ocaml-values-stubs: $$(LIB_TARGETS)
+
+test-passing-ocaml-values-stub-generator.dir = tests/test-passing-ocaml-values/stub-generator
+test-passing-ocaml-values-stub-generator.threads = yes
+test-passing-ocaml-values-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-passing-ocaml-values-stubs tests-common
+test-passing-ocaml-values-stub-generator.deps = str bigarray bytes integers
+test-passing-ocaml-values-stub-generator: PROJECT=test-passing-ocaml-values-stub-generator
+test-passing-ocaml-values-stub-generator: $$(BEST_TARGET)
+
+test-passing-ocaml-values.dir = tests/test-passing-ocaml-values
+test-passing-ocaml-values.threads = yes
+test-passing-ocaml-values.deps = str bigarray oUnit bytes integers
+test-passing-ocaml-values.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-passing-ocaml-values-stubs
+test-passing-ocaml-values.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-passing-ocaml-values: PROJECT=test-passing-ocaml-values
+test-passing-ocaml-values: $$(BEST_TARGET)
+
+test-passing-ocaml-values-generated= \
+  tests/test-passing-ocaml-values/generated_bindings.ml \
+  tests/test-passing-ocaml-values/generated_stubs.c
+
+test-passing-ocaml-values-generated: $(test-passing-ocaml-values-generated)
+
+tests/test-passing-ocaml-values/generated_stubs.c: $(BUILDDIR)/test-passing-ocaml-values-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-passing-ocaml-values/generated_bindings.ml: $(BUILDDIR)/test-passing-ocaml-values-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-lwt-jobs-stubs.dir  = tests/test-lwt-jobs/stubs
+test-lwt-jobs-stubs.threads = yes
+test-lwt-jobs-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-lwt-jobs-stubs: PROJECT=test-lwt-jobs-stubs
+test-lwt-jobs-stubs: $$(LIB_TARGETS)
+
+test-lwt-jobs-stub-generator.dir = tests/test-lwt-jobs/stub-generator
+test-lwt-jobs-stub-generator.threads = yes
+test-lwt-jobs-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-lwt-jobs-stubs tests-common
+test-lwt-jobs-stub-generator.deps = str bigarray bytes integers
+test-lwt-jobs-stub-generator: PROJECT=test-lwt-jobs-stub-generator
+test-lwt-jobs-stub-generator: $$(BEST_TARGET)
+
+test-lwt-jobs.dir = tests/test-lwt-jobs
+test-lwt-jobs.threads = yes
+test-lwt-jobs.deps = str bigarray oUnit bytes integers lwt.unix
+test-lwt-jobs.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-lwt-jobs-stubs
+test-lwt-jobs.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-lwt-jobs: PROJECT=test-lwt-jobs
+test-lwt-jobs: $$(BEST_TARGET)
+
+test-lwt-jobs-generated= \
+  tests/test-lwt-jobs/generated_bindings.ml \
+  tests/test-lwt-jobs/generated_stubs.c \
+  tests/test-lwt-jobs/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-lwt-jobs/generated_struct_stubs.c
+
+test-lwt-jobs-generated: $(test-lwt-jobs-generated)
+
+tests/test-lwt-jobs/generated_stubs.c: $(BUILDDIR)/test-lwt-jobs-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-lwt-jobs/generated_bindings.ml: $(BUILDDIR)/test-lwt-jobs-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-lwt-jobs/generated_struct_bindings.ml: $(BUILDDIR)/test-lwt-jobs-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-lwt-jobs-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-lwt-jobs/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-lwt-jobs/generated_struct_stubs.c: $(BUILDDIR)/test-lwt-jobs-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-lwt-preemptive-stubs.dir  = tests/test-lwt-preemptive/stubs
+test-lwt-preemptive-stubs.threads = yes
+test-lwt-preemptive-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-lwt-preemptive-stubs: PROJECT=test-lwt-preemptive-stubs
+test-lwt-preemptive-stubs: $$(LIB_TARGETS)
+
+test-lwt-preemptive-stub-generator.dir = tests/test-lwt-preemptive/stub-generator
+test-lwt-preemptive-stub-generator.threads = yes
+test-lwt-preemptive-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-lwt-preemptive-stubs tests-common
+test-lwt-preemptive-stub-generator.deps = str bigarray bytes integers
+test-lwt-preemptive-stub-generator: PROJECT=test-lwt-preemptive-stub-generator
+test-lwt-preemptive-stub-generator: $$(BEST_TARGET)
+
+test-lwt-preemptive.dir = tests/test-lwt-preemptive
+test-lwt-preemptive.threads = yes
+test-lwt-preemptive.deps = str bigarray oUnit bytes integers lwt.unix
+test-lwt-preemptive.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-lwt-preemptive-stubs
+test-lwt-preemptive.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-lwt-preemptive: PROJECT=test-lwt-preemptive
+test-lwt-preemptive: $$(BEST_TARGET)
+
+test-lwt-preemptive-generated= \
+  tests/test-lwt-preemptive/generated_bindings.ml \
+  tests/test-lwt-preemptive/generated_stubs.c \
+  tests/test-lwt-preemptive/generated_struct_bindings.ml \
+  $(BUILDDIR)/tests/test-lwt-preemptive/generated_struct_stubs.c
+
+test-lwt-preemptive-generated: $(test-lwt-preemptive-generated)
+
+tests/test-lwt-preemptive/generated_stubs.c: $(BUILDDIR)/test-lwt-preemptive-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-lwt-preemptive/generated_bindings.ml: $(BUILDDIR)/test-lwt-preemptive-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-lwt-preemptive/generated_struct_bindings.ml: $(BUILDDIR)/test-lwt-preemptive-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-lwt-preemptive-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-lwt-preemptive/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-lwt-preemptive/generated_struct_stubs.c: $(BUILDDIR)/test-lwt-preemptive-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-returning-errno-lwt-jobs-stubs.dir  = tests/test-returning-errno-lwt-jobs/stubs
+test-returning-errno-lwt-jobs-stubs.threads = yes
+test-returning-errno-lwt-jobs-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-returning-errno-lwt-jobs-stubs: PROJECT=test-returning-errno-lwt-jobs-stubs
+test-returning-errno-lwt-jobs-stubs: $$(LIB_TARGETS)
+
+test-returning-errno-lwt-jobs-stub-generator.dir = tests/test-returning-errno-lwt-jobs/stub-generator
+test-returning-errno-lwt-jobs-stub-generator.threads = yes
+test-returning-errno-lwt-jobs-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-returning-errno-lwt-jobs-stubs tests-common
+test-returning-errno-lwt-jobs-stub-generator.deps = str bigarray bytes integers
+test-returning-errno-lwt-jobs-stub-generator: PROJECT=test-returning-errno-lwt-jobs-stub-generator
+test-returning-errno-lwt-jobs-stub-generator: $$(BEST_TARGET)
+
+test-returning-errno-lwt-jobs.dir = tests/test-returning-errno-lwt-jobs
+test-returning-errno-lwt-jobs.threads = yes
+test-returning-errno-lwt-jobs.deps = str bigarray oUnit bytes integers lwt.unix
+test-returning-errno-lwt-jobs.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-returning-errno-lwt-jobs-stubs
+test-returning-errno-lwt-jobs.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-returning-errno-lwt-jobs: PROJECT=test-returning-errno-lwt-jobs
+test-returning-errno-lwt-jobs: $$(BEST_TARGET)
+
+test-returning-errno-lwt-jobs-generated= \
+  tests/test-returning-errno-lwt-jobs/generated_bindings.ml \
+  tests/test-returning-errno-lwt-jobs/generated_struct_bindings.ml \
+  tests/test-returning-errno-lwt-jobs/generated_stubs.c
+
+test-returning-errno-lwt-jobs-generated: $(test-returning-errno-lwt-jobs-generated)
+
+tests/test-returning-errno-lwt-jobs/generated_stubs.c: $(BUILDDIR)/test-returning-errno-lwt-jobs-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-returning-errno-lwt-jobs/generated_bindings.ml: $(BUILDDIR)/test-returning-errno-lwt-jobs-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-returning-errno-lwt-jobs/generated_struct_bindings.ml: $(BUILDDIR)/test-returning-errno-lwt-jobs-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-returning-errno-lwt-jobs-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-returning-errno-lwt-jobs/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-returning-errno-lwt-jobs/generated_struct_stubs.c: $(BUILDDIR)/test-returning-errno-lwt-jobs-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-returning-errno-lwt-preemptive-stubs.dir  = tests/test-returning-errno-lwt-preemptive/stubs
+test-returning-errno-lwt-preemptive-stubs.threads = yes
+test-returning-errno-lwt-preemptive-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-returning-errno-lwt-preemptive-stubs: PROJECT=test-returning-errno-lwt-preemptive-stubs
+test-returning-errno-lwt-preemptive-stubs: $$(LIB_TARGETS)
+
+test-returning-errno-lwt-preemptive-stub-generator.dir = tests/test-returning-errno-lwt-preemptive/stub-generator
+test-returning-errno-lwt-preemptive-stub-generator.threads = yes
+test-returning-errno-lwt-preemptive-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-returning-errno-lwt-preemptive-stubs tests-common
+test-returning-errno-lwt-preemptive-stub-generator.deps = str bigarray bytes integers
+test-returning-errno-lwt-preemptive-stub-generator: PROJECT=test-returning-errno-lwt-preemptive-stub-generator
+test-returning-errno-lwt-preemptive-stub-generator: $$(BEST_TARGET)
+
+test-returning-errno-lwt-preemptive.dir = tests/test-returning-errno-lwt-preemptive
+test-returning-errno-lwt-preemptive.threads = yes
+test-returning-errno-lwt-preemptive.deps = str bigarray oUnit bytes integers lwt.unix
+test-returning-errno-lwt-preemptive.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-returning-errno-lwt-preemptive-stubs
+test-returning-errno-lwt-preemptive.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-returning-errno-lwt-preemptive: PROJECT=test-returning-errno-lwt-preemptive
+test-returning-errno-lwt-preemptive: $$(BEST_TARGET)
+
+test-returning-errno-lwt-preemptive-generated= \
+  tests/test-returning-errno-lwt-preemptive/generated_bindings.ml \
+  tests/test-returning-errno-lwt-preemptive/generated_struct_bindings.ml \
+  tests/test-returning-errno-lwt-preemptive/generated_stubs.c
+
+test-returning-errno-lwt-preemptive-generated: $(test-returning-errno-lwt-preemptive-generated)
+
+tests/test-returning-errno-lwt-preemptive/generated_stubs.c: $(BUILDDIR)/test-returning-errno-lwt-preemptive-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-returning-errno-lwt-preemptive/generated_bindings.ml: $(BUILDDIR)/test-returning-errno-lwt-preemptive-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-returning-errno-lwt-preemptive/generated_struct_bindings.ml: $(BUILDDIR)/test-returning-errno-lwt-preemptive-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-returning-errno-lwt-preemptive-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-returning-errno-lwt-preemptive/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-returning-errno-lwt-preemptive/generated_struct_stubs.c: $(BUILDDIR)/test-returning-errno-lwt-preemptive-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+test-returning-errno-stubs.dir  = tests/test-returning-errno/stubs
+test-returning-errno-stubs.threads = yes
+test-returning-errno-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-returning-errno-stubs: PROJECT=test-returning-errno-stubs
+test-returning-errno-stubs: $$(LIB_TARGETS)
+
+test-returning-errno-stub-generator.dir = tests/test-returning-errno/stub-generator
+test-returning-errno-stub-generator.threads = yes
+test-returning-errno-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-returning-errno-stubs tests-common
+test-returning-errno-stub-generator.deps = str bigarray bytes integers
+test-returning-errno-stub-generator: PROJECT=test-returning-errno-stub-generator
+test-returning-errno-stub-generator: $$(BEST_TARGET)
+
+test-returning-errno.dir = tests/test-returning-errno
+test-returning-errno.threads = yes
+test-returning-errno.deps = str bigarray oUnit bytes integers
+test-returning-errno.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-returning-errno-stubs
+test-returning-errno.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-returning-errno: PROJECT=test-returning-errno
+test-returning-errno: $$(BEST_TARGET)
+
+test-returning-errno-generated= \
+  tests/test-returning-errno/generated_bindings.ml \
+  tests/test-returning-errno/generated_struct_bindings.ml \
+  tests/test-returning-errno/generated_stubs.c
+
+test-returning-errno-generated: $(test-returning-errno-generated)
+
+tests/test-returning-errno/generated_stubs.c: $(BUILDDIR)/test-returning-errno-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-returning-errno/generated_bindings.ml: $(BUILDDIR)/test-returning-errno-stub-generator.$(BEST)
+	$< --ml-file $@
+tests/test-returning-errno/generated_struct_bindings.ml: $(BUILDDIR)/test-returning-errno-ml-stub-generator.$(BEST)
+	$< > $@
+$(BUILDDIR)/test-returning-errno-ml-stub-generator.$(BEST): $(BUILDDIR)/tests/test-returning-errno/generated_struct_stubs.c
+	$(CC) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` $(CFLAGS) $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+$(BUILDDIR)/tests/test-returning-errno/generated_struct_stubs.c: $(BUILDDIR)/test-returning-errno-stub-generator.$(BEST)
+	$< --c-struct-file $@
+
+
+test-threads-stubs.dir  = tests/test-threads/stubs
+test-threads-stubs.threads = yes
+test-threads-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-threads-stubs: PROJECT=test-threads-stubs
+test-threads-stubs: $$(LIB_TARGETS)
+
+test-threads-stub-generator.dir = tests/test-threads/stub-generator
+test-threads-stub-generator.threads = yes
+test-threads-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-threads-stubs tests-common
+test-threads-stub-generator.deps = str bigarray bytes integers
+test-threads-stub-generator: PROJECT=test-threads-stub-generator
+test-threads-stub-generator: $$(BEST_TARGET)
+
+test-threads.dir = tests/test-threads
+test-threads.threads = yes
+test-threads.deps = str bigarray oUnit bytes integers
+test-threads.subproject_deps = ctypes ctypes-foreign-base \
+   ctypes-foreign-threaded cstubs tests-common test-threads-stubs
+test-threads.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-threads: PROJECT=test-threads
+test-threads: $$(BEST_TARGET)
+
+test-threads-generated= \
+  tests/test-threads/generated_bindings.ml \
+  tests/test-threads/generated_stubs.c
+
+test-threads-generated: $(test-threads-generated)
+
+tests/test-threads/generated_stubs.c: $(BUILDDIR)/test-threads-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-threads/generated_bindings.ml: $(BUILDDIR)/test-threads-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-closure-type-promotion-stubs.dir  = tests/test-closure-type-promotion/stubs
+test-closure-type-promotion-stubs.threads = yes
+test-closure-type-promotion-stubs.subproject_deps = ctypes \
+   ctypes-foreign-base ctypes-foreign-threaded tests-common
+test-closure-type-promotion-stubs: PROJECT=test-closure-type-promotion-stubs
+test-closure-type-promotion-stubs: $$(LIB_TARGETS)
+
+test-closure-type-promotion-stub-generator.dir = tests/test-closure-type-promotion/stub-generator
+test-closure-type-promotion-stub-generator.threads = yes
+test-closure-type-promotion-stub-generator.subproject_deps = ctypes cstubs \
+     ctypes-foreign-base ctypes-foreign-threaded test-closure-type-promotion-stubs tests-common
+test-closure-type-promotion-stub-generator.deps = str bigarray bytes integers
+test-closure-type-promotion-stub-generator: PROJECT=test-closure-type-promotion-stub-generator
+test-closure-type-promotion-stub-generator: $$(BEST_TARGET)
+
+test-closure-type-promotion.dir = tests/test-closure-type-promotion
+test-closure-type-promotion.threads = yes
+test-closure-type-promotion.deps = str bigarray oUnit bytes integers
+test-closure-type-promotion.subproject_deps = ctypes ctypes-foreign-base \
+  ctypes-foreign-threaded cstubs test-closure-type-promotion-stubs tests-common
+test-closure-type-promotion.link_flags = -L$(BUILDDIR)/clib -ltest_functions
+test-closure-type-promotion: PROJECT=test-closure-type-promotion
+test-closure-type-promotion: $$(BEST_TARGET)
+
+test-closure-type-promotion-generated= \
+  tests/test-closure-type-promotion/generated_bindings.ml \
+  tests/test-closure-type-promotion/generated_stubs.c
+
+test-closure-type-promotion-generated: $(test-closure-type-promotion-generated)
+
+tests/test-closure-type-promotion/generated_stubs.c: $(BUILDDIR)/test-closure-type-promotion-stub-generator.$(BEST)
+	$< --c-file $@
+tests/test-closure-type-promotion/generated_bindings.ml: $(BUILDDIR)/test-closure-type-promotion-stub-generator.$(BEST)
+	$< --ml-file $@
+
+test-ldouble.dir = tests/test-ldouble
+test-ldouble.threads = yes
+test-ldouble.deps = str bigarray oUnit bytes integers
+test-ldouble.subproject_deps = ctypes 
+test-ldouble: PROJECT=test-ldouble
+test-ldouble: $$(BEST_TARGET)
+
+TESTS =
+TESTS += test-raw
+TESTS += test-pointers-stubs test-pointers-stub-generator test-pointers-generated test-pointers
+TESTS += test-integers-stubs test-integers-stub-generator test-integers-generated test-integers
+TESTS += test-variadic-stubs test-variadic-stub-generator test-variadic-generated test-variadic
+TESTS += test-builtins-stubs test-builtins-stub-generator test-builtins-generated test-builtins
+TESTS += test-macros-stubs test-macros-stub-generator test-macros-generated test-macros
+TESTS += test-higher_order-stubs test-higher_order-stub-generator test-higher_order-generated test-higher_order
+TESTS += test-enums-struct-stubs test-enums-struct-stub-generator test-enums-structs-generated test-enums-stubs test-enums-stub-generator test-enums-generated test-enums
+TESTS += test-structs-stubs test-structs-stub-generator test-structs-generated test-structs
+TESTS += test-constants-stubs test-constants-stub-generator test-constants-generated test-constants
+TESTS += test-finalisers
+TESTS += test-cstdlib-stubs test-cstdlib-stub-generator test-cstdlib-generated test-cstdlib
+TESTS += test-sizeof
+TESTS += test-foreign_values-stubs test-foreign_values-stub-generator test-foreign_values-generated test-foreign_values
+TESTS += test-unions-stubs test-unions-stub-generator test-unions-generated test-unions
+TESTS += test-custom_ops
+TESTS += test-arrays-stubs test-arrays-stub-generator test-arrays-generated test-arrays
+TESTS += test-foreign-errno
+TESTS += test-passable
+TESTS += test-alignment
+TESTS += test-views-stubs test-views-stub-generator test-views-generated test-views
+TESTS += test-oo_style-stubs test-oo_style-stub-generator test-oo_style-generated test-oo_style
+TESTS += test-marshal
+TESTS += test-type_printing-stubs test-type_printing-stub-generator test-type_printing-generated test-type_printing
+TESTS += test-value_printing-stubs test-value_printing-stub-generator test-value_printing-generated test-value_printing
+TESTS += test-complex-stubs test-complex-stub-generator test-complex-generated test-complex
+TESTS += test-bools-stubs test-bools-stub-generator test-bools-generated test-bools
+TESTS += test-callback_lifetime-stubs test-callback_lifetime-stub-generator test-callback_lifetime-generated test-callback_lifetime
+TESTS += test-lifetime-stubs test-lifetime-stub-generator test-lifetime-generated test-lifetime
+TESTS += test-stubs
+TESTS += test-bigarrays-stubs test-bigarrays-stub-generator test-bigarrays-generated test-bigarrays
+TESTS += test-coercions-stubs test-coercions-stub-generator test-coercions-generated test-coercions
+TESTS += test-roots
+TESTS += test-passing-ocaml-values-stubs test-passing-ocaml-values-stub-generator test-passing-ocaml-values-generated test-passing-ocaml-values
+TESTS += test-lwt-jobs-stubs test-lwt-jobs-stub-generator test-lwt-jobs-generated test-lwt-jobs
+TESTS += test-lwt-preemptive-stubs test-lwt-preemptive-stub-generator test-lwt-preemptive-generated test-lwt-preemptive
+TESTS += test-returning-errno-lwt-jobs-stubs test-returning-errno-lwt-jobs-stub-generator test-returning-errno-lwt-jobs-generated test-returning-errno-lwt-jobs
+TESTS += test-returning-errno-lwt-preemptive-stubs test-returning-errno-lwt-preemptive-stub-generator test-returning-errno-lwt-preemptive-generated test-returning-errno-lwt-preemptive
+TESTS += test-returning-errno-stubs test-returning-errno-stub-generator test-returning-errno-generated test-returning-errno
+TESTS += test-closure-type-promotion-stubs test-closure-type-promotion-stub-generator test-closure-type-promotion-generated test-closure-type-promotion
+TESTS += test-threads-stubs test-threads-stub-generator test-threads-generated test-threads
+TESTS += test-ldouble
+
+ifneq (,$(filter mingw%,$(OSYSTEM)))
+WINLDFLAGS=-Wl,--out-implib,libtest_functions.dll.a
+LDFLAGS+=-static-libgcc
+endif
+
+testlib: $(BUILDDIR)/clib/libtest_functions$(EXTDLL)
+$(BUILDDIR)/clib/libtest_functions$(EXTDLL): $(BUILDDIR)/clib/test_functions.o
+	$(CC) -shared $(LDFLAGS) $(WINLDFLAGS) -o $@ $^
+ifneq (,$(filter mingw%,$(OSYSTEM)))
+	cp $@ libtest_functions.dll.a $(BUILDDIR)
+endif
+
+$(BUILDDIR)/clib/test_functions.o: tests/clib/test_functions.c
+	@mkdir -p $(@D)
+	$(CC) -c $(CFLAGS) -I `$(OCAMLFIND) ocamlc -where | sed 's|\r$$||'` -o $@ $^
+tests/clib/test_functions.c: tests/clib/test_functions.h
+
+.PHONY: test testlib $(TESTS) tests-common clean-tests
+test: build testlib tests-common $(TESTS) \
+         $(filter-out %-stubs,\
+         $(filter-out %-stub-generator,\
+         $(filter-out %-generated,\
+           $(TESTS:%=run-%))))
+
+TESTS_GENERATED=$(foreach test,$(filter %-generated,$(TESTS)),$($(test)))
+
+clean-tests:
+	rm -f $(TESTS_GENERATED)
+
+run-%:	$*
+	@echo running $*
+	@cd $(BUILDDIR) && CAML_LD_LIBRARY_PATH=. LD_LIBRARY_PATH=clib DYLD_LIBRARY_PATH=clib ./$*.$(BEST) -runner sequential
+

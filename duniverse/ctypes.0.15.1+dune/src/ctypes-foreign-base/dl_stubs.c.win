@@ -1,0 +1,281 @@
+/*
+ * This file is distributed under the terms of the MIT License.
+ * See the file LICENSE for details.
+ */
+
+/* for compatiblity with Windows Vista and XP */
+#define PSAPI_VERSION 1
+#include <windows.h>
+#include <psapi.h>
+
+#include <caml/mlvalues.h>
+#include <caml/memory.h>
+#include <caml/alloc.h>
+
+#define STUB_ERROR_UNKNOWN (Val_long(0))
+#define STUB_ERROR_NOMEM (Val_long(1))
+#define STUB_TAG_ERROR 0
+
+static value
+get_tagged_error_msg(DWORD ecode)
+{
+  CAMLparam0();
+  CAMLlocal1(msg);
+  value ret=STUB_ERROR_UNKNOWN;
+  if ( ecode ){
+    char buf[512];
+    DWORD len ;
+    len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+                        NULL,
+                        ecode,
+                        MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+                        buf,
+                        sizeof(buf),
+                        NULL);
+    if (len){
+      msg=caml_copy_string(buf);
+      ret=caml_alloc_small(1,STUB_TAG_ERROR);
+      Field(ret,0)=msg;
+    }
+  }
+  CAMLreturn(ret);
+}
+
+static value
+utf8_to_wstring(value utf8string)
+{
+  CAMLparam1(utf8string);
+  value ret;
+  int n;
+  WCHAR *result;
+  n = MultiByteToWideChar(CP_UTF8,0,String_val(utf8string),-1, NULL,0);
+  if (!n){
+    ret=Val_unit;
+    goto endp;
+  }
+  ret = caml_alloc_string(n * sizeof(*result));
+  result = (WCHAR *)String_val(ret);
+  if ( n != MultiByteToWideChar(CP_UTF8,0,String_val(utf8string),-1,result,n) ){
+    ret = Val_unit;
+  }
+endp:
+  CAMLreturn(ret);
+}
+
+
+/*
+  In order to get a list of all used dlls, we can use the following approaches:
+  - EnumProcessModules (psapi.dll on older windows versions)
+  - RtlQueryProcessDebugInformation (no documented by microsoft, seems to be
+     slower than EnumProcessModules)
+  - CreateToolhelp32Snapshot (even slower,
+     see http://securityxploded.com/enumheaps.php)
+  - using NtQueryInformationProcess (low level and fiddly)
+ details:
+ https://sites.google.com/site/ericuday/EICAR2008_UserMode_Memory_Scanning_3.doc
+ (Eric Uday Kumar: User-mode memory scanning on 32-bit & 64-bit windows)
+*/
+
+/*
+  integer:
+    0: unknown error
+    1: nomem
+    2: enoent
+  blocks of size 1:
+    0: error message
+    1: success handle
+*/
+value
+ctypes_win32_dlsym_rtld_default(value needle)
+{
+  CAMLparam1(needle);
+  CAMLlocal2(ret,tmp);
+  HMODULE hmodules[128];
+  HMODULE *r_modules = hmodules;
+  HANDLE proc = NULL;
+  DWORD bytes_hmodules;
+  DWORD bytes_hmodules_real;
+  DWORD i;
+  proc = OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                      FALSE, GetCurrentProcessId() );
+  if ( !proc ){
+    ret=get_tagged_error_msg(GetLastError());
+    goto endp;
+  }
+  if( ! EnumProcessModules(proc, r_modules, sizeof(hmodules), &bytes_hmodules)){
+    DWORD ec = GetLastError();
+    CloseHandle(proc);
+    ret=get_tagged_error_msg(ec);
+    goto endp;
+  }
+  bytes_hmodules_real = bytes_hmodules;
+  if ( bytes_hmodules > sizeof(hmodules) ){
+    r_modules=malloc(bytes_hmodules);
+    if ( !r_modules ){
+      ret=STUB_ERROR_NOMEM;
+      CloseHandle(proc);
+      goto endp;
+    }
+    if(!EnumProcessModules(proc,
+                           r_modules,
+                           bytes_hmodules,
+                           &bytes_hmodules_real)){
+      DWORD ec = GetLastError();
+      free(r_modules);
+      CloseHandle(proc);
+      ret=get_tagged_error_msg(ec);
+      goto endp;
+    }
+    bytes_hmodules_real =
+      bytes_hmodules < bytes_hmodules_real ?
+      bytes_hmodules : bytes_hmodules_real;
+  }
+  for ( i = 0; i < (bytes_hmodules_real / sizeof(HMODULE)); i++ )
+  {
+    FARPROC result=GetProcAddress(r_modules[i],String_val(needle));
+    if ( result ){
+      if ( r_modules != hmodules ){
+        free(r_modules);
+      }
+      CloseHandle(proc);
+      tmp=caml_copy_nativeint((intnat)result);
+      ret=caml_alloc_small(1,1);
+      Field(ret,0)=tmp;
+      goto endp;
+    }
+  }
+  ret=Val_long(2); /* enoent */
+  CloseHandle(proc);
+  if ( r_modules != hmodules ){
+    free(r_modules);
+  }
+endp:
+  CAMLreturn(ret);
+}
+
+/*
+  integer:
+    0: unknown error
+    1: nomem
+  block of size one:
+    0: error message
+    1: success handle
+*/
+value
+ctypes_win32_dlsym(value handle,value sym)
+{
+  CAMLparam2(handle,sym);
+  CAMLlocal2(ret,tmp);
+  PROC p = GetProcAddress((HMODULE)Nativeint_val(handle), String_val(sym));
+  if ( !p ){
+    ret=get_tagged_error_msg(GetLastError());
+  }
+  else {
+    tmp=caml_copy_nativeint((intnat)p);
+    ret=caml_alloc_small(1,1);
+    Field(ret,0)=tmp;
+  }
+  CAMLreturn(ret);
+}
+
+#define Val_none Val_long(0)
+#define Some_val(v) Field(v, 0)
+
+/*
+  integer:
+    0: unknown error
+    1: nomem
+    2: not loaded
+  block of size one:
+    0: error msg;
+    1: handle;
+*/
+value
+ctypes_win32_dlopen(value filename, value flags)
+{
+  CAMLparam1(filename);
+  CAMLlocal2(ret,tmp);
+  if ( filename == Val_none ){
+    HMODULE p = GetModuleHandle(NULL);
+    if ( !p ){
+      ret=get_tagged_error_msg(GetLastError());
+    }
+    else {
+      tmp = caml_copy_nativeint((intnat)p);
+      ret=caml_alloc_small(1,1);
+      Field(ret,0)=tmp;
+    }
+  }
+  else {
+    intnat iflags = Long_val(flags);
+    HMODULE p;
+    UINT e_mode;
+    DWORD ec;
+
+    filename=utf8_to_wstring(Some_val(filename));
+    if ( filename == Val_unit ){
+      tmp=caml_copy_string("invalid filename");
+      ret=caml_alloc_small(1,STUB_TAG_ERROR);
+      Field(ret,0)=tmp;
+      goto endp;
+    }
+    if ( iflags & 1 ){ /* RTLD_NOLOAD */
+      p= GetModuleHandleW((WCHAR *)String_val(filename));
+      if ( !p ){
+        ret=Val_long(2);
+        goto endp;
+      }
+      /* Note: If GetModuleHandle succeeds, we still need to
+         call LoadLibrary in order to increase the reference count
+         for the module. */
+    }
+    /* allocations first, so we are not responsible for not
+       decreasing the reference count, if we are out of
+       memory or another thread does something strange */
+    tmp = caml_copy_nativeint(0);
+    ret = caml_alloc_small(1,1);
+    Field(ret,0)=tmp;
+    /* some windows version show a message box without this */
+    e_mode = SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOOPENFILEERRORBOX);
+    p=LoadLibraryW((WCHAR *)String_val(filename));
+    if ( !p ){
+      ec = GetLastError();
+    }
+    SetErrorMode(e_mode); /* restores the previous state */
+    if ( !p ){
+      ret=get_tagged_error_msg(ec);
+      goto endp;
+    }
+    *((intnat *)Data_custom_val(tmp))=(intnat)p;
+    if (iflags & 2 ){ /* RTLD_NODELETE */
+      GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_PIN,
+                         (WCHAR *)String_val(filename),
+                         &p);
+    }
+  }
+endp:
+  CAMLreturn(ret);
+}
+
+/*
+  integer:
+    0: unknown error
+    1: nomem
+    2: ok
+  block of size one:
+    0: error msg
+*/
+value
+ctypes_win32_dlclose(value ohandle)
+{
+  CAMLparam1(ohandle);
+  CAMLlocal1(ret);
+  ret= Val_long(2);
+  HMODULE handle = (HMODULE) Nativeint_val(ohandle);
+  if (handle && handle != GetModuleHandle(NULL)){
+    if (!FreeLibrary(handle)){
+      ret=get_tagged_error_msg(GetLastError());
+    }
+  }
+  CAMLreturn(ret);
+}

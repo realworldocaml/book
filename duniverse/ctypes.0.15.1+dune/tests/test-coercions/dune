@@ -1,0 +1,4 @@
+(test
+ (name test_coercions)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_coercionss_stubs test_coercionss_bindings tests_common))

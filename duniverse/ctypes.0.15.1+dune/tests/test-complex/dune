@@ -1,0 +1,4 @@
+(test
+ (name test_complex)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_complexs_stubs test_complexs_bindings tests_common))

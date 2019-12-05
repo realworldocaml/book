@@ -1,0 +1,3 @@
+(library
+ (name date_stubs)
+ (libraries ctypes))

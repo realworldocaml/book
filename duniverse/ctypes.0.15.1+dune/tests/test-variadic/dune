@@ -1,0 +1,4 @@
+(test
+ (name test_variadic)
+ (libraries oUnit ctypes integers test_variadic_stubs test_variadic_bindings
+   tests_common))

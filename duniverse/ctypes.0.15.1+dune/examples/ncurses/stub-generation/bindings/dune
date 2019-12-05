@@ -1,0 +1,3 @@
+(library
+ (name ncurses_bindings)
+ (libraries ctypes))
