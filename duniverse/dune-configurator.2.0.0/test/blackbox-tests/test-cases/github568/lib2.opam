@@ -1,0 +1,6 @@
+opam-version: "1.2"
+name: "lib2"
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs]
+]

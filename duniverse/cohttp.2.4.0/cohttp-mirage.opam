@@ -1,0 +1,39 @@
+opam-version: "2.0"
+maintainer: "anil@recoil.org"
+authors: ["Anil Madhavapeddy" "Thomas Gazagnaire"]
+license: "ISC"
+tags: ["org:mirage" "org:xapi-project"]
+homepage: "https://github.com/mirage/ocaml-cohttp"
+doc: "https://mirage.github.io/ocaml-cohttp/"
+bug-reports: "https://github.com/mirage/ocaml-cohttp/issues"
+synopsis: "CoHTTP implementation for the MirageOS unikernel"
+description: """
+This HTTP implementation uses the Cohttp portable implementaiton
+along with the Lwt threading library in order to provide a
+`Cohttp_mirage` functor that can be used in MirageOS unikernels
+to build very small and efficient HTTP clients and servers
+without having a hard dependency on an underlying operating
+system.
+
+Please see <https://mirage.io> for a self-hosted explanation
+and instructions on how to use this library."""
+depends: [
+  "ocaml" {>= "4.05.0"}
+  "dune" {>= "1.1.0"}
+  "mirage-flow" {>= "2.0.0"}
+  "mirage-channel" {>= "4.0.0"}
+  "conduit" {>= "2.0.2"}
+  "conduit-mirage" {>= "2.0.2"}
+  "mirage-kv" {>= "3.0.0"}
+  "lwt" {>= "2.4.3"}
+  "cohttp"
+  "cohttp-lwt"
+  "astring"
+  "magic-mime"
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/mirage/ocaml-cohttp.git"

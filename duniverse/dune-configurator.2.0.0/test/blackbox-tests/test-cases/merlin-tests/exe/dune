@@ -1,0 +1,4 @@
+(executable
+ (name x)
+ (preprocess (action (run pp/pp.exe %{input-file})))
+ (libraries foo))

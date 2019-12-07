@@ -1,0 +1,46 @@
+opam-version: "2.0"
+maintainer: "anil@recoil.org"
+authors: ["Anil Madhavapeddy" "Thomas Leonard" "Thomas Gazagnaire"]
+license: "ISC"
+tags: "org:mirage"
+homepage: "https://github.com/mirage/ocaml-conduit"
+bug-reports: "https://github.com/mirage/ocaml-conduit/issues"
+depends: [
+  "ocaml" {>= "4.03.0"}
+  "dune"
+  "ppx_sexp_conv" {>= "v0.9.0"}
+  "sexplib"
+  "cstruct" {>= "3.0.0"}
+  "mirage-stack" {>= "2.0.0"}
+  "mirage-clock" {>= "3.0.0"}
+  "mirage-flow" {>= "2.0.0"}
+  "mirage-flow-combinators" {>= "2.0.0"}
+  "mirage-random" {>= "2.0.0"}
+  "dns-client" {>= "4.1.0"}
+  "conduit-lwt"
+  "vchan" {>= "5.0.0"}
+  "xenstore"
+  "tls" {>= "0.8.0"}
+  "tls-mirage"
+  "ipaddr" {>= "3.0.0"}
+  "ipaddr-sexp"
+
+  #these are required for tls.mirage, which conduit-mirage depends on
+  "mirage-kv" {>= "3.0.0"}
+  "mirage-clock" {>= "3.0.0"}
+  "ptime"
+]
+conflicts: [
+  "mirage-conduit"
+]
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
+]
+synopsis: "A network connection establishment library for MirageOS"
+dev-repo: "git+https://github.com/dune-universe/ocaml-conduit.git"
+url {
+  src: "git+https://github.com/dune-universe/ocaml-conduit.git#duniverse-master"
+}

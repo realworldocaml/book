@@ -1,0 +1,6 @@
+#7 "test-case.md"
+let msg0 = "I should be in the .ml file!"
+;;
+#13 "test-case.md"
+let msg1 = "Me too!"
+;;

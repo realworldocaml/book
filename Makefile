@@ -5,7 +5,7 @@ all:
 	@echo The site and the pdf have been generated in _build/default/static/
 
 vendor:
-	duniverse init rwo `cat pkgs` --pin mdx,https://github.com/Julow/mdx.git,duniverse_mode
+	duniverse init rwo `cat book-pkgs` --pin mdx,https://github.com/Julow/mdx.git,duniverse_mode
 
 test:
 	dune runtest

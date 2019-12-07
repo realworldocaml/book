@@ -1,0 +1,820 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+ "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+    <title>Failing tests, ocp-indent version 1.8.1+2 (2019-10-21)</title>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <style>
+      TABLE { border-collapse: collapse; border-spacing: 0px; margin: auto; }
+      H2 { margin-top: 5ex; text-align: center; padding: 1ex;
+           background-color: orange; }
+      TR,TD,PRE { padding: 0; margin: 0; }
+      PRE { font-family: mono; }
+      TD.linenum { vertical-align: top; font-family: mono;
+                   padding-right:2px; text-align: right }
+      TD.correct { background-color: #EEE; border: 1px solid white; }
+      TD.different { background-color: orange; border: 1px solid white; }
+    </style>
+</head>
+<body>
+<h1>Failing tests, ocp-indent version 1.8.1+2 (2019-10-21)</h1>
+<div>
+<h2>Differences in escaped-nl.ml.ref</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>let s1 = "No field 'install', but a field 'remove': install instructions \</pre></td><td class="correct"><pre>let s1 = "No field 'install', but a field 'remove': install instructions \</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>          probably part of 'build'. Use the 'install' field or a .install \</pre></td><td class="correct"><pre>          probably part of 'build'. Use the 'install' field or a .install \</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>          file"</pre></td><td class="correct"><pre>          file"</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>  cond 40 `Warning</pre></td><td class="correct"><pre>  cond 40 `Warning</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>    "Package uses flags that aren't recognised by earlier versions in \</pre></td><td class="correct"><pre>    "Package uses flags that aren't recognised by earlier versions in \</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>     OPAM 1.2 branch. At the moment, you should use a tag \"flags:foo\" \</pre></td><td class="correct"><pre>     OPAM 1.2 branch. At the moment, you should use a tag \"flags:foo\" \</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>     instead for compatibility"</pre></td><td class="correct"><pre>     instead for compatibility"</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>    ~detail:alpha_flags</pre></td><td class="correct"><pre>    ~detail:alpha_flags</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>    (alpha_flags <> [])</pre></td><td class="correct"><pre>    (alpha_flags <> [])</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>let s2 = "bla bla</pre></td><td class="correct"><pre>let s2 = "bla bla</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre> bli bli \</pre></td><td class="correct"><pre> bli bli \</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>          blo"</pre></td><td class="correct"><pre>          blo"</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>let s3 = "\</pre></td><td class="correct"><pre>let s3 = "\</pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre>"</pre></td><td class="correct"><pre>"</pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre>let s4 = " \</pre></td><td class="correct"><pre>let s4 = " \</pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre>         "</pre></td><td class="correct"><pre>         "</pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre>let s5 = "  \</pre></td><td class="correct"><pre>let s5 = "  \</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre>          \</pre></td><td class="correct"><pre>          \</pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>         "</pre></td><td class="correct"><pre>         "</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">26</td><td class="correct"><pre>let s6 = "</pre></td><td class="correct"><pre>let s6 = "</pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre>"</pre></td><td class="correct"><pre>"</pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>let s7 = "  </pre></td><td class="correct"><pre>let s7 = "  </pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre>"</pre></td><td class="correct"><pre>"</pre></td></tr>
+<tr><td class="linenum">31</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre>let c1 = '</pre></td><td class="correct"><pre>let c1 = '</pre></td></tr>
+<tr><td class="linenum">33</td><td class="different"><pre>'</pre></td><td class="different"><pre>···········'</pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>let x1 = f x '</pre></td><td class="correct"><pre>let x1 = f x '</pre></td></tr>
+<tr><td class="linenum">36</td><td class="different"><pre>'·y</pre></td><td class="different"><pre>···············'·y</pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre>    z</pre></td><td class="correct"><pre>    z</pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">39</td><td class="correct"><pre>let zz = "\</pre></td><td class="correct"><pre>let zz = "\</pre></td></tr>
+<tr><td class="linenum">40</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre>s \</pre></td><td class="correct"><pre>s \</pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre> \</pre></td><td class="correct"><pre> \</pre></td></tr>
+<tr><td class="linenum">43</td><td class="correct"><pre> "</pre></td><td class="correct"><pre> "</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-args.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  foo.bar <-</pre></td><td class="correct"><pre>  foo.bar <-</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>    f x</pre></td><td class="correct"><pre>    f x</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre>      y z</pre></td><td class="correct"><pre>      y z</pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>let should_check_can_sell_and_marking regulatory_regime =</pre></td><td class="correct"><pre>let should_check_can_sell_and_marking regulatory_regime =</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>  match z with</pre></td><td class="correct"><pre>  match z with</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>  | `foo</pre></td><td class="correct"><pre>  | `foo</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>    -> some_function</pre></td><td class="correct"><pre>    -> some_function</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>         argument</pre></td><td class="correct"><pre>         argument</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>(* The above typically occurs in a multi-pattern match clause, so the clause</pre></td><td class="correct"><pre>(* The above typically occurs in a multi-pattern match clause, so the clause</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>   expression is on a line by itself.  This is the more typical way a long</pre></td><td class="correct"><pre>   expression is on a line by itself.  This is the more typical way a long</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>   single-pattern match clause would be written: *)</pre></td><td class="correct"><pre>   single-pattern match clause would be written: *)</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>let should_check_can_sell_and_marking regulatory_regime =</pre></td><td class="correct"><pre>let should_check_can_sell_and_marking regulatory_regime =</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>  match z with</pre></td><td class="correct"><pre>  match z with</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>  | `foo -></pre></td><td class="correct"><pre>  | `foo -></pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>    some_function</pre></td><td class="correct"><pre>    some_function</pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre>      argument</pre></td><td class="correct"><pre>      argument</pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre>let f = fun x -></pre></td><td class="correct"><pre>let f = fun x -></pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre>  ghi</pre></td><td class="correct"><pre>  ghi</pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre>    x</pre></td><td class="correct"><pre>    x</pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre>(* common *)</pre></td><td class="correct"><pre>(* common *)</pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>  try x with</pre></td><td class="correct"><pre>  try x with</pre></td></tr>
+<tr><td class="linenum">26</td><td class="correct"><pre>  | a -> b</pre></td><td class="correct"><pre>  | a -> b</pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre>  | c -> d</pre></td><td class="correct"><pre>  | c -> d</pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre>let x = try x with</pre></td><td class="correct"><pre>let x = try x with</pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>  | a -> b</pre></td><td class="correct"><pre>  | a -> b</pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre>  | c -> d</pre></td><td class="correct"><pre>  | c -> d</pre></td></tr>
+<tr><td class="linenum">31</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre>  try x</pre></td><td class="correct"><pre>  try x</pre></td></tr>
+<tr><td class="linenum">33</td><td class="correct"><pre>  with</pre></td><td class="correct"><pre>  with</pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre>  | a -> b</pre></td><td class="correct"><pre>  | a -> b</pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>  | c -> d</pre></td><td class="correct"><pre>  | c -> d</pre></td></tr>
+<tr><td class="linenum">36</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre>let z =</pre></td><td class="correct"><pre>let z =</pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre>  some_function</pre></td><td class="correct"><pre>  some_function</pre></td></tr>
+<tr><td class="linenum">39</td><td class="correct"><pre>    argument</pre></td><td class="correct"><pre>    argument</pre></td></tr>
+<tr><td class="linenum">40</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">43</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">44</td><td class="correct"><pre>  f a b ~c:c</pre></td><td class="correct"><pre>  f a b ~c:c</pre></td></tr>
+<tr><td class="linenum">45</td><td class="correct"><pre>    d</pre></td><td class="correct"><pre>    d</pre></td></tr>
+<tr><td class="linenum">46</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">47</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">48</td><td class="correct"><pre>  f a b ~c:1.</pre></td><td class="correct"><pre>  f a b ~c:1.</pre></td></tr>
+<tr><td class="linenum">49</td><td class="correct"><pre>    d</pre></td><td class="correct"><pre>    d</pre></td></tr>
+<tr><td class="linenum">50</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">51</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">52</td><td class="correct"><pre>  My_module.f a b ~c:c</pre></td><td class="correct"><pre>  My_module.f a b ~c:c</pre></td></tr>
+<tr><td class="linenum">53</td><td class="correct"><pre>    d</pre></td><td class="correct"><pre>    d</pre></td></tr>
+<tr><td class="linenum">54</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">55</td><td class="correct"><pre>(* This last case is where Tuareg is inconsistent with the others. *)</pre></td><td class="correct"><pre>(* This last case is where Tuareg is inconsistent with the others. *)</pre></td></tr>
+<tr><td class="linenum">56</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">57</td><td class="correct"><pre>  My_module.f a b ~c:1.</pre></td><td class="correct"><pre>  My_module.f a b ~c:1.</pre></td></tr>
+<tr><td class="linenum">58</td><td class="correct"><pre>    d</pre></td><td class="correct"><pre>    d</pre></td></tr>
+<tr><td class="linenum">59</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">60</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">61</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">62</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">63</td><td class="correct"><pre>  messages :=</pre></td><td class="correct"><pre>  messages :=</pre></td></tr>
+<tr><td class="linenum">64</td><td class="correct"><pre>    Message_store.create (Session_id.of_string "")</pre></td><td class="correct"><pre>    Message_store.create (Session_id.of_string "")</pre></td></tr>
+<tr><td class="linenum">65</td><td class="correct"><pre>      (* Tuareg indents these lines too far to the left. *)</pre></td><td class="correct"><pre>      (* Tuareg indents these lines too far to the left. *)</pre></td></tr>
+<tr><td class="linenum">66</td><td class="correct"><pre>      "herd-retransmitter"</pre></td><td class="correct"><pre>      "herd-retransmitter"</pre></td></tr>
+<tr><td class="linenum">67</td><td class="correct"><pre>      Message_store.Message_size.Byte</pre></td><td class="correct"><pre>      Message_store.Message_size.Byte</pre></td></tr>
+<tr><td class="linenum">68</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">69</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">70</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">71</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">72</td><td class="correct"><pre>  raise (Bug ("foo"</pre></td><td class="correct"><pre>  raise (Bug ("foo"</pre></td></tr>
+<tr><td class="linenum">73</td><td class="correct"><pre>              (* In this and similar cases, we want the subsequent lines to</pre></td><td class="correct"><pre>              (* In this and similar cases, we want the subsequent lines to</pre></td></tr>
+<tr><td class="linenum">74</td><td class="correct"><pre>                 align with the first expression. *)</pre></td><td class="correct"><pre>                 align with the first expression. *)</pre></td></tr>
+<tr><td class="linenum">75</td><td class="correct"><pre>              ^ "bar"));</pre></td><td class="correct"><pre>              ^ "bar"));</pre></td></tr>
+<tr><td class="linenum">76</td><td class="correct"><pre>  raise (Bug ("foo" ^ "quux"</pre></td><td class="correct"><pre>  raise (Bug ("foo" ^ "quux"</pre></td></tr>
+<tr><td class="linenum">77</td><td class="correct"><pre>              ^ "bar"));</pre></td><td class="correct"><pre>              ^ "bar"));</pre></td></tr>
+<tr><td class="linenum">78</td><td class="correct"><pre>  raise (Bug (foo + quux</pre></td><td class="correct"><pre>  raise (Bug (foo + quux</pre></td></tr>
+<tr><td class="linenum">79</td><td class="correct"><pre>              ^ "bar"));</pre></td><td class="correct"><pre>              ^ "bar"));</pre></td></tr>
+<tr><td class="linenum">80</td><td class="correct"><pre>  raise (Bug ((foo + quux)</pre></td><td class="correct"><pre>  raise (Bug ((foo + quux)</pre></td></tr>
+<tr><td class="linenum">81</td><td class="correct"><pre>              ^ "bar"))</pre></td><td class="correct"><pre>              ^ "bar"))</pre></td></tr>
+<tr><td class="linenum">82</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">83</td><td class="correct"><pre>(* Except in specific cases, we want the argument indented relative to the</pre></td><td class="correct"><pre>(* Except in specific cases, we want the argument indented relative to the</pre></td></tr>
+<tr><td class="linenum">84</td><td class="correct"><pre>   function being called.  (Exceptions include "fun" arguments where the line</pre></td><td class="correct"><pre>   function being called.  (Exceptions include "fun" arguments where the line</pre></td></tr>
+<tr><td class="linenum">85</td><td class="correct"><pre>   ends with "->" and subsequent lines beginning with operators, like above.) *)</pre></td><td class="correct"><pre>   ends with "->" and subsequent lines beginning with operators, like above.) *)</pre></td></tr>
+<tr><td class="linenum">86</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">87</td><td class="correct"><pre>  Some (Message_store.create s</pre></td><td class="correct"><pre>  Some (Message_store.create s</pre></td></tr>
+<tr><td class="linenum">88</td><td class="correct"><pre>          "herd-retransmitter" ~unlink:true Message_store.Message_size.Byte)</pre></td><td class="correct"><pre>          "herd-retransmitter" ~unlink:true Message_store.Message_size.Byte)</pre></td></tr>
+<tr><td class="linenum">89</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">90</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">91</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">92</td><td class="correct"><pre>(* We like the indentation of most arguments, but want to get back towards the</pre></td><td class="correct"><pre>(* We like the indentation of most arguments, but want to get back towards the</pre></td></tr>
+<tr><td class="linenum">93</td><td class="correct"><pre>   left margin in a few special cases: *)</pre></td><td class="correct"><pre>   left margin in a few special cases: *)</pre></td></tr>
+<tr><td class="linenum">94</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">95</td><td class="correct"><pre>  foo (bar (fun x ->                    (* special: "fun _ ->" at EOL *)</pre></td><td class="correct"><pre>  foo (bar (fun x ->                    (* special: "fun _ ->" at EOL *)</pre></td></tr>
+<tr><td class="linenum">96</td><td class="correct"><pre>    baz))                               (* assume no more arguments to "bar" *)</pre></td><td class="correct"><pre>    baz))                               (* assume no more arguments to "bar" *)</pre></td></tr>
+<tr><td class="linenum">97</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">98</td><td class="correct"><pre>  foo</pre></td><td class="correct"><pre>  foo</pre></td></tr>
+<tr><td class="linenum">99</td><td class="correct"><pre>    ~a_long_field_name:(check (fun bar -></pre></td><td class="correct"><pre>    ~a_long_field_name:(check (fun bar -></pre></td></tr>
+<tr><td class="linenum">100</td><td class="correct"><pre>      baz))</pre></td><td class="correct"><pre>      baz))</pre></td></tr>
+<tr><td class="linenum">101</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">102</td><td class="correct"><pre>  foo ~a_long_field_name:(check (fun bar -></pre></td><td class="correct"><pre>  foo ~a_long_field_name:(check (fun bar -></pre></td></tr>
+<tr><td class="linenum">103</td><td class="correct"><pre>    baz))</pre></td><td class="correct"><pre>    baz))</pre></td></tr>
+<tr><td class="linenum">104</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">105</td><td class="correct"><pre>  foo (bar (quux (fnord (fun x ->       (* any depth *)</pre></td><td class="correct"><pre>  foo (bar (quux (fnord (fun x ->       (* any depth *)</pre></td></tr>
+<tr><td class="linenum">106</td><td class="correct"><pre>    baz))))</pre></td><td class="correct"><pre>    baz))))</pre></td></tr>
+<tr><td class="linenum">107</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">108</td><td class="correct"><pre>(* We also wanted to tweak the operator indentation, making operators like <=</pre></td><td class="correct"><pre>(* We also wanted to tweak the operator indentation, making operators like <=</pre></td></tr>
+<tr><td class="linenum">109</td><td class="correct"><pre>   not special cases in contexts like this:  *)</pre></td><td class="correct"><pre>   not special cases in contexts like this:  *)</pre></td></tr>
+<tr><td class="linenum">110</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">111</td><td class="correct"><pre>  assert (foo (bar + baz</pre></td><td class="correct"><pre>  assert (foo (bar + baz</pre></td></tr>
+<tr><td class="linenum">112</td><td class="correct"><pre>               <= quux))                (* lined up under left argument to op,</pre></td><td class="correct"><pre>               <= quux))                (* lined up under left argument to op,</pre></td></tr>
+<tr><td class="linenum">113</td><td class="correct"><pre>                                           sim. to ^ above *)</pre></td><td class="correct"><pre>                                           sim. to ^ above *)</pre></td></tr>
+<tr><td class="linenum">114</td><td class="correct"><pre>(* Sim. indentation of if conditions: *)</pre></td><td class="correct"><pre>(* Sim. indentation of if conditions: *)</pre></td></tr>
+<tr><td class="linenum">115</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">116</td><td class="correct"><pre>  if (a</pre></td><td class="correct"><pre>  if (a</pre></td></tr>
+<tr><td class="linenum">117</td><td class="correct"><pre>      <= b)</pre></td><td class="correct"><pre>      <= b)</pre></td></tr>
+<tr><td class="linenum">118</td><td class="correct"><pre>  then ()</pre></td><td class="correct"><pre>  then ()</pre></td></tr>
+<tr><td class="linenum">119</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">120</td><td class="correct"><pre>  (* Comparisons are different than conditionals; we don't regard them as</pre></td><td class="correct"><pre>  (* Comparisons are different than conditionals; we don't regard them as</pre></td></tr>
+<tr><td class="linenum">121</td><td class="correct"><pre>     conceptually part of the [if] expression. *)</pre></td><td class="correct"><pre>     conceptually part of the [if] expression. *)</pre></td></tr>
+<tr><td class="linenum">122</td><td class="correct"><pre>  if a</pre></td><td class="correct"><pre>  if a</pre></td></tr>
+<tr><td class="linenum">123</td><td class="correct"><pre>     <= b</pre></td><td class="correct"><pre>     <= b</pre></td></tr>
+<tr><td class="linenum">124</td><td class="correct"><pre>  then ()</pre></td><td class="correct"><pre>  then ()</pre></td></tr>
+<tr><td class="linenum">125</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">126</td><td class="correct"><pre>  (* We regard the outermost condition terms as conceptually part of the [if]</pre></td><td class="correct"><pre>  (* We regard the outermost condition terms as conceptually part of the [if]</pre></td></tr>
+<tr><td class="linenum">127</td><td class="correct"><pre>     expression and indent accordingly.  Whether [&&] or [||], conditionals</pre></td><td class="correct"><pre>     expression and indent accordingly.  Whether [&&] or [||], conditionals</pre></td></tr>
+<tr><td class="linenum">128</td><td class="correct"><pre>     effectively state lists of conditions for [then]. *)</pre></td><td class="correct"><pre>     effectively state lists of conditions for [then]. *)</pre></td></tr>
+<tr><td class="linenum">129</td><td class="correct"><pre>  if Edge_adjustment.is_zero arb.cfg.extra_edge</pre></td><td class="correct"><pre>  if Edge_adjustment.is_zero arb.cfg.extra_edge</pre></td></tr>
+<tr><td class="linenum">130</td><td class="correct"><pre>  && 0. = sys.plugs.edge_backoff</pre></td><td class="correct"><pre>  && 0. = sys.plugs.edge_backoff</pre></td></tr>
+<tr><td class="linenum">131</td><td class="correct"><pre>  && 0. = zero_acvol_edge_backoff</pre></td><td class="correct"><pre>  && 0. = zero_acvol_edge_backoff</pre></td></tr>
+<tr><td class="linenum">132</td><td class="correct"><pre>  then 0.</pre></td><td class="correct"><pre>  then 0.</pre></td></tr>
+<tr><td class="linenum">133</td><td class="correct"><pre>  else 1.</pre></td><td class="correct"><pre>  else 1.</pre></td></tr>
+<tr><td class="linenum">134</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">135</td><td class="correct"><pre>  if</pre></td><td class="correct"><pre>  if</pre></td></tr>
+<tr><td class="linenum">136</td><td class="correct"><pre>    Edge_adjustment.is_zero arb.cfg.extra_edge</pre></td><td class="correct"><pre>    Edge_adjustment.is_zero arb.cfg.extra_edge</pre></td></tr>
+<tr><td class="linenum">137</td><td class="correct"><pre>    && 0. = sys.plugs.edge_backoff</pre></td><td class="correct"><pre>    && 0. = sys.plugs.edge_backoff</pre></td></tr>
+<tr><td class="linenum">138</td><td class="correct"><pre>    && 0. = zero_acvol_edge_backoff</pre></td><td class="correct"><pre>    && 0. = zero_acvol_edge_backoff</pre></td></tr>
+<tr><td class="linenum">139</td><td class="correct"><pre>  then 0.</pre></td><td class="correct"><pre>  then 0.</pre></td></tr>
+<tr><td class="linenum">140</td><td class="correct"><pre>  else 1.</pre></td><td class="correct"><pre>  else 1.</pre></td></tr>
+<tr><td class="linenum">141</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">142</td><td class="correct"><pre>  let entries = List.filter (Lazy.force transferstati) ~f:(fun ts -></pre></td><td class="correct"><pre>  let entries = List.filter (Lazy.force transferstati) ~f:(fun ts -></pre></td></tr>
+<tr><td class="linenum">143</td><td class="correct"><pre>    Pcre.pmatch ~pat ts.RQ.description</pre></td><td class="correct"><pre>    Pcre.pmatch ~pat ts.RQ.description</pre></td></tr>
+<tr><td class="linenum">144</td><td class="correct"><pre>  ) in</pre></td><td class="correct"><pre>  ) in</pre></td></tr>
+<tr><td class="linenum">145</td><td class="correct"><pre>  x</pre></td><td class="correct"><pre>  x</pre></td></tr>
+<tr><td class="linenum">146</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">147</td><td class="correct"><pre>(* combination of operator at BOL and -> at EOL: *)</pre></td><td class="correct"><pre>(* combination of operator at BOL and -> at EOL: *)</pre></td></tr>
+<tr><td class="linenum">148</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">149</td><td class="correct"><pre>  Shell.ssh_lines x</pre></td><td class="correct"><pre>  Shell.ssh_lines x</pre></td></tr>
+<tr><td class="linenum">150</td><td class="correct"><pre>  |! List.map ~f:(f (g (fun x -></pre></td><td class="correct"><pre>  |! List.map ~f:(f (g (fun x -></pre></td></tr>
+<tr><td class="linenum">151</td><td class="different"><pre>·······let·name,·path·=·String.lsplit2_exn·~on:'|'·x·in</pre></td><td class="different"><pre>····let·name,·path·=·String.lsplit2_exn·~on:'|'·x·in</pre></td></tr>
+<tr><td class="linenum">152</td><td class="different"><pre>·······String.strip·name,·String.strip·path)))</pre></td><td class="different"><pre>····String.strip·name,·String.strip·path)))</pre></td></tr>
+<tr><td class="linenum">153</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">154</td><td class="correct"><pre>(* open paren ending line like begin *)</pre></td><td class="correct"><pre>(* open paren ending line like begin *)</pre></td></tr>
+<tr><td class="linenum">155</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">156</td><td class="correct"><pre>  if a (p ^/ "s") [ e ] = Ok () then `S (</pre></td><td class="correct"><pre>  if a (p ^/ "s") [ e ] = Ok () then `S (</pre></td></tr>
+<tr><td class="linenum">157</td><td class="correct"><pre>    let label count =</pre></td><td class="correct"><pre>    let label count =</pre></td></tr>
+<tr><td class="linenum">158</td><td class="correct"><pre>      sprintf "%d s" c ^ if c = 1 then ":" else "s"</pre></td><td class="correct"><pre>      sprintf "%d s" c ^ if c = 1 then ":" else "s"</pre></td></tr>
+<tr><td class="linenum">159</td><td class="correct"><pre>    in</pre></td><td class="correct"><pre>    in</pre></td></tr>
+<tr><td class="linenum">160</td><td class="correct"><pre>    x</pre></td><td class="correct"><pre>    x</pre></td></tr>
+<tr><td class="linenum">161</td><td class="correct"><pre>  )</pre></td><td class="correct"><pre>  )</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-begin.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>let f = function</pre></td><td class="correct"><pre>let f = function</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  | zoo -> begin</pre></td><td class="correct"><pre>  | zoo -> begin</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>      foo;</pre></td><td class="correct"><pre>      foo;</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre>      bar;</pre></td><td class="correct"><pre>      bar;</pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>    end</pre></td><td class="correct"><pre>    end</pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>let g = function</pre></td><td class="correct"><pre>let g = function</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>  | zoo -> (</pre></td><td class="correct"><pre>  | zoo -> (</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>      foo;</pre></td><td class="correct"><pre>      foo;</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>      bar;</pre></td><td class="correct"><pre>      bar;</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>    )</pre></td><td class="correct"><pre>    )</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>  begin match foo with</pre></td><td class="correct"><pre>  begin match foo with</pre></td></tr>
+<tr><td class="linenum">14</td><td class="different"><pre>········|·Bar·->·snoo</pre></td><td class="different"><pre>··|·Bar·->·snoo</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>  end</pre></td><td class="correct"><pre>  end</pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-fun.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>(* preferred list style *)</pre></td><td class="correct"><pre>(* preferred list style *)</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>let z =</pre></td><td class="correct"><pre>let z =</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>  f</pre></td><td class="correct"><pre>  f</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre>    [ y</pre></td><td class="correct"><pre>    [ y</pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>    ; foo ~f:(fun () -></pre></td><td class="correct"><pre>    ; foo ~f:(fun () -></pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>        arg)</pre></td><td class="correct"><pre>        arg)</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>    ]</pre></td><td class="correct"><pre>    ]</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>let z =</pre></td><td class="correct"><pre>let z =</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>  f</pre></td><td class="correct"><pre>  f</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>    [ y</pre></td><td class="correct"><pre>    [ y</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>    ; foo ~f:(fun () -></pre></td><td class="correct"><pre>    ; foo ~f:(fun () -></pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>        arg</pre></td><td class="correct"><pre>        arg</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>      )</pre></td><td class="correct"><pre>      )</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>    ]</pre></td><td class="correct"><pre>    ]</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre>(* legacy list style *)</pre></td><td class="correct"><pre>(* legacy list style *)</pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre>  [ f (fun x -></pre></td><td class="correct"><pre>  [ f (fun x -></pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre>      x);</pre></td><td class="correct"><pre>      x);</pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre>    f (fun x -></pre></td><td class="correct"><pre>    f (fun x -></pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre>      x);</pre></td><td class="correct"><pre>      x);</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre>    f (fun x -></pre></td><td class="correct"><pre>    f (fun x -></pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>      x);</pre></td><td class="correct"><pre>      x);</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>  ]</pre></td><td class="correct"><pre>  ]</pre></td></tr>
+<tr><td class="linenum">26</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre>  [ f (fun x -></pre></td><td class="correct"><pre>  [ f (fun x -></pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre>      x</pre></td><td class="correct"><pre>      x</pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>    );</pre></td><td class="correct"><pre>    );</pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre>    f (fun x -></pre></td><td class="correct"><pre>    f (fun x -></pre></td></tr>
+<tr><td class="linenum">31</td><td class="correct"><pre>      x</pre></td><td class="correct"><pre>      x</pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre>    );</pre></td><td class="correct"><pre>    );</pre></td></tr>
+<tr><td class="linenum">33</td><td class="correct"><pre>    f (fun x -></pre></td><td class="correct"><pre>    f (fun x -></pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre>      x</pre></td><td class="correct"><pre>      x</pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>    );</pre></td><td class="correct"><pre>    );</pre></td></tr>
+<tr><td class="linenum">36</td><td class="correct"><pre>  ]</pre></td><td class="correct"><pre>  ]</pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">39</td><td class="correct"><pre>  [f (fun x -></pre></td><td class="correct"><pre>  [f (fun x -></pre></td></tr>
+<tr><td class="linenum">40</td><td class="correct"><pre>     x</pre></td><td class="correct"><pre>     x</pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre>   );</pre></td><td class="correct"><pre>   );</pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre>   f (fun x -></pre></td><td class="correct"><pre>   f (fun x -></pre></td></tr>
+<tr><td class="linenum">43</td><td class="correct"><pre>     x</pre></td><td class="correct"><pre>     x</pre></td></tr>
+<tr><td class="linenum">44</td><td class="correct"><pre>   );</pre></td><td class="correct"><pre>   );</pre></td></tr>
+<tr><td class="linenum">45</td><td class="correct"><pre>   f (fun x -></pre></td><td class="correct"><pre>   f (fun x -></pre></td></tr>
+<tr><td class="linenum">46</td><td class="correct"><pre>     x</pre></td><td class="correct"><pre>     x</pre></td></tr>
+<tr><td class="linenum">47</td><td class="correct"><pre>   );</pre></td><td class="correct"><pre>   );</pre></td></tr>
+<tr><td class="linenum">48</td><td class="correct"><pre>  ]</pre></td><td class="correct"><pre>  ]</pre></td></tr>
+<tr><td class="linenum">49</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">50</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">51</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">52</td><td class="correct"><pre>  x</pre></td><td class="correct"><pre>  x</pre></td></tr>
+<tr><td class="linenum">53</td><td class="correct"><pre>  >>= fun x -></pre></td><td class="correct"><pre>  >>= fun x -></pre></td></tr>
+<tr><td class="linenum">54</td><td class="correct"><pre>  (try x with _ -> ())</pre></td><td class="correct"><pre>  (try x with _ -> ())</pre></td></tr>
+<tr><td class="linenum">55</td><td class="correct"><pre>  >>= fun x -></pre></td><td class="correct"><pre>  >>= fun x -></pre></td></tr>
+<tr><td class="linenum">56</td><td class="correct"><pre>  try x with _ -> ()</pre></td><td class="correct"><pre>  try x with _ -> ()</pre></td></tr>
+<tr><td class="linenum">57</td><td class="correct"><pre>    >>= fun x -></pre></td><td class="correct"><pre>    >>= fun x -></pre></td></tr>
+<tr><td class="linenum">58</td><td class="correct"><pre>    x</pre></td><td class="correct"><pre>    x</pre></td></tr>
+<tr><td class="linenum">59</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">60</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">61</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">62</td><td class="correct"><pre>  expr</pre></td><td class="correct"><pre>  expr</pre></td></tr>
+<tr><td class="linenum">63</td><td class="correct"><pre>  >>| function</pre></td><td class="correct"><pre>  >>| function</pre></td></tr>
+<tr><td class="linenum">64</td><td class="correct"><pre>  | x -> 3</pre></td><td class="correct"><pre>  | x -> 3</pre></td></tr>
+<tr><td class="linenum">65</td><td class="correct"><pre>  | y -> 4</pre></td><td class="correct"><pre>  | y -> 4</pre></td></tr>
+<tr><td class="linenum">66</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">67</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">68</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">69</td><td class="correct"><pre>  expr</pre></td><td class="correct"><pre>  expr</pre></td></tr>
+<tr><td class="linenum">70</td><td class="correct"><pre>  >>| fun z -> match z with</pre></td><td class="correct"><pre>  >>| fun z -> match z with</pre></td></tr>
+<tr><td class="linenum">71</td><td class="different"><pre>···············|·x·->·3</pre></td><td class="different"><pre>··|·x·->·3</pre></td></tr>
+<tr><td class="linenum">72</td><td class="different"><pre>···············|·y·->·4</pre></td><td class="different"><pre>··|·y·->·4</pre></td></tr>
+<tr><td class="linenum">73</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">74</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">75</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">76</td><td class="correct"><pre>  expr</pre></td><td class="correct"><pre>  expr</pre></td></tr>
+<tr><td class="linenum">77</td><td class="correct"><pre>  >>| fun z -> function</pre></td><td class="correct"><pre>  >>| fun z -> function</pre></td></tr>
+<tr><td class="linenum">78</td><td class="correct"><pre>  | x -> 3</pre></td><td class="correct"><pre>  | x -> 3</pre></td></tr>
+<tr><td class="linenum">79</td><td class="correct"><pre>  | y -> 4</pre></td><td class="correct"><pre>  | y -> 4</pre></td></tr>
+<tr><td class="linenum">80</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">81</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">82</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">83</td><td class="correct"><pre>  my_func () >>= function</pre></td><td class="correct"><pre>  my_func () >>= function</pre></td></tr>
+<tr><td class="linenum">84</td><td class="correct"><pre>  | A -> 0</pre></td><td class="correct"><pre>  | A -> 0</pre></td></tr>
+<tr><td class="linenum">85</td><td class="correct"><pre>  | B -> 0</pre></td><td class="correct"><pre>  | B -> 0</pre></td></tr>
+<tr><td class="linenum">86</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">87</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">88</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">89</td><td class="correct"><pre>  my_func () >>= (function</pre></td><td class="correct"><pre>  my_func () >>= (function</pre></td></tr>
+<tr><td class="linenum">90</td><td class="correct"><pre>    | A -> 0</pre></td><td class="correct"><pre>    | A -> 0</pre></td></tr>
+<tr><td class="linenum">91</td><td class="correct"><pre>    | B -> 0)</pre></td><td class="correct"><pre>    | B -> 0)</pre></td></tr>
+<tr><td class="linenum">92</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">93</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">94</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">95</td><td class="correct"><pre>  expr</pre></td><td class="correct"><pre>  expr</pre></td></tr>
+<tr><td class="linenum">96</td><td class="correct"><pre>  >>| function</pre></td><td class="correct"><pre>  >>| function</pre></td></tr>
+<tr><td class="linenum">97</td><td class="correct"><pre>  | x -> 3</pre></td><td class="correct"><pre>  | x -> 3</pre></td></tr>
+<tr><td class="linenum">98</td><td class="correct"><pre>  | y -> 4</pre></td><td class="correct"><pre>  | y -> 4</pre></td></tr>
+<tr><td class="linenum">99</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">100</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">101</td><td class="correct"><pre>let () =</pre></td><td class="correct"><pre>let () =</pre></td></tr>
+<tr><td class="linenum">102</td><td class="correct"><pre>  expr</pre></td><td class="correct"><pre>  expr</pre></td></tr>
+<tr><td class="linenum">103</td><td class="correct"><pre>  >>| (function</pre></td><td class="correct"><pre>  >>| (function</pre></td></tr>
+<tr><td class="linenum">104</td><td class="correct"><pre>    | x -> 3</pre></td><td class="correct"><pre>    | x -> 3</pre></td></tr>
+<tr><td class="linenum">105</td><td class="correct"><pre>    | y -> 4)</pre></td><td class="correct"><pre>    | y -> 4)</pre></td></tr>
+<tr><td class="linenum">106</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">107</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">108</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">109</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">110</td><td class="correct"><pre>let f =</pre></td><td class="correct"><pre>let f =</pre></td></tr>
+<tr><td class="linenum">111</td><td class="correct"><pre>  f >>= m (fun f -></pre></td><td class="correct"><pre>  f >>= m (fun f -></pre></td></tr>
+<tr><td class="linenum">112</td><td class="correct"><pre>    fun x -></pre></td><td class="correct"><pre>    fun x -></pre></td></tr>
+<tr><td class="linenum">113</td><td class="correct"><pre>      y);</pre></td><td class="correct"><pre>      y);</pre></td></tr>
+<tr><td class="linenum">114</td><td class="correct"><pre>  z</pre></td><td class="correct"><pre>  z</pre></td></tr>
+<tr><td class="linenum">115</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">116</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">117</td><td class="correct"><pre>let f =</pre></td><td class="correct"><pre>let f =</pre></td></tr>
+<tr><td class="linenum">118</td><td class="correct"><pre>  f</pre></td><td class="correct"><pre>  f</pre></td></tr>
+<tr><td class="linenum">119</td><td class="correct"><pre>  |> m (fun f -></pre></td><td class="correct"><pre>  |> m (fun f -></pre></td></tr>
+<tr><td class="linenum">120</td><td class="correct"><pre>    fun x -></pre></td><td class="correct"><pre>    fun x -></pre></td></tr>
+<tr><td class="linenum">121</td><td class="correct"><pre>      y</pre></td><td class="correct"><pre>      y</pre></td></tr>
+<tr><td class="linenum">122</td><td class="correct"><pre>  );</pre></td><td class="correct"><pre>  );</pre></td></tr>
+<tr><td class="linenum">123</td><td class="correct"><pre>  z</pre></td><td class="correct"><pre>  z</pre></td></tr>
+<tr><td class="linenum">124</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">125</td><td class="correct"><pre>let f =</pre></td><td class="correct"><pre>let f =</pre></td></tr>
+<tr><td class="linenum">126</td><td class="correct"><pre>  f</pre></td><td class="correct"><pre>  f</pre></td></tr>
+<tr><td class="linenum">127</td><td class="correct"><pre>  |> m (fun f -></pre></td><td class="correct"><pre>  |> m (fun f -></pre></td></tr>
+<tr><td class="linenum">128</td><td class="correct"><pre>    fun x -></pre></td><td class="correct"><pre>    fun x -></pre></td></tr>
+<tr><td class="linenum">129</td><td class="correct"><pre>      y);</pre></td><td class="correct"><pre>      y);</pre></td></tr>
+<tr><td class="linenum">130</td><td class="correct"><pre>  z</pre></td><td class="correct"><pre>  z</pre></td></tr>
+<tr><td class="linenum">131</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-functor.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>module M =</pre></td><td class="correct"><pre>module M =</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  Foo (G)</pre></td><td class="correct"><pre>  Foo (G)</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>    (H)</pre></td><td class="correct"><pre>    (H)</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>module M =</pre></td><td class="correct"><pre>module M =</pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>  Foo</pre></td><td class="correct"><pre>  Foo</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>    (G)</pre></td><td class="correct"><pre>    (G)</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>    (struct</pre></td><td class="correct"><pre>    (struct</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>      let x</pre></td><td class="correct"><pre>      let x</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>    end)</pre></td><td class="correct"><pre>    end)</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>    (H)</pre></td><td class="correct"><pre>    (H)</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>(* To me, this looks fine as it is.  The rule seems fine as "indent arguments by</pre></td><td class="correct"><pre>(* To me, this looks fine as it is.  The rule seems fine as "indent arguments by</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>   2".  To illustrate, with a case where the functor name is longer: *)</pre></td><td class="correct"><pre>   2".  To illustrate, with a case where the functor name is longer: *)</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>module M =</pre></td><td class="correct"><pre>module M =</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>  Functor (G)</pre></td><td class="correct"><pre>  Functor (G)</pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>    (H)</pre></td><td class="correct"><pre>    (H)</pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre>    (I)</pre></td><td class="correct"><pre>    (I)</pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre>include Foo (struct</pre></td><td class="correct"><pre>include Foo (struct</pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre>    let x</pre></td><td class="correct"><pre>    let x</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre>  end) (struct</pre></td><td class="correct"><pre>  end) (struct</pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>    let y</pre></td><td class="correct"><pre>    let y</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>  end)</pre></td><td class="correct"><pre>  end)</pre></td></tr>
+<tr><td class="linenum">26</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre>include</pre></td><td class="correct"><pre>include</pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre>  Foo (struct</pre></td><td class="correct"><pre>  Foo (struct</pre></td></tr>
+<tr><td class="linenum">29</td><td class="different"><pre>······let·x</pre></td><td class="different"><pre>····let·x</pre></td></tr>
+<tr><td class="linenum">30</td><td class="different"><pre>····end)·(struct</pre></td><td class="different"><pre>··end)·(struct</pre></td></tr>
+<tr><td class="linenum">31</td><td class="different"><pre>······let·y</pre></td><td class="different"><pre>····let·y</pre></td></tr>
+<tr><td class="linenum">32</td><td class="different"><pre>····end)</pre></td><td class="different"><pre>··end)</pre></td></tr>
+<tr><td class="linenum">33</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre>include</pre></td><td class="correct"><pre>include</pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>  Foo</pre></td><td class="correct"><pre>  Foo</pre></td></tr>
+<tr><td class="linenum">36</td><td class="correct"><pre>    (struct</pre></td><td class="correct"><pre>    (struct</pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre>      let x</pre></td><td class="correct"><pre>      let x</pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre>    end) (struct</pre></td><td class="correct"><pre>    end) (struct</pre></td></tr>
+<tr><td class="linenum">39</td><td class="different"><pre>······let·y</pre></td><td class="different"><pre>····let·y</pre></td></tr>
+<tr><td class="linenum">40</td><td class="different"><pre>····end)</pre></td><td class="different"><pre>··end)</pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre>include Persistent.Make</pre></td><td class="correct"><pre>include Persistent.Make</pre></td></tr>
+<tr><td class="linenum">43</td><td class="different"><pre>··(struct·let·version·=·1·end)</pre></td><td class="different"><pre>····(struct·let·version·=·1·end)</pre></td></tr>
+<tr><td class="linenum">44</td><td class="different"><pre>··(Stable.Cr_soons_or_pending.V1)</pre></td><td class="different"><pre>····(Stable.Cr_soons_or_pending.V1)</pre></td></tr>
+<tr><td class="linenum">45</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">46</td><td class="correct"><pre>include Persistent.Make</pre></td><td class="correct"><pre>include Persistent.Make</pre></td></tr>
+<tr><td class="linenum">47</td><td class="different"><pre>··(struct</pre></td><td class="different"><pre>····(struct</pre></td></tr>
+<tr><td class="linenum">48</td><td class="different"><pre>····let·version·=·1</pre></td><td class="different"><pre>······let·version·=·1</pre></td></tr>
+<tr><td class="linenum">49</td><td class="different"><pre>··end)</pre></td><td class="different"><pre>····end)</pre></td></tr>
+<tr><td class="linenum">50</td><td class="different"><pre>··(Stable.Cr_soons_or_pending.V1)</pre></td><td class="different"><pre>····(Stable.Cr_soons_or_pending.V1)</pre></td></tr>
+<tr><td class="linenum">51</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">52</td><td class="correct"><pre>include</pre></td><td class="correct"><pre>include</pre></td></tr>
+<tr><td class="linenum">53</td><td class="correct"><pre>  Persistent.Make</pre></td><td class="correct"><pre>  Persistent.Make</pre></td></tr>
+<tr><td class="linenum">54</td><td class="correct"><pre>    (struct let version = 1 end)</pre></td><td class="correct"><pre>    (struct let version = 1 end)</pre></td></tr>
+<tr><td class="linenum">55</td><td class="correct"><pre>    (Stable.Cr_soons_or_pending.V1)</pre></td><td class="correct"><pre>    (Stable.Cr_soons_or_pending.V1)</pre></td></tr>
+<tr><td class="linenum">56</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">57</td><td class="correct"><pre>include</pre></td><td class="correct"><pre>include</pre></td></tr>
+<tr><td class="linenum">58</td><td class="correct"><pre>  Persistent.Make</pre></td><td class="correct"><pre>  Persistent.Make</pre></td></tr>
+<tr><td class="linenum">59</td><td class="correct"><pre>    (struct</pre></td><td class="correct"><pre>    (struct</pre></td></tr>
+<tr><td class="linenum">60</td><td class="correct"><pre>      let version = 1</pre></td><td class="correct"><pre>      let version = 1</pre></td></tr>
+<tr><td class="linenum">61</td><td class="correct"><pre>    end)</pre></td><td class="correct"><pre>    end)</pre></td></tr>
+<tr><td class="linenum">62</td><td class="correct"><pre>    (Stable.Cr_soons_or_pending.V1)</pre></td><td class="correct"><pre>    (Stable.Cr_soons_or_pending.V1)</pre></td></tr>
+<tr><td class="linenum">63</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">64</td><td class="correct"><pre>module M =</pre></td><td class="correct"><pre>module M =</pre></td></tr>
+<tr><td class="linenum">65</td><td class="correct"><pre>  Foo (struct</pre></td><td class="correct"><pre>  Foo (struct</pre></td></tr>
+<tr><td class="linenum">66</td><td class="different"><pre>······let·x</pre></td><td class="different"><pre>····let·x</pre></td></tr>
+<tr><td class="linenum">67</td><td class="different"><pre>····end)·(struct</pre></td><td class="different"><pre>··end)·(struct</pre></td></tr>
+<tr><td class="linenum">68</td><td class="different"><pre>······let·y</pre></td><td class="different"><pre>····let·y</pre></td></tr>
+<tr><td class="linenum">69</td><td class="different"><pre>····end)</pre></td><td class="different"><pre>··end)</pre></td></tr>
+<tr><td class="linenum">70</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">71</td><td class="correct"><pre>module M : S =</pre></td><td class="correct"><pre>module M : S =</pre></td></tr>
+<tr><td class="linenum">72</td><td class="correct"><pre>  Make (M)</pre></td><td class="correct"><pre>  Make (M)</pre></td></tr>
+<tr><td class="linenum">73</td><td class="correct"><pre>module M : S with type t := int =</pre></td><td class="correct"><pre>module M : S with type t := int =</pre></td></tr>
+<tr><td class="linenum">74</td><td class="correct"><pre>  Make (M)</pre></td><td class="correct"><pre>  Make (M)</pre></td></tr>
+<tr><td class="linenum">75</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">76</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">77</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">78</td><td class="correct"><pre>module Simple_command(Arg:sig</pre></td><td class="correct"><pre>module Simple_command(Arg:sig</pre></td></tr>
+<tr><td class="linenum">79</td><td class="correct"><pre>  end) = struct end</pre></td><td class="correct"><pre>  end) = struct end</pre></td></tr>
+<tr><td class="linenum">80</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">81</td><td class="correct"><pre>module Simple_command(Arg : sig</pre></td><td class="correct"><pre>module Simple_command(Arg : sig</pre></td></tr>
+<tr><td class="linenum">82</td><td class="correct"><pre>  end) = struct end</pre></td><td class="correct"><pre>  end) = struct end</pre></td></tr>
+<tr><td class="linenum">83</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">84</td><td class="correct"><pre>module Simple_command (Arg:sig</pre></td><td class="correct"><pre>module Simple_command (Arg:sig</pre></td></tr>
+<tr><td class="linenum">85</td><td class="correct"><pre>  end) = struct end</pre></td><td class="correct"><pre>  end) = struct end</pre></td></tr>
+<tr><td class="linenum">86</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">87</td><td class="correct"><pre>module Simple_command (Arg : sig</pre></td><td class="correct"><pre>module Simple_command (Arg : sig</pre></td></tr>
+<tr><td class="linenum">88</td><td class="correct"><pre>  end) = struct end</pre></td><td class="correct"><pre>  end) = struct end</pre></td></tr>
+<tr><td class="linenum">89</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">90</td><td class="correct"><pre>module Simple_command</pre></td><td class="correct"><pre>module Simple_command</pre></td></tr>
+<tr><td class="linenum">91</td><td class="different"><pre>··(Arg·:·sig</pre></td><td class="different"><pre>····(Arg·:·sig</pre></td></tr>
+<tr><td class="linenum">92</td><td class="different"><pre>···end)·=·struct·end</pre></td><td class="different"><pre>·····end)·=·struct·end</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-pattern.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>let f = function</pre></td><td class="correct"><pre>let f = function</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  | _ -> 0</pre></td><td class="correct"><pre>  | _ -> 0</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>let f x = match x with</pre></td><td class="correct"><pre>let f x = match x with</pre></td></tr>
+<tr><td class="linenum">5</td><td class="different"><pre>··········|·_·->·0</pre></td><td class="different"><pre>··|·_·->·0</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>let f =</pre></td><td class="correct"><pre>let f =</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>  function</pre></td><td class="correct"><pre>  function</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>  | _ -> 0</pre></td><td class="correct"><pre>  | _ -> 0</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>  match x with</pre></td><td class="correct"><pre>  match x with</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>  | _ -> 0</pre></td><td class="correct"><pre>  | _ -> 0</pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre>  begin match x with</pre></td><td class="correct"><pre>  begin match x with</pre></td></tr>
+<tr><td class="linenum">20</td><td class="different"><pre>········|·_·->·0</pre></td><td class="different"><pre>··|·_·->·0</pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre>  end</pre></td><td class="correct"><pre>  end</pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>let check_price t = function</pre></td><td class="correct"><pre>let check_price t = function</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>  | { Exec.</pre></td><td class="correct"><pre>  | { Exec.</pre></td></tr>
+<tr><td class="linenum">26</td><td class="correct"><pre>      trade_at_settlement = (None | Some false);</pre></td><td class="correct"><pre>      trade_at_settlement = (None | Some false);</pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre>    } -> ()</pre></td><td class="correct"><pre>    } -> ()</pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>let check_price t = function</pre></td><td class="correct"><pre>let check_price t = function</pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre>  | simpler -> ()</pre></td><td class="correct"><pre>  | simpler -> ()</pre></td></tr>
+<tr><td class="linenum">31</td><td class="correct"><pre>  | other -> ()</pre></td><td class="correct"><pre>  | other -> ()</pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">33</td><td class="correct"><pre>(* Sometimes we like to write big alternations like this, in which case the</pre></td><td class="correct"><pre>(* Sometimes we like to write big alternations like this, in which case the</pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre>   comment should typically align with the following clause. *)</pre></td><td class="correct"><pre>   comment should typically align with the following clause. *)</pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>let 0 =</pre></td><td class="correct"><pre>let 0 =</pre></td></tr>
+<tr><td class="linenum">36</td><td class="correct"><pre>  match x with</pre></td><td class="correct"><pre>  match x with</pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre>  | A</pre></td><td class="correct"><pre>  | A</pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre>    (* a *)</pre></td><td class="correct"><pre>    (* a *)</pre></td></tr>
+<tr><td class="linenum">39</td><td class="correct"><pre>    -> a</pre></td><td class="correct"><pre>    -> a</pre></td></tr>
+<tr><td class="linenum">40</td><td class="correct"><pre>let 0 =</pre></td><td class="correct"><pre>let 0 =</pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre>  match x with</pre></td><td class="correct"><pre>  match x with</pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre>    A</pre></td><td class="correct"><pre>    A</pre></td></tr>
+<tr><td class="linenum">43</td><td class="correct"><pre>    (* a *)</pre></td><td class="correct"><pre>    (* a *)</pre></td></tr>
+<tr><td class="linenum">44</td><td class="correct"><pre>    -> a</pre></td><td class="correct"><pre>    -> a</pre></td></tr>
+<tr><td class="linenum">45</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">46</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">47</td><td class="correct"><pre>  a</pre></td><td class="correct"><pre>  a</pre></td></tr>
+<tr><td class="linenum">48</td><td class="correct"><pre>  || match a with</pre></td><td class="correct"><pre>  || match a with</pre></td></tr>
+<tr><td class="linenum">49</td><td class="different"><pre>·····|·a·->·true</pre></td><td class="different"><pre>··|·a·->·true</pre></td></tr>
+<tr><td class="linenum">50</td><td class="different"><pre>·····|·b·->·false</pre></td><td class="different"><pre>··|·b·->·false</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-record.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>type x =</pre></td><td class="correct"><pre>type x =</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  { foo : int</pre></td><td class="correct"><pre>  { foo : int</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>  ; bar : int</pre></td><td class="correct"><pre>  ; bar : int</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>  { x with</pre></td><td class="correct"><pre>  { x with</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>    foo = 3</pre></td><td class="correct"><pre>    foo = 3</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>  ; bar = 5</pre></td><td class="correct"><pre>  ; bar = 5</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>  { (* blah blah blah *)</pre></td><td class="correct"><pre>  { (* blah blah blah *)</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>    foo = 3</pre></td><td class="correct"><pre>    foo = 3</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>  ; bar = 5</pre></td><td class="correct"><pre>  ; bar = 5</pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre>  [{ x with</pre></td><td class="correct"><pre>  [{ x with</pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre>     foo = 3</pre></td><td class="correct"><pre>     foo = 3</pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre>   ; bar = 5</pre></td><td class="correct"><pre>   ; bar = 5</pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre>   }]</pre></td><td class="correct"><pre>   }]</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>  [{ (* blah blah blah *)</pre></td><td class="correct"><pre>  [{ (* blah blah blah *)</pre></td></tr>
+<tr><td class="linenum">26</td><td class="different"><pre>·····foo·=·3</pre></td><td class="different"><pre>····foo·=·3</pre></td></tr>
+<tr><td class="linenum">27</td><td class="different"><pre>···;·bar·=·5</pre></td><td class="different"><pre>··;·bar·=·5</pre></td></tr>
+<tr><td class="linenum">28</td><td class="different"><pre>···}]</pre></td><td class="different"><pre>··}]</pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">31</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre>  { M.x with</pre></td><td class="correct"><pre>  { M.x with</pre></td></tr>
+<tr><td class="linenum">33</td><td class="correct"><pre>    M.</pre></td><td class="correct"><pre>    M.</pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre>    foo = 3</pre></td><td class="correct"><pre>    foo = 3</pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">36</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">39</td><td class="correct"><pre>  { x with</pre></td><td class="correct"><pre>  { x with</pre></td></tr>
+<tr><td class="linenum">40</td><td class="correct"><pre>    M.</pre></td><td class="correct"><pre>    M.</pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre>    foo = 3</pre></td><td class="correct"><pre>    foo = 3</pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">43</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">44</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">45</td><td class="correct"><pre>let x =</pre></td><td class="correct"><pre>let x =</pre></td></tr>
+<tr><td class="linenum">46</td><td class="correct"><pre>  { M.</pre></td><td class="correct"><pre>  { M.</pre></td></tr>
+<tr><td class="linenum">47</td><td class="correct"><pre>    foo = 3</pre></td><td class="correct"><pre>    foo = 3</pre></td></tr>
+<tr><td class="linenum">48</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">49</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">50</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">51</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">52</td><td class="correct"><pre>  { foo with</pre></td><td class="correct"><pre>  { foo with</pre></td></tr>
+<tr><td class="linenum">53</td><td class="correct"><pre>    Bar.</pre></td><td class="correct"><pre>    Bar.</pre></td></tr>
+<tr><td class="linenum">54</td><td class="correct"><pre>    field1 = value1</pre></td><td class="correct"><pre>    field1 = value1</pre></td></tr>
+<tr><td class="linenum">55</td><td class="correct"><pre>  ; field2 = value2</pre></td><td class="correct"><pre>  ; field2 = value2</pre></td></tr>
+<tr><td class="linenum">56</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">57</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">58</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">59</td><td class="correct"><pre>  { foo</pre></td><td class="correct"><pre>  { foo</pre></td></tr>
+<tr><td class="linenum">60</td><td class="correct"><pre>    with Bar.</pre></td><td class="correct"><pre>    with Bar.</pre></td></tr>
+<tr><td class="linenum">61</td><td class="different"><pre>····field1·=·value1</pre></td><td class="different"><pre>······field1·=·value1</pre></td></tr>
+<tr><td class="linenum">62</td><td class="different"><pre>··;·field2·=·value2</pre></td><td class="different"><pre>····;·field2·=·value2</pre></td></tr>
+<tr><td class="linenum">63</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">64</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">65</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">66</td><td class="correct"><pre>(* multicomponent record module pathname *)</pre></td><td class="correct"><pre>(* multicomponent record module pathname *)</pre></td></tr>
+<tr><td class="linenum">67</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">68</td><td class="correct"><pre>  { A.B.</pre></td><td class="correct"><pre>  { A.B.</pre></td></tr>
+<tr><td class="linenum">69</td><td class="correct"><pre>    a = b</pre></td><td class="correct"><pre>    a = b</pre></td></tr>
+<tr><td class="linenum">70</td><td class="correct"><pre>  ; c = d</pre></td><td class="correct"><pre>  ; c = d</pre></td></tr>
+<tr><td class="linenum">71</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">72</td><td class="correct"><pre>;;</pre></td><td class="correct"><pre>;;</pre></td></tr>
+<tr><td class="linenum">73</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">74</td><td class="correct"><pre>type t =</pre></td><td class="correct"><pre>type t =</pre></td></tr>
+<tr><td class="linenum">75</td><td class="correct"><pre>  { a</pre></td><td class="correct"><pre>  { a</pre></td></tr>
+<tr><td class="linenum">76</td><td class="correct"><pre>    : something_lengthy list list</pre></td><td class="correct"><pre>    : something_lengthy list list</pre></td></tr>
+<tr><td class="linenum">77</td><td class="correct"><pre>      [@default String.Map.empty]</pre></td><td class="correct"><pre>      [@default String.Map.empty]</pre></td></tr>
+<tr><td class="linenum">78</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">79</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">80</td><td class="correct"><pre>type t =</pre></td><td class="correct"><pre>type t =</pre></td></tr>
+<tr><td class="linenum">81</td><td class="correct"><pre>  { a</pre></td><td class="correct"><pre>  { a</pre></td></tr>
+<tr><td class="linenum">82</td><td class="correct"><pre>    : Something_lengthy.t list list</pre></td><td class="correct"><pre>    : Something_lengthy.t list list</pre></td></tr>
+<tr><td class="linenum">83</td><td class="correct"><pre>      [@default String.Map.empty]</pre></td><td class="correct"><pre>      [@default String.Map.empty]</pre></td></tr>
+<tr><td class="linenum">84</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">85</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">86</td><td class="correct"><pre>type t =</pre></td><td class="correct"><pre>type t =</pre></td></tr>
+<tr><td class="linenum">87</td><td class="correct"><pre>  { a</pre></td><td class="correct"><pre>  { a</pre></td></tr>
+<tr><td class="linenum">88</td><td class="correct"><pre>    : something_lengthy list</pre></td><td class="correct"><pre>    : something_lengthy list</pre></td></tr>
+<tr><td class="linenum">89</td><td class="correct"><pre>        list</pre></td><td class="correct"><pre>        list</pre></td></tr>
+<tr><td class="linenum">90</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">91</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">92</td><td class="correct"><pre>type t =</pre></td><td class="correct"><pre>type t =</pre></td></tr>
+<tr><td class="linenum">93</td><td class="correct"><pre>  { a</pre></td><td class="correct"><pre>  { a</pre></td></tr>
+<tr><td class="linenum">94</td><td class="correct"><pre>    : Something_lengthy.t list</pre></td><td class="correct"><pre>    : Something_lengthy.t list</pre></td></tr>
+<tr><td class="linenum">95</td><td class="correct"><pre>        list</pre></td><td class="correct"><pre>        list</pre></td></tr>
+<tr><td class="linenum">96</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+<tr><td class="linenum">97</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">98</td><td class="correct"><pre>type t =</pre></td><td class="correct"><pre>type t =</pre></td></tr>
+<tr><td class="linenum">99</td><td class="correct"><pre>  { a</pre></td><td class="correct"><pre>  { a</pre></td></tr>
+<tr><td class="linenum">100</td><td class="correct"><pre>    : Something_lengthy.t</pre></td><td class="correct"><pre>    : Something_lengthy.t</pre></td></tr>
+<tr><td class="linenum">101</td><td class="correct"><pre>        list</pre></td><td class="correct"><pre>        list</pre></td></tr>
+<tr><td class="linenum">102</td><td class="correct"><pre>  }</pre></td><td class="correct"><pre>  }</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-syntax.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>(* s *)</pre></td><td class="correct"><pre>(* s *)</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre>  [%raise_structural_sexp</pre></td><td class="correct"><pre>  [%raise_structural_sexp</pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>    "feature's tip is already an ancestor of new base"</pre></td><td class="correct"><pre>    "feature's tip is already an ancestor of new base"</pre></td></tr>
+<tr><td class="linenum">5</td><td class="different"><pre>····{·feature_tip·=·(old_tip·:·Rev.t)</pre></td><td class="different"><pre>······{·feature_tip·=·(old_tip·:·Rev.t)</pre></td></tr>
+<tr><td class="linenum">6</td><td class="different"><pre>····;·new_base····=·(new_base·:·Rev.t)</pre></td><td class="different"><pre>······;·new_base····=·(new_base·:·Rev.t)</pre></td></tr>
+<tr><td class="linenum">7</td><td class="different"><pre>····}]</pre></td><td class="different"><pre>······}]</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>  [%raise_structural_sexp "feature's tip is already an ancestor of new base"</pre></td><td class="correct"><pre>  [%raise_structural_sexp "feature's tip is already an ancestor of new base"</pre></td></tr>
+<tr><td class="linenum">11</td><td class="different"><pre>····{·feature_tip·=·(old_tip·:·Rev.t)</pre></td><td class="different"><pre>····························{·feature_tip·=·(old_tip·:·Rev.t)</pre></td></tr>
+<tr><td class="linenum">12</td><td class="different"><pre>····;·new_base····=·(new_base·:·Rev.t)</pre></td><td class="different"><pre>····························;·new_base····=·(new_base·:·Rev.t)</pre></td></tr>
+<tr><td class="linenum">13</td><td class="different"><pre>····}</pre></td><td class="different"><pre>····························}</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre>  ]</pre></td><td class="correct"><pre>  ]</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-to-do.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>(* Indentation that Jane Street needs to think about and make precise.</pre></td><td class="correct"><pre>(* Indentation that Jane Street needs to think about and make precise.</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>   These are long term ideas, possibly even conflicting with other tests. *)</pre></td><td class="correct"><pre>   These are long term ideas, possibly even conflicting with other tests. *)</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre>(* js-args *)</pre></td><td class="correct"><pre>(* js-args *)</pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>let _ =</pre></td><td class="correct"><pre>let _ =</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>  let min_closing_backoff =</pre></td><td class="correct"><pre>  let min_closing_backoff =</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>    -. (   Hidden_float.expose (arb.cfg.base_edge @! Buy)</pre></td><td class="correct"><pre>    -. (   Hidden_float.expose (arb.cfg.base_edge @! Buy)</pre></td></tr>
+<tr><td class="linenum">11</td><td class="different"><pre>········+.·Hidden_float.expose·(arb.cfg.base_edge·@!·Sell))</pre></td><td class="different"><pre>···········+.·Hidden_float.expose·(arb.cfg.base_edge·@!·Sell))</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>  in</pre></td><td class="correct"><pre>  in</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>  0</pre></td><td class="correct"><pre>  0</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">17</td><td class="correct"><pre>(* js-type *)</pre></td><td class="correct"><pre>(* js-type *)</pre></td></tr>
+<tr><td class="linenum">18</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre>(* The following tests incorporate several subtle and different indentation</pre></td><td class="correct"><pre>(* The following tests incorporate several subtle and different indentation</pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre>   ideas.  Please consider this only a proposal for discussion, for now.</pre></td><td class="correct"><pre>   ideas.  Please consider this only a proposal for discussion, for now.</pre></td></tr>
+<tr><td class="linenum">21</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">22</td><td class="correct"><pre>   First, notice the display treatment of "(,)" tuples, analogous to "[;]"</pre></td><td class="correct"><pre>   First, notice the display treatment of "(,)" tuples, analogous to "[;]"</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre>   lists.  While "(,)" is an intensional combination of "()" and ",", unlike</pre></td><td class="correct"><pre>   lists.  While "(,)" is an intensional combination of "()" and ",", unlike</pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>   "[;]" lists, we believe "(,)" isn't too big a departure.  Value expression</pre></td><td class="correct"><pre>   "[;]" lists, we believe "(,)" isn't too big a departure.  Value expression</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>   analogies are included in js-type.ml, (meant to be) consistent with the</pre></td><td class="correct"><pre>   analogies are included in js-type.ml, (meant to be) consistent with the</pre></td></tr>
+<tr><td class="linenum">26</td><td class="correct"><pre>   proposed type indentation.</pre></td><td class="correct"><pre>   proposed type indentation.</pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre>   Second, and more divergently, the proposed indentation of function types is</pre></td><td class="correct"><pre>   Second, and more divergently, the proposed indentation of function types is</pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>   based on the idea of aligning the arguments, even the first argument, even</pre></td><td class="correct"><pre>   based on the idea of aligning the arguments, even the first argument, even</pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre>   where that means automatically inserting spaces within lines.  This applies</pre></td><td class="correct"><pre>   where that means automatically inserting spaces within lines.  This applies</pre></td></tr>
+<tr><td class="linenum">31</td><td class="correct"><pre>   to the extra spaces in ":__unit" and "(____Config.Network.t" below.</pre></td><td class="correct"><pre>   to the extra spaces in ":__unit" and "(____Config.Network.t" below.</pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">33</td><td class="correct"><pre>   We believe this fits into a more general incorporation of alignment into</pre></td><td class="correct"><pre>   We believe this fits into a more general incorporation of alignment into</pre></td></tr>
+<tr><td class="linenum">34</td><td class="correct"><pre>   ocp-indent, to replace our internal alignment tool with a syntax-aware one.</pre></td><td class="correct"><pre>   ocp-indent, to replace our internal alignment tool with a syntax-aware one.</pre></td></tr>
+<tr><td class="linenum">35</td><td class="correct"><pre>   We like to align things for readability, like big records, record types,</pre></td><td class="correct"><pre>   We like to align things for readability, like big records, record types,</pre></td></tr>
+<tr><td class="linenum">36</td><td class="correct"><pre>   lists used to build tables, etc.</pre></td><td class="correct"><pre>   lists used to build tables, etc.</pre></td></tr>
+<tr><td class="linenum">37</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">38</td><td class="correct"><pre>   The proposal also includes indenting "->" in the circumstances below relative</pre></td><td class="correct"><pre>   The proposal also includes indenting "->" in the circumstances below relative</pre></td></tr>
+<tr><td class="linenum">39</td><td class="correct"><pre>   to the enclosing "()", by two spaces.  In a sense, this happens first, and</pre></td><td class="correct"><pre>   to the enclosing "()", by two spaces.  In a sense, this happens first, and</pre></td></tr>
+<tr><td class="linenum">40</td><td class="correct"><pre>   then the first argument is aligned accordingly.  So, there's no manual</pre></td><td class="correct"><pre>   then the first argument is aligned accordingly.  So, there's no manual</pre></td></tr>
+<tr><td class="linenum">41</td><td class="correct"><pre>   indentation or spacing below. *)</pre></td><td class="correct"><pre>   indentation or spacing below. *)</pre></td></tr>
+<tr><td class="linenum">42</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">43</td><td class="correct"><pre>val instances</pre></td><td class="correct"><pre>val instances</pre></td></tr>
+<tr><td class="linenum">44</td><td class="correct"><pre>  :  unit</pre></td><td class="correct"><pre>  :  unit</pre></td></tr>
+<tr><td class="linenum">45</td><td class="correct"><pre>  -> (    Config.Network.t</pre></td><td class="correct"><pre>  -> (    Config.Network.t</pre></td></tr>
+<tr><td class="linenum">46</td><td class="different"><pre>·······->·(App.t·*·Config.instance·*·Config.app)·list</pre></td><td class="different"><pre>··········->·(App.t·*·Config.instance·*·Config.app)·list</pre></td></tr>
+<tr><td class="linenum">47</td><td class="different"><pre>·······->·verbose:bool</pre></td><td class="different"><pre>··········->·verbose:bool</pre></td></tr>
+<tr><td class="linenum">48</td><td class="different"><pre>·······->·'m</pre></td><td class="different"><pre>··········->·'m</pre></td></tr>
+<tr><td class="linenum">49</td><td class="correct"><pre>     , 'm</pre></td><td class="correct"><pre>     , 'm</pre></td></tr>
+<tr><td class="linenum">50</td><td class="correct"><pre>     ) Command.Spec.t</pre></td><td class="correct"><pre>     ) Command.Spec.t</pre></td></tr>
+<tr><td class="linenum">51</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">52</td><td class="correct"><pre>val instances</pre></td><td class="correct"><pre>val instances</pre></td></tr>
+<tr><td class="linenum">53</td><td class="correct"><pre>  :  unit</pre></td><td class="correct"><pre>  :  unit</pre></td></tr>
+<tr><td class="linenum">54</td><td class="correct"><pre>  -> (    Config.Network.t</pre></td><td class="correct"><pre>  -> (    Config.Network.t</pre></td></tr>
+<tr><td class="linenum">55</td><td class="different"><pre>·······->·(App.t·*·Config.instance·*·Config.app)·list</pre></td><td class="different"><pre>··········->·(App.t·*·Config.instance·*·Config.app)·list</pre></td></tr>
+<tr><td class="linenum">56</td><td class="different"><pre>·······->·verbose:bool·->·'m</pre></td><td class="different"><pre>··········->·verbose:bool·->·'m</pre></td></tr>
+<tr><td class="linenum">57</td><td class="correct"><pre>     , 'm</pre></td><td class="correct"><pre>     , 'm</pre></td></tr>
+<tr><td class="linenum">58</td><td class="correct"><pre>     ) Command.Spec.t</pre></td><td class="correct"><pre>     ) Command.Spec.t</pre></td></tr>
+<tr><td class="linenum">59</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">60</td><td class="correct"><pre>(* presumed analog with stars *)</pre></td><td class="correct"><pre>(* presumed analog with stars *)</pre></td></tr>
+<tr><td class="linenum">61</td><td class="correct"><pre>val instances :</pre></td><td class="correct"><pre>val instances :</pre></td></tr>
+<tr><td class="linenum">62</td><td class="correct"><pre>  unit</pre></td><td class="correct"><pre>  unit</pre></td></tr>
+<tr><td class="linenum">63</td><td class="correct"><pre>  * (   Config.Network.t</pre></td><td class="correct"><pre>  * (   Config.Network.t</pre></td></tr>
+<tr><td class="linenum">64</td><td class="different"><pre>······*·(App.t·*·Config.instance·*·Config.app)·list</pre></td><td class="different"><pre>········*·(App.t·*·Config.instance·*·Config.app)·list</pre></td></tr>
+<tr><td class="linenum">65</td><td class="different"><pre>······*·bool</pre></td><td class="different"><pre>········*·bool</pre></td></tr>
+<tr><td class="linenum">66</td><td class="different"><pre>······*·'m</pre></td><td class="different"><pre>········*·'m</pre></td></tr>
+<tr><td class="linenum">67</td><td class="correct"><pre>    , 'm</pre></td><td class="correct"><pre>    , 'm</pre></td></tr>
+<tr><td class="linenum">68</td><td class="correct"><pre>    ) Command.Spec.t</pre></td><td class="correct"><pre>    ) Command.Spec.t</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in js-upon.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  stop</pre></td><td class="correct"><pre>  stop</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>  (* We don't do this as a matter of style, but the indentation reveals a common</pre></td><td class="correct"><pre>  (* We don't do this as a matter of style, but the indentation reveals a common</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre>     mistake. *)</pre></td><td class="correct"><pre>     mistake. *)</pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>  >>> fun () -> don't_wait_for (close fd);</pre></td><td class="correct"><pre>  >>> fun () -> don't_wait_for (close fd);</pre></td></tr>
+<tr><td class="linenum">5</td><td class="different"><pre>················bind·fd</pre></td><td class="different"><pre>··bind·fd</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>  stop</pre></td><td class="correct"><pre>  stop</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>  (* This is what was intended, which is indented correctly, although it's bad</pre></td><td class="correct"><pre>  (* This is what was intended, which is indented correctly, although it's bad</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre>     style on my part. *)</pre></td><td class="correct"><pre>     style on my part. *)</pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>  >>> (fun () -> don't_wait_for (close fd));</pre></td><td class="correct"><pre>  >>> (fun () -> don't_wait_for (close fd));</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>  bind</pre></td><td class="correct"><pre>  bind</pre></td></tr>
+</table>
+</div>
+<div>
+<h2>Differences in list_of_funs.ml</h2>
+<table>
+<tr><th><th>Expected<th>Ocp-indent output</tr>
+<tr><td class="linenum">0</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">1</td><td class="correct"><pre>  (fun x -> x [ (fun () -> 3) ;</pre></td><td class="correct"><pre>  (fun x -> x [ (fun () -> 3) ;</pre></td></tr>
+<tr><td class="linenum">2</td><td class="correct"><pre>                (fun () -> 4) ])</pre></td><td class="correct"><pre>                (fun () -> 4) ])</pre></td></tr>
+<tr><td class="linenum">3</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">4</td><td class="correct"><pre>let f x = (fun x -> x [ (fun () -> 3) ;</pre></td><td class="correct"><pre>let f x = (fun x -> x [ (fun () -> 3) ;</pre></td></tr>
+<tr><td class="linenum">5</td><td class="correct"><pre>                        (fun () -> 4) ])</pre></td><td class="correct"><pre>                        (fun () -> 4) ])</pre></td></tr>
+<tr><td class="linenum">6</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">7</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">8</td><td class="correct"><pre>  x [ (fun () -> 3) ;</pre></td><td class="correct"><pre>  x [ (fun () -> 3) ;</pre></td></tr>
+<tr><td class="linenum">9</td><td class="correct"><pre>      (fun () -> 4) ]</pre></td><td class="correct"><pre>      (fun () -> 4) ]</pre></td></tr>
+<tr><td class="linenum">10</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">11</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">12</td><td class="correct"><pre>  [ (fun () -> 3) ;</pre></td><td class="correct"><pre>  [ (fun () -> 3) ;</pre></td></tr>
+<tr><td class="linenum">13</td><td class="correct"><pre>    (fun () -> 4) ]</pre></td><td class="correct"><pre>    (fun () -> 4) ]</pre></td></tr>
+<tr><td class="linenum">14</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">15</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">16</td><td class="correct"><pre>  (fun x -> x [ (fun () -></pre></td><td class="correct"><pre>  (fun x -> x [ (fun () -></pre></td></tr>
+<tr><td class="linenum">17</td><td class="different"><pre>···················3)·;</pre></td><td class="different"><pre>·······3)·;</pre></td></tr>
+<tr><td class="linenum">18</td><td class="different"><pre>················(fun·()·->·4)·])</pre></td><td class="different"><pre>·······(fun·()·->·4)·])</pre></td></tr>
+<tr><td class="linenum">19</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">20</td><td class="correct"><pre>let f x = (fun x -> x [ (fun () -></pre></td><td class="correct"><pre>let f x = (fun x -> x [ (fun () -></pre></td></tr>
+<tr><td class="linenum">21</td><td class="different"><pre>···························3)·;</pre></td><td class="different"><pre>····3)·;</pre></td></tr>
+<tr><td class="linenum">22</td><td class="different"><pre>························(fun·()·->·4)·])</pre></td><td class="different"><pre>····(fun·()·->·4)·])</pre></td></tr>
+<tr><td class="linenum">23</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">24</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">25</td><td class="correct"><pre>  x [ (fun () -></pre></td><td class="correct"><pre>  x [ (fun () -></pre></td></tr>
+<tr><td class="linenum">26</td><td class="different"><pre>·········3)·;</pre></td><td class="different"><pre>······3)·;</pre></td></tr>
+<tr><td class="linenum">27</td><td class="correct"><pre>      (fun () -> 4) ]</pre></td><td class="correct"><pre>      (fun () -> 4) ]</pre></td></tr>
+<tr><td class="linenum">28</td><td class="correct"><pre></pre></td><td class="correct"><pre></pre></td></tr>
+<tr><td class="linenum">29</td><td class="correct"><pre>let f x =</pre></td><td class="correct"><pre>let f x =</pre></td></tr>
+<tr><td class="linenum">30</td><td class="correct"><pre>  [ (fun () -></pre></td><td class="correct"><pre>  [ (fun () -></pre></td></tr>
+<tr><td class="linenum">31</td><td class="different"><pre>·······3)·;</pre></td><td class="different"><pre>········3)·;</pre></td></tr>
+<tr><td class="linenum">32</td><td class="correct"><pre>    (fun () -> 4) ]</pre></td><td class="correct"><pre>    (fun () -> 4) ]</pre></td></tr>
+</table>
+</div>
+</body>
+</html>

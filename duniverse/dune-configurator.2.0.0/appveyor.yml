@@ -1,0 +1,16 @@
+# AppVeyor config using https://github.com/Chris00/ocaml-appveyor
+
+install:
+  - cd "%APPVEYOR_BUILD_FOLDER%"
+  - install_ocaml.cmd
+
+build_script:
+  - cd "%APPVEYOR_BUILD_FOLDER%"
+  - ocaml bootstrap.ml
+  - dune.exe build @test\blackbox-tests\windows-diff
+
+artifacts:
+  - path: _build/log
+    name: build-log
+  - path: _boot/log
+    name: build_bootstrap-log
