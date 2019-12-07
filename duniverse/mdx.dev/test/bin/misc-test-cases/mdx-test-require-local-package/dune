@@ -1,0 +1,9 @@
+(rule
+ (targets dune.inc.gen)
+ (deps
+  (package mdx))
+ (action
+  (with-stdout-to
+   %{targets}
+   (progn
+    (run ocaml-mdx rule %{dep:private_lib/require-package.md})))))

@@ -1,0 +1,42 @@
+(rule
+ (targets indentVersion.ml)
+ (action
+  (with-stdout-to %{targets}
+    (echo "let version = \"%{version:ocp-indent}\"")))
+)
+(ocamllex approx_lexer)
+(library
+ (name ocp_indent_lexer)
+ (public_name ocp-indent.lexer)
+ (wrapped false)
+ (modules indentExtend approx_tokens approx_lexer)
+)
+(library
+ (name ocp_indent_lib)
+ (wrapped false)
+ (public_name ocp-indent.lib)
+ (libraries ocp-indent.utils)
+ (modules indentConfig indentBlock indentPrinter)
+ (flags :standard -w -9)
+)
+(library
+ (name ocp_indent_utils)
+ (public_name ocp-indent.utils)
+ (wrapped false)
+ (libraries bytes ocp-indent.lexer)
+ (modules compat pos util nstream)
+)
+(library
+ (name ocp_indent_dynlink)
+ (public_name ocp-indent.dynlink)
+ (wrapped false)
+ (modules indentLoader)
+ (libraries findlib dynlink ocp-indent.lexer ocp-indent.utils)
+)
+(executable
+ (name indentMain)
+ (public_name ocp-indent)
+ (modules indentVersion indentArgs indentMain)
+ (libraries cmdliner ocp-indent.lexer ocp-indent.lib ocp-indent.dynlink unix)
+ (flags :standard -w -9)
+)

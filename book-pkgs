@@ -19,6 +19,8 @@ core
 core_bench
 core_extended
 core_kernel
+ctypes
+ctypes-foreign
 cppo
 domain-name
 easy-format

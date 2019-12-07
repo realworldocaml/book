@@ -1,6 +1,0 @@
-(library
- (name ctypes_foreign)
- (public_name ctypes-foreign)
- (wrapped false)
- (libraries ctypes-foreign.base)
- (virtual_modules foreign))

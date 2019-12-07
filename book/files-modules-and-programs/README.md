@@ -152,7 +152,7 @@ below will count the words that come up in the file `freq.ml`
 itself. [OCaml toolchain/dune]{.idx}
 
 ```sh dir=examples/freq-dune
-$ grep -o '[[:alpha:]]*' freq.ml | ./_build/default/freq.bc
+$ grep -Eo '[[:alpha:]]+' freq.ml | ./_build/default/freq.bc
   5: line
   5: List
   5: counts
@@ -169,7 +169,7 @@ Conveniently, `dune` allows us to combine the building and running an
 executable into a single operation, which we can do using `dune exec`.
 
 ```sh dir=examples/freq-dune
-$ grep -o '[[:alpha:]]*' freq.ml | dune exec ./freq.bc
+$ grep -Eo '[[:alpha:]]+' freq.ml | dune exec ./freq.bc
   5: line
   5: List
   5: counts

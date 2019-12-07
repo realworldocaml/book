@@ -1,0 +1,12 @@
+(include dune.inc)
+
+(rule
+ (target dune.gen)
+ (deps (source_tree .))
+ (action
+  (with-stdout-to %{target}
+   (run ../gen_dune_rules.exe test_expect))))
+
+(alias
+ (name runtest)
+ (action (diff dune.inc dune.gen)))

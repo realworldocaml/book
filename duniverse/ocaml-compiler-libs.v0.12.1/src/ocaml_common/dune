@@ -1,0 +1,14 @@
+(library
+ (name ocaml_common)
+ (public_name ocaml-compiler-libs.common)
+ (flags :standard -safe-string)
+ (libraries compiler-libs.common)
+ (preprocess no_preprocessing))
+
+(rule
+ (targets ocaml_common.ml)
+ (deps
+  (:first_dep ../gen/gen.exe))
+ (action
+  (run %{first_dep} -archive %{ocaml_where}/compiler-libs/ocamlcommon.cma -o
+    %{targets})))

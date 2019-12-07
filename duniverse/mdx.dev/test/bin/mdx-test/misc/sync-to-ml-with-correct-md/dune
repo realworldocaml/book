@@ -1,0 +1,11 @@
+(rule
+ (target test_case.ml.corrected)
+ (deps
+  (package mdx)
+  (:md test-case.md)
+  test_case.ml)
+ (action (run ocaml-mdx test --direction to-ml %{md})))
+
+(alias
+ (name runtest)
+ (action (diff test_case.ml.expected test_case.ml.corrected)))

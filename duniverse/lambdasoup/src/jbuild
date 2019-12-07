@@ -1,8 +1,0 @@
-(jbuild_version 1)
-
-(library
- ((name soup)
-  (public_name lambdasoup)
-  (synopsis "Easy functional HTML scraping and manipulation")
-  (flags (:standard -w +A -warn-error -3))
-  (libraries (markup))))

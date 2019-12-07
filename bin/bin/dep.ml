@@ -78,6 +78,37 @@ let dune_for_chapter file =
   (action  (run rwo-build build chapter -o . -repo-root .. %%{x})))|}
     file file file toc_file
 
+let dune_for_pdf () =
+  sprintf {|(rule
+  (targets inputs.tex)
+  (deps    %%{bin:rwo-build}
+           ../book/toc.scm)
+  (action  (run rwo-build build inputs -o . -repo-root ..)))
+
+(rule
+  (targets book.aux book.idx book.toc)
+  (deps    (alias ../book/latex)
+           (:x ../book/book.tex)
+           inputs.tex)
+  (action  (system "pdflatex -interaction=nonstopmode %%{x} -draftmode")))
+
+(rule
+  (targets book.ind)
+  (deps    (:x book.idx))
+  (action  (system "makeindex %%{x}")))
+
+(alias (name pdf) (deps book.pdf))
+
+(rule
+  (targets book.pdf)
+  (deps    (alias ../book/latex)
+           (:x ../book/book.tex)
+           inputs.tex
+           book.aux
+           book.ind
+           book.toc)
+  (action  (system "pdflatex -interaction=nonstopmode %%{x}")))|}
+
 let read_toc base_dir =
   let f = base_dir / toc_file in
   let s = Sexplib.Sexp.load_sexps f in
@@ -128,7 +159,8 @@ let process_chapters ~toc book_dir output_dir =
     List.filter ((<>)"")
   in
   let chapters = List.map dune_for_chapter (toc_files toc) in
-  html @ chapters |>
+  let pdf = [dune_for_pdf ()] in
+  html @ chapters @ pdf |>
   String.concat "\n\n" |> fun s ->
   find_static_files () ^ s  ^ "\n" |>
   emit_file (output_dir / "dune")
@@ -141,15 +173,28 @@ let process_md ~toc book_dir =
     let toc = String.concat "\n        " toc in
     sprintf "(alias\n  (name html)\n  (deps %s))" toc
   in
+  let latex_alias =
+    let file f = f ^ ".tex" in
+    let toc = List.map file toc in
+    let toc = String.concat "\n        " toc in
+    sprintf "(alias\n  (name latex)\n  (deps %s))" toc
+  in
   let main_dune () =
     List.map (fun chapter ->
-        let html = chapter ^ ".html" in
-        sprintf {|(rule
-  (targets %s)
-  (deps    %s)
-  (action  (run mdx output %%{deps} -o %%{targets})))|}
-          html (chapter / "README.md")
+        sprintf
+{|(rule
+  (targets %s.html)
+  (deps    (:md_file %s))
+  (action  (run rwo-convert_md %%{md_file} -t html -o %%{targets})))
+
+(rule
+  (targets %s.tex)
+  (deps    (:md_file %s))
+  (action  (run rwo-convert_md %%{md_file} -t latex -o %%{targets})))|}
+          chapter (chapter / "README.md")
+          chapter (chapter / "README.md")
       ) toc |>
+    (fun x -> latex_alias :: x) |>
     (fun x -> html_alias :: x) |>
     String.concat "\n\n" |>
     (fun x -> x ^ "\n") |>

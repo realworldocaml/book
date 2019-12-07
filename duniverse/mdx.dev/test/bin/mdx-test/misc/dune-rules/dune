@@ -1,0 +1,19 @@
+(rule
+ (targets
+   test-case.md.corrected
+   dune_rules_1.ml.corrected
+   dune_rules_2.ml.corrected)
+ (deps (package mdx) (:md test-case.md))
+ (action (run ocaml-mdx test --force-output --direction to-ml %{md})))
+
+(alias
+ (name runtest)
+ (action (diff test-case.md test-case.md.corrected)))
+
+(alias
+ (name runtest)
+ (action (diff dune_rules_1.ml dune_rules_1.ml.corrected)))
+
+(alias
+ (name runtest)
+ (action (diff dune_rules_2.ml dune_rules_2.ml.corrected)))
