@@ -450,6 +450,8 @@ But building this results in a compile-time error.
 $ dune build md5.exe
 ...
 File "md5.ml", line 15, characters 24-32:
+15 |       fun () -> do_hash filename)
+                             ^^^^^^^^
 Error: This expression has type string option
        but an expression was expected of type string
 [1]

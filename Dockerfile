@@ -4,7 +4,7 @@ ENV OPAMYES=1
 WORKDIR /home/opam/src
 
 # update opam
-RUN opam switch 4.07
+RUN opam switch 4.08
 RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 
 # install non-OCaml dependencies
