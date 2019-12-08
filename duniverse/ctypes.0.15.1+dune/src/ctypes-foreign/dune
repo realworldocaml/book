@@ -1,0 +1,7 @@
+(library
+ (name ctypes_foreign)
+ (public_name ctypes-foreign)
+ (wrapped false)
+ (libraries ctypes-foreign.base)
+ (default_implementation ctypes-foreign.threaded)
+ (virtual_modules foreign))

@@ -255,6 +255,19 @@ let make_simple_page file =
   ] in
   return (main_template ~title_bar:title_bar ~content ())
 
+let make_tex_inputs_page ?(repo_root=".") () : string Deferred.t =
+  Toc_tex.get ~repo_root () >>| fun l ->
+  let to_input s = [Tex.input (repo_root / "book" / s ^ ".tex"); Tex.newpage] in
+  let to_tex t : Tex.t list =
+      match t with
+      | `part (part: Toc_tex.part) ->
+          [Tex.part part.title]::(List.map ~f:to_input part.chapters)
+      | `chapter s -> [to_input s]
+  in
+  List.map ~f:to_tex l
+  |> List.join
+  |> List.map ~f:Tex.to_string
+  |> String.concat ~sep:"\n"
 
 (******************************************************************************)
 (* Main Functions                                                             *)
@@ -265,6 +278,7 @@ type src = [
 | `Toc_page
 | `FAQs
 | `Install
+| `Latex
 ]
 
 let make ?(repo_root=".") ~out_dir = function
@@ -309,5 +323,12 @@ let make ?(repo_root=".") ~out_dir = function
     Log.Global.info "making %s" out_file;
     make_simple_page in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
+    Writer.save out_file ~contents
+  )
+  | `Latex -> (
+    let base = "inputs.tex" in
+    let out_file = out_dir/base in
+    Log.Global.info "making %s" out_file;
+    make_tex_inputs_page ~repo_root () >>= fun contents ->
     Writer.save out_file ~contents
   )

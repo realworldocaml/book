@@ -1,0 +1,15 @@
+(library
+ (name ocaml_shadow)
+ (public_name ocaml-compiler-libs.shadow)
+ (flags
+  (:standard -safe-string)
+  -w
+  -49)
+ (preprocess no_preprocessing))
+
+(rule
+ (targets ocaml_shadow.ml)
+ (deps
+  (:first_dep gen/gen.exe))
+ (action
+  (run %{first_dep} -dir %{ocaml_where}/compiler-libs -o %{targets})))

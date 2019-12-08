@@ -1,0 +1,44 @@
+opam-version: "2.0"
+version: "dev"
+maintainer: "yallop@gmail.com"
+authors: "yallop@gmail.com"
+license: "MIT"
+tags: ["org:ocamllabs" "org:mirage"]
+homepage: "https://github.com/ocamllabs/ocaml-ctypes"
+bug-reports: "http://github.com/ocamllabs/ocaml-ctypes/issues"
+synopsis: "Combinators for binding to C libraries without writing any C"
+description: """
+ctypes is a library for binding to C libraries using pure OCaml. The primary
+aim is to make writing C extensions as straightforward as possible.
+The core of ctypes is a set of combinators for describing the structure of C
+types -- numeric types, arrays, pointers, structs, unions and functions. You
+can use these combinators to describe the types of the functions that you want
+to call, then bind directly to those functions -- all without writing or
+generating any C!
+
+To install the optional `ctypes.foreign` interface (which uses `libffi` to
+provide dynamic access to foreign libraries), you will need to also install
+the `ctypes-foreign` package.
+
+    opam install ctypes-foreign
+
+This will make the `ctypes-foreign` ocamlfind subpackage available.
+"""
+
+depends: [
+  "ocaml" {>= "4.02.3"}
+  "dune" {>="1.7"}
+  "integers"
+  "bisect_ppx"
+]
+depopts: [
+  "ocveralls" {with-test}
+]
+build: [
+  ["dune" "subst"]
+  ["dune" "build" "-p" name "-j" jobs]
+]
+dev-repo: "git+https://github.com/avsm/ocaml-ctypes.git"
+url {
+  src: "git+https://github.com/avsm/ocaml-ctypes.git#dune-port"
+}

@@ -307,7 +307,6 @@ val int16_t   : int typ
 val int32_t   : int32 typ
 val int64_t   : int64 typ
 val uchar     : uchar typ
-val uchar     : uchar typ
 val uint8_t   : uint8 typ
 val uint16_t  : uint16 typ
 val uint32_t  : uint32 typ
@@ -448,7 +447,7 @@ However, we can't just pass the result of `time` to `ctime`:
 
 ```ocaml env=posix
 # ctime (time' ())
-Characters 6-16:
+Line 1, characters 7-17:
 Error: This expression has type time_t but an expression was expected of type
          time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
 ```

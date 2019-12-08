@@ -1,0 +1,14 @@
+(library
+ (name ocaml_toplevel)
+ (public_name ocaml-compiler-libs.toplevel)
+ (flags :standard -safe-string)
+ (libraries compiler-libs.toplevel)
+ (preprocess no_preprocessing))
+
+(rule
+ (targets ocaml_toplevel.ml)
+ (deps
+  (:first_dep ../gen/gen.exe))
+ (action
+  (run %{first_dep} -archive %{ocaml_where}/compiler-libs/ocamltoplevel.cma -o
+    %{targets})))

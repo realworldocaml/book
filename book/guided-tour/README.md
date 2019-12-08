@@ -136,13 +136,13 @@ The following examples, however, are not legal:
 
 ```ocaml env=main
 # let Seven = 3 + 4
-Characters 4-9:
+Line 1, characters 5-10:
 Error: Unbound constructor Seven
 # let 7x = 7
-Characters 4-6:
+Line 1, characters 5-7:
 Error: Unknown modifier 'x' for literal 7x
 # let x-plus-y = x + y
-Characters 6-10:
+Line 1, characters 7-11:
 Error: Syntax error
 ```
 
@@ -374,7 +374,7 @@ two different concrete types for `'a` in the same use of `first_if_true`:
 
 ```ocaml env=main
 # first_if_true big_number "short" "loooooong"
-Characters 25-32:
+Line 1, characters 26-33:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -399,7 +399,7 @@ errors like this one:
 ```ocaml env=main
 # let add_potato x =
   x + "potato"
-Characters 25-33:
+Line 2, characters 7-15:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -505,7 +505,7 @@ tuples:
 
 ```ocaml env=main
 # let numbers = [3;"four";5]
-Characters 17-23:
+Line 1, characters 18-24:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -632,7 +632,7 @@ matching]{.idx}
 ```ocaml env=main
 # let my_favorite_language (my_favorite :: the_rest) =
     my_favorite
-Characters 25-68:
+Line 1, characters 26-69:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -754,7 +754,7 @@ for removing sequential duplicates:
     | first :: second :: tl ->
       let new_tl = remove_sequential_duplicates (second :: tl) in
       if first = second then new_tl else first :: new_tl
-Characters 48-232:
+Line 2, characters 5-189:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -814,7 +814,7 @@ double-semicolon, so the value of `x` is no longer available:
 
 ```ocaml env=local_let
 # x
-Characters 0-1:
+Line 1, characters 1-2:
 Error: Unbound value x
 ```
 

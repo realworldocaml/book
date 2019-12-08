@@ -1,0 +1,133 @@
+## 1.8.1
+* tiny API change to help with the detection of top-level phrase boundaries
+* fixed a bug with end of comment detection in some cases (esp. related to cinaps)
+* tweaks for better indentation within cinaps comments
+* lowered priority of algebraic attributes in expressions (`[@...]`) to better match the actual meaning.
+
+## 1.8.0
+* compatibility with OCaml 4.08.0 (new attributes, monadic lets...)
+* lots of smaller indentation fixes (module types, empty variants...)
+* more reliable "inplace" mode (preserving symlinks and permissions)
+* XDG compatibility (e.g. config file below `~/.config`)
+* support for "cinaps" comments (indent as code comments that start with `(*$`)
+* API: `IndentBlock.is_at_top` now returns true for top-level expressions
+
+## 1.7.0
+* lots of small fixes
+* better handling of attributes and extension points
+* better handling of GADT definitions
+* fixed a stack-overflow on extremely large files
+* indent the same (1 step) after `let f = fun x ->` and `let f =\n  fun x ->`
+* build using dune
+
+## 1.6.1
+* fixes related to ppx extensions
+* fixed regression on indentation within record types
+
+## 1.6.0
+* fixes some cases of comments
+* supports new cases of ppx
+* fixed cases of unstable indentation within records
+* supports local excemtions
+* fixed handling of polymorphic methods
+* uses cmdliner 1.0.0
+
+## 1.5.3
+* fixes on nested try-with and some cases of comments
+* better alignment of stand-alone semicolons in records
+* improved emacs and vim scripts
+* better indentation within extension blocks
+
+## 1.5.2
+* small emacs binding fix
+* compatibility with cmdliner 0.9.8
+
+## 1.5.1
+* generic handling of ppx keywords
+* much improved vim binding
+* changed installation location of vim bindings (to share/ocp-indent/vim/indent) for easier autoload
+* don't increase indentation level for sequences of try..with
+* support for '[@'
+* restore back-alignment of '&&', '||' after 'if' and 'when'
+* support for extensible variant types
+
+## 1.5
+* new vim binding
+* support for ppx lwt keywords
+* fixed indentation at BOF and EOF in some cases
+* back-alignment of '&&' and '||' disabled
+* tweaks to functor, struct and module indentation
+* support for ppx attributes
+* lots of fixes and tweaks
+
+## 1.4.1
+* OCaml 4.01.0 warnings fix
+* fixed indent of lwt try/finally
+* sort Jane Street tests by priority
+* added support for BENCH syntax
+* added support for the new {xx| |xx} quotation syntax
+* emacs mode: cleaner loading
+* emacs mode: fixed the 'syntax' option
+* emacs mode: workaround an auto-complete.el display bug
+* emacs and vim modes: install in editor-specific directories
+* refactored build system. Install through opam-installer, register libs as ocamlfind sub-packages
+
+## 1.4.0
+* license change: lessening the GPL to make ocp-indent easier to use as a library
+* removed indent by default after most common operators (when align_ops is set)
+* removed extra-indent in some pattern-matching cases
+* fixed a few bugs related to records, lazy as pattern, "module with"
+* added support for the cstruct syntax extension
+* fixed Makefile to properly install all cmi files, working around an ocp-build bug
+
+## 1.3.2
+* bug-fix release: object types, module type of, first line, etc.
+
+## 1.3.1
+* optimised functional operators on OCaml 4.00
+* fixed a bug in phrase boundary detection
+
+## 1.3.0
+* Large API rewrite, offering much more flexibility and functionality
+* Still some bug fixes (comments at end, nested ocamldoc tags, etc.)
+* Man-page fixes (thanks to Kaustuv Chaudhuri)
+* Temporarily disabled the non-functional state-marshalling function
+* Emacs mode: auto-disabling indent-tabs-mode by default, it's not compatible
+  anyways.
+
+## 1.2.2
+* Fixed critical bug with the parsing of the --syntax option
+* a few indent fixes (functor sigs, comments in expressions)
+
+## 1.2.1
+* Fixed bugs with GADTs, comments at end of modules
+* Fixed compilation with OCaml trunk (warnings as errors)
+* New vim script, contributed by Jonathan Derque
+* New option "strict_else" to allow unindenting after else
+
+## 1.2.0
+* Lots of fixes
+* Switched most operators and constructs with parentheses to column aligned by
+  default (can be disabled with option align_ops)
+* Better handling of records
+* Some code cleanup (record fields with meaningful names)
+* Documentation and manpage (now relying on cmdliner)
+* Added an option (max_indent) to limit over-indent in the most annoying cases
+* Syntax extensions can now be enabled from the configuration files
+
+## 1.1.0
+* Small fixes, stabilised ocamldoc indentation
+* Support for configuration files, either user or project-wide
+
+## 1.0.2
+* Supporting indentation of ocamldoc. In particular, code within
+  ocamldoc blocks {[...]} should be automatically indented
+* Fixed the emacs mode not to set the mark
+* A few new configuration options (strict_with, strict_comments, align_params)
+* A few tweaks and improvements (better empty line indent, etc.)
+* Bugfixes (#43, #47)
+
+## 1.0.1
+* Indentation of comments now follows ocamldoc conventions properly
+* Partial indent adapts more closely to manual indentation
+* Various small fixes (indent on empty lines, freeform comments...)

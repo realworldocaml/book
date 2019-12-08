@@ -1,8 +1,0 @@
-(* Older version of an imagined data format *)
-
-type t = {
-  a : int option;
-  b : bool;
-  ?c : int option;
-  ~d : float;
-}

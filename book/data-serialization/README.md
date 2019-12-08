@@ -436,6 +436,8 @@ Building this will give us the following error:
 ```sh dir=examples/test_interval_nosexp
 $ dune build test_interval_nosexp.exe
 File "test_interval_nosexp.ml", line 13, characters 20-42:
+13 |   |> List.sexp_of_t Int_interval.sexp_of_t
+                         ^^^^^^^^^^^^^^^^^^^^^^
 Error: Unbound value Int_interval.sexp_of_t
 [1]
 ```
@@ -583,11 +585,11 @@ Uncaught exception:
   (Of_sexp_error "int_of_sexp: (Failure int_of_string)"
    (invalid_sexp not-an-integer))
 
-Raised at file "duniverse/sexplib0/sexp_conv.ml", line 194, characters 30-72
+Raised at file "duniverse/sexplib0.v0.12.0/sexp_conv.ml", line 194, characters 30-72
 Called from file "read_foo.ml", line 5, characters 2-3
 Called from file "read_foo.ml", line 3, characters 0-71
 Called from file "read_foo.ml", line 11, characters 4-60
-Called from file "duniverse/base/src/exn.ml", line 107, characters 6-10
+Called from file "duniverse/base.v0.12.2/src/exn.ml", line 107, characters 6-10
 [1]
 ```
 
@@ -635,9 +637,9 @@ Uncaught exception:
   (Of_sexp_error foo_broken_example.scm:2:4
    "int_of_sexp: (Failure int_of_string)" (invalid_sexp not-an-integer))
 
-Raised at file "duniverse/sexplib/src/pre_sexp.ml", line 742, characters 4-56
+Raised at file "duniverse/sexplib.v0.12.0+dune/src/pre_sexp.ml", line 742, characters 4-56
 Called from file "read_foo_better_errors.ml", line 10, characters 10-68
-Called from file "duniverse/base/src/exn.ml", line 107, characters 6-10
+Called from file "duniverse/base.v0.12.2/src/exn.ml", line 107, characters 6-10
 [1]
 ```
 
@@ -678,7 +680,7 @@ and then try to use another type with a sexp converter, we'll error out:
 # type no_converter = int * int
 type no_converter = int * int
 # type t = { a: no_converter; b: string } [@@deriving sexp]
-Characters 14-26:
+Line 1, characters 15-27:
 Error: Unbound value no_converter_of_sexp
 ```
 

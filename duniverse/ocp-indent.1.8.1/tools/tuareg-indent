@@ -1,0 +1,75 @@
+#!/bin/bash -ue
+#
+# Copyright 2012-2013 OCamlPro
+#
+# All rights reserved.This file is distributed under the terms of the
+# GNU Lesser General Public License version 2.1 with linking
+# exception.
+#
+# TypeRex is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Lesser GNU General Public License for more details.
+#
+
+ocp-config-to-tuareg() {
+    while [ $# -gt 0 ]; do
+        case $1 in
+            -c)
+                shift
+                local c="normal,$1"
+                c=$(sed 's/normal/base=2,type=2,in=0,with=0,match_clause=2/' <<<"$c")
+                c=$(sed 's/JaneStreet/base=2,type=0,in=0,with=0,match_clause=2/' <<<"$c")
+                awk 'BEGIN { RS=","; FS="=" } { print $1,$2 }' <<<"$c" | {
+                    while read var val; do
+                        case "$var" in
+                            "base")         echo "(setq tuareg-default-indent $val)";;
+                            "type")         echo "(setq tuareg-type-indent $val)";;
+                            "in")           echo "(setq tuareg-in-indent $val)";;
+                            "with")         echo "(setq tuareg-with-indent $val)";;
+                            "match_clause") echo "(setq tuareg-match-clause-indent $((val-1)))";;
+                            "") ;;
+                            *)
+                                echo "Error: config option not understood by tuareg conversion: '$var'" >&2
+                        esac
+                    done
+                }
+                ;;
+            *)
+                echo "Error: config parameter not understood by tuareg conversion: '$1'" >&2
+        esac
+        shift
+    done
+}
+tuareg-indent() {
+    local f=$1; shift
+    local config=$(ocp-config-to-tuareg $*)
+    # At Jane Street, and perhaps other sites, Tuareg is found via the
+    # user's ~/.emacs, rather than in a standard location in /usr.  We
+    # may also wish to compare against standard or custom user config.
+    if [ -n "${TUAREG_INDENT_USE_USER_DOT_EMACS+set}" ]; then
+        local tuareg=${TUAREG_INDENT_USE_USER_DOT_EMACS:-$HOME/.emacs}
+    else
+        local tuareg=$(
+            ls /usr/share/emacs*/site-lisp/tuareg-mode/tuareg.elc 2>/dev/null \
+                || ls /usr/share/emacs/site-lisp/tuareg-mode/tuareg.el
+        )
+    fi
+    emacs $f -Q -batch --eval '
+      (progn
+        (load-file "'"$tuareg"'")
+        (tuareg-mode)
+        '"$config"'
+        (setq indent-tabs-mode nil)
+        (indent-region (point-min) (point-max))
+        (set-visited-file-name "/dev/stdout")
+        (save-buffer 0))
+    ' 2>/dev/null || true
+}
+
+# Note: This will whitespace-split individual arguments.
+args=
+while [ $# -gt 1 ]; do args="$args $1"; shift; done
+file=$1
+
+tuareg-indent "$file" $args

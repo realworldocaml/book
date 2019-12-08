@@ -194,7 +194,7 @@ We can use this same idiom for generating an error:
 ```ocaml env=main
 # Error.create "Something went terribly wrong"
     (3.5, ["a";"b";"c"], 6034)
-  [%sexp_of: float * string list * int]
+    [%sexp_of: float * string list * int]
 - : Error.t = ("Something went terribly wrong" (3.5 (a b c) 6034))
 ```
 
@@ -377,7 +377,7 @@ values:
 val exceptions : exn list = [Division_by_zero; Key_not_found("b")]
 # List.filter exceptions  ~f:(function
     | Key_not_found _ -> true
-  | _ -> false)
+    | _ -> false)
 - : exn list = [Key_not_found("b")]
 ```
 
@@ -729,7 +729,7 @@ val lookup_weight :
 A big part of the value of exceptions is that they provide useful debugging
 information in the form of a stack backtrace. Consider the following simple
 program:[debugging/stack backtraces]{.idx}[stack
-backtraces]{.idx}[backtraces]{.idx}:[exceptions/stack backtraces
+backtraces]{.idx}[backtraces]{.idx}[exceptions/stack backtraces
 for]{.idx}[error handling/exception backtracing]{.idx}
 
 ```ocaml file=examples/blow_up/blow_up.ml

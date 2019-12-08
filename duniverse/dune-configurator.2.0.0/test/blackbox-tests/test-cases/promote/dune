@@ -1,0 +1,38 @@
+(rule (with-stdout-to x.gen (echo "toto")))
+
+(alias
+ (name blah)
+ (action (diff x x.gen)))
+
+(rule (with-stdout-to x.gen.copy (cat x.gen)))
+
+(rule (with-stdout-to y.gen (echo "titi")))
+
+(alias
+ (name blah2)
+ (action (diff y y.gen)))
+
+(rule
+ (targets promoted)
+ (action (with-stdout-to promoted (echo "Hello, world!")))
+ (mode (promote-into subdir)))
+
+(rule
+ (targets only1 only2)
+ (action
+  (progn
+   (with-stdout-to only1 (echo "0"))
+   (with-stdout-to only2 (echo "0"))))
+ (mode (promote (only *1))))
+
+;; More complex test
+
+(rule
+ (target into+ignoring)
+ (mode (promote (into subdir)))
+ (action (with-stdout-to %{target} (echo "hello"))))
+
+(rule
+ (target into+ignoring)
+ (enabled_if %{ignoring_promoted_rules})
+ (action (copy subdir/into+ignoring into+ignoring)))

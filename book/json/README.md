@@ -488,7 +488,7 @@ mistakenly include a single value instead of a list of keys:
 val person : [> `Assoc of string * [> `String of string ] ] =
   `Assoc ("name", `String "Anil")
 # Yojson.Basic.pretty_to_string person
-Characters 30-36:
+Line 1, characters 31-37:
 Error: This expression has type
          [> `Assoc of string * [> `String of string ] ]
        but an expression was expected of type Yojson.Basic.t
@@ -503,7 +503,7 @@ about your intentions:
 ```ocaml env=build_json
 # let (person : Yojson.Basic.t) =
   `Assoc ("name", `String "Anil")
-Characters 41-65:
+Line 2, characters 10-34:
 Error: This expression has type 'a * 'b
        but an expression was expected of type (string * Yojson.Basic.t) list
 ```

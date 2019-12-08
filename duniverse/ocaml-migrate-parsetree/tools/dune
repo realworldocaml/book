@@ -1,5 +1,0 @@
-(executables
- (names add_special_comments pp gencopy)
- (libraries compiler-libs.common))
-
-(ocamllex pp_rewrite)

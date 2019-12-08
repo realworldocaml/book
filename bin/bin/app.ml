@@ -83,6 +83,13 @@ let build_install_page : Command.t =
       and out_dir = Params.out_dir
       in fun () -> Book.make ~repo_root ~out_dir `Install ]
 
+let build_tex_inputs_page : Command.t =
+  Command.async ~summary:"build content page"
+    [%map_open
+      let repo_root = Params.repo_root
+      and out_dir = Params.out_dir
+      in fun () -> Book.make ~repo_root ~out_dir `Latex ]
+
 let build : Command.t =
   Command.group ~summary:"build commands"
     [ "chapter", build_chapter
@@ -90,6 +97,7 @@ let build : Command.t =
     ; "toc", build_toc_page
     ; "faqs", build_faqs_page
     ; "install", build_install_page
+    ; "inputs", build_tex_inputs_page
     ]
 
 

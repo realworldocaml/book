@@ -1,0 +1,3 @@
+(library
+ (name gen_rule_helpers)
+ (libraries cmdliner fmt))

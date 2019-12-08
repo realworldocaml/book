@@ -1,0 +1,15 @@
+(library
+ (name ocaml_optcomp)
+ (public_name ocaml-compiler-libs.optcomp)
+ (flags :standard -safe-string)
+ (optional)
+ (libraries compiler-libs.optcomp)
+ (preprocess no_preprocessing))
+
+(rule
+ (targets ocaml_optcomp.ml)
+ (deps
+  (:first_dep ../gen/gen.exe))
+ (action
+  (run %{first_dep} -archive %{ocaml_where}/compiler-libs/ocamloptcomp.cma -o
+    %{targets})))
