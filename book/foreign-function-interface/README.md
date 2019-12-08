@@ -447,7 +447,7 @@ However, we can't just pass the result of `time` to `ctime`:
 
 ```ocaml env=posix
 # ctime (time' ())
-Characters 6-16:
+Line 1, characters 7-17:
 Error: This expression has type time_t but an expression was expected of type
          time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
 ```

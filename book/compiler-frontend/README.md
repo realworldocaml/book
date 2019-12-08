@@ -168,6 +168,8 @@ The code results in a syntax error when compiled:
 ```sh dir=examples/front-end
 $ ocamlc -c broken_module.ml
 File "broken_module.ml", line 2, characters 2-8:
+2 |   module MyString = String;
+      ^^^^^^
 Error: Syntax error
 [2]
 ```
@@ -214,6 +216,8 @@ When you compile this file, you'll get a syntax error again:
 ```sh dir=examples/front-end
 $ ocamlc -c follow_on_function.ml
 File "follow_on_function.ml", line 11, characters 0-3:
+11 | let () =
+     ^^^
 Error: Syntax error
 [2]
 ```
@@ -579,6 +583,16 @@ There's a single character typo in the code so that it uses `Nu` instead of
 ```sh dir=examples/front-end
 $ ocamlc -c broken_poly.ml
 File "broken_poly.ml", line 9, characters 10-154:
+ 9 | ..........(
+10 |     `Add (
+11 |       (`Num 0),
+12 |       (`Sub (
+13 |           (`Num 1),
+14 |           (`Mul (
+15 |               (`Nu 3),(`Num 2)
+16 |             ))
+17 |         ))
+18 |     ))
 Error: This expression has type
          [> `Add of
               ([< `Add of 'a * 'a
@@ -587,7 +601,8 @@ Error: This expression has type
                 | `Sub of 'a * 'a
                 > `Num ]
                as 'a) *
-              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ] ] ]
+              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ]
+              ] ]
        but an expression was expected of type
          [< `Add of 'a * 'a | `Mul of 'a * 'a | `Num of int | `Sub of 'a * 'a
           > `Num ]
@@ -644,6 +659,8 @@ type definition of the polymorphic variants, and a type annotation to the
 ```sh dir=examples/front-end
 $ ocamlc -i broken_poly_with_annot.ml
 File "broken_poly_with_annot.ml", line 22, characters 14-21:
+22 |               (`Nu 3),(`Num 2)
+                   ^^^^^^^
 Error: This expression has type [> `Nu of int ]
        but an expression was expected of type t
        The second variant type does not allow tag(s) `Nu
@@ -696,6 +713,8 @@ Inferring the signature with `-principal` will show you a new warning:
 ```sh dir=examples/front-end
 $ ocamlc -i -principal non_principal.ml
 File "non_principal.ml", line 6, characters 4-7:
+6 |   x.foo
+        ^^^
 Warning 18: this type-based field disambiguation is not principal.
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
@@ -1180,7 +1199,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Tstr_type Rec
     [
-      type_declaration t/1002 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+      type_declaration t/80 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
         ptype_params =
           []
         ptype_cstrs =
@@ -1189,11 +1208,11 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
           Ttype_variant
             [
               (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-                Foo/1003
+                Foo/81
                 []
                 None
               (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-                Bar/1004
+                Bar/82
                 []
                 None
             ]
@@ -1206,7 +1225,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
     [
       <def>
         pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-          Tpat_var "v/1005"
+          Tpat_var "v/83"
         expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
           Texp_construct "Foo"
           []

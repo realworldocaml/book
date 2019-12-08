@@ -201,7 +201,7 @@ warnings]{.idx}[records/missing field warnings]{.idx}
 # #warnings "+9"
 # let service_info_to_string { service_name = name; port = port; protocol = prot  } =
     sprintf "%s %i/%s" name port prot
-Characters 27-81:
+Line 1, characters 28-82:
 Warning 9: the following labels are not bound in this record pattern:
 comment
 Either bind these labels explicitly or add '; _' to the pattern.
@@ -415,7 +415,7 @@ heartbeat:
 # let status_and_session t = (t.status_message, t.session_id)
 val status_and_session : heartbeat -> string * string = <fun>
 # let session_and_status t = (t.session_id, t.status_message)
-Characters 44-58:
+Line 1, characters 45-59:
 Error: This expression has type logon
        The field status_message does not belong to type logon
 # let session_and_status (t:heartbeat) = (t.session_id, t.status_message)

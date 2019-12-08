@@ -367,7 +367,7 @@ You can see these in action:
 
 ```ocaml env=ref
 # let x = ref 1
-val x : int Caml.ref = {Base.Ref.contents = 1}
+val x : int Stdlib.ref = {Base.Ref.contents = 1}
 # !x
 - : int = 1
 # x := !x + 1
@@ -1108,7 +1108,7 @@ just that: [let rec]{.idx}
 # let memo_rec f_norec =
     let rec f = memoize (fun x -> f_norec f x) in
     f
-Characters 39-69:
+Line 2, characters 17-47:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
@@ -1304,7 +1304,7 @@ string, we'll get a type error:
 
 ```ocaml env=printf
 # printf "An integer: %i\n" 4.5
-Characters 26-29:
+Line 1, characters 27-30:
 Error: This expression has type float but an expression was expected of type
          int
 ```
@@ -1327,7 +1327,7 @@ literal at compile time. Indeed, if you try to pass an ordinary string to
 # let fmt = "%i is an integer\n"
 val fmt : string = "%i is an integer\n"
 # printf fmt 3
-Characters 7-10:
+Line 1, characters 8-11:
 Error: This expression has type string but an expression was expected of type
          ('a -> 'b, out_channel, unit) format =
            ('a -> 'b, out_channel, unit, unit, unit, unit) format6
@@ -1680,7 +1680,7 @@ val remember_three : unit -> int = <fun>
 # remember
 - : int -> int = <fun>
 # remember "avocado"
-Characters 9-18:
+Line 1, characters 10-19:
 Error: This expression has type string but an expression was expected of type
          int
 ```

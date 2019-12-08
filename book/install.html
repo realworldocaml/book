@@ -9,7 +9,7 @@
   <ul>
     <li>Get <a href="https://opam.ocaml.org">opam</a> installed</li>
 
-    <li>Build OCaml 4.07.1 or later using opam or your OS package manager</li>
+    <li>Build OCaml 4.08.1 or later using opam or your OS package manager</li>
 
     <li>With opam, install the key libraries that you need to work
     through the examples in the book</li>
@@ -78,7 +78,7 @@ sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-n
 
   <h3>Debian Linux</h3>
 
-  <p>Debian's OCaml packages aren't yet at 4.07.1, and so you will
+  <p>Debian's OCaml packages aren't yet at 4.08.1, and so you will
   need to compile it from sources. If you are using the
   Debian 10 <code>stable</code> stream, then opam 2.0 will
   be available.</p>
@@ -105,9 +105,9 @@ sudo pacman -S opam
   <p>The following is enough to get OCaml installed on most
   platforms.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-curl -OL https://github.com/ocaml/ocaml/archive/4.07.1.tar.gz
-tar -zxvf 4.07.1.tar.gz
-cd ocaml-4.07.1
+curl -OL https://github.com/ocaml/ocaml/archive/4.08.1.tar.gz
+tar -zxvf 4.08.1.tar.gz
+cd ocaml-4.08.1
 ./configure
 make world world.opt
 sudo make install
@@ -219,7 +219,7 @@ eval `opam config env`
   can do this in <code>bash</code> as follows.</p>
   <pre class="command-line" data-user="rwo" data-host="lama" data-output="2"><code class="language-bash">
 printenv OCAML_TOPLEVEL_PATH
-/Users/myusername/.opam/4.07.1/lib/toplevel
+/Users/myusername/.opam/4.08.1/lib/toplevel
 </code></pre>
 
   <p>The next step is to make sure we have the right compiler
@@ -227,17 +227,17 @@ printenv OCAML_TOPLEVEL_PATH
   <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-5"><code class="language-bash">
 opam switch
 system  C system                      System compiler (4.00.1)
---     -- 4.04.2                      Official 4.04.2 release
 --     -- 4.05.0                      Official 4.05.0 release
 --     -- 4.06.0                      Official 4.06.0 release
 --     -- 4.07.1                      Official 4.07.1 release
+--     -- 4.08.1                      Official 4.08.1 release
 </code></pre>
 
   <p>If, as in this case, your system compiler is older than
-  <code>4.07.1</code>, you should install a more up to date version
+  <code>4.08.1</code>, you should install a more up to date version
   of the compiler, as shown below.</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam switch 4.07.1
+opam switch 4.08.1
 eval `opam env`
 </code></pre>
 
@@ -248,7 +248,7 @@ eval `opam env`
   them once they're installed is fast.</p>
 
   <p>The new compiler and all libraries associated with it will be
-  installed in <code>~/.opam/4.01.0</code>.</p>
+  installed in <code>~/.opam/4.08.1</code>.</p>
 
   <p>Finally, we're ready to install the libraries and tools we'll
   need for the book. The most important ones are <code>core</code>,
