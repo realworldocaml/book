@@ -170,7 +170,7 @@ method:
 # let toggle sq b : unit =
     if b then sq#resize `Fullscreen
   else minimize sq
-Characters 77-79:
+Line 3, characters 17-19:
 Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
        but an expression was expected of type < resize : int -> unit; .. >
        Types for method resize are incompatible
@@ -193,7 +193,7 @@ val area_closed : < width : int > -> int = <fun>
   end
 val sq : < name : string; width : int > = <obj>
 # area_closed sq
-Characters 12-14:
+Line 1, characters 13-15:
 Error: This expression has type < name : string; width : int >
        but an expression was expected of type < width : int >
        The second object type has no method name
@@ -211,7 +211,7 @@ variables]{.idx}
 
 ```ocaml env=polymorphism
 # type square = < width : int; ..>
-Characters 0-32:
+Line 1, characters 1-33:
 Error: A type variable is unbound in this type declaration.
 In type < width : Base.int; .. > as 'a the variable 'a is unbound
 ```
@@ -404,7 +404,7 @@ is. Note, however, that the coercion `:>` must be explicit:
 
 ```ocaml env=subtyping
 # (square 10 : shape)
-Characters 1-10:
+Line 1, characters 2-11:
 Error: This expression has type < area : float; width : int >
        but an expression was expected of type shape
        The second object type has no method width
@@ -514,10 +514,8 @@ squares. OCaml recognizes this and does not allow the coercion:
 # let square_array: square array = [| square 10; square 20 |]
 val square_array : square array = [|<obj>; <obj>|]
 # let shape_array: shape array = (square_array :> shape array)
-Characters 31-60:
+Line 1, characters 32-61:
 Error: Type square array is not a subtype of shape array
-       Type square = < area : float; width : int >
-       is not compatible with type shape = < area : float >
        The second object type has no method width
 ```
 
@@ -597,10 +595,10 @@ In this case, OCaml is forced to assume that the type is invariant.
 
 ```ocaml env=subtyping
 # (Abs_either.left (square 40) :> (shape, _) Abs_either.t)
-Characters 1-28:
-Error: This expression cannot be coerced to type (shape, 'a) Abs_either.t;
-       it has type (< area : float; width : int >, 'b) Abs_either.t
-       but is here used with type (shape, 'a) Abs_either.t
+Line 1, characters 2-29:
+Error: This expression cannot be coerced to type (shape, 'b) Abs_either.t;
+       it has type (< area : float; width : int >, 'a) Abs_either.t
+       but is here used with type (shape, 'b) Abs_either.t
        Type < area : float; width : int > is not compatible with type
          shape = < area : float >
        The second object type has no method width
@@ -670,12 +668,13 @@ error:
 
 ```ocaml env=subtyping
 # total_area [(square_stack :> shape stack); (circle_stack :> shape stack)]
-Characters 12-41:
+Line 1, characters 13-42:
 Error: Type square stack = < pop : square option; push : square -> unit >
        is not a subtype of
          shape stack = < pop : shape option; push : shape -> unit >
        Type shape = < area : float > is not a subtype of
          square = < area : float; width : int >
+       The first object type has no method width
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of
@@ -878,7 +877,7 @@ cannot be created using row polymorphism:
 
 ```ocaml env=row_polymorphism
 # let hlist: < area: float; ..> list = [square 10; circle 30]
-Characters 49-58:
+Line 1, characters 50-59:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
        The second object type has no method radius
@@ -892,7 +891,7 @@ in the same reference:
 val shape_ref : < area : float; width : int > ref =
   {Base.Ref.contents = <obj>}
 # shape_ref := circle 20
-Characters 13-22:
+Line 1, characters 14-23:
 Error: This expression has type < area : float; radius : int >
        but an expression was expected of type < area : float; width : int >
        The second object type has no method radius

@@ -108,6 +108,8 @@ the executable like this:
 ```sh dir=examples/freq
 $ ocamlc freq.ml -o freq.byte
 File "freq.ml", line 1, characters 5-9:
+1 | open Base
+         ^^^^
 Error: Unbound module Base
 [2]
 ```
@@ -379,6 +381,8 @@ If we now try to compile `freq.ml`, we'll get the following error:
 ```sh dir=examples/freq-with-sig-abstract
 $ dune build freq.bc
 File "freq.ml", line 5, characters 53-66:
+5 |   In_channel.fold_lines In_channel.stdin ~init:[] ~f:Counter.touch
+                                                         ^^^^^^^^^^^^^
 Error: This expression has type Counter.t -> Base.string -> Counter.t
        but an expression was expected of type
          'a list -> Base.string -> 'a list
@@ -596,6 +600,8 @@ this bug for us.
 ```sh dir=examples/session_info
 $ dune build session_info.exe
 File "session_info.ml", line 27, characters 23-30:
+27 |   Username.(=) s1.user s2.host
+                            ^^^^^^^
 Error: This expression has type Hostname.t
        but an expression was expected of type Username.t
 [1]
@@ -625,7 +631,7 @@ identifiers. Here's an example:
 # module M = struct let foo = 3 end
 module M : sig val foo : int end
 # foo
-Characters 0-3:
+Line 1, characters 1-4:
 Error: Unbound value foo
 # open M
 # foo
@@ -752,7 +758,7 @@ If we'd used `open`, we'd have gotten a quite different result:
 module Extended_interval :
   sig val contains : Extended_interval.t -> int -> bool end
 # Extended_interval.contains (Extended_interval.create 3 10) 4
-Characters 28-52:
+Line 1, characters 29-53:
 Error: Unbound value Extended_interval.create
 ```
 
@@ -937,6 +943,8 @@ we'll see this error when we try to build:
 ```sh dir=examples/freq-cyclic1
 $ dune build freq.bc
 File "counter.ml", line 18, characters 18-31:
+18 | let singleton l = Counter.touch Counter.empty
+                       ^^^^^^^^^^^^^
 Error: Unbound module Counter
 [1]
 ```

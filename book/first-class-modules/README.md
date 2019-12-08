@@ -173,7 +173,7 @@ is `int`.
 
 ```ocaml env=main
 # let (module Bumpable) = int_bumper in Bumpable.bump 3
-Characters 52-53:
+Line 1, characters 53-54:
 Error: This expression has type int but an expression was expected of type
          Bumpable.t
 ```
@@ -262,7 +262,7 @@ concrete type, say, `int`, then the compiler will complain:
 
 ```ocaml env=main
 # let double_int (type a) (x:a) = x + x
-Characters 32-33:
+Line 1, characters 33-34:
 Error: This expression has type a but an expression was expected of type int
 ```
 

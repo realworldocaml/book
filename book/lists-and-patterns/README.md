@@ -110,7 +110,7 @@ immediately warn you that something is wrong:
     | [] -> []
     | to_drop :: tl -> drop_value tl to_drop
     | hd :: tl -> hd :: drop_value tl to_drop
-Characters 114-122:
+Line 5, characters 7-15:
 Warning 11: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
@@ -304,7 +304,7 @@ a case, along with an example of an unmatched pattern:
     match l with
     | [] -> []
     | 0  :: tl -> drop_zero tl
-Characters 26-84:
+Line 2, characters 5-63:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 1::_
@@ -860,7 +860,7 @@ as you can see if you try to apply it to values of a different type.
 
 ```ocaml env=poly
 # "foo" = "bar"
-Characters 0-5:
+Line 1, characters 1-6:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -969,7 +969,7 @@ exhaustive:
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
-Characters 30-169:
+Line 2, characters 5-144:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_

@@ -436,6 +436,8 @@ Building this will give us the following error:
 ```sh dir=examples/test_interval_nosexp
 $ dune build test_interval_nosexp.exe
 File "test_interval_nosexp.ml", line 13, characters 20-42:
+13 |   |> List.sexp_of_t Int_interval.sexp_of_t
+                         ^^^^^^^^^^^^^^^^^^^^^^
 Error: Unbound value Int_interval.sexp_of_t
 [1]
 ```
@@ -678,7 +680,7 @@ and then try to use another type with a sexp converter, we'll error out:
 # type no_converter = int * int
 type no_converter = int * int
 # type t = { a: no_converter; b: string } [@@deriving sexp]
-Characters 14-26:
+Line 1, characters 15-27:
 Error: Unbound value no_converter_of_sexp
 ```
 
