@@ -116,3 +116,16 @@ To accept the changes:
 ```
 make promote
 ```
+
+## Upgrading or adding dependencies
+
+RWO's dependencies are vendored using `duniverse`. If you want to upgrade them
+to their latest availbale opam version you can run:
+
+```
+make duniverse-upgrade
+```
+
+Additionally, if you're working on the book and need a new package vendored, you
+can simply add it to the `$DEPS` variable in the `Makefile` and run the above
+command again.
