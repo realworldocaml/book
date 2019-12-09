@@ -51,6 +51,7 @@ depext:
 duniverse-init:
 	duniverse init \
 		--pin mdx,https://github.com/Julow/mdx.git,duniverse_mode \
+		rwo \
 		$(DEPS)
 
 duniverse-upgrade: duniverse-init
