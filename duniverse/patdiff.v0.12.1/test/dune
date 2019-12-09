@@ -1,4 +1,0 @@
-(library (name patdiff_test)
- (modules_without_implementation test_diff_quality)
- (libraries async core expect_test_helpers patdiff_lib)
- (preprocess (pps ppx_jane)))

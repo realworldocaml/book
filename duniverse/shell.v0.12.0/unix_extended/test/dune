@@ -1,3 +1,0 @@
-(library (name unix_extended_test)
- (libraries expect_test_helpers_kernel unix_extended)
- (preprocess (pps ppx_jane)))

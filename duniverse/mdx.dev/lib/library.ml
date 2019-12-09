@@ -48,8 +48,8 @@ let from_string s =
   match Astring.String.cuts ~sep:"." s with
   | [""] | [""; _] | [_; ""] -> invalid ()
   | [base_name] -> Ok {base_name; sub_lib = None}
-  | [base_name; sl] -> Ok {base_name; sub_lib = Some sl}
-  | _ -> invalid ()
+  | base_name::sl -> Ok {base_name; sub_lib = Some (String.concat "." sl)}
+  | [] -> assert false (* String.cuts invariant *)
 
 module Set = struct
   include Set.Make(struct
