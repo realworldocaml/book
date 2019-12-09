@@ -6,6 +6,7 @@ async \
 base \
 cmdliner \
 cohttp-async \
+conf-ncurses \
 core \
 core_bench \
 ctypes \

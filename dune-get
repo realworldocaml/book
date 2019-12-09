@@ -1,7 +1,7 @@
 ((config
   ((root_packages
     (((name async)) ((name base)) ((name cmdliner)) ((name cohttp-async))
-     ((name core)) ((name core_bench)) ((name ctypes))
+     ((name conf-ncurses)) ((name core)) ((name core_bench)) ((name ctypes))
      ((name ctypes-foreign)) ((name fmt)) ((name lambdasoup)) ((name mdx))
      ((name ocaml-compiler-libs)) ((name ppx_jane)) ((name re)) ((name rwo))
      ((name sexp_pretty)) ((name textwrap)) ((name yojson))))
