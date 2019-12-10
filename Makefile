@@ -1,4 +1,25 @@
-.PHONY: all clean dep publish promote test test-all docker depext
+.PHONY: all clean dep publish promote test test-all docker depext \
+	duniverse-init duniverse-update
+
+DEPS =\
+async \
+base \
+cmdliner \
+cohttp-async \
+conf-ncurses \
+core \
+core_bench \
+ctypes \
+ctypes-foreign \
+fmt \
+lambdasoup \
+mdx \
+ocaml-compiler-libs \
+ppx_jane \
+re \
+sexp_pretty \
+textwrap \
+yojson
 
 all:
 	@dune build @site @pdf
@@ -26,5 +47,13 @@ docker:
 	docker build -t ocaml/rwo .
 
 depext:
-	opam depext -y core async ppx_sexp_conv dune toplevel_expect_test patdiff \
-		lambdasoup sexp_pretty fmt re mdx ctypes-foreign conf-ncurses
+	opam depext -y $(DEPS)
+
+duniverse-init:
+	duniverse init \
+		--pin mdx,https://github.com/Julow/mdx.git,duniverse_mode \
+		rwo \
+		$(DEPS)
+
+duniverse-upgrade: duniverse-init
+	duniverse pull --no-cache

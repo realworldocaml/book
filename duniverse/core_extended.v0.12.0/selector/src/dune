@@ -1,2 +1,0 @@
-(library (name selector) (public_name core_extended.selection)
- (libraries re core_kernel) (preprocess (pps ppx_jane)))

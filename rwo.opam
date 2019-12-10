@@ -8,8 +8,8 @@ homepage: "https://github.com/realworldocaml/book"
 bug-reports: "https://github.com/realworldocaml/book/issues"
 synopsis: "Real World OCaml book sources"
 depends: [
-  "ocaml" {>= "4.06.0"}
-  "dune" {>= "1.11.0"}
+  "ocaml" {>= "4.08.1"}
+  "dune" {>= "2.0.0"}
 ]
 build: ["dune" "build"]
 depexts: [

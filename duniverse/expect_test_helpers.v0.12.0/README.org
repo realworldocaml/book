@@ -1,6 +1,0 @@
-January 2016
-
-A set of small helper functions for use in expect test.
-
-Note that this library is still in its infancy, and so may change
-considerably over time.

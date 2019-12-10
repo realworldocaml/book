@@ -61,8 +61,8 @@ with only `dune` installed to avoid conflicts between the opam and local
 libraries. To set up your RWO development environment you can run:
 
 ```
-opam switch create rwo 4.07.1
-opam install dune=1.11.0
+opam switch create rwo 4.08.1
+opam install dune=2.0.0
 ```
 
 ### Generating the HTML
@@ -116,3 +116,16 @@ To accept the changes:
 ```
 make promote
 ```
+
+## Upgrading or adding dependencies
+
+RWO's dependencies are vendored using `duniverse`. If you want to upgrade them
+to their latest availbale opam version you can run:
+
+```
+make duniverse-upgrade
+```
+
+Additionally, if you're working on the book and need a new package vendored, you
+can simply add it to the `$DEPS` variable in the `Makefile` and run the above
+command again.
