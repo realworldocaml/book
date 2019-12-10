@@ -52,7 +52,7 @@ depext:
 
 duniverse-init:
 	duniverse init \
-		--pin mdx,https://github.com/Julow/mdx.git,duniverse_mode \
+		--pin mdx,https://github.com/realworldocaml/mdx.git,master \
 		rwo \
 		$(DEPS)
 

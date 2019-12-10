@@ -8,8 +8,8 @@
      ((name textwrap)) ((name yojson))))
    (excludes (((name rwo))))
    (pins
-    (((pin mdx) (url (https://github.com/Julow/mdx.git))
-      (tag (duniverse_mode)))))
+    (((pin mdx) (url (https://github.com/realworldocaml/mdx.git))
+      (tag (master)))))
    (remotes ()) (branch master)))
  (deps
   ((opamverse (((name ctypes-foreign) (version (0.15.1+dune)))))
@@ -188,9 +188,8 @@
      ((dir markup.0.8.1) (upstream https://github.com/aantron/markup.ml.git)
       (ref ((t 0.8.1) (commit ea68bebf5c3a19f56350393e359d444f864154e3)))
       (provided_packages (((name markup) (version (0.8.1))))))
-     ((dir mdx.dev) (upstream https://github.com/Julow/mdx.git)
-      (ref
-       ((t duniverse_mode) (commit f9f796dbec4165efe8eecd6712591b813ba63978)))
+     ((dir mdx.dev) (upstream https://github.com/realworldocaml/mdx.git)
+      (ref ((t master) (commit ba31c7378eb4f478c7bec614145ab6e1d9a2b0dc)))
       (provided_packages (((name mdx) (version (dev))))))
      ((dir mmap.1.1.0) (upstream https://github.com/mirage/mmap.git)
       (ref ((t v1.1.0) (commit 46f613db11c00667764523ccbb3d63e53e1c666c)))
