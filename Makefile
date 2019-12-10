@@ -1,5 +1,5 @@
 .PHONY: all clean dep publish promote test test-all docker depext \
-	duniverse-init duniverse-update
+	duniverse-init duniverse-upgrade
 
 DEPS =\
 async \
