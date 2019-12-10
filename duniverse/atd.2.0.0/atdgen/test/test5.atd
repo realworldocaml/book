@@ -1,0 +1,45 @@
+(* Basic testing of -allow-name-overlap *)
+
+type ab1 = {
+  a : string;
+  b : int;
+}
+
+type ab2 = {
+  a : string;
+  b : int;
+}
+
+type bca = {
+  b : ab2 list;
+  c : int list;
+  a : float;
+}
+
+type cd1 = [
+  | C of int
+  | D of string
+] <ocaml repr="classic">
+
+type cd2 = [
+  | C of float
+  | D of bool
+] <ocaml repr="classic">
+
+type cde = [
+  | C of int
+  | D of cd1
+  | E of cd2
+]
+
+type all = {
+  a : ab1;
+  b : ab2;
+  c : bca list;
+  d : cde list;
+}
+
+type contains_variant = {
+  foo : string;
+  bar : [ One | Two | Three of int ]
+}

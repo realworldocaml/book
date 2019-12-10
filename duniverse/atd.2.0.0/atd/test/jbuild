@@ -1,0 +1,12 @@
+(jbuild_version 1)
+
+(executables
+ ((libraries (atd))
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (names (unit_tests))))
+
+(alias
+ ((name   runtest)
+  (package atd)
+  (deps   (unit_tests.exe))
+  (action (run ${<}))))

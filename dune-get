@@ -1,10 +1,11 @@
 ((config
   ((root_packages
-    (((name async)) ((name base)) ((name cmdliner)) ((name cohttp-async))
-     ((name conf-ncurses)) ((name core)) ((name core_bench)) ((name ctypes))
-     ((name ctypes-foreign)) ((name fmt)) ((name lambdasoup)) ((name mdx))
-     ((name ocaml-compiler-libs)) ((name ppx_jane)) ((name re)) ((name rwo))
-     ((name sexp_pretty)) ((name textwrap)) ((name yojson))))
+    (((name async)) ((name atdgen)) ((name base)) ((name cmdliner))
+     ((name cohttp-async)) ((name conf-ncurses)) ((name core))
+     ((name core_bench)) ((name ctypes)) ((name ctypes-foreign)) ((name fmt))
+     ((name lambdasoup)) ((name mdx)) ((name ocaml-compiler-libs))
+     ((name ppx_jane)) ((name re)) ((name rwo)) ((name sexp_pretty))
+     ((name textwrap)) ((name yojson))))
    (excludes (((name rwo))))
    (pins
     (((pin mdx) (url (https://github.com/Julow/mdx.git))
@@ -38,6 +39,12 @@
       (upstream https://github.com/janestreet/async_unix.git)
       (ref ((t v0.12.0) (commit d234c9730862797bbf7cac9bf5a28c3f67e36ed6)))
       (provided_packages (((name async_unix) (version (v0.12.0))))))
+     ((dir atd.2.0.0) (upstream git://github.com/mjambon/atd.git)
+      (ref ((t 2.0.0) (commit fa543c75c57909b5ff34644492e7d4d9d7b54025)))
+      (provided_packages
+       (((name atd) (version (2.0.0)))
+        ((name atdgen-runtime) (version (2.0.0)))
+        ((name atdgen) (version (2.0.0))))))
      ((dir base.v0.12.2) (upstream https://github.com/janestreet/base.git)
       (ref ((t v0.12.2) (commit dd30ff183630ebf483589a77653d33ff349870bf)))
       (provided_packages (((name base) (version (v0.12.2))))))

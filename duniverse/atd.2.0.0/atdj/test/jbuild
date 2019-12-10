@@ -1,0 +1,53 @@
+(jbuild_version 1)
+
+(alias
+ ((name runtest)
+  (action (diff expected/A.java com/mylife/test/A.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/Atdj.java com/mylife/test/Atdj.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/B.java com/mylife/test/B.java))))
+
+(alias
+ ((name runtest)
+  (action
+   (diff expected/ComplexRecord.java com/mylife/test/ComplexRecord.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/E.java com/mylife/test/E.java))))
+
+(alias
+ ((name runtest)
+  (action
+   (diff expected/RecordWithDefaults.java com/mylife/test/RecordWithDefaults.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/SampleSum.java com/mylife/test/SampleSum.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/SimpleRecord.java com/mylife/test/SimpleRecord.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/Util.java com/mylife/test/Util.java))))
+
+(alias
+ ((name runtest)
+  (action (diff expected/package.html com/mylife/test/package.html))))
+
+(alias
+ ((name runtest)
+  (package atdj)
+  (deps
+   (AtdjTest.java
+    json.jar
+    junit-4.8.2.jar
+    (glob_files com/mylife/test/*.java)))
+  (action (run ./run_test.sh))))

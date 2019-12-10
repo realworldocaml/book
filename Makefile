@@ -3,6 +3,7 @@
 
 DEPS =\
 async \
+atdgen \
 base \
 cmdliner \
 cohttp-async \
