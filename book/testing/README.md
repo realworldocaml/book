@@ -1,26 +1,26 @@
 # Testing
 
 Testing is not the best loved part of software engineering.  It can be
-hard and tedious, and it often feels like a distraction from the work
-of just adding functionality to your code.  In some ways, OCaml's
+painful work, and it often feels like a distraction from the important
+work of adding functionality to your code.  In some ways, OCaml's
 type-system makes testing seem even less appealing, since the type
 system's ability to squash many kinds of bugs at compile time makes it
-easier to imagine that testing isn't all that important.
+seem like that testing isn't all that important.
 
 But make no mistake, clever types notwithstanding, testing is
 essential for developing and evolving complex software systems.  The
 goal of this chapter is to teach you more about how to write effective
-tests in OCaml, and in particular to teach you some of the best tools
-for doing so.
+tests in OCaml, and to teach you some of the best tools for doing so.
 
-Tooling is especially important here because one of the things that
-prevents people from writing all the tests they should is the sheer
-tedium of it all.  But with the right tools in hand, writing tests can
-be lightweight and fun.  And when testing is fun, people do a lot more
-of it.
+Tooling is especially important in the context of testing because one
+of the things that prevents people from writing all the tests they
+should is the sheer tedium of it all.  But with the right tools in
+hand, writing tests can be lightweight and fun.  And when testing is
+fun, people do a lot more of it.
 
-Before talking about the tools, let's discuss what we want out of our
-tests in the first place.
+But before talking about the testing tools that are available in
+OCaml, let's discuss at a high level what we want out of our tests and
+our testing tools in the first place.
 
 ## What makes for good tests?
 
@@ -30,7 +30,8 @@ in a good testing environment.
 - **Easy to write and run**. Tests should require a minimum of
   boilerplate to create and to hook into your build pipeline.
   Ideally, you should set things up so that tests are run
-  automatically on every proposed change, before it's accepted.
+  automatically on every proposed change, preventing people from
+  accidentally breaking the build.
 - **Easy to update**. Tests that are hard to adjust in the face of
   code changes can become their own form of technical debt.
 - **Fast**, so they don't slow down your development process.
@@ -43,10 +44,12 @@ in a good testing environment.
   fix the problem flagged by a failing test.
 
 No testing framework can ensure that your tests satisfy these
-properties.  But the tools you choose can help or hinder on all of
-these fronts.  As we go through the rest of this chapter, you should
-be able to see how the testing tools available for OCaml can help
-advance these goals.
+properties.  But the tools you choose can help or hinder on all these
+fronts.
+
+As we go through the rest of this chapter and introduce you to some of
+the available tooling, you should be able to see how each tool can
+help advance these goals.
 
 ## Inline tests
 
