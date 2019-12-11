@@ -1,0 +1,8 @@
+
+type 'x abs1 = abstract
+
+type 'x abs2 <ocaml_biniou module="Test">
+             <ocaml_json module="Testj"> = abstract
+
+type 'x abs3 <ocaml module="Test">
+             <ocaml_json module="Testj"> = abstract

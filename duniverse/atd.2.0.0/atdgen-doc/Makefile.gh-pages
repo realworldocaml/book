@@ -1,0 +1,17 @@
+# -*- makefile -*-
+.PHONY: default dev pub clean
+
+PAGES = \
+  atd-syntax.html \
+  atdgen.css \
+  atdgen.html \
+  biniou-format.txt \
+  index.html \
+  tutorial.html
+
+default:
+	$(MAKE) -C src
+	cd html && cp $(PAGES) ..
+
+clean:
+	$(MAKE) -C src clean
