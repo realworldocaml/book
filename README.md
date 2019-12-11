@@ -17,31 +17,17 @@ reported on the [issue tracker](https://github.com/realworldocaml/book/issues).
 
 ## Repository layout
 
-The book is structured as HTML sources that are transformed into
-the online site via OCaml scripts. Code fragments are evaluated
-and inserted into the book via custom `<link>` tags in the source code.
+Each chapter of the book sits in a separate subfolder of the `book/` directory.
+The `README.md` file contains the text of the chapter, written in markdown.
+Each ocaml or shell code block in the chapter is validated using
+[mdx](https://github.com/realworldocaml/mdx). The more complex and structured
+examples live in an `examples/` sub folder and mdx is used to keep the examples
+and the chapter's code block in sync.
 
-If you wish to build the book yourself, then you will need to be
-familiar with the [opam](https://opam.ocaml.org) pinning workflow.
+The `bin/` folder contains the OCaml scripts used to generate the books HTML
+and PDF versions.
 
-There are three main repositories for the book:
-
-- <https://github.com/realworldocaml/scripts> contains the `rwo`
-  opam package which provides the binaries for build and dependency
-  analysis of the book sources.  These scripts are currently unreleased
-  and so need to be pinned to master via opam.  The working branch
-  is currently the `v2` branch.
-- <https://github.com/realworldocaml/examples> contain the source
-  code fragments which are evaluated and inserted into this book.
-  They can be checked out separately for easy building by readers.
-  The code fragments are evaluted by the `rwo` tool by using the
-  [mdx](https://github.com/realworldocaml/mdx) mardkown
-  parser.  The working branch is currently the `master` branch.
-- <https://github.com/realworldocaml/book> is this repository, which
-  uses the scripts and examples repositories to compile the HTML
-  site online.
-
-All of the code and examples are built using OCaml 4.07.1.
+All of the code and examples are built using OCaml 4.08.1.
 
 ## Building
 
@@ -66,12 +52,6 @@ opam install dune=2.0.0
 ```
 
 ### Generating the HTML
-
-The contents of the pages is split between:
-
-- [the chapter contents](./book), written using
-[pandoc markdown](https://pandoc.org/MANUAL.html#markdown-variants).
-- [the code examples](./examples/code)
 
 To generate the HTML pages:
 
