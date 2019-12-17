@@ -1,0 +1,9 @@
+(rule
+ (deps test_deriving_map.cppo.ml)
+ (targets test_deriving_map.ml)
+ (action (run %{bin:cppo} -V OCAML:%{ocaml_version} %{deps} -o %{targets})))
+
+(test
+ (name test_deriving_map)
+ (libraries oUnit ppx_deriving.runtime)
+ (preprocess (pps ppx_deriving.map ppx_deriving.show)))

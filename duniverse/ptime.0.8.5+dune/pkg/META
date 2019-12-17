@@ -1,0 +1,56 @@
+description = "POSIX time for OCaml"
+version = "%%VERSION_NUM%%"
+requires = "result"
+archive(byte) = "ptime.cma"
+archive(native) = "ptime.cmxa"
+plugin(byte) = "ptime.cma"
+plugin(native) = "ptime.cmxs"
+
+package "top" (
+  description = "Ptime toplevel support"
+  version = "%%VERSION_NUM%%"
+  requires = "ptime"
+  archive(byte) = "ptime_top.cma"
+  archive(native) = "ptime_top.cmxa"
+  plugin(byte) = "ptime_top.cma"
+  plugin(native) = "ptime_top.cmxs"
+)
+
+package "clock" (
+  description = "POSIX time clocks"
+  version = "%%VERSION_NUM%%"
+  requires = ""
+
+  package "os" (
+    directory="os"
+    description = "Ptime_clock for native OS"
+    version = "%%VERSION_NUM%%"
+    requires = "ptime"
+    archive(byte) = "ptime_clock.cma"
+    archive(native) = "ptime_clock.cmxa"
+    plugin(byte) = "ptime_clock.cma"
+    plugin(native) = "ptime_clock.cmxs"
+    exists_if = "ptime_clock.cma"
+
+    package "top" (
+      description = "Ptime_clock native OS toplevel support"
+      version = "%%VERSION_NUM%%"
+      requires = "ptime.top ptime.clock.os"
+      archive(byte) = "ptime_clock_top.cma"
+      archive(native) = "ptime_clock_top.cmxa"
+      plugin(byte) = "ptime_clock_top.cma"
+      plugin(native) = "ptime_clock_top.cmxs"
+      exists_if = "ptime_clock_top.cma"))
+
+  package "jsoo" (
+    directory="jsoo"
+    description = "Ptime_clock for js_of_ocaml"
+    version = "%%VERSION_NUM%%"
+    requires = "js_of_ocaml ptime"
+    archive(byte) = "ptime_clock.cma"
+    plugin(byte) = "ptime_clock.cma"
+    archive(native) = "ptime_clock.cmxa"
+    plugin(native) = "ptime_clock.cmxs"
+    exists_if = "ptime_clock.cma"
+  )
+)

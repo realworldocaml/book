@@ -1,0 +1,16 @@
+description = "Arbitrary precision integers"
+requires = ""
+version = "1.9.1"
+archive(byte) = "zarith.cma"
+archive(native) = "zarith.cmxa"
+
+package "top" (
+  version = "1.9.1"
+  description = "ZArith toplevel support"
+  requires = "zarith"
+  archive(byte) = "zarith_top.cma"
+  archive(native) = "zarith_top.cmxa"
+  plugin(byte) = "zarith_top.cma"
+  plugin(native) = "zarith_top.cmxs"
+  exists_if = "zarith_top.cma"
+)

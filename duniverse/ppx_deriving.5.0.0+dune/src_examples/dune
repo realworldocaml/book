@@ -1,0 +1,7 @@
+(executable
+ (name print_test)
+ (preprocess (pps ppx_deriving.show)))
+
+(alias
+ (name examples)
+ (deps print_test.exe))

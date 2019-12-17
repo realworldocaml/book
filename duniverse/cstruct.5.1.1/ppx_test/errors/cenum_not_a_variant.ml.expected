@@ -1,0 +1,2 @@
+File "cenum_not_a_variant.ml", line 2, characters 2-34:
+Error: ppx_cstruct: expected variant type

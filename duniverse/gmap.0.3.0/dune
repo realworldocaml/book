@@ -1,0 +1,9 @@
+(library
+  (name gmap)
+  (public_name gmap)
+  (modules gmap))
+
+(test
+  (name tests)
+  (modules tests)
+  (libraries alcotest fmt gmap))

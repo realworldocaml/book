@@ -1,0 +1,5 @@
+(library
+ (name        mirage_clock_freestanding)
+ (wrapped     false)
+ (public_name mirage-clock-freestanding)
+ (libraries   mirage-clock))

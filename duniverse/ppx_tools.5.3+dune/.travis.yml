@@ -1,0 +1,14 @@
+language: c
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex .travis-docker.sh
+env:
+ global:
+   - PACKAGE="ppx_tools"
+   - PRE_INSTALL_HOOK="cd /home/opam/opam-repository && git pull origin master && opam update -u -y"
+ matrix:
+   - DISTRO=ubuntu-lts OCAML_VERSION=4.06
+   - DISTRO=ubuntu-lts OCAML_VERSION=4.07
+   - DISTRO=ubuntu-16.04 OCAML_VERSION=4.08

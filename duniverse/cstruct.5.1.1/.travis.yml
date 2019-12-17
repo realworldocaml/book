@@ -1,0 +1,20 @@
+language: c
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex ./.travis-docker.sh
+env:
+  global:
+  - PINS="cstruct:. cstruct-sexp:. cstruct-async:. cstruct-lwt:. cstruct-unix:. ppx_cstruct:."
+  matrix:
+  - PACKAGE="cstruct"       DISTRO="alpine"   OCAML_VERSION="4.03"
+  - PACKAGE="cstruct"       DISTRO="alpine"   OCAML_VERSION="4.04"
+  - PACKAGE="cstruct-sexp"  DISTRO="alpine"   OCAML_VERSION="4.05"
+  - PACKAGE="cstruct-sexp"  DISTRO="alpine"   OCAML_VERSION="4.06"
+  - PACKAGE="cstruct"       DISTRO="alpine"   OCAML_VERSION="4.07"
+  - PACKAGE="cstruct-lwt"   DISTRO="debian-testing"  OCAML_VERSION="4.07"
+  - PACKAGE="cstruct-async" DISTRO="centos"   OCAML_VERSION="4.07"
+  - PACKAGE="ppx_cstruct"   DISTRO="debian-unstable" OCAML_VERSION="4.07"
+  - PACKAGE="cstruct-unix"  DISTRO="ubuntu"          OCAML_VERSION="4.07"
+  - PACKAGE="cstruct-unix"  DISTRO="alpine"          OCAML_VERSION="4.08"

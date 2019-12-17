@@ -1,0 +1,2 @@
+File "cenum_id_payload.ml", line 2, characters 18-20:
+Error: ppx_cstruct: invalid id

@@ -1,0 +1,32 @@
+opam-version: "1.2"
+homepage:     "https://github.com/mirleft/ocaml-tls"
+dev-repo:     "https://github.com/hannesm/ocaml-tls.git"
+bug-reports:  "https://github.com/mirleft/ocaml-tls/issues"
+doc:          "https://mirleft.github.io/ocaml-tls/doc"
+author:       ["David Kaloper <david@numm.org>" "Hannes Mehnert <hannes@mehnert.org>"]
+maintainer:   ["Hannes Mehnert <hannes@mehnert.org>" "David Kaloper <david@numm.org>"]
+license:      "BSD2"
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+build-test: [["dune" "runtest" "-p" name "-j" jobs]]
+
+depends: [
+  "dune" {build & >= "1.0"}
+  "tls"
+  "result"
+  "lwt" {>= "2.4.8"}
+  "cstruct" {>= "1.9.0"}
+  "mirage-types" {>= "3.0.0"}
+  "sexplib"
+  "nocrypto" {>= "0.5.4"}
+  "x509" {>= "0.5.0"}
+  "ptime" {>= "0.8.1"}
+]
+
+tags: [ "org:mirage"]
+url {
+  src: "git://github.com/dune-universe/ocaml-tls.git#awa-future"
+}

@@ -9,7 +9,7 @@ let () =
     | "impl" -> basename ^ ".ml"
     | _ -> assert false
   in
-  let ic = open_in file in
+  let ic = open_in_bin file in
   let length = in_channel_length ic in
   let content = really_input_string ic length in
   close_in ic;

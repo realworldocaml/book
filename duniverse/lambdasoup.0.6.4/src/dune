@@ -1,0 +1,7 @@
+(library
+ (name soup)
+ (public_name lambdasoup)
+ (synopsis "Easy functional HTML scraping and manipulation")
+ (wrapped false)
+ (flags (:standard -w +A -warn-error -3))
+ (libraries markup))

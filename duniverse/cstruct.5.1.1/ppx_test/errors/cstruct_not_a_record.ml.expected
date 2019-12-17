@@ -1,0 +1,2 @@
+File "cstruct_not_a_record.ml", line 2, characters 2-14:
+Error: ppx_cstruct: record type declaration expected

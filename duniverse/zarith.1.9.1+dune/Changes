@@ -1,0 +1,101 @@
+Release 1.9.1 (2019-08-28) (bugfix):
+- Fix configure issue for non-bash sh introduced in #45
+- Tweaks to opam file [kit-ty-kate]
+
+Release 1.9 (2019-08-22):
+- Issue #50: add opam file, make it easy to "opam publish" new versions
+- Issue #38: configure detects 32bit OCaml switch on 64bit host
+- Fix #36: change Q.equal, leq, geq comparisons for undef
+- Request #47: move infix comparison operators of Z in submodule 
+  avoid shadowing the polymorphic compare [Bernhard Schommer]
+- Fix #49: INT_MAX undeclared
+- Request #46: add prefixnonocaml option [Et7f3]
+- Request #45: fix ocamllibdir/caml/mlvalues.h bug (Cygwin) [Et7f3]
+- Fix: attempting to build numbers too large for GMP raises an OCaml exception
+  instead of crashing with "gmp: overflow in mpz type"
+
+Release 1.8 (2019-03-30):
+- Request #20: infix comparison operators for Q and Z [Max Mouratov]
+- Request #39: gdc(x,0) = gcd(0,x) = x [Vincent Laporte]
+- Request #41: support for upcoming OCaml 4.08 [Daniel Hillerström]
+- Issue #17: add package zarith.top with REPL printer [Christophe Troestler]
+- Issue #22: wrong stack marking directive in caml_z_x86_64_mingw64.S
+  [Bernhard Schommer]
+- Issue #24: generate and install .cmti files for easy access to documentation
+- Issue #25: false alarm in tests/zq.ml owing to unreliable printing  
+  of FP values
+- Request #28: better handling of absolute paths in "configure" 
+
+Release 1.7 (2017-10-13):
+- Issue#14, pull request#15: ARM assembly code was broken.
+- Fix tests so that they work even if the legacy Num library is unavailable.
+
+Release 1.6 (2017-09-23):
+- On Linux and BSD, keep the stack non-executable.
+- Issue#10: clarify documentation of Q.of_string
+- Fixed spurious installation error if shared libraries not supported
+  [Bernhard Schommer]
+
+Release 1.5 (2017-05-26):
+- Install all .cmx files, improving performance of clients and
+  avoiding a warning from OCaml 4.03 and up.
+- Z.of_float: fix a bug in the fast path [Richard Jones]
+  (See https://bugzilla.redhat.com/show_bug.cgi?id=1392247)
+- Improve compatibility with OCaml 4.03 and up
+  [Bernhard Schommer]
+- Overflow issue in Z.pow and Z.root with very large exponents (GPR#5)
+  [Andre Maroneze]
+- Added function Q.to_float.
+
+Release 1.4.1 (2015-11-09):
+- Fixed ml_z_of_substring_base and Z.of_substring [Thomas Braibant]
+- Integrated Opam fix for Perl scripts [Thomas Braibant]
+
+Release 1.4 (2015-11-02):
+- Improvements to Q (using divexact) [Bertrand Jeannet]
+- Fixed div_2exp bug [Bertrand Jeannet]
+- Improvements for divexact [Bertrand Jeannet]
+- Added of_substring, with fast path for native integers [Thomas Braibant]
+- Added Z.powm_sec (constant-time modular exponentiation)
+- Reimplemented Z.to_float, now produces correctly rounded FP numbers
+- Added Z.trailing_zeros.
+- Added Z.testbit, Z.is_even, Z.is_odd.
+- Added Z.numbits, Z.log2 and Z.log2up.
+- PR#1467: Z.hash is declared as "noalloc" [François Bobot]
+- PR#1451: configure fix [Spiros Eliopoulos]
+- PR#1436: disable "(void)" trick for unused variables on Windows [Bernhard Schommer]
+- PR#1434: removed dependencies on printf & co when Z_PERFORM_CHECK is 0 [Hannes Mehnert]
+- PR#1462: issues with Z.to_float and large numbers.
+
+Release 1.3 (2014-09-03):
+- Fixed inefficiencies in asm fast path for ARM.
+- Revised detection of NaNs and infinities in Z.of_float
+- Suppress the redundant fast paths written in C if a corresponding
+  fast path exists in asm.
+- Use <stdint.h> to ensure compatibility with OCaml 4.02.
+- More prudent implementation of Z.of_int, avoids GC problem
+  with OCaml < 4.02 (PR#6501 in the OCaml bug tracker).
+- PR#1429: of_string accepts 'a' in base 10.
+- Macro change to avoid compiler warnings on unused variables.
+
+Release 1.2.1 (2013-06-12):
+- Install fixes
+
+Release 1.2 (2013-05-19):
+- Added fast asm path for ARMv7 processors.
+- PR#1192: incorrect behavior of div_2exp
+- Issue with aggressive C compiler optimization in the fast path for multiply
+- Better support for Windows/Mingw32
+
+Release 1.1 (2012-03-24):
+- Various improvements in the asm fast path for i686 and x86_64
+- PR#1034: support for static linking of GMP/MPIR
+- PR#1046: autodetection of ocamlopt and dynlink
+- PR#1048: autodetection of more platforms that we support
+- PR#1051: support architectures with strict alignment constraints for 
+    64-bit integers (e.g. Sparc)
+- Fixed 1-bit precision loss when converting doubles to rationals
+- Improved support for the forthcoming release 4.00 of OCaml
+
+Release 1.0 (2011-08-18):
+- First public release
