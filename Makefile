@@ -1,5 +1,5 @@
 .PHONY: all clean dep publish promote test test-all docker depext \
-	duniverse-init duniverse-update
+	duniverse-init duniverse-upgrade
 
 DUNIVERSE ?= duniverse
 
@@ -54,7 +54,7 @@ depext:
 
 duniverse-init:
 	$(DUNIVERSE) init \
-		--pin mdx,https://github.com/Julow/mdx.git,duniverse_mode \
+		--pin mdx,https://github.com/realworldocaml/mdx.git,master \
 		rwo \
 		$(DEPS) $(DUNIVERSE_SPECIFIC_DEPS)
 

@@ -109,3 +109,11 @@ make duniverse-upgrade
 Additionally, if you're working on the book and need a new package vendored, you
 can simply add it to the `$DEPS` variable in the `Makefile` and run the above
 command again.
+
+It's possible that after upgrading you get some errors because vendored
+dependencies use jbuild files instead of dune files and compatibility with those
+has been dropped in dune 2. You can upgrade those using the following command:
+
+```
+dune upgrade --root duniverse/<package_name>.<version>
+```
