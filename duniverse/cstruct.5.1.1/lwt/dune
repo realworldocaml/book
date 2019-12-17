@@ -1,0 +1,5 @@
+(library
+ (name cstruct_lwt)
+ (wrapped false)
+ (public_name cstruct-lwt)
+ (libraries cstruct lwt.unix))

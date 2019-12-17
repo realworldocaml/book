@@ -1,0 +1,24 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  global:
+    - PACKAGE="tls"
+    - PINS="x509"
+  matrix:
+    - OCAML_VERSION=4.04
+    - OCAML_VERSION=4.05 DEPOPTS="lwt ptime astring"
+    - OCAML_VERSION=4.05
+      DEPOPTS="mirage-flow-lwt mirage-kv-lwt mirage-clock ptime"
+      POST_INSTALL_HOOK="./.travis-test-mirage.sh" TESTS=false
+    - OCAML_VERSION=4.06
+    - OCAML_VERSION=4.06 DEPOPTS="lwt ptime astring"
+    - OCAML_VERSION=4.06
+      DEPOPTS="mirage-flow-lwt mirage-kv-lwt mirage-clock ptime"
+      POST_INSTALL_HOOK="./.travis-test-mirage.sh" TESTS=false
+    - OCAML_VERSION=4.07
+    - OCAML_VERSION=4.07
+      DEPOPTS="mirage-flow-lwt mirage-kv-lwt mirage-clock ptime"
+      POST_INSTALL_HOOK="./.travis-test-mirage.sh" TESTS=false
+notifications:
+  email: false

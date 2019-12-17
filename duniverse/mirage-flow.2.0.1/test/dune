@@ -1,0 +1,11 @@
+(executables
+ (names test)
+ (libraries mirage-flow-combinators mirage-flow-unix alcotest))
+
+(alias
+ (name runtest)
+ (package mirage-flow-unix)
+ (deps
+  (:< test.exe))
+ (action
+  (run %{<} --color=always)))

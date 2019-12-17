@@ -1,0 +1,8 @@
+(executable
+ (name performance)
+ (flags (:standard -w +A))
+ (libraries lambdasoup unix))
+
+(alias
+ (name build-performance-test)
+ (deps performance.exe (source_tree ../pages)))

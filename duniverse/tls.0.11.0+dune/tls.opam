@@ -1,0 +1,49 @@
+opam-version: "2.0"
+homepage:     "https://github.com/mirleft/ocaml-tls"
+dev-repo:     "git+https://github.com/hannesm/ocaml-tls.git"
+bug-reports:  "https://github.com/mirleft/ocaml-tls/issues"
+doc:          "https://mirleft.github.io/ocaml-tls/doc"
+author:       ["David Kaloper <david@numm.org>" "Hannes Mehnert <hannes@mehnert.org>"]
+maintainer:   ["Hannes Mehnert <hannes@mehnert.org>" "David Kaloper <david@numm.org>"]
+license:      "BSD2"
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.04.2"}
+  "dune"
+  "ppx_sexp_conv"
+  "ppx_deriving"
+  "ppx_cstruct" {>= "3.0.0"}
+  "cstruct" {>= "4.0.0"}
+  "cstruct-sexp"
+  "sexplib"
+  "nocrypto" {>= "0.5.4"}
+  "x509" {>= "0.6.1"}
+  "cstruct-unix" {with-test & >= "3.0.0"}
+  "ounit" {with-test}
+  "lwt" {>="2.4.8"}
+  "mirage-flow"
+  "mirage-kv"
+  "mirage-clock"
+  "ptime"
+  "astring" {with-test}
+]
+conflicts: [
+  "mirage-net-xen" {<"1.3.0"}
+  "mirage-types" {<"3.0.0"}
+  "mirage-kv-lwt" {<"2.0.0"}
+  "sexplib" {= "v0.9.0"}
+  "ppx_sexp_conv" {= "v0.11.0"}
+  "ptime" {< "0.8.1"}
+]
+
+tags: [ "org:mirage"]
+synopsis: "Transport Layer Security purely in OCaml"
+url {
+  src: "git://github.com/dune-universe/ocaml-tls.git#awa-future"
+}

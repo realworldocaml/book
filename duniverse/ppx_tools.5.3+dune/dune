@@ -1,0 +1,47 @@
+(library
+ (name ppx_tools)
+ (public_name ppx_tools)
+ (modules ast_convenience ast_mapper_class)
+ (wrapped false)
+ (libraries compiler-libs.common))
+
+(library
+ (name ast_lifter)
+ (modules ast_lifter)
+ (flags :standard -w -17)
+ (libraries compiler-libs))
+
+(executable
+ (name genlifter)
+ (modules genlifter)
+ (libraries ppx_tools))
+
+(executable
+ (name rewriter)
+ (modules rewriter)
+ (libraries ppx_tools))
+
+(executable
+ (name dumpast)
+ (modules dumpast)
+ (libraries ppx_tools ast_lifter compiler-libs.bytecomp))
+
+(rule
+ (targets ast_lifter.ml)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ./genlifter.exe -I +compiler-libs Parsetree.expression))))
+
+(executable
+ (name ppx_metaquot)
+ (modules ppx_metaquot)
+ (libraries ppx_tools ast_lifter))
+
+(install
+ (section libexec)
+ (files
+  (ppx_metaquot.exe as ppx_metaquot)
+  (rewriter.exe as rewriter)
+  (dumpast.exe as dumpast)
+  (genlifter.exe as genlifter)))

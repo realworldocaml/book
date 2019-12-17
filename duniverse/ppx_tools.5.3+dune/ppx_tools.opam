@@ -1,0 +1,26 @@
+opam-version: "2.0"
+name: "ppx_tools"
+maintainer: "alain.frisch@lexifi.com"
+authors: "Alain Frisch <alain.frisch@lexifi.com>"
+license: "MIT"
+tags: "syntax"
+homepage: "https://github.com/ocaml-ppx/ppx_tools"
+bug-reports: "https://github.com/ocaml-ppx/ppx_tools/issues"
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dune"
+]
+build: [
+ [ "dune" "subst" ]
+ [ "dune" "build" "-p" name "-j" jobs] ]
+dev-repo: "git://github.com/dune-universe/ppx_tools.git"
+synopsis: "Tools for authors of syntactic tools (such as ppx rewriters)"
+description: """
+The tools are installed as a findlib package called 'ppx_tools'.
+Executables are thus accessible through the ocamlfind driver (e.g.:
+ocamlfind ppx_tools/dumpast).
+"""
+url {
+  src: "git://github.com/dune-universe/ppx_tools.git#to-dune-4.08"
+}
+

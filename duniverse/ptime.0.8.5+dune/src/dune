@@ -1,0 +1,16 @@
+(library
+ (name ptime)
+ (synopsis "POSIX time for OCaml")
+ (public_name ptime)
+ (modules ptime)
+ (libraries result)
+ (flags (:standard -w -6-27))
+ (wrapped false))
+
+(library
+ (name ptime_top)
+ (public_name ptime.top)
+ (libraries compiler-libs.toplevel ptime)
+ (modules ptime_top)
+ (flags (:standard -w -6-27))
+ (wrapped false))

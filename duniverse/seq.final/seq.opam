@@ -13,7 +13,7 @@ depends: [
   "dune" {>= "1.1.0"}
   # opam-repo contains a version for 4.07 and above that does nothing,
   # because OCaml starts having a `Seq` module in the stdlib
-  "ocaml" {< "4.07.0"}
+  "ocaml"
 ]
 tags: [ "iterator" "seq" "pure" "list" "compatibility" "cascade" ]
 homepage: "https://github.com/c-cube/seq/"

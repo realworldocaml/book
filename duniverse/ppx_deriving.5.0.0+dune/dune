@@ -1,0 +1,5 @@
+(env
+ (_
+  (flags -w -9)))
+
+(copy_files# src_plugins/compat_macros.cppo)

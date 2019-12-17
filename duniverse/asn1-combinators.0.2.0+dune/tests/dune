@@ -1,0 +1,24 @@
+(library
+  (name asn1_combinators_test)
+  (modules testlib x509)
+  (wrapped false)
+  (libraries asn1-combinators oUnit))
+
+(executable
+  (name      testrunner)
+  (modules   testrunner)
+  (libraries asn1_combinators_test oUnit))
+
+(executable
+  (name      bench)
+  (modules   bench)
+  (libraries asn1_combinators_test cstruct.unix))
+
+(alias
+  (name    runtest)
+  (action  (run ./testrunner.exe)))
+
+(alias
+  (name bench)
+  (action (run ./bench.exe)))
+

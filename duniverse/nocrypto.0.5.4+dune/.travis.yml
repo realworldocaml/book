@@ -1,0 +1,21 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  global:
+    - PACKAGE="nocrypto"
+    - UPDATE_GCC_BINUTILS=1
+    - TESTS=true
+  matrix:
+    - OCAML_VERSION=4.03
+    - OCAML_VERSION=4.04
+    - OCAML_VERSION=4.05
+    - OCAML_VERSION=4.05 DEPOPTS="lwt cstruct-lwt"
+    - OCAML_VERSION=4.06
+    - OCAML_VERSION=4.06 NOCRYPTO_ACCELERATE="false"
+    - OCAML_VERSION=4.06 DEPOPTS="lwt cstruct-lwt"
+    - OCAML_VERSION=4.04 DEPOPTS="mirage-xen"
+    - OCAML_VERSION=4.06 DEPOPTS="mirage-solo5 mirage-entropy"
+    - OCAML_VERSION=4.07
+notifications:
+  email: false

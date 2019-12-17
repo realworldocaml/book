@@ -1,0 +1,2 @@
+File "cstruct_unknown_type.ml", line 3, characters 4-15:
+Error: ppx_cstruct: Unknown type uint9_t

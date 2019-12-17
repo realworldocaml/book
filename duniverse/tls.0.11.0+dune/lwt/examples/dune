@@ -1,0 +1,9 @@
+(executables
+ (names starttls_server echo_server echo_server_sni echo_client test_server
+   test_client)
+ (libraries tls-lwt str))
+
+(alias
+ (name DEFAULT)
+ (deps starttls_server.exe echo_server.exe echo_server_sni.exe
+   echo_client.exe test_server.exe test_client.exe))

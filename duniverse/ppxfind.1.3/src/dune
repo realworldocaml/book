@@ -1,0 +1,7 @@
+(executable
+ (name ppxfind)
+ (public_name ppxfind)
+ (libraries dynlink findlib.dynload ocaml-migrate-parsetree
+   compiler-libs.common str)
+ (link_flags -linkall)
+ (modes byte))

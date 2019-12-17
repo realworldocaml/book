@@ -1,0 +1,2 @@
+File "cstruct_multiple_len.ml", line 3, characters 4-35:
+Error: ppx_cstruct: multiple field length attribute
