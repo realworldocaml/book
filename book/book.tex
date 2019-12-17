@@ -77,9 +77,28 @@
 \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{#1}}
 \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{#1}}
 \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{#1}}}}
-\usepackage{listings, pmboxdraw}
+\usepackage{listings, pmboxdraw, lstautogobble, color}
+\usepackage{zi4}            % Nice font
 \lstset{
+  autogobble,
+  columns=fullflexible,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
   showstringspaces=false,
+  breakatwhitespace=true,
+  escapeinside={(*@}{@*)},
+  commentstyle=\color{greencomments},
+  keywordstyle=\color{bluekeywords},
+  stringstyle=\color{redstrings},
+  numberstyle=\color{graynumbers},
+  basicstyle=\ttfamily\footnotesize,
+  frame=l,
+  rulecolor=\color{orangerule},
+  framesep=10pt,
+  xleftmargin=10pt,
+  tabsize=4,
+  captionpos=b,
   literate=
   {á}{{\'a}}1
   {é}{{\'e}}1
@@ -97,6 +116,12 @@
   {│}{\textSFxi}1%
   {┼}{\textSFv}1%
 }
+
+\definecolor{bluekeywords}{rgb}{0.10, 0.10, 1}
+\definecolor{greencomments}{rgb}{0, 0.5, 0}
+\definecolor{redstrings}{rgb}{0.9, 0.10, 0.10}
+\definecolor{graynumbers}{rgb}{0.50, 0.50, 0.50}
+\definecolor{orangerule}{rgb}{1,0.84,.69}
 \DeclareUnicodeCharacter{2005}{\hspace{0,25em}}
 \newcommand{\passthrough}[1]{#1}
 \lstset{defaultdialect=[5.3]Lua}
