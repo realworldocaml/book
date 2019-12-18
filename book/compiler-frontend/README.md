@@ -582,7 +582,7 @@ There's a single character typo in the code so that it uses `Nu` instead of
 
 ```sh dir=examples/front-end
 $ ocamlc -c broken_poly.ml
-File "broken_poly.ml", line 9, characters 10-154:
+File "broken_poly.ml", lines 9-18, characters 10-6:
  9 | ..........(
 10 |     `Add (
 11 |       (`Num 0),

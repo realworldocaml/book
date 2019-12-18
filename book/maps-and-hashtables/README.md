@@ -537,7 +537,7 @@ comparators stored within the sets contain function values:
 
 ```ocaml env=main
 # Poly.(m1 = m2)
-Exception: (Invalid_argument "compare: functional value").
+Exception: (Invalid_argument "compare: functional value")
 ```
 
 We can, however, use the function `Map.Using_comparator.to_tree` to expose

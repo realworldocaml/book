@@ -120,7 +120,7 @@ that doesn't match the structure of the OCaml type in question.
 - : int list = [1; 2; 3]
 # List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)")
 Exception:
-(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three)).
+(Of_sexp_error "int_of_sexp: (Failure int_of_string)" (invalid_sexp three))
 ```
 
 ::: {data-type=note}
@@ -709,7 +709,7 @@ fail at runtime if it is used:
 # t_of_sexp (Sexp.of_string "((a whatever) (b foo))")
 Exception:
 (Of_sexp_error "opaque_of_sexp: cannot convert opaque values"
- (invalid_sexp whatever)).
+  (invalid_sexp whatever))
 ```
 
 This is there to allow for s-expression converters to be created for types

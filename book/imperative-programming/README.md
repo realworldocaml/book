@@ -1147,7 +1147,7 @@ evaluation.
 
 ```ocaml env=letrec
 # force x
-Exception: Lazy.Undefined.
+Exception: Lazy.Undefined
 ```
 
 But we can also create useful recursive definitions with `lazy`. In
