@@ -1,0 +1,9 @@
+(rule
+ (deps test_deriving_iter.cppo.ml)
+ (targets test_deriving_iter.ml)
+ (action (run %{bin:cppo} -V OCAML:%{ocaml_version} %{deps} -o %{targets})))
+
+(test
+ (name test_deriving_iter)
+ (libraries oUnit ppx_deriving.runtime)
+ (preprocess (pps ppx_deriving.iter ppx_deriving.show)))

@@ -1,0 +1,50 @@
+language: c
+
+env:
+  - COMPILER=4.08.1 COVERALLS=yes PERFORMANCE=yes
+  - COMPILER=4.02.3
+  - COMPILER=4.03.0
+  - COMPILER=4.04.2
+  - COMPILER=4.05.0
+  - COMPILER=4.06.1
+  - COMPILER=4.07.1
+  - COMPILER=4.09.0
+
+matrix:
+  allow_failures:
+    - env: COMPILER=4.09.0
+
+before_script:
+  - wget https://github.com/ocaml/opam/releases/download/2.0.5/opam-2.0.5-x86_64-linux
+  - sudo mv opam-2.0.5-x86_64-linux /usr/local/bin/opam
+  - sudo chmod a+x /usr/local/bin/opam
+  - opam init -y --bare --disable-sandboxing --disable-shell-hook
+  - "[ -d _opam/bin ] || (rm -rf _opam && opam switch create . $COMPILER $REPOSITORIES --no-install)"
+  - eval `opam env`
+  - opam --version
+  - ocaml -version
+
+script:
+  - opam lint
+  - opam install -y ounit lwt js_of_ocaml
+  - opam pin add -y --no-action markup .
+  - opam install -y --deps-only markup
+  - make test
+  - make coverage
+  - "[ -z $COVERALLS ] || bisect-ppx-report send-to Coveralls"
+  - make js-test
+  - make dependency-test
+  - "[ -z $PERFORMANCE ] || opam install -y xmlm ocamlnet"
+  - "[ -z $PERFORMANCE ] || make performance-test"
+  - "[ -z $DOCS ] || opam install -y lambdasoup"
+  - "[ -z $DOCS ] || make clean docs"
+
+cache:
+  directories:
+    - $HOME/.opam
+    - ./_opam
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always

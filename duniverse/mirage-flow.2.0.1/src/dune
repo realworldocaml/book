@@ -1,0 +1,5 @@
+(library
+ (name mirage_flow)
+ (public_name mirage-flow)
+ (libraries fmt lwt cstruct)
+ (wrapped false))

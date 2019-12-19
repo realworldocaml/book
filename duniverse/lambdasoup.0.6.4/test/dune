@@ -1,0 +1,13 @@
+(executable
+ (name test)
+ (flags (:standard -w +A))
+ (libraries lambdasoup oUnit))
+
+(alias
+ (name build-test)
+ (deps test.exe (source_tree pages)))
+
+(alias
+ (name runtest)
+ (deps test.exe (source_tree pages))
+ (action (run %{exe:test.exe})))

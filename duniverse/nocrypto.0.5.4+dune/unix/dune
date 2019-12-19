@@ -1,0 +1,6 @@
+(library
+  (name nocrypto_entropy_unix)
+  (public_name nocrypto.unix)
+  (synopsis "Unix-based entropy seeding")
+  (libraries nocrypto unix)
+  (optional))

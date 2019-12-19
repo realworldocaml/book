@@ -1,0 +1,2 @@
+File "cenum_invalid_type.ml", line 2, characters 11-19:
+Error: ppx_cstruct: invalid cenum variant

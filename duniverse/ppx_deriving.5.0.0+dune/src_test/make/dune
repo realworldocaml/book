@@ -1,0 +1,4 @@
+(test
+ (name test_deriving_make)
+ (libraries oUnit ppx_deriving.runtime)
+ (preprocess (pps ppx_deriving.make ppx_deriving.show)))

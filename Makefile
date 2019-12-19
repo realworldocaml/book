@@ -1,5 +1,7 @@
 .PHONY: all clean dep publish promote test test-all docker depext \
-	duniverse-init duniverse-update
+	duniverse-init duniverse-upgrade
+
+DUNIVERSE ?= duniverse
 
 DEPS =\
 async \
@@ -22,12 +24,12 @@ sexp_pretty \
 textwrap \
 yojson
 
+# these do not exist in opam-repository yet
+DUNIVERSE_SPECIFIC_DEPS = tls-lwt
+
 all:
 	@dune build @site @pdf
 	@echo The site and the pdf have been generated in _build/default/static/
-
-vendor:
-	duniverse init rwo `cat book-pkgs` --pin mdx,https://github.com/Julow/mdx.git,duniverse_mode
 
 test:
 	dune runtest
@@ -51,10 +53,10 @@ depext:
 	opam depext -y $(DEPS)
 
 duniverse-init:
-	duniverse init \
-		--pin mdx,https://github.com/Julow/mdx.git,duniverse_mode \
+	$(DUNIVERSE) init \
+		--pin mdx,https://github.com/realworldocaml/mdx.git,master \
 		rwo \
-		$(DEPS)
+		$(DEPS) $(DUNIVERSE_SPECIFIC_DEPS)
 
 duniverse-upgrade: duniverse-init
-	duniverse pull --no-cache
+	$(DUNIVERSE) pull --no-cache

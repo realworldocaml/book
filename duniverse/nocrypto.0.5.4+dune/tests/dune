@@ -1,0 +1,4 @@
+(test
+  (name testrunner)
+  (libraries nocrypto nocrypto.unix oUnit))
+

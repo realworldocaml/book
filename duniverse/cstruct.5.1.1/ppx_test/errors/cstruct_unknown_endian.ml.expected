@@ -1,0 +1,2 @@
+File "cstruct_unknown_endian.ml", line 2, characters 2-49:
+Error: ppx_cstruct: unknown endian unknown_endian, should be little_endian, big_endian, host_endian or bi_endian

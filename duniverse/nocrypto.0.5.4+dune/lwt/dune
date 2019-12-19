@@ -1,0 +1,7 @@
+(library
+  (name nocrypto_entropy_lwt)
+  (public_name nocrypto.lwt)
+  (synopsis "Unix+Lwt entropy seeding")
+  (libraries nocrypto nocrypto.unix lwt.unix)
+  (optional))
+

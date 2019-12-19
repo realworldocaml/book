@@ -1,0 +1,7 @@
+(library
+ (name tls_lwt)
+ (public_name tls-lwt)
+ (synopsis "Effectful lwt layer for TLS")
+ (libraries ptime.clock.os lwt lwt.unix tls nocrypto.lwt x509)
+ (flags (:standard -w -8-32))
+ (wrapped false))

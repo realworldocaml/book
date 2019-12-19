@@ -1,0 +1,23 @@
+(executable
+  (name pp)
+  (modules pp)
+  (preprocess (action
+    (run %{bin:cppo} -V OCAML:%{ocaml_version} %{input-file})))
+  (libraries
+    ppx_cstruct
+    ocaml-migrate-parsetree))
+
+(executable
+  (name gen_tests)
+  (modules gen_tests))
+
+(include dune.inc)
+
+(rule
+ (targets dune.inc.gen)
+ (deps (source_tree .))
+ (action (with-stdout-to %{targets} (run ./gen_tests.exe))))
+
+(alias
+ (name runtest)
+ (action (diff dune.inc dune.inc.gen)))

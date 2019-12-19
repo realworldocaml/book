@@ -1,0 +1,11 @@
+_build
+tmp
+*~
+\.\#*
+.*.swp
+\#*#
+gmon.out
+rondom
+lambda
+.merlin
+*.install
