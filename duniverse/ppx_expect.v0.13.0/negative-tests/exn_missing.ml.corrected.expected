@@ -1,0 +1,11 @@
+open! Core
+
+let%expect_test "without trailing output" =
+  printf "hello world";
+  [%expect "hello world"]
+;;
+
+let%expect_test "with trailing output" =
+  printf "hello world";
+  [%expect {| hello world |}]
+;;

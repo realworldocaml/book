@@ -1,0 +1,4 @@
+(alias (name runtest) (deps qtest.exe) (action (bash ./qtest.exe)))
+
+(executables (names qtest) (libraries unpack_sequence qtest_lib)
+ (preprocess (pps ppx_jane)))

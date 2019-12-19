@@ -1,0 +1,7 @@
+(alias (name runtest) (deps test_runner.exe)
+ (action (bash ./test_runner.exe)))
+
+(executables
+ (names example test_runner mac_test microbench bin_prot_test_nonrec)
+ (libraries bin_prot core core_bench oUnit)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))

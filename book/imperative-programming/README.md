@@ -1147,7 +1147,7 @@ evaluation.
 
 ```ocaml env=letrec
 # force x
-Exception: Lazy.Undefined.
+Exception: Lazy.Undefined
 ```
 
 But we can also create useful recursive definitions with `lazy`. In
@@ -1487,7 +1487,7 @@ val sum_file : string -> int = <fun>
 And now, the file descriptor leak is gone:
 
 ```ocaml env=file2
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts" : int) with _ -> () done
 - : unit = ()
 # sum_file "numbers.txt"
 - : int = 15

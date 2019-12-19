@@ -1,0 +1,15 @@
+(rule (targets config.h rt-flags) (deps)
+ (action (bash "cp %{lib:jst-config:config.h} %{lib:jst-config:rt-flags} .")))
+
+(library (name core_kernel) (public_name core_kernel)
+ (install_c_headers time_ns_stubs)
+ (libraries base base_bigstring base_for_tests base_quickcheck bin_prot
+  base.caml fieldslib jane-street-headers base.md5 ppx_assert.runtime-lib
+  ppx_hash.runtime-lib ppx_inline_test.runtime-lib sexplib splittable_random
+  stdio time_now typerep variantslib)
+ (c_flags :standard -D_LARGEFILE64_SOURCE)
+ (c_library_flags (:include rt-flags))
+ (c_names bigstring_stubs md5_stubs array_stubs gc_stubs time_ns_stubs
+  heap_block_stubs)
+ (preprocess (pps ppx_jane -check-doc-comments)) (preprocessor_deps config.h)
+ (js_of_ocaml (javascript_files strftime.js runtime.js)))

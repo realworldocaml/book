@@ -1,0 +1,2 @@
+(library (name tuple_pool) (public_name core_kernel.tuple_pool)
+ (libraries core_kernel) (preprocess (pps ppx_jane)))

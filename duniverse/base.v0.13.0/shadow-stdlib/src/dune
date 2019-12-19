@@ -1,0 +1,8 @@
+(library (name shadow_stdlib) (public_name base.shadow_stdlib)
+ (libraries caml) (preprocess no_preprocessing))
+
+(rule (targets shadow_stdlib.mli)
+ (deps (:first_dep ../gen/gen.exe) ../../compiler-stdlib/src/caml.cma)
+ (action
+  (run %{first_dep} -caml-cmi ../../compiler-stdlib/src/.caml.objs/caml.cmi
+   ../../compiler-stdlib/src/.caml.objs/byte/caml.cmi -o %{targets})))

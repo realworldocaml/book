@@ -416,7 +416,7 @@ val is_a_multiple : int -> int -> bool = <fun>
 - : bool = true
 # is_a_multiple 8 0
 Exception:
-Invalid_argument "8 % 0 in core_int.ml: modulus should be positive".
+(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
 ```
 
 The distinction here is that type errors will stop you whether or not the
@@ -632,7 +632,7 @@ matching]{.idx}
 ```ocaml env=main
 # let my_favorite_language (my_favorite :: the_rest) =
     my_favorite
-Line 1, characters 26-69:
+Lines 1-2, characters 26-16:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -657,7 +657,7 @@ on empty ones:
 # my_favorite_language ["English";"Spanish";"French"]
 - : string = "English"
 # my_favorite_language []
-Exception: Match_failure ("//toplevel//", 1, 26).
+Exception: "Match_failure //toplevel//:1:26"
 ```
 
 You can avoid these warnings, and more importantly make sure that your code
@@ -754,7 +754,7 @@ for removing sequential duplicates:
     | first :: second :: tl ->
       let new_tl = remove_sequential_duplicates (second :: tl) in
       if first = second then new_tl else first :: new_tl
-Line 2, characters 5-189:
+Lines 2-6, characters 5-57:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -1265,7 +1265,7 @@ From a syntactic perspective, you should note the keywords that distinguish a
 
 Here's an example run of this code:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # let ar = Array.init 20 ~f:(fun i -> i)
 val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
@@ -1273,7 +1273,7 @@ val ar : int array =
 - : unit = ()
 # ar
 - : int array =
-[|5; 4; 13; 17; 16; 19; 1; 6; 10; 14; 15; 7; 18; 2; 9; 11; 12; 0; 3; 8|]
+[|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
 ```
 
 OCaml also supports `while` loops, as shown in the following function for
@@ -1314,7 +1314,7 @@ error by rewriting the function to avoid the short-circuiting:
     if !pos = Array.length array then None else Some !pos
 val find_first_negative_entry : int array -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|]
-Exception: Invalid_argument "index out of bounds".
+Exception: (Invalid_argument "index out of bounds")
 ```
 
 The or operator, `||`, short-circuits in a similar way to `&&`.

@@ -1,0 +1,226 @@
+open Variantslib
+
+#verbose true;;
+
+module Normal = struct
+  type t = Foo of int | Bar | Exception [@@deriving variants]
+end
+
+[%%expect{|
+module Normal :
+  sig
+    type t = Foo of int | Bar | Exception
+    val foo : int -> t
+    val bar : t
+    val exception_ : t
+    module Variants :
+      sig
+        val foo : (int -> t) Variant.t
+        val bar : t Variant.t
+        val exception_ : t Variant.t
+        val fold :
+          init:'a ->
+          foo:('a -> (int -> t) Variant.t -> 'b) ->
+          bar:('b -> t Variant.t -> 'c) ->
+          exception_:('c -> t Variant.t -> 'd) -> 'd
+        val iter :
+          foo:((int -> t) Variant.t -> unit) ->
+          bar:(t Variant.t -> unit) ->
+          exception_:(t Variant.t -> unit) -> unit
+        val map :
+          t ->
+          foo:((int -> t) Variant.t -> int -> 'a) ->
+          bar:(t Variant.t -> 'a) -> exception_:(t Variant.t -> 'a) -> 'a
+        val make_matcher :
+          foo:((int -> t) Variant.t -> 'a -> (int -> 'b) * 'c) ->
+          bar:(t Variant.t -> 'c -> (unit -> 'b) * 'd) ->
+          exception_:(t Variant.t -> 'd -> (unit -> 'b) * 'e) ->
+          'a -> (t -> 'b) * 'e
+        val to_rank : t -> int
+        val to_name : t -> string
+        val descriptions : (string * int) list
+      end
+  end
+|}];;
+
+module Normal2 : sig
+  type t = Foo of int | Bar | Exception [@@deriving variants]
+end = Normal
+[%%expect{|
+module Normal2 :
+  sig
+    type t = Foo of int | Bar | Exception
+    val foo : int -> t
+    val bar : t
+    val exception_ : t
+    module Variants :
+      sig
+        val foo : (int -> t) Variant.t
+        val bar : t Variant.t
+        val exception_ : t Variant.t
+        val fold :
+          init:'acc__ ->
+          foo:('acc__ -> (int -> t) Variant.t -> 'acc__) ->
+          bar:('acc__ -> t Variant.t -> 'acc__) ->
+          exception_:('acc__ -> t Variant.t -> 'acc__) -> 'acc__
+        val iter :
+          foo:((int -> t) Variant.t -> unit) ->
+          bar:(t Variant.t -> unit) ->
+          exception_:(t Variant.t -> unit) -> unit
+        val map :
+          t ->
+          foo:((int -> t) Variant.t -> int -> 'result__) ->
+          bar:(t Variant.t -> 'result__) ->
+          exception_:(t Variant.t -> 'result__) -> 'result__
+        val make_matcher :
+          foo:((int -> t) Variant.t ->
+               'acc__0 -> (int -> 'result__) * 'acc__1) ->
+          bar:(t Variant.t -> 'acc__1 -> (unit -> 'result__) * 'acc__2) ->
+          exception_:(t Variant.t -> 'acc__2 -> (unit -> 'result__) * 'acc__3) ->
+          'acc__0 -> (t -> 'result__) * 'acc__3
+        val to_rank : t -> int
+        val to_name : t -> string
+        val descriptions : (string * int) list
+      end
+  end
+|}];;
+
+module Normal_inline_record = struct
+  type t =  Foo of { a : int; b : string} | Bar [@@deriving variants]
+end
+
+[%%expect{|
+module Normal_inline_record :
+  sig
+    type t = Foo of { a : int; b : string; } | Bar
+    val foo : a:int -> b:string -> t
+    val bar : t
+    module Variants :
+      sig
+        val foo : (a:int -> b:string -> t) Variant.t
+        val bar : t Variant.t
+        val fold :
+          init:'a ->
+          foo:('a -> (a:int -> b:string -> t) Variant.t -> 'b) ->
+          bar:('b -> t Variant.t -> 'c) -> 'c
+        val iter :
+          foo:((a:int -> b:string -> t) Variant.t -> unit) ->
+          bar:(t Variant.t -> unit) -> unit
+        val map :
+          t ->
+          foo:((a:int -> b:string -> t) Variant.t -> a:int -> b:string -> 'a) ->
+          bar:(t Variant.t -> 'a) -> 'a
+        val make_matcher :
+          foo:((a:int -> b:string -> t) Variant.t ->
+               'a -> (a:int -> b:string -> 'b) * 'c) ->
+          bar:(t Variant.t -> 'c -> (unit -> 'b) * 'd) ->
+          'a -> (t -> 'b) * 'd
+        val to_rank : t -> int
+        val to_name : t -> string
+        val descriptions : (string * int) list
+      end
+  end
+|}];;
+
+module Poly = struct
+  type t =  [ `Foo of int | `Bar | `Exception ] [@@deriving variants]
+end
+
+[%%expect{|
+module Poly :
+  sig
+    type t = [ `Bar | `Exception | `Foo of int ]
+    val foo : 'a -> [> `Foo of 'a ]
+    val bar : [> `Bar ]
+    val exception_ : [> `Exception ]
+    module Variants :
+      sig
+        val foo : ('a -> [> `Foo of 'a ]) Variant.t
+        val bar : [> `Bar ] Variant.t
+        val exception_ : [> `Exception ] Variant.t
+        val fold :
+          init:'a ->
+          foo:('a -> ('b -> [> `Foo of 'b ]) Variant.t -> 'c) ->
+          bar:('c -> [> `Bar ] Variant.t -> 'd) ->
+          exception_:('d -> [> `Exception ] Variant.t -> 'e) -> 'e
+        val iter :
+          foo:(('a -> [> `Foo of 'a ]) Variant.t -> unit) ->
+          bar:([> `Bar ] Variant.t -> unit) ->
+          exception_:([> `Exception ] Variant.t -> unit) -> unit
+        val map :
+          [< `Bar | `Exception | `Foo of 'a ] ->
+          foo:(('b -> [> `Foo of 'b ]) Variant.t -> 'a -> 'c) ->
+          bar:([> `Bar ] Variant.t -> 'c) ->
+          exception_:([> `Exception ] Variant.t -> 'c) -> 'c
+        val make_matcher :
+          foo:(('a -> [> `Foo of 'a ]) Variant.t -> 'b -> ('c -> 'd) * 'e) ->
+          bar:([> `Bar ] Variant.t -> 'e -> (unit -> 'd) * 'f) ->
+          exception_:([> `Exception ] Variant.t -> 'f -> (unit -> 'd) * 'g) ->
+          'b -> ([< `Bar | `Exception | `Foo of 'c ] -> 'd) * 'g
+        val to_rank : [< `Bar | `Exception | `Foo of 'a ] -> int
+        val to_name : [< `Bar | `Exception | `Foo of 'a ] -> string
+        val descriptions : (string * int) list
+      end
+  end
+|}];;
+
+module Wildcard : sig
+  type _ t = A | B [@@deriving variants]
+end = struct
+  type _ t = A | B [@@deriving variants]
+end
+
+[%%expect{|
+module Wildcard :
+  sig
+    type _ t = A | B
+    val a : 'a t
+    val b : 'a t
+    module Variants :
+      sig
+        val a : 'a t Variant.t
+        val b : 'a t Variant.t
+        val fold :
+          init:'acc__ ->
+          a:('acc__ -> 'a t Variant.t -> 'acc__) ->
+          b:('acc__ -> 'b t Variant.t -> 'acc__) -> 'acc__
+        val iter :
+          a:('a t Variant.t -> unit) -> b:('b t Variant.t -> unit) -> unit
+        val map :
+          'a t ->
+          a:('b t Variant.t -> 'result__) ->
+          b:('c t Variant.t -> 'result__) -> 'result__
+        val make_matcher :
+          a:('a t Variant.t -> 'acc__0 -> (unit -> 'result__) * 'acc__1) ->
+          b:('b t Variant.t -> 'acc__1 -> (unit -> 'result__) * 'acc__2) ->
+          'acc__0 -> ('c t -> 'result__) * 'acc__2
+        val to_rank : 'a t -> int
+        val to_name : 'a t -> string
+        val descriptions : (string * int) list
+      end
+  end
+|}];;
+
+type fail1 = [ Poly.t | `Blah ] [@@deriving variants]
+[%%expect{|
+Line _, characters _-_:
+Error: ppx_variants_conv: polymorphic variant inclusion is not supported
+|}];;
+
+type fail2 = [> `Foo | `Bar ] [@@deriving variants]
+[%%expect{|
+Line _, characters _-_:
+Error: ppx_variants_conv: polymorphic variants with a row variable are not supported
+|}];;
+
+type fail3 = [< `Foo | `Bar ] [@@deriving variants]
+[%%expect{|
+Line _, characters _-_:
+Error: ppx_variants_conv: polymorphic variants with a row variable are not supported
+|}];;
+
+type fail4 = [< `Foo | `Bar > `Foo ] [@@deriving variants]
+[%%expect{|
+Line _, characters _-_:
+Error: ppx_variants_conv: polymorphic variants with a row variable are not supported
+|}];;

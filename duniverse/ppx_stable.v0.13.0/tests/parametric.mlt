@@ -1,0 +1,485 @@
+;;
+#verbose true
+
+(******************************************************************************)
+(*                                                                            *)
+(* First we duplicate some of the examples from test.mlt, but changing their  *)
+(* use of fresh abstract types for type parameters.                           *)
+(*                                                                            *)
+(******************************************************************************)
+
+module Stable = struct
+  module V1 = struct
+    type ('a, 'b, 'c, 'd) t =
+      { a : 'a
+      ; b1 : 'b
+      ; c : 'c
+      ; d : 'd
+      }
+  end
+
+  module V2 = struct
+    type ('a, 'b, 'c, 'd) t =
+      { a : 'a
+      ; b2 : 'b
+      ; c : 'c
+      ; d : 'd * 'a
+      }
+    [@@deriving
+      stable_record
+        ~version:[%stable: ('a, 'b, 'c, 'd) V1.t]
+        ~add:[ b1 ]
+        ~remove:[ b2 ]
+        ~modify:[ c ]
+        ~set:[ d ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig type ('a, 'b, 'c, 'd) t = { a : 'a; b1 : 'b; c : 'c; d : 'd; } end
+    module V2 :
+      sig
+        type ('a, 'b, 'c, 'd) t = { a : 'a; b2 : 'b; c : 'c; d : 'd * 'a; }
+        val to_V1_t :
+          ('a, 'b, 'c, 'd) t ->
+          modify_c:('c -> 'c) -> d:'d -> b1:'b -> ('a, 'b, 'c, 'd) V1.t
+        val of_V1_t :
+          ('a, 'b, 'c, 'd) V1.t ->
+          modify_c:('c -> 'c) -> d:'d * 'a -> b2:'b -> ('a, 'b, 'c, 'd) t
+      end
+  end
+|}]
+
+module Stable = struct
+  module V1 = struct
+    type ('a, 'b, 'c, 'd, 'e, 'f, 'j, 'k, 'l) t =
+      | I0
+      | I1 of 'a
+      | I2 of 'b * 'c
+      | X1
+      | X2 of 'j
+      | X3 of 'k * 'l
+      | Z1 of 'd * 'e
+      | Z2 of 'f
+      | Z3
+    [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t =
+      | I0
+      | I1 of 'a
+      | I2 of 'b * 'c
+      | Y1
+      | Y2 of 'g
+      | Y3 of 'h * 'i
+      | Z1
+      | Z2 of 'f
+      | Z3 of 'd * 'e
+    [@@deriving
+      stable_variant
+        ~version:[%stable: ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t]
+        ~remove:[ Y1; Y2; Y3 ]
+        ~add:[ X1; X2; X3 ]
+        ~modify:[ Z1; Z2; Z3 ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type ('a, 'b, 'c, 'd, 'e, 'f, 'j, 'k, 'l) t =
+            I0
+          | I1 of 'a
+          | I2 of 'b * 'c
+          | X1
+          | X2 of 'j
+          | X3 of 'k * 'l
+          | Z1 of 'd * 'e
+          | Z2 of 'f
+          | Z3
+        module Stable_variant :
+          sig
+            val i0 : unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val i1 : 'a -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val i2 : 'a -> 'b -> ('c, 'a, 'b, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val x1 : unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val x2 : 'a -> ('b, 'c, 'd, 'e, 'f, 'g, 'a, 'h, 'i) t
+            val x3 : 'a -> 'b -> ('c, 'd, 'e, 'f, 'g, 'h, 'i, 'a, 'b) t
+            val z1 : 'a -> 'b -> ('c, 'd, 'e, 'a, 'b, 'f, 'g, 'h, 'i) t
+            val z2 : 'a -> ('b, 'c, 'd, 'e, 'f, 'a, 'g, 'h, 'i) t
+            val z3 : unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            module Helper :
+              sig
+                val map :
+                  i0:(unit -> 'a) ->
+                  i1:('b -> 'a) ->
+                  i2:('c -> 'd -> 'a) ->
+                  x1:(unit -> 'a) ->
+                  x2:('e -> 'a) ->
+                  x3:('f -> 'g -> 'a) ->
+                  z1:('h -> 'i -> 'a) ->
+                  z2:('j -> 'a) ->
+                  z3:(unit -> 'a) ->
+                  ('b, 'c, 'd, 'h, 'i, 'j, 'e, 'f, 'g) t -> 'a
+              end
+          end
+      end
+    module V2 :
+      sig
+        type ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t =
+            I0
+          | I1 of 'a
+          | I2 of 'b * 'c
+          | Y1
+          | Y2 of 'g
+          | Y3 of 'h * 'i
+          | Z1
+          | Z2 of 'f
+          | Z3 of 'd * 'e
+        module Stable_variant :
+          sig
+            val i0 : unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val i1 : 'a -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val i2 : 'a -> 'b -> ('c, 'a, 'b, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val y1 : unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val y2 : 'a -> ('b, 'c, 'd, 'e, 'f, 'g, 'a, 'h, 'i) t
+            val y3 : 'a -> 'b -> ('c, 'd, 'e, 'f, 'g, 'h, 'i, 'a, 'b) t
+            val z1 : unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+            val z2 : 'a -> ('b, 'c, 'd, 'e, 'f, 'a, 'g, 'h, 'i) t
+            val z3 : 'a -> 'b -> ('c, 'd, 'e, 'a, 'b, 'f, 'g, 'h, 'i) t
+            module Helper :
+              sig
+                val map :
+                  i0:(unit -> 'a) ->
+                  i1:('b -> 'a) ->
+                  i2:('c -> 'd -> 'a) ->
+                  y1:(unit -> 'a) ->
+                  y2:('e -> 'a) ->
+                  y3:('f -> 'g -> 'a) ->
+                  z1:(unit -> 'a) ->
+                  z2:('h -> 'a) ->
+                  z3:('i -> 'j -> 'a) ->
+                  ('b, 'c, 'd, 'i, 'j, 'h, 'e, 'f, 'g) t -> 'a
+              end
+          end
+        val to_V1_t :
+          modify_Z1:(unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t) ->
+          modify_Z2:('f -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t) ->
+          modify_Z3:('d -> 'e -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t) ->
+          remove_Y3:('h -> 'i -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t) ->
+          remove_Y2:('g -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t) ->
+          remove_Y1:(unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t) ->
+          ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t ->
+          ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t
+        val of_V1_t :
+          modify_Z1:('d -> 'e -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t) ->
+          modify_Z2:('f -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t) ->
+          modify_Z3:(unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t) ->
+          remove_X3:('h -> 'i -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t) ->
+          remove_X2:('g -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t) ->
+          remove_X1:(unit -> ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t) ->
+          ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) V1.t ->
+          ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i) t
+      end
+  end
+|}]
+
+(******************************************************************************)
+(*                                                                            *)
+(* Now we add some more interesting examples                                  *)
+(*                                                                            *)
+(******************************************************************************)
+
+(******************)
+(* First: records *)
+(******************)
+
+(* Where we add a type parameter *)
+
+module Stable = struct
+  module V1 = struct
+    type t = { value : int }
+  end
+
+  module V2 = struct
+    type 'a t =
+      { value : int
+      ; stuff : 'a
+      }
+    [@@deriving stable_record ~version:V1.t ~remove:[ stuff ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 : sig type t = { value : int; } end
+    module V2 :
+      sig
+        type 'a t = { value : int; stuff : 'a; }
+        val to_V1_t : 'a t -> V1.t
+        val of_V1_t : V1.t -> stuff:'a -> 'a t
+      end
+  end
+|}]
+
+(* Where we change the type parameter *)
+
+module Stable = struct
+  module V1 = struct
+    type 'a t = { lst : 'a list }
+  end
+
+  module V2 = struct
+    type ('a, 'b) t = { pair_lst : ('a * 'b) list }
+    [@@deriving
+      stable_record ~version:[%stable: 'a V1.t] ~add:[ lst ] ~remove:[ pair_lst ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 : sig type 'a t = { lst : 'a list; } end
+    module V2 :
+      sig
+        type ('a, 'b) t = { pair_lst : ('a * 'b) list; }
+        val to_V1_t : ('a, 'b) t -> lst:'a list -> 'a V1.t
+        val of_V1_t : 'a V1.t -> pair_lst:('a * 'b) list -> ('a, 'b) t
+      end
+  end
+|}]
+
+(* error case *)
+
+module Stable = struct
+  module V1 = struct
+    type 'a t = { lst : 'a list }
+  end
+
+  module V2 = struct
+    type ('a, 'b) t = { pair_lst : ('a * 'b) list }
+    [@@deriving stable_record ~version:V1.t ~add:[ lst ] ~remove:[ pair_lst ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: The type constructor V1.t expects 1 argument(s),
+       but is here applied to 0 argument(s)
+|}]
+
+(******************)
+(* Then: variants *)
+(******************)
+
+(* Where we add a type parameter *)
+
+module Stable = struct
+  module V1 = struct
+    type t = Int of int [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type 'a t =
+      | Int of int
+      | Otherwise of 'a
+    [@@deriving stable_variant ~version:V1.t ~remove:[ Otherwise ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type t = Int of int
+        module Stable_variant :
+          sig
+            val int : int -> t
+            module Helper : sig val map : int:(int -> 'a) -> t -> 'a end
+          end
+      end
+    module V2 :
+      sig
+        type 'a t = Int of int | Otherwise of 'a
+        module Stable_variant :
+          sig
+            val int : int -> 'a t
+            val otherwise : 'a -> 'a t
+            module Helper :
+              sig
+                val map :
+                  int:(int -> 'a) -> otherwise:('b -> 'a) -> 'b t -> 'a
+              end
+          end
+        val to_V1_t : remove_Otherwise:('a -> V1.t) -> 'a t -> V1.t
+        val of_V1_t : V1.t -> 'a t
+      end
+  end
+|}]
+
+(* Where we change the type parameter *)
+
+module Stable = struct
+  module V1 = struct
+    type 'a t = Foo of 'a [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type ('a, 'b) t =
+      | Foo of 'a * int
+      | Bar of 'b
+    [@@deriving
+      stable_variant ~version:[%stable: ('a * int) V1.t] ~modify:[ Foo ] ~remove:[ Bar ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type 'a t = Foo of 'a
+        module Stable_variant :
+          sig
+            val foo : 'a -> 'a t
+            module Helper : sig val map : foo:('a -> 'b) -> 'a t -> 'b end
+          end
+      end
+    module V2 :
+      sig
+        type ('a, 'b) t = Foo of 'a * int | Bar of 'b
+        module Stable_variant :
+          sig
+            val foo : 'a -> int -> ('a, 'b) t
+            val bar : 'a -> ('b, 'a) t
+            module Helper :
+              sig
+                val map :
+                  foo:('a -> int -> 'b) -> bar:('c -> 'b) -> ('a, 'c) t -> 'b
+              end
+          end
+        val to_V1_t :
+          modify_Foo:('a -> int -> ('a * int) V1.t) ->
+          remove_Bar:('b -> ('a * int) V1.t) -> ('a, 'b) t -> ('a * int) V1.t
+        val of_V1_t :
+          modify_Foo:('a * int -> ('a, 'b) t) ->
+          ('a * int) V1.t -> ('a, 'b) t
+      end
+  end
+|}]
+
+(* error case *)
+
+module Stable = struct
+  module V1 = struct
+    type 'a t = Foo of 'a [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type ('a, 'b) t =
+      | Foo of 'a * int
+      | Bar of 'b
+    [@@deriving stable_variant ~version:V1.t ~modify:[ Foo ] ~remove:[ Bar ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: The type constructor V1.t expects 1 argument(s),
+       but is here applied to 0 argument(s)
+|}]
+
+module Stable = struct
+  module V1 = struct
+    type 'a t = { foo : 'a }
+  end
+
+  module V2a = struct
+    type 'b t = { foo : 'b }
+    [@@deriving stable_record ~version:[%stable: 'x V1.t] ~modify:[ foo ]]
+  end
+
+  module V2b = struct
+    type 'b t = { foo : 'b }
+    [@@deriving stable_record ~version:[%stable: 'b V1.t] ~modify:[ foo ]]
+  end
+
+  module V2c = struct
+    type 'b t = { foo : 'b }
+    [@@deriving stable_record ~version:[%stable: _ V1.t] ~modify:[ foo ]]
+  end
+
+  module V2d = struct
+    type 'b t = { foo : 'b }
+    [@@deriving stable_record ~version:[%stable: (int * string) V1.t] ~modify:[ foo ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 : sig type 'a t = { foo : 'a; } end
+    module V2a :
+      sig
+        type 'b t = { foo : 'b; }
+        val to_V1_t : 'b t -> modify_foo:('b -> 'x) -> 'x V1.t
+        val of_V1_t : 'x V1.t -> modify_foo:('x -> 'b) -> 'b t
+      end
+    module V2b :
+      sig
+        type 'b t = { foo : 'b; }
+        val to_V1_t : 'b t -> modify_foo:('b -> 'b) -> 'b V1.t
+        val of_V1_t : 'b V1.t -> modify_foo:('b -> 'b) -> 'b t
+      end
+    module V2c :
+      sig
+        type 'b t = { foo : 'b; }
+        val to_V1_t : 'b t -> modify_foo:('b -> 'a) -> 'a V1.t
+        val of_V1_t : 'a V1.t -> modify_foo:('a -> 'b) -> 'b t
+      end
+    module V2d :
+      sig
+        type 'b t = { foo : 'b; }
+        val to_V1_t :
+          'b t -> modify_foo:('b -> int * string) -> (int * string) V1.t
+        val of_V1_t :
+          (int * string) V1.t -> modify_foo:(int * string -> 'b) -> 'b t
+      end
+  end
+|}]
+
+module Stable = struct
+  module V1 = struct
+    type 'a t = { foo : 'a } [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type ('a, 'b) t =
+      | Foo of 'a * int
+      | Bar of 'b
+    [@@deriving
+      stable_variant ~version:[%stable: ('a * int) V1.t] ~modify:[ Foo ] ~remove:[ Bar ]]
+  end
+end
+
+[%%expect {|
+Line _, characters _-_:
+Error: stable_variant: missing target version
+|}]

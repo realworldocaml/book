@@ -659,7 +659,7 @@ structure:
 ```ocaml env=posix,non-deterministic
 # let gettimeofday' () =
     let tv = make timeval in
-    ignore(gettimeofday (addr tv) (from_voidp timezone null));
+    ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
     let secs = Signed.Long.(to_int (getf tv tv_sec)) in
     let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
     Caml.Pervasives.(float secs +. float usecs /. 1000000.0)

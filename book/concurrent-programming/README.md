@@ -615,7 +615,7 @@ function, we'll get a helpful type error:
     if n > 0 then loop_forever ();
     x + n
 Line 3, characters 19-34:
-Error: This expression has type never_returns = (unit, int) Type_equal.t
+Error: This expression has type never_returns
        but an expression was expected of type unit
        because it is in the result of a conditional with no else branch
 ```
@@ -1058,7 +1058,7 @@ val maybe_raise : unit -> unit Deferred.t = <fun>
 # maybe_raise ()
 - : unit = ()
 # maybe_raise ()
-Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async")).
+Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
 In `utop`, the exception thrown by `maybe_raise ()` terminates the evaluation
@@ -1079,7 +1079,7 @@ val handle_error : unit -> string Deferred.t = <fun>
 # handle_error ()
 - : string = "success"
 # handle_error ()
-Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async")).
+Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
 This didn't work because `try/with` only captures exceptions that are thrown
@@ -1138,7 +1138,7 @@ val blow_up : unit -> unit Deferred.t = <fun>
 # blow_up ()
 - : unit = ()
 # blow_up ()
-Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor")).
+Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor"))
 ```
 
 In addition to the ordinary stack-trace, the exception displays the trace of

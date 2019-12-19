@@ -1,0 +1,6 @@
+(library (name sexplib) (libraries bigarray parsexp sexplib0)
+ (public_name sexplib) (preprocess no_preprocessing))
+
+(ocamllex lexer)
+
+(ocamlyacc parser parser_with_layout)

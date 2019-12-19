@@ -1,0 +1,8 @@
+(alias (name runtest) (deps rpc_test.exe)
+ (action (bash "./rpc_test.exe regression")))
+
+(executables
+ (names rpc_test rpc_latency_test test_low_latency_transport_close)
+ (libraries async async_rpc_kernel async_rpc core cpu_usage jane
+  async_kernel.limiter_async netkit netkit_rpc netkit_sockets)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))

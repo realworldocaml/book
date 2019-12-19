@@ -1,0 +1,3 @@
+(library (name pooled_hashtbl_test)
+ (libraries core_kernel core_kernel_test pooled_hashtbl)
+ (preprocess (pps ppx_jane)))

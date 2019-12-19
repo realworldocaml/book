@@ -1,0 +1,2 @@
+(library (name ppx_assert_lib) (public_name ppx_assert.runtime-lib)
+ (libraries base base.caml) (preprocess (pps ppxlib ppx_sexp_conv ppx_cold)))

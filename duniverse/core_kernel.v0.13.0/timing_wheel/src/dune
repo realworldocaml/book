@@ -1,0 +1,3 @@
+(library (name timing_wheel) (public_name core_kernel.timing_wheel)
+ (preprocess (pps ppx_jane -check-doc-comments))
+ (libraries core_kernel tuple_pool))

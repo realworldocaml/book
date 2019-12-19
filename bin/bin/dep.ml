@@ -202,7 +202,7 @@ let process_md ~toc book_dir =
   in
   main_dune ()
 
-let _ =
+let () =
   let toc = read_toc "book" in
   process_md ~toc "book";
-  process_chapters ~toc "book" "static";
+  process_chapters ~toc "book" "static"

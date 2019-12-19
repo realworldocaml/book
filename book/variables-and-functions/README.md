@@ -198,7 +198,7 @@ patterns]{.idx}
 # let upcase_first_entry line =
     let (first :: rest) = String.split ~on:',' line in
     String.concat ~sep:"," (String.uppercase first :: rest)
-Line 2, characters 5-115:
+Lines 2-3, characters 5-60:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -1159,7 +1159,7 @@ if we try to pass in that optional argument now, it will be rejected.
 ```ocaml env=main
 # prepend_pound "a BASH comment" ~sep:":"
 Line 1, characters 1-14:
-Error: This function has type string -> string
+Error: This function has type Base.String.t -> Base.String.t
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
 

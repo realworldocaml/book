@@ -1,0 +1,2 @@
+(library (name pooled_hashtbl) (public_name core_kernel.pooled_hashtbl)
+ (libraries core_kernel tuple_pool) (preprocess (pps ppx_jane)))

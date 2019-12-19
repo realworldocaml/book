@@ -1,0 +1,21 @@
+(* -*- tuareg -*- *)
+
+module Let_syntax = struct
+  type 'a t = T of 'a
+
+  let map (T x) ~f = T (f x)
+  let both (T x) (T y) = T (x, y)
+
+  module Open_on_rhs = struct
+    let return x = T x
+    let f x ~(doc : string) = T (x, doc)
+  end
+end
+
+let (_ : _) =
+  (* This tests whether we correctly detect that `let x : t = e`
+     has been rewritten into `let x : t = (e : t)` (and undo the
+     change). A typing error occurs  *)
+  let%map_open _x : int Let_syntax.t = return 42 in
+  ()
+;;

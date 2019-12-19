@@ -219,10 +219,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "duniverse/base.v0.12.2/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base.v0.13.0/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "duniverse/base.v0.12.2/src/comparator.mli", line 20, characters 2-25:
+       File "duniverse/base.v0.13.0/src/comparator.mli", line 19, characters 2-25:
          Expected declaration
 ```
 
@@ -537,7 +537,7 @@ comparators stored within the sets contain function values:
 
 ```ocaml env=main
 # Poly.(m1 = m2)
-Exception: (Invalid_argument "compare: functional value").
+Exception: (Invalid_argument "compare: functional value")
 ```
 
 We can, however, use the function `Map.Using_comparator.to_tree` to expose
@@ -887,7 +887,8 @@ module Book :
     type t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    val hash_fold_t : Hash.state -> t -> Hash.state
+    val hash_fold_t :
+      Base_internalhash_types.state -> t -> Base_internalhash_types.state
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book)

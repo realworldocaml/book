@@ -1,0 +1,41 @@
+{0 Async}
+
+{b {{!Async} The full API is browsable here}}.
+
+Async is a library for asynchronous programming, i.e., programming
+where some part of the program must wait for things that happen at
+times determined by some external entity (like a human or another
+program).  This includes pretty much any program that uses blocking
+calls (e.g., networking code, disk access), timeouts, or event loops
+(e.g., GUIs).
+
+In a nutshell, the idea is to use non-preemptive user-level threads
+and first-class blocking operations with blocking expressed in the
+type system.
+
+Read more in {{:
+https://dev.realworldocaml.org/concurrent-programming.html} Chapter
+18 of {e Real World OCaml}}.
+
+{1 Organization}
+
+Async comprises four packages, [Async_command], [Async_kernel],
+[Async_rpc], and [Async_unix].
+
+- {b {!Async_kernel}} contains Async's core data structures, like
+  {{!Async_kernel.Deferred}[Deferred]}.  [Async_kernel] is portable, and
+  so can be used in JavaScript using {!Async_js}.  In principle it
+  could also be used on Windows, but no scheduler has been written
+  for Async on Windows as of yet.
+
+- {b {!Async_unix}} adds Unix dependencies for things like system calls and
+  threads. Using these, it hooks the {!Async_kernel} scheduler up to either
+  `epoll` or `select`, depending on availabilty, and manages a thread pool that
+  blocking system calls run in.
+
+- {b {!Async_command}} extends [Core.Command]'s command-line handling
+  
+- {b {!Async_rpc}} adds RPC support.
+
+You can most easily understand Async's API by reading the
+documentation of these individually.

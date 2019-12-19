@@ -1,0 +1,4 @@
+#+TITLE: Base_internalhash_types
+
+This micro-library allows hash states, seeds, and values to be type-equal
+between ~Base~ and ~Base_boot~.
