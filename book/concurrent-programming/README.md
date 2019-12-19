@@ -615,7 +615,7 @@ function, we'll get a helpful type error:
     if n > 0 then loop_forever ();
     x + n
 Line 3, characters 19-34:
-Error: This expression has type never_returns = (unit, int) Type_equal.t
+Error: This expression has type never_returns
        but an expression was expected of type unit
        because it is in the result of a conditional with no else branch
 ```

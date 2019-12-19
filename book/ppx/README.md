@@ -36,12 +36,12 @@ compiler warning.
 # module Abc = struct
 
   [@@@warning "+10"]
-  let a = Sys.argv; ()
+  let a = Sys.get_argv (); ()
 
   [@@@warning "-10"]
-  let b = Sys.argv; ()
+  let b = Sys.get_argv (); ()
   end
-Line 4, characters 11-19:
+Line 4, characters 11-26:
 Warning 10: this expression should have type unit.
 module Abc : sig val a : unit val b : unit end
 ```
