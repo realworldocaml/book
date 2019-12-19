@@ -1,0 +1,10 @@
+open Base
+
+module No_comparing2 = struct
+  (* Checks that we don't trigger an 'unused rec' warning. *)
+  type t =
+    { a : t [@compare.ignore]
+    ; b : (t [@compare.ignore]) * int
+    } [@@deriving compare]
+end
+[%%expect {| |}]

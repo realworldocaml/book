@@ -1,0 +1,50 @@
+opam-version: "2.0"
+maintainer: "anil@recoil.org"
+authors: [
+  "Anil Madhavapeddy"
+  "Stefano Zacchiroli"
+  "David Sheets"
+  "Thomas Gazagnaire"
+  "David Scott"
+  "Rudi Grinberg"
+  "Andy Ray"
+]
+synopsis: "CoHTTP implementation for the Async concurrency library"
+description: """
+An implementation of an HTTP client and server using the Async
+concurrency library. See the `Cohttp_async` module for information
+on how to use this.  The package also installs `cohttp-curl-async`
+and a `cohttp-server-async` binaries for quick uses of a HTTP(S)
+client and server respectively.
+"""
+license: "ISC"
+tags: ["org:mirage" "org:xapi-project"]
+homepage: "https://github.com/mirage/ocaml-cohttp"
+doc: "https://mirage.github.io/ocaml-cohttp/"
+bug-reports: "https://github.com/mirage/ocaml-cohttp/issues"
+depends: [
+  "ocaml" {>= "4.04.1"}
+  "dune" {>= "1.1.0"}
+  "async_kernel" {>= "v0.13.0"}
+  "async_unix" {>= "v0.13.0"}
+  "async" {>= "v0.13.0"}
+  "base" {>= "v0.11.0"}
+  "core" {with-test}
+  "cohttp" {=version}
+  "conduit-async" {>="1.2.0"}
+  "magic-mime"
+  "logs"
+  "fmt" {>= "0.8.2"}
+  "sexplib0"
+  "stdlib-shims"
+  "ppx_sexp_conv" {>= "v0.13.0"}
+  "ounit" {with-test}
+  "uri" {>= "2.0.0"}
+  "uri-sexp"
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/mirage/ocaml-cohttp.git"

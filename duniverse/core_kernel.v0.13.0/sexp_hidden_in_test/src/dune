@@ -1,0 +1,3 @@
+(library (name sexp_hidden_in_test)
+ (preprocess (pps ppx_jane -annotated-ignores))
+ (public_name core_kernel.sexp_hidden_in_test) (libraries core_kernel))

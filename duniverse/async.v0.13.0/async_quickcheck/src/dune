@@ -1,0 +1,2 @@
+(library (name async_quickcheck) (public_name async.async_quickcheck)
+ (libraries async_kernel) (preprocess (pps ppx_jane)))

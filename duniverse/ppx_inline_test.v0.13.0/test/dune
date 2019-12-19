@@ -1,0 +1,51 @@
+(library (name ppx_inline_test_lib_test)
+ (preprocess
+  (per_module
+   ((pps ppx_inline_test) config failures order performance_test
+    file_without_test_module random_state)
+   ((pps ppx_inline_test_drop) drop))))
+
+(rule (targets test.output test-partitions.output test-inlining.output)
+ (deps ./inline_tests_runner ./inline_tests_runner.exe)
+ (action
+  (bash
+    "\
+   \nfunction run {\
+   \n  { OCAMLRUNPARAM=b=0 ./inline_tests_runner \"$@\" || echo code: $?; } |&\
+   \n    sed -r -e '/runtime.ml/ s/[0-9]+/XXX/g' -e 's/\\([0-9.]* sec\\)/(XXX sec)/'\
+   \n}\
+   \nrun > test.output\
+   \n\
+   \n(\
+   \n  export DONT_ASSUME_ALL_TESTS_RUN=\
+   \n  run -list-partitions | while read p; do\
+   \n     echo Test for partition $p:\
+   \n     run -partition $p\
+   \n  done\
+   \n) > test-partitions.output\
+   \n\
+   \n(\
+   \n  export DONT_ASSUME_ALL_TESTS_RUN=\
+   \n  echo Partitions diff:\
+   \n  diff <(run -require-tag x-library-inlining-sensitive -list-partitions) <(run -list-partitions) || true\
+   \n  echo\
+   \n  run -require-tag x-library-inlining-sensitive -verbose\
+   \n) > test-inlining.output")))
+
+(rule (targets diff-with-without-partitions)
+ (deps ./test.output ./test-partitions.output)
+ (action
+  (bash
+    "\
+   \ndiff -u  --label test.output --label test-partitions.output test.output test-partitions.output > diff-with-without-partitions || true\
+   \n"))
+ (mode fallback))
+
+(alias (name runtest)
+ (deps test.expected test.output test-inlining.expected test-inlining.output)
+ (action
+  (bash
+    "diff -u test.{expected,output}\
+   \n          diff -u test-inlining.{expected,output}")))
+
+(alias (name runtest) (deps diff-with-without-partitions))

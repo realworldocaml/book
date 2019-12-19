@@ -1,0 +1,2 @@
+(library (name bin_prot_cinaps) (libraries base stdio)
+ (preprocess (pps ppx_custom_printf)))

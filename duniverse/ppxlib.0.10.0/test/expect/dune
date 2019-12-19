@@ -1,0 +1,13 @@
+(executable
+ (name expect_test)
+ (modules expect_test printers)
+ (link_flags (-linkall))
+ (modes byte)
+ (libraries unix compiler-libs.toplevel ppxlib ppxlib.traverse))
+
+(rule
+ (deps    printers_lt_408.ml printers_ge_408.ml)
+ (targets printers.ml)
+ (action  (with-stdout-to printers.ml (run %{ocaml} %{dep:gen-printers} %{ocaml_version}))))
+
+(ocamllex expect_test)

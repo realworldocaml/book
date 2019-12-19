@@ -1,0 +1,4 @@
+(library (name test_ppx_sexp_value_lib) (libraries core)
+ (preprocess
+  (pps ppx_sexp_conv ppx_here ppx_assert ppx_sexp_value ppx_inline_test
+   ppx_cold)))

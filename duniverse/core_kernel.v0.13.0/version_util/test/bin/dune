@@ -1,0 +1,8 @@
+(executables (names main) (libraries core_kernel version_util)
+ (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT) (deps main.exe)
+ (action (bash "./main.exe > /dev/null")))
+
+(alias (name javascript-runtest) (deps main.bc.js)
+ (action (bash "%{NODE} main.bc.js > /dev/null")))

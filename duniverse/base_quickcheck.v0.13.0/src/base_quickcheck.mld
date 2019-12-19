@@ -1,0 +1,6 @@
+{0 Base_quickcheck}
+
+Base_quickcheck is a randomized testing framework for OCaml, designed for users
+of {!Base}.
+
+{b {{!Base_quickcheck} The full API is browsable here.}}

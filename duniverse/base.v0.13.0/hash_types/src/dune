@@ -1,0 +1,4 @@
+(library (name base_internalhash_types)
+ (public_name base.base_internalhash_types) (libraries)
+ (preprocess no_preprocessing) (js_of_ocaml (javascript_files runtime.js))
+ (c_names internalhash_stubs) (install_c_headers internalhash))
