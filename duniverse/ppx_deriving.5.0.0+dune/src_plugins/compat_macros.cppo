@@ -1,0 +1,11 @@
+#if OCAML_VERSION < (4, 03, 0)
+#define Pcstr_tuple(core_types) core_types
+#endif
+
+#if OCAML_VERSION < (4, 08, 0)
+#define Rtag_patt(label, constant, args) Rtag(label, _, constant, args)
+#define Rinherit_patt(typ) Rinherit(typ)
+#else
+#define Rtag_patt(label, constant, args) {prf_desc = Rtag(label, constant, args); _}
+#define Rinherit_patt(typ) {prf_desc = Rinherit(typ); _}
+#endif

@@ -1,0 +1,38 @@
+opam-version: "2.0"
+maintainer: "thomas@gazagnaire.org"
+authors: [
+  "Thomas Gazagnaire"
+  "Anil Madhavapeddy"
+  "Gabriel Radanne"
+  "Mindy Preston"
+  "Thomas Leonard"
+  "Nicolas Ojeda Bar"
+  "Dave Scott"
+  "David Kaloper"
+  "Hannes Mehnert"
+  "Richard Mortier"
+]
+license: "ISC"
+tags: "org:mirage"
+homepage: "https://github.com/mirage/mirage-device"
+doc: "https://mirage.github.io/mirage-device/"
+bug-reports: "https://github.com/mirage/mirage-device/issues"
+depends: [
+  "ocaml" {>= "4.06.0"}
+  "dune" {>= "1.0"}
+  "fmt"
+  "lwt" {>= "4.4.0"}
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+]
+dev-repo: "git+https://github.com/mirage/mirage-device.git"
+synopsis: "Abstract devices for MirageOS"
+description: """
+mirage-device defines [Mirage_device.S][1], the signature for
+basic abstract devices for MirageOS and a pretty-printing function
+for device errors.
+
+[1]: https://mirage.github.io/mirage-device/Mirage_device.S.html
+"""

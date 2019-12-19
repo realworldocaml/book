@@ -1,0 +1,25 @@
+opam-version: "2.0"
+
+synopsis: "Adapter between Markup.ml and Lwt"
+
+version: "dev"
+license: "MIT"
+homepage: "https://github.com/aantron/markup.ml"
+doc: "http://aantron.github.io/markup.ml"
+bug-reports: "https://github.com/aantron/markup.ml/issues"
+
+authors: "Anton Bachin <antonbachin@yahoo.com>"
+maintainer: "Anton Bachin <antonbachin@yahoo.com>"
+dev-repo: "git+https://github.com/aantron/markup.ml.git"
+
+depends: [
+  "base-unix"
+  "dune"
+  "lwt"
+  "markup"
+  "ocaml"
+]
+
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]

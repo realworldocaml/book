@@ -1,0 +1,11 @@
+# JBUILDER_GEN
+
+package "mirage" (
+  description = "Deprecated. Use tls-mirage"
+  requires = "tls-mirage"
+)
+
+package "lwt" (
+  description = "Deprecated. Use tls-lwt"
+  requires = "tls-lwt"
+)

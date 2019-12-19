@@ -1,0 +1,5 @@
+(library
+ (name async_cstruct)
+ (wrapped false)
+ (public_name cstruct-async)
+ (libraries core_kernel cstruct async_kernel async_unix))

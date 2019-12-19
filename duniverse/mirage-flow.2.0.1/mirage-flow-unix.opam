@@ -1,0 +1,31 @@
+opam-version: "2.0"
+maintainer: "thomas@gazagnaire.org"
+authors: ["Thomas Gazagnaire" "Dave Scott"]
+license: "ISC"
+tags: "org:mirage"
+homepage: "https://github.com/mirage/mirage-flow"
+doc: "https://mirage.github.io/mirage-flow/"
+bug-reports: "https://github.com/mirage/mirage-flow/issues"
+depends: [
+  "ocaml" {>= "4.06.0"}
+  "dune" {>= "1.0"}
+  "fmt"
+  "logs"
+  "mirage-flow" {= version}
+  "lwt" {>= "4.0.0"}
+  "cstruct" {>= "4.0.0"}
+  "alcotest" {with-test}
+  "mirage-flow-combinators" {with-test & = version}
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/mirage/mirage-flow.git"
+synopsis: "Flow implementations and combinators for MirageOS on Unix"
+description: """
+This repo contains generic operations over Mirage `FLOW` implementations.
+
+Please consult [the API documentation](https://mirage.github.io/mirage-flow/index.html).
+"""

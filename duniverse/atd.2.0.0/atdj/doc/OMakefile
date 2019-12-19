@@ -1,0 +1,28 @@
+# No default target.
+# `omake pdf' requires pdflatex and builds readme.pdf
+# `omake txt' requires hevea and builds readme.txt
+# `omake html' requires hevea and builds readme.html
+
+USEPDFLATEX = true
+TEXFILES = readme atdj-body
+
+.PHONY: all pdf txt html
+all: pdf txt html
+pdf: readme.pdf
+txt: readme.txt
+html: readme.html
+
+readme.txt: $(addsuffix .tex, $(TEXFILES))
+	hevea -text readme
+	hevea -text readme
+
+readme.html: $(addsuffix .tex, $(TEXFILES))
+	hevea readme
+	hevea readme
+
+LaTeXDocument(readme, $(TEXFILES))
+
+.PHONY: clean
+clean:
+	rm -f *.aux *.toc *.log *.out *.haux *.htoc *.fls \
+		readme.pdf readme.txt readme.html

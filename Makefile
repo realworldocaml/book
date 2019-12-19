@@ -1,11 +1,35 @@
-.PHONY: all clean dep publish promote test test-all docker depext
+.PHONY: all clean dep publish promote test test-all docker depext \
+	duniverse-init duniverse-upgrade
+
+DUNIVERSE ?= duniverse
+
+DEPS =\
+async \
+atdgen \
+base \
+cmdliner \
+cohttp-async \
+conf-ncurses \
+core \
+core_bench \
+ctypes \
+ctypes-foreign \
+fmt \
+lambdasoup \
+mdx \
+ocaml-compiler-libs \
+ppx_jane \
+re \
+sexp_pretty \
+textwrap \
+yojson
+
+# these do not exist in opam-repository yet
+DUNIVERSE_SPECIFIC_DEPS = tls-lwt
 
 all:
 	@dune build @site @pdf
 	@echo The site and the pdf have been generated in _build/default/static/
-
-vendor:
-	duniverse init rwo `cat book-pkgs` --pin mdx,https://github.com/Julow/mdx.git,duniverse_mode
 
 test:
 	dune runtest
@@ -26,5 +50,13 @@ docker:
 	docker build -t ocaml/rwo .
 
 depext:
-	opam depext -y core async ppx_sexp_conv dune toplevel_expect_test patdiff \
-		lambdasoup sexp_pretty fmt re mdx ctypes-foreign conf-ncurses
+	opam depext -y $(DEPS)
+
+duniverse-init:
+	$(DUNIVERSE) init \
+		--pin mdx,https://github.com/realworldocaml/mdx.git,master \
+		rwo \
+		$(DEPS) $(DUNIVERSE_SPECIFIC_DEPS)
+
+duniverse-upgrade: duniverse-init
+	$(DUNIVERSE) pull --no-cache

@@ -1,0 +1,7 @@
+(executable
+ (name atdj_main)
+ (public_name atdj)
+ (flags
+  (:include %{workspace_root}/ocamlflags.sexp))
+ (package atdj)
+ (libraries str atd))

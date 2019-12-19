@@ -1,0 +1,2 @@
+File "cenum_unknown_attribute.ml", line 2, characters 2-32:
+Error: ppx_cstruct: enum: unknown width specifier uint9_t

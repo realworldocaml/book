@@ -1,0 +1,10 @@
+type ('aa, 'bb) poly <ocaml_biniou module="Test">
+                     <ocaml_json module="Testj"> = abstract
+
+type poly_int2 = (int, int) poly
+type poly_int_string = (int, string) poly
+
+type test2 = {
+  test0 : poly_int2;
+  test1 : (int, string option) poly
+}

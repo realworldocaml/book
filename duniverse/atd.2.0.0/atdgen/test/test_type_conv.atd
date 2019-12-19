@@ -1,0 +1,13 @@
+<doc text="testing -type-conv.">
+
+type my_record = {
+  fst: int;
+  snd: string;
+}
+
+
+type 'a contains_my_record = [
+  | C1 of int
+  | C2 of 'a
+  | C3 of my_record
+]

@@ -15,10 +15,10 @@ let test_from_string =
   in
   [ make_test ~str:"some-lib" ~expected:(Ok {base_name = "some-lib"; sub_lib = None}) ()
   ; make_test ~str:"some.lib" ~expected:(Ok {base_name = "some"; sub_lib = Some "lib"}) ()
+  ; make_test ~str:"some.lib.x" ~expected:(Ok {base_name = "some"; sub_lib = Some "lib.x"}) ()
   ; make_test ~str:"" ~expected:(Error "Invalid library name: \"\"") ()
   ; make_test ~str:".lib" ~expected:(Error "Invalid library name: \".lib\"") ()
   ; make_test ~str:"some." ~expected:(Error "Invalid library name: \"some.\"") ()
-  ; make_test ~str:"a.b.c" ~expected:(Error "Invalid library name: \"a.b.c\"") ()
   ]
 
 let suite = ("Library", test_from_string)

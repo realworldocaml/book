@@ -1,0 +1,14 @@
+(rule
+ (deps ppx_deriving_main.cppo.ml)
+ (targets ppx_deriving_main.ml)
+ (action (run %{bin:cppo} -V OCAML:%{ocaml_version} %{deps} -o %{targets})))
+
+(executable
+ (name ppx_deriving_main)
+ (libraries ppx_deriving_api findlib.dynload compiler-libs.common)
+ (link_flags :standard -linkall)
+ (preprocess (action (run ppxfind -legacy ppx_tools.metaquot --as-pp %{input-file}))))
+
+(install
+ (section libexec)
+ (files (ppx_deriving_main.exe as ppx_deriving)))

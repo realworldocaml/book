@@ -1,0 +1,7 @@
+(executables
+ (names atdcat)
+ (public_names atdcat)
+ (flags
+  (:include %{workspace_root}/ocamlflags.sexp))
+ (libraries atd)
+ (package atd))

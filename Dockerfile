@@ -14,7 +14,7 @@ RUN opam install dune=2.0.0
 
 #install pandoc
 WORKDIR /tmp
-RUN curl -OL https://github.com/jgm/pandoc/releases/download/2.1.3/pandoc-2.1.3-1-amd64.deb && sudo dpkg -i pandoc-2.1.3-1-amd64.deb
+RUN curl -OL https://github.com/jgm/pandoc/releases/download/2.9/pandoc-2.9-1-amd64.deb && sudo dpkg -i pandoc-2.9-1-amd64.deb
 WORKDIR /home/opam/src
 
 #install pdflatex

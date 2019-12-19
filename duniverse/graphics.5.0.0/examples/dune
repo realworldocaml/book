@@ -1,3 +1,0 @@
-(executables
- (names graph_example graph_test sorts)
- (libraries graphics threads))

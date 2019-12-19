@@ -1,0 +1,2 @@
+File "cstruct_len_int32.ml", line 3, characters 17-20:
+Error: ppx_cstruct: [@len] argument should be an integer

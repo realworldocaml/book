@@ -1,0 +1,4 @@
+(install
+ (section bin)
+ (package atdgen)
+ (files atdgen-cppo cppo-json))
