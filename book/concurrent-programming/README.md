@@ -952,9 +952,6 @@ to wait for all the results. Here's the type of `Deferred.all`:
 - : 'a Deferred.t list -> 'a list Deferred.t = <fun>
 ```
 
-(Somewhat confusingly, the type `Conduit_async.io` is just a type
-alias for `Deferred.t`, introduced by `Conduit_async`.)
-
 The list returned by `Deferred.all` reflects the order of the
 deferreds passed to it. As such, the definitions will be printed out
 in the same order that the search words are passed in, no matter what
