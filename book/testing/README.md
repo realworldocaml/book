@@ -117,17 +117,14 @@ we'll see an error when we run it.
   [1]
 ```
 
-It doesn't matter here, but it's worth noting that the test runner
-will execute tests declared in different files in parallel.
-
 ### More readable errors with `test_eq`
 
 One annoyance with the test output we just saw is that it doesn't show
 the data associated with the failed test, thus making it harder to
 diagnose and fix the problem when it occurs.  We can fix this by
-having the test signal failure not just by returning false, but by
-throwing an exception on failure.  That failure can contain human
-readable details about what went wrong.
+having the test signal by throwing an exception, rather than by
+returning false.  That exception can then be used to report the
+details of what went wrong.
 
 To do this, we'll change our test declaration to use `let%test_unit`
 instead of `let%test`, so that the test no longer expects a body that
