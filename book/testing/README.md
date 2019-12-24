@@ -112,7 +112,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -133,7 +133,7 @@ which, given a type, generates code to test for equality and throw a
 meaningful exception if the arguments are unequal.
 
 Here's what our new test looks like. You'll notice that it's a little
-more concise, mostly because this is a less verbose way to express the
+more concise, mostly because this is a more concise way to express the
 comparison function.
 
 ```ocaml file=examples/test_eq-inline_test/test.ml
@@ -156,15 +156,15 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
 
 As you can see, the data that caused the comparison to fail is printed
 out, along with the stacktrace.  Note that in this case the stacktrace
-is mostly a distraction, which is a downside of this way of writing
-the test.
+is mostly a distraction, which is a downside of using exceptions to
+report test failures.
 
 ### Where should tests go?
 
@@ -188,9 +188,9 @@ libraries has several downsides.
 
 - **Excess dependencies**. Testing code doesn't just add size to your
   final executable; it can also require dependencies on libraries that
-  you don't need in production.  This can further bloat your
-  application, and can reduce portability and cause you to link risky
-  code into your production application.
+  you don't need in production.  This adds further bloat, can reduce
+  portability, and can cause you to link risky code into your
+  production application.
 
 - **Testing against unexposed APIs**. Writing tests on the inside of
   your libraries has the virtue of letting you write tests against any
@@ -326,7 +326,7 @@ Quickcheck has found a counterexample.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
