@@ -372,12 +372,15 @@ generated values.
 open Core_kernel
 
 let%test_unit "List.rev_append is List.append of List.rev" =
-  let int_list_gen =
-    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
+  let generator =
+    let int_list_gen =
+      List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
+    in
+    Quickcheck.Generator.both int_list_gen int_list_gen
   in
   Quickcheck.test
     ~sexp_of:[%sexp_of: int list * int list]
-    (Quickcheck.Generator.both int_list_gen int_list_gen)
+    generator
     ~f:(fun (l1,l2) ->
         [%test_eq: int list]
           (List.rev_append l1 l2)
@@ -401,8 +404,17 @@ tedious.  Happily, Quickcheck ships with a PPX that can automate
 creation of the generator given just the type declaration.
 
 ```ocaml file=examples/bigger_quickcheck_test_with_ppx/test.ml
-```
+open Core_kernel
 
+let%test_unit "List.rev_append is List.append of List.rev" =
+  Quickcheck.test
+    ~sexp_of:[%sexp_of: int list * int list]
+    [%quickcheck.generator: int list * int list]
+    ~f:(fun (l1,l2) ->
+        [%test_eq: int list]
+          (List.rev_append l1 l2)
+          (List.append (List.rev l1) l2))
+```
 
 Quickcheck's generator also form a monad, meaning that it supports
 operators like `bind` and `map`, which we presented in an error
