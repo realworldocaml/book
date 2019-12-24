@@ -249,7 +249,12 @@ examples. The test then checks whether the predicate holds over many
 randomly generated examples.
 
 We can write a property test using only the tools we've learned so
-far.  Here's an example.
+far.  In this example, we'll check the obvious invariant between three
+operations: `Int.sign`, which computes the sign of an integer,
+`Int.neg`, which negates a number, and `Sign.flip`, which, well, flips
+the sign.
+
+Here's one way of implementing this test.
 
 ```ocaml file=examples/manual_property_test/test.ml
 open! Base
@@ -263,21 +268,22 @@ let%test_unit "negation flips the sign" =
   done
 ```
 
-As you can see below, this test passes.
+And, as you might expect, the test passes.
 
 ```sh dir=examples/manual_property_test
   $ dune runtest
 ```
 
-One thing that was implicit in the example we gave above is the
-probability distribution that was used for selecting
-examples. Whenever you pick things at random, you're always making a
-choice as to the probability with which each possible example is
-selected. But not all probability distributions are equally good for
-testing.  In fact, the choice we made above, which was to pick
-integers uniformly and at random, is problematic, since it picks
-interesting special cases, like zero and one, with the same
-probability as everything else.
+One thing that was implicit in the implementation above is the
+probability distribution that was used for selecting examples.
+Whenever you pick things at random, you're always making a choice as
+to the probability with which each possible example is selected. But
+not all probability distributions are equally good for testing.  In
+fact, the choice we made above, which was to pick integers uniformly
+and at random, is problematic, since it picks interesting special
+cases, like zero and one, with the same probability as everything
+else.  Given the number of integers, the chance of testing any of
+those special cases is rather low.x
 
 That's where Quickcheck comes in.  Quickcheck is a library to help
 automate the construction of testing distributions. Let's try
@@ -304,8 +310,8 @@ tested. Quickcheck has a built in default which can be overridden by
 way of an optional argument.
 
 In any case, running the test uncovers the fact that the property
-we've been testing doesn't actually hold on all outputs, and
-Quickcheck has found a counterexample.
+we've been testing doesn't actually hold on all outputs, as you can
+see below.
 
 ```sh dir=examples/quickcheck_property_test
   $ dune runtest
@@ -390,9 +396,17 @@ types.
 = <fun>
 ```
 
+The declaration of the generator is pretty simple, but it's also
+tedious.  Happily, Quickcheck ships with a PPX that can automate
+creation of the generator given just the type declaration.
+
+```ocaml file=examples/bigger_quickcheck_test_with_ppx/test.ml
+```
+
+
 Quickcheck's generator also form a monad, meaning that it supports
-operators like `bind` and `map`, which we say in an error handling
-context in [Error
+operators like `bind` and `map`, which we presented in an error
+handling context in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 
 In combination with `Let_syntax`, the generator monad gives us a

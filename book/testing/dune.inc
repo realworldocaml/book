@@ -7,7 +7,8 @@
   (package core_kernel)
   (package mdx)
   (package ppx_jane)
-  (:y9 examples/bigger_quickcheck_test/test.ml)
+  (:y10 examples/bigger_quickcheck_test/test.ml)
+  (:y9 examples/bigger_quickcheck_test_with_ppx/test.ml)
   (:y8 examples/broken_inline_test/test.ml)
   (:y7 examples/manual_property_test/test.ml)
   (:y6 examples/quickcheck_property_test/test.ml)
@@ -30,6 +31,7 @@
   (progn
    (run ocaml-mdx test --prelude=prelude.ml --direction=to-md %{x})
    (diff? %{x} %{x}.corrected)
+   (diff? %{y10} %{y10}.corrected)
    (diff? %{y9} %{y9}.corrected)
    (diff? %{y8} %{y8}.corrected)
    (diff? %{y7} %{y7}.corrected)
