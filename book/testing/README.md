@@ -181,69 +181,66 @@ aspects of your code that aren't exposed by its external interface.
 While this sounds appealing at first glance, putting tests in
 libraries has several downsides.
 
-- **Bloat**. When your tests are written as a part of your library, it
-  means that every user of your library has to link in that testing
-  code in their production application. Even though that code won't be
-  run, it still adds to the size of the executable.
-
-- **Excess dependencies**. Testing code doesn't just add size to your
-  final executable; it can also require dependencies on libraries that
-  you don't need in production.  This adds further bloat, can reduce
-  portability, and can cause you to link risky code into your
-  production application.
-
-- **Testing against unexposed APIs**. Writing tests on the inside of
-  your libraries has the virtue of letting you write tests against any
-  of the code you've written, not just what has been exposed in the
-  API. But this is a two-edged sword.  Most of the time, it's a good
-  mental discipline to express your testing in terms of the public
-  API, rather than in terms of the implementation. This encourages you
-  to think about and test the invariants exposed to users.
-
 - **Readability**. Including all of your tests directly in your
   application code can make that code itself harder to read. This can
   lead to people writing too few tests in an effort to keep their
   application code uncluttered.
 
-For all of these reasons, our recommendation is to put your tests in
-test-only libraries created for that purpose.  There are some
-legitimate reasons to want to put some test directly in your
-production library, e.g., there's something that's really awkward to
-expose in a way that makes it possible to test. But these examples are
-few and far between.
+- **Bloat**. When your tests are written as a part of your library, it
+  means that every user of your library has to link in that testing
+  code in their production application.  Even though that code won't
+  be run, it still adds to the size of the executable.  It can also
+  require dependencies on libraries that you don't need in production,
+  which can reduce the portability of your code.
+
+- **Testing mindset**. Writing tests on the inside of your libraries
+  lets you write tests against any part of your implementation, rather
+  than just the exposed API.  This freedom is useful, but can also put
+  you in the wrong testing mindset.  Testing that's phrased in terms
+  of the public API often does a better job of testing what's
+  fundamental about your code, and will better survive refactoring of
+  the implementation.  Also, the discipline of keeping tests outside
+  of requires you to write code that can be tested that way, which
+  pushes towards designs that are better factored out.
+
+For all of these reasons, our recommendation is to put the bulk of
+your tests in test-only libraries created for that purpose.  There are
+some legitimate reasons to want to put some test directly in your
+production library, e.g., when you need access to some functionality
+to do the test that's important but is really awkward to expose.  But
+such cases are very much the exception.
 
 ::: {data-type=note}
 ##### Why can't inline tests go in executables?
 
 We've only talked about putting tests into libraries. What about
 executables? After all, you want to test the logic of your
-command-line tools as well. It turns out you can't do this directly,
-since Dune doesn't support the `inline_tests` declaration in
-executable files.
+command-line tools as well.  It turns out you can't do this directly,
+because Dune doesn't support the `inline_tests` declaration in source
+files that are directly part of an executable.
 
 There's a good reason for this: the `ppx_inline_test` test runner
 needs to instantiate the modules that contain the tests. If those
-modules have toplevel side-effects, that's a recipe for disaster. You
-don't want your test-framework running lots of copies of your
-executables in parallel without your say-so.
+modules have toplevel side-effects, that's a recipe for disaster,
+since you don't want those top-level effects to be triggered by the
+test framework without your say-so.
 
 So, how do we test code that's part of an executable? The solution is
 to break up your program in to two pieces: a directory containing a
-library that contains all of the logic of your program, and is
-suitable for testing (either with embedded inline tests, or from a
-purpose-built testing library); and a directory for the executable
-that links in the library, and is just responsible for launching the
-program.
+library that contains the logic of your program, but no dangerous
+top-level effects; and a directory for the executable that links in
+the library, and is responsible for launching the code.
 
 :::
 
 ## Property testing with Quickcheck
 
-The tests we've discussed so far have been pretty simple, amounting to
-little more than writing down individual examples and checking that
-their behavior is as expected.  We often want to write tests that do
-more than that. One good example of a more powerful style of tests is
-called *property testing*.
+The tests we've discussed so far have been quite simple, amounting to
+little more than individual examples paired with assertions checking
+that the example in question worked as expected.  *Property testing*
+is a useful extension of this approach, which lets us explore a much
+larger portion of our code's behavior with only a small amount of
+extra code.
 
 The basic idea is simple enough. A property test requires two things:
 a function that takes an example input and checks that a given
