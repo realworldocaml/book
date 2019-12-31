@@ -1,11 +1,11 @@
 # Testing
 
-Testing is not the best loved part of software engineering.  It can be
-painful work, and it often feels like a distraction from the important
-work of adding functionality to your code.  In some ways, OCaml's
-type-system makes testing seem even less appealing, since the type
-system's ability to squash many kinds of bugs at compile time makes it
-seem like that testing isn't all that important.
+Testing is not the best loved part of software engineering, often
+feeling like a painful distraction from the work of building out the
+functionality of a project.  OCaml's type-system can make testing seem
+even less appealing, since the type system's ability to squash many
+kinds of bugs at compile time makes it seem like that testing isn't
+all that important.
 
 But make no mistake, clever types notwithstanding, testing is
 essential for developing and evolving complex software systems.  The
@@ -13,14 +13,14 @@ goal of this chapter is to teach you more about how to write effective
 tests in OCaml, and to teach you some of the best tools for doing so.
 
 Tooling is especially important in the context of testing because one
-of the things that prevents people from writing all the tests they
-should is the sheer tedium of it all.  But with the right tools in
-hand, writing tests can be lightweight and fun.  And when testing is
-fun, people do a lot more of it.
+of the things that prevents people from doing as much testing as they
+should is the sheer tedium of it.  But with the right tools in hand,
+writing tests can be lightweight and fun.  And when testing is fun, a
+lot more testing gets done.
 
-But before talking about the testing tools that are available in
-OCaml, let's discuss at a high level what we want out of our tests and
-our testing tools in the first place.
+Before talking about the testing tools that are available in OCaml,
+let's discuss at a high level what we want out of our tests and our
+testing tools in the first place.
 
 ## What makes for good tests?
 
