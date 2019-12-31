@@ -363,7 +363,7 @@ see here.
 Quickcheck's insistence on tracking and testing special cases is what
 allowed it to find this error.
 
-### Building more complex values
+### Handling complex types
 
 Tests can't subsist on simple atomic types alone, which is why you'll
 often want to build probability distributions over more complex types.
@@ -380,7 +380,6 @@ let gen_int_list_pair =
     List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
   in
   Quickcheck.Generator.both int_list_gen int_list_gen
-
 
 let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test
@@ -422,24 +421,58 @@ let%test_unit "List.rev_append is List.append of List.rev" =
           (List.append (List.rev l1) l2))
 ```
 
-Quickcheck's generator also form a monad, meaning that it supports
-operators like `bind` and `map`, which we presented in an error
-handling context in [Error
-Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
-
-In combination with `Let_syntax`, the generator monad gives us a
-convenient way to specify generators for custom types. Imagine we
-wanted to generate examples of the following variant type.
+This also works with other, more complex data-types, like variants.
+Here's a simple example.
 
 ```ocaml env=main
-# type shape = | Circle of { radius: float }
-               | Rect of { height: float; width: float }
-               | Poly of (float * float) list
+# type shape =
+    | Circle of { radius: float }
+    | Rect of { height: float; width: float }
+    | Poly of (float * float) list
+  [@@deriving quickcheck]
 type shape =
     Circle of { radius : float; }
   | Rect of { height : float; width : float; }
   | Poly of (float * float) list
+val quickcheck_generator_shape : shape Base_quickcheck.Generator.t = <abstr>
+val quickcheck_observer_shape : shape Base_quickcheck.Observer.t = <abstr>
+val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
 ```
+
+This will make a bunch of reasonable default decisions, like picking
+`Circle`, `Rect`, and `Poly` with equal probability.  We can use
+annotations to adjust this, for example, by specifying the weight on a
+particular variant.
+
+```ocaml env=main
+# type shape =
+    | Circle of { radius: float } [@quickcheck.weight 0.2]
+    | Rect of { height: float; width: float }
+    | Poly of (float * float) list
+  [@@deriving quickcheck]
+type shape =
+    Circle of { radius : float; }
+  | Rect of { height : float; width : float; }
+  | Poly of (float * float) list
+val quickcheck_generator_shape : shape Base_quickcheck.Generator.t = <abstr>
+val quickcheck_observer_shape : shape Base_quickcheck.Observer.t = <abstr>
+val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
+```
+
+Note that the default weight on each case is `1`.
+
+### Getting more control
+
+If the annotations associated with `ppx_quickcheck` don't let you do
+precisely what you want, you can get more control by taking advantage
+of the fact that Quickcheck's generators form a monad.  That means it
+supports operators like `bind` and `map`, which we first presented in
+an error handling context in [Error
+Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
+
+In combination with `Let_syntax`, the generator monad gives us a
+convenient way to specify generators for custom types. Imagine we
+wanted to construct a generator for the `shape` type defined above.
 
 Using `Let_syntax`, a generator for this would look as follows.
 
@@ -468,11 +501,10 @@ Using `Let_syntax`, a generator for this would look as follows.
 val gen_shape : shape Base_quickcheck.Generator.t = <abstr>
 ```
 
-It may not be obvious, but throughout this function we're making
-choices about the probability distribution. For example, the use of
-the `union` operator means that circles, rectangles and polygons will
-be equally likely. We could have used `weighted_union` to pick a
-different distribution.
+Throughout this function we're making choices about the probability
+distribution. For example, the use of the `union` operator means that
+circles, rectangles and polygons will be equally likely. We could have
+used `weighted_union` to pick a different distribution.
 
 The full API for building generators is beyond the scope of this
 chapter, but it's worth digging in to the API docs if you want more
