@@ -238,8 +238,8 @@ the library, and is responsible for launching the code.
 The tests we've discussed so far have been quite simple, amounting to
 little more than individual examples paired with assertions checking
 that the example in question worked as expected.  *Property testing*
-is a useful extension of this approach, which lets us explore a much
-larger portion of our code's behavior with only a small amount of
+is a useful extension of this approach, which lets you explore a much
+larger portion of your code's behavior with only a small amount of
 extra code.
 
 The basic idea is simple enough. A property test requires two things:
@@ -249,12 +249,15 @@ examples. The test then checks whether the predicate holds over many
 randomly generated examples.
 
 We can write a property test using only the tools we've learned so
-far.  In this example, we'll check the obvious invariant between three
-operations: `Int.sign`, which computes the sign of an integer,
-`Int.neg`, which negates a number, and `Sign.flip`, which, well, flips
-the sign.
+far.  In this example, we'll check an obvious-seeming invariant
+connecting three operations: `Int.sign`, which computes a `Sign.t`
+representing the sign of an integer (`Positive`, `Negative`, or
+`Zero`), `Int.neg`, which negates a number, and `Sign.flip`, which,
+well, flips a `Sign.t`, i.e., mapping `Positive` to `Negative` and
+vice-versa.  The invariant is simply that the sign of the negation of
+an integer `x` is the flip of the sign of `x`.
 
-Here's one way of implementing this test.
+Here's one way of implementing this test as a property test.
 
 ```ocaml file=examples/manual_property_test/test.ml
 open! Base
@@ -268,22 +271,24 @@ let%test_unit "negation flips the sign" =
   done
 ```
 
-And, as you might expect, the test passes.
+As you might expect, the test passes.
 
 ```sh dir=examples/manual_property_test
   $ dune runtest
 ```
 
-One thing that was implicit in the implementation above is the
-probability distribution that was used for selecting examples.
-Whenever you pick things at random, you're always making a choice as
-to the probability with which each possible example is selected. But
-not all probability distributions are equally good for testing.  In
-fact, the choice we made above, which was to pick integers uniformly
-and at random, is problematic, since it picks interesting special
-cases, like zero and one, with the same probability as everything
-else.  Given the number of integers, the chance of testing any of
-those special cases is rather low.x
+One choice we had to make in our implementation is which probability
+distribution to use for selecting examples.  This may seem like an
+unimportant question, but when it comes to testing, not all
+probability distributions are equally good.
+
+In fact, the choice we made, which was to pick integers uniformly and
+at random from the full set of integers, is problematic, since it
+picks interesting special cases, like zero and one, with the same
+probability as everything else.  Given the number of integers, the
+chance of testing any of those special cases is rather low.  This
+accords poorly with the intuition that one should make sure to test
+out corner cases.
 
 That's where Quickcheck comes in.  Quickcheck is a library to help
 automate the construction of testing distributions. Let's try
@@ -335,9 +340,9 @@ see below.
 ```
 
 The example that triggers the exception is `-4611686018427387904`,
-which can also be referred to as `Int.min_value`, and is the smallest
-value of type `Int.t`. Note that the largest int, `Int.max_value`, is
-smaller in absolute value than `Int.max_value`.
+also known as `Int.min_value`, which is the smallest value of type
+`Int.t`. Note that the largest int, `Int.max_value`, is smaller in
+absolute value than `Int.max_value`.
 
 ```ocaml env=main
 # Int.min_value
@@ -348,39 +353,39 @@ smaller in absolute value than `Int.max_value`.
 
 It turns out that the standard behavior for negation is that the
 negation of the minimum value of an int is equal to itself, as you can
-see here:
+see here.
 
 ```ocaml env=main
 # Int.neg Int.min_value
 - : int = -4611686018427387904
 ```
 
-Quickcheck found this example for us because it's careful about the
-probability distributions it uses, and in particular is careful about
-making sure to keep track of and explore special cases like
-`min_value` and `max_value`.
+Quickcheck's insistence on tracking and testing special cases is what
+allowed it to find this error.
 
 ### Building more complex values
 
 Tests can't subsist on simple atomic types alone, which is why you'll
 often want to build probability distributions over more complex types.
 Here's a simple example, where we want to test the behavior of
-`List.rev_append`, which requires us to create lists of randomly
-generated values.
+`List.rev_append`.  For this test, we're going to use a probability
+distribution for generating pairs of lists of integers.  The following
+example shows how htat can be done using Quickcheck's combinators.
 
 ```ocaml file=examples/bigger_quickcheck_test/test.ml
 open Core_kernel
 
-let%test_unit "List.rev_append is List.append of List.rev" =
-  let generator =
-    let int_list_gen =
-      List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
-    in
-    Quickcheck.Generator.both int_list_gen int_list_gen
+let gen_int_list_pair =
+  let int_list_gen =
+    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
   in
+  Quickcheck.Generator.both int_list_gen int_list_gen
+
+
+let%test_unit "List.rev_append is List.append of List.rev" =
   Quickcheck.test
     ~sexp_of:[%sexp_of: int list * int list]
-    generator
+    gen_int_list_pair
     ~f:(fun (l1,l2) ->
         [%test_eq: int list]
           (List.rev_append l1 l2)
@@ -401,7 +406,8 @@ types.
 
 The declaration of the generator is pretty simple, but it's also
 tedious.  Happily, Quickcheck ships with a PPX that can automate
-creation of the generator given just the type declaration.
+creation of the generator given just the type declaration.  We can use
+that to simplify our code, as shown below.
 
 ```ocaml file=examples/bigger_quickcheck_test_with_ppx/test.ml
 open Core_kernel
