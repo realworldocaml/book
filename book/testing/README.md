@@ -461,7 +461,7 @@ val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
 
 Note that the default weight on each case is `1`.
 
-### Getting more control
+### More control with let-syntax
 
 If the annotations associated with `ppx_quickcheck` don't let you do
 precisely what you want, you can get more control by taking advantage
@@ -512,23 +512,22 @@ control over the distribution of your test examples.
 
 ## Expect Tests
 
-While property-based tests are extremely useful, they're not always
-what you want.  Sometimes, instead of writing down properties, you
-want tests that simply capture and make visible the behavior of your
-code under simple, concrete scenarios, and which warn you when that
-captured behavior changes.  *Expect tests* provide a way of doing just
-that.
+While property-based tests are very useful, they're not always what
+you want.  Sometimes, instead of writing down properties, you want
+tests that capture and make visible the behavior of your code under
+specified, concrete scenarios, and which warn you when that captured
+behavior changes.  *Expect tests* provide a way of doing just that.
 
 ### Basic mechanics
 
 With expect tests, your source file specifies both the code to be
-executed and the expected output. Upon running an expect test, any
+executed and the expected output.  Upon running an expect test, any
 discrepancy between the expected output and what was actually
 generated is reported as a test failure.
 
-Here's a simple example of a test written in this style.  Note that
-the test generates output, but that output isn't captured in the
-source, at least, not yet.
+Here's a simple example of a test written in this style.  While the
+test generates output (though a call to `print_endline`), that output
+isn't captured in the source, at least, not yet.
 
 ```ocaml file=examples/trivial_expect_test/test.ml
 open! Base
@@ -559,12 +558,11 @@ wrote, and a *corrected* version of the source file that now has an
   [1]
 ```
 
-It doesn't just generate this output, it also creates a version of the
-file with the captured output, with `.corrected` appended to the end.
-If this new output looks correct, we can *promote* it to be the
-expected output by copying it over the original source.  The `dune
-promote` command does just this, leaving our test file in the
-following state.
+The expect test runner also creates a version of the file with the
+captured output, with `.corrected` appended to the end of the
+filename.  If this new output looks correct, we can *promote* it by
+copying the corrected file it over the original source.  The `dune
+promote` command does just this, leaving our source as follows.
 
 ```ocaml file=examples/trivial_expect_test_fixed/test.ml
 open! Base
