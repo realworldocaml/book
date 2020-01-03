@@ -582,11 +582,11 @@ Now, if we run the test again, we'll see that it passes.
 We only have one expect block in this example, but the system supports
 having multiple expect blocks, as you can see below.
 
-```ocaml file=examples/multiline_expect_test/test.ml
+```ocaml file=examples/multi_block_expect_test/test.ml
 open! Base
 open! Stdio
 
-let%expect_test "multiline" =
+let%expect_test "multi-block" =
   print_endline "Hello";
   [%expect{| Hello |}];
   print_endline "World!";

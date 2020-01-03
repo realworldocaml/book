@@ -11,7 +11,7 @@
   (:y10 examples/bigger_quickcheck_test_with_ppx/test.ml)
   (:y9 examples/broken_inline_test/test.ml)
   (:y8 examples/manual_property_test/test.ml)
-  (:y7 examples/multiline_expect_test/test.ml)
+  (:y7 examples/multi_block_expect_test/test.ml)
   (:y6 examples/quickcheck_property_test/test.ml)
   (:y5 examples/simple_expect_test/test.ml)
   (:y4 examples/simple_inline_test/dune)
