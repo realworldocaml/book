@@ -112,7 +112,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -334,7 +334,7 @@ see below.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -582,8 +582,16 @@ Now, if we run the test again, we'll see that it passes.
 We only have one expect block in this example, but the system supports
 having multiple expect blocks, as you can see below.
 
-(Something about multi-expect-tests here?
-examples/multi_expect_test/test.ml)
+```ocaml file=examples/multiline_expect_test/test.ml
+open! Base
+open! Stdio
+
+let%expect_test "multiline" =
+  print_endline "Hello";
+  [%expect{| Hello |}];
+  print_endline "World!";
+  [%expect{| World! |}]
+```
 
 
 ### What are expect tests good for?
