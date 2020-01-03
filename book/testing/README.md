@@ -513,10 +513,11 @@ control over the distribution of your test examples.
 ## Expect Tests
 
 While property-based tests are extremely useful, they're not always
-what you want. Sometimes, instead of writing down properties, you want
-to express your tests as a way of capturing and visualizing the
-behavior of your code under simple, concrete scenarios. *Expect tests*
-provide a way of doing just that.
+what you want.  Sometimes, instead of writing down properties, you
+want tests that simply capture and make visible the behavior of your
+code under simple, concrete scenarios, and which warn you when that
+captured behavior changes.  *Expect tests* provide a way of doing just
+that.
 
 ### Basic mechanics
 
@@ -562,7 +563,8 @@ It doesn't just generate this output, it also creates a version of the
 file with the captured output, with `.corrected` appended to the end.
 If this new output looks correct, we can *promote* it to be the
 expected output by copying it over the original source.  The `dune
-promote` does just this, leaving our original test looking like this:
+promote` command does just this, leaving our test file in the
+following state.
 
 ```ocaml file=examples/trivial_expect_test_fixed/test.ml
 open! Base
