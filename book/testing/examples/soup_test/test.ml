@@ -7,3 +7,6 @@ let get_href_hosts soup =
   |> List.map ~f:(Soup.R.attribute "href")
   |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
   |> Set.of_list (module String)
+
+let%expect_test "" =
+  print_endline "Whoa"

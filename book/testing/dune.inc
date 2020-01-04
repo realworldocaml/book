@@ -23,6 +23,7 @@
   (source_tree examples/manual_property_test)
   (source_tree examples/quickcheck_property_test)
   (source_tree examples/simple_inline_test)
+  (source_tree examples/soup_test)
   (source_tree examples/test_eq-inline_test)
   (source_tree examples/trivial_expect_test)
   (source_tree examples/trivial_expect_test_fixed)

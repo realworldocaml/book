@@ -112,7 +112,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -334,7 +334,7 @@ see below.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -635,6 +635,17 @@ of expect tests is simply to capture the behavior of code where you
 don't necessarily have a concise specification of how the code should
 behave, and you just want to generate some examples and look at the
 output to make sure it makes sense to the human eye.
+
+```sh dir=examples/soup_test
+  $ dune runtest
+  File "dune", line 3, characters 23-33:
+  3 |  (libraries base stdio lambdasoup)
+                             ^^^^^^^^^^
+  Error: Library "lambdasoup" not found.
+  Hint: try: dune external-lib-deps --missing @runtest
+  [1]
+```
+
 
 (UNFINISHED)
 
