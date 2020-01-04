@@ -638,10 +638,10 @@ output to make sure it makes sense to the human eye.
 
 ```sh dir=examples/soup_test
   $ dune runtest
-  File "dune", line 3, characters 23-33:
-  3 |  (libraries base stdio lambdasoup)
-                             ^^^^^^^^^^
-  Error: Library "lambdasoup" not found.
+  File "dune", line 3, characters 34-37:
+  3 |  (libraries base stdio lambdasoup uri)
+                                        ^^^
+  Error: Library "uri" not found.
   Hint: try: dune external-lib-deps --missing @runtest
   [1]
 ```
