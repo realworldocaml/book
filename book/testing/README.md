@@ -638,11 +638,25 @@ output to make sure it makes sense to the human eye.
 
 ```sh dir=examples/soup_test
   $ dune runtest
-  File "dune", line 3, characters 34-37:
-  3 |  (libraries base stdio lambdasoup uri)
-                                        ^^^
-  Error: Library "uri" not found.
-  Hint: try: dune external-lib-deps --missing @runtest
+       patdiff (internal) (exit 1)
+  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 12, characters 0-1:
+   |open! Base
+   |open! Stdio
+   |
+   |let get_href_hosts soup =
+   |  Soup.select "a[href]" soup
+   |  |> Soup.to_list
+   |  |> List.map ~f:(Soup.R.attribute "href")
+   |  |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
+   |  |> Set.of_list (module String)
+   |
+   |let%expect_test "" =
+  -|  print_endline "Whoa"
+  +|  print_endline "Whoa";
+  +|  [%expect {| Whoa |}]
   [1]
 ```
 
