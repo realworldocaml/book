@@ -5,6 +5,7 @@ let get_href_hosts soup =
   Soup.select "a[href]" soup
   |> Soup.to_list
   |> List.map ~f:(Soup.R.attribute "href")
+  |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
   |> Set.of_list (module String)
 
 let%expect_test _ =
@@ -20,4 +21,4 @@ let%expect_test _ =
   let soup = Soup.parse example_html in
   let hrefs = get_href_hosts soup in
   print_s [%sexp (hrefs : Set.M(String).t)];
-  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  [%expect {| (github.com ocaml.org) |}]
