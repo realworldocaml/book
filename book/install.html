@@ -593,24 +593,6 @@ endif
   such as Syntastic and neocomplcache -- see <code>:help
   merlin.txt</code> for pointers.</p>
 
-  <h5>Tell Merlin about your project layout</h5>
-
-  <p>Regardless of which editor you use, you need to tell Merlin a
-  bit about the build environment you're working with in order for
-  it to work properly. This is done by creating a
-  <code>.merlin</code> file. If you're building applications based
-  on Core and Async using the <code>corebuild</code> script (which
-  is built on top of <code>ocamlbuild</code>), then the following
-  is a good starting point.</p>
-  <pre>
-<code class="language-none">S .
-B _build
-PKG core
-PKG async
-PKG core_extended
-EXT nonrec
-</code></pre>
-
   <p>See the Merlin README for complete details of the file
   format.</p>
 

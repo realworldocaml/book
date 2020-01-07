@@ -205,7 +205,7 @@ val sexp_of_t : t -> Sexp.t = <fun>
 The syntax extension can be used outside of type declarations as well. As
 discussed in
 [Error Handling](error-handling.html#error-handling){data-type=xref},
-`with sexp` can be attached to the declaration of an exception, which will
+`[@@deriving sexp]` can be attached to the declaration of an exception, which will
 improve the ability of Core to generate a useful string representation:
 
 ```ocaml env=auto_making_sexp
@@ -267,6 +267,17 @@ and `ppx_fields`, described in
 [Records](records.html#records){data-type=xref}, that generate code based
 on type declarations. [Type_conv library]{.idx}[Sexplib package/Type_conv
 library and]{.idx}
+
+Using these extensions from a `dune` file is as simple as adding this
+directive to a `(library)` or `(executable)` stanza to indicate that the
+files should be run through a preprocessor:
+
+```sexp
+(executable
+  (name hello)
+  (preprocess (pps ppx_sexp_conv))
+)
+```
 :::
 
 
@@ -660,9 +671,10 @@ having to write a custom converter. [s-expressions/modifying default behavior
 of]{.idx}
 
 Note that the extra directives aren't part of the standard OCaml syntax, but
-are added via the Sexplib syntax extension. However, since Sexplib is used
-throughout Core and is part of the standard bundle activated by `corebuild`,
-you can use these in your own Core code without any special effort.
+are added via the Sexplib PPX syntax extension.  You can simply activate
+the preprocessor in your own `dune` files by adding `(preprocess (pps ppx_sexp_conv))`
+to your build descriptions.  We've shown you some examples of complete `dune`
+files with this added previously in the chapter.
 
 ### sexp_opaque {#sexp_opaque}
 
