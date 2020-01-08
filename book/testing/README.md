@@ -636,28 +636,31 @@ don't necessarily have a concise specification of how the code should
 behave, and you just want to generate some examples and look at the
 output to make sure it makes sense to the human eye.
 
+### An example: web-scraping
+
+A routine programming task which often suffers from a lack of a clear
+specification is web-scraping.  The goal is to extract some useful
+information from an arbitrary web page.
+
+Here's some code that attempts to just that.  The following function
+uses the `lambdasoup` package to traverse some HTML and spit out a set
+of strings.  The goal of this function is to produce the set of
+hosts that show up in the href of links within the document.
+
+```ocaml file=examples/soup_test/test.ml,part=0
+open! Base
+open! Stdio
+
+let get_href_hosts soup =
+  Soup.select "a[href]" soup
+  |> Soup.to_list
+  |> List.map ~f:(Soup.R.attribute "href")
+  |> Set.of_list (module String)
+```
+
+
 ```sh dir=examples/soup_test
   $ dune runtest
-       patdiff (internal) (exit 1)
-  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
-  ------ test.ml
-  ++++++ test.ml.corrected
-  File "test.ml", line 12, characters 0-1:
-   |open! Base
-   |open! Stdio
-   |
-   |let get_href_hosts soup =
-   |  Soup.select "a[href]" soup
-   |  |> Soup.to_list
-   |  |> List.map ~f:(Soup.R.attribute "href")
-   |  |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
-   |  |> Set.of_list (module String)
-   |
-   |let%expect_test "" =
-  -|  print_endline "Whoa"
-  +|  print_endline "Whoa";
-  +|  [%expect {| Whoa |}]
-  [1]
 ```
 
 

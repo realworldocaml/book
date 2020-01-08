@@ -1,3 +1,4 @@
+[@@@part "0"] ;;
 open! Base
 open! Stdio
 
@@ -7,6 +8,7 @@ let get_href_hosts soup =
   |> List.map ~f:(Soup.R.attribute "href")
   |> Set.of_list (module String)
 
+[@@@part "1"] ;;
 let%expect_test _ =
   let example_html = {|
     <html>
