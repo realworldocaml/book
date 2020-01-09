@@ -662,6 +662,19 @@ We can then try this out by adding an expect test that runs this code
 on some sample data.
 
 ```ocaml file=examples/soup_test/test.ml,part=1
+let%expect_test _ =
+  let example_html = {|
+    <html>
+      Some random <b>text</b> with a
+      <a href="http://ocaml.org/base">link</a>.
+      And here's another
+      <a href="http://github.com/ocaml/dune">link</a>.
+      And here is <a>link</a> with no href.
+    </html>|}
+  in
+  let soup = Soup.parse example_html in
+  let hrefs = get_href_hosts soup in
+  print_s [%sexp (hrefs : Set.M(String).t)]
 ```
 
 If we run the test, we'll see that the output isn't exactly what was
@@ -669,19 +682,76 @@ intended.
 
 ```sh dir=examples/soup_test
   $ dune runtest
+       patdiff (internal) (exit 1)
+  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 24, characters 0-1:
+   |  |> List.map ~f:(Soup.R.attribute "href")
+   |  |> Set.of_list (module String)
+   |
+   |[@@@part "1"] ;;
+   |let%expect_test _ =
+   |  let example_html = {|
+   |    <html>
+   |      Some random <b>text</b> with a
+   |      <a href="http://ocaml.org/base">link</a>.
+   |      And here's another
+   |      <a href="http://github.com/ocaml/dune">link</a>.
+   |      And here is <a>link</a> with no href.
+   |    </html>|}
+   |  in
+   |  let soup = Soup.parse example_html in
+   |  let hrefs = get_href_hosts soup in
+  -|  print_s [%sexp (hrefs : Set.M(String).t)]
+  +|  print_s [%sexp (hrefs : Set.M(String).t)];
+  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  [1]
 ```
 
 The problem here is that we failed to extract the host from the URI
-string.  We can fix that by using the `uri` library to parse the
-string and extract the host.  Here's the modified code.
+string.  I.e., we ended up with `http://github.com/ocaml/dune` instead
+of simple `github.com`.  We can fix that by using the `uri` library to
+parse the string and extract the host.  Here's the modified code.
 
 ```ocaml file=examples/soup_test_half_fixed/test.ml,part=0
+let get_href_hosts soup =
+  Soup.select "a[href]" soup
+  |> Soup.to_list
+  |> List.map ~f:(Soup.R.attribute "href")
+  |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
+  |> Set.of_list (module String)
 ```
 
 And if we
 
-```sh dir=examples/soup_test
+```sh dir=examples/soup_test_half_fixed
   $ dune runtest
+       patdiff (internal) (exit 1)
+  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 24, characters 0-1:
+   |  |> List.map ~f:(Soup.R.attribute "href")
+   |  |> Set.of_list (module String)
+   |
+   |[@@@part "1"] ;;
+   |let%expect_test _ =
+   |  let example_html = {|
+   |    <html>
+   |      Some random <b>text</b> with a
+   |      <a href="http://ocaml.org/base">link</a>.
+   |      And here's another
+   |      <a href="http://github.com/ocaml/dune">link</a>.
+   |      And here is <a>link</a> with no href.
+   |    </html>|}
+   |  in
+   |  let soup = Soup.parse example_html in
+   |  let hrefs = get_href_hosts soup in
+  -|  print_s [%sexp (hrefs : Set.M(String).t)]
+  +|  print_s [%sexp (hrefs : Set.M(String).t)];
+  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  [1]
 ```
 
 

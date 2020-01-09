@@ -1,6 +1,7 @@
 open! Base
 open! Stdio
 
+[@@@part "0"] ;;
 let get_href_hosts soup =
   Soup.select "a[href]" soup
   |> Soup.to_list
@@ -8,6 +9,7 @@ let get_href_hosts soup =
   |> List.filter_map ~f:(fun uri -> Uri.host (Uri.of_string uri))
   |> Set.of_list (module String)
 
+[@@@part "1"] ;;
 let%expect_test _ =
   let example_html = {|
     <html>
