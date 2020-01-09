@@ -112,7 +112,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -334,7 +334,7 @@ see below.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-  
+
   FAILED 1 / 1 tests
   [1]
 ```
@@ -658,6 +658,27 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 ```
 
+We can then try this out by adding an expect test that runs this code
+on some sample data.
+
+```ocaml file=examples/soup_test/test.ml,part=1
+```
+
+If we run the test, we'll see that the output isn't exactly what was
+intended.
+
+```sh dir=examples/soup_test
+  $ dune runtest
+```
+
+The problem here is that we failed to extract the host from the URI
+string.  We can fix that by using the `uri` library to parse the
+string and extract the host.  Here's the modified code.
+
+```ocaml file=examples/soup_test_half_fixed/test.ml,part=0
+```
+
+And if we
 
 ```sh dir=examples/soup_test
   $ dune runtest

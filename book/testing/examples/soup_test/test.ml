@@ -21,5 +21,4 @@ let%expect_test _ =
   in
   let soup = Soup.parse example_html in
   let hrefs = get_href_hosts soup in
-  print_s [%sexp (hrefs : Set.M(String).t)];
-  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  print_s [%sexp (hrefs : Set.M(String).t)]
