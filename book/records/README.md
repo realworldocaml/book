@@ -299,7 +299,7 @@ val service_info_of_string : string -> service_info = <fun>
 In the preceding code, we defined variables corresponding to the
 record fields first, and then the record declaration itself simply
 listed the fields that needed to be included. You can take advantage
-of both field punning and label punning when writing a function for
+of both fields punning and label punning when writing a function for
 constructing a record from labeled arguments:[label
 punning]{.idx}[records/label punning in]{.idx}
 
