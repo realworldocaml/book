@@ -112,7 +112,7 @@ we'll see an error when we run it.
 ```sh dir=examples/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -156,7 +156,7 @@ Here's what it looks like when we run the test.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -334,7 +334,7 @@ see below.
     Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
     Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
-
+  
   FAILED 1 / 1 tests
   [1]
 ```
@@ -731,8 +731,7 @@ And if we
   (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
   ------ test.ml
   ++++++ test.ml.corrected
-  File "test.ml", line 24, characters 0-1:
-   |  |> List.map ~f:(Soup.R.attribute "href")
+  File "test.ml", line 26, characters 0-1:
    |  |> Set.of_list (module String)
    |
    |[@@@part "1"] ;;
@@ -748,9 +747,9 @@ And if we
    |  in
    |  let soup = Soup.parse example_html in
    |  let hrefs = get_href_hosts soup in
-  -|  print_s [%sexp (hrefs : Set.M(String).t)]
-  +|  print_s [%sexp (hrefs : Set.M(String).t)];
-  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+   |  print_s [%sexp (hrefs : Set.M(String).t)];
+  -|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  +|  [%expect {| (github.com ocaml.org) |}]
   [1]
 ```
 
