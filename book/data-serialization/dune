@@ -1,15 +1,33 @@
 (rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}
-      --prelude=%{dep:prelude.ml}))))
+ (target README.md.corrected)
+ (deps
+  (package mdx)
+  (package core)
+  (package ppx_jane)
+  examples/int_interval_manual_sexp.mli
+  examples/int_interval_nosexp.mli
+  examples/read_foo/read_foo.ml
+  examples/read_foo_better_errors/read_foo_better_errors.ml
+  examples/sexp.mli
+  examples/sexp_override.ml
+  examples/test_interval/int_interval.ml
+  examples/test_interval/int_interval.mli
+  examples/test_interval/test_interval.ml
+  (source_tree examples)
+  (source_tree examples/read_foo)
+  (source_tree examples/read_foo_better_errors)
+  (source_tree examples/test_interval)
+  (source_tree examples/test_interval_nosexp))
+ (locks ../../global-lock)
+ (action
+  (run ocaml-mdx test
+   --prelude=%{dep:prelude.ml}
+   --output %{target}
+   --direction=to-md
+   %{dep:README.md})))
 
 (alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
 
 (data_only_dirs examples)
