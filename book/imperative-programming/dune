@@ -1,19 +1,32 @@
 (rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}
-                --prelude=%{dep:prelude.ml}
-                --prelude=memo:%{dep:memo.ml}
-                --prelude=fib:%{dep:fib.ml}
-                --prelude=letrec:%{dep:letrec.ml}
-                --prelude=value_restriction:%{dep:letrec.ml}))))
+ (target README.md.corrected)
+ (deps
+  (package mdx)
+  (package core)
+  (package ppx_jane)
+  examples/dictionary.ml
+  examples/dictionary.mli
+  examples/dictionary2.ml
+  examples/dlist.ml
+  examples/dlist.mli
+  examples/let_rec.ml
+  examples/remember_type.ml
+  examples/time_converter/time_converter.ml
+  examples/time_converter2.ml)
+ (locks ../../global-lock)
+ (action
+  (run ocaml-mdx test
+   --prelude=%{dep:prelude.ml}
+   --prelude=memo:%{dep:memo.ml}
+   --prelude=fib:%{dep:fib.ml}
+   --prelude=letrec:%{dep:letrec.ml}
+   --prelude=value_restriction:%{dep:letrec.ml}
+   --output %{target}
+   --direction=to-md
+   %{dep:README.md})))
 
 (alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
 
 (data_only_dirs examples)
