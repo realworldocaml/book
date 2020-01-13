@@ -20,7 +20,6 @@
     --prelude=%{dep:prelude.ml}
     --output %{target}
     --direction=to-md
-    --root=examples/json
     %{dep:README.md})))
 
 (alias
