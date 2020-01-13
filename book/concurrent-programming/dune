@@ -1,15 +1,38 @@
 (rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}
-      --prelude=%{dep:prelude.ml}))))
+ (target README.md.corrected)
+ (deps
+  (package mdx)
+  (package async)
+  (package cohttp-async)
+  (package core)
+  (package ppx_jane)
+  (package textwrap)
+  (package yojson)
+  examples/better_echo.ml
+  examples/echo/echo.ml
+  examples/search/search.ml
+  examples/search_out_of_order.ml
+  examples/search_with_configurable_server/search.ml
+  examples/search_with_error_handling/search.ml
+  examples/search_with_timeout.ml
+  examples/search_with_timeout_no_leak/search.ml
+  examples/search_with_timeout_no_leak_simple/search.ml
+  (source_tree examples/echo)
+  (source_tree examples/native_code_log_delays)
+  (source_tree examples/search)
+  (source_tree examples/search_with_configurable_server)
+  (source_tree examples/search_with_error_handling)
+  (source_tree examples/search_with_timeout_no_leak))
+ (locks ../../global-lock)
+ (action
+  (run ocaml-mdx test
+    --prelude=%{dep:prelude.ml}
+    --output %{target}
+    --direction=to-md
+    %{dep:README.md})))
 
 (alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
 
 (data_only_dirs examples)
