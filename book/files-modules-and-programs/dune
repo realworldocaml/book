@@ -1,15 +1,52 @@
 (rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}
-      --prelude=%{dep:prelude.ml}))))
+ (target README.md.corrected)
+ (deps
+  (package core)
+  (package mdx)
+  (package ppx_jane)
+  examples/abstract_username.ml
+  examples/common.ml
+  examples/ext_list.ml
+  examples/ext_list.mli
+  examples/freq-cyclic1/counter.ml
+  examples/freq-cyclic2/counter.ml
+  examples/freq-fast/counter.ml
+  examples/freq-median/counter.ml
+  examples/freq-median/counter.mli
+  examples/freq-median/use_median_1.ml
+  examples/freq-median/use_median_2.ml
+  examples/freq-with-counter/counter.ml
+  examples/freq-with-counter/freq.ml
+  examples/freq-with-missing-def/counter.mli
+  examples/freq-with-sig-abstract-fixed/freq.ml
+  examples/freq-with-sig-abstract/counter.ml
+  examples/freq-with-sig-abstract/counter.mli
+  examples/freq-with-sig-mismatch/counter.mli
+  examples/freq-with-sig/counter.mli
+  examples/freq-with-type-mismatch/counter.mli
+  examples/freq/freq.ml
+  examples/session_info/session_info.ml
+  (source_tree examples/freq)
+  (source_tree examples/freq-cyclic1)
+  (source_tree examples/freq-cyclic2)
+  (source_tree examples/freq-dune)
+  (source_tree examples/freq-with-counter)
+  (source_tree examples/freq-with-missing-def)
+  (source_tree examples/freq-with-sig-abstract)
+  (source_tree examples/freq-with-sig-abstract-fixed)
+  (source_tree examples/freq-with-sig-mismatch)
+  (source_tree examples/freq-with-type-mismatch)
+  (source_tree examples/session_info))
+ (locks ../../global-lock)
+ (action
+  (run ocaml-mdx test
+   --prelude=%{dep:prelude.ml}
+   --output %{target}
+   --direction=to-md
+   %{dep:README.md})))
 
 (alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
 
 (data_only_dirs examples)
