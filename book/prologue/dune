@@ -1,12 +1,13 @@
 (rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}))))
+ (target README.md.corrected)
+ (deps (package mdx))
+ (locks ../../global-lock)
+ (action
+   (run ocaml-mdx test
+    --output %{target}
+    --direction=to-md
+    %{dep:README.md})))
 
 (alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
