@@ -1,15 +1,34 @@
 (rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode --direction=to-md %{dep:README.md}
-      --prelude=%{dep:prelude.ml}))))
+ (target README.md.corrected)
+ (deps
+  (package mdx)
+  (package core)
+  (package ppx_jane)
+  examples/back-end-embed/embed_me1.ml
+  examples/back-end-embed/embed_me2.ml
+  examples/back-end/alternate_list/alternate_list.ml
+  examples/back-end/bench_patterns/bench_patterns.ml
+  examples/back-end/bench_poly_and_mono/bench_poly_and_mono.ml
+  examples/back-end/compare_mono.ml
+  examples/back-end/compare_poly.ml
+  examples/back-end/pattern_monomorphic_large.ml
+  examples/back-end/pattern_monomorphic_small.ml
+  examples/back-end/pattern_polymorphic.ml
+  (source_tree examples/back-end)
+  (source_tree examples/back-end-embed)
+  (source_tree examples/back-end/alternate_list)
+  (source_tree examples/back-end/bench_patterns)
+  (source_tree examples/back-end/bench_poly_and_mono))
+ (locks ../../global-lock)
+ (action
+  (run ocaml-mdx test
+    --prelude=%{dep:prelude.ml}
+    --output %{target}
+    --direction=to-md
+    %{dep:README.md})))
 
 (alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
 
 (data_only_dirs examples)
