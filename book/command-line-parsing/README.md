@@ -161,7 +161,7 @@ let () =
 identify which version of the binary you are running in production.
 You'll need the following `dune` file:
 
-```scheme
+```scheme file=examples/md5/dune
 (executable
   (name       md5)
   (libraries  core)
@@ -824,7 +824,7 @@ And that's all you really need to add subcommand support! Let's build the
 example first in the usual way and inspect the help output, which now
 reflects the subcommands we just added.
 
-```scheme
+```scheme file=examples/cal_add_sub_days/dune
 (executable
   (name       cal)
   (libraries  core)
