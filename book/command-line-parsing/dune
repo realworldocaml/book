@@ -1,2 +1,46 @@
+(rule
+ (target README.md.corrected)
+ (deps
+  (package mdx)
+  (package core)
+  (package ppx_jane)
+  examples/command-line-parsing/cal_add_days/cal.ml
+  examples/command-line-parsing/cal_add_interactive/cal.ml
+  examples/command-line-parsing/cal_add_interactive2/cal.ml
+  examples/command-line-parsing/cal_add_sub_days/cal.ml
+  examples/command-line-parsing/md5/md5.ml
+  examples/command-line-parsing/md5_as_filename/md5.ml
+  examples/command-line-parsing/md5_let_syntax/md5.ml
+  examples/command-line-parsing/md5_let_syntax2/md5.ml
+  examples/command-line-parsing/md5_multiarg/md5.ml
+  examples/command-line-parsing/md5_sequence/md5.ml
+  examples/command-line-parsing/md5_succinct/md5.ml
+  examples/command-line-parsing/md5_with_custom_arg/md5.ml
+  examples/command-line-parsing/md5_with_default_file/md5.ml
+  examples/command-line-parsing/md5_with_flags/md5.ml
+  examples/command-line-parsing/md5_with_optional_file/md5.ml
+  examples/command-line-parsing/md5_with_optional_file_broken/md5.ml
+  (source_tree examples/command-line-parsing/cal_add_days)
+  (source_tree examples/command-line-parsing/cal_add_interactive2)
+  (source_tree examples/command-line-parsing/cal_add_sub_days)
+  (source_tree examples/command-line-parsing/md5)
+  (source_tree examples/command-line-parsing/md5_multiarg)
+  (source_tree examples/command-line-parsing/md5_sequence)
+  (source_tree examples/command-line-parsing/md5_with_custom_arg)
+  (source_tree examples/command-line-parsing/md5_with_default_file)
+  (source_tree examples/command-line-parsing/md5_with_flags)
+  (source_tree examples/command-line-parsing/md5_with_optional_file)
+  (source_tree examples/command-line-parsing/md5_with_optional_file_broken))
+ (locks ../../global-lock)
+ (action
+  (run ocaml-mdx test
+   --prelude=%{dep:prelude.ml}
+   --output %{target}
+   --direction=to-md
+   %{dep:README.md})))
+
+(alias
+ (name runtest)
+ (action (diff README.md README.md.corrected)))
 
 (data_only_dirs examples)
