@@ -59,4 +59,5 @@ duniverse-init:
 		$(DEPS) $(DUNIVERSE_SPECIFIC_DEPS)
 
 duniverse-upgrade: duniverse-init
+	rm -rf duniverse/
 	$(DUNIVERSE) pull --no-cache
