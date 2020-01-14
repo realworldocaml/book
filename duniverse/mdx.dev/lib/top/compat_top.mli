@@ -11,6 +11,22 @@ val get_id_in_path : Path.t -> Ident.t
 
 val lookup_type : Longident.t -> Env.t -> Path.t
 
+val lookup_value : Longident.t -> Env.t -> Path.t * Types.value_description
+
+val find_value : Env.t -> Location.t -> Longident.t -> Path.t * Types.value_description
+
+val find_type : Env.t -> Location.t -> Longident.t -> Path.t * Types.type_declaration
+
+val find_constructor : Env.t -> Location.t -> Longident.t -> Types.constructor_description
+
+val find_module : Env.t -> Location.t -> Longident.t -> Path.t * Types.module_declaration
+
+val find_modtype : Env.t -> Location.t -> Longident.t -> Path.t * Types.modtype_declaration
+
+val find_class : Env.t -> Location.t -> Longident.t -> Path.t * Types.class_declaration
+
+val find_class_type : Env.t -> Location.t -> Longident.t -> Path.t * Types.class_type_declaration
+
 val type_structure : Env.t -> Parsetree.structure -> Location.t -> Typedtree.structure * Env.t
 
 val sig_value : Ident.t -> Types.value_description -> Types.signature_item
@@ -69,5 +85,7 @@ val match_env :
   cltype:(Env.summary -> 'a) ->
   class_:(Env.summary -> Ident.t -> 'a) ->
   extension:(Env.summary -> Ident.t -> 'a) ->
+  value_unbound:(Env.summary -> 'a) ->
+  module_unbound:(Env.summary -> 'a) ->
   Env.summary ->
   'a

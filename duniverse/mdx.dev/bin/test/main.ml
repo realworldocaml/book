@@ -93,6 +93,10 @@ let root_dir ?root t =
   | Some r, Some d -> Some (r / d)
   | Some d, None   -> Some d
 
+let resolve_root file dir root = match root with
+    | None   -> dir / file
+    | Some r -> r / dir / file
+
 let run_cram_tests ?syntax t ?root ppf temp_file pad tests =
   Block.pp_header ?syntax ppf t;
   let pad =
@@ -190,6 +194,17 @@ let read_parts file =
       Hashtbl.add files file f;
       f
 
+let read_part file part =
+  let parts = read_parts file in
+  match Mdx_top.Part.find parts.current ~part with
+  | None       ->
+    Fmt.failwith "Cannot find part %S in %s"
+      (match part with None -> "" | Some p -> p)
+      file
+  | Some lines ->
+    let contents = String.concat ~sep:"\n" lines in
+    String.trim contents
+
 let write_parts ~force_output file parts =
   let output_file = file ^ ".corrected" in
   match has_changed ~force_output parts with
@@ -200,19 +215,13 @@ let write_parts ~force_output file parts =
     flush oc;
     close_out oc
 
-let update_block_with_file ppf t file part =
+let update_block_content ppf t content =
   Block.pp_header ppf t;
-  let parts = read_parts file in
-  match Mdx_top.Part.find parts.current ~part with
-  | None       ->
-    Fmt.failwith "Cannot find part %S in %s"
-      (match part with None -> "" | Some p -> p)
-      file
-  | Some lines ->
-    let contents = String.concat ~sep:"\n" lines in
-    let contents = String.trim contents in
-    Output.pp ppf (`Output contents);
-    Block.pp_footer ppf ()
+  Output.pp ppf (`Output content);
+  Block.pp_footer ppf ()
+
+let update_block_with_file ppf t file part =
+  update_block_content ppf t (read_part file part)
 
 let update_file_with_block ppf t file part =
   let parts = read_parts file in
@@ -234,10 +243,7 @@ let update_file_with_block ppf t file part =
 let update_file_or_block ?root ppf md_file ml_file block direction =
   let root = root_dir ?root block in
   let dir = Filename.dirname md_file in
-  let ml_file = match root with
-    | None   -> dir / ml_file
-    | Some r -> r / dir / ml_file
-  in
+  let ml_file = resolve_root ml_file dir root in
   match direction with
   | `To_md ->
      update_block_with_file ppf block ml_file (Block.part block)
@@ -291,8 +297,16 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
     match active, non_deterministic, Block.mode t, Block.value t with
     (* Print errors *)
     | _, _, _, Error _ -> Block.pp ?syntax ppf t
-    (* Skip raw blocks. *)
-    | true, _, _, Raw -> Block.pp ?syntax ppf t
+    (* Skip or copy raw blocks. Without parts support *)
+    | true, _, _, Raw -> 
+    (match Block.part t with
+      | None -> 
+        (match Block.file t with
+          | Some file -> 
+            let new_content = (read_part file (Block.part t)) in
+            update_block_content ppf t new_content
+          | None -> Block.pp ?syntax ppf t )
+      | Some _ -> Fmt.failwith "Parts are not supported for non-OCaml code blocks.")
     (* The command is not active, skip it. *)
     | false, _, _, _ -> Block.pp ?syntax ppf t
     (* the command is active but non-deterministic so skip everything *)

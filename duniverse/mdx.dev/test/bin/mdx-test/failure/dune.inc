@@ -46,3 +46,15 @@
 (alias
  (name runtest)
  (action (diff part-not-found/test-case.md.expected part-not-found.actual)))
+
+(rule
+ (target part-unsupported.actual)
+ (deps (package mdx) (source_tree part-unsupported))
+ (action
+  (with-outputs-to %{target}
+   (chdir part-unsupported
+    (system "! ocaml-mdx test test-case.md")))))
+
+(alias
+ (name runtest)
+ (action (diff part-unsupported/test-case.md.expected part-unsupported.actual)))
