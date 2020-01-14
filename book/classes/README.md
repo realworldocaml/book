@@ -1275,7 +1275,7 @@ graphical display and ask Async to run `repaint` at regular intervals.
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies:
 
-```scheme
+```scheme file=examples/shapes/dune
 (executable
   (name      shapes)
   (modules   shapes)
