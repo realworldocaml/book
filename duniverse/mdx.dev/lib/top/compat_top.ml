@@ -41,10 +41,68 @@ let rec get_id_in_path = function
   | Path.Papply (_, p) -> get_id_in_path p
 
 let lookup_type typ env =
-#if OCAML_VERSION >= (4, 4, 0)
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.find_type_by_name typ env |> fst
+#elif OCAML_VERSION >= (4, 4, 0)
   Env.lookup_type typ env
 #else
   Env.lookup_type typ env |> fst
+#endif
+
+let lookup_value v env =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.find_value_by_name v env
+#else
+  Env.lookup_value v env
+#endif
+
+let find_value env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_value ~loc id env
+#else
+  Typetexp.find_value env loc id
+#endif
+
+let find_type env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_type ~loc id env
+#else
+  Typetexp.find_type env loc id
+#endif
+
+let find_constructor env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_constructor ~loc Env.Positive id env
+#else
+  Typetexp.find_constructor env loc id
+#endif
+
+let find_module env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_module ~loc id env
+#else
+  Typetexp.find_module env loc id
+#endif
+
+let find_modtype env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_modtype ~loc id env
+#else
+  Typetexp.find_modtype env loc id
+#endif
+
+let find_class env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_class ~loc id env
+#else
+  Typetexp.find_class env loc id
+#endif
+
+let find_class_type env loc id =
+#if OCAML_VERSION >= (4, 10, 0)
+  Env.lookup_cltype ~loc id env
+#else
+  Typetexp.find_class_type env loc id
 #endif
 
 let type_structure env str loc =
@@ -123,7 +181,7 @@ let add_directive ~name ~doc kind =
 #if OCAML_VERSION >= (4, 3, 0)
   let directive = match kind with
     | `Bool f -> Toploop.Directive_bool f
-    | `Show_prim to_sig -> 
+    | `Show_prim to_sig ->
         let show_prim to_sig lid =
           let env = !Toploop.toplevel_env in
           let loc = Location.none in
@@ -243,8 +301,10 @@ let match_env
     ~cltype
     ~class_
     ~extension
+    ~value_unbound
+    ~module_unbound
     env =
-  ignore (constraints, persistent, copy_types);
+  ignore (constraints, persistent, copy_types, value_unbound, module_unbound);
   match env with
   | Env.Env_value (summary, id, _) ->
     value summary id
@@ -275,7 +335,11 @@ let match_env
 #if OCAML_VERSION >= (4, 4, 0)
   | Env_constraints (summary, _) -> constraints summary
 #endif
-#if OCAML_VERSION >= (4, 6, 0)
+#if OCAML_VERSION >= (4, 10, 0)
+  | Env_copy_types summary -> copy_types summary
+  | Env_value_unbound (summary, _, _) -> value_unbound summary
+  | Env_module_unbound (summary, _, _) -> module_unbound summary
+#elif OCAML_VERSION >= (4, 6, 0)
   | Env_copy_types (summary, _) -> copy_types summary
 #endif
 #if OCAML_VERSION >= (4, 8, 0)

@@ -218,7 +218,7 @@ module Rewrite = struct
     let is_persistent_path p =
       Ident.persistent (get_id_in_path p)
     in
-    try is_persistent_path (fst (Env.lookup_value longident env))
+    try is_persistent_path (fst (Compat_top.lookup_value longident env))
     with Not_found -> false
 
   let apply ts env pstr_item path e =
@@ -433,7 +433,7 @@ let reg_show_prim name to_sig doc =
 let show_val () =
   reg_show_prim "show_val"
     (fun env loc id lid ->
-       let _path, desc = Typetexp.find_value env loc lid in
+       let _path, desc = Compat_top.find_value env loc lid in
        [sig_value id desc]
     )
     "Print the signature of the corresponding value."
@@ -441,7 +441,7 @@ let show_val () =
 let show_type () =
   reg_show_prim "show_type"
     (fun env loc id lid ->
-       let _path, desc = Typetexp.find_type env loc lid in
+       let _path, desc = Compat_top.find_type env loc lid in
        [sig_type id desc]
     )
     "Print the signature of the corresponding type constructor."
@@ -449,7 +449,7 @@ let show_type () =
 let show_exception () =
   reg_show_prim "show_exception"
     (fun env loc id lid ->
-       let desc = Typetexp.find_constructor env loc lid in
+       let desc = Compat_top.find_constructor env loc lid in
        if not (Ctype.equal env true [desc.cstr_res] [Predef.type_exn]) then
          raise Not_found;
        let ret_type =
@@ -498,7 +498,7 @@ let show_module () =
          | Some path -> accum_aliases path acc
          | None -> List.rev acc
        in
-       let path, _ = Typetexp.find_module env loc lid in
+       let path, _ = Compat_top.find_module env loc lid in
        accum_aliases path []
     )
     "Print the signature of the corresponding module."
@@ -506,7 +506,7 @@ let show_module () =
 let show_module_type () =
   reg_show_prim "show_module_type"
     (fun env loc id lid ->
-       let _path, desc = Typetexp.find_modtype env loc lid in
+       let _path, desc = Compat_top.find_modtype env loc lid in
        [sig_modtype id desc]
     )
     "Print the signature of the corresponding module type."
@@ -514,7 +514,7 @@ let show_module_type () =
 let show_class () =
   reg_show_prim "show_class"
     (fun env loc id lid ->
-       let _path, desc = Typetexp.find_class env loc lid in
+       let _path, desc = Compat_top.find_class env loc lid in
        [sig_class id desc]
     )
     "Print the signature of the corresponding class."
@@ -522,7 +522,7 @@ let show_class () =
 let show_class_type () =
   reg_show_prim "show_class_type"
     (fun env loc id lid ->
-       let _path, desc = Typetexp.find_class_type env loc lid in
+       let _path, desc = Compat_top.find_class_type env loc lid in
        [sig_class_type id desc]
     )
     "Print the signature of the corresponding class type."
@@ -650,6 +650,8 @@ let rec save_summary acc s =
     ~type_:default_case
     ~copy_types:default_case
     ~persistent:default_case
+    ~value_unbound:default_case
+    ~module_unbound:default_case
 
 let default_env = ref (Compmisc.initial_env ())
 let first_call = ref true
