@@ -1,0 +1,18 @@
+opam-version: "2.0"
+version: "0.2.2"
+synopsis:
+  "Compatibility package for OCaml's standard iterator type starting from 4.07"
+author: "Simon Cruanes"
+maintainer: "simon.cruanes.2007@m4x.org"
+license: "LGPL2.1"
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
+depends: [
+  "dune" {>= "1.1.0"}
+  "ocaml"
+]
+tags: [ "iterator" "seq" "pure" "list" "compatibility" "cascade" ]
+homepage: "https://github.com/c-cube/seq/"
+bug-reports: "https://github.com/c-cube/seq/issues"
+dev-repo: "git+https://github.com/c-cube/seq.git"

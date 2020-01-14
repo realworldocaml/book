@@ -362,7 +362,8 @@ let eval t =
        | `OCaml `Toplevel ->
          let value = toplevel ~file:t.file ~line:t.line t.contents in
          { t with value }
-       | `Other -> { t with value = Raw })
+       | `Other -> Fmt.failwith "Dead code. todo: remove"
+       )
     | _ -> t
 
 let ends_by_semi_semi c = match List.rev c with
