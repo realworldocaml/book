@@ -1367,7 +1367,7 @@ We'll compile our program using `dune`, a build system that's designed
 for use with OCaml projects. First, we need to write a *dune* file to
 specify the build.
 
-```scheme
+```scheme file=examples/sum/dune
 (executable
  (name      sum)
  (libraries base stdio))
