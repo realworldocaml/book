@@ -1030,7 +1030,7 @@ let () =
 The results show the hash table version to be around four times faster than
 the map version:
 
-```scheme
+```scheme file=examples/map_vs_hash/dune
 (executable
   (name      map_vs_hash)
   (libraries base core_bench))
@@ -1114,7 +1114,7 @@ let () =
 Unsurprisingly, maps perform far better than hash tables on this benchmark,
 in this case by more than a factor of 10:
 
-```scheme
+```scheme file=examples/map_vs_hash2/dune
 (executable
   (name      map_vs_hash2)
   (libraries core_bench))
