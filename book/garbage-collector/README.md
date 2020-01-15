@@ -499,7 +499,7 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring:
 
-```scheme
+```scheme file=examples/barrier_bench/dune
 (executable
   (name      barrier_bench)
   (modules   barrier_bench)
@@ -645,7 +645,7 @@ let () =
 
 Building and running this should show the following output:
 
-```scheme
+```scheme file=examples/finalizer/dune
 (executable
   (name      finalizer)
   (modules   finalizer)
