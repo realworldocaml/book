@@ -36,7 +36,7 @@ pairs, and an ordered list of values. Values can be strings, Booleans,
 floats, integers, or null. Let's see what a JSON record for an example book
 description looks like: [values/in JSON data]{.idx}[key/value pairs]{.idx}
 
-```
+``` file=examples/book.json
 {
   "title": "Real World OCaml",
   "tags" : [ "functional programming", "ocaml", "algorithms" ],
@@ -183,7 +183,7 @@ let () =
 
 You can build this by running `dune`:
 
-```scheme
+```scheme file=examples/read_json/dune
 (executable
   (name      read_json)
   (libraries core yojson))
@@ -241,7 +241,7 @@ let () =
 
 Now build and run this in the same way as the previous example:
 
-```scheme
+```scheme file=examples/parse_book/dune
 (executable
   (name      parse_book)
   (libraries core yojson))
@@ -640,7 +640,7 @@ The following ATD code fragment describes the GitHub authorization API (which
 is based on a pseudostandard web protocol known as OAuth): [GitHub
 API]{.idx}[OAuth web protocol]{.idx}
 
-```
+``` file=examples/github.atd
 type scope = [
     User <json name="user">
   | Public_repo <json name="public_repo">
@@ -803,7 +803,7 @@ present in the response will be ignored by the ATD parser, so we don't need a
 completely exhaustive specification of every field that GitHub might send
 back:
 
-```
+``` file=examples/github_org_info/github_org.atd
 type org = {
   login: string;
   id: int;
@@ -917,7 +917,7 @@ let () =
 The following is a short shell script that generates all of the OCaml code
 and also builds the final executable:
 
-```scheme
+```scheme file=examples/github_org_info/dune
 (rule
   (targets github_org_j.ml github_org_j.mli)
   (deps    github_org.atd)
@@ -932,7 +932,7 @@ and also builds the final executable:
 
 (executable
   (name      github_org_info)
-  (libraries core yojson atdgen core_extended)
+  (libraries core yojson atdgen shell)
   (flags     :standard -w -32)
   (modules   github_org_info github_org_t github_org_j))
 ```
