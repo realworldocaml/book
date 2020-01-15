@@ -1,6 +1,3 @@
-
-
-(* part "4" *)
 (* Inefficient right-recursive rule *)
 object_fields:
   | (* empty *) { [] }

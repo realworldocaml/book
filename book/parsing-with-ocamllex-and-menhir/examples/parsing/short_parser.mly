@@ -14,7 +14,8 @@
 %start <Json.value option> prog
 %%
 
-(* part "1" *)
+
+[@@@part "rules"]
 prog:
   | v = value { Some v }
   | EOF       { None   } ;

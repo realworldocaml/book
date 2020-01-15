@@ -1,3 +1,4 @@
+[@@@part "tokens"]
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -12,21 +13,24 @@
 %token COLON
 %token COMMA
 %token EOF
+[@@@part "end-tokens"]
 
 
-(* part "1" *)
+[@@@part "start-symbol"]
 %start <Json.value option> prog
 %%
+[@@@part "end-start-symbol"]
 
 
-(* part "2" *)
+[@@@part "prog"]
 prog:
   | EOF       { None }
   | v = value { Some v }
   ;
+[@@@part "end-prog"]
 
 
-(* part "3" *)
+[@@@part "value"]
 value:
   | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
     { `Assoc obj }
@@ -45,9 +49,10 @@ value:
   | NULL
     { `Null }
   ;
+[@@@part "end-value"]
 
 
-(* part "4" *)
+[@@@part "objects"]
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
@@ -55,6 +60,7 @@ rev_object_fields:
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
+[@@@part "end-objects"]
 
 (* part "5" *)
 array_values:
