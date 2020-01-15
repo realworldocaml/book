@@ -135,7 +135,7 @@ projects require a tool to orchestrate the build. One good tool for this task
 is `dune`. To invoke `dune`, you need to have a `dune` file that
 specifies the details of the build. [dune]{.idx}
 
-```scheme
+```scheme file=examples/freq-dune/dune
 (executable
   (name      freq)
   (libraries base stdio))
