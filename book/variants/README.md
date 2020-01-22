@@ -1137,7 +1137,7 @@ let extended_color_to_int : extended_color -> int = function
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
 
-```scheme
+```scheme file=examples/variants-termcol-annotated/dune
 (executable
   (name      terminal_color)
   (libraries core))

@@ -236,7 +236,7 @@ let () =
 The `hello` executable is compiled by linking with the `ctypes-foreign`
 OCamlfind package:
 
-```scheme
+```scheme file=examples/ffi/hello/dune
 (executable
   (name      hello)
   (libraries ctypes-foreign.threaded)
@@ -727,7 +727,7 @@ let () =
 
 This can be compiled and run in the usual way: [returning function]{.idx}
 
-```scheme
+```scheme file=examples/ffi/datetime/dune
 (executable
   (name      datetime)
   (libraries core ctypes-foreign.threaded))
@@ -991,7 +991,7 @@ let () =
 Compile it in the usual way with *dune* and test it against some input data,
 and also build the inferred interface so we can examine it more closely:
 
-```scheme
+```scheme file=examples/ffi/qsort/dune
 (executable
   (name      qsort)
   (libraries core ctypes-foreign.threaded))

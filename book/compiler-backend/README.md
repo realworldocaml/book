@@ -236,7 +236,7 @@ let () =
 Building and executing this example will run for around 30 seconds by
 default, and you'll see the results summarized in a neat table:
 
-```scheme
+```scheme file=examples/back-end/bench_patterns/dune
 (executable
   (name      bench_patterns)
   (modules   bench_patterns)
@@ -720,7 +720,7 @@ let () =
 
 Running this shows quite a significant runtime difference between the two:
 
-```scheme
+```scheme file=examples/back-end/bench_poly_and_mono/dune
 (executable
   (name      bench_poly_and_mono)
   (modules   bench_poly_and_mono)
@@ -846,7 +846,7 @@ let () =
 Compile and run this with debugging symbols. You should see the following
 output:
 
-```scheme
+```scheme file=examples/back-end/alternate_list/dune
 (executable
   (name      alternate_list)
   (libraries core))

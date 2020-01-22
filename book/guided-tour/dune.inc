@@ -5,7 +5,8 @@
   (package base)
   (package mdx)
   (package ppx_jane)
-  (:y1 examples/recursion.ml)
+  (:y2 examples/recursion.ml)
+  (:y1 examples/sum/dune)
   (:y0 examples/sum/sum.ml)
   (source_tree examples/sum)
   prelude.ml)
@@ -14,6 +15,7 @@
   (progn
    (run ocaml-mdx test --prelude=prelude.ml --direction=to-md %{x})
    (diff? %{x} %{x}.corrected)
+   (diff? %{y2} %{y2}.corrected)
    (diff? %{y1} %{y1}.corrected)
    (diff? %{y0} %{y0}.corrected))))
 
@@ -24,7 +26,8 @@
   (package base)
   (package mdx)
   (package ppx_jane)
-  (:y1 examples/recursion.ml)
+  (:y2 examples/recursion.ml)
+  (:y1 examples/sum/dune)
   (:y0 examples/sum/sum.ml)
   (source_tree examples/sum)
   prelude.ml)
@@ -34,5 +37,6 @@
    (run ocaml-mdx test --prelude=prelude.ml --direction=to-md
      --non-deterministic %{x})
    (diff? %{x} %{x}.corrected)
+   (diff? %{y2} %{y2}.corrected)
    (diff? %{y1} %{y1}.corrected)
    (diff? %{y0} %{y0}.corrected))))

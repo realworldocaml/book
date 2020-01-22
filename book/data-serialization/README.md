@@ -436,7 +436,7 @@ val contains : t -> int -> bool
 
 Building this will give us the following error:
 
-```scheme
+```scheme file=examples/test_interval_nosexp/dune
 (executable
   (name      test_interval_nosexp)
   (libraries core))
@@ -484,7 +484,7 @@ val contains : t -> int -> bool
 
 At this point, `test_interval.ml` will compile again using this `dune` file:
 
-```scheme
+```scheme file=examples/test_interval/dune
 (executable
   (name       test_interval)
   (libraries  core sexplib)
@@ -549,7 +549,7 @@ can be hard to localize errors to the right place using this scheme. Consider
 the following example: [debugging/s-expressions]{.idx}[errors/error messages
 with s-expressions]{.idx}[s-expressions/deserializing a type from]{.idx}
 
-```scheme
+```scheme file=examples/read_foo/dune
 (executable
   (name       read_foo)
   (libraries  core sexplib)
@@ -580,7 +580,7 @@ let () =
 
 If you were to run this on a malformatted file, say, this one:
 
-```
+``` file=examples/read_foo/foo_broken_example.scm
 ((a "not-an-integer")
  (b "not-an-integer")
  (c 1.0))
@@ -608,7 +608,7 @@ bad error message can be pure misery.
 But there's hope! We can make a small change to the code to improve the error
 message greatly:
 
-```scheme
+```scheme file=examples/read_foo_better_errors/dune
 (executable
   (name       read_foo_better_errors)
   (libraries  core sexplib)
