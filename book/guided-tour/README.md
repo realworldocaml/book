@@ -887,7 +887,16 @@ everywhere.[datatypes/nullable]{.idx}
 In OCaml, however, missing values are explicit. A value of type
 `string * string` always contains two well-defined values of type `string`.
 If you want to allow, say, the first of those to be absent, then you need to
-change the type to `string option * string`. As we'll see in
+change the type to `string option * string`:
+
+```ocaml env=main
+# Some "File";;
+- : string option = Some "File"
+# (Some "File", "exists");;
+- : string option * string = (Some "File", "exists")
+```
+
+As we'll see in
 [Error Handling](error-handling.html#error-handling){data-type=xref}, this
 explicitness allows the compiler to provide a great deal of help in making
 sure you're correctly handling the possibility of missing data.
