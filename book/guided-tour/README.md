@@ -804,18 +804,18 @@ within which the new variable can be used. Thus, we could write:[let
 syntax/nested let binding]{.idx}
 
 ```ocaml env=local_let
-# let x = 7 in
-  x + x
+# let z = 7 in
+  z + z
 - : int = 14
 ```
 
 Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `x` is no longer available:
+double-semicolon, so the value of `z` is no longer available:
 
 ```ocaml env=local_let
-# x
+# z
 Line 1, characters 1-2:
-Error: Unbound value x
+Error: Unbound value z
 ```
 
 We can also have multiple `let` statements in a row, each one adding a new
