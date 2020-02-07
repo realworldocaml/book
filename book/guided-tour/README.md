@@ -868,7 +868,7 @@ to split on.
       base ^ "." ^ String.lowercase ext
 val downcase_extension : string -> string = <fun>
 # List.map ~f:downcase_extension
-    [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
+    [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ]
 - : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
 ```
 
