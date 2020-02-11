@@ -723,7 +723,8 @@ let get_href_hosts soup =
   |> Set.of_list (module String)
 ```
 
-And if we
+And if we run the test again, we'll see that the output is now as it
+should be.
 
 ```sh dir=examples/soup_test_half_fixed
   $ dune runtest
