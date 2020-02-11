@@ -101,7 +101,7 @@ language, but a few things jump right out at you:
   be a bit of a nuisance, but it has its benefits, since it prevents some
   kinds of bugs that arise in other languages due to unexpected differences
   between the behavior of `int` and `float`. For example, in many languages,
-  `1 / 3` is zero, but `1 / 3.0` is a third. OCaml requires you to be
+  `1 / 3` is zero, but `1.0 /. 3.0` is a third. OCaml requires you to be
   explicit about which operation you're using.
 
 We can also create a variable to name the value of a given expression, using
