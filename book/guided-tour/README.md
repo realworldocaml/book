@@ -803,7 +803,7 @@ including a function body. The `in` marks the beginning of the scope
 within which the new variable can be used. Thus, we could write:[let
 syntax/nested let binding]{.idx}
 
-```ocaml env=local_let
+```ocaml env=main
 # let z = 7 in
   z + z
 - : int = 14
@@ -812,7 +812,7 @@ syntax/nested let binding]{.idx}
 Note that the scope of the `let` binding is terminated by the
 double-semicolon, so the value of `z` is no longer available:
 
-```ocaml env=local_let
+```ocaml env=main
 # z
 Line 1, characters 1-2:
 Error: Unbound value z
@@ -821,7 +821,7 @@ Error: Unbound value z
 We can also have multiple `let` statements in a row, each one adding a new
 variable binding to what came before:
 
-```ocaml env=local_let
+```ocaml env=main
 # let x = 7 in
   let y = x * x in
   x + y
