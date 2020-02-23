@@ -14,11 +14,12 @@ this chapter after you've gotten a better sense of the rest of the language.
 
 ## Variables
 
-At its simplest, a variable is an identifier whose meaning is bound to a
-particular value. In OCaml these bindings are often introduced using the
-`let` keyword. We can type a so-called *top-level*`let` binding with the
-following syntax. Note that variable names must start with a lowercase letter
-or an underscore. [bindings/top-level]{.idx}[top-level bindings]{.idx}[let
+At its simplest, a variable is an identifier whose meaning is bound to
+a particular value. In OCaml these bindings are often introduced using
+the `let` keyword. We can type a so-called *top-level* `let` binding
+with the following syntax. Note that variable names must start with a
+lowercase letter or an
+underscore. [bindings/top-level]{.idx}[top-level bindings]{.idx}[let
 syntax/top-level bindings]{.idx}
 
 ```
