@@ -16,24 +16,25 @@
 
 open Cmdliner
 
-let cmds = [Test.cmd; Pp.cmd; Rule.cmd]
+let cmds = [ Test.cmd; Pp.cmd; Rule.cmd; Deps.cmd ]
+
 let main (`Setup ()) = `Help (`Pager, None)
 
 let main =
   let doc = "Execute markdown files." in
   let exits = Term.default_exits in
   let man = [] in
-  Term.(ret (const main $ Cli.setup)),
-  Term.info "ocaml-mdx" ~version:"%%VERSION%%" ~doc ~exits ~man
+  ( Term.(ret (const main $ Cli.setup)),
+    Term.info "ocaml-mdx" ~version:"%%VERSION%%" ~doc ~exits ~man )
 
 let main () = Term.(exit_status @@ eval_choice main cmds)
 
-let main () = 
-  if String.compare (Sys.argv).(0) "mdx" == 0
-  then
+let main () =
+  if String.compare Sys.argv.(0) "mdx" == 0 then
     Format.eprintf
-    "\x1b[0;1mWarning\x1b[0m: 'mdx' is deprecated and will one day be removed.
-    Use 'ocaml-mdx' instead\n%!";
+      "\x1b[0;1mWarning\x1b[0m: 'mdx' is deprecated and will one day be removed.\n\
+      \    Use 'ocaml-mdx' instead\n\
+       %!";
   main ()
 
 let () = main ()

@@ -15,19 +15,20 @@
  *)
 
 let src = Logs.Src.create "cram.test"
+
 module Log = (val Logs.src_log src : Logs.LOG)
 
-let (/) x y = match x with
-  | "." -> y
-  | _   -> Filename.concat x y
+let ( / ) x y = match x with "." -> y | _ -> Filename.concat x y
 
 let run (`Setup ()) _ _ _ _ _ _ _ _ _ _ =
   let base = Filename.basename Sys.argv.(0) in
   let dir = Filename.dirname Sys.argv.(0) in
-  let cmd = match base with
+  let cmd =
+    match base with
     | "main.exe" -> dir / "test" / "main.exe"
-    | x when String.length x > 6 && String.sub x 0 6 = "ocaml-" -> dir / x ^ "-test"
-    | x -> dir / "ocaml-" ^ x ^ "-test"
+    | x when String.length x > 6 && String.sub x 0 6 = "ocaml-" ->
+        (dir / x) ^ "-test"
+    | x -> (dir / "ocaml-") ^ x ^ "-test"
   in
   let argv = Array.sub Sys.argv 1 (Array.length Sys.argv - 1) in
   argv.(0) <- cmd;
@@ -36,11 +37,11 @@ let run (`Setup ()) _ _ _ _ _ _ _ _ _ _ =
 
 open Cmdliner
 
-let cmd: int Term.t * Term.info =
+let cmd : int Term.t * Term.info =
   let doc = "Test markdown files." in
-  Term.(pure run
-        $ Cli.setup $ Cli.non_deterministic $ Cli.not_verbose $ Cli.syntax
-        $ Cli.silent $ Cli.verbose_findlib $ Cli.prelude $ Cli.prelude_str
-        $ Cli.file $ Cli.section $ Cli.root $ Cli.direction $ Cli.force_output
-        $ Cli.output),
-  Term.info "test" ~doc
+  ( Term.(
+      pure run $ Cli.setup $ Cli.non_deterministic $ Cli.silent_eval
+      $ Cli.syntax $ Cli.silent $ Cli.verbose_findlib $ Cli.prelude
+      $ Cli.prelude_str $ Cli.file $ Cli.section $ Cli.root $ Cli.force_output
+      $ Cli.output),
+    Term.info "test" ~doc )

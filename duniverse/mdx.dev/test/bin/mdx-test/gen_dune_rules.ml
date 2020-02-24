@@ -24,9 +24,7 @@ let pp_expect_action fmt dir =
   (with-stdout-to %%{target}
    (chdir %s
     (run ocaml-mdx test --output - %a%s)))|}
-    dir.dir_name
-    pp_options dir.options
-    dir.test_file
+    dir.dir_name pp_options dir.options dir.test_file
 
 (** Tests that 'cd <dir> && ocaml-mdx test [options] <file>' exits with a
     failing code and that its output is equal to the content of the
@@ -37,8 +35,6 @@ let pp_failure_action fmt dir =
   (with-outputs-to %%{target}
    (chdir %s
     (system "! ocaml-mdx test %a%s")))|}
-    dir.dir_name
-    pp_options dir.options
-    dir.test_file
+    dir.dir_name pp_options dir.options dir.test_file
 
-let () = run {pp_expect_action; pp_failure_action}
+let () = run { pp_expect_action; pp_failure_action }

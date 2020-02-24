@@ -15,7 +15,7 @@
  (locks ../../global-lock)
  (action
   (progn
-   (run ocaml-mdx test --prelude=prelude.ml --direction=to-md %{x})
+   (run ocaml-mdx test --prelude=prelude.ml %{x})
    (diff? %{x} %{x}.corrected)
    (diff? %{y5} %{y5}.corrected)
    (diff? %{y4} %{y4}.corrected)

@@ -14,14 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+type t = { base_name : string; sub_lib : string option }
 (** The type to represent dune libraries as referred to in '#require' statements
     or in dune files.
     I.e. lib.sub_lib is [{base_name = "lib"; sub_lib = Some "sub_lib"}].
     *)
-type t =
-  { base_name : string
-  ; sub_lib : string option
-  }
 
 val equal : t -> t -> bool
 
@@ -29,16 +26,16 @@ val compare : t -> t -> int
 
 val pp : t Fmt.t
 
+val from_string : string -> (t, string) Result.result
 (** [from_string s] returns the library represented by [s] or an error if [s]
     isn't a valid library. *)
-val from_string : string -> (t, string) Result.result
 
 (** Set of libraries *)
 module Set : sig
   include Set.S with type elt = t
 
+  val to_package_set : t -> Astring.String.Set.t
   (** [to_package_set lib_set] returns the set of dune packages needed to get
       all the libraries in [lib_set].
       I.e. it's the set of basenames for all the libraries in [lib_set]. *)
-  val to_package_set : t -> Astring.String.Set.t
 end

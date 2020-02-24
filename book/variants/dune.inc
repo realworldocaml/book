@@ -18,7 +18,7 @@
  (action
   (progn
    (run ocaml-mdx test --prelude=prelude.ml --prelude=catch_all:catch_all.ml
-     --prelude=logger:logger.ml --direction=to-md %{x})
+     --prelude=logger:logger.ml %{x})
    (diff? %{x} %{x}.corrected)
    (diff? %{y4} %{y4}.corrected)
    (diff? %{y3} %{y3}.corrected)

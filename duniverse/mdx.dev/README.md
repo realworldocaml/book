@@ -20,6 +20,9 @@ can be installed using opam:
 $ opam install mdx
 ```
 
+If you want to contribute or hack on the project, please see the
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 ### Supported Extensions
 
 #### Shell Scripts
@@ -353,7 +356,7 @@ generates the following `dune` rules on the standard output:
          (:y0 dune_rules_2.ml)
          (source_tree foo))
  (action (progn
-           (run ocaml-mdx test --direction=infer-timestamp %{x})
+           (run ocaml-mdx test %{x})
            (diff? %{x} %{x}.corrected)
            (diff? %{y1} %{y1}.corrected)
            (diff? %{y0} %{y0}.corrected))))

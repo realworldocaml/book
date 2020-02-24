@@ -2,8 +2,8 @@ open Mdx.Migrate_ast
 
 val try_finally : always:(unit -> unit) -> (unit -> 'a) -> 'a
 
-val map_error_loc : f:(Location.t -> Location.t)
-  -> Location.error -> Location.error
+val map_error_loc :
+  f:(Location.t -> Location.t) -> Location.error -> Location.error
 
 val error_of_exn : exn -> Location.error option
 
@@ -13,21 +13,29 @@ val lookup_type : Longident.t -> Env.t -> Path.t
 
 val lookup_value : Longident.t -> Env.t -> Path.t * Types.value_description
 
-val find_value : Env.t -> Location.t -> Longident.t -> Path.t * Types.value_description
+val find_value :
+  Env.t -> Location.t -> Longident.t -> Path.t * Types.value_description
 
-val find_type : Env.t -> Location.t -> Longident.t -> Path.t * Types.type_declaration
+val find_type :
+  Env.t -> Location.t -> Longident.t -> Path.t * Types.type_declaration
 
-val find_constructor : Env.t -> Location.t -> Longident.t -> Types.constructor_description
+val find_constructor :
+  Env.t -> Location.t -> Longident.t -> Types.constructor_description
 
-val find_module : Env.t -> Location.t -> Longident.t -> Path.t * Types.module_declaration
+val find_module :
+  Env.t -> Location.t -> Longident.t -> Path.t * Types.module_declaration
 
-val find_modtype : Env.t -> Location.t -> Longident.t -> Path.t * Types.modtype_declaration
+val find_modtype :
+  Env.t -> Location.t -> Longident.t -> Path.t * Types.modtype_declaration
 
-val find_class : Env.t -> Location.t -> Longident.t -> Path.t * Types.class_declaration
+val find_class :
+  Env.t -> Location.t -> Longident.t -> Path.t * Types.class_declaration
 
-val find_class_type : Env.t -> Location.t -> Longident.t -> Path.t * Types.class_type_declaration
+val find_class_type :
+  Env.t -> Location.t -> Longident.t -> Path.t * Types.class_type_declaration
 
-val type_structure : Env.t -> Parsetree.structure -> Location.t -> Typedtree.structure * Env.t
+val type_structure :
+  Env.t -> Parsetree.structure -> Location.t -> Typedtree.structure * Env.t
 
 val sig_value : Ident.t -> Types.value_description -> Types.signature_item
 
@@ -43,12 +51,16 @@ val sig_modtype : Ident.t -> Types.modtype_declaration -> Types.signature_item
 
 val sig_class : Ident.t -> Types.class_declaration -> Types.signature_item
 
-val sig_class_type : Ident.t -> Types.class_type_declaration -> Types.signature_item
+val sig_class_type :
+  Ident.t -> Types.class_type_declaration -> Types.signature_item
 
-val add_directive : name:string -> doc:string ->
+val add_directive :
+  name:string ->
+  doc:string ->
   [ `Bool of bool -> unit
-  | `Show_prim of Env.t -> Location.t -> Ident.t -> Longident.t ->
-      Types.signature ] -> unit
+  | `Show_prim of
+    Env.t -> Location.t -> Ident.t -> Longident.t -> Types.signature ] ->
+  unit
 
 val extension_constructor :
   ext_type_path:Path.t ->
@@ -64,12 +76,11 @@ val is_predef_or_global : Ident.t -> bool
 
 val map_sig_attributes :
   f:(Parsetree_.attributes -> Parsetree_.attributes) ->
-  Types.signature -> Types.signature
+  Types.signature ->
+  Types.signature
 
 val attribute :
-  name:string Location.loc ->
-  payload:Parsetree_.payload ->
-  Parsetree_.attribute
+  name:string Location.loc -> payload:Parsetree_.payload -> Parsetree_.attribute
 
 val match_env :
   value:(Env.summary -> Ident.t -> 'a) ->

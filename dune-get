@@ -10,8 +10,7 @@
    (pins
     (((pin mdx) (url (https://github.com/realworldocaml/mdx.git))
       (tag (master)))))
-   (pull_mode source)
-   (remotes ()) (branch master)))
+   (pull_mode Source) (remotes ()) (branch master)))
  (deps
   ((opamverse ())
    (duniverse
@@ -206,7 +205,7 @@
       (ref ((t 0.8.2) (commit 2c2254e773dbc9c9e6b3a24f983d826c23630d97)))
       (provided_packages (((name markup) (version (0.8.2))))))
      ((dir mdx.dev) (upstream https://github.com/realworldocaml/mdx.git)
-      (ref ((t master) (commit b6779d277c74f85b1b165296c5065bbeff5b295a)))
+      (ref ((t master) (commit 08cf6e146bee02196957448aa35c09c8fb4071d6)))
       (provided_packages (((name mdx) (version (dev))))))
      ((dir mirage-clock.3.0.1+dune)
       (upstream https://github.com/mirage/mirage-clock.git)

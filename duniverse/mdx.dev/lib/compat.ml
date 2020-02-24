@@ -14,6 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+module Char = struct
+  include Char
+
+#if OCAML_VERSION < (4, 3, 0)
+  let equal x y = Char.compare x y = 0
+#endif
+end
+
 module String = struct
   include String
 
@@ -32,6 +40,14 @@ module String = struct
         end
     done;
     String.sub s 0 !j :: !r
+#endif
+
+#if OCAML_VERSION < (4, 5, 0)
+  let rec index_rec_opt s lim i c =
+    if i >= lim then None else
+    if unsafe_get s i = c then Some i else index_rec_opt s lim (i + 1) c
+
+  let index_opt s c = index_rec_opt s (length s) 0 c
 #endif
 end
 
@@ -63,6 +79,18 @@ end
 module List = struct
   include List
 
+#if OCAML_VERSION < (4, 8, 0)
+  let filter_map f =
+    let rec aux accu = function
+      | [] -> rev accu
+      | x :: l ->
+        match f x with
+        | None -> aux accu l
+        | Some v -> aux (v :: accu) l
+    in
+    aux []
+#endif
+
 #if OCAML_VERSION < (4, 6, 0)
   let rec init_aux i n f =
     if i >= n then []
@@ -84,6 +112,10 @@ module List = struct
     | _ :: l ->
        if n <= 0 then 1 else
          compare_length_with l (n-1)
+#endif
+
+#if OCAML_VERSION < (4, 3, 0)
+  let cons x xs = x :: xs
 #endif
 end
 
