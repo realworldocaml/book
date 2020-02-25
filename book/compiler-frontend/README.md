@@ -767,7 +767,7 @@ The `dune` equivalent is to add the flag `-principal` to your build description.
 The `:standard` directive will include all the default flags, and then
 `-principal` will be appended after those in the compiler build flags.
 
-```sh dir=examples/front-end/,unset-INSIDE_DUNE
+```sh dir=examples/front-end/
 $ dune build principal.exe
 $ dune build non_principal.exe
 File "non_principal.ml", line 6, characters 4-7:
