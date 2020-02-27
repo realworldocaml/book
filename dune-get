@@ -10,6 +10,7 @@
    (pins
     (((pin mdx) (url (https://github.com/realworldocaml/mdx.git))
       (tag (master)))))
+   (pull_mode source)
    (remotes ()) (branch master)))
  (deps
   ((opamverse ())

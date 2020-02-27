@@ -54,6 +54,7 @@ depext:
 
 duniverse-init:
 	$(DUNIVERSE) init \
+		--pull-mode source \
 		--pin mdx,https://github.com/realworldocaml/mdx.git,master \
 		rwo \
 		$(DEPS) $(DUNIVERSE_SPECIFIC_DEPS)
