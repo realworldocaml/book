@@ -9,7 +9,7 @@ bug-reports: "https://github.com/realworldocaml/book/issues"
 synopsis: "Real World OCaml book sources"
 depends: [
   "ocaml" {>= "4.09.0"}
-  "dune" {>= "2.0.0"}
+  "dune" {>= "2.4.0"}
 ]
 build: ["dune" "build"]
 depexts: [
