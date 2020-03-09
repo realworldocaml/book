@@ -10,7 +10,7 @@ RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 # install non-OCaml dependencies
 COPY Makefile /home/opam/src/.
 RUN make depext
-RUN opam install dune=2.3.1
+RUN opam install dune=2.2.0
 
 #install pandoc
 WORKDIR /tmp
