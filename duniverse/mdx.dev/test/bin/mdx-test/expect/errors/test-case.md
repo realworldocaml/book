@@ -61,7 +61,7 @@ Error: This expression has type string but an expression was expected of type
          int
 ```
 
-```ocaml non-deterministic
+```ocaml non-deterministic=output
 # raise Not_found
 Exception: Not_found.
 ```

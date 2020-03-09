@@ -30,7 +30,7 @@
  (locks ../../global-lock)
  (action
   (progn
-   (run ocaml-mdx test --prelude=prelude.ml --direction=to-md %{x})
+   (run ocaml-mdx test --prelude=prelude.ml %{x})
    (diff? %{x} %{x}.corrected)
    (diff? %{y15} %{y15}.corrected)
    (diff? %{y14} %{y14}.corrected)
@@ -81,8 +81,7 @@
  (locks ../../global-lock)
  (action
   (progn
-   (run ocaml-mdx test --prelude=prelude.ml --direction=to-md
-     --non-deterministic %{x})
+   (run ocaml-mdx test --prelude=prelude.ml --non-deterministic %{x})
    (diff? %{x} %{x}.corrected)
    (diff? %{y15} %{y15}.corrected)
    (diff? %{y14} %{y14}.corrected)

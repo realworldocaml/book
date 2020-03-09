@@ -18,25 +18,54 @@ open Result
 
 module Result : sig
   module Infix : sig
-    val (>>=) : ('a, 'err) result -> ('a -> ('b, 'err) result) -> ('b, 'err) result
+    val ( >>= ) :
+      ('a, 'err) result -> ('a -> ('b, 'err) result) -> ('b, 'err) result
 
-    val (>>|) : ('a, 'err) result -> ('a -> 'b) -> ('b, 'err) result
+    val ( >>| ) : ('a, 'err) result -> ('a -> 'b) -> ('b, 'err) result
   end
+
+  val errorf :
+    ('a, unit, string, ('b, [> `Msg of string ]) result) format4 -> 'a
 
   module List : sig
     val fold :
-      f: ('acc -> 'a -> ('acc, 'err) result) ->
-      init: 'acc ->
+      f:('acc -> 'a -> ('acc, 'err) result) ->
+      init:'acc ->
       'a list ->
       ('acc, 'err) result
 
-    val map :
-      f: ('a -> ('b, 'err) result) ->
-      'a list ->
-      ('b list, 'err) result
+    val map : f:('a -> ('b, 'err) result) -> 'a list -> ('b list, 'err) result
   end
 end
 
 module File : sig
   val read_lines : string -> string list
+end
+
+module Option : sig
+  val is_some : 'a option -> bool
+
+  val value : default:'a -> 'a option -> 'a
+end
+
+module List : sig
+  val find_map : ('a -> 'b option) -> 'a list -> 'b option
+end
+
+module String : sig
+  val english_conjonction : string list -> string
+  (** [english_conjonction ["a"; "b"; "c"]] returns ["a, b and c"].
+      @raise Invalid_argument when called on the empty list. *)
+end
+
+module Sexp : sig
+  type t = Atom of string | List of t list
+
+  val equal : t -> t -> bool
+
+  module Canonical : sig
+    val to_buffer : buf:Buffer.t -> t -> unit
+
+    val to_string : t -> string
+  end
 end

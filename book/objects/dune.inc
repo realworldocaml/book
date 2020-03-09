@@ -10,6 +10,5 @@
  (locks ../../global-lock)
  (action
   (progn
-   (run ocaml-mdx test --prelude=prelude.ml --prelude=subtyping.ml
-     --direction=to-md %{x})
+   (run ocaml-mdx test --prelude=prelude.ml --prelude=subtyping.ml %{x})
    (diff? %{x} %{x}.corrected))))

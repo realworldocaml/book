@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+val env_and_file : string -> string option * string
 (** [env_and_file s] returns the environment and file/prelude string describe
     by [s].
     I.e. [env_and_file "a:prelude.ml"] is [(Some "a", "prelude.ml")]. *)
-val env_and_file : string -> string option * string

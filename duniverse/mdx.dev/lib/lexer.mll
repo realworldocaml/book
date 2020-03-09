@@ -1,4 +1,5 @@
 {
+open Result
 open Astring
 
 let line_ref = ref 1
@@ -20,7 +21,13 @@ rule text section = parse
   | "```" ([^' ' '\n']* as h) ws* ([^'\n']* as l) eol
       { let header = if h = "" then None else Some h in
         let contents = block lexbuf in
-        let labels = Block.labels_of_string l in
+        let labels = match Label.of_string l with
+          | Ok labels -> labels
+          | Error msgs ->
+            let msgs = List.map (fun (`Msg (x : string)) -> x) msgs in
+            let msg = String.concat ~sep:" " msgs in
+            failwith msg
+        in
         let value = Block.Raw in
         let file = lexbuf.Lexing.lex_start_p.Lexing.pos_fname in
         newline lexbuf;
@@ -56,10 +63,14 @@ and cram_text section = parse
         let rest = cram_text section lexbuf in
         `Block { Block.file; line; section; header; contents; labels; value }
         :: (if requires_empty_line then `Text "" :: rest else rest) }
-  | "<-- non-deterministic" ws* (("command"|"output") as choice) eol
+  | "<-- non-deterministic" ws* ([^'\n']* as choice) eol
       { let header = Syntax.cram_default_header in
         let requires_empty_line, contents = cram_block lexbuf in
-        let labels = ["non-deterministic", Some (`Eq, choice)] in
+        let labels =
+          match Label.interpret "non-deterministic" (Some (Eq, choice)) with
+          | Ok label -> [label]
+          | Error (`Msg msg) -> failwith msg
+        in
         let value = Block.Raw in
         let file = lexbuf.Lexing.lex_start_p.Lexing.pos_fname in
         newline lexbuf;
@@ -85,5 +96,5 @@ let token syntax lexbuf =
     match syntax with
     | Syntax.Normal -> text      None lexbuf
     | Syntax.Cram   -> cram_text None lexbuf
-  with Failure _ -> Misc.err lexbuf "incomplete code block"
+  with Failure e -> Misc.err lexbuf "invalid code block: %s" e
 }

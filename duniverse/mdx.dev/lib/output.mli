@@ -16,21 +16,21 @@
 
 (** Test outputs. *)
 
-type t = [`Output of string | `Ellipsis]
+type t = [ `Output of string | `Ellipsis ]
 (** The type for test outputs. Ellipisis ([...]) allow to skip zero,
    one or many lines while comparing the outputs with {!equal}. *)
 
-val equal: t list -> t list -> bool
+val equal : t list -> t list -> bool
 (** [equal x y] is true iff [x] and [y] are equivalent, modulo
    ellipsis. *)
 
-val merge: [`Output of string] list -> t list -> t list
+val merge : [ `Output of string ] list -> t list -> t list
 (** [merge output test] merges any [`Ellipsis] items from [test] into
    [output]. *)
 
-val pp: ?pad:int -> t Fmt.t
+val pp : ?pad:int -> t Fmt.t
 (** [pp] is the pretty-printer for test outputs. [pad] is the size of
    the optional whitespace left-padding (by default it is 0). *)
 
-val dump: t Fmt.t
+val dump : t Fmt.t
 (** [dump] is the printer for dumping test outputs. Useful for debugging. *)

@@ -12,18 +12,6 @@
  (action (diff casual-file-inc/test-case.md.expected casual-file-inc.actual)))
 
 (rule
- (target casual-file-inc-to-ml.actual)
- (deps (package mdx) (source_tree casual-file-inc-to-ml))
- (action
-  (with-stdout-to %{target}
-   (chdir casual-file-inc-to-ml
-    (run ocaml-mdx test --output - --direction=to-ml test-case.md)))))
-
-(alias
- (name runtest)
- (action (diff casual-file-inc-to-ml/test-case.md.expected casual-file-inc-to-ml.actual)))
-
-(rule
  (target code.actual)
  (deps (package mdx) (source_tree code))
  (action
@@ -180,18 +168,6 @@
  (action (diff heredoc/test-case.md heredoc.actual)))
 
 (rule
- (target labels.actual)
- (deps (package mdx) (source_tree labels))
- (action
-  (with-stdout-to %{target}
-   (chdir labels
-    (run ocaml-mdx test --output - -s Testing test-case.md)))))
-
-(alias
- (name runtest)
- (action (diff labels/test-case.md.expected labels.actual)))
-
-(rule
  (target lines.actual)
  (deps (package mdx) (source_tree lines))
  (action
@@ -228,18 +204,6 @@
  (action (diff mlt/test-case.md mlt.actual)))
 
 (rule
- (target module-alias.actual)
- (deps (package mdx) (source_tree module-alias))
- (action
-  (with-stdout-to %{target}
-   (chdir module-alias
-    (run ocaml-mdx test --output - test-case.md)))))
-
-(alias
- (name runtest)
- (action (diff module-alias/test-case.md module-alias.actual)))
-
-(rule
  (target multilines.actual)
  (deps (package mdx) (source_tree multilines))
  (action
@@ -264,6 +228,18 @@
  (action (diff non-det/test-case.md non-det.actual)))
 
 (rule
+ (target non-det-default-preserved.actual)
+ (deps (package mdx) (source_tree non-det-default-preserved))
+ (action
+  (with-stdout-to %{target}
+   (chdir non-det-default-preserved
+    (run ocaml-mdx test --output - test-case.md)))))
+
+(alias
+ (name runtest)
+ (action (diff non-det-default-preserved/test-case.md non-det-default-preserved.actual)))
+
+(rule
  (target ocaml-408-syntax.actual)
  (deps (package mdx) (source_tree ocaml-408-syntax))
  (action
@@ -286,6 +262,18 @@
 (alias
  (name runtest)
  (action (diff padding/test-case.md padding.actual)))
+
+(rule
+ (target parts-begin-end.actual)
+ (deps (package mdx) (source_tree parts-begin-end))
+ (action
+  (with-stdout-to %{target}
+   (chdir parts-begin-end
+    (run ocaml-mdx test --output - test-case.md)))))
+
+(alias
+ (name runtest)
+ (action (diff parts-begin-end/test-case.md.expected parts-begin-end.actual)))
 
 (rule
  (target prelude.actual)
@@ -348,6 +336,18 @@
  (action (diff semisemi/test-case.md semisemi.actual)))
 
 (rule
+ (target shell-file-inc.actual)
+ (deps (package mdx) (source_tree shell-file-inc))
+ (action
+  (with-stdout-to %{target}
+   (chdir shell-file-inc
+    (run ocaml-mdx test --output - test-case.md)))))
+
+(alias
+ (name runtest)
+ (action (diff shell-file-inc/test-case.md.expected shell-file-inc.actual)))
+
+(rule
  (target spaces.actual)
  (deps (package mdx) (source_tree spaces))
  (action
@@ -360,16 +360,40 @@
  (action (diff spaces/test-case.md spaces.actual)))
 
 (rule
+ (target sync-from-subdir.actual)
+ (deps (package mdx) (source_tree sync-from-subdir))
+ (action
+  (with-stdout-to %{target}
+   (chdir sync-from-subdir
+    (run ocaml-mdx test --output - test-case.md)))))
+
+(alias
+ (name runtest)
+ (action (diff sync-from-subdir/test-case.md.expected sync-from-subdir.actual)))
+
+(rule
  (target sync-to-md.actual)
  (deps (package mdx) (source_tree sync-to-md))
  (action
   (with-stdout-to %{target}
    (chdir sync-to-md
-    (run ocaml-mdx test --output - --direction=to-md test-case.md)))))
+    (run ocaml-mdx test --output - test-case.md)))))
 
 (alias
  (name runtest)
  (action (diff sync-to-md/test-case.md.expected sync-to-md.actual)))
+
+(rule
+ (target toploop-getvalue.actual)
+ (deps (package mdx) (source_tree toploop-getvalue))
+ (action
+  (with-stdout-to %{target}
+   (chdir toploop-getvalue
+    (run ocaml-mdx test --output - test-case.md)))))
+
+(alias
+ (name runtest)
+ (action (diff toploop-getvalue/test-case.md toploop-getvalue.actual)))
 
 (rule
  (target trailing-whitespaces.actual)

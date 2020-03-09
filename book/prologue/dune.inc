@@ -6,5 +6,5 @@
  (locks ../../global-lock)
  (action
   (progn
-   (run ocaml-mdx test --direction=to-md %{x})
+   (run ocaml-mdx test %{x})
    (diff? %{x} %{x}.corrected))))

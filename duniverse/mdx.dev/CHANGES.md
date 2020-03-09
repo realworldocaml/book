@@ -2,8 +2,44 @@
 
 #### Added
 
+#### Changed
+
+#### Deprecated
+
+#### Fixed
+
+#### Removed
+
+#### Security
+
+### 1.6.0
+
+#### Added
+
 - Add a `--duniverse-mode` to `ocaml-mdx rule` so that the generated rules work
   within a duniverse
+- Allow to import arbitrary files (not only .ml/.mli ones) into code blocks using
+  the `file` label. (#203, #207, @voodoos)
+- Allow to set the `--non-deterministic` option through the `MDX_RUN_NON_DETERMINISTIC`
+  env variables (#208, @NathanReb)
+- Add support for OCaml 4.10 (#204, @kit-ty-kate)
+- Infer syntax kind when `--syntax` is not set, and add 'markdown' as an alias to 'normal' (#222, @gpetiot)
+- Add `ocaml-mdx deps` command to be used by dune to compute file and dir dependencies of an
+  mdx file. (#217, @voodoos)
+- Add new delimiters syntax using comments for partial OCaml files include (#212, @voodoos).
+
+#### Changed
+
+- Do not unset `INSIDE_DUNE` when executing shell commands by default (#224, @NathanReb)
+
+#### Fixed
+
+- Fix a bug that could cause `ocaml-mdx test` to crash on some `include` in toplevel code blocks
+  (#202, @trefis)
+
+#### Removed
+
+- Remove the `direction` option, only synchronize from .ml to .md files (#214, @gpetiot)
 
 ### 1.5.0 (2019-11-29)
 

@@ -16,7 +16,7 @@
 
 (** Code blocks. *)
 
-type cram_value = { pad: int; tests: Cram.t list }
+type cram_value = { pad : int; tests : Cram.t list }
 
 (** The type for block values. *)
 type value =
@@ -29,113 +29,107 @@ type value =
 type section = int * string
 (** The type for sections. *)
 
-(** The type for supported code blocks. *)
 type t = {
-  line    : int;
-  file    : string;
+  line : int;
+  file : string;
   section : section option;
-  labels  :
-    (string * ([`Eq | `Neq | `Le | `Lt | `Ge | `Gt] * string) option) list;
-  header  : string option;
-  contents: string list;
-  value   : value;
+  labels : Label.t list;
+  header : string option;
+  contents : string list;
+  value : value;
 }
+(** The type for supported code blocks. *)
 
-val empty: t
+val empty : t
 (** [empty] is the empty block. *)
 
 (** {2 Printers} *)
 
-val dump: t Fmt.t
+val dump : t Fmt.t
 (** [dump] is the printer for dumping code blocks. Useful for debugging. *)
 
-val pp_header: ?syntax:Syntax.t -> t Fmt.t
+val pp_header : ?syntax:Syntax.t -> t Fmt.t
 (** [pp_header] pretty-prints block headers. *)
 
-val pp_contents: ?syntax:Syntax.t -> t Fmt.t
+val pp_contents : ?syntax:Syntax.t -> t Fmt.t
 (** [pp_contents] pretty-prints block contents. *)
 
-val pp_footer: ?syntax:Syntax.t -> unit Fmt.t
+val pp_footer : ?syntax:Syntax.t -> unit Fmt.t
 (** [pp_footer] pretty-prints block footer. *)
 
-val pp: ?syntax:Syntax.t -> t Fmt.t
+val pp : ?syntax:Syntax.t -> t Fmt.t
 (** [pp] pretty-prints blocks. *)
 
-val pp_line_directive: (string * int) Fmt.t
+val pp_line_directive : (string * int) Fmt.t
 (** [pp_line_directive] pretty-prints a line directive given as a
    filename and line number. *)
 
 (** {2 Accessors} *)
 
-val mode: t -> [`Non_det of [`Command|`Output] | `Normal]
+val mode : t -> [ `Non_det of Label.non_det | `Normal ]
 (** [mode t] is [t]'s mode. *)
 
-val directory: t -> string option
+val directory : t -> string option
 (** [directory t] is the directory where [t] tests should be run. *)
 
-val source_trees: t -> string list
+val source_trees : t -> string list
 (** [source_trees t] is the list of extra source-trees to add as
    dependency of the code-block. *)
 
-val file: t -> string option
+val file : t -> string option
 (** [file t] is the name of the file to synchronize [t] with. *)
 
-val part: t -> string option
+val part : t -> string option
 (** [part t] is the part of the file to synchronize [t] with.
     If lines is not specified synchronize the whole file. *)
 
-val environment: t -> string
+val environment : t -> string
 (** [environment t] is the name given to the environment where [t] tests
     are run. *)
 
-val set_variables: t -> (string * string) list
+val set_variables : t -> (string * string) list
 (** [set_variable t] is the list of environment variable to set and their values *)
 
-val unset_variables: t -> string list
+val unset_variables : t -> string list
 (** [unset_variable t] is the list of environment variable to unset *)
 
-val explicit_required_packages: t -> string list
+val explicit_required_packages : t -> string list
 (** [explicit_required_packages t] returns the list of packages explicitly required by the user
     through require-package labels in the block [t]. *)
 
-val required_libraries: t -> (Library.Set.t, string) Result.result
+val required_libraries : t -> (Library.Set.t, string) Result.result
 (** [required_libraries t] returns the set of libaries that are loaded through [#require]
     statements in the block [t]. Always returns an empty set if [t] isn't a toplevel
     block. *)
 
-val skip: t -> bool
+val skip : t -> bool
 (** [skip t] is true iff [skip] is in the labels of [t]. *)
 
-val value: t -> value
+val value : t -> value
 (** [value t] is [t]'s value. *)
 
-val section: t -> section option
+val section : t -> section option
 (** [section t] is [t]'s section. *)
 
-val header: t -> string option
+val header : t -> string option
 (** [header t] is [t]'s header. *)
 
-val executable_contents: t -> string list
+val executable_contents : t -> string list
 (** [executable_contents t] is either [t]'s contents if [t] is a raw
    or a cram block, or [t]'s commands if [t] is a toplevel fragments
    (e.g. the phrase result is discarded). *)
 
-val version_enabled: t -> bool
+val version_enabled : t -> bool
 (** [version_supported t] if the current OCaml version complies with [t]'s
     version. *)
 
 (** {2 Evaluation} *)
 
-val eval: t -> t
+val eval : t -> t
 (** [eval t] is the same as [t] but with it's value replaced by either
    [Cram] or [Toplevel] blocks, depending on [t]'s header. *)
 
 (** {2 Parsers} *)
-
-val labels_of_string:
-  string ->
-  (string * ([`Eq | `Neq | `Gt | `Ge | `Lt | `Le] * string) option) list
-(** [labels_of_string s] cuts [s] into a list of labels. *)
 
 val require_from_line : string -> (Library.Set.t, string) Result.result
 (** [require_from_line line] returns the set of libraries imported by the
