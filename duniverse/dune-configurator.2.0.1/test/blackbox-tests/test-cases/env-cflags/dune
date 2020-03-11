@@ -1,4 +1,0 @@
-(env
- (default
-  (c_flags :standard ":standard + in .")
-  (cxx_flags :standard ":standard + in .")))

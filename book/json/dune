@@ -1,15 +1,10 @@
-(rule
-  (target dune.gen)
-  (action
-   (with-stdout-to %{target}
-    (run ocaml-mdx rule --locks ../../global-lock --duniverse-mode %{dep:README.md}
-     --prelude=%{dep:prelude.ml}))))
-
-(alias
- (name   runtest)
- (deps   README.md)
- (action (diff dune.inc dune.gen)))
-
-(include dune.inc)
+(mdx
+ (files README.md)
+ (packages
+  core
+  mdx
+  ppx_jane
+  yojson)
+ (preludes prelude.ml))
 
 (data_only_dirs examples)
