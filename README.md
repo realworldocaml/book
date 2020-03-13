@@ -31,6 +31,30 @@ All of the code and examples are built using OCaml 4.09.0.
 
 ## Building
 
+### Prequisites
+
+The following prequisites are required to build
+
+- `pandoc`
+- `pdflatex`
+  
+#### Mac OSX
+
+This is pretty straightforward with [Homebrew](https://brew.sh/)
+
+pandoc
+
+`brew install pandoc`
+
+pdflatex
+
+`brew cask install mactex`
+
+Note: you will need to restart your console or reload your shell profile to update the `PATH`.
+
+
+### Building the Website
+
 Here are the commands to build the website:
 
 ### Installing Dependencies
