@@ -409,7 +409,7 @@ can for example use `fold` to reverse a list, in which case the accumulator
 is itself a list:
 
 ```ocaml env=main
-# List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4]
+# List.fold ~init:[] ~f:(fun accum head -> head :: accum) [1;2;3;4]
 - : int list = [4; 3; 2; 1]
 ```
 
