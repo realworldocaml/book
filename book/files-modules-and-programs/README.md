@@ -137,7 +137,8 @@ specifies the details of the build. [dune]{.idx}
 
 ```scheme file=examples/freq-dune/dune
 (executable
-  (name      freq)
+  (name freq)
+  (modes byte exe)
   (libraries base stdio))
 ```
 

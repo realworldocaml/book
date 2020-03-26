@@ -1,3 +1,4 @@
 (executable
-  (name      freq)
+  (name freq)
+  (modes byte exe)
   (libraries base stdio))
