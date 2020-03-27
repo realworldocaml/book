@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 38))
+    (paragraph
+     (((f.ml (1 0) (1 38))
+       (reference (constructor Baz (type bar (root Foo module))) ())))))))
+ (warnings ()))

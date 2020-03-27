@@ -8,7 +8,7 @@
    true
    (run ocaml-mdx test --force-output %{dep:test-case.md}))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action
   (diff test-case.md.expected test-case.md.corrected)))

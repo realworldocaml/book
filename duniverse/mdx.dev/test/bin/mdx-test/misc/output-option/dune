@@ -8,8 +8,8 @@
    %{target}
    (run ocaml-mdx test --output - %{md}))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case.md)
   (:actual std-out.corrected))
@@ -24,8 +24,8 @@
  (action
   (run ocaml-mdx test --force-output --output %{target} %{md})))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case.md)
   (:actual explicit-outfile.corrected))
@@ -40,8 +40,8 @@
  (action
   (run ocaml-mdx test --force-output %{md})))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case.md)
   (:actual test-case.md.corrected))

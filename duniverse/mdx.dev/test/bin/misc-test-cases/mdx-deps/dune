@@ -7,7 +7,7 @@
    %{target}
    (run ocaml-mdx deps %{dep:deps.md}))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action
   (diff %{dep:deps.txt.expected} %{dep:deps.txt})))

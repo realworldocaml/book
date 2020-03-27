@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 14))
+    (paragraph (((f.ml (1 0) (1 14)) (word @deprecatedfoo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-14:\
+   \nUnknown tag '@deprecatedfoo'.")))

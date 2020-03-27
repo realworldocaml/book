@@ -1,0 +1,10 @@
+(executable
+ (name       minihtml)
+ (libraries  tyxml)
+ (preprocess (pps tyxml-ppx))
+)
+(rule
+ (targets index.html)
+ (deps minihtml.exe)
+ (action (run %{exe:minihtml.exe}))
+)

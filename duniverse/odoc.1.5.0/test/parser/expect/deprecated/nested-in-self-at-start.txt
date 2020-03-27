@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (1 27))
+    (@deprecated
+     ((f.ml (1 12) (1 23))
+      (paragraph (((f.ml (1 12) (1 23)) (word @deprecated)))))
+     ((f.ml (1 24) (1 27)) (paragraph (((f.ml (1 24) (1 27)) (word foo)))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 12-23:\
+   \n'@deprecated' is not allowed in '@deprecated'.\
+   \nSuggestion: move '@deprecated' outside of any other markup.")))

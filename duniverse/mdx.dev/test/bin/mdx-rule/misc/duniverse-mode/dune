@@ -6,7 +6,7 @@
    (run ocaml-mdx rule --duniverse-mode --prelude %{dep:prelude.ml}
      --prelude-str "#require \"prelude-str\"" %{dep:duniverse-mode.md}))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action
   (diff %{dep:dune.gen.expected} %{dep:dune.gen})))

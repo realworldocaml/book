@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 6)) (verbatim foo))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-6:\
+   \nEnd of text is not allowed in '{v ... v}' (verbatim text).")))

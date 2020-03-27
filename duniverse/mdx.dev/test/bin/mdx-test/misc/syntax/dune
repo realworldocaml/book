@@ -6,8 +6,8 @@
  (action
   (run ocaml-mdx test --output %{target} %{md})))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case.md)
   (:actual test-case.md.corrected))
@@ -22,8 +22,8 @@
  (action
   (run ocaml-mdx test --output %{target} %{md})))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case.t)
   (:actual test-case.t.corrected))
@@ -38,8 +38,8 @@
  (action
   (run ocaml-mdx test %{md} --output %{target} --syntax markdown)))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case-md.ext)
   (:actual test-case-md.ext.corrected))
@@ -54,8 +54,8 @@
  (action
   (run ocaml-mdx test %{md} --output %{target} --syntax cram)))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:expected test-case-cram.ext)
   (:actual test-case-cram.ext.corrected))

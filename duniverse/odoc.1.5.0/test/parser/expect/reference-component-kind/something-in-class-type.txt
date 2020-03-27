@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 21))
+    (paragraph
+     (((f.ml (1 0) (1 21)) (reference (dot bar (root foo class_type)) ())))))))
+ (warnings ()))

@@ -8,8 +8,8 @@
    %{targets}
    (run ocaml-mdx pp %{x}))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:x skip.ml)
   (:y skip.ml.expected))

@@ -1,0 +1,2 @@
+File "positional-identifier-clash.mly", line 4, characters 6-8:
+Error: there are multiple producers named _1 in this sequence.

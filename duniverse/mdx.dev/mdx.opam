@@ -15,7 +15,7 @@ build: [
 
 depends: [
   "ocaml" {>= "4.02.3"}
-  "dune" {>= "1.11"}
+  "dune" {>= "2.0"}
   "ocamlfind"
   "fmt"
   "cppo" {build}
@@ -26,6 +26,7 @@ depends: [
   "result"
   "ocaml-migrate-parsetree" {>= "1.0.6"}
   "ocaml-version" {>= "2.3.0"}
+  "odoc"
   "lwt" {with-test}
   "alcotest" {with-test}
 ]

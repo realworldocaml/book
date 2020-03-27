@@ -121,3 +121,9 @@ module List = struct
     in
     aux l
 end
+
+module Array = struct
+  let slice t ~from ~to_ =
+    let start_index, length = (from, to_ - from + 1) in
+    Array.sub t start_index length
+end

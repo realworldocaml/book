@@ -1,0 +1,132 @@
+(jbuild_version 1)
+
+(rule
+ ((targets (test.ml test.mli))
+  (deps    (test.atd))
+  (action  (run ${bin:atdgen} ${<}))))
+
+(alias
+ ((name runtest)
+  (action (diff test.expected.ml test.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff test.expected.mli test.mli))))
+
+(rule
+ ((targets (test2.ml test2.mli))
+  (deps    (test2.atd))
+  (action  (run ${bin:atdgen} -open Test ${<}))))
+
+(alias
+ ((name runtest)
+  (action (diff test2.expected.ml test2.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff test2.expected.mli test2.mli))))
+
+(rule
+ ((targets (testj.ml testj.mli))
+  (deps    (test.atd test.ml test.mli))
+  (action
+   (run
+    ${bin:atdgen} -json -extend Test -j-custom-fields
+    "fun loc s -> Printf.eprintf \"Warning: skipping field %s (def: %s)\n\" s loc"
+    ${<}
+    -o testj))))
+
+(alias
+ ((name runtest)
+  (action (diff testj.expected.ml testj.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff testj.expected.mli testj.mli))))
+
+(rule
+ ((targets (test2j.ml test2j.mli))
+  (deps    (test2.atd))
+  (action
+   (run ${bin:atdgen} -json -std-json -o test2j -open Test,Test2,Testj -ntd ${<}))))
+
+(alias
+ ((name runtest)
+  (action (diff test2j.expected.ml test2j.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff test2j.expected.mli test2j.mli))))
+
+(rule
+ ((targets (test3j_t.ml test3j_t.mli))
+  (deps    (test3j.atd))
+  (action  (run ${bin:atdgen} -t ${<}))))
+
+(alias
+ ((name runtest)
+  (action (diff test3j_t.expected.ml test3j_t.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff test3j_t.expected.mli test3j_t.mli))))
+
+(rule
+ ((targets (test3j_j.ml test3j_j.mli))
+  (deps    (test3j.atd))
+  (action  (run ${bin:atdgen} -j -j-std ${<}))))
+
+(alias
+ ((name runtest)
+  (action (diff test3j_j.expected.ml test3j_j.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff test3j_j.expected.mli test3j_j.mli))))
+
+(rule
+ ((targets (testjstd.ml testjstd.mli))
+  (deps    (test.atd))
+  (action  (run ${bin:atdgen} -std-json -extend Test test.atd -o testjstd))))
+
+(alias
+ ((name runtest)
+  (action (diff testjstd.expected.ml testjstd.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff testjstd.expected.mli testjstd.mli))))
+
+(rule
+ ((targets (testv.ml testv.mli))
+  (deps    (test.atd))
+  (action  (run ${bin:atdgen} -validate -extend Test test.atd -o testv))))
+
+(alias
+ ((name runtest)
+  (action (diff testv.expected.ml testv.ml))))
+
+(alias
+ ((name runtest)
+  (action (diff testv.expected.mli testv.mli))))
+
+(executables
+ ((libraries (atd atdgen-runtime))
+  (names (test_atdgen_main))
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (modules
+   (test
+    test3j_j
+    test3j_t
+    testjstd
+    testj
+    testv
+    test_atdgen_main
+    test_atdgen_type_conv
+    test_lib))))
+
+(alias
+ ((name   runtest)
+  (package atd)
+  (deps   (test_atdgen_main.exe))
+  (action (run ${<}))))

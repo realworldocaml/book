@@ -1,0 +1,4 @@
+%attribute A
+%token B
+
+%%

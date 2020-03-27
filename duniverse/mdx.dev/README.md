@@ -13,6 +13,12 @@ and to practice "literate programming" using markdown and OCaml.
 The test mode allows to ensure that shell scripts and OCaml fragments
 in the documentation always stays up-to-date.
 
+The blocks in markdown files can be parameterized by `mdx`-specific labels, that
+will change the way `mdx` interprets the block.
+The syntax is: `<!-- $MDX labels -->`, where `labels` is a list of valid labels
+separated by a comma. This line has to immediately precede the block it is
+attached to. Examples are given in the following sections.
+
 `mdx` is released as a single binary (called `ocaml-mdx`) and
 can be installed using opam:
 
@@ -104,12 +110,14 @@ using the label `file`. When an OCaml file is included it can be automatically
 sliced if it contains annotations such as `[@@@part "partName"]` and if the
 block has the label `part=partName`:
 
-    ```ocaml file=sync_to_md.ml,part=partName
+    <!-- $MDX file=sync_to_md.ml,part=partName -->
+    ```ocaml
     ```
 
 Non-OCaml files can also be read and included in a block:
 
-    ``` file=any_file.txt
+    <!-- $MDX file=any_file.txt -->
+    ```
     ```
 However, part splitting is only supported for OCaml files.
 
@@ -224,7 +232,8 @@ $ dune promote
 
 `ocaml-mdx test` supports non-deterministic outputs:
 
-    ```sh non-deterministic=output
+    <!-- $MDX non-deterministic=output -->
+    ```sh
     $ <command>
     <output>
     ```
@@ -238,7 +247,8 @@ back to the default behaviour.
 
 `ocaml-mdx test` supports non-deterministic commands:
 
-    ```ocaml non-deterministic=command
+    <!-- $MDX non-deterministic=command -->
+    ```ocaml
     # Random.int 10;;
     - : int = 5
     ```
@@ -252,23 +262,27 @@ Separate environments can be defined for blocks:
 
 `x` holds the value `1` in the environment `e1`.
 
-    ```ocaml env=e1
+    <!-- $MDX env=e1 -->
+    ```ocaml
     let x = 1;;
     ```
 
-    ```ocaml env=e1
+    <!-- $MDX env=e1 -->
+    ```ocaml
     module M = struct let k = 42 let f x = x * k end;;
     ```
 
 `x` holds the value `3` in the environment `e2`.
 
-    ```ocaml env=e2
+    <!-- $MDX env=e2 -->
+    ```ocaml
     let x = 3;;
     ```
 
 We can retrieve the value of `x` in environment `e1`:
 
-    ```ocaml env=e1
+    <!-- $MDX env=e1 -->
+    ```ocaml
     # print_int x;;
     1
     - : unit = ()
@@ -285,7 +299,8 @@ Blocks can be processed or ignored depending on the current version of OCaml.
 
 For example to have a different outcome whether we are past OCaml 4.06:
 
-    ```ocaml version<4.06
+    <!-- $MDX version<4.06 -->
+    ```ocaml
     # let f x = x + 1
     val f : int -> int = <fun>
     # let f y =
@@ -293,13 +308,14 @@ For example to have a different outcome whether we are past OCaml 4.06:
     val f : bytes -> bytes = <fun>
     ```
 
-    ```ocaml version>=4.06
+    <!-- $MDX version>=4.06 -->
+    ```ocaml
     # let f x = x + 1
     val f : int -> int = <fun>
     # let f y =
       y^"foo"
-      val f : string -> string = <fun>
-      ```
+    val f : string -> string = <fun>
+    ```
 
 The available operators are `<>`, `>=`, `>`, `<=`, `<` and `=`.
 The version number can be of the following forms:
@@ -312,7 +328,8 @@ The version number can be of the following forms:
 
 Environment variables can be declared at the beginning of a block:
 
-    ```ocaml set-FOO=bar,set-BAR=foo
+    <!-- $MDX set-FOO=bar,set-BAR=foo -->
+    ```ocaml
     # print_endline (Sys.getenv "FOO")
     bar
     - : unit = ()

@@ -16,7 +16,7 @@
 
 (** {2 Lines} *)
 
-type syntax = Syntax.t = Normal | Cram
+type syntax = Syntax.t = Normal | Cram | Mli
 
 (** The type for the lines of a markdown or cram file. *)
 type line = Section of (int * string) | Text of string | Block of Block.t

@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 11)) (@author Foo))
+   ((f.ml (2 0) (2 5)) (paragraph (((f.ml (2 0) (2 5)) (code_span bar)))))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-5:\
+   \nParagraph is not allowed in the tags section.\
+   \nSuggestion: move '[...]' (code) before any tags.")))

@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (3 2)) (code_block ""))))
+ (warnings
+  ( "File \"f.ml\", line 1, character 0 to line 3, character 2:\
+   \n'{[...]}' (code block) should not be empty.")))

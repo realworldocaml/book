@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 32))
+    (paragraph
+     (((f.ml (1 0) (1 32))
+       (reference (method baz (class_type bar (root Foo unknown))) ())))))))
+ (warnings ()))

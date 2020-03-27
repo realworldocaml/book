@@ -1,0 +1,455 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title>
+   Markup (test_package+ml.Markup)
+  </title>
+  <link rel="stylesheet" href="../../odoc.css">
+  <meta charset="utf-8">
+  <meta name="generator" content="odoc %%VERSION%%">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <script src="../../highlight.pack.js"></script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+ </head>
+ <body>
+  <div class="content">
+   <header>
+    <nav>
+     <a href="../index.html">Up</a> – <a href="../index.html">test_package+ml</a> » Markup
+    </nav>
+    <h1>
+     Module <code>Markup</code>
+    </h1>
+    <p>
+     Here, we test the rendering of comment markup.
+    </p>
+    <nav class="toc">
+     <ul>
+      <li>
+       <a href="#sections">Sections</a>
+       <ul>
+        <li>
+         <a href="#subsection-headings">Subsection headings</a>
+         <ul>
+          <li>
+           <a href="#sub-subsection-headings">Sub-subsection headings</a>
+          </li>
+          <li>
+           <a href="#anchors">Anchors</a>
+           <ul>
+            <li>
+             <a href="#paragraph">Paragraph</a>
+             <ul>
+              <li>
+               <a href="#subparagraph">Subparagraph</a>
+              </li>
+             </ul>
+            </li>
+           </ul>
+          </li>
+         </ul>
+        </li>
+       </ul>
+      </li>
+      <li>
+       <a href="#styling">Styling</a>
+      </li>
+      <li>
+       <a href="#links-and-references">Links and references</a>
+      </li>
+      <li>
+       <a href="#preformatted-text">Preformatted text</a>
+      </li>
+      <li>
+       <a href="#lists">Lists</a>
+      </li>
+      <li>
+       <a href="#unicode">Unicode</a>
+      </li>
+      <li>
+       <a href="#raw-html">Raw HTML</a>
+      </li>
+      <li>
+       <a href="#modules">Modules</a>
+      </li>
+      <li>
+       <a href="#tags">Tags</a>
+      </li>
+     </ul>
+    </nav>
+   </header>
+   <section>
+    <header>
+     <h2 id="sections">
+      <a href="#sections" class="anchor"></a>Sections
+     </h2>
+     <p>
+      Let's get these done first, because sections will be used to break up the rest of this test.
+     </p>
+     <p>
+      Besides the section heading above, there are also
+     </p>
+    </header>
+    <section>
+     <header>
+      <h3 id="subsection-headings">
+       <a href="#subsection-headings" class="anchor"></a>Subsection headings
+      </h3>
+      <p>
+       and
+      </p>
+     </header>
+     <section>
+      <header>
+       <h4 id="sub-subsection-headings">
+        <a href="#sub-subsection-headings" class="anchor"></a>Sub-subsection headings
+       </h4>
+       <p>
+        but odoc has banned deeper headings. There are also title headings, but they are only allowed in mld files.
+       </p>
+      </header>
+     </section>
+     <section>
+      <header>
+       <h4 id="anchors">
+        <a href="#anchors" class="anchor"></a>Anchors
+       </h4>
+       <p>
+        Sections can have attached <a href="index.html#anchors"><span>Anchors</span></a>, and it is possible to <a href="index.html#anchors"><span>link</span></a> to them. Links to section headers should not be set in source code style.
+       </p>
+      </header>
+      <section>
+       <header>
+        <h5 id="paragraph">
+         <a href="#paragraph" class="anchor"></a>Paragraph
+        </h5>
+        <p>
+         Individual paragraphs can have a heading.
+        </p>
+       </header>
+       <section>
+        <header>
+         <h6 id="subparagraph">
+          <a href="#subparagraph" class="anchor"></a>Subparagraph
+         </h6>
+         <p>
+          Parts of a longer paragraph that can be considered alone can also have headings.
+         </p>
+        </header>
+       </section>
+      </section>
+     </section>
+    </section>
+   </section>
+   <section>
+    <header>
+     <h2 id="styling">
+      <a href="#styling" class="anchor"></a>Styling
+     </h2>
+     <p>
+      This paragraph has some styled elements: <b>bold</b> and <i>italic</i>, <b><i>bold italic</i></b>, <em>emphasis</em>, <em><em>emphasis</em> within emphasis</em>, <b><i>bold italic</i></b>, super<sup>script</sup>, sub<sub>script</sub>. The line spacing should be enough for superscripts and subscripts not to look odd.
+     </p>
+     <p>
+      <code>code</code> is a different kind of markup that doesn't allow nested markup.
+     </p>
+     <p>
+      It's possible for two markup elements to appear <b>next</b> <i>to</i> each other and have a space, and appear <b>next</b><i>to</i> each other with no space. It doesn't matter <b>how</b> <i>much</i> space it was in the source: in this sentence, it was two space characters. And in this one, there is <b>a</b> <i>newline</i>.
+     </p>
+     <p>
+      This is also true between <em>non-</em><code>code</code> markup <em>and</em> <code>code</code>.
+     </p>
+     <p>
+      Code can appear <b>inside <code>other</code> markup</b>. Its display shouldn't be affected.
+     </p>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="links-and-references">
+      <a href="#links-and-references" class="anchor"></a>Links and references
+     </h2>
+     <p>
+      This is a <a href="#">link</a>. It sends you to the top of this page. Links can have markup inside them: <a href="#"><b>bold</b></a>, <a href="#"><i>italics</i></a>, <a href="#"><em>emphasis</em></a>, <a href="#">super<sup>script</sup></a>, <a href="#">sub<sub>script</sub></a>, and <a href="#"><code>code</code></a>. Links can also be nested <em><a href="#">inside</a></em> markup. Links cannot be nested inside each other. This link has no replacement text: <a href="#">#</a>. The text is filled in by odoc. This is a shorthand link: <a href="#">#</a>. The text is also filled in by odoc in this case.
+     </p>
+     <p>
+      This is a reference to <a href="index.html#val-foo"><code>foo</code></a>. References can have replacement text: <a href="index.html#val-foo"><span>the value foo</span></a>. Except for the special lookup support, references are pretty much just like links. The replacement text can have nested styles: <a href="index.html#val-foo"><span><b>bold</b></span></a>, <a href="index.html#val-foo"><span><i>italic</i></span></a>, <a href="index.html#val-foo"><span><em>emphasis</em></span></a>, <a href="index.html#val-foo"><span>super<sup>script</sup></span></a>, <a href="index.html#val-foo"><span>sub<sub>script</sub></span></a>, and <a href="index.html#val-foo"><span><code>code</code></span></a>. It's also possible to surround a reference in a style: <b><a href="index.html#val-foo"><code>foo</code></a></b>. References can't be nested inside references, and links and references can't be nested inside each other.
+     </p>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="preformatted-text">
+      <a href="#preformatted-text" class="anchor"></a>Preformatted text
+     </h2>
+     <p>
+      This is a code block:
+     </p>
+     <pre><code class="ml">let foo = ()
+(** There are some nested comments in here, but an unpaired comment
+    terminator would terminate the whole doc surrounding comment. It's
+    best to keep code blocks no wider than 72 characters. *)
+
+let bar =
+  ignore foo</code></pre>
+     <p>
+      There are also verbatim blocks:
+     </p>
+     <pre>The main difference is these don't get syntax highlighting.</pre>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="lists">
+      <a href="#lists" class="anchor"></a>Lists
+     </h2>
+     <ul>
+      <li>
+       This is a
+      </li>
+      <li>
+       shorthand bulleted list,
+      </li>
+      <li>
+       and the paragraphs in each list item support <em>styling</em>.
+      </li>
+     </ul>
+     <ol>
+      <li>
+       This is a
+      </li>
+      <li>
+       shorthand numbered list.
+      </li>
+     </ol>
+     <ul>
+      <li>
+       Shorthand list items can span multiple lines, however trying to put two paragraphs into a shorthand list item using a double line break
+      </li>
+     </ul>
+     <p>
+      just creates a paragraph outside the list.
+     </p>
+     <ul>
+      <li>
+       Similarly, inserting a blank line between two list items
+      </li>
+     </ul>
+     <ul>
+      <li>
+       creates two separate lists.
+      </li>
+     </ul>
+     <ul>
+      <li>
+       <p>
+        To get around this limitation, one
+       </p>
+       <p>
+        can use explicitly-delimited lists.
+       </p>
+      </li>
+      <li>
+       This one is bulleted,
+      </li>
+     </ul>
+     <ol>
+      <li>
+       but there is also the numbered variant.
+      </li>
+     </ol>
+     <ul>
+      <li>
+       <ul>
+        <li>
+         lists
+        </li>
+        <li>
+         can be nested
+        </li>
+        <li>
+         and can include references
+        </li>
+        <li>
+         <a href="index.html#val-foo"><code>foo</code></a>
+        </li>
+       </ul>
+      </li>
+     </ul>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="unicode">
+      <a href="#unicode" class="anchor"></a>Unicode
+     </h2>
+     <p>
+      The parser supports any ASCII-compatible encoding, in particuλar UTF-8.
+     </p>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="raw-html">
+      <a href="#raw-html" class="anchor"></a>Raw HTML
+     </h2>
+     <p>
+      Raw HTML can be <input type="text" placeholder="inserted"> as inline elements into sentences.
+     </p>
+     <blockquote>
+      If the raw HTML is the only thing in a paragraph, it is treated as a block
+      element, and won't be wrapped in paragraph tags by the HTML generator.
+     </blockquote>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="modules">
+      <a href="#modules" class="anchor"></a>Modules
+     </h2>
+     <ul class="modules"></ul>
+     <ul class="modules">
+      <li>
+       <code>X</code>
+      </li>
+     </ul>
+     <ul class="modules">
+      <li>
+       <code>X</code>
+      </li>
+      <li>
+       <code>Y</code>
+      </li>
+      <li>
+       <code>Z</code>
+      </li>
+     </ul>
+    </header>
+   </section>
+   <section>
+    <header>
+     <h2 id="tags">
+      <a href="#tags" class="anchor"></a>Tags
+     </h2>
+     <p>
+      Each comment can end with zero or more tags. Here are some examples:
+     </p>
+     <dl>
+      <dt>
+       author
+      </dt>
+      <dd>
+       antron
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       deprecated
+      </dt>
+      <dd>
+       <p>
+        a <em>long</em> time ago
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       parameter foo
+      </dt>
+      <dd>
+       <p>
+        unused
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       raises Failure
+      </dt>
+      <dd>
+       <p>
+        always
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       returns
+      </dt>
+      <dd>
+       <p>
+        never
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       see <a href="#">#</a>
+      </dt>
+      <dd>
+       <p>
+        this url
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       see <code>foo.ml</code>
+      </dt>
+      <dd>
+       <p>
+        this file
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       see Foo
+      </dt>
+      <dd>
+       <p>
+        this document
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       since
+      </dt>
+      <dd>
+       0
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       before 1.0
+      </dt>
+      <dd>
+       <p>
+        it was in b<sup>e</sup>t<sub>a</sub>
+       </p>
+      </dd>
+     </dl>
+     <dl>
+      <dt>
+       version
+      </dt>
+      <dd>
+       -1
+      </dd>
+     </dl>
+    </header>
+    <dl>
+     <dt class="spec value" id="val-foo">
+      <a href="#val-foo" class="anchor"></a><code><span class="keyword">val</span> foo : unit</code>
+     </dt>
+     <dd>
+      <p>
+       Comments in structure items <b>support</b> <em>markup</em>, t<sup>o</sup><sub>o</sub>.
+      </p>
+     </dd>
+    </dl>
+   </section>
+  </div>
+ </body>
+</html>

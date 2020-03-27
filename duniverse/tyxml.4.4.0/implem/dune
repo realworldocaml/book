@@ -1,0 +1,8 @@
+(library
+ (name tyxml)
+ (public_name tyxml)
+ (wrapped false)
+ (libraries tyxml_f re uutf)
+ (flags (:standard
+         -safe-string))
+)

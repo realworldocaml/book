@@ -1,0 +1,5 @@
+(test
+ (name test_bigarrays)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_bigarrays_stubs test_bigarrays_bindings tests_common))

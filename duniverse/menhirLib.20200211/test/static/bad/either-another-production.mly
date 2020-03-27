@@ -1,0 +1,6 @@
+%%
+
+main:
+  { () }
+
+%type<unit> main

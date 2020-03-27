@@ -1,0 +1,49 @@
+(library
+ (name ex_common)
+ (libraries lwt.unix sexplib tls)
+ (modules ex_common))
+
+(executable
+ (name starttls_server)
+ (modules starttls_server)
+ (libraries tls.lwt lwt.unix))
+
+(executable
+ (name echo_server)
+ (modules echo_server)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name echo_server_sni)
+ (modules echo_server_sni)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name echo_server_alpn)
+ (modules echo_server_alpn)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name echo_client)
+ (modules echo_client)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name echo_client_alpn)
+ (modules echo_client_alpn)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name test_server)
+ (modules test_server)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name test_client)
+ (modules test_client)
+ (libraries tls.lwt lwt.unix ex_common))
+
+(executable
+ (name http_client)
+ (modules http_client)
+ (libraries tls.lwt lwt.unix ex_common))

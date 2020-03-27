@@ -17,8 +17,8 @@
   section.out
   (run ./section.exe)))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (deps
   (:x section.out)
   (:y section.out.expected))

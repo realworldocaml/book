@@ -1,0 +1,10 @@
+(env
+  (dev (flags
+    :standard
+    -g
+    -w @A-4-44
+  ))
+  (release (flags
+    :standard
+  ))
+)

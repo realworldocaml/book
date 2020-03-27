@@ -1,0 +1,6 @@
+(test
+ (name test_closure_type_promotion)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_closure_type_promotions_stubs test_closure_type_promotions_bindings
+   tests_common))

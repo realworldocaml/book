@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 13))
+    (paragraph
+     (((f.ml (1 0) (1 13)) (emphasis (((f.ml (1 9) (1 12)) (word foo))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 7-7:\
+   \nIdentifier in reference should not be empty.")))

@@ -42,6 +42,8 @@ let cwd_test_file_md = "test-case.md"
 
 let cwd_test_file_t = "test-case.t"
 
+let cwd_test_file_mli = "test-case.mli"
+
 type dir = {
   test_file : string;
   target_file : string;
@@ -51,18 +53,20 @@ type dir = {
 }
 
 let test_file ~dir_name files =
-  let is_test_file f = f = cwd_test_file_md || f = cwd_test_file_t in
+  let is_test_file f =
+    f = cwd_test_file_md || f = cwd_test_file_t || f = cwd_test_file_mli
+  in
   match List.filter is_test_file files with
   | [ test_file ] -> test_file
   | [] ->
       Printf.eprintf "No test file for %s\n" dir_name;
-      Printf.eprintf "There should be one of %s or %s\n" cwd_test_file_md
-        cwd_test_file_t;
+      Printf.eprintf "There should be one of %s, %s, or %s\n" cwd_test_file_md
+        cwd_test_file_t cwd_test_file_mli;
       exit 1
   | _ ->
       Printf.eprintf "More than one test file for %s\n" dir_name;
-      Printf.eprintf "There should be only one of %s or %s\n" cwd_test_file_md
-        cwd_test_file_t;
+      Printf.eprintf "There should be only one of %s, %s, or %s\n"
+        cwd_test_file_md cwd_test_file_t cwd_test_file_mli;
       exit 1
 
 let expected_file ~dir_name ~test_file files =
@@ -86,8 +90,8 @@ let dir dir_name =
 
 let pr_runtest_alias dir =
   Fmt.pr {|
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action (diff %s/%s %s)))
 |} dir.dir_name
     dir.expected_file dir.target_file

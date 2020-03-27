@@ -1,0 +1,4 @@
+%%
+
+main:
+  %prec foo A {}

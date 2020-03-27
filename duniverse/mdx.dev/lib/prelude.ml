@@ -16,6 +16,7 @@
 
 let env_and_file f =
   match Astring.String.cut ~sep:":" f with
-  | None -> (None, f)
+  | None -> (Block.Env.Default, f)
   | Some (e, f) ->
-      if Astring.String.exists (( = ) ' ') e then (None, f) else (Some e, f)
+      if Astring.String.exists (( = ) ' ') e then (Block.Env.Default, f)
+      else (Block.Env.User_defined e, f)

@@ -1,0 +1,4 @@
+%%
+
+%public %public foo:
+  {}

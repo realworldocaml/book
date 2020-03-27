@@ -34,14 +34,13 @@ let run (`Setup ()) (`File file) (`Section section) =
         (function
           | Mdx.Section _ | Text _ -> ()
           | Block b ->
-              let b = Mdx.Block.eval b in
               if not (Mdx.Block.skip b) then (
                 Log.debug (fun l -> l "pp: %a" Mdx.Block.dump b);
                 let pp_lines = Fmt.(list ~sep:(unit "\n") string) in
-                let contents = Mdx.Block.executable_contents b in
+                let contents = Mdx.Block.executable_contents ~syntax:Normal b in
                 match b.value with
                 | Toplevel _ -> Fmt.pr "%a\n" pp_lines contents
-                | OCaml ->
+                | OCaml _ ->
                     Fmt.pr "%a\n%a\n" Mdx.Block.pp_line_directive (file, b.line)
                       pp_lines contents
                 | _ -> () ))

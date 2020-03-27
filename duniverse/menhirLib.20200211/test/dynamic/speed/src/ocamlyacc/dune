@@ -1,0 +1,9 @@
+(copy_files# ../*.ml)
+(copy_files ../parser.mly)
+
+(ocamlyacc parser)
+
+(executable
+  (name gene)
+  (libraries unix)
+)

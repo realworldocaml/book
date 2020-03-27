@@ -1,0 +1,28 @@
+;; Menhir, table back-end, %inline disabled.
+
+;; Copy the common source files.
+(copy_files# ../src/{calc,aux}.ml)
+(copy_files# ../src/lexer.mll)
+
+;; Copy the appropriate parser.
+(rule (copy ../src/parser-menhir.mly parser.mly))
+
+;; Compile the lexer.
+(ocamllex lexer)
+
+;; Compile the parser with appropriate flags.
+(menhir
+  (flags
+    -v
+    --fixed-exception
+    --table
+    --no-inline
+  )
+  (modules parser)
+)
+
+;; Create the executable.
+(executable
+  (name calc)
+  (libraries menhirLib)
+)

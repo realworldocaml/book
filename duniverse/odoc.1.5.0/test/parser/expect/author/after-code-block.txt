@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 7)) (code_block foo)) ((f.ml (1 8) (1 19)) (@author Bar))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 8-19:\
+   \n'@author' should begin on its own line.")))

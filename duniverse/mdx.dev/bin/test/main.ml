@@ -82,12 +82,16 @@ let run_test ?root blacklist temp_file t =
   Unix.close fd;
   match snd (Unix.waitpid [] pid) with WEXITED n -> n | _ -> 255
 
-let root_dir ?root t =
-  match (root, Mdx.Block.directory t) with
-  | None, None -> None
-  | None, Some d -> Some (Filename.dirname t.file / d)
-  | Some r, Some d -> Some (r / d)
-  | Some d, None -> Some d
+let root_dir ?root ?block () =
+  match block with
+  | Some t -> (
+      match Mdx.Block.directory t with
+      | Some d -> (
+          match root with
+          | Some r -> Some (r / d)
+          | None -> Some (Filename.dirname t.file / d) )
+      | None -> root )
+  | None -> root
 
 let resolve_root file dir root =
   match root with None -> dir / file | Some r -> r / dir / file
@@ -97,7 +101,7 @@ let run_cram_tests ?syntax t ?root ppf temp_file pad tests =
   let pad = match syntax with Some Cram -> pad + 2 | _ -> pad in
   List.iter
     (fun test ->
-      let root = root_dir ?root t in
+      let root = root_dir ?root ~block:t () in
       let blacklist = Block.unset_variables t in
       let n = run_test ?root blacklist temp_file test in
       let lines = Mdx.Util.File.read_lines temp_file in
@@ -116,12 +120,12 @@ let run_cram_tests ?syntax t ?root ppf temp_file pad tests =
         output;
       Cram.pp_exit_code ~pad ppf n)
     tests;
-  Block.pp_footer ?syntax ppf ()
+  Block.pp_footer ?syntax ppf t
 
-let eval_test t ?root c test =
+let eval_test ?block ?root c test =
   Log.debug (fun l ->
       l "eval_test %a" Fmt.(Dump.list (Fmt.fmt "%S")) (Toplevel.command test));
-  let root = root_dir ?root t in
+  let root = root_dir ?root ?block () in
   with_dir root (fun () -> Mdx_top.eval c (Toplevel.command test))
 
 let err_eval ~cmd lines =
@@ -132,15 +136,13 @@ let err_eval ~cmd lines =
     lines;
   exit 1
 
-let eval_raw t ?root c ~line lines =
+let eval_raw ?block ?root c ~line lines =
   let test =
     Toplevel.{ vpad = 0; hpad = 0; line; command = lines; output = [] }
   in
-  match eval_test t ?root c test with
+  match eval_test ?block ?root c test with
   | Ok _ -> ()
   | Error e -> err_eval ~cmd:lines e
-
-let lines = function Ok x | Error x -> x
 
 let split_lines lines =
   let aux acc s =
@@ -150,11 +152,39 @@ let split_lines lines =
   in
   List.fold_left aux [] (List.rev lines)
 
-let run_toplevel_tests ?root c ppf tests t =
-  Block.pp_header ppf t;
+let eval_ocaml ~block ?syntax ?root c ppf ~line lines errors =
+  let test =
+    Toplevel.{ vpad = 0; hpad = 0; line; command = lines; output = [] }
+  in
+  let update ~errors = function
+    | { Block.value = OCaml v; _ } as b ->
+        { b with value = OCaml { v with errors } }
+    (* [eval_ocaml] only called on OCaml blocks *)
+    | _ -> assert false
+  in
+  match eval_test ?root ~block c test with
+  | Ok _ -> Block.pp ?syntax ppf (update ~errors:[] block)
+  | Error lines ->
+      let errors =
+        let lines = split_lines lines in
+        let output = List.map output_from_line lines in
+        if Output.equal output errors then errors
+        else
+          List.map
+            (function
+              | `Ellipsis -> `Ellipsis
+              | `Output x -> `Output (ansi_color_strip x))
+            (Output.merge output errors)
+      in
+      Block.pp ?syntax ppf (update ~errors block)
+
+let lines = function Ok x | Error x -> x
+
+let run_toplevel_tests ?syntax ?root c ppf tests t =
+  Block.pp_header ?syntax ppf t;
   List.iter
     (fun test ->
-      let lines = lines (eval_test ?root t c test) in
+      let lines = lines (eval_test ?root ~block:t c test) in
       let lines = split_lines lines in
       let output =
         let output = List.map output_from_line lines in
@@ -170,7 +200,7 @@ let run_toplevel_tests ?root c ppf tests t =
               Output.pp ~pad ppf (`Output line))
         output)
     tests;
-  Block.pp_footer ppf ()
+  match syntax with Some Syntax.Mli -> () | _ -> Block.pp_footer ?syntax ppf t
 
 type file = { first : Mdx.Part.file; current : Mdx.Part.file }
 
@@ -212,117 +242,110 @@ let write_parts ~force_output file parts =
       flush oc;
       close_out oc
 
-let update_block_content ppf t content =
-  Block.pp_header ppf t;
+let update_block_content ?syntax ppf t content =
+  Block.pp_header ?syntax ppf t;
   Output.pp ppf (`Output content);
-  Block.pp_footer ppf ()
+  Block.pp_footer ?syntax ppf t
 
-let update_file_or_block ?root ppf md_file ml_file block =
-  let root = root_dir ?root block in
+let update_file_or_block ?syntax ?root ppf md_file ml_file block part =
+  let root = root_dir ?root ~block () in
   let dir = Filename.dirname md_file in
   let ml_file = resolve_root ml_file dir root in
-  update_block_content ppf block (read_part ml_file (Block.part block))
+  update_block_content ?syntax ppf block (read_part ml_file part)
 
 exception Test_block_failure of Block.t * string
 
+let with_non_det ~command ~output ~det non_deterministic = function
+  (* the command is non-deterministic so skip everything *)
+  | Some Label.Nd_command when not non_deterministic -> command ()
+  (* its output is non-deterministic; run it but keep the old output. *)
+  | Some Label.Nd_output when not non_deterministic -> output ()
+  | _ -> det ()
+
+let eval_prelude ?root top prelude prelude_str =
+  let aux to_lines p =
+    let env, f = Mdx.Prelude.env_and_file p in
+    let eval () = eval_raw ?root top ~line:0 (to_lines f) in
+    Mdx_top.in_env env eval
+  in
+  match (prelude, prelude_str) with
+  | [], [] -> ()
+  | [], fs -> List.iter (aux (fun x -> [ x ])) fs
+  | fs, [] -> List.iter (aux Mdx.Util.File.read_lines) fs
+  | _ -> Fmt.failwith "only one of --prelude or --prelude-str shoud be used"
+
 let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
-    (`Silent_eval silent_eval) (`Syntax syntax) (`Silent silent)
-    (`Verbose_findlib verbose_findlib) (`Prelude prelude)
-    (`Prelude_str prelude_str) (`File file) (`Section section) (`Root root)
-    (`Force_output force_output) (`Output output) =
+    (`Silent_eval silent_eval) (`Record_backtrace record_backtrace)
+    (`Syntax syntax) (`Silent silent) (`Verbose_findlib verbose_findlib)
+    (`Prelude prelude) (`Prelude_str prelude_str) (`File file)
+    (`Section section) (`Root root) (`Force_output force_output)
+    (`Output output) =
+  Printexc.record_backtrace record_backtrace;
   let syntax =
     match syntax with Some syntax -> Some syntax | None -> Syntax.infer ~file
   in
   let c = Mdx_top.init ~verbose:(not silent_eval) ~silent ~verbose_findlib () in
-  let section =
-    match section with None -> None | Some p -> Some (Re.Perl.compile_pat p)
-  in
-  let active b =
-    match (section, Block.section b) with
-    | None, _ -> true
-    | Some re, None -> Re.execp re ""
-    | Some re, Some s -> Re.execp re (snd s)
-  in
-  let () =
-    match (prelude, prelude_str) with
-    | [], [] -> ()
-    | [], fs ->
-        List.iter
-          (fun p ->
-            let env, f = Mdx.Prelude.env_and_file p in
-            let eval () = eval_raw Block.empty ?root c ~line:0 [ f ] in
-            match env with None -> eval () | Some e -> Mdx_top.in_env e eval)
-          fs
-    | fs, [] ->
-        List.iter
-          (fun p ->
-            let env, f = Mdx.Prelude.env_and_file p in
-            let eval () =
-              eval_raw Block.empty ?root c ~line:0 (Mdx.Util.File.read_lines f)
-            in
-            match env with None -> eval () | Some e -> Mdx_top.in_env e eval)
-          fs
-    | _ -> Fmt.failwith "only one of --prelude or --prelude-str shoud be used"
-  in
+  eval_prelude ?root c prelude prelude_str;
 
   let test_block ~ppf ~temp_file t =
-    let active = active t && Block.version_enabled t && not (Block.skip t) in
     let print_block () = Block.pp ?syntax ppf t in
-    match
-      (active, non_deterministic, Block.file t, Block.mode t, Block.value t)
-    with
-    (* Print errors *)
-    | _, _, _, _, Error _
-    (* The command is not active, skip it. *)
-    | false, _, _, _, _
-    (* the command is active but non-deterministic so skip everything *)
-    | true, false, _, `Non_det Nd_command, _ ->
-        print_block ()
-    (* the command is active but it's output is
-       non-deterministic; run it but keep the old output. *)
-    | true, false, _, `Non_det Nd_output, Cram { tests; _ } ->
-        print_block ();
-        let blacklist = Block.unset_variables t in
-        List.iter
-          (fun t ->
-            let (_ : int) = run_test ?root blacklist temp_file t in
-            ())
-          tests
-    | true, false, _, `Non_det Nd_output, Toplevel tests ->
-        assert (syntax <> Some Cram);
-        print_block ();
-        List.iter
-          (fun test ->
-            match eval_test t ?root c test with
-            | Ok _ -> ()
-            | Error e ->
-                let output = List.map (fun l -> `Output l) e in
-                if Output.equal test.output output then ()
-                else err_eval ~cmd:test.command e)
-          tests
-    | true, _, Some ext_file, _, kind -> (
-        match kind with
-        | OCaml | Toplevel _ ->
+    if Block.is_active ?section t then
+      match Block.value t with
+      | Raw _ -> print_block ()
+      | Include { file_included; file_kind = Fk_ocaml { part_included } } ->
+          assert (syntax <> Some Cram);
+          update_file_or_block ?syntax ?root ppf file file_included t
+            part_included
+      | Include { file_included; file_kind = Fk_other _ } ->
+          let new_content = read_part file_included None in
+          update_block_content ?syntax ppf t new_content
+      | OCaml { non_det; env; errors } ->
+          let det () =
             assert (syntax <> Some Cram);
-            update_file_or_block ?root ppf file ext_file t
-        | _ when Util.Option.is_some (Block.part t) ->
-            Fmt.failwith "Parts are not supported for non-OCaml code blocks."
-        | Cram _ | Raw ->
-            let new_content = read_part ext_file (Block.part t) in
-            update_block_content ppf t new_content
-        | _ -> print_block () )
-    | true, _, None, _, kind -> (
-        match kind with
-        | OCaml ->
-            assert (syntax <> Some Cram);
-            eval_raw t ?root c ~line:t.line t.contents;
-            Block.pp ppf t
-        | Cram { tests; pad } ->
-            run_cram_tests ?syntax t ?root ppf temp_file pad tests
-        | Toplevel tests ->
-            assert (syntax <> Some Cram);
-            run_toplevel_tests ?root c ppf tests t
-        | Raw | _ -> print_block () )
+            Mdx_top.in_env env (fun () ->
+                eval_ocaml ~block:t ?syntax ?root c ppf ~line:t.line t.contents
+                  errors)
+          in
+          with_non_det non_deterministic non_det ~command:print_block
+            ~output:det ~det
+      | Cram { non_det } ->
+          let pad, tests = Cram.of_lines t.contents in
+          with_non_det non_deterministic non_det ~command:print_block
+            ~output:(fun () ->
+              print_block ();
+              let blacklist = Block.unset_variables t in
+              List.iter
+                (fun t -> ignore (run_test ?root blacklist temp_file t))
+                tests)
+            ~det:(fun () ->
+              run_cram_tests ?syntax t ?root ppf temp_file pad tests)
+      | Toplevel { non_det; env } ->
+          let tests =
+            let syntax = Util.Option.value syntax ~default:Normal in
+            Toplevel.of_lines ~syntax ~file:t.file ~line:t.line ~column:t.column
+              t.contents
+          in
+          with_non_det non_deterministic non_det ~command:print_block
+            ~output:(fun () ->
+              assert (syntax <> Some Cram);
+              print_block ();
+              List.iter
+                (fun test ->
+                  match
+                    Mdx_top.in_env env (fun () ->
+                        eval_test ~block:t ?root c test)
+                  with
+                  | Ok _ -> ()
+                  | Error e ->
+                      let output = List.map (fun l -> `Output l) e in
+                      if Output.equal test.output output then ()
+                      else err_eval ~cmd:test.command e)
+                tests)
+            ~det:(fun () ->
+              assert (syntax <> Some Cram);
+              Mdx_top.in_env env (fun () ->
+                  run_toplevel_tests ?syntax ?root c ppf tests t))
+    else print_block ()
   in
   let gen_corrected file_contents items =
     let temp_file = Filename.temp_file "ocaml-mdx" ".output" in
@@ -331,12 +354,10 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
     let ppf = Format.formatter_of_buffer buf in
     List.iter
       (function
-        | (Section _ | Text _) as t -> Mdx.pp_line ?syntax ppf t
+        | (Mdx.Document.Section _ | Text _) as t -> Mdx.pp_line ?syntax ppf t
         | Block t -> (
             List.iter (fun (k, v) -> Unix.putenv k v) (Block.set_variables t);
-            try
-              Mdx_top.in_env (Block.environment t) (fun () ->
-                  test_block ~ppf ~temp_file t)
+            try test_block ~ppf ~temp_file t
             with Failure msg -> raise (Test_block_failure (t, msg)) ))
       items;
     Format.pp_print_flush ppf ();
@@ -353,19 +374,22 @@ let run_exn (`Setup ()) (`Non_deterministic non_deterministic)
 let report_error_in_block block msg =
   let kind =
     match block.Block.value with
-    | Raw | Error _ -> ""
-    | OCaml -> "OCaml "
+    | Raw _ -> ""
+    | Include { file_kind = Fk_ocaml _; _ } -> "OCaml file include "
+    | Include { file_kind = Fk_other _; _ } -> "file include "
+    | OCaml _ -> "OCaml "
     | Cram _ -> "cram "
     | Toplevel _ -> "toplevel "
   in
   Fmt.epr "Error in the %scode block in %s at line %d:@]\n%s\n" kind block.file
     block.line msg
 
-let run setup non_deterministic silent_eval syntax silent verbose_findlib
-    prelude prelude_str file section root force_output output : int =
+let run setup non_deterministic silent_eval record_backtrace syntax silent
+    verbose_findlib prelude prelude_str file section root force_output output :
+    int =
   try
-    run_exn setup non_deterministic silent_eval syntax silent verbose_findlib
-      prelude prelude_str file section root force_output output
+    run_exn setup non_deterministic silent_eval record_backtrace syntax silent
+      verbose_findlib prelude prelude_str file section root force_output output
   with
   | Failure f ->
       prerr_endline f;
@@ -384,9 +408,9 @@ let cmd =
   let doc = "Test markdown files." in
   ( Term.(
       pure run $ Cli.setup $ Cli.non_deterministic $ Cli.silent_eval
-      $ Cli.syntax $ Cli.silent $ Cli.verbose_findlib $ Cli.prelude
-      $ Cli.prelude_str $ Cli.file $ Cli.section $ Cli.root $ Cli.force_output
-      $ Cli.output),
+      $ Cli.record_backtrace $ Cli.syntax $ Cli.silent $ Cli.verbose_findlib
+      $ Cli.prelude $ Cli.prelude_str $ Cli.file $ Cli.section $ Cli.root
+      $ Cli.force_output $ Cli.output),
     Term.info "ocaml-mdx-test" ~version:"%%VERSION%%" ~doc ~exits ~man )
 
 let main () = Term.(exit_status @@ eval cmd)

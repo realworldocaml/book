@@ -1,0 +1,5 @@
+\input{mymacros.sty}
+
+% Ignore \raisebox and \phantom.
+\newcommand{\raisebox}[2]{#2}
+\newcommand{\phantom}[1]{}

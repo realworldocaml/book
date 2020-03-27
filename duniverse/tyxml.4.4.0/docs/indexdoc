@@ -1,0 +1,38 @@
+{1 Main modules }
+
+{!modules:
+Tyxml
+Tyxml.Html
+Tyxml.Svg
+}
+
+{1 Types and signatures}
+
+{!modules:
+Html_sigs
+Html_types
+Svg_sigs
+Svg_types
+}
+
+{1 TyXML Functors }
+
+{!modules:
+Html_f
+Svg_f
+Xml_sigs
+Xml_wrap
+Xml_iter
+Xml_print
+Xml_stream
+}
+
+{1 Ppx library}
+
+{!modules:
+Tyxml_ppx
+}
+
+{1 Indexes}
+
+{!indexlist}

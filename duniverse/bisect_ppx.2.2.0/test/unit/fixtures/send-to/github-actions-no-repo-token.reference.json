@@ -1,0 +1,8 @@
+/*
+Info: will write coverage report to 'coverage.json'
+Info: detected CI: GitHub Actions
+Info: using service name 'github'
+Info: using job ID variable $GITHUB_RUN_NUMBER
+Info: $PULL_REQUEST_NUMBER not set
+Error: expected repo token in $COVERALLS_REPO_TOKEN
+*/

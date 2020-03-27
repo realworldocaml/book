@@ -12,6 +12,8 @@ val section : [> `Section of string option ] t
 
 val silent_eval : [> `Silent_eval of bool ] t
 
+val record_backtrace : [> `Record_backtrace of bool ] t
+
 val silent : [> `Silent of bool ] t
 
 val verbose_findlib : [> `Verbose_findlib of bool ] t

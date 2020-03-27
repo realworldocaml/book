@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (unordered
+     ((((f.ml (1 2) (1 15))
+        (unordered
+         ((((f.ml (1 10) (1 13))
+            (paragraph (((f.ml (1 10) (1 13)) (word foo)))))))))))))))
+ (warnings ()))

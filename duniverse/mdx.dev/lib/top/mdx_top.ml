@@ -630,7 +630,8 @@ let load_env env names objs =
   Toploop.toplevel_env := env;
   List.iter2 Toploop.setvalue names objs
 
-let in_env env_name f =
+let in_env e f =
+  let env_name = Mdx.Block.Env.name e in
   if !first_call then (
     (* We will start from the *correct* initial environment with
        everything loaded, for each environment. *)

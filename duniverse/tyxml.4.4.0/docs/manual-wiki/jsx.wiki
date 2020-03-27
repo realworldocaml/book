@@ -1,0 +1,81 @@
+= TyXML JSX syntax =
+
+TyXML provides a ppx which allows use Reason's convenient JSX syntax
+while still enjoying the benefits and type-safety of TyXML.
+It is available as the ##tyxml-jsx## package:
+<<code|
+opam install tyxml-jsx
+>>
+
+==@@id="syntax"@@ Syntax ==
+
+This syntax should be familiar to most Reason users:
+
+<<code language="ocaml"|
+# open Tyxml;
+
+# let intro = <span id="hello"> "Hello!" </span>;
+let intro: Tyxml_html.elt([> Html_types.span ]) =
+  <span id="hello">Hello!</span>;
+
+# let svgpath = <path d="M 0 1 L 1 0" />;
+let svgpath: Tyxml_svg.elt([> Svg_types.path ]) =
+  <path d="M 0 1 L 1 0"></path>;
+>>
+
+The quotations will use the {{{Html}}} and {{{Svg}}} module that are available in scope, but it can also be disambiguated manually by prefixing the namespace.
+
+We can also build list of elements:
+
+<<code language="ocaml"|
+# let nice_picture = <> <p>"picture: "</p> <Html.svg> svgpath </Html.svg> </> ;
+let nice_picture: list(Tyxml_html.elt([> `P | `Svg ])) =
+  [<p>picture: </p>,
+   <svg><path d="M 0 1 L 1 0"></path></svg>];
+>>
+
+We can nest various elements and use spreads:
+
+<<code language="ocaml"|
+# let content = <> intro <div class_="content"> ...nice_picture </div> </>;
+let content: list(Tyxml_html.elt([> `Div | `Span ])) =
+  [<span id="hello">Hello!</span>,
+   <div class="content"><p>picture: </p><svg><path d="M 0 1 L 1 0"></path></svg></div>];
+>>
+
+Finally, we can insert custom elements:
+<<code language="ocaml"|
+# module Page = {
+  let createElement = (~title, ~children, ()) => {
+    <html>
+      <head>
+        <title> {Html.txt(title)} </title>
+        <link rel="stylesheet" href="home.css" />
+      </head>
+      <body> ...children </body>
+    </html>
+  };
+};
+module Page:
+  {
+    let createElement:
+      (~title: string,
+      ~children: list(Html.elt([< Html_types.object__content_fun ])),
+      unit) => Html.doc;
+  };
+
+# let this_title = "Weeee";
+# let page = 
+  <Page title=this_title>
+    ...content
+  </Page>;
+let page: Html.doc = ....
+>>
+
+In the previous examples, we used the textual implementation of tyxml (module {{{Tyxml}}}) in the ##tyxml## library), but it works equally well
+with other implementations:
+- The DOM tree with the ##js_of_ocaml-tyxml## library. Either the {{{Js_of_ocaml_tyxml.Tyxml_js}}} or the reactive 
+version in {{{Js_of_ocaml_tyxml.Tyxml_js.R}}}.
+- The ##virtual_dom## library with the module {{{Virtual_dom.Tyxml}}}.
+
+In each case, simply open the module and the JSX syntax will use it.

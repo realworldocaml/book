@@ -7,8 +7,8 @@
    (chdir section-option
     (run ocaml-mdx pp --section Valuable test-case.md)))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action (diff section-option/test_case.ml.expected section-option.actual)))
 
 (rule
@@ -19,8 +19,8 @@
    (chdir spaces
     (run ocaml-mdx pp test-case.md)))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action (diff spaces/test_case.ml.expected spaces.actual)))
 
 (rule
@@ -31,6 +31,6 @@
    (chdir toplevel
     (run ocaml-mdx pp test-case.md)))))
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (action (diff toplevel/test_case.ml.expected toplevel.actual)))

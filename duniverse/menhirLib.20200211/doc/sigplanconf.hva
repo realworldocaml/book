@@ -1,0 +1,10 @@
+\input{article.hva}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{amsmath}
+
+\newcommand{\authorinfo}[3]{\author{\renewcommand\and{ and }#1\\#2\\\texttt{#3}}}
+
+\newcommand{\mathstrut}[1]{#1}
+
+\usepackage{style}

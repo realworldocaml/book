@@ -1,0 +1,210 @@
+% EBNF syntax.
+
+\let\nt\textit % Nonterminal.
+\newcommand{\is}{& ${} ::= {}$ &}
+\newcommand{\newprod}{\\\hspace{1cm}\barre\hspace{2mm}}
+\newcommand{\phaprod}{\\\hspace{1cm}\phantom\barre\hspace{2mm}}
+% Options and choices.
+\newcommand{\optional}[1]{%
+  \ifmmode [\,#1\,]%
+  \else    $[\,\text{#1}\,]$%
+  \fi
+}
+\newcommand{\metachoice}{$\,\mid\,$}
+% Lists.
+\newcommand{\seplist}[2]{#2#1${}\ldots{}$#1#2}
+\newcommand{\sepspacelist}[1]{\seplist{\ }{#1}}
+\newcommand{\sepcommalist}[1]{\seplist{,\ }{#1}}
+\newcommand{\precseplist}[2]{%
+  \optional{#1} \seplist{\ #1}{#2}%
+}
+% Optional parameters.
+\newcommand{\tuple}[1]{\dlpar\sepcommalist{#1}\drpar}
+\newcommand{\oparams}[1]{\optional{\tuple{#1}}}
+% Some nonterminal symbols used in the grammar.
+\newcommand{\expression}{\nt{expression}\xspace}
+\newcommand{\expressionsub}[1]{\nt{expression}${}_{#1}$}
+\newcommand{\pattern}{\nt{pattern}\xspace}
+
+% Concrete syntax.
+
+\newcommand{\percentpercent}{\kw{\%\%}\xspace}
+\newcommand{\deuxpoints}{\kw{:}\xspace}
+\newcommand{\barre}{\kw{\textbar}\xspace}
+\newcommand{\kangle}[1]{\kw{\textless} #1 \kw{\textgreater}}
+\newcommand{\ocamltype}{\kangle{\textit{\ocaml type}}\xspace}
+\newcommand{\ocamlparam}{\kangle{\nt{uid} \deuxpoints \textit{\ocaml module type}}\xspace}
+\newcommand{\dheader}[1]{\kw{\%\{} #1 \kw{\%\}}}
+\newcommand{\dtoken}{\kw{\%token}\xspace}
+\newcommand{\dstart}{\kw{\%start}\xspace}
+\newcommand{\dtype}{\kw{\%type}\xspace}
+\newcommand{\dnonassoc}{\kw{\%nonassoc}\xspace}
+\newcommand{\dleft}{\kw{\%left}\xspace}
+\newcommand{\dright}{\kw{\%right}\xspace}
+\newcommand{\dparameter}{\kw{\%parameter}\xspace}
+\newcommand{\dpublic}{\kw{\%public}\xspace}
+\newcommand{\dinline}{\kw{\%inline}\xspace}
+\newcommand{\donerrorreduce}{\kw{\%on\_error\_reduce}\xspace}
+\newcommand{\dattribute}{\kw{\%attribute}\xspace}
+\newcommand{\dpaction}[1]{\kw{\{} #1 \kw{\}}\xspace}
+\newcommand{\daction}{\dpaction{\textit{\ocaml code}}\xspace}
+\newcommand{\dpfaction}[1]{\kw{<} #1 \kw{>}\xspace}
+\newcommand{\dpfidentityaction}{\kw{<>}\xspace}
+\newcommand{\dprec}{\kw{\%prec}\xspace}
+\newcommand{\dequal}{\kw{\small =}\xspace}
+\newcommand{\dquestion}{\kw{?}\xspace}
+\newcommand{\dplus}{\raisebox{2pt}{\kw{\small +}}\xspace}
+\newcommand{\dcolonequal}{\kw{\small :=}\xspace}
+\newcommand{\dequalequal}{\kw{\small ==}\xspace}
+\newcommand{\dstar}{\kw{*}\xspace}
+\newcommand{\dlpar}{\kw{(}\,\xspace}
+\newcommand{\drpar}{\,\kw{)}\xspace}
+\newcommand{\eos}{\kw{\#}\xspace}
+\newcommand{\dnewline}{\kw{\textbackslash n}\xspace}
+\newcommand{\dlet}{\kw{let}\xspace}
+\newcommand{\dsemi}{\kw{;}\xspace}
+\newcommand{\dunderscore}{\kw{\_}\xspace}
+\newcommand{\dtilde}{\raisebox{-4pt}{\kw{\textasciitilde}}\xspace}
+
+% Stylistic conventions.
+
+\newcommand{\kw}[1]{\text{\upshape\sf\bfseries #1}}
+\newcommand{\inlinesidecomment}[1]{\textit{\textbf{\footnotesize // #1}}}
+\newcommand{\sidecomment}[1]{\hspace{2cm}\inlinesidecomment{#1}}
+\newcommand{\docskip}{\vspace{1mm plus 1mm}}
+\newcommand{\docswitch}[1]{\docskip#1.\hspace{3mm}}
+\newcommand{\error}{\kw{error}\xspace}
+
+% Links to Menhir's repository.
+
+\newcommand{\repo}[2]{\href{https://gitlab.inria.fr/fpottier/menhir/blob/master/#1}{#2}}
+\newcommand{\menhirlibconvert}{\repo{src/Convert.mli}{\texttt{MenhirLib.Convert}}\xspace}
+\newcommand{\menhirlibincrementalengine}{\repo{src/IncrementalEngine.ml}{\texttt{MenhirLib.IncrementalEngine}}\xspace}
+\newcommand{\standardmly}{\repo{src/standard.mly}{\texttt{standard.mly}}\xspace}
+\newcommand{\distrib}[1]{\repo{#1}{\texttt{#1}}}
+
+% Links to CompCert's repository.
+
+\newcommand{\compcertgithub}{https://github.com/AbsInt/CompCert/tree/master}
+\newcommand{\compcertgithubfile}[1]{\href{\compcertgithub/#1}{\texttt{#1}}}
+
+% Abbreviations.
+
+\newcommand{\menhir}{Menhir\xspace}
+\newcommand{\menhirlib}{\texttt{MenhirLib}\xspace}
+\newcommand{\menhirsdk}{\texttt{MenhirSdk}\xspace}
+\newcommand{\menhirinterpreter}{\texttt{MenhirInterpreter}\xspace}
+\newcommand{\cmenhir}{\texttt{menhir}\xspace}
+\newcommand{\ml}{\texttt{.ml}\xspace}
+\newcommand{\mli}{\texttt{.mli}\xspace}
+\newcommand{\mly}{\texttt{.mly}\xspace}
+\newcommand{\cmly}{\texttt{.cmly}\xspace}
+\newcommand{\vy}{\texttt{.vy}\xspace}
+\newcommand{\ocaml}{OCaml\xspace}
+\newcommand{\ocamlc}{\texttt{ocamlc}\xspace}
+\newcommand{\ocamlopt}{\texttt{ocamlopt}\xspace}
+\newcommand{\ocamldep}{\texttt{ocamldep}\xspace}
+\newcommand{\make}{\texttt{make}\xspace}
+\newcommand{\omake}{\texttt{omake}\xspace}
+\newcommand{\ocamlbuild}{\texttt{ocamlbuild}\xspace}
+\newcommand{\dune}{\texttt{dune}\xspace}
+\newcommand{\Makefile}{\texttt{Makefile}\xspace}
+\newcommand{\yacc}{\texttt{yacc}\xspace}
+\newcommand{\bison}{\texttt{bison}\xspace}
+\newcommand{\ocamlyacc}{\texttt{ocamlyacc}\xspace}
+\newcommand{\ocamllex}{\texttt{ocamllex}\xspace}
+\newcommand{\token}{\texttt{token}\xspace}
+\newcommand{\automaton}{\texttt{.automaton}\xspace}
+\newcommand{\conflicts}{\texttt{.conflicts}\xspace}
+\newcommand{\dott}{\texttt{.dot}\xspace}
+
+% Environments.
+
+\newcommand{\question}[1]{\vspace{3mm}$\diamond$ \textbf{#1}}
+
+% Ocamlweb settings.
+
+\newcommand{\basic}[1]{\textit{#1}}
+\let\ocwkw\kw
+\let\ocwbt\basic
+\let\ocwupperid\basic
+\let\ocwlowerid\basic
+\let\ocwtv\basic
+\newcommand{\ocwbar}{\vskip 2mm plus 2mm \hrule \vskip 2mm plus 2mm}
+\newcommand{\tcup}{${}\cup{}$}
+\newcommand{\tcap}{${}\cap{}$}
+\newcommand{\tminus}{${}\setminus{}$}
+
+% Command line options.
+
+\newcommand{\oo}[1]{\texttt{-{}-#1}\xspace}
+
+\newcommand{\obase}{\oo{base}}
+\newcommand{\ocanonical}{\oo{canonical}} % undocumented!
+\newcommand{\ocomment}{\oo{comment}}
+\newcommand{\ocmly}{\oo{cmly}}
+\newcommand{\odepend}{\oo{depend}}
+\newcommand{\orawdepend}{\oo{raw-depend}}
+\newcommand{\odump}{\oo{dump}}
+\newcommand{\oerrorrecovery}{\oo{error-recovery}}
+\newcommand{\oexplain}{\oo{explain}}
+\newcommand{\oexternaltokens}{\oo{external-tokens}}
+\newcommand{\ofixedexc}{\oo{fixed-exception}}
+\newcommand{\ograph}{\oo{graph}}
+\newcommand{\oignoreone}{\oo{unused-token}}
+\newcommand{\oignoreall}{\oo{unused-tokens}}
+\newcommand{\oignoreprec}{\oo{unused-precedence-levels}}
+\newcommand{\oinfer}{\oo{infer}}
+\newcommand{\oinferwrite}{\oo{infer-write-query}}
+\newcommand{\oinferread}{\oo{infer-read-reply}}
+\newcommand{\oinferprotocolsupported}{\oo{infer-protocol-supported}}
+\newcommand{\oinspection}{\oo{inspection}}
+\newcommand{\ointerpret}{\oo{interpret}}
+\newcommand{\ointerpretshowcst}{\oo{interpret-show-cst}}
+\newcommand{\ologautomaton}{\oo{log-automaton}}
+\newcommand{\ologcode}{\oo{log-code}}
+\newcommand{\ologgrammar}{\oo{log-grammar}}
+\newcommand{\onodollars}{\oo{no-dollars}}
+\newcommand{\onoinline}{\oo{no-inline}}
+\newcommand{\onostdlib}{\oo{no-stdlib}}
+\newcommand{\oocamlc}{\oo{ocamlc}}
+\newcommand{\oocamldep}{\oo{ocamldep}}
+\newcommand{\oonlypreprocess}{\oo{only-preprocess}}
+\newcommand{\oonlytokens}{\oo{only-tokens}}
+\newcommand{\ostrict}{\oo{strict}}
+\newcommand{\osuggestcomp}{\oo{suggest-comp-flags}}
+\newcommand{\osuggestlinkb}{\oo{suggest-link-flags-byte}}
+\newcommand{\osuggestlinko}{\oo{suggest-link-flags-opt}}
+\newcommand{\osuggestmenhirlib}{\oo{suggest-menhirLib}}
+\newcommand{\osuggestocamlfind}{\oo{suggest-ocamlfind}}
+\newcommand{\otable}{\oo{table}}
+\newcommand{\otimings}{\oo{timings}}
+\newcommand{\otimingsto}{\oo{timings-to}}
+\newcommand{\otrace}{\oo{trace}}
+\newcommand{\ostdlib}{\oo{stdlib}}
+\newcommand{\oversion}{\oo{version}}
+\newcommand{\ocoq}{\oo{coq}}
+\newcommand{\ocoqlibpath}{\oo{coq-lib-path}}
+\newcommand{\ocoqlibnopath}{\oo{coq-lib-no-path}}
+\newcommand{\ocoqnocomplete}{\oo{coq-no-complete}}
+\newcommand{\ocoqnoactions}{\oo{coq-no-actions}}
+\newcommand{\olisterrors}{\oo{list-errors}}
+\newcommand{\ointerpreterror}{\oo{interpret-error}}
+\newcommand{\ocompileerrors}{\oo{compile-errors}}
+\newcommand{\ocompareerrors}{\oo{compare-errors}}
+\newcommand{\oupdateerrors}{\oo{update-errors}}
+\newcommand{\oechoerrors}{\oo{echo-errors}}
+
+% The .messages file format.
+\newcommand{\messages}{\texttt{.messages}\xspace}
+
+% Adding mathstruts to ensure a common baseline.
+\newcommand{\mycommonbaseline}{
+\let\oldnt\nt
+\renewcommand{\nt}[1]{$\mathstrut$\oldnt{##1}}
+\let\oldbasic\basic
+\renewcommand{\basic}[1]{$\mathstrut$\oldbasic{##1}}
+}
+
+% Position keywords.
+\newcommand{\ksymbolstartpos}{\texttt{\$symbolstartpos}\xspace}

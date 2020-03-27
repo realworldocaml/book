@@ -1,0 +1,2 @@
+File "undefined-producer.mly", line 5, characters 7-9:
+Error: $2 refers to a nonexistent symbol.

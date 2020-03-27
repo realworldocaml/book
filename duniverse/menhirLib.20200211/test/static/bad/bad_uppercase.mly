@@ -1,0 +1,7 @@
+%start <unit> Main
+
+%%
+
+Main:
+  { () }
+

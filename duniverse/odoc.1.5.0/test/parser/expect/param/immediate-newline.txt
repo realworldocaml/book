@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (2 3))
+    (@param ""
+     ((f.ml (2 0) (2 3)) (paragraph (((f.ml (2 0) (2 3)) (word foo)))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-6:\
+   \n'@param' expects parameter name on the same line.")))

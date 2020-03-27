@@ -123,6 +123,7 @@ let print_format_dune_rules pp_rules =
 let options_of_syntax = function
   | Some Mdx.Normal -> [ "--syntax=normal" ]
   | Some Mdx.Cram -> [ "--syntax=cram" ]
+  | Some Mdx.Mli -> [ "--syntax=mli" ]
   | None -> []
 
 let options_of_section = function
@@ -177,11 +178,11 @@ let run (`Setup ()) (`File md_file) (`Section section) (`Syntax syntax)
       | Some re, Some s -> Re.execp re (snd s)
   in
   let on_item acc = function
-    | Mdx.Section _ | Text _ -> Ok acc
+    | Mdx.Document.Section _ | Text _ -> Ok acc
     | Block b when active b ->
         let files, dirs, nd, packages = acc in
         let nd =
-          nd || match Mdx.Block.mode b with `Non_det _ -> true | _ -> false
+          nd || match Mdx.Block.non_det b with Some _ -> true | None -> false
         in
         let source_trees = String.Set.of_list (Mdx.Block.source_trees b) in
         let dirs =

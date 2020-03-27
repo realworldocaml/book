@@ -69,3 +69,7 @@ module Sexp : sig
     val to_string : t -> string
   end
 end
+
+module Array : sig
+  val slice : 'a array -> from:int -> to_:int -> 'a array
+end

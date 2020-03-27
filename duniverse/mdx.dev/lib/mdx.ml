@@ -16,15 +16,19 @@
 
 let src = Logs.Src.create "ocaml-mdx"
 
+module Lexer_mdx = Lexer_mdx
+
 module Log = (val Logs.src_log src : Logs.LOG)
 
 module Output = Output
 module Cram = Cram
+module Document = Document
 module Toplevel = Toplevel
 module Library = Library
 module Part = Part
 module Block = Block
 module Migrate_ast = Migrate_ast
+module Mli_parser = Mli_parser
 module Compat = Compat
 module Util = Util
 module Prelude = Prelude
@@ -56,11 +60,20 @@ let parse l =
       | `Text t -> Text t | `Section s -> Section s | `Block b -> Block b)
     l
 
-let parse_lexbuf syntax l = parse (Lexer.token syntax l)
+let parse_lexbuf file_contents syntax l =
+  match syntax with
+  | Syntax.Mli -> Mli_parser.parse_mli file_contents
+  | Normal -> parse (Lexer_mdx.markdown_token l)
+  | Cram -> parse (Lexer_mdx.cram_token l)
 
-let parse_file syntax f = parse (Lexer.token syntax (snd (Misc.init f)))
+let parse_file syntax f =
+  let l = snd (Misc.init f) in
+  parse_lexbuf f syntax l
 
-let of_string syntax s = parse_lexbuf syntax (Lexing.from_string s)
+let of_string syntax s =
+  match syntax with
+  | Syntax.Mli -> Mli_parser.parse_mli s
+  | Syntax.Normal | Syntax.Cram -> parse_lexbuf s syntax (Lexing.from_string s)
 
 let dump_line ppf (l : line) =
   match l with
@@ -70,21 +83,15 @@ let dump_line ppf (l : line) =
 
 let dump = Fmt.Dump.list dump_line
 
-let eval = function
-  | (Section _ | Text _) as x -> x
-  | Block t as x ->
-      let t' = Block.eval t in
-      if t == t' then x else Block t'
-
 type expect_result = Identical | Differs
 
 let run_str ~syntax ~f file =
   let file_contents, lexbuf = Misc.init file in
-  let items = parse_lexbuf syntax lexbuf in
-  let items = List.map eval items in
+  let items = parse_lexbuf file_contents syntax lexbuf in
   Log.debug (fun l -> l "run @[%a@]" dump items);
   let corrected = f file_contents items in
-  let result = if corrected <> file_contents then Differs else Identical in
+  let has_changed = corrected <> file_contents in
+  let result = if has_changed then Differs else Identical in
   (result, corrected)
 
 let write_file ~outfile content =

@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 9))
+    (paragraph
+     (((f.ml (1 0) (1 6)) (reference (root foo unknown) ()))
+      ((f.ml (1 6) (1 9)) (word bar)))))))
+ (warnings ()))

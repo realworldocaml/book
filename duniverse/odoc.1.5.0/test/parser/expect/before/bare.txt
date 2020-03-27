@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 7)) (@before ""))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-7:\
+   \n'@before' expects version number on the same line.")))

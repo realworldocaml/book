@@ -1,0 +1,2 @@
+File "arity-self.mly", line 12, characters 14-17:
+Error: does the symbol "seq" expect 1 or 2 arguments?

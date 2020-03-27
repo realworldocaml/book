@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 9))
+    (unordered
+     ((((f.ml (1 2) (1 9)) (paragraph (((f.ml (1 5) (1 8)) (word Foo)))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-4:\
+   \n'{2 ...}' (section heading) is not allowed in '-' (bulleted list item).\
+   \nSuggestion: move '{2' outside of any other markup.")))

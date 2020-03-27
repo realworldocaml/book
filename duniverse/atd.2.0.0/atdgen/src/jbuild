@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(ocamllex (doc_lexer))
+
+(library
+ ((name atdgen_emit)
+  (flags (:include ${ROOT}/ocamlflags.sexp))
+  (libraries (atd yojson))))

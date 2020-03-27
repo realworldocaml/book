@@ -23,13 +23,16 @@
     Cram tests and toplevel phrases are sequences of commands and
    {{!Output}outputs}.  *)
 
+module Lexer_mdx = Lexer_mdx
 module Output = Output
 module Cram = Cram
+module Document = Document
 module Toplevel = Toplevel
 module Library = Library
 module Part = Part
 module Block = Block
 module Migrate_ast = Migrate_ast
+module Mli_parser = Mli_parser
 module Compat = Compat
 module Util = Util
 module Prelude = Prelude
@@ -38,6 +41,8 @@ module Label = Label
 module Dep = Dep
 
 include module type of Document
+
+val dump : line list Fmt.t
 
 (** {2 Document} *)
 
@@ -48,7 +53,7 @@ val of_string : syntax -> string -> t
 val parse_file : syntax -> string -> t
 (** [parse_file s] is {!of_string} of [s]'s contents. *)
 
-val parse_lexbuf : syntax -> Lexing.lexbuf -> t
+val parse_lexbuf : string -> syntax -> Lexing.lexbuf -> t
 (** [parse_lexbuf l] is {!of_string} of [l]'s contents. *)
 
 (** {2 Evaluation} *)

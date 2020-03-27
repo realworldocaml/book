@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 14))
+    (paragraph
+     (((f.ml (1 0) (1 14))
+       (reference (root "( * )" unknown) (((f.ml (1 10) (1 13)) (word baz))))))))))
+ (warnings ()))

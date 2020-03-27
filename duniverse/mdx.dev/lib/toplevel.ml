@@ -93,15 +93,21 @@ let vpad_of_lines t =
   in
   aux 0 t
 
-let of_lines ~file ~line t =
-  let hpad = hpad_of_lines t in
+let of_lines ~syntax ~file ~line ~column t =
+  let hpad =
+    match syntax with Syntax.Mli -> column + 2 | _ -> hpad_of_lines t
+  in
   let unpad line =
-    if String.is_empty line then line
-    else if String.length line < hpad then
-      Fmt.failwith "invalide padding: %S" line
-    else String.with_index_range line ~first:hpad
+    match syntax with
+    | Syntax.Mli -> String.trim line
+    | Syntax.Normal | Syntax.Cram ->
+        if String.is_empty line then line
+        else if String.length line < hpad then
+          Fmt.failwith "invalid padding: %S" line
+        else String.with_index_range line ~first:hpad
   in
   let lines = List.map unpad t in
+  let lines = match syntax with Syntax.Mli -> "" :: lines | _ -> lines in
   let lines = String.concat ~sep:"\n" lines in
   let lines = Lexer_top.token (lexbuf ~file ~line lines) in
   let vpad, lines = vpad_of_lines lines in

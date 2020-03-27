@@ -14,34 +14,103 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+(** Code blocks headers. *)
+
+module Header : sig
+  type t = Shell | OCaml | Other of string
+
+  val pp : Format.formatter -> t -> unit
+
+  val of_string : string -> t option
+end
+
+(** Block environments. *)
+
+module Env : sig
+  type t = Default | User_defined of string
+
+  val name : t -> string
+end
+
 (** Code blocks. *)
 
-type cram_value = { pad : int; tests : Cram.t list }
+type cram_value = { non_det : Label.non_det option }
+
+type ocaml_value = {
+  env : Env.t;
+      (** [env] is the name given to the environment where tests are run. *)
+  non_det : Label.non_det option;
+  errors : Output.t list;
+}
+
+type toplevel_value = {
+  env : Env.t;
+      (** [env] is the name given to the environment where tests are run. *)
+  non_det : Label.non_det option;
+}
+
+type include_ocaml_file = {
+  part_included : string option;
+      (** [part_included] is the part of the file to synchronize with.
+          If lines is not specified synchronize the whole file. *)
+}
+
+type include_other_file = { header : Header.t option }
+
+type include_file_kind =
+  | Fk_ocaml of include_ocaml_file
+  | Fk_other of include_other_file
+
+type include_value = {
+  file_included : string;
+      (** [file_included] is the name of the file to synchronize with. *)
+  file_kind : include_file_kind;
+}
+
+type raw_value = { header : Header.t option }
 
 (** The type for block values. *)
 type value =
-  | Raw
-  | OCaml
-  | Error of string list
+  | Raw of raw_value
+  | OCaml of ocaml_value
   | Cram of cram_value
-  | Toplevel of Toplevel.t list
+  | Toplevel of toplevel_value
+  | Include of include_value
 
 type section = int * string
 (** The type for sections. *)
 
 type t = {
   line : int;
+  column : int;
   file : string;
   section : section option;
+  dir : string option;
+  source_trees : string list;
+  required_packages : string list;
   labels : Label.t list;
-  header : string option;
+  legacy_labels : bool;
   contents : string list;
+  skip : bool;
+  version_enabled : bool;
+      (** Whether the current OCaml version complies with the block's version. *)
+  set_variables : (string * string) list;
+  unset_variables : string list;
   value : value;
 }
 (** The type for supported code blocks. *)
 
-val empty : t
-(** [empty] is the empty block. *)
+val mk :
+  line:int ->
+  file:string ->
+  column:int ->
+  section:section option ->
+  labels:Label.t list ->
+  legacy_labels:bool ->
+  header:Header.t option ->
+  contents:string list ->
+  errors:Output.t list ->
+  (t, [ `Msg of string ]) Result.result
 
 (** {2 Printers} *)
 
@@ -49,12 +118,12 @@ val dump : t Fmt.t
 (** [dump] is the printer for dumping code blocks. Useful for debugging. *)
 
 val pp_header : ?syntax:Syntax.t -> t Fmt.t
-(** [pp_header] pretty-prints block headers. *)
+(** [pp_header] pretty-prints full block headers with the labels. *)
 
 val pp_contents : ?syntax:Syntax.t -> t Fmt.t
 (** [pp_contents] pretty-prints block contents. *)
 
-val pp_footer : ?syntax:Syntax.t -> unit Fmt.t
+val pp_footer : ?syntax:Syntax.t -> t Fmt.t
 (** [pp_footer] pretty-prints block footer. *)
 
 val pp : ?syntax:Syntax.t -> t Fmt.t
@@ -66,8 +135,8 @@ val pp_line_directive : (string * int) Fmt.t
 
 (** {2 Accessors} *)
 
-val mode : t -> [ `Non_det of Label.non_det | `Normal ]
-(** [mode t] is [t]'s mode. *)
+val non_det : t -> Label.non_det option
+(** Whether a block's command or output is non-deterministic. *)
 
 val directory : t -> string option
 (** [directory t] is the directory where [t] tests should be run. *)
@@ -78,14 +147,6 @@ val source_trees : t -> string list
 
 val file : t -> string option
 (** [file t] is the name of the file to synchronize [t] with. *)
-
-val part : t -> string option
-(** [part t] is the part of the file to synchronize [t] with.
-    If lines is not specified synchronize the whole file. *)
-
-val environment : t -> string
-(** [environment t] is the name given to the environment where [t] tests
-    are run. *)
 
 val set_variables : t -> (string * string) list
 (** [set_variable t] is the list of environment variable to set and their values *)
@@ -111,23 +172,12 @@ val value : t -> value
 val section : t -> section option
 (** [section t] is [t]'s section. *)
 
-val header : t -> string option
-(** [header t] is [t]'s header. *)
-
-val executable_contents : t -> string list
+val executable_contents : syntax:Syntax.t -> t -> string list
 (** [executable_contents t] is either [t]'s contents if [t] is a raw
    or a cram block, or [t]'s commands if [t] is a toplevel fragments
    (e.g. the phrase result is discarded). *)
 
-val version_enabled : t -> bool
-(** [version_supported t] if the current OCaml version complies with [t]'s
-    version. *)
-
-(** {2 Evaluation} *)
-
-val eval : t -> t
-(** [eval t] is the same as [t] but with it's value replaced by either
-   [Cram] or [Toplevel] blocks, depending on [t]'s header. *)
+val is_active : ?section:string -> t -> bool
 
 (** {2 Parsers} *)
 

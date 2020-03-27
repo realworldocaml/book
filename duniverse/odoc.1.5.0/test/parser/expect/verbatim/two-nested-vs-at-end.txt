@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 7)) (verbatim vvv}))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 5-7:\
+   \n'v}' should be preceded by whitespace.")))

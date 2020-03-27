@@ -1,2 +1,1 @@
-Error in the code block in test-case.md at line 4:
-Parts are not supported for non-OCaml code blocks.
+File "test-case.md", line 3, character 36: invalid code block: `part` is not supported for non-OCaml code blocks.

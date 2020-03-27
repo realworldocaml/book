@@ -18,7 +18,7 @@ let syntax =
   in
   let syntax = (parse, Mdx.Syntax.pp) in
   let doc =
-    "Which syntax to use. Either 'markdown' (also 'normal') or 'cram'."
+    "Which syntax to use. Either 'markdown' (also 'normal'), 'cram', or 'mli'."
   in
   named
     (fun x -> `Syntax x)
@@ -47,6 +47,12 @@ let silent_eval =
   named
     (fun x -> `Silent_eval x)
     Arg.(value & flag & info [ "silent-eval" ] ~doc)
+
+let record_backtrace =
+  let doc = "Print backtraces when evaluating toplevel phrases." in
+  named
+    (fun x -> `Record_backtrace x)
+    Arg.(value & flag & info [ "record-backtrace" ] ~doc)
 
 let silent =
   let doc = "Do not show any (phrases and findlib directives) results." in

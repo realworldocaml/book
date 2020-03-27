@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 19))
+    (paragraph (((f.ml (1 0) (1 19)) (code_span .constructor-Foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-2:\
+   \nIdentifier in reference should not be empty.")))

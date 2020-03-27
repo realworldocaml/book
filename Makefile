@@ -18,14 +18,13 @@ fmt \
 lambdasoup \
 mdx \
 ocaml-compiler-libs \
+ocaml-print-intf \
 ppx_jane \
 re \
 sexp_pretty \
 textwrap \
+tls \
 yojson
-
-# these do not exist in opam-repository yet
-DUNIVERSE_SPECIFIC_DEPS = tls-lwt
 
 all:
 	@dune build @site @pdf

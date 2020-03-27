@@ -128,6 +128,14 @@ module Warnings = struct
 #endif
 end
 
+module Lexer = struct
+  include Lexer
+
+#if OCAML_VERSION < (4, 3, 0)
+  let handle_docstrings = ref true
+#endif
+end
+
 #if OCAML_VERSION < (4, 4, 0)
 module Env = struct
   include Env

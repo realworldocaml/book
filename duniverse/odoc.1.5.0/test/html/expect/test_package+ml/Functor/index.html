@@ -1,0 +1,45 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title>
+   Functor (test_package+ml.Functor)
+  </title>
+  <link rel="stylesheet" href="../../odoc.css">
+  <meta charset="utf-8">
+  <meta name="generator" content="odoc %%VERSION%%">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <script src="../../highlight.pack.js"></script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+ </head>
+ <body>
+  <div class="content">
+   <header>
+    <nav>
+     <a href="../index.html">Up</a> – <a href="../index.html">test_package+ml</a> » Functor
+    </nav>
+    <h1>
+     Module <code>Functor</code>
+    </h1>
+   </header>
+   <div class="spec module-type" id="module-type-S">
+    <a href="#module-type-S" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S/index.html">S</a> = <span class="keyword">sig</span> ... <span class="keyword">end</span></code>
+   </div>
+   <div class="spec module-type" id="module-type-S1">
+    <a href="#module-type-S1" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S1/index.html">S1</a> = <span class="keyword">functor</span> (<a href="module-type-S1/argument-1-_/index.html">_</a> : <a href="index.html#module-type-S">S</a>) <span>-&gt;</span> <a href="index.html#module-type-S">S</a></code>
+   </div>
+   <div class="spec module" id="module-F1">
+    <a href="#module-F1" class="anchor"></a><code><span class="keyword">module</span> <a href="F1/index.html">F1</a> : <span class="keyword">functor</span> (<a href="F1/argument-1-Arg/index.html">Arg</a> : <a href="index.html#module-type-S">S</a>) <span>-&gt;</span> <a href="index.html#module-type-S">S</a></code>
+   </div>
+   <div class="spec module" id="module-F2">
+    <a href="#module-F2" class="anchor"></a><code><span class="keyword">module</span> <a href="F2/index.html">F2</a> : <span class="keyword">functor</span> (<a href="F2/argument-1-Arg/index.html">Arg</a> : <a href="index.html#module-type-S">S</a>) <span>-&gt;</span> <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="F2/index.html#type-t">t</a> = <a href="F2/argument-1-Arg/index.html#type-t">Arg.t</a></code>
+   </div>
+   <div class="spec module" id="module-F3">
+    <a href="#module-F3" class="anchor"></a><code><span class="keyword">module</span> <a href="F3/index.html">F3</a> : <span class="keyword">functor</span> (<a href="F3/argument-1-Arg/index.html">Arg</a> : <a href="index.html#module-type-S">S</a>) <span>-&gt;</span> <span class="keyword">sig</span> ... <span class="keyword">end</span></code>
+   </div>
+   <div class="spec module" id="module-F4">
+    <a href="#module-F4" class="anchor"></a><code><span class="keyword">module</span> <a href="F4/index.html">F4</a> : <span class="keyword">functor</span> (<a href="F4/argument-1-Arg/index.html">Arg</a> : <a href="index.html#module-type-S">S</a>) <span>-&gt;</span> <a href="index.html#module-type-S">S</a></code>
+   </div>
+  </div>
+ </body>
+</html>
