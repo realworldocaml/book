@@ -1,0 +1,13 @@
+(executables
+ (libraries atd)
+ (flags
+  (:include %{workspace_root}/ocamlflags.sexp))
+ (names unit_tests))
+
+(alias
+ (name runtest)
+ (package atd)
+ (deps
+  (:< unit_tests.exe))
+ (action
+  (run %{<})))

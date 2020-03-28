@@ -1,0 +1,7 @@
+(ocamllex doc_lexer)
+
+(library
+ (name atdgen_emit)
+ (flags
+  (:include %{workspace_root}/ocamlflags.sexp))
+ (libraries atd yojson))
