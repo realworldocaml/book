@@ -1,3 +1,0 @@
-lib/compat.ml
-lib/migrate_ast.ml
-lib/top/compat_top.ml

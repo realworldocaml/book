@@ -1,2 +1,0 @@
-((output (((f.ml (1 0) (1 2)) (paragraph (((f.ml (1 0) (1 2)) (word -@)))))))
- (warnings ()))
