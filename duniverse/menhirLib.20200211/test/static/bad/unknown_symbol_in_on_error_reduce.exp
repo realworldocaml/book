@@ -1,0 +1,2 @@
+File "unknown_symbol_in_on_error_reduce.mly", line 3, characters 17-20:
+Error: FOO is undefined.

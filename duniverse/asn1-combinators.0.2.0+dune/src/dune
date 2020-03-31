@@ -1,5 +1,0 @@
-(library
-  (name asn1_combinators)
-  (public_name asn1-combinators)
-  (libraries cstruct zarith bigarray-compat ptime)
-  (wrapped false))

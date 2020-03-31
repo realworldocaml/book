@@ -1,0 +1,17 @@
+%start a
+%token A
+%type <int> a
+%%
+
+a:
+  _1 = A _2 = c
+    {let _1 =              () in
+()}
+
+c:
+  _1 = A
+    {     ()}
+
+%%
+
+

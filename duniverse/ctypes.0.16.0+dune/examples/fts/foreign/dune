@@ -1,3 +1,0 @@
-(executables
- (names fts_cmd)
- (libraries ctypes-foreign.threaded))

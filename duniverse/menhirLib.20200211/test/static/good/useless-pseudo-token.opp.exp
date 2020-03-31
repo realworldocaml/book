@@ -1,0 +1,14 @@
+%start main
+%token BAR
+%token FOO
+%left zorro
+%type <unit> main
+%%
+
+main:
+  _1 = FOO _2 = BAR %prec zorro
+    {          ()}
+
+%%
+
+

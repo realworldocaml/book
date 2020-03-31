@@ -1,4 +1,0 @@
-(test
- (name portable)
- (package mirage-clock-unix)
- (libraries mirage-clock-unix))

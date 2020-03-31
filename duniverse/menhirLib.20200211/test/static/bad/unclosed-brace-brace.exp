@@ -1,0 +1,2 @@
+File "unclosed-brace-brace.mly", line 3, characters 9-9:
+Error: unbalanced opening brace.

@@ -1,0 +1,21 @@
+(rule
+ (with-stdout-to
+  ctypes_primitives.ml
+  (run ../configure/gen_c_primitives.exe)))
+
+(library
+ (name ctypes)
+ (public_name ctypes)
+ (wrapped false)
+ (libraries bigarray bytes integers)
+ (modules_without_implementation ctypes_types)
+ (preprocess
+  (pps bisect_ppx --conditional))
+ (install_c_headers ctypes_raw_pointer ctypes_primitives
+   ctypes_cstubs_internals ctypes_managed_buffer_stubs
+   ctypes_complex_compatibility cstubs_internals ctypes_ldouble_stubs
+   ctypes_complex_stubs ctypes_type_info_stubs)
+ (foreign_stubs
+  (language c)
+  (names complex_stubs ctypes_bigarrays ctypes_roots ldouble_stubs
+    managed_buffer_stubs posix_types_stubs raw_pointer_stubs type_info_stubs)))

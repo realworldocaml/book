@@ -1,0 +1,6 @@
+true : bin_annot, package(bytes), safe_string, package(astring), \
+       package(result)
+
+<src> : include
+<src/fpath_top*> : package(compiler-libs.toplevel)
+<test> : include

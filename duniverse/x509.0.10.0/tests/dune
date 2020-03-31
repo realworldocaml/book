@@ -1,0 +1,4 @@
+(test
+ (name tests)
+ (deps (source_tree regression) (source_tree testcertificates) (source_tree crl) (source_tree csr))
+ (libraries x509 alcotest cstruct-unix ptime.clock.os mirage-crypto-pk mirage-crypto-rng.unix))

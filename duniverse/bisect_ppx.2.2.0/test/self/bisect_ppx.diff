@@ -1,0 +1,39 @@
+diff -ru src/common/dune _self/bisect_ppx/src/common/dune
+--- src/common/dune
++++ _self/bisect_ppx/src/common/dune
+@@ -1,4 +1,5 @@
+ (library
+  (name bisect_common)
+  (public_name bisect_ppx.common)
++ (preprocess (pps meta_bisect_ppx))
+  (synopsis "Bisect_ppx internal functions (internal)"))
+diff -ru src/ppx/dune _self/bisect_ppx/src/ppx/dune
+--- src/ppx/dune
++++ _self/bisect_ppx/src/ppx/dune
+@@ -7,5 +7,5 @@
+  (kind ppx_rewriter)
+  (synopsis "Code coverage for OCaml")
+  (ppx_runtime_libraries bisect_ppx.runtime)
+- (preprocess (pps ppx_tools_versioned.metaquot_410))
++ (preprocess (pps meta_bisect_ppx ppx_tools_versioned.metaquot_410))
+  (libraries bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
+diff -ru src/report/dune _self/bisect_ppx/src/report/dune
+--- src/report/dune
++++ _self/bisect_ppx/src/report/dune
+@@ -2,6 +2,7 @@
+  (name report)
+  (public_name bisect-ppx-report)
+  (package bisect_ppx)
++ (preprocess (pps meta_bisect_ppx))
+  (libraries bisect_ppx.common cmdliner unix))
+ 
+ (rule
+diff -ru src/runtime/native/dune _self/bisect_ppx/src/runtime/native/dune
+--- src/runtime/native/dune
++++ _self/bisect_ppx/src/runtime/native/dune
+@@ -2,4 +2,5 @@
+  (name bisect)
+  (public_name bisect_ppx.runtime)
+  (synopsis "Bisect_ppx runtime library (internal)")
++ (preprocess (pps meta_bisect_ppx))
+  (libraries bisect_ppx.common unix))

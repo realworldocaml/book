@@ -1,0 +1,8 @@
+{
+  "name": "bisect_ppx",
+  "namespace": "Bisect",
+  "sources": [
+    "src/common",
+    "src/runtime/bucklescript"
+  ]
+}

@@ -1,0 +1,5 @@
+%token FOO
+%token FOO
+
+%%
+

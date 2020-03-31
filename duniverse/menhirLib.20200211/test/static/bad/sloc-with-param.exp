@@ -1,0 +1,2 @@
+File "sloc-with-param.mly", line 4, characters 20-28:
+Error: $sloc does not take a parameter.

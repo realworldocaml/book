@@ -1,0 +1,6 @@
+%%
+
+let tired :=
+  {}
+
+%token TIRED

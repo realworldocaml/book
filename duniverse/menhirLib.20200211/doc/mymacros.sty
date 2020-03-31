@@ -1,0 +1,30 @@
+%; whizzy -macros main.tex
+
+% References to sections, lemmas, theorems, etc.
+\newcommand{\sref}[1]{\S\ref{#1}}
+\newcommand{\tref}[1]{Theorem~\ref{#1}}
+\newcommand{\lemref}[1]{Lemma~\ref{#1}}
+\newcommand{\dref}[1]{Definition~\ref{#1}}
+\newcommand{\eref}[1]{Example~\ref{#1}}
+\newcommand{\fref}[1]{Figure~\ref{#1}}
+\newcommand{\aref}[1]{Appendix~\ref{#1}}
+
+% Abbreviations.
+\def\etal.{\emph{et al.}}
+
+% Define \citeyear in addition to \cite, if not already defined.
+\@ifundefined{citeyear}{
+  \@ifundefined{shortcite}{
+    \let\citeyear\cite
+  }{
+    \let\citeyear\shortcite
+  }
+}{}
+
+% Lambda-calculus syntax.
+\newcommand{\ekw}[1]{\mathsf{#1}}
+\newcommand{\expr}{e}
+\newcommand{\evar}{x}
+\newcommand{\eabs}[2]{\lambda#1.#2}
+\newcommand{\eapp}[2]{#1\;#2}
+\newcommand{\elet}[3]{\ekw{let}\;#1=#2\;\ekw{in}\;#3}

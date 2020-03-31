@@ -1,0 +1,4 @@
+(executable
+  (name ocaml_print_intf)
+  (public_name ocaml-print-intf)
+  (libraries bos compiler-libs.common dune-build-info))

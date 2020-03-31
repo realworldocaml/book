@@ -1,0 +1,20 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  global:
+    - PACKAGE="x509"
+matrix:
+  include:
+  - os: linux
+    env: OCAML_VERSION=4.07
+  - os: linux
+    env: OCAML_VERSION=4.08
+  - os: linux
+    env: OCAML_VERSION=4.09
+  - os: linux
+    env: OCAML_VERSION=4.10
+  - os: osx
+    env: OCAML_VERSION=4.08
+notifications:
+  email: false

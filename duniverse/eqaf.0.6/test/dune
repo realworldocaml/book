@@ -1,0 +1,18 @@
+(executable
+ (name test)
+ (libraries alcotest eqaf))
+
+(alias
+ (name runtest)
+ (deps (:test test.exe))
+ (action (run %{test} --color=always)))
+
+(rule
+ (targets test_branch)
+ (deps build.sh (:src asm_sleep.S time.c test_branch.ml))
+ (action (run ./build.sh)))
+
+(alias
+ (name runtest)
+ (deps (:test test_branch))
+ (action (run %{test})))

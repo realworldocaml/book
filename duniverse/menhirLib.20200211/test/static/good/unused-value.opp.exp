@@ -1,0 +1,13 @@
+%start main
+%token BAR
+%token FOO
+%type <unit> main
+%%
+
+main:
+  f = FOO b = BAR
+    {    ( () )}
+
+%%
+
+

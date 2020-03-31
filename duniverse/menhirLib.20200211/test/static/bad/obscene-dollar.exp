@@ -1,0 +1,2 @@
+File "obscene-dollar.mly", line 7, characters 9-11:
+Error: please do not say: $1. Instead, say: x.
