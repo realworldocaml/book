@@ -180,9 +180,20 @@ The module signature for `ncurses.mli` looks much like a normal OCaml
 signature. You can infer it directly from the `ncurses.ml` by running a
 special build target:
 
-```sh dir=examples/ffi/ncurses,skip
-$ corebuild -pkg ctypes-foreign ncurses.inferred.mli
-$ cp _build/ncurses.inferred.mli .
+```sh dir=examples/ffi/ncurses
+$ ocaml-print-intf ncurses.ml
+type window
+val window : window Ctypes.typ
+val initscr : unit -> window
+val endwin : unit -> unit
+val refresh : unit -> unit
+val wrefresh : window -> unit
+val newwin : int -> int -> int -> int -> window
+val mvwaddch : window -> int -> int -> char -> unit
+val addstr : string -> unit
+val mvwaddstr : window -> int -> int -> string -> unit
+val box : window -> char -> char -> unit
+val cbreak : unit -> int
 ```
 
 The `inferred.mli` target instructs the compiler to generate the default
@@ -999,7 +1010,7 @@ and also build the inferred interface so we can examine it more closely:
 
 
 
-```sh dir=examples/ffi/qsort,skip
+```sh dir=examples/ffi/qsort
 $ dune build qsort.exe
 $ cat input.txt
 2
@@ -1011,10 +1022,17 @@ $ ./_build/default/qsort.exe < input.txt
 2
 3
 4
-$ corebuild -pkg ctypes-foreign qsort.inferred.mli
-ocamlfind ocamldep -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' -modules qsort.ml > qsort.ml.depends
-ocamlfind ocamlc -i -thread -short-paths -package ctypes-foreign -package core -ppx 'ppx-jane -as-ppx' qsort.ml > qsort.inferred.mli
-$ cp _build/qsort.inferred.mli qsort.mli
+$ ocaml-print-intf qsort.ml
+val compare_t :
+  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) Ctypes_static.fn
+val qsort :
+  unit Ctypes_static.ptr ->
+  PosixTypes.size_t ->
+  PosixTypes.size_t ->
+  (unit Ctypes_static.ptr -> unit Ctypes_static.ptr -> int) -> unit
+val qsort' :
+  ('a -> 'a -> int) -> 'a Ctypes_static.carray -> 'a Ctypes_static.carray
+val sort_stdin : unit -> unit
 ```
 
 The inferred interface shows us the types of the raw `qsort` binding and also

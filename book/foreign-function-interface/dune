@@ -5,6 +5,7 @@
   ctypes
   ctypes-foreign
   mdx
+  ocaml-print-intf
   ppx_jane)
  (preludes prelude.ml))
 
