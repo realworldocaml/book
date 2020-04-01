@@ -40,6 +40,24 @@ let () =
           Location.raise_errorf ~loc:id.loc
             "invalid 'inline-test' cookie (%s), expected one of: drop, drop_with_deadcode"
             s)
+;;
+
+(* Same as above, but for the standard one passed by dune *)
+let () =
+  Driver.Cookies.add_simple_handler "inline_tests"
+    Ast_pattern.(estring __')
+    ~f:(function
+      | None -> ()
+      | Some id ->
+        match id.txt with
+        | "enabled" -> maybe_drop_mode := Keep
+        | "disabled" -> maybe_drop_mode := Drop
+        | "ignored" -> maybe_drop_mode := Drop_with_deadcode
+        | s ->
+          Location.raise_errorf ~loc:id.loc
+            "invalid 'inline_tests' cookie (%s), expected one of: enabled, disabled or ignored"
+            s)
+;;
 
 let maybe_drop loc code =
   match !maybe_drop_mode with
