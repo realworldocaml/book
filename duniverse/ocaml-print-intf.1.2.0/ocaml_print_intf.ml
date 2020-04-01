@@ -20,8 +20,9 @@ let rec root_from_verbose_output = function
     prerr_endline
       "Error: could not retrieve workspace root from dune build output";
     exit 1
+  | "Workspace root:"::root::_ -> root
   | hd::tl ->
-    match String.split_on_char ' ' (String.trim hd) with
+    match String.split_on_char ' ' hd with
     | ["Workspace"; "root:"; root] -> root
     | _ -> root_from_verbose_output tl
 
