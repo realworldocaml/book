@@ -439,6 +439,8 @@ it is standard practice to name the type associated with the module
 `t`. Using this style we would write:
 
 ```ocaml env=main2
+# #require "ppx_jane"
+# #require "fieldslib"
 # module Log_entry = struct
     type t =
       { session_id: string;

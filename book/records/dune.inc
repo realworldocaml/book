@@ -3,6 +3,7 @@
  (deps
   (:x README.md)
   (package core)
+  (package fieldslib)
   (package mdx)
   (package ppx_jane)
   (package re)
@@ -18,6 +19,7 @@
  (deps
   (:x README.md)
   (package core)
+  (package fieldslib)
   (package mdx)
   (package ppx_jane)
   (package re)
