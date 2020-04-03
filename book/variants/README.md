@@ -501,7 +501,7 @@ correctly. Otherwise, we'd need to qualify them explicitly.
 # let messages_for_user user (messages : (Common.t * details) list) =
     let (user_messages,_) =
       List.fold messages ~init:([],Set.empty (module String))
-        ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
+        ~f:(fun (messages, user_sessions as acc) ((common, details) as message) ->
           match details with
           | Logon m ->
             if String.(=) m.user user then
