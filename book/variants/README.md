@@ -377,6 +377,38 @@ types as conjunctions. Variants, on the other hand, are disjunctions, letting
 you represent multiple possibilities, as in the following example:
 
 ```ocaml env=logger
+# module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time_ns.t;
+        user: string;
+        credentials: string;
+      }
+    end
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
+# module Heartbeat = struct
+  type t =
+    { session_id : string;
+      time: Time_ns.t;
+      status_message: string;
+    }
+  end
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
 # type client_message = | Logon of Logon.t
                         | Heartbeat of Heartbeat.t
                         | Log_entry of Log_entry.t
