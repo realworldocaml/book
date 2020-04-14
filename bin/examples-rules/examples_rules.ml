@@ -43,7 +43,7 @@ let print_rule ~dir_name ~path (config : Config.t) =
  (deps
   (source_tree %s)%s)
  (action
-  (run dune build @all --root %s)))
+  (run dune build @all @runtest --root %s)))
 
 (alias
  (name runtest)
