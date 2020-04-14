@@ -7,7 +7,7 @@
      ((name ocaml-print-intf)) ((name ppx_jane)) ((name re)) ((name rwo))
      ((name sexp_pretty)) ((name textwrap)) ((name tls)) ((name yojson))))
    (excludes (((name rwo)))) (pins ()) (pull_mode Source) (remotes ())
-   (branch master)))
+   (ocaml_compilers (4.10)) (branch master)))
  (deps
   ((opamverse ())
    (duniverse
@@ -253,11 +253,10 @@
       (upstream https://github.com/ocurrent/ocaml-version.git)
       (ref ((t v2.4.0) (commit 1eb91307b47cb46508273d4f63faa95a8173a411)))
       (provided_packages (((name ocaml-version) (version (2.4.0))))))
-     ((dir ocplib-endian.1.0+dune)
-      (upstream git://github.com/dune-universe/ocplib-endian.git)
-      (ref
-       ((t duniverse-1.0) (commit ebd4740799e0f9d018e75ede55c777335a564080)))
-      (provided_packages (((name ocplib-endian) (version (1.0+dune))))))
+     ((dir ocplib-endian.1.1)
+      (upstream https://github.com/OCamlPro/ocplib-endian.git)
+      (ref ((t 1.1) (commit 6ee41bb7f8f2bef103bcf4e05ace57597c0d2316)))
+      (provided_packages (((name ocplib-endian) (version (1.1))))))
      ((dir octavius.1.2.2)
       (upstream https://github.com/ocaml-doc/octavius.git)
       (ref ((t v1.2.2) (commit 32223e1c69aae188643203c0f99b581f7576025d)))

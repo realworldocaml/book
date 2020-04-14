@@ -78,31 +78,47 @@ module type EndianBytesSig = sig
 
 end
 
-let get_char (s:Bytes.t) off =
-  Bytes.get s off
-let set_char (s:Bytes.t) off v =
-  Bytes.set s off v
-let unsafe_get_char (s:Bytes.t) off =
-  Bytes.unsafe_get s off
-let unsafe_set_char (s:Bytes.t) off v =
-  Bytes.unsafe_set s off v
+module BigEndian : sig
+  (** Functions reading according to Big Endian byte order *)
 
-#include "common.ml"
+  include EndianBytesSig
 
-external unsafe_get_16 : Bytes.t -> int -> int = "%caml_string_get16u"
-external unsafe_get_32 : Bytes.t -> int -> int32 = "%caml_string_get32u"
-external unsafe_get_64 : Bytes.t -> int -> int64 = "%caml_string_get64u"
+end
 
-external unsafe_set_16 : Bytes.t -> int -> int -> unit = "%caml_string_set16u"
-external unsafe_set_32 : Bytes.t -> int -> int32 -> unit = "%caml_string_set32u"
-external unsafe_set_64 : Bytes.t -> int -> int64 -> unit = "%caml_string_set64u"
+module BigEndian_unsafe : sig
+  (** Functions reading according to Big Endian byte order without
+  checking for overflow *)
 
-external get_16 : Bytes.t -> int -> int = "%caml_string_get16"
-external get_32 : Bytes.t -> int -> int32 = "%caml_string_get32"
-external get_64 : Bytes.t -> int -> int64 = "%caml_string_get64"
+  include EndianBytesSig
 
-external set_16 : Bytes.t -> int -> int -> unit = "%caml_string_set16"
-external set_32 : Bytes.t -> int -> int32 -> unit = "%caml_string_set32"
-external set_64 : Bytes.t -> int -> int64 -> unit = "%caml_string_set64"
+end
 
-#include "common_401.ml"
+module LittleEndian : sig
+  (** Functions reading according to Little Endian byte order *)
+
+  include EndianBytesSig
+
+end
+
+module LittleEndian_unsafe : sig
+  (** Functions reading according to Big Endian byte order without
+  checking for overflow *)
+
+  include EndianBytesSig
+
+end
+
+module NativeEndian : sig
+  (** Functions reading according to machine endianness *)
+
+  include EndianBytesSig
+
+end
+
+module NativeEndian_unsafe : sig
+  (** Functions reading according to machine endianness without
+  checking for overflow *)
+
+  include EndianBytesSig
+
+end
