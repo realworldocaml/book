@@ -527,7 +527,7 @@ from the string type.
 Here's how you might create such an abstract type, within a submodule:
 [abstract types]{.idx}
 
-```ocaml file=examples/abstract_username.ml
+```ocaml file=examples/correct/abstract-username/abstract_username.ml
 open Base
 
 module Username : sig

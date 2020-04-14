@@ -1,5 +1,17 @@
 
 (rule
+ (alias abstract-username)
+ (deps
+  (source_tree ./correct/abstract-username)
+  (package base))
+ (action
+  (run dune build @all --root ./correct/abstract-username)))
+
+(alias
+ (name runtest)
+ (deps (alias abstract-username)))
+
+(rule
  (alias ext-list)
  (deps
   (source_tree ./correct/ext-list)
