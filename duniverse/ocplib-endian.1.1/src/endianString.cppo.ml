@@ -89,16 +89,30 @@ external unsafe_get_16 : string -> int -> int = "%caml_string_get16u"
 external unsafe_get_32 : string -> int -> int32 = "%caml_string_get32u"
 external unsafe_get_64 : string -> int -> int64 = "%caml_string_get64u"
 
-external unsafe_set_16 : Bytes.t -> int -> int -> unit = "%caml_string_set16u"
-external unsafe_set_32 : Bytes.t -> int -> int32 -> unit = "%caml_string_set32u"
-external unsafe_set_64 : Bytes.t -> int -> int64 -> unit = "%caml_string_set64u"
-
 external get_16 : string -> int -> int = "%caml_string_get16"
 external get_32 : string -> int -> int32 = "%caml_string_get32"
 external get_64 : string -> int -> int64 = "%caml_string_get64"
 
+#if OCAML_VERSION < (4, 07, 0)
+
+external unsafe_set_16 : Bytes.t -> int -> int -> unit = "%caml_string_set16u"
+external unsafe_set_32 : Bytes.t -> int -> int32 -> unit = "%caml_string_set32u"
+external unsafe_set_64 : Bytes.t -> int -> int64 -> unit = "%caml_string_set64u"
+
 external set_16 : Bytes.t -> int -> int -> unit = "%caml_string_set16"
 external set_32 : Bytes.t -> int -> int32 -> unit = "%caml_string_set32"
 external set_64 : Bytes.t -> int -> int64 -> unit = "%caml_string_set64"
+
+#else
+
+external unsafe_set_16 : Bytes.t -> int -> int -> unit = "%caml_bytes_set16u"
+external unsafe_set_32 : Bytes.t -> int -> int32 -> unit = "%caml_bytes_set32u"
+external unsafe_set_64 : Bytes.t -> int -> int64 -> unit = "%caml_bytes_set64u"
+
+external set_16 : Bytes.t -> int -> int -> unit = "%caml_bytes_set16"
+external set_32 : Bytes.t -> int -> int32 -> unit = "%caml_bytes_set32"
+external set_64 : Bytes.t -> int -> int64 -> unit = "%caml_bytes_set64"
+
+#endif
 
 #include "common_401.ml"

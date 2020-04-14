@@ -27,9 +27,9 @@ let () =
   Test_bytes.test1 ();
   let stat1 = Gc.quick_stat () in
   Test_bytes.test2 ();
-  if Sys.word_size = 64 then Test_string.test_64 ();
+  if Sys.word_size = 64 then Test_bytes.test_64 ();
   let stat2 = Gc.quick_stat () in
-  if Sys.word_size = 32 then Test_string.test_64 ();
+  if Sys.word_size = 32 then Test_bytes.test_64 ();
   let alloc3 = stat2.Gc.minor_words -. stat1.Gc.minor_words -. allocdiff in
   Printf.printf "bytes: allocated words %f\n%!" alloc3;
   (* we cannot ensure that there are no allocations only with the

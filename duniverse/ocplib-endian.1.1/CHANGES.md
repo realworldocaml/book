@@ -1,15 +1,18 @@
-1.2
+1.1
 ---
 
+* Add the OPAM support for building the documentation
+* Use the correct bytes_set primitive for OCaml >= 4.07.0
+  (issue #21 fixed in #22 @hhugo)
+* Fix tests on big endian architectures
+  (issue #20 reported by @TC01 and @olafhering)
+* Fix documentation typo (@bobot)
+* Change cppo to a build dependency (@TheLortex)
 * Port to Dune from jbuilder (@avsm)
 * Upgrade opam metadata to 2.0 format (@avsm)
 * Remove code for OCaml <4.01 support, as the minimum
   supported version is now OCaml 4.02+ (@avsm)
-
-1.1
----------------
-
-* Build with jbuilder
+* Build with jbuilder (unreleased, superseded by dune)
 
 1.0
 ---------------

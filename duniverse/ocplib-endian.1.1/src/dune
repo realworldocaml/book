@@ -11,7 +11,7 @@
   common.ml
   common_401.ml)
  (action
-  (run %{bin:cppo} %{<} -o %{targets})))
+  (run %{bin:cppo} -V OCAML:%{ocaml_version} %{<} -o %{targets})))
 
 (rule
  (targets endianBytes.mli)
@@ -27,7 +27,7 @@
   common.ml
   common_401.ml)
  (action
-  (run %{bin:cppo} %{<} -o %{targets})))
+  (run %{bin:cppo} -V OCAML:%{ocaml_version} %{<} -o %{targets})))
 
 (rule
  (targets endianBigstring.mli)
@@ -72,4 +72,4 @@
  (wrapped false)
  (modules endianBigstring)
  (ocamlopt_flags (:standard -inline 1000))
- (libraries ocplib_endian bigarray-compat bytes))
+ (libraries ocplib_endian bigarray bytes))

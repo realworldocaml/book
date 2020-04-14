@@ -9,3 +9,8 @@ The library implements three modules:
 - [EndianBytes](src/endianBytes.cppo.mli) works directly on bytes, and provides submodules BigEndian and LittleEndian, with their unsafe counter-parts;
 - [EndianBigstring](src/endianBigstring.cppo.mli) works on bigstrings (Bigarrays of chars), and provides submodules BigEndian and LittleEndian, with their unsafe counter-parts;
 
+
+= Hacking =
+
+The tests only pass in dune release profile. The debug mode prevents
+cross module inlining, which prevents unboxing in the tests.
