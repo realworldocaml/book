@@ -107,19 +107,19 @@ module Patt = Make(struct
 
 let () =
   let extensions ctx lifter =
-    [ E.declare "expr" ctx A.(single_expr_payload __)
+    [ E.declare "metaquot.expr" ctx A.(single_expr_payload __)
         (fun ~loc ~path:_ e -> (lifter loc)#expression e)
-    ; E.declare "pat"  ctx A.(ppat __ none)
+    ; E.declare "metaquot.pat"  ctx A.(ppat __ none)
         (fun ~loc ~path:_ p -> (lifter loc)#pattern p)
-    ; E.declare "str"  ctx A.(pstr __)
+    ; E.declare "metaquot.str"  ctx A.(pstr __)
         (fun ~loc ~path:_ s -> (lifter loc)#structure s)
-    ; E.declare "stri"  ctx A.(pstr (__ ^:: nil))
+    ; E.declare "metaquot.stri"  ctx A.(pstr (__ ^:: nil))
         (fun ~loc ~path:_ s -> (lifter loc)#structure_item s)
-    ; E.declare "sig"  ctx A.(psig __)
+    ; E.declare "metaquot.sig"  ctx A.(psig __)
         (fun ~loc ~path:_ s -> (lifter loc)#signature s)
-    ; E.declare "sigi"  ctx A.(psig (__ ^:: nil))
+    ; E.declare "metaquot.sigi"  ctx A.(psig (__ ^:: nil))
         (fun ~loc ~path:_ s -> (lifter loc)#signature_item s)
-    ; E.declare "type"  ctx A.(ptyp __)
+    ; E.declare "metaquot.type"  ctx A.(ptyp __)
         (fun ~loc ~path:_ t -> (lifter loc)#core_type t)
     ]
   in
