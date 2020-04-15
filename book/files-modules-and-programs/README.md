@@ -903,9 +903,9 @@ Error: The implementation counter.ml
          type median = Median of string | Before_and_after of string * string
        is not included in
          type median = Before_and_after of string * string | Median of string
+       Constructors number 1 have different names, Median and Before_and_after.
        File "counter.mli", lines 21-22, characters 0-32: Expected declaration
        File "counter.ml", lines 18-19, characters 0-51: Actual declaration
-       Fields number 1 have different names, Median and Before_and_after.
 [1]
 ```
 

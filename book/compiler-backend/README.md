@@ -59,8 +59,8 @@ $ ocamlc -dlambda -c pattern_monomorphic_large.ml 2>&1
 (setglobal Pattern_monomorphic_large!
   (let
     (test/85 =
-       (function v/86 : int
-         (switch* v/86
+       (function v/87 : int
+         (switch* v/87
           case int 0: 100
           case int 1: 101
           case int 2: 102
@@ -108,7 +108,7 @@ The lambda output for this code is now quite different:
 ```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
 (setglobal Pattern_monomorphic_small!
-  (let (test/83 = (function v/84 : int (if (!= v/84 0) 101 100)))
+  (let (test/83 = (function v/85 : int (if v/85 101 100)))
     (makeblock 0 test/83)))
 ```
 
@@ -135,10 +135,10 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
 (setglobal Pattern_polymorphic!
   (let
     (test/80 =
-       (function v/81 : int
-         (if (!= v/81 3306965)
-           (if (>= v/81 482771474) (if (>= v/81 884917024) 100 102)
-             (if (>= v/81 3457716) 104 103))
+       (function v/82 : int
+         (if (!= v/82 3306965)
+           (if (>= v/82 482771474) (if (>= v/82 884917024) 100 102)
+             (if (>= v/82 3457716) 104 103))
            101)))
     (makeblock 0 test/80)))
 ```
@@ -319,9 +319,6 @@ examples:
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
 	branch L2
 L1:	acc 0
-	push
-	const 0
-	neqint
 	branchifnot L3
 	const 101
 	return 1

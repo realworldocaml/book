@@ -18,6 +18,6 @@
  (description "Scripts and sources to compile the Real World OCaml
 second edition book. See https://realworldocaml.org/")
  (depends
-  (ocaml (and (>= 4.09.0) (< 4.10.0))
+  (ocaml (and (>= 4.10.0) (< 4.11.0))
 )))
 
