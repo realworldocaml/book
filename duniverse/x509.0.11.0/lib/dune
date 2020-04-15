@@ -1,0 +1,9 @@
+(library
+ (name x509)
+ (public_name x509)
+ (private_modules asn_grammars registry authenticator certificate validation
+                  public_key private_key crl distinguished_name algorithm
+                  extension pem signing_request general_name host)
+ (flags (:standard -safe-string))
+ (libraries asn1-combinators rresult fmt ptime cstruct mirage-crypto
+            mirage-crypto-pk gmap domain-name base64 logs))

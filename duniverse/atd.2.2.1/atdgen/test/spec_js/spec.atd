@@ -1,0 +1,44 @@
+type r1 = { r1: string }
+type r2 = { r2: int option }
+type r3 = { ?r3: int option }
+type r4 = { ~r4: bool }
+type r5 = { ~r5: int option }
+type r6 = { ~r6 <ocaml default="42">: int }
+type r7 = { ~r7 <ocaml repr="int64">: int }
+type r8 = { ~r8 <ocaml name="r888">: int list }
+
+type j1 = string list
+type j2 = unit
+type j3 = int list <ocaml repr="array">
+type j4 = int <ocaml repr="char">
+
+type o1 = (string * int) list <json repr="object">
+type o2 = (string * int) list <json repr="object"> <ocaml repr="array">
+
+type t1 = (int * string)
+type t2 = (int * int * <ocaml default="-1"> : int)
+
+type v1 =
+  [ V1
+  | V2 <json name="v22">
+  | V3 of string
+  | V4 of int <json name="v44">
+  | V5 of bool option]
+
+type v1list = v1 list
+
+type v2 =
+  { v2 <json tag_field="kind">: [ A | B of int ]
+  }
+
+type v3 = [ C1 | C2 of bool] <ocaml repr="classic">
+
+type v3list = v3 list
+
+type age = int wrap
+  <ocaml
+    t="[`Age of int]"
+    wrap="fun i -> assert (i < 100 && i > 0); `Age i"
+    unwrap="fun (`Age i) -> max 1 (min i 100)">
+
+type ages = age list

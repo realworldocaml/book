@@ -1,0 +1,100 @@
+
+type label = string
+
+type valid = bool
+
+type labeled =
+  { flag: valid
+  ; lb: label
+  ; count: int
+  }
+
+type point = (int * int * string * unit)
+
+type 'a param =
+  { data: 'a
+  ; nothing: unit
+  }
+
+type 'a param_similar =
+  { data: 'a
+  ; something: int
+  }
+
+type 'a same_pair = ('a * 'a)
+
+type ('a, 'b) pair =
+  { left: 'a
+  ; right: 'b
+  }
+
+
+type 'a pairs = ('a, 'a) pair list
+
+type id = string <ocaml validator="fun path x -> assert false"> wrap
+   <ocaml t="[ `Id of string ]"
+          wrap="fun s -> `Id s"
+          unwrap="function `Id s -> s"
+          validator="fun path x ->
+                       match x with
+                         `Id \"\" -> failwith \"empty\"
+                       | _ -> None">
+
+type 'a simple_var =
+  [ Foo of (int * int)
+  | Bar
+  | Foobar of 'a
+  | Foo_id of id
+  ]
+
+type simple_vars = unit simple_var list
+
+type v1 =
+ [ V1_foo of bool
+ | V2_bar of int
+ ] <ocaml repr="classic">
+
+type v2 =
+ [ V1_foo of int
+ | V2_bar of bool
+ ] <ocaml repr="classic">
+
+type from_module_a <ocaml from="A"> = abstract
+
+type record_json_name =
+  { foo <json name="bar"> : int
+  }
+
+type single_tuple = [ Single_tuple of (int) ]
+
+(*** Test json adapters ***)
+
+type adapted = [
+  | A of a
+  | B of b
+] <json adapter.ocaml="Atdgen_codec_runtime.Json_adapter.Type_field">
+
+type a = {
+  thing: string;
+  other_thing: bool;
+}
+
+type b = {
+  thing: int;
+}
+
+type recurse = {
+  recurse_items: recurse list;
+}
+
+type mutual_recurse1 = {
+  mutual_recurse2: mutual_recurse2;
+}
+
+type mutual_recurse2 = {
+  mutual_recurse1: mutual_recurse1;
+}
+
+type using_object = {
+   f : (string * int) list <json repr="object">;
+ }

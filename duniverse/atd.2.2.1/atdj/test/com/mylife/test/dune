@@ -1,0 +1,18 @@
+
+(rule
+ (targets
+  A.java
+  Atdj.java
+  B.java
+  ComplexRecord.java
+  E.java
+  RecordWithDefaults.java
+  SampleSum.java
+  SimpleRecord.java
+  Util.java
+  package.html)
+ (deps ../../../test.atd)
+ (action
+  (chdir
+   ../../../
+   (run %{bin:atdj} %{deps} -package com.mylife.test))))

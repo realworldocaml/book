@@ -1,0 +1,24 @@
+(executable
+ (name report)
+ (public_name bisect-ppx-report)
+ (package bisect_ppx)
+ (libraries bisect_ppx.common cmdliner unix))
+
+(rule
+ (targets assets.ml)
+ (deps
+  (:css coverage.css)
+  (:js coverage.js)
+  (:hljs ../vendor/highlight.js/highlight.pack.js))
+ (action
+  (with-stdout-to %{targets}
+   (progn
+    (echo "let css = {css|")
+    (cat %{css})
+    (echo "|css}")
+    (echo "let js = {js|")
+    (cat %{js})
+    (echo "|js}")
+    (echo "let highlight_js = {js|")
+    (cat %{hljs})
+    (echo "|js}")))))
