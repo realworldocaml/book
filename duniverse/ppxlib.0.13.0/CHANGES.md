@@ -1,3 +1,22 @@
+0.13.0 (04/15/2020)
+-------------------
+
+- Add 'metaquot.' prefix to disambiguate metaquote extensions (#121,
+  @ceastlund)
+
+- Bump dune language to 1.11 since the cinaps extension requires at
+  least Dune 1.11 (#126, @diml)
+
+0.12.0 (01/07/2020)
+-------------------
+
+- Support for OCaml 4.10 (#109, @xclerc)
+
+0.11.0 (01/07/2020)
+-------------------
+
+- Invariant check on locations (#107, @trefis)
+
 0.10.0 (11/21/2019)
 -------------------
 
