@@ -1,0 +1,22 @@
+
+(rule
+ (targets test.scala)
+ (deps test.atd)
+ (action
+  (run %{bin:atds} %{deps} -package com.mylife.test -o test.scala)))
+
+(rule
+ (alias runtest)
+ (package atds)
+ (action (diff test.expected.scala test.scala)))
+
+(rule
+ (alias runtest)
+ (package atds)
+ (deps
+  AtdsTest.scala
+  argonaut_2.11-6.2.2.jar
+  argonaut_2.12-6.2.2.jar
+  junit-4.8.2.jar
+  test.scala)
+ (action (run ./run_test.sh)))

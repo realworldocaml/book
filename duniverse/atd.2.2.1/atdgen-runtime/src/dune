@@ -1,0 +1,4 @@
+(library
+ (name atdgen_runtime)
+ (public_name atdgen-runtime)
+ (libraries biniou yojson))

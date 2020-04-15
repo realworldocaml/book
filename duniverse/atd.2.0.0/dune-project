@@ -1,3 +1,0 @@
-(lang dune 1.0)
-(name atd)
-(using menhir 2.1)
