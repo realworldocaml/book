@@ -11,7 +11,7 @@ homepage: "https://github.com/realworldocaml/book"
 bug-reports: "https://github.com/realworldocaml/book/issues"
 depends: [
   "dune" {>= "2.4"}
-  "ocaml" {>= "4.09.0" & < "4.10.0"}
+  "ocaml" {>= "4.10.0" & < "4.11.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}
