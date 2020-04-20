@@ -762,56 +762,57 @@ Line 1, characters 29-53:
 Error: Unbound value Extended_interval.create
 ```
 
-To consider a more realistic example, imagine you wanted to build an extended
-version of the `List` module, where you've added some functionality not
-present in the module as distributed in `Base`. That's a job for `include`.
+To consider a more realistic example, imagine you wanted to build an
+extended version of the `Option` module, where you've added some
+functionality not present in the module as distributed in
+`Base`. That's a job for `include`.
 
-```ocaml file=examples/correct/ext-list/ext_list.ml
+```ocaml file=examples/correct/ext-option/ext_option.ml
 open Base
 
 (* The new function we're going to add *)
-let rec intersperse list el =
-  match list with
-  | [] | [ _ ]   -> list
-  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
+let apply f_opt x =
+  match f_opt with
+  | None -> None
+  | Some f -> Some (f x)
 
 (* The remainder of the list module *)
-include List
+include Option
 ```
 
-Now, how do we write an interface for this new module? It turns out that
-`include` works on signatures as well, so we can pull essentially the same
-trick to write our `mli`. The only issue is that we need to get our hands on
-the signature for the `List` module. This can be done using `module type of`,
-which computes a signature from a module:
+Now, how do we write an interface for this new module? It turns out
+that `include` works on signatures as well, so we can pull essentially
+the same trick to write our `mli`. The only issue is that we need to
+get our hands on the signature for the `Option` module. This can be
+done using `module type of`, which computes a signature from a module:
 
-```ocaml file=examples/correct/ext-list/ext_list.mli
+```ocaml file=examples/correct/ext-option/ext_option.mli
 open Base
 
-(* Include the interface of the list module from Core *)
-include (module type of List)
+(* Include the interface of the option module from Base *)
+include (module type of Option)
 
 (* Signature of function we're adding *)
-val intersperse : 'a list -> 'a -> 'a list
+val apply : ('a -> 'b) t -> 'a -> 'b t
 ```
 
 Note that the order of declarations in the `mli` does not need to match the
 order of declarations in the `ml`. The order of declarations in the `ml`
 mostly matters insofar as it affects which values are shadowed. If we wanted
-to replace a function in `List` with a new function of the same name, the
+to replace a function in `Option` with a new function of the same name, the
 declaration of that function in the `ml` would have to come after the
-`include List` declaration.
+`include Option` declaration.
 
-We can now use `Ext_list` as a replacement for `List`. If we want to use
-`Ext_list` in preference to `List` in our project, we can create a file of
+We can now use `Ext_option` as a replacement for `Option`. If we want to use
+`Ext_option` in preference to `Option` in our project, we can create a file of
 common definitions:
 
-```ocaml file=examples/correct/ext-list/common.ml
-module List = Ext_list
+```ocaml file=examples/correct/ext-option/common.ml
+module Option = Ext_option
 ```
 
 And if we then put `open Common` after `open Base` at the top of each file in
-our project, then references to `List` will automatically go to `Ext_list`
+our project, then references to `Option` will automatically go to `Ext_option`
 instead.
 
 ## Common Errors with Modules

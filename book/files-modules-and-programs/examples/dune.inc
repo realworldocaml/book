@@ -12,16 +12,16 @@
  (deps (alias abstract-username)))
 
 (rule
- (alias ext-list)
+ (alias ext-option)
  (deps
-  (source_tree ./correct/ext-list)
+  (source_tree ./correct/ext-option)
   (package base))
  (action
-  (run dune build @all @runtest --root ./correct/ext-list)))
+  (run dune build @all @runtest --root ./correct/ext-option)))
 
 (alias
  (name runtest)
- (deps (alias ext-list)))
+ (deps (alias ext-option)))
 
 (rule
  (alias freq-dune)
