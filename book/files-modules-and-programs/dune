@@ -3,5 +3,6 @@
  (packages
   core
   mdx
+  ocamlfind
   ppx_jane)
  (preludes prelude.ml))
