@@ -7,7 +7,7 @@
      ((name ocaml-print-intf)) ((name ppx_jane)) ((name re)) ((name rwo))
      ((name sexp_pretty)) ((name textwrap)) ((name tls)) ((name yojson))))
    (excludes (((name rwo)))) (pins ()) (pull_mode Source) (remotes ())
-   (ocaml_compilers (4.10.0)) (branch master)))
+   (ocaml_compilers (4.10)) (branch master)))
  (deps
   ((opamverse ())
    (duniverse
