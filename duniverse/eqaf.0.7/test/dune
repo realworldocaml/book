@@ -1,0 +1,19 @@
+(executable
+ (name test)
+ (modules test)
+ (libraries alcotest eqaf))
+
+(alias
+ (name runtest)
+ (deps (:test test.exe))
+ (action (run %{test} --color=always)))
+
+(executable
+ (name test_branch)
+ (modules test_branch)
+ (libraries clock unix eqaf))
+
+(alias
+ (name runtest)
+ (deps (:test test_branch.exe))
+ (action (run %{test})))
