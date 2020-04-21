@@ -1,0 +1,3 @@
+(library
+ (name abstract_username)
+ (libraries base))
