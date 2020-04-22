@@ -172,10 +172,12 @@ abstract, so that we can no longer recover the fact that the type in question
 is `int`.
 
 ```ocaml env=main
-# let (module Bumpable) = int_bumper in Bumpable.bump 3
-Line 1, characters 53-54:
+# let bumped = 
+    let (module Bumper) = int_bumper in 
+    Bumper.bump 3
+Line 3, characters 14-15:
 Error: This expression has type int but an expression was expected of type
-         Bumpable.t
+         Bumper.t
 ```
 
 To make `int_bumper` usable, we need to expose the type, which we can do as
@@ -194,9 +196,9 @@ result, we can now use these first-class modules on values of the matching
 type:
 
 ```ocaml env=main
-# let (module Bumpable) = int_bumper in Bumpable.bump 3
+# let (module Bumper) = int_bumper in Bumper.bump 3
 - : int = 4
-# let (module Bumpable) = float_bumper in Bumpable.bump 3.5
+# let (module Bumper) = float_bumper in Bumper.bump 3.5
 - : float = 4.5
 ```
 
