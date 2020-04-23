@@ -34,6 +34,7 @@ second edition book. See https://realworldocaml.org/")
   mdx
   ocaml-compiler-libs
   ocaml-print-intf
+  patdiff
   ppx_jane
   re
   sexp_pretty

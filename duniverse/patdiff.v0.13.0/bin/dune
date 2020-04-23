@@ -1,0 +1,7 @@
+(executables (names patdiff) (libraries core patdiff_lib pcre)
+ (preprocess (pps ppx_jane)))
+
+(install (section bin) (files (patdiff.exe as patdiff) patdiff-git-wrapper))
+
+(alias (name DEFAULT) (deps (glob_files patdiff-git-wrapper))
+ (action (bash "shellcheck -x patdiff-git-wrapper")))

@@ -1,0 +1,92 @@
+* patdiff.exe
+
+: Compare two files (or process a diff read in on stdin) using the
+: patience diff algorithm.
+: 
+: If you don't supply any arguments to patdiff, it will read diff-like
+: text from stdin and color it in the normal patdiff way.
+: 
+: The file ~/.patdiff is used as a config file if it exists.  You can
+: write a sample config with the -make-config flag.
+: 
+:   patdiff.exe [FILE1 FILE2]
+: 
+: Display documentation for the configuration file and other help
+: 
+: === flags ===
+: 
+:   [-alt-next NAME]                             Mask next filename with NAME
+:                                                (alias: -alt-new)
+:   [-alt-prev NAME]                             Mask prev filename with NAME
+:                                                (alias: -alt-old)
+:   [-ansi]                                      Output in ASCII with ANSI escape
+:                                                codes
+:   [-ascii]                                     Output in ASCII with no ANSI
+:                                                escape codes (implies -unrefined)
+:   [-context NUM]                               Show lines of unchanged context
+:                                                before and after changes
+:   [-default]                                   Use the default configuration
+:                                                instead of ~/.patdiff
+:   [-dont-produce-unified-lines]                Don't produce unified lines (this
+:                                                makes the diff unambiguous even
+:                                                if color is stripped)
+:   [-double-check]                              If files seem identical, double
+:                                                check with cmp
+:   [-exclude REGEXP] ...                        exclude files matching this
+:                                                pattern when comparing two
+:                                                directories (overrides include
+:                                                patterns)
+:   [-ext-cmp FILE]                              Use external string comparison
+:                                                program (implies -unrefined)
+:   [-file FILE]                                 Use FILE as configuration file
+:                                                instead of ~/.patdiff
+:   [-float-tolerance PERCENT]                   Consider strings equal if only
+:                                                difference is floats changing
+:                                                within PERCENT
+:   [-html]                                      Output in HTML format instead of
+:                                                default (ASCII with ANSI escape
+:                                                codes)
+:   [-include REGEXP] ...                        include files matching this
+:                                                pattern when comparing two
+:                                                directories
+:   [-keep-whitespace]                           Consider whitespace when
+:                                                comparing lines
+:   [-line-big-enough NUM]                       Limit line-level semantic cleanup
+:                                                to the matches of length less
+:                                                than NUM lines
+:   [-location-style <diff|omake>]               how to format location
+:                                                information in hunk headers
+:   [-make-config FILE]                          Write default configuration file
+:   [-mask-uniques]                              When comparing directories, don't
+:                                                compare against /dev/null
+:   [-no-interleave]                             Don't attempt to split up large
+:                                                hunks near equalities
+:   [-no-semantic-cleanup]                       Don't do any semantic cleanup;
+:                                                let small, spurious matches
+:                                                survive
+:   [-quiet]                                     Report only whether files differ,
+:                                                not the details
+:   [-reverse]                                   produce a diff that undoes the
+:                                                changes
+:   [-shallow]                                   When comparing directories, don't
+:                                                recurse into subdirs
+:   [-split-long-lines]                          Split long lines into multiple
+:                                                displayed lines
+:   [-text]                                      Treat all files as text (i.e.
+:                                                display diffs of binary file
+:                                                contents)
+:   [-unrefined]                                 Don't highlight word differences
+:                                                between lines
+:   [-warn-if-no-trailing-newline-in-both BOOL]  warn when neither file ends in a
+:                                                newline, even though this does
+:                                                not constitute a diff (default:
+:                                                read from config, or true)
+:   [-word-big-enough NUM]                       Limit word-level semantic cleanup
+:                                                to the matches of length less
+:                                                than NUM words
+:   [-build-info]                                print info about this build and
+:                                                exit
+:   [-version]                                   print the version of this build
+:                                                and exit
+:   [-help]                                      print this help text and exit
+:                                                (alias: -?)

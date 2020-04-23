@@ -151,11 +151,11 @@ Here's what it looks like when we run the test.
   (duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml.E "comparison failed"
     ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
     Raised at file "duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml", line 28, characters 28-53
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 502, characters 15-19
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 343, characters 8-12
-    Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 502, characters 15-19
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 343, characters 8-12
+    Re-raised at file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 346, characters 6-13
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 359, characters 15-52
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 446, characters 52-83
   
   FAILED 1 / 1 tests
   [1]
@@ -326,14 +326,14 @@ see below.
       ((duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml.E
          "comparison failed" (Neg vs Pos (Loc test.ml:7:19)))
          "Raised at file \"duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from file \"duniverse/base.v0.13.0/src/or_error.ml\", line 75, characters 9-15\
+        \nCalled from file \"duniverse/base.v0.13.1/src/or_error.ml\", line 75, characters 9-15\
         \n"))).
-    Raised at file "duniverse/base.v0.13.0/src/error.ml", line 8, characters 14-30
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 502, characters 15-19
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 343, characters 8-12
-    Re-raised at file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 346, characters 6-13
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 359, characters 15-52
-    Called from file "duniverse/ppx_inline_test.v0.13.0/runtime-lib/runtime.ml", line 446, characters 52-83
+    Raised at file "duniverse/base.v0.13.1/src/error.ml", line 8, characters 14-30
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 502, characters 15-19
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 343, characters 8-12
+    Re-raised at file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 346, characters 6-13
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 359, characters 15-52
+    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 446, characters 52-83
   
   FAILED 1 / 1 tests
   [1]
@@ -541,10 +541,10 @@ If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
 
-```sh dir=examples/trivial_expect_test
+```sh dir=examples/trivial_expect_test,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
-  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ...
   ------ test.ml
   ++++++ test.ml.corrected
   File "test.ml", line 5, characters 0-1:
@@ -680,10 +680,10 @@ let%expect_test _ =
 If we run the test, we'll see that the output isn't exactly what was
 intended.
 
-```sh dir=examples/soup_test
+```sh dir=examples/soup_test,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
-  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ...
   ------ test.ml
   ++++++ test.ml.corrected
   File "test.ml", line 24, characters 0-1:
@@ -726,10 +726,10 @@ let get_href_hosts soup =
 And if we run the test again, we'll see that the output is now as it
 should be.
 
-```sh dir=examples/soup_test_half_fixed
+```sh dir=examples/soup_test_half_fixed,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
-  (cd _build/default && /home/yminsky/bin/patdiff -keep-whitespace -location-style omake -ascii test.ml test.ml.corrected)
+  ...
   ------ test.ml
   ++++++ test.ml.corrected
   File "test.ml", line 26, characters 0-1:
