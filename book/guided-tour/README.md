@@ -730,7 +730,7 @@ Logically, you can think of the evaluation of a simple recursive function
 like `sum` almost as if it were a mathematical equation whose meaning you
 were unfolding step by step:
 
-```ocaml file=examples/recursion.ml
+```ocaml skip
 sum [1;2;3]
 = 1 + sum [2;3]
 = 1 + (2 + sum [3])
@@ -1331,7 +1331,7 @@ Here's the code, which you can save in a file called
 <em class="filename">sum.ml</em>. Note that we don't terminate expressions
 with `;;` here, since it's not required outside the toplevel.
 
-```ocaml file=examples/sum/sum.ml
+```ocaml file=examples/correct/sum/sum.ml
 open Base
 open Stdio
 
@@ -1367,7 +1367,7 @@ We'll compile our program using `dune`, a build system that's designed
 for use with OCaml projects. First, we need to write a *dune* file to
 specify the build.
 
-```scheme file=examples/sum/dune
+```scheme file=examples/correct/sum/dune
 (executable
  (name      sum)
  (libraries base stdio))
@@ -1379,7 +1379,7 @@ depend on.
 
 We can now invoke dune to build the executable.
 
-```sh dir=examples/sum
+```sh dir=examples/correct/sum
 $ dune build sum.exe
 ```
 
