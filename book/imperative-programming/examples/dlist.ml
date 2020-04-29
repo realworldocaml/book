@@ -14,7 +14,7 @@ type 'a t = 'a element option ref
 [@@@part "2"] ;;
 
 let create () = ref None
-let is_empty t = !t = None
+let is_empty t = let open Poly in !t = None
 
 let value elt = elt.value
 

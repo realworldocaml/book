@@ -546,7 +546,7 @@ Now we can define a few basic functions that operate on lists and elements:
 
 ```ocaml file=examples/dlist.ml,part=2
 let create () = ref None
-let is_empty t = !t = None
+let is_empty t = let open Poly in !t = None
 
 let value elt = elt.value
 
