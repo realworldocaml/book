@@ -839,7 +839,7 @@ flow back to the caller.
 
 If we run this with stacktraces on, the benchmark results look like this:
 
-```sh dir=examples/correct/exn_cost,non-deterministic=command
+```sh dir=examples/correct/exn_cost,non-deterministic=output
 $ dune exec -- ./exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 
