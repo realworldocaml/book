@@ -25,9 +25,6 @@ clean:
 docker:
 	docker build -t ocaml/rwo .
 
-depext:
-	opam depext -y $(DEPS)
-
 duniverse-init:
 	$(DUNIVERSE) init
 
