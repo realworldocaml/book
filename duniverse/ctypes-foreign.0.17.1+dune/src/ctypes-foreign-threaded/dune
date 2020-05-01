@@ -1,0 +1,11 @@
+(library
+ (name ctypes_foreign_threaded)
+ (public_name ctypes-foreign.threaded)
+ (preprocess
+  (pps bisect_ppx --conditional))
+ (libraries ctypes threads)
+ (private_modules Ctypes_foreign_threaded_stubs)
+ (implements ctypes-foreign)
+ (foreign_stubs
+  (language c)
+  (names foreign_threaded_stubs)))

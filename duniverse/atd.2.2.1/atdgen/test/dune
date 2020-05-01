@@ -1,0 +1,237 @@
+(rule
+ (targets test.ml test.mli)
+ (deps    test.atd)
+ (action  (run %{bin:atdgen} %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test.expected.ml test.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test.expected.mli test.mli)))
+
+(rule
+ (targets test2.ml test2.mli)
+ (deps    test2.atd)
+ (action  (run %{bin:atdgen} -open Test %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test2.expected.ml test2.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test2.expected.mli test2.mli)))
+
+(rule
+ (targets testj.ml testj.mli)
+ (deps    (:atd test.atd) test.ml test.mli)
+ (action
+  (run
+   %{bin:atdgen} -json -extend Test -j-custom-fields
+   "fun loc s -> Printf.eprintf \"Warning: skipping field %s (def: %s)\n\" s loc"
+   %{atd}
+    -o testj)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff testj.expected.ml testj.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff testj.expected.mli testj.mli)))
+
+(rule
+ (targets test2j.ml test2j.mli)
+ (deps    test2.atd)
+ (action
+  (run %{bin:atdgen} -json -std-json -o test2j -open Test,Test2,Testj -ntd %{deps})))
+
+(rule
+ (targets test_ambiguous_record_t.ml test_ambiguous_record_t.mli)
+ (deps    test_ambiguous_record.atd)
+ (action
+  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (targets test_ambiguous_record_j.ml test_ambiguous_record_j.mli)
+ (deps    test_ambiguous_record.atd)
+ (action
+  (run %{bin:atdgen} -json -std-json -o test_ambiguous_record_j -open Test_ambiguous_record_t -ntd %{deps})))
+
+(rule
+ (targets test_polymorphic_wrap_t.ml test_polymorphic_wrap_t.mli)
+ (deps    test_polymorphic_wrap.atd)
+ (action
+  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (targets test_polymorphic_wrap_j.ml test_polymorphic_wrap_j.mli)
+ (deps    test_polymorphic_wrap.atd)
+ (action
+  (run %{bin:atdgen} -json -std-json -o test_polymorphic_wrap_j %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test2j.expected.ml test2j.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test2j.expected.mli test2j.mli)))
+
+(rule
+ (targets test3j_t.ml test3j_t.mli)
+ (deps    test3j.atd)
+ (action  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test3j_t.expected.ml test3j_t.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test3j_t.expected.mli test3j_t.mli)))
+
+(rule
+ (targets test3j_j.ml test3j_j.mli)
+ (deps    test3j.atd)
+ (action  (run %{bin:atdgen} -j -j-std %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test3j_j.expected.ml test3j_j.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test3j_j.expected.mli test3j_j.mli)))
+
+(rule
+ (targets testjstd.ml testjstd.mli)
+ (deps    test.atd)
+ (action  (run %{bin:atdgen} -std-json -extend Test test.atd -o testjstd)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff testjstd.expected.ml testjstd.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff testjstd.expected.mli testjstd.mli)))
+
+(rule
+ (targets testv.ml testv.mli)
+ (deps    test.atd)
+ (action  (run %{bin:atdgen} -validate -extend Test test.atd -o testv)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff testv.expected.ml testv.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff testv.expected.mli testv.mli)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_ambiguous_record_j.expected.ml test_ambiguous_record_j.ml)))
+
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_polymorphic_wrap_t.expected.ml test_polymorphic_wrap_t.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_polymorphic_wrap_j.expected.ml test_polymorphic_wrap_j.ml)))
+
+(rule
+ (targets test_annot_t.ml test_annot_t.mli)
+ (deps    test_annot.atd)
+ (action  (run %{bin:atdgen} -t %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_annot_t.expected.ml test_annot_t.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_annot_t.expected.mli test_annot_t.mli)))
+
+(rule
+ (targets test_annot_j.ml test_annot_j.mli)
+ (deps    test_annot.atd)
+ (action  (run %{bin:atdgen} -j -j-std %{deps})))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_annot_j.expected.ml test_annot_j.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_annot_j.expected.mli test_annot_j.mli)))
+
+(rule
+ (targets test_annot_error.stderr)
+ (deps    (:atd test_annot_error.atd))
+ (action
+  (with-stderr-to test_annot_error.stderr
+   (with-stdout-to test_annot_error.stdout
+    (with-accepted-exit-codes 1 (run %{bin:atdgen} -t %{atd}))))))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_annot_error.expected.stderr test_annot_error.stderr)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff test_annot_error.expected.stdout test_annot_error.stdout)))
+
+(executables
+ (libraries atd atdgen-runtime)
+ (names test_atdgen_main)
+ (modules
+  test
+  json_adapters
+  array_wrap
+  test3j_j
+  test3j_t
+  test_ambiguous_record_t
+  test_ambiguous_record_j
+  test_polymorphic_wrap_t
+  test_polymorphic_wrap_j
+  testjstd
+  testj
+  testv
+  test_atdgen_main
+  test_lib))
+
+(rule
+ (alias   runtest)
+ (package atdgen)
+ (action (run ./test_atdgen_main.exe)))

@@ -1,4 +1,0 @@
-(test
- (name test_ppx_deriving)
- (libraries oUnit compiler-libs.common ppx_deriving.api)
- (preprocess (pps ppx_deriving.ord ppx_deriving.show ppx_deriving.eq)))

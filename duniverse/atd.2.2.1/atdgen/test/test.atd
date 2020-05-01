@@ -1,0 +1,212 @@
+<doc text="This is just a test.">
+
+type def <ocaml_biniou module="Test_lib.Biniou">
+         <ocaml_json module="Test_lib.Json"> = abstract
+  <doc text="
+         }}}abc{{def}}ghi
+{{{
+j  *  j
+ k * k
+  l*l
+}}}{{{mno}}}
+
+
+
+{{pqr}}{stu}vwx
+
+         yz
+
+{{} [ ] {v }}
+{{{
+} [x] v} {v [ @ \
+}}}
+      ">
+
+type r = {
+  a : int <ocaml validator="fun _ _ -> None">;
+  b <ocaml mutable> : bool;
+  c : p;
+}
+
+type p =
+    [ A | B of r | C ]
+    <ocaml validator="\
+      fun path x ->
+         match x with
+           `A -> Some (Atdgen_runtime.Util.Validation.error path)
+         | _ -> None">
+
+type star_rating = int <ocaml valid="fun x -> x >= 1 && x <= 5">
+
+type p'' = int p'
+
+type 'a p' = [ A | Bb of 'a p' | Ccccc of 'a ] <ocaml repr="classic">
+
+type hello = [ Hello of string | World ] <ocaml repr="poly">
+
+type tup = (int * test)
+
+
+type test_variant =
+    [ Case1 | Case2 of int | Case3 of string | Case4 of test_variant list ]
+
+type date = (int * int nullable * int nullable)
+
+type floats = {
+  f32 : float <biniou repr="float32">;
+  f64 : float;
+}
+
+type mixed_record = {
+  ?field0 : int option;
+  ?field1 : float option;
+  field2 : string option;
+  field3 : int <ocaml repr="int64"> <biniou repr="int64">;
+  field4 : float list <ocaml repr="array">;
+  ?field5 : bool option;
+  ?field6 : string option;
+  field7 : test_variant;
+  field8 : string list <ocaml repr="array">;
+  field9 : (
+    int <biniou repr="uvint">
+    * int <biniou repr="int8">
+    * int <ocaml repr="char"> <biniou repr="int8">
+    * int <biniou repr="int16">
+
+    * int <ocaml repr="int32"> <biniou repr="int32">
+    * int <ocaml repr="int64"> <biniou repr="int64">
+  );
+  field10 : bool;
+  ~field11 : bool;
+  field12 : unit list;
+  field13 : string option list;
+  field14 : date;
+}
+
+type mixed =
+    (mixed_record list <ocaml repr="array"> <biniou repr="table">
+    * mixed_record list <ocaml repr="array">) list
+
+type test = {
+  ?x0 : int option;
+  ?x1 : float option;
+  x2 : mixed;
+  x3 : mixed_record list;
+  x4 : int <ocaml repr="int64"> <biniou repr="int64">;
+}
+
+type base = {
+  b0 : int;
+  b1 : bool;
+}
+
+type extended = {
+  b0 <ocaml name="b0x"> : int;
+  b1 <ocaml name="b1x"> : bool
+    <ocaml validator="\
+      fun path x ->
+        if x = false then None else Some (Atdgen_runtime.Util.Validation.error path)">;
+  b2 <ocaml name="b2x"> : string;
+  ?b3 <ocaml name="b3x"> : string option;
+  b4 <ocaml name="b4x"> : string option;
+  ~b5 <ocaml name="b5x" default="0.5"> : float;
+} <ocaml validator="\
+    fun path x ->
+      if x.b0x >= 0 then None
+      else Some (Atdgen_runtime.Util.Validation.error path)">
+
+type val1 = { val1_x : int
+              <ocaml validator="fun path _ -> \
+                                  Some (Atdgen_runtime.Util.Validation.error path)"> }
+type val2 = {
+  val2_x : val1;
+  ?val2_y : val1 option;
+}
+
+type base_tuple = (int * float)
+    <ocaml validator="\
+      fun path (i, f) -> \
+        if float i < f then None \
+        else Some (Atdgen_runtime.Util.Validation.error ~msg:\"i < f\" path)">
+type extended_tuple =
+    (int
+     * float
+     * <ocaml default="true"> : bool
+     * <ocaml default="None"> : int option
+     * string
+     * <ocaml default="[]"> : string list)
+
+type option_validation =
+    int <ocaml validator="fun path _ -> Some (Atdgen_runtime.Util.Validation.error path)">
+      option
+
+type ('x, 'y) poly = {
+  fst : 'x list;
+  snd : ('x, 'y) poly option;
+}
+
+
+(*
+type field_hash_clash = {
+  workshop1 : bool;
+  examples3 : bool;
+}
+
+type variant_hash_clash = [ X_workshop1 | X_examples3 ]
+*)
+
+type int_assoc_list =
+    (string * int) list <json repr="object">
+
+type int_assoc_array =
+    (string * int) list <ocaml repr="array"> <json repr="object">
+
+type 'a abs1 = 'a list
+type 'a abs2 = 'a list
+type 'a abs3 = 'a list
+
+type intopt = int option
+
+type int8 = int <biniou repr="int8">
+type char = int <ocaml repr="char"> <biniou repr="int8">
+type int32 = int <ocaml repr="int32"> <biniou repr="int32">
+type int64 = int <ocaml repr="int64"> <biniou repr="int64">
+type 'a array = 'a list <ocaml repr="array">
+
+type id = string <ocaml validator="fun path x -> assert false"> wrap
+   <ocaml t="[ `Id of string ]"
+          wrap="fun s -> `Id s"
+          unwrap="function `Id s -> s"
+          validator="fun path x ->
+                       match x with
+                         `Id \"\" -> failwith \"empty\"
+                       | _ -> None">
+
+type json_map = (id * int) list <json repr="object">
+
+type natural = int wrap <ocaml module="Test_lib.Natural">
+type even_natural = natural wrap <ocaml module="Test_lib.Even_natural">
+
+type some_record = {
+  some_field : int <ocaml validator="fun path x -> failwith \"passed\"">
+}
+type no_real_wrap = some_record wrap
+
+type unixtime_list = float <json repr="int"> list
+
+type precision = {
+  sqrt2_5 : float <json precision="5">;
+  small_2 : float <json precision="2">;
+  large_2 : float <json precision="2">;
+}
+
+type 'a generic = { x294623: int; }
+type specialized = string generic
+
+type validate_me =
+  string
+    <ocaml valid="fun s -> true">
+      list
+        <ocaml valid="fun l -> true">
+
+type validated_string_check = string <ocaml valid="fun s -> s = \"abc\"">

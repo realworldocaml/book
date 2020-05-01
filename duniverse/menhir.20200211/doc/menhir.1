@@ -1,0 +1,227 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.TH MENHIR 1 "July 03, 2018"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+
+
+.SH NAME
+menhir \- an LR(1) parser generator for OCaml
+
+.SH SYNOPSIS
+.B menhir
+.RI [ options ] " files"
+.SH DESCRIPTION
+.B menhir
+is an LR(1) parser generator for the OCaml programming language.
+That is, Menhir compiles LR(1) grammar specifications down to
+OCaml code. It is mostly compatible with
+.BR ocamlyacc (1).
+
+.SH OPTIONS
+.TP
+.B \-h, \-\-help
+Show summary of options.
+.TP
+.BI \-b,\ \-\-base\  basename
+Specifies a base name for the output file(s).
+.TP
+.B \-\-canonical
+Construct a canonical Knuth LR(1) automaton.
+.TP
+.B \-\-cmly
+Write the grammar and automaton to
+.IR basename .cmly.
+.TP
+.B \-\-comment
+Include comments in the generated code.
+.TP
+.BI \-\-compare\-errors\  file1\  \-\-compare\-errors\  file2
+Compare two .messages files.
+.TP
+.BI \-\-compile\-errors\  file
+Compile a .messages file to OCaml code.
+.TP
+.B \-\-coq
+Generate a formally verified parser, in Coq.
+.TP
+.BI \-\-coq\-lib\-path\  path
+How to qualify references to MenhirLib.
+.TP
+.B \-\-coq\-lib\-no\-path
+Do not qualify references to MenhirLib.
+.TP
+.B \-\-coq\-no\-actions
+Ignore semantic actions in the Coq output.
+.TP
+.B \-\-coq\-no\-complete
+Do not generate a proof of completeness.
+.TP
+.B \-\-depend
+Invoke ocamldep and display dependencies.
+.TP
+.B \-\-dump
+Describe the automaton in
+.IR basename .automaton.
+.TP
+.BI \-\-echo\-errors\  file
+Echo the sentences in a .messages file.
+.TP
+.B \-\-explain
+Explain conflicts in
+.IR basename .conflicts.
+.TP
+.BI \-\-external\-tokens\  module
+Import token type definition from
+.IR module .
+.TP
+.B \-\-fixed\-exception
+Declares Error = Parsing.Parse_error.
+.TP
+.B \-\-graph
+Write grammar's dependency graph to
+.IR basename .dot.
+.TP
+.B \-\-infer
+Invoke ocamlc for ahead of time type inference.
+.TP
+.B \-\-infer\-protocol\-supported
+Stop with exit code 0.
+.TP
+.BI \-\-infer\-write\-query\  file
+Write mock .ml file.
+.TP
+.BI \-\-infer\-read\-reply\  file
+Read inferred .mli file.
+.TP
+.B \-\-inspection
+Generate the inspection API.
+.TP
+.B \-\-interpret
+Interpret the sentences provided on stdin.
+.TP
+.B \-\-interpret\-show\-cst
+Show a concrete syntax tree upon acceptance.
+.TP
+.B \-\-interpret\-error
+Interpret an error sentence provided on stdin.
+.TP
+.B \-\-lalr
+Construct an LALR(1) automaton.
+.TP
+.BI \-la,\ \-\-log\-automaton\  level
+Log information about the automaton.
+.TP
+.BI \-lc,\ \-\-log\-code\  level
+Log information about the generated code.
+.TP
+.BI \-lg,\ \-\-log\-grammar\  level
+Log information about the grammar.
+.TP
+.B \-\-list\-errors
+Produce a list of erroneous inputs.
+.TP
+.B \-\-no\-dollars
+Disallow the use of $i notation.
+.TP
+.B \-\-no\-inline
+Ignore the %inline keyword.
+.TP
+.B \-\-no\-stdlib
+Do not load the standard library.
+.TP
+.BI \-\-ocamlc\  command
+Specifies how ocamlc should be invoked.
+.TP
+.BI \-\-ocamldep\  command
+Specifies how ocamldep should be invoked.
+.TP
+.B \-\-only\-preprocess
+Print a simplified grammar and exit.
+.TP
+.B \-\-only\-preprocess\-for\-ocamlyacc
+Print grammar in ocamlyacc format and exit.
+.TP
+.B \-\-only\-preprocess\-u
+Print grammar with unit actions and exit.
+.TP
+.B \-\-only\-preprocess\-uu
+Print grammar with unit actions and tokens and exit.
+.TP
+.B \-\-only\-tokens
+Generate token type definition only, no code.
+.TP
+.B \-\-raw\-depend
+Invoke ocamldep and echo its raw output.
+.TP
+.BI \-\-stdlib\  directory
+Specify where the standard library lies.
+.TP
+.B \-\-strict
+Warnings about the grammar are errors.
+.TP
+.B \-\-suggest\-comp\-flags
+Suggest compilation flags for ocaml{c,opt}.
+.TP
+.B \-\-suggest\-link\-flags-byte
+Suggest link flags for ocamlc.
+.TP
+.B \-\-suggest\-link\-flags-opt
+Suggest link flags for ocamlopt.
+.TP
+.B \-\-suggest\-menhirLib
+Suggest where MenhirLib was installed in source form.
+.TP
+.B \-\-suggest\-ocamlfind
+Deprecated.
+.TP
+.B \-t, \-\-table
+Use the table-based back-end.
+.TP
+.B \-\-timings
+Display internal timings.
+.TP
+.B \-\-trace
+Include tracing instructions in the generated code.
+.TP
+.B \-\-unused\-precedence\-levels
+Do not warn about unused precedence levels.
+.TP
+.BI \-\-unused\-token\  token
+Do not warn that
+.IR token
+is unused.
+.TP
+.B \-\-unused\-tokens
+Do not warn about any unused token.
+.TP
+.BI \-\-update\-errors\  file
+Update auto-comments in a .messages file.
+.TP
+.B \-\-version
+Show version number and exit.
+.TP
+.B \-v
+Synonymous with
+.BR \-\-dump\ \-\-explain .
+
+
+.SH SEE ALSO
+.BR ocaml (1).
+
+
+.SH AUTHOR
+.B menhir
+was written by Fran\(,cois Pottier and Yann R\('egis-Gianas.
+.PP
+This manual page was originally written by Samuel Mimram <smimram@debian.org>
+for the Debian project (but may be used by others).

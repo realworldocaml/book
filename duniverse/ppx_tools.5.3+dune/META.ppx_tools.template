@@ -1,8 +1,0 @@
-# DUNE_GEN
-package "metaquot" (
-  version = "5.3"
-  description = "Meta-quotation: Parsetree manipulation using concrete syntax"
-  requires = "ppx_tools"
-  ppx = "./ppx_metaquot"
-)
-

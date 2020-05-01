@@ -1,0 +1,4 @@
+(executable
+ (name source)
+ (flags (-linkall))
+ (preprocess (pps bisect_ppx --conditional)))

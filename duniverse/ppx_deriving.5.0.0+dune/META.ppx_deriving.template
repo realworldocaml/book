@@ -1,5 +1,0 @@
-description = "Type-driven code generation"
-ppx(-custom_ppx) = "./ppx_deriving"
-requires = "ppx_deriving.runtime"
-
-# DUNE_GEN

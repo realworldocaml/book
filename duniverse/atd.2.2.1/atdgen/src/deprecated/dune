@@ -1,0 +1,6 @@
+;; this is a deprecated library whose only purpose is to re-export the runtime
+;; new users should be using atdgen_runtime
+(library
+ (name atdgen)
+ (public_name atdgen)
+ (libraries atdgen-runtime))

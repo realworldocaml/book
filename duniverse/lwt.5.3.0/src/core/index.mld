@@ -1,0 +1,131 @@
+{0 Lwt}
+
+{1 Introduction}
+
+Lwt is a concurrent programming library for OCaml. It provides a single data
+type: the {e promise}, which is a value that will become determined in the
+future. Creating a promise spawns a computation. When that computation is I/O,
+Lwt runs it in parallel with your OCaml code.
+
+OCaml code, including creating and waiting on promises, is run in a single
+thread by default, so you don't have to worry about locking or preemption. You
+can detach code to be run in separate threads on an opt-in basis.
+
+Here is a simplistic Lwt program which requests the Google front page, and fails
+if the request is not completed in five seconds:
+
+{[
+open Lwt.Syntax
+
+let () =
+  let request =
+    let* addresses = Lwt_unix.getaddrinfo "google.com" "80" [] in
+    let google = Lwt_unix.((List.hd addresses).ai_addr) in
+
+    Lwt_io.(with_connection google (fun (incoming, outgoing) ->
+      let* () = write outgoing "GET / HTTP/1.1\r\n" in
+      let* () = write outgoing "Connection: close\r\n\r\n" in
+      let* response = read incoming in
+      Lwt.return (Some response)))
+  in
+
+  let timeout =
+    let* () = Lwt_unix.sleep 5. in
+    Lwt.return None
+  in
+
+  match Lwt_main.run (Lwt.pick [request; timeout]) with
+  | Some response -> print_string response
+  | None -> prerr_endline "Request timed out"; exit 1
+
+(* ocamlfind opt -package lwt.unix -linkpkg example.ml && ./a.out *)
+]}
+
+In the program, functions such as [Lwt_io.write] create promises. The
+[let%lwt ... in] construct is used to wait for a promise to become determined;
+the code after [in] is scheduled to run in a "callback." [Lwt.pick] races
+promises against each other, and behaves as the first one to complete.
+[Lwt_main.run] forces the whole promise-computation network to be executed. All
+the visible OCaml code is run in a single thread, but Lwt internally uses a
+combination of worker threads and non-blocking file descriptors to resolve in
+parallel the promises that do I/O.
+
+
+
+{1 Tour}
+
+Lwt compiles to native code on Linux, macOS, Windows, and other systems. It's
+also routinely compiled to JavaScript for the front end and Node by js_of_ocaml.
+
+In Lwt,
+
+- The core library {!Lwt} provides promises...
+- ...and a few pure-OCaml helpers, such as promise-friendly {{!Lwt_mutex}
+  mutexes}, {{!Lwt_condition} condition variables}, and {{!Lwt_mvar} mvars}.
+- There is a big Unix binding, {!Lwt_unix}, that binds almost every Unix system
+  call. A higher-level module {!Lwt_io} provides nice I/O channels.
+- {!Lwt_process} is for subprocess handling.
+- {!Lwt_preemptive} spawns system threads.
+
+
+
+{1 Installing}
+
++ Use your system package manager to install a development libev package. It is
+  often called [libev-dev] or [libev-devel].
++ [opam install conf-libev lwt]
+
+
+
+{1 Additional Docs}
+
+- {{:http://ocsigen.org/lwt/} Online manual}.
+- {{:https://github.com/dkim/rwo-lwt#readme} Concurrent Programming with Lwt} is
+  a nice source of Lwt examples. They are translations of code from Real World
+  OCaml, but are just as useful if you are not reading the book.
+- {{:https://mirage.io/wiki/tutorial-lwt} Mirage Lwt tutorial}.
+- {{:http://www.baturin.org/code/lwt-counter-server/} Example server} written
+  with Lwt.
+
+
+
+{1 API: Library [lwt]}
+
+This is the system-independent, pure-OCaml core of Lwt. To link with it, use
+[(libraries lwt)] in your [dune] file.
+
+{!modules:
+  Lwt
+  Lwt_list
+  Lwt_stream
+  Lwt_result
+  Lwt_mutex
+  Lwt_condition
+  Lwt_mvar
+  Lwt_switch
+  Lwt_pool
+}
+
+
+
+{1 API: Library [lwt.unix]}
+
+This is the system call and I/O library. Despite its name, it is implemented on
+both Unix-like systems and Windows, although not all functions are available on
+Windows. To link with this library, use [(libraries lwt.unix)] in your [dune]
+file.
+
+{!modules:
+  Lwt_unix
+  Lwt_main
+  Lwt_io
+  Lwt_process
+  Lwt_bytes
+  Lwt_preemptive
+  Lwt_fmt
+  Lwt_throttle
+  Lwt_timeout
+  Lwt_engine
+  Lwt_gc
+  Lwt_sys
+}

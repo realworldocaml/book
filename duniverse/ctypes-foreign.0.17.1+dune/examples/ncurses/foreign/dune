@@ -1,0 +1,11 @@
+(library
+ (name ncurses)
+ (modules ncurses)
+ (libraries ctypes-foreign.threaded))
+
+(executables
+ (names ncurses_cmd)
+ (modules ncurses_cmd)
+ (link_flags
+  (:standard -cclib -lncurses))
+ (libraries ncurses))

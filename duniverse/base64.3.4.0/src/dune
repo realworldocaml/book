@@ -1,0 +1,16 @@
+(library
+ (name base64)
+ (modules unsafe base64)
+ (public_name base64)
+ (libraries bytes))
+
+(rule
+ (targets unsafe.ml)
+ (deps (:config ../config/config.exe) unsafe_pre407.ml unsafe_stable.ml)
+ (action (run %{config})))
+
+(library
+ (name base64_rfc2045)
+ (modules base64_rfc2045)
+ (public_name base64.rfc2045)
+ (libraries bytes))

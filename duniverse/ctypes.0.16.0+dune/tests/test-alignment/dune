@@ -1,3 +1,0 @@
-(test
- (name test_alignment)
- (libraries oUnit ctypes ctypes-foreign.threaded))

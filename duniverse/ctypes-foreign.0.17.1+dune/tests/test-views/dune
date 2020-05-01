@@ -1,0 +1,4 @@
+(test
+ (name test_views)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes test_views_stubs test_views_bindings tests_common))

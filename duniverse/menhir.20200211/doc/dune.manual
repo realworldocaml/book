@@ -1,0 +1,15 @@
+;; This file is concatenated at the end of the file "dune"
+;; by the release script, so the documentation is installed
+;; only on release branches.
+
+;; The documentation is currently built outside of dune's control
+;; by doc/Makefile.
+
+(install
+  (section doc)
+  (files
+    manual.pdf
+    manual.html manual001.png manual002.png manual003.png
+  )
+  (package menhir)
+)

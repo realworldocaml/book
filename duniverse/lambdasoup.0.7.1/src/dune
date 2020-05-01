@@ -1,0 +1,20 @@
+(* -*- tuareg -*- *)
+
+let preprocess =
+  match Sys.getenv "BISECT_ENABLE" with
+  | "yes" -> "(preprocess (pps bisect_ppx))"
+  | _ -> ""
+  | exception Not_found -> ""
+
+let () = Jbuild_plugin.V1.send @@ {|
+
+(library
+ (name soup)
+ (public_name lambdasoup)
+ (synopsis "Easy functional HTML scraping and manipulation")
+ (wrapped false)
+ (flags (:standard -w +A -warn-error -3))
+ |} ^ preprocess ^ {|
+ (libraries markup))
+
+|}

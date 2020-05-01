@@ -101,7 +101,7 @@ language, but a few things jump right out at you:
   be a bit of a nuisance, but it has its benefits, since it prevents some
   kinds of bugs that arise in other languages due to unexpected differences
   between the behavior of `int` and `float`. For example, in many languages,
-  `1 / 3` is zero, but `1 / 3.0` is a third. OCaml requires you to be
+  `1 / 3` is zero, but `1.0 /. 3.0` is a third. OCaml requires you to be
   explicit about which operation you're using.
 
 We can also create a variable to name the value of a given expression, using
@@ -730,7 +730,7 @@ Logically, you can think of the evaluation of a simple recursive function
 like `sum` almost as if it were a mathematical equation whose meaning you
 were unfolding step by step:
 
-```ocaml file=examples/recursion.ml
+```ocaml skip
 sum [1;2;3]
 = 1 + sum [2;3]
 = 1 + (2 + sum [3])
@@ -803,25 +803,25 @@ including a function body. The `in` marks the beginning of the scope
 within which the new variable can be used. Thus, we could write:[let
 syntax/nested let binding]{.idx}
 
-```ocaml env=local_let
-# let x = 7 in
-  x + x
+```ocaml env=main
+# let z = 7 in
+  z + z
 - : int = 14
 ```
 
 Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `x` is no longer available:
+double-semicolon, so the value of `z` is no longer available:
 
-```ocaml env=local_let
-# x
+```ocaml env=main
+# z
 Line 1, characters 1-2:
-Error: Unbound value x
+Error: Unbound value z
 ```
 
 We can also have multiple `let` statements in a row, each one adding a new
 variable binding to what came before:
 
-```ocaml env=local_let
+```ocaml env=main
 # let x = 7 in
   let y = x * x in
   x + y
@@ -868,7 +868,7 @@ to split on.
       base ^ "." ^ String.lowercase ext
 val downcase_extension : string -> string = <fun>
 # List.map ~f:downcase_extension
-    [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
+    [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ]
 - : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
 ```
 
@@ -1331,7 +1331,7 @@ Here's the code, which you can save in a file called
 <em class="filename">sum.ml</em>. Note that we don't terminate expressions
 with `;;` here, since it's not required outside the toplevel.
 
-```ocaml file=examples/sum/sum.ml
+```ocaml file=examples/correct/sum/sum.ml
 open Base
 open Stdio
 
@@ -1367,7 +1367,7 @@ We'll compile our program using `dune`, a build system that's designed
 for use with OCaml projects. First, we need to write a *dune* file to
 specify the build.
 
-```scheme file=examples/sum/dune
+```scheme file=examples/correct/sum/dune
 (executable
  (name      sum)
  (libraries base stdio))
@@ -1379,7 +1379,7 @@ depend on.
 
 We can now invoke dune to build the executable.
 
-```sh dir=examples/sum
+```sh dir=examples/correct/sum
 $ dune build sum.exe
 ```
 

@@ -1,0 +1,4 @@
+# DUNE_GEN
+
+xen_linkopts = "-l:xen/libmirage_crypto_xen_stubs.a"
+freestanding_linkopts = "-l:freestanding/libmirage_crypto_freestanding_stubs.a"

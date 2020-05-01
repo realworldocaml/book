@@ -1,0 +1,11 @@
+(env
+ ;; disable warnings against "Innocuous unused variables"
+ ;; enforce the separation between types `string` and `bytes`
+ (dev (flags :standard -w -27 -safe-string))
+ (release (flags :standard -w -27 -safe-string)))
+
+(rule (copy atd.opam.template atdgen-codec-runtime.opam.template))
+(rule (copy atd.opam.template atdgen-runtime.opam.template))
+(rule (copy atd.opam.template atdgen.opam.template))
+(rule (copy atd.opam.template atdj.opam.template))
+(rule (copy atd.opam.template atds.opam.template))

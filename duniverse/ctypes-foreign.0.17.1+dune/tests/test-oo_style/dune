@@ -1,0 +1,5 @@
+(test
+ (name test_oo_style)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_oo_style_stubs test_oo_style_bindings tests_common))
