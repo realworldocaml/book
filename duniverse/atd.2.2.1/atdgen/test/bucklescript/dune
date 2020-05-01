@@ -1,0 +1,51 @@
+(rule
+ (targets bucklespec_bs.ml bucklespec_bs.mli)
+ (deps bucklespec.atd)
+ (action (run atdgen %{deps} -bs)))
+
+(rule
+ (targets bucklespec_t.ml bucklespec_t.mli)
+ (deps bucklespec.atd)
+ (action (run atdgen %{deps} -t)))
+
+(rule
+ (targets bucklespec_j.ml bucklespec_j.mli)
+ (deps bucklespec.atd)
+ (action (run atdgen %{deps} -j -j-std)))
+
+(library
+ (name bucklespec_types)
+ (wrapped false)
+ (libraries atdgen-codec-runtime)
+ (modules bucklespec_t a_t a_bs))
+
+(library
+ (name bucklespec_bs)
+ (wrapped false)
+ (libraries atdgen-codec-runtime bucklespec_types)
+ (modules bucklespec_bs))
+
+(executable
+ (name bucklespec_roundtrip)
+ (modules bucklespec_roundtrip bucklespec_j a_j)
+ (libraries bucklespec_types bucklespec_bs atdgen-runtime))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff bucklespec_bs.expected.ml bucklespec_bs.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff bucklespec_bs.expected.mli bucklespec_bs.mli)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff bucklespec_j.expected.ml bucklespec_j.ml)))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (run ./bucklespec_roundtrip.exe)))

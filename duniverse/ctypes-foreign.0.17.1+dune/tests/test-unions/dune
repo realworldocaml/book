@@ -1,0 +1,46 @@
+(rule
+ (targets generated_stubs.c)
+ (action
+  (run %{exe:stub-generator/driver.exe} --c-file %{targets})))
+
+(rule
+ (targets generated_bindings.ml)
+ (action
+  (run %{exe:stub-generator/driver.exe} --ml-file %{targets})))
+
+(rule
+ (targets generated_struct_stubs.c)
+ (action
+  (run %{exe:stub-generator/driver.exe} --c-struct-file %{targets})))
+
+(rule
+ (targets ml-stub-generator.exe)
+ (deps generated_struct_stubs.c ../clib/test_functions.h
+   ../config/test-cflags)
+ (action
+  (run %{cc} %{read-lines:../config/test-cflags} -I ../clib -I
+    %{ocaml-config:standard_library} -o %{targets} generated_struct_stubs.c)))
+
+(rule
+ (targets generated_struct_bindings.ml)
+ (deps ml-stub-generator.exe)
+ (action
+  (with-stdout-to
+   %{targets}
+   (run %{deps}))))
+
+(library
+ (name test_unions_bindings)
+ (wrapped false)
+ (foreign_stubs
+  (language c)
+  (names generated_stubs))
+ (modules generated_bindings generated_struct_bindings)
+ (libraries ctypes test_functions lwt.unix))
+
+(test
+ (name test_unions)
+ (modules test_unions)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_unions_stubs test_functions test_unions_bindings tests_common))

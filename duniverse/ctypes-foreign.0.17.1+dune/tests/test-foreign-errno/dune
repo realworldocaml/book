@@ -1,0 +1,4 @@
+(test
+ (name test_errno)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes-foreign.threaded))

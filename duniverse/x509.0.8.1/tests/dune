@@ -1,4 +1,0 @@
-(test
- (name tests)
- (deps (source_tree regression) (source_tree testcertificates) (source_tree crl))
- (libraries x509 alcotest cstruct-unix ptime.clock.os nocrypto.unix))

@@ -1,0 +1,624 @@
+# ----------------------------------------------------------------------------
+
+grammar: UID
+grammar: HEADER UID
+
+Either a declaration or '%%' is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: TYPE UID
+grammar: TYPE OCAMLTYPE TYPE
+grammar: TYPE OCAMLTYPE UID PREC
+grammar: TYPE OCAMLTYPE UID LPAREN TYPE
+grammar: TYPE OCAMLTYPE UID COMMA TYPE
+grammar: TYPE OCAMLTYPE UID LPAREN UID UID
+grammar: TYPE OCAMLTYPE UID LPAREN UID COMMA TYPE
+grammar: TYPE OCAMLTYPE UID PLUS RPAREN
+grammar: ON_ERROR_REDUCE TYPE
+
+# %type<ocamltype> and %on_error_reduce are both followed with clist(strict_actual),
+# so they are not distinguished in the automaton.
+
+Ill-formed declaration.
+Examples of well-formed declarations:
+  %type <Syntax.expression> expression
+  %type <int> date time
+  %type <int option> option(date)
+  %on_error_reduce expression
+  %on_error_reduce date time
+  %on_error_reduce option(date)
+
+# ----------------------------------------------------------------------------
+
+grammar: TOKEN TYPE
+grammar: TOKEN OCAMLTYPE TYPE
+grammar: TOKEN UID STAR
+grammar: TOKEN UID QID STAR
+grammar: TOKEN UID COMMA TYPE
+
+Ill-formed '%token' declaration.
+Examples of well-formed declarations:
+  %token FOO
+  %token BAR "|"
+  %token DOT "." SEMICOLON ";"
+  %token <string> LID UID
+  %token FOO [@cost 0]
+
+# ----------------------------------------------------------------------------
+
+grammar: START UID
+grammar: START OCAMLTYPE LEFT
+grammar: START LID UID
+grammar: START LID COMMA UID
+
+Ill-formed '%start' declaration.
+A start symbol must begin with a lowercase letter.
+Examples of well-formed declarations:
+  %start program
+  %start expression phrase
+  %start <int> date time
+
+# ----------------------------------------------------------------------------
+
+grammar: RIGHT TYPE
+grammar: RIGHT UID STAR
+grammar: RIGHT UID COMMA TYPE
+
+Ill-formed precedence declaration.
+Examples of well-formed declarations:
+  %left PLUS
+  %left PLUS MINUS
+  %nonassoc unary_minus
+  %right CONCAT
+
+# ----------------------------------------------------------------------------
+
+grammar: PARAMETER UID
+
+Ill-formed '%parameter' declaration.
+Examples of well-formed declarations:
+  %parameter <X : sig type t end>
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT TYPE
+
+# Do not mention that %% or EOF would be accepted at this point.
+
+A rule is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON ACTION SEMI UNDERSCORE
+
+# We have seen a semicolon, so we know that the previous rule is complete.
+
+# Do not mention that %% or EOF would be accepted at this point.
+
+Another rule is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON ACTION TYPE
+
+# Do not mention that %% or EOF would be accepted at this point.
+
+Either another production '|' ...
+or another rule is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT INLINE TYPE
+
+# This is definitely old-style syntax.
+
+Ill-formed rule.
+Either '%public' or a non-terminal symbol is expected at this point.
+Examples of well-formed rules:
+  %public option(X): { None } | x = X { Some x }
+  %inline clist(X): xs = separated_nonempty_list(COMMA?, X) { xs }
+  %public %inline pair(X, Y): x = X; y = Y { (x, y) }
+
+grammar: PERCENTPERCENT PUBLIC INLINE TYPE
+
+# This is definitely old-style syntax.
+
+Ill-formed rule.
+A non-terminal symbol is expected at this point.
+Examples of well-formed rules:
+  %public option(X): { None } | x = X { Some x }
+  %inline clist(X): xs = separated_nonempty_list(COMMA?, X) { xs }
+  %public %inline pair(X, Y): x = X; y = Y { (x, y) }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID UID
+
+Ill-formed rule.
+Either a parenthesized, comma-delimited list of formal parameters
+or an attribute
+or a colon ':' is expected at this point.
+Examples of well-formed rules:
+  main: e = expr; EOL { e }
+  expr: i = INT { i } | e1 = expr; PLUS; e2 = expr { e1 + e2 }
+  option(X): { None } | x = X { Some x }
+  main [@cost 0]: e = expr; EOL { e }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID LPAREN TYPE
+grammar: PERCENTPERCENT UID LPAREN UID COMMA TYPE
+
+Ill-formed rule.
+A comma-delimited list of formal parameters is expected at this point.
+Examples of well-formed rules:
+  option(X): { None } | x = X { Some x }
+  pair(X, Y): x = X; y = Y { (x, y) }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID LPAREN UID UID
+
+# Ignore the fact that the comma-delimited list of symbols could continue.
+
+Ill-formed rule.
+A closing parenthesis ')' is expected at this point.
+Examples of well-formed rules:
+  option(X): { None } | x = X { Some x }
+  pair(X, Y): x = X; y = Y { (x, y) }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON TYPE
+grammar: PERCENTPERCENT UID COLON BAR TYPE
+grammar: PERCENTPERCENT UID COLON ACTION BAR TYPE
+grammar: PERCENTPERCENT UID COLON UID BAR TYPE
+
+Ill-formed rule.
+A list of productions is expected at this point.
+Examples of well-formed rules:
+  main: e = expr; EOL { e }
+  expr: i = INT { i } | e1 = expr; PLUS; e2 = expr { e1 + e2 }
+  symbol: s = LID | s = UID { s }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON UID TYPE
+grammar: PERCENTPERCENT UID COLON UID SEMI TYPE
+grammar: PERCENTPERCENT UID COLON LID TYPE
+grammar: PERCENTPERCENT UID COLON LID EQUAL TYPE
+grammar: PERCENTPERCENT UID COLON LID EQUAL UID PLUS TYPE
+# The following sentences are tricky. In front of us could be many things
+# (comma, closing parenthesis, identifier, modifier, %prec keyword, etc.).
+# We don't know which symbol we expect to reduce towards (e.g., it could be
+# [actual] or [lax_actual]).
+#
+# Let's just back up to a safe level of abstraction and say that this is an
+# ill-formed production.
+grammar: PERCENTPERCENT UID COLON UID LPAREN UID TYPE
+grammar: PERCENTPERCENT UID COLON UID LPAREN UID STAR TYPE
+
+Ill-formed production.
+A production is a sequence of producers, followed with a semantic action.
+Examples of well-formed producers:
+  expr
+  option(COMMA)
+  separated_list(COMMA, expr)
+  e = expr
+  ds = declaration*
+  es = list(terminated(expr, SEMI))
+  es = list(e = expr SEMI { e })
+  xs = list(x = var { Some x } | WILDCARD { None })
+  expr [@cost 0]
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON UID LPAREN ACTION BAR TYPE
+
+# Here, we have seen a BAR, so we expect a production (group).
+
+A production is expected at this point.
+A production is a sequence of producers, followed with a semantic action.
+Examples of well-formed producers:
+  expr
+  option(COMMA)
+  separated_list(COMMA, expr)
+  e = expr
+  ds = declaration*
+  es = list(terminated(expr, SEMI))
+  es = list(e = expr SEMI { e })
+  xs = list(x = var { Some x } | WILDCARD { None })
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON UID LPAREN ACTION UID
+# In the non-canonical automaton, this is a tricky case where, looking at the
+# description of the state, it seems that only COMMA and RPAREN can follow
+# here. But in fact, other tokens are possible, such as BAR, simply because
+# they will NOT take us into this state. In the canonical automaton, the list
+# of possibilities is explicit in the lookahead sets.
+grammar: PERCENTPERCENT UID COLON UID LPAREN ACTION PREC UID UID
+# In the first case above, we may expect a %prec annotation, whereas in the
+# second case above, we have just seen it. In the error message, we merge
+# these two situations and do not mention the possibility of a %prec
+# annotation.
+
+Either another production '|' ...
+or a comma ','
+or a closing parenthesis ')'
+is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON PREC TYPE
+grammar: PERCENTPERCENT UID COLON UID LPAREN ACTION PREC TYPE
+grammar: PERCENTPERCENT UID COLON ACTION PREC TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL PREC EOF
+
+# Conflate old rule syntax and new rule syntax.
+
+Ill-formed %prec annotation.
+A symbol is expected at this point.
+Examples of well-formed annotations:
+  expr: MINUS e = expr %prec UMINUS { -e }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON PREC LID UID
+
+Ill-formed rule.
+Either a semantic action '{' ... '}'
+or another production '|' ...
+is expected at this point.
+Examples of well-formed rules:
+  expr: MINUS e = expr %prec UMINUS { -e }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID LPAREN UID RPAREN BAR
+
+Ill-formed rule.
+A colon ':' is expected at this point.
+Examples of well-formed rules:
+  option(X): { None } | x = X { Some x }
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT UID COLON ACTION PREC UID TYPE
+
+Either another rule
+or another production '|' ...
+is expected at this point.
+Examples of well-formed rules:
+  option(X): { None } | x = X { Some x }
+
+# ----------------------------------------------------------------------------
+
+grammar: TYPE OCAMLTYPE UID LPAREN UID LPAREN TYPE
+grammar: PERCENTPERCENT UID COLON UID LPAREN UID COMMA TYPE
+grammar: PERCENTPERCENT UID COLON UID LPAREN UID LPAREN TYPE
+
+Ill-formed list of actual parameters.
+A comma-delimited list of actual parameters is expected at this point.
+Examples of well-formed actual parameters:
+  expr
+  expr+
+  option(expr)
+  separated_list(COMMA, expr)
+
+# Omitting the fact that an anonymous rule is a valid actual parameter...
+# Also omitting the subtle distinctions between lax_actual, actual, etc.
+
+# ----------------------------------------------------------------------------
+
+grammar: TYPE OCAMLTYPE UID LPAREN UID PLUS UID
+
+Ill-formed list of actual parameters.
+Either a modifier '*' or '+' or '?'
+or a closing parenthesis ')'
+or a comma ',' is expected at this point.
+Examples of well-formed actual parameters:
+  expr
+  expr+
+  option(expr)
+  separated_list(COMMA, expr)
+
+# ------------------------------------------------------------------------------
+
+grammar: PERCENTATTRIBUTE TYPE
+grammar: PERCENTATTRIBUTE UID COMMA TYPE
+grammar: PERCENTATTRIBUTE UID TYPE
+grammar: PERCENTATTRIBUTE UID PLUS TYPE
+grammar: PERCENTATTRIBUTE UID LPAREN TYPE
+grammar: PERCENTATTRIBUTE UID ATTRIBUTE UID
+
+Ill-formed '%attribute' declaration.
+An '%attribute' declaration should contain a nonempty list of symbols,
+followed with a nonempty list of attributes.
+Examples of well-formed declarations:
+  %attribute FOO [@printer "foo"]
+  %attribute bar BAZ [@printer "bar/BAZ"] [@cost 2.0]
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
+# The following error sentences concern both the old and new rule syntax.
+
+grammar: PERCENTPERCENT PUBLIC TYPE
+
+Ill-formed rule.
+'let' or '%inline' or a non-terminal symbol is expected at this point.
+Examples of well-formed rules:
+  %public     option(X):   { None } | x = X  { Some x }
+  %public let option(X) := { None } | x = X; { Some x }
+
+# ----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+
+# The following error sentences have to do with the new rule syntax.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET EOF
+
+A lowercase identifier is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID EOF
+grammar: PERCENTPERCENT LET LID LPAREN UID RPAREN EOF
+
+# Ignore attributes.
+
+# In the first case, we have not seen a list of formal parameters yet,
+# so such a list could still appear; yet I choose not to mention it.
+
+# People are likely to write '=' whereas we expect ':=' or '=='.
+# We should remind them what these two symbols mean.
+
+An equality symbol ':=' or '==' is expected at this point.
+Examples of well-formed rules:
+  let  option(X) := { None } | x = X; { Some x } (* ordinary *)
+  let ioption(X) == { None } | x = X; { Some x } (*  inline  *)
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID LPAREN EOF
+
+# By accident, the lookahead token (EQUALEQUAL or COLONEQUAL) reveals
+# that we are in the new rule syntax.
+
+A comma-delimited list of formal parameters is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID LPAREN UID EOF
+
+# By accident, the lookahead token (EQUALEQUAL or COLONEQUAL) reveals
+# that we are in the new rule syntax.
+
+At this point, one of the following is expected:
+a comma ',' followed with an expression, or
+a closing parenthesis ')'.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL EOF
+
+# A choice expression is expected.
+
+An expression is expected at this point.
+Examples of expressions:
+  term
+  t = term; { t }
+  LPAREN; ~ = term; RPAREN; <>
+  factor | term; MUL; factor
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL TILDE EOF
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN TILDE EOF
+
+An equals sign '=' is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL TILDE EQUAL EOF
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN TILDE EQUAL EOF
+
+# A symbol expression is expected.
+# A symbol expression always begins with a symbol,
+# so we can say that a symbol is expected.
+
+A symbol is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL TILDE EQUAL LID EOF
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UNDERSCORE EQUAL UID ATTRIBUTE EOF
+
+# Ignore the fact that an attribute or a modifier is permitted.
+
+A semicolon ';' is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL PREC UID EOF
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN PREC UID EOF
+
+A semantic action is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL LPAREN EOF
+grammar: PERCENTPERCENT LET LID COLONEQUAL LPAREN LPAREN EOF
+
+This opening parenthesis seems to be the beginning of a tuple pattern.
+Thus, a comma-separated list of patterns is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL LPAREN LPAREN UNDERSCORE EOF
+grammar: PERCENTPERCENT LET LID COLONEQUAL LPAREN UNDERSCORE EOF
+
+The previous opening parenthesis seemed to be the beginning of a tuple pattern.
+Thus, either a comma ',' followed with a pattern
+or a closing parenthesis ')' is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL LPAREN UNDERSCORE COMMA EOF
+
+A pattern is expected at this point.
+Examples of patterns:
+  x
+  ~
+  _
+  (x, y, _)
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL LID TYPE
+
+# This is tricky. We have read a lowercase identifier,
+# but do not know yet whether it represents a pattern
+# (in which case an EQUAL sign is expected)
+# or a symbol
+# (in which case many continuations are possible)
+# (in fact, the rule could be complete, as we are
+#  at the top level).
+
+# Ignore the fact that this symbol could be followed with a list of
+# actual parameters, or a modifier, or an attribute.
+
+At this point, one of the following is expected:
+an equals sign '=' followed with a symbol, or
+a semicolon ';' followed with an expression, or
+a bar '|' followed with an expression, or
+another rule.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN LID EOF
+
+# This is analogous to the previous case,
+# except we are not at the top level.
+
+At this point, one of the following is expected:
+an equals sign '=' followed with a symbol, or
+a semicolon ';' followed with an expression, or
+a bar '|' followed with an expression, or
+a closing parenthesis ')'.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL ACTION TYPE
+
+At this point, one of the following is expected:
+a bar '|' followed with an expression, or
+another rule.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID TYPE
+
+# Ignore modifiers and attributes.
+# We expect either SEMI; seq_expression or BAR; expression or another rule.
+
+At this point, one of the following is expected:
+a semicolon ';' followed with an expression, or
+a bar '|' followed with an expression, or
+another rule.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UID LPAREN TYPE
+
+A comma-separated list of expressions is expected at this point.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL BAR TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID BAR TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN BAR TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UID BAR TYPE
+
+# A sequence expression is expected.
+
+# We are inside a choice expression.
+
+# We can show examples that involve '|',
+# as our sequence expression can be part of a choice expression
+# and therefore followed with a BAR.
+
+An expression is expected at this point.
+Examples of expressions:
+  term
+  t = term; { t }
+  LPAREN; ~ = term; RPAREN; <>
+  factor | term; MUL; factor
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UID SEMI TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UNDERSCORE EQUAL UID SEMI TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UNDERSCORE EQUAL UID SEMI TYPE
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID SEMI EOF
+
+# A sequence expression is expected.
+
+# We are inside a sequence expression.
+
+# In fact, we have just read a semicolon.
+# Maybe it is worth re-iterating that (in the new syntax)
+# a rule cannot be terminated with a semicolon.
+
+After a semicolon, an expression is expected.
+(A rule cannot be terminated with a semicolon.)
+Examples of expressions:
+  term
+  t = term; { t }
+  LPAREN; ~ = term; RPAREN; <>
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN ACTION EOF
+
+At this point, one of the following is expected:
+a comma ',' followed with an expression, or
+a bar '|' followed with an expression, or
+a closing parenthesis ')'.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UID EOF
+
+# Ignore modifiers and attributes.
+# We expect either SEMI; seq_expression or BAR; expression or COMMA; expression or RPAREN.
+
+At this point, one of the following is expected:
+a semicolon ';' followed with an expression, or
+a bar '|' followed with an expression, or
+a comma ',' followed with an expression, or
+a closing parenthesis ')'.
+
+# ----------------------------------------------------------------------------
+
+grammar: PERCENTPERCENT LET LID COLONEQUAL UID LPAREN UID COMMA TYPE
+
+# A choice expression is expected (allowed).
+
+An expression is expected at this point.
+Examples of expressions:
+  term
+  t = term; { t }
+  LPAREN; ~ = term; RPAREN; <>
+  factor | ~ = term; ~ = op; ~ = factor; <EBinOp>
+
+# ----------------------------------------------------------------------------
+
+# Local Variables:
+# mode: shell-script
+# End:

@@ -1,0 +1,19 @@
+(executable
+ (name ncurses_stub_generator)
+ (modules ncurses_stub_generator)
+ (libraries ncurses_bindings ctypes.stubs ctypes))
+
+(rule
+ (targets ncurses_stubs.c ncurses_generated.ml)
+ (deps ncurses_stub_generator.exe)
+ (action
+  (run %{deps})))
+
+(library
+ (name ncurses_generated)
+ (modules ncurses_generated)
+ (c_library_flags -lncurses)
+ (foreign_stubs
+  (language c)
+  (names ncurses_stubs))
+ (libraries ctypes.stubs))

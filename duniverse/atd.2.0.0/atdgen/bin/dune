@@ -1,7 +1,0 @@
-(executables
- (libraries str atd atdgen_emit)
- (names ag_main)
- (flags
-  (:include %{workspace_root}/ocamlflags.sexp))
- (public_names atdgen)
- (package atdgen))

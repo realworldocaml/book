@@ -75,7 +75,7 @@ equivalent of `In_channel.read_all`. [Deferred.t]{.idx}
 ```
 
 We first load the Async package in the toplevel using `#require`, and then
-open the module. Async, Like Core, is designed to be an extension to your
+open the module. Async, like Core, is designed to be an extension to your
 basic programming environment, and is intended to be opened.
 
 A deferred is essentially a handle to a value that may be computed in the

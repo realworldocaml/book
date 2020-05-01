@@ -1,0 +1,8 @@
+(executables
+ (libraries atd)
+ (names unit_tests))
+
+(rule
+ (alias   runtest)
+ (package atd)
+ (action (run ./unit_tests.exe)))

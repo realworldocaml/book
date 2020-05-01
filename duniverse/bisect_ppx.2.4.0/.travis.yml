@@ -1,0 +1,188 @@
+sudo: required
+language: generic
+
+scripts:
+  - &bucklescript
+    before_install:
+      - |
+        if [ "$TRAVIS_EVENT_TYPE" == cron ]
+        then
+          rm -rf ./test/bucklescript/node_modules
+          rm -rf ./node_modules
+          rm -rf ./_cache
+        fi
+
+    install:
+      - npm --version
+      - |
+        if [ "$TRAVIS_BRANCH" != binaries ]
+        then
+          WD=`pwd`
+          if [ ! -f node_modules/.bin/esy ]
+          then
+            npm install --no-save esy
+            export PATH="$WD/node_modules/.bin:$PATH"
+          else
+            mkdir -p _wrapped_esy
+            ln -s $WD/node_modules/.bin/esy-solve-cudf _wrapped_esy/esy-solve-cudf
+            cp test/ci/travis-wrapped-esy.sh _wrapped_esy/esy
+            chmod a+x _wrapped_esy/esy
+            export PATH="$WD/_wrapped_esy:$PATH"
+          fi
+        fi
+      - make -C test/bucklescript clean-for-caching
+      - make -C test/bucklescript install
+
+    script:
+      - make -C test/bucklescript test
+      - |
+        if [ "$SAVE_BINARIES" == YES ]
+        then
+          if [ "$TRAVIS_BRANCH" == master ]
+          then
+            if [ "$TRAVIS_PULL_REQUEST" == false ]
+            then
+              bash ./test/ci/travis-binaries.sh
+            fi
+          fi
+        fi
+
+    before_cache:
+      - make -C test/bucklescript clean-for-caching
+
+  - &opam
+    before_install:
+      - '[ "$TRAVIS_EVENT_TYPE" != cron ] || rm -rf ~/.opam ~/.esy ./_opam'
+
+    install:
+      - mkdir -p _cache
+
+      - |
+        case $TRAVIS_OS_NAME in
+          "linux") OPAM_OS=linux;;
+          "osx") OPAM_OS=macos;;
+        esac
+      - OPAM_VERSION=2.0.6
+      - OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
+      - |
+        if [ ! -f _cache/opam ]
+        then
+          wget https://github.com/ocaml/opam/releases/download/${OPAM_VERSION}/${OPAM_PKG}
+          mv ${OPAM_PKG} _cache/opam
+        fi
+      - sudo cp _cache/opam /usr/local/bin/opam
+      - sudo chmod a+x /usr/local/bin/opam
+
+      - opam init -y --bare --disable-sandboxing --disable-shell-hook
+      - OPAM_FROM_CACHE=YES
+      - |
+        if [ ! -d _opam/bin ]
+        then
+          OPAM_FROM_CACHE=NO
+          rm -rf _opam
+          opam switch create . $COMPILER $REPOSITORIES --no-install
+        fi
+      - eval `opam config env`
+      - ocaml -version
+      - opam --version
+
+      - opam install -y --with-test --deps-only .
+      - opam list
+
+    script:
+      - |
+        if [ -d _cache/_build ]
+        then
+          cp -r _cache/_build .
+        fi
+      - make build
+      - (unset TRAVIS && unset TRAVIS_JOB_ID && make test)
+      - |
+        if [ ! -d _cache/_build ]
+        then
+          cp -r _build _cache
+        fi
+
+      - |
+        if [ "$USAGE_TEST" == YES ]
+        then
+          opam install -y reason
+          opam install -y js_of_ocaml
+          make clean-usage usage
+        fi
+
+      - |
+        if [ "$SELF_COVERAGE" == YES ]
+        then
+          (unset TRAVIS && unset TRAVIS_JOB_ID && make self-coverage)
+          (cd _self && \
+            _build/install/default/bin/meta-bisect-ppx-report \
+              send-to Coveralls bisect*.meta)
+        fi
+
+    before_cache:
+      - opam clean
+
+matrix:
+  include:
+    - <<: *bucklescript
+      os: osx
+      env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
+    - <<: *bucklescript
+      os: linux
+      env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
+    - <<: *opam
+      os: osx
+      env: COMPILER=4.10.0
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.10.0
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.09.0
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.08.1 SELF_COVERAGE=YES
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.07.1 USAGE_TEST=YES
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.06.1
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.05.0
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.04.2
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.03.0
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.02.3
+
+  allow_failures:
+    - env: COMPILER=4.09.0
+    - env: COMPILER=4.08.1 SELF_COVERAGE=YES
+    - env: COMPILER=4.07.1 USAGE_TEST=YES
+    - env: COMPILER=4.06.1
+    - env: COMPILER=4.05.0
+    - env: COMPILER=4.04.2
+    - env: COMPILER=4.03.0
+
+  fast_finish: true
+
+cache:
+  directories:
+    - $HOME/.opam
+    - ./_opam
+    - $HOME/.esy
+    - ./test/bucklescript/node_modules
+    - ./node_modules
+    - ./_cache
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always

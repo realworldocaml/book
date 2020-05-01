@@ -1,0 +1,6 @@
+File "test_annot_error.atd", line 1, characters 19-32:
+Duplicate annotation ocaml.from (also in:
+  File "test_annot_error.atd", line 1, characters 48-61,
+  File "test_annot_error.atd", line 1, characters 70-83,
+  File "test_annot_error.atd", line 1, characters 84-97
+)

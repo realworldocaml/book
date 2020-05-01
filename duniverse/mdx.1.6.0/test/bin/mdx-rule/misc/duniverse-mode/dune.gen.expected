@@ -1,0 +1,14 @@
+(alias
+ (name runtest)
+ (deps
+  (:x duniverse-mode.md)
+  (package block)
+  (package mdx)
+  (package prelude-ml)
+  (package prelude-str)
+  prelude.ml)
+ (action
+  (progn
+   (run ocaml-mdx test --prelude=prelude.ml --prelude-str
+     "#require \"prelude-str\"" %{x})
+   (diff? %{x} %{x}.corrected))))
