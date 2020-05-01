@@ -1,4 +1,0 @@
-File "new-syntax-parentheses.mly", line 7, characters 6-7:
-Error: syntax error after '(' and before 'B'.
-This opening parenthesis seems to be the beginning of a tuple pattern.
-Thus, a comma-separated list of patterns is expected at this point.

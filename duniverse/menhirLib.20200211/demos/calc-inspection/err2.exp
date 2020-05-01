@@ -1,6 +1,0 @@
-At line 1, column 12: syntax error.
-expr -> expr . + expr 
-expr -> expr . - expr 
-expr -> expr . * expr 
-expr -> expr . / expr 
-main -> expr . EOL 

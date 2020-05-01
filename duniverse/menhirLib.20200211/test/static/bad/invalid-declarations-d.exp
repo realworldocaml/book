@@ -1,8 +1,0 @@
-File "invalid-declarations-d.mly", line 10, characters 0-9:
-Error: syntax error after '%right' and before '%nonassoc'.
-Ill-formed precedence declaration.
-Examples of well-formed declarations:
-  %left PLUS
-  %left PLUS MINUS
-  %nonassoc unary_minus
-  %right CONCAT

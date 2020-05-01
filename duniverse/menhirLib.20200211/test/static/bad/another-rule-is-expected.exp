@@ -1,3 +1,0 @@
-File "another-rule-is-expected.mly", line 9, characters 0-5:
-Error: syntax error after ';' and before '%type'.
-Another rule is expected at this point.

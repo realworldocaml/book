@@ -1,3 +1,0 @@
-File "syntax-let.mly", line 3, characters 4-10:
-Error: syntax error after 'let' and before 'HAHAHA'.
-A lowercase identifier is expected at this point.

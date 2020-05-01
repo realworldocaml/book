@@ -1,3 +1,0 @@
-File "a-rule-is-expected.mly", line 5, characters 0-6:
-Error: syntax error after '%%' and before '%start'.
-A rule is expected at this point.

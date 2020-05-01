@@ -1,6 +1,0 @@
-%%
-
-main:
-  { () }
-
-%type<unit> main

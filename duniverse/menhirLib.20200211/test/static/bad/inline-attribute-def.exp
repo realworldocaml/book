@@ -1,3 +1,0 @@
-File "inline-attribute-def.mly", line 7, characters 12-21:
-Error: the nonterminal symbol foo is declared %inline.
-It cannot carry an attribute.

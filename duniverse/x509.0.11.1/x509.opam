@@ -1,0 +1,47 @@
+opam-version: "2.0"
+maintainer: [
+  "Hannes Mehnert <hannes@mehnert.org>"
+]
+authors: [
+  "Hannes Mehnert <hannes@mehnert.org>"
+  "David Kaloper <dk505@cam.ac.uk>"
+]
+license: "BSD-2-Clause"
+tags: "org:mirage"
+homepage: "https://github.com/mirleft/ocaml-x509"
+doc: "https://mirleft.github.io/ocaml-x509/doc"
+bug-reports: "https://github.com/mirleft/ocaml-x509/issues"
+depends: [
+  "ocaml" {>= "4.07.0"}
+  "dune" {>= "1.2"}
+  "cstruct" {>= "4.0.0"}
+  "asn1-combinators" {>= "0.2.0"}
+  "ptime"
+  "base64" {>= "3.0.0"}
+  "mirage-crypto"
+  "mirage-crypto-pk"
+  "rresult"
+  "fmt" {>= "0.8.7"}
+  "alcotest" {with-test}
+  "cstruct-unix" {with-test & >= "3.0.0"}
+  "mirage-crypto-rng" {with-test}
+  "gmap" {>= "0.3.0"}
+  "domain-name" {>= "0.3.0"}
+  "logs"
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/mirleft/ocaml-x509.git"
+synopsis: "Public Key Infrastructure (RFC 5280, PKCS) purely in OCaml"
+description: """
+X.509 is a public key infrastructure used mostly on the Internet.  It consists
+of certificates which include public keys and identifiers, signed by an
+authority. Authorities must be exchanged over a second channel to establish the
+trust relationship. This library implements most parts of RFC5280 and RFC6125.
+The Public Key Cryptography Standards (PKCS) defines encoding and decoding
+(in ASN.1 DER and PEM format), which is also implemented by this library -
+namely PKCS 1, PKCS 7, PKCS 8, PKCS 9 and PKCS 10.
+"""

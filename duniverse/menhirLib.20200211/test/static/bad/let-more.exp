@@ -1,5 +1,0 @@
-File "let-more.mly", line 3, characters 10-11:
-Error: syntax error after 'A' and before '+'.
-At this point, one of the following is expected:
-a comma ',' followed with an expression, or
-a closing parenthesis ')'.

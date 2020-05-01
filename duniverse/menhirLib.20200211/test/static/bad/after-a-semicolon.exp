@@ -1,8 +1,0 @@
-File "after-a-semicolon.mly", line 8, characters 0-6:
-Error: syntax error after ';' and before '%token'.
-After a semicolon, an expression is expected.
-(A rule cannot be terminated with a semicolon.)
-Examples of expressions:
-  term
-  t = term; { t }
-  LPAREN; ~ = term; RPAREN; <>

@@ -1,2 +1,0 @@
-File "two-prec.mly", line 10, characters 2-15:
-Error: this production carries two %prec declarations.

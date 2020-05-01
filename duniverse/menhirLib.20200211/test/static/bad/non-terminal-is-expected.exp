@@ -1,8 +1,0 @@
-File "non-terminal-is-expected.mly", line 3, characters 16-21:
-Error: syntax error after '%inline' and before '%type'.
-Ill-formed rule.
-A non-terminal symbol is expected at this point.
-Examples of well-formed rules:
-  %public option(X): { None } | x = X { Some x }
-  %inline clist(X): xs = separated_nonempty_list(COMMA?, X) { xs }
-  %public %inline pair(X, Y): x = X; y = Y { (x, y) }

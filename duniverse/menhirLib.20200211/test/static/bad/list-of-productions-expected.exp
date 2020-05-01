@@ -1,8 +1,0 @@
-File "list-of-productions-expected.mly", line 6, characters 0-5:
-Error: syntax error after '|' and before '%type'.
-Ill-formed rule.
-A list of productions is expected at this point.
-Examples of well-formed rules:
-  main: e = expr; EOL { e }
-  expr: i = INT { i } | e1 = expr; PLUS; e2 = expr { e1 + e2 }
-  symbol: s = LID | s = UID { s }

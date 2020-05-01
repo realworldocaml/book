@@ -1,3 +1,0 @@
-File "declaration-error-b.mly", line 3, characters 10-11:
-Error: syntax error inside a declaration.
-Did you perhaps forget the %% that separates declarations and rules?

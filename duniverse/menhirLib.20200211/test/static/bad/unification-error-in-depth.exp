@@ -1,4 +1,0 @@
-File "unification-error-in-depth.mly", line 5, characters 13-14:
-Error: how is the symbol "A" parameterized?
-It is used at sorts (a) -> * and *.
-The sort (a) -> * is not compatible with the sort *.
