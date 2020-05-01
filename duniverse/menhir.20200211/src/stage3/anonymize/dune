@@ -1,0 +1,4 @@
+(executable
+  (name anonymize)
+  (libraries str)
+)

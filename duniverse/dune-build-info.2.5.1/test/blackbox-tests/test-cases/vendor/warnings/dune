@@ -1,0 +1,10 @@
+(alias
+ (name no-warnings-please)
+ (deps vendored/lib.cmxa))
+
+(alias
+ (name no-warnings-please)
+ (deps vendored-two/lib2.cmxa)
+ (action (echo "There should be no OCaml warning!")))
+
+(vendored_dirs vendored vendored-two)

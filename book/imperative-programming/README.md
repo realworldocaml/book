@@ -305,7 +305,7 @@ Strings also come with their own syntax for getting and setting values:
 
 ```
 <string_expr>.[<index_expr>]
-          <string_expr>.[<index_expr>] <- <char_expr>
+<string_expr>.[<index_expr>] <- <char_expr>
 ```
 
 And string literals are bounded by quotes. There's also a module `String`
@@ -321,7 +321,7 @@ Bigarrays too have their own getting and setting syntax: [bigarrays]{.idx}
 
 ```
 <bigarray_expr>.{<index_expr>}
-          <bigarray_expr>.{<index_expr>} <- <value_expr>
+<bigarray_expr>.{<index_expr>} <- <value_expr>
 ```
 
 ### Mutable Record and Object Fields and Ref Cells
@@ -973,7 +973,7 @@ recursive call.
 ```ocaml env=fib
 # let fib_norec fib i =
     if i <= 1 then i
-  else fib (i - 1) + fib (i - 2)
+    else fib (i - 1) + fib (i - 2)
 val fib_norec : (int -> int) -> int -> int = <fun>
 ```
 
@@ -1147,7 +1147,7 @@ evaluation.
 
 ```ocaml env=letrec
 # force x
-Exception: Lazy.Undefined.
+Exception: Lazy.Undefined
 ```
 
 But we can also create useful recursive definitions with `lazy`. In
@@ -1487,7 +1487,7 @@ val sum_file : string -> int = <fun>
 And now, the file descriptor leak is gone:
 
 ```ocaml env=file2
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done
+# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts" : int) with _ -> () done
 - : unit = ()
 # sum_file "numbers.txt"
 - : int = 15
@@ -1602,7 +1602,7 @@ Consider the following example:
 # List.exists ~f:(fun x -> Float.O.(x < 0.))
     [ (printf "1\n"; Float.sin 120.);
       (printf "2\n"; Float.sin 75.);
-  (printf "3\n"; Float.sin 128.); ]
+      (printf "3\n"; Float.sin 128.); ]
 3
 2
 1

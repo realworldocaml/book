@@ -1,0 +1,2 @@
+(library (name eager_deferred) (public_name async_kernel.eager_deferred)
+ (libraries async_kernel core_kernel) (preprocess (pps ppx_jane)))

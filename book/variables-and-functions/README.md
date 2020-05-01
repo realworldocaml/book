@@ -14,11 +14,12 @@ this chapter after you've gotten a better sense of the rest of the language.
 
 ## Variables
 
-At its simplest, a variable is an identifier whose meaning is bound to a
-particular value. In OCaml these bindings are often introduced using the
-`let` keyword. We can type a so-called *top-level*`let` binding with the
-following syntax. Note that variable names must start with a lowercase letter
-or an underscore. [bindings/top-level]{.idx}[top-level bindings]{.idx}[let
+At its simplest, a variable is an identifier whose meaning is bound to
+a particular value. In OCaml these bindings are often introduced using
+the `let` keyword. We can type a so-called *top-level* `let` binding
+with the following syntax. Note that variable names must start with a
+lowercase letter or an
+underscore. [bindings/top-level]{.idx}[top-level bindings]{.idx}[let
 syntax/top-level bindings]{.idx}
 
 ```
@@ -198,7 +199,7 @@ patterns]{.idx}
 # let upcase_first_entry line =
     let (first :: rest) = String.split ~on:',' line in
     String.concat ~sep:"," (String.uppercase first :: rest)
-Line 2, characters 5-115:
+Lines 2-3, characters 5-60:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -370,7 +371,7 @@ right-associative. The type signature of `abs_diff` can therefore be
 parenthesized as follows. [curried functions]{.idx}[functions/curried
 functions]{.idx}
 
-```ocaml file=examples/abs_diff.mli
+```ocaml skip
 val abs_diff : int -> (int -> int)
 ```
 
@@ -819,14 +820,14 @@ Labeled arguments are useful in a few different cases:
   Boolean flag, which indicates whether that array will ever shrink when
   elements are removed.
 
-```ocaml file=examples/htable_sig1.ml
+```ocaml skip
 val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
 ```
 
 The signature makes it hard to divine the meaning of those two arguments.
   but with labeled arguments, we can make the intent immediately clear.
 
-```ocaml file=examples/htable_sig2.ml
+```ocaml skip
 val create_hashtable :
   init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
 ```
@@ -840,7 +841,7 @@ Choosing label names well is especially important for Boolean values, since
   the same type. For example, consider this signature for a function that
   extracts a substring.
 
-```ocaml file=examples/substring_sig1.ml
+```ocaml skip
 val substring: string -> int -> int -> string
 ```
 
@@ -848,7 +849,7 @@ Here, the two `ints` are the starting position and length of the substring
   to extract, respectively, but you wouldn't know that from the type
   signature. We can make the signature more informative by adding labels.
 
-```ocaml file=examples/substring_sig2.ml
+```ocaml skip
 val substring: string -> pos:int -> len:int -> string
 ```
 
@@ -1084,7 +1085,7 @@ Even worse, it would be perfectly consistent for `f` to take an optional
 argument instead of a labeled one, which could lead to this type signature
 for `numeric_deriv`.
 
-```ocaml file=examples/numerical_deriv_alt_sig.mli
+```ocaml skip
 val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float
@@ -1159,7 +1160,7 @@ if we try to pass in that optional argument now, it will be rejected.
 ```ocaml env=main
 # prepend_pound "a BASH comment" ~sep:":"
 Line 1, characters 1-14:
-Error: This function has type string -> string
+Error: This function has type Base.String.t -> Base.String.t
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
 

@@ -275,7 +275,7 @@ problem, which is that we haven't handled the new `Bold` tag:
     | Basic basic_color -> basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
     | Gray i -> 232 + i
-Line 1, characters 20-155:
+Lines 1-4, characters 20-24:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 Bold _
@@ -1137,7 +1137,7 @@ let extended_color_to_int : extended_color -> int = function
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
 
-```scheme
+```scheme file=examples/variants-termcol-annotated/dune
 (executable
   (name      terminal_color)
   (libraries core))

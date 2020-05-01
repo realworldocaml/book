@@ -1,0 +1,4 @@
+(test
+ (name test_roots)
+ (package ctypes-foreign)
+ (libraries ctypes ctypes-foreign.threaded oUnit))

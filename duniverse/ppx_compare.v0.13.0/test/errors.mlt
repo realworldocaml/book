@@ -1,0 +1,40 @@
+open Ppx_compare_lib.Builtin
+
+type t =
+  { x : int [@compare.ignore]
+  ; y : int
+  }
+  [@@deriving equal]
+[%%expect{|
+Line _, characters _-_:
+Error: Cannot use [@compare.ignore] with [@@deriving equal]
+|}]
+
+
+type t =
+  { x : int [@equal.ignore]
+  ; y : int
+  }
+  [@@deriving compare, equal]
+[%%expect{|
+Line _, characters _-_:
+Error: Cannot use [@equal.ignore] with [@@deriving compare].
+|}]
+
+(* The following ones are OK: *)
+
+type t =
+  { x : int [@compare.ignore] [@equal.ignore]
+  ; y : int
+  }
+  [@@deriving compare, equal]
+[%%expect{|
+|}]
+
+type t =
+  { x : int [@ignore]
+  ; y : int
+  }
+  [@@deriving compare, equal]
+[%%expect{|
+|}]

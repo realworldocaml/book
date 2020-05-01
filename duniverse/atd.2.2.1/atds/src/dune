@@ -1,0 +1,5 @@
+(executable
+ (name atds_main)
+ (public_name atds)
+ (package atds)
+ (libraries str atd))

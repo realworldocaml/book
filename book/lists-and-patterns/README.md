@@ -304,7 +304,7 @@ a case, along with an example of an unmatched pattern:
     match l with
     | [] -> []
     | 0  :: tl -> drop_zero tl
-Line 2, characters 5-63:
+Lines 2-4, characters 5-31:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 1::_
@@ -381,7 +381,7 @@ of mismatched length:
 
 ```ocaml env=main
 # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0]
-Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ").
+Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ")
 ```
 
 `List.fold` is the most complicated of the three, taking three arguments: a
@@ -920,7 +920,7 @@ runtime if it encounters a function value.
 
 ```ocaml env=poly
 # (fun x -> x + 1) = (fun x -> x + 1)
-Exception: (Invalid_argument "compare: functional value").
+Exception: (Invalid_argument "compare: functional value")
 ```
 
 Similarly, it will fail on values that come from outside the OCaml heap, like
@@ -969,7 +969,7 @@ exhaustive:
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
-Line 2, characters 5-144:
+Lines 2-5, characters 5-57:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_

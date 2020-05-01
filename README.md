@@ -27,7 +27,7 @@ and the chapter's code block in sync.
 The `bin/` folder contains the OCaml scripts used to generate the books HTML
 and PDF versions.
 
-All of the code and examples are built using OCaml 4.08.1.
+All of the code and examples are built using OCaml 4.09.0.
 
 ## Building
 
@@ -47,8 +47,8 @@ with only `dune` installed to avoid conflicts between the opam and local
 libraries. To set up your RWO development environment you can run:
 
 ```
-opam switch create rwo 4.08.1
-opam install dune=2.0.0
+opam switch create rwo 4.09.0
+opam install dune=2.0.1
 ```
 
 ### Generating the HTML

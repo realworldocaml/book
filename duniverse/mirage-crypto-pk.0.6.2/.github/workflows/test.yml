@@ -1,0 +1,28 @@
+name: Crypto
+on: [push, pull_request]
+jobs:
+  tests:
+    name: Tests
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-version: [ '4.08.1', '4.09.0', '4.10.0' ]
+        operating-system: [macos-latest, ubuntu-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@master
+    - uses: avsm/setup-ocaml@master
+      with:
+        ocaml-version: ${{ matrix.ocaml-version }}
+    - name: Deps
+      run: |
+        opam pin add -n mirage-crypto.dev .
+        opam pin add -n mirage-crypto-rng.dev .
+        opam pin add -n mirage-crypto-pk.dev .
+        opam pin add -n mirage-crypto-entropy.dev .
+        opam depext -y mirage-crypto mirage-crypto-rng mirage-crypto-pk mirage-crypto-entropy
+        opam install -t --deps-only .
+    - name: Build
+      run: opam exec -- dune build
+    - name: Test
+      run: opam exec -- dune runtest

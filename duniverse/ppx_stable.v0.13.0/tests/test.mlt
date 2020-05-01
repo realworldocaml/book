@@ -1,0 +1,745 @@
+;;
+#verbose true
+
+module Stable = struct
+  type a
+  type b1
+  type b2
+  type c1
+  type c2
+  type d1
+  type d2
+
+  module V1 = struct
+    type t =
+      { a : a
+      ; b1 : b1
+      ; c : c1
+      ; d : d1
+      }
+  end
+
+  module V2 = struct
+    type t =
+      { a : a
+      ; b2 : b2
+      ; c : c2
+      ; d : d2 * a
+      }
+    [@@deriving
+      stable_record ~version:V1.t ~add:[ b1 ] ~remove:[ b2 ] ~modify:[ c ] ~set:[ d ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    type a
+    type b1
+    type b2
+    type c1
+    type c2
+    type d1
+    type d2
+    module V1 : sig type t = { a : a; b1 : b1; c : c1; d : d1; } end
+    module V2 :
+      sig
+        type t = { a : a; b2 : b2; c : c2; d : d2 * a; }
+        val to_V1_t : t -> modify_c:(c2 -> c1) -> d:d1 -> b1:b1 -> V1.t
+        val of_V1_t : V1.t -> modify_c:(c1 -> c2) -> d:d2 * a -> b2:b2 -> t
+      end
+  end
+|}]
+
+(* types are not named t and nested *)
+module Stable = struct
+  module V1 = struct
+    module A = struct
+      type a =
+        { x : bool
+        ; y : int
+        }
+    end
+  end
+
+  module V2 = struct
+    module B = struct
+      type b =
+        { x : int
+        ; y : int
+        }
+      [@@deriving stable_record ~version:V1.A.a ~modify:[ x ]]
+    end
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 : sig module A : sig type a = { x : bool; y : int; } end end
+    module V2 :
+      sig
+        module B :
+          sig
+            type b = { x : int; y : int; }
+            val b_to_V1_A_a : b -> modify_x:(int -> bool) -> V1.A.a
+            val b_of_V1_A_a : V1.A.a -> modify_x:(bool -> int) -> b
+          end
+      end
+  end
+|}]
+
+(* nothing to convert *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : bool }
+  end
+
+  module V2 = struct
+    type t = { x : bool } [@@deriving stable_record ~version:V1.t]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 : sig type t = { x : bool; } end
+    module V2 :
+      sig
+        type t = { x : bool; }
+        val to_V1_t : t -> V1.t
+        val of_V1_t : V1.t -> t
+      end
+  end
+|}]
+
+(* Testing various error cases. *)
+
+(* Removing unknown field *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~remove:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some fields were supposed to be removed but they were not found: `y'
+|}]
+
+(* Modifying unknown field *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~modify:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some fields were supposed to be modified but they were not found: `y'
+|}]
+
+(* Adding unknown field *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int } [@@deriving stable_record ~version:V1.t ~add:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This record expression is expected to have type V1.t
+       The field y does not belong to type V1.t
+|}]
+
+(* Intersecting sets of add/remove. *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int }
+    [@@deriving stable_record ~version:V1.t ~add:[ f ] ~remove:[ f ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Sets `add' and `remove' must be disjoint but they are not: `f' found in both
+|}]
+
+(* Intersecting sets of modify/set. *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { x : int }
+    [@@deriving stable_record ~version:V1.t ~modify:[ x ] ~set:[ x ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Sets `modify' and `set' must be disjoint but they are not: `x' found in both
+|}]
+
+(* Wrong casing *)
+module Stable = struct
+  module V1 = struct
+    type t = { x : int }
+  end
+
+  module V2 = struct
+    type t = { y : int }
+    [@@deriving stable_record ~version:V1.t ~add:[ x ] ~remove:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some fields were supposed to be removed but they were not found: `Y'
+|}]
+
+(* omitted [~version] argument *)
+module Stable = struct
+  module V2 = struct
+    type t =
+      { x : int
+      ; f : float
+      ; z : string
+      }
+    [@@deriving stable_record ~add:[ y ] ~remove:[ f ] ~modify:[ z ]]
+  end
+end
+
+[%%expect {|
+Line _, characters _-_:
+Error: stable_record: missing target version
+|}]
+
+(* Variants suport *)
+
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = Y [@@deriving stable_variant ~version:V1.t ~add:[ X ] ~remove:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type t = X
+        module Stable_variant :
+          sig
+            val x : unit -> t
+            module Helper : sig val map : x:(unit -> 'a) -> t -> 'a end
+          end
+      end
+    module V2 :
+      sig
+        type t = Y
+        module Stable_variant :
+          sig
+            val y : unit -> t
+            module Helper : sig val map : y:(unit -> 'a) -> t -> 'a end
+          end
+        val to_V1_t : remove_Y:(unit -> V1.t) -> t -> V1.t
+        val of_V1_t : remove_X:(unit -> t) -> V1.t -> t
+      end
+  end
+|}]
+
+module Stable = struct
+  type a
+  type b
+  type c
+  type d
+  type e
+  type f
+  type g
+  type h
+  type i
+  type j
+  type k
+  type l
+
+  module V1 = struct
+    type t =
+      | I0
+      | I1 of a
+      | I2 of b * c
+      | X1
+      | X2 of j
+      | X3 of k * l
+      | Z1 of d * e
+      | Z2 of f
+      | Z3
+    [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t =
+      | I0
+      | I1 of a
+      | I2 of b * c
+      | Y1
+      | Y2 of g
+      | Y3 of h * i
+      | Z1
+      | Z2 of f
+      | Z3 of d * e
+    [@@deriving
+      stable_variant
+        ~version:V1.t
+        ~remove:[ Y1; Y2; Y3 ]
+        ~add:[ X1; X2; X3 ]
+        ~modify:[ Z1; Z2; Z3 ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    type a
+    type b
+    type c
+    type d
+    type e
+    type f
+    type g
+    type h
+    type i
+    type j
+    type k
+    type l
+    module V1 :
+      sig
+        type t =
+            I0
+          | I1 of a
+          | I2 of b * c
+          | X1
+          | X2 of j
+          | X3 of k * l
+          | Z1 of d * e
+          | Z2 of f
+          | Z3
+        module Stable_variant :
+          sig
+            val i0 : unit -> t
+            val i1 : a -> t
+            val i2 : b -> c -> t
+            val x1 : unit -> t
+            val x2 : j -> t
+            val x3 : k -> l -> t
+            val z1 : d -> e -> t
+            val z2 : f -> t
+            val z3 : unit -> t
+            module Helper :
+              sig
+                val map :
+                  i0:(unit -> 'a) ->
+                  i1:(a -> 'a) ->
+                  i2:(b -> c -> 'a) ->
+                  x1:(unit -> 'a) ->
+                  x2:(j -> 'a) ->
+                  x3:(k -> l -> 'a) ->
+                  z1:(d -> e -> 'a) ->
+                  z2:(f -> 'a) -> z3:(unit -> 'a) -> t -> 'a
+              end
+          end
+      end
+    module V2 :
+      sig
+        type t =
+            I0
+          | I1 of a
+          | I2 of b * c
+          | Y1
+          | Y2 of g
+          | Y3 of h * i
+          | Z1
+          | Z2 of f
+          | Z3 of d * e
+        module Stable_variant :
+          sig
+            val i0 : unit -> t
+            val i1 : a -> t
+            val i2 : b -> c -> t
+            val y1 : unit -> t
+            val y2 : g -> t
+            val y3 : h -> i -> t
+            val z1 : unit -> t
+            val z2 : f -> t
+            val z3 : d -> e -> t
+            module Helper :
+              sig
+                val map :
+                  i0:(unit -> 'a) ->
+                  i1:(a -> 'a) ->
+                  i2:(b -> c -> 'a) ->
+                  y1:(unit -> 'a) ->
+                  y2:(g -> 'a) ->
+                  y3:(h -> i -> 'a) ->
+                  z1:(unit -> 'a) ->
+                  z2:(f -> 'a) -> z3:(d -> e -> 'a) -> t -> 'a
+              end
+          end
+        val to_V1_t :
+          modify_Z1:(unit -> V1.t) ->
+          modify_Z2:(f -> V1.t) ->
+          modify_Z3:(d -> e -> V1.t) ->
+          remove_Y3:(h -> i -> V1.t) ->
+          remove_Y2:(g -> V1.t) -> remove_Y1:(unit -> V1.t) -> t -> V1.t
+        val of_V1_t :
+          modify_Z1:(d -> e -> t) ->
+          modify_Z2:(f -> t) ->
+          modify_Z3:(unit -> t) ->
+          remove_X3:(k -> l -> t) ->
+          remove_X2:(j -> t) -> remove_X1:(unit -> t) -> V1.t -> t
+      end
+  end
+|}]
+
+(* types are not named t and nested *)
+module Stable = struct
+  module V1 = struct
+    module A = struct
+      type a =
+        | X of bool
+        | Y
+      [@@deriving stable_variant]
+    end
+  end
+
+  module V2 = struct
+    module B = struct
+      type b =
+        | X of int
+        | Y
+      [@@deriving stable_variant ~version:V1.A.a ~modify:[ X ]]
+    end
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        module A :
+          sig
+            type a = X of bool | Y
+            module Stable_variant_of_a :
+              sig
+                val x : bool -> a
+                val y : unit -> a
+                module Helper :
+                  sig
+                    val map : x:(bool -> 'a) -> y:(unit -> 'a) -> a -> 'a
+                  end
+              end
+          end
+      end
+    module V2 :
+      sig
+        module B :
+          sig
+            type b = X of int | Y
+            module Stable_variant_of_b :
+              sig
+                val x : int -> b
+                val y : unit -> b
+                module Helper :
+                  sig
+                    val map : x:(int -> 'a) -> y:(unit -> 'a) -> b -> 'a
+                  end
+              end
+            val b_to_V1_A_a : modify_X:(int -> V1.A.a) -> b -> V1.A.a
+            val b_of_V1_A_a : modify_X:(bool -> b) -> V1.A.a -> b
+          end
+      end
+  end
+|}]
+
+(* nothing to convert *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type t = X
+        module Stable_variant :
+          sig
+            val x : unit -> t
+            module Helper : sig val map : x:(unit -> 'a) -> t -> 'a end
+          end
+      end
+    module V2 :
+      sig
+        type t = X
+        module Stable_variant :
+          sig
+            val x : unit -> t
+            module Helper : sig val map : x:(unit -> 'a) -> t -> 'a end
+          end
+        val to_V1_t : t -> V1.t
+        val of_V1_t : V1.t -> t
+      end
+  end
+|}]
+
+(* Error cases *)
+(* Removing unknown variant *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~remove:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some variants were supposed to be removed but they were not found: `Y'
+|}]
+
+(* Modifying unknown variant *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~modify:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some variants were supposed to be modified but they were not found: `Y'
+|}]
+
+(* Adding unknown variant *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~add:[ Y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type unit -> t
+       but an expression was expected of type unit -> y:'a -> 'b
+       Type t is not compatible with type y:'a -> 'b
+|}]
+
+(* Intersecting sets of add/remove. *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X [@@deriving stable_variant ~version:V1.t ~add:[ F ] ~remove:[ F ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Sets `add' and `remove' must be disjoint but they are not: `F' found in both
+|}]
+
+(* Wrong casing *)
+module Stable = struct
+  module V1 = struct
+    type t = X [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = Y [@@deriving stable_variant ~version:V1.t ~add:[ X ] ~remove:[ y ]]
+  end
+end
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Some variants were supposed to be removed but they were not found: `y'
+|}]
+
+(* Inline record support *)
+
+(* Generic example *)
+module Stable = struct
+  module V1 = struct
+    type t =
+      | I of
+          { x : int
+          ; y : float
+          }
+      | X of { x : int }
+      | Y of
+          { y : float
+          ; y1 : bool
+          }
+    [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t =
+      | I of
+          { x : int
+          ; y : float
+          }
+      | X of { x : float }
+      | Z of
+          { z : float * int
+          ; z1 : float * bool
+          }
+    [@@deriving stable_variant ~version:V1.t ~add:[ Y ] ~remove:[ Z ] ~modify:[ X ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type t =
+            I of { x : int; y : float; }
+          | X of { x : int; }
+          | Y of { y : float; y1 : bool; }
+        module Stable_variant :
+          sig
+            val i : x:int -> y:float -> t
+            val x : x:int -> t
+            val y : y:float -> y1:bool -> t
+            module Helper :
+              sig
+                val map :
+                  i:(x:int -> y:float -> 'a) ->
+                  x:(x:int -> 'a) -> y:(y:float -> y1:bool -> 'a) -> t -> 'a
+              end
+          end
+      end
+    module V2 :
+      sig
+        type t =
+            I of { x : int; y : float; }
+          | X of { x : float; }
+          | Z of { z : float * int; z1 : float * bool; }
+        module Stable_variant :
+          sig
+            val i : x:int -> y:float -> t
+            val x : x:float -> t
+            val z : z:float * int -> z1:float * bool -> t
+            module Helper :
+              sig
+                val map :
+                  i:(x:int -> y:float -> 'a) ->
+                  x:(x:float -> 'a) ->
+                  z:(z:float * int -> z1:float * bool -> 'a) -> t -> 'a
+              end
+          end
+        val to_V1_t :
+          modify_X:(x:float -> V1.t) ->
+          remove_Z:(z:float * int -> z1:float * bool -> V1.t) -> t -> V1.t
+        val of_V1_t :
+          modify_X:(x:int -> t) ->
+          remove_Y:(y:float -> y1:bool -> t) -> V1.t -> t
+      end
+  end
+|}]
+
+(* Record has the same name as constructor *)
+module Stable = struct
+  module V1 = struct
+    type t = X of { x : float } [@@deriving stable_variant]
+  end
+
+  module V2 = struct
+    type t = X of { x : int } [@@deriving stable_variant ~version:V1.t ~modify:[ X ]]
+  end
+end
+
+[%%expect
+  {|
+module Stable :
+  sig
+    module V1 :
+      sig
+        type t = X of { x : float; }
+        module Stable_variant :
+          sig
+            val x : x:float -> t
+            module Helper : sig val map : x:(x:float -> 'a) -> t -> 'a end
+          end
+      end
+    module V2 :
+      sig
+        type t = X of { x : int; }
+        module Stable_variant :
+          sig
+            val x : x:int -> t
+            module Helper : sig val map : x:(x:int -> 'a) -> t -> 'a end
+          end
+        val to_V1_t : modify_X:(x:int -> V1.t) -> t -> V1.t
+        val of_V1_t : modify_X:(x:float -> t) -> V1.t -> t
+      end
+  end
+|}]

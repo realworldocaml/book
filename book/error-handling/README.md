@@ -538,7 +538,7 @@ the `assert`:
     loop xs ys
 val merge_lists : 'a list -> 'b list -> f:('a -> 'b -> 'c) -> 'c list = <fun>
 # merge_lists [1;2;3] [-1] ~f:(+)
-Exception: "Assert_failure //toplevel//:6:14".
+Exception: "Assert_failure //toplevel//:6:14"
 ```
 
 This shows what's special about `assert`: it captures the line number and
@@ -777,6 +777,8 @@ off by setting the `OCAMLRUNPARAM` environment variable to be empty:
 $ OCAMLRUNPARAM= dune exec -- ./blow_up.bc
 3
 Fatal error: exception Blow_up.Empty_list
+Raised at file "blow_up.ml", line 6, characters 16-26
+Called from file "blow_up.ml", line 11, characters 16-29
 [2]
 ```
 
@@ -885,9 +887,9 @@ exceptions and error-aware types]{.idx}
   Option.try_with (fun () -> find_exn alist key)
 val find : (string * 'a) list -> string -> 'a option = <fun>
 # find ["a",1; "b",2] "c"
-- : int option = None
+- : int option = Base.Option.None
 # find ["a",1; "b",2] "b"
-- : int option = Some 2
+- : int option = Base.Option.Some 2
 ```
 
 And `Result` and `Or_error` have similar `try_with` functions. So, we could

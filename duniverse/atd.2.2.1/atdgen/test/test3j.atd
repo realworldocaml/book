@@ -1,0 +1,97 @@
+(* JSON support only *)
+
+type json <ocaml module="Yojson.Safe" t="t"> = abstract
+type dyn <ocaml module="Yojson.Safe" t="t"> = abstract
+
+type t = {
+  foo: int;
+  bar: json;
+  baz: dyn
+}
+
+type unixtime_list = int <ocaml repr="float"> list
+
+type patch = {
+  ?patch1: int nullable option;
+  ?patch2: int nullable option;
+  ?patch3: int nullable option;
+} <json keep_nulls>
+
+(*** Test json adapters ***)
+
+(*
+   The real json representation uses an object with a `"type"` field
+   equal to `"a"` or `"b"`. Types `a` and `b` are incompatible
+   with one another.
+
+   See normalize/restore functions in `adapter.ml`.
+*)
+type adapted = [
+  | A <json name="a"> of a
+  | B <json name="b"> of b
+] <json adapter.ocaml="Atdgen_runtime.Json_adapter.Type_field">
+
+type a = {
+  thing: string;
+  other_thing: bool;
+}
+
+type b = {
+  thing: int; (* field name found in `a` with another type! *)
+}
+
+(* Json adapters on recursive types *)
+
+type rec_type = {
+  more: rec_type list;
+} <json adapter.ocaml="Json_adapters.Identity">
+
+(*
+   Test variants represented as single-field json objects.
+*)
+type sf_adapted = [
+  | A <json name="a"> of bool
+  | B <json name="b"> of int
+] <json adapter.ocaml="Atdgen_runtime.Json_adapter.One_field">
+
+(*
+   Test substitute for the retired tag_field feature.
+*)
+
+type tf_variant = [
+  | A <json name="a"> of int
+  | B <json name="b"> of int
+]
+
+(*
+   Sample raw json: { "the_type": "a", "the_value": 123, "etc": "blah" }
+   Sample normalized json: { "the_value": ["a", 123], "etc": "blah" }
+   Test_lib.Tag_field_example takes care of the conversion
+   between the two forms.
+*)
+type tf_record = {
+  the_value : tf_variant;
+  etc : string;
+} <json adapter.ocaml="Test_lib.Tag_field_example">
+
+type tf_variant2 = [
+  | A <json name="a"> of int
+  | B <json name="b"> of int
+  | Unknown of (string * json nullable)
+]
+
+type tf_record2 = {
+  the_value2 : tf_variant2;
+  etc2 : string;
+} <json adapter.ocaml="Test_lib.Tag_field_with_catchall">
+
+(*
+   Test open_enum feature.
+*)
+type sample_open_enum = [
+  | Alpha
+  | Beta
+  | Other of string
+] <json open_enum>
+
+type sample_open_enums = sample_open_enum list

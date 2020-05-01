@@ -1,4 +1,0 @@
-(test
-  (name      test)
-  (package   mirage-kv)
-  (libraries mirage-kv alcotest))

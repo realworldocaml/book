@@ -1,0 +1,314 @@
+#+TITLE: expect-test - a cram like framework for OCaml
+
+** Introduction
+
+Expect-test is a framework for writing tests in OCaml, similar to [[https://bitheap.org/cram/][Cram]].
+Expect-tests mimic the existing inline tests framework with the =let%expect_test= construct.
+The body of an expect-test can contain output-generating code, interleaved with =%expect= extension
+expressions to denote the expected output.
+
+When run, these tests will pass iff the output matches what was expected. If a test fails, a
+corrected file with the suffix ".corrected" will be produced with the actual output, and the
+=inline_tests_runner= will output a diff.
+
+Here is an example Expect-test program, say in =foo.ml=
+
+#+begin_src ocaml
+open Core
+
+let%expect_test "addition" =
+  printf "%d" (1 + 2);
+  [%expect {| 4 |}]
+#+end_src
+
+When the test is run (as part of =inline_tests_runner=), =foo.ml.corrected= will be produced with the
+contents:
+
+#+begin_src ocaml
+open Core
+
+let%expect_test "addition" =
+  printf "%d" (1 + 2);
+  [%expect {| 3 |}]
+#+end_src
+
+=inline_tests_runner= will also output the diff:
+
+#+begin_src
+---foo.ml
++++foo.ml.corrected
+File "foo.ml", line 5, characters 0-1:
+  open Core
+
+  let%expect_test "addition" =
+    printf "%d" (1 + 2);
+-|  [%expect {| 4 |}]
++|  [%expect {| 3 |}]
+#+end_src
+
+Diffs will be shown in color if the =-use-color= flag is passed to the test runner executable.
+
+** Expects reached from multiple places
+
+A [%expect] can exist in a way that it is encountered multiple times, e.g. in a
+functor or a function:
+
+#+begin_src ocaml
+let%expect_test _ =
+  let f output =
+    print_string output;
+    [%expect {| hello world |}]
+  in
+  f "hello world";
+  f "hello world";
+;;
+#+end_src
+
+The =[%expect]= should capture the exact same output (i.e. up to string equality) at every
+invocation. In particular, this does **not** work:
+
+#+begin_src ocaml
+let%expect_test _ =
+  let f output =
+    print_string output;
+    [%expect {| \(foo\|bar\) (regexp) |}]
+  in
+  f "foo";
+  f "bar";
+;;
+#+end_src
+
+** Output matching
+
+Matching is done on a line-by-line basis. If any output line fails to
+match its expected output, the expected line is replaced with the
+actual line in the final output.
+
+*** Whitespace
+
+Inside =%expect= nodes, whitespace around patterns are ignored, and
+the user is free to put any amount for formatting purposes. The same
+goes for the actual output.
+
+Ignoring surrounding whitespace allows to write nicely formatted
+expectation and focus only on matching the bits that matter.
+
+To do this, ppx_expect strips patterns and outputs by taking the
+smallest rectangle of text that contains the non-whitespace
+material. All end of line whitespace are ignored as well. So for
+instance all these lines are equivalent:
+
+#+begin_src ocaml
+  print blah;
+  [%expect {|
+abc
+defg
+  hij|}]
+
+  print blah;
+  [%expect {|
+                abc
+                defg
+                  hij
+  |}]
+
+  print blah;
+  [%expect {|
+    abc
+    defg
+      hij
+  |}]
+#+end_src
+
+However, the last one is nicer to read.
+
+For the rare cases where one does care about what the exact output is,
+ppx_expect provides the =%expect_exact= extension point, which only
+succeed when the untouched output is exactly equal to the untouched
+pattern.
+
+When producing a correction, ppx_expect tries to respect as much as
+possible the formatting of the pattern.
+
+** Output capture
+
+The extension point =[%expect.output]= returns a =string= with the output that
+would have been matched had an =[%expect]= node been there instead.
+
+An idiom for testing non-deterministic output is to capture the output using
+=[%expect.output]= and either post-process it or inspect it manually, e.g.,
+
+#+BEGIN_SRC ocaml
+show_process ();
+let pid_and_exit_status = [%expect.output] in
+let exit_status = discard_pid pid_and_exit_status in
+print_endline exit_status;
+[%expect {| 1 |}]
+#+END_SRC
+
+This is preferred over output patterns (see below).
+
+** Integration with Async, Lwt or other cooperative libraries
+
+If you are writing expect tests for a system using Async, Lwt or any
+other libraries for cooperative threading, you need some preparation
+so that everything works well. For instance, you probably need to
+flush some =stdout= channel. The expect test runtime takes care of
+flushing =Caml.stdout= but it doesn't know about
+=Async.Writer.stdout=, =Lwt_io.stdout= or anything else.
+
+To deal with this, expect\_test provides some hooks in the form of a
+configuration module =Expect_test_config=. The default module in scope
+define no-op hooks that the user can override. =Async= redefines
+this module so when =Async= is opened you can write async-aware
+expect test.
+
+In addition to =Async.Expect_test_config=, there is an
+alternative, =Async.Expect_test_config_with_unit_expect=.  That is
+easier to use than =Async.Expect_test_config= because =[%expect]= has
+type =unit= rather than =unit Deferred.t=.  So one can write:
+
+#+begin_src ocaml
+[%expect foo];
+#+end_src
+
+rather than:
+
+#+begin_src ocaml
+let%bind () = [%expect foo] in
+#+end_src
+
+=Expect_test_config_with_unit_expect= arrived in 2019-06.  We hope to
+transition from =Expect_test_config= to
+=Expect_test_config_with_unit_expect=, eventually renaming the latter
+as the former.
+
+*** LWT
+
+This is what you would need to write expect tests with Lwt:
+
+#+begin_src ocaml
+module Expect_test_config
+  : Expect_test_config.S with module IO = Lwt =
+struct
+  module IO = Lwt
+  let flush () = Lwt_io.(flush stdout)
+  let run = Lwt_main.run
+end
+#+end_src
+
+** Comparing Expect-test and unit testing (e.g. =let%test_unit=)
+
+The simple example above can be easily represented as a unit test:
+
+#+begin_src ocaml
+let%test_unit "addition" = [%test_result: int] (1 + 2) ~expect:4
+#+end_src
+
+So, why would one use Expect-test rather than a unit test?  There are
+several differences between the two approaches.
+
+With a unit test, one must write code that explicitly checks that the
+actual behavior agrees with the expected behavior.  =%test_result= is
+often a convenient way of doing that, but even using that requires:
+
+- creating a value to compare
+- writing the type of that value
+- having a comparison function on the value
+- writing down the expected value
+
+With Expect-test, we can simply add print statements whose output gives
+insight into the behavior of the program, and blank =%expect=
+attributes to collect the output.  We then run the program to see if
+the output is acceptable, and if so, *replace* the original program
+with its output.  E.g we might first write our program like this:
+
+#+begin_src ocaml
+let%expect_test _ =
+  printf "%d" (1 + 2);
+  [%expect {||}]
+#+end_src
+
+The corrected file would contain:
+
+#+begin_src ocaml
+let%expect_test _ =
+  printf "%d" (1 + 2);
+  [%expect {| 3 |}]
+#+end_src
+
+With Expect-test, we only have to write code that prints things that we
+care about.  We don't have to construct expected values or write code
+to compare them.  We get comparison for free by using diff on the
+output.  And a good diff (e.g. patdiff) can make understanding
+differences between large outputs substantially easier, much easier
+than typical unit-testing code that simply states that two values
+aren't equal.
+
+Once an Expect-test program produces the desired expected output and we
+have replaced the original program with its output, we now
+automatically have a regression test going forward.  Any undesired
+change to the output will lead to a mismatch between the source
+program and its output.
+
+With Expect-test, the source program and its output are interleaved.  This
+makes debugging easier, because we do not have to jump between source
+and its output and try to line them up.  Furthermore, when there is a
+mismatch, we can simply add print statements to the source program and
+run it again.  This gives us interleaved source and output with the
+debug messages interleaved in the right place.  We might even insert
+additional empty =%%expect= attributes to collect debug messages.
+
+** Implementation
+
+Every =%expect= node in an Expect-test program becomes a point at which
+the program output is captured. Once the program terminates, the
+captured outputs are matched against the expected outputs, and interleaved with
+the original source code to produce the corrected file. Trailing output is appended in a
+new =%expect= node.
+
+** Build system integration
+
+Follow the same rules as for [[https://github.com/janestreet/ppx_inline_test][ppx_inline_test]]. Just make sure to
+include =ppx_expect.evaluator= as a dependency of the test runner. The
+[[https://github.com/janestreet/jane-street-tests][Jane Street tests]] contains a few working examples using oasis.
+
+** Output patterns
+
+Lines in an =%expect= can end with a "tag" indicating the kind of
+match to perform.  This functionality is deprecated because it
+interferes with the smooth expect-test workflow of accepting output.
+One should instead use output post-processing.
+
+To enable support for output patterns, your =jbuild= file should have:
+
+=((inline_tests ((flags (-allow-output-patterns)))))=
+
+Here are the different kinds of output patterns.
+
+The =(regexp)= tag will perform regexp matching on the given line:
+
+#+begin_src ocaml
+printf "foo";
+[%expect {| foo\|bar (regexp) |}]
+#+end_src
+
+Similarly, the =(glob)= tag will perform glob matching on the given
+line:
+
+#+begin_src ocaml
+printf "foobarbaz";
+[%expect {| {foo,hello}* (glob) |}]
+#+end_src
+
+The =(literal)= tag will force a literal match on a line, and can be
+useful in edge cases:
+
+#+begin_src ocaml
+printf "foo*bar (regexp)";
+[%expect {| foo*bar (regexp) (literal) |}]
+#+end_src
+
+The =(escaped)= tag will treat the line as an escaped literal string,
+which can be useful for matching unprintable characters. It doesn't
+support escaped newlines right now.

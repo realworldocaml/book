@@ -56,7 +56,7 @@ let to_string t =
 
 let is_elem_node item name' = match item with
   | `Data _ -> false
-  | `Element {name; _} -> name' = name
+  | `Element {name; _} -> String.(name' = name)
 
 let has_html_extension file =
   Filename.split_extension file
@@ -74,7 +74,7 @@ let get_all_nodes tag t =
     List.fold t ~init:[] ~f:(fun accum item ->
       match item with
       | `Element {name; childs; _} ->
-        if name = tag then
+        if String.(name = tag) then
           item::accum
         else
           (helper childs)@accum
@@ -88,10 +88,10 @@ let is_nested name t =
   let rec loop have_seen = function
     | `Data _ -> false
     | `Element {name=name'; childs; _} ->
-      if have_seen && (name = name') then
+      if have_seen && String.(name = name') then
         true
       else
-        let have_seen = have_seen || (name = name') in
+        let have_seen = have_seen || String.(name = name') in
         List.exists childs ~f:(loop have_seen)
   in
   List.exists t ~f:(loop false)

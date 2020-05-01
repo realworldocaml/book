@@ -306,26 +306,15 @@
            ../book/toc.scm)
   (action  (run rwo-build build inputs -o . -repo-root ..)))
 
-(rule
-  (targets book.aux book.idx book.toc)
-  (deps    (alias ../book/latex)
-           (:x ../book/book.tex)
-           inputs.tex)
-  (action  (system "pdflatex -interaction=nonstopmode %{x} -draftmode")))
-
-(rule
-  (targets book.ind)
-  (deps    (:x book.idx))
-  (action  (system "makeindex %{x}")))
-
 (alias (name pdf) (deps book.pdf))
 
 (rule
   (targets book.pdf)
   (deps    (alias ../book/latex)
            (:x ../book/book.tex)
-           inputs.tex
-           book.aux
-           book.ind
-           book.toc)
-  (action  (system "pdflatex -interaction=nonstopmode %{x}")))
+           inputs.tex)
+  (action
+   (progn
+    (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
+    (system "makeindex book.idx")
+    (system "pdflatex -interaction=nonstopmode %{x}"))))

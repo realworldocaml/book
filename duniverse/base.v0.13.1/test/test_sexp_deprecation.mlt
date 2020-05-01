@@ -1,0 +1,45 @@
+open! Base
+
+type t = unit sexp_array
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.sexp_array
+[since 2019-03] use [@sexp.array] instead
+|}]
+
+type t = sexp_bool
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Unbound type constructor sexp_bool
+|}]
+
+type t = unit sexp_list
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.sexp_list
+[since 2019-03] use [@sexp.list] instead
+|}]
+
+type t = unit sexp_option
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.sexp_option
+[since 2019-03] use [@sexp.option] instead
+|}]
+
+type t = unit sexp_opaque
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.sexp_opaque
+[since 2019-03] use [@sexp.opaque] instead
+|}]

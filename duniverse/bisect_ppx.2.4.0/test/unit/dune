@@ -1,0 +1,8 @@
+(executable
+ (name test_main)
+ (libraries bisect_ppx.runtime compiler-libs.common ounit2))
+
+(alias
+ (name runtest)
+ (deps (:tester test_main.exe) (source_tree fixtures))
+ (action (run %{tester} -runner processes -shards 6)))

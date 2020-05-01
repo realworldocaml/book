@@ -1,0 +1,7 @@
+let succ x = x + 1[@@ocaml.inline never][@@ocaml.local never][@@ocaml.specialise
+                                                               never]
+let pred x = x - 1[@@ocaml.inline never][@@ocaml.local never][@@ocaml.specialise
+                                                               never]
+let id x = ((x)[@ocaml.warning "-8"])[@@ocaml.inline never][@@ocaml.local
+                                                             never][@@ocaml.specialise
+                                                                    never]

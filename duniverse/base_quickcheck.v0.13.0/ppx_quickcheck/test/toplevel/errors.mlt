@@ -1,0 +1,85 @@
+type abstract [@@deriving quickcheck]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: abstract type
+|}]
+
+type gadt = GADT : 'a -> gadt [@@deriving quickcheck]
+
+[%%expect {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: GADT
+|}]
+
+type variant_gt = [> `tag ] [@@deriving quickcheck]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: polymorphic variant type with [>]
+|}]
+
+type variant_lt = [< `tag ] [@@deriving quickcheck]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: polymorphic variant type with [<]
+|}]
+
+type record_mutable =
+  { pure : int
+  ; mutable impure : int
+  }
+[@@deriving quickcheck]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: mutable record field
+|}]
+
+type ('a, 'b) fn = 'a -> 'b [@@deriving quickcheck]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: invalid syntax: misuse of type variable 'a: would confuse observer with generator in generated code; could be due to a missing or incorrect covariance/contravariance annotation
+|}]
+
+let _ = [%quickcheck.generator: [%arbitrary.tag? ()]]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: uknown extension: arbitrary.tag
+|}]
+
+let _ = [%quickcheck.observer: [%custom ;;
+  1
+  ;;
+  2]]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: invalid syntax: [%custom] extension expects a single expression as its payload
+|}]
+
+let _ = [%quickcheck.shrinker: unit * [%custom: bool] * char]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: invalid syntax: [%custom] extension expects a single expression as its payload
+|}]
+
+let _ = [%quickcheck.generator: _ list]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_quickcheck: unsupported: wildcard type
+|}]

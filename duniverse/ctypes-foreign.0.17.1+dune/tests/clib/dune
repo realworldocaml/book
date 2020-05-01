@@ -1,0 +1,8 @@
+(library
+ (name test_functions)
+ (install_c_headers test_functions)
+ (foreign_stubs
+  (language c)
+  (names test_functions))
+ (c_library_flags -pthread)
+ (libraries ctypes))

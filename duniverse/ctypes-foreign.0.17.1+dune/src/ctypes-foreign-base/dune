@@ -1,0 +1,30 @@
+(rule
+ (copy# "dl_stubs.c.%{read-lines:backend.sexp}" dl_stubs.c))
+
+(rule
+ (copy# "dl.ml.%{read-lines:backend.sexp}" dl.ml))
+
+(rule
+ (with-stdout-to
+  libffi_abi.ml
+  (run ./config/gen_libffi_abi.exe -cflags "%{read-lines:c_flags}")))
+
+(library
+ (name ctypes_foreign_base)
+ (public_name ctypes-foreign.base)
+ (preprocess
+  (pps bisect_ppx --conditional))
+ (wrapped false)
+ (libraries ctypes)
+ (c_library_flags
+  (:include c_library_flags.sexp))
+ (foreign_stubs
+  (language c)
+  (names dl_stubs ffi_call_stubs ffi_type_stubs)
+  (flags
+   (:include c_flags.sexp))))
+
+(rule
+ (targets c_flags c_flags.sexp c_library_flags.sexp backend.sexp)
+ (action
+  (run ./config/discover.exe)))

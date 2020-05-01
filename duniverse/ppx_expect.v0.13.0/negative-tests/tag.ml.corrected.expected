@@ -1,0 +1,21 @@
+open! Core
+
+let%expect_test _ =
+  (* Correction should include a string tag *)
+  print_string "{|String tag required|}";
+  [%expect {xxx| {|String tag required|} |xxx}]
+;;
+
+let%expect_test _ =
+  (* The correction should use the same string-kind (normal,quoted) as the [%expect] *)
+  print_string "foo\\bar";
+  [%expect {| foo\bar |}];
+  print_string "hey\\ho";
+  [%expect_exact "hey\\ho"];
+  print_string {|
+    Foo
+    "bar baz"|};
+  [%expect{|
+    Foo
+    "bar baz" |}]
+;;

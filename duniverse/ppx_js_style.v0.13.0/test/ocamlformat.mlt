@@ -1,0 +1,25 @@
+
+let _ : _ = 3 [@ocamlformat "test"]
+
+[%%expect {|
+Line _, characters _-_:
+Error: Invalid ocamlformat attribute. Ocamlformat cannot be configured locally
+|}]
+
+[@@@ocamlformat "disable"]
+
+let _ : _ = `dont_reformat_me
+
+[@@@ocamlformat "enable"]
+
+[%%expect {|
+|}]
+
+
+let _ = x [@@ocamlformat "disable"]
+
+[%%expect {|
+Line _, characters _-_:
+Error: Invalid ocamlformat attribute. Ocamlformat can only be disabled at toplevel
+(e.g [@@@ocamlformat "disable"])
+|}]

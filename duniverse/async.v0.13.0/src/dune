@@ -1,0 +1,4 @@
+(library (name async) (public_name async)
+ (libraries async_command async_kernel async_quickcheck async_rpc async_unix
+  core)
+ (preprocess (pps ppx_jane -check-doc-comments)))

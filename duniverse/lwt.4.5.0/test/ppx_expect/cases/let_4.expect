@@ -1,3 +1,0 @@
-File "let_4.ml", line 3, characters 14-17:
-Error: This expression has type unit but an expression was expected of type
-         int

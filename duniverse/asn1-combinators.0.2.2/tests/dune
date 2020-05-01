@@ -1,0 +1,14 @@
+(library
+  (name x509)
+  (modules x509)
+  (libraries asn1-combinators))
+
+(test
+  (name test)
+  (modules test)
+  (libraries x509 alcotest))
+
+(executable
+  (name bench)
+  (modules bench)
+  (libraries asn1-combinators x509))

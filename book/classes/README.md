@@ -131,7 +131,7 @@ be "too polymorphic": `init` could have some type `'b list`:
     method push hd =
       v <- hd :: v
   end
-Line 1, characters 1-216:
+Lines 1-13, characters 1-6:
 Error: Some type variables are unbound in this type:
          class ['a] stack :
            'b list ->
@@ -1275,7 +1275,7 @@ graphical display and ask Async to run `repaint` at regular intervals.
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies:
 
-```scheme
+```scheme file=examples/shapes/dune
 (executable
   (name      shapes)
   (modules   shapes)

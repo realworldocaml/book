@@ -1,0 +1,2 @@
+(library (name ppx_cold) (public_name ppx_cold) (libraries base ppxlib)
+ (preprocess no_preprocessing))

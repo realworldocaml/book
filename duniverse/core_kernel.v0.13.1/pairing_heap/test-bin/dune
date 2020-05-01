@@ -1,0 +1,6 @@
+(alias (name runtest) (deps (:first_dep test_pairing_heap.exe))
+ (action (bash ./%{first_dep})))
+
+(executables (names test_pairing_heap)
+ (libraries core pairing_heap oUnit quickcheck_deprecated)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))

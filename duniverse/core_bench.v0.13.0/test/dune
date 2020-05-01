@@ -1,0 +1,3 @@
+(executables (names test_bench mv_regr)
+ (libraries core core_bench core.time_stamp_counter)
+ (preprocess no_preprocessing))

@@ -1,0 +1,4 @@
+(library (name ppx_bench_sample_lib) (libraries core)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))
+
+(alias (name DEFAULT) (deps ppx_bench_sample.ml.pp))

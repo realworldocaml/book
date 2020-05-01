@@ -499,7 +499,7 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring:
 
-```scheme
+```scheme file=examples/barrier_bench/dune
 (executable
   (name      barrier_bench)
   (modules   barrier_bench)
@@ -623,7 +623,7 @@ type t = { foo: bool }
 
 let main () =
   let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = alloced_float > 0.0 in
+  let alloced_bool = Float.is_positive alloced_float in
   let alloced_string = Bytes.create 4 in
   attach_finalizer "immediate int" 1;
   attach_finalizer "immediate float" 1.0;
@@ -645,7 +645,7 @@ let () =
 
 Building and running this should show the following output:
 
-```scheme
+```scheme file=examples/finalizer/dune
 (executable
   (name      finalizer)
   (modules   finalizer)

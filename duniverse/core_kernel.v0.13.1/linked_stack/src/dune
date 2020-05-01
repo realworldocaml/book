@@ -1,0 +1,2 @@
+(library (name linked_stack) (public_name core_kernel.linked_stack)
+ (libraries core_kernel) (preprocess (pps ppx_jane)))

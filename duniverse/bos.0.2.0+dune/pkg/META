@@ -1,0 +1,27 @@
+description = "Basic OS interaction for OCaml"
+version = "%%VERSION_NUM%%"
+requires = "rresult astring fpath fmt unix logs"
+archive(byte) = "bos.cma"
+archive(native) = "bos.cmxa"
+plugin(byte) = "bos.cma"
+plugin(native) = "bos.cmxs"
+
+package "top" (
+  description = "Bos toplevel support"
+  version = "%%VERSION_NUM%%"
+  requires = "rresult.top astring.top fpath.top fmt.top logs.top bos"
+  archive(byte) = "bos_top.cma"
+  archive(native) = "bos_top.cmxa"
+  plugin(byte) = "bos_top.cma"
+  plugin(native) = "bos_top.cmxs"
+)
+
+package "setup" (
+  description = "Bos quick setup for simple programs"
+  version = "%%VERSION_NUM%%"
+  requires = "fmt.tty logs.fmt bos"
+  archive(byte) = "bos_setup.cma"
+  archive(native) = "bos_setup.cmxa"
+  plugin(byte) = "bos_setup.cma"
+  plugin(native) = "bos_setup.cmxs"
+)

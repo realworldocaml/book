@@ -1,0 +1,5 @@
+(library
+ (name bisect)
+ (public_name bisect_ppx.runtime)
+ (synopsis "Bisect_ppx runtime library (internal)")
+ (libraries bisect_ppx.common unix))

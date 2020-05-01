@@ -1,0 +1,3 @@
+(library (name ppx_here_expander) (public_name ppx_here.expander)
+ (libraries base ppxlib) (preprocess no_preprocessing)
+ (ppx_runtime_libraries ppx_here.runtime-lib))

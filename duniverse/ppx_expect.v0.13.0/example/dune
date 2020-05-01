@@ -1,0 +1,9 @@
+(library (name expect_test_examples) (libraries core async)
+ (preprocess (pps ppx_jane)))
+
+(rule (targets tabs.ml) (deps (:first_dep tabs.ml.in) jbuild)
+ (action
+  (bash
+   "cp %{first_dep} %{targets}; %{bin:apply-style} -directory-config jbuild -in-place %{targets}")))
+
+(alias (name DEFAULT) (deps tests.ml.pp))

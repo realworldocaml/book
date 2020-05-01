@@ -85,29 +85,18 @@ let dune_for_pdf () =
            ../book/toc.scm)
   (action  (run rwo-build build inputs -o . -repo-root ..)))
 
-(rule
-  (targets book.aux book.idx book.toc)
-  (deps    (alias ../book/latex)
-           (:x ../book/book.tex)
-           inputs.tex)
-  (action  (system "pdflatex -interaction=nonstopmode %%{x} -draftmode")))
-
-(rule
-  (targets book.ind)
-  (deps    (:x book.idx))
-  (action  (system "makeindex %%{x}")))
-
 (alias (name pdf) (deps book.pdf))
 
 (rule
   (targets book.pdf)
   (deps    (alias ../book/latex)
            (:x ../book/book.tex)
-           inputs.tex
-           book.aux
-           book.ind
-           book.toc)
-  (action  (system "pdflatex -interaction=nonstopmode %%{x}")))|}
+           inputs.tex)
+  (action
+   (progn
+    (system "pdflatex -interaction=nonstopmode %%{x} -draftmode")
+    (system "makeindex book.idx")
+    (system "pdflatex -interaction=nonstopmode %%{x}"))))|}
 
 let read_toc base_dir =
   let f = base_dir / toc_file in
@@ -202,7 +191,7 @@ let process_md ~toc book_dir =
   in
   main_dune ()
 
-let _ =
+let () =
   let toc = read_toc "book" in
   process_md ~toc "book";
-  process_chapters ~toc "book" "static";
+  process_chapters ~toc "book" "static"

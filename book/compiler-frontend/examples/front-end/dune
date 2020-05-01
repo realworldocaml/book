@@ -1,0 +1,9 @@
+(executable
+  (name principal)
+  (flags :standard -principal)
+  (modules principal))
+
+(executable
+  (name non_principal)
+  (flags :standard -principal)
+  (modules non_principal))

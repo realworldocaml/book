@@ -1,6 +1,0 @@
-(library
- (name tls_mirage)
- (public_name tls-mirage)
- (synopsis "Effectful mirage layer for TLS")
- (wrapped false)
- (libraries tls x509 mirage-flow mirage-kv mirage-clock lwt ptime))

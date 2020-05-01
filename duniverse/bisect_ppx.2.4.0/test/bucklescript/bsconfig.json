@@ -1,0 +1,11 @@
+{
+  "name": "bisect_ppx-test",
+  "bs-dependencies": [
+    "bisect_ppx"
+  ],
+  "ppx-flags": [
+    "bisect_ppx/ppx"
+  ],
+  "refmt": 3,
+  "sources": ["."]
+}

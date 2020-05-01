@@ -1,0 +1,7 @@
+(library (name bin_prot_test) (libraries core_kernel bin_prot base.md5)
+ (preprocess (pps ppx_jane)))
+
+(alias (name runtest) (deps blob_tests.ml)
+ (action
+  (bash
+   "diff <(echo e6e9404b65524d1b543284e2b10fb9fb) <(cat blob_tests.ml | md5sum | sed 's# .*##')")))

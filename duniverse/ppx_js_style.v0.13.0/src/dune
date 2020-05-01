@@ -1,0 +1,7 @@
+(library (name ppx_js_style) (public_name ppx_js_style) (kind ppx_rewriter)
+ (libraries compiler-libs.common base ppxlib octavius)
+ (preprocess (pps ppxlib.metaquot)))
+
+(rule (targets in_janestreet.ml) (deps)
+ (action (write-file %{targets} "let in_janestreet = false "))
+ (mode fallback))

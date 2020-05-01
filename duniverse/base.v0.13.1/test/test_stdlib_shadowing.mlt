@@ -1,0 +1,49 @@
+(* Additional shadowing tests, to make sure the [@@deprecated] attributes are properly
+   transported in [Base] *)
+open Base
+
+let () = seek_in stdin 0
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.seek_in
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Use [Stdio.In_channel.seek] instead.
+Line _, characters _-_:
+Error (alert deprecated): Base.stdin
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Use [Stdio.stdin] instead.
+|}]
+
+let (_ : _) = StringLabels.make 10 'x'
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): module Base.StringLabels
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Referring to the stdlib directly is discouraged by Base. You should either
+use the equivalent functionality offered by Base, or if you really want to
+refer to the stdlib, use Caml.StringLabels instead
+|}]
+
+let _ = ( == )
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.==
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Use [phys_equal] instead.
+|}]
+
+let _ = ( != )
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Base.!=
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Use [not (phys_equal ...)] instead.
+|}]

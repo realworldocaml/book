@@ -1,0 +1,8 @@
+(alias (name runtest) (deps float_test.exe) (action (bash ./float_test.exe)))
+
+(alias (name runtest)
+ (deps just_raise.exe just_raise.expected-output uncaught_exception_test.sh)
+ (action (bash ./uncaught_exception_test.sh)))
+
+(executables (names float_test just_raise) (libraries core version_util)
+ (preprocess (pps ppx_jane)))

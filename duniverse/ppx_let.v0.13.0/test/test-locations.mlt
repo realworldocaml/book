@@ -1,0 +1,27 @@
+(* -*- tuareg -*- *)
+
+module Let_syntax = struct
+  type 'a t = T of 'a
+
+  let map (T x) ~f = T (f x)
+  let both (T x) (T y) = T (x, y)
+
+  module Open_on_rhs = struct
+    let return x = T x
+    let f x ~(doc : string) = T (x, doc)
+  end
+end
+
+let (_ : _) =
+  [%map_open
+    let x = return 42
+    and y = f 42 in
+    ()]
+;;
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: This expression has type doc:string -> (int * string) Let_syntax.t
+       but an expression was expected of type 'a Let_syntax.t
+|}]

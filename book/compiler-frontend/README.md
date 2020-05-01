@@ -465,11 +465,11 @@ Error: The implementation conflicting_interface.ml
          type t = Foo
        is not included in
          type t = Bar
+       Constructors number 1 have different names, Foo and Bar.
        File "conflicting_interface.mli", line 1, characters 0-12:
          Expected declaration
        File "conflicting_interface.ml", line 1, characters 0-12:
          Actual declaration
-       Fields number 1 have different names, Foo and Bar.
 [2]
 ```
 
@@ -582,7 +582,7 @@ There's a single character typo in the code so that it uses `Nu` instead of
 
 ```sh dir=examples/front-end
 $ ocamlc -c broken_poly.ml
-File "broken_poly.ml", line 9, characters 10-154:
+File "broken_poly.ml", lines 9-18, characters 10-6:
  9 | ..........(
 10 |     `Add (
 11 |       (`Num 0),
@@ -750,19 +750,31 @@ type t = { foo : int; }
 val f : s -> int
 ```
 
-The `ocamlbuild` equivalent is to add the tag `principal` to your build. The
-*corebuild* wrapper script actually adds this by default, but it does no harm
-to explicitly repeat it:
+The `dune` equivalent is to add the flag `-principal` to your build description.
 
-```sh dir=examples/front-end,skip
-$ corebuild -no-hygiene -tag principal principal.cmi non_principal.cmi
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules principal.ml > principal.ml.depends
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o principal.cmo principal.ml
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules non_principal.ml > non_principal.ml.depends
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o non_principal.cmo non_principal.ml
-+ ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o non_principal.cmo non_principal.ml
+```ocaml file=examples/front-end/dune
+(executable
+  (name principal)
+  (flags :standard -principal)
+  (modules principal))
+
+(executable
+  (name non_principal)
+  (flags :standard -principal)
+  (modules non_principal))
+```
+
+The `:standard` directive will include all the default flags, and then
+`-principal` will be appended after those in the compiler build flags.
+
+```sh dir=examples/front-end/
+$ dune build principal.exe
+$ dune build non_principal.exe
 File "non_principal.ml", line 6, characters 4-7:
-Warning 18: this type-based field disambiguation is not principal.
+6 |   x.foo
+        ^^^
+Error (warning 18): this type-based field disambiguation is not principal.
+[1]
 ```
 
 Ideally, all code should systematically use `-principal`. It reduces variance
@@ -773,16 +785,12 @@ objects, which usually have larger type signatures to cover all their
 methods.
 
 If compiling in principal mode works, it is guaranteed that the program will
-pass type checking in nonprincipal mode, too. For this reason, the
-`corebuild` wrapper script activates principal mode by default, preferring
-stricter type inference over a small loss in compilation speed and extra disk
-space usage.
-
-Bear in mind that the `cmi` files generated in principal mode differ from the
-default mode. Try to ensure that you compile your whole project with it
-activated. Getting the files mixed up won't let you violate type safety, but
-it can result in the type checker failing unexpectedly very occasionally. In
-this case, just recompile with a clean source tree.
+pass type checking in non-principal mode, too.  Bear in mind that the `cmi`
+files generated in principal mode differ from the default mode. Try to ensure
+that you compile your whole project with it activated. Getting the files mixed
+up won't let you violate type safety, but it can result in the type checker
+failing unexpectedly very occasionally. In this case, just recompile with a
+clean source tree.
 
 
 ### Modules and Separate Compilation

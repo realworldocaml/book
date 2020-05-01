@@ -1,0 +1,2 @@
+(library (name univ) (public_name core_kernel.univ) (libraries core_kernel)
+ (preprocess (pps ppx_jane)))

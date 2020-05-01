@@ -1,0 +1,5 @@
+(library
+  (kind ppx_deriver)
+  (name ppx_foo_deriver)
+  (libraries base ppxlib)
+)

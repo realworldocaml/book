@@ -1,3 +1,0 @@
-File "let_1.ml", line 2, characters 10-12:
-Error: This pattern matches values of type unit
-       but a pattern was expected which matches values of type int
