@@ -1,2 +1,0 @@
-File "invalid-point-free-action.mly", line 7, characters 20-24:
-Error: A point-free semantic action must consist of a single OCaml identifier.

@@ -1,5 +1,0 @@
-%token FOO
-%token FOO
-
-%%
-

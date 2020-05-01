@@ -1,3 +1,0 @@
-File "multiple-precedence.mly", line 2, characters 7-8:
-File "multiple-precedence.mly", line 1, characters 6-7:
-Error: there are multiple precedence declarations for token A.

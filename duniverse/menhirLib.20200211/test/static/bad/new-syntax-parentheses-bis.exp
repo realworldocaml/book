@@ -1,5 +1,0 @@
-File "new-syntax-parentheses-bis.mly", line 9, characters 8-9:
-Error: syntax error after 'b' and before '|'.
-The previous opening parenthesis seemed to be the beginning of a tuple pattern.
-Thus, either a comma ',' followed with a pattern
-or a closing parenthesis ')' is expected at this point.

@@ -1,6 +1,0 @@
-File "ill-formed-prec.mly", line 5, characters 4-6:
-Error: syntax error after '%prec' and before '{}'.
-Ill-formed %prec annotation.
-A symbol is expected at this point.
-Examples of well-formed annotations:
-  expr: MINUS e = expr %prec UMINUS { -e }

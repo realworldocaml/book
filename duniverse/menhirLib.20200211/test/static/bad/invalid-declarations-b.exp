@@ -1,8 +1,0 @@
-File "invalid-declarations-b.mly", line 5, characters 7-10:
-Error: syntax error after '%start' and before 'RAT'.
-Ill-formed '%start' declaration.
-A start symbol must begin with a lowercase letter.
-Examples of well-formed declarations:
-  %start program
-  %start expression phrase
-  %start <int> date time

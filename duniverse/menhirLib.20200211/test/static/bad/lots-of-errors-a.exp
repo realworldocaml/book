@@ -1,3 +1,0 @@
-File "lots-of-errors-a.mly", line 1, characters 0-1:
-Error: syntax error before '('.
-Either a declaration or '%%' is expected at this point.

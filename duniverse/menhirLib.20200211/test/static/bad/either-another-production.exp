@@ -1,4 +1,0 @@
-File "either-another-production.mly", line 6, characters 0-5:
-Error: syntax error after '{ () }' and before '%type'.
-Either another production '|' ...
-or another rule is expected at this point.

@@ -1,5 +1,0 @@
-File "invalid-parameter-declaration.mly", line 1, characters 11-12:
-Error: syntax error after '%parameter' and before 'F'.
-Ill-formed '%parameter' declaration.
-Examples of well-formed declarations:
-  %parameter <X : sig type t end>

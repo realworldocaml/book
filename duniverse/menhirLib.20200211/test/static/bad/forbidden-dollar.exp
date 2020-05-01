@@ -1,2 +1,0 @@
-File "forbidden-dollar.mly", line 12, characters 8-10:
-Error: please do not use $2. Instead, name this value.

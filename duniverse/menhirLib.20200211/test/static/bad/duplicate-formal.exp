@@ -1,2 +1,0 @@
-File "duplicate-formal.mly", line 6, characters 0-3:
-Error: several parameters of this rule are named "X31".

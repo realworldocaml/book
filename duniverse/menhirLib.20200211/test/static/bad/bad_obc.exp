@@ -1,4 +1,0 @@
-File "bad_obc.mly", line 107, characters 0-7:
-File "bad_obc.mly", line 110, characters 0-7:
-Error: the nonterminal symbol imports is multiply defined.
-Only %public symbols can have split definitions.

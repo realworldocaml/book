@@ -1,4 +1,0 @@
-File "inline-cycle.mly", line 5, characters 8-9:
-Error: there is a cycle of %inline nonterminal symbols:
-  b refers to c,
-  which refers back to b.

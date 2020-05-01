@@ -1,9 +1,0 @@
-File "lots-of-errors-c.mly", line 2, characters 7-8:
-Error: syntax error after '%token' and before '('.
-Ill-formed '%token' declaration.
-Examples of well-formed declarations:
-  %token FOO
-  %token BAR "|"
-  %token DOT "." SEMICOLON ";"
-  %token <string> LID UID
-  %token FOO [@cost 0]

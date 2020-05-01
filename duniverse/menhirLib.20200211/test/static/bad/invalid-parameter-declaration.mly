@@ -1,1 +1,0 @@
-%parameter F : sig end

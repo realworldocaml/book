@@ -1,4 +1,0 @@
-File "parameterized-start.mly", line 3, characters 13-17:
-Error: how is the symbol "main" parameterized?
-It is used at sorts * and (*) -> *.
-The sort * is not compatible with the sort (*) -> *.

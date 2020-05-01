@@ -1,8 +1,0 @@
-File "ill-formed-attribute.mly", line 2, characters 0-6:
-Error: syntax error after 'A' and before '%token'.
-Ill-formed '%attribute' declaration.
-An '%attribute' declaration should contain a nonempty list of symbols,
-followed with a nonempty list of attributes.
-Examples of well-formed declarations:
-  %attribute FOO [@printer "foo"]
-  %attribute bar BAZ [@printer "bar/BAZ"] [@cost 2.0]
