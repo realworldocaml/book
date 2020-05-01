@@ -1,6 +1,0 @@
-File "forbidden-dollar-bis.mly", line 10, characters 9-10:
-Error: syntax error after 'main' and before '='.
-An equality symbol ':=' or '==' is expected at this point.
-Examples of well-formed rules:
-  let  option(X) := { None } | x = X; { Some x } (* ordinary *)
-  let ioption(X) == { None } | x = X; { Some x } (*  inline  *)

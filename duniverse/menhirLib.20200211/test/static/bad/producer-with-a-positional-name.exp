@@ -1,2 +1,0 @@
-File "producer-with-a-positional-name.mly", line 4, characters 5-7:
-Error: there are multiple producers named _1 in this sequence.

@@ -1,4 +1,0 @@
-File "production-group.mly", line 4, characters 20-21:
-Error: two productions that share a semantic action must define exactly
-the same identifiers. Here, "y" is defined
-in one production, but not in all of them.

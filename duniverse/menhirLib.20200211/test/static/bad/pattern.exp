@@ -1,8 +1,0 @@
-File "pattern.mly", line 4, characters 6-11:
-Error: syntax error after ',' and before '%prec'.
-A pattern is expected at this point.
-Examples of patterns:
-  x
-  ~
-  _
-  (x, y, _)

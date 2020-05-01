@@ -1,6 +1,0 @@
-%%
-
-let tired :=
-  {}
-
-%token TIRED

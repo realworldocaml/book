@@ -1,7 +1,0 @@
-File "mixed.mly", line 3, characters 8-15:
-Error: syntax error after '%public' and before '%public'.
-Ill-formed rule.
-'let' or '%inline' or a non-terminal symbol is expected at this point.
-Examples of well-formed rules:
-  %public     option(X):   { None } | x = X  { Some x }
-  %public let option(X) := { None } | x = X; { Some x }

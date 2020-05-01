@@ -1,7 +1,0 @@
-File "comma-delimited-list-expected.mly", line 3, characters 5-6:
-Error: syntax error after '(' and before ')'.
-Ill-formed rule.
-A comma-delimited list of formal parameters is expected at this point.
-Examples of well-formed rules:
-  option(X): { None } | x = X { Some x }
-  pair(X, Y): x = X; y = Y { (x, y) }

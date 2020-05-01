@@ -1,2 +1,0 @@
-File "keyword-in-header.mly", line 3, characters 10-12:
-Error: a Menhir keyword cannot be used in an OCaml header.

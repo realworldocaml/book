@@ -1,2 +1,0 @@
-File "no-start-and-inline.mly", line 4, characters 8-9:
-Error: a cannot be both a start symbol and inlined.

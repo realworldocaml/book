@@ -1,6 +1,0 @@
-File "commabar.mly", line 8, characters 0-6:
-Error: syntax error after '{}' and before '%token'.
-At this point, one of the following is expected:
-a comma ',' followed with an expression, or
-a bar '|' followed with an expression, or
-a closing parenthesis ')'.

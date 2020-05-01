@@ -1,4 +1,0 @@
-File "type-ill-kinded.mly", line 3, characters 12-18:
-Error: how is the symbol "phrase" parameterized?
-It is used at sorts * and (*) -> *.
-The sort * is not compatible with the sort (*) -> *.

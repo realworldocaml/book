@@ -1,4 +1,0 @@
-File "multiple-symbol-definition.mly", line 11, characters 0-1:
-File "multiple-symbol-definition.mly", line 12, characters 0-1:
-Error: the nonterminal symbol b is multiply defined.
-Only %public symbols can have split definitions.

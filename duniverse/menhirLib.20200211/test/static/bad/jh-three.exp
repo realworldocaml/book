@@ -1,3 +1,0 @@
-Error: the parameterized nonterminal symbols in this grammar
-cannot be expanded away: expansion would not terminate.
-The first formal parameter of "F(list,_)" grows without bound.
