@@ -1,0 +1,6 @@
+(library
+  (name mirage_crypto_pk)
+  (public_name mirage-crypto-pk)
+  (libraries cstruct zarith mirage-crypto mirage-crypto-rng sexplib eqaf.cstruct rresult)
+  (preprocess (pps ppx_sexp_conv))
+  (private_modules common dh dsa rsa z_extra))

@@ -1,0 +1,6 @@
+- produce an output tree using Atd.Indent rather fprintf
+  (for clarity and atdj performance)
+- translate atd syntax tree first, then generate code instead of doing
+  everything in the same pass (for clarity and atdj performance)
+- merge into atdgen
+- add location information to exceptions (need own parser)

@@ -1,0 +1,10 @@
+image: busybox
+
+pages:
+  script:
+  - mv www public
+  artifacts:
+    paths:
+    - public
+  only:
+  - master

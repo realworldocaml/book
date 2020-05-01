@@ -1,0 +1,14 @@
+(library
+ (name fpath)
+ (public_name fpath)
+ (libraries astring result)
+ (modules fpath)
+ (flags :standard -w -6-27-32-33-39)
+ (wrapped false))
+
+(library
+ (name fpath_top)
+ (public_name fpath.top)
+ (libraries compiler-libs.toplevel astring.top)
+ (modules fpath_top)
+ (wrapped false))

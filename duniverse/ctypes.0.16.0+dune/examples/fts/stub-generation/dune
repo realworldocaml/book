@@ -1,3 +1,0 @@
-(executable
- (name fts_cmd)
- (libraries fts_stubs fts_generated))

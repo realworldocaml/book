@@ -1,0 +1,179 @@
+diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_common.ml
+--- src/common/bisect_common.ml
++++ _self/meta_bisect_ppx/src/common/bisect_common.ml
+@@ -167,7 +167,7 @@
+   Random.self_init ()
+ 
+ let random_filename base_name =
+-  Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
++  Printf.sprintf "%s%09d.meta" base_name (abs (Random.int 1000000000))
+ 
+ let write_points points =
+   let points_array = Array.of_list points in
+diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
+--- src/common/dune
++++ _self/meta_bisect_ppx/src/common/dune
+@@ -1,4 +1,4 @@
+ (library
+- (name bisect_common)
+- (public_name bisect_ppx.common)
++ (name meta_bisect_common)
++ (public_name meta_bisect_ppx.common)
+  (synopsis "Bisect_ppx internal functions (internal)"))
+diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
+--- src/ppx/dune
++++ _self/meta_bisect_ppx/src/ppx/dune
+@@ -2,10 +2,10 @@
+ (ocamlyacc exclude_parser)
+ 
+ (library
+- (name bisect_ppx)
+- (public_name bisect_ppx)
++ (name meta_bisect_ppx)
++ (public_name meta_bisect_ppx)
+  (kind ppx_rewriter)
+  (synopsis "Code coverage for OCaml")
+- (ppx_runtime_libraries bisect_ppx.runtime)
++ (ppx_runtime_libraries meta_bisect_ppx.runtime)
+  (preprocess (pps ppx_tools_versioned.metaquot_410))
+- (libraries bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
++ (libraries meta_bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
+diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
+--- src/ppx/instrument.ml
++++ _self/meta_bisect_ppx/src/ppx/instrument.ml
+@@ -54,7 +54,7 @@
+ module Ast_mapper_class = Ast_mapper_class_410
+ 
+ (* From Bisect_ppx. *)
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ 
+ 
+@@ -907,7 +907,7 @@
+           let ___bisect_visit___ =
+             let point_definitions = [%e points_data] in
+             let `Staged cb =
+-              Bisect.Runtime.register_file
++              Meta_bisect.Runtime.register_file
+                 ~bisect_file:[%e bisect_file] ~bisect_silent:[%e bisect_silent]
+                 [%e file] ~point_count:[%e point_count] ~point_definitions
+             in
+diff -ru src/ppx/register.ml _self/meta_bisect_ppx/src/ppx/register.ml
+--- src/ppx/register.ml
++++ _self/meta_bisect_ppx/src/ppx/register.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ let conditional = ref false
+ 
+diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
+--- src/report/dune
++++ _self/meta_bisect_ppx/src/report/dune
+@@ -1,8 +1,8 @@
+ (executable
+  (name report)
+- (public_name bisect-ppx-report)
+- (package bisect_ppx)
+- (libraries bisect_ppx.common cmdliner unix))
++ (public_name meta-bisect-ppx-report)
++ (package meta_bisect_ppx)
++ (libraries meta_bisect_ppx.common cmdliner unix))
+ 
+ (rule
+  (targets assets.ml)
+diff -ru src/report/report_coveralls.ml _self/meta_bisect_ppx/src/report/report_coveralls.ml
+--- src/report/report_coveralls.ml
++++ _self/meta_bisect_ppx/src/report/report_coveralls.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ let file_json verbose indent in_file resolver visited points =
+   verbose (Printf.sprintf "Processing file '%s'..." in_file);
+diff -ru src/report/report_generic.ml _self/meta_bisect_ppx/src/report/report_generic.ml
+--- src/report/report_generic.ml
++++ _self/meta_bisect_ppx/src/report/report_generic.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ class type converter =
+   object
+diff -ru src/report/report_html.ml _self/meta_bisect_ppx/src/report/report_html.ml
+--- src/report/report_html.ml
++++ _self/meta_bisect_ppx/src/report/report_html.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ let css_variables =
+   ["unvisited_color", "#ffecec";
+diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
+--- src/report/report.ml
++++ _self/meta_bisect_ppx/src/report/report.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ module Arguments :
+ sig
+diff -ru src/runtime/native/dune _self/meta_bisect_ppx/src/runtime/native/dune
+--- src/runtime/native/dune
++++ _self/meta_bisect_ppx/src/runtime/native/dune
+@@ -1,5 +1,5 @@
+ (library
+- (name bisect)
+- (public_name bisect_ppx.runtime)
++ (name meta_bisect)
++ (public_name meta_bisect_ppx.runtime)
+  (synopsis "Bisect_ppx runtime library (internal)")
+- (libraries bisect_ppx.common unix))
++ (libraries meta_bisect_ppx.common unix))
+diff -ru src/runtime/native/runtime.ml _self/meta_bisect_ppx/src/runtime/native/runtime.ml
+--- src/runtime/native/runtime.ml
++++ _self/meta_bisect_ppx/src/runtime/native/runtime.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ let default_bisect_file = ref "bisect"
+ 
+@@ -76,8 +76,17 @@
+     in
+     create_file 100
+ 
++let base_name () =
++  let rec scan path =
++    if Filename.basename path = "_self" then
++      Filename.concat path "bisect"
++    else
++      scan (Filename.dirname path)
++  in
++  scan (Sys.getcwd ())
++
+ let file_channel () =
+-  let base_name = full_path (env_to_fname "BISECT_FILE" default_bisect_file) in
++  let base_name = base_name () in
+   let rec create_file () =
+     let filename = Common.random_filename base_name in
+     try

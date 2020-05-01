@@ -1,4 +1,0 @@
-(env
- (dev
-  (flags
-   (:standard -principal))))

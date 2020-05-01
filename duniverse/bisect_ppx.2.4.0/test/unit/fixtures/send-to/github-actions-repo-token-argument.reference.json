@@ -1,0 +1,24 @@
+/*
+Info: will write coverage report to 'coverage.json'
+Info: detected CI: GitHub Actions
+Info: using service name 'github'
+Info: using job ID variable $GITHUB_RUN_NUMBER
+Info: $PULL_REQUEST_NUMBER not set
+Info: including git info
+Info: sending to Coveralls with command:
+Info: curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
+*/
+{
+    "service_name": "github",
+    "service_job_id": "43",
+    "repo_token": "defuvw",
+    "git":{"head":{"id":"5689966cc697646c10975ff9355863bc12744ea0","author_name":"A","author_email":"b","committer_name":"C","committer_email":"d","message":"Foo"},"branch":"master","remotes":{}},
+
+    "source_files": [
+        {
+            "name": "source.ml",
+            "source_digest": "f1cdfb92deaa0354af0016d554b21c8e",
+            "coverage": [null,null,null,null,null,null,null,null,null,0,7,null,null,9,9,null,null,null,2,9,9,null,null,null,0,2,2,null,0,null,null,2,null,null,0,null,null,0,0,0,0,0,0,0,null,null,0,null,null,0,null,null,null,2,2,0,null,2,null,0]
+        }
+    ]
+}

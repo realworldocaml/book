@@ -1,0 +1,83 @@
+(* Sum (enum) *)
+type e = [ Alpha | Beta ]
+
+type es = e list
+
+(* Record with optional field *)
+type simple_record = {
+  int_field: int;
+  ?opt : bool option
+}
+
+
+(* Sum *)
+type sample_sum = [
+  | Simple_tag
+  | Bool of bool
+  | Int <scala name="Integer"> of int
+  | Float of float
+  | String <scala name="S"> of string
+  | Simple_rec of simple_record
+  | Complex_record of complex_record
+  | Record_with_defaults of record_with_defaults
+]
+
+
+(* Record *)
+type complex_record = {
+  b <doc text="foo bar baz"> : bool;
+  i : int;
+  s : string;
+  l : bool list;
+  m : int list list;
+  sample_sum : sample_sum;
+
+  (* Scala keywords used as field names *)
+  ?class : int option;
+  ?final <java name="is_final"> : int option;
+  case <scala name="kase"> : string;
+
+  (* List of records *)
+  l2 : record_with_defaults list;
+}
+<doc text="wibble">
+
+(* Record with default fields *)
+type record_with_defaults = {
+  ~b : bool;
+  ~i : int;
+  ~s : string;
+  ~o : bool option;
+  ~l : bool list;
+  ~e : e;
+  }
+
+type bigger_record = {
+  inherit record_with_defaults;
+  more : string;
+}
+
+(* type alias *)
+type rec = record_with_defaults
+type rwd <scala name="RWD"> = record_with_defaults
+
+type bigger_sum = [
+  inherit e
+  | Gamma
+]
+
+type street = (int * string)
+type city = string
+type state = string
+
+type addr = {
+  street: street;
+  city: city;
+  state: state;
+}
+
+(*
+(* https://github.com/esperco/atdj/issues/2 *)
+type a = [ A of b list ]
+type b = [ B ]
+*)

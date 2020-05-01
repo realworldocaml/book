@@ -1,0 +1,4 @@
+(test
+ (name test_passable)
+ (package ctypes-foreign)
+ (libraries ctypes ctypes.stubs ctypes-foreign.threaded oUnit))

@@ -1,7 +1,0 @@
-(library
- (name tls)
- (public_name tls)
- (synopsis "Transport layer security (TLS 1.x) purely in OCaml")
- (preprocess (pps ppx_cstruct))
- (flags (:standard -w -9-33))
- (libraries cstruct nocrypto x509 sexplib domain-name))

@@ -1,0 +1,17 @@
+(library
+  (name mirage_crypto)
+  (public_name mirage-crypto)
+  (libraries cstruct ocplib-endian)
+  (private_modules ccm cipher_block cipher_stream hash native uncommon)
+  (c_names misc
+           md5 sha1 sha256 sha512 hash_stubs
+           aes_generic aes_aesni ghash_generic ghash_pclmul
+           des_generic
+           entropy_cpu_stubs)
+  (c_flags (:include cflags.sexp)))
+
+(include_subdirs unqualified)
+
+(rule
+  (deps (env_var MIRAGE_CRYPTO_ACCELERATE))
+  (action (with-stdout-to cflags.sexp (run ../config/cfg.exe))))

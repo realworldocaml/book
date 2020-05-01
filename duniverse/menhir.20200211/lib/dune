@@ -1,0 +1,24 @@
+;; Note: the library MenhirLib is not built here; it is built in lib/pack.
+
+;; These rules generate the module [StaticVersion]. This module defines a
+;; value of type [unit] whose name is [require_XXXXXXXX], where [XXXXXXXX]
+;; is our 8-digit version number. This number is set in the [dune-project]
+;; file.
+
+;; When the [--table] switch is passed, Menhir produces a reference to
+;; [MenhirLib.StaticVersion.require_XXXXXXXX] in the generated code. This
+;; ensures that the generated code can be linked only with an appropriate
+;; version of MenhirLib. This is important because we use unsafe casts: a
+;; version mismatch could cause a crash.
+
+(rule
+  (with-stdout-to StaticVersion.mli
+    (echo "val require_%{version:menhir}: unit\n")
+  )
+)
+
+(rule
+  (with-stdout-to StaticVersion.ml
+    (echo "let require_%{version:menhir} = ()\n")
+  )
+)

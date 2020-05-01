@@ -1,0 +1,30 @@
+version: "{build}"
+
+shallow_clone: true
+
+environment:
+  global:
+    ARCH: x86_64
+
+install:
+  - SET CYGSH=C:\Cygwin64\bin\bash -lc
+  - SET CYGSETUP=C:\Cygwin64\setup-x86_64
+
+  - '%CYGSETUP% -q -P rsync -P patch -P diffutils -P make -P unzip -P m4'
+
+  - '%CYGSH% "wget https://github.com/fdopen/opam-repository-mingw/releases/download/0.0.0.2/opam64.tar.xz"'
+  - '%CYGSH% "tar -xf opam64.tar.xz"'
+  - '%CYGSH% "bash opam64/install.sh"'
+  - '%CYGSH% "opam init default https://github.com/fdopen/opam-repository-mingw.git#opam2 -c ocaml-variants.4.07.1+mingw64c --disable-sandboxing --yes --auto-setup"'
+
+  - '%CYGSH% "cd /cygdrive/c/projects/bisect-ppx && eval `opam config env` && opam pin add -yn bisect_ppx . && opam install -y --deps-only bisect_ppx"'
+
+build_script:
+  - '%CYGSH% "cd /cygdrive/c/projects/bisect-ppx && eval `opam config env` && make"'
+
+branches:
+  except:
+    - binaries
+
+cache:
+  - C:\Cygwin64\home\appveyor\.opam -> bisect_ppx.opam, appveyor.yml

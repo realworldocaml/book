@@ -1,0 +1,37 @@
+% This tiny package invokes ``hyperref'' with appropriate options.
+% Three modes are provided:
+%   if \fppdf is defined, we configure ``hyperref'' for PDF output.
+%   otherwise, if WhizzyTeX is active, we do configure ``softref'' for producing DVI output
+%     containing ``advi''-style hyperlinks.
+%   otherwise, we configure nothing.
+\ProvidesPackage{fppdf}
+
+\@ifundefined{fppdf}{
+  \newcommand{\texorpdfstring}[2]{#1}
+  \newcommand{\href}[2]{#2}
+  \@ifundefined{WhizzyTeX}{
+    % PostScript output.
+    \typeout{No hyperlinks.}
+  }{
+    % WhizzyTeX output.
+    \typeout{Hyperlinks in advi style.}
+    %
+    % Définissons les commandes \softlink et \softtarget, employées par locallabel,
+    % de façon à ce que les labels de preuves deviennent des hyperliens.
+    %
+    \edef\hyper@quote{\string"}
+    \edef\hyper@sharp{\string#}
+    \def \softlink #1#2{\special 
+      {html:<A href=\hyper@quote\hyper@sharp#1\hyper@quote>}#2\special
+      {html:</A>}}
+    \def \softtarget #1#2{\special
+      {html:<A name=\hyper@quote#1\hyper@quote>}#2\special
+      {html:</A>}}
+  }
+}{
+  % PDF output.
+  \typeout{Hyperlinks in pdflatex style.}
+  \usepackage[bookmarks=true,bookmarksopen=true,colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+  \let\softlink\hyperlink
+  \let\softtarget\hypertarget
+}

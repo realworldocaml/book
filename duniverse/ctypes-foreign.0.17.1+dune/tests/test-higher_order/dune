@@ -1,0 +1,5 @@
+(test
+ (name test_higher_order)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_higher_order_stubs test_higher_order_bindings tests_common))
