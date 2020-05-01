@@ -1,8 +1,0 @@
-File "parameterized-start-weird.mly", line 4, characters 17-18:
-Error: syntax error after 'main' and before '('.
-Ill-formed '%start' declaration.
-A start symbol must begin with a lowercase letter.
-Examples of well-formed declarations:
-  %start program
-  %start expression phrase
-  %start <int> date time

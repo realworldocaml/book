@@ -1,5 +1,0 @@
-File "tuple-pattern-previous.mly", line 4, characters 5-10:
-Error: syntax error after '_' and before '%prec'.
-The previous opening parenthesis seemed to be the beginning of a tuple pattern.
-Thus, either a comma ',' followed with a pattern
-or a closing parenthesis ')' is expected at this point.

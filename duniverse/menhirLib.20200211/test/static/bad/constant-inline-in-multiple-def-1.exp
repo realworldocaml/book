@@ -1,3 +1,0 @@
-File "constant-inline-in-multiple-def-2.mly", line 3, characters 16-17:
-File "constant-inline-in-multiple-def-1.mly", line 5, characters 8-9:
-Error: not all definitions of a are marked %inline.

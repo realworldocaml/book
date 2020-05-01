@@ -1,3 +1,0 @@
-File "symbol-expected.mly", line 4, characters 6-7:
-Error: syntax error after '=' and before '('.
-A symbol is expected at this point.

@@ -1,3 +1,0 @@
-File "equals-expected.mly", line 3, characters 13-17:
-Error: syntax error after '~' and before 'main'.
-An equals sign '=' is expected at this point.

@@ -1,5 +1,0 @@
-File "inline-cycle-long.mly", line 37, characters 4-15:
-Error: there is a cycle of %inline nonterminal symbols:
-  atomic_expr refers to delimited(LPAREN,app(unary_op,atomic_expr),RPAREN),
-  which refers to app(unary_op,atomic_expr),
-  which refers back to atomic_expr.

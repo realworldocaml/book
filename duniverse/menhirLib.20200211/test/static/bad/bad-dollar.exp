@@ -1,2 +1,0 @@
-File "bad-dollar.mly", line 7, characters 9-11:
-Error: $3 refers to a nonexistent symbol.

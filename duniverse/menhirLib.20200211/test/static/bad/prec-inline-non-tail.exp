@@ -1,5 +1,0 @@
-File "prec-inline-non-tail.mly", line 35, characters 23-29:
-File "prec-inline-non-tail.mly", line 19, characters 2-18:
-Error: this production carries a %prec annotation,
-and the nonterminal symbol raw_expr is marked %inline.
-For this reason, raw_expr can be used only in tail position.

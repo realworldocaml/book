@@ -1,8 +1,0 @@
-File "choice-expression.mly", line 6, characters 0-6:
-Error: syntax error after ',' and before '%token'.
-An expression is expected at this point.
-Examples of expressions:
-  term
-  t = term; { t }
-  LPAREN; ~ = term; RPAREN; <>
-  factor | ~ = term; ~ = op; ~ = factor; <EBinOp>

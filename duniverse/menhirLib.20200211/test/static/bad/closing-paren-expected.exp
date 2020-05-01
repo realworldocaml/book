@@ -1,7 +1,0 @@
-File "closing-paren-expected.mly", line 3, characters 6-7:
-Error: syntax error after 'X' and before ':'.
-Ill-formed rule.
-A closing parenthesis ')' is expected at this point.
-Examples of well-formed rules:
-  option(X): { None } | x = X { Some x }
-  pair(X, Y): x = X; y = Y { (x, y) }

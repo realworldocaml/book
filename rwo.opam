@@ -12,6 +12,27 @@ bug-reports: "https://github.com/realworldocaml/book/issues"
 depends: [
   "dune" {>= "2.4"}
   "ocaml" {>= "4.10.0" & < "4.11.0"}
+  "async"
+  "atdgen"
+  "base"
+  "cmdliner"
+  "cohttp-async"
+  "conf-ncurses"
+  "core"
+  "core_bench"
+  "ctypes"
+  "ctypes-foreign"
+  "fmt"
+  "lambdasoup"
+  "mdx"
+  "ocaml-compiler-libs"
+  "ocaml-print-intf"
+  "ppx_jane"
+  "re"
+  "sexp_pretty"
+  "textwrap"
+  "tls"
+  "yojson"
 ]
 build: [
   ["dune" "subst"] {pinned}

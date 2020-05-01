@@ -1,4 +1,0 @@
-%attribute A
-%token B
-
-%%

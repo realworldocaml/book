@@ -1,8 +1,0 @@
-File "uppercase-start.mly", line 2, characters 7-10:
-Error: syntax error after '%start' and before 'Bla'.
-Ill-formed '%start' declaration.
-A start symbol must begin with a lowercase letter.
-Examples of well-formed declarations:
-  %start program
-  %start expression phrase
-  %start <int> date time

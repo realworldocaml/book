@@ -1,3 +1,0 @@
-File "terminal-type.mly", line 2, characters 11-12:
-Error: A is a terminal symbol,
-but %type declarations are applicable only to nonterminal symbols.
