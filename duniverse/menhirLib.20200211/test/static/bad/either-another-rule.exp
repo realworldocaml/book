@@ -1,7 +1,0 @@
-File "either-another-rule.mly", line 4, characters 14-15:
-Error: syntax error after 'foo' and before '('.
-Either another rule
-or another production '|' ...
-is expected at this point.
-Examples of well-formed rules:
-  option(X): { None } | x = X { Some x }

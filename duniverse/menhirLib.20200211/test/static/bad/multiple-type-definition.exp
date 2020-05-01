@@ -1,3 +1,0 @@
-File "multiple-type-definition.mly", line 2, characters 12-13:
-File "multiple-type-definition.mly", line 1, characters 11-12:
-Error: there are multiple %type declarations for the symbol a.

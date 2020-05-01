@@ -1,6 +1,0 @@
-File "rule-error.mly", line 11, characters 0-3:
-Error: syntax error after '{ () }' and before 'bar'.
-Either another production '|' ...
-or a comma ','
-or a closing parenthesis ')'
-is expected at this point.

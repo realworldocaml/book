@@ -1,6 +1,0 @@
--I .
--R . MiniCalc
-
-Parser.v
-Lexer.v
-MiniCalc.v

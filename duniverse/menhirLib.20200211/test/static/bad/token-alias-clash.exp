@@ -1,4 +1,0 @@
-File "token-alias-clash.mly", line 3, characters 7-12:
-File "token-alias-clash.mly", line 2, characters 7-11:
-Error: "+" cannot be declared as an alias for the symbol MINUS.
-It has already been declared as an alias for PLUS.

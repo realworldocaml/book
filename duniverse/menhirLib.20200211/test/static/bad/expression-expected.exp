@@ -1,8 +1,0 @@
-File "expression-expected.mly", line 3, characters 9-11:
-Error: syntax error after ':=' and before ':='.
-An expression is expected at this point.
-Examples of expressions:
-  term
-  t = term; { t }
-  LPAREN; ~ = term; RPAREN; <>
-  factor | term; MUL; factor

@@ -1,4 +1,0 @@
-File "tuple-pattern.mly", line 4, characters 3-8:
-Error: syntax error after '(' and before '%prec'.
-This opening parenthesis seems to be the beginning of a tuple pattern.
-Thus, a comma-separated list of patterns is expected at this point.

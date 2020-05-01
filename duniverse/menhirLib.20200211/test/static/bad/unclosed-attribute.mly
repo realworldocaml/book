@@ -1,2 +1,0 @@
-%token FOO [@bar
-%%

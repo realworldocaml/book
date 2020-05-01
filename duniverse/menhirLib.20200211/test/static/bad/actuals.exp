@@ -1,9 +1,0 @@
-File "actuals.mly", line 4, characters 12-13:
-Error: syntax error after ',' and before ')'.
-Ill-formed list of actual parameters.
-A comma-delimited list of actual parameters is expected at this point.
-Examples of well-formed actual parameters:
-  expr
-  expr+
-  option(expr)
-  separated_list(COMMA, expr)

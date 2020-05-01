@@ -1,2 +1,0 @@
-File "undeclared-token-alias.mly", line 23, characters 6-10:
-Error: the token alias "42" was never declared.
