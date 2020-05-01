@@ -9,6 +9,7 @@ RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 
 # install non-OCaml dependencies
 COPY Makefile /home/opam/src/.
+COPY rwo.opam /home/opam/src/.
 RUN opam pin add -n rwo . && opam depext -y rwo
 RUN opam install dune=2.5.1
 
