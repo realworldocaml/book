@@ -1,6 +1,0 @@
-File "prec-inline-prec.mly", line 35, characters 23-29:
-File "prec-inline-prec.mly", line 19, characters 21-27:
-Error: this production carries a %prec annotation,
-and the nonterminal symbol raw_expr is marked %inline.
-For this reason, raw_expr cannot be used in a production
-which itself carries a %prec annotation.

@@ -1,3 +1,0 @@
-File "semicolon.mly", line 6, characters 0-3:
-Error: syntax error after 'foo' and before 'let'.
-A semicolon ';' is expected at this point.

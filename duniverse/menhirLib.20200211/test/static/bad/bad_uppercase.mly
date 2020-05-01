@@ -1,7 +1,0 @@
-%start <unit> Main
-
-%%
-
-Main:
-  { () }
-

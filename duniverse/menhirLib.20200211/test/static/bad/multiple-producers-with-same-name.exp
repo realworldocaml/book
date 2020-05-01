@@ -1,2 +1,0 @@
-File "multiple-producers-with-same-name.mly", line 5, characters 10-11:
-Error: there are multiple producers named x in this sequence.

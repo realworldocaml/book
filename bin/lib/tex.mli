@@ -12,9 +12,6 @@ type t = item list [@@deriving sexp]
 
 val to_string : t -> string
 
-(******************************************************************************)
-(** {Constructors} *)
-(******************************************************************************)
 val input : string -> item
 val newpage : item
 val part : string -> item

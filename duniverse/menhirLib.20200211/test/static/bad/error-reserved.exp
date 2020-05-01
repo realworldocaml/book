@@ -1,2 +1,0 @@
-File "error-reserved.mly", line 6, characters 0-5:
-Error: error is reserved and thus cannot be used as a non-terminal symbol.

@@ -1,4 +1,0 @@
-File "occurs-check.mly", line 2, characters 8-9:
-Error: how is the symbol "a" parameterized?
-It is used at sorts a and ((a) -> *) -> *.
-The sort a cannot be unified with the sort ((a) -> *) -> *.

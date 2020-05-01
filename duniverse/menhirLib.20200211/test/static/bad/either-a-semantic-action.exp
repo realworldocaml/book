@@ -1,8 +1,0 @@
-File "either-a-semantic-action.mly", line 4, characters 12-13:
-Error: syntax error after 'foo' and before 'A'.
-Ill-formed rule.
-Either a semantic action '{' ... '}'
-or another production '|' ...
-is expected at this point.
-Examples of well-formed rules:
-  expr: MINUS e = expr %prec UMINUS { -e }
