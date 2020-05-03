@@ -858,7 +858,7 @@ You might have noticed that `destutter` is specialized to lists of integers.
 That's because `Base`'s default equality operator is specialized to integers,
 as you can see if you try to apply it to values of a different type.
 
-```ocaml env=poly
+```ocaml env=main
 # "foo" = "bar"
 Line 1, characters 1-6:
 Error: This expression has type string but an expression was expected of type
@@ -868,7 +868,7 @@ Error: This expression has type string but an expression was expected of type
 OCaml also has a collection of polymorphic equality and comparison operators,
 which we can make available by opening the module `Base.Poly`.
 
-```ocaml env=poly
+```ocaml env=main
 # open Base.Poly
 # "foo" = "bar"
 - : bool = false
@@ -881,7 +881,7 @@ which we can make available by opening the module `Base.Poly`.
 Indeed, if we look at the type of the equality operator, we'll see that it is
 polymorphic.
 
-```ocaml env=poly
+```ocaml env=main
 # (=)
 - : 'a -> 'a -> bool = <fun>
 ```
@@ -889,7 +889,7 @@ polymorphic.
 If we rewrite our destutter example with `Base.Poly` open, we'll see that it
 gets a polymorphic type, and can now be used on inputs of different types.
 
-```ocaml env=poly
+```ocaml env=main
 # let rec destutter = function
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
@@ -918,7 +918,7 @@ they're laid out in memory. (You can learn more about this structure in
 Polymorphic compare does have some limitations. For example, it will fail at
 runtime if it encounters a function value.
 
-```ocaml env=poly
+```ocaml env=main
 # (fun x -> x + 1) = (fun x -> x + 1)
 Exception: (Invalid_argument "compare: functional value")
 ```
@@ -940,12 +940,12 @@ sense for the particular type of values you're dealing with. This can lead to
 surprising and hard to resolve bugs in your code. It's for this reason that
 `Base` discourages the use of polymorphic compare by hiding it by default.
 
-We'll discuss this issue more in
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-But in any case, you can restore the default behavior of `Base` by opening
-the module again.
+We'll discuss this issue more in [Maps And Hash
+Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
+But in any case, you can restore the default behavior of `Base` by
+opening the module again.
 
-```ocaml env=poly
+```ocaml env=main
 # open Base
 ```
 
