@@ -750,11 +750,15 @@ that.[record field accessor functions]{.idx}
 
 The `[@@deriving fields]` annotation at the end of the declaration of
 a record type will cause the extension to be applied to a given type
-declaration. So, for example, we could have defined `Logon` as
-follows:
+declaration.  We need to enable the extension explicitly,
 
 ```ocaml env=main
-# #require "ppx_jane";;
+# #require "ppx_fields";;
+```
+
+at which point, we can define `Logon` as follows:
+
+```ocaml env=main
 # module Logon = struct
     type t =
       { session_id: string;
