@@ -389,7 +389,7 @@ val x : int Stdlib.ref = {Base.Ref.contents = 1}
 The preceding are just ordinary OCaml functions, which could be defined as
 follows:
 
-```ocaml env=main
+```ocaml env=custom_ref
 # let ref x = { contents = x }
 val ref : 'a -> 'a ref = <fun>
 # let (!) r = r.contents
@@ -463,7 +463,6 @@ function for reversing an array in place:
     let i = Ref.create 0 in
     let j = Ref.create (Array.length ar - 1) in
     (* terminate when the upper and lower indices meet *)
-    let (!) = Ref.(!) in
     while !i < !j do
       (* swap the two elements *)
       let tmp = ar.(!i) in
@@ -750,7 +749,7 @@ To better understand how laziness works, let's walk through the
 implementation of our own lazy type. We'll start by declaring types to
 represent a lazy value:
 
-```ocaml env=main
+```ocaml env=custom_lazy
 # type 'a lazy_state =
     | Delayed of (unit -> 'a)
     | Value of 'a
@@ -772,19 +771,19 @@ We can create a lazy value from a thunk, i.e., a function that takes a
 unit argument. Wrapping an expression in a thunk is another way to
 suspend the computation of an expression: [thunks]{.idx}
 
-```ocaml env=main
+```ocaml env=custom_lazy
 # let create_lazy f = ref (Delayed f)
 val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
 # let v =
     create_lazy (fun () ->
   print_endline "performing lazy computation"; Float.sqrt 16.)
-val v : float lazy_state ref = {Base.Ref.contents = Delayed <fun>}
+val v : float lazy_state ref = {contents = Delayed <fun>}
 ```
 
-Now we just need a way to force a lazy value. The following function does
-just that:
+Now we just need a way to force a lazy value. The following function
+does just that.
 
-```ocaml env=main
+```ocaml env=custom_lazy
 # let force v =
     match !v with
     | Value x -> x
@@ -802,7 +801,7 @@ val force : 'a lazy_state ref -> 'a = <fun>
 
 Which we can use in the same way we used `Lazy.force`:
 
-```ocaml env=main
+```ocaml env=custom_lazy
 # force v
 performing lazy computation
 - : float = 4.
@@ -1782,7 +1781,7 @@ every time it's called can have a fully polymorphic type:
 
 ```ocaml env=main
 # let f () = ref None
-val f : unit -> 'a option ref = <fun>
+val f : unit -> 'a option Stdlib.ref = <fun>
 ```
 
 But a function that has a mutable cache that persists across calls, like
