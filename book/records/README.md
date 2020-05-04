@@ -752,8 +752,10 @@ The `[@@deriving fields]` annotation at the end of the declaration of
 a record type will cause the extension to be applied to a given type
 declaration.  We need to enable the extension explicitly,
 
+<!-- FIXME: This should be ppx_fields -->
+
 ```ocaml env=main
-# #require "ppx_fields";;
+# #require "ppx_jane";;
 ```
 
 at which point, we can define `Logon` as follows:
@@ -885,12 +887,12 @@ Here's an example of `show_field` in action:
                 user = "yminsky";
                 credentials = "Xy2d9W"; }
 val logon : Logon.t =
-  {Logon.session_id = "26685"; time = 2017-07-21 17:11:45.000000+02:00;
+  {Logon.session_id = "26685"; time = 2017-07-21 11:11:45.000000000-04:00;
    user = "yminsky"; credentials = "Xy2d9W"}
 # show_field Logon.Fields.user Fn.id logon
 - : string = "user: yminsky"
 # show_field Logon.Fields.time Time_ns.to_string logon
-- : string = "time: 2017-07-21 17:11:45.000000+02:00"
+- : string = "time: 2017-07-21 11:11:45.000000000-04:00"
 ```
 
 As a side note, the preceding example is our first use of the `Fn`
@@ -935,13 +937,13 @@ the fields of a `Logon` record:
     in
     Logon.Fields.iter
       ~session_id:(print Fn.id)
-      ~time:(print (Time_ns.to_string_abs ~zone:Time_ns.Zone.utc))
+      ~time:(print Time_ns.to_string)
       ~user:(print Fn.id)
       ~credentials:(print Fn.id)
 val print_logon : Logon.t -> unit = <fun>
 # print_logon logon
 session_id: 26685
-time: 2017-07-21 17:11:45.000000+02:00
+time: 2017-07-21 11:11:45.000000000-04:00
 user: yminsky
 credentials: Xy2d9W
 - : unit = ()
