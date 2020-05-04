@@ -887,12 +887,12 @@ Here's an example of `show_field` in action:
                 user = "yminsky";
                 credentials = "Xy2d9W"; }
 val logon : Logon.t =
-  {Logon.session_id = "26685"; time = 2017-07-21 11:11:45.000000000-04:00;
+  {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
    user = "yminsky"; credentials = "Xy2d9W"}
 # show_field Logon.Fields.user Fn.id logon
 - : string = "user: yminsky"
 # show_field Logon.Fields.time Time_ns.to_string logon
-- : string = "time: 2017-07-21 11:11:45.000000000-04:00"
+- : string = "time: 2017-07-21 15:11:45.000000000Z"
 ```
 
 As a side note, the preceding example is our first use of the `Fn`
@@ -943,7 +943,7 @@ the fields of a `Logon` record:
 val print_logon : Logon.t -> unit = <fun>
 # print_logon logon
 session_id: 26685
-time: 2017-07-21 11:11:45.000000000-04:00
+time: 2017-07-21 15:11:45.000000000Z
 user: yminsky
 credentials: Xy2d9W
 - : unit = ()
