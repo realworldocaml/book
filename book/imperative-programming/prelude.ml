@@ -1,6 +1,5 @@
-#require "core,core.top,ppx_jane";;
+#require "core,core.top";;
 
 open Base
-open Stdio
 
 let () = Printexc.record_backtrace false
