@@ -158,6 +158,7 @@ irrefutable, unlike types with variable structures like lists and
 variants.[irrefutable patterns]{.idx}[datatypes/fixed vs.  variable
 structure of]{.idx}
 
+
 Another important characteristic of record patterns is that they don't
 need to be complete; a pattern can mention only a subset of the fields
 in the record. This can be convenient, but it can also be error
@@ -880,7 +881,7 @@ which the field can be grabbed.
 
 Here's an example of `show_field` in action:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic=output
 # let logon = { Logon.
                 session_id = "26685";
                 time = Time_ns.of_string "2017-07-21 10:11:45 EST";
@@ -930,7 +931,7 @@ combination of the record and the `Field.t`.
 Now, let's use `Logon.Fields.iter` and `show_field` to print out all
 the fields of a `Logon` record:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic=output
 # let print_logon logon =
     let print to_string field =
       printf "%s\n" (show_field field to_string logon)
