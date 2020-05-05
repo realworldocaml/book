@@ -176,13 +176,18 @@ package/sexp converter]{.idx}
 Note that the character isn't actually serialized into an s-expression until
 the error is printed out.
 
-We're not restricted to doing this kind of error reporting with built-in
-types. This will be discussed in more detail in
-[Data Serialization With S Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
+We're not restricted to doing this kind of error reporting with
+built-in types. This will be discussed in more detail in [Data
+Serialization With S
+Expressions](data-serialization.html#data-serialization-with-s-expressions){data-type=xref},
 but Sexplib comes with a language extension that can autogenerate sexp
-converters for newly generated types:
+converters for newly generated types.  We can enable it explicitly in
+the toplevel with a `#require` statement.
 
+<!-- FIXME: we should use ppx_sexp_value instead of ppx_jane, but that -->
+<!-- doesn't work here for some reason. -->
 ```ocaml env=main
+# #require "ppx_jane"
 # let custom_to_sexp = [%sexp_of: float * string list * int]
 val custom_to_sexp : float * string list * int -> Sexp.t = <fun>
 # custom_to_sexp (3.5, ["a";"b";"c"], 6034)
@@ -218,12 +223,13 @@ it is, after `option`, the most common way of returning errors in Base.
 
 ### `bind` and Other Error Handling Idioms
 
-As you write more error handling code in OCaml, you'll discover that certain
-patterns start to emerge. A number of these common patterns have been
-codified by functions in modules like `Option` and `Result`. One particularly
-useful pattern is built around the function `bind`, which is both an ordinary
-function and an infix operator `>>=`. Here's the definition of `bind` for
-options: [bind function]{.idx}
+As you write more error handling code in OCaml, you'll discover that
+certain patterns start to emerge. A number of these common patterns
+have been codified by functions in modules like `Option` and
+`Result`. One particularly useful pattern is built around the function
+`bind`, which is both an ordinary function and an infix operator
+`>>=`. Here's the definition of `bind` for options: [bind
+function]{.idx}
 
 ```ocaml env=main
 # let bind option f =
@@ -234,10 +240,10 @@ val bind : 'a option -> ('a -> 'b option) -> 'b option = <fun>
 ```
 
 As you can see, `bind None f` returns `None` without calling `f`, and
-`bind (Some x) f` returns `f x`. `bind` can be used as a way of sequencing
-together error-producing functions so that the first one to produce an error
-terminates the computation. Here's a rewrite of `compute_bounds` to use a
-nested series of `bind`s:
+`bind (Some x) f` returns `f x`. `bind` can be used as a way of
+sequencing together error-producing functions so that the first one to
+produce an error terminates the computation. Here's a rewrite of
+`compute_bounds` to use a nested series of `bind`s:
 
 ```ocaml env=main
 # let compute_bounds ~compare list =
@@ -249,13 +255,14 @@ val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
 
-The preceding code is a little bit hard to swallow, however, on a syntactic
-level. We can make it easier to read and drop some of the parentheses, by
-using the infix operator form of `bind`, which we get access to by locally
-opening `Option.Monad_infix`. The module is called `Monad_infix` because the
-`bind` operator is part of a subinterface called `Monad`, which we'll see
-again in
-[Concurrent Programming With Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
+The preceding code is a little bit hard to swallow, however, on a
+syntactic level. We can make it easier to read and drop some of the
+parentheses, by using the infix operator form of `bind`, which we get
+access to by locally opening `Option.Monad_infix`. The module is
+called `Monad_infix` because the `bind` operator is part of a
+subinterface called `Monad`, which we'll see again in [Concurrent
+Programming With
+Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
 
 ```ocaml env=main
 # let compute_bounds ~compare list =
@@ -268,20 +275,22 @@ val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
 
-This use of `bind` isn't really materially better than the one we started
-with, and indeed, for small examples like this, direct matching of options is
-generally better than using `bind`. But for large, complex examples with many
-stages of error handling, the `bind` idiom becomes clearer and easier to
-manage.
+This use of `bind` isn't really materially better than the one we
+started with, and indeed, for small examples like this, direct
+matching of options is generally better than using `bind`. But for
+large, complex examples with many stages of error handling, the `bind`
+idiom becomes clearer and easier to manage.
 
 ::: {data-type=note}
 #### Monads and `Let_syntax`
 
-We can make this look a little bit more ordinary by using a syntax extension
-that's designed specifically for monadic binds, called `Let_syntax`. Here's
-what the above example looks like using this extension.
+We can make this look a little bit more ordinary by using a syntax
+extension that's designed specifically for monadic binds, called
+`Let_syntax`. Here's what the above example looks like using this
+extension.
 
 ```ocaml env=main
+# #require "ppx_let"
 # let compute_bounds ~compare list =
     let open Option.Let_syntax in
     let sorted = List.sort ~compare list in
@@ -291,6 +300,8 @@ what the above example looks like using this extension.
 val compute_bounds : compare:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
   <fun>
 ```
+
+Note that we needed a `#require` statement to enable the extension.
 
 To understand what's going on here, you need to know that
 `let%bind x = some_expr in some_other_expr` is rewritten into
