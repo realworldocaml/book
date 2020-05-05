@@ -124,7 +124,7 @@ Exception:
 ```
 
 ::: {data-type=note}
-### More on Top-Level Printing
+##### More on Top-Level Printing
 
 The values of the s-expressions that we created were printed properly as
 s-expressions in the toplevel, instead of as the tree of `Atom` and `List`
@@ -245,7 +245,7 @@ functionality that you could in theory have implemented by hand, but with far
 less programmer effort.
 
 ::: {data-type=note}
-#### Syntax Extensions and PPX
+##### Syntax Extensions and PPX
 
 OCaml doesn't directly support deriving s-expression converters from type
 definitions. Instead, it provides a mechanism called *PPX* which allows you

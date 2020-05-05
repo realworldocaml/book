@@ -73,7 +73,7 @@ library/installation of]{.idx}[static checking]{.idx}[compile-time static
 checking]{.idx}[unit tests]{.idx}
 
 ::: {data-type=note}
-### Installing the Yojson Library
+##### Installing the Yojson Library
 
 There are several JSON libraries available for OCaml. For this chapter, we've
 picked the [Yojson](https://github.com/mjambon/yojson) library by Martin Jambon.
@@ -607,7 +607,7 @@ OCaml modules, which are then used throughout your application. [ATDgen
 Library/installation of]{.idx}[Domain Specific Language]{.idx}
 
 ::: {data-type=note}
-### Installing the ATDgen Library and Tool
+##### Installing the ATDgen Library and Tool
 
 ATDgen installs some OCaml libraries that interface with Yojson, and also a
 command-line tool that generates code. It can all be installed via OPAM:

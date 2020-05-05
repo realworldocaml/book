@@ -33,7 +33,7 @@ of how to build a parser in OCaml. [ocamlyacc parser generator]{.idx}[Menhir
 parser generator/vs. ocamlyacc]{.idx}
 
 ::: {data-type=note}
-## Menhir Versus ocamlyacc
+##### Menhir Versus ocamlyacc
 
 Menhir is an alternative parser generator that is generally superior to the
 venerable `ocamlyacc`, which dates back quite a few years. Menhir is mostly
@@ -609,7 +609,7 @@ generator]{.idx}[Camomile unicode parser]{.idx}[Unicode, parsing solutions
 for]{.idx}
 
 ::: {data-type=note}
-#### Handling Unicode
+##### Handling Unicode
 
 We've glossed over an important detail here: parsing Unicode characters to
 handle the full spectrum of the world's writing systems. OCaml has several

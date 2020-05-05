@@ -471,7 +471,7 @@ val items : item list = [<obj>; <obj>]
 ```
 
 ::: {data-type=note}
-#### Polymorphic Variant Subtyping
+##### Polymorphic Variant Subtyping
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type. A polymorphic variant type *A* is a subtype of
@@ -910,7 +910,7 @@ val shape_ref : shape ref = {Base.Ref.contents = <obj>}
 ```
 
 ::: {data-type=note}
-#### Production Note
+##### Production Note
 
 This chapter contains significant contributions from Leo White.
 :::

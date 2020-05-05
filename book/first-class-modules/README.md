@@ -245,7 +245,7 @@ connect the types associated with a first-class module to the types of other
 values you're working with.
 
 ::: {data-type=note}
-### More on Locally Abstract Types
+##### More on Locally Abstract Types
 
 One of the key properties of locally abstract types is that they're dealt
 with as abstract types in the function they're defined within, but are

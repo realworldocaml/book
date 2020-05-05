@@ -353,7 +353,7 @@ HTML generator]{.idx}[HTML
 generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
 
 ::: {data-type=note}
-#### Using Custom ocamldoc Generators
+##### Using Custom ocamldoc Generators
 
 The default HTML output stylesheets from `ocamldoc` are pretty spartan and
 distinctly Web 1.0. The tool supports plugging in custom documentation
@@ -474,7 +474,7 @@ Error: The implementation conflicting_interface.ml
 ```
 
 ::: {.allow_break data-type=note}
-#### Which Comes First: The ml or the mli?
+##### Which Comes First: The ml or the mli?
 
 There are two schools of thought on which order OCaml code should be written
 in. It's very easy to begin writing code by starting with an `ml` file and
