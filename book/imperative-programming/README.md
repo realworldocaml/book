@@ -173,7 +173,7 @@ overall `iter` function returns `unit` as well.
 The code for `iter` uses two forms of iteration: a `for` loop to walk
 over the array of buckets; and within that loop a call to `List.iter`
 to walk over the values in a given bucket. We could have done the
-outer loop with a recursive function instead nof a `for` loop, but
+outer loop with a recursive function instead of a `for` loop, but
 `for` loops are syntactically convenient, and are more familiar and
 idiomatic in imperative contexts.
 
@@ -423,9 +423,11 @@ explicit `for` and `while` loops are both more concise and more idiomatic
 when programming imperatively. [looping constructs]{.idx}[while
 loops]{.idx}[for loops]{.idx}
 
-The `for` loop is the simpler of the two. Indeed, we've already seen the
-`for` loop in action—the `iter` function in `Dictionary` is built using it.
-Here's a simple example of `for`:
+The `for` loop is the simpler of the two. Indeed, we've already seen
+the `for` loop in action—the `iter` function in `Dictionary` is built
+using it.  Here's a simple example of `for`.  Note that we open the
+`Stdio` library to get access to the `printf` function.
+
 
 ```ocaml env=main
 # open Stdio
@@ -460,8 +462,8 @@ function for reversing an array in place:
 
 ```ocaml env=main
 # let rev_inplace ar =
-    let i = Ref.create 0 in
-    let j = Ref.create (Array.length ar - 1) in
+    let i = ref 0 in
+    let j = ref (Array.length ar - 1) in
     (* terminate when the upper and lower indices meet *)
     while !i < !j do
       (* swap the two elements *)
