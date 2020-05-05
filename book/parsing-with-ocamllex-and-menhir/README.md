@@ -604,7 +604,7 @@ recursive call to the lexer.
 
 That covers the lexer. Next, we need to combine the lexer with the parser to
 bring it all together. [lexers/Unicode parsing]{.idx}[Uutf Unicode
-codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[Ulex lexer
+codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[sedlex lexer
 generator]{.idx}[Camomile unicode parser]{.idx}[Unicode, parsing solutions
 for]{.idx}
 
