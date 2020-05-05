@@ -1,0 +1,54 @@
+;; Compilation flags for Menhir.
+
+;; Warnings are enabled (and fatal) during development,
+;; but are disabled in releases.
+
+;; If you change these flags, please also update the file
+;; src/.merlin, which currently is *not* auto-generated.
+
+(env
+  (dev (flags
+    :standard
+    -safe-string
+    -g
+    -w @1..66-4-9-41-44-60
+  ))
+  (release (flags
+    :standard
+    -safe-string
+    -g
+  ))
+)
+
+;; The following parsers are built by ocamlyacc.
+
+(ocamlyacc
+  sentenceParser
+)
+
+;; The following lexers are built by ocamllex.
+
+(ocamllex
+  lexer
+  lineCount
+  lexmli
+  lexdep
+  chopInlined
+  sentenceLexer
+  segment
+  lexpointfree
+)
+
+;; The Menhir standard library "standard.mly" is embedded in the source code of
+;; Menhir using the following rule. It generates a file "standard_mly.ml" with
+;; contents "let contents = {|<contents of standard.mly>|}".
+
+(rule
+  (with-stdout-to standard_mly.ml
+    (progn
+      (echo "let contents = {|")
+      (cat standard.mly)
+      (echo "|}")
+    )
+  )
+)

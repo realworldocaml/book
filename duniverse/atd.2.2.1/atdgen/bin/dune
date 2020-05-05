@@ -1,0 +1,5 @@
+(executables
+ (libraries re atd atdgen_emit)
+ (names ag_main)
+ (public_names atdgen)
+ (package atdgen))

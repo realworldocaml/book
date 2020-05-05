@@ -1,0 +1,4 @@
+(executables
+ (names fts_cmd)
+ (enabled_if (= %{os_type} "Unix"))
+ (libraries ctypes-foreign.threaded))

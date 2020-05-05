@@ -1,0 +1,16 @@
+(library
+ (name testlib)
+ (modules testlib)
+ (libraries tls ounit2 cstruct-unix mirage-crypto-rng.unix)
+ (optional))
+
+(test
+ (name unittestrunner)
+ (package tls)
+ (modules readertests readerwritertests writertests unittests unittestrunner)
+ (libraries tls ounit2 cstruct-unix testlib))
+
+(executable
+ (name feedback)
+ (modules feedback)
+ (libraries tls x509 testlib))

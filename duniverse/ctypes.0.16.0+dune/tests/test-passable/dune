@@ -1,3 +1,0 @@
-(test
- (name test_passable)
- (libraries ctypes ctypes.stubs ctypes-foreign.threaded oUnit))

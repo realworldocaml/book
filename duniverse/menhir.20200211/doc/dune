@@ -1,0 +1,7 @@
+;; Install the man page.
+(install
+  (section man)
+  (files menhir.1)
+  (package menhir)
+)
+(include dune.manual)

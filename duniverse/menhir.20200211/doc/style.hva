@@ -1,0 +1,12 @@
+% Compact layout
+\newstyle{body}{
+  max-width:800px;
+  width: 85\%;
+  margin: auto;
+  font-size: 1rem;
+}
+
+\newstyle{pre, .quote}{
+  margin-left: 2em;
+  font-size: 1rem;
+}

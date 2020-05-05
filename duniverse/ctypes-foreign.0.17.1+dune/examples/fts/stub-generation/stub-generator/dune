@@ -1,0 +1,21 @@
+(executable
+ (name fts_stub_generator)
+ (enabled_if (= %{os_type} "Unix"))
+ (modules fts_stub_generator)
+ (libraries fts_stubs ctypes.stubs ctypes))
+
+(rule
+ (targets fts_stubs.c fts_generated.ml)
+ (deps fts_stub_generator.exe)
+ (enabled_if (= %{os_type} "Unix"))
+ (action
+  (run %{deps})))
+
+(library
+ (name fts_generated)
+ (enabled_if (= %{os_type} "Unix"))
+ (modules fts_generated)
+ (foreign_stubs
+  (language c)
+  (names fts_stubs))
+ (libraries ctypes.stubs))

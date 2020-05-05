@@ -872,7 +872,8 @@ module Make_interval :
                   val compare : t -> t -> int
                   val t_of_sexp : Sexp.t -> t
                   val sexp_of_t : t -> Sexp.t
-                end) ->
+                end)
+    ->
     sig
       type t
       val create : Endpoint.t -> Endpoint.t -> t

@@ -1,0 +1,5 @@
+(ocamllex doc_lexer)
+
+(library
+ (name atdgen_emit)
+ (libraries atd yojson))

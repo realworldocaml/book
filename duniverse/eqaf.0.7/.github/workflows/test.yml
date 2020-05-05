@@ -1,0 +1,42 @@
+name: Eqaf
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-version: ["4.10.0", "4.09.0", "4.08.1"]
+        operating-system: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.0.0
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1.0
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1
+
+      - name: Install dependencies
+        run: |
+          opam pin add -n eqaf .
+          opam depext -y eqaf
+          opam install -t --deps-only .
+
+      - name: Build
+        run: opam exec -- dune build -p eqaf
+      - name: Simple tests
+        run: opam exec -- dune exec test/test.exe
+      - name: Branch tests
+        run: opam exec -- dune exec test/test_branch.exe
+      - name: Fuzz tests
+        run: opam exec -- dune exec fuzz/fuzz.exe

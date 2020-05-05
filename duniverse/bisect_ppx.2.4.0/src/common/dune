@@ -1,0 +1,4 @@
+(library
+ (name bisect_common)
+ (public_name bisect_ppx.common)
+ (synopsis "Bisect_ppx internal functions (internal)"))

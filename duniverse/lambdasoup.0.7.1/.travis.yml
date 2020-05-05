@@ -1,0 +1,42 @@
+language: generic
+
+env:
+  - SWITCH=4.10.0
+  - SWITCH=4.09.0 COVERAGE=yes
+  - SWITCH=4.08.1
+  - SWITCH=4.02.3
+  - SWITCH=4.03.0
+  - SWITCH=4.04.2
+  - SWITCH=4.05.0
+  - SWITCH=4.06.1
+  - SWITCH=4.07.1
+
+before_script:
+  - set -e
+  - wget https://github.com/ocaml/opam/releases/download/2.0.6/opam-2.0.6-x86_64-linux
+  - sudo mv opam-2.0.6-x86_64-linux /usr/local/bin/opam
+  - sudo chmod a+x /usr/local/bin/opam
+  - sudo apt-get install python-bs4
+  - opam init -y --compiler $SWITCH --disable-sandboxing
+  - eval `opam env`
+  - ocaml -version
+
+script:
+  - opam pin add -y --no-action lambdasoup .
+  - opam install -y --deps-only lambdasoup
+  - opam install -y ounit
+  - make test
+  - "[ -z $COVERAGE ] || make clean coverage"
+  - "[ -z $COVERAGE ] || bisect-ppx-report send-to Coveralls"
+  - make performance-test
+  - opam lint
+
+cache:
+  directories:
+    - $HOME/.opam
+    - ./_build/default
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always

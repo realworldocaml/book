@@ -1,0 +1,35 @@
+(* -*- tuareg -*- *)
+
+let preprocess =
+  let older =
+    Scanf.sscanf
+      Sys.ocaml_version
+      "%d.%2d.%s"
+      (fun maj min _ -> maj < 4 || (maj = 4 && min < 8))
+  in
+  let bisect =
+    match Sys.getenv "BISECT_ENABLE" with
+    | "yes" -> "(preprocess (pps bisect_ppx))"
+    | _ -> ""
+    | exception _ -> ""
+  in
+  let future_syntax = "(preprocess (future_syntax))" in
+  if older then
+    future_syntax
+  else
+    bisect
+
+let () = Jbuild_plugin.V1.send @@ {|
+
+(library
+ (public_name lwt)
+ (synopsis "Monadic promises and concurrent I/O")
+ (wrapped false)
+ |} ^ preprocess ^ {|
+ (libraries bytes result seq)
+ (flags (:standard -w +A-29)))
+
+(documentation
+ (package lwt))
+
+|}

@@ -1,0 +1,5 @@
+(test
+ (name test_array)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_arrays_stubs test_arrays_bindings tests_common stdlib-shims))

@@ -732,7 +732,7 @@ Logically, you can think of the evaluation of a simple recursive function
 like `sum` almost as if it were a mathematical equation whose meaning you
 were unfolding step by step:
 
-```ocaml file=examples/recursion.ml
+```ocaml skip
 sum [1;2;3]
 = 1 + sum [2;3]
 = 1 + (2 + sum [3])
@@ -805,25 +805,25 @@ including a function body. The `in` marks the beginning of the scope
 within which the new variable can be used. Thus, we could write:[let
 syntax/nested let binding]{.idx}
 
-```ocaml env=local_let
-# let x = 7 in
-  x + x
+```ocaml env=main
+# let z = 7 in
+  z + z
 - : int = 14
 ```
 
 Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `x` is no longer available:
+double-semicolon, so the value of `z` is no longer available:
 
-```ocaml env=local_let
-# x
+```ocaml env=main
+# z
 Line 1, characters 1-2:
-Error: Unbound value x
+Error: Unbound value z
 ```
 
 We can also have multiple `let` statements in a row, each one adding a new
 variable binding to what came before:
 
-```ocaml env=local_let
+```ocaml env=main
 # let x = 7 in
   let y = x * x in
   x + y
@@ -1333,7 +1333,7 @@ Here's the code, which you can save in a file called
 <em class="filename">sum.ml</em>. Note that we don't terminate expressions
 with `;;` here, since it's not required outside the toplevel.
 
-```ocaml file=examples/sum/sum.ml
+```ocaml file=examples/correct/sum/sum.ml
 open Base
 open Stdio
 
@@ -1369,7 +1369,7 @@ We'll compile our program using `dune`, a build system that's designed
 for use with OCaml projects. First, we need to write a *dune* file to
 specify the build.
 
-```scheme file=examples/sum/dune
+```scheme file=examples/correct/sum/dune
 (executable
  (name      sum)
  (libraries base stdio))
@@ -1381,7 +1381,7 @@ depend on.
 
 We can now invoke dune to build the executable.
 
-```sh dir=examples/sum
+```sh dir=examples/correct/sum
 $ dune build sum.exe
 ```
 

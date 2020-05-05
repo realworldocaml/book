@@ -1,0 +1,13 @@
+post-messages: "This package requires libffi on your system" {failure}
+depexts: [
+  ["libffi-dev"] {os-distribution = "debian"}
+  ["libffi-dev"] {os-distribution = "ubuntu"}
+  ["libffi"] {os = "macos" & os-distribution = "homebrew"}
+  ["libffi"] {os = "macos" & os-distribution = "macports"}
+  ["libffi-devel"] {os-distribution = "centos"}
+  ["libffi-devel"] {os-distribution = "oraclelinux"}
+  ["libffi"] {os = "win32" & os-distribution = "cygwinports"}
+  ["libffi-devel"] {os-distribution = "fedora"}
+  ["libffi-dev"] {os-distribution = "alpine"}
+  ["libffi-devel"] {os-family = "suse"}
+]

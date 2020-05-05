@@ -465,11 +465,11 @@ Error: The implementation conflicting_interface.ml
          type t = Foo
        is not included in
          type t = Bar
+       Constructors number 1 have different names, Foo and Bar.
        File "conflicting_interface.mli", line 1, characters 0-12:
          Expected declaration
        File "conflicting_interface.ml", line 1, characters 0-12:
          Actual declaration
-       Fields number 1 have different names, Foo and Bar.
 [2]
 ```
 

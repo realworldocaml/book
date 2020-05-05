@@ -1,0 +1,40 @@
+# This file determines who will be assigned code reviews by Github.
+# See https://help.github.com/articles/about-codeowners/
+
+# We are looking for volunteers to help with project maintenance.
+# Please open an pull request or an issue indicating your skills and interests.
+#
+# We can use help with the following:
+# - triaging issues: answering questions of fellow users,
+#   asking for clarification on how to reproduce a bug, assigning issues
+#   to a suitable team member.
+# - documentation: adding examples based on your practical use cases.
+# - tooling: if you're familiar with a particular tool that would be useful
+#   to the project, please use your expertise and help us get set up.
+# - community: let the world know your organization depends on the project,
+#   help us get more users, weigh in on design decisions.
+
+# Fallback reviewers
+* @mjambon @rgrinberg
+
+# ATD language
+/atd/ @mjambon
+/atdcat/ @mjambon
+
+# OCaml and Bucklescript support
+/atdgen-runtime/ @rgrinberg @mjambon
+/atdgen/ @rgrinberg @mjambon
+
+# Bucklescript-specific files
+obuckle_* @rgrinberg
+bucklescript/ @rgrinberg
+*_bs* @rgrinberg
+
+# Java support
+# /atdj/ YOUR_NAME_HERE
+
+# Scala support
+/atds/ @aij
+
+# Use of the dune build system
+dune* @rgrinberg

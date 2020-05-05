@@ -1,0 +1,4 @@
+(executable
+ (name examples_rules)
+ (public_name rwo-examples-rules)
+ (libraries sexplib))

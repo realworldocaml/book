@@ -1,0 +1,7 @@
+(ocamllex lexer doc_lexer)
+(menhir (modules parser))
+
+(library
+ (name atd)
+ (public_name atd)
+ (libraries easy-format unix re))
