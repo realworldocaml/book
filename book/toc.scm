@@ -21,7 +21,6 @@
   (chapters
    (maps-and-hashtables
     concurrent-programming
-    testing
     command-line-parsing
     json
     parsing-with-ocamllex-and-menhir

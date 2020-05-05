@@ -23,7 +23,6 @@
         prologue.html
         records.html
         runtime-memory-layout.html
-        testing.html
         variables-and-functions.html
         variants.html))
 
@@ -52,7 +51,6 @@
         prologue.tex
         records.tex
         runtime-memory-layout.tex
-        testing.tex
         variables-and-functions.tex
         variants.tex))
 
@@ -284,16 +282,6 @@
 (rule
   (targets runtime-memory-layout.tex)
   (deps    (:md_file runtime-memory-layout/README.md))
-  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
-
-(rule
-  (targets testing.html)
-  (deps    (:md_file testing/README.md))
-  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
-
-(rule
-  (targets testing.tex)
-  (deps    (:md_file testing/README.md))
   (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
 
 (rule
