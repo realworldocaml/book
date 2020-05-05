@@ -4,11 +4,6 @@
   core
   mdx
   ppx_jane)
- (preludes
-  prelude.ml
-  (env memo memo.ml)
-  (env fib fib.ml)
-  (env letrec letrec.ml)
-  (env value_restriction letrec.ml)))
+ (preludes prelude.ml))
 
 (data_only_dirs examples)
