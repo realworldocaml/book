@@ -611,7 +611,7 @@ structures]{.idx}
 An expression in this language will be defined by the variant `expr`, with
 one tag for each kind of expression we want to support:
 
-```ocaml env=blang
+```ocaml env=main
 # type 'a expr =
     | Base  of 'a
     | Const of bool
@@ -641,7 +641,7 @@ falsehood is determined by your application. If you were writing a filter
 language for an email processor, your base predicates might specify the tests
 you would run against an email, as in the following example:
 
-```ocaml env=blang
+```ocaml env=main
 # type mail_field = To | From | CC | Date | Subject
 type mail_field = To | From | CC | Date | Subject
 # type mail_predicate = { field: mail_field;
@@ -652,7 +652,7 @@ type mail_predicate = { field : mail_field; contains : string; }
 Using the preceding code, we can construct a simple expression with
 `mail_predicate` as its base predicate:
 
-```ocaml env=blang
+```ocaml env=main
 # let test field contains = Base { field; contains }
 val test : mail_field -> string -> mail_predicate expr = <fun>
 # And [ Or [ test To "doligez"; test CC "doligez" ];
@@ -669,7 +669,7 @@ And
 Being able to construct such expressions isn't enough; we also need to be
 able to evaluate them. Here's a function for doing just that:
 
-```ocaml env=blang
+```ocaml env=main
 # let rec eval expr base_eval =
     (* a shortcut, so we don't need to repeatedly pass [base_eval]
        explicitly to [eval] *)
@@ -693,7 +693,7 @@ Another useful operation on expressions is simplification. The following is a
 set of simplifying construction functions that mirror the tags of an
 `expr`:
 
-```ocaml env=blang
+```ocaml env=main
 # let and_ l =
     if List.exists l ~f:(function Const false -> true | _ -> false)
     then Const false
@@ -720,7 +720,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 We can now write a simplification routine that is based on the preceding
 functions.
 
-```ocaml env=blang
+```ocaml env=main
 # let rec simplify = function
     | Base _ | Const _ as x -> x
     | And l -> and_ (List.map ~f:simplify l)
@@ -732,7 +732,7 @@ val simplify : 'a expr -> 'a expr = <fun>
 We can apply this to a Boolean expression and see how good a job it does at
 simplifying it:
 
-```ocaml env=blang
+```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
   Base "it's raining"]))
 - : string expr = Not (Base "it's raining")
@@ -745,7 +745,7 @@ component.
 There are some simplifications it misses, however. In particular, see what
 happens if we add a double negation in:
 
-```ocaml env=blang
+```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
   Not (Not (Base "it's raining"))]))
 - : string expr = Not (Not (Not (Base "it's raining")))
@@ -757,7 +757,7 @@ case it explicitly considers, that of the negation of a constant. Catch-all
 cases are generally a bad idea, and if we make the code more explicit, we see
 that the missing of the double negation is more obvious:
 
-```ocaml env=blang
+```ocaml env=main
 # let not_ = function
     | Const b -> Const (not b)
     | (Base _ | And _ | Or _ | Not _) as e -> Not e
@@ -767,7 +767,7 @@ val not_ : 'a expr -> 'a expr = <fun>
 We can of course fix this by simply adding an explicit case for double
 negation:
 
-```ocaml env=blang
+```ocaml env=main
 # let not_ = function
     | Const b -> Const (not b)
     | Not e -> e
