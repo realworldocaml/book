@@ -137,7 +137,7 @@ collections, such as handling pending UNIX signals, and they don't ordinarily
 matter for application code. [minor heaps/setting size of]{.idx}
 
 ::: {data-type=note}
-#### Setting the Size of the Minor Heap
+##### Setting the Size of the Minor Heap
 
 The default minor heap size in OCaml is normally 2 MB on 64-bit platforms,
 but this is increased to 8 MB if you use Core (which generally prefers
@@ -225,7 +225,7 @@ MB chunks (or 512 KB on 32-bit architectures). [major heaps/controlling
 growth of]{.idx}
 
 ::: {data-type=note}
-#### Controlling Major Heap Growth
+##### Controlling Major Heap Growth
 
 The `Gc` module uses the `major_heap_increment` value to control the major
 heap growth. This defines the number of words to add to the major heap per

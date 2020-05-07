@@ -84,7 +84,7 @@ print them to the screen. These operations are tied together using the
 [let ( ) declaration]{.idx}[main function]{.idx}
 
 ::: {.allow_break data-type=note}
-### Where Is `main`?
+##### Where Is `main`?
 
 Unlike programs in C, Java or C#, programs in OCaml don't have a unique
 `main` function. When an OCaml program is evaluated, all the statements in
@@ -186,7 +186,7 @@ $ grep -Eo '[[:alpha:]]+' freq.ml | dune exec ./freq.bc
 
 
 ::: {data-type=note}
-### Bytecode Versus Native Code
+##### Bytecode Versus Native Code
 
 OCaml ships with two compilers: the `ocamlc` bytecode compiler and the
 `ocamlopt` native-code compiler. Programs compiled with `ocamlc` are

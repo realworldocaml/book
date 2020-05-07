@@ -141,7 +141,7 @@ A muted gray...
 ```
 
 ::: {.allow_break data-type=note}
-#### Variants, tuples and parens
+##### Variants, tuples and parens
 
 Variants with multiple arguments look an awful lot like tuples.
 Consider the following example of a value of the type `color` we
@@ -1012,7 +1012,7 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
 ```
 
 ::: {.allow_break data-type=note}
-#### Polymorphic Variants and Catch-all Cases
+##### Polymorphic Variants and Catch-all Cases
 
 As we saw with the definition of `is_positive`, a `match` statement can lead
 to the inference of an upper bound on a variant type, limiting the possible
