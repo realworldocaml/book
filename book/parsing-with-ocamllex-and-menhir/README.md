@@ -33,7 +33,7 @@ of how to build a parser in OCaml. [ocamlyacc parser generator]{.idx}[Menhir
 parser generator/vs. ocamlyacc]{.idx}
 
 ::: {data-type=note}
-## Menhir Versus ocamlyacc
+##### Menhir Versus ocamlyacc
 
 Menhir is an alternative parser generator that is generally superior to the
 venerable `ocamlyacc`, which dates back quite a few years. Menhir is mostly
@@ -604,12 +604,12 @@ recursive call to the lexer.
 
 That covers the lexer. Next, we need to combine the lexer with the parser to
 bring it all together. [lexers/Unicode parsing]{.idx}[Uutf Unicode
-codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[Ulex lexer
+codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[sedlex lexer
 generator]{.idx}[Camomile unicode parser]{.idx}[Unicode, parsing solutions
 for]{.idx}
 
 ::: {data-type=note}
-#### Handling Unicode
+##### Handling Unicode
 
 We've glossed over an important detail here: parsing Unicode characters to
 handle the full spectrum of the world's writing systems. OCaml has several
@@ -620,8 +620,8 @@ flexibility and complexity:
   Unicode character types, conversion from around 200 encodings, and
   collation and locale-sensitive case mappings.
 
-- [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode that can
-  serve as a Unicode-aware replacement for `ocamllex`.
+- [sedlex](https://github.com/ocaml-community/sedlex) is a lexer generator for
+  Unicode that can serve as a Unicode-aware replacement for `ocamllex`.
 
 - [Uutf](http://erratique.ch/software/uutf) is a nonblocking streaming
   Unicode codec for OCaml, available as a standalone library. It is

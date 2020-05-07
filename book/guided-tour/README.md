@@ -14,7 +14,7 @@ assume you're using `utop`, but the ordinary toplevel should mostly work
 fine.
 
 ::: {data-type=note}
-## `Base`, `Core` and `Core_kernel`
+##### `Base`, `Core` and `Core_kernel`
 
 `Base` is one of a family of three standard library replacements, each with
 different use-cases, each building on the last. Here's a quick summary.
@@ -28,9 +28,11 @@ different use-cases, each building on the last. Here's a quick summary.
   install. It's also portable, running on every platform that OCaml does,
   including Windows and JavaScript.
 
-- *`Core_kernel`* extends `Base` with many new data structures, like heaps, types to represent times and time-zones, support for efficient binary serializers, and other capabilities. It's still portable, but has many
-  more dependencies, takes longer to build, and will add more to the size of
-  your executables.
+- *`Core_kernel`* extends `Base` with many new data structures, like
+  heaps, types to represent times and time-zones, support for
+  efficient binary serializers, and other capabilities. It's still
+  portable, but has many more dependencies, takes longer to build, and
+  will add more to the size of your executables.
 
 - *`Core`* is the most full-featured, extending `Core_kernel` with support
   for a variety of UNIX APIs, but only works on UNIX-like OSs, including
@@ -384,7 +386,7 @@ whereas `"short"` and `"loooooong"` require that `'a` be instantiated as
 `string`, and they can't both be right at the same time.
 
 ::: {data-type=note}
-#### Type Errors Versus Exceptions
+##### Type Errors Versus Exceptions
 
 There's a big difference in OCaml between errors that are caught at compile
 time and those that are caught at runtime. It's better to catch errors as early
@@ -794,7 +796,7 @@ to iterate in a new way.
 
 
 ::: {data-type=note}
-#### Nesting lets with let and in
+##### Nesting lets with let and in
 
 `new_tl` in the above examples was our first use of `let` to define a
 new variable within the body of a function. A `let` paired with an
@@ -1023,7 +1025,7 @@ case, we're using `List.exists` to check if there is a scene element within
 which our point resides.
 
 ::: {data-type=note}
-### `Base` and polymorphic comparison
+##### `Base` and polymorphic comparison
 
 One other thing to notice was the fact that we opened `Float.O` in the
 definition of `is_inside_scene_element`. That allowed us to use the simple,

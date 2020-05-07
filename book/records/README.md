@@ -223,7 +223,7 @@ It's a good idea to enable the warning for incomplete record matches
 and to explicitly disable it with an `_` where necessary.
 
 ::: {.allow_break data-type=note}
-### Compiler Warnings
+##### Compiler Warnings
 
 The OCaml compiler is packed full of useful warnings that can be
 enabled and disabled separately. These are documented in the compiler
