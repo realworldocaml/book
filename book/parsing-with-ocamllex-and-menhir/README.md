@@ -604,7 +604,7 @@ recursive call to the lexer.
 
 That covers the lexer. Next, we need to combine the lexer with the parser to
 bring it all together. [lexers/Unicode parsing]{.idx}[Uutf Unicode
-codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[Ulex lexer
+codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[sedlex lexer
 generator]{.idx}[Camomile unicode parser]{.idx}[Unicode, parsing solutions
 for]{.idx}
 
@@ -620,8 +620,8 @@ flexibility and complexity:
   Unicode character types, conversion from around 200 encodings, and
   collation and locale-sensitive case mappings.
 
-- [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode that can
-  serve as a Unicode-aware replacement for `ocamllex`.
+- [sedlex](https://github.com/ocaml-community/sedlex) is a lexer generator for
+  Unicode that can serve as a Unicode-aware replacement for `ocamllex`.
 
 - [Uutf](http://erratique.ch/software/uutf) is a nonblocking streaming
   Unicode codec for OCaml, available as a standalone library. It is
