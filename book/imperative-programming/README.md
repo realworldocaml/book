@@ -1697,11 +1697,12 @@ not quite, like the type of the identity function. Here it is again:
 val remember : '_weak1 -> '_weak1 = <fun>
 ```
 
-The `'_weak1` type variable tells us that the variable is only
-*weakly polymorphic*, which is to say that it can be used with any *single*
-type. That makes sense because, unlike `identity`, `remember` always returns
-the value it was passed on its first invocation, which means its return value
-must always have the same type. [type variables]{.idx}
+The underscore in the type variable `'_weak1` tells us that the
+variable is only *weakly polymorphic*, which is to say that it can be
+used with any *single* type. That makes sense because, unlike
+`identity`, `remember` always returns the value it was passed on its
+first invocation, which means its return value must always have the
+same type. [type variables]{.idx}
 
 OCaml will convert a weakly polymorphic variable to a concrete type as soon
 as it gets a clue as to what concrete type it is to be used as:
