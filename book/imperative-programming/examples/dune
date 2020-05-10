@@ -1,0 +1,14 @@
+(data_only_dirs correct erroneous *)
+
+(rule
+ (deps
+  (source_tree ./))
+ (action
+  (with-stdout-to dune.gen
+   (run rwo-examples-rules ./))))
+
+(rule
+ (alias runtest)
+ (action (diff dune.inc dune.gen)))
+
+(include dune.inc)

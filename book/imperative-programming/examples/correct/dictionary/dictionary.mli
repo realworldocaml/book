@@ -1,5 +1,4 @@
-[@@@part "1"] ;;
-
+(* $MDX part-begin=1 *)
 (* file: dictionary.mli *)
 open Base
 
@@ -11,3 +10,6 @@ val add    : ('a, 'b) t -> key:'a -> data:'b -> unit
 val find   : ('a, 'b) t -> 'a -> 'b option
 val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
+(* $MDX part-end *)
+
+val add_with_let_in : ('a, 'b) t -> key:'a -> data:'b -> unit

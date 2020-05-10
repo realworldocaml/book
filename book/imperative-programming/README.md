@@ -53,7 +53,7 @@ Here's the interface we'll match, provided as an `mli`. The type `('a,
 'b) t` represents a dictionary with keys of type `'a` and data of type
 `'b`:
 
-```ocaml file=examples/dictionary.mli,part=1
+```ocaml file=examples/correct/dictionary/dictionary.mli,part=1
 (* file: dictionary.mli *)
 open Base
 
@@ -80,7 +80,7 @@ imperative constructs as they come up.
 Our first step is to define the type of a dictionary as a record with
 two fields:
 
-```ocaml file=examples/dictionary.ml,part=1
+```ocaml file=examples/correct/dictionary/dictionary.ml,part=1
 (* file: dictionary.ml *)
 open Base
 
@@ -98,7 +98,7 @@ structure. [fields/mutability of]{.idx}
 Now we'll start putting together the basic functions for manipulating
 a dictionary:
 
-```ocaml file=examples/dictionary.ml,part=2
+```ocaml file=examples/correct/dictionary/dictionary.ml,part=2
 let num_buckets = 17
 
 let hash_bucket key = (Hashtbl.hash key) % num_buckets
@@ -112,7 +112,7 @@ let length t = t.length
 
 let find t key =
   List.find_map t.buckets.(hash_bucket key)
-    ~f:(fun (key',data) -> if key' = key then Some data else None)
+    ~f:(fun (key',data) -> if Poly.(key' = key) then Some data else None)
 ```
 
 Note that `num_buckets` is a constant, which means our bucket array is
@@ -157,7 +157,7 @@ returned.
 
 Now let's look at the implementation of `iter`:
 
-```ocaml file=examples/dictionary.ml,part=3
+```ocaml file=examples/correct/dictionary/dictionary.ml,part=3
 let iter t ~f =
   for i = 0 to Array.length t.buckets - 1 do
     List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
@@ -180,16 +180,16 @@ idiomatic in imperative contexts.
 The following code is for adding and removing mappings from the
 dictionary:
 
-```ocaml file=examples/dictionary.ml,part=4
+```ocaml file=examples/correct/dictionary/dictionary.ml,part=4
 let bucket_has_key t i key =
-  List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key)
+  List.exists t.buckets.(i) ~f:(fun (key',_) -> Poly.(key' = key))
 
 let add t ~key ~data =
   let i = hash_bucket key in
   let replace = bucket_has_key t i key in
   let filtered_bucket =
     if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> Poly.(key' <> key))
     else
       t.buckets.(i)
   in
@@ -200,7 +200,7 @@ let remove t key =
   let i = hash_bucket key in
   if bucket_has_key t i key then (
     let filtered_bucket =
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> Poly.(key' <> key))
     in
     t.buckets.(i) <- filtered_bucket;
     t.length <- t.length - 1
@@ -219,7 +219,7 @@ updating a record field (`record.field <- expression`).
 We also use `;`, the sequencing operator, to express a sequence of imperative
 actions. We could have done the same using `let` bindings:
 
-```ocaml file=examples/dictionary2.ml,part=1
+```ocaml file=examples/correct/dictionary/dictionary.ml,part=add-with-let-in
 let () = t.buckets.(i) <- (key, data) :: filtered_bucket in
   if not replace then t.length <- t.length + 1
 ```
@@ -498,7 +498,7 @@ lists]{.idx}[imperative programming/doubly-linked lists]{.idx #IPdoublink}
 
 Here's the `mli` of the module we'll build:
 
-```ocaml file=examples/dlist.mli
+```ocaml file=examples/correct/dlist/dlist.mli
 (* file: dlist.mli *)
 open Base
 
@@ -533,7 +533,7 @@ which to apply mutating operations.
 Now let's look at the implementation. We'll start by defining `'a element`
 and `'a t`:
 
-```ocaml file=examples/dlist.ml,part=1
+```ocaml file=examples/correct/dlist/dlist.ml,part=1
 (* file: dlist.ml *)
 open Base
 
@@ -557,7 +557,7 @@ otherwise.
 
 Now we can define a few basic functions that operate on lists and elements:
 
-```ocaml file=examples/dlist.ml,part=2
+```ocaml file=examples/correct/dlist/dlist.ml,part=2
 let create () = ref None
 let is_empty t = Option.is_none !t
 
@@ -599,7 +599,7 @@ Now, we'll start considering operations that mutate the list, starting with
 `insert_first`, which inserts an element at the front of the list:
 [elements/inserting in lists]{.idx}
 
-```ocaml file=examples/dlist.ml,part=3
+```ocaml file=examples/correct/dlist/dlist.ml,part=3
 let insert_first t value =
   let new_elt = { prev = None; next = !t; value } in
   begin match !t with
@@ -622,7 +622,7 @@ We can use `insert_after` to insert elements later in the list.
 `insert_after` takes as arguments both an `element` after which to insert the
 new node and a value to insert:
 
-```ocaml file=examples/dlist.ml,part=4
+```ocaml file=examples/correct/dlist/dlist.ml,part=4
 let insert_after elt value =
   let new_elt = { value; prev = Some elt; next = elt.next } in
   begin match elt.next with
@@ -635,7 +635,7 @@ let insert_after elt value =
 
 Finally, we need a `remove` function:
 
-```ocaml file=examples/dlist.ml,part=5
+```ocaml file=examples/correct/dlist/dlist.ml,part=5
 let remove t elt =
   let { prev; next; _ } = elt in
   begin match prev with
@@ -687,7 +687,7 @@ the list, returning the first `element` that passes the test. Both
 use `next` to walk from element to element and `value` to extract the
 element from a given node:
 
-```ocaml file=examples/dlist.ml,part=6
+```ocaml file=examples/correct/dlist/dlist.ml,part=6
 let iter t ~f =
   let rec loop = function
     | None -> ()
@@ -1141,7 +1141,7 @@ OCaml rejects the definition because OCaml, as a strict language, has limits
 on what it can put on the righthand side of a `let rec`. In particular,
 imagine how the following code snippet would be compiled:
 
-```ocaml file=examples/let_rec.ml
+```ocaml skip
 let rec x = x + 1
 ```
 
@@ -1257,13 +1257,13 @@ Core's `Zone` module for looking up a time zone, and the `Time` module
 for computing the current time and printing it out in the time zone in
 question:
 
-```ocaml file=examples/time_converter/time_converter.ml
+```ocaml file=examples/correct/time_converter/time_converter.ml
 open Core
 
 let () =
   Out_channel.output_string stdout "Pick a timezone: ";
   Out_channel.flush stdout;
-  match In_channel.input_line stdin with
+  match In_channel.(input_line stdin) with
   | None -> failwith "No timezone provided"
   | Some zone_string ->
     let zone = Time.Zone.find_exn zone_string in
@@ -1402,7 +1402,7 @@ useful to keep the broad outlines of the story in the back of your head.
 Now let's see how we can rewrite our time conversion program to be a little
 more concise using `printf`:
 
-```ocaml file=examples/time_converter2.ml
+```ocaml file=examples/correct/time_converter2/time_converter.ml
 open Core
 
 let () =
@@ -1693,15 +1693,16 @@ This is not what happens with `remember`, though. As you can see from the
 above examples, the type that OCaml infers for `remember` looks almost, but
 not quite, like the type of the identity function. Here it is again:
 
-```ocaml file=examples/remember_type.ml
-val remember : '_a -> '_a = <fun>
+```ocaml skip
+val remember : '_weak1 -> '_weak1 = <fun>
 ```
 
-The underscore in the type variable `'_a` tells us that the variable is only
-*weakly polymorphic*, which is to say that it can be used with any *single*
-type. That makes sense because, unlike `identity`, `remember` always returns
-the value it was passed on its first invocation, which means its return value
-must always have the same type. [type variables]{.idx}
+The underscore in the type variable `'_weak1` tells us that the
+variable is only *weakly polymorphic*, which is to say that it can be
+used with any *single* type. That makes sense because, unlike
+`identity`, `remember` always returns the value it was passed on its
+first invocation, which means its return value must always have the
+same type. [type variables]{.idx}
 
 OCaml will convert a weakly polymorphic variable to a concrete type as soon
 as it gets a clue as to what concrete type it is to be used as:
