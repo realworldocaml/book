@@ -34,16 +34,16 @@ imperative features, and help you use them to their fullest.
 
 We'll start with the implementation of a simple imperative dictionary,
 i.e., a mutable mapping from keys to values. This is really for
-illustration purposes; both Core and the standard library provide
+illustration purposes; both `Base` and the standard library provide
 imperative dictionaries, and for most real-world tasks, you should use
-one of those implementations.  There's more advice on using Core's
+one of those implementations.  There's more advice on using `Base`'s
 implementation in particular in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-[dictionaries, imperative]{.idx #DICTimper}[Core standard
+[dictionaries, imperative]{.idx #DICTimper}[Base standard
 library/imperative dictionaries in]{.idx}[imperative
 programming/imperative dictionaries]{.idx #IPimpdict}
 
-The dictionary we'll describe now, like those in Core and the standard
+The dictionary we'll describe now, like those in `Base` and the standard
 library, will be implemented as a hash table. In particular, we'll use
 an *open hashing* scheme, where the hash table will be an array of
 buckets, each bucket containing a list of key/value pairs that have
@@ -489,12 +489,14 @@ respectively.
 
 ## Example: Doubly Linked Lists
 
-Another common imperative data structure is the doubly linked list. Doubly
-linked lists can be traversed in both directions, and elements can be added
-and removed from the list in constant time. Core defines a doubly linked list
-(the module is called `Doubly_linked`), but we'll define our own linked list
-library as an illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
-lists]{.idx}[imperative programming/doubly-linked lists]{.idx #IPdoublink}
+Another common imperative data structure is the doubly linked
+list. Doubly linked lists can be traversed in both directions, and
+elements can be added and removed from the list in constant
+time. Core_kernel defines a doubly linked list (the module is called
+`Doubly_linked`), but we'll define our own linked list library as an
+illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
+lists]{.idx}[imperative programming/doubly-linked lists]{.idx
+#IPdoublink}
 
 Here's the `mli` of the module we'll build:
 
@@ -662,15 +664,15 @@ element will cause the main list reference to be set to `None`, thus emptying
 the list. Similar problems arise from removing an element from a list it
 doesn't belong to.
 
-This shouldn't be a big surprise. Complex imperative data structures can be
-quite tricky, considerably trickier than their pure equivalents. The issues
-described previously can be dealt with by more careful error detection, and
-such error correction is taken care of in modules like Core's
-`Doubly_linked`. You should use imperative data structures from a
-well-designed library when you can. And when you can't, you should make sure
-to put great care into your error handling. [imperative programming/drawbacks
-of]{.idx}[Doubly-linked module]{.idx}[error handling/and imperative data
-structures]{.idx}
+This shouldn't be a big surprise. Complex imperative data structures
+can be quite tricky, considerably trickier than their pure
+equivalents. The issues described previously can be dealt with by more
+careful error detection, and such error correction is taken care of in
+modules like Core_kernel's `Doubly_linked`. You should use imperative
+data structures from a well-designed library when you can. And when
+you can't, you should make sure to put great care into your error
+handling. [imperative programming/drawbacks of]{.idx}[Doubly-linked
+module]{.idx}[error handling/and imperative data structures]{.idx}
 
 ### Iteration Functions
 
@@ -705,14 +707,15 @@ let find_el t ~f =
   loop !t
 ```
 
-This completes our implementation, but there's still considerably more work
-to be done to make a really usable doubly linked list. As mentioned earlier,
-you're probably better off using something like Core's `Doubly_linked` module
-that has a more complete interface and has more of the tricky corner cases
-worked out. Nonetheless, this example should serve to demonstrate some of the
-techniques you can use to build nontrivial imperative data structure in
-OCaml, as well as some of the
-pitfalls.<a data-type="indexterm" data-startref="IPdoublink">&nbsp;</a>
+This completes our implementation, but there's still considerably more
+work to be done to make a really usable doubly linked list. As
+mentioned earlier, you're probably better off using something like
+Core_kernel's `Doubly_linked` module that has a more complete
+interface and has more of the tricky corner cases worked
+out. Nonetheless, this example should serve to demonstrate some of the
+techniques you can use to build nontrivial imperative data structure
+in OCaml, as well as some of the pitfalls.<a data-type="indexterm"
+data-startref="IPdoublink">&nbsp;</a>
 
 
 ## Laziness and Other Benign Effects
@@ -826,7 +829,7 @@ effects/memoization]{.idx #BEmem}
 
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
-function. Here we'll use Core's `Hashtbl` module, rather than our toy
+function. Here we'll use Base's `Hashtbl` module, rather than our toy
 `Dictionary`:
 
 ```ocaml env=main
@@ -908,7 +911,7 @@ are two different calls to `edit_distance "OCam" "oca"`. The number of
 redundant calls grows exponentially with the size of the strings,
 meaning that our implementation of `edit_distance` is brutally slow
 for large strings. We can see this by writing a small timing function,
-using the `Mtime` package.
+using Core's `Time` module.
 
 ```ocaml env=main
 # let time f =
@@ -1210,14 +1213,14 @@ I/O]{.idx}[imperative programming/input and output]{.idx #IPinpout}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
-`In_channel` and `Out_channel` modules in Core. Other I/O primitives
-are also available through the `Unix` module in Core as well as
+`In_channel` and `Out_channel` modules in Stdio. Other I/O primitives
+are also available through the `Unix` module in `Core` as well as
 `Async`, the asynchronous I/O library that is covered in [Concurrent
 Programming With
 Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
-Most of the functionality in Core's `In_channel` and `Out_channel`
-(and in Core's `Unix` module) derives from the standard library, but
-we'll use Core's interfaces here.
+Most of the functionality in `Core`'s `In_channel` and `Out_channel`
+(and in `Core`'s `Unix` module) derives from the standard library, but
+we'll use `Core`'s interfaces here.
 
 ### Terminal I/O
 
@@ -1253,9 +1256,9 @@ go through the `In_channel` and `Out_channel` modules.
 Let's see this in action in a simple interactive application. The
 following program, `time_converter`, prompts the user for a time zone,
 and then prints out the current time in that time zone. Here, we use
-Core's `Zone` module for looking up a time zone, and the `Time` module
-for computing the current time and printing it out in the time zone in
-question:
+`Core`'s `Zone` module for looking up a time zone, and the `Time`
+module for computing the current time and printing it out in the time
+zone in question:
 
 ```ocaml file=examples/correct/time_converter/time_converter.ml
 open Core
