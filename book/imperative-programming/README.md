@@ -69,16 +69,14 @@ val remove : ('a, 'b) t -> 'a -> unit
 
 This `mli` also includes a collection of helper functions whose
 purpose and behavior should be largely inferrable from their names and
-type signatures.  The `create` function is notable because it takes
-two important arguments: a hash-function `hash`, for converting values
-of the key type to integers; and an equality-testing function,
-`equal`.
+type signatures. Note that the `create` function takes as its
+arguments functions for hashing keys and testing them for equality.
 
-Another interesting aspect of the interface is that a number of the
-functions, like `add` and `iter`, return `unit`.  That's because the
-goal of these functions is to modify the data structure, rather than
-to compute a value.  This kind of signature shows up a lot when
-programming imperatively.
+A notable aspect of the interface is that some of the functions, like
+`add` and `iter`, return `unit`.  That's because the goal of these
+functions is to modify the data structure, rather than to compute a
+value.  This kind of signature shows up a lot when programming
+imperatively.
 
 We'll now walk through the implementation (contained in the
 corresponding `ml` file) piece by piece, explaining different
