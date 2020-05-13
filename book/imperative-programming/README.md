@@ -366,7 +366,7 @@ field. [ref cells]{.idx}
 
 The definition for the `ref` type is as follows:
 
-```ocaml env=main
+```ocaml env=custom_ref
 # type 'a ref = { mutable contents : 'a }
 type 'a ref = { mutable contents : 'a; }
 ```
@@ -840,11 +840,16 @@ effects/memoization]{.idx #BEmem}
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
 function. Here we'll use Base's `Hashtbl` module, rather than our toy
-`Dictionary`.
+`Dictionary`. Note that this implementations requires an argument of a
+`Hashtbl.Key.t`, which plays the role of the `hash` and `equal`
+arguments of our implementation.  As we'll see later, `Hashtbl.Key.t`
+is an example of what's called a first-class module, which we'll see
+more of in [First Class
+Modules](first-class-modules.html#First-Class-Modules).
 
 ```ocaml env=main
-# let memoize f =
-    let memo_table = Hashtbl.Poly.create () in
+# let memoize m f =
+    let memo_table = Hashtbl.create m in
     (fun x ->
        Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
 val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
@@ -1051,9 +1056,9 @@ variant of `make_rec` that inserts memoization when it ties the recursive
 knot. We'll call that function `memo_rec`:
 
 ```ocaml env=main
-# let memo_rec f_norec x =
+# let memo_rec m f_norec x =
     let fref = ref (fun _ -> assert false) in
-    let f = memoize (fun x -> f_norec !fref x) in
+    let f = memoize m (fun x -> f_norec !fref x) in
     fref := f;
     f x
 val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
@@ -1067,7 +1072,7 @@ using a `let rec`, which for reasons we'll describe later wouldn't work here.
 Using `memo_rec`, we can now build an efficient version of `fib`:
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memo_rec fib_norec
+# let fib = memo_rec (module Int) fib_norec
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
 Time: 0.0388622283936 ms
@@ -1089,7 +1094,7 @@ We can use `memo_rec` as part of a single declaration that makes this
 look like it's little more than a special form of `let rec`:
 
 ```ocaml env=main
-# let fib = memo_rec (fun fib i ->
+# let fib = memo_rec (module Int) (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2))
 val fib : int -> int = <fun>
 ```
@@ -1099,28 +1104,43 @@ defined above is not especially efficient, allocating space linear in the
 number passed in to `fib`. It's easy enough to write a Fibonacci function
 that takes a constant amount of space.
 
-But memoization is a good approach for optimizing `edit_distance`, and we can
-apply the same approach we used on `fib` here. We will need to change
-`edit_distance` to take a pair of strings as a single argument, since
-`memo_rec` only works on single-argument functions. (We can always recover
-the original interface with a wrapper function.) With just that change and
-the addition of the `memo_rec` call, we can get a memoized version of
-`edit_distance`:
+But memoization is a good approach for optimizing `edit_distance`, and
+we can apply the same approach we used on `fib` here. We will need to
+change `edit_distance` to take a pair of strings as a single argument,
+since `memo_rec` only works on single-argument functions. (We can
+always recover the original interface with a wrapper function.) With
+just that change and the addition of the `memo_rec` call, we can get a
+memoized version of `edit_distance`.  The memoization key is going to
+be a pair of strings, so we need to get our hands on a module with the
+necessary functionality for building a hash-table in `Base`.  We'll
+use `ppx_jane` to derive the necessary functions automatically, so we
+don't have to write them by hand.
 
 ```ocaml env=main
-# let edit_distance = memo_rec (fun edit_distance (s,t) ->
-    match String.length s, String.length t with
-    | (0,x) | (x,0) -> x
-    | (len_s,len_t) ->
-      let s' = String.drop_suffix s 1 in
-      let t' = String.drop_suffix t 1 in
-      let cost_to_drop_both =
-        if Char.(=) s.[len_s - 1] t.[len_t - 1] then 0 else 1
-      in
-      List.reduce_exn ~f:Int.min
-        [ edit_distance (s',t ) + 1
-        ; edit_distance (s ,t') + 1
-        ; edit_distance (s',t') + cost_to_drop_both
+# #require "ppx_jane"
+# module String_pair = struct
+    type t = string * string [@@deriving sexp_of, hash, compare]
+  end
+```
+
+With that in hand, we can define our optimized form of
+`edit_distance`.
+
+```ocaml env=main
+# let edit_distance = memo_rec (module String_pair)
+    (fun edit_distance (s,t) ->
+       match String.length s, String.length t with
+       | (0,x) | (x,0) -> x
+       | (len_s,len_t) ->
+         let s' = String.drop_suffix s 1 in
+         let t' = String.drop_suffix t 1 in
+         let cost_to_drop_both =
+           if Char.(=) s.[len_s - 1] t.[len_t - 1] then 0 else 1
+         in
+         List.reduce_exn ~f:Int.min
+           [ edit_distance (s',t ) + 1
+           ; edit_distance (s ,t') + 1
+           ; edit_distance (s',t') + cost_to_drop_both
   ])
 val edit_distance : string * string -> int = <fun>
 ```
@@ -1736,17 +1756,18 @@ Note that the type of `remember` was settled by the definition of
 
 ### The Value Restriction
 
-So, when does the compiler infer weakly polymorphic types? As we've seen, we
-need weakly polymorphic types when a value of unknown type is stored in a
-persistent mutable cell. Because the type system isn't precise enough to
-determine all cases where this might happen, OCaml uses a rough rule to flag
-cases that don't introduce any persistent mutable cells, and to only infer
-polymorphic types in those cases. This rule is called
-*the value restriction*. [value restriction]{.idx}
+So, when does the compiler infer weakly polymorphic types? As we've
+seen, we need weakly polymorphic types when a value of unknown type is
+stored in a persistent mutable cell. Because the type system isn't
+precise enough to determine all cases where this might happen, OCaml
+uses a rough rule to flag cases that don't introduce any persistent
+mutable cells, and to only infer polymorphic types in those
+cases. This rule is called *the value restriction*. [value
+restriction]{.idx}
 
-The core of the value restriction is the observation that some kinds of
-expressions, which we'll refer to as *simple values*, by their nature can't
-introduce persistent mutable cells, including:
+The core of the value restriction is the observation that some kinds
+of expressions, which we'll refer to as *simple values*, by their
+nature can't introduce persistent mutable cells, including:
 
 - Constants (i.e., things like integer and floating-point literals)
 
@@ -1755,11 +1776,11 @@ introduce persistent mutable cells, including:
 - Function declarations, i.e., expressions that begin with `fun` or
   `function`, or the equivalent let binding, `let f x = ...`
 
-- `let` bindings of the form `let` *`var`* `=` *`expr1`* `in` *`expr2`*, where
-  both *`expr1`* and *`expr2`* are simple values
+- `let` bindings of the form `let` *`var`* `=` *`expr1`* `in`
+  *`expr2`*, where both *`expr1`* and *`expr2`* are simple values
 
-Thus, the following expression is a simple value, and as a result, the types
-of values contained within it are allowed to be polymorphic:
+Thus, the following expression is a simple value, and as a result, the
+types of values contained within it are allowed to be polymorphic:
 
 ```ocaml env=main
 # (fun x -> [x;x])
@@ -1767,54 +1788,45 @@ of values contained within it are allowed to be polymorphic:
 ```
 
 But, if we write down an expression that isn't a simple value by the
-preceding definition, we'll get different results. For example, consider what
-happens if we try to memoize the function defined previously.
-
-```ocaml env=main
-# memoize (fun x -> [x;x])
-- : '_weak2 -> '_weak2 list = <fun>
-```
-
-The memoized version of the function does in fact need to be restricted to a
-single type because it uses mutable state behind the scenes to cache values
-returned by previous invocations of the function. But OCaml would make the
-same determination even if the function in question did no such thing.
-Consider this example:
+preceding definition, we'll get different results.
 
 ```ocaml env=main
 # identity (fun x -> [x;x])
 - : '_weak3 -> '_weak3 list = <fun>
 ```
 
-It would be safe to infer a fully polymorphic variable here, but because
-OCaml's type system doesn't distinguish between pure and impure functions, it
-can't separate those two cases.
+In principle, it would be safe to infer a fully polymorphic variable
+here, but because OCaml's type system doesn't distinguish between pure
+and impure functions, it can't separate those two cases.
 
-The value restriction doesn't require that there is no mutable state, only
-that there is no *persistent* mutable state that could share values between
-uses of the same function. Thus, a function that produces a fresh reference
-every time it's called can have a fully polymorphic type:
+The value restriction doesn't require that there is no mutable state,
+only that there is no *persistent* mutable state that could share
+values between uses of the same function. Thus, a function that
+produces a fresh reference every time it's called can have a fully
+polymorphic type:
 
 ```ocaml env=main
 # let f () = ref None
 val f : unit -> 'a option Stdlib.ref = <fun>
 ```
 
-But a function that has a mutable cache that persists across calls, like
-`memoize`, can only be weakly polymorphic.
+But a function that has a mutable cache that persists across calls,
+like `memoize`, can only be weakly polymorphic.
 
 ### Partial Application and the Value Restriction
 
 Most of the time, when the value restriction kicks in, it's for a good
-reason, i.e., it's because the value in question can actually only safely be
-used with a single type. But sometimes, the value restriction kicks in when
-you don't want it. The most common such case is partially applied functions.
-A partially applied function, like any function application, is not a simple
-value, and as such, functions created by partial application are sometimes
-less general than you might expect. [partial application]{.idx}
+reason, i.e., it's because the value in question can actually only
+safely be used with a single type. But sometimes, the value
+restriction kicks in when you don't want it. The most common such case
+is partially applied functions.  A partially applied function, like
+any function application, is not a simple value, and as such,
+functions created by partial application are sometimes less general
+than you might expect. [partial application]{.idx}
 
-Consider the `List.init` function, which is used for creating lists where
-each element is created by calling a function on the index of that element:
+Consider the `List.init` function, which is used for creating lists
+where each element is created by calling a function on the index of
+that element:
 
 ```ocaml env=main
 # List.init
