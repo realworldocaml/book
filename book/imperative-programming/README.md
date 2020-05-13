@@ -387,7 +387,7 @@ You can see these in action:
 
 ```ocaml env=main
 # let x = ref 1
-val x : int Stdlib.ref = {Base.Ref.contents = 1}
+val x : int ref = {Base.Ref.contents = 1}
 # !x
 - : int = 1
 # x := !x + 1
@@ -852,7 +852,7 @@ Modules](first-class-modules.html#First-Class-Modules).
     let memo_table = Hashtbl.create m in
     (fun x ->
        Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
-val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
+val memoize : 'a Hashtbl.Key.t -> ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
 The preceding code is a bit tricky. `memoize` takes as its argument a
@@ -1061,7 +1061,8 @@ knot. We'll call that function `memo_rec`:
     let f = memoize m (fun x -> f_norec !fref x) in
     fref := f;
     f x
-val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+val memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
+  <fun>
 ```
 
 Note that `memo_rec` has the same signature as `make_rec`.
@@ -1121,6 +1122,15 @@ don't have to write them by hand.
 # module String_pair = struct
     type t = string * string [@@deriving sexp_of, hash, compare]
   end
+module String_pair :
+  sig
+    type t = string * string
+    val sexp_of_t : t -> Sexp.t
+    val hash_fold_t :
+      Base_internalhash_types.state -> t -> Base_internalhash_types.state
+    val hash : t -> int
+    val compare : t -> t -> int
+  end
 ```
 
 With that in hand, we can define our optimized form of
@@ -1142,7 +1152,7 @@ With that in hand, we can define our optimized form of
            ; edit_distance (s ,t') + 1
            ; edit_distance (s',t') + cost_to_drop_both
   ])
-val edit_distance : string * string -> int = <fun>
+val edit_distance : String_pair.t -> int = <fun>
 ```
 
 This new version of `edit_distance` is much more efficient than the one we
@@ -1163,10 +1173,10 @@ You might wonder why we didn't tie the recursive knot in `memo_rec` using
 just that: [let rec]{.idx}
 
 ```ocaml env=main
-# let memo_rec f_norec =
-    let rec f = memoize (fun x -> f_norec f x) in
+# let memo_rec m f_norec =
+    let rec f = memoize m (fun x -> f_norec f x) in
     f
-Line 2, characters 17-47:
+Line 2, characters 17-49:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
@@ -1792,7 +1802,7 @@ preceding definition, we'll get different results.
 
 ```ocaml env=main
 # identity (fun x -> [x;x])
-- : '_weak3 -> '_weak3 list = <fun>
+- : '_weak2 -> '_weak2 list = <fun>
 ```
 
 In principle, it would be safe to infer a fully polymorphic variable
@@ -1807,7 +1817,7 @@ polymorphic type:
 
 ```ocaml env=main
 # let f () = ref None
-val f : unit -> 'a option Stdlib.ref = <fun>
+val f : unit -> 'a option ref = <fun>
 ```
 
 But a function that has a mutable cache that persists across calls,
@@ -1841,7 +1851,7 @@ follows:
 
 ```ocaml env=main
 # let list_init_10 = List.init 10
-val list_init_10 : f:(int -> '_weak4) -> '_weak4 list = <fun>
+val list_init_10 : f:(int -> '_weak3) -> '_weak3 list = <fun>
 ```
 
 As you can see, we now infer a weakly polymorphic type for the resulting
@@ -1876,7 +1886,7 @@ value into a weakly polymorphic one:
 
 ```ocaml env=main
 # identity (fun x -> [x;x])
-- : '_weak5 -> '_weak5 list = <fun>
+- : '_weak4 -> '_weak4 list = <fun>
 ```
 
 But that's not always the case. When the type of the returned value is
@@ -1894,7 +1904,7 @@ weakly polymorphic:
 # [||]
 - : 'a array = [||]
 # identity [||]
-- : '_weak6 array = [||]
+- : '_weak5 array = [||]
 ```
 
 A more important example of this comes up when defining abstract data types.
@@ -1945,7 +1955,7 @@ mutable:
 # Concat_list.empty
 - : 'a Concat_list.t = <abstr>
 # identity Concat_list.empty
-- : '_weak7 Concat_list.t = <abstr>
+- : '_weak6 Concat_list.t = <abstr>
 ```
 
 The issue here is that the signature, by virtue of being abstract, has
