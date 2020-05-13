@@ -1255,7 +1255,7 @@ I/O]{.idx}[imperative programming/input and output]{.idx #IPinpout}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
-`In_channel` and `Out_channel` modules in Stdio. Other I/O primitives
+`In_channel` and `Out_channel` modules in Stdio.  Other I/O primitives
 are also available through the `Unix` module in `Core` as well as
 `Async`, the asynchronous I/O library that is covered in [Concurrent
 Programming With
@@ -1847,44 +1847,44 @@ that element:
 - : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 ```
 
-Imagine we wanted to create a specialized version of `List.init` that always
-created lists of length 10. We could do that using partial application, as
-follows:
+Imagine we wanted to create a specialized version of `List.init` that
+always created lists of length 10. We could do that using partial
+application, as follows:
 
 ```ocaml env=main
 # let list_init_10 = List.init 10
 val list_init_10 : f:(int -> '_weak3) -> '_weak3 list = <fun>
 ```
 
-As you can see, we now infer a weakly polymorphic type for the resulting
-function. That's because there's nothing that guarantees that `List.init`
-isn't creating a persistent `ref` somewhere inside of it that would be shared
-across multiple calls to `list_init_10`. We can eliminate this possibility,
-and at the same time get the compiler to infer a polymorphic type, by
-avoiding partial application:
+As you can see, we now infer a weakly polymorphic type for the
+resulting function. That's because there's nothing that guarantees
+that `List.init` isn't creating a persistent `ref` somewhere inside of
+it that would be shared across multiple calls to `list_init_10`. We
+can eliminate this possibility, and at the same time get the compiler
+to infer a polymorphic type, by avoiding partial application:
 
 ```ocaml env=main
 # let list_init_10 ~f = List.init 10 ~f
 val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
 ```
 
-This transformation is referred to as *eta expansion* and is often useful to
-resolve problems that arise from the value restriction.
+This transformation is referred to as *eta expansion* and is often
+useful to resolve problems that arise from the value restriction.
 
 ### Relaxing the Value Restriction
 
-OCaml is actually a little better at inferring polymorphic types than was
-suggested previously. The value restriction as we described it is basically a
-syntactic check: you can do a few operations that count as simple values, and
-anything that's a simple value can be generalized.
+OCaml is actually a little better at inferring polymorphic types than
+was suggested previously. The value restriction as we described it is
+basically a syntactic check: you can do a few operations that count as
+simple values, and anything that's a simple value can be generalized.
 
-But OCaml actually has a relaxed version of the value restriction that can
-make use of type information to allow polymorphic types for things that are
-not simple values.
+But OCaml actually has a relaxed version of the value restriction that
+can make use of type information to allow polymorphic types for things
+that are not simple values.
 
-For example, we saw that a function application, even a simple application of
-the identity function, is not a simple value and thus can turn a polymorphic
-value into a weakly polymorphic one:
+For example, we saw that a function application, even a simple
+application of the identity function, is not a simple value and thus
+can turn a polymorphic value into a weakly polymorphic one:
 
 ```ocaml env=main
 # identity (fun x -> [x;x])
@@ -1948,10 +1948,10 @@ module Concat_list :
   end
 ```
 
-The details of the implementation don't matter so much, but it's important to
-note that a `Concat_list.t` is unquestionably an immutable value. However,
-when it comes to the value restriction, OCaml treats it as if it were
-mutable:
+The details of the implementation don't matter so much, but it's
+important to note that a `Concat_list.t` is unquestionably an
+immutable value. However, when it comes to the value restriction,
+OCaml treats it as if it were mutable:
 
 ```ocaml env=main
 # Concat_list.empty
@@ -1961,20 +1961,20 @@ mutable:
 ```
 
 The issue here is that the signature, by virtue of being abstract, has
-obscured the fact that `Concat_list.t` is in fact an immutable data type. We
-can resolve this in one of two ways: either by making the type concrete
-(i.e., exposing the implementation in the `mli`), which is often not
-desirable; or by marking the type variable in question as *covariant*. We'll
-learn more about covariance and contravariance in
+obscured the fact that `Concat_list.t` is in fact an immutable data
+type. We can resolve this in one of two ways: either by making the
+type concrete (i.e., exposing the implementation in the `mli`), which
+is often not desirable; or by marking the type variable in question as
+*covariant*. We'll learn more about covariance and contravariance in
 [Objects](objects.html#objects){data-type=xref}, but for now, you can
-think of it as an annotation that can be put in the interface of a pure data
-structure. [datatypes/covariant]{.idx}
+think of it as an annotation that can be put in the interface of a
+pure data structure. [datatypes/covariant]{.idx}
 
-In particular, if we replace `type 'a t` in the interface with `type +'a t`,
-that will make it explicit in the interface that the data structure doesn't
-contain any persistent references to values of type `'a`, at which point,
-OCaml can infer polymorphic types for expressions of this type that are not
-simple values:
+In particular, if we replace `type 'a t` in the interface with `type
++'a t`, that will make it explicit in the interface that the data
+structure doesn't contain any persistent references to values of type
+`'a`, at which point, OCaml can infer polymorphic types for
+expressions of this type that are not simple values:
 
 ```ocaml env=main
 # module Concat_list : sig
@@ -2021,8 +2021,7 @@ losing any polymorphism:
 
 ## Summary
 
-This chapter has covered quite a lot of ground, including: [imperative
-programming/overview of]{.idx}
+This chapter has covered quite a lot of ground, including:
 
 - Discussing the building blocks of mutable data structures as well as the
   basic imperative constructs like `for` loops, `while` loops, and the
@@ -2038,10 +2037,9 @@ programming/overview of]{.idx}
 - Discussing how language-level issues like order of evaluation and weak
   polymorphism interact with OCaml's imperative features
 
-The scope and sophistication of the material here is an indication of the
-importance of OCaml's imperative features. The fact that OCaml defaults to
-immutability shouldn't obscure the fact that imperative programming is a
-fundamental part of building any serious application, and that if you want to
-be an effective OCaml programmer, you need to understand OCaml's approach to
-imperative
-programming.<a data-type="indexterm" data-startref="PROGimper">&nbsp;</a>
+The scope and sophistication of the material here is an indication of
+the importance of OCaml's imperative features. The fact that OCaml
+defaults to immutability shouldn't obscure the fact that imperative
+programming is a fundamental part of building any serious application,
+and that if you want to be an effective OCaml programmer, you need to
+understand OCaml's approach to imperative programming.
