@@ -100,8 +100,7 @@ are immutable by default, but individual fields are mutable when
 marked as such.  The second field, `buckets`, is immutable but
 contains an array, which is itself a mutable data
 structure. [fields/mutability of]{.idx} The remaining fields contain
-the functions that provide the ability to compute hash values and
-check keys for equiality.
+the functions for hashing and equality checking.
 
 Now we'll start putting together the basic functions for manipulating
 a dictionary:
@@ -838,12 +837,13 @@ effects/memoization]{.idx #BEmem}
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
 function. Here we'll use Base's `Hashtbl` module, rather than our toy
-`Dictionary`. Note that this implementations requires an argument of a
-`Hashtbl.Key.t`, which plays the role of the `hash` and `equal`
-arguments of our implementation.  As we'll see later, `Hashtbl.Key.t`
-is an example of what's called a first-class module, which we'll see
-more of in [First Class
-Modules](first-class-modules.html#First-Class-Modules).
+`Dictionary`.
+
+This implementation requires an argument of a `Hashtbl.Key.t`, which
+plays the role of the `hash` and `equal` arguments of the
+implementation we showed earlier.  `Hashtbl.Key.t` is an example of
+what's called a first-class module, which we'll see more of in [First
+Class Modules](first-class-modules.html#First-Class-Modules).
 
 ```ocaml env=main
 # let memoize m f =
@@ -943,7 +943,7 @@ And now we can use this to try out some examples:
 # time (fun () -> edit_distance "OCaml" "ocaml")
 Time: 1.10292434692 ms
 - : int = 2
-# time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01")
+# time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09")
 Time: 3282.86218643 ms
 - : int = 2
 ```
@@ -1111,9 +1111,13 @@ always recover the original interface with a wrapper function.) With
 just that change and the addition of the `memo_rec` call, we can get a
 memoized version of `edit_distance`.  The memoization key is going to
 be a pair of strings, so we need to get our hands on a module with the
-necessary functionality for building a hash-table in `Base`.  We'll
-use `ppx_jane` to derive the necessary functions automatically, so we
-don't have to write them by hand.
+necessary functionality for building a hash-table in `Base`.
+
+Writing hash-functions and equality tests and the like by hand can be
+tedious and error prone, so instead we'll use a few different syntax
+extensions for deriving the necessary functionality automatically.  By
+enabling `ppx_jane`, we pull in a collection of such derivers, three
+of which we use in defining `String_pair` below.
 
 ```ocaml env=main
 # #require "ppx_jane"
@@ -1153,12 +1157,12 @@ With that in hand, we can define our optimized form of
 val edit_distance : String_pair.t -> int = <fun>
 ```
 
-This new version of `edit_distance` is much more efficient than the one we
-started with; the following call is many thousands of times faster than it
-was without memoization:
+This new version of `edit_distance` is much more efficient than the
+one we started with; the following call is many thousands of times
+faster than it was without memoization.
 
 ```ocaml env=memo,non-deterministic=command
-# time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"))
+# time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"))
 Time: 0.348091125488 ms
 - : int = 2
 ```
