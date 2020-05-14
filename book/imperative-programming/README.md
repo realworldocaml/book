@@ -33,15 +33,15 @@ imperative features, and help you use them to their fullest.
 ## Example: Imperative Dictionaries
 
 We'll start with the implementation of a simple imperative dictionary,
-i.e., a mutable mapping from keys to values. This is really for
-illustration purposes; both `Base` and the standard library provide
-imperative dictionaries, and for most real-world tasks, you should use
-one of those implementations.  There's more advice on using `Base`'s
-implementation in particular in [Maps And Hash
+i.e., a mutable mapping from keys to values. This is very much a toy
+implementation, and it's really not suitable for any real-world
+use. That's fine, since both `Base` and the standard library provide
+effective imperative dictionaries.  There's more advice on using
+`Base`'s implementation in particular in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-[dictionaries, imperative]{.idx #DICTimper}[Base standard
-library/imperative dictionaries in]{.idx}[imperative
-programming/imperative dictionaries]{.idx #IPimpdict}
+[dictionaries, imperative]{.idx}
+[Base standard library/imperative dictionaries in]{.idx}
+[imperative programming/imperative dictionaries]{.idx}
 
 The dictionary we'll describe now, like those in `Base` and the
 standard library, will be implemented as a hash table. In particular,
@@ -72,11 +72,10 @@ purpose and behavior should be largely inferrable from their names and
 type signatures. Note that the `create` function takes as its
 arguments functions for hashing keys and testing them for equality.
 
-A notable aspect of the interface is that some of the functions, like
-`add` and `iter`, return `unit`.  That's because the goal of these
-functions is to modify the data structure, rather than to compute a
-value.  This kind of signature shows up a lot when programming
-imperatively.
+You might notice that some of the functions, like `add` and `iter`,
+return `unit`.  This is unusual for functional code, but common for
+imperative functions whose primary purpose is to mutate some data
+structure, rather than to compute a value.
 
 We'll now walk through the implementation (contained in the
 corresponding `ml` file) piece by piece, explaining different
