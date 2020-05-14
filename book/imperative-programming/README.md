@@ -33,25 +33,25 @@ imperative features, and help you use them to their fullest.
 ## Example: Imperative Dictionaries
 
 We'll start with the implementation of a simple imperative dictionary,
-i.e., a mutable mapping from keys to values. This is really for
-illustration purposes; both Core and the standard library provide
-imperative dictionaries, and for most real-world tasks, you should use
-one of those implementations.  There's more advice on using Core's
-implementation in particular in [Maps And Hash
+i.e., a mutable mapping from keys to values. This is very much a toy
+implementation, and it's really not suitable for any real-world
+use. That's fine, since both `Base` and the standard library provide
+effective imperative dictionaries.  There's more advice on using
+`Base`'s implementation in particular in [Maps And Hash
 Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-[dictionaries, imperative]{.idx #DICTimper}[Core standard
-library/imperative dictionaries in]{.idx}[imperative
-programming/imperative dictionaries]{.idx #IPimpdict}
+[dictionaries, imperative]{.idx}
+[Base standard library/imperative dictionaries in]{.idx}
+[imperative programming/imperative dictionaries]{.idx}
 
-The dictionary we'll describe now, like those in Core and the standard
-library, will be implemented as a hash table. In particular, we'll use
-an *open hashing* scheme, where the hash table will be an array of
-buckets, each bucket containing a list of key/value pairs that have
-been hashed into that bucket. [open hashing]{.idx}
+The dictionary we'll describe now, like those in `Base` and the
+standard library, will be implemented as a hash table. In particular,
+we'll use an *open hashing* scheme, where the hash table will be an
+array of buckets, each bucket containing a list of key/value pairs
+that have been hashed into that bucket. [open hashing]{.idx}
 
 Here's the interface we'll match, provided as an `mli`. The type `('a,
 'b) t` represents a dictionary with keys of type `'a` and data of type
-`'b`:
+`'b`.
 
 ```ocaml file=examples/correct/dictionary/dictionary.mli,part=1
 (* file: dictionary.mli *)
@@ -59,7 +59,7 @@ open Base
 
 type ('a, 'b) t
 
-val create : unit -> ('a, 'b) t
+val create : hash:('a -> int) -> equal:('a -> 'a -> bool) -> ('a, 'b) t
 val length : ('a, 'b) t -> int
 val add    : ('a, 'b) t -> key:'a -> data:'b -> unit
 val find   : ('a, 'b) t -> 'a -> 'b option
@@ -67,18 +67,21 @@ val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
 val remove : ('a, 'b) t -> 'a -> unit
 ```
 
-The `mli` also includes a collection of helper functions whose purpose
-and behavior should be largely inferrable from their names and type
-signatures.  Notice that a number of the functions, in particular,
-ones like `add` that modify the dictionary, return `unit`. This is
-typical of functions that act by side effect.
+This `mli` also includes a collection of helper functions whose
+purpose and behavior should be largely inferrable from their names and
+type signatures. Note that the `create` function takes as its
+arguments functions for hashing keys and testing them for equality.
+
+You might notice that some of the functions, like `add` and `iter`,
+return `unit`.  This is unusual for functional code, but common for
+imperative functions whose primary purpose is to mutate some data
+structure, rather than to compute a value.
 
 We'll now walk through the implementation (contained in the
 corresponding `ml` file) piece by piece, explaining different
 imperative constructs as they come up.
 
-Our first step is to define the type of a dictionary as a record with
-two fields:
+Our first step is to define the type of a dictionary as a record.
 
 ```ocaml file=examples/correct/dictionary/dictionary.ml,part=1
 (* file: dictionary.ml *)
@@ -86,6 +89,8 @@ open Base
 
 type ('a, 'b) t = { mutable length: int;
                     buckets: ('a * 'b) list array;
+                    hash: 'a -> int;
+                    equal: 'a -> 'a -> bool;
                   }
 ```
 
@@ -93,7 +98,8 @@ The first field, `length`, is declared as mutable. In OCaml, records
 are immutable by default, but individual fields are mutable when
 marked as such.  The second field, `buckets`, is immutable but
 contains an array, which is itself a mutable data
-structure. [fields/mutability of]{.idx}
+structure. [fields/mutability of]{.idx} The remaining fields contain
+the functions for hashing and equality checking.
 
 Now we'll start putting together the basic functions for manipulating
 a dictionary:
@@ -101,18 +107,20 @@ a dictionary:
 ```ocaml file=examples/correct/dictionary/dictionary.ml,part=2
 let num_buckets = 17
 
-let hash_bucket key = (Hashtbl.hash key) % num_buckets
+let hash_bucket t key = (t.hash key) % num_buckets
 
-let create () =
+let create ~hash ~equal =
   { length = 0;
     buckets = Array.create ~len:num_buckets [];
+    hash;
+    equal;
   }
 
 let length t = t.length
 
 let find t key =
-  List.find_map t.buckets.(hash_bucket key)
-    ~f:(fun (key',data) -> if Poly.(key' = key) then Some data else None)
+  List.find_map t.buckets.(hash_bucket t key)
+    ~f:(fun (key',data) -> if t.equal key' key then Some data else None)
 ```
 
 Note that `num_buckets` is a constant, which means our bucket array is
@@ -122,9 +130,7 @@ but we'll omit this to simplify the presentation.
 
 The function `hash_bucket` is used throughout the rest of the module
 to choose the position in the array that a given key should be stored
-at. It is implemented on top of `Hashtbl.hash`, which is a hash
-function provided by the OCaml runtime that can be applied to values
-of any type. Thus, its own type is polymorphic: `'a -> int`.
+at.
 
 The other functions defined above are fairly straightforward:
 
@@ -139,8 +145,8 @@ The other functions defined above are fairly straightforward:
 : Looks for a matching key in the table and returns the corresponding value
   if found as an option.
 
-Another important piece of imperative syntax shows up in `find`: we write
-`array.(index)` to grab a value from an array. `find` also uses
+Another important piece of imperative syntax shows up in `find`: we
+write `array.(index)` to grab a value from an array. `find` also uses
 `List.find_map`, which you can see the type of by typing it into the
 toplevel:
 
@@ -182,14 +188,14 @@ dictionary:
 
 ```ocaml file=examples/correct/dictionary/dictionary.ml,part=4
 let bucket_has_key t i key =
-  List.exists t.buckets.(i) ~f:(fun (key',_) -> Poly.(key' = key))
+  List.exists t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
 
 let add t ~key ~data =
-  let i = hash_bucket key in
+  let i = hash_bucket t key in
   let replace = bucket_has_key t i key in
   let filtered_bucket =
     if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> Poly.(key' <> key))
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
     else
       t.buckets.(i)
   in
@@ -197,10 +203,10 @@ let add t ~key ~data =
   if not replace then t.length <- t.length + 1
 
 let remove t key =
-  let i = hash_bucket key in
+  let i = hash_bucket t key in
   if bucket_has_key t i key then (
     let filtered_bucket =
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> Poly.(key' <> key))
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
     in
     t.buckets.(i) <- filtered_bucket;
     t.length <- t.length - 1
@@ -356,7 +362,7 @@ field. [ref cells]{.idx}
 
 The definition for the `ref` type is as follows:
 
-```ocaml env=main
+```ocaml env=custom_ref
 # type 'a ref = { mutable contents : 'a }
 type 'a ref = { mutable contents : 'a; }
 ```
@@ -377,7 +383,7 @@ You can see these in action:
 
 ```ocaml env=main
 # let x = ref 1
-val x : int Stdlib.ref = {Base.Ref.contents = 1}
+val x : int ref = {Base.Ref.contents = 1}
 # !x
 - : int = 1
 # x := !x + 1
@@ -489,12 +495,14 @@ respectively.
 
 ## Example: Doubly Linked Lists
 
-Another common imperative data structure is the doubly linked list. Doubly
-linked lists can be traversed in both directions, and elements can be added
-and removed from the list in constant time. Core defines a doubly linked list
-(the module is called `Doubly_linked`), but we'll define our own linked list
-library as an illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
-lists]{.idx}[imperative programming/doubly-linked lists]{.idx #IPdoublink}
+Another common imperative data structure is the doubly linked
+list. Doubly linked lists can be traversed in both directions, and
+elements can be added and removed from the list in constant
+time. Core_kernel defines a doubly linked list (the module is called
+`Doubly_linked`), but we'll define our own linked list library as an
+illustration. [lists/doubly-linked lists]{.idx}[doubly-linked
+lists]{.idx}[imperative programming/doubly-linked lists]{.idx
+#IPdoublink}
 
 Here's the `mli` of the module we'll build:
 
@@ -662,15 +670,15 @@ element will cause the main list reference to be set to `None`, thus emptying
 the list. Similar problems arise from removing an element from a list it
 doesn't belong to.
 
-This shouldn't be a big surprise. Complex imperative data structures can be
-quite tricky, considerably trickier than their pure equivalents. The issues
-described previously can be dealt with by more careful error detection, and
-such error correction is taken care of in modules like Core's
-`Doubly_linked`. You should use imperative data structures from a
-well-designed library when you can. And when you can't, you should make sure
-to put great care into your error handling. [imperative programming/drawbacks
-of]{.idx}[Doubly-linked module]{.idx}[error handling/and imperative data
-structures]{.idx}
+This shouldn't be a big surprise. Complex imperative data structures
+can be quite tricky, considerably trickier than their pure
+equivalents. The issues described previously can be dealt with by more
+careful error detection, and such error correction is taken care of in
+modules like Core_kernel's `Doubly_linked`. You should use imperative
+data structures from a well-designed library when you can. And when
+you can't, you should make sure to put great care into your error
+handling. [imperative programming/drawbacks of]{.idx}[Doubly-linked
+module]{.idx}[error handling/and imperative data structures]{.idx}
 
 ### Iteration Functions
 
@@ -705,14 +713,15 @@ let find_el t ~f =
   loop !t
 ```
 
-This completes our implementation, but there's still considerably more work
-to be done to make a really usable doubly linked list. As mentioned earlier,
-you're probably better off using something like Core's `Doubly_linked` module
-that has a more complete interface and has more of the tricky corner cases
-worked out. Nonetheless, this example should serve to demonstrate some of the
-techniques you can use to build nontrivial imperative data structure in
-OCaml, as well as some of the
-pitfalls.<a data-type="indexterm" data-startref="IPdoublink">&nbsp;</a>
+This completes our implementation, but there's still considerably more
+work to be done to make a really usable doubly linked list. As
+mentioned earlier, you're probably better off using something like
+Core_kernel's `Doubly_linked` module that has a more complete
+interface and has more of the tricky corner cases worked
+out. Nonetheless, this example should serve to demonstrate some of the
+techniques you can use to build nontrivial imperative data structure
+in OCaml, as well as some of the pitfalls.<a data-type="indexterm"
+data-startref="IPdoublink">&nbsp;</a>
 
 
 ## Laziness and Other Benign Effects
@@ -826,15 +835,21 @@ effects/memoization]{.idx #BEmem}
 
 Here's a function that takes as an argument an arbitrary
 single-argument function and returns a memoized version of that
-function. Here we'll use Core's `Hashtbl` module, rather than our toy
-`Dictionary`:
+function. Here we'll use Base's `Hashtbl` module, rather than our toy
+`Dictionary`.
+
+This implementation requires an argument of a `Hashtbl.Key.t`, which
+plays the role of the `hash` and `equal` arguments of the
+implementation we showed earlier.  `Hashtbl.Key.t` is an example of
+what's called a first-class module, which we'll see more of in [First
+Class Modules](first-class-modules.html#First-Class-Modules).
 
 ```ocaml env=main
-# let memoize f =
-    let memo_table = Hashtbl.Poly.create () in
+# let memoize m f =
+    let memo_table = Hashtbl.create m in
     (fun x ->
        Hashtbl.find_or_add memo_table x ~default:(fun () -> f x))
-val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
+val memoize : 'a Hashtbl.Key.t -> ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
 The preceding code is a bit tricky. `memoize` takes as its argument a
@@ -908,7 +923,7 @@ are two different calls to `edit_distance "OCam" "oca"`. The number of
 redundant calls grows exponentially with the size of the strings,
 meaning that our implementation of `edit_distance` is brutally slow
 for large strings. We can see this by writing a small timing function,
-using the `Mtime` package.
+using Core's `Time` module.
 
 ```ocaml env=main
 # let time f =
@@ -927,7 +942,7 @@ And now we can use this to try out some examples:
 # time (fun () -> edit_distance "OCaml" "ocaml")
 Time: 1.10292434692 ms
 - : int = 2
-# time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01")
+# time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09")
 Time: 3282.86218643 ms
 - : int = 2
 ```
@@ -1038,12 +1053,13 @@ variant of `make_rec` that inserts memoization when it ties the recursive
 knot. We'll call that function `memo_rec`:
 
 ```ocaml env=main
-# let memo_rec f_norec x =
+# let memo_rec m f_norec x =
     let fref = ref (fun _ -> assert false) in
-    let f = memoize (fun x -> f_norec !fref x) in
+    let f = memoize m (fun x -> f_norec !fref x) in
     fref := f;
     f x
-val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+val memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
+  <fun>
 ```
 
 Note that `memo_rec` has the same signature as `make_rec`.
@@ -1054,7 +1070,7 @@ using a `let rec`, which for reasons we'll describe later wouldn't work here.
 Using `memo_rec`, we can now build an efficient version of `fib`:
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memo_rec fib_norec
+# let fib = memo_rec (module Int) fib_norec
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
 Time: 0.0388622283936 ms
@@ -1076,7 +1092,7 @@ We can use `memo_rec` as part of a single declaration that makes this
 look like it's little more than a special form of `let rec`:
 
 ```ocaml env=main
-# let fib = memo_rec (fun fib i ->
+# let fib = memo_rec (module Int) (fun fib i ->
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2))
 val fib : int -> int = <fun>
 ```
@@ -1086,38 +1102,66 @@ defined above is not especially efficient, allocating space linear in the
 number passed in to `fib`. It's easy enough to write a Fibonacci function
 that takes a constant amount of space.
 
-But memoization is a good approach for optimizing `edit_distance`, and we can
-apply the same approach we used on `fib` here. We will need to change
-`edit_distance` to take a pair of strings as a single argument, since
-`memo_rec` only works on single-argument functions. (We can always recover
-the original interface with a wrapper function.) With just that change and
-the addition of the `memo_rec` call, we can get a memoized version of
-`edit_distance`:
+But memoization is a good approach for optimizing `edit_distance`, and
+we can apply the same approach we used on `fib` here. We will need to
+change `edit_distance` to take a pair of strings as a single argument,
+since `memo_rec` only works on single-argument functions. (We can
+always recover the original interface with a wrapper function.) With
+just that change and the addition of the `memo_rec` call, we can get a
+memoized version of `edit_distance`.  The memoization key is going to
+be a pair of strings, so we need to get our hands on a module with the
+necessary functionality for building a hash-table in `Base`.
+
+Writing hash-functions and equality tests and the like by hand can be
+tedious and error prone, so instead we'll use a few different syntax
+extensions for deriving the necessary functionality automatically.  By
+enabling `ppx_jane`, we pull in a collection of such derivers, three
+of which we use in defining `String_pair` below.
 
 ```ocaml env=main
-# let edit_distance = memo_rec (fun edit_distance (s,t) ->
-    match String.length s, String.length t with
-    | (0,x) | (x,0) -> x
-    | (len_s,len_t) ->
-      let s' = String.drop_suffix s 1 in
-      let t' = String.drop_suffix t 1 in
-      let cost_to_drop_both =
-        if Char.(=) s.[len_s - 1] t.[len_t - 1] then 0 else 1
-      in
-      List.reduce_exn ~f:Int.min
-        [ edit_distance (s',t ) + 1
-        ; edit_distance (s ,t') + 1
-        ; edit_distance (s',t') + cost_to_drop_both
-  ])
-val edit_distance : string * string -> int = <fun>
+# #require "ppx_jane"
+# module String_pair = struct
+    type t = string * string [@@deriving sexp_of, hash, compare]
+  end
+module String_pair :
+  sig
+    type t = string * string
+    val sexp_of_t : t -> Sexp.t
+    val hash_fold_t :
+      Base_internalhash_types.state -> t -> Base_internalhash_types.state
+    val hash : t -> int
+    val compare : t -> t -> int
+  end
 ```
 
-This new version of `edit_distance` is much more efficient than the one we
-started with; the following call is many thousands of times faster than it
-was without memoization:
+With that in hand, we can define our optimized form of
+`edit_distance`.
+
+```ocaml env=main
+# let edit_distance = memo_rec (module String_pair)
+    (fun edit_distance (s,t) ->
+       match String.length s, String.length t with
+       | (0,x) | (x,0) -> x
+       | (len_s,len_t) ->
+         let s' = String.drop_suffix s 1 in
+         let t' = String.drop_suffix t 1 in
+         let cost_to_drop_both =
+           if Char.(=) s.[len_s - 1] t.[len_t - 1] then 0 else 1
+         in
+         List.reduce_exn ~f:Int.min
+           [ edit_distance (s',t ) + 1
+           ; edit_distance (s ,t') + 1
+           ; edit_distance (s',t') + cost_to_drop_both
+  ])
+val edit_distance : String_pair.t -> int = <fun>
+```
+
+This new version of `edit_distance` is much more efficient than the
+one we started with; the following call is many thousands of times
+faster than it was without memoization.
 
 ```ocaml env=memo,non-deterministic=command
-# time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"))
+# time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"))
 Time: 0.348091125488 ms
 - : int = 2
 ```
@@ -1130,10 +1174,10 @@ You might wonder why we didn't tie the recursive knot in `memo_rec` using
 just that: [let rec]{.idx}
 
 ```ocaml env=main
-# let memo_rec f_norec =
-    let rec f = memoize (fun x -> f_norec f x) in
+# let memo_rec m f_norec =
+    let rec f = memoize m (fun x -> f_norec f x) in
     f
-Line 2, characters 17-47:
+Line 2, characters 17-49:
 Error: This kind of expression is not allowed as right-hand side of `let rec'
 ```
 
@@ -1210,14 +1254,14 @@ I/O]{.idx}[imperative programming/input and output]{.idx #IPinpout}
 
 There are multiple I/O libraries in OCaml. In this section we'll
 discuss OCaml's buffered I/O library that can be used through the
-`In_channel` and `Out_channel` modules in Core. Other I/O primitives
-are also available through the `Unix` module in Core as well as
+`In_channel` and `Out_channel` modules in Stdio.  Other I/O primitives
+are also available through the `Unix` module in `Core` as well as
 `Async`, the asynchronous I/O library that is covered in [Concurrent
 Programming With
 Async](concurrent-programming.html#concurrent-programming-with-async){data-type=xref}.
-Most of the functionality in Core's `In_channel` and `Out_channel`
-(and in Core's `Unix` module) derives from the standard library, but
-we'll use Core's interfaces here.
+Most of the functionality in `Core`'s `In_channel` and `Out_channel`
+(and in `Core`'s `Unix` module) derives from the standard library, but
+we'll use `Core`'s interfaces here.
 
 ### Terminal I/O
 
@@ -1253,9 +1297,9 @@ go through the `In_channel` and `Out_channel` modules.
 Let's see this in action in a simple interactive application. The
 following program, `time_converter`, prompts the user for a time zone,
 and then prints out the current time in that time zone. Here, we use
-Core's `Zone` module for looking up a time zone, and the `Time` module
-for computing the current time and printing it out in the time zone in
-question:
+`Core`'s `Zone` module for looking up a time zone, and the `Time`
+module for computing the current time and printing it out in the time
+zone in question:
 
 ```ocaml file=examples/correct/time_converter/time_converter.ml
 open Core
@@ -1723,17 +1767,18 @@ Note that the type of `remember` was settled by the definition of
 
 ### The Value Restriction
 
-So, when does the compiler infer weakly polymorphic types? As we've seen, we
-need weakly polymorphic types when a value of unknown type is stored in a
-persistent mutable cell. Because the type system isn't precise enough to
-determine all cases where this might happen, OCaml uses a rough rule to flag
-cases that don't introduce any persistent mutable cells, and to only infer
-polymorphic types in those cases. This rule is called
-*the value restriction*. [value restriction]{.idx}
+So, when does the compiler infer weakly polymorphic types? As we've
+seen, we need weakly polymorphic types when a value of unknown type is
+stored in a persistent mutable cell. Because the type system isn't
+precise enough to determine all cases where this might happen, OCaml
+uses a rough rule to flag cases that don't introduce any persistent
+mutable cells, and to only infer polymorphic types in those
+cases. This rule is called *the value restriction*. [value
+restriction]{.idx}
 
-The core of the value restriction is the observation that some kinds of
-expressions, which we'll refer to as *simple values*, by their nature can't
-introduce persistent mutable cells, including:
+The core of the value restriction is the observation that some kinds
+of expressions, which we'll refer to as *simple values*, by their
+nature can't introduce persistent mutable cells, including:
 
 - Constants (i.e., things like integer and floating-point literals)
 
@@ -1742,11 +1787,11 @@ introduce persistent mutable cells, including:
 - Function declarations, i.e., expressions that begin with `fun` or
   `function`, or the equivalent let binding, `let f x = ...`
 
-- `let` bindings of the form `let` *`var`* `=` *`expr1`* `in` *`expr2`*, where
-  both *`expr1`* and *`expr2`* are simple values
+- `let` bindings of the form `let` *`var`* `=` *`expr1`* `in`
+  *`expr2`*, where both *`expr1`* and *`expr2`* are simple values
 
-Thus, the following expression is a simple value, and as a result, the types
-of values contained within it are allowed to be polymorphic:
+Thus, the following expression is a simple value, and as a result, the
+types of values contained within it are allowed to be polymorphic:
 
 ```ocaml env=main
 # (fun x -> [x;x])
@@ -1754,54 +1799,45 @@ of values contained within it are allowed to be polymorphic:
 ```
 
 But, if we write down an expression that isn't a simple value by the
-preceding definition, we'll get different results. For example, consider what
-happens if we try to memoize the function defined previously.
-
-```ocaml env=main
-# memoize (fun x -> [x;x])
-- : '_weak2 -> '_weak2 list = <fun>
-```
-
-The memoized version of the function does in fact need to be restricted to a
-single type because it uses mutable state behind the scenes to cache values
-returned by previous invocations of the function. But OCaml would make the
-same determination even if the function in question did no such thing.
-Consider this example:
+preceding definition, we'll get different results.
 
 ```ocaml env=main
 # identity (fun x -> [x;x])
-- : '_weak3 -> '_weak3 list = <fun>
+- : '_weak2 -> '_weak2 list = <fun>
 ```
 
-It would be safe to infer a fully polymorphic variable here, but because
-OCaml's type system doesn't distinguish between pure and impure functions, it
-can't separate those two cases.
+In principle, it would be safe to infer a fully polymorphic variable
+here, but because OCaml's type system doesn't distinguish between pure
+and impure functions, it can't separate those two cases.
 
-The value restriction doesn't require that there is no mutable state, only
-that there is no *persistent* mutable state that could share values between
-uses of the same function. Thus, a function that produces a fresh reference
-every time it's called can have a fully polymorphic type:
+The value restriction doesn't require that there is no mutable state,
+only that there is no *persistent* mutable state that could share
+values between uses of the same function. Thus, a function that
+produces a fresh reference every time it's called can have a fully
+polymorphic type:
 
 ```ocaml env=main
 # let f () = ref None
-val f : unit -> 'a option Stdlib.ref = <fun>
+val f : unit -> 'a option ref = <fun>
 ```
 
-But a function that has a mutable cache that persists across calls, like
-`memoize`, can only be weakly polymorphic.
+But a function that has a mutable cache that persists across calls,
+like `memoize`, can only be weakly polymorphic.
 
 ### Partial Application and the Value Restriction
 
 Most of the time, when the value restriction kicks in, it's for a good
-reason, i.e., it's because the value in question can actually only safely be
-used with a single type. But sometimes, the value restriction kicks in when
-you don't want it. The most common such case is partially applied functions.
-A partially applied function, like any function application, is not a simple
-value, and as such, functions created by partial application are sometimes
-less general than you might expect. [partial application]{.idx}
+reason, i.e., it's because the value in question can actually only
+safely be used with a single type. But sometimes, the value
+restriction kicks in when you don't want it. The most common such case
+is partially applied functions.  A partially applied function, like
+any function application, is not a simple value, and as such,
+functions created by partial application are sometimes less general
+than you might expect. [partial application]{.idx}
 
-Consider the `List.init` function, which is used for creating lists where
-each element is created by calling a function on the index of that element:
+Consider the `List.init` function, which is used for creating lists
+where each element is created by calling a function on the index of
+that element:
 
 ```ocaml env=main
 # List.init
@@ -1810,48 +1846,48 @@ each element is created by calling a function on the index of that element:
 - : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
 ```
 
-Imagine we wanted to create a specialized version of `List.init` that always
-created lists of length 10. We could do that using partial application, as
-follows:
+Imagine we wanted to create a specialized version of `List.init` that
+always created lists of length 10. We could do that using partial
+application, as follows:
 
 ```ocaml env=main
 # let list_init_10 = List.init 10
-val list_init_10 : f:(int -> '_weak4) -> '_weak4 list = <fun>
+val list_init_10 : f:(int -> '_weak3) -> '_weak3 list = <fun>
 ```
 
-As you can see, we now infer a weakly polymorphic type for the resulting
-function. That's because there's nothing that guarantees that `List.init`
-isn't creating a persistent `ref` somewhere inside of it that would be shared
-across multiple calls to `list_init_10`. We can eliminate this possibility,
-and at the same time get the compiler to infer a polymorphic type, by
-avoiding partial application:
+As you can see, we now infer a weakly polymorphic type for the
+resulting function. That's because there's nothing that guarantees
+that `List.init` isn't creating a persistent `ref` somewhere inside of
+it that would be shared across multiple calls to `list_init_10`. We
+can eliminate this possibility, and at the same time get the compiler
+to infer a polymorphic type, by avoiding partial application:
 
 ```ocaml env=main
 # let list_init_10 ~f = List.init 10 ~f
 val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
 ```
 
-This transformation is referred to as *eta expansion* and is often useful to
-resolve problems that arise from the value restriction.
+This transformation is referred to as *eta expansion* and is often
+useful to resolve problems that arise from the value restriction.
 
 ### Relaxing the Value Restriction
 
-OCaml is actually a little better at inferring polymorphic types than was
-suggested previously. The value restriction as we described it is basically a
-syntactic check: you can do a few operations that count as simple values, and
-anything that's a simple value can be generalized.
+OCaml is actually a little better at inferring polymorphic types than
+was suggested previously. The value restriction as we described it is
+basically a syntactic check: you can do a few operations that count as
+simple values, and anything that's a simple value can be generalized.
 
-But OCaml actually has a relaxed version of the value restriction that can
-make use of type information to allow polymorphic types for things that are
-not simple values.
+But OCaml actually has a relaxed version of the value restriction that
+can make use of type information to allow polymorphic types for things
+that are not simple values.
 
-For example, we saw that a function application, even a simple application of
-the identity function, is not a simple value and thus can turn a polymorphic
-value into a weakly polymorphic one:
+For example, we saw that a function application, even a simple
+application of the identity function, is not a simple value and thus
+can turn a polymorphic value into a weakly polymorphic one:
 
 ```ocaml env=main
 # identity (fun x -> [x;x])
-- : '_weak5 -> '_weak5 list = <fun>
+- : '_weak4 -> '_weak4 list = <fun>
 ```
 
 But that's not always the case. When the type of the returned value is
@@ -1869,7 +1905,7 @@ weakly polymorphic:
 # [||]
 - : 'a array = [||]
 # identity [||]
-- : '_weak6 array = [||]
+- : '_weak5 array = [||]
 ```
 
 A more important example of this comes up when defining abstract data types.
@@ -1911,33 +1947,33 @@ module Concat_list :
   end
 ```
 
-The details of the implementation don't matter so much, but it's important to
-note that a `Concat_list.t` is unquestionably an immutable value. However,
-when it comes to the value restriction, OCaml treats it as if it were
-mutable:
+The details of the implementation don't matter so much, but it's
+important to note that a `Concat_list.t` is unquestionably an
+immutable value. However, when it comes to the value restriction,
+OCaml treats it as if it were mutable:
 
 ```ocaml env=main
 # Concat_list.empty
 - : 'a Concat_list.t = <abstr>
 # identity Concat_list.empty
-- : '_weak7 Concat_list.t = <abstr>
+- : '_weak6 Concat_list.t = <abstr>
 ```
 
 The issue here is that the signature, by virtue of being abstract, has
-obscured the fact that `Concat_list.t` is in fact an immutable data type. We
-can resolve this in one of two ways: either by making the type concrete
-(i.e., exposing the implementation in the `mli`), which is often not
-desirable; or by marking the type variable in question as *covariant*. We'll
-learn more about covariance and contravariance in
+obscured the fact that `Concat_list.t` is in fact an immutable data
+type. We can resolve this in one of two ways: either by making the
+type concrete (i.e., exposing the implementation in the `mli`), which
+is often not desirable; or by marking the type variable in question as
+*covariant*. We'll learn more about covariance and contravariance in
 [Objects](objects.html#objects){data-type=xref}, but for now, you can
-think of it as an annotation that can be put in the interface of a pure data
-structure. [datatypes/covariant]{.idx}
+think of it as an annotation that can be put in the interface of a
+pure data structure. [datatypes/covariant]{.idx}
 
-In particular, if we replace `type 'a t` in the interface with `type +'a t`,
-that will make it explicit in the interface that the data structure doesn't
-contain any persistent references to values of type `'a`, at which point,
-OCaml can infer polymorphic types for expressions of this type that are not
-simple values:
+In particular, if we replace `type 'a t` in the interface with `type
++'a t`, that will make it explicit in the interface that the data
+structure doesn't contain any persistent references to values of type
+`'a`, at which point, OCaml can infer polymorphic types for
+expressions of this type that are not simple values:
 
 ```ocaml env=main
 # module Concat_list : sig
@@ -1984,8 +2020,7 @@ losing any polymorphism:
 
 ## Summary
 
-This chapter has covered quite a lot of ground, including: [imperative
-programming/overview of]{.idx}
+This chapter has covered quite a lot of ground, including:
 
 - Discussing the building blocks of mutable data structures as well as the
   basic imperative constructs like `for` loops, `while` loops, and the
@@ -2001,10 +2036,9 @@ programming/overview of]{.idx}
 - Discussing how language-level issues like order of evaluation and weak
   polymorphism interact with OCaml's imperative features
 
-The scope and sophistication of the material here is an indication of the
-importance of OCaml's imperative features. The fact that OCaml defaults to
-immutability shouldn't obscure the fact that imperative programming is a
-fundamental part of building any serious application, and that if you want to
-be an effective OCaml programmer, you need to understand OCaml's approach to
-imperative
-programming.<a data-type="indexterm" data-startref="PROGimper">&nbsp;</a>
+The scope and sophistication of the material here is an indication of
+the importance of OCaml's imperative features. The fact that OCaml
+defaults to immutability shouldn't obscure the fact that imperative
+programming is a fundamental part of building any serious application,
+and that if you want to be an effective OCaml programmer, you need to
+understand OCaml's approach to imperative programming.
