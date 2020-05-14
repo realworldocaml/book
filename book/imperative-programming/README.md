@@ -839,10 +839,10 @@ function. Here we'll use Base's `Hashtbl` module, rather than our toy
 `Dictionary`.
 
 This implementation requires an argument of a `Hashtbl.Key.t`, which
-plays the role of the `hash` and `equal` arguments of the
-implementation we showed earlier.  `Hashtbl.Key.t` is an example of
-what's called a first-class module, which we'll see more of in [First
-Class Modules](first-class-modules.html#First-Class-Modules).
+plays the role of the `hash` and `equal` from `Dictionary`.
+`Hashtbl.Key.t` is an example of what's called a first-class module,
+which we'll see more of in [First Class
+Modules](first-class-modules.html#First-Class-Modules).
 
 ```ocaml env=main
 # let memoize m f =
