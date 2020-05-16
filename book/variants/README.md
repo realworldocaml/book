@@ -347,8 +347,8 @@ types]{.idx}[variant types/and records]{.idx #VARTYPrec}
 
 Algebraic data types gain much of their power from the ability to
 construct layered combinations of sums and products. Let's see what we
-can achieve with this by revisiting the server message types that were
-described in [Records](records.html#records){data-type=xref}.
+can achieve with this by reiterating the `Log_entry` message type that
+was described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
 # module Time_ns = Core_kernel.Time_ns
@@ -361,7 +361,27 @@ module Time_ns = Core_kernel.Time_ns
         message: string;
       }
   end
-  module Heartbeat = struct
+module Log_entry :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      important : bool;
+      message : string;
+    }
+  end
+```
+
+This record type combines multiple pieces of data into a single value.
+In particular, a single `Log_entry.t` has a `session_id` *and* a
+`time` *and* an `important` flag *and* a `message`. More generally,
+you can think of record types as conjunctions. Variants, on the other
+hand, are disjunctions, letting you represent multiple possibilities.
+To see this, first, let's remember the other message types that came
+along-side `Log_entry`.
+
+```ocaml env=main
+# module Heartbeat = struct
     type t =
       { session_id: string;
         time: Time_ns.t;
@@ -375,15 +395,6 @@ module Time_ns = Core_kernel.Time_ns
         user: string;
         credentials: string;
       }
-  end
-module Log_entry :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      important : bool;
-      message : string;
-    }
   end
 module Heartbeat :
   sig
@@ -404,11 +415,8 @@ module Logon :
   end
 ```
 
-This record type combines multiple pieces of data into one value. In
-particular, a single `Log_entry.t` has a `session_id` *and* a `time` *and* an
-`important` flag *and* a `message`. More generally, you can think of record
-types as conjunctions. Variants, on the other hand, are disjunctions, letting
-you represent multiple possibilities, as in the following example:
+We can now combine all three of these types into a single
+`client_message` type.
 
 ```ocaml env=main
 # type client_message = | Logon of Logon.t
