@@ -843,7 +843,7 @@ and we try to compile, we'll get the following error.
 $ dune build freq.exe
 File "counter.ml", line 1:
 Error: The implementation counter.ml
-       does not match the interface .freq.eobjs/byte/counter.cmi:
+       does not match the interface .freq.eobjs/byte/dune__exe__Counter.cmi:
        Values do not match:
          val touch :
            ('a, int, 'b) Base.Map.t -> 'a -> ('a, int, 'b) Base.Map.t
@@ -902,7 +902,7 @@ will lead to a compilation error.
 $ dune build freq.exe
 File "counter.ml", line 1:
 Error: The implementation counter.ml
-       does not match the interface .freq.eobjs/byte/counter.cmi:
+       does not match the interface .freq.eobjs/byte/dune__exe__Counter.cmi:
        Type declarations do not match:
          type median = Median of string | Before_and_after of string * string
        is not included in
@@ -949,7 +949,7 @@ $ dune build freq.exe
 File "counter.ml", line 18, characters 18-31:
 18 | let singleton l = Counter.touch Counter.empty
                        ^^^^^^^^^^^^^
-Error: Unbound module Counter
+Error: The module Counter is an alias for module Dune__exe__Counter, which is missing
 [1]
 ```
 
