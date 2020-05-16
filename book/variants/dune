@@ -5,8 +5,6 @@
   mdx
   ppx_jane)
  (preludes
-  prelude.ml
-  (env catch_all catch_all.ml)
-  (env logger logger.ml)))
+  prelude.ml))
 
 (data_only_dirs examples)

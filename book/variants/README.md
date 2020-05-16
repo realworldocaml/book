@@ -1,12 +1,12 @@
 # Variants
 
-Variant types are one of the most useful features of OCaml and also one of
-the most unusual. They let you represent data that may take on multiple
-different forms, where each form is marked by an explicit tag. As we'll see,
-when combined with pattern matching, variants give you a powerful way of
-representing complex data and of organizing the case-analysis on that
-information. [variant types/usefulness of]{.idx}[datatypes/variant
-types]{.idx #DTvar}
+Variant types are one of the most useful features of OCaml and also
+one of the most unusual. They let you represent data that may take on
+multiple different forms, where each form is marked by an explicit
+tag. As we'll see, when combined with pattern matching, variants give
+you a powerful way of representing complex data and of organizing the
+case-analysis on that information. [variant types/usefulness
+of]{.idx}[datatypes/variant types]{.idx #DTvar}
 
 The basic syntax of a variant type declaration is as follows: [variant
 types/basic syntax of]{.idx}
@@ -18,15 +18,15 @@ type <variant> =
   | ...
 ```
 
-Each row essentially represents a case of the variant. Each case has an
-associated tag and may optionally have a sequence of fields, where each field
-has a specified type.
+Each row essentially represents a case of the variant. Each case has
+an associated tag and may optionally have a sequence of fields, where
+each field has a specified type.
 
-Let's consider a concrete example of how variants can be useful. Almost all
-terminals support a set of eight basic colors, and we can represent those
-colors using a variant. Each color is declared as a simple tag, with pipes
-used to separate the different cases. Note that variant tags must be
-capitalized.
+Let's consider a concrete example of how variants can be
+useful. Almost all terminals support a set of eight basic colors, and
+we can represent those colors using a variant. Each color is declared
+as a simple tag, with pipes used to separate the different cases. Note
+that variant tags must be capitalized.
 
 ```ocaml env=main
 # open Base
@@ -235,7 +235,7 @@ refactoring]{.idx}
 Consider what would happen if we were to change the definition of `color` to
 the following:
 
-```ocaml env=catch_all
+```ocaml env=main
 # type color =
     | Basic of basic_color     (* basic colors *)
     | Bold  of basic_color     (* bold basic colors *)
@@ -254,7 +254,7 @@ We've essentially broken out the `Basic` case into two cases, `Basic` and
 and if we try to compile that same code again, the compiler will notice the
 discrepancy:
 
-```ocaml env=catch_all
+```ocaml env=main
 # let color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
@@ -270,7 +270,7 @@ Here, the compiler is complaining that the `Basic` tag is used with the wrong
 number of arguments. If we fix that, however, the compiler will flag a second
 problem, which is that we haven't handled the new `Bold` tag:
 
-```ocaml env=catch_all
+```ocaml env=main
 # let color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
@@ -284,7 +284,7 @@ val color_to_int : color -> int = <fun>
 
 Fixing this now leads us to the correct implementation:
 
-```ocaml env=catch_all
+```ocaml env=main
 # let color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | Bold  basic_color -> 8 + basic_color_to_int basic_color
@@ -305,7 +305,7 @@ on older terminals by rendering the first 16 colors (the eight `basic_color`s
 in regular and bold) in the normal way, but renders everything else as white.
 We might have written the function as follows: [exhaustion checks]{.idx}
 
-```ocaml env=catch_all
+```ocaml env=main
 # let oldschool_color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
@@ -319,7 +319,7 @@ Error: This pattern matches values of type 'a * 'b
 If we then applied the same fix we did above, we would have ended up with
 this.
 
-```ocaml env=catch_all
+```ocaml env=main
 # let oldschool_color_to_int = function
     | Basic basic_color -> basic_color_to_int basic_color
     | _ -> basic_color_to_int White
@@ -332,25 +332,27 @@ they effectively suppress exhaustiveness checking.
 
 ## Combining Records and Variants
 
-The term *algebraic data types* is often used to describe a collection of
-types that includes variants, records, and tuples. Algebraic data types act
-as a peculiarly useful and powerful language for describing data. At the
-heart of their utility is the fact that they combine two different kinds of
-types: *product types*, like tuples and records, which combine multiple
-different types together and are mathematically similar to Cartesian
-products; and *sum types*, like variants, which let you combine multiple
-different possibilities into one type, and are mathematically similar to
-disjoint unions.[records/and variant types]{.idx #RECvartyp}[sum
-types]{.idx}[product types]{.idx}[datatypes/algebraic types]{.idx}[algebraic
-data types]{.idx}[variant types/and records]{.idx #VARTYPrec}
+The term *algebraic data types* is often used to describe a collection
+of types that includes variants, records, and tuples. Algebraic data
+types act as a peculiarly useful and powerful language for describing
+data. At the heart of their utility is the fact that they combine two
+different kinds of types: *product types*, like tuples and records,
+which combine multiple different types together and are mathematically
+similar to Cartesian products; and *sum types*, like variants, which
+let you combine multiple different possibilities into one type, and
+are mathematically similar to disjoint unions.[records/and variant
+types]{.idx #RECvartyp}[sum types]{.idx}[product
+types]{.idx}[datatypes/algebraic types]{.idx}[algebraic data
+types]{.idx}[variant types/and records]{.idx #VARTYPrec}
 
-Algebraic data types gain much of their power from the ability to construct
-layered combinations of sums and products. Let's see what we can achieve with
-this by revisiting the logging server types that were described in
-[Records](records.html#records){data-type=xref}. We'll start by reminding
-ourselves of the definition of `Log_entry.t`:
+Algebraic data types gain much of their power from the ability to
+construct layered combinations of sums and products. Let's see what we
+can achieve with this by reiterating the `Log_entry` message type that
+was described in [Records](records.html#records){data-type=xref}.
 
-```ocaml env=logger
+```ocaml env=main
+# module Time_ns = Core_kernel.Time_ns
+module Time_ns = Core_kernel.Time_ns
 # module Log_entry = struct
     type t =
       { session_id: string;
@@ -370,13 +372,53 @@ module Log_entry :
   end
 ```
 
-This record type combines multiple pieces of data into one value. In
-particular, a single `Log_entry.t` has a `session_id` *and* a `time` *and* an
-`important` flag *and* a `message`. More generally, you can think of record
-types as conjunctions. Variants, on the other hand, are disjunctions, letting
-you represent multiple possibilities, as in the following example:
+This record type combines multiple pieces of data into a single value.
+In particular, a single `Log_entry.t` has a `session_id` *and* a
+`time` *and* an `important` flag *and* a `message`. More generally,
+you can think of record types as conjunctions. Variants, on the other
+hand, are disjunctions, letting you represent multiple possibilities.
+To see this, first, let's remember the other message types that came
+along-side `Log_entry`.
 
-```ocaml env=logger
+```ocaml env=main
+# module Heartbeat = struct
+    type t =
+      { session_id: string;
+        time: Time_ns.t;
+        status_message: string;
+      }
+  end
+  module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time_ns.t;
+        user: string;
+        credentials: string;
+      }
+  end
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
+    }
+  end
+```
+
+We can now combine all three of these types into a single
+`client_message` type.
+
+```ocaml env=main
 # type client_message = | Logon of Logon.t
                         | Heartbeat of Heartbeat.t
                         | Log_entry of Log_entry.t
@@ -386,19 +428,20 @@ type client_message =
   | Log_entry of Log_entry.t
 ```
 
-A `client_message` is a `Logon` *or* a `Heartbeat` *or* a `Log_entry`. If we
-want to write code that processes messages generically, rather than code
-specialized to a fixed message type, we need something like `client_message`
-to act as one overarching type for the different possible messages. We can
-then match on the `client_message` to determine the type of the particular
-message being dealt with.
+A `client_message` is a `Logon` *or* a `Heartbeat` *or* a
+`Log_entry`. If we want to write code that processes messages
+generically, rather than code specialized to a fixed message type, we
+need something like `client_message` to act as one overarching type
+for the different possible messages. We can then match on the
+`client_message` to determine the type of the particular message being
+dealt with.
 
-You can increase the precision of your types by using variants to represent
-differences between types, and records to represent shared structure.
-Consider the following function that takes a list of `client_message`s and
-returns all messages generated by a given user. The code in question is
-implemented by folding over the list of messages, where the accumulator is a
-pair of:
+You can increase the precision of your types by using variants to
+represent differences between types, and records to represent shared
+structure.  Consider the following function that takes a list of
+`client_message`s and returns all messages generated by a given
+user. The code in question is implemented by folding over the list of
+messages, where the accumulator is a pair of:
 
 - The set of session identifiers for the user that have been seen thus far
 
@@ -406,7 +449,7 @@ pair of:
 
 Here's the concrete code:
 
-```ocaml env=logger
+```ocaml env=main
 # let messages_for_user user messages =
     let (user_messages,_) =
       List.fold messages ~init:([], Set.empty (module String))
@@ -448,7 +491,7 @@ information that's shared between the different messages. The first step is
 to cut down the definitions of each per-message record to contain just the
 information unique to that record:
 
-```ocaml env=logger
+```ocaml env=main
 # module Log_entry = struct
     type t = { important: bool;
                message: string;
@@ -469,7 +512,7 @@ module Logon : sig type t = { user : string; credentials : string; } end
 
 We can then define a variant type that combines these types:
 
-```ocaml env=logger
+```ocaml env=main
 # type details =
     | Logon of Logon.t
     | Heartbeat of Heartbeat.t
@@ -483,7 +526,7 @@ type details =
 Separately, we need a record that contains the fields that are common across
 all messages:
 
-```ocaml env=logger
+```ocaml env=main
 # module Common = struct
     type t = { session_id: string;
                time: Time_ns.t;
@@ -497,7 +540,7 @@ A full message can then be represented as a pair of a `Common.t` and a
 that we add extra type annotations so that OCaml recognizes the record fields
 correctly. Otherwise, we'd need to qualify them explicitly.
 
-```ocaml env=logger
+```ocaml env=main
 # let messages_for_user user (messages : (Common.t * details) list) =
     let (user_messages,_) =
       List.fold messages ~init:([],Set.empty (module String))
@@ -518,17 +561,17 @@ val messages_for_user :
   string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
 
-As you can see, the code for extracting the session ID has been replaced with
-the simple expression `common.session_id`.
+As you can see, the code for extracting the session ID has been
+replaced with the simple expression `common.session_id`.
 
-In addition, this design allows us to grab the specific message and dispatch
-code to handle just that message type. In particular, while we use the type
-`Common.t * details` to represent an arbitrary message, we can use
-`Common.t * Logon.t` to represent a logon message. Thus, if we had functions
-for handling individual message types, we could write a dispatch function as
-follows:
+In addition, this design allows us to grab the specific message and
+dispatch code to handle just that message type. In particular, while
+we use the type `Common.t * details` to represent an arbitrary
+message, we can use `Common.t * Logon.t` to represent a logon
+message. Thus, if we had functions for handling individual message
+types, we could write a dispatch function as follows:
 
-```ocaml env=logger
+```ocaml env=main
 # let handle_message server_state ((common:Common.t), details) =
     match details with
     | Log_entry m -> handle_log_entry server_state (common,m)
@@ -539,14 +582,15 @@ val handle_message : server_state -> Common.t * details -> unit = <fun>
 
 And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
-<a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a><a data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a>
+<a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a><a
+data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a>
 
 ### Embedded records
 
 If we don't need to be able to pass the record types separately from the
 variant, then OCaml allows us to embed the records directly into the variant.
 
-```ocaml env=logger
+```ocaml env=main
 # type details =
     | Logon     of { user: string; credentials: string; }
     | Heartbeat of { status_message: string; }
@@ -560,7 +604,7 @@ type details =
 Even though the type is different, we can write `messages_for_user` in
 essentially the same way we did before.
 
-```ocaml env=logger
+```ocaml env=main
 # let messages_for_user user (messages : (Common.t * details) list) =
     let (user_messages,_) =
       List.fold messages ~init:([],Set.empty (module String))
@@ -590,7 +634,7 @@ The main downside is the obvious one, which is that an inline record can't be
 treated as its own free-standing object. And, as you can see below, OCaml
 will reject code that tries to do so.
 
-```ocaml env=logger
+```ocaml env=main
 # let get_logon_contents = function
     | Logon m -> Some m
     | _ -> None
