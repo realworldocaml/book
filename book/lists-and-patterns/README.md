@@ -229,9 +229,9 @@ the `core_bench` library, which can be installed by running
 # #require "core_bench"
 # open Core_bench
 # [ Bench.Test.create ~name:"plus_one_match" (fun () ->
-        ignore (plus_one_match 10))
+        plus_one_match 10)
   ; Bench.Test.create ~name:"plus_one_if" (fun () ->
-        ignore (plus_one_if 10)) ]
+        plus_one_if 10) ]
   |> Bench.bench
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
