@@ -352,6 +352,7 @@ described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
 # module Time_ns = Core_kernel.Time_ns
+module Time_ns = Core_kernel.Time_ns
 # module Log_entry = struct
     type t =
       { session_id: string;
@@ -382,6 +383,23 @@ module Log_entry :
       time : Time_ns.t;
       important : bool;
       message : string;
+    }
+  end
+module Heartbeat :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      status_message : string;
+    }
+  end
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time_ns.t;
+      user : string;
+      credentials : string;
     }
   end
 ```
