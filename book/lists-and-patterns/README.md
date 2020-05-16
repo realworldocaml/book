@@ -260,8 +260,8 @@ Again, we can benchmark these to see the difference:
 
 ```ocaml env=main,non-deterministic=command
 # let numbers = List.range 0 1000 in
-  [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
-  ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
+  [ Bench.Test.create ~name:"sum_if" (fun () -> sum_if numbers)
+  ; Bench.Test.create ~name:"sum"    (fun () -> sum numbers) ]
   |> Bench.bench
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
