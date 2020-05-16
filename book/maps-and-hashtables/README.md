@@ -607,11 +607,13 @@ module Book :
 
 Much of the code here is devoted to creating a comparison function and
 s-expression converter for the type `Book.t`. But if we have the
-ppx_sexp_conv and ppx_compare syntax extensions enabled (both of which come
-with the omnibus ppx_jane package), then we can request that default
-implementations of these functions be created, as follows.
+`ppx_sexp_conv` and `ppx_compare` syntax extensions enabled (both of
+which come with the omnibus `ppx_jane` package), then we can request
+that default implementations of these functions be created, as
+follows.
 
 ```ocaml env=main
+# #require "ppx_jane"
 # module Book = struct
     module T = struct
       type t = { title: string; isbn: string }
