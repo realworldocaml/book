@@ -332,31 +332,47 @@ they effectively suppress exhaustiveness checking.
 
 ## Combining Records and Variants
 
-The term *algebraic data types* is often used to describe a collection of
-types that includes variants, records, and tuples. Algebraic data types act
-as a peculiarly useful and powerful language for describing data. At the
-heart of their utility is the fact that they combine two different kinds of
-types: *product types*, like tuples and records, which combine multiple
-different types together and are mathematically similar to Cartesian
-products; and *sum types*, like variants, which let you combine multiple
-different possibilities into one type, and are mathematically similar to
-disjoint unions.[records/and variant types]{.idx #RECvartyp}[sum
-types]{.idx}[product types]{.idx}[datatypes/algebraic types]{.idx}[algebraic
-data types]{.idx}[variant types/and records]{.idx #VARTYPrec}
+The term *algebraic data types* is often used to describe a collection
+of types that includes variants, records, and tuples. Algebraic data
+types act as a peculiarly useful and powerful language for describing
+data. At the heart of their utility is the fact that they combine two
+different kinds of types: *product types*, like tuples and records,
+which combine multiple different types together and are mathematically
+similar to Cartesian products; and *sum types*, like variants, which
+let you combine multiple different possibilities into one type, and
+are mathematically similar to disjoint unions.[records/and variant
+types]{.idx #RECvartyp}[sum types]{.idx}[product
+types]{.idx}[datatypes/algebraic types]{.idx}[algebraic data
+types]{.idx}[variant types/and records]{.idx #VARTYPrec}
 
-Algebraic data types gain much of their power from the ability to construct
-layered combinations of sums and products. Let's see what we can achieve with
-this by revisiting the logging server types that were described in
-[Records](records.html#records){data-type=xref}. We'll start by reminding
-ourselves of the definition of `Log_entry.t`:
+Algebraic data types gain much of their power from the ability to
+construct layered combinations of sums and products. Let's see what we
+can achieve with this by revisiting the server message types that were
+described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
+# module Time_ns = Core_kernel.Time_ns
 # module Log_entry = struct
     type t =
       { session_id: string;
         time: Time_ns.t;
         important: bool;
         message: string;
+      }
+  end
+  module Heartbeat = struct
+    type t =
+      { session_id: string;
+        time: Time_ns.t;
+        status_message: string;
+      }
+  end
+  module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time_ns.t;
+        user: string;
+        credentials: string;
       }
   end
 module Log_entry :
@@ -518,15 +534,15 @@ val messages_for_user :
   string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
 
-As you can see, the code for extracting the session ID has been replaced with
-the simple expression `common.session_id`.
+As you can see, the code for extracting the session ID has been
+replaced with the simple expression `common.session_id`.
 
-In addition, this design allows us to grab the specific message and dispatch
-code to handle just that message type. In particular, while we use the type
-`Common.t * details` to represent an arbitrary message, we can use
-`Common.t * Logon.t` to represent a logon message. Thus, if we had functions
-for handling individual message types, we could write a dispatch function as
-follows:
+In addition, this design allows us to grab the specific message and
+dispatch code to handle just that message type. In particular, while
+we use the type `Common.t * details` to represent an arbitrary
+message, we can use `Common.t * Logon.t` to represent a logon
+message. Thus, if we had functions for handling individual message
+types, we could write a dispatch function as follows:
 
 ```ocaml env=main
 # let handle_message server_state ((common:Common.t), details) =
@@ -539,7 +555,8 @@ val handle_message : server_state -> Common.t * details -> unit = <fun>
 
 And it's explicit at the type level that `handle_log_entry` sees only
 `Log_entry` messages, `handle_logon` sees only `Logon` messages, etc.
-<a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a><a data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a>
+<a data-type="indexterm" data-startref="RECvartyp">&nbsp;</a><a
+data-type="indexterm" data-startref="VARTYPrec">&nbsp;</a>
 
 ### Embedded records
 
