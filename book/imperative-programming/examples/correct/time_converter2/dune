@@ -1,0 +1,11 @@
+(executable
+  (name      time_converter)
+  (modules   time_converter)
+  (modes (byte exe))
+  (libraries core))
+
+(rule
+ (alias runtest)
+ (action
+  (with-stdin-from %{dep:input-tz}
+   (run ./time_converter.bc))))

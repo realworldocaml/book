@@ -1,4 +1,4 @@
 (executable
   (name      blow_up)
   (modules   blow_up)
-  (libraries core))
+  (libraries base stdio))

@@ -158,6 +158,7 @@ irrefutable, unlike types with variable structures like lists and
 variants.[irrefutable patterns]{.idx}[datatypes/fixed vs.  variable
 structure of]{.idx}
 
+
 Another important characteristic of record patterns is that they don't
 need to be complete; a pattern can mention only a subset of the fields
 in the record. This can be convenient, but it can also be error
@@ -221,8 +222,8 @@ val service_info_to_string : service_info -> string = <fun>
 It's a good idea to enable the warning for incomplete record matches
 and to explicitly disable it with an `_` where necessary.
 
-::: {.allow_break data-type=note}
-### Compiler Warnings
+::: {data-type=note}
+##### Compiler Warnings
 
 The OCaml compiler is packed full of useful warnings that can be
 enabled and disabled separately. These are documented in the compiler
@@ -253,7 +254,8 @@ warnings are too often ignored during development. When preparing a
 package for distribution, however, this is a bad idea, since the list
 of warnings may grow from one release of the compiler to another, and
 so this may lead your package to fail to compile on newer compiler
-releases.  :::
+releases.
+:::
 
 
 ## Field Punning
@@ -438,7 +440,7 @@ namespace within which to put related values. When using this style,
 it is standard practice to name the type associated with the module
 `t`. Using this style we would write:
 
-```ocaml env=main2
+```ocaml env=main
 # module Log_entry = struct
     type t =
       { session_id: string;
@@ -492,7 +494,7 @@ module Logon :
 
 Now, our log-entry-creation function can be rendered as follows:
 
-```ocaml env=main2
+```ocaml env=main
 # let create_log_entry ~session_id ~important message =
     { Log_entry.time = Time_ns.now ();
       Log_entry.session_id;
@@ -510,7 +512,7 @@ record field, however, so we can write this more concisely. Note that
 we are allowed to insert whitespace between the module path and the
 field name:
 
-```ocaml env=main2
+```ocaml env=main
 # let create_log_entry ~session_id ~important message =
     { Log_entry.
       time = Time_ns.now (); session_id; important; message }
@@ -522,7 +524,7 @@ Earlier, we saw that you could help OCaml understand which record
 field was intended by adding a type annotation.  We can use that here
 to make the example even more concise.
 
-```ocaml env=main2
+```ocaml env=main
 # let create_log_entry ~session_id ~important message : Log_entry.t =
     { time = Time_ns.now (); session_id; important; message }
 val create_log_entry :
@@ -532,7 +534,7 @@ val create_log_entry :
 This is not restricted to constructing a record; we can use the same
 approaches when pattern matching:
 
-```ocaml env=main2
+```ocaml env=main
 # let message_to_string { Log_entry.important; message; _ } =
     if important then String.uppercase message else message
 val message_to_string : Log_entry.t -> string = <fun>
@@ -541,7 +543,7 @@ val message_to_string : Log_entry.t -> string = <fun>
 When using dot notation for accessing record fields, we can qualify
 the field by the module as well.
 
-```ocaml env=main2
+```ocaml env=main
 # let is_important t = t.Log_entry.important
 val is_important : Log_entry.t -> bool = <fun>
 ```
@@ -561,7 +563,7 @@ it can otherwise infer the type of the record in question. In
 particular, we can rewrite the above declarations by adding type
 annotations and removing the module qualifications.
 
-```ocaml env=main2
+```ocaml env=main
 # let create_log_entry ~session_id ~important message : Log_entry.t =
     { time = Time_ns.now (); session_id; important; message }
 val create_log_entry :
@@ -592,7 +594,7 @@ for representing this information, as well as a function for updating
 the client information when a new heartbeat arrives:[functional
 updates]{.idx}[records/functional updates to]{.idx}
 
-```ocaml env=main2
+```ocaml env=main
 # type client_info =
     { addr: Unix.Inet_addr.t;
       port: int;
@@ -634,7 +636,7 @@ on an existing one, with a set of field changes layered on top.
 
 Given this, we can rewrite `register_heartbeat` more concisely:
 
-```ocaml env=main2
+```ocaml env=main
 # let register_heartbeat t hb =
   { t with last_heartbeat_time = hb.Heartbeat.time }
 val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
@@ -648,7 +650,7 @@ not prompt you to reconsider whether your code needs to change to
 accommodate the new fields. Consider what happens if we decided to add
 a field for the status message received on the last heartbeat:
 
-```ocaml env=main2
+```ocaml env=main
 # type client_info =
     { addr: Unix.Inet_addr.t;
       port: int;
@@ -674,7 +676,7 @@ update continues to compile as is, even though it incorrectly ignores
 the new field. The correct thing to do would be to update the code as
 follows:
 
-```ocaml env=main2
+```ocaml env=main
 # let register_heartbeat t hb =
     { t with last_heartbeat_time   = hb.Heartbeat.time;
              last_heartbeat_status = hb.Heartbeat.status_message;
@@ -689,7 +691,7 @@ however, declare individual record fields as mutable. In the following
 code, we've made the last two fields of `client_info` mutable:[mutable
 record fields]{.idx}[records/mutable fields in]{.idx}
 
-```ocaml env=main2
+```ocaml env=main
 # type client_info =
     { addr: Unix.Inet_addr.t;
       port: int;
@@ -712,7 +714,7 @@ The `<-` operator is used for setting a mutable field. The
 side-effecting version of `register_heartbeat` would be written as
 follows:
 
-```ocaml env=main2
+```ocaml env=main
 # let register_heartbeat t hb =
     t.last_heartbeat_time   <- hb.Heartbeat.time;
     t.last_heartbeat_status <- hb.Heartbeat.status_message
@@ -735,7 +737,7 @@ Consider the following function for extracting the usernames from a
 list of `Logon` messages:[fields/first-class fields]{.idx}[first-class
 fields]{.idx}[records/first-class fields in]{.idx}
 
-```ocaml env=main2
+```ocaml env=main
 # let get_users logons =
     List.dedup_and_sort ~compare:String.compare
   (List.map logons ~f:(fun x -> x.Logon.user))
@@ -750,10 +752,17 @@ that.[record field accessor functions]{.idx}
 
 The `[@@deriving fields]` annotation at the end of the declaration of
 a record type will cause the extension to be applied to a given type
-declaration. So, for example, we could have defined `Logon` as
-follows:
+declaration.  We need to enable the extension explicitly,
 
-```ocaml env=main2
+<!-- FIXME: This should be ppx_fields -->
+
+```ocaml env=main
+# #require "ppx_jane";;
+```
+
+at which point, we can define `Logon` as follows:
+
+```ocaml env=main
 # module Logon = struct
     type t =
       { session_id: string;
@@ -797,7 +806,7 @@ the remainder from the documentation that comes with `fieldslib`.
 One of the functions we obtain is `Logon.user`, which we can use to
 extract the user field from a logon message:
 
-```ocaml env=main2
+```ocaml env=main
 # let get_users logons =
     List.dedup_and_sort ~compare:String.compare
   (List.map logons ~f:Logon.user)
@@ -832,7 +841,7 @@ whereas the type of `Logon.Fields.time` is `(Logon.t, Time.t)
 Field.t`. Thus, if you call `Field.get` on `Logon.Fields.user`, you'll
 get a function for extracting the `user` field from a `Logon.t`:
 
-```ocaml env=main2
+```ocaml env=main
 # Field.get Logon.Fields.user
 - : Logon.t -> string = <fun>
 ```
@@ -844,7 +853,7 @@ contained in the field, which is also the return type of `get`.
 The type of `Field.get` is a little more complicated than you might
 naively expect from the preceding one:
 
-```ocaml env=main2
+```ocaml env=main
 # Field.get
 - : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
 ```
@@ -858,7 +867,7 @@ updates.
 We can use first-class fields to do things like write a generic
 function for displaying a record field:
 
-```ocaml env=main2
+```ocaml env=main
 # let show_field field to_string record =
     let name = Field.name field in
     let field_string = to_string (Field.get field record) in
@@ -873,19 +882,19 @@ which the field can be grabbed.
 
 Here's an example of `show_field` in action:
 
-```ocaml env=main2,non-deterministic
+```ocaml env=main,non-deterministic=output
 # let logon = { Logon.
                 session_id = "26685";
                 time = Time_ns.of_string "2017-07-21 10:11:45 EST";
                 user = "yminsky";
                 credentials = "Xy2d9W"; }
 val logon : Logon.t =
-  {Logon.session_id = "26685"; time = 2017-07-21 17:11:45.000000+02:00;
+  {Logon.session_id = "26685"; time = 2017-07-21 15:11:45.000000000Z;
    user = "yminsky"; credentials = "Xy2d9W"}
 # show_field Logon.Fields.user Fn.id logon
 - : string = "user: yminsky"
 # show_field Logon.Fields.time Time_ns.to_string logon
-- : string = "time: 2017-07-21 17:11:45.000000+02:00"
+- : string = "time: 2017-07-21 15:11:45.000000000Z"
 ```
 
 As a side note, the preceding example is our first use of the `Fn`
@@ -898,7 +907,7 @@ and `Fields.iter`, which let you walk over the fields of a record. So,
 for example, in the case of `Logon.t`, the field iterator has the
 following type:
 
-```ocaml env=main2
+```ocaml env=main
 # Logon.Fields.iter
 - : session_id:(([< `Read | `Set_and_create ], Logon.t, string)
                 Field.t_with_perm -> unit) ->
@@ -923,7 +932,7 @@ combination of the record and the `Field.t`.
 Now, let's use `Logon.Fields.iter` and `show_field` to print out all
 the fields of a `Logon` record:
 
-```ocaml env=main2,non-deterministic
+```ocaml env=main,non-deterministic=output
 # let print_logon logon =
     let print to_string field =
       printf "%s\n" (show_field field to_string logon)
@@ -936,7 +945,7 @@ the fields of a `Logon` record:
 val print_logon : Logon.t -> unit = <fun>
 # print_logon logon
 session_id: 26685
-time: 2017-07-21 17:11:45.000000+02:00
+time: 2017-07-21 15:11:45.000000000Z
 user: yminsky
 credentials: Xy2d9W
 - : unit = ()
