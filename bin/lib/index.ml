@@ -6,7 +6,7 @@ let nbsp = `Data (List.hd_exn (Soup.(texts (parse "&nbsp;"))))
 let indexterm_to_idx docs =
   let rec loop item = match item with
     | `Data _ -> item
-    | `Element {name="a"; attrs; childs=[x]} when x = nbsp -> (
+    | `Element {name="a"; attrs; childs=[x]} when Base.Poly.(x = nbsp) -> (
       if List.mem ~equal:Util.string_pair_equal attrs ("data-type", "indexterm")
       then (
         match
@@ -42,8 +42,8 @@ let idx_to_indexterm t =
   let rec loop item = match item with
     | `Data _ -> item
     | `Element {name="span"; attrs; childs=[`Data data]}
-      when List.Assoc.find ~equal:(=) attrs "class" = Some "idx"->
-      let attrs = List.filter attrs ~f:(fun (x, _) -> x <> "class") in
+      when Base.Poly.(List.Assoc.find ~equal:String.equal attrs "class" = Some "idx") ->
+      let attrs = List.filter attrs ~f:(fun (x, _) -> String.(x <> "class")) in
       (match String.split data ~on:'/' with
       | x::[] ->
         `Element {

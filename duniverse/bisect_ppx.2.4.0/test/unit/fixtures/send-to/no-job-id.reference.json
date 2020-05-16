@@ -1,0 +1,7 @@
+/*
+Info: will write coverage report to 'coverage.json'
+Info: detected CI: Travis
+Info: using service name 'travis-ci'
+Info: using job ID variable $TRAVIS_JOB_ID
+Error: expected job id in $TRAVIS_JOB_ID
+*/

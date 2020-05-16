@@ -1,0 +1,49 @@
+#!/bin/sh
+# This script is only used for developement. It is removed by the
+# distribution process.
+
+set -e
+
+OCAMLBUILD=${OCAMLBUILD:="ocamlbuild -tag debug -classic-display \
+                          -use-ocamlfind" }
+
+action ()
+{
+    case $1 in
+        default) action lib;;
+        lib) $OCAMLBUILD -I src ptime.cma ptime.cmxa ptime_top.cma ;;
+        lib-os)
+            action lib
+            $OCAMLBUILD -I src-os ptime_clock.cma ptime_clock.cmxa \
+                        src/ptime_top.cma ;;
+        lib-jsoo)
+            action lib
+            $OCAMLBUILD -I src-jsoo ptime_clock.cma
+            ;;
+        test)
+            action lib
+            $OCAMLBUILD -I src test/tests.otarget
+            ;;
+        test-os)
+            action lib-os
+            $OCAMLBUILD -I src -I src-os test-os/tests.otarget
+            ;;
+        test-jsoo)
+            action lib-jsoo
+            $OCAMLBUILD -I src-jsoo test-jsoo/tests.otarget;
+            shift;
+            if [ "$1" = "-b" ]; then
+                topkg browse \
+                "http://localhost/ptime/test-jsoo/min_clock_jsoo.html"
+            fiOA
+            ;;
+        doc)     shift; topkg doc --dev $* ;;
+        api-doc) shift; topkg doc $* ;;
+        clean)   topkg clean ;;
+        *)       $OCAMLBUILD $* ;;
+    esac
+}
+
+if [ $# -eq 0 ];
+then action default ;
+else action $*; fi

@@ -110,7 +110,7 @@ immediately warn you that something is wrong:
     | [] -> []
     | to_drop :: tl -> drop_value tl to_drop
     | hd :: tl -> hd :: drop_value tl to_drop
-Characters 114-122:
+Line 5, characters 7-15:
 Warning 11: this match case is unused.
 val drop_value : 'a list -> 'a -> 'a list = <fun>
 ```
@@ -229,9 +229,9 @@ the `core_bench` library, which can be installed by running
 # #require "core_bench"
 # open Core_bench
 # [ Bench.Test.create ~name:"plus_one_match" (fun () ->
-        ignore (plus_one_match 10))
+        plus_one_match 10)
   ; Bench.Test.create ~name:"plus_one_if" (fun () ->
-        ignore (plus_one_if 10)) ]
+        plus_one_if 10) ]
   |> Bench.bench
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
@@ -260,8 +260,8 @@ Again, we can benchmark these to see the difference:
 
 ```ocaml env=main,non-deterministic=command
 # let numbers = List.range 0 1000 in
-  [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
-  ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
+  [ Bench.Test.create ~name:"sum_if" (fun () -> sum_if numbers)
+  ; Bench.Test.create ~name:"sum"    (fun () -> sum numbers) ]
   |> Bench.bench
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
@@ -304,7 +304,7 @@ a case, along with an example of an unmatched pattern:
     match l with
     | [] -> []
     | 0  :: tl -> drop_zero tl
-Characters 26-84:
+Lines 2-4, characters 5-31:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 1::_
@@ -381,7 +381,7 @@ of mismatched length:
 
 ```ocaml env=main
 # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0]
-Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ").
+Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ")
 ```
 
 `List.fold` is the most complicated of the three, taking three arguments: a
@@ -409,7 +409,7 @@ can for example use `fold` to reverse a list, in which case the accumulator
 is itself a list:
 
 ```ocaml env=main
-# List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4]
+# List.fold ~init:[] ~f:(fun acc hd -> hd :: acc) [1;2;3;4]
 - : int list = [4; 3; 2; 1]
 ```
 
@@ -457,7 +457,7 @@ provide some whitespace around each entry in the table.[strings/concatenation
 of]{.idx}[String.concat]{.idx}[List module/String.concat and]{.idx}
 
 ::: {data-type=note}
-### Performance of String.concat and ^
+##### Performance of String.concat and ^
 
 In the preceding code we’ve concatenated strings two different ways:
 `String.concat`, which operates on lists of strings; and `^`, which is a
@@ -858,9 +858,9 @@ You might have noticed that `destutter` is specialized to lists of integers.
 That's because `Base`'s default equality operator is specialized to integers,
 as you can see if you try to apply it to values of a different type.
 
-```ocaml env=poly
+```ocaml env=main
 # "foo" = "bar"
-Characters 0-5:
+Line 1, characters 1-6:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -868,7 +868,7 @@ Error: This expression has type string but an expression was expected of type
 OCaml also has a collection of polymorphic equality and comparison operators,
 which we can make available by opening the module `Base.Poly`.
 
-```ocaml env=poly
+```ocaml env=main
 # open Base.Poly
 # "foo" = "bar"
 - : bool = false
@@ -881,7 +881,7 @@ which we can make available by opening the module `Base.Poly`.
 Indeed, if we look at the type of the equality operator, we'll see that it is
 polymorphic.
 
-```ocaml env=poly
+```ocaml env=main
 # (=)
 - : 'a -> 'a -> bool = <fun>
 ```
@@ -889,7 +889,7 @@ polymorphic.
 If we rewrite our destutter example with `Base.Poly` open, we'll see that it
 gets a polymorphic type, and can now be used on inputs of different types.
 
-```ocaml env=poly
+```ocaml env=main
 # let rec destutter = function
     | [] | [_] as l -> l
     | hd :: (hd' :: _ as tl) when hd = hd' -> destutter tl
@@ -918,9 +918,9 @@ they're laid out in memory. (You can learn more about this structure in
 Polymorphic compare does have some limitations. For example, it will fail at
 runtime if it encounters a function value.
 
-```ocaml env=poly
+```ocaml env=main
 # (fun x -> x + 1) = (fun x -> x + 1)
-Exception: (Invalid_argument "compare: functional value").
+Exception: (Invalid_argument "compare: functional value")
 ```
 
 Similarly, it will fail on values that come from outside the OCaml heap, like
@@ -940,12 +940,12 @@ sense for the particular type of values you're dealing with. This can lead to
 surprising and hard to resolve bugs in your code. It's for this reason that
 `Base` discourages the use of polymorphic compare by hiding it by default.
 
-We'll discuss this issue more in
-[Maps And Hash Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
-But in any case, you can restore the default behavior of `Base` by opening
-the module again.
+We'll discuss this issue more in [Maps And Hash
+Tables](maps-and-hashtables.html#maps-and-hash-tables){data-type=xref}.
+But in any case, you can restore the default behavior of `Base` by
+opening the module again.
 
-```ocaml env=poly
+```ocaml env=main
 # open Base
 ```
 
@@ -969,7 +969,7 @@ exhaustive:
     | [] -> 0
     | x :: tl when Option.is_none x -> count_some tl
     | x :: tl when Option.is_some x -> 1 + count_some tl
-Characters 30-169:
+Lines 2-5, characters 5-57:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::_

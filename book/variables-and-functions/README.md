@@ -14,11 +14,12 @@ this chapter after you've gotten a better sense of the rest of the language.
 
 ## Variables
 
-At its simplest, a variable is an identifier whose meaning is bound to a
-particular value. In OCaml these bindings are often introduced using the
-`let` keyword. We can type a so-called *top-level*`let` binding with the
-following syntax. Note that variable names must start with a lowercase letter
-or an underscore. [bindings/top-level]{.idx}[top-level bindings]{.idx}[let
+At its simplest, a variable is an identifier whose meaning is bound to
+a particular value. In OCaml these bindings are often introduced using
+the `let` keyword. We can type a so-called *top-level* `let` binding
+with the following syntax. Note that variable names must start with a
+lowercase letter or an
+underscore. [bindings/top-level]{.idx}[top-level bindings]{.idx}[let
 syntax/top-level bindings]{.idx}
 
 ```
@@ -73,7 +74,7 @@ as we can see if we try to access it now.
 
 ```ocaml env=main
 # language_list
-Characters 0-13:
+Line 1, characters 1-14:
 Error: Unbound value language_list
 ```
 
@@ -125,7 +126,7 @@ would work if we had instead written this purposefully confusing bit of code:
     let area_of_circle r = pi *. r *. r in
     let pi = 0. in
     area_of_circle outer_radius -. area_of_circle inner_radius
-Characters 121-123:
+Line 4, characters 9-11:
 Warning 26: unused variable pi.
 val area_of_ring : float -> float -> float = <fun>
 ```
@@ -146,7 +147,7 @@ values in OCaml, which we'll discuss in
 but there are no mutable variables.
 
 ::: {data-type=note}
-### Why Don't Variables Vary?
+##### Why Don't Variables Vary?
 
 One source of confusion for people new to OCaml is the fact that variables
 are immutable. This seems pretty surprising even on linguistic terms. Isn't
@@ -198,7 +199,7 @@ patterns]{.idx}
 # let upcase_first_entry line =
     let (first :: rest) = String.split ~on:',' line in
     String.concat ~sep:"," (String.uppercase first :: rest)
-Characters 34-144:
+Lines 2-3, characters 5-60:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -313,7 +314,7 @@ syntactic niceties aside, the two styles of function definition are
 equivalent.
 
 ::: {data-type=note}
-#### let and fun
+##### let and fun
 
 Functions and `let` bindings have a lot to do with each other. In some sense,
 you can think of the parameter of a function as a variable being bound to the
@@ -370,7 +371,7 @@ right-associative. The type signature of `abs_diff` can therefore be
 parenthesized as follows. [curried functions]{.idx}[functions/curried
 functions]{.idx}
 
-```ocaml file=examples/abs_diff.mli
+```ocaml skip
 val abs_diff : int -> (int -> int)
 ```
 
@@ -546,7 +547,7 @@ Note that you have to be careful when dealing with operators containing
 
 ```ocaml env=main
 # let (***) x y = (x **. y) **. y
-Characters 17-18:
+Line 1, characters 18-19:
 Error: This expression has type int but an expression was expected of type
          float
 ```
@@ -606,7 +607,7 @@ operators]{.idx}[negation operators]{.idx}
 # Int.max 3 (-4)
 - : int = 3
 # Int.max 3 -4
-Characters 0-9:
+Line 1, characters 1-10:
 Error: This expression has type int -> int
        but an expression was expected of type int
 ```
@@ -615,7 +616,7 @@ Here, OCaml is interpreting the second expression as equivalent to.
 
 ```ocaml env=main
 # (Int.max 3) - 4
-Characters 0-11:
+Line 1, characters 1-12:
 Error: This expression has type int -> int
        but an expression was expected of type int
 ```
@@ -702,7 +703,7 @@ val ( ^> ) : 'a -> ('a -> 'b) -> 'b = <fun>
 # String.split ~on:':' path
   ^> List.dedup_and_sort ~compare:String.compare
   ^> List.iter ~f:print_endline
-Characters 80-106:
+Line 3, characters 6-32:
 Error: This expression has type string list -> unit
        but an expression was expected of type
          (string list -> string list) -> 'a
@@ -819,14 +820,14 @@ Labeled arguments are useful in a few different cases:
   Boolean flag, which indicates whether that array will ever shrink when
   elements are removed.
 
-```ocaml file=examples/htable_sig1.ml
+```ocaml skip
 val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
 ```
 
 The signature makes it hard to divine the meaning of those two arguments.
   but with labeled arguments, we can make the intent immediately clear.
 
-```ocaml file=examples/htable_sig2.ml
+```ocaml skip
 val create_hashtable :
   init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
 ```
@@ -840,7 +841,7 @@ Choosing label names well is especially important for Boolean values, since
   the same type. For example, consider this signature for a function that
   extracts a substring.
 
-```ocaml file=examples/substring_sig1.ml
+```ocaml skip
 val substring: string -> int -> int -> string
 ```
 
@@ -848,7 +849,7 @@ Here, the two `ints` are the starting position and length of the substring
   to extract, respectively, but you wouldn't know that from the type
   signature. We can make the signature more informative by adding labels.
 
-```ocaml file=examples/substring_sig2.ml
+```ocaml skip
 val substring: string -> pos:int -> len:int -> string
 ```
 
@@ -913,7 +914,7 @@ we'll find that it can't be passed in to `apply_to_tuple_2`.
 
 ```ocaml env=main
 # apply_to_tuple_2 divide (3,4)
-Characters 17-23:
+Line 1, characters 18-24:
 Error: This expression has type first:int -> second:int -> int
        but an expression was expected of type second:'a -> first:'b -> 'c
 ```
@@ -1084,7 +1085,7 @@ Even worse, it would be perfectly consistent for `f` to take an optional
 argument instead of a labeled one, which could lead to this type signature
 for `numeric_deriv`.
 
-```ocaml file=examples/numerical_deriv_alt_sig.mli
+```ocaml skip
 val numeric_deriv :
   delta:float ->
   x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float
@@ -1107,10 +1108,10 @@ invocations of `f` list the arguments in different orders.
     let dx = (f ~y ~x:x' -. base) /. delta in
     let dy = (f ~x ~y:y' -. base) /. delta in
     (dx,dy)
-Characters 130-131:
+Line 5, characters 15-16:
 Error: This function is applied to arguments
-in an order different from other calls.
-This is only allowed when the real type is known.
+       in an order different from other calls.
+       This is only allowed when the real type is known.
 ```
 
 As suggested by the error message, we can get OCaml to accept the fact that
@@ -1158,8 +1159,8 @@ if we try to pass in that optional argument now, it will be rejected.
 
 ```ocaml env=main
 # prepend_pound "a BASH comment" ~sep:":"
-Characters 0-13:
-Error: This function has type string -> string
+Line 1, characters 1-14:
+Error: This function has type Base.String.t -> Base.String.t
        It is applied to too many arguments; maybe you forgot a `;'.
 ```
 
@@ -1203,7 +1204,7 @@ can't be erased at all, which leads to a compiler warning.
 
 ```ocaml env=main
 # let concat x y ?(sep="") = x ^ sep ^ y
-Characters 17-23:
+Line 1, characters 18-24:
 Warning 16: this optional argument cannot be erased.
 val concat : string -> string -> ?sep:string -> string = <fun>
 ```

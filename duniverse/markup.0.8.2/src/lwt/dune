@@ -1,0 +1,7 @@
+(library
+ (name markup_lwt)
+ (public_name markup-lwt)
+ (synopsis "Lwt support for Markup.ml")
+ (preprocess (pps bisect_ppx --conditional))
+ (libraries lwt markup)
+ (flags (:standard -w +A-4-9-44-48 -warn-error -3-4-9-44-48 -safe-string)))

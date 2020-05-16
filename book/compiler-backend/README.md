@@ -58,14 +58,14 @@ The lambda output for this code looks like this:
 $ ocamlc -dlambda -c pattern_monomorphic_large.ml 2>&1
 (setglobal Pattern_monomorphic_large!
   (let
-    (test/1007 =
-       (function v/1008
-         (switch* v/1008
+    (test/85 =
+       (function v/87 : int
+         (switch* v/87
           case int 0: 100
           case int 1: 101
           case int 2: 102
           case int 3: 103)))
-    (makeblock 0 test/1007)))
+    (makeblock 0 test/85)))
 ```
 
 It's not important to understand every detail of this internal form, and it
@@ -108,8 +108,8 @@ The lambda output for this code is now quite different:
 ```sh dir=examples/back-end
 $ ocamlc -dlambda -c pattern_monomorphic_small.ml 2>&1
 (setglobal Pattern_monomorphic_small!
-  (let (test/1005 = (function v/1006 (if (!= v/1006 0) 101 100)))
-    (makeblock 0 test/1005)))
+  (let (test/83 = (function v/85 : int (if v/85 101 100)))
+    (makeblock 0 test/83)))
 ```
 
 The compiler emits simpler conditional jumps rather than setting up a jump
@@ -134,13 +134,13 @@ polymorphic variants:
 $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
 (setglobal Pattern_polymorphic!
   (let
-    (test/1002 =
-       (function v/1003
-         (if (!= v/1003 3306965)
-           (if (>= v/1003 482771474) (if (>= v/1003 884917024) 100 102)
-             (if (>= v/1003 3457716) 104 103))
+    (test/80 =
+       (function v/82 : int
+         (if (!= v/82 3306965)
+           (if (>= v/82 482771474) (if (>= v/82 884917024) 100 102)
+             (if (>= v/82 3457716) 104 103))
            101)))
-    (makeblock 0 test/1002)))
+    (makeblock 0 test/80)))
 ```
 
 We mentioned in [Variants](variants.html#variants){data-type=xref} that
@@ -153,7 +153,7 @@ variable in as few comparisons as possible. [pattern matching/fundamental
 algorithms in]{.idx}
 
 ::: {data-type=note}
-#### Learning More About Pattern Matching Compilation
+##### Learning More About Pattern Matching Compilation
 
 Pattern matching is an important part of OCaml programming. You'll often
 encounter deeply nested pattern matches over complex data structures in real
@@ -236,7 +236,7 @@ let () =
 Building and executing this example will run for around 30 seconds by
 default, and you'll see the results summarized in a neat table:
 
-```scheme
+```scheme file=examples/back-end/bench_patterns/dune
 (executable
   (name      bench_patterns)
   (modules   bench_patterns)
@@ -319,9 +319,6 @@ examples:
 $ ocamlc -dinstr pattern_monomorphic_small.ml 2>&1
 	branch L2
 L1:	acc 0
-	push
-	const 0
-	neqint
 	branchifnot L3
 	const 101
 	return 1
@@ -346,7 +343,7 @@ arity). You can find full details
 compiler/instruction set for]{.idx}
 
 ::: {data-type=note}
-### Where Did the Bytecode Instruction Set Come From?
+##### Where Did the Bytecode Instruction Set Come From?
 
 The bytecode interpreter is much slower than compiled native code, but is
 still remarkably performant for an interpreter without a JIT compiler. Its
@@ -720,7 +717,7 @@ let () =
 
 Running this shows quite a significant runtime difference between the two:
 
-```scheme
+```scheme file=examples/back-end/bench_poly_and_mono/dune
 (executable
   (name      bench_poly_and_mono)
   (modules   bench_poly_and_mono)
@@ -846,7 +843,7 @@ let () =
 Compile and run this with debugging symbols. You should see the following
 output:
 
-```scheme
+```scheme file=examples/back-end/alternate_list/dune
 (executable
   (name      alternate_list)
   (libraries core))
@@ -1098,7 +1095,7 @@ later) that resolve symbols from left to right in a single
 pass.[debugging/activating debug runtime]{.idx}
 
 ::: {data-type=note}
-#### Activating the Debug Runtime
+##### Activating the Debug Runtime
 
 Despite your best efforts, it is easy to introduce a bug into some
 components, such as C bindings, that causes heap invariants to be violated.

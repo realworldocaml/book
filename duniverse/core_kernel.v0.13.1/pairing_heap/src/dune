@@ -1,0 +1,2 @@
+(library (name pairing_heap) (public_name core_kernel.pairing_heap)
+ (libraries core_kernel tuple_pool) (preprocess (pps ppx_jane)))

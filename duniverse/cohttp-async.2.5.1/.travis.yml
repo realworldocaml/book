@@ -1,0 +1,43 @@
+language: c
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash -ex ./.travis-docker.sh
+env:
+  global:
+  - PINS="cohttp-top.dev:. cohttp-async.dev:. cohttp-lwt-unix.dev:. cohttp-lwt-jsoo.dev:. cohttp-lwt.dev:. cohttp-mirage.dev:. cohttp.dev:."
+  matrix:
+  - PACKAGE="cohttp" DISTRO="ubuntu-lts" OCAML_VERSION="4.08" DEPOPTS="cohttp-async cohttp-lwt-unix cohttp-mirage"
+  - PACKAGE="cohttp" DISTRO="ubuntu-lts" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-async" DISTRO="ubuntu-lts" OCAML_VERSION="4.08"
+  - PACKAGE="cohttp-async" DISTRO="alpine" OCAML_VERSION="4.08"
+  - PACKAGE="cohttp-async" DISTRO="debian-unstable" OCAML_VERSION="4.08"
+  - PACKAGE="cohttp-async" DISTRO="ubuntu-16.04" OCAML_VERSION="4.08"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="ubuntu-lts" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="ubuntu-lts" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-lwt" DISTRO="ubuntu-lts" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp-mirage" DISTRO="alpine" OCAML_VERSION="4.07"
+  - PACKAGE="cohttp" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp-lwt" DISTRO="alpine" OCAML_VERSION="4.06"
+  - PACKAGE="cohttp" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp-lwt" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+  - PACKAGE="cohttp" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-lwt-unix" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-lwt-jsoo" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+  - PACKAGE="cohttp-lwt" DISTRO="ubuntu-16.04" OCAML_VERSION="4.04"
+matrix:
+  allow_failures:
+  - env: PACKAGE="cohttp-lwt-unix" DISTRO="debian-unstable" OCAML_VERSION="4.05"
+
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/6ee5059c7420709f4ad1
+    on_success: change
+    on_failure: always
+    on_start: false

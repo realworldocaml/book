@@ -315,7 +315,7 @@ will prevent us from confusing them.
 
 ```ocaml env=main
 # Int_interval.contains rev_interval 3
-Characters 22-34:
+Line 1, characters 23-35:
 Error: This expression has type Rev_int_interval.t
        but an expression was expected of type Int_interval.t
 ```
@@ -429,7 +429,7 @@ module Int_interval :
     val intersect : t -> t -> t
   end
 # Int_interval.create 3 4
-Characters 20-21:
+Line 1, characters 21-22:
 Error: This expression has type int but an expression was expected of type
          Int_interval.endpoint
 ```
@@ -654,7 +654,7 @@ module Int_interval :
   (Int_interval.create 3 4)
 - : bool = false
 # Int_interval.is_empty (Int_interval.Interval (4,3))
-Characters 23-44:
+Line 1, characters 24-45:
 Error: Unbound constructor Int_interval.Interval
 ```
 
@@ -741,7 +741,7 @@ declaration to the definition of `t` within the functor:
         create (max l1 l2) (min h1 h2)
 
   end
-Characters 138-148:
+Line 4, characters 28-38:
 Error: Unbound value Endpoint.t_of_sexp
 ```
 
@@ -872,7 +872,8 @@ module Make_interval :
                   val compare : t -> t -> int
                   val t_of_sexp : Sexp.t -> t
                   val sexp_of_t : t -> Sexp.t
-                end) ->
+                end)
+    ->
     sig
       type t
       val create : Endpoint.t -> Endpoint.t -> t

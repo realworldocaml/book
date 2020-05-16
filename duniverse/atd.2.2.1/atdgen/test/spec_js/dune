@@ -1,0 +1,47 @@
+(library
+ (name spec_js)
+ (modules spec_t spec_j spec_js spec_bs)
+ (libraries atdgen-runtime atdgen-codec-runtime))
+
+(rule
+ (targets spec_t.ml spec_t.mli)
+ (deps spec.atd)
+ (action (run atdgen %{deps} -t)))
+
+(rule
+ (targets spec_j.ml spec_j.mli)
+ (deps spec.atd)
+ (action (run atdgen %{deps} -j -j-std)))
+
+(rule
+ (targets spec_bs.ml spec_bs.mli)
+ (deps spec.atd)
+ (action (run atdgen %{deps} -bs)))
+
+(executable
+ (name test_j)
+ (modules test_j)
+ (libraries spec_js atdgen-runtime))
+
+(executable
+ (name test_bs)
+ (modules test_bs)
+ (libraries spec_js atdgen-codec-runtime))
+
+(rule
+ (targets spec_j.json)
+ (action (with-stdout-to %{targets} (run ./test_j.exe))))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff spec_j.expected.json spec_j.json)))
+
+(rule
+ (targets spec_bs.json)
+ (action (with-stdout-to %{targets} (run ./test_bs.exe))))
+
+(rule
+ (alias runtest)
+ (package atdgen)
+ (action (diff spec_bs.expected.json spec_bs.json)))

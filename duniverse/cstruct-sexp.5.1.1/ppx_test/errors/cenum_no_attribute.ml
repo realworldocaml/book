@@ -1,0 +1,4 @@
+[%%cenum
+  type t =
+    | A
+]

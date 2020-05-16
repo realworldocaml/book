@@ -1,0 +1,4 @@
+(executable
+ (name main)
+ (modules main)
+ (libraries dune_bench core_bench.inline_benchmarks))

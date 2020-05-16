@@ -1,0 +1,15 @@
+deadbeef deadbeef
+foo = {
+  a = 0x7
+  b = 0x2c
+  c = 0xbeef
+  d = <buffer uint8_t[8] d>
+61 62 63 64 65 66 67 68
+
+}
+"\007\000,\000\000\190\239abcdefgh"
+with_ignored_field = {
+  a = 0x1
+  c = 0x3
+
+}

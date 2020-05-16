@@ -1,0 +1,20 @@
+kind: pipeline
+name: amd
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: ocaml/opam2:4.08
+  commands:
+  - sudo apt-get update && sudo apt-get -y install afl
+  - sudo chown -R opam .
+  - git -C /home/opam/opam-repository pull origin && opam update
+  - opam switch 4.08+afl
+  - opam pin add -n .
+  - opam depext -u cstruct-async cstruct-lwt cstruct-unix cstruct ppx_cstruct
+  - opam install -y .
+  - opam install -y dune.1.11.4 crowbar fmt bun
+  - opam exec -- dune build @fuzz --no-buffer

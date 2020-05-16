@@ -215,14 +215,14 @@ see.
 
 ```ocaml env=main
 # Map.empty (module Book)
-Characters 18-22:
+Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base.v0.13.1/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "duniverse/base/src/comparator.mli", line 20, characters 2-25:
+       File "duniverse/base.v0.13.1/src/comparator.mli", line 19, characters 2-25:
          Expected declaration
 ```
 
@@ -443,7 +443,7 @@ result.
 
 ```ocaml env=main
 # Map.symmetric_diff ord_map rev_map
-Characters 27-34:
+Line 1, characters 28-35:
 Error: This expression has type
          (string, int, Reverse.comparator_witness) Map.t
        but an expression was expected of type
@@ -475,7 +475,7 @@ the compiler rejects the following:
 # Map.symmetric_diff
     (Map.Poly.singleton 3 "three")
     (Map.singleton (module Int) 3 "four" )
-Characters 58-96:
+Line 3, characters 5-43:
 Error: This expression has type (int, string, Int.comparator_witness) Map.t
        but an expression was expected of type
          (int, string, Comparator.Poly.comparator_witness) Map.t
@@ -537,7 +537,7 @@ comparators stored within the sets contain function values:
 
 ```ocaml env=main
 # Poly.(m1 = m2)
-Exception: (Invalid_argument "compare: functional value").
+Exception: (Invalid_argument "compare: functional value")
 ```
 
 We can, however, use the function `Map.Using_comparator.to_tree` to expose
@@ -667,8 +667,8 @@ You'll see a warning if you use `==` anywhere in code that opens
 ```ocaml env=core_phys_equal
 # open Base
 # 1 == 2
-Characters 2-4:
-Warning 3: deprecated: Base.==
+Line 1, characters 3-5:
+Alert deprecated: Base.==
 [2016-09] this element comes from the stdlib distributed with OCaml.
 Use [phys_equal] instead.
 - : bool = false
@@ -705,7 +705,7 @@ want to put a `[@@deriving]` annotation on a map or set type itself?
 # type string_int_map =
     (string,int,String.comparator_witness) Map.t
   [@@deriving sexp]
-Characters 65-70:
+Line 2, characters 44-49:
 Error: Unbound value Map.t_of_sexp
 Hint: Did you mean m__t_of_sexp?
 ```
@@ -754,7 +754,7 @@ module/Map.to_tree]{.idx}[maps/tree structure]{.idx}
 ```ocaml env=main
 # let ord_tree = Map.Using_comparator.to_tree ord_map
 val ord_tree :
-  (string, int, String.comparator_witness) Core_kernel.Map_intf.Tree.t =
+  (string, int, String.comparator_witness) Map.Using_comparator.Tree.t =
   <abstr>
 ```
 
@@ -779,12 +779,12 @@ following example, using the wrong comparator will lead to a type error:
 
 ```ocaml env=main
 # Map.Using_comparator.Tree.find ~comparator:Reverse.comparator ord_tree "snoo"
-Characters 62-70:
+Line 1, characters 63-71:
 Error: This expression has type
-         (string, int, String.comparator_witness) Core_kernel.Map_intf.Tree.t
+         (string, int, String.comparator_witness) Map.Using_comparator.Tree.t
        but an expression was expected of type
          (string, int, Reverse.comparator_witness)
-         Core_kernel.Map_intf.Tree.t
+         Map.Using_comparator.Tree.t
        Type String.comparator_witness is not compatible with type
          Reverse.comparator_witness
 ```
@@ -887,7 +887,8 @@ module Book :
     type t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    val hash_fold_t : Hash.state -> t -> Hash.state
+    val hash_fold_t :
+      Base_internalhash_types.state -> t -> Base_internalhash_types.state
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book)
@@ -962,7 +963,7 @@ good idea to write one's own hash function, or to use the ones provided by
 ```
 
 Note that rather than declaring a type and using `[@@deriving hash]` to
-invoke ppx_hash, we use `[%%hash]`, a shorthand for creating a hash function
+invoke ppx_hash, we use `[%hash]`, a shorthand for creating a hash function
 inline in an expression.
 :::
 
@@ -1029,7 +1030,7 @@ let () =
 The results show the hash table version to be around four times faster than
 the map version:
 
-```scheme
+```scheme file=examples/map_vs_hash/dune
 (executable
   (name      map_vs_hash)
   (libraries base core_bench))
@@ -1113,7 +1114,7 @@ let () =
 Unsurprisingly, maps perform far better than hash tables on this benchmark,
 in this case by more than a factor of 10:
 
-```scheme
+```scheme file=examples/map_vs_hash2/dune
 (executable
   (name      map_vs_hash2)
   (libraries core_bench))

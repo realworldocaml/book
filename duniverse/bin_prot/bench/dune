@@ -1,1 +1,0 @@
-(library (name bin_prot_bench) (libraries core) (preprocess (pps ppx_jane)))

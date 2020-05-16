@@ -168,6 +168,8 @@ The code results in a syntax error when compiled:
 ```sh dir=examples/front-end
 $ ocamlc -c broken_module.ml
 File "broken_module.ml", line 2, characters 2-8:
+2 |   module MyString = String;
+      ^^^^^^
 Error: Syntax error
 [2]
 ```
@@ -214,6 +216,8 @@ When you compile this file, you'll get a syntax error again:
 ```sh dir=examples/front-end
 $ ocamlc -c follow_on_function.ml
 File "follow_on_function.ml", line 11, characters 0-3:
+11 | let () =
+     ^^^
 Error: Syntax error
 [2]
 ```
@@ -349,7 +353,7 @@ HTML generator]{.idx}[HTML
 generators]{.idx}<a data-type="indexterm" data-startref="SCpras">&nbsp;</a><a data-type="indexterm" data-startref="PARSsource">&nbsp;</a><a data-type="indexterm" data-startref="CPpars">&nbsp;</a>
 
 ::: {data-type=note}
-#### Using Custom ocamldoc Generators
+##### Using Custom ocamldoc Generators
 
 The default HTML output stylesheets from `ocamldoc` are pretty spartan and
 distinctly Web 1.0. The tool supports plugging in custom documentation
@@ -461,16 +465,16 @@ Error: The implementation conflicting_interface.ml
          type t = Foo
        is not included in
          type t = Bar
+       Constructors number 1 have different names, Foo and Bar.
        File "conflicting_interface.mli", line 1, characters 0-12:
          Expected declaration
        File "conflicting_interface.ml", line 1, characters 0-12:
          Actual declaration
-       Fields number 1 have different names, Foo and Bar.
 [2]
 ```
 
 ::: {.allow_break data-type=note}
-#### Which Comes First: The ml or the mli?
+##### Which Comes First: The ml or the mli?
 
 There are two schools of thought on which order OCaml code should be written
 in. It's very easy to begin writing code by starting with an `ml` file and
@@ -578,7 +582,17 @@ There's a single character typo in the code so that it uses `Nu` instead of
 
 ```sh dir=examples/front-end
 $ ocamlc -c broken_poly.ml
-File "broken_poly.ml", line 9, characters 10-154:
+File "broken_poly.ml", lines 9-18, characters 10-6:
+ 9 | ..........(
+10 |     `Add (
+11 |       (`Num 0),
+12 |       (`Sub (
+13 |           (`Num 1),
+14 |           (`Mul (
+15 |               (`Nu 3),(`Num 2)
+16 |             ))
+17 |         ))
+18 |     ))
 Error: This expression has type
          [> `Add of
               ([< `Add of 'a * 'a
@@ -587,7 +601,8 @@ Error: This expression has type
                 | `Sub of 'a * 'a
                 > `Num ]
                as 'a) *
-              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ] ] ]
+              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ]
+              ] ]
        but an expression was expected of type
          [< `Add of 'a * 'a | `Mul of 'a * 'a | `Num of int | `Sub of 'a * 'a
           > `Num ]
@@ -644,6 +659,8 @@ type definition of the polymorphic variants, and a type annotation to the
 ```sh dir=examples/front-end
 $ ocamlc -i broken_poly_with_annot.ml
 File "broken_poly_with_annot.ml", line 22, characters 14-21:
+22 |               (`Nu 3),(`Num 2)
+                   ^^^^^^^
 Error: This expression has type [> `Nu of int ]
        but an expression was expected of type t
        The second variant type does not allow tag(s) `Nu
@@ -696,6 +713,8 @@ Inferring the signature with `-principal` will show you a new warning:
 ```sh dir=examples/front-end
 $ ocamlc -i -principal non_principal.ml
 File "non_principal.ml", line 6, characters 4-7:
+6 |   x.foo
+        ^^^
 Warning 18: this type-based field disambiguation is not principal.
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
@@ -731,19 +750,31 @@ type t = { foo : int; }
 val f : s -> int
 ```
 
-The `ocamlbuild` equivalent is to add the tag `principal` to your build. The
-*corebuild* wrapper script actually adds this by default, but it does no harm
-to explicitly repeat it:
+The `dune` equivalent is to add the flag `-principal` to your build description.
 
-```sh dir=examples/front-end,skip
-$ corebuild -no-hygiene -tag principal principal.cmi non_principal.cmi
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules principal.ml > principal.ml.depends
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o principal.cmo principal.ml
-ocamlfind ocamldep -package core -ppx 'ppx-jane -as-ppx' -modules non_principal.ml > non_principal.ml.depends
-ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o non_principal.cmo non_principal.ml
-+ ocamlfind ocamlc -c -w A-4-33-40-41-42-43-34-44 -strict-sequence -g -bin-annot -short-paths -principal -thread -package core -ppx 'ppx-jane -as-ppx' -o non_principal.cmo non_principal.ml
+```ocaml file=examples/front-end/dune
+(executable
+  (name principal)
+  (flags :standard -principal)
+  (modules principal))
+
+(executable
+  (name non_principal)
+  (flags :standard -principal)
+  (modules non_principal))
+```
+
+The `:standard` directive will include all the default flags, and then
+`-principal` will be appended after those in the compiler build flags.
+
+```sh dir=examples/front-end/
+$ dune build principal.exe
+$ dune build non_principal.exe
 File "non_principal.ml", line 6, characters 4-7:
-Warning 18: this type-based field disambiguation is not principal.
+6 |   x.foo
+        ^^^
+Error (warning 18): this type-based field disambiguation is not principal.
+[1]
 ```
 
 Ideally, all code should systematically use `-principal`. It reduces variance
@@ -754,16 +785,12 @@ objects, which usually have larger type signatures to cover all their
 methods.
 
 If compiling in principal mode works, it is guaranteed that the program will
-pass type checking in nonprincipal mode, too. For this reason, the
-`corebuild` wrapper script activates principal mode by default, preferring
-stricter type inference over a small loss in compilation speed and extra disk
-space usage.
-
-Bear in mind that the `cmi` files generated in principal mode differ from the
-default mode. Try to ensure that you compile your whole project with it
-activated. Getting the files mixed up won't let you violate type safety, but
-it can result in the type checker failing unexpectedly very occasionally. In
-this case, just recompile with a clean source tree.
+pass type checking in non-principal mode, too.  Bear in mind that the `cmi`
+files generated in principal mode differ from the default mode. Try to ensure
+that you compile your whole project with it activated. Getting the files mixed
+up won't let you violate type safety, but it can result in the type checker
+failing unexpectedly very occasionally. In this case, just recompile with a
+clean source tree.
 
 
 ### Modules and Separate Compilation
@@ -1180,7 +1207,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
     Tstr_type Rec
     [
-      type_declaration t/1002 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
+      type_declaration t/80 (typedef.ml[1,0+0]..typedef.ml[1,0+18])
         ptype_params =
           []
         ptype_cstrs =
@@ -1189,11 +1216,11 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
           Ttype_variant
             [
               (typedef.ml[1,0+9]..typedef.ml[1,0+12])
-                Foo/1003
+                Foo/81
                 []
                 None
               (typedef.ml[1,0+13]..typedef.ml[1,0+18])
-                Bar/1004
+                Bar/82
                 []
                 None
             ]
@@ -1206,7 +1233,7 @@ $ ocamlc -dtypedtree typedef.ml 2>&1
     [
       <def>
         pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-          Tpat_var "v/1005"
+          Tpat_var "v/83"
         expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
           Texp_construct "Foo"
           []

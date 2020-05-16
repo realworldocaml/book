@@ -1,8 +1,0 @@
-(jbuild_version 1)
-
-(ocamllex  (octLexer))
-(ocamlyacc (octParser))
-
-(library
- ((name octavius)
-  (public_name octavius)))

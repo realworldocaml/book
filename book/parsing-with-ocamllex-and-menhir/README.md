@@ -33,7 +33,7 @@ of how to build a parser in OCaml. [ocamlyacc parser generator]{.idx}[Menhir
 parser generator/vs. ocamlyacc]{.idx}
 
 ::: {data-type=note}
-## Menhir Versus ocamlyacc
+##### Menhir Versus ocamlyacc
 
 Menhir is an alternative parser generator that is generally superior to the
 venerable `ocamlyacc`, which dates back quite a few years. Menhir is mostly
@@ -193,7 +193,7 @@ syntax `%token <`*`type`*`>`*`uid`*, where the *`<type>`* is optional and
 *`uid`* is a capitalized identifier. For JSON, we need tokens for numbers,
 strings, identifiers, and punctuation: [tokens, declaration of]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/parser.mly,part=tokens
 %token <int> INT
 %token <float> FLOAT
 %token <string> ID
@@ -239,7 +239,7 @@ the non-terminal symbol `prog`, and by declaring that when parsed, a
 `Json.value option`. We then end the declaration section of the parser with a
 `%%`:
 
-```ocaml skip
+```ocaml file=examples/parsing/parser.mly,part=start-symbol
 %start <Json.value option> prog
 %%
 ```
@@ -249,7 +249,7 @@ productions are organized into *rules*, where each rule lists all the
 possible productions for a given nonterminal symbols. Here, for example, is
 the rule for `prog`:
 
-```ocaml skip
+```ocaml file=examples/parsing/parser.mly,part=prog
 prog:
   | EOF       { None }
   | v = value { Some v }
@@ -273,7 +273,7 @@ within the curly braces for that production.
 
 Now let's consider a more complex example, the rule for the `value` symbol:
 
-```ocaml skip
+```ocaml file=examples/parsing/parser.mly,part=value
 value:
   | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
     { `Assoc obj }
@@ -317,7 +317,7 @@ side, because what we're matching on in this case is an empty sequence of
 tokens. The comment `(* empty *)` is used to make this clear:
 [rev_object_fields]{.idx}[object_fields]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/parser.mly,part=objects
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
@@ -334,7 +334,7 @@ right-recursive rule accepts the same input, but during parsing, it requires
 linear stack space to read object field definitions: [Menhir parser
 generator/left-recursive definitions]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/right_rec_rule.mly
 (* Inefficient right-recursive rule *)
 object_fields:
   | (* empty *) { [] }
@@ -347,7 +347,7 @@ construct the returned value in left-to-right order. This is even less
 efficient, since the complexity of building the list incrementally in this
 way is quadratic in the length of the list:
 
-```ocaml skip
+```ocaml file=examples/parsing/quadratic_rule.mly
 (* Quadratic left-recursive rule *)
 object_fields:
   | (* empty *) { [] }
@@ -368,7 +368,7 @@ A version of the JSON grammar using these more succinct Menhir rules follows.
 Notice the use of `separated_list` to parse both JSON objects and lists with
 one rule:
 
-```ocaml skip
+```ocaml file=examples/parsing/short_parser.mly,part=rules
 prog:
   | v = value { Some v }
   | EOF       { None   } ;
@@ -399,7 +399,7 @@ handle files with the `.mly` suffix: [-use-menhir
 flag]{.idx data-primary-sortas=use}[Menhir parser
 generator/invoking]{.idx}<a data-type="indexterm" data-startref="PARSparsdef">&nbsp;</a>
 
-```scheme
+```scheme file=examples/parsing/dune
 (rule
  (targets short_parser.mli short_parser.ml)
   (deps   short_parser.mly)
@@ -425,7 +425,7 @@ Let's walk through the definition of a lexer section by section. The first
 section is an optional chunk of OCaml code that is bounded by a pair of curly
 braces: [lexers/optional OCaml code for]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/lexer.mll,part=utilities
 {
 open Lexing
 open Parser
@@ -459,7 +459,7 @@ really this is a specialized syntax for declaring regular expressions. Here's
 an example: [regular expressions]{.idx}[lexers/regular expressions
 collection]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/lexer.mll,part=int
 let int = '-'? ['0'-'9'] ['0'-'9']*
 ```
 
@@ -476,7 +476,7 @@ points and exponents. We make the expression easier to read by building up a
 sequence of named regular expressions, rather than creating one big and
 impenetrable expression:
 
-```ocaml skip
+```ocaml file=examples/parsing/lexer.mll,part=numbers
 let digit = ['0'-'9']
 let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
@@ -485,7 +485,7 @@ let float = digit* frac? exp?
 
 Finally, we define whitespace, newlines, and identifiers:
 
-```ocaml skip
+```ocaml file=examples/parsing/lexer.mll,part=whitespaces
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
@@ -503,7 +503,7 @@ quite complicated, using side effects and invoking other rules as part of the
 body of the rule. Let's look at the `read` rule for parsing a JSON
 expression: [lexers/rules for]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/lexer.mll,part=rule
 rule read =
   parse
   | white    { read lexbuf }
@@ -574,7 +574,7 @@ multiple lexers in the same file, and the definitions can be recursive. In
 this case, we use recursion to match string literals using the following rule
 definition: [recursion/in lexers]{.idx}[lexers/recursive rules]{.idx}
 
-```ocaml skip
+```ocaml file=examples/parsing/lexer.mll,part=rec-rule
 and read_string buf =
   parse
   | '"'       { STRING (Buffer.contents buf) }
@@ -605,24 +605,24 @@ recursive call to the lexer.
 
 That covers the lexer. Next, we need to combine the lexer with the parser to
 bring it all together. [lexers/Unicode parsing]{.idx}[Uutf Unicode
-codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[Ulex lexer
+codec]{.idx}[OCaml toolchain/ocamllex]{.idx}[sedlex lexer
 generator]{.idx}[Camomile unicode parser]{.idx}[Unicode, parsing solutions
 for]{.idx}
 
 ::: {data-type=note}
-#### Handling Unicode
+##### Handling Unicode
 
 We've glossed over an important detail here: parsing Unicode characters to
 handle the full spectrum of the world's writing systems. OCaml has several
 third-party solutions to handling Unicode, with varying degrees of
 flexibility and complexity:
 
-- [Camomile](http://camomile.sourceforge.net) supports the full spectrum of
+- [Camomile](https://github.com/yoriyuki/Camomile) supports the full spectrum of
   Unicode character types, conversion from around 200 encodings, and
   collation and locale-sensitive case mappings.
 
-- [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode that can
-  serve as a Unicode-aware replacement for `ocamllex`.
+- [sedlex](https://github.com/ocaml-community/sedlex) is a lexer generator for
+  Unicode that can serve as a Unicode-aware replacement for `ocamllex`.
 
 - [Uutf](http://erratique.ch/software/uutf) is a nonblocking streaming
   Unicode codec for OCaml, available as a standalone library. It is
@@ -713,7 +713,7 @@ let () =
 
 Here's a test input file we can use to test the code we just wrote:
 
-```
+``` file=examples/parsing-test/test1.json
 true
 false
 null

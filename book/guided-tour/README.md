@@ -14,7 +14,7 @@ assume you're using `utop`, but the ordinary toplevel should mostly work
 fine.
 
 ::: {data-type=note}
-## `Base`, `Core` and `Core_kernel`
+##### `Base`, `Core` and `Core_kernel`
 
 `Base` is one of a family of three standard library replacements, each with
 different use-cases, each building on the last. Here's a quick summary.
@@ -28,9 +28,11 @@ different use-cases, each building on the last. Here's a quick summary.
   install. It's also portable, running on every platform that OCaml does,
   including Windows and JavaScript.
 
-- *`Core_kernel`* extends `Base` with many new data structures, like heaps, types to represent times and time-zones, support for efficient binary serializers, and other capabilities. It's still portable, but has many
-  more dependencies, takes longer to build, and will add more to the size of
-  your executables.
+- *`Core_kernel`* extends `Base` with many new data structures, like
+  heaps, types to represent times and time-zones, support for
+  efficient binary serializers, and other capabilities. It's still
+  portable, but has many more dependencies, takes longer to build, and
+  will add more to the size of your executables.
 
 - *`Core`* is the most full-featured, extending `Core_kernel` with support
   for a variety of UNIX APIs, but only works on UNIX-like OSs, including
@@ -101,7 +103,7 @@ language, but a few things jump right out at you:
   be a bit of a nuisance, but it has its benefits, since it prevents some
   kinds of bugs that arise in other languages due to unexpected differences
   between the behavior of `int` and `float`. For example, in many languages,
-  `1 / 3` is zero, but `1 / 3.0` is a third. OCaml requires you to be
+  `1 / 3` is zero, but `1.0 /. 3.0` is a third. OCaml requires you to be
   explicit about which operation you're using.
 
 We can also create a variable to name the value of a given expression, using
@@ -136,13 +138,13 @@ The following examples, however, are not legal:
 
 ```ocaml env=main
 # let Seven = 3 + 4
-Characters 4-9:
+Line 1, characters 5-10:
 Error: Unbound constructor Seven
 # let 7x = 7
-Characters 4-6:
+Line 1, characters 5-7:
 Error: Unknown modifier 'x' for literal 7x
 # let x-plus-y = x + y
-Characters 6-10:
+Line 1, characters 7-11:
 Error: Syntax error
 ```
 
@@ -374,7 +376,7 @@ two different concrete types for `'a` in the same use of `first_if_true`:
 
 ```ocaml env=main
 # first_if_true big_number "short" "loooooong"
-Characters 25-32:
+Line 1, characters 26-33:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -384,7 +386,7 @@ whereas `"short"` and `"loooooong"` require that `'a` be instantiated as
 `string`, and they can't both be right at the same time.
 
 ::: {data-type=note}
-#### Type Errors Versus Exceptions
+##### Type Errors Versus Exceptions
 
 There's a big difference in OCaml between errors that are caught at compile
 time and those that are caught at runtime. It's better to catch errors as early
@@ -399,7 +401,7 @@ errors like this one:
 ```ocaml env=main
 # let add_potato x =
   x + "potato"
-Characters 25-33:
+Line 2, characters 7-15:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -416,7 +418,7 @@ val is_a_multiple : int -> int -> bool = <fun>
 - : bool = true
 # is_a_multiple 8 0
 Exception:
-Invalid_argument "8 % 0 in core_int.ml: modulus should be positive".
+(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
 ```
 
 The distinction here is that type errors will stop you whether or not the
@@ -505,7 +507,7 @@ tuples:
 
 ```ocaml env=main
 # let numbers = [3;"four";5]
-Characters 17-23:
+Line 1, characters 18-24:
 Error: This expression has type string but an expression was expected of type
          int
 ```
@@ -632,7 +634,7 @@ matching]{.idx}
 ```ocaml env=main
 # let my_favorite_language (my_favorite :: the_rest) =
     my_favorite
-Characters 25-68:
+Lines 1-2, characters 26-16:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 []
@@ -657,7 +659,7 @@ on empty ones:
 # my_favorite_language ["English";"Spanish";"French"]
 - : string = "English"
 # my_favorite_language []
-Exception: Match_failure ("//toplevel//", 1, 26).
+Exception: "Match_failure //toplevel//:1:26"
 ```
 
 You can avoid these warnings, and more importantly make sure that your code
@@ -730,7 +732,7 @@ Logically, you can think of the evaluation of a simple recursive function
 like `sum` almost as if it were a mathematical equation whose meaning you
 were unfolding step by step:
 
-```ocaml file=examples/recursion.ml
+```ocaml skip
 sum [1;2;3]
 = 1 + sum [2;3]
 = 1 + (2 + sum [3])
@@ -754,7 +756,7 @@ for removing sequential duplicates:
     | first :: second :: tl ->
       let new_tl = remove_sequential_duplicates (second :: tl) in
       if first = second then new_tl else first :: new_tl
-Characters 48-232:
+Lines 2-6, characters 5-57:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a case that is not matched:
 _::[]
@@ -794,7 +796,7 @@ to iterate in a new way.
 
 
 ::: {data-type=note}
-#### Nesting lets with let and in
+##### Nesting lets with let and in
 
 `new_tl` in the above examples was our first use of `let` to define a
 new variable within the body of a function. A `let` paired with an
@@ -803,25 +805,25 @@ including a function body. The `in` marks the beginning of the scope
 within which the new variable can be used. Thus, we could write:[let
 syntax/nested let binding]{.idx}
 
-```ocaml env=local_let
-# let x = 7 in
-  x + x
+```ocaml env=main
+# let z = 7 in
+  z + z
 - : int = 14
 ```
 
 Note that the scope of the `let` binding is terminated by the
-double-semicolon, so the value of `x` is no longer available:
+double-semicolon, so the value of `z` is no longer available:
 
-```ocaml env=local_let
-# x
-Characters 0-1:
-Error: Unbound value x
+```ocaml env=main
+# z
+Line 1, characters 1-2:
+Error: Unbound value z
 ```
 
 We can also have multiple `let` statements in a row, each one adding a new
 variable binding to what came before:
 
-```ocaml env=local_let
+```ocaml env=main
 # let x = 7 in
   let y = x * x in
   x + y
@@ -868,7 +870,7 @@ to split on.
       base ^ "." ^ String.lowercase ext
 val downcase_extension : string -> string = <fun>
 # List.map ~f:downcase_extension
-    [ "Hello_World.TXT"; "Hello_World.TXT"; "Hello_World" ]
+    [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ]
 - : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
 ```
 
@@ -1023,7 +1025,7 @@ case, we're using `List.exists` to check if there is a scene element within
 which our point resides.
 
 ::: {data-type=note}
-### `Base` and polymorphic comparison
+##### `Base` and polymorphic comparison
 
 One other thing to notice was the fact that we opened `Float.O` in the
 definition of `is_inside_scene_element`. That allowed us to use the simple,
@@ -1265,7 +1267,7 @@ From a syntactic perspective, you should note the keywords that distinguish a
 
 Here's an example run of this code:
 
-```ocaml env=main
+```ocaml env=main,non-deterministic
 # let ar = Array.init 20 ~f:(fun i -> i)
 val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
@@ -1273,7 +1275,7 @@ val ar : int array =
 - : unit = ()
 # ar
 - : int array =
-[|5; 4; 13; 17; 16; 19; 1; 6; 10; 14; 15; 7; 18; 2; 9; 11; 12; 0; 3; 8|]
+[|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
 ```
 
 OCaml also supports `while` loops, as shown in the following function for
@@ -1314,7 +1316,7 @@ error by rewriting the function to avoid the short-circuiting:
     if !pos = Array.length array then None else Some !pos
 val find_first_negative_entry : int array -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|]
-Exception: Invalid_argument "index out of bounds".
+Exception: (Invalid_argument "index out of bounds")
 ```
 
 The or operator, `||`, short-circuits in a similar way to `&&`.
@@ -1331,7 +1333,7 @@ Here's the code, which you can save in a file called
 <em class="filename">sum.ml</em>. Note that we don't terminate expressions
 with `;;` here, since it's not required outside the toplevel.
 
-```ocaml file=examples/sum/sum.ml
+```ocaml file=examples/correct/sum/sum.ml
 open Base
 open Stdio
 
@@ -1367,7 +1369,7 @@ We'll compile our program using `dune`, a build system that's designed
 for use with OCaml projects. First, we need to write a *dune* file to
 specify the build.
 
-```scheme
+```scheme file=examples/correct/sum/dune
 (executable
  (name      sum)
  (libraries base stdio))
@@ -1379,7 +1381,7 @@ depend on.
 
 We can now invoke dune to build the executable.
 
-```sh dir=examples/sum
+```sh dir=examples/correct/sum
 $ dune build sum.exe
 ```
 

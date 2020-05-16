@@ -1,0 +1,31 @@
+(rule
+ (with-stdout-to
+  dune.1
+  (run %{bin:dune} --help=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files dune.1))
+
+(rule
+ (with-stdout-to
+  dune-config.5
+  (run %{bin:dune} help config --man-format=groff)))
+
+(install
+ (section man)
+ (package dune)
+ (files dune-config.5))
+
+(include dune.inc)
+
+(rule
+ (alias runtest)
+ (mode promote)
+ (deps
+  (package dune))
+ (action
+  (with-stdout-to
+   dune.inc
+   (run bash %{dep:update-jbuild.sh}))))

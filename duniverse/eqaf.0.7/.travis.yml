@@ -1,0 +1,20 @@
+dist: trusty
+language: c
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get -y install nasm
+install:
+  - wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  global:
+    - PINS="eqaf:."
+  matrix:
+    - PACKAGE="eqaf" OCAML_VERSION=4.05 TESTS=true
+    - PACKAGE="eqaf" OCAML_VERSION=4.06 TESTS=true
+    - PACKAGE="eqaf" OCAML_VERSION=4.07 TESTS=true
+    - PACKAGE="eqaf" OCAML_VERSION=4.07 TESTS=false EXTRA_DEPS="cstruct"
+    - PACKAGE="eqaf" OCAML_VERSION=4.07 TESTS=false EXTRA_DEPS="base-bigarray"
+    - PACKAGE="eqaf" OCAML_VERSION=4.08 TESTS=true
+    - PACKAGE="eqaf" OCAML_VERSION=4.09 TESTS=true
+    - PACKAGE="eqaf" OCAML_VERSION=4.10 TESTS=true

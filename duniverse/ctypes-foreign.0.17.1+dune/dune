@@ -1,0 +1,12 @@
+(env
+ (dev
+  (flags
+   (:standard -principal))))
+
+(deprecated_library_name
+ (old_public_name "ctypes.foreign")
+ (new_public_name "ctypes-foreign"))
+
+(deprecated_library_name
+ (old_public_name "ctypes.foreign.base")
+ (new_public_name "ctypes-foreign.base"))

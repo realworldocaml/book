@@ -1,0 +1,5 @@
+(test
+ (name test_macros)
+ (package ctypes-foreign)
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_macros_stubs test_macros_bindings tests_common))

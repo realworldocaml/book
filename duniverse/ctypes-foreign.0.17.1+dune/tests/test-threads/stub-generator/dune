@@ -1,0 +1,23 @@
+(executable
+ (name driver)
+ (modules driver)
+ (libraries ctypes test_threads_stubs tests_common))
+
+(rule
+ (targets generated_stubs.c)
+ (action
+  (run %{exe:driver.exe} --c-file %{targets})))
+
+(rule
+ (targets generated_bindings.ml)
+ (action
+  (run %{exe:driver.exe} --ml-file %{targets})))
+
+(library
+ (name test_threads_bindings)
+ (wrapped false)
+ (foreign_stubs
+  (language c)
+  (names generated_stubs))
+ (modules generated_bindings)
+ (libraries ctypes test_functions))

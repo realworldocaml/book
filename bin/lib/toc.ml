@@ -58,7 +58,7 @@ let html_to_title html =
 
 (* Convert section title to a valid HTML ID. *)
 let title_to_id s =
-  String.filter s ~f:(fun c -> Char.is_alphanum c || c = ' ')
+  String.filter s ~f:(fun c -> Char.is_alphanum c || Char.(c = ' '))
   |> String.map ~f:(function ' ' -> '-' | c -> c)
 
 let split_into_sections ~filename items =
@@ -175,7 +175,7 @@ let of_chapters (chapters : chapter list) : part list =
     | p::rest ->
       let prev_part = p.info in
       let curr_part = x.part_info in
-      if prev_part = curr_part then
+      if Poly.(prev_part = curr_part) then
         {p with chapters = x::p.chapters}::rest
       else
           {info = curr_part; chapters = [x]}::p::rest
@@ -209,7 +209,7 @@ let find ~name (t:t) =
   let rec aux = function
     | []   -> None
     | h::t ->
-      match List.find h.chapters ~f:(fun c -> c.name = name) with
+      match List.find h.chapters ~f:(fun c -> String.(c.name = name)) with
       | Some _ as x -> x
       | None -> aux t
   in

@@ -1,0 +1,18 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docker.sh
+script: bash -ex .travis-docker.sh
+sudo: false
+services:
+  - docker
+env:
+  global:
+    - PINS="tls.dev:. tls-mirage.dev:."
+    - DISTRO=alpine
+    - TESTS=true
+  matrix:
+    - OCAML_VERSION=4.07 PACKAGE="tls"
+    - OCAML_VERSION=4.08 PACKAGE="tls-mirage"
+    - OCAML_VERSION=4.09 PACKAGE="tls"
+    - OCAML_VERSION=4.10 PACKAGE="tls-mirage"
+notifications:
+  email: false

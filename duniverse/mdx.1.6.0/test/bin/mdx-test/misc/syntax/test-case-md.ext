@@ -1,0 +1,6 @@
+The syntax of this file is `markdown`, it can't be inferred by its file extension, so `--syntax=markdown` is required.
+
+```ocaml
+# let x = 1 + 1;;
+val x : int = 2
+```

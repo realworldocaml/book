@@ -1,0 +1,14 @@
+(* File untypable.atd *)
+
+type json <ocaml module="Yojson.Safe"> = abstract
+  (* uses type Yojson.Safe.t,
+     with the functions Yojson.Safe.write_json
+     and Yojson.Safe.read_json *)
+
+type obj_list = obj list
+
+type obj = {
+  ?label: string option;
+  ?labels: string list option;
+  value: json
+}

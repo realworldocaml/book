@@ -1,0 +1,1910 @@
+start parse
+total pcap file length 216805
+pcap_header (len 24)
+magic_number a1b2c3d4 (bigendian)
+version 2 4
+timezone shift 0
+timestamp accuracy 0
+snaplen 65535
+lltype 1
+
+** 1286832922.783199  bytes 54 (of 54)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 248 proto 6
+tcpv4 port 5223->49559 seq 407703533 ack 3892329100 win 1024 off 0 flags ? opt 0 fin false syn false payload_len=0
+
+** 1286832922.872360  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 48 proto 6
+tcpv4 port 5223->49559 seq 407703534 ack 3892329101 win 78 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832922.880940  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49559->5223 seq 3892329101 ack 407703534 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832935.715078  bytes 76 (of 76)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832936.642015  bytes 284 (of 284)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832936.698700  bytes 76 (of 76)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832936.699259  bytes 284 (of 284)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832936.711027  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473116531 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832936.761514  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281406477 ack 2473116532 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832936.765220  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473116532 ack 281406478 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832936.781155  bytes 447 (of 447)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473116532 ack 281406478 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=381
+
+** 1286832936.828485  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281406478 ack 2473116913 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832936.830532  bytes 628 (of 628)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281406478 ack 2473116913 win 14 off 0 flags ? opt 12 fin false syn false payload_len=562
+
+** 1286832936.830713  bytes 86 (of 86)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281407040 ack 2473116913 win 14 off 0 flags ? opt 12 fin false syn false payload_len=20
+
+** 1286832936.838365  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473116913 ack 281407040 win 32835 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832936.838667  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473116913 ack 281407060 win 32830 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832936.910983  bytes 461 (of 461)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473116913 ack 281407060 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=395
+
+** 1286832936.960946  bytes 593 (of 593)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281407060 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=527
+
+** 1286832936.962011  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281407587 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832936.963024  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281408961 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832936.963843  bytes 1414 (of 1414)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281410335 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1348
+
+** 1286832936.986201  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281407587 win 32844 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.4584  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281410335 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.4597  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281411683 win 32295 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.34216  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281411683 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.52055  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281413057 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.52282  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281413057 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.52338  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281414431 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.58966  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281414431 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.58989  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281415805 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.64450  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281415805 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.65358  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281417179 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.66140  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281418553 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.74607  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281419927 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.108899  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281419927 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.110917  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281421301 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.111208  bytes 452 (of 452)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281422675 ack 2473117308 win 16 off 0 flags ? opt 12 fin false syn false payload_len=386
+
+** 1286832937.121830  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281423061 win 32192 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.250897  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832937.251331  bytes 537 (of 537)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117308 ack 281423061 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=471
+
+** 1286832937.251353  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154388409 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.272222  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593356 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.272247  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359297700 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.303118  bytes 567 (of 567)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281423061 ack 2473117779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=501
+
+** 1286832937.304256  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281423562 ack 2473117779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.305125  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281424936 ack 2473117779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.305951  bytes 1414 (of 1414)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281426310 ack 2473117779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1348
+
+** 1286832937.314094  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281427658 ack 2473117779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.314742  bytes 1221 (of 1221)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281429032 ack 2473117779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1155
+
+** 1286832937.314873  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141914146 ack 3154388410 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.320774  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117779 ack 281423562 win 32850 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.320801  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117779 ack 281427658 win 32295 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.321902  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117779 ack 281429032 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.323504  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49565 seq 1946509275 ack 2359297701 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.324295  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49564 seq 1940372050 ack 121593357 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.325276  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117779 ack 281430187 win 32687 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.325294  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154388410 ack 4141914147 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.342020  bytes 280 (of 280)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832937.351138  bytes 536 (of 536)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154388410 ack 4141914147 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=470
+
+** 1286832937.351157  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359297701 ack 1946509276 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.351168  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593357 ack 1940372051 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.351182  bytes 539 (of 539)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593357 ack 1940372051 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=473
+
+** 1286832937.351195  bytes 537 (of 537)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359297701 ack 1946509276 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=471
+
+** 1286832937.355242  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104123 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.355268  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68329577 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.355877  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154158 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.358722  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982122739 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832937.373028  bytes 477 (of 477)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473117779 ack 281430187 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=411
+
+** 1286832937.419351  bytes 567 (of 567)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141914147 ack 3154388880 win 14 off 0 flags ? opt 12 fin false syn false payload_len=501
+
+** 1286832937.419952  bytes 1024 (of 1024)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141914648 ack 3154388880 win 14 off 0 flags ? opt 12 fin false syn false payload_len=958
+
+** 1286832937.420097  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49564 seq 1940372051 ack 121593830 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.420604  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49565 seq 1946509276 ack 2359298172 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.420769  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301142176 ack 4274104124 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.421381  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305922067 ack 68329578 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.421518  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294207838 ack 3610154159 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.421629  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303560391 ack 3982122740 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832937.422081  bytes 567 (of 567)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49565 seq 1946509276 ack 2359298172 win 14 off 0 flags ? opt 12 fin false syn false payload_len=501
+
+** 1286832937.422362  bytes 566 (of 566)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49564 seq 1940372051 ack 121593830 win 14 off 0 flags ? opt 12 fin false syn false payload_len=500
+
+** 1286832937.424113  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154388880 ack 4141914648 win 32850 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.424447  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154388880 ack 4141915606 win 32611 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.424467  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104124 ack 3301142177 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.424749  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68329578 ack 3305922068 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.426056  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154159 ack 3294207839 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.426228  bytes 1188 (of 1188)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49565 seq 1946509777 ack 2359298172 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1122
+
+** 1286832937.426263  bytes 242 (of 242)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49564 seq 1940372551 ack 121593830 win 14 off 0 flags ? opt 12 fin false syn false payload_len=176
+
+** 1286832937.427246  bytes 566 (of 566)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281430187 ack 2473118190 win 20 off 0 flags ? opt 12 fin false syn false payload_len=500
+
+** 1286832937.429040  bytes 158 (of 158)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281430687 ack 2473118190 win 20 off 0 flags ? opt 12 fin false syn false payload_len=92
+
+** 1286832937.429812  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982122740 ack 3303560392 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.429828  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359298172 ack 1946509777 win 32850 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.429835  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593830 ack 1940372551 win 32851 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.429845  bytes 483 (of 483)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104124 ack 3301142177 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=417
+
+** 1286832937.430691  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359298172 ack 1946510899 win 32570 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.432845  bytes 458 (of 458)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154159 ack 3294207839 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=392
+
+** 1286832937.432865  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593830 ack 1940372727 win 32807 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.438337  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118190 ack 281430687 win 32851 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.438358  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118190 ack 281430779 win 32828 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.438369  bytes 460 (of 460)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982122740 ack 3303560392 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=394
+
+** 1286832937.438382  bytes 463 (of 463)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68329578 ack 3305922068 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=397
+
+** 1286832937.471021  bytes 443 (of 443)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118190 ack 281430779 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=377
+
+** 1286832937.474266  bytes 466 (of 466)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154388880 ack 4141915606 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=400
+
+** 1286832937.477782  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301142177 ack 4274104541 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.478717  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301142177 ack 4274104541 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.479592  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301143551 ack 4274104541 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.480506  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301144925 ack 4274104541 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.482224  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294207839 ack 3610154551 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.484721  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104541 ack 3301144925 win 32289 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.484955  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294207839 ack 3610154551 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.485658  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294209213 ack 3610154551 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.486421  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294210587 ack 3610154551 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.487788  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104541 ack 3301146299 win 32969 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.489908  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303560392 ack 3982123134 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.490863  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303560392 ack 3982123134 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.491455  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303561766 ack 3982123134 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.492218  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303563140 ack 3982123134 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.492318  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305922068 ack 68329975 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.493166  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305922068 ack 68329975 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.493847  bytes 694 (of 694)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305923442 ack 68329975 win 14 off 0 flags ? opt 12 fin false syn false payload_len=628
+
+** 1286832937.494606  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154551 ack 3294210587 win 32289 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.494632  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154551 ack 3294211961 win 32969 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.498073  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123134 ack 3303563140 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.500765  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123134 ack 3303564514 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.500788  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68329975 ack 3305924070 win 32819 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.521143  bytes 568 (of 568)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281430779 ack 2473118567 win 22 off 0 flags ? opt 12 fin false syn false payload_len=502
+
+** 1286832937.521809  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281431281 ack 2473118567 win 22 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.521960  bytes 356 (of 356)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281432655 ack 2473118567 win 22 off 0 flags ? opt 12 fin false syn false payload_len=290
+
+** 1286832937.522487  bytes 574 (of 574)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141915606 ack 3154389280 win 16 off 0 flags ? opt 12 fin false syn false payload_len=508
+
+** 1286832937.523218  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141916114 ack 3154389280 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.524134  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141917488 ack 3154389280 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.524854  bytes 1414 (of 1414)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141918862 ack 3154389280 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1348
+
+** 1286832937.525398  bytes 1351 (of 1351)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141920210 ack 3154389280 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1285
+
+** 1286832937.531349  bytes 496 (of 496)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68329975 ack 3305924070 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=430
+
+** 1286832937.532367  bytes 232 (of 232)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301146299 ack 4274104541 win 14 off 0 flags ? opt 12 fin false syn false payload_len=166
+
+** 1286832937.534433  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118567 ack 281431281 win 32850 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.534453  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118567 ack 281432945 win 32560 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.534464  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154389280 ack 4141916114 win 32849 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.534477  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154389280 ack 4141918862 win 32162 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.535877  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154389280 ack 4141920210 win 31825 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.536504  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154389280 ack 4141921495 win 31503 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.543640  bytes 771 (of 771)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294211961 ack 3610154551 win 14 off 0 flags ? opt 12 fin false syn false payload_len=705
+
+** 1286832937.546057  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303564514 ack 3982123134 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.546102  bytes 172 (of 172)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303565888 ack 3982123134 win 14 off 0 flags ? opt 12 fin false syn false payload_len=106
+
+** 1286832937.547904  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104541 ack 3301146465 win 32934 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.553908  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154551 ack 3294212666 win 32799 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.555336  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123134 ack 3303565888 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.555361  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123134 ack 3303565994 win 32606 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.582368  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305924070 ack 68330405 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.582970  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305925444 ack 68330405 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.583438  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305926818 ack 68330405 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.583960  bytes 1286 (of 1286)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305928192 ack 68330405 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1220
+
+** 1286832937.595347  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330405 ack 3305928192 win 32289 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.595372  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330405 ack 3305929412 win 31984 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.643263  bytes 444 (of 444)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123134 ack 3303565994 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=378
+
+** 1286832937.680481  bytes 446 (of 446)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154551 ack 3294212666 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=380
+
+** 1286832937.680516  bytes 440 (of 440)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330405 ack 3305929412 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=374
+
+** 1286832937.691601  bytes 445 (of 445)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104541 ack 3301146465 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=379
+
+** 1286832937.691773  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303565994 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.692190  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303567368 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.692861  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303568742 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.693505  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303570116 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.695697  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303571490 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.695966  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303572864 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.705602  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123512 ack 3303570116 win 32289 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.706386  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123512 ack 3303574238 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.744433  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301146465 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.744670  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301147839 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.745224  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301149213 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.745699  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301150587 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.746495  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301151961 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.753936  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303574238 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.755184  bytes 873 (of 873)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303575612 ack 3982123512 win 16 off 0 flags ? opt 12 fin false syn false payload_len=807
+
+** 1286832937.775899  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104920 ack 3301149213 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.775922  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104920 ack 3301150587 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.775932  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123512 ack 3303576419 win 32430 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.775947  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104920 ack 3301153335 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.819401  bytes 461 (of 461)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123512 ack 3303576419 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=395
+
+** 1286832937.828018  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301153335 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.828104  bytes 664 (of 664)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301154709 ack 4274104920 win 16 off 0 flags ? opt 12 fin false syn false payload_len=598
+
+** 1286832937.834861  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104920 ack 3301155307 win 32826 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.843133  bytes 475 (of 475)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274104920 ack 3301155307 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=409
+
+** 1286832937.872177  bytes 1209 (of 1209)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303576419 ack 3982123907 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1143
+
+** 1286832937.877410  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123907 ack 3303577562 win 32690 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.889917  bytes 478 (of 478)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982123907 ack 3303577562 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=412
+
+** 1286832937.893996  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301155307 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.894310  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301156681 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.894708  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301158055 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.895263  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301159429 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.895697  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301160803 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.896145  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301162177 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.896556  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301163551 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.897117  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301164925 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.900102  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301163551 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.903863  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301166299 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.939441  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303577562 ack 3982124319 win 20 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.939804  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303578936 ack 3982124319 win 20 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.940635  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303580310 ack 3982124319 win 20 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.941048  bytes 88 (of 88)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303581684 ack 3982124319 win 20 off 0 flags ? opt 12 fin false syn false payload_len=22
+
+** 1286832937.948137  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982124319 ack 3303581706 win 32283 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.951845  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301166299 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.952452  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301167673 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.952707  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301169047 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.953136  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301170421 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.953573  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301171795 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.954041  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301173169 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.954505  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301174543 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832937.954653  bytes 741 (of 741)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301175917 ack 4274105329 win 18 off 0 flags ? opt 12 fin false syn false payload_len=675
+
+** 1286832937.963872  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301169047 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.968004  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301174543 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832937.968028  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301176592 win 32463 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.588325  bytes 446 (of 446)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154551 ack 3294212666 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=380
+
+** 1286832938.591042  bytes 440 (of 440)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330405 ack 3305929412 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=374
+
+** 1286832938.646255  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294212666 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.646877  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294214040 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.647490  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294215414 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.647824  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294216788 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.648277  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294218162 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.648783  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305929412 ack 68330779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.649053  bytes 1007 (of 1007)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305930786 ack 68330779 win 18 off 0 flags ? opt 12 fin false syn false payload_len=941
+
+** 1286832938.667928  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294216788 win 32289 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.667952  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294219536 win 31602 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.667966  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330779 ack 3305931727 win 32740 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.717166  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294219536 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.718093  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294220910 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.718364  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294222284 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.719271  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294223658 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.719788  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294225032 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.725628  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294220910 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.730880  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294222284 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.734575  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294226406 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.775591  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294226406 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.775861  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294227780 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.792169  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294229154 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.801214  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294229154 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.801423  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294230528 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.802399  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294231902 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.803977  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294233276 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.805685  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294234650 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.805787  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294236024 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.807848  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294233276 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.823479  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294234650 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.823505  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294236024 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.851488  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294237398 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.851672  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294238772 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832938.851998  bytes 1072 (of 1072)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294240146 ack 3610154931 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1006
+
+** 1286832938.856825  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294238772 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832938.885119  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294241152 win 32381 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.195429  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832939.234708  bytes 258 (of 258)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832939.238542  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412471214 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832939.286436  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433907771 ack 3412471215 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832939.294541  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412471215 ack 433907772 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.294564  bytes 528 (of 528)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412471215 ack 433907772 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=462
+
+** 1286832939.343021  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433907772 ack 3412471677 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.353384  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433907772 ack 3412471677 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.363577  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433909146 ack 3412471677 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.363759  bytes 1086 (of 1086)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433910520 ack 3412471677 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1020
+
+** 1286832939.369058  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412471677 ack 433910520 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.371453  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412471677 ack 433911540 win 32721 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.422353  bytes 466 (of 466)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412471677 ack 433911540 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=400
+
+** 1286832939.435185  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858411810 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832939.440619  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49572->80 seq 3206722304 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832939.477373  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433911540 ack 3412472077 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.477475  bytes 733 (of 733)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433912914 ack 3412472077 win 16 off 0 flags ? opt 12 fin false syn false payload_len=667
+
+** 1286832939.484629  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315898002 ack 3858411811 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832939.489285  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412472077 ack 433913581 win 32465 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.491100  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49572 seq 2311921825 ack 3206722305 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832939.499897  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858411811 ack 2315898003 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.502531  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49572->80 seq 3206722305 ack 2311921826 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.525360  bytes 455 (of 455)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49572->80 seq 3206722305 ack 2311921826 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=389
+
+** 1286832939.533722  bytes 450 (of 450)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858411811 ack 2315898003 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=384
+
+** 1286832939.572750  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49572 seq 2311921826 ack 3206722694 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.574185  bytes 1412 (of 1412)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49572 seq 2311921826 ack 3206722694 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1346
+
+** 1286832939.576627  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49572->80 seq 3206722694 ack 2311923172 win 32639 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.584953  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315898003 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.589439  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315898003 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.589788  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315899377 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.590180  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315900751 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.604059  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315900751 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.605641  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315902125 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.653454  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315902125 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.653760  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315903499 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.661055  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315904873 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.663853  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315903499 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.663879  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315904873 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.664474  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315906247 win 32632 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.671673  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315906247 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.672112  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315907621 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.675601  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315907621 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.690514  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315908995 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.713679  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315908995 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.715091  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315910369 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.718717  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315911743 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.719313  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315913117 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832939.720206  bytes 692 (of 692)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315914491 ack 3858412195 win 14 off 0 flags ? opt 12 fin false syn false payload_len=626
+
+** 1286832939.732275  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315911743 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.732295  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315915117 win 32132 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832939.878127  bytes 79 (of 79)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832939.896615  bytes 233 (of 233)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832939.896619  bytes 75 (of 75)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832939.926021  bytes 83 (of 83)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832939.926048  bytes 87 (of 87)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832939.927615  bytes 283 (of 283)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832939.943429  bytes 237 (of 237)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832939.946839  bytes 295 (of 295)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832940.97714  bytes 441 (of 441)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412472077 ack 433913581 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=375
+
+** 1286832940.103897  bytes 441 (of 441)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412195 ack 2315915117 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=375
+
+** 1286832940.107978  bytes 80 (of 80)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 255 proto 17
+unknown ip proto 17
+
+** 1286832940.145593  bytes 736 (of 736)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433913581 ack 3412472452 win 18 off 0 flags ? opt 12 fin false syn false payload_len=670
+
+** 1286832940.145955  bytes 261 (of 261)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 64 proto 17
+unknown ip proto 17
+
+** 1286832940.152568  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315915117 ack 3858412570 win 16 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832940.153448  bytes 724 (of 724)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315916491 ack 3858412570 win 16 off 0 flags ? opt 12 fin false syn false payload_len=658
+
+** 1286832940.154576  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412472452 ack 433914251 win 32808 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.157536  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275824751 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832940.163092  bytes 78 (of 78)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954377863 ack 0 win 65535 off 0 flags ? opt 24 fin false syn true payload_len=0
+
+** 1286832940.163118  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412570 ack 2315917149 win 32468 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.205766  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206152091 ack 3275824752 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832940.212382  bytes 74 (of 74)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207479458 ack 2954377864 win 5792 off 0 flags ? opt 20 fin false syn true payload_len=0
+
+** 1286832940.216499  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275824752 ack 2206152092 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.219985  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954377864 ack 2207479459 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.220004  bytes 528 (of 528)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275824752 ack 2206152092 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=462
+
+** 1286832940.225430  bytes 486 (of 486)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954377864 ack 2207479459 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=420
+
+** 1286832940.274142  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206152092 ack 3275825214 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.274371  bytes 507 (of 507)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206152092 ack 3275825214 win 14 off 0 flags ? opt 12 fin false syn false payload_len=441
+
+** 1286832940.274897  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206152533 ack 3275825214 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832940.284690  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206153907 ack 3275825214 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832940.284845  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207479459 ack 2954378284 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.285234  bytes 507 (of 507)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207479459 ack 2954378284 win 14 off 0 flags ? opt 12 fin false syn false payload_len=441
+
+** 1286832940.285804  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207479900 ack 2954378284 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832940.286282  bytes 1440 (of 1440)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207481274 ack 2954378284 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1374
+
+** 1286832940.289799  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275825214 ack 2206152533 win 32865 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.292122  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275825214 ack 2206153907 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.295201  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954378284 ack 2207479900 win 32865 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.295651  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954378284 ack 2207482648 win 32178 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.338125  bytes 1389 (of 1389)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206155281 ack 3275825214 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1323
+
+** 1286832940.341942  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275825214 ack 2206156604 win 32645 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832940.342955  bytes 1386 (of 1386)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207482648 ack 2954378284 win 14 off 0 flags ? opt 12 fin false syn false payload_len=1320
+
+** 1286832940.349082  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954378284 ack 2207483968 win 32646 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832941.574950  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49572 seq 2311923172 ack 3206722694 win 14 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832941.628179  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49572->80 seq 3206722694 ack 2311923173 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832942.149374  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433914251 ack 3412472452 win 18 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832942.239995  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412472452 ack 433914252 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832942.446318  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315917149 ack 3858412570 win 16 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832942.544814  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412570 ack 2315917150 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832942.956461  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301176592 ack 4274105329 win 18 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.10775  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303581706 ack 3982124319 win 20 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.53744  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301176593 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.57857  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982124319 ack 3303581707 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.109349  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275825214 ack 2206156604 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.111287  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954378284 ack 2207483968 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.113826  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49572->80 seq 3206722694 ack 2311923173 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.113859  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49571->80 seq 3858412570 ack 2315917150 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.114508  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49570->80 seq 3412472452 ack 433914252 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.115747  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359298172 ack 1946510899 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.122454  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593830 ack 1940372727 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.122476  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154389280 ack 4141921495 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.122486  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118567 ack 281432945 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.122497  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49566->80 seq 4274105329 ack 3301176593 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.122511  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330779 ack 3305931727 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.126056  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154931 ack 3294241152 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.126073  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49569->80 seq 3982124319 ack 3303581707 win 32976 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.157109  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49573 seq 2206156604 ack 3275825215 win 14 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.158775  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49574 seq 2207483968 ack 2954378285 win 14 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.161916  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49572 seq 2311923173 ack 3206722695 win 14 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.162304  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49573->80 seq 3275825215 ack 2206156605 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.163048  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49571 seq 2315917150 ack 3858412571 win 16 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.163667  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49570 seq 433914252 ack 3412472453 win 18 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.166771  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49574->80 seq 2954378285 ack 2207483969 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.168698  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49565 seq 1946510899 ack 2359298173 win 14 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.172983  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49563 seq 4141921495 ack 3154389281 win 16 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.173772  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49562 seq 281432945 ack 2473118568 win 22 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.175122  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49565->80 seq 2359298173 ack 1946510900 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.175906  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49566 seq 3301176593 ack 4274105330 win 18 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.175949  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49564 seq 1940372727 ack 121593831 win 14 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.176982  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49567 seq 3305931727 ack 68330780 win 18 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.177786  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49568 seq 3294241152 ack 3610154932 win 16 off 0 flags ? opt 12 fin true syn false payload_len=0
+
+** 1286832943.177826  bytes 66 (of 66)
+ether 00:1c:b3:b3:6a:fb -> cc:08:e0:2f:9f:ec etype 800
+ipv4 hlen 20 ttl 50 proto 6
+tcpv4 port 80->49569 seq 3303581707 ack 3982124320 win 20 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.189993  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49563->80 seq 3154389281 ack 4141921496 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.190016  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49562->80 seq 2473118568 ack 281432946 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.190027  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49564->80 seq 121593831 ack 1940372728 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.190038  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49567->80 seq 68330780 ack 3305931728 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+
+** 1286832943.190050  bytes 66 (of 66)
+ether cc:08:e0:2f:9f:ec -> 00:1c:b3:b3:6a:fb etype 800
+ipv4 hlen 20 ttl 64 proto 6
+tcpv4 port 49568->80 seq 3610154932 ack 3294241153 win 32976 off 0 flags ? opt 12 fin false syn false payload_len=0
+num_packets 380

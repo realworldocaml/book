@@ -1,0 +1,18 @@
+(library
+ (name ptime_os)
+ (synopsis "Ptime_clock for native OS")
+ (public_name ptime.clock.os)
+ (libraries ptime)
+ (modules ptime_clock)
+ (c_names ptime_clock_stubs)
+ (flags (:standard -w -6-27))
+ (wrapped false))
+
+(library
+ (name ptime_clock_top)
+ (public_name ptime.clock.top)
+ (libraries compiler-libs.toplevel ptime ptime.top)
+ (modules ptime_clock_top)
+ (flags (:standard -w -6-27))
+ (wrapped false))
+

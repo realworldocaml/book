@@ -75,7 +75,7 @@ equivalent of `In_channel.read_all`. [Deferred.t]{.idx}
 ```
 
 We first load the Async package in the toplevel using `#require`, and then
-open the module. Async, Like Core, is designed to be an extension to your
+open the module. Async, like Core, is designed to be an extension to your
 basic programming environment, and is intended to be opened.
 
 A deferred is essentially a handle to a value that may be computed in the
@@ -172,7 +172,7 @@ a function that counts the number of lines in a file:
     Reader.file_contents filename
     >>= fun text ->
     List.length (String.split text ~on:'\n')
-Characters 85-125:
+Line 4, characters 5-45:
 Error: This expression has type int but an expression was expected of type
          'a Deferred.t
 ```
@@ -236,7 +236,7 @@ deferred to become determined, and shows us the contents of the deferred
 instead.
 
 ::: {data-type=note}
-### Using `Let_syntax` with Async
+##### Using `Let_syntax` with Async
 
 As was discussed in
 [Error Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
@@ -383,7 +383,7 @@ deferreds when you can.<a data-type="indexterm"
 data-startref="ALbas">&nbsp;</a>
 
 ::: {data-type=note}
-#### Understanding `bind` in terms of ivars and `upon`
+##### Understanding `bind` in terms of ivars and `upon`
 
 Here's roughly what happens when you write `let d' = Deferred.bind d ~f`.
 
@@ -471,7 +471,7 @@ unbounded amounts of memory, as it keeps track of all the data it
 intends to write but hasn't been able to yet.
 
 ::: {data-type=note}
-### Tail-calls and chains of deferreds
+##### Tail-calls and chains of deferreds
 
 There's another memory problem you might be concerned about, which is
 the allocation of deferreds.  If you think about the execution of
@@ -614,8 +614,8 @@ function, we'll get a helpful type error:
     let x = 3 in
     if n > 0 then loop_forever ();
     x + n
-Characters 52-67:
-Error: This expression has type never_returns = (unit, int) Type_equal.t
+Line 3, characters 19-34:
+Error: This expression has type never_returns
        but an expression was expected of type unit
        because it is in the result of a conditional with no else branch
 ```
@@ -949,11 +949,8 @@ to wait for all the results. Here's the type of `Deferred.all`:
 
 ```ocaml env=main
 # Deferred.all
-- : 'a Conduit_async.io list -> 'a list Conduit_async.io = <fun>
+- : 'a Deferred.t list -> 'a list Deferred.t = <fun>
 ```
-
-(Somewhat confusingly, the type `Conduit_async.io` is just a type
-alias for `Deferred.t`, introduced by `Conduit_async`.)
 
 The list returned by `Deferred.all` reflects the order of the
 deferreds passed to it. As such, the definitions will be printed out
@@ -980,7 +977,7 @@ can see the type of this function in `utop`:
 
 ```ocaml env=main
 # Deferred.all_unit
-- : unit Conduit_async.io list -> unit Conduit_async.io = <fun>
+- : unit Deferred.t list -> unit Deferred.t = <fun>
 ```
 
 Finally, we create a command-line interface using `Command.async`:
@@ -1054,11 +1051,11 @@ the two behaviors on subsequent calls:
       after (Time.Span.of_sec 0.5)
       >>= fun () ->
       if will_fail then raise Exit else return ()
-val maybe_raise : unit -> unit Conduit_async.io = <fun>
+val maybe_raise : unit -> unit Deferred.t = <fun>
 # maybe_raise ()
 - : unit = ()
 # maybe_raise ()
-Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async")).
+Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
 In `utop`, the exception thrown by `maybe_raise ()` terminates the evaluation
@@ -1075,11 +1072,11 @@ doesn't quite do the trick:
       maybe_raise ()
       >>| fun () -> "success"
     with _ -> return "failure"
-val handle_error : unit -> string Conduit_async.io = <fun>
+val handle_error : unit -> string Deferred.t = <fun>
 # handle_error ()
 - : string = "success"
 # handle_error ()
-Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async")).
+Exception: (monitor.ml.Error Exit ("Caught by monitor block_on_async"))
 ```
 
 This didn't work because `try/with` only captures exceptions that are thrown
@@ -1095,7 +1092,7 @@ provided by Async: [exceptions/asynchronous errors]{.idx}
     >>| function
     | Ok ()   -> "success"
     | Error _ -> "failure"
-val handle_error : unit -> string Conduit_async.io = <fun>
+val handle_error : unit -> string Deferred.t = <fun>
 # handle_error ()
 - : string = "success"
 # handle_error ()
@@ -1134,11 +1131,11 @@ Here's an example:
 # let blow_up () =
     let monitor = Monitor.create ~name:"blow up monitor" () in
     within' ~monitor maybe_raise
-val blow_up : unit -> unit Conduit_async.io = <fun>
+val blow_up : unit -> unit Deferred.t = <fun>
 # blow_up ()
 - : unit = ()
 # blow_up ()
-Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor")).
+Exception: (monitor.ml.Error Exit ("Caught by monitor blow up monitor"))
 ```
 
 In addition to the ordinary stack-trace, the exception displays the trace of
@@ -1163,7 +1160,7 @@ captures and ignores errors in the processes it spawns.
     within' ~monitor (fun () ->
       after (Time.Span.of_sec 0.25)
       >>= fun () -> failwith "Kaboom!")
-val swallow_error : unit -> 'a Conduit_async.io = <fun>
+val swallow_error : unit -> 'a Deferred.t = <fun>
 ```
 
 The deferred returned by this function is never determined, since the
@@ -1205,7 +1202,7 @@ exception Ignore_me
     within' ~monitor:child_monitor (fun () ->
       after (Time.Span.of_sec 0.25)
       >>= fun () -> raise exn_to_raise)
-val swallow_some_errors : exn -> 'a Conduit_async.io = <fun>
+val swallow_some_errors : exn -> 'a Deferred.t = <fun>
 ```
 
 Note that we use `Monitor.extract_exn` to grab the underlying exception that
@@ -1378,7 +1375,7 @@ library/timeouts and cancellations]{.idx}
 # let string_and_float = Deferred.both
                            (after (sec 0.5)  >>| fun () -> "A")
   (after (sec 0.25) >>| fun () -> 32.33)
-val string_and_float : (string * float) Conduit_async.io = <abstr>
+val string_and_float : (string * float) Deferred.t = <abstr>
 # string_and_float
 - : string * float = ("A", 32.33)
 ```
@@ -1475,9 +1472,9 @@ the type signature of `choice` and `choose`:
 
 ```ocaml env=main
 # choice
-- : 'a Conduit_async.io -> ('a -> 'b) -> 'b Deferred.choice = <fun>
+- : 'a Deferred.t -> ('a -> 'b) -> 'b Deferred.choice = <fun>
 # choose
-- : 'a Deferred.choice list -> 'a Conduit_async.io = <fun>
+- : 'a Deferred.choice list -> 'a Deferred.t = <fun>
 ```
 
 Note that there's no guarantee that the winning deferred will be the one that
@@ -1578,7 +1575,7 @@ doing just this, `In_thread.run` being the simplest. We can simply write:
 
 ```ocaml env=main
 # let def = In_thread.run (fun () -> List.range 1 10)
-val def : int list Conduit_async.io = <abstr>
+val def : int list Deferred.t = <abstr>
 # def
 - : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
 ```
@@ -1608,8 +1605,7 @@ prints out one last timestamp:
     print_time ();
     printf "\n";
     Writer.flushed (force Writer.stdout);
-val log_delays : (unit -> unit Conduit_async.io) -> unit Conduit_async.io =
-  <fun>
+val log_delays : (unit -> unit Deferred.t) -> unit Deferred.t = <fun>
 ```
 
 If we feed this function a simple timeout deferred, it works as you might

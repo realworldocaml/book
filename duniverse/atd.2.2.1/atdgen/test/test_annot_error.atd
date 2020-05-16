@@ -1,0 +1,3 @@
+type pointA <ocaml from="ProtoA"> <ocaml predef from="ProtoB"> <ocaml from="ProtoC" from="ProtoB">= {
+  f: float
+}

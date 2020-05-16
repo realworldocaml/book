@@ -172,14 +172,17 @@ abstract, so that we can no longer recover the fact that the type in question
 is `int`.
 
 ```ocaml env=main
-# let (module Bumpable) = int_bumper in Bumpable.bump 3
-Characters 52-53:
+# let (module Bumper) = int_bumper in
+  Bumper.bump 3
+Line 2, characters 15-16:
 Error: This expression has type int but an expression was expected of type
-         Bumpable.t
+         Bumper.t
 ```
 
-To make `int_bumper` usable, we need to expose the type, which we can do as
-follows:
+To make `int_bumper` usable, we need to expose that the type
+`Bumpable.t` is actually equal to `int`.  Below we'll do that for
+`int_bumper`, and also provide the corresponding definition for
+`float_bumper`.
 
 ```ocaml env=main
 # let int_bumper = (module Int_bumper : Bumpable with type t = int)
@@ -188,31 +191,32 @@ val int_bumper : (module Bumpable with type t = int) = <module>
 val float_bumper : (module Bumpable with type t = float) = <module>
 ```
 
-The sharing constraints we've added above make the resulting first-class
-modules <span class="keep-together">polymorphic</span> in the type `t`. As a
-result, we can now use these first-class modules on values of the matching
-type:
+The sharing constraints we've added above make the resulting
+first-class modules polymorphic in the type `t`. As a result, we can
+now use these first-class modules on values of the matching type:
 
 ```ocaml env=main
-# let (module Bumpable) = int_bumper in Bumpable.bump 3
+# let (module Bumper) = int_bumper in
+  Bumper.bump 3
 - : int = 4
-# let (module Bumpable) = float_bumper in Bumpable.bump 3.5
+# let (module Bumper) = float_bumper in
+  Bumper.bump 3.5
 - : float = 4.5
 ```
 
 We can also write functions that use such first-class modules
-polymorphically. The following function takes two arguments: a `Bumpable`
-module and a list of elements of the same type as the type `t` of the module:
-[polymorphism/in first-class modules]{.idx}[first-class modules/polymorphism
-in]{.idx}
+polymorphically. The following function takes two arguments: a
+`Bumpable` module and a list of elements of the same type as the type
+`t` of the module: [polymorphism/in first-class
+modules]{.idx}[first-class modules/polymorphism in]{.idx}
 
 ```ocaml env=main
 # let bump_list
         (type a)
-        (module B : Bumpable with type t = a)
+        (module Bumper : Bumpable with type t = a)
         (l: a list)
     =
-    List.map ~f:B.bump l
+    List.map ~f:Bumper.bump l
 val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
   <fun>
 ```
@@ -241,7 +245,7 @@ connect the types associated with a first-class module to the types of other
 values you're working with.
 
 ::: {data-type=note}
-### More on Locally Abstract Types
+##### More on Locally Abstract Types
 
 One of the key properties of locally abstract types is that they're dealt
 with as abstract types in the function they're defined within, but are
@@ -262,7 +266,7 @@ concrete type, say, `int`, then the compiler will complain:
 
 ```ocaml env=main
 # let double_int (type a) (x:a) = x + x
-Characters 32-33:
+Line 1, characters 33-34:
 Error: This expression has type a but an expression was expected of type int
 ```
 

@@ -1,0 +1,3 @@
+(library (name field_setting_bench)
+ (preprocess (pps ppx_bench ppx_fields_conv ppx_cold))
+ (libraries fieldslib compiler-libs.common))

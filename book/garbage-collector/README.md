@@ -137,7 +137,7 @@ collections, such as handling pending UNIX signals, and they don't ordinarily
 matter for application code. [minor heaps/setting size of]{.idx}
 
 ::: {data-type=note}
-#### Setting the Size of the Minor Heap
+##### Setting the Size of the Minor Heap
 
 The default minor heap size in OCaml is normally 2 MB on 64-bit platforms,
 but this is increased to 8 MB if you use Core (which generally prefers
@@ -154,7 +154,8 @@ val c : Core_kernel.Gc.control =
   {Core_kernel.Gc.Control.minor_heap_size = 262144;
    major_heap_increment = 15; space_overhead = 80; verbose = 0;
    max_overhead = 500; stack_limit = 1048576; allocation_policy = 0;
-   window_size = 1}
+   window_size = 1; custom_major_ratio = 44; custom_minor_ratio = 100;
+   custom_minor_max_size = 8192}
 # Gc.tune ~minor_heap_size:(262144 * 2) ()
 - : unit = ()
 ```
@@ -224,7 +225,7 @@ MB chunks (or 512 KB on 32-bit architectures). [major heaps/controlling
 growth of]{.idx}
 
 ::: {data-type=note}
-#### Controlling Major Heap Growth
+##### Controlling Major Heap Growth
 
 The `Gc` module uses the `major_heap_increment` value to control the major
 heap growth. This defines the number of words to add to the major heap per
@@ -498,7 +499,7 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring:
 
-```scheme
+```scheme file=examples/barrier_bench/dune
 (executable
   (name      barrier_bench)
   (modules   barrier_bench)
@@ -622,7 +623,7 @@ type t = { foo: bool }
 
 let main () =
   let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = alloced_float > 0.0 in
+  let alloced_bool = Float.is_positive alloced_float in
   let alloced_string = Bytes.create 4 in
   attach_finalizer "immediate int" 1;
   attach_finalizer "immediate float" 1.0;
@@ -644,7 +645,7 @@ let () =
 
 Building and running this should show the following output:
 
-```scheme
+```scheme file=examples/finalizer/dune
 (executable
   (name      finalizer)
   (modules   finalizer)

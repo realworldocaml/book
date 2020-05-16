@@ -1,0 +1,17 @@
+(rule
+  (targets github_org_j.ml github_org_j.mli)
+  (deps    github_org.atd)
+  (mode    fallback)
+  (action  (run atdgen -j %{deps})))
+
+(rule
+  (targets github_org_t.ml github_org_t.mli)
+  (deps    github_org.atd)
+  (mode    fallback)
+  (action  (run atdgen -t %{deps})))
+
+(executable
+  (name      github_org_info)
+  (libraries core yojson atdgen shell)
+  (flags     :standard -w -32)
+  (modules   github_org_info github_org_t github_org_j))

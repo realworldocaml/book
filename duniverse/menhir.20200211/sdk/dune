@@ -1,0 +1,20 @@
+;; The library MenhirSdk is built here.
+
+;; This rule generates the module [Version]. This module defines the value
+;; [version] of type [string]. Its value is a string representation of our
+;; 8-digit version number [XXXXXXXX]. This number is set in the [dune-project]
+;; file.
+
+(rule
+  (with-stdout-to version.ml
+    (echo "let version = \"%{version:menhir}\"\n")
+  )
+)
+
+;; Compile MenhirSdk in this directory.
+
+(library
+  (name menhirSdk)
+  (public_name menhirSdk)
+  (synopsis "Toolkit for postprocessing Menhir automata (.cmly files)")
+)

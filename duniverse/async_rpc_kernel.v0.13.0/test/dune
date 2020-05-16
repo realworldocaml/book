@@ -1,0 +1,3 @@
+(library (name async_rpc_kernel_test)
+ (libraries core_kernel async_kernel async_rpc_kernel expect_test_helpers)
+ (preprocess (pps ppx_jane)))

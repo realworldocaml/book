@@ -1,0 +1,18 @@
+true : bin_annot, safe_string, package(result)
+
+# Ideally we should get rid of this.
+<src> : include
+
+<src/ptime_top*> : package(compiler-libs.toplevel)
+
+<test/test_unix*> : package(unix)
+
+<src-os/ptime_clock.{cma,cmxa}> : record_ptime_clock_os_stubs
+<src-os/ptime_clock.cmxs> : link_ptime_clock_os_stubs
+<src-os/ptime_clock_top*> : package(compiler-libs.toplevel)
+
+<test-os/*> : use_ptime_clock_os
+<test-os/min_clock_os.byte> : custom
+
+<{src,test}-jsoo/*> : package(js_of_ocaml)
+<test-jsoo/*> : use_ptime_clock_jsoo

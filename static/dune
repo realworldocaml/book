@@ -299,3 +299,22 @@
            ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
+
+(rule
+  (targets inputs.tex)
+  (deps    %{bin:rwo-build}
+           ../book/toc.scm)
+  (action  (run rwo-build build inputs -o . -repo-root ..)))
+
+(alias (name pdf) (deps book.pdf))
+
+(rule
+  (targets book.pdf)
+  (deps    (alias ../book/latex)
+           (:x ../book/book.tex)
+           inputs.tex)
+  (action
+   (progn
+    (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
+    (system "makeindex book.idx")
+    (system "pdflatex -interaction=nonstopmode %{x}"))))

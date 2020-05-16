@@ -1,6 +1,0 @@
-(install
- (section share_root)
- (files
-  (ocp-indent.el as emacs/site-lisp/ocp-indent.el)
-  (ocp-indent.vim as ocp-indent/vim/indent/ocaml.vim))
-)

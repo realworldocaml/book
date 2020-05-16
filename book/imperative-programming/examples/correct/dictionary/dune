@@ -1,0 +1,3 @@
+(library
+ (name dictionary)
+ (libraries base))

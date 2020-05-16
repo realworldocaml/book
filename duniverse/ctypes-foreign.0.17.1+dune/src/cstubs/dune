@@ -1,0 +1,7 @@
+(library
+ (name ctypes_stubs)
+ (public_name ctypes.stubs)
+ (preprocess
+  (pps bisect_ppx --conditional))
+ (wrapped false)
+ (libraries ctypes str))

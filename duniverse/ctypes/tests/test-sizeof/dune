@@ -1,3 +1,0 @@
-(test
- (name test_sizeof)
- (libraries ctypes ctypes-foreign.threaded oUnit))

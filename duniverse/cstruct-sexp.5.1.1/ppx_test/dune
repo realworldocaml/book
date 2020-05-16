@@ -1,0 +1,6 @@
+(tests
+ (names pcap basic enum)
+ (deps http.cap)
+ (libraries cstruct-unix sexplib cstruct-sexp)
+ (preprocess (pps ppx_cstruct))
+ (package ppx_cstruct))

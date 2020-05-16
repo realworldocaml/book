@@ -1,3 +1,3 @@
-#require "base,core.top,ppx_jane";;
+#require "base,core.top";;
 
 let () = Base.Printexc.record_backtrace false

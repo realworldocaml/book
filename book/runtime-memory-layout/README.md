@@ -27,7 +27,7 @@ you can know rather precisely where a block of performance-critical OCaml
 code is spending its time. [OCaml toolchain/benefits of]{.idx}
 
 ::: {data-type=note}
-## Why Do OCaml Types Disappear at Runtime?
+##### Why Do OCaml Types Disappear at Runtime?
 
 The OCaml compiler runs through several phases during the compilation
 process. The first phase is syntax checking, during which source files are
@@ -130,7 +130,7 @@ area, it is treated as an opaque C pointer to some other system resource.
 [word-aligned pointers]{.idx}[pointers/word-aligned]{.idx}
 
 ::: {data-type=note}
-#### Some History About OCaml's Word-Aligned Pointers
+##### Some History About OCaml's Word-Aligned Pointers
 
 The alert reader may be wondering how OCaml can guarantee that all of its
 pointers are word-aligned. In the old days, when RISC chips such as Sparc,
@@ -215,7 +215,7 @@ String | Word-aligned byte arrays with an explicit length.
 Tuples, records, and arrays | An array of values. Arrays can be variable size, but tuples and records are fixed-size.
 Records or arrays, all float | Special tag for unboxed arrays of floats, or records that only have `float` fields.
 
-Table:  OCaml values 
+Table:  OCaml values
 :::
 
 
@@ -382,7 +382,7 @@ Finally, the parameters are fields that contain OCaml values within the
 block, and `Obj.field` can be used to retrieve them.
 
 Lists are stored with a representation that is exactly the same as if the
-list was written as a variant type with `Nil` and `Cons`. The empty list 
+list was written as a variant type with `Nil` and `Cons`. The empty list
 `[]` is an integer `0`, and subsequent blocks have tag `0` and two
 parameters: a block with the current value, and a pointer to the rest of the
 list. [debugging/Obj module warning]{.idx}[security issues/Obj module
@@ -488,7 +488,7 @@ String length mod 4 | Padding
 2 | `00 01`
 3 | `00`
 
-Table:  String length and padding 
+Table:  String length and padding
 :::
 
 
@@ -584,4 +584,3 @@ high-performance numerical code for applications that require linear algebra.
 It supports large vectors and matrices, but with static typing safety of
 OCaml to make it easier to write safe algorithms.
 <a data-type="indexterm" data-startref="MAPocaml">&nbsp;</a><a data-type="indexterm" data-startref="VALmemory">&nbsp;</a>
-

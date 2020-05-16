@@ -131,7 +131,7 @@ be "too polymorphic": `init` could have some type `'b list`:
     method push hd =
       v <- hd :: v
   end
-Characters 0-215:
+Lines 1-13, characters 1-6:
 Error: Some type variables are unbound in this type:
          class ['a] stack :
            'b list ->
@@ -710,12 +710,13 @@ define a common base class `shape` that also includes an equality method:
 # type shape = < equals : shape -> bool; area : float >
 type shape = < area : float; equals : shape -> bool >
 # (new square 5 :> shape)
-Characters 0-23:
+Line 1, characters 1-24:
 Error: Type square = < area : float; equals : square -> bool; width : int >
        is not a subtype of shape = < area : float; equals : shape -> bool >
        Type shape = < area : float; equals : shape -> bool >
        is not a subtype of
          square = < area : float; equals : square -> bool; width : int >
+       The first object type has no method width
 ```
 
 The problem is that a `square` expects to be compared with a `square`, not an
@@ -1274,7 +1275,7 @@ graphical display and ask Async to run `repaint` at regular intervals.
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies:
 
-```scheme
+```scheme file=examples/shapes/dune
 (executable
   (name      shapes)
   (modules   shapes)
