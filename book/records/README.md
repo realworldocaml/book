@@ -222,7 +222,7 @@ val service_info_to_string : service_info -> string = <fun>
 It's a good idea to enable the warning for incomplete record matches
 and to explicitly disable it with an `_` where necessary.
 
-::: {.allow_break data-type=note}
+::: {data-type=note}
 ##### Compiler Warnings
 
 The OCaml compiler is packed full of useful warnings that can be
@@ -254,7 +254,8 @@ warnings are too often ignored during development. When preparing a
 package for distribution, however, this is a bad idea, since the list
 of warnings may grow from one release of the compiler to another, and
 so this may lead your package to fail to compile on newer compiler
-releases.  :::
+releases.
+:::
 
 
 ## Field Punning
