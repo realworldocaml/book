@@ -647,14 +647,14 @@ val messages_for_user :
   string -> (Common.t * details) list -> (Common.t * details) list = <fun>
 ```
 
-Variants with inline records are both more concise and more efficient than
-having variants containing references to free-standing record types, because
-they don't require a separate allocated object for the contents of the
-variant.
+Variants with inline records are both more concise and more efficient
+than having variants containing references to free-standing record
+types, because they don't require a separate allocated object for the
+contents of the variant.
 
-The main downside is the obvious one, which is that an inline record can't be
-treated as its own free-standing object. And, as you can see below, OCaml
-will reject code that tries to do so.
+The main downside is the obvious one, which is that an inline record
+can't be treated as its own free-standing object. And, as you can see
+below, OCaml will reject code that tries to do so.
 
 ```ocaml env=main
 # let get_logon_contents = function
@@ -670,9 +670,10 @@ Another common application of variants is to represent tree-like recursive
 data structures. We'll show how this can be done by walking through the
 design of a simple Boolean expression language. Such a language can be useful
 anywhere you need to specify filters, which are used in everything from
-packet analyzers to mail clients. [recursive data structures]{.idx}[data
-structures/recursive]{.idx}[variant types/and recursive data
-structures]{.idx}
+packet analyzers to mail clients.
+[recursive data structures]{.idx}
+[data structures/recursive]{.idx}
+[variant types/and recursive data structures]{.idx}
 
 An expression in this language will be defined by the variant `expr`, with
 one tag for each kind of expression we want to support:
@@ -750,14 +751,25 @@ val eval : 'a expr -> ('a -> bool) -> bool = <fun>
 ```
 
 The structure of the code is pretty straightforward—we're just pattern
-matching over the structure of the data, doing the appropriate calculation
-based on which tag we see. To use this evaluator on a concrete example, we
-just need to write the `base_eval` function, which is capable of evaluating a
-base predicate.
+matching over the structure of the data, doing the appropriate
+calculation based on which tag we see. To use this evaluator on a
+concrete example, we just need to write the `base_eval` function,
+which is capable of evaluating a base predicate.
 
-Another useful operation on expressions is simplification. The following is a
-set of simplifying construction functions that mirror the tags of an
-`expr`:
+Another useful operation on expressions is *simplification*, which is
+the process of taking a boolean expression and reducing it to an
+equivalent one that is smaller.  First, we'll bulid a few simplifying
+construction functions that mirror the tags of an `expr`.
+
+The `and_` function below does a few things:
+
+- Reduces the entire expression to the constant `false` if any of the
+  arms of the and are themselves are `false`.
+- Drops any arms of the `And` that there the constant `true`.
+- Drops the `And` if it only has one arm.
+- If the `And` has no arms, then reduces it to `Const true`.
+
+The code is below.
 
 ```ocaml env=main
 # let and_ l =
@@ -769,6 +781,13 @@ set of simplifying construction functions that mirror the tags of an
       | [ x ] -> x
       | l -> And l
 val and_ : 'a expr list -> 'a expr = <fun>
+```
+
+`Or` is the dual of `And`, and as you can see, the code for `or_`
+follows a similar pattern as that for `and_`, mostly reversing the
+role of `true` and `false`.
+
+```ocaml env=main
 # let or_ l =
     if List.exists l ~f:(function Const true -> true | _ -> false) then Const true
     else
@@ -777,14 +796,22 @@ val and_ : 'a expr list -> 'a expr = <fun>
       | [x] -> x
       | l -> Or l
 val or_ : 'a expr list -> 'a expr = <fun>
+```
+
+Finally, `not_` just has special handling for constants, applying the
+ordinary boolean negation function to them.
+
+```ocaml env=main
 # let not_ = function
     | Const b -> Const (not b)
     | e -> Not e
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
-We can now write a simplification routine that is based on the preceding
-functions.
+We can now write a simplification routine that is based on the
+preceding functions.  Note that this function is recursive, in that it
+applies all of these simplifications in a bottom-up way across the
+entire expression.
 
 ```ocaml env=main
 # let rec simplify = function
@@ -795,8 +822,8 @@ functions.
 val simplify : 'a expr -> 'a expr = <fun>
 ```
 
-We can apply this to a Boolean expression and see how good a job it does at
-simplifying it:
+We can now apply this to a Boolean expression and see how good a job
+it does at simplifying it.
 
 ```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
