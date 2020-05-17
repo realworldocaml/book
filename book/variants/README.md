@@ -1225,10 +1225,16 @@ kind of error that the compiler would catch with ordinary variants,
 but with polymorphic variants, this compiles without issue.  All that
 happened was that the compiler inferred a wider type for
 `extended_color_to_int`, which happens to be compatible with the
-narrower type that was listed in the `mli`.
+narrower type that was listed in the `mli`.  As a result, this library
+builds without error.
 
-If we add an explicit type annotation to the code itself (rather than just in
-the `mli`), then the compiler has enough information to warn us:
+```sh dir=examples/variants-termcol
+$ dune build @all
+```
+
+If we add an explicit type annotation to the code itself (rather than
+just in the `mli`), then the compiler has enough information to warn
+us:
 
 ```ocaml file=examples/variants-termcol-annotated/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function

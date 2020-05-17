@@ -1,0 +1,3 @@
+(library
+  (name terminal_color)
+  (libraries base))
