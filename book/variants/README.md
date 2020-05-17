@@ -5,8 +5,9 @@ one of the most unusual. They let you represent data that may take on
 multiple different forms, where each form is marked by an explicit
 tag. As we'll see, when combined with pattern matching, variants give
 you a powerful way of representing complex data and of organizing the
-case-analysis on that information. [variant types/usefulness
-of]{.idx}[datatypes/variant types]{.idx #DTvar}
+case-analysis on that information.
+[variant types/usefulness of]{.idx}
+[datatypes/variant types]{.idx}
 
 The basic syntax of a variant type declaration is as follows: [variant
 types/basic syntax of]{.idx}
@@ -22,11 +23,14 @@ Each row essentially represents a case of the variant. Each case has
 an associated tag and may optionally have a sequence of fields, where
 each field has a specified type.
 
-Let's consider a concrete example of how variants can be
-useful. Almost all terminals support a set of eight basic colors, and
-we can represent those colors using a variant. Each color is declared
-as a simple tag, with pipes used to separate the different cases. Note
-that variant tags must be capitalized.
+Let's consider a concrete example of how variants can be useful.  Most
+UNIX-like operating systems support terminals as a fundamental,
+text-based user interface.  Almost all of these terminals support a
+set of eight basic colors.
+
+Those colors can be naturally represented as a variant. Each color is
+declared as a simple tag, with pipes used to separate the different
+cases. Note that variant tags must be capitalized.
 
 ```ocaml env=main
 # open Base
@@ -48,9 +52,8 @@ type basic_color =
 - : basic_color list = [Blue; Magenta; Red]
 ```
 
-The following function uses pattern matching to convert a `basic_color` to a
-corresponding integer. The exhaustiveness checking on pattern matches means
-that the compiler will warn us if we miss a color:
+There's an integer code associated with each basic color, and thex
+following function uses pattern matching to express that function.
 
 ```ocaml env=main
 # let basic_color_to_int = function
@@ -61,8 +64,21 @@ val basic_color_to_int : basic_color -> int = <fun>
 - : int list = [4; 1]
 ```
 
-Using the preceding function, we can generate escape codes to change the
-color of a given string displayed in a terminal:
+We know that the above function is complete, because the compiler
+would have warned us if we'd missed a color.
+
+```ocaml env=main
+# let incomplete_color_to_int = function
+    | Black -> 0 | Red -> 1 | White -> 7
+Lines 1-2, characters 31-41:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a case that is not matched:
+(Green|Yellow|Blue|Magenta|Cyan)
+val incomplete_color_to_int : basic_color -> int = <fun>
+```
+
+In any case, using the correct function, we can generate escape codes
+to change the color of a given string displayed in a terminal:
 
 ```ocaml env=main
 # let color_by_number number text =
@@ -77,13 +93,14 @@ Hello Blue World!
 
 On most terminals, that word "Blue" will be rendered in blue.
 
-In this example, the cases of the variant are simple tags with no associated
-data. This is substantively the same as the enumerations found in languages
-like C and Java. But as we'll see, variants can do considerably more than
-represent a simple enumeration. As it happens, an enumeration isn't enough to
-effectively describe the full set of colors that a modern terminal can
-display. Many terminals, including the venerable `xterm`, support 256
-different colors, broken up into the following groups:
+In this example, the cases of the variant are simple tags with no
+associated data. This is substantively the same as the enumerations
+found in languages like C and Java. But as we'll see, variants can do
+considerably more than represent a simple enumeration. As it happens,
+an enumeration isn't enough to effectively describe the full set of
+colors that a modern terminal can display. Many terminals, including
+the venerable `xterm`, support 256 different colors, broken up into
+the following groups:
 
 - The eight basic colors, in regular and bold versions
 
@@ -91,10 +108,10 @@ different colors, broken up into the following groups:
 
 - A 24-level grayscale ramp
 
-We'll also represent this more complicated color space as a variant, but this
-time, the different tags will have arguments that describe the data available
-in each case. Note that variants can have multiple arguments, which are
-separated by `*`s:
+We'll also represent this more complicated color space as a variant,
+but this time, the different tags will have arguments that describe
+the data available in each case. Note that variants can have multiple
+arguments, which are separated by `*`s:
 
 ```ocaml env=main
 # type weight = Regular | Bold
