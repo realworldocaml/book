@@ -1,3 +1,5 @@
+open Base
+
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
   | `Magenta | `Red  | `White | `Yellow ]

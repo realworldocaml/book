@@ -1153,14 +1153,14 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 ```
 
-Let's consider how we might turn our code into a proper library with an
-implementation in an `ml` file and an interface in a separate `mli`, as we
-saw in
-[Files Modules And Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
-Let's start with the `mli`:
+Let's consider how we might turn our code into a proper library with
+an implementation in an `ml` file and an interface in a separate
+`mli`, as we saw in [Files Modules And
+Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
+Let's start with the `mli`.
 
 ```ocaml file=examples/variants-termcol/terminal_color.mli
-open Core
+open Base
 
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
@@ -1181,10 +1181,10 @@ val extended_color_to_int : extended_color -> int
 
 Here, `extended_color` is defined as an explicit extension of `color`. Also,
 notice that we defined all of these types as exact variants. We can implement
-this library as follows:
+this library as follows.
 
 ```ocaml file=examples/variants-termcol/terminal_color.ml
-open Core
+open Base
 
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
@@ -1217,14 +1217,15 @@ let extended_color_to_int = function
 ```
 
 In the preceding code, we did something funny to the definition of
-`extended_color_to_int` that underlines some of the downsides of polymorphic
-variants. In particular, we added some special-case handling for the color
-gray, rather than using `color_to_int`. Unfortunately, we misspelled
-`Gray` as `Grey`. This is exactly the kind of error that the compiler would
-catch with ordinary variants, but with polymorphic variants, this compiles
-without issue. All that happened was that the compiler inferred a wider type
-for `extended_color_to_int`, which happens to be compatible with the narrower
-type that was listed in the `mli`.
+`extended_color_to_int` that underlines some of the downsides of
+polymorphic variants.  In particular, we added some special-case
+handling for the color gray, rather than using `color_to_int`.
+Unfortunately, we misspelled `Gray` as `Grey`.  This is exactly the
+kind of error that the compiler would catch with ordinary variants,
+but with polymorphic variants, this compiles without issue.  All that
+happened was that the compiler inferred a wider type for
+`extended_color_to_int`, which happens to be compatible with the
+narrower type that was listed in the `mli`.
 
 If we add an explicit type annotation to the code itself (rather than just in
 the `mli`), then the compiler has enough information to warn us:
@@ -1248,9 +1249,8 @@ In particular, the compiler will complain that the `` `Grey`` case is unused:
 
 ```sh dir=examples/variants-termcol-annotated
 $ dune build terminal_color.exe
-...
-File "terminal_color.ml", line 29, characters 25-32:
-29 |   | (`Basic _ | `RGB _ | `Grey _) as color -> color_to_int color
+File "terminal_color.ml", line 31, characters 25-32:
+31 |   | (`Basic _ | `RGB _ | `Grey _) as color -> color_to_int color
                               ^^^^^^^
 Error: This pattern matches values of type [? `Grey of 'a ]
        but a pattern was expected which matches values of type extended_color
