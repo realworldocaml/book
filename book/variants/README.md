@@ -808,20 +808,10 @@ ordinary boolean negation function to them.
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
-By the way, all of this focus on simplifying constants may seem
-pointless.  Why would someone write a filter with constant values in
-it anyway?  But sometimes you want to specialize your boolean
-expression for a particular context, e.g., you might want to apply
-your mail filters to a collection of messages for a particular
-recipient.  That might allow you to conclude that some base predicates
-are either always true or always false, and so you can convert those
-terms to constants, at which point, simplification can reduce the size
-of your overall expression, making it cheaper to evaluate.
-
-In any case, we can now write a simplification routine that is based
-on the preceding functions.  Note that this function is recursive, in
-that it applies all of these simplifications in a bottom-up way across
-the entire expression.
+We can now write a simplification routine that is based on the
+preceding functions.  Note that this function is recursive, in that it
+applies all of these simplifications in a bottom-up way across the
+entire expression.
 
 ```ocaml env=main
 # let rec simplify = function
@@ -842,11 +832,11 @@ it does at simplifying it.
 ```
 
 Here, it correctly converted the `Or` branch to `Const true` and then
-eliminated the `And` entirely, since the `And` then had only one nontrivial
-component.
+eliminated the `And` entirely, since the `And` then had only one
+nontrivial component.
 
-There are some simplifications it misses, however. In particular, see what
-happens if we add a double negation in.
+There are some simplifications it misses, however. In particular, see
+what happens if we add a double negation in.
 
 ```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
@@ -855,10 +845,11 @@ happens if we add a double negation in.
 ```
 
 It fails to remove the double negation, and it's easy to see why. The
-`not_` function has a catch-all case, so it ignores everything but the one
-case it explicitly considers, that of the negation of a constant. Catch-all
-cases are generally a bad idea, and if we make the code more explicit, we see
-that the missing of the double negation is more obvious:
+`not_` function has a catch-all case, so it ignores everything but the
+one case it explicitly considers, that of the negation of a
+constant. Catch-all cases are generally a bad idea, and if we make the
+code more explicit, we see that the missing of the double negation is
+more obvious:
 
 ```ocaml env=main
 # let not_ = function
@@ -878,24 +869,26 @@ negation:
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
-The example of a Boolean expression language is more than a toy. There's a
-module very much in this spirit in `Core_kernel` called `Blang` (short for "Boolean
-language"), and it gets a lot of practical use in a variety of applications.
-The simplification algorithm in particular is useful when you want to use it
-to specialize the evaluation of expressions for which the evaluation of some
-of the base predicates is already known.
+The example of a Boolean expression language is more than a
+toy. There's a module very much in this spirit in `Core_kernel` called
+`Blang` (short for "Boolean language"), and it gets a lot of practical
+use in a variety of applications.  The simplification algorithm in
+particular is useful when you want to use it to specialize the
+evaluation of expressions for which the evaluation of some of the base
+predicates is already known.
 
-More generally, using variants to build recursive data structures is a common
-technique, and shows up everywhere from designing little languages to
-building complex data structures.
+More generally, using variants to build recursive data structures is a
+common technique, and shows up everywhere from designing little
+languages to building complex data structures.
 
 ## Polymorphic Variants
 
-In addition to the ordinary variants we've seen so far, OCaml also supports
-so-called *polymorphic variants*. As we'll see, polymorphic variants are more
-flexible and syntactically more lightweight than ordinary variants, but that
-extra power comes at a cost. [polymorphic variant types/basic syntax
-of]{.idx}[variant types/polymorphic]{.idx #VARTYPpoly}
+In addition to the ordinary variants we've seen so far, OCaml also
+supports so-called *polymorphic variants*. As we'll see, polymorphic
+variants are more flexible and syntactically more lightweight than
+ordinary variants, but that extra power comes at a cost. [polymorphic
+variant types/basic syntax of]{.idx}[variant types/polymorphic]{.idx
+#VARTYPpoly}
 
 Syntactically, polymorphic variants are distinguished from ordinary variants
 by the leading backtick. And unlike ordinary variants, polymorphic variants
