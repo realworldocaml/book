@@ -359,10 +359,11 @@ different kinds of types: *product types*, like tuples and records,
 which combine multiple different types together and are mathematically
 similar to Cartesian products; and *sum types*, like variants, which
 let you combine multiple different possibilities into one type, and
-are mathematically similar to disjoint unions.[records/and variant
-types]{.idx #RECvartyp}[sum types]{.idx}[product
-types]{.idx}[datatypes/algebraic types]{.idx}[algebraic data
-types]{.idx}[variant types/and records]{.idx #VARTYPrec}
+are mathematically similar to disjoint unions.
+[sum types]{.idx}
+[product types]{.idx}
+[algebraic data types]{.idx}
+[variants/and records]{.idx}
 
 Algebraic data types gain much of their power from the ability to
 construct layered combinations of sums and products. Let's see what we
