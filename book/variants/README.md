@@ -808,10 +808,20 @@ ordinary boolean negation function to them.
 val not_ : 'a expr -> 'a expr = <fun>
 ```
 
-We can now write a simplification routine that is based on the
-preceding functions.  Note that this function is recursive, in that it
-applies all of these simplifications in a bottom-up way across the
-entire expression.
+By the way, all of this focus on simplifying constants may seem
+pointless.  Why would someone write a filter with constant values in
+it anyway?  But sometimes you want to specialize your boolean
+expression for a particular context, e.g., you might want to apply
+your mail filters to a collection of messages for a particular
+recipient.  That might allow you to conclude that some base predicates
+are either always true or always false, and so you can convert those
+terms to constants, at which point, simplification can reduce the size
+of your overall expression, making it cheaper to evaluate.
+
+In any case, we can now write a simplification routine that is based
+on the preceding functions.  Note that this function is recursive, in
+that it applies all of these simplifications in a bottom-up way across
+the entire expression.
 
 ```ocaml env=main
 # let rec simplify = function
@@ -836,7 +846,7 @@ eliminated the `And` entirely, since the `And` then had only one nontrivial
 component.
 
 There are some simplifications it misses, however. In particular, see what
-happens if we add a double negation in:
+happens if we add a double negation in.
 
 ```ocaml env=main
 # simplify (Not (And [ Or [Base "it's snowing"; Const true];
