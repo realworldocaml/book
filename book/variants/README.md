@@ -1270,48 +1270,50 @@ explicitly in the match.
 At first glance, polymorphic variants look like a strict improvement
 over ordinary variants. You can do everything that ordinary variants
 can do, plus it's more flexible and more concise. What's not to
-like?[polymorphic variant types/vs. ordinary
-variants]{.idx}[polymorphic variant types/drawbacks of]{.idx}
+like?
+[polymorphic variant types/vs. ordinary variants]{.idx}
+[polymorphic variant types/drawbacks of]{.idx}
 
-In reality, regular variants are the more pragmatic choice most of the time.
-That's because the flexibility of polymorphic variants comes at a price. Here
-are some of the downsides:
+In reality, regular variants are the more pragmatic choice most of the
+time.  That's because the flexibility of polymorphic variants comes at
+a price. Here are some of the downsides:
 
 Complexity
-: As we've seen, the typing rules for polymorphic variants are a lot more
-  complicated than they are for regular variants. This means that heavy use
-  of polymorphic variants can leave you scratching your head trying to figure
-  out why a given piece of code did or didn't compile. It can also lead to
-  absurdly long and hard to decode error messages. Indeed, concision at the
-  value level is often balanced out by more verbosity at the type level.
+: As we've seen, the typing rules for polymorphic variants are a lot
+  more complicated than they are for regular variants. This means that
+  heavy use of polymorphic variants can leave you scratching your head
+  trying to figure out why a given piece of code did or didn't
+  compile. It can also lead to absurdly long and hard to decode error
+  messages. Indeed, concision at the value level is often balanced out
+  by more verbosity at the type level.
 
 Error-finding
-: Polymorphic variants are type-safe, but the typing discipline that they
-  impose is, by dint of its flexibility, less likely to catch bugs in your
-  program.
+: Polymorphic variants are type-safe, but the typing discipline that
+  they impose is, by dint of its flexibility, less likely to catch
+  bugs in your program.
 
 Efficiency
-: This isn't a huge effect, but polymorphic variants are somewhat heavier
-  than regular variants, and OCaml can't generate code for matching on
-  polymorphic variants that is quite as efficient as what it generated for
-  regular variants.
+: This isn't a huge effect, but polymorphic variants are somewhat
+  heavier than regular variants, and OCaml can't generate code for
+  matching on polymorphic variants that is quite as efficient as what
+  it generated for regular variants.
 
-All that said, polymorphic variants are still a useful and powerful feature,
-but it's worth understanding their limitations and how to use them sensibly
-and modestly.
+All that said, polymorphic variants are still a useful and powerful
+feature, but it's worth understanding their limitations and how to use
+them sensibly and modestly.
 
-Probably the safest and most common use case for polymorphic variants is
-where ordinary variants would be sufficient but are syntactically too
-heavyweight. For example, you often want to create a variant type for
-encoding the inputs or outputs to a function, where it's not worth declaring
-a separate type for it. Polymorphic variants are very useful here, and as
-long as there are type annotations that constrain these to have explicit,
-exact types, this tends to work well.
+Probably the safest and most common use case for polymorphic variants
+is where ordinary variants would be sufficient but are syntactically
+too heavyweight. For example, you often want to create a variant type
+for encoding the inputs or outputs to a function, where it's not worth
+declaring a separate type for it. Polymorphic variants are very useful
+here, and as long as there are type annotations that constrain these
+to have explicit, exact types, this tends to work well.
 
-Variants are most problematic exactly where you take full advantage of their
-power; in particular, when you take advantage of the ability of polymorphic
-variant types to overlap in the tags they support. This ties into OCaml's
-support for subtyping. As we'll discuss further when we cover objects in
-[Objects](objects.html#objects){data-type=xref}, subtyping brings in a lot
-of complexity, and most of the time, that's complexity you want to
-avoid.<a data-type="indexterm" data-startref="VARTYPpoly">&nbsp;</a><a data-type="indexterm" data-startref="DTvar">&nbsp;</a>
+Variants are most problematic exactly where you take full advantage of
+their power; in particular, when you take advantage of the ability of
+polymorphic variant types to overlap in the tags they support. This
+ties into OCaml's support for subtyping. As we'll discuss further when
+we cover objects in [Objects](objects.html#objects){data-type=xref},
+subtyping brings in a lot of complexity, and most of the time, that's
+complexity you want to avoid.
