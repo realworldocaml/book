@@ -886,13 +886,13 @@ languages to building complex data structures.
 In addition to the ordinary variants we've seen so far, OCaml also
 supports so-called *polymorphic variants*. As we'll see, polymorphic
 variants are more flexible and syntactically more lightweight than
-ordinary variants, but that extra power comes at a cost. [polymorphic
-variant types/basic syntax of]{.idx}[variant types/polymorphic]{.idx
-#VARTYPpoly}
+ordinary variants, but that extra power comes at a cost.
+[polymorphic variant types/basic syntax of]{.idx}
+[variant types/polymorphic]{.idx}
 
-Syntactically, polymorphic variants are distinguished from ordinary variants
-by the leading backtick. And unlike ordinary variants, polymorphic variants
-can be used without an explicit type declaration:
+Syntactically, polymorphic variants are distinguished from ordinary
+variants by the leading backtick. And unlike ordinary variants,
+polymorphic variants can be used without an explicit type declaration:
 
 ```ocaml env=main
 # let three = `Int 3
@@ -906,13 +906,15 @@ val nan : [> `Not_a_number ] = `Not_a_number
 [`Int 3; `Float 4.; `Not_a_number]
 ```
 
-As you can see, polymorphic variant types are inferred automatically, and
-when we combine variants with different tags, the compiler infers a new type
-that knows about all of those tags. Note that in the preceding example, the
-tag name (e.g., `` `Int``) matches the type name (`int`). This is a common
-convention in OCaml. [polymorphic variant types/automatic inference of]{.idx}
+As you can see, polymorphic variant types are inferred automatically,
+and when we combine variants with different tags, the compiler infers
+a new type that knows about all of those tags. Note that in the
+preceding example, the tag name (e.g., `` `Int``) matches the type
+name (`int`). This is a common convention in OCaml.
+[polymorphic variant types/automatic inference of]{.idx}
 
-The type system will complain if it sees incompatible uses of the same tag:
+The type system will complain if it sees incompatible uses of the same
+tag:
 
 ```ocaml env=main
 # let five = `Int "five"
@@ -925,15 +927,15 @@ Error: This expression has type [> `Int of string ]
        Types for tag `Int are incompatible
 ```
 
-The `>` at the beginning of the variant types above is critical because it
-marks the types as being open to combination with other variant types. We can
-read the type `` [> `Float of float | `Int of int]`` as describing a
-variant whose tags include `` `Float of float`` and `` `Int of int``, but
-may include more tags as well. In other words, you can roughly translate
-`>` to mean: "these tags or more."
+The `>` at the beginning of the variant types above is critical
+because it marks the types as being open to combination with other
+variant types.  We can read the type `` [> `Float of float | `Int of
+int]`` as describing a variant whose tags include `` `Float of float``
+and `` `Int of int``, but may include more tags as well. In other
+words, you can roughly translate `>` to mean: "these tags or more."
 
-OCaml will in some cases infer a variant type with `<`, to indicate "these
-tags or less," as in the following example:
+OCaml will in some cases infer a variant type with `<`, to indicate
+"these tags or less," as in the following example:
 
 ```ocaml env=main
 # let is_positive = function
@@ -942,13 +944,14 @@ tags or less," as in the following example:
 val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
 ```
 
-The `<` is there because `is_positive` has no way of dealing with values that
-have tags other than `` `Float of float`` or `` `Int of int``.
+The `<` is there because `is_positive` has no way of dealing with
+values that have tags other than `` `Float of float`` or `` `Int of
+int``.
 
-We can think of these `<` and `>` markers as indications of upper and lower
-bounds on the tags involved. If the same set of tags are both an upper and a
-lower bound, we end up with an *exact* polymorphic variant type, which has
-neither marker. For example:
+We can think of these `<` and `>` markers as indications of upper and
+lower bounds on the tags involved. If the same set of tags are both an
+upper and a lower bound, we end up with an *exact* polymorphic variant
+type, which has neither marker. For example:
 
 ```ocaml env=main
 # let exact = List.filter ~f:is_positive [three;four]
