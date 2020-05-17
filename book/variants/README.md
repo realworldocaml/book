@@ -960,8 +960,8 @@ val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
 
 Perhaps surprisingly, we can also create polymorphic variant types that have
 different upper and lower bounds. Note that `Ok` and `Error` in the following
-example come from the `Result.t` type from `Base`: [polymorphic variant
-types/upper/lower bounds of]{.idx}
+example come from the `Result.t` type from `Base`.
+[polymorphic variant types/upper and lower bounds of]{.idx}
 
 ```ocaml env=main
 # let is_positive = function
@@ -977,18 +977,61 @@ val is_positive :
 [`Int 3; `Float 4.]
 ```
 
-Here, the inferred type states that the tags can be no more than `` `Float``,
-`` `Int``, and `` `Not_a_number``, and must contain at least `` `Float`` and
-`` `Int``. As you can already start to see, polymorphic variants can lead to
-fairly complex inferred types.
+Here, the inferred type states that the tags can be no more than ``
+`Float``, `` `Int``, and `` `Not_a_number``, and must contain at least
+`` `Float`` and `` `Int``. As you can already start to see,
+polymorphic variants can lead to fairly complex inferred types.
+
+::: {.allow_break data-type=note}
+##### Polymorphic Variants and Catch-all Cases
+
+As we saw with the definition of `is_positive`, a `match` statement
+can lead to the inference of an upper bound on a variant type,
+limiting the possible tags to those that can be handled by the match.
+If we add a catch-all case to our `match` statement, we end up with a
+type with a lower bound.
+[pattern matching/catch-all cases]{.idx}
+[catch-all cases]{.idx}
+[polymorphic variant types/and catch-all cases]{.idx}
+
+```ocaml env=main
+# let is_positive_permissive = function
+    | `Int   x -> Ok Int.(x > 0)
+    | `Float x -> Ok Float.(x > 0.)
+    | _ -> Error "Unknown number type"
+val is_positive_permissive :
+  [> `Float of float | `Int of int ] -> (bool, string) result = <fun>
+# is_positive_permissive (`Int 0)
+- : (bool, string) result = Ok false
+# is_positive_permissive (`Ratio (3,4))
+- : (bool, string) result = Error "Unknown number type"
+```
+
+Catch-all cases are error-prone even with ordinary variants, but they
+are especially so with polymorphic variants. That's because you have
+no way of bounding what tags your function might have to deal with.
+Such code is particularly vulnerable to typos.  For instance, if code
+that uses `is_positive_permissive` passes in `Float` misspelled as
+`Floot`, the erroneous code will compile without complaint.
+
+```ocaml env=main
+# is_positive_permissive (`Floot 3.5)
+- : (bool, string) result = Error "Unknown number type"
+```
+
+With ordinary variants, such a typo would have been caught as an
+unknown tag.  As a general matter, one should be wary about mixing
+catch-all cases and polymorphic variants.
+:::
 
 ### Example: Terminal Colors Redux
 
-To see how to use polymorphic variants in practice, we'll return to terminal
-colors. Imagine that we have a new terminal type that adds yet more colors,
-say, by adding an alpha channel so you can specify translucent colors. We
-could model this extended set of colors as follows, using an ordinary
-variant:[polymorphic variant types/vs. ordinary variants]{.idx}
+To see how to use polymorphic variants in practice, we'll return to
+terminal colors. Imagine that we have a new terminal type that adds
+yet more colors, say, by adding an alpha channel so you can specify
+translucent colors. We could model this extended set of colors as
+follows, using an ordinary variant:
+[polymorphic variant types/vs. ordinary variants]{.idx}
 
 ```ocaml env=main
 # type extended_color =
@@ -1019,13 +1062,13 @@ Error: This expression has type extended_color
 
 The code looks reasonable enough, but it leads to a type error because
 `extended_color` and `color` are in the compiler's view distinct and
-unrelated types. The compiler doesn't, for example, recognize any equality
-between the `Basic` tag in the two types.
+unrelated types. The compiler doesn't, for example, recognize any
+equality between the `Basic` tag in the two types.
 
-What we want to do is to share tags between two different variant types, and
-polymorphic variants let us do this in a natural way. First, let's rewrite
-`basic_color_to_int` and `color_to_int` using polymorphic variants. The
-translation here is pretty straightforward:
+What we want to do is to share tags between two different variant
+types, and polymorphic variants let us do this in a natural way.
+First, let's rewrite `basic_color_to_int` and `color_to_int` using
+polymorphic variants.  The translation here is pretty straightforward:
 
 ```ocaml env=main
 # let basic_color_to_int = function
@@ -1109,47 +1152,6 @@ Error: This expression has type [> `RGBA of int * int * int * int ]
           | `RGB of int * int * int ]
        The second variant type does not allow tag(s) `RGBA
 ```
-
-::: {.allow_break data-type=note}
-##### Polymorphic Variants and Catch-all Cases
-
-As we saw with the definition of `is_positive`, a `match` statement can lead
-to the inference of an upper bound on a variant type, limiting the possible
-tags to those that can be handled by the match. If we add a catch-all case to
-our `match` statement, we end up with a type with a lower bound:[pattern
-matching/catch-all cases]{.idx}[catch-all cases]{.idx}[polymorphic variant
-types/and catch-all cases]{.idx}
-
-```ocaml env=main
-# let is_positive_permissive = function
-    | `Int   x -> Ok Int.(x > 0)
-    | `Float x -> Ok Float.(x > 0.)
-    | _ -> Error "Unknown number type"
-val is_positive_permissive :
-  [> `Float of float | `Int of int ] -> (bool, string) result = <fun>
-# is_positive_permissive (`Int 0)
-- : (bool, string) result = Ok false
-# is_positive_permissive (`Ratio (3,4))
-- : (bool, string) result = Error "Unknown number type"
-```
-
-Catch-all cases are error-prone even with ordinary variants, but they are
-especially so with polymorphic variants. That's because you have no way of
-bounding what tags your function might have to deal with. Such code is
-particularly vulnerable to typos. For instance, if code that uses
-`is_positive_permissive` passes in `Float` misspelled as `Floot`, the
-erroneous code will compile without complaint:
-
-```ocaml env=main
-# is_positive_permissive (`Floot 3.5)
-- : (bool, string) result = Error "Unknown number type"
-```
-
-With ordinary variants, such a typo would have been caught as an unknown tag.
-As a general matter, one should be wary about mixing catch-all cases and
-polymorphic variants.
-:::
-
 
 Let's consider how we might turn our code into a proper library with an
 implementation in an `ml` file and an interface in a separate `mli`, as we
