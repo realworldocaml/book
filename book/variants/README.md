@@ -1217,7 +1217,7 @@ let extended_color_to_int = function
 ```
 
 In the preceding code, we did something funny to the definition of
-`extended_color_to_int` that underlines some of the downsides of
+`extended_color_to_int` that highlights some of the downsides of
 polymorphic variants.  In particular, we added some special-case
 handling for the color gray, rather than using `color_to_int`.
 Unfortunately, we misspelled `Gray` as `Grey`.  This is exactly the
@@ -1239,16 +1239,8 @@ let extended_color_to_int : extended_color -> int = function
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
 
-```scheme file=examples/variants-termcol-annotated/dune
-(executable
-  (name      terminal_color)
-  (libraries core))
-```
-
-
-
 ```sh dir=examples/variants-termcol-annotated
-$ dune build terminal_color.exe
+$ dune build @all
 File "terminal_color.ml", line 31, characters 25-32:
 31 |   | (`Basic _ | `RGB _ | `Grey _) as color -> color_to_int color
                               ^^^^^^^
@@ -1258,10 +1250,10 @@ Error: This pattern matches values of type [? `Grey of 'a ]
 [1]
 ```
 
-Once we have type definitions at our disposal, we can revisit the question of
-how we write the pattern match that narrows the type. In particular, we can
-explicitly use the type name as part of the pattern match, by prefixing it
-with a `#`:
+Once we have type definitions at our disposal, we can revisit the
+question of how we write the pattern match that narrows the type. In
+particular, we can explicitly use the type name as part of the pattern
+match, by prefixing it with a `#`:
 
 ```ocaml file=examples/variants-termcol-fixed/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
@@ -1269,17 +1261,17 @@ let extended_color_to_int : extended_color -> int = function
   | #color as color -> color_to_int color
 ```
 
-This is useful when you want to narrow down to a type whose definition is
-long, and you don't want the verbosity of writing the tags down explicitly in
-the match.
+This is useful when you want to narrow down to a type whose definition
+is long, and you don't want the verbosity of writing the tags down
+explicitly in the match.
 
 ### When to Use Polymorphic Variants
 
-At first glance, polymorphic variants look like a strict improvement over
-ordinary variants. You can do everything that ordinary variants can do, plus
-it's more flexible and more concise. What's not to like?[polymorphic variant
-types/vs. ordinary variants]{.idx}[polymorphic variant types/drawbacks
-of]{.idx}
+At first glance, polymorphic variants look like a strict improvement
+over ordinary variants. You can do everything that ordinary variants
+can do, plus it's more flexible and more concise. What's not to
+like?[polymorphic variant types/vs. ordinary
+variants]{.idx}[polymorphic variant types/drawbacks of]{.idx}
 
 In reality, regular variants are the more pragmatic choice most of the time.
 That's because the flexibility of polymorphic variants comes at a price. Here
