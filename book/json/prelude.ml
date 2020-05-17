@@ -1,4 +1,4 @@
-#require "core,core.top,ppx_jane,yojson";;
+#require "core,core.top,yojson";;
 
 open Core_kernel;;
 
