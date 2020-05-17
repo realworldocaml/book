@@ -96,11 +96,12 @@ On most terminals, that word "Blue" will be rendered in blue.
 In this example, the cases of the variant are simple tags with no
 associated data. This is substantively the same as the enumerations
 found in languages like C and Java. But as we'll see, variants can do
-considerably more than represent a simple enumeration. As it happens,
-an enumeration isn't enough to effectively describe the full set of
-colors that a modern terminal can display. Many terminals, including
-the venerable `xterm`, support 256 different colors, broken up into
-the following groups:
+considerably more than represent simple enumerations.
+
+As it happens, an enumeration isn't enough to effectively describe the
+full set of colors that a modern terminal can display. Many terminals,
+including the venerable `xterm`, support 256 different colors, broken
+up into the following groups:
 
 - The eight basic colors, in regular and bold versions
 
@@ -128,10 +129,10 @@ type color =
 - : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 ```
 
-Once again, we'll use pattern matching to convert a color to a corresponding
-integer. But in this case, the pattern matching does more than separate out
-the different cases; it also allows us to extract the data associated with
-each tag:
+Once again, we'll use pattern matching to convert a color to a
+corresponding integer. But in this case, the pattern matching does
+more than separate out the different cases; it also allows us to
+extract the data associated with each tag:
 
 ```ocaml env=main
 # let color_to_int = function
@@ -242,15 +243,16 @@ Values](runtime-memory-layout.html){data-type=xref}.
 
 ## Catch-All Cases and Refactoring
 
-OCaml's type system can act as a refactoring tool, warning you of places
-where your code needs to be updated to match an interface change. This is
-particularly valuable in the context of variants. [errors/catch-all cases and
-refactoring]{.idx}[pattern matching/catch-all cases]{.idx}[functional
-updates]{.idx}[refactoring]{.idx}[variant types/catch-all cases and
-refactoring]{.idx}
+OCaml's type system can act as a refactoring tool, warning you of
+places where your code needs to be updated to match an interface
+change. This is particularly valuable in the context of
+variants.
+[pattern matching/catch-all cases]{.idx}
+[refactoring]{.idx}
+[exhaustion checks]{.idx}
 
-Consider what would happen if we were to change the definition of `color` to
-the following:
+Consider what would happen if we were to change the definition of
+`color` to the following:
 
 ```ocaml env=main
 # type color =
@@ -310,27 +312,27 @@ Fixing this now leads us to the correct implementation:
 val color_to_int : color -> int = <fun>
 ```
 
-As we've seen, the type errors identified the things that needed to be fixed
-to complete the refactoring of the code. This is fantastically useful, but
-for it to work well and reliably, you need to write your code in a way that
-maximizes the compiler's chances of helping you find the bugs. To this end, a
-useful rule of thumb is to avoid catch-all cases in pattern matches.
+As we've seen, the type errors identified the things that needed to be
+fixed to complete the refactoring of the code. This is fantastically
+useful, but for it to work well and reliably, you need to write your
+code in a way that maximizes the compiler's chances of helping you
+find the bugs.  To this end, a useful rule of thumb is to avoid
+catch-all cases in pattern matches.
 
 Here's an example that illustrates how catch-all cases interact with
-exhaustion checks. Imagine we wanted a version of `color_to_int` that works
-on older terminals by rendering the first 16 colors (the eight `basic_color`s
-in regular and bold) in the normal way, but renders everything else as white.
-We might have written the function as follows: [exhaustion checks]{.idx}
+exhaustion checks. Imagine we wanted a version of `color_to_int` that
+works on older terminals by rendering the first 16 colors (the eight
+`basic_color`s in regular and bold) in the normal way, but renders
+everything else as white.  We might have written the function as
+follows.
 
-```ocaml env=main
+```ocaml env=old_termcolor
 # let oldschool_color_to_int = function
     | Basic (basic_color,weight) ->
       let base = match weight with Bold -> 8 | Regular -> 0 in
       base + basic_color_to_int basic_color
     | _ -> basic_color_to_int White
-Line 2, characters 13-33:
-Error: This pattern matches values of type 'a * 'b
-       but a pattern was expected which matches values of type basic_color
+val oldschool_color_to_int : color -> int = <fun>
 ```
 
 If we then applied the same fix we did above, we would have ended up with
@@ -343,9 +345,9 @@ this.
 val oldschool_color_to_int : color -> int = <fun>
 ```
 
-Because of the catch-all case, we'll no longer be warned about missing the
-`Bold` case. This highlights the value of avoiding catch-all cases, since
-they effectively suppress exhaustiveness checking.
+Because of the catch-all case, we'll no longer be warned about missing
+the `Bold` case.  That's why you should beware of catch-all cases:
+they suppress exhaustiveness checking.
 
 ## Combining Records and Variants
 
