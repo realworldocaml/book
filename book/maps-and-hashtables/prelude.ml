@@ -1,3 +1,3 @@
-#require "core,core.top,ppx_jane";;
+#require "core,core.top";;
 
 let () = Printexc.record_backtrace false

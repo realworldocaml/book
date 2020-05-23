@@ -186,12 +186,21 @@ parser, i.e., `t_of_sexp`, which is considerably more complex. Writing this
 kind of parsing and printing code by hand is mechanical and error prone, not
 to mention a drag.
 
-Given how mechanical the code is, you could imagine writing a program that
-inspects the type definition and automatically generates the conversion code
-for you. As it turns out, there's a *syntax extension* called `ppx_sexp_conv`
-which does just that, creating the required functions for every type
-annotated with `[@@deriving sexp]`. [Sexplib package/syntax extension
-in]{.idx}[syntax extension/in Sexplib package]{.idx}
+Given how mechanical the code is, you could imagine writing a program
+that inspects the type definition and automatically generates the
+conversion code for you. As it turns out, there's a *syntax extension*
+called `ppx_sexp_conv` which does just that, creating the required
+functions for every type annotated with `[@@deriving sexp]`.  To
+enable `ppx_sexp_conv`, we're going to enable `ppx_jane`, which is a
+larger collection of useful extensions that includes `ppx_sexp_conv`.
+[Sexplib package/syntax extension in]{.idx} [syntax extension/in
+Sexplib package]{.idx}
+
+```ocaml env=auto_making_sexp
+# #require "ppx_jane"
+```
+
+And now we can use the extension as follows.
 
 ```ocaml env=auto_making_sexp
 # type t = { foo: int; bar: float } [@@deriving sexp]

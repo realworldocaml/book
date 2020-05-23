@@ -771,9 +771,10 @@ Called from file "blow_up.ml", line 11, characters 16-29
 ```
 
 You can also capture a backtrace within your program by calling
-`Exn.backtrace`, which returns the backtrace of the most recently thrown
-exception. This is useful for reporting detailed information on errors that
-did not cause your program to fail.[Exn module/Exn.backtrace]{.idx}
+`Backtrace.Exn.most_recent`, which returns the backtrace of the most
+recently thrown exception.  This is useful for reporting detailed
+information on errors that did not cause your program to fail.
+[Backtrace module/Backtrace.Exn.most_recent]{.idx}
 
 This works well if you have backtraces enabled, but that isn't always the
 case. In fact, by default, OCaml has backtraces turned off, and even if you
@@ -781,8 +782,9 @@ have them turned on at runtime, you can't get backtraces unless you have
 compiled with debugging symbols. Base reverses the default, so if you're
 linking in Base, you will have backtraces enabled by default.
 
-Even using Base and compiling with debugging symbols, you can turn backtraces
-off by setting the `OCAMLRUNPARAM` environment variable to be empty:
+Even using Base and compiling with debugging symbols, you can turn
+backtraces off by setting the `OCAMLRUNPARAM` environment variable to
+be empty:
 
 ```sh dir=examples/correct/blow_up
 $ OCAMLRUNPARAM= dune exec -- ./blow_up.bc

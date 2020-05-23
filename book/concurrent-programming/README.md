@@ -238,11 +238,17 @@ instead.
 ::: {data-type=note}
 ##### Using `Let_syntax` with Async
 
-As was discussed in
-[Error Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
-there is a special syntax designed for working with monads, called
-`Let_syntax`. Here's what the `bind`-using version of `count_lines` looks
-like with that syntax.
+As was discussed in [Error
+Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref},
+there is a special syntax designed for working with monads, which we
+can enable by enabling `ppx_let`.
+
+```ocaml env=main
+# #require "ppx_let"
+```
+
+Here's what the `bind`-using version of `count_lines` looks like using
+that syntax.
 
 ```ocaml env=main
 # let count_lines filename =

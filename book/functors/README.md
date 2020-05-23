@@ -1,50 +1,51 @@
 # Functors
 
-Up until now, we've seen OCaml's modules play an important but limited role.
-In particular, we've seen them as a mechanism for organizing code into units
-with specified interfaces. But OCaml's module system can do much more than
-that, serving as a powerful tool for building generic code and structuring
-large-scale systems. Much of that power comes from functors.
-[functors/benefits of]{.idx}
+Up until now, we've seen OCaml's modules play an important but limited
+role.  In particular, we've seen them as a mechanism for organizing
+code into units with specified interfaces. But OCaml's module system
+can do much more than that, serving as a powerful tool for building
+generic code and structuring large-scale systems. Much of that power
+comes from functors.  [functors/benefits of]{.idx}
 
-Functors are, roughly speaking, functions from modules to modules, and they
-can be used to solve a variety of code-structuring problems, including:
+Functors are, roughly speaking, functions from modules to modules, and
+they can be used to solve a variety of code-structuring problems,
+including:
 
 Dependency injection
-: Makes the implementations of some components of a system swappable. This is
-  particularly useful when you want to mock up parts of your system for
-  testing and simulation purposes.
+: Makes the implementations of some components of a system
+  swappable. This is particularly useful when you want to mock up
+  parts of your system for testing and simulation purposes.
 
 Autoextension of modules
 : Functors give you a way of extending existing modules with new
-  functionality in a standardized way. For example, you might want to add a
-  slew of comparison operators derived from a base comparison function. To do
-  this by hand would require a lot of repetitive code for each type, but
-  functors let you write this logic just once and apply it to many different
-  types.
+  functionality in a standardized way. For example, you might want to
+  add a slew of comparison operators derived from a base comparison
+  function. To do this by hand would require a lot of repetitive code
+  for each type, but functors let you write this logic just once and
+  apply it to many different types.
 
 Instantiating modules with state
-: Modules can contain mutable states, and that means that you'll occasionally
-  want to have multiple instantiations of a particular module, each with its
-  own separate and independent mutable state. Functors let you automate the
-  construction of such modules.
+: Modules can contain mutable states, and that means that you'll
+  occasionally want to have multiple instantiations of a particular
+  module, each with its own separate and independent mutable
+  state. Functors let you automate the construction of such modules.
 
-These are really just some of the uses that you can put functors to. We'll
-make no attempt to provide examples of all of the uses of functors here.
-Instead, this chapter will try to provide examples that illuminate the
-language features and design patterns that you need to master in order to use
-functors effectively.
+These are really just some of the uses that you can put functors
+to. We'll make no attempt to provide examples of all of the uses of
+functors here.  Instead, this chapter will try to provide examples
+that illuminate the language features and design patterns that you
+need to master in order to use functors effectively.
 
 ## A Trivial Example
 
 Let's create a functor that takes a module containing a single integer
-variable `x` and returns a new module with `x` incremented by one. This is
-intended to serve as a way to walk through the basic mechanics of functors,
-even though it's not something you'd want to do in practice. [functors/basic
-mechanics of]{.idx}
+variable `x` and returns a new module with `x` incremented by
+one. This is intended to serve as a way to walk through the basic
+mechanics of functors, even though it's not something you'd want to do
+in practice. [functors/basic mechanics of]{.idx}
 
-First, let's define a signature for a module that contains a single value of
-type `int`:
+First, let's define a signature for a module that contains a single
+value of type `int`:
 
 ```ocaml env=main
 # open Base
@@ -53,7 +54,8 @@ module type X_int = sig val x : int end
 ```
 
 Now we can define our functor. We'll use `X_int` both to constrain the
-argument to the functor and to constrain the module returned by the functor:
+argument to the functor and to constrain the module returned by the
+functor:
 
 ```ocaml env=main
 # module Increment (M : X_int) : X_int = struct
@@ -62,15 +64,16 @@ argument to the functor and to constrain the module returned by the functor:
 module Increment : functor (M : X_int) -> X_int
 ```
 
-One thing that immediately jumps out is that functors are more syntactically
-heavyweight than ordinary functions. For one thing, functors require explicit
-(module) type annotations, which ordinary functions do not. Technically, only
-the type on the input is mandatory, although in practice, you should usually
-constrain the module returned by the functor, just as you should use an
-`mli`, even though it's not mandatory.
+One thing that immediately jumps out is that functors are more
+syntactically heavyweight than ordinary functions. For one thing,
+functors require explicit (module) type annotations, which ordinary
+functions do not. Technically, only the type on the input is
+mandatory, although in practice, you should usually constrain the
+module returned by the functor, just as you should use an `mli`, even
+though it's not mandatory.
 
-The following shows what happens when we omit the module type for the output
-of the functor:
+The following shows what happens when we omit the module type for the
+output of the functor:
 
 ```ocaml env=main
 # module Increment (M : X_int) = struct
@@ -79,8 +82,9 @@ of the functor:
 module Increment : functor (M : X_int) -> sig val x : int end
 ```
 
-We can see that the inferred module type of the output is now written out
-explicitly, rather than being a reference to the named signature `X_int`.
+We can see that the inferred module type of the output is now written
+out explicitly, rather than being a reference to the named signature
+`X_int`.
 
 We can use `Increment` to define new modules:
 
@@ -93,12 +97,13 @@ module Four : sig val x : int end
 - : int = 1
 ```
 
-In this case, we applied `Increment` to a module whose signature is exactly
-equal to `X_int`. But we can apply `Increment` to any module that *satisfies*
-the interface `X_int`, in the same way that the contents of an `ml` file must
-satisfy the `mli`. That means that the module type can omit some information
-available in the module, either by dropping fields or by leaving some fields
-abstract. Here's an example:
+In this case, we applied `Increment` to a module whose signature is
+exactly equal to `X_int`. But we can apply `Increment` to any module
+that *satisfies* the interface `X_int`, in the same way that the
+contents of an `ml` file must satisfy the `mli`. That means that the
+module type can omit some information available in the module, either
+by dropping fields or by leaving some fields abstract. Here's an
+example:
 
 ```ocaml env=main
 # module Three_and_more = struct
@@ -118,22 +123,24 @@ looking for (in this case, the variable `y`) is simply ignored.
 
 ## A Bigger Example: Computing with Intervals
 
-Let's consider a more realistic example of how to use functors: a library for
-computing with intervals. Intervals are a common computational object, and
-they come up in different contexts and for different types. You might need to
-work with intervals of floating-point values or strings or times, and in each
-of these cases, you want similar operations: testing for emptiness, checking
-for containment, intersecting intervals, and so on.
+Let's consider a more realistic example of how to use functors: a
+library for computing with intervals. Intervals are a common
+computational object, and they come up in different contexts and for
+different types. You might need to work with intervals of
+floating-point values or strings or times, and in each of these cases,
+you want similar operations: testing for emptiness, checking for
+containment, intersecting intervals, and so on.
 
-Let's see how to use functors to build a generic interval library that can be
-used with any type that supports a total ordering on the underlying set over
-which you want to build intervals. [interval computation/generic library
-for]{.idx}[functors/interval computation with]{.idx #FUNCTinterv}
+Let's see how to use functors to build a generic interval library that
+can be used with any type that supports a total ordering on the
+underlying set over which you want to build intervals. [interval
+computation/generic library for]{.idx}[functors/interval computation
+with]{.idx #FUNCTinterv}
 
-First we'll define a module type that captures the information we'll need
-about the endpoints of the intervals. This interface, which we'll call
-`Comparable`, contains just two things: a comparison function and the type of
-the values to be compared:
+First we'll define a module type that captures the information we'll
+need about the endpoints of the intervals. This interface, which we'll
+call `Comparable`, contains just two things: a comparison function and
+the type of the values to be compared:
 
 ```ocaml env=main
 # module type Comparable = sig
@@ -143,11 +150,11 @@ the values to be compared:
 module type Comparable = sig type t val compare : t -> t -> int end
 ```
 
-The comparison function follows the standard OCaml idiom for such functions,
-returning `0` if the two elements are equal, a positive number if the first
-element is larger than the second, and a negative number if the first element
-is smaller than the second. Thus, we could rewrite the standard comparison
-functions on top of `compare`.
+The comparison function follows the standard OCaml idiom for such
+functions, returning `0` if the two elements are equal, a positive
+number if the first element is larger than the second, and a negative
+number if the first element is smaller than the second. Thus, we could
+rewrite the standard comparison functions on top of `compare`.
 
 ```ocaml file=examples/compare_example.ml
 compare x y < 0     (* x < y *)
@@ -155,15 +162,16 @@ compare x y = 0     (* x = y *)
 compare x y > 0     (* x > y *)
 ```
 
-(This idiom is a bit of a historical error. It would be better if `compare`
-returned a variant with three cases for less than, greater than, and equal.
-But it's a well-established idiom at this point, and unlikely to change.)
+(This idiom is a bit of a historical error. It would be better if
+`compare` returned a variant with three cases for less than, greater
+than, and equal.  But it's a well-established idiom at this point, and
+unlikely to change.)
 
 The functor for creating the interval module follows. We represent an
-interval with a variant type, which is either `Empty` or `Interval (x,y)`,
-where `x` and `y` are the bounds of the interval. In addition to the type,
-the body of the functor contains implementations of a number of useful
-primitives for interacting with intervals:
+interval with a variant type, which is either `Empty` or `Interval
+(x,y)`, where `x` and `y` are the bounds of the interval. In addition
+to the type, the body of the functor contains implementations of a
+number of useful primitives for interacting with intervals:
 
 ```ocaml env=main
 # module Make_interval(Endpoint : Comparable) = struct
@@ -232,10 +240,10 @@ module Int_interval :
   end
 ```
 
-If the input interface for your functor is aligned with the standards of the
-libraries you use, then you don't need to construct a custom module to feed
-to the functor. In this case, we can directly use the `Int` or `String`
-modules provided by `Base`:
+If the input interface for your functor is aligned with the standards
+of the libraries you use, then you don't need to construct a custom
+module to feed to the functor. In this case, we can directly use the
+`Int` or `String` modules provided by `Base`:
 
 ```ocaml env=main
 # module Int_interval = Make_interval(Int)
@@ -263,11 +271,12 @@ module String_interval :
 
 This works because many modules in Base, including `Int` and `String`,
 satisfy an extended version of the `Comparable` signature described
-previously. Such standardized signatures are good practice, both because they
-make functors easier to use, and because they encourage standardization that
-makes your codebase easier to navigate.
+previously. Such standardized signatures are good practice, both
+because they make functors easier to use, and because they encourage
+standardization that makes your codebase easier to navigate.
 
-We can use the newly defined `Int_interval` module like any ordinary module:
+We can use the newly defined `Int_interval` module like any ordinary
+module:
 
 ```ocaml env=main
 # let i1 = Int_interval.create 3 8
@@ -278,10 +287,10 @@ val i2 : Int_interval.t = Int_interval.Interval (4, 10)
 - : Int_interval.t = Int_interval.Interval (4, 8)
 ```
 
-This design gives us the freedom to use any comparison function we want for
-comparing the endpoints. We could, for example, create a type of integer
-interval with the order of the comparison reversed, as follows:[interval
-computation/comparison function for]{.idx}
+This design gives us the freedom to use any comparison function we
+want for comparing the endpoints. We could, for example, create a type
+of integer interval with the order of the comparison reversed, as
+follows:[interval computation/comparison function for]{.idx}
 
 ```ocaml env=main
 # module Rev_int_interval =
@@ -309,9 +318,9 @@ val interval : Int_interval.t = Int_interval.Empty
 val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
 ```
 
-Importantly, `Rev_int_interval.t` is a different type than `Int_interval.t`,
-even though its physical representation is the same. Indeed, the type system
-will prevent us from confusing them.
+Importantly, `Rev_int_interval.t` is a different type than
+`Int_interval.t`, even though its physical representation is the
+same. Indeed, the type system will prevent us from confusing them.
 
 ```ocaml env=main
 # Int_interval.contains rev_interval 3
@@ -320,17 +329,18 @@ Error: This expression has type Rev_int_interval.t
        but an expression was expected of type Int_interval.t
 ```
 
-This is important, because confusing the two kinds of intervals would be a
-semantic error, and it's an easy one to make. The ability of functors to mint
-new types is a useful trick that comes up a lot.
+This is important, because confusing the two kinds of intervals would
+be a semantic error, and it's an easy one to make. The ability of
+functors to mint new types is a useful trick that comes up a lot.
 
 ### Making the Functor Abstract
 
-There's a problem with `Make_interval`. The code we wrote depends on the
-invariant that the upper bound of an interval is greater than its lower
-bound, but that invariant can be violated. The invariant is enforced by the
-`create` function, but because `Interval.t` is not abstract, we can bypass
-the `create` function:[interval computation/abstract functor for]{.idx}
+There's a problem with `Make_interval`. The code we wrote depends on
+the invariant that the upper bound of an interval is greater than its
+lower bound, but that invariant can be violated. The invariant is
+enforced by the `create` function, but because `Interval.t` is not
+abstract, we can bypass the `create` function:[interval
+computation/abstract functor for]{.idx}
 
 ```ocaml env=main
 # Int_interval.is_empty (* going through create *)
@@ -342,8 +352,8 @@ the `create` function:[interval computation/abstract functor for]{.idx}
 ```
 
 To make `Int_interval.t` abstract, we need to restrict the output of
-`Make_interval` with an interface. Here's an explicit interface that we can
-use for that purpose:
+`Make_interval` with an interface. Here's an explicit interface that
+we can use for that purpose:
 
 ```ocaml env=main
 # module type Interval_intf = sig
@@ -365,10 +375,11 @@ module type Interval_intf =
   end
 ```
 
-This interface includes the type `endpoint` to give us a way of referring to
-the endpoint type. Given this interface, we can redo our definition of
-`Make_interval`. Notice that we added the type `endpoint` to the
-implementation of the module to match `Interval_intf`:
+This interface includes the type `endpoint` to give us a way of
+referring to the endpoint type. Given this interface, we can redo our
+definition of `Make_interval`. Notice that we added the type
+`endpoint` to the implementation of the module to match
+`Interval_intf`:
 
 ```ocaml env=main
 # module Make_interval(Endpoint : Comparable) : Interval_intf = struct
@@ -413,9 +424,10 @@ module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
 
 ### Sharing Constraints
 
-The resulting module is abstract, but it's unfortunately too abstract. In
-particular, we haven't exposed the type `endpoint`, which means that we can't
-even construct an interval anymore: [sharing constraint]{.idx}
+The resulting module is abstract, but it's unfortunately too
+abstract. In particular, we haven't exposed the type `endpoint`, which
+means that we can't even construct an interval anymore: [sharing
+constraint]{.idx}
 
 ```ocaml env=main
 # module Int_interval = Make_interval(Int)
@@ -434,20 +446,21 @@ Error: This expression has type int but an expression was expected of type
          Int_interval.endpoint
 ```
 
-To fix this, we need to expose the fact that `endpoint` is equal to `Int.t`
-(or more generally, `Endpoint.t`, where `Endpoint` is the argument to the
-functor). One way of doing this is through a *sharing constraint*, which
-allows you to tell the compiler to expose the fact that a given type is equal
-to some other type. The syntax for a simple sharing constraint is as follows:
+To fix this, we need to expose the fact that `endpoint` is equal to
+`Int.t` (or more generally, `Endpoint.t`, where `Endpoint` is the
+argument to the functor). One way of doing this is through a *sharing
+constraint*, which allows you to tell the compiler to expose the fact
+that a given type is equal to some other type. The syntax for a simple
+sharing constraint is as follows:
 
 ```
 <Module_type> with type <type> = <type'>
 ```
 
-The result of this expression is a new signature that's been modified so that
-it exposes the fact that *`type`* defined inside of the module type is equal
-to *`type'`* whose definition is outside of it. One can also apply multiple
-sharing constraints to the same signature:
+The result of this expression is a new signature that's been modified
+so that it exposes the fact that *`type`* defined inside of the module
+type is equal to *`type'`* whose definition is outside of it. One can
+also apply multiple sharing constraints to the same signature:
 
 ```
 <Module_type> with type <type1> = <type1'> and type <type2> = <type2'>
@@ -683,9 +696,18 @@ computation/multiple interfaces and]{.idx}
 - : Sexp.t = (This is (an s-expression))
 ```
 
-`Base` comes with a syntax extension called `ppx_sexp_conv` which will
-generate s-expression conversion functions for any type annotated with
-`[@@deriving sexp]`. Thus, we can write: [sexp declaration]{.idx}
+`Base` is designed to work well with a syntax extension called
+`ppx_sexp_conv` which will generate s-expression conversion functions
+for any type annotated with `[@@deriving sexp]`.  We can enable
+`ppx_sexp_conv` along with a collection of other useful extensions by
+enabling `ppx_jane`:
+
+```ocaml env=main
+# #require "ppx_jane"
+```
+
+Now, we can use the deriving annotation to create sexp-converters for
+a given type.
 
 ```ocaml env=main
 # type some_type = int * string list [@@deriving sexp]
@@ -1089,4 +1111,3 @@ on that list.
 All of this means that for small and simple programs, heavy use of functors
 is probably a mistake. But as your programs get more complicated and you need
 more effective modular architectures, functors become a highly valuable tool.
-
