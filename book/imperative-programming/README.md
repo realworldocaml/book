@@ -53,7 +53,7 @@ Here's the interface we'll match, provided as an `mli`. The type `('a,
 'b) t` represents a dictionary with keys of type `'a` and data of type
 `'b`.
 
-```ocaml file=examples/correct/dictionary/dictionary.mli,part=1
+```ocaml file=examples/correct/dictionary/src/dictionary.mli,part=1
 (* file: dictionary.mli *)
 open Base
 
@@ -83,7 +83,7 @@ imperative constructs as they come up.
 
 Our first step is to define the type of a dictionary as a record.
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=1
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=1
 (* file: dictionary.ml *)
 open Base
 
@@ -104,7 +104,7 @@ the functions for hashing and equality checking.
 Now we'll start putting together the basic functions for manipulating
 a dictionary:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=2
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=2
 let num_buckets = 17
 
 let hash_bucket t key = (t.hash key) % num_buckets
@@ -163,7 +163,7 @@ returned.
 
 Now let's look at the implementation of `iter`:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=3
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=3
 let iter t ~f =
   for i = 0 to Array.length t.buckets - 1 do
     List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
@@ -186,7 +186,7 @@ idiomatic in imperative contexts.
 The following code is for adding and removing mappings from the
 dictionary:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=4
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=4
 let bucket_has_key t i key =
   List.exists t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
 
@@ -225,7 +225,7 @@ updating a record field (`record.field <- expression`).
 We also use `;`, the sequencing operator, to express a sequence of imperative
 actions. We could have done the same using `let` bindings:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=add-with-let-in
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=add-with-let-in
 let () = t.buckets.(i) <- (key, data) :: filtered_bucket in
   if not replace then t.length <- t.length + 1
 ```
