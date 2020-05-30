@@ -18,6 +18,4 @@ let%expect_test "" =
   [%expect{| ((2 bar) (1 foo)) |}];
   Dictionary.add d ~key:2 ~data:"snoo";
   p ();
-  (* FIX: Well, this is obviously wrong.  We should have overwritten
-     the old binding. *)
-  [%expect{| ((2 snoo) (2 bar) (1 foo)) |}]
+  [%expect{| ((2 snoo) (1 foo)) |}]

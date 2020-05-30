@@ -195,7 +195,7 @@ let add t ~key ~data =
   let replace = bucket_has_key t i key in
   let filtered_bucket =
     if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
     else
       t.buckets.(i)
   in
