@@ -7,134 +7,46 @@
   <p>At the highest level, here's what you need to do:</p>
 
   <ul>
-    <li>Get <a href="https://opam.ocaml.org">opam</a> installed</li>
+    <li><a href="#installing-opam">Install opam</a>, OCaml's default
+      package manager</li>
 
-    <li>Build OCaml 4.10.0 or later using opam or your OS package
-    manager</li>
+    <li><a href="#install-via-opam">Install via opam</a> the version of
+      OCaml you'll need, along with the libraries and tools will help
+      you work through the examples in the book</li>
 
-    <li>With opam, install the key libraries that you need to work
-    through the examples in the book</li>
+    <li><a href="#utop-setup">Configure utop</a>, the interactive
+      toplevel that will be the primary vehicle we'll use for walking
+      through small examples.</li>
 
-    <li>Install <a href="https://github.com/ocaml-community/utop">Utop</a>,
-    a modern interactive toplevel with command history, tab
-    completion, and defaults that are tuned to work with the examples
-    in Real World OCaml,</li>
-
-    <li>Set up your editing environment.</li>
+    <li><a href="#editor-setup">Set up your editing environment.</a>
+    We have instructions for Visual Studio Code, Emacs, and Vi</li>
   </ul>
 
   <p>Note that Windows is not currently supported by the examples in
   Real World OCaml or by opam, although it is being worked on.  Until
   that's ready, we recommend using a virtual machine running Debian
   Linux on your local machine, or
-<a href="https://docker.com">Docker for Windows</a>.</p>
+  <a href="https://docker.com">Docker for Windows</a>.</p>
 
   <p>Let's get started.</p>
 
-  <h2>Getting opam</h2>
+  <h2 id="installing-opam">Installing opam</h2>
+
+  <p>opam is the default package manager for OCaml, and you'll need it
+  to get everything else you need installed and set up.</p>
 
   <p>The easiest way to install opam is through your OS's package
   manager. In most cases, installing opam will also trigger the
-  installation of OCaml. The version installed isn't important,
-  since we can use opam itself to install other versions of the
+  installation of OCaml. The version installed isn't important, since
+  we can use opam itself to install other versions of the
   compiler.</p>
 
-  <p>Here are platform-specific instructions.</p>
+  <p>Here are
+  some <a href="http://opam.ocaml.org/doc/Install.html">platform-specific
+  installation instructions</a> that can help you through the
+  process.</p>
 
-  <h3>macOS</h3>
-
-  <p>If you don't already have a package manager set up, try
-  installing homebrew. You can find information on installing
-  homebrew <a href="http://brew.sh/">here</a>. make sure you have
-  the latest XCode (and Command Line Tools for XCode) installed
-  from the App Store first.</p>
-
-  <p>You can then install opam using brew.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-brew install opam
-</code></pre>
-
-  <p>Another popular package manager on macOS is <a href=
-  "http://macports.org">MacPorts</a>, which also has an opam
-  package.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-sudo port install opam
-</code></pre>
-
-  <h3>Ubuntu Linux</h3>
-
-  <p>14.04 and higher comes with recent versions of OCaml and opam. No PPA
-  needed.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-sudo apt-get install curl build-essential m4 zlib1g-dev libssl-dev ocaml ocaml-native-compilers opam
-</code></pre>
-
-  <h3>Debian Linux</h3>
-
-  <p>Debian's OCaml packages aren't yet at 4.10.0, and so you will
-  need to compile it from sources. If you are using the
-  Debian 10 <code>stable</code> stream, then opam 2.0 will
-  be available.</p>
-
-  <h3>Arch Linux</h3>
-
-  <p>opam is available from the <code>community</code> repository. You can
-  install opam using <code>pacman</code>:</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-sudo pacman -S opam
-</code></pre>
-
-  <h3>Building from source</h3>
-
-  <p>On platforms not listed above, you'll need to install opam
-  from source, and to do that you'll need OCaml installed first.
-  Some platforms, including Fedora Linux, have OCaml packages that
-  you can install but not opam packages. You can build opam on
-  OCaml version 4.02.1 or later.</p>
-
-  <p>To install OCaml from source, you'll first need a C compiler,
-  generally <code>gcc</code> or <code>llvm</code>.</p>
-
-  <p>The following is enough to get OCaml installed on most
-  platforms.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-curl -OL https://github.com/ocaml/ocaml/archive/4.10.0.tar.gz
-tar -zxvf 4.10.0.tar.gz
-cd ocaml-4.10.0
-./configure
-make world world.opt
-sudo make install
-</code></pre>
-
-  <p>If you have problems with any of the above, read the
-  <code>INSTALL</code> file in the tar file.</p>
-
-  <h4>Installing OCaml locally</h4>
-
-  <p>The installation step described above requires administrator
-  privileges. You can also install it in your home directory by
-  passing the <code>prefix</code> option to the configuration
-  script:</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-./configure -prefix $HOME/my-ocaml
-</code></pre>
-
-  <p>Once the installation is completed into this custom location,
-  you will need to add <code>$HOME/my-ocaml/bin</code> to your
-  <code>PATH</code>, normally by editing <code>~/.bashrc</code> or
-  <code>~/.profile</code>. You shouldn't really do this unless you
-  have special reasons, so try to install binary packages before
-  trying a source installation.</p>
-
-  <h4>Installing opam</h4>
-
-  <p>If the binary packages aren't available for your system,
-  you'll need to install the latest opam release from source. You
-  can follow the online <a href=
-  "http://opam.ocaml.org/doc/Quick_Install.html">quick install
-  guide</a>.</p>
-
-  <h2>Configuring opam</h2>
+  <h2 id="#install-via-opam">Install libraries and tools in opam</h2>
 
   <p>The entire opam package database is held in the
   <code>.opam</code> directory in your home directory, including
@@ -148,7 +60,8 @@ sudo make install
   will ask you a few interactive questions at the end. It's safe to
   answer yes to these unless you want to manually control the
   configuration steps yourself as an advanced user.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-22"><code class="language-bash">
+  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-22">
+    <code class="language-bash">
 opam init
 &lt;...&gt;
 =-=-=-= Configuring opam =-=-=-=
@@ -277,7 +190,7 @@ opam install async yojson core_extended core_bench cohttp async_graphics cryptok
   this set up as part of your shell init scripts, as described
   earlier.</p>
 
-  <h2>Setting up and using <code>utop</code></h2>
+  <h2 id="utop-setup">Setting up and using <code>utop</code></h2>
 
   <p>When you first run <code>utop</code>, you'll find yourself at
   an interactive prompt with a bar at the bottom of the screen. The
@@ -322,7 +235,7 @@ open Core
   remember to open it before running any of the interactive
   examples in the book.</p>
 
-  <h2>Editors</h2>
+  <h2 id="editor-setup">Editor set-up</h2>
 
   <h3>Emacs</h3>
 
