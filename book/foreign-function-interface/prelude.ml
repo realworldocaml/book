@@ -1,4 +1,4 @@
-#require "core,core.top,ppx_jane";;
+#require "core,core.top";;
 #require "ctypes";;
 #require "ctypes.top";;
 #require "ctypes-foreign.threaded";;

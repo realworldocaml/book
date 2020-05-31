@@ -229,9 +229,9 @@ the `core_bench` library, which can be installed by running
 # #require "core_bench"
 # open Core_bench
 # [ Bench.Test.create ~name:"plus_one_match" (fun () ->
-        ignore (plus_one_match 10))
+        plus_one_match 10)
   ; Bench.Test.create ~name:"plus_one_if" (fun () ->
-        ignore (plus_one_if 10)) ]
+        plus_one_if 10) ]
   |> Bench.bench
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────────────┬──────────┐
@@ -260,8 +260,8 @@ Again, we can benchmark these to see the difference:
 
 ```ocaml env=main,non-deterministic=command
 # let numbers = List.range 0 1000 in
-  [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
-  ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
+  [ Bench.Test.create ~name:"sum_if" (fun () -> sum_if numbers)
+  ; Bench.Test.create ~name:"sum"    (fun () -> sum numbers) ]
   |> Bench.bench
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
 ┌────────┬──────────┐
@@ -409,7 +409,7 @@ can for example use `fold` to reverse a list, in which case the accumulator
 is itself a list:
 
 ```ocaml env=main
-# List.fold ~init:[] ~f:(fun list x -> x :: list) [1;2;3;4]
+# List.fold ~init:[] ~f:(fun acc hd -> hd :: acc) [1;2;3;4]
 - : int list = [4; 3; 2; 1]
 ```
 

@@ -1,4 +1,4 @@
-open Core
+open Base
 
 type basic_color =
   [ `Black   | `Blue | `Cyan  | `Green
