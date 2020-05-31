@@ -10,8 +10,9 @@
     <li><a href="#installing-opam">Install opam</a>, OCaml's default
       package manager</li>
 
-    <li><a href="#install-via-opam">Install via opam</a> the version of
-      OCaml you'll need, along with the libraries and tools will help
+    <li><a href="#opam-setup">Set up opam</a>, which means
+      initializing opam and then installing the version of OCaml
+      you'll need, along with the libraries and tools that will help
       you work through the examples in the book</li>
 
     <li><a href="#utop-setup">Configure utop</a>, the interactive
@@ -22,10 +23,10 @@
     We have instructions for Visual Studio Code, Emacs, and Vi</li>
   </ul>
 
-  <p>Note that Windows is not currently supported by the examples in
-  Real World OCaml or by opam, although it is being worked on.  Until
-  that's ready, we recommend using a virtual machine running Debian
-  Linux on your local machine, or
+  <p>Note that Windows is not fully supported by the examples in Real
+  World OCaml or by opam, though it's being worked on.  Until that's
+  ready, we recommend using a virtual machine running Debian Linux on
+  your local machine, or
   <a href="https://docker.com">Docker for Windows</a>.</p>
 
   <p>Let's get started.</p>
@@ -46,7 +47,9 @@
   installation instructions</a> that can help you through the
   process.</p>
 
-  <h2 id="#install-via-opam">Install libraries and tools in opam</h2>
+  <h2 id="#opam-setup">Setting up opam</h2>
+
+  <h3>Run <code>opam init</code></h3>
 
   <p>The entire opam package database is held in the
   <code>.opam</code> directory in your home directory, including
@@ -56,147 +59,94 @@
   problems configuring opam, just delete the whole
   <code>~/.opam</code> directory and start over.</p>
 
-  <p>Let's begin by initialising the opam package database. This
-  will ask you a few interactive questions at the end. It's safe to
-  answer yes to these unless you want to manually control the
-  configuration steps yourself as an advanced user.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-22">
-    <code class="language-bash">
-opam init
-&lt;...&gt;
-=-=-=-= Configuring opam =-=-=-=
-Do you want to update your configuration to use opam ? [Y/n] y
-[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
-[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
-[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
-[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
-User configuration:
-  ~/.ocamlinit is already up-to-date.
-  ~/.profile is already up-to-date.
-Gloabal configuration:
-  Updating &lt;root&gt;/opam-init/init.sh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating &lt;root&gt;/opam-init/init.zsh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating &lt;root&gt;/opam-init/init.csh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-</code></pre>
+  <p>Let's begin by initialising the opam package database. We do this
+    by running:</p>
 
-  <p>You only need to run this command once, and it will create the
-  <code>~/.opam</code> directory and sync with the latest package
-  list from the online opam database.</p>
+  <pre class="command-line" data-user="rwo" data-host="lama">
+<code class="language-bash">
+opam init</code></pre>
 
-  <p>When the <code>init</code> command finishes, you'll see some
-  instructions about environment variables. opam never installs
-  files into your system directories (which would require
-  administrator privileges). Instead, it puts them into your home
-  directory by default, and can output a set of shell commands
-  which configures your shell with the right <code>PATH</code>
-  variables so that packages will just work.</p>
+  <p>Before <code>opam init</code> finishes, it will ask you if you
+  want it to adjust some of the config files for your shell.  We
+  recommend you say yes here so as to automate adjusting the PATH
+  environment variable of your shell and to prepare your environment
+  in other ways.</p>
 
-  <p>If you choose not to follow the opam instructions to add
-  itself to your shell profile, you can still configure it
-  on-the-fly in your current shell with just one command.</p>
+  <p>Note that if for whatever reason your shell is not set up
+    properly, you can put it in the right state by running:</p>
 
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-eval `opam config env`
-  </code></pre>
+    <pre class="command-line" data-user="rwo"
+  data-host="lama"><code class="language-bash">
+eval $(opam env)</code></pre>
 
   <p>This evaluates the results of running <code>opam config
   env</code> in your current shell and sets the variables so that
   subsequent commands will use them. This <em>only</em> works with
-  your current shell and it can only be automated for future shells
-  by adding the line to your login scripts. On macOS you should
-  typically use <code>~/.profile</code>, and <code>~/.bashrc</code>
-  on most Linux setups.</p>
+  your current shell and it can only be automated for future shells by
+  adding the line to your login scripts (which is exactly what opam
+  offers to do for you in <code>opam init</code>). </p>
 
-  <p>opam isn't unusual in this approach; the SSH
-  <code>ssh-agent</code> also works similarly, so if you're having
-  any problems just hunt around in your configuration scripts to
-  see how that's being invoked.</p>
-
-  <p>If you answered <code>yes</code> to the auto-complete scripts
-  question during <code>opam init</code>, this should have all been
-  set up for you. You can verify this worked by seeing if the
-  <code>OCAML_TOPLEVEL_PATH</code> environment variable is set. You
-  can do this in <code>bash</code> as follows.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2"><code class="language-bash">
-printenv OCAML_TOPLEVEL_PATH
-/Users/myusername/.opam/4.10.0/lib/toplevel
-</code></pre>
-
-  <p>The next step is to make sure we have the right compiler
-  version installed.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-5"><code class="language-bash">
+  <p>You can check if your environment is set up properly by
+  running <code>opam switch</code> with no arguments.  It will emit
+  a warning if your shell is not set up correctly, along with
+  instructions on how to fix it.</p>
+  <pre class="command-line" data-user="rwo" data-host="lama" data-output="2-7">
+<code class="language-bash">
 opam switch
-system  C system                      System compiler (4.04.1)
---     -- 4.05.0                      Official 4.05.0 release
---     -- 4.06.0                      Official 4.06.0 release
---     -- 4.07.1                      Official 4.07.1 release
---     -- 4.08.1                      Official 4.08.1 release
---     -- 4.09.1                      Official 4.09.1 release
---     -- 4.10.0                      Official 4.10.0 release
+#  switch                            compiler                    description
+→  default                           ocaml-base-compiler.4.09.1  default
+
+[WARNING] The environment is not in sync with the current switch.
+          You should run: eval $(opam env)
 </code></pre>
 
-  <p>If, as in this case, your system compiler is older than
-  <code>4.08.1</code>, you should install a more up to date version
-  of the compiler, as shown below.</p>
+  <h3>Installing the right compiler</h3>
+
+  <p>Real World OCaml requires OCaml 4.10.0.  You can use <code>opam
+      switch</code> to see which version of OCaml you have installed.
+      If, as shown in the above invocation of switch, you have an
+      older version installed, you can use opam to install a more
+      up-to-date version:</p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam switch 4.10.0
-eval `opam env`
+opam switch create 4.10.0
+eval $(opam env)
 </code></pre>
 
-  <p>The <code>switch</code> itself will take around ten or fifteen
-  minutes on a modern machine, and will download and install the
-  OCaml compiler within the <code>~/.opam</code> directory). You
-  can install multiple compilers at once, and switching between
-  them once they're installed is fast.</p>
+  <p>The <code>opam switch create</code> will take a few minutes on a
+  modern machine, and will download and install the new compiler and
+  all libraries associated with it in <code>~/.opam/4.10.0</code>.</p>
 
-  <p>The new compiler and all libraries associated with it will be
-  installed in <code>~/.opam/4.10.0</code>.</p>
+  <h3>Installing libraries and tools</h3>
 
   <p>Finally, we're ready to install the libraries and tools we'll
-  need for the book. The most important ones are <code>core</code>,
+  need for the book. The two important ones are <code>base</code>,
   which provides the standard library that all the examples in the
   book are based on, and <code>utop</code>, which is the
   interactive toplevel that you can use for working through the
-  examples.</p>
+  examples.  We can install them as follows. </p>
   <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam install core utop
+opam install base utop
 </code></pre>
 
-  <p>This will take about five or ten minutes to build, and will
-  install the requested packages along with a bunch of
-  dependencies. But there are other libraries that will be useful
-  as you go through the book that you might as well install
-  now.</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam install async yojson core_extended core_bench cohttp async_graphics cryptokit menhir
+  <p>But you'll probably want more than this as you work through the
+  book.  Here's a more complete list of libraries you should install:</p>
+  <pre class="command-line" data-user="rwo" data-host="lama">
+    <code class="language-bash">
+opam install core async yojson \
+     core_extended core_bench cohttp-async \
+     async_graphics cryptokit menhir ocamlformat
 </code></pre>
 
   <p>If some of the above don't work, don't worry too much. Most of
-  them come up in only a few places in the book. (There are some
-  known problems right now: in particular,
-  <code>core_extended</code> doesn't install cleanly on recent
-  versions of OS X, due to an issue with the <code>re2</code>
-  library it depends on. That is expected to be resolved soon.)</p>
-
-  <p>Note that if you've installed <code>utop</code> and can't
-  launch it from the shell, make sure you've run <code>eval `opam
-  config env`</code> in this shell. In general, you should just get
-  this set up as part of your shell init scripts, as described
-  earlier.</p>
+  them come up in only a few places in the book.</p>
 
   <h2 id="utop-setup">Setting up and using <code>utop</code></h2>
 
-  <p>When you first run <code>utop</code>, you'll find yourself at
-  an interactive prompt with a bar at the bottom of the screen. The
-  bottom bar dynamically updates as you write text, and contains
-  the possible names of modules or variables that are valid at that
-  point in the phrase you are entering. You can press the
+  <p>When you first run <code>utop</code>, you'll find yourself at an
+  interactive prompt with a bar at the bottom of the screen. The
+  bottom bar dynamically updates as you write text, and contains the
+  possible names of modules or variables that are valid at that point
+  in the phrase you are entering. You can press the
   <code>&lt;tab&gt;</code> key to complete the phrase with the
   first choice.</p>
 
