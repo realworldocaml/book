@@ -13,6 +13,9 @@ can start by typing *ocaml* at the command line). These instructions will
 assume you're using `utop`, but the ordinary toplevel should mostly work
 fine.
 
+Before going any further, make sure you've followed the steps in [the
+installation page](install.html).
+
 ::: {data-type=note}
 ##### `Base`, `Core` and `Core_kernel`
 
