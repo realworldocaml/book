@@ -20,7 +20,8 @@
       through small examples.</li>
 
     <li><a href="#editor-setup">Set up your editing environment.</a>
-    We have instructions for Visual Studio Code, Emacs, and Vi</li>
+    We have pointers for a few editors, including Visual Studio Code,
+    Emacs, and Vi</li>
   </ul>
 
   <p>Note that Windows is not fully supported by the examples in Real
@@ -132,9 +133,9 @@ opam install base utop
   book.  Here's a more complete list of libraries you should install:</p>
   <pre class="command-line" data-user="rwo" data-host="lama">
     <code class="language-bash">
-opam install core async yojson \
-     core_extended core_bench cohttp-async \
-     async_graphics cryptokit menhir ocamlformat
+opam install core async yojson core_extended \
+     core_bench cohttp-async async_graphics \
+     cryptokit menhir ocamlformat
 </code></pre>
 
   <p>If some of the above don't work, don't worry too much. Most of
@@ -156,6 +157,7 @@ opam install core async yojson \
   that you have Core installed, you should update your
   <code>ocamlinit</code> to load Core every time you start
   <code>utop</code>, by adding the following lines.</p>
+
   <pre ><code class="language-ocaml">
 #use "topfind";;
 #thread;;
@@ -187,101 +189,56 @@ open Core
 
   <h2 id="editor-setup">Editor set-up</h2>
 
+  In order to have a reasonable editing experience, there are a
+  collection of different tools you'll want set up.
+
+  <ul>
+    <li> An editor mode that understands the language, and can help
+      with the basics of syntax-highlighting and navigation. </li>
+    <li> <a href="https://github.com/ocaml/merlin">Merlin</a>, which
+      provides out of your code, like auto-completion,
+      go-to-definition, and type-throwback.</li>
+    <li> <a href="https://github.com/ocaml-ppx/ocamlformat">ocamlformat</a>,
+      which automatically reformats and indents your code.
+  </ul>
+
+  In the following, we'll describe how to set up what you need for
+  each of the editors.
+
+  <h3>Visual Studio Code</h3>
+
+  There are several OCaml modes for Visual Studio, but we recommend
+  the <a href="https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform">OCaml
+  Labs OCaml-Platform plug-in</a>.  This works alongside a server that
+  supports the Visual
+  Studio's <a href="https://microsoft.github.io/language-server-protocol/">Language
+  Server Protocol</a> (LSP).
+
+  Instructions for installing OCaml LSP server cane be
+  found <a href="https://github.com/ocaml/ocaml-lsp">here</a>.
+
   <h3>Emacs</h3>
 
-  <p>These instructions have been tested on emacs 24.2 and should
-  work for that version and newer. There are some reports of
-  problems with earlier emacsen.</p>
+  opam comes with a <code>user-setup</code> package that can be used
+  to install Emacs configs.  You can install it as follows.  Note that
+  we first make sure that <code>ocp-indent</code>, an OCaml
+  indentation tool, is available, as well as <code>tuareg</code>,
+  which is an Emacs mode for OCaml.
 
-  <p><code>tuareg</code> is the most commonly used mode for editing
-  OCaml code in emacs. You can download it <a href=
-  "https://github.com/ocaml/tuareg">here</a>. You should download
-  it and untar it into some subdirectory of your home
-  directory.</p>
+  <pre class="command-line" data-user="rwo" data-host="lama">
+<code class="language-bash">
+opam install tuareg ocp-indent
+opam install user-setup
+opam user-setup install</code></pre>
 
-  <p>Once you've done that, you can add the following rather
-  lengthy snippet to your <code>.emacs</code> file.</p>
-  <pre><code class="language-scheme">
-;; -- common-lisp compatibility if not added earlier in your .emacs
-(require 'cl)
+  An alternative to <code>ocp-indent</code>
+  is <code>ocamlformat</code>, which is a full-on code formatter, as
+  opposed to just an indenter.  <code>user-setup</code> doesn't
+  support <code>ocamlformat</code> yet, but you can find
+  instructions <a href="https://github.com/ocaml-ppx/ocamlformat">here</a>
 
-;; -- Tuareg mode -----------------------------------------
-;; Add Tuareg to your search path
-(add-to-list
- 'load-path
- ;; Change the path below to be wherever you've put your tuareg installation.
- (expand-file-name "~/lib/elisp/tuareg"))
-(require 'tuareg)
-(setq auto-mode-alist
-      (append '(("\\.ml[ily]?$" . tuareg-mode))
-          auto-mode-alist))
-
-;; -- Tweaks for OS X -------------------------------------
-;; Tweak for problem on OS X where Emacs.app doesn't run the right
-;; init scripts when invoking a sub-shell
-(cond
- ((eq window-system 'ns) ; macosx
-  ;; Invoke login shells, so that .profile or .bash_profile is read
-  (setq shell-command-switch "-lc")))
-
-;; -- opam and utop setup --------------------------------
-;; Setup environment variables using opam
-(dolist
-   (var (car (read-from-string
-           (shell-command-to-string "opam config env --sexp"))))
- (setenv (car var) (cadr var)))
-;; Update the emacs path
-(setq exec-path (split-string (getenv "PATH") path-separator))
-;; Update the emacs load path
-(push (concat (getenv "OCAML_TOPLEVEL_PATH")
-          "/../../share/emacs/site-lisp") load-path)
-;; Automatically load utop.el
-(autoload 'utop "utop" "Toplevel for OCaml" t)
-(autoload 'utop-setup-ocaml-buffer "utop" "Toplevel for OCaml" t)
-(add-hook 'tuareg-mode-hook 'utop-setup-ocaml-buffer)
-</code></pre>
-
-  <p>Once this successfully loads in Emacs, you can run
-  <code>utop</code> by doing <code>M-x utop</code> in Emacs. You
-  can also use commands like <code>Ctrl-c Ctrl-b</code> to evaluate
-  your current buffer in <code>utop</code>, or <code>Ctrl-c
-  Ctrl-e</code> to just evaluate a single expression.</p>
-
-  <p>There are more detailed instructions at the <a href=
-  "https://github.com/diml/utop#integration-with-emacs">utop
-  homepage</a>.</p>
-
-  <h4>Using Emacs24 packages</h4>
-
-  <p>As an alternative to the setup above, here is a simplified
-  OCaml setup using <a href="http://melpa.milkbox.net/#/">MELPA</a>
-  packages.</p>
-
-  <p>Add to <code>.emacs.d/init.el</code></p>
-  <pre><code class="language-scheme">
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
-</code></pre>
-
-  <p>Now do <code>M-x package-install</code> and install
-  <code>tuareg</code>, <code>utop</code> and
-  <code>merlin</code>.</p>
-
-  <p>Then add the rest of the configuration to
-  <code>.emacs.d/init.el</code></p>
-  <pre><code class="language-scheme">
-(add-hook 'tuareg-mode-hook 'tuareg-imenu-set-imenu)
-(setq auto-mode-alist
-      (append '(("\\.ml[ily]?$" . tuareg-mode)
-                ("\\.topml$" . tuareg-mode))
-              auto-mode-alist))
-(autoload 'utop-setup-ocaml-buffer "utop" "Toplevel for OCaml" t)
-(add-hook 'tuareg-mode-hook 'utop-setup-ocaml-buffer)
-(add-hook 'tuareg-mode-hook 'merlin-mode)
-(setq merlin-use-auto-complete-mode t)
-(setq merlin-error-after-save nil)
-</code></pre>
+  Note that you can also install Tuareg from your favorite Emacs
+  package manager, if you prefer.
 
   <h3>Vim</h3>
 
