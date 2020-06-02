@@ -85,10 +85,10 @@ make promote
 ### Testing non-deterministic examples
 
 A few code examples are not deterministic: for instance benchmarks. In this case,
-there is a special command to run:
+there is a specific dune profile to use:
 
 ```
-make test-all
+dune runtest --profile non-deterministic ...
 ```
 
 To accept the changes:
