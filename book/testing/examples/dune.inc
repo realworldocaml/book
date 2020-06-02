@@ -34,8 +34,10 @@
  (deps
   (source_tree ./correct/manual_property_test)
   (package base)
+  (package bin_prot)
   (package ppx_jane)
-  (package stdio))
+  (package stdio)
+  (package typerep))
  (action
   (run dune build @all @runtest --root ./correct/manual_property_test)))
 
@@ -62,8 +64,10 @@
  (deps
   (source_tree ./correct/simple_expect_test)
   (package base)
+  (package bin_prot)
   (package ppx_jane)
-  (package stdio))
+  (package stdio)
+  (package typerep))
  (action
   (run dune build @all @runtest --root ./correct/simple_expect_test)))
 
@@ -76,8 +80,10 @@
  (deps
   (source_tree ./correct/simple_inline_test)
   (package base)
+  (package bin_prot)
   (package ppx_jane)
-  (package stdio))
+  (package stdio)
+  (package typerep))
  (action
   (run dune build @all @runtest --root ./correct/simple_inline_test)))
 
@@ -90,9 +96,11 @@
  (deps
   (source_tree ./correct/soup_test_fixed)
   (package base)
+  (package bin_prot)
   (package lambdasoup)
   (package ppx_jane)
   (package stdio)
+  (package typerep)
   (package uri))
  (action
   (run dune build @all @runtest --root ./correct/soup_test_fixed)))
@@ -106,8 +114,10 @@
  (deps
   (source_tree ./correct/trivial_expect_test_fixed)
   (package base)
+  (package bin_prot)
   (package ppx_jane)
-  (package stdio))
+  (package stdio)
+  (package typerep))
  (action
   (run dune build @all @runtest --root ./correct/trivial_expect_test_fixed)))
 
