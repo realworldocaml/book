@@ -994,7 +994,7 @@ memoize it after the fact and expect the first call to `fib` to be
 improved.
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memoize fib
+# let fib = memoize (module Int) fib
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
 Time: 18122.092247 ms
@@ -1224,11 +1224,11 @@ particular, we can use laziness to make our definition of `memo_rec` work
 without explicit mutation:
 
 ```ocaml env=main,non-deterministic=command
-# let lazy_memo_rec f_norec x =
-    let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
+# let lazy_memo_rec m f_norec x =
+    let rec f = lazy (memoize m (fun x -> f_norec (force f) x)) in
     (force f) x
 val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-# time (fun () -> lazy_memo_rec fib_norec 40)
+# time (fun () -> lazy_memo_rec (module Int) fib_norec 40)
 Time: 0.0441074371338 ms
 - : int = 102334155
 ```
