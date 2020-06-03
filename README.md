@@ -97,6 +97,68 @@ To accept the changes:
 make promote
 ```
 
+### Standalone examples
+
+Examples in each chapter's `examples/` folder are split between `correct/` and
+`erroneous/`.  Each individual example is a valid dune-project that lives in its
+own sub folder.  Examples that contain errors on purpose, for instance to
+showcase some specific compile errors, go into the latter. All other examples
+should go in `correct/`.
+
+Examples in the `correct/` folder are automatically built and tested in the CI.
+It's possible to build and test them individually using the dune alias
+corresponding to the example folder name. For instance, to build and test the
+example in `book/imperative-programming/examples/correct/dictionary`, one can
+run:
+
+```
+dune build @dictionary
+```
+
+Note that the `runtest` alias will also build and test examples so running
+`make test` will build all of the book's examples.
+
+When adding a new chapter, the example folder should have the following structure:
+
+```
+examples/
+├── correct/
+├── dune
+├── dune.inc
+└── erroneous/
+```
+
+With the following dune file:
+
+```
+(data_only_dirs correct erroneous)
+
+(rule
+ (deps
+  (source_tree ./))
+ (action
+  (with-stdout-to dune.gen
+   (run rwo-examples-rules ./))))
+
+(rule
+ (alias runtest)
+ (action (diff dune.inc dune.gen)))
+
+(include dune.inc)
+```
+
+From that point forward, running `dune runtest` will generate the right dune
+rules for each folder in `correct/`. When the rules change, they must be
+accepted through promotion first.
+
+Each example must explicitly define its external dependencies in a
+`.rwo-example`. For instance, if your example requires `base` and `core`, it must
+include the following `.rwo-example` file at its root:
+
+```
+(packages base core)
+```
+
 ## Upgrading or adding dependencies
 
 RWO's dependencies are vendored using `duniverse`. If you want to upgrade them
