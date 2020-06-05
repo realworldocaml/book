@@ -526,10 +526,12 @@ function is chosen from one of a specialized set of identifiers. This set
 includes identifiers that are sequences of characters from the following set:
 
 ```
-! $ % & * + - . / : < = > ? @ ^ | ~
+~ ! $ % & * + - . / : < = > ? @ ^ |
 ```
 
-or is one of a handful of predetermined strings, including `mod`, the modulus
+The first character of the infix operator cannot be `~ ! $`.
+
+Or it's one of a handful of predetermined strings, including `mod`, the modulus
 operator, and `lsl`, for "logical shift left," a bit-shifting operation.
 
 We can define (or redefine) the meaning of an operator. Here's an example of
