@@ -43,10 +43,14 @@
   we can use opam itself to install other versions of the
   compiler.</p>
 
-  <p>Here are
-  some <a href="http://opam.ocaml.org/doc/Install.html">platform-specific
-  installation instructions</a> that can help you through the
-  process.</p>
+  <p>Here
+    are <a href="http://opam.ocaml.org/doc/Install.html#Using-your-distribution-39-s-package-system">
+    platform-specific installation instructions</a> for installing via
+    your package manager.  The same page
+    has <a href="http://opam.ocaml.org/doc/Install.html#Binary-distribution">
+    instructions for using a binary installer</a> if you have trouble
+    with your package manager.
+</p>
 
   <h2 id="#opam-setup">Setting up opam</h2>
 
@@ -162,30 +166,15 @@ opam install core async yojson core_extended \
 #use "topfind";;
 #thread;;
 #require "core.top";;
-#require "core.syntax";;
 </code></pre>
 
-  <p>For <code>utop</code> only you could get away with just the
-  last two lines, but you need the whole thing if you want the
+  <p>For <code>utop</code> only you could get away with just the last
+  line, but you need the whole thing if you want the
   traditional <code>ocaml</code> toplevel to work too.</p>
 
   <p>Note that <code>opam</code> will have already added some lines
   to the file. Also, notice that <code>#</code> is used to mark a
   toplevel directive, not a comment.</p>
-
-  <p>If you want to use Core as your primary standard library, then
-  you should open the <code>Core</code> module by default,
-  which you can do by appending the following to the end of your
-  <code>.ocamlinit</code>.</p>
-  <pre><code class="language-ocaml">
-open Core
-</code></pre>
-
-  <p>When you run <code>utop</code> with these initialization
-  rules, it should start up with Core opened and ready to use. If
-  you don't open <code>Core</code> by default, then you must
-  remember to open it before running any of the interactive
-  examples in the book.</p>
 
   <h2 id="editor-setup">Editor set-up</h2>
 
@@ -205,6 +194,7 @@ open Core
   In the following, we'll describe how to set up what you need for
   each of the editors.
 
+  <br><br>
   <h3>Visual Studio Code</h3>
 
   There are several OCaml modes for Visual Studio, but we recommend
@@ -215,8 +205,12 @@ open Core
   Server Protocol</a> (LSP).
 
   Instructions for installing OCaml LSP server cane be
-  found <a href="https://github.com/ocaml/ocaml-lsp">here</a>.
+  found <a href="https://github.com/ocaml/ocaml-lsp">here</a>.  These
+  instructions show you how to set things up so you can install the
+  LSP server via opam.  Eventually the LSP server will be available
+  from opam by default.
 
+  <br><br>
   <h3>Emacs</h3>
 
   opam comes with a <code>user-setup</code> package that can be used
@@ -227,7 +221,7 @@ open Core
 
   <pre class="command-line" data-user="rwo" data-host="lama">
 <code class="language-bash">
-opam install tuareg ocp-indent
+opam install tuareg ocp-indent merlin
 opam install user-setup
 opam user-setup install</code></pre>
 
@@ -237,206 +231,15 @@ opam user-setup install</code></pre>
   support <code>ocamlformat</code> yet, but you can find
   instructions <a href="https://github.com/ocaml-ppx/ocamlformat">here</a>
 
+  <br><br>
   <h3>Vim</h3>
 
-  <p>Vim users can use the built-in style, and <a href=
-  "http://github.com/avsm/ocaml-annot">ocaml-annot</a> may also be
-  useful. For a more richly-featured setup, see the section on
-  Merlin below.</p>
+  <p>Vim users can use the built-in style for handling OCaml source
+  code.  Beyond that, Merlin and other associated tools can be
+  installed as follows. </p>
 
-  <h3>Eclipse</h3>
-
-  <p>Eclipse is a popular IDE usually used for Java development.
-  The <a href="http://ocamldt.free.fr">OCaml Development Tools
-  (ODT)</a> project provides equivalent IDE features for editing
-  and compiling OCaml code, such as automatic compilation and name
-  completion. Installation instructions can be found <a href=
-  "http://ocamldt.free.fr/spip.php?article5">here</a></p>
-
-  <h3>Other editors</h3>
-
-  <p>There are lots of other editors, and many of them come with
-  built-in OCaml modes. These includes TextMate and Sublime Text
-  for the Mac, and countless others.</p>
-
-  <h3>Cross-editor tools</h3>
-
-  <p>There are a number of tools that are compatible with multiple
-  editors that can help you work more effectively with OCaml. Two
-  of the best are <code>merlin</code> and <code>ocp-indent</code>,
-  which we'll describe below. Note that these are very much
-  optional. You might want to get started with the book before
-  getting back to setting these up.</p>
-
-  <h4>Merlin</h4>
-
-  <p>Merlin provides a number of advanced IDE-like features,
-  including:</p>
-
-  <ul>
-    <li>context-sensitive auto-completion</li>
-
-    <li>interactive type-querying (i.e., you can ask it, "what is
-    the type of this expression")</li>
-
-    <li>error reporting -- it will highlight parts of your code
-    that don't compile as you go.</li>
-  </ul>
-
-  <p>You can install merlin with opam:</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam install merlin
-</code></pre>
-
-  <p>Then you will need to add configuration for your editor. The
-  following examples assume Merlin has been installed through opam
-  as above.</p>
-
-  <h5>Emacs</h5>
-
-  <p>A summary follows -- for more complete information, see
-  <a href=
-  "https://github.com/the-lambda-church/merlin/wiki/emacs-from-scratch">
-  Merlin's Emacs documentation</a>.</p>
-  <pre><code class="language-scheme">
-;; -- merlin setup ---------------------------------------
-
-(setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
-(add-to-list 'load-path (concat opam-share "/emacs/site-lisp"))
-(require 'merlin)
-
-;; Enable Merlin for ML buffers
-(add-hook 'tuareg-mode-hook 'merlin-mode)
-
-;; So you can do it on a mac, where `C-&lt;up&gt;` and `C-&lt;down&gt;` are used
-;; by spaces.
-(define-key merlin-mode-map
-  (kbd "C-c &lt;up&gt;") 'merlin-type-enclosing-go-up)
-(define-key merlin-mode-map
-  (kbd "C-c &lt;down&gt;") 'merlin-type-enclosing-go-down)
-(set-face-background 'merlin-type-face "#88FF44")
-
-;; -- enable auto-complete -------------------------------
-;; Not required, but useful along with merlin-mode
-(require 'auto-complete)
-(add-hook 'tuareg-mode-hook 'auto-complete-mode)
-</code></pre>
-
-  <p>Here are some of the more useful key commands that merlin
-  provides:</p>
-
-  <ul>
-    <li><code>C-c C-t</code>: <code>merlin-type-enclosing</code>:
-    show you the type of the current expression.
-    <code>C-&lt;up&gt;</code> and <code>C-&lt;down&gt;</code> can
-    then be used to look at the types of enclosing expressions, or
-    drill down to smaller ones.</li>
-
-    <li><code>C-c &lt;TAB&gt;</code>: if you have auto-complete set
-    up, this gives you a list of possible auto-completions, along
-    with their types. You can use <code>C-s</code> to search within
-    that list.</li>
-
-    <li><code>C-c C-l</code>: to go to the definition of the value
-    under your cursor.</li>
-
-    <li><code>C-c r</code>: to restart merlin if it gets
-    confused</li>
-  </ul>
-
-  <h5>Vim</h5>
-
-  <p>A summary follows -- for more complete information, see
-  <a href=
-  "https://github.com/the-lambda-church/merlin/wiki/vim-from-scratch">
-  Merlin's Vim documentation</a> and <code>:h merlin.txt</code>
-  after installing.</p>
-  <pre><code class="language-vim">
-" Your vimrc
-filetype plugin indent on
-syntax enable
-
-" Vim needs to be built with Python scripting support, and must be
-" able to find Merlin's executable on PATH.
-if executable('ocamlmerlin') &amp;&amp; has('python')
-  let s:ocamlmerlin = substitute(system('opam config var share'), '\n$', '', '''') . "/merlin"
-  execute "set rtp+=".s:ocamlmerlin."/vim"
-  execute "set rtp+=".s:ocamlmerlin."/vimbufsync"
-endif
-</code></pre>
-
-  <p>As a one-time step after installation, index the documentation
-  in Vim's help system:</p>
-  <pre><code class="language-vim">
-:execute "helptags " . substitute(system('opam config var share'), '\n$', '', '''')
-</code></pre>
-
-  <p>Some highlights of the functionality this enables:</p>
-
-  <ul>
-    <li>Autocompletion with Vim's omnicomplete system:
-    <code>&lt;C-x&gt;&lt;C-o&gt;</code></li>
-
-    <li>Quick type checking with keybindings -- the defaults use
-    <code>LocalLeader</code>, which is normally backslash
-    (<code>\</code>) by default:
-
-      <ul>
-        <li><code>\t</code>: type of expression under the cursor
-        (also works with a visual selection).</li>
-
-        <li><code>\n</code> / <code>\p</code>: expand/contract the
-        expression(s) to type check.</li>
-      </ul>
-    </li>
-
-    <li><code>:Locate [identifier]</code>: go to the definition of
-    given identifier or the one under the cursor.</li>
-
-    <li><code>:Reload</code>: if Merlin gets confused following
-    build changes like new packages.</li>
-
-    <li><code>:GotoDotMerlin</code>: edit the <code>.merlin</code>
-    project configuration (see below).</li>
-  </ul>
-
-  <p>The plugin can integrate with some other popular Vim plugins
-  such as Syntastic and neocomplcache -- see <code>:help
-  merlin.txt</code> for pointers.</p>
-
-  <p>See the Merlin README for complete details of the file
-  format.</p>
-
-  <h4><a id="user-content-ocp-indent" class="anchor" href=
-  "#ocp-indent" aria-hidden="true" name=
-  "user-content-ocp-indent"></a>ocp-indent</h4>
-
-  <p><code>ocp-indent</code> is a source-code indenter which
-  includes a command-line tool, library and integration with emacs
-  and vi. It does a better job than most editor modes, including
-  tuareg, and has the advantage that it can be used as a
-  command-line tool and be integrated into multiple editors, so you
-  get consistent indentation across tools.</p>
-
-  <p>You can install it with <code>opam</code>:</p>
-  <pre class="command-line" data-user="rwo" data-host="lama"><code class="language-bash">
-opam install ocp-indent
-</code></pre>
-
-  <h5>Emacs</h5>
-
-  <p>After installing through opam, simply load the file as follows
-  to override tuareg-mode's indentation:</p>
-  <pre><code class="language-scheme">
-(setq opam-share (substring (shell-command-to-string "opam config var share") 0 -1))
-(load-file (concat opam-share "/typerex/ocp-indent/ocp-indent.el"))
-</code></pre>
-
-  <h5>Vim</h5>
-
-  <p>After installing through opam, simply add this
-  <code>autocmd</code> to your Vim configuration:</p>
-  <pre><code class="language-none">
-" Your vimrc
-autocmd FileType ocaml execute "set rtp+=" . substitute(system('opam config var share'), '\n$', '', '''') . "/ocp-indent/vim/indent/ocaml.vim"
-</code></pre>
+  <pre class="command-line" data-user="rwo" data-host="lama">
+<code class="language-bash">
+opam install ocp-indent merlin
+opam install user-setup
+opam user-setup install</code></pre>
