@@ -139,7 +139,7 @@ opam install base utop
     <code class="language-bash">
 opam install core async yojson core_extended \
      core_bench cohttp-async async_graphics \
-     cryptokit menhir ocamlformat
+     cryptokit menhir
 </code></pre>
 
   <p>If some of the above don't work, don't worry too much. Most of
@@ -187,8 +187,11 @@ opam install core async yojson core_extended \
     <li> <a href="https://github.com/ocaml/merlin">Merlin</a>, which
       provides out of your code, like auto-completion,
       go-to-definition, and type-throwback.</li>
+    <li> <a href="https://github.com/ocaml-ppx/ocamlformat">ocp-indent</a>,
+      which auto-indents your code.
     <li> <a href="https://github.com/ocaml-ppx/ocamlformat">ocamlformat</a>,
-      which automatically reformats and indents your code.
+      which provides fully automatic formatting and indentation
+      (including line-breaking).
   </ul>
 
   In the following, we'll describe how to set up what you need for
@@ -231,6 +234,17 @@ opam user-setup install</code></pre>
   support <code>ocamlformat</code> yet, but you can find
   instructions <a href="https://github.com/ocaml-ppx/ocamlformat">here</a>
 
+  If you want fully automatic formatting (as opposed to just
+  indentation), you should first install it via opam.
+
+    <pre class="command-line" data-user="rwo" data-host="lama">
+<code class="language-bash">
+opam install ocamlformat</code></pre>
+
+    <code>user-setup</code> doesn't support ocamlformat yet, but here
+  are <a href="https://github.com/ocaml-ppx/ocamlformat#emacs-setup">instructions
+  for setting up ocamlformat for emacs</a>.
+
   <br><br>
   <h3>Vim</h3>
 
@@ -240,6 +254,17 @@ opam user-setup install</code></pre>
 
   <pre class="command-line" data-user="rwo" data-host="lama">
 <code class="language-bash">
-opam install ocp-indent merlin
+opam install merlin ocp-indent
 opam install user-setup
 opam user-setup install</code></pre>
+
+  If you want fully automatic formatting (as opposed to just
+  indentation), you should first install it via opam.
+
+    <pre class="command-line" data-user="rwo" data-host="lama">
+<code class="language-bash">
+opam install ocamlformat</code></pre>
+
+    <code>user-setup</code> doesn't support ocamlformat yet, but here
+  are <a href="https://github.com/ocaml-ppx/ocamlformat#vim-setup">instructions
+  for setting up ocamlformat for VIM</a>.
