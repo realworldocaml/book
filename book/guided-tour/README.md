@@ -77,6 +77,8 @@ Now let's try a few simple numerical calculations:
 - : int = 100
 # 3 * 5 > 14
 - : bool = true
+# Float.max 2.7182 3.1415
+- : float = 3.1415
 ```
 
 By and large, this is pretty similar to what you'd find in any programming
