@@ -1,0 +1,11 @@
+((output
+  (((f.ml (1 0) (1 5))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label ])))
+     (((f.ml (1 3) (1 4)) (word ])))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 3-4:\
+   \nUnpaired ']' (end of code).\
+   \nSuggestion: try '\\]'.")))

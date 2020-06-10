@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 37))
+    (paragraph
+     (((f.ml (1 0) (1 37)) (code_span class-foo.class-type-bar.field-baz)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-11:\
+   \nExpected 'module-', 'module-type-', or an unqualified reference.")))

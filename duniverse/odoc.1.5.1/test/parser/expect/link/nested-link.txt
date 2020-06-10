@@ -1,0 +1,9 @@
+((output
+  (((f.ml (1 0) (1 21))
+    (paragraph
+     (((f.ml (1 0) (1 21))
+       (link foo
+        (((f.ml (1 8) (1 20)) (emphasis (((f.ml (1 16) (1 19)) (word baz)))))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 8-20:\
+   \n'{{:...} ...}' (external link) is not allowed in '{{:...} ...}' (external link).")))

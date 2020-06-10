@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 4) (1 7)) (paragraph (((f.ml (1 4) (1 7)) (word foo)))))
+   ((f.ml (1 7) (1 8)) (paragraph (((f.ml (1 7) (1 8)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-3:\
+   \n'{li ...}' (list item) is not allowed in top-level text.\
+   \nSuggestion: move '{li ...}' into '{ul ...}' (bulleted list), or use '-' (bulleted list item)."
+    "File \"f.ml\", line 1, characters 7-8:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

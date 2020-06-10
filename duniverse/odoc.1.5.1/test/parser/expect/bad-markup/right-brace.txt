@@ -1,0 +1,5 @@
+((output (((f.ml (1 0) (1 1)) (paragraph (((f.ml (1 0) (1 1)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-1:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

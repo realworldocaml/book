@@ -1,0 +1,4 @@
+((output
+  (((f.ml (1 0) (1 10))
+    (paragraph (((f.ml (1 0) (1 10)) (word <b>foo</b>)))))))
+ (warnings ()))

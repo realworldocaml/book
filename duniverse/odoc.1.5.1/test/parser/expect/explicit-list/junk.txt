@@ -1,0 +1,7 @@
+((output (((f.ml (1 0) (1 8)) (unordered ()))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 4-7:\
+   \n'foo' is not allowed in '{ul ...}' (bulleted list).\
+   \nSuggestion: move 'foo' into a list item, '{li ...}' or '{- ...}'."
+    "File \"f.ml\", line 1, characters 0-3:\
+   \n'{ul ...}' (bulleted list) should not be empty.")))

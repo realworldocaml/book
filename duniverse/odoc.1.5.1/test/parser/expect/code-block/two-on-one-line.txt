@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 7)) (code_block foo))
+   ((f.ml (1 8) (1 15)) (code_block bar))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 8-15:\
+   \n'{[...]}' (code block) should begin on its own line.")))

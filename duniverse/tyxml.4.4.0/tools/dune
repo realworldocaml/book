@@ -1,0 +1,4 @@
+(executable
+ (name autoname)
+ (modules autoname)
+)

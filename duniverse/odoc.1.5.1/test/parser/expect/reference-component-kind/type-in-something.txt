@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (paragraph
+     (((f.ml (1 0) (1 15)) (reference (type bar (root Foo unknown)) ())))))))
+ (warnings ()))

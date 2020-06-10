@@ -1,0 +1,11 @@
+((output
+  (((f.ml (1 0) (1 12))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label foo-bar)))
+     (((f.ml (1 4) (1 7)) (word foo)) ((f.ml (1 7) (1 8)) space)
+      ((f.ml (1 8) (1 11)) (word Bar)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-3:\
+   \nHeading label should not be empty.")))

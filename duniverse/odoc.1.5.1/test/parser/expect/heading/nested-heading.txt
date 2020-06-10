@@ -1,0 +1,24 @@
+((output
+  (((f.ml (1 0) (1 2))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label "")))
+     ()))
+   ((f.ml (1 3) (1 10))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label foo)))
+     (((f.ml (1 6) (1 9)) (word Foo)))))
+   ((f.ml (1 10) (1 11)) (paragraph (((f.ml (1 10) (1 11)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 3-5:\
+   \n'{2 ...}' (section heading) is not allowed in '{2 ...}' (section heading)."
+    "File \"f.ml\", line 1, characters 0-2:\
+   \n'{2 ...}' (section heading) should not be empty."
+    "File \"f.ml\", line 1, characters 3-5:\
+   \n'{2 ...}' (section heading) should begin on its own line."
+    "File \"f.ml\", line 1, characters 10-11:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

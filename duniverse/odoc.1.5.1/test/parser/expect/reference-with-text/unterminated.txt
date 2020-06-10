@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (1 6))
+    (paragraph (((f.ml (1 0) (1 6)) (reference (root foo unknown) ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-6:\
+   \nEnd of text is not allowed in '{{!...} ...}' (cross-reference)."
+    "File \"f.ml\", line 1, characters 6-6:\
+   \nEnd of text is not allowed in '{{!...} ...}' (cross-reference)."
+    "File \"f.ml\", line 1, characters 0-6:\
+   \n'{{!...} ...}' (cross-reference) should not be empty.")))

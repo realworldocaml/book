@@ -1,0 +1,12 @@
+(executable
+ (name reflect)
+ (libraries ppx_tools_versioned)
+ (preprocess (pps ppx_tools_versioned.metaquot_408))
+ (flags (:standard
+         -safe-string
+         -open Migrate_parsetree
+         -open Ast_408
+         -open Ppx_tools_408
+         -w "-9"
+ ))
+)

@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (2 3))
+    (paragraph
+     (((f.ml (1 0) (1 2)) (word "\206\187")) ((f.ml (1 2) (2 1)) space)
+      ((f.ml (2 1) (2 3)) (word "\206\187")))))))
+ (warnings ()))

@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (1 12))
+    (5
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label foo)))
+     (((f.ml (1 8) (1 11)) (word Bar)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-12:\
+   \n'22': bad heading level (0-5 allowed).")))

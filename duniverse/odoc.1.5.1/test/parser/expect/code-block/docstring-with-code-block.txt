@@ -1,0 +1,19 @@
+((output
+  (((f.ml (1 0) (1 13)) (code_block "(** {[foo"))
+   ((f.ml (1 14) (2 13))
+    (paragraph
+     (((f.ml (1 14) (1 16)) (word "*)")) ((f.ml (1 16) (2 0)) space)
+      ((f.ml (2 0) (2 3)) (word let)) ((f.ml (2 3) (2 4)) space)
+      ((f.ml (2 4) (2 7)) (word bar)) ((f.ml (2 7) (2 8)) space)
+      ((f.ml (2 8) (2 9)) (word =)) ((f.ml (2 9) (2 10)) space)
+      ((f.ml (2 10) (2 12)) (word "()")) ((f.ml (2 12) (2 13)) (word ])))))
+   ((f.ml (2 13) (2 14)) (paragraph (((f.ml (2 13) (2 14)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 14-16:\
+   \nParagraph should begin on its own line."
+    "File \"f.ml\", line 2, characters 12-13:\
+   \nUnpaired ']' (end of code).\
+   \nSuggestion: try '\\]'."
+    "File \"f.ml\", line 2, characters 13-14:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

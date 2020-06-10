@@ -1,0 +1,37 @@
+opam-version: "2.0"
+version: "dev"
+maintainer: "dev@ocsigen.org"
+author: "The ocsigen team"
+homepage: "https://github.com/ocsigen/tyxml/"
+bug-reports: "https://github.com/ocsigen/tyxml/issues"
+doc: "https://ocsigen.org/tyxml/manual/"
+dev-repo: "git+https://github.com/ocsigen/tyxml.git"
+license: "LGPL-2.1 with OCaml linking exception"
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.02"}
+  "dune"
+  "alcotest" {with-test}
+  "tyxml" {= version}
+  "tyxml-syntax" {= version}
+  "markup" {>= "0.7.2"}
+  "ppx_tools_versioned"
+]
+
+synopsis:"PPX that allows to write TyXML documents with the HTML syntax"
+description:"""
+
+```ocaml
+open Tyxml
+let%html to_ocaml = "<a href='ocaml.org'>OCaml!</a>"
+```
+
+The TyXML PPX is compatible with all TyXML instance, from textual trees
+to reactive virtual DOM trees.
+"""

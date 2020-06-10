@@ -1,0 +1,4 @@
+((output
+  (((f.ml (1 0) (1 9)) (verbatim foo))
+   ((f.ml (2 0) (2 3)) (paragraph (((f.ml (2 0) (2 3)) (word bar)))))))
+ (warnings ()))

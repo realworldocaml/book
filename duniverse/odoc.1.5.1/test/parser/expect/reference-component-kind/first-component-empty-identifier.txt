@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 14))
+    (paragraph (((f.ml (1 0) (1 14)) (code_span module-.foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 9-9:\
+   \nIdentifier in reference should not be empty.")))

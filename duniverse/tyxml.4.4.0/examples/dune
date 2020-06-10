@@ -1,0 +1,26 @@
+(alias
+ (name runtest)
+ (deps
+   mini_website/index.html
+   basic_website/index.html
+ )
+ (package tyxml)
+)
+
+(alias
+ (name runtest)
+ (deps
+   mini_website_ppx/index.html
+   basic_website_ppx/index.html
+ )
+ (package tyxml-ppx)
+)
+
+(alias
+ (name runtest)
+ (deps
+   mini_website_jsx/index.html
+   basic_website_jsx/index.html
+ )
+ (package tyxml-jsx)
+)

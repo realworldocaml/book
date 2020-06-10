@@ -1,0 +1,4 @@
+File "cases/parser_errors_fatal.mli", line 1, characters 4-26:
+'{x This is bad markup}': bad markup.
+Suggestion: did you mean '{!x This is bad markup}' or '[x This is bad markup]'?
+ERROR: Warnings have been generated.

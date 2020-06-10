@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 9)) (unordered (())))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 4-6:\
+   \n'{- ...}' (list item) should not be empty.")))

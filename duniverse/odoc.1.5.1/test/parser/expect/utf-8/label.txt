@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 10))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label "\206\187")))
+     (((f.ml (1 6) (1 9)) (word Bar)))))))
+ (warnings ()))

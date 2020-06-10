@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 8)) (@version ""))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-8:\
+   \n'@version' should not be empty.")))

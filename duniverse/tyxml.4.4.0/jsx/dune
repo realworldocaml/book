@@ -1,0 +1,16 @@
+(library
+ (name tyxml_jsx)
+ (public_name tyxml-jsx)
+ (libraries ppx_tools_versioned
+            tyxml-syntax
+ )
+ (kind ppx_rewriter)
+ (preprocess (pps ppx_tools_versioned.metaquot_408))
+ (flags (:standard
+         -safe-string
+         -open Migrate_parsetree
+         -open Ast_408
+         -open Ppx_tools_408
+         -w "-9"
+ ))
+)

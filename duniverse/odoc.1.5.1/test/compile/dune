@@ -1,0 +1,43 @@
+(rule
+ (deps cases/ast.mli)
+ (targets ast.output)
+ (action
+  (progn
+   (run %{ocamlc} -bin-annot -o ast.cmi -c cases/ast.mli)
+   (with-stderr-to ast.output
+	  (run
+     %{workspace_root}/src/odoc/bin/main.exe compile --package foo ast.cmti)))))
+
+(alias
+ (name runtest)
+ (action (diff expect/ast.txt ast.output)))
+
+(rule
+ (deps cases/parser_errors.mli)
+ (targets parser_errors.output)
+ (action
+  (progn
+   (run %{ocamlc} -bin-annot -o parser_errors.cmi -c cases/parser_errors.mli)
+   (with-stderr-to parser_errors.output
+	  (run
+      %{workspace_root}/src/odoc/bin/main.exe compile
+       --package foo parser_errors.cmti)))))
+
+(alias
+ (name runtest)
+ (action (diff expect/parser_errors.txt parser_errors.output)))
+
+;; Test --warn-error
+
+(rule
+ (deps cases/parser_errors_fatal.mli)
+ (targets parser_errors_fatal.output)
+ (action
+  (progn
+   (run %{ocamlc} -bin-annot -o parser_errors_fatal.cmi -c cases/parser_errors_fatal.mli)
+   (with-stderr-to parser_errors_fatal.output
+	  (system "! %{bin:odoc} compile --package foo --warn-error parser_errors_fatal.cmti")))))
+
+(alias
+ (name runtest)
+ (action (diff expect/parser_errors_fatal.txt parser_errors_fatal.output)))

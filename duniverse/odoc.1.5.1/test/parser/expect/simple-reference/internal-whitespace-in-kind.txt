@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 11))
+    (paragraph (((f.ml (1 0) (1 11)) (code_span "va l:foo")))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-6:\
+   \nUnknown reference qualifier 'va l'.")))

@@ -1,0 +1,9 @@
+((output
+  (((f.ml (1 0) (2 7))
+    (@deprecated
+     ((f.ml (1 12) (1 15)) (paragraph (((f.ml (1 12) (1 15)) (word foo)))))
+     ((f.ml (2 0) (2 7)) (paragraph (((f.ml (2 3) (2 6)) (word Bar)))))))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-2:\
+   \n'{2 ...}' (section heading) is not allowed in '@deprecated'.\
+   \nSuggestion: move '{2' outside of any other markup.")))

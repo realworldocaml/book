@@ -1,0 +1,9 @@
+((output
+  (((f.ml (1 0) (1 11)) (@author Foo))
+   ((f.ml (2 0) (2 13))
+    (unordered
+     ((((f.ml (2 8) (2 11)) (paragraph (((f.ml (2 8) (2 11)) (word bar)))))))))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-3:\
+   \n'{ul ...}' (bulleted list) is not allowed in the tags section.\
+   \nSuggestion: move '{ul ...}' (bulleted list) before any tags.")))

@@ -1,0 +1,63 @@
+(rule
+ (target test-case.md.corrected)
+ (deps
+  (package mdx)
+  (:md test-case.md))
+ (action
+  (run ocaml-mdx test --output %{target} %{md})))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case.md)
+  (:actual test-case.md.corrected))
+ (action
+  (diff %{expected} %{actual})))
+
+(rule
+ (target test-case.t.corrected)
+ (deps
+  (package mdx)
+  (:md test-case.t))
+ (action
+  (run ocaml-mdx test --output %{target} %{md})))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case.t)
+  (:actual test-case.t.corrected))
+ (action
+  (diff %{expected} %{actual})))
+
+(rule
+ (target test-case-md.ext.corrected)
+ (deps
+  (package mdx)
+  (:md test-case-md.ext))
+ (action
+  (run ocaml-mdx test %{md} --output %{target} --syntax markdown)))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case-md.ext)
+  (:actual test-case-md.ext.corrected))
+ (action
+  (diff %{expected} %{actual})))
+
+(rule
+ (target test-case-cram.ext.corrected)
+ (deps
+  (package mdx)
+  (:md test-case-cram.ext))
+ (action
+  (run ocaml-mdx test %{md} --output %{target} --syntax cram)))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case-cram.ext)
+  (:actual test-case-cram.ext.corrected))
+ (action
+  (diff %{expected} %{actual})))

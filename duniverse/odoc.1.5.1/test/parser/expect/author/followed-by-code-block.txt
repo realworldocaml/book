@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 11)) (@author Foo)) ((f.ml (2 0) (2 7)) (code_block bar))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-7:\
+   \n'{[...]}' (code block) is not allowed in the tags section.\
+   \nSuggestion: move '{[...]}' (code block) before any tags.")))

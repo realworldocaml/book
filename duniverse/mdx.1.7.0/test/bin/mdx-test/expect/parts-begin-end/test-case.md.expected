@@ -1,0 +1,69 @@
+Mdx can also understand ocaml code blocks:
+
+
+```ocaml file=parts-begin-end.ml,part=toto
+let x = 34
+let f = 42.3
+let s = "toto"
+let f x u = u x
+
+let () =
+  print_int x;
+  print_float f
+;;
+```
+
+```ocaml file=parts-begin-end.ml,part=z_zz
+let () =
+  print_string s
+;;
+```
+
+```ocaml file=parts-begin-end.ml,part=4-2
+let () =
+  f x print_int;
+```
+
+```ocaml file=parts-begin-end.ml
+let () =
+  ();
+  ()
+;;
+
+let x = 34
+let f = 42.3
+let s = "toto"
+let f x u = u x
+
+let () =
+  print_int x;
+  print_float f
+;;
+
+p
+let () =
+  print_string s
+;;
+
+
+let () =
+  f x print_int;
+  ()
+
+let () =
+  let () = fooooooooooooooooooooooooooooooooooooooooooo in
+  if not fooooooooo then foooooooooooo
+```
+
+```ocaml
+# let x = 2;;
+val x : int = 2
+# print_int x;;
+2
+- : unit = ()
+```
+
+```ocaml file=parts-begin-end.ml,part=indented
+  let () = fooooooooooooooooooooooooooooooooooooooooooo in
+  if not fooooooooo then foooooooooooo
+```

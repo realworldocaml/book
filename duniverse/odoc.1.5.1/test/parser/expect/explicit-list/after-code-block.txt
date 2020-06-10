@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 7)) (code_block foo))
+   ((f.ml (1 8) (1 21))
+    (unordered
+     ((((f.ml (1 16) (1 19)) (paragraph (((f.ml (1 16) (1 19)) (word bar)))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 8-11:\
+   \n'{ul ...}' (bulleted list) should begin on its own line.")))

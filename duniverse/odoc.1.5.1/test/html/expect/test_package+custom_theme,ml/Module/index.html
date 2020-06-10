@@ -1,0 +1,84 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title>
+   Module (test_package+custom_theme,ml.Module)
+  </title>
+  <link rel="stylesheet" href="/a/b/c/odoc.css">
+  <meta charset="utf-8">
+  <meta name="generator" content="odoc %%VERSION%%">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <script src="../../highlight.pack.js"></script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+ </head>
+ <body>
+  <div class="content">
+   <header>
+    <nav>
+     <a href="../index.html">Up</a> – <a href="../index.html">test_package+custom_theme,ml</a> » Module
+    </nav>
+    <h1>
+     Module <code>Module</code>
+    </h1>
+    <p>
+     Foo.
+    </p>
+   </header>
+   <dl>
+    <dt class="spec value" id="val-foo">
+     <a href="#val-foo" class="anchor"></a><code><span class="keyword">val</span> foo : unit</code>
+    </dt>
+    <dd>
+     <p>
+      The module needs at least one signature item, otherwise a bug causes the compiler to drop the module comment (above). See <a href="https://caml.inria.fr/mantis/view.php?id=7701">https://caml.inria.fr/mantis/view.php?id=7701</a>.
+     </p>
+    </dd>
+   </dl>
+   <div class="spec module-type" id="module-type-S">
+    <a href="#module-type-S" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S/index.html">S</a> = <span class="keyword">sig</span> ... <span class="keyword">end</span></code>
+   </div>
+   <div class="spec module-type" id="module-type-S1">
+    <a href="#module-type-S1" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S1/index.html">S1</a></code>
+   </div>
+   <div class="spec module-type" id="module-type-S2">
+    <a href="#module-type-S2" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S2/index.html">S2</a> = <a href="index.html#module-type-S">S</a></code>
+   </div>
+   <div class="spec module-type" id="module-type-S3">
+    <a href="#module-type-S3" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S3/index.html">S3</a> = <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="module-type-S3/index.html#type-t">t</a> = int <span class="keyword">and</span> <span class="keyword">type</span> <a href="module-type-S3/index.html#type-u">u</a> = string</code>
+   </div>
+   <div class="spec module-type" id="module-type-S4">
+    <a href="#module-type-S4" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S4/index.html">S4</a> = <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="module-type-S4/index.html#type-t">t</a> := int</code>
+   </div>
+   <div class="spec module-type" id="module-type-S5">
+    <a href="#module-type-S5" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S5/index.html">S5</a> = <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">type</span> <span>'a <a href="module-type-S5/index.html#type-v">v</a></span> := <span><span class="type-var">'a</span> list</span></code>
+   </div>
+   <dl>
+    <dt class="spec type" id="type-result">
+     <a href="#type-result" class="anchor"></a><code><span class="keyword">type</span> <span>('a, 'b) result</span></code>
+    </dt>
+   </dl>
+   <div class="spec module-type" id="module-type-S6">
+    <a href="#module-type-S6" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S6/index.html">S6</a> = <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">type</span> <span>('a, 'b) <a href="module-type-S6/index.html#type-w">w</a></span> := <span><span>(<span class="type-var">'a</span>,&nbsp;<span class="type-var">'b</span>)</span> <a href="index.html#type-result">result</a></span></code>
+   </div>
+   <div class="spec module" id="module-M'">
+    <a href="#module-M'" class="anchor"></a><code><span class="keyword">module</span> <a href="M'/index.html">M'</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code>
+   </div>
+   <div class="spec module-type" id="module-type-S7">
+    <a href="#module-type-S7" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S7/index.html">S7</a> = <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">module</span> <a href="module-type-S7/M/index.html">M</a> = <a href="index.html#module-M'">M'</a></code>
+   </div>
+   <div class="spec module-type" id="module-type-S8">
+    <a href="#module-type-S8" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S8/index.html">S8</a> = <a href="index.html#module-type-S">S</a> <span class="keyword">with</span> <span class="keyword">module</span> <a href="module-type-S8/M/index.html">M</a> := <a href="index.html#module-M'">M'</a></code>
+   </div>
+   <div class="spec module-type" id="module-type-S9">
+    <a href="#module-type-S9" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-S9/index.html">S9</a> = <span class="keyword">module</span> <span class="keyword">type</span> <span class="keyword">of</span> <a href="index.html#module-M'">M'</a></code>
+   </div>
+   <div class="spec module" id="module-Mutually">
+    <a href="#module-Mutually" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">rec</span> <a href="Mutually/index.html">Mutually</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code>
+   </div>
+   <div class="spec module" id="module-Recursive">
+    <a href="#module-Recursive" class="anchor"></a><code><span class="keyword">and</span> <a href="Recursive/index.html">Recursive</a> : <span class="keyword">sig</span> ... <span class="keyword">end</span></code>
+   </div>
+  </div>
+ </body>
+</html>

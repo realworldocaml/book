@@ -1,0 +1,37 @@
+opam-version: "2.0"
+version: "dev"
+maintainer: "dev@ocsigen.org"
+author: "The ocsigen team"
+homepage: "https://github.com/ocsigen/tyxml/"
+bug-reports: "https://github.com/ocsigen/tyxml/issues"
+doc: "https://ocsigen.org/tyxml/manual/"
+dev-repo: "git+https://github.com/ocsigen/tyxml.git"
+license: "LGPL-2.1 with OCaml linking exception"
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.02"}
+  "dune"
+  "alcotest" {with-test}
+  "tyxml" {= version}
+  "tyxml-syntax" {= version}
+  "ppx_tools_versioned"
+  "reason" {with-test}
+]
+
+synopsis:"JSX syntax to write TyXML documents"
+description:"""
+
+```reason
+open Tyxml;
+let to_ocaml = <a href="ocaml.org"> "OCaml!" </a>;
+```
+
+Allow to write any TyXML documents with reason's JSX syntax, from textual trees
+to reactive virtual DOM trees.
+"""

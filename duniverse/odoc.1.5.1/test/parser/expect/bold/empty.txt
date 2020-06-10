@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 4)) (paragraph (((f.ml (1 0) (1 4)) (bold ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-4:\
+   \n'{b ...}' (boldface text) should not be empty.")))

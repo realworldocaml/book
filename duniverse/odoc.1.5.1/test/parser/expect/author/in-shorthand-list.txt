@@ -1,0 +1,14 @@
+((output
+  (((f.ml (1 0) (1 17))
+    (unordered
+     ((((f.ml (1 2) (1 6))
+        (paragraph
+         (((f.ml (1 2) (1 5)) (word foo)) ((f.ml (1 5) (1 6)) space))))
+       ((f.ml (1 6) (1 17))
+        (paragraph
+         (((f.ml (1 6) (1 17)) (word @author)) ((f.ml (1 6) (1 17)) space)
+          ((f.ml (1 6) (1 17)) (word " Bar")))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-17:\
+   \n'@author' is not allowed in '-' (bulleted list item).\
+   \nSuggestion: move '@author' outside of any other markup.")))

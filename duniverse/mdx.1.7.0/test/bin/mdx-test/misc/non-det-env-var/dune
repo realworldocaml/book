@@ -1,0 +1,14 @@
+(rule
+ (target test-case.md.corrected)
+ (deps
+  (package mdx))
+ (action
+  (setenv
+   MDX_RUN_NON_DETERMINISTIC
+   true
+   (run ocaml-mdx test --force-output %{dep:test-case.md}))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff test-case.md.expected test-case.md.corrected)))

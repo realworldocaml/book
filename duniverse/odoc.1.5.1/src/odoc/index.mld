@@ -1,0 +1,134 @@
+{0:top odoc}
+
+The documentation compiler for OCaml and Reason.
+
++ {{:#overview} What is [odoc]?}
++ {{:#getting-started} Getting Started with [odoc]}
++ {{:high-level-flow.html} How does [odoc] work?}
++ {{:using-odoc.html} Using [odoc]}
++ {{:system-integrations.html} Integrating [odoc] into your Build System}
++ {{:odoc-internals.html} Understanding [odoc] Internals}
++ {{:contributing.html} Contributing to [odoc]}
+
+{1:overview What is [odoc]?}
+
+[odoc] is not your ordinary documentation tool.
+
+It's built from the ground up to be build-tool friendly, and it focuses on
+parallelism and caching. Instead of source code, it works with {i compilation
+units}; that is, it works on compiler outputs and turns them into compiled
+documentation, which then becomes gorgeous HTML.
+
+Compiled documentation appears in the form of [.odoc] files, which consist of
+an intermediary representation that is currrently internal and subject to
+change.
+
+A regular [odoc] execution transforms [.cmt], [.cmti], and [.mld] files into
+[.odoc] files, and then turns those into [.html] files. Roughly like this:
+
+{[
+cmti_and_mld_files |> compile_to_odoc |> compile_to_html
+]}
+
+This means that an [intro.mld] file will be compiled to [page-intro.odoc] which
+in turn will become [intro.html].
+
+Similarly, a [Game.cmti] will be compiled to [Game.odoc] which in turn will become
+[Game/index.html].
+
+{1:getting-started Getting Started with [odoc]}
+
+You can install [odoc] today through [opam]:
+
+{v
+opam install odoc
+v}
+
+{2:usage-ocaml ...using OCaml}
+
+If you want to use odoc on the packages you have installed in your
+opam switch type:
+
+{v
+opam install ocaml-manual odig
+odig doc
+v}
+
+When you are developing the easiest way to use odoc right now is by
+having Dune drive it. This command should work in most Dune projects
+out of the box:
+
+{v
+dune build @doc
+v}
+
+The generated docs can be found at [./_build/default/_doc/_html/index.html].
+
+{2:usage-bucklescript ...using BuckleScript}
+
+While the BuckleScript/Reason toolchain relies on [npm], [odoc] at the moment
+needs to be used from a working OCaml toolchain.
+
+This means we follow the same installation than above, but using the
+[4.02.3+buckle-master] version of the OCaml compiler.
+
+{[
+$ opam switch 4.02.3+buckle-master
+$ eval `opam config env`
+$ opam install odoc
+]}
+
+Now with that working, we can point [odoc] to the path where BuckleScript saves
+the compiled code that we can use to generate our documentation. This path is
+[$root/lib/bs].
+
+In there you'll find your [.cmt] and [.cmti] files.
+
+You can now compile each one of them from [.cmt[i]] to [.odoc] and from [.odoc]
+to [.html].
+
+The following script can help you get started:
+
+{[
+#!/bin/bash
+
+readonly PKG=$1
+readonly DOCS=$2
+
+readonly ODOC=$(which odoc)
+readonly LIB=./lib/bs/src
+
+readonly CMT_FILES=$(find ${LIB} -name "*.cmti")
+readonly ODOC_FILES=$(echo ${CMT_FILES} | sed "s/cmti/odoc/g")
+
+echo "<< Compiling docs..."
+for file in ${CMT_FILES}; do
+  ${ODOC} compile \
+    -I ${LIB} \
+    --pkg=${PKG} \
+    ${file}
+done
+echo ">> Done!"
+
+echo "<< Generating HTML..."
+for file in ${ODOC_FILES}; do
+  ${ODOC} html \
+    -I ${LIB} \
+    -o ${DOCS} \
+    --syntax=re \
+    --semantic-uris \
+    ${file}
+done
+echo ">> Done!"
+]}
+
+And you can call it like:
+
+{[
+$ ./mk-docs.sh MyPackageName ${path_to_docs_folder}
+<< Compiling docs...
+>> Done!
+<< Generating HTML...
+>> Done!
+]}
+

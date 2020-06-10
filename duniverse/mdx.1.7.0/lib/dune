@@ -1,0 +1,14 @@
+(library
+ (name mdx)
+ (public_name mdx)
+ (preprocess
+  (action
+   (run %{bin:cppo} -V OCAML:%{ocaml_version} %{input-file})))
+ (libraries astring csexp fmt logs ocaml-migrate-parsetree ocaml-version
+   odoc.parser re result str))
+
+(ocamllex lexer_mdx)
+
+(ocamllex lexer_cram)
+
+(ocamllex lexer_top)
