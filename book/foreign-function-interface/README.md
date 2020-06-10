@@ -227,7 +227,7 @@ passed to an Ncurses library call.
 Now compile a "hello world" terminal drawing program to tie this all
 together:
 
-```ocaml file=examples/ffi/hello/hello.ml,non-deterministic
+```ocaml file=examples/ffi/hello/hello.ml
 open Ncurses
 
 let () =
