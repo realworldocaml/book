@@ -52,7 +52,6 @@ the box containing `3`) points to the empty list.[lists/structure of]{.idx}
   <img src="images/lists-and-patterns/lists_layout.png"/>
 </figure>
 
-
 Each `::` essentially adds a new block to the proceding picture. Such a block
 contains two things: a reference to the data in that list element, and a
 reference to the remainder of the list. This is why `::` can extend a list
@@ -319,7 +318,6 @@ outright errors, they act as a sort of refactoring tool, guiding you to the
 locations where you need to adapt your code to deal with changing
 types.<a data-type="indexterm" data-startref="PATMAT">&nbsp;</a>
 
-
 ## Using the List Module Effectively
 
 We've so far written a fair amount of list-munging code using pattern
@@ -457,6 +455,7 @@ provide some whitespace around each entry in the table.[strings/concatenation
 of]{.idx}[String.concat]{.idx}[List module/String.concat and]{.idx}
 
 ::: {data-type=note}
+
 ##### Performance of String.concat and ^
 
 In the preceding code we’ve concatenated strings two different ways:
@@ -480,7 +479,6 @@ allocates one string of size 7, as well as a list of length 7. At these small
 sizes, the differences don't amount to much, but for assembling large
 strings, it can be a serious performance issue.
 :::
-
 
 Now we need code for rendering a row with data in it. We'll first write a
 function called `pad`, for padding out a string to a specified length plus
@@ -588,7 +586,7 @@ character:[lists/duplicate removal]{.idx}[duplicates, removing]{.idx}
 # let extensions filenames =
     List.filter_map filenames ~f:(fun fname ->
         match String.rsplit2 ~on:'.' fname with
-        | None  | Some ("",_) -> None
+        | None  | Some (_,"") -> None
         | Some (_,ext) ->
           Some ext)
     |> List.dedup_and_sort ~compare:String.compare
@@ -599,7 +597,7 @@ val extensions : string list -> string list = <fun>
 
 The preceding code is also an example of an Or pattern, which allows you to
 have multiple subpatterns within a larger pattern. In this case,
-`None | Some ("",_)` is an Or pattern. As we'll see later, Or patterns can be
+`None | Some (_,"")` is an Or pattern. As we'll see later, Or patterns can be
 nested anywhere within larger patterns.
 
 #### Partitioning with List.partition_tf {#partitioning-with-list.partition_tf}
@@ -725,7 +723,7 @@ needs some space to keep track of information associated with the call, such
 as the arguments passed to the function, or the location of the code that
 needs to start executing when the function call is complete. To allow for
 nested function calls, this information is typically organized in a stack,
-where a new *stack frame* is allocated for each nested function call, and
+where a new _stack frame_ is allocated for each nested function call, and
 then deallocated when the function call is complete.[stack frames]{.idx}
 
 And that's the problem with our call to `length`: it tried to allocate 10
@@ -753,10 +751,10 @@ nested sequence of function calls, as we did in our first implementation of
 `length`.
 
 The advantage of this approach is that the recursive call in `length_plus_n`
-is a *tail call*. We'll explain more precisely what it means to be a tail
+is a _tail call_. We'll explain more precisely what it means to be a tail
 call shortly, but the reason it's important is that tail calls don't require
 the allocation of a new stack frame, due to what is called the
-*tail-call optimization*. A recursive function is said to be *tail recursive*
+_tail-call optimization_. A recursive function is said to be _tail recursive_
 if all of its recursive calls are tail calls. `length_plus_n` is indeed tail
 recursive, and as a result, `length` can take a long list as input without
 blowing the stack:[tail calls]{.idx}
@@ -767,7 +765,7 @@ blowing the stack:[tail calls]{.idx}
 ```
 
 So when is a call a tail call? Let's think about the situation where one
-function (the *caller*) invokes another (the *callee*). The invocation is
+function (the _caller_) invokes another (the _callee_). The invocation is
 considered a tail call when the caller doesn't do anything with the value
 returned by the callee except to return it. The tail-call optimization makes
 sense because, when a caller makes a tail call, the caller's stack frame need
@@ -827,7 +825,7 @@ val destutter : int list -> int list = <fun>
 ```
 
 We can further collapse this by combining the first two cases into one, using
-an *or pattern*:
+an _or pattern_:
 
 ```ocaml env=main
 # let rec destutter = function
@@ -852,6 +850,7 @@ val destutter : int list -> int list = <fun>
 ```
 
 ::: {data-type=note}
+
 ##### Polymorphic Compare
 
 You might have noticed that `destutter` is specialized to lists of integers.
@@ -907,7 +906,7 @@ function `compare` that returns `-1`, `0`, or `1` to flag whether the first
 operand is smaller than, equal to, or greater than the second, respectively.
 
 You might wonder how you could build functions like these yourself if OCaml
-didn't come with them built in. It turns out that you *can't* build these
+didn't come with them built in. It turns out that you _can't_ build these
 functions on your own. OCaml's polymorphic comparison functions are built
 into the runtime to a low level. These comparisons are polymorphic on the
 basis of ignoring almost everything about the types of the values that are
