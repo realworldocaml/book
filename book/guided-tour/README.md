@@ -91,10 +91,6 @@ language, but a few things jump right out at you:
 - After evaluating an expression, the toplevel first prints the type of the
   result, and then prints the result itself.
 
-- Function arguments are separated by spaces instead of by parentheses and
-  commas, which is more like the UNIX shell than it is like traditional
-  programming languages such as C or Java.
-
 - OCaml allows you to place underscores in the middle of numeric literals to
   improve readability. Note that underscores can be placed anywhere within a
   number, not just every three digits.
@@ -190,11 +186,16 @@ val ratio : int -> int -> float = <fun>
 - : float = 0.571428571428571397
 ```
 
-The preceding example also happens to be our first use of modules. Here,
-`Float.of_int` refers to the `of_int` function contained in the `Float`
-module. This is different from what you might expect from an object-oriented
-language, where dot-notation is typically used for accessing a method of an
-object. Note that module names always start with a capital letter.
+Note that in OCaml, function arguments are separated by spaces instead
+of by parentheses and commas, which is more like the UNIX shell than
+it is like traditional programming languages such as C or Java.
+
+The preceding example also happens to be our first use of
+modules. Here, `Float.of_int` refers to the `of_int` function
+contained in the `Float` module. This is different from what you might
+expect from an object-oriented language, where dot-notation is
+typically used for accessing a method of an object. Note that module
+names always start with a capital letter.
 
 Modules can also be opened to make their contents available without
 explicitly qualifying by the module name. We did that once already, when we
