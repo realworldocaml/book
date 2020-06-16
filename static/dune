@@ -29,25 +29,25 @@
         theme/pdf/pdf.css))(alias (name site) (deps faqs.html))
   (rule
     (targets faqs.html)
-    (deps    (alias ../book/html) ../book/faqs.html ../bin/bin/app.exe )
+    (deps    (alias ../book/html) ../book/faqs.html)
     (action  (run rwo-build build faqs -o . -repo-root ..)))
 
 (alias (name site) (deps index.html))
   (rule
     (targets index.html)
-    (deps    (alias ../book/html) ../book/index.html ../bin/bin/app.exe )
+    (deps    (alias ../book/html) ../book/index.html)
     (action  (run rwo-build build index -o . -repo-root ..)))
 
 (alias (name site) (deps install.html))
   (rule
     (targets install.html)
-    (deps    (alias ../book/html) ../book/install.html ../bin/bin/app.exe )
+    (deps    (alias ../book/html) ../book/install.html)
     (action  (run rwo-build build install -o . -repo-root ..)))
 
 (alias (name site) (deps toc.html))
   (rule
     (targets toc.html)
-    (deps    (alias ../book/html) ../book/toc.html ../bin/bin/app.exe ../book/toc.scm)
+    (deps    (alias ../book/html) ../book/toc.html ../book/toc.scm)
     (action  (run rwo-build build toc -o . -repo-root ..)))
 
 (alias (name site) (deps classes.html))
@@ -56,7 +56,6 @@
   (targets classes.html)
   (deps    (:x ../book/classes.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -66,7 +65,6 @@
   (targets command-line-parsing.html)
   (deps    (:x ../book/command-line-parsing.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -76,7 +74,6 @@
   (targets compiler-backend.html)
   (deps    (:x ../book/compiler-backend.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -86,7 +83,6 @@
   (targets compiler-frontend.html)
   (deps    (:x ../book/compiler-frontend.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -96,7 +92,6 @@
   (targets concurrent-programming.html)
   (deps    (:x ../book/concurrent-programming.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -106,7 +101,6 @@
   (targets data-serialization.html)
   (deps    (:x ../book/data-serialization.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -116,7 +110,6 @@
   (targets error-handling.html)
   (deps    (:x ../book/error-handling.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -126,7 +119,6 @@
   (targets files-modules-and-programs.html)
   (deps    (:x ../book/files-modules-and-programs.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -136,7 +128,6 @@
   (targets first-class-modules.html)
   (deps    (:x ../book/first-class-modules.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -146,7 +137,6 @@
   (targets foreign-function-interface.html)
   (deps    (:x ../book/foreign-function-interface.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -156,7 +146,6 @@
   (targets functors.html)
   (deps    (:x ../book/functors.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -166,7 +155,6 @@
   (targets garbage-collector.html)
   (deps    (:x ../book/garbage-collector.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -176,7 +164,6 @@
   (targets guided-tour.html)
   (deps    (:x ../book/guided-tour.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -186,7 +173,6 @@
   (targets imperative-programming.html)
   (deps    (:x ../book/imperative-programming.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -196,7 +182,6 @@
   (targets json.html)
   (deps    (:x ../book/json.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -206,7 +191,6 @@
   (targets lists-and-patterns.html)
   (deps    (:x ../book/lists-and-patterns.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -216,7 +200,6 @@
   (targets maps-and-hashtables.html)
   (deps    (:x ../book/maps-and-hashtables.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -226,7 +209,6 @@
   (targets objects.html)
   (deps    (:x ../book/objects.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -236,7 +218,6 @@
   (targets parsing-with-ocamllex-and-menhir.html)
   (deps    (:x ../book/parsing-with-ocamllex-and-menhir.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -246,7 +227,6 @@
   (targets ppx.html)
   (deps    (:x ../book/ppx.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -256,7 +236,6 @@
   (targets prologue.html)
   (deps    (:x ../book/prologue.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -266,7 +245,6 @@
   (targets records.html)
   (deps    (:x ../book/records.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -276,7 +254,6 @@
   (targets runtime-memory-layout.html)
   (deps    (:x ../book/runtime-memory-layout.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -286,7 +263,6 @@
   (targets variables-and-functions.html)
   (deps    (:x ../book/variables-and-functions.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
@@ -296,7 +272,6 @@
   (targets variants.html)
   (deps    (:x ../book/variants.html)
            (alias ../book/html)
-           ../bin/bin/app.exe
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
 
