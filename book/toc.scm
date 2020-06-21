@@ -20,11 +20,12 @@
  ((title "Tools and Techniques")
   (chapters
    (maps-and-hashtables
+    concurrent-programming
     command-line-parsing
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
-    concurrent-programming))))
+    ))))
 
 (part
  ((title "The Compiler and Runtime System")
