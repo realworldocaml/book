@@ -1,0 +1,6 @@
+(env
+  (dev
+    (flags (:standard -w -9 -principal))
+    (c_flags (:standard -Wall -pedantic -Wextra -Wunused)))
+  (release (ocamlopt_flags (:standard -O3)))
+)

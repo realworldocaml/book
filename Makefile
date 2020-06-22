@@ -11,7 +11,7 @@ test:
 	dune runtest
 
 test-all:
-	dune build @runtest-all
+	dune runtest --profile non-deterministic
 
 dep:
 	dune exec -- rwo-dep
