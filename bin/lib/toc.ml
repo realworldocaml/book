@@ -196,15 +196,6 @@ let flatten_chapters t =
 let get_chapters ?repo_root () =
   get ?repo_root () >>| flatten_chapters
 
-let code_files ?(repo_root=".") () =
-  Util.find_files (repo_root/"examples"/"code") >>|
-  List.filter ~f:(function
-      (* ignore auto-generated files *)
-      | "./book/code/async/test.txt"
-      | "./book/code/imperative-programming/numbers.txt" -> false
-      | _ -> true
-    )
-
 let find ~name (t:t) =
   let rec aux = function
     | []   -> None
