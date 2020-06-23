@@ -1,0 +1,4 @@
+(library
+ (name hex)
+ (public_name hex)
+ (libraries cstruct bigarray-compat))

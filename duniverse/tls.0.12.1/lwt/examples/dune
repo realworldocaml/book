@@ -1,0 +1,64 @@
+(library
+ (name ex_common)
+ (libraries lwt lwt.unix sexplib tls tls.lwt cmdliner fmt.cli logs.fmt fmt.tty logs.cli)
+ (modules ex_common))
+
+(executable
+ (name starttls_server)
+ (modules starttls_server)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt))
+
+(executable
+ (name echo_server)
+ (modules echo_server)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name echo_server_sni)
+ (modules echo_server_sni)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name echo_server_alpn)
+ (modules echo_server_alpn)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name echo_client)
+ (modules echo_client)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name echo_client_alpn)
+ (modules echo_client_alpn)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name test_server)
+ (modules test_server)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name test_client)
+ (modules test_client)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name http_client)
+ (modules http_client)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name fuzz_server)
+ (modules fuzz_server)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name resume_client)
+ (modules resume_client)
+ (libraries tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))
+
+(executable
+ (name resume_echo_server)
+ (modules resume_echo_server)
+ (libraries randomconv tls.lwt lwt.unix mirage-crypto-rng.lwt ex_common))

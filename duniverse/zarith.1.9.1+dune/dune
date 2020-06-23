@@ -9,7 +9,7 @@
 (rule
  (targets libzarith_c_stubs%{ext_lib} dllzarith_c_stubs%{ext_dll})
  (deps   caml_z_arch.o caml_z.o)
- (action (run ocamlmklib -o zarith_c_stubs %{deps})))
+ (action (run ocamlmklib -o zarith_c_stubs %{deps} %{read-lines:config/ldflags})))
 
 (executable
  (name z_pp)

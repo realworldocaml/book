@@ -1,0 +1,15 @@
+(copy_files# ../src/native/*)
+
+(library
+ (name mirage_crypto_freestanding)
+ (public_name mirage-crypto.freestanding)
+ (optional)
+ (libraries ocaml-freestanding)
+ (c_flags (:standard) (:include ../src/cflags.sexp) (:include cflags-freestanding.sexp))
+ (c_names detect_cpu_features misc misc_sse hash_stubs md5 sha1 sha256 sha512
+          aes_generic aes_aesni des_generic
+          ghash_pclmul ghash_generic ghash_ctmul
+          entropy_cpu_stubs)
+)
+
+(rule (with-stdout-to cflags-freestanding.sexp (run ./cflags.sh)))

@@ -1,0 +1,3 @@
+(executables
+  (names cfg)
+  (libraries dune-configurator))

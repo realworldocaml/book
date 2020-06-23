@@ -48,7 +48,7 @@ type _ typ =
                                          -> 'a typ
   | OCaml           : 'a ocaml_type      -> 'a ocaml typ
 and 'a carray = { astart : 'a ptr; alength : int }
-and ('a, 'kind) structured = { structured : ('a, 'kind) structured ptr }
+and ('a, 'kind) structured = { structured : ('a, 'kind) structured ptr } [@@unboxed]
 and 'a union = ('a, [`Union]) structured
 and 'a structure = ('a, [`Struct]) structured
 and 'a abstract = ('a, [`Abstract]) structured

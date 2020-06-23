@@ -1,6 +1,5 @@
-(lang dune 2.3)
+(lang dune 2.6)
 (name ctypes)
-(using library_variants 0.2)
 (formatting (enabled_for dune))
 
 (generate_opam_files true)

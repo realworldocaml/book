@@ -1,0 +1,9 @@
+(library
+  (name duration)
+  (public_name duration)
+  (modules duration))
+
+(test
+  (name tests)
+  (modules tests)
+  (libraries alcotest duration))

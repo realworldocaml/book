@@ -1,0 +1,37 @@
+opam-version: "2.0"
+homepage:     "https://github.com/mirleft/ocaml-tls"
+dev-repo:     "git+https://github.com/mirleft/ocaml-tls.git"
+bug-reports:  "https://github.com/mirleft/ocaml-tls/issues"
+doc:          "https://mirleft.github.io/ocaml-tls/doc"
+author:       ["David Kaloper <david@numm.org>" "Hannes Mehnert <hannes@mehnert.org>"]
+maintainer:   ["Hannes Mehnert <hannes@mehnert.org>" "David Kaloper <david@numm.org>"]
+license:      "BSD-2-Clause"
+
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+
+depends: [
+  "ocaml" {>= "4.07.0"}
+  "dune" {>= "1.0"}
+  "tls" {= version}
+  "x509" {>= "0.10.0"}
+  "fmt"
+  "lwt" {>= "3.0.0"}
+  "mirage-flow" {>= "2.0.0"}
+  "mirage-kv" {>= "3.0.0"}
+  "mirage-clock" {>= "3.0.0"}
+  "ptime" {>= "0.8.1"}
+  "mirage-crypto"
+  "mirage-crypto-pk"
+  "hacl_x25519" {>= "0.1.1"}
+  "fiat-p256" {>= "0.2.1"}
+]
+tags: [ "org:mirage"]
+synopsis: "Transport Layer Security purely in OCaml, MirageOS layer"
+description: """
+Tls-mirage provides an effectful FLOW module to be used in the MirageOS
+ecosystem.
+"""

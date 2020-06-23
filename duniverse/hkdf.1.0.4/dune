@@ -1,0 +1,10 @@
+(library
+  (name hkdf)
+  (public_name hkdf)
+  (modules hkdf)
+  (libraries cstruct mirage-crypto))
+
+(test
+  (name rfctests)
+  (modules rfctests)
+  (libraries alcotest hkdf))

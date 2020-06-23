@@ -1,0 +1,30 @@
+opam-version: "2.0"
+homepage:     "https://github.com/mirage/mirage-crypto"
+dev-repo:     "git+https://github.com/mirage/mirage-crypto.git"
+bug-reports:  "https://github.com/mirage/mirage-crypto/issues"
+doc:          "https://mirage.github.io/mirage-crypto/doc"
+authors:      ["David Kaloper <dk505@cam.ac.uk>" "Hannes Mehnert <hannes@mehnert.org>" ]
+maintainer:   "Hannes Mehnert <hannes@mehnert.org>"
+license:      "ISC"
+synopsis:     "Entropy collection for a cryptographically secure PRNG"
+
+build: [ ["dune" "subst"] {pinned}
+         ["dune" "build" "-p" name "-j" jobs ]
+         ["dune" "runtest" "-p" name "-j" jobs] {with-test} ]
+
+depends: [
+  "ocaml" {>= "4.08.0"}
+  "dune" {>= "1.7"}
+  "mirage-crypto-rng" {=version}
+  "duration"
+  "cstruct" {>= "4.0.0"}
+  "mirage-runtime" {>= "3.7.0"}
+  "mirage-time" {>= "2.0.0"}
+  "mirage-clock" {>= "3.0.0"}
+  "mirage-unix" {with-test & >= "3.0.0"}
+  "mirage-time-unix" {with-test & >= "2.0.0"}
+  "mirage-clock-unix" {with-test & >= "3.0.0"}
+]
+description: """
+Mirage-crypto-rng-mirage provides entropy collection code for the RNG.
+"""

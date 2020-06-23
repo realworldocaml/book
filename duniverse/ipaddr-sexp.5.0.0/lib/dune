@@ -1,0 +1,54 @@
+(library
+ (name        ipaddr)
+ (public_name ipaddr)
+ (modules ipaddr)
+ (libraries macaddr domain-name stdlib-shims))
+
+(library
+ (name        macaddr)
+ (public_name macaddr)
+ (modules macaddr))
+
+(library
+ (name        ipaddr_sexp)
+ (public_name ipaddr-sexp)
+ (modules ipaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
+ (libraries ipaddr sexplib0))
+
+(library
+ (name        macaddr_sexp)
+ (public_name macaddr-sexp)
+ (modules macaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
+ (libraries macaddr sexplib0))
+
+(library
+ (name        ipaddr_unix)
+ (public_name ipaddr.unix)
+ (modules ipaddr_unix)
+ (libraries unix ipaddr))
+
+(library
+ (name        ipaddr_cstruct)
+ (public_name ipaddr-cstruct)
+ (modules ipaddr_cstruct)
+ (libraries ipaddr cstruct))
+
+(library
+ (name        macaddr_cstruct)
+ (public_name macaddr-cstruct)
+ (modules macaddr_cstruct)
+ (libraries macaddr cstruct))
+
+(library
+ (name        ipaddr_top)
+ (public_name ipaddr.top)
+ (modules ipaddr_top)
+ (libraries macaddr.top ipaddr compiler-libs))
+
+(library
+ (name        macaddr_top)
+ (public_name macaddr.top)
+ (modules macaddr_top)
+ (libraries macaddr compiler-libs))

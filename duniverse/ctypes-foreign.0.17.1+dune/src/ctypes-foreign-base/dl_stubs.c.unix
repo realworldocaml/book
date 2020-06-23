@@ -74,7 +74,7 @@ value ctypes_dlopen(value filename, value flag)
 {
   CAMLparam2(filename, flag);
 
-  char *cfilename = filename == Val_none ? NULL : String_val(Some_val(filename));
+  const char *cfilename = filename == Val_none ? NULL : String_val(Some_val(filename));
   int cflag = Int_val(flag);
 
   void *handle = dlopen(cfilename, cflag);
@@ -90,7 +90,7 @@ value ctypes_dlsym(value handle_option, value symbol)
     ? RTLD_DEFAULT
     : (void *)Some_val(handle_option);
 
-  char *s = String_val(symbol);
+  const char *s = String_val(symbol);
   void *result = dlsym(handle, s);
   CAMLreturn(result == NULL
              ? Val_none
