@@ -1,3 +1,25 @@
+; PDF Generation
+
+(rule
+  (targets inputs.tex)
+  (deps ../book/toc.scm)
+  (action (run rwo-build build inputs -o . -repo-root ..)))
+
+(rule
+ (alias pdf)
+ (targets book.pdf)
+ (deps
+  (alias ../book/latex)
+  (:x ../book/book.tex)
+  inputs.tex)
+ (action
+  (progn
+   (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
+   (system "makeindex book.idx")
+   (system "pdflatex -interaction=nonstopmode %{x}"))))
+
+; Website Generation
+
 (alias
   (name site)
   (deps css/app.css
@@ -26,29 +48,31 @@
         js/prism.js
         js/min/app-min.js
         js/min/modernizr-min.js
-        theme/pdf/pdf.css))(alias (name site) (deps faqs.html))
-  (rule
-    (targets faqs.html)
-    (deps    (alias ../book/html) ../book/faqs.html)
-    (action  (run rwo-build build faqs -o . -repo-root ..)))
+        theme/pdf/pdf.css))
 
-(alias (name site) (deps index.html))
-  (rule
-    (targets index.html)
-    (deps    (alias ../book/html) ../book/index.html)
-    (action  (run rwo-build build index -o . -repo-root ..)))
+(rule
+ (alias site)
+ (targets faqs.html)
+ (deps (alias ../book/html) ../book/faqs.html)
+ (action (run rwo-build build faqs -o . -repo-root ..)))
 
-(alias (name site) (deps install.html))
-  (rule
-    (targets install.html)
-    (deps    (alias ../book/html) ../book/install.html)
-    (action  (run rwo-build build install -o . -repo-root ..)))
+(rule
+ (alias site)
+ (targets index.html)
+ (deps (alias ../book/html) ../book/index.html)
+ (action (run rwo-build build index -o . -repo-root ..)))
 
-(alias (name site) (deps toc.html))
-  (rule
-    (targets toc.html)
-    (deps    (alias ../book/html) ../book/toc.html ../book/toc.scm)
-    (action  (run rwo-build build toc -o . -repo-root ..)))
+(rule
+ (alias site)
+ (targets install.html)
+ (deps (alias ../book/html) ../book/install.html)
+ (action (run rwo-build build install -o . -repo-root ..)))
+
+(rule
+ (alias site)
+ (targets toc.html)
+ (deps (alias ../book/html) ../book/toc.html ../book/toc.scm)
+ (action (run rwo-build build toc -o . -repo-root ..)))
 
 (alias (name site) (deps classes.html))
 
@@ -274,22 +298,3 @@
            (alias ../book/html)
            ../book/toc.scm)
   (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(rule
-  (targets inputs.tex)
-  (deps    %{bin:rwo-build}
-           ../book/toc.scm)
-  (action  (run rwo-build build inputs -o . -repo-root ..)))
-
-(alias (name pdf) (deps book.pdf))
-
-(rule
-  (targets book.pdf)
-  (deps    (alias ../book/latex)
-           (:x ../book/book.tex)
-           inputs.tex)
-  (action
-   (progn
-    (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
-    (system "makeindex book.idx")
-    (system "pdflatex -interaction=nonstopmode %{x}"))))
