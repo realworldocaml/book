@@ -21,6 +21,7 @@ type chapter = {
   title : string;
   part_info : part_info option;
   sections : sections;
+  wip : bool;
 }
 
 type part = {
@@ -110,13 +111,31 @@ let flatten_sections sections =
     )
   )
 
-module Toc = struct
+module Repr = struct
+  type chapter =
+    { name : string
+    ; wip : bool }
+
+  let chapter_of_sexp : Sexplib.Sexp.t -> chapter = function
+    | List [ Atom "wip"; s ] ->
+      let name = string_of_sexp s in
+      {name; wip = true}
+    | s ->
+      let name = string_of_sexp s in
+      {name; wip = false}
+
+  let sexp_of_chapter {name; wip} : Sexplib.Sexp.t =
+    if wip then
+      List [ Atom "wip"; sexp_of_string name ]
+    else
+      sexp_of_string name
+
   type part = {
     title   : string;
-    chapters: string list;
+    chapters: chapter list;
   } [@@deriving sexp]
 
-  type t = [ `part of part | `chapter of string] list [@@deriving sexp]
+  type t = [ `part of part | `chapter of chapter] list [@@deriving sexp]
 
   let read dir =
     let f = dir / "toc.scm" in
@@ -124,19 +143,22 @@ module Toc = struct
     let s = Sexplib.Sexp.scan_sexps (Lexing.from_string contents) in
     t_of_sexp (Sexplib.Sexp.List s)
 
+  let get ?(repo_root=".") () =
+    let book_dir = repo_root/"book" in
+    read book_dir
 end
 
 let of_toc book_dir toc =
-  let chapter part_info number basename =
-    let file = book_dir / basename ^ ".html" in
+  let chapter part_info number {Repr.name; wip} =
+    let file = book_dir / name ^ ".html" in
     Html.of_file file >>| fun html ->
     let title = get_title file html in
     let sections = get_sections ~filename:file html in
-    { number; name = basename; part_info; sections; title }
+    { number; name; part_info; sections; title; wip }
   in
-  let part ~parts ~chapters title files =
+  let part ~parts ~chapters title chapter_list =
     let part_info = Some { title; number = parts } in
-    Deferred.List.mapi ~f:(fun i f -> chapter part_info (i+chapters) f) files
+    Deferred.List.mapi ~f:(fun i f -> chapter part_info (i+chapters) f) chapter_list
     >>| fun chapters ->
     { info = part_info; chapters }
   in
@@ -146,8 +168,8 @@ let of_toc book_dir toc =
       chapter None chapters c >>= fun c ->
       let p = { info = None; chapters = [c] } in
       aux ~parts ~chapters:(chapters+1) (p :: acc) t
-    | `part (p:Toc.part) :: t ->
-      part ~parts ~chapters p.title p.Toc.chapters >>= fun p ->
+    | `part (p:Repr.part) :: t ->
+      part ~parts ~chapters p.title p.chapters >>= fun p ->
       let chapters = chapters + List.length p.chapters in
       aux ~parts:(parts+1) ~chapters (p :: acc) t
   in
@@ -172,7 +194,7 @@ let of_chapters (chapters : chapter list) : part list =
 
 let get ?(repo_root=".") () =
   let book_dir = repo_root/"book" in
-  Toc.read book_dir >>= fun toc ->
+  Repr.read book_dir >>= fun toc ->
   of_toc book_dir toc
 
 let flatten_chapters t =

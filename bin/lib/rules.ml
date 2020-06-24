@@ -9,6 +9,7 @@ let print_web ~repo_root =
   let toc_file = book_folder / "toc.scm" in
   let html_alias = book_folder / "html" in
   Toc.get_chapters ~repo_root () >>| fun chapters ->
+  let chapters = List.filter chapters ~f:(fun {Toc.wip; _} -> not wip) in
   List.iter chapters
     ~f:(fun chapter ->
         let html_file = book_folder / (chapter.name ^ ".html") in

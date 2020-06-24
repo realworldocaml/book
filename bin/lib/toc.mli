@@ -4,6 +4,23 @@
 open! Core
 open Async
 
+module Repr : sig
+  (** Basic representation of the Table of content *)
+
+  type chapter =
+    { name : string
+    ; wip : bool }
+
+  type part = {
+    title   : string;
+    chapters: chapter list;
+  }
+
+  type t = [ `part of part | `chapter of chapter] list [@@deriving sexp]
+
+  val get : ?repo_root: string -> unit -> t Deferred.t
+end
+
 type part_info = {
   number : int;
   title : string;
@@ -23,6 +40,7 @@ type chapter = {
   title : string;
   part_info : part_info option;
   sections : sections;
+  wip : bool;
 }
 
 type part = {
