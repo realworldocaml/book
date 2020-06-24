@@ -118,22 +118,11 @@ module Toc = struct
 
   type t = [ `part of part | `chapter of string] list [@@deriving sexp]
 
-  let html_file f =
-    try (Filename.chop_extension f) ^ ".html"
-    with Invalid_argument _ -> f
-
-  let html =
-    let aux = function
-      | `chapter f -> `chapter (html_file f)
-      | `part p    -> `part {p with chapters = List.map ~f:html_file p.chapters}
-    in
-    List.map ~f:aux
-
   let read dir =
     let f = dir / "toc.scm" in
     Reader.file_contents f >>| fun contents ->
     let s = Sexplib.Sexp.scan_sexps (Lexing.from_string contents) in
-    html (t_of_sexp (Sexplib.Sexp.List s))
+    t_of_sexp (Sexplib.Sexp.List s)
 
 end
 
