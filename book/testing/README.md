@@ -326,9 +326,9 @@ see below.
       ((duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml.E
          "comparison failed" (Neg vs Pos (Loc test.ml:7:19)))
          "Raised at file \"duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from file \"duniverse/base.v0.13.2/src/or_error.ml\", line 75, characters 9-15\
+        \nCalled from file \"duniverse/base.v0.13.1/src/or_error.ml\", line 75, characters 9-15\
         \n"))).
-    Raised at file "duniverse/base.v0.13.2/src/error.ml", line 8, characters 14-30
+    Raised at file "duniverse/base.v0.13.1/src/error.ml", line 8, characters 14-30
     Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 502, characters 15-19
     Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 343, characters 8-12
     Re-raised at file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 346, characters 6-13
@@ -543,7 +543,19 @@ wrote, and a *corrected* version of the source file that now has an
 
 ```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
   $ dune runtest
-  Entering directory '/Users/avsm/src/git/realworldocaml/book'
+       patdiff (internal) (exit 1)
+  ...
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 5, characters 0-1:
+   |open! Base
+   |open! Stdio
+   |
+   |let%expect_test "trivial" =
+  -|  print_endline "Hello World!"
+  +|  print_endline "Hello World!";
+  +|  [%expect {| Hello World! |}]
+  [1]
 ```
 
 The expect test runner also creates a version of the file with the
@@ -670,7 +682,31 @@ intended.
 
 ```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
   $ dune runtest
-  Entering directory '/Users/avsm/src/git/realworldocaml/book'
+       patdiff (internal) (exit 1)
+  ...
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 24, characters 0-1:
+   |  |> List.map ~f:(Soup.R.attribute "href")
+   |  |> Set.of_list (module String)
+   |
+   |[@@@part "1"] ;;
+   |let%expect_test _ =
+   |  let example_html = {|
+   |    <html>
+   |      Some random <b>text</b> with a
+   |      <a href="http://ocaml.org/base">link</a>.
+   |      And here's another
+   |      <a href="http://github.com/ocaml/dune">link</a>.
+   |      And here is <a>link</a> with no href.
+   |    </html>|}
+   |  in
+   |  let soup = Soup.parse example_html in
+   |  let hrefs = get_href_hosts soup in
+  -|  print_s [%sexp (hrefs : Set.M(String).t)]
+  +|  print_s [%sexp (hrefs : Set.M(String).t)];
+  +|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  [1]
 ```
 
 The problem here is that we failed to extract the host from the URI
@@ -692,7 +728,30 @@ should be.
 
 ```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
   $ dune runtest
-  Entering directory '/Users/avsm/src/git/realworldocaml/book'
+       patdiff (internal) (exit 1)
+  ...
+  ------ test.ml
+  ++++++ test.ml.corrected
+  File "test.ml", line 26, characters 0-1:
+   |  |> Set.of_list (module String)
+   |
+   |[@@@part "1"] ;;
+   |let%expect_test _ =
+   |  let example_html = {|
+   |    <html>
+   |      Some random <b>text</b> with a
+   |      <a href="http://ocaml.org/base">link</a>.
+   |      And here's another
+   |      <a href="http://github.com/ocaml/dune">link</a>.
+   |      And here is <a>link</a> with no href.
+   |    </html>|}
+   |  in
+   |  let soup = Soup.parse example_html in
+   |  let hrefs = get_href_hosts soup in
+   |  print_s [%sexp (hrefs : Set.M(String).t)];
+  -|  [%expect {| (http://github.com/ocaml/dune http://ocaml.org/base) |}]
+  +|  [%expect {| (github.com ocaml.org) |}]
+  [1]
 ```
 
 
