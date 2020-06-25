@@ -126,8 +126,13 @@ struct
       assert_equal ~cmp:complex32_eq (Complex.mul l r) (mul_complexf_val l r);
 
       let zinf = { re = 0.; im = infinity } in
-      assert_equal 0. (add_complexd_val zinf zinf).re;
+      let res = add_complexd_val zinf zinf in
+      assert_equal 0. res.re;
       assert_equal 0. (add_complexf_val zinf zinf).re;
+      let ozinf = Obj.repr zinf in
+      let ores = Obj.repr res in
+      assert_equal (Obj.tag ozinf) (Obj.tag ores);
+      assert_equal (Obj.size ozinf) (Obj.size ores);
 
       (* test long double complex *)
       let re x = LDouble.(to_float (ComplexL.re x)) in

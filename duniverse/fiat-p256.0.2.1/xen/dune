@@ -1,0 +1,20 @@
+(copy_files# ../p256/p256_stubs.c)
+
+(copy_files# ../p256/p256_32.h)
+
+(copy_files# ../p256/p256_64.h)
+
+(library
+ (name fiat_p256_xen)
+ (public_name fiat-p256.xen)
+ (optional)
+ (libraries mirage-xen-posix)
+ (c_flags
+  (:include ../p256/discover/cflags.sexp)
+  (:include cflags-xen.sexp))
+ (c_names p256_stubs))
+
+(rule
+ (with-stdout-to
+  cflags-xen.sexp
+  (run ./cflags.sh)))

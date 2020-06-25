@@ -1,0 +1,7 @@
+(library
+ (name mtime_clock)
+ (public_name mtime.clock.os)
+ (libraries mtime)
+ (modules mtime_clock)
+ (c_names mtime_clock_stubs)
+ (wrapped false))

@@ -1,0 +1,12 @@
+(executable
+ (name bench)
+ (libraries fiat_p256 benchmark stdlib-shims))
+
+(alias
+ (name bench)
+ (action
+  (run ./bench.exe --all)))
+
+(alias
+ (name runtest)
+ (deps bench.exe))

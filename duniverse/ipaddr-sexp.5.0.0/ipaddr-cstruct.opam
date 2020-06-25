@@ -1,0 +1,24 @@
+opam-version: "2.0"
+maintainer: "anil@recoil.org"
+authors: ["David Sheets" "Anil Madhavapeddy" "Hugo Heuzard"]
+synopsis: "A library for manipulation of IP address representations using Cstructs"
+license: "ISC"
+tags: ["org:mirage" "org:xapi-project"]
+homepage: "https://github.com/mirage/ocaml-ipaddr"
+doc: "https://mirage.github.io/ocaml-ipaddr/"
+bug-reports: "https://github.com/mirage/ocaml-ipaddr/issues"
+depends: [
+  "ocaml" {>= "4.04.0"}
+  "dune"
+  "ipaddr" {=version}
+  "cstruct"
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/mirage/ocaml-ipaddr.git"
+description: """
+Cstruct convertions for macaddr
+"""

@@ -26,7 +26,7 @@ homepage: "https://github.com/ocamllabs/ocaml-ctypes"
 doc: "https://ocamllabs.github.io/ocaml-ctypes/"
 bug-reports: "https://github.com/ocamllabs/ocaml-ctypes/issues"
 depends: [
-  "dune" {>= "2.3"}
+  "dune" {>= "2.6"}
   "ocaml" {>= "4.02.3"}
   "integers"
   "dune-configurator"

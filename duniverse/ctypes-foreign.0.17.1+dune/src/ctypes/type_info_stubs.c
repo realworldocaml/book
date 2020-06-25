@@ -79,7 +79,7 @@ value ctypes_read(value prim_, value buffer_)
 
 /* Read a C value from a block of memory */
 /* write : 'a prim -> 'a -> fat_pointer -> unit */
-value ctypes_write(value prim_, value v, value buffer_)
+value ctypes_write(value prim_, value v, value buffer_) /* noalloc */
 {
   CAMLparam3(prim_, v, buffer_);
   void *buf = CTYPES_ADDR_OF_FATPTR(buffer_);
@@ -179,7 +179,7 @@ value ctypes_string_of_prim(value prim_, value v)
     assert(0);
   }
   s = caml_alloc_string(len);
-  memcpy(String_val(s), buf, len);
+  memcpy((char *)String_val(s), buf, len);
   CAMLreturn (s);
 }
 

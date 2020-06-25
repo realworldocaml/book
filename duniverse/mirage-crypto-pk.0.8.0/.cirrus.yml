@@ -1,0 +1,14 @@
+freebsd_instance:
+  image_family: freebsd-12-1
+
+freebsd_task:
+  env:
+    matrix:
+      - OCAML_VERSION: 4.08.1
+      - OCAML_VERSION: 4.09.0
+  pkg_install_script: pkg install -y ocaml-opam gmp gmake pkgconf
+  ocaml_script: opam init -a --comp=$OCAML_VERSION
+  dependencies_script: eval `opam env` && opam install -y --deps-only .
+  freestanding_script: eval `opam env` && opam install -y solo5-bindings-hvt zarith-freestanding
+  build_script: eval `opam env` && dune build
+  test_script: eval `opam env` && opam install -y -t --deps-only . && dune runtest

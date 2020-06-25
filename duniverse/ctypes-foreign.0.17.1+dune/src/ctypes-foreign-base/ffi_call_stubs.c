@@ -370,7 +370,7 @@ value ctypes_call(value fnname, value function, value callspec_,
   callback_val_arr = caml_alloc_tuple(nelements);
   caml_callback2(argwriter, callback_arg_buf, callback_val_arr);
 
-  void **val_refs = alloca(sizeof(void*) * nelements);
+  const void **val_refs = alloca(sizeof(void*) * nelements);
 
   unsigned arg_idx;
   for(arg_idx = 0; arg_idx < Wosize_val(callback_val_arr); arg_idx++) {
@@ -385,7 +385,7 @@ value ctypes_call(value fnname, value function, value callspec_,
     assert(Is_block(arg_ptr) && Tag_val(arg_ptr) == String_tag);
     val_refs[arg_idx] = String_val(arg_ptr) + Long_val(arg_offset);
 
-    ((void**)(callbuffer + arg_array_offset))[arg_idx] = &val_refs[arg_idx];
+    ((const void**)(callbuffer + arg_array_offset))[arg_idx] = &val_refs[arg_idx];
   }
 
   void (*cfunction)(void) = (void (*)(void)) CTYPES_ADDR_OF_FATPTR(function);

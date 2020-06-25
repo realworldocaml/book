@@ -1,5 +1,0 @@
-(library
- (name tls_lwt)
- (public_name tls.lwt)
- (wrapped false)
- (libraries tls lwt lwt.unix mirage-crypto-rng.unix ptime.clock.os))

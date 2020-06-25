@@ -1,0 +1,6 @@
+(library
+ (name wycheproof)
+ (libraries yojson ppx_deriving_yojson.runtime hex)
+ (preprocess
+  (pps ppx_deriving.std ppx_deriving_yojson ppx_blob))
+ (preprocessor_deps x25519_test.json))

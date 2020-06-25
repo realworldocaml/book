@@ -1,0 +1,42 @@
+(rule (copy# ../lib/ipaddr_sexp.ml ipaddr_sexp.ml))
+(rule (copy# ../lib/macaddr_sexp.ml macaddr_sexp.ml))
+(rule (copy# ../lib/ipaddr.ml ipaddr_internal.ml))
+
+
+(library
+ (name test_macaddr_sexp)
+ (wrapped false)
+ (modules macaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
+ (libraries macaddr sexplib0))
+
+(library
+ (name test_ipaddr_sexp)
+ (wrapped false)
+ (modules ipaddr_sexp)
+ (preprocess (pps ppx_sexp_conv))
+ (libraries ipaddr sexplib0))
+
+(test
+ (name test_ipaddr)
+ (package ipaddr-sexp)
+ (modules test_ipaddr)
+ (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
+
+(test
+ (name test_ipaddr_b128)
+ (package ipaddr-sexp)
+ (modules test_ipaddr_b128 ipaddr_internal)
+ (libraries ipaddr ipaddr-cstruct test_ipaddr_sexp oUnit))
+
+(test
+ (name test_macaddr)
+ (package macaddr-sexp)
+ (modules test_macaddr)
+ (libraries macaddr macaddr-cstruct test_macaddr_sexp oUnit))
+
+(test
+ (name test_ppx)
+ (modules test_ppx)
+ (package ipaddr-sexp)
+ (libraries ipaddr macaddr test_ipaddr_sexp test_macaddr_sexp oUnit))
