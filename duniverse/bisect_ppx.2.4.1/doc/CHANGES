@@ -1,0 +1,419 @@
+Version 2.4.1 (2020-05-10):
+---------------------------
+  Bugs fixed
+
+  - Support Jest with in-source builds (#322, Jihchi Lee).
+  - Make application expression instrumentation less invasive (#319).
+
+  Changes
+
+  - Use OCaml 4.11 AST (#321).
+
+Version 2.4.0 (2020-04-21):
+---------------------------
+  Additions
+
+  - PPX --exclude-files command-line option (#313).
+  - Jest integration (#314, Jihchi Lee).
+  - Register exit hook automatically on Node (3471d2a).
+
+  Bugs fixed
+
+  - CSS: display text cursor over entire code view (#315).
+
+Version 2.3.2 (2020-04-19):
+---------------------------
+  Bugs fixed
+
+  - Support taking PPX options from BuckleScript (#310).
+  - Find exclusions file when run from ./lib/bs by BuckleScript (#311).
+
+Version 2.3.1 (2020-04-13):
+---------------------------
+  Bugs fixed
+
+  - Support JS method calls (#308).
+
+Version 2.3.0 (2020-04-06):
+---------------------------
+  Additions
+
+  - Dark theme support (#301, Ulrik Strid).
+  - Dark theme based on GitHub-Dark (#260).
+  - PPX options --bisect-file and --bisect-silent as alternatives to BISECT_FILE
+    and BISECT_SILENT environment variables (#303, Mehdi Bouaziz).
+
+  Bugs fixed
+
+  - HTML: coverage meters displayed incorrectly (b61f46a, reported Ulrik Strid).
+  - HTML: Firefox would use the default font in pre > code (#300, Ulrik Strid).
+  - HTML: don't show tooltip over unvisited points (#304).
+
+Version 2.2.0 (2020-03-26):
+---------------------------
+  Additions
+
+  - Support for exception pattern extensions added in OCaml 4.08 (#297).
+
+  Bugs fixed
+
+  - HTML: generate <!DOCTYPE html> and <html lang="en"> (#288, @zapashcanon).
+  - Invalid doc comment section heading levels (#291, reported Risto Stevcev).
+  - Hide generated code from odoc (#293, reported Risto Stevcev).
+
+Version 2.1.0 (2020-03-20):
+---------------------------
+  Additions
+
+  - GitHub Actions integration (#280, Ulrik Strid).
+  - Reporter --coverage-path option to specify search paths for .coverage files
+    (#269).
+  - Reporter --source-path option to specify search paths for source files
+    (#283).
+
+  Deprecations
+
+  - -I in favor of --search-path (#283).
+
+Version 2.0.0 (2020-03-17):
+---------------------------
+  Additions
+
+  - BuckleScript support and NPM packaging (#206, #249).
+  - Js_of_ocaml support (#212).
+  - Automated sending of reports from Travis and CircleCI to Coveralls and
+    Codecov (#241).
+  - Better integration with Dune (#235).
+  - Better integration with esy (#263, #270).
+  - [@coverage off] attribute and its variants for excluding expressions and
+    module items from coverage (#198).
+  - [@@@coverage exclude file] for excluding entire files (#130, #219).
+  - Cmdliner-based command line (#145).
+  - Reporter automatically searches for .coverage files (#236).
+  - New, more disciplined instrumentation strategy (#82, #128, #205).
+  - Syntax highlighting in the generated reports (#135).
+  - Sanity-checking the set of source files included in the coverage report
+    (a7a4ca0).
+  - Use 4.10 ASTs internally for the transformation (#274).
+  - MIT license (#199).
+
+  Deprecations
+
+  These features will be removed in 2.1.0.
+
+  - PPX -mode option (#200).
+  - PPX -no-comment-parsing option (#202).
+  - PPX -exclude option (#244).
+  - PPX -exclude-file in favor of --exclusions (#245).
+  - Reporter --html, --text, --coveralls are deprecated in favor of the html,
+    summary, coveralls sub-commands, respectively (#145).
+  - All other reporter multi-character options with a single dash (-) prefix are
+    deprecated in favor of double-dashed (--) versions (#145).
+  - .out files are now .coverage files (#110).
+
+  Removed
+
+  - BISECT-IGNORE comments, in favor of [@coverage off] (#202).
+
+  Bugs fixed
+
+  - Randomize intermediate filenames to avoid collisions upon their creation
+    (#194, Mindy Preston).
+  - Left margin indicators in the HTML report could be invisible, if they were
+    located at the bottom of the margin (#254).
+
+Version 1.4.2 (2020-01-17):
+---------------------------
+  Changes
+
+  - Use OCaml 4.09 ASTs during preprocessing (88d24c5, 02dfb10).
+
+
+Version 1.4.1 (2018-03-25):
+---------------------------
+  Additions
+
+  - PPX -no-comment-parsing option, to work around Bisect_ppx trying to parse
+    (*BISECT-IGNORE*) comments (#187, reported Ben Anderson).
+
+  Bugs fixed
+
+  - Bisect_ppx should run after other PPXs (#186, reported Brian Caine).
+  - Round displayed coverage percentages down (#172, reported Iago Abal).
+
+Version 1.4.0 (2018-11-28):
+---------------------------
+  Additions
+
+  - Coveralls reports with bisect-ppx-report -coveralls ... (#176, Sam Miller).
+
+  Bugs fixed
+
+  - Infinite loop when unable to create bisect*.out files (#175, reported Josh
+    Berdine).
+  - Infinite loop when source file was compiled with an absolute path (#180,
+    reported Calvin Beck).
+
+Version 1.3.4 (2018-07-23):
+---------------------------
+  - Remove manual call to PPX driver (#173, Rudi Grinberg).
+
+Version 1.3.3 (2018-04-29):
+---------------------------
+  Bugs fixed
+
+  - Don't try to read .exclude file when Bisect_ppx is disabled (#169, Gary
+    Trakhman).
+  - Refactor how instrumented code registers itself with the Bisect_ppx runtime,
+    to make it easier to use Bisect_ppx with libraries other than stdlib (#171,
+    Hugo Heuzard).
+
+  Packaging
+
+  - The deprecated packages bisect_ppx.ocamlbuild and bisect_ppx.plugin, which
+    contained the Bisect_ppx Ocamlbuild plugin, have been deleted. The plugin is
+    now available only through bisect_ppx-ocamlbuild (#143).
+  - The deprecated package alias bisect_ppx.fast has been deleted (#144).
+
+  Miscellaneous
+
+  - Major refactoring of the instrumenter to make it much easier to work on.
+
+Version 1.3.2 (2017-12-21):
+---------------------------
+  Bugs fixed
+
+  - Report names of intermediate files when Bisect_ppx is unable to read them
+    (#163, Emilio Jesús Gallego Arias).
+  - Don't apply instrumentation to attributes in .mli files (#164, reported
+    Etienne Millon).
+
+  Improvements
+
+  - Generate HTML report filenames from source filenames, instead of assigning
+    them numbers (#139, Brad Langel).
+
+Version 1.3.1 (2017-10-05):
+---------------------------
+  Compatibility with OCaml 4.06
+
+  - Do not treat bytes and string as equivalent types.
+
+  Bugs fixed
+
+  - Reporter tool now has better usage/help output (76220cf).
+  - Various documentation improvements.
+  - Reduce chance of generated identifier collisions, and make collision a
+    compile-time error (#160).
+
+  Simplifications
+
+  - Drop pre-visited points (BISECT-VISIT), and implement them as ignored
+    points (#159).
+  - Remove -simple-cases PPX option. This was an internal feature.
+  - Remove -inexhaustive-matching PPX option. This was an internal feature.
+  - Internal source code improvements, including a complete reorganization of
+    the PPX.
+
+Version 1.3.0 (2017-08-16):
+---------------------------
+  Planned to break in the future 2.0.0
+
+  - The Ocamlbuild plugin will be factored out into its own OPAM package
+    bisect_ppx-ocamlbuild, and the ocamlfind package will be changed to also
+    have that name, instead of the current bisect_ppx.ocamlbuild. The new OPAM
+    package is available now, since Bisect_ppx 1.3.0 (#146).
+  - Delete ocamlfind package bisect_ppx.fast. It is a little-used alias for
+    package bisect_ppx (#144).
+  - Delete ocamlfind package bisect_ppx.plugin. It is a little-used alias for
+    bisect_ppx.ocamlbuild (#144).
+
+  Additions
+
+  - Port to Jbuilder (#117, Rudi Grinberg).
+  - Port to ocaml-migrate-parsetree (#117, Rudi Grinberg).
+  - Add "-conditional" workaround for Jbuilder (#153).
+  - API for dumping coverage statistics before program exit, e.g. for
+    long-running daemons (#129, Edwin Török).
+  - Match cases consisting of only assert false are no longer instrumented
+    (#118, Gabriel Scherer).
+  - Change license to MPL 2.0, from GPL 3.0 (#133).
+
+  Bugs fixed
+
+  - Don't instrument refutation cases ("| p -> .") (#118, Gabriel Scherer).
+  - Some builds failing with "unary operator expected" (#123, Brad Langel).
+  - Better error messages for malformed bisect*.out files (#137,
+    Emilio Jesús Gallego Arias).
+
+  Miscellaneous
+
+  - Document bisect*.out file format (#138, Brad Langel).
+  - Testing, build, debuggability improvements, including by Gabriel Scherer,
+    Emilio Jesús Gallego Arias.
+
+Version 1.2.0 (2016-11-08):
+---------------------------
+  Additions
+
+  - Compatibility with OCaml 4.04 (#113).
+  - Install .mli files (#98, prompted Christian Lindig).
+
+  Removals
+
+  This release removes several features which appear to get little or no use.
+
+  - Rename package bisect_ppx.plugin to bisect_ppx.ocamlbuild; bisect_ppx.plugin
+    is still available as a deprecated name (#93).
+  - Remove -combine-expr option from the reporter (#105, #106).
+  - Remove EMMA, XML, and "bisect" output formats (#105, #106).
+  - Remove obsolete -no-navbar and -no-folding options from HTML output (#106).
+  - Remove point kinds (#101).
+  - Eliminate .cmp files; this makes the -I option unnecessary for output
+    formats besides HTML (#102, #108).
+
+Version 1.1.0 (2016-04-02):
+---------------------------
+  - Port to 4.03.
+  - Allow exclusion of entire files, instead of only top-level values (prompted
+    @solongordon).
+  - Allow files to be excluded by regular expression, instead of only by exact
+    string match (requested @solongordon).
+
+Version 1.0.1 (2016-03-04):
+---------------------------
+  - Add option -ignore-missing-files to bisect-ppx-report, which allows the
+    reporter to silently ignore missing source files instead of failing. This is
+    intended for build processes that generate temporary source files, but
+    delete them before the reporter is run (requested Ivan Gotovchits).
+  - Fix bug in which bisect-ppx-report treated source code as format strings for
+    Buffer.add_substitute. This caused wrong behavior on source code substrings
+    that looked like Buffer.add_substitute patterns (reported Ivan Gotovchits).
+  - Various minor documentation and internal build fixes.
+
+Version 1.0.0 (2016-02-09):
+---------------------------
+  - Redesign HTML reports.
+  - Put separate points on each clause of or-patterns.
+  - Put points on applications of |>.
+  - Eliminate -safe, -fast, -faster modes. All modes now fast and thread-safe.
+  - Improve integration with other ppx preprocessors.
+  - Install native ppx rewriter when possible.
+  - Adjust which points have which kinds.
+  - Clean up command-line help of bisect-ppx-report.
+  - Add Ocamlbuild plugin helper and "coverage" tag.
+  - New documentation.
+  - Testing, build, and packaging improvements.
+
+Version 0.2.6 (2016-01-01):
+--------------------------
+  - Fix missing 'function' and 'fun' expression instrumentation (Anton Bachin).
+  - Update bisect-report test for recent points (Anton Bachin).
+  - Added appropriate tests (Anton Bachin).
+
+Version 0.2.5 (2015-09-07):
+---------------------------
+  - Revert the _Random_ indices for output files, just create multiple
+  - Correct dependency on Str in META.
+  - Obey OCamls line directive when looking for BISECT comments.
+
+Version 0.2.4 (2015-08-14):
+---------------------------
+  - Fast mode returns: create one array to track instrumented points per
+    implementation file (module). Created a separate findlib package:
+    bisect_ppx.fast to implement this method (just calls the ppx rewriter
+    with the appropriate argument).
+  - Runtime logging now default to a file: bisect.log. To regain original
+    behavior set BISECT_SILENT=ERR. You can use the same variable to set
+    a filename.
+  - Fixed bug for creating html reports off of implicit filenames.
+
+Version 0.2.3 (2015-06-17):
+--------------------------
+  - @hnrgrgr Fixed more comment lexing bugs
+
+Version 0.2.2 (2015-06-12):
+---------------------------
+  - Added a runtime only package distribution for findlib.
+  - Change the points annotation method, 'For' loops are correctly labeled.
+    - Updated appropriate test.
+  - When linking with '-thread' _Random_ indices are used for the output files.
+  - @simonjbeaumont, fix for exclusions of locally abstract typed definitions.
+
+Version 0.2.1 (2015-05-22):
+---------------------------
+  - fix double slashes at the end of a string bug, due to BISECT
+    specifiy commenting.
+
+Version 0.2 (2015-05-15):
+-------------------------
+  - fix bug to make sure that we don't instrument other ppx attributes.
+
+Version 0.1 (2015-05-06):
+-------------------------
+  - start versioning for bisect_ppx (just the ppx no CamlP4) of Bisect.
+    - Original bisect (changes below).
+
+Version 1.3 (2012-11-03):
+-------------------------
+  - new instrumenter based on '-ppx'
+  - new '-summary-only' to output only summary (text mode only)
+  - refactoring, including minor bugfixes
+  - bug#86: '-ocaml-prefix' doesn't really work
+  - bug#87: install shouldn't build anything
+  - bug#89: do not activate warnings by default
+
+Version 1.2 (2012-08-14):
+-------------------------
+  - new '-combine-expr' to allow combination of results
+  - new 'dump' output mode (mainly for debug)
+  - new 'bisect' output mode (i. e. format of runtime data)
+  - new '-exclude-file' command-line switch to exclude toplevel functions
+    listed in a file
+  - update for OCaml 4.00.0
+  - bug #95: polymorphic recursion is not handled
+  - bug #104: configure script should be executable
+
+Version 1.1 (2011-02-12):
+-------------------------
+  - update for Objective Caml 3.12.0
+  - new build system
+  - 'instrument.cmo' renamed to 'bisect_pp.cmo' (and now depends on 'str.cma')
+  - instrumentation modes ('safe', 'fast', and 'faster')
+  - '-exclude' command-line switch to exclude functions from instrumentation
+  - '(*BISECT-MARK*)' / '(*BISECT-VISIT*)' comments to mark lines
+  - '(*BISECT-IGNORE-BEGIN*)' / '(*BISECT-IGNORE-END*)' / '(*BISECT-IGNORE*)'
+    comments to ignore parts of source file
+  - bug #51: unportable use of 'which'
+  - bug #52: thread-compatibility module does not compile
+  - bug #59: instrumented code is 20 times slower
+
+Version 1.0 (2009-12-17):
+-------------------------
+  - switch to OCaml 3.11.1
+  - multiple outputs now allowed at once
+  - '-enable' / '-disable' command-line switches to control instrumentation
+  - support for multithread applications
+  - new output mode: EMMA-compatible XML
+  - support for ocamlfind installation
+  - major code refactoring and improvement
+  - bug #41: '-I' command-line switch to specify search path
+
+Version 1.0-beta (2009-05-31):
+------------------------------
+  - switch to OCaml 3.11.0
+  - bug #30: incorrect detection of ocamljava
+  - bug #31: default make target
+  - bug #32: incorrect source rendering under Firefox
+  - bug #33: information about global coverage missing
+  - bug #34: bare text mode added
+  - bug #35: introduction of navigation bar and code folding
+  - bug #36: instrumentation with -unsafe switch
+  - bug #37: incorrect handling of array literals
+  - unreported bug regarding the handling of if/then construct with no else
+  - introduction of CSV, XML modes
+  - major code refactoring and improvement
+
+Version 1.0-alpha (2008-07-06):
+-------------------------------
+  - first public version

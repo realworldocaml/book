@@ -11,7 +11,7 @@ RUN git -C /home/opam/opam-repository pull origin master && opam update -uy
 COPY Makefile /home/opam/src/.
 COPY rwo.opam /home/opam/src/.
 RUN opam pin add -n rwo . && opam depext -y rwo
-RUN opam install dune=2.5.1
+RUN opam install dune=2.6.0
 
 #install pandoc
 WORKDIR /tmp

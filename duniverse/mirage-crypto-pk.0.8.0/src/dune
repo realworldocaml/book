@@ -1,0 +1,21 @@
+(library
+  (name mirage_crypto)
+  (public_name mirage-crypto)
+  (libraries cstruct)
+  (private_modules ccm cipher_block cipher_stream hash native uncommon)
+  (c_names detect_cpu_features
+           misc misc_sse
+           md5 sha1 sha256 sha512 hash_stubs
+           aes_generic aes_aesni
+           ghash_generic ghash_pclmul ghash_ctmul
+           des_generic
+           entropy_cpu_stubs)
+  (c_flags (:standard) (:include cflags.sexp)))
+
+(env
+  (dev (c_flags (-Werror))))
+
+(include_subdirs unqualified)
+
+(rule
+  (action (with-stdout-to cflags.sexp (run ../config/cfg.exe))))

@@ -83,12 +83,12 @@ let write_field fmt specs =
   let case = function
   | `Struct (tag, typedef), fname ->
     let foffset fmt = offsetof fmt (typedef, fname) in
-    puts fmt (Printf.sprintf "  | Struct ({ tag = %S} as s'), %S ->" tag fname);
+    puts fmt (Printf.sprintf "  | Struct ({ tag = %S; _} as s'), %S ->" tag fname);
     printf1 fmt             "    let f = {ftype; fname; foffset = %zu} in \n" foffset;
     puts fmt                "    (s'.fields <- BoxedField f :: s'.fields; f)";
   | `Union (tag, typedef), fname ->
     let foffset fmt = offsetof fmt (typedef, fname) in
-    puts fmt (Printf.sprintf "  | Union ({ utag = %S} as s'), %S ->" tag fname);
+    puts fmt (Printf.sprintf "  | Union ({ utag = %S; _} as s'), %S ->" tag fname);
     printf1 fmt             "    let f = {ftype; fname; foffset = %zu} in \n" foffset;
     puts fmt                "    (s'.ufields <- BoxedField f :: s'.ufields; f)";
   | _ -> raise (Unsupported "Adding a field to non-structured type")
@@ -108,12 +108,12 @@ let write_seal fmt specs =
     | `Struct (tag, typedef) ->
         let ssize fmt = sizeof fmt typedef
         and salign fmt = alignmentof fmt typedef in
-        puts fmt (Printf.sprintf "  | Struct ({ tag = %S; spec = Incomplete _ } as s') ->" tag);
+        puts fmt (Printf.sprintf "  | Struct ({ tag = %S; spec = Incomplete _; _ } as s') ->" tag);
         printf2 fmt              "    s'.spec <- Complete { size = %zu; align = %zu }\n" ssize salign;
     | `Union (tag, typedef) ->
         let usize fmt = sizeof fmt typedef
         and ualign fmt = alignmentof fmt typedef in
-        puts fmt (Printf.sprintf "  | Union ({ utag = %S; uspec = None } as s') ->" tag);
+        puts fmt (Printf.sprintf "  | Union ({ utag = %S; uspec = None; _ } as s') ->" tag);
         printf2 fmt              "    s'.uspec <- Some { size = %zu; align = %zu }\n" usize ualign;
     | `Other -> 
       raise (Unsupported "Sealing a non-structured type")
@@ -122,9 +122,9 @@ let write_seal fmt specs =
     ["";
      "let rec seal : type a. a typ -> unit = function"]
     ~case
-    ["  | Struct { tag; spec = Complete _ } ->";
+    ["  | Struct { tag; spec = Complete _; _ } ->";
      "    raise (ModifyingSealedType tag)";
-     "  | Union { utag; uspec = Some _ } ->";
+     "  | Union { utag; uspec = Some _; _ } ->";
      "    raise (ModifyingSealedType utag)";
      "  | View { ty } -> seal ty";
      "  | _ ->";

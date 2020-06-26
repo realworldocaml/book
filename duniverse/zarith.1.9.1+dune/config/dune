@@ -3,7 +3,7 @@
  (libraries str dune.configurator))
 
 (rule
- (targets ldflags.sxp cflags.sxp cflags asflags arch)
+ (targets ldflags.sxp cflags.sxp cflags asflags arch ldflags)
  (deps discover.exe)
  (action (run ./discover.exe)))
 

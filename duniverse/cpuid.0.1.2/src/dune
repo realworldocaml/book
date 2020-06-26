@@ -1,9 +1,0 @@
-(library
-  (public_name cpuid)
-  (synopsis "Detect CPU features")
-  (wrapped false)
-  (c_names cpuid)
-  (c_flags --std=c99 -Wall -Wextra -O3))
-
-(include_subdirs unqualified)
-

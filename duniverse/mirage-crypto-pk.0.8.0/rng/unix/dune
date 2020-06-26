@@ -1,0 +1,19 @@
+(executable
+ (name discover)
+ (modules discover)
+ (libraries dune.configurator))
+
+(rule
+ (targets rng_c_flags.sexp)
+ (action (run ./discover.exe)))
+
+(library
+  (name mirage_crypto_rng_unix)
+  (public_name mirage-crypto-rng.unix)
+  (modules mirage_crypto_rng_unix)
+  (libraries mirage-crypto-rng unix logs)
+  (c_names mc_getrandom_stubs)
+  (c_library_flags (:include rng_c_flags.sexp)))
+
+(env
+  (dev (c_flags (-Werror))))

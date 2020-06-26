@@ -1,0 +1,3 @@
+(executable
+ (name chapter_rules)
+ (public_name rwo-chapter-rules))

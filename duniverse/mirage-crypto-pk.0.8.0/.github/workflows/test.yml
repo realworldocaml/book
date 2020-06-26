@@ -1,0 +1,39 @@
+name: Crypto
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    name: Tests
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ocaml-version: ["4.10.0", "4.09.0", "4.08.1"]
+        operating-system: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.operating-system }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
+
+      - name: Install dependencies
+        run: |
+          opam pin add -n mirage-crypto.dev .
+          opam pin add -n mirage-crypto-rng.dev .
+          opam pin add -n mirage-crypto-rng-mirage.dev .
+          opam pin add -n mirage-crypto-pk.dev .
+          opam depext -y mirage-crypto mirage-crypto-rng mirage-crypto-rng-mirage mirage-crypto-pk
+          opam install -t --deps-only .
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Test
+        run: opam exec -- dune runtest

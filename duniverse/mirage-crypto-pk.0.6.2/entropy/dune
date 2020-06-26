@@ -1,4 +1,0 @@
-(library
-  (name mirage_crypto_entropy)
-  (public_name mirage-crypto-entropy)
-  (libraries cstruct lwt mirage-runtime mirage-crypto mirage-crypto-rng))

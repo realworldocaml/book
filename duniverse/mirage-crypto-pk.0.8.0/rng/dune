@@ -1,0 +1,5 @@
+(library
+  (name mirage_crypto_rng)
+  (public_name mirage-crypto-rng)
+  (libraries cstruct mirage-crypto)
+  (private_modules entropy fortuna hmac_drbg rng))

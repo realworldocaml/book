@@ -1,0 +1,5 @@
+true : bin_annot, safe_string
+<_b0> : -traverse
+<src> : include
+<src/astring_top*> : package(compiler-libs.toplevel)
+<test> : include

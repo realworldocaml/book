@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "ocaml": ">= 4.2.0",
+    "@opam/cmdliner": "^1.0.0",
+    "@opam/dune": "*",
+    "@opam/ocaml-migrate-parsetree": "^1.7.0",
+    "@opam/ppx_tools_versioned": "^5.4.0"
+  },
+  "esy": {
+    "build": "dune build -p bisect_ppx",
+    "install": "esy-installer bisect_ppx.install",
+    "buildsInSource": "_build"
+  }
+}
