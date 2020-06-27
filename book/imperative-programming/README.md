@@ -940,10 +940,10 @@ And now we can use this to try out some examples:
 
 ```ocaml env=main,non-deterministic=command
 # time (fun () -> edit_distance "OCaml" "ocaml")
-Time: 1.10292434692 ms
+Time: 0.655651092529 ms
 - : int = 2
 # time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09")
-Time: 3282.86218643 ms
+Time: 2541.6533947 ms
 - : int = 2
 ```
 
@@ -977,11 +977,11 @@ This is, however, exponentially slow, for the same reason that
 
 ```ocaml env=main,non-deterministic=command
 # time (fun () -> fib 20)
-Time: 1.12414360046 ms
-- : int = 10946
+Time: 1.14369392395 ms
+- : int = 6765
 # time (fun () -> fib 40)
-Time: 18263.7000084 ms
-- : int = 165580141
+Time: 14752.7184486 ms
+- : int = 102334155
 ```
 
 As you can see, `fib 40` takes thousands of times longer to compute
@@ -997,11 +997,11 @@ improved.
 # let fib = memoize (module Int) fib
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
-Time: 18122.092247 ms
-- : int = 165580141
+Time: 18174.5970249 ms
+- : int = 102334155
 # time (fun () -> fib 40)
-Time: 0.00596046447754 ms
-- : int = 165580141
+Time: 0.00524520874023 ms
+- : int = 102334155
 ```
 
 In order to make `fib` fast, our first step will be to rewrite `fib`
@@ -1073,7 +1073,7 @@ Using `memo_rec`, we can now build an efficient version of `fib`:
 # let fib = memo_rec (module Int) fib_norec
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
-Time: 0.0388622283936 ms
+Time: 0.121355056763 ms
 - : int = 102334155
 ```
 
@@ -1160,9 +1160,9 @@ This new version of `edit_distance` is much more efficient than the
 one we started with; the following call is many thousands of times
 faster than it was without memoization.
 
-```ocaml env=memo,non-deterministic=command
+```ocaml env=main,non-deterministic=command
 # time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"))
-Time: 0.348091125488 ms
+Time: 0.964403152466 ms
 - : int = 2
 ```
 
@@ -1227,9 +1227,10 @@ without explicit mutation:
 # let lazy_memo_rec m f_norec x =
     let rec f = lazy (memoize m (fun x -> f_norec (force f) x)) in
     (force f) x
-val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+val lazy_memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
+  <fun>
 # time (fun () -> lazy_memo_rec (module Int) fib_norec 40)
-Time: 0.0441074371338 ms
+Time: 0.181913375854 ms
 - : int = 102334155
 ```
 
@@ -1529,7 +1530,7 @@ file that doesn't actually contain numbers, we'll see such an error:
 # sum_file "/etc/hosts"
 Exception:
 (Failure
- "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"").
+  "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
 ```
 
 And if we do this over and over in a loop, we'll eventually run out of file
