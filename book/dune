@@ -1,12 +1,305 @@
-(rule
- (deps
-  (source_tree ./))
- (action
-  (with-stdout-to dune.gen
-   (run rwo-chapter-rules ./))))
+(alias
+  (name html)
+  (deps classes.html
+        command-line-parsing.html
+        compiler-backend.html
+        compiler-frontend.html
+        concurrent-programming.html
+        data-serialization.html
+        error-handling.html
+        files-modules-and-programs.html
+        first-class-modules.html
+        foreign-function-interface.html
+        functors.html
+        garbage-collector.html
+        guided-tour.html
+        imperative-programming.html
+        json.html
+        lists-and-patterns.html
+        maps-and-hashtables.html
+        objects.html
+        parsing-with-ocamllex-and-menhir.html
+        ppx.html
+        prologue.html
+        records.html
+        runtime-memory-layout.html
+        variables-and-functions.html
+        variants.html))
+
+(alias
+  (name latex)
+  (deps classes.tex
+        command-line-parsing.tex
+        compiler-backend.tex
+        compiler-frontend.tex
+        concurrent-programming.tex
+        data-serialization.tex
+        error-handling.tex
+        files-modules-and-programs.tex
+        first-class-modules.tex
+        foreign-function-interface.tex
+        functors.tex
+        garbage-collector.tex
+        guided-tour.tex
+        imperative-programming.tex
+        json.tex
+        lists-and-patterns.tex
+        maps-and-hashtables.tex
+        objects.tex
+        parsing-with-ocamllex-and-menhir.tex
+        ppx.tex
+        prologue.tex
+        records.tex
+        runtime-memory-layout.tex
+        variables-and-functions.tex
+        variants.tex))
 
 (rule
- (alias runtest)
- (action (diff dune.inc dune.gen)))
+  (targets classes.html)
+  (deps    (:md_file classes/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
 
-(include dune.inc)
+(rule
+  (targets classes.tex)
+  (deps    (:md_file classes/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets command-line-parsing.html)
+  (deps    (:md_file command-line-parsing/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets command-line-parsing.tex)
+  (deps    (:md_file command-line-parsing/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets compiler-backend.html)
+  (deps    (:md_file compiler-backend/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets compiler-backend.tex)
+  (deps    (:md_file compiler-backend/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets compiler-frontend.html)
+  (deps    (:md_file compiler-frontend/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets compiler-frontend.tex)
+  (deps    (:md_file compiler-frontend/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets concurrent-programming.html)
+  (deps    (:md_file concurrent-programming/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets concurrent-programming.tex)
+  (deps    (:md_file concurrent-programming/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets data-serialization.html)
+  (deps    (:md_file data-serialization/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets data-serialization.tex)
+  (deps    (:md_file data-serialization/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets error-handling.html)
+  (deps    (:md_file error-handling/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets error-handling.tex)
+  (deps    (:md_file error-handling/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets files-modules-and-programs.html)
+  (deps    (:md_file files-modules-and-programs/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets files-modules-and-programs.tex)
+  (deps    (:md_file files-modules-and-programs/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets first-class-modules.html)
+  (deps    (:md_file first-class-modules/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets first-class-modules.tex)
+  (deps    (:md_file first-class-modules/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets foreign-function-interface.html)
+  (deps    (:md_file foreign-function-interface/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets foreign-function-interface.tex)
+  (deps    (:md_file foreign-function-interface/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets functors.html)
+  (deps    (:md_file functors/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets functors.tex)
+  (deps    (:md_file functors/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets garbage-collector.html)
+  (deps    (:md_file garbage-collector/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets garbage-collector.tex)
+  (deps    (:md_file garbage-collector/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets guided-tour.html)
+  (deps    (:md_file guided-tour/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets guided-tour.tex)
+  (deps    (:md_file guided-tour/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets imperative-programming.html)
+  (deps    (:md_file imperative-programming/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets imperative-programming.tex)
+  (deps    (:md_file imperative-programming/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets json.html)
+  (deps    (:md_file json/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets json.tex)
+  (deps    (:md_file json/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets lists-and-patterns.html)
+  (deps    (:md_file lists-and-patterns/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets lists-and-patterns.tex)
+  (deps    (:md_file lists-and-patterns/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets maps-and-hashtables.html)
+  (deps    (:md_file maps-and-hashtables/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets maps-and-hashtables.tex)
+  (deps    (:md_file maps-and-hashtables/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets objects.html)
+  (deps    (:md_file objects/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets objects.tex)
+  (deps    (:md_file objects/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets parsing-with-ocamllex-and-menhir.html)
+  (deps    (:md_file parsing-with-ocamllex-and-menhir/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets parsing-with-ocamllex-and-menhir.tex)
+  (deps    (:md_file parsing-with-ocamllex-and-menhir/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets ppx.html)
+  (deps    (:md_file ppx/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets ppx.tex)
+  (deps    (:md_file ppx/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets prologue.html)
+  (deps    (:md_file prologue/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets prologue.tex)
+  (deps    (:md_file prologue/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets records.html)
+  (deps    (:md_file records/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets records.tex)
+  (deps    (:md_file records/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets runtime-memory-layout.html)
+  (deps    (:md_file runtime-memory-layout/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets runtime-memory-layout.tex)
+  (deps    (:md_file runtime-memory-layout/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets variables-and-functions.html)
+  (deps    (:md_file variables-and-functions/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets variables-and-functions.tex)
+  (deps    (:md_file variables-and-functions/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
+
+(rule
+  (targets variants.html)
+  (deps    (:md_file variants/README.md))
+  (action  (run rwo-convert_md %{md_file} -t html -o %{targets})))
+
+(rule
+  (targets variants.tex)
+  (deps    (:md_file variants/README.md))
+  (action  (run rwo-convert_md %{md_file} -t latex -o %{targets})))
