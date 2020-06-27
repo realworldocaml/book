@@ -518,22 +518,26 @@ operator, you can use it as an ordinary prefix function.
 - : int list = [7; 8; 9]
 ```
 
-In the second expression, we've partially applied `(+)` to create a function
-that increments its single argument by `3`.
+In the second expression, we've partially applied `(+)` to create a
+function that increments its single argument by `3`.
 
 A function is treated syntactically as an operator if the name of that
-function is chosen from one of a specialized set of identifiers. This set
-includes identifiers that are sequences of characters from the following set:
+function is chosen from one of a specialized set of identifiers. This
+set includes identifiers that are sequences of characters from the
+following set:
 
 ```
-! $ % & * + - . / : < = > ? @ ^ | ~
+~ ! $ % & * + - . / : < = > ? @ ^ |
 ```
 
-or is one of a handful of predetermined strings, including `mod`, the modulus
-operator, and `lsl`, for "logical shift left," a bit-shifting operation.
+as long as the first character is not `~`, `!`, or `$`.
 
-We can define (or redefine) the meaning of an operator. Here's an example of
-a simple vector-addition operator on `int` pairs.
+There are also a handful of predetermined strings that count as infix
+operators, including `mod`, the modulus operator, and `lsl`, for
+"logical shift left," a bit-shifting operation.
+
+We can define (or redefine) the meaning of an operator. Here's an
+example of a simple vector-addition operator on `int` pairs.
 
 ```ocaml env=main
 # let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2)
