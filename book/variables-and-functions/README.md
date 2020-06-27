@@ -530,8 +530,7 @@ following set:
 ~ ! $ % & * + - . / : < = > ? @ ^ |
 ```
 
-Note that the first character of the infix operator cannot be `~`,
-`!`, or `$`.
+as long as the first character is not `~`, `!`, or `$`.
 
 There are also a handful of predetermined strings that count as infix
 operators, including `mod`, the modulus operator, and `lsl`, for
