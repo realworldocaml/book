@@ -1,5 +1,0 @@
-(library
-  (name mirage_crypto_rng)
-  (public_name mirage-crypto-rng)
-  (libraries cstruct mirage-crypto)
-  (private_modules boot fortuna hmac_drbg))

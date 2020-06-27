@@ -1,0 +1,24 @@
+opam-version: "2.0"
+maintainer: "Hannes Mehnert <hannes@mehnert.org>"
+authors: "Hannes Mehnert <hannes@mehnert.org>"
+license: "ISC"
+homepage: "https://github.com/hannesm/duration"
+doc: "https://hannesm.github.io/duration/doc"
+bug-reports: "https://github.com/hannesm/duration/issues"
+depends: [
+  "ocaml" {>= "4.04.2"}
+  "dune" {build}
+  "alcotest" {with-test & >= "0.8.1"}
+]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
+]
+dev-repo: "git+https://github.com/hannesm/duration.git"
+synopsis: "Conversions to various time units"
+description: """
+A duration is represented in nanoseconds as an unsigned 64 bit integer.  This
+has a range of up to 584 years.  Functions provided check the input and raise
+on negative or out of bound input.
+"""

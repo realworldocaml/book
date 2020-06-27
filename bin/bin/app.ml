@@ -100,6 +100,16 @@ let build : Command.t =
     ; "inputs", build_tex_inputs_page
     ]
 
+let rules_web : Command.t =
+  Command.async ~summary:"generate dune rules for website generation"
+    [%map_open
+      let repo_root = Params.repo_root in
+      fun () -> Rules.print_web ~repo_root ]
+
+let rules : Command.t =
+  Command.group ~summary:"generate dune rules"
+    [ "web", rules_web
+    ]
 
 (******************************************************************************)
 (* `main` command                                                             *)
@@ -108,6 +118,7 @@ let main =
   Command.group
     ~summary:"Real World OCaml authoring and publication tools"
     [ "build", build
+    ; "rules", rules
     ]
 
 let () =

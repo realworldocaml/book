@@ -1,0 +1,2 @@
+(env
+ (non-deterministic (env-vars (MDX_RUN_NON_DETERMINISTIC true))))

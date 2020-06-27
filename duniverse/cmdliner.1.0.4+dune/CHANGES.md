@@ -1,8 +1,3 @@
-
-
-- Fix default value rendering in manpages. These were not properly
-  escaped. Thanks to David Allsopp for the patch.
-
 v1.0.4 2019-06-14 Zagreb
 ------------------------
 

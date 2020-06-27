@@ -1,0 +1,5 @@
+(library
+  (name mirage_crypto_rng_lwt)
+  (public_name mirage-crypto-rng.lwt)
+  (modules mirage_crypto_rng_lwt)
+  (libraries lwt lwt.unix mirage-crypto-rng mirage-crypto-rng.unix duration mtime.clock.os logs))

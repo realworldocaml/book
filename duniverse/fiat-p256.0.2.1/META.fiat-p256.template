@@ -1,0 +1,4 @@
+# DUNE_GEN
+
+xen_linkopts = "-l:xen/libfiat_p256_xen_stubs.a"
+freestanding_linkopts = "-l:freestanding/libfiat_p256_freestanding_stubs.a"

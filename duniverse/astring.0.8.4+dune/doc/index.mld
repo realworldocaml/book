@@ -1,0 +1,12 @@
+{0 Astring {%html: <span class="version">%%VERSION%%</span>%}}
+
+Astring exposes an alternative [String] module for OCaml. This module
+tries to balance minimality and expressiveness for basic, index-free,
+string processing and provides types and functions for substrings,
+string sets and string maps.
+
+{1:api API}
+
+{!modules:
+Astring
+}

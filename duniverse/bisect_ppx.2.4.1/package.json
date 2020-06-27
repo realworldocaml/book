@@ -1,0 +1,41 @@
+{
+  "name": "bisect_ppx",
+  "description": "Code coverage for OCaml and Reason",
+  "version": "2.4.1",
+  "license": "MIT",
+  "homepage": "https://github.com/aantron/bisect_ppx",
+  "bugs": {
+    "url": "https://github.com/aantron/bisect_ppx/issues"
+  },
+  "keywords": [
+    "BuckleScript",
+    "reason",
+    "coverage"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aantron/bisect_ppx.git"
+  },
+  "author": {
+    "name": "Anton Bachin",
+    "email": "antonbachin@yahoo.com",
+    "url": "https://github.com/aantron"
+  },
+  "peerDependencies": {
+    "bs-platform": "*"
+  },
+  "scripts": {
+    "preinstall": "bash src/npm-install.sh"
+  },
+  "bin": {
+    "bisect-ppx-report": "bisect-ppx-report"
+  },
+  "files": [
+    "bisect_ppx.opam",
+    "bsconfig.json",
+    "dune-project",
+    "binaries.esy.json",
+    "src",
+    "bin"
+  ]
+}

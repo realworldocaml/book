@@ -13,7 +13,7 @@
 
 static value allocate_complex_value(double r, double i)
 {
-  value v = caml_alloc(2 * sizeof(double), Double_array_tag);
+  value v = caml_alloc(2 * Double_wosize, Double_array_tag);
   Store_double_field(v, 0, r);
   Store_double_field(v, 1, i);
   return v;

@@ -1,1 +1,1 @@
-(packages base)
+(packages base core ppx_jane)

@@ -1,0 +1,72 @@
+{1 Implementation }
+
+The goal of this document is to describe how the library is implemented.
+
+{2 Field operations}
+
+These are implemented in [Field_element], which is a binding over
+[p256_{32,64}.h]. These are files extracted from Coq code in
+{{:https://github.com/mit-plv/fiat-crypto}this repository}.
+
+This module uses
+{{:https://en.wikipedia.org/wiki/Montgomery_modular_multiplication} Montgomery
+Modular Multiplication}. Instead of storing a number [a], operations are done
+on [aR] where R = 2{^256}.
+
+It is possible to check that these files correspond to the extracted ones in
+the upstream repository by running [dune build @check_vendors].
+
+These files are part of the trusted computing base. That is, using this package
+relies on the fact that they implemented the correct algorithms. To go further,
+one can re-run the extraction process from Coq sources, see
+{{:https://github.com/mirage/fiat/issues/41}#41}.
+
+{2 Point operations}
+
+Points (see the [Point] module) are stored using projective coordinates (X : Y
+: Z):
+
+- Z=0 corresponds to the point at infinity
+- for Z≠0, this corresponds to a point with affine coordinates (X/Z{^2},
+  Y/Z{^3})
+
+Doubling and addition are implemented as C stubs in [p256_stubs.c] using code
+that comes from BoringSSL, Google's fork of OpenSSL. Fiat code has been design
+in part to be included in BoringSSL, so this does not require any particular
+glue code.
+
+Some operations are implemented manually, in particular:
+
+- conversion to affine coordinates, as described above. This relies on a field
+  inversion primitive from BoringSSL, that is exposed in [Field_element].
+- point verification (bound checking and making sure that the equation is
+  satisfied).
+
+There is no automated way to check that the BoringSSL part is identical to that
+in the upstream repository (nor to update it).
+
+{2 Scalar multiplication}
+
+Implemented by hand using the
+{{:https://cr.yp.to/bib/2003/joye-ladder.pdf}Montgomery Powering Ladder}.
+
+Instead of branching based on key bits, constant-time selection (as defined in
+fiat code) is used.
+
+The following references discuss this algorithm:
+
+- {{:https://cryptojedi.org/peter/data/eccss-20130911b.pdf}Scalar-multiplication algorithms, Peter Schwabe, ECC 2013 Summer School}
+- {{:https://eprint.iacr.org/2017/293.pdf}Montgomery curves and the Montgomery
+ladder, Daniel J. Bernstein and Tanja Lange}
+
+{2 Key exchange}
+
+Key exchange consists in
+
+- validating the public key as described in
+  {{:https://tools.ietf.org/html/rfc8446#section-4.2.8.2}RFC 8446 §4.2.8.2};
+- computing scalar multiplication;
+- returning the encoded x coordinate of the result.
+
+This is implemented by hand and checked against common errors using test
+vectors from {{:https://github.com/google/wycheproof}project Wycheproof}.
