@@ -204,8 +204,13 @@ let flatten_chapters t =
   in
   aux [] t
 
-let get_chapters ?repo_root () =
-  get ?repo_root () >>| flatten_chapters
+let get_chapters ?repo_root ~include_wip () =
+  get ?repo_root () >>| fun t ->
+  let chapters = flatten_chapters t in
+  if include_wip then
+    chapters
+  else
+    List.filter chapters ~f:(fun c -> not c.wip)
 
 let find ~name (t:t) =
   let rec aux = function

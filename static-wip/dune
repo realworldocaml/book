@@ -3,10 +3,10 @@
 (rule
   (targets inputs.tex)
   (deps ../book/toc.scm)
-  (action (run rwo-build build inputs -o . -repo-root ..)))
+  (action (run rwo-build build inputs -include-wip -o . -repo-root ..)))
 
 (rule
- (alias pdf)
+ (alias pdf-wip)
  (targets book.pdf)
  (deps
   (alias ../book/latex)
@@ -21,7 +21,7 @@
 ; Website Generation
 
 (alias
-  (name site)
+  (name site-wip)
   (deps css/app.css
         css/prism.css
         images/anil.jpg
@@ -51,41 +51,41 @@
         theme/pdf/pdf.css))
 
 (rule
- (alias site)
+ (alias site-wip)
  (targets faqs.html)
  (deps (alias ../book/html) ../book/faqs.html)
  (action (run rwo-build build faqs -o . -repo-root ..)))
 
 (rule
- (alias site)
+ (alias site-wip)
  (targets index.html)
  (deps (alias ../book/html) ../book/index.html)
- (action (run rwo-build build index -o . -repo-root ..)))
+ (action (run rwo-build build index -include-wip -o . -repo-root ..)))
 
 (rule
- (alias site)
+ (alias site-wip)
  (targets install.html)
  (deps (alias ../book/html) ../book/install.html)
  (action (run rwo-build build install -o . -repo-root ..)))
 
 (rule
- (alias site)
+ (alias site-wip)
  (targets toc.html)
  (deps (alias ../book/html) ../book/toc.html ../book/toc.scm)
- (action (run rwo-build build toc -o . -repo-root ..)))
+ (action (run rwo-build build toc -include-wip -o . -repo-root ..)))
 
 (rule
  (deps ../book/toc.scm)
  (action
   (with-stdout-to dune.gen
-   (run rwo-build rules web -repo-root ..))))
+   (run rwo-build rules web -include-wip -repo-root ..))))
 
 (rule
  (alias runtest)
  (action (diff dune.inc dune.gen)))
 
 (alias
- (name site)
+ (name site-wip)
  (deps (alias runtest)))
 
 (include dune.inc)

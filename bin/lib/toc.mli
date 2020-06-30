@@ -55,7 +55,8 @@ val of_chapters : chapter list -> part list
 
 (** Return all chapter numbers and names, ordered by chapter
     number. *)
-val get_chapters : ?repo_root:string -> unit -> chapter list Deferred.t
+val get_chapters :
+  ?repo_root:string -> include_wip:bool -> unit -> chapter list Deferred.t
 
 val get_next_chapter : chapter list -> chapter -> chapter option
 
