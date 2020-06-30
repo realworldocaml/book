@@ -1,7 +1,7 @@
 (executables
  (package      rwo)
- (names        app dep convert_md)
- (public_names rwo-build rwo-dep rwo-convert_md)
+ (names        app convert_md)
+ (public_names rwo-build rwo-convert_md)
  (preprocess   (pps ppx_jane))
  (libraries    rwo lambdasoup sexp_pretty mdx cmdliner fmt)
  (flags        :standard -short-paths))
