@@ -1,3 +1,0 @@
-(executable
-  (name      cal_append_broken)
-  (libraries core))
