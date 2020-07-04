@@ -434,7 +434,7 @@ argument as optional, which we can do with the `maybe` operator.
 [arguments/default arguments]{.idx}[default arguments]{.idx}[optional
 arguments/and default arguments]{.idx}[arguments/optional arguments]{.idx}
 
-```ocaml file=examples/correct/md5_with_optional_file_broken/md5.ml,part=1
+```ocaml file=examples/erroneous/md5_with_optional_file_broken/md5.ml,part=1
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
@@ -446,7 +446,7 @@ let command =
 
 But building this results in a compile-time error.
 
-```sh dir=examples/correct/md5_with_optional_file_broken
+```sh dir=examples/erroneous/md5_with_optional_file_broken
 $ dune build md5.exe
 ...
 File "md5.ml", line 15, characters 24-32:

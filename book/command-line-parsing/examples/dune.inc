@@ -177,15 +177,3 @@
 (alias
  (name runtest)
  (deps (alias md5_with_optional_file)))
-
-(rule
- (alias md5_with_optional_file_broken)
- (deps
-  (source_tree ./correct/md5_with_optional_file_broken)
-  (package core))
- (action
-  (run dune build @all @runtest --root ./correct/md5_with_optional_file_broken)))
-
-(alias
- (name runtest)
- (deps (alias md5_with_optional_file_broken)))
