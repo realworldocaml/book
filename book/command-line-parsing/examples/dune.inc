@@ -45,17 +45,6 @@
  (deps (alias cal_add_sub_days)))
 
 (rule
- (alias cal_append_broken)
- (deps
-  (source_tree ./correct/cal_append_broken))
- (action
-  (run dune build @all @runtest --root ./correct/cal_append_broken)))
-
-(alias
- (name runtest)
- (deps (alias cal_append_broken)))
-
-(rule
  (alias md5)
  (deps
   (source_tree ./correct/md5))
