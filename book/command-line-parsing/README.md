@@ -219,7 +219,7 @@ removing intermediate variables.
 open Core
 
 let do_hash file =
-  Md5.digest_file_blocking filee
+  Md5.digest_file_blocking file
   |> Md5.to_hex
   |> print_endline
 
