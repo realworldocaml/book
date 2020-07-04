@@ -70,7 +70,6 @@
  (alias md5_as_filename)
  (deps
   (source_tree ./correct/md5_as_filename)
-  (package cryptokit)
   (package core))
  (action
   (run dune build @all @runtest --root ./correct/md5_as_filename)))
