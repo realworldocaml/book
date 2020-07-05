@@ -94,8 +94,8 @@ and exceptions:
 - : Sexp.t = (Invalid_argument foo)
 ```
 
-It's also possible to convert more complex types such as lists or arrays that
-are polymorphic across the types that they can contain:
+It's also possible to convert more complex types such as lists or
+arrays that are polymorphic across the types that they can contain:
 
 ```ocaml env=to_from_sexp
 # List.sexp_of_t
@@ -104,16 +104,17 @@ are polymorphic across the types that they can contain:
 - : Sexp.t = (1 2 3)
 ```
 
-Notice that `List.sexp_of_t` is polymorphic and takes as its first argument
-another conversion function to handle the elements of the list to be
-converted. Core uses this scheme more generally for defining sexp converters
-for polymorphic types.
+Notice that `List.sexp_of_t` is polymorphic and takes as its first
+argument another conversion function to handle the elements of the
+list to be converted. Core uses this scheme more generally for
+defining sexp converters for polymorphic types.
 
-The functions that go in the other direction, *i.e.*, reconstruct an OCaml
-value from an s-expression, use essentially the same trick for handling
-polymorphic types, as shown in the following example. Note that these
-functions will fail with an exception when presented with an s-expression
-that doesn't match the structure of the OCaml type in question.
+The functions that go in the other direction, *i.e.*, reconstruct an
+OCaml value from an s-expression, use essentially the same trick for
+handling polymorphic types, as shown in the following example. Note
+that these functions will fail with an exception when presented with
+an s-expression that doesn't match the structure of the OCaml type in
+question.
 
 ```ocaml env=to_from_sexp
 # List.t_of_sexp
@@ -128,14 +129,15 @@ Exception:
 ::: {data-type=note}
 ##### More on Top-Level Printing
 
-The values of the s-expressions that we created were printed properly as
-s-expressions in the toplevel, instead of as the tree of `Atom` and `List`
-variants that they're actually made of. [top-level printers]{.idx}
+The values of the s-expressions that we created were printed properly
+as s-expressions in the toplevel, instead of as the tree of `Atom` and
+`List` variants that they're actually made of. [top-level
+printers]{.idx}
 
-This is due to OCaml's facility for installing custom *top-level printers*
-that can rewrite some values into more top-level-friendly equivalents. They
-are generally installed as `ocamlfind` packages ending in `top`:
-:::
+This is due to OCaml's facility for installing custom *top-level
+printers* that can rewrite some values into more top-level-friendly
+equivalents. They are generally installed as `ocamlfind` packages
+ending in `top`:
 
 ```sh dir=examples,non-deterministic=output
 $ ocamlfind list | grep top
@@ -161,9 +163,13 @@ uri.top             (version: 1.9.6)
 utop                (version: 2.1.0)
 ```
 
-The `core.top` package (which you should have loaded by default in your
-`.ocamlinit` file) loads in printers for the Core extensions already, so you
-don't need to do anything special to use the s-expression printer.
+The `core.top` package (which you should have loaded by default in
+your `.ocamlinit` file) loads in printers for the Core extensions
+already, so you don't need to do anything special to use the
+s-expression printer.
+
+:::
+
 
 ### Generating S-Expressions from OCaml Types
 
