@@ -44,6 +44,17 @@
  (deps (alias read_foo_better_errors)))
 
 (rule
+ (alias sexp)
+ (deps
+  (source_tree ./correct/sexp))
+ (action
+  (run dune build @all @runtest --root ./correct/sexp)))
+
+(alias
+ (name runtest)
+ (deps (alias sexp)))
+
+(rule
  (alias sexp_override)
  (deps
   (source_tree ./correct/sexp_override))
@@ -64,14 +75,3 @@
 (alias
  (name runtest)
  (deps (alias test_interval)))
-
-(rule
- (alias test_interval_nosexp)
- (deps
-  (source_tree ./correct/test_interval_nosexp))
- (action
-  (run dune build @all @runtest --root ./correct/test_interval_nosexp)))
-
-(alias
- (name runtest)
- (deps (alias test_interval_nosexp)))
