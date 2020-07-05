@@ -442,7 +442,7 @@ a convenient abstraction for working with input and output channels: [Writer
 module]{.idx}[Reader module]{.idx}[I/O (input/output) operations/copying
 data]{.idx}
 
-```ocaml file=examples/echo/echo.ml,part=0
+```ocaml file=examples/correct/echo/echo.ml,part=0
 open Core
 open Async
 
@@ -510,7 +510,7 @@ still need to set up a server to receive such connections and dispatch to
 collection of utilities for creating TCP clients and servers: [TCP
 clients/servers]{.idx}
 
-```ocaml file=examples/echo/echo.ml,part=1
+```ocaml file=examples/correct/echo/echo.ml,part=1
 (** Starts a TCP server, which listens on the specified port, invoking
     copy_blocks every time a client connects. *)
 let run () =
@@ -541,7 +541,7 @@ becomes determined.
 
 Finally, we need to initiate the server and start the Async scheduler:
 
-```ocaml file=examples/echo/echo.ml,part=2
+```ocaml file=examples/correct/echo/echo.ml,part=2
 (* Call [run], and then start the scheduler *)
 let () =
   run ();
@@ -564,7 +564,7 @@ to both build and run the executable.  We use the double-dashes so
 that Dune's parsing of arguments doesn't interfere with argument
 parsing for the executed program.
 
-```sh skip,dir=examples/echo
+```sh skip,dir=examples/correct/echo
 $ dune exec -- ./echo.exe &
 $ echo "This is an echo server" | nc 127.0.0.1 8765
 This is an echo server
@@ -657,7 +657,7 @@ a few improvements. In particular, we will:
 
 The following code does all of this:
 
-```ocaml file=examples/better_echo.ml
+```ocaml file=examples/correct/better_echo/echo.ml
 open Core
 open Async
 
@@ -824,7 +824,7 @@ engine/URI handling in]{.idx}
 We'll need a function for generating the URIs that we're going to use to
 query the DuckDuckGo servers:
 
-```ocaml file=examples/search/search.ml,part=0
+```ocaml file=examples/correct/search/search.ml,part=0
 open Core
 open Async
 
@@ -854,7 +854,7 @@ definition itself to come across under either the key "Abstract" or
 "Definition," and so the following code looks under both keys, returning the
 first one for which a nonempty value is defined:
 
-```ocaml file=examples/search/search.ml,part=1
+```ocaml file=examples/correct/search/search.ml,part=1
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
 let get_definition_from_json json =
   match Yojson.Safe.from_string json with
@@ -879,7 +879,7 @@ using the Cohttp library: [query-handlers/executing an HTTP client
 query]{.idx}[client queries]{.idx}[HTTP client queries]{.idx}[DuckDuckGo
 search engine/executing an HTTP client query in]{.idx}
 
-```ocaml file=examples/search/search.ml,part=2
+```ocaml file=examples/correct/search/search.ml,part=2
 (* Execute the DuckDuckGo search *)
 let get_definition word =
   Cohttp_async.Client.get (query_uri word)
@@ -916,7 +916,7 @@ perspective, so let's write code for dispatching multiple searches in
 parallel. First, we need code for formatting and printing out the search
 result:
 
-```ocaml file=examples/search/search.ml,part=3
+```ocaml file=examples/correct/search/search.ml,part=3
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -941,7 +941,7 @@ you write an Async program and forget to start the scheduler, calls like
 The next function dispatches the searches in parallel, waits for the results,
 and then prints:
 
-```ocaml file=examples/search/search.ml,part=4
+```ocaml file=examples/correct/search/search.ml,part=4
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
 let search_and_print words =
@@ -967,7 +967,7 @@ until all results arrive.
 We could rewrite this code to print out the results as they're
 received (and thus potentially out of order) as follows:
 
-```ocaml file=examples/search_out_of_order.ml,part=1
+```ocaml file=examples/correct/search_out_of_order/search.ml,part=4
 (* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
   Deferred.all_unit (List.map words ~f:(fun word ->
@@ -988,7 +988,7 @@ can see the type of this function in `utop`:
 
 Finally, we create a command-line interface using `Command.async`:
 
-```ocaml file=examples/search/search.ml,part=5
+```ocaml file=examples/correct/search/search.ml,part=5
 let () =
   Command.async_spec
     ~summary:"Retrieve definitions from duckduckgo search engine"
@@ -1003,7 +1003,7 @@ let () =
 And that's all we need for a simple but usable definition
 searcher:<a data-type="indexterm" data-startref="ALduckduck">&nbsp;</a>
 
-```sh dir=examples/search,require-package=textwrap,require-package=yojson,non-deterministic
+```sh dir=examples/correct/search,require-package=textwrap,require-package=yojson,non-deterministic
 $ dune exec -- ./search.exe "Concurrent Programming" "OCaml"
 Concurrent Programming
 ----------------------
@@ -1265,7 +1265,7 @@ that occur when one of those servers is misspecified.
 First we'll need to change `query_uri` to take an argument specifying the
 server to connect to:
 
-```ocaml file=examples/search_with_configurable_server/search.ml,part=1
+```ocaml file=examples/correct/search_with_configurable_server/search.ml,part=1
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
@@ -1281,7 +1281,7 @@ list of servers.
 Now, let's see what happens when we rebuild the application and run it
 two servers, one of which won't respond to the query.
 
-```sh dir=examples/search_with_configurable_server,non-deterministic=output
+```sh dir=examples/correct/search_with_configurable_server,non-deterministic=output
 $ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" "OCaml"
 (monitor.ml.Error (Unix.Unix_error "Connection refused" connect 127.0.0.1:80)
  ("Raised by primitive operation at file \"duniverse/async_unix/src/unix_syscalls.ml\", line 1046, characters 17-74"
@@ -1297,7 +1297,7 @@ through successfully on its own. We can handle the failures of
 individual connections separately by using the `try_with` function
 within each call to `get_definition`, as follows:
 
-```ocaml file=examples/search_with_error_handling/search.ml,part=1
+```ocaml file=examples/correct/search_with_error_handling/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
@@ -1319,7 +1319,7 @@ first element is the word being searched for, and the second element is the
 Now we just need to change the code for `print_result` so that it can handle
 the new type:
 
-```ocaml file=examples/search_with_error_handling/search.ml,part=2
+```ocaml file=examples/correct/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
 let print_result (word,definition) =
   printf "%s\n%s\n\n%s\n\n"
@@ -1336,7 +1336,7 @@ let print_result (word,definition) =
 Now, if we run that same query, we'll get individualized handling of the
 connection failures:
 
-```sh dir=examples/search_with_error_handling,non-deterministic=output
+```sh dir=examples/correct/search_with_error_handling,non-deterministic=output
 $ dune exec -- ./search.exe -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
 Concurrent Programming
 ----------------------
@@ -1406,7 +1406,7 @@ following code is a wrapper for `get_definition` that takes a timeout
 (in the form of a `Time.Span.t`) and returns either the definition,
 or, if that takes too long, an error:
 
-```ocaml file=examples/search_with_timeout.ml,part=1
+```ocaml file=examples/correct/search_with_timeout.ml,part=1
 let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
     [ (after timeout >>| fun () -> (word,Error "Timed out"))
@@ -1435,7 +1435,7 @@ The following code shows how you can change `get_definition` and
 `get_definition_with_timeout` to cancel the `get` call if the timeout
 expires:
 
-```ocaml file=examples/search_with_timeout_no_leak_simple/search.ml,part=1
+```ocaml file=examples/correct/search_with_timeout_no_leak_simple/search.ml,part=1
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
   try_with (fun () ->
@@ -1453,7 +1453,7 @@ Next, we'll modify `get_definition_with_timeout` to create a deferred to pass
 in to `get_definition`, which will become determined when our timeout
 expires:
 
-```ocaml file=examples/search_with_timeout_no_leak_simple/search.ml,part=2
+```ocaml file=examples/correct/search_with_timeout_no_leak_simple/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   get_definition ~server ~interrupt:(after timeout) word
   >>| fun (word,result) ->
@@ -1492,7 +1492,7 @@ In the following example, we use `choose` to ensure that the `interrupt`
 deferred becomes determined if and only if the timeout deferred is chosen.
 Here's the code:
 
-```ocaml file=examples/search_with_timeout_no_leak/search.ml,part=2
+```ocaml file=examples/correct/search_with_timeout_no_leak/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
@@ -1513,7 +1513,7 @@ let get_definition_with_timeout ~server ~timeout word =
 Now, if we run this with a suitably small timeout, we'll see that one query
 succeeds and the other fails reporting a timeout:
 
-```sh dir=examples/search_with_timeout_no_leak,non-deterministic=output
+```sh dir=examples/correct/search_with_timeout_no_leak,non-deterministic=output
 $ dune exec -- ./search.exe "concurrent programming" ocaml -timeout 0.1s
 concurrent programming
 ----------------------
@@ -1676,7 +1676,7 @@ Finished at: 418.69187355041504ms,
 But if we compile this to a native-code executable, then the nonallocating
 busy loop will block anything else from running:
 
-```sh dir=examples/native_code_log_delays,non-deterministic=output
+```sh dir=examples/correct/native_code_log_delays,non-deterministic=output
 $ dune exec -- native_code_log_delays.exe
 197.41058349609375us,
 Finished at: 1.2127914428710938s,

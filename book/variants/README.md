@@ -1159,7 +1159,7 @@ an implementation in an `ml` file and an interface in a separate
 Programs](files-modules-and-programs.html#files-modules-and-programs){data-type=xref}.
 Let's start with the `mli`.
 
-```ocaml file=examples/variants-termcol/terminal_color.mli
+```ocaml file=examples/correct/variants-termcol/terminal_color.mli
 open Base
 
 type basic_color =
@@ -1183,7 +1183,7 @@ Here, `extended_color` is defined as an explicit extension of `color`. Also,
 notice that we defined all of these types as exact variants. We can implement
 this library as follows.
 
-```ocaml file=examples/variants-termcol/terminal_color.ml
+```ocaml file=examples/correct/variants-termcol/terminal_color.ml
 open Base
 
 type basic_color =
@@ -1228,7 +1228,7 @@ happened was that the compiler inferred a wider type for
 narrower type that was listed in the `mli`.  As a result, this library
 builds without error.
 
-```sh dir=examples/variants-termcol
+```sh dir=examples/correct/variants-termcol
 $ dune build @all
 ```
 
@@ -1236,7 +1236,7 @@ If we add an explicit type annotation to the code itself (rather than
 just in the `mli`), then the compiler has enough information to warn
 us:
 
-```ocaml file=examples/variants-termcol-annotated/terminal_color.ml,part=1
+```ocaml file=examples/erroneous/variants-termcol-annotated/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | `Grey x -> 2000 + x
@@ -1245,7 +1245,7 @@ let extended_color_to_int : extended_color -> int = function
 
 In particular, the compiler will complain that the `` `Grey`` case is unused:
 
-```sh dir=examples/variants-termcol-annotated
+```sh dir=examples/erroneous/variants-termcol-annotated
 $ dune build @all
 File "terminal_color.ml", line 30, characters 4-11:
 30 |   | `Grey x -> 2000 + x
@@ -1261,7 +1261,7 @@ question of how we write the pattern match that narrows the type. In
 particular, we can explicitly use the type name as part of the pattern
 match, by prefixing it with a `#`:
 
-```ocaml file=examples/variants-termcol-fixed/terminal_color.ml,part=1
+```ocaml file=examples/correct/variants-termcol-fixed/terminal_color.ml,part=1
 let extended_color_to_int : extended_color -> int = function
   | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
   | #color as color -> color_to_int color

@@ -9,5 +9,3 @@
   textwrap
   yojson)
  (preludes prelude.ml))
-
-(data_only_dirs examples)
