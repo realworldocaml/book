@@ -164,9 +164,15 @@ let main_template ?(next_chapter_footer=None)
 (******************************************************************************)
 (* Make Pages                                                                 *)
 (******************************************************************************)
-let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
+let make_frontpage ?(repo_root=".") ~include_wip () : Html.t Deferred.t =
   let part_items {Toc.info; chapters} = List.filter_map ~f:Fn.id [
     Option.map info ~f:(fun x -> Html.h4 [`Data x.Toc.title]);
+    let chapters =
+      if include_wip then
+        chapters
+      else
+        List.filter chapters ~f:(fun c -> not c.wip)
+    in
     Some (Html.ul (List.map chapters ~f:(fun x ->
       Html.li [Html.a ~a:["href", x.Toc.name ^ ".html"] [`Data x.title]])))
   ]
@@ -191,8 +197,8 @@ let make_frontpage ?(repo_root=".") () : Html.t Deferred.t =
   in
   main_template ~title_bar:title_bar_frontpage ~content ()
 
-let make_toc_page ?(repo_root=".") () : Html.t Deferred.t =
-  Toc.get_chapters ~repo_root () >>| fun chapters ->
+let make_toc_page ?(repo_root=".") ~include_wip () : Html.t Deferred.t =
+  Toc.get_chapters ~repo_root ~include_wip () >>| fun chapters ->
   let content = Html.[
     div ~a:["class","left-column"] [];
     article ~a:["class","main-body"] (toc chapters);
@@ -255,14 +261,22 @@ let make_simple_page file =
   ] in
   return (main_template ~title_bar:title_bar ~content ())
 
-let make_tex_inputs_page ?(repo_root=".") () : string Deferred.t =
-  Toc_tex.get ~repo_root () >>| fun l ->
+let make_tex_inputs_page ?(repo_root=".") ~include_wip () : string Deferred.t =
+  Toc.Repr.get ~repo_root () >>| fun l ->
   let to_input s = [Tex.input (repo_root / "book" / s ^ ".tex"); Tex.newpage] in
   let to_tex t : Tex.t list =
       match t with
-      | `part (part: Toc_tex.part) ->
-          [Tex.part part.title]::(List.map ~f:to_input part.chapters)
-      | `chapter s -> [to_input s]
+      | `part (part: Toc.Repr.part) ->
+        let chapters =
+          if include_wip then
+            part.chapters
+          else
+            List.filter part.chapters ~f:(fun c -> not c.wip)
+        in
+        let names = List.map chapters ~f:(fun c -> c.name) in
+        [Tex.part part.title]::(List.map ~f:to_input names)
+      | `chapter (c : Toc.Repr.chapter) ->
+        if c.wip then [] else [to_input c.name]
   in
   List.map ~f:to_tex l
   |> List.join
@@ -281,12 +295,12 @@ type src = [
 | `Latex
 ]
 
-let make ?(repo_root=".") ~out_dir = function
+let make ?(repo_root=".") ?(include_wip=false) ~out_dir = function
   | `Frontpage -> (
     let base = "index.html" in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
-    make_frontpage ~repo_root () >>= fun html ->
+    make_frontpage ~repo_root ~include_wip () >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
@@ -294,7 +308,7 @@ let make ?(repo_root=".") ~out_dir = function
     let base = "toc.html" in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
-    make_toc_page ~repo_root () >>= fun html ->
+    make_toc_page ~include_wip ~repo_root () >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
   )
@@ -302,7 +316,7 @@ let make ?(repo_root=".") ~out_dir = function
     let base = Filename.basename in_file in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
-    Toc.get_chapters ~repo_root () >>= fun chapters ->
+    Toc.get_chapters ~include_wip:true ~repo_root () >>= fun chapters ->
     make_chapter_page chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
@@ -329,6 +343,6 @@ let make ?(repo_root=".") ~out_dir = function
     let base = "inputs.tex" in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
-    make_tex_inputs_page ~repo_root () >>= fun contents ->
+    make_tex_inputs_page ~include_wip ~repo_root () >>= fun contents ->
     Writer.save out_file ~contents
   )

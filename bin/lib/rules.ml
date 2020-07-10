@@ -3,12 +3,13 @@ open Async
 
 let (/) = Filename.concat
 
-let print_web ~repo_root =
+let print_web ~repo_root ~include_wip =
   let out = Lazy.force Writer.stdout in
   let book_folder = repo_root / "book" in
   let toc_file = book_folder / "toc.scm" in
   let html_alias = book_folder / "html" in
-  Toc.get_chapters ~repo_root () >>| fun chapters ->
+  let alias = if include_wip then "site-wip" else "site" in
+  Toc.Repr.get_chapters ~repo_root ~include_wip () >>| fun chapters ->
   List.iter chapters
     ~f:(fun chapter ->
         let html_file = book_folder / (chapter.name ^ ".html") in
@@ -16,11 +17,12 @@ let print_web ~repo_root =
         Writer.writef out
           {|
 (rule
- (alias site)
+ (alias %s)
  (target %s)
  (deps (alias %s) %s)
  (action (run rwo-build build chapter -o . -repo-root %s %%{dep:%s})))
 |}
+          alias
           target
           html_alias
           toc_file
