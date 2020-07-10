@@ -19,6 +19,9 @@ module Repr : sig
   type t = [ `part of part | `chapter of chapter] list [@@deriving sexp]
 
   val get : ?repo_root: string -> unit -> t Deferred.t
+
+  val get_chapters :
+    ?repo_root: string -> include_wip: bool -> unit -> chapter list Deferred.t
 end
 
 type part_info = {

@@ -146,6 +146,16 @@ module Repr = struct
   let get ?(repo_root=".") () =
     let book_dir = repo_root/"book" in
     read book_dir
+
+  let get_chapters ?(repo_root=".") ~include_wip () =
+    get ~repo_root () >>| fun t ->
+    let chapters =
+      List.concat_map t ~f:(function `part p -> p.chapters | `chapter c -> [c])
+    in
+    if include_wip then
+      chapters
+    else
+      List.filter chapters ~f:(fun c -> not c.wip)
 end
 
 let of_toc book_dir toc =

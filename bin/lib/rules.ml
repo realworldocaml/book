@@ -9,7 +9,7 @@ let print_web ~repo_root ~include_wip =
   let toc_file = book_folder / "toc.scm" in
   let html_alias = book_folder / "html" in
   let alias = if include_wip then "site-wip" else "site" in
-  Toc.get_chapters ~repo_root ~include_wip () >>| fun chapters ->
+  Toc.Repr.get_chapters ~repo_root ~include_wip () >>| fun chapters ->
   List.iter chapters
     ~f:(fun chapter ->
         let html_file = book_folder / (chapter.name ^ ".html") in
