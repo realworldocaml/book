@@ -226,7 +226,7 @@ We also use `;`, the sequencing operator, to express a sequence of imperative
 actions. We could have done the same using `let` bindings:
 
 ```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=add-with-let-in
-let () = t.buckets.(i) <- (key, data) :: filtered_bucket in
+  let () = t.buckets.(i) <- (key, data) :: filtered_bucket in
   if not replace then t.length <- t.length + 1
 ```
 
