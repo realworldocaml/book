@@ -1127,8 +1127,7 @@ module String_pair :
   sig
     type t = string * string
     val sexp_of_t : t -> Sexp.t
-    val hash_fold_t :
-      Base_internalhash_types.state -> t -> Base_internalhash_types.state
+    val hash_fold_t : Hash.state -> t -> Hash.state
     val hash : t -> int
     val compare : t -> t -> int
   end
