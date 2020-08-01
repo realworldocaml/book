@@ -2,7 +2,8 @@
 (rule
  (alias int_interval_manual_sexp)
  (deps
-  (source_tree ./correct/int_interval_manual_sexp))
+  (source_tree ./correct/int_interval_manual_sexp)
+  (package core))
  (action
   (run dune build @all @runtest --root ./correct/int_interval_manual_sexp)))
 
@@ -13,7 +14,8 @@
 (rule
  (alias int_interval_nosexp)
  (deps
-  (source_tree ./correct/int_interval_nosexp))
+  (source_tree ./correct/int_interval_nosexp)
+  (package core))
  (action
   (run dune build @all @runtest --root ./correct/int_interval_nosexp)))
 
@@ -62,7 +64,8 @@
 (rule
  (alias sexp_override)
  (deps
-  (source_tree ./correct/sexp_override))
+  (source_tree ./correct/sexp_override)
+  (package core))
  (action
   (run dune build @all @runtest --root ./correct/sexp_override)))
 
