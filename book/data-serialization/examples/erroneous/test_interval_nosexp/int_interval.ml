@@ -5,7 +5,6 @@ open Core
 type t =
   | Range of int * int
   | Empty
-[@@deriving sexp]
 
 let is_empty =
   function
