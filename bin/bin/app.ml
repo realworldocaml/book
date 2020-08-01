@@ -29,6 +29,12 @@ module Params = struct
     let doc = sprintf "DIR Output directory. Default: \"%s\"" default in
     flag "-o" (optional_with_default default string) ~doc
 
+  let include_wip =
+    let doc =
+      "Whether to include WIP chapters to the generated rules, website or PDF"
+    in
+    flag "-include-wip" no_arg ~doc
+
   let file =
     anon ("file" %: string)
 
@@ -60,14 +66,16 @@ let build_frontpage : Command.t =
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
-      in fun () -> Book.make ~repo_root ~out_dir `Frontpage ]
+      and include_wip = Params.include_wip
+      in fun () -> Book.make ~repo_root ~include_wip ~out_dir `Frontpage ]
 
 let build_toc_page : Command.t =
   Command.async ~summary:"build TOC page"
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
-      in fun () -> Book.make ~repo_root ~out_dir `Toc_page ]
+      and include_wip = Params.include_wip
+      in fun () -> Book.make ~repo_root ~include_wip ~out_dir `Toc_page ]
 
 let build_faqs_page : Command.t =
   Command.async ~summary:"build FAQs page"
@@ -88,7 +96,8 @@ let build_tex_inputs_page : Command.t =
     [%map_open
       let repo_root = Params.repo_root
       and out_dir = Params.out_dir
-      in fun () -> Book.make ~repo_root ~out_dir `Latex ]
+      and include_wip = Params.include_wip
+      in fun () -> Book.make ~repo_root ~include_wip ~out_dir `Latex ]
 
 let build : Command.t =
   Command.group ~summary:"build commands"
@@ -103,8 +112,10 @@ let build : Command.t =
 let rules_web : Command.t =
   Command.async ~summary:"generate dune rules for website generation"
     [%map_open
-      let repo_root = Params.repo_root in
-      fun () -> Rules.print_web ~repo_root ]
+      let repo_root = Params.repo_root
+      and include_wip = Params.include_wip
+      in
+      fun () -> Rules.print_web ~include_wip ~repo_root ]
 
 let rules : Command.t =
   Command.group ~summary:"generate dune rules"

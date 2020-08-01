@@ -856,12 +856,13 @@ Error: The implementation counter.ml
 
 ### Missing Definitions
 
-We might decide that we want a new function in `Counter` for pulling out the
-frequency count of a given string. We can update the `mli` by adding the
-following line: [errors/missing module definitions]{.idx}[modules/missing
-definitions in]{.idx}
+We might decide that we want a new function in `Counter` for pulling
+out the frequency count of a given string.  We could add that to the
+`mli` by adding the following line. [errors/missing module
+definitions]{.idx}[modules/missing definitions in]{.idx}
 
 ```ocaml file=examples/erroneous/freq-with-missing-def/counter.mli,part=1
+(** Returns the frequency count for the given string *)
 val count : t -> string -> int
 ```
 
@@ -869,9 +870,12 @@ Now if we try to compile without actually adding the implementation, we'll
 get this error.
 
 ```sh dir=examples/erroneous/freq-with-missing-def
-$ dune build counter.bc
-Error: Don't know how to build counter.bc
-Hint: did you mean counter.ml?
+$ dune build freq.exe
+File "counter.ml", line 1:
+Error: The implementation counter.ml
+       does not match the interface .freq.eobjs/byte/dune__exe__Counter.cmi:
+       The value `count' is required but not provided
+       File "counter.mli", line 15, characters 0-30: Expected declaration
 [1]
 ```
 
