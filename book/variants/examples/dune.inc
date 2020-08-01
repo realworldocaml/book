@@ -2,7 +2,8 @@
 (rule
  (alias variants-termcol)
  (deps
-  (source_tree ./correct/variants-termcol))
+  (source_tree ./correct/variants-termcol)
+  (package base))
  (action
   (run dune build @all @runtest --root ./correct/variants-termcol)))
 
