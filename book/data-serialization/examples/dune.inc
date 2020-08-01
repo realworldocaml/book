@@ -24,6 +24,18 @@
  (deps (alias int_interval_nosexp)))
 
 (rule
+ (alias int_interval_sexp_override)
+ (deps
+  (source_tree ./correct/int_interval_sexp_override)
+  (package core))
+ (action
+  (run dune build @all @runtest --root ./correct/int_interval_sexp_override)))
+
+(alias
+ (name runtest)
+ (deps (alias int_interval_sexp_override)))
+
+(rule
  (alias read_foo)
  (deps
   (source_tree ./correct/read_foo)
@@ -60,18 +72,6 @@
 (alias
  (name runtest)
  (deps (alias sexp)))
-
-(rule
- (alias sexp_override)
- (deps
-  (source_tree ./correct/sexp_override)
-  (package core))
- (action
-  (run dune build @all @runtest --root ./correct/sexp_override)))
-
-(alias
- (name runtest)
- (deps (alias sexp_override)))
 
 (rule
  (alias test_interval)
