@@ -8,4 +8,4 @@ let () =
   (* Use the file JSON constructor *)
   let json2 = Yojson.Basic.from_file "book.json" in
   (* Test that the two values are the same *)
-  print_endline (if json1 = json2 then "OK" else "FAIL")
+  print_endline (if Yojson.Basic.equal json1 json2 then "OK" else "FAIL")
