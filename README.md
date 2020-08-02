@@ -4,7 +4,7 @@ Real World OCaml v2
 This is the source code for the Real World OCaml 2nd edition, which is
 still a work in progress.  The original edition was written by Yaron
 Minsky, Anil Madhavapeddy and Jason Hickey, and the revised edition is
-being lead by Yaron Minsky and Anil Madhavapeddy.  There have been
+being led by Yaron Minsky and Anil Madhavapeddy.  There have been
 significant contributions to the revised tooling from Ashish Agarwal,
 Jeremy Yallop, Frederic Bour, and Sander Spies.
 
@@ -19,7 +19,7 @@ feedback.  More specific issues such as typos can be reported on the
 
 Each chapter of the book sits in a separate subfolder of the `book/`
 directory.  The `README.md` file contains the text of the chapter,
-written in markdown.  Each ocaml or shell code block in the chapter is
+written in markdown.  Each OCaml or shell code block in the chapter is
 validated using [mdx](https://github.com/realworldocaml/mdx). The more
 complex and structured examples live in an `examples/` sub folder and
 mdx is used to keep the examples and the chapter's code block in sync.
