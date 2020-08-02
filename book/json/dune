@@ -6,5 +6,3 @@
   ppx_jane
   yojson)
  (preludes prelude.ml))
-
-(data_only_dirs examples)
