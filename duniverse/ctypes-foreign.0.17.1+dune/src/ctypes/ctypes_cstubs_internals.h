@@ -16,8 +16,12 @@
 #include "ctypes_raw_pointer.h"
 #include "ctypes_managed_buffer_stubs.h"
 #include <caml/threads.h>
+/* The cast here removes the 'const' qualifier in recent
+   versions of OCaml because ctypes doesn't yet support const.
+
+   TODO: when ctypes supports cv-qualifiers, remove the cast. */
 #define CTYPES_PTR_OF_OCAML_STRING(s) \
-  (String_val(Field(s, 1)) + Long_val(Field(s, 0)))
+  ((char *)String_val(Field(s, 1)) + Long_val(Field(s, 0)))
 
 #ifdef Bytes_val
 #define CTYPES_PTR_OF_OCAML_BYTES(s) \

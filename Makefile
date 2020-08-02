@@ -1,4 +1,4 @@
-.PHONY: all clean dep publish promote test test-all docker depext \
+.PHONY: all clean publish promote test test-all docker depext \
 	duniverse-init duniverse-upgrade
 
 DUNIVERSE ?= duniverse
@@ -11,10 +11,7 @@ test:
 	dune runtest
 
 test-all:
-	dune build @runtest-all
-
-dep:
-	dune exec -- rwo-dep
+	dune runtest --profile non-deterministic
 
 promote:
 	dune promote

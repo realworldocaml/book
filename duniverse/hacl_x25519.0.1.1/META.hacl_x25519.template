@@ -1,0 +1,4 @@
+# DUNE_GEN
+
+xen_linkopts = "-l:xen/libhacl_x25519_xen_stubs.a"
+freestanding_linkopts = "-l:freestanding/libhacl_x25519_freestanding_stubs.a"

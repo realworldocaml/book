@@ -3,7 +3,9 @@
  (alias dictionary)
  (deps
   (source_tree ./correct/dictionary)
-  (package base))
+  (package base)
+  (package core)
+  (package ppx_jane))
  (action
   (run dune build @all @runtest --root ./correct/dictionary)))
 

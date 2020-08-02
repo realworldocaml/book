@@ -1,0 +1,14 @@
+language: c
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+sudo: required
+env:
+  global:
+    - PACKAGE="hkdf"
+  matrix:
+    - OCAML_VERSION=4.07
+    - OCAML_VERSION=4.08
+    - OCAML_VERSION=4.09
+    - OCAML_VERSION=4.10
+notifications:
+  email: false

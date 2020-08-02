@@ -39,7 +39,7 @@ value ctypes_string_of_array(value p, value vlen)
   if (len < 0)
     caml_invalid_argument("ctypes_string_of_array");
   dst = caml_alloc_string(len);
-  memcpy(String_val(dst), CTYPES_ADDR_OF_FATPTR(p), len);
+  memcpy((char *)String_val(dst), CTYPES_ADDR_OF_FATPTR(p), len);
   CAMLreturn(dst);
 }
 
@@ -52,7 +52,7 @@ value ctypes_cstring_of_string(value s)
   size_t len = caml_string_length(s);
   buffer = ctypes_allocate(Val_int(1), Val_long(len + 1));
   char *dst = CTYPES_TO_PTR(ctypes_block_address(buffer));
-  char *ss = String_val(s);
+  const char *ss = String_val(s);
   memcpy(dst, ss, len);
   dst[len] = '\0';
   CAMLreturn(buffer);

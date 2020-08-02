@@ -1,0 +1,1 @@
+(copy_files %{project_root}/static/js/min/*)

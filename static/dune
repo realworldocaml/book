@@ -1,3 +1,25 @@
+; PDF Generation
+
+(rule
+  (targets inputs.tex)
+  (deps ../book/toc.scm)
+  (action (run rwo-build build inputs -o . -repo-root ..)))
+
+(rule
+ (alias pdf)
+ (targets book.pdf)
+ (deps
+  (alias ../book/latex)
+  (:x ../book/book.tex)
+  inputs.tex)
+ (action
+  (progn
+   (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
+   (system "makeindex book.idx")
+   (system "pdflatex -interaction=nonstopmode %{x}"))))
+
+; Website Generation
+
 (alias
   (name site)
   (deps css/app.css
@@ -26,295 +48,44 @@
         js/prism.js
         js/min/app-min.js
         js/min/modernizr-min.js
-        theme/pdf/pdf.css))(alias (name site) (deps faqs.html))
-  (rule
-    (targets faqs.html)
-    (deps    (alias ../book/html) ../book/faqs.html ../bin/bin/app.exe )
-    (action  (run rwo-build build faqs -o . -repo-root ..)))
-
-(alias (name site) (deps index.html))
-  (rule
-    (targets index.html)
-    (deps    (alias ../book/html) ../book/index.html ../bin/bin/app.exe )
-    (action  (run rwo-build build index -o . -repo-root ..)))
-
-(alias (name site) (deps install.html))
-  (rule
-    (targets install.html)
-    (deps    (alias ../book/html) ../book/install.html ../bin/bin/app.exe )
-    (action  (run rwo-build build install -o . -repo-root ..)))
-
-(alias (name site) (deps toc.html))
-  (rule
-    (targets toc.html)
-    (deps    (alias ../book/html) ../book/toc.html ../bin/bin/app.exe ../book/toc.scm)
-    (action  (run rwo-build build toc -o . -repo-root ..)))
-
-(alias (name site) (deps classes.html))
+        theme/pdf/pdf.css))
 
 (rule
-  (targets classes.html)
-  (deps    (:x ../book/classes.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps command-line-parsing.html))
+ (alias site)
+ (targets faqs.html)
+ (deps (alias ../book/html) ../book/faqs.html)
+ (action (run rwo-build build faqs -o . -repo-root ..)))
 
 (rule
-  (targets command-line-parsing.html)
-  (deps    (:x ../book/command-line-parsing.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps compiler-backend.html))
+ (alias site)
+ (targets index.html)
+ (deps (alias ../book/html) ../book/index.html)
+ (action (run rwo-build build index -o . -repo-root ..)))
 
 (rule
-  (targets compiler-backend.html)
-  (deps    (:x ../book/compiler-backend.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps compiler-frontend.html))
+ (alias site)
+ (targets install.html)
+ (deps (alias ../book/html) ../book/install.html)
+ (action (run rwo-build build install -o . -repo-root ..)))
 
 (rule
-  (targets compiler-frontend.html)
-  (deps    (:x ../book/compiler-frontend.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps concurrent-programming.html))
+ (alias site)
+ (targets toc.html)
+ (deps (alias ../book/html) ../book/toc.html ../book/toc.scm)
+ (action (run rwo-build build toc -o . -repo-root ..)))
 
 (rule
-  (targets concurrent-programming.html)
-  (deps    (:x ../book/concurrent-programming.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps data-serialization.html))
+ (deps ../book/toc.scm)
+ (action
+  (with-stdout-to dune.gen
+   (run rwo-build rules web -repo-root ..))))
 
 (rule
-  (targets data-serialization.html)
-  (deps    (:x ../book/data-serialization.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
+ (alias runtest)
+ (action (diff dune.inc dune.gen)))
 
-(alias (name site) (deps error-handling.html))
+(alias
+ (name site)
+ (deps (alias runtest)))
 
-(rule
-  (targets error-handling.html)
-  (deps    (:x ../book/error-handling.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps files-modules-and-programs.html))
-
-(rule
-  (targets files-modules-and-programs.html)
-  (deps    (:x ../book/files-modules-and-programs.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps first-class-modules.html))
-
-(rule
-  (targets first-class-modules.html)
-  (deps    (:x ../book/first-class-modules.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps foreign-function-interface.html))
-
-(rule
-  (targets foreign-function-interface.html)
-  (deps    (:x ../book/foreign-function-interface.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps functors.html))
-
-(rule
-  (targets functors.html)
-  (deps    (:x ../book/functors.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps garbage-collector.html))
-
-(rule
-  (targets garbage-collector.html)
-  (deps    (:x ../book/garbage-collector.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps guided-tour.html))
-
-(rule
-  (targets guided-tour.html)
-  (deps    (:x ../book/guided-tour.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps imperative-programming.html))
-
-(rule
-  (targets imperative-programming.html)
-  (deps    (:x ../book/imperative-programming.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps json.html))
-
-(rule
-  (targets json.html)
-  (deps    (:x ../book/json.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps lists-and-patterns.html))
-
-(rule
-  (targets lists-and-patterns.html)
-  (deps    (:x ../book/lists-and-patterns.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps maps-and-hashtables.html))
-
-(rule
-  (targets maps-and-hashtables.html)
-  (deps    (:x ../book/maps-and-hashtables.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps objects.html))
-
-(rule
-  (targets objects.html)
-  (deps    (:x ../book/objects.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps parsing-with-ocamllex-and-menhir.html))
-
-(rule
-  (targets parsing-with-ocamllex-and-menhir.html)
-  (deps    (:x ../book/parsing-with-ocamllex-and-menhir.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps ppx.html))
-
-(rule
-  (targets ppx.html)
-  (deps    (:x ../book/ppx.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps prologue.html))
-
-(rule
-  (targets prologue.html)
-  (deps    (:x ../book/prologue.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps records.html))
-
-(rule
-  (targets records.html)
-  (deps    (:x ../book/records.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps runtime-memory-layout.html))
-
-(rule
-  (targets runtime-memory-layout.html)
-  (deps    (:x ../book/runtime-memory-layout.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps variables-and-functions.html))
-
-(rule
-  (targets variables-and-functions.html)
-  (deps    (:x ../book/variables-and-functions.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(alias (name site) (deps variants.html))
-
-(rule
-  (targets variants.html)
-  (deps    (:x ../book/variants.html)
-           (alias ../book/html)
-           ../bin/bin/app.exe
-           ../book/toc.scm)
-  (action  (run rwo-build build chapter -o . -repo-root .. %{x})))
-
-(rule
-  (targets inputs.tex)
-  (deps    %{bin:rwo-build}
-           ../book/toc.scm)
-  (action  (run rwo-build build inputs -o . -repo-root ..)))
-
-(alias (name pdf) (deps book.pdf))
-
-(rule
-  (targets book.pdf)
-  (deps    (alias ../book/latex)
-           (:x ../book/book.tex)
-           inputs.tex)
-  (action
-   (progn
-    (system "pdflatex -interaction=nonstopmode %{x} -draftmode")
-    (system "makeindex book.idx")
-    (system "pdflatex -interaction=nonstopmode %{x}"))))
+(include dune.inc)

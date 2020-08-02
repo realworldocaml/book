@@ -29,7 +29,7 @@ external read : 'a Ctypes_primitive_types.prim -> _ Fat.t -> 'a
 
 (* Write a C value to a block of memory *)
 external write : 'a Ctypes_primitive_types.prim -> 'a -> _ Fat.t -> unit
-  = "ctypes_write"
+  = "ctypes_write" [@@noalloc]
 
 module Pointer =
 struct

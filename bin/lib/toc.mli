@@ -4,6 +4,26 @@
 open! Core
 open Async
 
+module Repr : sig
+  (** Basic representation of the Table of content *)
+
+  type chapter =
+    { name : string
+    ; wip : bool }
+
+  type part = {
+    title   : string;
+    chapters: chapter list;
+  }
+
+  type t = [ `part of part | `chapter of chapter] list [@@deriving sexp]
+
+  val get : ?repo_root: string -> unit -> t Deferred.t
+
+  val get_chapters :
+    ?repo_root: string -> include_wip: bool -> unit -> chapter list Deferred.t
+end
+
 type part_info = {
   number : int;
   title : string;
@@ -23,6 +43,7 @@ type chapter = {
   title : string;
   part_info : part_info option;
   sections : sections;
+  wip : bool;
 }
 
 type part = {
@@ -37,7 +58,8 @@ val of_chapters : chapter list -> part list
 
 (** Return all chapter numbers and names, ordered by chapter
     number. *)
-val get_chapters : ?repo_root:string -> unit -> chapter list Deferred.t
+val get_chapters :
+  ?repo_root:string -> include_wip:bool -> unit -> chapter list Deferred.t
 
 val get_next_chapter : chapter list -> chapter -> chapter option
 
@@ -50,6 +72,3 @@ val get_sections : filename:string -> Html.t -> sections
 
 (** Useful for debugging. *)
 val flatten_sections : sections -> section list
-
-(** Return list of all files within the book/code directory. *)
-val code_files : ?repo_root:string -> unit -> string list Deferred.t

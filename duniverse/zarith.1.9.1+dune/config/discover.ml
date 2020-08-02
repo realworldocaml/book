@@ -120,4 +120,5 @@ let () =
     C.Flags.write_lines "asflags" asflags;
     C.Flags.write_lines "cflags" cflags;
     C.Flags.write_sexp "ldflags.sxp" ldflags;
+    C.Flags.write_lines "ldflags" ldflags;
     C.Flags.write_lines "arch" [machine])

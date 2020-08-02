@@ -392,7 +392,7 @@ CAMLprim value ctypes_ldouble_format(value width, value prec, value d) {
 
 CAMLprim value ctypes_ldouble_of_string(value v) {
   CAMLparam1(v);
-  char *str = String_val(v);
+  const char *str = String_val(v);
   int len = caml_string_length(v);
   char *end;
   long double r;

@@ -1,0 +1,20 @@
+(copy_files# ../p256/p256_stubs.c)
+
+(copy_files# ../p256/p256_32.h)
+
+(copy_files# ../p256/p256_64.h)
+
+(library
+ (name fiat_p256_freestanding)
+ (public_name fiat-p256.freestanding)
+ (optional)
+ (libraries ocaml-freestanding)
+ (c_flags
+  (:include ../p256/discover/cflags.sexp)
+  (:include cflags-freestanding.sexp))
+ (c_names p256_stubs))
+
+(rule
+ (with-stdout-to
+  cflags-freestanding.sexp
+  (run ./cflags.sh)))

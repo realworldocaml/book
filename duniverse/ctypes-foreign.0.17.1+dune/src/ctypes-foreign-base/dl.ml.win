@@ -125,5 +125,7 @@ let dlsym ?handle ~symbol =
     | Dlsy_ok v -> v
     | Dlsy_unknown -> draise "dlsym" unknown
     | Dlsy_nomem -> draise "dlsym" nomem
-    | Dlsy_enoent -> draise "dlsym" "no such symbol"
+    | Dlsy_enoent ->
+       let msg = Printf.sprintf "no such symbol: %S" symbol in
+       draise "dlsym" msg
     | Dlsy_error x -> draise "dlsym" x

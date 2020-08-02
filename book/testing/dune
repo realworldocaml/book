@@ -1,0 +1,12 @@
+(mdx
+ (files README.md)
+ (packages
+  base
+  base_quickcheck
+  core_kernel
+  lambdasoup
+  mdx
+  patdiff
+  ppx_jane
+  uri)
+ (preludes prelude.ml))

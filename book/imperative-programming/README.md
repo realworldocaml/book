@@ -53,7 +53,7 @@ Here's the interface we'll match, provided as an `mli`. The type `('a,
 'b) t` represents a dictionary with keys of type `'a` and data of type
 `'b`.
 
-```ocaml file=examples/correct/dictionary/dictionary.mli,part=1
+```ocaml file=examples/correct/dictionary/src/dictionary.mli,part=1
 (* file: dictionary.mli *)
 open Base
 
@@ -83,7 +83,7 @@ imperative constructs as they come up.
 
 Our first step is to define the type of a dictionary as a record.
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=1
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=1
 (* file: dictionary.ml *)
 open Base
 
@@ -104,7 +104,7 @@ the functions for hashing and equality checking.
 Now we'll start putting together the basic functions for manipulating
 a dictionary:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=2
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=2
 let num_buckets = 17
 
 let hash_bucket t key = (t.hash key) % num_buckets
@@ -163,7 +163,7 @@ returned.
 
 Now let's look at the implementation of `iter`:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=3
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=3
 let iter t ~f =
   for i = 0 to Array.length t.buckets - 1 do
     List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
@@ -186,7 +186,7 @@ idiomatic in imperative contexts.
 The following code is for adding and removing mappings from the
 dictionary:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=4
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=4
 let bucket_has_key t i key =
   List.exists t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
 
@@ -195,7 +195,7 @@ let add t ~key ~data =
   let replace = bucket_has_key t i key in
   let filtered_bucket =
     if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> t.equal key' key)
+      List.filter t.buckets.(i) ~f:(fun (key',_) -> not (t.equal key' key))
     else
       t.buckets.(i)
   in
@@ -225,7 +225,7 @@ updating a record field (`record.field <- expression`).
 We also use `;`, the sequencing operator, to express a sequence of imperative
 actions. We could have done the same using `let` bindings:
 
-```ocaml file=examples/correct/dictionary/dictionary.ml,part=add-with-let-in
+```ocaml file=examples/correct/dictionary/src/dictionary.ml,part=add-with-let-in
 let () = t.buckets.(i) <- (key, data) :: filtered_bucket in
   if not replace then t.length <- t.length + 1
 ```
@@ -940,10 +940,10 @@ And now we can use this to try out some examples:
 
 ```ocaml env=main,non-deterministic=command
 # time (fun () -> edit_distance "OCaml" "ocaml")
-Time: 1.10292434692 ms
+Time: 0.655651092529 ms
 - : int = 2
 # time (fun () -> edit_distance "OCaml 4.09" "ocaml 4.09")
-Time: 3282.86218643 ms
+Time: 2541.6533947 ms
 - : int = 2
 ```
 
@@ -977,11 +977,11 @@ This is, however, exponentially slow, for the same reason that
 
 ```ocaml env=main,non-deterministic=command
 # time (fun () -> fib 20)
-Time: 1.12414360046 ms
-- : int = 10946
+Time: 1.14369392395 ms
+- : int = 6765
 # time (fun () -> fib 40)
-Time: 18263.7000084 ms
-- : int = 165580141
+Time: 14752.7184486 ms
+- : int = 102334155
 ```
 
 As you can see, `fib 40` takes thousands of times longer to compute
@@ -994,14 +994,14 @@ memoize it after the fact and expect the first call to `fib` to be
 improved.
 
 ```ocaml env=main,non-deterministic=command
-# let fib = memoize fib
+# let fib = memoize (module Int) fib
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
-Time: 18122.092247 ms
-- : int = 165580141
+Time: 18174.5970249 ms
+- : int = 102334155
 # time (fun () -> fib 40)
-Time: 0.00596046447754 ms
-- : int = 165580141
+Time: 0.00524520874023 ms
+- : int = 102334155
 ```
 
 In order to make `fib` fast, our first step will be to rewrite `fib`
@@ -1073,7 +1073,7 @@ Using `memo_rec`, we can now build an efficient version of `fib`:
 # let fib = memo_rec (module Int) fib_norec
 val fib : int -> int = <fun>
 # time (fun () -> fib 40)
-Time: 0.0388622283936 ms
+Time: 0.121355056763 ms
 - : int = 102334155
 ```
 
@@ -1160,9 +1160,9 @@ This new version of `edit_distance` is much more efficient than the
 one we started with; the following call is many thousands of times
 faster than it was without memoization.
 
-```ocaml env=memo,non-deterministic=command
+```ocaml env=main,non-deterministic=command
 # time (fun () -> edit_distance ("OCaml 4.09","ocaml 4.09"))
-Time: 0.348091125488 ms
+Time: 0.964403152466 ms
 - : int = 2
 ```
 
@@ -1224,12 +1224,13 @@ particular, we can use laziness to make our definition of `memo_rec` work
 without explicit mutation:
 
 ```ocaml env=main,non-deterministic=command
-# let lazy_memo_rec f_norec x =
-    let rec f = lazy (memoize (fun x -> f_norec (force f) x)) in
+# let lazy_memo_rec m f_norec x =
+    let rec f = lazy (memoize m (fun x -> f_norec (force f) x)) in
     (force f) x
-val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-# time (fun () -> lazy_memo_rec fib_norec 40)
-Time: 0.0441074371338 ms
+val lazy_memo_rec : 'a Hashtbl.Key.t -> (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b =
+  <fun>
+# time (fun () -> lazy_memo_rec (module Int) fib_norec 40)
+Time: 0.181913375854 ms
 - : int = 102334155
 ```
 
@@ -1529,7 +1530,7 @@ file that doesn't actually contain numbers, we'll see such an error:
 # sum_file "/etc/hosts"
 Exception:
 (Failure
- "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"").
+  "Int.of_string: \"127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4\"")
 ```
 
 And if we do this over and over in a loop, we'll eventually run out of file

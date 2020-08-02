@@ -1,0 +1,25 @@
+(copy_files# ../src/hacl_x25519_stubs.c)
+
+(copy_files# ../src/Hacl_Curve25519.c)
+
+(copy_files# ../src/Hacl_Curve25519.h)
+
+(copy_files# ../src/FStar.h)
+
+(copy_files# ../src/kremlib_base.h)
+
+(copy_files# ../src/kremlib.h)
+
+(library
+ (name hacl_x25519_xen)
+ (public_name hacl_x25519.xen)
+ (optional)
+ (libraries mirage-xen-posix)
+ (c_flags
+  (:include cflags-xen.sexp))
+ (c_names hacl_x25519_stubs Hacl_Curve25519))
+
+(rule
+ (with-stdout-to
+  cflags-xen.sexp
+  (run ./cflags.sh)))

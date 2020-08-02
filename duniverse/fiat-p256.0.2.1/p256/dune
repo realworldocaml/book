@@ -1,0 +1,31 @@
+(library
+ (name fiat_p256)
+ (public_name fiat-p256)
+ (libraries bigarray-compat cstruct eqaf.cstruct hex)
+ (c_names p256_stubs)
+ (c_flags
+  (:include discover/cflags.sexp)))
+
+(rule
+ (targets upstream_p256_32)
+ (action
+  (bash
+    "wget https://raw.githubusercontent.com/mit-plv/fiat-crypto/ecdfd03c636ab63e167fbe4fc4d7ab0ed5d9db74/p256_32.c -O %{targets}")))
+
+(rule
+ (targets upstream_p256_64)
+ (action
+  (bash
+    "wget https://raw.githubusercontent.com/mit-plv/fiat-crypto/ecdfd03c636ab63e167fbe4fc4d7ab0ed5d9db74/p256_64.c -O %{targets}")))
+
+(alias
+ (name check_vendors)
+ (action
+  (diff p256_32.h upstream_p256_32)))
+
+(alias
+ (name check_vendors)
+ (action
+  (diff p256_64.h upstream_p256_64)))
+
+(documentation)

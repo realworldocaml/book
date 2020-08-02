@@ -49,7 +49,7 @@ Let's consider an example of how one might use a map in practice. In
 we showed a module `Counter` for keeping frequency counts on a set of
 strings. Here's the interface:
 
-```ocaml file=examples/freq-fast/counter.mli
+```ocaml file=examples/correct/freq-fast/counter.mli
 open Base
 
 (** A collection of string frequency counts *)
@@ -74,7 +74,7 @@ frequencies.
 
 Here's the implementation.
 
-```ocaml file=examples/freq-fast/counter.ml
+```ocaml file=examples/correct/freq-fast/counter.ml
 open Base
 
 type t = (string,int,String.comparator_witness) Map.t
@@ -219,10 +219,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "duniverse/base.v0.13.1/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base.v0.13.2/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "duniverse/base.v0.13.1/src/comparator.mli", line 19, characters 2-25:
+       File "duniverse/base.v0.13.2/src/comparator.mli", line 19, characters 2-25:
          Expected declaration
 ```
 
@@ -992,7 +992,7 @@ the keys and updating the values they contain. Note that we use the
 `Map.change` and `Hashtbl.change` functions to update the respective data
 structures:
 
-```ocaml file=examples/map_vs_hash/map_vs_hash.ml
+```ocaml file=examples/correct/map_vs_hash/map_vs_hash.ml
 open Base
 open Core_bench
 
@@ -1032,7 +1032,7 @@ let () =
 The results show the hash table version to be around four times faster than
 the map version:
 
-```scheme file=examples/map_vs_hash/dune
+```scheme file=examples/correct/map_vs_hash/dune
 (executable
   (name      map_vs_hash)
   (libraries base core_bench))
@@ -1040,7 +1040,7 @@ the map version:
 
 
 
-```sh dir=examples/map_vs_hash,non-deterministic=command
+```sh dir=examples/correct/map_vs_hash,non-deterministic=command
 $ dune build map_vs_hash.exe
 $ ./_build/default/map_vs_hash.exe -ascii -quota 1 -clear-columns time speedup
 Estimated testing time 2s (2 benchmarks x 1s). Change using -quota SECS.
@@ -1072,7 +1072,7 @@ keeping these copies around. In the map case, this is done by using
 are done using `Hashtbl.change`, but we also need to call `Hashtbl.copy` to
 take snapshots of the table:
 
-```ocaml file=examples/map_vs_hash2/map_vs_hash2.ml
+```ocaml file=examples/correct/map_vs_hash2/map_vs_hash2.ml
 open Base
 open Core_bench
 
@@ -1116,15 +1116,14 @@ let () =
 Unsurprisingly, maps perform far better than hash tables on this benchmark,
 in this case by more than a factor of 10:
 
-```scheme file=examples/map_vs_hash2/dune
+```scheme file=examples/correct/map_vs_hash2/dune
 (executable
   (name      map_vs_hash2)
   (libraries core_bench))
 ```
 
 
-
-```sh dir=examples/map_vs_hash2,non-deterministic=command
+```sh dir=examples/correct/map_vs_hash2,non-deterministic=command
 $ dune build map_vs_hash2.exe
 $ ./_build/default/map_vs_hash2.exe -ascii -clear-columns time speedup
 Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.

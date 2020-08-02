@@ -1,0 +1,4 @@
+(library
+ (public_name hacl_x25519)
+ (libraries cstruct eqaf)
+ (c_names hacl_x25519_stubs Hacl_Curve25519))

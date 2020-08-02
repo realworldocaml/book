@@ -1,0 +1,87 @@
+1 - normal case - ok
+2 - normal case - ok
+3 - public key on twist - ok
+4 - public key on twist - ok
+5 - public key on twist - ok
+6 - public key on twist - ok
+7 - public key on twist - ok
+8 - public key = 0 - ok
+9 - public key = 1 - ok
+10 - edge case on twist - ok
+11 - edge case on twist - ok
+12 - edge case on twist - ok
+13 - edge case on twist - ok
+14 - edge case on twist - ok
+15 - edge case on twist - ok
+16 - edge case for public key - ok
+17 - edge case for public key - ok
+18 - edge case for public key - ok
+19 - edge case for public key - ok
+20 - edge case for public key - ok
+21 - edge case for public key - ok
+22 - edge case for public key - ok
+23 - public key with low order - ok
+24 - public key with low order - ok
+25 - public key with low order - ok
+26 - public key with low order - ok
+27 - public key with low order - ok
+28 - public key with low order - ok
+29 - public key with low order - ok
+30 - public key with low order - ok
+31 - public key with low order - ok
+32 - public key with low order - ok
+33 - public key with low order - ok
+34 - public key with low order - ok
+35 - public key with low order - ok
+36 - public key with low order - ok
+37 - public key with low order - ok
+38 - public key with low order - ok
+39 - public key with low order - ok
+40 - public key with low order - ok
+41 - public key with low order - ok
+42 - public key with low order - ok
+43 - public key with low order - ok
+44 - public key with low order - ok
+45 - public key with low order - ok
+46 - public key with low order - ok
+47 - public key with low order - ok
+48 - public key with low order - ok
+49 - public key >= p - ok
+50 - public key >= p - ok
+51 - public key >= p - ok
+52 - public key >= p - ok
+53 - public key >= p - ok
+54 - public key >= p - ok
+55 - public key >= p - ok
+56 - public key >= p - ok
+57 - public key >= p - ok
+58 - public key >= p - ok
+59 - public key >= p - ok
+60 - public key >= p - ok
+61 - public key >= p - ok
+62 - public key >= p - ok
+63 - public key >= p - ok
+64 - public key >= p - ok
+65 - RFC 7748 - ok
+66 - RFC 7748 - ok
+67 - edge case for shared secret - ok
+68 - edge case for shared secret - ok
+69 - edge case for shared secret - ok
+70 - edge case for shared secret - ok
+71 - edge case for shared secret - ok
+72 - edge case for shared secret - ok
+73 - edge case for shared secret - ok
+74 - edge case for shared secret - ok
+75 - edge case for shared secret - ok
+76 - edge case for shared secret - ok
+77 - edge case for shared secret - ok
+78 - edge case for shared secret - ok
+79 - edge case for shared secret - ok
+80 - edge case for shared secret - ok
+81 - checking for overflow - ok
+82 - checking for overflow - ok
+83 - checking for overflow - ok
+84 - checking for overflow - ok
+85 - checking for overflow - ok
+86 - private key == -1 (mod order) - ok
+87 - private key == 1 (mod order) on twist - ok

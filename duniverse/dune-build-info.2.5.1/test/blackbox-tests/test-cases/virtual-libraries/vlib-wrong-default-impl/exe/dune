@@ -1,9 +1,0 @@
-(executable
- (name exe)
- (libraries vlibfoo)
-)
-
-(alias
- (name default)
- (action
-  (run ./exe.exe)))
