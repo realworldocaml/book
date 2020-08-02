@@ -2,7 +2,8 @@
 (rule
  (alias int_interval_manual_sexp)
  (deps
-  (source_tree ./correct/int_interval_manual_sexp))
+  (source_tree ./correct/int_interval_manual_sexp)
+  (package core))
  (action
   (run dune build @all @runtest --root ./correct/int_interval_manual_sexp)))
 
@@ -13,13 +14,26 @@
 (rule
  (alias int_interval_nosexp)
  (deps
-  (source_tree ./correct/int_interval_nosexp))
+  (source_tree ./correct/int_interval_nosexp)
+  (package core))
  (action
   (run dune build @all @runtest --root ./correct/int_interval_nosexp)))
 
 (alias
  (name runtest)
  (deps (alias int_interval_nosexp)))
+
+(rule
+ (alias int_interval_sexp_override)
+ (deps
+  (source_tree ./correct/int_interval_sexp_override)
+  (package core))
+ (action
+  (run dune build @all @runtest --root ./correct/int_interval_sexp_override)))
+
+(alias
+ (name runtest)
+ (deps (alias int_interval_sexp_override)))
 
 (rule
  (alias read_foo)
@@ -58,17 +72,6 @@
 (alias
  (name runtest)
  (deps (alias sexp)))
-
-(rule
- (alias sexp_override)
- (deps
-  (source_tree ./correct/sexp_override))
- (action
-  (run dune build @all @runtest --root ./correct/sexp_override)))
-
-(alias
- (name runtest)
- (deps (alias sexp_override)))
 
 (rule
  (alias test_interval)

@@ -3,7 +3,7 @@
  (alias cal_add_days)
  (deps
   (source_tree ./correct/cal_add_days)
-  (package base))
+  (package core))
  (action
   (run dune build @all @runtest --root ./correct/cal_add_days)))
 

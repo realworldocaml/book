@@ -1,2 +1,2 @@
 (library
-  (name sexp))
+  (name fake_sexp))
