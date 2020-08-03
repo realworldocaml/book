@@ -1,7 +1,7 @@
 #require "core,core.top";;
 #require "ctypes";;
 #require "ctypes.top";;
-#require "ctypes-foreign.threaded";;
+#require "ctypes-foreign";;
 
 open Base
 open Ctypes
