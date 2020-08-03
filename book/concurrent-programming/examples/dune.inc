@@ -2,7 +2,9 @@
 (rule
  (alias better_echo)
  (deps
-  (source_tree ./correct/better_echo))
+  (source_tree ./correct/better_echo)
+  (package core)
+  (package async))
  (action
   (run dune build @all @runtest --root ./correct/better_echo)))
 
@@ -13,7 +15,9 @@
 (rule
  (alias echo)
  (deps
-  (source_tree ./correct/echo))
+  (source_tree ./correct/echo)
+  (package core)
+  (package async))
  (action
   (run dune build @all @runtest --root ./correct/echo)))
 
@@ -24,7 +28,9 @@
 (rule
  (alias native_code_log_delays)
  (deps
-  (source_tree ./correct/native_code_log_delays))
+  (source_tree ./correct/native_code_log_delays)
+  (package core)
+  (package async))
  (action
   (run dune build @all @runtest --root ./correct/native_code_log_delays)))
 
@@ -35,7 +41,12 @@
 (rule
  (alias search)
  (deps
-  (source_tree ./correct/search))
+  (source_tree ./correct/search)
+  (package core)
+  (package async)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
  (action
   (run dune build @all @runtest --root ./correct/search)))
 
@@ -46,7 +57,12 @@
 (rule
  (alias search_out_of_order)
  (deps
-  (source_tree ./correct/search_out_of_order))
+  (source_tree ./correct/search_out_of_order)
+  (package core)
+  (package async)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
  (action
   (run dune build @all @runtest --root ./correct/search_out_of_order)))
 
@@ -57,7 +73,10 @@
 (rule
  (alias search_with_configurable_server)
  (deps
-  (source_tree ./correct/search_with_configurable_server))
+  (source_tree ./correct/search_with_configurable_server)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
  (action
   (run dune build @all @runtest --root ./correct/search_with_configurable_server)))
 
@@ -68,7 +87,10 @@
 (rule
  (alias search_with_error_handling)
  (deps
-  (source_tree ./correct/search_with_error_handling))
+  (source_tree ./correct/search_with_error_handling)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
  (action
   (run dune build @all @runtest --root ./correct/search_with_error_handling)))
 
@@ -79,7 +101,10 @@
 (rule
  (alias search_with_timeout_no_leak)
  (deps
-  (source_tree ./correct/search_with_timeout_no_leak))
+  (source_tree ./correct/search_with_timeout_no_leak)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
  (action
   (run dune build @all @runtest --root ./correct/search_with_timeout_no_leak)))
 
@@ -90,7 +115,10 @@
 (rule
  (alias search_with_timeout_no_leak_simple)
  (deps
-  (source_tree ./correct/search_with_timeout_no_leak_simple))
+  (source_tree ./correct/search_with_timeout_no_leak_simple)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
  (action
   (run dune build @all @runtest --root ./correct/search_with_timeout_no_leak_simple)))
 

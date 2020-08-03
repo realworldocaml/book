@@ -761,10 +761,10 @@ provide some information about where the error occurred and the stack of
 function calls that were in place at the time of the error:
 
 ```sh dir=examples/correct/blow_up
-$ dune exec -- ./blow_up.bc
+$ dune exec -- ./blow_up.exe
 3
-Fatal error: exception Blow_up.Empty_list
-Raised at file "blow_up.ml", line 6, characters 16-26
+Fatal error: exception Dune__exe__Blow_up.Empty_list
+Raised at file "blow_up.ml", line 6, characters 10-26
 Called from file "blow_up.ml", line 11, characters 16-29
 [2]
 ```
@@ -786,10 +786,10 @@ backtraces off by setting the `OCAMLRUNPARAM` environment variable to
 be empty:
 
 ```sh dir=examples/correct/blow_up
-$ OCAMLRUNPARAM= dune exec -- ./blow_up.bc
+$ OCAMLRUNPARAM= dune exec -- ./blow_up.exe
 3
-Fatal error: exception Blow_up.Empty_list
-Raised at file "blow_up.ml", line 6, characters 16-26
+Fatal error: exception Dune__exe__Blow_up.Empty_list
+Raised at file "blow_up.ml", line 6, characters 10-26
 Called from file "blow_up.ml", line 11, characters 16-29
 [2]
 ```
