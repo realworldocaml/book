@@ -1,0 +1,4 @@
+(library (name ppx_let_test) (libraries core ppx_let_expander)
+ (preprocess
+  (pps ppx_expect ppx_inline_test ppx_let ppx_sexp_message ppx_sexp_value
+   ppxlib.metaquot)))

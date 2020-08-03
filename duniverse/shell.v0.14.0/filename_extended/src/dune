@@ -1,0 +1,3 @@
+(library (name filename_extended) (public_name shell.filename_extended)
+ (libraries core shell_internal string_extended)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))

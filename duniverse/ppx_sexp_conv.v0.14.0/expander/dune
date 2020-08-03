@@ -1,0 +1,4 @@
+(library (name ppx_sexp_conv_expander) (public_name ppx_sexp_conv.expander)
+ (libraries base ppxlib ppxlib.metaquot_lifters)
+ (ppx_runtime_libraries ppx_sexp_conv.runtime-lib)
+ (preprocess (pps ppxlib.metaquot ppxlib.traverse)))

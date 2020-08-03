@@ -1,0 +1,2 @@
+module Ppx_compare_lib = Base.Exported_for_specific_uses.Ppx_compare_lib
+module Ppx_sexp_conv_lib = Base.Exported_for_specific_uses.Ppx_sexp_conv_lib

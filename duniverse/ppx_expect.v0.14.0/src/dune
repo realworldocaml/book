@@ -1,0 +1,7 @@
+(library (name ppx_expect) (public_name ppx_expect) (kind ppx_rewriter)
+ (ppx_runtime_libraries ppx_expect.collector ppx_expect.config)
+ (libraries base expect_test_common ppx_expect_payload ppxlib ppx_inline_test
+  ppx_inline_test.libname ppx_here.expander)
+ (preprocess (pps ppxlib.metaquot))
+ (inline_tests.backend (runner_libraries ppx_expect.evaluator)
+  (extends ppx_inline_test)))

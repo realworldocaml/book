@@ -1,0 +1,22 @@
+open Base
+
+open Expect_test_helpers_core
+
+;;
+print_s [%sexp (Not_found_s [%message "foo"] : exn)]
+
+[%%expect {| (Not_found_s foo) |}]
+
+;;
+Not_found
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error (alert deprecated): Not_found
+[2016-09] this element comes from the stdlib distributed with OCaml.
+Instead of raising [Not_found], consider using [raise_s] with an informative error
+message.  If code needs to distinguish [Not_found] from other exceptions, please change
+it to handle both [Not_found] and [Not_found_s].  Then, instead of raising [Not_found],
+raise [Not_found_s] with an informative error message.
+|}]

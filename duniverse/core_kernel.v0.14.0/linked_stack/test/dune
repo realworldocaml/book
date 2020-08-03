@@ -1,0 +1,2 @@
+(library (name linked_stack_test) (libraries base_test_helpers linked_stack)
+ (preprocess (pps ppx_jane)))

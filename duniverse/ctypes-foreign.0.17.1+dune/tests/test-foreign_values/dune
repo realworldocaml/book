@@ -1,5 +1,5 @@
 (test
  (name test_foreign_values)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign
    test_foreign_values_stubs test_foreign_values_bindings tests_common))

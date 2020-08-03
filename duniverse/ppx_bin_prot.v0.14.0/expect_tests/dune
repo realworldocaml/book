@@ -1,0 +1,3 @@
+(library (name ppx_bin_prot_expect_tests)
+ (libraries core_kernel expect_test_helpers_core)
+ (preprocess (pps ppx_jane)))

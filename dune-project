@@ -39,6 +39,7 @@ second edition book. See https://realworldocaml.org/")
   ppx_jane
   re
   sexp_pretty
+  shell
   textwrap
   tls
   yojson))

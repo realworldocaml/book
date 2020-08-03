@@ -1,0 +1,7 @@
+(library (name expect_test_matcher) (public_name ppx_expect.matcher)
+ (libraries base stdio re expect_test_common expect_test_config_types
+  ppx_inline_test.runtime-lib)
+ (preprocess no_preprocessing)
+ (lint (pps ppx_base ppx_base_lint -apply=js_style,base_lint,type_conv)))
+
+(ocamllex lexer)

@@ -1,0 +1,37 @@
+
+module Position_for_polymorphic_variant_errors = struct
+  type t1 = [ `A ] [@@deriving of_sexp]
+  type t2 = [ `B ] [@@deriving of_sexp]
+  type t3 = A of [ t1 | t2 ] [@@deriving of_sexp]
+  let (_ : t3) = t3_of_sexp (List [Atom "A"; Atom "C"])
+end
+[%%expect{|
+Exception:
+(Of_sexp_error
+  "examples.mlt.Position_for_polymorphic_variant_errors.t3_of_sexp: no matching variant found"
+  (invalid_sexp C))
+|}]
+
+let _ = [%sexp_of: 'a]
+[%%expect{|
+Line _, characters _-_:
+Error: Type variables not allowed in [%sexp_of: ]. Please use locally abstract types instead.
+|}]
+
+let _ = [%of_sexp: 'a]
+[%%expect{|
+Line _, characters _-_:
+Error: Type variables not allowed in [%of_sexp: ]. Please use locally abstract types instead.
+|}]
+
+let _ = [%sexp (() : 'a)]
+[%%expect{|
+Line _, characters _-_:
+Error: Type variables not allowed in [%sexp_of: ]. Please use locally abstract types instead.
+|}]
+
+type 'a t =
+  | None
+  | Something_else of { value : 'a }
+[@@deriving sexp]
+[%%expect{||}]

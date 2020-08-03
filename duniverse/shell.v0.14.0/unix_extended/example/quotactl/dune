@@ -1,0 +1,2 @@
+(executables (names quotactl) (libraries core unix_extended)
+ (preprocess (pps ppx_jane)))

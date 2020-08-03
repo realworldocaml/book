@@ -1,0 +1,7 @@
+(library (name ppx_jane_test_alert_in_mli) (preprocess (pps ppx_jane)))
+
+(alias (name DEFAULT) (deps ppx_jane_test_alert_in_mli_mli_pp.output))
+
+(rule (targets ppx_jane_test_alert_in_mli_mli_pp.output) (mode fallback)
+ (deps (:first_dep ppx_jane_test_alert_in_mli.mli.pp))
+ (action (bash "cp %{first_dep} %{targets}")))

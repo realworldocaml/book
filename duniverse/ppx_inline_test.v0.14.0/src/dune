@@ -1,0 +1,9 @@
+(library (name ppx_inline_test) (public_name ppx_inline_test)
+ (kind (ppx_rewriter (cookies (inline_tests %{inline_tests}))))
+ (ppx_runtime_libraries ppx_inline_test.runtime-lib)
+ (libraries base ppxlib ppx_inline_test_libname)
+ (preprocess (pps ppxlib.metaquot))
+ (inline_tests.backend (runner_libraries ppx_inline_test.runner.lib)
+  (generate_runner (echo "let () = Ppx_inline_test_lib.Runtime.exit ();;"))
+  (flags "inline-test-runner" %{library-name} -source-tree-root
+   %{workspace_root} -diff-cmd -)))

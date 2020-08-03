@@ -1,0 +1,66 @@
+(* This toplevel test exercises some polymorphic variants that sexp_grammar rejects. We
+   show that in each case, the compiler or sexp would have given an error anyway. *)
+type t = [ `A of int & string ] [@@deriving sexp]
+
+[%%expect {|
+Line _, characters _-_:
+Error: split_row_field/&
+|}]
+
+type t = [ `A of int & string ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_sexp_conv: sexp_grammar doesn't support polymorphic variants with intersection types ([`A of _ & _])
+|}]
+
+type t = [> `A ] [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: A type variable is unbound in this type declaration.
+In type [> `A ] as 'a the variable 'a is unbound
+|}]
+
+type t = [> `A ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_sexp_conv: sexp_grammar doesn't support polymorphic variants with < or >
+|}]
+
+type t = [< `A ] [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: A type variable is unbound in this type declaration.
+In type [< `A ] as 'a the variable 'a is unbound
+|}]
+
+type t = [< `A ] [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_sexp_conv: sexp_grammar doesn't support polymorphic variants with < or >
+|}]
+
+type 'a t = [< `A ] as 'a [@@deriving sexp]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: Type unsupported for ppx [of_sexp] conversion
+|}]
+
+type 'a t = [< `A ] as 'a [@@deriving sexp_grammar]
+
+[%%expect
+  {|
+Line _, characters _-_:
+Error: ppx_sexp_conv: sexp_grammar doesn't support aliases
+|}]

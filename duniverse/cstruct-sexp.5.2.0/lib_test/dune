@@ -1,0 +1,9 @@
+(executable
+ (libraries cstruct bigarray alcotest cstruct-sexp)
+ (name tests))
+
+(rule
+ (alias runtest)
+ (package cstruct-sexp)
+ (action
+  (run ./tests.exe -e)))

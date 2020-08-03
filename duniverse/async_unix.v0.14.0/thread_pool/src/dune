@@ -1,0 +1,4 @@
+(library (name thread_pool) (public_name async_unix.thread_pool)
+ (libraries core core.linux_ext core.nano_mutex core.squeue
+  core_kernel.thread_pool_cpu_affinity thread_safe_ivar)
+ (preprocess (pps ppx_jane -annotated-ignores -check-doc-comments)))

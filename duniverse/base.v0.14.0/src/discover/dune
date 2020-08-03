@@ -1,0 +1,2 @@
+(executables (names discover) (libraries dune-configurator)
+ (preprocess no_preprocessing))

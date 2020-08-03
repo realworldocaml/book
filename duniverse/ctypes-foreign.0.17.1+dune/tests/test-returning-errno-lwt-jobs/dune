@@ -42,6 +42,6 @@
  (name test_returning_errno)
  (package ctypes-foreign)
  (modules test_returning_errno)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign
    test_returning_errno_lwt_jobs_stubs test_functions
    test_returning_errno_lwt_jobs_bindings tests_common))

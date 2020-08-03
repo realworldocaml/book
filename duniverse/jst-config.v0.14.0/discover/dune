@@ -1,0 +1,2 @@
+(executables (names discover) (libraries base stdio dune-configurator)
+ (preprocess (pps ppx_assert)))

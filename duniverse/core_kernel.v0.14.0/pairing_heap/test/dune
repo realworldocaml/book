@@ -1,0 +1,3 @@
+(library (name pairing_heap_test)
+ (libraries expect_test_helpers_core pairing_heap)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))

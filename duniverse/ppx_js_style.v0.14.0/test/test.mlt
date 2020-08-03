@@ -1,0 +1,61 @@
+module type S = sig
+  val x : int [@deprecated "[since 2018-01] ..."]
+end
+
+[%%expect{|
+Line _, characters _-_:
+Error: Jane Street style: Invalid deprecated attribute, it will be ignored by the compiler
+|}];;
+
+let ( let* ) o f =
+  match o with
+  | None -> None
+  | Some x -> f x
+
+let return x = Some x
+
+let find_and_sum tbl k1 k2 =
+  let* x1 = Hashtbl.find_opt tbl k1 in
+  let* x2 = Hashtbl.find_opt tbl k2 in
+  return (x1 + x2)
+
+[%%expect{|
+Line _, characters _-_:
+Error: Jane Street style: This use of ( let* ) is forbidden.
+ppx_let is currently more featureful, please use that instead to keep a consistent style
+|}];;
+
+let find_and_sum tbl k1 k2 =
+  ( let* ) (Hashtbl.find_opt tbl k1)
+    (fun x1 ->
+       ( let* ) (Hashtbl.find_opt tbl k2)
+         (fun x2 -> return (x1 + x2)))
+
+[%%expect{| |}];;
+
+(* we check annotated ignores when extensions are used too *)
+let%foo _ = "whatever"
+
+[%%expect{|
+Line _, characters _-_:
+Error: Jane Street style: Ignored expression must come with a type annotation
+|}];;
+
+(* expect test expansion is done before annotated ignores, so this is allowed *)
+let%expect_test _ = "whatever"
+
+[%%expect{|
+Line _, characters _-_:
+Error: ppx_expect: extension is disabled because the tests would be ignored (the build system didn't pass -inline-test-lib)
+|}];;
+
+(* a regression test (this used to result in a strange error message): *)
+let foo = [%expect "foo"]
+
+[%%expect{|
+Line _, characters _-_:
+Error: Extension `expect' was not translated.
+Hint: `expect' is available for structure items but is used here in the
+context of an expression.
+Did you put it at the wrong level?
+|}];;

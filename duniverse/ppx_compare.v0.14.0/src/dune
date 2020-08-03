@@ -1,0 +1,2 @@
+(library (name ppx_compare) (public_name ppx_compare) (kind ppx_deriver)
+ (libraries base ppxlib ppx_compare_expander) (preprocess no_preprocessing))

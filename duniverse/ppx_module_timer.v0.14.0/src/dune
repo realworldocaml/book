@@ -1,0 +1,4 @@
+(library (name ppx_module_timer) (public_name ppx_module_timer)
+ (kind ppx_rewriter) (libraries base ppxlib)
+ (preprocess (pps ppxlib.metaquot))
+ (ppx_runtime_libraries ppx_module_timer.runtime))

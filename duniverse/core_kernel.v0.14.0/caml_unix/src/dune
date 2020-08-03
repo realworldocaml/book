@@ -1,0 +1,2 @@
+(library (name caml_unix) (public_name core_kernel.caml_unix)
+ (libraries unix) (preprocess no_preprocessing))

@@ -1,3 +1,0 @@
-(library (name base_quickcheck_examples)
- (libraries async base base_quickcheck core expect_test_helpers_kernel)
- (preprocess (pps ppx_jane)))

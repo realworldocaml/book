@@ -1,4 +1,5 @@
 (executable
  (name fts_cmd)
- (enabled_if (= %{os_type} "xnix"))
+ (enabled_if
+  (= %{os_type} "xnix"))
  (libraries fts_stubs fts_generated))

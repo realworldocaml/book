@@ -1,0 +1,3 @@
+(library (name low_level_process) (public_name shell.low_level_process)
+ (libraries core core.linux_ext shell_internal unix_extended)
+ (preprocess (pps ppx_jane -allow-unannotated-ignores)))

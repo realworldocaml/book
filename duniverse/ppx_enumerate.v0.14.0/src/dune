@@ -1,0 +1,3 @@
+(library (name ppx_enumerate) (public_name ppx_enumerate) (kind ppx_deriver)
+ (libraries base ppxlib) (ppx_runtime_libraries ppx_enumerate.runtime-lib)
+ (preprocess (pps ppxlib.metaquot)))
