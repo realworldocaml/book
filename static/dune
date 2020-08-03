@@ -59,7 +59,7 @@
 (rule
  (alias site)
  (targets index.html)
- (deps (alias ../book/html) ../book/index.html)
+ (deps (alias ../book/html) ../book/index.html ../book/toc.scm)
  (action (run rwo-build build index -o . -repo-root ..)))
 
 (rule

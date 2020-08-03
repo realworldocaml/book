@@ -10,7 +10,9 @@ let print_web ~repo_root ~include_wip =
   let html_alias = book_folder / "html" in
   let alias = if include_wip then "site-wip" else "site" in
   Toc.Repr.get_chapters ~repo_root ~include_wip () >>| fun chapters ->
-  List.iter chapters
+  chapters
+  |> List.sort ~compare:(fun c c' -> String.compare c.name c'.name)
+  |> List.iter
     ~f:(fun chapter ->
         let html_file = book_folder / (chapter.name ^ ".html") in
         let target = chapter.name ^ ".html" in
