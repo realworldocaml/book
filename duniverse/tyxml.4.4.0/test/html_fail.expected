@@ -1,0 +1,97 @@
+Characters 6-14:
+  div [a [a []]] ;;
+       ^^^^^^^^
+Error: This expression has type
+         ([> 'b Html_types.a ] as 'a) Tyxml.Html.elt = 'a Tyxml_html.elt
+       but an expression was expected of type
+         ([< Html_types.div_content_fun ] as 'd) Tyxml.Html.elt =
+           'd Tyxml_html.elt
+       Type 'a = [> `A of 'b ] is not compatible with type
+         'd =
+           [< `A of Html_types.flow5_without_interactive
+            | `Abbr
+            | `Address
+            | `Article
+            | `Aside
+            | `Audio of Html_types.flow5_without_media
+            | `Audio_interactive of Html_types.flow5_without_media
+            | `B
+            | `Bdo
+            | `Blockquote
+            | `Br
+            | `Button
+            | `Canvas of Html_types.flow5
+            | `Cite
+            | `Code
+            | `Command
+            | `Datalist
+            | `Del of Html_types.flow5
+            | `Details
+            | `Dfn
+            | `Div
+            | `Dl
+            | `Em
+            | `Embed
+            | `Fieldset
+            | `Figure
+            | `Footer
+            | `Form
+            | `H1
+            | `H2
+            | `H3
+            | `H4
+            | `H5
+            | `H6
+            | `Header
+            | `Hgroup
+            | `Hr
+            | `I
+            | `Iframe
+            | `Img
+            | `Img_interactive
+            | `Input
+            | `Ins of Html_types.flow5
+            | `Kbd
+            | `Keygen
+            | `Label
+            | `Main
+            | `Map of Html_types.flow5
+            | `Mark
+            | `Menu
+            | `Meter
+            | `Nav
+            | `Noscript of Html_types.flow5_without_noscript
+            | `Object of Html_types.flow5
+            | `Object_interactive of Html_types.flow5
+            | `Ol
+            | `Output
+            | `P
+            | `PCDATA
+            | `Pre
+            | `Progress
+            | `Q
+            | `Ruby
+            | `Samp
+            | `Script
+            | `Section
+            | `Select
+            | `Small
+            | `Span
+            | `Strong
+            | `Style
+            | `Sub
+            | `Sup
+            | `Svg
+            | `Table
+            | `Textarea
+            | `Time
+            | `U
+            | `Ul
+            | `Var
+            | `Video of Html_types.flow5_without_media
+            | `Video_interactive of Html_types.flow5_without_media
+            | `Wbr ] 
+       Type 'b = [> `A of 'c ] is not compatible with type
+         Html_types.flow5_without_interactive 
+       Types for tag `A are incompatible
+

@@ -1,0 +1,9 @@
+((output
+  (((f.ml (1 0) (1 5))
+    (unordered
+     ((((f.ml (1 2) (1 5)) (paragraph (((f.ml (1 2) (1 5)) (word foo)))))))))
+   ((f.ml (1 5) (1 6)) (paragraph (((f.ml (1 5) (1 6)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 5-6:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

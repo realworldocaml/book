@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 21))
+    (paragraph (((f.ml (1 0) (1 21)) (code_span val-foo.method-bar)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-9:\
+   \nExpected 'class-', 'class-type-', or an unqualified reference.")))

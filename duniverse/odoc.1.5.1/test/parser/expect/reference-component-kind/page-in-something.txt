@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (paragraph (((f.ml (1 0) (1 15)) (code_span foo.page-bar)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-14:\
+   \nPage label is not allowed in the last component of a reference path.\
+   \nSuggestion: 'page-bar' should be first.")))

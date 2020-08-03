@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 6)) (verbatim ""))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-6:\
+   \n'{v ... v}' (verbatim text) should not be empty.")))

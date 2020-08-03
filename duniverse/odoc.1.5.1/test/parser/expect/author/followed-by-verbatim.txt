@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 11)) (@author Foo)) ((f.ml (2 0) (2 9)) (verbatim bar))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-9:\
+   \n'{v ... v}' (verbatim text) is not allowed in the tags section.\
+   \nSuggestion: move '{v ... v}' (verbatim text) before any tags.")))

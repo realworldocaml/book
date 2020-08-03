@@ -1,0 +1,1 @@
+[mdx] Fatal error: File "test-case.md", lines 3-5: invalid code block: `part` is not supported for non-OCaml code blocks.

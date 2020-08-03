@@ -1,0 +1,16 @@
+((output
+  (((f.ml (1 0) (2 13))
+    (unordered
+     ((((f.ml (1 8) (1 11)) (paragraph (((f.ml (1 8) (1 11)) (word foo)))))
+       ((f.ml (2 0) (2 13))
+        (paragraph
+         (((f.ml (2 0) (2 13)) (word @author)) ((f.ml (2 0) (2 13)) space)
+          ((f.ml (2 0) (2 13)) (word " Bar}}")))))))))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-13:\
+   \n'@author' is not allowed in '{li ...}' (list item).\
+   \nSuggestion: move '@author' outside of any other markup."
+    "File \"f.ml\", line 2, characters 13-13:\
+   \nEnd of text is not allowed in '{li ...}' (list item)."
+    "File \"f.ml\", line 2, characters 13-13:\
+   \nEnd of text is not allowed in '{ul ...}' (bulleted list).")))

@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 16))
+    (paragraph
+     (((f.ml (1 0) (1 16))
+       (reference (root foo unknown)
+        (((f.ml (1 8) (1 15)) (bold (((f.ml (1 11) (1 14)) (word bar)))))))))))))
+ (warnings ()))

@@ -1,0 +1,4 @@
+((output
+  (((f.ml (3 2) (3 6)) (paragraph (((f.ml (3 2) (3 6)) (word @foo)))))))
+ (warnings ( "File \"f.ml\", line 3, characters 2-6:\
+            \nUnknown tag '@foo'.")))

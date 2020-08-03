@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 12))
+    (paragraph (((f.ml (1 0) (1 12)) (reference (root Foo constructor) ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-11:\
+   \n'const' is deprecated, use 'constructor' instead.")))

@@ -1,0 +1,16 @@
+(library
+ (name cli)
+ (modules cli)
+ (libraries cmdliner fmt.cli logs.fmt fmt.tty logs.cli mdx))
+
+(executable
+ (name main)
+ (public_name ocaml-mdx)
+ (package mdx)
+ (modules :standard \ cli)
+ (libraries cli mdx))
+
+(install
+ (section bin)
+ (files
+  (main.exe as mdx)))

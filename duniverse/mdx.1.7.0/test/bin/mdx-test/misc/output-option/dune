@@ -1,0 +1,49 @@
+(rule
+ (target std-out.corrected)
+ (deps
+  (package mdx)
+  (:md test-case.md))
+ (action
+  (with-stdout-to
+   %{target}
+   (run ocaml-mdx test --output - %{md}))))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case.md)
+  (:actual std-out.corrected))
+ (action
+  (diff %{expected} %{actual})))
+
+(rule
+ (target explicit-outfile.corrected)
+ (deps
+  (package mdx)
+  (:md test-case.md))
+ (action
+  (run ocaml-mdx test --force-output --output %{target} %{md})))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case.md)
+  (:actual explicit-outfile.corrected))
+ (action
+  (diff %{expected} %{actual})))
+
+(rule
+ (target test-case.md.corrected)
+ (deps
+  (package mdx)
+  (:md test-case.md))
+ (action
+  (run ocaml-mdx test --force-output %{md})))
+
+(rule
+ (alias runtest)
+ (deps
+  (:expected test-case.md)
+  (:actual test-case.md.corrected))
+ (action
+  (diff %{expected} %{actual})))

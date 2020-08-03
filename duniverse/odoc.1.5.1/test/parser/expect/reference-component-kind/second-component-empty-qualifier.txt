@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 11))
+    (paragraph (((f.ml (1 0) (1 11)) (code_span Foo.-bar)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-10:\
+   \nUnknown reference qualifier ''.")))

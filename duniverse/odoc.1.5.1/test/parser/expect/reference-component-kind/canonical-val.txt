@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 18))
+    (paragraph
+     (((f.ml (1 0) (1 18)) (word @canonical)) ((f.ml (1 0) (1 18)) space)
+      ((f.ml (1 0) (1 18)) (code_span val-foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 11-18:\
+   \nExpected a reference to a module.")))

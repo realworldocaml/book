@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 20))
+    (paragraph
+     (((f.ml (1 0) (1 20)) (reference (extension Bar (root Foo unknown)) ())))))))
+ (warnings ()))

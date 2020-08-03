@@ -1,0 +1,2 @@
+Error in the OCaml file include code block in test-case.md at line 3:
+In file ./parts-begin-end.ml, line 18: Part toto has no end.

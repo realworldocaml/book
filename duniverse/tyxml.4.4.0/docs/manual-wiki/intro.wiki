@@ -1,0 +1,153 @@
+= TyXML =
+
+Tyxml is a library for building statically correct HTML and SVG documents.
+
+<<code language="ocaml"|
+open Tyxml
+let to_ocaml = Html.(a ~a:[a_href "ocaml.org"] [txt "OCaml!"])
+>>
+
+==@@id="usage"@@ Using TyXML ==
+
+=== Standalone Use ===
+
+To use TyXML in standalone manner, simply install the ##tyxml## OPAM package, link the ##tyxml## ocamlfind library and open <<a_api|module Tyxml>>.
+
+=== Use with another library ===
+
+TyXML combinators can be used in conjunction with other libraries. Please consult the relevant document. For example,
+<<a_manual project="eliom" chapter="clientserver-html"|Eliom>>
+and
+<<a_api project="js_of_ocaml" text="Js_of_ocaml"|module Tyxml_js>>.
+
+=== Use with the PPX ===
+
+TyXML can also be used with the standard HTML syntax, using <<a_manual chapter="ppx"|the PPX syntax extension>>:
+<<code language="ocaml"|
+open Tyxml
+let%html to_ocaml = "<a href='ocaml.org'>OCaml!</a>"
+>>
+
+This syntax is available both while using TyXML standalone, or with another library. In order to do so, install the ##tyxml-ppx## OPAM package and link the ##tyxml.ppx## ##ocamlfind## library.
+
+==@@id="example"@@ Examples and documentation
+
+For standalone use, examples are available in the [[https://github.com/ocsigen/tyxml/tree/master/examples|examples]] directory. The entry point of the documentation is in the <<a_api|module Tyxml>> module.
+
+==@@id="creation"@@ Creating documents with TyXML ==
+
+This section assumes you have at your disposal an {{{Html}}} or {{{Svg}}} module, as instructed in <<a_manual fragment="usage"|the previous section>>.
+
+The documentation for TyXML combinators is provided in <<a_api|module Html_sigs.T>> and <<a_api|module Svg_sigs.T>> and is common to all instances of {{{Html}}} and {{{Svg}}}.
+
+The first thing to understand about TyXML is that for most intents and purposes, it is exactly like HTML. As such, the [[https://developer.mozilla.org/en-US/docs/Web/HTML/Element|HTML reference]] is still very useful. For each HTML element or attribute, there is a combinator implementing it. The main differences are that you can use OCaml to manipulate the elements and that invalid markup produces a type error.
+
+In this tutorial, we will build the [[https://github.com/ocsigen/tyxml/tree/master/examples/mini_website|Mini website]].
+If you prefer the native HTML syntax, you can also use the <<a_manual chapter="ppx"|PPX syntax extension>> and consult the [[https://github.com/ocsigen/tyxml/tree/master/examples/mini_website_ppx|PPX mini website]].
+
+Let us start by building the content of our website. For text, we use the {{{txt}}} combinator. In traditional Web fashion, we put everything in a ##div##.
+<<code language="ocaml"|
+let mycontent =
+  div [
+    txt "This is a fabulous content." ;
+  ]
+>>
+
+The variable ##mycontent## is of type {{{[> `Div] Html.elt}}}.
+As we can see, the fact that this is a ##div## is reflected in the type. HTML elements are of type <<a_api text="elt"|type Html_sigs.T.elt>> and have a combinator of the same name, except when it's a reserved OCaml keyword (such as {{{object_}}}).
+
+Our content is fabulous, but for the sake of CSS styling (and still in true Web fashion) we want to add a ##class## to it.
+<<code language="ocaml"|
+let mycontent =
+  div ~a:[a_class ["content"]] [
+    txt "This is a fabulous content." ;
+  ]
+>>
+
+The <<a_api text="a_class"|val Html_sigs.T.a_class>> creates a new ##class## attribute of type {{{[> `Class] attrib}}}. Similarly to elements, the kind of attribute is reflected in the <<a_api text="attrib"|type Html_sigs.T.attrib>> type.
+We use the optional argument {{{~a}}} to pass the list of attributes. This optional argument is available on all element combinators.
+
+In order to add a title to our fabulous content, we use the <<a_api text="h1"|val Html_sigs.T.a>> combinator.
+<<code language="ocaml"|
+let mycontent =
+  div ~a:[a_class ["content"]] [
+    h1 [txt "A fabulous title"] ;
+    txt "This is a fabulous content." ;
+  ]
+>>
+
+Naturally, {{{div}}} accepts several children. In TyXML vocabulary, this is a <<a_api text="star"|type Html_sigs.T.star>> combinator.
+There are also
+<<a_api text="unary"|type Html_sigs.T.unary>> and
+<<a_api text="nullary"|type Html_sigs.T.nullary>> combinators,
+which accept, respectively, one child and zero children.
+
+<<a_api text="title"|val Html_sigs.T.title>> is an example of a {{{unary}}}
+combinator.
+<<code language="ocaml"|
+let mytitle = title (txt "A Fabulous Web Page")
+>>
+
+====@@id="type-errors"@@ Interlude about type errors ====
+
+However, what would happen if we were to try to put **bold** text in our title? This is not specification-compliant! Let's try it.
+<<code language="ocaml"|
+let mytitle = title (b [txt "A Bold Web Page"])
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: This expression has type ([> Html_types.b ] as 'a) elt
+       but an expression was expected of type
+         ([< Html_types.title_content_fun ] as 'b) elt = 'b elt
+       Type 'a = [> `B ] is not compatible with type 'b = [< `PCDATA ]
+       The second variant type does not allow tag(s) `B
+>>
+
+As expected, this code does not type-check!
+The type checker is unfortunately a bit unclear about the source of the error.
+
+It tells us that the given expression has type {{{[> b] elt}}}
+(indeed, it is produced by a {{{b}}} combinator)
+but an expression is expected of type {{{[< title_content_fun] elt}}}
+(which means that is is used as content for a {{{title}}} element).
+It then tells us that, since {{{[> b] = [> `B]}}} and
+{{{[< title_content_fun] = [< `PCDATA ]}}},
+{{{`B}}} is not allowed inside a {{{title}}}.
+
+In order to get reasonable type errors with TyXML, The ##-short-paths## option should always be used when invoking OCaml.
+
+====@@id="finishing"@@ Finishing up the webpage ====
+
+To finish our webpage, we use <<a_api text="body"|val Html_sigs.T.body>>, <<a_api text="head"|val Html_sigs.T.head>> and <<a_api text="html"|val Html_sigs.T.html>>.
+The last two combinators have special types due to their specific constraints: <<a_api text="head"|val Html_sigs.T.head>> requires only one ##title## child, and <<a_api text="html"|val Html_sigs.T.html>> requires exactly two children: ##head## and ##body##.
+
+<<code language="ocaml"|
+let mypage =
+  html
+    (head mytitle [])
+    (body [mycontent])
+>>
+
+If you are using <<a_manual project="eliom" chapter="clientserver-html"|Eliom>>
+or <<a_api project="js_of_ocaml" text="Js_of_ocaml"|module Tyxml_js>>,
+this is the end of TyXML's territory. However, for standalone use, we now need to print our document as an HTML file. The standalone implementation comes with a printer, <<a_api|val Tyxml.Html.pp>>, that we can use to print files:
+
+<<code language="ocaml"|
+let () =
+  let file = open_out "index.html" in
+  let fmt = Format.formatter_of_out_channel file in
+  pp () fmt mypage;
+  close_out file
+>>
+
+You could also print directly to a string:
+<<code language="ocaml"|
+let s = Format.asprintf "%a" (Html.pp ()) mypage
+>>
+
+Well done, you know have a very minimal (but fabulous) website! Once again, the implementation can be found [[https://github.com/ocsigen/tyxml/tree/master/examples/mini_website|here]].
+
+Other examples are available in the [[https://github.com/ocsigen/tyxml/tree/master/examples/|examples]] directory.
+
+==@@id="custom"@@ Using your own underlying implementation ==
+
+You can use TyXML with any underlying implementation. In order to do so, TyXML provides a set of functors.
+Please consult <<a_manual chapter="functors"|the relevant manual>>.

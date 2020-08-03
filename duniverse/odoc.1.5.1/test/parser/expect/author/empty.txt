@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 7)) (@author ""))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-7:\
+   \n'@author' should not be empty.")))

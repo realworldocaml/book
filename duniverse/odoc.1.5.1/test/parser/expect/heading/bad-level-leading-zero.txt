@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (1 8))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label foo)))
+     (((f.ml (1 4) (1 7)) (word Foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 1-3:\
+   \n'02': leading zero in heading level.")))

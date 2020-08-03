@@ -1,0 +1,15 @@
+(executable
+ (name test_case)
+ (preprocess
+  (action
+   (run ocaml-mdx pp %{input-file}))))
+
+(rule
+ (with-stdout-to
+  output.actual
+  (run ./test_case.exe)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff output.expected output.actual)))

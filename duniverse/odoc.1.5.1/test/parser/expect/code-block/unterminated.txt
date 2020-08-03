@@ -1,0 +1,4 @@
+((output (((f.ml (1 0) (1 5)) (code_block foo))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 5-5:\
+   \nEnd of text is not allowed in '{[...]}' (code block).")))

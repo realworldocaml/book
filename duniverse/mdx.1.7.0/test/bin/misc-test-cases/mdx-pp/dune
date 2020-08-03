@@ -1,0 +1,17 @@
+(rule
+ (targets skip.ml)
+ (deps
+  (:x skip.md)
+  (package mdx))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ocaml-mdx pp %{x}))))
+
+(rule
+ (alias runtest)
+ (deps
+  (:x skip.ml)
+  (:y skip.ml.expected))
+ (action
+  (diff? %{y} %{x})))

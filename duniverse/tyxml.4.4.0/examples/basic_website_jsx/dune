@@ -1,0 +1,10 @@
+(executable
+ (name       site_html)
+ (libraries  tyxml)
+ (preprocess (pps tyxml-jsx)
+))
+(rule
+ (targets index.html)
+ (deps site_html.exe)
+ (action (run %{exe:site_html.exe})
+))

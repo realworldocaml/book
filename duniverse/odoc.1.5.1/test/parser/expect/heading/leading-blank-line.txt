@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (3 4))
+    (2
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label foo)))
+     (((f.ml (3 0) (3 3)) (word Foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-0:\
+   \nBlank line is not allowed in '{2 ...}' (section heading).")))

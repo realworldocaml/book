@@ -1,0 +1,60 @@
+{
+  "name": "odoc",
+  "version": "1.5.1",
+  "description": "The OCaml/Reason Documentation Generator",
+  "repository": "https://github.com/ocaml/odoc",
+  "authors": [
+    "Thomas Refis <trefis@janestreet.com>",
+    "David Sheets <sheets@alum.mit.edu>",
+    "Leo White <leo@lpw25.net>"
+  ],
+  "esy": {
+    "build": "dune build",
+    "release": {
+      "releasedBinaries": [
+        "odoc"
+      ],
+      "deleteFromBinaryRelease": [
+        "alcotest",
+        "bisect_ppx",
+        "js-build-tools",
+        "lambdasoup",
+        "markup",
+        "oasis",
+        "ocaml-*",
+        "ocamlfind",
+        "sexplib"
+      ]
+    },
+    "buildsInSource": "_build"
+  },
+  "dependencies": {
+    "@opam/alcotest": "0.8.3",
+    "@opam/astring": "0.8.3",
+    "@opam/bisect_ppx": "1.3.4",
+    "@opam/bos": "0.2.0",
+    "@opam/cmdliner": "1.0.2",
+    "@opam/cppo": "1.6.5",
+    "@opam/dune": "1.3.0",
+    "@opam/fpath": "0.7.2",
+    "@opam/js-build-tools": "113.33.04",
+    "@opam/lambdasoup": "0.6.3",
+    "@opam/markup": "*",
+    "@opam/oasis": "0.4.11",
+    "@opam/ocamlfind": "1.8.0",
+    "@opam/result": "1.3",
+    "@opam/sexplib": "*",
+    "@opam/tyxml": "4.3.0",
+    "ocaml": "~4.2.0"
+  },
+  "resolutions": {
+    "@opam/markup": "aantron/markup.ml:markup.opam#9f8e77",
+    "@opam/sexplib": "bryphe/sexplib:opam#548f94d"
+  },
+  "devDependencies": {
+    "@opam/merlin": "^3.0.3",
+    "ocaml": "~4.2.0"
+  },
+  "license": "ISC",
+  "private": false
+}

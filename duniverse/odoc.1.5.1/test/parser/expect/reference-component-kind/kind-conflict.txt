@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (paragraph (((f.ml (1 0) (1 15)) (reference (root foo type) ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-15:\
+   \nOld-style reference kind ('val:') does not match new ('type-').")))

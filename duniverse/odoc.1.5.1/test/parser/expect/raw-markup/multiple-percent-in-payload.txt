@@ -1,0 +1,4 @@
+((output
+  (((f.ml (1 0) (1 16))
+    (paragraph (((f.ml (1 0) (1 16)) (raw_markup html %%foo%%)))))))
+ (warnings ()))

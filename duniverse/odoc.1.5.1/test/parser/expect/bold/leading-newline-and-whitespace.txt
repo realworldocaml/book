@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (2 5))
+    (paragraph
+     (((f.ml (1 0) (2 5)) (bold (((f.ml (2 1) (2 4)) (word foo))))))))))
+ (warnings ()))

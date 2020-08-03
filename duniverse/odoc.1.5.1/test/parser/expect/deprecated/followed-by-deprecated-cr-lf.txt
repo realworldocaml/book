@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (@deprecated
+     ((f.ml (1 12) (1 15)) (paragraph (((f.ml (1 12) (1 15)) (word foo)))))))
+   ((f.ml (2 0) (2 15))
+    (@deprecated
+     ((f.ml (2 12) (2 15)) (paragraph (((f.ml (2 12) (2 15)) (word bar)))))))))
+ (warnings ()))

@@ -1,0 +1,106 @@
+{0:top Hows does [odoc] work?}
+
+[odoc] is built in a very modular fashion, with several modules that take care
+of mostly orthogonal concerns.
+
+Instead of namedropping them, we will describe a use-case and how they connect to
+each other as we analyze its execution superficially.
+
+We will begin the flow with an [odoc] command that compiles a single [cmti] file,
+[Player.cmti], into its corresponding [html] file. Then we will compile the
+[intro.mld] documentation file into html.
+
++ {{:#step-1} Compiling Player.cmti to Player.odoc }
++ {{:#step-2} Compiling Player.odoc to Player/index.html }
++ {{:#step-3} Compiling intro.mld to page-intro.odoc }
++ {{:#step-4} Compiling page-intro.odoc to intro.html }
+
+Off we go!
+
+
+{3:step-1 1 — Compiling Player.cmti to Player.odoc}
+
+Superficially, what we need to do is straighforward.
+
+{[
+# We must tell odoc what the name of this Package is!
+$ odoc compile --package Game -o ./src/Player.odoc ./src/Player.cmti
+$ ls src
+Player.cmti Player.mli Player.odoc
+]}
+
+Voila! We get a [Player.odoc] right where we expected it. But what really just
+happened?
+
++ In {!Main} the command was parsed and a decision was made to {i compile} this
+  file into an [odoc] file
++ Compilation is orchestrated by {!Main.Compile.compile}, that based on the
+  input extension will delegate to one of many {!Compile} functions. In this
+  case {!Compile.cmti}
++ The [cmti] file is read by {!Odoc_loader.read_cmti} into a {!Odoc_model.Root.t} and a
+  {!Compilation_unit.t} is created
++ This compilation unit is then turned into an {!Env.t} (environment),
+  expanding all found references between modules
++ And lastly {!Compilation_unit.save} takes care of saving this compilation
+  unit into the [Player.odoc] file in marshalled format.
+
+
+{3:step-2 2 — Compiling Player.odoc to Player/index.html}
+
+Now we can compile this to an HTML file:
+
+{[
+$ odoc html -I src -o . ./src/Player.odoc
+$ cat Game/Player/index.html
+# mangled html output here!
+]}
+
+In this case, what happened was
+
++ In {!Main} the command is parsed as well, and it decides to {i compile} the
+  input into an [html] file.
++ Compilation is orchestrated by {!Main.Odoc_html.html}, that will make sure some
+  global flags are set up (depending on command flags), and delegate to
+  {!Html_page.from_odoc}
++ The [odoc] file is read into a {!Odoc_model.Root.t}
++ Since it contains a {!Odoc_model.Root.Odoc_file.Compilation_unit}, an {!Env.t}
+  (environment) will be built, with its references expanded, just like in the
+  first step
++ An {!Odoc_html.Html_tree.t} will be built, depending on the syntax chosen (in
+  this case the default is OCaml) by {!Odoc_html.To_html_tree.ML.compilation_unit}
++ Lastly, this tree will be traversed, the [Game/Player] folder created, and
+  the [index.html] file written to disk.
+
+{3:step-3 3 — Compiling page-intro.mld to page-intro.odoc}
+
+We will begin by invoking [odoc] similarly than we did in the {{:#step-1}first
+step}.
+
+{[
+$ odoc compile --package Game -o ./src/page-intro.odoc ./src/page-intro.mld
+$ ls src
+page-intro.mld page-intro.odoc
+]}
+
++ Again in {!Main} the command was parsed and a decision was made to {i compile}
+  this file into an [odoc] file
++ Compilation is orchestrated by {!Main.Compile.compile}, and it delegates
+  compilation to {!Compile.mld} based on the extension of the input
++ A {!Odoc_model.Lang.Page.t} will be created from it, and an {!Env.t} will be built
+  resolving found references
++ Lastly, the resulting page will be written down to disk by {!Page.save}
+
+{3:step-4 4 — Compiling page-intro.odoc to intro.html}
+
+{[
+$ odoc html -I src -o . ./src/page-intro.odoc
+$ cat Game/intro.html
+# mangled html output here!
+]}
+
+This process is in fact almost the same as in {{:#step-2} the last html
+compilation}. The main differences are that:
+
++ the read {!Odoc_model.Root.t} contains a {!Odoc_model.Root.Odoc_file.Page} instead,
++ the output file name will drop the [page-] prefix,
++ the {!Odoc_html.Html_tree.t} is built by {!Odoc_html.To_html_tree.ML.page}

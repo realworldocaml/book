@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (paragraph (((f.ml (1 0) (1 15)) (reference (root foo field) ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-14:\
+   \n'recfield' is deprecated, use 'field' instead.")))

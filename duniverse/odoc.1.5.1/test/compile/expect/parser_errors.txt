@@ -1,0 +1,44 @@
+File "cases/parser_errors.mli", line 1, characters 4-26:
+'{x This is bad markup}': bad markup.
+Suggestion: did you mean '{!x This is bad markup}' or '[x This is bad markup]'?
+File "cases/parser_errors.mli", line 4, characters 4-24:
+'9': bad heading level (0-5 allowed).
+File "cases/parser_errors.mli", line 10, characters 8-11:
+'{li ...}' should be followed by space, a tab, or a new line.
+File "cases/parser_errors.mli", line 13, characters 4-7:
+'{li ...}' (list item) is not allowed in top-level text.
+Suggestion: move '{li ...}' into '{ul ...}' (bulleted list), or use '-' (bulleted list item).
+File "cases/parser_errors.mli", line 13, characters 19-20:
+Unpaired '}' (end of markup).
+Suggestion: try '\}'.
+File "cases/parser_errors.mli", line 16, characters 4-6:
+'{v' should be followed by whitespace.
+File "cases/parser_errors.mli", line 19, characters 37-39:
+'v}' should be preceded by whitespace.
+File "cases/parser_errors.mli", line 22, characters 4-5:
+Stray '@'.
+File "cases/parser_errors.mli", line 28, characters 4-11:
+'@before' expects version number on the same line.
+File "cases/parser_errors.mli", line 31, characters 4-10:
+'@param' expects parameter name on the same line.
+File "cases/parser_errors.mli", line 34, characters 4-10:
+'@raise' expects exception constructor on the same line.
+File "cases/parser_errors.mli", line 37, characters 4-8:
+'@see' should be followed by <url>, 'file', or "document title".
+File "cases/parser_errors.mli", line 40, characters 4-15:
+Unknown tag '@UnknownTag'.
+File "cases/parser_errors.mli", line 43, characters 4-5:
+Unpaired '}' (end of markup).
+Suggestion: try '\}'.
+File "cases/parser_errors.mli", line 46, characters 4-5:
+Unpaired ']' (end of code).
+Suggestion: try '\]'.
+File "cases/parser_errors.mli", line 49, characters 4-35:
+'{%invalid:': bad raw markup target.
+Suggestion: try '{%html:...%}'.
+File "cases/parser_errors.mli", line 53, characters 4-5:
+Unpaired '}' (end of markup).
+Suggestion: try '\}'.
+File "cases/parser_errors.mli", line 56, characters 4-18:
+'{x bad markup}': bad markup.
+Suggestion: did you mean '{!x bad markup}' or '[x bad markup]'?

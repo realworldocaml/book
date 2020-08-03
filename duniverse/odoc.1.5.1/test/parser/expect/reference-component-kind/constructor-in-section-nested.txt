@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 34))
+    (paragraph
+     (((f.ml (1 0) (1 34)) (code_span foo.section-bar.constructor-Baz)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-17:\
+   \nExpected 'type-' or an unqualified reference.")))

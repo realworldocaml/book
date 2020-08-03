@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 16))
+    (paragraph
+     (((f.ml (1 0) (1 16))
+       (link "foo bar" (((f.ml (1 12) (1 15)) (word baz))))))))))
+ (warnings ()))

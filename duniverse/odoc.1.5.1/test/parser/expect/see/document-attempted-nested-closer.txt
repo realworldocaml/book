@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 14))
+    (@see document foo
+     ((f.ml (1 10) (1 14))
+      (paragraph (((f.ml (1 10) (1 14)) (word "bar\"")))))))))
+ (warnings ()))

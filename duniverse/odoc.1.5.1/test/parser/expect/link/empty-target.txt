@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 9))
+    (paragraph
+     (((f.ml (1 0) (1 9)) (link "" (((f.ml (1 5) (1 8)) (word foo))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-4:\
+   \n'{{:...} ...}' (external link) should not be empty.")))

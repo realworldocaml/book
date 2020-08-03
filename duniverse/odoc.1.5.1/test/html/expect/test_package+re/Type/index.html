@@ -1,0 +1,420 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title>
+   Type (test_package+re.Type)
+  </title>
+  <link rel="stylesheet" href="../../odoc.css">
+  <meta charset="utf-8">
+  <meta name="generator" content="odoc %%VERSION%%">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <script src="../../highlight.pack.js"></script>
+  <script>
+   hljs.initHighlightingOnLoad();
+  </script>
+ </head>
+ <body>
+  <div class="content">
+   <header>
+    <nav>
+     <a href="../index.html">Up</a> – <a href="../index.html">test_package+re</a> » Type
+    </nav>
+    <h1>
+     Module <code>Type</code>
+    </h1>
+   </header>
+   <dl>
+    <dt class="spec type" id="type-abstract">
+     <a href="#type-abstract" class="anchor"></a><code><span class="keyword">type</span> abstract</code>;
+    </dt>
+    <dd>
+     <p>
+      Some <em>documentation</em>.
+     </p>
+    </dd>
+   </dl>
+   <dl>
+    <dt class="spec type" id="type-alias">
+     <a href="#type-alias" class="anchor"></a><code><span class="keyword">type</span> alias</code><code> = int</code>;
+    </dt>
+    <dt class="spec type" id="type-private_">
+     <a href="#type-private_" class="anchor"></a><code><span class="keyword">type</span> private_</code><code> = <span class="keyword">pri</span> int</code>;
+    </dt>
+    <dt class="spec type" id="type-constructor">
+     <a href="#type-constructor" class="anchor"></a><code><span class="keyword">type</span> constructor('a)</code><code> = <span class="type-var">'a</span></code>;
+    </dt>
+    <dt class="spec type" id="type-arrow">
+     <a href="#type-arrow" class="anchor"></a><code><span class="keyword">type</span> arrow</code><code> = int <span>=&gt;</span> int</code>;
+    </dt>
+    <dt class="spec type" id="type-higher_order">
+     <a href="#type-higher_order" class="anchor"></a><code><span class="keyword">type</span> higher_order</code><code> = <span>(int <span>=&gt;</span> int)</span> <span>=&gt;</span> int</code>;
+    </dt>
+    <dt class="spec type" id="type-labeled">
+     <a href="#type-labeled" class="anchor"></a><code><span class="keyword">type</span> labeled</code><code> = <span>l:int</span> <span>=&gt;</span> int</code>;
+    </dt>
+    <dt class="spec type" id="type-optional">
+     <a href="#type-optional" class="anchor"></a><code><span class="keyword">type</span> optional</code><code> = <span>?⁠l:int</span> <span>=&gt;</span> int</code>;
+    </dt>
+    <dt class="spec type" id="type-labeled_higher_order">
+     <a href="#type-labeled_higher_order" class="anchor"></a><code><span class="keyword">type</span> labeled_higher_order</code><code> = <span>(<span>l:int</span> <span>=&gt;</span> int)</span> <span>=&gt;</span> <span>(<span>?⁠l:int</span> <span>=&gt;</span> int)</span> <span>=&gt;</span> int</code>;
+    </dt>
+    <dt class="spec type" id="type-pair">
+     <a href="#type-pair" class="anchor"></a><code><span class="keyword">type</span> pair</code><code> = <span>(int, int)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-parens_dropped">
+     <a href="#type-parens_dropped" class="anchor"></a><code><span class="keyword">type</span> parens_dropped</code><code> = <span>(int, int)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-triple">
+     <a href="#type-triple" class="anchor"></a><code><span class="keyword">type</span> triple</code><code> = <span>(int, int, int)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-nested_pair">
+     <a href="#type-nested_pair" class="anchor"></a><code><span class="keyword">type</span> nested_pair</code><code> = <span>(<span>(int, int)</span>, int)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-instance">
+     <a href="#type-instance" class="anchor"></a><code><span class="keyword">type</span> instance</code><code> = <a href="index.html#type-constructor">constructor</a>(int)</code>;
+    </dt>
+    <dt class="spec type" id="type-variant_e">
+     <a href="#type-variant_e" class="anchor"></a><code><span class="keyword">type</span> variant_e</code><code> = </code><code>{</code>
+     <table class="record">
+      <tbody>
+       <tr id="type-variant_e.a" class="anchored">
+        <td class="def field">
+         <a href="#type-variant_e.a" class="anchor"></a><code>a: int,</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code>}</code>;
+    </dt>
+    <dt class="spec type" id="type-variant">
+     <a href="#type-variant" class="anchor"></a><code><span class="keyword">type</span> variant</code><code> = </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-variant.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-variant.A" class="anchor"></a><code>| </code><code><span class="constructor">A</span></code>
+        </td>
+       </tr>
+       <tr id="type-variant.B" class="anchored">
+        <td class="def constructor">
+         <a href="#type-variant.B" class="anchor"></a><code>| </code><code><span class="constructor">B</span>(int)</code>
+        </td>
+       </tr>
+       <tr id="type-variant.C" class="anchored">
+        <td class="def constructor">
+         <a href="#type-variant.C" class="anchor"></a><code>| </code><code><span class="constructor">C</span></code>
+        </td>
+        <td class="doc">
+         <p>
+          foo
+         </p>
+        </td>
+       </tr>
+       <tr id="type-variant.D" class="anchored">
+        <td class="def constructor">
+         <a href="#type-variant.D" class="anchor"></a><code>| </code><code><span class="constructor">D</span></code>
+        </td>
+        <td class="doc">
+         <p>
+          <em>bar</em>
+         </p>
+        </td>
+       </tr>
+       <tr id="type-variant.E" class="anchored">
+        <td class="def constructor">
+         <a href="#type-variant.E" class="anchor"></a><code>| </code><code><span class="constructor">E</span>(<a href="index.html#type-variant_e">variant_e</a>)</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     ;
+    </dt>
+    <dt class="spec type" id="type-variant_c">
+     <a href="#type-variant_c" class="anchor"></a><code><span class="keyword">type</span> variant_c</code><code> = </code><code>{</code>
+     <table class="record">
+      <tbody>
+       <tr id="type-variant_c.a" class="anchored">
+        <td class="def field">
+         <a href="#type-variant_c.a" class="anchor"></a><code>a: int,</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code>}</code>;
+    </dt>
+    <dt class="spec type" id="type-gadt">
+     <a href="#type-gadt" class="anchor"></a><code><span class="keyword">type</span> gadt(_)</code><code> = </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-gadt.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-gadt.A" class="anchor"></a><code>| </code><code><span class="constructor">A</span> : <a href="index.html#type-gadt">gadt</a>(int)</code>
+        </td>
+       </tr>
+       <tr id="type-gadt.B" class="anchored">
+        <td class="def constructor">
+         <a href="#type-gadt.B" class="anchor"></a><code>| </code><code><span class="constructor">B</span>(int) : <a href="index.html#type-gadt">gadt</a>(string)</code>
+        </td>
+       </tr>
+       <tr id="type-gadt.C" class="anchored">
+        <td class="def constructor">
+         <a href="#type-gadt.C" class="anchor"></a><code>| </code><code><span class="constructor">C</span>(<a href="index.html#type-variant_c">variant_c</a>) : <a href="index.html#type-gadt">gadt</a>(unit)</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     ;
+    </dt>
+    <dt class="spec type" id="type-degenerate_gadt">
+     <a href="#type-degenerate_gadt" class="anchor"></a><code><span class="keyword">type</span> degenerate_gadt</code><code> = </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-degenerate_gadt.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-degenerate_gadt.A" class="anchor"></a><code>| </code><code><span class="constructor">A</span> : <a href="index.html#type-degenerate_gadt">degenerate_gadt</a></code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     ;
+    </dt>
+    <dt class="spec type" id="type-private_variant">
+     <a href="#type-private_variant" class="anchor"></a><code><span class="keyword">type</span> private_variant</code><code> = <span class="keyword">pri</span> </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-private_variant.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-private_variant.A" class="anchor"></a><code>| </code><code><span class="constructor">A</span></code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     ;
+    </dt>
+    <dt class="spec type" id="type-record">
+     <a href="#type-record" class="anchor"></a><code><span class="keyword">type</span> record</code><code> = </code><code>{</code>
+     <table class="record">
+      <tbody>
+       <tr id="type-record.a" class="anchored">
+        <td class="def field">
+         <a href="#type-record.a" class="anchor"></a><code>a: int,</code>
+        </td>
+       </tr>
+       <tr id="type-record.b" class="anchored">
+        <td class="def field">
+         <a href="#type-record.b" class="anchor"></a><code><span class="keyword">mutable</span> b: int,</code>
+        </td>
+       </tr>
+       <tr id="type-record.c" class="anchored">
+        <td class="def field">
+         <a href="#type-record.c" class="anchor"></a><code>c: int,</code>
+        </td>
+        <td class="doc">
+         <p>
+          foo
+         </p>
+        </td>
+       </tr>
+       <tr id="type-record.d" class="anchored">
+        <td class="def field">
+         <a href="#type-record.d" class="anchor"></a><code>d: int,</code>
+        </td>
+        <td class="doc">
+         <p>
+          <em>bar</em>
+         </p>
+        </td>
+       </tr>
+       <tr id="type-record.e" class="anchored">
+        <td class="def field">
+         <a href="#type-record.e" class="anchor"></a><code>e: a. <span class="type-var">'a</span>,</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code>}</code>;
+    </dt>
+    <dt class="spec type" id="type-polymorphic_variant">
+     <a href="#type-polymorphic_variant" class="anchor"></a><code><span class="keyword">type</span> polymorphic_variant</code> = <code>[ </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-polymorphic_variant.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-polymorphic_variant.A" class="anchor"></a><code>| </code><code>`A</code>
+        </td>
+       </tr>
+       <tr id="type-polymorphic_variant.B" class="anchored">
+        <td class="def constructor">
+         <a href="#type-polymorphic_variant.B" class="anchor"></a><code>| </code><code>`B(int)</code>
+        </td>
+       </tr>
+       <tr id="type-polymorphic_variant.C" class="anchored">
+        <td class="def constructor">
+         <a href="#type-polymorphic_variant.C" class="anchor"></a><code>| </code><code>`C(<span>(int, unit)</span>)</code>
+        </td>
+       </tr>
+       <tr id="type-polymorphic_variant.D" class="anchored">
+        <td class="def constructor">
+         <a href="#type-polymorphic_variant.D" class="anchor"></a><code>| </code><code>`D</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code> ]</code>;
+    </dt>
+    <dt class="spec type" id="type-polymorphic_variant_extension">
+     <a href="#type-polymorphic_variant_extension" class="anchor"></a><code><span class="keyword">type</span> polymorphic_variant_extension</code> = <code>[ </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-polymorphic_variant_extension.polymorphic_variant" class="anchored">
+        <td class="def type">
+         <a href="#type-polymorphic_variant_extension.polymorphic_variant" class="anchor"></a><code>| </code><code><a href="index.html#type-polymorphic_variant">polymorphic_variant</a></code>
+        </td>
+       </tr>
+       <tr id="type-polymorphic_variant_extension.E" class="anchored">
+        <td class="def constructor">
+         <a href="#type-polymorphic_variant_extension.E" class="anchor"></a><code>| </code><code>`E</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code> ]</code>;
+    </dt>
+    <dt class="spec type" id="type-nested_polymorphic_variant">
+     <a href="#type-nested_polymorphic_variant" class="anchor"></a><code><span class="keyword">type</span> nested_polymorphic_variant</code> = <code>[ </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-nested_polymorphic_variant.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-nested_polymorphic_variant.A" class="anchor"></a><code>| </code><code>`A(<span>[ `B <span>| `C</span> ]</span>)</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code> ]</code>;
+    </dt>
+    <dt class="spec type" id="type-private_extenion#row">
+     <a href="#type-private_extenion#row" class="anchor"></a><code><span class="keyword">type</span> private_extenion#row</code>;
+    </dt>
+    <dt class="spec type" id="type-private_extenion">
+     <a href="#type-private_extenion" class="anchor"></a><code><span class="keyword">and</span> private_extenion</code> = <span class="keyword">pri</span> <code>[&gt; </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-private_extenion.polymorphic_variant" class="anchored">
+        <td class="def type">
+         <a href="#type-private_extenion.polymorphic_variant" class="anchor"></a><code>| </code><code><a href="index.html#type-polymorphic_variant">polymorphic_variant</a></code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     <code> ]</code>;
+    </dt>
+    <dt class="spec type" id="type-object_">
+     <a href="#type-object_" class="anchor"></a><code><span class="keyword">type</span> object_</code><code> = {. a: int, b: int, c: int, }</code>;
+    </dt>
+   </dl>
+   <div class="spec module-type" id="module-type-X">
+    <a href="#module-type-X" class="anchor"></a><code><span class="keyword">module</span> <span class="keyword">type</span> <a href="module-type-X/index.html">X</a> = { ... };</code>
+   </div>
+   <dl>
+    <dt class="spec type" id="type-module_">
+     <a href="#type-module_" class="anchor"></a><code><span class="keyword">type</span> module_</code><code> = <span>(<span class="keyword">module</span> <a href="module-type-X/index.html">X</a>)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-module_substitution">
+     <a href="#type-module_substitution" class="anchor"></a><code><span class="keyword">type</span> module_substitution</code><code> = <span>(<span class="keyword">module</span> <a href="module-type-X/index.html">X</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="module-type-X/index.html#type-t">t</a> = int <span class="keyword">and</span> <span class="keyword">type</span> <a href="module-type-X/index.html#type-u">u</a> = unit)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-covariant">
+     <a href="#type-covariant" class="anchor"></a><code><span class="keyword">type</span> covariant(+'a)</code>;
+    </dt>
+    <dt class="spec type" id="type-contravariant">
+     <a href="#type-contravariant" class="anchor"></a><code><span class="keyword">type</span> contravariant(-'a)</code>;
+    </dt>
+    <dt class="spec type" id="type-bivariant">
+     <a href="#type-bivariant" class="anchor"></a><code><span class="keyword">type</span> bivariant(_)</code><code> = int</code>;
+    </dt>
+    <dt class="spec type" id="type-binary">
+     <a href="#type-binary" class="anchor"></a><code><span class="keyword">type</span> binary('a, 'b)</code>;
+    </dt>
+    <dt class="spec type" id="type-using_binary">
+     <a href="#type-using_binary" class="anchor"></a><code><span class="keyword">type</span> using_binary</code><code> = <a href="index.html#type-binary">binary</a><span>(int,&nbsp;int)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-name">
+     <a href="#type-name" class="anchor"></a><code><span class="keyword">type</span> name('custom)</code>;
+    </dt>
+    <dt class="spec type" id="type-constrained">
+     <a href="#type-constrained" class="anchor"></a><code><span class="keyword">type</span> constrained('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = int</code>;
+    </dt>
+    <dt class="spec type" id="type-exact_variant">
+     <a href="#type-exact_variant" class="anchor"></a><code><span class="keyword">type</span> exact_variant('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = <span>[ `A <span><span>| `B</span><span>(int)</span></span> ]</span></code>;
+    </dt>
+    <dt class="spec type" id="type-lower_variant">
+     <a href="#type-lower_variant" class="anchor"></a><code><span class="keyword">type</span> lower_variant('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = <span>[&gt; `A <span><span>| `B</span><span>(int)</span></span> ]</span></code>;
+    </dt>
+    <dt class="spec type" id="type-any_variant">
+     <a href="#type-any_variant" class="anchor"></a><code><span class="keyword">type</span> any_variant('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = <span>[&gt;  ]</span></code>;
+    </dt>
+    <dt class="spec type" id="type-upper_variant">
+     <a href="#type-upper_variant" class="anchor"></a><code><span class="keyword">type</span> upper_variant('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = <span>[&lt; `A <span><span>| `B</span><span>(int)</span></span> ]</span></code>;
+    </dt>
+    <dt class="spec type" id="type-named_variant">
+     <a href="#type-named_variant" class="anchor"></a><code><span class="keyword">type</span> named_variant('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = <span>[&lt; <a href="index.html#type-polymorphic_variant">polymorphic_variant</a> ]</span></code>;
+    </dt>
+    <dt class="spec type" id="type-exact_object">
+     <a href="#type-exact_object" class="anchor"></a><code><span class="keyword">type</span> exact_object('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = {. a: int, b: int, }</code>;
+    </dt>
+    <dt class="spec type" id="type-lower_object">
+     <a href="#type-lower_object" class="anchor"></a><code><span class="keyword">type</span> lower_object('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = {.. a: int, b: int, }</code>;
+    </dt>
+    <dt class="spec type" id="type-poly_object">
+     <a href="#type-poly_object" class="anchor"></a><code><span class="keyword">type</span> poly_object('a)</code><code> = <span class="type-var">'a</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = {. a: a. <span class="type-var">'a</span>, }</code>;
+    </dt>
+    <dt class="spec type" id="type-double_constrained">
+     <a href="#type-double_constrained" class="anchor"></a><code><span class="keyword">type</span> double_constrained('a, 'b)</code><code> = <span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span></code><code> <span class="keyword">constraint</span> <span class="type-var">'a</span> = int <span class="keyword">constraint</span> <span class="type-var">'b</span> = unit</code>;
+    </dt>
+    <dt class="spec type" id="type-as_">
+     <a href="#type-as_" class="anchor"></a><code><span class="keyword">type</span> as_</code><code> = <span>(int <span class="keyword">as</span> 'a, <span class="type-var">'a</span>)</span></code>;
+    </dt>
+    <dt class="spec type" id="type-extensible">
+     <a href="#type-extensible" class="anchor"></a><code><span class="keyword">type</span> extensible</code><code> = </code><code>..</code>;
+    </dt>
+   </dl>
+   <dl>
+    <dt class="spec extension">
+     <code><span class="keyword">type</span> <a href="index.html#type-extensible">extensible</a> += </code><code><span class="extension">Extension</span></code><code> | </code><code><span class="extension">Another_extension</span></code>;
+    </dt>
+   </dl>
+   <dl>
+    <dt class="spec type" id="type-mutually">
+     <a href="#type-mutually" class="anchor"></a><code><span class="keyword">type</span> mutually</code><code> = </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-mutually.A" class="anchored">
+        <td class="def constructor">
+         <a href="#type-mutually.A" class="anchor"></a><code>| </code><code><span class="constructor">A</span>(<a href="index.html#type-recursive">recursive</a>)</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     ;
+    </dt>
+    <dt class="spec type" id="type-recursive">
+     <a href="#type-recursive" class="anchor"></a><code><span class="keyword">and</span> recursive</code><code> = </code>
+     <table class="variant">
+      <tbody>
+       <tr id="type-recursive.B" class="anchored">
+        <td class="def constructor">
+         <a href="#type-recursive.B" class="anchor"></a><code>| </code><code><span class="constructor">B</span>(<a href="index.html#type-mutually">mutually</a>)</code>
+        </td>
+       </tr>
+      </tbody>
+     </table>
+     ;
+    </dt>
+   </dl>
+   <dl>
+    <dt class="spec exception" id="exception-Foo">
+     <a href="#exception-Foo" class="anchor"></a><code><span class="keyword">exception</span> </code><code><span class="exception">Foo</span>(int, int)</code>;
+    </dt>
+   </dl>
+  </div>
+ </body>
+</html>

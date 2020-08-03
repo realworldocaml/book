@@ -1,0 +1,147 @@
+language: generic
+sudo: required
+
+scripts:
+  - &opam
+    before_install:
+      - |
+        if [ "$TRAVIS_EVENT_TYPE" == cron ]
+        then
+          rm -rf ~/.opam ./_opam ./_cache
+        fi
+
+    install:
+      - |
+        if [ "$TIDY" == YES ]
+        then
+          sudo add-apt-repository -y ppa:robert7/tidy-html5
+          sudo apt-get update
+          sudo apt-get install tidy
+          tidy --version
+        fi
+      - OPAM_RELEASES=https://github.com/ocaml/opam/releases/
+      - OPAM_VERSION=2.0.5
+      - |
+        case $TRAVIS_OS_NAME in
+        "linux") OPAM_OS=linux;;
+          "osx") OPAM_OS=macos;;
+              *) echo Unsupported system $TRAVIS_OS_NAME; exit 1;;
+        esac
+      - OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
+      - wget ${OPAM_RELEASES}/download/${OPAM_VERSION}/${OPAM_PKG}
+      - sudo mv ${OPAM_PKG} /usr/local/bin/opam
+      - sudo chmod a+x /usr/local/bin/opam
+      - opam init -y --bare --disable-sandboxing
+      - |
+        if [ ! -d _opam/bin ]
+        then
+            rm -rf _opam
+            opam switch create . $OCAML $REPOSITORIES --no-install
+        fi
+      - eval `opam env`
+      - opam install -y --deps-only .
+      - opam --version
+      - ocaml -version
+
+    before_script:
+      - rm -rf ./_build/default/test/html/_scratch
+
+    script:
+      - |
+        if [ -d _cache/_build ]
+        then
+          cp -r _cache/_build .
+        fi
+      - make test
+      - make docs
+      - |
+        if [ ! -d _cache/_build ]
+        then
+          cp -r _build _cache
+        fi
+
+    before_cache:
+      - opam clean
+      - rm -rf /home/travis/build/ocaml/odoc/_opam/.opam-switch/sources/odoc
+
+  - &esy
+    before_install:
+      - |
+        if [ "$TRAVIS_EVENT_TYPE" == cron ]
+        then
+          rm -rf ~/.esy ./_cache
+        fi
+
+    install:
+      - npm --global install esy@0.5.x
+      - $(npm bin --global)/esy --version
+      - ESY=$(npm bin --global)/esy
+      - $ESY install --verbose
+
+    script:
+      - |
+        if [ -d _cache/_build ]
+        then
+          cp -r _cache/_build .
+        fi
+      - $ESY build --verbose
+      - $ESY make test
+      - |
+        if [ ! -d _cache/_build ]
+        then
+          cp -r _build _cache
+        fi
+
+matrix:
+  include:
+    - <<: *esy
+      os: osx
+      env: ESY_BUILD=YES ESY__CACHE=/home/travis/.esy
+    - <<: *esy
+      os : linux
+      env: ESY_BUILD=YES ESY__CACHE=/home/travis/.esy
+    - <<: *opam
+      os: osx
+      env: OCAML=4.08.1
+    - <<: *opam
+      os: linux
+      env: OCAML=4.11.0+trunk REPOSITORIES="--repo=default,beta=git://github.com/ocaml/ocaml-beta-repository.git"
+    - <<: *opam
+      os: linux
+      env: OCAML=4.10.0
+    - <<: *opam
+      os: linux
+      env: OCAML=4.09.0 TIDY=YES
+    - <<: *opam
+      os: linux
+      env: OCAML=4.07.1
+    - <<: *opam
+      os: linux
+      env: OCAML=4.06.1
+    - <<: *opam
+      os: linux
+      env: OCAML=4.05.0
+    - <<: *opam
+      os: linux
+      env: OCAML=4.04.2
+    - <<: *opam
+      os: linux
+      env: OCAML=4.03.0
+    - <<: *opam
+      os: linux
+      env: OCAML=4.02.3
+
+  fast_finish: true
+
+cache:
+  directories:
+    - $HOME/.opam
+    - $HOME/.esy
+    - $HOME/.nvm
+    - ./_opam
+    - ./_cache
+
+notifications:
+  email:
+    on_success: always
+    on_failure: always
