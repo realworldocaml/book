@@ -2,7 +2,9 @@
 (rule
  (alias github)
  (deps
-  (source_tree ./correct/github))
+  (source_tree ./correct/github)
+  (package core)
+  (package atdgen))
  (action
   (run dune build @all @runtest --root ./correct/github)))
 

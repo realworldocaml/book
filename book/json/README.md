@@ -190,7 +190,6 @@ You can build this by running `dune`:
 ```
 
 
-
 ```sh dir=read_json
 ```
 
@@ -251,7 +250,7 @@ Now build and run this in the same way as the previous example:
 
 ```sh dir=examples/correct/parse_book
 $ dune build parse_book.exe
-$ ./_build/default/parse_book.exe
+$ dune exec -- ./parse_book.exe
 Title: Real World OCaml (450)
 Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
 Tags: functional programming, ocaml, algorithms
@@ -703,27 +702,46 @@ specifications to OCaml]{.idx}
 
 The `atdgen` command will generate some new files in your current directory.
 `github_t.ml` and `github_t.mli` will contain an OCaml module with types
-defined that correspond to the ATD file:
+defined that correspond to the ATD file. The following dune file adds
+the rules that will invoke these commands:
 
-```sh dir=examples,skip
-$ atdgen -t github.atd
-$ atdgen -j github.atd
-$ ocamlfind ocamlc -package atd -i github_t.mli
-type scope =
-    [ `Delete_repo | `Gist | `Public_repo | `Repo | `Repo_status | `User ]
-type app = { app_name : string; app_url : string; }
+```scheme file=examples/correct/github/dune
+(rule
+  (targets github_j.ml github_j.mli)
+  (deps    github.atd)
+  (action  (run atdgen -j %{deps})))
+
+(rule
+  (targets github_t.ml github_t.mli)
+  (deps    github.atd)
+  (action  (run atdgen -t %{deps})))
+```
+
+```sh dir=examples/correct/github
+$ dune build github_t.ml
+$ cat _build/default/github_t.ml
+(* Auto-generated from "github.atd" *)
+              [@@@ocaml.warning "-27-32-35-39"]
+
+type scope = [
+    `User | `Public_repo | `Repo | `Repo_status | `Delete_repo | `Gist
+]
+
+type app = { app_name (*atd name *): string; app_url (*atd url *): string }
+
 type authorization_response = {
-  scopes : scope list;
-  token : string;
-  app : app;
-  url : string;
-  id : int;
-  note : string option;
-  note_url : string option;
+  scopes: scope list;
+  token: string;
+  app: app;
+  url: string;
+  id: int;
+  note: string option;
+  note_url: string option
 }
+
 type authorization_request = {
-  auth_req_scopes : scope list;
-  auth_req_note : string;
+  auth_req_scopes (*atd scopes *): scope list;
+  auth_req_note (*atd note *): string
 }
 ```
 
@@ -818,7 +836,7 @@ type org = {
 Let's build the OCaml type declaration first by calling `atdgen -t` on the
 specification file:
 
-```sh dir=examples/correct/github_org_info,skip
+```sh dir=examples/correct/github_org_info
 $ dune build github_org_t.mli
 $ cat _build/default/github_org_t.mli
 (* Auto-generated from "github_org.atd" *)
@@ -840,7 +858,7 @@ logic to convert JSON buffers to and from this type. Calling `atdgen -j` will
 generate this serialization code for us in a new file called
 `github_org_j.ml`:
 
-```sh dir=examples/correct/github_org_info,skip
+```sh dir=examples/correct/github_org_info
 $ dune build github_org_j.mli
 $ cat _build/default/github_org_j.mli
 (* Auto-generated from "github_org.atd" *)
@@ -914,7 +932,7 @@ let () =
   |> Command.run
 ```
 
-The following is a short shell script that generates all of the OCaml code
+The following is the dune file that generates all of the OCaml code
 and also builds the final executable:
 
 ```scheme file=examples/correct/github_org_info/dune
@@ -938,20 +956,15 @@ and also builds the final executable:
 ```
 
 
-
-```sh dir=examples/correct/github_org_info,skip
-$ dune build github_org_info.exe
-```
-
 You can now run the command-line tool with a single argument to specify the
 name of the organization, and it will dynamically fetch the JSON from the
 web, parse it, and render the summary to your console:
 
-```sh dir=examples/correct/github_org_info,non-deterministic=output,skip
+```sh dir=examples/correct/github_org_info,non-deterministic=output
 $ dune exec -- ./github_org_info.exe mirage
-MirageOS (131943) with 125 public repos
+MirageOS (131943) with 174 public repos
 $ dune exec -- ./github_org_info.exe janestreet
-??? (3384712) with 145 public repos
+Jane Street (3384712) with 175 public repos
 ```
 
 The JSON returned from the `janestreet` query is missing an organization

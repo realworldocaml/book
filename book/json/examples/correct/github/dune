@@ -1,0 +1,9 @@
+(rule
+  (targets github_j.ml github_j.mli)
+  (deps    github.atd)
+  (action  (run atdgen -j %{deps})))
+
+(rule
+  (targets github_t.ml github_t.mli)
+  (deps    github.atd)
+  (action  (run atdgen -t %{deps})))
