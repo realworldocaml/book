@@ -1,0 +1,5 @@
+(library
+  (name sexp_example)
+  (libraries core)
+  (preprocess (pps ppx_sexp_conv))
+)

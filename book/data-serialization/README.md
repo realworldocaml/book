@@ -1,11 +1,13 @@
 # Data Serialization with S-Expressions
 
-S-expressions are nested parenthetical expressions whose atomic values are
-strings. They were first popularized by the Lisp programming language in the
-1960s. They have remained one of the simplest and most effective ways to
-encode structured data in a human-readable and editable form. [serialization
-formats/s-expressions]{.idx #SERFORMsexp}[s-expressions/uses for]{.idx}[data
-serialization/with s-expressions]{.idx}
+S-expressions are nested parenthetical expressions whose atomic values
+are strings. They were first popularized by the Lisp programming
+language in the 1960s. They have remained one of the simplest and most
+effective ways to encode structured data in a human-readable and
+editable form.
+[serialization formats/s-expressions]{.idx}
+[s-expressions/uses for]{.idx}
+[data serialization/with s-expressions]{.idx}
 
 An example s-expression might look like this.
 
@@ -13,12 +15,12 @@ An example s-expression might look like this.
 (this (is an) (s expression))
 ```
 
-S-expressions play a major role in Core, effectively acting as the default
-serialization format. Indeed, we've encountered s-expressions multiple times
-already, including in
-[Error Handling](error-handling.html#error-handling){data-type=xref},
-[Functors](functors.html#functors){data-type=xref}, and
-[First Class Modules](first-class-modules.html#first-class-modules){data-type=xref}.
+S-expressions play a major role in Core, effectively acting as the
+default serialization format. Indeed, we've encountered s-expressions
+multiple times already, including in [Error
+Handling](error-handling.html#error-handling){data-type=xref},
+[Functors](functors.html#functors){data-type=xref}, and [First Class
+Modules](first-class-modules.html#first-class-modules){data-type=xref}.
 
 This chapter will go into s-expressions in more depth. In particular, we'll
 discuss:
@@ -43,7 +45,7 @@ formatted configuration file for a web server
 The type used to represent an s-expression is quite simple:
 [s-expressions/basic usage of]{.idx}
 
-```ocaml file=examples/sexp.mli
+```ocaml file=examples/correct/sexp/sexp.mli
 module Sexp : sig
   type t =
   | Atom of string
@@ -92,8 +94,8 @@ and exceptions:
 - : Sexp.t = (Invalid_argument foo)
 ```
 
-It's also possible to convert more complex types such as lists or arrays that
-are polymorphic across the types that they can contain:
+It's also possible to convert more complex types such as lists or
+arrays that are polymorphic across the types that they can contain:
 
 ```ocaml env=to_from_sexp
 # List.sexp_of_t
@@ -102,16 +104,17 @@ are polymorphic across the types that they can contain:
 - : Sexp.t = (1 2 3)
 ```
 
-Notice that `List.sexp_of_t` is polymorphic and takes as its first argument
-another conversion function to handle the elements of the list to be
-converted. Core uses this scheme more generally for defining sexp converters
-for polymorphic types.
+Notice that `List.sexp_of_t` is polymorphic and takes as its first
+argument another conversion function to handle the elements of the
+list to be converted. Core uses this scheme more generally for
+defining sexp converters for polymorphic types.
 
-The functions that go in the other direction, *i.e.*, reconstruct an OCaml
-value from an s-expression, use essentially the same trick for handling
-polymorphic types, as shown in the following example. Note that these
-functions will fail with an exception when presented with an s-expression
-that doesn't match the structure of the OCaml type in question.
+The functions that go in the other direction, *i.e.*, reconstruct an
+OCaml value from an s-expression, use essentially the same trick for
+handling polymorphic types, as shown in the following example. Note
+that these functions will fail with an exception when presented with
+an s-expression that doesn't match the structure of the OCaml type in
+question.
 
 ```ocaml env=to_from_sexp
 # List.t_of_sexp
@@ -126,14 +129,15 @@ Exception:
 ::: {data-type=note}
 ##### More on Top-Level Printing
 
-The values of the s-expressions that we created were printed properly as
-s-expressions in the toplevel, instead of as the tree of `Atom` and `List`
-variants that they're actually made of. [top-level printers]{.idx}
+The values of the s-expressions that we created were printed properly
+as s-expressions in the toplevel, instead of as the tree of `Atom` and
+`List` variants that they're actually made of. [top-level
+printers]{.idx}
 
-This is due to OCaml's facility for installing custom *top-level printers*
-that can rewrite some values into more top-level-friendly equivalents. They
-are generally installed as `ocamlfind` packages ending in `top`:
-:::
+This is due to OCaml's facility for installing custom *top-level
+printers* that can rewrite some values into more top-level-friendly
+equivalents. They are generally installed as `ocamlfind` packages
+ending in `top`:
 
 ```sh dir=examples,non-deterministic=output
 $ ocamlfind list | grep top
@@ -159,9 +163,13 @@ uri.top             (version: 1.9.6)
 utop                (version: 2.1.0)
 ```
 
-The `core.top` package (which you should have loaded by default in your
-`.ocamlinit` file) loads in printers for the Core extensions already, so you
-don't need to do anything special to use the s-expression printer.
+The `core.top` package (which you should have loaded by default in
+your `.ocamlinit` file) loads in printers for the Core extensions
+already, so you don't need to do anything special to use the
+s-expression printer.
+
+:::
+
 
 ### Generating S-Expressions from OCaml Types
 
@@ -311,7 +319,7 @@ of]{.idx}
 can be loaded using Sexplib. As you can see, the commented data is not part
 of the resulting s-expression:
 
-```ocaml env=example_load,dir=examples
+```ocaml env=example_load,dir=examples/sexps
 # Sexp.load_sexp "example.scm"
 - : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
 ```
@@ -345,7 +353,7 @@ The following example shows all of these in action:
 
 Again, loading the file as an s-expression drops the comments:
 
-```ocaml env=example_load,dir=examples
+```ocaml env=example_load,dir=examples/sexps
 # Sexp.load_sexp "comment_heavy.scm"
 - : Sexp.t = ((this is included) (this stays) (and now we're done))
 ```
@@ -354,7 +362,7 @@ If we introduce an error into our s-expression, by, say, creating a file
 `broken_example.scm` which is `example.scm`, without open-paren in front of
 `bar`, we'll get a parse error:
 
-```ocaml env=example_load,dir=examples
+```ocaml env=example_load,dir=examples/sexps
 # Exn.handle_uncaught ~exit:false (fun () ->
   ignore (Sexp.load_sexp "example_broken.scm" : Sexp.t))
 Uncaught exception:
@@ -373,15 +381,16 @@ exceptions.
 
 ## Preserving Invariants
 
-The most important functionality provided by Sexplib is the
-autogeneration of converters for new types. We've seen a bit of how
-this works already, but let's walk through a complete example. Here's
-the contents of a file `int_interval.ml`, which is a simple library
-for representing integer intervals, similar to the one described in
+One of the most important bits of sexp-related functionality is the
+autogeneration of converters for new types via `ppx_sexp_conv`. We've
+seen a bit of how this works already, but let's walk through a
+complete example. Here's the contents of a file `int_interval.ml`,
+which is a simple library for representing integer intervals, similar
+to the one described in
 [Functors](functors.html#functors){data-type=xref}.
 [s-expressions/preserving invariants in]{.idx}
 
-```ocaml file=examples/test_interval/int_interval.ml
+```ocaml file=examples/correct/test_interval/int_interval.ml
 (* Module for representing closed integer intervals *)
 open Core
 
@@ -411,7 +420,7 @@ let contains i x =
 Because of the filename, the resulting module will be available under
 the name `Int_interval`. We can use this module as follows.
 
-```ocaml file=examples/test_interval/test_interval.ml
+```ocaml file=examples/correct/test_interval/test_interval.ml
 open Core
 
 let intervals =
@@ -435,7 +444,7 @@ to explicitly export the s-expression converters that were created
 within the `ml` file. For example, here's an interface that doesn't
 export the s-expression functions:
 
-```ocaml file=examples/int_interval_nosexp.mli
+```ocaml file=examples/erroneous/test_interval_nosexp/int_interval.mli
 type t
 
 val is_empty : t -> bool
@@ -445,15 +454,7 @@ val contains : t -> int -> bool
 
 Building this will give us the following error:
 
-```scheme file=examples/test_interval_nosexp/dune
-(executable
-  (name      test_interval_nosexp)
-  (libraries core))
-```
-
-
-
-```sh dir=examples/test_interval_nosexp
+```sh dir=examples/erroneous/test_interval_nosexp
 $ dune build test_interval_nosexp.exe
 File "test_interval_nosexp.ml", line 13, characters 20-42:
 13 |   |> List.sexp_of_t Int_interval.sexp_of_t
@@ -465,7 +466,7 @@ Error: Unbound value Int_interval.sexp_of_t
 We could export the types by hand in the signature, by writing the signatures
 for the extra functions generated by Sexplib:
 
-```ocaml file=examples/int_interval_manual_sexp.mli
+```ocaml file=examples/correct/int_interval_manual_sexp/int_interval.mli
 open Core
 
 type t
@@ -483,7 +484,7 @@ Sexplib solves this by exposing the same syntax extension in signature
 definitions so that we can just use the same `with` shorthand in the
 `mli` file. Here's the final version of the signature that does just this:
 
-```ocaml file=examples/test_interval/int_interval.mli
+```ocaml file=examples/correct/test_interval/int_interval.mli
 type t [@@deriving sexp]
 
 val is_empty : t -> bool
@@ -493,7 +494,7 @@ val contains : t -> int -> bool
 
 At this point, `test_interval.ml` will compile again using this `dune` file:
 
-```scheme file=examples/test_interval/dune
+```scheme file=examples/correct/test_interval/dune
 (executable
   (name       test_interval)
   (libraries  core sexplib)
@@ -502,7 +503,7 @@ At this point, `test_interval.ml` will compile again using this `dune` file:
 
 And if we run it, we'll get the following output:
 
-```sh dir=examples/test_interval
+```sh dir=examples/correct/test_interval
 $ dune build test_interval.exe
 $ dune exec ./test_interval.exe
 ((Range 3 4) Empty (Range 2 3) (Range 1 6))
@@ -519,14 +520,13 @@ We can fix this problem by overriding the autogenerated function and writing
 a custom sexp converter that wraps the autogenerated converter with whatever
 invariant checks are necessary:
 
-```ocaml file=examples/sexp_override.ml
+```ocaml file=examples/correct/int_interval_sexp_override/int_interval.ml,part=1
+open Core
+
 type t =
   | Range of int * int
   | Empty
 [@@deriving sexp]
-
-let create x y =
-  if x > y then Empty else Range (x,y)
 
 let t_of_sexp sexp =
   let t = t_of_sexp sexp in
@@ -558,7 +558,7 @@ can be hard to localize errors to the right place using this scheme. Consider
 the following example: [debugging/s-expressions]{.idx}[errors/error messages
 with s-expressions]{.idx}[s-expressions/deserializing a type from]{.idx}
 
-```scheme file=examples/read_foo/dune
+```scheme file=examples/correct/read_foo/dune
 (executable
   (name       read_foo)
   (libraries  core sexplib)
@@ -567,7 +567,7 @@ with s-expressions]{.idx}[s-expressions/deserializing a type from]{.idx}
 
 
 
-```ocaml file=examples/read_foo/read_foo.ml
+```ocaml file=examples/correct/read_foo/read_foo.ml
 open Core
 
 type t = {
@@ -589,7 +589,7 @@ let () =
 
 If you were to run this on a malformatted file, say, this one:
 
-``` file=examples/read_foo/foo_broken_example.scm
+``` file=examples/correct/read_foo/foo_broken_example.scm
 ((a "not-an-integer")
  (b "not-an-integer")
  (c 1.0))
@@ -597,7 +597,7 @@ If you were to run this on a malformatted file, say, this one:
 
 you'll get the following error:
 
-```sh dir=examples/read_foo
+```sh dir=examples/correct/read_foo
 $ dune build read_foo.exe
 $ dune exec -- ./read_foo.exe foo_example_broken.scm
 Uncaught exception:
@@ -617,7 +617,7 @@ bad error message can be pure misery.
 But there's hope! We can make a small change to the code to improve the error
 message greatly:
 
-```scheme file=examples/read_foo_better_errors/dune
+```scheme file=examples/correct/read_foo_better_errors/dune
 (executable
   (name       read_foo_better_errors)
   (libraries  core sexplib)
@@ -626,7 +626,7 @@ message greatly:
 
 
 
-```ocaml file=examples/read_foo_better_errors/read_foo_better_errors.ml
+```ocaml file=examples/correct/read_foo_better_errors/read_foo_better_errors.ml
 open Core
 
 type t = {
@@ -645,7 +645,7 @@ let () =
 
 If we run it again, we'll see a much more specific error:
 
-```sh dir=examples/read_foo_better_errors
+```sh dir=examples/correct/read_foo_better_errors
 $ dune build read_foo_better_errors.exe
 $ dune exec -- ./read_foo_better_errors.exe foo_example_broken.scm
 Uncaught exception:
@@ -659,13 +659,14 @@ Called from file "duniverse/base.v0.13.2/src/exn.ml", line 102, characters 6-10
 [1]
 ```
 
-In the preceding error, `foo_broken_example.scm:2:5` tells us that the error
-occurred in the file `"foo_broken_example.scm"` on line 2, character 5. This
-is a much better start for figuring out what went wrong. The ability to find
-the precise location of the error depends on the sexp converter reporting
-errors using the function `of_sexp_error`. This is already done by converters
-generated by Sexplib, but you should make sure to do the same when you write
-custom converters.
+In the preceding error, `foo_broken_example.scm:2:5` tells us that the
+error occurred in the file `"foo_broken_example.scm"` on line 2,
+character 5. This is a much better start for figuring out what went
+wrong. The ability to find the precise location of the error depends
+on the sexp converter reporting errors using the function
+`of_sexp_error`. This is already done by converters generated by
+Sexplib, but you should make sure to do the same when you write custom
+converters.
 
 ## Sexp-Conversion Directives
 
