@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (paragraph
+     (((f.ml (1 0) (1 15)) (word @canonical)) ((f.ml (1 0) (1 15)) space)
+      ((f.ml (1 0) (1 15)) (code_span .Foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 11-15:\
+   \nExpected a valid path.")))

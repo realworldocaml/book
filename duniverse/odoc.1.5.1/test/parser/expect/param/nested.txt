@@ -1,0 +1,11 @@
+((output
+  (((f.ml (1 0) (1 21))
+    (@param foo
+     ((f.ml (1 11) (1 21))
+      (paragraph
+       (((f.ml (1 11) (1 21)) (word @param)) ((f.ml (1 11) (1 21)) space)
+        ((f.ml (1 11) (1 21)) (word bar)))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 11-21:\
+   \n'@param' is not allowed in '@param'.\
+   \nSuggestion: move '@param' outside of any other markup.")))

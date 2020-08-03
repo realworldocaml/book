@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (1 10))
+    (paragraph
+     (((f.ml (1 0) (1 10)) (word @canonical)) ((f.ml (1 0) (1 10)) space)
+      ((f.ml (1 0) (1 10)) (code_span "")))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-10:\
+   \n'@canonical' should not be empty."
+    "File \"f.ml\", line 1, characters 11-10:\
+   \nExpected a valid path.")))

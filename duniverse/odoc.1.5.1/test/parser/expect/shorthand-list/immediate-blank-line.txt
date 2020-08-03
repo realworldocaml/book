@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 1)) (unordered (())))
+   ((f.ml (3 0) (3 3)) (paragraph (((f.ml (3 0) (3 3)) (word foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-1:\
+   \n'-' (bulleted list item) should not be empty.")))

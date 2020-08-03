@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 12))
+    (paragraph (((f.ml (1 0) (1 12)) (reference (root foo value) ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-11:\
+   \n'value' is deprecated, use 'val' instead.")))

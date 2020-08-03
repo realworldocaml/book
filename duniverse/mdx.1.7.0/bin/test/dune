@@ -1,0 +1,10 @@
+(executable
+ (name main)
+ (public_name ocaml-mdx-test)
+ (package mdx)
+ (modes byte) ;; no native code toplevel libs yet
+ (link_flags -linkall)
+ (preprocess
+  (action
+   (run %{bin:cppo} -V OCAML:%{ocaml_version} %{input-file})))
+ (libraries cli mdx.top))

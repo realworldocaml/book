@@ -1,0 +1,5 @@
+(executable
+ (name main)
+ (public_name odoc)
+ (libraries cmdliner odoc_model odoc_odoc)
+ (flags (:standard -open StdLabels)))

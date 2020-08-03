@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 7))
+    (paragraph (((f.ml (1 0) (1 7)) (code_span "L foo")))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-7:\
+   \n'{L foo}': bad markup.\
+   \nSuggestion: did you mean '{!L foo}' or '[L foo]'?")))

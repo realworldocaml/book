@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 7)) (paragraph (((f.ml (1 0) (1 7)) (code_span :foo)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 2-2:\
+   \nUnknown reference qualifier ''.")))

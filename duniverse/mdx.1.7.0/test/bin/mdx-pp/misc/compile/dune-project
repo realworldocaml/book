@@ -1,0 +1,12 @@
+(lang dune 2.0)
+
+(name mdx-pp-test)
+
+(dialect
+ (name md)
+ (implementation
+  (extension md))
+ (interface
+  (extension mdi)))
+
+(formatting disabled)

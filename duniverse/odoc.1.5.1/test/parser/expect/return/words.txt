@@ -1,0 +1,8 @@
+((output
+  (((f.ml (1 0) (1 15))
+    (@return
+     ((f.ml (1 8) (1 15))
+      (paragraph
+       (((f.ml (1 8) (1 11)) (word foo)) ((f.ml (1 11) (1 12)) space)
+        ((f.ml (1 12) (1 15)) (word bar)))))))))
+ (warnings ()))

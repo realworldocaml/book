@@ -1,0 +1,23 @@
+(library
+ (name ocamlary)
+ (modules ocamlary))
+
+(executables
+ (names testCmi testCmti testCmt)
+ (modules testCmi testCmti testCmt testCommon)
+ (libraries doc_model))
+
+; (alias
+;  ((name   runtest)
+;   (deps   (ocamlary.cmi))
+;   (action (run ${exe:testCmi.exe} ${<}))))
+
+; (alias
+;  ((name   runtest)
+;   (deps   (ocamlary.cmti))
+;   (action (run ${exe:testCmti.exe} ${<}))))
+
+; (alias
+;  ((name   runtest)
+;   (deps   (ocamlary.cmt))
+;   (action (run ${exe:testCmt.exe} ${<}))))

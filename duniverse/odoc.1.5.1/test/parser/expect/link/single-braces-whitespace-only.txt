@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 4)) (paragraph (((f.ml (1 0) (1 4)) (link "" ())))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-4:\
+   \n'{:...} (external link)' should not be empty.")))

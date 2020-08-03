@@ -1,0 +1,11 @@
+((output
+  (((f.ml (1 0) (1 3)) (paragraph (((f.ml (1 0) (1 3)) (word foo)))))
+   ((f.ml (2 0) (2 7))
+    (0
+     (label
+      ((root (f.ml (page f.ml) 00000000000000000000000000000000) f.ml)
+       (label bar)))
+     (((f.ml (2 3) (2 6)) (word Bar)))))))
+ (warnings
+  ( "File \"f.ml.mld\":\
+   \nPages (.mld files) should start with a heading.")))

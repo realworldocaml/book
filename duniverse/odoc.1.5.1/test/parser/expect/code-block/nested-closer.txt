@@ -1,0 +1,13 @@
+((output
+  (((f.ml (1 0) (1 7)) (code_block foo))
+   ((f.ml (1 7) (1 8)) (paragraph (((f.ml (1 7) (1 8)) (word ])))))
+   ((f.ml (1 8) (1 9)) (paragraph (((f.ml (1 8) (1 9)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 7-8:\
+   \nUnpaired ']' (end of code).\
+   \nSuggestion: try '\\]'."
+    "File \"f.ml\", line 1, characters 7-8:\
+   \nParagraph should begin on its own line."
+    "File \"f.ml\", line 1, characters 8-9:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

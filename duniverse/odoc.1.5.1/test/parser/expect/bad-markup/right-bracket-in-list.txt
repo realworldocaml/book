@@ -1,0 +1,10 @@
+((output (((f.ml (1 0) (1 6)) (unordered ()))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 4-5:\
+   \nUnpaired ']' (end of code).\
+   \nSuggestion: try '\\]'."
+    "File \"f.ml\", line 1, characters 4-5:\
+   \n']' is not allowed in '{ul ...}' (bulleted list).\
+   \nSuggestion: move ']' into a list item, '{li ...}' or '{- ...}'."
+    "File \"f.ml\", line 1, characters 0-3:\
+   \n'{ul ...}' (bulleted list) should not be empty.")))

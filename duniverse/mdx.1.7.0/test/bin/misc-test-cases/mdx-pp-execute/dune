@@ -1,0 +1,26 @@
+(rule
+ (targets section.ml)
+ (deps
+  (:x section.md)
+  (package mdx))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ocaml-mdx pp %{x}))))
+
+(executable
+ (name section)
+ (modules section))
+
+(rule
+ (with-stdout-to
+  section.out
+  (run ./section.exe)))
+
+(rule
+ (alias runtest)
+ (deps
+  (:x section.out)
+  (:y section.out.expected))
+ (action
+  (diff? %{y} %{x})))

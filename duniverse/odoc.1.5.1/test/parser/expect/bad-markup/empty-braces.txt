@@ -1,0 +1,10 @@
+((output
+  (((f.ml (1 0) (1 1)) (paragraph (((f.ml (1 0) (1 1)) (word {)))))
+   ((f.ml (1 1) (1 2)) (paragraph (((f.ml (1 1) (1 2)) (word })))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-1:\
+   \n'{': bad markup.\
+   \nSuggestion: escape the brace with '\\{'."
+    "File \"f.ml\", line 1, characters 1-2:\
+   \nUnpaired '}' (end of markup).\
+   \nSuggestion: try '\\}'.")))

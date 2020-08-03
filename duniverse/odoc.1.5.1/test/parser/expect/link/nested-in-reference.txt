@@ -1,0 +1,12 @@
+((output
+  (((f.ml (1 0) (1 25))
+    (paragraph
+     (((f.ml (1 0) (1 25))
+       (reference (root foo unknown)
+        (((f.ml (1 8) (1 24))
+          (emphasis
+           (((f.ml (1 11) (1 23))
+             (emphasis (((f.ml (1 19) (1 22)) (word baz))))))))))))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 11-23:\
+   \n'{{:...} ...}' (external link) is not allowed in '{{!...} ...}' (cross-reference).")))

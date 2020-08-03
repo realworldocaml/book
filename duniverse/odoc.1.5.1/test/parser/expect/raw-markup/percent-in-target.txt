@@ -1,0 +1,6 @@
+((output
+  (((f.ml (1 0) (1 6)) (paragraph (((f.ml (1 0) (1 6)) (code_span "")))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-6:\
+   \n'{%%:': bad raw markup target.\
+   \nSuggestion: try '{%html:...%}'.")))

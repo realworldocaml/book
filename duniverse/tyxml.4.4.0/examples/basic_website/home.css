@@ -1,0 +1,11 @@
+#links_bar li {
+    margin:1em;
+    padding:0.4em;
+    font-size:large;
+    display:inline;
+    cursor:pointer;
+    border:none;
+    border-radius:0px;
+    transition:.2s linear;
+    text-align:center;
+}

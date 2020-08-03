@@ -24,6 +24,17 @@ let pp_output ppf = function
   let cmds = match t.command with [c] -> [c ^ ";;"] | l -> l @ [";;"] in
   Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_output) t.output
 
+let pp_toplevel_block (b: Mdx.Block.t) ppf =
+  let ts =
+    Mdx.Toplevel.of_lines
+      ~syntax:Normal
+      ~file:b.file
+      ~line:b.line
+      ~column:b.column
+      b.contents
+  in
+  pp_list pp_toplevel ppf ts
+
 let pp_contents (t:Mdx.Block.t) ppf =
   Fmt.(list ~sep:(unit "\n") pp_html) ppf t.contents
 
@@ -36,22 +47,29 @@ let pp_cram ppf (t:Mdx.Cram.t) =
     (pp_list pp_line) t.command
     (pp_list pp_output) t.output pp_exit
 
+let pp_cram_block content ppf =
+  pp_list pp_cram ppf (snd (Mdx.Cram.of_lines content))
+
+let header_to_string = Fmt.strf "%a" Mdx.Block.Header.pp 
+
 let pp_block_html ppf (b:Mdx.Block.t) =
   let lang, pp_code, attrs = match b.value with
-    | Toplevel t -> Some "ocaml", (fun ppf -> pp_list pp_toplevel ppf t), [
+    | Toplevel _ -> Some "ocaml", pp_toplevel_block b, [
         ("class"             , "command-line");
         ("data-prompt"       , "#");
         ("data-filter-output", ">");
       ]
-    | OCaml  -> Some "ocaml", pp_contents b, []
-    | Cram t -> Some "bash" , (fun ppf -> pp_list pp_cram ppf t.tests), [
+    | Include {file_kind = Fk_ocaml _; _}
+    | OCaml _ -> Some "ocaml", pp_contents b, []
+    | Cram _ -> Some "bash" , pp_cram_block b.contents, [
         ("class"             , "command-line");
         ("data-user"         , "fun");
         ("data-host"         , "lama");
         ("data-filter-output", ">");
       ]
-    | Raw     -> b.header, pp_contents b, []
-    | Error s -> Some "error", (fun ppf -> pp_list Fmt.string ppf s), []
+    | Include {file_kind = Fk_other {header}; _}
+    | Raw {header} ->
+      Option.map header_to_string header, pp_contents b, []
   in
   let pp_attr ppf (k, v) = Fmt.pf ppf "%s=%S" k v in
   let pp_lang ppf () = match lang with
@@ -68,10 +86,11 @@ let pp_block_html ppf (b:Mdx.Block.t) =
 let pp_block_latex ppf (b:Mdx.Block.t) =
   let lang = match b.value with
     | Toplevel _
-    | OCaml  -> Some "ocaml"
+    | Include {file_kind = Fk_ocaml _; _}
+    | OCaml _ -> Some "ocaml"
     | Cram _ -> Some "bash"
-    | Raw     -> b.header
-    | Error _ -> Some "error"
+    | Include {file_kind = Fk_other {header}; _}
+    | Raw {header} -> Option.map header_to_string header
   in
   let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
   let lang = match lang with
@@ -129,10 +148,12 @@ let get_output_infos = function
 
 let run (`File file) (`Output output) output_type =
   let (pp_block, pp_text, out_args) = get_output_infos output_type in
-  let t = Mdx.parse_file Normal file in
-  match t with
-  | [] -> 1
-  | _  ->
+  match Mdx.parse_file Normal file with
+  | Error (`Msg msg) ->
+    Printf.eprintf "%s\n" msg;
+    1
+  | Ok [] -> 1
+  | Ok t  ->
     let tmp = Filename.temp_file "ocaml-mdx" "pandoc" in
     let oc = open_out tmp in
     let ppf = Format.formatter_of_out_channel oc in
@@ -143,7 +164,6 @@ let run (`File file) (`Output output) output_type =
           []
         | Text t        -> t::acc
         | Block b ->
-          let b = Mdx.Block.eval b in
           Fmt.pf ppf "%a%a" pp_text acc pp_block b;
           []
     in

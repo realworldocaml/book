@@ -1,0 +1,17 @@
+(library
+ (name tyxml_ppx)
+ (public_name tyxml-ppx.internal)
+ (libraries re.str
+            ppx_tools_versioned
+            markup
+            tyxml-syntax
+ )
+ (preprocess (pps ppx_tools_versioned.metaquot_408))
+ (flags (:standard
+         -safe-string
+         -open Migrate_parsetree
+         -open Ast_408
+         -open Ppx_tools_408
+         -w "-9"
+ ))
+)

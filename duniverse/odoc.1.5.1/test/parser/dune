@@ -1,0 +1,8 @@
+(executable
+ (name test)
+ (libraries alcotest markup odoc_model odoc_parser print))
+
+(alias
+ (name runtest)
+ (action (run %{exe:test.exe}))
+ (deps test.exe (source_tree expect)))

@@ -334,11 +334,10 @@ module Book :
     val clamp : t -> min:t -> max:t -> t Base__.Or_error.t
     type comparator_witness = Base.Comparable.Make(T).comparator_witness
     val comparator : (t, comparator_witness) Comparator.t
-    val validate_lbound : min:t Core_kernel._maybe_bound -> t Validate.check
-    val validate_ubound : max:t Core_kernel._maybe_bound -> t Validate.check
+    val validate_lbound : min:t Maybe_bound.t -> t Validate.check
+    val validate_ubound : max:t Maybe_bound.t -> t Validate.check
     val validate_bound :
-      min:t Core_kernel._maybe_bound ->
-      max:t Core_kernel._maybe_bound -> t Validate.check
+      min:t Maybe_bound.t -> max:t Maybe_bound.t -> t Validate.check
   end
 ```
 
@@ -849,7 +848,7 @@ building a hashtable can be obtained.
 
 ```ocaml env=main
 # let table = Hashtbl.create (module String)
-val table : (string, '_weak1) Core_kernel.Hashtbl.t = <abstr>
+val table : (string, '_weak1) Hashtbl.Poly.t = <abstr>
 # Hashtbl.set table ~key:"three" ~data:3
 - : unit = ()
 # Hashtbl.find table "three"
@@ -889,12 +888,11 @@ module Book :
     type t = { title : string; isbn : string; }
     val compare : t -> t -> int
     val sexp_of_t : t -> Sexp.t
-    val hash_fold_t :
-      Base_internalhash_types.state -> t -> Base_internalhash_types.state
+    val hash_fold_t : Hash.state -> t -> Hash.state
     val hash : t -> int
   end
 # let table = Hashtbl.create (module Book)
-val table : (Book.t, '_weak2) Core_kernel.Hashtbl.t = <abstr>
+val table : (Book.t, '_weak2) Hashtbl.Poly.t = <abstr>
 ```
 
 You can also create a hashtable based on OCaml's polymorphic hash and
@@ -902,7 +900,7 @@ comparison functions.
 
 ```ocaml env=main
 # let table = Hashtbl.Poly.create ()
-val table : ('_weak3, '_weak4) Core_kernel.Hashtbl.t = <abstr>
+val table : ('_weak3, '_weak4) Hashtbl.Poly.t = <abstr>
 # Hashtbl.set table ~key:("foo",3,[1;2;3]) ~data:"random data!"
 - : unit = ()
 # Hashtbl.find table ("foo",3,[1;2;3])

@@ -1,0 +1,106 @@
+{0:top Understanding odoc Internals}
+
+This manual page describes the constituents of the compilation process and
+their relationships in the different compilation phases.
+
++ {{:#constituents} Constituents}
++ {{:#phases} Compilation Phases}
+
+{1:constituents Constituents}
+...
+
+{1:phases Compilation Phases}
+
+Whenever [odoc] attempts to compile a new [.odoc] file from a compiler output,
+it will go through 3 distinct compilation phases:
+
++ Prepping,
++ Loading, and
++ Cross-referencing
+
+In the case of HTML generation, an additional 2 phases happen:
+
++ Tree building, and
++ Printing.
+
+{2:prepping-phase Prepping}
+
+Every compilation step will begin by building an {!Env.t} (environment) by
+looking into the import directories (specified with [-I]), and acquiring a
+{!File.t} file descriptor to the input file. This will make all of the
+compilation units compiled earlier, available to the current one.
+
+Output directories will be made sure exist and are writeable too.
+
+Once this is all done, dispatching based on the file extension will happen and
+{{:#loading-phase} loading will begin}.
+
+{2:loading-phase Loading}
+
+It always begins by creating a {!Odoc_model.Root.Odoc_file.t} file representation.
+This happens equally for all formats, including [.mld] files where
+{!Odoc_model.Root.Odoc_file.create_page} is used.
+
+This representation specifies whether we are about to compile a {!Page} or if we
+in fact have an OCaml {!Compilation_unit}. It will be used to create a broader
+record of type {!Odoc_model.Root.t}, that will contain all the information relevant
+to our current document.
+
+For [.cmt(i)] files, however, this record isn't yet created. We will come by it
+as soon as a module name and a {i digest} are read. The process then continues
+and {!Odoc_loader.read_cmti} will attempt to read this file, accessing the {i
+digest}, creating the {!Odoc_model.Root.t}, and, subsequently, when the [.cmti] typed
+tree is read and parsed, building a {!Compilation_unit.t}.
+
+While building the {!Compilation_unit.t}, the [.cmti] file will be read into a
+{!Cmt_format.cmt_infos} value using the OCaml library {!Cmt_format}. This could
+end up in a few error cases, but if we don't catch any exceptions on our way,
+we will get a value of {!Cmt_format.binary_annots} (binary annotations) indicating
+whether this file is indeed an {!Interface} or some other thing (a {!Packed}
+module, an {!Implementation}, a {!Partial_implementation}, or even a
+{!Partial_interface}).
+
+Given that we do have an {!Interface}, we can extract its module name, the list
+of modules that need to be imported (and tag them as Unresolved), and finally
+build {!Compilation_unit.t} out of them. This list will be important later on,
+as we attempt to {{:#xref-phase} resolve all references}.
+
+{2:xref-phase Cross Referencing}
+
+Now that we have a brand new compilation unit, we need to make sure that the
+things it references (such as functions or types in other modules) are properly
+resolved.
+
+To do this, we will begin by making a {i lookup}. This will create a new
+{!Lookup.lookup} object, and use our current compilation unit to grow its name
+environment ({!Name_env.t}) by adding whatever new signatures we've defined in
+the current module.
+
+Immediately after, we will attempt to build a {i resolving environment} (of type
+{!Env.t}). This environment will then be used to resolve this modlule's
+references in {!Odoc_xref.resolve}.
+
+This process occurs two times! For legacy reasons, we need to repeat this twice,
+the second time with the result of the first.  Then we can proceed to {i expand}
+these references, which we can use for saving our [.odoc] file.
+
+We expand the cross-referencing environment one more time, and hand it over to
+{!Compilation_unit.save} so it will be marshalled and saved.
+
+{2:tree-phase Tree Building}
+
+In case we are compiling an [.odoc] file to [.html], we will continue the
+process after cross-referencing by delegating to one of the [To_html_tree]
+modules. If the HTML is to have Reason syntax, {!Odoc_html.To_html_tree.RE} will be
+used, otherwise {!Odoc_html.To_html_tree.ML}.
+
+[TODO(@ostera): explain how Odoc_html.To_html_tree.ML.compilation_unit works]
+
+{2:printing-phase Printing}
+
+After the HTML tree is fully built, we can just ask {!Tyxml.Html} to print it
+into a string for us. So folders will be created to make sure the output can be
+written, and then for each page and compilation unit an [.html] file will be
+created and written to.
+
+That's pretty much all there is to printing.

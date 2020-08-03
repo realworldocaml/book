@@ -1,0 +1,11 @@
+((output
+  (((f.ml (1 0) (2 6))
+    (paragraph
+     (((f.ml (1 0) (2 6))
+       (bold
+        (((f.ml (2 0) (2 1)) (word +)) ((f.ml (2 1) (2 2)) space)
+         ((f.ml (2 2) (2 5)) (word foo))))))))))
+ (warnings
+  ( "File \"f.ml\", line 2, characters 0-1:\
+   \n'+' (numbered list item) is not allowed in '{b ...}' (boldface text).\
+   \nSuggestion: move '+' so it isn't the first thing on the line.")))

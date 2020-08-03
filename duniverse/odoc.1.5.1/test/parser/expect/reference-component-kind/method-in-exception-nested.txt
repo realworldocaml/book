@@ -1,0 +1,7 @@
+((output
+  (((f.ml (1 0) (1 31))
+    (paragraph
+     (((f.ml (1 0) (1 31)) (code_span Foo.exception-Bar.method-baz)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 6-19:\
+   \nExpected 'class-', 'class-type-', or an unqualified reference.")))

@@ -1,0 +1,5 @@
+((output
+  (((f.ml (1 0) (1 7)) (paragraph (((f.ml (1 0) (1 7)) (word @custom)))))))
+ (warnings
+  ( "File \"f.ml\", line 1, characters 0-7:\
+   \nUnknown tag '@custom'.")))
