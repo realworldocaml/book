@@ -89,8 +89,7 @@ this regard. As an example, here's a type that represents an arbitrary
 item tagged with a line number.
 
 ```ocaml env=main
-# type 'a with_line_num = { item: 'a; line_num: int }
-type 'a with_line_num = { item : 'a; line_num : int; }
+type 'a with_line_num = { item: 'a; line_num: int }
 ```
 
 We can then write polymorphic functions that operate over this
