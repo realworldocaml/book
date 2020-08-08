@@ -417,55 +417,29 @@ it is standard practice to name the type associated with the module
 `t`. Using this style we would write:
 
 ```ocaml env=main
-# module Log_entry = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        important: bool;
-        message: string;
-      }
-  end
-  module Heartbeat = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        status_message: string;
-      }
-  end
-  module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        user: string;
-        credentials: string;
-      }
-  end
-module Log_entry :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      important : bool;
-      message : string;
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      important: bool;
+      message: string;
     }
-  end
-module Heartbeat :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      status_message : string;
+end
+module Heartbeat = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      status_message: string;
     }
-  end
-module Logon :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      user : string;
-      credentials : string;
+end
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+      credentials: string;
     }
-  end
+end
 ```
 
 Now, our log-entry-creation function can be rendered as follows:

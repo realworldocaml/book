@@ -365,25 +365,15 @@ can achieve with this by reiterating the `Log_entry` message type that
 was described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
-# module Time_ns = Core_kernel.Time_ns
 module Time_ns = Core_kernel.Time_ns
-# module Log_entry = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        important: bool;
-        message: string;
-      }
-  end
-module Log_entry :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      important : bool;
-      message : string;
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      important: bool;
+      message: string;
     }
-  end
+end
 ```
 
 This record type combines multiple pieces of data into a single value.
@@ -395,38 +385,21 @@ To construct an example of where this is useful, we'll first write out
 the other message types that came along-side `Log_entry`.
 
 ```ocaml env=main
-# module Heartbeat = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        status_message: string;
-      }
-  end
-  module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        user: string;
-        credentials: string;
-      }
-  end
-module Heartbeat :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      status_message : string;
+module Heartbeat = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      status_message: string;
     }
-  end
-module Logon :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      user : string;
-      credentials : string;
+end
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+      credentials: string;
     }
-  end
+end
 ```
 
 A variant comes in handy when we want to represent values that could
@@ -504,22 +477,19 @@ first step is to cut down the definitions of each per-message record
 to contain just the information unique to that record:
 
 ```ocaml env=main
-# module Log_entry = struct
-    type t = { important: bool;
-               message: string;
-             }
-  end
-  module Heartbeat = struct
-    type t = { status_message: string; }
-  end
-  module Logon = struct
-    type t = { user: string;
-               credentials: string;
-             }
-  end
-module Log_entry : sig type t = { important : bool; message : string; } end
-module Heartbeat : sig type t = { status_message : string; } end
-module Logon : sig type t = { user : string; credentials : string; } end
+module Log_entry = struct
+  type t = { important: bool;
+             message: string;
+           }
+end
+module Heartbeat = struct
+  type t = { status_message: string; }
+end
+module Logon = struct
+  type t = { user: string;
+             credentials: string;
+           }
+end
 ```
 
 We can then define a variant type that combines these types:
@@ -535,12 +505,11 @@ Separately, we need a record that contains the fields that are common across
 all messages:
 
 ```ocaml env=main
-# module Common = struct
-    type t = { session_id: string;
-               time: Time_ns.t;
-             }
-  end
-module Common : sig type t = { session_id : string; time : Time_ns.t; } end
+module Common = struct
+  type t = { session_id: string;
+             time: Time_ns.t;
+           }
+end
 ```
 
 A full message can then be represented as a pair of a `Common.t` and a
