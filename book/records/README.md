@@ -31,13 +31,12 @@ name for protocols such as FTP or SSH. Note that we're going to open
 API, which you need `Core` for.
 
 ```ocaml env=main
-# open Core
-# type service_info =
-    { service_name : string;
-      port         : int;
-      protocol     : string;
-    }
-type service_info = { service_name : string; port : int; protocol : string; }
+open Core
+type service_info =
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+  }
 ```
 
 We can construct a `service_info` just as easily as we declared its
@@ -51,7 +50,8 @@ language you can use for parsing a string.
 # #require "re"
 # let service_info_of_string line =
     let matches =
-      Re.exec (Re.Posix.compile_pat "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)") line
+      let pat = "([a-zA-Z]+)[ \t]+([0-9]+)/([a-zA-Z]+)" in
+      Re.exec (Re.Posix.compile_pat pat) line
     in
     { service_name = Re.Group.get matches 1;
       port = Int.of_string (Re.Group.get matches 2);
@@ -171,18 +171,12 @@ record so that it preserves comments. We can do this by providing a
 new definition of `service_info` that includes a `comment` field:
 
 ```ocaml env=main
-# type service_info =
-    { service_name : string;
-      port         : int;
-      protocol     : string;
-      comment      : string option;
-    }
-type service_info = {
-  service_name : string;
-  port : int;
-  protocol : string;
-  comment : string option;
-}
+type service_info =
+  { service_name : string;
+    port         : int;
+    protocol     : string;
+    comment      : string option;
+  }
 ```
 
 The code for `service_info_to_string` would continue to compile
@@ -354,40 +348,23 @@ and connected. All of these messages include a session ID and the time
 the message was generated.
 
 ```ocaml env=main
-# type log_entry =
-    { session_id: string;
-      time: Time_ns.t;
-      important: bool;
-      message: string;
-    }
-  type heartbeat =
-    { session_id: string;
-      time: Time_ns.t;
-      status_message: string;
-    }
-  type logon =
-    { session_id: string;
-      time: Time_ns.t;
-      user: string;
-      credentials: string;
-    }
-type log_entry = {
-  session_id : string;
-  time : Time_ns.t;
-  important : bool;
-  message : string;
-}
-type heartbeat = {
-  session_id : string;
-  time : Time_ns.t;
-  status_message : string;
-}
-type logon = {
-  session_id : string;
-  time : Time_ns.t;
-  user : string;
-  credentials : string;
-}
+type log_entry =
+  { session_id: string;
+    time: Time_ns.t;
+    important: bool;
+    message: string;
+  }
+type heartbeat =
+  { session_id: string;
+    time: Time_ns.t;
+    status_message: string;
+  }
+type logon =
+  { session_id: string;
+    time: Time_ns.t;
+    user: string;
+    credentials: string;
+  }
 ```
 
 Reusing field names can lead to some ambiguity. For example, if we
@@ -589,26 +566,24 @@ Fairly often, you will find yourself wanting to create a new record
 that differs from an existing record in only a subset of the
 fields. For example, imagine our logging server had a record type for
 representing the state of a given client, including when the last
-heartbeat was received from that client. The following defines a type
-for representing this information, as well as a function for updating
-the client information when a new heartbeat arrives:[functional
-updates]{.idx}[records/functional updates to]{.idx}
+heartbeat was received from that client.
+[functional updates]{.idx}
+[records/functional updates to]{.idx}
 
 ```ocaml env=main
-# type client_info =
-    { addr: Unix.Inet_addr.t;
-      port: int;
-      user: string;
-      credentials: string;
-      last_heartbeat_time: Time_ns.t;
-  }
-type client_info = {
-  addr : Unix.inet_addr;
-  port : int;
-  user : string;
-  credentials : string;
-  last_heartbeat_time : Time_ns.t;
+type client_info =
+  { addr: Unix.Inet_addr.t;
+    port: int;
+    user: string;
+    credentials: string;
+    last_heartbeat_time: Time_ns.t;
 }
+```
+
+We could define a function for updating the client information when a
+new heartbeat arrives as follows.
+
+```ocaml env=main
 # let register_heartbeat t hb =
     { addr = t.addr;
       port = t.port;
@@ -651,21 +626,13 @@ accommodate the new fields. Consider what happens if we decided to add
 a field for the status message received on the last heartbeat:
 
 ```ocaml env=main
-# type client_info =
-    { addr: Unix.Inet_addr.t;
-      port: int;
-      user: string;
-      credentials: string;
-      last_heartbeat_time: Time_ns.t;
-      last_heartbeat_status: string;
-  }
-type client_info = {
-  addr : Unix.inet_addr;
-  port : int;
-  user : string;
-  credentials : string;
-  last_heartbeat_time : Time_ns.t;
-  last_heartbeat_status : string;
+type client_info =
+  { addr: Unix.Inet_addr.t;
+    port: int;
+    user: string;
+    credentials: string;
+    last_heartbeat_time: Time_ns.t;
+    last_heartbeat_status: string;
 }
 ```
 
@@ -692,21 +659,13 @@ code, we've made the last two fields of `client_info` mutable:[mutable
 record fields]{.idx}[records/mutable fields in]{.idx}
 
 ```ocaml env=main
-# type client_info =
-    { addr: Unix.Inet_addr.t;
-      port: int;
-      user: string;
-      credentials: string;
-      mutable last_heartbeat_time: Time_ns.t;
-      mutable last_heartbeat_status: string;
-  }
-type client_info = {
-  addr : Unix.inet_addr;
-  port : int;
-  user : string;
-  credentials : string;
-  mutable last_heartbeat_time : Time_ns.t;
-  mutable last_heartbeat_status : string;
+type client_info =
+  { addr: Unix.Inet_addr.t;
+    port: int;
+    user: string;
+    credentials: string;
+    mutable last_heartbeat_time: Time_ns.t;
+    mutable last_heartbeat_status: string;
 }
 ```
 
