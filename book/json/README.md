@@ -178,20 +178,14 @@ let () =
   (* Use the file JSON constructor *)
   let json2 = Yojson.Basic.from_file "book.json" in
   (* Test that the two values are the same *)
-  print_endline (if json1 = json2 then "OK" else "FAIL")
+  print_endline (if Yojson.Basic.equal json1 json2 then "OK" else "FAIL")
 ```
 
 You can build this by running `dune`:
 
-```scheme file=examples/read_json/dune
-(executable
-  (name      read_json)
-  (libraries core yojson))
-```
-
-
-
-```sh dir=read_json
+```sh dir=examples/read_json
+$ dune exec -- ./read_json.exe
+OK
 ```
 
 The `from_file` function accepts an input filename and takes care of opening
