@@ -976,8 +976,11 @@ The `|` character separates the different cases of the variant (the first
 `|` is optional), and each case has a capitalized tag, like `Circle`,
 `Rect` or `Segment`, to distinguish that case from the others.
 
-Here's how we might write a function for testing whether a point is in the
-interior of some element of a list of `scene_element`s:
+Here's how we might write a function for testing whether a point is in
+the interior of some element of a list of `scene_element`s.  Note that
+there are two `let` bindings in a row without a double semicolon
+between them. That's because the double semicolon is required only to
+tell *utop* to process the input, not to separate two declarations
 
 ```ocaml env=main
 # let is_inside_scene_element point scene_element =
@@ -1105,10 +1108,7 @@ type running_sum =
 
 The fields in `running_sum` are designed to be easy to extend incrementally,
 and sufficient to compute means and standard deviations, as shown in the
-following example. Note that there are two `let` bindings in a row without a
-double semicolon between them. That's because the double semicolon is
-required only to tell *utop* to process the input, not to separate two
-declarations:
+following example.
 
 ```ocaml env=main
 # let mean rsum = rsum.sum /. Float.of_int rsum.samples
