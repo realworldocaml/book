@@ -33,27 +33,25 @@ declared as a simple tag, with pipes used to separate the different
 cases. Note that variant tags must be capitalized.
 
 ```ocaml env=main
-# open Base
-# open Stdio
-# type basic_color =
-  | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
+open Base
+open Stdio
 type basic_color =
-    Black
-  | Red
-  | Green
-  | Yellow
-  | Blue
-  | Magenta
-  | Cyan
-  | White
+  | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White
+```
+
+As we show below, the variant tags introduced by the definition of
+`basic_color` can be used for constructing values of that type.
+
+```ocaml env=main
 # Cyan
 - : basic_color = Cyan
 # [Blue; Magenta; Red]
 - : basic_color list = [Blue; Magenta; Red]
 ```
 
-There's an integer code associated with each basic color, and thex
-following function uses pattern matching to express that function.
+The following function uses pattern matching to convert each of these
+to the corresponding integer code that is used for communicating these
+colors to the terminal.
 
 ```ocaml env=main
 # let basic_color_to_int = function
@@ -64,8 +62,8 @@ val basic_color_to_int : basic_color -> int = <fun>
 - : int list = [4; 1]
 ```
 
-We know that the above function is complete, because the compiler
-would have warned us if we'd missed a color.
+We know that the above function handles every color in `basic_color`
+because the compiler would have warned us if we'd missed one:
 
 ```ocaml env=main
 # let incomplete_color_to_int = function
@@ -78,7 +76,7 @@ val incomplete_color_to_int : basic_color -> int = <fun>
 ```
 
 In any case, using the correct function, we can generate escape codes
-to change the color of a given string displayed in a terminal:
+to change the color of a given string displayed in a terminal.
 
 ```ocaml env=main
 # let color_by_number number text =
@@ -112,27 +110,28 @@ up into the following groups:
 We'll also represent this more complicated color space as a variant,
 but this time, the different tags will have arguments that describe
 the data available in each case. Note that variants can have multiple
-arguments, which are separated by `*`s:
+arguments, which are separated by `*`s.
 
 ```ocaml env=main
-# type weight = Regular | Bold
 type weight = Regular | Bold
-# type color =
-    | Basic of basic_color * weight (* basic colors, regular and bold *)
-    | RGB   of int * int * int      (* 6x6x6 color cube *)
-    | Gray  of int                  (* 24 grayscale levels *)
 type color =
-    Basic of basic_color * weight
-  | RGB of int * int * int
-  | Gray of int
+  | Basic of basic_color * weight (* basic colors, regular and bold *)
+  | RGB   of int * int * int      (* 6x6x6 color cube *)
+  | Gray  of int                  (* 24 grayscale levels *)
+```
+
+As before, we can use these introduced tags to construct values of our
+newly defined type.
+
+```ocaml env=main
 # [RGB (250,70,70); Basic (Green, Regular)]
 - : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
 ```
 
-Once again, we'll use pattern matching to convert a color to a
-corresponding integer. But in this case, the pattern matching does
-more than separate out the different cases; it also allows us to
-extract the data associated with each tag:
+And again, we'll use pattern matching to convert a color to a
+corresponding integer.  In this case, the pattern matching does more
+than separate out the different cases; it also allows us to extract
+the data associated with each tag:
 
 ```ocaml env=main
 # let color_to_int = function
@@ -255,16 +254,11 @@ Consider what would happen if we were to change the definition of
 `color` to the following:
 
 ```ocaml env=main
-# type color =
-    | Basic of basic_color     (* basic colors *)
-    | Bold  of basic_color     (* bold basic colors *)
-    | RGB   of int * int * int (* 6x6x6 color cube *)
-    | Gray  of int             (* 24 grayscale levels *)
 type color =
-    Basic of basic_color
-  | Bold of basic_color
-  | RGB of int * int * int
-  | Gray of int
+  | Basic of basic_color     (* basic colors *)
+  | Bold  of basic_color     (* bold basic colors *)
+  | RGB   of int * int * int (* 6x6x6 color cube *)
+  | Gray  of int             (* 24 grayscale levels *)
 ```
 
 We've essentially broken out the `Basic` case into two cases, `Basic` and
@@ -371,25 +365,15 @@ can achieve with this by reiterating the `Log_entry` message type that
 was described in [Records](records.html#records){data-type=xref}.
 
 ```ocaml env=main
-# module Time_ns = Core_kernel.Time_ns
 module Time_ns = Core_kernel.Time_ns
-# module Log_entry = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        important: bool;
-        message: string;
-      }
-  end
-module Log_entry :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      important : bool;
-      message : string;
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      important: bool;
+      message: string;
     }
-  end
+end
 ```
 
 This record type combines multiple pieces of data into a single value.
@@ -401,38 +385,21 @@ To construct an example of where this is useful, we'll first write out
 the other message types that came along-side `Log_entry`.
 
 ```ocaml env=main
-# module Heartbeat = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        status_message: string;
-      }
-  end
-  module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time_ns.t;
-        user: string;
-        credentials: string;
-      }
-  end
-module Heartbeat :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      status_message : string;
+module Heartbeat = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      status_message: string;
     }
-  end
-module Logon :
-  sig
-    type t = {
-      session_id : string;
-      time : Time_ns.t;
-      user : string;
-      credentials : string;
+end
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+      credentials: string;
     }
-  end
+end
 ```
 
 A variant comes in handy when we want to represent values that could
@@ -440,13 +407,9 @@ be any of these three types.  The `client_message` type below lets you
 do just that.
 
 ```ocaml env=main
-# type client_message = | Logon of Logon.t
-                        | Heartbeat of Heartbeat.t
-                        | Log_entry of Log_entry.t
-type client_message =
-    Logon of Logon.t
-  | Heartbeat of Heartbeat.t
-  | Log_entry of Log_entry.t
+type client_message = | Logon of Logon.t
+                      | Heartbeat of Heartbeat.t
+                      | Log_entry of Log_entry.t
 ```
 
 In particular, a `client_message` is a `Logon` *or* a `Heartbeat` *or*
@@ -514,33 +477,26 @@ first step is to cut down the definitions of each per-message record
 to contain just the information unique to that record:
 
 ```ocaml env=main
-# module Log_entry = struct
-    type t = { important: bool;
-               message: string;
-             }
-  end
-  module Heartbeat = struct
-    type t = { status_message: string; }
-  end
-  module Logon = struct
-    type t = { user: string;
-               credentials: string;
-             }
-  end
-module Log_entry : sig type t = { important : bool; message : string; } end
-module Heartbeat : sig type t = { status_message : string; } end
-module Logon : sig type t = { user : string; credentials : string; } end
+module Log_entry = struct
+  type t = { important: bool;
+             message: string;
+           }
+end
+module Heartbeat = struct
+  type t = { status_message: string; }
+end
+module Logon = struct
+  type t = { user: string;
+             credentials: string;
+           }
+end
 ```
 
 We can then define a variant type that combines these types:
 
 ```ocaml env=main
-# type details =
-    | Logon of Logon.t
-    | Heartbeat of Heartbeat.t
-    | Log_entry of Log_entry.t
 type details =
-    Logon of Logon.t
+  | Logon of Logon.t
   | Heartbeat of Heartbeat.t
   | Log_entry of Log_entry.t
 ```
@@ -549,12 +505,11 @@ Separately, we need a record that contains the fields that are common across
 all messages:
 
 ```ocaml env=main
-# module Common = struct
-    type t = { session_id: string;
-               time: Time_ns.t;
-             }
-  end
-module Common : sig type t = { session_id : string; time : Time_ns.t; } end
+module Common = struct
+  type t = { session_id: string;
+             time: Time_ns.t;
+           }
+end
 ```
 
 A full message can then be represented as a pair of a `Common.t` and a
@@ -613,14 +568,10 @@ the variant, then OCaml allows us to embed the records directly into
 the variant.
 
 ```ocaml env=main
-# type details =
-    | Logon     of { user: string; credentials: string; }
-    | Heartbeat of { status_message: string; }
-    | Log_entry of { important: bool; message: string; }
 type details =
-    Logon of { user : string; credentials : string; }
-  | Heartbeat of { status_message : string; }
-  | Log_entry of { important : bool; message : string; }
+  | Logon     of { user: string; credentials: string; }
+  | Heartbeat of { status_message: string; }
+  | Log_entry of { important: bool; message: string; }
 ```
 
 Even though the type is different, we can write `messages_for_user` in
@@ -679,18 +630,12 @@ An expression in this language will be defined by the variant `expr`, with
 one tag for each kind of expression we want to support:
 
 ```ocaml env=main
-# type 'a expr =
-    | Base  of 'a
-    | Const of bool
-    | And   of 'a expr list
-    | Or    of 'a expr list
-    | Not   of 'a expr
 type 'a expr =
-    Base of 'a
+  | Base  of 'a
   | Const of bool
-  | And of 'a expr list
-  | Or of 'a expr list
-  | Not of 'a expr
+  | And   of 'a expr list
+  | Or    of 'a expr list
+  | Not   of 'a expr
 ```
 
 Note that the definition of the type `expr` is recursive, meaning that a
@@ -709,11 +654,9 @@ language for an email processor, your base predicates might specify the tests
 you would run against an email, as in the following example:
 
 ```ocaml env=main
-# type mail_field = To | From | CC | Date | Subject
 type mail_field = To | From | CC | Date | Subject
-# type mail_predicate = { field: mail_field;
-                          contains: string }
-type mail_predicate = { field : mail_field; contains : string; }
+type mail_predicate = { field: mail_field;
+                        contains: string }
 ```
 
 Using the preceding code, we can construct a simple expression with
@@ -1034,16 +977,11 @@ follows, using an ordinary variant:
 [polymorphic variant types/vs. ordinary variants]{.idx}
 
 ```ocaml env=main
-# type extended_color =
-    | Basic of basic_color * weight  (* basic colors, regular and bold *)
-    | RGB   of int * int * int       (* 6x6x6 color space *)
-    | Gray  of int                   (* 24 grayscale levels *)
-    | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
 type extended_color =
-    Basic of basic_color * weight
-  | RGB of int * int * int
-  | Gray of int
-  | RGBA of int * int * int * int
+  | Basic of basic_color * weight  (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color space *)
+  | Gray  of int                   (* 24 grayscale levels *)
+  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
 ```
 
 We want to write a function `extended_color_to_int`, that works like

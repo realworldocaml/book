@@ -907,8 +907,7 @@ types. Here's a toy example of a data type representing a point in
 two-dimensional space:[datatypes/defining new]{.idx}
 
 ```ocaml env=main
-# type point2d = { x : float; y : float }
-type point2d = { x : float; y : float; }
+type point2d = { x : float; y : float }
 ```
 
 `point2d` is a *record* type, which you can think of as a tuple where the
@@ -955,12 +954,9 @@ types. Here, for example, are some types for modeling different geometric
 objects that contain values of type `point2d`:
 
 ```ocaml env=main
-# type circle_desc  = { center: point2d; radius: float }
-type circle_desc = { center : point2d; radius : float; }
-# type rect_desc    = { lower_left: point2d; width: float; height: float }
-type rect_desc = { lower_left : point2d; width : float; height : float; }
-# type segment_desc = { endpoint1: point2d; endpoint2: point2d }
-type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
+type circle_desc  = { center: point2d; radius: float }
+type rect_desc    = { lower_left: point2d; width: float; height: float }
+type segment_desc = { endpoint1: point2d; endpoint2: point2d }
 ```
 
 Now, imagine that you want to combine multiple objects of these types
@@ -970,13 +966,9 @@ this is using a *variant* type:[datatypes/variant types]{.idx}[variant
 types/combining multiple object types with]{.idx}
 
 ```ocaml env=main
-# type scene_element =
-    | Circle  of circle_desc
-    | Rect    of rect_desc
-    | Segment of segment_desc
 type scene_element =
-    Circle of circle_desc
-  | Rect of rect_desc
+  | Circle  of circle_desc
+  | Rect    of rect_desc
   | Segment of segment_desc
 ```
 
@@ -1104,16 +1096,11 @@ numbers.[imperative programming/mutable record fields]{.idx}[mutable record
 fields]{.idx}[data structures/mutable record fields]{.idx}
 
 ```ocaml env=main
-# type running_sum =
-    { mutable sum: float;
-      mutable sum_sq: float; (* sum of squares *)
-      mutable samples: int;
-    }
-type running_sum = {
-  mutable sum : float;
-  mutable sum_sq : float;
-  mutable samples : int;
-}
+type running_sum =
+  { mutable sum: float;
+    mutable sum_sq: float; (* sum of squares *)
+    mutable samples: int;
+  }
 ```
 
 The fields in `running_sum` are designed to be easy to extend incrementally,
