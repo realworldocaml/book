@@ -782,11 +782,11 @@ compiled with debugging symbols. Base reverses the default, so if you're
 linking in Base, you will have backtraces enabled by default.
 
 Even using Base and compiling with debugging symbols, you can turn
-backtraces off by setting the `OCAMLRUNPARAM` environment variable to
-be empty:
+backtraces off via the `OCAMLRUNPARAM` environment variable, as shown
+below.
 
 ```sh dir=examples/correct/blow_up
-$ OCAMLRUNPARAM= dune exec -- ./blow_up.exe
+$ OCAMLRUNPARAM=b=0 dune exec -- ./blow_up.exe
 3
 Fatal error: exception Dune__exe__Blow_up.Empty_list
 Raised at file "blow_up.ml", line 6, characters 10-26
@@ -868,7 +868,7 @@ handler, and 60 more to actually throwing and catching an exception. If we
 turn backtraces off, then the results look like this:
 
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
-$ OCAMLRUNPARAM= ./_build/default/exn_cost.exe -ascii cycles -quota 1
+$ OCAMLRUNPARAM=b=0 ./_build/default/exn_cost.exe -ascii cycles -quota 1
 Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
 |
 |    Name                           Time/Run   Cycls/Run   mWd/Run   Percentage
