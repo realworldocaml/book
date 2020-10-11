@@ -5,6 +5,7 @@ let do_hash file =
   |> Md5.to_hex
   |> print_endline
 
+[@@@part "1"];;
 let regular_file =
   Command.Arg_type.map Filename.arg_type ~f:(fun filename ->
       match Sys.is_file filename with
@@ -12,6 +13,7 @@ let regular_file =
       | `No -> failwith "Not a regular file"
       | `Unknown -> failwith "Could not determine if this was a regular file")
 
+[@@@part "2"];;
 let command =
   Command.basic ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
