@@ -663,27 +663,26 @@ open Async
 
 let run ~uppercase ~port =
   let host_and_port =
-    Tcp.Server.create
-      ~on_handler_error:`Raise
-      (Tcp.Where_to_listen.of_port port)
-      (fun _addr r w ->
+    Tcp.Server.create ~on_handler_error:`Raise
+      (Tcp.Where_to_listen.of_port port) (fun _addr r w ->
         Pipe.transfer (Reader.pipe r) (Writer.pipe w)
-           ~f:(if uppercase then String.uppercase else Fn.id))
+          ~f:(if uppercase then String.uppercase else Fn.id))
   in
   ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
   Deferred.never ()
 
 let () =
-  Command.async_spec
-    ~summary:"Start an echo server"
-    Command.Spec.(
-      empty
-      +> flag "-uppercase" no_arg
-        ~doc:" Convert to uppercase before echoing back"
-      +> flag "-port" (optional_with_default 8765 int)
-        ~doc:" Port to listen on (default 8765)"
-    )
-    (fun uppercase port () -> run ~uppercase ~port)
+  Command.async ~summary:"Start an echo server"
+    Command.Let_syntax.(
+      let%map_open uppercase =
+        flag "-uppercase" no_arg
+          ~doc:" Convert to uppercase before echoing back"
+      and port =
+        flag "-port"
+          (optional_with_default 8765 int)
+          ~doc:" Port to listen on (default 8765)"
+      in
+      fun () -> run ~uppercase ~port)
   |> Command.run
 ```
 
@@ -831,7 +830,7 @@ open Async
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri query =
   let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
-  Uri.add_query_param base_uri ("q", [query])
+  Uri.add_query_param base_uri ("q", [ query ])
 ```
 
 A `Uri.t` is constructed from the `Uri.of_string` function, and a query
@@ -858,17 +857,13 @@ first one for which a nonempty value is defined:
 (* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
 let get_definition_from_json json =
   match Yojson.Safe.from_string json with
-  | `Assoc kv_list ->
-    let find key =
-      begin match List.Assoc.find ~equal:String.equal kv_list key with
-      | None | Some (`String "") -> None
-      | Some s -> Some (Yojson.Safe.to_string s)
-      end
-    in
-    begin match find "Abstract" with
-    | Some _ as x -> x
-    | None -> find "Definition"
-    end
+  | `Assoc kv_list -> (
+      let find key =
+        match List.Assoc.find ~equal:String.equal kv_list key with
+        | None | Some (`String "") -> None
+        | Some s -> Some (Yojson.Safe.to_string s)
+      in
+      match find "Abstract" with Some _ as x -> x | None -> find "Definition" )
   | _ -> None
 ```
 
@@ -882,10 +877,8 @@ search engine/executing an HTTP client query in]{.idx}
 ```ocaml file=examples/correct/search/search.ml,part=2
 (* Execute the DuckDuckGo search *)
 let get_definition word =
-  Cohttp_async.Client.get (query_uri word)
-  >>= fun (_, body) ->
-  Cohttp_async.Body.to_string body
-  >>| fun string ->
+  Cohttp_async.Client.get (query_uri word) >>= fun (_, body) ->
+  Cohttp_async.Body.to_string body >>| fun string ->
   (word, get_definition_from_json string)
 ```
 
@@ -918,15 +911,13 @@ result:
 
 ```ocaml file=examples/correct/search/search.ml,part=3
 (* Print out a word/definition pair *)
-let print_result (word,definition) =
-  printf "%s\n%s\n\n%s\n\n"
-    word
+let print_result (word, definition) =
+  printf "%s\n%s\n\n%s\n\n" word
     (String.init (String.length word) ~f:(fun _ -> '-'))
-    (match definition with
+    ( match definition with
     | None -> "No definition found"
-    | Some def ->
-      String.concat ~sep:"\n"
-        (Wrapper.wrap (Wrapper.make 70) def))
+    | Some def -> String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def)
+    )
 ```
 
 We use the `Wrapper` module from the `textwrap` package to do the line
@@ -945,8 +936,7 @@ and then prints:
 (* Run many searches in parallel, printing out the results after they're all
    done. *)
 let search_and_print words =
-  Deferred.all (List.map words ~f:get_definition)
-  >>| fun results ->
+  Deferred.all (List.map words ~f:get_definition) >>| fun results ->
   List.iter results ~f:print_result
 ```
 
@@ -970,8 +960,8 @@ received (and thus potentially out of order) as follows:
 ```ocaml file=examples/correct/search_out_of_order/search.ml,part=4
 (* Run many searches in parallel, printing out the results as you go *)
 let search_and_print words =
-  Deferred.all_unit (List.map words ~f:(fun word ->
-    get_definition word >>| print_result))
+  Deferred.all_unit
+    (List.map words ~f:(fun word -> get_definition word >>| print_result))
 ```
 
 The difference is that we both dispatch the query and print out the result in
@@ -990,13 +980,10 @@ Finally, we create a command-line interface using `Command.async`:
 
 ```ocaml file=examples/correct/search/search.ml,part=5
 let () =
-  Command.async_spec
-    ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Spec.(
-      empty
-      +> anon (sequence ("word" %: string))
-    )
-    (fun words () -> search_and_print words)
+  Command.async ~summary:"Retrieve definitions from duckduckgo search engine"
+    Command.Let_syntax.(
+      let%map_open words = anon (sequence ("word" %: string)) in
+      fun () -> search_and_print words)
   |> Command.run
 ```
 
@@ -1269,9 +1256,9 @@ server to connect to:
 (* Generate a DuckDuckGo search URI from a query string *)
 let query_uri ~server query =
   let base_uri =
-    Uri.of_string (String.concat ["http://";server;"/?format=json"])
+    Uri.of_string (String.concat [ "http://"; server; "/?format=json" ])
   in
-  Uri.add_query_param base_uri ("q", [query])
+  Uri.add_query_param base_uri ("q", [ query ])
 ```
 
 In addition, we'll make the necessary changes to get the list of servers on
@@ -1301,14 +1288,12 @@ within each call to `get_definition`, as follows:
 (* Execute the DuckDuckGo search *)
 let get_definition ~server word =
   try_with (fun () ->
-    Cohttp_async.Client.get (query_uri ~server word)
-    >>= fun (_, body) ->
-    Cohttp_async.Body.to_string body
-    >>| fun string ->
-    (word, get_definition_from_json string))
+      Cohttp_async.Client.get (query_uri ~server word) >>= fun (_, body) ->
+      Cohttp_async.Body.to_string body >>| fun string ->
+      (word, get_definition_from_json string))
   >>| function
-  | Ok (word,result) -> (word, Ok result)
-  | Error _          -> (word, Error "Unexpected failure")
+  | Ok (word, result) -> (word, Ok result)
+  | Error _ -> (word, Error "Unexpected failure")
 ```
 
 Here, we first use `try_with` to capture the exception, and then use map (the
@@ -1321,16 +1306,14 @@ the new type:
 
 ```ocaml file=examples/correct/search_with_error_handling/search.ml,part=2
 (* Print out a word/definition pair *)
-let print_result (word,definition) =
-  printf "%s\n%s\n\n%s\n\n"
-    word
+let print_result (word, definition) =
+  printf "%s\n%s\n\n%s\n\n" word
     (String.init (String.length word) ~f:(fun _ -> '-'))
-    (match definition with
-     | Error s -> "DuckDuckGo query failed: " ^ s
-     | Ok None -> "No definition found"
-     | Ok (Some def) ->
-       String.concat ~sep:"\n"
-         (Wrapper.wrap (Wrapper.make 70) def))
+    ( match definition with
+    | Error s -> "DuckDuckGo query failed: " ^ s
+    | Ok None -> "No definition found"
+    | Ok (Some def) ->
+        String.concat ~sep:"\n" (Wrapper.wrap (Wrapper.make 70) def) )
 ```
 
 Now, if we run that same query, we'll get individualized handling of the
@@ -1406,18 +1389,18 @@ following code is a wrapper for `get_definition` that takes a timeout
 (in the form of a `Time.Span.t`) and returns either the definition,
 or, if that takes too long, an error:
 
-```ocaml file=examples/correct/search_with_timeout.ml,part=1
+```ocaml file=examples/correct/search_with_timeout/search.ml,part=1
 let get_definition_with_timeout ~server ~timeout word =
   Deferred.any
-    [ (after timeout >>| fun () -> (word,Error "Timed out"))
-    ; (get_definition ~server word
-       >>| fun (word,result) ->
-       let result' = match result with
-         | Ok _ as x -> x
-         | Error _ -> Error "Unexpected failure"
-       in
-       (word,result')
-      )
+    [
+      (after timeout >>| fun () -> (word, Error "Timed out"));
+      ( get_definition ~server word >>| fun (word, result) ->
+        let result' =
+          match result with
+          | Ok _ as x -> x
+          | Error _ -> Error "Unexpected failure"
+        in
+        (word, result') );
     ]
 ```
 
@@ -1439,14 +1422,13 @@ expires:
 (* Execute the DuckDuckGo search *)
 let get_definition ~server ~interrupt word =
   try_with (fun () ->
-    Cohttp_async.Client.get ~interrupt (query_uri ~server word)
-    >>= fun (_, body) ->
-    Cohttp_async.Body.to_string body
-    >>| fun string ->
-    (word, get_definition_from_json string))
+      Cohttp_async.Client.get ~interrupt (query_uri ~server word)
+      >>= fun (_, body) ->
+      Cohttp_async.Body.to_string body >>| fun string ->
+      (word, get_definition_from_json string))
   >>| function
-  | Ok (word,result) -> (word, Ok result)
-  | Error _          -> (word, Error "Unexpected failure")
+  | Ok (word, result) -> (word, Ok result)
+  | Error _ -> (word, Error "Unexpected failure")
 ```
 
 Next, we'll modify `get_definition_with_timeout` to create a deferred to pass
@@ -1456,12 +1438,11 @@ expires:
 ```ocaml file=examples/correct/search_with_timeout_no_leak_simple/search.ml,part=2
 let get_definition_with_timeout ~server ~timeout word =
   get_definition ~server ~interrupt:(after timeout) word
-  >>| fun (word,result) ->
-  let result' = match result with
-    | Ok _ as x -> x
-    | Error _ -> Error "Unexpected failure"
+  >>| fun (word, result) ->
+  let result' =
+    match result with Ok _ as x -> x | Error _ -> Error "Unexpected failure"
   in
-  (word,result')
+  (word, result')
 ```
 
 This will cause the connection to shutdown cleanly when we time out;
@@ -1496,17 +1477,19 @@ Here's the code:
 let get_definition_with_timeout ~server ~timeout word =
   let interrupt = Ivar.create () in
   choose
-    [ choice (after timeout) (fun () ->
-       Ivar.fill interrupt ();
-       (word,Error "Timed out"))
-    ; choice (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
-        (fun (word,result) ->
-           let result' = match result with
-             | Ok _ as x -> x
-             | Error _ -> Error "Unexpected failure"
-           in
-           (word,result')
-        )
+    [
+      choice (after timeout) (fun () ->
+          Ivar.fill interrupt ();
+          (word, Error "Timed out"));
+      choice
+        (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
+        (fun (word, result) ->
+          let result' =
+            match result with
+            | Ok _ as x -> x
+            | Error _ -> Error "Unexpected failure"
+          in
+          (word, result'));
     ]
 ```
 
