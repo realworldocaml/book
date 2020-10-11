@@ -3,35 +3,30 @@ open Core_bench
 
 exception Exit
 
-let simple_computation () =
-  List.range 0 10
-  |> List.fold ~init:0 ~f:(fun sum x -> sum + x * x)
-  |> ignore
+let x = 0
 
-let simple_with_handler () =
-  try simple_computation () with Exit -> ()
+type how_to_end = Ordinary | Raise | Raise_no_backtrace
 
-let end_with_exn () =
-  try
-    simple_computation ();
-    raise Exit
-  with Exit -> ()
+let computation how_to_end =
+  let x = 10 in
+  let y = 40 in
+  let _z = x + (y * y) in
+  match how_to_end with
+  | Ordinary -> ()
+  | Raise -> raise Exit
+  | Raise_no_backtrace -> raise_notrace Exit
 
-let end_with_exn_notrace () =
-  try
-    simple_computation ();
-    Exn.raise_without_backtrace Exit
-  with Exit -> ()
+let computation_with_handler how = try computation how with Exit -> ()
 
 let () =
-  [ Bench.Test.create ~name:"simple computation"
-      (fun () -> simple_computation ());
-    Bench.Test.create ~name:"simple computation w/handler"
-      (fun () -> simple_with_handler ());
-    Bench.Test.create ~name:"end with exn"
-      (fun () -> end_with_exn ());
-    Bench.Test.create ~name:"end with exn notrace"
-      (fun () -> end_with_exn_notrace ());
+  [
+    Bench.Test.create ~name:"simple computation" (fun () ->
+        computation Ordinary);
+    Bench.Test.create ~name:"simple computation w/handler" (fun () ->
+        computation_with_handler Ordinary);
+    Bench.Test.create ~name:"end with exn" (fun () ->
+        computation_with_handler Raise);
+    Bench.Test.create ~name:"end with exn notrace" (fun () ->
+        computation_with_handler Raise_no_backtrace);
   ]
-  |> Bench.make_command
-  |> Command.run
+  |> Bench.make_command |> Command.run
