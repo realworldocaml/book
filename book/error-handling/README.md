@@ -842,7 +842,7 @@ We're testing four cases here:
 - a simple computation with no exception,
 - the same, but with an exception handler but no exception thrown,
 - the same, but where we do throw an exception,
-- and finally, the same, but where we thorw an exception using
+- and finally, the same, but where we throw an exception using
   `raise_notrace`, which is a version of `raise` which for that
   particular exception avoids the costs of keeping track of the
   backtrace.
