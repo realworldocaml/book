@@ -964,11 +964,11 @@ the accumulator value as it walks over the queue, returning the final value
 of the accumulator at the end of the computation. `fold` is a quite powerful
 operation, as we'll see.
 
-We'll implement `Fqueue` the well known trick of maintaining an input and an
-output list so that one can efficiently enqueue on the input list and
-efficiently dequeue from the output list. If you attempt to dequeue when the
-output list is empty, the input list is reversed and becomes the new output
-list. Here's the implementation:
+We'll implement `Fqueue` using the well known trick of maintaining an
+input and an output list so that one can both efficiently enqueue on
+the input list and dequeue from the output list. If you attempt to
+dequeue when the output list is empty, the input list is reversed and
+becomes the new output list. Here's the implementation:
 
 ```ocaml file=examples/fqueue.ml
 open Base

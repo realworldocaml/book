@@ -782,27 +782,25 @@ compiled with debugging symbols. Base reverses the default, so if you're
 linking in Base, you will have backtraces enabled by default.
 
 Even using Base and compiling with debugging symbols, you can turn
-backtraces off by setting the `OCAMLRUNPARAM` environment variable to
-be empty:
+backtraces off via the `OCAMLRUNPARAM` environment variable, as shown
+below.
 
 ```sh dir=examples/correct/blow_up
-$ OCAMLRUNPARAM= dune exec -- ./blow_up.exe
+$ OCAMLRUNPARAM=b=0 dune exec -- ./blow_up.exe
 3
 Fatal error: exception Dune__exe__Blow_up.Empty_list
-Raised at file "blow_up.ml", line 6, characters 10-26
-Called from file "blow_up.ml", line 11, characters 16-29
 [2]
 ```
 
-The resulting error message is considerably less informative. You can also
-turn backtraces off in your code by calling
-`Backtrace.Exn.set_recording false`.[Exn module/Backtrace.Exn.set_recording
-false]{.idx}
+The resulting error message is considerably less informative. You can
+also turn backtraces off in your code by calling
+`Backtrace.Exn.set_recording false`.[Exn
+module/Backtrace.Exn.set_recording false]{.idx}
 
-There is a legitimate reasons to run without backtraces: speed. OCaml's
-exceptions are fairly fast, but they're even faster still if you disable
-backtraces. Here's a simple benchmark that shows the effect, using the
-`core_bench` package:
+There is a legitimate reasons to run without backtraces:
+speed. OCaml's exceptions are fairly fast, but they're faster still if
+you disable backtraces. Here's a simple benchmark that shows the
+effect, using the `core_bench` package:
 
 ```ocaml file=examples/correct/exn_cost/exn_cost.ml
 open Core
@@ -810,79 +808,93 @@ open Core_bench
 
 exception Exit
 
-let simple_computation () =
-  List.range 0 10
-  |> List.fold ~init:0 ~f:(fun sum x -> sum + x * x)
-  |> ignore
+let x = 0
 
-let simple_with_handler () =
-  try simple_computation () with Exit -> ()
+type how_to_end = Ordinary | Raise | Raise_no_backtrace
 
-let end_with_exn () =
-  try
-    simple_computation ();
-    raise Exit
-  with Exit -> ()
+let computation how_to_end =
+  let x = 10 in
+  let y = 40 in
+  let _z = x + (y * y) in
+  match how_to_end with
+  | Ordinary -> ()
+  | Raise -> raise Exit
+  | Raise_no_backtrace -> raise_notrace Exit
 
-let end_with_exn_notrace () =
-  try
-    simple_computation ();
-    Exn.raise_without_backtrace Exit
-  with Exit -> ()
+let computation_with_handler how = try computation how with Exit -> ()
 
 let () =
-  [ Bench.Test.create ~name:"simple computation"
-      (fun () -> simple_computation ());
-    Bench.Test.create ~name:"simple computation w/handler"
-      (fun () -> simple_with_handler ());
-    Bench.Test.create ~name:"end with exn"
-      (fun () -> end_with_exn ());
-    Bench.Test.create ~name:"end with exn notrace"
-      (fun () -> end_with_exn_notrace ());
+  [
+    Bench.Test.create ~name:"simple computation" (fun () ->
+        computation Ordinary);
+    Bench.Test.create ~name:"computation w/handler" (fun () ->
+        computation_with_handler Ordinary);
+    Bench.Test.create ~name:"end with exn" (fun () ->
+        computation_with_handler Raise);
+    Bench.Test.create ~name:"end with exn notrace" (fun () ->
+        computation_with_handler Raise_no_backtrace);
   ]
-  |> Bench.make_command
-  |> Command.run
+  |> Bench.make_command |> Command.run
 ```
 
-We're testing three cases here: a simple computation with no exceptions; the
-same computation with an exception handler but no thrown exceptions; and
-finally the same computation where we use the exception to do the control
-flow back to the caller.
+We're testing four cases here:
 
-If we run this with stacktraces on, the benchmark results look like this:
+- a simple computation with no exception,
+- the same, but with an exception handler but no exception thrown,
+- the same, but where an exception is thrown,
+- and finally, the same, but where we throw an exception using
+  `raise_notrace`, which is a version of `raise` which locally avoids
+  the costs of keeping track of the backtrace.
+
+Here are the results.
 
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
-$ dune exec -- ./exn_cost.exe -ascii cycles -quota 1
-Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
+$ dune exec -- \
+> ./exn_cost.exe -ascii -quota 1 -clear-columns time cycles
+Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
 
-  Name                           Time/Run   Cycls/Run   mWd/Run   Percentage
- ------------------------------ ---------- ----------- --------- ------------
-  simple computation             177.25ns     353.04c    84.00w       90.04%
-  simple computation w/handler   171.60ns     341.81c    84.00w       87.17%
-  end with exn                   196.85ns     392.11c    84.00w      100.00%
-  end with exn notrace           169.20ns     337.00c    84.00w       85.95%
+  Name                    Time/Run   Cycls/Run
+ ----------------------- ---------- -----------
+  simple computation        1.84ns       3.66c
+  computation w/handler     3.13ns       6.23c
+  end with exn             27.96ns      55.69c
+  end with exn notrace     11.69ns      23.28c
+
 ```
 
-Here, we see that we lose something like 30 cycles to adding an exception
-handler, and 60 more to actually throwing and catching an exception. If we
-turn backtraces off, then the results look like this:
+Note that we lose just a small number of cycles to setting up an
+exception handler, which means that an unused exception handler is
+quite cheap indeed.  We lose a much bigger chunk, around 45 cycles, to
+actually raising an exception.  If we explicitly raise an exception
+with no stacktrace, it costs us about 15 cycles.
+
+We can also disable stacktraces, as we discussed, using
+`OCAMLRUNPARAM`.  That changes the results a bit.
 
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
-$ OCAMLRUNPARAM= ./_build/default/exn_cost.exe -ascii cycles -quota 1
-Estimated testing time 4s (4 benchmarks x 1s). Change using -quota SECS.
-|
-|    Name                           Time/Run   Cycls/Run   mWd/Run   Percentage
-|   ------------------------------ ---------- ----------- --------- ------------
-|    simple computation             428.29ns      1.33kc    84.00w       92.36%
-|    simple computation w/handler   463.72ns      1.44kc    84.00w      100.00%
-|    end with exn                   428.89ns      1.33kc    84.00w       92.49%
-|    end with exn notrace           413.29ns      1.28kc    84.00w       89.13%
+$ OCAMLRUNPARAM=b=0 dune exec -- \
+> ./exn_cost.exe -ascii -quota 1 -clear-columns time cycles
+Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
+
+  Name                    Time/Run   Cycls/Run
+ ----------------------- ---------- -----------
+  simple computation        1.71ns       3.41c
+  computation w/handler     3.04ns       6.05c
+  end with exn             19.36ns      38.57c
+  end with exn notrace     11.48ns      22.86c
+
 ```
 
-Here, the handler costs about the same, but the exception itself costs only
-25, as opposed to 60 additional cycles. All told, this should only matter if
-you're using exceptions routinely as part of your flow control, which is in
-most cases a stylistic mistake anyway.
+The only significant change here is that raising an exception in the
+ordinary way becomes just a bit cheaper: 30 cycles instead of 45
+cycles.  But it's still not as fast as using `raise_notrace` explicitly.
+
+Differences on this scale should only matter if you're using
+exceptions routinely as part of your flow control.  That's not a
+pattern you should be using routinely anyway, and when you do, it's
+better from a performance perspective to use `raise_notrace` in those
+particular places anyway.  All of which is to say, you should almost
+always leave stack-traces on.
 
 ### From Exceptions to Error-Aware Types and Back Again
 
