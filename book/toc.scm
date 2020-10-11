@@ -20,9 +20,9 @@
  ((title "Tools and Techniques")
   (chapters
    (maps-and-hashtables
+    command-line-parsing
     concurrent-programming
     (wip testing)
-    command-line-parsing
     json
     parsing-with-ocamllex-and-menhir
     data-serialization
