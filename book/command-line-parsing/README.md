@@ -417,6 +417,22 @@ For usage information, run
 [1]
 ```
 
+```sh dir=examples/correct/md5_with_better_custom_arg
+$ dune exec -- ./md5.exe md5.ml
+b5d69e668b55cc32eb683ae818cd5938
+$ dune exec -- ./md5.exe /dev/null
+Error parsing command line:
+
+  (Failure "Not a regular file")
+
+For usage information, run
+
+  md5.exe -help
+
+[1]
+```
+
+
 ### Optional and Default Arguments
 
 A more realistic `md5` binary could also read from the standard input if a

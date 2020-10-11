@@ -133,6 +133,18 @@
  (deps (alias md5_succinct)))
 
 (rule
+ (alias md5_with_better_custom_arg)
+ (deps
+  (source_tree ./correct/md5_with_better_custom_arg)
+  (package core))
+ (action
+  (run dune build @all @runtest --root ./correct/md5_with_better_custom_arg)))
+
+(alias
+ (name runtest)
+ (deps (alias md5_with_better_custom_arg)))
+
+(rule
  (alias md5_with_custom_arg)
  (deps
   (source_tree ./correct/md5_with_custom_arg)
