@@ -339,29 +339,17 @@ some of the more advanced features of Command.
 ## Argument Types
 
 You aren't just limited to parsing command lines of strings and ints.
-`Command.Param` defines several other conversion functions (shown in
-[Table14_1](command-line-parsing.html#table14_1){data-type=xref}) that
-validate and parse input into various types. [arguments/argument
+`Command.Param` defines several other argument types that validate and
+parse different types of input.  Some of these argument types, like
+ones for `string`, `float`, and `int`, are defined in `Command.Param`
+itself.  Some of them are defined within the modules in `Core` and
+other associated libraries that define the type in question.
+[arguments/argument
 types]{.idx}[command-line parsing/argument types]{.idx}
 
-::: {#table14_1 data-type=table}
-Argument type | OCaml type | Example
---------------|------------|--------
-`string` | `string` | `foo`
-`int` | `int` | `123`
-`float` | `float` | `123.01`
-`bool` | `bool` | `true`
-`date` | `Date.t` | `2013-12-25`
-`time_span` | `Span.t` | `5s`
-`file` | `string` | `/etc/passwd`
-
-Table:  Conversion functions defined in `Command.Param`
-:::
-
-
-
-We can tighten up the specification of the command to `Filename.arg_type` to
-reflect that the argument must be a valid filename, and not just any string.
+As an example, we can tighten up the specification of the command to
+`Filename.arg_type` to reflect that the argument must be a valid
+filename, and not just any string.
 
 ```ocaml file=examples/correct/md5_as_filename/md5.ml,part=1
 let command =
