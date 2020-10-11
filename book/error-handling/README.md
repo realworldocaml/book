@@ -827,7 +827,7 @@ let () =
   [
     Bench.Test.create ~name:"simple computation" (fun () ->
         computation Ordinary);
-    Bench.Test.create ~name:"simple computation w/handler" (fun () ->
+    Bench.Test.create ~name:"computation w/handler" (fun () ->
         computation_with_handler Ordinary);
     Bench.Test.create ~name:"end with exn" (fun () ->
         computation_with_handler Raise);
@@ -850,15 +850,16 @@ We're testing four cases here:
 Here are the results.
 
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
-$ dune exec -- ./exn_cost.exe -ascii cycles -quota 1
+$ dune exec -- \
+> ./exn_cost.exe -ascii -quota 1 -clear-columns time cycles
 Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
 
-  Name                           Time/Run   Cycls/Run   Percentage
- ------------------------------ ---------- ----------- ------------
-  simple computation               1.52ns       3.03c        6.33%
-  simple computation w/handler     2.90ns       5.77c       12.04%
-  end with exn                    24.06ns      47.93c      100.00%
-  end with exn notrace            10.88ns      21.68c       45.22%
+  Name                    Time/Run   Cycls/Run
+ ----------------------- ---------- -----------
+  simple computation        1.84ns       3.66c
+  computation w/handler     3.13ns       6.23c
+  end with exn             27.96ns      55.69c
+  end with exn notrace     11.69ns      23.28c
 
 ```
 
@@ -872,15 +873,16 @@ We can also disable stacktraces, as we discussed, using
 `OCAMLRUNPARAM`.  That changes the results a bit.
 
 ```sh dir=examples/correct/exn_cost,non-deterministic=output
-$ OCAMLRUNPARAM=b=0 ./_build/default/exn_cost.exe -ascii cycles -quota 1
+$ OCAMLRUNPARAM=b=0 dune exec -- \
+> ./exn_cost.exe -ascii -quota 1 -clear-columns time cycles
 Estimated testing time 4s (4 benchmarks x 1s). Change using '-quota'.
 
-  Name                           Time/Run   Cycls/Run   Percentage
- ------------------------------ ---------- ----------- ------------
-  simple computation               1.60ns       3.19c        8.79%
-  simple computation w/handler     3.03ns       6.04c       16.67%
-  end with exn                    18.20ns      36.26c      100.00%
-  end with exn notrace            11.33ns      22.57c       62.23%
+  Name                    Time/Run   Cycls/Run
+ ----------------------- ---------- -----------
+  simple computation        1.71ns       3.41c
+  computation w/handler     3.04ns       6.05c
+  end with exn             19.36ns      38.57c
+  end with exn notrace     11.48ns      22.86c
 
 ```
 
