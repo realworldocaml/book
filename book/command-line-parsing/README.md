@@ -73,13 +73,14 @@ let filename_param =
   anon ("filename" %: string)
 ```
 
-Here, `anon` is used to signal the parsing of an anonymous argument, and the
-expression `("filename" %: string)` indicates the textual name of the
-argument and specification that describes the kind of value that is expected.
-The textual name is used for generating help text, and the specification is
-used both to nail down the OCaml type of the returned value (`string`, in
-this case) and to guide features like input validation. The values `anon`,
-`string` and `%:` all come from the `Command.Param` module.
+Here, `anon` is used to signal the parsing of an anonymous argument,
+and the expression `("filename" %: string)` indicates the textual name
+of the argument and specification that describes the kind of value
+that is expected.  The textual name is used for generating help text,
+and the specification, which has type `Command.Arg_type.t`, is used
+both to nail down the OCaml type of the returned value (`string`, in
+this case) and to guide features like input validation. The values
+`anon`, `string` and `%:` all come from the `Command.Param` module.
 
 ### Defining basic commands
 
@@ -339,12 +340,10 @@ some of the more advanced features of Command.
 ## Argument Types
 
 You aren't just limited to parsing command lines of strings and ints.
-`Command.Param` defines several other argument types that validate and
-parse different types of input.  Some of these argument types, like
-ones for `string`, `float`, and `int`, are defined in `Command.Param`
-itself.  Some of them are defined within the modules in `Core` and
-other associated libraries that define the type in question.
-[arguments/argument
+There are some other argument types defined in `Command.Param`, like
+`date` and `percent`.  But most of the time, argument types for
+specific types in `Core` and other associated libraries are defined in
+the module that defines the type in question.  [arguments/argument
 types]{.idx}[command-line parsing/argument types]{.idx}
 
 As an example, we can tighten up the specification of the command to
@@ -361,9 +360,9 @@ let command =
       fun () -> do_hash file)
 ```
 
-This doesn't change the validation of the provided value, but it does enable
-interactive command-line completion. We'll explain how to enable that later
-in the chapter.
+This doesn't change the validation of the provided value, but it does
+enable interactive command-line completion. We'll explain how to
+enable that later in the chapter.
 
 ### Defining Custom Argument Types
 
@@ -381,24 +380,20 @@ let do_hash file =
   |> print_endline
 
 let regular_file =
-  Command.Arg_type.create
-    (fun filename ->
-       match Sys.is_file filename with
-       | `Yes -> filename
-       | `No | `Unknown ->
-         eprintf "'%s' is not a regular file.\n%!" filename;
-         exit 1)
+  Command.Arg_type.create (fun filename ->
+      match Sys.is_file filename with
+      | `Yes -> filename
+      | `No -> failwith "Not a regular file"
+      | `Unknown -> failwith "Could not determine if this was a regular file")
 
 let command =
-  Command.basic
-    ~summary:"Generate an MD5 hash of the input data"
+  Command.basic ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
     Command.Let_syntax.(
       let%map_open filename = anon ("filename" %: regular_file) in
       fun () -> do_hash filename)
 
-let () =
-  Command.run ~version:"1.0" ~build_info:"RWO" command
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command
 ```
 
 The `regular_file` function transforms a `filename` string parameter into the
@@ -408,9 +403,17 @@ try to open a special device such as `/dev/null`:
 
 ```sh dir=examples/correct/md5_with_custom_arg
 $ dune exec -- ./md5.exe md5.ml
-dcf52e01189f63155410b17f252cf676
+ed81ec895966cab3170befc62cf0a702
 $ dune exec -- ./md5.exe /dev/null
-'/dev/null' is not a regular file.
+Error parsing command line:
+
+  failed to parse FILENAME value "/dev/null"
+  (Failure "Not a regular file")
+
+For usage information, run
+
+  md5.exe -help
+
 [1]
 ```
 
