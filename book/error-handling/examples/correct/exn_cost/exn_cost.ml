@@ -22,7 +22,7 @@ let () =
   [
     Bench.Test.create ~name:"simple computation" (fun () ->
         computation Ordinary);
-    Bench.Test.create ~name:"simple computation w/handler" (fun () ->
+    Bench.Test.create ~name:"computation w/handler" (fun () ->
         computation_with_handler Ordinary);
     Bench.Test.create ~name:"end with exn" (fun () ->
         computation_with_handler Raise);
