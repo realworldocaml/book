@@ -1144,7 +1144,7 @@ You can find more information about the C interface in several places:
   [*Developing Applications with Objective Caml*](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf).
 
 - Florent Monnier maintains an excellent online
-  [ OCaml](http://www.linux-nantes.org/~fmonnier/ocaml/ocaml-wrapping-c.html)
+  [ OCaml](http://decapode314.free.fr/ocaml/ocaml-wrapping-c.html)
   that provides examples of how to call OCaml functions from C. This covers a
   wide variety of OCaml data types and also more complex callbacks between C
   and OCaml.
