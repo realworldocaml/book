@@ -20,30 +20,32 @@ let get_definition_from_json json =
       match find "Abstract" with Some _ as x -> x | None -> find "Definition" )
   | _ -> None
 
-[@@@part "1"]
-
 (* Execute the DuckDuckGo search *)
-let get_definition ~server ~interrupt word =
+let get_definition ~server word =
   try_with (fun () ->
-      Cohttp_async.Client.get ~interrupt (query_uri ~server word)
-      >>= fun (_, body) ->
+      Cohttp_async.Client.get (query_uri ~server word) >>= fun (_, body) ->
       Cohttp_async.Body.to_string body >>| fun string ->
       (word, get_definition_from_json string))
   >>| function
   | Ok (word, result) -> (word, Ok result)
   | Error _ -> (word, Error "Unexpected failure")
 
-[@@@part "2"]
+[@@@part "1"]
 
 let get_definition_with_timeout ~server ~timeout word =
-  get_definition ~server ~interrupt:(after timeout) word
-  >>| fun (word, result) ->
-  let result' =
-    match result with Ok _ as x -> x | Error _ -> Error "Unexpected failure"
-  in
-  (word, result')
+  Deferred.any
+    [
+      (after timeout >>| fun () -> (word, Error "Timed out"));
+      ( get_definition ~server word >>| fun (word, result) ->
+        let result' =
+          match result with
+          | Ok _ as x -> x
+          | Error _ -> Error "Unexpected failure"
+        in
+        (word, result') );
+    ]
 
-[@@@part "3"]
+[@@@part "2"]
 
 (* Print out a word/definition pair *)
 let print_result (word, definition) =
@@ -70,7 +72,7 @@ let () =
     Command.Let_syntax.(
       let%map_open words = anon (sequence ("word" %: string))
       and servers =
-        let string_list = Arg_type.create (String.split ~on:',') in
+        let string_list = Command.Arg_type.create (String.split ~on:',') in
         flag "-servers"
           (optional_with_default [ "api.duckduckgo.com" ] string_list)
           ~doc:" Specify server to connect to"

@@ -99,6 +99,22 @@
  (deps (alias search_with_error_handling)))
 
 (rule
+ (alias search_with_timeout)
+ (deps
+  (source_tree ./correct/search_with_timeout)
+  (package core)
+  (package async)
+  (package cohttp-async)
+  (package yojson)
+  (package textwrap))
+ (action
+  (run dune build @all @runtest --root ./correct/search_with_timeout)))
+
+(alias
+ (name runtest)
+ (deps (alias search_with_timeout)))
+
+(rule
  (alias search_with_timeout_no_leak)
  (deps
   (source_tree ./correct/search_with_timeout_no_leak)
