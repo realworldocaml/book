@@ -1138,11 +1138,11 @@ class small_square = object
 end
 ```
 
-We can also use mixins to create animated shapes. Each animated shape has a
-list of update functions to be called during animation. We create an
-`animated` mixin to provide this update list and ensure that the functions in
-it are called regular intervals when the shape is animated:
-[animation/creating with mixins]{.idx}
+We can also use mixins to create animated shapes. Each animated shape
+has a list of update functions to be called during animation. We
+create an `animated` mixin to provide this update list and ensure that
+the functions in it are called at regular intervals when the shape is
+animated: [animation/creating with mixins]{.idx}
 
 ```ocaml file=examples/shapes/shapes.ml,part=6
 class virtual animated span = object(self)
