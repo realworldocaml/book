@@ -991,7 +991,7 @@ tell *utop* to process the input, not to separate two declarations
     | Rect { lower_left; width; height } ->
       point.x    > lower_left.x && point.x < lower_left.x + width
       && point.y > lower_left.y && point.y < lower_left.y + height
-    | _ -> false
+    | Segment _ -> false
 
   let is_inside_scene point scene =
     List.exists scene
