@@ -701,7 +701,7 @@ which is capable of evaluating a base predicate.
 
 Another useful operation on expressions is *simplification*, which is
 the process of taking a boolean expression and reducing it to an
-equivalent one that is smaller.  First, we'll bulid a few simplifying
+equivalent one that is smaller.  First, we'll build a few simplifying
 construction functions that mirror the tags of an `expr`.
 
 The `and_` function below does a few things:
