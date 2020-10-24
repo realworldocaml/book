@@ -101,12 +101,17 @@ job, but at the expense of an extra level of indirection to access the data
 within the boxed value. [garbage collection/and boxed values]{.idx}[boxing
 (of values)]{.idx}[values/boxing of]{.idx}
 
-OCaml values don't all have to be boxed at runtime. Instead, values use a
-single tag bit per word to distinguish integers and pointers at runtime. The
-value is an integer if the lowest bit of the block word is nonzero, and a
-pointer if the lowest bit of the block word is zero. Several OCaml types map
-onto this integer representation, including `bool`, `int`, the empty list,
-`unit`, and variants without constructors.
+OCaml values don't all have to be boxed at runtime. Instead, values
+use a single tag bit per word to distinguish integers and pointers at
+runtime. The value is an integer if the lowest bit of the block word
+is nonzero, and a pointer if the lowest bit of the block word is
+zero. Several OCaml types map onto this integer representation,
+including `bool`, `int`, the empty list, and `unit`.  Some types, like
+variants, sometimes use this integer representation and sometimes
+don't.  In particular, for variants, constant constructors, i.e.,
+constructors with no arguments like `None`, are represented as
+integers, but constructors like `Some` that carry associated values
+are boxed.
 
 This representation means that integers are unboxed runtime values in OCaml
 so that they can be stored directly without having to allocate a wrapper
