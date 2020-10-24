@@ -124,7 +124,7 @@ $ ocamlfind ocamlopt -linkpkg -package base -package stdio freq.ml -o freq
 ```
 
 This uses `ocamlfind`, a tool which itself invokes other parts of the
-OCaml toolchain (in this case, `ocamlc`) with the appropriate flags to
+OCaml toolchain (in this case, `ocamlopt`) with the appropriate flags to
 link in particular libraries and packages. Here, `-package base` is
 asking `ocamlfind` to link in the `Base` library; `-linkpkg` asks
 ocamlfind to link in the packages as is necessary for building an
