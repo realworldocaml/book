@@ -579,7 +579,9 @@ substitution]{.idx}[interval computation/destructive substitution]{.idx}
 <Module_type> with type <type> := <type'>
 ```
 
-The following shows how we could use this with `Make_interval`:
+This looks just like a sharing constraint, except that we use `:=`
+instead of `=`.  The following shows how we could use this with
+`Make_interval`.
 
 ```ocaml env=main
 # module type Int_interval_intf =
