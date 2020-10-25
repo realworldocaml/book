@@ -579,10 +579,10 @@ passed to `List.filter_map` returns an optional value, and `List.filter_map`
 drops all elements for which `None` is returned.
 
 Here's an example. The following function computes a list of file extensions
-from a list of files, piping the results through `List.dedup` to remove
-duplicates. Note that this example uses `String.rsplit2` from the String
-module to split a string on the rightmost appearance of a given
-character:[lists/duplicate removal]{.idx}[duplicates, removing]{.idx}
+from a list of files, piping the results through `List.dedup_and_sort` to
+return the list with duplicates removed and in sorted order. Note that
+this example uses `String.rsplit2` from the String module to split astring on the
+rightmost appearance of a given character:[lists/duplicate removal]{.idx}[duplicates, removing]{.idx}
 
 ```ocaml env=main
 # let extensions filenames =
