@@ -14,17 +14,23 @@ let pp_html ppf s =
   in
   String.iter add s
 
-let pp_output ppf = function
+let pp_output_html ppf = function
   |`Output s -> Fmt.pf ppf ">%a\n" pp_html s
   |`Ellipsis -> Fmt.pf ppf "...\n"
 
- let pp_line ppf l = Fmt.pf ppf "%a\n" pp_html l
+let pp_output_latex ppf = function
+  |`Output s -> Fmt.pf ppf "%s\n" s
+  |`Ellipsis -> Fmt.pf ppf "...\n"
 
- let pp_toplevel ppf (t:Mdx.Toplevel.t) =
+let pp_line_html ppf l = Fmt.pf ppf "%a\n" pp_html l
+
+let pp_line_latex ppf l = Fmt.pf ppf "# %s\n" l
+
+let pp_toplevel pp_line pp_output ppf (t:Mdx.Toplevel.t) =
   let cmds = match t.command with [c] -> [c ^ ";;"] | l -> l @ [";;"] in
   Fmt.pf ppf "%a%a" (pp_list pp_line) cmds (pp_list pp_output) t.output
 
-let pp_toplevel_block (b: Mdx.Block.t) ppf =
+let pp_toplevel_block pp_line pp_output (b: Mdx.Block.t) ppf =
   let ts =
     Mdx.Toplevel.of_lines
       ~syntax:Normal
@@ -33,7 +39,7 @@ let pp_toplevel_block (b: Mdx.Block.t) ppf =
       ~column:b.column
       b.contents
   in
-  pp_list pp_toplevel ppf ts
+  pp_list (pp_toplevel pp_line pp_output) ppf ts
 
 let pp_contents (t:Mdx.Block.t) ppf =
   Fmt.(list ~sep:(unit "\n") pp_html) ppf t.contents
@@ -44,8 +50,8 @@ let pp_cram ppf (t:Mdx.Cram.t) =
     | i -> Fmt.pf ppf "[%d]" i
   in
   Fmt.pf ppf "%a%a%t"
-    (pp_list pp_line) t.command
-    (pp_list pp_output) t.output pp_exit
+    (pp_list pp_line_html) t.command
+    (pp_list pp_output_html) t.output pp_exit
 
 let pp_cram_block content ppf =
   pp_list pp_cram ppf (snd (Mdx.Cram.of_lines content))
@@ -54,7 +60,7 @@ let header_to_string = Fmt.strf "%a" Mdx.Block.Header.pp
 
 let pp_block_html ppf (b:Mdx.Block.t) =
   let lang, pp_code, attrs = match b.value with
-    | Toplevel _ -> Some "ocaml", pp_toplevel_block b, [
+    | Toplevel _ -> Some "ocaml", pp_toplevel_block pp_line_html pp_output_html b, [
         ("class"             , "command-line");
         ("data-prompt"       , "#");
         ("data-filter-output", ">");
@@ -84,15 +90,17 @@ let pp_block_html ppf (b:Mdx.Block.t) =
     pp_attrs () pp_lang () pp_code
 
 let pp_block_latex ppf (b:Mdx.Block.t) =
-  let lang = match b.value with
-    | Toplevel _
-    | Include {file_kind = Fk_ocaml _; _}
-    | OCaml _ -> Some "ocaml"
-    | Cram _ -> Some "bash"
-    | Include {file_kind = Fk_other {header}; _}
-    | Raw {header} -> Option.map header_to_string header
+  let pp_code_default ppf =
+    Fmt.(list ~sep:(unit "\n") string) ppf b.contents
   in
-  let pp_code = (fun ppf -> Fmt.(list ~sep:(unit "\n") string) ppf b.contents) in
+  let lang, pp_code = match b.value with
+    | Toplevel _ -> Some "ocaml", pp_toplevel_block pp_line_latex pp_output_latex b
+    | Include {file_kind = Fk_ocaml _; _}
+    | OCaml _ -> Some "ocaml", pp_code_default
+    | Cram _ -> Some "bash", pp_code_default
+    | Include {file_kind = Fk_other {header}; _}
+    | Raw {header} -> Option.map header_to_string header, pp_code_default
+  in
   let lang = match lang with
     | None   -> "clike"
     | Some l -> l
