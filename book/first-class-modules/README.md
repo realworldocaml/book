@@ -822,11 +822,6 @@ Now build this into a command-line interface to experiment with it:
   (preprocess (pps ppx_sexp_conv)))
 ```
 
-
-
-```sh dir=examples/query_handler_loader
-```
-
 The resulting command-line interface behaves much as you'd expect, starting
 out with no query handlers available but giving you the ability to load and
 unload them. Here's an example of it in action. As you can see, we start out
