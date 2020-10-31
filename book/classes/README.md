@@ -1307,6 +1307,6 @@ graphics]{.idx}[external libraries/for graphics]{.idx}
 : An interface between OCaml and OpenGL, a widely supported standard for 3D
   rendering.
 
-[js_of_ocaml](http://ocsigen.org/js_of_ocaml/api/Js)
+[js_of_ocaml](https://ocsigen.org/js_of_ocaml/)
 : Compiles OCaml code to JavaScript and has bindings to WebGL. This is the
   emerging standard for 3D rendering in web browsers.
