@@ -2,7 +2,7 @@ open Core_kernel
 
 let gen_int_list_pair =
   let int_list_gen =
-    List.gen_non_empty (Int.gen_incl Int.min_value Int.max_value)
+    List.quickcheck_generator Int.quickcheck_generator
   in
   Quickcheck.Generator.both int_list_gen int_list_gen
 
