@@ -18,6 +18,7 @@
  (description "Scripts and sources to compile the Real World OCaml
 second edition book. See https://realworldocaml.org/")
  (depends
+  (dune (= 2.6.2))
   (ocaml (and (>= 4.10.0) (< 4.11.0)))
   async
   atdgen
@@ -41,5 +42,8 @@ second edition book. See https://realworldocaml.org/")
   sexp_pretty
   textwrap
   tls
-  yojson))
+  yojson)
+ (conflicts
+  (dune-build-info (<> 2.6.2))
+  (dune-configurator (<> 2.6.2))))
 

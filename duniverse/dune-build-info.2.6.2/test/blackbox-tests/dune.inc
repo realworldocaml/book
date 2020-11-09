@@ -1325,6 +1325,22 @@
    (progn (run dune-cram run run.t) (diff? run.t run.t.corrected)))))
 
 (rule
+ (alias github3490)
+ (deps (package dune) (source_tree test-cases/github3490) (alias test-deps))
+ (action
+  (chdir
+   test-cases/github3490
+   (progn (run dune-cram run run.t) (diff? run.t run.t.corrected)))))
+
+(rule
+ (alias github3530)
+ (deps (package dune) (source_tree test-cases/github3530) (alias test-deps))
+ (action
+  (chdir
+   test-cases/github3530
+   (progn (run dune-cram run run.t) (diff? run.t run.t.corrected)))))
+
+(rule
  (alias github534)
  (deps (package dune) (source_tree test-cases/github534) (alias test-deps))
  (action
@@ -1630,6 +1646,17 @@
  (action
   (chdir
    test-cases/invalid-module-name
+   (progn (run dune-cram run run.t) (diff? run.t run.t.corrected)))))
+
+(rule
+ (alias invalid-pform)
+ (deps
+  (package dune)
+  (source_tree test-cases/invalid-pform)
+  (alias test-deps))
+ (action
+  (chdir
+   test-cases/invalid-pform
    (progn (run dune-cram run run.t) (diff? run.t run.t.corrected)))))
 
 (rule
@@ -3063,6 +3090,8 @@
   (alias github3046)
   (alias github3180)
   (alias github3440)
+  (alias github3490)
+  (alias github3530)
   (alias github534)
   (alias github568)
   (alias github597)
@@ -3095,6 +3124,7 @@
   (alias intf-only)
   (alias invalid-dune-package)
   (alias invalid-module-name)
+  (alias invalid-pform)
   (alias lib)
   (alias lib-available)
   (alias lib-errors)
@@ -3348,6 +3378,8 @@
   (alias github3046)
   (alias github3180)
   (alias github3440)
+  (alias github3490)
+  (alias github3530)
   (alias github534)
   (alias github568)
   (alias github597)
@@ -3377,6 +3409,7 @@
   (alias intf-only)
   (alias invalid-dune-package)
   (alias invalid-module-name)
+  (alias invalid-pform)
   (alias lib)
   (alias lib-available)
   (alias lib-errors)

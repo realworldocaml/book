@@ -1,3 +1,25 @@
+2.6.2 (26/07/2020)
+------------------
+
+* Fix compatibility with OCaml 4.12 (#3585, fixes #3583, @ejgallego)
+
+2.6.1 (02/07/2020)
+------------------
+
+- Fix crash when caching is enabled (@rgrinberg, #3581, fixes #3580)
+
+- Do not use `-output-complete-exe` until 4.10.1 as it is broken in
+  4.10.0 (@jeremiedimino, #3187)
+
+- Fix crash when an unknown pform is found (such as `%{unknown}`) (#3560,
+  @emillon)
+
+- Improve error message when invalid package names (such as the empty string)
+  are passed to `dune build -p`. (#3561, @emillon)
+
+- Fix a stack overflow when displaying large outputs (including diffs) (#3537,
+  fixes #2767, #3490, @emillon)
+
 2.6.0 (05/06/2020)
 ------------------
 
