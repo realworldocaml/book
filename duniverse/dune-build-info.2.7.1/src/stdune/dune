@@ -1,0 +1,8 @@
+(library
+ (name stdune)
+ (public_name dune-private-libs.stdune)
+ (synopsis "[Internal] Standard library of Dune")
+ (libraries unix dune_csexp)
+ (foreign_stubs
+  (language c)
+  (names fcntl_stubs)))

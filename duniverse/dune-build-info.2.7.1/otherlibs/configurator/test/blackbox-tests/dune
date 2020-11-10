@@ -1,0 +1,9 @@
+(cram
+ (deps
+  (package dune)
+  (package dune-configurator)))
+
+(cram
+ (enabled_if
+  (<> %{ocaml-config:system} win))
+ (applies_to configurator.t))

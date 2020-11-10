@@ -1,0 +1,27 @@
+(executable
+ (name main)
+ (libraries memo dune_lang fiber stdune unix cache_daemon cache dune_rules
+   dune_engine dune_util cmdliner threads.posix build_info dune_csexp)
+ (bootstrap_info bootstrap-info))
+
+(rule
+ (action
+  (copy main.exe dune.exe))
+ (enabled_if
+  (<> %{profile} dune-bootstrap)))
+
+(rule
+ (action
+  (copy ../dune.exe dune.exe))
+ (enabled_if
+  (= %{profile} dune-bootstrap)))
+
+(install
+ (section bin)
+ (package dune)
+ (files
+  (dune.exe as dune)))
+
+(deprecated_library_name
+ (old_public_name dune.configurator)
+ (new_public_name dune-configurator))

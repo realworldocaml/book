@@ -1,0 +1,4 @@
+(executable
+ (name dune_cmd)
+ (libraries dune-private-libs.stdune dune-private-libs.dune_re
+   dune-configurator))
