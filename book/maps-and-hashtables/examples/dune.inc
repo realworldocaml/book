@@ -6,7 +6,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/freq-fast)))
+  (system "dune build @all @runtest --root ./correct/freq-fast")))
 
 (alias
  (name runtest)
@@ -19,7 +19,7 @@
   (package base)
   (package core_bench))
  (action
-  (run dune build @all @runtest --root ./correct/map_vs_hash)))
+  (system "dune build @all @runtest --root ./correct/map_vs_hash")))
 
 (alias
  (name runtest)
@@ -31,7 +31,7 @@
   (source_tree ./correct/map_vs_hash2)
   (package core_bench))
  (action
-  (run dune build @all @runtest --root ./correct/map_vs_hash2)))
+  (system "dune build @all @runtest --root ./correct/map_vs_hash2")))
 
 (alias
  (name runtest)
