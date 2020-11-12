@@ -642,6 +642,49 @@ you can always write your own comparison function by hand; but if all you
 need is a total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
+If you use Core rather than Base, things are a bit different. `Comparator.Make`
+requires `t_of_sexp` for the generated serialization modules. For this, we change
+the ppx from `sexp_of` to `sexp`.
+
+```ocaml env=main
+# #require "ppx_jane"
+# module Book = struct
+    module T = struct
+      type t = { title: string; isbn: string }
+      [@@deriving compare, sexp]
+    end
+    include T
+    include Comparator.Make(T)
+  end
+module Foo :
+  sig
+    module T :
+      sig
+        type t = { title : string; isbn : string; }
+        val t_of_sexp : Sexp.t -> t
+        val sexp_of_t : t -> Sexp.t
+        val compare : t -> t -> int
+      end
+    type t = T.t = { title : string; isbn : string; }
+    val t_of_sexp : Sexp.t -> t
+    val sexp_of_t : t -> Sexp.t
+    ...
+    module Replace_polymorphic_compare : ...
+    module Map : ...
+    module Set : ...
+```
+
+The module `Foo` has inner modules `Map` and `Set`. Theses modules are for 
+serialization and they are not compatible with `Core.Map` or `Core.Set`.
+When you open this module locally, the `Core.Set` will be shadowed by 
+`Foo.Set` silently. 
+
+```ocaml env=main
+# let play_foo foo =
+    let open Foo in
+    Set.add ...
+```
+
 ::: {data-type=note}
 ##### =, ==, and phys_equal
 
