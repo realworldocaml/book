@@ -6,7 +6,7 @@
   (package base)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/sum)))
+  (system "dune build @all @runtest --root ./correct/sum")))
 
 (alias
  (name runtest)
