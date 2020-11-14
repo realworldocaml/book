@@ -18,8 +18,7 @@ First-class modules are a sophisticated technique, and you'll need to
 get comfortable with some advanced aspects of the language to use them
 effectively. But it's worth learning, because letting modules into the
 core language is quite powerful, increasing the range of what you can
-express and making it easier to build flexible and modular <span
-class="keep-together">systems</span>.
+express and making it easier to build flexible and modular systems.
 
 ## Working with First-Class Modules
 
@@ -819,7 +818,7 @@ ability to load and unload them. Here's an example of it in action. As
 you can see, we start out with `loader` itself as the only active
 handler:
 
-```
+```sh skip
 $ ./query_handler_loader.exe
 >>> (loader known_services)
 (ls unique)
@@ -829,7 +828,7 @@ $ ./query_handler_loader.exe
 
 Any attempt to use an inactive query handler will fail:
 
-```
+```sh skip
 >>> (ls .)
 Could not find matching handler: ls
 ```
@@ -838,22 +837,22 @@ But, we can load the `ls` handler with a config of our choice, at which point
 it will be available for use. And once we unload it, it will be unavailable
 yet again and could be reloaded with a different config:
 
-```
+```sh skip
 >>> (loader (load ls /var))
 ()
->>> (ls /var)
+>>> (ls .)
 (agentx at audit backups db empty folders jabberd lib log mail msgs named
  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
 >>> (loader (unload ls))
 ()
->>> (ls /var)
+>>> (ls .)
 Could not find matching handler: ls
 ```
 
 Notably, the loader can't be loaded (since it's not on the list of known
 handlers) and can't be unloaded either:
 
-```
+```sh skip
 >>> (loader (unload loader))
 It's unwise to unload yourself
 ```
