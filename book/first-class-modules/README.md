@@ -813,27 +813,14 @@ let () =
   cli loader.Loader.active
 ```
 
-Now build this into a command-line interface to experiment with it:
-
-```scheme
-(executable
-  (name       query_handler_loader)
-  (libraries  core core_kernel ppx_sexp_conv)
-  (preprocess (pps ppx_sexp_conv)))
-```
-
-
-
-```sh dir=examples/query_handler_loader
-```
-
-The resulting command-line interface behaves much as you'd expect, starting
-out with no query handlers available but giving you the ability to load and
-unload them. Here's an example of it in action. As you can see, we start out
-with `loader` itself as the only active handler:
+The resulting command-line interface behaves much as you'd expect,
+starting out with no query handlers available but giving you the
+ability to load and unload them. Here's an example of it in action. As
+you can see, we start out with `loader` itself as the only active
+handler:
 
 ```
-$ ./query_handler_loader.byte
+$ ./query_handler_loader.exe
 >>> (loader known_services)
 (ls unique)
 >>> (loader active_services)
