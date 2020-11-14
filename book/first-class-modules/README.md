@@ -863,15 +863,15 @@ further using OCaml's dynamic linking facilities, which allow you to compile
 and link in new code to a running program. This can be automated using
 libraries like `ocaml_plugin`, which can be installed via OPAM, and which
 takes care of much of the workflow around setting up dynamic linking.
-<a data-type="indexterm" data-startref="FCMquery">&nbsp;</a>
 
 
 ## Living Without First-Class Modules
 
-It's worth noting that most designs that can be done with first-class modules
-can be simulated without them, with some level of awkwardness. For example,
-we could rewrite our query handler example without first-class modules using
-the following types:[first-class modules/alternatives to]{.idx}
+It's worth noting that most designs that can be done with first-class
+modules can be simulated without them, with some level of
+awkwardness. For example, we could rewrite our query handler example
+without first-class modules using the following types:[first-class
+modules/alternatives to]{.idx}
 
 ```ocaml env=query_handler
 # type query_handler_instance = { name : string
