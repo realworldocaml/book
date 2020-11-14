@@ -8,7 +8,7 @@
   (package ppx_jane)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/bigger_quickcheck_test)))
+  (system "dune build @all @runtest --root ./correct/bigger_quickcheck_test")))
 
 (alias
  (name runtest)
@@ -23,7 +23,7 @@
   (package ppx_jane)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/bigger_quickcheck_test_with_ppx)))
+  (system "dune build @all @runtest --root ./correct/bigger_quickcheck_test_with_ppx")))
 
 (alias
  (name runtest)
@@ -39,7 +39,7 @@
   (package stdio)
   (package typerep))
  (action
-  (run dune build @all @runtest --root ./correct/manual_property_test)))
+  (system "dune build @all @runtest --root ./correct/manual_property_test")))
 
 (alias
  (name runtest)
@@ -53,7 +53,7 @@
   (package ppx_jane)
   (package stdio))
  (action
-  (run dune build @all @runtest --root ./correct/multi_block_expect_test)))
+  (system "dune build @all @runtest --root ./correct/multi_block_expect_test")))
 
 (alias
  (name runtest)
@@ -69,7 +69,7 @@
   (package stdio)
   (package typerep))
  (action
-  (run dune build @all @runtest --root ./correct/simple_expect_test)))
+  (system "dune build @all @runtest --root ./correct/simple_expect_test")))
 
 (alias
  (name runtest)
@@ -85,7 +85,7 @@
   (package stdio)
   (package typerep))
  (action
-  (run dune build @all @runtest --root ./correct/simple_inline_test)))
+  (system "dune build @all @runtest --root ./correct/simple_inline_test")))
 
 (alias
  (name runtest)
@@ -103,7 +103,7 @@
   (package typerep)
   (package uri))
  (action
-  (run dune build @all @runtest --root ./correct/soup_test_fixed)))
+  (system "dune build @all @runtest --root ./correct/soup_test_fixed")))
 
 (alias
  (name runtest)
@@ -119,7 +119,7 @@
   (package stdio)
   (package typerep))
  (action
-  (run dune build @all @runtest --root ./correct/trivial_expect_test_fixed)))
+  (system "dune build @all @runtest --root ./correct/trivial_expect_test_fixed")))
 
 (alias
  (name runtest)

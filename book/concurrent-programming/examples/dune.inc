@@ -6,7 +6,7 @@
   (package core)
   (package async))
  (action
-  (run dune build @all @runtest --root ./correct/better_echo)))
+  (system "dune build @all @runtest --root ./correct/better_echo")))
 
 (alias
  (name runtest)
@@ -19,7 +19,7 @@
   (package core)
   (package async))
  (action
-  (run dune build @all @runtest --root ./correct/echo)))
+  (system "dune build @all @runtest --root ./correct/echo")))
 
 (alias
  (name runtest)
@@ -32,7 +32,7 @@
   (package core)
   (package async))
  (action
-  (run dune build @all @runtest --root ./correct/native_code_log_delays)))
+  (system "dune build @all @runtest --root ./correct/native_code_log_delays")))
 
 (alias
  (name runtest)
@@ -48,7 +48,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search)))
+  (system "dune build @all @runtest --root ./correct/search")))
 
 (alias
  (name runtest)
@@ -64,7 +64,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search_out_of_order)))
+  (system "dune build @all @runtest --root ./correct/search_out_of_order")))
 
 (alias
  (name runtest)
@@ -78,7 +78,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search_with_configurable_server)))
+  (system "dune build @all @runtest --root ./correct/search_with_configurable_server")))
 
 (alias
  (name runtest)
@@ -92,7 +92,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search_with_error_handling)))
+  (system "dune build @all @runtest --root ./correct/search_with_error_handling")))
 
 (alias
  (name runtest)
@@ -108,7 +108,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search_with_timeout)))
+  (system "dune build @all @runtest --root ./correct/search_with_timeout")))
 
 (alias
  (name runtest)
@@ -122,7 +122,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search_with_timeout_no_leak)))
+  (system "dune build @all @runtest --root ./correct/search_with_timeout_no_leak")))
 
 (alias
  (name runtest)
@@ -136,7 +136,7 @@
   (package yojson)
   (package textwrap))
  (action
-  (run dune build @all @runtest --root ./correct/search_with_timeout_no_leak_simple)))
+  (system "dune build @all @runtest --root ./correct/search_with_timeout_no_leak_simple")))
 
 (alias
  (name runtest)

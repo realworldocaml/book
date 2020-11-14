@@ -37,7 +37,7 @@ class istack :
 ```
 
 The `class istack : object ... end` result shows that we have created a class
-`istack` with *class type*`object ... end`. Like module types, class types
+`istack` with *class type* `object ... end`. Like module types, class types
 are completely separate from regular OCaml types (e.g., `int`, `string`, and
 `list`) and, in particular, should not be confused with object types (e.g.,
 `< get : int; .. >`). The class type describes the class itself rather than
@@ -1307,6 +1307,6 @@ graphics]{.idx}[external libraries/for graphics]{.idx}
 : An interface between OCaml and OpenGL, a widely supported standard for 3D
   rendering.
 
-[js_of_ocaml](http://ocsigen.org/js_of_ocaml/api/Js)
+[js_of_ocaml](https://ocsigen.org/js_of_ocaml/)
 : Compiles OCaml code to JavaScript and has bindings to WebGL. This is the
   emerging standard for 3D rendering in web browsers.
