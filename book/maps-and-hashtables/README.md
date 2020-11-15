@@ -642,12 +642,13 @@ you can always write your own comparison function by hand; but if all you
 need is a total order suitable for creating maps and sets with, then
 `[@@deriving compare]` is a good choice.
 
-If you use Core rather than Base, things are a bit different. `Comparator.Make`
-requires `t_of_sexp` for the generated serialization modules. For this, we change
-the ppx from `sexp_of` to `sexp`.
+If you use Core rather than Base, things are a bit different. Either `Comparator.Make` 
+or `Comparable.Make` requires `t_of_sexp` for the generated serialization modules. 
+We need to change the deriving from `sexp_of` to `sexp`.
 
-```ocaml env=main
+```ocaml env=core_compare
 # #require "ppx_jane"
+# open Core
 # module Book = struct
     module T = struct
       type t = { title: string; isbn: string }
@@ -656,34 +657,52 @@ the ppx from `sexp_of` to `sexp`.
     include T
     include Comparator.Make(T)
   end
-module Foo :
+module Book :
   sig
     module T :
       sig
         type t = { title : string; isbn : string; }
-        val t_of_sexp : Sexp.t -> t
-        val sexp_of_t : t -> Sexp.t
         val compare : t -> t -> int
+        val t_of_sexp : Sexplib0.Sexp.t -> t
+        val sexp_of_t : t -> Sexp.t
       end
     type t = T.t = { title : string; isbn : string; }
+    val compare : t -> t -> int
     val t_of_sexp : Sexp.t -> t
     val sexp_of_t : t -> Sexp.t
-    ...
-    module Replace_polymorphic_compare : ...
-    module Map : ...
-    module Set : ...
+    type comparator_witness = Base.Comparator.Make(T).comparator_witness
+    val comparator : (t, comparator_witness) Comparator.t
+  end
 ```
 
-The module `Foo` has inner modules `Map` and `Set`. Theses modules are for 
-serialization and they are not compatible with `Core.Map` or `Core.Set`.
-When you open this module locally, the `Core.Set` will be shadowed by 
-`Foo.Set` silently. 
+`Core.Comparable` generates inner modules `Map` and `Set` for serialization. When you open this module locally, the `Core.Set` will be shadowed by 
+`Book.Set` silently. 
 
-```ocaml env=main
-# let play_foo foo =
-    let open Foo in
-    Set.add ...
+```ocaml file=examples/correct/core_comparable.ml
+open Core
+
+module Book = struct
+  module T = struct
+    type t = { title: string; isbn: string }
+    [@@deriving compare, sexp]
+  end
+  include T
+  include Comparable.Make(T)
+end
+
+let title_set = Set.empty (module String)
+
+let add_title title_set (book : Book.t) =
+  let open Book in
+  Set.add title_set book.title
+
+(* 
+Error: This expression has type string but an expression was expected of type t
+ *)
 ```
+
+The error message shows `Set.add` expects an expression of type `t`(`Book.t`) 
+and we cannot use it on other sets since it's `Book.Set` rather than `Core.Set`.
 
 ::: {data-type=note}
 ##### =, ==, and phys_equal
