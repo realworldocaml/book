@@ -5,7 +5,7 @@
   (source_tree ./correct/cal_add_days)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/cal_add_days)))
+  (system "dune build @all @runtest --root ./correct/cal_add_days")))
 
 (alias
  (name runtest)
@@ -18,7 +18,7 @@
   (package core)
   (package ppx_jane))
  (action
-  (run dune build @all @runtest --root ./correct/cal_add_interactive)))
+  (system "dune build @all @runtest --root ./correct/cal_add_interactive")))
 
 (alias
  (name runtest)
@@ -30,7 +30,7 @@
   (source_tree ./correct/cal_add_interactive2)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/cal_add_interactive2)))
+  (system "dune build @all @runtest --root ./correct/cal_add_interactive2")))
 
 (alias
  (name runtest)
@@ -42,7 +42,7 @@
   (source_tree ./correct/cal_add_sub_days)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/cal_add_sub_days)))
+  (system "dune build @all @runtest --root ./correct/cal_add_sub_days")))
 
 (alias
  (name runtest)
@@ -54,7 +54,7 @@
   (source_tree ./correct/md5)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5)))
+  (system "dune build @all @runtest --root ./correct/md5")))
 
 (alias
  (name runtest)
@@ -66,7 +66,7 @@
   (source_tree ./correct/md5_as_filename)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_as_filename)))
+  (system "dune build @all @runtest --root ./correct/md5_as_filename")))
 
 (alias
  (name runtest)
@@ -78,7 +78,7 @@
   (source_tree ./correct/md5_let_syntax)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_let_syntax)))
+  (system "dune build @all @runtest --root ./correct/md5_let_syntax")))
 
 (alias
  (name runtest)
@@ -90,7 +90,7 @@
   (source_tree ./correct/md5_let_syntax2)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_let_syntax2)))
+  (system "dune build @all @runtest --root ./correct/md5_let_syntax2")))
 
 (alias
  (name runtest)
@@ -102,7 +102,7 @@
   (source_tree ./correct/md5_multiarg)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_multiarg)))
+  (system "dune build @all @runtest --root ./correct/md5_multiarg")))
 
 (alias
  (name runtest)
@@ -114,7 +114,7 @@
   (source_tree ./correct/md5_sequence)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_sequence)))
+  (system "dune build @all @runtest --root ./correct/md5_sequence")))
 
 (alias
  (name runtest)
@@ -126,7 +126,7 @@
   (source_tree ./correct/md5_succinct)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_succinct)))
+  (system "dune build @all @runtest --root ./correct/md5_succinct")))
 
 (alias
  (name runtest)
@@ -138,7 +138,7 @@
   (source_tree ./correct/md5_with_custom_arg)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_with_custom_arg)))
+  (system "dune build @all @runtest --root ./correct/md5_with_custom_arg")))
 
 (alias
  (name runtest)
@@ -150,7 +150,7 @@
   (source_tree ./correct/md5_with_default_file)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_with_default_file)))
+  (system "dune build @all @runtest --root ./correct/md5_with_default_file")))
 
 (alias
  (name runtest)
@@ -162,7 +162,7 @@
   (source_tree ./correct/md5_with_flags)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_with_flags)))
+  (system "dune build @all @runtest --root ./correct/md5_with_flags")))
 
 (alias
  (name runtest)
@@ -174,7 +174,7 @@
   (source_tree ./correct/md5_with_optional_file)
   (package core))
  (action
-  (run dune build @all @runtest --root ./correct/md5_with_optional_file)))
+  (system "dune build @all @runtest --root ./correct/md5_with_optional_file")))
 
 (alias
  (name runtest)
