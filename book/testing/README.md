@@ -103,7 +103,7 @@ running via the test runner.
 No output is generated because the test passed successfully.
 But if we break the test,
 
-```ocaml file=examples/erroneous/broken_inline_test/test.ml
+```ocaml file=examples/correct/broken_inline_test/test.ml
 open! Base
 
 let%test "rev" =
@@ -112,7 +112,7 @@ let%test "rev" =
 
 we'll see an error when we run it.
 
-```sh dir=examples/erroneous/broken_inline_test
+```sh dir=examples/correct/broken_inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-66: rev is false.
   
@@ -139,7 +139,7 @@ Here's what our new test looks like. You'll notice that it's a little
 more concise, mostly because this is a more concise way to express the
 comparison function.
 
-```ocaml file=examples/erroneous/test_eq-inline_test/test.ml
+```ocaml file=examples/correct/test_eq-inline_test/test.ml
 open! Base
 
 let%test_unit "rev" =
@@ -148,7 +148,7 @@ let%test_unit "rev" =
 
 Here's what it looks like when we run the test.
 
-```sh dir=examples/erroneous/test_eq-inline_test
+```sh dir=examples/correct/test_eq-inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-71: rev threw
   (duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml.E "comparison failed"
@@ -305,7 +305,7 @@ integrated support for `Quickcheck`, with helper functions already
 integrated into most common modules.  There's also a standalone
 `Base_quickcheck` library that can be used without `Core_kernel`.
 
-```ocaml file=examples/erroneous/quickcheck_property_test/test.ml
+```ocaml file=examples/correct/quickcheck_property_test/test.ml
 open Core_kernel
 
 let%test_unit "negation flips the sign" =
@@ -325,7 +325,7 @@ In any case, running the test uncovers the fact that the property
 we've been testing doesn't actually hold on all outputs, as you can
 see below.
 
-```sh dir=examples/erroneous/quickcheck_property_test
+```sh dir=examples/correct/quickcheck_property_test
   $ dune runtest
   File "test.ml", line 3, characters 0-226: negation flips the sign threw
   ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
@@ -450,8 +450,7 @@ val quickcheck_shrinker_shape : shape Base_quickcheck.Shrinker.t = <abstr>
 This will make a bunch of reasonable default decisions, like picking
 `Circle`, `Rect`, and `Poly` with equal probability.  We can use
 annotations to adjust this, for example, by specifying the weight on a
-particular variant, and by requiring that the radius of `Circle`
-always be non-negative.
+particular variant.
 
 ```ocaml env=main
 # type shape =
@@ -480,29 +479,30 @@ an error handling context in [Error
 Handling](error-handling.html#bind-and-other-error-handling-idioms){data-type=xref}.
 
 In combination with `Let_syntax`, the generator monad gives us a
-convenient way to specify generators for custom types. Imagine we
+convenient way to specify generators for custom types.  Imagine we
 wanted to construct a generator for the `shape` type defined above.
 
-Using `Let_syntax`, a generator for this would look as follows.
+Here's an example generator where we make sure that the radius,
+height, and width of the shape in question can't be negative.
 
 ```ocaml env=main
 # let gen_shape =
     let open Quickcheck.Generator.Let_syntax in
-    let module G = Quickcheck.Generator in
+    let module G = Base_quickcheck.Generator in
     let circle =
-      let%map radius = Float.gen_positive in
+      let%map radius = G.float_positive_or_zero in
       Circle { radius }
     in
     let rect =
-      let%map height = Float.gen_positive
-      and width = Float.gen_positive
+      let%map height = G.float_positive_or_zero
+      and width = G.float_positive_or_zero
       in
       Rect { height; width }
     in
     let poly =
       let%map points =
         List.gen_non_empty
-          (G.both Float.gen_positive Float.gen_positive)
+          (G.both G.float_positive_or_zero G.float_positive_or_zero)
       in
       Poly points
     in
@@ -538,7 +538,7 @@ Here's a simple example of a test written in this style.  While the
 test generates output (though a call to `print_endline`), that output
 isn't captured in the source, at least, not yet.
 
-```ocaml file=examples/erroneous/trivial_expect_test/test.ml
+```ocaml file=examples/correct/trivial_expect_test/test.ml
 open! Base
 open! Stdio
 
@@ -550,7 +550,7 @@ If we run the test, we'll be presented with a diff between what we
 wrote, and a *corrected* version of the source file that now has an
 `[%expect]` clause containing the output.
 
-```sh dir=examples/erroneous/trivial_expect_test,unset-INSIDE_DUNE
+```sh dir=examples/correct/trivial_expect_test,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
   ...
@@ -656,7 +656,7 @@ uses the `lambdasoup` package to traverse some HTML and spit out a set
 of strings.  The goal of this function is to produce the set of
 hosts that show up in the href of links within the document.
 
-```ocaml file=examples/erroneous/soup_test/test.ml,part=0
+```ocaml file=examples/correct/soup_test/test.ml,part=0
 open! Base
 open! Stdio
 
@@ -670,7 +670,7 @@ let get_href_hosts soup =
 We can then try this out by adding an expect test that runs this code
 on some sample data.
 
-```ocaml file=examples/erroneous/soup_test/test.ml,part=1
+```ocaml file=examples/correct/soup_test/test.ml,part=1
 let%expect_test _ =
   let example_html = {|
     <html>
@@ -689,7 +689,7 @@ let%expect_test _ =
 If we run the test, we'll see that the output isn't exactly what was
 intended.
 
-```sh dir=examples/erroneous/soup_test,unset-INSIDE_DUNE
+```sh dir=examples/correct/soup_test,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
   ...
@@ -723,7 +723,7 @@ string.  I.e., we ended up with `http://github.com/ocaml/dune` instead
 of simple `github.com`.  We can fix that by using the `uri` library to
 parse the string and extract the host.  Here's the modified code.
 
-```ocaml file=examples/erroneous/soup_test_half_fixed/test.ml,part=0
+```ocaml file=examples/correct/soup_test_half_fixed/test.ml,part=0
 let get_href_hosts soup =
   Soup.select "a[href]" soup
   |> Soup.to_list
@@ -735,7 +735,7 @@ let get_href_hosts soup =
 And if we run the test again, we'll see that the output is now as it
 should be.
 
-```sh dir=examples/erroneous/soup_test_half_fixed,unset-INSIDE_DUNE
+```sh dir=examples/correct/soup_test_half_fixed,unset-INSIDE_DUNE
   $ dune runtest
        patdiff (internal) (exit 1)
   ...
