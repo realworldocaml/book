@@ -137,25 +137,32 @@ module Repr = struct
 
   type t = [ `part of part | `chapter of chapter] list [@@deriving sexp]
 
+  let drop_wip t =
+    List.filter_map t
+      ~f:(function
+          | `chapter {wip = true; _} -> None
+          | `chapter _ as c -> Some c
+          | `part ({chapters; _} as part) ->
+            let chapters =
+              List.filter_map chapters
+                ~f:(fun ({wip; _} as c) -> if wip then None else Some c)
+            in
+            Some (`part {part with chapters}))
+
   let read dir =
     let f = dir / "toc.scm" in
     Reader.file_contents f >>| fun contents ->
     let s = Sexplib.Sexp.scan_sexps (Lexing.from_string contents) in
     t_of_sexp (Sexplib.Sexp.List s)
 
-  let get ?(repo_root=".") () =
+  let get ?(repo_root=".") ~include_wip () =
     let book_dir = repo_root/"book" in
-    read book_dir
+    read book_dir >>| fun t ->
+    if include_wip then t else drop_wip t
 
   let get_chapters ?(repo_root=".") ~include_wip () =
-    get ~repo_root () >>| fun t ->
-    let chapters =
-      List.concat_map t ~f:(function `part p -> p.chapters | `chapter c -> [c])
-    in
-    if include_wip then
-      chapters
-    else
-      List.filter chapters ~f:(fun c -> not c.wip)
+    get ~include_wip ~repo_root () >>| fun t ->
+    List.concat_map t ~f:(function `part p -> p.chapters | `chapter c -> [c])
 end
 
 let of_toc book_dir toc =
@@ -202,9 +209,9 @@ let of_chapters (chapters : chapter list) : part list =
           {info = curr_part; chapters = [x]}::p::rest
     )
 
-let get ?(repo_root=".") () =
+let get ?(repo_root=".") ~include_wip () =
   let book_dir = repo_root/"book" in
-  Repr.read book_dir >>= fun toc ->
+  Repr.get ~repo_root ~include_wip () >>= fun toc ->
   of_toc book_dir toc
 
 let flatten_chapters t =
@@ -215,12 +222,8 @@ let flatten_chapters t =
   aux [] t
 
 let get_chapters ?repo_root ~include_wip () =
-  get ?repo_root () >>| fun t ->
-  let chapters = flatten_chapters t in
-  if include_wip then
-    chapters
-  else
-    List.filter chapters ~f:(fun c -> not c.wip)
+  get ?repo_root ~include_wip () >>| fun t ->
+  flatten_chapters t
 
 let find ~name (t:t) =
   let rec aux = function

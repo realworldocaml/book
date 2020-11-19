@@ -179,7 +179,7 @@ let make_frontpage ?(repo_root=".") ~include_wip () : Html.t Deferred.t =
   in
   let file = repo_root/"book"/"index.html" in
   (
-    Toc.get ~repo_root () >>| function
+    Toc.get ~repo_root ~include_wip () >>| function
     | [a;b;c;d] -> a,b,c,d
     | _ -> failwith "frontpage design expects exactly 3 parts"
   ) >>= fun (prologue,part1,part2,part3) ->
@@ -262,21 +262,15 @@ let make_simple_page file =
   return (main_template ~title_bar:title_bar ~content ())
 
 let make_tex_inputs_page ?(repo_root=".") ~include_wip () : string Deferred.t =
-  Toc.Repr.get ~repo_root () >>| fun l ->
+  Toc.Repr.get ~repo_root ~include_wip () >>| fun l ->
   let to_input s = [Tex.input (repo_root / "book" / s ^ ".tex"); Tex.newpage] in
   let to_tex t : Tex.t list =
       match t with
       | `part (part: Toc.Repr.part) ->
-        let chapters =
-          if include_wip then
-            part.chapters
-          else
-            List.filter part.chapters ~f:(fun c -> not c.wip)
-        in
-        let names = List.map chapters ~f:(fun c -> c.name) in
+        let names = List.map part.chapters ~f:(fun c -> c.name) in
         [Tex.part part.title]::(List.map ~f:to_input names)
       | `chapter (c : Toc.Repr.chapter) ->
-        if c.wip then [] else [to_input c.name]
+        [to_input c.name]
   in
   List.map ~f:to_tex l
   |> List.join
@@ -316,7 +310,7 @@ let make ?(repo_root=".") ?(include_wip=false) ~out_dir = function
     let base = Filename.basename in_file in
     let out_file = out_dir/base in
     Log.Global.info "making %s" out_file;
-    Toc.get_chapters ~include_wip:true ~repo_root () >>= fun chapters ->
+    Toc.get_chapters ~include_wip ~repo_root () >>= fun chapters ->
     make_chapter_page chapters in_file >>= fun html ->
     return (Html.to_string html) >>= fun contents ->
     Writer.save out_file ~contents
