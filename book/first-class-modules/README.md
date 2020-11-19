@@ -656,7 +656,7 @@ let () =
 Here's an example of a session with this program:
 
 ```sh skip
-$ dune exec ./query_handler.exe
+$ dune exec -- ./query_handler.exe
 >>> (unique ())
 0
 >>> (unique ())
@@ -819,7 +819,7 @@ you can see, we start out with `loader` itself as the only active
 handler:
 
 ```sh skip
-$ ./query_handler_loader.exe
+$ dune exec -- ./query_handler_loader.exe
 >>> (loader known_services)
 (ls unique)
 >>> (loader active_services)
