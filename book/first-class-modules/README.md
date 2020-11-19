@@ -648,7 +648,7 @@ We can most effectively run this command-line interface from a standalone
 program, which we can do by putting the above code in a file along with
 following command to launch the interface:
 
-```ocaml file=examples/query_handler_loader/query_handler.ml,part=1
+```ocaml file=examples/correct/query_handler_loader/query_handler.ml,part=1
 let () =
   cli (build_dispatch_table [unique_instance; list_dir_instance])
 ```
@@ -681,9 +681,9 @@ active query handlers. The module in question will be called `Loader`, and
 its configuration is a list of known `Query_handler` modules. Here are the
 basic types:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=1
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=1
 module Loader = struct
-  type config = (module Query_handler) list sexp_opaque
+  type config = (module Query_handler) list [@sexp.opaque]
   [@@deriving sexp]
 
   type t = { known  : (module Query_handler)          String.Table.t
@@ -703,7 +703,7 @@ Next, we'll need a function for creating a `Loader.t`. This function requires
 the list of known query handler modules. Note that the table of active
 modules starts out as empty:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=2
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=2
 let create known_list =
     let active = String.Table.create () in
     let known  = String.Table.create () in
@@ -720,7 +720,7 @@ configuration for instantiating that handler in the form of an s-expression.
 These are used for creating a first-class module of type
 `(module Query_handler_instance)`, which is then added to the active table:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=3
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=3
 let load t handler_name config =
     if Hashtbl.mem t.active handler_name then
       Or_error.error "Can't re-register an active handler"
@@ -744,11 +744,11 @@ Since the `load` function will refuse to `load` an already active handler, we
 also need the ability to unload a handler. Note that the handler explicitly
 refuses to unload itself:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=4
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=4
 let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
       Or_error.error "Handler not active" handler_name String.sexp_of_t
-    else if handler_name = name then
+    else if String.(=) handler_name name then
       Or_error.error_string "It's unwise to unload yourself"
     else (
       Hashtbl.remove t.active handler_name;
@@ -761,7 +761,7 @@ query <span class="keep-together">interface</span> presented to the user.
 We'll do this by creating a variant type, and using the s-expression
 converter generated for that type to parse the query from the user:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=5
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=5
 type request =
     | Load of string * Sexp.t
     | Unload of string
@@ -778,7 +778,7 @@ strings to an s-expression, as described in
 
 This function ends the definition of the `Loader` module:
 
-```ocaml file=examples/query_handler_loader/query_handler_core.ml,part=6
+```ocaml file=examples/correct/query_handler_loader/query_handler_core.ml,part=6
 let eval t sexp =
     match Or_error.try_with (fun () -> request_of_sexp sexp) with
     | Error _ as err -> err
@@ -798,7 +798,7 @@ first create an instance of the loader query handler and then add that
 instance to the loader's active table. We can then just launch the
 command-line interface, passing it the active table:
 
-```ocaml file=examples/query_handler_loader/query_handler_loader.ml,part=1
+```ocaml file=examples/correct/query_handler_loader/query_handler_loader.ml,part=1
 let () =
   let loader = Loader.create [(module Unique); (module List_dir)] in
   let loader_instance =
