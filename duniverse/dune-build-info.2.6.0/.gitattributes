@@ -1,5 +1,0 @@
-*.ml*             text eol=lf
-*.rst             text eol=lf
-dune              text eol=lf
-dune.inc          text eol=lf
-.gitignore        text eol=lf

@@ -148,14 +148,14 @@ Here's what it looks like when we run the test.
 ```sh dir=examples/erroneous/test_eq-inline_test
   $ dune runtest
   File "test.ml", line 3, characters 0-71: rev threw
-  (duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml.E "comparison failed"
+  (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
     ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-    Raised at file "duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml", line 28, characters 28-53
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 502, characters 15-19
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 343, characters 8-12
-    Re-raised at file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 346, characters 6-13
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 359, characters 15-52
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 446, characters 52-83
+    Raised at file "duniverse/ppx_assert/runtime-lib/runtime.ml", line 28, characters 28-53
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 502, characters 15-19
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 343, characters 8-12
+    Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 346, characters 6-13
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 359, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 446, characters 52-83
   
   FAILED 1 / 1 tests
   [1]
@@ -323,17 +323,17 @@ see below.
   File "test.ml", line 3, characters 0-244: negation flips the sign threw
   ("Base_quickcheck.Test.run: test failed" (input -4611686018427387904)
     (error
-      ((duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml.E
-         "comparison failed" (Neg vs Pos (Loc test.ml:7:19)))
-         "Raised at file \"duniverse/ppx_assert.v0.13.0/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from file \"duniverse/base.v0.13.2/src/or_error.ml\", line 75, characters 9-15\
+      ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
+         (Neg vs Pos (Loc test.ml:7:19)))
+         "Raised at file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
+        \nCalled from file \"duniverse/base/src/or_error.ml\", line 75, characters 9-15\
         \n"))).
-    Raised at file "duniverse/base.v0.13.2/src/error.ml", line 8, characters 14-30
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 502, characters 15-19
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 343, characters 8-12
-    Re-raised at file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 346, characters 6-13
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 359, characters 15-52
-    Called from file "duniverse/ppx_inline_test.v0.13.1/runtime-lib/runtime.ml", line 446, characters 52-83
+    Raised at file "duniverse/base/src/error.ml", line 8, characters 14-30
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 502, characters 15-19
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 343, characters 8-12
+    Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 346, characters 6-13
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 359, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 446, characters 52-83
   
   FAILED 1 / 1 tests
   [1]

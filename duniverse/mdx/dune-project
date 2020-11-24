@@ -1,0 +1,4 @@
+(lang dune 2.0)
+
+(name mdx)
+(version 1.7.0)
