@@ -523,7 +523,7 @@ val render_table : string list -> string list list -> string = <fun>
 
 ### More Useful List Functions
 
-The previous example we worked through touched on only three of the functions
+The previous example we touched on only three of the functions
 in `List`. We won't cover the entire interface (for that you should look at
 the [online docs](https://ocaml.janestreet.com/ocaml-core/latest/doc/base/Base/List/index.html)), but a few more functions
 are useful enough to mention here.
