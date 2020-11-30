@@ -178,22 +178,17 @@ Each example must explicitly define its external dependencies in a
 
 ## Upgrading or adding dependencies
 
-RWO's dependencies are vendored using `duniverse`. If you want to
-upgrade them to their latest availbale opam version you can run:
+RWO's dependencies are managed using the `opam-monorepo` plugin. The dependencies are expressed
+in the `rwo.opam` opam file as they would be for any project. The plugin is used to generate a
+`rwo.opam.locked` lockfile from this deps specification using the `opam monorepo lock`
+command. Running `opam monorepo pull` will then fetch the sources locally into the `duniverse/`
+folder so that rwo and its dependencies can all be built together in a single dune-workspace.
 
+Before running `opam-monorepo lock` it's important to have the proper opam configuration.
+We need to both add the `opam-overlays` repo which contains dune port of some of our dependencies.
+We also use a pinned version of ctypes until the dune-port is stable. To set these up, you can run:
 ```
-make duniverse-upgrade
-```
-
-Additionally, if you're working on the book and need a new package
-vendored, you can simply add it to the `$DEPS` variable in the
-`Makefile` and run the above command again.
-
-It's possible that after upgrading you get some errors because
-vendored dependencies use jbuild files instead of dune files and
-compatibility with those has been dropped in dune 2. You can upgrade
-those using the following command:
-
-```
-dune upgrade --root duniverse/<package_name>.<version>
+opam repository add dune-opam-overlays git+https://github.com/dune-universe/opam-overlays.git
+opam pin add ctypes.0.17.1+dune git+https://github.com/dune-universe/ocaml-ctypes.git#rwo-dune-port
+opam pin add ctypes-foreign.0.17.1+dune git+https://github.com/dune-universe/ocaml-ctypes.git#rwo-dune-port
 ```
