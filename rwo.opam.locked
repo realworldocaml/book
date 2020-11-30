@@ -32,6 +32,7 @@ depends: [
   "conf-gmp" {= "2"}
   "conf-gmp-powm-sec" {= "2"}
   "conf-libpcre" {= "1"}
+  "conf-ncurses" {= "1"}
   "conf-pkg-config" {= "1.3"}
   "core" {= "v0.13.0"}
   "core_bench" {= "v0.13.0"}
