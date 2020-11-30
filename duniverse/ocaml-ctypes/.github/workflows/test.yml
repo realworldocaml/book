@@ -1,45 +1,26 @@
 name: Ctypes
-
-on:
-  - pull_request
-  - push
-  - workflow_dispatch
-
+on: [push, pull_request]
 jobs:
   tests:
     name: Tests
-
+    runs-on: ${{ matrix.operating-system }}
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - macos-latest
-          - ubuntu-latest
-          - windows-latest
-        ocaml-version:
-          - 4.10.0
-          - 4.09.1
-
-    runs-on: ${{ matrix.os }}
-
+        ocaml-version: [ '4.08.1', '4.09.1', '4.10.0' ]
+        operating-system: [macos-latest, ubuntu-latest, windows-latest]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
-        with:
-          ocaml-version: ${{ matrix.ocaml-version }}
-
-      - name: Deps
-        run: |
-          opam pin add -n ctypes.dev .
-          opam pin add -n ctypes-foreign.dev .
-          opam depext -ty ctypes ctypes-foreign
-          opam install -t --deps-only .
-
-      - name: Build
-        run: opam exec -- dune build
-
-      - name: Test
-        run: opam exec -- dune runtest
+    - uses: actions/checkout@master
+    - uses: avsm/setup-ocaml@master
+      with:
+        ocaml-version: ${{ matrix.ocaml-version }}
+    - name: Deps
+      run: |
+        opam pin add -n ctypes.dev .
+        opam pin add -n ctypes-foreign.dev .
+        opam depext -ty ctypes ctypes-foreign
+        opam install -t --deps-only .
+    - name: Build
+      run: opam exec -- dune build
+    - name: Test
+      run: opam exec -- dune runtest

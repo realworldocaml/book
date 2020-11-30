@@ -42,5 +42,5 @@
  (name test_structs)
  (modules test_structs)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign test_structs_stubs
-   test_functions test_structs_bindings tests_common))
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_structs_stubs test_functions test_structs_bindings tests_common))

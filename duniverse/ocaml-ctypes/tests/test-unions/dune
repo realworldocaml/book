@@ -42,5 +42,5 @@
  (name test_unions)
  (modules test_unions)
  (package ctypes-foreign)
- (libraries oUnit ctypes ctypes.stubs ctypes-foreign test_unions_stubs
-   test_functions test_unions_bindings tests_common))
+ (libraries oUnit ctypes ctypes.stubs ctypes-foreign.threaded
+   test_unions_stubs test_functions test_unions_bindings tests_common))
