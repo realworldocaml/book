@@ -170,7 +170,7 @@ pin-depends: [
   ]
   [
     "astring.0.8.4+dune"
-    "git://github.com/dune-universe/astring.git#baa4e7e2bf919293aac2c899786c2ac40757dd9b"
+    "https://github.com/dune-universe/astring/archive/v0.8.4+dune.tar.gz"
   ]
   [
     "async.v0.13.0"
@@ -233,11 +233,11 @@ pin-depends: [
   ]
   [
     "bos.0.2.0+dune"
-    "git://github.com/dune-universe/bos.git#6c69eddd9a56f3caa21a7240c37cbf1c7b7ba1a1"
+    "https://github.com/dune-universe/bos/archive/v0.2.0+dune.tar.gz"
   ]
   [
     "cmdliner.1.0.4+dune"
-    "git://github.com/dune-universe/cmdliner.git#4fc08affe26642b6285cedc1d2ca7ec03127caf3"
+    "https://github.com/dune-universe/cmdliner/archive/v1.0.4+dune.tar.gz"
   ]
   [
     "cohttp.2.5.1"
@@ -325,15 +325,15 @@ pin-depends: [
   ]
   [
     "findlib.1.8.1+dune"
-    "git+https://github.com/dune-universe/lib-findlib#55b3374114ea425e8881e4758a06b02ba06aabb5"
+    "https://github.com/dune-universe/lib-findlib/archive/v1.8.1+dune.tar.gz"
   ]
   [
     "fmt.0.8.8+dune"
-    "git+https://github.com/dune-universe/fmt#342fa6d95e847694b71f798ad55cb932b64d0d35"
+    "https://github.com/dune-universe/fmt/archive/v0.8.8+dune.tar.gz"
   ]
   [
     "fpath.0.7.2+dune"
-    "git://github.com/dune-universe/fpath.git#9402e6033c994ab3201be04c6f8e8a101e737ab9"
+    "https://github.com/dune-universe/fpath/archive/v0.7.2+dune.tar.gz"
   ]
   [
     "gmap.0.3.0"
@@ -369,7 +369,7 @@ pin-depends: [
   ]
   [
     "jsonm.1.0.1+dune"
-    "git://github.com/dune-universe/jsonm.git#fa845829b558cd55b1a0918782198a4b37267df0"
+    "https://github.com/dune-universe/jsonm/archive/v1.0.1+dune.tar.gz"
   ]
   [
     "jst-config.v0.13.0"
@@ -381,7 +381,7 @@ pin-depends: [
   ]
   [
     "logs.0.7.0+dune"
-    "git://github.com/dune-universe/logs.git#4f141048f71b1d84b8e283086c62ca270aa13051"
+    "https://github.com/dune-universe/logs/archive/v0.7.0+dune.tar.gz"
   ]
   ["lwt.5.3.0" "https://github.com/ocsigen/lwt/archive/5.3.0.tar.gz"]
   [
@@ -429,11 +429,11 @@ pin-depends: [
   ]
   [
     "mtime.1.2.0+dune"
-    "git://github.com/dune-universe/mtime.git#9584b66cecc891208b31cec4628dd412b8cffe75"
+    "https://github.com/dune-universe/mtime/archive/v1.2.0+dune.tar.gz"
   ]
   [
     "num.1.3+dune"
-    "git://github.com/dune-universe/num.git#bdb2d7653e927e142b701b51d89f393471279713"
+    "https://github.com/dune-universe/num/archive/v1.3+dune.tar.gz"
   ]
   [
     "ocaml-compiler-libs.v0.12.1"
@@ -453,7 +453,7 @@ pin-depends: [
   ]
   [
     "ocamlfind.1.8.1+dune"
-    "git+https://github.com/dune-universe/lib-findlib#55b3374114ea425e8881e4758a06b02ba06aabb5"
+    "https://github.com/dune-universe/lib-findlib/archive/v1.8.1+dune.tar.gz"
   ]
   [
     "ocplib-endian.1.1"
@@ -613,7 +613,7 @@ pin-depends: [
   ]
   [
     "ptime.0.8.5+dune"
-    "git://github.com/dune-universe/ptime.git#498a4bed88330a98bfa2afac913f6f60dc8ddfd7"
+    "https://github.com/dune-universe/ptime/archive/v0.8.5+dune.tar.gz"
   ]
   [
     "re.1.9.0"
@@ -625,7 +625,7 @@ pin-depends: [
   ]
   [
     "rresult.0.6.0+dune"
-    "git://github.com/dune-universe/rresult.git#1ff30e48943f69f7e7bcac211b56f6c7c76eeccb"
+    "https://github.com/dune-universe/rresult/archive/v0.6.0+dune.tar.gz"
   ]
   ["seq.base+dune" "https://github.com/c-cube/seq/archive/0.2.2.tar.gz"]
   [
@@ -634,7 +634,7 @@ pin-depends: [
   ]
   [
     "sexplib.v0.13.0+dune"
-    "git+https://github.com/dune-universe/sexplib.git#c41a3f1831c07323dea41d48dfb999239f336e9e"
+    "https://github.com/dune-universe/sexplib/archive/vv0.13.0+dune.tar.gz"
   ]
   [
     "sexplib0.v0.13.0"
@@ -666,7 +666,7 @@ pin-depends: [
   ]
   [
     "textwrap.0.2+dune"
-    "git://github.com/dune-universe/ocaml-textwrap.git#ec2f31ec1bc526aaba44395ac6f8680eb78433b6"
+    "https://github.com/dune-universe/ocaml-textwrap/archive/v0.2+dune.tar.gz"
   ]
   [
     "time_now.v0.13.0"
@@ -686,7 +686,7 @@ pin-depends: [
   ]
   [
     "uchar.0.0.2+dune"
-    "git+https://github.com/dune-universe/uchar.git#1a5cd87433f6ecc34be987d5cc8bf421ab7d3dfa"
+    "https://github.com/dune-universe/uchar/archive/v0.0.2+dune.tar.gz"
   ]
   [
     "uri.3.1.0"
@@ -698,7 +698,7 @@ pin-depends: [
   ]
   [
     "uutf.1.0.2+dune"
-    "git://github.com/dune-universe/uutf.git#66ddef1cf88fa0806095fb262b3a47b32a85b54d"
+    "https://github.com/dune-universe/uutf/archive/v1.0.2+dune.tar.gz"
   ]
   [
     "variantslib.v0.13.0"
@@ -714,62 +714,10 @@ pin-depends: [
   ]
   [
     "zarith.1.9.1+dune"
-    "git://github.com/dune-universe/Zarith.git#c62b045106fafa407874053bdd79273a8f591352"
+    "https://github.com/dune-universe/Zarith/archive/v1.9.1+dune.tar.gz"
   ]
 ]
 x-opam-monorepo-duniverse-dirs: [
-  [
-    "git://github.com/dune-universe/Zarith.git#c62b045106fafa407874053bdd79273a8f591352"
-    "Zarith"
-  ]
-  [
-    "git://github.com/dune-universe/astring.git#baa4e7e2bf919293aac2c899786c2ac40757dd9b"
-    "astring"
-  ]
-  [
-    "git://github.com/dune-universe/bos.git#6c69eddd9a56f3caa21a7240c37cbf1c7b7ba1a1"
-    "bos"
-  ]
-  [
-    "git://github.com/dune-universe/cmdliner.git#4fc08affe26642b6285cedc1d2ca7ec03127caf3"
-    "cmdliner"
-  ]
-  [
-    "git://github.com/dune-universe/fpath.git#9402e6033c994ab3201be04c6f8e8a101e737ab9"
-    "fpath"
-  ]
-  [
-    "git://github.com/dune-universe/jsonm.git#fa845829b558cd55b1a0918782198a4b37267df0"
-    "jsonm"
-  ]
-  [
-    "git://github.com/dune-universe/logs.git#4f141048f71b1d84b8e283086c62ca270aa13051"
-    "logs"
-  ]
-  [
-    "git://github.com/dune-universe/mtime.git#9584b66cecc891208b31cec4628dd412b8cffe75"
-    "mtime"
-  ]
-  [
-    "git://github.com/dune-universe/num.git#bdb2d7653e927e142b701b51d89f393471279713"
-    "num"
-  ]
-  [
-    "git://github.com/dune-universe/ocaml-textwrap.git#ec2f31ec1bc526aaba44395ac6f8680eb78433b6"
-    "ocaml-textwrap"
-  ]
-  [
-    "git://github.com/dune-universe/ptime.git#498a4bed88330a98bfa2afac913f6f60dc8ddfd7"
-    "ptime"
-  ]
-  [
-    "git://github.com/dune-universe/rresult.git#1ff30e48943f69f7e7bcac211b56f6c7c76eeccb"
-    "rresult"
-  ]
-  [
-    "git://github.com/dune-universe/uutf.git#66ddef1cf88fa0806095fb262b3a47b32a85b54d"
-    "uutf"
-  ]
   [
     "https://github.com/OCamlPro/ocplib-endian/archive/1.1.tar.gz"
     "ocplib-endian"
@@ -818,24 +766,127 @@ x-opam-monorepo-duniverse-dirs: [
     ]
   ]
   [
-    "git+https://github.com/dune-universe/fmt#342fa6d95e847694b71f798ad55cb932b64d0d35"
-    "fmt"
+    "https://github.com/dune-universe/Zarith/archive/v1.9.1+dune.tar.gz"
+    "Zarith"
+    [
+      "sha256=0055fc2f02a401d2d36e7f077620593689d83147a38d1ce5edd10c2c426cb77e"
+    ]
   ]
   [
-    "git+https://github.com/dune-universe/lib-findlib#55b3374114ea425e8881e4758a06b02ba06aabb5"
+    "https://github.com/dune-universe/astring/archive/v0.8.4+dune.tar.gz"
+    "astring"
+    [
+      "sha256=f033789895d92081d9926880c5fe364f925576b2236cb179ad85bf7b8dc84efb"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/bos/archive/v0.2.0+dune.tar.gz"
+    "bos"
+    [
+      "sha256=d59c3a3af92a0d04ba8c66c19e69226a87576cd5ccd5bbea4d7fa1b00d5cc0d4"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/cmdliner/archive/v1.0.4+dune.tar.gz"
+    "cmdliner"
+    [
+      "sha256=ffc09f07a9e394d6be4dbecea7add601ff00519a91dff4c95b9cd0a4aa60eceb"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/fmt/archive/v0.8.8+dune.tar.gz"
+    "fmt"
+    [
+      "sha256=da16172528cc5ebde062fcb25e46085962ddd5fd32d2dc00eb07697384f0eb2d"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/fpath/archive/v0.7.2+dune.tar.gz"
+    "fpath"
+    [
+      "sha256=3ff946188d3a21ba1f7cdd5e3809a2572ca24e5063334a7845ff6b36173ff8d6"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/jsonm/archive/v1.0.1+dune.tar.gz"
+    "jsonm"
+    [
+      "sha256=cb82b2742662636029644db0354a8ff028b9e7495d4fe5278ddef72656b88d1b"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/lib-findlib/archive/v1.8.1+dune.tar.gz"
     "lib-findlib"
+    [
+      "sha256=1a337aaedca94837d4d6a1689ed18109e4a2cfd4aa99a56252a6f19fe1291bb0"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/logs/archive/v0.7.0+dune.tar.gz"
+    "logs"
+    [
+      "sha256=06ab994e5fc195f9b655544bffdc7d6aecec8f0f9b285e46f5668ec78030d13c"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/mtime/archive/v1.2.0+dune.tar.gz"
+    "mtime"
+    [
+      "sha256=92435c47ba03ddbe18793383551e306bcaaecc7191db901dc34707b5c4b4eaf0"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/num/archive/v1.3+dune.tar.gz"
+    "num"
+    [
+      "sha256=29716f41349bd408e46b676a518464576003cc0e38929975e411c31a5c374728"
+    ]
   ]
   [
     "git+https://github.com/dune-universe/ocaml-ctypes.git#a186a0dd10b7a04ce8eec5c6b63b1d6865eaa21e"
     "ocaml-ctypes"
   ]
   [
-    "git+https://github.com/dune-universe/sexplib.git#c41a3f1831c07323dea41d48dfb999239f336e9e"
-    "sexplib"
+    "https://github.com/dune-universe/ocaml-textwrap/archive/v0.2+dune.tar.gz"
+    "ocaml-textwrap"
+    [
+      "sha256=a8ff845d1221be6a8d65974595ef1a332b584c749208abcbbce58beb3e30e498"
+    ]
   ]
   [
-    "git+https://github.com/dune-universe/uchar.git#1a5cd87433f6ecc34be987d5cc8bf421ab7d3dfa"
+    "https://github.com/dune-universe/ptime/archive/v0.8.5+dune.tar.gz"
+    "ptime"
+    [
+      "sha256=35b69816b9110e5fe2f9308690faff2bd2ed19cb0bd7de3f9a5066e5061eb769"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/rresult/archive/v0.6.0+dune.tar.gz"
+    "rresult"
+    [
+      "sha256=041a484d68f72db3a742d6045bc6ff2b3a36efe629c7683dd58a377b1fa5c477"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/sexplib/archive/vv0.13.0+dune.tar.gz"
+    "sexplib"
+    [
+      "sha256=34815208e57a0f7a7cbed925c534782c7adda49b0d8a50a109d46d6c9d08d3be"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/uchar/archive/v0.0.2+dune.tar.gz"
     "uchar"
+    [
+      "sha256=ddd2dac470c4aa8e8d6163a2fceb82c4a7725693a0d92c5f4834bd4258e659dc"
+    ]
+  ]
+  [
+    "https://github.com/dune-universe/uutf/archive/v1.0.2+dune.tar.gz"
+    "uutf"
+    [
+      "sha256=c7e272d513afacd8d9a790b63a11db9d0db09265d599fd52c7fdb7497920ed76"
+    ]
   ]
   [
     "https://github.com/hannesm/domain-name/releases/download/v0.3.0/domain-name-v0.3.0.tbz"
