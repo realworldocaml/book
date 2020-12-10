@@ -219,10 +219,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "duniverse/base.v0.13.2/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "duniverse/base.v0.13.2/src/comparator.mli", line 19, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 19, characters 2-25:
          Expected declaration
 ```
 

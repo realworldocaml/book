@@ -1,0 +1,14 @@
+opam-version: "2.0"
+maintainer: "Daniel Bünzli <daniel.buenzl i@erratique.ch>"
+authors: ["Daniel Bünzli <daniel.buenzl i@erratique.ch>"]
+homepage: "http://ocaml.org"
+doc: "https://ocaml.github.io/uchar/"
+dev-repo: "https://github.com/ocaml/uchar.git"
+bug-reports: "https://github.com/ocaml/uchar/issues"
+tags: [ "text" "character" "unicode" "compatibility" "org:ocaml.org" ]
+license: "typeof OCaml system"
+depends: [ "dune" "ocaml" {>= "4.03"} ]
+synopsis: "Dummy but non virtual package to satisfy both opam-monorepo and opam"
+url {
+  src: "git+https://github.com/dune-universe/uchar.git#dune-universe-v0.0.2"
+}

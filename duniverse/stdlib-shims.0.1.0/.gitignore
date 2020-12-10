@@ -1,9 +1,0 @@
-.merlin
-_build
-tmp
-*.install
-*~
-\.\#*
-\#*#
-*.native
-*.byte

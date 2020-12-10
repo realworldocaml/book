@@ -1,5 +1,0 @@
-# Default behaviour, for if core.autocrlf isn't set
-* text=auto
-
-.azure-pipelines.sh text eol=lf
-ppx_test/errors/* text eol=lf

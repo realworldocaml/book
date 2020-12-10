@@ -1,8 +1,0 @@
-_build/
-_tests/
-coverage/
-bisect*.out
-*.byte
-*.native
-*.install
-.merlin
