@@ -47,7 +47,6 @@ module Digest = Digest
 module Fdecl = Fdecl
 module Unit = Unit
 module Monad = Monad
-module Fun = Fun
 module Dyn = Dyn
 module Float = Float
 module Tuple = Tuple
@@ -67,6 +66,8 @@ module Top_closure_intf = Top_closure_intf
 module Top_closure = Top_closure
 module Spawn = Spawn
 module Seq = Seq
+module Temp = Temp
+module Queue = Queue
 
 external reraise : exn -> _ = "%reraise"
 
@@ -91,3 +92,5 @@ type ordering = Ordering.t =
 let sprintf = Printf.sprintf
 
 let ksprintf = Printf.ksprintf
+
+let printfn a = ksprintf print_endline a

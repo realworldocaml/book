@@ -104,3 +104,8 @@ module Array = struct
     let start_index, length = (from, to_ - from + 1) in
     Array.sub t start_index length
 end
+
+module Process = struct
+  let wait ~pid =
+    match snd (Unix.waitpid [] pid) with WEXITED n -> n | _ -> 255
+end

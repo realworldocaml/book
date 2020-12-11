@@ -1,4 +1,4 @@
-open Expect_test_common.Std
+open Expect_test_common
 
 module Test_outcome : sig
   type t =
@@ -8,12 +8,12 @@ module Test_outcome : sig
     ; uncaught_exn_expectation : Expectation.Raw.t option
     ; saved_output : (File.Location.t * string) list
     ; trailing_output : string
-    ; upon_unreleasable_issue : Expect_test_config.Upon_unreleasable_issue.t
+    ; upon_unreleasable_issue : Expect_test_config_types.Upon_unreleasable_issue.t
     ; uncaught_exn : (exn * Printexc.raw_backtrace) option
     }
 end
 
-module Make (Config : Expect_test_config.S) : sig
+module Make (Config : Expect_test_config_types.S) : sig
   (** Collect the output that has been run since the last call to [save_output], or
       since the current expect-test started running.
 

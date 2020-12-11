@@ -93,6 +93,11 @@ module type S = sig
       been called, then the returned deferred is never determined. *)
   val connected : t -> conn Deferred.t
 
+  (** [connected_or_failed_to_connect] is immediately determined as [Ok _] if [t] is
+      already connected.  Otherwise it becomes determined the next time [t] becomes
+      connected or fails to connect or when [t] is closed. *)
+  val connected_or_failed_to_connect : t -> conn Or_error.t Deferred.t
+
   (** The current connection, if any. *)
   val current_connection : t -> conn option
 

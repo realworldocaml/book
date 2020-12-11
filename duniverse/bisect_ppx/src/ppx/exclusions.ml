@@ -10,7 +10,7 @@ type t =
 
 let excluded = ref []
 
-let function_separator = Str.regexp "[ \t]*,[ \t]*"
+let function_separator = Str.regexp "[ \t]*,[ \t]*" [@coverage off]
 
 let add s =
   let patterns = Str.split function_separator s in

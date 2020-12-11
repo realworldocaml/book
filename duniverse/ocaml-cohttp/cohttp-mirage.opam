@@ -1,4 +1,4 @@
-version: "2.5.1"
+version: "4.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: ["Anil Madhavapeddy" "Thomas Gazagnaire"]
@@ -19,18 +19,19 @@ system.
 Please see <https://mirage.io> for a self-hosted explanation
 and instructions on how to use this library."""
 depends: [
-  "ocaml" {>= "4.05.0"}
+  "ocaml" {>= "4.08"}
   "dune" {>= "1.1.0"}
   "mirage-flow" {>= "2.0.0"}
   "mirage-channel" {>= "4.0.0"}
-  "conduit" {>= "2.0.2"}
-  "conduit-mirage" {>= "2.0.2"}
+  "conduit" {>= "2.0.2" & <"3.0.0"}
+  "conduit-mirage" {>= "2.0.2" & <"3.0.0"}
   "mirage-kv" {>= "3.0.0"}
   "lwt" {>= "2.4.3"}
-  "cohttp"
-  "cohttp-lwt"
+  "cohttp" {=version}
+  "cohttp-lwt" {=version}
   "astring"
   "magic-mime"
+  "ppx_sexp_conv" {>= "v0.13.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}

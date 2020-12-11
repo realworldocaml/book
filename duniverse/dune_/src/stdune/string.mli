@@ -89,6 +89,8 @@ val for_all : t -> f:(char -> bool) -> bool
     whether to add the quote characters ends up being quite arbitrary. *) *)
 val maybe_quoted : t -> t
 
+val quoted : t -> t
+
 (** Produces: "x, y and z" *)
 val enumerate_and : string list -> string
 
@@ -128,3 +130,5 @@ val need_quoting : string -> bool
 (** [quote_for_shell s] quotes [s] using [Filename.quote] if [need_quoting s] is
     [true] *)
 val quote_for_shell : string -> string
+
+val filter_map : string -> f:(char -> char option) -> string

@@ -1,4 +1,2 @@
-(executables (names gen_parser_automaton)
- (libraries base stdio gen_parsexp_lib)
- (preprocess
-  (pps ppx_js_style -check-doc-comments ppx_sexp_conv ppx_compare)))
+(executables (names gen_bytes0) (libraries) (modules gen_bytes0)
+ (preprocess no_preprocessing))

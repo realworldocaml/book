@@ -1,3 +1,6 @@
+ppx\_stable
+===========
+
 A ppx extension for easier implementation of conversion functions between almost
 identical types.
 
@@ -212,4 +215,26 @@ end
 
 let convert_to_v1 (v2 : V2.t) : V1.t =
   V2.to_V1_t ~remove_X1:(fun v -> X0 (X0b.of_int v)) v2
+```
+
+### Renaming a constructor
+
+```ocaml
+module V1 = struct
+  type t =
+    | Do
+    | Re
+    | Mi of int
+  [@@deriving stable_variant]
+end
+
+module V2 = struct
+  type t =
+    | Do
+    | Re
+    | Ew of int
+  [@@deriving stable_variant ~version:V1.t ~remove:[ Ew ] ~add:[ Mi ]]
+end
+
+let v2_of_v1 : V1.t -> V2.t = V2.of_V1_t ~remove_Mi:(fun i -> V2.Ew i)
 ```

@@ -20,6 +20,10 @@ let yielded = Lwt_sequence.create ()
 
 let yield () = (Lwt.add_task_r [@ocaml.warning "-3"]) yielded
 
+let abandon_yielded_and_paused () =
+  Lwt_sequence.clear yielded;
+  Lwt.abandon_paused ()
+
 let run p =
   let rec run_loop () =
     (* Fulfill paused promises now. *)

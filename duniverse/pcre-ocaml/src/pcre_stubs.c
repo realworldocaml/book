@@ -36,11 +36,9 @@
 #endif
 
 #if __GNUC__ >= 3
-# define inline inline __attribute__ ((always_inline))
 # define __unused __attribute__ ((unused))
 #else
 # define __unused
-# define inline
 #endif
 
 #include <ctype.h>
@@ -513,15 +511,10 @@ CAMLprim value pcre_firsttable_stub(value v_rex)
   if (ftable == NULL) return None;
   else {
     value v_res, v_res_str;
-    char *ptr;
-    int i;
 
     Begin_roots1(v_rex);
-      v_res_str = caml_alloc_string(32);
+      v_res_str = caml_alloc_initialized_string(32, (char *) ftable);
     End_roots();
-
-    ptr = String_val(v_res_str);
-    for (i = 0; i <= 31; ++i) { *ptr = *ftable; ++ptr; ++ftable; }
 
     Begin_roots1(v_res_str);
       /* Allocates [Some string] from firsttable */

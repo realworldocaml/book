@@ -1,15 +1,15 @@
 diff -ru src/common/bisect_common.ml _self/meta_bisect_ppx/src/common/bisect_common.ml
 --- src/common/bisect_common.ml
 +++ _self/meta_bisect_ppx/src/common/bisect_common.ml
-@@ -167,7 +167,7 @@
-   Random.self_init ()
+@@ -175,7 +175,7 @@
+   Random.State.make_self_init () [@coverage off]
  
  let random_filename base_name =
--  Printf.sprintf "%s%09d.coverage" base_name (abs (Random.int 1000000000))
-+  Printf.sprintf "%s%09d.meta" base_name (abs (Random.int 1000000000))
+-  Printf.sprintf "%s%09d.coverage"
++  Printf.sprintf "%s%09d.meta"
+     base_name (abs (Random.State.int prng 1000000000))
  
  let write_points points =
-   let points_array = Array.of_list points in
 diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 --- src/common/dune
 +++ _self/meta_bisect_ppx/src/common/dune
@@ -23,7 +23,7 @@ diff -ru src/common/dune _self/meta_bisect_ppx/src/common/dune
 diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
 --- src/ppx/dune
 +++ _self/meta_bisect_ppx/src/ppx/dune
-@@ -2,10 +2,10 @@
+@@ -2,12 +2,12 @@
  (ocamlyacc exclude_parser)
  
  (library
@@ -32,25 +32,28 @@ diff -ru src/ppx/dune _self/meta_bisect_ppx/src/ppx/dune
 + (name meta_bisect_ppx)
 + (public_name meta_bisect_ppx)
   (kind ppx_rewriter)
+- (instrumentation.backend (ppx bisect_ppx))
++ (instrumentation.backend (ppx meta_bisect_ppx))
   (synopsis "Code coverage for OCaml")
 - (ppx_runtime_libraries bisect_ppx.runtime)
 + (ppx_runtime_libraries meta_bisect_ppx.runtime)
-  (preprocess (pps ppx_tools_versioned.metaquot_410))
-- (libraries bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
-+ (libraries meta_bisect_ppx.common ocaml-migrate-parsetree ppx_tools_versioned str))
+  (preprocess (pps ppxlib.metaquot))
+  (flags (:standard -open Ocaml_shadow))
+- (libraries bisect_ppx.common ppxlib str))
++ (libraries meta_bisect_ppx.common ppxlib str))
 diff -ru src/ppx/instrument.ml _self/meta_bisect_ppx/src/ppx/instrument.ml
 --- src/ppx/instrument.ml
 +++ _self/meta_bisect_ppx/src/ppx/instrument.ml
-@@ -54,7 +54,7 @@
- module Ast_mapper_class = Ast_mapper_class_410
+@@ -45,7 +45,7 @@
+ module Cl = Ppxlib.Ast_helper.Cl
+ module Cf = Ppxlib.Ast_helper.Cf
  
- (* From Bisect_ppx. *)
 -module Common = Bisect_common
 +module Common = Meta_bisect_common
  
  
  
-@@ -907,7 +907,7 @@
+@@ -969,7 +969,7 @@
            let ___bisect_visit___ =
              let point_definitions = [%e points_data] in
              let `Staged cb =
@@ -86,42 +89,6 @@ diff -ru src/report/dune _self/meta_bisect_ppx/src/report/dune
  
  (rule
   (targets assets.ml)
-diff -ru src/report/report_coveralls.ml _self/meta_bisect_ppx/src/report/report_coveralls.ml
---- src/report/report_coveralls.ml
-+++ _self/meta_bisect_ppx/src/report/report_coveralls.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- let file_json verbose indent in_file resolver visited points =
-   verbose (Printf.sprintf "Processing file '%s'..." in_file);
-diff -ru src/report/report_generic.ml _self/meta_bisect_ppx/src/report/report_generic.ml
---- src/report/report_generic.ml
-+++ _self/meta_bisect_ppx/src/report/report_generic.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- class type converter =
-   object
-diff -ru src/report/report_html.ml _self/meta_bisect_ppx/src/report/report_html.ml
---- src/report/report_html.ml
-+++ _self/meta_bisect_ppx/src/report/report_html.ml
-@@ -4,7 +4,7 @@
- 
- 
- 
--module Common = Bisect_common
-+module Common = Meta_bisect_common
- 
- let css_variables =
-   ["unvisited_color", "#ffecec";
 diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
 --- src/report/report.ml
 +++ _self/meta_bisect_ppx/src/report/report.ml
@@ -134,6 +101,30 @@ diff -ru src/report/report.ml _self/meta_bisect_ppx/src/report/report.ml
  
  module Arguments :
  sig
+diff -ru src/report/report_coveralls.ml _self/meta_bisect_ppx/src/report/report_coveralls.ml
+--- src/report/report_coveralls.ml
++++ _self/meta_bisect_ppx/src/report/report_coveralls.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ let file_json verbose indent in_file resolver visited points =
+   verbose (Printf.sprintf "Processing file '%s'..." in_file);
+diff -ru src/report/report_html.ml _self/meta_bisect_ppx/src/report/report_html.ml
+--- src/report/report_html.ml
++++ _self/meta_bisect_ppx/src/report/report_html.ml
+@@ -4,7 +4,7 @@
+ 
+ 
+ 
+-module Common = Bisect_common
++module Common = Meta_bisect_common
+ 
+ type theme = [
+   | `Light
 diff -ru src/runtime/native/dune _self/meta_bisect_ppx/src/runtime/native/dune
 --- src/runtime/native/dune
 +++ _self/meta_bisect_ppx/src/runtime/native/dune

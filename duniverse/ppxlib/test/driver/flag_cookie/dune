@@ -1,0 +1,8 @@
+(executable
+ (public_name print_cookie_driver)
+ (libraries ppxlib)
+ (preprocess
+  (pps ppxlib.metaquot)))
+
+(cram
+ (deps %{bin:print_cookie_driver}))

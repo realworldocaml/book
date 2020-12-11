@@ -4,12 +4,10 @@
    It must be opened in all modules, especially the ones coming from the compiler.
 *)
 
-module Js    = Migrate_parsetree.OCaml_408
-module Ocaml = Migrate_parsetree.Versions.OCaml_current
+module Js    = Versions.OCaml_412
+module Ocaml = Versions.OCaml_current
 
-module Select_ast(Ocaml : Migrate_parsetree.Versions.OCaml_version) = struct
-  open Migrate_parsetree
-
+module Select_ast(Ocaml : Versions.OCaml_version) = struct
   include Js
 
   module Type = struct
@@ -23,9 +21,6 @@ module Select_ast(Ocaml : Migrate_parsetree.Versions.OCaml_version) = struct
       | Toplevel_phrase
         : (Js   .Ast.Parsetree.toplevel_phrase,
            Ocaml.Ast.Parsetree.toplevel_phrase) t
-      | Out_phrase
-        : (Js   .Ast.Outcometree.out_phrase,
-           Ocaml.Ast.Outcometree.out_phrase) t
       | Expression
         : (Js   .Ast.Parsetree.expression,
            Ocaml.Ast.Parsetree.expression) t
@@ -58,7 +53,6 @@ module Select_ast(Ocaml : Migrate_parsetree.Versions.OCaml_version) = struct
       | Signature             -> copy_signature
       | Structure             -> copy_structure
       | Toplevel_phrase       -> copy_toplevel_phrase
-      | Out_phrase            -> copy_out_phrase
       | Expression            -> copy_expression
       | Core_type             -> copy_core_type
       | Type_declaration      -> copy_type_declaration
@@ -77,7 +71,6 @@ module Select_ast(Ocaml : Migrate_parsetree.Versions.OCaml_version) = struct
       | Signature             -> copy_signature
       | Structure             -> copy_structure
       | Toplevel_phrase       -> copy_toplevel_phrase
-      | Out_phrase            -> copy_out_phrase
       | Expression            -> copy_expression
       | Core_type             -> copy_core_type
       | Type_declaration      -> copy_type_declaration
@@ -89,11 +82,11 @@ module Select_ast(Ocaml : Migrate_parsetree.Versions.OCaml_version) = struct
         let g = to_ocaml b in
         fun (x, y) -> (f x, g y)
 
-  let of_ocaml_mapper item f x =
-    to_ocaml item x |> f |> of_ocaml item
+  let of_ocaml_mapper item f ctxt x =
+    to_ocaml item x |> f ctxt |> of_ocaml item
 
-  let to_ocaml_mapper item f x =
-    of_ocaml item x |> f |> to_ocaml item
+  let to_ocaml_mapper item f ctxt x =
+    of_ocaml item x |> f ctxt |> to_ocaml item
 end
 
 module Selected_ast = Select_ast(Ocaml)
@@ -101,9 +94,8 @@ module Selected_ast = Select_ast(Ocaml)
 (* Modules from migrate_parsetree *)
 module Parsetree  = Selected_ast.Ast.Parsetree
 module Asttypes   = Selected_ast.Ast.Asttypes
-module Ast_helper = Selected_ast.Ast.Ast_helper
-module Docstrings = Selected_ast.Ast.Docstrings
 
+module Ast_helper = Ast_helper_lite
 
 module Location   = struct
   include Ocaml_common.Location
@@ -121,7 +113,7 @@ end
 
 module Parse = struct
   include Ocaml_common.Parse
-  module Of_ocaml = Migrate_parsetree.Versions.Convert(Ocaml)(Js)
+  module Of_ocaml = Versions.Convert(Ocaml)(Js)
   let implementation lexbuf = implementation lexbuf |> Of_ocaml.copy_structure
   let interface lexbuf = interface lexbuf |> Of_ocaml.copy_signature
   let toplevel_phrase lexbuf = toplevel_phrase lexbuf |> Of_ocaml.copy_toplevel_phrase
@@ -133,7 +125,7 @@ end
 
 module Parser = struct
   include Ocaml_common.Parser
-  module Of_ocaml = Migrate_parsetree.Versions.Convert(Ocaml)(Js)
+  module Of_ocaml = Versions.Convert(Ocaml)(Js)
   let use_file lexer lexbuf = use_file lexer lexbuf |> List.map Of_ocaml.copy_toplevel_phrase
   let toplevel_phrase lexer lexbuf = toplevel_phrase lexer lexbuf |> Of_ocaml.copy_toplevel_phrase
   let parse_pattern lexer lexbuf = parse_pattern lexer lexbuf |> Of_ocaml.copy_pattern

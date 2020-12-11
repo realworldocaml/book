@@ -78,6 +78,20 @@ module Inherit (C : sig
           val component : t -> C.t
         end) : S with type t := T.t
 
+(** {2 Comparison-only Functors}
+
+    These functors require only [type t] and [val compare]. They do not require [val
+    sexp_of_t], and do not generate container datatypes.
+*)
+
+module Infix (T : sig
+    type t [@@deriving compare]
+  end) : Infix with type t := T.t
+
+module Polymorphic_compare (T : sig
+    type t [@@deriving compare]
+  end) : Polymorphic_compare with type t := T.t
+
 (** {2 Make Functors}
 
     The Comparable Make functor family allows users to choose among the following

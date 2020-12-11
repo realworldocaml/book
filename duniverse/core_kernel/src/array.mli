@@ -312,10 +312,6 @@ module Permissioned : sig
 
   val last : ('a, [> read ]) t -> 'a
   val equal : ('a -> 'a -> bool) -> ('a, [> read ]) t -> ('a, [> read ]) t -> bool
-
-  val unsafe_truncate : (_, [> write ]) t -> len:int -> unit
-  [@@deprecated "[since 2019-07] It will be removed in the future"]
-
   val to_sequence : ('a, [> read ]) t -> 'a Sequence.t
   val to_sequence_mutable : ('a, [> read ]) t -> 'a Sequence.t
 end

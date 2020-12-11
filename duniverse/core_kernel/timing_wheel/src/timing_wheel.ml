@@ -224,7 +224,7 @@ end = struct
     end
 
     include T
-    include Binable.Of_binable (Time_ns.Span) (T)
+    include Binable.Of_binable_without_uuid [@alert "-legacy"] (Time_ns.Span) (T)
     include Sexpable.Of_sexpable (Time_ns.Span) (T)
   end
 end

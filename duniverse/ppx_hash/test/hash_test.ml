@@ -181,49 +181,47 @@ end
 module Ignoring = struct
   type a = { a : (int [@compare.ignore]) * string }
   [@@deriving_inline hash]
-  let _ = fun (_ : a) -> ()
-
-
-  let (hash_fold_a :
-         Ppx_hash_lib.Std.Hash.state -> a -> Ppx_hash_lib.Std.Hash.state) =
-    fun hsv ->
+  
+let _ = fun (_ : a) -> ()
+  
+  
+let (hash_fold_a :
+  Ppx_hash_lib.Std.Hash.state -> a -> Ppx_hash_lib.Std.Hash.state) =
+  fun hsv ->
     fun arg ->
-    let hsv = hsv in
-    let (e0, e1) = arg.a in
-    let hsv = let _ = e0 in hsv in
-    let hsv = hash_fold_string hsv e1 in
-    hsv
-  let _ = hash_fold_a
-  let (hash_a : a -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func arg =
-      Ppx_hash_lib.Std.Hash.get_hash_value
-        (let hsv = Ppx_hash_lib.Std.Hash.create () in hash_fold_a hsv arg) in
-    fun x -> func x
-  let _ = hash_a
-  [@@@deriving.end]
+      let hsv = hsv in
+      let (e0, e1) = arg.a in
+      let hsv = let _ = e0 in hsv in let hsv = hash_fold_string hsv e1 in hsv
+let _ = hash_fold_a
+let (hash_a : a -> Ppx_hash_lib.Std.Hash.hash_value) =
+  let func arg =
+    Ppx_hash_lib.Std.Hash.get_hash_value
+      (let hsv = Ppx_hash_lib.Std.Hash.create () in hash_fold_a hsv arg) in
+  fun x -> func x
+let _ = hash_a
+[@@@deriving.end]
 
   type b = { b : (int [@hash.ignore]) * string }
   [@@deriving_inline hash]
-  let _ = fun (_ : b) -> ()
-
-
-  let (hash_fold_b :
+  
+let _ = fun (_ : b) -> ()
+  
+  
+let (hash_fold_b :
   Ppx_hash_lib.Std.Hash.state -> b -> Ppx_hash_lib.Std.Hash.state) =
   fun hsv ->
     fun arg ->
-    let hsv = hsv in
-    let (e0, e1) = arg.b in
-    let hsv = let _ = e0 in hsv in
-    let hsv = hash_fold_string hsv e1 in
-    hsv
-  let _ = hash_fold_b
-  let (hash_b : b -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func arg =
-      Ppx_hash_lib.Std.Hash.get_hash_value
-        (let hsv = Ppx_hash_lib.Std.Hash.create () in hash_fold_b hsv arg) in
-    fun x -> func x
-  let _ = hash_b
-  [@@@deriving.end]
+      let hsv = hsv in
+      let (e0, e1) = arg.b in
+      let hsv = let _ = e0 in hsv in let hsv = hash_fold_string hsv e1 in hsv
+let _ = hash_fold_b
+let (hash_b : b -> Ppx_hash_lib.Std.Hash.hash_value) =
+  let func arg =
+    Ppx_hash_lib.Std.Hash.get_hash_value
+      (let hsv = Ppx_hash_lib.Std.Hash.create () in hash_fold_b hsv arg) in
+  fun x -> func x
+let _ = hash_b
+[@@@deriving.end]
 end
 
 module Type_extension = struct
@@ -242,30 +240,29 @@ module Nested_tuples = struct
   type a = int * (string * bool) [@@deriving_inline hash]
 
 
-  let _ = fun (_ : a)  -> ()
-
-
-  let (hash_fold_a :
-         Ppx_hash_lib.Std.Hash.state -> a -> Ppx_hash_lib.Std.Hash.state) =
-    fun hsv  ->
-    fun arg  ->
-      let (e0,e1) = arg  in
-      let hsv = hash_fold_int hsv e0  in
+  
+let _ = fun (_ : a) -> ()
+  
+  
+let (hash_fold_a :
+  Ppx_hash_lib.Std.Hash.state -> a -> Ppx_hash_lib.Std.Hash.state) =
+  fun hsv ->
+    fun arg ->
+      let (e0, e1) = arg in
+      let hsv = hash_fold_int hsv e0 in
       let hsv =
-        let (e0,e1) = e1  in
-        let hsv = hash_fold_string hsv e0  in
-        let hsv = hash_fold_bool hsv e1  in hsv  in
+        let (e0, e1) = e1 in
+        let hsv = hash_fold_string hsv e0 in
+        let hsv = hash_fold_bool hsv e1 in hsv in
       hsv
-
-  let _ = hash_fold_a
-  let (hash_a : a -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func arg =
-      Ppx_hash_lib.Std.Hash.get_hash_value
-        (let hsv = Ppx_hash_lib.Std.Hash.create ()  in hash_fold_a hsv arg)
-    in
-    fun x  -> func x
-  let _ = hash_a
-  [@@@deriving.end]
+let _ = hash_fold_a
+let (hash_a : a -> Ppx_hash_lib.Std.Hash.hash_value) =
+  let func arg =
+    Ppx_hash_lib.Std.Hash.get_hash_value
+      (let hsv = Ppx_hash_lib.Std.Hash.create () in hash_fold_a hsv arg) in
+  fun x -> func x
+let _ = hash_a
+[@@@deriving.end]
 end
 
 module Wildcard : sig

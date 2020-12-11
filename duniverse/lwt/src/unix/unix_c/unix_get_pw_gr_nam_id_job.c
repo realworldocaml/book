@@ -16,6 +16,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "lwt_unix.h"
 
@@ -81,9 +82,16 @@ static value alloc_group_entry(struct group *entry)
     {                                                                  \
         size_t buffer_size = sysconf(_SC_##CONF##_R_SIZE_MAX);         \
         if (buffer_size == (size_t)-1) buffer_size = 16384;            \
-        job->buffer = (char *)lwt_unix_malloc(buffer_size);            \
-        job->result = FUNC##_r(job->ARG, &job->entry, job->buffer,     \
-                               buffer_size, &job->ptr);                \
+        while (1)                                                   \
+        {                                                              \
+            job->buffer = (char *)lwt_unix_malloc(buffer_size);        \
+            job->result = FUNC##_r(job->ARG, &job->entry, job->buffer, \
+                                   buffer_size, &job->ptr);            \
+            if (job->result != ERANGE) break;                          \
+            buffer_size = buffer_size * 2;                             \
+            if (buffer_size > 1 << 20) break;                          \
+            free(job->buffer);                                         \
+        }                                                              \
     }                                                                  \
                                                                        \
     static value result_##FUNC(struct job_##FUNC *job)                 \

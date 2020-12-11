@@ -32,6 +32,7 @@ include Comparable.Make (T)
    functions are available within this module. *)
 open! Uchar_replace_polymorphic_compare
 
+let invariant (_ : t) = ()
 let int_is_scalar = is_valid
 
 let succ_exn c =

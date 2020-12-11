@@ -18,7 +18,11 @@ let invariant a_invariant t : unit =
       ~length:(check (fun length -> assert (length = List.length t.elts)))
   with
   | exn ->
-    failwiths "Linked_stack.invariant failed" (exn, t) [%sexp_of: exn * _ t_internal]
+    failwiths
+      ~here:[%here]
+      "Linked_stack.invariant failed"
+      (exn, t)
+      [%sexp_of: exn * _ t_internal]
 ;;
 
 let create () = { elts = []; length = 0 }

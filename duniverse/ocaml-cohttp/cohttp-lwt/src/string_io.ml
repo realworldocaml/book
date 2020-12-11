@@ -16,8 +16,9 @@
   }}}*)
 
 type 'a t = 'a Lwt.t
+
 let return = Lwt.return
-let (>>=) = Lwt.bind
+let ( >>= ) = Lwt.bind
 
 module Sio = Cohttp__String_io
 
@@ -27,7 +28,5 @@ type conn = Sio.M.conn
 
 let read_line ic = return (Sio.M.read_line ic)
 let read ic n = return (Sio.M.read ic n)
-
 let write oc str = return (Sio.M.write oc str)
 let flush oc = return (Sio.M.flush oc)
-

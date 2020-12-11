@@ -80,7 +80,9 @@ let print_token_type (prop : token_properties) =
   | PrintNormal
   | PrintForOCamlyacc
   | PrintUnitActions false ->
-      Misc.o2s prop.tk_ocamltype print_ocamltype
+      Option.value
+        (Option.map print_ocamltype prop.tk_ocamltype)
+        ~default:""
   | PrintUnitActions true ->
       "" (* omitted ocamltype after %token means <unit> *)
 

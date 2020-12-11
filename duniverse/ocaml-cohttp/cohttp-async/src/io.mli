@@ -13,7 +13,8 @@
  * PERFORMANCE OF THIS SOFTWARE.
   }}}*)
 
-include Cohttp.S.IO
-  with type 'a t = 'a Async_kernel.Deferred.t
-   and type ic = Async_unix.Reader.t
-   and type oc = Async_unix.Writer.t
+include
+  Cohttp.S.IO
+    with type 'a t = 'a Async_kernel.Deferred.t
+     and type ic = Async_unix.Reader.t
+     and type oc = Async_unix.Writer.t

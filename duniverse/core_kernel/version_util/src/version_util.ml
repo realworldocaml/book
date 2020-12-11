@@ -7,16 +7,38 @@ open! Core_kernel
 external generated_build_info : unit -> string = "generated_build_info"
 external generated_hg_version : unit -> string = "generated_hg_version"
 
-let trim_trailing_newline s =
-  match (String.chop_suffix s ~suffix:"\n") with
-  | Some s -> s
-  | None -> s
+let parse_generated_hg_version generated_hg_version =
+  generated_hg_version
+  |> String.chop_suffix_if_exists ~suffix:"\n"
+  |> String.split ~on:'\n'
+  |> List.map ~f:(fun line ->
+    match String.rsplit2 line ~on:' ' with
+    | None ->
+      (* no version util, or compatibility until jenga produces the other branch *)
+      line
+    | Some (repo, rev_status) ->
+      if String.mem rev_status '_' (* the repo has a space in it *)
+      then line
+      else
+        (* For compability with downstream tools that might rely on this output format,
+           and with [Version.parse].*)
+        String.concat
+          [ repo
+          ; "_"
+          ; String.prefix rev_status 12
+          ; (* The revision can have a one-character '+' suffix. Keep it. *)
+            if String.length rev_status mod 2 = 1
+            then String.suffix rev_status 1
+            else ""
+          ])
+;;
+
+let version_list = parse_generated_hg_version (generated_hg_version ())
+
+let version = String.concat version_list ~sep:" "
+let hg_version = String.concat version_list ~sep:"\n"
 
 let build_info = generated_build_info ()
-let hg_version = trim_trailing_newline (generated_hg_version ())
-
-let version = String.tr ~target:'\n' ~replacement:' ' hg_version
-let version_list = String.split ~on:'\n' hg_version
 
 module Version = struct
   type t =
@@ -28,13 +50,6 @@ module Version = struct
     match String.rsplit2 version ~on:'_' with
     | None -> error_s [%message "Could not parse version" version]
     | Some (repo, version) -> Ok {repo; version}
-
-  let%expect_test "get version" =
-    printf
-      !"%{sexp:t Or_error.t}\n"
-      (parse "ssh://somerepo_04ce83e21002");
-    [%expect {| (Ok ((repo ssh://somerepo) (version 04ce83e21002))) |}]
-  ;;
 end
 
 let arg_spec = [
@@ -89,6 +104,7 @@ type t = {
   executable_path             : string;
   build_system                : string;
   allowed_projections         : string list option [@sexp.option];
+  with_fdo                    : (string * Md5.t option) option [@sexp.option];
   application_specific_fields : Application_specific_fields.t option [@sexp.option];
 } [@@deriving sexp]
 
@@ -109,6 +125,7 @@ let { username;
       executable_path;
       build_system;
       allowed_projections;
+      with_fdo;
       application_specific_fields;
     } = t
 ;;
@@ -125,3 +142,7 @@ let reprint_build_info sexp_of_time =
     ~f:(fun () -> Sexp.to_string (sexp_of_t t))
 
 let compiled_for_speed = x_library_inlining && not dynlinkable_code
+
+module For_tests = struct
+  let parse_generated_hg_version = parse_generated_hg_version
+end

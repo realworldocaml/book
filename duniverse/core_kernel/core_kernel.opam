@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "v0.13.0"
+version: "v0.14.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/core_kernel"
@@ -12,27 +12,27 @@ build: [
 ]
 depends: [
   "ocaml"               {>= "4.08.0"}
-  "base"                {>= "v0.13" & < "v0.14"}
-  "base_bigstring"      {>= "v0.13" & < "v0.14"}
-  "base_quickcheck"     {>= "v0.13" & < "v0.14"}
-  "bin_prot"            {>= "v0.13" & < "v0.14"}
-  "fieldslib"           {>= "v0.13" & < "v0.14"}
-  "jane-street-headers" {>= "v0.13" & < "v0.14"}
-  "jst-config"          {>= "v0.13" & < "v0.14"}
-  "ppx_assert"          {>= "v0.13" & < "v0.14"}
-  "ppx_base"            {>= "v0.13" & < "v0.14"}
-  "ppx_hash"            {>= "v0.13" & < "v0.14"}
-  "ppx_inline_test"     {>= "v0.13" & < "v0.14"}
-  "ppx_jane"            {>= "v0.13" & < "v0.14"}
-  "ppx_sexp_conv"       {>= "v0.13" & < "v0.14"}
-  "ppx_sexp_message"    {>= "v0.13" & < "v0.14"}
-  "sexplib"             {>= "v0.13" & < "v0.14"}
-  "splittable_random"   {>= "v0.13" & < "v0.14"}
-  "stdio"               {>= "v0.13" & < "v0.14"}
-  "time_now"            {>= "v0.13" & < "v0.14"}
-  "typerep"             {>= "v0.13" & < "v0.14"}
-  "variantslib"         {>= "v0.13" & < "v0.14"}
-  "dune"                {>= "1.5.1"}
+  "base"                {>= "v0.14" & < "v0.15"}
+  "base_bigstring"      {>= "v0.14" & < "v0.15"}
+  "base_quickcheck"     {>= "v0.14" & < "v0.15"}
+  "bin_prot"            {>= "v0.14" & < "v0.15"}
+  "fieldslib"           {>= "v0.14" & < "v0.15"}
+  "jane-street-headers" {>= "v0.14" & < "v0.15"}
+  "jst-config"          {>= "v0.14" & < "v0.15"}
+  "ppx_assert"          {>= "v0.14" & < "v0.15"}
+  "ppx_base"            {>= "v0.14" & < "v0.15"}
+  "ppx_hash"            {>= "v0.14" & < "v0.15"}
+  "ppx_inline_test"     {>= "v0.14" & < "v0.15"}
+  "ppx_jane"            {>= "v0.14" & < "v0.15"}
+  "ppx_sexp_conv"       {>= "v0.14" & < "v0.15"}
+  "ppx_sexp_message"    {>= "v0.14" & < "v0.15"}
+  "sexplib"             {>= "v0.14" & < "v0.15"}
+  "splittable_random"   {>= "v0.14" & < "v0.15"}
+  "stdio"               {>= "v0.14" & < "v0.15"}
+  "time_now"            {>= "v0.14" & < "v0.15"}
+  "typerep"             {>= "v0.14" & < "v0.15"}
+  "variantslib"         {>= "v0.14" & < "v0.15"}
+  "dune"                {>= "2.0.0"}
 ]
 synopsis: "Industrial strength alternative to OCaml's standard library"
 description: "

@@ -1,0 +1,3 @@
+(cram
+ (deps test.ml)
+ (alias compatible))

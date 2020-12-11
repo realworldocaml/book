@@ -38,18 +38,14 @@ let set_binary_mode = Caml.set_binary_mode_in
 
 let input_all t =
   (* We use 65536 because that is the size of OCaml's IO buffers. *)
-  let buf_size = 65536 in
-  let buf = Bytes.create buf_size in
-  let buffer = Buffer.create buf_size in
+  let chunk_size = 65536 in
+  let buffer = Buffer.create chunk_size in
   let rec loop () =
-    let len = input t ~buf ~pos:0 ~len:(Bytes.length buf) in
-    if len > 0 then begin
-      Buffer.add_subbytes buffer buf ~pos:0 ~len;
-      loop ();
-    end
+    Caml.Buffer.add_channel buffer t chunk_size;
+    loop ()
   in
-  loop ();
-  Buffer.contents buffer;
+  try loop () with
+  | End_of_file -> Buffer.contents buffer
 ;;
 
 let trim ~fix_win_eol line =

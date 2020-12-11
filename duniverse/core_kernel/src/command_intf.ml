@@ -45,16 +45,15 @@ module type For_unix = sig
     type t
   end
 
-  module Sys : sig
-    val get_argv : unit -> string array
-    val getenv : string -> string option
-    val unsafe_getenv : string -> string option
-  end
-
   module Thread : sig
     type t
 
-    val create : ('a -> unit) -> 'a -> t
+    val create
+      :  on_uncaught_exn:[ `Kill_whole_process | `Print_to_stderr ]
+      -> ('a -> unit)
+      -> 'a
+      -> t
+
     val join : t -> unit
   end
 
@@ -88,6 +87,7 @@ module type For_unix = sig
     val in_channel_of_descr : File_descr.t -> In_channel.t
     val putenv : key:string -> data:string -> unit
     val unsetenv : string -> unit
+    val unsafe_getenv : string -> string option
 
     type env =
       [ `Replace of (string * string) list
@@ -135,6 +135,14 @@ module type For_unix = sig
 end
 
 module type Command = sig
+  module Auto_complete : sig
+    (** In addition to the argument prefix, an auto-completion spec has access to any
+        previously parsed arguments in the form of a heterogeneous map into which those
+        arguments may register themselves by providing a [Univ_map.Key] using the [~key]
+        argument to [Arg_type.create]. *)
+    type t = Univ_map.t -> part:string -> string list
+  end
+
   (** Argument types. *)
   module Arg_type : sig
     (** The type of a command line argument. *)
@@ -142,16 +150,13 @@ module type Command = sig
 
     (** An argument type includes information about how to parse values of that type from
         the command line, and (optionally) how to autocomplete partial arguments of that
-        type via bash's programmable tab-completion. In addition to the argument prefix,
-        autocompletion also has access to any previously parsed arguments in the form of a
-        heterogeneous map into which previously parsed arguments may register themselves by
-        providing a [Univ_map.Key] using the [~key] argument to [create].
+        type via bash's programmable tab-completion.
 
         If the [of_string] function raises an exception, command line parsing will be
         aborted and the exception propagated up to top-level and printed along with
         command-line help. *)
     val create
-      :  ?complete:(Univ_map.t -> part:string -> string list)
+      :  ?complete:Auto_complete.t
       -> ?key:'a Univ_map.Multi.Key.t
       -> (string -> 'a)
       -> 'a t
@@ -233,8 +238,8 @@ module type Command = sig
         flag is passed on the command line. *)
     val no_arg : bool t
 
-    (** [no_arg_register ~key ~value] is like [no_arg], but associates [value] with [key] in
-        the autocomplete environment. *)
+    (** [no_arg_register ~key ~value] is like [no_arg], but associates [value] with [key]
+        in the autocomplete environment. *)
     val no_arg_register : key:'a Univ_map.With_default.Key.t -> value:'a -> bool t
 
     (** [no_arg_some value] is like [no_arg], but will return [Some value] if the flag is
@@ -819,83 +824,11 @@ module type Command = sig
   (** Extracts the summary string for a command. *)
   val summary : t -> string
 
-  module Shape : sig
-    module Flag_info : sig
-      type t =
-        { name : string
-        ; doc : string
-        ; aliases : string list
-        }
-      [@@deriving bin_io, compare, fields, sexp]
-    end
-
-    module Base_info : sig
-      type grammar =
-        | Zero
-        | One of string
-        | Many of grammar
-        | Maybe of grammar
-        | Concat of grammar list
-        | Ad_hoc of string
-      [@@deriving bin_io, compare, sexp]
-
-      type anons =
-        | Usage of string
-        (** When exec'ing an older binary whose help sexp doesn't expose the grammar. *)
-        | Grammar of grammar
-      [@@deriving bin_io, compare, sexp]
-
-      type t =
-        { summary : string
-        ; readme : string option
-        ; anons : anons
-        ; flags : Flag_info.t list
-        }
-      [@@deriving bin_io, compare, fields, sexp]
-    end
-
-    module Group_info : sig
-      type 'a t =
-        { summary : string
-        ; readme : string option
-        ; subcommands : (string, 'a) List.Assoc.t Lazy.t
-        }
-      [@@deriving bin_io, compare, fields, sexp]
-
-      val map : 'a t -> f:('a -> 'b) -> 'b t
-    end
-
-    module Exec_info : sig
-      type t =
-        { summary : string
-        ; readme : string option
-        ; working_dir : string
-        ; path_to_exe : string
-        ; child_subcommand : string list
-        }
-      [@@deriving bin_io, compare, fields, sexp]
-    end
-
-    type t =
-      | Basic of Base_info.t
-      | Group of t Group_info.t
-      | Exec of Exec_info.t * (unit -> t)
-      | Lazy of t Lazy.t
-
-    (** Fully forced shapes are comparable and serializable. *)
-    module Fully_forced : sig
-      type shape = t
-
-      type t =
-        | Basic of Base_info.t
-        | Group of t Group_info.t
-        | Exec of Exec_info.t * t
-      [@@deriving bin_io, compare, sexp]
-
-      val create : shape -> t
-    end
-    with type shape := t
+  module Shape : module type of struct
+    include Command_shape
   end
+  with module Private := Command_shape.Private
+   and module Stable := Command_shape.Stable
 
 
   (** call this instead of [Core.exit] if in command-related code that you want to run in
@@ -931,15 +864,10 @@ module type Command = sig
     https://opensource.janestreet.com/standards/#private-submodules *)
   module Private : sig
     val abs_path : dir:string -> string -> string
+    val word_wrap : string -> int -> string list
 
     module Anons : sig
       val normalize : string -> string
-    end
-
-    module Format : sig
-      module V1 : sig
-        val word_wrap : string -> int -> string list
-      end
     end
 
     module Path : sig
@@ -983,6 +911,7 @@ module type Command = sig
         -> ?build_info:string
         -> ?argv:string list
         -> ?extend:(string list -> string list)
+        -> ?when_parsing_succeeds:(unit -> unit)
         -> t
         -> unit
 
@@ -996,5 +925,9 @@ module type Command = sig
         -> is_expand_dots:bool
         -> unit
     end
+  end
+
+  module Stable : sig
+    module Shape = Command_shape.Stable
   end
 end

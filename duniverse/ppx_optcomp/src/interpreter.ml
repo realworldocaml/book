@@ -241,7 +241,7 @@ let rec eval env e : Value.t =
   match e.pexp_desc with
   | Pexp_constant (Pconst_integer    (x, None)) -> Int (parse_int loc x)
   | Pexp_constant (Pconst_char    x       ) -> Char x
-  | Pexp_constant (Pconst_string (x, _   )) -> String x
+  | Pexp_constant (Pconst_string (x, _, _   )) -> String x
 
   | Pexp_construct ({ txt = Lident "true" ; _ }, None) -> Bool true
   | Pexp_construct ({ txt = Lident "false"; _ }, None) -> Bool false
@@ -361,7 +361,7 @@ and bind env patt value =
 
   | Ppat_constant (Pconst_integer    (x, None)), Int    y when parse_int loc x = y -> env
   | Ppat_constant (Pconst_char    x       ), Char   y when Char.equal   x y -> env
-  | Ppat_constant (Pconst_string (x, _   )), String y when String.equal x y -> env
+  | Ppat_constant (Pconst_string (x, _, _   )), String y when String.equal x y -> env
 
   | Ppat_construct ({ txt = Lident "true" ; _ }, None), Bool true  -> env
   | Ppat_construct ({ txt = Lident "false"; _ }, None), Bool false -> env

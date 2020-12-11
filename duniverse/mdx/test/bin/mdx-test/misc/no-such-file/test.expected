@@ -1,0 +1,3 @@
+ocaml-mdx: FILE argument: no `foo' file
+Usage: ocaml-mdx test [OPTION]... FILE
+Try `ocaml-mdx test --help' or `ocaml-mdx --help' for more information.

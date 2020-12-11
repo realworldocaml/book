@@ -498,11 +498,11 @@ let%test_module "random" =
 
       let%test_unit "partition_map vs filter_map" =
         let partition_of_variant = function
-          | `A a -> `Fst a
-          | `B b -> `Snd b
+          | `A a -> First a
+          | `B b -> Second b
         in
         Q.test
-          ~sexp_of:[%sexp_of: t list * (t -> [ `Fst of t | `Snd of t ])]
+          ~sexp_of:[%sexp_of: t list * (t -> (t, t) Either.t)]
           (G.tuple2
              (List.quickcheck_generator quickcheck_generator)
              (G.fn
@@ -514,12 +514,12 @@ let%test_module "random" =
               (List.partition_map list ~f)
               ( List.filter_map list ~f:(fun x ->
                   match f x with
-                  | `Fst x -> Some x
-                  | `Snd _ -> None)
+                  | First x -> Some x
+                  | Second _ -> None)
               , List.filter_map list ~f:(fun x ->
                   match f x with
-                  | `Fst _ -> None
-                  | `Snd x -> Some x) ))
+                  | First _ -> None
+                  | Second x -> Some x) ))
       ;;
 
       let%test_unit "partition3_map vs filter_map" =
@@ -568,7 +568,7 @@ let%test_module "random" =
           ~f:(fun (list, f) ->
             [%test_eq: t list * t list]
               (List.partition_tf list ~f)
-              (List.partition_map list ~f:(fun x -> if f x then `Fst x else `Snd x)))
+              (List.partition_map list ~f:(fun x -> if f x then First x else Second x)))
       ;;
 
       let%test_unit "append + split_n" =

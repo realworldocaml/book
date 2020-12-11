@@ -245,10 +245,11 @@ val read_lines : input_channel -> string Lwt_stream.t
   (** [read_lines ic] returns a stream holding all lines of [ic] *)
 
 val read : ?count : int -> input_channel -> string Lwt.t
-(** If [~count] is specified, [read ~count ic] reads at most [~count] characters
-    from [ic]. Note that fewer than [~count] characters can be read; check the
-    size of the resulting string. [read] returns [""] if the end of input is
-    reached.
+(** If [~count] is specified, [read ~count ic] reads at most [~count] bytes from
+    [ic] in one read operation. Note that fewer than [~count] bytes can be read.
+    This can happen for multiple reasons, including end of input, or no more
+    data currently available. Check the size of the resulting string. [read]
+    resolves with [""] if the input channel is already at the end of input.
 
     If [~count] is not specified, [read ic] reads all bytes until the end of
     input. *)
@@ -266,6 +267,10 @@ val read_into_exactly : input_channel -> bytes -> int -> int -> unit Lwt.t
       [length] bytes and stores them in [buffer] at offset [offset].
 
       @raise End_of_file on end of input *)
+
+val read_into_bigstring : input_channel -> Lwt_bytes.t -> int -> int -> int Lwt.t
+
+val read_into_exactly_bigstring : input_channel -> Lwt_bytes.t -> int -> int -> unit Lwt.t
 
 val read_value : input_channel -> 'a Lwt.t
 (** [read_value channel] reads a marshaled value from [channel]; it corresponds
@@ -312,12 +317,16 @@ val write_from : output_channel -> bytes -> int -> int -> int Lwt.t
       to [oc], from [buffer] at offset [offset] and returns the number
       of bytes actually written *)
 
+val write_from_bigstring : output_channel -> Lwt_bytes.t -> int -> int -> int Lwt.t
+
 val write_from_string : output_channel -> string -> int -> int -> int Lwt.t
   (** See {!write}. *)
 
 val write_from_exactly : output_channel -> bytes -> int -> int -> unit Lwt.t
   (** [write_from_exactly oc buffer offset length] writes all [length]
       bytes from [buffer] at offset [offset] to [oc] *)
+
+val write_from_exactly_bigstring : output_channel -> Lwt_bytes.t -> int -> int -> unit Lwt.t
 
 val write_from_string_exactly :
   output_channel -> string -> int -> int -> unit Lwt.t

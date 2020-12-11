@@ -1,3 +1,43 @@
+## v3.1.0 (2021-02-25)
+
+* Add OCaml 4.11.2 and 4.12.0 (@smorimoto @kit-ty-kate)
+* Add OCaml 4.10.2 and 4.11.1 release. (@avsm)
+* Add `Since.options_packages` and update for new opam-repository
+  layout for 4.12+. (@dra27 @avsm)
+
+## v3.0.0 (2020-08-23)
+
+* Update for release of 4.11.0 and 4.10.1.
+
+Interface changes:
+* Change signature of `Configure_options.to_configure_flag` to
+  take an OCaml version, and add support for post-autoconf
+  flags in OCaml 4.08+ (#13 @avsm).
+* Add some extra configure options for modern OCaml (@avsm).
+* Add a `trunk_variants` that has additional tests that a
+  full OCaml test run can use (like disable-flat-float-array).
+* Add comparison and equality functions to `Configure_options`.
+* Remove dependency on Result compatibility module and use
+  Stdlib, which bumps up the minimum OCaml version to 4.07.0 (@avsm)
+* Add conversion functions to go from Docker and opam
+  representations of architecture strings (@avsm)
+
+Base images:
+* Remove safe-string variants from the compiler build images,
+  as the era of safe string migration is behind us.
+* Add in no-naked-pointers, disable-float-array to compiler
+  trunk variants, as they need to be actively tested.
+
+## v2.6.1 (2020-07-15)
+
+* Fix `arch_of_string` to work with i386 strings (@avsm).
+
+## v2.6.0 (2020-07-14)
+
+* Mark trunk as 4.12.0 and add the 4.11 as a development beta (@avsm).
+* Add i386 architecture (@dinosaure @avsm)
+* Add a `arch_is_32bit` to determine if wordsize is 32-bits. (@avsm)
+
 ## v2.5.0 (2020-03-22)
 
 * Add OCaml 4.09.1 and 4.10.0 releases (@avsm @kit-ty-kate).

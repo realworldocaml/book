@@ -1,3 +1,329 @@
+2.8.5 (28/03/2021)
+------------------
+
+- Fixed absence of executable bit for installed `.cmxs` (#4149, fixes #4148, @bobot)
+
+- Fix a race in Dune cache. It was particularly easy to hit this race when using
+  the cache on Windows (#4406, fixes #4167, @snowleopard)
+
+2.8.4 (08/03/2021)
+------------------
+
+- Fix crash when META file for `compiler-libs.toplevel` is present
+  (@jeremiedimino, #4249)
+
+2.8.3 (07/03/2021)
+------------------
+
+- Make `patdiff` show refined diffs (#4257, fixes #4254, @hakuch)
+
+- Fixed a bug that could result in needless recompilation under Windows due to
+  case differences in the result of `Sys.getcwd` (observed under `emacs`).
+  (#3966, @nojb).
+
+- Restore compatibility with Coq < 8.10 for coq-lang < 0.3 , document
+  that `(using coq 0.3)` does require Coq 8.10 at least (#4224, fixes
+  #4142, @ejgallego)
+
+- Add a META rule for 'compiler-libs.native-toplevel' (#4175, @altgr)
+
+- No longer call `chmod` on symbolic links (fixes #4195, @dannywillems)
+
+- Dune no longer automatically create or edit `dune-project` files
+  (#4239, fixes #4108, @jeremiedimino)
+
+- Have `dune` communicate the location of the standard library directory to
+  `merlin` (#4211, fixes #4188, @nojb)
+
+- Workaround incorrect exception raised by Unix.utimes (OCaml PR#8857) in
+  Path.touch on Windows (#4223, @dra27)
+
+- `dune ocaml-merlin` is now able to provide configuration for source files in
+  the `_build` directory. (#4274, @voodoos)
+
+- Automatically delete left-over Merlin files when rebuilding for the first time
+  a project previously built with Dune `<= 2.7`. (#4261, @voodoos, @aalekseyev)
+
+- Fix `ppx.exe` being compiled for the wrong target when cross-compiling
+  (#3751, fixes #3698, @toots)
+
+- `dune top` correctly escapes the generated toplevel directives, and make it
+  easier for `dune top` to locate C stubs associated to concerned libraries.
+  (#4242, fixes #4231, @nojb)
+
+- Do not pass include directories containing native objects when compiling
+  bytecode (#4200, @nojb)
+
+2.8.2 (21/01/2021)
+------------------
+
+- Fixed wrong workspace discovery from `dune ocaml-merlin` (#4127, fixes #4125,
+  @voodoos)
+
+- Fixed memory blow up introduced in 2.8.0 (#4144, fixes #4134,
+  @jeremiedimino)
+
+2.8.1 (14/01/2021)
+------------------
+
+- Fixed `dune --version` printing `n/a` rather than the version
+
+2.8.0 (13/01/2021)
+------------------
+
+- `dune rules` accepts aliases and other non-path rules (#4063, @mrmr1993)
+
+- Action `(diff reference test_result)` now accept `reference` to be absent and
+  in that case consider that the reference is empty. Then running `dune promote`
+  will create the reference file. (#3795, @bobot)
+
+- Ignore special files (BLK, CHR, FIFO, SOCKET), (#3570, fixes #3124, #3546,
+  @ejgallego)
+
+- Experimental: Simplify loading of additional files (data or code) at runtime
+  in programs by introducing specific installation sites. In particular it allow
+  to define plugins to be installed in these sites. (#3104, #3794, fixes #1185,
+  @bobot)
+
+- Move all temporary files created by dune to run actions to a single directory
+  and make sure that actions executed by dune also use this directory by setting
+  `TMPDIR` (or `TEMP` on Windows). (#3691, fixes #3422, @rgrinberg)
+
+- Fix bootstrap script with custom configuration. (#3757, fixes #3774, @marsam)
+
+- Add the `executable` field to `inline_tests` to customize the compilation
+  flags of the test runner executable (#3747, fixes #3679, @lubegasimon)
+
+- Add `(enabled_if ...)` to `(copy_files ...)` (#3765, @nojb)
+
+- Make sure Dune cleans up the status line before exiting (#3767,
+  fixes #3737, @alan-j-hu)
+
+- Add `{gitlab,bitbucket}` as options for defining project sources with `source`
+  stanza `(source (<host> user/repo))` in the `dune-project` file.  (#3813,
+  @rgrinberg)
+
+- Fix generation of `META` and `dune-package` files when some targets (byte,
+  native, dynlink) are disabled. Previously, dune would generate all archives
+  for regardless of settings. (#3829, #4041, @rgrinberg)
+
+- Do not run ocamldep to for single module executables & libraries. The
+  dependency graph for such artifacts is trivial (#3847, @rgrinberg)
+
+- Fix cram tests inside vendored directories not being interpreted correctly.
+  (#3860, fixes #3843, @rgrinberg)
+
+- Add `package` field to private libraries. This allows such libraries to be
+  installed and to be usable by other public libraries in the same project
+  (#3655, fixes #1017, @rgrinberg)
+
+- Fix the `%{make}` variable on Windows by only checking for a `gmake` binary
+  on UNIX-like systems as a unrelated `gmake` binary might exist on Windows.
+  (#3853, @kit-ty-kate)
+
+- Fix `$ dune install` modifying the build directory. This made the build
+  directory unusable when `$ sudo dune install` modified permissions. (fix
+  #3857, @rgrinberg)
+
+- Fix handling of aliases given on the command line (using the `@` and `@@`
+  syntax) so as to correctly handle relative paths. (#3874, fixes #3850, @nojb)
+
+- Allow link time code generation to be used in preprocessing executable. This
+  makes it possible to use the build info module inside the preprocessor.
+  (#3848, fix #3848, @rgrinberg)
+
+- Correctly call `git ls-tree` so unicode files are not quoted, this fixes
+  problems with `dune subst` in the presence of unicode files. Fixes #3219
+  (#3879, @ejgallego)
+
+- `dune subst` now accepts common command-line arguments such as
+  `--debug-backtraces` (#3878, @ejgallego)
+
+- `dune describe` now also includes information about executables in addition to
+  that of libraries. (#3892, #3895, @nojb)
+
+- instrumentation backends can now receive arguments via `(instrumentation
+  (backend <name> <args>))`. (#3906, #3932, @nojb)
+
+- Tweak auto-formatting of `dune` files to improve readability. (#3928, @nojb)
+
+- Add a switch argument to opam when context is not default. (#3951, @tmattio)
+
+- Avoid pager when running `$ git diff` (#3912, @AltGr)
+
+- Add `(root_module ..)` field to libraries & executables. This makes it
+  possible to use library dependencies shadowed by local modules (#3825,
+  @rgrinberg)
+
+- Allow `(formatting ...)` field in `(env ...)` stanza to set per-directory
+  formatting specification. (#3942, @nojb)
+
+- [coq] In `coq.theory`, `:standard` for the `flags` field now uses the
+  flags set in `env` profile flags (#3931 , @ejgallego @rgrinberg)
+
+- [coq] Add `-q` flag to `:standard` `coqc` flags , fixes #3924, (#3931 , @ejgallego)
+
+- Add support for Coq's native compute compilation mode (@ejgallego, #3210)
+
+- Add a `SUFFIX` directive in `.merlin` files for each dialect with no
+  preprocessing, to let merlin know of additional file extensions (#3977,
+  @vouillon)
+
+- Stop promoting `.merlin` files. Write per-stanza Merlin configurations in
+  binary form. Add a new subcommand `dune ocaml-merlin` that Merlin can use to
+  query the configuration files. The `allow_approximate_merlin` option is now
+  useless and deprecated. Dune now conflicts with `merlin < 3.4.0` and
+  `ocaml-lsp-server < 1.3.0` (#3554, @voodoos)
+
+- Configurator: fix a bug introduced in 2.6.0 where the configurator V1 API
+  doesn't work at all when used outside of dune. (#4046, @aalekseyev)
+
+- Fix `libexec` and `libexec-private` variables. In cross-compilation settings,
+  they now point to the file in the host context. (#4058, fixes #4057,
+  @TheLortex)
+
+- When running `$ dune subst`, use project metadata as a fallback when package
+  metadata is missing. We also generate a warning when `(name ..)` is missing in
+  `dune-project` files to avoid failures in production builds.
+
+- Remove support for passing `-nodynlink` for executables. It was bypassed in
+  most cases and not correct in other cases in particular on arm32.
+  (#4085, fixes #4069, fixes #2527, @emillon)
+
+- Generate archive rules compatible with 4.12. Dune longer attempt to generate
+  an archive file if it's unnecessary (#3973, fixes #3766, @rgrinberg)
+
+- Fix generated Merlin configurations when multiple preprocessors are defined
+  for different modules in the same folder. (#4092, fixes #2596, #1212 and
+  #3409, @voodoos)
+
+- Add the option `use_standard_c_and_cxx_flags` to `dune-project` that 1.
+  disables the unconditional use of the `ocamlc_cflags` and `ocamlc_cppflags`
+  from `ocamlc -config` in C compiler calls, these flags will be present in the
+  `:standard` set instead; and 2. enables the detection of the C compiler family
+  and populates the `:standard` set of flags with common default values when
+  building CXX stubs. (#3875, #3802, fix #3718 and #3528, @voodoos)
+
+2.7.1 (2/09/2020)
+-----------------
+
+- configurator: More flexible probing of `#define`. We allow duplicate values in
+  the object file, as long as they are the same after parsing. (#3739, fixes
+  #3736, @rgrinberg)
+
+- Record instrumentation backends in dune-package files. This makes it possible
+  to use instrumentation backends defined in installed libraries (eg via OPAM).
+  (#3735, @nojb)
+
+- Add missing `.aux` & `.glob` targets to coq rules (#3721, fixes #3437,
+  @rgrinberg)
+
+- Fix `dune-package` installation when META templates are present (#3743, fixes
+  #3746, @rgrinberg)
+
+- Resolve symlinks before running `$ git diff` (#3750, fixes #3740, @rgrinberg)
+
+- Cram tests: when checking that all test directories contain a `run.t` file,
+  skip empty directories. These can be left around by git. (#3753, @emillon)
+
+2.7.0 (13/08/2020)
+------------------
+
+- Write intermediate files in a `.mdx` folder for each `mdx` stanza
+  to prevent the corresponding actions to be executed as part of the `@all`
+  alias (#3659, @NathanReb)
+
+- Read Coq flags from `env` (#3547 , fixes #3486, @gares)
+
+- Add instrumentation framework to toggle instrumentation by `bisect_ppx`,
+  `landmarks`, etc, via dune-workspace and/or the command-line. (#3404, #3526
+  @stephanieyou, @nojb)
+
+- Formatting of dune files is now done in the executing dune process instead of
+  in a separate process. (#3536, @nojb)
+
+- Add a `--debug-artifact-substution` flag to help debug problem with
+  version not being captured by `dune-build-info` (#3589,
+  @jeremiedimino)
+
+- Allow the use of the `context_name` variable in the `enabled_if` fields of
+  executable(s) and install stanzas. (#3568, fixes #3566, @voodoos)
+
+- Fix compatibility with OCaml 4.12.0 when compiling empty archives; no .a file
+  is generated. (#3576, @dra27)
+
+- `$ dune utop` no longer tries to load optional libraries that are unavailable
+  (#3612, fixes #3188, @anuragsoni)
+
+- Fix dune-build-info on 4.10.0+flambda (#3599, @emillon, @jeremiedimino).
+
+- Allow multiple libraries with `inline_tests` to be defined in the same
+  directory (#3621, @rgrinberg)
+
+- Run exit hooks in jsoo separate compilation mode (#3626, fixes #3622,
+  @rgrinberg)
+
+- Add (alias ...), (mode ...) fields to (copy_fields ...) stanza (#3631, @nojb)
+
+- (copy_files ...) now supports copying files from outside the workspace using
+  absolute file names (#3639, @nojb)
+
+- Dune does not use `ocamlc` as an intermediary to call C compiler anymore.
+  Configuration flags `ocamlc_cflags` and `ocamlc_cppflags` are always prepended
+  to the compiler arguments. (#3565, fixes #3346, @voodoos)
+
+- Revert the build optimization in #2268. This optimization slows down building
+  individual executables when they're part of an `executables` stanza group
+  (#3644, @rgrinberg)
+
+- Use `{dev}` rather than `{pinned}` in the generated `.opam` file. (#3647,
+  @kit-ty-kate)
+
+- Insert correct extension name when editing `dune-project` files. Previously,
+  dune would just insert the stanza name. (#3649, fixes #3624, @rgrinberg)
+
+- Fix crash when evaluating an `mdx` stanza that depends on unavailable
+  packages. (#3650, @CraigFe)
+
+- Fix typo in `cache-check-probablity` field in dune config files. This field
+  now requires 2.7 as it wasn't usable before this version. (#3652, @edwintorok)
+
+- Add `"odoc" {with-doc}` to the dependencies in the generated `.opam` files.
+  (#3667, @kit-ty-kate)
+
+- Do not allow user actions to capture dune's stdin (#3677, fixes #3672,
+  @rgrinberg)
+
+- `(subdir ...)` stanzas can now appear in dune files used via `(include ...)`.
+  (#3676, @nojb)
+
+- Add actions `pipe-{stdout,stderr,outputs}` for output redirections (#3392,
+  fixes #428, @NathanReb)
+
+2.6.2 (26/07/2020)
+------------------
+
+* Fix compatibility with OCaml 4.12 (#3585, fixes #3583, @ejgallego)
+
+2.6.1 (02/07/2020)
+------------------
+
+- Fix crash when caching is enabled (@rgrinberg, #3581, fixes #3580)
+
+- Do not use `-output-complete-exe` until 4.10.1 as it is broken in
+  4.10.0 (@jeremiedimino, #3187)
+
+- Fix crash when an unknown pform is found (such as `%{unknown}`) (#3560,
+  @emillon)
+
+- Improve error message when invalid package names (such as the empty string)
+  are passed to `dune build -p`. (#3561, @emillon)
+
+- Fix a stack overflow when displaying large outputs (including diffs) (#3537,
+  fixes #2767, #3490, @emillon)
+
+- Pass `-g` when compiling ppx preprocessors (#3671, @rgrinberg)
+
 2.6.0 (05/06/2020)
 ------------------
 

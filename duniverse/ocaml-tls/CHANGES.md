@@ -1,3 +1,78 @@
+## v0.13.1 (2021-04-22)
+
+* Breaking: use deriving sexp_of instead of sexp. Constructing a state from
+  a sexp has not been supported (lead to exception), and is now removed
+  (#430 by @torinnd, continued in #431 by @hannesm)
+* Bugfix: TLS 1.3 client authentication with certificate, client side. This
+  used to work accidentally before 0.13.0 changed the signature algorithms
+  handling, now the right signature algorithm (as requested by server) is used.
+  (#431 @hannesm, @talex5 reported https://github.com/mirage/capnp-rpc/pull/228)
+* adapt to x509 0.13.0 and mirage-crypto-ec 0.10.0 changes (#431 @hannesm)
+
+## v0.13.0 (2021-04-14)
+
+* Remove static RSA and CBC ciphersuites from default configuration. The
+  default configuration now includes FFDHE and ECDHE key exchanges with RSA or
+  ECDSA/EdDSA certificates, and AEAD ciphers
+  (AES-GCM, AES-CCM, ChaCha20-Poly1305) (#429 by @hannesm)
+* Remove SHA1 from signature_algorithms in the default configuration
+  (#429 by @hannesm)
+* Support ECDSA and EdDSA certificates and private keys via x509 0.12.0 and
+  mirage-crypto-ec (#428 by @hannesm)
+  Breaking changes:
+  - the second part of type Tls.Config.certchain is now a X509.Private_key.t
+    (previously Mirage_crypto_pk.Rsa.priv)
+  - the type aliases X509_lwt.priv and X509_lwt.authenticator have been removed
+* Use mirage-crypto-ec instead of fiat-p256 and hacl_x25519 for elliptic curve
+  support - this adds P384 and P521 ECDH support (#428 by @hannesm)
+* Remove custom Monad implementation, use Result and Rresult instead
+  (#429 by @hannesm)
+* Remove Utils.Cs submodule, use Cstruct API instead (#429 by @hannesm)
+* Breaking: Tls.Engine.ret type is now a result instead of a custom variant type
+  (#429 by @hannesm)
+* Breaking: Tls_lwt.Unix.epoch results in (Tls.Core.epoch_data, unit) result -
+  it was a custom error type previously (#429 by @hannesm)
+
+## v0.12.8 (2020-12-08)
+
+* Re-add ECPointFormats hello extension (both client and server) to avoid
+  handshake failures with Go's TLS stack (RFC 8422 makes it optional, but go
+  (1.15.5) requires it) - reported by @jeffa5 at
+  https://discuss.ocaml.org/t/strange-prohibited-tls-1-2-cipher-suite-9d-issue/
+  fix by @hannesm #424
+
+## v0.12.7 (2020-12-04)
+
+* Tls.lwt: make the receive buffer connection-local to avoid potential data
+  races (#422 by @dinosaure)
+* Tls_mirage: remove unneeded type alias (@hannesm)
+* Add Tls.Config.Ciphers.http2 - a list of ciphersuites allowed to be negotiated
+  for HTTP2 sessions (#423 by @jeffa5)
+
+## v0.12.6 (2020-11-06)
+
+* OCaml 4.12 support (#421 @kit-ty-kate)
+
+## v0.12.5 (2020-09-22)
+
+* Rename length to v_length to be compatible with cstruct 6.0.0 (#419 @dinosaure)
+
+## v0.12.4 (2020-08-08)
+
+* handshake_server13: demote group and cipher log level (#417 by @xguerin)
+* tls_lwt: register printers for Tls_alert and Tls_failure (#418 by @hannesm)
+
+## v0.12.3 (2020-07-04)
+
+* Adapt to new GCM and CCM API of mirage-crypto (#416 by @hannesm)
+* Add support for ChaCha20/Poly1305 ciphersuite (#416 by @hannesm)
+
+## v0.12.2 (2020-06-20)
+
+* tls_lwt again calls Mirage_crypto_rng_lwt.initialize () -- which is since
+  mirage-crypto-rng 0.8 no longer inside the lwt monad, and safe to be called
+  multiple times and on top level (#415 by @hannesm)
+
 ## v0.12.1 (2020-06-12)
 
 in #414 by @hannesm

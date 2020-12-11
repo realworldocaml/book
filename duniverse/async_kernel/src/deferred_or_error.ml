@@ -46,7 +46,6 @@ end
 
 open Let_syntax
 
-let ignore = ignore_m
 let fail error = Deferred.return (Result.fail error)
 let ok_exn t = Deferred.map t ~f:Or_error.ok_exn
 let of_exn exn = Deferred.return (Or_error.of_exn exn)

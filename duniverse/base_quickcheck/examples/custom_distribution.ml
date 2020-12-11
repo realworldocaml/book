@@ -34,7 +34,7 @@ end = struct
 
   (* We can test our distribution: *)
   let%expect_test _ =
-    let open Expect_test_helpers_kernel in
+    let open Expect_test_helpers_core in
     Test.with_sample_exn
       quickcheck_generator
       ~config:{ Test.default_config with test_count = 20 }
@@ -95,7 +95,7 @@ end = struct
 
   (* We can test our distribution: *)
   let%expect_test _ =
-    let open Expect_test_helpers_kernel in
+    let open Expect_test_helpers_core in
     Test.with_sample_exn
       quickcheck_generator
       ~config:{ Test.default_config with test_count = 20 }

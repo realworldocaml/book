@@ -68,10 +68,13 @@ let base =
 let dump =
   ref false
 
-let follow =
+let dump_resolved =
   ref false
 
-let graph =
+let reference_graph =
+  ref false
+
+let automaton_graph =
   ref false
 
 let trace =
@@ -261,6 +264,12 @@ let compare_errors =
 let add_compare_errors filename =
   compare_errors := filename :: !compare_errors
 
+let merge_errors =
+  ref []
+
+let add_merge_errors filename =
+  merge_errors := filename :: !merge_errors
+
 let update_errors =
   ref None
 
@@ -272,6 +281,12 @@ let echo_errors =
 
 let set_echo_errors filename =
   echo_errors := Some filename
+
+let echo_errors_concrete =
+  ref None
+
+let set_echo_errors_concrete filename =
+  echo_errors_concrete := Some filename
 
 let cmly =
   ref false
@@ -286,10 +301,26 @@ type dollars =
 let dollars =
   ref DollarsAllowed
 
+let require_aliases =
+  ref false
+
+let strategy =
+  ref `Legacy
+
+let set_strategy = function
+  | "legacy" ->
+      strategy := `Legacy
+  | "simplified" ->
+      strategy := `Simplified
+  | _ ->
+      eprintf "Error: --strategy should be followed with legacy | simplified.\n";
+      exit 1
+
 (* When new command line options are added, please update both the manual
    in [doc/manual.tex] and the man page in [doc/menhir.1]. *)
 
 let options = Arg.align [
+  "--automaton-graph", Arg.Set automaton_graph, " (undocumented)";
   "--base", Arg.Set_string base, "<basename> Specifies a base name for the output file(s)";
   "--canonical", Arg.Unit (fun () -> construction_mode := ModeCanonical), " Construct a canonical Knuth LR(1) automaton";
   "--cmly", Arg.Set cmly, " Write a .cmly file";
@@ -299,18 +330,18 @@ let options = Arg.align [
   "--coq", Arg.Set coq, " Generate a formally verified parser, in Coq";
   "--coq-lib-path", Arg.String (fun path -> coq_lib_path := Some path), "<path> How to qualify references to MenhirLib";
   "--coq-lib-no-path", Arg.Unit (fun () -> coq_lib_path := None), " Do *not* qualify references to MenhirLib";
-  "--coq-no-version-check", Arg.Set coq_no_version_check, " The generated parser will not check that the versions of Menhir and MenhirLib match.";
+  "--coq-no-version-check", Arg.Set coq_no_version_check, " Do not generate a version check.";
   "--coq-no-actions", Arg.Set coq_no_actions, " Ignore semantic actions in the Coq output";
   "--coq-no-complete", Arg.Set coq_no_complete, " Do not generate a proof of completeness";
   "--depend", Arg.Unit enable_depend, " Invoke ocamldep and display dependencies";
   "--dump", Arg.Set dump, " Write an .automaton file";
+  "--dump-resolved", Arg.Set dump_resolved, " Write an .automaton.resolved file";
   "--echo-errors", Arg.String set_echo_errors, "<filename> Echo the sentences in a .messages file";
+  "--echo-errors-concrete", Arg.String set_echo_errors_concrete, "<filename> Echo the sentences in a .messages file";
   "--error-recovery", Arg.Set recovery, " (no longer supported)";
   "--explain", Arg.Set explain, " Explain conflicts in <basename>.conflicts";
   "--external-tokens", Arg.String codeonly, "<module> Import token type definition from <module>";
   "--fixed-exception", Arg.Set fixedexc, " Declares Error = Parsing.Parse_error";
-  "--follow-construction", Arg.Set follow, " (undocumented)";
-  "--graph", Arg.Set graph, " Write a dependency graph to a .dot file";
   "--infer", Arg.Unit enable_infer, " Invoke ocamlc to do type inference";
   "--infer-protocol-supported", Arg.Unit (fun () -> exit 0), " Stop with exit code 0";
   "--infer-write-query", Arg.String enable_write_query, "<filename> Write mock .ml file";
@@ -324,6 +355,7 @@ let options = Arg.align [
   "--log-automaton", Arg.Set_int logA, "<level> Log information about the automaton";
   "--log-code", Arg.Set_int logC, "<level> Log information about the generated code";
   "--log-grammar", Arg.Set_int logG, "<level> Log information about the grammar";
+  "--merge-errors", Arg.String add_merge_errors, "<filename> (used twice) Merge two .messages files";
   "--no-code-inlining", Arg.Clear code_inlining, " (undocumented)";
   "--no-dollars", Arg.Unit (fun () -> dollars := DollarsDisallowed), " Disallow $i in semantic actions";
   "--no-inline", Arg.Clear inline, " Ignore the %inline keyword";
@@ -342,13 +374,16 @@ let options = Arg.align [
                           " Print grammar with unit actions & tokens";
   "--only-tokens", Arg.Unit tokentypeonly, " Generate token type definition only, no code";
   "--raw-depend", Arg.Unit enable_raw_depend, " Invoke ocamldep and echo its raw output";
+  "--reference-graph", Arg.Set reference_graph, " (undocumented)";
+  "--require-aliases", Arg.Set require_aliases, " Check that every token has a token alias";
   "--stdlib", Arg.String ignore, "<directory> Ignored (deprecated)";
+  "--strategy", Arg.String set_strategy, "<strategy> Choose an error-handling strategy";
   "--strict", Arg.Set strict, " Warnings about the grammar are errors";
   "--suggest-comp-flags", Arg.Unit (fun () -> suggestion := SuggestCompFlags),
                           " Suggest compilation flags for ocaml{c,opt}";
-  "--suggest-link-flags-byte", Arg.Unit (fun () -> suggestion := SuggestLinkFlags "cmo"),
+  "--suggest-link-flags-byte", Arg.Unit (fun () -> suggestion := SuggestLinkFlags "cma"),
                                " Suggest link flags for ocamlc";
-  "--suggest-link-flags-opt", Arg.Unit (fun () -> suggestion := SuggestLinkFlags "cmx"),
+  "--suggest-link-flags-opt", Arg.Unit (fun () -> suggestion := SuggestLinkFlags "cmxa"),
                               " Suggest link flags for ocamlopt";
   "--suggest-menhirLib", Arg.Unit (fun () -> suggestion := SuggestWhereIsMenhirLibSource),
                          " Suggest where is MenhirLib";
@@ -455,11 +490,14 @@ let explain =
 let dump =
   !dump
 
-let follow =
-  !follow
+let dump_resolved =
+  !dump_resolved
 
-let graph =
-  !graph
+let reference_graph =
+  !reference_graph
+
+let automaton_graph =
+  !automaton_graph
 
 let trace =
   !trace
@@ -566,11 +604,26 @@ let compare_errors =
          --compare-errors <filename1> --compare-errors <filename2>.\n";
       exit 1
 
+let merge_errors =
+  match !merge_errors with
+  | [] ->
+      None
+  | [ filename2; filename1 ] -> (* LIFO *)
+      Some (filename1, filename2)
+  | _ ->
+      eprintf
+        "To merge two .messages files, please use:\n\
+         --merge-errors <filename1> --merge-errors <filename2>.\n";
+      exit 1
+
 let update_errors =
   !update_errors
 
 let echo_errors =
   !echo_errors
+
+let echo_errors_concrete =
+  !echo_errors_concrete
 
 let cmly =
   !cmly
@@ -580,6 +633,12 @@ let coq_lib_path =
 
 let dollars =
   !dollars
+
+let require_aliases =
+  !require_aliases
+
+let strategy =
+  !strategy
 
 let infer =
   !infer
@@ -594,6 +653,7 @@ let skipping_parser_generation =
   interpret_error ||
   list_errors ||
   compare_errors <> None ||
+  merge_errors <> None ||
   update_errors <> None ||
   echo_errors <> None ||
   false

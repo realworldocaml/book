@@ -1,3 +1,51 @@
+===== 5.4.1 =====
+
+====== Bugs fixed ======
+
+  * Fix Lwt_fmt.stderr to actually point to stderr (#852, #850, Volker Diels-Grabsch).
+
+  * Make temporary files created by Lwt_io.with_temp_dir deletable on Windows by removing the RO bit (#849, #861, Antonin Décimo).
+
+  * Handle ECONNABORTED in Lwt_io.establish_server* (#829, #830, Reynir Björnsson, Hannes Mehnert).
+
+
+
+===== 5.4.0 (2020-12-16) =====
+
+====== Installability ======
+
+  * Support for OCaml 4.12 (#804, #826, Kate Deplaix).
+
+  * lwt_ppx now uses ppxlib. This introduce a transitive dependency to OCaml.4.04 (#807, Philippe Veber).
+
+====== Bugfixes ======
+
+  * Catch exceptions in Lwt_react.of_stream (#809, Petter A. Urkedal).
+
+  * Avoid segfaults in Lwt_unix.tcsetattr (#798, Frédéric Fortier).
+
+====== Additions ======
+
+  * fork method in Lwt_engine. This method is a noop in the released engines but it paves the way to a libuv-based engine (#811, Ulrik Strid, Anton Bachin).
+
+  * Lwt_main.abandon_yielded_and_paused for use in conjunction with Lwt.fork (#789, Julien Tesson).
+
+  * Lwt.wrap_in_cancelable to complete protect and no_cancel (#785).
+
+  * Support for IOV_MAX in [Lwt_unix.IO_vectors.system_limit (#801, Pino Toscano).
+
+  * Lwt_unix.send_msgto (#805, Antonio Nuno Monteiro).
+
+  * Lwt.dont_wait, a more explicit alternative to Lwt.async (#820, François Thiré).
+
+====== Miscellaneous ======
+
+  * Avoid double-reversing when traversing lists. This may change the order in which some promises are collected, which may change which of several rejection is arbitrarily selected during concurrent traversal (#784).
+
+  * Numerous documentation improvements (including external contributions from Bikal Lem, Sudha Parimala, and Hannes Mehnert).
+
+
+
 ===== 5.3.0 (2020-04-22) =====
 
   * Add let* and and* in Lwt.Syntax and Lwt_result.Syntax (#775, Rahul Kumar).

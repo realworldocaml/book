@@ -9,4 +9,9 @@
 (rule
  (alias runtest)
  (action
-  (diff %{dep:dune.gen.expected} %{dep:dune.gen})))
+  (diff %{dep:dune.gen.expected.formatted} %{dep:dune.gen})))
+
+(rule
+ (with-stdout-to
+  dune.gen.expected.formatted
+  (run dune format-dune-file %{dep:dune.gen.expected})))

@@ -45,7 +45,8 @@ module Make (Hashtbl : Hashtbl_for_testing) = struct
     | _ -> false
   ;;
 
-  let%test "findi_and_call" =
+  (* In js_of_ocaml, strings can be hashconst-ed. *)
+  let%test ("findi_and_call"[@tags "no-js"]) =
     let our_hash = Hashtbl.copy test_hash in
     let test_string = "test string" in
     Hashtbl.add_exn our_hash ~key:test_string ~data:10;

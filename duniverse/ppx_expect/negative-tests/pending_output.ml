@@ -1,5 +1,6 @@
 module Expect_test_config :
-  Expect_test_config.S with type 'a IO_flush.t = 'a with type 'a IO_run.t = 'a = struct
+  Expect_test_config_types.S with type 'a IO_flush.t = 'a with type 'a IO_run.t = 'a
+= struct
   include Expect_test_config
 
   let flushed () =

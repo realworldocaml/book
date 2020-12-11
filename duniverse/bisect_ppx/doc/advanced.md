@@ -68,6 +68,12 @@ the Bisect_ppx preprocessor:
 (preprocessor_deps (file bisect.exclude))
 ```
 
+*Note: this requires using the old Dune integration, not the current
+`(instrumentation.backend ...)`. See the older README for
+[instructions](https://github.com/aantron/bisect_ppx/tree/a4b8cb617dd9b8f33be8da7b8e63390e81b85fb6#Dune)
+on how to use that integration. `bisect.exclude` will be usable with the new
+integration once https://github.com/ocaml/dune/issues/3983 is addressed.*
+
 Note that the paths to `bisect.exclude` might be different between the
 `preprocess` and `preprocessor_deps` stanzas, because `pps bisect_ppx` looks for
 the file relative to the root directory of your project, while
@@ -140,18 +146,21 @@ to another filename, or to `ERR` in order to log to `STDERR`.
 #### Setting at compile time
 
 If your testing environment doesn't allow you to easily specify these
-environment variables at testing runtime, you can specify default values
-for them at compile time by passing the `--bisect-file` and `--bisect-silent`
-options to the Bisect_ppx preprocessor:
+environment variables at testing time, you can specify default values for them
+at compile time by passing the `--bisect-file` and `--bisect-silent` options to
+the Bisect_ppx instrumenter:
 
 ```
-(preprocess
- (pps bisect_ppx --
-  --bisect-file /tmp/mycoverage/ --bisect-silent /tmp/coverage.log))
+(instrumentation
+ (backend bisect_ppx
+  --bisect-file /tmp/mycoverage
+  --bisect-silent /tmp/coverage.log))
 ```
 
-If different values are specified in different files, one of them is chosen.
-Which one is unspecified.
+If different values are specified in different `dune` files for code that is
+then linked into one binary, one set of values is chosen arbitrarily.
+
+Passing arguments to Bisect in this way requires Dune version 2.8.0 or higher.
 
 
 

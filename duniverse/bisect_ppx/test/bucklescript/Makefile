@@ -20,7 +20,8 @@ install :
 
 .PHONY : clean
 clean :
-	rm -rf node_modules lib _esy *.tgz package *.coverage _coverage
+	rm -rf node_modules lib _esy *.tgz package *.coverage _coverage \
+	  package-lock.json
 
 .PHONY : clean-for-caching
 clean-for-caching :

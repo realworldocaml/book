@@ -47,7 +47,7 @@ module Make_plain (M : sig
         module T = struct
           type t = A | B [@@deriving bin_io, compare, hash, sexp]
           include Sexpable.To_stringable (struct type nonrec t = t [@@deriving sexp] end)
-          let module_name = "My_library.Std.Id"
+          let module_name = "My_library.Id"
         end
         include T
         include Identifiable.Make (T)

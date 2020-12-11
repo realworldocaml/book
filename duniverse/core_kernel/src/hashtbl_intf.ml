@@ -97,6 +97,7 @@ module Hashtbl = Base.Hashtbl
 module type Key_plain = Hashtbl.Key.S
 
 module Hashable = Base.Hashable
+module Merge_into_action = Base.Hashtbl.Merge_into_action
 
 module type Hashable = Base.Hashable.Hashable
 
@@ -218,6 +219,7 @@ module type Hashtbl = sig
   end
 
   module Hashable = Hashable
+  module Merge_into_action = Merge_into_action
 
   val hashable : ('key, _) t -> 'key Hashable.t
 

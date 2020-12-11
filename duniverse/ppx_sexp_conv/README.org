@@ -63,6 +63,28 @@ putting underscores for that type name.
   => "((1 _)(2 _))"
 #+end_src
 
+* [@@deriving sexp_grammar]
+
+If =ppx_sexp_conv= can derive =of_sexp=, it can also generate a description of
+the sexps that the resulting =t_of_sexp= would accept.  This is the sexp grammar.
+See =Sexplib0.Raw_grammar= for details.
+
+It is possible to construct sexp grammars directly from type expressions, e.g.,
+
+#+BEGIN_SRC ocaml
+[%sexp_grammar: (int, bool array) Either.t Base.Map.M(String).t]
+#+END_SRC
+
+The syntax for grammars of polymorphic types is nonstandard:
+
+#+BEGIN_SRC ocaml
+[%sexp_grammar: < for_all : 'a 'b . ('a, 'b) Either.t > ]
+#+END_SRC
+
+We represent polymorphic types as object types because we cannot
+deserialize objects from sexps, and object method types are one of the
+few places we can use OCaml's syntax for explicit type variables.
+
 ** Conversion rules
 
 In the following, we'll review the serialization rules for different

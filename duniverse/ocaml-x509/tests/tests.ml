@@ -4,6 +4,7 @@ let suites =
     "Host names", Regression.hostname_tests ;
     "Revoke", Revoke.revoke_tests ;
     "CRL", Crltests.crl_tests ;
+    "PKCS12", Pkcs12.tests ;
   ]
 
 

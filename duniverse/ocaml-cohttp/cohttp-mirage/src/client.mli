@@ -1,3 +1,9 @@
+module Make
+    (P : Mirage_clock.PCLOCK)
+    (R : Resolver_mirage.S)
+    (S : Conduit_mirage.S) : sig
+  include Cohttp_lwt.S.Client
 
-include Cohttp_lwt.S.Client
-val ctx: Resolver_lwt.t -> Conduit_mirage.t -> ctx
+  val ctx : ?authenticator:X509.Authenticator.t -> R.t -> S.t -> ctx
+  val with_authenticator : X509.Authenticator.t -> ctx -> ctx
+end

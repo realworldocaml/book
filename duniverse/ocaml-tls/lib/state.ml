@@ -13,7 +13,7 @@ type hmac_key = Cstruct.t
 type iv_mode =
   | Iv of Cstruct_sexp.t  (* traditional CBC (reusing last cipherblock) *)
   | Random_iv        (* TLS 1.1 and higher explicit IV (we use random) *)
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
 type 'k cbc_cipher    = (module Cipher_block.S.CBC with type key = 'k)
 type 'k cbc_state = {
@@ -29,6 +29,7 @@ type nonce = Cstruct.t
 type 'k aead_cipher =
   | CCM of (module Cipher_block.S.CCM with type key = 'k)
   | GCM of (module Cipher_block.S.GCM with type key = 'k)
+  | ChaCha20_Poly1305 of (module AEAD with type key = 'k)
 
 type 'k aead_state = {
   cipher         : 'k aead_cipher ;
@@ -46,30 +47,30 @@ let sexp_of_cipher_st = function
   | CBC _    -> Sexp.Atom "<cbc-state>"
   | AEAD _   -> Sexp.Atom "<aead-state>"
 
-let cipher_st_of_sexp =
-  Conv.of_sexp_error "cipher_st_of_sexp: not implemented"
 (* *** *)
 
 (* context of a TLS connection (both in and out has each one of these) *)
 type crypto_context = {
   sequence  : int64 ; (* sequence number *)
   cipher_st : cipher_st ; (* cipher state *)
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 (* the raw handshake log we need to carry around *)
-type hs_log = Cstruct_sexp.t list [@@deriving sexp]
+type hs_log = Cstruct_sexp.t list [@@deriving sexp_of]
 
 type dh_secret = [
-  | `Fiat of Fiat_p256.secret
-  | `Hacl of Hacl_x25519.secret
-  | `Mirage_crypto of Mirage_crypto_pk.Dh.secret
+  | `Finite_field of Mirage_crypto_pk.Dh.secret
+  | `P256 of Mirage_crypto_ec.P256.Dh.secret
+  | `P384 of Mirage_crypto_ec.P384.Dh.secret
+  | `P521 of Mirage_crypto_ec.P521.Dh.secret
+  | `X25519 of Mirage_crypto_ec.X25519.secret
 ]
 let sexp_of_dh_secret _ = Sexp.Atom "dh_secret"
 let dh_secret_of_sexp = Conv.of_sexp_error "dh_secret_of_sexp: not implemented"
 
 
 (* a collection of client and server verify bytes for renegotiation *)
-type reneg_params = Cstruct_sexp.t * Cstruct_sexp.t [@@deriving sexp]
+type reneg_params = Cstruct_sexp.t * Cstruct_sexp.t [@@deriving sexp_of]
 
 type common_session_data = {
   server_random          : Cstruct_sexp.t ; (* 32 bytes random from the server hello *)
@@ -79,12 +80,12 @@ type common_session_data = {
   trust_anchor           : Cert.t option ;
   received_certificates  : Cert.t list ;
   own_certificate        : Cert.t list ;
-  own_private_key        : Mirage_crypto_pk.Rsa.priv option ;
+  own_private_key        : Priv.t option ;
   own_name               : string option ;
   client_auth            : bool ;
   master_secret          : master_secret ;
   alpn_protocol          : string option ; (* selected alpn protocol after handshake *)
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type session_data = {
   common_session_data    : common_session_data ;
@@ -94,23 +95,23 @@ type session_data = {
   renegotiation          : reneg_params ; (* renegotiation data *)
   session_id             : Cstruct_sexp.t ;
   extended_ms            : bool ;
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 (* state machine of the server *)
 type server_handshake_state =
   | AwaitClientHello (* initial state *)
   | AwaitClientHelloRenegotiate
   | AwaitClientCertificate_RSA of session_data * hs_log
-  | AwaitClientCertificate_DHE_RSA of session_data * dh_secret * hs_log
+  | AwaitClientCertificate_DHE of session_data * dh_secret * hs_log
   | AwaitClientKeyExchange_RSA of session_data * hs_log (* server hello done is sent, and RSA key exchange used, waiting for a client key exchange message *)
-  | AwaitClientKeyExchange_DHE_RSA of session_data * dh_secret * hs_log (* server hello done is sent, and DHE_RSA key exchange used, waiting for client key exchange *)
+  | AwaitClientKeyExchange_DHE of session_data * dh_secret * hs_log (* server hello done is sent, and DHE_RSA key exchange used, waiting for client key exchange *)
   | AwaitClientCertificateVerify of session_data * crypto_context * crypto_context * hs_log
   | AwaitClientChangeCipherSpec of session_data * crypto_context * crypto_context * hs_log (* client key exchange received, next should be change cipher spec *)
   | AwaitClientChangeCipherSpecResume of session_data * crypto_context * Cstruct_sexp.t * hs_log (* resumption: next should be change cipher spec *)
   | AwaitClientFinished of session_data * hs_log (* change cipher spec received, next should be the finished including a hmac over all handshake packets *)
   | AwaitClientFinishedResume of session_data * Cstruct_sexp.t * hs_log (* change cipher spec received, next should be the finished including a hmac over all handshake packets *)
   | Established (* handshake successfully completed *)
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
 (* state machine of the client *)
 type client_handshake_state =
@@ -118,8 +119,8 @@ type client_handshake_state =
   | AwaitServerHello of client_hello * (group * dh_secret) list * hs_log (* client hello is sent, handshake_params are half-filled *)
   | AwaitServerHelloRenegotiate of session_data * client_hello * hs_log (* client hello is sent, handshake_params are half-filled *)
   | AwaitCertificate_RSA of session_data * hs_log (* certificate expected with RSA key exchange *)
-  | AwaitCertificate_DHE_RSA of session_data * hs_log (* certificate expected with DHE_RSA key exchange *)
-  | AwaitServerKeyExchange_DHE_RSA of session_data * hs_log (* server key exchange expected with DHE_RSA *)
+  | AwaitCertificate_DHE of session_data * hs_log (* certificate expected with DHE key exchange *)
+  | AwaitServerKeyExchange_DHE of session_data * hs_log (* server key exchange expected with DHE *)
   | AwaitCertificateRequestOrServerHelloDone of session_data * Cstruct_sexp.t * Cstruct_sexp.t * hs_log (* server hello done expected, client key exchange and premastersecret are ready *)
   | AwaitServerHelloDone of session_data * signature_algorithm list option * Cstruct_sexp.t * Cstruct_sexp.t * hs_log (* server hello done expected, client key exchange and premastersecret are ready *)
   | AwaitServerChangeCipherSpec of session_data * crypto_context * Cstruct_sexp.t * hs_log (* change cipher spec expected *)
@@ -127,13 +128,13 @@ type client_handshake_state =
   | AwaitServerFinished of session_data * Cstruct_sexp.t * hs_log (* finished expected with a hmac over all handshake packets *)
   | AwaitServerFinishedResume of session_data * hs_log (* finished expected with a hmac over all handshake packets *)
   | Established (* handshake successfully completed *)
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
 type kdf = {
   secret : Cstruct_sexp.t ;
   cipher : Ciphersuite.ciphersuite13 ;
   hash : Ciphersuite.H.t ;
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 (* TODO needs log of CH..CF for post-handshake auth *)
 (* TODO drop master_secret!? *)
@@ -146,17 +147,17 @@ type session_data13 = {
   resumed                : bool ;
   client_app_secret      : Cstruct_sexp.t ;
   server_app_secret      : Cstruct_sexp.t ;
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type client13_handshake_state =
   | AwaitServerHello13 of client_hello * (group * dh_secret) list * Cstruct_sexp.t (* this is for CH1 ~> HRR ~> CH2 <~ WAIT SH *)
   | AwaitServerEncryptedExtensions13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * Cstruct_sexp.t
   | AwaitServerCertificateRequestOrCertificate13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * Cstruct_sexp.t
-  | AwaitServerCertificate13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * Cstruct_sexp.t
-  | AwaitServerCertificateVerify13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * Cstruct_sexp.t
-  | AwaitServerFinished13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * Cstruct_sexp.t
+  | AwaitServerCertificate13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * signature_algorithm list option * Cstruct_sexp.t
+  | AwaitServerCertificateVerify13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * signature_algorithm list option * Cstruct_sexp.t
+  | AwaitServerFinished13 of session_data13 * Cstruct_sexp.t * Cstruct_sexp.t * signature_algorithm list option * Cstruct_sexp.t
   | Established13
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
 type server13_handshake_state =
   | AwaitClientHelloHRR13 (* if we sent out HRR (also to-be-used for tls13-only) *)
@@ -165,14 +166,14 @@ type server13_handshake_state =
   | AwaitClientFinished13 of Cstruct_sexp.t * crypto_context * session_ticket option * Cstruct_sexp.t
   | AwaitEndOfEarlyData13 of Cstruct_sexp.t * crypto_context * crypto_context * session_ticket option * Cstruct_sexp.t
   | Established13
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
 type handshake_machina_state =
   | Client of client_handshake_state
   | Server of server_handshake_state
   | Client13 of client13_handshake_state
   | Server13 of server13_handshake_state
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
 (* state during a handshake, used in the handlers *)
 type handshake_state = {
@@ -182,13 +183,13 @@ type handshake_state = {
   machina          : handshake_machina_state ; (* state machine state *)
   config           : Config.config ; (* given config *)
   hs_fragment      : Cstruct_sexp.t ; (* handshake messages can be fragmented, leftover from before *)
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 (* connection state: initially None, after handshake a crypto context *)
-type crypto_state = crypto_context option [@@deriving sexp]
+type crypto_state = crypto_context option [@@deriving sexp_of]
 
 (* record consisting of a content type and a byte vector *)
-type record = Packet.content_type * Cstruct_sexp.t [@@deriving sexp]
+type record = Packet.content_type * Cstruct_sexp.t [@@deriving sexp_of]
 
 (* response returned by a handler *)
 type rec_resp = [
@@ -206,13 +207,20 @@ type state = {
   decryptor : crypto_state ; (* the current decryption state *)
   encryptor : crypto_state ; (* the current encryption state *)
   fragment  : Cstruct_sexp.t ; (* the leftover fragment from TCP fragmentation *)
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 module V_err = struct
   type t = X509.Validation.validation_error
-  let t_of_sexp _ = failwith "couldn't convert validatin error from sexp"
   let sexp_of_t v =
     let s = Fmt.to_to_string X509.Validation.pp_validation_error v in
+    Sexplib.Sexp.Atom s
+end
+
+module Ec_err = struct
+  type t = Mirage_crypto_ec.error
+  let t_of_sexp _ = failwith "couldn't convert validatin error from sexp"
+  let sexp_of_t v =
+    let s = Fmt.to_to_string Mirage_crypto_ec.pp_error v in
     Sexplib.Sexp.Atom s
 end
 
@@ -224,7 +232,7 @@ type error = [
   | `NoMatchingCertificateFound of string
   | `NoCertificateConfigured
   | `CouldntSelectCertificate
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type client_hello_errors = [
   | `EmptyCiphersuites
@@ -241,7 +249,7 @@ type client_hello_errors = [
   | `NotSubsetKeyShareSupportedGroup of (Packet.named_group list * (Packet.named_group * Cstruct_sexp.t) list)
   | `Has0rttAfterHRR
   | `NoCookie
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type fatal = [
   | `NoSecureRenegotiation
@@ -251,12 +259,9 @@ type fatal = [
   | `NoCertificateReceived
   | `NoCertificateVerifyReceived
   | `NotRSACertificate
-  | `NotRSASignature
   | `KeyTooSmall
-  | `RSASignatureMismatch
-  | `RSASignatureVerificationFailed
-  | `UnsupportedSignatureScheme
-  | `HashAlgorithmMismatch
+  | `SignatureVerificationFailed of string
+  | `SigningFailed of string
   | `BadCertificateChain
   | `MACMismatch
   | `MACUnderflow
@@ -270,6 +275,7 @@ type fatal = [
   | `HandshakeFragmentsNotEmpty
   | `InsufficientDH
   | `InvalidDH
+  | `BadECDH of Ec_err.t
   | `InvalidRenegotiation
   | `InvalidClientHello of client_hello_errors
   | `InvalidServerHello
@@ -287,17 +293,12 @@ type fatal = [
   | `MissingContentType
   | `Downgrade12
   | `Downgrade11
-  | `UnsupportedKeyExchange
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type failure = [
   | `Error of error
   | `Fatal of fatal
-] [@@deriving sexp]
-
-(* Monadic control-flow core. *)
-include Control.Or_error_make (struct type err = failure end)
-type 'a eff = 'a t
+] [@@deriving sexp_of]
 
 let common_data_to_epoch common is_server peer_name =
   let own_random, peer_random =

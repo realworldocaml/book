@@ -333,6 +333,7 @@ module type MONOLITHIC_ENGINE = sig
   exception Error
 
   val entry:
+    (* strategy: *) [ `Legacy | `Simplified ] -> (* see [IncrementalEngine] *)
     state ->
     (Lexing.lexbuf -> token) ->
     Lexing.lexbuf ->

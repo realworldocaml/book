@@ -1,5 +1,6 @@
-open Expect_test_common.Std
-open Ppx_compare_lib.Builtin
+open! Base
+open Import
+open Expect_test_common
 open Ppx_sexp_conv_lib.Conv
 
 module Result = struct
@@ -7,7 +8,37 @@ module Result = struct
   type 'a t =
     | Match
     | Correction of 'a
-  [@@deriving sexp_of, compare]
+  [@@deriving_inline sexp_of, compare]
+
+  let _ = fun (_ : 'a t) -> ()
+
+  let sexp_of_t
+    : type a. (a -> Ppx_sexp_conv_lib.Sexp.t) -> a t -> Ppx_sexp_conv_lib.Sexp.t
+    =
+    fun _of_a -> function
+      | Match -> Ppx_sexp_conv_lib.Sexp.Atom "Match"
+      | Correction v0 ->
+        let v0 = _of_a v0 in
+        Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "Correction"; v0 ]
+  ;;
+
+  let _ = sexp_of_t
+
+  let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int =
+    fun _cmp__a a__001_ b__002_ ->
+    if Ppx_compare_lib.phys_equal a__001_ b__002_
+    then 0
+    else (
+      match a__001_, b__002_ with
+      | Match, Match -> 0
+      | Match, _ -> -1
+      | _, Match -> 1
+      | Correction _a__003_, Correction _b__004_ -> _cmp__a _a__003_ _b__004_)
+  ;;
+
+  let _ = compare
+
+  [@@@end]
 
   let map t ~f =
     match t with
@@ -35,15 +66,6 @@ let line_matches ~(expect : Fmt.t) ~actual =
   | Regexp expect -> matches_regexp ~pat:(Re.Emacs.re expect) actual
 ;;
 
-let%test _ = line_matches ~expect:(Literal "foo") ~actual:"foo"
-let%test _ = line_matches ~expect:(Literal "f.*o (regexp)") ~actual:"f.*o (regexp)"
-let%test _ = line_matches ~expect:(Regexp "f.*o") ~actual:"foo"
-let%test _ = not (line_matches ~expect:(Regexp "f.*o") ~actual:"foo (regexp)")
-let%test _ = not (line_matches ~expect:(Regexp "[a]") ~actual:"[a]")
-let%test _ = line_matches ~expect:(Regexp "f.*o") ~actual:"foo"
-(* Regexp provides the possibility to match trailing *)
-let%test _ = line_matches ~expect:(Regexp "f.*o[ ]") ~actual:"foo "
-
 let literal_line ~allow_output_patterns actual : Fmt.t Cst.Line.t =
   match actual with
   | "" -> Blank ""
@@ -68,37 +90,6 @@ let reconcile_line ~(expect : Fmt.t) ~actual ~allow_output_patterns
   if line_matches ~expect ~actual
   then Match
   else Correction (literal_line actual ~allow_output_patterns)
-;;
-
-let%test_module _ =
-  (module struct
-    let allow_output_patterns = true
-
-    let expect_match ~expect ~actual =
-      let expect = Lexer.parse_pretty_line expect ~allow_output_patterns in
-      [%test_result: Fmt.t Cst.Line.t Result.t]
-        (reconcile_line ~expect ~actual ~allow_output_patterns)
-        ~expect:Match
-    ;;
-
-    let expect_correction ~expect ~actual ~corrected =
-      let expect = Lexer.parse_pretty_line expect ~allow_output_patterns in
-      let corrected : Fmt.t Cst.Line.t =
-        Not_blank
-          { orig = corrected
-          ; data = Lexer.parse_pretty_line corrected ~allow_output_patterns
-          ; trailing_blanks = ""
-          }
-      in
-      [%test_result: Fmt.t Cst.Line.t Result.t]
-        (reconcile_line ~expect ~actual ~allow_output_patterns)
-        ~expect:(Correction corrected)
-    ;;
-
-    let%test_unit _ = expect_match ~expect:"foo" ~actual:"foo"
-    let%test_unit _ = expect_match ~expect:"[a] (regexp)" ~actual:"a"
-    let%test_unit _ = expect_correction ~expect:"[a] (regexp)" ~actual:"b" ~corrected:"b"
-  end)
 ;;
 
 let rec lines_match
@@ -129,7 +120,7 @@ let rec corrected_rev
   match expect_lines, actual_lines with
   | [], [] -> acc
   | [], actual_lines ->
-    ListLabels.fold_left actual_lines ~init:acc ~f:(fun acc x ->
+    List.fold actual_lines ~init:acc ~f:(fun acc x ->
       literal_line x ~allow_output_patterns :: acc)
   | _, [] -> acc
   | expect :: expect_lines, actual :: actual_lines ->
@@ -226,99 +217,7 @@ let expectation_body
      | Correction _ -> assert false)
 ;;
 
-let%test_module _ =
-  (module struct
-    let allow_output_patterns = true
-    let strip s = Lexer.strip_surrounding_whitespaces s
-    let nb orig trailing_blanks = Cst.Line.Not_blank { orig; trailing_blanks; data = () }
-
-    let%test_unit _ = [%test_result: unit Cst.t] (strip "\n  ") ~expect:(Empty "\n  ")
-
-    let%test_unit _ =
-      [%test_result: unit Cst.t]
-        (strip "   \n   foo   \n     bar     \n     plop  \n  \n    blah \n \n   ")
-        ~expect:
-          (Multi_lines
-             { leading_spaces = "   \n"
-             ; trailing_spaces = "\n \n   "
-             ; indentation = "   "
-             ; lines =
-                 [ nb "foo" "   "
-                 ; nb "  bar" "     "
-                 ; nb "  plop" "  "
-                 ; Blank "  "
-                 ; nb " blah" " "
-                 ]
-             })
-    ;;
-
-    let%test_unit _ =
-      [%test_result: unit Cst.t]
-        (strip "abc \ndef ")
-        ~expect:
-          (Multi_lines
-             { leading_spaces = ""
-             ; trailing_spaces = " "
-             ; indentation = ""
-             ; lines = [ nb "abc" " "; nb "def" "" ]
-             })
-    ;;
-
-    let%test_unit _ =
-      [%test_result: unit Cst.t]
-        (strip " [a] (regexp) ")
-        ~expect:
-          (Single_line
-             { leading_blanks = " "
-             ; trailing_spaces = " "
-             ; orig = "[a] (regexp)"
-             ; data = ()
-             })
-    ;;
-
-    let expect_match ~expect ~actual =
-      let expect = Lexer.parse_body (Pretty expect) ~allow_output_patterns in
-      [%test_result: Fmt.t Cst.t Expectation.Body.t Result.t]
-        (expectation_body
-           ~expect
-           ~actual
-           ~default_indent:0
-           ~pad_single_line:true
-           ~allow_output_patterns)
-        ~expect:Match
-    ;;
-
-    let expect_correction ~expect ~actual ~default_indent ~corrected =
-      let expect = Lexer.parse_body (Pretty expect) ~allow_output_patterns in
-      [%test_result: Fmt.t Cst.t Expectation.Body.t Result.t]
-        (expectation_body
-           ~expect
-           ~actual
-           ~default_indent
-           ~pad_single_line:true
-           ~allow_output_patterns)
-        ~expect:(Correction corrected)
-    ;;
-
-    let%test_unit _ = expect_match ~expect:" foo " ~actual:"foo"
-    let%test_unit _ = expect_match ~expect:"foo\n[a] (regexp)" ~actual:"foo\na"
-
-    let%test_unit _ =
-      expect_correction
-        ~expect:"foo\n[a] (regexp)"
-        ~actual:"foo\nb"
-        ~default_indent:0
-        ~corrected:(Lexer.parse_body ~allow_output_patterns:true (Pretty "foo\nb"))
-    ;;
-
-    (* check regexp are preserved in corrections *)
-    let%test_unit _ =
-      expect_correction
-        ~expect:"foo\n[ab]* (regexp)"
-        ~actual:"not-foo\nbaba"
-        ~default_indent:0
-        ~corrected:
-          (Lexer.parse_body ~allow_output_patterns (Pretty "not-foo\n[ab]* (regexp)"))
-    ;;
-  end)
-;;
+module Private = struct
+  let line_matches = line_matches
+  let reconcile_line = reconcile_line
+end

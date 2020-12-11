@@ -1,7 +1,0 @@
-(library
-  (name        conduit_lwt)
-  (public_name conduit-lwt)
-  (preprocess  (pps ppx_sexp_conv))
-  (wrapped     false)
-  (modules     resolver_lwt)
-  (libraries   conduit lwt))

@@ -11,17 +11,6 @@
 (*                                                                            *)
 (******************************************************************************)
 
-let unSome = function
-    None -> assert false
-  | Some x -> x
-
-let o2s o f =
-  match o with
-  | None ->
-      ""
-  | Some x ->
-      f x
-
 let single = function
   | [ x ] ->
       x
@@ -46,22 +35,27 @@ let sum n (f : int -> int) : int =
   done;
   !sum
 
+let with_buffer n f =
+  let b = Buffer.create n in
+  f b;
+  Buffer.contents b
+
 type 'a iter = ('a -> unit) -> unit
 
 let separated_iter_to_string printer separator iter =
-  let b = Buffer.create 32 in
-  let first = ref true in
-  iter (fun x ->
-    if !first then begin
-      Buffer.add_string b (printer x);
-      first := false
-    end
-    else begin
-      Buffer.add_string b separator;
-      Buffer.add_string b (printer x)
-    end
-  );
-  Buffer.contents b
+  with_buffer 32 (fun b ->
+    let first = ref true in
+    iter (fun x ->
+      if !first then begin
+        Buffer.add_string b (printer x);
+        first := false
+      end
+      else begin
+        Buffer.add_string b separator;
+        Buffer.add_string b (printer x)
+      end
+    )
+  )
 
 let separated_list_to_string printer separator xs =
   separated_iter_to_string printer separator (fun f -> List.iter f xs)
@@ -83,13 +77,6 @@ let support_assoc l x =
     List.assoc x l
   with Not_found -> x
 
-let index (strings : string list) : int * string array * int StringMap.t =
-  let name = Array.of_list strings
-  and n, map = List.fold_left (fun (n, map) s ->
-    n+1, StringMap.add s n map
-  ) (0, StringMap.empty) strings in
-  n, name, map
-
 (* Turning an implicit list, stored using pointers through a hash
    table, into an explicit list. The head of the implicit list is
    not included in the explicit list. *)
@@ -107,26 +94,28 @@ let materialize (table : ('a, 'a option) Hashtbl.t) (x : 'a) : 'a list =
 (* [iteri] implements a [for] loop over integers, from 0 to
    [n-1]. *)
 
-let iteri n f =
-  for i = 0 to n - 1 do
-    f i
+let iterij i j f =
+  for x = i to j - 1 do
+    f x
   done
 
-(* [foldi] implements a [for] loop over integers, from 0 to [n-1],
-   with an accumulator. [foldij] implements a [for] loop over
-   integers, from [start] to [n-1], with an accumulator. *)
+let iteri n f =
+  iterij 0 n f
 
-let foldij start n f accu =
-  let rec loop i accu =
-    if i = n then
-      accu
-    else
-      loop (i+1) (f i accu)
-  in
-  loop start accu
+let rec foldij i j f accu =
+  if i < j then
+    foldij (i + 1) j f (f i accu)
+  else
+    accu
 
 let foldi n f accu =
   foldij 0 n f accu
+
+let rec foldij_lazy i j f accu =
+  if i < j then
+    f i (fun () -> foldij_lazy (i + 1) j f accu)
+  else
+    accu
 
 (* [mapij start n f] produces the list [ f start; ... f (n-1) ]. *)
 
@@ -216,9 +205,9 @@ let postincrement r =
   r := x + 1;
   x
 
-(* [map_opt f l] returns the list of [y]s such that [f x = Some y] where [x]
+(* [filter_map f l] returns the list of [y]s such that [f x = Some y] where [x]
    is in [l], preserving the order of elements of [l]. *)
-let map_opt f l =
+let filter_map f l =
   List.(rev (fold_left (fun ys x ->
     match f x with
       | None -> ys
@@ -258,15 +247,6 @@ let new_encode_decode capacity =
       !c (H.length table)
   in
   encode, decode, verbose
-
-let new_claim () =
-  let names = ref StringSet.empty in
-  let claim name =
-    if StringSet.mem name !names then
-      Error.error [] "internal name clash over %s" name;
-    names := StringSet.add name !names
-  in
-  claim
 
 let rec best (preferable : 'a -> 'a -> bool) (xs : 'a list) : 'a option =
   match xs with
@@ -405,3 +385,48 @@ let array_for_all p a =
     else if p (Array.unsafe_get a i) then loop (succ i)
     else false in
   loop 0
+
+(* Similarly, we copy [Array.for_all2], which appeared in 4.11. *)
+let array_for_all2 p l1 l2 =
+  let n1 = Array.length l1
+  and n2 = Array.length l2 in
+  if n1 <> n2 then invalid_arg "Array.for_all2"
+  else let rec loop i =
+    if i = n1 then true
+    else if p (Array.unsafe_get l1 i) (Array.unsafe_get l2 i) then loop (succ i)
+    else false in
+  loop 0
+
+let array_fold_left2 f accu a1 a2 =
+  let n1 = Array.length a1
+  and n2 = Array.length a2 in
+  if n1 <> n2 then invalid_arg "Array.fold_left2";
+  let accu = ref accu in
+  for i = 0 to n1 - 1 do
+    accu := f !accu (Array.unsafe_get a1 i) (Array.unsafe_get a2 i)
+  done;
+  !accu
+
+let rec list_make n x =
+  if n = 0 then [] else x :: list_make (n - 1) x
+
+(* [digits n] computes how many decimal digits are involved in the
+   decimal representation of the integer [n]. *)
+
+let digits n =
+  let rec loop accu n =
+    if n < 10 then
+      accu + 1
+    else
+      loop (accu + 1) (n / 10)
+  in
+  loop 0 n
+
+(* [pad n s] pads the string [s] with zeroes in front so that its length
+   is [n]. *)
+
+let pad n s =
+  String.make (n - String.length s) '0' ^ s
+
+let padded_index n i =
+  pad (digits n) (Printf.sprintf "%d" i)

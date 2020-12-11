@@ -1,10 +1,16 @@
 open! Import
 open Std_internal
 
-(* the module [T] serves to enforce the invariant that all Blang.t values are in a
+(* The module [T] serves to enforce the invariant that all Blang.t values are in a
    normal form whereby boolean constants True and False only appear as the topmost
    constructor -- in any other position they are simplified away using laws of
    boolean algebra.
+
+   We also enforce that nested [And]s and [Or]s each lean to the right so that [eval]
+   doesn't need so much stack space as it would if they leaned to the left.  Thought
+   experiment: compare how [eval] works on right-leaning [And (a, And (b, And (c, d)))]
+   versus left-leaning [And (And (And (a, b), c), d)].  The former is the best case and is
+   enforced.
 
    Note: this file deviates from the usual pattern of modules with Stable interfaces in
    that the Stable sub-module is not the first thing to be defined in the module.  The
@@ -67,17 +73,23 @@ end = struct
     | t -> Not t
   ;;
 
-  let andalso t1 t2 =
+  let rec andalso t1 t2 =
     match t1, t2 with
     | _, False | False, _ -> False
     | other, True | True, other -> other
+    | And (t1a, t1b), _ ->
+      (* nested [And]s lean right -- see comment above *)
+      And (t1a, andalso t1b t2)
     | _ -> And (t1, t2)
   ;;
 
-  let orelse t1 t2 =
+  let rec orelse t1 t2 =
     match t1, t2 with
     | _, True | True, _ -> True
     | other, False | False, other -> other
+    | Or (t1a, t1b), _ ->
+      (* nested [Or]s lean right -- see comment above *)
+      Or (t1a, orelse t1b t2)
     | _ -> Or (t1, t2)
   ;;
 
@@ -93,6 +105,18 @@ end = struct
        | False, _ -> andalso (not_ a) c
        | _ -> If (a, b, c))
   ;;
+end
+
+module Raw = struct
+  type 'a t = 'a T.t = private
+    | True
+    | False
+    | And of 'a t * 'a t
+    | Or of 'a t * 'a t
+    | Not of 'a t
+    | If of 'a t * 'a t * 'a t
+    | Base of 'a
+  [@@deriving sexp_of]
 end
 
 include T
@@ -164,23 +188,10 @@ module Stable = struct
       loop [] [ t ]
     ;;
 
-    let and_ ts =
-      let rec loop acc = function
-        | [] -> acc
-        | False :: _ -> false_ (* short circuit evaluation *)
-        | t :: ts -> loop (andalso acc t) ts
-      in
-      loop true_ ts
-    ;;
-
-    let or_ ts =
-      let rec loop acc = function
-        | [] -> acc
-        | True :: _ -> true_ (* short circuit evaluation *)
-        | t :: ts -> loop (orelse acc t) ts
-      in
-      loop false_ ts
-    ;;
+    (* [and_] and [or_] use [fold_right] instead of [fold_left] to avoid quadratic
+       behavior with [andalso] or [orelse], respectively. *)
+    let and_ ts = List.fold_right ts ~init:true_ ~f:andalso
+    let or_ ts = List.fold_right ts ~init:false_ ~f:orelse
 
     let unary name args sexp =
       match args with

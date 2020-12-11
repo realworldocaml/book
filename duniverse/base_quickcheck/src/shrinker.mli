@@ -29,6 +29,11 @@ val set_tree_using_comparator
 (** {2 Modifying Shrinkers} *)
 
 val map : 'a t -> f:('a -> 'b) -> f_inverse:('b -> 'a) -> 'b t
+val filter : 'a t -> f:('a -> bool) -> 'a t
+
+(** Filters and maps according to [f], and provides input to [t] via [f_inverse]. Only the
+    [f] direction produces options, intentionally. *)
+val filter_map : 'a t -> f:('a -> 'b option) -> f_inverse:('b -> 'a) -> 'b t
 
 (** {2 Shrinkers for Recursive Types} *)
 

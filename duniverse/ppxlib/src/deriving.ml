@@ -43,19 +43,6 @@ let () =
 let keep_w32_impl () = !keep_w32_impl || Driver.pretty ()
 let keep_w32_intf () = !keep_w32_intf || Driver.pretty ()
 
-module List = struct
-  include List
-  let concat_map xs ~f = concat (map xs ~f)
-
-  let rec filter_map l ~f =
-    match l with
-    | [] -> []
-    | x :: l ->
-      match f x with
-      | None   ->      filter_map l ~f
-      | Some y -> y :: filter_map l ~f
-end
-
 module Args = struct
   include (Ast_pattern : module type of struct include Ast_pattern end
            with type ('a, 'b, 'c) t := ('a, 'b, 'c) Ast_pattern.t)
@@ -105,7 +92,7 @@ module Args = struct
         | Nil -> I_nil
         | Cons (t, p) ->
           let value =
-            match List.Assoc.find args ~equal:String.equal p.name with
+            match List.assoc_opt p.name args with
             | None -> p.default
             | Some expr -> Ast_pattern.Packed.parse p.pattern expr.pexp_loc expr
           in
@@ -138,7 +125,7 @@ module Generator = struct
   type ('a, 'b) t =
     | T : { spec           : ('c, 'a) Args.t
           ; gen            : ctxt:Expansion_context.Deriver.t -> 'b -> 'c
-          ; arg_names      : Set.M(String).t
+          ; arg_names      : String.Set.t
           ; attributes     : Attribute.packed list
           ; deps           : deriver list
           } -> ('a, 'b) t
@@ -147,7 +134,7 @@ module Generator = struct
 
   module V2 = struct
     let make ?(attributes=[]) ?(deps=[]) spec gen =
-      let arg_names = Set.of_list (module String) (Args.names spec) in
+      let arg_names = String.Set.of_list (Args.names spec) in
       T { spec
         ; gen
         ; arg_names
@@ -167,9 +154,9 @@ module Generator = struct
   let merge_accepted_args l =
     let rec loop acc = function
       | [] -> acc
-      | T t :: rest -> loop (Set.union acc t.arg_names) rest
+      | T t :: rest -> loop (String.Set.union acc t.arg_names) rest
     in
-    loop (Set.empty (module String)) l
+    loop String.Set.empty l
 
   let check_arguments name generators (args : (string * expression) list) =
     List.iter args ~f:(fun (label, e) ->
@@ -182,9 +169,9 @@ module Generator = struct
           "Ppxlib.Deriving: argument labelled '%s' appears more than once" label);
     let accepted_args = merge_accepted_args generators in
     List.iter args ~f:(fun (label, e) ->
-      if not (Set.mem accepted_args label) then
+      if not (String.Set.mem label accepted_args) then
         let spellcheck_msg =
-          match Spellcheck.spellcheck (Set.to_list accepted_args) label with
+          match Spellcheck.spellcheck (String.Set.elements accepted_args) label with
           | None -> ""
           | Some s -> ".\n" ^ s
         in
@@ -310,12 +297,12 @@ module Deriver = struct
   ;;
 
   let supported_for field =
-    List.fold_left (derivers ()) ~init:(Set.empty (module String))
+    List.fold_left (derivers ()) ~init:String.Set.empty
       ~f:(fun acc (name, _) ->
         match resolve_internal field name with
-        | _ -> Set.add acc name
+        | _ -> String.Set.add name acc
         | exception Not_supported _ -> acc)
-    |> Set.to_list
+    |> String.Set.elements
   ;;
 
   let not_supported (field : (_, _) Field.t) ?(spellcheck=true) name =
@@ -359,22 +346,22 @@ module Deriver = struct
           None)
     in
     (* Set of actual deriver names *)
-    let seen = Hash_set.create (module String) in
+    let seen = Hashtbl.create 16 in
     List.map derivers_and_args ~f:(fun (name, args) ->
       let named_generators = resolve field name in
       List.iter named_generators ~f:(fun (actual_deriver_name, gen) ->
         if Options.fail_on_duplicate_derivers
-        && Hash_set.mem seen actual_deriver_name then
+        && Hashtbl.mem seen actual_deriver_name then
           Location.raise_errorf ~loc:name.loc
             "Deriver %s appears twice" actual_deriver_name;
         List.iter (Generator.deps gen) ~f:(fun dep ->
           List.iter (resolve_actual_derivers field dep) ~f:(fun drv ->
             let dep_name = drv.name in
-            if not (Hash_set.mem seen dep_name) then
+            if not (Hashtbl.mem seen dep_name) then
               Location.raise_errorf ~loc:name.loc
                 "Deriver %s is needed for %s, you need to add it before in the list"
                 dep_name name.txt));
-        Hash_set.add seen actual_deriver_name);
+        Hashtbl.set seen ~key:actual_deriver_name ~data:());
       (name, List.map named_generators ~f:snd, args))
   ;;
 
@@ -473,13 +460,13 @@ let parse_arguments l =
               let name =
                 match id.txt with
                 | Lident s -> s
-                | _ -> Exn.raise_without_backtrace
+                | _ -> raise_notrace
                          (Unknown_syntax
                             (id.loc, "simple identifier expected"))
               in
               (name, expr))
           | _ ->
-            Exn.raise_without_backtrace
+            raise_notrace
               (Unknown_syntax
                  (e.pexp_loc, "non-optional labelled argument or record expected"))
         end
@@ -489,7 +476,7 @@ let parse_arguments l =
           | Labelled s ->
             (s, expr)
           | _ ->
-            Exn.raise_without_backtrace
+            raise_notrace
               (Unknown_syntax
                  (expr.pexp_loc, "non-optional labelled argument expected"))))
   with Unknown_syntax (loc, msg) ->

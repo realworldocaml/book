@@ -4,9 +4,5 @@
 
 
 
-val make : bool -> Report_generic.converter
-(** Returns a converter for bare text output, the passed boolean indicates
-    whether only summary should be output. *)
-
 val output : per_file:bool -> (string, int array) Hashtbl.t -> unit
 (** Writes a text summary report to STDOUT. *)

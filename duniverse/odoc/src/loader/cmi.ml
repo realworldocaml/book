@@ -593,16 +593,19 @@ let read_type_parameter abstr var param =
     if name = "_" then Any
     else Var name
   in
-  let var =
+  let variance =
     if not (abstr || aliasable param) then None
     else begin
       let co, cn = Variance.get_upper var in
         if not cn then Some Pos
         else if not co then Some Neg
         else None
-    end
+      end in
+  let injectivity =
+    let _,_,_,inj =Variance.get_lower var in
+    inj
   in
-    (desc, var)
+  {desc; variance; injectivity}
 
 let read_type_constraints env params =
   List.fold_right

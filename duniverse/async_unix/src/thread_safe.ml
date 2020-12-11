@@ -71,6 +71,7 @@ let block_on_async t f =
     upon (return ()) (fun () -> Thread_safe_ivar.fill scheduler_ran_a_job ());
     ignore
       (Core.Thread.create
+         ~on_uncaught_exn:`Print_to_stderr
          (fun () ->
             Exn.handle_uncaught ~exit:true (fun () ->
               lock t;

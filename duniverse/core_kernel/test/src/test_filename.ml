@@ -76,3 +76,26 @@ let%expect_test "V1" =
 
 (* Assert type equality between stable and unstable map types *)
 let _f (x : int Filename.Map.t) : int Stable.V1.Map.t = x
+
+let%expect_test "to_absolute" =
+  let to_absolute = to_absolute_exn ~relative_to:"/a/b/c" in
+  print_s
+    [%message
+      (to_absolute "/already/absolute")
+        (to_absolute "./relative")
+        (to_absolute "../relative")
+        (to_absolute "implicitly-relative")];
+  [%expect
+    {|
+    (/already/absolute
+     /a/b/c/relative
+     /a/b/c/../relative
+     /a/b/c/implicitly-relative) |}];
+  Expect_test_helpers_core.show_raise (fun () ->
+    to_absolute_exn ~relative_to:"./a/relative/path" "foo");
+  [%expect
+    {|
+    (raised (
+      Failure
+      "Filename.to_absolute_exn called with a [relative_to] that is a relative path: ./a/relative/path")) |}]
+;;

@@ -32,9 +32,10 @@ let pp_expect_action fmt dir =
 let pp_failure_action fmt dir =
   Fmt.pf fmt
     {|
-  (with-outputs-to %%{target}
-   (chdir %s
-    (system "! ocaml-mdx test %a%s")))|}
+  (with-accepted-exit-codes 1
+   (with-outputs-to %%{target}
+    (chdir %s
+     (run %%{bin:ocaml-mdx} test %a%s))))|}
     dir.dir_name pp_options dir.options dir.test_file
 
 let () = run { pp_expect_action; pp_failure_action }

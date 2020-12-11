@@ -16,3 +16,4 @@ val print_s : ?mach:unit -> Sexplib.Sexp.t -> unit
 val printf : ('a, unit, string, unit) format4 -> 'a
 val fprintf : Writer.t -> ('a, unit, string, unit) format4 -> 'a
 val eprintf : ('a, unit, string, unit) format4 -> 'a
+val eprint_s : ?mach:unit -> Sexplib.Sexp.t -> unit

@@ -1,4 +1,5 @@
 open! Core_kernel
+open Base_test_helpers
 
 let%test_module _ =
   (module (

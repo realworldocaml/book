@@ -1,6 +1,6 @@
 (** [Unpack_sequence] uses an [Unpack_buffer.t] to unpack a sequence of packed values
     coming from a [string Pipe.Reader.t] or a [Reader.t].  It can produce a pipe of
-    upacked values or iterate a user-supplied function over the unpacked values. *)
+    unpacked values or iterate a user-supplied function over the unpacked values. *)
 
 open! Core
 open! Async

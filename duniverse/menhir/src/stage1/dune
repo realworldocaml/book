@@ -13,6 +13,11 @@
 
 (executable
   (name main)
-  (libraries unix fix menhirLib menhirSdk)
+  (libraries
+    unix
+    vendored_fix
+    vendored_pprint
+    menhirLib menhirSdk
+  )
   (flags :standard -open MenhirSdk)
 )

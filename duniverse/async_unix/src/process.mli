@@ -8,8 +8,8 @@ open! Import
 type t [@@deriving sexp_of]
 
 (** accessors *)
-val pid : t -> Pid.t
 
+val pid : t -> Pid.t
 val stdin : t -> Writer.t
 val stdout : t -> Reader.t
 val stderr : t -> Reader.t
@@ -137,6 +137,13 @@ val collect_stdout_and_wait : string Or_error.t collect
 val collect_stdout_and_wait_exn : string collect
 val collect_stdout_lines_and_wait : string list Or_error.t collect
 val collect_stdout_lines_and_wait_exn : string list collect
+
+(** Sends a signal to this process. This is safe to call concurrently with [wait t], even
+    if the Pid is reused after the process died.
+
+    If the process was already terminated, the call succeeds and silently does nothing,
+    regardless of whether or not the process was waited for. *)
+val send_signal : t -> Signal.t -> unit
 
 (** [Lines_or_sexp] is useful for rendering a string nicely in a sexp, avoiding quoting if
     the string is multi-line or was produced by converting a sexp to a string.

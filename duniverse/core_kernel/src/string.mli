@@ -7,6 +7,14 @@ end
 
 type t = string [@@deriving bin_io, typerep]
 
+(** [Caseless] compares and hashes strings ignoring case, so that for example
+    [Caseless.equal "OCaml" "ocaml"] and [Caseless.("apple" < "Banana")] are [true], and
+    [Caseless.Map], [Caseless.Table] lookup and [Caseless.Set] membership is
+    case-insensitive.
+
+    [Caseless] also provides case-insensitive [is_suffix] and [is_prefix] functions, so
+    that for example [Caseless.is_suffix "OCaml" ~suffix:"AmL"] and [Caseless.is_prefix
+    "OCaml" ~prefix:"oc"] are [true]. *)
 module Caseless : sig
   type nonrec t = t [@@deriving bin_io, hash, sexp]
 
@@ -15,6 +23,7 @@ module Caseless : sig
 
   val is_suffix : t -> suffix:t -> bool
   val is_prefix : t -> prefix:t -> bool
+  val is_substring : t -> substring:t -> bool
 end
 
 
@@ -57,6 +66,8 @@ val gen_with_length : int -> char Quickcheck.Generator.t -> t Quickcheck.Generat
 module Stable : sig
   module V1 : sig
     type nonrec t = t [@@deriving equal, hash]
+
+    include Base.Stringable.S with type t := t
 
     include
       Stable_comparable.V1

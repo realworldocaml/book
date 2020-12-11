@@ -187,12 +187,14 @@ let for_all =
   in
   fun s ~f -> loop s 0 (length s) f
 
+let quoted = Printf.sprintf "%S"
+
 let maybe_quoted s =
   let escaped = escaped s in
   if (s == escaped || s = escaped) && not (String.contains s ' ') then
     s
   else
-    Printf.sprintf {|"%s"|} escaped
+    quoted s
 
 module O = Comparable.Make (T)
 
@@ -305,3 +307,7 @@ let of_list chars =
   let s = Bytes.make (List.length chars) '0' in
   List.iteri chars ~f:(fun i c -> Bytes.set s i c);
   Bytes.to_string s
+
+let filter_map t ~f =
+  (* TODO more efficient implementation *)
+  to_seq t |> Seq.filter_map ~f |> of_seq

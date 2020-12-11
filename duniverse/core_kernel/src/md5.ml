@@ -18,7 +18,7 @@ module As_binary_string = struct
       let sexp_of_t x = String.sexp_of_t (T.to_binary x)
       let t_of_sexp x = T.of_binary_exn (String.t_of_sexp x)
 
-      include Bin_prot.Utils.Make_binable (struct
+      include Bin_prot.Utils.Make_binable_without_uuid [@alert "-legacy"] (struct
           module Binable = String
 
           type t = Bin_prot.Md5.t
@@ -41,7 +41,7 @@ module Stable = struct
     let hash_fold_t = hash_fold_t
     let hash = hash
 
-    include Bin_prot.Utils.Make_binable (struct
+    include Bin_prot.Utils.Make_binable_without_uuid [@alert "-legacy"] (struct
         module Binable = Bin_prot.Md5
 
         type t = Bin_prot.Md5.t

@@ -1,2 +1,2 @@
 (library (name ppx_inline_test_lib) (public_name ppx_inline_test.runtime-lib)
- (libraries base inline_test_config) (preprocess no_preprocessing))
+ (libraries base inline_test_config time_now) (preprocess no_preprocessing))

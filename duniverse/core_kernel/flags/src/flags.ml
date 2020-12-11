@@ -6,6 +6,7 @@ let create ~bit:n =
   if n < 0 || n > 62
   then
     failwiths
+      ~here:[%here]
       "Flags.create got invalid ~bit (must be between 0 and 62)"
       n
       [%sexp_of: int];

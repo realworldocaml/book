@@ -13,6 +13,18 @@
 
 (* Driver for the back-end. *)
 
+(* The automaton is now frozen and will no longer be modified. It is
+   time to dump a new description of it, if requested by the user. *)
+
+let () =
+  if Settings.dump_resolved then
+    let module D = Dump.Make(Default) in
+    D.dump (Settings.base ^ ".automaton.resolved")
+
+let () =
+  if Settings.automaton_graph then
+    AutomatonGraph.print_automaton_graph()
+
 (* Let [Interpret] handle the command line options [--interpret],
    [--interpret-error], [--compile-errors], [--compare-errors]. *)
 
@@ -58,30 +70,25 @@ let () =
   if Settings.cmly then
     Cmly_write.write (Settings.base ^ ".cmly")
 
-(* Construct the code, using either the table-based or the code-based
-   back-end, and pass it on to the printer. (This continuation-passing
-   style is imposed by the fact that there is no conditional in ocaml's
-   module language.) *)
+(* Construct and print the code using an appropriate back-end. *)
 
 let () =
-  if Settings.coq then
+  if Settings.table then begin
+    let module B = TableBackend.Run (struct end) in
+    write B.program;
+    Interface.write Front.grammar ()
+  end
+  else if Settings.coq then begin
     let module B = CoqBackend.Run (struct end) in
     let filename = Settings.base ^ ".v" in
     let f = open_out filename in
-    B.write_all f;
-    exit 0
-  else
-    if Settings.table then
-      let module B = TableBackend.Run (struct end) in
-      write B.program
-    else
-      let module B = CodeBackend.Run (struct end) in
-      write (CodeInliner.inline B.program)
-
-(* Write the interface file. *)
-
-let () =
-  Interface.write Front.grammar ()
+    B.write_all f
+  end
+  else begin
+    let module B = CodeBackend.Run (struct end) in
+    write (CodeInliner.inline B.program);
+    Interface.write Front.grammar ()
+  end
 
 let () =
   Time.tick "Printing"

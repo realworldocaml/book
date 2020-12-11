@@ -1,0 +1,16 @@
+(library
+ (name RFC7159)
+ (wrapped false)
+ (modules RFC7159)
+ (libraries angstrom))
+
+(library
+ (name RFC2616)
+ (wrapped false)
+ (modules RFC2616)
+ (libraries angstrom))
+
+;; Build bytecode library just to make sure this compiles
+(alias
+ (name examples)
+ (deps RFC7159.cma RFC2616.cma))

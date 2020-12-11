@@ -55,6 +55,25 @@ module Infix : sig
   val (>>=) : ('a,'e) t -> ('a -> ('b,'e) t) -> ('b,'e) t
 end
 
+module Let_syntax : sig
+  module Let_syntax : sig
+    val return : 'a -> ('a, _) t
+    (** See {!Lwt_result.return}. *)
+
+    val map : ('a, 'e) t -> f:('a -> 'b) -> ('b, 'e) t
+    (** See {!Lwt_result.map}. *)
+
+    val bind : ('a, 'e) t -> f:('a -> ('b, 'e) t) -> ('b, 'e) t
+    (** See {!Lwt_result.bind}. *)
+
+    val both : ('a, 'e) t -> ('b, 'e) t -> ('a * 'b, 'e) t
+    (** See {!Lwt_result.both}. *)
+
+    module Open_on_rhs : sig
+    end
+  end
+end
+
 (** {3 Let syntax} *)
 module Syntax : sig
 

@@ -30,6 +30,8 @@ type non_det = Nd_output | Nd_command
 
 val default_non_det : non_det
 
+type block_kind = OCaml | Cram | Toplevel | Include
+
 type t =
   | Dir of string
   | Source_tree of string
@@ -42,6 +44,7 @@ type t =
   | Require_package of string
   | Set of string * string
   | Unset of string
+  | Block_kind of block_kind
 
 val pp : Format.formatter -> t -> unit
 

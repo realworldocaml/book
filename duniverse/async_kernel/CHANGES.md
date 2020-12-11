@@ -1,5 +1,12 @@
 ## git version
 
+- Deprecated `Deferred.choice` type alias.  Use `Deferred.Choice.t`
+  instead.
+
+- Removed deprecated `ignore` functions from `Deferred`,
+  `Deferred.Result`, and `Deferred.Or_error` (and the corresponding
+  `Eager_deferred` modules).
+
 - `Deferred.Memo` no longer requires the key to be `of_sexp`'able.
 
 - rename paramater of `Pipe.merge` from `cmp` to `compare`.

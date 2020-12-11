@@ -17,7 +17,7 @@
    principle, we work with real terminal symbols only. However, we encode
    [any] as [#] -- see below. *)
 
-(* NOTE: Because he performance impact of the assertions in this file is about
+(* NOTE: Because the performance impact of the assertions in this file is about
    10%, they are turned off by default. Change the value of [debug] to [true]
    if you wish to enable assertions. *)
 

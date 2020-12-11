@@ -25,8 +25,6 @@ let all () =
        [
          Avltree_test.test;
          Bag_test.test;
-         Bigbuffer_test.test;
-         Bigstring_test.test;
          Blang_test.test;
          Common_test.test;
          Comparable_test.test;
@@ -49,6 +47,5 @@ let all () =
          Zone_test.test;
          Core_unix_test.test;
          Union_find_test.test;
-         Ofday_unit_tests_v1.test ();
          Validate_test.test;
        ])

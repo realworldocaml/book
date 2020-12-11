@@ -17,6 +17,10 @@ val in_file : string -> t
 (** An arbitrary value of type [t]; describes an empty ghost range. *)
 val none : t
 
+(** Set the file name and line number of the [lexbuf] to be the start
+    of the named file. *)
+val init : Lexing.lexbuf -> string -> unit
+
 (** Raise a located error. The exception is caught by driver and handled
     appropriately *)
 val raise_errorf : ?loc:t -> ('a, Caml.Format.formatter, unit, 'b) format4 -> 'a
@@ -60,6 +64,13 @@ module Error : sig
   (** Convert an error to an extension point. The compiler recognizes this and displays
       the error properly. *)
   val to_extension : t -> extension
+
+ (** Raise a compiler [Parsing.Location.Error] exception.
+     The composition of [Location.Error.createf] with [Location.Error.raise] is the
+     same as [Location.raise_errorf]. *)
+  val raise : t -> 'a
+
+  val update_loc : t -> location -> t
 end with type location := t
 
 exception Error of Error.t

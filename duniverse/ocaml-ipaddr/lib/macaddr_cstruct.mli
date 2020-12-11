@@ -18,19 +18,18 @@
 
 (** Convert to and from Cstructs and MAC address. *)
 
-(** [of_cstruct c] parses the 6 octets of [c] into a MAC address. *)
 val of_cstruct : Cstruct.t -> (Macaddr.t, [> `Msg of string ]) result
+(** [of_cstruct c] parses the 6 octets of [c] into a MAC address. *)
 
-(** [of_cstruct_exn] parses the 6 octets of [c] into a MAC address.
-    Raises {!Macaddr.Parse_failure} on error. *)
 val of_cstruct_exn : Cstruct.t -> Macaddr.t
+(** [of_cstruct_exn] parses the 6 octets of [c] into a MAC address. Raises
+    {!Macaddr.Parse_failure} on error. *)
 
-(** [to_cstruct mac] is a cstruct of length 4 encoding [ipv4].
-    The cstruct is allocated using [allocator]. If [allocator] is
-    not provided, [Cstruct.create] is used. *)
-val to_cstruct: ?allocator:(int -> Cstruct.t) -> Macaddr.t -> Cstruct.t
+val to_cstruct : ?allocator:(int -> Cstruct.t) -> Macaddr.t -> Cstruct.t
+(** [to_cstruct mac] is a cstruct of length 4 encoding [ipv4]. The cstruct is
+    allocated using [allocator]. If [allocator] is not provided,
+    [Cstruct.create] is used. *)
 
-(** [write_cstruct_exn mac cs] writes 6 bytes into [cs] representing
-    the [mac] address octets. Raises {!Macaddr.Parse_error} if [cs]
-    is not 6 bytes long. *)
 val write_cstruct_exn : Macaddr.t -> Cstruct.t -> unit
+(** [write_cstruct_exn mac cs] writes 6 bytes into [cs] representing the [mac]
+    address octets. Raises {!Macaddr.Parse_error} if [cs] is not 6 bytes long. *)

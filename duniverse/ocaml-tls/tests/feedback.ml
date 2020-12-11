@@ -18,12 +18,12 @@ module Flow = struct
       | `S st -> (st, "server")
       | `C st -> (st, "client") in
     match Tls.Engine.handle_tls st msg with
-    | `Ok (`Ok st', `Response (Some ans), `Data appdata) ->
+    | Ok (`Ok st', `Response (Some ans), `Data appdata) ->
         (rewrap_st (state, st'), ans, appdata)
-    | `Fail (a, _) ->
+    | Error (a, _) ->
         failwith @@ Printf.sprintf "[%s] %s error: %s"
           tag descr (Sexplib.Sexp.to_string_hum (Tls.Engine.sexp_of_failure a))
-    | `Ok _ -> failwith "decoded alert"
+    | Ok _ -> failwith "decoded alert"
 end
 
 let loop_chatter ~certificate ~loops ~size =
@@ -63,7 +63,7 @@ let loop_chatter ~certificate ~loops ~size =
     in
     let (srv, cli) = handshake (`S server) (`C client) init in
     let message' = chat srv cli message loops in
-    if Tls.Utils.Cs.equal message message' then ()
+    if Cstruct.equal message message' then ()
     else failwith @@ "the message got corrupted :("
 
 
@@ -73,7 +73,7 @@ let load_priv () =
   match
     X509.Certificate.decode_pem_multiple cs1, X509.Private_key.decode_pem cs2
   with
-  | Ok certs, Ok (`RSA key) -> certs, key
+  | Ok certs, Ok key -> certs, key
   | Error (`Msg m), _ -> failwith ("can't parse certificates " ^ m)
   | _, Error (`Msg m) -> failwith ("can't parse private key " ^ m)
 

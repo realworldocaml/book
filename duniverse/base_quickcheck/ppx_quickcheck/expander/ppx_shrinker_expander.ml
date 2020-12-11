@@ -14,7 +14,7 @@ let compound_sequence ~loc ~make_compound_expr ~field_pats ~field_exprs ~shrinke
              field_exprs
              shrinker_exprs
              ~f:(fun field_pat field_expr shrinker ->
-               let loc = shrinker.pexp_loc in
+               let loc = { shrinker.pexp_loc with loc_ghost = true } in
                [%expr
                  Base.Sequence.map
                    (Base_quickcheck.Shrinker.shrink [%e shrinker] [%e field_expr])
@@ -59,7 +59,7 @@ let variant
         pexp_function
           ~loc
           (List.map clauses ~f:(fun clause ->
-             let loc = Clause.location clause in
+             let loc = { (Clause.location clause) with loc_ghost = true } in
              let core_type_list = Clause.core_type_list clause in
              let field_pats, field_exprs =
                gensyms

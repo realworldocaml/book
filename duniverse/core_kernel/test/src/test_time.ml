@@ -1,6 +1,6 @@
 open! Core_kernel
 open Poly
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 
 let utc date_string ofday_string =
   Time.of_date_ofday
@@ -783,11 +783,8 @@ let%test_module "Span.to_string/of_string" =
       test ~cr:Comment "d";
       [%expect
         {|
-        (* require-failed: lib/core_kernel/test/src/test_time.ml:LINE:COL. *)
-        (* require-failed: lib/core_kernel/test/src/test_time.ml:LINE:COL. *)
-        ("Base_quickcheck.Test.run: test failed"
-          (input -2.1695734240829744e+44d3e+28d)
-          (error "printed 1 CRs for Quickcheck-generated input")) |}];
+        ("quickcheck: test failed" (input -2.1695734240829744e+44d3e+28d))
+        (* require-failed: lib/core_kernel/test/src/test_time.ml:LINE:COL. *) |}];
       test "h";
       [%expect {| |}];
       test "m";
@@ -804,11 +801,8 @@ let%test_module "Span.to_string/of_string" =
       test ~cr:Comment "ns";
       [%expect
         {|
-        (* require-failed: lib/core_kernel/test/src/test_time.ml:LINE:COL. *)
-        (* require-failed: lib/core_kernel/test/src/test_time.ml:LINE:COL. *)
-        ("Base_quickcheck.Test.run: test failed"
-          (input -3.70807784925899e-59ns4e-75ns)
-          (error "printed 1 CRs for Quickcheck-generated input")) |}]
+        ("quickcheck: test failed" (input -3.70807784925899e-59ns4e-75ns))
+        (* require-failed: lib/core_kernel/test/src/test_time.ml:LINE:COL. *) |}]
     ;;
   end)
 ;;

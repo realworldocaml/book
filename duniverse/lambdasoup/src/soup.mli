@@ -63,7 +63,7 @@ let _ = ul |> previous_siblings |> elements in
     {{:https://github.com/aantron/lambdasoup/blob/master/LICENSE.md} BSD
     license}.
 
-    This documentation page is for version 0.7.1 of the library. Documentation
+    This documentation page is for version 0.7.2 of the library. Documentation
     for other versions can be downloaded from the
     {{:https://github.com/aantron/lambdasoup/releases} releases page}. *)
 

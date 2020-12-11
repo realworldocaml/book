@@ -1,12 +1,19 @@
 module Base = struct
   type t =
-    { omp_config : Migrate_parsetree.Driver.config
+    { tool_name : string
     ; code_path : Code_path.t
+    ; input_name : string
     }
 
-  let top_level ~omp_config ~file_path =
+  let top_level ~tool_name ~file_path ~input_name =
     let code_path = Code_path.top_level ~file_path in
-    {omp_config; code_path}
+    {tool_name; code_path; input_name }
+
+  let code_path t = t.code_path
+
+  let input_name t = t.input_name
+
+  let tool_name t = t.tool_name
 
   let enter_expr t = {t with code_path = Code_path.enter_expr t.code_path}
   let enter_module ~loc name t = {t with code_path = Code_path.enter_module ~loc name t.code_path}
@@ -23,7 +30,7 @@ module Extension = struct
 
   let extension_point_loc t = t.extension_point_loc
   let code_path t = t.base.code_path
-  let omp_config t = t.base.omp_config
+  let tool_name t = t.base.tool_name
 
   let with_loc_and_path f =
     fun ~ctxt ->
@@ -41,7 +48,7 @@ module Deriver = struct
 
   let derived_item_loc t = t.derived_item_loc
   let code_path t = t.base.code_path
-  let omp_config t = t.base.omp_config
+  let tool_name t = t.base.tool_name
   let inline t = t.inline
 
   let with_loc_and_path f =

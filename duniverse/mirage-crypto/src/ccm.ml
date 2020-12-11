@@ -78,7 +78,7 @@ let prepare_header nonce adata plen tlen =
 
 type mode = Encrypt | Decrypt
 
-let crypto_core ~cipher ~mode ~key ~nonce ~maclen ?(adata = Cstruct.empty) data =
+let crypto_core ~cipher ~mode ~key ~nonce ~maclen ~adata data =
   let datalen = Cstruct.len data in
   let cbcheader = prepare_header nonce adata datalen maclen in
   let target = Cstruct.create datalen in
@@ -146,21 +146,21 @@ let valid_nonce nonce =
   if nsize < 7 || nsize > 13 then
     invalid_arg "CCM: nonce length not between 7 and 13: %d" nsize
 
-let generation_encryption ~cipher ~key ~nonce ~maclen ?adata data =
+let generation_encryption ~cipher ~key ~nonce ~maclen ~adata data =
   valid_nonce nonce;
-  let cdata, t = crypto_core ~cipher ~mode:Encrypt ~key ~nonce ~maclen ?adata data in
+  let cdata, t = crypto_core ~cipher ~mode:Encrypt ~key ~nonce ~maclen ~adata data in
   crypto_t t nonce cipher key ;
   cdata <+> t
 
-let decryption_verification ~cipher ~key ~nonce ~maclen ?adata data =
+let decryption_verification ~cipher ~key ~nonce ~maclen ~adata data =
   valid_nonce nonce;
   if Cstruct.len data < maclen then
     None
   else
     let pclen = Cstruct.len data - maclen in
-    let cdata, t = crypto_core ~cipher ~mode:Decrypt ~key ~nonce ~maclen ?adata (Cstruct.sub data 0 pclen) in
+    let cdata, t = crypto_core ~cipher ~mode:Decrypt ~key ~nonce ~maclen ~adata (Cstruct.sub data 0 pclen) in
     let t' = Cs.clone (Cstruct.sub data pclen maclen) in
     crypto_t t' nonce cipher key ;
-    match Cstruct.equal t' t with
+    match Eqaf_cstruct.equal t' t with
     | true  -> Some cdata
     | false -> None

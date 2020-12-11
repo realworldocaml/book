@@ -1,4 +1,5 @@
 (library
-  (name mirage_crypto_rng_mirage)
-  (public_name mirage-crypto-rng-mirage)
-  (libraries cstruct lwt mirage-runtime mirage-crypto-rng mirage-time mirage-clock duration logs))
+ (name mirage_crypto_rng_mirage)
+ (public_name mirage-crypto-rng-mirage)
+ (libraries cstruct lwt mirage-runtime mirage-crypto-rng mirage-time
+   mirage-clock duration logs))

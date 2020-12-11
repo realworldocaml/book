@@ -20,7 +20,7 @@ let run_build_command ~common ~targets =
     (* Synchronously wait for the end of the connection with the cache daemon,
        ensuring all dedup messages have been queued. *)
     Caching.Cache.teardown Caching.cache;
-    (* Hande all remaining dedup mesages. *)
+    (* Hande all remaining dedup messages. *)
     Scheduler.wait_for_dune_cache ()
   | None -> ()
 
@@ -82,12 +82,12 @@ let runtest =
       ~targets:
         (List.map dirs ~f:(fun s ->
              let dir = Path.Local.of_string s in
-             Arg.Dep.alias_rec ~dir Dune.Alias.Name.runtest));
+             Arg.Dep.alias_rec ~dir Dune_engine.Alias.Name.runtest));
     let targets (setup : Main.build_system) =
       List.map dirs ~f:(fun dir ->
           let dir = Path.(relative root) (Common.prefix_target common dir) in
           Target.Alias
-            (Alias.in_dir ~name:Dune.Alias.Name.runtest ~recursive:true
+            (Alias.in_dir ~name:Dune_engine.Alias.Name.runtest ~recursive:true
                ~contexts:setup.workspace.contexts dir))
     in
     run_build_command ~common ~targets
@@ -264,5 +264,5 @@ let () =
     | _ -> exit 0
   with exn ->
     let exn = Exn_with_backtrace.capture exn in
-    Dune.Report_error.report exn;
+    Dune_engine.Report_error.report exn;
     exit 1

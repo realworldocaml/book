@@ -179,12 +179,12 @@ let signal_to_string = function
         end
       | Some name ->
         match d.public_identifier, d.system_identifier with
-        | None, None -> name
+        | None, None -> " " ^ name
         | Some p, None -> Printf.sprintf " %s PUBLIC \"%s\"" name p
         | None, Some s -> Printf.sprintf " %s SYSTEM \"%s\"" name s
         | Some p, Some s -> Printf.sprintf " %s PUBLIC \"%s\" \"%s\"" name p s
     in
-    Printf.sprintf "<!DOCTYPE %s>" text
+    Printf.sprintf "<!DOCTYPE%s>" text
 
   | `Start_element (name, attributes) ->
     let name_to_string = function

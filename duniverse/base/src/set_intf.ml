@@ -3,12 +3,10 @@ open! T
 
 module type Elt_plain = sig
   type t [@@deriving_inline compare, sexp_of]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare : t -> t -> int
-      val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val compare : t -> t -> int
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
@@ -49,6 +47,7 @@ module type Accessors_generic = sig
   val compare_direct : ('a, 'cmp, ('a, 'cmp) t -> ('a, 'cmp) t -> int) options
   val equal : ('a, 'cmp, ('a, 'cmp) t -> ('a, 'cmp) t -> bool) options
   val is_subset : ('a, 'cmp, ('a, 'cmp) t -> of_:('a, 'cmp) t -> bool) options
+  val are_disjoint : ('a, 'cmp, ('a, 'cmp) t -> ('a, 'cmp) t -> bool) options
 
   type ('a, 'cmp) named
 
@@ -175,6 +174,7 @@ module type Accessors0 = sig
   val compare_direct : t -> t -> int
   val equal : t -> t -> bool
   val is_subset : t -> of_:t -> bool
+  val are_disjoint : t -> t -> bool
 
   type named
 
@@ -266,6 +266,7 @@ module type Accessors1 = sig
   val compare_direct : 'a t -> 'a t -> int
   val equal : 'a t -> 'a t -> bool
   val is_subset : 'a t -> of_:'a t -> bool
+  val are_disjoint : 'a t -> 'a t -> bool
 
   type 'a named
 
@@ -356,6 +357,7 @@ module type Accessors2 = sig
   val compare_direct : ('a, 'cmp) t -> ('a, 'cmp) t -> int
   val equal : ('a, 'cmp) t -> ('a, 'cmp) t -> bool
   val is_subset : ('a, 'cmp) t -> of_:('a, 'cmp) t -> bool
+  val are_disjoint : ('a, 'cmp) t -> ('a, 'cmp) t -> bool
 
   type ('a, 'cmp) named
 
@@ -476,6 +478,12 @@ module type Accessors2_with_comparator = sig
     :  comparator:('a, 'cmp) Comparator.t
     -> ('a, 'cmp) t
     -> of_:('a, 'cmp) t
+    -> bool
+
+  val are_disjoint
+    :  comparator:('a, 'cmp) Comparator.t
+    -> ('a, 'cmp) t
+    -> ('a, 'cmp) t
     -> bool
 
   type ('a, 'cmp) named
@@ -974,17 +982,17 @@ module type For_deriving = sig
 
   module type Sexp_of_m = sig
     type t [@@deriving_inline sexp_of]
-    include
-      sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end
 
   module type M_of_sexp = sig
     type t [@@deriving_inline of_sexp]
-    include
-      sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-      end[@@ocaml.doc "@inline"]
+
+    val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
     [@@@end]
 
     include Comparator.S with type t := t
@@ -1023,13 +1031,14 @@ module type Set = sig
       require that they be passed sets with the same element type and the same comparator
       type. *)
   type ('elt, 'cmp) t [@@deriving_inline compare]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare :
-        ('elt -> 'elt -> int) ->
-        ('cmp -> 'cmp -> int) -> ('elt, 'cmp) t -> ('elt, 'cmp) t -> int
-    end[@@ocaml.doc "@inline"]
+
+  val compare
+    :  ('elt -> 'elt -> int)
+    -> ('cmp -> 'cmp -> int)
+    -> ('elt, 'cmp) t
+    -> ('elt, 'cmp) t
+    -> int
+
   [@@@end]
 
   type ('k, 'cmp) comparator =
@@ -1148,6 +1157,10 @@ module type Set = sig
 
   (** [is_subset t1 ~of_:t2] returns true iff [t1] is a subset of [t2]. *)
   val is_subset : ('a, 'cmp) t -> of_:('a, 'cmp) t -> bool
+
+  (** [are_disjoint t1 t2] returns [true] iff [is_empty (inter t1 t2)], but is more
+      efficient. *)
+  val are_disjoint : ('a, 'cmp) t -> ('a, 'cmp) t -> bool
 
   (** [Named] allows the validation of subset and equality relationships between sets.  A
       [Named.t] is a record of a set and a name, where the name is used in error messages,
@@ -1392,14 +1405,16 @@ module type Set = sig
       | Right of 'b
       | Both of 'a * 'b
     [@@deriving_inline compare, sexp]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare :
-          ('a -> 'a -> int) ->
-          ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
-        include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a,'b) t :=  ('a, 'b) t
-      end[@@ocaml.doc "@inline"]
+
+    val compare
+      :  ('a -> 'a -> int)
+      -> ('b -> 'b -> int)
+      -> ('a, 'b) t
+      -> ('a, 'b) t
+      -> int
+
+    include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+
     [@@@end]
   end
 
@@ -1443,14 +1458,13 @@ module type Set = sig
       [Set] takes a [('elt, 'cmp) comparator]. *)
   module Using_comparator : sig
     type nonrec ('elt, 'cmp) t = ('elt, 'cmp) t [@@deriving_inline sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val sexp_of_t :
-          ('elt -> Ppx_sexp_conv_lib.Sexp.t) ->
-          ('cmp -> Ppx_sexp_conv_lib.Sexp.t) ->
-          ('elt, 'cmp) t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val sexp_of_t
+      :  ('elt -> Ppx_sexp_conv_lib.Sexp.t)
+      -> ('cmp -> Ppx_sexp_conv_lib.Sexp.t)
+      -> ('elt, 'cmp) t
+      -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
 
     val t_of_sexp_direct
@@ -1464,14 +1478,13 @@ module type Set = sig
           including the comparator.  Accordingly, any operation on a [Tree.t] must also take
           as an argument the corresponding comparator. *)
       type ('a, 'cmp) t [@@deriving_inline sexp_of]
-      include
-        sig
-          [@@@ocaml.warning "-32"]
-          val sexp_of_t :
-            ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-            ('cmp -> Ppx_sexp_conv_lib.Sexp.t) ->
-            ('a, 'cmp) t -> Ppx_sexp_conv_lib.Sexp.t
-        end[@@ocaml.doc "@inline"]
+
+      val sexp_of_t
+        :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
+        -> ('cmp -> Ppx_sexp_conv_lib.Sexp.t)
+        -> ('a, 'cmp) t
+        -> Ppx_sexp_conv_lib.Sexp.t
+
       [@@@end]
 
       val t_of_sexp_direct

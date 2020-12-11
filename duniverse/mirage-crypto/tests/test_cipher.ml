@@ -135,20 +135,18 @@ let aes_ctr_cases =
 let gcm_cases =
   let open Cipher_block in
 
-  let case ~key ~p ~a ~iv ~c ~t =
-    (AES.GCM.of_secret (vx key), vx p, vx a, vx iv, vx c, vx t) in
+  let case ~key ~p ~a ~nonce ~c ~t =
+    (AES.GCM.of_secret (vx key), vx p, vx a, vx nonce, vx c, vx t) in
 
-  let check (key, p, adata, iv, c, t) _ =
-    let open AES.GCM in
-    let { message = cdata ; tag = ctag } =
-      AES.GCM.encrypt ~key ~iv ~adata p in
-    let { message = pdata ; tag = ptag } =
-      AES.GCM.decrypt ~key ~iv ~adata cdata
+  let check (key, p, adata, nonce, c, t) _ =
+    let cipher = AES.GCM.authenticate_encrypt ~key ~nonce ~adata p in
+    let pdata =
+      match AES.GCM.authenticate_decrypt ~key ~nonce ~adata cipher with
+      | None -> assert_failure "GCM decryption broken"
+      | Some data -> data
     in
-    assert_cs_equal ~msg:"ciphertext" c cdata ;
-    assert_cs_equal ~msg:"encryption tag" t ctag  ;
-    assert_cs_equal ~msg:"decrypted plaintext" p pdata ;
-    assert_cs_equal ~msg:"decryption tag" t ptag
+    assert_cs_equal ~msg:"ciphertext" (Cstruct.append c t) cipher ;
+    assert_cs_equal ~msg:"decrypted plaintext" p pdata
   in
 
   cases_of check [
@@ -156,13 +154,13 @@ let gcm_cases =
     case ~key: "00000000000000000000000000000000"
          ~p:   ""
          ~a:   ""
-         ~iv:  "000000000000000000000000"
+         ~nonce: "000000000000000000000000"
          ~c:   ""
          ~t:   "58e2fccefa7e3061367f1d57a4e7455a" ;
     case ~key: "00000000000000000000000000000000"
          ~p:   "00000000000000000000000000000000"
          ~a:   ""
-         ~iv:  "000000000000000000000000"
+         ~nonce: "000000000000000000000000"
          ~c:   "0388dace60b6a392f328c2b971b2fe78"
          ~t:   "ab6e47d42cec13bdf53a67b21257bddf" ;
     case ~key: "feffe9928665731c6d6a8f9467308308"
@@ -171,7 +169,7 @@ let gcm_cases =
                 1c3c0c95956809532fcf0e2449a6b525
                 b16aedf5aa0de657ba637b391aafd255"
          ~a:   ""
-         ~iv:  "cafebabefacedbaddecaf888"
+         ~nonce: "cafebabefacedbaddecaf888"
          ~c:   "42831ec2217774244b7221b784d0d49c
                 e3aa212f2c02a4e035c17e2329aca12e
                 21d514b25466931c7d8f6a5aac84aa05
@@ -184,7 +182,7 @@ let gcm_cases =
                 b16aedf5aa0de657ba637b39"
          ~a:   "feedfacedeadbeeffeedfacedeadbeef
                 abaddad2"
-         ~iv:  "cafebabefacedbaddecaf888"
+         ~nonce: "cafebabefacedbaddecaf888"
          ~c:   "42831ec2217774244b7221b784d0d49c
                 e3aa212f2c02a4e035c17e2329aca12e
                 21d514b25466931c7d8f6a5aac84aa05
@@ -197,7 +195,7 @@ let gcm_cases =
                 b16aedf5aa0de657ba637b39"
          ~a:   "feedfacedeadbeeffeedfacedeadbeef
                 abaddad2"
-         ~iv:  "cafebabefacedbad"
+         ~nonce: "cafebabefacedbad"
          ~c:   "61353b4c2806934a777ff51fa22a4755
                 699b2a714fcdc6f83766e5f97b6c7423
                 73806900e49f24b22b097544d4896b42
@@ -210,7 +208,7 @@ let gcm_cases =
                 b16aedf5aa0de657ba637b39"
          ~a:   "feedfacedeadbeeffeedfacedeadbeef
                 abaddad2"
-         ~iv:  "9313225df88406e555909c5aff5269aa
+         ~nonce: "9313225df88406e555909c5aff5269aa
                 6a7a9538534f7da1e4c303d2a318a728
                 c3c0c95156809539fcf0e2429a6b5254
                 16aedbf5a0de6a57a637b39b"
@@ -227,7 +225,7 @@ let gcm_cases =
                 b16aedf5aa0de657ba637b39"
          ~a:   "feedfacedeadbeeffeedfacedeadbeef
                 abaddad2"
-         ~iv:  "cafebabefacedbaddecaf888"
+         ~nonce: "cafebabefacedbaddecaf888"
          ~c:   "3980ca0b3c00e841eb06fac4872a2757
                 859e1ceaa6efd984628593b40ca1e19c
                 7d773d00c144c525ac619d18c84a3f47
@@ -241,7 +239,7 @@ let gcm_cases =
                 b16aedf5aa0de657ba637b39"
          ~a:   "feedfacedeadbeeffeedfacedeadbeef
                 abaddad2"
-         ~iv:  "9313225df88406e555909c5aff5269aa
+         ~nonce: "9313225df88406e555909c5aff5269aa
                 6a7a9538534f7da1e4c303d2a318a728
                 c3c0c95156809539fcf0e2429a6b5254
                 16aedbf5a0de6a57a637b39b"
@@ -269,11 +267,11 @@ let gcm_cases =
                 10101010101010100101010101010101
                 00000000000000000000000000000000
                 ff"
-         ~iv:  "000000000000000000000000"
+         ~nonce: "000000000000000000000000"
          ~c:   ""
          ~t:   "9bfdb8fdac1be65739780c41703c0fb6";
     case ~key: "00000000000000000000000000000002"  (* ctr rollover *)
-         ~iv:  "3222415d"
+         ~nonce: "3222415d"
          ~p:   "deadbeefdeadbeefdeadbeefdeadbeef
                 deadbeefdeadbeefdeadbeefdeadbeef
                 deadbeef"
@@ -292,11 +290,11 @@ let ccm_cases =
     (of_secret ~maclen (vx key), vx p, vx a, vx nonce, vx c) in
 
   let check (key, p, adata, nonce, c) _ =
-    let cip = encrypt ~key ~nonce ~adata p in
+    let cip = authenticate_encrypt ~key ~nonce ~adata p in
     assert_cs_equal ~msg:"encrypt" c cip ;
-    match decrypt ~key ~nonce ~adata c with
+    match authenticate_decrypt ~key ~nonce ~adata c with
       | Some x -> assert_cs_equal ~msg:"decrypt" p x
-      | None -> assert_failure "decryption broken"
+      | None -> assert_failure "CCM decryption broken"
   in
 
   cases_of check [
@@ -333,8 +331,8 @@ let ccm_regressions =
     and plaintext = Cstruct.of_string "hello"
     in
     assert_cs_equal ~msg:"CCM no vs empty ad"
-      (encrypt ~key ~nonce plaintext)
-      (encrypt ~adata:Cstruct.empty ~key ~nonce plaintext)
+      (authenticate_encrypt ~key ~nonce plaintext)
+      (authenticate_encrypt ~adata:Cstruct.empty ~key ~nonce plaintext)
   and short_nonce_enc _ =
     (* as reported in https://github.com/mirleft/ocaml-nocrypto/issues/167 *)
     (* valid nonce sizes for CCM are 7..13 (L can be 2..8, nonce is 15 - L)*)
@@ -345,7 +343,7 @@ let ccm_regressions =
     in
     assert_raises ~msg:"CCM with short nonce raises"
       (Invalid_argument "Mirage_crypto: CCM: nonce length not between 7 and 13: 0")
-      (fun () -> encrypt ~key ~nonce plaintext)
+      (fun () -> authenticate_encrypt ~key ~nonce plaintext)
   and short_nonce_enc2 _ =
     let key = of_secret ~maclen:16 (vx "000102030405060708090a0b0c0d0e0f")
     and nonce = vx "00"
@@ -353,7 +351,7 @@ let ccm_regressions =
     in
     assert_raises ~msg:"CCM with short nonce raises"
       (Invalid_argument "Mirage_crypto: CCM: nonce length not between 7 and 13: 1")
-      (fun () -> encrypt ~key ~nonce plaintext)
+      (fun () -> authenticate_encrypt ~key ~nonce plaintext)
   and short_nonce_enc3 _ =
     let key = of_secret ~maclen:16 (vx "000102030405060708090a0b0c0d0e0f")
     and nonce = vx "000102030405"
@@ -361,7 +359,7 @@ let ccm_regressions =
     in
     assert_raises ~msg:"CCM with short nonce raises"
       (Invalid_argument "Mirage_crypto: CCM: nonce length not between 7 and 13: 6")
-      (fun () -> encrypt ~key ~nonce plaintext)
+      (fun () -> authenticate_encrypt ~key ~nonce plaintext)
   and long_nonce_enc _ =
     let key = of_secret ~maclen:16 (vx "000102030405060708090a0b0c0d0e0f")
     and nonce = vx "000102030405060708090a0b0c0d"
@@ -369,7 +367,7 @@ let ccm_regressions =
     in
     assert_raises ~msg:"CCM with short nonce raises"
       (Invalid_argument "Mirage_crypto: CCM: nonce length not between 7 and 13: 14")
-      (fun () -> encrypt ~key ~nonce plaintext)
+      (fun () -> authenticate_encrypt ~key ~nonce plaintext)
   and enc_dec_empty_message _ =
     (* as reported in https://github.com/mirleft/ocaml-nocrypto/issues/168 *)
     let key = of_secret ~maclen:16 (vx "000102030405060708090a0b0c0d0e0f")
@@ -377,8 +375,8 @@ let ccm_regressions =
     and adata = Cstruct.of_string "hello"
     and p = Cstruct.empty
     in
-    let cipher = encrypt ~adata ~key ~nonce p in
-    match decrypt ~key ~nonce ~adata cipher with
+    let cipher = authenticate_encrypt ~adata ~key ~nonce p in
+    match authenticate_decrypt ~key ~nonce ~adata cipher with
     | Some x -> assert_cs_equal ~msg:"CCM decrypt of empty message" p x
     | None -> assert_failure "decryption broken"
   in
@@ -395,23 +393,299 @@ let gcm_regressions =
   let open Cipher_block.AES.GCM in
   let msg = vx "000102030405060708090a0b0c0d0e0f" in
   let key = of_secret msg
-  and iv = Cstruct.empty
+  and nonce = Cstruct.empty
   in
-  let iv_zero_length_enc _ =
+  let nonce_zero_length_enc _ =
     (* reported in https://github.com/mirleft/ocaml-nocrypto/issues/169 *)
-    assert_raises ~msg:"GCM with iv of length 0"
-      (Invalid_argument "Mirage_crypto: GCM: invalid IV of length 0")
-      (fun () -> encrypt ~key ~iv msg)
-  and iv_zero_length_dec _ =
-    assert_raises ~msg:"GCM with iv of 0"
-      (Invalid_argument "Mirage_crypto: GCM: invalid IV of length 0")
-      (fun () -> decrypt ~key ~iv msg)
+    assert_raises ~msg:"GCM with nonce of length 0"
+      (Invalid_argument "Mirage_crypto: GCM: invalid nonce of length 0")
+      (fun () -> authenticate_encrypt ~key ~nonce msg)
+  and nonce_zero_length_dec _ =
+    assert_raises ~msg:"GCM with nonce of 0"
+      (Invalid_argument "Mirage_crypto: GCM: invalid nonce of length 0")
+      (fun () -> authenticate_decrypt ~key ~nonce msg)
+  and unaligned _ =
+    let key = of_secret (vx "00000000000000000000000000000000")
+    and c = vx "0388dace60b6a392f328c2b971b2fe78"
+    and p = vx "00000000000000000000000000000000"
+    and nonce = vx "000000000000000000000000"
+    and t = vx "ab6e47d42cec13bdf53a67b21257bddf"
+    in
+    let cipher = Cstruct.shift (Cstruct.concat [ Cstruct.create 1 ; c ; t ]) 1 in
+    let auth_dec ~key ~nonce cipher = match authenticate_decrypt ~key ~nonce cipher with
+      | None -> assert_failure "GCM decryption failure"
+      | Some x -> x
+    in
+    assert_cs_equal ~msg:"GCM with unaligned msg"
+      (auth_dec ~key ~nonce cipher) p
   in
   [
-    test_case iv_zero_length_enc ;
-    test_case iv_zero_length_dec ;
+    test_case nonce_zero_length_enc ;
+    test_case nonce_zero_length_dec ;
+    test_case unaligned ;
   ]
 
+
+let chacha20_cases =
+  let case msg ?ctr ~key ~nonce ?(input = Cstruct.create 128) output =
+    let key = Chacha20.of_secret (vx key)
+    and nonce = vx nonce
+    and output = vx output
+    in
+    assert_cs_equal ~msg (Chacha20.crypt ~key ~nonce ?ctr input) output
+  in
+  let rfc8439_input = Cstruct.of_string "Ladies and Gentlemen of the class of '99: If I could offer you only one tip for the future, sunscreen would be it." in
+  let rfc8439_test_2_4_2 _ =
+    let key = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    and nonce = "000000000000004a00000000"
+    and output =
+{|6e 2e 35 9a 25 68 f9 80 41 ba 07 28 dd 0d 69 81
+  e9 7e 7a ec 1d 43 60 c2 0a 27 af cc fd 9f ae 0b
+  f9 1b 65 c5 52 47 33 ab 8f 59 3d ab cd 62 b3 57
+  16 39 d6 24 e6 51 52 ab 8f 53 0c 35 9f 08 61 d8
+  07 ca 0d bf 50 0d 6a 61 56 a3 8e 08 8a 22 b6 5e
+  52 bc 51 4d 16 cc f8 06 81 8c e9 1a b7 79 37 36
+  5a f9 0b bf 74 a3 5b e6 b4 0b 8e ed f2 78 5e 42
+  87 4d|}
+    in
+    case "Chacha20 RFC 8439 2.4.2" ~ctr:1L ~key ~nonce ~input:rfc8439_input output
+  and rfc8439_test_2_8_2 _ =
+    let key = Chacha20.of_secret (vx "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f")
+    and adata = vx "50515253c0c1c2c3c4c5c6c7"
+    and nonce = vx "0700000040 41424344454647"
+    and output = vx {|
+  d3 1a 8d 34 64 8e 60 db 7b 86 af bc 53 ef 7e c2
+  a4 ad ed 51 29 6e 08 fe a9 e2 b5 a7 36 ee 62 d6
+  3d be a4 5e 8c a9 67 12 82 fa fb 69 da 92 72 8b
+  1a 71 de 0a 9e 06 0b 29 05 d6 a5 b6 7e cd 3b 36
+  92 dd bd 7f 2d 77 8b 8c 98 03 ae e3 28 09 1b 58
+  fa b3 24 e4 fa d6 75 94 55 85 80 8b 48 31 d7 bc
+  3f f4 de f0 8e 4b 7a 9d e5 76 d2 65 86 ce c6 4b
+  61 16
+  1a e1 0b 59 4f 09 e2 6a 7e 90 2e cb d0 60 06 91|}
+    in
+    assert_cs_equal ~msg:"Chacha20/Poly1305 RFC 8439 2.8.2 encrypt"
+      (Chacha20.authenticate_encrypt ~key ~nonce ~adata rfc8439_input)
+      output;
+    assert_cs_equal ~msg:"Chacha20/Poly1305 RFC 8439 2.8.2 decrypt"
+      (match Chacha20.authenticate_decrypt ~key ~nonce ~adata output with
+       | Some cs -> cs | None -> assert_failure "Chacha20/poly1305 decryption broken")
+      rfc8439_input;
+    let input = Cstruct.(shift (append (create 16) rfc8439_input) 16) in
+    assert_cs_equal ~msg:"Chacha20/Poly1305 RFC 8439 2.8.2 encrypt 2"
+      (Chacha20.authenticate_encrypt ~key ~nonce ~adata input)
+      output;
+  in
+  (* from https://tools.ietf.org/html/draft-strombergson-chacha-test-vectors-01 *)
+  let case ~key ~nonce ~output0 ~output1 _ =
+    case "chacha20 crypt" ~key ~nonce (output0 ^ output1)
+  in
+  List.map test_case
+    [
+      rfc8439_test_2_4_2 ;
+
+      rfc8439_test_2_8_2 ;
+
+      case
+        ~key:(String.make 64 '0')
+        ~nonce:(String.make 16 '0')
+        ~output0:("76b8e0ada0f13d90405d6ae55386bd28" ^
+                  "bdd219b8a08ded1aa836efcc8b770dc7" ^
+                  "da41597c5157488d7724e03fb8d84a37" ^
+                  "6a43b8f41518a11cc387b669b2ee6586")
+        ~output1:("9f07e7be5551387a98ba977c732d080d" ^
+                  "cb0f29a048e3656912c6533e32ee7aed" ^
+                  "29b721769ce64e43d57133b074d839d5" ^
+                  "31ed1f28510afb45ace10a1f4b794d6f") ;
+
+      case
+        ~key:("01" ^ String.make 62 '0')
+        ~nonce:(String.make 16 '0')
+        ~output0:("c5d30a7ce1ec119378c84f487d775a85" ^
+                  "42f13ece238a9455e8229e888de85bbd" ^
+                  "29eb63d0a17a5b999b52da22be4023eb" ^
+                  "07620a54f6fa6ad8737b71eb0464dac0")
+        ~output1:("10f656e6d1fd55053e50c4875c9930a3" ^
+                  "3f6d0263bd14dfd6ab8c70521c19338b" ^
+                  "2308b95cf8d0bb7d202d2102780ea352" ^
+                  "8f1cb48560f76b20f382b942500fceac") ;
+
+      case
+        ~key:(String.make 64 '0')
+        ~nonce:("01" ^ String.make 14 '0')
+        ~output0:("ef3fdfd6c61578fbf5cf35bd3dd33b80" ^
+                  "09631634d21e42ac33960bd138e50d32" ^
+                  "111e4caf237ee53ca8ad6426194a8854" ^
+                  "5ddc497a0b466e7d6bbdb0041b2f586b")
+        ~output1:("5305e5e44aff19b235936144675efbe4" ^
+                  "409eb7e8e5f1430f5f5836aeb49bb532" ^
+                  "8b017c4b9dc11f8a03863fa803dc71d5" ^
+                  "726b2b6b31aa32708afe5af1d6b69058") ;
+
+      case
+        ~key:(String.make 64 'f')
+        ~nonce:(String.make 16 'f')
+        ~output0:("d9bf3f6bce6ed0b54254557767fb5744" ^
+                  "3dd4778911b606055c39cc25e674b836" ^
+                  "3feabc57fde54f790c52c8ae43240b79" ^
+                  "d49042b777bfd6cb80e931270b7f50eb")
+        ~output1:("5bac2acd86a836c5dc98c116c1217ec3" ^
+                  "1d3a63a9451319f097f3b4d6dab07787" ^
+                  "19477d24d24b403a12241d7cca064f79" ^
+                  "0f1d51ccaff6b1667d4bbca1958c4306") ;
+
+      case
+        ~key:(String.make 64 '5')
+        ~nonce:(String.make 16 '5')
+        ~output0:("bea9411aa453c5434a5ae8c92862f564" ^
+                  "396855a9ea6e22d6d3b50ae1b3663311" ^
+                  "a4a3606c671d605ce16c3aece8e61ea1" ^
+                  "45c59775017bee2fa6f88afc758069f7")
+        ~output1:("e0b8f676e644216f4d2a3422d7fa36c6" ^
+                  "c4931aca950e9da42788e6d0b6d1cd83" ^
+                  "8ef652e97b145b14871eae6c6804c700" ^
+                  "4db5ac2fce4c68c726d004b10fcaba86") ;
+
+      case
+        ~key:(String.make 64 'a')
+        ~nonce:(String.make 16 'a')
+        ~output0:("9aa2a9f656efde5aa7591c5fed4b35ae" ^
+                  "a2895dec7cb4543b9e9f21f5e7bcbcf3" ^
+                  "c43c748a970888f8248393a09d43e0b7" ^
+                  "e164bc4d0b0fb240a2d72115c4808906")
+        ~output1:("72184489440545d021d97ef6b693dfe5" ^
+                  "b2c132d47e6f041c9063651f96b623e6" ^
+                  "2a11999a23b6f7c461b2153026ad5e86" ^
+                  "6a2e597ed07b8401dec63a0934c6b2a9") ;
+
+      case
+        ~key:"00112233445566778899aabbccddeeffffeeddccbbaa99887766554433221100"
+        ~nonce:"0f1e2d3c4b5a6978"
+        ~output0:("9fadf409c00811d00431d67efbd88fba" ^
+                  "59218d5d6708b1d685863fabbb0e961e" ^
+                  "ea480fd6fb532bfd494b215101505742" ^
+                  "3ab60a63fe4f55f7a212e2167ccab931")
+        ~output1:("fbfd29cf7bc1d279eddf25dd316bb884" ^
+                  "3d6edee0bd1ef121d12fa17cbc2c574c" ^
+                  "ccab5e275167b08bd686f8a09df87ec3" ^
+                  "ffb35361b94ebfa13fec0e4889d18da5") ;
+
+      case
+        ~key:"c46ec1b18ce8a878725a37e780dfb7351f68ed2e194c79fbc6aebee1a667975d"
+        ~nonce:"1ada31d5cf688221"
+        ~output0:("f63a89b75c2271f9368816542ba52f06" ^
+                  "ed49241792302b00b5e8f80ae9a473af" ^
+                  "c25b218f519af0fdd406362e8d69de7f" ^
+                  "54c604a6e00f353f110f771bdca8ab92")
+        ~output1:("e5fbc34e60a1d9a9db17345b0a402736" ^
+                  "853bf910b060bdf1f897b6290f01d138" ^
+                  "ae2c4c90225ba9ea14d518f55929dea0" ^
+                  "98ca7a6ccfe61227053c84e49a4a3332") ;
+
+      case
+        ~key:(String.make 32 '0')
+        ~nonce:(String.make 16 '0')
+        ~output0:("89670952608364fd00b2f90936f031c8" ^
+                  "e756e15dba04b8493d00429259b20f46" ^
+                  "cc04f111246b6c2ce066be3bfb32d9aa" ^
+                  "0fddfbc12123d4b9e44f34dca05a103f")
+        ~output1:("6cd135c2878c832b5896b134f6142a9d" ^
+                  "4d8d0d8f1026d20a0a81512cbce6e975" ^
+                  "8a7143d021978022a384141a80cea306" ^
+                  "2f41f67a752e66ad3411984c787e30ad") ;
+
+      case
+        ~key:("01" ^ String.make 30 '0')
+        ~nonce:(String.make 16 '0')
+        ~output0:("ae56060d04f5b597897ff2af1388dbce" ^
+                  "ff5a2a4920335dc17a3cb1b1b10fbe70" ^
+                  "ece8f4864d8c7cdf0076453a8291c7db" ^
+                  "eb3aa9c9d10e8ca36be4449376ed7c42")
+        ~output1:("fc3d471c34a36fbbf616bc0a0e7c5230" ^
+                  "30d944f43ec3e78dd6a12466547cb4f7" ^
+                  "b3cebd0a5005e762e562d1375b7ac445" ^
+                  "93a991b85d1a60fba2035dfaa2a642d5") ;
+
+      case
+        ~key:(String.make 32 '0')
+        ~nonce:("01" ^ String.make 14 '0')
+        ~output0:("1663879eb3f2c9949e2388caa343d361" ^
+                  "bb132771245ae6d027ca9cb010dc1fa7" ^
+                  "178dc41f8278bc1f64b3f12769a24097" ^
+                  "f40d63a86366bdb36ac08abe60c07fe8")
+        ~output1:("b057375c89144408cc744624f69f7f4c" ^
+                  "cbd93366c92fc4dfcada65f1b959d8c6" ^
+                  "4dfc50de711fb46416c2553cc60f21bb" ^
+                  "fd006491cb17888b4fb3521c4fdd8745") ;
+
+      case
+        ~key:(String.make 32 'f')
+        ~nonce:(String.make 16 'f')
+        ~output0:("992947c3966126a0e660a3e95db048de" ^
+                  "091fb9e0185b1e41e41015bb7ee50150" ^
+                  "399e4760b262f9d53f26d8dd19e56f5c" ^
+                  "506ae0c3619fa67fb0c408106d0203ee")
+        ~output1:("40ea3cfa61fa32a2fda8d1238a2135d9" ^
+                  "d4178775240f99007064a6a7f0c731b6" ^
+                  "7c227c52ef796b6bed9f9059ba0614bc" ^
+                  "f6dd6e38917f3b150e576375be50ed67") ;
+
+      case
+        ~key:(String.make 32 '5')
+        ~nonce:(String.make 16 '5')
+        ~output0:("357d7d94f966778f5815a2051dcb0413" ^
+                  "3b26b0ead9f57dd09927837bc3067e4b" ^
+                  "6bf299ad81f7f50c8da83c7810bfc17b" ^
+                  "b6f4813ab6c326957045fd3fd5e19915")
+        ~output1:("ec744a6b9bf8cbdcb36d8b6a5499c68a" ^
+                  "08ef7be6cc1e93f2f5bcd2cad4e47c18" ^
+                  "a3e5d94b5666382c6d130d822dd56aac" ^
+                  "b0f8195278e7b292495f09868ddf12cc") ;
+
+      case
+        ~key:(String.make 32 'a')
+        ~nonce:(String.make 16 'a')
+        ~output0:("fc79acbd58526103862776aab20f3b7d" ^
+                  "8d3149b2fab65766299316b6e5b16684" ^
+                  "de5de548c1b7d083efd9e3052319e0c6" ^
+                  "254141da04a6586df800f64d46b01c87")
+        ~output1:("1f05bc67e07628ebe6f6865a2177e0b6" ^
+                  "6a558aa7cc1e8ff1a98d27f7071f8335" ^
+                  "efce4537bb0ef7b573b32f32765f2900" ^
+                  "7da53bba62e7a44d006f41eb28fe15d6") ;
+
+      case
+        ~key:"00112233445566778899aabbccddeeff"
+        ~nonce:"0f1e2d3c4b5a6978"
+        ~output0:("d1abf630467eb4f67f1cfb47cd626aae" ^
+                  "8afedbbe4ff8fc5fe9cfae307e74ed45" ^
+                  "1f1404425ad2b54569d5f18148939971" ^
+                  "abb8fafc88ce4ac7fe1c3d1f7a1eb7ca")
+        ~output1:("e76ca87b61a9713541497760dd9ae059" ^
+                  "350cad0dcedfaa80a883119a1a6f987f" ^
+                  "d1ce91fd8ee0828034b411200a9745a2" ^
+                  "85554475d12afc04887fef3516d12a2c") ;
+
+      case
+        ~key:"c46ec1b18ce8a878725a37e780dfb735"
+        ~nonce:"1ada31d5cf688221"
+        ~output0:("826abdd84460e2e9349f0ef4af5b179b" ^
+                  "426e4b2d109a9c5bb44000ae51bea90a" ^
+                  "496beeef62a76850ff3f0402c4ddc99f" ^
+                  "6db07f151c1c0dfac2e56565d6289625")
+        ~output1:("5b23132e7b469c7bfb88fa95d44ca5ae" ^
+                  "3e45e848a4108e98bad7a9eb15512784" ^
+                  "a6a9e6e591dce674120acaf9040ff50f" ^
+                  "f3ac30ccfb5e14204f5e4268b90a8804")
+    ]
+
+let poly1305_rfc8439_2_5_2 _ =
+  let key = vx "85d6be7857556d337f4452fe42d506a80103808afb0db2fd4abff6af4149f51b"
+  and data = Cstruct.of_string "Cryptographic Forum Research Group"
+  and output = vx "a8061dc1305136c6c22b8baf0c0127a9"
+  in
+  assert_cs_equal ~msg:"poly 1305 RFC8439 Section 2.5.2"
+    (Poly1305.mac ~key data) output
 
 let suite = [
   "AES-ECB" >::: [ "SP 300-38A" >::: aes_ecb_cases ] ;
@@ -421,4 +695,6 @@ let suite = [
   "AES-CCM" >::: ccm_cases ;
   "AES-CCM-REGRESSION" >::: ccm_regressions ;
   "AES-GCM-REGRESSION" >::: gcm_regressions ;
+  "Chacha20" >::: chacha20_cases ;
+  "poly1305" >:: poly1305_rfc8439_2_5_2 ;
 ]

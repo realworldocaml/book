@@ -2,9 +2,6 @@ open! Core_kernel
 
 include Monad.S2 with type ('a, 'b) t = ('a, 'b) Result.t Deferred1.t (** @open *)
 
-val ignore : (_, 'err) t -> (unit, 'err) t
-[@@deprecated "[since 2019-06] Use [ignore_m] instead"]
-
 val fail : 'err -> (_, 'err) t
 
 (** e.g., [failf "Couldn't find bloogle %s" (Bloogle.to_string b)]. *)

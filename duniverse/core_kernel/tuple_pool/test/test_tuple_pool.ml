@@ -176,7 +176,7 @@ module Make (Pool : Pool.S) = struct
           let r = ref true in
           List.partition_map live ~f:(fun a ->
             r := not !r;
-            if !r then `Fst a else `Snd a)
+            if !r then First a else Second a)
         in
         List.iter to_free ~f:(fun l -> free p l);
         loop p (num_iters_left - 1) (num_to_alloc_this_iter * 2) live)
@@ -203,7 +203,7 @@ module Make (Pool : Pool.S) = struct
       assert (is_nil (tail p l));
       free p l
     with
-    | exn -> failwiths "failure" (exn, p) [%sexp_of: exn * _ Pool.t]
+    | exn -> failwiths ~here:[%here] "failure" (exn, p) [%sexp_of: exn * _ Pool.t]
   ;;
 
   (* [sexp_of] *)
@@ -215,7 +215,7 @@ module Make (Pool : Pool.S) = struct
       let l = create p 13 (nil ()) in
       ignore (sexp_of l)
     with
-    | exn -> failwiths "failure" (exn, p) [%sexp_of: exn * _ Pool.t]
+    | exn -> failwiths ~here:[%here] "failure" (exn, p) [%sexp_of: exn * _ Pool.t]
   ;;
 
   (* [id_of_pointer], [pointer_of_id_exn], [Id.to_int63], [Id.of_int63] *)

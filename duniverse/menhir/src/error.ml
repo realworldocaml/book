@@ -113,6 +113,16 @@ let exit_if category =
   if !category then
     exit 1
 
+let with_new_category f =
+  let c = new_category() in
+  match f c with
+  | y ->
+      exit_if c;
+      y
+  | exception e ->
+      exit_if c;
+      raise e
+
 (* ---------------------------------------------------------------------------- *)
 
 (* Certain warnings about the grammar can optionally be treated as errors. *)

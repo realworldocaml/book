@@ -1,5 +1,5 @@
 (** First-class representative of an individual variant in a variant type, used in
-    [[@@deriving_inline variants][@@@end]]. *)
+    [[@@deriving variants]]. *)
 
 type 'constructor t =
   { name : string

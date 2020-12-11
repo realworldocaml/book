@@ -833,11 +833,11 @@ module Expert = struct
     type t = Responder.t
 
     let cannot_send r =
-      failwiths "Message cannot be sent" r [%sexp_of: _ Transport.Send_result.t]
+      failwiths ~here:[%here] "Message cannot be sent" r [%sexp_of: _ Transport.Send_result.t]
     ;;
 
     let mark_responded (t : t) =
-      if t.responded then failwiths "Already responded" t [%sexp_of: Responder.t];
+      if t.responded then failwiths ~here:[%here] "Already responded" t [%sexp_of: Responder.t];
       t.responded <- true;
     ;;
 

@@ -6,6 +6,7 @@ open With_return
 let failwiths = Error.failwiths
 
 module Hashable = Hashtbl_intf.Hashable
+module Merge_into_action = Hashtbl_intf.Merge_into_action
 module Pool = Tuple_pool
 
 let hash_param = Hashable.hash_param
@@ -337,26 +338,118 @@ let find_exn t key =
   else  raise Caml.Not_found
 ;;
 
-let[@inline always] find_and_call_impl t key ~call_if_found ~if_found ~if_not_found =
+let[@inline always] find_and_call_impl
+                      t
+                      key
+                      ~call_if_found
+                      ~call_if_not_found
+                      ~if_found
+                      ~if_not_found
+                      arg1
+                      arg2
+  =
   let index = slot t key in
   let it = table_get t.table index in
   let e = find_entry t ~key ~it in
   if not (Entry.is_null e)
   then
-    call_if_found ~if_found ~key:(Entry.key t.entries e) ~data:(Entry.data t.entries e)
-  else if_not_found key
+    call_if_found
+      ~if_found
+      ~key:(Entry.key t.entries e)
+      ~data:(Entry.data t.entries e)
+      arg1
+      arg2
+  else call_if_not_found ~if_not_found key arg1 arg2
 ;;
 
 let find_and_call =
-  let call_if_found ~if_found ~key:_ ~data = if_found data in
+  let call_if_found ~if_found ~key:_ ~data () () = if_found data in
+  let call_if_not_found ~if_not_found key () () = if_not_found key in
   fun t key ~if_found ~if_not_found ->
-    find_and_call_impl t key ~call_if_found ~if_found ~if_not_found
+    find_and_call_impl
+      t
+      key
+      ()
+      ()
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
 ;;
 
 let findi_and_call =
-  let call_if_found ~if_found ~key ~data = if_found ~key ~data in
+  let call_if_found ~if_found ~key ~data () () = if_found ~key ~data in
+  let call_if_not_found ~if_not_found key () () = if_not_found key in
   fun t key ~if_found ~if_not_found ->
-    find_and_call_impl t key ~call_if_found ~if_found ~if_not_found
+    find_and_call_impl
+      t
+      key
+      ()
+      ()
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+;;
+
+let find_and_call1 =
+  let call_if_found ~if_found ~key:_ ~data a () = if_found data a in
+  let call_if_not_found ~if_not_found key a () = if_not_found key a in
+  fun t key ~a ~if_found ~if_not_found ->
+    find_and_call_impl
+      t
+      key
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+      a
+      ()
+;;
+
+let findi_and_call1 =
+  let call_if_found ~if_found ~key ~data a () = if_found ~key ~data a in
+  let call_if_not_found ~if_not_found key a () = if_not_found key a in
+  fun t key ~a ~if_found ~if_not_found ->
+    find_and_call_impl
+      t
+      key
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+      a
+      ()
+;;
+
+let find_and_call2 =
+  let call_if_found ~if_found ~key:_ ~data a b = if_found data a b in
+  let call_if_not_found ~if_not_found key a b = if_not_found key a b in
+  fun t key ~a ~b ~if_found ~if_not_found ->
+    find_and_call_impl
+      t
+      key
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+      a
+      b
+;;
+
+let findi_and_call2 =
+  let call_if_found ~if_found ~key ~data a b = if_found ~key ~data a b in
+  let call_if_not_found ~if_not_found key a b = if_not_found key a b in
+  fun t key ~a ~b ~if_found ~if_not_found ->
+    find_and_call_impl
+      t
+      key
+      ~call_if_found
+      ~call_if_not_found
+      ~if_found
+      ~if_not_found
+      a
+      b
 ;;
 
 (* This is split in a rather odd way so as to make find_and_remove for a single entry
@@ -638,15 +731,16 @@ let partition_mapi t ~f =
   in
   iteri t ~f:(fun ~key ~data ->
     match f ~key ~data with
-    | `Fst new_data -> replace t0 ~key ~data:new_data
-    | `Snd new_data -> replace t1 ~key ~data:new_data);
+    | First new_data -> replace t0 ~key ~data:new_data
+    | Second new_data -> replace t1 ~key ~data:new_data);
   t0, t1
 ;;
 
 let partition_map t ~f = partition_mapi t ~f:(fun ~key:_ ~data -> f data)
 
 let partitioni_tf t ~f =
-  partition_mapi t ~f:(fun ~key ~data -> if f ~key ~data then `Fst data else `Snd data)
+  partition_mapi t ~f:(fun ~key ~data ->
+    if f ~key ~data then First data else Second data)
 ;;
 
 let partition_tf t ~f = partitioni_tf t ~f:(fun ~key:_ ~data -> f data)
@@ -789,15 +883,11 @@ let merge =
     new_t
 ;;
 
-type 'a merge_into_action =
-  | Remove
-  | Set_to of 'a
-
 let merge_into ~src ~dst ~f =
   iteri src ~f:(fun ~key ~data ->
     let dst_data = find dst key in
     let action = without_mutating dst (fun () -> f ~key data dst_data) () in
-    match action with
+    match (action : _ Merge_into_action.t) with
     | Remove -> remove dst key
     | Set_to data ->
       (match dst_data with
@@ -836,7 +926,7 @@ let mapi_inplace t ~f =
 
 let map_inplace t ~f = mapi_inplace t ~f:(fun ~key:_ ~data -> f data)
 
-let equal t t' equal =
+let equal equal t t' =
   length t = length t'
   && with_return (fun r ->
     iteri t ~f:(fun ~key ~data ->
@@ -869,10 +959,6 @@ let copy t =
 ;;
 
 module Accessors = struct
-  type nonrec 'a merge_into_action = 'a merge_into_action =
-    | Remove
-    | Set_to of 'a
-
   let choose = choose
   let choose_exn = choose_exn
   let clear = clear
@@ -917,6 +1003,10 @@ module Accessors = struct
   let find_exn = find_exn
   let find_and_call = find_and_call
   let findi_and_call = findi_and_call
+  let find_and_call1 = find_and_call1
+  let findi_and_call1 = findi_and_call1
+  let find_and_call2 = find_and_call2
+  let findi_and_call2 = findi_and_call2
   let find_and_remove = find_and_remove
   let to_alist = to_alist
   let validate = validate
@@ -1111,7 +1201,11 @@ module Make_plain (Key : Key_plain) = struct
           match find t key with
           | None -> replace t ~key ~data
           | Some _ ->
-            failwiths "Pooled_hashtbl.bin_read_t: duplicate key" key [%sexp_of: Key.t]
+            failwiths
+              ~here:[%here]
+              "Pooled_hashtbl.bin_read_t: duplicate key"
+              key
+              [%sexp_of: Key.t]
         done;
         t
       ;;

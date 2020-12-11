@@ -47,8 +47,8 @@ let deprecated_msg_with_approx_repl ~is_exn ~id repl =
      [2016-09] this element comes from the stdlib distributed with OCaml.\n\
      There is no equivalent functionality in Base or Stdio but you can use\n\
      [%s] instead.\n\
-     Alternatively, if you really want to refer the stdlib function you can\n\
-     use [Caml.%s].\"]"
+     Alternatively, if you really want to refer the stdlib you can use\n\
+     [Caml.%s].\"]"
     (if is_exn then "@" else "@@")
     repl id
 
@@ -151,7 +151,7 @@ let val_replacement = function
   | "read_int"            -> No_equivalent
   | "read_line"           -> Repl "Stdio.In_channel.input_line"
   | "really_input"        -> Repl "Stdio.In_channel.really_input"
-  | "really_input_string" -> Approx "Stdio.Out_channel"
+  | "really_input_string" -> Approx "Stdio.In_channel"
   | "seek_in"             -> Repl "Stdio.In_channel.seek"
   | "seek_out"            -> Repl "Stdio.Out_channel.seek"
   | "set_binary_mode_in"  -> Repl "Stdio.In_channel.set_binary_mode"
@@ -183,6 +183,13 @@ it to handle both [Not_found] and [Not_found_s].  Then, instead of raising [Not_
 raise [Not_found_s] with an informative error message")
   | _ -> None
 
+let type_replacement = function
+  | "result" -> Some (Repl "Result.t")
+  | "in_channel"  -> Some (Repl "Stdio.In_channel.t")
+  | "out_channel" -> Some (Repl "Stdio.Out_channel.t")
+  | _ -> None
+;;
+
 let module_replacement = function
   | "Printexc" -> Some (Repl_text "Use [Exn] or [Backtrace] instead")
   | "Format" ->
@@ -192,7 +199,9 @@ let module_replacement = function
        for interaction with other libraries"
     in
     Some (Repl_text repl_text)
-  | "Fun" -> Some (Repl_text "Use [Fn] instead")
+  | "Fun" -> Some (Repl "Fn")
+  | "Gc" -> Some No_equivalent
+  | "Seq" -> Some (Approx "Sequence")
   | _ -> None
 
 let replace ~is_exn id replacement line =
@@ -219,12 +228,10 @@ rule line = parse
     { "" (* We can't deprecate these *) }
   | "module Bigarray" _* { "" (* Don't deprecate it yet *) }
   | "type " (params? (id as id) _* as def)
-      { sprintf "type nonrec %s\n%s" def
-          (match id with
-           | "in_channel"  -> deprecated_msg_with_repl ~is_exn:false "Stdio.In_channel.t"
-           | "out_channel" -> deprecated_msg_with_repl ~is_exn:false "Stdio.Out_channel.t"
-           | _ -> deprecated_msg ~is_exn:false id)
-      }
+      { sprintf "type nonrec %s"
+          (match type_replacement id with
+           | Some replacement -> replace ~is_exn:false id replacement def
+           | None -> sprintf "%s\n%s" def (deprecated_msg ~is_exn:false id)) }
 
   | val_ (val_id as id) _* as line { replace ~is_exn:false id (val_replacement id) line }
 

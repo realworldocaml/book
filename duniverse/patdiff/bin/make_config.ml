@@ -18,7 +18,7 @@ let main filename =
   if delete
   then (
     try
-      Patdiff_lib.Configuration.save_default ~filename;
+      Patdiff.Configuration.save_default ~filename;
       printf "Default configuration written to %s\n%!" filename
     with
     | e -> failwithf "Error: %s" (Exn.to_string e) ())

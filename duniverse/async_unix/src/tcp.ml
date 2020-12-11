@@ -285,17 +285,6 @@ module Server = struct
   [@@deriving fields, sexp_of]
 
   let num_connections t = Bag.length t.connections
-
-  type ('address, 'listening_on, 'callback) create_options =
-    ?max_connections:int
-    -> ?max_accepts_per_batch:int
-    -> ?backlog:int
-    -> ?socket:([ `Unconnected ], 'address) Socket.t
-    -> on_handler_error:[ `Raise | `Ignore | `Call of 'address -> exn -> unit ]
-    -> ('address, 'listening_on) Where_to_listen.t
-    -> 'callback
-    -> ('address, 'listening_on) t Deferred.t
-
   let listening_socket = socket
 
   type inet = (Socket.Address.Inet.t, int) t [@@deriving sexp_of]
@@ -324,7 +313,8 @@ module Server = struct
         ~drop_incoming_connections:ignore
         ~close_finished_and_handlers_determined:ignore
     with
-    | exn -> failwiths "invariant failed" (exn, t) [%sexp_of: exn * (_, _) t]
+    | exn ->
+      failwiths ~here:[%here] "invariant failed" (exn, t) [%sexp_of: exn * (_, _) t]
   ;;
 
   let fd t = Socket.fd t.socket
@@ -397,30 +387,14 @@ module Server = struct
     maybe_accept t
   ;;
 
-  let create_sock_internal
-        ?(max_connections = 10_000)
+  let create_from_socket
+        ~max_connections
         ?(max_accepts_per_batch = 1)
-        ?backlog
-        ?socket
         ~on_handler_error
         (where_to_listen : _ Where_to_listen.t)
         handle_client
+        socket
     =
-    if max_connections <= 0
-    then
-      failwiths
-        "Tcp.Server.creater got negative [max_connections]"
-        max_connections
-        sexp_of_int;
-    let socket, should_set_reuseaddr =
-      match socket with
-      | Some socket -> socket, false
-      | None -> Socket.create where_to_listen.socket_type, true
-    in
-    close_sock_on_error socket (fun () ->
-      Socket.bind ~reuseaddr:should_set_reuseaddr socket where_to_listen.address
-      >>| Socket.listen ?backlog)
-    >>| fun socket ->
     let t =
       { socket
       ; listening_on = where_to_listen.listening_on (Socket.getsockname socket)
@@ -442,14 +416,55 @@ module Server = struct
     t
   ;;
 
+  let get_max_connections max_connections =
+    match max_connections with
+    | None -> 10_000
+    | Some max_connections ->
+      if max_connections <= 0
+      then
+        failwiths
+          ~here:[%here]
+          "Tcp.Server.creater got negative [max_connections]"
+          max_connections
+          sexp_of_int;
+      max_connections
+  ;;
+
+  let create_sock_internal
+        ?max_connections
+        ?max_accepts_per_batch
+        ?backlog
+        ?socket
+        ~on_handler_error
+        (where_to_listen : _ Where_to_listen.t)
+        handle_client
+    =
+    let max_connections = get_max_connections max_connections in
+    let socket, should_set_reuseaddr =
+      match socket with
+      | Some socket -> socket, false
+      | None -> Socket.create where_to_listen.socket_type, true
+    in
+    close_sock_on_error socket (fun () ->
+      Socket.bind ~reuseaddr:should_set_reuseaddr socket where_to_listen.address
+      >>| Socket.listen ?backlog)
+    >>| create_from_socket
+          ~max_connections
+          ?max_accepts_per_batch
+          ~on_handler_error
+          where_to_listen
+          handle_client
+  ;;
+
   let create_sock
         ?max_connections
         ?max_accepts_per_batch
         ?backlog
         ?socket
         ~on_handler_error
-        where_to_listen
-        handle_client
+        (where_to_listen : ('address, 'listening_on) Where_to_listen.t)
+        (handle_client :
+           ([< Socket.Address.t ] as 'b) -> ([ `Active ], 'b) Socket.t -> unit Deferred.t)
     =
     create_sock_internal
       ?max_connections
@@ -463,7 +478,64 @@ module Server = struct
            handle_client client_address client_socket))
   ;;
 
-  let create
+  let create_sock_inet_internal
+        ?max_connections
+        ?max_accepts_per_batch
+        ?backlog
+        ?(socket : ([ `Unconnected ], Socket.Address.Inet.t) Socket.t option)
+        ~on_handler_error
+        (where_to_listen : Where_to_listen.inet)
+        handle_client
+    =
+    let max_connections = get_max_connections max_connections in
+    let socket, should_set_reuseaddr =
+      match socket with
+      | Some socket -> socket, false
+      | None -> Socket.create where_to_listen.socket_type, true
+    in
+    let socket =
+      try
+        let socket =
+          Socket.bind_inet ~reuseaddr:should_set_reuseaddr socket where_to_listen.address
+        in
+        Socket.listen ?backlog socket
+      with
+      | exn ->
+        don't_wait_for (Unix.close (Socket.fd socket));
+        raise exn
+    in
+    create_from_socket
+      ~max_connections
+      ?max_accepts_per_batch
+      ~on_handler_error
+      where_to_listen
+      handle_client
+      socket
+  ;;
+
+  let create_sock_inet
+        ?max_connections
+        ?max_accepts_per_batch
+        ?backlog
+        ?socket
+        ~on_handler_error
+        where_to_listen
+        handle_client
+    =
+    create_sock_inet_internal
+      ?max_connections
+      ?max_accepts_per_batch
+      ?backlog
+      ?socket
+      ~on_handler_error
+      where_to_listen
+      (fun client_address client_socket ->
+         try_with ~name:"Tcp.Server.create_sock_inet" (fun () ->
+           handle_client client_address client_socket))
+  ;;
+
+  let create_internal
+        ~create_sock
         ?buffer_age_limit
         ?max_connections
         ?max_accepts_per_batch
@@ -473,7 +545,7 @@ module Server = struct
         where_to_listen
         handle_client
     =
-    create_sock_internal
+    create_sock
       ?max_connections
       ?max_accepts_per_batch
       ?backlog
@@ -488,6 +560,50 @@ module Server = struct
            ; Writer.consumer_left w |> Deferred.ok
            ]
          >>= fun res -> close_connection_via_reader_and_writer r w >>| fun () -> res)
+  ;;
+
+  let create_inet
+        ?buffer_age_limit
+        ?max_connections
+        ?max_accepts_per_batch
+        ?backlog
+        ?socket
+        ~on_handler_error
+        where_to_listen
+        handle_client
+    =
+    create_internal
+      ~create_sock:create_sock_inet_internal
+      ?buffer_age_limit
+      ?max_connections
+      ?max_accepts_per_batch
+      ?backlog
+      ?socket
+      ~on_handler_error
+      where_to_listen
+      handle_client
+  ;;
+
+  let create
+        ?buffer_age_limit
+        ?max_connections
+        ?max_accepts_per_batch
+        ?backlog
+        ?socket
+        ~on_handler_error
+        where_to_listen
+        handle_client
+    =
+    create_internal
+      ~create_sock:create_sock_internal
+      ?buffer_age_limit
+      ?max_connections
+      ?max_accepts_per_batch
+      ?backlog
+      ?socket
+      ~on_handler_error
+      where_to_listen
+      handle_client
   ;;
 
   module Private = struct

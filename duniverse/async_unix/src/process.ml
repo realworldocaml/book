@@ -84,7 +84,7 @@ let create
       ; args
       ; working_dir
       ; env
-      ; wait = lazy (Unix.waitpid pid)
+      ; wait = lazy (Unix.waitpid_prompt pid)
       }
     in
     (match write_to_stdin with
@@ -297,3 +297,26 @@ let run_expect_no_output
 ;;
 
 let run_expect_no_output_exn = map_run run_expect_no_output ok_exn
+
+let send_signal t signal =
+  (* We don't force the lazy (and therefore we don't reap the PID) here. We only do
+     that if the user calls [wait] explicitly. *)
+  if Lazy.is_val t.wait && Deferred.is_determined (Lazy.force t.wait)
+  then (* The process was reaped, so it's not safe to send signals to this pid. *)
+    ()
+  else (
+    match Signal.send signal (`Pid t.pid) with
+    | `No_such_process ->
+      (* This should not be reachable: even for a zombie process (a process that has
+         already been terminated, but wasn't waited for), the [kill] system call returns
+         successfully. And we know that we haven't waited for this process because
+         otherwise [t.wait] would have been determined.
+
+         Let's print a log, but not raise in case our analysis is wrong and this can
+         legitimately happen for some reason. After all, not doing anything is the
+         correct behavior if there is no such process. *)
+      Debug.log_string
+        "Bug? We know we never waited for this process, but [kill] says the process \
+         does not exist."
+    | `Ok -> ())
+;;

@@ -11,9 +11,9 @@ let partition_map t ~f =
     match t with
     | [] -> rev fst, rev snd
     | x :: t ->
-      (match f x with
-       | `Fst y -> loop t (y :: fst) snd
-       | `Snd y -> loop t fst (y :: snd))
+      (match (f x : _ Either0.t) with
+       | First y -> loop t (y :: fst) snd
+       | Second y -> loop t fst (y :: snd))
   in
   loop t [] []
 ;;

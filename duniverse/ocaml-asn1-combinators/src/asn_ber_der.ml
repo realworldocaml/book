@@ -402,9 +402,9 @@ module W = struct
           let fn = { Seq.f = fun a asn xs ->
             ( Asn_core.tag a asn, encode conf None a asn ) :: xs } in
           Writer.concat @@
-            List.( map snd @@
-              sort (fun (t1, _) (t2, _) -> compare t1 t2) @@
-                Seq.fold_with_value fn [] a asns )
+            List.map snd @@
+              List.sort (fun (t1, _) (t2, _) -> compare t1 t2) @@
+                Seq.fold_with_value fn [] a asns
         in
         e_constructed (tag @? set_tag) @@
           if conf.der then h_sorted conf a asns else e_seq conf a asns

@@ -1,3 +1,21 @@
+### 7.4.6 (2020-08-04)
+
+  * Removed mistakenly kept base library configuration dependency.
+
+
+### 7.4.5 (2020-08-04)
+
+  * Removed excessive build dependency on `base` package.
+
+
+### 7.4.4 (2020-07-30)
+
+  * Added missing dune-configurator dependency.
+
+  * Added support for const char strings in stubs due to stricter handling
+    in newer OCaml runtimes.  This eliminates C-compiler warnings.
+
+
 ### 7.4.3 (2019-10-27)
 
   * Switched from `caml_alloc_custom` to `caml_alloc_custom_mem`.

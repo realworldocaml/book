@@ -15,7 +15,7 @@ Test recursive diff of directories.
   $ echo next > next/this-changes
   $ echo next > next/subdir/this-changes-in-subdir
 
-  $ patdiff.exe -default prev next | visible_colors
+  $ patdiff -default prev next | visible_colors
   Only in prev: this-goes-away
   (fg:red)------ (+bold)prev/this-goes-away
   (fg:green)++++++ (+bold)/dev/null
@@ -40,15 +40,15 @@ Test recursive diff of directories.
 
 Test behavior of -alt-prev and -alt-next.
 
-  $ patdiff.exe -default prev next -alt-prev a -alt-next b | visible_colors
+  $ patdiff -default prev next -alt-prev a -alt-next b | visible_colors
   Only in a: this-goes-away
-  (fg:red)------ (+bold)a
-  (fg:green)++++++ (+bold)b
+  (fg:red)------ (+bold)a/this-goes-away
+  (fg:green)++++++ (+bold)/dev/null
   (fg:black)@|(+bold)-1,1 +1,0(off) ============================================================
   (fg:black bg:red)-|(fg:red).
   Only in b: this-appears
-  (fg:red)------ (+bold)a
-  (fg:green)++++++ (+bold)b
+  (fg:red)------ (+bold)/dev/null
+  (fg:green)++++++ (+bold)b/this-appears
   (fg:black)@|(+bold)-1,0 +1,1(off) ============================================================
   (fg:black bg:green)+|(fg:green).
   Files a/foo and b/foo are not the same type

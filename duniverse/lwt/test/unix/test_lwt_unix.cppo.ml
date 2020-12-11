@@ -929,7 +929,13 @@ let send_recv_msg_tests = [
 
 let bind_tests_address = Unix.(ADDR_INET (inet_addr_loopback, 56100))
 
-let bind_tests = [
+let bind_tests =
+  let directory_exists dir =
+    try Sys.is_directory dir
+    with Sys_error _ -> false
+  in
+
+  [
   test "bind: basic"
     (fun () ->
       let socket = Lwt_unix.(socket PF_INET SOCK_STREAM 0) in
@@ -945,7 +951,8 @@ let bind_tests = [
 
       Lwt.return (address' = bind_tests_address));
 
-  test "bind: Unix domain" ~only_if:(fun () -> not Sys.win32)
+  test "bind: Unix domain" ~only_if:(fun () -> not Sys.win32 &&
+                                               not (directory_exists "/hurd"))
     (fun () ->
       let socket = Lwt_unix.(socket PF_UNIX SOCK_STREAM 0) in
 

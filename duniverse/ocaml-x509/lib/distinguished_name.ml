@@ -171,14 +171,9 @@ module Asn = struct
 
   (* See rfc5280 section 4.1.2.4. *)
   let directory_name =
-    let f = function | `C1 s -> s | `C2 s -> s | `C3 s -> s
-                     | `C4 s -> s | `C5 s -> s | `C6 s -> s
-    and g s = `C1 s in
-    map f g @@
     choice6
       utf8_string printable_string
       ia5_string universal_string teletex_string bmp_string
-
 
   (* We flatten the sequence-of-set-of-tuple here into a single list.
   * This means that we can't write non-singleton sets back.
@@ -187,48 +182,50 @@ module Asn = struct
 
   let name =
     let open Registry in
+    let of_c = function
+      | `C1 x | `C2 x | `C3 x | `C4 x | `C5 x | `C6 x -> x in
 
     let a_f = case_of_oid_f [
-      (domain_component              , fun x -> DC x) ;
-      (X520.common_name              , fun x -> CN x) ;
-      (X520.serial_number            , fun x -> Serialnumber x) ;
-      (X520.country_name             , fun x -> C x) ;
-      (X520.locality_name            , fun x -> L x) ;
-      (X520.state_or_province_name   , fun x -> ST x) ;
-      (X520.organization_name        , fun x -> O x) ;
-      (X520.organizational_unit_name , fun x -> OU x) ;
-      (X520.title                    , fun x -> T x) ;
-      (X520.dn_qualifier             , fun x -> DNQ x) ;
-      (PKCS9.email                   , fun x -> Mail x) ;
-      (X520.given_name               , fun x -> Given_name x) ;
-      (X520.surname                  , fun x -> Surname x) ;
-      (X520.initials                 , fun x -> Initials x) ;
-      (X520.pseudonym                , fun x -> Pseudonym x) ;
-      (X520.generation_qualifier     , fun x -> Generation x) ;
-      (X520.street_address           , fun x -> Street x) ;
-      (userid                        , fun x -> Userid x)]
-      ~default:(fun oid x -> Other (oid, x))
+      (domain_component              , fun x -> DC (of_c x)) ;
+      (X520.common_name              , fun x -> CN (of_c x)) ;
+      (X520.serial_number            , fun x -> Serialnumber (of_c x)) ;
+      (X520.country_name             , fun x -> C (of_c x)) ;
+      (X520.locality_name            , fun x -> L (of_c x)) ;
+      (X520.state_or_province_name   , fun x -> ST (of_c x)) ;
+      (X520.organization_name        , fun x -> O (of_c x)) ;
+      (X520.organizational_unit_name , fun x -> OU (of_c x)) ;
+      (X520.title                    , fun x -> T (of_c x)) ;
+      (X520.dn_qualifier             , fun x -> DNQ (of_c x)) ;
+      (PKCS9.email                   , fun x -> Mail (of_c x)) ;
+      (X520.given_name               , fun x -> Given_name (of_c x)) ;
+      (X520.surname                  , fun x -> Surname (of_c x)) ;
+      (X520.initials                 , fun x -> Initials (of_c x)) ;
+      (X520.pseudonym                , fun x -> Pseudonym (of_c x)) ;
+      (X520.generation_qualifier     , fun x -> Generation (of_c x)) ;
+      (X520.street_address           , fun x -> Street (of_c x)) ;
+      (userid                        , fun x -> Userid (of_c x))]
+      ~default:(fun oid x -> Other (oid, of_c x))
 
     and a_g = function
-      | DC x -> (domain_component, x )
-      | CN x -> (X520.common_name, x )
-      | Serialnumber x -> (X520.serial_number, x )
-      | C x -> (X520.country_name, x )
-      | L x -> (X520.locality_name, x )
-      | ST x -> (X520.state_or_province_name, x )
-      | O x -> (X520.organization_name, x )
-      | OU x -> (X520.organizational_unit_name, x )
-      | T x -> (X520.title, x )
-      | DNQ x -> (X520.dn_qualifier, x )
-      | Mail x -> (PKCS9.email, x )
-      | Given_name x -> (X520.given_name, x )
-      | Surname x -> (X520.surname, x )
-      | Initials x -> (X520.initials, x )
-      | Pseudonym x -> (X520.pseudonym, x )
-      | Generation x -> (X520.generation_qualifier, x )
-      | Street x -> (X520.street_address, x )
-      | Userid x -> (userid, x )
-      | Other (oid, x) -> (oid, x )
+      | DC x -> (domain_component, `C3 x )
+      | CN x -> (X520.common_name, `C1 x )
+      | Serialnumber x -> (X520.serial_number, `C2 x )
+      | C x -> (X520.country_name, `C2 x )
+      | L x -> (X520.locality_name, `C1 x )
+      | ST x -> (X520.state_or_province_name, `C1 x )
+      | O x -> (X520.organization_name, `C1 x )
+      | OU x -> (X520.organizational_unit_name, `C1 x )
+      | T x -> (X520.title, `C1 x )
+      | DNQ x -> (X520.dn_qualifier, `C2 x )
+      | Mail x -> (PKCS9.email, `C3 x )
+      | Given_name x -> (X520.given_name, `C1 x )
+      | Surname x -> (X520.surname, `C1 x )
+      | Initials x -> (X520.initials, `C1 x )
+      | Pseudonym x -> (X520.pseudonym, `C1 x )
+      | Generation x -> (X520.generation_qualifier, `C1 x )
+      | Street x -> (X520.street_address, `C1 x )
+      | Userid x -> (userid, `C1 x )
+      | Other (oid, x) -> (oid, `C1 x )
     in
 
     let attribute_tv =

@@ -196,7 +196,7 @@ module type Clock = sig
     -> unit Async_stream.t
 
   (** [every' ?start ?stop span f] runs [f ()] every [span] amount of time starting when
-      [start] becomes determined and stopping when [stop] becomes determined.  [every]
+      [start] becomes determined and stopping when [stop] becomes determined.  [every']
       waits until the result of [f ()] becomes determined before waiting for the next
       [span].
 

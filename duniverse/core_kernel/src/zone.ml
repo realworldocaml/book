@@ -39,7 +39,7 @@ module Stable = struct
            the index to -1, which is a safe value. *)
         let of_external (_ : t) = -1
 
-        include Binable.Of_binable
+        include Binable.Of_binable_without_uuid [@alert "-legacy"]
             (Int)
             (struct
               type t = int

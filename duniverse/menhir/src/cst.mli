@@ -26,6 +26,10 @@ type cst =
   | CstNonTerminal of Production.index * cst array
   | CstError
 
+(* The fringe of a concrete syntax tree. *)
+
+val fringe: cst -> Terminal.t list
+
 (* This is a (mostly) unambiguous printer for concrete syntax trees,
    in an sexp-like notation. *)
 
@@ -36,4 +40,3 @@ val print: out_channel -> cst -> unit
    that the [Pprint] library is used to manage indentation. *)
 
 val show: out_channel -> cst -> unit
-

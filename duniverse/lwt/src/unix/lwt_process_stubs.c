@@ -47,8 +47,9 @@ CAMLprim value lwt_process_create_process(value prog, value cmdline, value env,
   si.hStdOutput = get_handle(Field(fds, 1));
   si.hStdError = get_handle(Field(fds, 2));
 
-  if (!CreateProcess(string_option(prog), String_val(cmdline), NULL, NULL, TRUE,
-                     0, string_option(env), string_option(cwd), &si, &pi)) {
+  if (!CreateProcess(string_option(prog), (LPSTR)String_val(cmdline), NULL,
+                     NULL, TRUE, 0, (LPVOID)string_option(env),
+                     string_option(cwd), &si, &pi)) {
     win32_maperr(GetLastError());
     uerror("CreateProcess", Nothing);
   }

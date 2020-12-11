@@ -33,7 +33,6 @@ module Library = Library
 module Ocaml_delimiter = Ocaml_delimiter
 module Part = Part
 module Block = Block
-module Migrate_ast = Migrate_ast
 module Mli_parser = Mli_parser
 module Compat = Compat
 module Util = Util
@@ -42,6 +41,7 @@ module Syntax = Syntax
 module Label = Label
 module Dep = Dep
 module Ocaml_env = Ocaml_env
+module Stable_printer = Stable_printer
 
 include module type of Document
 

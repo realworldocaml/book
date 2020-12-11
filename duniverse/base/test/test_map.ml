@@ -94,6 +94,65 @@ let%expect_test "[t_of_sexp] error on duplicate" =
   [%expect {| (Of_sexp_error "Map.t_of_sexp_direct: duplicate key" (invalid_sexp 1)) |}]
 ;;
 
+let%expect_test "combine_errors" =
+  let test list =
+    let input =
+      list
+      |> List.map ~f:(Result.map_error ~f:Error.of_string)
+      |> List.mapi ~f:(fun k x -> Int.succ k, x)
+      |> Map.of_alist_exn (module Int)
+    in
+    let output = Map.combine_errors input in
+    print_s [%sexp (output : string Map.M(Int).t Or_error.t)]
+  in
+  (* empty *)
+  test [];
+  [%expect {| (Ok ()) |}];
+  (* singletons *)
+  test [ Ok "one" ];
+  test [ Error "one" ];
+  [%expect {|
+    (Ok ((1 one)))
+    (Error ((1 one))) |}];
+  (* multiple ok *)
+  test [ Ok "one"; Ok "two"; Ok "three" ];
+  [%expect {|
+    (Ok (
+      (1 one)
+      (2 two)
+      (3 three))) |}];
+  (* multiple errors *)
+  test [ Error "one"; Error "two"; Error "three" ];
+  [%expect {|
+    (Error (
+      (1 one)
+      (2 two)
+      (3 three))) |}];
+  (* one error among oks *)
+  test [ Error "one"; Ok "two"; Ok "three" ];
+  test [ Ok "one"; Error "two"; Ok "three" ];
+  test [ Ok "one"; Ok "two"; Error "three" ];
+  [%expect {|
+    (Error ((1 one)))
+    (Error ((2 two)))
+    (Error ((3 three))) |}];
+  (* one ok among errors *)
+  test [ Ok "one"; Error "two"; Error "three" ];
+  test [ Error "one"; Ok "two"; Error "three" ];
+  test [ Error "one"; Error "two"; Ok "three" ];
+  [%expect
+    {|
+    (Error (
+      (2 two)
+      (3 three)))
+    (Error (
+      (1 one)
+      (3 three)))
+    (Error (
+      (1 one)
+      (2 two))) |}]
+;;
+
 module Poly = struct
   let%test _ = length Poly.empty = 0
 

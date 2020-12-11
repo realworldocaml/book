@@ -44,7 +44,7 @@ let nullary_equation =
 let covariant_equation =
   let open TypeDecl in
   let open TypeDecl.Equation in
-  let params = [Var "'a", Some Pos] in
+  let params = [{desc=Var "'a"; variance=Some Pos; injectivity=true}] in
   let private_ = false in
   let manifest = None in
   let constraints = [] in
@@ -53,7 +53,7 @@ let covariant_equation =
 let invariant_equation =
   let open TypeDecl in
   let open TypeDecl.Equation in
-  let params = [Var "'a", None] in
+  let params = [{ desc =Var "'a"; variance=None; injectivity = true}] in
   let private_ = false in
   let manifest = None in
   let constraints = [] in

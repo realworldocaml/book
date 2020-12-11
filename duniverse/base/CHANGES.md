@@ -1,5 +1,15 @@
 ## git version
 
+- Renamed `Result.ok_fst` to `Result.to_either` (old name remains as
+  deprecated alias).  Added analogous `Result.of_either` function.
+
+- Removed deprecated values `Array.truncate`, `{Obj_array,
+  Uniform_array}.unsafe_truncate`, `Result.ok_unit`, `{Result,
+  Or_error}.ignore`.
+
+- Changed the signature of `Hashtbl.equal` to take the data equality
+  function first, allowing it to be used with `[%equal: t]`.
+
 - Remove deprecated function `List.dedup`.
 
 - Remove deprecated string mutation functions from the `String` module.

@@ -19,11 +19,11 @@
 
 [@@@ocaml.warning "-3"]
 
-open Ast_helper
+open Ppxlib.Ast_helper
 
 type 'a gparser =
   ?separated_by:string -> ?default:string -> Location.t -> string -> 'a ->
-    Parsetree.expression option
+    expression option
 
 type parser = string gparser
 type vparser = string Common.value gparser
@@ -144,7 +144,7 @@ let float_exp loc s =
 
 let bool_exp loc b =
   let s = if b then "true" else "false" in
-  Exp.construct ~loc (Location.mkloc (Longident.Lident s) loc) None
+  Exp.construct ~loc ({ txt = (Longident.Lident s); loc }) None
 
 (* Numeric. *)
 
@@ -166,7 +166,9 @@ let char ?separated_by:_ ?default:_ loc name s =
   | `End -> ()
   | _ -> Common.error loc "Multiple characters in attribute %s" name
   end;
-  Some (with_default_loc loc @@ fun () -> Ast_convenience.char c)
+  Some (Ast_builder.Default.echar ~loc c)
+
+
 
 let onoff ?separated_by:_ ?default:_ loc name s =
   let b = match s with
@@ -188,7 +190,7 @@ let bool ?separated_by:_ ?default:_ loc name s =
 
 let unit ?separated_by:_ ?default:_ loc name s =
   if s = "" || s = name then
-    Some (Ast_convenience.(with_default_loc loc unit))
+    Some (Ast_builder.Default.eunit ~loc)
   else
     Common.error loc
       {|Value of %s must be %s or "".|}
@@ -411,7 +413,7 @@ let transform =
 (* String-like. *)
 
 let string ?separated_by:_ ?default:_ loc _ s =
-  Some (with_default_loc loc @@ fun () -> Ast_convenience.str s)
+  Some (Ast_builder.Default.estring ~loc s)
 
 let variand s =
   let without_backtick s =

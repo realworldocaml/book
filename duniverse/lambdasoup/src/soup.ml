@@ -52,7 +52,8 @@ type element_values =
    mutable children   : general node list}
 
 and document_values =
-  {mutable roots : general node list}
+  {mutable roots : general node list;
+   doctype : Markup.doctype option}
 
 and 'a node =
   {mutable self   : 'b. 'b node option;
@@ -89,32 +90,60 @@ let create_text text =
   node.self <- Some node;
   node
 
-let create_document roots =
-  let node = {self = None; parent = None; values = `Document {roots}} in
+let create_document doctype roots =
+  let node =
+    {self = None; parent = None; values = `Document {roots; doctype}} in
   node.self <- Some node;
   roots |> List.iter (fun root -> root.parent <- Some node);
   node
 
-let create_soup () = create_document []
+let create_soup () = create_document None []
 
-let from_signals signals =
+let from_signals' ~map_attributes signals =
+  let doctype = ref None in
   signals
+  |> Markup.map (fun s ->
+    begin match s with
+    | `Doctype d -> doctype := Some d
+    | _ -> ()
+    end;
+    s)
   |> (fun s -> Markup.trees
     ~text:(fun ss -> create_text (String.concat "" ss))
     ~element:(fun name attributes children ->
       let attributes =
-        attributes |> List.map (fun ((_, n), v) -> n, v) in
+        attributes
+        |> List.map (fun ((_, n), v) -> n, v)
+        |> map_attributes name in
       create_element (snd name) attributes children)
     s)
   |> Markup.to_list
-  |> create_document
+  |> create_document !doctype
+
+let from_signals =
+  from_signals' ~map_attributes:(fun _n a -> a)
 
 let parse text =
+  let body_attributes = ref [] in
+  let report _l e =
+    match e with
+    | `Misnested_tag ("body", _, attributes) ->
+      body_attributes := !body_attributes @ attributes
+    | _ -> () in
   text
   |> Markup.string
-  |> (fun s -> Markup.parse_html s)
+  |> (fun s -> Markup.parse_html ~report s)
   |> Markup.signals
-  |> from_signals
+  |> from_signals'
+    ~map_attributes:(fun name attributes ->
+      match name with
+      | ns, "body" when ns = Markup.Ns.html ->
+        List.fold_left (fun attributes (n, v) ->
+          match List.mem_assoc n attributes with
+          | true -> attributes
+          | false -> (n, v) :: attributes
+        ) attributes !body_attributes
+      | _ -> attributes)
 
 let is_document node =
   match node.values with
@@ -251,7 +280,7 @@ let elements sequence =
 
 let child_list = function
   | {values = `Element {children; _}; _} -> Some children
-  | {values = `Document {roots}; _} -> Some roots
+  | {values = `Document {roots; _}; _} -> Some roots
   | _ -> None
 
 let children node =
@@ -423,7 +452,7 @@ let rec texts node =
   | `Text s -> [s]
   | `Element {children; _} ->
     children |> List.map forget_type |> List.map texts |> List.fold_left (@) []
-  | `Document {roots} ->
+  | `Document {roots; _} ->
     roots |> List.map forget_type |> List.map texts |> List.fold_left (@) []
 
 let trimmed_texts node =
@@ -982,22 +1011,21 @@ let signals root =
       in
       `End_element::(traverse_list (start_signal::acc) children)
 
-    | {values = `Document {roots}; _} -> traverse_list acc roots
+    | {values = `Document {roots; doctype}; _} ->
+      let acc =
+        match doctype with
+        | None -> acc
+        | Some doctype -> acc @ [`Doctype doctype]
+      in
+      traverse_list acc roots
+
     | {values = `Text s; _} -> (`Text [s])::acc
 
   and traverse_list acc l = List.fold_left traverse acc l
 
   in
 
-  let signals = List.rev (traverse [] root) |> Markup.of_list in
-  match root with
-  | {values =
-    `Document {roots = {values = `Element {name = "html"; _}; _}::_}; _}
-  | {values =
-    `Element {name = "html"; _}; _} ->
-    Markup.html5 signals
-  | _ ->
-    signals
+  List.rev (traverse [] root) |> Markup.of_list
 
 let pretty_print root =
   signals root

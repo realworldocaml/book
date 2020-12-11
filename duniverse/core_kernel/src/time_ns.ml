@@ -102,6 +102,7 @@ let check_before_conversion_for_1us_rounding time =
   || Time_float.( > ) time max_time_value_for_1us_rounding
   then
     failwiths
+      ~here:[%here]
       "Time_ns does not support this time"
       time
       [%sexp_of: Time_float.Stable.With_utc_sexp.V2.t]
@@ -119,7 +120,11 @@ let of_time_float_round_nearest_microsecond time =
 ;;
 
 let[@cold] raise_next_multiple_got_nonpositive_interval interval =
-  failwiths "Time_ns.next_multiple got nonpositive interval" interval [%sexp_of: Span.t]
+  failwiths
+    ~here:[%here]
+    "Time_ns.next_multiple got nonpositive interval"
+    interval
+    [%sexp_of: Span.t]
 ;;
 
 let next_multiple_internal ~can_equal_after ~base ~after ~interval =

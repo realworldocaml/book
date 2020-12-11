@@ -2,7 +2,7 @@ open! Core_kernel
 open! Import
 open! Byte_units
 
-let bytes_per_word = Float.of_int (Word_size.num_bits Word_size.word_size / 8)
+let bytes_per_word = Float.of_int (Int.( / ) (Word_size.num_bits Word_size.word_size) 8)
 let kbyte = 1024.
 
 let%expect_test ("Byte_units.to_string_hum"[@tags "64-bits-only"]) =
@@ -61,6 +61,11 @@ let examples =
   ; Byte_units.of_bytes_int (-10000)
   ; Byte_units.of_bytes_int (-10000000)
   ]
+;;
+
+let%expect_test "[List.sum] to ensure [Byte_units] satisfies [Container_intf.Summable]" =
+  print_s [%sexp (List.sum (module Byte_units) examples ~f:Fn.id : t)];
+  [%expect {| 1.19025e+09G |}]
 ;;
 
 let print_all_byte_units fmt =

@@ -9,15 +9,42 @@ include Int64_replace_polymorphic_compare
 
 module T0 = struct
   module T = struct
-    type t = int64 [@@deriving_inline compare, hash, sexp]
+    type t = int64 [@@deriving_inline compare, hash, sexp, sexp_grammar]
+
     let compare = (compare_int64 : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       hash_fold_int64
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = hash_int64 in fun x -> func x
+      let func = hash_int64 in
+      fun x -> func x
+    ;;
+
     let t_of_sexp = (int64_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
     let sexp_of_t = (sexp_of_int64 : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group)
+        =
+        { implicit_vars = [ "int64" ]
+        ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+        ; types = [ "t", Implicit_var 0 ]
+        }
+      in
+      let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+        { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+        ; apply_implicit = [ int64_sexp_grammar ]
+        ; generic_group = _the_generic_group
+        ; origin = "int63_emul.ml.T0.T"
+        }
+      in
+      let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+        Ref ("t", _the_group)
+      in
+      t_sexp_grammar
+    ;;
+
     [@@@end]
   end
 
@@ -43,6 +70,7 @@ module W : sig
   (** Returns a non-negative int64 that is equal to the input int63 modulo 2^63. *)
   val unwrap_unsigned : t -> Caml.Int64.t
 
+  val invariant : t -> unit
   val add : t -> t -> t
   val sub : t -> t -> t
   val neg : t -> t
@@ -73,6 +101,8 @@ module W : sig
   val ceil_log2 : t -> int
   val floor_log2 : t -> int
   val is_pow2 : t -> bool
+  val clz : t -> int
+  val ctz : t -> int
 end = struct
   type t = int64
 
@@ -105,6 +135,7 @@ end = struct
 
   let mask = 0xffff_ffff_ffff_fffeL
   let m x = Caml.Int64.logand x mask
+  let invariant t = assert (m t = t)
   let add x y = Caml.Int64.add x y
   let sub x y = Caml.Int64.sub x y
   let neg x = Caml.Int64.neg x
@@ -134,6 +165,14 @@ end = struct
   let sexp_of_t x = sexp_of_int64 (unwrap x)
   let compare (x : t) y = compare x y
   let is_pow2 x = Int64.is_pow2 (unwrap x)
+
+  let clz x =
+    (* We run Int64.clz directly on the wrapped int63 value. This is correct because the
+       bits of the int63_emul are left-aligned in the Int64. *)
+    Int64.clz x
+  ;;
+
+  let ctz x = Int64.ctz (unwrap x)
   let floor_pow2 x = Int64.floor_pow2 (unwrap x) |> wrap_exn
   let ceil_pow2 x = Int64.floor_pow2 (unwrap x) |> wrap_exn
   let floor_log2 x = Int64.floor_log2 (unwrap x)
@@ -143,24 +182,51 @@ end
 open W
 
 module T = struct
-  type t = W.t [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = W.t [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     W.hash_fold_t
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = W.hash in fun x -> func x
+    let func = W.hash in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (W.t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (W.sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "W.t" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ W.t_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "int63_emul.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
+
   type comparator_witness = W.comparator_witness
 
   let comparator = W.comparator
   let compare = W.compare
+  let invariant = W.invariant
 
   (* We don't expect [hash] to follow the behavior of int in 64bit architecture *)
   let _ = hash
   let hash (x : t) = Caml.Hashtbl.hash x
-  let invalid_str x = failwith (Printf.sprintf "Int63.of_string: invalid input %S" x)
+  let invalid_str x = Printf.failwithf "Int63.of_string: invalid input %S" x ()
 
   (*
      "sign" refers to whether the number starts with a '-'
@@ -224,6 +290,10 @@ module T = struct
     with
     | _ -> invalid_str str
   ;;
+
+  let bswap16 t = wrap_modulo (Int64.bswap16 (unwrap t))
+  let bswap32 t = wrap_modulo (Int64.bswap32 (unwrap t))
+  let bswap48 t = wrap_modulo (Int64.bswap48 (unwrap t))
 end
 
 include T
@@ -255,6 +325,8 @@ let floor_pow2 = floor_pow2
 let ceil_pow2 = ceil_pow2
 let floor_log2 = floor_log2
 let ceil_log2 = ceil_log2
+let clz = clz
+let ctz = ctz
 let to_float x = Caml.Int64.to_float (unwrap x)
 let of_float_unchecked x = wrap_modulo (Caml.Int64.of_float x)
 
@@ -329,12 +401,17 @@ include Conv.Make (T)
 
 include Conv.Make_hex (struct
     type t = T.t [@@deriving_inline compare, hash]
+
     let compare = (T.compare : t -> t -> int)
-    let (hash_fold_t :
-           Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+
+    let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
       T.hash_fold_t
+
     and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-      let func = T.hash in fun x -> func x
+      let func = T.hash in
+      fun x -> func x
+    ;;
+
     [@@@end]
 
     let zero = zero

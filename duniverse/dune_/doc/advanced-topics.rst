@@ -57,8 +57,11 @@ set of predicates:
   it is linked as part of a driver or meant to add a ``-ppx`` argument
   to the compiler, choose the former behavior
 
-Dynamic loading of packages
-===========================
+
+Dynamic loading of packages with findlib
+========================================
+
+The preferred way for new development is to use :ref:`plugins`.
 
 Dune supports the ``findlib.dynload`` package from `findlib
 <http://projects.camlcity.org/projects/findlib.html>`_ that enables

@@ -41,7 +41,9 @@ let run (`Setup ()) _ _ _ _ _ _ _ _ _ _ =
   let argv = Array.sub Sys.argv 1 (Array.length Sys.argv - 1) in
   argv.(0) <- cmd;
   Log.debug (fun l -> l "executing %a" Fmt.(Dump.array string) argv);
-  Unix.execvp cmd argv
+  let pid = Unix.create_process cmd argv Unix.stdin Unix.stdout Unix.stderr in
+  let code = Mdx.Util.Process.wait ~pid in
+  exit code
 
 open Cmdliner
 

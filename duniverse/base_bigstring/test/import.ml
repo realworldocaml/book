@@ -1,7 +1,7 @@
 include Base
 include Stdio
 include Base_for_tests
-include Expect_test_helpers_kernel
+include Expect_test_helpers_core
 
 module Quickcheck = struct
   include Core_kernel.Quickcheck

@@ -271,6 +271,7 @@ let%test_module _ =
         if alist <> alist'
         then
           failwiths
+            ~here:[%here]
             "Bounded_int_table alist bug"
             (t, alist, alist')
             [%sexp_of: t * alist * alist];
@@ -279,13 +280,18 @@ let%test_module _ =
         if sexp <> sexp'
         then
           failwiths
+            ~here:[%here]
             "Bounded_int_table sexp bug"
             (t, sexp, sexp')
             [%sexp_of: t * Sexp.t * Sexp.t];
         let ensure_equal message t t' =
           if not (equal t t')
           then
-            failwiths "Bounded_int_table bug" (message, t, t') [%sexp_of: string * t * t]
+            failwiths
+              ~here:[%here]
+              "Bounded_int_table bug"
+              (message, t, t')
+              [%sexp_of: string * t * t]
         in
         ensure_equal "t_of_sexp" t (Table.t_of_sexp Int.t_of_sexp sexp);
         ensure_equal "filter_mapi" t (filter_mapi t ~f:(fun ~key ~data:_ -> Some key));

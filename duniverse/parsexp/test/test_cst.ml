@@ -1,13 +1,14 @@
-open Import
+open! Import
 
 let parse_and_print input =
-  let x = Parsexp.Many_cst.parse_string_exn input in
-  print_s [%sexp (x : Parsexp.Cst.t_or_comment list)]
+  let x = Many_cst.parse_string_exn input in
+  print_s [%sexp (x : Cst.t_or_comment list)]
 ;;
 
 let%expect_test "escape sequence in block comment" =
   parse_and_print {|#| "\255" |#|};
-  [%expect{|
+  [%expect
+    {|
     ((
       Comment (
         Plain_comment
@@ -26,7 +27,8 @@ let%expect_test "escape sequence in block comment" =
 
 let%expect_test "quoted atom" =
   parse_and_print {| "foo bar" |};
-  [%expect{|
+  [%expect
+    {|
     ((
       Sexp (
         Atom

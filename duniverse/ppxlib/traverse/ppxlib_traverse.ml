@@ -1,10 +1,10 @@
-open Base
+open Stdppx
 open Ppxlib
 open Ast_builder.Default
 
 let alphabet =
-  Array.init (Char.to_int 'z' - Char.to_int 'a' + 1)
-    ~f:(fun i -> String.make 1 (Char.of_int_exn (i + Char.to_int 'a')))
+  Array.init (Char.code 'z' - Char.code 'a' + 1)
+    ~f:(fun i -> String.make 1 (Char.chr (i + Char.code 'a')))
 ;;
 
 let vars_of_list ~get_loc l =
@@ -34,7 +34,7 @@ module Backends = struct
 
     inherit reconstructors
 
-    method class_params : loc:Location.t -> (core_type * variance) list
+    method class_params : loc:Location.t -> (core_type * (variance * injectivity)) list
 
     method apply
       :  loc:Location.t
@@ -106,7 +106,7 @@ module Backends = struct
 
     inherit reconstructors
 
-    method class_params ~loc = [(ptyp_var ~loc "acc", Invariant)]
+    method class_params ~loc = [(ptyp_var ~loc "acc", (NoVariance, NoInjectivity))]
 
     method apply ~loc expr args = eapply ~loc expr (args @ [evar ~loc "acc"])
     method abstract ~loc patt expr =
@@ -132,7 +132,7 @@ module Backends = struct
 
     inherit reconstructors
 
-    method class_params ~loc = [(ptyp_var ~loc "acc", Invariant)]
+    method class_params ~loc = [(ptyp_var ~loc "acc", (NoVariance, NoInjectivity))]
 
     method apply ~loc expr args = eapply ~loc expr (args @ [evar ~loc "acc"])
     method abstract ~loc patt expr = eabstract ~loc [patt; pvar ~loc "acc"] expr
@@ -156,7 +156,7 @@ module Backends = struct
       inherit Ast_traverse.iter as super
       method! expression_desc = function
         | Pexp_ident { txt = Lident id; _ } when String.equal id var ->
-          Exn.raise_without_backtrace Found
+          raise_notrace Found
         | e -> super#expression_desc e
     end in
     fun e ->
@@ -174,7 +174,7 @@ module Backends = struct
 
       inherit reconstructors
 
-      method class_params ~loc = [(ptyp_var ~loc "ctx", Invariant)]
+      method class_params ~loc = [(ptyp_var ~loc "ctx", (NoVariance, NoInjectivity))]
 
       method apply ~loc expr args = eapply ~loc expr (evar ~loc "ctx" :: args)
       method abstract ~loc patt expr =
@@ -201,7 +201,7 @@ module Backends = struct
   let lifter : what = object
     method name = "lift"
 
-    method class_params ~loc = [(ptyp_var ~loc "res", Invariant)]
+    method class_params ~loc = [(ptyp_var ~loc "res", (NoVariance, NoInjectivity))]
 
     method apply ~loc expr args = eapply ~loc expr args
     method abstract ~loc patt expr = pexp_fun ~loc Nolabel None patt expr
@@ -238,7 +238,7 @@ type what = Backends.what
 let mapper_type ~(what:what) ~loc type_name params =
   let vars = vars_of_list params ~get_loc:(fun t -> t.ptyp_loc) in
   let params = tvars_of_vars vars in
-  let ty = ptyp_constr ~loc (Loc.map type_name ~f:lident) params in
+  let ty = ptyp_constr ~loc type_name params in
   let ty =
     List.fold_right params ~init:(what#typ ~loc ty)
       ~f:(fun param ty ->
@@ -276,15 +276,16 @@ let constrained_mapper ~(what:what) ?(is_gadt=false) mapper td =
   pexp_poly ~loc:mapper.pexp_loc mapper (Some typ)
 ;;
 
-let mapper_type_of_td ~what td =
-  mapper_type ~what ~loc:td.ptype_loc td.ptype_name (List.map td.ptype_params ~f:fst)
-;;
-
-let method_name = function
-  | Lident s -> String.lowercase s
-  | Ldot (_, b) -> b
-  | Lapply _ -> assert false
-;;
+let mangle_type_name lid =
+  let rec mangled_parts lid ~suffix =
+    match lid with
+    | Lident s -> String.lowercase_ascii s :: suffix
+    | Ldot (lid, s) ->
+      mangled_parts lid ~suffix:("__" :: String.lowercase_ascii s :: suffix)
+    | Lapply (a, b) ->
+      mangled_parts a ~suffix:("_'" :: mangled_parts b ~suffix:("'" :: suffix))
+  in
+  mangled_parts lid ~suffix:[] |> String.concat ~sep:""
 
 let rec type_expr_mapper ~(what:what) te =
   let loc = te.ptyp_loc in
@@ -297,9 +298,7 @@ let rec type_expr_mapper ~(what:what) te =
     let mappers = map_variables ~what vars tes in
     what#abstract ~loc deconstruct (what#combine ~loc mappers ~reconstruct)
   | Ptyp_constr (path, params) ->
-    let map =
-      pexp_send ~loc (evar ~loc "self") { txt = method_name path.txt; loc = path.loc; }
-    in
+    let map = pexp_send ~loc (evar ~loc "self") (Loc.map path ~f:mangle_type_name) in
     (match params with
      | [] -> map
      | _  ->
@@ -310,7 +309,7 @@ let rec type_expr_mapper ~(what:what) te =
   | _ -> what#any ~loc
 
 and map_variables ~(what:what) vars tes =
-  List.map2_exn tes vars ~f:(fun te var ->
+  List.map2 tes vars ~f:(fun te var ->
     (var,
      what#apply ~loc:te.ptyp_loc (type_expr_mapper ~what te)
        [evar_of_var var]))
@@ -421,17 +420,17 @@ let gen_mapper ~(what:what) td =
 
 let type_deps =
   let collect = object
-    inherit [int Map.M(Longident).t] Ast_traverse.fold as super
+    inherit [int Longident.Map.t] Ast_traverse.fold as super
     method! core_type t acc =
       let acc =
         match t.ptyp_desc with
-        | Ptyp_constr (id, vars) -> Map.set acc ~key:id.txt ~data:(List.length vars)
+        | Ptyp_constr (id, vars) -> Longident.Map.add id.txt (List.length vars) acc
         | _ -> acc
       in
       super#core_type t acc
   end in
   fun tds ->
-    let empty = Map.empty (module Longident) in
+    let empty = Longident.Map.empty in
     let map =
       List.fold_left tds ~init:empty ~f:(fun map td ->
         let map = collect#type_kind td.ptype_kind map in
@@ -441,20 +440,21 @@ let type_deps =
     in
     let map =
       List.fold_left tds ~init:map ~f:(fun map td ->
-        Map.remove map (Lident td.ptype_name.txt))
+        Longident.Map.remove (Lident td.ptype_name.txt) map)
     in
-    Map.to_alist map
+    Longident.Map.bindings map
 
 let lift_virtual_methods ~loc methods =
   let collect = object
-    inherit [Set.M(String).t] Ast_traverse.fold as super
+    inherit [String.Set.t] Ast_traverse.fold as super
 
     method! expression_desc x acc =
       match x with
-      | Pexp_send (_, ({ txt = "tuple"|"record"|"constr"|"other" as s; loc = _; })) -> Set.add acc s
+      | Pexp_send (_, ({ txt = "tuple"|"record"|"constr"|"other" as s; loc = _; })) ->
+        String.Set.add s acc
       | _ -> super#expression_desc x acc
   end in
-  let used = collect#list collect#class_field methods (Set.empty (module String)) in
+  let used = collect#list collect#class_field methods String.Set.empty in
   let all_virtual_methods =
     match
       [%stri
@@ -478,29 +478,18 @@ let lift_virtual_methods ~loc methods =
   in
   List.filter all_virtual_methods ~f:(fun m ->
     match m.pcf_desc with
-    | Pcf_method (s, _, _) -> Set.mem used s.txt
+    | Pcf_method (s, _, _) -> String.Set.mem s.txt used
     | _ -> false)
-
-let map_lident id ~f =
-  match id with
-  | Lident s -> Lident (f s)
-  | Ldot (id, s) -> Ldot (id, f s)
-  | Lapply _ -> assert false
-
-let class_constr ~what ~class_params id =
-  pcl_constr ~loc:id.loc (Loc.map id ~f:(map_lident ~f:(fun s -> what#name ^ "_" ^ s)))
-    (List.map class_params ~f:fst)
 
 let gen_class ~(what:what) ~loc tds =
   let class_params = what#class_params ~loc in
   let virtual_methods =
     List.map (type_deps tds) ~f:(fun (id, arity) ->
-      let id = { txt = Longident.last_exn id; loc } in
       pcf_method ~loc
-        (id,
+        ({ txt = mangle_type_name id; loc },
          Public,
-         Cfk_virtual (mapper_type ~what ~loc id
-                        (List.init arity ~f:(fun _ -> ptyp_any ~loc)))))
+         Cfk_virtual (mapper_type ~what ~loc {txt = id; loc}
+                        (List.init ~len:arity ~f:(fun _ -> ptyp_any ~loc)))))
   in
   let methods =
     List.map tds ~f:(fun td ->

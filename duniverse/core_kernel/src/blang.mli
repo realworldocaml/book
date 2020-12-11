@@ -71,13 +71,16 @@ open! Import
     instead of
 
     {v (and FOO (and BAR (and BAZ QUX))) v}
+
+    If you want to see the derived sexp, use [Raw.sexp_of_t].
 *)
 
 open Std_internal
 
 (** Note that the sexps are not directly inferred from the type below -- there are lots of
     fancy shortcuts.  Also, the sexps for ['a] must not look anything like blang sexps.
-    Otherwise [t_of_sexp] will fail. *)
+    Otherwise [t_of_sexp] will fail.  The directly inferred sexps are available via
+    [Raw.sexp_of_t]. *)
 type 'a t = private
   | True
   | False
@@ -87,6 +90,12 @@ type 'a t = private
   | If of 'a t * 'a t * 'a t
   | Base of 'a
 [@@deriving bin_io, compare, hash, sexp]
+
+(** [Raw] provides the automatically derived [sexp_of_t], useful in debugging the actual
+    structure of the blang. *)
+module Raw : sig
+  type nonrec 'a t = 'a t [@@deriving sexp_of]
+end
 
 (** {2 Smart constructors that simplify away constants whenever possible} *)
 

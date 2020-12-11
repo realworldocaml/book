@@ -18,7 +18,10 @@
     been consumed by a reader.
 
     There are distinct [Reader] and [Writer] modules and types, but all of the operations
-    on readers and writers are available directly from the [Pipe] module. *)
+    on readers and writers are available directly from the [Pipe] module.
+
+    For debugging your pipe usage you can use [show_debug_messages], and also use
+    [set_info] to attach some data to a pipe for identification purposes. *)
 
 open! Core_kernel
 
@@ -72,16 +75,14 @@ val create_reader
     failed. *)
 val create_writer : ('a Reader.t -> unit Deferred.t) -> 'a Writer.t
 
-val init : ('a Writer.t -> unit Deferred.t) -> 'a Reader.t
-[@@deprecated
-  {|[since 2016-03] Use [create_reader ~close_on_exception:true] to preserve behavior, though
-you might want to consider changing the argument [close_on_exception] to the recommended
-[false].|}]
-
 (** [create ()] creates a new pipe.  It is preferable to use [create_reader] or
     [create_writer] instead of [create], since they provide exception handling and
-    automatic closing of the pipe. *)
-val create : unit -> 'a Reader.t * 'a Writer.t
+    automatic closing of the pipe.  [info] is an arbitrary sexp displayed by [sexp_of_t],
+    for debugging purposes; see also [set_info]. *)
+val create : ?info:Sexp.t -> unit -> 'a Reader.t * 'a Writer.t
+
+(** [empty ()] returns a closed pipe reader with no contents. *)
+val empty : unit -> _ Reader.t
 
 (** [of_list l] returns a closed pipe reader filled with the contents of [l]. *)
 val of_list : 'a list -> 'a Reader.t
@@ -376,14 +377,6 @@ val read'
     meaning of values being flushed (see the [Consumer] module above). *)
 val read : ?consumer:Consumer.t -> 'a Reader.t -> [ `Eof | `Ok of 'a ] Deferred.t
 
-(** [read_at_most t ~num_values] is [read' t ~max_queue_length:num_values]. *)
-val read_at_most
-  :  ?consumer:Consumer.t
-  -> 'a Reader.t
-  -> num_values:int
-  -> [ `Eof | `Ok of 'a Queue.t ] Deferred.t
-[@@deprecated "[since 2015-12] Use [read' ~max_queue_length]"]
-
 
 (** [read_exactly r ~num_values] reads exactly [num_values] items, unless EOF is
     encountered.  [read_exactly] performs a sequence of [read_at_most] operations, so
@@ -419,14 +412,6 @@ val read_now
   :  ?consumer:Consumer.t
   -> 'a Reader.t
   -> [ `Eof | `Nothing_available | `Ok of 'a ]
-
-(** [read_now_at_most t ~num_values] is [read_now' t ~max_queue_length:num_values] *)
-val read_now_at_most
-  :  ?consumer:Consumer.t
-  -> 'a Reader.t
-  -> num_values:int
-  -> [ `Eof | `Nothing_available | `Ok of 'a Queue.t ]
-[@@deprecated "[since 2015-12] Use [read_now' ~max_queue_length"]
 
 
 val peek : 'a Reader.t -> 'a option
@@ -475,12 +460,12 @@ val values_available : _ Reader.t -> [ `Eof | `Ok ] Deferred.t
     has no other consumers. *)
 val read_choice
   :  'a Reader.t
-  -> [ `Eof | `Ok of 'a | `Nothing_available ] Deferred.choice
+  -> [ `Eof | `Ok of 'a | `Nothing_available ] Deferred.Choice.t
 
 val read_choice_single_consumer_exn
   :  'a Reader.t
   -> Source_code_position.t
-  -> [ `Eof | `Ok of 'a ] Deferred.choice
+  -> [ `Eof | `Ok of 'a ] Deferred.Choice.t
 
 (** {2 Sequence functions} *)
 
@@ -634,14 +619,6 @@ val folding_map
   -> f:('accum -> 'a -> 'accum * 'b)
   -> 'b Reader.t
 
-val fold_map
-  :  ?max_queue_length:int (** default is [Int.max_value] *)
-  -> 'a Reader.t
-  -> init:'accum
-  -> f:('accum -> 'a -> 'accum * 'b)
-  -> 'b Reader.t
-[@@deprecated "[since 2017-03] Use folding_map instead"]
-
 (** [filter_map' input ~f] returns a reader, [output], and repeatedly applies [f] to
     elements from [input], with the results that aren't [None] appearing in [output].  If
     values are not being consumed from [output], [filter_map'] will pushback and stop
@@ -662,22 +639,24 @@ val filter_map
   -> f:('a -> 'b option)
   -> 'b Reader.t
 
-(** [folding_filter_map] is a version [filter_map] that threads an accumulator through
-    calls to [f]. *)
+(** [folding_filter_map'] is a version of [filter_map'] that threads an accumulator
+    through calls to [f].  Like [filter_map'], [folding_filter_map'] processes elements in
+    batches as per [max_queue_length]; in a single batch, all outputs will propagate to
+    the result only when all inputs have been processed. *)
+val folding_filter_map'
+  :  ?max_queue_length:int (** default is [Int.max_value] *)
+  -> 'a Reader.t
+  -> init:'accum
+  -> f:('accum -> 'a -> ('accum * 'b option) Deferred.t)
+  -> 'b Reader.t
+
+(** [folding_filter_map] is a specialized version of [folding_filter_map']. *)
 val folding_filter_map
   :  ?max_queue_length:int (** default is [Int.max_value] *)
   -> 'a Reader.t
   -> init:'accum
   -> f:('accum -> 'a -> 'accum * 'b option)
   -> 'b Reader.t
-
-val fold_filter_map
-  :  ?max_queue_length:int (** default is [Int.max_value] *)
-  -> 'a Reader.t
-  -> init:'accum
-  -> f:('accum -> 'a -> 'accum * 'b option)
-  -> 'b Reader.t
-[@@deprecated "[since 2017-03] Use folding_filter_map instead"]
 
 (** [filter input ~f] returns a reader, [output], and copies to [output] each element from
     [input] that satisfies the predicate [f].  If [output] is closed, then [filter] closes
@@ -705,6 +684,10 @@ val merge : 'a Reader.t list -> compare:('a -> 'a -> int) -> 'a Reader.t
     in sequence.  [concat] closes [output] once it reaches EOF on the final input.
     If [output] is closed, then [concat] closes all its inputs. *)
 val concat : 'a Reader.t list -> 'a Reader.t
+
+(** [concat_pipe] is like [concat], but it takes a pipe of inputs instead of
+    a list, and closes the input pipe when the output pipe is closed. *)
+val concat_pipe : 'a Reader.t Reader.t -> 'a Reader.t
 
 (** [fork input] returns a pair of readers and transfers each of the values in [input]
     into both of the returned readers.  It closes [input] early if both of the readers are
@@ -783,3 +766,7 @@ val show_debug_messages : bool ref
 (** [check_invariant], if true, will cause pipes' invariants to be checked at the start of
     each operation. *)
 val check_invariant : bool ref
+
+(** [set_info] updates [t]'s [info] field, which is displayed by [sexp_of_t], and thus in
+    debugging messages. *)
+val set_info : (_, _) t -> Sexp.t -> unit

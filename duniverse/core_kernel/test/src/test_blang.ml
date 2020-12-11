@@ -316,6 +316,7 @@ let%test_module "laws" =
           with
           | exn ->
             failwiths
+              ~here:[%here]
               "fail on expression"
               (expression, exn)
               [%sexp_of: base_set t * Exn.t]
@@ -352,3 +353,244 @@ let%expect_test "quickcheck generator obeys invariants" =
     ~f:Blang.invariant;
   [%expect {| |}]
 ;;
+
+module And_structure = struct
+  let a, b, c, d = base "a", base "b", base "c", base "d"
+
+  let print l =
+    let blang = and_ l in
+    print_s [%message "standard" ~_:(blang : string t)];
+    print_s [%message "raw" ~_:(blang : string Raw.t)]
+  ;;
+
+  let%expect_test _ =
+    print [ a ];
+    [%expect {|
+        (standard a)
+        (raw (Base a)) |}]
+  ;;
+
+  let%expect_test _ =
+    print [ a; b ];
+    [%expect
+      {|
+        (standard (and a b))
+        (raw (
+          And
+          (Base a)
+          (Base b))) |}]
+  ;;
+
+  let%expect_test _ =
+    print [ a; b; c ];
+    [%expect
+      {|
+        (standard (and a b c))
+        (raw (
+          And
+          (Base a)
+          (And
+            (Base b)
+            (Base c)))) |}]
+  ;;
+
+  let%expect_test _ =
+    print [ a; b; c; d ];
+    [%expect
+      {|
+        (standard (and a b c d))
+        (raw (
+          And
+          (Base a)
+          (And
+            (Base b)
+            (And
+              (Base c)
+              (Base d))))) |}]
+  ;;
+
+  let%expect_test "arbitrary nesting" =
+    let b = base in
+    let p x =
+      print
+        [ and_ [ b "a"; b "b" ]
+        ; and_ [ and_ [ b "c"; b "d"; and_ [ x; b "e"; and_ [ b "f" ] ]; b "g" ]; b "h" ]
+        ]
+    in
+    p true_;
+    [%expect
+      {|
+      (standard (and a b c d e f g h))
+      (raw (
+        And
+        (Base a)
+        (And
+          (Base b)
+          (And
+            (Base c)
+            (And
+              (Base d)
+              (And
+                (Base e)
+                (And
+                  (Base f)
+                  (And
+                    (Base g)
+                    (Base h))))))))) |}];
+    p false_;
+    [%expect {|
+      (standard false)
+      (raw False) |}]
+  ;;
+end
+
+module Or_structure = struct
+  let a, b, c, d = base "a", base "b", base "c", base "d"
+
+  let print l =
+    let blang = or_ l in
+    print_s [%message "standard" ~_:(blang : string t)];
+    print_s [%message "raw" ~_:(blang : string Raw.t)]
+  ;;
+
+  let%expect_test _ =
+    print [ a ];
+    [%expect {|
+        (standard a)
+        (raw (Base a)) |}]
+  ;;
+
+  let%expect_test _ =
+    print [ a; b ];
+    [%expect
+      {|
+        (standard (or a b))
+        (raw (
+          Or
+          (Base a)
+          (Base b))) |}]
+  ;;
+
+  let%expect_test _ =
+    print [ a; b; c ];
+    [%expect
+      {|
+        (standard (or a b c))
+        (raw (
+          Or
+          (Base a)
+          (Or
+            (Base b)
+            (Base c)))) |}]
+  ;;
+
+  let%expect_test _ =
+    print [ a; b; c; d ];
+    [%expect
+      {|
+        (standard (or a b c d))
+        (raw (
+          Or
+          (Base a)
+          (Or
+            (Base b)
+            (Or
+              (Base c)
+              (Base d))))) |}]
+  ;;
+
+  let%expect_test "arbitrary nesting" =
+    let b = base in
+    let p x =
+      print
+        [ or_ [ b "a"; b "b" ]
+        ; or_ [ or_ [ b "c"; b "d"; or_ [ x; b "e"; or_ [ b "f" ] ]; b "g" ]; b "h" ]
+        ]
+    in
+    p true_;
+    [%expect {|
+      (standard true)
+      (raw True) |}];
+    p false_;
+    [%expect
+      {|
+      (standard (or a b c d e f g h))
+      (raw (
+        Or
+        (Base a)
+        (Or
+          (Base b)
+          (Or
+            (Base c)
+            (Or
+              (Base d)
+              (Or
+                (Base e)
+                (Or
+                  (Base f)
+                  (Or
+                    (Base g)
+                    (Base h))))))))) |}]
+  ;;
+end
+
+type 'a eval_benchmark =
+  { blang : 'a t
+  ; f : 'a -> bool
+  }
+
+module And_bench = struct
+  let bench ~less_than:upper_bound_exclusive ~len =
+    let blang = and_ (List.init len ~f:(fun i -> base i)) in
+    let gt i = Int.( < ) i upper_bound_exclusive in
+    { blang; f = gt }
+  ;;
+
+  let%bench_fun "and_ false first item in short list" =
+    let { blang; f } = bench ~less_than:0 ~len:2 in
+    fun () -> eval blang f
+  ;;
+
+  let%bench_fun "and_ false first item in long list" =
+    let { blang; f } = bench ~less_than:0 ~len:100 in
+    fun () -> eval blang f
+  ;;
+
+  let%bench_fun "and_ false last item in short list" =
+    let { blang; f } = bench ~less_than:1 ~len:2 in
+    fun () -> eval blang f
+  ;;
+
+  let%bench_fun "and_ false last item in long list" =
+    let { blang; f } = bench ~less_than:99 ~len:100 in
+    fun () -> eval blang f
+  ;;
+end
+
+module Or_bench = struct
+  let bench ~equal ~len =
+    let blang = or_ (List.init len ~f:(fun i -> base i)) in
+    let eq i = Int.equal equal i in
+    { blang; f = eq }
+  ;;
+
+  let%bench_fun "or_ true first item in short list" =
+    let { blang; f } = bench ~equal:0 ~len:2 in
+    fun () -> eval blang f
+  ;;
+
+  let%bench_fun "or_ true first item in long list" =
+    let { blang; f } = bench ~equal:0 ~len:100 in
+    fun () -> eval blang f
+  ;;
+
+  let%bench_fun "or_ true last item in short list" =
+    let { blang; f } = bench ~equal:1 ~len:2 in
+    fun () -> eval blang f
+  ;;
+
+  let%bench_fun "or_ true last item in long list" =
+    let { blang; f } = bench ~equal:99 ~len:100 in
+    fun () -> eval blang f
+  ;;
+end

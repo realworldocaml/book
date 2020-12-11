@@ -65,7 +65,7 @@ let replace t ~key ~data = set_data t key (get_entry t key) data
 let add_exn t ~key ~data =
   let entry = get_entry t key in
   if Weak_pointer.is_some entry
-  then failwiths "Weak_hashtbl.add_exn of key in use" t [%sexp_of: (_, _) t];
+  then failwiths ~here:[%here] "Weak_hashtbl.add_exn of key in use" t [%sexp_of: (_, _) t];
   set_data t key entry data;
 ;;
 

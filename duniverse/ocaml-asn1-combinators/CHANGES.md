@@ -1,3 +1,13 @@
+## v0.2.5 (2021-03-05)
+* Fix an integer overflow in the length field on 32 bit architectures
+  (#36 by @hannesm)
+
+## v0.2.4 (2020-11-05)
+* OCaml 4.12 support (#35 by @kit-ty-kate, @hannesm)
+
+## v0.2.3 (2020-09-28)
+* adapt to cstruct 6.0.0 API changes (#34 by @dinosaure)
+
 ## v0.2.2 (2020-01-29)
 * packaging improvements: add lower bound to dune dependency, improve test
   invocation, remove version from dune-project

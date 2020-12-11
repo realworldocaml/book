@@ -44,7 +44,7 @@ let serve_ssl port callback =
          | Unix.Unix_error (e, f, p) -> return (`L (string_of_unix_err e f p))
          | Tls_lwt.Tls_alert a -> return (`L (Tls.Packet.alert_type_to_string a))
          | Tls_lwt.Tls_failure f -> return (`L (Tls.Engine.string_of_failure f))
-         | _exn -> return (`L "loop: exception"))) >>= function
+         | exn -> return (`L ("loop: exception: " ^ Printexc.to_string exn)))) >>= function
     | `R (channels, addr) ->
       yap ~tag "-> connect" >>= fun () -> ( handle channels addr ; loop s )
     | `L (msg) ->
@@ -55,7 +55,6 @@ let serve_ssl port callback =
 
 let echo_server _ port =
   Lwt_main.run (
-    Mirage_crypto_rng_lwt.initialize () >>= fun () ->
     serve_ssl port @@ fun (ic, oc) _addr ->
     lines ic |> Lwt_stream.iter_s (fun line ->
         yap ~tag:"handler" ("+ " ^ line) >>= fun () ->
@@ -69,6 +68,6 @@ let port =
 
 let cmd =
   Term.(ret (const echo_server $ setup_log $ port)),
-  Term.info "server" ~version:"%%VERSION_NUM%%"
+  Term.info "server" ~version:"0.13.1"
 
 let () = match Term.eval cmd with `Ok () -> exit 0 | _ -> exit 1

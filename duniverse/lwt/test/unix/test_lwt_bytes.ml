@@ -755,6 +755,25 @@ let suite = suite "lwt_bytes" [
       Lwt.return check
     end;
 
+    test "send_msgto" ~only_if:(fun () -> not Sys.win32) begin fun () ->
+      let buffer = gen_buf 6 in
+      let offset = 0 in
+      let server_logic socket =
+        let io_vectors = [Lwt_bytes.io_vector ~buffer ~offset ~length:6] in
+        (Lwt_bytes.recv_msg [@ocaml.warning "-3"]) ~socket ~io_vectors
+      in
+      let client_logic socket sockaddr =
+        let message = Lwt_bytes.of_string "abcdefghij" in
+        let io_vectors = Lwt_unix.IO_vectors.create () in
+        Lwt_unix.IO_vectors.append_bigarray io_vectors message offset 9;
+        Lwt_unix.send_msgto ~socket ~io_vectors ~fds:[] ~dest:sockaddr
+      in
+      udp_server_client_exchange server_logic client_logic
+      >>= fun () ->
+      let check = "abcdef" = Lwt_bytes.to_string buffer in
+      Lwt.return check
+    end;
+
     test "map_file" begin fun () ->
       let test_file = "bytes_io_data" in
       let fd = Unix.openfile test_file [O_RDONLY] 0 in

@@ -16,6 +16,9 @@ val of_nativeint : nativeint -> t option
 val to_nativeint : t -> nativeint option
 val of_nativeint_trunc : nativeint -> t
 val to_nativeint_trunc : t -> nativeint
+val bswap16 : t -> t
+val bswap32 : t -> t
+val bswap48 : t -> t
 
 (*_ exported for Core_kernel *)
 module W : sig

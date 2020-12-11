@@ -19,7 +19,7 @@
 type t = {
   vpad : int;
   hpad : int;
-  line : int;
+  pos : Lexing.position;
   command : string list;
   output : Output.t list;
 }
@@ -41,21 +41,6 @@ val pp_command : t Fmt.t
 
 (** {2 Parser} *)
 
-val of_lines :
-  syntax:Syntax.t ->
-  file:string ->
-  line:int ->
-  column:int ->
-  string list ->
-  t list
-(** [of_lines ~file ~line ~column lines] is the list of toplevel blocks from
-   file [file] starting at line [line]. Return the vertical and
-   horizontal whitespace padding as well.*)
-
-(** {2 Accessors} *)
-
-val command : t -> string list
-(** [command t] is [t]'s command. *)
-
-val output : t -> Output.t list
-(** [output t] is [t]'s output. *)
+val of_lines : syntax:Syntax.t -> loc:Location.t -> string list -> t list
+(** [of_lines ~loc lines] is the list of toplevel blocks from location [loc].
+    Return the vertical and horizontal whitespace padding as well. *)

@@ -75,6 +75,10 @@ module type Span = sig
     "[since 2019-01] use [of_span_float_round_nearest] or \
      [of_span_float_round_nearest_microsecond]"]
 
+  (** [*_round_nearest] vs [*_round_nearest_microsecond]: If you don't know that you need
+      microsecond precision, use the [*_round_nearest] version.
+      [*_round_nearest_microsecond] is for historical purposes. *)
+
   val to_span_float_round_nearest : t -> Span_float.t
   val to_span_float_round_nearest_microsecond : t -> Span_float.t
   val of_span_float_round_nearest : Span_float.t -> t
@@ -124,6 +128,16 @@ module type Ofday = sig
   (** [sub_exn t span] shifts the time of day [t] back by [span]. It raises if the result
       is not in the same 24-hour day. Daylight savings shifts are not accounted for. *)
   val sub_exn : t -> Span.t -> t
+
+
+  (** [every span ~start ~stop] returns a sorted list of all [t]s that can be expressed as
+      [start + (i * span)] without overflow, and satisfying [t >= start && t <= stop].
+
+      If [span <= Span.zero || start > stop], returns an Error.
+
+      The result never crosses the midnight boundary. Constructing a list crossing
+      midnight, e.g. every hour from 10pm to 2am, requires multiple calls to [every]. *)
+  val every : Span.t -> start:t -> stop:t -> t list Or_error.t
 end
 
 (** Time represented as an [Int63.t] number of nanoseconds since the epoch.
@@ -263,6 +277,10 @@ module type Time_ns = sig
   [@@deprecated
     "[since 2019-01] use [to_time_float_round_nearest] or \
      [to_time_float_round_nearest_microsecond]"]
+
+  (** [*_round_nearest] vs [*_round_nearest_microsecond]: If you don't know that you need
+      microsecond precision, use the [*_round_nearest] version.
+      [*_round_nearest_microsecond] is for historical purposes. *)
 
   val to_time_float_round_nearest : t -> Time_float.t
   val to_time_float_round_nearest_microsecond : t -> Time_float.t

@@ -1,65 +1,7 @@
 open! Core
 
-module Color : sig
-  type t = Console.Ansi.color
-end
-
-module Attr : sig
-  type t = Console.Ansi.attr
-end
-
-module Align : sig
-  type t =
-    | Left
-    | Right
-    | Center
-end
-
-module Display : sig
-  type t
-
-  (** Default--cells can be multi-line. *)
-  val short_box : t
-
-  (** Puts --- between entries. *)
-  val tall_box : t
-
-  (** Trails off with ... if necessary. *)
-  val line : t
-
-  (** No lines. *)
-  val blank : t
-
-  (** Draw lines only under column titles. *)
-  val column_titles : t
-end
-
-module Column : sig
-  type 'a t
-
-  (** creates a column given the header and the to-string function *)
-  val create
-    :  ?align:Align.t (* Default: left *)
-    -> ?min_width:int
-    -> ?max_width:int
-    -> ?show:[ `Yes | `No | `If_not_empty ] (* Default: `Yes *)
-    -> string
-    -> ('a -> string)
-    -> 'a t
-
-  (** like create, except that the to_string function must provide a list of
-      attributes. *)
-  val create_attr
-    :  ?align:Align.t (* Default: left *)
-    -> ?min_width:int
-    -> ?max_width:int
-    -> ?show:[ `Yes | `No | `If_not_empty ] (* Default: `Yes *)
-    -> string
-    -> ('a -> Attr.t list * string)
-    -> 'a t
-
-  val header : 'a t -> string
-  val to_data : 'a t -> 'a -> Console.Ansi.attr list * string list
+include module type of struct
+  include Ascii_table_kernel
 end
 
 type ('row, 'rest) renderer =
@@ -90,12 +32,3 @@ val simple_list_table
   -> string list
   -> string list list
   -> unit
-
-module Table_char : sig
-  type t =
-    { ascii : char
-    ; utf8 : string
-    }
-
-  val connect : ?top:unit -> ?bottom:unit -> ?left:unit -> ?right:unit -> unit -> t
-end

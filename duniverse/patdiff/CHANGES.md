@@ -1,5 +1,8 @@
 ## git version
 
+- Extract a Js\_of\_ocaml-compatible library called `Patdiff_kernel`.
+  `Patdiff_lib` is renamed to simply `Patdiff`.
+
 - Fixed detection heuristic for binary files to function correctly given UTF-8
   input.
 
@@ -92,4 +95,3 @@ Minor update: doc.
 ## 109.53.00
 
 - Bump version number
-

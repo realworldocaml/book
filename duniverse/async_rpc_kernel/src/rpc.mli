@@ -415,7 +415,8 @@ module Pipe_rpc : sig
         -> ('response Pipe.Reader.t, 'error) Result.t Deferred.t)
     -> 'connection_state Implementation.t
 
-  (** A [Direct_stream_writer.t] is a simple object for responding to a [Pipe_rpc] query. *)
+  (** A [Direct_stream_writer.t] is a simple object for responding to a [Pipe_rpc]
+      query. *)
   module Direct_stream_writer : sig
     type 'a t
 
@@ -426,6 +427,7 @@ module Pipe_rpc : sig
     val write_without_pushback : 'a t -> 'a -> [`Ok | `Closed]
     val close : _ t -> unit
     val closed : _ t -> unit Deferred.t
+    val flushed : _ t -> unit Deferred.t
     val is_closed : _ t -> bool
 
     module Expert : sig
@@ -461,9 +463,10 @@ module Pipe_rpc : sig
 
       val create : ?buffer:Buffer.t -> unit -> _ t
 
-      (** [flushed t] is determined when the underlying writer for each member of [t] is
-          flushed. *)
-      val flushed : _ t -> unit Deferred.t
+      (** [flushed_or_closed t] is determined when the underlying writer for each member of [t] is
+          flushed or closed. *)
+      val flushed_or_closed : _ t -> unit Deferred.t
+      val flushed : _ t -> unit Deferred.t [@@deprecated "[since 2019-11] renamed as [flushed_or_closed]" ]
 
       (** Add a direct stream writer to the group. Raises if the writer is closed or
           already part of the group, or if its bin-prot writer is different than an
@@ -516,8 +519,7 @@ module Pipe_rpc : sig
       Though the implementation function is given a writer immediately, the result of the
       client's call to [dispatch] will not be determined until after the implementation
       function returns. Elements written before the function returns will be queued up to
-      be written after the function returns.
-  *)
+      be written after the function returns. *)
   val implement_direct
     :  ('query, 'response, 'error) t
     -> ('connection_state
@@ -578,8 +580,7 @@ module Pipe_rpc : sig
       started. This may be fed to [abort] with the same [Pipe_rpc.t] and [Connection.t] as
       the call to [dispatch_iter] to cancel the subscription, which will close the pipe on
       the implementation side. Calling it with a different [Pipe_rpc.t] or [Connection.t]
-      has undefined behavior.
-  *)
+      has undefined behavior. *)
   val dispatch_iter
     :  ('query, 'response, 'error) t
     -> Connection.t
@@ -593,8 +594,7 @@ module Pipe_rpc : sig
 
       If you are using [dispatch] rather than [dispatch_iter], you are encouraged to close
       the pipe you receive rather than calling [abort] -- both of these have the same
-      effect.
-  *)
+      effect. *)
   val abort : (_, _, _) t -> Connection.t -> Id.t -> unit
 
   (** [close_reason metadata] will be determined sometime after the pipe associated with

@@ -48,7 +48,7 @@ module Add_bin_io (Raw : sig
   end)
     (Validated : S with type raw := Raw.t) =
 struct
-  include Binable.Of_binable
+  include Binable.Of_binable_without_uuid [@alert "-legacy"]
       (Raw)
       (struct
         type t = Raw.t

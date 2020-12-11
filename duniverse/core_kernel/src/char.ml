@@ -17,6 +17,18 @@ include (
   end
   with type t := t)
 
+module Caseless = struct
+  module T = struct
+    include Caseless
+
+    type t = char [@@deriving bin_io]
+  end
+
+  include T
+  include Comparable.Make_binable_using_comparator (T)
+  include Hashable.Make_binable (T)
+end
+
 module Replace_polymorphic_compare = Base.Char
 
 let quickcheck_generator = Base_quickcheck.Generator.char

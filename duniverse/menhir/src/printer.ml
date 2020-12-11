@@ -824,12 +824,12 @@ let print_expr f e =
   P.expr e
 
 let string_of_expr e =
-  let b = Buffer.create 512 in
-  let module P =
-    MakeBuffered (struct
-      let f = b
-      let locate_stretches = None
-    end)
-  in
-  P.expr e;
-  Buffer.contents b
+  Misc.with_buffer 512 (fun b ->
+    let module P =
+      MakeBuffered (struct
+        let f = b
+        let locate_stretches = None
+      end)
+    in
+    P.expr e
+  )

@@ -13,7 +13,7 @@
 
 let position = Positions.position
 open Keyword
-type sw = Action.sw
+type sw = subject * where
 open BasicSyntax
 open ListMonad
 let drop = MenhirLib.General.drop
@@ -166,12 +166,12 @@ let rename (used : StringSet.t) producers: Action.subst * producers =
       if StringSet.mem x used then
         let x' = fresh used x in
         let id' = Positions.map (fun _x -> x') id in
-        (x, x') :: phi,
+        Action.extend x x' phi,
         StringSet.add x' used,
         { producer with producer_identifier = id' } :: producers
       else
         (phi, StringSet.add x used, producer :: producers)
-    ) ([], used, []) producers
+    ) (Action.empty, used, []) producers
   in
   phi, List.rev producers
 
@@ -358,7 +358,7 @@ let inline_branch caller (i, producer : site) (callee : branch) : branch =
 
   let x = producer_identifier producer in
   let caller_action, callee_action =
-    Action.rename (rename_sw_outer (x, startp, endp)) [] caller.action,
+    Action.rename (rename_sw_outer (x, startp, endp)) Action.empty caller.action,
     Action.rename (rename_sw_inner beforeendp) phi callee.action
   in
   let action = Action.compose x callee_action caller_action in

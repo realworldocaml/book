@@ -88,7 +88,11 @@ module Using_comparator = struct
     match of_iteri ~comparator ~iteri:(Hashtbl.iteri hashtbl) with
     | `Ok map -> map
     | `Duplicate_key key ->
-      Error.failwiths "Map.of_hashtbl_exn: duplicate key" key comparator.sexp_of_t
+      Error.failwiths
+        ~here:[%here]
+        "Map.of_hashtbl_exn: duplicate key"
+        key
+        comparator.sexp_of_t
   ;;
 
   let tree_of_hashtbl_exn ~comparator hashtbl =
@@ -318,12 +322,14 @@ module Make_tree (Key : Comparator.S1) = struct
   let partition_map t ~f = partition_map t ~f ~comparator
   let partitioni_tf t ~f = partitioni_tf t ~f ~comparator
   let partition_tf t ~f = partition_tf t ~f ~comparator
+  let combine_errors t = combine_errors t ~comparator
   let compare_direct a b c = compare_direct a b c ~comparator
   let equal a b c = equal a b c ~comparator
   let keys = keys
   let data = data
   let to_alist = to_alist
   let validate = validate
+  let validatei = validatei
   let symmetric_diff a b ~data_equal = symmetric_diff a b ~data_equal ~comparator
 
   let fold_symmetric_diff a b ~data_equal ~init ~f =
@@ -570,36 +576,88 @@ module Make_binable (Key : Key_binable) = Make_binable_using_comparator (struct
     include Comparator.Make (Key)
   end)
 
-module M = Map.M
+module For_deriving = struct
+  module M = Map.M
 
-let bin_shape_m__t (type t c) (m : (t, c) Key_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_shape_t
-;;
+  let bin_shape_m__t (type t c) (m : (t, c) Key_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_shape_t
+  ;;
 
-let bin_size_m__t (type t c) (m : (t, c) Key_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_size_t
-;;
+  let bin_size_m__t (type t c) (m : (t, c) Key_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_size_t
+  ;;
 
-let bin_write_m__t (type t c) (m : (t, c) Key_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_write_t
-;;
+  let bin_write_m__t (type t c) (m : (t, c) Key_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_write_t
+  ;;
 
-let bin_read_m__t (type t c) (m : (t, c) Key_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.bin_read_t
-;;
+  let bin_read_m__t (type t c) (m : (t, c) Key_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.bin_read_t
+  ;;
 
-let __bin_read_m__t__ (type t c) (m : (t, c) Key_bin_io.t) =
-  let module M = Provide_bin_io ((val m)) in
-  M.__bin_read_t__
-;;
+  let __bin_read_m__t__ (type t c) (m : (t, c) Key_bin_io.t) =
+    let module M = Provide_bin_io ((val m)) in
+    M.__bin_read_t__
+  ;;
 
-module type For_deriving = For_deriving
+  module type Quickcheck_generator_m = sig
+    include Comparator.S
 
-include (Map : For_deriving with type ('a, 'b, 'c) t := ('a, 'b, 'c) t)
+    val quickcheck_generator : t Quickcheck.Generator.t
+  end
+
+  module type Quickcheck_observer_m = sig
+    include Comparator.S
+
+    val quickcheck_observer : t Quickcheck.Observer.t
+  end
+
+  module type Quickcheck_shrinker_m = sig
+    include Comparator.S
+
+    val quickcheck_shrinker : t Quickcheck.Shrinker.t
+  end
+
+  let quickcheck_generator_m__t
+        (type k cmp)
+        (module Key : Quickcheck_generator_m
+          with type t = k
+           and type comparator_witness = cmp)
+        v_generator
+    =
+    quickcheck_generator (module Key) Key.quickcheck_generator v_generator
+  ;;
+
+  let quickcheck_observer_m__t
+        (type k cmp)
+        (module Key : Quickcheck_observer_m
+          with type t = k
+           and type comparator_witness = cmp)
+        v_observer
+    =
+    quickcheck_observer Key.quickcheck_observer v_observer
+  ;;
+
+  let quickcheck_shrinker_m__t
+        (type k cmp)
+        (module Key : Quickcheck_shrinker_m
+          with type t = k
+           and type comparator_witness = cmp)
+        v_shrinker
+    =
+    quickcheck_shrinker Key.quickcheck_shrinker v_shrinker
+  ;;
+
+  module type For_deriving = Map.For_deriving
+
+  include (Map : For_deriving with type ('a, 'b, 'c) t := ('a, 'b, 'c) t)
+end
+
+include For_deriving
 
 module Tree = struct
   include Tree

@@ -1,5 +1,5 @@
 open! Base
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 
 module type S = sig
   type t [@@deriving sexp_of]

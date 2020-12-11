@@ -1,19 +1,9 @@
 include Base
 include Stdio
 include Base_for_tests
-include Expect_test_helpers_kernel
-
-module Quickcheck = struct
-  include Core_kernel.Quickcheck
-  module Bool = Core_kernel.Bool
-  module Char = Core_kernel.Char
-  module Int = Core_kernel.Int
-  module Int32 = Core_kernel.Int32
-  module Int64 = Core_kernel.Int64
-  module List = Core_kernel.List
-  module Nativeint = Core_kernel.Nativeint
-  module String = Core_kernel.String
-end
+include Base_test_helpers
+include Base_quickcheck.Export
+include Expect_test_helpers_core
 
 module Core_kernel = struct end
 [@@deprecated "[since 1970-01] Don't use Core_kernel in Base tests. Use Base."]
@@ -55,3 +45,5 @@ let check_int_hash_coherence (type t) here (module I : Int_hash with type t = t)
     (module I)
     [ I.min_value; I.of_int_exn 0; I.of_int_exn 37; I.max_value ]
 ;;
+
+let test_conversion ~to_string f x = printf "%s --> %s\n" (to_string x) (to_string (f x))

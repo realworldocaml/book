@@ -47,6 +47,8 @@ type 'a fields_parser = ('a, fields) parser
     information such as versions to individual parsers. *)
 val parse : 'a t -> Univ_map.t -> ast -> 'a
 
+val set_input : ast list -> (unit, 'k) parser
+
 val return : 'a -> ('a, _) parser
 
 val ( >>= ) : ('a, 'k) parser -> ('a -> ('b, 'k) parser) -> ('b, 'k) parser
@@ -78,7 +80,10 @@ val loc : (Loc.t, _) parser
 (** [a <|> b] is either [a] or [b]. If [a] fails to parse the input, then try
     [b]. If [b] fails as well, raise the error from the parser that consumed the
     most input. *)
-val ( <|> ) : 'a t -> 'a t -> 'a t
+val ( <|> ) : ('a, 'k) parser -> ('a, 'k) parser -> ('a, 'k) parser
+
+val either :
+  ('a, 'k) parser -> ('b, 'k) parser -> (('a, 'b) Either.t, 'k) parser
 
 (** [atom_matching f] expects the next element to be an atom for which [f]
     returns [Some v]. [desc] is used to describe the atom in case of error. [f]
@@ -103,9 +108,12 @@ type kind =
 
 val kind : (kind, _) parser
 
-(** [repeat t] use [t] to consume all remaning elements of the input until the
+(** [repeat t] uses [t] to consume all remaining elements of the input until the
     end of sequence is reached. *)
 val repeat : 'a t -> 'a list t
+
+(** Like [repeat] but the list of elements must be non-empty. *)
+val repeat1 : 'a t -> 'a list t
 
 (** Capture the rest of the input for later parsing *)
 val capture : ('a t -> 'a) t
@@ -170,6 +178,9 @@ val plain_string : (loc:Loc.t -> string -> 'a) -> 'a t
 (** A valid filename, i.e. a string other than "." or ".." *)
 val filename : string t
 
+(** A relative filename *)
+val relative_file : string t
+
 val fix : ('a t -> 'a t) -> 'a t
 
 val located : ('a, 'k) parser -> (Loc.t * 'a, 'k) parser
@@ -213,12 +224,14 @@ val fields_mutually_exclusive :
   -> (string * 'a t) list
   -> 'a fields_parser
 
+(** Test if the field is present *)
 val field_b :
      ?check:unit t
   -> ?on_dup:(Univ_map.t -> string -> Ast.t list -> unit)
   -> string
   -> bool fields_parser
 
+(** Differentiate between not present and set to true or false *)
 val field_o_b :
      ?check:unit t
   -> ?on_dup:(Univ_map.t -> string -> Ast.t list -> unit)

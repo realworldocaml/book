@@ -419,6 +419,9 @@ struct
   let a_step step =
     user_attrib C.string_of_step "step" step
 
+  let a_translate x =
+    user_attrib C.string_of_big_variant "translate" x
+  
   let a_wrap x =
     user_attrib C.string_of_big_variant "wrap" x
 
@@ -803,6 +806,10 @@ struct
     let a = (a_src src) :: (a_alt alt) :: a in
     Xml.leaf ~a "img"
 
+  let picture ~img ?a elts =
+    let content = W.cons img elts in
+    Xml.node ?a "picture" content
+
   let meta = terminal "meta"
 
   let style ?(a = []) elts = Xml.node ~a "style" elts
@@ -1017,6 +1024,8 @@ struct
     | `Tel -> "tel"
     | `Email -> "email"
     | `Url -> "url"
+    | `Text -> "text"
+    | `Decimal -> "decimal"
     | `Other s -> s
 
   let string_of_input_type = function

@@ -145,7 +145,7 @@ let%test_unit _ =
 ;;
 
 let%expect_test "enqueue_front, enqueue_front_exn" =
-  let open Expect_test_helpers_kernel in
+  let open Expect_test_helpers_core in
   let hq = Hq.create () in
   let ok_exn = function
     | `Key_already_present -> raise_s [%message "Key already present"]
@@ -223,7 +223,7 @@ let%expect_test "lookup_and_move_to_front_exn" =
 ;;
 
 let%expect_test "dequeue_back, dequeue_back_exn" =
-  let open Expect_test_helpers_kernel in
+  let open Expect_test_helpers_core in
   let make_hq () =
     let hq = Hq.create () in
     for i = 1 to 10 do
@@ -266,7 +266,7 @@ let%expect_test "dequeue_back, dequeue_back_exn" =
 ;;
 
 let%expect_test "drop" =
-  let open Expect_test_helpers_kernel in
+  let open Expect_test_helpers_core in
   let make_hq () =
     let hq = Hq.create () in
     for i = 1 to 10 do
@@ -287,4 +287,22 @@ let%expect_test "drop" =
   Hq.drop_back ~n:20 hq;
   print_s [%sexp (Hq.to_list hq : int list)];
   [%expect {| () |}]
+;;
+
+let%expect_test "lookup_and_remove" =
+  let hq = Hq.create () in
+  let n = 10 in
+  for i = 1 to n do
+    Hq.enqueue_back_exn hq (Int.to_string i) i
+  done;
+  print_s [%sexp (Hq.to_list hq : int list)];
+  [%expect {| (1 2 3 4 5 6 7 8 9 10) |}];
+  print_s [%sexp (Hq.lookup_and_remove hq "5" : int option)];
+  [%expect {| (5) |}];
+  print_s [%sexp (Hq.to_list hq : int list)];
+  [%expect {| (1 2 3 4 6 7 8 9 10) |}];
+  print_s [%sexp (Hq.lookup_and_remove hq "11" : int option)];
+  [%expect {| () |}];
+  print_s [%sexp (Hq.to_list hq : int list)];
+  [%expect {| (1 2 3 4 6 7 8 9 10) |}]
 ;;

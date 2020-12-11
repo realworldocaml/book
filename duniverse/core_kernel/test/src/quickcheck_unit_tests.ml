@@ -1,6 +1,6 @@
 open! Core_kernel
 open Poly
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! Quickcheck
 
 let%expect_test ("Quickcheck.Let_syntax"[@tags "64-bits-only"]) =
@@ -38,6 +38,8 @@ let%expect_test "ppx_quickcheck" =
       | A
       | B of int list * Unit.t Option.t
       | C of { x : float }
+      | D of int Map.M(String).t
+      | E of Set.M(String).t
     [@@deriving compare, quickcheck, sexp_of]
   end
   in
@@ -52,6 +54,12 @@ let%expect_test "ppx_quickcheck" =
         | _ -> false)
     ; (function
         | M.C _ -> true
+        | _ -> false)
+    ; (function
+        | M.D _ -> true
+        | _ -> false)
+    ; (function
+        | M.E _ -> true
         | _ -> false)
     ];
   [%expect {| |}]

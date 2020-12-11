@@ -15,13 +15,13 @@
   }}}*)
 
 open Transfer
-module Make(IO : S.IO) : sig
+
+module Make (IO : S.IO) : sig
   type reader
   type writer
 
   val make_reader : encoding -> IO.ic -> reader
   val make_writer : ?flush:bool -> encoding -> IO.oc -> writer
-
   val read : reader -> chunk IO.t
   val write : writer -> string -> unit IO.t
 end

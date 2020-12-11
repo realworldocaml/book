@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/realworldocaml/mdx.svg?branch=master)](https://travis-ci.org/realworldocaml/mdx)
+[![Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Frealworldocaml%2Fmdx%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/realworldocaml/mdx)
 
 ## mdx -- executable code blocks inside markdown files
 

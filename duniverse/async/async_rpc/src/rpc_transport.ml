@@ -42,6 +42,7 @@ end = struct
     if not (message_size_ok t ~payload_len)
     then
       failwiths
+        ~here:[%here]
         "Rpc_transport: message too small or too big"
         (`Message_size payload_len, `Max_message_size t.max_message_size)
         [%sexp_of: [ `Message_size of int ] * [ `Max_message_size of int ]]

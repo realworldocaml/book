@@ -1,3 +1,34 @@
+## v0.13.0 (2021-04-22)
+
+* FEATURE support for RFC 5915 "BEGIN EC PRIVATE KEY" pem encoded private keys
+  (#147 @hannesm, requested by @ulrikstrid)
+* BREAKING remove EC_pub _ from Public_key.t and EC _ from Certificate.key_type
+  (#147 by @hannesm)
+* BREAKING move Certificate.key_type to Key_type.t (#147 @hannesm)
+* FEATURE some private key utilities (of_cstruct, generate, sign), and
+  Public_key.verify (#report #146, fix #147 @hannesm)
+* BREAKING rename hash_whitelist to allowed_hashes (#147 @hannesm)
+* BREAKING provide Key_type.signature_scheme and use across the API
+  (#147 @hannesm)
+
+## v0.12.0 (2021-04-05)
+
+* FEATURE PKCS12 support (#114 by @hannesm)
+* FEATURE ECDSA and EDDSA support via mirage-crypto-ec (#145 by @hannesm)
+  This breaks some clients since the Private_key.t and Public_key.t variants
+  are extended (may result in partial pattern matches of users of this library).
+* CRL.is_revoked has `crls` as last parameter to avoid warning 16
+  (4.12 compatibility) (#144 by @hannesm)
+* Signing_request.sign: add optional labelled argument `~subject` to allow
+  changing the subject when signing a signing request (#139 by @reynir)
+* BUGFIX Encoding of Distinguished_name components (adhere to specification)
+  DomainComponent and EMail are now serialised using a IA5String; Serialnumber,
+  CountryName and DnQualifier as PrintableString (reported in #69, fixed #140
+  by @NightBlues)
+* BREAKING Remove `~sloppy` from Private_key.decode_{pem,der}. The seemingly
+  bad RSA keys were valid and should have been accepted by mirage-crypto.
+  (#142 by @psafont)
+
 ## v0.11.2 (2020-05-14)
 
 * Private_key.decode_{pem,der} now has a `~sloppy` option to recover from
@@ -9,7 +40,7 @@
 * open variant for errors to make the composable (#133 by @dinosaure,
   review by @hannesm)
 * BUGFIX avoid fractional seconds in generalized_time: truncate on serialising,
-  validate them to be 0 on deseariasing, as required in RFC 5280 4.1.2.5.2
+  validate them to be 0 on deserialising, as required in RFC 5280 4.1.2.5.2
   (#134 by @hannesm, reported by @ansiwen)
 
 ## v0.11.0 (2020-04-07)

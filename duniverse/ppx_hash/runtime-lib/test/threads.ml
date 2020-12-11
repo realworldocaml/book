@@ -16,9 +16,11 @@ module Tests(Hash : Base.Hash.S with type hash_value = int) = struct
 
   let run_in_two_threads f1 x1 f2 x2 =
     let res1 = ref None in
-    let t = Thread.create (fun () ->
-      res1 := Some (f1 x1)
-    ) ()
+    let t =
+      Thread.create
+        (fun () -> res1 := Some (f1 x1))
+        ~on_uncaught_exn:`Print_to_stderr
+        ()
     in
     let res2 = f2 x2 in
     Thread.join t;

@@ -1,5 +1,5 @@
 open! Base
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! Balanced_reducer
 
 type a = int list [@@deriving sexp_of]

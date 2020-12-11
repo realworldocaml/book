@@ -11,29 +11,12 @@ let lident x = Longident.Lident x
 
 module Loc = struct
   let mk     x = { Location.loc; txt = x }
-  let lident x = mk (Longident.parse x)
+  let lident x = mk (Longident.parse x) [@@warning "-3"]
 end
 
-module List = struct
-  include ListLabels
-
-  let rec filter_map l ~f =
-    match l with
-    | [] -> []
-    | x :: l ->
-      match f x with
-      | None -> filter_map l ~f
-      | Some x -> x :: filter_map l ~f
-end
-
-module String = struct
-  include StringLabels
-
-  (* in OCaml 4.04, StringLabels doesn't define lowercase_ascii, so we
-     need to explicitly redefine it here as long as we support 4.04. *)
-  let lowercase_ascii = String.lowercase_ascii
-end
-module Array  = ArrayLabels
+module List = Stdppx.List
+module String = Stdppx.String
+module Array = Stdppx.Array
 
 let evar v = Exp.ident (Loc.lident v)
 let pvar v = Pat.var (Loc.mk v)

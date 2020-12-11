@@ -674,3 +674,47 @@ let set_t_m m elt_gen =
   set_tree_using_comparator ~comparator elt_gen
   |> map ~f:(Set.Using_comparator.of_tree ~comparator)
 ;;
+
+let bigarray1 t kind layout =
+  let%map elts = list t in
+  let elts = Array.of_list elts in
+  let dim = Array.length elts in
+  let offset = Bigarray_helpers.Layout.offset layout in
+  Bigarray_helpers.Array1.init kind layout dim ~f:(fun i -> elts.(i - offset))
+;;
+
+let bigstring = bigarray1 char Char C_layout
+let float32_vec = bigarray1 float Float32 Fortran_layout
+let float64_vec = bigarray1 float Float64 Fortran_layout
+
+let bigarray2_dim =
+  match%bind size with
+  | 0 -> return (0, 0)
+  | max_total_size ->
+    let%bind a =
+      (* choose a dimension up to [max_total_size], weighted low to give the other
+         dimension a good chance of being comparatively high *)
+      int_log_uniform_inclusive 1 max_total_size
+    in
+    let%bind b =
+      (* choose a dimension up to [max_total_size / a], weighted high to reach close to
+         [max_total_size] most of the time *)
+      let max_b = max_total_size / a in
+      let%map b_weighted_low = int_log_uniform_inclusive 0 max_b in
+      max_b - b_weighted_low
+    in
+    (* avoid any skew of a vs b by randomly swapping *)
+    if%map bool then a, b else b, a
+;;
+
+let bigarray2 t kind layout =
+  let%bind dim1, dim2 = bigarray2_dim in
+  let%map elts = list_with_length ~length:dim1 (list_with_length ~length:dim2 t) in
+  let elts = Array.of_list_map ~f:Array.of_list elts in
+  let offset = Bigarray_helpers.Layout.offset layout in
+  Bigarray_helpers.Array2.init kind layout dim1 dim2 ~f:(fun i j ->
+    elts.(i - offset).(j - offset))
+;;
+
+let float32_mat = bigarray2 float Float32 Fortran_layout
+let float64_mat = bigarray2 float Float64 Fortran_layout

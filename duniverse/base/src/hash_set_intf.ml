@@ -102,17 +102,14 @@ end
 
 module type Hash_set = sig
   type 'a t [@@deriving_inline sexp_of]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val sexp_of_t :
-        ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 
-  (** We use [[@@deriving_inline sexp_of][@@@end]] but not [[@@deriving sexp]] because we want people to be
+  (** We use [[@@deriving sexp_of]] but not [[@@deriving sexp]] because we want people to be
       explicit about the hash and comparison functions used when creating hashtables.  One
-      can use [Hash_set.Poly.t], which does have [[@@deriving_inline sexp][@@@end]], to use polymorphic
+      can use [Hash_set.Poly.t], which does have [[@@deriving sexp]], to use polymorphic
       comparison and hashing. *)
 
   module Key = Key
@@ -136,11 +133,9 @@ module type Hash_set = sig
   (** A hash set that uses polymorphic comparison *)
   module Poly : sig
     type nonrec 'a t = 'a t [@@deriving_inline sexp]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-      end[@@ocaml.doc "@inline"]
+
+    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
     [@@@end]
 
     include
@@ -174,17 +169,17 @@ module type Hash_set = sig
 
   module type Sexp_of_m = sig
     type t [@@deriving_inline sexp_of]
-    include
-      sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end
 
   module type M_of_sexp = sig
     type t [@@deriving_inline of_sexp]
-    include
-      sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-      end[@@ocaml.doc "@inline"]
+
+    val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
     [@@@end]
 
     include Hashtbl_intf.Key.S with type t := t

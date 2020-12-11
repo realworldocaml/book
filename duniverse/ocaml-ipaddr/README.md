@@ -42,6 +42,20 @@ repository, included as part of the respective opam packages.
 - `ipaddr-sexp`: S-expression converters for Ipaddr.
 - `macaddr-sexp`: S-expression converters for Macaddr.
 
+## Installation and development
+
+The packages are released to the opam-repository. An `opam install ipaddr`
+(or any other above mentioned package) will install it. If you want to install
+the latest development commit, `opam pin add ipaddr --dev` will do this.
+
+A local build, after a `git clone` can be done with `dune build`, a
+`dune runtest` compiles and executes the testsuite. If dependencies are missing,
+`opam install (-t) --deps-only .` in the cloned directory will install them.
+
+The auto-formatter [`ocamlformat`](https://github.com/ocaml-ppx/ocamlformat) is
+used, please execute `dune build @fmt --auto-promote` before submitting a pull
+request.
+
 ## Contact
 
 - Issues: <https://github.com/mirage/ocaml-ipaddr/issues>

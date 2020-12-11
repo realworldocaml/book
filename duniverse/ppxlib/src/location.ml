@@ -23,6 +23,15 @@ let in_file name =
 
 let none = in_file "_none_"
 
+let init lexbuf fname =
+  let open Lexing in
+  lexbuf.lex_curr_p <- {
+    pos_fname = fname;
+    pos_lnum = 1;
+    pos_bol = 0;
+    pos_cnum = 0;
+  }
+
 let raise_errorf ?loc fmt = L.raise_errorf ?loc fmt
 let report_exception = L.report_exception
 
@@ -69,23 +78,11 @@ let compare loc1 loc2 =
   | n -> n
 
 module Error = struct
-  module Helpers = Selected_ast.Ast.Ast_mapper
+  include Ppxlib_ast.Location_error
 
-  type t = Helpers.location_error
-
-  let make = Helpers.make_error_of_message
   let createf ~loc fmt =
     Printf.ksprintf
-      (fun str -> Helpers.make_error_of_message ~loc ~sub:[] str) fmt
-
-  let message = Helpers.get_error_message
-  let set_message = Helpers.set_error_message
-
-  let register_error_of_exn = Helpers.register_error_of_exn
-
-  let of_exn = Helpers.error_of_exn
-
-  let to_extension = Helpers.extension_of_error
+      (fun str -> make ~loc ~sub:[] str) fmt
 end
 
 exception Error of Error.t

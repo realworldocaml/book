@@ -21,13 +21,13 @@ details.
 
 - **Discussion:** Post on <https://discuss.ocaml.org/> with the `ocaml` tag under
   the Ecosystem category.
-- **Bugs:** <https://github.com/avsm/ocaml-version/issues>
+- **Bugs:** <https://github.com/ocurrent/ocaml-version/issues>
 - **Docs:** <http://docs.mirage.io/ocaml-version>
 
 Contributions are very welcome.  Please see the overall TODO list below, or
 please get in touch with any particular comments you might have.
 
-[![Build Status](https://travis-ci.org/avsm/ocaml-version.svg?branch=master)](https://travis-ci.org/avsm/ocaml-version)
+[![Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Focurrent%2Focaml-version%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/ocurrent/ocaml-version)
 
 ### TODO 
 

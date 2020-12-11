@@ -34,9 +34,6 @@ let check_no_collision =
 
 module A = struct (* Additional AST construction helpers *)
 
-  let exp_string : (loc:Location.t -> string -> expression) = fun ~loc s ->
-    pexp_constant ~loc (Pconst_string (s,None))
-
   let pat_name : (loc:Location.t -> string -> pattern) = fun ~loc name ->
     ppat_var ~loc (Loc.make name ~loc)
 
@@ -56,7 +53,7 @@ module A = struct (* Additional AST construction helpers *)
 
   let mod_ ~loc : (string -> structure -> structure_item) =
     fun name structure ->
-      pstr_module ~loc (module_binding ~loc ~name:(Located.mk ~loc name)
+      pstr_module ~loc (module_binding ~loc ~name:(Located.mk ~loc (Some name))
                           ~expr:(pmod_structure ~loc structure))
 
   let sig_item ~loc name typ =
@@ -66,7 +63,7 @@ module A = struct (* Additional AST construction helpers *)
 
   let sig_mod ~loc : (string -> signature -> signature_item) =
     fun name signature ->
-      psig_module ~loc (module_declaration ~loc ~name:(Located.mk ~loc name)
+      psig_module ~loc (module_declaration ~loc ~name:(Located.mk ~loc (Some name))
                           ~type_:(pmty_signature ~loc signature))
 
 end
@@ -440,7 +437,7 @@ module Gen_struct = struct
           [%expr
               Fieldslib.Field.Field { Fieldslib.Field.For_generated_code.
                 force_variance = (fun (_ : [%t perm]) -> ());
-                name = [%e A.exp_string ~loc name];
+                name = [%e estring ~loc name];
                 getter = [%e A.exp_name ~loc name];
                 setter = [%e setter_field];
                 fset = [%e fset];}]
@@ -725,7 +722,7 @@ module Gen_struct = struct
     let getter_and_setters, fields = gen_fields ~private_ ~loc labdecs in
     let create = creation_fun ~loc record_name labdecs in
     let simple_create = simple_creation_fun ~loc record_name labdecs in
-    let names = List.map (Inspect.field_names labdecs) ~f:(A.exp_string ~loc) in
+    let names = List.map (Inspect.field_names labdecs) ~f:(estring ~loc) in
     let fields_module =
       if String.equal record_name "t" then "Fields" else "Fields_of_" ^ record_name
     in

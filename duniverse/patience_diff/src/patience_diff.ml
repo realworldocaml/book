@@ -1014,6 +1014,7 @@ let%test_module _ =
       then ()
       else
         failwiths
+          ~here:[%here]
           "invariant failure"
           (a, b)
           [%sexp_of: (int * int) list * (int * int) list]
@@ -1031,6 +1032,7 @@ let%test_module _ =
         then ()
         else
           failwiths
+            ~here:[%here]
             "invariant failure"
             (a, b, matches)
             [%sexp_of: int array * int array * (int * int) list]

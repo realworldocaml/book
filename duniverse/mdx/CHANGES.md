@@ -1,3 +1,29 @@
+### 1.8.1
+
+#### Changed
+
+- Dropped OMP dependency and use handwritten compat layers instead
+  (#317, @NathanReb)
+
+### 1.8.0
+
+#### Added
+
+- Allow to explicitly set the kind of blocks in labels: `ocaml`, `cram`, `toplevel` or `include`. (#237, @gpetiot)
+- Include blocks do not require an empty block anymore (#286, @gpetiot)
+- Support for OCaml 4.12 (#298, @kit-ty-kate)
+
+#### Changed
+
+- Improve error message of cram test exceptions due to empty lines in a block (#270, @pitag-ha)
+
+#### Fixed
+
+- Report `#require` directive errors (#276, @gpetiot)
+- Handle no such file exception: the input file and the values of options `--root` and `--prelude` are checked (#292, @gpetiot)
+- Keep locations from parsing instead of recomputing the lines, providing better error messages (#241, @gpetiot)
+- Use `create_process` instead of `execvp` to call `mdx-test` from `mdx`. This fixes running mdx from dune on Windows (#299, @emillon)
+
 ### 1.7.0
 
 #### Added

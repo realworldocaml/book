@@ -26,7 +26,7 @@ module Sorted_list = struct
   let invariant t =
     if List.is_sorted t ~compare:Int.compare
     then ()
-    else failwiths "sorted_list isn't sorted" t sexp_of_t
+    else failwiths ~here:[%here] "sorted_list isn't sorted" t sexp_of_t
   ;;
 
   let invalid_merge t_a t_b = List.append t_a t_b

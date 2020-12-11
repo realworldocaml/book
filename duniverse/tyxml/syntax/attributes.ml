@@ -68,7 +68,7 @@ let parse loc (language, element_name) attributes =
         | Some e -> e
       in
 
-      (Common.Label.labelled label, e)::labeled, regular
+      (Labelled label, e)::labeled, regular
 
     | None ->
       (* The attribute is not individually labeled, so it is passed in ~a.
@@ -143,7 +143,7 @@ let parse loc (language, element_name) attributes =
   if regular = [] then List.rev labeled
   else
     let regular =
-      Common.Label.labelled "a",
+      Labelled "a",
       Common.list loc (List.rev regular)
     in
     List.rev (regular::labeled)

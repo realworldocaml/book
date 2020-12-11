@@ -44,28 +44,26 @@ let test_parse_mli =
         (Ok
            {x|[Text "\n(** This is a doc comment with some code blocks in it:\n\n    ";
  Text "{[";
- Block {file: ; line: 4; column: 4; section: None; labels: [];
+ Block {loc: File "_none_", lines 4-7; section: None; labels: [];
         header: Some ocaml;
-                contents: ["# List.map (fun x -> x * x) [(1 + 9); 2; 3]";
-                           "- : int list = [100; 4; 9]"];
+        contents: ["# List.map (fun x -> x * x) [(1 + 9); 2; 3]";
+                   "- : int list = [100; 4; 9]"];
         value: Toplevel};
  Text "    ]}"; Text "\n\n    "; Text "{[";
- Block {file: ; line: 9; column: 4; section: None; labels: [];
+ Block {loc: File "_none_", line 9; section: None; labels: [];
         header: Some ocaml;
-                contents: ["List.map (fun x -> x * x) [1; 2; 3]"];
-        value: OCaml};
+        contents: ["List.map (fun x -> x * x) [1; 2; 3]"]; value: OCaml};
  Text "]}"; Text "\n\n    "; Text "{[";
- Block {file: ; line: 11; column: 4; section: None; labels: [];
+ Block {loc: File "_none_", lines 11-16; section: None; labels: [];
         header: Some ocaml;
-                contents: ["# List.map (fun x -> x * x) [(1 + 9); 2; 3]";
-                           "- : int list = [100; 4; 9]";
-                           "# List.map (fun x -> x * x) [1; 2; 3]";
-                           "- : int list = [1; 4; 9]"];
+        contents: ["# List.map (fun x -> x * x) [(1 + 9); 2; 3]";
+                   "- : int list = [100; 4; 9]";
+                   "# List.map (fun x -> x * x) [1; 2; 3]";
+                   "- : int list = [1; 4; 9]"];
         value: Toplevel};
  Text "    ]}"; Text "\n*)\nval foo : string\n\n(** "; Text "{[";
- Block {file: ; line: 20; column: 4; section: None; labels: [];
-        header: Some ocaml;
-                contents: ["1 + 1 = 3"]; value: OCaml};
+ Block {loc: File "_none_", line 20; section: None; labels: [];
+        header: Some ocaml; contents: ["1 + 1 = 3"]; value: OCaml};
  Text "]}";|x})
       ();
   ]

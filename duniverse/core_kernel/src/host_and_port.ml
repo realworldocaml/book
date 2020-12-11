@@ -20,7 +20,7 @@ module Stable = struct
 
     include T
 
-    include Binable.Stable.Of_binable.V1
+    include Binable.Stable.Of_binable.V1 [@alert "-legacy"]
         (Serializable)
         (struct
           include T

@@ -17,6 +17,14 @@ module InfiniteArray =
   MenhirLib.InfiniteArray
 
 (* ------------------------------------------------------------------------ *)
+
+(* Perform loop detection before attempting to build the LR(0) automaton. *)
+
+let () =
+  let module L = LoopDetection.Run() in
+  ()
+
+(* ------------------------------------------------------------------------ *)
 (* Symbolic lookahead information. *)
 
 (* A symbolic lookahead set consists of an actual concrete set of
@@ -304,14 +312,14 @@ let export (k, toksr) =
 (* Displaying a concrete state. *)
 
 let print_concrete leading (state : concretelr1state) =
-  let buffer = Buffer.create 1024 in
-  Item.Map.iter (fun item toks ->
-    Printf.bprintf buffer "%s%s[ %s ]\n"
-      leading
-      (Item.print item)
-      (TerminalSet.print toks)
-  ) state;
-  Buffer.contents buffer
+  Misc.with_buffer 1024 (fun buffer ->
+    Item.Map.iter (fun item toks ->
+      Printf.bprintf buffer "%s%s [ %s ]\n"
+        leading
+        (Item.print item)
+        (TerminalSet.print toks)
+    ) state
+  )
 
 (* Displaying a state. By default, only the kernel is displayed, not
    the closure. *)
@@ -327,9 +335,15 @@ let print_closure leading state =
 let core (k, _) =
   k
 
-(* A sanity check. *)
+(* A sanity check. This well-formedness check is quite costly, due to the
+   use of [Item.Set.cardinal]. Therefore, it is enabled only when [debug]
+   is [true]. *)
+
+let debug =
+  false
 
 let well_formed (k, toksr) =
+  not debug ||
   Array.length toksr = Item.Set.cardinal (InfiniteArray.get states k)
 
 (* An LR(1) start state is the combination of an LR(0) start state
@@ -629,11 +643,22 @@ let error_compatible  (k1, toksr1) (k2, toksr2) =
 (* Union of two states. The two states must have the same core. The
    new state is obtained by pointwise union of the lookahead sets. *)
 
-let union (k1, toksr1) (k2, toksr2) =
+let union (k1, toksr1) ((k2, toksr2) as s2) =
   assert (k1 = k2);
-  k1, Array.init (Array.length toksr1) (fun i ->
-    TerminalSet.union toksr1.(i) toksr2.(i)
-  )
+  let k = k1 in
+  let toksr =
+    Array.init (Array.length toksr1) (fun i ->
+      TerminalSet.union toksr1.(i) toksr2.(i)
+    ) in
+  (* If the fresh array [toksr] has the same content as [toksr2],
+     then we must return the state [s2], unchanged. We could be
+     even more ambitious and try to not even allocate the array
+     [toksr] in that case, but that seems more trouble than it
+     is worth. *)
+  if Misc.array_for_all2 (==) toksr2 toksr then
+    s2
+  else
+    k, toksr
 
 (* Restriction of a state to a set of tokens of interest. Every
    lookahead set is intersected with that set. *)
@@ -689,14 +714,15 @@ let reduction_tokens reductions =
 
 let invert reductions : TerminalSet.t ProductionMap.t =
   TerminalMap.fold (fun tok prods inverse ->
-    let prod = Misc.single prods in
-    let toks =
-      try
-        ProductionMap.lookup prod inverse
-      with Not_found ->
-        TerminalSet.empty
-    in
-    ProductionMap.add prod (TerminalSet.add tok toks) inverse
+    List.fold_left (fun inverse prod ->
+      let toks =
+        try
+          ProductionMap.lookup prod inverse
+        with Not_found ->
+          TerminalSet.empty
+      in
+      ProductionMap.add prod (TerminalSet.add tok toks) inverse
+    ) inverse prods
   ) reductions ProductionMap.empty
 
 (* [has_eos_conflict transitions reductions] tells whether a state has

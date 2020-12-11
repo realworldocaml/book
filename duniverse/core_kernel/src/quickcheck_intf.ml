@@ -7,7 +7,6 @@
 open! Import
 open Base_quickcheck
 
-(*_ JS-only: For an overview see: lib/core_kernel/doc/quickcheck.mkd *)
 
 module type Generator = sig
   (** An ['a t] a generates values of type ['a] with a specific probability distribution.
@@ -394,6 +393,12 @@ module type Shrinker = sig
   val bool : bool t
   val char : char t
   val map : 'a t -> f:('a -> 'b) -> f_inverse:('b -> 'a) -> 'b t
+  val filter : 'a t -> f:('a -> bool) -> 'a t
+
+  (** Filters and maps according to [f], and provides input to [t] via [f_inverse]. Only
+      the [f] direction produces options, intentionally. *)
+  val filter_map : 'a t -> f:('a -> 'b option) -> f_inverse:('b -> 'a) -> 'b t
+
   val tuple2 : 'a t -> 'b t -> ('a * 'b) t
   val tuple3 : 'a t -> 'b t -> 'c t -> ('a * 'b * 'c) t
   val tuple4 : 'a t -> 'b t -> 'c t -> 'd t -> ('a * 'b * 'c * 'd) t

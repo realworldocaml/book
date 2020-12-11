@@ -23,7 +23,7 @@ module Rule = struct
 
     let attr_name (T t) = Attribute.name t.attribute
 
-    let split_normal_and_expect l = List.partition_tf l ~f:(fun (T t) -> not t.expect)
+    let split_normal_and_expect l = List.partition l ~f:(fun (T t) -> not t.expect)
   end
 
   module Attr_inline = struct
@@ -39,7 +39,7 @@ module Rule = struct
     type ('a, 'b) t = T : ('a, 'b, _) unpacked -> ('a, 'b) t
     let attr_name (T t) = Attribute.name t.attribute
 
-    let split_normal_and_expect l = List.partition_tf l ~f:(fun (T t) -> not t.expect)
+    let split_normal_and_expect l = List.partition l ~f:(fun (T t) -> not t.expect)
   end
 
   module Special_function = struct
@@ -283,10 +283,10 @@ let table_of_special_functions special_functions =
       (ident, expand))
     (* We expect the lookup to fail most of the time, by making the table big (and
        sparse), we make it more likely to fail quickly *)
-    |> Hashtbl.Poly.of_alist ~size:(max 1024 (List.length special_functions * 2))
+    |> Hashtbl.of_alist ~size:(max 1024 (List.length special_functions * 2))
   with
-  | `Ok table -> table
-  | `Duplicate_key ident ->
+  | Ok table -> table
+  | Error ident ->
     Printf.ksprintf invalid_arg
       "Context_free.V1.map_top_down: \
        %s present twice in list of special functions"
@@ -317,13 +317,13 @@ let rev_concat = function
 ;;
 
 let sort_attr_group_inline l =
-  List.sort l ~compare:(fun a b ->
+  List.sort l ~cmp:(fun a b ->
     String.compare
       (Rule.Attr_group_inline.attr_name a)
       (Rule.Attr_group_inline.attr_name b))
 
 let sort_attr_inline l =
-  List.sort l ~compare:(fun a b ->
+  List.sort l ~cmp:(fun a b ->
     String.compare
       (Rule.Attr_inline.attr_name a)
       (Rule.Attr_inline.attr_name b))
@@ -378,7 +378,7 @@ class map_top_down ?(expect_mismatch_handler=Expect_mismatch_handler.nop)
   let constants =
     Rule.filter Constant rules
     |> List.map ~f:(fun (c:Rule.Constant.t) -> ((c.suffix,c.kind),c.expand))
-    |> Hashtbl.Poly.of_alist_exn
+    |> Hashtbl.of_alist_exn
   in
   let extensions = Rule.filter Extension rules in
   let class_expr       = E.filter_by_context EC.class_expr       extensions
@@ -461,13 +461,13 @@ class map_top_down ?(expect_mismatch_handler=Expect_mismatch_handler.nop)
         | _ -> e
       in
       let expand_constant kind char text =
-        match Hashtbl.find constants (char,kind) with
+        match Hashtbl.find_opt constants (char,kind) with
         | None -> super#expression base_ctxt e
         | Some expand -> self#expression base_ctxt (expand e.pexp_loc text)
       in
       match e.pexp_desc with
       | Pexp_apply ({ pexp_desc = Pexp_ident id; _ } as func, args) -> begin
-          match Hashtbl.find special_functions id.txt with
+          match Hashtbl.find_opt special_functions id.txt with
           | None ->
             self#pexp_apply_without_traversing_function base_ctxt e func args
           | Some pattern ->
@@ -478,7 +478,7 @@ class map_top_down ?(expect_mismatch_handler=Expect_mismatch_handler.nop)
               self#expression base_ctxt e
         end
       | Pexp_ident id -> begin
-          match Hashtbl.find special_functions id.txt with
+          match Hashtbl.find_opt special_functions id.txt with
           | None ->
             super#expression base_ctxt e
           | Some pattern ->

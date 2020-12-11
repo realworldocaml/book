@@ -119,6 +119,27 @@ module Connection : sig
     -> unit
     -> ('address, 'listening_on) Tcp.Server.t Deferred.t
 
+  (** As [serve], but only accepts IP addresses, not Unix sockets; returns server
+      immediately rather than asynchronously. *)
+  val serve_inet
+    :  implementations:'s Implementations.t
+    -> initial_connection_state:(Socket.Address.Inet.t -> t -> 's)
+    -> where_to_listen:Tcp.Where_to_listen.inet
+    -> ?max_connections:int
+    -> ?backlog:int
+    -> ?max_message_size:int
+    -> ?make_transport:transport_maker
+    -> ?handshake_timeout:Time.Span.t
+    -> ?heartbeat_config:Heartbeat_config.t
+    -> ?auth:(Socket.Address.Inet.t -> bool) (** default is [`Ignore] *)
+    -> ?on_handshake_error:on_handshake_error (** default is [`Ignore] *)
+    -> ?on_handler_error:[ `Raise
+                         | `Ignore
+                         | `Call of Socket.Address.Inet.t -> exn -> unit
+                         ]
+    -> unit
+    -> (Socket.Address.Inet.t, int) Tcp.Server.t
+
   val serve_with_transport
     :  handshake_timeout:Time.Span.t option
     -> heartbeat_config:Heartbeat_config.t option

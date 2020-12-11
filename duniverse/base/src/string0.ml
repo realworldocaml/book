@@ -9,16 +9,11 @@
    [String], and come before [Base.String] in build order should do
 
    {[
-     module String = String0]
+     module String = String0
    ]}
 
    Defining [module String = String0] is also necessary because it prevents
    ocamldep from mistakenly causing a file to depend on [Base.String]. *)
-
-let capitalize = Caml.String.capitalize_ascii
-let lowercase = Caml.String.lowercase_ascii
-let uncapitalize = Caml.String.uncapitalize_ascii
-let uppercase = Caml.String.uppercase_ascii
 
 open! Import0
 module Sys = Sys0
@@ -35,12 +30,16 @@ include String
 
 let max_length = Sys.max_string_length
 let ( ^ ) = ( ^ )
+let capitalize = Caml.String.capitalize_ascii
 let compare = Caml.String.compare
 let[@warning "-3"] copy = Caml.String.copy
 let escaped = Caml.String.escaped
+let lowercase = Caml.String.lowercase_ascii
 let make = Caml.String.make
 let sub = Caml.String.sub
+let uncapitalize = Caml.String.uncapitalize_ascii
 let unsafe_blit = Caml.String.unsafe_blit
+let uppercase = Caml.String.uppercase_ascii
 
 let concat ?(sep = "") l =
   match l with

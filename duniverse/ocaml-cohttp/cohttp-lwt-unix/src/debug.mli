@@ -17,9 +17,9 @@
 (** Debugging output for Cohttp Unix *)
 
 val activate_debug : unit -> unit
-(** [activate_debug] enables debugging output that will be sent to
-    standard error. *)
+(** [activate_debug] enables debugging output that will be sent to standard
+    error. *)
 
 val debug_active : unit -> bool
-(** [debug_active] returns true if [activate_debug] has been called and
-    false otherwise *)
+(** [debug_active] returns true if [activate_debug] has been called and false
+    otherwise *)

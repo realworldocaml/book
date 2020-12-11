@@ -1,5 +1,4 @@
-open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Import
 module Int63_emul = Base.Int63.Private.Emul
 
 let%expect_test _ =

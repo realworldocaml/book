@@ -47,19 +47,19 @@ let ptuple = function
 
 (* A list subject to a condition. *)
 
-let listif condition xs =
+let ifn condition xs =
   if condition then
     xs
   else
     []
 
-let elementif condition x =
+let if1 condition x =
   if condition then
     [ x ]
   else
     []
 
-let listiflazy condition xs =
+let ifnlazy condition xs =
   if condition then
     xs()
   else
@@ -313,3 +313,13 @@ let mapp me1 me2 =
 
 let mapp me1 mes2 =
   List.fold_left mapp me1 mes2
+
+let field modifiable name t =
+  {
+    modifiable = modifiable;
+    fieldname = name;
+    fieldtype = type2scheme t
+  }
+
+let branch branchpat branchbody =
+  { branchpat; branchbody }

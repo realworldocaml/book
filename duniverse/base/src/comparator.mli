@@ -52,12 +52,10 @@ module S_to_S1 (S : S) :
     nullary type. *)
 module Make (M : sig
     type t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : t -> t -> int
-        val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : t -> t -> int
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end) : S with type t := M.t
 
@@ -83,13 +81,10 @@ end
     ['a t] given a comparator for the type ['a]. *)
 module Derived (M : sig
     type 'a t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-        val sexp_of_t :
-          ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+    val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end) : Derived with type 'a t := 'a M.t
 
@@ -107,17 +102,15 @@ end
     [('a, 'b) t] given comparators for the type ['a] and ['b]. *)
 module Derived2 (M : sig
     type ('a, 'b) t [@@deriving_inline compare, sexp_of]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        val compare :
-          ('a -> 'a -> int) ->
-          ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
-        val sexp_of_t :
-          ('a -> Ppx_sexp_conv_lib.Sexp.t) ->
-          ('b -> Ppx_sexp_conv_lib.Sexp.t) ->
-          ('a, 'b) t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val compare : ('a -> 'a -> int) -> ('b -> 'b -> int) -> ('a, 'b) t -> ('a, 'b) t -> int
+
+    val sexp_of_t
+      :  ('a -> Ppx_sexp_conv_lib.Sexp.t)
+      -> ('b -> Ppx_sexp_conv_lib.Sexp.t)
+      -> ('a, 'b) t
+      -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
   end) : Derived2 with type ('a, 'b) t := ('a, 'b) M.t
 

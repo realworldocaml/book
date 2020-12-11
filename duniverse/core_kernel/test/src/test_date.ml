@@ -122,11 +122,31 @@ let%expect_test "Date.V1.Map" =
       "\003\254*\004\t\016\026not the Battle of Hastings\254\163\007\n\005\014flux capacitor\254\220\007\003\019\na Thursday")) |}]
 ;;
 
-let%test_unit "create_exn doesn't allocate" =
-  let allocation_before = Gc.major_plus_minor_words () in
-  ignore (Date.create_exn ~y:1999 ~m:Dec ~d:31 : Date.t);
-  let allocation_after = Gc.major_plus_minor_words () in
-  [%test_eq: int] allocation_before allocation_after
+let%expect_test "Date.Option.V1" =
+  let date_examples =
+    [ Date.create_exn ~y:1066 ~m:Oct ~d:16
+    ; Date.create_exn ~y:1955 ~m:Nov ~d:5
+    ; Date.create_exn ~y:2012 ~m:Apr ~d:19
+    ]
+  in
+  let date_opt_examples =
+    Date.Option.none :: List.map date_examples ~f:Date.Option.some
+  in
+  print_and_check_stable_type [%here] (module Date.Stable.Option.V1) date_opt_examples;
+  [%expect
+    {|
+    (bin_shape_digest aff59493f3c14f005635a016cd36c44b)
+    ((sexp ()) (bin_io "\000"))
+    ((sexp (1066-10-16)) (bin_io "\253\016\n*\004"))
+    ((sexp (1955-11-05)) (bin_io "\253\005\011\163\007"))
+    ((sexp (2012-04-19)) (bin_io "\253\019\004\220\007")) |}]
+;;
+
+let%expect_test "create_exn doesn't allocate" =
+  let y, m, d = Sys.opaque_identity (1999, Month.Dec, 31) in
+  require_no_allocation [%here] (fun () ->
+    ignore (Sys.opaque_identity (Date.create_exn ~y ~m ~d) : Date.t));
+  [%expect {| |}]
 ;;
 
 let%test_unit "creation and destruction" =
@@ -270,6 +290,148 @@ let%test_module "diff_weekdays" =
   end)
 ;;
 
+let%test_module "adding weekdays and business days" =
+  (module struct
+    let test alist day_of_week date_string =
+      let date = Date.of_string date_string in
+      require_equal [%here] (module Day_of_week) day_of_week (Date.day_of_week date);
+      List.iter alist ~f:(fun (name, round_and_add) ->
+        let list =
+          List.map [ -2; -1; 0; 1; 2 ] ~f:(fun increment ->
+            let date = round_and_add date increment in
+            let day_of_week = Date.day_of_week date in
+            increment, day_of_week, date)
+        in
+        print_s [%sexp (name : string), (list : (int * Day_of_week.t * Date.t) list)])
+    ;;
+
+    let%expect_test "weekdays" =
+      let open Day_of_week in
+      let test =
+        test
+          [ "add_weekdays_rounding_backward", add_weekdays_rounding_backward
+          ; "add_weekdays_rounding_forward", add_weekdays_rounding_forward
+          ]
+      in
+      (* Friday *)
+      test Fri "2019-05-03";
+      [%expect
+        {|
+        (add_weekdays_rounding_backward (
+          (-2 WED 2019-05-01)
+          (-1 THU 2019-05-02)
+          (0  FRI 2019-05-03)
+          (1  MON 2019-05-06)
+          (2  TUE 2019-05-07)))
+        (add_weekdays_rounding_forward (
+          (-2 WED 2019-05-01)
+          (-1 THU 2019-05-02)
+          (0  FRI 2019-05-03)
+          (1  MON 2019-05-06)
+          (2  TUE 2019-05-07))) |}];
+      (* Saturday, Sunday: both round back to Friday or forward to Monday *)
+      List.iter
+        [ Sat, "2019-05-04"; Sun, "2019-05-05" ]
+        ~f:(fun (day_of_week, date_string) ->
+          test day_of_week date_string;
+          [%expect
+            {|
+            (add_weekdays_rounding_backward (
+              (-2 WED 2019-05-01)
+              (-1 THU 2019-05-02)
+              (0  FRI 2019-05-03)
+              (1  MON 2019-05-06)
+              (2  TUE 2019-05-07)))
+            (add_weekdays_rounding_forward (
+              (-2 THU 2019-05-02)
+              (-1 FRI 2019-05-03)
+              (0  MON 2019-05-06)
+              (1  TUE 2019-05-07)
+              (2  WED 2019-05-08))) |}]);
+      (* Monday *)
+      test Mon "2019-05-06";
+      [%expect
+        {|
+        (add_weekdays_rounding_backward (
+          (-2 THU 2019-05-02)
+          (-1 FRI 2019-05-03)
+          (0  MON 2019-05-06)
+          (1  TUE 2019-05-07)
+          (2  WED 2019-05-08)))
+        (add_weekdays_rounding_forward (
+          (-2 THU 2019-05-02)
+          (-1 FRI 2019-05-03)
+          (0  MON 2019-05-06)
+          (1  TUE 2019-05-07)
+          (2  WED 2019-05-08))) |}]
+    ;;
+
+    let%expect_test "business days" =
+      let open Day_of_week in
+      let test =
+        let is_holiday = Date.equal (Date.of_string "2019-05-06") in
+        test
+          [ ( "add_business_days_rounding_backward"
+            , add_business_days_rounding_backward ~is_holiday )
+          ; ( "add_business_days_rounding_forward"
+            , add_business_days_rounding_forward ~is_holiday )
+          ]
+      in
+      (* Friday *)
+      test Fri "2019-05-03";
+      [%expect
+        {|
+        (add_business_days_rounding_backward (
+          (-2 WED 2019-05-01)
+          (-1 THU 2019-05-02)
+          (0  FRI 2019-05-03)
+          (1  TUE 2019-05-07)
+          (2  WED 2019-05-08)))
+        (add_business_days_rounding_forward (
+          (-2 WED 2019-05-01)
+          (-1 THU 2019-05-02)
+          (0  FRI 2019-05-03)
+          (1  TUE 2019-05-07)
+          (2  WED 2019-05-08))) |}];
+      (* Saturday, Sunday, Monday: all round back to Friday or forward to Tuesday *)
+      List.iter
+        [ Sat, "2019-05-04"; Sun, "2019-05-05"; Mon, "2019-05-06" ]
+        ~f:(fun (day_of_week, date_string) ->
+          test day_of_week date_string;
+          [%expect
+            {|
+            (add_business_days_rounding_backward (
+              (-2 WED 2019-05-01)
+              (-1 THU 2019-05-02)
+              (0  FRI 2019-05-03)
+              (1  TUE 2019-05-07)
+              (2  WED 2019-05-08)))
+            (add_business_days_rounding_forward (
+              (-2 THU 2019-05-02)
+              (-1 FRI 2019-05-03)
+              (0  TUE 2019-05-07)
+              (1  WED 2019-05-08)
+              (2  THU 2019-05-09))) |}]);
+      (* Tuesday *)
+      test Tue "2019-05-07";
+      [%expect
+        {|
+        (add_business_days_rounding_backward (
+          (-2 THU 2019-05-02)
+          (-1 FRI 2019-05-03)
+          (0  TUE 2019-05-07)
+          (1  WED 2019-05-08)
+          (2  THU 2019-05-09)))
+        (add_business_days_rounding_forward (
+          (-2 THU 2019-05-02)
+          (-1 FRI 2019-05-03)
+          (0  TUE 2019-05-07)
+          (1  WED 2019-05-08)
+          (2  THU 2019-05-09))) |}]
+    ;;
+  end)
+;;
+
 let%test_module "ordinal_date" =
   (module struct
     (* check the ordinal date tables we found on wikipedia... *)
@@ -386,4 +548,45 @@ let%test_unit _ =
     ~compare
     ~trials:1_000
     ~distinct_values:500
+;;
+
+let%test_unit _ =
+  Quickcheck.test_can_generate
+    Date.Option.quickcheck_generator
+    ~sexp_of:Date.Option.sexp_of_t
+    ~f:(fun t -> Date.Option.equal t Date.Option.none)
+;;
+
+let%test_unit _ =
+  Quickcheck.test_can_generate
+    Date.Option.quickcheck_generator
+    ~sexp_of:Date.Option.sexp_of_t
+    ~f:(fun t -> Date.Option.equal t (Date.Option.some (Date.of_string "1900-01-01")))
+;;
+
+let%test_unit _ =
+  Quickcheck.test_can_generate
+    Date.Option.quickcheck_generator
+    ~sexp_of:Date.Option.sexp_of_t
+    ~f:(fun t -> Date.Option.equal t (Date.Option.some (Date.of_string "2100-01-01")))
+;;
+
+let%test_unit _ =
+  Quickcheck.test_can_generate
+    Date.Option.quickcheck_generator
+    ~sexp_of:Date.Option.sexp_of_t
+    ~f:(fun t ->
+      Date.Option.between
+        t
+        ~low:(Date.Option.some (Date.of_string "1900-01-01"))
+        ~high:(Date.Option.some (Date.of_string "2100-01-01")))
+;;
+
+let%test_unit _ =
+  Quickcheck.test_distinct_values
+    Date.Option.quickcheck_generator
+    ~sexp_of:Date.Option.sexp_of_t
+    ~compare:Date.Option.compare
+    ~trials:1_000
+    ~distinct_values:100
 ;;

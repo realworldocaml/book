@@ -24,10 +24,6 @@ module Trusted : sig
   val length : 'a t -> int
   val unsafe_blit : ('a t, 'a t) Blit.blit
   val copy : 'a t -> 'a t
-
-  val unsafe_truncate : 'a t -> len:int -> unit
-  [@@deprecated "[since 2019-07] It will be removed in the future"]
-
   val unsafe_clear_if_pointer : _ t -> int -> unit
 end = struct
   type 'a t = Obj_array.t
@@ -61,9 +57,6 @@ end = struct
   ;;
 
   let unsafe_clear_if_pointer = Obj_array.unsafe_clear_if_pointer
-
-  (* deprecated *)
-  let unsafe_truncate = (Obj_array.truncate [@ocaml.warning "-3"])
 end
 
 include Trusted
@@ -87,6 +80,12 @@ let map a ~f = init ~f:(fun i -> f (unsafe_get a i)) (length a)
 let iter a ~f =
   for i = 0 to length a - 1 do
     f (unsafe_get a i)
+  done
+;;
+
+let iteri a ~f =
+  for i = 0 to length a - 1 do
+    f i (unsafe_get a i)
   done
 ;;
 

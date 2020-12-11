@@ -1,0 +1,11 @@
+(rule
+ (with-outputs-to
+  test.output
+  (with-accepted-exit-codes
+   (not 0)
+   (run %{bin:mdx} test foo))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff test.expected test.output)))

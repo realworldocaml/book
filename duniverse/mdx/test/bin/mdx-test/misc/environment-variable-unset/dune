@@ -1,0 +1,16 @@
+(rule
+ (deps
+  (package mdx)
+  (source_tree environment-variable-unset))
+ (action
+  (with-stdout-to
+   test-case.output
+   (setenv
+    VAR
+    val
+    (run ocaml-mdx test --output - %{dep:test-case.md})))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff test-case.md test-case.output)))

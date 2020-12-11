@@ -160,6 +160,10 @@ let string_to_expr ~loc s =
   match sexp_converter_opt with
   | Some (sexp_converter, unparsed_type) ->
     let lexbuf = Lexing.from_string unparsed_type in
+    (* ~loc is the position of the string, not the position of the %{bla} group we're
+       looking at. The format strings don't contain location information, so we can't
+       actually find the proper positions. *)
+    lexbuf.lex_abs_pos <- loc.loc_start.pos_cnum;
     lexbuf.lex_curr_p <- loc.loc_start;
     let ty = Parse.core_type lexbuf in
     let e = Ppx_sexp_conv_expander.Sexp_of.core_type ty in
@@ -260,13 +264,13 @@ let expand_format_string ~loc fmt_string =
 let expand e =
   match e.pexp_desc with
   | Pexp_apply ({ pexp_attributes = ident_attrs; _ },
-                [ (Nolabel, { pexp_desc = Pexp_constant (Pconst_string (str, _))
+                [ (Nolabel, { pexp_desc = Pexp_constant (Pconst_string (str, _, _))
                             ; pexp_loc = loc; pexp_loc_stack = _
                             ; pexp_attributes = str_attrs }) ]) ->
     assert_no_attributes ident_attrs;
     assert_no_attributes str_attrs;
     let e' = expand_format_string ~loc str in
-    Some { e' with pexp_attributes = e.pexp_attributes }
+    Some { e' with pexp_attributes = Merlin_helpers.hide_attribute :: e.pexp_attributes }
   | _ -> None
 ;;
 

@@ -4,7 +4,6 @@ open Lwt
 
 let echo_client host port =
   let open Lwt_io in
-  Mirage_crypto_rng_lwt.initialize () >>= fun () ->
   let port = int_of_string port in
   let authenticator = null_auth in
   Tls_lwt.Unix.connect

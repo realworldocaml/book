@@ -198,31 +198,30 @@ module Ignoring_field = struct
     }
   [@@deriving_inline compare, equal]
 
-  let _ = fun (_ : t)  -> ()
-
-
-  let compare =
-    (fun a__589_ ->
-       fun b__590_ ->
-         if Ppx_compare_lib.phys_equal a__589_ b__590_
-         then 0
-         else
-           (match compare_int a__589_.b b__590_.b with
-            | 0 -> compare_int a__589_.c b__590_.c
-            | n -> n) : t -> t -> int)
-  let _ = compare
-
-
-  let equal =
-    (fun a__591_ ->
-       fun b__592_ ->
-         if Ppx_compare_lib.phys_equal a__591_ b__592_
-         then true
-         else
-           Ppx_compare_lib.(&&) (equal_int a__591_.b b__592_.b)
-             (equal_int a__591_.c b__592_.c) : t -> t -> bool)
-  let _ = equal
-  [@@@deriving.end]
+  
+let _ = fun (_ : t) -> ()
+  
+  
+let compare =
+  (fun a__589_ ->
+     fun b__590_ ->
+       if Ppx_compare_lib.phys_equal a__589_ b__590_
+       then 0
+       else
+         (match compare_int a__589_.b b__590_.b with
+          | 0 -> compare_int a__589_.c b__590_.c
+          | n -> n) : t -> t -> int)
+let _ = compare
+let equal =
+  (fun a__591_ ->
+     fun b__592_ ->
+       if Ppx_compare_lib.phys_equal a__591_ b__592_
+       then true
+       else
+         Ppx_compare_lib.(&&) (equal_int a__591_.b b__592_.b)
+           (equal_int a__591_.c b__592_.c) : t -> t -> bool)
+let _ = equal
+[@@@deriving.end]
 
   let equal = [%compare.equal: t]
 end
@@ -246,38 +245,62 @@ module Ignoring = struct
   type t = { a : (int [@ignore]) * string }
   [@@deriving_inline compare, equal]
 
-  let _ = fun (_ : t) -> ()
-
-  let compare =
-    (fun a__609_ ->
-       fun b__610_ ->
-         if Ppx_compare_lib.phys_equal a__609_ b__610_
-         then 0
-         else
-           (let (t__611_, t__612_) = a__609_.a in
-            let (t__613_, t__614_) = b__610_.a in
-            match let _ = t__611_
-              and _ = t__613_ in 0 with
-            | 0 -> compare_string t__612_ t__614_
-            | n -> n) : t -> t -> int)
-  let _ = compare
-
-  let equal =
-    (fun a__615_ ->
-       fun b__616_ ->
-         if Ppx_compare_lib.phys_equal a__615_ b__616_
-         then true
-         else
-           (let (t__617_, t__618_) = a__615_.a in
-            let (t__619_, t__620_) = b__616_.a in
-            Ppx_compare_lib.(&&) (let _ = t__617_
-                                  and _ = t__619_ in true)
-              (equal_string t__618_ t__620_)) : t -> t -> bool)
-  let _ = equal
-  [@@@deriving.end]
+  
+let _ = fun (_ : t) -> ()
+  
+let compare =
+  (fun a__609_ ->
+     fun b__610_ ->
+       if Ppx_compare_lib.phys_equal a__609_ b__610_
+       then 0
+       else
+         (let (t__611_, t__612_) = a__609_.a in
+          let (t__613_, t__614_) = b__610_.a in
+          match let (_ : _) = t__611_
+                and (_ : _) = t__613_ in 0 with
+          | 0 -> compare_string t__612_ t__614_
+          | n -> n) : t -> t -> int)
+let _ = compare
+let equal =
+  (fun a__615_ ->
+     fun b__616_ ->
+       if Ppx_compare_lib.phys_equal a__615_ b__616_
+       then true
+       else
+         (let (t__617_, t__618_) = a__615_.a in
+          let (t__619_, t__620_) = b__616_.a in
+          Ppx_compare_lib.(&&)
+            (let (_ : _) = t__617_
+             and (_ : _) = t__619_ in true) (equal_string t__618_ t__620_)) :
+  t -> t -> bool)
+let _ = equal
+[@@@deriving.end]
 
   let%test _ = equal { a = (1, "hi") } { a = (2, "hi") }
   let%test _ = not (equal { a = (1, "hi") } { a = (1, "ho") })
+end
+
+module Ignoring_with_type = struct
+  type t =
+    { a : int
+    ; b : (int[@compare.ignore])
+    }
+  [@@deriving_inline compare]
+  
+let _ = fun (_ : t) -> ()
+  
+let compare =
+  (fun a__621_ ->
+     fun b__622_ ->
+       if Ppx_compare_lib.phys_equal a__621_ b__622_
+       then 0
+       else
+         (match compare_int a__621_.a b__622_.a with
+          | 0 -> let (_ : _) = a__621_.b
+                 and (_ : _) = b__622_.b in 0
+          | n -> n) : t -> t -> int)
+let _ = compare
+[@@@deriving.end]
 end
 
 module Enum_optim = struct
@@ -285,16 +308,15 @@ module Enum_optim = struct
   type t = A | B | C
   [@@deriving_inline compare, equal]
 
-  let _ = fun (_ : t) -> ()
-
-
-  let compare = (Ppx_compare_lib.polymorphic_compare : t -> t -> int)
-  let _ = compare
-
-
-  let equal = (Ppx_compare_lib.polymorphic_equal : t -> t -> bool)
-  let _ = equal
-  [@@@deriving.end]
+  
+let _ = fun (_ : t) -> ()
+  
+  
+let compare = (Ppx_compare_lib.polymorphic_compare : t -> t -> int)
+let _ = compare
+let equal = (Ppx_compare_lib.polymorphic_equal : t -> t -> bool)
+let _ = equal
+[@@@deriving.end]
 end
 
 

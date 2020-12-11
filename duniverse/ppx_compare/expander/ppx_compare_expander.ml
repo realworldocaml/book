@@ -157,32 +157,39 @@ module Make(Params : Params) = struct
 
   let tp_name n = Printf.sprintf "_cmp__%s" n
 
-  let type_ ~loc ty =
-    [%type: [%t ty] -> [%t ty] -> [%t result_type ~loc]]
+  let type_ ~hide ~loc ty =
+    let loc = { loc with loc_ghost = true } in
+    let ptyp_attributes =
+      if hide
+      then Merlin_helpers.hide_attribute :: ty.ptyp_attributes
+      else ty.ptyp_attributes
+    in
+    let hty = { ty with ptyp_attributes } in
+    [%type: [%t ty] -> [%t hty] -> [%t result_type ~loc]]
 
   let function_name = function
     | "t" -> name
     | s -> name ^ "_" ^ s
 
   let compare_ignore ~loc value1 value2 =
-    [%expr let _ = [%e value1] and _ = [%e value2] in [%e const ~loc Equal]]
+    [%expr let _ : _ = [%e value1] and _ : _ = [%e value2] in [%e const ~loc Equal]]
 
-  let rec compare_applied ~constructor ~args value1 value2 =
+  let rec compare_applied ~hide ~constructor ~args value1 value2 =
     let args =
-      List.map args ~f:(compare_of_ty_fun ~type_constraint:false) @ [value1; value2]
+      List.map args ~f:(compare_of_ty_fun ~hide ~type_constraint:false) @ [value1; value2]
     in
     type_constr_conv ~loc:(Located.loc constructor) constructor args
       ~f:function_name
 
-  and compare_of_tuple loc tys value1 value2 =
+  and compare_of_tuple ~hide loc tys value1 value2 =
     with_tuple loc ~value:value1 ~tys (fun elems1 ->
       with_tuple loc ~value:value2 ~tys (fun elems2 ->
         let exprs = List.map2_exn elems1 elems2 ~f:(fun (v1, t) (v2, _) ->
-          compare_of_ty t v1 v2)
+          compare_of_ty ~hide t v1 v2)
         in
         chain_if ~loc exprs))
 
-  and compare_variant loc row_fields value1 value2 =
+  and compare_variant ~hide loc row_fields value1 value2 =
     let map = fun row ->
       match row.prf_desc with
       | Rtag ({ txt = cnstr; _ }, true, _) | Rtag ({ txt = cnstr; _ }, _, []) ->
@@ -193,7 +200,7 @@ module Make(Params : Params) = struct
       | Rtag ({ txt = cnstr; _ }, false, tp :: _) ->
         let v1 = gen_symbol ~prefix:"_left" ()
         and v2 = gen_symbol ~prefix:"_right" () in
-        let body = compare_of_ty tp (evar ~loc v1) (evar ~loc v2) in
+        let body = compare_of_ty ~hide tp (evar ~loc v1) (evar ~loc v2) in
         case ~guard:None
           ~lhs:(ppat_tuple ~loc [ ppat_variant ~loc cnstr (Some (pvar ~loc v1))
                                 ; ppat_variant ~loc cnstr (Some (pvar ~loc v2))
@@ -213,7 +220,7 @@ module Make(Params : Params) = struct
           ~lhs:(ppat_tuple ~loc [ ppat_alias ~loc (ppat_type ~loc id) (Located.mk ~loc v1)
                                 ; ppat_alias ~loc (ppat_type ~loc id) (Located.mk ~loc v2)
                                 ])
-          ~rhs:(compare_applied ~constructor:id ~args (evar ~loc v1) (evar ~loc v2))
+          ~rhs:(compare_applied ~hide ~constructor:id ~args (evar ~loc v1) (evar ~loc v2))
       | Rinherit ty ->
         Location.raise_errorf ~loc:ty.ptyp_loc "Ppx_compare.compare_variant: unknown type"
     in
@@ -231,7 +238,7 @@ module Make(Params : Params) = struct
     in
     phys_equal_first value1 value2 e
 
-  and branches_of_sum cds =
+  and branches_of_sum ~hide cds =
     let rightmost_index = (List.length cds - 1) in
     List.concat
       (List.mapi cds ~f:(fun i cd ->
@@ -249,7 +256,8 @@ module Make(Params : Params) = struct
                ~lhs:(ppat_tuple ~loc [ pconstruct cd (Some (pvar ~loc value1))
                                      ; pconstruct cd (Some (pvar ~loc value2))
                                      ])
-               ~rhs:(compare_of_record_no_phys_equal loc lds (evar ~loc value1) (evar ~loc value2))
+               ~rhs:(compare_of_record_no_phys_equal ~hide
+                       loc lds (evar ~loc value1) (evar ~loc value2))
            in
            if rightmost then
              [ res ]
@@ -290,7 +298,7 @@ module Make(Params : Params) = struct
              and rpatt = List.map ids_ty ~f:(fun (_l,r,_ty) -> pvar ~loc r) |> ppat_tuple ~loc
              and body =
                List.map ids_ty ~f:(fun (l,r,ty) ->
-                 compare_of_ty ty (evar ~loc l) (evar ~loc r))
+                 compare_of_ty ~hide ty (evar ~loc l) (evar ~loc r))
                |> chain_if ~loc
              in
              let res =
@@ -313,7 +321,7 @@ module Make(Params : Params) = struct
                ; case pany   pcnstr Greater
                ]))
 
-  and compare_sum loc cds value1 value2 =
+  and compare_sum ~hide loc cds value1 value2 =
     let is_sum_type_with_all_constant_constructors =
       List.for_all cds ~f:(fun cd ->
         (Option.is_none cd.pcd_res) && (* we could support GADTs, but the general case
@@ -326,31 +334,33 @@ module Make(Params : Params) = struct
       (* the compiler will optimize the polymorphic comparison to an integer one *)
       poly ~loc value1 value2
     end else begin
-      let mcs = branches_of_sum cds in
+      let mcs = branches_of_sum ~hide cds in
       let e = pexp_match ~loc (pexp_tuple ~loc [value1; value2]) mcs in
       phys_equal_first value1 value2 e
     end
 
-  and compare_of_ty ty value1 value2 =
+  and compare_of_ty ~hide ty value1 value2 =
     let loc = ty.ptyp_loc in
     if core_type_is_ignored ty
     then compare_ignore ~loc value1 value2
     else
       match ty.ptyp_desc with
-      | Ptyp_constr (constructor, args) -> compare_applied ~constructor ~args value1 value2
-      | Ptyp_tuple tys -> compare_of_tuple loc tys value1 value2
+      | Ptyp_constr (constructor, args) ->
+        compare_applied ~hide ~constructor ~args value1 value2
+      | Ptyp_tuple tys -> compare_of_tuple ~hide loc tys value1 value2
       | Ptyp_var name -> eapply ~loc (evar ~loc (tp_name name)) [value1; value2]
       | Ptyp_arrow _ ->
         Location.raise_errorf ~loc
           "ppx_compare: Functions can not be compared."
       | Ptyp_variant (row_fields, Closed, None) ->
-        compare_variant loc row_fields value1 value2
+        compare_variant ~hide loc row_fields value1 value2
       | Ptyp_any -> compare_ignore ~loc value1 value2
       | _ ->
         Location.raise_errorf ~loc "ppx_compare: unknown type"
 
-  and compare_of_ty_fun ~type_constraint ty =
-    let loc = ty.ptyp_loc in
+  and compare_of_ty_fun ~hide ~type_constraint ty =
+    let loc = { ty.ptyp_loc with loc_ghost = true } in
+    let do_hide hide_fun x = if hide then hide_fun x else x in
     let a = gen_symbol ~prefix:"a" () in
     let b = gen_symbol ~prefix:"b" () in
     let e_a = evar ~loc a in
@@ -361,10 +371,13 @@ module Make(Params : Params) = struct
       else
         pvar ~loc x
     in
+    let body = do_hide Merlin_helpers.hide_expression (compare_of_ty ~hide ty e_a e_b) in
     eta_reduce_if_possible
-      [%expr fun [%p mk_pat a] [%p mk_pat b] -> [%e compare_of_ty ty e_a e_b] ]
+      [%expr
+        fun [%p mk_pat a] [%p do_hide Merlin_helpers.hide_pattern (mk_pat b)] ->
+          [%e body] ]
 
-  and compare_of_record_no_phys_equal loc lds value1 value2 =
+  and compare_of_record_no_phys_equal ~hide loc lds value1 value2 =
     let is_evar = function
       | { pexp_desc = Pexp_ident _; _ } -> true
       | _                               -> false
@@ -375,29 +388,29 @@ module Make(Params : Params) = struct
     |> List.map ~f:(fun ld ->
       let loc = ld.pld_loc in
       let label = Located.map lident ld.pld_name in
-      compare_of_ty ld.pld_type
+      compare_of_ty ~hide ld.pld_type
         (pexp_field ~loc value1 label)
         (pexp_field ~loc value2 label))
     |> chain_if ~loc
 
 
-  let compare_of_record loc lds value1 value2 =
-    compare_of_record_no_phys_equal loc lds value1 value2
+  let compare_of_record ~hide loc lds value1 value2 =
+    compare_of_record_no_phys_equal ~hide loc lds value1 value2
     |> phys_equal_first value1 value2
 
   let compare_abstract loc type_name v_a v_b =
     abstract ~loc ~type_name v_a v_b
 
-  let scheme_of_td td =
+  let scheme_of_td ~hide td =
     let loc = td.ptype_loc in
-    let type_ = combinator_type_of_type_declaration td ~f:type_ in
+    let type_ = combinator_type_of_type_declaration td ~f:(type_ ~hide) in
     match td.ptype_params with
     | [] -> type_
     | l ->
       let vars = List.map l ~f:get_type_param_name in
       ptyp_poly ~loc vars type_
 
-  let compare_of_td td ~rec_flag =
+  let compare_of_td ~hide td ~rec_flag =
     let loc = td.ptype_loc in
     let a = gen_symbol ~prefix:"a" () in
     let b = gen_symbol ~prefix:"b" () in
@@ -405,8 +418,8 @@ module Make(Params : Params) = struct
     let v_b = evar ~loc b in
     let function_body =
       match td.ptype_kind with
-      | Ptype_variant cds -> compare_sum       loc cds v_a v_b
-      | Ptype_record  lds -> compare_of_record loc lds v_a v_b
+      | Ptype_variant cds -> compare_sum       ~hide loc cds v_a v_b
+      | Ptype_record  lds -> compare_of_record ~hide loc lds v_a v_b
       | Ptype_open ->
         Location.raise_errorf ~loc
           "ppx_compare: open types are not yet supported"
@@ -419,9 +432,9 @@ module Make(Params : Params) = struct
             Location.raise_errorf ~loc:ty.ptyp_loc
               "ppx_compare: cannot compare open polymorphic variant types"
           | Ptyp_variant (row_fields, _, _) ->
-            compare_variant loc row_fields v_a v_b
+            compare_variant ~hide loc row_fields v_a v_b
           | _ ->
-            compare_of_ty ty v_a v_b
+            compare_of_ty ~hide ty v_a v_b
     in
     let extra_names =
       List.map td.ptype_params
@@ -432,11 +445,18 @@ module Make(Params : Params) = struct
     let poly_scheme = (match extra_names with [] -> false | _::_ -> true) in
     let body = eta_reduce_if_possible_and_nonrec ~rec_flag
                  (eabstract ~loc patts function_body) in
-    if poly_scheme
-    then value_binding ~loc ~pat:(ppat_constraint ~loc bnd (scheme_of_td td)) ~expr:body
-    else value_binding ~loc ~pat:bnd ~expr:(pexp_constraint ~loc body (scheme_of_td td))
+    if poly_scheme then
+      value_binding ~loc
+        ~pat:(ppat_constraint ~loc bnd (scheme_of_td ~hide td))
+        ~expr:body
+    else
+      value_binding ~loc
+        ~pat:bnd
+        ~expr:(pexp_constraint ~loc body (scheme_of_td ~hide td))
 
-  let str_type_decl ~loc ~path:_ (rec_flag, tds) =
+  let str_type_decl ~ctxt (rec_flag, tds) =
+    let loc = Expansion_context.Deriver.derived_item_loc ctxt in
+    let hide = not (Expansion_context.Deriver.inline ctxt) in
     let tds = List.map tds ~f:name_type_params_in_td in
     let rec_flag =
       (object
@@ -452,19 +472,20 @@ module Make(Params : Params) = struct
 
       end)#go ()
     in
-    let bindings = List.map tds ~f:(compare_of_td ~rec_flag) in
+    let bindings = List.map tds ~f:(compare_of_td ~hide ~rec_flag) in
     [ pstr_value ~loc rec_flag bindings ]
 
-  let sig_type_decl ~loc:_ ~path:_ (_rec_flag, tds) =
+  let sig_type_decl ~ctxt (_rec_flag, tds) =
+    let hide = not (Expansion_context.Deriver.inline ctxt) in
     let tds = List.map tds ~f:name_type_params_in_td in
     List.map tds ~f:(fun td ->
-      let compare_of = combinator_type_of_type_declaration td ~f:type_ in
+      let compare_of = combinator_type_of_type_declaration td ~f:(type_ ~hide) in
       let name = function_name td.ptype_name.txt in
       let loc = td.ptype_loc in
       psig_value ~loc (value_description ~loc ~name:{ td.ptype_name with txt = name }
                          ~type_:compare_of ~prim:[]))
 
-  let compare_core_type ty = compare_of_ty_fun ~type_constraint:true ty
+  let compare_core_type ty = compare_of_ty_fun ~hide:true ~type_constraint:true ty
 
   let core_type = compare_core_type
 end
@@ -473,16 +494,18 @@ module Compare = struct
   include Make(Compare_params)
 
   let equal_core_type ty =
-    let loc = ty.ptyp_loc in
+    let loc = { ty.ptyp_loc with loc_ghost = true } in
     let arg1 = gen_symbol () in
     let arg2 = gen_symbol () in
+    let body =
+      Merlin_helpers.hide_expression
+        [%expr
+          match [%e compare_core_type ty] [%e evar ~loc arg1] [%e evar ~loc arg2] with
+          | 0 -> true
+          | _ -> false]
+    in
     [%expr
-      (fun [%p pvar ~loc arg1] [%p pvar ~loc arg2] ->
-         match [%e compare_core_type ty] [%e evar ~loc arg1] [%e evar ~loc arg2] with
-         | 0 -> true
-         | _ -> false
-      )
-    ]
+      (fun ([%p pvar ~loc arg1] : [%t ty]) [%p pvar ~loc arg2] -> [%e body])]
 end
 
 module Equal = Make(Equal_params)

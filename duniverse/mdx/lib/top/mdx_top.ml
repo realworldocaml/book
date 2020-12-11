@@ -15,16 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Mdx.Migrate_ast
 open Mdx.Compat
 open Compat_top
-
-module Toploop = struct
-  include Toploop
-
-  let execute_phrase verbose ppf p =
-    execute_phrase verbose ppf (to_current.copy_toplevel_phrase p)
-end
 
 let redirect ~f =
   let stdout_backup = Unix.dup Unix.stdout in
@@ -156,8 +148,10 @@ module Phrase = struct
       | _ -> false
     in
     function
-    | { parsed = Ok (Ptop_dir { pdir_name = { txt = dir; _ }; _ }); _ } ->
-        findlib_directive dir
+    | { parsed = Ok toplevel_phrase; _ } -> (
+        match Compat_top.top_directive_name toplevel_phrase with
+        | Some dir -> findlib_directive dir
+        | None -> false )
     | _ -> false
 end
 
@@ -278,15 +272,7 @@ module Rewrite = struct
 
   let preload verbose ppf =
     let require pkg =
-      let p =
-        Ptop_dir
-          {
-            pdir_name = { txt = "require"; loc = Location.none };
-            pdir_arg =
-              Some { pdira_desc = Pdir_string pkg; pdira_loc = Location.none };
-            pdir_loc = Location.none;
-          }
-      in
+      let p = Compat_top.top_directive_require pkg in
       let _ = Toploop.execute_phrase verbose ppf p in
       ()
     in
@@ -380,10 +366,12 @@ let cut_into_sentences l =
   in
   aux [] [] l
 
+let errors = ref false
+
 let eval t cmd =
   let buf = Buffer.create 1024 in
   let ppf = Format.formatter_of_buffer buf in
-  let errors = ref false in
+  errors := false;
   let exec_code ~capture phrase =
     let lines = ref [] in
     let capture () =
@@ -416,7 +404,9 @@ let eval t cmd =
     Format.pp_print_flush ppf ();
     capture ();
     if
-      t.silent || ((not t.verbose_findlib) && Phrase.is_findlib_directive phrase)
+      t.silent
+      || (not !errors) && (not t.verbose_findlib)
+         && Phrase.is_findlib_directive phrase
     then []
     else trim (List.rev !lines)
   in
@@ -469,7 +459,7 @@ let show_exception () =
       let ext =
         extension_constructor ~ext_type_path:Predef.path_exn ~ext_type_params:[]
           ~ext_args:desc.cstr_args ~ext_ret_type:ret_type
-          ~ext_private:Asttypes_.Public ~ext_loc:desc.cstr_loc
+          ~ext_private:Asttypes.Public ~ext_loc:desc.cstr_loc
           ~ext_attributes:desc.cstr_attributes
       in
       [ sig_typext id ext ])
@@ -482,7 +472,7 @@ let show_module () =
         Mty_signature
           (map_sig_attributes sg ~f:(fun attrs ->
                attribute ~name:(Location.mknoloc "...")
-                 ~payload:(Parsetree_.PStr [])
+                 ~payload:(Parsetree.PStr [])
                :: attrs))
     | mty -> mty
   in
@@ -571,16 +561,52 @@ let patch_env () =
   end in
   ()
 
-let init ~verbose:v ~silent:s ~verbose_findlib () =
+let protect f arg =
+  try
+    let _ = f arg in
+    ()
+  with
+  | Failure s ->
+      errors := true;
+      print_string s
+  | Fl_package_base.No_such_package (pkg, reason) ->
+      errors := true;
+      print_string
+        ("No such package: " ^ pkg ^ if reason <> "" then " - " ^ reason else "")
+  | Fl_package_base.Package_loop pkg ->
+      errors := true;
+      print_string ("Package requires itself: " ^ pkg)
+
+let in_words s =
+  (* splits s in words separated by commas and/or whitespace *)
+  let l = String.length s in
+  let rec split i j =
+    if j < l then
+      match s.[j] with
+      | ' ' | '\t' | '\n' | '\r' | ',' ->
+          if i < j then String.sub s i (j - i) :: split (j + 1) (j + 1)
+          else split (j + 1) (j + 1)
+      | _ -> split i (j + 1)
+    else if i < j then [ String.sub s i (j - i) ]
+    else []
+  in
+  split 0 0
+
+let init ~verbose:v ~silent:s ~verbose_findlib ~dirs ~packages ~predicates () =
   Clflags.real_paths := false;
   Toploop.set_paths ();
   Mdx.Compat.init_path ();
   Toploop.toplevel_env := Compmisc.initial_env ();
   Sys.interactive := false;
   patch_env ();
-  Topfind.don't_load_deeply
-    [ "unix"; "findlib.top"; "findlib.internal"; "compiler-libs.toplevel" ];
-  Topfind.add_predicates [ "byte"; "toploop" ];
+  List.iter (Topdirs.dir_load Format.err_formatter) dirs;
+  Topfind.don't_load_deeply packages;
+  Topfind.add_predicates predicates;
+  (* [require] directive is overloaded to toggle the [errors] reference when
+     an exception is raised. *)
+  Hashtbl.add Toploop.directive_table "require"
+    (Toploop.Directive_string
+       (fun s -> protect Topfind.load_deeply (in_words s)));
   let t = { verbose = v; silent = s; verbose_findlib } in
   show ();
   show_val ();

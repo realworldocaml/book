@@ -1,7 +1,7 @@
 open! Import
 include Base.Sequence
 
-include Bin_prot.Utils.Make_binable1 (struct
+include Bin_prot.Utils.Make_binable1_without_uuid [@alert "-legacy"] (struct
     module Binable = struct
       type 'a t = 'a list [@@deriving bin_io]
     end

@@ -310,7 +310,7 @@ val string_with_length_of : char t -> length:int -> string t
 (** Produces s-expressions whose atoms are chosen from the given string distribution. *)
 val sexp_of : string t -> Sexp.t t
 
-(** {3 List Distrubtions} *)
+(** {3 List Distributions} *)
 
 val list_non_empty : 'a t -> 'a list t
 val list_with_length : 'a t -> length:int -> 'a list t

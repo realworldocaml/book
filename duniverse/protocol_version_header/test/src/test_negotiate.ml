@@ -1,5 +1,5 @@
 open! Core_kernel
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 open Protocol_version_header
 
 module Legacy = struct

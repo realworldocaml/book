@@ -17,12 +17,6 @@
 
 val run: unit -> unit
 
-(* This default error message is produced by [--list-errors] when it creates a
-   [.messages] file, and is recognized by [--compare-errors] when it compares
-   two such files. *)
-
-val default_message: string
-
 (* [print_messages_item] displays one data item. The item is of the form [nt,
    sentence, target], which means that beginning at the start symbol [nt], the
    sentence [sentence] ends in an error in the target state given by [target].
@@ -33,3 +27,18 @@ open Grammar
 
 val print_messages_item:
   Nonterminal.t * Terminal.t list * ReferenceInterpreter.target -> unit
+
+(* [print_sentence (nto, terminals)] prints a sentence (given by an
+   optional start symbol and a sequence of terminal symbols) as a
+   space-separated list of symbolic token names. *)
+
+val print_sentence:
+  Nonterminal.t option * Terminal.t list -> string
+
+(* [stream] turns a finite list of terminals into a stream of terminals,
+   represented as a pair of a lexer and a lexing buffer, so as to be usable
+   with Menhir's traditional API. This lexer can raise [EndOfStream]. *)
+
+exception EndOfStream
+
+val stream: Terminal.t list -> (Lexing.lexbuf -> Terminal.t) * Lexing.lexbuf

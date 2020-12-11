@@ -1,0 +1,3 @@
+(library
+ (name ast_cinaps_helpers)
+ (libraries supported_version))

@@ -1,24 +1,5 @@
 module Sys = Stdlib.Sys
 
-module Fpath = struct
-  let is_root t = Filename.dirname t = t
-
-  let rec mkdir_p ?(perms = 0o777) t_s =
-    if is_root t_s then
-      ()
-    else
-      try Unix.mkdir t_s perms with
-      | Unix.Unix_error (EEXIST, _, _) -> ()
-      | Unix.Unix_error (ENOENT, _, _) as e ->
-        let parent = Filename.dirname t_s in
-        if is_root parent then
-          raise e
-        else (
-          mkdir_p parent ~perms;
-          Unix.mkdir t_s perms
-        )
-end
-
 let basename_opt ~is_root ~basename t =
   if is_root t then
     None
@@ -146,7 +127,8 @@ end = struct
       Code_error.raise "Path.External.parent_exn called on a root path" []
     | Some p -> p
 
-  let mkdir_p ?perms p = Fpath.mkdir_p ?perms (to_string p)
+  let mkdir_p ?perms p =
+    ignore (Fpath.mkdir_p ?perms (to_string p) : Fpath.mkdir_p)
 
   let extension t = Filename.extension (to_string t)
 
@@ -568,7 +550,8 @@ end = struct
 end
 
 module Relative_to_source_root = struct
-  let mkdir_p ?perms s = Fpath.mkdir_p ?perms (Local.to_string s)
+  let mkdir_p ?perms s =
+    ignore (Fpath.mkdir_p ?perms (Local.to_string s) : Fpath.mkdir_p)
 end
 
 module Source0 = Local
@@ -1091,25 +1074,10 @@ let explode_exn t =
 
 let exists t = try Sys.file_exists (to_string t) with Sys_error _ -> false
 
-let readdir_unsorted =
-  let rec loop dh acc =
-    match Unix.readdir dh with
-    | "."
-    | ".." ->
-      loop dh acc
-    | s -> loop dh (s :: acc)
-    | exception End_of_file -> acc
-  in
-  fun t ->
-    try
-      let dh = Unix.opendir (to_string t) in
-      Exn.protect
-        ~f:(fun () ->
-          match loop dh [] with
-          | exception Unix.Unix_error (e, _, _) -> Error e
-          | s -> Result.Ok s)
-        ~finally:(fun () -> Unix.closedir dh)
-    with Unix.Unix_error (e, _, _) -> Error e
+let readdir_unsorted t = Dune_filesystem_stubs.read_directory (to_string t)
+
+let readdir_unsorted_with_kinds t =
+  Dune_filesystem_stubs.read_directory_with_kinds (to_string t)
 
 let is_directory t =
   try Sys.is_directory (to_string t) with Sys_error _ -> false
@@ -1180,22 +1148,34 @@ let insert_after_build_dir_exn =
     | External _ ->
       error a b
 
-let rm_rf =
-  let rec loop dir =
-    Array.iter (Sys.readdir dir) ~f:(fun fn ->
+let rec clear_dir dir =
+  match Dune_filesystem_stubs.read_directory_with_kinds dir with
+  | Error ENOENT -> ()
+  | Error error ->
+    raise
+      (Unix.Unix_error
+         (error, dir, "Stdune.Path.rm_rf: read_directory_with_kinds"))
+  | Ok listing ->
+    List.iter listing ~f:(fun (fn, kind) ->
         let fn = Filename.concat dir fn in
-        match Unix.lstat fn with
-        | { st_kind = S_DIR; _ } -> loop fn
-        | _ -> unlink_operation fn);
-    Unix.rmdir dir
-  in
-  fun ?(allow_external = false) t ->
-    if (not allow_external) && not (is_managed t) then
-      Code_error.raise "Path.rm_rf called on external dir" [ ("t", to_dyn t) ];
-    let fn = to_string t in
-    match Unix.lstat fn with
-    | exception Unix.Unix_error (ENOENT, _, _) -> ()
-    | _ -> loop fn
+        match kind with
+        | Unix.S_DIR -> rm_rf_dir fn
+        | _ -> unlink_operation fn)
+
+and rm_rf_dir path =
+  clear_dir path;
+  Unix.rmdir path
+
+let rm_rf ?(allow_external = false) t =
+  if (not allow_external) && not (is_managed t) then
+    Code_error.raise "Path.rm_rf called on external dir" [ ("t", to_dyn t) ];
+  let fn = to_string t in
+  match Unix.lstat fn with
+  | exception Unix.Unix_error (ENOENT, _, _) -> ()
+  | { Unix.st_kind = S_DIR; _ } -> rm_rf_dir fn
+  | _ -> unlink_operation fn
+
+let clear_dir dir = clear_dir (to_string dir)
 
 let mkdir_p ?perms = function
   | External s -> External.mkdir_p s ?perms
@@ -1211,9 +1191,19 @@ let touch ?(create = true) p =
     | In_build_dir k ->
       Kind.to_string (Kind.append_local (Fdecl.get Build.build_dir) k)
   in
-  try Unix.utimes p 0.0 0.0
-  with Unix.Unix_error (Unix.ENOENT, _, _) ->
-    if create then Unix.close (Unix.openfile p [ Unix.O_CREAT ] 0o777)
+  let create =
+    if create then
+      fun () ->
+    Unix.close (Unix.openfile p [ Unix.O_CREAT ] 0o777)
+    else
+      Fun.id
+  in
+  try Unix.utimes p 0.0 0.0 with
+  | Unix.Unix_error (Unix.ENOENT, _, _) -> create ()
+  | Unix.Unix_error (Unix.EUNKNOWNERR 0, _, _)
+    when Sys.win32 && not (Sys.file_exists p) ->
+    (* OCaml PR#8857 *)
+    create ()
 
 let compare x y =
   match (x, y) with
@@ -1279,6 +1269,8 @@ let local_part = function
 
 let stat t = Unix.stat (to_string t)
 
+let lstat t = Unix.lstat (to_string t)
+
 include (Comparator.Operators (T) : Comparator.OPS with type t := t)
 
 let path_of_local = of_local
@@ -1306,32 +1298,6 @@ let string_of_file_kind = function
   | Unix.S_FIFO -> "named pipe"
   | Unix.S_SOCK -> "socket"
 
-let rand_digits () =
-  let rand = Random.State.(bits (make_self_init ()) land 0xFFFFFF) in
-  Printf.sprintf "%06x" rand
-
-let get_temp_dir_name () = of_string (Filename.get_temp_dir_name ())
-
-let temp_dir ?(temp_dir = get_temp_dir_name ()) ?(mode = 0o700) prefix suffix =
-  let attempts = 512 in
-  let rec loop count =
-    if Stdlib.( >= ) count attempts then
-      Code_error.raise "Path.temp_dir: too many failing attemps"
-        [ ("attempts", Int attempts) ]
-    else
-      let dir =
-        relative temp_dir
-          (String.concat ~sep:"" [ prefix; rand_digits (); suffix ])
-      in
-      try
-        mkdir_p ~perms:mode dir;
-        dir
-      with
-      | Unix.Unix_error (Unix.EEXIST, _, _) -> loop (count - 1)
-      | Unix.Unix_error (Unix.EINTR, _, _) -> loop count
-  in
-  loop 0
-
 let rename old_path new_path =
   Sys.rename (to_string old_path) (to_string new_path)
 
@@ -1352,3 +1318,6 @@ let chmod ~mode ?(stats = None) ?(op = `Set) path =
         stats.st_perm land lnot mode
   in
   Unix.chmod (to_string path) mode
+
+let follow_symlink path =
+  Fpath.follow_symlink (to_string path) |> Result.map ~f:of_string

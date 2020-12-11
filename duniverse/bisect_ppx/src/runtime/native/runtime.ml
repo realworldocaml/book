@@ -102,6 +102,10 @@ let dump_counters_exn =
 
 let dump () =
   match file_channel () with
+  (* Failure "TypeError: runtime.unix_open is not a function" indicates that the
+     code was compiled by js_of_ocaml. In this case, we *want* to do nothing at
+     process exit. See https://github.com/aantron/bisect_ppx/issues/334. *)
+  | exception Failure _ -> ()
   | None -> ()
   | Some channel ->
       (try

@@ -123,9 +123,9 @@ let crl_number { asn ; _ } =
 let signature_algorithm { asn ; _ } =
   Algorithm.to_signature_algorithm asn.signature_algo
 
-let validate { raw ; asn } ?(hash_whitelist = Validation.sha2) pub =
-  let tbs_raw = Validation.raw_cert_hack raw asn.signature_val in
-  Validation.validate_raw_signature asn.tbs_crl.issuer hash_whitelist
+let validate { raw ; asn } ?(allowed_hashes = Validation.sha2) pub =
+  let tbs_raw = Validation.raw_cert_hack raw in
+  Validation.validate_raw_signature asn.tbs_crl.issuer allowed_hashes
     tbs_raw asn.signature_algo asn.signature_val pub
 
 type verification_error = [
@@ -151,7 +151,7 @@ let pp_verification_error ppf = function
       (Ptime.pp_human ~tz_offset_s:0 ()) scheduled
       (Ptime.pp_human ~tz_offset_s:0 ()) now
 
-let verify ({ asn ; _ } as crl) ?hash_whitelist ?time cert =
+let verify ({ asn ; _ } as crl) ?allowed_hashes ?time cert =
   let open Rresult.R.Infix in
   let subj = Certificate.subject cert in
   guard
@@ -166,19 +166,19 @@ let verify ({ asn ; _ } as crl) ?hash_whitelist ?time cert =
      | None -> Ok ()
      | Some y -> guard (Ptime.is_earlier ~than:y x)
                    (`Next_update_scheduled (subj, x, y))) >>= fun () ->
-  validate ?hash_whitelist crl (Certificate.public_key cert)
+  validate ?allowed_hashes crl (Certificate.public_key cert)
 
 let reason (revoked : revoked_cert) =
   match Extension.(find Reason revoked.extensions) with
   | Some (_, x) -> Some x
   | None -> None
 
-let is_revoked (crls : t list) ?hash_whitelist ~issuer:super ~cert =
+let is_revoked ?allowed_hashes ~issuer:super ~cert (crls : t list) =
   List.exists (fun crl ->
       if
         Distinguished_name.equal (Certificate.subject super) (issuer crl)
       then
-        match validate ?hash_whitelist crl (Certificate.public_key super) with
+        match validate ?allowed_hashes crl (Certificate.public_key super) with
         | Ok () ->
           begin try
               let entry = List.find
@@ -197,25 +197,28 @@ let is_revoked (crls : t list) ?hash_whitelist ~issuer:super ~cert =
     crls
 
 let sign_tbs (tbs : tBS_CRL) key =
+  let open Rresult.R.Infix in
   let tbs_raw = Asn.tbs_CRL_to_cstruct tbs in
-  let digest = match Algorithm.to_signature_algorithm tbs.signature with
-    | Some (_, h) -> h
-    | _ -> invalid_arg "couldn't parse signature algorithm"
-  in
-  let signature_val = Signing_request.raw_sign tbs_raw digest key in
-  let asn = { tbs_crl = tbs ; signature_algo = tbs.signature ; signature_val } in
-  let raw = Asn.crl_to_cstruct asn in
-  { asn ; raw }
+  match Algorithm.to_signature_algorithm tbs.signature with
+  | None -> Error (`Msg "couldn't parse signature algorithm")
+  | Some (_, hash) ->
+    let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+    Private_key.sign hash ~scheme key (`Message tbs_raw) >>| fun signature_val ->
+    let asn = { tbs_crl = tbs ; signature_algo = tbs.signature ; signature_val } in
+    let raw = Asn.crl_to_cstruct asn in
+    { asn ; raw }
 
 let revoke
-    ?(digest = `SHA256)
+    ?digest
     ~issuer
     ~this_update ?next_update
     ?(extensions = Extension.empty)
     revoked_certs
     key =
+  let digest = Signing_request.default_digest digest key in
   let signature =
-    Algorithm.of_signature_algorithm (Private_key.keytype key) digest
+    let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+    Algorithm.of_signature_algorithm scheme digest
   in
   let tbs_crl = {
     version = `V2 ;

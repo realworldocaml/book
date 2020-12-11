@@ -1,5 +1,5 @@
 open Core_kernel
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 open Md5
 
 let%expect_test "digest_bin_prot" =

@@ -381,7 +381,7 @@ of mismatched length:
 
 ```ocaml env=main
 # List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0]
-Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4 ")
+Exception: (Invalid_argument "length mismatch in map2_exn: 3 <> 4")
 ```
 
 `List.fold` is the most complicated of the three, taking three arguments: a

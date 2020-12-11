@@ -275,18 +275,18 @@ let benchmarks = [
 
   bm "aes-128-gcm" (fun name ->
     let key = AES.GCM.of_secret (Mirage_crypto_rng.generate 16)
-    and iv  = Mirage_crypto_rng.generate 12 in
-    throughput name (fun cs -> AES.GCM.encrypt ~key ~iv cs));
+    and nonce = Mirage_crypto_rng.generate 12 in
+    throughput name (fun cs -> AES.GCM.authenticate_encrypt ~key ~nonce cs));
 
   bm "aes-128-ghash" (fun name ->
     let key = AES.GCM.of_secret (Mirage_crypto_rng.generate 16)
-    and iv  = Mirage_crypto_rng.generate 12 in
-    throughput name (fun cs -> AES.GCM.encrypt ~key ~iv ~adata:cs Cstruct.empty));
+    and nonce = Mirage_crypto_rng.generate 12 in
+    throughput name (fun cs -> AES.GCM.authenticate_encrypt ~key ~nonce ~adata:cs Cstruct.empty));
 
   bm "aes-128-ccm" (fun name ->
     let key   = AES.CCM.of_secret ~maclen:16 (Mirage_crypto_rng.generate 16)
     and nonce = Mirage_crypto_rng.generate 10 in
-    throughput name (fun cs -> AES.CCM.encrypt ~key ~nonce cs));
+    throughput name (fun cs -> AES.CCM.authenticate_encrypt ~key ~nonce cs));
 
   bm "aes-192-ecb" (fun name ->
     let key = AES.ECB.of_secret (Mirage_crypto_rng.generate 24) in

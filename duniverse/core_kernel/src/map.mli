@@ -394,18 +394,17 @@ val filter_mapi
   -> f:(key:'k -> data:'v1 -> 'v2 option)
   -> ('k, 'v2, 'cmp) t
 
-
 (** [partition_mapi t ~f] returns two new [t]s, with each key in [t] appearing in exactly
     one of the result maps depending on its mapping in [f]. *)
 val partition_mapi
   :  ('k, 'v1, 'cmp) t
-  -> f:(key:'k -> data:'v1 -> [ `Fst of 'v2 | `Snd of 'v3 ])
+  -> f:(key:'k -> data:'v1 -> ('v2, 'v3) Either.t)
   -> ('k, 'v2, 'cmp) t * ('k, 'v3, 'cmp) t
 
 (** [partition_map t ~f = partition_mapi t ~f:(fun ~key:_ ~data -> f data)] *)
 val partition_map
   :  ('k, 'v1, 'cmp) t
-  -> f:('v1 -> [ `Fst of 'v2 | `Snd of 'v3 ])
+  -> f:('v1 -> ('v2, 'v3) Either.t)
   -> ('k, 'v2, 'cmp) t * ('k, 'v3, 'cmp) t
 
 (**
@@ -414,8 +413,8 @@ val partition_map
      =
      partition_mapi t ~f:(fun ~key ~data ->
        if f ~key ~data
-       then `Fst data
-       else `Snd data)
+       then First data
+       else Second data)
    ]}
 *)
 val partitioni_tf
@@ -428,6 +427,10 @@ val partition_tf
   :  ('k, 'v, 'cmp) t
   -> f:('v -> bool)
   -> ('k, 'v, 'cmp) t * ('k, 'v, 'cmp) t
+
+(** Produces [Ok] of a map including all keys if all data is [Ok], or an [Error]
+    including all errors otherwise. *)
+val combine_errors : ('k, 'v Or_error.t, 'cmp) t -> ('k, 'v, 'cmp) t Or_error.t
 
 (** Total ordering between maps.  The first argument is a total ordering used to compare
     data associated with equal keys in the two maps. *)
@@ -460,6 +463,11 @@ val to_alist
   -> ('k * 'v) list
 
 val validate : name:('k -> string) -> 'v Validate.check -> ('k, 'v, _) t Validate.check
+
+val validatei
+  :  name:('k -> string)
+  -> ('k * 'v) Validate.check
+  -> ('k, 'v, _) t Validate.check
 
 (** {2 Additional operations on maps} *)
 
@@ -820,10 +828,6 @@ module Poly : sig
 end
 with type ('a, 'b, 'c) map = ('a, 'b, 'c) t
 
-module type For_deriving = For_deriving
-
-include For_deriving with type ('a, 'b, 'c) t := ('a, 'b, 'c) t
-
 module type Key_plain = Key_plain
 module type Key = Key
 module type Key_binable = Key_binable
@@ -862,39 +866,8 @@ module Make_binable_using_comparator (Key : sig
   with type Key.t = Key.t
   with type Key.comparator_witness = Key.comparator_witness
 
-module M (K : sig
-    type t
-    type comparator_witness
-  end) : sig
-  type nonrec 'v t = (K.t, 'v, K.comparator_witness) t
-end
-
-(** The following [*bin*] functions support bin-io on base-style maps, e.g.:
-
-    {[ type t = int Map.M(String).t [@@deriving bin_io] ]} *)
 module Key_bin_io = Key_bin_io
-
-val bin_shape_m__t : ('a, 'c) Key_bin_io.t -> Bin_prot.Shape.t -> Bin_prot.Shape.t
-
-val bin_size_m__t
-  :  ('a, 'c) Key_bin_io.t
-  -> 'b Bin_prot.Size.sizer
-  -> ('a, 'b, 'c) t Bin_prot.Size.sizer
-
-val bin_write_m__t
-  :  ('a, 'c) Key_bin_io.t
-  -> 'b Bin_prot.Write.writer
-  -> ('a, 'b, 'c) t Bin_prot.Write.writer
-
-val bin_read_m__t
-  :  ('a, 'c) Key_bin_io.t
-  -> 'b Bin_prot.Read.reader
-  -> ('a, 'b, 'c) t Bin_prot.Read.reader
-
-val __bin_read_m__t__
-  :  ('a, 'c) Key_bin_io.t
-  -> 'b Bin_prot.Read.reader
-  -> (int -> ('a, 'b, 'c) t) Bin_prot.Read.reader
+include For_deriving with type ('a, 'b, 'c) t := ('a, 'b, 'c) t
 
 (** The following functors may be used to define stable modules *)
 module Stable : sig

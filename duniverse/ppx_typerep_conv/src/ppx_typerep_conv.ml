@@ -184,7 +184,7 @@ module Typerep_implementation = struct
 
     val arg_of_param : string -> string
 
-    val params_names : params:(core_type * variance) list -> string list
+    val params_names : params:(core_type * (variance * injectivity)) list -> string list
     val params_patts : loc:Location.t -> params_names:string list -> pattern list
 
     val type_name_module_definition : loc:Location.t -> path:string ->
@@ -233,7 +233,7 @@ module Typerep_implementation = struct
     let str_item_type_and_name ~loc ~path ~params_names ~type_name =
       let params =
         List.map params_names
-          ~f:(fun name -> (ptyp_var ~loc name, Invariant))
+          ~f:(fun name -> (ptyp_var ~loc name, (NoVariance, NoInjectivity)))
       in
       let td =
         let manifest =
@@ -312,7 +312,7 @@ module Typerep_implementation = struct
       in
       let type_name_module = pmod_apply ~loc make type_name_struct in
       let module_def =
-        pstr_module ~loc @@ module_binding ~loc ~name:(Located.mk ~loc name)
+        pstr_module ~loc @@ module_binding ~loc ~name:(Located.mk ~loc (Some name))
                               ~expr:type_name_module
       in
       let typename_of_t =
@@ -510,7 +510,7 @@ module Typerep_implementation = struct
   end
 
   let rec typerep_of_type ty =
-    let loc = ty.ptyp_loc in
+    let loc = { ty.ptyp_loc with loc_ghost = true } in
     match ty.ptyp_desc with
     | Ptyp_constr (id, params) ->
       type_constr_conv ~loc id ~f:(fun tn -> "typerep_of_" ^ tn)

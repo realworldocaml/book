@@ -1,19 +1,3 @@
-(data_only_dirs test)
-
-(rule
- (alias run_dynamic)
+(cram
  (deps
-  (package dune)
-  (source_tree test/)
-  (glob_files bin/*.exe))
- (action
-  (chdir
-   test
-   (progn
-    (run dune-cram run run.t)
-    (diff? run.t run.t.corrected)))))
-
-(alias
- (name runtest)
- (deps
-  (alias run_dynamic)))
+  (glob_files bin/*.exe)))

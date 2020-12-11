@@ -1,4 +1,4 @@
-version: "2.1.0"
+version: "4.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -12,7 +12,7 @@ bug-reports: "https://github.com/mirage/ocaml-conduit/issues"
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune"
-  "ppx_sexp_conv" {>="v0.12.0"}
+  "ppx_sexp_conv" {>="v0.13.0"}
   "sexplib"
   "astring"
   "uri"
@@ -27,7 +27,7 @@ build: [
 dev-repo: "git+https://github.com/mirage/ocaml-conduit.git"
 synopsis: "A network connection establishment library"
 description: """
-The `conduit` library takes care of establishing and listening for 
+The `conduit` library takes care of establishing and listening for
 TCP and SSL/TLS connections for the Lwt and Async libraries.
 
 The reason this library exists is to provide a degree of abstraction

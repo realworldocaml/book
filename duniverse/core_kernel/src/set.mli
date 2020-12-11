@@ -152,6 +152,10 @@ val remove_index : ('a, 'cmp) t -> int -> ('a, 'cmp) t
 (** [is_subset t1 ~of_:t2] returns true iff [t1] is a subset of [t2]. *)
 val is_subset : ('a, 'cmp) t -> of_:('a, 'cmp) t -> bool
 
+(** [are_disjoint t1 t2] returns [true] iff [is_empty (inter t1 t2)], but is more
+    efficient. *)
+val are_disjoint : ('a, 'cmp) t -> ('a, 'cmp) t -> bool
+
 (** [Named] allows the validation of subset and equality relationships between sets.  A
     [Named.t] is a record of a set and a name, where the name is used in error messages,
     and [Named.is_subset] and [Named.equal] validate subset and equality relationships
@@ -525,25 +529,8 @@ module Make_binable_using_comparator (Elt : sig
   with type Elt.t = Elt.t
   with type Elt.comparator_witness = Elt.comparator_witness
 
-module M (Elt : sig
-    type t
-    type comparator_witness
-  end) : sig
-  type nonrec t = (Elt.t, Elt.comparator_witness) t
-end
-
-include Base.Set.For_deriving with type ('a, 'b) t := ('a, 'b) t
-
-(** The following [*bin*] functions support bin-io on base-style sets, e.g.:
-
-    {[ type t = Set.M(String).t [@@deriving bin_io] ]} *)
 module Elt_bin_io = Elt_bin_io
-
-val bin_shape_m__t : ('a, 'b) Elt_bin_io.t -> Bin_prot.Shape.t
-val bin_size_m__t : ('a, 'b) Elt_bin_io.t -> ('a, 'b) t Bin_prot.Size.sizer
-val bin_write_m__t : ('a, 'b) Elt_bin_io.t -> ('a, 'b) t Bin_prot.Write.writer
-val bin_read_m__t : ('a, 'b) Elt_bin_io.t -> ('a, 'b) t Bin_prot.Read.reader
-val __bin_read_m__t__ : ('a, 'b) Elt_bin_io.t -> (int -> ('a, 'b) t) Bin_prot.Read.reader
+include For_deriving with type ('a, 'b) t := ('a, 'b) t
 
 (** The following types and functors may be used to define stable modules. *)
 module Stable : sig
@@ -557,6 +544,8 @@ module Stable : sig
 
       include Stable_module_types.S0_without_comparator with type t := t
     end
+
+    include For_deriving with type ('a, 'b) t := ('a, 'b) t
 
     module Make (Elt : Stable_module_types.S0) :
       S with type elt := Elt.t with type elt_comparator_witness := Elt.comparator_witness

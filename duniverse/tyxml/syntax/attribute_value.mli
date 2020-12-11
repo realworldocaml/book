@@ -19,10 +19,9 @@
 
 (** Attribute value parsers and parser combinators. *)
 
-
 type 'a gparser =
   ?separated_by:string -> ?default:string -> Location.t -> string -> 'a ->
-    Parsetree.expression option
+    expression option
 type parser = string gparser
 type vparser = string Common.value gparser
 (** Attribute value parsers are assigned to each attribute depending on the type

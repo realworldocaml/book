@@ -159,10 +159,7 @@ module Pipe_simple_test = struct
         ~summary:"test client"
         Command.Spec.(
           empty
-          +> flag
-               "msg-size"
-               (required (Command.Arg_type.create Byte_units.of_string))
-               ~doc:""
+          +> flag "msg-size" (required Byte_units.arg_type) ~doc:""
           +> flag "msgs-per-sec" (optional int) ~doc:""
           +> flag "hostname" (required string) ~doc:""
           +> flag "port" (required int) ~doc:""
@@ -748,7 +745,7 @@ module Rpc_expert_test = struct
 
   let main debug ~rpc_impl () =
     let level = if debug then `Debug else `Error in
-    let log = Log.create ~level ~output:[ Log.Output.stdout () ] ~on_error:`Raise in
+    let log = Log.create ~level ~output:[ Log.Output.stdout () ] ~on_error:`Raise () in
     let one_way_reader, one_way_writer = Pipe.create () in
     let assert_one_way_rpc_received () =
       Pipe.read one_way_reader

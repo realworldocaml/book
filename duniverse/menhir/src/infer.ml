@@ -122,13 +122,6 @@ let tokentype grammar symbol =
   | Some ocamltype ->
       TypTextual ocamltype
 
-(* [is_standard] determines whether a branch derives from a standard
-   library definition. The method, based on a file name, is somewhat
-   fragile. *)
-
-let is_standard branch =
-  List.for_all (fun x -> x = Settings.stdlib_filename) (Action.filenames branch.action)
-
 (* [actiondef] turns a branch into a function definition. *)
 
 (* The names and types of the conventional internal variables that
@@ -222,7 +215,7 @@ let program grammar =
   let bindings1, bindings2 =
     StringMap.fold (fun symbol rule (bindings1, bindings2) ->
       List.fold_left (fun (bindings1, bindings2) branch ->
-        if is_standard branch then
+        if Action.is_standard branch.action then
           (PWildcard, actiondef grammar symbol branch) :: bindings1, bindings2
         else
           bindings1, (PWildcard, actiondef grammar symbol branch) :: bindings2
