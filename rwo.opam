@@ -18,6 +18,7 @@ depends: [
   "cmdliner"
   "cohttp-async"
   "conf-ncurses"
+  "conf-pandoc"
   "core"
   "core_bench"
   "ctypes"

@@ -35,6 +35,7 @@ depends: [
   "conf-gmp-powm-sec" {= "3"}
   "conf-libpcre" {= "1"}
   "conf-ncurses" {= "1"}
+  "conf-pandoc" {= "0.1"}
   "conf-pkg-config" {= "2"}
   "core" {= "v0.14.1"}
   "core_bench" {= "v0.14.0"}
@@ -163,6 +164,7 @@ depends: [
 ]
 depexts: [
   ["devel/pkgconf"] {os = "openbsd"}
+  ["epel-release" "pandoc"] {os-distribution = "centos"}
   ["gmp"] {os = "freebsd"}
   ["gmp"] {os = "openbsd"}
   ["gmp"] {os = "macos" & os-distribution = "homebrew"}
@@ -196,6 +198,10 @@ depexts: [
   ["ncurses-devel"] {os-distribution = "ol"}
   ["ncurses-devel"] {os-distribution = "rhel"}
   ["ncurses-devel"] {os-family = "suse"}
+  ["pandoc"] {os-distribution = "fedora"}
+  ["pandoc"] {os-family = "debian"}
+  ["pandoc"] {os-family = "suse"}
+  ["pandoc"] {os = "macos" & os-distribution = "homebrew"}
   ["pcre"] {os = "freebsd"}
   ["pcre"] {os-family = "arch"}
   ["pcre"] {os = "macos" & os-distribution = "homebrew"}

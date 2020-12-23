@@ -25,6 +25,7 @@ second edition book. See https://realworldocaml.org/")
   cmdliner
   cohttp-async
   conf-ncurses
+  conf-pandoc
   core
   core_bench
   ctypes
