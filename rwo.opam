@@ -56,4 +56,5 @@ depexts: [
   ["tzdata"] {os-distribution = "ubuntu"}
   ["tzdata"] {os-distribution = "debian"}
   ["tzdata"] {os-distribution = "alpine"}
+  ["texlive-full"] {os-family = "debian"}
 ]

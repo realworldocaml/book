@@ -226,6 +226,7 @@ depexts: [
   ["pkgconfig"] {os-distribution = "centos" & os-version <= "7"}
   ["pkgconfig"] {os-distribution = "rhel" & os-version <= "7"}
   ["system:pkgconf"] {os = "win32" & os-distribution = "cygwinports"}
+  ["texlive-full"] {os-family = "debian"}
   ["tzdata"] {os-distribution = "alpine"}
   ["tzdata"] {os-distribution = "debian"}
   ["tzdata"] {os-distribution = "ubuntu"}
