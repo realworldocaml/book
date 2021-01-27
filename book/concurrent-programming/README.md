@@ -709,7 +709,7 @@ val w : '_weak4 Pipe.Writer.t = <abstr>
 
 `r` and `w` are really just read and write handles to the same underlying
 object. Note that `r` and `w` have weakly polymorphic types, as discussed in
-[Imperative Programming](guided-tour.html#imperative-programming){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 and so can only contain values of a single, yet-to-be-determined type.
 
 If we just try and write to the writer, we'll see that we block indefinitely
