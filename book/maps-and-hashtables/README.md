@@ -794,7 +794,7 @@ Error: This expression has type
 
 Hash tables are the imperative cousin of maps. We walked over a basic hash
 table implementation in
-[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 so in this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
 module. We'll cover this material more briefly than we did with maps because
 many of the concepts are shared. [hash tables/basics of]{.idx}

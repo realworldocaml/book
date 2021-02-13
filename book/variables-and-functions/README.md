@@ -435,7 +435,7 @@ A function is *recursive* if it refers to itself in its definition. Recursion
 is important in any programming language, but is particularly important in
 functional languages, because it is the way that you build looping
 constructs. (As will be discussed in more detail in
-[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 OCaml also supports imperative looping constructs like `for` and `while`, but
 these are only useful when using OCaml's imperative features.)[recursive
 functions/definition of]{.idx}[functions/recursive functions]{.idx}
