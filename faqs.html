@@ -1,0 +1,106 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"></div><article class="main-body">  <section data-type="chapter">
+    <p class="question">Why do I need to provide my Github login
+    details to add comments?</p>
+
+    <p>You need a free <a href="http://github.com/">Github</a>
+    account to make comments on the book. You will be redirected to
+    Github to login to authenticate to the website. When this is
+    complete, you <i>temporarily</i> grant us access to your public
+    repositories. However, we do not store your authorization
+    tokens on the server side and instead use a client-side cookie
+    on your browser. To log out, simply delete the cookie.</p>
+
+    <p>Once authenticated, every paragraph in the book will now
+    have a <tt>(comments)</tt> link just beside it. Clicking on
+    this link will show you all the comments that other reviewers
+    have made. You can enter your own feedback in there, which will
+    result in an issue being created on the <a href="http://github.com/realworldocaml/rwo-comments/issues">RWO
+    comments repository</a>. This issue will be created using your
+    own Github account, and makes it easier for Anil, Yaron and
+    Jason to follow up with questions.</p>
+
+    <p>You will receive e-mail notifications from Github whenever
+    the issue is updated (either with a followup, or just a
+    notification that we've fixed your problem in the next revision
+    of the book).</p>
+
+    <p class="question">Do I create a new issue if I want to
+    comment on someone else's comment?</p>
+
+    <p>No. If you are browsing comments and you want to start a
+    thread on someone else's comment, then just follow the link
+    marked <tt>(github)</tt> right beside that particular comment.
+    This will take you directly to the Github issue tracker where
+    you can lodge your feedback.</p>
+
+    <p class="question">Why do I need to grant you so much access
+    to the rest of my Github?</p>
+
+    <p>Sadly, the Github oAuth mechanism is severely limited in how
+    much access control that we can request. We just want the
+    ability to create issues in one specific <a href="http://github.com/ocamllabs/rwo-comments">public
+    repository</a>, but the minimum privileges we can request from
+    Github are the ones you see when you login. If you can convince
+    someone at Github to add more granular permissions, let us
+    know! However, we <i>never</i> store your authorization tokens
+    in our server, and instead just directly pass your
+    authorization token into a client-side cookie.</p>
+
+    <p class="question">Who is Bactrian the Double Humped OCaml,
+    and why does this mysterious ungulate comment on every
+    issue?</p>
+
+    <p>We use Github to store all the comments recorded against
+    book milestones instead of keeping our own database. To render
+    the HTML pages, we need to map back every Github issue into a
+    concrete paragraph and milestone id, which is done via the
+    labels associated with every comment in the issue repository.
+    However, the book contents obviously change every milestone,
+    and so we found it convenient to have a <a href="http://github.com/bactrian">bot</a> that uses the <a href="http://github.com/avsm/ocaml-github">OCaml Github bindings</a>
+    to add a contextual link containing the paragraph text to every
+    comment. This lets us (the authors) browse all of the book
+    issues directly using the excellent Github UI, and jump
+    straight to the relevant section in the HTML version of the
+    book if we need to.</p>
+
+    <p>Bactrian is a double-humped camel to distinguish us from our
+    single-humped Perl friends. Remember, a dromedary camel has one
+    hump and a bactrian has two (writing the D and the B will help you
+    tell them apart). We're still giddy that we bagged a camel for our
+    book...</p>
+
+    <p class="question">What license is the book released
+    under?</p>
+
+    <p>The online HTML version of the book is available under a
+    <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">Creative
+    Commons Attribution- Noncommercial-No Derivative Works 3.0
+    United States License</a>, which means that you are welcome to
+    copy, distribute and transmit the work, but must give us
+    attribution, not create derived works from it, or use it
+    directly for commercial purposes (it's fine to use to within
+    your workplace to learn OCaml, of course, but not to re-sell
+    the book directly.</p>
+
+    <p>We'd like to thank O'Reilly for their generosity in allowing
+    this online version to be available freely. Of course, we
+    encourage you to also purchase a copy of the book from them.
+    The O'Reilly production team is doing a tremendous job of
+    typesetting and editing the print version of the book into a
+    beautiful edition that's worthy of a place on your shelf.</p>
+
+    <p class="question">Is the source code to the website
+    commenting system available?</p>
+
+    <p>It's not right now, but only because the authors are so busy
+    finishing the book. Anil is planning to tidy up the toolchain
+    and open-source it just as soon as he finds time. All the
+    libraries used to build it, such as <a href="http://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> or
+    <a href="http://github.com/avsm/ocaml-github">ocaml-github</a>
+    are already all available via <a href="http://opam.ocamlpro.com">OPAM</a>.</p>
+
+    <p>If you have any questions about all this, please get in
+    touch with <a href="mailto:anil@recoil.org">Anil
+    Madhavapeddy</a>.</p>
+  </section>
+</article></div><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

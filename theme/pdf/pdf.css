@@ -1,0 +1,98 @@
+@charset "UTF-8";
+
+/*--------Put Your Custom CSS Rules Below--------*/
+/*--- This oneoff overrides the code in https://github.com/oreillymedia/animal_theme/blob/master/pdf/pdf.css---*/
+
+/* HERE ARE OLD ONEOFF STYLINGS FROM WHEN IN V1
+p.sourcecode {
+  text-align: right;
+  display: block;
+  hyphens: none;
+  margin-bottom: 0;
+  font-size: 8.3pt;
+  font-style: italic;
+  page-break-after: avoid
+}
+
+
+table.warning td p.sourcecode, 
+table.caution td p.sourcecode,
+table.note td p.sourcecode,
+table.tip td p.sourcecode { 
+  text-align: right;
+  display: block;
+  hyphens: none;
+  margin-bottom: 0;
+  font-size: 8.3pt;
+  font-style: italic;
+  page-break-after: avoid
+}
+
+.sidebar p.sourcecode {
+  text-align: right;
+  display: block;
+  hyphens: none;
+  margin-bottom: 0;
+  font-size: 8.3pt;
+  font-style: italic;
+  page-break-after: avoid
+}
+
+table.warning.allow_break,
+table.caution.allow_break,
+table.note.allow_break,
+table.tip.allow_break {
+page-break-inside: auto;
+}
+
+table.warning.allow_break tbody tr td,
+table.caution.allow_break tbody tr td,
+table.note.allow_break tbody tr td,
+table.tip.allow_break tbody tr td {
+page-break-inside: auto;
+}
+*/
+
+/*----Uncomment to turn on automatic code wrapping
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+----*/
+
+/*----Uncomment to change the TOC start page (set 
+the number to one page _after_ the one you want; 
+so 6 to start on v, 8 to start on vii, etc.)
+
+@page toc:first {
+  counter-reset: page 6;
+}
+----*/
+
+/*----Uncomment to fix a bad break in the title 
+      (increase padding value to push down, decrease 
+      value to pull up)
+
+section[data-type="titlepage"] h1 {
+  padding-left: 1.5in;
+}
+----*/
+
+/*----Uncomment to fix a bad break in the subtitle
+      (increase padding value to push down, decrease
+      value to pull up)
+
+section[data-type="titlepage"] h2 {
+  padding-left: 1in;
+}
+----*/
+
+/*----Uncomment to fix a bad break in the author names 
+      (increase padding value to push down, decrease 
+      value to pull up)
+
+section[data-type="titlepage"] p.author {
+  padding-left: 3in;
+}
+----*/

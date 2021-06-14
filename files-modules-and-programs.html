@@ -1,0 +1,646 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Files, Modules, and Programs - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="files-modules-and-programs">
+<h1>Files, Modules, and Programs</h1>
+<p>We’ve so far experienced OCaml largely through the toplevel. As you move from exercises to real-world programs, you’ll need to leave the toplevel behind and start building programs from files. Files are more than just a convenient way to store and manage your code; in OCaml, they also correspond to modules, which act as boundaries that divide your program into conceptual units.</p>
+<p>In this chapter, we’ll show you how to build an OCaml program from a collection of files, as well as the basics of working with modules and module signatures.</p>
+<section class="level2" id="single-file-programs">
+<h2>Single-File Programs</h2>
+<p>We’ll start with an example: a utility that reads lines from <code>stdin</code>, computes a frequency count of the lines, and prints out the ten most frequent lines. We’ll start with a simple implementation, which we’ll save as the file <em>freq.ml</em>. <a id="FILEsnglprog" data-secondary="single-file programs" data-primary="files" data-type="indexterm">&nbsp;</a><a id="Psingfil" data-secondary="single-file programs" data-primary="programs" data-type="indexterm">&nbsp;</a></p>
+<p>This implementation will use two functions from the <code>List.Assoc</code> module, which provides utility functions for interacting with <em>association lists</em>, <em>i.e.</em>, lists of key/value pairs. In particular, we use the function <code>List.Assoc.find</code>, which looks up a key in an association list; and <code>List.Assoc.add</code>, which adds a new binding to an association list, as shown here: <a data-secondary="List.Assoc.add" data-primary="List.Assoc module" data-type="indexterm">&nbsp;</a><a data-secondary="List.Assoc.find" data-primary="List.Assoc module" data-type="indexterm">&nbsp;</a><a data-secondary="adding new bindings in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="finding key associations in" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+let assoc = [("one", 1); ("two",2); ("three",3)];;
+&gt;val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
+List.Assoc.find ~equal:String.equal assoc "two";;
+&gt;- : int option = Some 2
+List.Assoc.add ~equal:String.equal assoc "four" 4 (* add a new key *);;
+&gt;- : (string, int) Base.List.Assoc.t =
+&gt;[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
+List.Assoc.add ~equal:String.equal assoc "two"  4 (* overwrite an existing key *);;
+&gt;- : (string, int) Base.List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
+</code></pre>
+</div>
+<p>Note that <code>List.Assoc.add</code> doesn’t modify the original list, but instead allocates a new list with the requisite key/value pair added.</p>
+<p>Now we can write <code>freq.ml</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+open Stdio
+
+let build_counts () =
+  In_channel.fold_lines In_channel.stdin ~init:[] ~f:(fun counts line -&gt;
+    let count =
+      match List.Assoc.find ~equal:String.equal counts line with
+      | None -&gt; 0
+      | Some x -&gt; x
+    in
+    List.Assoc.add ~equal:String.equal counts line (count + 1)
+  )
+
+let () =
+  build_counts ()
+  |&gt; List.sort ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; (fun l -&gt; List.take l 10)
+  |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</code></pre>
+</div>
+<p>The function <code>build_counts</code> reads in lines from <code>stdin</code>, constructing from those lines an association list with the frequencies of each line. It does this by invoking <code>In_channel.fold_lines</code> (similar to the function <code>List.fold</code> described in <a data-type="xref" href="lists-and-patterns.html#lists-and-patterns">Chapter 3, Lists And Patterns</a>), which reads through the lines one by one, calling the provided <code>fold</code> function for each line to update the accumulator. That accumulator is initialized to the empty list.</p>
+<p>With <code>build_counts</code> defined, we then call the function to build the association list, sort that list by frequency in descending order, grab the first 10 elements off the list, and then iterate over those 10 elements and print them to the screen. These operations are tied together using the <code>|&gt;</code> operator described in <a data-type="xref" href="variables-and-functions.html#prefix-and-infix-operators">Chapter 2, Variables And Functions</a>. <a data-primary="let ( ) declaration" data-type="indexterm">&nbsp;</a><a data-primary="main function" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5 allow_break" id="where-is-main">
+<h5>Where Is <code>main</code>?</h5>
+<p>Unlike programs in C, Java or C#, programs in OCaml don’t have a unique <code>main</code> function. When an OCaml program is evaluated, all the statements in the implementation files are evaluated in the order in which they were linked together. These implementation files can contain arbitrary expressions, not just function definitions. In this example, the declaration starting with <code>let () =</code> plays the role of the <code>main</code> function, kicking off the processing. But really the entire file is evaluated at startup, and so in some sense the full codebase is one big <code>main</code> function.</p>
+<p>The idiom of writing <code>let () =</code> may seem a bit odd, but it has a purpose. The <code>let</code> binding here is a pattern-match to a value of type <code>unit</code>, which is there to ensure that the expression on the righthand side returns <code>unit</code>, as is common for functions that operate primarily by side effect.</p>
+</section>
+<p>If we weren’t using <code>Base</code> or any other external libraries, we could build the executable like this:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlopt freq.ml -o freq
+&gt;File "freq.ml", line 1, characters 5-9:
+&gt;1 | open Base
+&gt;         ^^^^
+&gt;Error: Unbound module Base
+[2]</code></pre>
+</div>
+<p>But as you can see, it fails because it can’t find <code>Base</code> and <code>Stdio</code>. We need a somewhat more complex invocation to get them linked in: <a data-secondary="ocamlc" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="ocamlfind" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-secondary="finding with ocamlfind" data-primary="Base standard library" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocamlfind ocamlopt -linkpkg -package base -package stdio freq.ml -o freq
+</code></pre>
+</div>
+<p>This uses <code>ocamlfind</code>, a tool which itself invokes other parts of the OCaml toolchain (in this case, <code>ocamlopt</code>) with the appropriate flags to link in particular libraries and packages. Here, <code>-package base</code> is asking <code>ocamlfind</code> to link in the <code>Base</code> library; <code>-linkpkg</code> asks ocamlfind to link in the packages as is necessary for building an executable. <a data-primary-sortas="linkpkg" data-primary="-linkpkg" data-type="indexterm">&nbsp;</a></p>
+<p>While this works well enough for a one-file project, more complicated projects require a tool to orchestrate the build. One good tool for this task is <code>dune</code>. To invoke <code>dune</code>, you need to have a <code>dune</code> file that specifies the details of the build. <a data-primary="dune" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name      freq)
+  (libraries base stdio))</code></pre>
+</div>
+<p>With that in place, we can invoke <code>dune</code> as follows.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+</code></pre>
+</div>
+<p>We can run the resulting executable, <code>freq.exe</code>, from the command line. Executables built with <code>dune</code> will be left in the <code>_build/default</code> directory, from which they can be invoked. The specific invocation below will count the words that come up in the file <code>freq.ml</code> itself. <a data-secondary="dune" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">grep -Eo '[[:alpha:]]+' freq.ml | ./_build/default/freq.exe
+&gt;  5: line
+&gt;  5: List
+&gt;  5: counts
+&gt;  4: count
+&gt;  4: fun
+&gt;  4: x
+&gt;  4: equal
+&gt;  3: let
+&gt;  2: f
+&gt;  2: l
+</code></pre>
+</div>
+<p>Conveniently, <code>dune</code> allows us to combine the building and running an executable into a single operation, which we can do using <code>dune exec</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">grep -Eo '[[:alpha:]]+' freq.ml | dune exec ./freq.exe
+&gt;  5: line
+&gt;  5: List
+&gt;  5: counts
+&gt;  4: count
+&gt;  4: fun
+&gt;  4: x
+&gt;  4: equal
+&gt;  3: let
+&gt;  2: f
+&gt;  2: l
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="bytecode-versus-native-code">
+<h5>Bytecode Versus Native Code</h5>
+<p>OCaml ships with two compilers: the <code>ocamlopt</code> native code compiler and the <code>ocamlc</code> bytecode compiler. Programs compiled with <code>ocamlc</code> are interpreted by a virtual machine, while programs compiled with <code>ocamlopt</code> are compiled to machine code to be run on a specific operating system and processor architecture. With <code>dune</code>, targets ending with <code>.bc</code> are built as bytecode executables, and those ending with <code>.exe</code> are built as native code.</p>
+<p>Aside from performance, executables generated by the two compilers have nearly identical behavior. There are a few things to be aware of. First, the bytecode compiler can be used on more architectures, and has some tools that are not available for native code. For example, the OCaml debugger only works with bytecode (although <code>gdb</code>, the GNU Debugger, works with some limitations on OCaml native-code applications). The bytecode compiler is also quicker than the native-code compiler. In addition, in order to run a bytecode executable, you typically need to have OCaml installed on the system in question. That’s not strictly required, though, since you can build a bytecode executable with an embedded runtime, using the <code>-custom</code> compiler flag.</p>
+<p>As a general matter, production executables should usually be built using the native-code compiler, but it sometimes makes sense to use bytecode for development builds. And, of course, bytecode makes sense when targeting a platform not supported by the native-code compiler. We’ll cover both compilers in more detail in <a data-type="xref" href="compiler-backend.html#the-compiler-backend-byte-code-and-native-code">Chapter 24, The Compiler Backend: Byte Code And Native Code</a>.</p>
+</section>
+</section>
+<section class="level2" id="multi-file-programs-and-modules">
+<h2>Multifile Programs and Modules</h2>
+<p>Source files in OCaml are tied into the module system, with each file compiling down into a module whose name is derived from the name of the file. We’ve encountered modules before, such as when we used functions like <code>find</code> and <code>add</code> from the <code>List.Assoc</code> module. At its simplest, you can think of a module as a collection of definitions that are stored within a namespace. <a data-secondary="basics of" data-primary="modules" data-type="indexterm">&nbsp;</a><a data-secondary="multi-file programs" data-primary="files" data-type="indexterm">&nbsp;</a><a data-secondary="multi-file programs" data-primary="programs" data-type="indexterm">&nbsp;</a></p>
+<p>Let’s consider how we can use modules to refactor the implementation of <code>freq.ml</code>. Remember that the variable <code>counts</code> contains an association list representing the counts of the lines seen so far. But updating an association list takes time linear in the length of the list, meaning that the time complexity of processing a file is quadratic in the number of distinct lines in the file.</p>
+<p>We can fix this problem by replacing association lists with a more efficient data structure. To do that, we’ll first factor out the key functionality into a separate module with an explicit interface. We can consider alternative (and more efficient) implementations once we have a clear interface to program against.</p>
+<p>We’ll start by creating a file, <code>counter.ml</code>, that contains the logic for maintaining the association list used to represent the frequency counts. The key function, called <code>touch</code>, bumps the frequency count of a given line by one.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+let touch counts line =
+  let count =
+    match List.Assoc.find ~equal:String.equal counts line with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  List.Assoc.add ~equal:String.equal counts line (count + 1)</code></pre>
+</div>
+<p>The file <em>counter.ml</em> will be compiled into a module named <code>Counter</code>, where the name of the module is derived automatically from the filename. The module name is capitalized even if the file is not. Indeed, module names are always capitalized. <a data-secondary="naming of" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<p>We can now rewrite <code>freq.ml</code> to use <code>Counter</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+open Stdio
+
+let build_counts () =
+  In_channel.fold_lines In_channel.stdin ~init:[] ~f:Counter.touch
+
+let () =
+  build_counts ()
+  |&gt; List.sort ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; (fun l -&gt; List.take l 10)
+  |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</code></pre>
+</div>
+<p>The resulting code can still be built with <code>dune</code>, which will discover dependencies and realize that <code>counter.ml</code> needs to be compiled.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+</code></pre>
+</div>
+</section>
+<section class="level2" id="signatures-and-abstract-types">
+<h2>Signatures and Abstract Types</h2>
+<p>While we’ve pushed some of the logic to the <code>Counter</code> module, the code in <code>freq.ml</code> can still depend on the details of the implementation of <code>Counter</code>. Indeed, if you look at the definition of <code>build_counts</code>, you’ll see that it depends on the fact that the empty set of frequency counts is represented as an empty list. We’d like to prevent this kind of dependency, so we can change the implementation of <code>Counter</code> without needing to change client code like that in <code>freq.ml</code>. <a data-primary="abstract types" data-type="indexterm">&nbsp;</a><a data-secondary="module type" data-primary="modules" data-type="indexterm">&nbsp;</a><a data-secondary="abstract types" data-primary="signatures" data-type="indexterm">&nbsp;</a><a data-secondary="hiding implementation details with" data-primary="interfaces" data-type="indexterm">&nbsp;</a><a data-secondary="hiding implementation details" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<p>The implementation details of a module can be hidden by attaching an <em>interface</em>. (Note that in the context of OCaml, the terms <em>interface</em>, <em>signature</em>, and <em>module type</em> are all used interchangeably.) A module defined by a file <code>filename.ml</code> can be constrained by a signature placed in a file called <code>filename.mli</code>. <a data-secondary="synonyms for" data-primary="interfaces" data-type="indexterm">&nbsp;</a></p>
+<p>For <code>counter.mli</code>, we’ll start by writing down an interface that describes what’s currently available in <code>counter.ml</code>, without hiding anything. <code>val</code> declarations are used to specify values in a signature. The syntax of a <code>val</code> declaration is as follows:</p>
+<div class="highlight">
+<pre><code class="language-clike">val &lt;identifier&gt; : &lt;type&gt;</code></pre>
+</div>
+<p>Using this syntax, we can write the signature of <code>counter.ml</code> as follows.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+(** Bump the frequency count for the given string. *)
+val touch : (string * int) list -&gt; string -&gt; (string * int) list</code></pre>
+</div>
+<p>Note that <code>dune</code> will detect the presence of the <code>mli</code> file automatically and include it in the build.</p>
+<p>To hide the fact that frequency counts are represented as association lists, we’ll need to make the type of frequency counts <em>abstract</em>. A type is abstract if its name is exposed in the interface, but its definition is not. Here’s an abstract interface for <code>Counter</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+(** A collection of string frequency counts *)
+type t
+
+(** The empty set of frequency counts  *)
+val empty : t
+
+(** Bump the frequency count for the given string. *)
+val touch : t -&gt; string -&gt; t
+
+(** Converts the set of frequency counts to an association list.  A string shows
+    up at most once, and the counts are &gt;= 1. *)
+val to_list : t -&gt; (string * int) list</code></pre>
+</div>
+<p>Note that we needed to add <code>empty</code> and <code>to_list</code> to <code>Counter</code>, since otherwise there would be no way to create a <code>Counter.t</code> or get data out of one.</p>
+<p>We also used this opportunity to document the module. The <code>mli</code> file is the place where you specify your module’s interface, and as such is a natural place to put documentation. We started our comments with a double asterisk to cause them to be picked up by the <code>odoc</code> tool when generating API documentation. We’ll discuss <code>odoc</code> more in <a data-type="xref" href="compiler-frontend.html#the-compiler-frontend-parsing-and-type-checking">Chapter 22, The Compiler Frontend Parsing And Type Checking</a>.</p>
+<p>Here’s a rewrite of <code>counter.ml</code> to match the new <code>counter.mli</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+type t = (string * int) list
+
+let empty = []
+
+let to_list x = x
+
+let touch counts line =
+  let count =
+    match List.Assoc.find ~equal:String.equal counts line with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  List.Assoc.add ~equal:String.equal counts line (count + 1)</code></pre>
+</div>
+<p>If we now try to compile <code>freq.ml</code>, we’ll get the following error:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+&gt;File "freq.ml", line 5, characters 53-66:
+&gt;5 |   In_channel.fold_lines In_channel.stdin ~init:[] ~f:Counter.touch
+&gt;                                                         ^^^^^^^^^^^^^
+&gt;Error: This expression has type Counter.t -&gt; Base.string -&gt; Counter.t
+&gt;       but an expression was expected of type
+&gt;         'a list -&gt; Base.string -&gt; 'a list
+&gt;       Type Counter.t is not compatible with type 'a list
+[1]</code></pre>
+</div>
+<p>This is because <code>freq.ml</code> depends on the fact that frequency counts are represented as association lists, a fact that we’ve just hidden. We just need to fix <code>build_counts</code> to use <code>Counter.empty</code> instead of <code>[]</code> and to use <code>Counter.to_list</code> to convert the completed counts to an association list. The resulting implementation is shown below.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+open Stdio
+
+let build_counts () =
+  In_channel.fold_lines In_channel.stdin ~init:Counter.empty ~f:Counter.touch
+
+let () =
+  build_counts ()
+  |&gt; Counter.to_list
+  |&gt; List.sort ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  |&gt; (fun counts -&gt; List.take counts 10)
+  |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</code></pre>
+</div>
+<p>With this implementation, the build now succeeds!</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+</code></pre>
+</div>
+<p>Now we can turn to optimizing the implementation of <code>Counter</code>. Here’s an alternate and far more efficient implementation, based on the <code>Map</code> data structure in <code>Core_kernel</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+type t = (string,int,String.comparator_witness) Map.t
+
+let empty = Map.empty (module String)
+
+let to_list t = Map.to_alist t
+
+let touch t s =
+  let count =
+    match Map.find t s with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  Map.set t ~key:s ~data:(count + 1)</code></pre>
+</div>
+<p>There’s some unfamiliar syntax in the above example, in particular the use of <code>Map.empty (module String)</code> to generate an empty map. Here, we’re making use of a more advanced feature of the language (specifically, <em>first-class modules</em>, which we’ll get to in later chapters). The use of these features for the Map data-structure in particular is covered in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 13, Maps And Hash Tables</a>.</p>
+</section>
+<section class="level2" id="concrete-types-in-signatures">
+<h2>Concrete Types in Signatures</h2>
+<p>In our frequency-count example, the module <code>Counter</code> had an abstract type <code>Counter.t</code> for representing a collection of frequency counts. Sometimes, you’ll want to make a type in your interface <em>concrete</em>, by including the type definition in the interface. <a data-primary="concrete types" data-type="indexterm">&nbsp;</a><a data-secondary="concrete types" data-primary="signatures" data-type="indexterm">&nbsp;</a></p>
+<p>For example, imagine we wanted to add a function to <code>Counter</code> for returning the line with the median frequency count. If the number of lines is even, then there is no precise median, and the function would return the lines before and after the median instead. We’ll use a custom type to represent the fact that there are two possible return values. Here’s a possible implementation:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type median = | Median of string
+              | Before_and_after of string * string
+
+let median t =
+  let sorted_strings =
+    List.sort (Map.to_alist t)
+      ~compare:(fun (_,x) (_,y) -&gt; Int.descending x y)
+  in
+  let len = List.length sorted_strings in
+  if len = 0 then failwith "median: empty frequency count";
+  let nth n = fst (List.nth_exn sorted_strings n) in
+  if len % 2 = 1
+  then Median (nth (len/2))
+  else Before_and_after (nth (len/2 - 1), nth (len/2))</code></pre>
+</div>
+<p>In the above, we use <code>failwith</code> to throw an exception for the case of the empty list. We’ll discuss exceptions more in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>. Note also that the function <code>fst</code> simply returns the first element of any two-tuple.</p>
+<p>Now, to expose this usefully in the interface, we need to expose both the function and the type <code>median</code> with its definition. Note that values (of which functions are an example) and types have distinct namespaces, so there’s no name clash here. Adding the following two lines to <code>counter.mli</code> does the trick.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">(** Represents the median computed from a set of strings.  In the case where
+    there is an even number of choices, the one before and after the median is
+    returned.  *)
+type median = | Median of string
+              | Before_and_after of string * string
+
+val median : t -&gt; median</code></pre>
+</div>
+<p>The decision of whether a given type should be abstract or concrete is an important one. Abstract types give you more control over how values are created and accessed, and make it easier to enforce invariants beyond what is enforced by the type itself; concrete types let you expose more detail and structure to client code in a lightweight way. The right choice depends very much on the context.</p>
+</section>
+<section class="level2" id="nested-modules">
+<h2>Nested Modules</h2>
+<p>Up until now, we’ve only considered modules that correspond to files, like <code>counter.ml</code>. But modules (and module signatures) can be nested inside other modules. As a simple example, consider a program that needs to deal with multiple identifiers like usernames and hostnames. If you just represent these as strings, then it becomes easy to confuse one with the other. <a data-secondary="dealing with multiple" data-primary="identifiers" data-type="indexterm">&nbsp;</a><a data-primary="nested modules" data-type="indexterm">&nbsp;</a><a data-secondary="nested modules" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<p>A better approach is to mint new abstract types for each identifier, where those types are under the covers just implemented as strings. That way, the type system will prevent you from confusing a username with a hostname, and if you do need to convert, you can do so using explicit conversions to and from the string type.</p>
+<p>Here’s how you might create such an abstract type, within a submodule: <a data-primary="abstract types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+module Username : sig
+  type t
+  val of_string : string -&gt; t
+  val to_string : t -&gt; string
+  val (=) : t -&gt; t -&gt; bool
+end = struct
+  type t = string
+  let of_string x = x
+  let to_string x = x
+  let (=) = String.(=)
+end</code></pre>
+</div>
+<p>Note that the <code>to_string</code> and <code>of_string</code> functions above are implemented simply as the identity function, which means they have no runtime effect. They are there purely as part of the discipline that they enforce on the code through the type system. We also chose to put in an equality function, so you can check if two usernames match. In a real application, we might want more functionality, like the ability to hash and compare usernames, but we’ve kept this example purposefully simple.</p>
+<p>The basic structure of a module declaration like this is:</p>
+<div class="highlight">
+<pre><code class="language-clike">module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;</code></pre>
+</div>
+<p>We could have written this slightly differently, by giving the signature its own top-level <code>module type</code> declaration, making it possible to create multiple distinct types with the same underlying implementation in a lightweight way:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+module Time = Core_kernel.Time
+
+module type ID = sig
+  type t
+  val of_string : string -&gt; t
+  val to_string : t -&gt; string
+  val (=) : t -&gt; t -&gt; bool
+end
+
+module String_id = struct
+  type t = string
+  let of_string x = x
+  let to_string x = x
+  let (=) = String.(=)
+end
+
+module Username : ID = String_id
+module Hostname : ID = String_id
+
+type session_info = { user: Username.t;
+                      host: Hostname.t;
+                      when_started: Time.t;
+                    }
+
+let sessions_have_same_user s1 s2 =
+  Username.(=) s1.user s2.host</code></pre>
+</div>
+<p>The preceding code has a bug: it compares the username in one session to the host in the other session, when it should be comparing the usernames in both cases. Because of how we defined our types, however, the compiler will flag this bug for us.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build session_info.exe
+&gt;File "session_info.ml", line 27, characters 23-30:
+&gt;27 |   Username.(=) s1.user s2.host
+&gt;                            ^^^^^^^
+&gt;Error: This expression has type Hostname.t
+&gt;       but an expression was expected of type Username.t
+[1]</code></pre>
+</div>
+<p>This is a trivial example, but confusing different kinds of identifiers is a very real source of bugs, and the approach of minting abstract types for different classes of identifiers is an effective way of avoiding such issues.</p>
+</section>
+<section class="level2" id="opening-modules">
+<h2>Opening Modules</h2>
+<p>Most of the time, you refer to values and types within a module by using the module name as an explicit qualifier. For example, you write <code>List.map</code> to refer to the <code>map</code> function in the <code>List</code> module. Sometimes, though, you want to be able to refer to the contents of a module without this explicit qualification. That’s what the <code>open</code> statement is for. <a data-secondary="open modules and" data-primary="identifiers" data-type="indexterm">&nbsp;</a><a data-secondary="opening" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<p>We’ve encountered <code>open</code> already, specifically where we’ve written <code>open Base</code> to get access to the standard definitions in the <code>Base</code> library. In general, opening a module adds the contents of that module to the environment that the compiler looks at to find the definition of various identifiers. Here’s an example:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+module M = struct let foo = 3 end;;
+&gt;module M : sig val foo : int end
+foo;;
+&gt;Line 1, characters 1-4:
+&gt;Error: Unbound value foo
+open M;;
+foo;;
+&gt;- : int = 3
+</code></pre>
+</div>
+<p><code>open</code> is essential when you want to modify your environment for a standard library like <code>Base</code>, but it’s generally good style to keep the opening of modules to a minimum. Opening a module is basically a trade-off between terseness and explicitness—the more modules you open, the fewer module qualifications you need, and the harder it is to look at an identifier and figure out where it comes from.</p>
+<p>Here’s some general advice on how to deal with <code>open</code>s: <a data-primary="local opens" data-type="indexterm">&nbsp;</a></p>
+<ul>
+<li><p>Opening modules at the toplevel of a module should be done quite sparingly, and generally only with modules that have been specifically designed to be opened, like <code>Base</code> or <code>Option.Monad_infix</code>.</p></li>
+<li><p>If you do need to do an open, it’s better to do a <em>local open</em>. There are two syntaxes for local opens. For example, you can write:</p></li>
+</ul>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let average x y =
+  let open Int64 in
+  (x + y) / of_int 2
+;;
+&gt;val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Here, <code>of_int</code> and the infix operators are the ones from the <code>Int64</code> module.</p>
+<p>There’s another, even more lightweight syntax for local <code>open</code>s, which is particularly useful for small expressions:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let average x y =
+  Int64.((x + y) / of_int 2)
+;;
+&gt;val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
+</code></pre>
+</div>
+<ul>
+<li>An alternative to local <code>open</code>s that makes your code terser without giving up on explicitness is to locally rebind the name of a module. So, when using the <code>Counter.median</code> type, instead of writing:</li>
+</ul>
+<div class="highlight">
+<pre><code class="language-ocaml">let print_median m =
+  match m with
+  | Counter.Median string -&gt; printf "True median:\n   %s\n" string
+  | Counter.Before_and_after (before, after) -&gt;
+    printf "Before and after median:\n   %s\n   %s\n" before after</code></pre>
+</div>
+<p>you could write:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let print_median m =
+  let module C = Counter in
+  match m with
+  | C.Median string -&gt; printf "True median:\n   %s\n" string
+  | C.Before_and_after (before, after) -&gt;
+    printf "Before and after median:\n   %s\n   %s\n" before after</code></pre>
+</div>
+<p>Because the module name <code>C</code> only exists for a short scope, it’s easy to read and remember what <code>C</code> stands for. Rebinding modules to very short names at the top level of your module is usually a mistake.</p>
+</section>
+<section class="level2" id="including-modules">
+<h2>Including Modules</h2>
+<p>While opening a module affects the environment used to search for identifiers, <em>including</em> a module is a way of adding new identifiers to a module proper. Consider the following simple module for representing a range of integer values: <a data-secondary="including" data-primary="modules" data-type="indexterm">&nbsp;</a><a data-secondary="adding to modules" data-primary="identifiers" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Interval = struct
+  type t = | Interval of int * int
+           | Empty
+
+  let create low high =
+    if high &lt; low then Empty else Interval (low,high)
+end
+;;
+&gt;module Interval :
+&gt;  sig type t = Interval of int * int | Empty val create : int -&gt; int -&gt; t end
+</code></pre>
+</div>
+<p>We can use the <code>include</code> directive to create a new, extended version of the <code>Interval</code> module:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Extended_interval = struct
+  include Interval
+
+  let contains t x =
+    match t with
+    | Empty -&gt; false
+    | Interval (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
+end
+;;
+&gt;module Extended_interval :
+&gt;  sig
+&gt;    type t = Interval.t = Interval of int * int | Empty
+&gt;    val create : int -&gt; int -&gt; t
+&gt;    val contains : t -&gt; int -&gt; bool
+&gt;  end
+Extended_interval.contains (Extended_interval.create 3 10) 4;;
+&gt;- : bool = true
+</code></pre>
+</div>
+<p>The difference between <code>include</code> and <code>open</code> is that we’ve done more than change how identifiers are searched for: we’ve changed what’s in the module. If we’d used <code>open</code>, we’d have gotten a quite different result:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Extended_interval = struct
+  open Interval
+
+  let contains t x =
+    match t with
+    | Empty -&gt; false
+    | Interval (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high
+end
+;;
+&gt;module Extended_interval :
+&gt;  sig val contains : Extended_interval.t -&gt; int -&gt; bool end
+Extended_interval.contains (Extended_interval.create 3 10) 4;;
+&gt;Line 1, characters 29-53:
+&gt;Error: Unbound value Extended_interval.create
+</code></pre>
+</div>
+<p>To consider a more realistic example, imagine you wanted to build an extended version of the <code>Option</code> module, where you’ve added some functionality not present in the module as distributed in <code>Base</code>. That’s a job for <code>include</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+(* The new function we're going to add *)
+let apply f_opt x =
+  match f_opt with
+  | None -&gt; None
+  | Some f -&gt; Some (f x)
+
+(* The remainder of the list module *)
+include Option</code></pre>
+</div>
+<p>Now, how do we write an interface for this new module? It turns out that <code>include</code> works on signatures as well, so we can pull essentially the same trick to write our <code>mli</code>. The only issue is that we need to get our hands on the signature for the <code>Option</code> module. This can be done using <code>module type of</code>, which computes a signature from a module:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+(* Include the interface of the option module from Base *)
+include (module type of Option)
+
+(* Signature of function we're adding *)
+val apply : ('a -&gt; 'b) t -&gt; 'a -&gt; 'b t</code></pre>
+</div>
+<p>Note that the order of declarations in the <code>mli</code> does not need to match the order of declarations in the <code>ml</code>. The order of declarations in the <code>ml</code> mostly matters insofar as it affects which values are shadowed. If we wanted to replace a function in <code>Option</code> with a new function of the same name, the declaration of that function in the <code>ml</code> would have to come after the <code>include Option</code> declaration.</p>
+<p>We can now use <code>Ext_option</code> as a replacement for <code>Option</code>. If we want to use <code>Ext_option</code> in preference to <code>Option</code> in our project, we can create a file of common definitions:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Option = Ext_option</code></pre>
+</div>
+<p>And if we then put <code>open Common</code> after <code>open Base</code> at the top of each file in our project, then references to <code>Option</code> will automatically go to <code>Ext_option</code> instead.</p>
+</section>
+<section class="level2" id="common-errors-with-modules">
+<h2>Common Errors with Modules</h2>
+<p>When OCaml compiles a program with an <code>ml</code> and an <code>mli</code>, it will complain if it detects a mismatch between the two. Here are some of the common errors you’ll run into.</p>
+<section class="level3" id="type-mismatches">
+<h3>Type Mismatches</h3>
+<p>The simplest kind of error is where the type specified in the signature does not match the type in the implementation of the module. As an example, if we replace the <code>val</code> declaration in <code>counter.mli</code> by swapping the types of the first two arguments: <a data-secondary="module type mismatches" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-primary="type mismatches" data-type="indexterm">&nbsp;</a><a data-secondary="type mismatches in" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">(** Bump the frequency count for the given string. *)
+val touch : string -&gt; t -&gt; t</code></pre>
+</div>
+<p>and we try to compile, we’ll get the following error.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+&gt;File "counter.ml", line 1:
+&gt;Error: The implementation counter.ml
+&gt;       does not match the interface .freq.eobjs/byte/dune__exe__Counter.cmi:
+&gt;       Values do not match:
+&gt;         val touch :
+&gt;           ('a, int, 'b) Base.Map.t -&gt; 'a -&gt; ('a, int, 'b) Base.Map.t
+&gt;       is not included in
+&gt;         val touch : string -&gt; t -&gt; t
+&gt;       File "counter.mli", line 16, characters 0-28: Expected declaration
+&gt;       File "counter.ml", line 9, characters 4-9: Actual declaration
+[1]</code></pre>
+</div>
+</section>
+<section class="level3" id="missing-definitions">
+<h3>Missing Definitions</h3>
+<p>We might decide that we want a new function in <code>Counter</code> for pulling out the frequency count of a given string. We could add that to the <code>mli</code> by adding the following line. <a data-secondary="missing module definitions" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="missing definitions in" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">(** Returns the frequency count for the given string *)
+val count : t -&gt; string -&gt; int</code></pre>
+</div>
+<p>Now if we try to compile without actually adding the implementation, we’ll get this error.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+&gt;File "counter.ml", line 1:
+&gt;Error: The implementation counter.ml
+&gt;       does not match the interface .freq.eobjs/byte/dune__exe__Counter.cmi:
+&gt;       The value `count' is required but not provided
+&gt;       File "counter.mli", line 15, characters 0-30: Expected declaration
+[1]</code></pre>
+</div>
+<p>A missing type definition will lead to a similar error.</p>
+</section>
+<section class="level3" id="type-definition-mismatches">
+<h3>Type Definition Mismatches</h3>
+<p>Type definitions that show up in an <code>mli</code> need to match up with corresponding definitions in the <code>ml</code>. Consider again the example of the type <code>median</code>. The order of the declaration of variants matters to the OCaml compiler, so the definition of <code>median</code> in the implementation listing those options in a different order: <a data-primary="type definition mismatches" data-type="indexterm">&nbsp;</a><a data-secondary="module type definition mismatches" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="type definition mismatches" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">(** Represents the median computed from a set of strings.  In the case where
+    there is an even number of choices, the one before and after the median is
+    returned.  *)
+type median = | Before_and_after of string * string
+              | Median of string
+
+val median : t -&gt; median</code></pre>
+</div>
+<p>will lead to a compilation error.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+&gt;File "counter.ml", line 1:
+&gt;Error: The implementation counter.ml
+&gt;       does not match the interface .freq.eobjs/byte/dune__exe__Counter.cmi:
+&gt;       Type declarations do not match:
+&gt;         type median = Median of string | Before_and_after of string * string
+&gt;       is not included in
+&gt;         type median = Before_and_after of string * string | Median of string
+&gt;       Constructors number 1 have different names, Median and Before_and_after.
+&gt;       File "counter.mli", lines 21-22, characters 0-32: Expected declaration
+&gt;       File "counter.ml", lines 18-19, characters 0-51: Actual declaration
+[1]</code></pre>
+</div>
+<p>Order is similarly important to other type declarations, including the order in which record fields are declared and the order of arguments (including labeled and optional arguments) to a function.</p>
+</section>
+<section class="level3" id="cyclic-dependencies">
+<h3>Cyclic Dependencies</h3>
+<p>In most cases, OCaml doesn’t allow cyclic dependencies, i.e., a collection of definitions that all refer to one another. If you want to create such definitions, you typically have to mark them specially. For example, when defining a set of mutually recursive values (like the definition of <code>is_even</code> and <code>is_odd</code> in <a data-type="xref" href="variables-and-functions.html#recursive-functions">Chapter 2, Recursive Functions</a>), you need to define them using <code>let rec</code> rather than ordinary <code>let</code>. <a data-primary="dependencies, cyclic" data-type="indexterm">&nbsp;</a><a data-primary="cyclic dependencies" data-type="indexterm">&nbsp;</a><a data-secondary="cyclic dependencies" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="cyclic dependencies" data-primary="modules" data-type="indexterm">&nbsp;</a></p>
+<p>The same is true at the module level. By default, cyclic dependencies between modules are not allowed, and cyclic dependencies among files are never allowed. Recursive modules are possible but are a rare case, and we won’t discuss them further here.</p>
+<p>The simplest example of a forbidden circular reference is a module referring to its own module name. So, if we tried to add a reference to <code>Counter</code> from within <code>counter.ml</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let singleton l = Counter.touch Counter.empty</code></pre>
+</div>
+<p>we’ll see this error when we try to build:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+&gt;File "counter.ml", line 18, characters 18-31:
+&gt;18 | let singleton l = Counter.touch Counter.empty
+&gt;                       ^^^^^^^^^^^^^
+&gt;Error: The module Counter is an alias for module Dune__exe__Counter, which is missing
+[1]</code></pre>
+</div>
+<p>The problem manifests in a different way if we create cyclic references between files. We could create such a situation by adding a reference to <code>Freq</code> from <code>counter.ml</code>, e.g., by adding the following line.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let _build_counts = Freq.build_counts</code></pre>
+</div>
+<p>In this case, <code>dune</code> will notice the error and complain explicitly about the cycle:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build freq.exe
+&gt;Error: Dependency cycle between the following files:
+&gt;   _build/default/.freq.eobjs/freq.impl.all-deps
+&gt;-&gt; _build/default/.freq.eobjs/counter.impl.all-deps
+&gt;-&gt; _build/default/.freq.eobjs/freq.impl.all-deps
+[1]</code></pre>
+</div>
+</section>
+</section>
+<section class="level2" id="designing-with-modules">
+<h2>Designing with Modules</h2>
+<p>The module system is a key part of how an OCaml program is structured. As such, we’ll close this chapter with some advice on how to think about designing that structure effectively.</p>
+<section class="level3" id="expose-concrete-types-rarely">
+<h3>Expose Concrete Types Rarely</h3>
+<p>When designing an <code>mli</code>, one choice that you need to make is whether to expose the concrete definition of your types or leave them abstract. Most of the time, abstraction is the right choice, for two reasons: it enhances the flexibility of your design, and it makes it possible to enforce invariants on the use of your module.</p>
+<p>Abstraction enhances flexibility by restricting how users can interact with your types, thus reducing the ways in which users can depend on the details of your implementation. If you expose types explicitly, then users can depend on any and every detail of the types you choose. If they’re abstract, then only the specific operations you want to expose are available. This means that you can freely change the implementation without affecting clients, as long as you preserve the semantics of those operations.</p>
+<p>In a similar way, abstraction allows you to enforce invariants on your types. If your types are exposed, then users of the module can create new instances of that type (or if mutable, modify existing instances) in any way allowed by the underlying type. That may violate a desired invariant <em>i.e.</em>, a property about your type that is always supposed to be true. Abstract types allow you to protect invariants by making sure that you only expose functions that preserves your invariants.</p>
+<p>Despite these benefits, there is a trade-off here. In particular, exposing types concretely makes it possible to use pattern-matching with those types, which as we saw in <span class="keep-together">Lists And Patterns</span> is a powerful and important tool. You should generally only expose the concrete implementation of your types when there’s significant value in the ability to pattern match, and when the invariants that you care about are already enforced by the data type itself.</p>
+</section>
+<section class="level3" id="design-for-the-call-site">
+<h3>Design for the Call Site</h3>
+<p>When writing an interface, you should think not just about how easy it is to understand the interface for someone who reads your carefully documented <code>mli</code> file, but more importantly, you want the call to be as obvious as possible for someone who is reading it at the call site.</p>
+<p>The reason for this is that most of the time, people interacting with your API will be doing so by reading and modifying code that uses the API, not by reading the interface definition. By making your API as obvious as possible from that perspective, you simplify the lives of your users.</p>
+<p>There are many ways of improving readability at the call site. One example is labeled arguments (discussed in <a data-type="xref" href="variables-and-functions.html#labeled-arguments">Chapter 2, Labeled Arguments</a>), which act as documentation that is available at the call site.</p>
+<p>You can also improve readability simply by choosing good names for your functions, variant tags and record fields. Good names aren’t always long, to be clear. If you wanted to write an anonymous function for doubling a number: <code>(fun x -&gt; x * 2)</code>, a short variable name like <code>x</code> is best. A good rule of thumb is that names that have a small scope should be short, whereas names that have a large scope, like the name of a function in a module interface, should be longer and more explicit.</p>
+<p>There is of course a tradeoff here, in that making your APIs more explicit tends to make them more verbose as well. Another useful rule of thumb is that more rarely used names should be longer and more explicit, since the cost of concision and the benefit of explicitness become more important the more often a name is used.</p>
+</section>
+<section class="level3" id="create-uniform-intefaces">
+<h3>Create Uniform Interfaces</h3>
+<p>Designing the interface of a module is a task that should not be thought of in isolation. The interfaces that appear in your codebase should play together harmoniously. Part of achieving that is standardizing aspects of those interfaces.</p>
+<p><code>Base</code>, <code>Core</code> and other libraries from the same family have been designed with a uniform set of standards in mind around the design of module interfaces. Here are some of the guidelines that they use.</p>
+<ul>
+<li><p><em>A module for (almost) every type.</em> You should mint a module for almost every type in your program, and the primary type of a given module should be called <code>t</code>.</p></li>
+<li><p><em>Put <code>t</code> first</em>. If you have a module <code>M</code> whose primary type is <code>M.t</code>, the functions in <code>M</code> that take a value of <code>M.t</code> should take it as their first argument.</p></li>
+<li><p>Functions that routinely throw an exception should end in <code>_exn</code>. Otherwise, errors should be signaled by returning an <code>option</code> or an <code>Or_error.t</code> (both of which are discussed in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a> ).</p></li>
+</ul>
+<p>There are also standards in Base about what the type signature for specific functions should be. For example, the signature for <code>map</code> is always essentially the same, no matter what the underlying type it is applied to. This kind of function-by-function API uniformity is achieved through the use of <em>signature includes</em>, which allow for different modules to share components of their interface. This approach is described in <a data-type="xref" href="functors.html#using-multiple-interfaces">Chapter 9, Using Multiple Interfaces</a>.</p>
+<p>Base’s standards may or may not fit your projects, but you can improve the usability of your codebase by finding some consistent set of standards to apply.</p>
+</section>
+<section class="level3" id="interfaces-before-implementations">
+<h3>Interfaces before implementations</h3>
+<p>OCaml’s concise and flexible type language enables a type-oriented approach to software design. Such an approach involves thinking through and writing out the types you’re going to use before embarking on the implementation itself.</p>
+<p>This is a good approach both when working in the core language, where you would write your type definitions before writing the logic of your computations, as well as at the module level, where you would write a first draft of your <code>mli</code> before working on the <code>ml</code>.</p>
+<p>Of course, the design process goes in both directions. You’ll often find yourself going back and modifying your types in response to things you learn by working on the implementation. But types and signatures provide a lightweight tool for constructing a skeleton of your design in a way that helps clarify your goals and intent, before you spend a lot of time and effort fleshing it out.</p>
+</section>
+</section>
+</section>
+</article></div><a href="records.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 05</small>Records</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

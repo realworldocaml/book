@@ -1,0 +1,447 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Parsing with OCamllex and Menhir - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="parsing-with-ocamllex-and-menhir">
+<h1>Parsing with OCamllex and Menhir</h1>
+<p>Many programming tasks start with the interpretion of some form of structured textual data. <em>Parsing</em> is the process of converting such data into data structures that are easy to program against. For simple formats, it’s often enough to parse the data in an ad hoc way, say, by breaking up the data into lines, and then using regular expressions for breaking those lines down into their component pieces.</p>
+<p>But this simplistic approach tends to fall down when parsing more complicated data, particularly data with the kind of recursive structure you find in full-blown programming languages or flexible data formats like JSON and XML. Parsing such formats accurately and efficiently while providing useful error messages is a complex task.</p>
+<p>Often, you can find an existing parsing library that handles these issues for you. But there are tools to simplify the task when you do need to write a parser, in the form of <em>parser generators</em>. A parser generator creates a parser from a specification of the data format that you want to parse, and uses that to generate a parser. <a data-secondary="parser generators" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
+<p>Parser generators have a long history, including tools like <code>lex</code> and <code>yacc</code> that date back to the early 1970s. OCaml has its own alternatives, including <code>ocamllex</code>, which replaces <code>lex</code>, and <code>ocamlyacc</code> and <code>menhir</code>, which replace <code>yacc</code>. We’ll explore these tools in the course of walking through the implementation of a parser for the JSON serialization format that we discussed in <a data-type="xref" href="json.html#handling-json-data">Chapter 16, Handling Json Data</a>.</p>
+<p>Parsing is a broad and often intricate topic, and our purpose here is not to teach all of the theoretical issues, but to provide a pragmatic introduction of how to build a parser in OCaml. <a data-primary="ocamlyacc parser generator" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;ocamlyacc" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="menhir-versus-ocamlyacc">
+<h5>Menhir Versus ocamlyacc</h5>
+<p>Menhir is an alternative parser generator that is generally superior to the venerable <code>ocamlyacc</code>, which dates back quite a few years. Menhir is mostly compatible with <code>ocamlyacc</code> grammars, and so you can usually just switch to Menhir and expect older code to work (with some minor differences described in the Menhir manual).</p>
+<p>The biggest advantage of Menhir is that its error messages are generally more human-comprehensible, and the parsers that it generates are fully reentrant and can be parameterized in OCaml modules more easily. We recommend that any new code you develop should use Menhir instead of <code>ocamlyacc</code>.</p>
+<p>Menhir isn’t distributed directly with OCaml but is available through OPAM by running <code>opam install menhir</code>.</p>
+</section>
+<section class="level2" id="lexing-and-parsing">
+<h2>Lexing and Parsing</h2>
+<p>Parsing is traditionally broken down into two parts: <em>lexical analysis</em>, which is a kind of simplified parsing phase that converts a stream of characters into a stream of logical tokens; and full-on parsing, which involves converting a stream of tokens into the final representation, which is often in the form of a tree-like data structure called an <em>abstract syntax tree</em>, or AST. <a data-primary="AST (abstract syntax-tree)" data-type="indexterm">&nbsp;</a><a data-primary="lexical analysis (lexing)" data-type="indexterm">&nbsp;</a></p>
+<p>It’s confusing that the term parsing is applied to both the overall process of converting textual data to structured data, and also more specifically to the second phase of converting a stream of tokens to an AST; so from here on out, we’ll use the term parsing to refer only to this second phase.</p>
+<p>Let’s consider lexing and parsing in the context of the JSON format. Here’s a snippet of text that represents a JSON object containing a string labeled <code>title</code> and an array containing two objects, each with a name and array of zip codes:</p>
+<div class="highlight">
+<pre><code class="language-clike">{
+  "title": "Cities",
+  "cities": [
+    { "name": "Chicago",  "zips": [60601] },
+    { "name": "New York", "zips": [10004] }
+  ]
+}</code></pre>
+</div>
+<p>At a syntactic level, we can think of a JSON file as a series of simple logical units, like curly braces, square brackets, commas, colons, identifiers, numbers, and quoted strings. Thus, we could represent our JSON text as a sequence of tokens of the following type:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type token =
+  | NULL
+  | TRUE
+  | FALSE
+  | STRING of string
+  | INT of int
+  | FLOAT of float
+  | ID of string
+  | LEFT_BRACK
+  | RIGHT_BRACK
+  | LEFT_BRACE
+  | RIGHT_BRACE
+  | COMMA
+  | COLON
+  | EOF</code></pre>
+</div>
+<p>Note that this representation loses some information about the original text. For example, whitespace is not represented. It’s common, and indeed useful, for the token stream to forget some details of the original text that are not required for understanding its meaning.</p>
+<p>If we converted the preceding example into a list of these tokens, it would look something like this:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">[ LEFT_BRACE; ID("title"); COLON; STRING("Cities"); COMMA; ID("cities"); ...</code></pre>
+</div>
+<p>This kind of representation is easier to work with than the original text, since it gets rid of some unimportant syntactic details and adds useful structure. But it’s still a good deal more low-level than the simple AST we used for representing JSON data in <a data-type="xref" href="json.html#handling-json-data">Chapter 16, Handling Json Data</a>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type value = [
+  | `Assoc of (string * value) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of value list
+  | `Null
+  | `String of string
+]
+
+(* part 1 *)
+open Core
+open Out_channel
+
+let rec output_value outc = function
+  | `Assoc obj  -&gt; print_assoc outc obj
+  | `List l     -&gt; print_list outc l
+  | `String s   -&gt; printf "\"%s\"" s
+  | `Int i      -&gt; printf "%d" i
+  | `Float x    -&gt; printf "%f" x
+  | `Bool true  -&gt; output_string outc "true"
+  | `Bool false -&gt; output_string outc "false"
+  | `Null       -&gt; output_string outc "null"
+
+and print_assoc outc obj =
+  output_string outc "{ ";
+  let sep = ref "" in
+  List.iter ~f:(fun (key, value) -&gt;
+      printf "%s\"%s\": %a" !sep key output_value value;
+      sep := ",\n  ") obj;
+  output_string outc " }"
+
+and print_list outc arr =
+  output_string outc "[";
+  List.iteri ~f:(fun i v -&gt;
+      if i &gt; 0 then
+        output_string outc ", ";
+      output_value outc v) arr;
+  output_string outc "]"</code></pre>
+</div>
+<p>This representation is much richer than our token stream, capturing the fact that JSON values can be nested inside each other and that JSON has a variety of value types, including numbers, strings, arrays, and objects. The parser we’ll write will convert a token stream into a value of this AST type, as shown below for our earlier JSON example:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">`Assoc
+  ["title", `String "Cities";
+   "cities", `List
+     [`Assoc ["name", `String "Chicago"; "zips", `List [`Int 60601]];
+      `Assoc ["name", `String "New York"; "zips", `List [`Int 10004]]]]</code></pre>
+</div>
+</section>
+<section class="level2" id="defining-a-parser">
+<h2>Defining a Parser</h2>
+<p>A parser-specification file has suffix <code>.mly</code> and contains two sections that are broken up by separator lines consisting of the characters <code>%%</code> on a line by themselves. The first section of the file is for declarations, including token and type specifications, precedence directives, and other output directives; and the second section is for specifying the grammar of the language to be parsed. <a data-secondary="mly files" data-primary="files" data-type="indexterm">&nbsp;</a><a id="PARSparsdef" data-secondary="parser definition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll start by declaring the list of tokens. A token is declared using the syntax <code>%token &lt;</code><em><code>type</code></em><code>&gt;</code><em><code>uid</code></em>, where the <em><code>&lt;type&gt;</code></em> is optional and <em><code>uid</code></em> is a capitalized identifier. For JSON, we need tokens for numbers, strings, identifiers, and punctuation: <a data-primary="tokens, declaration of" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">%token &lt;int&gt; INT
+%token &lt;float&gt; FLOAT
+%token &lt;string&gt; ID
+%token &lt;string&gt; STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF</code></pre>
+</div>
+<p>The <code>&lt;</code><em><code>type</code></em><code>&gt;</code> specifications mean that a token carries a value. The <code>INT</code> token carries an integer value with it, <code>FLOAT</code> has a <code>float</code> value, and <code>STRING</code> carries a <code>string</code> value. The remaining tokens, such as <code>TRUE</code>, <code>FALSE</code>, or the punctuation, aren’t associated with any value, and so we can omit the <code>&lt;</code><em><code>type</code></em><code>&gt;</code> specification.</p>
+<section class="level3" id="describing-the-grammar">
+<h3>Describing the Grammar</h3>
+<p>The next thing we need to do is to specify the grammar of a JSON expression. <code>menhir</code>, like many parser generators, expresses grammars as <em>context-free grammars</em>. (More precisely, <code>menhir</code> supports LR(1) grammars, but we will ignore that technical distinction here.) You can think of a context-free grammar as a set of abstract names, called <em>non-terminal symbols</em>, along with a collection of rules for transforming a nonterminal symbol into a sequence of tokens and nonterminal symbols. A sequence of tokens is parsable by a grammar if you can apply the grammar’s rules to produce a series of transformations, starting at a distinguished <em>start symbol</em> that produces the token sequence in <span class="keep-together">question</span>. <a data-secondary="context-free" data-primary="grammars" data-type="indexterm">&nbsp;</a><a data-primary="LR(1) grammars" data-type="indexterm">&nbsp;</a><a data-primary="start symbols" data-type="indexterm">&nbsp;</a><a data-primary="non-terminal symbols" data-type="indexterm">&nbsp;</a><a data-primary="context-free grammars" data-type="indexterm">&nbsp;</a><a data-secondary="context-free grammars in" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll start describing the JSON grammar by declaring the start symbol to be the non-terminal symbol <code>prog</code>, and by declaring that when parsed, a <code>prog</code> value should be converted into an OCaml value of type <code>Json.value option</code>. We then end the declaration section of the parser with a <code>%%</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">%start &lt;Json.value option&gt; prog
+%%</code></pre>
+</div>
+<p>Once that’s in place, we can start specifying the productions. In <code>menhir</code>, productions are organized into <em>rules</em>, where each rule lists all the possible productions for a given nonterminal symbols. Here, for example, is the rule for <code>prog</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">prog:
+  | EOF       { None }
+  | v = value { Some v }
+  ;</code></pre>
+</div>
+<p>The syntax for this is reminiscent of an OCaml <code>match</code> statement. The pipes separate the individual productions, and the curly braces contain a <em>semantic action</em>: OCaml code that generates the OCaml value corresponding to the production in question. Semantic actions are arbitrary OCaml expressions that are evaluated during parsing to produce values that are attached to the non-terminal in the rule. <a data-primary="semantic actions" data-type="indexterm">&nbsp;</a><a data-primary="curly braces ({ })" data-type="indexterm">&nbsp;</a></p>
+<p>We have two cases for <code>prog</code>: either there’s an <code>EOF</code>, which means the text is empty, and so there’s no JSON value to read, we return the OCaml value <code>None</code>; or we have an instance of the <code>value</code> nonterminal, which corresponds to a well-formed JSON value, and we wrap the corresponding <code>Json.value</code> in a <code>Some</code> tag. Note that in the <code>value</code> case, we wrote <code>v = value</code> to bind the OCaml value that corresponds to the variable <code>v</code>, which we can then use within the curly braces for that production.</p>
+<p>Now let’s consider a more complex example, the rule for the <code>value</code> symbol:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">value:
+  | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
+    { `Assoc obj }
+  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
+    { `List vl }
+  | s = STRING
+    { `String s }
+  | i = INT
+    { `Int i }
+  | x = FLOAT
+    { `Float x }
+  | TRUE
+    { `Bool true }
+  | FALSE
+    { `Bool false }
+  | NULL
+    { `Null }
+  ;</code></pre>
+</div>
+<p>According to these rules, a JSON <code>value</code> is either: <a data-secondary="in JSON data" data-primary="values" data-type="indexterm">&nbsp;</a></p>
+<ul>
+<li><p>An object bracketed by curly braces</p></li>
+<li><p>An array bracketed by square braces</p></li>
+<li><p>A string, integer, float, bool, or null value</p></li>
+</ul>
+<p>In each of the productions, the OCaml code in curly braces shows what to transform the object in question to. Note that we still have two nonterminals whose definitions we depend on here but have not yet defined: <code>object_fields</code> and <code>array_values</code>. We’ll look at how these are parsed next.</p>
+</section>
+<section class="level3" id="parsing-sequences">
+<h3>Parsing Sequences</h3>
+<p>The rule for <code>object_fields</code> follows, and is really just a thin wrapper that reverses the list returned by the following rule for <code>rev_object_fields</code>. Note that the first production in <code>rev_object_fields</code> has an empty left-hand side, because what we’re matching on in this case is an empty sequence of tokens. The comment <code>(* empty *)</code> is used to make this clear: <a data-primary="rev_object_fields" data-type="indexterm">&nbsp;</a><a data-primary="object_fields" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">object_fields: obj = rev_object_fields { List.rev obj };
+
+rev_object_fields:
+  | (* empty *) { [] }
+  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
+    { (k, v) :: obj }
+  ;</code></pre>
+</div>
+<p>The rules are structured as they are because <code>menhir</code> generates left-recursive parsers, which means that the constructed pushdown automaton uses less stack space with left-recursive definitions. The following right-recursive rule accepts the same input, but during parsing, it requires linear stack space to read object field definitions: <a data-secondary="left-recursive definitions" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">(* Inefficient right-recursive rule *)
+object_fields:
+  | (* empty *) { [] }
+  | k = ID; COLON; v = value; COMMA; obj = object_fields
+    { (k, v) :: obj }</code></pre>
+</div>
+<p>Alternatively, we could keep the left-recursive definition and simply construct the returned value in left-to-right order. This is even less efficient, since the complexity of building the list incrementally in this way is quadratic in the length of the list:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">(* Quadratic left-recursive rule *)
+object_fields:
+  | (* empty *) { [] }
+  | obj = object_fields; COMMA; k = ID; COLON; v = value
+    { obj @ [k, v] }
+  ;</code></pre>
+</div>
+<p>Assembling lists like this is a pretty common requirement in most realistic grammars, and the preceding rules (while useful for illustrating how parsing works) are rather verbose. Menhir features an extended standard library of built-in rules to simplify this handling. These rules are detailed in the Menhir manual and include optional values, pairs of values with optional separators, and lists of elements (also with optional separators). <a data-secondary="built-in rules of" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
+<p>A version of the JSON grammar using these more succinct Menhir rules follows. Notice the use of <code>separated_list</code> to parse both JSON objects and lists with one rule:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">prog:
+  | v = value { Some v }
+  | EOF       { None   } ;
+
+value:
+  | LEFT_BRACE; obj = obj_fields; RIGHT_BRACE { `Assoc obj  }
+  | LEFT_BRACK; vl = list_fields; RIGHT_BRACK { `List vl    }
+  | s = STRING                                { `String s   }
+  | i = INT                                   { `Int i      }
+  | x = FLOAT                                 { `Float x    }
+  | TRUE                                      { `Bool true  }
+  | FALSE                                     { `Bool false }
+  | NULL                                      { `Null       } ;
+
+obj_fields:
+    obj = separated_list(COMMA, obj_field)    { obj } ;
+
+obj_field:
+    k = STRING; COLON; v = value              { (k, v) } ;
+
+list_fields:
+    vl = separated_list(COMMA, value)         { vl } ;</code></pre>
+</div>
+<p>We can invoke <code>menhir</code> by using <code>corebuild</code> with the <code>-use-menhir</code> flag. This tells the build system to switch to using <code>menhir</code> instead of <code>ocamlyacc</code> to handle files with the <code>.mly</code> suffix: <a data-primary-sortas="use" data-primary="-use-menhir flag" data-type="indexterm">&nbsp;</a><a data-secondary="invoking" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a><a data-startref="PARSparsdef" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-scheme">(rule
+ (targets short_parser.mli short_parser.ml)
+  (deps   short_parser.mly)
+  (action (ignore-stderr (run menhir --external-tokens Json --explain ${&lt;}))))</code></pre>
+</div>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash"></code></pre>
+</div>
+</section>
+</section>
+<section class="level2" id="defining-a-lexer">
+<h2>Defining a Lexer</h2>
+<p>Now we can define a lexer, using <code>ocamllex</code>, to convert our input text into a stream of tokens. The specification of the lexer is placed in a file with an <code>.mll</code> suffix. <a data-secondary="specification of" data-primary="lexers" data-type="indexterm">&nbsp;</a><a data-secondary="ocamllex" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="mll files" data-type="indexterm">&nbsp;</a><a data-secondary="mll files" data-primary="files" data-type="indexterm">&nbsp;</a><a id="PARlex" data-secondary="lexer definition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
+<section class="level3" id="ocaml-prelude">
+<h3>OCaml Prelude</h3>
+<p>Let’s walk through the definition of a lexer section by section. The first section is an optional chunk of OCaml code that is bounded by a pair of curly braces: <a data-secondary="optional OCaml code for" data-primary="lexers" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">{
+open Lexing
+open Parser
+
+exception SyntaxError of string
+
+let next_line lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  lexbuf.lex_curr_p &lt;-
+    { pos with pos_bol = lexbuf.lex_curr_pos;
+               pos_lnum = pos.pos_lnum + 1
+    }
+}</code></pre>
+</div>
+<p>This code is there to define utility functions used by later snippets of OCaml code and to set up the environment by opening useful modules and define an exception, <code>SyntaxError</code>.</p>
+<p>We also define a utility function <code>next_line</code> for tracking the location of tokens across line breaks. The <code>Lexing</code> module defines a <code>lexbuf</code> structure that holds the state of the lexer, including the current location within the source file. The <code>next_line</code> function simply accesses the <code>lex_curr_p</code> field that holds the current location and updates its line number.</p>
+</section>
+<section class="level3" id="regular-expressions">
+<h3>Regular Expressions</h3>
+<p>The next section of the lexing file is a collection of named regular expressions. These look syntactically like ordinary OCaml <code>let</code> bindings, but really this is a specialized syntax for declaring regular expressions. Here’s an example: <a data-primary="regular expressions" data-type="indexterm">&nbsp;</a><a data-secondary="regular expressions collection" data-primary="lexers" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">let int = '-'? ['0'-'9'] ['0'-'9']*</code></pre>
+</div>
+<p>The syntax here is something of a hybrid between OCaml syntax and traditional regular expression syntax. The <code>int</code> regular expression specifies an optional leading <code>-</code>, followed by a digit from <code>0</code> to <code>9</code>, followed by some number of digits from <code>0</code> to <code>9</code>. The question mark is used to indicate an optional component of a regular expression; the square brackets are used to specify ranges; and the <code>*</code> operator is used to indicate a (possibly empty) repetition.</p>
+<p>Floating-point numbers are specified similarly, but we deal with decimal points and exponents. We make the expression easier to read by building up a sequence of named regular expressions, rather than creating one big and impenetrable expression:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let digit = ['0'-'9']
+let frac = '.' digit*
+let exp = ['e' 'E'] ['-' '+']? digit+
+let float = digit* frac? exp?</code></pre>
+</div>
+<p>Finally, we define whitespace, newlines, and identifiers:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let white = [' ' '\t']+
+let newline = '\r' | '\n' | "\r\n"
+let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</code></pre>
+</div>
+<p>The <code>newline</code> introduces the <code>|</code> operator, which lets one of several alternative regular expressions match (in this case, the various carriage-return combinations of CR, LF, or CRLF).</p>
+</section>
+<section class="level3" id="lexing-rules">
+<h3>Lexing Rules</h3>
+<p>The lexing rules are essentially functions that consume the data, producing OCaml expressions that evaluate to tokens. These OCaml expressions can be quite complicated, using side effects and invoking other rules as part of the body of the rule. Let’s look at the <code>read</code> rule for parsing a JSON expression: <a data-secondary="rules for" data-primary="lexers" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">rule read =
+  parse
+  | white    { read lexbuf }
+  | newline  { next_line lexbuf; read lexbuf }
+  | int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+  | "true"   { TRUE }
+  | "false"  { FALSE }
+  | "null"   { NULL }
+  | '"'      { read_string (Buffer.create 17) lexbuf }
+  | '{'      { LEFT_BRACE }
+  | '}'      { RIGHT_BRACE }
+  | '['      { LEFT_BRACK }
+  | ']'      { RIGHT_BRACK }
+  | ':'      { COLON }
+  | ','      { COMMA }
+  | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+  | eof      { EOF }</code></pre>
+</div>
+<p>The rules are structured very similarly to pattern matches, except that the variants are replaced by regular expressions on the left-hand side. The righthand-side clause is the parsed OCaml return value of that rule. The OCaml code for the rules has a parameter called <code>lexbuf</code> that defines the input, including the position in the input file, as well as the text that was matched by the regular expression. <a data-secondary="vs.&nbsp;lexing rules" data-primary="pattern matching" data-type="indexterm">&nbsp;</a></p>
+<p>The first <code>white { read lexbuf }</code> calls the lexer recursively. That is, it skips the input whitespace and returns the following token. The action <code>newline { next_line lexbuf; read lexbuf }</code> is similar, but we use it to advance the line number for the lexer using the utility function that we defined at the top of the file. Let’s skip to the third action:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">| int { INT (int_of_string (Lexing.lexeme lexbuf)) }</code></pre>
+</div>
+<p>This action specifies that when the input matches the <code>int</code> regular expression, then the lexer should return the expression <code>INT (int_of_string (Lexing.lexeme lexbuf))</code>. The expression <code>Lexing.lexeme lexbuf</code> returns the complete string matched by the regular expression. In this case, the string represents a number, so we use the <code>int_of_string</code> function to convert it to a number.</p>
+<p>There are actions for each different kind of token. The string expressions like <code>"true" { TRUE }</code> are used for keywords, and the special characters have actions, too, like <code>'{' { LEFT_BRACE }</code>.</p>
+<p>Some of these patterns overlap. For example, the regular expression <code>"true"</code> is also matched by the <code>id</code> pattern. <code>ocamllex</code> used the following disambiguation when a prefix of the input is matched by more than one pattern:</p>
+<ul>
+<li><p>The longest match always wins. For example, the first input <code>trueX: 167</code> matches the regular expression <code>"true"</code> for four characters, and it matches <code>id</code> for five characters. The longer match wins, and the return value is <code>ID "trueX"</code>.</p></li>
+<li><p>If all matches have the same length, then the first action wins. If the input were <code>true: 167</code>, then both <code>"true"</code> and <code>id</code> match the first four characters; <code>"true"</code> is first, so the return value is <code>TRUE</code>.</p></li>
+</ul>
+</section>
+<section class="level3" id="recursive-rules">
+<h3>Recursive Rules</h3>
+<p>Unlike many other lexer generators, <code>ocamllex</code> allows the definition of multiple lexers in the same file, and the definitions can be recursive. In this case, we use recursion to match string literals using the following rule definition: <a data-secondary="in lexers" data-primary="recursion" data-type="indexterm">&nbsp;</a><a data-secondary="recursive rules" data-primary="lexers" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">and read_string buf =
+  parse
+  | '"'       { STRING (Buffer.contents buf) }
+  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | [^ '"' '\\']+
+    { Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
+  | eof { raise (SyntaxError ("String is not terminated")) }</code></pre>
+</div>
+<p>This rule takes a <code>buf : Buffer.t</code> as an argument. If we reach the terminating double quote <code>"</code>, then we return the contents of the buffer as a <code>STRING</code>.</p>
+<p>The other cases are for handling the string contents. The action <code>[^ '"' '\\']+ { ... }</code> matches normal input that does not contain a double quote or backslash. The actions beginning with a backslash <code>\</code> define what to do for escape sequences. In each of these cases, the final step includes a recursive call to the lexer.</p>
+<p>That covers the lexer. Next, we need to combine the lexer with the parser to bring it all together. <a data-secondary="Unicode parsing" data-primary="lexers" data-type="indexterm">&nbsp;</a><a data-primary="Uutf Unicode codec" data-type="indexterm">&nbsp;</a><a data-secondary="ocamllex" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="sedlex lexer generator" data-type="indexterm">&nbsp;</a><a data-primary="Camomile unicode parser" data-type="indexterm">&nbsp;</a><a data-primary="Unicode, parsing solutions for" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="handling-unicode">
+<h5>Handling Unicode</h5>
+<p>We’ve glossed over an important detail here: parsing Unicode characters to handle the full spectrum of the world’s writing systems. OCaml has several third-party solutions to handling Unicode, with varying degrees of flexibility and complexity:</p>
+<ul>
+<li><p><a href="https://github.com/yoriyuki/Camomile">Camomile</a> supports the full spectrum of Unicode character types, conversion from around 200 encodings, and collation and locale-sensitive case mappings.</p></li>
+<li><p><a href="https://github.com/ocaml-community/sedlex">sedlex</a> is a lexer generator for Unicode that can serve as a Unicode-aware replacement for <code>ocamllex</code>.</p></li>
+<li><p><a href="http://erratique.ch/software/uutf">Uutf</a> is a nonblocking streaming Unicode codec for OCaml, available as a standalone library. It is accompanied by the <a href="http://erratique.ch/software/uunf">Uunf</a> text normalization and <a href="http://erratique.ch/software/uucd">Uucd</a> Unicode character database libraries. There is also a robust parser for <a href="http://erratique.ch/software/jsonm">JSON</a> available that illustrates the use of Uutf in your own libraries.</p></li>
+</ul>
+<p>All of these libraries are available via OPAM under their respective names.<a data-startref="PARlex" data-type="indexterm">&nbsp;</a></p>
+</section>
+</section>
+</section>
+<section class="level2" id="bringing-it-all-together">
+<h2>Bringing It All Together</h2>
+<p>For the final part, we need to compose the lexer and parser. As we saw in the type definition in <code>parser.mli</code>, the parsing function expects a lexer of type <code>Lexing.lexbuf -&gt; token</code>, and a <code>lexbuf</code>: <a data-secondary="lexer and parser composition" data-primary="parsing" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option</code></pre>
+</div>
+<p>Before we start with the lexing, let’s first define some functions to handle parsing errors. There are currently two errors: <code>Parser.Error</code> and <code>Lexer.SyntaxError</code>. A simple solution when encountering an error is to print the error and give up: <a data-secondary="“give up on first error” approach" data-primary="errors" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+open Lexer
+open Lexing
+
+let print_position outx lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  fprintf outx "%s:%d:%d" pos.pos_fname
+    pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+
+let parse_with_error lexbuf =
+  try Parser.prog Lexer.read lexbuf with
+  | SyntaxError msg -&gt;
+    fprintf stderr "%a: %s\n" print_position lexbuf msg;
+    None
+  | Parser.Error -&gt;
+    fprintf stderr "%a: syntax error\n" print_position lexbuf;
+    exit (-1)</code></pre>
+</div>
+<p>The “give up on the first error” approach is easy to implement but isn’t very friendly. In general, error handling can be pretty intricate, and we won’t discuss it here. However, the Menhir parser defines additional mechanisms you can use to try and recover from errors. These are described in detail in its reference <a href="http://gallium.inria.fr/~fpottier/menhir/">manual</a>. <a data-secondary="error handling in" data-primary="Menhir parser generator" data-type="indexterm">&nbsp;</a></p>
+<p>The standard lexing library <code>Lexing</code> provides a function <code>from_channel</code> to read the input from a channel. The following function describes the structure, where the <code>Lexing.from_channel</code> function is used to construct a <code>lexbuf</code>, which is passed with the lexing function <code>Lexer.read</code> to the <code>Parser.prog</code> function. <code>Parsing.prog</code> returns <code>None</code> when it reaches end of file. We define a function <code>Json.output_value</code>, not shown here, to print a <code>Json.value</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let rec parse_and_print lexbuf =
+  match parse_with_error lexbuf with
+  | Some value -&gt;
+    printf "%a\n" Json.output_value value;
+    parse_and_print lexbuf
+  | None -&gt; ()
+
+let loop filename () =
+  let inx = In_channel.create filename in
+  let lexbuf = Lexing.from_channel inx in
+  lexbuf.lex_curr_p &lt;- { lexbuf.lex_curr_p with pos_fname = filename };
+  parse_and_print lexbuf;
+  In_channel.close inx
+
+let () =
+  Command.basic_spec ~summary:"Parse and display JSON"
+    Command.Spec.(empty +&gt; anon ("filename" %: string))
+    loop
+  |&gt; Command.run</code></pre>
+</div>
+<p>Here’s a test input file we can use to test the code we just wrote:</p>
+<div class="highlight">
+<pre><code class="language-clike">true
+false
+null
+[1, 2, 3., 4.0, .5, 5.5e5, 6.3]
+"Hello World"
+{ "field1": "Hello",
+  "field2": 17e13,
+  "field3": [1, 2, 3],
+  "field4": { "fieldA": 1, "fieldB": "Hello" }
+}</code></pre>
+</div>
+<p>Now build and run the example using this file, and you can see the full parser in action:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec ./test.exe test1.json
+&gt;true
+&gt;false
+&gt;null
+&gt;[1, 2, 3.000000, 4.000000, 0.500000, 550000.000000, 6.300000]
+&gt;"Hello World"
+&gt;{ "field1": "Hello",
+&gt;  "field2": 170000000000000.000000,
+&gt;  "field3": [1, 2, 3],
+&gt;  "field4": { "fieldA": 1,
+&gt;  "fieldB": "Hello" } }
+</code></pre>
+</div>
+<p>With our simple error handling scheme, errors are fatal and cause the program to terminate with a nonzero exit code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cat test2.json
+&gt;{ "name": "Chicago",
+&gt;  "zips": [12345,
+&gt;}
+&gt;{ "name": "New York",
+&gt;  "zips": [10004]
+&gt;}
+dune exec ./test.exe test2.json
+&gt;test2.json:3:2: syntax error
+[255]</code></pre>
+</div>
+<p>That wraps up our parsing tutorial. As an aside, notice that the JSON polymorphic variant type that we defined in this chapter is actually structurally compatible with the Yojson representation explained in <a data-type="xref" href="json.html#handling-json-data">Chapter 16, Handling Json Data</a>. That means that you can take this parser and use it with the helper functions in Yojson to build more sophisticated applications.</p>
+</section>
+</section>
+</article></div><a href="data-serialization.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 18</small>Data Serialization with S-Expressions</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

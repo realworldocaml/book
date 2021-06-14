@@ -1,0 +1,262 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"></div><article class="main-body">  <h1>Installation Instructions</h1>
+
+  <p>These instructions are aimed at readers of Real World OCaml,
+  though much of what you find here will be useful for anyone who
+  wants to get a good working OCaml installation.</p>
+
+  <p>At the highest level, here's what you need to do:</p>
+
+  <ul>
+    <li><a href="#installing-opam">Install opam</a>, OCaml's default
+      package manager</li>
+
+    <li><a href="#opam-setup">Set up opam</a>, which means
+      initializing opam and then installing the version of OCaml
+      you'll need, along with the libraries and tools that will help
+      you work through the examples in the book</li>
+
+    <li><a href="#utop-setup">Configure utop</a>, the interactive
+      toplevel that will be the primary vehicle we'll use for walking
+      through small examples.</li>
+
+    <li><a href="#editor-setup">Set up your editing environment.</a>
+    We have pointers for a few editors, including Visual Studio Code,
+    Emacs, and Vi</li>
+  </ul>
+
+  <p>Note that Windows is not fully supported by the examples in Real
+  World OCaml or by opam, though it's being worked on.  Until that's
+  ready, we recommend using a virtual machine running Debian Linux on
+  your local machine, or
+  <a href="https://docker.com">Docker for Windows</a>.</p>
+
+  <p>Let's get started.</p>
+
+  <h2 id="installing-opam">Installing opam</h2>
+
+  <p>opam is the default package manager for OCaml, and you'll need it
+  to get everything else you need installed and set up.</p>
+
+  <p>The easiest way to install opam is through your OS's package
+  manager. In most cases, installing opam will also trigger the
+  installation of OCaml. The version installed isn't important, since
+  we can use opam itself to install other versions of the
+  compiler.</p>
+
+  <p>Here
+    are <a href="http://opam.ocaml.org/doc/Install.html#Using-your-distribution-39-s-package-system">
+    platform-specific installation instructions</a> for installing via
+    your package manager.  The same page
+    has <a href="http://opam.ocaml.org/doc/Install.html#Binary-distribution">
+    instructions for using a binary installer</a> if you have trouble
+    with your package manager.
+</p>
+
+  <h2 id="#opam-setup">Setting up opam</h2>
+
+  <h3>Run <code>opam init</code></h3>
+
+  <p>The entire opam package database is held in the
+  <code>.opam</code> directory in your home directory, including
+  compiler installations. On Linux and macOS, this will be the
+  <code>~/.opam</code> directory, which means you don't need
+  administrative privileges to configure it. If you run into
+  problems configuring opam, just delete the whole
+  <code>~/.opam</code> directory and start over.</p>
+
+  <p>Let's begin by initialising the opam package database. We do this
+    by running:</p>
+
+  <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam init</code></pre>
+
+  <p>Before <code>opam init</code> finishes, it will ask you if you
+  want it to adjust some of the config files for your shell.  We
+  recommend you say yes here so as to automate adjusting the PATH
+  environment variable of your shell and to prepare your environment
+  in other ways.</p>
+
+  <p>Note that if for whatever reason your shell is not set up
+    properly, you can put it in the right state by running:</p>
+
+    <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+eval $(opam env)</code></pre>
+
+  <p>This evaluates the results of running <code>opam config
+  env</code> in your current shell and sets the variables so that
+  subsequent commands will use them. This <em>only</em> works with
+  your current shell and it can only be automated for future shells by
+  adding the line to your login scripts (which is exactly what opam
+  offers to do for you in <code>opam init</code>). </p>
+
+  <p>You can check if your environment is set up properly by
+  running <code>opam switch</code> with no arguments.  It will emit
+  a warning if your shell is not set up correctly, along with
+  instructions on how to fix it.</p>
+  <pre data-output="2-7" data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam switch
+#  switch                            compiler                    description
+→  default                           ocaml-base-compiler.4.09.1  default
+
+[WARNING] The environment is not in sync with the current switch.
+          You should run: eval $(opam env)
+</code></pre>
+
+  <h3>Installing the right compiler</h3>
+
+  <p>Real World OCaml requires OCaml 4.10.0.  You can use <code>opam
+      switch</code> to see which version of OCaml you have installed.
+      If, as shown in the above invocation of switch, you have an
+      older version installed, you can use opam to install a more
+      up-to-date version:</p>
+  <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam switch create 4.10.0
+eval $(opam env)
+</code></pre>
+
+  <p>The <code>opam switch create</code> will take a few minutes on a
+  modern machine, and will download and install the new compiler and
+  all libraries associated with it in <code>~/.opam/4.10.0</code>.</p>
+
+  <h3>Installing libraries and tools</h3>
+
+  <p>Finally, we're ready to install the libraries and tools we'll
+  need for the book. The two important ones are <code>base</code>,
+  which provides the standard library that all the examples in the
+  book are based on, and <code>utop</code>, which is the
+  interactive toplevel that you can use for working through the
+  examples.  We can install them as follows. </p>
+  <pre data-host="lama" data-user="rwo" class="command-line">    <code class="language-bash">
+opam install base utop
+</code></pre>
+
+  <p>But you'll probably want more than this as you work through the
+  book.  Here's a more complete list of libraries you should install:</p>
+  <pre data-output="2-3" data-host="lama" data-user="rwo" class="command-line">    <code class="language-bash">
+opam install core async yojson core_extended \
+     core_bench cohttp-async async_graphics \
+     cryptokit menhir
+</code></pre>
+
+  <p>If some of the above don't work, don't worry too much. Most of
+  them come up in only a few places in the book.</p>
+
+  <h2 id="utop-setup">Setting up and using <code>utop</code></h2>
+
+  <p>When you first run <code>utop</code>, you'll find yourself at an
+  interactive prompt with a bar at the bottom of the screen. The
+  bottom bar dynamically updates as you write text, and contains the
+  possible names of modules or variables that are valid at that point
+  in the phrase you are entering. You can press the
+  <code>&lt;tab&gt;</code> key to complete the phrase with the
+  first choice.</p>
+
+  <p>The <code>~/.ocamlinit</code> file in your home directory
+  initializes <code>utop</code> with common libraries and syntax
+  extensions so you don't need to type them in every time. Given
+  that you have Core installed, you should update your
+  <code>ocamlinit</code> to load Core every time you start
+  <code>utop</code>, by adding the following lines.</p>
+
+  <pre><code class="language-ocaml">
+#use "topfind";;
+#thread;;
+#require "core.top";;
+</code></pre>
+
+  <p>For <code>utop</code> only you could get away with just the last
+  line, but you need the whole thing if you want the
+  traditional <code>ocaml</code> toplevel to work too.</p>
+
+  <p>Note that <code>opam</code> will have already added some lines
+  to the file. Also, notice that <code>#</code> is used to mark a
+  toplevel directive, not a comment.</p>
+
+  <h2 id="editor-setup">Editor set-up</h2>
+
+  In order to have a reasonable editing experience, there are a
+  collection of different tools you'll want set up.
+
+  <ul>
+    <li> An editor mode that understands the language, and can help
+      with the basics of syntax-highlighting and navigation. </li>
+    <li> <a href="https://github.com/ocaml/merlin">Merlin</a>, which
+      provides out of your code, like auto-completion,
+      go-to-definition, and type-throwback.</li>
+    <li> <a href="https://github.com/ocaml-ppx/ocamlformat">ocp-indent</a>,
+      which auto-indents your code.
+    </li><li> <a href="https://github.com/ocaml-ppx/ocamlformat">ocamlformat</a>,
+      which provides fully automatic formatting and indentation
+      (including line-breaking).
+  </li></ul>
+
+  In the following, we'll describe how to set up what you need for
+  each of the editors.
+
+  <br><br>
+  <h3>Visual Studio Code</h3>
+
+  There are several OCaml modes for Visual Studio, but we recommend
+  the <a href="https://marketplace.visualstudio.com/items?itemName=ocamllabs.ocaml-platform">OCaml Platform plug-in</a>.
+  This works alongside a server that supports the Visual
+  Studio's <a href="https://microsoft.github.io/language-server-protocol/">Language
+  Server Protocol</a> (LSP).
+
+  Instructions for installing OCaml LSP server can be
+  found <a href="https://github.com/ocaml/ocaml-lsp">here</a>.  These
+  instructions show you how to set things up so you can install the
+  LSP server via opam.  Eventually the LSP server will be available
+  from opam by default.
+
+  <br><br>
+  <h3>Emacs</h3>
+
+  opam comes with a <code>user-setup</code> package that can be used
+  to install Emacs configs.  You can install it as follows.  Note that
+  we first make sure that <code>ocp-indent</code>, an OCaml
+  indentation tool, is available, as well as <code>tuareg</code>,
+  which is an Emacs mode for OCaml.
+
+  <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam install tuareg ocp-indent merlin
+opam install user-setup
+opam user-setup install</code></pre>
+
+  An alternative to <code>ocp-indent</code>
+  is <code>ocamlformat</code>, which is a full-on code formatter, as
+  opposed to just an indenter.  <code>user-setup</code> doesn't
+  support <code>ocamlformat</code> yet, but you can find
+  instructions <a href="https://github.com/ocaml-ppx/ocamlformat">here</a>
+
+  If you want fully automatic formatting (as opposed to just
+  indentation), you should first install it via opam.
+
+    <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam install ocamlformat</code></pre>
+
+    <code>user-setup</code> doesn't support ocamlformat yet, but here
+  are <a href="https://github.com/ocaml-ppx/ocamlformat#emacs-setup">instructions
+  for setting up ocamlformat for emacs</a>.
+
+  <br><br>
+  <h3>Vim</h3>
+
+  <p>Vim users can use the built-in style for handling OCaml source
+  code.  Beyond that, Merlin and other associated tools can be
+  installed as follows. </p>
+
+  <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam install merlin ocp-indent
+opam install user-setup
+opam user-setup install</code></pre>
+
+  If you want fully automatic formatting (as opposed to just
+  indentation), you should first install it via opam.
+
+    <pre data-host="lama" data-user="rwo" class="command-line"><code class="language-bash">
+opam install ocamlformat</code></pre>
+
+    <code>user-setup</code> doesn't support ocamlformat yet, but here
+  are <a href="https://github.com/ocaml-ppx/ocamlformat#vim-setup">instructions
+  for setting up ocamlformat for VIM</a>.
+</article></div><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

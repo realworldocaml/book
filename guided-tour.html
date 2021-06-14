@@ -1,0 +1,850 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>A Guided Tour - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="a-guided-tour">
+<h1>A Guided Tour</h1>
+<p>This chapter gives an overview of OCaml by walking through a series of small examples that cover most of the major features of the language. This should provide a sense of what OCaml can do, without getting too deep into any one topic.</p>
+<p>Throughout the book we’re going to use <code>Base</code>, a more full-featured and capable replacement for OCaml’s standard library. We’ll also use <code>utop</code>, a shell that lets you type in expressions and evaluate them interactively. <code>utop</code> is an easier-to-use version of OCaml’s standard toplevel (which you can start by typing <em>ocaml</em> at the command line). These instructions will assume you’re using <code>utop</code>, but the ordinary toplevel should mostly work fine.</p>
+<p>Before going any further, make sure you’ve followed the steps in <a href="install.html">the installation page</a>.</p>
+<section data-type="note" class="level5" id="base-core-and-core_kernel">
+<h5><code>Base</code>, <code>Core</code> and <code>Core_kernel</code></h5>
+<p><code>Base</code> is one of a family of three standard library replacements, each with different use-cases, each building on the last. Here’s a quick summary.</p>
+<ul>
+<li><p><em><code>Base</code></em> is designed to provide the fundamentals needed from a standard library. It has a variety of basic efficient data structures like hash-tables, sets and sequences. It also defines the basic idioms for error handling and serialization, and contains well organized APIs for every basic data type from integers to lazy values. This comes along with a minimum of external dependencies, so <code>Base</code> just takes seconds to build and install. It’s also portable, running on every platform that OCaml does, including Windows and JavaScript.</p></li>
+<li><p><em><code>Core_kernel</code></em> extends <code>Base</code> with many new data structures, like heaps, types to represent times and time-zones, support for efficient binary serializers, and other capabilities. It’s still portable, but has many more dependencies, takes longer to build, and will add more to the size of your executables.</p></li>
+<li><p><em><code>Core</code></em> is the most full-featured, extending <code>Core_kernel</code> with support for a variety of UNIX APIs, but only works on UNIX-like OSs, including Linux and macOS.</p></li>
+</ul>
+<p>We use <code>Base</code> in this section, but you should check out <code>Core</code> and <code>Core_kernel</code>, depending on your requirements. We’ll discuss some of the additional functionality provided by <code>Core</code> and <code>Core_kernel</code> later in the book.</p>
+</section>
+<p>Before getting started, make sure you have a working OCaml installation so you can try out the examples as you read through the chapter.</p>
+<section class="level2" id="ocaml-as-a-calculator">
+<h2>OCaml as a Calculator</h2>
+<p>Our first step is to open <code>Base</code>: <a data-secondary="numerical calculations in" data-primary="OCaml" data-type="indexterm">&nbsp;</a><a data-primary="numerical calculations" data-type="indexterm">&nbsp;</a><a data-secondary="opening" data-primary="Core standard library" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+</code></pre>
+</div>
+<p>By opening <code>Base</code>, we make the definitions it contains available without having to reference <code>Base</code> explicitly. This is required for many of the examples in the tour and in the remainder of the book.</p>
+<p>Now let’s try a few simple numerical calculations:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">3 + 4;;
+&gt;- : int = 7
+8 / 3;;
+&gt;- : int = 2
+3.5 +. 6.;;
+&gt;- : float = 9.5
+30_000_000 / 300_000;;
+&gt;- : int = 100
+3 * 5 &gt; 14;;
+&gt;- : bool = true
+</code></pre>
+</div>
+<p>By and large, this is pretty similar to what you’d find in any programming language, but a few things jump right out at you:</p>
+<ul>
+<li><p>We needed to type <code>;;</code> in order to tell the toplevel that it should evaluate an expression. This is a peculiarity of the toplevel that is not required in standalone programs (though it is sometimes helpful to include <code>;;</code> to improve OCaml’s error reporting, by making it more explicit where a given top-level declaration was intended to end).</p></li>
+<li><p>After evaluating an expression, the toplevel first prints the type of the result, and then prints the result itself.</p></li>
+<li><p>OCaml allows you to place underscores in the middle of numeric literals to improve readability. Note that underscores can be placed anywhere within a number, not just every three digits.</p></li>
+<li><p>OCaml carefully distinguishes between <code>float</code>, the type for floating-point numbers, and <code>int</code>, the type for integers. The types have different literals (<code>6.</code> instead of <code>6</code>) and different infix operators (<code>+.</code> instead of <code>+</code>), and OCaml doesn’t automatically cast between these types. This can be a bit of a nuisance, but it has its benefits, since it prevents some kinds of bugs that arise in other languages due to unexpected differences between the behavior of <code>int</code> and <code>float</code>. For example, in many languages, <code>1 / 3</code> is zero, but <code>1.0 /. 3.0</code> is a third. OCaml requires you to be explicit about which operation you’re using.</p></li>
+</ul>
+<p>We can also create a variable to name the value of a given expression, using the <code>let</code> keyword. This is known as a <em>let binding</em>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 3 + 4;;
+&gt;val x : int = 7
+let y = x + x;;
+&gt;val y : int = 14
+</code></pre>
+</div>
+<p>After a new variable is created, the toplevel tells us the name of the variable (<code>x</code> or <code>y</code>), in addition to its type (<code>int</code>) and value (<code>7</code> or <code>14</code>).</p>
+<p>Note that there are some constraints on what identifiers can be used for variable names. Punctuation is excluded, except for <code>_</code> and <code>'</code>, and variables must start with a lowercase letter or an underscore. Thus, these are legal:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x7 = 3 + 4;;
+&gt;val x7 : int = 7
+let x_plus_y = x + y;;
+&gt;val x_plus_y : int = 21
+let x' = x + 1;;
+&gt;val x' : int = 8
+</code></pre>
+</div>
+<p>The following examples, however, are not legal:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let Seven = 3 + 4;;
+&gt;Line 1, characters 5-10:
+&gt;Error: Unbound constructor Seven
+let 7x = 7;;
+&gt;Line 1, characters 5-7:
+&gt;Error: Unknown modifier 'x' for literal 7x
+let x-plus-y = x + y;;
+&gt;Line 1, characters 7-11:
+&gt;Error: Syntax error
+</code></pre>
+</div>
+<p>This highlights that variables can’t be capitalized, can’t begin with numbers, and can’t contain dashes.</p>
+</section>
+<section class="level2" id="functions-and-type-inference">
+<h2>Functions and Type Inference</h2>
+<p>The <code>let</code> syntax can also be used to define a function:<a data-secondary="function definition with" data-primary="let syntax" data-type="indexterm">&nbsp;</a><a data-secondary="defining" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square x = x * x;;
+&gt;val square : int -&gt; int = &lt;fun&gt;
+square 2;;
+&gt;- : int = 4
+square (square 2);;
+&gt;- : int = 16
+</code></pre>
+</div>
+<p>Functions in OCaml are values like any other, which is why we use the <code>let</code> keyword to bind a function to a variable name, just as we use <code>let</code> to bind a simple value like an integer to a variable name. When using <code>let</code> to define a function, the first identifier after the <code>let</code> is the function name, and each subsequent identifier is a different argument to the function. Thus, <code>square</code> is a function with a single argument.</p>
+<p>Now that we’re creating more interesting values like functions, the types have gotten more interesting too. <code>int -&gt; int</code> is a function type, in this case indicating a function that takes an <code>int</code> and returns an <code>int</code>. We can also write functions that take multiple arguments. (Reminder: Don’t forget <code>open Base</code>, or these examples won’t work!) <a data-primary="multi-argument functions" data-type="indexterm">&nbsp;</a><a data-secondary="with multiple arguments" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
+  Float.of_int x /. Float.of_int y
+;;
+&gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
+ratio 4 7;;
+&gt;- : float = 0.571428571428571397
+</code></pre>
+</div>
+<p>Note that in OCaml, function arguments are separated by spaces instead of by parentheses and commas, which is more like the UNIX shell than it is like traditional programming languages such as C or Java.</p>
+<p>The preceding example also happens to be our first use of modules. Here, <code>Float.of_int</code> refers to the <code>of_int</code> function contained in the <code>Float</code> module. This is different from what you might expect from an object-oriented language, where dot-notation is typically used for accessing a method of an object. Note that module names always start with a capital letter.</p>
+<p>Modules can also be opened to make their contents available without explicitly qualifying by the module name. We did that once already, when we opened <code>Base</code> earlier. We can use that to make this code a little easier to read, both avoiding the repetition of <code>Float</code> above, and avoiding use of the slightly awkward <code>/.</code> operator. In the following example, we open the <code>Float.O</code> module, which has a bunch of useful operators and functions that are designed to be used in this kind of context. Note that this causes the standard int-only arithmetic operators to be shadowed locally.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
+  let open Float.O in
+  of_int x / of_int y
+;;
+&gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Note that we used a slightly different syntax for opening the module, since we were only opening it in the local scope inside the definition of <code>ratio</code>. There’s also a more concise syntax for local opens, as you can see here.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ratio x y =
+  Float.O.(of_int x / of_int y)
+;;
+&gt;val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The notation for the type-signature of a multiargument function may be a little surprising at first, but we’ll explain where it comes from when we get to function currying in <a data-type="xref" href="variables-and-functions.html#multi-argument-functions">Chapter 2, Multi Argument Functions</a>. For the moment, think of the arrows as separating different arguments of the function, with the type after the final arrow being the return value. Thus, <code>int -&gt; int -&gt; float</code> describes a function that takes two <code>int</code> arguments and returns a <code>float</code>.</p>
+<p>We can also write functions that take other functions as arguments. Here’s an example of a function that takes three arguments: a test function and two integer arguments. The function returns the sum of the integers that pass the test:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let sum_if_true test first second =
+  (if test first then first else 0)
+  + (if test second then second else 0)
+;;
+&gt;val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>If we look at the inferred type signature in detail, we see that the first argument is a function that takes an integer and returns a boolean, and that the remaining two arguments are integers. Here’s an example of this function in action:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let even x =
+x % 2 = 0
+;;
+&gt;val even : int -&gt; bool = &lt;fun&gt;
+sum_if_true even 3 4;;
+&gt;- : int = 4
+sum_if_true even 2 4;;
+&gt;- : int = 6
+</code></pre>
+</div>
+<p>Note that in the definition of <code>even</code>, we used <code>=</code> in two different ways: once as part of the <code>let</code> binding that separates the thing being defined from its definition; and once as an equality test, when comparing <code>x % 2</code> to <code>0</code>. These are very different operations despite the fact that they share some syntax.</p>
+<section class="level3" id="type-inference">
+<h3>Type Inference</h3>
+<p>As the types we encounter get more complicated, you might ask yourself how OCaml is able to figure them out, given that we didn’t write down any explicit type information.<a data-secondary="process of" data-primary="type inference" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml determines the type of an expression using a technique called <em>type inference</em>, by which the type of an expression is inferred from the available type information about the components of that expression.</p>
+<p>As an example, let’s walk through the process of inferring the type of <code>sum_if_true</code>:</p>
+<ol type="1">
+<li><p>OCaml requires that both branches of an <code>if</code> statement have the same type, so the expression</p>
+<p><code>if test first then first else 0</code></p>
+<p>requires that <code>first</code> must be the same type as <code>0</code>, and so <code>first</code> must be of type <code>int</code>. Similarly, from</p>
+<p><code>if test second then second else 0</code></p>
+<p>we can infer that <code>second</code> has type <code>int</code>.</p></li>
+<li><p><code>test</code> is passed <code>first</code> as an argument. Since <code>first</code> has type <code>int</code>, the input type of <code>test</code> must be <code>int</code>.</p></li>
+<li><p><code>test first</code> is used as the condition in an <code>if</code> statement, so the return type of <code>test</code> must be <code>bool</code>.</p></li>
+<li><p>The fact that <code>+</code> returns <code>int</code> implies that the return value of <code>sum_if_true</code> must be int.</p></li>
+</ol>
+<p>Together, that nails down the types of all the variables, which determines the overall type of <code>sum_if_true</code>.</p>
+<p>Over time, you’ll build a rough intuition for how the OCaml inference engine works, which makes it easier to reason through your programs. You can also make it easier to understand the types of a given expression by adding explicit type annotations. These annotations don’t change the behavior of an OCaml program, but they can serve as useful documentation, as well as catch unintended type changes. They can also be helpful in figuring out why a given piece of code fails to compile.</p>
+<p>Here’s an annotated version of <code>sum_if_true</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let sum_if_true (test : int -&gt; bool) (x : int) (y : int) : int =
+  (if test x then x else 0)
+  + (if test y then y else 0)
+;;
+&gt;val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>In the above, we’ve marked every argument to the function with its type, with the final annotation indicating the type of the return value. Such type annotations can be placed on any expression in an OCaml program.</p>
+</section>
+<section class="level3" id="inferring-generic-types">
+<h3>Inferring Generic Types</h3>
+<p>Sometimes, there isn’t enough information to fully determine the concrete type of a given value. Consider this function..<a data-secondary="generic types" data-primary="type inference" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let first_if_true test x y =
+  if test x then x else y
+;;
+&gt;val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
+</code></pre>
+</div>
+<p><code>first_if_true</code> takes as its arguments a function <code>test</code>, and two values, <code>x</code> and <code>y</code>, where <code>x</code> is to be returned if <code>test x</code> evaluates to <code>true</code>, and <code>y</code> otherwise. So what’s the type of the <code>x</code> argument to <code>first_if_true</code>? There are no obvious clues such as arithmetic operators or literals to narrow it down. That makes it seem like <code>first_if_true</code> would work on values of any type.</p>
+<p>Indeed, if we look at the type returned by the toplevel, we see that rather than choose a single concrete type, OCaml has introduced a <em>type variable</em><code>'a</code> to express that the type is generic. (You can tell it’s a type variable by the leading single quote mark.) In particular, the type of the <code>test</code> argument is <code>('a -&gt; bool)</code>, which means that <code>test</code> is a one-argument function whose return value is <code>bool</code> and whose argument could be of any type <code>'a</code>. But, whatever type <code>'a</code> is, it has to be the same as the type of the other two arguments, <code>x</code> and <code>y</code>, and of the return value of <code>first_if_true</code>. This kind of genericity is called <em>parametric polymorphism</em> because it works by parameterizing the type in question with a type variable. It is very similar to generics in C# and Java. <a data-primary="parametric polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="type variables" data-type="indexterm">&nbsp;</a></p>
+<p>Because the type of <code>first_if_true</code> is generic, we can write this:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let long_string s = String.length s &gt; 6;;
+&gt;val long_string : string -&gt; bool = &lt;fun&gt;
+first_if_true long_string "short" "loooooong";;
+&gt;- : string = "loooooong"
+</code></pre>
+</div>
+<p>As well as this:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let big_number x = x &gt; 3;;
+&gt;val big_number : int -&gt; bool = &lt;fun&gt;
+first_if_true big_number 4 3;;
+&gt;- : int = 4
+</code></pre>
+</div>
+<p>Both <code>long_string</code> and <code>big_number</code> are functions, and each is passed to <code>first_if_true</code> with two other arguments of the appropriate type (strings in the first example, and integers in the second). But we can’t mix and match two different concrete types for <code>'a</code> in the same use of <code>first_if_true</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">first_if_true big_number "short" "loooooong";;
+&gt;Line 1, characters 26-33:
+&gt;Error: This expression has type string but an expression was expected of type
+&gt;         int
+</code></pre>
+</div>
+<p>In this example, <code>big_number</code> requires that <code>'a</code> be instantiated as <code>int</code>, whereas <code>"short"</code> and <code>"loooooong"</code> require that <code>'a</code> be instantiated as <code>string</code>, and they can’t both be right at the same time.</p>
+<section data-type="note" class="level5" id="type-errors-versus-exceptions">
+<h5>Type Errors Versus Exceptions</h5>
+<p>There’s a big difference in OCaml between errors that are caught at compile time and those that are caught at runtime. It’s better to catch errors as early as possible in the development process, and compilation time is best of all.<a data-primary="runtime exceptions vs.&nbsp;type errors" data-type="indexterm">&nbsp;</a><a data-secondary="runtime vs.&nbsp;compile time" data-primary="errors" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;type errors" data-primary="exceptions" data-type="indexterm">&nbsp;</a><a data-primary="type errors vs.&nbsp;exceptions" data-type="indexterm">&nbsp;</a></p>
+<p>Working in the toplevel somewhat obscures the difference between runtime and compile-time errors, but that difference is still there. Generally, type errors like this one:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let add_potato x =
+x + "potato"
+;;
+&gt;Line 2, characters 7-15:
+&gt;Error: This expression has type string but an expression was expected of type
+&gt;         int
+</code></pre>
+</div>
+<p>are compile-time errors (because <code>+</code> requires that both its arguments be of type <code>int</code>), whereas errors that can’t be caught by the type system, like division by zero, lead to runtime exceptions:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_a_multiple x y =
+x % y = 0
+;;
+&gt;val is_a_multiple : int -&gt; int -&gt; bool = &lt;fun&gt;
+is_a_multiple 8 2;;
+&gt;- : bool = true
+is_a_multiple 8 0;;
+&gt;Exception:
+&gt;(Invalid_argument "8 % 0 in core_int.ml: modulus should be positive")
+</code></pre>
+</div>
+<p>The distinction here is that type errors will stop you whether or not the offending code is ever actually executed. Merely defining <code>add_potato</code> is an error, whereas <code>is_a_multiple</code> only fails when it’s called, and then, only when it’s called with an input that triggers the exception.</p>
+</section>
+</section>
+</section>
+<section class="level2" id="tuples-lists-options-and-pattern-matching">
+<h2>Tuples, Lists, Options, and Pattern Matching</h2>
+<section class="level3" id="tuples">
+<h3>Tuples</h3>
+<p>So far we’ve encountered a handful of basic types like <code>int</code>, <code>float</code>, and <code>string</code>, as well as function types like <code>string -&gt; int</code>. But we haven’t yet talked about any data structures. We’ll start by looking at a particularly simple data structure, the tuple. A tuple is an ordered collection of values that can each be of a different type. You can create a tuple by joining values together with a comma. <a data-primary="tuples" data-type="indexterm">&nbsp;</a><a data-secondary="tuples" data-primary="data structures" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let a_tuple = (3,"three");;
+&gt;val a_tuple : int * string = (3, "three")
+let another_tuple = (3,"four",5.);;
+&gt;val another_tuple : int * string * float = (3, "four", 5.)
+</code></pre>
+</div>
+<p>(For the mathematically inclined, <code>*</code> is used in the type <code>t * s</code> because that type corresponds to the set of all pairs containing one value of type <code>t</code> and one of type <code>s</code>. In other words, it’s the <em>Cartesian product</em> of the two types, which is why we use <code>*</code>, the symbol for product.)</p>
+<p>You can extract the components of a tuple using OCaml’s pattern-matching syntax, as shown below:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let (x,y) = a_tuple;;
+&gt;val x : int = 3
+&gt;val y : string = "three"
+</code></pre>
+</div>
+<p>Here, the <code>(x,y)</code> on the left-hand side of the <code>let</code> binding is the pattern. This pattern lets us mint the new variables <code>x</code> and <code>y</code>, each bound to different components of the value being matched. These can now be used in subsequent expressions:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">x + String.length y;;
+&gt;- : int = 8
+</code></pre>
+</div>
+<p>Note that the same syntax is used both for constructing and for pattern matching on tuples.</p>
+<p>Pattern matching can also show up in function arguments. Here’s a function for computing the distance between two points on the plane, where each point is represented as a pair of <code>float</code>s. The pattern-matching syntax lets us get at the values we need with a minimum of fuss:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let distance (x1,y1) (x2,y2) =
+  Float.sqrt ((x1 -. x2) **. 2. +. (y1 -. y2) **. 2.)
+;;
+&gt;val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The <code>**.</code> operator used above is for raising a floating-point number to a power.</p>
+<p>This is just a first taste of pattern matching. Pattern matching is a pervasive tool in OCaml, and as you’ll see, it has surprising power.</p>
+</section>
+<section class="level3" id="lists">
+<h3>Lists</h3>
+<p>Where tuples let you combine a fixed number of items, potentially of different types, lists let you hold any number of items of the same type. Consider the following example:<a id="DSlists" data-secondary="lists" data-primary="data structures" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let languages = ["OCaml";"Perl";"C"];;
+&gt;val languages : string list = ["OCaml"; "Perl"; "C"]
+</code></pre>
+</div>
+<p>Note that you can’t mix elements of different types in the same list, unlike tuples:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [3;"four";5];;
+&gt;Line 1, characters 18-24:
+&gt;Error: This expression has type string but an expression was expected of type
+&gt;         int
+</code></pre>
+</div>
+<section class="level4" id="the-list-module">
+<h4>The List module</h4>
+<p><code>Base</code> comes with a <code>List</code> module that has a rich collection of functions for working with lists. We can access values from within a module by using dot notation. For example, this is how we compute the length of a list:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.length languages;;
+&gt;- : int = 3
+</code></pre>
+</div>
+<p>Here’s something a little more complicated. We can compute the list of the lengths of each language as follows:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map languages ~f:String.length;;
+&gt;- : int list = [5; 4; 1]
+</code></pre>
+</div>
+<p><code>List.map</code> takes two arguments: a list and a function for transforming the elements of that list. It returns a new list with the transformed elements and does not modify the original list.</p>
+<p>Notably, the function passed to <code>List.map</code> is passed under a <em>labeled argument</em><code>~f</code>. Labeled arguments are specified by name rather than by position, and thus allow you to change the order in which arguments are presented to a function without changing its behavior, as you can see here:<a data-secondary="labeled arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-primary="labeled arguments" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:String.length languages;;
+&gt;- : int list = [5; 4; 1]
+</code></pre>
+</div>
+<p>We’ll learn more about labeled arguments and why they’re important in <a data-type="xref" href="variables-and-functions.html#variables-and-functions">Chapter 2, Variables And Functions</a>.</p>
+</section>
+<section class="level4" id="constructing-lists-with">
+<h4>Constructing lists with ::</h4>
+<p>In addition to constructing lists using brackets, we can use the list constructor <code>::</code> for adding elements to the front of a list:<a data-secondary=": : operator" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operator : :" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"French" :: "Spanish" :: languages;;
+&gt;- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
+</code></pre>
+</div>
+<p>Here, we’re creating a new and extended list, not changing the list we started with, as you can see below:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">languages;;
+&gt;- : string list = ["OCaml"; "Perl"; "C"]
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="semicolons-versus-commas">
+<h5>Semicolons Versus Commas</h5>
+<p>Unlike many other languages, OCaml uses semicolons to separate list elements in lists rather than commas. Commas, instead, are used for separating elements in a tuple. If you try to use commas in a list, you’ll see that your code compiles but doesn’t do quite what you might expect:<a data-primary="commas vs. semicolons" data-type="indexterm">&nbsp;</a><a data-primary="semicolons vs.&nbsp;commas" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">["OCaml", "Perl", "C"];;
+&gt;- : (string * string * string) list = [("OCaml", "Perl", "C")]
+</code></pre>
+</div>
+<p>In particular, rather than a list of three strings, what we have is a singleton list containing a three-tuple of strings.</p>
+<p>This example uncovers the fact that commas create a tuple, even if there are no surrounding parens. So, we can write:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">1,2,3;;
+&gt;- : int * int * int = (1, 2, 3)
+</code></pre>
+</div>
+<p>to allocate a tuple of integers. This is generally considered poor style and should be avoided.</p>
+</section>
+<p>The bracket notation for lists is really just syntactic sugar for <code>::</code>. Thus, the following declarations are all equivalent. Note that <code>[]</code> is used to represent the empty list and that <code>::</code> is right-associative:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1; 2; 3];;
+&gt;- : int list = [1; 2; 3]
+1 :: (2 :: (3 :: []));;
+&gt;- : int list = [1; 2; 3]
+1 :: 2 :: 3 :: [];;
+&gt;- : int list = [1; 2; 3]
+</code></pre>
+</div>
+<p>The <code>::</code> constructor can only be used for adding one element to the front of the list, with the list terminating at <code>[]</code>, the empty list. There’s also a list concatenation operator, <code>@</code>, which can concatenate two lists:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1;2;3] @ [4;5;6];;
+&gt;- : int list = [1; 2; 3; 4; 5; 6]
+</code></pre>
+</div>
+<p>It’s important to remember that, unlike <code>::</code>, this is not a constant-time operation. Concatenating two lists takes time proportional to the length of the first list.</p>
+</section>
+<section class="level4" id="list-patterns-using-match">
+<h4>List patterns using match</h4>
+<p>The elements of a list can be accessed through pattern matching. List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here’s a simple example:<a data-secondary="in lists" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="pattern matching" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let my_favorite_language (my_favorite :: the_rest) =
+  my_favorite
+;;
+&gt;Lines 1-2, characters 26-16:
+&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;[]
+&gt;val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;
+</code></pre>
+</div>
+<p>By pattern matching using <code>::</code>, we’ve isolated and named the first element of the list (<code>my_favorite</code>) and the remainder of the list (<code>the_rest</code>). If you know Lisp or Scheme, what we’ve done is the equivalent of using the functions <code>car</code> and <code>cdr</code> to isolate the first element of a list and the remainder of that list.</p>
+<p>As you can see, however, the toplevel did not like this definition and spit out a warning indicating that the pattern is not exhaustive. This means that there are values of the type in question that won’t be captured by the pattern. The warning even gives an example of a value that doesn’t match the provided pattern, in particular, <code>[]</code>, the empty list. If we try to run <code>my_favorite_language</code>, we’ll see that it works on nonempty lists and fails on empty ones:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">my_favorite_language ["English";"Spanish";"French"];;
+&gt;- : string = "English"
+my_favorite_language [];;
+&gt;Exception: "Match_failure //toplevel//:1:26"
+</code></pre>
+</div>
+<p>You can avoid these warnings, and more importantly make sure that your code actually handles all of the possible cases, by using a <code>match</code> statement instead.</p>
+<p>A <code>match</code> statement is a kind of juiced-up version of the <code>switch</code> statement found in C and Java. It essentially lets you list a sequence of patterns, separated by pipe characters. (The one before the first case is optional.) The compiler then dispatches to the code following the first matching pattern. As we’ve already seen, the pattern can mint new variables that correspond to parts of the value being matched.</p>
+<p>Here’s a new version of <code>my_favorite_language</code> that uses <code>match</code> and doesn’t trigger a compiler warning:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let my_favorite_language languages =
+  match languages with
+  | first :: the_rest -&gt; first
+  | [] -&gt; "OCaml" (* A good default! *)
+;;
+&gt;val my_favorite_language : string list -&gt; string = &lt;fun&gt;
+my_favorite_language ["English";"Spanish";"French"];;
+&gt;- : string = "English"
+my_favorite_language [];;
+&gt;- : string = "OCaml"
+</code></pre>
+</div>
+<p>The preceding code also includes our first comment. OCaml comments are bounded by <code>(*</code> and <code>*)</code> and can be nested arbitrarily and cover multiple lines. There’s no equivalent of C++-style single-line comments that are prefixed by <code>//</code>.</p>
+<p>The first pattern, <code>first :: the_rest</code>, covers the case where <code>languages</code> has at least one element, since every list except for the empty list can be written down with one or more <code>::</code>’s. The second pattern, <code>[]</code>, matches only the empty list. These cases are exhaustive, since every list is either empty or has at least one element, a fact that is verified by the compiler.</p>
+</section>
+<section class="level4" id="recursive-list-functions">
+<h4>Recursive list functions</h4>
+<p>Recursive functions, or functions that call themselves, are an important part of working in OCaml or really any functional language. The typical approach to designing a recursive function is to separate the logic into a set of <em>base cases</em> that can be solved directly and a set of <em>inductive cases</em>, where the function breaks the problem down into smaller pieces and then calls itself to solve those smaller problems.<a data-secondary="list functions" data-primary="recursive functions" data-type="indexterm">&nbsp;</a><a data-secondary="recursive list functions" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<p>When writing recursive list functions, this separation between the base cases and the inductive cases is often done using pattern matching. Here’s a simple example of a function that sums the elements of a list:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec sum l =
+  match l with
+  | [] -&gt; 0                   (* base case *)
+  | hd :: tl -&gt; hd + sum tl   (* inductive case *)
+;;
+&gt;val sum : int list -&gt; int = &lt;fun&gt;
+sum [1;2;3];;
+&gt;- : int = 6
+</code></pre>
+</div>
+<p>Following the common OCaml idiom, we use <code>hd</code> to refer to the head of the list and <code>tl</code> to refer to the tail. Note that we had to use the <code>rec</code> keyword to allow <code>sum</code> to refer to itself. As you might imagine, the base case and inductive case are different arms of the match.</p>
+<p>Logically, you can think of the evaluation of a simple recursive function like <code>sum</code> almost as if it were a mathematical equation whose meaning you were unfolding step by step:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">sum [1;2;3]
+= 1 + sum [2;3]
+= 1 + (2 + sum [3])
+= 1 + (2 + (3 + sum []))
+= 1 + (2 + (3 + 0))
+= 1 + (2 + 3)
+= 1 + 5
+= 6</code></pre>
+</div>
+<p>This suggests a reasonable mental model for what OCaml is actually doing to evaluate a recursive function.</p>
+<p>We can introduce more complicated list patterns as well. Here’s a function for removing sequential duplicates:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
+  match list with
+  | [] -&gt; []
+  | first :: second :: tl -&gt;
+    let new_tl = remove_sequential_duplicates (second :: tl) in
+    if first = second then new_tl else first :: new_tl
+;;
+&gt;Lines 2-6, characters 5-57:
+&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;_::[]
+&gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Again, the first arm of the match is the base case, and the second is the inductive case. Unfortunately, this code has a problem, as indicated by the warning message. In particular, it doesn’t handle one-element lists. We can fix this warning by adding another case to the match:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec remove_sequential_duplicates list =
+  match list with
+  | [] -&gt; []
+  | [hd] -&gt; [hd]
+  | hd1 :: hd2 :: tl -&gt;
+    let new_tl = remove_sequential_duplicates (hd2 :: tl) in
+    if hd1 = hd2 then new_tl else hd1 :: new_tl
+;;
+&gt;val remove_sequential_duplicates : int list -&gt; int list = &lt;fun&gt;
+remove_sequential_duplicates [1;1;2;3;3;4;4;1;1;1];;
+&gt;- : int list = [1; 2; 3; 4; 1]
+</code></pre>
+</div>
+<p>Note that this code used another variant of the list pattern, <code>[hd]</code>, to match a list with a single element. We can do this to match a list with any fixed number of elements; for example, <code>[x;y;z]</code> will match any list with exactly three elements and will bind those elements to the variables <code>x</code>, <code>y</code>, and <code>z</code>.</p>
+<p>In the last few examples, our list processing code involved a lot of recursive functions. In practice, this isn’t usually necessary. Most of the time, you’ll find yourself happy to use the iteration functions found in the <code>List</code> module. But it’s good to know how to use recursion for when you need to iterate in a new way. <a data-startref="DSlists" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="nesting-lets-with-let-and-in">
+<h5>Nesting lets with let and in</h5>
+<p><code>new_tl</code> in the above examples was our first use of <code>let</code> to define a new variable within the body of a function. A <code>let</code> paired with an <code>in</code> can be used to introduce a new binding within any local scope, including a function body. The <code>in</code> marks the beginning of the scope within which the new variable can be used. Thus, we could write:<a data-secondary="nested let binding" data-primary="let syntax" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let z = 7 in
+z + z
+;;
+&gt;- : int = 14
+</code></pre>
+</div>
+<p>Note that the scope of the <code>let</code> binding is terminated by the double-semicolon, so the value of <code>z</code> is no longer available:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">z;;
+&gt;Line 1, characters 1-2:
+&gt;Error: Unbound value z
+</code></pre>
+</div>
+<p>We can also have multiple <code>let</code> statements in a row, each one adding a new variable binding to what came before:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = 7 in
+let y = x * x in
+x + y
+;;
+&gt;- : int = 56
+</code></pre>
+</div>
+<p>This kind of nested <code>let</code> binding is a common way of building up a complex expression, with each <code>let</code> naming some component, before combining them in one final expression.</p>
+</section>
+</section>
+</section>
+<section class="level3" id="options">
+<h3>Options</h3>
+<p>Another common data structure in OCaml is the <em>option</em>. An option is used to express that a value might or might not be present. For example:<a data-primary="options" data-type="indexterm">&nbsp;</a><a data-secondary="options" data-primary="data structures" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let divide x y =
+if y = 0 then None else Some (x / y)
+;;
+&gt;val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The function <code>divide</code> either returns <code>None</code> if the divisor is zero, or <code>Some</code> of the result of the division otherwise. <code>Some</code> and <code>None</code> are constructors that let you build optional values, just as <code>::</code> and <code>[]</code> let you build lists. You can think of an option as a specialized list that can only have zero or one elements.</p>
+<p>To examine the contents of an option, we use pattern matching, as we did with tuples and lists. Let’s see how this plays out in a small example. We’ll write a function that takes a filename, and returns a version of that filename with the file extension (the part after the dot) downcased. We’ll base this on the function <code>String.rsplit2</code> to split the string based on the rightmost period found in the string. Note that <code>String.rsplit2</code> has return type <code>(string * string) option</code>, returning <code>None</code> when no character was found to split on.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let downcase_extension filename =
+  match String.rsplit2 filename ~on:'.' with
+  | None -&gt; filename
+  | Some (base,ext) -&gt;
+    base ^ "." ^ String.lowercase ext
+;;
+&gt;val downcase_extension : string -&gt; string = &lt;fun&gt;
+List.map ~f:downcase_extension
+  [ "Hello_World.TXT"; "Hello_World.txt"; "Hello_World" ]
+;;
+&gt;- : string list = ["Hello_World.txt"; "Hello_World.txt"; "Hello_World"]
+</code></pre>
+</div>
+<p>Note that we used the <code>^</code> operator for concatenating strings. The concatenation operator is provided as part of the <code>Pervasives</code> module, which is automatically opened in every OCaml program.</p>
+<p>Options are important because they are the standard way in OCaml to encode a value that might not be there; there’s no such thing as a <code>NullPointerException</code> in OCaml. This is different from most other languages, including Java and C#, where most if not all data types are <em>nullable</em>, meaning that, whatever their type is, any given value also contains the possibility of being a null value. In such languages, null is lurking everywhere.<a data-secondary="nullable" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
+<p>In OCaml, however, missing values are explicit. A value of type <code>string * string</code> always contains two well-defined values of type <code>string</code>. If you want to allow, say, the first of those to be absent, then you need to change the type to <code>string option * string</code>. As we’ll see in <a data-type="xref" href="error-handling.html#error-handling">Chapter 7, Error Handling</a>, this explicitness allows the compiler to provide a great deal of help in making sure you’re correctly handling the possibility of missing data.</p>
+</section>
+</section>
+<section class="level2" id="records-and-variants">
+<h2>Records and Variants</h2>
+<p>So far, we’ve only looked at data structures that were predefined in the language, like lists and tuples. But OCaml also allows us to define new data types. Here’s a toy example of a data type representing a point in two-dimensional space:<a data-secondary="defining new" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">type point2d = { x : float; y : float }</code></pre>
+</div>
+<p><code>point2d</code> is a <em>record</em> type, which you can think of as a tuple where the individual fields are named, rather than being defined positionally. Record types are easy enough to construct:<a data-secondary="record types" data-primary="records" data-type="indexterm">&nbsp;</a><a data-secondary="record types" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let p = { x = 3.; y = -4. };;
+&gt;val p : point2d = {x = 3.; y = -4.}
+</code></pre>
+</div>
+<p>And we can get access to the contents of these types using pattern matching:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let magnitude { x = x_pos; y = y_pos } =
+Float.sqrt (x_pos **. 2. +. y_pos **. 2.)
+;;
+&gt;val magnitude : point2d -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The pattern match here binds the variable <code>x_pos</code> to the value contained in the <code>x</code> field, and the variable <code>y_pos</code> to the value in the <code>y</code> field.</p>
+<p>We can write this more tersely using what’s called <em>field punning</em>. In particular, when the name of the field and the name of the variable it is bound to coincide, we don’t have to write them both down. Using this, our magnitude function can be rewritten as follows:<a data-secondary="field punning" data-primary="fields" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let magnitude { x; y } = Float.sqrt (x **. 2. +. y **. 2.);;
+&gt;val magnitude : point2d -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Alternatively, we can use dot notation for accessing record fields:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let distance v1 v2 =
+magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y }
+;;
+&gt;val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>And we can of course include our newly defined types as components in larger types. Here, for example, are some types for modeling different geometric objects that contain values of type <code>point2d</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type circle_desc  = { center: point2d; radius: float }
+type rect_desc    = { lower_left: point2d; width: float; height: float }
+type segment_desc = { endpoint1: point2d; endpoint2: point2d }</code></pre>
+</div>
+<p>Now, imagine that you want to combine multiple objects of these types together as a description of a multi-object scene. You need some unified way of representing these objects together in a single type. One way of doing this is using a <em>variant</em> type:<a data-secondary="variant types" data-primary="datatypes" data-type="indexterm">&nbsp;</a><a data-secondary="combining multiple object types with" data-primary="variant types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">type scene_element =
+  | Circle  of circle_desc
+  | Rect    of rect_desc
+  | Segment of segment_desc</code></pre>
+</div>
+<p>The <code>|</code> character separates the different cases of the variant (the first <code>|</code> is optional), and each case has a capitalized tag, like <code>Circle</code>, <code>Rect</code> or <code>Segment</code>, to distinguish that case from the others.</p>
+<p>Here’s how we might write a function for testing whether a point is in the interior of some element of a list of <code>scene_element</code>s. Note that there are two <code>let</code> bindings in a row without a double semicolon between them. That’s because the double semicolon is required only to tell <em>utop</em> to process the input, not to separate two declarations</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_inside_scene_element point scene_element =
+  let open Float.O in
+  match scene_element with
+  | Circle { center; radius } -&gt;
+    distance center point &lt; radius
+  | Rect { lower_left; width; height } -&gt;
+    point.x    &gt; lower_left.x &amp;&amp; point.x &lt; lower_left.x + width
+    &amp;&amp; point.y &gt; lower_left.y &amp;&amp; point.y &lt; lower_left.y + height
+  | Segment _ -&gt; false
+
+let is_inside_scene point scene =
+  List.exists scene
+    ~f:(fun el -&gt; is_inside_scene_element point el)
+;;
+&gt;val is_inside_scene_element : point2d -&gt; scene_element -&gt; bool = &lt;fun&gt;
+&gt;val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
+is_inside_scene {x=3.;y=7.}
+[ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ]
+;;
+&gt;- : bool = false
+is_inside_scene {x=3.;y=7.}
+[ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ]
+;;
+&gt;- : bool = true
+</code></pre>
+</div>
+<p>You might at this point notice that the use of <code>match</code> here is reminiscent of how we used <code>match</code> with <code>option</code> and <code>list</code>. This is no accident: <code>option</code> and <code>list</code> are just examples of variant types that are important enough to be defined in the standard library (and in the case of lists, to have some special syntax).</p>
+<p>We also made our first use of an <em>anonymous function</em> in the call to <code>List.exists</code>. Anonymous functions are declared using the <code>fun</code> keyword, and don’t need to be explicitly named. Such functions are common in OCaml, particularly when using iteration functions like <code>List.exists</code>.<a data-primary="anonymous functions" data-type="indexterm">&nbsp;</a><a data-secondary="anonymous functions" data-primary="functions" data-type="indexterm">&nbsp;</a></p>
+<p>The purpose of <code>List.exists</code> is to check if there are any elements of the list in question for which the provided function evaluates to <code>true</code>. In this case, we’re using <code>List.exists</code> to check if there is a scene element within which our point resides.</p>
+<section data-type="note" class="level5" id="base-and-polymorphic-comparison">
+<h5><code>Base</code> and polymorphic comparison</h5>
+<p>One other thing to notice was the fact that we opened <code>Float.O</code> in the definition of <code>is_inside_scene_element</code>. That allowed us to use the simple, un-dotted infix operators, but more importantly it brought the float comparison operators into scope. When using <code>Base</code>, the default comparison operators work only on integers, and you need to explicitly choose other comparison operators when you want them. OCaml also offers a special set of <em>polymorphic comparison operators</em> that can work on almost any type, but those are considered to be problematic, and so are hidden by default by <code>Base</code>. We’ll learn more about polymorphic compare in <a data-type="xref" href="lists-and-patterns.html#terser-and-faster-patterns">Chapter 3, Terser and Faster Patterns</a></p>
+</section>
+</section>
+<section class="level2" id="imperative-programming">
+<h2>Imperative Programming</h2>
+<p>The code we’ve written so far has been almost entirely <em>pure</em> or <em>functional</em>, which roughly speaking means that the code in question doesn’t modify variables or values as part of its execution. Indeed, almost all of the data structures we’ve encountered are <em>immutable</em>, meaning there’s no way in the language to modify them at all. This is a quite different style from <em>imperative</em> programming, where computations are structured as sequences of instructions that operate by making modifications to the state of the program.<a data-primary="functional code" data-type="indexterm">&nbsp;</a><a data-primary="pure code" data-type="indexterm">&nbsp;</a><a data-secondary="immutable" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-secondary="immutable vs.&nbsp;imperative" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
+<p>Functional code is the default in OCaml, with variable bindings and most data structures being immutable. But OCaml also has excellent support for imperative programming, including mutable data structures like arrays and hash tables, and control-flow constructs like <code>for</code> and <code>while</code> loops.</p>
+<section class="level3" id="arrays">
+<h3>Arrays</h3>
+<p>Perhaps the simplest mutable data structure in OCaml is the array. Arrays in OCaml are very similar to arrays in other languages like C: indexing starts at 0, and accessing or modifying an array element is a constant-time operation. Arrays are more compact in terms of memory utilization than most other data structures in OCaml, including lists. Here’s an example:<a data-secondary="arrays" data-primary="data structures" data-type="indexterm">&nbsp;</a><a data-secondary="imperative programming and" data-primary="arrays" data-type="indexterm">&nbsp;</a><a data-secondary="arrays" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = [| 1; 2; 3; 4 |];;
+&gt;val numbers : int array = [|1; 2; 3; 4|]
+numbers.(2) &lt;- 4;;
+&gt;- : unit = ()
+numbers;;
+&gt;- : int array = [|1; 2; 4; 4|]
+</code></pre>
+</div>
+<p>The <code>.(i)</code> syntax is used to refer to an element of an array, and the <code>&lt;-</code> syntax is for modification. Because the elements of the array are counted starting at zero, element <span class="keep-together">.(2) is</span> the third element.</p>
+<p>The <code>unit</code> type that we see in the preceding code is interesting in that it has only one possible value, written <code>()</code>. This means that a value of type <code>unit</code> doesn’t convey any information, and so is generally used as a placeholder. Thus, we use <code>unit</code> for the return value of an operation like setting a mutable field that communicates by side effect rather than by returning a value. It’s also used as the argument to functions that don’t require an input value. This is similar to the role that <code>void</code> plays in languages like C and Java.</p>
+</section>
+<section class="level3" id="mutable-record-fields">
+<h3>Mutable Record Fields</h3>
+<p>The array is an important mutable data structure, but it’s not the only one. Records, which are immutable by default, can have some of their fields explicitly declared as mutable. Here’s an example of a mutable data structure for storing a running statistical summary of a collection of numbers.<a data-secondary="mutable record fields" data-primary="imperative programming" data-type="indexterm">&nbsp;</a><a data-primary="mutable record fields" data-type="indexterm">&nbsp;</a><a data-secondary="mutable record fields" data-primary="data structures" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">type running_sum =
+  { mutable sum: float;
+    mutable sum_sq: float; (* sum of squares *)
+    mutable samples: int;
+  }</code></pre>
+</div>
+<p>The fields in <code>running_sum</code> are designed to be easy to extend incrementally, and sufficient to compute means and standard deviations, as shown in the following example.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let mean rsum = rsum.sum /. Float.of_int rsum.samples
+let stdev rsum =
+  Float.sqrt (rsum.sum_sq /. Float.of_int rsum.samples
+-. (rsum.sum /. Float.of_int rsum.samples) **. 2.)
+;;
+&gt;val mean : running_sum -&gt; float = &lt;fun&gt;
+&gt;val stdev : running_sum -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We also need functions to create and update <code>running_sum</code>s:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
+let update rsum x =
+  rsum.samples &lt;- rsum.samples + 1;
+  rsum.sum     &lt;- rsum.sum     +. x;
+  rsum.sum_sq  &lt;- rsum.sum_sq  +. x *. x
+;;
+&gt;val create : unit -&gt; running_sum = &lt;fun&gt;
+&gt;val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p><code>create</code> returns a <code>running_sum</code> corresponding to the empty set, and <code>update rsum x</code> changes <code>rsum</code> to reflect the addition of <code>x</code> to its set of samples by updating the number of samples, the sum, and the sum of squares.</p>
+<p>Note the use of single semicolons to sequence operations. When we were working purely functionally, this wasn’t necessary, but you start needing it when you’re writing imperative code.</p>
+<p>Here’s an example of <code>create</code> and <code>update</code> in action. Note that this code uses <code>List.iter</code>, which calls the function <code>~f</code> on each element of the provided list:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rsum = create ();;
+&gt;val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
+List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -&gt; update rsum x);;
+&gt;- : unit = ()
+mean rsum;;
+&gt;- : float = 1.33333333333333326
+stdev rsum;;
+&gt;- : float = 3.94405318873307698
+</code></pre>
+</div>
+<p>It’s worth noting that the preceding algorithm is numerically naive and has poor precision in the presence of cancellation. You can look at this Wikipedia <a href="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article on algorithms for calculating variance</a> for more details, paying particular attention to the weighted incremental and parallel algorithms.</p>
+</section>
+<section class="level3" id="refs">
+<h3>Refs</h3>
+<p>We can create a single mutable value by using a <code>ref</code>. The <code>ref</code> type comes predefined in the standard library, but there’s nothing really special about it. It’s just a record type with a single mutable field called <code>contents</code>:<a data-secondary="record types" data-primary="records" data-type="indexterm">&nbsp;</a><a data-secondary="ref type" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = { contents = 0 };;
+&gt;val x : int ref = {contents = 0}
+x.contents &lt;- x.contents + 1;;
+&gt;- : unit = ()
+x;;
+&gt;- : int ref = {contents = 1}
+</code></pre>
+</div>
+<p>There are a handful of useful functions and operators defined for <code>ref</code>s to make them more convenient to work with:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let x = ref 0  (* create a ref, i.e., { contents = 0 } *);;
+&gt;val x : int ref = {Base.Ref.contents = 0}
+!x             (* get the contents of a ref, i.e., x.contents *);;
+&gt;- : int = 0
+x := !x + 1    (* assignment, i.e., x.contents &lt;- ... *);;
+&gt;- : unit = ()
+!x;;
+&gt;- : int = 1
+</code></pre>
+</div>
+<p>There’s nothing magical with these operators either. You can completely reimplement the <code>ref</code> type and all of these operators in just a few lines of code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a ref = { mutable contents : 'a };;
+&gt;type 'a ref = { mutable contents : 'a; }
+let ref x = { contents = x };;
+&gt;val ref : 'a -&gt; 'a ref = &lt;fun&gt;
+let (!) r = r.contents;;
+&gt;val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;
+let (:=) r x = r.contents &lt;- x;;
+&gt;val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The <code>'a</code> before the <code>ref</code> indicates that the <code>ref</code> type is polymorphic, in the same way that lists are polymorphic, meaning it can contain values of any type. The parentheses around <code>!</code> and <code>:=</code> are needed because these are operators, rather than ordinary functions.<a data-primary="parametric polymorphism" data-type="indexterm">&nbsp;</a></p>
+<p>Even though a <code>ref</code> is just another record type, it’s important because it is the standard way of simulating the traditional mutable variables you’ll find in most languages. For example, we can sum over the elements of a list imperatively by calling <code>List.iter</code> to call a simple function on every element of a list, using a <code>ref</code> to accumulate the results:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let sum list =
+  let sum = ref 0 in
+  List.iter list ~f:(fun x -&gt; sum := !sum + x);
+  !sum
+;;
+&gt;val sum : int list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>This isn’t the most idiomatic way to sum up a list, but it shows how you can use a <code>ref</code> in place of a mutable variable.</p>
+</section>
+<section class="level3" id="for-and-while-loops">
+<h3>For and While Loops</h3>
+<p>OCaml also supports traditional imperative control-flow constructs like <code>for and while</code> loops. Here, for example, is some code for permuting an array that uses a <code>for</code> loop. We use the <code>Random</code> module as our source of randomness. <code>Random</code> starts with a default seed, but you can call <code>Random.self_init</code> to choose a new seed at random:<a data-primary="Random module" data-type="indexterm">&nbsp;</a><a data-primary="while loops" data-type="indexterm">&nbsp;</a><a data-primary="for loops" data-type="indexterm">&nbsp;</a><a data-secondary="for and while loops" data-primary="imperative programming" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let permute array =
+  let length = Array.length array in
+  for i = 0 to length - 2 do
+    (* pick a j to swap with *)
+    let j = i + Random.int (length - i) in
+    (* Swap i and j *)
+    let tmp = array.(i) in
+    array.(i) &lt;- array.(j);
+    array.(j) &lt;- tmp
+  done
+;;
+&gt;val permute : 'a array -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p>From a syntactic perspective, you should note the keywords that distinguish a <code>for</code> loop: <code>for</code>, <code>to</code>, <code>do</code>, and <code>done</code>.</p>
+<p>Here’s an example run of this code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ar = Array.init 20 ~f:(fun i -&gt; i);;
+&gt;val ar : int array =
+&gt;  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
+permute ar;;
+&gt;- : unit = ()
+ar;;
+&gt;- : int array =
+&gt;[|12; 16; 5; 13; 1; 6; 0; 7; 15; 19; 14; 4; 2; 11; 3; 8; 17; 9; 10; 18|]
+</code></pre>
+</div>
+<p>OCaml also supports <code>while</code> loops, as shown in the following function for finding the position of the first negative entry in an array. Note that <code>while</code> (like <code>for</code>) is also a keyword:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let find_first_negative_entry array =
+  let pos = ref 0 in
+  while !pos &lt; Array.length array &amp;&amp; array.(!pos) &gt;= 0 do
+    pos := !pos + 1
+  done;
+  if !pos = Array.length array then None else Some !pos
+;;
+&gt;val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
+find_first_negative_entry [|1;2;0;3|];;
+&gt;- : int option = None
+find_first_negative_entry [|1;-2;0;3|];;
+&gt;- : int option = Some 1
+</code></pre>
+</div>
+<p>As a side note, the preceding code takes advantage of the fact that <code>&amp;&amp;</code>, OCaml’s And operator, short-circuits. In particular, in an expression of the form <em><code>expr1</code></em><code>&amp;&amp;</code><em><code>expr2</code></em>, <em><code>expr2</code></em> will only be evaluated if <em><code>expr1</code></em> evaluated to true. Were it not for that, then the preceding function would result in an out-of-bounds error. Indeed, we can trigger that out-of-bounds error by rewriting the function to avoid the short-circuiting:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let find_first_negative_entry array =
+  let pos = ref 0 in
+  while
+    let pos_is_good = !pos &lt; Array.length array in
+    let element_is_non_negative = array.(!pos) &gt;= 0 in
+    pos_is_good &amp;&amp; element_is_non_negative
+  do
+    pos := !pos + 1
+  done;
+  if !pos = Array.length array then None else Some !pos
+;;
+&gt;val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
+find_first_negative_entry [|1;2;0;3|];;
+&gt;Exception: (Invalid_argument "index out of bounds")
+</code></pre>
+</div>
+<p>The or operator, <code>||</code>, short-circuits in a similar way to <code>&amp;&amp;</code>.</p>
+</section>
+</section>
+<section class="level2" id="a-complete-program">
+<h2>A Complete Program</h2>
+<p>So far, we’ve played with the basic features of the language via <code>utop</code>. Now we’ll show how to create a simple standalone program. In particular, we’ll create a program that sums up a list of numbers read in from the standard input.<a data-secondary="simple standalone example" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
+<p>Here’s the code, which you can save in a file called <em class="filename">sum.ml</em>. Note that we don’t terminate expressions with <code>;;</code> here, since it’s not required outside the toplevel.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+open Stdio
+
+let rec read_and_accumulate accum =
+  let line = In_channel.input_line In_channel.stdin in
+  match line with
+  | None -&gt; accum
+  | Some x -&gt; read_and_accumulate (accum +. Float.of_string x)
+
+let () =
+  printf "Total: %F\n" (read_and_accumulate 0.)</code></pre>
+</div>
+<p>This is our first use of OCaml’s input and output routines, and we needed to open another library, <code>Stdio</code>, to get access to them. The function <code>read_and_accumulate</code> is a recursive function that uses <code>In_channel.input_line</code> to read in lines one by one from the standard input, invoking itself at each iteration with its updated accumulated sum. Note that <code>input_line</code> returns an optional value, with <code>None</code> indicating the end of the input stream.</p>
+<p>After <code>read_and_accumulate</code> returns, the total needs to be printed. This is done using the <code>printf</code> command, which provides support for type-safe format strings, similar to what you’ll find in a variety of languages. The format string is parsed by the compiler and used to determine the number and type of the remaining arguments that are <span class="keep-together">required</span>. In this case, there is a single formatting directive, <code>%F</code>, so <code>printf</code> expects one additional argument of type <code>float</code>.</p>
+<section class="level3" id="compiling-and-running">
+<h3>Compiling and Running</h3>
+<p>We’ll compile our program using <code>dune</code>, a build system that’s designed for use with OCaml projects. First, we need to write a <em>dune</em> file to specify the build.</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+ (name      sum)
+ (libraries base stdio))</code></pre>
+</div>
+<p>All we need to specify is the fact that we’re building an executable rather than a library, the name of the executable, and the name of the libraries we depend on.</p>
+<p>We can now invoke dune to build the executable.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build sum.exe
+</code></pre>
+</div>
+<p>The <code>.exe</code> suffix indicates that we’re building a native-code executable, which we’ll discuss more in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>. Once the build completes, we can use the resulting program like any command-line utility. We can feed input to <code>sum.exe</code> by typing in a sequence of numbers, one per line, hitting <strong><code>Ctrl-D</code></strong> when we’re done:</p>
+<div class="highlight">
+<pre><code class="language-clike">$ ./_build/default/sum.exe
+1
+2
+3
+94.5
+Total: 100.5</code></pre>
+</div>
+<p>More work is needed to make a really usable command-line program, including a proper command-line parsing interface and better error handling, all of which is covered in <a data-type="xref" href="command-line-parsing.html#command-line-parsing">Chapter 14, Command Line Parsing</a>.</p>
+</section>
+</section>
+<section class="level2" id="where-to-go-from-here">
+<h2>Where to Go from Here</h2>
+<p>That’s it for the guided tour! There are plenty of features left and lots of details to explain, but we hope that you now have a sense of what to expect from OCaml, and that you’ll be more comfortable reading the rest of the book as a result.</p>
+</section>
+</section>
+</article></div><a href="variables-and-functions.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 02</small>Variables and Functions</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

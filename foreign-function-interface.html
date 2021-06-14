@@ -1,0 +1,759 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Foreign Function Interface - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="foreign-function-interface">
+<h1>Foreign Function Interface</h1>
+<p>OCaml has several options available to interact with non-OCaml code. The compiler can link with external system libraries via C code and also can produce standalone native object files that can be embedded within other non-OCaml applications.<a data-secondary="language interfaces" data-primary="programming" data-type="indexterm">&nbsp;</a><a data-secondary="basics of" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a><a id="INTERffi" data-secondary="foreign function interface (FFI)" data-primary="interfaces" data-type="indexterm">&nbsp;</a></p>
+<p>The mechanism by which code in one programming language can invoke routines in a different programming language is called a <em>foreign function interface</em>. This chapter will:</p>
+<ul>
+<li><p>Show how to call routines in C libraries directly from your OCaml code</p></li>
+<li><p>Teach you how to build higher-level abstractions in OCaml from the low-level C bindings</p></li>
+<li><p>Work through some full examples for binding a terminal interface and UNIX date/time functions</p></li>
+</ul>
+<p>The simplest foreign function interface in OCaml doesn’t even require you to write any C code at all! The Ctypes library lets you define the C interface in pure OCaml, and the library then takes care of loading the C symbols and invoking the foreign function call.<a data-primary="libffi library" data-type="indexterm">&nbsp;</a><a data-primary="Ncurses terminal toolkit" data-type="indexterm">&nbsp;</a><a data-secondary="installation of" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a></p>
+<p>Let’s dive straight into a realistic example to show you how the library looks. We’ll create a binding to the Ncurses terminal toolkit, as it’s widely available on most systems and doesn’t have any complex dependencies.</p>
+<section data-type="note" class="level2" id="installing-the-ctypes-library">
+<h2>Installing the Ctypes Library</h2>
+<p>If you want to use Ctypes interactively, you’ll also need to install the <a href="https://github.com/atgreen/libffi"><code>libffi</code></a> library as a prerequisite to using Ctypes. It’s a fairly popular library and should be available in your OS package manager. Try <code>opam depext -ui ctypes-foreign</code>.</p>
+<p>Once that’s done, Ctypes is available via OPAM as usual:</p>
+</section>
+<div class="highlight">
+<pre><code class="language-clike">$ brew install libffi     # for MacOS X users
+$ opam install ctypes ctypes-foreign
+$ utop
+# require "ctypes-foreign" ;;</code></pre>
+</div>
+<p>You’ll also need the Ncurses library for the first example. This comes preinstalled on many operating systems such as Mac OS X, and Debian Linux provides it as the <code>libncurses5-dev</code> package.</p>
+<section class="level2" id="example-a-terminal-interface">
+<h2>Example: A Terminal Interface</h2>
+<p>Ncurses is a library to help build terminal-independent text interfaces in a reasonably efficient way. It’s used in console mail clients like Mutt and Pine, and console web browsers such as Lynx.<a id="FFItermint" data-secondary="terminal interface example" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
+<p>The full C interface is quite large and is explained in the online <a href="http://www.gnu.org/software/ncurses/">documentation</a>. We’ll just use the small excerpt, since we just want to demonstrate Ctypes in action:<a data-secondary="terminal interface example" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-clike">typedef struct _win_st WINDOW;
+typedef unsigned int chtype;
+
+WINDOW *initscr   (void);
+WINDOW *newwin    (int, int, int, int);
+void    endwin    (void);
+void    refresh   (void);
+void    wrefresh  (WINDOW *);
+void    addstr (const char *);
+int     mvwaddch  (WINDOW *, int, int, const chtype);
+void    mvwaddstr (WINDOW *, int, int, char *);
+void    box (WINDOW *, chtype, chtype);
+int     cbreak (void);</code></pre>
+</div>
+<p>The Ncurses functions either operate on the current pseudoterminal or on a window that has been created via <code>newwin</code>. The <code>WINDOW</code> structure holds the internal library state and is considered abstract outside of Ncurses. Ncurses clients just need to store the pointer somewhere and pass it back to Ncurses library calls, which in turn dereference its contents.</p>
+<p>Note that there are over 200 library calls in Ncurses, so we’re only binding a select few for this example. The <code>initscr</code> and <code>newwin</code> create <code>WINDOW</code> pointers for the global and subwindows, respectively. The <code>mvwaddrstr</code> takes a window, x/y offsets, and a string and writes to the screen at that location. The terminal is only updated after <code>refresh</code> or <code>wrefresh</code> are called.</p>
+<p>Ctypes provides an OCaml interface that lets you map these C functions to equivalent OCaml functions. The library takes care of converting OCaml function calls and arguments into the C calling convention, invoking the foreign call within the C library and finally returning the result as an OCaml value.</p>
+<p>Let’s begin by defining the basic values we need, starting with the <code>WINDOW</code> state pointer:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Ctypes
+
+type window = unit ptr
+let window : window typ = ptr void</code></pre>
+</div>
+<p>We don’t know the internal representation of the window pointer, so we treat it as a C void pointer. We’ll improve on this later on in the chapter, but it’s good enough for now. The second statement defines an OCaml value that represents the <code>WINDOW</code> C pointer. This value is used later in the Ctypes function definitions:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Foreign
+
+let initscr =
+  foreign "initscr" (void @-&gt; returning window)</code></pre>
+</div>
+<p>That’s all we need to invoke our first function call to <code>initscr</code> to initialize the terminal. The <code>foreign</code> function accepts two parameters:</p>
+<ul>
+<li><p>The C function call name, which is looked up using the <code>dlsym</code> POSIX function.</p></li>
+<li><p>A value that defines the complete set of C function arguments and its return type. The <code>@-&gt;</code> operator adds an argument to the C parameter list, and <code>returning</code> terminates the parameter list with the return type.</p></li>
+</ul>
+<p>The remainder of the Ncurses binding simply expands on these definitions:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let newwin =
+  foreign "newwin"
+    (int @-&gt; int @-&gt; int @-&gt; int @-&gt; returning window)
+
+let endwin =
+  foreign "endwin" (void @-&gt; returning void)
+
+let refresh =
+  foreign "refresh" (void @-&gt; returning void)
+
+let wrefresh =
+  foreign "wrefresh" (window @-&gt; returning void)
+
+let addstr =
+  foreign "addstr" (string @-&gt; returning void)
+
+let mvwaddch =
+  foreign "mvwaddch"
+    (window @-&gt; int @-&gt; int @-&gt; char @-&gt; returning void)
+
+let mvwaddstr =
+  foreign "mvwaddstr"
+    (window @-&gt; int @-&gt; int @-&gt; string @-&gt; returning void)
+
+let box =
+  foreign "box" (window @-&gt; char @-&gt; char @-&gt; returning void)
+
+let cbreak =
+  foreign "cbreak" (void @-&gt; returning int)</code></pre>
+</div>
+<p>These definitions are all straightforward mappings from the C declarations in the Ncurses header file. Note that the <code>string</code> and <code>int</code> values here are nothing to do with OCaml type declarations; instead, they are values that come from opening the <code>Ctypes</code> module at the top of the file.</p>
+<p>Most of the parameters in the Ncurses example represent fairly simple scalar C types, except for <code>window</code> (a pointer to the library state) and <code>string</code>, which maps from OCaml strings that have a specific length onto C character buffers whose length is defined by a terminating null character that immediately follows the string data.</p>
+<p>The module signature for <code>ncurses.mli</code> looks much like a normal OCaml signature. You can infer it directly from the <code>ncurses.ml</code> by running a special build target:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">ocaml-print-intf ncurses.ml
+&gt;type window
+&gt;val window : window Ctypes.typ
+&gt;val initscr : unit -&gt; window
+&gt;val endwin : unit -&gt; unit
+&gt;val refresh : unit -&gt; unit
+&gt;val wrefresh : window -&gt; unit
+&gt;val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
+&gt;val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
+&gt;val addstr : string -&gt; unit
+&gt;val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
+&gt;val box : window -&gt; char -&gt; char -&gt; unit
+&gt;val cbreak : unit -&gt; int
+</code></pre>
+</div>
+<p>The <code>inferred.mli</code> target instructs the compiler to generate the default signature for a module file and places it in the <code>_build</code> directory as a normal output. You should normally copy it out into your source directory and customize it to improve its safety for external callers by making some of its internals more abstract.</p>
+<p>Here’s the customized interface that we can safely use from other libraries:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type window
+val window : window Ctypes.typ
+val initscr : unit -&gt; window
+val endwin : unit -&gt; unit
+val refresh : unit -&gt; unit
+val wrefresh : window -&gt; unit
+val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
+val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
+val addstr : string -&gt; unit
+val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
+val box : window -&gt; char -&gt; char -&gt; unit
+val cbreak : unit -&gt; int</code></pre>
+</div>
+<p>The <code>window</code> type is left abstract in the signature to ensure that window pointers can only be constructed via the <code>Ncurses.initscr</code> function. This prevents void pointers obtained from other sources from being mistakenly passed to an Ncurses library call.</p>
+<p>Now compile a “hello world” terminal drawing program to tie this all together:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Ncurses
+
+let () =
+  let main_window = initscr () in
+  ignore(cbreak ());
+  let small_window = newwin 10 10 5 5 in
+  mvwaddstr main_window 1 2 "Hello";
+  mvwaddstr small_window 2 2 "World";
+  box small_window '\000' '\000';
+  refresh ();
+  Unix.sleep 1;
+  wrefresh small_window;
+  Unix.sleep 5;
+  endwin ()</code></pre>
+</div>
+<p>The <code>hello</code> executable is compiled by linking with the <code>ctypes-foreign</code> OCamlfind package:</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name      hello)
+  (libraries ctypes-foreign.threaded)
+  (flags     :standard -cclib -lncurses))</code></pre>
+</div>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build hello.exe
+</code></pre>
+</div>
+<p>Running <code>./hello.native</code> should now display a Hello World in your terminal! <a data-secondary="build directives for" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a></p>
+<p>Ctypes wouldn’t be very useful if it were limited to only defining simple C types, of course. It provides full support for C pointer arithmetic, pointer conversions, and reading and writing through pointers, using OCaml functions as function pointers to C code, as well as struct and union definitions.</p>
+<p>We’ll go over some of these features in more detail for the remainder of the chapter by using some POSIX date functions as running examples.<a data-startref="FFItermint" data-type="indexterm">&nbsp;</a></p>
+</section>
+<section class="level2" id="basic-scalar-c-types">
+<h2>Basic Scalar C Types</h2>
+<p>First, let’s look at how to define basic scalar C types. Every C type is represented by an OCaml equivalent via the single type definition:<a data-primary="scalar C types" data-type="indexterm">&nbsp;</a><a data-secondary="basic scalar C types" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">type 'a typ</code></pre>
+</div>
+<p><code>Ctypes.typ</code> is the type of values that represents C types to OCaml. There are two types associated with each instance of <code>typ</code>:</p>
+<ul>
+<li><p>The C type used to store and pass values to the foreign library.</p></li>
+<li><p>The corresponding OCaml type. The <code>'a</code> type parameter contains the OCaml type such that a value of type <code>t typ</code> is used to read and write OCaml values of type <code>t</code>.</p></li>
+</ul>
+<p>There are various other uses of <code>typ</code> values within Ctypes, such as:</p>
+<ul>
+<li><p>Constructing function types for binding native functions</p></li>
+<li><p>Constructing pointers for reading and writing locations in C-managed storage</p></li>
+<li><p>Describing component fields of structures, unions, and arrays</p></li>
+</ul>
+<p>Here are the definitions for most of the standard C99 scalar types, including some platform-dependent ones: <a data-primary="C99 scalar types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">val void      : unit typ
+val char      : char typ
+val schar     : int typ
+val short     : int typ
+val int       : int typ
+val long      : long typ
+val llong     : llong typ
+val nativeint : nativeint typ
+
+val int8_t    : int typ
+val int16_t   : int typ
+val int32_t   : int32 typ
+val int64_t   : int64 typ
+val uchar     : uchar typ
+val uint8_t   : uint8 typ
+val uint16_t  : uint16 typ
+val uint32_t  : uint32 typ
+val uint64_t  : uint64 typ
+val size_t    : size_t typ
+val ushort    : ushort typ
+val uint      : uint typ
+val ulong     : ulong typ
+val ullong    : ullong typ
+
+val float     : float typ
+val double    : float typ
+
+val complex32 : Complex.t typ
+val complex64 : Complex.t typ</code></pre>
+</div>
+<p>These values are all of type <code>'a typ</code>, where the value name (e.g., <code>void</code>) tells you the C type and the <code>'a</code> component (e.g., <code>unit</code>) is the OCaml representation of that C type. Most of the mappings are straightforward, but some of them need a bit more explanation:</p>
+<ul>
+<li><p>Void values appear in OCaml as the <code>unit</code> type. Using <code>void</code> in an argument or result type specification produces an OCaml function that accepts or returns <code>unit</code>. Dereferencing a pointer to <code>void</code> is an error, as in C, and will raise the <code>IncompleteType</code> exception.</p></li>
+<li><p>The C <code>size_t</code> type is an alias for one of the unsigned integer types. The actual size and alignment requirements for <code>size_t</code> varies between platforms. Ctypes provides an OCaml <code>size_t</code> type that is aliased to the appropriate integer type.</p></li>
+<li><p>OCaml only supports double-precision floating-point numbers, and so the C <code>float</code> and <code>double</code> types both map onto the OCaml <code>float</code> type, and the C <code>float complex</code> and <code>double complex</code> types both map onto the OCaml double-precision <code>Complex.t</code> type.</p></li>
+</ul>
+</section>
+<section class="level2" id="pointers-and-arrays">
+<h2>Pointers and Arrays</h2>
+<p>Pointers are at the heart of C, so they are necessarily part of Ctypes, which provides support for pointer arithmetic, pointer conversions, reading and writing through pointers, and passing and returning pointers to and from functions.<a data-primary="POSIX functions" data-type="indexterm">&nbsp;</a><a data-secondary="pointers and" data-primary="arrays" data-type="indexterm">&nbsp;</a><a data-secondary="support for in Ctypes" data-primary="pointers" data-type="indexterm">&nbsp;</a><a data-secondary="pointers and arrays" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
+<p>We’ve already seen a simple use of pointers in the Ncurses example. Let’s start a new example by binding the following POSIX functions:</p>
+<div class="highlight">
+<pre><code class="language-clike">time_t time(time_t *);
+double difftime(time_t, time_t);
+char *ctime(const time_t *timep);</code></pre>
+</div>
+<p>The <code>time</code> function returns the current calendar time and is a simple start. The first step is to open some of the Ctypes modules:</p>
+<dl>
+<dt><code>Ctypes</code></dt>
+<dd>The <code>Ctypes</code> module provides functions for describing C types in OCaml.
+</dd>
+<dt><code>PosixTypes</code></dt>
+<dd>The <code>PosixTypes</code> module includes some extra POSIX-specific types (such as <code>time_t</code>).
+</dd>
+<dt><code>Foreign</code></dt>
+<dd>The <code>Foreign</code> module exposes the <code>foreign</code> function that makes it possible to invoke C functions.
+</dd>
+</dl>
+<p>We can now create a binding to <code>time</code> directly from the toplevel.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "ctypes-foreign.threaded";;
+#require "ctypes.top";;
+open Ctypes;;
+open PosixTypes;;
+open Foreign;;
+let time = foreign "time" (ptr time_t @-&gt; returning time_t);;
+&gt;val time : time_t Ctypes_static.ptr -&gt; time_t = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The <code>foreign</code> function is the main link between OCaml and C. It takes two arguments: the name of the C function to bind, and a value describing the type of the bound function. In the <code>time</code> binding, the function type specifies one argument of type <code>ptr time_t</code> and a return type of <code>time_t</code>.</p>
+<p>We can now call <code>time</code> immediately in the same toplevel. The argument is actually optional, so we’ll just pass a null pointer that has been coerced into becoming a null pointer to <code>time_t</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let cur_time = time (from_voidp time_t null);;
+...
+</code></pre>
+</div>
+<p>Since we’re going to call <code>time</code> a few times, let’s create a wrapper function that passes the null pointer through:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let time' () = time (from_voidp time_t null);;
+&gt;val time' : unit -&gt; time_t = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Since <code>time_t</code> is an abstract type, we can’t actually do anything useful with it directly. We need to bind a second function to do anything useful with the return values from <code>time</code>. We’ll move on to <code>difftime</code>; the second C function in our prototype list:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let difftime =
+foreign "difftime" (time_t @-&gt; time_t @-&gt; returning double)
+;;
+&gt;val difftime : time_t -&gt; time_t -&gt; float = &lt;fun&gt;
+let t1 =
+  time' () in
+Unix.sleep 2;
+let t2 = time' () in
+difftime t2 t1
+;;
+&gt;- : float = 2.
+</code></pre>
+</div>
+<p>The binding to <code>difftime</code> above is sufficient to compare two <code>time_t</code> values.</p>
+<section class="level3" id="allocating-typed-memory-for-pointers">
+<h3>Allocating Typed Memory for Pointers</h3>
+<p>Let’s look at a slightly less trivial example where we pass a nonnull pointer to a function. Continuing with the theme from earlier, we’ll bind to the <code>ctime</code> function, which converts a <code>time_t</code> value to a human-readable string:<a data-secondary="allocation for pointers" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="allocating typed memory for" data-primary="pointers" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let ctime = foreign "ctime" (ptr time_t @-&gt; returning string);;
+&gt;val ctime : time_t Ctypes_static.ptr -&gt; string = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The binding is continued in the toplevel to add to our growing collection. However, we can’t just pass the result of <code>time</code> to <code>ctime</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ctime (time' ());;
+&gt;Line 1, characters 7-17:
+&gt;Error: This expression has type time_t but an expression was expected of type
+&gt;         time_t Ctypes_static.ptr = (time_t, [ `C ]) pointer
+</code></pre>
+</div>
+<p>This is because <code>ctime</code> needs a pointer to the <code>time_t</code> rather than passing it by value. We thus need to allocate some memory for the <code>time_t</code> and obtain its memory address:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let t_ptr = allocate time_t (time' ());;
+...
+</code></pre>
+</div>
+<p>The <code>allocate</code> function takes the type of the memory to be allocated and the initial value and it returns a suitably typed pointer. We can now call <code>ctime</code> passing the pointer as an argument:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">ctime t_ptr;;
+...
+</code></pre>
+</div>
+</section>
+<section class="level3" id="using-views-to-map-complex-values">
+<h3>Using Views to Map Complex Values</h3>
+<p>While scalar types typically have a 1:1 representation, other C types require extra work to convert them into OCaml. Views create new C type descriptions that have special behavior when used to read or write C values. <a data-secondary="complex values with views" data-primary="mapping" data-type="indexterm">&nbsp;</a><a data-secondary="mapping complex with views" data-primary="values" data-type="indexterm">&nbsp;</a></p>
+<p>We’ve already used one view in the definition of <code>ctime</code> earlier. The <code>string</code> view wraps the C type <code>char *</code> (written in OCaml as <code>ptr char</code>) and converts between the C and OCaml string representations each time the value is written or read.</p>
+<p>Here is the type signature of the <code>Ctypes.view</code> function:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">val view :
+  read:('a -&gt; 'b) -&gt;
+  write:('b -&gt; 'a) -&gt;
+  'a typ -&gt; 'b typ</code></pre>
+</div>
+<p>Ctypes has some internal low-level conversion functions that map between an OCaml <code>string</code> and a C character buffer by copying the contents into the respective data structure. They have the following type signature:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">val string_of_char_ptr : char ptr -&gt; string
+val char_ptr_of_string : string -&gt; char ptr</code></pre>
+</div>
+<p>Given these functions, the definition of the <code>Ctypes.string</code> value that uses views is quite simple:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let string =
+  view (char ptr)
+    ~read:string_of_char_ptr
+    ~write:char_ptr_of_string</code></pre>
+</div>
+<p>The type of this <code>string</code> function is a normal <code>typ</code> with no external sign of the use of the view function:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">val string    : string.typ</code></pre>
+</div>
+<section data-type="note" class="level4" id="ocaml-strings-versus-c-character-buffers">
+<h4>OCaml Strings Versus C Character Buffers</h4>
+<p>Although OCaml strings may look like C character buffers from an interface perspective, they’re very different in terms of their memory representations.</p>
+<p>OCaml strings are stored in the OCaml heap with a header that explicitly defines their length. C buffers are also fixed-length, but by convention, a C string is terminated by a null (a <code>\0</code> byte) character. The C string functions calculate their length by scanning the buffer until the first null character is encountered.</p>
+<p>This means that you need to be careful that OCaml strings that you pass to C functions don’t contain any null values, since the first occurrence of a null character will be treated as the end of the C string. Ctypes also defaults to a <em>copying</em> interface for strings, which means that you shouldn’t use them when you want the library to mutate the buffer in-place. In that situation, use the Ctypes <code>Bigarray</code> support to pass memory by reference instead.</p>
+</section>
+</section>
+</section>
+<section class="level2" id="structs-and-unions">
+<h2>Structs and Unions</h2>
+<p>The C constructs <code>struct</code> and <code>union</code> make it possible to build new types from existing types. Ctypes contains counterparts that work similarly.<a data-primary="unions" data-type="indexterm">&nbsp;</a><a data-secondary="structure definition" data-primary="structs and unions" data-type="indexterm">&nbsp;</a><a data-secondary="structs and unions" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
+<section class="level3" id="defining-a-structure">
+<h3>Defining a Structure</h3>
+<p>Let’s improve the timer function that we wrote earlier. The POSIX function <code>gettimeofday</code> retrieves the time with microsecond resolution. The signature of <code>gettimeofday</code> is as follows, including the structure definitions:</p>
+<div class="highlight">
+<pre><code class="language-clike">struct timeval {
+  long tv_sec;
+  long tv_usec;
+};
+
+int gettimeofday(struct timeval *, struct timezone *tv);</code></pre>
+</div>
+<p>Using Ctypes, we can describe this type as follows in our toplevel, continuing on from the previous definitions:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type timeval;;
+&gt;type timeval
+let timeval : timeval structure typ = structure "timeval";;
+&gt;val timeval : timeval structure typ =
+&gt;  Ctypes_static.Struct
+&gt;   {Ctypes_static.tag = "timeval";
+&gt;    spec = Ctypes_static.Incomplete {Ctypes_static.isize = 0}; fields = []}
+</code></pre>
+</div>
+<p>The first command defines a new OCaml type <code>timeval</code> that we’ll use to instantiate the OCaml version of the struct. This is a <em>phantom type</em> that exists only to distinguish the underlying C type from other pointer types. The particular <code>timeval</code> structure now has a distinct type from other structures we define elsewhere, which helps to avoid getting them mixed up.</p>
+<p>The second command calls <code>structure</code> to create a fresh structure type. At this point, the structure type is incomplete: we can add fields but cannot yet use it in <code>foreign</code> calls or use it to create values.</p>
+</section>
+<section class="level3" id="adding-fields-to-structures">
+<h3>Adding Fields to Structures</h3>
+<p>The <code>timeval</code> structure definition still doesn’t have any fields, so we need to add those next: <a data-secondary="adding to structures" data-primary="fields" data-type="indexterm">&nbsp;</a><a data-secondary="field addition" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let tv_sec  = field timeval "tv_sec" long;;
+&gt;val tv_sec : (Signed.long, timeval structure) field =
+&gt;  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
+&gt;   foffset = 0; fname = "tv_sec"}
+let tv_usec = field timeval "tv_usec" long;;
+&gt;val tv_usec : (Signed.long, timeval structure) field =
+&gt;  {Ctypes_static.ftype = Ctypes_static.Primitive Ctypes_primitive_types.Long;
+&gt;   foffset = 8; fname = "tv_usec"}
+seal timeval;;
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>The <code>field</code> function appends a field to the structure, as shown with <code>tv_sec</code> and <code>tv_usec</code>. Structure fields are typed accessors that are associated with a particular structure, and they correspond to the labels in C.</p>
+<p>Every field addition mutates the structure variable and records a new size (the exact value of which depends on the type of the field that was just added). Once we <code>seal</code> the structure, we will be able to create values using it, but adding fields to a sealed structure is an error.</p>
+</section>
+<section class="level3" id="incomplete-structure-definitions">
+<h3>Incomplete Structure Definitions</h3>
+<p>Since <code>gettimeofday</code> needs a <code>struct timezone</code> pointer for its second argument, we also need to define a second structure type: <a data-secondary="incomplete structure definitions" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type timezone;;
+&gt;type timezone
+let timezone : timezone structure typ = structure "timezone";;
+&gt;val timezone : timezone structure typ =
+&gt;  Ctypes_static.Struct
+&gt;   {Ctypes_static.tag = "timezone";
+&gt;    spec = Ctypes_static.Incomplete {Ctypes_static.isize = 0}; fields = []}
+</code></pre>
+</div>
+<p>We don’t ever need to create <code>struct timezone</code> values, so we can leave this struct as incomplete without adding any fields or sealing it. If you ever try to use it in a situation where its concrete size needs to be known, the library will raise an <code>IncompleteType</code> exception.</p>
+<p>We’re finally ready to bind to <code>gettimeofday</code> now:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let gettimeofday = foreign "gettimeofday" ~check_errno:true
+(ptr timeval @-&gt; ptr timezone @-&gt; returning int)
+;;
+&gt;val gettimeofday :
+&gt;  timeval structure Ctypes_static.ptr -&gt;
+&gt;  timezone structure Ctypes_static.ptr -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>There’s one other new feature here: the <code>returning_checking_errno</code> function behaves like <code>returning</code>, except that it checks whether the bound C function modifies the C error flag. Changes to <code>errno</code> are mapped into OCaml exceptions and raise a <code>Unix.Unix_error</code> exception just as the standard library functions do.</p>
+<p>As before, we can create a wrapper to make <code>gettimeofday</code> easier to use. The functions <code>make</code>, <code>addr</code>, and <code>getf</code> create a structure value, retrieve the address of a structure value, and retrieve the value of a field from a structure:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let gettimeofday' () =
+  let tv = make timeval in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null) : int);
+  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
+  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
+  Caml.Pervasives.(float secs +. float usecs /. 1000000.0)
+;;
+&gt;val gettimeofday' : unit -&gt; float = &lt;fun&gt;
+gettimeofday' ();;
+&gt;- : float = 1516746708.884176
+</code></pre>
+</div>
+<p>You need to be a little careful not to get all the open modules mixed up here. Both <code>Pervasives</code> and <code>Ctypes</code> define different <code>float</code> functions. The <code>Ctypes</code> module we opened up earlier overrides the <code>Pervasives</code> definition. As seen previously though, you just need to locally open <code>Pervasives</code> again to bring the usual <code>float</code> function back in scope.</p>
+<section class="level4" id="recap-a-time-printing-command">
+<h4>Recap: A time-printing command</h4>
+<p>We built up a lot of bindings in the previous section, so let’s recap them with a complete example that ties it together with a command-line frontend: <a data-secondary="time-printing command" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+open Ctypes
+open PosixTypes
+open Foreign
+
+let time     = foreign "time" (ptr time_t @-&gt; returning time_t)
+let difftime = foreign "difftime" (time_t @-&gt; time_t @-&gt; returning double)
+let ctime    = foreign "ctime" (ptr time_t @-&gt; returning string)
+
+type timeval
+let timeval : timeval structure typ = structure "timeval"
+let tv_sec   = field timeval "tv_sec" long
+let tv_usec  = field timeval "tv_usec" long
+let ()       = seal timeval
+
+type timezone
+let timezone : timezone structure typ = structure "timezone"
+
+let gettimeofday = foreign "gettimeofday" ~check_errno:true
+    (ptr timeval @-&gt; ptr timezone @-&gt; returning int)
+
+let time' () = time (from_voidp time_t null)
+
+let gettimeofday' () =
+  let tv = make timeval in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
+  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
+  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
+  Pervasives.(float secs +. float usecs /. 1_000_000.)
+
+let float_time () = printf "%f%!\n" (gettimeofday' ())
+
+let ascii_time () =
+  let t_ptr = allocate time_t (time' ()) in
+  printf "%s%!" (ctime t_ptr)
+
+let () =
+  let open Command in
+  basic_spec ~summary:"Display the current time in various formats"
+    Spec.(empty +&gt; flag "-a" no_arg ~doc:" Human-readable output format")
+    (fun human -&gt; if human then ascii_time else float_time)
+  |&gt; Command.run</code></pre>
+</div>
+<p>This can be compiled and run in the usual way: <a data-primary="returning function" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name      datetime)
+  (libraries core ctypes-foreign.threaded))</code></pre>
+</div>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build datetime.exe
+./_build/default/datetime.exe
+&gt;1520339271.364367
+./_build/default/datetime.exe -a
+&gt;Tue Mar  6 13:27:51 2018
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="why-do-we-need-to-use-returning">
+<h5>Why Do We Need to Use returning?</h5>
+<p>The alert reader may be curious about why all these function definitions have to be terminated by <code>returning</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">(* correct types *)
+val time: ptr time_t @-&gt; returning time_t
+val difftime: time_t @-&gt; time_t @-&gt; returning double</code></pre>
+</div>
+<p>The <code>returning</code> function may appear superfluous here. Why couldn’t we simply give the types as follows?</p>
+<div class="highlight">
+<pre><code class="language-ocaml">(* incorrect types *)
+val time: ptr time_t @-&gt; time_t
+val difftime: time_t @-&gt; time_t @-&gt; double</code></pre>
+</div>
+<p>The reason involves higher types and two differences between the way that functions are treated in OCaml and C. Functions are first-class values in OCaml, but not in C. For example, in C it is possible to return a function pointer from a function, but not to return an actual function.</p>
+<p>Secondly, OCaml functions are typically defined in a curried style. The signature of a two-argument function is written as follows:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">val curried : int -&gt; int -&gt; int</code></pre>
+</div>
+<p>but this really means:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">val curried : int -&gt; (int -&gt; int)</code></pre>
+</div>
+<p>and the arguments can be supplied one at a time to create a closure. In contrast, C functions receive their arguments all at once. The equivalent C function type is the following:</p>
+<div class="highlight">
+<pre><code class="language-clike">int uncurried_C(int, int);</code></pre>
+</div>
+<p>and the arguments must always be supplied together:</p>
+<div class="highlight">
+<pre><code class="language-clike">uncurried_C(3, 4);</code></pre>
+</div>
+<p>A C function that’s written in curried style looks very different:</p>
+<div class="highlight">
+<pre><code class="language-clike">/* A function that accepts an int, and returns a function
+   pointer that accepts a second int and returns an int. */
+typedef int (function_t)(int);
+function_t *curried_C(int);
+
+/* supply both arguments */
+curried_C(3)(4);
+
+/* supply one argument at a time */
+function_t *f = curried_C(3); f(4);</code></pre>
+</div>
+<p>The OCaml type of <code>uncurried_C</code> when bound by Ctypes is <code>int -&gt; int -&gt; int</code>: a two-argument function. The OCaml type of <code>curried_C</code> when bound by <code>ctypes</code> is <code>int -&gt; (int -&gt; int)</code>: a one-argument function that returns a one-argument function.</p>
+<p>In OCaml, of course, these types are absolutely equivalent. Since the OCaml types are the same but the C semantics are quite different, we need some kind of marker to distinguish the cases. This is the purpose of <code>returning</code> in function definitions.</p>
+</section>
+</section>
+</section>
+<section class="level3" id="defining-arrays">
+<h3>Defining Arrays</h3>
+<p>Arrays in C are contiguous blocks of the same type of value. Any of the basic types defined previously can be allocated as blocks via the <code>Array</code> module: <a data-secondary="definition of" data-primary="arrays" data-type="indexterm">&nbsp;</a><a data-secondary="array definition" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Array : sig
+  type 'a t = 'a array
+
+  val get : 'a t -&gt; int -&gt; 'a
+  val set : 'a t -&gt; int -&gt; 'a -&gt; unit
+  val of_list : 'a typ -&gt; 'a list -&gt; 'a t
+  val to_list : 'a t -&gt; 'a list
+  val length : 'a t -&gt; int
+  val start : 'a t -&gt; 'a ptr
+  val from_ptr : 'a ptr -&gt; int -&gt; 'a t
+  val make : 'a typ -&gt; ?initial:'a -&gt; int -&gt; 'a t
+end</code></pre>
+</div>
+<p>The array functions are similar to those in the standard library <code>Array</code> module except that they operate on arrays stored using the flat C representation rather than the OCaml representation described in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 20, Memory Representation Of Values</a>.</p>
+<p>As with standard OCaml arrays, the conversion between arrays and lists requires copying the values, which can be expensive for large data structures. Notice that you can also convert an array into a <code>ptr</code> pointer to the head of the underlying buffer, which can be useful if you need to pass the pointer and size arguments separately to a C function.</p>
+<p>Unions in C are named structures that can be mapped onto the same underlying memory. They are also fully supported in Ctypes, but we won’t go into more detail here. <a data-secondary="controlling pointers" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operators controlling" data-primary="pointers" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="pointer-operators-for-dereferencing-and-arithmetic">
+<h5>Pointer Operators for Dereferencing and Arithmetic</h5>
+<p>Ctypes defines a number of operators that let you manipulate pointers and arrays just as you would in C. The Ctypes equivalents do have the benefit of being more strongly typed, of course (see <a data-type="xref" href="foreign-function-interface.html#Table19sub1">Table19sub1</a>).</p>
+<div data-type="table" id="Table19sub1">
+<table>
+<caption>Operators for manipulating pointers and arrays</caption>
+<colgroup>
+<col style="width: 52%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operator</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>!@ p</code></td>
+<td>Dereference the pointer <code>p</code>.</td>
+</tr>
+<tr class="even">
+<td><code>p &lt;-@ v</code></td>
+<td>Write the value <code>v</code> to the address <code>p</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>p +@ n</code></td>
+<td>If <code>p</code> points to an array element, then compute the address of the <code>n</code>th next element.</td>
+</tr>
+<tr class="even">
+<td><code>p -@ n</code></td>
+<td>If <code>p</code> points to an array element, then compute the address of the <code>n</code>th previous element.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>There are also other useful nonoperator functions available (see the Ctypes documentation), such as pointer differencing and comparison.</p>
+</section>
+</section>
+</section>
+<section class="level2" id="passing-functions-to-c">
+<h2>Passing Functions to C</h2>
+<p>It’s also straightforward to pass OCaml function values to C. The C standard library function <code>qsort</code> sorts arrays of elements using a comparison function passed in as a function pointer. The signature for <code>qsort</code> is:<a data-secondary="passing to C" data-primary="functions" data-type="indexterm">&nbsp;</a><a data-secondary="passing functions to C" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-clike">void qsort(void *base, size_t nmemb, size_t size,
+           int(*compar)(const void *, const void *));</code></pre>
+</div>
+<p>C programmers often use <code>typedef</code> to make type definitions involving function pointers easier to read. Using a typedef, the type of <code>qsort</code> looks a little more palatable:</p>
+<div class="highlight">
+<pre><code class="language-clike">typedef int(compare_t)(const void *, const void *);
+
+void qsort(void *base, size_t nmemb, size_t size, compare_t *);</code></pre>
+</div>
+<p>This also happens to be a close mapping to the corresponding Ctypes definition. Since type descriptions are regular values, we can just use <code>let</code> in place of <code>typedef</code> and end up with working OCaml bindings to <code>qsort</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Ctypes;;
+open PosixTypes;;
+open Foreign;;
+let compare_t = ptr void @-&gt; ptr void @-&gt; returning int;;
+&gt;val compare_t : (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) fn =
+&gt;  Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
+&gt;   Ctypes_static.Function (Ctypes_static.Pointer Ctypes_static.Void,
+&gt;    Ctypes_static.Returns
+&gt;     (Ctypes_static.Primitive Ctypes_primitive_types.Int)))
+let qsort = foreign "qsort"
+              (ptr void @-&gt; size_t @-&gt; size_t @-&gt;
+funptr compare_t @-&gt; returning void)
+;;
+&gt;val qsort :
+&gt;  unit Ctypes_static.ptr -&gt;
+&gt;  size_t -&gt;
+&gt;  size_t -&gt; (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) -&gt; unit =
+&gt;  &lt;fun&gt;
+</code></pre>
+</div>
+<p>We only use <code>compare_t</code> once (in the <code>qsort</code> definition), so you can choose to inline it in the OCaml code if you prefer. As the type shows, the resulting <code>qsort</code> value is a higher-order function, since the fourth argument is itself a function. As before, let’s define a wrapper function to make <code>qsort</code> easier to use. The second and third arguments to <code>qsort</code> specify the length (number of elements) of the array and the element size.</p>
+<p>Arrays created using Ctypes have a richer runtime structure than C arrays, so we don’t need to pass size information around. Furthermore, we can use OCaml polymorphism in place of the unsafe <code>void ptr</code> type.</p>
+<section class="level3" id="example-a-command-line-quicksort">
+<h3>Example: A Command-Line Quicksort</h3>
+<p>The following is a command-line tool that uses the <code>qsort</code> binding to sort all of the integers supplied on the standard input: <a data-primary="qsort binding" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+open Ctypes
+open PosixTypes
+open Foreign
+
+let compare_t = ptr void @-&gt; ptr void @-&gt; returning int
+
+let qsort = foreign "qsort"
+    (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt;
+       returning void)
+
+let qsort' cmp arr =
+  let open Unsigned.Size_t in
+  let ty = CArray.element_type arr in
+  let len = of_int (CArray.length arr) in
+  let elsize = of_int (sizeof ty) in
+  let start = to_voidp (CArray.start arr) in
+  let compare l r = cmp (!@ (from_voidp ty l)) (!@ (from_voidp ty r)) in
+  qsort start len elsize compare;
+  arr
+
+let sort_stdin () =
+  In_channel.input_lines In_channel.stdin
+  |&gt; List.map ~f:int_of_string
+  |&gt; CArray.of_list int
+  |&gt; qsort' Int.compare
+  |&gt; CArray.to_list
+  |&gt; List.iter ~f:(fun a -&gt; printf "%d\n" a)
+
+let () =
+  Command.basic_spec ~summary:"Sort integers on standard input"
+    Command.Spec.empty sort_stdin
+  |&gt; Command.run</code></pre>
+</div>
+<p>Compile it in the usual way with <em>dune</em> and test it against some input data, and also build the inferred interface so we can examine it more closely:</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name      qsort)
+  (libraries core ctypes-foreign.threaded))</code></pre>
+</div>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build qsort.exe
+cat input.txt
+&gt;2
+&gt;4
+&gt;1
+&gt;3
+./_build/default/qsort.exe &lt; input.txt
+&gt;1
+&gt;2
+&gt;3
+&gt;4
+ocaml-print-intf qsort.ml
+&gt;val compare_t :
+&gt;  (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) Ctypes_static.fn
+&gt;val qsort :
+&gt;  unit Ctypes_static.ptr -&gt;
+&gt;  PosixTypes.size_t -&gt;
+&gt;  PosixTypes.size_t -&gt;
+&gt;  (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) -&gt; unit
+&gt;val qsort' :
+&gt;  ('a -&gt; 'a -&gt; int) -&gt; 'a Ctypes_static.carray -&gt; 'a Ctypes_static.carray
+&gt;val sort_stdin : unit -&gt; unit
+</code></pre>
+</div>
+<p>The inferred interface shows us the types of the raw <code>qsort</code> binding and also the <code>qsort'</code> wrapper function:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">val compare_t :
+  (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) Ctypes_static.fn
+val qsort :
+  unit Ctypes_static.ptr -&gt;
+  PosixTypes.size_t -&gt;
+  PosixTypes.size_t -&gt;
+  (unit Ctypes_static.ptr -&gt; unit Ctypes_static.ptr -&gt; int) -&gt; unit
+val qsort' :
+  ('a -&gt; 'a -&gt; int) -&gt; 'a Ctypes_static.carray -&gt; 'a Ctypes_static.carray
+val sort_stdin : unit -&gt; unit</code></pre>
+</div>
+<p>The <code>qsort'</code> wrapper function has a much more canonical OCaml interface than the raw binding. It accepts a comparator function and a Ctypes array, and returns the same Ctypes array. It’s not strictly required that it returns the array, since it modifies it in-place, but it makes it easier to chain the function using the <code>|&gt;</code> operator (as <code>sort_stdin</code> does in the example).</p>
+<p>Using <code>qsort'</code> to sort arrays is straightforward. Our example code reads the standard input as a list, converts it to a C array, passes it through qsort, and outputs the result to the standard output. Again, remember to not confuse the <code>Ctypes.Array</code> module with the <code>Core.Array</code> module: the former is in scope since we opened <code>Ctypes</code> at the start of the file.<a data-secondary="and allocated Ctypes" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="lifetime of allocated Ctypes" data-primary="Ctypes library" data-type="indexterm">&nbsp;</a><a data-secondary="of allocated Ctypes" data-primary="garbage collection" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="lifetime-of-allocated-ctypes">
+<h5>Lifetime of Allocated Ctypes</h5>
+<p>Values allocated via Ctypes (i.e., using <code>allocate</code>, <code>Array.make</code>, and so on) will not be garbage-collected as long as they are reachable from OCaml values. The system memory they occupy is freed when they do become unreachable, via a finalizer function registered with the garbage collector (GC).</p>
+<p>The definition of reachability for Ctypes values is a little different from conventional OCaml values, though. The allocation functions return an OCaml-managed pointer to the value, and as long as some derivative pointer is still reachable by the GC, the value won’t be collected.</p>
+<p>“Derivative” means a pointer that’s computed from the original pointer via arithmetic, so a reachable reference to an array element or a structure field protects the whole object from collection.</p>
+<p>A corollary of the preceding rule is that pointers written into the C heap don’t have any effect on reachability. For example, if you have a C-managed array of pointers to structs, then you’ll need some additional way of keeping the structs themselves around to protect them from collection. You could achieve this via a global array of values on the OCaml side that would keep them live until they’re no longer needed.</p>
+<p>Functions passed to C have similar considerations regarding lifetime. On the OCaml side, functions created at runtime may be collected when they become unreachable. As we’ve seen, OCaml functions passed to C are converted to function pointers, and function pointers written into the C heap have no effect on the reachability of the OCaml functions they reference. With <code>qsort</code> things are straightforward, since the comparison function is only used during the call to <code>qsort</code> itself. However, other C libraries may store function pointers in global variables or elsewhere, in which case you’ll need to take care that the OCaml functions you pass to them aren’t prematurely garbage-collected.</p>
+</section>
+</section>
+</section>
+<section class="level2" id="learning-more-about-c-bindings">
+<h2>Learning More About C Bindings</h2>
+<p>The Ctypes <a href="http://github.com/ocamllabs/ocaml-ctypes">distribution</a> contains a number of larger-scale examples, including: <a data-secondary="C bindings" data-primary="foreign function interface (FFI)" data-type="indexterm">&nbsp;</a></p>
+<ul>
+<li><p>Bindings to the POSIX <code>fts</code> API, which demonstrates C callbacks more comprehensively</p></li>
+<li><p>A more complete Ncurses binding than the example we opened the chapter with</p></li>
+<li><p>A comprehensive test suite that covers the complete library, and can provide useful snippets for your own bindings</p></li>
+</ul>
+<p>This chapter hasn’t really needed you to understand the innards of OCaml at all. Ctypes does its best to make function bindings easy, but the rest of this part will also fill you in about interactions with OCaml memory layout in <a data-type="xref" href="runtime-memory-layout.html#memory-representation-of-values">Chapter 20, Memory Representation Of Values</a> and automatic memory management in <a data-type="xref" href="garbage-collector.html#understanding-the-garbage-collector">Chapter 21, Understanding The Garbage Collector</a>.</p>
+<p>Ctypes gives OCaml programs access to the C representation of values, shielding you from the details of the OCaml value representation, and introduces an abstraction layer that hides the details of foreign calls. While this covers a wide variety of situations, it’s sometimes necessary to look behind the abstraction to obtain finer control over the details of the interaction between the two languages.</p>
+<p>You can find more information about the C interface in several places:</p>
+<ul>
+<li><p>The standard OCaml foreign function interface allows you to glue OCaml and C together from the other side of the boundary, by writing C functions that operate on the OCaml representation of values. You can find details of the standard interface in the <a href="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html">OCaml manual</a> and in the book <a href="http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf"><em>Developing Applications with Objective Caml</em></a>.</p></li>
+<li><p>Florent Monnier maintains an excellent online <a href="http://decapode314.free.fr/ocaml/ocaml-wrapping-c.html">OCaml</a> that provides examples of how to call OCaml functions from C. This covers a wide variety of OCaml data types and also more complex callbacks between C and OCaml.</p></li>
+<li><p><a href="http://www.swig.org">SWIG</a> is a tool that connects programs written in C/C++ to a variety of higher-level programming languages, including OCaml. The SWIG manual has examples of converting library specifications into OCaml bindings.</p></li>
+</ul>
+<section class="level3" id="struct-memory-layout">
+<h3>Struct Memory Layout</h3>
+<p>The C language gives implementations a certain amount of freedom in choosing how to lay out structs in memory. There may be padding between members and at the end of the struct, in order to satisfy the memory alignment requirements of the host platform. Ctypes uses platform-appropriate size and alignment information to replicate the struct layout process. OCaml and C will have consistent views about the layout of the struct as long as you declare the fields of a struct in the same order and with the same types as the C library you’re binding to. <a data-secondary="layout for structs" data-primary="memory" data-type="indexterm">&nbsp;</a><a data-secondary="memory layout of" data-primary="structs and unions" data-type="indexterm">&nbsp;</a></p>
+<p>However, this approach can lead to difficulties when the fields of a struct aren’t fully specified in the interface of a library. The interface may list the fields of a structure without specifying their order, or make certain fields available only on certain platforms, or insert undocumented fields into struct definitions for performance reasons. For example, the <code>struct timeval</code> definition used in this chapter accurately describes the layout of the struct on common platforms, but implementations on some more unusual architectures include additional padding members that will lead to strange behavior in the examples.</p>
+<p>The Cstubs subpackage of Ctypes addresses this issue. Rather than simply assuming that struct definitions given by the user accurately reflect the actual definitions of structs used in C libraries, Cstubs generates code that uses the C library headers to discover the layout of the struct. The good news is that the code that you write doesn’t need to change much. Cstubs provides alternative implementations of the <code>field</code> and <code>seal</code> functions that you’ve already used to describe <code>struct timeval</code>; instead of computing member offsets and sizes appropriate for the platform, these implementations obtain them directly from C.</p>
+<p>The details of using Cstubs are available in the online <a href="https://ocamllabs.github.io/ocaml-ctypes">documentation</a>, along with instructions on integration with <code>autoconf</code> platform portability instructions.<a data-startref="INTERffi" data-type="indexterm">&nbsp;</a></p>
+</section>
+</section>
+</section>
+</article></div><a href="runtime-memory-layout.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 20</small>Memory Representation of Values</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

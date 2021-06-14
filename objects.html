@@ -1,0 +1,623 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Objects - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="objects">
+<h1>Objects</h1>
+<p>We’ve already seen several tools that OCaml provides for organizing programs, particularly modules. In addition, OCaml also supports object-oriented programming. There are objects, classes, and their associated types. In this chapter, we’ll introduce you to OCaml objects and subtyping. In the next chapter, <a data-type="xref" href="classes.html#classes">Chapter 12, Classes</a>, we’ll introduce you to classes and inheritance. <a data-secondary="in object-oriented programming" data-primary="objects" data-type="indexterm">&nbsp;</a><a data-primary="object-oriented programming (OOP)" data-type="indexterm">&nbsp;</a><a data-secondary="object-oriented programming (OOP)" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="what-is-object-oriented-programming">
+<h5>What Is Object-Oriented Programming?</h5>
+<p>Object-oriented programming (often shortened to OOP) is a programming style that encapsulates computation and data within logical <em>objects</em>. Each object contains some data stored in <em>fields</em> and has <em>method</em> functions that can be invoked against the data within the object (also called “sending a message” to the object). The code definition behind an object is called a <em>class</em>, and objects are constructed from a class definition by calling a constructor with the data that the object will use to build itself.</p>
+<p>There are five fundamental properties that differentiate OOP from other styles:</p>
+<dl>
+<dt>Abstraction</dt>
+<dd>The details of the implementation are hidden in the object, and the external interface is just the set of publicly accessible methods.
+</dd>
+<dt>Dynamic lookup</dt>
+<dd>When a message is sent to an object, the method to be executed is determined by the implementation of the object, not by some static property of the program. In other words, different objects may react to the same message in different ways.
+</dd>
+<dt>Subtyping</dt>
+<dd>If an object <code>a</code> has all the functionality of an object <code>b</code>, then we may use <code>a</code> in any context where <code>b</code> is expected.
+</dd>
+<dt>Inheritance</dt>
+<dd>The definition of one kind of object can be reused to produce a new kind of object. This new definition can override some behavior, but also share code with its parent.
+</dd>
+<dt>Open recursion</dt>
+<dd>An object’s methods can invoke another method in the same object using a special variable (often called <code>self</code> or <code>this</code>). When objects are created from classes, these calls use dynamic lookup, allowing a method defined in one class to invoke methods defined in another class that inherits from the first.
+</dd>
+</dl>
+<p>Almost every notable modern programming language has been influenced by OOP, and you’ll have run across these terms if you’ve ever used C++, Java, C#, Ruby, Python, or JavaScript.</p>
+</section>
+<section class="level2" id="ocaml-objects">
+<h2>OCaml Objects</h2>
+<p>If you already know about object-oriented programming in a language like Java or <span class="keep-together">C++,</span> the OCaml object system may come as a surprise. Foremost is the complete separation of objects and their types from the class system. In a language like Java, a class name is also used as the type of objects created by instantiating it, and the relationships between these object types correspond to inheritance. For example, if we implement a class <code>Deque</code> in Java by inheriting from a class <code>Stack</code>, we would be allowed to pass a deque anywhere a stack is expected. <a data-secondary="in OCaml" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml is entirely different. Classes are used to construct objects and support inheritance, but classes are not types. Instead, objects have <em>object types</em>, and if you want to use objects, you aren’t required to use classes at all. Here’s an example of a simple object:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+let s = object
+  val mutable v = [0; 2]
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+end
+;;
+&gt;val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
+</code></pre>
+</div>
+<p>The object has an integer list value <code>v</code>, a method <code>pop</code> that returns the head of <code>v</code>, and a method <code>push</code> that adds an integer to the head of <code>v</code>.</p>
+<p>The object type is enclosed in angle brackets <code>&lt; ... &gt;</code>, containing just the types of the methods. Fields, like <code>v</code>, are not part of the public interface of an object. All interaction with an object is through its methods. The syntax for a method invocation uses the <code>#</code> character:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">s#pop;;
+&gt;- : int option = Some 0
+s#push 4;;
+&gt;- : unit = ()
+s#pop;;
+&gt;- : int option = Some 4
+</code></pre>
+</div>
+<p>Note that unlike functions, methods can have zero parameters, since the method call is routed to a concrete object instance. That’s why the <code>pop</code> method doesn’t have a <code>unit</code> argument, as the equivalent functional version would.</p>
+<p>Objects can also be constructed by functions. If we want to specify the initial value of the object, we can define a function that takes the value and returns an object:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let stack init = object
+  val mutable v = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+end
+;;
+&gt;val stack : 'a list -&gt; &lt; pop : 'a option; push : 'a -&gt; unit &gt; = &lt;fun&gt;
+let s = stack [3; 2; 1];;
+&gt;val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
+s#pop;;
+&gt;- : int option = Some 3
+</code></pre>
+</div>
+<p>Note that the types of the function <code>stack</code> and the returned object now use the polymorphic type <code>'a</code>. When <code>stack</code> is invoked on a concrete value <code>[3; 2; 1]</code>, we get the same object type as before, with type <code>int</code> for the values on the stack.</p>
+</section>
+<section class="level2" id="object-polymorphism">
+<h2>Object Polymorphism</h2>
+<p>Like polymorphic variants, methods can be used without an explicit type declaration: <a data-secondary="in objects" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-secondary="polymorphism of" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area sq = sq#width * sq#width;;
+&gt;val area : &lt; width : int; .. &gt; -&gt; int = &lt;fun&gt;
+let minimize sq : unit = sq#resize 1;;
+&gt;val minimize : &lt; resize : int -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;
+let limit sq = if (area sq) &gt; 100 then minimize sq;;
+&gt;val limit : &lt; resize : int -&gt; unit; width : int; .. &gt; -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p>As you can see, object types are inferred automatically from the methods that are invoked on them.</p>
+<p>The type system will complain if it sees incompatible uses of the same method:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let toggle sq b : unit =
+  if b then sq#resize `Fullscreen
+else minimize sq
+;;
+&gt;Line 3, characters 17-19:
+&gt;Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; .. &gt;
+&gt;       but an expression was expected of type &lt; resize : int -&gt; unit; .. &gt;
+&gt;       Types for method resize are incompatible
+</code></pre>
+</div>
+<p>The <code>..</code> in the inferred object types are ellipses, standing for other unspecified methods that the object may have. The type <code>&lt; width : float; .. &gt;</code> specifies an object that must have at least a <code>width</code> method, and possibly some others as well. Such object types are said to be <em>open</em>. <a data-primary="open object types" data-type="indexterm">&nbsp;</a></p>
+<p>We can manually <em>close</em> an object type using a type annotation:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let area_closed (sq: &lt; width : int &gt;) = sq#width * sq#width;;
+&gt;val area_closed : &lt; width : int &gt; -&gt; int = &lt;fun&gt;
+let sq = object
+  method width = 30
+  method name = "sq"
+end
+;;
+&gt;val sq : &lt; name : string; width : int &gt; = &lt;obj&gt;
+area_closed sq;;
+&gt;Line 1, characters 13-15:
+&gt;Error: This expression has type &lt; name : string; width : int &gt;
+&gt;       but an expression was expected of type &lt; width : int &gt;
+&gt;       The second object type has no method name
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="elisions-are-polymorphic">
+<h5>Elisions Are Polymorphic</h5>
+<p>The <code>..</code> in an open object type is an elision, standing for “possibly more methods.” It may not be apparent from the syntax, but an elided object type is actually polymorphic. For example, if we try to write a type definition, we get an “unbound type variable” error: <a data-secondary="row polymorphism" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="row polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="ellipses (..)" data-type="indexterm">&nbsp;</a><a data-primary="type variables" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; width : int; ..&gt;;;
+&gt;Line 1, characters 1-33:
+&gt;Error: A type variable is unbound in this type declaration.
+&gt;In type &lt; width : Base.int; .. &gt; as 'a the variable 'a is unbound
+</code></pre>
+</div>
+<p>This is because <code>..</code> is really a special kind of type variable called a <em>row variable</em>.</p>
+<p>This kind of typing scheme using row variables is called <em>row polymorphism</em>. Row polymorphism is also used in polymorphic variant types, and there is a close relationship between objects and polymorphic variants: objects are to records what polymorphic variants are to ordinary variants.</p>
+</section>
+<p>An object of type <code>&lt; pop : int option; .. &gt;</code> can be any object with a method <code>pop : int option</code>; it doesn’t matter how it is implemented. When the method <code>#pop</code> is invoked, the actual method that is run is determined by the object. Consider the following function.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let print_pop st = Option.iter ~f:(Stdio.printf "Popped: %d\n") st#pop;;
+&gt;val print_pop : &lt; pop : int option; .. &gt; -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can run it on the stack type we defined above, which is based on linked lists.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (stack [5;4;3;2;1]);;
+&gt;Popped: 5
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>But we could also create a totally different implementation of stacks, using Base’s array-based <code>Stack</code> module.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let array_stack l = object
+  val stack = Stack.of_list l
+  method pop = Stack.pop stack
+end
+;;
+&gt;val array_stack : 'a list -&gt; &lt; pop : 'a option &gt; = &lt;fun&gt;
+</code></pre>
+</div>
+<p>And <code>print_pop</code> will work just as well on this kind of stack object, despite having a completely different implementation.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">print_pop (array_stack [5;4;3;2;1]);;
+&gt;Popped: 5
+&gt;- : unit = ()
+</code></pre>
+</div>
+</section>
+<section class="level2" id="immutable-objects">
+<h2>Immutable Objects</h2>
+<p>Many people consider object-oriented programming to be intrinsically imperative, where an object is like a state machine. Sending a message to an object causes it to change state, possibly sending messages to other objects. <a data-secondary="immutable" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<p>Indeed, in many programs this makes sense, but it is by no means required. Let’s define a function that creates immutable stack objects:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let imm_stack init = object
+  val v = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt; Some (hd, {&lt; v = tl &gt;})
+    | [] -&gt; None
+
+  method push hd =
+    {&lt; v = hd :: v &gt;}
+end
+;;
+&gt;val imm_stack :
+&gt;  'a list -&gt; (&lt; pop : ('a * 'b) option; push : 'a -&gt; 'b &gt; as 'b) = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The key parts of this implementation are in the <code>pop</code> and <code>push</code> methods. The expression <code>{&lt; ... &gt;}</code> produces a copy of the current object, with the same type, and the specified fields updated. In other words, the <code>push hd</code> method produces a copy of the object, with <code>v</code> replaced by <code>hd :: v</code>. The original object is not modified:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = imm_stack [3; 2; 1];;
+&gt;val s : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
+let r = s#push 4;;
+&gt;val r : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
+s#pop;;
+&gt;- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
+&gt;Some (3, &lt;obj&gt;)
+r#pop;;
+&gt;- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
+&gt;Some (4, &lt;obj&gt;)
+</code></pre>
+</div>
+<p>There are some restrictions on the use of the expression <code>{&lt; ... &gt;}</code>. It can be used only within a method body, and only the values of fields may be updated. Method implementations are fixed at the time the object is created; they cannot be changed <span class="keep-together">dynamically</span>.</p>
+</section>
+<section class="level2" id="when-to-use-objects">
+<h2>When to Use Objects</h2>
+<p>You might wonder when to use objects in OCaml, which has a multitude of alternative mechanisms to express the similar concepts. First-class modules are more expressive (a module can include types, while classes and objects cannot). Modules, functors, and data types also offer a wide range of ways to express program structure. In fact, many seasoned OCaml programmers rarely use classes and objects, if at all. <a data-secondary="vs.&nbsp;objects" data-primary="first-class modules" data-type="indexterm">&nbsp;</a><a data-secondary="benefits and drawbacks of" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<p>Objects have some advantages over records: they don’t require type definitions, and their support for row polymorphism makes them more flexible. However, the heavy syntax and additional runtime cost means that objects are rarely used in place of records.</p>
+<p>The real benefits of objects come from the class system. Classes support inheritance and open recursion. Open recursion allows interdependent parts of an object to be defined separately. This works because calls between the methods of an object are determined when the object is instantiated, a form of <em>late</em> binding. This makes it possible (and necessary) for one method to refer to other methods in the object without knowing statically how they will be implemented. <a data-primary="late binding" data-type="indexterm">&nbsp;</a><a data-secondary="open recursion" data-primary="recursion" data-type="indexterm">&nbsp;</a><a data-primary="open recursion" data-type="indexterm">&nbsp;</a><a data-secondary="benefits of" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>In contrast, modules use early binding. If you want to parameterize your module code so that some part of it can be implemented later, you would write a function or functor. This is more explicit, but often more verbose than overriding a method in a class.</p>
+<p>In general, a rule of thumb is: use classes and objects in situations where open recursion is a big win. Two good examples are Xavier Leroy’s <a href="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</a>, which provides a variety of cryptographic primitives that can be combined in building-block style; and the <a href="http://cristal.inria.fr/camlimages/">Camlimages</a> library, which manipulates various graphical file formats. Camlimages also provides a module-based version of the same library, letting you choose between functional and object-oriented styles depending on your problem domain. <a data-primary="Camlimages library" data-type="indexterm">&nbsp;</a> <a data-primary="Cryptokit library" data-type="indexterm">&nbsp;</a> <a data-secondary="Cryptokit" data-primary="libraries" data-type="indexterm">&nbsp;</a> <a data-secondary="Camlimages" data-primary="libraries" data-type="indexterm">&nbsp;</a> <a data-secondary="Camlimages" data-primary="external libraries" data-type="indexterm">&nbsp;</a> <a data-secondary="Cryptokit" data-primary="external libraries" data-type="indexterm">&nbsp;</a></p>
+<p>We’ll introduce you to classes, and examples using open recursion, in <a data-type="xref" href="classes.html#classes">Chapter 12, Classes</a>.</p>
+</section>
+<section class="level2" id="subtyping">
+<h2>Subtyping</h2>
+<p>Subtyping is a central concept in object-oriented programming. It governs when an object with one type <em>A</em> can be used in an expression that expects an object of another type <em>B</em>. When this is true, we say that <em>A</em> is a <em>subtype</em> of <em>B</em>. More concretely, subtyping restricts when the coercion operator <code>e :&gt; t</code> can be applied. This coercion works only if the type of <code>e</code> is a subtype of <code>t</code>. <a data-secondary="basics of" data-primary="subtyping" data-type="indexterm">&nbsp;</a><a id="OBsub" data-secondary="subtyping and" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<section class="level3" id="width-subtyping">
+<h3>Width Subtyping</h3>
+<p>To explore this, let’s define some simple object types for geometric shapes. The generic type <code>shape</code> just has a method to compute the area. <a data-primary="width subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="width subtyping" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; area : float &gt;;;
+&gt;type shape = &lt; area : float &gt;
+</code></pre>
+</div>
+<p>Now let’s add a type representing a specific kind of shape, as well as a function for creating objects of that type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type square = &lt; area : float; width : int &gt;;;
+&gt;type square = &lt; area : float; width : int &gt;
+let square w = object
+  method area = Float.of_int (w * w)
+  method width = w
+end
+;;
+&gt;val square : int -&gt; &lt; area : float; width : int &gt; = &lt;fun&gt;
+</code></pre>
+</div>
+<p>A <code>square</code> has a method <code>area</code> just like a <code>shape</code>, and an additional method <code>width</code>. Still, we expect a <code>square</code> to be a <code>shape</code>, and it is. Note, however, that the coercion <code>:&gt;</code> must be explicit:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(square 10 : shape);;
+&gt;Line 1, characters 2-11:
+&gt;Error: This expression has type &lt; area : float; width : int &gt;
+&gt;       but an expression was expected of type shape
+&gt;       The second object type has no method width
+(square 10 :&gt; shape);;
+&gt;- : shape = &lt;obj&gt;
+</code></pre>
+</div>
+<p>This form of object subtyping is called <em>width</em> subtyping. Width subtyping means that an object type <em>A</em> is a subtype of <em>B</em>, if <em>A</em> has all of the methods of <em>B</em>, and possibly more. A <code>square</code> is a subtype of <code>shape</code> because it implements all of the methods of <code>shape</code>, which in this case means the <code>area</code> method.</p>
+</section>
+<section class="level3" id="depth-subtyping">
+<h3>Depth Subtyping</h3>
+<p>We can also use <em>depth</em> subtyping with objects. Depth subtyping allows us coerce an object if its individual methods could safely be coerced. So an object type <code>&lt; m: t1 &gt;</code> is a subtype of <code>&lt; m: t2 &gt;</code> if <code>t1</code> is a subtype of <code>t2</code>. <a data-primary="depth subtyping" data-type="indexterm">&nbsp;</a><a data-secondary="depth subtyping" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
+<p>First, let’s add a new shape type, <code>circle</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type circle = &lt; area : float; radius : int &gt;;;
+&gt;type circle = &lt; area : float; radius : int &gt;
+let circle r = object
+  method area = 3.14 *. (Float.of_int r) **. 2.0
+  method radius = r
+end
+;;
+&gt;val circle : int -&gt; &lt; area : float; radius : int &gt; = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Using that, let’s create a couple of objects that each have a <code>shape</code> method, one returning a shape of type <code>circle</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let coin = object
+  method shape = circle 5
+  method color = "silver"
+end
+;;
+&gt;val coin : &lt; color : string; shape : &lt; area : float; radius : int &gt; &gt; = &lt;obj&gt;
+</code></pre>
+</div>
+<p>And the other returning a shape of type <code>square</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let map = object
+  method shape = square 10
+end
+;;
+&gt;val map : &lt; shape : &lt; area : float; width : int &gt; &gt; = &lt;obj&gt;
+</code></pre>
+</div>
+<p>Both these objects have a <code>shape</code> method whose type is a subtype of the <code>shape</code> type, so they can both be coerced into the object type <code>&lt; shape : shape &gt;</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type item = &lt; shape : shape &gt;;;
+&gt;type item = &lt; shape : shape &gt;
+let items = [ (coin :&gt; item) ; (map :&gt; item) ];;
+&gt;val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="polymorphic-variant-subtyping">
+<h5>Polymorphic Variant Subtyping</h5>
+<p>Subtyping can also be used to coerce a polymorphic variant into a larger polymorphic variant type. A polymorphic variant type <em>A</em> is a subtype of <em>B</em>, if the tags of <em>A</em> are a subset of the tags of <em>B</em>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type num = [ `Int of int | `Float of float ];;
+&gt;type num = [ `Float of float | `Int of int ]
+type const = [ num | `String of string ];;
+&gt;type const = [ `Float of float | `Int of int | `String of string ]
+let n : num = `Int 3;;
+&gt;val n : num = `Int 3
+let c : const = (n :&gt; const);;
+&gt;val c : const = `Int 3
+</code></pre>
+</div>
+</section>
+</section>
+<section class="level3" id="variance">
+<h3>Variance</h3>
+<p>What about types built from object types? If a <code>square</code> is a <code>shape</code>, we expect a <code>square list</code> to be a <code>shape list</code>. OCaml does indeed allow such coercions:<a id="var" data-primary="variance" data-type="indexterm">&nbsp;</a><a id="SUBvar" data-secondary="variance and" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares: square list = [ square 10; square 20 ];;
+&gt;val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]
+let shapes: shape list = (squares :&gt; shape list);;
+&gt;val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
+</code></pre>
+</div>
+<p>Note that this relies on lists being immutable. It would not be safe to treat a <code>square array</code> as a <code>shape array</code> because it would allow you to store nonsquare shapes into what should be an array of squares. OCaml recognizes this and does not allow the coercion:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let square_array: square array = [| square 10; square 20 |];;
+&gt;val square_array : square array = [|&lt;obj&gt;; &lt;obj&gt;|]
+let shape_array: shape array = (square_array :&gt; shape array);;
+&gt;Line 1, characters 32-61:
+&gt;Error: Type square array is not a subtype of shape array
+&gt;       The second object type has no method width
+</code></pre>
+</div>
+<p>We say that <code>'a list</code> is <em>covariant</em> (in <code>'a</code>), while <code>'a array</code> is <em>invariant</em>. <a data-primary="invariance" data-type="indexterm">&nbsp;</a><a data-primary="covariance" data-type="indexterm">&nbsp;</a></p>
+<p>Subtyping function types requires a third class of variance. A function with type <code>square -&gt; string</code> cannot be used with type <code>shape -&gt; string</code> because it expects its argument to be a <code>square</code> and would not know what to do with a <code>circle</code>. However, a function with type <code>shape -&gt; string</code> can safely be used with type <code>square -&gt; string</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let shape_to_string: shape -&gt; string =
+  fun s -&gt; Printf.sprintf "Shape(%F)" s#area
+;;
+&gt;val shape_to_string : shape -&gt; string = &lt;fun&gt;
+let square_to_string: square -&gt; string =
+  (shape_to_string :&gt; square -&gt; string)
+;;
+&gt;val square_to_string : square -&gt; string = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We say that <code>'a -&gt; string</code> is <em>contravariant</em> in <code>'a</code>. In general, function types are contravariant in their arguments and covariant in their results. <a data-primary="contravariance" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="variance-annotations">
+<h5>Variance Annotations</h5>
+<p>OCaml works out the variance of a type using that type’s definition. Consider the following simple immutable <code>Either</code> type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Either = struct
+  type ('a, 'b) t =
+    | Left of 'a
+    | Right of 'b
+  let left x = Left x
+  let right x = Right x
+end
+;;
+&gt;module Either :
+&gt;  sig
+&gt;    type ('a, 'b) t = Left of 'a | Right of 'b
+&gt;    val left : 'a -&gt; ('a, 'b) t
+&gt;    val right : 'a -&gt; ('b, 'a) t
+&gt;  end
+</code></pre>
+</div>
+<p>By looking at what coercions are allowed, we can see that the type parameters of the immutable <code>Either</code> type are covariant.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let left_square = Either.left (square 40);;
+&gt;val left_square : (&lt; area : float; width : int &gt;, 'a) Either.t =
+&gt;  Either.Left &lt;obj&gt;
+(left_square :&gt; (shape,_) Either.t);;
+&gt;- : (shape, 'a) Either.t = Either.Left &lt;obj&gt;
+</code></pre>
+</div>
+<p>The story is different, however, if the definition is hidden by a signature.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Abs_either : sig
+  type ('a, 'b) t
+  val left: 'a -&gt; ('a, 'b) t
+  val right: 'b -&gt; ('a, 'b) t
+end = Either
+;;
+&gt;module Abs_either :
+&gt;  sig
+&gt;    type ('a, 'b) t
+&gt;    val left : 'a -&gt; ('a, 'b) t
+&gt;    val right : 'b -&gt; ('a, 'b) t
+&gt;  end
+</code></pre>
+</div>
+<p>In this case, OCaml is forced to assume that the type is invariant.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Abs_either.left (square 40) :&gt; (shape, _) Abs_either.t);;
+&gt;Line 1, characters 2-29:
+&gt;Error: This expression cannot be coerced to type (shape, 'b) Abs_either.t;
+&gt;       it has type (&lt; area : float; width : int &gt;, 'a) Abs_either.t
+&gt;       but is here used with type (shape, 'b) Abs_either.t
+&gt;       Type &lt; area : float; width : int &gt; is not compatible with type
+&gt;         shape = &lt; area : float &gt;
+&gt;       The second object type has no method width
+</code></pre>
+</div>
+<p>We can fix this by adding <em>variance annotations</em> to the type’s parameters in the signature: <code>+</code> for covariance or <code>-</code> for contravariance:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Var_either : sig
+  type (+'a, +'b) t
+  val left: 'a -&gt; ('a, 'b) t
+  val right: 'b -&gt; ('a, 'b) t
+end = Either
+;;
+&gt;module Var_either :
+&gt;  sig
+&gt;    type (+'a, +'b) t
+&gt;    val left : 'a -&gt; ('a, 'b) t
+&gt;    val right : 'b -&gt; ('a, 'b) t
+&gt;  end
+</code></pre>
+</div>
+<p>As you can see, this now allows the coercion once again.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(Var_either.left (square 40) :&gt; (shape, _) Var_either.t);;
+&gt;- : (shape, 'a) Var_either.t = &lt;abstr&gt;
+</code></pre>
+</div>
+</section>
+<p>For a more concrete example of variance, let’s create some stacks containing shapes by applying our <code>stack</code> function to some squares and some circles:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt;;;
+&gt;type 'a stack = &lt; pop : 'a option; push : 'a -&gt; unit &gt;
+let square_stack: square stack = stack [square 30; square 10];;
+&gt;val square_stack : square stack = &lt;obj&gt;
+let circle_stack: circle stack = stack [circle 20; circle 40];;
+&gt;val circle_stack : circle stack = &lt;obj&gt;
+</code></pre>
+</div>
+<p>If we wanted to write a function that took a list of such stacks and found the total area of their shapes, we might try:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let total_area (shape_stacks: shape stack list) =
+  let stack_area acc st =
+    let rec loop acc =
+      match st#pop with
+      | Some s -&gt; loop (acc +. s#area)
+      | None -&gt; acc
+    in
+    loop acc
+  in
+List.fold ~init:0.0 ~f:stack_area shape_stacks
+;;
+&gt;val total_area : shape stack list -&gt; float = &lt;fun&gt;
+</code></pre>
+</div>
+<p>However, when we try to apply this function to our objects, we get an error:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];;
+&gt;Line 1, characters 13-42:
+&gt;Error: Type square stack = &lt; pop : square option; push : square -&gt; unit &gt;
+&gt;       is not a subtype of
+&gt;         shape stack = &lt; pop : shape option; push : shape -&gt; unit &gt;
+&gt;       Type shape = &lt; area : float &gt; is not a subtype of
+&gt;         square = &lt; area : float; width : int &gt;
+&gt;       The first object type has no method width
+</code></pre>
+</div>
+<p>As you can see, <code>square stack</code> and <code>circle stack</code> are not subtypes of <code>shape stack</code>. The problem is with the <code>push</code> method. For <code>shape stack</code>, the <code>push</code> method takes an arbitrary <code>shape</code>. So if we could coerce a <code>square stack</code> to a <code>shape stack</code>, then it would be possible to push an arbitrary shape onto <code>square stack</code>, which would be an error.</p>
+<p>Another way of looking at this is that <code>&lt; push: 'a -&gt; unit; .. &gt;</code> is contravariant in <code>'a</code>, so <code>&lt; push: square -&gt; unit; pop: square option &gt;</code> cannot be a subtype of <code>&lt; push: shape -&gt; unit; pop: shape option &gt;</code>.</p>
+<p>Still, the <code>total_area</code> function should be fine, in principle. It doesn’t call <code>push</code>, so it isn’t making that error. To make it work, we need to use a more precise type that indicates we are not going to be using the <code>push</code> method. We define a type <code>readonly_stack</code> and confirm that we can coerce the list of <code>stack</code>s to it:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a readonly_stack = &lt; pop : 'a option &gt;;;
+&gt;type 'a readonly_stack = &lt; pop : 'a option &gt;
+let total_area (shape_stacks: shape readonly_stack list) =
+  let stack_area acc st =
+    let rec loop acc =
+      match st#pop with
+      | Some s -&gt; loop (acc +. s#area)
+      | None -&gt; acc
+    in
+    loop acc
+  in
+List.fold ~init:0.0 ~f:stack_area shape_stacks
+;;
+&gt;val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
+total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt;
+shape readonly_stack)]
+;;
+&gt;- : float = 7280.
+</code></pre>
+</div>
+<p>Aspects of this section may seem fairly complicated, but it should be pointed out that this typing <em>works</em>, and in the end, the type annotations are fairly minor. In most typed object-oriented languages, these coercions would simply not be possible. For example, in C++, a STL type <code>list&lt;T&gt;</code> is invariant in <code>T</code>, so it is simply not possible to use <code>list&lt;square&gt;</code> where <code>list&lt;shape&gt;</code> is expected (at least safely). The situation is similar in Java, although Java has an escape hatch that allows the program to fall back to dynamic typing. The situation in OCaml is much better: it works, it is statically checked, and the annotations are pretty simple.<a data-startref="var" data-type="indexterm">&nbsp;</a><a data-startref="SUBvar" data-type="indexterm">&nbsp;</a></p>
+</section>
+<section class="level3" id="narrowing">
+<h3>Narrowing</h3>
+<p>Narrowing, also called <em>down casting</em>, is the ability to coerce an object to one of its subtypes. For example, if we have a list of shapes <code>shape list</code>, we might know (for some reason) what the actual type of each shape is. Perhaps we know that all objects in the list have type <code>square</code>. In this case, <em>narrowing</em> would allow the recasting of the object from type <code>shape</code> to type <code>square</code>. Many languages support narrowing through dynamic type checking. For example, in Java, a coercion <code>(Square) x</code> is allowed if the value <code>x</code> has type <code>Square</code> or one of its subtypes; otherwise the coercion throws an exception. <a data-primary="dynamic type checking" data-type="indexterm">&nbsp;</a><a data-primary="down casting" data-type="indexterm">&nbsp;</a><a data-primary="narrowing" data-type="indexterm">&nbsp;</a><a data-secondary="narrowing and" data-primary="objects" data-type="indexterm">&nbsp;</a></p>
+<p>Narrowing is <em>not permitted</em> in OCaml. Period.</p>
+<p>Why? There are two reasonable explanations, one based on a design principle, and another technical (the technical reason is simple: it is hard to implement).</p>
+<p>The design argument is this: narrowing violates abstraction. In fact, with a structural typing system like in OCaml, narrowing would essentially provide the ability to enumerate the methods in an object. To check whether an object <code>obj</code> has some method <code>foo : int</code>, one would attempt a coercion <code>(obj :&gt; &lt; foo : int &gt;)</code>.</p>
+<p>More pragmatically, narrowing leads to poor object-oriented style. Consider the following Java code, which returns the name of a shape object:</p>
+<div class="highlight">
+<pre><code class="language-java">String GetShapeName(Shape s) {
+  if (s instanceof Square) {
+    return "Square";
+  } else if (s instanceof Circle) {
+    return "Circle";
+  } else {
+    return "Other";
+  }
+}</code></pre>
+</div>
+<p>Most programmers would consider this code to be “wrong.” Instead of performing a case analysis on the type of object, it would be better to define a method to return the name of the shape. Instead of calling <code>GetShapeName(s)</code>, we should call <code>s.Name()</code> instead.</p>
+<p>However, the situation is not always so obvious. The following code checks whether an array of shapes looks like a “barbell,” composed of two <code>Circle</code> objects separated by a <code>Line</code>, where the circles have the same radius:</p>
+<div class="highlight">
+<pre><code class="language-java">boolean IsBarbell(Shape[] s) {
+  return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
+    (s[1] instanceof Line) &amp;&amp; (s[2] instanceof Circle) &amp;&amp;
+        ((Circle) s[0]).radius() == ((Circle) s[2]).radius();
+}</code></pre>
+</div>
+<p>In this case, it is much less clear how to augment the <code>Shape</code> class to support this kind of pattern analysis. It is also not obvious that object-oriented programming is well-suited for this situation. Pattern matching seems like a better fit:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = Circle of { radius : int } | Line of { length: int };;
+&gt;type shape = Circle of { radius : int; } | Line of { length : int; }
+let is_barbell = function
+| [Circle {radius=r1}; Line _; Circle {radius=r2}] when r1 = r2 -&gt; true
+| _ -&gt; false
+;;
+&gt;val is_barbell : shape list -&gt; bool = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Regardless, there is a solution if you find yourself in this situation, which is to augment the classes with variants. You can define a method <code>variant</code> that injects the actual object into a variant type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; variant : repr &gt;
+and circle = &lt; variant : repr; radius : int &gt;
+and line = &lt; variant : repr; length : int &gt;
+and repr =
+ | Circle of circle
+ | Line of line;;
+;;
+&gt;type shape = &lt; variant : repr &gt;
+&gt;and circle = &lt; radius : int; variant : repr &gt;
+&gt;and line = &lt; length : int; variant : repr &gt;
+&gt;and repr = Circle of circle | Line of line
+let is_barbell = function
+| [s1; s2; s3] -&gt;
+   (match s1#variant, s2#variant, s3#variant with
+    | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -&gt; true
+    | _ -&gt; false)
+| _ -&gt; false;;
+;;
+&gt;val is_barbell : &lt; variant : repr; .. &gt; list -&gt; bool = &lt;fun&gt;
+</code></pre>
+</div>
+<p>This pattern works, but it has drawbacks. In particular, the recursive type definition should make it clear that this pattern is essentially equivalent to using variants, and that objects do not provide much value here.</p>
+</section>
+<section class="level3" id="subtyping-vs.-row-polymorphism">
+<h3>Subtyping Versus Row Polymorphism</h3>
+<p>There is considerable overlap between subtyping and row polymorphism. Both mechanisms allow you to write functions that can be applied to objects of different types. In these cases, row polymorphism is usually preferred over subtyping because it does not require explicit coercions, and it preserves more type information, allowing functions like the following: <a data-secondary="row polymorphism" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-primary="row polymorphism" data-type="indexterm">&nbsp;</a><a data-secondary="vs.&nbsp;row polymorphism" data-primary="subtyping" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let remove_large l =
+List.filter ~f:(fun s -&gt; Float.(s#area &lt;= 100.)) l
+;;
+&gt;val remove_large : (&lt; area : float; .. &gt; as 'a) list -&gt; 'a list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The return type of this function is built from the open object type of its argument, preserving any additional methods that it may have:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let squares : &lt; area : float; width : int &gt; list =
+[square 5; square 15; square 10]
+;;
+&gt;val squares : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;; &lt;obj&gt;]
+remove_large squares;;
+&gt;- : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;]
+</code></pre>
+</div>
+<p>Writing a similar function with a closed type and applying it using subtyping does not preserve the methods of the argument: the returned object is only known to have an <code>area</code> method:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let remove_large (l: &lt; area : float &gt; list) =
+List.filter ~f:(fun s -&gt; Float.(s#area &lt;= 100.)) l
+;;
+&gt;val remove_large : &lt; area : float &gt; list -&gt; &lt; area : float &gt; list = &lt;fun&gt;
+remove_large (squares :&gt; &lt; area : float &gt; list );;
+&gt;- : &lt; area : float &gt; list = [&lt;obj&gt;; &lt;obj&gt;]
+</code></pre>
+</div>
+<p>However, there are some situations where we cannot use row polymorphism. In particular, row polymorphism cannot be used to place different types of object in the same container. For example, lists of heterogeneous elements cannot be created using row polymorphism:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: &lt; area: float; ..&gt; list = [square 10; circle 30];;
+&gt;Line 1, characters 50-59:
+&gt;Error: This expression has type &lt; area : float; radius : int &gt;
+&gt;       but an expression was expected of type &lt; area : float; width : int &gt;
+&gt;       The second object type has no method radius
+</code></pre>
+</div>
+<p>Similarly, we cannot use row polymorphism to store different types of object in the same reference:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let shape_ref: &lt; area: float; ..&gt; ref = ref (square 40);;
+&gt;val shape_ref : &lt; area : float; width : int &gt; ref =
+&gt;  {Base.Ref.contents = &lt;obj&gt;}
+shape_ref := circle 20;;
+&gt;Line 1, characters 14-23:
+&gt;Error: This expression has type &lt; area : float; radius : int &gt;
+&gt;       but an expression was expected of type &lt; area : float; width : int &gt;
+&gt;       The second object type has no method radius
+</code></pre>
+</div>
+<p>In both these cases we must use subtyping:<a data-startref="OBsub" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)];;
+&gt;val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]
+let shape_ref: shape ref = ref (square 40 :&gt; shape);;
+&gt;val shape_ref : shape ref = {Base.Ref.contents = &lt;obj&gt;}
+shape_ref := (circle 20 :&gt; shape);;
+&gt;- : unit = ()
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="production-note">
+<h5>Production Note</h5>
+<p>This chapter contains significant contributions from Leo White.</p>
+</section>
+</section>
+</section>
+</section>
+</article></div><a href="classes.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 12</small>Classes</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

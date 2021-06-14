@@ -1,0 +1,870 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Variants - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="variants">
+<h1>Variants</h1>
+<p>Variant types are one of the most useful features of OCaml and also one of the most unusual. They let you represent data that may take on multiple different forms, where each form is marked by an explicit tag. As we’ll see, when combined with pattern matching, variants give you a powerful way of representing complex data and of organizing the case-analysis on that information. <a data-secondary="usefulness of" data-primary="variant types" data-type="indexterm">&nbsp;</a> <a data-secondary="variant types" data-primary="datatypes" data-type="indexterm">&nbsp;</a></p>
+<p>The basic syntax of a variant type declaration is as follows: <a data-secondary="basic syntax of" data-primary="variant types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-clike">type &lt;variant&gt; =
+  | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
+  | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
+  | ...</code></pre>
+</div>
+<p>Each row essentially represents a case of the variant. Each case has an associated tag and may optionally have a sequence of fields, where each field has a specified type.</p>
+<p>Let’s consider a concrete example of how variants can be useful. Most UNIX-like operating systems support terminals as a fundamental, text-based user interface. Almost all of these terminals support a set of eight basic colors.</p>
+<p>Those colors can be naturally represented as a variant. Each color is declared as a simple tag, with pipes used to separate the different cases. Note that variant tags must be capitalized.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+open Stdio
+type basic_color =
+  | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White</code></pre>
+</div>
+<p>As we show below, the variant tags introduced by the definition of <code>basic_color</code> can be used for constructing values of that type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Cyan;;
+&gt;- : basic_color = Cyan
+[Blue; Magenta; Red];;
+&gt;- : basic_color list = [Blue; Magenta; Red]
+</code></pre>
+</div>
+<p>The following function uses pattern matching to convert each of these to the corresponding integer code that is used for communicating these colors to the terminal.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let basic_color_to_int = function
+  | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3
+  | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7
+;;
+&gt;val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;
+List.map ~f:basic_color_to_int [Blue;Red];;
+&gt;- : int list = [4; 1]
+</code></pre>
+</div>
+<p>We know that the above function handles every color in <code>basic_color</code> because the compiler would have warned us if we’d missed one:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let incomplete_color_to_int = function
+  | Black -&gt; 0 | Red -&gt; 1 | White -&gt; 7
+;;
+&gt;Lines 1-2, characters 31-41:
+&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;(Green|Yellow|Blue|Magenta|Cyan)
+&gt;val incomplete_color_to_int : basic_color -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>In any case, using the correct function, we can generate escape codes to change the color of a given string displayed in a terminal.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_by_number number text =
+Printf.sprintf "\027[38;5;%dm%s\027[0m" number text
+;;
+&gt;val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;
+let blue = color_by_number (basic_color_to_int Blue) "Blue";;
+&gt;val blue : string = "\027[38;5;4mBlue\027[0m"
+printf "Hello %s World!\n" blue;;
+&gt;Hello Blue World!
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>On most terminals, that word “Blue” will be rendered in blue.</p>
+<p>In this example, the cases of the variant are simple tags with no associated data. This is substantively the same as the enumerations found in languages like C and Java. But as we’ll see, variants can do considerably more than represent simple enumerations.</p>
+<p>As it happens, an enumeration isn’t enough to effectively describe the full set of colors that a modern terminal can display. Many terminals, including the venerable <code>xterm</code>, support 256 different colors, broken up into the following groups:</p>
+<ul>
+<li><p>The eight basic colors, in regular and bold versions</p></li>
+<li><p>A 6 × 6 × 6 RGB color cube</p></li>
+<li><p>A 24-level grayscale ramp</p></li>
+</ul>
+<p>We’ll also represent this more complicated color space as a variant, but this time, the different tags will have arguments that describe the data available in each case. Note that variants can have multiple arguments, which are separated by <code>*</code>s.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type weight = Regular | Bold
+type color =
+  | Basic of basic_color * weight (* basic colors, regular and bold *)
+  | RGB   of int * int * int      (* 6x6x6 color cube *)
+  | Gray  of int                  (* 24 grayscale levels *)</code></pre>
+</div>
+<p>As before, we can use these introduced tags to construct values of our newly defined type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[RGB (250,70,70); Basic (Green, Regular)];;
+&gt;- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
+</code></pre>
+</div>
+<p>And again, we’ll use pattern matching to convert a color to a corresponding integer. In this case, the pattern matching does more than separate out the different cases; it also allows us to extract the data associated with each tag:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_to_int = function
+  | Basic (basic_color,weight) -&gt;
+    let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+    base + basic_color_to_int basic_color
+  | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | Gray i -&gt; 232 + i
+;;
+&gt;val color_to_int : color -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Now, we can print text using the full set of available colors:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_print color s =
+printf "%s\n" (color_by_number (color_to_int color) s)
+;;
+&gt;val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;
+color_print (Basic (Red,Bold)) "A bold red!";;
+&gt;A bold red!
+&gt;- : unit = ()
+color_print (Gray 4) "A muted gray...";;
+&gt;A muted gray...
+&gt;- : unit = ()
+</code></pre>
+</div>
+<section data-type="note" class="level5 allow_break" id="variants-tuples-and-parens">
+<h5>Variants, tuples and parens</h5>
+<p>Variants with multiple arguments look an awful lot like tuples. Consider the following example of a value of the type <code>color</code> we defined earlier.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">RGB (200,0,200);;
+&gt;- : color = RGB (200, 0, 200)
+</code></pre>
+</div>
+<p>It really looks like we’ve created a 3-tuple and wrapped it with the <code>RGB</code> constructor. But that’s not what’s really going on, as you can see if we create a tuple first and then place it inside the <code>RGB</code> constructor.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let purple = (200,0,200);;
+&gt;val purple : int * int * int = (200, 0, 200)
+RGB purple;;
+&gt;Line 1, characters 1-11:
+&gt;Error: The constructor RGB expects 3 argument(s),
+&gt;       but is applied here to 1 argument(s)
+</code></pre>
+</div>
+<p>We can also create variants that explicitly contain tuples, like this one.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type tupled = Tupled of (int * int);;
+&gt;type tupled = Tupled of (int * int)
+</code></pre>
+</div>
+<p>The syntactic difference is unfortunately quite subtle, coming down to the extra set of parens around the arguments. But having defined it this way, we can now take the tuple in and out freely.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let of_tuple x = Tupled x;;
+&gt;val of_tuple : int * int -&gt; tupled = &lt;fun&gt;
+let to_tuple (Tupled x) = x;;
+&gt;val to_tuple : tupled -&gt; int * int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>If, on the other hand, we define a variant without the parens, then we get the same behavior we got with the <code>RGB</code> constructor.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type untupled = Untupled of int * int;;
+&gt;type untupled = Untupled of int * int
+let of_tuple x = Untupled x;;
+&gt;Line 1, characters 18-28:
+&gt;Error: The constructor Untupled expects 2 argument(s),
+&gt;       but is applied here to 1 argument(s)
+let to_tuple (Untupled x) = x;;
+&gt;Line 1, characters 14-26:
+&gt;Error: The constructor Untupled expects 2 argument(s),
+&gt;       but is applied here to 1 argument(s)
+</code></pre>
+</div>
+<p>Note that, while we can’t just grab the tuple as a whole from this type, we can achieve more or less the same ends by explicitly deconstructing and reconstructing the data we need.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let of_tuple (x,y) = Untupled (x,y);;
+&gt;val of_tuple : int * int -&gt; untupled = &lt;fun&gt;
+let to_tuple (Untupled (x,y)) = (x,y);;
+&gt;val to_tuple : untupled -&gt; int * int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The differences between a multi-argument variant and a variant containing a tuple are mostly about performance. A multi-argument variant is a single allocated block in memory, while a variant containing a tuple requires an extra heap-allocated block for the tuple. You can learn more about OCaml’s memory representation in <a data-type="xref" href="runtime-memory-layout.html">Chapter 20, Memory Representation of Values</a>.</p>
+</section>
+<section class="level2" id="catch-all-cases-and-refactoring">
+<h2>Catch-All Cases and Refactoring</h2>
+<p>OCaml’s type system can act as a refactoring tool, warning you of places where your code needs to be updated to match an interface change. This is particularly valuable in the context of variants. <a data-secondary="catch-all cases" data-primary="pattern matching" data-type="indexterm">&nbsp;</a> <a data-primary="refactoring" data-type="indexterm">&nbsp;</a> <a data-primary="exhaustion checks" data-type="indexterm">&nbsp;</a></p>
+<p>Consider what would happen if we were to change the definition of <code>color</code> to the following:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type color =
+  | Basic of basic_color     (* basic colors *)
+  | Bold  of basic_color     (* bold basic colors *)
+  | RGB   of int * int * int (* 6x6x6 color cube *)
+  | Gray  of int             (* 24 grayscale levels *)</code></pre>
+</div>
+<p>We’ve essentially broken out the <code>Basic</code> case into two cases, <code>Basic</code> and <code>Bold</code>, and <code>Basic</code> has changed from having two arguments to one. <code>color_to_int</code> as we wrote it still expects the old structure of the variant, and if we try to compile that same code again, the compiler will notice the discrepancy:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_to_int = function
+  | Basic (basic_color,weight) -&gt;
+    let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+    base + basic_color_to_int basic_color
+  | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | Gray i -&gt; 232 + i
+;;
+&gt;Line 2, characters 13-33:
+&gt;Error: This pattern matches values of type 'a * 'b
+&gt;       but a pattern was expected which matches values of type basic_color
+</code></pre>
+</div>
+<p>Here, the compiler is complaining that the <code>Basic</code> tag is used with the wrong number of arguments. If we fix that, however, the compiler will flag a second problem, which is that we haven’t handled the new <code>Bold</code> tag:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_to_int = function
+  | Basic basic_color -&gt; basic_color_to_int basic_color
+  | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | Gray i -&gt; 232 + i
+;;
+&gt;Lines 1-4, characters 20-24:
+&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;Bold _
+&gt;val color_to_int : color -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Fixing this now leads us to the correct implementation:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let color_to_int = function
+  | Basic basic_color -&gt; basic_color_to_int basic_color
+  | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color
+  | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | Gray i -&gt; 232 + i
+;;
+&gt;val color_to_int : color -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>As we’ve seen, the type errors identified the things that needed to be fixed to complete the refactoring of the code. This is fantastically useful, but for it to work well and reliably, you need to write your code in a way that maximizes the compiler’s chances of helping you find the bugs. To this end, a useful rule of thumb is to avoid catch-all cases in pattern matches.</p>
+<p>Here’s an example that illustrates how catch-all cases interact with exhaustion checks. Imagine we wanted a version of <code>color_to_int</code> that works on older terminals by rendering the first 16 colors (the eight <code>basic_color</code>s in regular and bold) in the normal way, but renders everything else as white. We might have written the function as follows.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let oldschool_color_to_int = function
+  | Basic (basic_color,weight) -&gt;
+    let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in
+    base + basic_color_to_int basic_color
+  | _ -&gt; basic_color_to_int White
+;;
+&gt;val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>If we then applied the same fix we did above, we would have ended up with this.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let oldschool_color_to_int = function
+  | Basic basic_color -&gt; basic_color_to_int basic_color
+  | _ -&gt; basic_color_to_int White
+;;
+&gt;val oldschool_color_to_int : color -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Because of the catch-all case, we’ll no longer be warned about missing the <code>Bold</code> case. That’s why you should beware of catch-all cases: they suppress exhaustiveness checking.</p>
+</section>
+<section class="level2" id="combining-records-and-variants">
+<h2>Combining Records and Variants</h2>
+<p>The term <em>algebraic data types</em> is often used to describe a collection of types that includes variants, records, and tuples. Algebraic data types act as a peculiarly useful and powerful language for describing data. At the heart of their utility is the fact that they combine two different kinds of types: <em>product types</em>, like tuples and records, which combine multiple different types together and are mathematically similar to Cartesian products; and <em>sum types</em>, like variants, which let you combine multiple different possibilities into one type, and are mathematically similar to disjoint unions. <a data-primary="sum types" data-type="indexterm">&nbsp;</a> <a data-primary="product types" data-type="indexterm">&nbsp;</a> <a data-primary="algebraic data types" data-type="indexterm">&nbsp;</a> <a data-secondary="and records" data-primary="variants" data-type="indexterm">&nbsp;</a></p>
+<p>Algebraic data types gain much of their power from the ability to construct layered combinations of sums and products. Let’s see what we can achieve with this by reiterating the <code>Log_entry</code> message type that was described in <a data-type="xref" href="records.html#records">Chapter 5, Records</a>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Time_ns = Core_kernel.Time_ns
+module Log_entry = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      important: bool;
+      message: string;
+    }
+end</code></pre>
+</div>
+<p>This record type combines multiple pieces of data into a single value. In particular, a single <code>Log_entry.t</code> has a <code>session_id</code> <em>and</em> a <code>time</code> <em>and</em> an <code>important</code> flag <em>and</em> a <code>message</code>. More generally, you can think of record types as conjunctions. Variants, on the other hand, are disjunctions, letting you represent multiple possibilities. To construct an example of where this is useful, we’ll first write out the other message types that came along-side <code>Log_entry</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Heartbeat = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      status_message: string;
+    }
+end
+module Logon = struct
+  type t =
+    { session_id: string;
+      time: Time_ns.t;
+      user: string;
+      credentials: string;
+    }
+end</code></pre>
+</div>
+<p>A variant comes in handy when we want to represent values that could be any of these three types. The <code>client_message</code> type below lets you do just that.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type client_message = | Logon of Logon.t
+                      | Heartbeat of Heartbeat.t
+                      | Log_entry of Log_entry.t</code></pre>
+</div>
+<p>In particular, a <code>client_message</code> is a <code>Logon</code> <em>or</em> a <code>Heartbeat</code> <em>or</em> a <code>Log_entry</code>. If we want to write code that processes messages generically, rather than code specialized to a fixed message type, we need something like <code>client_message</code> to act as one overarching type for the different possible messages. We can then match on the <code>client_message</code> to determine the type of the particular message being handled.</p>
+<p>You can increase the precision of your types by using variants to represent differences between different cases, and records to represent shared structure. Consider the following function that takes a list of <code>client_message</code>s and returns all messages generated by a given user. The code in question is implemented by folding over the list of messages, where the accumulator is a pair of:</p>
+<ul>
+<li>The set of session identifiers for the user that have been seen thus far</li>
+<li>The set of messages so far that are associated with the user</li>
+</ul>
+<p>Here’s the concrete code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let messages_for_user user messages =
+  let (user_messages,_) =
+    List.fold messages ~init:([], Set.empty (module String))
+      ~f:(fun ((messages,user_sessions) as acc) message -&gt;
+        match message with
+        | Logon m -&gt;
+          if String.(m.user = user) then
+            (message::messages, Set.add user_sessions m.session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ -&gt;
+          let session_id = match message with
+            | Logon     m -&gt; m.session_id
+            | Heartbeat m -&gt; m.session_id
+            | Log_entry m -&gt; m.session_id
+          in
+          if Set.mem user_sessions session_id then
+            (message::messages,user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+;;
+&gt;val messages_for_user : string -&gt; client_message list -&gt; client_message list =
+&gt;  &lt;fun&gt;
+</code></pre>
+</div>
+<p>We take advantage of the fact that the type of the record <code>m</code> is known in the above code, so we don’t have to qualify the record fields by the module they come from. <em>e.g.</em>, we write <code>m.user</code> instead of <code>m.Logon.user</code>.</p>
+<p>One annoyance of the above code is that the logic for determining the session ID is somewhat repetitive, contemplating each of the possible message types (including the <code>Logon</code> case, which isn’t actually possible at that point in the code) and extracting the session ID in each case. This per-message-type handling seems unnecessary, since the session ID works the same way for all of message types.</p>
+<p>We can improve the code by refactoring our types to explicitly reflect the information that’s shared between the different messages. The first step is to cut down the definitions of each per-message record to contain just the information unique to that record:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Log_entry = struct
+  type t = { important: bool;
+             message: string;
+           }
+end
+module Heartbeat = struct
+  type t = { status_message: string; }
+end
+module Logon = struct
+  type t = { user: string;
+             credentials: string;
+           }
+end</code></pre>
+</div>
+<p>We can then define a variant type that combines these types:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type details =
+  | Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t</code></pre>
+</div>
+<p>Separately, we need a record that contains the fields that are common across all messages:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Common = struct
+  type t = { session_id: string;
+             time: Time_ns.t;
+           }
+end</code></pre>
+</div>
+<p>A full message can then be represented as a pair of a <code>Common.t</code> and a <code>details</code>. Using this, we can rewrite our preceding example as follows. Note that we add extra type annotations so that OCaml recognizes the record fields correctly. Otherwise, we’d need to qualify them explicitly.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let messages_for_user user (messages : (Common.t * details) list) =
+  let (user_messages,_) =
+    List.fold messages ~init:([],Set.empty (module String))
+      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) -&gt;
+        match details with
+        | Logon m -&gt;
+          if String.(=) m.user user then
+            (message::messages, Set.add user_sessions common.session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ -&gt;
+          if Set.mem user_sessions common.session_id then
+            (message::messages, user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+;;
+&gt;val messages_for_user :
+&gt;  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>As you can see, the code for extracting the session ID has been replaced with the simple expression <code>common.session_id</code>.</p>
+<p>In addition, this design allows us to grab the specific message and dispatch code to handle just that message type. In particular, while we use the type <code>Common.t * details</code> to represent an arbitrary message, we can use <code>Common.t * Logon.t</code> to represent a logon message. Thus, if we had functions for handling individual message types, we could write a dispatch function as follows:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let handle_message server_state ((common:Common.t), details) =
+  match details with
+  | Log_entry m -&gt; handle_log_entry server_state (common,m)
+  | Logon     m -&gt; handle_logon     server_state (common,m)
+  | Heartbeat m -&gt; handle_heartbeat server_state (common,m)
+;;
+&gt;val handle_message : server_state -&gt; Common.t * details -&gt; unit = &lt;fun&gt;
+</code></pre>
+</div>
+<p>And it’s explicit at the type level that <code>handle_log_entry</code> sees only <code>Log_entry</code> messages, <code>handle_logon</code> sees only <code>Logon</code> messages, etc.</p>
+<section class="level3" id="embedded-records">
+<h3>Embedded records</h3>
+<p>If we don’t need to be able to pass the record types separately from the variant, then OCaml allows us to embed the records directly into the variant.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type details =
+  | Logon     of { user: string; credentials: string; }
+  | Heartbeat of { status_message: string; }
+  | Log_entry of { important: bool; message: string; }</code></pre>
+</div>
+<p>Even though the type is different, we can write <code>messages_for_user</code> in essentially the same way we did before.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let messages_for_user user (messages : (Common.t * details) list) =
+  let (user_messages,_) =
+    List.fold messages ~init:([],Set.empty (module String))
+      ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) -&gt;
+        match details with
+        | Logon m -&gt;
+          if String.(=) m.user user then
+            (message::messages, Set.add user_sessions common.session_id)
+          else acc
+        | Heartbeat _ | Log_entry _ -&gt;
+          if Set.mem user_sessions common.session_id then
+            (message::messages, user_sessions)
+          else acc
+      )
+  in
+  List.rev user_messages
+;;
+&gt;val messages_for_user :
+&gt;  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Variants with inline records are both more concise and more efficient than having variants containing references to free-standing record types, because they don’t require a separate allocated object for the contents of the variant.</p>
+<p>The main downside is the obvious one, which is that an inline record can’t be treated as its own free-standing object. And, as you can see below, OCaml will reject code that tries to do so.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let get_logon_contents = function
+  | Logon m -&gt; Some m
+  | _ -&gt; None
+;;
+&gt;Line 2, characters 23-24:
+&gt;Error: This form is not allowed as the type of the inlined record could escape.
+</code></pre>
+</div>
+</section>
+</section>
+<section class="level2" id="variants-and-recursive-data-structures">
+<h2>Variants and Recursive Data Structures</h2>
+<p>Another common application of variants is to represent tree-like recursive data structures. We’ll show how this can be done by walking through the design of a simple Boolean expression language. Such a language can be useful anywhere you need to specify filters, which are used in everything from packet analyzers to mail clients. <a data-primary="recursive data structures" data-type="indexterm">&nbsp;</a> <a data-secondary="recursive" data-primary="data structures" data-type="indexterm">&nbsp;</a> <a data-secondary="and recursive data structures" data-primary="variant types" data-type="indexterm">&nbsp;</a></p>
+<p>An expression in this language will be defined by the variant <code>expr</code>, with one tag for each kind of expression we want to support:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type 'a expr =
+  | Base  of 'a
+  | Const of bool
+  | And   of 'a expr list
+  | Or    of 'a expr list
+  | Not   of 'a expr</code></pre>
+</div>
+<p>Note that the definition of the type <code>expr</code> is recursive, meaning that a <code>expr</code> may contain other <code>expr</code>s. Also, <code>expr</code> is parameterized by a polymorphic type <code>'a</code> which is used for specifying the type of the value that goes under the <code>Base</code> tag.</p>
+<p>The purpose of each tag is pretty straightforward. <code>And</code>, <code>Or</code>, and <code>Not</code> are the basic operators for building up Boolean expressions, and <code>Const</code> lets you enter the constants <code>true</code> and <code>false</code>.</p>
+<p>The <code>Base</code> tag is what allows you to tie the <code>expr</code> to your application, by letting you specify an element of some base predicate type, whose truth or falsehood is determined by your application. If you were writing a filter language for an email processor, your base predicates might specify the tests you would run against an email, as in the following example:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type mail_field = To | From | CC | Date | Subject
+type mail_predicate = { field: mail_field;
+                        contains: string }</code></pre>
+</div>
+<p>Using the preceding code, we can construct a simple expression with <code>mail_predicate</code> as its base predicate:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let test field contains = Base { field; contains };;
+&gt;val test : mail_field -&gt; string -&gt; mail_predicate expr = &lt;fun&gt;
+And [ Or [ test To "doligez"; test CC "doligez" ];
+      test Subject "runtime";
+    ]
+;;
+&gt;- : mail_predicate expr =
+&gt;And
+&gt; [Or
+&gt;   [Base {field = To; contains = "doligez"};
+&gt;    Base {field = CC; contains = "doligez"}];
+&gt;  Base {field = Subject; contains = "runtime"}]
+</code></pre>
+</div>
+<p>Being able to construct such expressions isn’t enough; we also need to be able to evaluate them. Here’s a function for doing just that:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec eval expr base_eval =
+  (* a shortcut, so we don't need to repeatedly pass [base_eval]
+     explicitly to [eval] *)
+  let eval' expr = eval expr base_eval in
+  match expr with
+  | Base  base  -&gt; base_eval base
+  | Const bool  -&gt; bool
+  | And   exprs -&gt; List.for_all exprs ~f:eval'
+  | Or    exprs -&gt; List.exists  exprs ~f:eval'
+  | Not   expr  -&gt; not (eval' expr)
+;;
+&gt;val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The structure of the code is pretty straightforward—we’re just pattern matching over the structure of the data, doing the appropriate calculation based on which tag we see. To use this evaluator on a concrete example, we just need to write the <code>base_eval</code> function, which is capable of evaluating a base predicate.</p>
+<p>Another useful operation on expressions is <em>simplification</em>, which is the process of taking a boolean expression and reducing it to an equivalent one that is smaller. First, we’ll build a few simplifying construction functions that mirror the tags of an <code>expr</code>.</p>
+<p>The <code>and_</code> function below does a few things:</p>
+<ul>
+<li>Reduces the entire expression to the constant <code>false</code> if any of the arms of the and are themselves are <code>false</code>.</li>
+<li>Drops any arms of the <code>And</code> that there the constant <code>true</code>.</li>
+<li>Drops the <code>And</code> if it only has one arm.</li>
+<li>If the <code>And</code> has no arms, then reduces it to <code>Const true</code>.</li>
+</ul>
+<p>The code is below.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let and_ l =
+  if List.exists l ~f:(function Const false -&gt; true | _ -&gt; false)
+  then Const false
+  else
+    match List.filter l ~f:(function Const true -&gt; false | _ -&gt; true) with
+    | [] -&gt; Const true
+    | [ x ] -&gt; x
+    | l -&gt; And l
+;;
+&gt;val and_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;
+</code></pre>
+</div>
+<p><code>Or</code> is the dual of <code>And</code>, and as you can see, the code for <code>or_</code> follows a similar pattern as that for <code>and_</code>, mostly reversing the role of <code>true</code> and <code>false</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let or_ l =
+  if List.exists l ~f:(function Const true -&gt; true | _ -&gt; false) then Const true
+  else
+    match List.filter l ~f:(function Const false -&gt; false | _ -&gt; true) with
+    | [] -&gt; Const false
+    | [x] -&gt; x
+    | l -&gt; Or l
+;;
+&gt;val or_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Finally, <code>not_</code> just has special handling for constants, applying the ordinary boolean negation function to them.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let not_ = function
+  | Const b -&gt; Const (not b)
+  | e -&gt; Not e
+;;
+&gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can now write a simplification routine that is based on the preceding functions. Note that this function is recursive, in that it applies all of these simplifications in a bottom-up way across the entire expression.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec simplify = function
+  | Base _ | Const _ as x -&gt; x
+  | And l -&gt; and_ (List.map ~f:simplify l)
+  | Or l  -&gt; or_  (List.map ~f:simplify l)
+  | Not e -&gt; not_ (simplify e)
+;;
+&gt;val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can now apply this to a Boolean expression and see how good a job it does at simplifying it.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">simplify (Not (And [ Or [Base "it's snowing"; Const true];
+Base "it's raining"]))
+;;
+&gt;- : string expr = Not (Base "it's raining")
+</code></pre>
+</div>
+<p>Here, it correctly converted the <code>Or</code> branch to <code>Const true</code> and then eliminated the <code>And</code> entirely, since the <code>And</code> then had only one nontrivial component.</p>
+<p>There are some simplifications it misses, however. In particular, see what happens if we add a double negation in.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">simplify (Not (And [ Or [Base "it's snowing"; Const true];
+Not (Not (Base "it's raining"))]))
+;;
+&gt;- : string expr = Not (Not (Not (Base "it's raining")))
+</code></pre>
+</div>
+<p>It fails to remove the double negation, and it’s easy to see why. The <code>not_</code> function has a catch-all case, so it ignores everything but the one case it explicitly considers, that of the negation of a constant. Catch-all cases are generally a bad idea, and if we make the code more explicit, we see that the missing of the double negation is more obvious:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let not_ = function
+  | Const b -&gt; Const (not b)
+  | (Base _ | And _ | Or _ | Not _) as e -&gt; Not e
+;;
+&gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can of course fix this by simply adding an explicit case for double negation:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let not_ = function
+  | Const b -&gt; Const (not b)
+  | Not e -&gt; e
+  | (Base _ | And _ | Or _ ) as e -&gt; Not e
+;;
+&gt;val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The example of a Boolean expression language is more than a toy. There’s a module very much in this spirit in <code>Core_kernel</code> called <code>Blang</code> (short for “Boolean language”), and it gets a lot of practical use in a variety of applications. The simplification algorithm in particular is useful when you want to use it to specialize the evaluation of expressions for which the evaluation of some of the base predicates is already known.</p>
+<p>More generally, using variants to build recursive data structures is a common technique, and shows up everywhere from designing little languages to building complex data structures.</p>
+</section>
+<section class="level2" id="polymorphic-variants">
+<h2>Polymorphic Variants</h2>
+<p>In addition to the ordinary variants we’ve seen so far, OCaml also supports so-called <em>polymorphic variants</em>. As we’ll see, polymorphic variants are more flexible and syntactically more lightweight than ordinary variants, but that extra power comes at a cost. <a data-secondary="basic syntax of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a> <a data-secondary="polymorphic" data-primary="variant types" data-type="indexterm">&nbsp;</a></p>
+<p>Syntactically, polymorphic variants are distinguished from ordinary variants by the leading backtick. And unlike ordinary variants, polymorphic variants can be used without an explicit type declaration:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let three = `Int 3;;
+&gt;val three : [&gt; `Int of int ] = `Int 3
+let four = `Float 4.;;
+&gt;val four : [&gt; `Float of float ] = `Float 4.
+let nan = `Not_a_number;;
+&gt;val nan : [&gt; `Not_a_number ] = `Not_a_number
+[three; four; nan];;
+&gt;- : [&gt; `Float of float | `Int of int | `Not_a_number ] list =
+&gt;[`Int 3; `Float 4.; `Not_a_number]
+</code></pre>
+</div>
+<p>As you can see, polymorphic variant types are inferred automatically, and when we combine variants with different tags, the compiler infers a new type that knows about all of those tags. Note that in the preceding example, the tag name (e.g., <code>`Int</code>) matches the type name (<code>int</code>). This is a common convention in OCaml. <a data-secondary="automatic inference of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
+<p>The type system will complain if it sees incompatible uses of the same tag:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let five = `Int "five";;
+&gt;val five : [&gt; `Int of string ] = `Int "five"
+[three; four; five];;
+&gt;Line 1, characters 15-19:
+&gt;Error: This expression has type [&gt; `Int of string ]
+&gt;       but an expression was expected of type
+&gt;         [&gt; `Float of float | `Int of int ]
+&gt;       Types for tag `Int are incompatible
+</code></pre>
+</div>
+<p>The <code>&gt;</code> at the beginning of the variant types above is critical because it marks the types as being open to combination with other variant types. We can read the type <code>[&gt; `Float of float | `Int of int]</code> as describing a variant whose tags include <code>`Float of float</code> and <code>`Int of int</code>, but may include more tags as well. In other words, you can roughly translate <code>&gt;</code> to mean: “these tags or more.”</p>
+<p>OCaml will in some cases infer a variant type with <code>&lt;</code>, to indicate “these tags or less,” as in the following example:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive = function
+  | `Int   x -&gt; x &gt; 0
+  | `Float x -&gt; Float.(x &gt; 0.)
+;;
+&gt;val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The <code>&lt;</code> is there because <code>is_positive</code> has no way of dealing with values that have tags other than <code>`Float of float</code> or <code>`Int of int</code>.</p>
+<p>We can think of these <code>&lt;</code> and <code>&gt;</code> markers as indications of upper and lower bounds on the tags involved. If the same set of tags are both an upper and a lower bound, we end up with an <em>exact</em> polymorphic variant type, which has neither marker. For example:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let exact = List.filter ~f:is_positive [three;four];;
+&gt;val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
+</code></pre>
+</div>
+<p>Perhaps surprisingly, we can also create polymorphic variant types that have different upper and lower bounds. Note that <code>Ok</code> and <code>Error</code> in the following example come from the <code>Result.t</code> type from <code>Base</code>. <a data-secondary="upper and lower bounds of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive = function
+  | `Int   x -&gt; Ok (x &gt; 0)
+  | `Float x -&gt; Ok Float.(x &gt; 0.)
+  | `Not_a_number -&gt; Error "not a number"
+;;
+&gt;val is_positive :
+&gt;  [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt; (bool, string) result =
+&gt;  &lt;fun&gt;
+List.filter [three; four] ~f:(fun x -&gt;
+match is_positive x with Error _ -&gt; false | Ok b -&gt; b)
+;;
+&gt;- : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =
+&gt;[`Int 3; `Float 4.]
+</code></pre>
+</div>
+<p>Here, the inferred type states that the tags can be no more than <code>`Float</code>, <code>`Int</code>, and <code>`Not_a_number</code>, and must contain at least <code>`Float</code> and <code>`Int</code>. As you can already start to see, polymorphic variants can lead to fairly complex inferred types.</p>
+<section data-type="note" class="level5 allow_break" id="polymorphic-variants-and-catch-all-cases">
+<h5>Polymorphic Variants and Catch-all Cases</h5>
+<p>As we saw with the definition of <code>is_positive</code>, a <code>match</code> statement can lead to the inference of an upper bound on a variant type, limiting the possible tags to those that can be handled by the match. If we add a catch-all case to our <code>match</code> statement, we end up with a type with a lower bound. <a data-secondary="catch-all cases" data-primary="pattern matching" data-type="indexterm">&nbsp;</a> <a data-primary="catch-all cases" data-type="indexterm">&nbsp;</a> <a data-secondary="and catch-all cases" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_positive_permissive = function
+  | `Int   x -&gt; Ok Int.(x &gt; 0)
+  | `Float x -&gt; Ok Float.(x &gt; 0.)
+  | _ -&gt; Error "Unknown number type"
+;;
+&gt;val is_positive_permissive :
+&gt;  [&gt; `Float of float | `Int of int ] -&gt; (bool, string) result = &lt;fun&gt;
+is_positive_permissive (`Int 0);;
+&gt;- : (bool, string) result = Ok false
+is_positive_permissive (`Ratio (3,4));;
+&gt;- : (bool, string) result = Error "Unknown number type"
+</code></pre>
+</div>
+<p>Catch-all cases are error-prone even with ordinary variants, but they are especially so with polymorphic variants. That’s because you have no way of bounding what tags your function might have to deal with. Such code is particularly vulnerable to typos. For instance, if code that uses <code>is_positive_permissive</code> passes in <code>Float</code> misspelled as <code>Floot</code>, the erroneous code will compile without complaint.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">is_positive_permissive (`Floot 3.5);;
+&gt;- : (bool, string) result = Error "Unknown number type"
+</code></pre>
+</div>
+<p>With ordinary variants, such a typo would have been caught as an unknown tag. As a general matter, one should be wary about mixing catch-all cases and polymorphic variants.</p>
+</section>
+<section class="level3" id="example-terminal-colors-redux">
+<h3>Example: Terminal Colors Redux</h3>
+<p>To see how to use polymorphic variants in practice, we’ll return to terminal colors. Imagine that we have a new terminal type that adds yet more colors, say, by adding an alpha channel so you can specify translucent colors. We could model this extended set of colors as follows, using an ordinary variant: <a data-secondary="vs.&nbsp;ordinary variants" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">type extended_color =
+  | Basic of basic_color * weight  (* basic colors, regular and bold *)
+  | RGB   of int * int * int       (* 6x6x6 color space *)
+  | Gray  of int                   (* 24 grayscale levels *)
+  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)</code></pre>
+</div>
+<p>We want to write a function <code>extended_color_to_int</code>, that works like <code>color_to_int</code> for all of the old kinds of colors, with new logic only for handling colors that include an alpha channel. One might try to write such a function as follows.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extended_color_to_int = function
+  | RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | (Basic _ | RGB _ | Gray _) as color -&gt; color_to_int color
+;;
+&gt;Line 3, characters 59-64:
+&gt;Error: This expression has type extended_color
+&gt;       but an expression was expected of type color
+</code></pre>
+</div>
+<p>The code looks reasonable enough, but it leads to a type error because <code>extended_color</code> and <code>color</code> are in the compiler’s view distinct and unrelated types. The compiler doesn’t, for example, recognize any equality between the <code>Basic</code> tag in the two types.</p>
+<p>What we want to do is to share tags between two different variant types, and polymorphic variants let us do this in a natural way. First, let’s rewrite <code>basic_color_to_int</code> and <code>color_to_int</code> using polymorphic variants. The translation here is pretty straightforward:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let basic_color_to_int = function
+  | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
+  | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7
+;;
+&gt;val basic_color_to_int :
+&gt;  [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;
+&gt;  int = &lt;fun&gt;
+let color_to_int = function
+  | `Basic (basic_color,weight) -&gt;
+    let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | `Gray i -&gt; 232 + i
+;;
+&gt;val color_to_int :
+&gt;  [&lt; `Basic of
+&gt;       [&lt; `Black
+&gt;        | `Blue
+&gt;        | `Cyan
+&gt;        | `Green
+&gt;        | `Magenta
+&gt;        | `Red
+&gt;        | `White
+&gt;        | `Yellow ] *
+&gt;       [&lt; `Bold | `Regular ]
+&gt;   | `Gray of int
+&gt;   | `RGB of int * int * int ] -&gt;
+&gt;  int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Now we can try writing <code>extended_color_to_int</code>. The key issue with this code is that <code>extended_color_to_int</code> needs to invoke <code>color_to_int</code> with a narrower type, i.e., one that includes fewer tags. Written properly, this narrowing can be done via a pattern match. In particular, in the following code, the type of the variable <code>color</code> includes only the tags <code>`Basic</code>, <code>`RGB</code>, and <code>`Gray</code>, and not <code>`RGBA</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color
+;;
+&gt;val extended_color_to_int :
+&gt;  [&lt; `Basic of
+&gt;       [&lt; `Black
+&gt;        | `Blue
+&gt;        | `Cyan
+&gt;        | `Green
+&gt;        | `Magenta
+&gt;        | `Red
+&gt;        | `White
+&gt;        | `Yellow ] *
+&gt;       [&lt; `Bold | `Regular ]
+&gt;   | `Gray of int
+&gt;   | `RGB of int * int * int
+&gt;   | `RGBA of int * int * int * int ] -&gt;
+&gt;  int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The preceding code is more delicately balanced than one might imagine. In particular, if we use a catch-all case instead of an explicit enumeration of the cases, the type is no longer narrowed, and so compilation fails:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | color -&gt; color_to_int color
+;;
+&gt;Line 3, characters 29-34:
+&gt;Error: This expression has type [&gt; `RGBA of int * int * int * int ]
+&gt;       but an expression was expected of type
+&gt;         [&lt; `Basic of
+&gt;              [&lt; `Black
+&gt;               | `Blue
+&gt;               | `Cyan
+&gt;               | `Green
+&gt;               | `Magenta
+&gt;               | `Red
+&gt;               | `White
+&gt;               | `Yellow ] *
+&gt;              [&lt; `Bold | `Regular ]
+&gt;          | `Gray of int
+&gt;          | `RGB of int * int * int ]
+&gt;       The second variant type does not allow tag(s) `RGBA
+</code></pre>
+</div>
+<p>Let’s consider how we might turn our code into a proper library with an implementation in an <code>ml</code> file and an interface in a separate <code>mli</code>, as we saw in <a data-type="xref" href="files-modules-and-programs.html#files-modules-and-programs">Chapter 4, Files Modules And Programs</a>. Let’s start with the <code>mli</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+
+type color =
+  [ `Basic of basic_color * [ `Bold | `Regular ]
+  | `Gray of int
+  | `RGB  of int * int * int ]
+
+type extended_color =
+  [ color
+  | `RGBA of int * int * int * int ]
+
+val color_to_int          : color -&gt; int
+val extended_color_to_int : extended_color -&gt; int</code></pre>
+</div>
+<p>Here, <code>extended_color</code> is defined as an explicit extension of <code>color</code>. Also, notice that we defined all of these types as exact variants. We can implement this library as follows.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Base
+
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+
+type color =
+  [ `Basic of basic_color * [ `Bold | `Regular ]
+  | `Gray of int
+  | `RGB  of int * int * int ]
+
+type extended_color =
+  [ color
+  | `RGBA of int * int * int * int ]
+
+let basic_color_to_int = function
+  | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
+  | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7
+
+let color_to_int = function
+  | `Basic (basic_color,weight) -&gt;
+    let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | `Gray i -&gt; 232 + i
+
+let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | `Grey x -&gt; 2000 + x
+  | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color</code></pre>
+</div>
+<p>In the preceding code, we did something funny to the definition of <code>extended_color_to_int</code> that highlights some of the downsides of polymorphic variants. In particular, we added some special-case handling for the color gray, rather than using <code>color_to_int</code>. Unfortunately, we misspelled <code>Gray</code> as <code>Grey</code>. This is exactly the kind of error that the compiler would catch with ordinary variants, but with polymorphic variants, this compiles without issue. All that happened was that the compiler inferred a wider type for <code>extended_color_to_int</code>, which happens to be compatible with the narrower type that was listed in the <code>mli</code>. As a result, this library builds without error.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build @all
+</code></pre>
+</div>
+<p>If we add an explicit type annotation to the code itself (rather than just in the <code>mli</code>), then the compiler has enough information to warn us:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let extended_color_to_int : extended_color -&gt; int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | `Grey x -&gt; 2000 + x
+  | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color</code></pre>
+</div>
+<p>In particular, the compiler will complain that the <code>`Grey</code> case is unused:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build @all
+&gt;File "terminal_color.ml", line 30, characters 4-11:
+&gt;30 |   | `Grey x -&gt; 2000 + x
+&gt;         ^^^^^^^
+&gt;Error: This pattern matches values of type [? `Grey of 'a ]
+&gt;       but a pattern was expected which matches values of type extended_color
+&gt;       The second variant type does not allow tag(s) `Grey
+[1]</code></pre>
+</div>
+<p>Once we have type definitions at our disposal, we can revisit the question of how we write the pattern match that narrows the type. In particular, we can explicitly use the type name as part of the pattern match, by prefixing it with a <code>#</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let extended_color_to_int : extended_color -&gt; int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | #color as color -&gt; color_to_int color</code></pre>
+</div>
+<p>This is useful when you want to narrow down to a type whose definition is long, and you don’t want the verbosity of writing the tags down explicitly in the match.</p>
+</section>
+<section class="level3" id="when-to-use-polymorphic-variants">
+<h3>When to Use Polymorphic Variants</h3>
+<p>At first glance, polymorphic variants look like a strict improvement over ordinary variants. You can do everything that ordinary variants can do, plus it’s more flexible and more concise. What’s not to like? <a data-secondary="vs.&nbsp;ordinary variants" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a> <a data-secondary="drawbacks of" data-primary="polymorphic variant types" data-type="indexterm">&nbsp;</a></p>
+<p>In reality, regular variants are the more pragmatic choice most of the time. That’s because the flexibility of polymorphic variants comes at a price. Here are some of the downsides:</p>
+<dl>
+<dt>Complexity</dt>
+<dd>As we’ve seen, the typing rules for polymorphic variants are a lot more complicated than they are for regular variants. This means that heavy use of polymorphic variants can leave you scratching your head trying to figure out why a given piece of code did or didn’t compile. It can also lead to absurdly long and hard to decode error messages. Indeed, concision at the value level is often balanced out by more verbosity at the type level.
+</dd>
+<dt>Error-finding</dt>
+<dd>Polymorphic variants are type-safe, but the typing discipline that they impose is, by dint of its flexibility, less likely to catch bugs in your program.
+</dd>
+<dt>Efficiency</dt>
+<dd>This isn’t a huge effect, but polymorphic variants are somewhat heavier than regular variants, and OCaml can’t generate code for matching on polymorphic variants that is quite as efficient as what it generated for regular variants.
+</dd>
+</dl>
+<p>All that said, polymorphic variants are still a useful and powerful feature, but it’s worth understanding their limitations and how to use them sensibly and modestly.</p>
+<p>Probably the safest and most common use case for polymorphic variants is where ordinary variants would be sufficient but are syntactically too heavyweight. For example, you often want to create a variant type for encoding the inputs or outputs to a function, where it’s not worth declaring a separate type for it. Polymorphic variants are very useful here, and as long as there are type annotations that constrain these to have explicit, exact types, this tends to work well.</p>
+<p>Variants are most problematic exactly where you take full advantage of their power; in particular, when you take advantage of the ability of polymorphic variant types to overlap in the tags they support. This ties into OCaml’s support for subtyping. As we’ll discuss further when we cover objects in <a data-type="xref" href="objects.html#objects">Chapter 11, Objects</a>, subtyping brings in a lot of complexity, and most of the time, that’s complexity you want to avoid.</p>
+</section>
+</section>
+</section>
+</article></div><a href="error-handling.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 07</small>Error Handling</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

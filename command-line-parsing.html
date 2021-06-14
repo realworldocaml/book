@@ -1,0 +1,801 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Command-Line Parsing - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="command-line-parsing">
+<h1>Command-Line Parsing</h1>
+<p>Many of the OCaml programs that you’ll write will end up as binaries that need to be run from a command prompt. Any nontrivial command line should support a collection of basic features:</p>
+<ul>
+<li><p>Parsing of command-line arguments</p></li>
+<li><p>Generation of error messages in response to incorrect inputs</p></li>
+<li><p>Help for all the available options</p></li>
+<li><p>Interactive autocompletion</p></li>
+</ul>
+<p>It’s tedious and error-prone to code all of this manually for every program you write. Core provides the Command library, which simplifies all of this by letting you declare your command-line options in one place and by deriving all of the above functionality from these declarations. <a data-secondary="Command library for" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
+<p>Command is simple to use for simple applications but also scales well as your needs grow more complex. In particular, Command provides a sophisticated subcommand mode that groups related commands together as the complexity of your user interface grows. You may already be familiar with this command-line style from the Git or Mercurial version control systems.</p>
+<p>In this chapter, we’ll:</p>
+<ul>
+<li><p>Learn how to use Command to construct basic and grouped command-line interfaces</p></li>
+<li><p>We will build simple equivalents to the cryptographic <code>md5</code> and <code>shasum</code> utilities</p></li>
+<li><p>Demonstrate how to declare complex command-line interfaces in a type-safe and elegant way <a data-secondary="functional combinators" data-primary="combinators" data-type="indexterm">&nbsp;</a></p></li>
+</ul>
+<section class="level2" id="basic-command-line-parsing">
+<h2>Basic Command-Line Parsing</h2>
+<p>Let’s start by working through a clone of the <code>md5sum</code> command that is present on most Linux installations (the equivalent command on macOS is simply <code>md5</code>). The following function defined below reads in the contents of a file, applies the MD5 one-way cryptographic hash function to the data, and outputs an ASCII hex representation of the result: <a data-primary="MD5 one-way cryptographic hash function" data-type="indexterm">&nbsp;</a><a data-secondary="basic approach to" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let do_hash file =
+  Md5.digest_file_blocking file
+  |&gt; Md5.to_hex
+  |&gt; print_endline</code></pre>
+</div>
+<p>The <code>do_hash</code> function accepts a <code>filename</code> parameter and prints the human-readable MD5 string to the console standard output. The first step toward turning this function into a command-line program is to create a parser for the command line arguments. The module <code>Command.Param</code> provides a set of combinators that can be combined together to define a parameter parser for optional flags and positional arguments, including documentation, the types they should map to, and whether to take special actions such as pausing for interactive input if certain inputs are encountered.</p>
+<section class="level3" id="anonymous-arguments">
+<h3>Defining an anonymous argument</h3>
+<p>Let’s build a parser for a command line UI with a single <em>anonymous</em> argument, i.e., an argument that is passed in without a flag.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let filename_param =
+  let open Command.Param in
+  anon ("filename" %: string)</code></pre>
+</div>
+<p>Here, <code>anon</code> is used to signal the parsing of an anonymous argument, and the expression <code>("filename" %: string)</code> indicates the textual name of the argument and specification that describes the kind of value that is expected. The textual name is used for generating help text, and the specification, which has type <code>Command.Arg_type.t</code>, is used both to nail down the OCaml type of the returned value (<code>string</code>, in this case) and to guide features like input validation. The values <code>anon</code>, <code>string</code> and <code>%:</code> all come from the <code>Command.Param</code> module.</p>
+</section>
+<section class="level3" id="defining-basic-commands">
+<h3>Defining basic commands</h3>
+<p>Once we’ve defined a specification, we need to put it to work on real input. The simplest way is to directly create a command-line interface with <code>Command.basic</code>. <a data-primary="Command.basic" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    (Command.Param.map filename_param ~f:(fun filename -&gt;
+         (fun () -&gt; do_hash filename)))</code></pre>
+</div>
+<p>The <code>summary</code> argument is a one-line description which goes at the top of the help screen, while the (optional) <code>readme</code> argument is for providing a more detailed description that will be provided on demand.</p>
+<p>The final argument is the most interesting one, which is the parameter parser. This will be easier to understand if we first learn a bit more about the type signatures of the various components we’ve been using. Let’s do that by recreating some of this code in the toplevel.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let filename_param = Command.Param.(anon ("filename" %: string));;
+&gt;val filename_param : string Command.Spec.param = &lt;abstr&gt;
+</code></pre>
+</div>
+<p>The type parameter of <code>filename_param</code> is there to indicate the type of the value returned by the parser; in this case, <code>string</code>.</p>
+<p>But <code>Command.basic</code> requires a parameter parser that returns a value of type <code>unit -&gt; unit</code>. We can see that by using <code>#show</code> to explore the types.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.basic;;
+&gt;val basic : unit Command.basic_command
+#show Command.basic_command;;
+&gt;type nonrec 'result basic_command =
+&gt;    summary:string -&gt;
+&gt;    ?readme:(unit -&gt; string) -&gt;
+&gt;    (unit -&gt; 'result) Command.Spec.param -&gt; Command.t
+</code></pre>
+</div>
+<p>Note that the <code>'result</code> parameter of the type alias <code>basic_command</code> is instantiated as <code>unit</code> for the type of <code>Command.basic</code>.</p>
+<p>It makes sense that <code>Command.basic</code> wants a parser that returns a function; after all, in the end, it needs a function it can run that constitutes the execution of the program. But how do we get such a parser, given the parser we have returns just a filename?</p>
+<p>The answer is to use a <code>map</code> function to change the value returned by the parser. As you can see below, the type of <code>Command.Param.map</code> is very similar to the code of <code>List.map</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.map;;
+&gt;val map : 'a Command.Spec.param -&gt; f:('a -&gt; 'b) -&gt; 'b Command.Spec.param
+</code></pre>
+</div>
+<p>In our program, we used <code>map</code> to convert the <code>filename_param</code> parser, which returns a string representing the file name, into a parser that returns a function of type <code>unit -&gt; unit</code> containing the body of the command.</p>
+</section>
+<section class="level3" id="running-basic-commands">
+<h3>Running commands</h3>
+<p>Once we’ve defined the basic command, running it is just one function call away.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let () =
+  Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+<p><code>Command.run</code> takes a couple of optional arguments that are useful to identify which version of the binary you are running in production. You’ll need the following <code>dune</code> file:</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name       md5)
+  (libraries  core)
+  (preprocess (pps ppx_jane)))</code></pre>
+</div>
+<p>At which point we can build and execute the program using <code>dune exec</code>. Let’s use this to query version information from the binary.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe -version
+&gt;1.0
+dune exec -- ./md5.exe -build-info
+&gt;RWO
+</code></pre>
+</div>
+<p>The versions that you see in the output were defined via the optional arguments to <code>Command.run</code>. You can leave these blank in your own programs or get your build system to generate them directly from your version control system. Dune provides a <a href="https://dune.readthedocs.io/en/stable/executables.html#embedding-build-information-into-executables"><code>dune-build-info</code> library</a> that automates this process for most common workflows.</p>
+<p>We can invoke our binary with <code>-help</code> to see the auto-generated help.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe -help
+&gt;Generate an MD5 hash of the input data
+&gt;
+&gt;  md5.exe FILENAME
+&gt;
+&gt;More detailed information
+&gt;
+&gt;=== flags ===
+&gt;
+&gt;  [-build-info]  print info about this build and exit
+&gt;  [-version]     print the version of this build and exit
+&gt;  [-help]        print this help text and exit
+&gt;                 (alias: -?)
+</code></pre>
+</div>
+<p>If you supply the <code>filename</code> argument, then <code>do_hash</code> is called with the argument and the MD5 output is displayed to the standard output.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe md5.ml
+&gt;cd43f59095550dce382f8f3427aa3373
+</code></pre>
+</div>
+<p>And that’s all it took to build our little MD5 utility! Here’s a complete version of the example we just walked through, made slightly more succinct by removing intermediate variables.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let do_hash file =
+  Md5.digest_file_blocking file
+  |&gt; Md5.to_hex
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Param.(
+     map (anon ("filename" %: string))
+       ~f:(fun filename -&gt; (fun () -&gt; do_hash filename)))
+
+let () =
+  Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+</section>
+<section class="level3" id="multiple-arguments">
+<h3>Multi-argument commands</h3>
+<p>All the examples thus far have involved a single argument, but we can of course create multi-argument commands as well. We can make a parser for multiple arguments by binding together simpler parsers, using the function <code>Command.Param.both</code>. Here is its type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#show Command.Param.both;;
+&gt;val both :
+&gt;  'a Command.Spec.param -&gt;
+&gt;  'b Command.Spec.param -&gt; ('a * 'b) Command.Spec.param
+</code></pre>
+</div>
+<p><code>both</code> allows us to take two parameter parsers and combine them into a single parser that returns the two arguments as a pair. In the following, we rewrite our <code>md5</code> program so it takes two anonymous arguments: the first is an integer saying how many characters of the hash to print out, and the second is the filename.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let do_hash hash_length filename =
+  Md5.digest_file_blocking filename
+  |&gt; Md5.to_hex
+  |&gt; (fun s -&gt; String.prefix s hash_length)
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Param.(
+      map (both
+            (anon ("hash_length" %: int))
+            (anon ("filename" %: string)))
+       ~f:(fun (hash_length,filename) -&gt;
+            (fun () -&gt; do_hash hash_length filename)))
+
+let () =
+  Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+<p>Building and running this command, we can see that it now indeed expects two arguments.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe 5 md5.ml
+&gt;c45ae
+</code></pre>
+</div>
+<p>This works well enough for two parameters, but if you want longer parameter lists, this approach gets old fast. A better way is to use let-syntax, which was discussed in <a data-type="xref" href="error-handling.html#bind-and-other-error-handling-idioms">Chapter 7, Error Handling</a>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    (let open Command.Let_syntax in
+     let open Command.Param in
+     let%map
+       hash_length = anon ("hash_length" %: int)
+     and filename  = anon ("filename" %: string)
+     in
+     fun () -&gt; do_hash hash_length filename)</code></pre>
+</div>
+<p>Here, we take advantage of let-syntax’s support for parallel let bindings, using <code>and</code> to join the definitions together. This syntax translates down to the same pattern based on <code>both</code> that we showed above, but it’s easier to read and use, and scales better to more arguments.</p>
+<p>The need to open both modules is a little awkward, and the <code>Param</code> module in particular you really only need on the right-hand-side of the equals-sign. This is achieved automatically by using the <code>let%map_open</code> syntax, demonstrated below.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open
+        hash_length = anon ("hash_length" %: int)
+      and filename  = anon ("filename" %: string)
+      in
+      fun () -&gt; do_hash hash_length filename)</code></pre>
+</div>
+<p>Let-syntax is the most common way of writing parsers for <code>Command</code>, and we’ll use that idiom from here on.</p>
+<p>Now that we have the basics in place, the rest of the chapter will examine some of the more advanced features of Command.</p>
+</section>
+</section>
+<section class="level2" id="argument-types">
+<h2>Argument Types</h2>
+<p>You aren’t just limited to parsing command lines of strings and ints. There are some other argument types defined in <code>Command.Param</code>, like <code>date</code> and <code>percent</code>. But most of the time, argument types for specific types in <code>Core</code> and other associated libraries are defined in the module that defines the type in question. <a data-secondary="argument types" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-secondary="argument types" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
+<p>As an example, we can tighten up the specification of the command to <code>Filename.arg_type</code> to reflect that the argument must be a valid filename, and not just any string.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open file = anon ("filename" %: Filename.arg_type) in
+      fun () -&gt; do_hash file)</code></pre>
+</div>
+<p>This doesn’t change the validation of the provided value, but it does enable interactive command-line completion. We’ll explain how to enable that later in the chapter.</p>
+<section class="level3" id="defining-custom-argument-types">
+<h3>Defining Custom Argument Types</h3>
+<p>We can also define our own argument types if the predefined ones aren’t sufficient. For instance, let’s make a <code>regular_file</code> argument type that ensures that the input file isn’t a character device or some other odd UNIX file type that can’t be fully read. <a data-secondary="defining custom types" data-primary="arguments" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let do_hash file =
+  Md5.digest_file_blocking file
+  |&gt; Md5.to_hex
+  |&gt; print_endline
+
+let regular_file =
+  Command.Arg_type.create (fun filename -&gt;
+      match Sys.is_file filename with
+      | `Yes -&gt; filename
+      | `No -&gt; failwith "Not a regular file"
+      | `Unknown -&gt; failwith "Could not determine if this was a regular file")
+
+let command =
+  Command.basic ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open filename = anon ("filename" %: regular_file) in
+      fun () -&gt; do_hash filename)
+
+let () = Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+<p>The <code>regular_file</code> function transforms a <code>filename</code> string parameter into the same string but first checks that the file exists and is a regular file type. When you build and run this code, you will see the new error messages if you try to open a special device such as <code>/dev/null</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe md5.ml
+&gt;ed81ec895966cab3170befc62cf0a702
+dune exec -- ./md5.exe /dev/null
+&gt;Error parsing command line:
+&gt;
+&gt;  failed to parse FILENAME value "/dev/null"
+&gt;  (Failure "Not a regular file")
+&gt;
+&gt;For usage information, run
+&gt;
+&gt;  md5.exe -help
+&gt;
+[1]</code></pre>
+</div>
+</section>
+<section class="level3" id="optional-and-default-arguments">
+<h3>Optional and Default Arguments</h3>
+<p>A more realistic <code>md5</code> binary could also read from the standard input if a <code>filename</code> isn’t specified. To do this, we need to declare the filename argument as optional, which we can do with the <code>maybe</code> operator. <a data-secondary="default arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a><a data-primary="default arguments" data-type="indexterm">&nbsp;</a><a data-secondary="and default arguments" data-primary="optional arguments" data-type="indexterm">&nbsp;</a><a data-secondary="optional arguments" data-primary="arguments" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open filename = anon (maybe ("filename" %: string)) in
+      fun () -&gt; do_hash filename)</code></pre>
+</div>
+<p>But building this results in a compile-time error.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build md5.exe
+...
+&gt;File "md5.ml", line 15, characters 24-32:
+&gt;15 |       fun () -&gt; do_hash filename)
+&gt;                             ^^^^^^^^
+&gt;Error: This expression has type string option
+&gt;       but an expression was expected of type string
+[1]</code></pre>
+</div>
+<p>This is because changing the argument type has also changed the type of the value that is returned by the parser. It now produces a <code>string option</code> instead of a <code>string</code>, reflecting the optionality of the argument. We can adapt our example to use the new information and read from standard input if no file is specified.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let get_contents = function
+  | None | Some "-" -&gt;
+    In_channel.input_all In_channel.stdin
+  | Some filename -&gt;
+    In_channel.read_all filename
+
+let do_hash filename =
+  get_contents filename
+  |&gt; Md5.digest_string
+  |&gt; Md5.to_hex
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open filename =
+        anon (maybe ("filename" %: Filename.arg_type))
+      in
+      fun () -&gt; do_hash filename)
+
+let () =
+  Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+<p>The <code>filename</code> parameter to <code>do_hash</code> is now a <code>string option</code> type. This is resolved into a string via <code>get_contents</code> to determine whether to read the standard input or a file, and then the rest of the command is similar to our previous examples.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cat md5.ml | dune exec -- ./md5.exe
+&gt;e533f209e966f6c6c60f909f651fc24d
+</code></pre>
+</div>
+<p>Another possible way to handle this would be to supply a dash as the default filename if one isn’t specified. The <code>maybe_with_default</code> function can do just this, with the benefit of not having to change the callback parameter type.</p>
+<p>The following example behaves exactly the same as the previous example, but replaces <code>maybe</code> with <code>maybe_with_default</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let get_contents = function
+  | "-"      -&gt; In_channel.input_all In_channel.stdin
+  | filename -&gt; In_channel.read_all filename
+
+let do_hash filename =
+  get_contents filename
+  |&gt; Md5.digest_string
+  |&gt; Md5.to_hex
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open filename =
+        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+      in
+      fun () -&gt; do_hash filename)
+
+let () =
+  Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+<p>Building and running this confirms that it has the same behavior as before.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">cat md5.ml | dune exec -- ./md5.exe
+&gt;560f6fd99e100c7df0ef18161e9e8626
+</code></pre>
+</div>
+</section>
+<section class="level3" id="sequences-of-arguments">
+<h3>Sequences of Arguments</h3>
+<p>Another common way of parsing anonymous arguments is as a variable length list. As an example, let’s modify our MD5 code to take a collection of files to process on the command line. <a data-secondary="sequences of" data-primary="arguments" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let get_contents = function
+  | "-"      -&gt; In_channel.input_all In_channel.stdin
+  | filename -&gt; In_channel.read_all filename
+
+let do_hash filename =
+  get_contents filename
+  |&gt; Md5.digest_string
+  |&gt; Md5.to_hex
+  |&gt; fun md5 -&gt; printf "MD5 (%s) = %s\n" filename md5
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    ~readme:(fun () -&gt; "More detailed information")
+    Command.Let_syntax.(
+      let%map_open files =
+        anon (sequence ("filename" %: Filename.arg_type))
+      in
+      fun () -&gt;
+        match files with
+        | [] -&gt; do_hash "-"
+        | _  -&gt; List.iter files ~f:do_hash)
+
+let () =
+  Command.run ~version:"1.0" ~build_info:"RWO" command</code></pre>
+</div>
+<p>The callback function is a little more complex now, to handle the extra options. The <code>files</code> are now a <code>string list</code>, and an empty list reverts to using standard input, just as our previous <code>maybe</code> and <code>maybe_with_default</code> examples did. If the list of files isn’t empty, then it opens up each file and runs them through <code>do_hash</code> sequentially.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe /etc/services ./_build/default/md5.exe
+&gt;MD5 (/etc/services) = 6501e9c7bf20b1dc56f015e341f79833
+&gt;MD5 (./_build/default/md5.exe) = 6602408aa98478ba5617494f7460d3d9
+</code></pre>
+</div>
+</section>
+</section>
+<section class="level2" id="adding-labeled-flags">
+<h2>Adding Labeled Flags</h2>
+<p>You aren’t limited to anonymous arguments on the command line. A <em>flag</em> is a named field that can be followed by an optional argument. These flags can appear in any order on the command line, or multiple times, depending on how they’re declared in the specification. <a data-primary="flags" data-type="indexterm">&nbsp;</a><a data-secondary="labeled flags and" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
+<p>Let’s add two arguments to our <code>md5</code> command that mimics the Mac OS X version. A <code>-s</code> flag specifies the string to be hashed directly on the command line and <code>-t</code> runs a self-test. The complete example follows.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let checksum_from_string buf =
+  Md5.digest_string buf
+  |&gt; Md5.to_hex
+  |&gt; print_endline
+
+let checksum_from_file filename =
+  let contents = match filename with
+    | "-"      -&gt; In_channel.input_all In_channel.stdin
+    | filename -&gt; In_channel.read_all filename
+  in
+  Md5.digest_string contents
+  |&gt; Md5.to_hex
+  |&gt; print_endline
+
+let command =
+  Command.basic
+    ~summary:"Generate an MD5 hash of the input data"
+    Command.Let_syntax.(
+      let%map_open
+        use_string = flag "-s" (optional string)
+          ~doc:"string Checksum the given string"
+      and trial = flag "-t" no_arg ~doc:" run a built-in time trial"
+      and filename =
+        anon (maybe_with_default "-" ("filename" %: Filename.arg_type))
+      in
+      fun () -&gt;
+        if trial then printf "Running time trial\n"
+        else match use_string with
+          | Some buf -&gt; checksum_from_string buf
+          | None -&gt; checksum_from_file filename)
+
+let () = Command.run command</code></pre>
+</div>
+<p>The specification now uses the <code>flag</code> function to define the two new labeled, command-line arguments. The <code>doc</code> string is formatted so that the first word is the short name that appears in the usage text, with the remainder being the full help text. Notice that the <code>-t</code> flag has no argument, and so we prepend its <code>doc</code> text with a blank space. The help text for the preceding code looks like this:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./md5.exe -help
+&gt;Generate an MD5 hash of the input data
+&gt;
+&gt;  md5.exe [FILENAME]
+&gt;
+&gt;=== flags ===
+&gt;
+&gt;  [-s string]    Checksum the given string
+&gt;  [-t]           run a built-in time trial
+&gt;  [-build-info]  print info about this build and exit
+&gt;  [-version]     print the version of this build and exit
+&gt;  [-help]        print this help text and exit
+&gt;                 (alias: -?)
+&gt;
+dune exec -- ./md5.exe -s "ocaml rocks"
+&gt;5a118fe92ac3b6c7854c595ecf6419cb
+</code></pre>
+</div>
+<p>The <code>-s</code> flag in our specification requires a <code>string</code> argument and isn’t optional. The Command parser outputs an error message if the flag isn’t supplied, as with the anonymous arguments in earlier examples. <a data-type="xref" href="command-line-parsing.html#table14-2">Table14 2</a> contains a list of some of the functions that you can wrap flags in to control how they are parsed. <a data-primary="flag functions" data-type="indexterm">&nbsp;</a></p>
+<div data-type="table" id="table14-2">
+<table>
+<caption>Flag functions</caption>
+<thead>
+<tr class="header">
+<th>Flag function</th>
+<th>OCaml type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>required</code> <em>arg</em></td>
+<td><em>arg</em> and error if not present</td>
+</tr>
+<tr class="even">
+<td><code>optional</code> <em>arg</em></td>
+<td><em>arg</em> <code>option</code></td>
+</tr>
+<tr class="odd">
+<td><code>optional_with_default</code> <em>val</em> <em>arg</em></td>
+<td><em>arg</em> with default <em>val</em> if not present</td>
+</tr>
+<tr class="even">
+<td><code>listed</code> <em>arg</em></td>
+<td><em>arg</em> <code>list</code>, flag may appear multiple times</td>
+</tr>
+<tr class="odd">
+<td><code>no_arg</code></td>
+<td><code>bool</code> that is true if flag is present</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The flags affect the type of the callback function in exactly the same way as anonymous arguments do. This lets you change the specification and ensure that all the callback functions are updated appropriately, without runtime errors.</p>
+</section>
+<section class="level2" id="grouping-sub-commands-together">
+<h2>Grouping Subcommands Together</h2>
+<p>You can get pretty far by using flags and anonymous arguments to assemble complex, command-line interfaces. After a while, though, too many options can make the program very confusing for newcomers to your application. One way to solve this is by grouping common operations together and adding some hierarchy to the command-line interface. <a data-primary="subcommands, grouping of" data-type="indexterm">&nbsp;</a><a data-primary="OPAM package manager" data-type="indexterm">&nbsp;</a><a data-secondary="subcommand grouping" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
+<p>You’ll have run across this style already when using the opam package manager (or, in the non-OCaml world, the Git or Mercurial commands). opam exposes commands in this form:</p>
+<div class="highlight">
+<pre><code class="language-clike">$ opam config env
+$ opam remote list -k git
+$ opam install --help
+$ opam install core --verbose</code></pre>
+</div>
+<p>The <code>config</code>, <code>remote</code>, and <code>install</code> keywords form a logical grouping of commands that factor out a set of flags and arguments. This lets you prevent flags that are specific to a particular subcommand from leaking into the general configuration space. <a data-primary="install keyword" data-type="indexterm">&nbsp;</a><a data-primary="remote keyword" data-type="indexterm">&nbsp;</a></p>
+<p>This usually only becomes a concern when your application organically grows features. Luckily, it’s simple to extend your application to do this in Command: just use <code>Command.group</code>, which lets you merge a collection of <code>Command.t</code>’s into one. <a data-primary="Command.group" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Command.group;;
+&gt;- : summary:string -&gt;
+&gt;    ?readme:(unit -&gt; string) -&gt;
+&gt;    ?preserve_subcommand_order:unit -&gt;
+&gt;    ?body:(path:string list -&gt; unit) -&gt;
+&gt;    (string * Command.t) list -&gt; Command.t
+&gt;= &lt;fun&gt;
+</code></pre>
+</div>
+<p>The <code>group</code> signature accepts a list of basic <code>Command.t</code> values and their corresponding names. When executed, it looks for the appropriate subcommand from the name list, and dispatches it to the right command handler.</p>
+<p>Let’s build the outline of a calendar tool that does a few operations over dates from the command line. We first need to define a command that adds days to an input date and prints the resulting date:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let add =
+  Command.basic
+    ~summary:"Add [days] to the [base] date and print day"
+    Command.Let_syntax.(
+      let%map_open
+        base = anon ("base" %: date)
+      and days = anon ("days" %: int)
+      in
+      fun () -&gt;
+       Date.add_days base days
+       |&gt; Date.to_string
+       |&gt; print_endline)
+
+let () = Command.run add</code></pre>
+</div>
+<p>Everything in this command should be familiar to you by now, and it works as you might expect.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./cal.exe -help
+&gt;Add [days] to the [base] date and print day
+&gt;
+&gt;  cal.exe BASE DAYS
+&gt;
+&gt;=== flags ===
+&gt;
+&gt;  [-build-info]  print info about this build and exit
+&gt;  [-version]     print the version of this build and exit
+&gt;  [-help]        print this help text and exit
+&gt;                 (alias: -?)
+&gt;
+dune exec -- ./cal.exe 2012-12-25 40
+&gt;2013-02-03
+</code></pre>
+</div>
+<p>Now, let’s also add the ability to take the difference between two dates, but, instead of creating a new binary, we’ll group both operations as subcommands using <code>Command.group</code>.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let add =
+  Command.basic
+    ~summary:"Add [days] to the [base] date"
+    Command.Let_syntax.(
+      let%map_open base = anon ("base" %: date)
+      and days = anon ("days" %: int)
+      in
+      fun () -&gt;
+        Date.add_days base days
+        |&gt; Date.to_string
+        |&gt; print_endline)
+
+let diff =
+  Command.basic
+    ~summary:"Show days between [date1] and [date2]"
+    Command.Let_syntax.(
+      let%map_open
+        date1 = anon ("date1" %: date)
+      and date2 = anon ("date2" %: date)
+      in
+      fun () -&gt;
+        Date.diff date1 date2
+        |&gt; printf "%d days\n")
+
+let command =
+  Command.group ~summary:"Manipulate dates"
+    [ "add", add
+    ; "diff", diff ]
+
+let () = Command.run command</code></pre>
+</div>
+<p>And that’s all you really need to add subcommand support! Let’s build the example first in the usual way and inspect the help output, which now reflects the subcommands we just added.</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name       cal)
+  (libraries  core)
+  (preprocess (pps ppx_jane)))</code></pre>
+</div>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./cal.exe -help
+&gt;Manipulate dates
+&gt;
+&gt;  cal.exe SUBCOMMAND
+&gt;
+&gt;=== subcommands ===
+&gt;
+&gt;  add      Add [days] to the [base] date
+&gt;  diff     Show days between [date1] and [date2]
+&gt;  version  print version information
+&gt;  help     explain a given subcommand (perhaps recursively)
+</code></pre>
+</div>
+<p>We can invoke the two commands we just defined to verify that they work and see the date parsing in action:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune exec -- ./cal.exe add 2012-12-25 40
+&gt;2013-02-03
+dune exec -- ./cal.exe diff 2012-12-25 2012-11-01
+&gt;54 days
+</code></pre>
+</div>
+</section>
+<section class="level2" id="prompting-for-interactive-input">
+<h2>Prompting for Interactive Input</h2>
+<p>Sometimes, if a value isn’t provided on the command line, you want to prompt for it instead. Let’s return to the calendar tool we built before. <a data-secondary="prompts for" data-primary="interactive input" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let add =
+  Command.basic
+    ~summary:"Add [days] to the [base] date and print day"
+    Command.Let_syntax.(
+      let%map_open
+        base = anon ("base" %: date)
+      and days = anon ("days" %: int)
+      in
+      fun () -&gt;
+       Date.add_days base days
+       |&gt; Date.to_string
+       |&gt; print_endline)
+
+let () = Command.run add</code></pre>
+</div>
+<p>This program requires you to specify both the <code>base</code> date and the number of <code>days</code> to add onto it. If <code>days</code> isn’t supplied on the command line, an error is output. Now let’s modify it to interactively prompt for a number of days if only the <code>base</code> date is supplied.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+let add_days base days =
+  Date.add_days base days
+  |&gt; Date.to_string
+  |&gt; print_endline
+
+let prompt_for_string name of_string =
+  printf "enter %s: %!" name;
+  match In_channel.input_line In_channel.stdin with
+  | None -&gt; failwith "no value entered. aborting."
+  | Some line -&gt; of_string line
+
+let add =
+  Command.basic
+    ~summary:"Add [days] to the [base] date and print day"
+    Command.Let_syntax.(
+      let%map_open
+        base = anon ("base" %: date)
+      and days = anon (maybe ("days" %: int))
+      in
+      let days =
+        match days with
+        | Some x -&gt; x
+        | None -&gt; prompt_for_string "days" Int.of_string
+      in
+      fun () -&gt;
+        add_days base days)
+
+let () = Command.run add</code></pre>
+</div>
+<p>The <code>days</code> anonymous argument is now an optional integer in the spec, and when it isn’t there, we simply prompt for the value as part of the ordinary execution of our program.</p>
+<p>Sometimes, it’s convenient to pack the prompting behavior into the parser itself. For one thing, this would allow you to easily share the prompting behavior among multiple commands. This is easy enough to do by adding a new function, <code>anon_prompt</code>, which creates a parser that automatically prompts if the value isn’t provided.</p>
+<div class="highlight">
+<pre><code class="language-ocaml">let anon_prompt name of_string =
+  let arg = Command.Arg_type.create of_string in
+  Command.Let_syntax.(
+    let%map_open value = anon (maybe (name %: arg)) in
+    match value with
+    | Some v -&gt; v
+    | None -&gt; prompt_for_string name of_string)
+
+let add =
+  Command.basic
+    ~summary:"Add [days] to the [base] date and print day"
+    Command.Let_syntax.(
+      let%map_open
+        base = anon ("base" %: date)
+      and days = anon_prompt "days" Int.of_string
+      in
+      fun () -&gt;
+        add_days base days)</code></pre>
+</div>
+<p>We can see the prompting behavior if we run the program without providing the second argument.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">echo 35 | dune exec -- ./cal.exe 2013-12-01
+&gt;enter days: 2014-01-05
+</code></pre>
+</div>
+</section>
+<section class="level2" id="command-line-auto-completion-with-bash">
+<h2>Command-Line Autocompletion with bash</h2>
+<p>Modern UNIX shells usually have a tab-completion feature to interactively help you figure out how to build a command line. These work by pressing the Tab key in the middle of typing a command, and seeing the options that pop up. You’ve probably used this most often to find the files in the current directory, but it can actually be extended for other parts of the command, too. <a data-primary="tab-autocompletion" data-type="indexterm">&nbsp;</a><a data-primary="autocompletion" data-type="indexterm">&nbsp;</a><a data-secondary="autocompletion with bash" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a></p>
+<p>The precise mechanism for autocompletion varies depending on what shell you are using, but we’ll assume you are using the most common one: <code>bash</code>. This is the default interactive shell on most Linux distributions and Mac OS X, but you may need to switch to it on *BSD or Windows (when using Cygwin). The rest of this section assumes that you’re using <code>bash</code>. <a data-primary="bash autocompletion" data-type="indexterm">&nbsp;</a></p>
+<p>Bash autocompletion isn’t always installed by default, so check your OS package manager to see if you have it available.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Operating system</th>
+<th>Package manager</th>
+<th>Package</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Debian Linux</td>
+<td><code>apt</code></td>
+<td><code>bash-completion</code></td>
+</tr>
+<tr class="even">
+<td>Mac OS X</td>
+<td>Homebrew</td>
+<td><code>bash-completion</code></td>
+</tr>
+<tr class="odd">
+<td>FreeBSD</td>
+<td>Ports system</td>
+<td><em class="filename">/usr/ports/shells/bash-completion</em></td>
+</tr>
+</tbody>
+</table>
+<p>Once <em>bash</em> completion is installed and configured, check that it works by typing the <code>ssh</code> command and pressing the Tab key. This should show you the list of known hosts from your <em>~/.ssh/known_hosts</em> file. If it lists some hosts that you’ve recently connected to, you can continue on. If it lists the files in your current directory instead, then check your OS documentation to configure completion correctly.</p>
+<p>One last bit of information you’ll need to find is the location of the <em class="filename">bash_completion.d</em> directory. This is where all the shell fragments that contain the completion logic are held. On Linux, this is often in <em class="filename">/etc/bash_completion.d</em>, and in Homebrew on Mac OS X, it would be <em class="filename">/usr/local/etc/bash_completion.d</em> by default.</p>
+<section class="level3" id="generating-completion-fragments-from-command">
+<h3>Generating Completion Fragments from Command</h3>
+<p>The Command library has a declarative description of all the possible valid options, and it can use this information to generate a shell script that provides completion support for that command. To generate the fragment, just run the command with the <code>COMMAND_OUTPUT_INSTALLATION_BASH</code> environment variable set to any value.</p>
+<p>For example, let’s try it on our MD5 example from earlier, assuming that the binary is called <code>md5</code> in the current directory:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">env COMMAND_OUTPUT_INSTALLATION_BASH=1 dune exec -- ./md5.exe
+&gt;function _jsautocom_16984 {
+&gt;  export COMP_CWORD
+&gt;  COMP_WORDS[0]=./md5.exe
+&gt;  if type readarray &gt; /dev/null
+&gt;  then readarray -t COMPREPLY &lt; &lt;("${COMP_WORDS[@]}")
+&gt;  else IFS="
+&gt;" read -d "\0" -A COMPREPLY &lt; &lt;("${COMP_WORDS[@]}")
+&gt;  fi
+&gt;}
+&gt;complete -F _jsautocom_16984 ./md5.exe
+</code></pre>
+</div>
+<p>Recall that we used the <code>Arg_type.file</code> to specify the argument type. This also supplies the completion logic so that you can just press Tab to complete files in your current directory.</p>
+</section>
+<section class="level3" id="installing-the-completion-fragment">
+<h3>Installing the Completion Fragment</h3>
+<p>You don’t need to worry about what the preceding output script actually does (unless you have an unhealthy fascination with shell scripting internals, that is). Instead, redirect the output to a file in your current directory and source it into your current shell:</p>
+<div class="highlight">
+<pre><code class="language-clike">$ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal_add_sub_days.native &gt; cal.cmd
+$ . cal.cmd
+$ ./cal_add_sub_days.native &lt;tab&gt;
+add      diff     help     version</code></pre>
+</div>
+<p>Command completion support works for flags and grouped commands and is very useful when building larger command-line interfaces. Don’t forget to install the shell fragment into your global <em class="filename">bash_completion.d</em> directory if you want it to be loaded in all of your login shells. <a data-primary="completion handlers" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="installing-a-generic-completion-handler">
+<h5>Installing a Generic Completion Handler</h5>
+<p>Sadly, <code>bash</code> doesn’t support installing a generic handler for all Command-based applications. This means you have to install the completion script for every application, but you should be able to automate this in the build and packaging system for your application.</p>
+<p>It will help to check out how other applications install tab-completion scripts and follow their lead, as the details are very OS-specific.</p>
+</section>
+</section>
+</section>
+<section class="level2" id="alternative-command-line-parsers">
+<h2>Alternative Command-Line Parsers</h2>
+<p>This rounds up our tour of the Command library. This isn’t the only way to parse command-line arguments of course; there are several alternatives available on OPAM. Three of the most prominent ones follow: <a data-primary="Cmdliner" data-type="indexterm">&nbsp;</a><a data-secondary="ocaml-getopt" data-primary="OCaml toolchain" data-type="indexterm">&nbsp;</a><a data-primary="Arg module" data-type="indexterm">&nbsp;</a><a data-secondary="alternatives to Command library" data-primary="command-line parsing" data-type="indexterm">&nbsp;</a><a data-primary="OPAM package manager" data-type="indexterm">&nbsp;</a></p>
+<dl>
+<dt>The <code>Arg</code> module</dt>
+<dd>The <code>Arg</code> module is from the OCaml standard library, which is used by the compiler itself to handle its command-line interface. Command is generally more featureful than Arg (mainly via support for subcommands, the <code>step</code> combinator to transform inputs, and help generation), but there’s absolutely nothing wrong with using Arg either. You can use the <code>Command.Spec.flags_of_args_exn</code> function to convert Arg specifications into ones compatible with Command. This is quite often used to help port older non-Core code into the Core standard library world.
+</dd>
+<dt><a href="https://forge.ocamlcore.org/projects/ocaml-getopt/">ocaml-getopt</a></dt>
+<dd><code>ocaml-getopt</code> provides the general command-line syntax of GNU <code>getopt</code> and <code>getopt_long</code>. The GNU conventions are widely used in the open source world, and this library lets your OCaml programs obey the same rules.
+</dd>
+<dt><a href="http://erratique.ch/software/cmdliner">Cmdliner</a></dt>
+<dd>Cmdliner is a mix between the Command and Getopt libraries. It allows for the declarative definition of command-line interfaces but exposes a more <code>getopt</code>-like interface. It also automates the generation of UNIX man pages as part of the specification. Cmdliner is the parser used by OPAM to manage its command line.
+</dd>
+</dl>
+</section>
+</section>
+</article></div><a href="concurrent-programming.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 15</small>Concurrent Programming with Async</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

@@ -1,0 +1,982 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Classes - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="classes">
+<h1>Classes</h1>
+<p>Programming with objects directly is great for encapsulation, but one of the main goals of object-oriented programming is code reuse through inheritance. For inheritance, we need to introduce <em>classes</em>. In object-oriented programming, a class is a “recipe” for creating objects. The recipe can be changed by adding new methods and fields, or it can be changed by modifying existing methods. <a data-secondary="object-oriented programming (OOP)" data-primary="programming" data-type="indexterm">&nbsp;</a></p>
+<section class="level2" id="ocaml-classes">
+<h2>OCaml Classes</h2>
+<p>In OCaml, class definitions must be defined as toplevel statements in a module. The syntax for a class definition uses the keyword <code>class</code>: <a data-secondary="basic syntax for" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+class istack = object
+  val mutable v = [0; 2]
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+end
+;;
+&gt;class istack :
+&gt;  object
+&gt;    val mutable v : int list
+&gt;    method pop : int option
+&gt;    method push : int -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>The <code>class istack : object ... end</code> result shows that we have created a class <code>istack</code> with <em>class type</em> <code>object ... end</code>. Like module types, class types are completely separate from regular OCaml types (e.g., <code>int</code>, <code>string</code>, and <code>list</code>) and, in particular, should not be confused with object types (e.g., <code>&lt; get : int; .. &gt;</code>). The class type describes the class itself rather than the objects that the class creates. This particular class type specifies that the <code>istack</code> class defines a mutable field <code>v</code>, a method <code>pop</code> that returns an <code>int option</code>, and a method <code>push</code> with type <code>int -&gt; unit</code>.</p>
+<p>To produce an object, classes are instantiated with the keyword <code>new</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new istack;;
+&gt;val s : istack = &lt;obj&gt;
+s#pop;;
+&gt;- : int option = Some 0
+s#push 5;;
+&gt;- : unit = ()
+s#pop;;
+&gt;- : int option = Some 5
+</code></pre>
+</div>
+<p>You may have noticed that the object <code>s</code> has been given the type <code>istack</code>. But wait, we’ve stressed <em>classes are not types</em>, so what’s up with that? In fact, what we’ve said is entirely true: classes and class names <em>are not</em> types. However, for convenience, the definition of the class <code>istack</code> also defines an object type <code>istack</code> with the same methods as the class. This type definition is equivalent to:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type istack = &lt; pop: int option; push: int -&gt; unit &gt;;;
+&gt;type istack = &lt; pop : int option; push : int -&gt; unit &gt;
+</code></pre>
+</div>
+<p>Note that this type represents any object with these methods: objects created using the <code>istack</code> class will have this type, but objects with this type may not have been created by the <code>istack</code> class.</p>
+</section>
+<section class="level2" id="class-parameters-and-polymorphism">
+<h2>Class Parameters and Polymorphism</h2>
+<p>A class definition serves as the <em>constructor</em> for the class. In general, a class definition may have parameters that must be provided as arguments when the object is created with <code>new</code>. <a data-secondary="class parameters and" data-primary="polymorphism" data-type="indexterm">&nbsp;</a><a data-secondary="class parameters and polymorphism" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>Let’s implement a variant of the <code>istack</code> class that can hold any values, not just integers. When defining the class, the type parameters are placed in square brackets before the class name in the class definition. We also add a parameter <code>init</code> for the initial contents of the stack:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+end
+;;
+&gt;class ['a] stack :
+&gt;  'a list -&gt;
+&gt;  object
+&gt;    val mutable v : 'a list
+&gt;    method pop : 'a option
+&gt;    method push : 'a -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>Note that the type parameter <code>['a]</code> in the definition uses square brackets, but for other uses of the type they are omitted (or replaced with parentheses if there is more than one type parameter).</p>
+<p>The type annotation on the declaration of <code>v</code> is used to constrain type inference. If we omit this annotation, the type inferred for the class will be “too polymorphic”: <code>init</code> could have some type <code>'b list</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] stack init = object
+  val mutable v = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+end
+;;
+&gt;Lines 1-13, characters 1-6:
+&gt;Error: Some type variables are unbound in this type:
+&gt;         class ['a] stack :
+&gt;           'b list -&gt;
+&gt;           object
+&gt;             val mutable v : 'b list
+&gt;             method pop : 'b option
+&gt;             method push : 'b -&gt; unit
+&gt;           end
+&gt;       The method pop has type 'b option where 'b is unbound
+</code></pre>
+</div>
+<p>In general, we need to provide enough constraints so that the compiler will infer the correct type. We can add type constraints to the parameters, to the fields, and to the methods. It is a matter of preference how many constraints to add. You can add type constraints in all three places, but the extra text may not help clarity. A convenient middle ground is to annotate the fields and/or class parameters, and add constraints to methods only if necessary.</p>
+</section>
+<section class="level2" id="object-types-as-interfaces">
+<h2>Object Types as Interfaces</h2>
+<p>We may wish to traverse the elements on our stack. One common style for doing this in object-oriented languages is to define a class for an <code>iterator</code> object. An iterator provides a generic mechanism to inspect and traverse the elements of a collection. <a data-secondary="traversing with iterator objects" data-primary="elements" data-type="indexterm">&nbsp;</a><a data-primary="iterators" data-type="indexterm">&nbsp;</a><a data-secondary="object types as interfaces" data-primary="objects" data-type="indexterm">&nbsp;</a><a data-secondary="object types as" data-primary="interfaces" data-type="indexterm">&nbsp;</a><a data-secondary="object types as interfaces" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>There are two common styles for defining abstract interfaces like this. In Java, an iterator would normally be specified with an interface, which specifies a set of method types:</p>
+<div class="highlight">
+<pre><code class="language-java">// Java-style iterator, specified as an interface.
+interface &lt;T&gt; iterator {
+  T Get();
+  boolean HasValue();
+  void Next();
+};</code></pre>
+</div>
+<p>In languages without interfaces, like C++, the specification would normally use <em>abstract</em> classes to specify the methods without implementing them (C++ uses the “= 0” definition to mean “not implemented”):</p>
+<div class="highlight">
+<pre><code class="language-cpp">// Abstract class definition in C++.
+template&lt;typename T&gt;
+class Iterator {
+ public:
+  virtual ~Iterator() {}
+  virtual T get() const = 0;
+  virtual bool has_value() const = 0;
+  virtual void next() = 0;
+};</code></pre>
+</div>
+<p>OCaml supports both styles. In fact, OCaml is more flexible than these approaches because an object type can be implemented by any object with the appropriate methods; it does not have to be specified by the object’s class <em>a priori</em>. We’ll leave abstract classes for later. Let’s demonstrate the technique using object types.</p>
+<p>First, we’ll define an object type <code>iterator</code> that specifies the methods in an iterator:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;;;
+&gt;type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;
+</code></pre>
+</div>
+<p>Next, we’ll define an actual iterator for lists. We can use this to iterate over the contents of our stack:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] list_iterator init = object
+  val mutable current : 'a list = init
+
+  method has_value = Poly.(current &lt;&gt; [])
+
+  method get =
+    match current with
+    | hd :: tl -&gt; hd
+    | [] -&gt; raise (Invalid_argument "no value")
+
+  method next =
+    match current with
+    | hd :: tl -&gt; current &lt;- tl
+    | [] -&gt; raise (Invalid_argument "no value")
+end
+;;
+&gt;class ['a] list_iterator :
+&gt;  'a list -&gt;
+&gt;  object
+&gt;    val mutable current : 'a list
+&gt;    method get : 'a
+&gt;    method has_value : bool
+&gt;    method next : unit
+&gt;  end
+</code></pre>
+</div>
+<p>Finally, we add a method <code>iterator</code> to the <code>stack</code> class to produce an iterator. To do so, we construct a <code>list_iterator</code> that refers to the current contents of the stack:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+
+  method iterator : 'a iterator =
+    new list_iterator v
+end
+;;
+&gt;class ['a] stack :
+&gt;  'a list -&gt;
+&gt;  object
+&gt;    val mutable v : 'a list
+&gt;    method iterator : 'a iterator
+&gt;    method pop : 'a option
+&gt;    method push : 'a -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>Now we can build a new stack, push some values to it, and iterate over them:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = new stack [];;
+&gt;val s : '_weak1 stack = &lt;obj&gt;
+s#push 5;;
+&gt;- : unit = ()
+s#push 4;;
+&gt;- : unit = ()
+let it = s#iterator;;
+&gt;val it : int iterator = &lt;obj&gt;
+it#get;;
+&gt;- : int = 4
+it#next;;
+&gt;- : unit = ()
+it#get;;
+&gt;- : int = 5
+it#next;;
+&gt;- : unit = ()
+it#has_value;;
+&gt;- : bool = false
+</code></pre>
+</div>
+<section class="level3" id="functional-iterators">
+<h3>Functional Iterators</h3>
+<p>In practice, most OCaml programmers avoid iterator objects in favor of functional-style techniques. For example, the alternative <code>stack</code> class that follows takes a function <code>f</code> and applies it to each of the elements on the stack: <a data-primary="functional iterators" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+
+  method iter f =
+    List.iter ~f v
+end
+;;
+&gt;class ['a] stack :
+&gt;  'a list -&gt;
+&gt;  object
+&gt;    val mutable v : 'a list
+&gt;    method iter : ('a -&gt; unit) -&gt; unit
+&gt;    method pop : 'a option
+&gt;    method push : 'a -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>What about functional operations like <code>map</code> and <code>fold</code>? In general, these methods take a function that produces a value of some other type than the elements of the set.</p>
+<p>For example, a <code>fold</code> method for our <code>['a] stack</code> class should have type <code>('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b</code>, where the <code>'b</code> is polymorphic. To express a polymorphic method type like this, we must use a type quantifier, as shown in the following example:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class ['a] stack init = object
+  val mutable v : 'a list = init
+
+  method pop =
+    match v with
+    | hd :: tl -&gt;
+      v &lt;- tl;
+      Some hd
+    | [] -&gt; None
+
+  method push hd =
+    v &lt;- hd :: v
+
+  method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =
+    (fun f init -&gt; List.fold ~f ~init v)
+end
+;;
+&gt;class ['a] stack :
+&gt;  'a list -&gt;
+&gt;  object
+&gt;    val mutable v : 'a list
+&gt;    method fold : ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b
+&gt;    method pop : 'a option
+&gt;    method push : 'a -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>The type quantifier <code>'b.</code> can be read as “for all <code>'b</code>.” Type quantifiers can only be used <em>directly after</em> the method name, which means that method parameters must be expressed using a <code>fun</code> or <code>function</code> expression.</p>
+</section>
+</section>
+<section class="level2" id="inheritance">
+<h2>Inheritance</h2>
+<p>Inheritance uses an existing class to define a new one. For example, the following class definition inherits from our <code>stack</code> class for strings and adds a new method <code>print</code> that prints all the strings on the stack: <a data-primary="inheritance" data-type="indexterm">&nbsp;</a><a data-secondary="inheritance in" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class sstack init = object
+  inherit [string] stack init
+
+  method print =
+    List.iter ~f:Stdio.print_endline v
+end
+;;
+&gt;class sstack :
+&gt;  string list -&gt;
+&gt;  object
+&gt;    val mutable v : string list
+&gt;    method pop : string option
+&gt;    method print : unit
+&gt;    method push : string -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>A class can override methods from classes it inherits. For example, this class creates stacks of integers that double the integers before they are pushed onto the stack:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class double_stack init = object
+  inherit [int] stack init as super
+
+  method push hd =
+    super#push (hd * 2)
+end
+;;
+&gt;class double_stack :
+&gt;  int list -&gt;
+&gt;  object
+&gt;    val mutable v : int list
+&gt;    method pop : int option
+&gt;    method push : int -&gt; unit
+&gt;  end
+</code></pre>
+</div>
+<p>The preceding <code>as super</code> statement creates a special object called <code>super</code> which can be used to call superclass methods. Note that <code>super</code> is not a real object and can only be used to call methods.</p>
+</section>
+<section class="level2" id="class-types">
+<h2>Class Types</h2>
+<p>To allow code in a different file or module to inherit from a class, we must expose it and give it a class type. What is the class type? <a data-secondary="class types" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>As an example, let’s wrap up our <code>stack</code> class in an explicit module (we’ll use explicit modules for illustration, but the process is similar when we want to define a <code>.mli</code> file). In keeping with the usual style for modules, we define a type <code>'a t</code> to represent the type of our stacks:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Stack = struct
+  class ['a] stack init = object
+    ...
+  end
+
+  type 'a t = 'a stack
+
+  let make init = new stack init
+end</code></pre>
+</div>
+<p>We have multiple choices in defining the module type, depending on how much of the implementation we want to expose. At one extreme, a maximally abstract signature would completely hide the class definitions:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module AbstractStack : sig
+   type 'a t = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
+
+   val make : unit -&gt; 'a t
+end = Stack</code></pre>
+</div>
+<p>The abstract signature is simple because we ignore the classes. But what if we want to include them in the signature so that other modules can inherit from the class definitions? For this, we need to specify types for the classes, called <em>class types</em>.</p>
+<p>Class types do not appear in mainstream object-oriented programming languages, so you may not be familiar with them, but the concept is pretty simple. A class type specifies the type of each of the visible parts of the class, including both fields and methods. Just as with module types, you don’t have to give a type for everything; anything you omit will be hidden:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module VisibleStack : sig
+
+  type 'a t = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
+
+  class ['a] stack : object
+    val mutable v : 'a list
+    method pop : 'a option
+    method push : 'a -&gt; unit
+  end
+
+  val make : unit -&gt; 'a t
+end = Stack</code></pre>
+</div>
+<p>In this signature, we’ve chosen to make everything visible. The class type for <code>stack</code> specifies the types of the field <code>v</code>, as well as the types of each of the methods.</p>
+</section>
+<section class="level2" id="open-recursion">
+<h2>Open Recursion</h2>
+<p>Open recursion allows an object’s methods to invoke other methods on the same object. These calls are looked up dynamically, allowing a method in one class to call a method from another class, if both classes are inherited by the same object. This allows mutually recursive parts of an object to be defined separately. <a data-secondary="open recursion" data-primary="recursion" data-type="indexterm">&nbsp;</a><a data-primary="open recursion" data-type="indexterm">&nbsp;</a><a data-secondary="open recursion in" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>This ability to define mutually recursive methods from separate components is a key feature of classes: achieving similar functionality with data types or modules is much more cumbersome and verbose.</p>
+<p>For example, consider writing recursive functions over a simple document format. This format is represented as a tree with three different types of node:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">type doc =
+  | Heading of string
+  | Paragraph of text_item list
+  | Definition of string list_item list
+
+and text_item =
+  | Raw of string
+  | Bold of text_item list
+  | Enumerate of int list_item list
+  | Quote of doc
+
+and 'a list_item =
+  { tag: 'a;
+    text: text_item list }</code></pre>
+</div>
+<p>It is quite easy to write a function that operates by recursively traversing this data. However, what if you need to write many similar recursive functions? How can you factor out the common parts of these functions to avoid repetitive boilerplate?</p>
+<p>The simplest way is to use classes and open recursion. For example, the following class defines objects that fold over the document data:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+
+class ['a] folder = object(self)
+  method doc acc = function
+  | Heading _ -&gt; acc
+  | Paragraph text -&gt; List.fold ~f:self#text_item ~init:acc text
+  | Definition list -&gt; List.fold ~f:self#list_item ~init:acc list
+
+  method list_item: 'b. 'a -&gt; 'b list_item -&gt; 'a =
+    fun acc {tag; text} -&gt;
+      List.fold ~f:self#text_item ~init:acc text
+
+  method text_item acc = function
+  | Raw _ -&gt; acc
+  | Bold text -&gt; List.fold ~f:self#text_item ~init:acc text
+  | Enumerate list -&gt; List.fold ~f:self#list_item ~init:acc list
+  | Quote doc -&gt; self#doc acc doc
+end</code></pre>
+</div>
+<p>The <code>object (self)</code> syntax binds <code>self</code> to the current object, allowing the <code>doc</code>, <code>list_item</code>, and <code>text_item</code> methods to call each other.</p>
+<p>By inheriting from this class, we can create functions that fold over the document data. For example, the <code>count_doc</code> function counts the number of bold tags in the document that are not within a list:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class counter = object
+  inherit [int] folder as super
+
+  method list_item acc li = acc
+
+  method text_item acc ti =
+    let acc = super#text_item acc ti in
+    match ti with
+    | Bold _ -&gt; acc + 1
+    | _ -&gt; acc
+end
+
+let count_doc = (new counter)#doc</code></pre>
+</div>
+<p>Note how the <code>super</code> special object is used in <code>text_item</code> to call the <code>[int] folder</code> class’s <code>text_item</code> method to fold over the children of the <code>text_item</code> node.</p>
+</section>
+<section class="level2" id="private-methods">
+<h2>Private Methods</h2>
+<p>Methods can be declared <em>private</em>, which means that they may be called by subclasses, but they are not visible otherwise (similar to a <em>protected</em> method in C++). <a data-secondary="private methods" data-primary="methods" data-type="indexterm">&nbsp;</a><a data-primary="protected methods" data-type="indexterm">&nbsp;</a><a data-primary="private methods" data-type="indexterm">&nbsp;</a><a data-secondary="private methods for" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>For example, we may want to include methods in our <code>folder</code> class for handling each of the different cases in <code>doc</code> and <code>text_item</code>. However, we may not want to force subclasses of <code>folder</code> to expose these methods, as they probably shouldn’t be called directly:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class ['a] folder2 = object(self)
+  method doc acc = function
+  | Heading str -&gt; self#heading acc str
+  | Paragraph text -&gt; self#paragraph acc text
+  | Definition list -&gt; self#definition acc list
+
+  method list_item: 'b. 'a -&gt; 'b list_item -&gt; 'a =
+    fun acc {tag; text} -&gt;
+      List.fold ~f:self#text_item ~init:acc text
+
+  method text_item acc = function
+  | Raw str -&gt; self#raw acc str
+  | Bold text -&gt; self#bold acc text
+  | Enumerate list -&gt; self#enumerate acc list
+  | Quote doc -&gt; self#quote acc doc
+
+  method private heading acc str = acc
+  method private paragraph acc text =
+    List.fold ~f:self#text_item ~init:acc text
+  method private definition acc list =
+    List.fold ~f:self#list_item ~init:acc list
+
+  method private raw acc str = acc
+  method private bold acc text =
+    List.fold ~f:self#text_item ~init:acc text
+  method private enumerate acc list =
+    List.fold ~f:self#list_item ~init:acc list
+  method private quote acc doc = self#doc acc doc
+end
+
+let f :
+  &lt; doc : int -&gt; doc -&gt; int;
+    list_item : 'a . int -&gt; 'a list_item -&gt; int;
+    text_item : int -&gt; text_item -&gt; int &gt;  = new folder2</code></pre>
+</div>
+<p>The final statement that builds the value <code>f</code> shows how the instantiation of a <code>folder2</code> object has a type that hides the private methods.</p>
+<p>To be precise, the private methods are part of the class type, but not part of the object type. This means, for example, that the object <code>f</code> has no method <code>bold</code>. However, the private methods are available to subclasses: we can use them to simplify our <code>counter</code> class:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class counter_with_private_method = object
+  inherit [int] folder2 as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt =
+    let acc = super#bold acc txt in
+    acc + 1
+end</code></pre>
+</div>
+<p>The key property of private methods is that they are visible to subclasses, but not anywhere else. If you want the stronger guarantee that a method is <em>really</em> private, not even accessible in subclasses, you can use an explicit class type that omits the method. In the following code, the private methods are explicitly omitted from the class type of <code>counter_with_sig</code> and can’t be invoked in subclasses of <code>counter_with_sig</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class counter_with_sig : object
+  method doc : int -&gt; doc -&gt; int
+  method list_item : int -&gt; 'b list_item -&gt; int
+  method text_item : int -&gt; text_item -&gt; int
+end = object
+  inherit [int] folder2 as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt =
+    let acc = super#bold acc txt in
+    acc + 1
+end</code></pre>
+</div>
+</section>
+<section class="level2" id="binary-methods">
+<h2>Binary Methods</h2>
+<p>A <em>binary method</em> is a method that takes an object of <code>self</code> type. One common example is defining a method for equality: <a data-secondary="binary methods" data-primary="methods" data-type="indexterm">&nbsp;</a><a data-secondary="binary methods for" data-primary="classes" data-type="indexterm">&nbsp;</a><a data-primary="binary methods" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class square w = object(self : 'self)
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method equals (other : 'self) = other#width = self#width
+end
+;;
+&gt;class square :
+&gt;  int -&gt;
+&gt;  object ('a)
+&gt;    method area : float
+&gt;    method equals : 'a -&gt; bool
+&gt;    method width : int
+&gt;  end
+class circle r = object(self : 'self)
+  method radius = r
+  method area = 3.14 *. (Float.of_int self#radius) **. 2.0
+  method equals (other : 'self) = other#radius = self#radius
+end
+;;
+&gt;class circle :
+&gt;  int -&gt;
+&gt;  object ('a)
+&gt;    method area : float
+&gt;    method equals : 'a -&gt; bool
+&gt;    method radius : int
+&gt;  end
+</code></pre>
+</div>
+<p>Note how we can use the type annotation <code>(self: 'self)</code> to obtain the type of the current object.</p>
+<p>We can now test different object instances for equality by using the <code>equals</code> binary method:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(new square 5)#equals (new square 5);;
+&gt;- : bool = true
+(new circle 10)#equals (new circle 7);;
+&gt;- : bool = false
+</code></pre>
+</div>
+<p>This works, but there is a problem lurking here. The method <code>equals</code> takes an object of the exact type <code>square</code> or <code>circle</code>. Because of this, we can’t define a common base class <code>shape</code> that also includes an equality method:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape = &lt; equals : shape -&gt; bool; area : float &gt;;;
+&gt;type shape = &lt; area : float; equals : shape -&gt; bool &gt;
+(new square 5 :&gt; shape);;
+&gt;Line 1, characters 1-24:
+&gt;Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int &gt;
+&gt;       is not a subtype of shape = &lt; area : float; equals : shape -&gt; bool &gt;
+&gt;       Type shape = &lt; area : float; equals : shape -&gt; bool &gt;
+&gt;       is not a subtype of
+&gt;         square = &lt; area : float; equals : square -&gt; bool; width : int &gt;
+&gt;       The first object type has no method width
+</code></pre>
+</div>
+<p>The problem is that a <code>square</code> expects to be compared with a <code>square</code>, not an arbitrary shape; likewise for <code>circle</code>. This problem is fundamental. Many languages solve it either with narrowing (with dynamic type checking), or by method overloading. Since OCaml has neither of these, what can we do? <a data-secondary="method overloading" data-primary="methods" data-type="indexterm">&nbsp;</a><a data-primary="dynamic type checking" data-type="indexterm">&nbsp;</a><a data-primary="narrowing" data-type="indexterm">&nbsp;</a><a data-secondary="polymorphic equality" data-primary="polymorphism" data-type="indexterm">&nbsp;</a></p>
+<p>Since the problematic method is equality, one proposal we could consider is to just drop it from the base type <code>shape</code> and use polymorphic equality instead. However, the built-in polymorphic equality has very poor behavior when applied to objects:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Poly.(=)
+  (object method area = 5 end)
+(object method area = 5 end)
+;;
+&gt;- : bool = false
+</code></pre>
+</div>
+<p>The problem here is that two objects are considered equal by the built-in polymorphic equality if and only if they are physically equal. There are other reasons not to use the built-in polymorphic equality, but these false negatives are a showstopper.</p>
+<p>If we want to define equality for shapes in general, the remaining solution is to use the same approach as we described for narrowing. That is, introduce a <em>representation</em> type implemented using variants, and implement the comparison based on the representation type: <a data-primary="representation types" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type shape_repr =
+  | Square of int
+| Circle of int
+;;
+&gt;type shape_repr = Square of int | Circle of int
+type shape =
+&lt; repr : shape_repr; equals : shape -&gt; bool; area : float &gt;
+;;
+&gt;type shape = &lt; area : float; equals : shape -&gt; bool; repr : shape_repr &gt;
+class square w = object(self)
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method repr = Square self#width
+  method equals (other : shape) = Poly.(=) other#repr self#repr
+end
+;;
+&gt;class square :
+&gt;  int -&gt;
+&gt;  object
+&gt;    method area : float
+&gt;    method equals : shape -&gt; bool
+&gt;    method repr : shape_repr
+&gt;    method width : int
+&gt;  end
+</code></pre>
+</div>
+<p>The binary method <code>equals</code> is now implemented in terms of the concrete type <code>shape_repr</code>. When using this pattern, you will not be able to hide the <code>repr</code> method, but you can hide the type definition using the module system:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">module Shapes : sig
+  type shape_repr
+  type shape =
+    &lt; repr : shape_repr; equals : shape -&gt; bool; area: float &gt;
+
+  class square : int -&gt;
+    object
+      method width : int
+      method area : float
+      method repr : shape_repr
+      method equals : shape -&gt; bool
+    end
+end = struct
+  type shape_repr =
+  | Square of int
+  | Circle of int
+  ...
+end</code></pre>
+</div>
+<p>Note that this solution prevents us from adding new kinds of shapes without adding new constructors to the <code>shape_repr</code> type, which is quite restrictive. The objects created by these classes are also in one-to-one correspondence with members of the representation type, making the objects seem somewhat redundant.</p>
+<p>However, equality is quite an extreme instance of a binary method: it needs access to all the information of the other object. Many other binary methods need only partial information about the object. For instance, a method that compares shapes by their sizes:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class square w = object(self)
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method larger other = Float.(self#area &gt; other#area)
+end</code></pre>
+</div>
+<p>In this case, there is no one-to-one correspondence between the objects and their sizes, and we can still easily define new kinds of shape.</p>
+</section>
+<section class="level2" id="virtual-classes-and-methods">
+<h2>Virtual Classes and Methods</h2>
+<p>A <em>virtual</em> class is a class where some methods or fields are declared but not implemented. This should not be confused with the word <code>virtual</code> as it is used in C++. A <code>virtual</code> method in C++ uses dynamic dispatch, while regular, nonvirtual methods are statically dispatched. In OCaml, <em>all</em> methods use dynamic dispatch, but the keyword <code>virtual</code> means that the method or field is not implemented. A class containing virtual methods must also be flagged <code>virtual</code> and cannot be directly instantiated (i.e., no object of this class can be created). <a data-primary="dispatching, dynamic vs.&nbsp;static" data-type="indexterm">&nbsp;</a><a data-primary="static dispatch" data-type="indexterm">&nbsp;</a><a data-primary="dynamic dispatch" data-type="indexterm">&nbsp;</a><a data-primary="virtual methods" data-type="indexterm">&nbsp;</a><a data-secondary="and virtual classes" data-primary="methods" data-type="indexterm">&nbsp;</a><a data-primary="virtual classes" data-type="indexterm">&nbsp;</a><a data-secondary="virtual classes" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<p>To explore this, let’s extend our shapes examples to simple, interactive graphics. We will use the Async concurrency library and the <a href="http://github.com/lpw25/async_graphics/">Async_graphics</a> library, which provides an asynchronous interface to OCaml’s built-in Graphics library. Concurrent programming with Async will be explored later in <a data-type="xref" href="concurrent-programming.html#concurrent-programming-with-async">Chapter 15, Concurrent Programming With Async</a>; for now you can safely ignore the details. You just need to run <code>opam install async_graphics</code> to get the library installed on your system.</p>
+<p>We will give each shape a <code>draw</code> method that describes how to draw the shape on the <code>Async_graphics</code> display:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">open Core
+open Async
+open Async_graphics
+
+type drawable = &lt; draw: unit &gt;</code></pre>
+</div>
+<section class="level3" id="create-some-simple-shapes">
+<h3>Create Some Simple Shapes</h3>
+<p>Now let’s add classes for making squares and circles. We include an <code>on_click</code> method for adding event handlers to the shapes: <a data-primary="geometric shapes" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">class square w x y = object(self)
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  val mutable width = w
+  method width = width
+
+  method draw = fill_rect x y width width
+
+  method private contains x' y' =
+    x &lt;= x' &amp;&amp; x' &lt;= x + width &amp;&amp;
+      y &lt;= y' &amp;&amp; y' &lt;= y + width
+
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+end</code></pre>
+</div>
+<p>The <code>square</code> class is pretty straightforward, and the <code>circle</code> class below also looks very similar:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class circle r x y = object(self)
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  val mutable radius = r
+  method radius = radius
+
+  method draw = fill_circle x y radius
+
+  method private contains x' y' =
+    let dx = abs (x' - x) in
+    let dy = abs (y' - y) in
+    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
+      dist &lt;= (Float.of_int radius)
+
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+end</code></pre>
+</div>
+<p>These classes have a lot in common, and it would be useful to factor out this common functionality into a superclass. We can easily move the definitions of <code>x</code> and <code>y</code> into a superclass, but what about <code>on_click</code>? Its definition depends on <code>contains</code>, which has a different definition in each class. The solution is to create a <em>virtual</em> class. This class will declare a <code>contains</code> method but leave its definition to the subclasses.</p>
+<p>Here is the more succinct definition, starting with a virtual <code>shape</code> class that implements <code>on_click</code> and <code>on_mousedown</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class virtual shape x y = object(self)
+  method virtual private contains: int -&gt; int -&gt; bool
+
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+
+  method on_mousedown ?start ?stop f =
+    on_mousedown ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+end</code></pre>
+</div>
+<p>Now we can define <code>square</code> and <code>circle</code> by inheriting from <code>shape</code>:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class square w x y = object
+  inherit shape x y
+
+  val mutable width = w
+  method width = width
+
+  method draw = fill_rect x y width width
+
+  method private contains x' y' =
+    x &lt;= x' &amp;&amp; x' &lt;= x + width &amp;&amp;
+    y &lt;= y' &amp;&amp; y' &lt;= y + width
+end
+
+class circle r x y = object
+  inherit shape x y
+
+  val mutable radius = r
+  method radius = radius
+
+  method draw = fill_circle x y radius
+
+  method private contains x' y' =
+    let dx = abs (x' - x) in
+    let dy = abs (y' - y) in
+    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
+    dist &lt;= (Float.of_int radius)
+end</code></pre>
+</div>
+<p>One way to view a <code>virtual</code> class is that it is like a functor, where the “inputs” are the declared—but not defined—virtual methods and fields. The functor application is implemented through inheritance, when virtual methods are given concrete implementations.</p>
+</section>
+</section>
+<section class="level2" id="initializers">
+<h2>Initializers</h2>
+<p>You can execute expressions during the instantiation of a class by placing them before the object expression or in the initial value of a field: <a data-primary="initializers" data-type="indexterm">&nbsp;</a><a data-secondary="initializers for" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">class obj x =
+  let () = Stdio.printf "Creating obj %d\n" x in
+  object
+    val field = Stdio.printf "Initializing field\n"; x
+end
+;;
+&gt;class obj : int -&gt; object val field : int end
+let o = new obj 3;;
+&gt;Creating obj 3
+&gt;Initializing field
+&gt;val o : obj = &lt;obj&gt;
+</code></pre>
+</div>
+<p>However, these expressions are executed before the object has been created and cannot refer to the methods of the object. If you need to use an object’s methods during instantiation, you can use an initializer. An initializer is an expression that will be executed during instantiation but after the object has been created.</p>
+<p>For example, suppose we wanted to extend our previous shapes module with a <code>growing_circle</code> class for circles that expand when clicked. We could inherit from <code>circle</code> and used the inherited <code>on_click</code> to add a handler for click events:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class growing_circle r x y = object(self)
+  inherit circle r x y
+
+  initializer
+    self#on_click (fun _x _y -&gt; radius &lt;- radius * 2)
+end</code></pre>
+</div>
+</section>
+<section class="level2" id="multiple-inheritance">
+<h2>Multiple Inheritance</h2>
+<p>When a class inherits from more than one superclass, it is using <em>multiple inheritance</em>. Multiple inheritance extends the variety of ways that classes can be combined, and it can be quite useful, particularly with virtual classes. However, it can be tricky to use, particularly when the inheritance hierarchy is a graph rather than a tree, so it should be used with care. <a data-secondary="name resolution in" data-primary="multiple inheritance" data-type="indexterm">&nbsp;</a><a data-primary="inheritance" data-type="indexterm">&nbsp;</a><a data-secondary="multiple inheritance in" data-primary="classes" data-type="indexterm">&nbsp;</a></p>
+<section class="level3" id="how-names-are-resolved">
+<h3>How Names Are Resolved</h3>
+<p>The main trickiness of multiple inheritance is due to naming—what happens when a method or field with some name is defined in more than one class?</p>
+<p>If there is one thing to remember about inheritance in OCaml, it is this: inheritance is like textual inclusion. If there is more than one definition for a name, the last definition wins.</p>
+<p>For example, consider this class, which inherits from <code>square</code> and defines a new <code>draw</code> method that uses <code>draw_rect</code> instead of <code>fill_rect</code> to draw the square:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class square_outline w x y = object
+  inherit square w x y
+  method draw = draw_rect x y width width
+end</code></pre>
+</div>
+<p>Since the <code>inherit</code> declaration comes before the method definition, the new <code>draw</code> method overrides the old one, and the square is drawn using <code>draw_rect</code>. But, what if we had defined <code>square_outline</code> as follows?</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class square_outline w x y = object
+  method draw = draw_rect x y w w
+  inherit square w x y
+end</code></pre>
+</div>
+<p>Here the <code>inherit</code> declaration comes after the method definition, so the <code>draw</code> method from <code>square</code> will override the other definition, and the square will be drawn using <code>fill_rect</code>.</p>
+<p>To reiterate, to understand what inheritance means, replace each <code>inherit</code> directive with its definition, and take the last definition of each method or field. Note that the methods and fields added by an inheritance are those listed in its class type, so private methods that are hidden by the type will not be included.</p>
+</section>
+<section class="level3" id="mixins">
+<h3>Mixins</h3>
+<p>When should you use multiple inheritance? If you ask multiple people, you’re likely to get multiple (perhaps heated) answers. Some will argue that multiple inheritance is overly complicated; others will argue that inheritance is problematic in general, and one should use object composition instead. But regardless of who you talk to, you will rarely hear that multiple inheritance is great and that you should use it widely. <a data-primary="mixin patterns" data-type="indexterm">&nbsp;</a><a data-secondary="mixin pattern and" data-primary="multiple inheritance" data-type="indexterm">&nbsp;</a></p>
+<p>In any case, if you’re programming with objects, there’s one general pattern for multiple inheritance that is both useful and reasonably simple: the <em>mixin</em> pattern. Generically, a <em>mixin</em> is just a virtual class that implements a feature based on another one. If you have a class that implements methods <em>A</em>, and you have a mixin <em>M</em> that provides methods <em>B</em> from <em>A</em>, then you can inherit from <em>M</em>—“mixing” it in—to get features <em>B</em>.</p>
+<p>That’s too abstract, so let’s give some examples based on our interactive shapes. We may wish to allow a shape to be dragged by the mouse. We can define this functionality for any object that has mutable <code>x</code> and <code>y</code> fields and an <code>on_mousedown</code> method for adding event handlers:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class virtual draggable = object(self)
+  method virtual on_mousedown:
+    ?start:unit Deferred.t -&gt;
+    ?stop:unit Deferred.t -&gt;
+    (int -&gt; int -&gt; unit) -&gt; unit
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  val mutable dragging = false
+  method dragging = dragging
+
+  initializer
+    self#on_mousedown
+      (fun mouse_x mouse_y -&gt;
+         let offset_x = x - mouse_x in
+         let offset_y = y - mouse_y in
+         let mouse_up = Ivar.create () in
+         let stop = Ivar.read mouse_up in
+         dragging &lt;- true;
+         on_mouseup ~stop
+           (fun _ -&gt;
+              Ivar.fill mouse_up ();
+              dragging &lt;- false);
+         on_mousemove ~stop
+           (fun ev -&gt;
+              x &lt;- ev.mouse_x + offset_x;
+              y &lt;- ev.mouse_y + offset_y))
+end</code></pre>
+</div>
+<p>This allows us to create draggable shapes using multiple inheritance:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class small_square = object
+  inherit square 20 40 40
+  inherit draggable
+end</code></pre>
+</div>
+<p>We can also use mixins to create animated shapes. Each animated shape has a list of update functions to be called during animation. We create an <code>animated</code> mixin to provide this update list and ensure that the functions in it are called at regular intervals when the shape is animated: <a data-secondary="creating with mixins" data-primary="animation" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">class virtual animated span = object(self)
+  method virtual on_click:
+    ?start:unit Deferred.t -&gt;
+    ?stop:unit Deferred.t -&gt;
+    (int -&gt; int -&gt; unit) -&gt; unit
+  val mutable updates: (int -&gt; unit) list = []
+  val mutable step = 0
+  val mutable running = false
+
+  method running = running
+
+  method animate =
+    step &lt;- 0;
+    running &lt;- true;
+    let stop =
+      Clock.after span
+      &gt;&gt;| fun () -&gt; running &lt;- false
+    in
+    Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0))
+      (fun () -&gt;
+         step &lt;- step + 1;
+         List.iter ~f:(fun f -&gt; f step) updates
+      )
+
+  initializer
+    self#on_click (fun _x _y -&gt; if not self#running then self#animate)
+end</code></pre>
+</div>
+<p>We use initializers to add functions to this update list. For example, this class will produce circles that move to the right for a second when clicked:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class my_circle = object
+  inherit circle 20 50 50
+  inherit animated Time.Span.second
+  initializer updates &lt;- [fun _ -&gt; x &lt;- x + 5]
+end</code></pre>
+</div>
+<p>These initializers can also be added using mixins:</p>
+<div class="highlight">
+<pre><code class="language-ocaml">class virtual linear x' y' = object
+  val virtual mutable updates: (int -&gt; unit) list
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  initializer
+    let update _ =
+      x &lt;- x + x';
+      y &lt;- y + y'
+    in
+    updates &lt;- update :: updates
+end
+
+let pi = (Float.atan 1.0) *. 4.0
+
+class virtual harmonic offset x' y' = object
+  val virtual mutable updates: (int -&gt; unit) list
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  initializer
+    let update step =
+      let m = Float.sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
+      let x' = Float.to_int (m *. Float.of_int x') in
+      let y' = Float.to_int (m *. Float.of_int y') in
+      x &lt;- x + x';
+      y &lt;- y + y'
+    in
+    updates &lt;- update :: updates
+end</code></pre>
+</div>
+<p>Since the <code>linear</code> and <code>harmonic</code> mixins are only used for their side effects, they can be inherited multiple times within the same object to produce a variety of different animations: <a data-primary="linear mixins" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">class my_square x y = object
+  inherit square 40 x y
+  inherit draggable
+  inherit animated (Time.Span.of_int_sec 5)
+  inherit linear 5 0
+  inherit harmonic 0.0 7 ~-10
+end
+
+let my_circle = object
+  inherit circle 30 250 250
+  inherit animated (Time.Span.minute)
+  inherit harmonic 0.0 10 0
+  inherit harmonic (pi /. 2.0) 0 10
+end</code></pre>
+</div>
+</section>
+<section class="level3" id="displaying-the-animated-shapes">
+<h3>Displaying the Animated Shapes</h3>
+<p>We finish our shapes module by creating a <code>main</code> function to draw some shapes on the graphical display and running that function using the Async scheduler: <a data-secondary="displaying animated shapes" data-primary="animation" data-type="indexterm">&nbsp;</a><a data-secondary="displaying animated shapes with" data-primary="multiple inheritance" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre><code class="language-ocaml">let main () =
+  let shapes = [
+     (my_circle :&gt; drawable);
+     (new my_square 50 350 :&gt; drawable);
+     (new my_square 50 200 :&gt; drawable);
+     (new growing_circle 20 70 70 :&gt; drawable);
+  ] in
+  let repaint () =
+    clear_graph ();
+    List.iter ~f:(fun s -&gt; s#draw) shapes;
+    synchronize ()
+  in
+    open_graph "";
+    auto_synchronize false;
+    Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
+
+let () = never_returns (Scheduler.go_main ~main ())</code></pre>
+</div>
+<p>Our <code>main</code> function creates a list of shapes to be displayed and defines a <code>repaint</code> function that actually draws them on the display. We then open a graphical display and ask Async to run <code>repaint</code> at regular intervals.</p>
+<p>Finally, build the binary by linking against the <code>async_graphics</code> package, which will pull in all the other dependencies:</p>
+<div class="highlight">
+<pre><code class="language-scheme">(executable
+  (name      shapes)
+  (modules   shapes)
+  (libraries async_graphics))</code></pre>
+</div>
+<div class="highlight">
+<pre data-filter-output=">" data-host="lama" data-user="fun" class="command-line"><code class="language-bash">dune build shapes.exe
+</code></pre>
+</div>
+<p>When you run the binary, a new graphical window should appear (on Mac OS X, you will need to install the X11 package first, which you will be prompted for). Try clicking on the various widgets, and gasp in awe at the sophisticated animations that unfold as a result.</p>
+<p>The graphics library described here is the one built into OCaml and is more useful as a learning tool than anything else. There are several third-party libraries that provide more sophisticated bindings to various graphics subsystems: <a data-primary="js_of_ocaml library" data-type="indexterm">&nbsp;</a><a data-primary="LabIGL library" data-type="indexterm">&nbsp;</a><a data-primary="Lablgtk library" data-type="indexterm">&nbsp;</a><a data-primary="graphics libraries" data-type="indexterm">&nbsp;</a><a data-secondary="for graphics" data-primary="libraries" data-type="indexterm">&nbsp;</a><a data-secondary="for graphics" data-primary="external libraries" data-type="indexterm">&nbsp;</a></p>
+<dl>
+<dt><a href="http://lablgtk.forge.ocamlcore.org">Lablgtk</a></dt>
+<dd>A strongly typed interface to the GTK widget library.
+</dd>
+<dt><a href="https://forge.ocamlcore.org/projects/lablgl/">LablGL</a></dt>
+<dd>An interface between OCaml and OpenGL, a widely supported standard for 3D rendering.
+</dd>
+<dt><a href="https://ocsigen.org/js_of_ocaml/">js_of_ocaml</a></dt>
+<dd>Compiles OCaml code to JavaScript and has bindings to WebGL. This is the emerging standard for 3D rendering in web browsers.
+</dd>
+</dl>
+</section>
+</section>
+</section>
+</article></div><a href="maps-and-hashtables.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 13</small>Maps and Hash Tables</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

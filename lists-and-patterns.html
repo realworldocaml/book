@@ -1,0 +1,695 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Lists and Patterns - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="lists-and-patterns">
+<h1>Lists and Patterns</h1>
+<p>This chapter will focus on two common elements of programming in OCaml: lists and pattern matching. Both of these were discussed in <a data-type="xref" href="guided-tour.html#a-guided-tour">Chapter 1, A Guided Tour</a>, but we’ll go into more depth here, presenting the two topics together and using one to help illustrate the other.</p>
+<section class="level2" id="list-basics">
+<h2>List Basics</h2>
+<p>An OCaml list is an immutable, finite sequence of elements of the same type. As we’ve seen, OCaml lists can be generated using a bracket-and-semicolon notation:<a data-secondary="generation of" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+[1;2;3];;
+&gt;- : int list = [1; 2; 3]
+</code></pre>
+</div>
+<p>And they can also be generated using the equivalent <code>::</code> notation:<a data-secondary=": : operator" data-primary="operators" data-type="indexterm">&nbsp;</a><a data-secondary="operator : :" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">1 :: (2 :: (3 :: []));;
+&gt;- : int list = [1; 2; 3]
+1 :: 2 :: 3 :: [];;
+&gt;- : int list = [1; 2; 3]
+</code></pre>
+</div>
+<p>As you can see, the <code>::</code> operator is right-associative, which means that we can build up lists without parentheses. The empty list <code>[]</code> is used to terminate a list. Note that the empty list is polymorphic, meaning it can be used with elements of any type, as you can see here:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let empty = [];;
+&gt;val empty : 'a list = []
+3 :: empty;;
+&gt;- : int list = [3]
+"three" :: empty;;
+&gt;- : string list = ["three"]
+</code></pre>
+</div>
+<p>The way in which the <code>::</code> operator attaches elements to the front of a list reflects the fact that OCaml’s lists are in fact singly linked lists. The figure below is a rough graphical representation of how the list <code>1 :: 2 :: 3 :: []</code> is laid out as a data structure. The final arrow (from the box containing <code>3</code>) points to the empty list.<a data-secondary="structure of" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<figure style="float: 0">
+<img src="images/lists-and-patterns/lists_layout.png">
+</figure>
+<p>Each <code>::</code> essentially adds a new block to the proceding picture. Such a block contains two things: a reference to the data in that list element, and a reference to the remainder of the list. This is why <code>::</code> can extend a list without modifying it; extension allocates a new list element but does not change any of the existing ones, as you can see:<a data-secondary="extension of" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let l = 1 :: 2 :: 3 :: [];;
+&gt;val l : int list = [1; 2; 3]
+let m = 0 :: l;;
+&gt;val m : int list = [0; 1; 2; 3]
+l;;
+&gt;- : int list = [1; 2; 3]
+</code></pre>
+</div>
+</section>
+<section class="level2" id="using-patterns-to-extract-data-from-a-list">
+<h2>Using Patterns to Extract Data from a List</h2>
+<p>We can read data out of a list using a <code>match</code> statement. Here’s a simple example of a recursive function that computes the sum of all elements of a list:<a data-primary="match statements" data-type="indexterm">&nbsp;</a><a id="PATMAT" data-secondary="extracting data with" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="extracting data from" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec sum l =
+  match l with
+  | [] -&gt; 0
+  | hd :: tl -&gt; hd + sum tl
+;;
+&gt;val sum : int list -&gt; int = &lt;fun&gt;
+sum [1;2;3];;
+&gt;- : int = 6
+sum [];;
+&gt;- : int = 0
+</code></pre>
+</div>
+<p>This code follows the convention of using <code>hd</code> to represent the first element (or head) of the list, and <code>tl</code> to represent the remainder (or tail).</p>
+<p>The <code>match</code> statement in <code>sum</code> is really doing two things: first, it’s acting as a case-analysis tool, breaking down the possibilities into a pattern-indexed list of cases. Second, it lets you name substructures within the data structure being matched. In this case, the variables <code>hd</code> and <code>tl</code> are bound by the pattern that defines the second case of the match statement. Variables that are bound in this way can be used in the expression to the right of the arrow for the pattern in question.</p>
+<p>The fact that <code>match</code> statements can be used to bind new variables can be a source of confusion. To see how, imagine we wanted to write a function that filtered out from a list all elements equal to a particular value. You might be tempted to write that code as follows, but when you do, the compiler will immediately warn you that something is wrong:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_value l to_drop =
+  match l with
+  | [] -&gt; []
+  | to_drop :: tl -&gt; drop_value tl to_drop
+  | hd :: tl -&gt; hd :: drop_value tl to_drop
+;;
+&gt;Line 5, characters 7-15:
+&gt;Warning 11: this match case is unused.
+&gt;val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Moreover, the function clearly does the wrong thing, filtering out all elements of the list rather than just those equal to the provided value, as you can see here:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">drop_value [1;2;3] 2;;
+&gt;- : int list = []
+</code></pre>
+</div>
+<p>So, what’s going on?</p>
+<p>The key observation is that the appearance of <code>to_drop</code> in the second case doesn’t imply a check that the first element is equal to the value <code>to_drop</code> that was passed in as an argument to <code>drop_value</code>. Instead, it just causes a new variable <code>to_drop</code> to be bound to whatever happens to be in the first element of the list, shadowing the earlier definition of <code>to_drop</code>. The third case is unused because it is essentially the same pattern as we had in the second case.</p>
+<p>A better way to write this code is not to use pattern matching for determining whether the first element is equal to <code>to_drop</code>, but to instead use an ordinary <code>if</code> statement:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_value l to_drop =
+  match l with
+  | [] -&gt; []
+  | hd :: tl -&gt;
+    let new_tl = drop_value tl to_drop in
+    if hd = to_drop then new_tl else hd :: new_tl
+;;
+&gt;val drop_value : int list -&gt; int -&gt; int list = &lt;fun&gt;
+drop_value [1;2;3] 2;;
+&gt;- : int list = [1; 3]
+</code></pre>
+</div>
+<p>If we wanted to drop a particular literal value, rather than a value that was passed in, we could do this using something like our original implementation of <code>drop_value</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_zero l =
+  match l with
+  | [] -&gt; []
+  | 0  :: tl -&gt; drop_zero tl
+  | hd :: tl -&gt; hd :: drop_zero tl
+;;
+&gt;val drop_zero : int list -&gt; int list = &lt;fun&gt;
+drop_zero [1;2;0;3];;
+&gt;- : int list = [1; 2; 3]
+</code></pre>
+</div>
+</section>
+<section class="level2" id="limitations-and-blessings-of-pattern-matching">
+<h2>Limitations (and Blessings) of Pattern Matching</h2>
+<p>The preceding example highlights an important fact about patterns, which is that they can’t be used to express arbitrary conditions. Patterns can characterize the layout of a data structure and can even include literals, as in the <code>drop_zero</code> example, but that’s where they stop. A pattern can check if a list has two elements, but it can’t check if the first two elements are equal to each other.<a data-secondary="pattern matching and" data-primary="data structures" data-type="indexterm">&nbsp;</a></p>
+<p>You can think of patterns as a specialized sublanguage that can express a limited (though still quite rich) set of conditions. The fact that the pattern language is limited turns out to be a good thing, making it possible to build better support for patterns in the compiler. In particular, both the efficiency of <code>match</code> statements and the ability of the compiler to detect errors in matches depend on the constrained nature of patterns.</p>
+<section class="level3" id="performance">
+<h3>Performance</h3>
+<p>Naively, you might think that it would be necessary to check each case in a <code>match</code> in sequence to figure out which one fires. If the cases of a match were guarded by arbitrary code, that would be the case. But OCaml is often able to generate machine code that jumps directly to the matched case based on an efficiently chosen set of runtime checks.</p>
+<p>As an example, consider the following rather silly functions for incrementing an integer by one. The first is implemented with a <code>match</code> statement, and the second with a sequence of <code>if</code> statements:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let plus_one_match x =
+  match x with
+  | 0 -&gt; 1
+  | 1 -&gt; 2
+  | 2 -&gt; 3
+  | 3 -&gt; 4
+  | 4 -&gt; 5
+  | 5 -&gt; 6
+  | _ -&gt; x + 1
+;;
+&gt;val plus_one_match : int -&gt; int = &lt;fun&gt;
+let plus_one_if x =
+  if      x = 0 then 1
+  else if x = 1 then 2
+  else if x = 2 then 3
+  else if x = 3 then 4
+  else if x = 4 then 5
+  else if x = 5 then 6
+  else x + 1
+;;
+&gt;val plus_one_if : int -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Note the use of <code>_</code> in the above match. This is a wildcard pattern that matches any value, but without binding a variable name to the value in question.</p>
+<p>If you benchmark these functions, you’ll see that <code>plus_one_if</code> is considerably slower than <code>plus_one_match</code>, and the advantage gets larger as the number of cases increases. Here, we’ll benchmark these functions using the <code>core_bench</code> library, which can be installed by running <code>opam install core_bench</code> from the command line.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">#require "core_bench";;
+open Core_bench;;
+[ Bench.Test.create ~name:"plus_one_match" (fun () -&gt;
+      plus_one_match 10)
+; Bench.Test.create ~name:"plus_one_if" (fun () -&gt;
+      plus_one_if 10) ]
+|&gt; Bench.bench
+;;
+&gt;Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+&gt;┌────────────────┬──────────┐
+&gt;│ Name           │ Time/Run │
+&gt;├────────────────┼──────────┤
+&gt;│ plus_one_match │  34.86ns │
+&gt;│ plus_one_if    │  54.89ns │
+&gt;└────────────────┴──────────┘
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>Here’s another, less artificial example. We can rewrite the <code>sum</code> function we described earlier in the chapter using an <code>if</code> statement rather than a match. We can then use the functions <code>is_empty</code>, <code>hd_exn</code>, and <code>tl_exn</code> from the <code>List</code> module to deconstruct the list, allowing us to implement the entire function without pattern matching:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec sum_if l =
+  if List.is_empty l then 0
+  else List.hd_exn l + sum_if (List.tl_exn l)
+;;
+&gt;val sum_if : int list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Again, we can benchmark these to see the difference:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let numbers = List.range 0 1000 in
+[ Bench.Test.create ~name:"sum_if" (fun () -&gt; sum_if numbers)
+; Bench.Test.create ~name:"sum"    (fun () -&gt; sum numbers) ]
+|&gt; Bench.bench
+;;
+&gt;Estimated testing time 20s (2 benchmarks x 10s). Change using -quota SECS.
+&gt;┌────────┬──────────┐
+&gt;│ Name   │ Time/Run │
+&gt;├────────┼──────────┤
+&gt;│ sum_if │  62.00us │
+&gt;│ sum    │  17.99us │
+&gt;└────────┴──────────┘
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>In this case, the <code>match</code>-based implementation is many times faster than the <code>if</code>-based implementation. The difference comes because we need to effectively do the same work multiple times, since each function we call has to reexamine the first element of the list to determine whether or not it’s the empty cell. With a <code>match</code> statement, this work happens exactly once per list element.</p>
+<p>This is a more general phenomena: pattern matching is very efficient, and pattern matching code is usually a win over what you might write by hand.</p>
+</section>
+<section class="level3" id="detecting-errors">
+<h3>Detecting Errors</h3>
+<p>The error-detecting capabilities of <code>match</code> statements are if anything more important than their performance. We’ve already seen one example of OCaml’s ability to find problems in a pattern match: in our broken implementation of <code>drop_value</code>, OCaml warned us that the final case was redundant. There are no algorithms for determining if a predicate written in a general-purpose language is redundant, but it can be solved reliably in the context of patterns.<a data-primary="match statements" data-type="indexterm">&nbsp;</a><a data-secondary="detecting with match statements" data-primary="errors" data-type="indexterm">&nbsp;</a></p>
+<p>OCaml also checks <code>match</code> statements for exhaustiveness. Consider what happens if we modify <code>drop_zero</code> by deleting the handler for one of the cases. As you can see, the compiler will produce a warning that we’ve missed a case, along with an example of an unmatched pattern:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec drop_zero l =
+  match l with
+  | [] -&gt; []
+  | 0  :: tl -&gt; drop_zero tl
+;;
+&gt;Lines 2-4, characters 5-31:
+&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;1::_
+&gt;val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Even for simple examples like this, exhaustiveness checks are pretty useful. But as we’ll see in <a data-type="xref" href="variants.html#variants">Chapter 6, Variants</a>, they become yet more valuable as you get to more complicated examples, especially those involving user-defined types. In addition to catching outright errors, they act as a sort of refactoring tool, guiding you to the locations where you need to adapt your code to deal with changing types.<a data-startref="PATMAT" data-type="indexterm">&nbsp;</a></p>
+</section>
+</section>
+<section class="level2" id="using-the-list-module-effectively">
+<h2>Using the List Module Effectively</h2>
+<p>We’ve so far written a fair amount of list-munging code using pattern matching and recursive functions. In real life, you’re usually better off using the <code>List</code> module, which is full of reusable functions that abstract out common patterns for computing with lists.<a data-primary="tables, creating with List module" data-type="indexterm">&nbsp;</a><a data-secondary="creating tables with" data-primary="List module" data-type="indexterm">&nbsp;</a><a id="Llistmod" data-secondary="List module" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<p>Let’s work through a concrete example. We’ll write a function <code>render_table</code> that, given a list of column headers and a list of rows, prints them out in a well-formatted text table, as follows:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">Stdio.print_endline
+  (render_table
+     ["language";"architect";"first release"]
+     [ ["Lisp" ;"John McCarthy" ;"1958"] ;
+       ["C"    ;"Dennis Ritchie";"1969"] ;
+       ["ML"   ;"Robin Milner"  ;"1973"] ;
+       ["OCaml";"Xavier Leroy"  ;"1996"] ;
+])
+;;
+&gt;| language | architect      | first release |
+&gt;|----------+----------------+---------------|
+&gt;| Lisp     | John McCarthy  | 1958          |
+&gt;| C        | Dennis Ritchie | 1969          |
+&gt;| ML       | Robin Milner   | 1973          |
+&gt;| OCaml    | Xavier Leroy   | 1996          |
+&gt;- : unit = ()
+</code></pre>
+</div>
+<p>The first step is to write a function to compute the maximum width of each column of data. We can do this by converting the header and each row into a list of integer lengths, and then taking the element-wise max of those lists of lengths. Writing the code for all of this directly would be a bit of a chore, but we can do it quite concisely by making use of three functions from the <code>List</code> module: <code>map</code>, <code>map2_exn</code>, and <code>fold</code>.</p>
+<p><code>List.map</code> is the simplest to explain. It takes a list and a function for transforming elements of that list, and returns a new list with the transformed elements. Thus, we can write:<a data-secondary="List.map" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map ~f:String.length ["Hello"; "World!"];;
+&gt;- : int list = [5; 6]
+</code></pre>
+</div>
+<p><code>List.map2_exn</code> is similar to <code>List.map</code>, except that it takes two lists and a function for combining them. Thus, we might write:<a data-secondary="List.map2_exn" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;
+&gt;- : int list = [3; 2; 3]
+</code></pre>
+</div>
+<p>The <code>_exn</code> is there because the function throws an exception if the lists are of mismatched length:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;
+&gt;Exception: (Invalid_argument "length mismatch in map2_exn: 3 &lt;&gt; 4 ")
+</code></pre>
+</div>
+<p><code>List.fold</code> is the most complicated of the three, taking three arguments: a list to process, an initial accumulator value, and a function for updating the accumulator. <code>List.fold</code> walks over the list from left to right, updating the accumulator at each step and returning the final value of the accumulator when it’s done. You can see some of this by looking at the type-signature for <code>fold</code>:<a data-secondary="List.fold" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.fold;;
+&gt;- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can use <code>List.fold</code> for something as simple as summing up a list:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.fold ~init:0 ~f:(+) [1;2;3;4];;
+&gt;- : int = 10
+</code></pre>
+</div>
+<p>This example is particularly simple because the accumulator and the list elements are of the same type. But <code>fold</code> is not limited to such cases. We can for example use <code>fold</code> to reverse a list, in which case the accumulator is itself a list:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.fold ~init:[] ~f:(fun acc hd -&gt; hd :: acc) [1;2;3;4];;
+&gt;- : int list = [4; 3; 2; 1]
+</code></pre>
+</div>
+<p>Let’s bring our three functions together to compute the maximum column widths:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let max_widths header rows =
+  let lengths l = List.map ~f:String.length l in
+  List.fold rows
+    ~init:(lengths header)
+    ~f:(fun acc row -&gt;
+        List.map2_exn ~f:Int.max acc (lengths row))
+;;
+&gt;val max_widths : string list -&gt; string list list -&gt; int list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Using <code>List.map</code> we define the function <code>lengths</code>, which converts a list of strings to a list of integer lengths. <code>List.fold</code> is then used to iterate over the rows, using <code>map2_exn</code> to take the max of the accumulator with the lengths of the strings in each row of the table, with the accumulator initialized to the lengths of the header row.</p>
+<p>Now that we know how to compute column widths, we can write the code to generate the line that separates the header from the rest of the text table. We’ll do this in part by mapping <code>String.make</code> over the lengths of the columns to generate a string of dashes of the appropriate length. We’ll then join these sequences of dashes together using <code>String.concat</code>, which concatenates a list of strings with an optional separator string, and <code>^</code>, which is a pairwise string concatenation function, to add the delimiters on the outside:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let render_separator widths =
+  let pieces = List.map widths
+      ~f:(fun w -&gt; String.make (w + 2) '-')
+  in
+  "|" ^ String.concat ~sep:"+" pieces ^ "|"
+;;
+&gt;val render_separator : int list -&gt; string = &lt;fun&gt;
+render_separator [3;6;2];;
+&gt;- : string = "|-----+--------+----|"
+</code></pre>
+</div>
+<p>Note that we make the line of dashes two larger than the provided width to provide some whitespace around each entry in the table.<a data-secondary="concatenation of" data-primary="strings" data-type="indexterm">&nbsp;</a><a data-primary="String.concat" data-type="indexterm">&nbsp;</a><a data-secondary="String.concat and" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<section data-type="note" class="level5" id="performance-of-string.concat-and">
+<h5>Performance of String.concat and ^</h5>
+<p>In the preceding code we’ve concatenated strings two different ways: <code>String.concat</code>, which operates on lists of strings; and <code>^</code>, which is a pairwise operator. You should avoid <code>^</code> for joining long numbers of strings, since it allocates a new string every time it runs. Thus, the following code</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;
+&gt;val s : string = "......."
+</code></pre>
+</div>
+<p>will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this code</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let s = String.concat [".";".";".";".";".";".";"."];;
+&gt;val s : string = "......."
+</code></pre>
+</div>
+<p>allocates one string of size 7, as well as a list of length 7. At these small sizes, the differences don’t amount to much, but for assembling large strings, it can be a serious performance issue.</p>
+</section>
+<p>Now we need code for rendering a row with data in it. We’ll first write a function called <code>pad</code>, for padding out a string to a specified length plus one blank space on both sides:<a data-secondary="padding of" data-primary="strings" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let pad s length =
+  " " ^ s ^ String.make (length - String.length s + 1) ' '
+;;
+&gt;val pad : string -&gt; int -&gt; string = &lt;fun&gt;
+pad "hello" 10;;
+&gt;- : string = " hello      "
+</code></pre>
+</div>
+<p>We can render a row of data by merging together the padded strings. Again, we’ll use <code>List.map2_exn</code> for combining the list of data in the row with the list of widths:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let render_row row widths =
+  let padded = List.map2_exn row widths ~f:pad in
+  "|" ^ String.concat ~sep:"|" padded ^ "|"
+;;
+&gt;val render_row : string list -&gt; int list -&gt; string = &lt;fun&gt;
+render_row ["Hello";"World"] [10;15];;
+&gt;- : string = "| Hello      | World           |"
+</code></pre>
+</div>
+<p>Now we can bring this all together in a single function that renders the table:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let render_table header rows =
+  let widths = max_widths header rows in
+  String.concat ~sep:"\n"
+    (render_row header widths
+     :: render_separator widths
+     :: List.map rows ~f:(fun row -&gt; render_row row widths)
+    )
+;;
+&gt;val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
+</code></pre>
+</div>
+<section class="level3" id="more-useful-list-functions">
+<h3>More Useful List Functions</h3>
+<p>The previous example touched on only three of the functions in <code>List</code>. We won’t cover the entire interface (for that you should look at the <a href="https://ocaml.janestreet.com/ocaml-core/latest/doc/base/Base/List/index.html">online docs</a>), but a few more functions are useful enough to mention here.</p>
+<section class="level4" id="combining-list-elements-with-list.reduce">
+<h4>Combining list elements with List.reduce</h4>
+<p><code>List.fold</code>, which we described earlier, is a very general and powerful function. Sometimes, however, you want something simpler and easier to use. One such function is <code>List.reduce</code>, which is essentially a specialized version of <code>List.fold</code> that doesn’t require an explicit starting value, and whose accumulator has to consume and produce values of the same type as the elements of the list it applies to.<a data-secondary="combining with List.reduce" data-primary="elements" data-type="indexterm">&nbsp;</a><a data-secondary="List.reduce" data-primary="List module" data-type="indexterm">&nbsp;</a><a data-secondary="combining elements in" data-primary="lists" data-type="indexterm">&nbsp;</a></p>
+<p>Here’s the type signature:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.reduce;;
+&gt;- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;
+</code></pre>
+</div>
+<p><code>reduce</code> returns an optional result, returning <code>None</code> when the input list is empty.</p>
+<p>Now we can see <code>reduce</code> in action:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.reduce ~f:(+) [1;2;3;4;5];;
+&gt;- : int option = Some 15
+List.reduce ~f:(+) [];;
+&gt;- : int option = None
+</code></pre>
+</div>
+</section>
+<section class="level4" id="filtering-with-list.filter-and-list.filter_map">
+<h4>Filtering with List.filter and List.filter_map</h4>
+<p>Very often when processing lists, you wants to restrict your attention to a subset of the values on your list. The <code>List.filter</code> function is one way of doing that:<a data-secondary="filtering values in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="filtering with List.filter" data-primary="values" data-type="indexterm">&nbsp;</a><a data-secondary="List.filter" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.filter ~f:(fun x -&gt; x % 2 = 0) [1;2;3;4;5];;
+&gt;- : int list = [2; 4]
+</code></pre>
+</div>
+<p>Note that the <code>mod</code> used above is an infix operator, as described in <a data-type="xref" href="variables-and-functions.html#variables-and-functions">Chapter 2, Variables And Functions</a>.</p>
+<p>Sometimes, you want to both transform and filter as part of the same computation. In that case, <code>List.filter_map</code> is what you need. The function passed to <code>List.filter_map</code> returns an optional value, and <code>List.filter_map</code> drops all elements for which <code>None</code> is returned.</p>
+<p>Here’s an example. The following function computes a list of file extensions from a list of files, piping the results through <code>List.dedup_and_sort</code> to return the list with duplicates removed and in sorted order. Note that this example uses <code>String.rsplit2</code> from the String module to split a string on the rightmost appearance of a given character:<a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="duplicates, removing" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let extensions filenames =
+  List.filter_map filenames ~f:(fun fname -&gt;
+      match String.rsplit2 ~on:'.' fname with
+      | None  | Some ("",_) -&gt; None
+      | Some (_,ext) -&gt;
+        Some ext)
+  |&gt; List.dedup_and_sort ~compare:String.compare
+;;
+&gt;val extensions : string list -&gt; string list = &lt;fun&gt;
+extensions ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"];;
+&gt;- : string list = ["c"; "ml"; "mli"]
+</code></pre>
+</div>
+<p>The preceding code is also an example of an Or pattern, which allows you to have multiple subpatterns within a larger pattern. In this case, <code>None | Some ("",_)</code> is an Or pattern. As we’ll see later, Or patterns can be nested anywhere within larger patterns.</p>
+</section>
+<section class="level4" id="partitioning-with-list.partition_tf">
+<h4>Partitioning with List.partition_tf</h4>
+<p>Another useful operation that’s closely related to filtering is partitioning. The function <code>List.partition_tf</code> takes a list and a function for computing a Boolean condition on the list elements, and returns two lists. The <code>tf</code> in the name is a mnemonic to remind the user that <code>true</code> elements go to the first list and <code>false</code> ones go to the second. Here’s an example:<a data-secondary="partitioning with List.partition_tf" data-primary="elements" data-type="indexterm">&nbsp;</a><a data-secondary="partitioning elements in" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="List.partition_tf" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_ocaml_source s =
+  match String.rsplit2 s ~on:'.' with
+  | Some (_,("ml"|"mli")) -&gt; true
+  | _ -&gt; false
+;;
+&gt;val is_ocaml_source : string -&gt; bool = &lt;fun&gt;
+let (ml_files,other_files) =
+List.partition_tf ["foo.c"; "foo.ml"; "bar.ml"; "bar.mli"]  ~f:is_ocaml_source
+;;
+&gt;val ml_files : string list = ["foo.ml"; "bar.ml"; "bar.mli"]
+&gt;val other_files : string list = ["foo.c"]
+</code></pre>
+</div>
+</section>
+<section class="level4" id="combining-lists">
+<h4>Combining lists</h4>
+<p>Another very common operation on lists is concatenation. The <code>List</code> module actually comes with a few different ways of doing this. There’s <code>List.append</code>, for concatenating a pair of lists. <a data-secondary="combining" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-secondary="List.append" data-primary="List module" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.append [1;2;3] [4;5;6];;
+&gt;- : int list = [1; 2; 3; 4; 5; 6]
+</code></pre>
+</div>
+<p>There’s also <code>@</code>, an operator equivalent of <code>List.append</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">[1;2;3] @ [4;5;6];;
+&gt;- : int list = [1; 2; 3; 4; 5; 6]
+</code></pre>
+</div>
+<p>In addition, there is <code>List.concat</code>, for concatenating a list of lists:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">List.concat [[1;2];[3;4;5];[6];[]];;
+&gt;- : int list = [1; 2; 3; 4; 5; 6]
+</code></pre>
+</div>
+<p>Here’s an example of using <code>List.concat</code> along with <code>List.map</code> to compute a recursive listing of a directory tree.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Sys = Core.Sys
+module Filename = Core.Filename
+;;
+&gt;module Sys = Core.Sys
+&gt;module Filename = Core.Filename
+let rec ls_rec s =
+  if Sys.is_file_exn ~follow_symlinks:true s
+  then [s]
+  else
+    Sys.ls_dir s
+    |&gt; List.map ~f:(fun sub -&gt; ls_rec (Filename.concat s sub))
+    |&gt; List.concat
+;;
+&gt;val ls_rec : string -&gt; string list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Note that this example uses some functions from the <code>Sys</code> and <code>Filename</code> modules from <code>Core</code> for accessing the filesystem and dealing with filenames.</p>
+<p>The preceding combination of <code>List.map</code> and <code>List.concat</code> is common enough that there is a function <code>List.concat_map</code> that combines these into one, more efficient operation:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec ls_rec s =
+  if Sys.is_file_exn ~follow_symlinks:true s
+  then [s]
+  else
+    Sys.ls_dir s
+    |&gt; List.concat_map ~f:(fun sub -&gt; ls_rec (Filename.concat s sub))
+;;
+&gt;val ls_rec : string -&gt; string list = &lt;fun&gt;
+</code></pre>
+</div>
+</section>
+</section>
+</section>
+<section class="level2" id="tail-recursion">
+<h2>Tail Recursion</h2>
+<p>The only way to compute the length of an OCaml list is to walk the list from beginning to end. As a result, computing the length of a list takes time linear in the size of the list. Here’s a simple function for doing so:<a data-secondary="List.init" data-primary="List module" data-type="indexterm">&nbsp;</a><a data-secondary="computing length of" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="tail recursion" data-type="indexterm">&nbsp;</a><a data-secondary="tail recursion" data-primary="recursion" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec length = function
+  | [] -&gt; 0
+  | _ :: tl -&gt; 1 + length tl
+;;
+&gt;val length : 'a list -&gt; int = &lt;fun&gt;
+length [1;2;3];;
+&gt;- : int = 3
+</code></pre>
+</div>
+<p>This looks simple enough, but you’ll discover that this implementation runs into problems on very large lists, as we’ll show in the following code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let make_list n = List.init n ~f:(fun x -&gt; x);;
+&gt;val make_list : int -&gt; int list = &lt;fun&gt;
+length (make_list 10);;
+&gt;- : int = 10
+length (make_list 10_000_000);;
+&gt;Stack overflow during evaluation (looping recursion?).
+</code></pre>
+</div>
+<p>The preceding example creates lists using <code>List.init</code>, which takes an integer <code>n</code> and a function <code>f</code> and creates a list of length <code>n</code>, where the data for each element is created by calling <code>f</code> on the index of that element.</p>
+<p>To understand where the error in the above example comes from, you need to learn a bit more about how function calls work. Typically, a function call needs some space to keep track of information associated with the call, such as the arguments passed to the function, or the location of the code that needs to start executing when the function call is complete. To allow for nested function calls, this information is typically organized in a stack, where a new <em>stack frame</em> is allocated for each nested function call, and then deallocated when the function call is complete.<a data-primary="stack frames" data-type="indexterm">&nbsp;</a></p>
+<p>And that’s the problem with our call to <code>length</code>: it tried to allocate 10 million stack frames, which exhausted the available stack space. Happily, there’s a way around this problem. Consider the following alternative implementation:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec length_plus_n l n =
+  match l with
+  | [] -&gt; n
+  | _ :: tl -&gt; length_plus_n tl (n + 1)
+;;
+&gt;val length_plus_n : 'a list -&gt; int -&gt; int = &lt;fun&gt;
+let length l = length_plus_n l 0;;
+&gt;val length : 'a list -&gt; int = &lt;fun&gt;
+length [1;2;3;4];;
+&gt;- : int = 4
+</code></pre>
+</div>
+<p>This implementation depends on a helper function, <code>length_plus_n</code>, that computes the length of a given list plus a given <code>n</code>. In practice, <code>n</code> acts as an accumulator in which the answer is built up, step by step. As a result, we can do the additions along the way rather than doing them as we unwind the nested sequence of function calls, as we did in our first implementation of <code>length</code>.</p>
+<p>The advantage of this approach is that the recursive call in <code>length_plus_n</code> is a <em>tail call</em>. We’ll explain more precisely what it means to be a tail call shortly, but the reason it’s important is that tail calls don’t require the allocation of a new stack frame, due to what is called the <em>tail-call optimization</em>. A recursive function is said to be <em>tail recursive</em> if all of its recursive calls are tail calls. <code>length_plus_n</code> is indeed tail recursive, and as a result, <code>length</code> can take a long list as input without blowing the stack:<a data-primary="tail calls" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">length (make_list 10_000_000);;
+&gt;- : int = 10000000
+</code></pre>
+</div>
+<p>So when is a call a tail call? Let’s think about the situation where one function (the <em>caller</em>) invokes another (the <em>callee</em>). The invocation is considered a tail call when the caller doesn’t do anything with the value returned by the callee except to return it. The tail-call optimization makes sense because, when a caller makes a tail call, the caller’s stack frame need never be used again, and so you don’t need to keep it around. Thus, instead of allocating a new stack frame for the callee, the compiler is free to reuse the caller’s stack frame.</p>
+<p>Tail recursion is important for more than just lists. Ordinary nontail recursive calls are reasonable when dealing with data structures like binary trees, where the depth of the tree is logarithmic in the size of your data. But when dealing with situations where the depth of the sequence of nested calls is on the order of the size of your data, tail recursion is usually the right approach.</p>
+</section>
+<section class="level2" id="terser-and-faster-patterns">
+<h2>Terser and Faster Patterns</h2>
+<p>Now that we know more about how lists and patterns work, let’s consider how we can improve on an example from <a data-type="xref" href="guided-tour.html#recursive-list-functions">Chapter 1, Recursive List Functions</a>: the function <code>destutter</code>, which removes sequential duplicates from a list. Here’s the implementation that was described earlier:<a data-primary="destutter function" data-type="indexterm">&nbsp;</a><a id="PTTRNMAT" data-secondary="terser and faster patterns" data-primary="pattern matching" data-type="indexterm">&nbsp;</a><a data-secondary="duplicate removal" data-primary="lists" data-type="indexterm">&nbsp;</a><a data-primary="duplicates, removing" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter list =
+  match list with
+  | [] -&gt; []
+  | [hd] -&gt; [hd]
+  | hd :: hd' :: tl -&gt;
+    if hd = hd' then destutter (hd' :: tl)
+    else hd :: destutter (hd' :: tl)
+;;
+&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We’ll consider some ways of making this code more concise and more efficient.</p>
+<p>First, let’s consider efficiency. One problem with the <code>destutter</code> code above is that it in some cases re-creates on the righthand side of the arrow a value that already existed on the lefthand side. Thus, the pattern <code>[hd] -&gt; [hd]</code> actually allocates a new list element, when really, it should be able to just return the list being matched. We can reduce allocation here by using an <code>as</code> pattern, which allows us to declare a name for the thing matched by a pattern or subpattern. While we’re at it, we’ll use the <code>function</code> keyword to eliminate the need for an explicit match:<a data-primary="function keyword" data-type="indexterm">&nbsp;</a></p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+  | [] as l -&gt; l
+  | [_] as l -&gt; l
+  | hd :: (hd' :: _ as tl) -&gt;
+    if hd = hd' then destutter tl
+    else hd :: destutter tl
+;;
+&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can further collapse this by combining the first two cases into one, using an <em>or pattern</em>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+  | [] | [_] as l -&gt; l
+  | hd :: (hd' :: _ as tl) -&gt;
+    if hd = hd' then destutter tl
+    else hd :: destutter tl
+;;
+&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+</code></pre>
+</div>
+<p>We can make the code slightly terser now by using a <code>when</code> clause. A <code>when</code> clause allows us to add an extra precondition to a pattern in the form of an arbitrary OCaml expression. In this case, we can use it to include the check on whether the first two elements are equal:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+  | [] | [_] as l -&gt; l
+  | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl
+  | hd :: tl -&gt; hd :: destutter tl
+;;
+&gt;val destutter : int list -&gt; int list = &lt;fun&gt;
+</code></pre>
+</div>
+<section data-type="note" class="level5" id="polymorphic-compare">
+<h5>Polymorphic Compare</h5>
+<p>You might have noticed that <code>destutter</code> is specialized to lists of integers. That’s because <code>Base</code>’s default equality operator is specialized to integers, as you can see if you try to apply it to values of a different type.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">"foo" = "bar";;
+&gt;Line 1, characters 1-6:
+&gt;Error: This expression has type string but an expression was expected of type
+&gt;         int
+</code></pre>
+</div>
+<p>OCaml also has a collection of polymorphic equality and comparison operators, which we can make available by opening the module <code>Base.Poly</code>.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base.Poly;;
+"foo" = "bar";;
+&gt;- : bool = false
+3 = 4;;
+&gt;- : bool = false
+[1;2;3] = [1;2;3];;
+&gt;- : bool = true
+</code></pre>
+</div>
+<p>Indeed, if we look at the type of the equality operator, we’ll see that it is polymorphic.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(=);;
+&gt;- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;
+</code></pre>
+</div>
+<p>If we rewrite our destutter example with <code>Base.Poly</code> open, we’ll see that it gets a polymorphic type, and can now be used on inputs of different types.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec destutter = function
+  | [] | [_] as l -&gt; l
+  | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl
+  | hd :: tl -&gt; hd :: destutter tl
+;;
+&gt;val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
+destutter [1;2;2;3;4;3;3];;
+&gt;- : int list = [1; 2; 3; 4; 3]
+destutter ["one";"two";"two";"two";"three"];;
+&gt;- : string list = ["one"; "two"; "three"]
+</code></pre>
+</div>
+<p>OCaml comes with a whole family of polymorphic comparison operators, including the standard infix comparators, <code>&lt;</code>, <code>&gt;=</code>, etc., as well as the function <code>compare</code> that returns <code>-1</code>, <code>0</code>, or <code>1</code> to flag whether the first operand is smaller than, equal to, or greater than the second, respectively.</p>
+<p>You might wonder how you could build functions like these yourself if OCaml didn’t come with them built in. It turns out that you <em>can’t</em> build these functions on your own. OCaml’s polymorphic comparison functions are built into the runtime to a low level. These comparisons are polymorphic on the basis of ignoring almost everything about the types of the values that are being compared, paying attention only to the structure of the values as they’re laid out in memory. (You can learn more about this structure in <a data-type="xref" href="runtime-memory-layout.html">Chapter 20, Memory Representation of Values</a>.)</p>
+<p>Polymorphic compare does have some limitations. For example, it will fail at runtime if it encounters a function value.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">(fun x -&gt; x + 1) = (fun x -&gt; x + 1);;
+&gt;Exception: (Invalid_argument "compare: functional value")
+</code></pre>
+</div>
+<p>Similarly, it will fail on values that come from outside the OCaml heap, like values from C bindings. But it will work in a reasonable way for most other kinds of values.</p>
+<p>For simple atomic types, polymorphic compare has the semantics you would expect: for floating-point numbers and integers, polymorphic compare corresponds to the expected numerical comparison functions. For strings, it’s a lexicographic comparison.</p>
+<p>That said, experienced OCaml developers typically avoid polymorphic comparison. That’s surprising, given how obviously useful it is, but there’s a good reason. While it’s very convenient, in some cases, the type oblivious nature of polymorphic compare means that it does something that doesn’t make sense for the particular type of values you’re dealing with. This can lead to surprising and hard to resolve bugs in your code. It’s for this reason that <code>Base</code> discourages the use of polymorphic compare by hiding it by default.</p>
+<p>We’ll discuss this issue more in <a data-type="xref" href="maps-and-hashtables.html#maps-and-hash-tables">Chapter 13, Maps And Hash Tables</a>. But in any case, you can restore the default behavior of <code>Base</code> by opening the module again.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">open Base;;
+</code></pre>
+</div>
+</section>
+<p>Note that <code>when</code> clauses have some downsides. As we noted earlier, the static checks associated with pattern matches rely on the fact that patterns are restricted in what they can express. Once we add the ability to add an arbitrary condition to a pattern, something is lost. In particular, the ability of the compiler to determine if a match is exhaustive, or if some case is redundant, is compromised.</p>
+<p>Consider the following function, which takes a list of optional values, and returns the number of those values that are <code>Some</code>. Because this implementation uses <code>when</code> clauses, the compiler can’t tell that the code is exhaustive:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec count_some list =
+  match list with
+  | [] -&gt; 0
+  | x :: tl when Option.is_none x -&gt; count_some tl
+  | x :: tl when Option.is_some x -&gt; 1 + count_some tl
+;;
+&gt;Lines 2-5, characters 5-57:
+&gt;Warning 8: this pattern-matching is not exhaustive.
+&gt;Here is an example of a case that is not matched:
+&gt;_::_
+&gt;(However, some guarded clause may match this value.)
+&gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Despite the warning, the function does work fine:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">count_some [Some 3; None; Some 4];;
+&gt;- : int = 2
+</code></pre>
+</div>
+<p>If we add another redundant case without a <code>when</code> clause, the compiler will stop complaining about exhaustiveness and won’t produce a warning about the redundancy.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec count_some list =
+  match list with
+  | [] -&gt; 0
+  | x :: tl when Option.is_none x -&gt; count_some tl
+  | x :: tl when Option.is_some x -&gt; 1 + count_some tl
+  | x :: tl -&gt; -1 (* unreachable *)
+;;
+&gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>Probably a better approach is to simply drop the second <code>when</code> clause:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec count_some list =
+  match list with
+  | [] -&gt; 0
+  | x :: tl when Option.is_none x -&gt; count_some tl
+  | _ :: tl -&gt; 1 + count_some tl
+;;
+&gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>This is a little less clear, however, than the direct pattern-matching solution, where the meaning of each pattern is clearer on its own:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let rec count_some list =
+  match list with
+  | [] -&gt; 0
+  | None   :: tl -&gt; count_some tl
+  | Some _ :: tl -&gt; 1 + count_some tl
+;;
+&gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<p>The takeaway from all of this is although <code>when</code> clauses can be useful, we should prefer patterns wherever they are sufficient.</p>
+<p>As a side note, the above implementation of <code>count_some</code> is longer than necessary; even worse, it is not tail recursive. In real life, you would probably just use the <code>List.count</code> function from <code>Core_kernel</code>:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let count_some l = List.count ~f:Option.is_some l;;
+&gt;val count_some : 'a option list -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+</section>
+</section>
+</article></div><a href="files-modules-and-programs.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 04</small>Files, Modules, and Programs</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>

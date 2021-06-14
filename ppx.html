@@ -1,0 +1,104 @@
+<html style="" lang="en" class="js flexbox fontface"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><title>Preprocessing with ppx - Real World OCaml</title><link href="css/app.css" rel="stylesheet"><link href="css/prism.css" rel="stylesheet"><script src="js/min/modernizr-min.js"></script><script src="js/prism.js"></script><script src="//use.typekit.net/gfj8wez.js"></script><script>try{Typekit.load();}catch(e){}</script></head><body><div class="title-bar"><div class="title"><h1>Real World OCaml</h1><h5>2<sup>nd</sup> Edition (in progress)</h5><nav><a href="index.html">Home</a><a href="toc.html">Table of Contents</a><a href="faqs.html">FAQs</a><a href="install.html">Install</a><a href="https://ocaml.janestreet.com/ocaml-core/">API Docs</a></nav></div></div><div class="wrap"><div class="left-column"><a class="to-chapter" href="toc.html"><small>Back</small><h5>Table of Contents</h5></a></div><article class="main-body"><section class="level1" id="preprocessing-with-ppx">
+<h1>Preprocessing with ppx</h1>
+<p>One powerful feature in OCaml is a facility to extend the standard language via <em>extension points</em>. These represent placeholders in the OCaml syntax tree and are ignored by the standard compiler tooling, beyond being delimited and stored in the abstract syntax tree alongside the normal parsed source code. They are intended to be expanded by external tools that select extension nodes that can interpret them. The external tools can choose to generate further OCaml code by transforming the input syntax tree, thus forming the basis of an extensible preprocessor for the language.</p>
+<p>There are two primary forms of extension points in OCaml: <em>attributes</em> and <em>extension nodes</em>. Let’s first run through some examples of what they look like, and then see how to use them in your own code.</p>
+<section class="level2" id="extension-attributes">
+<h2>Extension Attributes</h2>
+<p>Attributes supply additional information that is attached to a node in the OCaml syntax tree, and subsequently interpreted and expanded by external tools.</p>
+<p>The basic form of an attribute is the <code>[@ ... ]</code> syntax. The number of <code>@</code> symbols defines which part of the syntax tree the attribute is bound to:</p>
+<ul>
+<li>a single <code>[@</code> binds to expressions and individual type definitions.</li>
+<li>a double <code>[@@</code> binds to blocks of code, such as module definitions, type declarations or class fields.</li>
+<li>a triple <code>[@@@</code> appears as a standalone entry in a module implementation or signature, and are not tied to any specific source code node.</li>
+</ul>
+<p>The OCaml compiler has some useful builtin attributes that we can use to illustrate their use without requiring any external tools. Let’s first look at the use of the standalone attribute <code>@@@warning</code> to toggle an OCaml compiler warning.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Abc = struct
+
+[@@@warning "+10"]
+let a = Sys.get_argv (); ()
+
+[@@@warning "-10"]
+let b = Sys.get_argv (); ()
+end
+;;
+&gt;Line 4, characters 11-26:
+&gt;Warning 10: this expression should have type unit.
+&gt;module Abc : sig val a : unit val b : unit end
+</code></pre>
+</div>
+<p>The warning number in our example is taken from the <a href="https://caml.inria.fr/pub/docs/manual-ocaml/native.html">compiler manual page</a>. In this case, warning 10 emits a message if the expression in a sequence doesn’t have type <code>unit</code>. The <code>@@@warning</code> nodes in the module implementation cause the compiler to change its behaviour within the scope of that structure only.</p>
+<p>An annotation can also be more narrowly attached to a block of code. For example, a module implementation can be annotated with <code>@@deprecated</code> to indicate that it should not be used in new code:</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">module Planets = struct
+  let earth = true
+  let pluto = true
+end [@@deprecated "Sorry, Pluto is no longer a planet. Use the Planets2016 module instead."]
+;;
+&gt;module Planets : sig val earth : bool val pluto : bool end
+module Planets2016 = struct
+  let earth = true
+  let pluto = false
+end
+;;
+&gt;module Planets2016 : sig val earth : bool val pluto : bool end
+</code></pre>
+</div>
+<p>In this example, the <code>@@deprecated</code> annotation is only attached to the <code>Planets</code> module, and the human-readable argument string redirects developers to the newer code. Now if we try to use the value that has been marked as deprecated, the compiler will issue a warning.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">let is_pluto_a_planet = Planets.pluto;;
+&gt;Line 1, characters 25-38:
+&gt;Alert deprecated: module Planets
+&gt;Sorry, Pluto is no longer a planet. Use the Planets2016 module instead.
+&gt;val is_pluto_a_planet : bool = true
+let is_pluto_a_planet = Planets2016.pluto;;
+&gt;val is_pluto_a_planet : bool = false
+</code></pre>
+</div>
+<p>Finally, an attribute can also be attached to an individual expression. In the next example, the <code>@warn_on_literal_pattern</code> attribute indicates that the argument to the type constructor should not be pattern matched upon with a constant literal.</p>
+<div class="highlight">
+<pre data-filter-output=">" data-prompt="#" class="command-line"><code class="language-ocaml">type program_result =
+| Error of string [@warn_on_literal_pattern]
+| Exit_code of int
+;;
+&gt;type program_result = Error of string | Exit_code of int
+let exit_with = function
+| Error "It blew up" -&gt; 1
+| Exit_code code -&gt; code
+| Error _ -&gt; 100
+;;
+&gt;Line 2, characters 11-23:
+&gt;Warning 52: Code should not depend on the actual values of
+&gt;this constructor's arguments. They are only for information
+&gt;and may change in future versions. (See manual section 9.5)
+&gt;val exit_with : program_result -&gt; int = &lt;fun&gt;
+</code></pre>
+</div>
+<section class="level4" id="commonly-used-extension-attributes">
+<h4>Commonly used extension attributes</h4>
+<p>We have already used extension points in <a data-type="xref" href="data-serialization.html#data-serialization-with-s-expressions">Chapter 18, Data Serialization With S Expressions</a> to generate boilerplate code for handling s-expressions.</p>
+<p>TODO</p>
+<p>###&nbsp;Extension Nodes</p>
+<p>While extension points are useful for annotating existing source code, we also need a mechanism to store generic placeholders within the OCaml AST for code generation. OCaml provides this facility via the <em>extension node</em> syntax.</p>
+<p>The general syntax for an extension node is <code>[%id expr]</code>, where <code>id</code> is an identifier for a particular extension node rewriter and <code>expr</code> is the payload for the rewriter to parse.</p>
+<p>##&nbsp;Using ppx extensions</p>
+</section>
+<section class="level3" id="ppx-in-the-compiler">
+<h3>ppx in the compiler</h3>
+</section>
+</section>
+<section class="level2" id="building-your-first-ppx-extension">
+<h2>Building your first ppx extension</h2>
+<section class="level3" id="the-ast-mapper-and-hello-world">
+<h3>The AST Mapper and hello world</h3>
+<ul>
+<li>replace <code>[%calc 1+2]</code> with a constant integer</li>
+</ul>
+</section>
+<section class="level3" id="ppxlib">
+<h3>ppxlib</h3>
+<p>Why use ppxlib over direct use of AST-mapper</p>
+</section>
+</section>
+</section>
+</article></div><a href="compiler-backend.html" class="next-chapter"><div class="content"><h1><small>Next: Chapter 24</small>The Compiler Backend: Bytecode and Native code</h1></div></a><footer><div class="content"><ul><li><a href="http://twitter.com/realworldocaml">@realworldocaml</a></li><li><a href="http://twitter.com/yminsky">@yminsky</a></li><li><a href="http://twitter.com/avsm">@avsm</a></li><li><a href="https://plus.google.com/111219778721183890368">+hickey</a></li><li><a href="https://github.com/realworldocaml">GitHub</a></li><li><a href="http://www.goodreads.com/book/show/16087552-real-world-ocaml">goodreads</a></li></ul><p>Copyright 2012-2014 Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p></div></footer><script src="js/jquery.min.js"></script><script src="js/min/app-min.js"></script></body></html>
