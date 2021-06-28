@@ -1,0 +1,3 @@
+(lang dune 1.2)
+(name asn1-combinators)
+(version v0.2.2)

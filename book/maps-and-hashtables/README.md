@@ -115,7 +115,7 @@ We don't need to provide the module again for functions like `Map.find` or
 function it uses.
 
 Not every module can be used for creating maps, but the standard ones in
-`Base` are. Later in the chapter, we'll show how you can set up a module your
+`Base` are. Later in the chapter, we'll show how you can set up a module of your
 own so it can be used in this way.
 
 ### Sets
@@ -219,10 +219,10 @@ Line 1, characters 19-23:
 Error: Signature mismatch:
        ...
        The value `comparator' is required but not provided
-       File "duniverse/base.v0.13.2/src/comparator.mli", line 21, characters 2-53:
+       File "duniverse/base/src/comparator.mli", line 21, characters 2-53:
          Expected declaration
        The type `comparator_witness' is required but not provided
-       File "duniverse/base.v0.13.2/src/comparator.mli", line 19, characters 2-25:
+       File "duniverse/base/src/comparator.mli", line 19, characters 2-25:
          Expected declaration
 ```
 
@@ -794,7 +794,7 @@ Error: This expression has type
 
 Hash tables are the imperative cousin of maps. We walked over a basic hash
 table implementation in
-[Imperative Programming 1](imperative-programming.html#imperative-programming-1){data-type=xref},
+[Imperative Programming](imperative-programming.html#imperative-programming-1){data-type=xref},
 so in this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
 module. We'll cover this material more briefly than we did with maps because
 many of the concepts are shared. [hash tables/basics of]{.idx}

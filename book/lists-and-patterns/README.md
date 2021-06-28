@@ -523,10 +523,11 @@ val render_table : string list -> string list list -> string = <fun>
 
 ### More Useful List Functions
 
-The previous example we worked through touched on only three of the functions
-in `List`. We won't cover the entire interface (for that you should look at
-the [online docs](https://ocaml.janestreet.com/ocaml-core/latest/doc/base/Base/List/index.html)), but a few more functions
-are useful enough to mention here.
+The previous example touched on only three of the functions in
+`List`. We won't cover the entire interface (for that you should look
+at the [online docs](
+https://ocaml.janestreet.com/ocaml-core/latest/doc/base/Base/List/index.html)),
+but a few more functions are useful enough to mention here.
 
 #### Combining list elements with List.reduce
 
@@ -580,9 +581,10 @@ drops all elements for which `None` is returned.
 
 Here's an example. The following function computes a list of file extensions
 from a list of files, piping the results through `List.dedup_and_sort` to
-return the list with duplicates removed and in sorted order. Note that
-this example uses `String.rsplit2` from the String module to split astring on the
-rightmost appearance of a given character:[lists/duplicate removal]{.idx}[duplicates, removing]{.idx}
+return the list with duplicates removed and in sorted order. Note that this
+example uses `String.rsplit2` from the String module to split a string on the
+rightmost appearance of a given character:[lists/duplicate
+removal]{.idx}[duplicates, removing]{.idx}
 
 ```ocaml env=main
 # let extensions filenames =
@@ -933,8 +935,8 @@ corresponds to the expected numerical comparison functions. For strings, it's
 a lexicographic comparison.
 
 That said, experienced OCaml developers typically avoid polymorphic
-comparison. That's surprising, given how obviously useful is, but there's a
-good reason. While it's very convenient, in some cases, the type oblivious
+comparison. That's surprising, given how obviously useful it is, but there's
+a good reason. While it's very convenient, in some cases, the type oblivious
 nature of polymorphic compare means that it does something that doesn't make
 sense for the particular type of values you're dealing with. This can lead to
 surprising and hard to resolve bugs in your code. It's for this reason that

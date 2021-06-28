@@ -1,0 +1,3 @@
+(lang dune 1.0)
+(name tyxml)
+(version 4.4.0)

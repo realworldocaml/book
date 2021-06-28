@@ -16,17 +16,19 @@ let print_web ~repo_root ~include_wip =
     ~f:(fun chapter ->
         let html_file = book_folder / (chapter.name ^ ".html") in
         let target = chapter.name ^ ".html" in
+        let include_wip = if include_wip then "-include-wip " else "" in
         Writer.writef out
           {|
 (rule
  (alias %s)
  (target %s)
  (deps (alias %s) %s)
- (action (run rwo-build build chapter -o . -repo-root %s %%{dep:%s})))
+ (action (run rwo-build build chapter -o . -repo-root %s %s%%{dep:%s})))
 |}
           alias
           target
           html_alias
           toc_file
           repo_root
+          include_wip
           html_file)
