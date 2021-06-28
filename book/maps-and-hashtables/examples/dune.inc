@@ -1,5 +1,16 @@
 
 (rule
+ (alias core-comparable)
+ (deps
+  (source_tree ./correct/core-comparable))
+ (action
+  (system "dune build @all @runtest --root ./correct/core-comparable")))
+
+(alias
+ (name runtest)
+ (deps (alias core-comparable)))
+
+(rule
  (alias freq-fast)
  (deps
   (source_tree ./correct/freq-fast)
