@@ -128,12 +128,25 @@ let docstrings lexbuf =
   in
   loop [] |> List.rev
 
+let convert_pos (p : Lexing.position) (pt : Odoc_model.Location_.point) =
+  { p with pos_lnum = pt.line; pos_cnum = pt.column }
+
+let convert_loc (loc : Location.t) (sp : Odoc_model.Location_.span) =
+  let loc_start = convert_pos loc.loc_start sp.start in
+  let loc_end = convert_pos loc.loc_end sp.end_ in
+  { loc with loc_start; loc_end }
+
 let docstring_code_blocks str =
   Lexer.handle_docstrings := true;
   Lexer.init ();
   List.map
     (fun (docstring, (location : Location.t)) ->
-      extract_code_blocks ~location:location.loc_start ~docstring)
+      let blocks =
+        extract_code_blocks ~location:location.loc_start ~docstring
+      in
+      List.map
+        (fun (b : Code_block.t) -> (b, convert_loc location b.location))
+        blocks)
     (docstrings (Lexing.from_string str))
   |> List.concat
 
@@ -146,7 +159,7 @@ let parse_mli file_contents =
   let lines = String.split_on_char '\n' file_contents |> Array.of_list in
   let tokens =
     List.map
-      (fun (code_block : Code_block.t) ->
+      (fun ((code_block : Code_block.t), loc) ->
         let pre_text =
           Document.Text
             (slice lines ~start:!cursor ~end_:code_block.location.start)
@@ -155,9 +168,8 @@ let parse_mli file_contents =
         let contents = Compat.String.split_on_char '\n' code_block.contents in
         let block =
           match
-            Block.mk ~line:code_block.location.start.line ~file:"" ~column
-              ~section:None ~labels:[] ~header:(Some OCaml) ~contents
-              ~legacy_labels:false ~errors:[]
+            Block.mk ~loc ~section:None ~labels:[] ~header:(Some OCaml)
+              ~contents ~legacy_labels:false ~errors:[]
           with
           | Ok block -> Document.Block block
           | Error _ -> failwith "Error creating block"

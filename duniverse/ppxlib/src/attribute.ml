@@ -4,7 +4,7 @@ let poly_equal a b =
   let module Poly = struct
     type t = T : _ -> t
   end in
-  Base.Poly.equal (Poly.T a) (Poly.T b)
+  Stdppx.Poly.equal (Poly.T a) (Poly.T b)
 ;;
 
 module Context = struct
@@ -347,7 +347,7 @@ let consume t x =
   match get_internal t attrs with
   | None -> None
   | Some attr ->
-    let attrs = List.filter attrs ~f:(fun attr' -> not (phys_equal attr attr')) in
+    let attrs = List.filter attrs ~f:(fun attr' -> not (attr == attr')) in
     let x = Context.set_attributes t.context x attrs in
     Some (x, convert t.payload attr)
 ;;
@@ -374,7 +374,7 @@ let remove_seen (type a) (context : a Context.t) packeds (x : a) =
   in
   let attrs =
     List.filter attrs ~f:(fun attr' ->
-      not (List.mem matched attr' ~equal:phys_equal))
+      not (List.memq ~set:matched attr'))
   in
   Context.set_attributes context x attrs
 ;;

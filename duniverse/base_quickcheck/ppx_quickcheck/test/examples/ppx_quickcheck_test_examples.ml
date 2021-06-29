@@ -148,6 +148,10 @@ module Instance_with_variance = struct
       quickcheck_shrinker_bool
       (quickcheck_shrinker_option quickcheck_shrinker_unit)
   ;;
+
+  let _quickcheck_generator_with_custom =
+    [%quickcheck.generator: [ `Foo of [%custom quickcheck_generator] ]]
+  ;;
 end
 
 module Poly_with_phantom = struct

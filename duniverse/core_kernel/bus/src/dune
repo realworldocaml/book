@@ -1,0 +1,2 @@
+(library (name bus) (public_name core_kernel.bus) (libraries core_kernel)
+ (preprocess (pps ppx_jane -check-doc-comments)))

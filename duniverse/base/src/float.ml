@@ -6,14 +6,39 @@ include Float0
 let raise_s = Error.raise_s
 
 module T = struct
-  type t = float [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = float [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     hash_fold_float
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = hash_float in fun x -> func x
+    let func = hash_float in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (float_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (sexp_of_float : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "float" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ float_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "float.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 
   let compare = Float_replace_polymorphic_compare.compare
@@ -27,6 +52,7 @@ include Comparator.Make (T)
    functions are available within this module. *)
 open Float_replace_polymorphic_compare
 
+let invariant (_ : t) = ()
 let to_float x = x
 let of_float x = x
 
@@ -525,45 +551,49 @@ module Class = struct
     | Subnormal
     | Zero
   [@@deriving_inline compare, enumerate, sexp]
+
   let compare = (Ppx_compare_lib.polymorphic_compare : t -> t -> int)
-  let all = ([Infinite; Nan; Normal; Subnormal; Zero] : t list)
+  let all = ([ Infinite; Nan; Normal; Subnormal; Zero ] : t list)
+
   let t_of_sexp =
-    (let _tp_loc = "src/float.ml.Class.t" in
+    (let _tp_loc = "float.ml.Class.t" in
      function
-     | Ppx_sexp_conv_lib.Sexp.Atom ("infinite"|"Infinite") -> Infinite
-     | Ppx_sexp_conv_lib.Sexp.Atom ("nan"|"Nan") -> Nan
-     | Ppx_sexp_conv_lib.Sexp.Atom ("normal"|"Normal") -> Normal
-     | Ppx_sexp_conv_lib.Sexp.Atom ("subnormal"|"Subnormal") -> Subnormal
-     | Ppx_sexp_conv_lib.Sexp.Atom ("zero"|"Zero") -> Zero
-     | Ppx_sexp_conv_lib.Sexp.List ((Ppx_sexp_conv_lib.Sexp.Atom
-                                       ("infinite"|"Infinite"))::_) as sexp ->
+     | Ppx_sexp_conv_lib.Sexp.Atom ("infinite" | "Infinite") -> Infinite
+     | Ppx_sexp_conv_lib.Sexp.Atom ("nan" | "Nan") -> Nan
+     | Ppx_sexp_conv_lib.Sexp.Atom ("normal" | "Normal") -> Normal
+     | Ppx_sexp_conv_lib.Sexp.Atom ("subnormal" | "Subnormal") -> Subnormal
+     | Ppx_sexp_conv_lib.Sexp.Atom ("zero" | "Zero") -> Zero
+     | Ppx_sexp_conv_lib.Sexp.List
+         (Ppx_sexp_conv_lib.Sexp.Atom ("infinite" | "Infinite") :: _) as sexp ->
        Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List ((Ppx_sexp_conv_lib.Sexp.Atom
-                                       ("nan"|"Nan"))::_) as sexp ->
+     | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom ("nan" | "Nan") :: _) as
+       sexp -> Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
+     | Ppx_sexp_conv_lib.Sexp.List
+         (Ppx_sexp_conv_lib.Sexp.Atom ("normal" | "Normal") :: _) as sexp ->
        Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List ((Ppx_sexp_conv_lib.Sexp.Atom
-                                       ("normal"|"Normal"))::_) as sexp ->
+     | Ppx_sexp_conv_lib.Sexp.List
+         (Ppx_sexp_conv_lib.Sexp.Atom ("subnormal" | "Subnormal") :: _) as sexp ->
        Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List ((Ppx_sexp_conv_lib.Sexp.Atom
-                                       ("subnormal"|"Subnormal"))::_) as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List ((Ppx_sexp_conv_lib.Sexp.Atom
-                                       ("zero"|"Zero"))::_) as sexp ->
-       Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
-     | Ppx_sexp_conv_lib.Sexp.List ((Ppx_sexp_conv_lib.Sexp.List _)::_) as sexp
-       -> Ppx_sexp_conv_lib.Conv_error.nested_list_invalid_sum _tp_loc sexp
+     | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.Atom ("zero" | "Zero") :: _)
+       as sexp -> Ppx_sexp_conv_lib.Conv_error.stag_no_args _tp_loc sexp
+     | Ppx_sexp_conv_lib.Sexp.List (Ppx_sexp_conv_lib.Sexp.List _ :: _) as sexp ->
+       Ppx_sexp_conv_lib.Conv_error.nested_list_invalid_sum _tp_loc sexp
      | Ppx_sexp_conv_lib.Sexp.List [] as sexp ->
        Ppx_sexp_conv_lib.Conv_error.empty_list_invalid_sum _tp_loc sexp
-     | sexp -> Ppx_sexp_conv_lib.Conv_error.unexpected_stag _tp_loc sexp :
-                 Ppx_sexp_conv_lib.Sexp.t -> t)
+     | sexp -> Ppx_sexp_conv_lib.Conv_error.unexpected_stag _tp_loc sexp
+               : Ppx_sexp_conv_lib.Sexp.t -> t)
+  ;;
+
   let sexp_of_t =
     (function
       | Infinite -> Ppx_sexp_conv_lib.Sexp.Atom "Infinite"
       | Nan -> Ppx_sexp_conv_lib.Sexp.Atom "Nan"
       | Normal -> Ppx_sexp_conv_lib.Sexp.Atom "Normal"
       | Subnormal -> Ppx_sexp_conv_lib.Sexp.Atom "Subnormal"
-      | Zero -> Ppx_sexp_conv_lib.Sexp.Atom "Zero" : t ->
-        Ppx_sexp_conv_lib.Sexp.t)
+      | Zero -> Ppx_sexp_conv_lib.Sexp.Atom "Zero"
+                : t -> Ppx_sexp_conv_lib.Sexp.t)
+  ;;
+
   [@@@end]
 
   let to_string t = string_of_sexp (sexp_of_t t)
@@ -819,10 +849,10 @@ let round_gen x ~how =
 let round_significant x ~significant_digits =
   if Int_replace_polymorphic_compare.( <= ) significant_digits 0
   then
-    raise
-      (Invalid_argument
-         ("Float.round_significant: invalid argument significant_digits:"
-          ^ Int.to_string significant_digits))
+    invalid_argf
+      "Float.round_significant: invalid argument significant_digits:%d"
+      significant_digits
+      ()
   else round_gen x ~how:(`significant_digits significant_digits)
 ;;
 
@@ -1017,6 +1047,34 @@ end
    this module. *)
 include Float_replace_polymorphic_compare
 
-(* These functions specifically replace defaults in replace_polymorphic_compare *)
-let min (x : t) y = if is_nan x || is_nan y then nan else if x < y then x else y
-let max (x : t) y = if is_nan x || is_nan y then nan else if x > y then x else y
+(* These functions specifically replace defaults in replace_polymorphic_compare.
+
+   The desired behavior here is to propagate a nan if either argument is nan. Because the
+   first comparison will always return false if either argument is nan, it suffices to
+   check if x is nan. Then, when x is nan or both x and y are nan, we return x = nan; and
+   when y is nan but not x, we return y = nan.
+
+   There are various ways to implement these functions.  The benchmark below shows a few
+   different versions.  This benchmark was run over an array of random floats (none of
+   which are nan).
+
+   ┌────────────────────────────────────────────────┬──────────┐
+   │ Name                                           │ Time/Run │
+   ├────────────────────────────────────────────────┼──────────┤
+   │ if is_nan x then x else if x < y then x else y │   2.42us │
+   │ if is_nan x || x < y then x else y             │   2.02us │
+   │ if x < y || is_nan x then x else y             │   1.88us │
+   └────────────────────────────────────────────────┴──────────┘
+
+   The benchmark below was run when x > y is always true (again, no nan values).
+
+   ┌────────────────────────────────────────────────┬──────────┐
+   │ Name                                           │ Time/Run │
+   ├────────────────────────────────────────────────┼──────────┤
+   │ if is_nan x then x else if x < y then x else y │   2.83us │
+   │ if is_nan x || x < y then x else y             │   1.97us │
+   │ if x < y || is_nan x then x else y             │   1.56us │
+   └────────────────────────────────────────────────┴──────────┘
+*)
+let min (x : t) y = if x < y || is_nan x then x else y
+let max (x : t) y = if x > y || is_nan x then x else y

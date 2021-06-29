@@ -27,5 +27,5 @@ val to_string : t -> string
 (** Pretty-print a connection identifer. *)
 
 val compare : t -> t -> int
-(** Comparison function for two identifiers.  More recently constructed
+(** Comparison function for two identifiers. More recently constructed
     identifiers will be greater than older ones. *)

@@ -51,6 +51,16 @@ val of_int64_trunc : Int64.t -> t
 val of_nativeint_trunc : nativeint -> t
 val to_nativeint_trunc : t -> nativeint
 
+(** {2 Byteswap functions}
+
+    See {{!modtype:Int.Int_without_module_types}[Int]'s byte swap section} for
+    a description of Base's approach to exposing byte swap primitives.
+*)
+
+val bswap16 : t -> t
+val bswap32 : t -> t
+val bswap48 : t -> t
+
 (** {2 Random generation} *)
 
 (** [random ~state bound] returns a random integer between 0 (inclusive) and [bound]

@@ -1462,3 +1462,56 @@ let%expect_test "of_lazy, unforced" =
     (m_nat ~up_to:30);
   [%expect {| (generator exhaustive) |}]
 ;;
+
+let bigstring = Generator.bigstring
+let float32_vec = Generator.float32_vec
+let float64_vec = Generator.float64_vec
+
+let%expect_test "[bigstring], [float32_vec], [float64_vec]" =
+  let test
+        (type elt pack layout)
+        (t : (elt, pack, layout) Bigarray.Array1.t Generator.t)
+        sexp_of_elt
+    =
+    let module M = struct
+      type t = (elt, pack, layout) Bigarray.Array1.t
+
+      let compare = Poly.compare
+      let sexp_of_t = [%sexp_of: (elt, _, _) Private.Bigarray_helpers.Array1.t]
+      let examples = []
+    end
+    in
+    test_generator t (module M)
+  in
+  test bigstring [%sexp_of: char];
+  [%expect {| (generator "generated 5_751 distinct values in 10_000 iterations") |}];
+  test float32_vec [%sexp_of: float];
+  [%expect {| (generator "generated 6_670 distinct values in 10_000 iterations") |}];
+  test float64_vec [%sexp_of: float];
+  [%expect {| (generator "generated 7_520 distinct values in 10_000 iterations") |}]
+;;
+
+let float32_mat = Generator.float32_mat
+let float64_mat = Generator.float64_mat
+
+let%expect_test "[float32_mat], [float64_mat]" =
+  let test
+        (type elt pack layout)
+        (t : (elt, pack, layout) Bigarray.Array2.t Generator.t)
+        sexp_of_elt
+    =
+    let module M = struct
+      type t = (elt, pack, layout) Bigarray.Array2.t
+
+      let compare = Poly.compare
+      let sexp_of_t = [%sexp_of: (elt, _, _) Private.Bigarray_helpers.Array2.t]
+      let examples = []
+    end
+    in
+    test_generator t (module M)
+  in
+  test float32_mat [%sexp_of: float];
+  [%expect {| (generator "generated 6_875 distinct values in 10_000 iterations") |}];
+  test float64_mat [%sexp_of: float];
+  [%expect {| (generator "generated 7_022 distinct values in 10_000 iterations") |}]
+;;

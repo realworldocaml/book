@@ -24,8 +24,8 @@ type assembler =
   lang:Common.lang ->
   loc:Location.t ->
   name:string ->
-  Parsetree.expression Common.value list ->
-  (Common.Label.t * Parsetree.expression) list
+  expression Common.value list ->
+  (arg_label * expression) list
 (** Assemblers satisfy: [assembler ~lang ~loc ~name children] evaluates
     to a list of optionally-labeled parse trees for passing [children] to the
     the element function for element [name]. For example, for a table element
@@ -77,6 +77,7 @@ val fieldset : assembler
 val datalist : assembler
 val details : assembler
 val menu : assembler
+val picture : assembler
 val script : assembler
 
 (** {1 Misc utilities} *)
@@ -84,8 +85,8 @@ val script : assembler
 (** Remove txt node containing only whitespace that are at the beginning or the end
     of the list. *)
 val filter_surrounding_whitespace :
-  Parsetree.expression Common.value list ->
-  Parsetree.expression Common.value list
+  expression Common.value list ->
+  expression Common.value list
 
 (** Improve an assembler by removing txt nodes containing only whitespace *)
 val comp_filter_whitespace : assembler -> assembler

@@ -90,5 +90,30 @@ let tests = [
       stream |> tree ~text:(fun _ -> ()) ~element:(fun _ _ _ -> ()) in
 
     assert_equal ~msg:"fi" (assemble ()) (Some ());
-    assert_equal ~msg:"fi" (assemble ()) None)
+    assert_equal ~msg:"fi" (assemble ()) None);
+
+  ("integration.doctype.round-trip" >:: fun _ ->
+    ({|<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" |} ^
+     {|"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">|})
+    |> string
+    |> parse_html
+    |> signals
+    |> write_html
+    |> to_string
+    |> assert_equal
+      ({|<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" |} ^
+       {|"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">|} ^
+       {|<html><head></head><body></body></html>|}));
+
+  ("integration.doctype.pretty_print" >:: fun _ ->
+    "<!DOCTYPE html><div></div>"
+    |> string
+    |> parse_html
+    |> signals
+    |> pretty_print
+    |> write_html
+    |> to_string
+    |> assert_equal
+      ("<!DOCTYPE html>\n<html>\n <head></head>\n" ^
+       " <body>\n  <div></div>\n </body>\n</html>\n"));
 ]

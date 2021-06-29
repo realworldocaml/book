@@ -6,32 +6,68 @@ type 'a t = 'a option =
 
 include (
 struct
-  type 'a t = 'a option [@@deriving_inline compare, hash, sexp]
-  let compare : 'a . ('a -> 'a -> int) -> 'a t -> 'a t -> int = compare_option
+  type 'a t = 'a option [@@deriving_inline compare, hash, sexp, sexp_grammar]
+
+  let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int = compare_option
+
   let hash_fold_t :
-    'a .
-    (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-    Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
-    = hash_fold_option
+    'a. (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
+    =
+    hash_fold_option
+  ;;
+
   let t_of_sexp :
-    'a . (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
+    'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t
+    =
     option_of_sexp
+  ;;
+
   let sexp_of_t :
-    'a . ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
+    'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+    =
     sexp_of_option
+  ;;
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group)
+      =
+      { implicit_vars = [ "option" ]
+      ; ggid = "j\132);\135qH\158\135\222H\001\007\004\158\218"
+      ; types =
+          [ "t", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ option_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "option.ml"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 end :
 sig
-  type 'a t = 'a option [@@deriving_inline compare, hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-      val hash_fold_t :
-        (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-        Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
-      include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-    end[@@ocaml.doc "@inline"]
+  type 'a t = 'a option [@@deriving_inline compare, hash, sexp, sexp_grammar]
+
+  val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+
+  val hash_fold_t
+    :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+    -> Ppx_hash_lib.Std.Hash.state
+    -> 'a t
+    -> Ppx_hash_lib.Std.Hash.state
+
+  include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
+  val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
   [@@@end]
 end
 with type 'a t := 'a t)
@@ -207,8 +243,15 @@ let filter t ~f =
 ;;
 
 let try_with f =
-  try Some (f ()) with
-  | _ -> None
+  match f () with
+  | x -> Some x
+  | exception _ -> None
+;;
+
+let try_with_join f =
+  match f () with
+  | x -> x
+  | exception _ -> None
 ;;
 
 include Monad.Make (struct

@@ -19,7 +19,7 @@
     enqueued into a killed throttle will be immediately aborted. *)
 
 open! Core_kernel
-module Deferred = Deferred1
+module Deferred := Deferred1
 
 (** We use a phantom type to distinguish between throttles, which have
     [max_concurrent_jobs >= 1], and sequencers, which have [max_concurrent_jobs = 1].  All
@@ -134,3 +134,9 @@ module Sequencer : sig
 
   val create : ?continue_on_error:bool (** default is [false] *) -> 'a -> 'a t
 end
+
+module Deferred = Deferred
+[@@deprecated
+  "[since 2020-03] Use [Deferred] directly; if that does not work, look for alternative \
+   ways to access the definition, for example use [Monad_sequence.how] instead of \
+   [Throttle.Deferred.how] "]

@@ -658,4 +658,20 @@ let suite = suite "lwt_io" [
       (Int64.float_of_bits 0x42F0203040506070L) >>= fun () ->
     Lwt.return (Lwt_bytes.to_string buffer = "\x42\xf0\x20\x30\x40\x50\x60\x70")
   end;
+
+  test "Write from Lwt_bytes" begin fun () ->
+    let bytes = Lwt_bytes.of_string "Hello World" in
+    let out = Lwt_bytes.create 11 in
+    Lwt_io.write_from_exactly_bigstring (Lwt_io.(of_bytes ~mode:output) out)
+      bytes 0 11 >>= fun () ->
+    Lwt.return (Lwt_bytes.to_string out = "Hello World")
+  end;
+
+  test "Read from Lwt_bytes" begin fun () ->
+    let bytes_in = Lwt_bytes.create 11 in
+    let bytes = Lwt_bytes.of_string "Hello World" in
+    Lwt_io.read_into_exactly_bigstring (Lwt_io.(of_bytes ~mode:input) bytes)
+      bytes_in 0 11 >>= fun () ->
+    Lwt.return (Lwt_bytes.to_string bytes_in = "Hello World")
+  end;
 ]

@@ -4,6 +4,10 @@
 - Make sure the code we generate can be typed without warning when `-principal`
   is passed to the compiler.
 
+## v0.14.1
+
+- Update to be compatible with ppxlib 0.18.0
+
 ## v0.11
 
 - Change `ppx_expect` so that when `-diff-cmd -` is passed, they write the

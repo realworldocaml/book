@@ -1,7 +1,7 @@
 (executable
  (name test)
  (flags (:standard -w +A))
- (libraries lambdasoup oUnit))
+ (libraries lambdasoup ounit2))
 
 (alias
  (name build-test)

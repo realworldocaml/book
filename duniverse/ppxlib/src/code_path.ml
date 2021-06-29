@@ -13,7 +13,7 @@ let top_level ~file_path =
     file_path
     |> Caml.Filename.basename
     |> Caml.Filename.remove_extension
-    |> String.capitalize
+    |> String.capitalize_ascii
   in
   {file_path; main_module_name; submodule_path = []; value = None; in_expr = false}
 

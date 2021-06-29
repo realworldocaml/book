@@ -2,7 +2,7 @@ open! Core
 open! Async
 
 let%expect_test "Flock" =
-  Expect_test_helpers.with_temp_dir (fun tempdir ->
+  Expect_test_helpers_async.with_temp_dir (fun tempdir ->
     let lock_path = tempdir ^/ "lock-file" in
     let second_thread_started = Ivar.create () in
     let%bind flock =
@@ -38,7 +38,7 @@ let%expect_test "Flock" =
 ;;
 
 let%expect_test "Symlink" =
-  Expect_test_helpers.with_temp_dir (fun tempdir ->
+  Expect_test_helpers_async.with_temp_dir (fun tempdir ->
     let lock_path = tempdir ^/ "lock-symlink" in
     let second_thread_started = Ivar.create () in
     let%bind flock =

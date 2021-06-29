@@ -3,16 +3,23 @@
 #ifdef __mc_ACCELERATE__
 
 static inline void xor_into (uint8_t *src, uint8_t *dst, size_t n) {
-
+#ifdef ARCH_64BIT
+  __m128i r;
   for (; n >= 16; n -= 16, src += 16, dst += 16)
     _mm_storeu_si128 (
         (__m128i*) dst,
         _mm_xor_si128 (
-          _mm_loadu_si128 ((__m128i*) src),
+          _mm_loadu_si128 ((__m128i*) memcpy(&r, src, 16)),
           _mm_loadu_si128 ((__m128i*) dst)));
 
+  uint64_t s;
   for (; n >= 8; n -= 8, src += 8, dst += 8)
-    *(uint64_t*) dst ^= *(uint64_t*) src;
+    *(uint64_t*) dst ^= *(uint64_t*) memcpy(&s, src, 8);
+#endif
+
+  uint32_t t;
+  for (; n >= 4; n -= 4, src += 4, dst += 4)
+    *(uint32_t*) dst ^= *(uint32_t*)memcpy(&t, src, 4);
 
   for (; n --; ++ src, ++ dst) *dst = *src ^ *dst;
 }

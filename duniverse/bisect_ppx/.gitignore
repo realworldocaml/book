@@ -1,15 +1,8 @@
 # Working and output directories.
 _build/
-_build.*/
-_findlib/
-ocamldoc/
 gh-pages/
 
 # Test working and coverage directories.
-test/_scratch
-test/_coverage
-test/_report
-test/_preserve
 _coverage/
 _self/
 

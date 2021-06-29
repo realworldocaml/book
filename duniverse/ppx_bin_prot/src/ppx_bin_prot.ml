@@ -205,7 +205,7 @@ module Generate_bin_size = struct
 
   (* Conversion of types *)
   let rec bin_size_type full_type_name _loc ty =
-    let loc = ty.ptyp_loc in
+    let loc = { ty.ptyp_loc with loc_ghost = true } in
     match ty.ptyp_desc with
     | Ptyp_constr (id, args) ->
       `Fun (bin_size_appl_fun full_type_name loc id args)
@@ -221,11 +221,13 @@ module Generate_bin_size = struct
 
   (* Conversion of polymorphic types *)
   and bin_size_appl_fun full_type_name loc id args =
+    let loc = { loc with loc_ghost = true } in
     let sizers =
       List.map args ~f:(fun ty ->
         match bin_size_type full_type_name ty.ptyp_loc ty with
         | `Fun e -> e
-        | `Match cases -> pexp_function ~loc:ty.ptyp_loc cases)
+        | `Match cases ->
+          pexp_function ~loc:{ ty.ptyp_loc with loc_ghost = true } cases)
     in
     match mk_abst_call ~loc id sizers with
     | [%expr Bin_prot.Size.bin_size_array Bin_prot.Size.bin_size_float ] ->
@@ -315,10 +317,10 @@ module Generate_bin_size = struct
           :: acc
         | Rtag (_, false, []) -> acc (* Impossible, let the OCaml compiler fail *)
         | Rinherit ty ->
-          let loc = ty.ptyp_loc in
+          let loc = { ty.ptyp_loc with loc_ghost = true } in
           match ty.ptyp_desc with
           | Ptyp_constr (id, args) ->
-            let call = bin_size_appl_fun full_type_name ty.ptyp_loc id args in
+            let call = bin_size_appl_fun full_type_name loc id args in
             case
               ~lhs:(ppat_alias ~loc (ppat_type ~loc id) (Located.mk ~loc "v"))
               ~guard:None
@@ -490,7 +492,7 @@ module Generate_bin_write = struct
 
   (* Conversion of types *)
   let rec bin_write_type full_type_name _loc ty =
-    let loc = ty.ptyp_loc in
+    let loc = { ty.ptyp_loc with loc_ghost = true } in
     match ty.ptyp_desc with
     | Ptyp_constr (id, args) ->
       `Fun (bin_write_appl_fun full_type_name loc id args)
@@ -506,6 +508,7 @@ module Generate_bin_write = struct
 
   (* Conversion of polymorphic types *)
   and bin_write_appl_fun full_type_name loc id args =
+    let loc = { loc with loc_ghost = true } in
     let writers =
       List.map args ~f:(fun ty ->
         match bin_write_type full_type_name ty.ptyp_loc ty with
@@ -607,10 +610,10 @@ module Generate_bin_write = struct
               [%e write_args]
             ]
         | Rinherit ty ->
-          let loc = ty.ptyp_loc in
+          let loc = { ty.ptyp_loc with loc_ghost = true } in
           match ty.ptyp_desc with
           | Ptyp_constr (id, args) ->
-            let call = bin_write_appl_fun full_type_name ty.ptyp_loc id args in
+            let call = bin_write_appl_fun full_type_name loc id args in
             case
               ~lhs:(ppat_alias ~loc (ppat_type ~loc id) (Located.mk ~loc "v"))
               ~guard:None
@@ -794,6 +797,7 @@ module Generate_bin_write = struct
   let gen = Deriving.Generator.make Deriving.Args.empty bin_write
 
   let extension ~loc ~path:_ ty =
+    let loc = { loc with loc_ghost = true } in
     let full_type_name = Full_type_name.absent in
     let size =
       Generate_bin_size.bin_size_type full_type_name loc ty
@@ -821,7 +825,8 @@ module Generate_bin_read = struct
                    if internal then "__" ^ s ^ "__" else s)
 
   (* Conversion of type paths *)
-  let bin_read_path_fun loc id args = mk_abst_call loc id args
+  let bin_read_path_fun loc id args =
+    mk_abst_call { loc with loc_ghost = true } id args
 
   let get_closed_expr loc = function
     | `Open   expr -> [%expr  fun buf ~pos_ref -> [%e expr] ]
@@ -852,7 +857,7 @@ module Generate_bin_read = struct
 
   (* Conversion of types *)
   and bin_read_type_internal full_type_name ~full_type _loc ty =
-    let loc = ty.ptyp_loc in
+    let loc = { ty.ptyp_loc with loc_ghost = true } in
     match ty.ptyp_desc with
     | Ptyp_constr (id, args) ->
       let args_expr =
@@ -902,6 +907,7 @@ module Generate_bin_read = struct
 
   (* Generate internal call *)
   and mk_internal_call full_type_name loc ty =
+    let loc = { loc with loc_ghost = true } in
     match ty.ptyp_desc with
     | Ptyp_constr (id, args) | Ptyp_class (id, args) ->
       let arg_exprs =
@@ -1327,6 +1333,7 @@ module Generate_bin_read = struct
   let gen = Deriving.Generator.make Deriving.Args.empty bin_read
 
   let extension ~loc ~path:_ ty =
+    let loc = { loc with loc_ghost = true } in
     let full_type_name = Full_type_name.absent in
     let read_name      = "read"      in
     let vtag_read_name = "vtag_read" in
@@ -1411,6 +1418,7 @@ module Generate_tp_class = struct
   let gen = Deriving.Generator.make Deriving.Args.empty bin_tp_class
 
   let extension ~loc ~path ty =
+    let loc = { loc with loc_ghost = true } in
     tp_record ~loc
       ~writer:(Generate_bin_write.extension ~loc ~path ty)
       ~reader:(Generate_bin_read .extension ~loc ~path ty)

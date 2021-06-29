@@ -288,24 +288,29 @@ module Tree0 = struct
   ;;
 
   exception Set_min_elt_exn_of_empty_set [@@deriving_inline sexp]
+
   let () =
     Ppx_sexp_conv_lib.Conv.Exn_converter.add
-      ([%extension_constructor Set_min_elt_exn_of_empty_set])
+      [%extension_constructor Set_min_elt_exn_of_empty_set]
       (function
         | Set_min_elt_exn_of_empty_set ->
-          Ppx_sexp_conv_lib.Sexp.Atom
-            "src/set.ml.Tree0.Set_min_elt_exn_of_empty_set"
+          Ppx_sexp_conv_lib.Sexp.Atom "set.ml.Tree0.Set_min_elt_exn_of_empty_set"
         | _ -> assert false)
+  ;;
+
   [@@@end]
+
   exception Set_max_elt_exn_of_empty_set [@@deriving_inline sexp]
+
   let () =
     Ppx_sexp_conv_lib.Conv.Exn_converter.add
-      ([%extension_constructor Set_max_elt_exn_of_empty_set])
+      [%extension_constructor Set_max_elt_exn_of_empty_set]
       (function
         | Set_max_elt_exn_of_empty_set ->
-          Ppx_sexp_conv_lib.Sexp.Atom
-            "src/set.ml.Tree0.Set_max_elt_exn_of_empty_set"
+          Ppx_sexp_conv_lib.Sexp.Atom "set.ml.Tree0.Set_max_elt_exn_of_empty_set"
         | _ -> assert false)
+  ;;
+
   [@@@end]
 
   let min_elt_exn t =
@@ -446,23 +451,26 @@ module Tree0 = struct
 
   let union s1 s2 ~compare_elt =
     let rec union s1 s2 =
-      match s1, s2 with
-      | Empty, t | t, Empty -> t
-      | Leaf v1, _ -> union (Node (Empty, v1, Empty, 1, 1)) s2
-      | _, Leaf v2 -> union s1 (Node (Empty, v2, Empty, 1, 1))
-      | Node (l1, v1, r1, h1, _), Node (l2, v2, r2, h2, _) ->
-        if h1 >= h2
-        then
-          if h2 = 1
-          then add s1 v2 ~compare_elt
+      if phys_equal s1 s2
+      then s1
+      else (
+        match s1, s2 with
+        | Empty, t | t, Empty -> t
+        | Leaf v1, _ -> union (Node (Empty, v1, Empty, 1, 1)) s2
+        | _, Leaf v2 -> union s1 (Node (Empty, v2, Empty, 1, 1))
+        | Node (l1, v1, r1, h1, _), Node (l2, v2, r2, h2, _) ->
+          if h1 >= h2
+          then
+            if h2 = 1
+            then add s1 v2 ~compare_elt
+            else (
+              let l2, _, r2 = split s2 v1 ~compare_elt in
+              join (union l1 l2) v1 (union r1 r2) ~compare_elt)
+          else if h1 = 1
+          then add s2 v1 ~compare_elt
           else (
-            let l2, _, r2 = split s2 v1 ~compare_elt in
-            join (union l1 l2) v1 (union r1 r2) ~compare_elt)
-        else if h1 = 1
-        then add s2 v1 ~compare_elt
-        else (
-          let l1, _, r1 = split s1 v2 ~compare_elt in
-          join (union l1 l2) v2 (union r1 r2) ~compare_elt)
+            let l1, _, r1 = split s1 v2 ~compare_elt in
+            join (union l1 l2) v2 (union r1 r2) ~compare_elt))
     in
     union s1 s2
   ;;
@@ -474,28 +482,34 @@ module Tree0 = struct
 
   let inter s1 s2 ~compare_elt =
     let rec inter s1 s2 =
-      match s1, s2 with
-      | Empty, _ | _, Empty -> Empty
-      | (Leaf elt as singleton), other_set | other_set, (Leaf elt as singleton) ->
-        if mem other_set elt ~compare_elt then singleton else Empty
-      | Node (l1, v1, r1, _, _), t2 ->
-        (match split t2 v1 ~compare_elt with
-         | l2, None, r2 -> concat (inter l1 l2) (inter r1 r2) ~compare_elt
-         | l2, Some v1, r2 -> join (inter l1 l2) v1 (inter r1 r2) ~compare_elt)
+      if phys_equal s1 s2
+      then s1
+      else (
+        match s1, s2 with
+        | Empty, _ | _, Empty -> Empty
+        | (Leaf elt as singleton), other_set | other_set, (Leaf elt as singleton) ->
+          if mem other_set elt ~compare_elt then singleton else Empty
+        | Node (l1, v1, r1, _, _), t2 ->
+          (match split t2 v1 ~compare_elt with
+           | l2, None, r2 -> concat (inter l1 l2) (inter r1 r2) ~compare_elt
+           | l2, Some v1, r2 -> join (inter l1 l2) v1 (inter r1 r2) ~compare_elt))
     in
     inter s1 s2
   ;;
 
   let diff s1 s2 ~compare_elt =
     let rec diff s1 s2 =
-      match s1, s2 with
-      | Empty, _ -> Empty
-      | t1, Empty -> t1
-      | Leaf v1, t2 -> diff (Node (Empty, v1, Empty, 1, 1)) t2
-      | Node (l1, v1, r1, _, _), t2 ->
-        (match split t2 v1 ~compare_elt with
-         | l2, None, r2 -> join (diff l1 l2) v1 (diff r1 r2) ~compare_elt
-         | l2, Some _, r2 -> concat (diff l1 l2) (diff r1 r2) ~compare_elt)
+      if phys_equal s1 s2
+      then Empty
+      else (
+        match s1, s2 with
+        | Empty, _ -> Empty
+        | t1, Empty -> t1
+        | Leaf v1, t2 -> diff (Node (Empty, v1, Empty, 1, 1)) t2
+        | Node (l1, v1, r1, _, _), t2 ->
+          (match split t2 v1 ~compare_elt with
+           | l2, None, r2 -> join (diff l1 l2) v1 (diff r1 r2) ~compare_elt
+           | l2, Some _, r2 -> concat (diff l1 l2) (diff r1 r2) ~compare_elt))
     in
     diff s1 s2
   ;;
@@ -555,7 +569,11 @@ module Tree0 = struct
         | _, End -> 1
         | More (v1, r1, e1), More (v2, r2, e2) ->
           let c = compare_elt v1 v2 in
-          if c <> 0 then c else loop (cons r1 e1) (cons r2 e2)
+          if c <> 0
+          then c
+          else if phys_equal r1 r2
+          then loop e1 e2
+          else loop (cons r1 e1) (cons r2 e2)
       in
       loop e1 e2
     ;;
@@ -765,13 +783,27 @@ module Tree0 = struct
         let c = compare_elt v1 v2 in
         if c = 0
         then
-          is_subset l1 ~of_:l2 && is_subset r1 ~of_:r2
+          phys_equal s1 s2 || (is_subset l1 ~of_:l2 && is_subset r1 ~of_:r2)
           (* Note that height and size don't matter here. *)
         else if c < 0
         then is_subset (Node (l1, v1, Empty, 0, 0)) ~of_:l2 && is_subset r1 ~of_:t2
         else is_subset (Node (Empty, v1, r1, 0, 0)) ~of_:r2 && is_subset l1 ~of_:t2
     in
     is_subset s1 ~of_:s2
+  ;;
+
+  let rec are_disjoint s1 s2 ~compare_elt =
+    match s1, s2 with
+    | Empty, _ | _, Empty -> true
+    | Leaf elt, other_set | other_set, Leaf elt -> not (mem other_set elt ~compare_elt)
+    | Node (l1, v1, r1, _, _), t2 ->
+      if phys_equal s1 s2
+      then false
+      else (
+        match split t2 v1 ~compare_elt with
+        | l2, None, r2 ->
+          are_disjoint l1 l2 ~compare_elt && are_disjoint r1 r2 ~compare_elt
+        | _, Some _, _ -> false)
   ;;
 
   let iter t ~f =
@@ -1108,6 +1140,10 @@ module Accessors = struct
     Tree0.is_subset t.tree ~of_:of_.tree ~compare_elt:(compare_elt t)
   ;;
 
+  let are_disjoint t1 t2 =
+    Tree0.are_disjoint t1.tree t2.tree ~compare_elt:(compare_elt t1)
+  ;;
+
   module Named = struct
     type nonrec ('a, 'cmp) t =
       { set : ('a, 'cmp) t
@@ -1238,6 +1274,11 @@ module Tree = struct
   let compare_direct ~comparator t1 t2 = Tree0.compare (ce comparator) t1 t2
   let equal ~comparator t1 t2 = Tree0.equal t1 t2 ~compare_elt:(ce comparator)
   let is_subset ~comparator t ~of_ = Tree0.is_subset t ~of_ ~compare_elt:(ce comparator)
+
+  let are_disjoint ~comparator t1 t2 =
+    Tree0.are_disjoint t1 t2 ~compare_elt:(ce comparator)
+  ;;
+
   let of_list ~comparator l = Tree0.of_list l ~compare_elt:(ce comparator)
   let of_array ~comparator a = Tree0.of_array a ~compare_elt:(ce comparator)
 
@@ -1424,17 +1465,17 @@ end
 
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
-  include
-    sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
-  include
-    sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-    end[@@ocaml.doc "@inline"]
+
+  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
   [@@@end]
 
   include Comparator.S with type t := t

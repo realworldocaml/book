@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "v0.13.0"
+version: "v0.14.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/core"
@@ -12,12 +12,13 @@ build: [
 ]
 depends: [
   "ocaml"        {>= "4.08.0"}
-  "core_kernel"  {>= "v0.13" & < "v0.14"}
-  "jst-config"   {>= "v0.13" & < "v0.14"}
-  "ppx_jane"     {>= "v0.13" & < "v0.14"}
-  "sexplib"      {>= "v0.13" & < "v0.14"}
+  "core_kernel"  {>= "v0.14" & < "v0.15"}
+  "jst-config"   {>= "v0.14" & < "v0.15"}
+  "ppx_jane"     {>= "v0.14" & < "v0.15"}
+  "sexplib"      {>= "v0.14" & < "v0.15"}
+  "timezone"     {>= "v0.14" & < "v0.15"}
   "base-threads"
-  "dune"         {>= "1.5.1"}
+  "dune"         {>= "2.0.0"}
   "spawn"        {>= "v0.12"}
 ]
 synopsis: "Industrial strength alternative to OCaml's standard library"

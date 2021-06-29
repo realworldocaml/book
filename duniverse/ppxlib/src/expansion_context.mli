@@ -2,15 +2,35 @@ module Base : sig
   (** Type for the location independent parts of the expansion context *)
   type t
 
-  (**/*)
+  (** Return the code path for the given context
+  In Driver, Deriving and Extension, the context is initialized so that the [file_path] component of
+  the [code_path] is determined from the first location found in the input AST. That means that:
+  - It's the empty string in empty structures or signatures
+  - It can be altered by line directives *)
+  val code_path : t -> Code_path.t
+
+  (** Return the input name for the given context.
+  In Driver, Deriving and Extension, the context argument is initialized so that the [input_name]
+  matches the input filename passed to the driver on the command line. That means that:
+  - It has a value even for empty files
+  - It is not affected by line directives
+  - It is ["_none_"] when using [Driver.map_structure] or [Driver.map_signature] *)
+  val input_name : t -> string
+
+  (** Can be used within a ppx preprocessor to know which tool is
+      calling it ["ocamlc"], ["ocamlopt"], ["ocamldep"], ["ocaml"], ... . *)
+  val tool_name : t -> string
+
+  (**/**)
   (** Undocumented section *)
 
   (** Build a new base context at the top level of the given file with the given
-      ocaml-mirgate-parsetree configuration.
+      calling tool name.
   *)
   val top_level :
-    omp_config:Migrate_parsetree.Driver.config ->
+    tool_name:string ->
     file_path:string ->
+    input_name:string ->
     t
 
   (** Proxy functions to update the wrapped code path. See code_path.mli for details. *)
@@ -29,8 +49,9 @@ module Extension : sig
   (** Return the code path for the given context *)
   val code_path : t -> Code_path.t
 
-  (** Return the ocaml-migrate-parsetree configuration for the given expansion context *)
-  val omp_config : t -> Migrate_parsetree.Driver.config
+  (** Can be used within a ppx preprocessor to know which tool is
+      calling it ["ocamlc"], ["ocamlopt"], ["ocamldep"], ["ocaml"], ... . *)
+  val tool_name : t -> string
 
   (** Wrap a [fun ~loc ~path] into a [fun ~ctxt] *)
   val with_loc_and_path : (loc:Location.t -> path:string -> 'a) -> (ctxt:t -> 'a)
@@ -52,8 +73,9 @@ module Deriver : sig
   (** Return the code path for the given context *)
   val code_path : t -> Code_path.t
 
-  (** Return the ocaml-migrate-parsetree configuration for the given expansion context *)
-  val omp_config : t -> Migrate_parsetree.Driver.config
+  (** Can be used within a ppx preprocessor to know which tool is
+      calling it ["ocamlc"], ["ocamlopt"], ["ocamldep"], ["ocaml"], ... . *)
+  val tool_name : t -> string
 
   (** Wrap a [fun ~loc ~path] into a [fun ~ctxt] *)
   val with_loc_and_path : (loc:Location.t -> path:string -> 'a) -> (ctxt:t -> 'a)

@@ -16,15 +16,13 @@
 
 module Request = struct
   include Cohttp.Request
-  include (Make(Io)
-           : module type of Make(Io) with type t := t)
-end
+  include (Make (Io) : module type of Make (Io) with type t := t)
+  end
 
 module Response = struct
   include Cohttp.Response
-  include (Make(Io)
-           : module type of Make(Io) with type t := t)
-end
+  include (Make (Io) : module type of Make (Io) with type t := t)
+  end
 
 module Client = Client
 module Server = Server

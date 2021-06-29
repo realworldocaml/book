@@ -29,6 +29,7 @@ val uncaught_exn : t -> Error.t option
 val uncaught_exn_unwrapped : t -> (Exn.t * Sexp.t) option
 val num_pending_jobs : t -> int
 val num_jobs_run : t -> int
+val last_cycle_num_jobs : t -> int
 val map_cycle_times : t -> f:(Time_ns.Span.t -> 'a) -> 'a Async_stream.t
 val cycle_num_jobs : t -> int Async_stream.t
 val cycle_count : t -> int
@@ -41,6 +42,8 @@ val check_invariants : t -> bool
 val set_check_invariants : t -> bool -> unit
 val set_record_backtraces : t -> bool -> unit
 val run_every_cycle_start : t -> f:(unit -> unit) -> unit
+val run_every_cycle_end : t -> f:(unit -> unit) -> unit
+val last_cycle_time : t -> Time_ns.Span.t
 val long_cycles : t -> at_least:Time_ns.Span.t -> Time_ns.Span.t Async_stream.t
 val can_run_a_job : t -> bool
 val create_alarm : t -> (unit -> unit) -> Gc.Expert.Alarm.t
@@ -79,7 +82,11 @@ val make_async_unusable : unit -> unit
 val reset_in_forked_process : unit -> unit
 val yield : t -> unit Deferred.t
 val yield_every : n:int -> (t -> unit Deferred.t) Staged.t
-val yield_until_no_jobs_remain : t -> unit Deferred.t
+
+val yield_until_no_jobs_remain
+  :  ?may_return_immediately:bool (** default is [false] *)
+  -> t
+  -> unit Deferred.t
 
 module Very_low_priority_work : sig
   module Worker_result : sig

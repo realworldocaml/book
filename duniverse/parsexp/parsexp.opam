@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "v0.13.0"
+version: "v0.14.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/parsexp"
@@ -12,9 +12,9 @@ build: [
 ]
 depends: [
   "ocaml"    {>= "4.04.2"}
-  "base"     {>= "v0.13" & < "v0.14"}
-  "sexplib0" {>= "v0.13" & < "v0.14"}
-  "dune"     {>= "1.5.1"}
+  "base"     {>= "v0.14" & < "v0.15"}
+  "sexplib0" {>= "v0.14" & < "v0.15"}
+  "dune"     {>= "2.0.0"}
 ]
 synopsis: "S-expression parsing library"
 description: "

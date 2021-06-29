@@ -423,9 +423,10 @@ let processed_payload () =
   let key = Mirage_crypto.Cipher_block.AES.GCM.of_secret write_handshake_key in
   let adata = Tls.Writer.assemble_hdr `TLS_1_2 (Tls.Packet.APPLICATION_DATA, Cstruct.empty) in
   Cstruct.BE.set_uint16 adata 3 (17 + Cstruct.len server_payload) ;
-  let res = Mirage_crypto.Cipher_block.AES.GCM.encrypt ~key ~adata ~iv:nonce buf in
-  let buf' = Cstruct.append res.message res.tag in
-  let data = Tls.Writer.assemble_hdr `TLS_1_2 (Tls.Packet.APPLICATION_DATA, buf') in
+  let res =
+    Mirage_crypto.Cipher_block.AES.GCM.authenticate_encrypt ~key ~adata ~nonce buf
+  in
+  let data = Tls.Writer.assemble_hdr `TLS_1_2 (Tls.Packet.APPLICATION_DATA, res) in
   Alcotest.check cs __LOC__ server_payload_processed data
 
 let c_finished = Cstruct.of_hex {|
@@ -519,7 +520,8 @@ let self_signature () =
     Tls.Handshake_common.signature `TLS_1_3
       ~context_string:"TLS 1.3, server CertificateVerify"
       (Mirage_crypto.Hash.digest hash log)
-      None [ `RSA_PSS_RSAENC_SHA256 ] private_key
+      (Some [ `RSA_PSS_RSAENC_SHA256 ]) [ `RSA_PSS_RSAENC_SHA256 ]
+      (`RSA private_key)
   with
   | Error _ -> Alcotest.fail "expected sth"
   | Ok data ->
@@ -632,14 +634,17 @@ c9 82 88 76 11 20 95 fe  66 76 2b db f7 c6 72 e1
 |}
   in
   let check_pub pr pu =
-    let _priv, pub = Hacl_x25519.gen_key ~rng:(fun _ -> pr) in
-    Alcotest.check cs __LOC__ pu pub
+    match Mirage_crypto_ec.X25519.secret_of_cs pr with
+    | Ok (_, pub) -> Alcotest.check cs __LOC__ pu pub
+    | Error _ -> Alcotest.fail "couldn't decode DH secret"
   in
   let check_one p ks =
-    let priv, _pub = Hacl_x25519.gen_key ~rng:(fun _ -> p) in
-    match Hacl_x25519.key_exchange priv ks with
-    | Ok shared -> Alcotest.check cs __LOC__ ikm shared
-    | Error _ -> Alcotest.fail "bad kex"
+    match Mirage_crypto_ec.X25519.secret_of_cs p with
+    | Error _ -> Alcotest.fail "couldn't decode DH secret"
+    | Ok (priv, _) ->
+      match Mirage_crypto_ec.X25519.key_exchange priv ks with
+      | Ok shared -> Alcotest.check cs __LOC__ ikm shared
+      | Error _ -> Alcotest.fail "bad kex"
   in
   check_one c_priv s_keyshare ;
   check_one s_priv c_keyshare ;
@@ -655,7 +660,7 @@ let tests = [
   "derive finished", `Quick, derive_finished ;
   "derive master", `Quick, derive_master ;
   "extract master", `Quick, extract_master ;
-  "derive hanshake keys", `Quick, derive_write_handshake_keys ;
+  "derive handshake keys", `Quick, derive_write_handshake_keys ;
   "derive traffic keys", `Quick, derive_traffic_keys ;
   "application write keys", `Quick, appdata_write ;
   "application read keys", `Quick, appdata_read ;

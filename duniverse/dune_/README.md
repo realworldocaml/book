@@ -88,14 +88,14 @@ several configurations simultaneously. This helps maintaining packages
 across several versions of OCaml as you can test them all at once
 without hassle.
 
-In particular, this makes it easy to handle [cross-compilation](https://dune.readthedocs.io/en/latest/advanced-topics.html#cross-compilation).
+In particular, this makes it easy to handle [cross-compilation](https://dune.readthedocs.io/en/latest/cross-compilation.html).
 
 This feature requires [opam][opam].
 
 Requirements
 ------------
 
-Dune requires OCaml version 4.07.0 to build itself and can build OCaml
+Dune requires OCaml version 4.08.0 to build itself and can build OCaml
 projects using ocaml 4.02.3 or greater.
 
 Installation

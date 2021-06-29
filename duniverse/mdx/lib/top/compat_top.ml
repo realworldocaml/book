@@ -1,4 +1,4 @@
-open Mdx.Migrate_ast
+open Mdx.Compat
 
 #if OCAML_VERSION >= (4, 8, 0)
 let try_finally ~always f = Misc.try_finally f ~always
@@ -111,7 +111,12 @@ let type_structure env str loc =
 #else
   let tstr, _, env =
 #endif
+#if OCAML_VERSION >= (4, 12, 0)
+    let _ = loc in
+    Typemod.type_structure env str
+#else
     Typemod.type_structure env str loc
+#endif
   in
   tstr, env
 
@@ -176,6 +181,17 @@ let sig_class_type id desc =
 #else
   Types.Sig_class_type (id, desc, Trec_not)
 #endif
+
+module Printtyp = struct
+  include Printtyp
+
+  let wrap_printing_env e f =
+    wrap_printing_env
+#if OCAML_VERSION >= (4, 7, 0)
+      ~error:false
+#endif
+      e f
+end
 
 let add_directive ~name ~doc kind =
 #if OCAML_VERSION >= (4, 3, 0)
@@ -273,7 +289,7 @@ let map_sig_attributes ~f =
 
 let attribute ~name ~payload =
 #if OCAML_VERSION >= (4, 8, 0)
-  { Parsetree_.attr_name = name
+  { Parsetree.attr_name = name
   ; attr_payload = payload
   ; attr_loc = Location.none
   }
@@ -347,4 +363,26 @@ let match_env
 #endif
 #if OCAML_VERSION >= (4, 8, 0)
   | Env_persistent (summary, _) -> persistent summary
+#endif
+
+let top_directive_name (toplevel_phrase : Parsetree.toplevel_phrase) =
+  match toplevel_phrase with
+  | Ptop_def _ -> None
+#if OCAML_VERSION >= (4, 8, 0)
+  | Ptop_dir { pdir_name = { txt; _}; _ } -> Some txt
+#else
+  | Ptop_dir (name, _) -> Some name
+#endif
+
+let top_directive_require pkg =
+#if OCAML_VERSION >= (4, 8, 0)
+  Parsetree.Ptop_dir
+    {
+      pdir_name = { txt = "require"; loc = Location.none };
+      pdir_arg =
+        Some { pdira_desc = Pdir_string pkg; pdira_loc = Location.none };
+      pdir_loc = Location.none;
+    }
+#else  
+  Parsetree.Ptop_dir ("require", Pdir_string pkg)
 #endif

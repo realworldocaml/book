@@ -2,22 +2,9 @@ open Core
 open Import
 module Fd = Raw_fd
 
-type t = Fd.t Option_array.t [@@deriving sexp_of]
+type t = Fd.t Option_array.t
 
 let capacity t = Option_array.length t
-
-let invariant t =
-  try
-    for i = 0 to capacity t - 1 do
-      match Option_array.get t i with
-      | None -> ()
-      | Some fd ->
-        Fd.invariant fd;
-        assert (File_descr.equal (i |> File_descr.of_int) (Fd.file_descr fd))
-    done
-  with
-  | exn -> raise_s [%message "Fd_by_descr.invariant failure" (exn : exn) ~fd:(t : t)]
-;;
 
 let create ~num_file_descrs =
   if num_file_descrs < 0
@@ -97,8 +84,35 @@ let fold t ~init ~f =
   !r
 ;;
 
+let foldi t ~init ~f =
+  let r = ref init in
+  for i = 0 to capacity t - 1 do
+    if Option_array.is_some t i then r := f i !r (Option_array.get_some_exn t i)
+  done;
+  !r
+;;
+
 let iter t ~f =
   for i = 0 to capacity t - 1 do
     if Option_array.is_some t i then f (Option_array.get_some_exn t i)
   done
+;;
+
+(* The default sexp representation of this is huge and pollutes debug output *)
+let sexp_of_t t =
+  let fd_alist = foldi ~init:[] t ~f:(fun i acc fd -> (i, fd) :: acc) in
+  [%sexp_of: (int * Fd.t) list] (List.rev fd_alist)
+;;
+
+let invariant t =
+  try
+    for i = 0 to capacity t - 1 do
+      match Option_array.get t i with
+      | None -> ()
+      | Some fd ->
+        Fd.invariant fd;
+        assert (File_descr.equal (i |> File_descr.of_int) (Fd.file_descr fd))
+    done
+  with
+  | exn -> raise_s [%message "Fd_by_descr.invariant failure" (exn : exn) ~fd:(t : t)]
 ;;

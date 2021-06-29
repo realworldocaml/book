@@ -1,14 +1,16 @@
-open Utils
 open Core
 open State
 
+open Rresult.R.Infix
+
+let guard p e = if p then Ok () else Error e
 
 type state = State.state
 
 type client_hello_errors = State.client_hello_errors
 type error = State.error
 type fatal = State.fatal
-type failure = State.failure [@@deriving sexp]
+type failure = State.failure [@@deriving sexp_of]
 
 let alert_of_authentication_failure = function
   | `LeafCertificateExpired _ -> Packet.CERTIFICATE_EXPIRED
@@ -49,16 +51,14 @@ let alert_of_fatal = function
   | `NoVersions _ -> Packet.PROTOCOL_VERSION
   | `InsufficientDH -> Packet.INSUFFICIENT_SECURITY
   | `InvalidDH -> Packet.ILLEGAL_PARAMETER
+  | `BadECDH _ -> Packet.ILLEGAL_PARAMETER
   | `BadFinished -> Packet.DECRYPT_ERROR
   | `HandshakeFragmentsNotEmpty -> Packet.HANDSHAKE_FAILURE
   | `InvalidSession -> Packet.HANDSHAKE_FAILURE
   | `UnexpectedCCS -> Packet.UNEXPECTED_MESSAGE
   | `UnexpectedHandshake _ -> Packet.UNEXPECTED_MESSAGE
-  | `RSASignatureMismatch -> Packet.HANDSHAKE_FAILURE
-  | `HashAlgorithmMismatch -> Packet.HANDSHAKE_FAILURE
-  | `NotRSASignature -> Packet.HANDSHAKE_FAILURE
-  | `RSASignatureVerificationFailed -> Packet.HANDSHAKE_FAILURE
-  | `UnsupportedSignatureScheme -> Packet.HANDSHAKE_FAILURE
+  | `SignatureVerificationFailed _ -> Packet.HANDSHAKE_FAILURE
+  | `SigningFailed _ -> Packet.HANDSHAKE_FAILURE
   | `KeyTooSmall -> Packet.INSUFFICIENT_SECURITY
   | `BadCertificateChain -> Packet.BAD_CERTIFICATE
   | `InvalidClientHello `NoSignatureAlgorithmsExtension
@@ -75,7 +75,6 @@ let alert_of_fatal = function
   | `Toomany0rttbytes -> Packet.UNEXPECTED_MESSAGE
   | `MissingContentType -> Packet.UNEXPECTED_MESSAGE
   | `Downgrade12 | `Downgrade11 -> Packet.ILLEGAL_PARAMETER
-  | `UnsupportedKeyExchange -> Packet.HANDSHAKE_FAILURE
 
 let alert_of_failure = function
   | `Error x -> alert_of_error x
@@ -87,17 +86,13 @@ let string_of_failure = function
     "authentication failure: " ^ s
   | f -> Sexplib.Sexp.to_string_hum (sexp_of_failure f)
 
-type ret = [
+type ret =
+  ([ `Ok of state | `Eof | `Alert of Packet.alert_type ]
+   * [ `Response of Cstruct.t option ]
+   * [ `Data of Cstruct.t option ],
+   failure * [ `Response of Cstruct.t ]) result
 
-  | `Ok of [ `Ok of state | `Eof | `Alert of Packet.alert_type ]
-         * [ `Response of Cstruct.t option ]
-         * [ `Data of Cstruct.t option ]
-
-  | `Fail of failure * [ `Response of Cstruct.t ]
-]
-
-
-let (<+>) = Cs.(<+>)
+let (<+>) = Cstruct.append
 
 let new_state config role =
   let handshake_state = match role with
@@ -121,7 +116,7 @@ let new_state config role =
     fragment  = Cstruct.create 0 ;
   }
 
-type raw_record = tls_hdr * Cstruct_sexp.t [@@deriving sexp]
+type raw_record = tls_hdr * Cstruct_sexp.t [@@deriving sexp_of]
 
 (* well-behaved pure encryptor *)
 let encrypt (version : tls_version) (st : crypto_state) ty buf =
@@ -170,13 +165,22 @@ let encrypt (version : tls_version) (st : crypto_state) ty buf =
                   (CBC { c with iv_mode = Iv iv' }, m) )
 
           | AEAD c ->
-             let explicit_nonce = Crypto.sequence_buf ctx.sequence in
-             let nonce = c.nonce <+> explicit_nonce
-             in
-             let msg =
-               Crypto.encrypt_aead ~cipher:c.cipher ~key:c.cipher_secret ~nonce ~adata:pseudo_hdr buf
-             in
-             (AEAD c, explicit_nonce <+> msg)
+            match c.cipher with
+            | ChaCha20_Poly1305 _ ->
+              (* RFC 7905: no explicit nonce, instead TLS 1.3 construction is adapted *)
+              let nonce = Crypto.aead_nonce c.nonce ctx.sequence in
+              let msg =
+                Crypto.encrypt_aead ~cipher:c.cipher ~key:c.cipher_secret ~nonce ~adata:pseudo_hdr buf
+              in
+              (AEAD c, msg)
+            | _ ->
+              let explicit_nonce = Crypto.sequence_buf ctx.sequence in
+              let nonce = c.nonce <+> explicit_nonce
+              in
+              let msg =
+                Crypto.encrypt_aead ~cipher:c.cipher ~key:c.cipher_secret ~nonce ~adata:pseudo_hdr buf
+              in
+              (AEAD c, explicit_nonce <+> msg)
         in
         (Some { sequence = Int64.succ ctx.sequence ; cipher_st = c_st }, ty, enc)
 
@@ -189,7 +193,7 @@ let verify_mac sequence mac mac_k ty ver decrypted =
     let ver = pair_of_tls_version ver in
     let hdr = Crypto.pseudo_header sequence ty ver (Cstruct.len body) in
     Crypto.mac mac mac_k hdr body in
-  guard (Cs.equal cmac mmac) (`Fatal `MACMismatch) >|= fun () ->
+  guard (Cstruct.equal cmac mmac) (`Fatal `MACMismatch) >>| fun () ->
   body
 
 
@@ -206,7 +210,7 @@ let decrypt ?(trial = false) (version : tls_version) (st : crypto_state) ty buf 
   (* defense against http://lasecwww.epfl.ch/memo/memo_ssl.shtml 1) in
      https://www.openssl.org/~bodo/tls-cbc.txt *)
   let mask_decrypt_failure seq mac mac_k =
-    compute_mac seq mac mac_k buf >>= fun _ -> fail (`Fatal `MACMismatch)
+    compute_mac seq mac mac_k buf >>= fun _ -> Error (`Fatal `MACMismatch)
   in
 
   let dec ctx =
@@ -218,34 +222,47 @@ let decrypt ?(trial = false) (version : tls_version) (st : crypto_state) ty buf 
          | None ->
             mask_decrypt_failure seq c.hmac c.hmac_secret
          | Some (dec, iv') ->
-            compute_mac seq c.hmac c.hmac_secret dec >|= fun msg ->
+            compute_mac seq c.hmac c.hmac_secret dec >>| fun msg ->
             (msg, iv')
        in
        ( match c.iv_mode with
          | Iv iv ->
-            dec iv buf >|= fun (msg, iv') ->
+            dec iv buf >>| fun (msg, iv') ->
             CBC { c with iv_mode = Iv iv' }, msg
          | Random_iv ->
             if Cstruct.len buf < Crypto.cbc_block c.cipher then
-              fail (`Fatal `MACUnderflow)
+              Error (`Fatal `MACUnderflow)
             else
               let iv, buf = Cstruct.split buf (Crypto.cbc_block c.cipher) in
-              dec iv buf >|= fun (msg, _) ->
+              dec iv buf >>| fun (msg, _) ->
               (CBC c, msg) )
 
     | AEAD c ->
-       if Cstruct.len buf < 8 then
-         fail (`Fatal `MACUnderflow)
-       else
-         let explicit_nonce, buf = Cstruct.split buf 8 in
-         let adata =
-           let ver = pair_of_tls_version version in
-           Crypto.pseudo_header seq ty ver (Cstruct.len buf - 16)
-         and nonce = c.nonce <+> explicit_nonce
-         in
-         match Crypto.decrypt_aead ~cipher:c.cipher ~key:c.cipher_secret ~nonce ~adata buf with
-         | None -> fail (`Fatal `MACMismatch)
-         | Some x -> return (AEAD c, x)
+      match c.cipher with
+      | ChaCha20_Poly1305 _ ->
+        (* RFC 7905: no explicit nonce, instead TLS 1.3 construction is adapted *)
+        let adata =
+          let ver = pair_of_tls_version version in
+          Crypto.pseudo_header seq ty ver (Cstruct.len buf - Crypto.tag_len c.cipher)
+        and nonce = Crypto.aead_nonce c.nonce seq
+        in
+        (match Crypto.decrypt_aead ~adata ~cipher:c.cipher ~key:c.cipher_secret ~nonce buf with
+         | None -> Error (`Fatal `MACMismatch)
+         | Some x -> Ok (AEAD c, x))
+      | _ ->
+        let explicit_nonce_len = 8 in
+        if Cstruct.len buf < explicit_nonce_len then
+          Error (`Fatal `MACUnderflow)
+        else
+          let explicit_nonce, buf = Cstruct.split buf explicit_nonce_len in
+          let adata =
+            let ver = pair_of_tls_version version in
+            Crypto.pseudo_header seq ty ver (Cstruct.len buf - Crypto.tag_len c.cipher)
+          and nonce = c.nonce <+> explicit_nonce
+          in
+          match Crypto.decrypt_aead ~cipher:c.cipher ~key:c.cipher_secret ~nonce ~adata buf with
+          | None -> Error (`Fatal `MACMismatch)
+          | Some x -> Ok (AEAD c, x)
   in
   match st, version with
   | None, _ when ty = Packet.APPLICATION_DATA ->
@@ -257,22 +274,22 @@ let decrypt ?(trial = false) (version : tls_version) (st : crypto_state) ty buf 
        the APP_DATA above cannot be decrypted or used, so we drop it.
     *)
     Ok (None, Cstruct.empty, Packet.APPLICATION_DATA)
-  | None, _ -> return (st, buf, ty)
+  | None, _ -> Ok (st, buf, ty)
   | Some ctx, `TLS_1_3 ->
     (match ty with
-     | Packet.CHANGE_CIPHER_SPEC -> return (st, buf, ty)
+     | Packet.CHANGE_CIPHER_SPEC -> Ok (st, buf, ty)
      | Packet.APPLICATION_DATA ->
        (match ctx.cipher_st with
         | AEAD c ->
           let nonce = Crypto.aead_nonce c.nonce ctx.sequence in
           let unpad x =
             let rec eat = function
-              | -1 -> fail (`Fatal `MissingContentType)
+              | -1 -> Error (`Fatal `MissingContentType)
               | idx -> match Cstruct.get_uint8 x idx with
                 | 0 -> eat (pred idx)
                 | n -> match Packet.int_to_content_type n with
-                  | Some ct -> return (Cstruct.sub x 0 idx, ct)
-                  | None -> fail (`Fatal `MACUnderflow) (* TODO better error? *)
+                  | Some ct -> Ok (Cstruct.sub x 0 idx, ct)
+                  | None -> Error (`Fatal `MACUnderflow) (* TODO better error? *)
             in
             eat (pred (Cstruct.len x))
           in
@@ -282,38 +299,38 @@ let decrypt ?(trial = false) (version : tls_version) (st : crypto_state) ty buf 
              if trial then
                Ok (Some ctx, Cstruct.empty, Packet.APPLICATION_DATA)
              else
-               fail (`Fatal `MACMismatch)
+               Error (`Fatal `MACMismatch)
            | Some x ->
-             unpad x >|= fun (data, ty) ->
+             unpad x >>| fun (data, ty) ->
              (Some { ctx with sequence = Int64.succ ctx.sequence }, data, ty))
-        | _ -> fail (`Fatal `InvalidMessage))
-     | _ -> fail (`Fatal `InvalidMessage))
+        | _ -> Error (`Fatal `InvalidMessage))
+     | _ -> Error (`Fatal `InvalidMessage))
   | Some ctx, _ ->
     dec ctx >>= fun (st', msg) ->
     let ctx' = { cipher_st = st' ; sequence = Int64.succ ctx.sequence } in
-    return (Some ctx', msg, ty)
+    Ok (Some ctx', msg, ty)
 
 (* party time *)
-let rec separate_records : Cstruct.t ->  ((tls_hdr * Cstruct.t) list * Cstruct.t) eff
+let rec separate_records : Cstruct.t -> ((tls_hdr * Cstruct.t) list * Cstruct.t, failure) result
 = fun buf ->
   let open Reader in
   match parse_record buf with
-  | Ok (`Fragment b) -> return ([], b)
+  | Ok (`Fragment b) -> Ok ([], b)
   | Ok (`Record (packet, fragment)) ->
-    separate_records fragment >|= fun (tl, frag) ->
+    separate_records fragment >>| fun (tl, frag) ->
     (packet :: tl, frag)
   | Error (Overflow x) ->
     Tracing.cs ~tag:"buf-in" buf ;
-    fail (`Fatal (`RecordOverflow x))
+    Error (`Fatal (`RecordOverflow x))
   | Error (UnknownVersion v) ->
     Tracing.cs ~tag:"buf-in" buf ;
-    fail (`Fatal (`UnknownRecordVersion v))
+    Error (`Fatal (`UnknownRecordVersion v))
   | Error (UnknownContent c) ->
     Tracing.cs ~tag:"buf-in" buf ;
-    fail (`Fatal (`UnknownContentType c))
+    Error (`Fatal (`UnknownContentType c))
   | Error e ->
     Tracing.cs ~tag:"buf-in" buf ;
-    fail (`Fatal (`ReaderError e))
+    Error (`Fatal (`ReaderError e))
 
 
 let encrypt_records encryptor version records =
@@ -349,8 +366,8 @@ module Alert = struct
           | CLOSE_NOTIFY -> `Eof
           | _            -> `Alert a_type in
         Tracing.sexpf ~tag:"alert-out" ~f:sexp_of_tls_alert (Packet.WARNING, Packet.CLOSE_NOTIFY) ;
-        return (err, [`Record close_notify])
-    | Error re -> fail (`Fatal (`ReaderError re))
+        Ok (err, [`Record close_notify])
+    | Error re -> Error (`Fatal (`ReaderError re))
 end
 
 let hs_can_handle_appdata s =
@@ -377,9 +394,9 @@ let early_data s =
 
 let rec separate_handshakes buf =
   match Reader.parse_handshake_frame buf with
-  | None, rest   -> return ([], rest)
+  | None, rest   -> Ok ([], rest)
   | Some hs, rest ->
-    separate_handshakes rest >|= fun (rt, frag) ->
+    separate_handshakes rest >>| fun (rt, frag) ->
     (hs :: rt, frag)
 
 let handle_change_cipher_spec = function
@@ -393,8 +410,8 @@ let handle_change_cipher_spec = function
   | Client13 (AwaitServerHello13 _)
   | Server13 AwaitClientHelloHRR13
   | Server13 (AwaitClientCertificate13 _)
-  | Server13 (AwaitClientFinished13 _) -> (fun s _ -> return (s, []))
-  | _ -> (fun _ _ -> fail (`Fatal `UnexpectedCCS))
+  | Server13 (AwaitClientFinished13 _) -> (fun s _ -> Ok (s, []))
+  | _ -> (fun _ _ -> Error (`Fatal `UnexpectedCCS))
 
 and handle_handshake = function
   | Client cs -> Handshake_client.handle_handshake cs
@@ -414,32 +431,33 @@ let handle_packet hs buf = function
  *)
 
   | Packet.ALERT ->
-      Alert.handle buf >|= fun (err, out) ->
+      Alert.handle buf >>| fun (err, out) ->
         (hs, out, None, err)
 
   | Packet.APPLICATION_DATA ->
     if hs_can_handle_appdata hs || (early_data hs && Cstruct.len hs.hs_fragment = 0) then
       (Tracing.cs ~tag:"application-data-in" buf;
-       return (hs, [], non_empty buf, `No_err))
+       Ok (hs, [], non_empty buf, `No_err))
     else
-      fail (`Fatal `CannotHandleApplicationDataYet)
+      Error (`Fatal `CannotHandleApplicationDataYet)
 
   | Packet.CHANGE_CIPHER_SPEC ->
      handle_change_cipher_spec hs.machina hs buf
-     >|= fun (hs, items) -> (hs, items, None, `No_err)
+     >>| fun (hs, items) -> (hs, items, None, `No_err)
 
   | Packet.HANDSHAKE ->
      separate_handshakes (hs.hs_fragment <+> buf)
      >>= fun (hss, hs_fragment) ->
        let hs = { hs with hs_fragment } in
-       foldM (fun (hs, items) raw ->
-         handle_handshake hs.machina hs raw
-         >|= fun (hs', items') -> (hs', items @ items'))
-       (hs, []) hss
-     >|= fun (hs, items) ->
+       List.fold_left (fun acc raw ->
+           acc >>= fun (hs, items) ->
+           handle_handshake hs.machina hs raw
+           >>| fun (hs', items') -> (hs', items @ items'))
+         (Ok (hs, [])) hss
+     >>| fun (hs, items) ->
        (hs, items, None, `No_err)
 
-  | Packet.HEARTBEAT -> fail (`Fatal `NoHeartbeat)
+  | Packet.HEARTBEAT -> Error (`Fatal `NoHeartbeat)
 
 let decrement_early_data hs ty buf =
   let bytes left cipher =
@@ -453,7 +471,7 @@ let decrement_early_data hs ty buf =
       | _ -> `AES_128_GCM_SHA256
       (* TODO assert and ensure that all early_data states have a cipher  *)
     in
-    bytes hs.early_data_left cipher >|= fun early_data_left ->
+    bytes hs.early_data_left cipher >>| fun early_data_left ->
     { hs with early_data_left }
   else
     Ok hs
@@ -465,9 +483,9 @@ let handle_raw_record state (hdr, buf as record : raw_record) =
   let hs = state.handshake in
   let version = hs.protocol_version in
   ( match hs.machina, version with
-    | Client (AwaitServerHello _), _       -> return ()
-    | Server AwaitClientHello    , _       -> return ()
-    | Server13 AwaitClientHelloHRR13, _       -> return ()
+    | Client (AwaitServerHello _), _       -> Ok ()
+    | Server AwaitClientHello    , _       -> Ok ()
+    | Server13 AwaitClientHelloHRR13, _       -> Ok ()
     | _                          , `TLS_1_3 -> guard (hdr.version = `TLS_1_2) (`Fatal (`BadRecordVersion hdr.version))
     | _                          , v       -> guard (version_eq hdr.version v) (`Fatal (`BadRecordVersion hdr.version)) )
   >>= fun () ->
@@ -481,7 +499,7 @@ let handle_raw_record state (hdr, buf as record : raw_record) =
   decrement_early_data hs ty buf >>= fun handshake ->
   Tracing.sexpf ~tag:"frame-in" ~f:sexp_of_record (ty, dec) ;
   handle_packet handshake dec ty
-  >|= fun (handshake, items, data, err) ->
+  >>| fun (handshake, items, data, err) ->
   let (encryptor, decryptor, encs) =
     List.fold_left (fun (enc, dec, es) -> function
       | `Change_enc enc' -> (Some enc', dec, es)
@@ -505,7 +523,7 @@ let maybe_app a b = match a, b with
 
 let assemble_records (version : tls_version) rs =
   let version = match version with `TLS_1_3 -> `TLS_1_2 | x -> x in
-  Cs.appends (List.map (Writer.assemble_hdr version) rs)
+  Cstruct.concat (List.map (Writer.assemble_hdr version) rs)
 
 (* main entry point *)
 let handle_tls state buf =
@@ -515,19 +533,19 @@ let handle_tls state buf =
   Tracing.cs ~tag:"wire-in" buf ;
 
   let rec handle_records st = function
-    | []    -> return (st, [], None, `No_err)
+    | []    -> Ok (st, [], None, `No_err)
     | r::rs ->
         handle_raw_record st r >>= function
           | (st, raw_rs, data, `No_err) ->
-              handle_records st rs >|= fun (st', raw_rs', data', err') ->
+              handle_records st rs >>| fun (st', raw_rs', data', err') ->
                 (st', raw_rs @ raw_rs', maybe_app data data', err')
-          | res -> return res
+          | res -> Ok res
   in
   match
     separate_records (state.fragment <+> buf)
     >>= fun (in_records, fragment) ->
       handle_records state in_records
-    >|= fun (state', out_records, data, err) ->
+    >>| fun (state', out_records, data, err) ->
       let version = state'.handshake.protocol_version in
       let resp    = match out_records with
                     | [] -> None
@@ -547,10 +565,10 @@ let handle_tls state buf =
           Tracing.sexpf ~tag:"ok-alert-out" ~f:Packet.sexp_of_alert_type al ;
           `Alert al
         | `No_err ->
-          Tracing.sexpf ~tag:"state-out" ~f:sexp_of_state state ;
+          (* Tracing.sexpf ~tag:"state-out" ~f:sexp_of_state state ; *)
           `Ok state
       in
-      `Ok (res, `Response resp, `Data data)
+      Ok (res, `Response resp, `Data data)
   | Error x ->
       let version = state.handshake.protocol_version in
       let alert   = alert_of_failure x in
@@ -559,7 +577,7 @@ let handle_tls state buf =
       let resp    = assemble_records version enc in
       Tracing.sexpf ~tag:"fail-alert-out" ~f:sexp_of_tls_alert (Packet.FATAL, alert) ;
       Tracing.sexpf ~tag:"failure" ~f:sexp_of_failure x ;
-      `Fail (x, `Response resp)
+      Error (x, `Response resp)
 
 let send_records (st : state) records =
   let version = st.handshake.protocol_version in
@@ -623,7 +641,7 @@ let reneg ?authenticator ?acceptable_cas ?cert st =
   | _ -> None
 
 let key_update ?(request = true) state =
-  Handshake_common.output_key_update ~request state >|= fun (state', out) ->
+  Handshake_common.output_key_update ~request state >>| fun (state', out) ->
   let _, outbuf = send_records state [out] in
   state', outbuf
 
@@ -729,7 +747,7 @@ let server config = new_state Config.(of_server config) `Server
 type epoch = [
   | `InitialEpoch
   | `Epoch of epoch_data
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 let epoch state =
   match epoch_of_hs state.handshake with

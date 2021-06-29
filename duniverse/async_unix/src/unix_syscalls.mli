@@ -56,12 +56,44 @@ type file_perm = int
 
 val openfile : ?perm:file_perm -> string -> mode:open_flag list -> Fd.t Deferred.t
 
-(** [with_file file ~mode ~perm ~f ?exclusive] opens [file], and applies [f] to the
+module Lock_mode : sig
+  type t =
+    | Shared (** Does not exclude other Shared locks, only other Exclusive locks *)
+    | Exclusive (** Excludes other Shared and Exclusive locks *)
+  [@@deriving sexp_of]
+end
+
+module Lock_mechanism : sig
+  type t =
+    | Lockf
+    (** Lockf refers to the ocaml [lockf] function, which, despite the name, does not call
+        the UNIX lockf() system call, but rather calls fcntl() with F_SETLKW. *)
+    | Flock
+  [@@deriving compare, enumerate, sexp]
+
+  include Stringable.S with type t := t
+
+  val arg_type : t Command.Arg_type.t
+end
+
+module Lock : sig
+  type t =
+    { mode : Lock_mode.t
+    ; mechanism : Lock_mechanism.t
+    }
+  [@@deriving sexp_of]
+end
+
+(** [with_file file ~mode ~perm ~f] opens [file], and applies [f] to the
     resulting file descriptor.  When the result of [f] becomes determined, it closes the
-    descriptor and returns the result of [f].  If [exclusive] is supplied, then the file
-    descriptor is locked before calling [f] and unlocked after calling [f]. *)
+    descriptor and returns the result of [f].
+
+    If [lock] is supplied, then the file descriptor is locked before calling [f] with
+    the specified [lock_mechanism]. Note that it is not unlocked before close, which might
+    be significant if this file descriptior is held elsewhere (e.g., by fork() or
+    dup()). *)
 val with_file
-  :  ?exclusive:[ `Read | `Write ]
+  :  ?lock:Lock.t (** default is no lock *)
   -> ?perm:file_perm
   -> string
   -> mode:open_flag list
@@ -85,26 +117,49 @@ val fsync : Fd.t -> unit Deferred.t
 val fdatasync : Fd.t -> unit Deferred.t
 val sync : unit -> unit Deferred.t
 
-(** [lockf fd read_or_write ?len] exclusively locks for reading/writing the section of the
-    open file [fd] specified by the current file position and [len] (see man lockf).  It
-    returns when the lock has been acquired.  It raises if [fd] is closed. *)
-val lockf : ?len:Int64.t -> Fd.t -> [ `Read | `Write ] -> unit Deferred.t
+(** [lockf fd lock_mode ?len] locks the section of the open file [fd] specified by the
+    current file position and [len] (see man lockf).  It returns when the lock has been
+    acquired.  It raises if [fd] is closed.
 
-(** [try_lockf fd read_or_write ?len] attempts to exclusively lock for reading/writing the
-    section of the open file [fd] specified by the current file position and [len] (see
-    man lockf).  It returns [true] if it acquired the lock.  It raises if [fd] is
-    closed. *)
-val try_lockf : ?len:Int64.t -> Fd.t -> [ `Read | `Write ] -> bool
+    Note that, despite the name, this function does not call the UNIX lockf() system call;
+    rather it calls fcntl() with F_SETLKW *)
+val lockf : ?len:Int64.t -> Fd.t -> Lock_mode.t -> unit Deferred.t
 
-(** [lockf_is_locked fd ?len] checks the lock on section of the open file [fd] specified
-    by the current file position and [len] (see [man lockf]).  If the section is unlocked
-    or locked by this process, it returns true, else it returns false.  It raises if [fd]
-    is closed. *)
+(** [try_lockf fd lock_mode ?len] attempts to lock the section of the open file
+    [fd] specified by the current file position and [len] (see man lockf).  It returns
+    [true] if it acquired the lock.  It raises if [fd] is closed.
+
+    Note that, despite the name, this function does not call the UNIX lockf() system call;
+    rather it calls fcntl() with F_SETLK *)
+val try_lockf : ?len:Int64.t -> Fd.t -> Lock_mode.t -> bool
+
+(** [test_lockf fd ?len] checks the lock on section of the open file [fd] specified by the
+    current file position and [len].  If the section is unlocked or locked by this
+    process, it returns true, else it returns false.  It raises if [fd] is closed.
+
+    Note that, despite the name, this function does not call the UNIX lockf() system call;
+    rather it calls fcntl() with F_GETLK *)
 val test_lockf : ?len:Int64.t -> Fd.t -> bool
 
 (** [unlockf fd ?len] unlocks the section of the open file [fd] specified by the current
-    file position and [len] (see [man lockf]).  It raises if [fd] is closed. *)
+    file position and [len].  It raises if [fd] is closed.
+
+    Note that, despite the name, this function does not call the UNIX lockf() system call;
+    rather it calls fcntl() with F_UNLCK *)
 val unlockf : ?len:Int64.t -> Fd.t -> unit
+
+(** [flock fd lock_mode] locks the open file [fd] (see man 2 flock).  It returns when the
+    lock has been acquired.  It raises if [fd] is closed. *)
+val flock : Fd.t -> Lock_mode.t -> unit Deferred.t
+
+(** [try_flock fd lock_mode] attempts to lock the open file [fd] (see man 2 flock).  It
+    returns [true] if it acquired the lock or [false] if a conflicting lock was already
+    present.  It raises if [fd] is closed. *)
+val try_flock : Fd.t -> Lock_mode.t -> bool
+
+(** [funlock fd] unlocks the open file [fd] (see [man 2 flock]).  It raises if [fd] is
+    closed. *)
+val funlock : Fd.t -> unit
 
 module File_kind : sig
   type t =
@@ -187,9 +242,6 @@ val opendir : string -> dir_handle Deferred.t
 (** [readdir_opt dir_handle] returns the next directory member, or [None] when there are
     no more directory members to return. *)
 val readdir_opt : dir_handle -> string option Deferred.t
-
-val readdir : dir_handle -> string Deferred.t
-[@@deprecated "[since 2016-08] use readdir_opt instead"]
 
 val rewinddir : dir_handle -> unit Deferred.t
 val closedir : dir_handle -> unit Deferred.t
@@ -288,6 +340,11 @@ val wait_nohang_untraced : wait_on -> (Pid.t * Exit_or_signal_or_stop.t) option
     zero; it raises if the child terminates in any other way. *)
 val waitpid : Pid.t -> Exit_or_signal.t Deferred.t
 
+(** Same as {!waitpid}, but guarantees that the resulting [Deferred] is determined
+    in the same async job as the [wait] system call, so that it's safe to keep using
+    the [pid] if the deferred is not determined. *)
+val waitpid_prompt : Pid.t -> Exit_or_signal.t Deferred.t
+
 val waitpid_exn : Pid.t -> unit Deferred.t
 
 module Inet_addr : sig
@@ -321,12 +378,6 @@ module Socket : sig
     module Inet : sig
       type t = [ `Inet of Inet_addr.t * int ] [@@deriving bin_io, compare, hash, sexp_of]
 
-      val t_of_sexp : Sexp.t -> t
-      [@@deprecated "[since 2015-10] Replace [t] by [Blocking_sexp.t]"]
-
-      val __t_of_sexp__ : Sexp.t -> t
-      [@@deprecated "[since 2015-10] Replace [t] by [Blocking_sexp.t]"]
-
       (** [Blocking_sexp] performs DNS lookup to resolve hostnames to IP addresses. *)
       module Blocking_sexp : sig
         type nonrec t = t [@@deriving bin_io, compare, hash, sexp_poly]
@@ -355,9 +406,6 @@ module Socket : sig
       | Unix.t
       ]
     [@@deriving bin_io, sexp_of]
-
-    val t_of_sexp : Sexp.t -> t
-    [@@deprecated "[since 2015-10] Replace [t] by [Blocking_sexp.t]"]
 
     (** [Blocking_sexp] performs DNS lookup to resolve hostnames to IP addresses. *)
     module Blocking_sexp : sig
@@ -570,9 +618,6 @@ type sockaddr = Unix.sockaddr =
   | ADDR_INET of Inet_addr.t * int
 [@@deriving bin_io, compare, sexp_of]
 
-val sockaddr_of_sexp : Sexp.t -> sockaddr
-[@@deprecated "[since 2015-10] Replace [sockaddr] by [sockaddr_blocking_sexp]"]
-
 (** [sockaddr_blocking_sexp] is like [sockaddr], with [of_sexp] that performs DNS lookup
     to resolve [Inet_addr.t]. *)
 type sockaddr_blocking_sexp = sockaddr [@@deriving bin_io, sexp]
@@ -586,9 +631,6 @@ module Addr_info : sig
     ; ai_canonname : string
     }
   [@@deriving bin_io, sexp_of]
-
-  val t_of_sexp : Sexp.t -> t
-  [@@deprecated "[since 2015-10] Replace [t] by [Blocking_sexp.t]"]
 
   (** [Blocking_sexp] performs DNS lookup to resolve hostnames to IP addresses. *)
   module Blocking_sexp : sig
@@ -640,84 +682,6 @@ val getegid : unit -> int
 val setuid : int -> unit
 
 module Error = Unix.Error
-
-type error = Unix.Error.t =
-  | E2BIG
-  | EACCES
-  | EAGAIN
-  | EBADF
-  | EBUSY
-  | ECHILD
-  | EDEADLK
-  | EDOM
-  | EEXIST
-  | EFAULT
-  | EFBIG
-  | EINTR
-  | EINVAL
-  | EIO
-  | EISDIR
-  | EMFILE
-  | EMLINK
-  | ENAMETOOLONG
-  | ENFILE
-  | ENODEV
-  | ENOENT
-  | ENOEXEC
-  | ENOLCK
-  | ENOMEM
-  | ENOSPC
-  | ENOSYS
-  | ENOTDIR
-  | ENOTEMPTY
-  | ENOTTY
-  | ENXIO
-  | EPERM
-  | EPIPE
-  | ERANGE
-  | EROFS
-  | ESPIPE
-  | ESRCH
-  | EXDEV
-  | EWOULDBLOCK
-  | EINPROGRESS
-  | EALREADY
-  | ENOTSOCK
-  | EDESTADDRREQ
-  | EMSGSIZE
-  | EPROTOTYPE
-  | ENOPROTOOPT
-  | EPROTONOSUPPORT
-  | ESOCKTNOSUPPORT
-  | EOPNOTSUPP
-  | EPFNOSUPPORT
-  | EAFNOSUPPORT
-  | EADDRINUSE
-  | EADDRNOTAVAIL
-  | ENETDOWN
-  | ENETUNREACH
-  | ENETRESET
-  | ECONNABORTED
-  | ECONNRESET
-  | ENOBUFS
-  | EISCONN
-  | ENOTCONN
-  | ESHUTDOWN
-  | ETOOMANYREFS
-  | ETIMEDOUT
-  | ECONNREFUSED
-  | EHOSTDOWN
-  | EHOSTUNREACH
-  | ELOOP
-  | EOVERFLOW
-  | EUNKNOWNERR of int
-[@@deprecated "[since 2016-10] use [Unix.Error.t] instead"]
-
-val sexp_of_error : Error.t -> Sexp.t
-[@@deprecated "[since 2016-10] use [Unix.Error.t] instead"]
-
-val error_of_sexp : Sexp.t -> Error.t
-[@@deprecated "[since 2016-10] use [Unix.Error.t] instead"]
 
 exception Unix_error of Error.t * string * string
 

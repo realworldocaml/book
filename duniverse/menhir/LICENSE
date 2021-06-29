@@ -1,28 +1,21 @@
-In the following, "THE LIBRARY" refers to the following files:
+In the following,
 
-  1- the file src/standard.mly;
+* "THE RUNTIME LIBRARY" refers to the files in the subdirectory lib/.
 
-  2- the OCaml source files whose basename appears in the file
-     src/menhirLib.mlpack and whose extension is ".ml" or ".mli".
+* "THE COQ LIBRARY" refers to the files in the subdirectory coq-menhirlib/.
 
-"THE COQ LIBRARY" refers to the files in the subdirectory coq-menhirlib/.
-
-"THE GENERATOR" refers to the files of this archive which are neither part of
-THE LIBRARY, nor part of THE COQ LIBRARY, nor in the subdirectory test/.
+* "THE GENERATOR" refers to the files that are
+  not part of THE RUNTIME LIBRARY,
+  not part of THE COQ LIBRARY,
+  and not located in the subdirectory test/.
 
 The files in the subdirectory test/ are not covered by this license.
 
 THE GENERATOR is distributed under the terms of the GNU General Public
 License version 2 (included below).
 
-THE LIBRARY is distributed under the terms of the GNU Library General
+THE RUNTIME LIBRARY is distributed under the terms of the GNU Library General
 Public License version 2 (included below).
-
-THE COQ LIBRARY is distributed under the terms of the GNU Lesser
-General Public License as published by the Free Software Foundation,
-either version 3 of the License, or (at your option) any later
-version. Version 3 of the GNU Lesser General Public License is
-included in the file coq-menhirlib/LICENSE.
 
 As a special exception to the GNU Library General Public License, you
 may link, statically or dynamically, a "work that uses the Library"
@@ -37,6 +30,12 @@ conditions defined in clause 3 of the GNU Library General Public
 License.  This exception does not however invalidate any other reasons
 why the executable file might be covered by the GNU Library General
 Public License.
+
+THE COQ LIBRARY is distributed under the terms of the GNU Lesser
+General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later
+version. Version 3 of the GNU Lesser General Public License is
+included in the file coq-menhirlib/LICENSE.
 
 ----------------------------------------------------------------------
 

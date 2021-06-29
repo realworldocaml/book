@@ -15,34 +15,22 @@
  *
  *)
 
-let to_inet_addr t =
-  Unix.inet_addr_of_string (Ipaddr.to_string t)
+let to_inet_addr t = Unix.inet_addr_of_string (Ipaddr.to_string t)
 
-let of_inet_addr t =
-  Ipaddr.of_string_exn (Unix.string_of_inet_addr t)
+let of_inet_addr t = Ipaddr.of_string_exn (Unix.string_of_inet_addr t)
 
 module V4 = struct
+  let to_inet_addr t = Unix.inet_addr_of_string (Ipaddr.V4.to_string t)
 
-  let to_inet_addr t =
-    Unix.inet_addr_of_string (Ipaddr.V4.to_string t)
+  let of_inet_addr_exn t = Ipaddr.V4.of_string_exn (Unix.string_of_inet_addr t)
 
-  let of_inet_addr_exn t =
-    Ipaddr.V4.of_string_exn (Unix.string_of_inet_addr t)
-
-  let of_inet_addr t =
-    try Some (of_inet_addr_exn t)
-    with _ -> None
+  let of_inet_addr t = try Some (of_inet_addr_exn t) with _ -> None
 end
 
 module V6 = struct
+  let to_inet_addr t = Unix.inet_addr_of_string (Ipaddr.V6.to_string t)
 
-  let to_inet_addr t =
-    Unix.inet_addr_of_string (Ipaddr.V6.to_string t)
+  let of_inet_addr_exn t = Ipaddr.V6.of_string_exn (Unix.string_of_inet_addr t)
 
-  let of_inet_addr_exn t =
-    Ipaddr.V6.of_string_exn (Unix.string_of_inet_addr t)
-
-  let of_inet_addr t =
-    try Some (of_inet_addr_exn t)
-    with _ -> None
+  let of_inet_addr t = try Some (of_inet_addr_exn t) with _ -> None
 end

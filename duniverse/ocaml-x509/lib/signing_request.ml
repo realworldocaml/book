@@ -111,10 +111,6 @@ module Asn = struct
     projections_of Asn.der signing_request
 end
 
-let raw_sign raw hash key =
-  match key with
-  | `RSA priv -> Mirage_crypto_pk.Rsa.PKCS1.sign ~hash ~key:priv (`Message raw)
-
 let info { asn ; _ } = asn.info
 
 let signature_algorithm { asn ; _ } =
@@ -136,17 +132,17 @@ let hostnames csr =
     | Some names -> names
     | None -> subj
 
-let validate_signature hash_whitelist { asn ; raw } =
-  let raw_data = Validation.raw_cert_hack raw asn.signature in
-  Validation.validate_raw_signature asn.info.subject hash_whitelist raw_data
+let validate_signature allowed_hashes { asn ; raw } =
+  let raw_data = Validation.raw_cert_hack raw in
+  Validation.validate_raw_signature asn.info.subject allowed_hashes raw_data
     asn.signature_algorithm asn.signature asn.info.public_key
 
-let decode_der ?(hash_whitelist = Validation.sha2) cs =
+let decode_der ?(allowed_hashes = Validation.sha2) cs =
   let open Rresult.R.Infix in
   Asn_grammars.err_to_msg (Asn.signing_request_of_cs cs) >>= fun csr ->
   let csr = { raw = cs ; asn = csr } in
   Rresult.R.error_to_msg ~pp_error:Validation.pp_signature_error
-    (validate_signature hash_whitelist csr) >>| fun () ->
+    (validate_signature allowed_hashes csr) >>| fun () ->
   csr
 
 let encode_der { raw ; _ } = raw
@@ -163,28 +159,47 @@ let decode_pem cs =
 let encode_pem v =
   Pem.unparse ~tag:"CERTIFICATE REQUEST" (encode_der v)
 
-let create subject ?(digest = `SHA256) ?(extensions = Ext.empty) = function
-  | `RSA priv ->
-    let public_key = `RSA (Mirage_crypto_pk.Rsa.pub_of_priv priv) in
-    let info : request_info = { subject ; public_key ; extensions } in
-    let info_cs = Asn.request_info_to_cs info in
-    let signature = raw_sign info_cs digest (`RSA priv) in
-    let signature_algorithm = Algorithm.of_signature_algorithm `RSA digest in
-    let asn = { info ; signature_algorithm ; signature } in
-    let raw = Asn.signing_request_to_cs asn in
-    { asn ; raw }
+let digest_of_key = function
+  | `RSA _ -> `SHA256
+  | `ED25519 _ -> `SHA512
+  | `P224 _ -> `SHA224
+  | `P256 _ -> `SHA256
+  | `P384 _ -> `SHA384
+  | `P521 _ -> `SHA512
+
+let default_digest digest key =
+  match digest with None -> digest_of_key key | Some x -> x
+
+let create subject ?digest ?(extensions = Ext.empty) (key : Private_key.t) =
+  let open Rresult.R.Infix in
+  let hash = default_digest digest key in
+  let public_key = Private_key.public key in
+  let info : request_info = { subject ; public_key ; extensions } in
+  let info_cs = Asn.request_info_to_cs info in
+  let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+  Private_key.sign hash ~scheme key (`Message info_cs) >>| fun signature ->
+  let signature_algorithm =
+    let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+    Algorithm.of_signature_algorithm scheme hash
+  in
+  let asn = { info ; signature_algorithm ; signature } in
+  let raw = Asn.signing_request_to_cs asn in
+  { asn ; raw }
 
 let sign signing_request
     ~valid_from ~valid_until
-    ?(hash_whitelist = Validation.sha2)
-    ?(digest = `SHA256)
+    ?(allowed_hashes = Validation.sha2)
+    ?digest
     ?(serial = Mirage_crypto_pk.(Z_extra.gen_r Z.one Z.(one lsl 64)))
     ?(extensions = Extension.empty)
+    ?(subject = signing_request.asn.info.subject)
     key issuer =
   let open Rresult.R.Infix in
-  validate_signature hash_whitelist signing_request >>= fun () ->
+  let hash = default_digest digest key in
+  validate_signature allowed_hashes signing_request >>= fun () ->
   let signature_algo =
-    Algorithm.of_signature_algorithm (Private_key.keytype key) digest
+    let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+    Algorithm.of_signature_algorithm scheme hash
   and info = signing_request.asn.info
   in
   let tbs_cert : Certificate.tBSCertificate = {
@@ -193,18 +208,19 @@ let sign signing_request
     signature = signature_algo ;
     issuer = issuer ;
     validity = (valid_from, valid_until) ;
-    subject = info.subject ;
+    subject ;
     pk_info = info.public_key ;
     issuer_id = None ;
     subject_id = None ;
     extensions
   } in
   let tbs_raw = Certificate.Asn.tbs_certificate_to_cstruct tbs_cert in
-  let signature_val = raw_sign tbs_raw digest key in
+  let scheme = Key_type.x509_default_scheme (Private_key.key_type key) in
+  Private_key.sign hash ~scheme key (`Message tbs_raw) >>| fun signature_val ->
   let asn = {
     Certificate.tbs_cert ;
     signature_algo ;
     signature_val ;
   } in
   let raw = Certificate.Asn.certificate_to_cstruct asn in
-  Ok { Certificate.asn ; raw }
+  { Certificate.asn ; raw }

@@ -3,7 +3,7 @@ SRC=..
 
 PKGS=\
   -package uutf -package re -package markup \
-  -package ppx_tools_versioned
+  -package ppxlib
 
 INCS=\
 	-I ${BLD}/lib/.*.objs/byte \

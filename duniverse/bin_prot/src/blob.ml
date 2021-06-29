@@ -42,7 +42,7 @@ type 'a id = 'a
 
 include T
 
-include Utils.Make_binable1 (struct
+include Utils.Make_binable1_without_uuid [@alert "-legacy"] (struct
     module Binable = T
 
     type 'a t = 'a T.t

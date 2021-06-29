@@ -1,0 +1,4 @@
+(test
+ (name test)
+ (libraries conduit-mirage tcpip.stack-socket)
+ (package conduit-mirage))

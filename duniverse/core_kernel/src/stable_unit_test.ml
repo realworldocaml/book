@@ -38,6 +38,7 @@ module Make_sexp_serialization_test (T : Stable_unit_test_intf.Arg) = struct
            if Sexp.( <> ) serialized_sexp sexp
            then
              failwiths
+               ~here:[%here]
                "sexp serialization mismatch"
                (`Expected sexp, `But_got serialized_sexp)
                [%sexp_of: [ `Expected of Sexp.t ] * [ `But_got of Sexp.t ]])))
@@ -54,6 +55,7 @@ module Make_bin_io_test (T : Stable_unit_test_intf.Arg) = struct
       if String.( <> ) serialized_bin_io expected_bin_io
       then
         failwiths
+          ~here:[%here]
           "bin_io serialization mismatch"
           (t, `Expected expected_bin_io, `But_got serialized_bin_io)
           [%sexp_of: T.t * [ `Expected of string ] * [ `But_got of string ]];
@@ -61,6 +63,7 @@ module Make_bin_io_test (T : Stable_unit_test_intf.Arg) = struct
       if not (T.equal t t')
       then
         failwiths
+          ~here:[%here]
           "bin_io deserialization mismatch"
           (`Expected t, `But_got t')
           [%sexp_of: [ `Expected of T.t ] * [ `But_got of T.t ]])
@@ -84,13 +87,18 @@ struct
         match T.sexp_of_t t with
         | Sexp.List sexps -> sexps
         | Sexp.Atom _ ->
-          failwiths "expected list when serializing unordered container" t T.sexp_of_t
+          failwiths
+            ~here:[%here]
+            "expected list when serializing unordered container"
+            t
+            T.sexp_of_t
       in
       let sorted_sexps = List.sort ~compare:Sexp.compare sexps in
       let sorted_serialized = List.sort ~compare:Sexp.compare serialized_elements in
       if not (List.equal Sexp.( = ) sorted_sexps sorted_serialized)
       then
         failwiths
+          ~here:[%here]
           "sexp serialization mismatch"
           (`Expected sexps, `But_got serialized_elements)
           [%sexp_of: [ `Expected of Sexp.t list ] * [ `But_got of Sexp.t list ]];
@@ -100,6 +108,7 @@ struct
         if not (T.equal t t')
         then
           failwiths
+            ~here:[%here]
             "sexp deserialization msimatch"
             (`Expected t, `But_got t')
             [%sexp_of: [ `Expected of T.t ] * [ `But_got of T.t ]]))
@@ -136,6 +145,7 @@ struct
       if not serialization_matches
       then
         failwiths
+          ~here:[%here]
           "serialization mismatch"
           (`Expected (bin_io_header, elements), `But_got serialized)
           [%sexp_of: [ `Expected of string * string list ] * [ `But_got of string ]];
@@ -145,6 +155,7 @@ struct
         if not (T.equal t t')
         then
           failwiths
+            ~here:[%here]
             "bin-io deserialization mismatch"
             (`Expected t, `But_got t')
             [%sexp_of: [ `Expected of T.t ] * [ `But_got of T.t ]]))

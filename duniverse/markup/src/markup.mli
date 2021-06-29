@@ -78,7 +78,7 @@ val write_xml  : signal stream -> char stream
     Markup.ml is developed on {{:https://github.com/aantron/markup.ml} GitHub}
     and distributed under the
     {{:https://github.com/aantron/markup.ml/blob/master/LICENSE.md} MIT
-    license}. This documentation is for version 0.8.2 of the library.
+    license}. This documentation is for version 1.0.0 of the library.
     Documentation for older versions can be found on the
     {{: https://github.com/aantron/markup.ml/releases} releases page}. *)
 
@@ -129,7 +129,7 @@ sig
     | `Unmatched_start_tag of string
     | `Unmatched_end_tag of string
     | `Bad_namespace of string
-    | `Misnested_tag of string * string
+    | `Misnested_tag of string * string * (string * string) list
     | `Bad_content of string ]
   (** Errors reported by the parsers. A few of these are also used by the
       writers.
@@ -163,10 +163,10 @@ sig
         resolved to a namespace, and by the writers when the namespace [s] can't
         be resolved to a prefix (or the default namespace).
 
-      - [`Misnested_tag (what, where)] is reported by the HTML parser when a tag
-        appears where it is not allowed. For example, if the input has a
-        [<body>] tag inside a [<p>] tag, the parser will report
-        [`Misnested_tag ("body", "p")].
+      - [`Misnested_tag (what, where, attributes)] is reported by the HTML
+        parser when a tag appears where it is not allowed. For example, if the
+        input has a [<body class="">] tag inside a [<p>] tag, the parser will
+        report [`Misnested_tag ("body", "p", [("class", "")])].
 
       - [`Bad_content where] is reported by the HTML parser if an element has
         content it is not allowed to have. For example, if there is stray text
@@ -296,15 +296,6 @@ content ::= `Text | element | `PI | `Comment
     exceeds about [Sys.max_string_length / 2], they will emit a [`Text] signal
     with several strings. *)
 
-type content_signal =
-  [ `Start_element of name * (name * string) list
-  | `End_element
-  | `Text of string list ]
-(** A restriction of type {!signal} to only elements and text, i.e. no comments,
-    processing instructions, or declarations. This can be useful for pattern
-    matching in applications that only care about the content and element
-    structure of a document. See the helper {!content}. *)
-
 val signal_to_string : [< signal ] -> string
 (** Provides a human-readable representation of signals for debugging. *)
 
@@ -408,9 +399,7 @@ foo</bar>
     example, if the first signal would be [`Doctype], the context is set to
     [`Document], but if the first signal would be [`Start_element "td"], the
     context is set to [`Fragment "tr"]. If the first signal would be
-    [`Start_element "g"], the context is set to [`Fragment "svg"].
-
- *)
+    [`Start_element "g"], the context is set to [`Fragment "svg"]. *)
 
 val write_html :
   ?escape_attribute:(string -> string) ->
@@ -418,8 +407,7 @@ val write_html :
   ([< signal ], 's) stream -> (char, 's) stream
 (** Similar to {!write_xml}, but emits HTML5 instead of XML.
     If [~escape_attribute] and/or [~escape_text] are provided,
-    they are used instead of default escaping functions.
-*)
+    they are used instead of default escaping functions. *)
 
 
 
@@ -545,7 +533,7 @@ val to_list : ('a, sync) stream -> 'a list
 
 (** {2 Utility} *)
 
-val content : ([< signal ], 's) stream -> (content_signal, 's) stream
+val content : ([< signal ], 's) stream -> (signal, 's) stream
 (** Converts a {!signal} stream into a {!content_signal} stream by filtering out
     all signals besides [`Start_element], [`End_element], and [`Text]. *)
 
@@ -569,7 +557,7 @@ type my_dom = Text of string | Element of name * my_dom list
 |> signals
 |> tree
   ~text:(fun ss -> Text (String.concat "" ss))
-  ~element:(fun (name, _) children -> Element (name, children))
+  ~element:(fun (_ns, name) _attrs children -> Element (name, children))
 ]}
 
     results in the structure
@@ -590,11 +578,16 @@ node    ::= element | `Text | `Comment | `PI | `Xml | `Doctype
 element ::= `Start_element node* `End_element
 ]}
 
-    Each time [trees] matches a production of [node], it calls the corresponding
+    Each time [tree] matches a production of [node], it calls the corresponding
     function to convert the node into your tree type ['a]. For example, when
-    [trees] matches [`Text ss], it calls [~text ss], if [~text] is supplied.
-    Similarly, when [trees] matches [element], it calls
+    [tree] matches [`Text ss], it calls [~text ss], if [~text] is supplied.
+    Similarly, when [tree] matches [element], it calls
     [~element name attributes children], if [~element] is supplied.
+
+    [tree] returns [None] when its input signal stream is empty. In terms of the
+    original input bytes, this can correspond to either an empty input, or a
+    non-empty input which the parser's error recovery completely discarded,
+    producing no signals.
 
     See {!trees} if the input stream might have multiple top-level trees. This
     function [tree] only retrieves the first one. *)
@@ -672,7 +665,7 @@ val text : ([< signal ], 's) stream -> (char, 's) stream
     [`Text ss] signal, the result stream has the bytes of the strings [ss], and
     all other signals are ignored. *)
 
-val trim : ([> content_signal ] as 'a, 's) stream -> ('a, 's) stream
+val trim : (signal, 's) stream -> (signal, 's) stream
 (** Trims insignificant whitespace in an HTML signal stream. Whitespace around
     flow ("block") content does not matter, but whitespace in phrasing
     ("inline") content does. So, if the input stream is
@@ -702,7 +695,7 @@ val normalize_text :
     after parsing, or generating streams from scratch, and would like to clean
     up the [`Text] signals. *)
 
-val pretty_print : ([> content_signal ] as 'a, 's) stream -> ('a, 's) stream
+val pretty_print : (signal, 's) stream -> (signal, 's) stream
 (** Adjusts the whitespace in the [`Text] signals in the given stream so that
     the output appears nicely-indented when the stream is converted to bytes and
     written.

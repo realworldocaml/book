@@ -31,5 +31,5 @@ Fmt is distributed under the ISC license.
 [cmdliner]: http://erratique.ch/software/cmdliner
 """
 url {
-  src: "git+https://github.com/dune-universe/fmt#duniverse-v0.8.8"
+  src: "git+https://github.com/dune-universe/fmt#duniverse-v0.8.9"
 }

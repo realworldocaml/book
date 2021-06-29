@@ -1,6 +1,14 @@
+type ecdsa = [
+  | `P224 of Mirage_crypto_ec.P224.Dsa.pub
+  | `P256 of Mirage_crypto_ec.P256.Dsa.pub
+  | `P384 of Mirage_crypto_ec.P384.Dsa.pub
+  | `P521 of Mirage_crypto_ec.P521.Dsa.pub
+]
+
 type t = [
-  | `RSA    of Mirage_crypto_pk.Rsa.pub
-  | `EC_pub of Asn.oid
+  | ecdsa
+  | `RSA of Mirage_crypto_pk.Rsa.pub
+  | `ED25519 of Mirage_crypto_ec.Ed25519.pub
 ]
 
 module Asn_oid = Asn.OID
@@ -25,14 +33,34 @@ module Asn = struct
 
   let rsa_pub_of_cs, rsa_pub_to_cs = project_exn rsa_public_key
 
-  let reparse_pk = function
-    | (Algorithm.RSA      , cs) -> `RSA (rsa_pub_of_cs cs)
-    | (Algorithm.EC_pub id, _)  -> `EC_pub id
+  let to_err = function
+    | Ok r -> r
+    | Error e ->
+      parse_error "failed to decode public EC key %a"
+        Mirage_crypto_ec.pp_error e
+
+  let reparse_pk =
+    let open Mirage_crypto_ec in
+    let open Algorithm in
+    function
+    | (RSA      , cs) -> `RSA (rsa_pub_of_cs cs)
+    | (ED25519  , cs) -> `ED25519 (to_err (Ed25519.pub_of_cstruct cs))
+    | (EC_pub `SECP224R1, cs) -> `P224 (to_err (P224.Dsa.pub_of_cstruct cs))
+    | (EC_pub `SECP256R1, cs) -> `P256 (to_err (P256.Dsa.pub_of_cstruct cs))
+    | (EC_pub `SECP384R1, cs) -> `P384 (to_err (P384.Dsa.pub_of_cstruct cs))
+    | (EC_pub `SECP521R1, cs) -> `P521 (to_err (P521.Dsa.pub_of_cstruct cs))
     | _ -> parse_error "unknown public key algorithm"
 
-  let unparse_pk = function
-    | `RSA pk    -> (Algorithm.RSA, rsa_pub_to_cs pk)
-    | `EC_pub id -> (Algorithm.EC_pub id, Cstruct.create 0)
+  let unparse_pk =
+    let open Mirage_crypto_ec in
+    let open Algorithm in
+    function
+    | `RSA pk    -> (RSA, rsa_pub_to_cs pk)
+    | `ED25519 pk -> (ED25519, Ed25519.pub_to_cstruct pk)
+    | `P224 pk -> (EC_pub `SECP224R1, P224.Dsa.pub_to_cstruct pk)
+    | `P256 pk -> (EC_pub `SECP256R1, P256.Dsa.pub_to_cstruct pk)
+    | `P384 pk -> (EC_pub `SECP384R1, P384.Dsa.pub_to_cstruct pk)
+    | `P521 pk -> (EC_pub `SECP521R1, P521.Dsa.pub_to_cstruct pk)
 
   let pk_info_der =
     map reparse_pk unparse_pk @@
@@ -44,16 +72,79 @@ module Asn = struct
     projections_of Asn.der pk_info_der
 end
 
-let id = function
-  | `RSA p -> Mirage_crypto.Hash.digest `SHA1 (Asn.rsa_public_to_cstruct p)
-  | `EC_pub _ -> Cstruct.empty
+let id k =
+  let data = match k with
+    | `RSA p -> Asn.rsa_public_to_cstruct p
+    | `ED25519 pk -> Mirage_crypto_ec.Ed25519.pub_to_cstruct pk
+    | `P224 pk -> Mirage_crypto_ec.P224.Dsa.pub_to_cstruct pk
+    | `P256 pk -> Mirage_crypto_ec.P256.Dsa.pub_to_cstruct pk
+    | `P384 pk -> Mirage_crypto_ec.P384.Dsa.pub_to_cstruct pk
+    | `P521 pk -> Mirage_crypto_ec.P521.Dsa.pub_to_cstruct pk
+  in
+  Mirage_crypto.Hash.digest `SHA1 data
 
 let fingerprint ?(hash = `SHA256) pub =
   Mirage_crypto.Hash.digest hash (Asn.pub_info_to_cstruct pub)
 
-let pp ppf = function
-  | `RSA _ as k -> Fmt.pf ppf "RSA %a" Cstruct.hexdump_pp (fingerprint k)
-  | `EC_pub oid -> Fmt.pf ppf "EC %a" Asn_oid.pp oid
+let key_type = function
+  | `RSA _ -> `RSA
+  | `ED25519 _ -> `ED25519
+  | `P224 _ -> `P224
+  | `P256 _ -> `P256
+  | `P384 _ -> `P384
+  | `P521 _ -> `P521
+
+let sig_alg = function
+  | #ecdsa -> `ECDSA
+  | `RSA _ -> `RSA
+  | `ED25519 _ -> `ED25519
+
+let pp ppf k =
+  Fmt.string ppf (Key_type.to_string (key_type k));
+  Fmt.sp ppf ();
+  Cstruct.hexdump_pp ppf (fingerprint k)
+
+let hashed hash data =
+  match data with
+  | `Message msg -> Ok (Mirage_crypto.Hash.digest hash msg)
+  | `Digest d ->
+    let n = Cstruct.len d and m = Mirage_crypto.Hash.digest_size hash in
+    if n = m then Ok d else Error (`Msg "digested data of invalid size")
+
+let verify hash ?scheme ~signature key data =
+  let open Mirage_crypto_ec in
+  let open Rresult.R.Infix in
+  let ok_if_true p = if p then Ok () else Error (`Msg "bad signature") in
+  let ecdsa_of_cs cs =
+    Rresult.R.reword_error (function `Parse s -> `Msg s)
+      (Algorithm.ecdsa_sig_of_cstruct cs)
+  in
+  let scheme = Key_type.opt_signature_scheme ?scheme (key_type key) in
+  match key, scheme with
+  | `RSA key, `RSA_PSS ->
+    let module H = (val (Mirage_crypto.Hash.module_of hash)) in
+    let module PSS = Mirage_crypto_pk.Rsa.PSS(H) in
+    hashed hash data >>= fun d ->
+    ok_if_true (PSS.verify ~key ~signature (`Digest d))
+  | `RSA key, `RSA_PKCS1 ->
+    let hashp x = x = hash in
+    hashed hash data >>= fun d ->
+    ok_if_true (Mirage_crypto_pk.Rsa.PKCS1.verify ~hashp ~key ~signature (`Digest d))
+  | `ED25519 key, `ED25519 ->
+    begin match data with
+      | `Message msg -> ok_if_true (Ed25519.verify ~key signature ~msg)
+      | `Digest _ -> Error (`Msg "Ed25519 only suitable with raw message")
+    end
+  | #ecdsa as key, `ECDSA ->
+    hashed hash data >>= fun d ->
+    ecdsa_of_cs signature >>= fun s ->
+    ok_if_true
+      (match key with
+       | `P224 key -> P224.Dsa.verify ~key s d
+       | `P256 key -> P256.Dsa.verify ~key s d
+       | `P384 key -> P384.Dsa.verify ~key s d
+       | `P521 key -> P521.Dsa.verify ~key s d)
+  | _ -> Error (`Msg "invalid key and signature scheme combination")
 
 let encode_der = Asn.pub_info_to_cstruct
 

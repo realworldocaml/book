@@ -145,6 +145,9 @@ module type S1 = sig
 
   val remove_exn : ('key, 'data) t -> 'key -> unit
 
+  (** like {!remove}, but returns the removed element *)
+  val lookup_and_remove : ('key, 'data) t -> 'key -> 'data option
+
   (** [replace q k v] changes the value of key [k] in the queue to [v]. *)
   val replace : ('key, 'data) t -> 'key -> 'data -> [ `Ok | `No_such_key ]
 

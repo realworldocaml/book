@@ -17,6 +17,50 @@ let input_lines =
   in
   fun ic -> loop ic []
 
+let input_zero_from_buffer from buf =
+  match String.index_from_opt buf from '\x00' with
+  | None -> None
+  | Some eos -> Some (String.sub buf ~pos:from ~len:(eos - from), eos + 1)
+
+(* Note, the complexity of this function will be bad if the zero-separated
+   elements are much larger than the current input buffer *)
+let input_zero_separated =
+  (* Take all the \0-terminated strings from [buf], return the scanned list and
+     the remainder *)
+  let rec scan_inputs_buf from buf acc =
+    (* note that from is untouched if input_zero_from_buffer returns None *)
+    match input_zero_from_buffer from buf with
+    | Some (istr, from) -> scan_inputs_buf from buf (istr :: acc)
+    | None ->
+      let total_len = String.length buf in
+      if total_len > from then
+        let rest = String.sub buf ~pos:from ~len:(total_len - from) in
+        (Some rest, acc)
+      else
+        (None, acc)
+  in
+  let ibuf_size = 65536 in
+  let ibuf = Bytes.create ibuf_size in
+  let rec input_loop ic rem acc =
+    let res = input ic ibuf 0 ibuf_size in
+    if res = 0 then
+      (* end of file, check if there is a remainder, and return the results *)
+      match rem with
+      | Some rem -> List.rev (rem :: acc)
+      | None -> List.rev acc
+    else
+      (* new input, append remainder and scan it *)
+      let actual_input = Bytes.sub_string ibuf ~pos:0 ~len:res in
+      let actual_input =
+        match rem with
+        | None -> actual_input
+        | Some rem -> rem ^ actual_input
+      in
+      let rem, acc = scan_inputs_buf 0 actual_input acc in
+      input_loop ic rem acc
+  in
+  fun ic -> input_loop ic None []
+
 let copy_channels =
   let buf_len = 65536 in
   let buf = Bytes.create buf_len in
@@ -68,6 +112,31 @@ struct
           };
         f lb)
 
+  let rec eagerly_input_acc ic s ~pos ~len acc =
+    if len <= 0 then
+      acc
+    else
+      let r = input ic s pos len in
+      if r = 0 then
+        acc
+      else
+        eagerly_input_acc ic s ~pos:(pos + r) ~len:(len - r) (acc + r)
+
+  (* [eagerly_input_string ic len] tries to read [len] chars from the channel.
+     Unlike [really_input_string], if the file ends before [len] characters are
+     found, it returns the characters it was able to read instead of raising an
+     exception.
+
+     This can be detected by checking that the length of the resulting string is
+     less than [len]. *)
+  let eagerly_input_string ic len =
+    let buf = Bytes.create len in
+    let r = eagerly_input_acc ic buf ~pos:0 ~len 0 in
+    if r = len then
+      Bytes.unsafe_to_string buf
+    else
+      Bytes.sub_string buf ~pos:0 ~len:r
+
   let read_all =
     (* We use 65536 because that is the size of OCaml's IO buffers. *)
     let chunk_size = 65536 in
@@ -87,10 +156,16 @@ struct
       match in_channel_length t with
       | exception _ -> read_all_generic t (Buffer.create chunk_size)
       | n -> (
-        let s = really_input_string t n in
         (* For some files [in_channel_length] returns an invalid value. For
-           instance for files in /proc it returns [0]. So we try to read one
-           more character to make sure we did indeed reach the end of the file *)
+           instance for files in /proc it returns [0] and on Windows the
+           returned value is larger than expected (it counts linebreaks as 2
+           chars, even in text mode).
+
+           To be robust in both directions, we: - use [eagerly_input_string]
+           instead of [really_input_string] in case we reach the end of the file
+           early - read one more character to make sure we did indeed reach the
+           end of the file *)
+        let s = eagerly_input_string t n in
         match input_char t with
         | exception End_of_file -> s
         | c ->
@@ -105,6 +180,9 @@ struct
   let read_file ?binary fn = with_file_in fn ~f:read_all ?binary
 
   let lines_of_file fn = with_file_in fn ~f:input_lines ~binary:false
+
+  let zero_strings_of_file fn =
+    with_file_in fn ~f:input_zero_separated ~binary:true
 
   let write_file ?binary fn data =
     with_file_out ?binary fn ~f:(fun oc -> output_string oc data)

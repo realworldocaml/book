@@ -31,7 +31,7 @@ module Variant = struct
   let weight t =
     match Attribute.get weight_attribute t.ast with
     | Some expr -> expr
-    | None -> efloat ~loc:(location t) "1."
+    | None -> efloat ~loc:{ (location t) with loc_ghost = true } "1."
   ;;
 
   let core_type_list t =
@@ -103,7 +103,7 @@ module Polymorphic_variant = struct
   let weight t =
     match Attribute.get weight_attribute t with
     | Some expr -> expr
-    | None -> efloat ~loc:(location t) "1."
+    | None -> efloat ~loc:{ (location t) with loc_ghost = true } "1."
   ;;
 
   let core_type_list t =

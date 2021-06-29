@@ -17,5 +17,5 @@
 
 (** Compile-time configuration variables *)
 
-val version: string
+val version : string
 (** The version number of this library. *)

@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "v0.13.0"
+version: "v0.14.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/bin_prot"
@@ -12,13 +12,14 @@ build: [
 ]
 depends: [
   "ocaml"             {>= "4.04.2"}
-  "base"              {>= "v0.13" & < "v0.14"}
-  "ppx_compare"       {>= "v0.13" & < "v0.14"}
-  "ppx_custom_printf" {>= "v0.13" & < "v0.14"}
-  "ppx_fields_conv"   {>= "v0.13" & < "v0.14"}
-  "ppx_sexp_conv"     {>= "v0.13" & < "v0.14"}
-  "ppx_variants_conv" {>= "v0.13" & < "v0.14"}
-  "dune"              {>= "1.5.1"}
+  "base"              {>= "v0.14" & < "v0.15"}
+  "ppx_compare"       {>= "v0.14" & < "v0.15"}
+  "ppx_custom_printf" {>= "v0.14" & < "v0.15"}
+  "ppx_fields_conv"   {>= "v0.14" & < "v0.15"}
+  "ppx_optcomp"       {>= "v0.14" & < "v0.15"}
+  "ppx_sexp_conv"     {>= "v0.14" & < "v0.15"}
+  "ppx_variants_conv" {>= "v0.14" & < "v0.15"}
+  "dune"              {>= "2.0.0"}
 ]
 depopts: [
   "mirage-xen-ocaml"

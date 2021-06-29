@@ -17,29 +17,25 @@
 open Sexplib0.Sexp_conv
 open Printf
 
-type challenge = [
- | `Basic of string (* realm *)
-] [@@deriving sexp]
+type challenge = [ `Basic of string (* realm *) ] [@@deriving sexp]
 
-type credential = [
- | `Basic of string * string (* username, password *)
- | `Other of string
-]  [@@deriving sexp]
+type credential =
+  [ `Basic of string * string (* username, password *) | `Other of string ]
+[@@deriving sexp]
 
-let string_of_credential (cred:credential) =
+let string_of_credential (cred : credential) =
   match cred with
   | `Basic (user, pass) ->
-    "Basic " ^ (Base64.encode_string (sprintf "%s:%s" user pass))
+      "Basic " ^ Base64.encode_string (sprintf "%s:%s" user pass)
   | `Other buf -> buf
 
-let credential_of_string (buf:string) : credential =
+let credential_of_string (buf : string) : credential =
   try
     let b64 = Scanf.sscanf buf "Basic %s" (fun b -> b) in
     match Stringext.split ~on:':' (Base64.decode_exn b64) ~max:2 with
-    |[user;pass] -> `Basic (user,pass)
-    |_ -> `Other buf
+    | [ user; pass ] -> `Basic (user, pass)
+    | _ -> `Other buf
   with _ -> `Other buf
 
-let string_of_challenge (ty:challenge) =
-  match ty with
-  |`Basic realm -> sprintf "Basic realm=\"%s\"" realm
+let string_of_challenge (ty : challenge) =
+  match ty with `Basic realm -> sprintf "Basic realm=\"%s\"" realm

@@ -47,6 +47,7 @@ module Sexp_of = struct
                     (fun ~loc:_ ~path:_ ty -> E.type_extension ty))
              ]
   ;;
+
 end
 
 module Of_sexp = struct
@@ -100,9 +101,42 @@ module Of_sexp_poly = struct
   ;;
 end
 
+module Sexp_grammar = struct
+  module E = Ppx_sexp_conv_expander.Sexp_grammar
+  let name = "sexp_grammar"
+
+  let str_type_decl =
+    Deriving.Generator.make_noarg E.str_type_decl
+  ;;
+
+  let sig_type_decl =
+    Deriving.Generator.make_noarg E.sig_type_decl
+  ;;
+
+  let extension  = E.core_type
+
+  let deriver =
+    Deriving.add name
+      ~sig_type_decl
+      ~str_type_decl
+      ~extension
+  ;;
+
+  let () =
+    Driver.register_transformation name
+      ~rules:[ Context_free.Rule.extension
+                 (Extension.declare name
+                    Core_type Ast_pattern.(ptyp __)
+                    (fun ~loc:_ ~path:_ ty -> E.type_extension ty))
+             ]
+  ;;
+
+end
+
 let sexp_of = Sexp_of.deriver
 let of_sexp = Of_sexp.deriver
 let of_sexp_poly = Of_sexp_poly.deriver
+let sexp_grammar = Sexp_grammar.deriver
 
 module Sexp_in_sig = struct
   module E = Ppx_sexp_conv_expander.Sig_sexp

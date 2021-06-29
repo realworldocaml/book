@@ -93,11 +93,13 @@ let shutdown ?force status =
 
 let shutdown_on_unhandled_exn () =
   Monitor.detach_and_iter_errors Monitor.main ~f:(fun exn ->
-    try
-      Debug.log "shutting down due to unhandled exception" exn [%sexp_of: exn];
-      shutdown 1
-    with
-    | _ -> ())
+    ignore_exn (fun () ->
+      Debug.log "shutting down due to unhandled exception" exn [%sexp_of: exn]);
+    try shutdown 1 with
+    | _ ->
+      (* The above [shutdown] call raises if we have already called shutdown with a
+         different non-zero status. *)
+      ())
 ;;
 
 let exit ?force status =
@@ -113,10 +115,14 @@ let don't_finish_before =
     check ();
     Ivar.read proceed_with_shutdown);
   fun d ->
-    incr num_waiting;
-    upon d (fun () ->
-      decr num_waiting;
-      match shutting_down () with
-      | `No -> ()
-      | `Yes _ -> check ())
+    match shutting_down () with
+    | `Yes _ ->
+      ()
+    | `No ->
+      incr num_waiting;
+      upon d (fun () ->
+        decr num_waiting;
+        match shutting_down () with
+        | `No -> ()
+        | `Yes _ -> check ())
 ;;

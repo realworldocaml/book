@@ -1,5 +1,5 @@
-(** Disallows whitespace around the edges in [of_string] and [t_of_sexp], but doesn't
-    check when reading from bin_io. *)
+(** Disallows the empty string and whitespace around the edges in [of_string] and
+    [t_of_sexp], but doesn't check when reading from bin_io. *)
 
 open! Import
 open Std_internal
@@ -13,6 +13,8 @@ module type S = sig
   module Stable : sig
     module V1 : sig
       type nonrec t = t [@@deriving equal, hash]
+
+      include Stringable.S with type t := t
 
       include
         Stable_comparable.V1

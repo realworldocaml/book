@@ -1,6 +1,6 @@
 PWD := $(shell pwd)
 
-COQINCLUDE := -R $(PWD) MenhirLib \
+COQINCLUDE := -R . MenhirLib \
 
 export COQINCLUDE
 
@@ -22,7 +22,7 @@ clean:
 # A nonempty value can be used to perform a dummy installation
 # in a different location.
 
-CONTRIB = $(shell $(COQBIN)coqc -where)/user-contrib
+CONTRIB = $(shell $(COQBIN)coqc -where  | tr -d '\r' | tr '\\' '/')/user-contrib
 TARGET  = $(DESTDIR)$(CONTRIB)/MenhirLib
 
 install: all

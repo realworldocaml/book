@@ -8,7 +8,7 @@ PATH="$(readlink -f "$HERE/../../bin/"):$PATH"
 export PATH
 
 function patdiff {
-    patdiff.exe "$@"
+    "$HERE/../../bin/main.exe" "$@"
 }
 export -f patdiff
 

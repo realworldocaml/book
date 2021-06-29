@@ -443,6 +443,14 @@ module Run (T: sig end) = struct
       fprintf f "Definition items_of_state (s:state): list item := []%%list.\n";
     fprintf f "Extract Constant items_of_state => \"fun _ -> assert false\".\n\n"
 
+  let write_state_helper f =
+    fprintf f "Definition N_of_state (s:state) : N :=\n";
+    fprintf f "  match s with\n";
+    lr1_iter_nonfinal (fun node ->
+        fprintf f "  | %s => %d%%N\n" (print_st node) (Lr1.number node)
+      );
+    fprintf f "  end.\n"
+
   let write_automaton f =
     fprintf f "Module Aut <: %sAutomaton.T.\n\n" menhirlib_path;
     fprintf f "Local Obligation Tactic := let x := fresh in intro x; case x; reflexivity.\n\n";
@@ -459,6 +467,7 @@ module Run (T: sig end) = struct
     write_past_symb f;
     write_past_states f;
     write_items f;
+    write_state_helper f;
     fprintf f "End Aut.\n\n"
 
   let write_theorems f =
@@ -513,6 +522,7 @@ module Run (T: sig end) = struct
 
     fprintf f "From Coq.Lists Require List.\n";
     fprintf f "From Coq.PArith Require Import BinPos.\n";
+    fprintf f "From Coq.NArith Require Import BinNat.\n";
     from_menhirlib f; fprintf f "Require Main.\n";
     if not Settings.coq_no_version_check then
       begin from_menhirlib f; fprintf f "Require Version.\n" end;

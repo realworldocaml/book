@@ -3,12 +3,13 @@ open Sexplib
 
 let windowsify_newlines str =
   let b = Buffer.create (String.length str * 2) in
-  for i = 0 to String.length str - 1; do
+  for i = 0 to String.length str - 1 do
     match str.[i] with
     | '\n' -> Buffer.add_string b "\r\n"
     | c -> Buffer.add_char b c
   done;
   Buffer.contents b
+;;
 
 let display sexp =
   (* My understanding of newlines on windows is that in memory, a newline is a \n, but
@@ -24,21 +25,27 @@ let display sexp =
     Sexp.of_string (windowsify_newlines (Sexp.to_string_hum sexp))
   in
   let reparsing_result =
-    if reparsed <> sexp then
-      Printf.sprintf "to_string_hum + of_string + to_mach is NOT the identity:\n%s\n"
+    if reparsed <> sexp
+    then
+      Printf.sprintf
+        "to_string_hum + of_string + to_mach is NOT the identity:\n%s\n"
         (Sexp.to_string_mach reparsed)
     else ""
   in
   let reparsing_after_windows_fiddling_result =
-    if reparsed_after_windows_fiddling <> sexp then
-      Printf.sprintf "to_string_hum + windowsify + of_string + to_mach is NOT the identity:\n%s\n"
+    if reparsed_after_windows_fiddling <> sexp
+    then
+      Printf.sprintf
+        "to_string_hum + windowsify + of_string + to_mach is NOT the identity:\n%s\n"
         (Sexp.to_string_mach reparsed_after_windows_fiddling)
     else ""
   in
-  Printf.printf "mach:\n%s\nhum:\n%s\n%s%s\n"
+  Printf.printf
+    "mach:\n%s\nhum:\n%s\n%s%s\n"
     (Sexp.to_string_mach sexp)
     (Sexp.to_string_hum sexp)
-    reparsing_result reparsing_after_windows_fiddling_result
+    reparsing_result
+    reparsing_after_windows_fiddling_result
 ;;
 
 let%expect_test _ =
@@ -66,7 +73,8 @@ let%expect_test _ =
     \nline2" |}];
   (* two lines and trailing newline *)
   display (Sexp.Atom "line1\nline2\n");
-  [%expect {|
+  [%expect
+    {|
     mach:
     "line1\nline2\n"
     hum:
@@ -83,7 +91,8 @@ let%expect_test _ =
     \nline2" |}];
   (* two lines and trailing windows style *)
   display (Sexp.Atom "line1\r\nline2\r\n");
-  [%expect {|
+  [%expect
+    {|
     mach:
     "line1\r\nline2\r\n"
     hum:
@@ -100,7 +109,8 @@ let%expect_test _ =
      \nline2") |}];
   (* many lines and indentation in the atom *)
   display (Sexp.Atom "line1\n line2\n  line3\n   line4\n");
-  [%expect {|
+  [%expect
+    {|
     mach:
     "line1\n line2\n  line3\n   line4\n"
     hum:
@@ -111,7 +121,8 @@ let%expect_test _ =
     \n" |}];
   (* indentation with tabs in the atom *)
   display (Sexp.Atom "line1\n\tline2\n\t\tline3\n\t\t\tline4\n");
-  [%expect {|
+  [%expect
+    {|
     mach:
     "line1\n\tline2\n\t\tline3\n\t\t\tline4\n"
     hum:
@@ -121,8 +132,9 @@ let%expect_test _ =
     \n\t\t\tline4\
     \n" |}];
   (* trailing whitespace *)
-  display (Sexp.List [Sexp.List [Sexp.Atom "line1  \n  line3  \n  "]]);
-  [%expect {|
+  display (Sexp.List [ Sexp.List [ Sexp.Atom "line1  \n  line3  \n  " ] ]);
+  [%expect
+    {|
     mach:
     (("line1  \n  line3  \n  "))
     hum:
@@ -130,8 +142,20 @@ let%expect_test _ =
       \n  line3  \
       \n  ")) |}];
   (* catalog snapshot *)
-  display (Sexp.Atom "                cancel-buy\n                |  cancel-sell\n                |  |  local-buy\n                |  |  |    local-cancel-buy\n                |  |  |    |  local-cancel-sell\n                |  |  |    |  |  local-sell\nINDEX      buy  |  |  |    |  |  |  sell\n|          |    |  |  |    |  |  |  |\ntest_sym1  10.        10.           9.\ntest_sym3                             \n");
-  [%expect {|
+  display
+    (Sexp.Atom
+       "                cancel-buy\n\
+       \                |  cancel-sell\n\
+       \                |  |  local-buy\n\
+       \                |  |  |    local-cancel-buy\n\
+       \                |  |  |    |  local-cancel-sell\n\
+       \                |  |  |    |  |  local-sell\n\
+        INDEX      buy  |  |  |    |  |  |  sell\n\
+        |          |    |  |  |    |  |  |  |\n\
+        test_sym1  10.        10.           9.\n\
+        test_sym3                             \n");
+  [%expect
+    {|
     mach:
     "                cancel-buy\n                |  cancel-sell\n                |  |  local-buy\n                |  |  |    local-cancel-buy\n                |  |  |    |  local-cancel-sell\n                |  |  |    |  |  local-sell\nINDEX      buy  |  |  |    |  |  |  sell\n|          |    |  |  |    |  |  |  |\ntest_sym1  10.        10.           9.\ntest_sym3                             \n"
     hum:
@@ -145,5 +169,5 @@ let%expect_test _ =
     \n|          |    |  |  |    |  |  |  |\
     \ntest_sym1  10.        10.           9.\
     \ntest_sym3                             \
-    \n" |}];
+    \n" |}]
 ;;

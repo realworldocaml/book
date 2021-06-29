@@ -1,5 +1,5 @@
 open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! List
 
 let print2 x1 x2 = print_s [%message (x1 : int) (x2 : int)]

@@ -39,8 +39,6 @@ include Monad.S with type 'a t := 'a t
 (** [fail error = Deferred.return (Error error)] **)
 val fail : Error.t -> _ t
 
-val ignore : _ t -> unit t [@@deprecated "[since 2019-06] Use [ignore_m] instead"]
-
 (** These functions are direct analogs of the corresponding [Core.Or_error] functions. *)
 val ok_exn : 'a t -> 'a Deferred.t
 
@@ -93,8 +91,10 @@ val try_with_join
 
 (** All of the [List] functions that take a [how] argument treat it the following way:
 
-    [`Sequential] indicates both sequential evaluation of the deferreds, and sequential
-    combination of the results.
+    [`Sequential] indicates both sequential evaluation of the deferreds, and
+    sequential combination of the results.  This means that if [f] returns an
+    [Error] on an element, that [Error] will be returned and [f] won't be
+    called on the remaining elements of the [List].
 
     [`Parallel] indicates parallel evaluation of the deferreds (in the sense that they are
     all in the scheduler at the same time), and parallel combination of the results. For

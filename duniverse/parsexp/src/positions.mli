@@ -1,7 +1,6 @@
 (** Compact set of positions *)
 
-open Import
-open Ppx_sexp_conv_lib
+open! Import
 
 (** A [t] value represent a sequence of positions. The focus is on small memory footprint.
 
@@ -16,32 +15,38 @@ open Ppx_sexp_conv_lib
     stores the same position twice for non-quoted single character atoms.
 *)
 type t [@@deriving_inline sexp_of, compare]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    val compare : t -> t -> int
-  end[@@ocaml.doc "@inline"]
+
+include sig
+  [@@@ocaml.warning "-32"]
+
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+  val compare : t -> t -> int
+end
+[@@ocaml.doc "@inline"]
+
 [@@@end]
 
 (** Represent a position in the input *)
 type pos =
-  { line   : int (** Line number. The first line has number [1].               *)
-  ; col    : int (** Column number. The first column has number [0].           *)
-  ; offset : int (** Number of bytes from the beginning of the input. The first
-                     byte has offset [0]. *)
+  { line : int (** Line number. The first line has number [1].               *)
+  ; col : int (** Column number. The first column has number [0].           *)
+  ; offset : int
+  (** Number of bytes from the beginning of the input. The first
+      byte has offset [0]. *)
   }
 [@@deriving_inline sexp_of, compare]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val sexp_of_pos : pos -> Ppx_sexp_conv_lib.Sexp.t
-    val compare_pos : pos -> pos -> int
-  end[@@ocaml.doc "@inline"]
+
+include sig
+  [@@@ocaml.warning "-32"]
+
+  val sexp_of_pos : pos -> Ppx_sexp_conv_lib.Sexp.t
+  val compare_pos : pos -> pos -> int
+end
+[@@ocaml.doc "@inline"]
+
 [@@@end]
 
 val beginning_of_file : pos
-
 val shift_pos : pos -> cols:int -> pos
 
 (** Range of positions, as reported in error messages. We follow the lexing conventions of
@@ -50,14 +55,20 @@ val shift_pos : pos -> cols:int -> pos
 
     This allow for instance to represent empty ranges with [start_pos = end_pos].
 *)
-type range = { start_pos : pos; end_pos : pos }
+type range =
+  { start_pos : pos
+  ; end_pos : pos
+  }
 [@@deriving_inline sexp_of, compare]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val sexp_of_range : range -> Ppx_sexp_conv_lib.Sexp.t
-    val compare_range : range -> range -> int
-  end[@@ocaml.doc "@inline"]
+
+include sig
+  [@@@ocaml.warning "-32"]
+
+  val sexp_of_range : range -> Ppx_sexp_conv_lib.Sexp.t
+  val compare_range : range -> range -> int
+end
+[@@ocaml.doc "@inline"]
+
 [@@@end]
 
 (** Make a range from two positions where both positions are inclusive, i.e. [start_pos]
@@ -68,20 +79,24 @@ val make_range_incl : start_pos:pos -> last_pos:pos -> range
 module Builder : sig
   type positions
   type t
-  val create      : ?initial_pos:pos -> unit -> t
+
+  val create : ?initial_pos:pos -> unit -> t
 
   (** [add], [add_twice] and [add_newline] must be called with strictly increasing
       [offset] values. *)
 
   (** int is absolute offset of the position *)
-  val add       : t -> offset:int -> unit
+  val add : t -> offset:int -> unit
+
   val add_twice : t -> offset:int -> unit
 
   (** int is absolute offset of the newline character *)
   val add_newline : t -> offset:int -> unit
-  val contents    : t -> positions
-  val reset       : t -> pos -> unit
-end with type positions := t
+
+  val contents : t -> positions
+  val reset : t -> pos -> unit
+end
+with type positions := t
 
 (** Build the list of all positions in [t]. *)
 val to_list : t -> pos list
@@ -109,6 +124,7 @@ val find : t -> int -> int -> range
     Comparison is done using physical equality.
 *)
 val find_sub_sexp_phys : t -> Sexp.t -> sub:Sexp.t -> range option
+
 val find_sub_sexp_in_list_phys : t -> Sexp.t list -> sub:Sexp.t -> range option
 
 (** Returns how much memory is used by [t] *)
@@ -117,7 +133,6 @@ val memory_footprint_in_bytes : t -> int
 (** API for iterating over positions in an efficient way *)
 module Iterator : sig
   type positions = t
-
   type t
 
   val create : positions -> t
@@ -129,4 +144,5 @@ module Iterator : sig
       next position and return it.
       Raises [No_more] when reaching the end of the position set. *)
   val advance_exn : t -> skip:int -> pos
-end with type positions := t
+end
+with type positions := t

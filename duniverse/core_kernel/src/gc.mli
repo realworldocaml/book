@@ -20,6 +20,51 @@ open! Import
   (* $Id: gc.mli,v 1.42 2005-10-25 18:34:07 doligez Exp $ *)
 *)
 module Stat : sig
+  [%%if ocaml_version >= (4, 12, 0)]
+
+  type t =
+    { minor_words : float
+    (** Number of words allocated in the minor heap since
+        the program was started.  This number is accurate in
+        byte-code programs, but only an approximation in programs
+        compiled to native code. *)
+    ; promoted_words : float
+    (** Number of words allocated in the minor heap that
+        survived a minor collection and were moved to the major heap
+        since the program was started. *)
+    ; major_words : float
+    (** Number of words allocated in the major heap, including
+        the promoted words, since the program was started. *)
+    ; minor_collections : int
+    (** Number of minor collections since the program was started. *)
+    ; major_collections : int
+    (** Number of major collection cycles completed since the program
+        was started. *)
+    ; heap_words : int (** Total size of the major heap, in words. *)
+    ; heap_chunks : int
+    (** Number of contiguous pieces of memory that make up the major heap. *)
+    ; live_words : int
+    (** Number of words of live data in the major heap, including the header
+        words. *)
+    ; live_blocks : int (** Number of live blocks in the major heap. *)
+    ; free_words : int (** Number of words in the free list. *)
+    ; free_blocks : int (** Number of blocks in the free list. *)
+    ; largest_free : int (** Size (in words) of the largest block in the free list. *)
+    ; fragments : int
+    (** Number of wasted words due to fragmentation.  These are
+        1-words free blocks placed between two live blocks.  They
+        are not available for allocation. *)
+    ; compactions : int (** Number of heap compactions since the program was started. *)
+    ; top_heap_words : int (** Maximum size reached by the major heap, in words. *)
+    ; stack_size : int (** Current size of the stack, in words. *)
+    ; forced_major_collections : int
+    (** Number of forced full major collections completed since the program
+        was started. @since v0.14.1 *)
+    }
+  [@@deriving bin_io, sexp, fields]
+
+  [%%else]
+
   type t =
     { minor_words : float
     (** Number of words allocated in the minor heap since
@@ -58,6 +103,8 @@ module Stat : sig
     }
   [@@deriving bin_io, sexp, fields]
 
+  [%%endif]
+
   include Comparable.S with type t := t
 end
 
@@ -93,7 +140,7 @@ module Control : sig
     ; mutable space_overhead : int
     (** The major GC speed is computed from this parameter.
         This is the memory that will be "wasted" because the GC does not
-        immediatly collect unreachable blocks.  It is expressed as a
+        immediately collect unreachable blocks.  It is expressed as a
         percentage of the memory used for live data.
         The GC will work more (use more CPU time and collect
         blocks more eagerly) if [space_overhead] is smaller.
@@ -170,7 +217,7 @@ module Control : sig
     ; mutable space_overhead : int
     (** The major GC speed is computed from this parameter.
         This is the memory that will be "wasted" because the GC does not
-        immediatly collect unreachable blocks.  It is expressed as a
+        immediately collect unreachable blocks.  It is expressed as a
         percentage of the memory used for live data.
         The GC will work more (use more CPU time and collect
         blocks more eagerly) if [space_overhead] is smaller.
@@ -312,6 +359,12 @@ external top_heap_words : unit -> int = "core_kernel_gc_top_heap_words" [@@noall
 *)
 external major_plus_minor_words : unit -> int = "core_kernel_gc_major_plus_minor_words"
 
+(** This function returns [major_words () - promoted_words () + minor_words ()], as fast
+    as possible. As [major_plus_minor_words], we avoid allocating but cannot be marked
+    [@@noalloc] yet. It may overflow in 32-bit mode.
+*)
+external allocated_words : unit -> int = "core_kernel_gc_allocated_words"
+
 (** Return the current values of the GC parameters in a [control] record. *)
 external get : unit -> control = "caml_gc_get"
 
@@ -365,7 +418,7 @@ val keep_alive : _ -> unit
 
     The Best_fit policy is as fast as Next_fit and has less fragmentation than First_fit.
 
-    The default is Next_fit.
+    The default is Best_fit.
 *)
 module Allocation_policy : sig
   type t =
@@ -417,6 +470,36 @@ val disable_compaction
   -> allocation_policy:[ `Don't_change | `Set_to of Allocation_policy.t ]
   -> unit
   -> unit
+
+module For_testing : sig
+  module Allocation_report : sig
+    type t =
+      { major_words_allocated : int
+      ; minor_words_allocated : int
+      }
+  end
+
+  (** [measure_allocation f] measures the words allocated by running [f ()] *)
+  val measure_allocation : (unit -> 'a) -> 'a * Allocation_report.t
+
+  (** [is_zero_alloc f] runs [f ()] and returns [true] if it does not allocate, or [false]
+      otherwise. [is_zero_alloc] does not allocate. *)
+  val is_zero_alloc : (unit -> _) -> bool
+
+  (** [prepare_heap_to_count_minor_allocation] sets up the heap so that one can
+      subsequently measure minor allocation via:
+
+      {[
+        let minor_words_before = Gc.minor_words () in
+        (* ... do stuff ... *)
+        let minor_words_after = Gc.minor_words () in
+        let minor_words_allocated = minor_words_after - minor_words_before in
+      ]}
+
+      Without calling [prepare_heap_to_count_minor_allocation], the resulting count may be
+      inaccurate. *)
+  val prepare_heap_to_count_minor_allocation : unit -> unit
+end
 
 (** The [Expert] module contains functions that novice users should not use, due to their
     complexity.

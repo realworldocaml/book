@@ -3,21 +3,49 @@
  (target both-prelude.actual)
  (deps (package mdx) (source_tree both-prelude))
  (action
-  (with-outputs-to %{target}
-   (chdir both-prelude
-    (system "! ocaml-mdx test --prelude=a --prelude-str=b test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir both-prelude
+     (run %{bin:ocaml-mdx} test --prelude=a --prelude-str=b test-case.md))))))
 
 (rule
  (alias runtest)
  (action (diff both-prelude/test-case.md.expected both-prelude.actual)))
 
 (rule
+ (target cram-command-syntax.actual)
+ (deps (package mdx) (source_tree cram-command-syntax))
+ (action
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir cram-command-syntax
+     (run %{bin:ocaml-mdx} test test-case.t))))))
+
+(rule
+ (alias runtest)
+ (action (diff cram-command-syntax/test-case.t.expected cram-command-syntax.actual)))
+
+(rule
+ (target cram-empty-line.actual)
+ (deps (package mdx) (source_tree cram-empty-line))
+ (action
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir cram-empty-line
+     (run %{bin:ocaml-mdx} test test-case.t))))))
+
+(rule
+ (alias runtest)
+ (action (diff cram-empty-line/test-case.t.expected cram-empty-line.actual)))
+
+(rule
  (target in-toplevel.actual)
  (deps (package mdx) (source_tree in-toplevel))
  (action
-  (with-outputs-to %{target}
-   (chdir in-toplevel
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir in-toplevel
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -27,9 +55,10 @@
  (target invalid-label.actual)
  (deps (package mdx) (source_tree invalid-label))
  (action
-  (with-outputs-to %{target}
-   (chdir invalid-label
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir invalid-label
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -39,9 +68,10 @@
  (target invalid-label-value.actual)
  (deps (package mdx) (source_tree invalid-label-value))
  (action
-  (with-outputs-to %{target}
-   (chdir invalid-label-value
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir invalid-label-value
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -51,9 +81,10 @@
  (target mixed-label-syntax.actual)
  (deps (package mdx) (source_tree mixed-label-syntax))
  (action
-  (with-outputs-to %{target}
-   (chdir mixed-label-syntax
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir mixed-label-syntax
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -63,9 +94,10 @@
  (target ml-file-not-found.actual)
  (deps (package mdx) (source_tree ml-file-not-found))
  (action
-  (with-outputs-to %{target}
-   (chdir ml-file-not-found
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir ml-file-not-found
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -75,9 +107,10 @@
  (target part-not-ended.actual)
  (deps (package mdx) (source_tree part-not-ended))
  (action
-  (with-outputs-to %{target}
-   (chdir part-not-ended
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir part-not-ended
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -87,9 +120,10 @@
  (target part-not-found.actual)
  (deps (package mdx) (source_tree part-not-found))
  (action
-  (with-outputs-to %{target}
-   (chdir part-not-found
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir part-not-found
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -99,9 +133,10 @@
  (target part-not-opened.actual)
  (deps (package mdx) (source_tree part-not-opened))
  (action
-  (with-outputs-to %{target}
-   (chdir part-not-opened
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir part-not-opened
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)
@@ -111,9 +146,10 @@
  (target part-unsupported.actual)
  (deps (package mdx) (source_tree part-unsupported))
  (action
-  (with-outputs-to %{target}
-   (chdir part-unsupported
-    (system "! ocaml-mdx test test-case.md")))))
+  (with-accepted-exit-codes 1
+   (with-outputs-to %{target}
+    (chdir part-unsupported
+     (run %{bin:ocaml-mdx} test test-case.md))))))
 
 (rule
  (alias runtest)

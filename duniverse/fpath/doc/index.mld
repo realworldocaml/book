@@ -1,0 +1,11 @@
+{0 Fpath {%html: <span class="version">%%VERSION%%</span>%}}
+
+Fpath handles file system paths with POSIX or Windows conventions. It
+processes paths without accessing the file system and is independent
+from any system library.
+
+{1:api API}
+
+{!modules:
+Fpath
+}

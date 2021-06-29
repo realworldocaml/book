@@ -122,7 +122,10 @@ module Make (X : Make_arg) = struct
 
   let round_nearest i ~to_multiple_of:modulus =
     let remainder = i % modulus in
-    if remainder * of_int_exn 2 < modulus then i - remainder else i - remainder + modulus
+    let modulus_minus_remainder = modulus - remainder in
+    if modulus_minus_remainder <= remainder
+    then i + modulus_minus_remainder
+    else i - remainder
   ;;
 
   let round ?(dir = `Nearest) i ~to_multiple_of =

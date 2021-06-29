@@ -81,7 +81,7 @@ module Ast_utils = struct
   let get_string ~loc payload =
     let e = get_expr ~loc payload in
     match e with
-    | { pexp_desc = Pexp_constant (Pconst_string (x, _ )); _ } -> x
+    | { pexp_desc = Pexp_constant (Pconst_string (x, _, _ )); _ } -> x
     | _ -> Location.raise_errorf ~loc "optcomp: invalid directive syntax, expected string"
 
 end

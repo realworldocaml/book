@@ -11,9 +11,6 @@ module Make (F : Mirage_flow.S) = struct
 
   type write_error = [ Mirage_flow.write_error | error ]
 
-  type buffer = Cstruct.t
-  type +'a io = 'a Lwt.t
-
   let pp_error ppf = function
     | `Tls_failure f -> Fmt.string ppf @@ Tls.Engine.string_of_failure f
     | `Tls_alert a   -> Fmt.string ppf @@ Tls.Packet.alert_type_to_string a
@@ -60,7 +57,7 @@ module Make (F : Mirage_flow.S) = struct
 
     let handle tls buf =
       match Tls.Engine.handle_tls tls buf with
-      | `Ok (res, `Response resp, `Data data) ->
+      | Ok (res, `Response resp, `Data data) ->
           flow.state <- ( match res with
             | `Ok tls      -> `Active tls
             | `Eof         -> `Eof
@@ -72,7 +69,7 @@ module Make (F : Mirage_flow.S) = struct
             | `Ok _ -> return_unit
             | _     -> FLOW.close flow.flow ) >>= fun () ->
           return @@ `Ok data
-      | `Fail (fail, `Response resp) ->
+      | Error (fail, `Response resp) ->
           let reason = tls_fail fail in
           flow.state <- reason ;
           FLOW.(write flow.flow resp >>= fun _ -> close flow.flow) >>= fun () -> return reason
@@ -97,7 +94,7 @@ module Make (F : Mirage_flow.S) = struct
           | `Error e       -> return @@ Error e )
     | bufs ->
       flow.linger <- [] ;
-      return @@ Ok (`Data (Tls.Utils.Cs.appends @@ List.rev bufs))
+      return @@ Ok (`Data (Cstruct.concat @@ List.rev bufs))
 
   let writev flow bufs =
     match flow.state with
@@ -237,21 +234,21 @@ module X509 (KV : Mirage_kv.RO) (C: Mirage_clock.PCLOCK) = struct
       err_fail pp_msg (X509.CRL.decode_der data) >|= fun crl ->
       Some [ crl ]
 
-  let authenticator ?hash_whitelist ?crl kv =
+  let authenticator ?allowed_hashes ?crl kv =
     let time () = Some (Ptime.v (C.now_d_ps ())) in
     let now = Ptime.v (C.now_d_ps ()) in
     read kv ca_roots_file >>=
     decode_or_fail X509.Certificate.decode_pem_multiple >>= fun cas ->
     let ta = X509.Validation.valid_cas ~time:now cas in
     read_crl kv crl >|= fun crls ->
-    X509.Authenticator.chain_of_trust ?crls ?hash_whitelist ~time ta
+    X509.Authenticator.chain_of_trust ?crls ?allowed_hashes ~time ta
 
   let certificate kv =
     let read name =
       read kv (Mirage_kv.Key.v (name ^ ".pem")) >>=
       decode_or_fail X509.Certificate.decode_pem_multiple >>= fun certs ->
       read kv (Mirage_kv.Key.v (name ^ ".key")) >>=
-      decode_or_fail X509.Private_key.decode_pem >|= fun (`RSA pk) ->
+      decode_or_fail X509.Private_key.decode_pem >|= fun pk ->
       (certs, pk)
     in function | `Default   -> read default_cert
                 | `Name name -> read name

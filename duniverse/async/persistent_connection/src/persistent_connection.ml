@@ -43,16 +43,65 @@ module Make (Conn : T) = struct
   ;;
 end
 
-module Versioned_rpc = Make (struct
-    module Address = Host_and_port
+let create_convenience_wrapper
+      ~create
+      ~connection_of_rpc_connection
+      ~server_name
+      ?log
+      ?on_event
+      ?retry_delay
+      ?bind_to_address
+      ?implementations
+      ?max_message_size
+      ?make_transport
+      ?handshake_timeout
+      ?heartbeat_config
+      get_address
+  =
+  let connect host_and_port =
+    let%bind.Deferred.Or_error conn =
+      Rpc.Connection.client
+        (Tcp.Where_to_connect.of_host_and_port ?bind_to_address host_and_port)
+        ?implementations
+        ?max_message_size
+        ?make_transport
+        ?handshake_timeout
+        ?heartbeat_config
+        ~description:(Info.of_string ("persistent connection to " ^ server_name))
+      >>| Or_error.of_exn_result
+    in
+    connection_of_rpc_connection conn
+  in
+  create
+    ~server_name
+    ?log
+    ?on_event
+    ?retry_delay
+    ?random_state:None
+    ?time_source:None
+    ~connect
+    get_address
+;;
 
-    type t = Versioned_rpc.Connection_with_menu.t
+module Versioned_rpc = struct
+  include Make (struct
+      module Address = Host_and_port
 
-    let rpc_connection = Versioned_rpc.Connection_with_menu.connection
-    let close t = Rpc.Connection.close (rpc_connection t)
-    let is_closed t = Rpc.Connection.is_closed (rpc_connection t)
-    let close_finished t = Rpc.Connection.close_finished (rpc_connection t)
-  end)
+      type t = Versioned_rpc.Connection_with_menu.t
+
+      let rpc_connection = Versioned_rpc.Connection_with_menu.connection
+      let close t = Rpc.Connection.close (rpc_connection t)
+      let is_closed t = Rpc.Connection.is_closed (rpc_connection t)
+      let close_finished t = Rpc.Connection.close_finished (rpc_connection t)
+    end)
+
+  let create' ~server_name =
+    create_convenience_wrapper
+      ~server_name
+      ~create
+      ~connection_of_rpc_connection:Versioned_rpc.Connection_with_menu.create
+  ;;
+end
 
 module Rpc = struct
   include Make (struct
@@ -65,31 +114,10 @@ module Rpc = struct
       let close_finished t = Rpc.Connection.close_finished t
     end)
 
-  (* convenience wrapper *)
-  let create'
-        ~server_name
-        ?log
-        ?on_event
-        ?retry_delay
-        ?bind_to_address
-        ?implementations
-        ?max_message_size
-        ?make_transport
-        ?handshake_timeout
-        ?heartbeat_config
-        get_address
-    =
-    let connect host_and_port =
-      Rpc.Connection.client
-        (Tcp.Where_to_connect.of_host_and_port ?bind_to_address host_and_port)
-        ?implementations
-        ?max_message_size
-        ?make_transport
-        ?handshake_timeout
-        ?heartbeat_config
-        ~description:(Info.of_string ("persistent connection to " ^ server_name))
-      >>| Or_error.of_exn_result
-    in
-    create ~server_name ?log ?on_event ?retry_delay ~connect get_address
+  let create' ~server_name =
+    create_convenience_wrapper
+      ~server_name
+      ~create
+      ~connection_of_rpc_connection:Deferred.Or_error.return
   ;;
 end

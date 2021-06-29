@@ -14,7 +14,7 @@
     --visited-color: #eaffea;
     --visited-number-color: rgba(64, 192, 64, 0.2);
     --unvisited-color: #ffecec;
-    --unvisited-number-color: rgba(255, 128, 128, 0.3);
+    --unvisited-number-color: rgba(255, 128, 128, 0.5);
     --somevisited-color: #ffd;
     --highlight-color: #a0fbff;
     --line-number-color: rgba(0, 0, 0, 0.4);
@@ -47,7 +47,7 @@
     --visited-color: #002800;
     --visited-number-color: #252;
     --unvisited-color: #380000;
-    --unvisited-number-color: #622;
+    --unvisited-number-color: #822;
     --somevisited-color: #303000;
     --highlight-color: #303e3f;
     --line-number-color: rgba(230, 230, 230, 0.3);
@@ -81,7 +81,7 @@
         --visited-color: #002800;
         --visited-number-color: #252;
         --unvisited-color: #380000;
-        --unvisited-number-color: #622;
+        --unvisited-number-color: #822;
         --somevisited-color: #303000;
         --highlight-color: #303e3f;
         --line-number-color: rgba(230, 230, 230, 0.3);
@@ -109,7 +109,7 @@ body {
 
 pre {
     margin: 0;
-    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-family: "Fira Code", "Cascadia Code", Consolas, "Liberation Mono", Menlo, Courier, monospace;
     font-size: 13px;
     color: var(--code-color);
     cursor: text;
@@ -354,12 +354,10 @@ a[id]:target + .some-visited {
 }
 
 code span[data-count] {
-    display: inline-block;
     background-color: var(--visited-number-color);
 }
 
 code span[data-count="0"] {
-    display: inline-block;
     background-color: var(--unvisited-number-color);
 }
 

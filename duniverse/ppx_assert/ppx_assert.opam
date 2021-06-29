@@ -1,5 +1,5 @@
 opam-version: "2.0"
-version: "v0.13.0"
+version: "v0.14.0"
 maintainer: "opensource@janestreet.com"
 authors: ["Jane Street Group, LLC <opensource@janestreet.com>"]
 homepage: "https://github.com/janestreet/ppx_assert"
@@ -12,13 +12,13 @@ build: [
 ]
 depends: [
   "ocaml"         {>= "4.04.2"}
-  "base"          {>= "v0.13" & < "v0.14"}
-  "ppx_cold"      {>= "v0.13" & < "v0.14"}
-  "ppx_compare"   {>= "v0.13" & < "v0.14"}
-  "ppx_here"      {>= "v0.13" & < "v0.14"}
-  "ppx_sexp_conv" {>= "v0.13" & < "v0.14"}
-  "dune"          {>= "1.5.1"}
-  "ppxlib"        {>= "0.9.0"}
+  "base"          {>= "v0.14" & < "v0.15"}
+  "ppx_cold"      {>= "v0.14" & < "v0.15"}
+  "ppx_compare"   {>= "v0.14" & < "v0.15"}
+  "ppx_here"      {>= "v0.14" & < "v0.15"}
+  "ppx_sexp_conv" {>= "v0.14" & < "v0.15"}
+  "dune"          {>= "2.0.0"}
+  "ppxlib"        {>= "0.11.0"}
 ]
 synopsis: "Assert-like extension nodes that raise useful errors on failure"
 description: "

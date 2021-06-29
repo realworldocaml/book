@@ -19,6 +19,7 @@ let with_loaded_file file ~f =
 let priv =
   match with_loaded_file "private/cakey" ~f:Private_key.decode_pem with
   | `RSA x -> x
+  | _ -> assert false
 
 let cert name = with_loaded_file name ~f:Certificate.decode_pem
 
@@ -91,12 +92,12 @@ let first_certs = [
 
 let allowed_hashes = [ `MD5 ; `SHA1 ; `SHA224 ; `SHA256 ; `SHA384 ; `SHA512 ]
 
-let test_valid_ca_cert ?(hash_whitelist = allowed_hashes) server chain valid name ca () =
+let test_valid_ca_cert ?(allowed_hashes = allowed_hashes) server chain valid name ca () =
   let anchors = ca
   and host = Some (host name)
   and full_chain = server :: chain
   in
-  match valid, Validation.verify_chain_of_trust ~time ~hash_whitelist ~host ~anchors full_chain with
+  match valid, Validation.verify_chain_of_trust ~time ~allowed_hashes ~host ~anchors full_chain with
   | false, Ok _   -> Alcotest.fail "expected to fail, but didn't"
   | false, Error _ -> ()
   | true , Ok _   -> ()
@@ -291,16 +292,16 @@ let second_no_cn_cert_ca_test (_, ca, x) =
 let invalid_tests =
   let c = second_cert "second" in
   let h = "second.foobar.com" in
-  let hash_whitelist = [ `SHA256 ; `SHA384 ; `SHA512 ] in
+  let allowed_hashes = [ `SHA256 ; `SHA384 ; `SHA512 ] in
   [
     "invalid chain", `Quick, test_valid_ca_cert c [] false h [cacert] ;
     "broken chain", `Quick, test_valid_ca_cert c [cacert] false h [cacert] ;
     "no trust anchor", `Quick, test_valid_ca_cert c [im_cert "cacert"] false h [] ;
-    "2chain invalid", `Quick, test_valid_ca_cert ~hash_whitelist c [im_cert "cacert" ; cacert] false h [cacert] ;
+    "2chain invalid", `Quick, test_valid_ca_cert ~allowed_hashes c [im_cert "cacert" ; cacert] false h [cacert] ;
     "2chain valid", `Quick, test_valid_ca_cert c [im_cert "cacert" ; cacert] true h [cacert] ;
-    "3chain invalid", `Quick, test_valid_ca_cert ~hash_whitelist c [im_cert "cacert" ; cacert ; cacert] false h [cacert] ;
+    "3chain invalid", `Quick, test_valid_ca_cert ~allowed_hashes c [im_cert "cacert" ; cacert ; cacert] false h [cacert] ;
     "3chain valid", `Quick, test_valid_ca_cert c [im_cert "cacert" ; cacert ; cacert] true h [cacert] ;
-    "chain-order invalid", `Quick, test_valid_ca_cert ~hash_whitelist c [im_cert "cacert" ; im_cert "cacert" ; cacert] false h [cacert] ;
+    "chain-order invalid", `Quick, test_valid_ca_cert ~allowed_hashes c [im_cert "cacert" ; im_cert "cacert" ; cacert] false h [cacert] ;
     "chain-order valid", `Quick, test_valid_ca_cert c [im_cert "cacert" ; im_cert "cacert" ; cacert] true h [cacert] ;
     "not a CA", `Quick, (fun _ -> Alcotest.(check int "is not a CA" 0
                                               (List.length (Validation.valid_cas [im_cert "cacert"])))) ;

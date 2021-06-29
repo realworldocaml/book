@@ -13,9 +13,8 @@
 
 open BasicSyntax
 
-(* [expand_grammar] expands away the keywords [$startpos] and [$endpos], as well
-   the entire [ofs] family of keywords. Doing this early simplifies some aspects
-   later on, in particular %inlining. *)
+(* [expand_grammar] expands away the keywords [$startpos] and [$endpos], as
+   well as the entire [ofs] family of keywords. Doing this early simplifies
+   some aspects later on, in particular %inlining. *)
 
 val expand_grammar: grammar -> grammar
-

@@ -39,6 +39,30 @@ module Cookies : sig
   val add_post_handler : (t -> unit) -> unit
 end
 
+module Instrument : sig
+  type t
+
+  type pos = Before | After
+
+  (** [make transformation ~position] creates an instrumentation that can be passed to
+      [Driver.register_transformation] to instrument an implementation file. [transformation] is
+      the transformation that will be applied to the AST; [position] specifies if it should be
+      applied before or after rewriters defined through [rules], [impl] or [intf] are applied.*)
+  val make
+    : (Parsetree.structure -> Parsetree.structure)
+    -> position:pos
+    -> t
+
+  module V2 : sig
+    (** Same as [Instrument.make], but the transformation that will be applied to the AST has
+        access to an expansion context. To be used together with [Driver.V2].*)
+    val make
+    : (Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure)
+    -> position:pos
+    -> t
+  end
+end
+
 (** [register_transformation name] registers a code transformation.
 
     [name] is a logical name for the transformation (such as [sexp_conv] or
@@ -82,11 +106,22 @@ end
     [lint_impl] and [lint_intf] are applied to the unprocessed source. Errors they return
     will be reported to the user as preprocessor warnings.
 
+    [instrument] can be used to instrument implementation files. Its transformation is
+    applied to the AST of the whole file. The difference to [impl] is that you can specify
+    if it should be applied before or after all rewriters defined through [rules], [impl]
+    or [intf] are applied.
+
+
     Rewritings are applied in the following order:
     - linters ([lint_impl], [lint_intf])
     - preprocessing ([preprocess_impl], [preprocess_intf])
+    - "before" instrumentations
+      ([instrument], where instrument = [Instrument.make ~position:Before (...)])
     - context-independent rules ([rules], [extensions])
-    - whole-file transformations ([impl], [intf], [enclose_impl], [enclose_intf])
+    - non-instrumentation whole-file transformations
+      ([impl], [intf], [enclose_impl], [enclose_intf])
+    - "after" instrumentations
+      ([instrument], where instrument = [Instrument.make ~position:After (...)])
 *)
 val register_transformation
   :  ?extensions       : Extension.t list (* deprecated, use ~rules instead *)
@@ -99,6 +134,7 @@ val register_transformation
   -> ?lint_intf        : (signature -> Lint_error.t list)
   -> ?preprocess_impl  : (structure -> structure)
   -> ?preprocess_intf  : (signature -> signature)
+  -> ?instrument       : Instrument.t
   -> ?aliases          : string list
   -> string
   -> unit
@@ -111,10 +147,10 @@ val register_transformation
     library.
 *)
 val register_transformation_using_ocaml_current_ast
-  :  ?impl : (Migrate_parsetree.OCaml_current.Ast.Parsetree.structure ->
-              Migrate_parsetree.OCaml_current.Ast.Parsetree.structure)
-  -> ?intf : (Migrate_parsetree.OCaml_current.Ast.Parsetree.signature ->
-              Migrate_parsetree.OCaml_current.Ast.Parsetree.signature)
+  :  ?impl : (Compiler_version.Ast.Parsetree.structure ->
+              Compiler_version.Ast.Parsetree.structure)
+  -> ?intf : (Compiler_version.Ast.Parsetree.signature ->
+              Compiler_version.Ast.Parsetree.signature)
   -> ?aliases : string list
   -> string
   -> unit
@@ -135,7 +171,7 @@ val register_code_transformation
   -> impl:(structure -> structure)
   -> intf:(signature -> signature)
   -> unit
-  [@@deprecated "[since 2015-11] use register_transformation instead"]
+[@@deprecated "[since 2015-11] use register_transformation instead"]
 
 (** Rewriters might call this function to suggest a correction to the code source. When
     they do this, the driver will generate a [file.ml.ppx-corrected] file with the
@@ -145,6 +181,38 @@ val register_correction : loc:Location.t -> repl:string -> unit
 
 (** Hook called before processing a file *)
 val register_process_file_hook : (unit -> unit) -> unit
+
+module V2 : sig
+  (** Same as [Driver.register_transformation], but the callbacks have access
+      to an expansion context. Their signatures coincide with the signatures of the
+      respective methods in [Ast_traverse.map_with_expansion_context]. *)
+  val register_transformation
+  :  ?extensions       : Extension.t list (* deprecated, use ~rules instead *)
+  -> ?rules            : Context_free.Rule.t list
+  -> ?enclose_impl     : (Expansion_context.Base.t -> Location.t option -> structure * structure)
+  -> ?enclose_intf     : (Expansion_context.Base.t -> Location.t option -> signature * signature)
+  -> ?impl             : (Expansion_context.Base.t -> structure -> structure)
+  -> ?intf             : (Expansion_context.Base.t -> signature -> signature)
+  -> ?lint_impl        : (Expansion_context.Base.t -> structure -> Lint_error.t list)
+  -> ?lint_intf        : (Expansion_context.Base.t -> signature -> Lint_error.t list)
+  -> ?preprocess_impl  : (Expansion_context.Base.t -> structure -> structure)
+  -> ?preprocess_intf  : (Expansion_context.Base.t -> signature -> signature)
+  -> ?instrument       : Instrument.t
+  -> ?aliases          : string list
+  -> string
+  -> unit
+
+  (** Same as [Driver.register_transformation_using_ocaml_current_ast], but the callbacks [?impl]
+      and [?intf] have access to an expansion context. *)
+  val register_transformation_using_ocaml_current_ast
+    :  ?impl : (Expansion_context.Base.t -> Compiler_version.Ast.Parsetree.structure ->
+                Compiler_version.Ast.Parsetree.structure)
+    -> ?intf : (Expansion_context.Base.t -> Compiler_version.Ast.Parsetree.signature ->
+                Compiler_version.Ast.Parsetree.signature)
+    -> ?aliases : string list
+    -> string
+    -> unit
+end
 
 (** Create a new file property.
 
@@ -176,9 +244,9 @@ val run_as_ppx_rewriter : unit -> unit
 val pretty : unit -> bool
 
 (**/**)
-val map_structure : structure -> Migrate_parsetree.Driver.some_structure
+val map_structure : structure -> structure
+val map_signature : signature -> signature
 
 val enable_checks : unit -> unit
 val enable_location_check : unit -> unit
 val disable_location_check : unit -> unit
-

@@ -163,7 +163,8 @@ module Command = struct
       let default =
         match t.log_to_console with
         | No -> false
-        | Stderr _ | Stdout _ -> false
+        | Stdout _ -> true
+        | Stderr _ -> false
       in
       let doc =
         sprintf !"BOOL Log to stdout when logging to console (default: %{Bool})" default

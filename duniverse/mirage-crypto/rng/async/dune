@@ -1,0 +1,5 @@
+(library
+ (name mirage_crypto_rng_async)
+ (public_name mirage-crypto-rng-async)
+ (modules mirage_crypto_rng_async)
+ (libraries async mirage-crypto-rng mirage-crypto-rng.unix logs))

@@ -1,6 +1,6 @@
 open Core
-(* This shows some sample uses of BENCH.  Have a look at pa_bench_sample.ml.pp to see how
-   the preprocessor works. *)
+(* This shows some sample uses of BENCH. Build and look at ppx_bench_sample.ml.pp in this
+   directory to see how the preprocessor works. *)
 
 (* One can specify a benchmark using the following syntax:
 
@@ -67,14 +67,14 @@ let%bench_fun "fold list indexed" [@indexed len = [1;10;100;1000]] =
 
      end)
 
-   For examples of all of the above see [core_gc.ml] and [core_array.ml].
+   For examples of all of the above see [bench_gc.ml] and [bench_array.ml] in
+   [lib/core_kernel/bench].
 
    Only the generated [inline_benchmarks_runner.exe] depends on [Core_bench] and other
-   libraries. The library that includes the the benchmarks itself does not have a
-   dependency on [Core_bench]. Doing this is important so that we can add benchmarks to
-   [Core] and still avoid cyclic dependencies. Finally, it is important to note that
-   adding inline benchmarks should have little effect on the execution or module
-   initialization time.
+   libraries. The library that includes the benchmarks itself does not have a dependency
+   on [Core_bench]. Doing this is important so that we can add benchmarks to [Core] and
+   still avoid cyclic dependencies. Finally, it is important to note that adding inline
+   benchmarks should have little effect on the execution or module initialization time.
 *)
 
 let%bench_module "trivial module" = (module struct

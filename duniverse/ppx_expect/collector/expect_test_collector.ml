@@ -1,4 +1,4 @@
-open Expect_test_common.Std
+open Expect_test_common
 module List = ListLabels
 
 module Test_outcome = struct
@@ -9,7 +9,7 @@ module Test_outcome = struct
     ; uncaught_exn_expectation : Expectation.Raw.t option
     ; saved_output : (File.Location.t * string) list
     ; trailing_output : string
-    ; upon_unreleasable_issue : Expect_test_config.Upon_unreleasable_issue.t
+    ; upon_unreleasable_issue : Expect_test_config_types.Upon_unreleasable_issue.t
     ; uncaught_exn : (exn * Printexc.raw_backtrace) option
     }
 end
@@ -48,7 +48,7 @@ module Current_file = struct
   ;;
 end
 
-module Make (C : Expect_test_config.S) = struct
+module Make (C : Expect_test_config_types.S) = struct
   let ( >>= ) t f = C.IO_flush.bind t ~f
   let return = C.IO_flush.return
 
@@ -111,7 +111,7 @@ module Make (C : Expect_test_config.S) = struct
       if not (Check_backtraces.contains_backtraces s)
       then s
       else
-        Expect_test_config.Upon_unreleasable_issue
+        Expect_test_config_types.Upon_unreleasable_issue
         .message_when_expectation_contains_backtrace
           C.upon_unreleasable_issue
         ^ s
@@ -146,21 +146,12 @@ module Make (C : Expect_test_config.S) = struct
     ;;
 
     let current_test : (File.Location.t * t) option ref = ref None
-    let last_test_loc = ref None
 
     let get_current () =
       match !current_test with
       | Some (_, t) -> t
       | None ->
-        Printf.ksprintf
-          failwith
-          "Expect_test_collector.Instance.get_current called outside a test.%s"
-          (match !last_test_loc with
-           | None -> ""
-           | Some location ->
-             Printf.sprintf
-               !"\nThe last test to be executed was: %{sexp:File.Location.t}."
-               location)
+        failwith "Expect_test_collector.Instance.get_current called outside a test."
     ;;
 
     let save_output location =
@@ -302,6 +293,7 @@ module Make (C : Expect_test_config.S) = struct
            true))
   ;;
 end
+[@@inline never]
 
 let tests_run () =
   (* We prepend tests when we encounter them, so reverse the list to reinstate order *)

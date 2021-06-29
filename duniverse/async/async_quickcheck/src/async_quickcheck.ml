@@ -14,7 +14,7 @@ module Configure (Config : Quickcheck.Quickcheck_config) = struct
       | None -> f
       | Some sexp_of_arg ->
         fun x ->
-          Deferred.Or_error.try_with (fun () -> f x)
+          Deferred.Or_error.try_with ~extract_exn:true (fun () -> f x)
           >>| (function
             | Ok () -> ()
             | Error e -> Error.raise (Error.tag_arg e "random input" x sexp_of_arg))

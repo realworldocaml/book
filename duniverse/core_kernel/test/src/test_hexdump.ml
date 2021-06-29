@@ -1,5 +1,5 @@
 open! Core_kernel
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 
 let require_same here (name1, string1) (name2, string2) =
   require

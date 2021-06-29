@@ -1,0 +1,14 @@
+(executables
+ (libraries angstrom core_bench threads RFC2616 RFC7159)
+ (modules pure_benchmark)
+ (names pure_benchmark))
+
+(executables
+ (libraries angstrom-async RFC2616 RFC7159)
+ (modules async_benchmark)
+ (names async_benchmark))
+
+(executables
+ (libraries angstrom-lwt-unix RFC2616 RFC7159)
+ (modules lwt_benchmark)
+ (names lwt_benchmark))

@@ -1,4 +1,4 @@
 (library
  (name test_support)
- (libraries markup oUnit)
+ (libraries markup ounit2)
  (flags (:standard -w +A-44)))

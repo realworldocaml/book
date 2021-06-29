@@ -17,45 +17,42 @@
 
 (** Convert to and from [Unix] to [Ipaddr] representations
 
-    {e v5.0.0 - {{:https://github.com/mirage/ocaml-ipaddr }homepage}} *)
+    {e v5.0.1 - {{:https://github.com/mirage/ocaml-ipaddr} homepage}} *)
 
-(** [to_inet_addr ip] is the {! Unix.inet_addr} equivalent of the
-    IPv4 or IPv6 address [ip]. *)
 val to_inet_addr : Ipaddr.t -> Unix.inet_addr
+(** [to_inet_addr ip] is the {!Unix.inet_addr} equivalent of the IPv4 or IPv6
+    address [ip]. *)
 
-(** [of_inet_addr ip] is the {! Ipaddr.t} equivalent of the
-    {! Unix.inet_addr} [ip]. *)
 val of_inet_addr : Unix.inet_addr -> Ipaddr.t
+(** [of_inet_addr ip] is the {!Ipaddr.t} equivalent of the {!Unix.inet_addr}
+    [ip]. *)
 
 module V4 : sig
-
-  (** [to_inet_addr ip] is the {! Unix.inet_addr} equivalent of the
-      IPv4 address [ip]. *)
   val to_inet_addr : Ipaddr.V4.t -> Unix.inet_addr
+  (** [to_inet_addr ip] is the {!Unix.inet_addr} equivalent of the IPv4 address
+      [ip]. *)
 
-  (** [of_inet_addr_exn ip] is the {! Ipaddr.t} equivalent of the
-      {!Unix.inet_addr} [ip] IPv4 address. Raises {! Ipaddr.Parse_error} if
-      [ip] is not a valid representation of an IPv4 address. *)
   val of_inet_addr_exn : Unix.inet_addr -> Ipaddr.V4.t
+  (** [of_inet_addr_exn ip] is the {!Ipaddr.t} equivalent of the
+      {!Unix.inet_addr} [ip] IPv4 address. Raises {!Ipaddr.Parse_error} if [ip]
+      is not a valid representation of an IPv4 address. *)
 
+  val of_inet_addr : Unix.inet_addr -> Ipaddr.V4.t option
   (** Same as [of_inet_addr_exn] but returns an option type instead of raising
       an exception. *)
-  val of_inet_addr : Unix.inet_addr -> Ipaddr.V4.t option
 end
 
 module V6 : sig
-
-  (** [to_inet_addr ip] is the {! Unix.inet_addr} equivalent of the
-      IPv6 address [ip]. *)
   val to_inet_addr : Ipaddr.V6.t -> Unix.inet_addr
+  (** [to_inet_addr ip] is the {!Unix.inet_addr} equivalent of the IPv6 address
+      [ip]. *)
 
-
-  (** [of_inet_addr_exn ip] is the {! Ipaddr.t} equivalent of the
-      {!Unix.inet_addr} [ip] IPv6 address. Raises {! Ipaddr.Parse_error} if
-      [ip] is not a valid representation of an IPv6 address. *)
   val of_inet_addr_exn : Unix.inet_addr -> Ipaddr.V6.t
+  (** [of_inet_addr_exn ip] is the {!Ipaddr.t} equivalent of the
+      {!Unix.inet_addr} [ip] IPv6 address. Raises {!Ipaddr.Parse_error} if [ip]
+      is not a valid representation of an IPv6 address. *)
 
+  val of_inet_addr : Unix.inet_addr -> Ipaddr.V6.t option
   (** Same as [of_inet_addr_exn] but returns an option type instead of raising
       an exception. *)
-  val of_inet_addr : Unix.inet_addr -> Ipaddr.V6.t option
 end

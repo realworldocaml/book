@@ -15,44 +15,49 @@
  *
   }}}*)
 
-(** Functions for the HTTP Cookie and Set-Cookie header fields.
-    Using the Set-Cookie header field, an HTTP server can pass name/value
-    pairs and associated metadata (called cookies) to a user agent.  When
-    the user agent makes subsequent requests to the server, the user
-    agent uses the metadata and other information to determine whether to
-    return the name/value pairs in the Cookie header. *)
+(** Functions for the HTTP Cookie and Set-Cookie header fields. Using the
+    Set-Cookie header field, an HTTP server can pass name/value pairs and
+    associated metadata (called cookies) to a user agent. When the user agent
+    makes subsequent requests to the server, the user agent uses the metadata
+    and other information to determine whether to return the name/value pairs in
+    the Cookie header. *)
 
+type expiration =
+  [ `Session
+    (** Instructs the user agent to discard the cookie unconditionally when the
+        user agent terminates. *)
+  | `Max_age of int64
+    (** The value of the Max-Age attribute is delta-seconds, the lifetime of the
+        cookie in seconds, a decimal non-negative integer. *) ]
+[@@deriving sexp]
 (** Lifetime of the cookie after which the user agent discards it *)
-type expiration = [
-  | `Session          (** Instructs the user agent to discard the cookie
-                          unconditionally when the user agent terminates. *)
-  | `Max_age of int64 (** The value of the Max-Age attribute is delta-seconds,
-                           the lifetime of the cookie in seconds, a decimal
-                           non-negative integer. *)
-] [@@deriving sexp]
+
 type cookie = string * string
 (** A cookie is simply a key/value pair send from the client to the server *)
 
 module Set_cookie_hdr : sig
-
   type t = {
-    cookie: cookie;
+    cookie : cookie;
     expiration : expiration;
     domain : string option;
     path : string option;
     secure : bool;
-    http_only : bool } [@@deriving fields, sexp]
+    http_only : bool;
+  }
+  [@@deriving sexp]
   (** A header which a server sends to a client to request that the client
-    returns the cookie in future requests, under certain conditions. *)
+      returns the cookie in future requests, under certain conditions. *)
 
   val make :
     ?expiration:expiration ->
     ?path:string ->
-    ?domain:string -> ?secure:bool -> ?http_only:bool -> cookie -> t
+    ?domain:string ->
+    ?secure:bool ->
+    ?http_only:bool ->
+    cookie ->
+    t
 
-  val serialize :
-    ?version:[ `HTTP_1_0 | `HTTP_1_1 ] ->
-    t -> string * string
+  val serialize : ?version:[ `HTTP_1_0 | `HTTP_1_1 ] -> t -> string * string
   (** Return an HTTP header *)
 
   val extract : Header.t -> (string * t) list
@@ -75,10 +80,11 @@ module Set_cookie_hdr : sig
 
   val secure : t -> bool
   (** Has the cookie's secure attribute been set? *)
+
+  val http_only : t -> bool
 end
 
 module Cookie_hdr : sig
-
   val extract : Header.t -> cookie list
   (** Return the list of cookies sent by the client *)
 

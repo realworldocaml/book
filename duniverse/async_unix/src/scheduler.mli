@@ -98,29 +98,6 @@ val reset_in_forked_process : unit -> unit
     the guarantee that the child process does not use Async. *)
 val make_async_unusable : unit -> unit
 
-(** Async supports "busy polling", which runs a thread that busy loops running
-    user-supplied polling functions.  The busy-loop thread is distinct from Async's
-    scheduler thread.
-
-    Busy polling is useful for a situation like a shared-memory ringbuffer being used for
-    IPC.  One can poll the ringbuffer with a busy poller, and then when data is detected,
-    fill some ivar that causes Async code to handle the data.
-
-    [add_busy_poller poll] adds [poll] to the busy loop.  [poll] will be called
-    continuously, once per iteration of the busy loop, until it returns [`Stop_polling a]
-    at which point the result of [add_busy_poller] will become determined.  [poll] will
-    hold the Async lock while running, so it is fine to do ordinary Async operations,
-    e.g., fill an ivar.  The busy loop will run an ordinary Async cycle if any of the
-    pollers add jobs.
-
-    [poll] will run in the monitor in effect when [add_busy_poller] was called; exceptions
-    raised by [poll] will be sent asynchronously to that monitor.  If [poll] raises, it
-    will still be run on subsequent iterations of the busy loop. *)
-val add_busy_poller
-  :  (unit -> [ `Continue_polling | `Stop_polling of 'a ])
-  -> 'a Deferred.t
-[@@deprecated "[since 2018-11] use [set_on_start_of_cycle]"]
-
 (** [handle_thread_pool_stuck f] causes [f] to run whenever Async detects its thread pool
     is stuck (i.e., hasn't completed a job for over a second and has work waiting to
     start).  Async checks every second.  By default, if the thread pool has been stuck for

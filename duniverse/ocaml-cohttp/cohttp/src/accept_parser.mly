@@ -19,7 +19,7 @@
 %{
   open Accept_types
 
-  type param = Q of int | Kv of (string * pv)
+  type param = Q of int | Kv of p
 
   let rec get_q = function
     | (Q q)::_ -> q
@@ -40,11 +40,11 @@
 %%
 
 param :
-| SEMI TOK EQUAL QS { Kv ($2, S $4) }
+| SEMI TOK EQUAL QS { Kv ($2, $4) }
 | SEMI TOK EQUAL TOK {
   if $2="q" then try Q (truncate (1000.*.(float_of_string $4)))
     with Failure _ -> raise Parsing.Parse_error
-  else Kv ($2, T $4)
+  else Kv ($2, $4)
 }
 
 params :

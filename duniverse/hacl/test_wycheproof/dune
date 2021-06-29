@@ -1,3 +1,0 @@
-(test
- (name wycheproof_hacl)
- (libraries hacl_x25519 wycheproof))

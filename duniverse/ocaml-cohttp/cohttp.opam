@@ -1,4 +1,4 @@
-version: "2.5.1"
+version: "4.0.0"
 opam-version: "2.0"
 maintainer: "anil@recoil.org"
 authors: [
@@ -33,18 +33,15 @@ homepage: "https://github.com/mirage/ocaml-cohttp"
 doc: "https://mirage.github.io/ocaml-cohttp/"
 bug-reports: "https://github.com/mirage/ocaml-cohttp/issues"
 depends: [
-  "ocaml" {>= "4.04.1"}
-  "dune" {>= "1.1.0"}
+  "ocaml" {>= "4.08"}
+  "dune" {>= "2.0.0"}
   "re" {>= "1.9.0"}
   "uri" {>= "2.0.0"}
   "uri-sexp"
-  "fieldslib"
   "sexplib0"
-  "ppx_fields_conv" {>= "v0.9.0"}
   "ppx_sexp_conv" {>= "v0.13.0"}
   "stringext"
   "base64" {>= "3.1.0"}
-  "stdlib-shims"
   "fmt" {with-test}
   "jsonm" {build}
   "alcotest" {with-test}

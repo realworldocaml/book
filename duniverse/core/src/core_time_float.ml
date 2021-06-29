@@ -99,11 +99,11 @@ module Stable = struct
         module Bin_repr = struct
           type t =
             { ofday : Time.Stable.Ofday.V1.t;
-              zone  : Core_zone.Stable.V1.t;
+              zone  : Timezone.Stable.V1.t;
             } [@@deriving bin_io]
         end
 
-        include Binable.Of_binable (Bin_repr) (struct
+        include (Binable.Of_binable_without_uuid [@alert "-legacy"]) (Bin_repr) (struct
             type nonrec t = t
 
             let to_binable t : Bin_repr.t =
@@ -113,7 +113,7 @@ module Stable = struct
               create repr.ofday repr.zone
           end)
 
-        type sexp_repr = Time.Stable.Ofday.V1.t * Core_zone.Stable.V1.t
+        type sexp_repr = Time.Stable.Ofday.V1.t * Timezone.Stable.V1.t
         [@@deriving sexp]
 
         let sexp_of_t t = [%sexp_of: sexp_repr] (ofday t, zone t)
@@ -126,7 +126,7 @@ module Stable = struct
     end
   end
 
-  module Zone = Core_zone.Stable
+  module Zone = Timezone.Stable
 end
 
 include (

@@ -73,6 +73,9 @@ val cycle_times : unit -> Time.Span.t Async_stream.t
 
 val cycle_times_ns : unit -> Time_ns.Span.t Async_stream.t
 
+(** [last_cycle_time] returns the time spent in the most recently completed cycle. *)
+val last_cycle_time : unit -> Time_ns.Span.t
+
 (** [long_cycles ~at_least] returns a stream of cycles whose duration is at least
     [at_least].  [long_cycles] is more efficient than [cycle_times] because it only
     allocates a stream entry when there is a long cycle, rather than on every cycle. *)
@@ -118,8 +121,18 @@ val yield : unit -> unit Deferred.t
 (** [yield_until_no_jobs_remain ()] returns a deferred that becomes determined the next
     time Async's job queue is empty.  This is useful in tests when one needs to wait for
     the completion of all the jobs based on what's in the queue, when those jobs might
-    create other jobs -- without depending on I/O or the passage of wall-clock time. *)
-val yield_until_no_jobs_remain : unit -> unit Deferred.t
+    create other jobs -- without depending on I/O or the passage of wall-clock time.
+
+    [may_return_immediately] determines how [yield_until_no_jobs_remain] behaves if the
+    job queue is currently empty.  If [may_return_immediately = true], then
+    [yield_until_no_jobs_remain] will [return ()].  If [may_return_immediately = false],
+    then [yield_until_no_jobs_remain]'s result will become determined after the next Async
+    cycle.  We hope to someday change the default [may_return_immediately] from [false] to
+    [true]. *)
+val yield_until_no_jobs_remain
+  :  ?may_return_immediately:bool (** default is [false] *)
+  -> unit
+  -> unit Deferred.t
 
 (** [yield_every ~n] returns a function that will act as [yield] every [n] calls and as
     [return ()] the rest of the time.  This is useful for improving fairness in
@@ -141,8 +154,16 @@ val num_pending_jobs : unit -> int
 
 module Expert : sig
   val run_cycles_until_no_jobs_remain : unit -> unit
+
   val set_on_start_of_cycle : (unit -> unit) -> unit
+  [@@deprecated "[since 2020-01] Use [run_every_cycle_start]"]
+
   val set_on_end_of_cycle : (unit -> unit) -> unit
+  [@@deprecated "[since 2020-01] Use [run_every_cycle_end]"]
+
+  val last_cycle_num_jobs : unit -> int
+  val run_every_cycle_start : (unit -> unit) -> unit
+  val run_every_cycle_end : (unit -> unit) -> unit
 end
 
 module Private = Scheduler

@@ -4,20 +4,26 @@
 
 open! Import
 
-type 'a t = 'a list [@@deriving_inline compare, hash, sexp]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-    val hash_fold_t :
-      (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state) ->
-      Ppx_hash_lib.Std.Hash.state -> 'a t -> Ppx_hash_lib.Std.Hash.state
-    include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t :=  'a t
-  end[@@ocaml.doc "@inline"]
+type 'a t = 'a list [@@deriving_inline compare, hash, sexp, sexp_grammar]
+
+val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+
+val hash_fold_t
+  :  (Ppx_hash_lib.Std.Hash.state -> 'a -> Ppx_hash_lib.Std.Hash.state)
+  -> Ppx_hash_lib.Std.Hash.state
+  -> 'a t
+  -> Ppx_hash_lib.Std.Hash.state
+
+include Ppx_sexp_conv_lib.Sexpable.S1 with type 'a t := 'a t
+
+val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
 [@@@end]
 
 
 include Container.S1 with type 'a t := 'a t
+
+include Invariant_intf.S1 with type 'a t := 'a t
 include Monad.S with type 'a t := 'a t
 
 (** [Or_unequal_lengths] is used for functions that take multiple lists and that only make
@@ -29,13 +35,10 @@ module Or_unequal_lengths : sig
     | Ok of 'a
     | Unequal_lengths
   [@@deriving_inline compare, sexp_of]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
-      val sexp_of_t :
-        ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val compare : ('a -> 'a -> int) -> 'a t -> 'a t -> int
+  val sexp_of_t : ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
@@ -119,9 +122,8 @@ val rev_filter : 'a t -> f:('a -> bool) -> 'a t
 
 val filteri : 'a t -> f:(int -> 'a -> bool) -> 'a t
 
-
 (** [partition_map t ~f] partitions [t] according to [f]. *)
-val partition_map : 'a t -> f:('a -> [ `Fst of 'b | `Snd of 'c ]) -> 'b t * 'c t
+val partition_map : 'a t -> f:('a -> ('b, 'c) Either0.t) -> 'b t * 'c t
 
 
 val partition3_map
@@ -336,6 +338,9 @@ val last_exn : 'a t -> 'a
 (** [is_prefix xs ~prefix] returns [true] if [xs] starts with [prefix]. *)
 val is_prefix : 'a t -> prefix:'a t -> equal:('a -> 'a -> bool) -> bool
 
+(** [is_suffix xs ~suffix] returns [true] if [xs] ends with [suffix]. *)
+val is_suffix : 'a t -> suffix:'a t -> equal:('a -> 'a -> bool) -> bool
+
 
 (** [find_consecutive_duplicate t ~equal] returns the first pair of consecutive elements
     [(a1, a2)] in [t] such that [equal a1 a2].  They are returned in the same order as
@@ -418,7 +423,7 @@ val filter_map : 'a t -> f:('a -> 'b option) -> 'b t
 val filter_mapi : 'a t -> f:(int -> 'a -> 'b option) -> 'b t
 
 (** [filter_opt l] is the sublist of [l] containing only elements which are [Some e].  In
-    other words, [filter_opt l] = [filter_map ~f:ident l]. *)
+    other words, [filter_opt l] = [filter_map ~f:Fn.id l]. *)
 val filter_opt : 'a option t -> 'a t
 
 (** Interpret a list of (key, value) pairs as a map in which only the first occurrence of
@@ -431,11 +436,9 @@ val filter_opt : 'a option t -> 'a t
     {[ Map.xxx (alist |> Map.of_alist_multi |> Map.map ~f:List.hd) ...args... ]} *)
 module Assoc : sig
   type ('a, 'b) t = ('a * 'b) list [@@deriving_inline sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a,'b) t :=  ('a, 'b) t
-    end[@@ocaml.doc "@inline"]
+
+  include Ppx_sexp_conv_lib.Sexpable.S2 with type ('a, 'b) t := ('a, 'b) t
+
   [@@@end]
 
   val add : ('a, 'b) t -> equal:('a -> 'a -> bool) -> 'a -> 'b -> ('a, 'b) t

@@ -19,24 +19,25 @@
 
 open Sexplib0.Sexp_conv
 
-type pv = T of string | S of string [@@deriving sexp]
-type p = string * pv [@@deriving sexp]
+type p = string * string [@@deriving sexp]
+
 type media_range =
   | MediaType of string * string
   | AnyMediaSubtype of string
-  | AnyMedia [@@deriving sexp]
-type charset =
-  | Charset of string
-  | AnyCharset [@@deriving sexp]
+  | AnyMedia
+[@@deriving sexp]
+
+type charset = Charset of string | AnyCharset [@@deriving sexp]
+
 type encoding =
   | Encoding of string
   | Gzip
   | Compress
   | Deflate
   | Identity
-  | AnyEncoding [@@deriving sexp]
-type language =
-  | Language of string list
-  | AnyLanguage [@@deriving sexp]
+  | AnyEncoding
+[@@deriving sexp]
+
+type language = Language of string list | AnyLanguage [@@deriving sexp]
 type q = int [@@deriving sexp]
 type 'a qlist = (q * 'a) list [@@deriving sexp]

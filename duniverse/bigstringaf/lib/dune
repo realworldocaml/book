@@ -1,0 +1,13 @@
+(library
+ (name        bigstringaf)
+ (public_name bigstringaf)
+ (libraries   bigarray-compat)
+ (flags       (:standard -safe-string))
+
+ (foreign_stubs
+  (language c)
+  (names     bigstringaf_stubs)
+  (flags     (:standard -Wall -Wextra -Wpedantic)))
+
+ (js_of_ocaml (javascript_files runtime.js))
+)

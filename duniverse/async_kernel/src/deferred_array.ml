@@ -20,7 +20,7 @@ let seqmapi t ~f =
 ;;
 
 let all ds = seqmapi ds ~f:(fun _ x -> x)
-let all_unit ds = Deferred.ignore (fold ds ~init:() ~f:(fun () d -> d))
+let all_unit ds = Deferred.ignore_m (fold ds ~init:() ~f:(fun () d -> d))
 
 let iteri ?(how = `Sequential) t ~f =
   match how with

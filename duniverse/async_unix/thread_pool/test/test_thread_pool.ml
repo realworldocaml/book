@@ -1,5 +1,5 @@
 open! Core
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 open! Thread_pool
 open! Thread_pool.Private
 module Debug = Async_kernel.Async_kernel_private.Debug
@@ -58,7 +58,10 @@ let%test_module _ =
     (* Check that the expected concurrency is used. *)
     let%expect_test _ =
       List.iter [ 1; 2; 5; 10; 100; 1000 ] ~f:(fun num_jobs ->
-        List.iter [ 1; 2; 5; 10; 100 ] ~f:(fun max_num_threads ->
+        List.iter ([ 1; 2; 5; 10 ]
+                   @ if Sys.word_size = 32
+                   then [] (* not enough address space when the stack limit is high *)
+                   else [ 100 ]) ~f:(fun max_num_threads ->
           if debug
           then
             eprintf
@@ -75,6 +78,7 @@ let%test_module _ =
           let worker_threads_should_continue = Thread_safe_ivar.create () in
           let (_ : Core.Thread.t) =
             Core.Thread.create
+              ~on_uncaught_exn:`Print_to_stderr
               (fun () ->
                  let start = Time_ns.now () in
                  let rec loop () =

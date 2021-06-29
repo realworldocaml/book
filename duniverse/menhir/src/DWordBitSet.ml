@@ -63,9 +63,11 @@ let add i s =
       singleton i
   | D (hi, lo) ->
       if i < A.bound then
-        D (hi, A.add i lo)
+        let lo' = A.add i lo in
+        if lo == lo' then s else D (hi, lo')
       else
-        D (A.add (i - A.bound) hi, lo)
+        let hi' = A.add (i - A.bound) hi in
+        if hi == hi' then s else D (hi', lo)
 
 let remove i s =
   match s with
@@ -73,9 +75,11 @@ let remove i s =
       s
   | D (hi, lo) ->
       if i < A.bound then
-        construct hi (A.remove i lo)
+        let lo' = A.remove i lo in
+        if lo == lo' then s else construct hi lo'
       else
-        construct (A.remove (i - A.bound) hi) lo
+        let hi' = A.remove (i - A.bound) hi in
+        if hi == hi' then s else construct hi' lo
 
 let fold f s accu =
   match s with
@@ -140,7 +144,9 @@ let union s1 s2 =
   | s, E ->
       s
   | D (hi1, lo1), D (hi2, lo2) ->
-      D (A.union hi1 hi2, A.union lo1 lo2)
+      let hi = A.union hi1 hi2
+      and lo = A.union lo1 lo2 in
+      if hi == hi2 && lo == lo2 then s2 else D (hi, lo)
 
 let inter s1 s2 =
   match s1, s2 with

@@ -36,7 +36,7 @@
 
 ; (executable
 ;  (name ppx)
-;  (libraries tyxml-ppx ocaml-migrate-parsetree)
+;  (libraries tyxml-ppx ppxlib)
 ;  (modules ppx)
 ; )
 

@@ -1,7 +1,7 @@
 open! Core
 open Poly
 open! Unix
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 
 let%expect_test "[File_descr.sexp_of_t]" =
   print_s
@@ -84,6 +84,16 @@ let%expect_test "filename validation in [remove]" =
   [%expect {| (raised (Invalid_argument "tmp-file-to-remove\000corrupted-filename")) |}]
 ;;
 
+let%expect_test "expand ~base works" =
+  let base = lazy [ "A=1"; "B=2"; "C=3" ] in
+  print_s [%sexp (Unix.Env.expand ~base (`Replace [ "C", "2" ]) : string list)];
+  [%expect {| (C=2) |}];
+  print_s
+    [%sexp
+      (Unix.Env.expand ~base (`Override [ "A", None; "B", Some "4" ]) : string list)];
+  [%expect {| (C=3 B=4) |}]
+;;
+
 let%test_unit "fork_exec ~env last binding takes precedence" =
   protectx
     ~finally:remove
@@ -126,7 +136,12 @@ let%test_module _ =
       let sexp1 = sexp_of_t t in
       let sexp2 = Sexp.of_string string in
       if Sexp.( <> ) sexp1 sexp2
-      then failwiths "unequal sexps" (sexp1, sexp2) [%sexp_of: Sexp.t * Sexp.t]
+      then
+        failwiths
+          ~here:[%here]
+          "unequal sexps"
+          (sexp1, sexp2)
+          [%sexp_of: Sexp.t * Sexp.t]
     ;;
 
     let%test_unit _ = check rdonly "(rdonly)"
@@ -303,7 +318,7 @@ let%test_module "" =
       List.iter all ~f:(fun t ->
         let x = to_int t in
         if Int.( <> ) (Int.ceil_pow2 x) x
-        then failwiths "Flag is not a power of 2" t sexp_of_t)
+        then failwiths ~here:[%here] "Flag is not a power of 2" t sexp_of_t)
     ;;
 
     let%test_unit _ =
@@ -345,10 +360,15 @@ let%test_module "the search path passed to [create_process_env] has an effect" =
   (module struct
     let call_ls = Unix.create_process_env ~prog:"ls" ~args:[] ~env:(`Extend [])
 
-    let%test _ = Or_error.is_ok @@ Or_error.try_with (fun () -> call_ls ())
+    let%expect_test "default search path" =
+      require_does_not_raise [%here] (fun () ->
+        ignore (Sys.opaque_identity (call_ls ())))
+    ;;
 
-    let%test _ =
-      Or_error.is_error @@ Or_error.try_with (fun () -> call_ls ~prog_search_path:[] ())
+    let%expect_test "empty search path" =
+      require_does_raise [%here] (fun () -> call_ls ~prog_search_path:[] ());
+      [%expect
+        {| (Invalid_argument "Core.Unix.create_process: empty prog_search_path") |}]
     ;;
   end)
 ;;

@@ -36,16 +36,14 @@ open! Import
 module type S = sig
   (** Serialization and comparison force the lazy message. *)
   type t [@@deriving_inline compare, equal, hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val compare : t -> t -> int
-      val equal : t -> t -> bool
-      val hash_fold_t :
-        Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-      val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-    end[@@ocaml.doc "@inline"]
+
+  val compare : t -> t -> int
+  val equal : t -> t -> bool
+  val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+  val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
+  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
   [@@@end]
 
   include Invariant_intf.S with type t := t
@@ -135,9 +133,9 @@ module type S = sig
       | Of_list of int option * t list
       | With_backtrace of t * string (** The second argument is the backtrace *)
     [@@deriving_inline sexp_of]
-    include
-      sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-      end[@@ocaml.doc "@inline"]
+
+    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
     [@@@end]
 
     val of_info : info -> t

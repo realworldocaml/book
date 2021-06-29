@@ -1,6 +1,6 @@
 .PHONY : build
 build :
-	dune build
+	dune build -p markup,markup-lwt
 
 # This is not part of the ordinary build process. The output file, entities.ml,
 # is checked into git.
@@ -9,16 +9,14 @@ entities :
 	dune exec src/translate_entities/translate_entities.exe \
 	  > src/entities.ml
 
-COVERAGE := _coverage
-
 .PHONY : test
-test : build
-	dune runtest --no-buffer -j 1
+test :
+	dune runtest
 
 .PHONY : coverage
-coverage : clean
-	BISECT_ENABLE=yes dune build
-	dune runtest --no-buffer -j 1
+coverage :
+	find . -name '*.coverage' | xargs rm -f
+	dune runtest --instrument-with bisect_ppx --force
 	bisect-ppx-report html --expect src/ --do-not-expect src/translate_entities/
 	bisect-ppx-report summary
 	@echo See _coverage/index.html
@@ -110,4 +108,4 @@ check-doc-prereqs :
 clean :
 	rm -rf $(HTML) $(PUBLISH) $(DOC_ZIP)
 	dune clean
-	rm -rf $(COVERAGE)
+	rm -rf _coverage

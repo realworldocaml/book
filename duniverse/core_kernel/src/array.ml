@@ -6,7 +6,7 @@ module Core_sequence = Sequence
 include (
   Base.Array :
   sig
-    type 'a t = 'a array [@@deriving sexp, compare]
+    type 'a t = 'a array [@@deriving sexp, compare, sexp_grammar]
   end)
 
 type 'a t = 'a array [@@deriving bin_io, typerep]
@@ -284,7 +284,6 @@ module type Permissioned = sig
 
   val last : ('a, [> read ]) t -> 'a
   val equal : ('a -> 'a -> bool) -> ('a, [> read ]) t -> ('a, [> read ]) t -> bool
-  val unsafe_truncate : (_, [> write ]) t -> len:int -> unit
   val to_sequence : ('a, [> read ]) t -> 'a Sequence.t
   val to_sequence_mutable : ('a, [> read ]) t -> 'a Sequence.t
 end
@@ -437,7 +436,6 @@ module type S = sig
   val sorted_copy : 'a t -> compare:('a -> 'a -> int) -> 'a t
   val last : 'a t -> 'a
   val equal : ('a -> 'a -> bool) -> 'a t -> 'a t -> bool
-  val unsafe_truncate : _ t -> len:int -> unit
   val to_sequence : 'a t -> 'a Core_sequence.t
   val to_sequence_mutable : 'a t -> 'a Core_sequence.t
 end

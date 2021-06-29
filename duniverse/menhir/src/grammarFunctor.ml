@@ -30,6 +30,19 @@ end) () = struct
   open G
 
 (* ------------------------------------------------------------------------ *)
+
+(* [index] indexes a list of (distinct) strings, that is, assigns an
+   integer index to each string and builds mappings both ways between
+   strings and indices. *)
+
+let index (strings : string list) : int * string array * int StringMap.t =
+  let name = Array.of_list strings
+  and n, map = List.fold_left (fun (n, map) s ->
+    n+1, StringMap.add s n map
+  ) (0, StringMap.empty) strings in
+  n, name, map
+
+(* ------------------------------------------------------------------------ *)
 (* Precedence levels for tokens or pseudo-tokens alike. *)
 
 module TokPrecedence = struct
@@ -106,7 +119,7 @@ module Nonterminal = struct
     List.length new_start_nonterminals
 
   let (n : int), (name : string array), (map : int StringMap.t) =
-    Misc.index (new_start_nonterminals @ original_nonterminals)
+    index (new_start_nonterminals @ original_nonterminals)
 
   let () =
     if verbose then
@@ -116,8 +129,11 @@ module Nonterminal = struct
           (n - start) start
       )
 
-  let is_start nt =
+  let is_internal_start nt =
     nt < start
+
+  let is_user_start nt =
+    StringSet.mem name.(nt) grammar.start_symbols
 
   let print normalize nt =
     if normalize then
@@ -152,7 +168,7 @@ module Nonterminal = struct
     Misc.foldij start n f accu
 
   let ocamltype nt =
-    assert (not (is_start nt));
+    assert (not (is_internal_start nt));
     try
       Some (StringMap.find (print false nt) grammar.types)
     with Not_found ->
@@ -223,7 +239,7 @@ module Terminal = struct
     | [] when verbose ->
         Error.error [] "no tokens have been declared."
     | _ ->
-        Misc.index ("error" :: tokens @ [ "#" ])
+        index ("error" :: tokens @ [ "#" ])
 
   let print tok =
     name.(tok)
@@ -256,6 +272,7 @@ module Terminal = struct
         tk_is_declared   = true;
         tk_position      = Positions.dummy;
         tk_attributes    = [];
+        tk_alias         = None;
       }
     in
     Array.init n (fun tok ->
@@ -306,6 +323,41 @@ module Terminal = struct
     for i = 1 to n-2 do
       f i
     done
+
+  let tokens_without_an_alias =
+    let accu = ref [] in
+    iter_real begin fun tok ->
+      let properties = token_properties.(tok) in
+      if properties.tk_alias = None then
+        accu := tok :: !accu
+    end;
+    List.rev !accu
+
+  let () =
+    if verbose && Settings.require_aliases then
+      tokens_without_an_alias |> List.iter begin fun tok ->
+        let properties = token_properties.(tok) in
+        let pos = properties.tk_position in
+        Error.grammar_warning [pos]
+          "no alias has been defined for the token %s."
+          (print tok)
+      end
+
+  let every_token_has_an_alias =
+    tokens_without_an_alias = []
+
+  let alias tok =
+    token_properties.(tok).tk_alias
+
+  let unquoted_alias tok =
+    alias tok |> Option.map (fun qid ->
+      assert (qid.[0] = '"');
+      (* Skip the opening quote and decode the remainder using the lexer
+         [decode_string]. *)
+      let qid = String.sub qid 1 (String.length qid - 1) in
+      let lexbuf = Lexing.from_string qid in
+      Misc.with_buffer 8 (fun b -> Lexer.decode_string b lexbuf)
+  )
 
   (* If a token named [EOF] exists, then it is assumed to represent
      ocamllex's [eof] pattern. *)
@@ -429,6 +481,9 @@ module TerminalSet = struct
   let is_maximal _ =
     false
 
+  let leq_join =
+    union
+
 end
 
 (* Maps over terminals. *)
@@ -496,20 +551,32 @@ module Symbol = struct
 
   (* Printing an array of symbols. [offset] is the start offset -- we
      print everything to its right. [dot] is the dot offset -- we
-     print a dot at this offset, if we find it. *)
+     print a dot at this offset, if we find it. Note that [dot] can be
+     equal to [length]. *)
+
+  let buffer =
+    Buffer.create 1024
 
   let printaod offset dot symbols =
-    let buffer = Buffer.create 512 in
     let length = Array.length symbols in
+    let first = ref true in
+    let separate () =
+      if not !first then Printf.bprintf buffer " ";
+      first := false
+    in
     for i = offset to length do
-      if i = dot then
-        Buffer.add_string buffer ". ";
+      if i = dot then begin
+        separate();
+        Printf.bprintf buffer "."
+      end;
       if i < length then begin
-        Buffer.add_string buffer (print symbols.(i));
-        Buffer.add_char buffer ' '
+        separate();
+        Printf.bprintf buffer "%s" (print symbols.(i))
       end
     done;
-    Buffer.contents buffer
+    let s = Buffer.contents buffer in
+    Buffer.clear buffer;
+    s
 
   let printao offset symbols =
     printaod offset (-1) symbols
@@ -549,8 +616,11 @@ module SymbolSet = struct
   let bottom =
     empty
 
-  let is_maximal _ =
-    false
+  let leq =
+    subset
+
+  let join =
+    union
 
 end
 
@@ -705,31 +775,19 @@ module Production = struct
 
   let iternt nt f =
     let k, k' = ntprods.(nt) in
-    for prod = k to k' - 1 do
-      f prod
-    done
+    Misc.iterij k k' f
 
-  let foldnt (nt : Nonterminal.t) (accu : 'a) (f : index -> 'a -> 'a) : 'a =
+  let foldnt nt f accu =
     let k, k' = ntprods.(nt) in
-    let rec loop accu prod =
-      if prod < k' then
-        loop (f prod accu) (prod + 1)
-      else
-        accu
-    in
-    loop accu k
+    Misc.foldij k k' f accu
 
-  (* This funny variant is lazy. If at some point [f] does not demand its
-     second argument, then iteration stops. *)
-  let foldnt_lazy (nt : Nonterminal.t) (f : index -> (unit -> 'a) -> 'a) (seed : 'a) : 'a =
+  let mapnt nt f =
     let k, k' = ntprods.(nt) in
-    let rec loop prod seed =
-      if prod < k' then
-        f prod (fun () -> loop (prod + 1) seed)
-      else
-        seed
-    in
-    loop k seed
+    Misc.mapij k k' f
+
+  let foldnt_lazy nt f accu =
+    let k, k' = ntprods.(nt) in
+    Misc.foldij_lazy k k' f accu
 
   (* Accessors. *)
 
@@ -787,6 +845,9 @@ module Production = struct
     with Not_found ->
       assert false (* [nt] is not a start symbol *)
 
+  let error_free prod =
+    Misc.array_for_all Symbol.non_error (rhs prod)
+
   (* Iteration. *)
 
   let init f =
@@ -820,7 +881,20 @@ module Production = struct
   let print prod =
     assert (not (is_start prod));
     let nt, rhs = table.(prod) in
-    Printf.sprintf "%s -> %s" (Nonterminal.print false nt) (Symbol.printao 0 rhs)
+    if Array.length rhs = 0 then
+      (* Avoid producing a trailing space. *)
+      Printf.sprintf "%s ->" (Nonterminal.print false nt)
+    else
+      Printf.sprintf "%s -> %s" (Nonterminal.print false nt) (Symbol.printao 0 rhs)
+
+  let describe gerund prod =
+    match classify prod with
+    | Some nt ->
+        let ending = if gerund then "ing" else "" in
+        Printf.sprintf "accept%s %s" ending (Nonterminal.print false nt)
+    | None ->
+        let ending = if gerund then "ing" else "e" in
+        Printf.sprintf "reduc%s production %s" ending (print prod)
 
   (* Tabulation and sum. *)
 
@@ -1046,7 +1120,7 @@ end = struct
 
   module F =
     Fix.Make
-      (Maps.ArrayAsImperativeMaps(Nonterminal))
+      (Fix.Glue.ArraysAsImperativeMaps(Nonterminal))
       (P)
 
   let nonterminal =
@@ -1071,7 +1145,7 @@ end
 
 module NONEMPTY =
   GenericAnalysis
-    (Boolean)
+    (Fix.Prop.Boolean)
     (struct
       (* A terminal symbol is nonempty. *)
       let terminal _ = true
@@ -1086,7 +1160,7 @@ module NONEMPTY =
 
 module NULLABLE =
   GenericAnalysis
-    (Boolean)
+    (Fix.Prop.Boolean)
     (struct
       (* A terminal symbol is not nullable. *)
       let terminal _ = false
@@ -1218,29 +1292,27 @@ let () =
    intuitively represents a set of symbols. *)
 
 module FOLLOW (P : sig
-  include Fix.PROPERTY
-  val union: property -> property -> property
+  include Fix.MINIMAL_SEMI_LATTICE
+  val bottom: property
   val terminal: Terminal.t -> property
   val first: Production.index -> int -> property
 end) = struct
 
+  module M =
+    Fix.Glue.ArraysAsImperativeMaps(Nonterminal)
+
   module S =
-    FixSolver.Make
-      (Maps.ArrayAsImperativeMaps(Nonterminal))
-      (P)
+    FixSolver.Make(M)(P)
 
   (* Build a system of constraints. *)
-
-  let record_ConVar, record_VarVar, solve =
-    S.create()
 
   (* Iterate over all start symbols. *)
   let () =
     let sharp = P.terminal Terminal.sharp in
     for nt = 0 to Nonterminal.start - 1 do
-      assert (Nonterminal.is_start nt);
+      assert (Nonterminal.is_internal_start nt);
       (* Add # to FOLLOW(nt). *)
-      record_ConVar sharp nt
+      S.record_ConVar sharp nt
     done
     (* We need to do this explicitly because our start productions are
        of the form S' -> S, not S' -> S #, so # will not automatically
@@ -1259,18 +1331,24 @@ end) = struct
             and first = P.first prod (i+1) in
             (* The FIRST set of the remainder of the right-hand side
                contributes to the FOLLOW set of [nt2]. *)
-            record_ConVar first nt2;
+            S.record_ConVar first nt2;
             (* If the remainder of the right-hand side is nullable,
                FOLLOW(nt1) contributes to FOLLOW(nt2). *)
             if nullable then
-              record_VarVar nt1 nt2
+              S.record_VarVar nt1 nt2
       ) rhs
     ) Production.table
 
   (* Second pass. Solve the equations (on demand). *)
 
+  let follow : (Nonterminal.t -> P.property) Lazy.t =
+    lazy (
+      let module S = S.Solve() in
+      fun nt -> Option.value (S.solution nt) ~default:P.bottom
+    )
+
   let follow : Nonterminal.t -> P.property =
-    solve()
+    fun nt -> (Lazy.force follow) nt
 
 end
 
@@ -1379,7 +1457,8 @@ let sfirst prod i =
 
 let sfollow : Nonterminal.t -> SymbolSet.t =
   let module F = FOLLOW(struct
-    include SymbolSet
+    let bottom = SymbolSet.bottom
+    include Fix.Glue.MinimalSemiLattice(SymbolSet)
     let terminal t = SymbolSet.singleton (Symbol.T t)
     let first = sfirst
   end) in
@@ -1447,7 +1526,7 @@ let rec convert = function
         (Terminal.print tok)
   | ENullable (symbols, e) ->
       let e = convert e in
-      Printf.sprintf "%scan vanish%s%s"
+      Printf.sprintf "%s can vanish%s%s"
         (Symbol.printl symbols)
         (if e = "" then "" else " and ")
         e
@@ -1495,6 +1574,13 @@ module Analysis = struct
 
   let attributes =
     grammar.gr_attributes
+
+  let minimal nt =
+    CompletedNatWitness.to_int (MINIMAL.nonterminal nt)
+
+  let minimal_prod prod i =
+    assert (0 <= i && i <= Production.length prod);
+    CompletedNatWitness.to_int (MINIMAL.production prod i)
 
 end
 

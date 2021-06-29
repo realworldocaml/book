@@ -43,14 +43,14 @@ let () = ()
 type node =
   int
 
-(* A property is an LR(1) state. The function [join] is used to merge the
-   contributions of multiple predecessor states. The function [leq] is used to
-   detect stabilization. *)
+(* A property is an LR(1) state. The function [leq_join] is used to detect
+   stabilization and to merge the contribution of a predecessor state into a
+   successor state. We exploit the fact that [Lr0.union s' s] is physically
+   equal to [s] if [s'] is a subet of [s]. (Yes, we live on the edge.) *)
 
 module P = struct
   type property = lr1state
-  let leq = Lr0.subsume
-  let join = Lr0.union
+  let leq_join = Lr0.union
 end
 
 (* The graph. *)

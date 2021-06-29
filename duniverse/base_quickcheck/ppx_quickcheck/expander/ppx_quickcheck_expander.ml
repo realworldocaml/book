@@ -20,7 +20,7 @@ let generator_attribute =
 ;;
 
 let rec generator_of_core_type core_type ~gen_env ~obs_env =
-  let loc = core_type.ptyp_loc in
+  let loc = { core_type.ptyp_loc with loc_ghost = true } in
   match Attribute.get generator_attribute core_type with
   | Some expr -> expr
   | None ->
@@ -65,7 +65,7 @@ let rec generator_of_core_type core_type ~gen_env ~obs_env =
      | Ptyp_package _ -> unsupported ~loc "%s" (short_string_of_core_type core_type))
 
 and observer_of_core_type core_type ~obs_env ~gen_env =
-  let loc = core_type.ptyp_loc in
+  let loc = { core_type.ptyp_loc with loc_ghost = true } in
   match core_type.ptyp_desc with
   | Ptyp_constr (constr, args) ->
     type_constr_conv
@@ -103,7 +103,7 @@ and observer_of_core_type core_type ~obs_env ~gen_env =
 ;;
 
 let rec shrinker_of_core_type core_type ~env =
-  let loc = core_type.ptyp_loc in
+  let loc = { core_type.ptyp_loc with loc_ghost = true } in
   match core_type.ptyp_desc with
   | Ptyp_constr (constr, args) ->
     type_constr_conv
@@ -347,11 +347,12 @@ let intf type_decl ~f ~covar ~contravar =
     List.fold_right
       type_decl.ptype_params
       ~init:result
-      ~f:(fun (core_type, variance) result ->
+      ~f:(fun (core_type, (variance, injectivity)) result ->
         let id =
-          match variance with
-          | Invariant | Covariant -> covar
-          | Contravariant -> contravar
+          match (variance, injectivity) with
+          | ((NoVariance | Covariant), NoInjectivity) -> covar
+          | (Contravariant, NoInjectivity) -> contravar
+          | (_, Injective) -> Location.raise_errorf ~loc "Injective type parameters aren't supported."
         in
         let arg = ptyp_constr ~loc { loc; txt = id } [ core_type ] in
         [%type: [%t arg] -> [%t result]])

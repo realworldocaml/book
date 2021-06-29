@@ -10,6 +10,10 @@ node_modules/
 package-lock.json
 # package-lock.json should probably be committed once we know what we're doing.
 
+# esy
+_esy
+esy.lock
+
 # Coverage analysis.
 bisect*.out
 _coverage/

@@ -7,8 +7,9 @@ module type Round = sig
   type t
 
   (** [round] rounds an int to a multiple of a given [to_multiple_of] argument, according
-      to a direction [dir], with default [dir] being [`Nearest].  [round] will raise if
-      [to_multiple_of <= 0].
+      to a direction [dir], with default [dir] being [`Nearest]. [round] will raise if
+      [to_multiple_of <= 0]. If the result overflows (too far positive or too far
+      negative), [round] returns an incorrect result.
 
       {v
        | `Down    | rounds toward Int.neg_infinity                          |
@@ -41,15 +42,13 @@ module type Hexable = sig
 
   module Hex : sig
     type nonrec t = t [@@deriving_inline sexp, compare, hash]
-    include
-      sig
-        [@@@ocaml.warning "-32"]
-        include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-        val compare : t -> t -> int
-        val hash_fold_t :
-          Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-        val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      end[@@ocaml.doc "@inline"]
+
+    include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+    val compare : t -> t -> int
+    val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+
     [@@@end]
 
     include Stringable.S with type t := t
@@ -59,21 +58,19 @@ module type Hexable = sig
 end
 
 module type S_common = sig
-  type t [@@deriving_inline hash, sexp]
-  include
-    sig
-      [@@@ocaml.warning "-32"]
-      val hash_fold_t :
-        Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-      val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-      include Ppx_sexp_conv_lib.Sexpable.S with type  t :=  t
-    end[@@ocaml.doc "@inline"]
+  type t [@@deriving_inline sexp, sexp_grammar]
+
+  include Ppx_sexp_conv_lib.Sexpable.S with type t := t
+
+  val t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t
+
   [@@@end]
 
   include Floatable.S with type t := t
   include Intable.S with type t := t
   include Identifiable.S with type t := t
   include Comparable.With_zero with type t := t
+  include Invariant.S with type t := t
   include Hexable with type t := t
 
   (** [delimiter] is an underscore by default. *)
@@ -285,6 +282,18 @@ module type S = sig
   (** [is_pow2 x] returns true iff [x] is a power of 2.  [is_pow2] raises if [x <= 0]. *)
   val is_pow2 : t -> bool
 
+  (** Returns the number of leading zeros in the binary representation of the input, as an
+      integer between 0 and one less than [num_bits].
+
+      The results are unspecified for [t = 0]. *)
+  val clz : t -> int
+
+  (** Returns the number of trailing zeros in the binary representation of the input, as
+      an integer between 0 and one less than [num_bits].
+
+      The results are unspecified for [t = 0]. *)
+  val ctz : t -> int
+
   (** A sub-module designed to be opened to make working with ints more convenient.  *)
   module O : Operators with type t := t
 end
@@ -326,6 +335,22 @@ module type Int_without_module_types = sig
   val to_int32_trunc : t -> int32
   val of_int64_trunc : int64 -> t
   val of_nativeint_trunc : nativeint -> t
+
+  (** {2 Byte swap operations}
+
+      Byte swap operations reverse the order of bytes in an integer. For
+      example, {!Int32.bswap32} reorders the bottom 32 bits (or 4 bytes),
+      turning [0x1122_3344] to [0x4433_2211]. Byte swap functions exposed by
+      Base use OCaml primitives to generate assembly instructions to perform
+      the relevant byte swaps.
+
+      For a more extensive list of byteswap functions, see {!Int32} and
+      {!Int64}.
+  *)
+
+  (** Byte swaps bottom 16 bits (2 bytes). The values of the remaining bytes
+      are undefined. *)
+  val bswap16 : t -> t
 
   (**/**)
 

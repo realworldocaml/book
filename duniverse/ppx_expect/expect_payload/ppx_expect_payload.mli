@@ -1,5 +1,5 @@
 open Ppxlib
-open Expect_test_common.Std
+open Expect_test_common
 
 (** Translate a compile time location to a runtime location *)
 val transl_loc : Location.t -> File.Location.t

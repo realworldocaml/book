@@ -14,13 +14,12 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * cohttp v2.5.1
+ * cohttp v4.0.0
  *)
 
 module Key = Mirage_kv.Key
 
-module HTTP(FS: Mirage_kv.RO)(S: Cohttp_lwt.S.Server) = struct
-
+module HTTP (FS : Mirage_kv.RO) (S : Cohttp_lwt.S.Server) = struct
   open Lwt.Infix
   open Astring
 
@@ -29,43 +28,45 @@ module HTTP(FS: Mirage_kv.RO)(S: Cohttp_lwt.S.Server) = struct
   let read_fs t name =
     FS.get t (Key.v name) >>= function
     | Error e -> failf "read %a" FS.pp_error e
-    | Ok buf  -> Lwt.return buf
+    | Ok buf -> Lwt.return buf
 
   let exists t name =
-  FS.exists t (Key.v name) >|= function
-  | Ok (Some `Value) -> true
-  | Ok (Some _ | None) -> false
-  | Error e -> Fmt.failwith "exists %a" FS.pp_error e
+    FS.exists t (Key.v name) >|= function
+    | Ok (Some `Value) -> true
+    | Ok (Some _ | None) -> false
+    | Error e -> Fmt.failwith "exists %a" FS.pp_error e
 
   let dispatcher request_fn =
     let rec fn fs uri =
-    match Uri.path uri with
-    | ("" | "/") as path ->
-      Logs.info (fun f -> f "request for '%s'" path);
-      fn fs (Uri.with_path uri "index.html")
-    | path when String.is_suffix ~affix:"/" path ->
-      Logs.info (fun f -> f "request for '%s'" path);
-      fn fs (Uri.with_path uri "index.html")
-    | path ->
-      Logs.info (fun f -> f "request for '%s'" path);
-      Lwt.catch (fun () ->
-        read_fs fs path >>= fun body ->
-        let mime_type = Magic_mime.lookup path in
-        let headers = Cohttp.Header.init_with "content-type" mime_type in
-        let headers = match request_fn with
-         | None -> headers
-         | Some fn -> fn uri headers in
-        S.respond_string ~status:`OK ~body ~headers ()
-      ) (fun _exn ->
-         let with_index = Fmt.strf "%s/index.html" path in
-         exists fs with_index >>= function
-         | true -> fn fs (Uri.with_path uri with_index)
-         | false ->  S.respond_not_found ()
-      )
-    in fn
+      match Uri.path uri with
+      | ("" | "/") as path ->
+          Logs.info (fun f -> f "request for '%s'" path);
+          fn fs (Uri.with_path uri "index.html")
+      | path when String.is_suffix ~affix:"/" path ->
+          Logs.info (fun f -> f "request for '%s'" path);
+          fn fs (Uri.with_path uri "index.html")
+      | path ->
+          Logs.info (fun f -> f "request for '%s'" path);
+          Lwt.catch
+            (fun () ->
+              read_fs fs path >>= fun body ->
+              let mime_type = Magic_mime.lookup path in
+              let headers = Cohttp.Header.init_with "content-type" mime_type in
+              let headers =
+                match request_fn with
+                | None -> headers
+                | Some fn -> fn uri headers
+              in
+              S.respond_string ~status:`OK ~body ~headers ())
+            (fun _exn ->
+              let with_index = Fmt.strf "%s/index.html" path in
+              exists fs with_index >>= function
+              | true -> fn fs (Uri.with_path uri with_index)
+              | false -> S.respond_not_found ())
+    in
+    fn
 
   let start ~http_port ?request_fn fs http =
-
     let callback (_, cid) request _body =
       let uri = Cohttp.Request.uri request in
       let cid = Cohttp.Connection.to_string cid in
@@ -74,7 +75,7 @@ module HTTP(FS: Mirage_kv.RO)(S: Cohttp_lwt.S.Server) = struct
     in
     let conn_closed (_, cid) =
       let cid = Cohttp.Connection.to_string cid in
-      Logs.info (fun f -> f "[%s] closing" cid);
+      Logs.info (fun f -> f "[%s] closing" cid)
     in
     Logs.info (fun f -> f "listening on %d/TCP" http_port);
     http (`TCP http_port) (S.make ~conn_closed ~callback ())

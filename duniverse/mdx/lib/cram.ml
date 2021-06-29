@@ -105,6 +105,17 @@ let of_lines t =
       (pad, aux cmd [] [] t)
   | `Command cmd :: t -> (pad, aux [ cmd ] [] [] t)
   | [] -> (0, [])
+  | `Output line :: _ ->
+      if String.length line > 0 && line.[0] = '$' then
+        failwith
+          "Blocks must start with a command or similar, not with an output \
+           line. To indicate a line as a command, start it with a dollar \
+           followed by a space."
+      else
+        failwith
+          "Blocks must start with a command or similar, not with an output \
+           line. Please, make sure that there's no spare empty line, \
+           particularly between the output and its input."
   | _ -> Fmt.failwith "invalid cram block: %a" Fmt.(Dump.list dump_line) lines
 
 let exit_code t = t.exit_code

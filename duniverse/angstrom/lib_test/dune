@@ -1,0 +1,27 @@
+(library
+ (name angstrom_test)
+ (libraries angstrom)
+ (flags :standard -safe-string)
+ (modules test_let_syntax_native test_let_syntax_ppx)
+ (preprocess
+  (per_module
+   (future_syntax test_let_syntax_native)
+   ((pps ppx_let) test_let_syntax_ppx))))
+
+(executables
+ (libraries alcotest angstrom angstrom_test)
+ (modules test_angstrom)
+ (names test_angstrom))
+
+(executables
+ (libraries bigstringaf angstrom RFC7159)
+ (modules test_json)
+ (names test_json))
+
+(alias
+ (name runtest)
+ (package angstrom)
+ (deps
+  (:< test_angstrom.exe))
+ (action
+  (run %{<})))

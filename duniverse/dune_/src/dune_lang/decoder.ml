@@ -29,7 +29,32 @@ module Name = struct
   module Map = Map.Make (T)
 end
 
-module Fields = struct
+module Fields : sig
+  module Unparsed : sig
+    type t = private
+      { values : Ast.t list
+      ; entry : Ast.t
+      ; prev : t option (* Previous occurrence of this field *)
+      }
+  end
+
+  type t = private
+    { unparsed : Unparsed.t Name.Map.t
+    ; known : string list
+    }
+
+  val of_values : Ast.t list -> t
+
+  val add_known : t -> string -> t
+
+  val consume : t -> string -> t
+
+  val unparsed_ast : t -> Ast.t list
+
+  val junk_unparsed : t -> t
+
+  val leftover_fields : t -> string list -> t
+end = struct
   module Unparsed = struct
     type t =
       { values : Ast.t list
@@ -43,12 +68,37 @@ module Fields = struct
     ; known : string list
     }
 
-  let consume name state =
+  let leftover_fields t fields =
+    { unparsed = Name.Map.empty; known = t.known @ fields }
+
+  let junk_unparsed t = { t with unparsed = Name.Map.empty }
+
+  let of_values sexps =
+    let unparsed =
+      List.fold_left sexps ~init:Name.Map.empty ~f:(fun acc sexp ->
+          match sexp with
+          | List (_, name_sexp :: values) -> (
+            match name_sexp with
+            | Atom (_, A name) ->
+              Name.Map.set acc name
+                { Unparsed.values; entry = sexp; prev = Name.Map.find acc name }
+            | List (loc, _)
+            | Quoted_string (loc, _)
+            | Template { loc; _ } ->
+              User_error.raise ~loc [ Pp.text "Atom expected" ] )
+          | _ ->
+            User_error.raise ~loc:(Ast.loc sexp)
+              [ Pp.text "S-expression of the form (<name> <values>...) expected"
+              ])
+    in
+    { unparsed; known = [] }
+
+  let consume state name =
     { unparsed = Name.Map.remove state.unparsed name
     ; known = name :: state.known
     }
 
-  let add_known name state = { state with known = name :: state.known }
+  let add_known state name = { state with known = name :: state.known }
 
   let unparsed_ast { unparsed; _ } =
     let rec loop acc = function
@@ -120,9 +170,9 @@ let set : type a b k. a Univ_map.Key.t -> a -> (b, k) parser -> (b, k) parser =
  fun key v t ctx state ->
   match ctx with
   | Values (loc, cstr, uc) ->
-    t (Values (loc, cstr, Univ_map.add uc key v)) state
+    t (Values (loc, cstr, Univ_map.set uc key v)) state
   | Fields (loc, cstr, uc) ->
-    t (Fields (loc, cstr, Univ_map.add uc key v)) state
+    t (Fields (loc, cstr, Univ_map.set uc key v)) state
 
 let set_many : type a k. Univ_map.t -> (a, k) parser -> (a, k) parser =
  fun map t ctx state ->
@@ -154,6 +204,11 @@ let repeat : 'a t -> 'a list t =
   in
   fun t ctx state -> loop t [] ctx state
 
+let repeat1 p =
+  let+ x = p
+  and+ xs = repeat p in
+  x :: xs
+
 let result : type a k. k context -> a * k -> a =
  fun ctx (v, state) ->
   match ctx with
@@ -183,6 +238,12 @@ let result : type a k. k context -> a * k -> a =
 let parse t context sexp =
   let ctx = Values (Ast.loc sexp, None, context) in
   result ctx (t ctx [ sexp ])
+
+let set_input : type k. ast list -> (unit, k) parser =
+ fun sexps context _ ->
+  match context with
+  | Values _ -> ((), sexps)
+  | Fields _ -> ((), Fields.of_values sexps)
 
 let capture ctx state =
   let f t = result ctx (t ctx state) in
@@ -226,7 +287,7 @@ let junk_everything : type k. (unit, k) parser =
  fun ctx state ->
   match ctx with
   | Values _ -> ((), [])
-  | Fields _ -> ((), { state with unparsed = Name.Map.empty })
+  | Fields _ -> ((), Fields.junk_unparsed state)
 
 let keyword kwd =
   next (function
@@ -273,6 +334,13 @@ let filename =
           [ Pp.textf "'.' and '..' are not valid filenames" ]
       | fn -> fn)
 
+let relative_file =
+  plain_string (fun ~loc fn ->
+      if Filename.is_relative fn then
+        fn
+      else
+        User_error.raise ~loc [ Pp.textf "relative filename expected" ])
+
 let enter t =
   next_with_user_context (fun uc sexp ->
       match sexp with
@@ -281,7 +349,7 @@ let enter t =
         result ctx (t ctx l)
       | sexp -> User_error.raise ~loc:(Ast.loc sexp) [ Pp.text "List expected" ])
 
-let ( <|> ) =
+let either =
   (* Before you read this code, close your eyes and internalise the fact that
      this code is temporary. It is a temporary state as part of a larger work to
      turn [Decoder.t] into a pure applicative. Once this is done, this function
@@ -296,10 +364,10 @@ let ( <|> ) =
       (approximate_how_much_input_a_failing_branch_consumed exn2)
   in
   fun a b ctx state ->
-    try a ctx state
+    try (a >>| Either.left) ctx state
     with exn_a -> (
       let exn_a = Exn_with_backtrace.capture exn_a in
-      try b ctx state
+      try (b >>| Either.right) ctx state
       with exn_b ->
         let exn_b = Exn_with_backtrace.capture exn_b in
         Exn_with_backtrace.reraise
@@ -308,6 +376,12 @@ let ( <|> ) =
           | Eq
           | Lt ->
             exn_b ) )
+
+let ( <|> ) x y =
+  let+ res = either x y in
+  match res with
+  | Left x -> x
+  | Right x -> x
 
 let fix f =
   let rec p = lazy (f r)
@@ -539,10 +613,10 @@ let field name ?default ?on_dup t (Fields (loc, _, uc)) state =
   | Some { values; entry; _ } ->
     let ctx = Values (Ast.loc entry, Some name, uc) in
     let x = result ctx (t ctx values) in
-    (x, Fields.consume name state)
+    (x, Fields.consume state name)
   | None -> (
     match default with
-    | Some v -> (v, Fields.add_known name state)
+    | Some v -> (v, Fields.add_known state name)
     | None -> field_missing loc name )
 
 let field_o name ?on_dup t (Fields (_, _, uc)) state =
@@ -550,8 +624,8 @@ let field_o name ?on_dup t (Fields (_, _, uc)) state =
   | Some { values; entry; _ } ->
     let ctx = Values (Ast.loc entry, Some name, uc) in
     let x = result ctx (t ctx values) in
-    (Some x, Fields.consume name state)
-  | None -> (None, Fields.add_known name state)
+    (Some x, Fields.consume state name)
+  | None -> (None, Fields.add_known state name)
 
 let field_b_gen field_gen ?check ?on_dup name =
   field_gen name ?on_dup
@@ -574,30 +648,11 @@ let multi_field name t (Fields (_, _, uc)) (state : Fields.t) =
       loop (x :: acc) prev
   in
   let res = loop [] (Name.Map.find state.unparsed name) in
-  (res, Fields.consume name state)
+  (res, Fields.consume state name)
 
 let fields t (Values (loc, cstr, uc)) sexps =
-  let unparsed =
-    List.fold_left sexps ~init:Name.Map.empty ~f:(fun acc sexp ->
-        match sexp with
-        | List (_, name_sexp :: values) -> (
-          match name_sexp with
-          | Atom (_, A name) ->
-            Name.Map.set acc name
-              { Fields.Unparsed.values
-              ; entry = sexp
-              ; prev = Name.Map.find acc name
-              }
-          | List (loc, _)
-          | Quoted_string (loc, _)
-          | Template { loc; _ } ->
-            User_error.raise ~loc [ Pp.text "Atom expected" ] )
-        | _ ->
-          User_error.raise ~loc:(Ast.loc sexp)
-            [ Pp.text "S-expression of the form (<name> <values>...) expected" ])
-  in
   let ctx = Fields (loc, cstr, uc) in
-  let x = result ctx (t ctx { Fields.unparsed; known = [] }) in
+  let x = result ctx (t ctx (Fields.of_values sexps)) in
   (x, [])
 
 let leftover_fields_generic t more_fields (Fields (loc, cstr, uc)) state =
@@ -605,7 +660,7 @@ let leftover_fields_generic t more_fields (Fields (loc, cstr, uc)) state =
     let ctx = Values (loc, cstr, uc) in
     result ctx (repeat t ctx (Fields.unparsed_ast state))
   in
-  (x, { Fields.known = state.known @ more_fields; unparsed = Name.Map.empty })
+  (x, Fields.leftover_fields state more_fields)
 
 let leftover_fields ctx (state : Fields.t) =
   leftover_fields_generic raw (Name.Map.keys state.unparsed) ctx state

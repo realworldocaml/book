@@ -1,0 +1,3 @@
+# DUNE_GEN
+
+freestanding_linkopts = "-l:libmirage_crypto_ec_freestanding_stubs.a"

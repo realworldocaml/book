@@ -84,7 +84,7 @@ let rec sexp_of_expr expr =
       "ppx_sexp_value: cannot handle [@omit_nil] in this context"
 
 and omittable_sexp_of_expr expr =
-  let loc = expr.pexp_loc in
+  let loc = { expr.pexp_loc with loc_ghost = true } in
   wrap_sexp_if_present ~f:(fun new_expr ->
     { new_expr with pexp_attributes = expr.pexp_attributes })
     (match expr.pexp_desc with
@@ -179,10 +179,23 @@ and sexp_of_omittable_sexp_list loc el ~tl =
 and sexp_of_record ~loc fields =
   sexp_of_omittable_sexp_list loc ~tl:(elist ~loc [])
     (List.map fields ~f:(fun (id, e) ->
-       let loc = { id.loc with loc_end = e.pexp_loc.loc_end } in
+       let e =
+         match e.pexp_desc with
+         | Pexp_constraint (e', c)
+           when Location.compare_pos id.loc.loc_start e.pexp_loc.loc_start = 0
+             && Location.compare e.pexp_loc e'.pexp_loc = 0 ->
+           (* { foo : int }  *)
+           { e with
+             pexp_desc = Pexp_constraint ({ e' with pexp_loc = id.loc}, c) }
+         | _ -> e
+       in
+       let loc = { id.loc with loc_end = e.pexp_loc.loc_end; loc_ghost = true } in
        let name = String.concat ~sep:"." (Longident.flatten_exn id.txt) in
        let k hole =
-         sexp_list ~loc (elist ~loc [ sexp_atom ~loc (estring ~loc:id.loc name); hole ])
+         sexp_list ~loc
+           (elist ~loc
+              [ sexp_atom ~loc (estring ~loc:{ id.loc with loc_ghost = true } name)
+              ; hole ])
        in
        wrap_sexp_if_present (omittable_sexp_of_expr e) ~f:k))
 ;;

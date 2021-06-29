@@ -1,6 +1,7 @@
 open! Core
 open! Async
-include Expect_test_helpers
+include Expect_test_helpers_core
+include Expect_test_helpers_async
 
 let pipe commands =
   List.map commands ~f:(fun (prog, args) ->
@@ -11,7 +12,7 @@ let pipe commands =
 ;;
 
 let links =
-  [ "../../bin/patdiff.exe", `In_path_as, "patdiff"
+  [ "../../bin/main.exe", `In_path_as, "patdiff"
   ; "../../../ansicodes/bin/main.exe", `In_path_as, "ansicodes"
   ]
 ;;

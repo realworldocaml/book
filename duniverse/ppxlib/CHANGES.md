@@ -1,3 +1,85 @@
+0.22.0 (04/02/2021)
+-------------------
+
+- Bump ppxlib's AST to 4.12 (#193, @NathanReb)
+
+0.21.0 (22/01/2021)
+-------------------
+
+- Fix ppxlib.traverse declaration and make it a deriver and not a rewriter
+  (#213, @NathanReb)
+- Driver (important for bucklescript): handling binary AST's, accept any
+  supported version as input; preserve that version (#205, @pitag-ha)
+
+- `-as-ppx`: take into account the `-loc-filename` argument (#197, @pitag-ha)
+
+- Add input name to expansion context (#202, @pitag-ha)
+
+- Add Driver.V2: give access to expansion context in whole file transformation
+  callbacks of `register_transformation` (#202, @pitag-ha)
+
+- Driver: take `-cookie` argument into account, also when the input is a
+  binary AST (@pitag-ha, #209)
+
+- `run_as_ppx_rewriter`: take into account the arguments
+  `-loc-filename`, `apply` and `dont-apply` (#205, @pitag-ha)
+
+- Location.Error: add functions `raise` and `update_loc`
+  (#205, @pitag-ha)
+
+0.20.0 (16/11/2020)
+-------------------
+
+- Expose `Ppxlib.Driver.map_signature` (#194, @kit-ty-kate)
+
+0.19.0 (23/10/2020)
+-------------------
+
+- Make ppxlib compatible with 4.12 compiler (#191, @kit-ty-kate)
+
+0.18.0 (06/10/2020)
+-------------------
+
+- Bump ppxlib's AST to 4.11 (#180, @NathanReb)
+
+0.17.0 (17/09/2020)
+-------------------
+
+- Add accessors for `code_path` and `tool_name` to `Expansion_context.Base`
+  (#173, @jberdine)
+- Add `cases` methods to traversal classes in `Ast_traverse` (#183, @pitag-ha)
+
+0.16.0 (18/08/2020)
+-------------------
+
+- `Driver.register_transformation`: add optional parameter `~instrument`
+  (#161, @pitag-ha)
+- Add missing `Location.init` (#165, @pitag-ha)
+- Upgrade to ocaml-migrate-parsetree.2.0.0 (#164, @ceastlund)
+
+0.15.0 (04/08/2020)
+-------------------
+
+- Remove `base` and `stdio` dependencies (#151, @ceastlund)
+
+- Update README and opam description (#155, @jeremiedimino)
+
+- Fix `Driver.partition_transformation` (#156, @NathanReb)
+
+- Implement name mangling for `ppxlib_traverse` (#159, @ceastlund)
+
+0.14.0 (08/07/2020)
+-------------------
+
+- Bump ppxlib's AST to 4.10 (#130, @NathanReb)
+
+- Remove omp_config from `Expansion_context` and replace it with `tool_name`
+  (#149, @NathanReb)
+
+- Change undocumented `Ppxlib.Driver.map_structure` to return a ppxlib's
+  `structure` instead of a `Migrate_parsetree.Driver.some_structure`.
+  (#153, @NathanReb)
+
 0.13.0 (04/15/2020)
 -------------------
 
@@ -81,14 +163,14 @@
 
 - Do not relocate files unless `-loc-filename` is passed (#55, @hhugo)
 
-- Perserve the filename in the output (#56, @hhugo)
+- Preserve the filename in the output (#56, @hhugo)
 
 0.3.1
 -----
 
 - Add `Attribute.declare_with_name_loc` (#33, @diml)
 
-- Let the tool name pass throught when used as a -ppx (#41, @diml)
+- Let the tool name pass thought when used as a -ppx (#41, @diml)
 
 - Update the AST to 4.06 (#8, @xclerc)
 

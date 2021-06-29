@@ -39,7 +39,7 @@ module A = struct
          This is strongly discouraged as backtraces are fragile.
          Please change this test to not include a backtrace. *)
 
-      Raised by primitive operation at file "bad_test.ml", line 13, characters 19-31
+      Raised by primitive operation at Ppx_expect_test__Bad_test.A.get_a_trace.loop in file "bad_test.ml", line 13, characters 19-31
     |}]
   ;;
 end

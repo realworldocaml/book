@@ -13,11 +13,5 @@ make
 Install:
 
 ```
-make PREFIX=/some/path install
-```
-
-or
-
-```
-make BINDIR=/some/path/bin install
+make DESTDIR=/some/path install
 ```

@@ -1,0 +1,2 @@
+File "test-case.t", line 5: Error in the cram code block
+Blocks must start with a command or similar, not with an output line. Please, make sure that there's no spare empty line, particularly between the output and its input.

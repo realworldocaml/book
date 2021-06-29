@@ -15,6 +15,7 @@ let cycle_start () = Time_ns.to_time_float_round_nearest (cycle_start_ns ())
 let cycle_times_ns () = map_cycle_times (t ()) ~f:Fn.id
 let cycle_times () = map_cycle_times (t ()) ~f:Time_ns.Span.to_span_float_round_nearest
 let total_cycle_time () = total_cycle_time (t ())
+let last_cycle_time () = last_cycle_time (t ())
 let long_cycles ~at_least = long_cycles (t ()) ~at_least
 let event_precision_ns () = event_precision (t ())
 let event_precision () = Time_ns.Span.to_span_float_round_nearest (event_precision_ns ())
@@ -27,7 +28,10 @@ let max_num_jobs_per_priority_per_cycle () = max_num_jobs_per_priority_per_cycle
 let set_record_backtraces bool = set_record_backtraces (t ()) bool
 let force_current_cycle_to_end () = force_current_cycle_to_end (t ())
 let yield () = yield (t ())
-let yield_until_no_jobs_remain () = yield_until_no_jobs_remain (t ())
+
+let yield_until_no_jobs_remain ?may_return_immediately () =
+  yield_until_no_jobs_remain ?may_return_immediately (t ())
+;;
 
 let yield_every ~n =
   let yield_every = Staged.unstage (yield_every ~n) in
@@ -42,6 +46,9 @@ module Expert = struct
   let run_cycles_until_no_jobs_remain = run_cycles_until_no_jobs_remain
   let set_on_start_of_cycle f = set_on_start_of_cycle (t ()) f
   let set_on_end_of_cycle f = set_on_end_of_cycle (t ()) f
+  let last_cycle_num_jobs () = last_cycle_num_jobs (t ())
+  let run_every_cycle_start f = run_every_cycle_start (t ()) ~f
+  let run_every_cycle_end f = run_every_cycle_end (t ()) ~f
 end
 
 module Private = Scheduler

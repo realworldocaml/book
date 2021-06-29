@@ -1,0 +1,18 @@
+[@@@alert implementation "This structure contains an alert."]
+let () =
+  Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__
+let () =
+  Ppx_bench_lib.Benchmark_accumulator.Current_libname.set
+    "ppx_jane_test_alert_in_ml"
+let () =
+  Expect_test_collector.Current_file.set
+    ~absolute_filename:"ppx/ppx_jane/test/alert_in_ml/ppx_jane_test_alert_in_ml.ml"
+let () =
+  Ppx_inline_test_lib.Runtime.set_lib_and_partition
+    "ppx_jane_test_alert_in_ml" "ppx_jane_test_alert_in_ml"
+let x = 0
+let () = Ppx_inline_test_lib.Runtime.unset_lib "ppx_jane_test_alert_in_ml"
+let () = Expect_test_collector.Current_file.unset ()
+let () = Ppx_bench_lib.Benchmark_accumulator.Current_libname.unset ()
+let () =
+  Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__

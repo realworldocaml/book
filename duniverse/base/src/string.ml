@@ -8,14 +8,39 @@ let raise_s = Error.raise_s
 let stage = Staged.stage
 
 module T = struct
-  type t = string [@@deriving_inline hash, sexp]
-  let (hash_fold_t :
-         Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
+  type t = string [@@deriving_inline hash, sexp, sexp_grammar]
+
+  let (hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state) =
     hash_fold_string
+
   and (hash : t -> Ppx_hash_lib.Std.Hash.hash_value) =
-    let func = hash_string in fun x -> func x
+    let func = hash_string in
+    fun x -> func x
+  ;;
+
   let t_of_sexp = (string_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
   let sexp_of_t = (sexp_of_string : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+      { implicit_vars = [ "string" ]
+      ; ggid = "\146e\023\249\235eE\139c\132W\195\137\129\235\025"
+      ; types = [ "t", Implicit_var 0 ]
+      }
+    in
+    let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+      { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+      ; apply_implicit = [ string_sexp_grammar ]
+      ; generic_group = _the_generic_group
+      ; origin = "string.ml.T"
+      }
+    in
+    let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+      Ref ("t", _the_group)
+    in
+    t_sexp_grammar
+  ;;
+
   [@@@end]
 
   let compare = compare
@@ -26,103 +51,7 @@ include Comparator.Make (T)
 
 type elt = char
 
-let is_substring_at_gen =
-  let rec loop ~str ~str_pos ~sub ~sub_pos ~sub_len ~char_equal =
-    if sub_pos = sub_len
-    then true
-    else if char_equal (unsafe_get str str_pos) (unsafe_get sub sub_pos)
-    then
-      loop ~str ~str_pos:(str_pos + 1) ~sub ~sub_pos:(sub_pos + 1) ~sub_len ~char_equal
-    else false
-  in
-  fun str ~pos:str_pos ~substring:sub ~char_equal ->
-    let str_len = length str in
-    let sub_len = length sub in
-    if str_pos < 0 || str_pos > str_len
-    then
-      invalid_argf
-        "String.is_substring_at: invalid index %d for string of length %d"
-        str_pos
-        str_len
-        ();
-    str_pos + sub_len <= str_len
-    && loop ~str ~str_pos ~sub ~sub_pos:0 ~sub_len ~char_equal
-;;
-
-let is_suffix_gen string ~suffix ~char_equal =
-  let string_len = length string in
-  let suffix_len = length suffix in
-  string_len >= suffix_len
-  && is_substring_at_gen
-       string
-       ~pos:(string_len - suffix_len)
-       ~substring:suffix
-       ~char_equal
-;;
-
-let is_prefix_gen string ~prefix ~char_equal =
-  let string_len = length string in
-  let prefix_len = length prefix in
-  string_len >= prefix_len
-  && is_substring_at_gen string ~pos:0 ~substring:prefix ~char_equal
-;;
-
-module Caseless = struct
-  module T = struct
-    type t = string [@@deriving_inline sexp]
-    let t_of_sexp = (string_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
-    let sexp_of_t = (sexp_of_string : t -> Ppx_sexp_conv_lib.Sexp.t)
-    [@@@end]
-
-    let char_compare_caseless c1 c2 =
-      Char.compare (Char.lowercase c1) (Char.lowercase c2)
-    ;;
-
-    let char_equal_caseless c1 c2 = Char.equal (Char.lowercase c1) (Char.lowercase c2)
-
-    let rec compare_loop ~pos ~string1 ~len1 ~string2 ~len2 =
-      if pos = len1
-      then if pos = len2 then 0 else -1
-      else if pos = len2
-      then 1
-      else (
-        let c =
-          char_compare_caseless (unsafe_get string1 pos) (unsafe_get string2 pos)
-        in
-        match c with
-        | 0 -> compare_loop ~pos:(pos + 1) ~string1 ~len1 ~string2 ~len2
-        | _ -> c)
-    ;;
-
-    let compare string1 string2 =
-      if phys_equal string1 string2
-      then 0
-      else
-        compare_loop
-          ~pos:0
-          ~string1
-          ~len1:(String.length string1)
-          ~string2
-          ~len2:(String.length string2)
-    ;;
-
-    let hash_fold_t state t =
-      let len = length t in
-      let state = ref (hash_fold_int state len) in
-      for pos = 0 to len - 1 do
-        state := hash_fold_char !state (Char.lowercase (unsafe_get t pos))
-      done;
-      !state
-    ;;
-
-    let hash t = Hash.run hash_fold_t t
-    let is_suffix s ~suffix = is_suffix_gen s ~suffix ~char_equal:char_equal_caseless
-    let is_prefix s ~prefix = is_prefix_gen s ~prefix ~char_equal:char_equal_caseless
-  end
-
-  include T
-  include Comparable.Make (T)
-end
+let invariant (_ : t) = ()
 
 (* This is copied/adapted from 'blit.ml'.
    [sub], [subo] could be implemented using [Blit.Make(Bytes)] plus unsafe casts to/from
@@ -245,41 +174,55 @@ let rindex_from t pos char =
   | Not_found_s _ | Caml.Not_found -> None
 ;;
 
-module Search_pattern = struct
-  type t = string * int array [@@deriving_inline sexp_of]
-  let sexp_of_t =
-    (function
-      | (v0, v1) ->
-        let v0 = sexp_of_string v0
-        and v1 = sexp_of_array sexp_of_int v1 in
-        Ppx_sexp_conv_lib.Sexp.List [v0; v1] : t -> Ppx_sexp_conv_lib.Sexp.t)
-  [@@@end]
+module Search_pattern0 = struct
+  type t =
+    { pattern : string
+    ; case_sensitive : bool
+    ; kmp_array : int array
+    }
+
+  let sexp_of_t { pattern; case_sensitive; kmp_array = _ } : Sexp.t =
+    List
+      [ List [ Atom "pattern"; sexp_of_string pattern ]
+      ; List [ Atom "case_sensitive"; sexp_of_bool case_sensitive ]
+      ]
+  ;;
+
+  let pattern t = t.pattern
+  let case_sensitive t = t.case_sensitive
 
   (* Find max number of matched characters at [next_text_char], given the current
      [matched_chars]. Try to extend the current match, if chars don't match, try to match
      fewer chars. If chars match then extend the match. *)
-  let kmp_internal_loop ~matched_chars ~next_text_char ~pattern ~kmp_arr =
+  let kmp_internal_loop ~matched_chars ~next_text_char ~pattern ~kmp_array ~char_equal =
     let matched_chars = ref matched_chars in
     while
       !matched_chars > 0
-      && Char.( <> ) next_text_char (unsafe_get pattern !matched_chars)
+      && not (char_equal next_text_char (unsafe_get pattern !matched_chars))
     do
-      matched_chars := Array.unsafe_get kmp_arr (!matched_chars - 1)
+      matched_chars := Array.unsafe_get kmp_array (!matched_chars - 1)
     done;
-    if Char.equal next_text_char (unsafe_get pattern !matched_chars)
+    if char_equal next_text_char (unsafe_get pattern !matched_chars)
     then matched_chars := !matched_chars + 1;
     !matched_chars
+  ;;
+
+  let get_char_equal ~case_sensitive =
+    match case_sensitive with
+    | true -> Char.equal
+    | false -> Char.Caseless.equal
   ;;
 
   (* Classic KMP pre-processing of the pattern: build the int array, which, for each i,
      contains the length of the longest non-trivial prefix of s which is equal to a suffix
      ending at s.[i] *)
-  let create pattern =
+  let create pattern ~case_sensitive =
     let n = length pattern in
-    let kmp_arr = Array.create ~len:n (-1) in
+    let kmp_array = Array.create ~len:n (-1) in
     if n > 0
     then (
-      Array.unsafe_set kmp_arr 0 0;
+      let char_equal = get_char_equal ~case_sensitive in
+      Array.unsafe_set kmp_array 0 0;
       let matched_chars = ref 0 in
       for i = 1 to n - 1 do
         matched_chars
@@ -287,18 +230,20 @@ module Search_pattern = struct
              ~matched_chars:!matched_chars
              ~next_text_char:(unsafe_get pattern i)
              ~pattern
-             ~kmp_arr;
-        Array.unsafe_set kmp_arr i !matched_chars
+             ~kmp_array
+             ~char_equal;
+        Array.unsafe_set kmp_array i !matched_chars
       done);
-    pattern, kmp_arr
+    { pattern; case_sensitive; kmp_array }
   ;;
 
   (* Classic KMP: use the pre-processed pattern to optimize look-behinds on non-matches.
      We return int to avoid allocation in [index_exn]. -1 means no match. *)
-  let index_internal ?(pos = 0) (pattern, kmp_arr) ~in_:text =
+  let index_internal ?(pos = 0) { pattern; case_sensitive; kmp_array } ~in_:text =
     if pos < 0 || pos > length text - length pattern
     then -1
     else (
+      let char_equal = get_char_equal ~case_sensitive in
       let j = ref pos in
       let matched_chars = ref 0 in
       let k = length pattern in
@@ -310,7 +255,8 @@ module Search_pattern = struct
              ~matched_chars:!matched_chars
              ~next_text_char
              ~pattern
-             ~kmp_arr;
+             ~kmp_array
+             ~char_equal;
         j := !j + 1
       done;
       if !matched_chars = k then !j - k else -1)
@@ -329,13 +275,14 @@ module Search_pattern = struct
     then p
     else
       raise_s
-        (Sexp.message "Substring not found" [ "substring", sexp_of_string (fst t) ])
+        (Sexp.message "Substring not found" [ "substring", sexp_of_string t.pattern ])
   ;;
 
-  let index_all (pattern, kmp_arr) ~may_overlap ~in_:text =
+  let index_all { pattern; case_sensitive; kmp_array } ~may_overlap ~in_:text =
     if length pattern = 0
     then List.init (1 + length text) ~f:Fn.id
     else (
+      let char_equal = get_char_equal ~case_sensitive in
       let matched_chars = ref 0 in
       let k = length pattern in
       let n = length text in
@@ -346,7 +293,7 @@ module Search_pattern = struct
           found := (j - k) :: !found;
           (* we just found a match in the previous iteration *)
           match may_overlap with
-          | true -> matched_chars := Array.unsafe_get kmp_arr (k - 1)
+          | true -> matched_chars := Array.unsafe_get kmp_array (k - 1)
           | false -> matched_chars := 0);
         if j < n
         then (
@@ -356,7 +303,8 @@ module Search_pattern = struct
                ~matched_chars:!matched_chars
                ~next_text_char
                ~pattern
-               ~kmp_arr)
+               ~kmp_array
+               ~char_equal)
       done;
       List.rev !found)
   ;;
@@ -366,7 +314,7 @@ module Search_pattern = struct
     | None -> s
     | Some i ->
       let len_s = length s in
-      let len_t = length (fst t) in
+      let len_t = length t.pattern in
       let len_with = length with_ in
       let dst = Bytes.create (len_s + len_with - len_t) in
       Bytes.blit_string ~src:s ~src_pos:0 ~dst ~dst_pos:0 ~len:i;
@@ -387,7 +335,7 @@ module Search_pattern = struct
     | [] -> s
     | _ :: _ ->
       let len_s = length s in
-      let len_t = length (fst t) in
+      let len_t = length t.pattern in
       let len_with = length with_ in
       let num_matches = List.length matches in
       let dst = Bytes.create (len_s + ((len_with - len_t) * num_matches)) in
@@ -417,29 +365,211 @@ module Search_pattern = struct
         ~len:(len_s - !next_src_pos);
       Bytes.unsafe_to_string ~no_mutation_while_string_reachable:dst
   ;;
+
+  module Private = struct
+    type public = t
+
+    type nonrec t = t =
+      { pattern : string
+      ; case_sensitive : bool
+      ; kmp_array : int array
+      }
+    [@@deriving_inline equal, sexp_of]
+
+    let equal =
+      (fun a__001_ b__002_ ->
+         if Ppx_compare_lib.phys_equal a__001_ b__002_
+         then true
+         else
+           Ppx_compare_lib.( && )
+             (equal_string a__001_.pattern b__002_.pattern)
+             (Ppx_compare_lib.( && )
+                (equal_bool a__001_.case_sensitive b__002_.case_sensitive)
+                (equal_array equal_int a__001_.kmp_array b__002_.kmp_array))
+           : t -> t -> bool)
+    ;;
+
+    let sexp_of_t =
+      (function
+        | { pattern = v_pattern
+          ; case_sensitive = v_case_sensitive
+          ; kmp_array = v_kmp_array
+          } ->
+          let bnds = [] in
+          let bnds =
+            let arg = sexp_of_array sexp_of_int v_kmp_array in
+            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "kmp_array"; arg ]
+            :: bnds
+          in
+          let bnds =
+            let arg = sexp_of_bool v_case_sensitive in
+            Ppx_sexp_conv_lib.Sexp.List
+              [ Ppx_sexp_conv_lib.Sexp.Atom "case_sensitive"; arg ]
+            :: bnds
+          in
+          let bnds =
+            let arg = sexp_of_string v_pattern in
+            Ppx_sexp_conv_lib.Sexp.List [ Ppx_sexp_conv_lib.Sexp.Atom "pattern"; arg ]
+            :: bnds
+          in
+          Ppx_sexp_conv_lib.Sexp.List bnds
+          : t -> Ppx_sexp_conv_lib.Sexp.t)
+    ;;
+
+    [@@@end]
+
+    let representation = Fn.id
+  end
 end
 
-let substr_index ?pos t ~pattern =
-  Search_pattern.index ?pos (Search_pattern.create pattern) ~in_:t
+module Search_pattern_helper = struct
+  module Search_pattern = Search_pattern0
+end
+
+open Search_pattern_helper
+
+let substr_index_gen ~case_sensitive ?pos t ~pattern =
+  Search_pattern.index ?pos (Search_pattern.create ~case_sensitive pattern) ~in_:t
 ;;
 
-let substr_index_exn ?pos t ~pattern =
-  Search_pattern.index_exn ?pos (Search_pattern.create pattern) ~in_:t
+let substr_index_exn_gen ~case_sensitive ?pos t ~pattern =
+  Search_pattern.index_exn ?pos (Search_pattern.create ~case_sensitive pattern) ~in_:t
 ;;
 
-let substr_index_all t ~may_overlap ~pattern =
-  Search_pattern.index_all (Search_pattern.create pattern) ~may_overlap ~in_:t
+let substr_index_all_gen ~case_sensitive t ~may_overlap ~pattern =
+  Search_pattern.index_all
+    (Search_pattern.create ~case_sensitive pattern)
+    ~may_overlap
+    ~in_:t
 ;;
 
-let substr_replace_first ?pos t ~pattern =
-  Search_pattern.replace_first ?pos (Search_pattern.create pattern) ~in_:t
+let substr_replace_first_gen ~case_sensitive ?pos t ~pattern =
+  Search_pattern.replace_first
+    ?pos
+    (Search_pattern.create ~case_sensitive pattern)
+    ~in_:t
 ;;
 
-let substr_replace_all t ~pattern =
-  Search_pattern.replace_all (Search_pattern.create pattern) ~in_:t
+let substr_replace_all_gen ~case_sensitive t ~pattern =
+  Search_pattern.replace_all (Search_pattern.create ~case_sensitive pattern) ~in_:t
 ;;
 
-let is_substring t ~substring = Option.is_some (substr_index t ~pattern:substring)
+let is_substring_gen ~case_sensitive t ~substring =
+  Option.is_some (substr_index_gen t ~pattern:substring ~case_sensitive)
+;;
+
+let substr_index = substr_index_gen ~case_sensitive:true
+let substr_index_exn = substr_index_exn_gen ~case_sensitive:true
+let substr_index_all = substr_index_all_gen ~case_sensitive:true
+let substr_replace_first = substr_replace_first_gen ~case_sensitive:true
+let substr_replace_all = substr_replace_all_gen ~case_sensitive:true
+let is_substring = is_substring_gen ~case_sensitive:true
+
+let is_substring_at_gen =
+  let rec loop ~str ~str_pos ~sub ~sub_pos ~sub_len ~char_equal =
+    if sub_pos = sub_len
+    then true
+    else if char_equal (unsafe_get str str_pos) (unsafe_get sub sub_pos)
+    then
+      loop ~str ~str_pos:(str_pos + 1) ~sub ~sub_pos:(sub_pos + 1) ~sub_len ~char_equal
+    else false
+  in
+  fun str ~pos:str_pos ~substring:sub ~char_equal ->
+    let str_len = length str in
+    let sub_len = length sub in
+    if str_pos < 0 || str_pos > str_len
+    then
+      invalid_argf
+        "String.is_substring_at: invalid index %d for string of length %d"
+        str_pos
+        str_len
+        ();
+    str_pos + sub_len <= str_len
+    && loop ~str ~str_pos ~sub ~sub_pos:0 ~sub_len ~char_equal
+;;
+
+let is_suffix_gen string ~suffix ~char_equal =
+  let string_len = length string in
+  let suffix_len = length suffix in
+  string_len >= suffix_len
+  && is_substring_at_gen
+       string
+       ~pos:(string_len - suffix_len)
+       ~substring:suffix
+       ~char_equal
+;;
+
+let is_prefix_gen string ~prefix ~char_equal =
+  let string_len = length string in
+  let prefix_len = length prefix in
+  string_len >= prefix_len
+  && is_substring_at_gen string ~pos:0 ~substring:prefix ~char_equal
+;;
+
+module Caseless = struct
+  module T = struct
+    type t = string [@@deriving_inline sexp]
+
+    let t_of_sexp = (string_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t)
+    let sexp_of_t = (sexp_of_string : t -> Ppx_sexp_conv_lib.Sexp.t)
+
+    [@@@end]
+
+    let char_compare_caseless c1 c2 =
+      Char.compare (Char.lowercase c1) (Char.lowercase c2)
+    ;;
+
+    let rec compare_loop ~pos ~string1 ~len1 ~string2 ~len2 =
+      if pos = len1
+      then if pos = len2 then 0 else -1
+      else if pos = len2
+      then 1
+      else (
+        let c =
+          char_compare_caseless (unsafe_get string1 pos) (unsafe_get string2 pos)
+        in
+        match c with
+        | 0 -> compare_loop ~pos:(pos + 1) ~string1 ~len1 ~string2 ~len2
+        | _ -> c)
+    ;;
+
+    let compare string1 string2 =
+      if phys_equal string1 string2
+      then 0
+      else
+        compare_loop
+          ~pos:0
+          ~string1
+          ~len1:(String.length string1)
+          ~string2
+          ~len2:(String.length string2)
+    ;;
+
+    let hash_fold_t state t =
+      let len = length t in
+      let state = ref (hash_fold_int state len) in
+      for pos = 0 to len - 1 do
+        state := hash_fold_char !state (Char.lowercase (unsafe_get t pos))
+      done;
+      !state
+    ;;
+
+    let hash t = Hash.run hash_fold_t t
+    let is_suffix s ~suffix = is_suffix_gen s ~suffix ~char_equal:Char.Caseless.equal
+    let is_prefix s ~prefix = is_prefix_gen s ~prefix ~char_equal:Char.Caseless.equal
+    let substr_index = substr_index_gen ~case_sensitive:false
+    let substr_index_exn = substr_index_exn_gen ~case_sensitive:false
+    let substr_index_all = substr_index_all_gen ~case_sensitive:false
+    let substr_replace_first = substr_replace_first_gen ~case_sensitive:false
+    let substr_replace_all = substr_replace_all_gen ~case_sensitive:false
+    let is_substring = is_substring_gen ~case_sensitive:false
+    let is_substring_at = is_substring_at_gen ~char_equal:Char.Caseless.equal
+  end
+
+  include T
+  include Comparable.Make (T)
+end
+
 let of_string = Fn.id
 let to_string = Fn.id
 
@@ -818,22 +948,28 @@ let chop_prefix s ~prefix =
   if is_prefix s ~prefix then Some (drop_prefix s (length prefix)) else None
 ;;
 
+let chop_prefix_if_exists s ~prefix =
+  if is_prefix s ~prefix then drop_prefix s (length prefix) else s
+;;
+
 let chop_prefix_exn s ~prefix =
   match chop_prefix s ~prefix with
   | Some str -> str
-  | None ->
-    raise (Invalid_argument (Printf.sprintf "String.chop_prefix_exn %S %S" s prefix))
+  | None -> invalid_argf "String.chop_prefix_exn %S %S" s prefix ()
 ;;
 
 let chop_suffix s ~suffix =
   if is_suffix s ~suffix then Some (drop_suffix s (length suffix)) else None
 ;;
 
+let chop_suffix_if_exists s ~suffix =
+  if is_suffix s ~suffix then drop_suffix s (length suffix) else s
+;;
+
 let chop_suffix_exn s ~suffix =
   match chop_suffix s ~suffix with
   | Some str -> str
-  | None ->
-    raise (Invalid_argument (Printf.sprintf "String.chop_suffix_exn %S %S" s suffix))
+  | None -> invalid_argf "String.chop_suffix_exn %S %S" s suffix ()
 ;;
 
 (* There used to be a custom implementation that was faster for very short strings
@@ -1336,6 +1472,14 @@ let clamp t ~min ~max =
          [ "min", T.sexp_of_t min; "max", T.sexp_of_t max ])
   else Ok (clamp_unchecked t ~min ~max)
 ;;
+
+(* Override [Search_pattern] with default case-sensitivity argument at the end of the
+   file, so that call sites above are forced to supply case-sensitivity explicitly. *)
+module Search_pattern = struct
+  include Search_pattern0
+
+  let create ?(case_sensitive = true) pattern = create pattern ~case_sensitive
+end
 
 (* Include type-specific [Replace_polymorphic_compare] at the end, after
    including functor application that could shadow its definitions. This is

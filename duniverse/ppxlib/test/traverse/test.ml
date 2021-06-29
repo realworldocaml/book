@@ -1,5 +1,3 @@
-#load "ppxlib_traverse.cmo";;
-
 type t =
   { x : int
   ; y : u
@@ -47,5 +45,32 @@ class virtual ['res] lift :
     method virtual record : (string * 'res) list -> 'res
     method t : t -> 'res
     method u : u -> 'res
+  end
+|}]
+
+type t =
+  { a : int
+  ; b : Int.t
+  ; c : (int, bool) Stdlib.Result.t
+  ; d : int Map.Make(Int).t
+  }
+[@@deriving traverse_iter]
+[%%expect{|
+type t = {
+  a : int;
+  b : int;
+  c : (int, bool) result;
+  d : int Map.Make(Int).t;
+}
+class virtual iter :
+  object
+    method virtual bool : bool -> unit
+    method virtual int : int -> unit
+    method virtual int__t : int -> unit
+    method virtual map__make_'int'__t :
+      ('a -> unit) -> 'a Map.Make(Int).t -> unit
+    method virtual stdlib__result__t :
+      ('a -> unit) -> ('b -> unit) -> ('a, 'b) result -> unit
+    method t : t -> unit
   end
 |}]

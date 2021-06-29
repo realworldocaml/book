@@ -59,6 +59,7 @@ let ptuple ~loc list =
 (* creating (probably-)unique symbols for generated code *)
 
 let gensym prefix loc =
+  let loc = { loc with loc_ghost = true } in
   let sym = gen_symbol ~prefix:("_" ^ prefix) () in
   pvar ~loc sym, evar ~loc sym
 ;;

@@ -1,5 +1,6 @@
 sudo: required
 language: generic
+dist: focal
 
 scripts:
   - &bucklescript
@@ -20,7 +21,7 @@ scripts:
           WD=`pwd`
           if [ ! -f node_modules/.bin/esy ]
           then
-            npm install --no-save esy
+            npm install --no-save esy@0.6.4
             export PATH="$WD/node_modules/.bin:$PATH"
           else
             mkdir -p _wrapped_esy
@@ -62,7 +63,7 @@ scripts:
           "linux") OPAM_OS=linux;;
           "osx") OPAM_OS=macos;;
         esac
-      - OPAM_VERSION=2.0.6
+      - OPAM_VERSION=2.0.7
       - OPAM_PKG=opam-${OPAM_VERSION}-x86_64-${OPAM_OS}
       - |
         if [ ! -f _cache/opam ]
@@ -83,10 +84,30 @@ scripts:
           opam switch create . $COMPILER $REPOSITORIES --no-install
         fi
       - eval `opam config env`
-      - ocaml -version
+      - ocamlc -version
       - opam --version
 
-      - opam install -y --with-test --deps-only .
+      - |
+        OCAMLC=`ocamlc -version`
+        case ${OCAMLC:0:6} in
+          "4.04.2") OCAMLFORMAT_BINARY=YES;;
+          "4.05.0") OCAMLFORMAT_BINARY=YES;;
+          "4.12.0") OCAMLFORMAT_BINARY=YES;;
+        esac
+      - |
+        if [ "$OCAMLFORMAT_BINARY" == YES ]
+        then
+          opam install -y --deps-only .
+          opam install -y --unset-root ocamlfind ounit2
+          wget https://github.com/aantron/ocamlformat-binary/releases/download/0.15.0/ocamlformat
+          sudo mv ocamlformat /usr/local/bin/ocamlformat
+          sudo chmod a+x /usr/local/bin/ocamlformat
+        else
+          opam install -y --deps-only . --with-test
+        fi
+      - which ocamlformat
+      - ocamlformat --version
+
       - opam list
 
     script:
@@ -96,7 +117,15 @@ scripts:
           cp -r _cache/_build .
         fi
       - make build
-      - (unset TRAVIS && unset TRAVIS_JOB_ID && make test)
+      - |
+        case `ocamlc -version` in
+          "4.04.2") TEST_ALIAS=@compatible;;
+          "4.05.0") TEST_ALIAS=@compatible;;
+          "4.06.1") TEST_ALIAS=@compatible;;
+          "4.07.1") TEST_ALIAS=@compatible;;
+          *) TEST_ALIAS=@runtest;;
+        esac
+      - (unset TRAVIS && unset TRAVIS_JOB_ID && make test TEST=$TEST_ALIAS)
       - |
         if [ ! -d _cache/_build ]
         then
@@ -133,10 +162,19 @@ matrix:
       env: BUCKLESCRIPT=YES SAVE_BINARIES=YES
     - <<: *opam
       os: osx
-      env: COMPILER=4.10.0
+      env: COMPILER=4.11.1
+    - <<: *opam
+      os: freebsd
+      env: COMPILER=4.11.1
     - <<: *opam
       os: linux
-      env: COMPILER=4.10.0
+      env: COMPILER=ocaml-variants.4.12.0+trunk REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.11.1
+    - <<: *opam
+      os: linux
+      env: COMPILER=4.10.1
     - <<: *opam
       os: linux
       env: COMPILER=4.09.0
@@ -155,21 +193,15 @@ matrix:
     - <<: *opam
       os: linux
       env: COMPILER=4.04.2
-    - <<: *opam
-      os: linux
-      env: COMPILER=4.03.0
-    - <<: *opam
-      os: linux
-      env: COMPILER=4.02.3
 
   allow_failures:
+    - env: COMPILER=ocaml-variants.4.12.0+trunk REPOSITORIES=--repositories=default,beta=git+https://github.com/ocaml/ocaml-beta-repository.git
+    - env: COMPILER=4.10.1
     - env: COMPILER=4.09.0
     - env: COMPILER=4.08.1 SELF_COVERAGE=YES
     - env: COMPILER=4.07.1 USAGE_TEST=YES
     - env: COMPILER=4.06.1
     - env: COMPILER=4.05.0
-    - env: COMPILER=4.04.2
-    - env: COMPILER=4.03.0
 
   fast_finish: true
 
@@ -181,8 +213,3 @@ cache:
     - ./test/bucklescript/node_modules
     - ./node_modules
     - ./_cache
-
-notifications:
-  email:
-    on_success: always
-    on_failure: always

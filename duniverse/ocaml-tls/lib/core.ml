@@ -5,15 +5,15 @@ open Sexplib.Conv
 open Packet
 open Ciphersuite
 
-type tls13 = [ `TLS_1_3 ] [@@deriving sexp]
+type tls13 = [ `TLS_1_3 ] [@@deriving sexp_of]
 
 type tls_before_13 = [
   | `TLS_1_0
   | `TLS_1_1
   | `TLS_1_2
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
-type tls_version = [ tls13 | tls_before_13 ] [@@deriving sexp]
+type tls_version = [ tls13 | tls_before_13 ] [@@deriving sexp_of]
 
 let pair_of_tls_version = function
   | `TLS_1_0   -> (3, 1)
@@ -55,7 +55,7 @@ type tls_any_version = [
   | tls_version
   | `SSL_3
   | `TLS_1_X of int
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 let any_version_to_version = function
   | #tls_version as v -> Some v
@@ -92,23 +92,23 @@ let min_protocol_version (lo, _) = lo
 type tls_hdr = {
   content_type : content_type;
   version      : tls_any_version;
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 module SessionID = struct
-  type t = Cstruct_sexp.t [@@deriving sexp]
+  type t = Cstruct_sexp.t [@@deriving sexp_of]
   let compare = Cstruct.compare
   let hash t = Hashtbl.hash (Cstruct.to_bigarray t)
   let equal = Cstruct.equal
 end
 
 module PreSharedKeyID = struct
-  type t = Cstruct_sexp.t [@@deriving sexp]
+  type t = Cstruct_sexp.t [@@deriving sexp_of]
   let compare = Cstruct.compare
   let hash t = Hashtbl.hash (Cstruct.to_bigarray t)
   let equal = Cstruct.equal
 end
 
-type psk_identity = (Cstruct_sexp.t * int32) * Cstruct_sexp.t [@@deriving sexp]
+type psk_identity = (Cstruct_sexp.t * int32) * Cstruct_sexp.t [@@deriving sexp_of]
 
 let binders_len psks =
   let binder_len (_, binder) =
@@ -124,7 +124,9 @@ type group = [
   | `FFDHE8192
   | `X25519
   | `P256
-] [@@deriving sexp]
+  | `P384
+  | `P521
+] [@@deriving sexp_of]
 
 let named_group_to_group = function
   | FFDHE2048 -> Some `FFDHE2048
@@ -134,6 +136,8 @@ let named_group_to_group = function
   | FFDHE8192 -> Some `FFDHE8192
   | X25519 -> Some `X25519
   | SECP256R1 -> Some `P256
+  | SECP384R1 -> Some `P384
+  | SECP521R1 -> Some `P521
   | _ -> None
 
 let group_to_named_group = function
@@ -144,15 +148,19 @@ let group_to_named_group = function
   | `FFDHE8192 -> FFDHE8192
   | `X25519 -> X25519
   | `P256 -> SECP256R1
+  | `P384 -> SECP384R1
+  | `P521 -> SECP521R1
 
 let group_to_impl = function
-  | `FFDHE2048 -> `Mirage_crypto Mirage_crypto_pk.Dh.Group.ffdhe2048
-  | `FFDHE3072 -> `Mirage_crypto Mirage_crypto_pk.Dh.Group.ffdhe3072
-  | `FFDHE4096 -> `Mirage_crypto Mirage_crypto_pk.Dh.Group.ffdhe4096
-  | `FFDHE6144 -> `Mirage_crypto Mirage_crypto_pk.Dh.Group.ffdhe6144
-  | `FFDHE8192 -> `Mirage_crypto Mirage_crypto_pk.Dh.Group.ffdhe8192
-  | `X25519 -> `Hacl `X25519
-  | `P256 -> `Fiat `P256
+  | `FFDHE2048 -> `Finite_field Mirage_crypto_pk.Dh.Group.ffdhe2048
+  | `FFDHE3072 -> `Finite_field Mirage_crypto_pk.Dh.Group.ffdhe3072
+  | `FFDHE4096 -> `Finite_field Mirage_crypto_pk.Dh.Group.ffdhe4096
+  | `FFDHE6144 -> `Finite_field Mirage_crypto_pk.Dh.Group.ffdhe6144
+  | `FFDHE8192 -> `Finite_field Mirage_crypto_pk.Dh.Group.ffdhe8192
+  | `X25519 -> `X25519
+  | `P256 -> `P256
+  | `P384 -> `P384
+  | `P521 -> `P521
 
 type signature_algorithm = [
   | `RSA_PKCS1_MD5
@@ -161,19 +169,19 @@ type signature_algorithm = [
   | `RSA_PKCS1_SHA256
   | `RSA_PKCS1_SHA384
   | `RSA_PKCS1_SHA512
-(*  | `ECDSA_SECP256R1_SHA1
+  | `ECDSA_SECP256R1_SHA1
   | `ECDSA_SECP256R1_SHA256
-  | `ECDSA_SECP256R1_SHA384
-    | `ECDSA_SECP256R1_SHA512 *)
+  | `ECDSA_SECP384R1_SHA384
+  | `ECDSA_SECP521R1_SHA512
   | `RSA_PSS_RSAENC_SHA256
   | `RSA_PSS_RSAENC_SHA384
   | `RSA_PSS_RSAENC_SHA512
-(*  | `ED25519
-  | `ED448
+  | `ED25519
+(*  | `ED448
   | `RSA_PSS_PSS_SHA256
   | `RSA_PSS_PSS_SHA384
     | `RSA_PSS_PSS_SHA512 *)
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 let hash_of_signature_algorithm = function
   | `RSA_PKCS1_MD5 -> `MD5
@@ -185,17 +193,51 @@ let hash_of_signature_algorithm = function
   | `RSA_PSS_RSAENC_SHA256 -> `SHA256
   | `RSA_PSS_RSAENC_SHA384 -> `SHA384
   | `RSA_PSS_RSAENC_SHA512 -> `SHA512
+  | `ECDSA_SECP256R1_SHA1 -> `SHA1
+  | `ECDSA_SECP256R1_SHA256 -> `SHA256
+  | `ECDSA_SECP384R1_SHA384 -> `SHA384
+  | `ECDSA_SECP521R1_SHA512 -> `SHA512
+  | `ED25519 -> `SHA512
 
 let signature_scheme_of_signature_algorithm = function
-  | `RSA_PKCS1_MD5 -> `PKCS1
-  | `RSA_PKCS1_SHA1 -> `PKCS1
-  | `RSA_PKCS1_SHA224 -> `PKCS1
-  | `RSA_PKCS1_SHA256 -> `PKCS1
-  | `RSA_PKCS1_SHA384 -> `PKCS1
-  | `RSA_PKCS1_SHA512 -> `PKCS1
-  | `RSA_PSS_RSAENC_SHA256 -> `PSS
-  | `RSA_PSS_RSAENC_SHA384 -> `PSS
-  | `RSA_PSS_RSAENC_SHA512 -> `PSS
+  | `RSA_PKCS1_MD5 -> `RSA_PKCS1
+  | `RSA_PKCS1_SHA1 -> `RSA_PKCS1
+  | `RSA_PKCS1_SHA224 -> `RSA_PKCS1
+  | `RSA_PKCS1_SHA256 -> `RSA_PKCS1
+  | `RSA_PKCS1_SHA384 -> `RSA_PKCS1
+  | `RSA_PKCS1_SHA512 -> `RSA_PKCS1
+  | `RSA_PSS_RSAENC_SHA256 -> `RSA_PSS
+  | `RSA_PSS_RSAENC_SHA384 -> `RSA_PSS
+  | `RSA_PSS_RSAENC_SHA512 -> `RSA_PSS
+  | `ECDSA_SECP256R1_SHA1 -> `ECDSA
+  | `ECDSA_SECP256R1_SHA256 -> `ECDSA
+  | `ECDSA_SECP384R1_SHA384 -> `ECDSA
+  | `ECDSA_SECP521R1_SHA512 -> `ECDSA
+  | `ED25519 -> `ED25519
+
+let rsa_sigalg = function
+  | `RSA_PSS_RSAENC_SHA256 | `RSA_PSS_RSAENC_SHA384 | `RSA_PSS_RSAENC_SHA512
+  | `RSA_PKCS1_SHA256 | `RSA_PKCS1_SHA384 | `RSA_PKCS1_SHA512
+  | `RSA_PKCS1_SHA224 | `RSA_PKCS1_SHA1 | `RSA_PKCS1_MD5 -> true
+  | `ECDSA_SECP256R1_SHA1 | `ECDSA_SECP256R1_SHA256 | `ECDSA_SECP384R1_SHA384
+  | `ECDSA_SECP521R1_SHA512 | `ED25519 -> false
+
+let tls13_sigalg = function
+  | `RSA_PSS_RSAENC_SHA256 | `RSA_PSS_RSAENC_SHA384 | `RSA_PSS_RSAENC_SHA512
+  | `ECDSA_SECP256R1_SHA256 | `ECDSA_SECP384R1_SHA384
+  | `ECDSA_SECP521R1_SHA512 | `ED25519 -> true
+  | `RSA_PKCS1_SHA256 | `RSA_PKCS1_SHA384 | `RSA_PKCS1_SHA512
+  | `RSA_PKCS1_SHA224 | `RSA_PKCS1_SHA1 | `RSA_PKCS1_MD5
+  | `ECDSA_SECP256R1_SHA1 -> false
+
+let pk_matches_sa pk sa =
+  match pk, sa with
+  | `RSA _, _ -> rsa_sigalg sa
+  | `ED25519 _, `ED25519
+  | `P256 _, (`ECDSA_SECP256R1_SHA1 | `ECDSA_SECP256R1_SHA256)
+  | `P384 _, `ECDSA_SECP384R1_SHA384
+  | `P521 _, `ECDSA_SECP521R1_SHA512 -> true
+  | _ -> false
 
 type client_extension = [
   | `Hostname of string
@@ -213,14 +255,15 @@ type client_extension = [
   | `PostHandshakeAuthentication
   | `Cookie of Cstruct_sexp.t
   | `PskKeyExchangeModes of psk_key_exchange_mode list
+  | `ECPointFormats
   | `UnknownExtension of (int * Cstruct_sexp.t)
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type server13_extension = [
   | `KeyShare of (group * Cstruct_sexp.t)
   | `PreSharedKey of int
   | `SelectedVersion of tls_version (* only used internally in writer!! *)
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type server_extension = [
   server13_extension
@@ -229,8 +272,9 @@ type server_extension = [
   | `SecureRenegotiation of Cstruct_sexp.t
   | `ExtendedMasterSecret
   | `ALPN of string
+  | `ECPointFormats
   | `UnknownExtension of (int * Cstruct_sexp.t)
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type encrypted_extension = [
   | `Hostname
@@ -239,14 +283,14 @@ type encrypted_extension = [
   | `ALPN of string
   | `EarlyDataIndication
   | `UnknownExtension of (int * Cstruct_sexp.t)
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type hello_retry_extension = [
   | `SelectedGroup of group (* only used internally in writer!! *)
   | `Cookie of Cstruct_sexp.t
   | `SelectedVersion of tls_version (* only used internally in writer!! *)
   | `UnknownExtension of (int * Cstruct_sexp.t)
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type client_hello = {
   client_version : tls_any_version;
@@ -254,7 +298,7 @@ type client_hello = {
   sessionid      : SessionID.t option;
   ciphersuites   : any_ciphersuite list;
   extensions     : client_extension list
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type server_hello = {
   server_version : tls_version;
@@ -262,13 +306,13 @@ type server_hello = {
   sessionid      : SessionID.t option;
   ciphersuite    : ciphersuite;
   extensions     : server_extension list
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type dh_parameters = {
   dh_p  : Cstruct_sexp.t;
   dh_g  : Cstruct_sexp.t;
   dh_Ys : Cstruct_sexp.t;
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type hello_retry = {
   retry_version : tls_version ;
@@ -276,12 +320,12 @@ type hello_retry = {
   sessionid : SessionID.t option ;
   selected_group : group ;
   extensions : hello_retry_extension list
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type session_ticket_extension = [
   | `EarlyDataIndication of int32
   | `UnknownExtension of int * Cstruct_sexp.t
-] [@@deriving sexp]
+] [@@deriving sexp_of]
 
 type session_ticket = {
   lifetime : int32 ;
@@ -289,7 +333,7 @@ type session_ticket = {
   nonce : Cstruct_sexp.t ;
   ticket : Cstruct_sexp.t ;
   extensions : session_ticket_extension list
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
 type certificate_request_extension = [
   (*  | `StatusRequest *)
@@ -317,29 +361,26 @@ type tls_handshake =
   | SessionTicket of session_ticket
   | KeyUpdate of key_update_request_type
   | EndOfEarlyData
-  [@@deriving sexp]
+  [@@deriving sexp_of]
 
-type tls_alert = alert_level * alert_type [@@deriving sexp]
+type tls_alert = alert_level * alert_type [@@deriving sexp_of]
 
 (** the master secret of a TLS connection *)
-type master_secret = Cstruct_sexp.t [@@deriving sexp]
+type master_secret = Cstruct_sexp.t [@@deriving sexp_of]
 
 module Cert = struct
   include X509.Certificate
-  let t_of_sexp _ = failwith "can't convert certificate from S-expression"
   let sexp_of_t _ = Sexplib.Sexp.Atom "certificate"
+end
+
+module Priv = struct
+  include X509.Private_key
+  let sexp_of_t _ = Sexplib.Sexp.Atom "private key"
 end
 
 module Ptime = struct
   include Ptime
   let sexp_of_t ts = Sexplib.Sexp.Atom (Ptime.to_rfc3339 ts)
-  let t_of_sexp = function
-    | (Sexplib.Sexp.Atom data) as s ->
-      begin match Ptime.of_rfc3339 data with
-        | Ok (t, _, _) -> t
-        | Error _ -> Sexplib.Conv.of_sexp_error "couldn't parse timestamp" s
-      end
-    | s -> Sexplib.Conv.of_sexp_error "couldn't parse timestamp, not an atom" s
 end
 
 type psk13 = {
@@ -350,9 +391,9 @@ type psk13 = {
   early_data : int32 ;
   issued_at : Ptime.t ;
   (* origin : [ `Resumption | `External ] (* using different labels for binder_key *) *)
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
-type epoch_state = [ `ZeroRTT | `Established ] [@@deriving sexp]
+type epoch_state = [ `ZeroRTT | `Established ] [@@deriving sexp_of]
 
 (** information about an open session *)
 type epoch_data = {
@@ -367,20 +408,20 @@ type epoch_data = {
   received_certificates  : Cert.t list ;
   own_random             : Cstruct_sexp.t ;
   own_certificate        : Cert.t list ;
-  own_private_key        : Mirage_crypto_pk.Rsa.priv option ;
+  own_private_key        : Priv.t option ;
   own_name               : string option ;
   master_secret          : master_secret ;
   session_id             : SessionID.t ;
   extended_ms            : bool ;
   alpn_protocol          : string option ;
-} [@@deriving sexp]
+} [@@deriving sexp_of]
 
-let supports_key_usage ?(not_present = false) cert usage =
+let supports_key_usage ?(not_present = false) usage cert =
   match X509.Extension.(find Key_usage (X509.Certificate.extensions cert)) with
   | None -> not_present
   | Some (_, kus) -> List.mem usage kus
 
-let supports_extended_key_usage ?(not_present = false) cert usage =
+let supports_extended_key_usage ?(not_present = false) usage cert =
   match X509.Extension.(find Ext_key_usage (X509.Certificate.extensions cert)) with
   | None -> not_present
   | Some (_, kus) -> List.mem usage kus

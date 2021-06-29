@@ -50,7 +50,25 @@ module Of_sexp : sig
 
   val str_type_decl
     :  loc:Location.t
-    -> poly:bool
+    -> poly:bool  (** the type is annotated with sexp_poly instead of sexp *)
+    -> path:string (** the module path within the file *)
+    -> rec_flag * type_declaration list
+    -> structure
+end
+
+module Sexp_grammar : sig
+  val type_extension : core_type -> core_type
+
+  val core_type : loc:Location.t -> path:string -> core_type -> expression
+
+  val sig_type_decl
+    :  loc:Location.t
+    -> path:string
+    -> rec_flag * type_declaration list
+    -> signature
+
+  val str_type_decl
+    :  loc:Location.t
     -> path:string
     -> rec_flag * type_declaration list
     -> structure

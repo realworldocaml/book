@@ -109,7 +109,7 @@ let get_mode () =
   then `Ignore
   else `Collect
 
-let add_bench
+let[@inline never] add_bench
       ~name
       ~code
       ~filename
@@ -130,7 +130,7 @@ let add_bench
     } in
     Hashtbl.add libs_to_entries libname (entry :: lookup_rev_lib ~libname)
 
-let add_bench_module
+let[@inline never] add_bench_module
     ~name
     ~code:_
     ~type_conv_path:_

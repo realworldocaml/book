@@ -15,7 +15,7 @@ module Stable = struct
       | FP_infinite | FP_nan -> raise Nan_or_inf
     ;;
 
-    include Binable.Of_binable.V1
+    include Binable.Of_binable.V1 [@alert "-legacy"]
         (Float)
         (struct
           type nonrec t = t

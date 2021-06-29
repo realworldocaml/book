@@ -153,6 +153,7 @@ module Unstable = struct
 end
 
 let to_string_hum t = if am_running_test then nil else to_string t
+let arg_type = Command.Arg_type.create of_string
 let sexp_of_t t = if am_running_test then sexp_of_t nil else sexp_of_t t
 
 module Private = struct

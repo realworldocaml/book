@@ -16,7 +16,7 @@
  * !LARGE_TABLES -> 8K per key, ~3x slower. */
 #define __MC_GHASH_LARGE_TABLES
 
-#if defined (__x86_64__) || defined (__aarch64__)
+#ifdef ARCH_64BIT
 
 #define __set_uint128_t(w1, w0) (((__uint128_t) w1 << 64) | w0)
 
@@ -103,4 +103,4 @@ mc_ghash_generic (value m, value hash, value src, value off, value len) {
   return Val_unit;
 }
 
-#endif /* x86_64 || aarch64 */
+#endif /* ARCH_64BIT */

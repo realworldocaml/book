@@ -1,5 +1,5 @@
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli. All rights reserved.
+   Copyright (c) 2015 The fpath programmers. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
@@ -185,14 +185,14 @@ let segs_to_path segs = String.concat ~sep:dir_sep segs
 
 type t = string (* N.B. a path is never "" or something is wrooong. *)
 
-let err s = Result.Error (`Msg (strf "%a: invalid path" String.dump s))
+let err s = Error (`Msg (strf "%a: invalid path" String.dump s))
 
 let validate_and_collapse_seps p =
   (* collapse non-initial sequences of [dir_sep] to a single one and checks
      no null byte *)
   let max_idx = String.length p - 1 in
   let rec with_buf b last_sep k i = (* k is the write index in b *)
-    if i > max_idx then Result.Ok (Bytes.sub_string b 0 k) else
+    if i > max_idx then Ok (Bytes.sub_string b 0 k) else
     let c = string_unsafe_get p i in
     if c = '\x00' then err p else
     if c <> dir_sep_char
@@ -202,7 +202,7 @@ let validate_and_collapse_seps p =
     with_buf b true k (i + 1)
   in
   let rec try_no_alloc last_sep i =
-    if i > max_idx then Result.Ok p else
+    if i > max_idx then Ok p else
     let c = string_unsafe_get p i in
     if c = '\x00' then err p else
     if c <> dir_sep_char then try_no_alloc false (i + 1) else
@@ -219,23 +219,22 @@ let of_string_windows s =
   if s = "" then err s else
   let p = String.map (fun c -> if c = '/' then '\\' else c) s in
   match validate_and_collapse_seps p with
-  | Result.Error _ as e -> e
-  | Result.Ok p as some ->
+  | Error _ as e -> e
+  | Ok p as some ->
       if Windows.is_unc_path p then
-        (match Windows.parse_unc p with None -> err s | Some p -> Result.Ok p)
+        (match Windows.parse_unc p with None -> err s | Some p -> Ok p)
       else
       match String.find (Char.equal ':') p with
       | None -> some
       | Some i when i = String.length p - 1 -> err p (* path is empty *)
-      | Some _ -> Result.Ok p
+      | Some _ -> Ok p
 
 let of_string_posix p = if p = "" then err p else validate_and_collapse_seps p
 let of_string = if windows then of_string_windows else of_string_posix
 
 let v s = match of_string s with
-| Result.Ok p -> p
-| Result.Error (`Msg m) -> invalid_arg m
-
+| Ok p -> p
+| Error (`Msg m) -> invalid_arg m
 
 let add_seg p seg =
   if not (is_seg seg) then invalid_arg (err_invalid_seg seg);
@@ -766,7 +765,7 @@ type set = Set.t
 type 'a map = 'a Map.t
 
 (*---------------------------------------------------------------------------
-   Copyright (c) 2015 Daniel C. Bünzli
+   Copyright (c) 2015 The fpath programmers
 
    Permission to use, copy, modify, and/or distribute this software for any
    purpose with or without fee is hereby granted, provided that the above

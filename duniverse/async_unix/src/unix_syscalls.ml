@@ -8,78 +8,6 @@ module Exit_or_signal_or_stop = Unix.Exit_or_signal_or_stop
 module Syscall_result = Unix.Syscall_result
 module Error = Unix.Error
 
-type error = Unix.Error.t =
-  | E2BIG
-  | EACCES
-  | EAGAIN
-  | EBADF
-  | EBUSY
-  | ECHILD
-  | EDEADLK
-  | EDOM
-  | EEXIST
-  | EFAULT
-  | EFBIG
-  | EINTR
-  | EINVAL
-  | EIO
-  | EISDIR
-  | EMFILE
-  | EMLINK
-  | ENAMETOOLONG
-  | ENFILE
-  | ENODEV
-  | ENOENT
-  | ENOEXEC
-  | ENOLCK
-  | ENOMEM
-  | ENOSPC
-  | ENOSYS
-  | ENOTDIR
-  | ENOTEMPTY
-  | ENOTTY
-  | ENXIO
-  | EPERM
-  | EPIPE
-  | ERANGE
-  | EROFS
-  | ESPIPE
-  | ESRCH
-  | EXDEV
-  | EWOULDBLOCK
-  | EINPROGRESS
-  | EALREADY
-  | ENOTSOCK
-  | EDESTADDRREQ
-  | EMSGSIZE
-  | EPROTOTYPE
-  | ENOPROTOOPT
-  | EPROTONOSUPPORT
-  | ESOCKTNOSUPPORT
-  | EOPNOTSUPP
-  | EPFNOSUPPORT
-  | EAFNOSUPPORT
-  | EADDRINUSE
-  | EADDRNOTAVAIL
-  | ENETDOWN
-  | ENETUNREACH
-  | ENETRESET
-  | ECONNABORTED
-  | ECONNRESET
-  | ENOBUFS
-  | EISCONN
-  | ENOTCONN
-  | ESHUTDOWN
-  | ETOOMANYREFS
-  | ETIMEDOUT
-  | ECONNREFUSED
-  | EHOSTDOWN
-  | EHOSTUNREACH
-  | ELOOP
-  | EOVERFLOW
-  | EUNKNOWNERR of int
-[@@deriving sexp]
-
 exception Unix_error = Unix.Unix_error
 
 include Fd.Close
@@ -187,21 +115,33 @@ let fsync fd = Fd.syscall_in_thread_exn fd ~name:"fsync" Unix.fsync
 let fdatasync fd = Fd.syscall_in_thread_exn fd ~name:"fdatasync" Unix.fdatasync
 let sync () = In_thread.syscall_exn ~name:"sync" Unix.sync
 
-let lockf ?(len = 0L) fd read_or_write =
+module Lock_mode = struct
+  type t =
+    | Shared
+    | Exclusive
+  [@@deriving sexp_of]
+
+  let flock_command : t -> _ = function
+    | Shared -> Unix.Flock_command.lock_shared
+    | Exclusive -> Unix.Flock_command.lock_exclusive
+  ;;
+end
+
+let lockf ?(len = 0L) fd (lock_mode : Lock_mode.t) =
   let mode : Unix.lock_command =
-    match read_or_write with
-    | `Read -> F_RLOCK
-    | `Write -> F_LOCK
+    match lock_mode with
+    | Shared -> F_RLOCK
+    | Exclusive -> F_LOCK
   in
   Fd.syscall_in_thread_exn fd ~name:"lockf" (fun file_descr ->
     Unix.lockf file_descr ~mode ~len)
 ;;
 
-let try_lockf ?(len = 0L) fd read_or_write =
+let try_lockf ?(len = 0L) fd (lock_mode : Lock_mode.t) =
   let mode : Unix.lock_command =
-    match read_or_write with
-    | `Read -> F_TRLOCK
-    | `Write -> F_TLOCK
+    match lock_mode with
+    | Shared -> F_TRLOCK
+    | Exclusive -> F_TLOCK
   in
   Fd.syscall_exn fd (fun file_descr ->
     try
@@ -224,21 +164,68 @@ let unlockf ?(len = 0L) fd =
   Fd.syscall_exn fd (fun file_descr -> Unix.lockf file_descr ~mode:F_ULOCK ~len)
 ;;
 
-let with_file ?exclusive ?perm file ~mode ~f =
+let flock fd lock_mode =
+  let mode = Lock_mode.flock_command lock_mode in
+  Fd.syscall_in_thread_exn fd ~name:"flock" (fun file_descr ->
+    Unix.flock_blocking file_descr mode)
+;;
+
+let try_flock fd lock_mode =
+  let mode = Lock_mode.flock_command lock_mode in
+  Fd.syscall_exn fd (fun file_descr -> Unix.flock file_descr mode)
+;;
+
+let funlock fd =
+  Fd.syscall_exn fd (fun file_descr ->
+    ignore (Unix.flock file_descr Unix.Flock_command.unlock : bool))
+;;
+
+module Lock_mechanism = struct
+  module T = struct
+    type t =
+      | Lockf
+      | Flock
+    [@@deriving compare, enumerate, sexp, variants]
+  end
+
+  let lock (t : T.t) =
+    match t with
+    | Lockf -> lockf ?len:None
+    | Flock -> flock
+  ;;
+
+  include T
+  include Sexpable.To_stringable (T)
+
+  let arg_type = Command.Param.Arg_type.Export.sexp_conv T.t_of_sexp
+end
+
+module Lock = struct
+  type t =
+    { mode : Lock_mode.t
+    ; mechanism : Lock_mechanism.t
+    }
+  [@@deriving sexp_of]
+end
+
+let with_file ?lock ?perm file ~mode ~f =
+  (* Here we rely on closing the fd to release the lock if appropriate. In the case of
+     flock, this will release the lock only if no other fds are pointing to the same file
+     description in the kernel. This will only happen if [f] dups or otherwise copies the
+     fd.
+
+     The question of what happens when this function is called with a file such as
+     [/dev/fd*] is left as an exercise to the caller. *)
   let doit f =
     let%bind fd = openfile file ~mode ?perm in
     Fd.with_close fd ~f
   in
-  match exclusive with
+  match lock with
   | None -> doit f
-  | Some read_or_write ->
+  | Some { Lock.mode; mechanism } ->
     doit (fun fd ->
-      let%bind () = lockf fd read_or_write in
-      Monitor.protect
-        (fun () -> f fd)
-        ~finally:(fun () ->
-          unlockf fd;
-          return ()))
+      let%bind () = Lock_mechanism.lock mechanism fd mode in
+      f fd)
 ;;
 
 (* file status *)
@@ -398,10 +385,6 @@ let readdir_opt handle =
   In_thread.syscall_exn ~name:"readdir" (fun () -> Unix.readdir_opt handle)
 ;;
 
-let readdir handle =
-  In_thread.syscall_exn ~name:"readdir" (fun () -> (Unix.readdir handle [@warning "-3"]))
-;;
-
 let rewinddir handle =
   In_thread.syscall_exn ~name:"rewinddir" (fun () -> Unix.rewinddir handle)
 ;;
@@ -412,11 +395,7 @@ let closedir handle =
 
 let pipe info =
   let%map reader, writer =
-    In_thread.syscall_exn ~name:"pipe" (fun () ->
-      let r, w = Unix.pipe () in
-      Unix.set_close_on_exec r;
-      Unix.set_close_on_exec w;
-      r, w)
+    In_thread.syscall_exn ~name:"pipe" (fun () -> Unix.pipe ~close_on_exec:true ())
   in
   let create file_descr kind = Fd.create Fifo file_descr (Info.tag info ~tag:kind) in
   `Reader (create reader "reader"), `Writer (create writer "writer")
@@ -507,29 +486,41 @@ let wait_nohang_untraced = Unix.wait_nohang_untraced
 module Wait : sig
   val check_all : unit -> unit
   val do_not_handle_sigchld : unit -> unit
+  val waitpid : Pid.t -> Exit_or_signal.t Deferred.t
   val wait : wait_on -> (Pid.t * Exit_or_signal.t) Deferred.t
   val wait_untraced : wait_on -> (Pid.t * Exit_or_signal_or_stop.t) Deferred.t
 end = struct
   module Kind = struct
-    type _ t =
-      | Normal : Exit_or_signal.t t
-      | Untraced : Exit_or_signal_or_stop.t t
+    type (_, _) t =
+      | Normal : (wait_on, Pid.t * Exit_or_signal.t) t
+      | Untraced : (wait_on, Pid.t * Exit_or_signal_or_stop.t) t
+      | Waitpid : (Pid.t, Exit_or_signal.t) t
     [@@deriving sexp_of]
 
-    let wait_nohang : type a. a t -> wait_on -> (Pid.t * a) option =
+    let waitpid_nohang pid =
+      let res = wait_nohang (`Pid pid) in
+      match res with
+      | None -> None
+      | Some (pid2, exit_or_signal) ->
+        assert (Pid.( = ) pid2 pid);
+        Some exit_or_signal
+    ;;
+
+    let wait_nohang : type q r. (q, r) t -> q -> r option =
       fun t wait_on ->
-      match t with
-      | Normal -> wait_nohang wait_on
-      | Untraced -> wait_nohang_untraced wait_on
+        match t with
+        | Normal -> wait_nohang wait_on
+        | Untraced -> wait_nohang_untraced wait_on
+        | Waitpid -> waitpid_nohang wait_on
     ;;
   end
 
   module Wait = struct
     type t =
       | T :
-          { kind : 'a Kind.t
-          ; result : (Pid.t * 'a, exn) Result.t Ivar.t
-          ; wait_on : wait_on
+          { kind : ('q, 'r) Kind.t
+          ; result : ('r, exn) Result.t Ivar.t
+          ; wait_on : 'q
           }
           -> t
     [@@deriving sexp_of]
@@ -565,7 +556,7 @@ end = struct
          Async_signal.handle [ Signal.chld ] ~f:(fun _ -> check_all ())))
   ;;
 
-  let deferred_wait (type k) wait_on ~(kind : k Kind.t) =
+  let deferred_wait (type q r) (wait_on : q) ~(kind : (q, r) Kind.t) =
     (* We are going to install a handler for SIGCHLD that will call [wait_nohang wait_on]
        in the future.  However, we must also call [wait_nohang wait_on] right now, in case
        the child already exited, and will thus never cause a SIGCHLD in the future.  We
@@ -581,16 +572,13 @@ end = struct
 
   let wait wait_on = deferred_wait wait_on ~kind:Normal
   let wait_untraced wait_on = deferred_wait wait_on ~kind:Untraced
+  let waitpid pid = deferred_wait pid ~kind:Waitpid
 end
 
 let wait = Wait.wait
 let wait_untraced = Wait.wait_untraced
-
-let waitpid pid =
-  let%map pid', exit_or_signal = wait (`Pid pid) in
-  assert (Pid.equal pid pid');
-  exit_or_signal
-;;
+let waitpid_prompt = Wait.waitpid
+let waitpid = Wait.waitpid
 
 let waitpid_exn pid =
   let%map exit_or_signal = waitpid pid in
@@ -648,8 +636,6 @@ module Socket = struct
         let to_string = to_string_internal ~show_port_in_test:true
       end
 
-      let t_of_sexp = Blocking_sexp.t_of_sexp
-      let __t_of_sexp__ = Blocking_sexp.__t_of_sexp__
       let addr (`Inet (a, _)) = a
       let port (`Inet (_, p)) = p
 
@@ -695,8 +681,6 @@ module Socket = struct
         ]
       [@@deriving bin_io, hash, sexp]
     end
-
-    let t_of_sexp = Blocking_sexp.t_of_sexp
 
     let to_sockaddr = function
       | #Inet.t as t -> Inet.to_sockaddr t
@@ -806,9 +790,13 @@ module Socket = struct
 
   let create (type_ : _ Type.t) =
     let file_descr =
-      Unix.socket ~domain:type_.family.family ~kind:type_.socket_type ~protocol:0
+      Unix.socket
+        ~domain:type_.family.family
+        ~kind:type_.socket_type
+        ~protocol:0
+        ~close_on_exec:true
+        ()
     in
-    Unix.set_close_on_exec file_descr;
     let fd =
       Fd.create
         (Socket `Unconnected)
@@ -947,11 +935,10 @@ module Socket = struct
        Unix Network Programming, p422). *)
     match
       Fd.with_file_descr t.fd ~nonblocking:true (fun file_descr ->
-        Unix.accept file_descr)
+        Unix.accept file_descr ~close_on_exec:true)
     with
     | `Already_closed -> `Socket_closed
     | `Ok (file_descr, sockaddr) ->
-      Unix.set_close_on_exec file_descr;
       let address = Family.address_of_sockaddr_exn t.type_.family sockaddr in
       let fd =
         Fd.create
@@ -964,7 +951,6 @@ module Socket = struct
               [%sexp_of: [ `listening_on of (_, _) t ] * [ `client of address ]]))
       in
       let s = { fd; type_ = t.type_; for_info = None } in
-      set_close_on_exec s.fd;
       turn_off_nagle sockaddr s;
       `Ok (s, address)
     | `Error (Unix_error ((EAGAIN | EWOULDBLOCK | ECONNABORTED | EINTR), _, _)) ->
@@ -1118,11 +1104,10 @@ module Socket = struct
 end
 
 let socketpair () =
-  let s1, s2 = Unix.socketpair ~domain:PF_UNIX ~kind:SOCK_STREAM ~protocol:0 in
-  let make_fd s =
-    Unix.set_close_on_exec s;
-    Fd.create (Fd.Kind.Socket `Active) s (Info.of_string "<socketpair>")
+  let s1, s2 =
+    Unix.socketpair ~domain:PF_UNIX ~kind:SOCK_STREAM ~protocol:0 ~close_on_exec:true ()
   in
+  let make_fd s = Fd.create (Fd.Kind.Socket `Active) s (Info.of_string "<socketpair>") in
   make_fd s1, make_fd s2
 ;;
 
@@ -1178,8 +1163,6 @@ type sockaddr_blocking_sexp = Unix.sockaddr =
   | ADDR_INET of Inet_addr.Blocking_sexp.t * int
 [@@deriving bin_io, sexp]
 
-let sockaddr_of_sexp = sockaddr_blocking_sexp_of_sexp
-
 module Addr_info = struct
   type t = Unix.addr_info =
     { ai_family : socket_domain
@@ -1200,8 +1183,6 @@ module Addr_info = struct
       }
     [@@deriving bin_io, sexp]
   end
-
-  let t_of_sexp = Blocking_sexp.t_of_sexp
 
   type getaddrinfo_option = Unix.getaddrinfo_option =
     | AI_FAMILY of socket_domain

@@ -298,6 +298,9 @@ val exists : t -> bool
 
 val readdir_unsorted : t -> (string list, Unix.error) Result.t
 
+val readdir_unsorted_with_kinds :
+  t -> ((string * Unix.file_kind) list, Unix.error) Result.t
+
 val is_dir_sep : char -> bool
 
 val is_directory : t -> bool
@@ -315,6 +318,10 @@ val unlink_no_err : t -> unit
 val link : t -> t -> unit
 
 val rm_rf : ?allow_external:bool -> t -> unit
+
+(** [clear_dir t] deletes all the contents of directory [t] without removing [t]
+    itself *)
+val clear_dir : t -> unit
 
 val mkdir_p : ?perms:int -> t -> unit
 
@@ -349,6 +356,8 @@ val local_part : t -> Local.t
 
 val stat : t -> Unix.stats
 
+val lstat : t -> Unix.stats
+
 (* it would be nice to call this [Set.of_source_paths], but it's annoying to
    change the [Set] signature because then we don't comply with [Path_intf.S] *)
 val set_of_source_paths : Source.Set.t -> Set.t
@@ -356,16 +365,6 @@ val set_of_source_paths : Source.Set.t -> Set.t
 val set_of_build_paths_list : Build.t list -> Set.t
 
 val string_of_file_kind : Unix.file_kind -> string
-
-(** temp_dir prefix suffix returns the name of a fresh temporary directory in
-    the temporary directory. The base name of the temporary directory is formed
-    by concatenating prefix, then a suitably chosen integer number, then suffix.
-    The optional argument temp_dir indicates the temporary directory to use,
-    defaulting to the current result of Filename.get_temp_dir_name. The
-    temporary directory is created with permissions [mode], defaulting to 0700.
-    The directory is guaranteed to be different from any other directory that
-    existed when temp_dir was called. *)
-val temp_dir : ?temp_dir:t -> ?mode:int -> string -> string -> t
 
 (** Rename a file. rename oldpath newpath renames the file called oldpath,
     giving it newpath as its new name, moving it between directories if needed.
@@ -384,3 +383,6 @@ val chmod :
   -> ?op:[ `Add | `Remove | `Set ]
   -> t
   -> unit
+
+(** Attempts to resolve a symlink. Returns [None] if the path isn't a symlink *)
+val follow_symlink : t -> (t, Fpath.follow_symlink_error) result

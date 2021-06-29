@@ -13,10 +13,7 @@
 
 module Make
 (M : Fix.IMPERATIVE_MAPS)
-(P : sig
-  include Fix.PROPERTY
-  val union: property -> property -> property
-end)
+(P : Fix.MINIMAL_SEMI_LATTICE)
 = struct
 
   type variable =
@@ -25,61 +22,47 @@ end)
   type property =
     P.property
 
-  (* A constraint is represented as a mapping of each variable to an
-     expression, which represents its lower bound. We could represent
-     an expression as a list of constants and variables; we can also
-     represent it as a binary tree, as follows. *)
+  let join =
+    P.leq_join
 
-  type expression =
-    | EBottom
-    | ECon of property
-    | EVar of variable
-    | EJoin of expression * expression
+  (* A map of each variable to its upper bounds (its successors). *)
 
-  type constraint_ =
-    expression M.t
+  let upper : variable list M.t =
+    M.create()
 
-  (* Looking up a variable's lower bound. *)
+  let successors x =
+    try M.find x upper with Not_found -> []
 
-  let consult (m : constraint_) (x : variable) : expression =
-    try
-      M.find x m
-    with Not_found ->
-      EBottom
+  let record_VarVar x y =
+    M.add x (y :: successors x) upper
 
-  (* Evaluation of an expression in an environment. *)
+  (* A map of each variable to its lower bound (a constant). *)
 
-  let rec evaluate get e =
-    match e with
-    | EBottom ->
-        P.bottom
-    | ECon p ->
-        p
-    | EVar x ->
-        get x
-    | EJoin (e1, e2) ->
-        P.union (evaluate get e1) (evaluate get e2)
+  let lower : property M.t =
+    M.create()
 
-  (* Solving a constraint. *)
+  let record_ConVar p y =
+    match M.find y lower with
+    | exception Not_found ->
+        M.add y p lower
+    | q ->
+        M.add y (join p q) lower
 
-  let solve (m : constraint_) : variable -> property =
-    let module F = Fix.Make(M)(P) in
-    F.lfp (fun x get ->
-      evaluate get (consult m x)
-    )
+  (* Running the analysis. *)
 
-  (* The imperative interface. *)
+  module Solve () = struct
 
-  let create () =
-    let m = M.create() in
-    let record_ConVar p y =
-      M.add y (EJoin (ECon p, consult m y)) m
-    and record_VarVar x y =
-      M.add y (EJoin (EVar x, consult m y)) m
-    in
-    record_ConVar,
-    record_VarVar,
-    fun () -> solve m
+    module G = struct
+      type nonrec variable = variable
+      type nonrec property = property
+      let foreach_root contribute =
+        M.iter contribute lower
+      let foreach_successor x p contribute =
+        List.iter (fun y -> contribute y p) (successors x)
+    end
+
+    include Fix.DataFlow.Run(M)(P)(G)
+
+  end
 
 end
-

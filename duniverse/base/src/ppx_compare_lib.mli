@@ -4,7 +4,7 @@
 val phys_equal : 'a -> 'a -> bool
 
 (*_ /!\ WARNING /!\ all these functions need to declared "external" in order to get the
-  lazy behavior for ( && ) (relied upon by [@@deriving_inline equal][@@@end]) and the type-based
+  lazy behavior for ( && ) (relied upon by [@@deriving equal]) and the type-based
   specialization for equal/compare. *)
 
 external polymorphic_compare : 'a -> 'a -> int = "%compare"

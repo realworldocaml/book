@@ -35,7 +35,7 @@ module Binable_exn = struct
 
       include T
 
-      include Binable.Stable.Of_binable.V1
+      include Binable.Stable.Of_binable.V1 [@alert "-legacy"]
           (Sexp)
           (struct
             include T
@@ -95,7 +95,7 @@ module Extend (Info : Base.Info.S) = struct
       include T
       include Comparator.Stable.V1.Make (T)
 
-      include Binable.Stable.Of_binable.V1
+      include Binable.Stable.Of_binable.V1 [@alert "-legacy"]
           (Internal_repr.Stable.V2)
           (struct
             type nonrec t = t
@@ -124,7 +124,7 @@ module Extend (Info : Base.Info.S) = struct
       include T
       include Comparator.Stable.V1.Make (T)
 
-      include Binable.Stable.Of_binable.V1
+      include Binable.Stable.Of_binable.V1 [@alert "-legacy"]
           (Sexp)
           (struct
             type nonrec t = t

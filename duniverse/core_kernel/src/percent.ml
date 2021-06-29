@@ -4,7 +4,7 @@ open Std_internal
 module Stable = struct
   module V1 = struct
     type t = (float[@quickcheck.generator Float.gen_finite])
-    [@@deriving compare, hash, quickcheck]
+    [@@deriving compare, hash, quickcheck, typerep]
 
     let of_mult f = f
     let to_mult t = t
@@ -142,9 +142,51 @@ module Stable = struct
         ;;
       end)
   end
+
+  module Option = struct
+    module V1 = struct
+      type t = V1.t [@@deriving bin_io, compare, hash, typerep]
+
+      let none = Float.nan
+      let is_none t = Float.is_nan t
+      let is_some t = not (is_none t)
+      let some_is_representable = is_some
+      let some = Fn.id
+      let unchecked_value = Fn.id
+      let to_option t = if is_some t then Some (unchecked_value t) else None
+
+      let of_option opt =
+        match opt with
+        | None -> none
+        | Some v -> some v
+      ;;
+
+      let value_exn t =
+        if is_some t
+        then unchecked_value t
+        else raise_s [%message [%here] "Percent.Option.value_exn none"]
+      ;;
+
+      let value t ~default = if is_some t then unchecked_value t else default
+      let sexp_of_t t = to_option t |> Option.sexp_of_t V1.sexp_of_t
+      let t_of_sexp sexp = (Option.t_of_sexp V1.t_of_sexp) sexp |> of_option
+    end
+  end
 end
 
 include Stable.V1
+
+module Option = struct
+  module Stable = Stable.Option
+  include Stable.V1
+
+  module Optional_syntax = struct
+    module Optional_syntax = struct
+      let is_none = is_none
+      let unsafe_value = unchecked_value
+    end
+  end
+end
 
 let is_zero t = t = 0.
 let apply t f = t *. f

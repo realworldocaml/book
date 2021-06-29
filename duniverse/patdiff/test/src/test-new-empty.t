@@ -10,7 +10,7 @@ Test diffing against empty files.
 
 Expect all red.
 
-  $ patdiff.exe -default prev next | visible_colors
+  $ patdiff -default prev next | visible_colors
   (fg:red)------ (+bold)prev
   (fg:green)++++++ (+bold)next
   (fg:black)@|(+bold)-1,1 +1,0(off) ============================================================
@@ -18,7 +18,7 @@ Expect all red.
 
 Expect all green.
 
-  $ patdiff.exe -default next prev | visible_colors
+  $ patdiff -default next prev | visible_colors
   (fg:red)------ (+bold)next
   (fg:green)++++++ (+bold)prev
   (fg:black)@|(+bold)-1,0 +1,1(off) ============================================================

@@ -688,7 +688,7 @@ val finalize : (unit -> 'a t) -> (unit -> unit t) -> 'a t
 {[
 let () =
   Lwt_main.run begin
-    let%lwt file = Lwt_io.(open_file Input "code.ml") in
+    let%lwt file = Lwt_io.(open_file ~mode:Input "code.ml") in
     Lwt.finalize
       (fun () ->
         let%lwt content = Lwt_io.read file in
@@ -706,7 +706,7 @@ let () =
 {[
 let () =
   Lwt_main.run begin
-    let%lwt file = Lwt_io.(open_file Input "code.ml") in
+    let%lwt file = Lwt_io.(open_file ~mode:Input "code.ml") in
     begin
       let%lwt content = Lwt_io.read file in
       Lwt_io.print content
@@ -740,12 +740,12 @@ let () =
       rejected with that exception. Again, no matter how [c ()] finishes, there
       is a promise [p_2] representing the outcome of cleanup.
     - If [p_2] is fulfilled, [p_3] is resolved the same way [p_1] had been
-      resolved. In other words, [p_1] is forwarded to [p_2] when cleanup is
+      resolved. In other words, [p_1] is forwarded to [p_3] when cleanup is
       successful.
     - If [p_2] is rejected, [p_3] is rejected with the same exception. In other
-      words, when cleanup fails, [p_3] is rejected. Note this means that if
-      {e both} the protected code and the cleanup fail, the cleanup exception
-      has precedence. *)
+      words, [p_2] is forwarded to [p_3] when cleanup is unsuccessful. Note this
+      means that if {e both} the protected code and the cleanup fail, the
+      cleanup exception has precedence. *)
 
 val try_bind : (unit -> 'a t) -> ('a -> 'b t) -> (exn -> 'b t) -> 'b t
 (** [Lwt.try_bind f g h] applies [f ()], and then makes it so that:
@@ -796,6 +796,25 @@ val try_bind : (unit -> 'a t) -> ('a -> 'b t) -> (exn -> 'b t) -> 'b t
       performing any operation on one is equivalent to performing it on the
       other. *)
 
+val dont_wait : (unit -> unit t) -> (exn -> unit) -> unit
+(** [Lwt.dont_wait f handler] applies [f ()], which returns a promise, and then
+    makes it so that if the promise is {{: #TYPEt} {e rejected}}, the exception
+    is passed to [handler].
+
+    In addition, if [f ()] raises an exception, it is also passed to [handler].
+
+    As the name implies, [dont_wait (fun () -> <e>) handler] is a way to
+    evaluate the expression [<e>] (which typically has asynchronous
+    side-effects) {e without waiting} for the resolution of the promise [<e>]
+    evaluates to.
+
+    [dont_wait] is meant as an alternative to {!async} with a local, explicit,
+    predictable exception handler.
+
+    Note that [dont_wait f h] causes [f ()] to be evaluated immediately.
+    Consequently, the non-yielding/non-pausing prefix of the body of [f] is
+    evaluated immediately. *)
+
 val async : (unit -> unit t) -> unit
 (** [Lwt.async f] applies [f ()], which returns a promise, and then makes it so
     that if the promise is {{: #TYPEt} {e rejected}}, the exception is passed to
@@ -805,7 +824,8 @@ val async : (unit -> unit t) -> unit
     [!]{!Lwt.async_exception_hook}.
 
     [!]{!Lwt.async_exception_hook} typically prints an error message and
-    terminates the program.
+    terminates the program. If you need a similar behaviour with a different
+    exception handler, you can use {!Lwt.dont_wait}.
 
     [Lwt.async] is misleadingly named. Itself, it has nothing to do with
     asynchronous execution. It's actually a safety function for making Lwt
@@ -872,8 +892,8 @@ val async_exception_hook : (exn -> unit) ref
 (** Reference to a function, to be called on an "unhandled" exception.
 
     This reference is used by {!Lwt.async}, {!Lwt.on_cancel}, {!Lwt.on_success},
-    {!Lwt.on_failure}, {!Lwt.on_termination}, {!Lwt.on_any}, and the deprecated
-    {!Lwt.ignore_result}.
+    {!Lwt.on_failure}, {!Lwt.on_termination}, {!Lwt.on_any},
+    {!Lwt_react.of_stream}, and the deprecated {!Lwt.ignore_result}.
 
     The initial, default implementation prints the exception, then terminates
     the process with non-zero exit status, as if the exception had reached the
@@ -1174,18 +1194,82 @@ val on_cancel : _ t -> (unit -> unit) -> unit
     [!]{!Lwt.async_exception_hook}, which terminates the process by default. *)
 
 val protected : 'a t -> 'a t
-(** [Lwt.protected p] creates a {{: #VALcancel} cancelable} promise [p'] with
-    the same state as [p]. However, cancellation, the backwards search described
-    in {!Lwt.cancel}, stops at [p'], and does not continue to [p]. *)
+(** [Lwt.protected p] creates a {{: #VALcancel} cancelable} promise [p']. The
+    original state of [p'] is the same as the state of [p] at the time of the
+    call.
+
+    The state of [p'] can change in one of two ways:
+    a. if [p] changes state (i.e., is resolved), then [p'] eventually changes
+       state to match [p]'s, and
+    b. during cancellation, if the backwards search described in {!Lwt.cancel}
+       reaches [p'] then it changes state to {!Rejected} [Canceled] and the
+       search stops.
+
+    As a consequence of the b. case, [Lwt.cancel (protected p)] does not cancel
+    [p].
+
+    The promise [p] can still be canceled either directly (through [Lwt.cancel p])
+    or being reached by the backwards cancellation search via another path.
+    [Lwt.protected] only prevents cancellation of [p] through [p']. *)
 
 val no_cancel : 'a t -> 'a t
-(** [Lwt.no_cancel p] creates a non-{{: #VALcancel}cancelable} promise [p'],
-    with the same state as [p]. Cancellation, the backwards search described in
-    {!Lwt.cancel}, stops at [p'], and does not continue to [p].
+(** [Lwt.no_cancel p] creates a non-{{: #VALcancel}cancelable} promise [p']. The
+    original state of [p'] is the same as [p] at the time of the call.
 
-    Note that [p'] can still be canceled if [p] is canceled. [Lwt.no_cancel]
-    only prevents cancellation of [p] and [p'] through [p']. *)
+    If the state of [p] changes, then the state of [p'] eventually changes too
+    to match [p]'s.
 
+    Note that even though [p'] is non-{{: #VALcancel}cancelable}, it can still
+    become canceled if [p] is canceled. [Lwt.no_cancel] only prevents
+    cancellation of [p] and [p'] through [p']. *)
+
+val wrap_in_cancelable : 'a t -> 'a t
+(** [Lwt.wrap_in_cancelable p] creates a {{: #VALcancel} cancelable} promise
+    [p']. The original state of [p'] is the same as [p].
+
+    The state of [p'] can change in one of two ways:
+    a. if [p] changes state (i.e., is resolved), then [p'] eventually changes
+       state to match [p]'s, and
+    b. during cancellation, if the backwards search described in {!Lwt.cancel}
+       reaches [p'] then it changes state to {!Rejected} [Canceled] and the
+       search continues to [p].
+*)
+
+(** {3 Cancellation tweaks}
+
+  The primitives [protected], [no_cancel], and [wrap_in_cancelable] give you
+  some level of control over the cancellation mechanism of Lwt. Note that
+  promises passed as arguments to either of these three functions are unchanged.
+  The functions return new promises with a specific cancellation behaviour.
+
+  The three behaviour of all three functions are summarised in the following
+  table.
+
+{[
+  +----------------------------+--------------------+--------------------+
+  |     setup - action         | cancel p           | cancel p'          |
+  +----------------------------+--------------------+--------------------+
+  | p is cancelable            | p is canceled      | p is not canceled  |
+  | p' = protected p           | p'  is canceled    | p' is canceled     |
+  +----------------------------+--------------------+--------------------+
+  | p is not cancelable        | p is not canceled  | p is not canceled  |
+  | p' = protected p           | p' is not canceled | p' is canceled     |
+  +----------------------------+--------------------+--------------------+
+  | p is cancelable            | p is canceled      | p is not canceled  |
+  | p' = no_cancel p           | p' is canceled     | p' is not canceled |
+  +----------------------------+--------------------+--------------------+
+  | p is not cancelable        | p is not canceled  | p is not canceled  |
+  | p' = no_cancel p           | p' is not canceled | p' is not canceled |
+  +----------------------------+--------------------+--------------------+
+  | p is cancelable            | p is canceled      | p is canceled      |
+  | p' = wrap_in_cancelable p  | p' is canceled     | p' is canceled     |
+  +----------------------------+--------------------+--------------------+
+  | p is not cancelable        | p is not canceled  | p is not canceled  |
+  | p' = wrap_in_cancelable p  | p' is not canceled | p' is canceled     |
+  +----------------------------+--------------------+--------------------+
+]}
+
+*)
 
 
 (** {2 Convenience} *)
@@ -1376,6 +1460,28 @@ let () =
       ppx_let}.
 
       @since 4.2.0 *)
+  module Let_syntax :
+  sig
+    val return : 'a -> 'a t
+    (** See {!Lwt.return}. *)
+
+    val map : 'a t -> f:('a -> 'b) -> 'b t
+    (** See {!Lwt.map}. *)
+
+    val bind : 'a t -> f:('a -> 'b t) -> 'b t
+    (** See {!Lwt.bind}. *)
+
+    val both : 'a t -> 'b t -> ('a * 'b) t
+    (** See {!Lwt.both}. *)
+
+    module Open_on_rhs :
+    sig
+    end
+  end
+end
+
+module Let_syntax :
+sig
   module Let_syntax :
   sig
     val return : 'a -> 'a t
@@ -1819,6 +1925,12 @@ val register_pause_notifier : (int -> unit) -> unit
 
     This function is intended for internal use by Lwt. *)
 
+val abandon_paused : unit -> unit
+(** Causes promises created with {!Lwt.pause} to remain forever pending. See
+    {!Lwt_main.abandon_yielded_and_paused}.
+
+    This function is intended for internal use by Lwt. *)
+
 (**/**)
 
 
@@ -1940,7 +2052,7 @@ val ignore_result : _ t -> unit
 
     - If [p] is already fulfilled, [Lwt.ignore_result p] does nothing.
     - If [p] is already rejected with [exn], [Lwt.ignore_result p] raises [exn]
-      immedaitely.
+      immediately.
     - If [p] is pending, [Lwt.ignore_result p] does nothing, but if [p] becomes
       rejected later, the exception is passed to [!]{!Lwt.async_exception_hook}.
 

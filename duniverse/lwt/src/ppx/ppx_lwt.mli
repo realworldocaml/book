@@ -161,4 +161,4 @@ else
 *)
 
 
-val mapper : Migrate_parsetree.OCaml_410.Ast.Ast_mapper.mapper
+class mapper : Ppxlib.Ast_traverse.map

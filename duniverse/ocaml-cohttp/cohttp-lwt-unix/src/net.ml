@@ -18,39 +18,30 @@
  * into some connection-management framework such as andrenth/release *)
 
 open Lwt.Infix
-
 module IO = Io
 
-type ctx = {
-  ctx: Conduit_lwt_unix.ctx;
-  resolver: Resolver_lwt.t;
-} [@@deriving sexp_of]
+type ctx = { ctx : Conduit_lwt_unix.ctx; resolver : Resolver_lwt.t }
+[@@deriving sexp_of]
 
-let init ?(ctx=Conduit_lwt_unix.default_ctx)
-         ?(resolver=Resolver_lwt_unix.system) () =
+let init ?(ctx = Conduit_lwt_unix.default_ctx)
+    ?(resolver = Resolver_lwt_unix.system) () =
   { ctx; resolver }
 
-let default_ctx = {
-  resolver = Resolver_lwt_unix.system;
-  ctx = Conduit_lwt_unix.default_ctx;
-}
+let default_ctx =
+  { resolver = Resolver_lwt_unix.system; ctx = Conduit_lwt_unix.default_ctx }
 
-let connect_uri ~ctx uri =
-  Resolver_lwt.resolve_uri ~uri ctx.resolver
-  >>= fun endp ->
-  Conduit_lwt_unix.endp_to_client ~ctx:ctx.ctx endp
-  >>= fun client ->
-  Conduit_lwt_unix.connect ~ctx:ctx.ctx client
+let connect_uri ~ctx:{ ctx; resolver } uri =
+  Resolver_lwt.resolve_uri ~uri resolver >>= fun endp ->
+  Conduit_lwt_unix.endp_to_client ~ctx endp >>= fun client ->
+  Conduit_lwt_unix.connect ~ctx client
 
-let close c = Lwt.catch
-  (fun () -> Lwt_io.close c)
-  (fun e ->
-    Logs.warn (fun f -> f "Closing channel failed: %s" (Printexc.to_string e));
-    Lwt.return_unit
-  )
+let close c =
+  Lwt.catch
+    (fun () -> Lwt_io.close c)
+    (fun e ->
+      Logs.warn (fun f -> f "Closing channel failed: %s" (Printexc.to_string e));
+      Lwt.return_unit)
 
 let close_in ic = Lwt.ignore_result (close ic)
-
 let close_out oc = Lwt.ignore_result (close oc)
-
 let close ic oc = Lwt.ignore_result (close ic >>= fun () -> close oc)

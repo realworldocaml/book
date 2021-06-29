@@ -165,13 +165,29 @@ let find_and_call t key ~if_found ~if_not_found =
     Avltree.find_and_call tree ~compare:(compare_key t) key ~if_found ~if_not_found
 ;;
 
-let find_and_call1 t key arg ~if_found ~if_not_found =
+let find_and_call1 t key ~a ~if_found ~if_not_found =
   match t.table.(slot t key) with
-  | Avltree.Empty -> if_not_found key arg
+  | Avltree.Empty -> if_not_found key a
   | Avltree.Leaf { key = k; value = v } ->
-    if compare_key t k key = 0 then if_found v arg else if_not_found key arg
+    if compare_key t k key = 0 then if_found v a else if_not_found key a
   | tree ->
-    Avltree.find_and_call1 tree ~compare:(compare_key t) key arg ~if_found ~if_not_found
+    Avltree.find_and_call1 tree ~compare:(compare_key t) key ~a ~if_found ~if_not_found
+;;
+
+let find_and_call2 t key ~a ~b ~if_found ~if_not_found =
+  match t.table.(slot t key) with
+  | Avltree.Empty -> if_not_found key a b
+  | Avltree.Leaf { key = k; value = v } ->
+    if compare_key t k key = 0 then if_found v a b else if_not_found key a b
+  | tree ->
+    Avltree.find_and_call2
+      tree
+      ~compare:(compare_key t)
+      key
+      ~a
+      ~b
+      ~if_found
+      ~if_not_found
 ;;
 
 let findi_and_call t key ~if_found ~if_not_found =
@@ -184,6 +200,31 @@ let findi_and_call t key ~if_found ~if_not_found =
     if compare_key t k key = 0 then if_found ~key:k ~data:v else if_not_found key
   | tree ->
     Avltree.findi_and_call tree ~compare:(compare_key t) key ~if_found ~if_not_found
+;;
+
+let findi_and_call1 t key ~a ~if_found ~if_not_found =
+  match t.table.(slot t key) with
+  | Avltree.Empty -> if_not_found key a
+  | Avltree.Leaf { key = k; value = v } ->
+    if compare_key t k key = 0 then if_found ~key:k ~data:v a else if_not_found key a
+  | tree ->
+    Avltree.findi_and_call1 tree ~compare:(compare_key t) key ~a ~if_found ~if_not_found
+;;
+
+let findi_and_call2 t key ~a ~b ~if_found ~if_not_found =
+  match t.table.(slot t key) with
+  | Avltree.Empty -> if_not_found key a b
+  | Avltree.Leaf { key = k; value = v } ->
+    if compare_key t k key = 0 then if_found ~key:k ~data:v a b else if_not_found key a b
+  | tree ->
+    Avltree.findi_and_call2
+      tree
+      ~compare:(compare_key t)
+      key
+      ~a
+      ~b
+      ~if_found
+      ~if_not_found
 ;;
 
 let find =
@@ -296,7 +337,7 @@ let find_exn =
     raise
       (Not_found_s (List [ Atom "Hashtbl.find_exn: not found"; t.hashable.sexp_of_t k ]))
   in
-  let find_exn t key = find_and_call1 t key t ~if_found ~if_not_found in
+  let find_exn t key = find_and_call1 t key ~a:t ~if_found ~if_not_found in
   (* named to preserve symbol in compiled binary *)
   find_exn
 ;;
@@ -358,16 +399,17 @@ let partition_mapi t ~f =
     create ~growth_allowed:t.growth_allowed ~hashable:t.hashable ~size:t.length ()
   in
   iteri t ~f:(fun ~key ~data ->
-    match f ~key ~data with
-    | `Fst new_data -> set t0 ~key ~data:new_data
-    | `Snd new_data -> set t1 ~key ~data:new_data);
+    match (f ~key ~data : _ Either.t) with
+    | First new_data -> set t0 ~key ~data:new_data
+    | Second new_data -> set t1 ~key ~data:new_data);
   t0, t1
 ;;
 
 let partition_map t ~f = partition_mapi t ~f:(fun ~key:_ ~data -> f data)
 
 let partitioni_tf t ~f =
-  partition_mapi t ~f:(fun ~key ~data -> if f ~key ~data then `Fst data else `Snd data)
+  partition_mapi t ~f:(fun ~key ~data ->
+    if f ~key ~data then First data else Second data)
 ;;
 
 let partition_tf t ~f = partitioni_tf t ~f:(fun ~key:_ ~data -> f data)
@@ -458,23 +500,6 @@ let create_mapped ?growth_allowed ?size ~hashable ~get_key ~get_data rows =
   | [] -> `Ok res
   | keys -> `Duplicate_keys (List.dedup_and_sort ~compare:hashable.Hashable.compare keys)
 ;;
-
-(*
-   {[
-     let create_mapped_exn ?growth_allowed ?size ~hashable ~get_key ~get_data rows =
-       let size = match size with Some s -> s | None -> List.length rows in
-       let res = create ?growth_allowed ~size ~hashable () in
-       List.iter rows ~f:(fun r ->
-         let key = get_key r in
-         let data = get_data r in
-         if mem res key then
-           let sexp_of_key = hashable.Hashable.sexp_of_t in
-           failwiths "Hashtbl.create_mapped_exn: duplicate key" key <:sexp_of< key >>
-         else
-           replace res ~key ~data);
-       res
-     ;;
-   ]} *)
 
 let create_mapped_multi ?growth_allowed ?size ~hashable ~get_key ~get_data rows =
   let size =
@@ -617,15 +642,11 @@ let merge =
     new_t
 ;;
 
-type 'a merge_into_action =
-  | Remove
-  | Set_to of 'a
-
 let merge_into ~src ~dst ~f =
   iteri src ~f:(fun ~key ~data ->
     let dst_data = find dst key in
     let action = without_mutating dst (fun () -> f ~key data dst_data) in
-    match action with
+    match (action : _ Merge_into_action.t) with
     | Remove -> remove dst key
     | Set_to data ->
       (match dst_data with
@@ -662,7 +683,7 @@ let mapi_inplace t ~f =
 
 let map_inplace t ~f = mapi_inplace t ~f:(fun ~key:_ ~data -> f data)
 
-let equal t t' equal =
+let equal equal t t' =
   length t = length t'
   && with_return (fun r ->
     without_mutating t' (fun () ->
@@ -676,10 +697,6 @@ let equal t t' equal =
 let similar = equal
 
 module Accessors = struct
-  type nonrec 'a merge_into_action = 'a merge_into_action =
-    | Remove
-    | Set_to of 'a
-
   let invariant = invariant
   let choose = choose
   let choose_exn = choose_exn
@@ -723,7 +740,11 @@ module Accessors = struct
   let find = find
   let find_exn = find_exn
   let find_and_call = find_and_call
+  let find_and_call1 = find_and_call1
+  let find_and_call2 = find_and_call2
   let findi_and_call = findi_and_call
+  let findi_and_call1 = findi_and_call1
+  let findi_and_call2 = findi_and_call2
   let find_and_remove = find_and_remove
   let to_alist = to_alist
   let validate = validate
@@ -886,17 +907,17 @@ end
 
 module type Sexp_of_m = sig
   type t [@@deriving_inline sexp_of]
-  include
-    sig [@@@ocaml.warning "-32"] val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-    end[@@ocaml.doc "@inline"]
+
+  val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
   [@@@end]
 end
 
 module type M_of_sexp = sig
   type t [@@deriving_inline of_sexp]
-  include
-    sig [@@@ocaml.warning "-32"] val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
-    end[@@ocaml.doc "@inline"]
+
+  val t_of_sexp : Ppx_sexp_conv_lib.Sexp.t -> t
+
   [@@@end]
 
   include Key.S with type t := t

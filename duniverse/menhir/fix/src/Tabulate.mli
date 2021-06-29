@@ -10,9 +10,13 @@
 (*                                                                            *)
 (******************************************************************************)
 
+(**[Tabulate] offers facilities for tabulating a function, that is, eagerly
+   evaluating this function at every point in its domain, so as to obtain an
+   equivalent function that can be queried in constant time. *)
+
 open Sigs
 
-(* [Make] constructs a tabulator for a finite type that is
+(**[Make] constructs a tabulator for a finite type that is
    equipped with an implementation of imperative maps. *)
 
 module Make
@@ -20,7 +24,7 @@ module Make
   (M : MINIMAL_IMPERATIVE_MAPS with type key = F.t)
      : TABULATOR with type key = F.t
 
-(* [ForOrderedType] is a special case of [Make] where it
+(**[ForOrderedType] is a special case of [Make] where it
    suffices to pass a finite ordered type as an argument.
    A reference to a persistent map is used to hold the table. *)
 
@@ -29,7 +33,7 @@ module ForOrderedType
   (T : OrderedType with type t = F.t)
      : TABULATOR with type key = F.t
 
-(* [ForOrderedType] is a special case of [Make] where it
+(**[ForOrderedType] is a special case of [Make] where it
    suffices to pass a finite hashed type as an argument.
    A reference to a persistent map is used to hold the table. *)
 
@@ -38,14 +42,14 @@ module ForHashedType
   (T : HashedType with type t = F.t)
      : TABULATOR with type key = F.t
 
-(* [ForOrderedType] is a special case of [Make] where it suffices to
+(**[ForOrderedType] is a special case of [Make] where it suffices to
    pass an arbitrary finite type as an argument. A reference to a
    persistent map is used to hold the table. *)
 
 module ForType (F : FINITE_TYPE)
      : TABULATOR with type key = F.t
 
-(* [ForIntSegment] constructs a tabulator for the integer segment [0..n).
+(**[ForIntSegment] constructs a tabulator for the integer segment [\[0..n)].
    An array is used to hold the table. *)
 
 module ForIntSegment

@@ -14,47 +14,62 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * cohttp v2.5.1
+ * cohttp v4.0.0
  *)
 
 open Lwt.Infix
 
-module Channel = Mirage_channel.Make(Conduit_mirage.Flow)
-module HTTP_IO = Io.Make(Channel)
+module Make
+    (P : Mirage_clock.PCLOCK)
+    (R : Resolver_mirage.S)
+    (S : Conduit_mirage.S) =
+struct
+  module Channel = Mirage_channel.Make (S.Flow)
+  module HTTP_IO = Io.Make (Channel)
+  module Endpoint = Conduit_mirage.Endpoint (P)
 
-module Net_IO = struct
+  module Net_IO = struct
+    module IO = HTTP_IO
 
-  module IO = HTTP_IO
+    type ctx = {
+      resolver : R.t;
+      conduit : S.t option;
+      authenticator : X509.Authenticator.t option;
+    }
 
-  type ctx = {
-    resolver: Resolver_lwt.t;
-    conduit : Conduit_mirage.t;
-  }
+    let sexp_of_ctx { resolver; _ } = R.sexp_of_t resolver
 
-  let sexp_of_ctx { resolver; _ } = Resolver_lwt.sexp_of_t resolver
+    let default_ctx =
+      { resolver = R.localhost; conduit = None; authenticator = None }
 
-  let default_ctx =
-    { resolver = Resolver_mirage.localhost; conduit = Conduit_mirage.empty }
+    let connect_uri ~ctx:{ resolver; conduit; authenticator } uri =
+      R.resolve_uri ~uri resolver >>= fun endp ->
+      Endpoint.client ?tls_authenticator:authenticator endp >>= fun client ->
+      match conduit with
+      | None -> failwith "conduit not initialised"
+      | Some c ->
+          S.connect c client >>= fun flow ->
+          let ch = Channel.create flow in
+          Lwt.return (flow, ch, ch)
 
-  let connect_uri ~ctx uri =
-    Resolver_lwt.resolve_uri ~uri ctx.resolver >>= fun endp ->
-    Conduit_mirage.client endp >>= fun client ->
-    Conduit_mirage.connect ctx.conduit client >>= fun flow ->
-    let ch = Channel.create flow in
-    Lwt.return (flow, ch, ch)
+    let close_in _ = ()
+    let close_out _ = ()
 
-  let close_in _ = ()
-  let close_out _ = ()
-  let close ic _oc = Lwt.ignore_result @@ Lwt.catch
-    (fun () -> Channel.close ic)
-    (fun e  ->
-      Logs.warn (fun f ->
-        f "Closing channel failed: %s" (Printexc.to_string e));
-      Lwt.return @@ Ok ()
-    )
+    let close ic _oc =
+      Lwt.ignore_result
+      @@ Lwt.catch
+           (fun () -> Channel.close ic)
+           (fun e ->
+             Logs.warn (fun f ->
+                 f "Closing channel failed: %s" (Printexc.to_string e));
+             Lwt.return @@ Ok ())
+  end
 
+  let ctx ?authenticator resolver conduit =
+    { Net_IO.resolver; conduit = Some conduit; authenticator }
+
+  let with_authenticator a ctx = { ctx with Net_IO.authenticator = Some a }
+
+  (* Build all the core modules from the [Cohttp_lwt] functors *)
+  include Cohttp_lwt.Make_client (HTTP_IO) (Net_IO)
 end
-let ctx resolver conduit = { Net_IO.resolver; conduit }
-
-(* Build all the core modules from the [Cohttp_lwt] functors *)
-include Cohttp_lwt.Make_client(HTTP_IO)(Net_IO)

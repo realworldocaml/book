@@ -39,6 +39,7 @@ module Unix = struct
                      | `Eof
                      | `Error of exn ] ;
     mutable linger : Cstruct.t option ;
+    recv_buf       : Cstruct.t ;
   }
 
   let safely th =
@@ -57,13 +58,11 @@ module Unix = struct
 
   let when_some f = function None -> return_unit | Some x -> f x
 
-  let recv_buf = Cstruct.create 4096
-
   let rec read_react t =
 
     let handle tls buf =
       match Tls.Engine.handle_tls tls buf with
-      | `Ok (state', `Response resp, `Data data) ->
+      | Ok (state', `Response resp, `Data data) ->
           let state' = match state' with
             | `Ok tls  -> `Active tls
             | `Eof     -> `Eof
@@ -73,7 +72,7 @@ module Unix = struct
           safely (resp |> when_some (write_t t)) >|= fun () ->
           `Ok data
 
-      | `Fail (alert, `Response resp) ->
+      | Error (alert, `Response resp) ->
           t.state <- `Error (Tls_failure alert) ;
           write_t t resp >>= fun () -> read_react t
     in
@@ -82,10 +81,10 @@ module Unix = struct
     | `Error e  -> fail e
     | `Eof      -> return `Eof
     | `Active _ ->
-        read_t t recv_buf >>= fun n ->
+        read_t t t.recv_buf >>= fun n ->
         match (t.state, n) with
         | (`Active _  , 0) -> t.state <- `Eof ; return `Eof
-        | (`Active tls, n) -> handle tls (Cstruct.sub recv_buf 0 n)
+        | (`Active tls, n) -> handle tls (Cstruct.sub t.recv_buf 0 n)
         | (`Error e, _)    -> fail e
         | (`Eof, _)        -> return `Eof
 
@@ -129,11 +128,10 @@ module Unix = struct
    * *)
   let rec drain_handshake t =
     let push_linger t mcs =
-      let open Tls.Utils.Cs in
       match (mcs, t.linger) with
       | (None, _)         -> ()
       | (scs, None)       -> t.linger <- scs
-      | (Some cs, Some l) -> t.linger <- Some (l <+> cs)
+      | (Some cs, Some l) -> t.linger <- Some (Cstruct.append l cs)
     in
     match t.state with
     | `Active tls when not (Tls.Engine.handshake_in_progress tls) ->
@@ -181,9 +179,10 @@ module Unix = struct
 
   let server_of_fd config fd =
     drain_handshake {
-      state  = `Active (Tls.Engine.server config) ;
-      fd     = fd ;
-      linger = None ;
+      state    = `Active (Tls.Engine.server config) ;
+      fd       = fd ;
+      linger   = None ;
+      recv_buf = Cstruct.create 4096
     }
 
   let client_of_fd config ?host fd =
@@ -192,9 +191,10 @@ module Unix = struct
       | Some host -> Tls.Config.peer config host
     in
     let t = {
-      state  = `Eof ;
-      fd     = fd ;
-      linger = None ;
+      state    = `Eof ;
+      fd       = fd ;
+      linger   = None ;
+      recv_buf = Cstruct.create 4096
     } in
     let (tls, init) = Tls.Engine.client config' in
     let t = { t with state  = `Active tls } in
@@ -224,9 +224,9 @@ module Unix = struct
     match t.state with
     | `Active tls -> ( match Tls.Engine.epoch tls with
         | `InitialEpoch -> assert false (* can never occur! *)
-        | `Epoch data   -> `Ok data )
-    | `Eof      -> `Error
-    | `Error _  -> `Error
+        | `Epoch data   -> Ok data )
+    | `Eof      -> Error ()
+    | `Error _  -> Error ()
 end
 
 
@@ -259,3 +259,14 @@ let accept certificate =
 and connect authenticator addr =
   let config = Tls.Config.client ~authenticator ()
   in connect_ext config addr
+
+(* Boot the entropy loop at module init time. *)
+let () = Mirage_crypto_rng_lwt.initialize ()
+
+let () =
+  Printexc.register_printer (function
+      | Tls_alert typ ->
+        Some ("TLS alert from peer: " ^ Tls.Packet.alert_type_to_string typ)
+      | Tls_failure f ->
+        Some ("TLS failure: " ^ Tls.Engine.string_of_failure f)
+      | _ -> None)

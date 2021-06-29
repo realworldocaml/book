@@ -10,9 +10,13 @@
 (*                                                                            *)
 (******************************************************************************)
 
+(**[Numbering] offers a facility for assigning a unique number to each value
+    in a certain finite set and translating (both ways) between values and
+    their numbers. *)
+
 open Sigs
 
-(* The functor [Make] requires an implementation of maps for the type [M.key]
+(**The functor [Make] requires an implementation of maps for the type [M.key]
    and offers a two-phase numbering facility. The function [encode] is backed
    by a map, therefore runs in logarithmic time or constant time, depending on
    the type of map that is used. The function [decode] is backed by an array
@@ -22,21 +26,21 @@ module Make
   (M : IMPERATIVE_MAPS)
      : TWO_PHASE_NUMBERING with type t = M.key
 
-(* [ForOrderedType] is a special case of [Make] where it suffices for
+(**[ForOrderedType] is a special case of [Make] where it suffices for
    keys to be ordered. *)
 
 module ForOrderedType
   (T : OrderedType)
      : TWO_PHASE_NUMBERING with type t = T.t
 
-(* [ForHashedType] is a special case of [Make] where it suffices for
+(**[ForHashedType] is a special case of [Make] where it suffices for
    keys to be hashed. *)
 
 module ForHashedType
   (T : HashedType)
      : TWO_PHASE_NUMBERING with type t = T.t
 
-(* [ForType] is a special case of [Make] where keys can have arbitrary type.
+(**[ForType] is a special case of [Make] where keys can have arbitrary type.
    OCaml's built-in generic equality and hash functions are used. *)
 
 module ForType

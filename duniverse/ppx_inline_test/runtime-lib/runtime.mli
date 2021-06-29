@@ -23,11 +23,7 @@ val unset_lib : string -> unit
 val test : ((unit -> bool) -> unit) test_function_args
 val test_unit : ((unit -> unit) -> unit) test_function_args
 val test_module : ((unit -> unit) -> unit) test_function_args
-val summarize : unit -> Test_result.t
-  [@@deprecated "[since 2016-04] use add_evaluator instead"]
 
-(** These values are meant to be used inside a user's tests. *)
-val collect : (unit -> unit) -> (unit -> unit) list
 
 (** [`Am_test_runner] means the [./inline_tests_runner] process, whereas
     [`Am_child_of_test_runner] means a process descended from the test runner. *)

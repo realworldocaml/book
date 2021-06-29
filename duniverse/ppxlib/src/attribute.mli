@@ -191,7 +191,7 @@ val explicitly_drop : Ast_traverse.iter
 (** Raise if there are unused attributes *)
 val check_unused : Ast_traverse.iter
 
-(** Collect all attribute names. To be used in conjuction with
+(** Collect all attribute names. To be used in conjunction with
     {!check_all_seen}. *)
 val collect : Ast_traverse.iter
 

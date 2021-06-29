@@ -25,7 +25,7 @@
         { foo: int;
           bar: float;
         }
-      [@@deriving_inline fields][@@@end]
+      [@@deriving fields]
 
       let validate t =
         let module V = Validate in

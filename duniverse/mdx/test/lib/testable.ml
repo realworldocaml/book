@@ -19,3 +19,18 @@ let ocaml_delimiter =
     | Part_end -> Fmt.string fs "Part_end"
   in
   Alcotest.testable pp ( = )
+
+let library_set =
+  let open Mdx.Library in
+  let equal = Set.equal in
+  let pp fmt set =
+    let l = Set.elements set in
+    Fmt.string fmt "[ ";
+    Fmt.(list ~sep:(const string "; ") pp) fmt l;
+    Fmt.string fmt " ]"
+  in
+  Alcotest.testable pp equal
+
+let block = Alcotest.testable Mdx.Block.dump ( = )
+
+let header = Alcotest.testable Mdx.Block.Header.pp ( = )

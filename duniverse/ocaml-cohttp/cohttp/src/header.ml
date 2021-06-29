@@ -18,58 +18,78 @@
 
 module LString : sig
   type t
-  val of_string: string -> t
-  val to_string: t -> string
-  val compare: t -> t -> int
+
+  val of_string : string -> t
+  val to_string : t -> string
+  val compare : t -> t -> int
 end = struct
   type t = string
+
   let of_string x = String.lowercase_ascii x
   let to_string x = x
   let compare a b = String.compare a b
 end
 
-module StringMap = Map.Make(LString)
+module StringMap = Map.Make (LString)
+
 type t = string list StringMap.t
 
 let user_agent = Printf.sprintf "ocaml-cohttp/%s" Conf.version
-
 let compare = StringMap.compare Stdlib.compare
 
-let headers_with_list_values = Array.map LString.of_string [|
-  "accept";"accept-charset";"accept-encoding";"accept-language";
-  "accept-ranges";"allow";"cache-control";"connection";"content-encoding";
-  "content-language";"expect";"if-match";"if-none-match";"link";"pragma";
-  "proxy-authenticate";"te";"trailer";"transfer-encoding";"upgrade";
-  "vary";"via";"warning";"www-authenticate"; |]
+let headers_with_list_values =
+  Array.map LString.of_string
+    [|
+      "accept";
+      "accept-charset";
+      "accept-encoding";
+      "accept-language";
+      "accept-ranges";
+      "allow";
+      "cache-control";
+      "connection";
+      "content-encoding";
+      "content-language";
+      "expect";
+      "if-match";
+      "if-none-match";
+      "link";
+      "pragma";
+      "proxy-authenticate";
+      "te";
+      "trailer";
+      "transfer-encoding";
+      "upgrade";
+      "vary";
+      "via";
+      "warning";
+      "www-authenticate";
+    |]
+
+let is_transfer_encoding =
+  let k = LString.of_string "transfer-encoding" in
+  fun k' -> LString.compare k k' = 0
 
 let is_header_with_list_value =
   let tbl = Hashtbl.create (Array.length headers_with_list_values) in
   headers_with_list_values |> Array.iter (fun h -> Hashtbl.add tbl h ());
   fun h -> Hashtbl.mem tbl h
 
-let init () =
-  StringMap.empty
-
+let init () = StringMap.empty
 let is_empty x = StringMap.is_empty x
-
-let init_with k v =
-  StringMap.singleton (LString.of_string k) [v]
+let init_with k v = StringMap.singleton (LString.of_string k) [ v ]
 
 let add h k v =
   let k = LString.of_string k in
-  try StringMap.add k (v::(StringMap.find k h)) h
-  with Not_found -> StringMap.add k [v] h
+  try
+    if is_transfer_encoding k then
+      StringMap.add k (StringMap.find k h @ [ v ]) h
+    else StringMap.add k (v :: StringMap.find k h) h
+  with Not_found -> StringMap.add k [ v ] h
 
-let add_list h l =
-  List.fold_left (fun h (k, v) -> add h k v) h l
-
-let add_multi h k l =
-  List.fold_left (fun h v -> add h k v) h l
-
-let add_opt h k v =
-  match h with
-  |None -> init_with k v
-  |Some h -> add h k v
+let add_list h l = List.fold_left (fun h (k, v) -> add h k v) h l
+let add_multi h k l = List.fold_left (fun h v -> add h k v) h l
+let add_opt h k v = match h with None -> init_with k v | Some h -> add h k v
 
 let remove h k =
   let k = LString.of_string k in
@@ -77,65 +97,76 @@ let remove h k =
 
 let replace h k v =
   let k = LString.of_string k in
-  StringMap.add k [v] h
+  StringMap.add k [ v ] h
 
 let get h k =
   let k = LString.of_string k in
   try
     let v = StringMap.find k h in
-    if is_header_with_list_value k
-    then Some (String.concat "," v)
+    if is_header_with_list_value k then Some (String.concat "," v)
     else Some (List.hd v)
   with Not_found | Failure _ -> None
 
-let mem h k = StringMap.mem (LString.of_string k) h
+let update h k f =
+  let vorig = get h k in
+  let k = LString.of_string k in
+  match (f vorig, vorig) with
+  | None, _ -> StringMap.remove k h
+  | Some s, Some s' when s == s' -> h
+  | Some s, _ ->
+      let v' =
+        if is_header_with_list_value k then String.split_on_char ',' s
+        else [ s ]
+      in
+      StringMap.add k v' h
 
-let add_unless_exists h k v =
-  if mem h k
-  then h
-  else add h k v
+let mem h k = StringMap.mem (LString.of_string k) h
+let add_unless_exists h k v = if mem h k then h else add h k v
 
 let add_opt_unless_exists h k v =
-  match h with
-  | None -> init_with k v
-  | Some h -> add_unless_exists h k v
+  match h with None -> init_with k v | Some h -> add_unless_exists h k v
 
 let get_multi h k =
   let k = LString.of_string k in
   try StringMap.find k h with Not_found -> []
 
-let map fn h = StringMap.mapi (fun k v -> fn (LString.to_string k) v)  h
-let iter fn h = ignore(map fn h)
-let fold fn h acc = StringMap.fold
-  (fun k v acc -> List.fold_left (fun acc v -> fn (LString.to_string k) v acc) acc v)
-  h acc
-let of_list l = List.fold_left (fun h (k,v) -> add h k v) (init ()) l
+let map fn h = StringMap.mapi (fun k v -> fn (LString.to_string k) v) h
+let iter fn h = ignore (map fn h)
 
-let to_list h = List.rev (fold (fun k v acc -> (k,v)::acc) h [])
+let fold fn h acc =
+  StringMap.fold
+    (fun k v acc ->
+      List.fold_left (fun acc v -> fn (LString.to_string k) v acc) acc v)
+    h acc
+
+let of_list l = List.fold_left (fun h (k, v) -> add h k v) (init ()) l
+let to_list h = List.rev (fold (fun k v acc -> (k, v) :: acc) h [])
 let header_line k v = Printf.sprintf "%s: %s\r\n" k v
-let to_lines h = List.rev (fold (fun k v acc -> (header_line k v)::acc) h [])
+let to_lines h = List.rev (fold (fun k v acc -> header_line k v :: acc) h [])
 
 let to_frames =
-  let to_frame k v acc = (Printf.sprintf "%s: %s" k v) :: acc in
+  let to_frame k v acc = Printf.sprintf "%s: %s" k v :: acc in
   fun h -> List.rev (fold to_frame h [])
 
 let to_string h =
   let b = Buffer.create 128 in
-  h |> iter (fun k v ->
-    v |> List.iter (fun v ->
-      Buffer.add_string b k;
-      Buffer.add_string b ": ";
-      Buffer.add_string b v;
-      Buffer.add_string b "\r\n"
-    );
-  );
+  h
+  |> iter (fun k v ->
+         v
+         |> List.iter (fun v ->
+                Buffer.add_string b k;
+                Buffer.add_string b ": ";
+                Buffer.add_string b v;
+                Buffer.add_string b "\r\n"));
   Buffer.add_string b "\r\n";
   Buffer.contents b
 
 let parse_content_range s =
   try
     let start, fini, total =
-      Scanf.sscanf s "bytes %Ld-%Ld/%Ld" (fun start fini total -> start, fini, total) in
+      Scanf.sscanf s "bytes %Ld-%Ld/%Ld" (fun start fini total ->
+          (start, fini, total))
+    in
     Some (start, fini, total)
   with Scanf.Scan_failure _ -> None
 
@@ -143,37 +174,32 @@ let parse_content_range s =
    number of bytes we attempt to read *)
 let get_content_range headers =
   match get headers "content-length" with
-  | Some clen -> (try Some (Int64.of_string clen) with _ -> None)
-  | None -> begin
-    match get headers "content-range" with
-    | Some range_s -> begin
-      match parse_content_range range_s with
-      | Some (start, fini, total) ->
-        (* some sanity checking before we act on these values *)
-        if fini < total && start <= total && 0L <= start && 0L <= total
-        then (
-          let num_bytes_to_read = Int64.add (Int64.sub fini start) 1L in
-          Some num_bytes_to_read
-        ) else None
-      | None -> None
-    end
-    | None -> None
-  end
+  | Some clen -> ( try Some (Int64.of_string clen) with _ -> None)
+  | None -> (
+      match get headers "content-range" with
+      | Some range_s -> (
+          match parse_content_range range_s with
+          | Some (start, fini, total) ->
+              (* some sanity checking before we act on these values *)
+              if fini < total && start <= total && 0L <= start && 0L <= total
+              then
+                let num_bytes_to_read = Int64.add (Int64.sub fini start) 1L in
+                Some num_bytes_to_read
+              else None
+          | None -> None)
+      | None -> None)
 
 let get_connection_close headers =
-  match get headers "connection" with
-  | Some "close" -> true
-  | _ -> false
-
+  match get headers "connection" with Some "close" -> true | _ -> false
 
 let media_type_re =
   let re = Re.Emacs.re ~case:true "[ \t]*\\([^ \t;]+\\)" in
-  Re.(compile (seq ([start; re])))
+  Re.(compile (seq [ start; re ]))
 
 let get_first_match _re s =
   try
     let subs = Re.exec ~pos:0 media_type_re s in
-    let (start, stop) = Re.Group.offset subs 1 in
+    let start, stop = Re.Group.offset subs 1 in
     Some (String.sub s start (stop - start))
   with Not_found -> None
 
@@ -200,21 +226,21 @@ let get_acceptable_languages headers =
 let get_transfer_encoding headers =
   match get headers "transfer-encoding" with
   | Some "chunked" -> Transfer.Chunked
-  | Some _ | None -> begin
-    match get_content_range headers with
-    |Some len -> Transfer.Fixed len
-    |None -> Transfer.Unknown
-  end
+  | Some _ | None -> (
+      match get_content_range headers with
+      | Some len -> Transfer.Fixed len
+      | None -> Transfer.Unknown)
 
 let add_transfer_encoding headers enc =
   let open Transfer in
   (* Only add a header if one doesnt already exist, e.g. from the app *)
-  match get_transfer_encoding headers, enc with
-  |Fixed _,_  (* App has supplied a content length, so use that *)
-  |Chunked, _ -> headers (* TODO: this is a protocol violation *)
-  |Unknown, Chunked -> add headers "transfer-encoding" "chunked"
-  |Unknown, Fixed len -> add headers "content-length" (Int64.to_string len)
-  |Unknown, Unknown -> headers
+  match (get_transfer_encoding headers, enc) with
+  | Fixed _, _ (* App has supplied a content length, so use that *) | Chunked, _
+    ->
+      headers (* TODO: this is a protocol violation *)
+  | Unknown, Chunked -> add headers "transfer-encoding" "chunked"
+  | Unknown, Fixed len -> add headers "content-length" (Int64.to_string len)
+  | Unknown, Unknown -> headers
 
 let add_authorization_req headers challenge =
   add headers "www-authenticate" (Auth.string_of_challenge challenge)
@@ -224,11 +250,11 @@ let add_authorization headers cred =
 
 let get_authorization headers =
   match get headers "authorization" with
-  |None -> None
-  |Some v -> Some (Auth.credential_of_string v)
+  | None -> None
+  | Some v -> Some (Auth.credential_of_string v)
 
 let is_form headers =
-  get_media_type headers = (Some "application/x-www-form-urlencoded")
+  get_media_type headers = Some "application/x-www-form-urlencoded"
 
 let get_location headers =
   match get headers "location" with
@@ -236,9 +262,10 @@ let get_location headers =
   | Some u -> Some (Uri.of_string u)
 
 let get_links headers =
-  List.rev (List.fold_left
-    (fun list link_s -> List.rev_append (Link.of_string link_s) list)
-    [] (get_multi headers "link"))
+  List.rev
+    (List.fold_left
+       (fun list link_s -> List.rev_append (Link.of_string link_s) list)
+       [] (get_multi headers "link"))
 
 let add_links headers links =
   add_multi headers "link" (List.map Link.to_string links)
@@ -246,8 +273,8 @@ let add_links headers links =
 let prepend_user_agent headers user_agent =
   let k = "user-agent" in
   match get headers k with
-    | Some ua -> replace headers k (user_agent^" "^ua)
-    | None -> add headers k user_agent
+  | Some ua -> replace headers k (user_agent ^ " " ^ ua)
+  | None -> add headers k user_agent
 
 let connection h =
   match get h "connection" with

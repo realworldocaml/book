@@ -1,6 +1,6 @@
 open! Core_kernel
 open Poly
-open Expect_test_helpers_kernel
+open Expect_test_helpers_core
 module Heap = Pairing_heap
 
 let%expect_test "Heap.sexp_of_t" =

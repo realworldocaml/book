@@ -1,7 +1,4 @@
-#use "topfind";;
 #require "base";;
-#load "ppxlib_metaquot_lifters.cmo";;
-#load "ppxlib_metaquot.cmo";;
 
 open Ppxlib
 
@@ -9,9 +6,9 @@ open Ppxlib
 let foo =
   Deriving.add "foo"
     ~str_type_decl:(Deriving.Generator.make_noarg
-                      (fun ~loc ~path:_ _ -> [%str let x = 42]))
+                      (fun ~loc ~path:_ _ -> [%str let foo = 42]))
     ~sig_type_decl:(Deriving.Generator.make_noarg
-                      (fun ~loc ~path:_ _ -> [%sig: val y : int]))
+                      (fun ~loc ~path:_ _ -> [%sig: val foo : int]))
 [%%expect{|
 val foo : Deriving.t = <abstr>
 |}]
@@ -20,7 +17,7 @@ let bar =
   Deriving.add "bar"
     ~str_type_decl:(Deriving.Generator.make_noarg
                       ~deps:[foo]
-                      (fun ~loc ~path:_ _ -> [%str let () = Printf.printf "x = %d\n" x]))
+                      (fun ~loc ~path:_ _ -> [%str let bar = foo + 1]))
 [%%expect{|
 val bar : Deriving.t = <abstr>
 |}]
@@ -52,7 +49,8 @@ Error: Deriver foo is needed for bar, you need to add it before in the list
 type nonrec int = int [@@deriving foo, bar]
 [%%expect{|
 type nonrec int = int
-val x : int = 42
+val foo : int = 42
+val bar : int = 43
 |}]
 
 module Foo_sig : sig
@@ -66,15 +64,15 @@ Error: Signature mismatch:
        Modules do not match:
          sig type t end
        is not included in
-         sig type t val y : int end
-       The value `y' is required but not provided
+         sig type t val foo : int end
+       The value `foo' is required but not provided
        File "test/deriving/test.ml", line 3, characters 2-25:
          Expected declaration
 |}]
 
 module type X = sig end [@@deriving mtd]
 [%%expect{|
-module type X = sig  end
+module type X = sig end
 val y : int = 42
 |}]
 
@@ -85,5 +83,5 @@ end = struct
   let y = 42
 end
 [%%expect{|
-module Y : sig module type X = sig  end val y : int end
+module Y : sig module type X = sig end val y : int end
 |}]

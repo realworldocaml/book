@@ -262,10 +262,15 @@ type config =
   ; vars : Ocaml_config.Vars.t
   }
 
+let dune_is_too_old ~min:v =
+  die
+    "You seem to be running dune < %s. This version of dune-configurator \
+     requires at least dune %s."
+    v v
+
 let read_dot_dune_configurator_file ~build_dir =
   let file = Filename.concat build_dir ".dune/configurator.v2" in
-  if not (Sys.file_exists file) then
-    die "Cannot find special file %S produced by dune." file;
+  if not (Sys.file_exists file) then dune_is_too_old ~min:"2.6";
   let open Sexp in
   let unable_to_parse err = die "Unable to parse %S.@.%s@." file err in
   let sexp =
@@ -461,10 +466,6 @@ module C_define = struct
       | Switch of bool
       | Int of int
       | String of string
-
-    let switch b = Switch b
-
-    let int i = Int i
   end
 
   let extract_program ?prelude includes vars =
@@ -527,31 +528,44 @@ const char *s%i = "BEGIN-%i-false-END";
   let extract_values obj_file vars =
     let values =
       Io.with_lexbuf_from_file obj_file ~f:(Extract_obj.extract [])
-      |> Int.Map.of_list_exn
+      |> List.fold_left ~init:Int.Map.empty ~f:(fun acc (key, v) ->
+             Int.Map.update acc key ~f:(function
+               | None -> Some [ v ]
+               | Some vs -> Some (v :: vs)))
     in
     List.mapi vars ~f:(fun i (name, t) ->
-        let raw_val =
+        let raw_vals =
           match Int.Map.find values i with
-          | None -> die "Unable to get value for %s" name
           | Some v -> v
+          | None -> die "Unable to get value for %s" name
+        in
+        let parse_val_or_exn f =
+          let f x =
+            match f x with
+            | Some s -> s
+            | None ->
+              die
+                "Unable to read variable %S of type %s. Invalid value %S in %s \
+                 found"
+                name (Type.name t) x obj_file
+          in
+          let vs =
+            List.map ~f:(fun x -> (x, f x)) raw_vals
+            |> List.sort_uniq ~cmp:(fun (_, x) (_, y) -> compare x y)
+          in
+          match vs with
+          | [] -> assert false
+          | [ (_, v) ] -> v
+          | vs ->
+            let vs = List.map ~f:fst vs in
+            die "Duplicate values for %s:\n%s" name
+              (vs |> List.map ~f:(sprintf "- %s") |> String.concat ~sep:"\n")
         in
         let value =
           match t with
-          | Type.Switch -> Bool.of_string raw_val |> Option.map ~f:Value.switch
-          | Int -> Int.of_string raw_val |> Option.map ~f:Value.int
-          | String -> Some (String raw_val)
-        in
-        let value =
-          match value with
-          | Some v -> v
-          | None ->
-            let msg =
-              sprintf
-                "Unable to read variable %S of type %s. Invalid value %S in %s \
-                 found"
-                name (Type.name t) raw_val obj_file
-            in
-            raise (Fatal_error msg)
+          | Type.Switch -> Value.Switch (parse_val_or_exn Bool.of_string)
+          | Int -> Value.Int (parse_val_or_exn Int.of_string)
+          | String -> String (parse_val_or_exn Option.some)
         in
         (name, value))
 
@@ -647,8 +661,8 @@ module Pkg_config = struct
       match ocaml_config_var c "system" with
       | Some "macosx" ->
         let open Option.O in
-        let* brew = which c "brew" in
-        let+ new_pkg_config_path =
+        which c "brew" >>= fun brew ->
+        let new_pkg_config_path =
           let prefix =
             String.trim (Process.run_capture_exn c ~dir brew [ "--prefix" ])
           in
@@ -661,6 +675,7 @@ module Pkg_config = struct
             | exception Sys_error _ -> false )
             p
         in
+        new_pkg_config_path >>| fun new_pkg_config_path ->
         let _PKG_CONFIG_PATH = "PKG_CONFIG_PATH" in
         let pkg_config_path =
           match Sys.getenv _PKG_CONFIG_PATH with
@@ -703,10 +718,7 @@ let main ?(args = []) ~name f =
       die
         "Configurator scripts must be run with Dune. To manually run a script, \
          use $ dune exec."
-    | "1" ->
-      die
-        "You seem to be running Dune < 2.3. This version of dune-configurator \
-         requres at lest dune 2.3."
+    | "1" -> dune_is_too_old ~min:"2.3"
     | s -> s
   in
   let verbose = ref false in
@@ -725,16 +737,17 @@ let main ?(args = []) ~name f =
   Arg.parse args anon usage;
   let log_db = ref [] in
   let log s = log_db := s :: !log_db in
-  let t =
-    create_from_inside_dune ~dest_dir:!dest_dir
-      ~log:
-        ( if !verbose then
-          prerr_endline
-        else
-          log )
-      ~build_dir ~name
-  in
-  try f t
+  try
+    let t =
+      create_from_inside_dune ~dest_dir:!dest_dir
+        ~log:
+          ( if !verbose then
+            prerr_endline
+          else
+            log )
+        ~build_dir ~name
+    in
+    f t
   with exn -> (
     let bt = Printexc.get_raw_backtrace () in
     List.iter (List.rev !log_db) ~f:(eprintf "%s\n");

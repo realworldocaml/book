@@ -1,3 +1,0 @@
-(test
- (name test_fiat_p256)
- (libraries alcotest fiat-p256 rresult))

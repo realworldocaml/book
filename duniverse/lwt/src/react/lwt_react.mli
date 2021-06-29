@@ -63,7 +63,11 @@ module E : sig
 
   val of_stream : 'a Lwt_stream.t -> 'a event
     (** [of_stream stream] creates an event which occurs each time a
-        value is available on the stream. *)
+        value is available on the stream.
+
+        If updating the event causes an exception at any point during the update
+        step, the excpetion is passed to [!]{!Lwt.async_exception_hook}, which
+        terminates the process by default. *)
 
   val delay : 'a event Lwt.t -> 'a event
     (** [delay promise] is an event which does not occur until

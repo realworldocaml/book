@@ -677,8 +677,18 @@ let bin_read_network64_int64 buf ~pos_ref =
   unsafe_get64be buf pos
 ;;
 
+[%%if
+  ocaml_version < (4, 07, 0)]
+
 external unsafe_bytes_set32 : bytes -> int -> int32 -> unit = "%caml_string_set32u"
 external unsafe_bytes_set64 : bytes -> int -> int64 -> unit = "%caml_string_set64u"
+
+[%%else]
+
+external unsafe_bytes_set32 : bytes -> int -> int32 -> unit = "%caml_bytes_set32u"
+external unsafe_bytes_set64 : bytes -> int -> int64 -> unit = "%caml_bytes_set64u"
+
+[%%endif]
 
 let bin_read_md5 buf ~pos_ref =
   let pos = !pos_ref in

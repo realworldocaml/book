@@ -1,0 +1,13 @@
+(copy_files# ../bigstringaf_stubs.c)
+
+(rule
+ (deps Makefile bigstringaf_stubs.c)
+ (targets libbigstringaf_freestanding_stubs.a)
+ (action
+  (no-infer
+   (progn
+    (run %{make})))))
+
+(install
+ (section lib)
+ (files libbigstringaf_freestanding_stubs.a))

@@ -1,5 +1,5 @@
 open! Core_kernel
-open! Expect_test_helpers_kernel
+open! Expect_test_helpers_core
 
 let%expect_test "[sexp_of_int] respects [sexp_of_int_style]" =
   let sexp_of_int = Core_kernel.Core_kernel_stable.sexp_of_int in
@@ -43,7 +43,7 @@ module Hashtbl = struct
 
          type t = string Table.t [@@deriving sexp, bin_io]
 
-         let equal t1 t2 = Int.Table.equal t1 t2 String.equal
+         let equal t1 t2 = Int.Table.equal String.equal t1 t2
          let triple_table = Int.Table.of_alist_exn ~size:16 [ 1, "foo"; 2, "bar"; 3, "baz" ]
          let single_table = Int.Table.of_alist_exn [ 0, "foo" ]
 
@@ -133,32 +133,34 @@ module Map = struct
 end
 
 module Set = struct
-  module V1 (Elt : sig
-      type t [@@deriving bin_io, sexp]
-
-      include Comparator.S with type t := t
-    end) : sig
+  module type F = functor (Elt : Stable) -> sig
     type t = (Elt.t, Elt.comparator_witness) Set.t [@@deriving sexp, bin_io, compare]
-  end = Set.Stable.V1.Make (struct
-      include Elt
+  end
 
-      let compare = comparator.compare
+  module Test (F : F) = Stable_unit_test.Make (struct
+      include F (Int)
+
+      let equal = Set.equal
+
+      let tests =
+        [ ( Int.Set.of_list (List.init 10 ~f:Fn.id)
+          , "(0 1 2 3 4 5 6 7 8 9)"
+          , "\010\000\001\002\003\004\005\006\007\008\009" )
+        ; Int.Set.empty, "()", "\000"
+        ; Int.Set.singleton 0, "(0)", "\001\000"
+        ]
+      ;;
     end)
 
-  let%test_module "Set.V1" =
-    (module Stable_unit_test.Make (struct
-         include V1 (Int)
+  let%test_module "Set.V1" = (module Test (Set.Stable.V1.Make))
 
-         let equal = Set.equal
+  let%test_module "Set.V1.M" =
+    (module struct
+      module F (Elt : Stable) = struct
+        type t = Set.Stable.V1.M(Elt).t [@@deriving bin_io, compare, sexp]
+      end
 
-         let tests =
-           [ ( Int.Set.of_list (List.init 10 ~f:Fn.id)
-             , "(0 1 2 3 4 5 6 7 8 9)"
-             , "\010\000\001\002\003\004\005\006\007\008\009" )
-           ; Int.Set.empty, "()", "\000"
-           ; Int.Set.singleton 0, "(0)", "\001\000"
-           ]
-         ;;
-       end))
+      include Test (F)
+    end)
   ;;
 end

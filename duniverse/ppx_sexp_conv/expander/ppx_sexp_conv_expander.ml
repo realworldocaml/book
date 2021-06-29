@@ -275,6 +275,7 @@ let really_recursive rec_flag tds =
 (* Generates the signature for type conversion to S-expressions *)
 module Sig_generate_sexp_of = struct
   let type_of_sexp_of ~loc t =
+    let loc = { loc with loc_ghost = true } in
     [%type: [%t t] -> Ppx_sexp_conv_lib.Sexp.t]
 
   let mk_type td = combinator_type_of_type_declaration td ~f:type_of_sexp_of
@@ -294,6 +295,7 @@ end
 (* Generates the signature for type conversion from S-expressions *)
 module Sig_generate_of_sexp = struct
   let type_of_of_sexp ~loc t =
+    let loc = { loc with loc_ghost = true } in
     [%type: Ppx_sexp_conv_lib.Sexp.t -> [%t t]]
 
   let mk_type td = combinator_type_of_type_declaration td ~f:type_of_of_sexp
@@ -338,7 +340,7 @@ module Str_generate_sexp_of = struct
   let rec sexp_of_type
             ~(typevar_handling : [`ok of Renaming.t | `disallowed_in_type_expr])
             typ : Fun_or_match.t =
-    let loc = typ.ptyp_loc in
+    let loc = { typ.ptyp_loc with loc_ghost = true } in
     match typ with
     | _ when Option.is_some (Attribute.get Attrs.opaque typ) ->
       Fun [%expr  Ppx_sexp_conv_lib.Conv.sexp_of_opaque ]
@@ -639,8 +641,8 @@ module Str_generate_sexp_of = struct
           [%expr
             let bnds =
               match [%e evar ~loc ("v_" ^ name)] with
-              | None -> bnds
-              | Some v ->
+              | Ppx_sexp_conv_lib.Option.None -> bnds
+              | Ppx_sexp_conv_lib.Option.Some v ->
                 let arg = [%e cnv_expr] in
                 let bnd =
                   Ppx_sexp_conv_lib.Sexp.List [Ppx_sexp_conv_lib.Sexp.Atom [%e estring ~loc name]; arg]
@@ -981,7 +983,7 @@ module Str_generate_of_sexp = struct
     | [%type: _ ] ->
       Fun [%expr  Ppx_sexp_conv_lib.Conv.opaque_of_sexp ]
     (*| [%type: sexp_option ] -> (* will never match surely! *)
-      Fun [%expr  fun a_of_sexp v -> Some (a_of_sexp v) ]*)
+      Fun [%expr  fun a_of_sexp v -> Ppx_sexp_conv_lib.Option.Some (a_of_sexp v) ]*)
     | [%type: [%t? ty1] sexp_list ] ->
       let arg1 = Fun_or_match.expr ~loc (type_of_sexp ~typevar_handling ty1) in
       Fun [%expr (fun a_of_sexp v -> Ppx_sexp_conv_lib.Conv.list_of_sexp  a_of_sexp v) [%e arg1]]
@@ -1242,24 +1244,29 @@ module Str_generate_of_sexp = struct
 
   (* Generate code for extracting record fields *)
   let mk_extract_fields ~typevar_handling ~allow_extra_fields (loc,flds) =
-    let rec loop inits no_args args = function
-      | [] -> inits,no_args,args
+    let rec loop inits cases = function
+      | [] -> inits,cases
       | ld :: more_flds ->
         let loc = ld.pld_name.loc in
         let nm = ld.pld_name.txt in
         match Attrs.Record_field_handler.Of_sexp.create ~loc ld, ld.pld_type with
         | Some `sexp_bool, _ ->
           let inits = [%expr false] :: inits in
-          let no_args =
+          let cases =
             (pstring ~loc nm -->
              [%expr
                if ! [%e evar ~loc (nm ^ "_field")] then
                  duplicates := ( field_name :: !duplicates )
-               else [%e evar ~loc (nm ^ "_field")] := true
+               else
+                 (match _field_sexps with
+                  | [] ->
+                    [%e evar ~loc (nm ^ "_field")] := true
+                  | _ :: _ ->
+                    Ppx_sexp_conv_lib.Conv_error.record_sexp_bool_with_payload _tp_loc sexp)
              ]
-            ) :: no_args
+            ) :: cases
           in
-          loop inits no_args args more_flds
+          loop inits cases more_flds
         | Some (`sexp_option tp), _
         | (None
           | Some (`default _
@@ -1267,23 +1274,24 @@ module Str_generate_of_sexp = struct
                  | `sexp_array _
                  | `sexp_list _)),
           tp ->
-          let inits = [%expr None] :: inits in
+          let inits = [%expr Ppx_sexp_conv_lib.Option.None] :: inits in
           let unrolled =
             Fun_or_match.unroll ~loc [%expr  _field_sexp ]
               (type_of_sexp ~typevar_handling tp)
           in
-          let args =
+          let cases =
             (pstring ~loc nm -->
              [%expr
                match ! [%e evar ~loc (nm ^ "_field")] with
-               | None ->
+               | Ppx_sexp_conv_lib.Option.None ->
+                 let _field_sexp = _field_sexp () in
                  let fvalue = [%e unrolled] in
-                 [%e evar ~loc (nm ^ "_field")] := Some fvalue
-               | Some _ ->
+                 [%e evar ~loc (nm ^ "_field")] := Ppx_sexp_conv_lib.Option.Some fvalue
+               | Ppx_sexp_conv_lib.Option.Some _ ->
                  duplicates := (field_name :: ! duplicates) ]
-            ) :: args
+            ) :: cases
           in
-          loop inits no_args args more_flds
+          loop inits cases more_flds
     in
     let handle_extra =
       [ [%pat? _] -->
@@ -1296,7 +1304,7 @@ module Str_generate_of_sexp = struct
             else ()]
       ]
     in
-    loop [] handle_extra handle_extra (List.rev flds)
+    loop [] handle_extra (List.rev flds)
 
   (* Generate code for handling the result of matching record fields *)
   let mk_handle_record_match_result ~typevar_handling has_poly (loc,flds) ~wrap_expr =
@@ -1317,8 +1325,8 @@ module Str_generate_of_sexp = struct
               has_nonopt_fields := true;
               (
                 [%expr
-                  (Ppx_sexp_conv_lib.Conv.(=) [%e fld] None, [%e estring ~loc nm]) ] :: bi_lst,
-                [%pat? Some [%p pvar ~loc (nm ^ "_value")] ] :: good_patts
+                  (Ppx_sexp_conv_lib.Conv.(=) [%e fld] Ppx_sexp_conv_lib.Option.None, [%e estring ~loc nm]) ] :: bi_lst,
+                [%pat? Ppx_sexp_conv_lib.Option.Some [%p pvar ~loc (nm ^ "_value")] ] :: good_patts
               )
           in
           let acc =(
@@ -1331,56 +1339,52 @@ module Str_generate_of_sexp = struct
       in
       loop ([], [], []) (List.rev flds)
     in
+    let cnvt_value ld =
+      let nm = ld.pld_name.txt in
+      match Attrs.Record_field_handler.Of_sexp.create ~loc ld with
+      | Some (`sexp_list _) ->
+        [%expr
+          match [%e evar ~loc (nm ^ "_value")] with
+          | Ppx_sexp_conv_lib.Option.None -> []
+          | Ppx_sexp_conv_lib.Option.Some v -> v
+        ]
+      | Some (`sexp_array _) ->
+        [%expr
+          match [%e evar ~loc (nm ^ "_value")] with
+          | Ppx_sexp_conv_lib.Option.None -> [||]
+          | Ppx_sexp_conv_lib.Option.Some v -> v
+        ]
+      | Some (`default default) ->
+        [%expr
+          match [%e evar ~loc (nm ^ "_value")] with
+          | Ppx_sexp_conv_lib.Option.None -> [%e default]
+          | Ppx_sexp_conv_lib.Option.Some v -> v
+        ]
+      | Some (`sexp_bool | `sexp_option _) | None ->
+        evar ~loc (nm ^ "_value")
+      | Some `omit_nil ->
+        [%expr
+          match [%e evar ~loc (nm ^ "_value")] with
+          | Ppx_sexp_conv_lib.Option.Some v -> v
+          | Ppx_sexp_conv_lib.Option.None ->
+            (* We change the exception so it contains a sub-sexp of the
+               initial sexp, otherwise sexplib won't find the source location
+               for the error. *)
+            try
+              [%e Fun_or_match.unroll ~loc [%expr Ppx_sexp_conv_lib.Sexp.List [] ]
+                    (type_of_sexp ~typevar_handling ld.pld_type) ]
+            with Ppx_sexp_conv_lib.Conv_error.Of_sexp_error (e, _sexp) ->
+              raise (Ppx_sexp_conv_lib.Conv_error.Of_sexp_error (e, sexp))
+        ]
+    in
     let match_good_expr =
       if has_poly then
-        let cnvt = function
-          | {pld_name = {txt=nm; _}; _ } ->
-            evar ~loc (nm ^ "_value")
-        in
-        match List.map ~f:cnvt flds with
+        match List.map ~f:cnvt_value flds with
         | [match_good_expr] -> match_good_expr
         | match_good_exprs -> pexp_tuple ~loc match_good_exprs
       else
         let cnvt ld =
-          let nm = ld.pld_name.txt in
-          let value =
-            match Attrs.Record_field_handler.Of_sexp.create ~loc ld with
-            | Some (`sexp_list _) ->
-              [%expr
-                match [%e evar ~loc (nm ^ "_value")] with
-                | None -> []
-                | Some v -> v
-              ]
-            | Some (`sexp_array _) ->
-              [%expr
-                match [%e evar ~loc (nm ^ "_value")] with
-                | None -> [||]
-                | Some v -> v
-              ]
-            | Some (`default default) ->
-              [%expr
-                match [%e evar ~loc (nm ^ "_value")] with
-                | None -> [%e default]
-                | Some v -> v
-              ]
-            | Some (`sexp_bool | `sexp_option _) | None ->
-              evar ~loc (nm ^ "_value")
-            | Some `omit_nil ->
-              [%expr
-                match [%e evar ~loc (nm ^ "_value")] with
-                | Some v -> v
-                | None ->
-                  (* We change the exception so it contains a sub-sexp of the
-                     initial sexp, otherwise sexplib won't find the source location
-                     for the error. *)
-                  try
-                    [%e Fun_or_match.unroll ~loc [%expr Ppx_sexp_conv_lib.Sexp.List [] ]
-                          (type_of_sexp ~typevar_handling ld.pld_type) ]
-                  with Ppx_sexp_conv_lib.Conv_error.Of_sexp_error (e, _sexp) ->
-                    raise (Ppx_sexp_conv_lib.Conv_error.Of_sexp_error (e, sexp))
-              ]
-          in
-          Located.lident ~loc nm, value
+          Located.lident ~loc ld.pld_name.txt, cnvt_value ld
         in
         wrap_expr (pexp_record ~loc (List.map ~f:cnvt flds) None)
     in
@@ -1404,7 +1408,7 @@ module Str_generate_of_sexp = struct
 
   (* Generate code for converting record fields *)
   let mk_cnv_fields ~typevar_handling ~allow_extra_fields has_poly (loc,flds) ~wrap_expr =
-    let expr_ref_inits, mc_no_args_fields, mc_fields_with_args =
+    let expr_ref_inits, mc_fields =
       mk_extract_fields ~typevar_handling ~allow_extra_fields (loc,flds)
     in
     let field_refs =
@@ -1419,12 +1423,18 @@ module Str_generate_of_sexp = struct
         [%e pexp_function ~loc
               [ [%pat?
                        Ppx_sexp_conv_lib.Sexp.List
-                       [(Ppx_sexp_conv_lib.Sexp.Atom field_name); _field_sexp] ::
+                       ((Ppx_sexp_conv_lib.Sexp.Atom field_name) ::
+                        (([] | [ _ ]) as _field_sexps)) ::
                      tail] -->
-                [%expr [%e pexp_match ~loc [%expr field_name] mc_fields_with_args];
-                  iter tail]
-              ; [%pat? Ppx_sexp_conv_lib.Sexp.List [(Ppx_sexp_conv_lib.Sexp.Atom field_name)] :: tail] -->
-                [%expr [%e pexp_match ~loc [%expr field_name] mc_no_args_fields];
+                [%expr
+                  let _field_sexp () =
+                    ((match _field_sexps with
+                       | [ x ] -> x
+                       | [] ->
+                         Ppx_sexp_conv_lib.Conv_error.record_only_pairs_expected _tp_loc sexp
+                       | _ -> assert false))
+                  in
+                  [%e pexp_match ~loc [%expr field_name] mc_fields];
                   iter tail]
               ; [%pat? ((Ppx_sexp_conv_lib.Sexp.Atom _ | Ppx_sexp_conv_lib.Sexp.List _) as sexp) :: _] -->
                 [%expr Ppx_sexp_conv_lib.Conv_error.record_only_pairs_expected _tp_loc sexp]
@@ -1722,12 +1732,14 @@ module Str_generate_of_sexp = struct
       pstr_value_list ~loc rec_flag bindings
 
   let type_of_sexp ~typevar_handling ~path ctyp =
-    let loc = ctyp.ptyp_loc in
+    let loc = { ctyp.ptyp_loc with loc_ghost = true } in
     let fp = type_of_sexp ~typevar_handling ctyp in
     let body =
-      match fp with
-      | Fun fun_expr    -> [%expr  [%e fun_expr] sexp ]
-      | Match matchings -> pexp_match ~loc [%expr sexp] matchings
+      Merlin_helpers.hide_expression (
+        match fp with
+        | Fun fun_expr    -> [%expr  [%e fun_expr] sexp ]
+        | Match matchings -> pexp_match ~loc [%expr sexp] matchings
+      )
     in
     let full_type_name =
       Printf.sprintf "%s line %i: %s"
@@ -1742,11 +1754,27 @@ module Str_generate_of_sexp = struct
   ;;
 end
 
+(* Generates the signature for generation of sexp grammar *)
+module Sig_generate_sexp_grammar = struct
+  let type_of_sexp_grammar ~loc _ = [%type: Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t]
+
+  let mk_sig ~loc:_ ~path:_ (_rf, tds) =
+    List.map tds ~f:(fun td ->
+      let loc = td.ptype_loc in
+      psig_value ~loc
+        (value_description ~loc
+           ~name:(Located.map (fun n -> n ^ "_sexp_grammar") td.ptype_name)
+           ~type_:(type_of_sexp_grammar ~loc td)
+           ~prim:[]))
+end
+
 module Sexp_of = struct
-  let type_extension ty = Sig_generate_sexp_of.type_of_sexp_of ~loc:ty.ptyp_loc ty
+  let type_extension ty =
+    Sig_generate_sexp_of.type_of_sexp_of
+      ~loc:{ ty.ptyp_loc with loc_ghost = true } ty
   let core_type ty =
     Str_generate_sexp_of.sexp_of_type ~typevar_handling:`disallowed_in_type_expr ty
-    |> Fun_or_match.expr ~loc:ty.ptyp_loc
+    |> Fun_or_match.expr ~loc:{ ty.ptyp_loc with loc_ghost = true }
   ;;
 
   let sig_type_decl = Sig_generate_sexp_of.mk_sig
@@ -1755,20 +1783,40 @@ module Sexp_of = struct
   let str_exception = Str_generate_sexp_of.sexp_of_exn ~types_being_defined:`Nonrecursive
 end
 
+module Sexp_grammar = struct
+  let type_extension ty =
+    Sig_generate_sexp_grammar.type_of_sexp_grammar ty ~loc:ty.ptyp_loc
+  ;;
+
+  let core_type ~loc ~path ty =
+    Merlin_helpers.hide_expression
+      (Str_generate_sexp_grammar.sexp_grammar ~loc ~path ty)
+
+  let sig_type_decl = Sig_generate_sexp_grammar.mk_sig
+  let str_type_decl = Str_generate_sexp_grammar.grammar_of_tds
+end
+
 module Of_sexp = struct
   let type_extension ty = Sig_generate_of_sexp.type_of_of_sexp ~loc:ty.ptyp_loc ty
+
   let core_type =
     Str_generate_of_sexp.type_of_sexp
       ~typevar_handling:`disallowed_in_type_expr
 
-  let sig_type_decl = Sig_generate_of_sexp.mk_sig
-  let str_type_decl = Str_generate_of_sexp.tds_of_sexp
+  let sig_type_decl ~poly ~loc ~path tds =
+    Sig_generate_of_sexp.mk_sig ~poly ~loc ~path tds
+
+  let str_type_decl ~loc ~poly ~path tds =
+    Str_generate_of_sexp.tds_of_sexp ~loc ~poly ~path tds
+
 end
 
 module Sig_sexp = struct
   let mk_sig ~loc ~path decls =
-    Sig_generate_sexp_of.mk_sig ~loc ~path decls
-    @ Sig_generate_of_sexp.mk_sig ~poly:false ~loc ~path decls
+    List.concat
+      [ Sig_generate_sexp_of.mk_sig ~loc ~path decls
+      ; Sig_generate_of_sexp.mk_sig ~poly:false ~loc ~path decls
+      ]
 
   let sig_type_decl ~loc ~path ((_rf, tds) as decls) =
     match

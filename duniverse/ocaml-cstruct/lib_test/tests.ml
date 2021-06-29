@@ -69,7 +69,7 @@ let concat_samples () =
 
 let concat_random ~n () =
   let rec explode cs =
-    let n = Cstruct.len cs in
+    let n = Cstruct.length cs in
     if n = 0 then [] else
       let k = Random.int (n + 1) in
       Cstruct.sub cs 0 k :: explode (Cstruct.shift cs k) in
@@ -110,7 +110,7 @@ let check_alignment alignment () =
   let buf = Cstruct.create (expected * alignment) in
   (* How many aligned offsets are there in this buffer? *)
   let actual = ref 0 in
-  for i = 0 to Cstruct.len buf - 1 do
+  for i = 0 to Cstruct.length buf - 1 do
     if Cstruct.(check_alignment (shift buf i) alignment) then incr actual
   done;
   Alcotest.(check int) "alignement" expected !actual

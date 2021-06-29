@@ -79,3 +79,7 @@ version in {{{Js_of_ocaml_tyxml.Tyxml_js.R}}}.
 - The ##virtual_dom## library with the module {{{Virtual_dom.Tyxml}}}.
 
 In each case, simply open the module and the JSX syntax will use it.
+
+==@@id="tips"@@ Tips
+
+It can sometime be necessary to disable the JSX syntax. For that purpose, simply use the toogle `[@tyxml.jsx false]` to turn the JSX on and off.

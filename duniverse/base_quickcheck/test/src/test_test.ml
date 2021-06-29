@@ -21,6 +21,7 @@ let%expect_test "default_config" =
 ;;
 
 let run = Test.run
+let result = Test.result
 let run_exn = Test.run_exn
 
 let%expect_test "run_exn" =

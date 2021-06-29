@@ -167,7 +167,3 @@ let copy src =
   blito ~src ~dst ();
   dst
 ;;
-
-let truncate t ~len =
-  (Caml.Obj.truncate [@ocaml.alert "-deprecated"]) (Caml.Obj.repr (t : t)) len
-;;

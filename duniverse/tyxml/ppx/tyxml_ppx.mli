@@ -28,9 +28,26 @@ type lang = Html | Svg
 
 val markup_to_expr :
   lang ->
-  Location.t -> Parsetree.expression list -> Parsetree.expression
+  Location.t -> Ppxlib.expression list -> Ppxlib.expression
 (** Given the payload of a [%html ...] or [%svg ...] expression,
     converts it to a TyXML expression representing the markup
     contained therein. *)
 
-val mapper : _ -> _ -> Ast_mapper.mapper
+val expand_expr :
+  lang:lang ->
+  loc: Ppxlib.Location.t ->
+  path: string ->
+  arg: Ppxlib.Longident.t Asttypes.loc option ->
+  Ppxlib.expression ->
+  Ppxlib.attribute list ->
+  Ppxlib.expression
+
+val expand_str_item : 
+  lang:lang ->
+  loc: Ppxlib.Location.t ->
+  path: string ->
+  arg: Ppxlib.Longident.t Asttypes.loc option ->
+  Ppxlib.rec_flag ->
+  Ppxlib.value_binding list ->
+  Ppxlib.structure_item
+    

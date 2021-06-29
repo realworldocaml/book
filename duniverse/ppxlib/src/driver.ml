@@ -34,44 +34,63 @@ module Lint_error = struct
 end
 
 module Cookies = struct
-  type t = Migrate_parsetree.Driver.cookies
+  type t = T
 
-  let get t name pattern =
-    Option.map (Migrate_parsetree.Driver.get_cookie t name (module Ppxlib_ast.Selected_ast))
+  let given_through_cli = ref []
+
+  let get T name pattern =
+    Option.map (Ocaml_common.Ast_mapper.get_cookie name)
       ~f:(fun e ->
+        let e = Selected_ast.of_ocaml Expression e in
         Ast_pattern.parse pattern e.pexp_loc e Fn.id)
 
-  let set t name expr =
-    Migrate_parsetree.Driver.set_cookie t name (module Ppxlib_ast.Selected_ast) expr
+  let set T name expr =
+    Ocaml_common.Ast_mapper.set_cookie name
+      (Selected_ast.to_ocaml Expression expr)
 
   let handlers = ref []
   let add_handler f = handlers := !handlers @ [f]
 
   let add_simple_handler name pattern ~f =
-    add_handler (fun t -> f (get t name pattern))
+    add_handler (fun T -> f (get T name pattern))
 
-  let acknoledge_cookies t =
-    List.iter !handlers ~f:(fun f -> f t)
+  let acknowledge_cookies T =
+    List.iter !handlers ~f:(fun f -> f T)
 
   let post_handlers = ref []
   let add_post_handler f = post_handlers := !post_handlers @ [f]
 
-  let call_post_handlers t =
-    List.iter !post_handlers ~f:(fun f -> f t)
+  let call_post_handlers T =
+    List.iter !post_handlers ~f:(fun f -> f T)
+end
+
+module Instrument = struct
+  type pos = Before | After
+
+  type t = { transformation : Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure ; position : pos}
+
+  module V2 = struct
+    let make transformation ~position = { transformation ; position }
+  end
+
+  let make transformation ~position =
+    let transformation _ st = transformation st in
+    V2.make transformation ~position
 end
 
 module Transform = struct
   type t =
     { name            : string
     ; aliases         : string list
-    ; impl            : (Parsetree.structure -> Parsetree.structure) option
-    ; intf            : (Parsetree.signature -> Parsetree.signature) option
-    ; lint_impl       : (Parsetree.structure -> Lint_error.t list) option
-    ; lint_intf       : (Parsetree.signature -> Lint_error.t list) option
-    ; preprocess_impl : (Parsetree.structure -> Parsetree.structure) option
-    ; preprocess_intf : (Parsetree.signature -> Parsetree.signature) option
-    ; enclose_impl    : (Location.t option -> Parsetree.structure * Parsetree.structure) option
-    ; enclose_intf    : (Location.t option -> Parsetree.signature * Parsetree.signature) option
+    ; impl            : (Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure) option
+    ; intf            : (Expansion_context.Base.t -> Parsetree.signature -> Parsetree.signature) option
+    ; lint_impl       : (Expansion_context.Base.t -> Parsetree.structure -> Lint_error.t list) option
+    ; lint_intf       : (Expansion_context.Base.t -> Parsetree.signature -> Lint_error.t list) option
+    ; preprocess_impl : (Expansion_context.Base.t -> Parsetree.structure -> Parsetree.structure) option
+    ; preprocess_intf : (Expansion_context.Base.t -> Parsetree.signature -> Parsetree.signature) option
+    ; enclose_impl    : (Expansion_context.Base.t -> Location.t option -> Parsetree.structure * Parsetree.structure) option
+    ; enclose_intf    : (Expansion_context.Base.t -> Location.t option -> Parsetree.signature * Parsetree.signature) option
+    ; instrument      : Instrument.t option
     ; rules           : Context_free.Rule.t list
     ; registered_at   : Caller_id.t
     }
@@ -83,13 +102,13 @@ module Transform = struct
 
   let print_caller_id oc (caller_id : Caller_id.t) =
     match caller_id with
-    | None -> Out_channel.output_string oc "<unknown location>"
-    | Some loc -> Out_channel.fprintf oc "%s:%d" loc.filename loc.line_number
+    | None -> output_string oc "<unknown location>"
+    | Some loc -> Printf.fprintf oc "%s:%d" loc.filename loc.line_number
   ;;
 
   let register ?(extensions=[]) ?(rules=[]) ?enclose_impl ?enclose_intf
         ?impl ?intf ?lint_impl ?lint_intf ?preprocess_impl ?preprocess_intf
-        ?(aliases=[]) name =
+        ?instrument ?(aliases=[]) name =
     let rules =
       List.map extensions ~f:Context_free.Rule.extension @ rules
     in
@@ -97,9 +116,9 @@ module Transform = struct
     begin match List.filter !all ~f:(fun ct -> has_name ct name) with
     | [] -> ()
     | ct :: _ ->
-      eprintf "Warning: code transformation %s registered twice.\n" name;
-      eprintf "  - first time was at %a\n" print_caller_id ct.registered_at;
-      eprintf "  - second time is at %a\n" print_caller_id caller_id;
+      Printf.eprintf "Warning: code transformation %s registered twice.\n" name;
+      Printf.eprintf "  - first time was at %a\n" print_caller_id ct.registered_at;
+      Printf.eprintf "  - second time is at %a\n" print_caller_id caller_id;
     end;
     let ct =
       { name
@@ -113,6 +132,7 @@ module Transform = struct
       ; preprocess_impl
       ; preprocess_intf
       ; lint_intf
+      ; instrument
       ; registered_at = caller_id
       }
     in
@@ -134,7 +154,7 @@ module Transform = struct
       Some { first with loc_end = last.loc_end }
   ;;
 
-  let merge_into_generic_mappers t ~hook ~expect_mismatch_handler ~omp_config =
+  let merge_into_generic_mappers t ~hook ~expect_mismatch_handler ~tool_name ~input_name =
     let { rules; enclose_impl; enclose_intf; impl; intf; _ } = t in
     let map =
       new Context_free.map_top_down rules
@@ -144,82 +164,85 @@ module Transform = struct
     let gen_header_and_footer context whole_loc f =
       let header, footer = f whole_loc in
       (match whole_loc with
-      | Some (loc : Location.t) ->
-        let loc_header = { loc with loc_end   = loc.loc_start } in
-        let loc_footer = { loc with loc_start = loc.loc_end   } in
-        (match header with [] -> () | _ -> hook.f context loc_header (Many header));
-        (match footer with [] -> () | _ -> hook.f context loc_footer (Many footer))
-      | None ->
-        match header @ footer with
-        | [] -> ()
-        | l ->
-          let pos =
-            { Lexing.
-              pos_fname = ""
-            ; pos_lnum  = 1
-            ; pos_bol   = 0
-            ; pos_cnum  = 0
-            }
-          in
-          let loc = { Location. loc_start = pos; loc_end = pos; loc_ghost = false } in
-          hook.f context loc (Many l));
+       | Some (loc : Location.t) ->
+         let loc_header = { loc with loc_end   = loc.loc_start } in
+         let loc_footer = { loc with loc_start = loc.loc_end   } in
+         (match header with [] -> () | _ -> hook.f context loc_header (Many header));
+         (match footer with [] -> () | _ -> hook.f context loc_footer (Many footer))
+       | None ->
+         match header @ footer with
+         | [] -> ()
+         | l ->
+           let pos =
+             { Lexing.
+               pos_fname = ""
+             ; pos_lnum  = 1
+             ; pos_bol   = 0
+             ; pos_cnum  = 0
+             }
+           in
+           let loc = { Location. loc_start = pos; loc_end = pos; loc_ghost = false } in
+           hook.f context loc (Many l));
       (header, footer)
     in
-    let map_impl st_with_attrs =
+    let input_name =
+      match input_name with Some input_name -> input_name | None -> "_none_"
+    in
+    let map_impl ctxt st_with_attrs =
       let st =
         let attrs, st =
           List.split_while st_with_attrs ~f:(function
             | { pstr_desc = Pstr_attribute _; _ } -> true
             | _ -> false)
         in
+        let file_path = File_path.get_default_path_str st in
+        let base_ctxt = Expansion_context.Base.top_level ~tool_name ~file_path ~input_name in
         let header, footer =
           match enclose_impl with
           | None   -> ([], [])
           | Some f ->
             let whole_loc = loc_of_list st ~get_loc:(fun st -> st.Parsetree.pstr_loc) in
-            gen_header_and_footer Structure_item whole_loc f
+            gen_header_and_footer Structure_item whole_loc (f base_ctxt)
         in
-        let file_path = File_path.get_default_path_str st in
-        let base_ctxt = Expansion_context.Base.top_level ~omp_config ~file_path in
         let attrs = map#structure base_ctxt attrs in
         let st = map#structure base_ctxt st in
         List.concat [ attrs; header; st; footer ]
       in
       match impl with
       | None -> st
-      | Some f -> f st
+      | Some f -> f ctxt st
     in
-    let map_intf sg_with_attrs =
+    let map_intf ctxt sg_with_attrs =
       let sg =
         let attrs, sg =
           List.split_while sg_with_attrs ~f:(function
             | { psig_desc = Psig_attribute _; _ } -> true
             | _ -> false)
         in
+        let file_path = File_path.get_default_path_sig sg in
+        let base_ctxt = Expansion_context.Base.top_level ~tool_name ~file_path ~input_name in
         let header, footer =
           match enclose_intf with
           | None   -> ([], [])
           | Some f ->
             let whole_loc = loc_of_list sg ~get_loc:(fun sg -> sg.Parsetree.psig_loc) in
-            gen_header_and_footer Signature_item whole_loc f
+            gen_header_and_footer Signature_item whole_loc (f base_ctxt)
         in
-        let file_path = File_path.get_default_path_sig sg in
-        let base_ctxt = Expansion_context.Base.top_level ~omp_config ~file_path in
         let attrs = map#signature base_ctxt attrs in
         let sg = map#signature base_ctxt sg in
         List.concat [ attrs; header; sg; footer ]
       in
       match intf with
       | None -> sg
-      | Some f -> f sg
+      | Some f -> f ctxt sg
     in
     { t with
       impl = Some map_impl
     ; intf = Some map_intf
     }
 
-  let builtin_of_context_free_rewriters ~hook ~rules ~enclose_impl ~enclose_intf =
-    merge_into_generic_mappers ~hook
+  let builtin_of_context_free_rewriters ~hook ~rules ~enclose_impl ~enclose_intf ~input_name =
+    merge_into_generic_mappers ~hook ~input_name
       { name = "<builtin:context-free>"
       ; aliases = []
       ; impl = None
@@ -230,11 +253,27 @@ module Transform = struct
       ; preprocess_intf = None
       ; enclose_impl
       ; enclose_intf
+      ; instrument = None
       ; rules
       ; registered_at = Caller_id.get ~skip:[]
       }
 
   let partition_transformations ts =
+    let before_instrs, after_instrs, rest =
+      List.fold_left ts ~init:([], [], []) ~f:(fun (bef_i, aft_i, rest) t ->
+        let reduced_t =
+          { t with
+            lint_impl = None
+          ; lint_intf = None
+          ; preprocess_impl = None
+          ; preprocess_intf = None
+          } in
+        let f instr = (instr.Instrument.position, instr.Instrument.transformation) in
+        match Option.map t.instrument ~f with
+        | Some (Before, transf) -> { reduced_t with impl = Some transf }::bef_i, aft_i, rest
+        | Some (After, transf) -> bef_i, { reduced_t with impl = Some transf }::aft_i, rest
+        | None -> bef_i, aft_i, reduced_t::rest)
+    in
     (`Linters
        (List.filter_map ts ~f:(fun t ->
           if Option.is_some t.lint_impl || Option.is_some t.lint_intf then
@@ -249,6 +288,7 @@ module Transform = struct
               ; enclose_intf = None
               ; preprocess_impl = None
               ; preprocess_intf = None
+              ; instrument = None
               ; rules = []
               ; registered_at = t.registered_at
               }
@@ -256,7 +296,7 @@ module Transform = struct
             None)),
      `Preprocess
        (List.filter_map ts ~f:(fun t ->
-          if Option.is_some t.preprocess_impl || Option.is_some t.preprocess_impl
+          if Option.is_some t.preprocess_impl || Option.is_some t.preprocess_intf
           then
             Some
               { name = Printf.sprintf "<preprocess:%s>" t.name
@@ -269,40 +309,57 @@ module Transform = struct
               ; enclose_intf = None
               ; preprocess_impl = None
               ; preprocess_intf = None
+              ; instrument = None
               ; rules = []
               ; registered_at = t.registered_at
               }
           else
             None)),
-     `Rest
-       (List.map ts ~f:(fun t ->
-          { t with
-            lint_impl = None
-          ; lint_intf = None
-          ; preprocess_impl = None
-          ; preprocess_intf = None
-          })))
+     `Before_instrs before_instrs,
+     `After_instrs after_instrs,
+     `Rest rest)
 end
 
-let register_transformation = Transform.register
+module V2 = struct
+  let register_transformation = Transform.register
+
+  let register_transformation_using_ocaml_current_ast ?impl ?intf ?aliases name =
+    let impl = Option.map impl ~f:(Ppxlib_ast.Selected_ast.of_ocaml_mapper Structure) in
+    let intf = Option.map intf ~f:(Ppxlib_ast.Selected_ast.of_ocaml_mapper Signature) in
+    register_transformation ?impl ?intf ?aliases name
+end
+
+let add_ctxt_arg (f : 'a -> 'b) : (Expansion_context.Base.t -> 'a -> 'b) = fun _ x -> f x
+
+let register_transformation ?extensions ?rules ?enclose_impl ?enclose_intf ?impl ?intf ?lint_impl ?lint_intf ?preprocess_impl ?preprocess_intf =
+  let impl = Option.map impl ~f:add_ctxt_arg in
+  let intf = Option.map intf ~f:add_ctxt_arg in
+  let preprocess_impl = Option.map preprocess_impl ~f:add_ctxt_arg in
+  let preprocess_intf = Option.map preprocess_intf ~f:add_ctxt_arg in
+  let lint_impl = Option.map lint_impl ~f:add_ctxt_arg in
+  let lint_intf = Option.map lint_intf ~f:add_ctxt_arg in
+  let enclose_impl = Option.map enclose_impl ~f:add_ctxt_arg in
+  let enclose_intf = Option.map enclose_intf ~f:add_ctxt_arg in
+  V2.register_transformation ?extensions ?rules ?enclose_impl ?enclose_intf ?impl ?intf ?lint_impl ?lint_intf ?preprocess_impl ?preprocess_intf
 
 let register_code_transformation ~name ?(aliases=[]) ~impl ~intf =
   register_transformation name ~impl ~intf ~aliases
+[@@warning "-16"] (* This function triggers a warning 16 as of ocaml 4.12 *)
 ;;
 
-let register_transformation_using_ocaml_current_ast ?impl ?intf ?aliases name =
-  let impl = Option.map impl ~f:(Ppxlib_ast.Selected_ast.of_ocaml_mapper Structure) in
-  let intf = Option.map intf ~f:(Ppxlib_ast.Selected_ast.of_ocaml_mapper Signature) in
-  register_transformation ?impl ?intf ?aliases name
+let register_transformation_using_ocaml_current_ast ?impl ?intf =
+  let impl = Option.map impl ~f:add_ctxt_arg in
+  let intf = Option.map intf ~f:add_ctxt_arg in
+  V2.register_transformation_using_ocaml_current_ast ?impl ?intf
 
 let debug_dropped_attribute name ~old_dropped ~new_dropped =
   let print_diff what a b =
     let diff =
       List.filter a ~f:(fun (name : _ Loc.t) ->
-        not (List.exists b ~f:(fun (name' : _ Location.loc) -> phys_equal name.txt name'.txt)))
+        not (List.exists b ~f:(fun (name' : _ Location.loc) -> name.txt == name'.txt)))
     in
     if not (List.is_empty diff) then begin
-      eprintf "The following attributes %s after applying %s:\n"
+      Printf.eprintf "The following attributes %s after applying %s:\n"
         what name;
       List.iter diff ~f:(fun { Location. txt; loc } ->
         Caml.Format.eprintf "- %a: %s\n" Location.print loc txt);
@@ -313,16 +370,16 @@ let debug_dropped_attribute name ~old_dropped ~new_dropped =
   print_diff "reappeared"  old_dropped new_dropped
 ;;
 
-let get_whole_ast_passes ~hook ~expect_mismatch_handler ~omp_config =
+let get_whole_ast_passes ~hook ~expect_mismatch_handler ~tool_name ~input_name =
   let cts =
     match !apply_list with
     | None -> List.rev !Transform.all
     | Some names ->
       List.map names ~f:(fun name ->
-        List.find_exn !Transform.all ~f:(fun (ct : Transform.t) ->
+        List.find !Transform.all ~f:(fun (ct : Transform.t) ->
           Transform.has_name ct name))
   in
-  let (`Linters linters, `Preprocess preprocess, `Rest cts) =
+  let (`Linters linters, `Preprocess preprocess, `Before_instrs before_instrs, `After_instrs after_instrs, `Rest cts) =
     Transform.partition_transformations cts in
   (* Allow only one preprocessor to assure deterministic order *)
   if (List.length preprocess) > 1 then begin
@@ -330,37 +387,37 @@ let get_whole_ast_passes ~hook ~expect_mismatch_handler ~omp_config =
     let err = Printf.sprintf "At most one preprocessor is allowed, while got: %s" pp in
     failwith err
   end;
-  let cts =
+  let make_generic transforms =
     if !no_merge then
-      List.map cts ~f:(Transform.merge_into_generic_mappers ~hook ~omp_config
-                         ~expect_mismatch_handler)
+      List.map transforms ~f:(Transform.merge_into_generic_mappers ~hook ~tool_name
+                                ~expect_mismatch_handler ~input_name)
     else begin
       let get_enclosers ~f =
-        List.filter_map cts ~f:(fun (ct : Transform.t) ->
+        List.filter_map transforms ~f:(fun (ct : Transform.t) ->
           match f ct with
           | None -> None
           | Some x -> Some (ct.name, x))
         (* Sort them to ensure deterministic ordering *)
-        |> List.sort ~compare:(fun (a, _) (b, _) -> String.compare a b)
+        |> List.sort ~cmp:(fun (a, _) (b, _) -> String.compare a b)
         |> List.map ~f:snd
       in
 
       let rules =
-        List.map cts ~f:(fun (ct : Transform.t) -> ct.rules) |> List.concat
+        List.map transforms ~f:(fun (ct : Transform.t) -> ct.rules) |> List.concat
       and impl_enclosers =
         get_enclosers ~f:(fun ct -> ct.enclose_impl)
       and intf_enclosers =
         get_enclosers ~f:(fun ct -> ct.enclose_intf)
       in
       match rules, impl_enclosers, intf_enclosers with
-      | [], [], [] -> cts
+      | [], [], [] -> transforms
       | _              ->
         let merge_encloser = function
           | [] -> None
-          | enclosers -> Some (fun loc ->
+          | enclosers -> Some (fun ctxt loc ->
             let headers, footers =
-              List.map enclosers ~f:(fun f -> f loc)
-              |> List.unzip
+              List.map enclosers ~f:(fun f -> f ctxt loc)
+              |> List.split
             in
             let headers = List.concat headers in
             let footers = List.concat (List.rev footers) in
@@ -369,39 +426,45 @@ let get_whole_ast_passes ~hook ~expect_mismatch_handler ~omp_config =
         Transform.builtin_of_context_free_rewriters ~rules ~hook ~expect_mismatch_handler
           ~enclose_impl:(merge_encloser impl_enclosers)
           ~enclose_intf:(merge_encloser intf_enclosers)
-          ~omp_config
-        :: cts
+          ~tool_name
+          ~input_name
+        :: transforms
     end
-  in linters @ preprocess @ List.filter cts ~f:(fun (ct : Transform.t) ->
-    match ct.impl, ct.intf with
-    | None, None -> false
-    | _          -> true)
+         |> List.filter ~f:(fun (ct : Transform.t) ->
+           match ct.impl, ct.intf with
+           | None, None -> false
+           | _          -> true)
+  in linters @ preprocess @ make_generic before_instrs @ make_generic cts @ make_generic after_instrs
 ;;
 
 let apply_transforms
-      ~omp_config ~field ~lint_field ~dropped_so_far ~hook ~expect_mismatch_handler x =
-  let cts = get_whole_ast_passes ~omp_config ~hook ~expect_mismatch_handler in
+      ~tool_name ~file_path ~field ~lint_field ~dropped_so_far ~hook ~expect_mismatch_handler ~input_name x =
+  let cts = get_whole_ast_passes ~tool_name ~hook ~expect_mismatch_handler ~input_name in
   let x, _dropped, lint_errors =
-  List.fold_left cts ~init:(x, [], [])
-    ~f:(fun (x, dropped, lint_errors) (ct : Transform.t) ->
-      let lint_errors =
-        match lint_field ct with
-        | None -> lint_errors
-        | Some f -> lint_errors @ f x
-      in
-      match field ct with
-      | None -> (x, dropped, lint_errors)
-      | Some f ->
-        let x = f x in
-        let dropped =
-          if !debug_attribute_drop then begin
-            let new_dropped = dropped_so_far x in
-            debug_dropped_attribute ct.name ~old_dropped:dropped ~new_dropped;
-            new_dropped
-          end else
-            []
+    List.fold_left cts ~init:(x, [], [])
+      ~f:(fun (x, dropped, lint_errors) (ct : Transform.t) ->
+        let input_name =
+          match input_name with Some input_name -> input_name | None -> "_none_"
         in
-        (x, dropped, lint_errors))
+        let ctxt = Expansion_context.Base.top_level ~tool_name ~file_path ~input_name in
+        let lint_errors =
+          match lint_field ct with
+          | None -> lint_errors
+          | Some f -> lint_errors @ f ctxt x
+        in
+        match field ct with
+        | None -> (x, dropped, lint_errors)
+        | Some f ->
+          let x = f ctxt x in
+          let dropped =
+            if !debug_attribute_drop then begin
+              let new_dropped = dropped_so_far x in
+              debug_dropped_attribute ct.name ~old_dropped:dropped ~new_dropped;
+              new_dropped
+            end else
+              []
+          in
+          (x, dropped, lint_errors))
   in
   (x, List.map lint_errors ~f:(fun (loc, s) -> Common.attribute_of_warning loc s))
 ;;
@@ -410,80 +473,38 @@ let apply_transforms
    | Actual rewriting of structure/signatures                        |
    +-----------------------------------------------------------------+ *)
 
-(* We want driver registered plugins to work with omp driver and vice-versa. To
-   simplify things we do as follow:
-
-   - we register driver as a single omp driver plugin
-   - driver calls the omp driver rewriting functions, which will apply everything
-
-   The registration with omp driver is at the end of the file.
-*)
-
-module C = struct
-  type t =
-    { hook                    : Context_free.Generated_code_hook.t
-    ; expect_mismatch_handler : Context_free.Expect_mismatch_handler.t
-    }
-
-  type Migrate_parsetree.Driver.extra += T of t
-
-  let default =
-    { hook                    = Context_free.Generated_code_hook.nop
-    ; expect_mismatch_handler = Context_free.Expect_mismatch_handler.nop
-    }
-
-  let find (config : Migrate_parsetree.Driver.config) =
-    List.find_map config.extras ~f:(function
-      | T config -> Some config
-      | _ -> None)
-    |> Option.value ~default
-end
-
-let config ~hook ~expect_mismatch_handler =
-  Migrate_parsetree.Driver.make_config ()
-    ~tool_name:"ppxlib_driver"
-    ~extras:[C.T { hook
-                 ; expect_mismatch_handler
-                 }]
-
-let as_ppx_config () =
-  Migrate_parsetree.Driver.make_config ()
-    ~tool_name:(Ocaml_common.Ast_mapper.tool_name ())
-    ~include_dirs:!Ocaml_common.Clflags.include_dirs
-    ~load_path:(Compiler_specifics.get_load_path ())
-    ~debug:!Ocaml_common.Clflags.debug
-    ?for_package:!Ocaml_common.Clflags.for_package
-
 let print_passes () =
+  let tool_name = "ppxlib_driver" in
   let hook = Context_free.Generated_code_hook.nop in
   let expect_mismatch_handler = Context_free.Expect_mismatch_handler.nop in
-  let omp_config = config ~hook ~expect_mismatch_handler in
-  let cts = get_whole_ast_passes ~hook ~expect_mismatch_handler ~omp_config in
+  let cts = get_whole_ast_passes ~hook ~expect_mismatch_handler ~tool_name ~input_name:None in
   if !perform_checks then
-    printf "<builtin:freshen-and-collect-attributes>\n";
-  List.iter cts ~f:(fun ct -> printf "%s\n" ct.Transform.name);
+    Printf.printf "<builtin:freshen-and-collect-attributes>\n";
+  List.iter cts ~f:(fun ct -> Printf.printf "%s\n" ct.Transform.name);
   if !perform_checks then
     begin
-      printf "<builtin:check-unused-attributes>\n";
+      Printf.printf "<builtin:check-unused-attributes>\n";
       if !perform_checks_on_extensions
-      then printf "<builtin:check-unused-extensions>\n"
+      then Printf.printf "<builtin:check-unused-extensions>\n"
     end
 ;;
 
 (*$*)
-let real_map_structure config cookies st =
-  let { C. hook; expect_mismatch_handler } = C.find config in
-  Cookies.acknoledge_cookies cookies;
+let map_structure_gen st ~tool_name ~hook ~expect_mismatch_handler ~input_name =
+  Cookies.acknowledge_cookies T;
   if !perform_checks then begin
     Attribute.reset_checks ();
     Attribute.collect#structure st
   end;
   let st, lint_errors =
+    let file_path = File_path.get_default_path_str st in
     apply_transforms st
-      ~omp_config:config
+      ~tool_name
+      ~file_path
       ~field:(fun (ct : Transform.t) -> ct.impl)
       ~lint_field:(fun (ct : Transform.t) -> ct.lint_impl)
       ~dropped_so_far:Attribute.dropped_so_far_structure ~hook ~expect_mismatch_handler
+      ~input_name
   in
   let st =
     match lint_errors with
@@ -493,7 +514,7 @@ let real_map_structure config cookies st =
         Ast_builder.Default.pstr_attribute ~loc attr)
       @ st
   in
-  Cookies.call_post_handlers cookies;
+  Cookies.call_post_handlers T;
   if !perform_checks then begin
     (* TODO: these two passes could be merged, we now have more passes for
        checks than for actual rewriting. *)
@@ -509,29 +530,29 @@ let real_map_structure config cookies st =
   st
 ;;
 
-let map_structure_gen st ~config : Migrate_parsetree.Driver.some_structure =
-  Migrate_parsetree.Driver.rewrite_structure
-    config
-    (module Ppxlib_ast.Selected_ast)
-    st
-
 let map_structure st =
-  map_structure_gen st ~config:(as_ppx_config ())
+  map_structure_gen st
+    ~tool_name:(Ocaml_common.Ast_mapper.tool_name ())
+    ~hook:Context_free.Generated_code_hook.nop
+    ~expect_mismatch_handler:Context_free.Expect_mismatch_handler.nop
+    ~input_name:None
 
 (*$ str_to_sig _last_text_block *)
-let real_map_signature config cookies sg =
-  let { C. hook; expect_mismatch_handler } = C.find config in
-  Cookies.acknoledge_cookies cookies;
+let map_signature_gen sg ~tool_name ~hook ~expect_mismatch_handler ~input_name =
+  Cookies.acknowledge_cookies T;
   if !perform_checks then begin
     Attribute.reset_checks ();
     Attribute.collect#signature sg
   end;
   let sg, lint_errors =
+    let file_path = File_path.get_default_path_sig sg in
     apply_transforms sg
-      ~omp_config:config
+      ~tool_name
+      ~file_path
       ~field:(fun (ct : Transform.t) -> ct.intf)
       ~lint_field:(fun (ct : Transform.t) -> ct.lint_intf)
       ~dropped_so_far:Attribute.dropped_so_far_signature ~hook ~expect_mismatch_handler
+      ~input_name
   in
   let sg =
     match lint_errors with
@@ -541,7 +562,7 @@ let real_map_signature config cookies sg =
         Ast_builder.Default.psig_attribute ~loc attr)
       @ sg
   in
-  Cookies.call_post_handlers cookies;
+  Cookies.call_post_handlers T;
   if !perform_checks then begin
     (* TODO: these two passes could be merged, we now have more passes for
        checks than for actual rewriting. *)
@@ -557,59 +578,18 @@ let real_map_signature config cookies sg =
   sg
 ;;
 
-let map_signature_gen sg ~config : Migrate_parsetree.Driver.some_signature =
-  Migrate_parsetree.Driver.rewrite_signature
-    config
-    (module Ppxlib_ast.Selected_ast)
-    sg
-
 let map_signature sg =
-  map_signature_gen sg ~config:(as_ppx_config ())
+  map_signature_gen sg
+    ~tool_name:(Ocaml_common.Ast_mapper.tool_name ())
+    ~hook:Context_free.Generated_code_hook.nop
+    ~expect_mismatch_handler:Context_free.Expect_mismatch_handler.nop
+    ~input_name:None
 
 (*$*)
 
 (* +-----------------------------------------------------------------+
    | Entry points                                                    |
    +-----------------------------------------------------------------+ *)
-
-let mapper =
-  let module Js = Ppxlib_ast.Selected_ast in
-  (*$*)
-  let structure _ st =
-    Js.of_ocaml Structure st
-    |> map_structure
-    |> Migrate_parsetree.Driver.migrate_some_structure
-         (module Migrate_parsetree.OCaml_current)
-  in
-  (*$ str_to_sig _last_text_block *)
-  let signature _ sg =
-    Js.of_ocaml Signature sg
-    |> map_signature
-    |> Migrate_parsetree.Driver.migrate_some_signature
-         (module Migrate_parsetree.OCaml_current)
-  in
-  (*$*)
-  { Ocaml_common.Ast_mapper.default_mapper with structure; signature }
-;;
-
-let as_ppx_rewriter_main argv =
-  let argv = Caml.Sys.executable_name :: argv in
-  let usage =
-    Printf.sprintf "%s [extra_args] <infile> <outfile>" exe_name
-  in
-  match
-    Arg.parse_argv (Array.of_list argv) (Arg.align (List.rev !args))
-      (fun _ -> raise (Arg.Bad "anonymous arguments not accepted"))
-      usage
-  with
-  | exception Arg.Bad  msg -> eprintf "%s" msg; Caml.exit 2
-  | exception Arg.Help msg -> eprintf "%s" msg; Caml.exit 0
-  | () -> mapper
-
-let run_as_ppx_rewriter () =
-  perform_checks := false;
-  Ocaml_common.Ast_mapper.run_main as_ppx_rewriter_main;
-  Caml.exit 0
 
 let string_contains_binary_ast s =
   let test magic_number =
@@ -618,24 +598,12 @@ let string_contains_binary_ast s =
   test Ast_magic.ast_intf_magic_number ||
   test Ast_magic.ast_impl_magic_number
 
-type pp_error = { filename : string; command_line : string }
-exception Pp_error of pp_error
-
-let report_pp_error e =
-  let buff = Buffer.create 128 in
-  let ppf = Caml.Format.formatter_of_buffer buff in
-  Caml.Format.fprintf ppf "Error while running external preprocessor@.\
-                           Command line: %s@." e.command_line;
-  Caml.Format.pp_print_flush ppf ();
-  Buffer.contents buff
-
-let () =
-  Location.Error.register_error_of_exn
-    (function
-      | Pp_error e ->
-        Some (Location.Error.make ~loc:(Location.in_file e.filename) ~sub:[]
-                (report_pp_error e))
-      | _ -> None)
+let versioned_errorf input_version input_file_name =
+  Printf.ksprintf (fun msg ->
+    let err =
+      Location.Error.make ~loc:(Location.in_file input_file_name) msg ~sub:[]
+    in
+    Error (err, input_version))
 
 let remove_no_error fn =
   try Caml.Sys.remove fn with Sys_error _ -> ()
@@ -653,23 +621,13 @@ let with_preprocessed_file fn ~f =
     protectx (Caml.Filename.temp_file "ocamlpp" "")
       ~finally:remove_no_error
       ~f:(fun tmpfile ->
-        let comm =
-          Printf.sprintf "%s %s > %s"
-            pp (if String.equal fn "-" then "" else Caml.Filename.quote fn)
-            (Caml.Filename.quote tmpfile)
-        in
-        if Caml.Sys.command comm <> 0 then
-          raise (Pp_error { filename = fn
-                          ; command_line = comm
-                          });
-        f tmpfile)
-
-let with_preprocessed_input fn ~f =
-  with_preprocessed_file fn ~f:(fun fn ->
-    if String.equal fn "-" then
-      f stdin
-    else
-      In_channel.with_file fn ~f)
+        match System.run_preprocessor ~pp ~input:fn ~output:tmpfile with
+          | Ok () -> f tmpfile
+          | Error (failed_command, fall_back_version) ->
+            versioned_errorf fall_back_version fn
+              "Error while running external preprocessor\n\
+               Command line: %s\n" failed_command
+      )
 ;;
 
 let relocate_mapper = object
@@ -687,52 +645,71 @@ end
 let set_input_name name =
   Ocaml_common.Location.input_name := name
 
-let load_input (kind : Kind.t) fn input_name ~relocate ic =
+let load_input ~(kind : Kind.t) ~input_name ~relocate fn =
   set_input_name input_name;
-  match Migrate_parsetree.Ast_io.from_channel ic with
-  | Ok (ast_input_name, ast) ->
-    let ast = Intf_or_impl.of_ast_io ast in
-    if not (Kind.equal kind (Intf_or_impl.kind ast)) then
-      Location.raise_errorf ~loc:(Location.in_file fn)
+  let input_source = if String.equal fn "-" then Ast_io.Stdin else File fn in
+  let input_kind = Ast_io.Possibly_source (kind, input_name) in
+  match Ast_io.read input_source ~input_kind with
+  | Ok { input_name = ast_input_name; input_version; ast } ->
+    let ast_kind = Intf_or_impl.kind ast in
+    if not (Kind.equal kind ast_kind) then
+      versioned_errorf input_version fn
         "File contains a binary %s AST but an %s was expected"
-        (Kind.describe (Intf_or_impl.kind ast))
-        (Kind.describe kind);
-    if String.equal ast_input_name input_name || not relocate then begin
+        (Kind.describe ast_kind) (Kind.describe kind)
+    else if String.equal ast_input_name input_name || not relocate then (
       set_input_name ast_input_name;
-      (ast_input_name, ast)
-    end else
-      (input_name,
-       Intf_or_impl.map_with_context ast relocate_mapper
-         (ast_input_name, input_name))
+      Ok (ast_input_name, input_version, ast) )
+    else
+      Ok
+        ( input_name,
+          input_version,
+          Intf_or_impl.map_with_context ast relocate_mapper
+            (ast_input_name, input_name) )
+  | Error (Unknown_version (unknown_magic, fall_back_version)) ->
+    versioned_errorf fall_back_version fn
+      "File is a binary ast for an unknown version of OCaml with magic \
+       number '%s'" unknown_magic
+  | Error (System_error (error, fall_back_version))
+  | Error (Source_parse_error (error, fall_back_version)) ->
+    Error (error, fall_back_version)
+  | Error Not_a_binary_ast -> assert false
+;;
 
-  | Error (Unknown_version _) ->
-    Location.raise_errorf ~loc:(Location.in_file fn)
-      "File is a binary ast for an unknown version of OCaml"
-  | Error (Not_a_binary_ast prefix_read_from_file) ->
-    (* To test if a file is an AST file, we have to read the first few bytes of the
-       file. If it is not, we have to parse these bytes and the rest of the file as
-       source code.
-
-       The compiler just does [seek_on 0] in this case, however this doesn't work when
-       the input is a pipe.
-
-       What we do instead is create a lexing buffer from the input channel and pre-fill
-       it with what we read to do the test. *)
-    let lexbuf = Lexing.from_channel ic in
-    let len = String.length prefix_read_from_file in
-    Bytes.From_string.blit ~src:prefix_read_from_file ~src_pos:0 ~dst:lexbuf.lex_buffer ~dst_pos:0
-      ~len;
-    lexbuf.lex_buffer_len <- len;
-    lexbuf.lex_curr_p <-
-      { pos_fname = input_name
-      ; pos_lnum  = 1
-      ; pos_bol   = 0
-      ; pos_cnum  = 0
-      };
-    Lexer.skip_hash_bang lexbuf;
-    match kind with
-    | Intf -> input_name, Intf (Parse.interface      lexbuf)
-    | Impl -> input_name, Impl (Parse.implementation lexbuf)
+let load_input_run_as_ppx fn =
+  (* If there's an error while loading in run_as_ppx mode, the kind of AST (impl/intf) is still unknown.
+     That's why, as opposed to load_input, this function raises errors instead of returning a result:
+     handling an error by returning an AST with the error packed as extension node wouldn't be possible. *)
+  match Ast_io.read (File fn) ~input_kind:Ast_io.Necessarily_binary with
+  | Ok {input_name = ast_input_name; input_version; ast} ->
+      let ast =
+        match !loc_fname with
+        | None ->
+            set_input_name ast_input_name;
+            ast
+        | Some input_name ->
+            set_input_name input_name;
+            if String.equal ast_input_name input_name then ast
+            else
+              Intf_or_impl.map_with_context ast relocate_mapper
+                (ast_input_name, input_name)
+      in
+      (* With `--as-ppx`, ocaml calls the standalone separately for every structure/signature item
+         with the filename as metadata that it gets from the previous call. relocate_mapper only
+         relocates positions whose position filename coincides with that metadata filename.
+         So always return the metadata filename itself, even if `-loc-filename` is provided. *)
+      (ast_input_name, input_version, ast)
+  | Error (Unknown_version (unknown_magic, _)) ->
+      Location.raise_errorf
+        ~loc:(Location.in_file fn)
+        "The input is a binary ast for an unknown version of OCaml with magic number '%s'" unknown_magic
+  | Error Not_a_binary_ast ->
+      Location.raise_errorf
+        ~loc:(Location.in_file fn)
+        "Expected a binary AST as input"
+  | Error (System_error (error, _)) | Error (Source_parse_error (error, _)) ->
+      Location.in_file fn
+      |> Location.Error.update_loc error
+      |> Location.Error.raise
 ;;
 
 let load_source_file fn =
@@ -752,7 +729,7 @@ type output_mode =
 
 (*$*)
 let extract_cookies_str st =
-  match st with
+  let st = match st with
   | { pstr_desc = Pstr_attribute {attr_name={txt = "ocaml.ppx.context"; _}; _}; _ } as prefix
     :: st ->
     let prefix = Ppxlib_ast.Selected_ast.to_ocaml Structure [prefix] in
@@ -760,6 +737,12 @@ let extract_cookies_str st =
               (Ocaml_common.Ast_mapper.drop_ppx_context_str ~restore:true prefix));
     st
   | _ -> st
+  in
+  (* The cli cookies have to be set after restoring the ppx context,
+     since restoring the ppx context resets the cookies *)
+  List.iter !Cookies.given_through_cli ~f:(fun (name, expr) ->
+    Cookies.set T name expr);
+  st
 
 let add_cookies_str st =
   let prefix =
@@ -770,7 +753,7 @@ let add_cookies_str st =
 
 (*$ str_to_sig _last_text_block *)
 let extract_cookies_sig sg =
-  match sg with
+  let sg = match sg with
   | { psig_desc = Psig_attribute {attr_name={txt = "ocaml.ppx.context"; _}; _}; _ } as prefix
     :: sg ->
     let prefix = Ppxlib_ast.Selected_ast.to_ocaml Signature [prefix] in
@@ -778,6 +761,12 @@ let extract_cookies_sig sg =
               (Ocaml_common.Ast_mapper.drop_ppx_context_sig ~restore:true prefix));
     sg
   | _ -> sg
+  in
+  (* The cli cookies have to be set after restoring the ppx context,
+     since restoring the ppx context resets the cookies *)
+  List.iter !Cookies.given_through_cli ~f:(fun (name, expr) ->
+    Cookies.set T name expr);
+  sg
 
 let add_cookies_sig sg =
   let prefix =
@@ -851,11 +840,42 @@ module Create_file_property(Name : sig val name : string end)(T : Sexpable.S) = 
   let set x = t.data <- Some x
 end
 
+
+let error_to_extension error ~(kind : Kind.t) =
+  let loc = Location.none in
+  let ext = Location.Error.to_extension error in
+  let open Ast_builder.Default in
+  let ast = match kind with
+    | Intf -> Intf_or_impl.Intf [ psig_extension ~loc ext [] ]
+    | Impl -> Intf_or_impl.Impl [ pstr_extension ~loc ext [] ]
+  in
+  ast
+;;
+
+let exn_to_extension exn ~(kind : Kind.t) =
+  match Location.Error.of_exn exn with
+  | None -> raise exn
+  | Some error -> error_to_extension error ~kind
+;;
+
+let process_ast (ast : Intf_or_impl.t) ~input_name ~tool_name ~hook ~expect_mismatch_handler =
+  match ast with
+  | Intf x ->
+    Intf_or_impl.Intf
+      (map_signature_gen x
+         ~tool_name ~hook ~expect_mismatch_handler ~input_name:(Some input_name))
+  | Impl x ->
+    Intf_or_impl.Impl
+      (map_structure_gen x
+         ~tool_name ~hook ~expect_mismatch_handler ~input_name:(Some input_name))
+;;
+
 let process_file (kind : Kind.t) fn ~input_name ~relocate ~output_mode ~embed_errors ~output =
   File_property.reset_all ();
   List.iter (List.rev !process_file_hooks) ~f:(fun f -> f ());
   corrections := [];
   let replacements = ref [] in
+  let tool_name = "ppx_driver" in
   let hook : Context_free.Generated_code_hook.t =
     match output_mode with
     | Reconcile (Using_line_directives | Delimiting_generated_blocks) ->
@@ -881,99 +901,87 @@ let process_file (kind : Kind.t) fn ~input_name ~relocate ~output_mode ~embed_er
     }
   in
 
-  let input_name, ast =
-    try
-      let input_name, ast =
-        with_preprocessed_input fn ~f:(load_input kind fn input_name ~relocate)
-      in
-      let ast = extract_cookies ast in
-      let config = config ~hook ~expect_mismatch_handler in
-      match ast with
-      | Intf x -> input_name, Some_intf_or_impl.Intf (map_signature_gen x ~config)
-      | Impl x -> input_name, Some_intf_or_impl.Impl (map_structure_gen x ~config)
-    with exn when embed_errors ->
-    match Location.Error.of_exn exn with
-    | None -> raise exn
-    | Some error ->
-      let loc = Location.none in
-      let ext = Location.Error.to_extension error in
-      let open Ast_builder.Default in
-      let ast = match kind with
-        | Intf ->
-           Some_intf_or_impl.Intf
-             (Sig ((module Ppxlib_ast.Selected_ast),
-                   [ psig_extension ~loc ext [] ]))
-        | Impl ->
-           Some_intf_or_impl.Impl
-             (Str ((module Ppxlib_ast.Selected_ast),
-                   [ pstr_extension ~loc ext [] ]))
-      in
-      input_name, ast
+  let input_name, input_version, ast =
+    let preprocessed_and_loaded =
+      with_preprocessed_file fn ~f:(load_input ~kind ~input_name ~relocate)
     in
+    match preprocessed_and_loaded with
+    | Ok (input_fname, input_version, ast) -> (
+        try
+          let ast =
+            extract_cookies ast
+            |> process_ast ~input_name ~tool_name ~hook ~expect_mismatch_handler
+          in
+          (input_fname, input_version, ast)
+        with exn when embed_errors ->
+          (input_fname, input_version, exn_to_extension exn ~kind) )
+    | Error (error, input_version) when embed_errors ->
+        (input_name, input_version, error_to_extension error ~kind)
+    | Error (error, _) ->
+        Location.in_file fn
+        |> Location.Error.update_loc error
+        |> Location.Error.raise
+  in
+  Option.iter !output_metadata_filename ~f:(fun fn ->
+    let metadata = File_property.dump_and_reset_all () in
+    Out_channel.write_all fn
+      ~data:(
+        List.map metadata ~f:(fun (s, sexp) ->
+          Sexp.to_string_hum (Sexp.List [Atom s; sexp]) ^ "\n")
+        |> String.concat ~sep:""));
 
-    Option.iter !output_metadata_filename ~f:(fun fn ->
-      let metadata = File_property.dump_and_reset_all () in
-      Out_channel.write_all fn
-        ~data:(
-          List.map metadata ~f:(fun (s, sexp) ->
-            Sexp.to_string_hum (Sexp.List [Atom s; sexp]) ^ "\n")
-          |> String.concat ~sep:""));
+  let input_contents = lazy (load_source_file fn) in
+  let corrected = fn ^ !corrected_suffix in
+  let mismatches_found =
+    match !corrections with
+    | [] ->
+      if Caml.Sys.file_exists corrected then Caml.Sys.remove corrected;
+      false
+    | corrections ->
+      Reconcile.reconcile corrections ~contents:(Lazy.force input_contents)
+        ~output:(Some corrected) ~input_filename:fn ~input_name ~target:Corrected
+        ?styler:!styler ~kind;
+      true
+  in
 
-    let input_contents = lazy (load_source_file fn) in
-    let corrected = fn ^ !corrected_suffix in
-    let mismatches_found =
-      match !corrections with
-      | [] ->
-        if Caml.Sys.file_exists corrected then Caml.Sys.remove corrected;
-        false
-      | corrections ->
-        Reconcile.reconcile corrections ~contents:(Lazy.force input_contents)
-          ~output:(Some corrected) ~input_filename:fn ~input_name ~target:Corrected
-          ?styler:!styler ~kind;
-        true
-    in
+  (match output_mode with
+   | Null -> ()
+   | Pretty_print ->
+     with_output output ~binary:false ~f:(fun oc ->
+       let ppf = Caml.Format.formatter_of_out_channel oc in
+       (match ast with
+        | Intf ast -> Pprintast.signature ppf ast
+        | Impl ast -> Pprintast.structure ppf ast);
+       let null_ast =
+         match ast with
+         | Intf [] | Impl [] -> true
+         | _ -> false
+       in
+       if not null_ast then Caml.Format.pp_print_newline ppf ())
+   | Dump_ast ->
+     with_output output ~binary:true ~f:(fun oc ->
+       Ast_io.write oc {input_name; input_version; ast} ~add_ppx_context:true)
+   | Dparsetree ->
+     with_output output ~binary:false ~f:(fun oc ->
+       let ppf = Caml.Format.formatter_of_out_channel oc in
+       let ast = add_cookies ast in
+       (match ast with
+        | Intf ast -> Sexp.pp_hum ppf (Ast_traverse.sexp_of#signature ast)
+        | Impl ast -> Sexp.pp_hum ppf (Ast_traverse.sexp_of#structure ast));
+       Caml.Format.pp_print_newline ppf ())
+   | Reconcile mode ->
+     Reconcile.reconcile !replacements ~contents:(Lazy.force input_contents) ~output
+       ~input_filename:fn ~input_name ~target:(Output mode) ?styler:!styler
+       ~kind);
 
-    (match output_mode with
-     | Null -> ()
-     | Pretty_print ->
-       with_output output ~binary:false ~f:(fun oc ->
-         let ppf = Caml.Format.formatter_of_out_channel oc in
-         let ast = Intf_or_impl.of_some_intf_or_impl ast in
-         (match ast with
-          | Intf ast -> Pprintast.signature ppf ast
-          | Impl ast -> Pprintast.structure ppf ast);
-         let null_ast =
-           match ast with
-           | Intf [] | Impl [] -> true
-           | _ -> false
-         in
-         if not null_ast then Caml.Format.pp_print_newline ppf ())
-     | Dump_ast ->
-       with_output output ~binary:true ~f:(fun oc ->
-         let ast = Some_intf_or_impl.to_ast_io ast ~add_ppx_context:true in
-         Migrate_parsetree.Ast_io.to_channel oc input_name ast)
-     | Dparsetree ->
-       with_output output ~binary:false ~f:(fun oc ->
-         let ppf = Caml.Format.formatter_of_out_channel oc in
-         let ast = Intf_or_impl.of_some_intf_or_impl ast in
-         let ast = add_cookies ast in
-         (match ast with
-          | Intf ast -> Sexp.pp_hum ppf (Ast_traverse.sexp_of#signature ast)
-          | Impl ast -> Sexp.pp_hum ppf (Ast_traverse.sexp_of#structure ast));
-         Caml.Format.pp_print_newline ppf ())
-     | Reconcile mode ->
-       Reconcile.reconcile !replacements ~contents:(Lazy.force input_contents) ~output
-         ~input_filename:fn ~input_name ~target:(Output mode) ?styler:!styler
-         ~kind);
-
-    if mismatches_found &&
-       (match !diff_command with
-        | Some  "-" -> false
-        | _ -> true) then begin
-      Ppxlib_print_diff.print () ~file1:fn ~file2:corrected ~use_color:!use_color
-        ?diff_command:!diff_command;
-      Caml.exit 1
-    end
+  if mismatches_found &&
+     (match !diff_command with
+      | Some  "-" -> false
+      | _ -> true) then begin
+    Ppxlib_print_diff.print () ~file1:fn ~file2:corrected ~use_color:!use_color
+      ?diff_command:!diff_command;
+    Caml.exit 1
+  end
 ;;
 
 let output_mode = ref Pretty_print
@@ -1016,11 +1024,11 @@ let set_output_mode mode =
 
 let print_transformations () =
   List.iter !Transform.all ~f:(fun (ct : Transform.t) ->
-    printf "%s\n" ct.name);
+    Printf.printf "%s\n" ct.name);
 ;;
 
 let parse_apply_list s =
-  let names = if String.equal s "" then [] else String.split s ~on:',' in
+  let names = if String.equal s "" then [] else String.split_on_char s ~sep:',' in
   List.iter names ~f:(fun name ->
     if not (List.exists !Transform.all ~f:(fun (ct : Transform.t) ->
       Transform.has_name ct name)) then
@@ -1073,6 +1081,22 @@ let interpret_mask () =
     apply_list := Some (List.filter_map !Transform.all ~f:selected_transform_name)
   end
 
+let set_cookie s =
+  match String.lsplit2 s ~on:'=' with
+  | None ->
+    raise (Arg.Bad "invalid cookie, must be of the form \"<name>=<expr>\"")
+  | Some (name, value) ->
+    let lexbuf = Lexing.from_string value in
+    lexbuf.Lexing.lex_curr_p <-
+      { Lexing.
+        pos_fname = "<command-line>"
+      ; pos_lnum  = 1
+      ; pos_bol   = 0
+      ; pos_cnum  = 0
+      };
+    let expr = Parse.expression lexbuf in
+    Cookies.given_through_cli := (name, expr) :: !Cookies.given_through_cli
+
 let shared_args =
   [ "-loc-filename", Arg.String (fun s -> loc_fname := Some s),
     "<string> File name to use in locations"
@@ -1096,27 +1120,14 @@ let shared_args =
     "<names> Exclude these transformations"
   ; "-no-merge", Arg.Set no_merge,
     " Do not merge context free transformations (better for debugging rewriters)"
+  ; "-cookie", Arg.String set_cookie,
+    "NAME=EXPR Set the cookie NAME to EXPR"
+  ; "--cookie", Arg.String set_cookie,
+    " Same as -cookie"
   ]
 
 let () =
   List.iter shared_args ~f:(fun (key, spec, doc) -> add_arg key spec ~doc)
-
-let set_cookie s =
-  match String.lsplit2 s ~on:'=' with
-  | None ->
-    raise (Arg.Bad "invalid cookie, must be of the form \"<name>=<expr>\"")
-  | Some (name, value) ->
-    let lexbuf = Lexing.from_string value in
-    lexbuf.Lexing.lex_curr_p <-
-      { Lexing.
-        pos_fname = "<command-line>"
-      ; pos_lnum  = 1
-      ; pos_bol   = 0
-      ; pos_cnum  = 0
-      };
-    let expr = Parse.expression lexbuf in
-    Migrate_parsetree.Driver.set_global_cookie name
-      (module Ppxlib_ast.Selected_ast) expr
 
 let as_pp () =
   set_output_mode Dump_ast;
@@ -1161,8 +1172,8 @@ let standalone_args =
     " Print the actual passes over the whole AST in the order they are applied"
   ; "-ite-check",
     Arg.Unit (fun () ->
-      eprintf "Warning: the -ite-check flag is deprecated \
-               and has no effect.\n%!";
+      Printf.eprintf "Warning: the -ite-check flag is deprecated \
+                      and has no effect.\n%!";
       Extra_warnings.care_about_ite_branch := true),
     " (no effect -- kept for compatibility)"
   ; "-pp", Arg.String (fun s -> preprocessor := Some s),
@@ -1181,30 +1192,15 @@ let standalone_args =
     " Instruct code generators to improve the prettiness of the generated code"
   ; "-styler", Arg.String (fun s -> styler := Some s),
     " Code styler"
-  ; "-cookie", Arg.String set_cookie,
-    "NAME=EXPR Set the cookie NAME to EXPR"
-  ; "--cookie", Arg.String set_cookie,
-    " Same as -cookie"
   ; "-output-metadata", Arg.String (fun s -> output_metadata_filename := Some s),
     "FILE Where to store the output metadata"
   ; "-corrected-suffix", Arg.Set_string corrected_suffix,
-    "SUFFIX Suffix to happend to corrected files"
+    "SUFFIX Suffix to append to corrected files"
   ]
 ;;
 
 let get_args ?(standalone_args=standalone_args) () =
-  let args = standalone_args @ List.rev !args in
-  let my_arg_names =
-    List.rev_map args ~f:(fun (name, _, _) -> name)
-    |> Set.of_list (module String)
-  in
-  let omp_args =
-    (* Filter out arguments that we override *)
-    List.filter (Migrate_parsetree.Driver.registered_args ())
-      ~f:(fun (name, _, _) ->
-          not (Set.mem my_arg_names name))
-  in
-  args @ omp_args
+  standalone_args @ List.rev !args
 ;;
 
 let standalone_main () =
@@ -1212,7 +1208,6 @@ let standalone_main () =
     Printf.sprintf "%s [extra_args] [<files>]" exe_name
   in
   let args = get_args () in
-  Migrate_parsetree.Driver.reset_args ();
   Arg.parse (Arg.align args) set_input usage;
   interpret_mask ();
   if !request_print_transformations then begin
@@ -1225,7 +1220,7 @@ let standalone_main () =
   end;
   match !input with
   | None    ->
-    eprintf "%s: no input file given\n%!" exe_name;
+    Printf.eprintf "%s: no input file given\n%!" exe_name;
     Caml.exit 2
   | Some fn ->
     let kind =
@@ -1235,7 +1230,7 @@ let standalone_main () =
         match Kind.of_filename fn with
         | Some k -> k
         | None ->
-          eprintf "%s: don't know what to do with '%s', use -impl or -intf.\n"
+          Printf.eprintf "%s: don't know what to do with '%s', use -impl or -intf.\n"
             exe_name fn;
           Caml.exit 2
     in
@@ -1248,35 +1243,69 @@ let standalone_main () =
       ~embed_errors:!embed_errors
 ;;
 
+let rewrite_binary_ast_file input_fn output_fn =
+  let input_name, input_version, ast =
+    load_input_run_as_ppx input_fn
+  in
+  let ast =
+    try
+      let ast = extract_cookies ast in
+      let tool_name = Ocaml_common.Ast_mapper.tool_name () in
+      let hook = Context_free.Generated_code_hook.nop in
+      let expect_mismatch_handler = Context_free.Expect_mismatch_handler.nop in
+      process_ast ast ~input_name ~tool_name ~hook ~expect_mismatch_handler
+    with exn -> exn_to_extension exn ~kind:(Intf_or_impl.kind ast)
+  in
+  with_output (Some output_fn) ~binary:true ~f:(fun oc ->
+    Ast_io.write oc {input_name; input_version; ast} ~add_ppx_context:true)
+;;
+
+let parse_input passed_in_args ~valid_args
+    ~incorrect_input_msg =
+  try
+    Arg.parse_argv passed_in_args (Arg.align valid_args)
+      (fun _ -> raise (Arg.Bad "anonymous arguments not accepted"))
+      incorrect_input_msg
+  with
+  | Arg.Bad msg ->
+      Printf.eprintf "%s" msg;
+      Caml.exit 2
+  | Arg.Help msg ->
+      Printf.eprintf "%s" msg;
+      Caml.exit 0
+;;
+
+let run_as_ppx_rewriter_main ~standalone_args ~usage input =
+  let valid_args = get_args ~standalone_args () in
+  match List.rev @@ Array.to_list @@ input with
+  | output_fn :: input_fn :: flags_and_prog_name
+    when List.length flags_and_prog_name > 0 ->
+      let prog_name_and_flags = List.rev flags_and_prog_name |> Array.of_list in
+      parse_input prog_name_and_flags ~valid_args ~incorrect_input_msg:usage;
+      interpret_mask ();
+      rewrite_binary_ast_file input_fn output_fn;
+      Caml.exit 0
+  | [ help; _ ] when String.equal help "-help" || String.equal help "--help" ->
+      parse_input input ~valid_args ~incorrect_input_msg:usage;
+      assert false
+  | _ ->
+      Printf.eprintf "Usage: %s\n%!" usage;
+      Caml.exit 2
+
+
 let standalone_run_as_ppx_rewriter () =
   let n = Array.length Caml.Sys.argv in
   let usage = Printf.sprintf "%s -as-ppx [extra_args] <infile> <outfile>" exe_name in
-  if n < 4 then begin
-    eprintf "Usage: %s\n%!" usage;
-    Caml.exit 2
-  end;
-  let argv = Array.create ~len:(n - 3) "" in
+  let argv = Array.make (n - 1) "" in
   argv.(0) <- Caml.Sys.argv.(0);
-  for i = 1 to (n - 4) do
+  for i = 1 to (n - 2) do
     argv.(i) <- Caml.Sys.argv.(i + 1)
   done;
   let standalone_args =
     List.map standalone_args ~f:(fun (arg, spec, _doc) ->
       (arg, spec, " Unused with -as-ppx"))
   in
-  let args = get_args ~standalone_args () in
-  Migrate_parsetree.Driver.reset_args ();
-  match
-    Arg.parse_argv argv (Arg.align args)
-      (fun _ -> raise (Arg.Bad "anonymous arguments not accepted"))
-      usage
-  with
-  | exception Arg.Bad  msg -> eprintf "%s" msg; Caml.exit 2
-  | exception Arg.Help msg -> eprintf "%s" msg; Caml.exit 0
-  | () ->
-    interpret_mask ();
-    Ocaml_common.Ast_mapper.apply
-      ~source:Caml.Sys.argv.(n - 2) ~target:Caml.Sys.argv.(n - 1) mapper
+  run_as_ppx_rewriter_main ~standalone_args ~usage argv
 ;;
 
 let standalone () =
@@ -1296,21 +1325,16 @@ let standalone () =
     Caml.exit 1
 ;;
 
-let pretty () = !pretty
+let run_as_ppx_rewriter () =
+  let usage = Printf.sprintf "%s [extra_args] <infile> <outfile>" exe_name in
+  let input = Caml.Sys.argv in
+  try run_as_ppx_rewriter_main ~standalone_args:[] ~usage input
+  with exn ->
+    Location.report_exception Caml.Format.err_formatter exn;
+    Caml.exit 1
+;;
 
-let () =
-  Migrate_parsetree.Driver.register
-    ~name:"ppxlib_driver"
-    (* This doesn't take arguments registered by rewriters. It's not worth supporting
-       them, since [--cookie] is a much better replacement for passing parameters to
-       individual rewriters. *)
-    ~args:shared_args
-    (module Ppxlib_ast.Selected_ast)
-    (fun config cookies ->
-       let module A = Ppxlib_ast.Selected_ast.Ast.Ast_mapper in
-       let structure _ st = real_map_structure config cookies st in
-       let signature _ sg = real_map_signature config cookies sg in
-       { A.default_mapper with structure; signature })
+let pretty () = !pretty
 
 let enable_checks () =
   (* We do not enable the locations check here, we currently require that one
@@ -1323,3 +1347,6 @@ let enable_location_check () =
 
 let disable_location_check () =
   perform_locations_check := false
+
+let map_structure st =
+  map_structure st

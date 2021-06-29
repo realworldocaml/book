@@ -157,6 +157,16 @@ let%test_unit _ = [%test_result: int array] (filter_opt [| Some 1 |]) ~expect:[|
 let%test_unit _ = [%test_result: int array] (filter_opt [| None |]) ~expect:[||]
 let%test_unit _ = [%test_result: int array] (filter_opt [||]) ~expect:[||]
 
+let%expect_test _ =
+  print_s ([%sexp_of: int array] (map2_exn [| 1; 2; 3 |] [| 2; 3; 4 |] ~f:( + )));
+  [%expect {| (3 5 7) |}]
+;;
+
+let%expect_test "map2_exn raise" =
+  require_does_raise [%here] (fun () -> map2_exn [| 1; 2; 3 |] [| 2; 3; 4; 5 |] ~f:( + ));
+  [%expect {| (Invalid_argument "length mismatch in Array.map2_exn: 3 <> 4") |}]
+;;
+
 let%test_unit _ =
   [%test_result: int]
     (fold2_exn [||] [||] ~init:13 ~f:(fun _ -> failwith "fail"))

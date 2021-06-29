@@ -2,16 +2,38 @@ open! Import
 include Array0
 module Int = Int0
 
-let raise_s = Error.raise_s
+type 'a t = 'a array [@@deriving_inline compare, sexp, sexp_grammar]
 
-type 'a t = 'a array [@@deriving_inline compare, sexp]
-let compare : 'a . ('a -> 'a -> int) -> 'a t -> 'a t -> int = compare_array
-let t_of_sexp :
-  'a . (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
+let compare : 'a. ('a -> 'a -> int) -> 'a t -> 'a t -> int = compare_array
+
+let t_of_sexp : 'a. (Ppx_sexp_conv_lib.Sexp.t -> 'a) -> Ppx_sexp_conv_lib.Sexp.t -> 'a t =
   array_of_sexp
-let sexp_of_t :
-  'a . ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
+;;
+
+let sexp_of_t : 'a. ('a -> Ppx_sexp_conv_lib.Sexp.t) -> 'a t -> Ppx_sexp_conv_lib.Sexp.t =
   sexp_of_array
+;;
+
+let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+  let (_the_generic_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.generic_group) =
+    { implicit_vars = [ "array" ]
+    ; ggid = "j\132);\135qH\158\135\222H\001\007\004\158\218"
+    ; types = [ "t", Explicit_bind ([ "a" ], Apply (Implicit_var 0, [ Explicit_var 0 ])) ]
+    }
+  in
+  let (_the_group : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.group) =
+    { gid = Ppx_sexp_conv_lib.Lazy_group_id.create ()
+    ; apply_implicit = [ array_sexp_grammar ]
+    ; generic_group = _the_generic_group
+    ; origin = "array.ml"
+    }
+  in
+  let (t_sexp_grammar : Ppx_sexp_conv_lib.Sexp.Private.Raw_grammar.t) =
+    Ref ("t", _the_group)
+  in
+  t_sexp_grammar
+;;
+
 [@@@end]
 
 (* This module implements a new in-place, constant heap sorting algorithm to replace the
@@ -441,19 +463,29 @@ let filter_mapi t ~f =
 let filter_map t ~f = filter_mapi t ~f:(fun _i a -> f a)
 let filter_opt t = filter_map t ~f:Fn.id
 
+let raise_length_mismatch name n1 n2 =
+  invalid_argf "length mismatch in %s: %d <> %d" name n1 n2 ()
+[@@cold] [@@inline never] [@@local never] [@@specialise never]
+;;
+
+let check_length2_exn name t1 t2 =
+  let n1 = length t1 in
+  let n2 = length t2 in
+  if n1 <> n2 then raise_length_mismatch name n1 n2
+;;
+
 let iter2_exn t1 t2 ~f =
-  if length t1 <> length t2 then invalid_arg "Array.iter2_exn";
+  check_length2_exn "Array.iter2_exn" t1 t2;
   iteri t1 ~f:(fun i x1 -> f x1 t2.(i))
 ;;
 
 let map2_exn t1 t2 ~f =
-  let len = length t1 in
-  if length t2 <> len then invalid_arg "Array.map2_exn";
-  init len ~f:(fun i -> f t1.(i) t2.(i))
+  check_length2_exn "Array.map2_exn" t1 t2;
+  init (length t1) ~f:(fun i -> f t1.(i) t2.(i))
 ;;
 
 let fold2_exn t1 t2 ~init ~f =
-  if length t1 <> length t2 then invalid_arg "Array.fold2_exn";
+  check_length2_exn "Array.fold2_exn" t1 t2;
   foldi t1 ~init ~f:(fun i ac x -> f ac x t2.(i))
 ;;
 
@@ -494,18 +526,16 @@ let exists2_exn t1 t2 ~f =
   let rec exists2_exn_loop t1 t2 ~f i =
     if i < 0 then false else f t1.(i) t2.(i) || exists2_exn_loop t1 t2 ~f (i - 1)
   in
-  let len = length t1 in
-  if length t2 <> len then invalid_arg "Array.exists2_exn";
-  exists2_exn_loop t1 t2 ~f (len - 1)
+  check_length2_exn "Array.exists2_exn" t1 t2;
+  exists2_exn_loop t1 t2 ~f (length t1 - 1)
 ;;
 
 let for_all2_exn t1 t2 ~f =
   let rec for_all2_loop t1 t2 ~f i =
     if i < 0 then true else f t1.(i) t2.(i) && for_all2_loop t1 t2 ~f (i - 1)
   in
-  let len = length t1 in
-  if length t2 <> len then invalid_arg "Array.for_all2_exn";
-  for_all2_loop t1 t2 ~f (len - 1)
+  check_length2_exn "Array.for_all2_exn" t1 t2;
+  for_all2_loop t1 t2 ~f (length t1 - 1)
 ;;
 
 let equal equal t1 t2 = length t1 = length t2 && for_all2_exn t1 t2 ~f:equal
@@ -769,17 +799,6 @@ include Blit.Make1 (struct
   end)
 
 let invariant invariant_a t = iter t ~f:invariant_a
-
-(* Deprecated. [Obj.truncate] reduces the size of a block on the ocaml heap.  For arrays, the block
-   size is the array length. This holds even for float arrays. *)
-let unsafe_truncate t ~len =
-  if len <= 0 || len > length t
-  then
-    raise_s
-      (Sexp.message "Array.unsafe_truncate got invalid len" [ "len", sexp_of_int len ]);
-  if len < length t
-  then (Caml.Obj.truncate [@ocaml.alert "-deprecated"]) (Caml.Obj.repr t) len
-;;
 
 module Private = struct
   module Sort = Sort

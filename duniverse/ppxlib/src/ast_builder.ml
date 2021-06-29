@@ -28,7 +28,7 @@ module Default = struct
 
   let eint ~loc t = pexp_constant ~loc (Pconst_integer (Int.to_string  t, None))
   let echar ~loc t = pexp_constant ~loc (Pconst_char t)
-  let estring ~loc t = pexp_constant ~loc (Pconst_string (t, None))
+  let estring ~loc t = pexp_constant ~loc (Pconst_string (t, loc, None))
   let efloat ~loc t = pexp_constant ~loc (Pconst_float (t, None))
   let eint32 ~loc t = pexp_constant ~loc (Pconst_integer (Int32.to_string t, Some 'l'))
   let eint64 ~loc t = pexp_constant ~loc (Pconst_integer (Int64.to_string t, Some 'L'))
@@ -36,7 +36,7 @@ module Default = struct
 
   let pint ~loc t = ppat_constant ~loc (Pconst_integer (Int.to_string t, None))
   let pchar ~loc t = ppat_constant ~loc (Pconst_char t)
-  let pstring ~loc t = ppat_constant ~loc (Pconst_string (t, None))
+  let pstring ~loc t = ppat_constant ~loc (Pconst_string (t, loc, None))
   let pfloat ~loc t = ppat_constant ~loc (Pconst_float (t, None))
   let pint32 ~loc t = ppat_constant ~loc (Pconst_integer (Int32.to_string t, Some 'l'))
   let pint64 ~loc t = ppat_constant ~loc (Pconst_integer (Int64.to_string t, Some 'L'))
@@ -142,7 +142,7 @@ module Default = struct
       | _ :: _ -> eapply ~loc:apply_loc ident args
       end
     | Ldot (Lapply _ as module_path, n) ->
-      let suffix_n functor_ = String.uncapitalize functor_ ^ "__" ^ n in
+      let suffix_n functor_ = String.uncapitalize_ascii functor_ ^ "__" ^ n in
       let rec gather_lapply functor_args : Longident.t -> Longident.t * _ = function
         | Lapply (rest, arg) ->
           gather_lapply (arg :: functor_args) rest
@@ -229,9 +229,8 @@ module Default = struct
                 -> String.(=) name' param.txt
               | _ -> false)
           with
-          | Unequal_lengths -> assert false
-          | Ok false -> None
-          | Ok true -> Some (annotate ~loc:expr.pexp_loc f_ident params)
+          | false -> None
+          | true -> Some (annotate ~loc:expr.pexp_loc f_ident params)
         end
       | _ -> None
   ;;

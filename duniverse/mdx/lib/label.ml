@@ -74,6 +74,8 @@ type non_det = Nd_output | Nd_command
 
 let default_non_det = Nd_output
 
+type block_kind = OCaml | Cram | Toplevel | Include
+
 type t =
   | Dir of string
   | Source_tree of string
@@ -86,6 +88,13 @@ type t =
   | Require_package of string
   | Set of string * string
   | Unset of string
+  | Block_kind of block_kind
+
+let pp_block_kind ppf = function
+  | OCaml -> Fmt.string ppf "ocaml"
+  | Cram -> Fmt.string ppf "cram"
+  | Toplevel -> Fmt.string ppf "toplevel"
+  | Include -> Fmt.string ppf "include"
 
 let pp ppf = function
   | Dir d -> Fmt.pf ppf "dir=%s" d
@@ -102,6 +111,7 @@ let pp ppf = function
   | Require_package p -> Fmt.pf ppf "require-package=%s" p
   | Set (v, x) -> Fmt.pf ppf "set-%s=%s" v x
   | Unset x -> Fmt.pf ppf "unset-%s" x
+  | Block_kind bk -> pp_block_kind ppf bk
 
 let is_prefix ~prefix s =
   let len_prefix = String.length prefix in
@@ -140,6 +150,10 @@ let requires_eq_value ~label ~value f =
 let interpret label value =
   match label with
   | "skip" -> doesnt_accept_value ~label ~value Skip
+  | "ocaml" -> doesnt_accept_value ~label ~value (Block_kind OCaml)
+  | "cram" -> doesnt_accept_value ~label ~value (Block_kind Cram)
+  | "toplevel" -> doesnt_accept_value ~label ~value (Block_kind Toplevel)
+  | "include" -> doesnt_accept_value ~label ~value (Block_kind Include)
   | v when is_prefix ~prefix:"unset-" v ->
       doesnt_accept_value ~label ~value
         (Unset (split_prefix ~prefix:"unset-" v))

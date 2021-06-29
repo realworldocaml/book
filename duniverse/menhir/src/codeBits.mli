@@ -29,13 +29,13 @@ val ptuple: pattern list -> pattern
 (* A list subject to a condition. (Be careful, though: the list is
    of course constructed even if the condition is false.) *)
 
-val listif: bool -> 'a list -> 'a list
-val elementif: bool -> 'a -> 'a list
+val ifn: bool -> 'a list -> 'a list
+val if1: bool -> 'a -> 'a list
 
-(* A lazy version of [listif], where the list is constructed only
+(* A lazy version of [ifn], where the list is constructed only
    if the condition is true. *)
 
-val listiflazy: bool -> (unit -> 'a list) -> 'a list
+val ifnlazy: bool -> (unit -> 'a list) -> 'a list
 
 (* Standard types. *)
 
@@ -121,7 +121,13 @@ val interface_to_structure: interface -> structure
 
 (* Constructing a named module type together with a list of "with type"
    constraints. *)
-val with_types: IL.with_kind -> string -> (string list * string * IL.typ) list -> IL.module_type
+val with_types: with_kind -> string -> (string list * string * typ) list -> module_type
 
 (* Functor applications. *)
-val mapp: IL.modexpr -> IL.modexpr list -> IL.modexpr
+val mapp: modexpr -> modexpr list -> modexpr
+
+(* Record fields. *)
+val field: bool -> string -> typ -> fielddef
+
+(* Branches. *)
+val branch: pattern -> expr -> branch

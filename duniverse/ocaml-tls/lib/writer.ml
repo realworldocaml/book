@@ -2,7 +2,7 @@ open Packet
 open Core
 open Cstruct
 
-let (<+>) = Utils.Cs.(<+>)
+let (<+>) = Cstruct.append
 
 let assemble_protocol_version_int buf version =
   let major, minor = pair_of_tls_version version in
@@ -46,7 +46,7 @@ let assemble_list ?none_if_empty lenb f elements =
        set_uint24_len l (len body) ;
        l
   in
-  let b es = Utils.Cs.appends (List.map f es) in
+  let b es = Cstruct.concat (List.map f es) in
   let full es =
     let body = b es in
     length body <+> body
@@ -181,6 +181,11 @@ let assemble_extension = function
      set_uint8 buf 0 (len x);
      (buf <+> x, RENEGOTIATION_INFO)
   | `ExtendedMasterSecret -> (create 0, EXTENDED_MASTER_SECRET)
+  | `ECPointFormats ->
+    (* a list of point formats, we support type 0 = uncompressed unconditionally *)
+    let data = Cstruct.create 2 in
+    Cstruct.set_uint8 data 0 1;
+    (data, EC_POINT_FORMATS)
   | _ -> invalid_arg "unknown extension"
 
 let assemble_cookie c =
@@ -247,7 +252,7 @@ let assemble_client_extension e =
     | `SupportedVersions vs ->
       (assemble_supported_versions vs, SUPPORTED_VERSIONS)
     | `PostHandshakeAuthentication ->
-      (Utils.Cs.empty, POST_HANDSHAKE_AUTH)
+      (Cstruct.empty, POST_HANDSHAKE_AUTH)
     | `Cookie c ->
       (assemble_cookie c, COOKIE)
     | `PskKeyExchangeModes modes ->

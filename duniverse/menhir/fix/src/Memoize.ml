@@ -113,6 +113,21 @@ module Make (M : IMPERATIVE_MAPS) = struct
       (* Answer this query. *)
       f stack depth marked x
 
+  (* The combinator [curried] can be used to obtain a curried version of [fix]
+     or [defensive_fix] in a concrete instance where the type [key] is a
+     product type. *)
+
+  (* [curried] could be defined as a toplevel function; it does not depend on
+     any of the code above. However, it seems convenient to place it here. *)
+
+  let   curry f x y = f (x, y)
+  let uncurry f (x, y) = f x y
+
+  let curried (fix : ('a * 'b -> 'c) fix) : ('a -> 'b -> 'c) fix =
+    fun ff ->
+      let ff f = uncurry (ff (curry f)) in
+      curry (fix ff)
+
 end
 
 module ForOrderedType (T : OrderedType) =

@@ -1,4 +1,4 @@
-let (<+>) = Utils.Cs.(<+>)
+let (<+>) = Cstruct.append
 
 let cdiv (x : int) (y : int) =
   if x > 0 && y > 0 then (x + y - 1) / y
@@ -11,55 +11,67 @@ let left_pad_dh group msg =
   padding <+> msg
 
 let not_all_zero = function
-  | None -> None
-  | Some cs ->
+  | Error _ as e -> e
+  | Ok cs ->
     let all_zero = Cstruct.create (Cstruct.len cs) in
-    if Cstruct.equal all_zero cs then None else Some cs
-
-let share_appropriate_length group share =
-  match Core.group_to_impl group with
-  | `Hacl `X25519 -> Ok () (* already checked by hacl_x25519.key_exchange *)
-  | `Fiat `P256 -> Ok () (* already checked by fiat_p256.key_exchange *)
-  | `Mirage_crypto group ->
-    let bits = Mirage_crypto_pk.Dh.modulus_size group in
-    if Cstruct.len share = cdiv bits 8 then
-      Ok ()
-    else (* truncated share, better reject this *)
+    if Cstruct.equal all_zero cs then
       Error (`Fatal `InvalidDH)
+    else
+      Ok cs
 
-let dh_shared group secret share =
+let dh_shared secret share =
   (* RFC 8556, Section 7.4.1 - we need zero-padding on the left *)
   not_all_zero
-    (match Core.group_to_impl group, secret with
-     | `Mirage_crypto mc_group, `Mirage_crypto secret ->
-       begin match Mirage_crypto_pk.Dh.shared secret share with
-         | None -> None
-         | Some shared -> Some (left_pad_dh mc_group shared)
+    (match secret with
+     | `Finite_field secret ->
+       let group = secret.Mirage_crypto_pk.Dh.group in
+       let bits = Mirage_crypto_pk.Dh.modulus_size group in
+       if Cstruct.len share = cdiv bits 8 then
+         begin match Mirage_crypto_pk.Dh.shared secret share with
+           | None -> Error (`Fatal `InvalidDH)
+           | Some shared -> Ok (left_pad_dh group shared)
+         end
+       else (* truncated share, better reject this *)
+         Error (`Fatal `InvalidDH)
+     | `P256 priv ->
+       begin match Mirage_crypto_ec.P256.Dh.key_exchange priv share with
+         | Error e -> Error (`Fatal (`BadECDH e))
+         | Ok shared -> Ok shared
        end
-     | `Hacl `X25519, `Hacl priv ->
-       begin match Hacl_x25519.key_exchange priv share with
-         | Error _ -> None
-         | Ok shared -> Some shared
+     | `P384 priv ->
+       begin match Mirage_crypto_ec.P384.Dh.key_exchange priv share with
+         | Error e -> Error (`Fatal (`BadECDH e))
+         | Ok shared -> Ok shared
        end
-     | `Fiat `P256, `Fiat priv ->
-       begin match Fiat_p256.key_exchange priv share with
-         | Error _ -> None
-         | Ok shared -> Some shared
+     | `P521 priv ->
+       begin match Mirage_crypto_ec.P521.Dh.key_exchange priv share with
+         | Error e -> Error (`Fatal (`BadECDH e))
+         | Ok shared -> Ok shared
        end
-     | _ -> None)
+     | `X25519 priv ->
+       begin match Mirage_crypto_ec.X25519.key_exchange priv share with
+         | Error e -> Error (`Fatal (`BadECDH e))
+         | Ok shared -> Ok shared
+       end)
 
 let dh_gen_key group =
   (* RFC 8556, Section 4.2.8.1 - we need zero-padding on the left *)
   match Core.group_to_impl group with
-  | `Mirage_crypto mc_group ->
+  | `Finite_field mc_group ->
     let sec, shared = Mirage_crypto_pk.Dh.gen_key mc_group in
-    `Mirage_crypto sec, left_pad_dh mc_group shared
-  | `Hacl `X25519 ->
-    let secret, shared = Hacl_x25519.gen_key ~rng:Mirage_crypto_rng.generate in
-    `Hacl secret, shared
-  | `Fiat `P256 ->
-    let secret, shared = Fiat_p256.gen_key ~rng:Mirage_crypto_rng.generate in
-    `Fiat secret, shared
+    `Finite_field sec, left_pad_dh mc_group shared
+  | `P256 ->
+    let secret, shared = Mirage_crypto_ec.P256.Dh.gen_key () in
+    `P256 secret, shared
+  | `P384 ->
+    let secret, shared = Mirage_crypto_ec.P384.Dh.gen_key () in
+    `P384 secret, shared
+  | `P521 ->
+    let secret, shared = Mirage_crypto_ec.P521.Dh.gen_key () in
+    `P521 secret, shared
+  | `X25519 ->
+    let secret, shared = Mirage_crypto_ec.X25519.gen_key () in
+    `X25519 secret, shared
 
 let trace tag cs = Tracing.cs ~tag:("crypto " ^ tag) cs
 

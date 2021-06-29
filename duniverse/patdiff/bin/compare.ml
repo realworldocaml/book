@@ -1,7 +1,8 @@
 open Core
-module P = Patdiff_lib.Patdiff_core
-module Compare_core = Patdiff_lib.Compare_core
-module Configuration = Patdiff_lib.Configuration
+module Compare_core = Patdiff.Compare_core
+module Configuration = Patdiff.Configuration
+module Format = Patdiff.Format
+module Output = Patdiff.Output
 
 let summary =
   {|Compare two files (or process a diff read in on stdin) using the
@@ -28,7 +29,7 @@ module Args = struct
     ; quiet_opt : bool option
     ; double_check_opt : bool option
     ; mask_uniques_opt : bool option
-    ; output : P.Output.t option
+    ; output : Output.t option
     ; context_opt : int option
     ; line_big_enough_opt : int option
     ; word_big_enough_opt : int option
@@ -39,7 +40,7 @@ module Args = struct
     ; next_alt_opt : string option option
     ; include_ : string list
     ; exclude : string list
-    ; location_style : P.Format.Location_style.t option
+    ; location_style : Format.Location_style.t option
     ; warn_if_no_trailing_newline_in_both : bool option
     }
 
@@ -90,28 +91,36 @@ let files_from_anons = function
 
 (* Override default/config file options with command line arguments *)
 let override config (args : Args.compare_flags) =
-  Configuration.override
-    config
-    ?output:args.output
-    ?unrefined:args.unrefined_opt
-    ?produce_unified_lines:args.produce_unified_lines_opt
-    ?ext_cmp:args.ext_cmp_opt
-    ?float_tolerance:args.float_tolerance_opt
-    ?keep_ws:args.keep_ws_opt
-    ?split_long_lines:args.split_long_lines_opt
-    ?interleave:args.interleave_opt
-    ?assume_text:args.assume_text_opt
-    ?context:args.context_opt
-    ?line_big_enough:args.line_big_enough_opt
-    ?word_big_enough:args.word_big_enough_opt
-    ?shallow:args.shallow_opt
-    ?quiet:args.quiet_opt
-    ?double_check:args.double_check_opt
-    ?mask_uniques:args.mask_uniques_opt
-    ?prev_alt:args.prev_alt_opt
-    ?next_alt:args.next_alt_opt
-    ?location_style:args.location_style
-    ?warn_if_no_trailing_newline_in_both:args.warn_if_no_trailing_newline_in_both
+  let config =
+    Configuration.override
+      config
+      ?output:args.output
+      ?unrefined:args.unrefined_opt
+      ?produce_unified_lines:args.produce_unified_lines_opt
+      ?float_tolerance:args.float_tolerance_opt
+      ?keep_ws:args.keep_ws_opt
+      ?split_long_lines:args.split_long_lines_opt
+      ?interleave:args.interleave_opt
+      ?assume_text:args.assume_text_opt
+      ?context:args.context_opt
+      ?line_big_enough:args.line_big_enough_opt
+      ?word_big_enough:args.word_big_enough_opt
+      ?shallow:args.shallow_opt
+      ?quiet:args.quiet_opt
+      ?double_check:args.double_check_opt
+      ?mask_uniques:args.mask_uniques_opt
+      ?prev_alt:args.prev_alt_opt
+      ?next_alt:args.next_alt_opt
+      ?location_style:args.location_style
+      ?warn_if_no_trailing_newline_in_both:args.warn_if_no_trailing_newline_in_both
+  in
+  match args.ext_cmp_opt with
+  | None -> config
+  | Some ext_cmp ->
+    (Configuration.Private.with_ext_cmp [@alert "-deprecated"])
+      config
+      ~ext_cmp
+      ~notify:ignore
 ;;
 
 let main' (args : Args.compare_flags) =
@@ -287,7 +296,7 @@ let command =
        choose_one
          [ map
              ~f:(function
-               | true -> Some (Some P.Output.Html)
+               | true -> Some (Some Output.Html)
                | _ -> None)
              (flag
                 "html"
@@ -297,7 +306,7 @@ let command =
                    codes)")
          ; map
              ~f:(function
-               | true -> Some (Some P.Output.Ascii)
+               | true -> Some (Some Output.Ascii)
                | _ -> None)
              (flag
                 "ascii"
@@ -305,7 +314,7 @@ let command =
                 ~doc:" Output in ASCII with no ANSI escape codes (implies -unrefined)")
          ; map
              ~f:(function
-               | true -> Some (Some P.Output.Ansi)
+               | true -> Some (Some Output.Ansi)
                | _ -> None)
              (flag "ansi" no_arg ~doc:" Output in ASCII with ANSI escape codes")
          ]
@@ -366,9 +375,9 @@ let command =
      and location_style =
        flag
          "location-style"
-         (optional (Arg_type.create P.Format.Location_style.of_string))
+         (optional (Arg_type.create Format.Location_style.of_string))
          ~doc:
-           P.Format.Location_style.(
+           Format.Location_style.(
              sprintf
                "<%s> how to format location information in hunk headers"
                (String.concat ~sep:"|" (List.map all ~f:to_string)))

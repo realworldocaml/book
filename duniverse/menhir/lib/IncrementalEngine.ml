@@ -78,9 +78,9 @@ module type INCREMENTAL_ENGINE = sig
     | Rejected
 
   (* [offer] allows the user to resume the parser after it has suspended
-     itself with a checkpoint of the form [InputNeeded env]. [offer] expects the
-     old checkpoint as well as a new token and produces a new checkpoint. It does not
-     raise any exception. *)
+     itself with a checkpoint of the form [InputNeeded env]. [offer] expects
+     the old checkpoint as well as a new token and produces a new checkpoint.
+     It does not raise any exception. *)
 
   val offer:
     'a checkpoint ->
@@ -89,10 +89,30 @@ module type INCREMENTAL_ENGINE = sig
 
   (* [resume] allows the user to resume the parser after it has suspended
      itself with a checkpoint of the form [AboutToReduce (env, prod)] or
-     [HandlingError env]. [resume] expects the old checkpoint and produces a new
-     checkpoint. It does not raise any exception. *)
+     [HandlingError env]. [resume] expects the old checkpoint and produces a
+     new checkpoint. It does not raise any exception. *)
+
+  (* The optional argument [strategy] influences the manner in which [resume]
+     deals with checkpoints of the form [ErrorHandling _]. Its default value
+     is [`Legacy]. It can be briefly described as follows:
+
+     - If the [error] token is used only to report errors (that is, if the
+       [error] token appears only at the end of a production, whose semantic
+       action raises an exception) then the simplified strategy should be
+       preferred. (This includes the case where the [error] token does not
+       appear at all in the grammar.)
+
+     - If the [error] token is used to recover after an error, or if
+       perfect backward compatibility is required, the legacy strategy
+       should be selected.
+
+     More details on these strategies appear in the file [Engine.ml]. *)
+
+  type strategy =
+    [ `Legacy | `Simplified ]
 
   val resume:
+    ?strategy:strategy ->
     'a checkpoint ->
     'a checkpoint
 
@@ -102,7 +122,8 @@ module type INCREMENTAL_ENGINE = sig
   type supplier =
     unit -> token * position * position
 
-  (* A pair of a lexer and a lexing buffer can be easily turned into a supplier. *)
+  (* A pair of a lexer and a lexing buffer can be easily turned into a
+     supplier. *)
 
   val lexer_lexbuf_to_supplier:
     (Lexing.lexbuf -> token) ->
@@ -117,9 +138,11 @@ module type INCREMENTAL_ENGINE = sig
   (* [loop supplier checkpoint] begins parsing from [checkpoint], reading
      tokens from [supplier]. It continues parsing until it reaches a
      checkpoint of the form [Accepted v] or [Rejected]. In the former case, it
-     returns [v]. In the latter case, it raises the exception [Error]. *)
+     returns [v]. In the latter case, it raises the exception [Error].
+     The optional argument [strategy], whose default value is [Legacy],
+     is passed to [resume] and influences the error-handling strategy. *)
 
-  val loop: supplier -> 'a checkpoint -> 'a
+  val loop: ?strategy:strategy -> supplier -> 'a checkpoint -> 'a
 
   (* [loop_handle succeed fail supplier checkpoint] begins parsing from
      [checkpoint], reading tokens from [supplier]. It continues parsing until
@@ -128,10 +151,10 @@ module type INCREMENTAL_ENGINE = sig
      observed first). In the former case, it calls [succeed v]. In the latter
      case, it calls [fail] with this checkpoint. It cannot raise [Error].
 
-     This means that Menhir's traditional error-handling procedure (which pops
-     the stack until a state that can act on the [error] token is found) does
-     not get a chance to run. Instead, the user can implement her own error
-     handling code, in the [fail] continuation. *)
+     This means that Menhir's error-handling procedure does not get a chance
+     to run. For this reason, there is no [strategy] parameter. Instead, the
+     user can implement her own error handling code, in the [fail]
+     continuation. *)
 
   val loop_handle:
     ('a -> 'answer) ->

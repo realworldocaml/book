@@ -1,0 +1,4 @@
+(test
+ (name test_bigstringaf)
+ (libraries alcotest bigstringaf)
+ (modules   test_bigstringaf s))

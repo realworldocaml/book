@@ -9,7 +9,9 @@ open! Import
 
 type how =
   [ `Parallel (** like [`Max_concurrent_jobs Int.max_value] *)
-  | `Sequential (** like [`Max_concurrent_jobs 1] *)
+  | `Sequential
+  (** [`Sequential] is often but not always the same as [`Max_concurrent_jobs 1]
+      (for example, they differ in the [Or_error] monad). *)
   | `Max_concurrent_jobs of int
   ]
 [@@deriving sexp_of]

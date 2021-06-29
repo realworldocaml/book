@@ -169,3 +169,29 @@ module Example_without_open = struct
     x + 1
   ;;
 end
+
+module Example_with_mapn = struct
+  module Let_syntax = struct
+    let return = Monad_example.X.Let_syntax.return
+
+    module Let_syntax = struct
+      include Monad_example.X.Let_syntax.Let_syntax
+
+      let map2 a b ~f = map (both a b) ~f:(fun (a, b) -> f a b)
+      let map3 a b c ~f = map2 (both a b) c ~f:(fun (a, b) c -> f a b c)
+
+      let map4 a b c d ~f =
+        map2 (both a b) (both c d) ~f:(fun (a, b) (c, d) -> f a b c d)
+      ;;
+    end
+  end
+
+  let _x =
+    let open Let_syntax in
+    let%mapn a = return 1
+    and b = return "hi"
+    and c = return 2.34
+    and d = return true in
+    Printf.sprintf "%d %s %f %b" a b c d
+  ;;
+end

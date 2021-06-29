@@ -12,10 +12,7 @@ type error =
   | Overflow       of int
   | UnknownVersion of (int * int)
   | UnknownContent of int
-  [@@deriving sexp]
-
-include Control.Or_error_make (struct type err = error end)
-type nonrec 'a result = ('a, error) result
+  [@@deriving sexp_of]
 
 exception Reader_error of error
 
@@ -24,9 +21,9 @@ and raise_wrong_length msg   = raise (Reader_error (WrongLength msg))
 and raise_trailing_bytes msg = raise (Reader_error (TrailingBytes msg))
 
 let catch f x =
-  try return (f x) with
-  | Reader_error err   -> fail err
-  | Invalid_argument _ -> fail Underflow
+  try Ok (f x) with
+  | Reader_error err   -> Error err
+  | Invalid_argument _ -> Error Underflow
 
 let parse_version_int buf =
   let major = get_uint8 buf 0 in
@@ -58,7 +55,7 @@ let parse_any_version = catch parse_any_version_exn
 
 let parse_record buf =
   if len buf < 5 then
-    return (`Fragment buf)
+    Ok (`Fragment buf)
   else
     let typ = get_uint8 buf 0
     and version = parse_version_int (shift buf 1)
@@ -68,18 +65,18 @@ let parse_record buf =
       (* 2 ^ 14 + 2048 for TLSCiphertext
          2 ^ 14 + 1024 for TLSCompressed
          2 ^ 14 for TLSPlaintext *)
-      fail (Overflow x)
-    | x when 5 + x > len buf -> return (`Fragment buf)
+      Error (Overflow x)
+    | x when 5 + x > len buf -> Ok (`Fragment buf)
     | x ->
       match
         tls_any_version_of_pair version,
         int_to_content_type typ
       with
-      | None, _ -> fail (UnknownVersion version)
-      | _, None -> fail (UnknownContent typ)
+      | None, _ -> Error (UnknownVersion version)
+      | _, None -> Error (UnknownContent typ)
       | Some version, Some content_type ->
         let payload, rest = split ~start:5 buf x in
-        return (`Record (({ content_type ; version }, payload), rest))
+        Ok (`Record (({ content_type ; version }, payload), rest))
 
 let validate_alert (lvl, typ) =
   let open Packet in
@@ -132,8 +129,8 @@ let parse_alert = catch @@ fun buf ->
 
 let parse_change_cipher_spec buf =
   match len buf, get_uint8 buf 0 with
-  | 1, 1 -> return ()
-  | _    -> fail (Unknown "bad change cipher spec message")
+  | 1, 1 -> Ok ()
+  | _    -> Error (Unknown "bad change cipher spec message")
 
 let rec parse_count_list parsef buf acc = function
   | 0 -> (List.rev acc, buf)
@@ -257,6 +254,15 @@ let parse_alpn_protocols buf =
   else
     parse_list parse_alpn_protocol (sub buf 2 length) []
 
+let parse_ec_point_format buf =
+  (* this is deprecated, we only check that uncompressed (typ 0) is present *)
+  let data = get_uint8 buf 0 in
+  Some (data = 0), shift buf 1
+
+let parse_ec_point_formats buf =
+  let count = get_uint8 buf 0 in
+  parse_count_list parse_ec_point_format (shift buf 1) [] count
+
 let parse_extension buf = function
   | MAX_FRAGMENT_LENGTH ->
      (match parse_fragment_length buf with
@@ -273,6 +279,14 @@ let parse_extension buf = function
          raise_trailing_bytes "extended master secret"
       else
         `ExtendedMasterSecret
+  | EC_POINT_FORMATS ->
+    let formats, rt = parse_ec_point_formats buf in
+    if len rt <> 0 then
+      raise_trailing_bytes "ec point formats"
+    else if List.mem true formats then
+      `ECPointFormats
+    else
+      raise_unknown "EC Point Formats without uncompressed"
   | x -> `UnknownExtension (extension_type_to_int x, buf)
 
 let parse_keyshare_entry buf =
@@ -303,7 +317,6 @@ let parse_client_presharedkeys buf =
   let identities = parse_list parse_id (sub buf 2 id_len) [] in
   let binders_len = BE.get_uint16 buf (id_len + 2) in
   let binders = parse_list parse_binder (sub buf (4 + id_len) binders_len) [] in
-  Printf.printf "identities are %d, binders %d\n%!" (List.length identities) (List.length binders) ;
   let id_binder = List.combine identities binders in
   if len buf <> 4 + binders_len + id_len then
     raise_trailing_bytes "psk"
@@ -702,7 +715,7 @@ let parse_ec_parameters = catch @@ fun raw ->
     match int_to_named_group (BE.get_uint16 raw 1) with
     | Some g ->
       begin match named_group_to_group g with
-        | Some ((`X25519 | `P256) as g) ->
+        | Some ((`X25519 | `P256 | `P384 | `P521) as g) ->
           let data_len = get_uint8 raw 3 in
           let d, rest = split (shift raw 4) data_len in
           g, d, sub raw 0 (data_len + 4), rest

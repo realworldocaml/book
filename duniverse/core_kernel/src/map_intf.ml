@@ -10,8 +10,6 @@
     matches [Creators3_with_comparator] but [Accessors3] (without comparator).
 *)
 
-(*_ JS-only: CRs and comments about [Map] functions do not belong in this file.
-  They belong next to the appropriate function in core_map.mli. *)
 
 open! Import
 open T
@@ -477,4 +475,72 @@ module type S_binable = sig
   include Binable.S1 with type 'a t := 'a t
 end
 
-module type For_deriving = Map.For_deriving
+module type For_deriving = sig
+  include Base.Map.For_deriving
+  module M = Base.Map.M
+
+  (** The following [*bin*] functions support bin-io on base-style maps,
+      e.g.:
+
+      {[ type t = int Map.M(String).t [@@deriving bin_io] ]} *)
+
+  val bin_shape_m__t : ('a, 'c) Key_bin_io.t -> Bin_prot.Shape.t -> Bin_prot.Shape.t
+
+  val bin_size_m__t
+    :  ('a, 'c) Key_bin_io.t
+    -> 'b Bin_prot.Size.sizer
+    -> ('a, 'b, 'c) t Bin_prot.Size.sizer
+
+  val bin_write_m__t
+    :  ('a, 'c) Key_bin_io.t
+    -> 'b Bin_prot.Write.writer
+    -> ('a, 'b, 'c) t Bin_prot.Write.writer
+
+  val bin_read_m__t
+    :  ('a, 'c) Key_bin_io.t
+    -> 'b Bin_prot.Read.reader
+    -> ('a, 'b, 'c) t Bin_prot.Read.reader
+
+  val __bin_read_m__t__
+    :  ('a, 'c) Key_bin_io.t
+    -> 'b Bin_prot.Read.reader
+    -> (int -> ('a, 'b, 'c) t) Bin_prot.Read.reader
+
+  (** The following [quickcheck*] functions support deriving quickcheck on base-style maps,
+      e.g.:
+
+      {[ type t = int Map.M(String).t [@@deriving quickcheck] ]} *)
+
+  module type Quickcheck_generator_m = sig
+    include Comparator.S
+
+    val quickcheck_generator : t Quickcheck.Generator.t
+  end
+
+  module type Quickcheck_observer_m = sig
+    include Comparator.S
+
+    val quickcheck_observer : t Quickcheck.Observer.t
+  end
+
+  module type Quickcheck_shrinker_m = sig
+    include Comparator.S
+
+    val quickcheck_shrinker : t Quickcheck.Shrinker.t
+  end
+
+  val quickcheck_generator_m__t
+    :  (module Quickcheck_generator_m with type t = 'k and type comparator_witness = 'cmp)
+    -> 'v Quickcheck.Generator.t
+    -> ('k, 'v, 'cmp) t Quickcheck.Generator.t
+
+  val quickcheck_observer_m__t
+    :  (module Quickcheck_observer_m with type t = 'k and type comparator_witness = 'cmp)
+    -> 'v Quickcheck.Observer.t
+    -> ('k, 'v, 'cmp) t Quickcheck.Observer.t
+
+  val quickcheck_shrinker_m__t
+    :  (module Quickcheck_shrinker_m with type t = 'k and type comparator_witness = 'cmp)
+    -> 'v Quickcheck.Shrinker.t
+    -> ('k, 'v, 'cmp) t Quickcheck.Shrinker.t
+end

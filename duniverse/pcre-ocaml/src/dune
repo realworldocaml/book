@@ -1,11 +1,7 @@
 (library
   (public_name pcre)
   (c_names pcre_stubs)
-  (c_flags
-    (:standard)
-    (:include c_flags.sexp) -O2 -fPIC -DPIC
-    -Wno-keyword-macro
-  )
+  (c_flags (:standard) (:include c_flags.sexp) -O2 -fPIC -DPIC)
   (c_library_flags (:include c_library_flags.sexp))
 )
 

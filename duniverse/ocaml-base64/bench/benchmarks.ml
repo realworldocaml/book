@@ -15,9 +15,9 @@ module Old_version = struct
   let decode ?alphabet input =
     let length = String.length input in
     let input =
-      if length mod 4 = 0 then input
-      else input ^ String.make (4 - (length mod 4)) padding
-    in
+      if length mod 4 = 0
+      then input
+      else input ^ String.make (4 - (length mod 4)) padding in
     let length = String.length input in
     let words = length / 4 in
     let padding =
@@ -25,8 +25,7 @@ module Old_version = struct
       | 0 -> 0
       | _ when input.[length - 2] = padding -> 2
       | _ when input.[length - 1] = padding -> 1
-      | _ -> 0
-    in
+      | _ -> 0 in
     let output = Bytes.make ((words * 3) - padding) '\000' in
     for i = 0 to words - 1 do
       let a = of_char ?alphabet input.[(4 * i) + 0]
@@ -38,10 +37,10 @@ module Old_version = struct
       and y = (n lsr 8) land 255
       and z = n land 255 in
       Bytes.set output ((3 * i) + 0) (char_of_int x) ;
-      if i <> words - 1 || padding < 2 then
-        Bytes.set output ((3 * i) + 1) (char_of_int y) ;
-      if i <> words - 1 || padding < 1 then
-        Bytes.set output ((3 * i) + 2) (char_of_int z)
+      if i <> words - 1 || padding < 2
+      then Bytes.set output ((3 * i) + 1) (char_of_int y) ;
+      if i <> words - 1 || padding < 1
+      then Bytes.set output ((3 * i) + 2) (char_of_int z)
     done ;
     Bytes.unsafe_to_string output
 
@@ -71,7 +70,8 @@ module Old_version = struct
     for i = 1 to padding_len do
       Bytes.set output (Bytes.length output - i) padding
     done ;
-    if pad then Bytes.unsafe_to_string output
+    if pad
+    then Bytes.unsafe_to_string output
     else Bytes.sub_string output 0 (Bytes.length output - padding_len)
 end
 
@@ -101,15 +101,10 @@ let old_encode_and_decode len =
 
 let args = [ 0; 10; 50; 100; 500; 1000; 2500; 5000 ]
 
-let test_b64 =
-  Test.create_indexed ~name:"Base64"
-    ~args b64_encode_and_decode
+let test_b64 = Test.create_indexed ~name:"Base64" ~args b64_encode_and_decode
 
-let test_old =
-  Test.create_indexed ~name:"Old"
-    ~args old_encode_and_decode
+let test_old = Test.create_indexed ~name:"Old" ~args old_encode_and_decode
 
-let command =
-  Bench.make_command [ test_b64; test_old ]
+let command = Bench.make_command [ test_b64; test_old ]
 
 let () = Command.run command

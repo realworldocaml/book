@@ -39,7 +39,17 @@ let () =
   |> List.iter ~f:(fun m ->
     let repl =
       match Smap.find m module_to_lib with
-      | lib -> Printf.sprintf ", use %s.%s instead" lib m
+      | lib ->
+        let lib =
+          let prefix = "Ocaml" in
+          let prefix_len = String.length prefix in
+          let lib_len = String.length lib in
+          if lib_len >= prefix_len && String.sub lib 0 prefix_len = prefix then
+            prefix ^ "_" ^ String.sub lib prefix_len (lib_len - prefix_len)
+          else
+            lib
+        in
+        Printf.sprintf ", use %s.%s instead" lib m
       | exception Not_found -> ""
     in
     Printf.fprintf oc

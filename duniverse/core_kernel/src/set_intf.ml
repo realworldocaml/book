@@ -44,6 +44,59 @@ module Elt_bin_io = struct
   type ('t, 'c) t = (module S with type t = 't and type comparator_witness = 'c)
 end
 
+module type For_deriving = sig
+  include Base.Set.For_deriving
+  module M = Base.Set.M
+
+  (** The following [*bin*] functions support bin-io on base-style sets, e.g.:
+
+      {[ type t = Set.M(String).t [@@deriving bin_io] ]} *)
+
+  val bin_shape_m__t : ('a, 'b) Elt_bin_io.t -> Bin_prot.Shape.t
+  val bin_size_m__t : ('a, 'b) Elt_bin_io.t -> ('a, 'b) t Bin_prot.Size.sizer
+  val bin_write_m__t : ('a, 'b) Elt_bin_io.t -> ('a, 'b) t Bin_prot.Write.writer
+  val bin_read_m__t : ('a, 'b) Elt_bin_io.t -> ('a, 'b) t Bin_prot.Read.reader
+
+  val __bin_read_m__t__
+    :  ('a, 'b) Elt_bin_io.t
+    -> (int -> ('a, 'b) t) Bin_prot.Read.reader
+
+  (** The following [quickcheck*] functions support deriving quickcheck on base-style
+      sets, e.g.:
+
+      {[ type t = Set.M(String).t [@@deriving quickcheck] ]} *)
+
+  module type Quickcheck_generator_m = sig
+    include Comparator.S
+
+    val quickcheck_generator : t Quickcheck.Generator.t
+  end
+
+  module type Quickcheck_observer_m = sig
+    include Comparator.S
+
+    val quickcheck_observer : t Quickcheck.Observer.t
+  end
+
+  module type Quickcheck_shrinker_m = sig
+    include Comparator.S
+
+    val quickcheck_shrinker : t Quickcheck.Shrinker.t
+  end
+
+  val quickcheck_generator_m__t
+    :  (module Quickcheck_generator_m with type t = 'a and type comparator_witness = 'cmp)
+    -> ('a, 'cmp) t Quickcheck.Generator.t
+
+  val quickcheck_observer_m__t
+    :  (module Quickcheck_observer_m with type t = 'a and type comparator_witness = 'cmp)
+    -> ('a, 'cmp) t Quickcheck.Observer.t
+
+  val quickcheck_shrinker_m__t
+    :  (module Quickcheck_shrinker_m with type t = 'a and type comparator_witness = 'cmp)
+    -> ('a, 'cmp) t Quickcheck.Shrinker.t
+end
+
 module Without_comparator = Set.Without_comparator
 module With_comparator = Set.With_comparator
 module With_first_class_module = Set.With_first_class_module

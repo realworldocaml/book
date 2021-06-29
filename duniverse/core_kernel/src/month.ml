@@ -15,7 +15,7 @@ module Stable = struct
       | Oct
       | Nov
       | Dec
-    [@@deriving sexp, compare, hash, variants]
+    [@@deriving sexp, compare, hash, variants, equal]
 
     let failwithf = Printf.failwithf
 
@@ -57,7 +57,7 @@ module Stable = struct
       | Dec -> 12
     ;;
 
-    include Binable.Stable.Of_binable.V1
+    include Binable.Stable.Of_binable.V1 [@alert "-legacy"]
         (Int)
         (struct
           type nonrec t = t

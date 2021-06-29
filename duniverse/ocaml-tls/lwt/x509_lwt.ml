@@ -1,9 +1,5 @@
 open Lwt
 
-type priv = X509.Certificate.t list * Mirage_crypto_pk.Rsa.priv
-
-type authenticator = X509.Authenticator.t
-
 let failure msg = fail @@ Failure msg
 
 let catch_invalid_arg th h =
@@ -54,7 +50,7 @@ let private_of_pems ~cert ~priv_key =
   catch_invalid_arg
     (read_file priv_key >|= fun pem ->
      match X509.Private_key.decode_pem pem with
-     | Ok (`RSA key) -> key
+     | Ok key -> key
      | Error (`Msg m) -> invalid_arg ("failed to parse private key " ^ m))
     (o failure @@ Printf.sprintf "Private key (%s): %s" priv_key) >>= fun pk ->
   return (certs, pk)
@@ -88,11 +84,11 @@ let crls_of_pem_dir = function
     Lwt_list.map_p (fun file -> crl_of_pem (path </> file)) files >|= fun crls ->
     Some crls
 
-let authenticator ?hash_whitelist ?crls param =
+let authenticator ?allowed_hashes ?crls param =
   let time () = Some (Ptime_clock.now ()) in
   let of_cas cas =
     crls_of_pem_dir crls >|= fun crls ->
-    X509.Authenticator.chain_of_trust ?hash_whitelist ?crls ~time cas
+    X509.Authenticator.chain_of_trust ?allowed_hashes ?crls ~time cas
   and dotted_hex_to_cs hex =
     Cstruct.of_hex (String.map (function ':' -> ' ' | x -> x) hex)
   and fingerp hash fingerprints =

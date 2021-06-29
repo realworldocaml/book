@@ -26,3 +26,18 @@ val to_nativeint_trunc : t -> nativeint
 
 val bits_of_float : float -> t
 val float_of_bits : t -> float
+
+(** {2 Byte swap operations}
+
+    See {{!modtype:Int.Int_without_module_types}[Int]'s byte swap section} for
+    a description of Base's approach to exposing byte swap primitives.
+
+    As of writing, these operations do not sign extend unnecessarily on 64 bit machines,
+    unlike their int32 counterparts, and hence, are more performant. See the {!Int32}
+    module for more details of the overhead entailed by the int32 byteswap functions.
+*)
+
+val bswap16 : t -> t
+val bswap32 : t -> t
+val bswap48 : t -> t
+val bswap64 : t -> t

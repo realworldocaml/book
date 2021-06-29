@@ -146,19 +146,20 @@ module rec Typerep : sig
           type t = {
             a : int;
             b : float;
-          } with typerep
+          } [@@deriving typerep]
         end
         module M2 = struct
           type t = {
             a : int;
             b : float;
-          } with typerep
+          } [@@deriving typerep]
         end
-        TEST = not (same M1.typerep_of_t M2.typerep_of_t)
+
+        [%test_result:bool] ~expect:false (same M1.typerep_of_t M2.typerep_of_t)
 
         type a = int with typerep
         type b = int with typerep
-        TEST = same typerep_of_a typerep_of_b
+        [%test_result:bool] ~expect:true (same typerep_of_a typerep_of_b)
       ]}
       This is meant to recover type equality hidden by existential constructors.
 

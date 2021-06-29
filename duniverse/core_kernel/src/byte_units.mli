@@ -131,6 +131,8 @@ val zero : t
 (** [scale t mul] scale the measure [t] by [mul] *)
 val scale : t -> float -> t
 
+val arg_type : t Command.Arg_type.t
+
 module Infix : sig
   val ( - ) : t -> t -> t
   val ( + ) : t -> t -> t
@@ -141,6 +143,8 @@ module Infix : sig
   (** [( // ) t1 t2] returns the ratio of t1 to t2 *)
   val ( // ) : t -> t -> float
 end
+
+include module type of Infix
 
 module Stable : sig
   (*_ old float based [bin_io] repr. *)

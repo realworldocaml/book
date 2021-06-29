@@ -1,0 +1,18 @@
+We include files with MDX comments:
+
+<!-- $MDX file=code.mli -->
+```ocaml
+type t
+
+val empty : t
+```
+
+<!-- $MDX file=dune -->
+```scheme
+
+```
+
+<!-- $MDX file=../.ocamlformat -->
+```
+disable=true
+```

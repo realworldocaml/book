@@ -1,0 +1,3 @@
+(library (name ppx_fixed_literal) (public_name ppx_fixed_literal)
+ (kind ppx_rewriter) (libraries base ppxlib) (ppx_runtime_libraries)
+ (preprocess (pps ppxlib.metaquot)))

@@ -1,5 +1,4 @@
 open Base
-open Int
 open Config
 module Sexp = Sexplib.Sexp
 
@@ -761,19 +760,23 @@ module Print = struct
     ignore (set_up_markers ~depth ~index:0 shape)
   ;;
 
-  (* The last element forces a breakline. *)
-  let last_forces = function
-    | List (_, list, true) ->
-      (match List.last list with
-       | Some (Aligned (_, line_list)) ->
-         (* Would not create an [Aligned] with an empty [line_list] *)
-         (match List.last_exn line_list with
-          | Comment_line (Line_comment _) | Atom_line (_, _ :: _) -> true
-          | Comment_line (Block_comment _ | Sexp_comment _) | Atom_line (_, []) -> false)
-       | Some (T (Comment (Line_comment _) | Sexp (_, _ :: _))) -> true
-       | Some (T (Comment (Block_comment _ | Sexp_comment _) | Sexp (_, []))) | None ->
-         false)
-    | List (_, _, false) | Atom _ | Singleton _ -> false
+  (* The closing paren goes on a new line, or the last element forces a breakline. *)
+  let newline_at_end conf sexp =
+    match conf.closing_parens with
+    | New_line -> true
+    | Same_line ->
+      (match sexp with
+       | List (_, list, true) ->
+         (match List.last list with
+          | Some (Aligned (_, line_list)) ->
+            (* Would not create an [Aligned] with an empty [line_list] *)
+            (match List.last_exn line_list with
+             | Comment_line (Line_comment _) | Atom_line (_, _ :: _) -> true
+             | Comment_line (Block_comment _ | Sexp_comment _) | Atom_line (_, []) -> false)
+          | Some (T (Comment (Line_comment _) | Sexp (_, _ :: _))) -> true
+          | Some (T (Comment (Block_comment _ | Sexp_comment _) | Sexp (_, []))) | None ->
+            false)
+       | List (_, _, false) | Atom _ | Singleton _ -> false)
   ;;
 
   let rec pp_t conf state ?(opened = Closed) ?(len = 1) depth ?(index = 0) fmt = function
@@ -820,9 +823,9 @@ module Print = struct
         let leading_not_empty = leading_len > 0 in
         let rest_not_empty = not (List.is_empty rest) in
         let same_line_rest =
-          Poly.equal conf.opening_parens Same_line
-          && rest_not_empty
-          && not leading_not_empty
+          match conf.opening_parens with
+          | New_line -> false
+          | Same_line -> rest_not_empty && not leading_not_empty
         in
         print
           (if same_line_rest then 1 else conf.indent)
@@ -843,13 +846,7 @@ module Print = struct
           (fun fmt () -> close_parens conf state ~depth:(depth + 1) fmt 1)
           ()
       in
-      (match
-         ( leading
-         , list
-         , forces_breakline
-         , opened
-         , Poly.equal conf.closing_parens New_line || last_forces sexp_list )
-       with
+      (match leading, list, forces_breakline, opened, newline_at_end conf sexp_list with
        | [], [], _, Closed, _ ->
          open_parens conf state ~depth:(depth + 1) fmt 1;
          close_parens conf state ~depth:(depth + 1) fmt 1
@@ -911,12 +908,7 @@ module Print = struct
           (close_parens conf state ~depth:(depth + 1))
           (d + 1)
       in
-      (match
-         ( atoms
-         , forces_breakline
-         , opened
-         , Poly.equal conf.closing_parens New_line || last_forces sexp )
-       with
+      (match atoms, forces_breakline, opened, newline_at_end conf sexp with
        | [], _, Opened, _ -> assert false
        | atoms, true, Closed, true ->
          print_closed (Format.fprintf fmt "@[<v %d>@[<h>%a%a%a@]@,%a@]@,%a") atoms
@@ -1051,13 +1043,15 @@ let run ~next conf fmt =
       (match conf.comments, t_or_comment with
        | Drop, W.Comment _ -> loop prints_newline
        | Print _, W.Comment _ ->
-         if prints_newline && Poly.equal conf.separator Empty_line
-         then Format.pp_print_break fmt 0 0;
+         (match prints_newline, conf.separator with
+          | true, Empty_line -> Format.pp_print_break fmt 0 0
+          | false, _ | _, No_separator -> ());
          Print.pp_sexp_rainbow_toplevel conf fmt t_or_comment;
          loop false
        | _, W.Sexp _ ->
-         if prints_newline && Poly.equal conf.separator Empty_line
-         then Format.pp_print_break fmt 0 0;
+         (match prints_newline, conf.separator with
+          | true, Empty_line -> Format.pp_print_break fmt 0 0
+          | false, _ | _, No_separator -> ());
          Print.pp_sexp_rainbow_toplevel conf fmt t_or_comment;
          loop true)
   in

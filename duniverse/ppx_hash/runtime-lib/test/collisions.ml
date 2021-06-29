@@ -30,7 +30,7 @@ module Tests(Hash : Base.Hash.S with type hash_value = int) = struct
       | [] -> assert false
       | [ _ ] -> ()
       | _ :: _ :: _ ->
-        failwiths "collision" (hash, values) [%sexp_of: State.t * t list])
+        failwiths ~here:[%here] "collision" (hash, values) [%sexp_of: State.t * t list])
 
   module Ints = struct
 

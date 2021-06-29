@@ -44,4 +44,7 @@ let%test_module _ = (module struct
   let%test _ = (group ~break:(fun _ _ -> false) mis) = single_letters
   let%test _ = (groupi ~break:(fun i _ _ -> i mod 3 = 0) mis) = every_three
 
+
+  let%test "slow, but takes no cpu time" = ignore (Unix.nanosleep 0.25 : float); true
+
 end)

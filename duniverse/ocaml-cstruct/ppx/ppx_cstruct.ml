@@ -14,17 +14,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Migrate_parsetree
 open Printf
-
-open Ast_404
-open Longident
-open Asttypes
-open Parsetree
+open Ppxlib
 open Ast_helper
-open Ast_mapper
-module Loc = Location
-module Ast = Ast_convenience_404
+
+module Ast = struct
+  include Ast_builder.Default
+
+  let econstr ~loc tag xs =
+    pexp_construct ~loc (Loc.make ~loc (lident tag)) (
+      match xs with
+      | [] -> None
+      | _ -> Some (pexp_tuple ~loc xs)
+    )
+
+  let pconstr ~loc tag xs =
+    ppat_construct ~loc (Loc.make ~loc (lident tag)) (
+      match xs with
+      | [] -> None
+      | _ -> Some (ppat_tuple ~loc xs)
+    )
+
+  let tconstr ~loc tag xs =
+    ptyp_constr ~loc (Loc.make ~loc (lident tag)) xs
+end
 
 type mode = Big_endian | Little_endian | Host_endian | Bi_endian
 
@@ -42,13 +55,13 @@ type ty =
 type raw_field = {
   name: string;
   ty: ty;
-  definition_loc: loc;
+  definition_loc: Location.t;
 }
 
 type named_field = {
   name: string;
   ty: ty;
-  definition_loc: loc;
+  definition_loc: Location.t;
   off: int;
 }
 
@@ -187,12 +200,12 @@ let op_name s op =
   in
   String.concat "_" parts
 
-let op_pvar s op = Ast.pvar (op_name s op)
-let op_evar s op = Ast.evar (op_name s op)
+let op_pvar ~loc s op = Ast.pvar ~loc (op_name s op)
+let op_evar ~loc s op = Ast.evar ~loc (op_name s op)
 
 let get_expr loc s f =
   let m = mode_mod loc s.endian in
-  let num x = Ast.int x in
+  let num x = Ast.eint ~loc x in
   match f.ty with
   |Buffer (_, _) ->
     let len = width_of_field f in
@@ -209,7 +222,7 @@ let get_expr loc s f =
             |UInt32 -> [%expr [%e m "get_uint32"] v [%e num f.off]]
             |UInt64 -> [%expr [%e m "get_uint64"] v [%e num f.off]]]]
 
-let type_of_int_field = function
+let type_of_int_field ~loc = function
   |Char -> [%type: char]
   |UInt8 -> [%type: Cstruct.uint8]
   |UInt16 -> [%type: Cstruct.uint16]
@@ -218,7 +231,7 @@ let type_of_int_field = function
 
 let set_expr loc s f =
   let m = mode_mod loc s.endian in
-  let num x = Ast.int x in
+  let num x = Ast.eint ~loc x in
   match f.ty with
   |Buffer (_,_) ->
     let len = width_of_field f in
@@ -234,24 +247,24 @@ let set_expr loc s f =
             |UInt32 -> [%expr [%e m "set_uint32"] v [%e num f.off] x]
             |UInt64 -> [%expr [%e m "set_uint64"] v [%e num f.off] x]]]
 
-let type_of_set f =
+let type_of_set ~loc f =
   match f.ty with
   |Buffer (_,_) ->
     [%type: string -> int -> Cstruct.t -> unit]
   |Prim prim ->
-    let retf = type_of_int_field prim in
+    let retf = type_of_int_field ~loc prim in
     [%type: Cstruct.t -> [%t retf] -> unit]
 
-let hexdump_expr s =
+let hexdump_expr ~loc s =
   [%expr fun v ->
     let buf = Buffer.create 128 in
-    Buffer.add_string buf [%e Ast.str (s.name ^ " = {\n")];
-    [%e op_evar s Op_hexdump_to_buffer] buf v;
+    Buffer.add_string buf [%e Ast.estring ~loc (s.name ^ " = {\n")];
+    [%e op_evar ~loc s Op_hexdump_to_buffer] buf v;
     print_endline (Buffer.contents buf);
     print_endline "}"
   ]
 
-let hexdump_to_buffer_expr s =
+let hexdump_to_buffer_expr ~loc s =
   let prim_format_string = function
     | Char -> [%expr "%c\n"]
     | UInt8 | UInt16 -> [%expr "0x%x\n"]
@@ -262,34 +275,34 @@ let hexdump_to_buffer_expr s =
     | Ignored_field ->
       [%expr ()]
     | Named_field f ->
-      let get_f = op_evar s (Op_get f) in
+      let get_f = op_evar ~loc s (Op_get f) in
       let expr =
         match f.ty with
         |Prim p ->
           [%expr Printf.bprintf buf [%e prim_format_string p] ([%e get_f] v)]
         |Buffer (_,_) ->
-          [%expr Printf.bprintf buf "<buffer %s>" [%e Ast.str (field_to_string f)];
+          [%expr Printf.bprintf buf "<buffer %s>" [%e Ast.estring ~loc (field_to_string f)];
             Cstruct.hexdump_to_buffer buf ([%e get_f] v)]
     in
     [%expr
-      Printf.bprintf buf "  %s = " [%e Ast.str f.name];
+      Printf.bprintf buf "  %s = " [%e Ast.estring ~loc f.name];
       [%e expr]]
   in
-  [%expr fun buf v -> [%e Ast.sequence (List.map hexdump_field s.fields)]]
+  [%expr fun buf v -> [%e Ast.esequence ~loc (List.map hexdump_field s.fields)]]
 
 let op_expr loc s = function
-  | Op_sizeof -> Ast.int s.len
-  | Op_hexdump -> hexdump_expr s
-  | Op_hexdump_to_buffer -> hexdump_to_buffer_expr s
+  | Op_sizeof -> Ast.eint ~loc s.len
+  | Op_hexdump -> hexdump_expr ~loc s
+  | Op_hexdump_to_buffer -> hexdump_to_buffer_expr ~loc s
   | Op_get f -> get_expr loc s f
   | Op_set f -> set_expr loc s f
   | Op_copy f ->
     let len = width_of_field f in
-    [%expr fun src -> Cstruct.copy src [%e Ast.int f.off] [%e Ast.int len] ]
+    [%expr fun src -> Cstruct.copy src [%e Ast.eint ~loc f.off] [%e Ast.eint ~loc len] ]
   | Op_blit f ->
     let len = width_of_field f in
     [%expr fun src srcoff dst ->
-      Cstruct.blit src srcoff dst [%e Ast.int f.off] [%e Ast.int len]]
+      Cstruct.blit src srcoff dst [%e Ast.eint ~loc f.off] [%e Ast.eint ~loc len]]
 
 let field_ops_for =
   function
@@ -319,7 +332,7 @@ let ops_for s =
 let output_struct_one_endian loc s =
   List.map
     (fun op ->
-       [%stri let[@ocaml.warning "-32"] [%p op_pvar s op] =
+       [%stri let[@ocaml.warning "-32"] [%p op_pvar ~loc s op] =
                 [%e op_expr loc s op]])
     (ops_for s)
 
@@ -331,28 +344,28 @@ let output_struct _loc s =
     and expr_le = Mod.structure (output_struct_one_endian _loc {s with endian = Little_endian})
 
     in [{pstr_desc = Pstr_module
-        {pmb_name = {txt = "BE"; loc = _loc}; pmb_expr = expr_be;
+        {pmb_name = {txt = Some "BE"; loc = _loc}; pmb_expr = expr_be;
         pmb_attributes = []; pmb_loc = _loc;}; pstr_loc = _loc;};
         {pstr_desc = Pstr_module
-        {pmb_name = {txt = "LE"; loc = _loc}; pmb_expr = expr_le;
+        {pmb_name = {txt = Some "LE"; loc = _loc}; pmb_expr = expr_le;
         pmb_attributes = []; pmb_loc = _loc;}; pstr_loc = _loc;}
         ]
   | _ -> output_struct_one_endian _loc s
 
-let type_of_get f =
+let type_of_get ~loc f =
   match f.ty with
   |Buffer (_,_) ->
     [%type: Cstruct.t -> Cstruct.t]
   |Prim prim ->
-    let retf = type_of_int_field prim in
+    let retf = type_of_int_field ~loc prim in
     [%type: Cstruct.t -> [%t retf]]
 
-let op_typ = function
+let op_typ ~loc = function
   | Op_sizeof -> [%type: int]
   | Op_hexdump_to_buffer -> [%type: Buffer.t -> Cstruct.t -> unit]
   | Op_hexdump -> [%type: Cstruct.t -> unit]
-  | Op_get f -> type_of_get f
-  | Op_set f -> type_of_set f
+  | Op_get f -> type_of_get ~loc f
+  | Op_set f -> type_of_set ~loc f
   | Op_copy _ -> [%type: Cstruct.t -> string]
   | Op_blit _ -> [%type: Cstruct.t -> int -> Cstruct.t -> unit]
 
@@ -362,8 +375,8 @@ let output_struct_sig loc s =
     (fun op ->
        Sig.value
          (Val.mk
-            (Loc.mkloc (op_name s op) loc)
-            (op_typ op)))
+            (Loc.make (op_name s op) ~loc)
+            (op_typ ~loc op)))
     (ops_for s)
 
 type enum_op =
@@ -376,8 +389,8 @@ type enum_op =
   | Enum_compare
 
 type cenum =
-  { name : string Loc.loc;
-    fields : (string Loc.loc * int64) list;
+  { name : string Loc.t;
+    fields : (string Loc.t * int64) list;
     prim : prim;
     sexp : bool;
   }
@@ -393,30 +406,30 @@ let enum_op_name cenum =
   | Enum_parse -> sprintf "string_to_%s" s
   | Enum_compare -> sprintf "compare_%s" s
 
-let enum_pattern {prim; _} =
+let enum_pattern ~loc {prim; _} =
   let pat_integer f suffix i =
     Pat.constant (Pconst_integer(f i, suffix))
   in
   match prim with
   | Char ->
-    (fun i -> Ast.pchar (Char.chr (Int64.to_int i)))
+    (fun i -> Ast.pchar ~loc (Char.chr (Int64.to_int i)))
   | (UInt8 | UInt16) -> pat_integer Int64.to_string None
   | UInt32 -> pat_integer (fun i -> Int32.to_string (Int64.to_int32 i)) (Some 'l')
   | UInt64 -> pat_integer Int64.to_string (Some 'L')
 
-let enum_integer {prim; _} =
+let enum_integer ~loc {prim; _} =
   let expr_integer f suffix i =
     Exp.constant (Pconst_integer(f i, suffix))
   in
   match prim with
-    | Char -> (fun i -> Ast.char (Char.chr (Int64.to_int i)))
+    | Char -> (fun i -> Ast.echar ~loc (Char.chr (Int64.to_int i)))
     | (UInt8 | UInt16) -> expr_integer Int64.to_string None
     | UInt32 -> expr_integer (fun i -> Int32.to_string (Int64.to_int32 i)) (Some 'l')
     | UInt64 -> expr_integer Int64.to_string (Some 'L')
 
-let declare_enum_expr ({fields; _} as cenum) = function
+let declare_enum_expr ~loc ({fields; _} as cenum) = function
   | Enum_to_sexp ->
-    [%expr fun x -> Sexplib.Sexp.Atom ([%e Ast.evar (enum_op_name cenum Enum_print)] x) ]
+    [%expr fun x -> Sexplib.Sexp.Atom ([%e Ast.evar ~loc (enum_op_name cenum Enum_print)] x) ]
   | Enum_of_sexp ->
     [%expr
       fun x ->
@@ -424,34 +437,34 @@ let declare_enum_expr ({fields; _} as cenum) = function
         | Sexplib.Sexp.List _ ->
           raise (Sexplib.Pre_sexp.Of_sexp_error (Failure "expected Atom, got List", x))
         | Sexplib.Sexp.Atom v ->
-          match [%e Ast.evar (enum_op_name cenum Enum_parse)] v with
+          match [%e Ast.evar ~loc (enum_op_name cenum Enum_parse)] v with
           | None ->
             raise (Sexplib.Pre_sexp.Of_sexp_error (Failure "unable to parse enum string", x))
           | Some r -> r
     ]
   | Enum_get ->
     let getters = (List.map (fun ({txt = f; _},i) ->
-        Exp.case (enum_pattern cenum i) [%expr Some [%e Ast.constr f []]]
+        Exp.case (enum_pattern ~loc cenum i) [%expr Some [%e Ast.econstr ~loc f []]]
       ) fields) @ [Exp.case [%pat? _] [%expr None]]
     in
     Exp.function_ getters
   | Enum_set ->
     let setters = List.map (fun ({txt = f; _},i) ->
-        Exp.case (Ast.pconstr f []) (enum_integer cenum i)
+        Exp.case (Ast.pconstr ~loc f []) (enum_integer ~loc cenum i)
       ) fields in
     Exp.function_ setters
   | Enum_print ->
     let printers = List.map (fun ({txt = f; _},_) ->
-        Exp.case (Ast.pconstr f []) (Ast.str f)
+        Exp.case (Ast.pconstr ~loc f []) (Ast.estring ~loc f)
       ) fields in
     Exp.function_ printers
   | Enum_parse ->
     let parsers = List.map (fun ({txt = f; _},_) ->
-        Exp.case (Ast.pstr f) [%expr Some [%e Ast.constr f []]]
+        Exp.case (Ast.pstring ~loc f) [%expr Some [%e Ast.econstr ~loc f []]]
       ) fields in
     Exp.function_ (parsers @ [Exp.case [%pat? _] [%expr None]])
   | Enum_compare -> [%expr fun x y ->
-    let to_int = [%e Ast.evar (enum_op_name cenum Enum_set)] in
+    let to_int = [%e Ast.evar ~loc (enum_op_name cenum Enum_set)] in
     Stdlib.compare (to_int x) (to_int y)
   ]
 
@@ -472,18 +485,18 @@ let enum_type_decl {name; fields; _} =
   let decls = List.map (fun (f,_) -> Type.constructor f) fields in
   Type.mk ~kind:(Ptype_variant decls) name
 
-let output_enum cenum =
+let output_enum ~loc cenum =
   Str.type_ Recursive [enum_type_decl cenum] ::
   List.map
     (fun op ->
        [%stri
-         let[@ocaml.warning "-32"] [%p Ast.pvar (enum_op_name cenum op)] =
-           [%e declare_enum_expr cenum op]
+         let[@ocaml.warning "-32"] [%p Ast.pvar ~loc (enum_op_name cenum op)] =
+           [%e declare_enum_expr ~loc cenum op]
        ])
     (enum_ops_for cenum)
 
-let enum_op_type {name; prim; _} =
-  let cty = Ast.tconstr name.txt [] in
+let enum_op_type ~loc {name; prim; _} =
+  let cty = Ast.tconstr ~loc name.txt [] in
   let oty = match prim with
     | Char -> [%type: char]
     | (UInt8|UInt16) -> [%type: int]
@@ -504,15 +517,18 @@ let output_enum_sig loc (cenum:cenum) =
   List.map
     (fun op ->
        let name = enum_op_name cenum op in
-       let typ = enum_op_type cenum op in
-       Sig.value (Val.mk (Loc.mkloc name loc) typ))
+       let typ = enum_op_type ~loc cenum op in
+       Sig.value (Val.mk (Loc.make name ~loc) typ))
     (enum_ops_for cenum)
 
 let constr_enum = function
   | {pcd_name = f; pcd_args = Pcstr_tuple []; pcd_attributes = attrs; _} ->
     let id = match attrs with
-      | [{txt = "id"; _}, PStr
-           [{pstr_desc = Pstr_eval ({pexp_desc = Pexp_constant cst; pexp_loc = loc; _}, _); _}]] ->
+      | [{attr_name = {txt = "id";_}; 
+          attr_payload = 
+            PStr [{ pstr_desc = 
+              Pstr_eval ({pexp_desc = Pexp_constant cst; pexp_loc = loc; _}, _); _}]
+          ;_ }] ->
         let cst = match cst with
           | Pconst_integer(i, _) -> Int64.of_string i
           | _ ->
@@ -527,18 +543,19 @@ let constr_enum = function
     loc_err loc "invalid cenum variant"
 
 let get_len = function
-  | [ ({txt = "len"; loc},
-       PStr
-         [{pstr_desc =
-             Pstr_eval ({pexp_desc = Pexp_constant (Pconst_integer (sz, None)); _}, _)
-          ; _}])]
+  | [{attr_name = {txt = "len"; loc};
+      attr_payload = PStr
+        [{pstr_desc =
+          Pstr_eval ({pexp_desc = Pexp_constant (Pconst_integer (sz, None)); _}, _);
+          _}]
+      ; _}]
     ->
     let n = int_of_string sz in
     if n > 0 then
       Some n
     else
       loc_err loc "[@len] argument should be > 0"
-  | [{txt = "len"; loc}, _ ] ->
+  | [{attr_name = {txt = "len"; loc}; _} ] ->
     loc_err loc "[@len] argument should be an integer"
   | _ ->
     None
@@ -565,8 +582,8 @@ let cstruct decl =
     | _ -> loc_err loc "record type declaration expected"
   in
   let endian = match attrs with
-    | [{txt = endian; _}, PStr []] -> endian
-    | [_, _] -> loc_err loc "no attribute payload expected"
+    | [{attr_name = {txt = endian; _}; attr_payload = PStr []; _}] -> endian
+    | [_] -> loc_err loc "no attribute payload expected"
     | _ -> loc_err loc "too many attributes"
   in
   create_struct loc endian name fields
@@ -581,9 +598,10 @@ let cenum decl =
   in
   let width, sexp =
     match attrs with
-    | ({txt = width; _}, PStr []) :: ({txt = "sexp"; _}, PStr []) :: [] ->
+    | ({attr_name = {txt = width; _};attr_payload= PStr [];_}) 
+      :: ({attr_name = {txt = "sexp"; _};attr_payload = PStr []; _}) :: [] ->
       width, true
-    | ({txt = width; _}, PStr []) :: [] ->
+    | ({attr_name = {txt = width; _};attr_payload= PStr [];_}) :: [] ->
       width, false
     | _ ->
       loc_err loc "invalid cenum attributes"
@@ -615,11 +633,7 @@ let signature_item' mapper = function
        Psig_extension (({txt = "cenum"; _}, PStr [{pstr_desc = Pstr_type(_, [decl]); _}]), _);
      psig_loc = loc} ->
     output_enum_sig loc (cenum decl)
-  | other ->
-    [default_mapper.signature_item mapper other]
-
-let signature mapper s =
-  List.concat (List.map (signature_item' mapper) s)
+  | other -> [mapper other]
 
 let structure_item' mapper = function
   | {pstr_desc =
@@ -628,14 +642,21 @@ let structure_item' mapper = function
     output_struct loc (cstruct decl)
   | {pstr_desc =
        Pstr_extension (({txt = "cenum"; _}, PStr [{pstr_desc = Pstr_type(_, [decl]); _}]), _);
+     pstr_loc = loc ;
      _ } ->
-    output_enum (cenum decl)
-  | other ->
-    [default_mapper.structure_item mapper other]
+    output_enum ~loc (cenum decl)
+  | other -> [mapper other]
 
-let structure mapper s =
-  List.concat (List.map (structure_item' mapper) s)
+class mapper = object
+  inherit Ast_traverse.map as super
+
+  method! signature s =
+    List.concat (List.map (signature_item' super#signature_item) s)
+
+  method! structure s =
+    List.concat (List.map (structure_item' super#structure_item) s)
+end
 
 let () =
-  Driver.register ~name:"ppx_cstruct" Versions.ocaml_404
-    (fun _config _cookies -> {default_mapper with structure; signature})
+  let mapper = new mapper in
+  Driver.register_transformation "ppx_cstruct" ~impl:mapper#structure ~intf:mapper#signature

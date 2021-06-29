@@ -157,3 +157,16 @@ end
 
 module HashTablesAsImperativeMaps (H : HashedType) =
   Adapt(Hashtbl.Make(H))
+
+module MinimalSemiLattice (P : SEMI_LATTICE) = struct
+
+  type property =
+    P.property
+
+  let leq_join p' p =
+    if P.leq p' p then
+      p
+    else
+      P.join p' p
+
+end

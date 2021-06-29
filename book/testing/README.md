@@ -150,12 +150,9 @@ Here's what it looks like when we run the test.
   File "test.ml", line 3, characters 0-71: rev threw
   (duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
     ((1 2 3) vs (3 2 1) (Loc test.ml:4:13))).
-    Raised at file "duniverse/ppx_assert/runtime-lib/runtime.ml", line 28, characters 28-53
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 502, characters 15-19
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 343, characters 8-12
-    Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 346, characters 6-13
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 359, characters 15-52
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 446, characters 52-83
+    Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
   
   FAILED 1 / 1 tests
   [1]
@@ -326,14 +323,11 @@ see below.
       ((duniverse/ppx_assert/runtime-lib/runtime.ml.E "comparison failed"
          (Neg vs Pos (Loc test.ml:7:19)))
          "Raised at file \"duniverse/ppx_assert/runtime-lib/runtime.ml\", line 28, characters 28-53\
-        \nCalled from file \"duniverse/base/src/or_error.ml\", line 75, characters 9-15\
+        \nCalled from file \"duniverse/base/src/or_error.ml\", line 76, characters 9-15\
         \n"))).
-    Raised at file "duniverse/base/src/error.ml", line 8, characters 14-30
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 502, characters 15-19
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 343, characters 8-12
-    Re-raised at file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 346, characters 6-13
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 359, characters 15-52
-    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 446, characters 52-83
+    Raised at file "duniverse/base/src/exn.ml", line 71, characters 4-114
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 356, characters 15-52
+    Called from file "duniverse/ppx_inline_test/runtime-lib/runtime.ml", line 444, characters 52-83
   
   FAILED 1 / 1 tests
   [1]

@@ -204,6 +204,26 @@ let sha512_cases =
      ab d1 34 91 cb 82 4d 61 b0 8d 8c 0e 15 61 b3 f7" ;
   ]
 
+let regression =
+  let input =
+    Cstruct.of_string "hellohellohellohellohellohellohellohellohellohellohellohellohell"
+  in
+  let md5_case _ =
+    let hash = vx "87bf8014f2949172f79965cb9505d126" in
+    let ctx = Hash.MD5.empty in
+    let ctx' = Hash.MD5.feed ctx (Cstruct.shift (Cstruct.append (Cstruct.create 1) input) 1) in
+    let computed_hash = Hash.MD5.get ctx' in
+    assert_cs_equal ~msg:"MD5 feed with unaligned data" computed_hash hash
+  and sha512_case _ =
+    let hash = vx "31c90f0e14f5b1b058e8790f6080c4110c98a0dfc95f711efa8cf176495902ca002a496bcf843fc8d195821429345f06683925b7c6f1c9342a51e8c7f89eb188"
+    in
+    let ctx = Hash.SHA512.empty in
+    let ctx' = Hash.SHA512.feed ctx (Cstruct.shift (Cstruct.append (Cstruct.create 1) input) 1) in
+    let computed_hash = Hash.SHA512.get ctx' in
+    assert_cs_equal ~msg:"SHA512 feed with unaligned data" computed_hash hash
+  in
+  [ test_case md5_case ; test_case sha512_case ]
+
 let suite = [
   "MD5" >::: md5_cases ;
   "SHA1" >::: sha1_cases ;
@@ -211,4 +231,5 @@ let suite = [
   "sha256" >::: sha256_cases ;
   "sha384" >::: sha384_cases ;
   "sha512" >::: sha512_cases ;
+  "regression" >::: regression ;
 ]

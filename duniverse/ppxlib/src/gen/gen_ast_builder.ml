@@ -213,14 +213,18 @@ let generate filename =
   in
   let st =
     [ Str.open_ (Opn.mk (Mod.ident (Loc.lident "Import")))
-    ; Str.module_ (Mb.mk (Loc.mk "M") (Mod.structure (items false)))
-    ; Str.module_ (Mb.mk (Loc.mk "Make")
-                     (Mod.functor_ (Loc.mk "Loc") (Some (Mty.signature [
-                        Sig.value (Val.mk (Loc.mk "loc") (M.ctyp "Location.t"))
-                      ]))
-                        (Mod.structure
-                           (M.stri "let loc = Loc.loc"
-                            :: items true))))
+    ; Str.module_ (Mb.mk (Loc.mk (Some "M")) (Mod.structure (items false)))
+    ; Str.module_ (Mb.mk (Loc.mk (Some "Make"))
+                     (Mod.functor_
+                        (Named
+                           ( (Loc.mk (Some "Loc"))
+                           , (Mty.signature [
+                                Sig.value
+                                  (Val.mk (Loc.mk "loc") (M.ctyp "Location.t"))
+                              ]) ))
+                           (Mod.structure
+                              (M.stri "let loc = Loc.loc"
+                               :: items true))))
     ]
   in
   dump "ast_builder_generated" Pprintast.structure st ~ext:".ml"

@@ -51,7 +51,7 @@ include Common
 
 (**/**)
 
-(* For tests and Ppx_core compatiblity layer *)
+(* For tests and Ppx_core compatibility layer *)
 module Ppxlib_private = struct
   module Common = Common
   module Name   = Name

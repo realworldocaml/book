@@ -14,18 +14,18 @@ type t = Caml.Lexing.position =
   ; pos_cnum : int
   }
 [@@deriving_inline hash, sexp_of]
-include
-  sig
-    [@@@ocaml.warning "-32"]
-    val hash_fold_t :
-      Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
-    val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
-    val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
-  end[@@ocaml.doc "@inline"]
+
+val hash_fold_t : Ppx_hash_lib.Std.Hash.state -> t -> Ppx_hash_lib.Std.Hash.state
+val hash : t -> Ppx_hash_lib.Std.Hash.hash_value
+val sexp_of_t : t -> Ppx_sexp_conv_lib.Sexp.t
+
 [@@@end]
 
 include Comparable.S with type t := t
 
 (** [to_string t] converts [t] to the form ["FILE:LINE:COL"]. *)
 val to_string : t -> string
+
+(** [of_pos Caml.__POS__] is like [[%here]] but without using ppx. *)
+val of_pos : string * int * int * int -> t
 

@@ -168,11 +168,11 @@
         },
         "308":{
             "code":"308",
-            "title":"Resume Incomplete",
-            "summary":"resumable HTTP requests",
+            "title":"Permanent Redirect",
+            "summary":"connect again to a different URI using the same method",
             "descriptions":{
                 "wikipedia":{
-                    "body":"This code is used in the Resumable HTTP Requests Proposal to resume aborted PUT or POST requests.",
+                    "body":"The request, and all future requests should be repeated using another URI. 307 and 308 (as proposed) parallel the behaviours of 302 and 301, but do not allow the HTTP method to change. So, for example, submitting a form to a permanently redirected resource may continue smoothly.",
                     "link":"http:\/\/en.wikipedia.org\/wiki\/List_of_HTTP_status_codes#308"
                 }
             },

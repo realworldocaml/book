@@ -140,8 +140,7 @@ Dune supports the following variables:
   the value of ``workspace_root`` is not constant and depends on
   whether your project is vendored or not
 -  ``CC`` is the C compiler command line (list made of the compiler
-   name followed by its flags) that was used to compile OCaml in the
-   current build context
+   name followed by its flags) that will be used to compile foreign code. For more details about its content see :ref:`this section <flags-flow>`.
 -  ``CXX`` is the C++ compiler command line being used in the
    current build context
 -  ``ocaml_bin`` is the path where ``ocamlc`` lives
@@ -347,6 +346,32 @@ all the literals evaluate to true. It is an error if none of the clauses are
 selectable. You can add a fallback by adding a clause of the form ``(->
 <file>)`` at the end of the list.
 
+Re-exported dependencies
+------------------------
+
+A dependency ``foo`` may be marked as always *re-exported* using the
+following syntax:
+
+.. code:: scheme
+
+   (re_export foo)
+
+For instance:
+
+.. code:: scheme
+
+   (library
+    (name bar)
+    (libraries (re_export foo)))
+
+This states that this library explicitly re-exports the interface of
+``foo``.  Concretely, when something depends on ``bar`` it will also
+be able to see ``foo`` independently of whether :ref:`implicit
+transitive dependencies<implicit_transitive_deps>` are allowed or
+not. When they are allowed, which is the default, all transitive
+dependencies are visible whether they are marked as re-exported or
+not.
+
 .. _preprocessing-spec:
 
 Preprocessing specification
@@ -481,8 +506,8 @@ introduced in 4.08, allowing the user to define custom let operators.
 
 Note that this feature is implemented by the third-party
 `ocaml-syntax-shims project
-<https://github.com/ocaml-ppx/ocaml-syntax-shims>`, so if you use this
-feature you must also declare a dependency on this package.
+<https://github.com/ocaml-ppx/ocaml-syntax-shims>`_, so if you use
+this feature you must also declare a dependency on this package.
 
 .. _preprocessor-deps:
 
@@ -663,7 +688,7 @@ The following constructions are available:
 - ``(with-accepted-exit-codes <pred> <DSL>)`` specifies the list of expected exit codes
   for the programs executed in ``<DSL>``. ``<pred>`` is a predicate on integer
   values, and is specified using the :ref:`predicate-lang`. ``<DSL>`` can only
-  contain nested occurences of ``run``, ``bash``, ``system``, ``chdir``,
+  contain nested occurrences of ``run``, ``bash``, ``system``, ``chdir``,
   ``setenv``, ``ignore-<outputs>``, ``with-stdin-from`` and
   ``with-<outputs>-to``. This action is available since dune 2.0.
 - ``(progn <DSL>...)`` to execute several commands in sequence
@@ -690,6 +715,10 @@ The following constructions are available:
 - ``(no-infer <DSL>)`` to perform an action without inference of dependencies
   and targets. This is useful if you are generating dependencies in a way
   that Dune doesn't know about, for instance by calling an external build system.
+- ``(pipe-<outputs> <DSL> <DSL> <DSL>...)`` to execute several actions (at least two)
+  in sequence, filtering the ``<outputs>`` of the first command through the other
+  command, piping the standard output of each one into the input of the next.
+  This action is available since dune 2.7.
 
 As mentioned ``copy#`` inserts a line directive at the beginning of
 the destination file. More precisely, it inserts the following line:
@@ -714,9 +743,9 @@ have this action in a ``src/foo/dune``:
 
 .. code:: lisp
 
-    (action (chdir ../../.. (echo %{path:dune})))
+    (action (chdir ../../.. (echo %{dep:dune})))
 
-Then ``%{path:dune}`` will expand to ``src/foo/dune``. When you run various
+Then ``%{dep:dune}`` will expand to ``src/foo/dune``. When you run various
 tools, they often use the filename given on the command line in error messages.
 As a result, if you execute the command from the original directory, it will
 only see the basename.
@@ -914,6 +943,8 @@ However, it is different for the following reason:
   produce ``b``. For cases where commands optionally produce a
   *corrected* file
 
+- if ``<file1>`` doesn't exists it will compare with the empty file
+
 - it allows promotion. See below
 
 Note that ``(cmp a b)`` does no end-of-line normalization and doesn't
@@ -1000,7 +1031,7 @@ recommended to use this method in new projects as we expect to deprecate it in
 the future. The right way to define a package is with a ``package`` stanza in
 the ``dune-project`` file.
 
-See :ref:`opam-generation` for intructions on configuring dune to automatically
+See :ref:`opam-generation` for instructions on configuring dune to automatically
 generate ``.opam`` files based on the ``package`` stanzas.
 
 Attaching elements to a package
@@ -1019,6 +1050,17 @@ the installation directory is either guessed or can be manually
 specified by the user.  This is described more in detail in the last
 section of this page.
 
+Sites of a package
+------------------
+
+When packages need additional resources outside their binary, their location
+could be hard to find. Moreover some packages could add resources to another
+package, for example in the case of plugins. These location are called sites in
+dune. One package can define them. During execution one site corresponds to a
+list of directories. They are like layers, the first directories have an higher
+priority. Examples and precisions are available at :ref:`sites`.
+
+
 Libraries
 ^^^^^^^^^
 
@@ -1033,9 +1075,9 @@ For instance:
 
 .. code:: scheme
 
-          (library
-           (name mylib)
-           (public_name mypackage.mylib))
+   (library
+    (name mylib)
+    (public_name mypackage.mylib))
 
 After you have added a public name to a library, Dune will know to
 install it as part of the package it is attached to.  Dune installs
@@ -1134,6 +1176,10 @@ Here is a complete list of supported subfields:
 - ``flags`` are passed when compiling source files. This field is specified
   using the :ref:`ordered-set-language`, where the ``:standard`` value comes
   from the environment settings ``c_flags`` and ``cxx_flags``, respectively.
+  Note that, for C subs, Dune unconditionally adds the flags present in the
+  fields ``ocamlc_cflags`` and ``ocamlc_cppflags`` of the OCaml config to the
+  compiler command line. This behavior can be disabled since Dune 2.8 via the
+  ``dune-project`` option :ref:`always-add-cflags`.
 - ``include_dirs`` are tracked as dependencies and passed to the compiler
   via the ``-I`` flag. You can use :ref:`variables` in this field, and
   refer to a library source directory using the ``(lib library-name)`` syntax.
@@ -1196,3 +1242,24 @@ foreign archive is a bit like a foreign library, hence the name of the stanza.
 Foreign archives are particularly useful when embedding a library written in
 a foreign language and/or built with another build system. See
 :ref:`foreign-sandboxing` for more details.
+
+.. _flags-flow:
+
+Flags
+-----
+
+Depending on the :ref:`always-add-cflags` option, the base `:standard` set of
+flags for C will contain only ``ocamlc_cflags`` or both ``ocamlc_cflags`` and
+`ocamlc_cflags`.
+
+There are multiple levels where one can declare custom flags (using the
+:ref:`ordered-set-language`), and each level inherits the flags of the previous
+one in its `:standard` set:
+
+- In the global `env` definition of a `dune-workspace` file
+- In the per-context `env` definitions in a `dune-workspace` file
+- In the env definition of a `dune` file
+- In a `foreign_` field of an executable or a library
+
+The ``%{cc}`` :ref:`variable <variables>` will contain the flags from the first
+three levels only.

@@ -1,0 +1,31 @@
+(library
+ (name conduit_async)
+ (public_name conduit-async)
+ (modules conduit_async private_ssl v1 v2 v3 s)
+ (preprocess
+  (pps ppx_here ppx_sexp_conv))
+ (libraries
+  conduit
+  async
+  ipaddr.unix
+  uri.services
+  (select
+   private_ssl.ml
+   from
+   (async_ssl -> private_ssl.real.ml)
+   (!async_ssl -> private_ssl.dummy.ml))
+  (select
+   v1.mli
+   from
+   (async_ssl -> v1.real.mli)
+   (!async_ssl -> v1.dummy.mli))
+  (select
+   v2.mli
+   from
+   (async_ssl -> v2.real.mli)
+   (!async_ssl -> v2.dummy.mli))
+  (select
+   v3.mli
+   from
+   (async_ssl -> v3.real.mli)
+   (!async_ssl -> v3.dummy.mli))))

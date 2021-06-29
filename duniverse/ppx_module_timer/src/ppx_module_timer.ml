@@ -21,14 +21,14 @@ let is_ocaml_file string =
 let enclose_impl = function
   | Some (loc : Location.t) when is_ocaml_file loc.loc_start.pos_fname ->
     let prefix =
-      let loc = { loc with loc_end = loc.loc_start } in
+      let loc = { loc with loc_end = loc.loc_start; loc_ghost = true } in
       [%str
         let () =
           Ppx_module_timer_runtime.record_start Ppx_module_timer_runtime.__MODULE__
         ;;]
     in
     let suffix =
-      let loc = { loc with loc_start = loc.loc_end } in
+      let loc = { loc with loc_start = loc.loc_end; loc_ghost = true } in
       [%str
         let () =
           Ppx_module_timer_runtime.record_until Ppx_module_timer_runtime.__MODULE__
@@ -72,7 +72,7 @@ module Time_individual_definitions = struct
           if structure_item_is_compound item
           then [ self#structure_item item ]
           else (
-            let loc = item.pstr_loc in
+            let loc = { item.pstr_loc with loc_ghost = true } in
             let name =
               Location.print Caml.Format.str_formatter loc;
               Caml.Format.flush_str_formatter () |> String.chop_suffix_exn ~suffix:":"
@@ -92,7 +92,16 @@ module Time_individual_definitions = struct
   ;;
 end
 
-let impl structure =
+let structure_item_is_attribute item =
+  match item.pstr_desc with
+  | Pstr_attribute _ -> true
+  | _ -> false
+;;
+
+let impl structure_with_initial_attributes =
+  let initial_attributes, structure =
+    List.split_while structure_with_initial_attributes ~f:structure_item_is_attribute
+  in
   let prefix, suffix =
     let loc =
       Option.both (List.hd structure) (List.last structure)
@@ -112,7 +121,7 @@ let impl structure =
     | None -> structure
     | Some () -> Time_individual_definitions.obj#structure structure
   in
-  prefix @ middle @ suffix
+  initial_attributes @ prefix @ middle @ suffix
 ;;
 
 let () = Driver.register_transformation "module_timer" ~impl

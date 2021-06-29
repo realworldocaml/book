@@ -79,7 +79,7 @@ module Only_used_as_phantom_type1 (Name : sig
   let compare _ _ _ = failwithf "Unexpectedly called [%s.compare]" Name.name ()
   let hash_fold_t _ _ _ = failwithf "Unexpectedly called [%s.hash_fold_t]" Name.name ()
 
-  include Binable.Of_binable1
+  include Binable.Of_binable1_without_uuid [@alert "-legacy"]
       (struct
         type 'a t = 'a [@@deriving bin_io]
       end)

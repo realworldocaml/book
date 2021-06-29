@@ -14,8 +14,8 @@
  *
   }}}*)
 
-(** RFC 5988 ("Web Linking") and RFC 5987 ("Character Set and Language
-    Encoding for Hypertext Transfer Protocol (HTTP) Header Field Parameters") *)
+(** RFC 5988 ("Web Linking") and RFC 5987 ("Character Set and Language Encoding
+    for Hypertext Transfer Protocol (HTTP) Header Field Parameters") *)
 
 module Rel : sig
   type t [@@deriving sexp]
@@ -82,9 +82,7 @@ module Ext : sig
   val charset : 'a t -> Charset.t
   val language : 'a t -> Language.t
   val value : 'a t -> 'a
-
   val make : ?charset:Charset.t -> ?language:Language.t -> 'a -> 'a t
-
   val map : ('a -> 'b) -> 'a t -> 'b t
 end
 
@@ -104,14 +102,8 @@ module Arc : sig
   val empty : t
 end
 
-type t = {
-  context : Uri.t;
-  arc : Arc.t;
-  target : Uri.t;
-} [@@deriving sexp]
+type t = { context : Uri.t; arc : Arc.t; target : Uri.t } [@@deriving sexp]
 
 val empty : t
-
 val of_string : string -> t list
-
 val to_string : t -> string
